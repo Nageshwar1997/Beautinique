@@ -1,3 +1,13 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+:root {
+  --primary: #ffffff;
+  --primary-inverted: #000000;
+}
+
+[data-theme="dark"] {
+  --primary: #000000;
+  --primary-inverted: #ffffff;
+}
