@@ -18,7 +18,7 @@ export const LightModeIcon = ({ className }: IconProps) => (
   </svg>
 );
 
-export const DarkModeIcon = ({ className }: { className?: string }) => (
+export const DarkModeIcon = ({ className }: IconProps) => (
   <svg
     className={className}
     xmlns="http://www.w3.org/2000/svg"
@@ -63,5 +63,57 @@ export const DarkModeIcon = ({ className }: { className?: string }) => (
       d="M20.9598 5.08351C21.3859 4.65748 21.3859 3.96675 20.9598 3.54072C20.5338 3.11468 19.8431 3.11468 19.417 3.54072L17.8587 5.09916C17.4325 5.52519 17.4325 6.21592 17.8587 6.64195C18.2846 7.06799 18.9753 7.06799 19.4014 6.64195L20.9598 5.08351Z"
       fill="black"
     />
+  </svg>
+);
+
+export const MailIcon = ({ className }: IconProps) => (
+  <svg
+    xmlns="http://www.w3.org/2000/svg"
+    height="24px"
+    viewBox="0 -960 960 960"
+    width="24px"
+    fill="#e8eaed"
+    className={className}
+  >
+    <path d="M160-160q-33 0-56.5-23.5T80-240v-480q0-33 23.5-56.5T160-800h640q33 0 56.5 23.5T880-720v480q0 33-23.5 56.5T800-160H160Zm320-280 320-200v-80L480-520 160-720v80l320 200Z" />
+  </svg>
+);
+export const LockIcon = ({ className }: IconProps) => (
+  <svg
+    xmlns="http://www.w3.org/2000/svg"
+    height="24px"
+    viewBox="0 -960 960 960"
+    width="24px"
+    fill="#e8eaed"
+    className={className}
+  >
+    <path d="M240-80q-33 0-56.5-23.5T160-160v-400q0-33 23.5-56.5T240-640h40v-80q0-83 58.5-141.5T480-920q83 0 141.5 58.5T680-720v80h40q33 0 56.5 23.5T800-560v400q0 33-23.5 56.5T720-80H240Zm240-200q33 0 56.5-23.5T560-360q0-33-23.5-56.5T480-440q-33 0-56.5 23.5T400-360q0 33 23.5 56.5T480-280ZM360-640h240v-80q0-50-35-85t-85-35q-50 0-85 35t-35 85v80Z" />
+  </svg>
+);
+
+
+export const InfoIcon = ({ className }: { className?: string }) => (
+  <svg
+    xmlns="http://www.w3.org/2000/svg"
+    className={`min-w-[18px] h-[18px] fill-red ${className}`}
+    width="24"
+    height="24"
+    viewBox="0 0 24 24"
+    fill="rgb(239 68 68)"
+  >
+    <path d="M12 22C6.47715 22 2 17.5228 2 12C2 6.47715 6.47715 2 12 2C17.5228 2 22 6.47715 22 12C22 17.5228 17.5228 22 12 22ZM12 20C16.4183 20 20 16.4183 20 12C20 7.58172 16.4183 4 12 4C7.58172 4 4 7.58172 4 12C4 16.4183 7.58172 20 12 20ZM11 7H13V9H11V7ZM11 11H13V17H11V11Z" />
+  </svg>
+);
+
+export const CheckMark = ({ className }: { className?: string }) => (
+  <svg
+    xmlns="http://www.w3.org/2000/svg"
+    className={`min-w-[18px] h-[18px] ${className}`}
+    width="24"
+    height="24"
+    viewBox="0 0 24 24"
+    fill="#26272A"
+  >
+    <path d="M12 22C6.47715 22 2 17.5228 2 12C2 6.47715 6.47715 2 12 2C17.5228 2 22 6.47715 22 12C22 17.5228 17.5228 22 12 22ZM12 20C16.4183 20 20 16.4183 20 12C20 7.58172 16.4183 4 12 4C7.58172 4 4 7.58172 4 12C4 16.4183 7.58172 20 12 20ZM11.0026 16L6.75999 11.7574L8.17421 10.3431L11.0026 13.1716L16.6595 7.51472L18.0737 8.92893L11.0026 16Z" />
   </svg>
 );
