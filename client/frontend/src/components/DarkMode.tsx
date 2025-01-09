@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { DarkModeIcon, LightModeIcon } from "./icons";
+// import { DarkModeIcon, LightModeIcon } from "./icons";
 import { ThemeTypes } from "../types";
 
 function DarkMode() {
@@ -19,10 +19,11 @@ function DarkMode() {
 
   return (
     <div
-      className="flex items-center gap-4 cursor-pointer w-6 h-6"
+      className="flex items-center justify-center gap-4 cursor-pointer w-6 h-6"
       onClick={toggleTheme}
     >
-      {theme === "dark" ? <LightModeIcon /> : <DarkModeIcon />}
+      {/* {theme === "dark" ? <LightModeIcon /> : <DarkModeIcon />} */}
+      <p className="text-">{theme === "dark" ? "Dark" : "Light"}</p>
     </div>
   );
 }

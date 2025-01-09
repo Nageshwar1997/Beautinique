@@ -1,40 +1,34 @@
 import { ChangeEvent, FC, useState } from "react";
-import {
-  CheckMark,
-  InfoIcon,
-  MailIcon,
-} from "../../components/icons";
+import { CheckMark, InfoIcon, MailIcon } from "../../components/icons";
 
 const Register = () => {
-  // const initialData = {
-  //   name: "",
-  //   password: "",
-  // };
-  // const [formData, setFormData] = useState(initialData);
+  const initialData = {
+    name: "",
+    password: "",
+  };
+  const [formData, setFormData] = useState(initialData);
 
-  // const handleInputChange = (event: ChangeEvent<HTMLInputElement>) => {
-  //   const { name, value } = event.target;
-  //   setFormData({ ...formData, [name]: value });
+  const handleInputChange = (event: ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = event.target;
+    setFormData({ ...formData, [name]: value });
 
-  //   console.log("formData", formData);
-  // };
+    console.log("formData", formData);
+  };
 
-  // interface InputProps {
-  //   label?: string;
-  //   name?: string;
-  //   type?: string;
-  //   Icon?: FC;
-  //   placeholder?: string;
-  //   errorMessage?: string;
-  //   successMessage?: string;
-  // }
+  interface InputProps {
+    label?: string;
+    name?: string;
+    type?: string;
+    Icon?: FC;
+    errorMessage?: string;
+    successMessage?: string;
+  }
 
   const FloatingLabelInput: React.FC<InputProps> = ({
     label,
     name,
     type = "text",
     Icon,
-    placeholder,
     errorMessage,
     successMessage,
   }) => {
@@ -96,54 +90,9 @@ const Register = () => {
   };
 
   return (
-    <>
-      <div className="w-screen h-screen overflow-hidden bg-[url(http://localhost:5173/public/images/auth_bg.jpg)] bg-cover bg-no-repeat bg-center relative">
-        import React from "react";
-        <div className="border border-[red] bg-[black]/50 backdrop-blur-[4px] max-w-xl w-full mx-auto absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 rounded-lg p-10">
-          <form className="w-full h-full grid gap-2 border border-[red] space-y-1">
-            <h1 className="text-center">Register</h1>
-            {/* input-group */}
-            {/* <div className="border h-12 border-black relative my-5">
-              <input
-                type="text"
-                placeholder=" "
-                className="w-full h-full text-[16px] text-white px-2.5 bg-transparent border border-[green] rounded-[5px]"
-              />
-              <label
-                className="absolute top-1/2 left-1.5 -translate-y-1/2 text-[16px] text-white
-               px-1.5 pointer-events-none"
-              >
-                Name
-              </label>
-            </div> */}
-            <FloatingLabelInput
-              label="Name"
-              type="text"
-              Icon={MailIcon}
-              name="name"
-              // errorMessage="Testing"
-              successMessage="Ok"
-            />
-            {/* <FloatingLabelInput
-              label="Name"
-              type="text"
-              Icon={MailIcon}
-              name="email"
-              // errorMessage="Testing"
-              successMessage="Ok"
-            />
-            <FloatingLabelInput
-              label="Name"
-              type="text"
-              Icon={MailIcon}
-              name="password"
-              // errorMessage="Testing"
-              successMessage="Ok"
-            /> */}
-          </form>
-        </div>
-      </div>
-    </>
+    <div className="w-[100dvw] h-[100dvh] border border-[red] text-primary-inverted">
+      test
+    </div>
   );
 };
 
