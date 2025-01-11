@@ -1,5 +1,4 @@
 import express, { NextFunction, Request, Response } from "express";
-import bcrypt from "bcryptjs";
 import connectDB from "./configs/db.config";
 import errorHandler from "./middlewares/errorHandler.middleware";
 import notFoundHandler from "./middlewares/notFoundHandler.middleware";
