@@ -5,7 +5,10 @@ export default {
     extend: {
       colors: {
         primary: "var(--primary)",
+        "primary-10": "var(--primary-10)",
         "primary-inverted": "var(--primary-inverted)",
+        "primary-inverted-10": "var(--primary-inverted-10)",
+        "smoke-eerie": "var(--smoke-eerie)",
       },
       backgroundImage: {
         "gradient-accent": "var(--gradient-accent)",
