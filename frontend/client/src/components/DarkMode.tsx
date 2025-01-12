@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 import { ThemeTypes } from "../types";
 
 function DarkMode() {
-  const storedTheme = (localStorage.getItem("theme") as ThemeTypes) || "light";
+  const storedTheme = (localStorage.getItem("theme") as ThemeTypes) || "dark";
 
   const [theme, setTheme] = useState<ThemeTypes>(storedTheme);
 
@@ -14,7 +14,7 @@ function DarkMode() {
   }, [theme]);
 
   const toggleTheme = () => {
-    setTheme((prevTheme) => (prevTheme === "light" ? "dark" : "light"));
+    setTheme((prevTheme) => (prevTheme === "dark" ? "light" : "dark"));
   };
 
   return (

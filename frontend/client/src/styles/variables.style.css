@@ -16,6 +16,7 @@
   --primary-inverted: #000000;
   --primary-inverted-10: #0000001a;
   --smoke-eerie: #f2f2f2;
+  /* --smoke-eerie-inverted: #1a1a1a; */
 
   /* Gradients */
   --accent-duo: linear-gradient(
@@ -37,6 +38,8 @@
   --primary-inverted: #ffffff;
   --primary-inverted-10: #ffffff1a;
   --smoke-eerie: #1a1a1a;
+  /* --smoke-eerie-inverted: #f2f2f2; */
+
 
   /* Gradients */
   --accent-duo: linear-gradient(

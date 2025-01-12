@@ -9,6 +9,7 @@ export default {
         "primary-inverted": "var(--primary-inverted)",
         "primary-inverted-10": "var(--primary-inverted-10)",
         "smoke-eerie": "var(--smoke-eerie)",
+        // "smoke-eerie-inverted": "var(--smoke-eerie-inverted)",
       },
       backgroundImage: {
         "accent-duo": "var(--accent-duo)",
