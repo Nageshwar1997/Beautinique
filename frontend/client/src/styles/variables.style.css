@@ -1,0 +1,43 @@
+/* Variable name format dark-light */
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  /* Common variables */
+  --picton-blue: #25adf9;
+  --blue-crayola: #07f;
+
+  /* Light Theme Variables */
+  /* Colors */
+  --primary: #ffffff;
+  --primary-10: #ffffff1a;
+  --primary-inverted: #000000;
+  --primary-inverted-10: #0000001a;
+  --smoke-eerie: #f2f2f2;
+
+  /* Gradients */
+  --gradient-accent: linear-gradient(
+    114deg,
+    var(--picton-blue) 6.19%,
+    var(--blue-crayola) 41.65%
+  );
+}
+
+[data-theme="dark"] {
+  /* Colors */
+  --primary: #000000;
+  --primary-10: #0000001a;
+  --primary-inverted: #ffffff;
+  --primary-inverted-10: #ffffff1a;
+  --smoke-eerie: #1a1a1a;
+
+  /* Gradients */
+  --gradient-accent: linear-gradient(
+    114deg,
+    #00e5d1 6.19%,
+    var(--picton-blue) 37.23%,
+    var(--blue-crayola) 94.85%
+  );
+}
