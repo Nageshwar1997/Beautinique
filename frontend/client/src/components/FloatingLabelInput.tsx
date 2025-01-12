@@ -1,74 +1,96 @@
-import { ChangeEvent, FC, useState } from "react";
+import { FC, useState, ChangeEvent } from "react";
 import { CheckMark, InfoIcon } from "./icons";
 
 interface InputProps {
   label?: string;
-  name?: string;
+  placeholder?: string;
   type?: string;
-  Icon?: FC;
-  errorMessage?: string;
-  successMessage?: string;
+  id?: string;
+  name?: string;
+  errorText?: string;
+  readOnly?: boolean;
+  successText?: string;
+  onChange?: (e: ChangeEvent<HTMLInputElement>) => void;
+  value?: string;
+  className?: string;
+  register?: object;
+  onKeyDown?: (e: React.KeyboardEvent<HTMLInputElement>) => void;
+  defaultValue?: string;
+  labelClassName?: string;
+  autoComplete?: string;
+  maxLength?: number;
+  minLength?: number;
+  pattern?: string;
 }
 
 const FloatingLabelInput: FC<InputProps> = ({
-  label,
-  name,
+  label = "Name",
+  placeholder = " ",
   type = "text",
-  Icon,
-  errorMessage,
-  successMessage,
+  id = "name",
+  name = "name",
+  errorText = "errorText",
+  readOnly,
+  successText,
+  onChange,
+  value = "",
+  className = "",
+  register,
+  onKeyDown,
+  defaultValue,
+  labelClassName = "",
+  autoComplete,
+  maxLength,
+  minLength,
+  pattern,
 }) => {
-  const [value, setValue] = useState("");
+  const [inputValue, setInputValue] = useState(value || defaultValue || "");
 
   const handleInputChange = (e: ChangeEvent<HTMLInputElement>) => {
-    setValue(e.target.value);
+    setInputValue(e.target.value);
+    if (onChange) onChange(e);
   };
 
   return (
-    <div className="w-full space-y-1">
+    <div className="w-[400px] space-y-1">
       <div className="relative">
         {/* Input */}
         <input
           type={type}
-          id={name}
+          id={id}
           name={name}
-          placeholder=" " // Always keep placeholder blank to make space for the label
-          value={value}
+          value={inputValue}
           onChange={handleInputChange}
-          className="peer w-full h-12 px-5 text-primary-inverted bg-transparent border-2 border-gray-300 outline-none focus:border-blue-500"
+          placeholder={placeholder}
+          readOnly={readOnly}
+          autoComplete={autoComplete}
+          className={`peer w-full focus:outline-none flex-grow outline-none font-normal text-base overflow-hidden bg-smoke-eerie rounded-xl border border-primary-inverted-10 px-8 py-4 text-primary-inverted ${className}`}
+          {...register}
         />
-
-        {/* Label */}
-        {label && (
-          <label
-            htmlFor={name}
-            className={`absolute left-3 ${
-              value
-                ? "top-0 text-sm text-blue-500"
-                : "top-1/2 text-base text-gray-500"
-            } transform ${"-translate-y-1/2"} transition-all duration-200 peer-focus:top-0 peer-focus:text-sm peer-focus:border peer-focus:bg-white peer-focus:border-blue-500 peer-focus:text-blue-500 cursor-text`}
-          >
-            {label}
-          </label>
-        )}
-
-        {/* Icon */}
-        {Icon && (
-          <span className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400">
-            <Icon />
-          </span>
-        )}
+        {/* Floating Label */}
+        <label
+          htmlFor={id}
+          className={`absolute left-5 text-base text-primary-inverted ${
+            inputValue ? "top-0" : "top-1/2"
+          } transform -translate-y-1/2 transition-all duration-200 leading-none peer-focus:top-0 peer-focus:text-sm peer-focus:text-blue-500 cursor-text peer-focus:leading-none peer-focus:px-3 peer-focus:py-1 peer-focus:border peer-focus:border-primary-inverted-10 peer-focus:bg-smoke-eerie peer-focus:rounded-full ${labelClassName}`}
+        >
+          {label}
+        </label>
       </div>
-      {errorMessage && !successMessage && (
+
+      {/* Error Message */}
+      {errorText && !successText && !readOnly && (
         <span className="flex gap-1 items-center text-red-500 text-xs font-normal mt-2">
           <InfoIcon className="fill-red-500" />
-          {errorMessage}
+          {errorText}
         </span>
       )}
-      {successMessage && !errorMessage && (
+
+      {/* Success Message */}
+      {successText && !errorText && !readOnly && (
         <span className="flex gap-1 items-center text-green-500 text-xs font-normal">
           <CheckMark className="fill-green-500" />
-          {successMessage}
+          {successText}
         </span>
       )}
     </div>
