@@ -18,3 +18,17 @@ export interface InputProps {
   labelClassName?: string;
   icon?: ReactNode;
 }
+
+export interface TextItem {
+  text: string;
+  isHighlighted?: boolean;
+  break?: boolean;
+}
+
+export type ContentItem = TextItem;
+
+export interface TextDisplayProps {
+  content: ContentItem[];
+  className?: string;
+  contentClassName?: string;
+}
