@@ -8,8 +8,8 @@ function DarkMode() {
   const [theme, setTheme] = useState<ThemeTypes>(storedTheme);
 
   useEffect(() => {
-    // Update the `data-theme` attribute on the body
-    document.body.setAttribute("data-theme", theme);
+    // Update the `theme` attribute on the body
+    document.body.setAttribute("theme", theme);
     localStorage.setItem("theme", theme);
   }, [theme]);
 
