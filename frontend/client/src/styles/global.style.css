@@ -1,14 +1,5 @@
+@import url("./fonts.style.css");
 @import url("./variables.style.css");
-
-@font-face {
-  font-family: "metropolis";
-  src: url("/fonts/metropolis/Metropolis-Regular.woff2") format("woff2"),
-    url("/fonts/metropolis/Metropolis-Light.woff2") format("woff"),
-    url("/fonts/metropolis/Metropolis-Medium.woff2") format("woff"),
-    url("/fonts/metropolis/Metropolis-SemiBold.woff2") format("woff"),
-    url("/fonts/metropolis/Metropolis-Metropolis-Bold.woff2") format("woff");
-  font-style: normal;
-}
 
 * {
   box-sizing: border-box;

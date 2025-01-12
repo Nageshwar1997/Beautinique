@@ -1,0 +1,21 @@
+/* Metropolis */
+@font-face {
+  font-family: "metropolis";
+  src: url("/fonts/metropolis/Metropolis-Regular.woff2") format("woff2"),
+    url("/fonts/metropolis/Metropolis-Light.woff2") format("woff"),
+    url("/fonts/metropolis/Metropolis-Medium.woff2") format("woff"),
+    url("/fonts/metropolis/Metropolis-SemiBold.woff2") format("woff"),
+    url("/fonts/metropolis/Metropolis-Metropolis-Bold.woff2") format("woff");
+  font-style: normal;
+  font-weight: normal;
+}
+
+/* Degular */
+@font-face {
+  font-family: "degular";
+  src: url("/fonts/degular/Degular-Regular.otf") format("opentype"),
+    url("/fonts/degular/Degular-Medium.otf") format("opentype"),
+    url("/fonts/degular/Degular-Semibold.otf") format("opentype");
+  font-style: normal;
+  font-weight: normal;
+}

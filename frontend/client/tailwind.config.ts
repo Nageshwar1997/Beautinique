@@ -11,10 +11,12 @@ export default {
         "smoke-eerie": "var(--smoke-eerie)",
       },
       backgroundImage: {
-        "gradient-accent": "var(--gradient-accent)",
+        "accent-duo": "var(--accent-duo)",
+        "silver-duo-gradient": "var(--silver-duo-gradient)",
       },
       fontFamily: {
         metropolis: ["metropolis", "sans-serif"],
+        degular: ["degular", "sans-serif"],
       },
     },
   },
@@ -24,8 +26,8 @@ export default {
     }: {
       addVariant: (name: string, selector: string) => void;
     }) {
-      addVariant("theme-light", '[data-theme="light"] &');
-      addVariant("theme-dark", '[data-theme="dark"] &');
+      addVariant("light", '[theme="light"] &');
+      addVariant("dark", '[theme="dark"] &');
     },
   ],
 };

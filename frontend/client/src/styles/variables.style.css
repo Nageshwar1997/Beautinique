@@ -18,14 +18,19 @@
   --smoke-eerie: #f2f2f2;
 
   /* Gradients */
-  --gradient-accent: linear-gradient(
+  --accent-duo: linear-gradient(
     114deg,
     var(--picton-blue) 6.19%,
     var(--blue-crayola) 41.65%
   );
+  --silver-duo-gradient: linear-gradient(
+    180deg,
+    #4d4d4d 24.54%,
+    #080808 87.96%
+  );
 }
 
-[data-theme="dark"] {
+[theme="dark"] {
   /* Colors */
   --primary: #000000;
   --primary-10: #0000001a;
@@ -34,10 +39,11 @@
   --smoke-eerie: #1a1a1a;
 
   /* Gradients */
-  --gradient-accent: linear-gradient(
+  --accent-duo: linear-gradient(
     114deg,
     #00e5d1 6.19%,
     var(--picton-blue) 37.23%,
     var(--blue-crayola) 94.85%
   );
+  --silver-duo-gradient: linear-gradient(180deg, #fff 24.54%, #b2b2b2 87.96%);
 }
