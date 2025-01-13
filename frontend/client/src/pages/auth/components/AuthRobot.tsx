@@ -6,10 +6,10 @@ const AuthRobot = () => {
     <div className="w-1/2 hidden relative md:block rounded-2xl text-center bg-[url(./images/auth/bg-gradient.svg)] bg-center bg-cover bg-no-repeat overflow-hidden">
       <div className="w-full absolute top-[10vh] left-1/2 transform -translate-x-1/2 flex flex-col items-center gap-2 text-white">
         <h1 className="text-xl md:text-2xl lg:text-3xl font-semibold">
-          Welcome to CTRUH Shop
+          Welcome to Beauty Shop
         </h1>
         <h2 className="text-base md:text-lg lg:text-xl">
-          Create a CTRUH Account
+          Create a Beauty Account
         </h2>
         <Branding type="light" />
       </div>

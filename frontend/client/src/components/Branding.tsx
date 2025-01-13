@@ -1,5 +1,3 @@
-import { HorizontalLogo } from "./icons";
-
 const Branding = ({
   type,
   className,
@@ -16,11 +14,8 @@ const Branding = ({
           type === "light" ? "text-white" : "text-black"
         }`}
       >
-        Powered by
+        Powered by BEAUTY SHOP
       </p>
-      <HorizontalLogo
-        className={`${type === "light" ? "fill-white" : "fill-black"}`}
-      />
     </div>
   );
 };
