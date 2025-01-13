@@ -1,10 +1,9 @@
 import AuthRobot from "../components/AuthRobot";
-import { useState } from "react";
+import { ChangeEvent, FormEvent, useState } from "react";
 import TextDisplay from "../../../components/TextDisplay";
-import { RegisterTextContent } from "./constants";
+import { initialRegisterData, RegisterTextContent } from "./constants";
 import { EyeIcon, EyeOffIcon } from "../../../components/icons";
 import Input from "../../../components/Input";
-import { useForm } from "react-hook-form";
 import { AuthInputProps } from "../../../types";
 import { registerInputMapData } from "../data";
 import SocialAuth from "../components/SocialAuth";
@@ -16,6 +15,8 @@ const Register = () => {
     confirmPassword: false,
   });
 
+  const [data, setData] = useState<AuthInputProps>(initialRegisterData || {});
+
   const togglePasswordVisibility = (field: keyof typeof showPassword) => {
     setShowPassword((prevState) => ({
       ...prevState,
@@ -23,11 +24,10 @@ const Register = () => {
     }));
   };
 
-  const {
-    register,
-    handleSubmit,
-    formState: { errors },
-  } = useForm<AuthInputProps>();
+  const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+  };
+
   return (
     <div className="w-full min-h-dvh p-4 flex gap-4 overflow-hidden">
       <AuthRobot />
@@ -46,7 +46,7 @@ const Register = () => {
           <div className="w-full sm:w-[90%] md:w-[90%] lg:w-[500px] border-gradient p-px rounded-3xl overflow-hidden mx-auto">
             <form
               className="shadow-shadow-light-dark-soft bg-platinum-black p-6 md:p-8 rounded-3xl space-y-6"
-              onSubmit={handleSubmit((data) => console.log(data))}
+              onSubmit={handleSubmit}
               autoComplete="off"
             >
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-x-4 gap-y-8">
@@ -67,6 +67,10 @@ const Register = () => {
                     <Input
                       label={input?.placeholder}
                       name={input?.field}
+                      onChange={(e: ChangeEvent<HTMLInputElement>) => {
+                        console.log(e);
+                      }}
+                      errorText={""}
                       icon={
                         ["password", "confirmPassword"].includes(
                           input?.field
@@ -92,14 +96,6 @@ const Register = () => {
                             }
                           />
                         ))
-                      }
-                      register={register(
-                        input?.field as keyof AuthInputProps,
-                        input?.register
-                      )}
-                      errorText={
-                        (errors[input?.field as keyof AuthInputProps]
-                          ?.message as string) || ""
                       }
                     />
                   </div>

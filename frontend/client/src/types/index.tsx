@@ -42,4 +42,6 @@ export interface AuthInputProps {
   confirmPassword: string;
   profilePic?: string;
   hasIcon?: boolean;
+  reminder?: boolean;
+  authType?: "social" | "manual";
 }

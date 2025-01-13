@@ -1,4 +1,4 @@
-import { ContentItem } from "../../../types";
+import { AuthInputProps, ContentItem } from "../../../types";
 
 export const RegisterTextContent: ContentItem[] = [
   {
@@ -13,7 +13,6 @@ export const LoginTextContent: ContentItem[] = [
     isHighlighted: true,
   },
 ];
-
 
 export const socialMediaAccounts = [
   {
@@ -33,3 +32,15 @@ export const socialMediaAccounts = [
     url: "https://ctruhcdn.azureedge.net/public/images/login/linkedin.webp",
   },
 ];
+
+export const initialRegisterData: AuthInputProps = {
+  firstName: "",
+  lastName: "",
+  email: "",
+  phoneNumber: "",
+  password: "",
+  confirmPassword: "",
+  profilePic: "",
+  reminder: false,
+  authType: "manual",
+};
