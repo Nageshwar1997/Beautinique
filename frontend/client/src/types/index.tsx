@@ -15,7 +15,6 @@ export interface InputProps {
   defaultValue?: string;
   labelClassName?: string;
   type?: "text" | "email" | "password";
-  iconClick?: (e: MouseEvent) => void;
   onKeyDown?: (e: KeyboardEvent<HTMLInputElement>) => void;
   onChange?: (e: ChangeEvent<HTMLInputElement>) => void;
 }

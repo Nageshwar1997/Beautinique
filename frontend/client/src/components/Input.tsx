@@ -56,7 +56,9 @@ const Input = ({
 
         {/* Icon */}
         {icon && (
-          <span className="h-full absolute top-0 right-0 p-3 flex justify-center items-center">
+          <span
+            className="h-full absolute top-0 right-0 p-3 flex justify-center items-center"
+          >
             {icon}
           </span>
         )}

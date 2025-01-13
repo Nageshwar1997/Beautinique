@@ -2,7 +2,7 @@ import AuthRobot from "../components/AuthRobot";
 import { useState } from "react";
 import TextDisplay from "../../../components/TextDisplay";
 import { RegisterTextContent } from "./constants";
-import { EyeIcon } from "../../../components/icons";
+import { EyeIcon, EyeOffIcon } from "../../../components/icons";
 import Input from "../../../components/Input";
 import { useForm } from "react-hook-form";
 import { AuthInputProps } from "../../../types";
@@ -16,7 +16,12 @@ const Register = () => {
     confirmPassword: false,
   });
 
-  const handleIconClick = () => {};
+  const togglePasswordVisibility = (field: keyof typeof showPassword) => {
+    setShowPassword((prevState) => ({
+      ...prevState,
+      [field]: !prevState[field],
+    }));
+  };
 
   const {
     register,
@@ -63,10 +68,30 @@ const Register = () => {
                       label={input?.placeholder}
                       name={input?.field}
                       icon={
-                        (input?.field === "password" ||
-                          input?.field === "confirmPassword") && (
-                          <EyeIcon className="fill-platinum-black-inverted" />
-                        )
+                        ["password", "confirmPassword"].includes(
+                          input?.field
+                        ) &&
+                        (showPassword[
+                          input?.field as keyof typeof showPassword
+                        ] ? (
+                          <EyeOffIcon
+                            className="cursor-pointer"
+                            onClick={() =>
+                              togglePasswordVisibility(
+                                input?.field as keyof typeof showPassword
+                              )
+                            }
+                          />
+                        ) : (
+                          <EyeIcon
+                            className="cursor-pointer"
+                            onClick={() =>
+                              togglePasswordVisibility(
+                                input?.field as keyof typeof showPassword
+                              )
+                            }
+                          />
+                        ))
                       }
                       register={register(
                         input?.field as keyof AuthInputProps,
