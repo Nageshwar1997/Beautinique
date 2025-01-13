@@ -4,19 +4,20 @@ export type ThemeTypes = "light" | "dark";
 
 export interface InputProps {
   label?: string;
-  placeholder?: string;
-  type?: "text" | "email" | "password";
   name?: string;
-  errorText?: string;
-  successText?: string;
-  onChange?: (e: ChangeEvent<HTMLInputElement>) => void;
   value?: string;
-  className?: string;
+  icon?: ReactNode;
   register?: object;
-  onKeyDown?: (e: KeyboardEvent<HTMLInputElement>) => void;
+  errorText?: string;
+  className?: string;
+  placeholder?: string;
+  successText?: string;
   defaultValue?: string;
   labelClassName?: string;
-  icon?: ReactNode;
+  type?: "text" | "email" | "password";
+  iconClick?: (e: MouseEvent) => void;
+  onKeyDown?: (e: KeyboardEvent<HTMLInputElement>) => void;
+  onChange?: (e: ChangeEvent<HTMLInputElement>) => void;
 }
 
 export interface TextItem {

@@ -28,6 +28,7 @@ const Input = ({
       <div className="relative">
         {/* Input */}
         <input
+          autoComplete="off"
           type={type}
           id={name}
           name={name}
