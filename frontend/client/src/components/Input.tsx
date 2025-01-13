@@ -24,7 +24,7 @@ const Input = ({
   };
 
   return (
-    <div className="w-[400px] space-y-1">
+    <div className="w-full space-y-1">
       <div className="relative">
         {/* Input */}
         <input
@@ -43,11 +43,11 @@ const Input = ({
         {label && (
           <label
             htmlFor={name}
-            className={`absolute left-5 border text-primary-inverted ${
+            className={`flex items-center justify-center absolute left-3 text-primary-inverted ${
               inputValue
-                ? "top-0 py-1 px-3 border-primary-inverted-10 text-sm rounded-full bg-smoke-eerie"
-                : "top-1/2 border-transparent"
-            } transform -translate-y-1/2 transition-all duration-200 leading-none peer-focus:top-0 peer-focus:text-sm cursor-text peer-focus:leading-none peer-focus:px-3 peer-focus:py-1 peer-focus:border-primary-inverted-10 peer-focus:bg-smoke-eerie peer-focus:rounded-full ${labelClassName}`}
+                ? "top-0 py-1 px-3 border border-primary-inverted-10 text-sm rounded-xl bg-smoke-eerie"
+                : "top-1/2 border border-transparent"
+            } transform -translate-y-1/2 transition-all duration-200 leading-none peer-focus:top-0 peer-focus:text-sm cursor-text peer-focus:leading-none peer-focus:px-3 peer-focus:py-1 peer-focus:border peer-focus:border-primary-inverted-10 peer-focus:bg-smoke-eerie peer-focus:rounded-xl ${labelClassName}`}
           >
             {label}
           </label>

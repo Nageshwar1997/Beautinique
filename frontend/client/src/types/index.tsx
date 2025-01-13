@@ -32,3 +32,14 @@ export interface TextDisplayProps {
   className?: string;
   contentClassName?: string;
 }
+
+export interface AuthInputProps {
+  firstName: string;
+  lastName: string;
+  email: string;
+  phoneNumber: string;
+  password: string;
+  confirmPassword: string;
+  profilePic?: string;
+  hasIcon?: boolean;
+}
