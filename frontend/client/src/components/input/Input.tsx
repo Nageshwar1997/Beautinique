@@ -1,3 +1,4 @@
+import { InputHTMLAttributes } from "react";
 import { CheckMark, InfoIcon } from "../icons";
 import { InputProps } from "../../types";
 
@@ -13,7 +14,7 @@ const Input = ({
   successText = "",
   placeholder = "",
   labelClassName = "",
-}: InputProps) => {
+}: InputProps & InputHTMLAttributes<HTMLInputElement>) => {
   return (
     <div className="w-full space-y-1">
       <div className="relative min-h-10 lg:min-h-12">
