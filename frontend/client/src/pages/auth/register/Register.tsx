@@ -9,7 +9,7 @@ import { initialRegisterData, RegisterTextContent } from "./constants";
 import { registerInputMapData } from "../data";
 import SocialAuth from "../components/SocialAuth";
 import UploadProfile from "../components/UploadProfile";
-import Input from "../../../components/Input";
+import Input from "../../../components/input/Input";
 // import { EyeIcon, EyeOffIcon } from "../../../components/icons";
 
 const Register = () => {
