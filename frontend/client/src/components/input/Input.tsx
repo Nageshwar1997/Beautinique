@@ -34,7 +34,7 @@ const Input = ({
           value={inputValue}
           onChange={handleInputChange}
           placeholder={placeholder ? placeholder : " "}
-          className={`peer w-full focus:outline-none flex-grow outline-none font-normal text-base overflow-hidden bg-smoke-eerie rounded-xl border border-primary-inverted-10 px-4 py-2 lg:py-3 2xl:py-4 text-primary-inverted ${
+          className={`peer w-full flex-grow outline-none focus:outline-none font-normal text-base overflow-hidden bg-smoke-eerie rounded-xl border border-primary-inverted-10 px-4 py-2 lg:py-3 2xl:py-4 text-primary-inverted ${
             icon && "pr-10"
           } ${className}`}
         />
