@@ -1,44 +1,47 @@
-/* eslint-disable react-hooks/exhaustive-deps */
-import AuthRobot from "../components/AuthRobot";
 import { ChangeEvent, FormEvent, useState } from "react";
-import TextDisplay from "../../../components/TextDisplay";
 import { initialRegisterData, RegisterTextContent } from "./constants";
-// import { EyeIcon, EyeOffIcon } from "../../../components/icons";
-
-// import { AuthInputProps } from "../../../types";
-import { registerInputMapData } from "../data";
-import SocialAuth from "../components/SocialAuth";
+import {
+  validateEmail,
+  validateName,
+  validateNumber,
+  validatePassword,
+} from "../../../validators";
+import AuthRobot from "../components/AuthRobot";
 import UploadProfile from "../components/UploadProfile";
+import TextDisplay from "../../../components/TextDisplay";
+import SocialAuth from "../components/SocialAuth";
 import Input from "../../../components/input/Input";
-// import { EyeIcon, EyeOffIcon } from "../../../components/icons";
 
 const Register = () => {
-  // const [showPassword, setShowPassword] = useState({
-  //   password: false,
-  //   confirmPassword: false,
-  // });
-
   const [data, setData] = useState(initialRegisterData || {});
-
-  // const togglePasswordVisibility = (field: keyof typeof showPassword) => {
-  //   setShowPassword((prevState) => ({
-  //     ...prevState,
-  //     [field]: !prevState[field],
-  //   }));
-  // };
 
   const handleInputChange = (e: ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
-    setData((prevData) => ({
-      ...prevData,
-      [name]: value,
-    }));
+
+    if (name === "firstName" || name === "lastName") {
+      if (validateName(value)) {
+        setData((prevData) => ({ ...prevData, [name]: value }));
+      }
+    } else if (name === "email") {
+      if (validateEmail(value)) {
+        setData((prevData) => ({ ...prevData, [name]: value }));
+      }
+    } else if (name === "password" || name === "confirmPassword") {
+      if (validatePassword(value)) {
+        setData((prevData) => ({ ...prevData, [name]: value }));
+      }
+    } else if (name === "phoneNumber") {
+      const newValue = validateNumber(value);
+      setData((prevData) => ({ ...prevData, [name]: newValue }));
+    } else {
+      setData((prevData) => ({ ...prevData, [name]: value }));
+    }
   };
-  console.log("data change", data);
+
+  console.log("Data", data);
 
   const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-
     console.log("Data Submit", data);
   };
 
@@ -58,35 +61,58 @@ const Register = () => {
               contentClassName="mt-3 font-semibold"
             />
           </div>
-          {/* Social Login */}
           <SocialAuth />
-
           <div className="w-full sm:w-[90%] lg:w-[500px] border-gradient p-px rounded-3xl overflow-hidden mx-auto">
             <div className="shadow-shadow-light-dark-soft bg-platinum-black p-6 md:p-8 rounded-3xl space-y-6">
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-x-4 gap-y-4 md:gap-y-5 lg:gap-y-6">
-                {registerInputMapData?.map((input) => (
-                  <div
-                    key={input?.field}
-                    className={`${
-                      ![
-                        "firstName",
-                        "lastName",
-                        "password",
-                        "confirmPassword",
-                      ].includes(input.field)
-                        ? "lg:col-span-2"
-                        : ""
-                    }`}
-                  >
-                    <Input
-                      label={input?.placeholder}
-                      name={input?.field}
-                      onChange={handleInputChange}
-                      type={input?.type}
-                      errorText="Hello"
-                    />
-                  </div>
-                ))}
+                <div className="">
+                  <Input
+                    label="First Name"
+                    name="firstName"
+                    value={data.firstName}
+                    onChange={handleInputChange}
+                  />
+                </div>
+                <div className="">
+                  <Input
+                    label="Last Name"
+                    name="lastName"
+                    value={data.lastName}
+                    onChange={handleInputChange}
+                  />
+                </div>
+                <div className="lg:col-span-2">
+                  <Input
+                    label="Email"
+                    name="email"
+                    value={data.email}
+                    onChange={handleInputChange}
+                  />
+                </div>
+                <div className="lg:col-span-2">
+                  <Input
+                    label="Phone Number"
+                    name="phoneNumber"
+                    value={data.phoneNumber}
+                    onChange={handleInputChange}
+                  />
+                </div>
+                <div className="">
+                  <Input
+                    label="Password"
+                    name="password"
+                    value={data.password}
+                    onChange={handleInputChange}
+                  />
+                </div>
+                <div className="">
+                  <Input
+                    label="Confirm Password"
+                    name="confirmPassword"
+                    value={data.confirmPassword}
+                    onChange={handleInputChange}
+                  />
+                </div>
               </div>
               <button type="submit" className="text-white">
                 Submit
