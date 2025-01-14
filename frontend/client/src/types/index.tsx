@@ -5,7 +5,7 @@ export type ThemeTypes = "light" | "dark";
 export interface InputProps {
   label?: string;
   name?: string;
-  value?: string;
+  value?: string | number | readonly string[];
   icon?: ReactNode;
   errorText?: string;
   className?: string;
