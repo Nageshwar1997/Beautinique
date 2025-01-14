@@ -7,14 +7,13 @@ export interface InputProps {
   name?: string;
   value?: string;
   icon?: ReactNode;
-  register?: object;
   errorText?: string;
   className?: string;
   placeholder?: string;
   successText?: string;
   defaultValue?: string;
   labelClassName?: string;
-  type?: "text" | "email" | "password";
+  type?: string;
   onKeyDown?: (e: KeyboardEvent<HTMLInputElement>) => void;
   onChange?: (e: ChangeEvent<HTMLInputElement>) => void;
 }

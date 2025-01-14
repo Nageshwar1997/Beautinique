@@ -8,7 +8,6 @@ const Input = ({
   type = "text",
   label = "",
   value = "",
-  register,
   onChange,
   className = "",
   errorText = "",
@@ -38,13 +37,12 @@ const Input = ({
           className={`peer w-full focus:outline-none flex-grow outline-none font-normal text-base overflow-hidden bg-smoke-eerie rounded-xl border border-primary-inverted-10 p-4 text-primary-inverted ${
             icon && "pr-10"
           } ${className}`}
-          {...register}
         />
         {/* Floating Label */}
         {label && (
           <label
             htmlFor={name}
-            className={`flex items-center justify-center absolute left-3 text-primary-inverted ${
+            className={`flex items-center justify-center absolute left-3 text-primary-inverted-50 ${
               inputValue
                 ? "top-0 py-1 px-3 border border-primary-inverted-10 text-sm rounded-xl bg-smoke-eerie"
                 : "top-1/2 border border-transparent"
@@ -56,9 +54,7 @@ const Input = ({
 
         {/* Icon */}
         {icon && (
-          <span
-            className="h-full absolute top-0 right-0 p-3 flex justify-center items-center"
-          >
+          <span className="h-full absolute top-0 right-0 p-3 flex justify-center items-center">
             {icon}
           </span>
         )}
