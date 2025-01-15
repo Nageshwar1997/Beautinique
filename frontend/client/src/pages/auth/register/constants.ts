@@ -1,4 +1,9 @@
-import { AuthInputProps, ContentItem } from "../../../types";
+import {
+  AuthInputProps,
+  ContentItem,
+  PasswordType,
+  PasswordVisibilityTypes,
+} from "../../../types";
 
 export const RegisterTextContent: ContentItem[] = [
   {
@@ -44,3 +49,61 @@ export const initialRegisterData: AuthInputProps = {
   reminder: false,
   authType: "manual",
 };
+
+export const getPasswordFieldType = (
+  field: keyof PasswordVisibilityTypes,
+  passwordVisibility: PasswordVisibilityTypes
+): PasswordType => {
+  if (["password", "confirmPassword"].includes(field)) {
+    return passwordVisibility[field] ? "text" : "password";
+  }
+  return "text";
+};
+
+// Define the inputMapData outside the component
+export const inputMapData: {
+  name: keyof AuthInputProps;
+  label: string;
+  type: string;
+  autoComplete: string;
+  icon?: boolean;
+}[] = [
+  {
+    name: "firstName",
+    label: "First Name",
+    type: "text",
+    autoComplete: "given-name",
+  },
+  {
+    name: "lastName",
+    label: "Last Name",
+    type: "text",
+    autoComplete: "given-name",
+  },
+  {
+    name: "email",
+    label: "Email",
+    type: "text",
+    autoComplete: "email",
+  },
+  {
+    name: "phoneNumber",
+    label: "Phone Number",
+    type: "text",
+    autoComplete: "tel",
+  },
+  {
+    name: "password",
+    label: "Password",
+    type: "password",
+    autoComplete: "new-password",
+    icon: true,
+  },
+  {
+    name: "confirmPassword",
+    label: "Confirm Password",
+    type: "password",
+    autoComplete: "new-password",
+    icon: true,
+  },
+];
