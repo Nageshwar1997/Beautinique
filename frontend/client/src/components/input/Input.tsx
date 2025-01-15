@@ -1,4 +1,3 @@
-import { InputHTMLAttributes } from "react";
 import { CheckMark, InfoIcon } from "../icons";
 import { InputProps } from "../../types";
 
@@ -14,13 +13,16 @@ const Input = ({
   successText = "",
   placeholder = "",
   labelClassName = "",
-}: InputProps & InputHTMLAttributes<HTMLInputElement>) => {
+  autoComplete = "off",
+  iconClick,
+}: InputProps) => {
   return (
     <div className="w-full space-y-1">
       <div className="relative min-h-10 lg:min-h-12">
         {/* Input */}
         <input
-          autoComplete="off"
+          autoComplete={autoComplete}
+          aria-autocomplete="none"
           type={type}
           id={name}
           name={name}
@@ -35,7 +37,7 @@ const Input = ({
         {label && (
           <label
             htmlFor={name}
-            className={`flex items-center justify-center text-base cursor-text absolute left-2 text-primary-inverted-50 leading-none ${
+            className={`flex items-center justify-center text-sm cursor-text absolute left-2 md:left-3 text-primary-inverted-50 leading-none ${
               value
                 ? "top-0 px-1 md:px-2 py-0.5 border border-primary-inverted-10 text-[10px] lg:text-xs rounded-xl bg-smoke-eerie"
                 : "top-1/2 border border-transparent"
@@ -47,7 +49,10 @@ const Input = ({
 
         {/* Icon */}
         {icon && (
-          <span className="h-full absolute top-0 right-0 flex justify-center items-center">
+          <span
+            onClick={iconClick && iconClick}
+            className="h-full absolute top-0 right-3 flex justify-center items-center cursor-pointer"
+          >
             {icon}
           </span>
         )}
