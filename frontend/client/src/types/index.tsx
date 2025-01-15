@@ -1,11 +1,16 @@
-import { ChangeEvent, KeyboardEvent, ReactNode } from "react";
+import {
+  ChangeEvent,
+  HTMLInputAutoCompleteAttribute,
+  KeyboardEvent,
+  ReactNode,
+} from "react";
 
 export type ThemeTypes = "light" | "dark";
 
 export interface InputProps {
   label?: string;
   name?: string;
-  value?: string | number | readonly string[];
+  value?: string;
   icon?: ReactNode;
   errorText?: string;
   className?: string;
@@ -13,7 +18,9 @@ export interface InputProps {
   successText?: string;
   defaultValue?: string;
   labelClassName?: string;
+  iconClick?: () => void;
   type?: string;
+  autoComplete?: HTMLInputAutoCompleteAttribute | undefined;
   onKeyDown?: (e: KeyboardEvent<HTMLInputElement>) => void;
   onChange?: (e: ChangeEvent<HTMLInputElement>) => void;
 }
@@ -40,7 +47,13 @@ export interface AuthInputProps {
   password: string;
   confirmPassword: string;
   profilePic?: string;
-  hasIcon?: boolean;
   reminder?: boolean;
-  authType?: "social" | "manual";
+  authType?: "manual" | "social";
 }
+
+export type PasswordType = "password" | "text";
+
+export type PasswordVisibilityTypes = {
+  password: boolean;
+  confirmPassword: boolean;
+};
