@@ -136,21 +136,21 @@ const Register = () => {
                           "lastName",
                           "password",
                           "confirmPassword",
-                        ].includes(item.name) && "lg:col-span-2"
+                        ].includes(item?.name) && "lg:col-span-2"
                       }`}
                     >
                       <Input
-                        autoComplete={item.autoComplete}
-                        label={item.label}
-                        type={item.type}
-                        name={item.name}
-                        value={data[item.name]}
+                        autoComplete={item?.autoComplete}
+                        label={item?.label}
+                        type={item?.type}
+                        name={item?.name}
+                        value={data[item?.name] as string}
                         onChange={handleInputChange}
                         icon={
                           item?.icon &&
-                          ["password", "confirmPassword"].includes(item.name) &&
+                          ["password", "confirmPassword"].includes(item?.name) &&
                           (passwordVisibility[
-                            item.name as "password" | "confirmPassword"
+                            item?.name as "password" | "confirmPassword"
                           ] ? (
                             <EyeOffIcon />
                           ) : (
@@ -159,7 +159,7 @@ const Register = () => {
                         }
                         iconClick={() => {
                           if (
-                            ["password", "confirmPassword"].includes(item.name)
+                            ["password", "confirmPassword"].includes(item?.name)
                           ) {
                             togglePasswordVisibility(
                               item?.name as keyof PasswordVisibilityTypes
