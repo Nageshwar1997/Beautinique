@@ -6,7 +6,7 @@ const SocialAuth = () => {
       {socialMediaAccounts.map((item, index) => (
         <div
           key={index}
-          className="h-12 w-12 p-2.5 rounded-2xl border border-primary-inverted-14 bg-seasalt-black backdrop-blur mb-2.5 shadow-neumorphic opacity-70 cursor-not-allowed pointer-events-none"
+          className="h-12 w-12 p-2.5 rounded-2xl border border-primary-inverted-14 bg-seasalt-black backdrop-blur mb-2.5 shadow-neumorphic-layered opacity-70 cursor-not-allowed pointer-events-none"
         >
           <img
             src={item.url}
