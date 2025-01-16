@@ -17,7 +17,7 @@ const Input = ({
   iconClick,
 }: InputProps) => {
   return (
-    <div className="w-full space-y-1">
+    <div className="w-full space-y-1.5">
       <div className="relative min-h-10 lg:min-h-12">
         {/* Input */}
         <input
@@ -60,15 +60,15 @@ const Input = ({
 
       {/* Error Message */}
       {errorText && !successText && (
-        <span className="flex md:gap-0.5 lg:gap-1 items-center text-[10px] md:text-xs font-normal mt-2 text-red-500">
-          <InfoIcon className="w-3 h-3 md:w-4 md:h-4 lg:w-5 lg:h-5 fill-red-500" />
+        <span className="w-full text-start flex gap-1 items-center text-[11px] leading-tight mt-2 text-red-500">
+          <InfoIcon className="w-3 h-3 md:w-4 md:h-4 fill-red-500" />
           {errorText}
         </span>
       )}
       {/* Success Message */}
       {successText && !errorText && (
-        <span className="flex md:gap-0.5 lg:gap-1 items-center text-[10px] md:text-xs font-normal mt-2 text-green-500">
-          <CheckMark className="w-3 h-3 md:w-4 md:h-4 lg:w-5 lg:h-5 fill-green-500" />
+        <span className="w-full text-start flex gap-1 items-center text-[11px] leading-tight mt-2 text-green-500">
+          <CheckMark className="w-3 h-3 md:w-4 md:h-4 fill-green-500" />
           {successText}
         </span>
       )}
