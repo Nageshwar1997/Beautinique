@@ -13,9 +13,22 @@ export const validateEmail = (value: string): boolean => {
   return regex.test(value) || value === "";
 };
 
+export const isValidEmail = (value: string): boolean => {
+  const regex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+  return regex.test(value);
+};
+
 export const validatePassword = (value: string): boolean => {
   const regex = /^[^\s]+$/;
   return regex.test(value) || value === "";
+};
+
+export const isValidPassword = (value: string): boolean => {
+  const regex =
+    /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{6,}$/;
+
+  return regex.test(value);
+  
 };
 
 export const isValidNumber = (value: string): boolean => {
