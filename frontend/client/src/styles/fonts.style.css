@@ -13,9 +13,9 @@
 /* Degular */
 @font-face {
   font-family: "degular";
-  src: url("/fonts/degular/Degular-Regular.otf") format("opentype"),
-    url("/fonts/degular/Degular-Medium.otf") format("opentype"),
-    url("/fonts/degular/Degular-Semibold.otf") format("opentype");
+  src: url("/fonts/degualar/Degular-Regular.otf") format("otf"),
+    url("/fonts/degular/Degular-Medium.otf") format("otf"),
+    url("/fonts/degular/Degular-Semibold.otf") format("otf");
   font-style: normal;
   font-weight: normal;
 }
