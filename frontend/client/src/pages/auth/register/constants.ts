@@ -4,6 +4,7 @@ import {
   PasswordType,
   PasswordVisibilityTypes,
 } from "../../../types";
+import { isValidEmail, isValidPassword } from "../../../validators";
 
 export const RegisterTextContent: ContentItem[] = [
   {
@@ -107,3 +108,44 @@ export const inputMapData: {
     icon: true,
   },
 ];
+
+export const validateForm = (data: AuthInputProps) => {
+  const { firstName, lastName, email, phoneNumber, password, confirmPassword } =
+    data;
+
+  const updatedErrors: { [key: string]: string } = {};
+
+  if (!firstName) {
+    updatedErrors.firstName = "First name is required.";
+  }
+
+  if (!lastName) {
+    updatedErrors.lastName = "Last name is required.";
+  }
+
+  if (!email) {
+    updatedErrors.email = "Email is required.";
+  } else if (!isValidEmail(email)) {
+    updatedErrors.email = "Invalid email address.";
+  }
+
+  if (!phoneNumber) {
+    updatedErrors.phoneNumber = "Phone number is required.";
+  }
+
+  if (!password) {
+    updatedErrors.password = "Password is required.";
+  } else if (!isValidPassword(password)) {
+    updatedErrors.password = "1 Upper, 1 Lower, 1 Num, 1 Symbol, 6+ chars.";
+  }
+
+  if (!confirmPassword) {
+    updatedErrors.confirmPassword = "Confirm password is required.";
+  }
+
+  if (password !== confirmPassword) {
+    updatedErrors.confirmPassword = "Passwords do not match.";
+  }
+
+  return updatedErrors;
+};
