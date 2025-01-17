@@ -130,6 +130,7 @@ const Register = () => {
                           item?.name as keyof PasswordVisibilityTypes,
                           passwordVisibility
                         )}
+                        placeholder={item?.placeholder}
                         name={item?.name}
                         value={data[item?.name] as string}
                         onChange={handleInputChange}
@@ -141,9 +142,9 @@ const Register = () => {
                           (passwordVisibility[
                             item?.name as keyof PasswordVisibilityTypes
                           ] ? (
-                            <EyeOffIcon />
+                            <EyeOffIcon className="fill-primary-inverted-50 hover:fill-primary-inverted" />
                           ) : (
-                            <EyeIcon />
+                            <EyeIcon className="fill-primary-inverted-50 hover:fill-primary-inverted" />
                           ))
                         }
                         iconClick={() => {

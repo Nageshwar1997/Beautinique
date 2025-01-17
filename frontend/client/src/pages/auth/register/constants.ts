@@ -67,6 +67,7 @@ export const inputMapData: {
   label: string;
   type: string;
   autoComplete: string;
+  placeholder: string;
   icon?: boolean;
 }[] = [
   {
@@ -74,24 +75,28 @@ export const inputMapData: {
     label: "First Name",
     type: "text",
     autoComplete: "given-name",
+    placeholder: "Enter your first name",
   },
   {
     name: "lastName",
     label: "Last Name",
     type: "text",
     autoComplete: "given-name",
+    placeholder: "Enter your last name",
   },
   {
     name: "email",
     label: "Email",
     type: "text",
     autoComplete: "email",
+    placeholder: "Enter your email address",
   },
   {
     name: "phoneNumber",
     label: "Phone Number",
     type: "text",
     autoComplete: "tel",
+    placeholder: "Enter your phone number",
   },
   {
     name: "password",
@@ -99,6 +104,7 @@ export const inputMapData: {
     type: "password",
     autoComplete: "new-password",
     icon: true,
+    placeholder: "Enter new password",
   },
   {
     name: "confirmPassword",
@@ -106,6 +112,7 @@ export const inputMapData: {
     type: "password",
     autoComplete: "new-password",
     icon: true,
+    placeholder: "Confirm new password",
   },
 ];
 

@@ -28,20 +28,15 @@ const Input = ({
           name={name}
           value={value}
           onChange={onChange}
-          placeholder={placeholder ? placeholder : " "}
-          className={`peer w-full flex-grow outline-none focus:outline-none font-normal text-base overflow-hidden bg-smoke-eerie rounded-lg border border-primary-inverted-10 px-4 py-2 lg:py-3 2xl:py-4 text-primary-inverted ${
+          placeholder={placeholder}
+          className={`w-full flex-grow outline-none focus:outline-none font-normal text-base overflow-hidden bg-smoke-eerie rounded-lg border border-primary-inverted-10 px-3 py-2 lg:py-3 2xl:py-4 text-primary-inverted placeholder:text-primary-inverted-50 placeholder:text-sm ${
             icon && "pr-10"
           } autofill-effect ${className}`}
         />
-        {/* Floating Label */}
         {label && (
           <label
             htmlFor={name}
-            className={`flex items-center justify-center text-[10px] lg:text-xs cursor-text absolute left-2 md:left-3 text-primary-inverted-50 leading-none ${
-              value
-                ? "top-0 px-1 md:px-2 py-0.5 border border-primary-inverted-10 text-[10px] lg:text-xs rounded bg-smoke-eerie"
-                : "top-1/2 border border-transparent"
-            } transform -translate-y-1/2 transition-all duration-200 leading-none peer-focus:top-0 peer-focus:text-[10px] peer-focus:lg:text-xs peer-focus:leading-none peer-focus:px-1 peer-focus:md:px-2 peer-focus:py-0.5 peer-focus:border peer-focus:border-primary-inverted-10 peer-focus:bg-smoke-eerie peer-focus:rounded ${labelClassName}`}
+            className={`text-[10px] lg:text-xs text-primary-inverted-50 absolute top-0 left-3 transform -translate-y-1/2 duration-200 border border-primary-inverted-10 leading-none px-1 md:px-2 py-0.5 md:py-1 bg-smoke-eerie rounded ${labelClassName}`}
           >
             {label}
           </label>
