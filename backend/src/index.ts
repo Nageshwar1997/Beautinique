@@ -1,3 +1,4 @@
+import "dotenv/config";
 import express, { NextFunction, Request, Response } from "express";
 import connectDB from "./configs/db.config";
 import errorHandler from "./middlewares/errorHandler.middleware";
@@ -5,13 +6,13 @@ import notFoundHandler from "./middlewares/notFoundHandler.middleware";
 
 
 const app = express();
-const PORT = process.env.PORT || 8080;
+const PORT = process.env.PORT || 5454;
 
 // Middleware to parse JSON
 app.use(express.json());
 
 // Example route
-app.get("/", (req: Request, res: Response, next: NextFunction) => {
+app.get("/", (_: Request, res: Response, next: NextFunction) => {
   res.status(200).json({
     success: true,
     error: false,
