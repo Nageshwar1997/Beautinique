@@ -5,25 +5,25 @@ import {
   registerInputMapData,
   RegisterTextContent,
   validateRegisterForm,
-} from "../constants";
+} from "./constants";
 import {
   validateEmail,
   validateName,
   validateNumber,
   validatePassword,
-} from "../../../validators";
-import AuthRobot from "../components/AuthRobot";
-import UploadProfile from "../components/UploadProfile";
-import TextDisplay from "../../../components/TextDisplay";
-import SocialAuth from "../components/SocialAuth";
-import Input from "../../../components/input/Input";
-import Button from "../../../components/button/Button";
-import { PasswordVisibilityTypes } from "../../../types";
-import { EyeIcon, EyeOffIcon } from "../../../components/icons";
-import useIsScrollable from "../../../hooks/useIsScrollable";
-import PhoneInput from "../../../components/input/PhoneInput";
+} from "../../validators";
+import AuthRobot from "./components/AuthRobot";
+import UploadProfile from "./components/UploadProfile";
+import TextDisplay from "../../components/TextDisplay";
+import SocialAuth from "./components/SocialAuth";
+import Input from "../../components/input/Input";
+import Button from "../../components/button/Button";
+import { PasswordVisibilityTypes } from "../../types";
+import { EyeIcon, EyeOffIcon } from "../../components/icons";
+import useIsScrollable from "../../hooks/useIsScrollable";
+import PhoneInput from "../../components/input/PhoneInput";
 import { Link } from "react-router-dom";
-import Checkbox from "../../../components/input/Checkbox";
+import Checkbox from "../../components/input/Checkbox";
 
 const Register = () => {
   const [scrollRef, isScrollable] = useIsScrollable();

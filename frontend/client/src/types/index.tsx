@@ -48,7 +48,6 @@ export interface AuthInputProps {
   confirmPassword: string;
   profilePic?: string;
   remember?: boolean;
-  authType?: "manual" | "social";
 }
 
 export type PasswordType = "password" | "text";

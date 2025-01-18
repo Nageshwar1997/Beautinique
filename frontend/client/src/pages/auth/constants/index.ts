@@ -48,14 +48,12 @@ export const initialRegisterData: AuthInputProps = {
   confirmPassword: "",
   profilePic: "",
   remember: false,
-  authType: "manual",
 };
 export const initialLoginData = {
-  email: "" as keyof AuthInputProps,
-  phoneNumber: "" as keyof AuthInputProps,
-  password: "" as keyof AuthInputProps,
-  remember: false as boolean,
-  authType: "manual" as keyof AuthInputProps,
+  email: "" ,
+  phoneNumber: "" ,
+  password: "" ,
+  remember: false ,
 };
 
 export const getPasswordFieldType = (
