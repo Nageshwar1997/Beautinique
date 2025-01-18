@@ -2,10 +2,10 @@ import { ChangeEvent, FormEvent, RefObject, useState } from "react";
 import {
   getPasswordFieldType,
   initialRegisterData,
-  inputMapData,
+  registerInputMapData,
   RegisterTextContent,
-  validateForm,
-} from "./constants";
+  validateRegisterForm,
+} from "../constants";
 import {
   validateEmail,
   validateName,
@@ -76,7 +76,7 @@ const Register = () => {
   const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
-    const updatedErrors = validateForm(data);
+    const updatedErrors = validateRegisterForm(data);
 
     if (Object.values(updatedErrors).some((error) => error !== "")) {
       setErrors(updatedErrors);
@@ -110,7 +110,7 @@ const Register = () => {
           <div className="w-full max-w-[400px] lg:max-w-[500px] sm:w-[90%] lg:w-[500px] border-gradient p-px rounded-3xl overflow-hidden mx-auto">
             <div className="shadow-light-dark-soft bg-platinum-black p-6 md:p-8 rounded-3xl space-y-6">
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-x-4 gap-y-5 lg:gap-y-6">
-                {inputMapData?.map((item, ind) => {
+                {registerInputMapData?.map((item, ind) => {
                   return (
                     <div
                       key={ind}

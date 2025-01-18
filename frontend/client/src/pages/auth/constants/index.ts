@@ -50,6 +50,13 @@ export const initialRegisterData: AuthInputProps = {
   remember: false,
   authType: "manual",
 };
+export const initialLoginData = {
+  email: "" as keyof AuthInputProps,
+  phoneNumber: "" as keyof AuthInputProps,
+  password: "" as keyof AuthInputProps,
+  remember: false as boolean,
+  authType: "manual" as keyof AuthInputProps,
+};
 
 export const getPasswordFieldType = (
   field: keyof PasswordVisibilityTypes,
@@ -62,7 +69,7 @@ export const getPasswordFieldType = (
 };
 
 // Define the inputMapData outside the component
-export const inputMapData: {
+export const registerInputMapData: {
   name: keyof AuthInputProps;
   label: string;
   type: string;
@@ -70,53 +77,53 @@ export const inputMapData: {
   placeholder: string;
   icon?: boolean;
 }[] = [
-  {
-    name: "firstName",
-    label: "First Name",
-    type: "text",
-    autoComplete: "given-name",
-    placeholder: "Enter your first name",
-  },
-  {
-    name: "lastName",
-    label: "Last Name",
-    type: "text",
-    autoComplete: "given-name",
-    placeholder: "Enter your last name",
-  },
-  {
-    name: "email",
-    label: "Email",
-    type: "text",
-    autoComplete: "email",
-    placeholder: "Enter your email address",
-  },
-  {
-    name: "phoneNumber",
-    label: "Phone Number",
-    type: "text",
-    autoComplete: "tel",
-    placeholder: "Enter your phone number",
-  },
-  {
-    name: "password",
-    label: "Password",
-    type: "password",
-    autoComplete: "new-password",
-    icon: true,
-    placeholder: "Enter new password",
-  },
-  {
-    name: "confirmPassword",
-    label: "Confirm Password",
-    type: "password",
-    autoComplete: "new-password",
-    icon: true,
-    placeholder: "Confirm new password",
-  },
-];
+    {
+      name: "firstName",
+      label: "First Name",
+      type: "text",
+      autoComplete: "given-name",
+      placeholder: "Enter your first name",
+    },
+    {
+      name: "lastName",
+      label: "Last Name",
+      type: "text",
+      autoComplete: "given-name",
+      placeholder: "Enter your last name",
+    },
+    {
+      name: "email",
+      label: "Email",
+      type: "text",
+      autoComplete: "email",
+      placeholder: "Enter your email address",
+    },
+    {
+      name: "phoneNumber",
+      label: "Phone Number",
+      type: "text",
+      autoComplete: "tel",
+      placeholder: "Enter your phone number",
+    },
+    {
+      name: "password",
+      label: "Password",
+      type: "password",
+      autoComplete: "new-password",
+      icon: true,
+      placeholder: "Enter new password",
+    },
+    {
+      name: "confirmPassword",
+      label: "Confirm Password",
+      type: "password",
+      autoComplete: "new-password",
+      icon: true,
+      placeholder: "Confirm new password",
+    },
+  ];
 
-export const validateForm = (data: AuthInputProps) => {
+export const validateRegisterForm = (data: AuthInputProps) => {
   const { firstName, lastName, email, phoneNumber, password, confirmPassword } =
     data;
 

@@ -1,4 +1,4 @@
-import { socialMediaAccounts } from "../register/constants";
+import { socialMediaAccounts } from "../constants";
 
 const SocialAuth = () => {
   return (
