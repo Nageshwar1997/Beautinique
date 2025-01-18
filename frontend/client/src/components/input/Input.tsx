@@ -19,6 +19,14 @@ const Input = ({
   return (
     <div className="w-full space-y-1.5">
       <div className="relative min-h-10 lg:min-h-12">
+        {label && (
+          <label
+            htmlFor={name}
+            className={`text-[10px] lg:text-xs text-primary-inverted-50 absolute top-0 left-3 transform -translate-y-1/2 duration-200 border border-primary-inverted-10 leading-none px-1 md:px-2 py-0.5 md:py-1 bg-smoke-eerie rounded cursor-pointer ${labelClassName}`}
+          >
+            {label}
+          </label>
+        )}
         {/* Input */}
         <input
           autoComplete={autoComplete}
@@ -33,14 +41,6 @@ const Input = ({
             icon && "pr-10"
           } autofill-effect ${className}`}
         />
-        {label && (
-          <label
-            htmlFor={name}
-            className={`text-[10px] lg:text-xs text-primary-inverted-50 absolute top-0 left-3 transform -translate-y-1/2 duration-200 border border-primary-inverted-10 leading-none px-1 md:px-2 py-0.5 md:py-1 bg-smoke-eerie rounded ${labelClassName}`}
-          >
-            {label}
-          </label>
-        )}
 
         {/* Icon */}
         {icon && (
