@@ -18,7 +18,7 @@ const userSchema = new Schema({
         lowercase: true,
     },
 
-    profileImage: {
+    profilePic: {
         type: String,
         default: "",
     },
@@ -33,7 +33,6 @@ const userSchema = new Schema({
         required: true,
         minlength: 6,
     },
-    DOB: Date,
     createdAt: {
         type: Date,
         default: Date.now(),
