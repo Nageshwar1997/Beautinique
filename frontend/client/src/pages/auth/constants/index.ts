@@ -1,7 +1,7 @@
 import {
-  AuthInputProps,
+  RegisterInputProps,
+  LoginInputProps,
   ContentItem,
-  PasswordType,
   PasswordVisibilityTypes,
 } from "../../../types";
 import { isValidEmail, isValidPassword } from "../../../validators";
@@ -39,7 +39,7 @@ export const socialMediaAccounts = [
   },
 ];
 
-export const initialRegisterData: AuthInputProps = {
+export const initialRegisterData: RegisterInputProps = {
   firstName: "",
   lastName: "",
   email: "",
@@ -49,17 +49,17 @@ export const initialRegisterData: AuthInputProps = {
   profilePic: "",
   remember: false,
 };
-export const initialLoginData = {
-  email: "" ,
-  phoneNumber: "" ,
-  password: "" ,
-  remember: false ,
+export const initialLoginData: LoginInputProps = {
+  email: "",
+  phoneNumber: "",
+  password: "",
+  remember: false,
 };
 
 export const getPasswordFieldType = (
   field: keyof PasswordVisibilityTypes,
   passwordVisibility: PasswordVisibilityTypes
-): PasswordType => {
+): "password" | "text" => {
   if (["password", "confirmPassword"].includes(field)) {
     return passwordVisibility[field] ? "text" : "password";
   }
@@ -68,7 +68,7 @@ export const getPasswordFieldType = (
 
 // Define the inputMapData outside the component
 export const registerInputMapData: {
-  name: keyof AuthInputProps;
+  name: keyof RegisterInputProps;
   label: string;
   type: string;
   autoComplete: string;
@@ -121,7 +121,39 @@ export const registerInputMapData: {
     },
   ];
 
-export const validateRegisterForm = (data: AuthInputProps) => {
+export const loginInputMapData: {
+  name: keyof LoginInputProps;
+  label: string;
+  type: string;
+  autoComplete: string;
+  placeholder: string;
+  icon?: boolean;
+}[] = [
+    {
+      name: "email",
+      label: "Email",
+      type: "text",
+      autoComplete: "email",
+      placeholder: "Enter your email address",
+    },
+    {
+      name: "phoneNumber",
+      label: "Phone Number",
+      type: "text",
+      autoComplete: "tel",
+      placeholder: "Enter your phone number",
+    },
+    {
+      name: "password",
+      label: "Password",
+      type: "password",
+      autoComplete: "new-password",
+      icon: true,
+      placeholder: "Enter your password",
+    },
+  ];
+
+export const validateRegisterForm = (data: RegisterInputProps) => {
   const { firstName, lastName, email, phoneNumber, password, confirmPassword } =
     data;
 
@@ -161,3 +193,36 @@ export const validateRegisterForm = (data: AuthInputProps) => {
 
   return updatedErrors;
 };
+
+export const validateLoginForm = (
+  data: LoginInputProps,
+  loginUsing: "email" | "phoneNumber"
+) => {
+  const { email, phoneNumber, password } = data;
+
+  const updatedErrors: { [key: string]: string } = {};
+
+  if (loginUsing === "email") {
+    // Validate email if loginUsing is email
+    if (!email) {
+      updatedErrors.email = "Email is required.";
+    } else if (!isValidEmail(email)) {
+      updatedErrors.email = "Invalid email address.";
+    }
+  } else if (loginUsing === "phoneNumber") {
+    // Validate phoneNumber if loginUsing is phoneNumber
+    if (!phoneNumber) {
+      updatedErrors.phoneNumber = "Phone number is required.";
+    }
+  }
+
+  // Validate password (common for both cases)
+  if (!password) {
+    updatedErrors.password = "Password is required.";
+  } else if (!isValidPassword(password)) {
+    updatedErrors.password = "1 Upper, 1 Lower, 1 Num, 1 Symbol, 6+ chars.";
+  }
+
+  return updatedErrors;
+};
+

@@ -39,7 +39,7 @@ export interface TextDisplayProps {
   contentClassName?: string;
 }
 
-export interface AuthInputProps {
+export interface RegisterInputProps {
   firstName: string;
   lastName: string;
   email: string;
@@ -50,9 +50,25 @@ export interface AuthInputProps {
   remember?: boolean;
 }
 
-export type PasswordType = "password" | "text";
+export interface LoginInputProps {
+  email: string;
+  phoneNumber: string;
+  password: string;
+  remember?: boolean;
+}
 
 export type PasswordVisibilityTypes = {
   password: boolean;
   confirmPassword: boolean;
 };
+
+export type LoginField = "email" | "password" | "phoneNumber" | "remember";
+
+export type RegisterField = "firstName" | "lastName" | "email" | "phoneNumber";
+
+export interface RadioProps {
+  value: string;
+  onChange: (value: string) => void;
+  options: { label: string; value: string }[];
+  className?: string;
+}

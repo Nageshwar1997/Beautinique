@@ -3,6 +3,7 @@ import App from "../App";
 import Home from "../pages/home/Home";
 import Register from "../pages/auth/Register";
 import WithHeaderFooter from "../components/WithHeaderFooter";
+import Login from "../pages/auth/Login";
 
 const router = createBrowserRouter([
   {
@@ -16,6 +17,10 @@ const router = createBrowserRouter([
       {
         path: "register",
         element: <Register />,
+      },
+      {
+        path: "login",
+        element: <Login />,
       },
     ],
   },
