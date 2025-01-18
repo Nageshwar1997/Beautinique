@@ -197,9 +197,9 @@ const Register = () => {
                 </p>
                 <Link
                   to={"/login"}
-                  className={`bg-clip-text text-transparent bg-accent-duo`}
+                  className={`bg-clip-text text-transparent bg-accent-duo text-lg hover:font-extrabold`}
                 >
-                  Sign in
+                  Login
                 </Link>
               </div>
             </div>
