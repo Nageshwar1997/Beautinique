@@ -22,7 +22,8 @@ import { PasswordVisibilityTypes } from "../../../types";
 import { EyeIcon, EyeOffIcon } from "../../../components/icons";
 import useIsScrollable from "../../../hooks/useIsScrollable";
 import PhoneInput from "../../../components/input/PhoneInput";
-// import Checkbox from "../../../components/input/Checkbox";
+import { Link } from "react-router-dom";
+import Checkbox from "../../../components/input/Checkbox";
 
 const Register = () => {
   const [scrollRef, isScrollable] = useIsScrollable();
@@ -52,7 +53,7 @@ const Register = () => {
   };
 
   const handleInputChange = (e: ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target;
+    const { name, value, type, checked } = e.target;
 
     if ((name === "firstName" || name === "lastName") && validateName(value)) {
       setData((prevData) => ({ ...prevData, [name]: value }));
@@ -66,6 +67,8 @@ const Register = () => {
     } else if (name === "phoneNumber") {
       const newValue = validateNumber(value);
       setData((prevData) => ({ ...prevData, [name]: newValue }));
+    } else if (type === "checkbox" && name === "remember") {
+      setData((prevData) => ({ ...prevData, [name]: checked }));
     }
     setErrors((prevErrors) => ({ ...prevErrors, [name]: "" }));
   };
@@ -171,22 +174,34 @@ const Register = () => {
                   );
                 })}
               </div>
-              <div className="flex items-center space-x-3">
-                <label className="relative inline-flex items-center cursor-pointer">
-                  <input
-                    name="remember"
-                    
-                    type="checkbox"
-                    className="sr-only peer outline-none"
+              <div className="space-y-3">
+                <div className="flex items-center space-x-3">
+                  <Checkbox
+                    checked={data?.remember as boolean}
+                    onChange={handleInputChange as () => void}
                   />
-                  <div className="w-10 h-6 bg-primary-inverted-50 rounded-full peer-checked:after:translate-x-4 after:content-[''] after:absolute after:top-1 after:left-1 after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-blue-600"></div>
-                </label>
-
-                <span className="text-sm text-primary-inverted-50 font-medium">
-                  Remember me
-                </span>
+                  <span className="text-sm text-primary-inverted-50 font-medium">
+                    Remember me
+                  </span>
+                </div>
+                <Button
+                  pattern="primary"
+                  type="submit"
+                  content="Register"
+                  className="!text-base"
+                />
               </div>
-              <Button pattern="primary" type="submit" content="Register" />
+              <div className="flex items-center justify-center gap-2">
+                <p className="bg-clip-text text-transparent bg-silver-duo-gradient">
+                  Already have an account?
+                </p>
+                <Link
+                  to={"/login"}
+                  className={`bg-clip-text text-transparent bg-accent-duo`}
+                >
+                  Sign in
+                </Link>
+              </div>
             </div>
           </div>
         </form>

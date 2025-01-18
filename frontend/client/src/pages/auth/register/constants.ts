@@ -47,7 +47,7 @@ export const initialRegisterData: AuthInputProps = {
   password: "",
   confirmPassword: "",
   profilePic: "",
-  reminder: false,
+  remember: false,
   authType: "manual",
 };
 
