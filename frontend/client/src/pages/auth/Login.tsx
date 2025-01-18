@@ -12,7 +12,6 @@ import {
 } from "../../validators";
 import AuthRobot from "./components/AuthRobot";
 import TextDisplay from "../../components/TextDisplay";
-import UploadProfile from "./components/UploadProfile";
 import SocialAuth from "./components/SocialAuth";
 import PhoneInput from "../../components/input/PhoneInput";
 import Input from "../../components/input/Input";
@@ -91,13 +90,10 @@ const Login = () => {
           autoComplete="off"
           className="w-full flex flex-col gap-4"
         >
-          <div className="text-center mb-3">
             <TextDisplay
               content={LoginTextContent}
               contentClassName="mb-3 font-semibold"
             />
-            <UploadProfile />
-          </div>
           <SocialAuth />
           <div className="w-full max-w-[400px] lg:max-w-[500px] sm:w-[90%] lg:w-[500px] border-gradient p-px rounded-3xl overflow-hidden mx-auto">
             <div className="shadow-light-dark-soft bg-platinum-black p-6 md:p-8 rounded-3xl space-y-6">
