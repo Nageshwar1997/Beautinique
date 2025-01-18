@@ -184,7 +184,7 @@ const Login = () => {
                 <Button
                   pattern="primary"
                   type="submit"
-                  content="Register"
+                  content="Login"
                   className="!text-base"
                 />
               </div>
