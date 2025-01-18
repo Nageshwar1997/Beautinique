@@ -18,7 +18,7 @@ import TextDisplay from "../../components/TextDisplay";
 import SocialAuth from "./components/SocialAuth";
 import Input from "../../components/input/Input";
 import Button from "../../components/button/Button";
-import { PasswordVisibilityTypes } from "../../types";
+import { PasswordVisibilityTypes, RegisterField } from "../../types";
 import { EyeIcon, EyeOffIcon } from "../../components/icons";
 import useIsScrollable from "../../hooks/useIsScrollable";
 import PhoneInput from "../../components/input/PhoneInput";
@@ -35,18 +35,9 @@ const Register = () => {
       confirmPassword: false,
     });
 
-  type ErrorsType = {
-    [key: string]: string;
-  };
-
-  const [errors, setErrors] = useState<ErrorsType>({
-    firstName: "",
-    lastName: "",
-    email: "",
-    phoneNumber: "",
-    password: "",
-    confirmPassword: "",
-  });
+  const [errors, setErrors] = useState<Partial<Record<RegisterField, string>>>(
+    {}
+  );
 
   const togglePasswordVisibility = (type: keyof PasswordVisibilityTypes) => {
     setPasswordVisibility((prev) => ({ ...prev, [type]: !prev[type] }));
@@ -132,7 +123,7 @@ const Register = () => {
                           name={item?.name}
                           value={data[item?.name] as string}
                           onChange={handleInputChange}
-                          errorText={errors[item?.name]}
+                          errorText={errors[item?.name as RegisterField]}
                         />
                       ) : (
                         <Input
@@ -167,7 +158,7 @@ const Register = () => {
                               item?.name as keyof PasswordVisibilityTypes
                             )
                           }
-                          errorText={errors[item?.name]}
+                          errorText={errors[item?.name as RegisterField]}
                         />
                       )}
                     </div>

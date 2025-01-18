@@ -16,6 +16,7 @@ export default {
         "seasalt-black": "var(--seasalt-black)",
         "platinum-black": "var(--platinum-black)",
         "platinum-black-inverted": "var(--platinum-black-inverted)",
+        "battleship-davys-gray": "var(--battleship-davys-gray)",
       },
       backgroundImage: {
         "accent-duo": "var(--accent-duo)",

@@ -29,9 +29,9 @@ const PhoneInput = ({
         )}
         {/* Input */}
         <div className="w-full text-base flex bg-smoke-eerie rounded-lg border border-primary-inverted-10 text-primary-inverted">
-          <div className="w-[18%] text-primary-inverted-50 content-center text-center border-r border-primary-inverted-10 py-2 lg:py-3 2xl:py-4">
+          <p className="w-[16%] text-primary-inverted-50 content-center text-center border-r border-primary-inverted-10 py-2 lg:py-3 2xl:py-4">
             +91
-          </div>
+          </p>
           <input
             autoComplete={autoComplete}
             aria-autocomplete="none"
