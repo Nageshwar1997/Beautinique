@@ -21,6 +21,8 @@ import Button from "../../../components/button/Button";
 import { PasswordVisibilityTypes } from "../../../types";
 import { EyeIcon, EyeOffIcon } from "../../../components/icons";
 import useIsScrollable from "../../../hooks/useIsScrollable";
+import PhoneInput from "../../../components/input/PhoneInput";
+// import Checkbox from "../../../components/input/Checkbox";
 
 const Register = () => {
   const [scrollRef, isScrollable] = useIsScrollable();
@@ -52,23 +54,18 @@ const Register = () => {
   const handleInputChange = (e: ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
 
-    if (name === "firstName" || name === "lastName") {
-      if (validateName(value)) {
-        setData((prevData) => ({ ...prevData, [name]: value }));
-      }
-    } else if (name === "email") {
-      if (validateEmail(value)) {
-        setData((prevData) => ({ ...prevData, [name]: value }));
-      }
-    } else if (name === "password" || name === "confirmPassword") {
-      if (validatePassword(value)) {
-        setData((prevData) => ({ ...prevData, [name]: value }));
-      }
+    if ((name === "firstName" || name === "lastName") && validateName(value)) {
+      setData((prevData) => ({ ...prevData, [name]: value }));
+    } else if (name === "email" && validateEmail(value)) {
+      setData((prevData) => ({ ...prevData, [name]: value }));
+    } else if (
+      (name === "password" || name === "confirmPassword") &&
+      validatePassword(value)
+    ) {
+      setData((prevData) => ({ ...prevData, [name]: value }));
     } else if (name === "phoneNumber") {
       const newValue = validateNumber(value);
       setData((prevData) => ({ ...prevData, [name]: newValue }));
-    } else {
-      setData((prevData) => ({ ...prevData, [name]: value }));
     }
     setErrors((prevErrors) => ({ ...prevErrors, [name]: "" }));
   };
@@ -100,16 +97,16 @@ const Register = () => {
           className="w-full flex flex-col gap-4"
         >
           <div className="text-center mb-3">
-            <UploadProfile />
             <TextDisplay
               content={RegisterTextContent}
-              contentClassName="mt-3 font-semibold"
+              contentClassName="mb-3 font-semibold"
             />
+            <UploadProfile />
           </div>
           <SocialAuth />
           <div className="w-full max-w-[400px] lg:max-w-[500px] sm:w-[90%] lg:w-[500px] border-gradient p-px rounded-3xl overflow-hidden mx-auto">
             <div className="shadow-light-dark-soft bg-platinum-black p-6 md:p-8 rounded-3xl space-y-6">
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-x-4 gap-y-4 md:gap-y-5 lg:gap-y-6">
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-x-4 gap-y-5 lg:gap-y-6">
                 {inputMapData?.map((item, ind) => {
                   return (
                     <div
@@ -123,44 +120,71 @@ const Register = () => {
                         ].includes(item?.name) && "lg:col-span-2"
                       }`}
                     >
-                      <Input
-                        autoComplete={item?.autoComplete}
-                        label={item?.label}
-                        type={getPasswordFieldType(
-                          item?.name as keyof PasswordVisibilityTypes,
-                          passwordVisibility
-                        )}
-                        placeholder={item?.placeholder}
-                        name={item?.name}
-                        value={data[item?.name] as string}
-                        onChange={handleInputChange}
-                        icon={
-                          item?.icon &&
-                          ["password", "confirmPassword"].includes(
-                            item?.name
-                          ) &&
-                          (passwordVisibility[
-                            item?.name as keyof PasswordVisibilityTypes
-                          ] ? (
-                            <EyeOffIcon className="fill-primary-inverted-50 hover:fill-primary-inverted" />
-                          ) : (
-                            <EyeIcon className="fill-primary-inverted-50 hover:fill-primary-inverted" />
-                          ))
-                        }
-                        iconClick={() => {
-                          if (
-                            ["password", "confirmPassword"].includes(item?.name)
-                          ) {
+                      {item.name === "phoneNumber" ? (
+                        <PhoneInput
+                          autoComplete={item?.autoComplete}
+                          label={item?.label}
+                          type={item?.type}
+                          placeholder={item?.placeholder}
+                          name={item?.name}
+                          value={data[item?.name] as string}
+                          onChange={handleInputChange}
+                          errorText={errors[item?.name]}
+                        />
+                      ) : (
+                        <Input
+                          autoComplete={item?.autoComplete}
+                          label={item?.label}
+                          type={getPasswordFieldType(
+                            item?.name as keyof PasswordVisibilityTypes,
+                            passwordVisibility
+                          )}
+                          placeholder={item?.placeholder}
+                          name={item?.name}
+                          value={data[item?.name] as string}
+                          onChange={handleInputChange}
+                          icon={
+                            item?.icon &&
+                            ["password", "confirmPassword"].includes(
+                              item?.name
+                            ) &&
+                            (passwordVisibility[
+                              item?.name as keyof PasswordVisibilityTypes
+                            ] ? (
+                              <EyeOffIcon className="fill-primary-inverted-50 hover:fill-primary-inverted" />
+                            ) : (
+                              <EyeIcon className="fill-primary-inverted-50 hover:fill-primary-inverted" />
+                            ))
+                          }
+                          iconClick={() =>
+                            ["password", "confirmPassword"].includes(
+                              item?.name
+                            ) &&
                             togglePasswordVisibility(
                               item?.name as keyof PasswordVisibilityTypes
-                            );
+                            )
                           }
-                        }}
-                        errorText={errors[item?.name]}
-                      />
+                          errorText={errors[item?.name]}
+                        />
+                      )}
                     </div>
                   );
                 })}
+              </div>
+              <div className="flex items-center space-x-3">
+                <label className="relative inline-flex items-center cursor-pointer">
+                  <input
+                    name="remember"
+                    
+                    type="checkbox"
+                    className="sr-only peer outline-none"
+                  />
+                  <div className="w-10 h-6 bg-primary-inverted-50 rounded-full peer-checked:after:translate-x-4 after:content-[''] after:absolute after:top-1 after:left-1 after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-blue-600"></div>
+                </label>
+
+                <span className="text-sm text-primary-inverted-50 font-medium">
+                  Remember me
+                </span>
               </div>
               <Button pattern="primary" type="submit" content="Register" />
             </div>
