@@ -2,6 +2,7 @@ import bcrypt from "bcryptjs";
 import { Request, Response, NextFunction } from "express";
 import generateToken from "../providers/jwt.provider";
 import { User } from "../models";
+import AppError from "../utils/AppError";
 
 const registerController = async (
   req: Request,
@@ -28,19 +29,21 @@ const registerController = async (
 
     res.status(201).json({
       success: true,
+      error: false,
       message: "User registered successfully",
       token: token,
       user: {
         _id: user._id,
         firstName: user.firstName,
         lastName: user.lastName,
+        phoneNumber: user.phoneNumber,
         email: user.email,
         profilePic: user.profilePic,
         role: user.role,
       },
     });
-  } catch (err) {
-    next(err);
+  } catch (err:any) {
+    next(new AppError(err.message || "Error registering user", 500));
   }
 };
 

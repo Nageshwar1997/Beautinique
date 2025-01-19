@@ -28,6 +28,8 @@ app.get("/", (_: Request, res: Response, next: NextFunction) => {
 // Auth routes
 import authRouter from "./routes/auth.routes";
 import uploadRouter from "./routes/upload.routes";
+
+
 app.use("/api/auth", authRouter)
 
 app.use("/api/upload", uploadRouter)
