@@ -1,5 +1,6 @@
 import "dotenv/config";
 import express, { NextFunction, Request, Response } from "express";
+import cors from "cors";
 import connectDB from "./configs/db.config";
 import errorHandler from "./middlewares/errorHandler.middleware";
 import notFoundHandler from "./middlewares/notFoundHandler.middleware";
@@ -10,6 +11,9 @@ const PORT = process.env.PORT || 5454;
 
 // Middleware to parse JSON
 app.use(express.json());
+
+app.use(cors());
+app.use(express.urlencoded({ extended: true }));
 
 // Example route
 app.get("/", (_: Request, res: Response, next: NextFunction) => {
@@ -23,7 +27,10 @@ app.get("/", (_: Request, res: Response, next: NextFunction) => {
 // Routes
 // Auth routes
 import authRouter from "./routes/auth.routes";
+import uploadRouter from "./routes/upload.routes";
 app.use("/api/auth", authRouter)
+
+app.use("/api/upload", uploadRouter)
 
 // Catch undefined routes
 app.use(notFoundHandler);
