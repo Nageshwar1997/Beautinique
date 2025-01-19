@@ -9,20 +9,24 @@ cloudinary.config({
   api_secret: process.env.CLOUDINARY_API_SECRET,
 });
 
-
-
-// Configure Multer Storage with Dynamic Folder Name
+// Configure Multer Storage
 const storage = new CloudinaryStorage({
   cloudinary: cloudinary,
-  params: async (req, file) => {
+  params: async (_, file) => {
+    // _ is the request object, file is the uploaded file
+
     const folderName = "Profile Pics";
-    const fileName = file.originalname;
+    const fileName = file?.originalname;
+    const publicId = `${fileName
+      .split(".")
+      .slice(0, -1)
+      .join("")}-${Date.now().toString()}`;
     return {
       folder: folderName, // Dynamic folder name
       filename: fileName, // Dynamic file name
-      allowed_formats: ["jpg", "jpeg", "png", "webp"], // Allowed formats
+      public_id: publicId,
       resource_type: "image", // Specify resource type
-      public_id: `${fileName.split('.').slice(0, -1).join('')}${Date.now().toString()}`,
+      allowed_formats: ["jpg", "jpeg", "png", "webp"], // Allowed formats
     };
   },
 });

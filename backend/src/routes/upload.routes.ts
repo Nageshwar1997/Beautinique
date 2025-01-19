@@ -1,5 +1,5 @@
 import { NextFunction, Request, Response, Router } from "express";
-import upload from "../middlewares/uploadFile.middleware";
+import upload from "../middlewares/uploadProfilePic.middleware";
 
 const uploadRouter = Router();
 
