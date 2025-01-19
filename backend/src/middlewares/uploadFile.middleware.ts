@@ -9,22 +9,23 @@ cloudinary.config({
   api_secret: process.env.CLOUDINARY_API_SECRET,
 });
 
+
+
 // Configure Multer Storage with Dynamic Folder Name
 const storage = new CloudinaryStorage({
   cloudinary: cloudinary,
   params: async (req, file) => {
-    console.log("file", file);
-    console.log("Request Body:", req.body.folderName);
-    console.log("Request Body:", req.body.fileName);
-    const folderName = req.body.folderName /* || "Test_folder2";*/ // Retrieve folder name from request body or use a default
-    const fileName = req.body.fileName /* || file.originalname; */ // Retrieve file name from request body or use the original name
-    console.log("folderName", folderName);
-    console.log("fileName", fileName);
+    const folderName = "Profile Pics";
+    const fileName = file.originalname;
+    let x = await req.body;
+
+    console.log("x",x)
     return {
       folder: folderName, // Dynamic folder name
       filename: fileName, // Dynamic file name
       allowed_formats: ["jpg", "jpeg", "png", "webp"], // Allowed formats
       resource_type: "image", // Specify resource type
+      public_id: `${fileName.split('.').slice(0, -1).join('')}${Date.now().toString()}`,
     };
   },
 });
