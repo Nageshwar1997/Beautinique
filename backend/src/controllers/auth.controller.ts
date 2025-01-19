@@ -1,7 +1,7 @@
 import bcrypt from "bcryptjs";
 import { Request, Response, NextFunction } from "express";
-import User from "../models";
 import generateToken from "../providers/jwt.provider";
+import { User } from "../models";
 
 const registerController = async (
   req: Request,
@@ -9,7 +9,7 @@ const registerController = async (
   next: NextFunction
 ) => {
   try {
-    const { firstName, lastName, email, password, profilePic,phoneNumber } =
+    const { firstName, lastName, email, password, profilePic, phoneNumber } =
       req.body;
 
     const hashPassword = await bcrypt.hash(password.trim(), 10);
