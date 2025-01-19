@@ -17,9 +17,6 @@ const storage = new CloudinaryStorage({
   params: async (req, file) => {
     const folderName = "Profile Pics";
     const fileName = file.originalname;
-    let x = await req.body;
-
-    console.log("x",x)
     return {
       folder: folderName, // Dynamic folder name
       filename: fileName, // Dynamic file name
