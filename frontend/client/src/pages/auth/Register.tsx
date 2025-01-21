@@ -24,6 +24,7 @@ import useIsScrollable from "../../hooks/useIsScrollable";
 import PhoneInput from "../../components/input/PhoneInput";
 import { Link } from "react-router-dom";
 import Checkbox from "../../components/input/Checkbox";
+import axios from "axios";
 
 const Register = () => {
   const [scrollRef, isScrollable] = useIsScrollable();
@@ -64,7 +65,7 @@ const Register = () => {
     setErrors((prevErrors) => ({ ...prevErrors, [name]: "" }));
   };
 
-  const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
     const updatedErrors = validateRegisterForm(data);
@@ -72,6 +73,19 @@ const Register = () => {
     if (Object.values(updatedErrors).some((error) => error !== "")) {
       setErrors(updatedErrors);
       return;
+    }
+
+    try {
+      const resp = await axios.post(
+        "http://localhost:8080/api/auth/register",
+        data
+      );
+
+      const resData = await resp.data;
+
+      console.log("resData", resData);
+    } catch (error) {
+      console.log("error", error);
     }
     console.log("data", data);
   };

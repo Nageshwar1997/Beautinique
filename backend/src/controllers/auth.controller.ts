@@ -42,8 +42,9 @@ const registerController = async (
         role: user.role,
       },
     });
-  } catch (err:any) {
-    next(new AppError(err.message || "Error registering user", 500));
+  } catch (err: any) {
+    // next(new AppError(err.message || "Error registering user", 500));
+    next(err);
   }
 };
 

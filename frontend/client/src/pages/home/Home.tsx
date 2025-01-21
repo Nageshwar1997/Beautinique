@@ -8,6 +8,12 @@ const Home = () => {
   const handleImageChange = async (e: ChangeEvent<HTMLInputElement>) => {
     setImageUrl(null);
     const file = e.target.files?.[0];
+
+    if (!file) {
+      alert("Please select a file");
+      return;
+    }
+
     if (file) {
       // Set image preview
       const preview = URL.createObjectURL(file);
@@ -17,6 +23,9 @@ const Home = () => {
       try {
         const formData = new FormData();
         formData.append("profilePic", file);
+
+        const folderName = "Profile Pics"; // You can hardcode any folder name here between two quotes use space or hyphen or underscore
+        formData.append("folder", folderName);
 
         const response = await axios.post(
           "http://localhost:8080/api/upload/profile-pic", // Replace with your backend URL
@@ -32,7 +41,8 @@ const Home = () => {
 
         // Update the profile picture URL (you can save this to state or context)
         if (responseData?.success) {
-          setImageUrl(responseData?.imageUrl);
+          setImageUrl(responseData?.url);
+
         }
       } catch (error) {
         setImageUrl(null);
