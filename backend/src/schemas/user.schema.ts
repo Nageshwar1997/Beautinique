@@ -79,29 +79,30 @@ const userSchema = new Schema(
 
     password: {
       type: String,
-      required: [true, "Password is required"],
-      validate: [
-        {
-          validator: hasSymbol,
-          message: "Password must contain at least one special character",
-        },
-        {
-          validator: hasUppercase,
-          message: "Password must contain at least one uppercase letter",
-        },
-        {
-          validator: hasLowercase,
-          message: "Password must contain at least one lowercase letter",
-        },
-        {
-          validator: hasNumber,
-          message: "Password must contain at least one number",
-        },
-        {
-          validator: hasValidLength,
-          message: "Password must be at least 6 characters long",
-        },
-      ],
+      // Commented this because if used is try to register via social account i.e(Google, etc) there is no password provided by user
+      // required: [true, "Password is required"],
+      // validate: [
+      //   {
+      //     validator: hasSymbol,
+      //     message: "Password must contain at least one special character",
+      //   },
+      //   {
+      //     validator: hasUppercase,
+      //     message: "Password must contain at least one uppercase letter",
+      //   },
+      //   {
+      //     validator: hasLowercase,
+      //     message: "Password must contain at least one lowercase letter",
+      //   },
+      //   {
+      //     validator: hasNumber,
+      //     message: "Password must contain at least one number",
+      //   },
+      //   {
+      //     validator: hasValidLength,
+      //     message: "Password must be at least 6 characters long",
+      //   },
+      // ],
     },
     createdAt: {
       type: Date,

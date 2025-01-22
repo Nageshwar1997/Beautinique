@@ -27,6 +27,10 @@ const registerController = async (
 
     const token = await generateToken(user?._id, next);
 
+    if (!token) {
+      return next(new AppError("Error generating token", 500));
+    }
+
     res.status(201).json({
       success: true,
       error: false,
@@ -43,8 +47,7 @@ const registerController = async (
       },
     });
   } catch (err: any) {
-    // next(new AppError(err.message || "Error registering user", 500));
-    next(err);
+    next(new AppError(err.message || "Error registering user", 500));
   }
 };
 

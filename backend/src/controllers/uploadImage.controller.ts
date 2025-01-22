@@ -1,7 +1,6 @@
 import { NextFunction, Request, Response } from "express";
 import cloudinary from "../configs/uploadProfilePic.config";
 import AppError from "../utils/AppError";
-import AppSuccess from "../utils/AppSuccess";
 
 const uploadProfilePicController = async (
   req: Request,
@@ -44,12 +43,19 @@ const uploadProfilePicController = async (
         )
         .end(req?.file?.buffer); // Upload the file buffer to Cloudinary
     }).then((data) => {
-      return new AppSuccess("Image uploaded successfully", 201, {
-        imageUrl: data?.secure_url,
+      return res.status(201).json({
+        success: true,
+        error: false,
+        message: "Image uploaded successfully",
+        imageUrl: data.secure_url,
       });
     });
   } catch (error) {
-    next(error);
+    const errorMessage =
+      error instanceof Error
+        ? error.message
+        : "Unable to upload image due to an unknown error";
+    return next(new AppError(errorMessage, 500));
   }
 };
 
