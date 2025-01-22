@@ -21,7 +21,7 @@ const uploadProfilePicController = async (
       .join("_")
       .split(".")
       .slice(0, -1)
-      .join("")}-${Date.now().toString()}}`;
+      .join("")}-${Date.now().toString()}`;
 
     // Wrap Cloudinary upload_stream in a Promise
     await new Promise<any>((resolve: any, reject: any) => {
