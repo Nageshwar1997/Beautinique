@@ -16,15 +16,15 @@ import SocialAuth from "./components/SocialAuth";
 import PhoneInput from "../../components/input/PhoneInput";
 import Input from "../../components/input/Input";
 import { EyeIcon, EyeOffIcon } from "../../components/icons";
-import useIsScrollable from "../../hooks/useIsScrollable";
+import useVerticalScrollable from "../../hooks/useVerticalScrollable";
 import Radio from "../../components/input/Radio";
-import { LoginField } from "../../types";
+import { LoginField, VerticalScrollType } from "../../types";
 import Button from "../../components/button/Button";
 import Checkbox from "../../components/input/Checkbox";
 import { Link } from "react-router-dom";
 
 const Login = () => {
-  const [scrollRef, isScrollable] = useIsScrollable();
+  const [showGradient, containerRef] = useVerticalScrollable();
 
   const [loginUsing, setLoginUsing] = useState<"email" | "phoneNumber">(
     "phoneNumber"
@@ -77,12 +77,15 @@ const Login = () => {
   };
 
   return (
-    <div className="w-full min-h-dvh max-h-dvh h-full p-4 flex gap-4 overflow-hidden">
+    <div className="w-full min-h-dvh max-h-dvh h-full p-4 flex gap-4 overflow-hidden relative">
       <AuthRobot />
       <div
-        ref={scrollRef as RefObject<HTMLDivElement>}
+        ref={containerRef as RefObject<HTMLDivElement>}
         className={`w-full md:w-1/2 flex flex-col items-center gap-4 overflow-hidden overflow-y-scroll ${
-          isScrollable ? "justify-start" : "justify-center"
+          !(showGradient as VerticalScrollType).bottom &&
+          !(showGradient as VerticalScrollType).top
+            ? "justify-center"
+            : "justify-start"
         }`}
       >
         <form
@@ -90,10 +93,10 @@ const Login = () => {
           autoComplete="off"
           className="w-full flex flex-col gap-4"
         >
-            <TextDisplay
-              content={LoginTextContent}
-              contentClassName="mb-3 font-semibold"
-            />
+          <TextDisplay
+            content={LoginTextContent}
+            contentClassName="mb-3 font-semibold"
+          />
           <SocialAuth />
           <div className="w-full max-w-[400px] lg:max-w-[500px] sm:w-[90%] lg:w-[500px] border-gradient p-px rounded-3xl overflow-hidden mx-auto">
             <div className="shadow-light-dark-soft bg-platinum-black p-6 md:p-8 rounded-3xl space-y-6">

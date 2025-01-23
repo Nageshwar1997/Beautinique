@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 import { ChangeEvent, FormEvent, RefObject, useState } from "react";
 import {
   getPasswordFieldType,
@@ -12,35 +13,39 @@ import {
   validateNumber,
   validatePassword,
 } from "../../validators";
+import {
+  PasswordVisibilityTypes,
+  RegisterField,
+  VerticalScrollType,
+} from "../../types";
 import AuthRobot from "./components/AuthRobot";
 import UploadProfile from "./components/UploadProfile";
 import TextDisplay from "../../components/TextDisplay";
 import SocialAuth from "./components/SocialAuth";
 import Input from "../../components/input/Input";
 import Button from "../../components/button/Button";
-import { PasswordVisibilityTypes, RegisterField } from "../../types";
 import { EyeIcon, EyeOffIcon } from "../../components/icons";
-import useIsScrollable from "../../hooks/useIsScrollable";
 import PhoneInput from "../../components/input/PhoneInput";
 import { Link } from "react-router-dom";
 import Checkbox from "../../components/input/Checkbox";
 import axios from "axios";
 import toast from "react-hot-toast";
+import useVerticalScrollable from "../../hooks/useVerticalScrollable";
 
 const Register = () => {
   // Hooks
-  const [scrollRef, isScrollable] = useIsScrollable();
+  const [showGradient, containerRef] = useVerticalScrollable();
 
   // States
   const [data, setData] = useState(initialRegisterData);
+  const [errors, setErrors] = useState<Partial<Record<RegisterField, string>>>(
+    {}
+  );
   const [passwordVisibility, setPasswordVisibility] =
     useState<PasswordVisibilityTypes>({
       password: false,
       confirmPassword: false,
     });
-  const [errors, setErrors] = useState<Partial<Record<RegisterField, string>>>(
-    {}
-  );
 
   // Functions
   const togglePasswordVisibility = (type: keyof PasswordVisibilityTypes) => {
@@ -155,14 +160,20 @@ const Register = () => {
   };
 
   return (
-    <div className="w-full min-h-dvh max-h-dvh h-full p-4 flex gap-4 overflow-hidden">
+    <div className="w-full min-h-dvh max-h-dvh h-full p-4 flex gap-4 overflow-hidden relative">
       <AuthRobot />
       <div
-        ref={scrollRef as RefObject<HTMLDivElement>}
+        ref={containerRef as RefObject<HTMLDivElement>}
         className={`w-full md:w-1/2 flex flex-col items-center gap-4 overflow-hidden overflow-y-scroll ${
-          isScrollable ? "justify-start" : "justify-center"
+          !(showGradient as VerticalScrollType).bottom &&
+          !(showGradient as VerticalScrollType).top
+            ? "justify-center"
+            : "justify-start"
         }`}
       >
+        {(showGradient as VerticalScrollType).top && (
+          <div className="border border-[red] bg-gradient-to-b from-[white] to-transparent absolute pointer-events-none max-w-[450px] lg:max-w-[550px] sm:w-[95%] lg:w-[550px] w-full h-20 z-[1]" />
+        )}
         <form
           onSubmit={handleSubmit}
           autoComplete="off"
@@ -263,17 +274,17 @@ const Register = () => {
                   content="Register"
                   className="!text-base"
                 />
-              </div>
-              <div className="flex items-center justify-center gap-2">
-                <p className="bg-clip-text text-transparent bg-silver-duo-gradient">
-                  Already have an account?
-                </p>
-                <Link
-                  to={"/login"}
-                  className={`bg-clip-text text-transparent bg-accent-duo text-lg hover:font-extrabold`}
-                >
-                  Login
-                </Link>
+                <div className="flex items-center justify-center gap-2">
+                  <p className="bg-clip-text text-transparent bg-silver-duo-gradient text-sm">
+                    Already have an account?
+                  </p>
+                  <Link
+                    to={"/login"}
+                    className={`bg-clip-text text-transparent bg-accent-duo text-base hover:font-extrabold`}
+                  >
+                    Login
+                  </Link>
+                </div>
               </div>
             </div>
           </div>

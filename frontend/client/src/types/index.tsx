@@ -72,3 +72,13 @@ export interface RadioProps {
   options: { label: string; value: string }[];
   className?: string;
 }
+
+export interface VerticalScrollType {
+  top: boolean;
+  bottom: boolean;
+}
+
+export interface HorizontalScrollType {
+  left: boolean;
+  right: boolean;
+}
