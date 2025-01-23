@@ -31,6 +31,7 @@ import Checkbox from "../../components/input/Checkbox";
 import axios from "axios";
 import toast from "react-hot-toast";
 import useVerticalScrollable from "../../hooks/useVerticalScrollable";
+import { BottomGradient, TopGradient } from "../../components/Gradients";
 
 const Register = () => {
   // Hooks
@@ -171,9 +172,7 @@ const Register = () => {
             : "justify-start"
         }`}
       >
-        {(showGradient as VerticalScrollType).top && (
-          <div className="border border-[red] bg-gradient-to-b from-[white] to-transparent absolute pointer-events-none max-w-[450px] lg:max-w-[550px] sm:w-[95%] lg:w-[550px] w-full h-20 z-[1]" />
-        )}
+        {(showGradient as VerticalScrollType).top && <TopGradient />}
         <form
           onSubmit={handleSubmit}
           autoComplete="off"
@@ -289,6 +288,7 @@ const Register = () => {
             </div>
           </div>
         </form>
+        {(showGradient as VerticalScrollType).bottom && <BottomGradient />}
       </div>
     </div>
   );

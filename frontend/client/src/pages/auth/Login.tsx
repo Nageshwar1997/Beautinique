@@ -22,6 +22,7 @@ import { LoginField, VerticalScrollType } from "../../types";
 import Button from "../../components/button/Button";
 import Checkbox from "../../components/input/Checkbox";
 import { Link } from "react-router-dom";
+import { BottomGradient, TopGradient } from "../../components/Gradients";
 
 const Login = () => {
   const [showGradient, containerRef] = useVerticalScrollable();
@@ -88,6 +89,7 @@ const Login = () => {
             : "justify-start"
         }`}
       >
+        {(showGradient as VerticalScrollType).top && <TopGradient />}
         <form
           onSubmit={handleSubmit}
           autoComplete="off"
@@ -205,6 +207,7 @@ const Login = () => {
             </div>
           </div>
         </form>
+        {(showGradient as VerticalScrollType).bottom && <BottomGradient />}
       </div>
     </div>
   );
