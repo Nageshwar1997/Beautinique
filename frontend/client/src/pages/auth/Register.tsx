@@ -1,4 +1,3 @@
-/* eslint-disable react-hooks/exhaustive-deps */
 import { ChangeEvent, FormEvent, RefObject, useState } from "react";
 import {
   getPasswordFieldType,
