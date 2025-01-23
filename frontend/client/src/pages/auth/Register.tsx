@@ -25,29 +25,93 @@ import PhoneInput from "../../components/input/PhoneInput";
 import { Link } from "react-router-dom";
 import Checkbox from "../../components/input/Checkbox";
 import axios from "axios";
+import toast from "react-hot-toast";
 
 const Register = () => {
+  // Hooks
   const [scrollRef, isScrollable] = useIsScrollable();
 
+  // States
   const [data, setData] = useState(initialRegisterData);
   const [passwordVisibility, setPasswordVisibility] =
     useState<PasswordVisibilityTypes>({
       password: false,
       confirmPassword: false,
     });
-
   const [errors, setErrors] = useState<Partial<Record<RegisterField, string>>>(
     {}
   );
 
+  // Functions
   const togglePasswordVisibility = (type: keyof PasswordVisibilityTypes) => {
     setPasswordVisibility((prev) => ({ ...prev, [type]: !prev[type] }));
   };
 
-  const handleInputChange = (e: ChangeEvent<HTMLInputElement>) => {
-    const { name, value, type, checked } = e.target;
+  const handleImageChange = async (file: File) => {
+    setData((prev) => ({ ...prev, profilePic: "" }));
+    if (!file) {
+      alert("Please select a file");
+      return;
+    }
 
-    if ((name === "firstName" || name === "lastName") && validateName(value)) {
+    if (file) {
+      // Set image preview
+      const preview = URL.createObjectURL(file);
+      setData((prev) => ({ ...prev, profilePic: preview }));
+
+      // Upload image to backend
+      try {
+        const formData = new FormData();
+        formData.append("profilePic", file);
+
+        const folderName = "Profile Pics"; // You can hardcode any folder name here between two quotes use space or hyphen or underscore
+        formData.append("folder", folderName);
+
+        const response = await axios.post(
+          "http://localhost:8080/api/upload/profile-pic", // Replace with your backend URL
+          formData,
+          {
+            headers: {
+              "Content-Type": "multipart/form-data",
+            },
+          }
+        );
+
+        const responseData = response?.data;
+
+        // Update the profile picture URL (you can save this to state or context)
+        if (responseData?.success) {
+          setData((prev) => ({ ...prev, profilePic: responseData?.imageUrl }));
+
+          setData((prevData) => ({
+            ...prevData,
+            profilePic: responseData.imageUrl,
+          }));
+          toast.success(responseData.message);
+        }
+      } catch (error) {
+        setData((prev) => ({ ...prev, profilePic: "" }));
+
+        if (error instanceof Error) {
+          toast.error(error.message);
+          console.error("Error uploading image:", error);
+        } else {
+          toast.error("Something went wrong");
+          console.error("Error uploading image:", error);
+        }
+      }
+    }
+  };
+
+  const handleInputChange = (e: ChangeEvent<HTMLInputElement>) => {
+    const { name, value, type, checked, files } = e.target;
+    if (type === "file" && name === "profilePic") {
+      const file = files?.[0];
+      handleImageChange(file as File);
+    } else if (
+      (name === "firstName" || name === "lastName") &&
+      validateName(value)
+    ) {
       setData((prevData) => ({ ...prevData, [name]: value }));
     } else if (name === "email" && validateEmail(value)) {
       setData((prevData) => ({ ...prevData, [name]: value }));
@@ -109,7 +173,11 @@ const Register = () => {
               content={RegisterTextContent}
               contentClassName="mb-3 font-semibold"
             />
-            <UploadProfile />
+            <UploadProfile
+              imageUrl={data.profilePic}
+              onChange={handleInputChange}
+              name="profilePic"
+            />
           </div>
           <SocialAuth />
           <div className="w-full max-w-[400px] lg:max-w-[500px] sm:w-[90%] lg:w-[500px] border-gradient p-px rounded-3xl overflow-hidden mx-auto">

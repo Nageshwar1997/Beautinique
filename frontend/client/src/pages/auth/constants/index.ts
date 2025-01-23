@@ -75,51 +75,51 @@ export const registerInputMapData: {
   placeholder: string;
   icon?: boolean;
 }[] = [
-    {
-      name: "firstName",
-      label: "First Name",
-      type: "text",
-      autoComplete: "given-name",
-      placeholder: "Enter your first name",
-    },
-    {
-      name: "lastName",
-      label: "Last Name",
-      type: "text",
-      autoComplete: "given-name",
-      placeholder: "Enter your last name",
-    },
-    {
-      name: "email",
-      label: "Email",
-      type: "text",
-      autoComplete: "email",
-      placeholder: "Enter your email address",
-    },
-    {
-      name: "phoneNumber",
-      label: "Phone Number",
-      type: "text",
-      autoComplete: "tel",
-      placeholder: "Enter your phone number",
-    },
-    {
-      name: "password",
-      label: "Password",
-      type: "password",
-      autoComplete: "new-password",
-      icon: true,
-      placeholder: "Enter new password",
-    },
-    {
-      name: "confirmPassword",
-      label: "Confirm Password",
-      type: "password",
-      autoComplete: "new-password",
-      icon: true,
-      placeholder: "Confirm new password",
-    },
-  ];
+  {
+    name: "firstName",
+    label: "First Name",
+    type: "text",
+    autoComplete: "given-name",
+    placeholder: "Enter your first name",
+  },
+  {
+    name: "lastName",
+    label: "Last Name",
+    type: "text",
+    autoComplete: "given-name",
+    placeholder: "Enter your last name",
+  },
+  {
+    name: "email",
+    label: "Email",
+    type: "text",
+    autoComplete: "email",
+    placeholder: "Enter your email address",
+  },
+  {
+    name: "phoneNumber",
+    label: "Phone Number",
+    type: "text",
+    autoComplete: "tel",
+    placeholder: "Enter your phone number",
+  },
+  {
+    name: "password",
+    label: "Password",
+    type: "password",
+    autoComplete: "new-password",
+    icon: true,
+    placeholder: "Enter new password",
+  },
+  {
+    name: "confirmPassword",
+    label: "Confirm Password",
+    type: "password",
+    autoComplete: "new-password",
+    icon: true,
+    placeholder: "Confirm new password",
+  },
+];
 
 export const loginInputMapData: {
   name: keyof LoginInputProps;
@@ -129,29 +129,29 @@ export const loginInputMapData: {
   placeholder: string;
   icon?: boolean;
 }[] = [
-    {
-      name: "email",
-      label: "Email",
-      type: "text",
-      autoComplete: "email",
-      placeholder: "Enter your email address",
-    },
-    {
-      name: "phoneNumber",
-      label: "Phone Number",
-      type: "text",
-      autoComplete: "tel",
-      placeholder: "Enter your phone number",
-    },
-    {
-      name: "password",
-      label: "Password",
-      type: "password",
-      autoComplete: "new-password",
-      icon: true,
-      placeholder: "Enter your password",
-    },
-  ];
+  {
+    name: "email",
+    label: "Email",
+    type: "text",
+    autoComplete: "email",
+    placeholder: "Enter your email address",
+  },
+  {
+    name: "phoneNumber",
+    label: "Phone Number",
+    type: "text",
+    autoComplete: "tel",
+    placeholder: "Enter your phone number",
+  },
+  {
+    name: "password",
+    label: "Password",
+    type: "password",
+    autoComplete: "new-password",
+    icon: true,
+    placeholder: "Enter your password",
+  },
+];
 
 export const validateRegisterForm = (data: RegisterInputProps) => {
   const { firstName, lastName, email, phoneNumber, password, confirmPassword } =
@@ -225,4 +225,3 @@ export const validateLoginForm = (
 
   return updatedErrors;
 };
-
