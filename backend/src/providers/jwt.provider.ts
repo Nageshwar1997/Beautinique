@@ -4,7 +4,7 @@ import { NextFunction } from "express";
 import { Types } from "mongoose";
 const generateToken = async (userId: Types.ObjectId, next: NextFunction) => {
   try {
-    const token = jwt.sign({ userId }, process.env.JWT_SECRET || "secret", {
+    const token = jwt.sign({ userId }, process.env.JWT_SECRET as string, {
       expiresIn: "1d",
     });
     return token;
