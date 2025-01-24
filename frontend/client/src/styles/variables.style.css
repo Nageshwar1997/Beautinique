@@ -4,8 +4,8 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Common variables */
 :root {
-  /* Common variables */
   --picton-blue-c: #25adf9;
   --blue-crayola-c: #07f;
   --sky-blue-burst: radial-gradient(
@@ -14,8 +14,10 @@
       rgba(0, 0, 0, 0) 100%
     ),
     linear-gradient(107deg, #2579f9 -65.15%, #244cf8 90.95%);
+}
 
-  /* Light Theme Variables */
+/* Light Theme Variables */
+[theme="light"] {
   /* Colors */
   --primary: #ffffff;
   --primary-10: #ffffff1a;
