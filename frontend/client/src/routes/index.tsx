@@ -1,28 +1,28 @@
 import { createBrowserRouter } from "react-router-dom";
-import App from "../App";
+
 import Home from "../pages/home/Home";
+import MainPage from "../pages/main/MainPage";
 import Register from "../pages/auth/Register";
-import WithHeaderFooter from "../components/WithHeaderFooter";
 import Login from "../pages/auth/Login";
 
 const router = createBrowserRouter([
   {
     path: "/",
-    element: <App />,
+    element: <MainPage />,
     children: [
       {
-        path: "",
-        element: <WithHeaderFooter children={<Home />} />,
-      },
-      {
-        path: "register",
-        element: <Register />,
-      },
-      {
-        path: "login",
-        element: <Login />,
+        index: true, // This is the default route
+        element: <Home />,
       },
     ],
+  },
+  {
+    path: "register",
+    element: <Register />,
+  },
+  {
+    path: "login",
+    element: <Login />,
   },
 ]);
 
