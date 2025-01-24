@@ -6,6 +6,15 @@ import connectDB from "./configs/db.config";
 const app = express();
 const PORT = process.env.PORT || 5454;
 
+// Routes
+// Auth routes
+import authRouter from "./routes/auth.routes";
+import uploadRouter from "./routes/upload.routes";
+
+// Error handling middleware
+import NotFoundHandler from "./middlewares/NotFoundHandler.middleware";
+import ErrorHandler from "./middlewares/ErrorHandler.middleware";
+
 // Middleware to parse JSON
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
@@ -19,13 +28,6 @@ app.get("/", (_: Request, res: Response) => {
     message: "Welcome to the MERN Beauty Shop API",
   });
 });
-
-// Routes
-// Auth routes
-import authRouter from "./routes/auth.routes";
-import uploadRouter from "./routes/upload.routes";
-import NotFoundHandler from "./middlewares/NotFoundHandler.middleware";
-import ErrorHandler from "./middlewares/ErrorHandler.middleware";
 
 app.use("/api/auth", authRouter);
 
