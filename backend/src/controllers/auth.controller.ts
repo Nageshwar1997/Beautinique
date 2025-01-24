@@ -3,6 +3,8 @@ import { Request, Response, NextFunction } from "express";
 import generateToken from "../providers/jwt.provider";
 import { User } from "../models";
 import AppError from "../utils/AppError";
+import { isValidPassword } from "../validators/user.validator";
+import SuccessResponse from "../middlewares/SuccessHandler.middleware";
 
 const registerController = async (
   req: Request,
@@ -12,6 +14,19 @@ const registerController = async (
   try {
     const { firstName, lastName, email, password, profilePic, phoneNumber } =
       req.body;
+
+    if (!password) {
+      return next(new AppError("Password is required", 400));
+    } else if (password) {
+      if (!isValidPassword(password)) {
+        return next(
+          new AppError(
+            "Password must be at least 6 characters long and contain at least one letter, one number, and one special character",
+            400
+          )
+        );
+      }
+    }
 
     const hashPassword = await bcrypt.hash(password.trim(), 10);
 
@@ -31,11 +46,8 @@ const registerController = async (
       return next(new AppError("Error generating token", 500));
     }
 
-    res.status(201).json({
-      success: true,
-      error: false,
-      message: "User registered successfully",
-      token: token,
+    SuccessResponse(res, 201, "User registered successfully", {
+      token,
       user: {
         _id: user._id,
         firstName: user.firstName,
@@ -46,6 +58,8 @@ const registerController = async (
         role: user.role,
       },
     });
+
+    return;
   } catch (err: any) {
     next(new AppError(err.message || "Error registering user", 500));
   }

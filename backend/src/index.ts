@@ -2,7 +2,7 @@ import "dotenv/config";
 import express, { NextFunction, Request, Response } from "express";
 import cors from "cors";
 import connectDB from "./configs/db.config";
-import errorHandler from "./middlewares/errorHandler.middleware";
+
 // import notFoundHandler from "./middlewares/notFoundHandler.middleware";
 
 const app = express();
@@ -26,26 +26,18 @@ app.get("/", (_: Request, res: Response) => {
 // Auth routes
 import authRouter from "./routes/auth.routes";
 import uploadRouter from "./routes/upload.routes";
-import notFoundHandler from "./middlewares/notFoundHandler.middleware";
+import NotFoundHandler from "./middlewares/NotFoundHandler.middleware";
+import ErrorHandler from "./middlewares/ErrorHandler.middleware";
 
 app.use("/api/auth", authRouter);
 
 app.use("/api/upload", uploadRouter);
 
 // Catch undefined routes
-app.use(
-  notFoundHandler as (req: Request, res: Response, next: NextFunction) => void
-);
+app.use(NotFoundHandler);
 
 // Error handling middleware
-app.use(
-  errorHandler as (
-    err: any,
-    req: Request,
-    res: Response,
-    next: NextFunction
-  ) => void
-);
+app.use(ErrorHandler);
 
 // Start the server
 app.listen(PORT, async () => {
