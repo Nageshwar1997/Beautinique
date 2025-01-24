@@ -3,8 +3,6 @@ import express, { NextFunction, Request, Response } from "express";
 import cors from "cors";
 import connectDB from "./configs/db.config";
 
-// import notFoundHandler from "./middlewares/notFoundHandler.middleware";
-
 const app = express();
 const PORT = process.env.PORT || 5454;
 
