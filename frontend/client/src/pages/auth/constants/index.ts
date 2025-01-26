@@ -189,6 +189,8 @@ export const validateRegisterForm = (data: RegisterInputProps) => {
 
   if (password !== confirmPassword) {
     updatedErrors.confirmPassword = "Passwords do not match.";
+  } else {
+    updatedErrors.confirmPassword = "";
   }
 
   return updatedErrors;
