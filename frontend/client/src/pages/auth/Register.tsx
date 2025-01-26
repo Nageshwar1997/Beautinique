@@ -31,6 +31,8 @@ import axios from "axios";
 import toast from "react-hot-toast";
 import useVerticalScrollable from "../../hooks/useVerticalScrollable";
 import { BottomGradient, TopGradient } from "../../components/Gradients";
+import { useRegisterUser } from "../../api/user/user.service";
+import { toastCatchErrorMessage } from "../../utils/errors";
 
 const Register = () => {
   // Hooks
@@ -47,6 +49,7 @@ const Register = () => {
       confirmPassword: false,
     });
 
+  const userMutation = useRegisterUser();
   // Functions
   const togglePasswordVisibility = (type: keyof PasswordVisibilityTypes) => {
     setPasswordVisibility((prev) => ({ ...prev, [type]: !prev[type] }));
@@ -86,24 +89,16 @@ const Register = () => {
 
         // Update the profile picture URL (you can save this to state or context)
         if (responseData?.success) {
-          setData((prev) => ({ ...prev, profilePic: responseData?.imageUrl }));
-
           setData((prevData) => ({
             ...prevData,
             profilePic: responseData.imageUrl,
           }));
-          toast.success(responseData.message);
+          toast.success("Profile Pic uploaded successfully!");
         }
-      } catch (error) {
+      } catch (error: unknown) {
         setData((prev) => ({ ...prev, profilePic: "" }));
-
-        if (error instanceof Error) {
-          toast.error(error.message);
-          console.error("Error uploading image:", error);
-        } else {
-          toast.error("Something went wrong");
-          console.error("Error uploading image:", error);
-        }
+        console.error("Error uploading profile pic:", error);
+        toastCatchErrorMessage(error, "Failed to upload profile pic!");
       }
     }
   };
@@ -144,19 +139,7 @@ const Register = () => {
       return;
     }
 
-    try {
-      const resp = await axios.post(
-        "http://localhost:8080/api/auth/register",
-        data
-      );
-
-      const resData = await resp.data;
-
-      console.log("resData", resData);
-    } catch (error) {
-      console.log("error", error);
-    }
-    console.log("data", data);
+    userMutation.mutate(data);
   };
 
   return (

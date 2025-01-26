@@ -4,6 +4,8 @@ import Home from "../pages/home/Home";
 import MainPage from "../pages/main/MainPage";
 import Register from "../pages/auth/Register";
 import Login from "../pages/auth/Login";
+import NotFound from "../pages/error/NotFound";
+import SomethingWentWrong from "../pages/error/SomethingWentWrong";
 
 const router = createBrowserRouter([
   {
@@ -23,6 +25,14 @@ const router = createBrowserRouter([
   {
     path: "login",
     element: <Login />,
+  },
+  {
+    path: "error",
+    element: <SomethingWentWrong />,
+  },
+  {
+    path: "*",
+    element: <NotFound />,
   },
 ]);
 
