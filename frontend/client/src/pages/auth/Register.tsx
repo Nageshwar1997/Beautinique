@@ -257,14 +257,22 @@ const Register = () => {
                 })}
               </div>
               <div className="space-y-3">
-                <div className="flex items-center space-x-3">
-                  <Checkbox
-                    checked={data?.remember as boolean}
-                    onChange={handleInputChange as () => void}
-                  />
-                  <span className="text-sm text-primary-inverted-50 font-medium">
-                    Remember me
-                  </span>
+                <div className="flex items-center justify-between gap-3">
+                  <div className="flex items-center space-x-3">
+                    <Checkbox
+                      checked={data?.remember as boolean}
+                      onChange={handleInputChange as () => void}
+                    />
+                    <span className="text-sm text-primary-inverted-50 font-medium">
+                      Remember me
+                    </span>
+                  </div>
+                  <Link
+                    to="/"
+                    className="text-primary-inverted-50 font-medium hover:font-extrabold hover:bg-clip-text hover:text-transparent hover:bg-accent-duo"
+                  >
+                    Back
+                  </Link>
                 </div>
                 <Button
                   pattern="primary"
@@ -273,12 +281,12 @@ const Register = () => {
                   className="!text-base"
                 />
                 <div className="flex items-center justify-center gap-2">
-                  <p className="bg-clip-text text-transparent bg-silver-duo-gradient text-sm">
+                  <p className="bg-clip-text text-transparent bg-silver-duo-gradient text-xs md:text-sm">
                     Already have an account?
                   </p>
                   <Link
                     to={"/login"}
-                    className={`bg-clip-text text-transparent bg-accent-duo text-base hover:font-extrabold`}
+                    className={`bg-clip-text text-transparent bg-accent-duo hover:font-extrabold text-sm md:text-base`}
                   >
                     Login
                   </Link>
