@@ -9,3 +9,7 @@ export const toastCatchErrorMessage = (error: unknown, message?: string) => {
 export const toastErrorMessage = (message: string) => {
   toast.error(message || "Something went wrong!");
 };
+
+export const toastSuccessMessage = (message: string) => {
+  toast.success(message || "Success!");
+};

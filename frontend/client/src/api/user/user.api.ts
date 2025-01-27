@@ -1,5 +1,5 @@
 import { AxiosError } from "axios";
-import api from "../api.instance";
+import api from "../../configs/axios.instance.config";
 import { RegisterInputProps } from "../../types";
 
 export const register_user = async (bodyData: RegisterInputProps) => {
@@ -9,7 +9,7 @@ export const register_user = async (bodyData: RegisterInputProps) => {
   } catch (error) {
     if (error instanceof AxiosError) {
       // If it's an Axios error
-      throw error.response?.data?.message || "API Error occurred";
+      throw error?.response?.data?.message || "API Error occurred";
     }
     throw "Something went wrong!"; // For non-Axios errors
   }

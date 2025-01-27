@@ -32,7 +32,7 @@ import toast from "react-hot-toast";
 import useVerticalScrollable from "../../hooks/useVerticalScrollable";
 import { BottomGradient, TopGradient } from "../../components/Gradients";
 import { useRegisterUser } from "../../api/user/user.service";
-import { toastCatchErrorMessage } from "../../utils/errors";
+import { toastCatchErrorMessage } from "../../utils/toasts";
 
 const Register = () => {
   // Hooks

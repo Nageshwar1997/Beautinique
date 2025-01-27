@@ -6,6 +6,6 @@ export const encryptData = (data: string): string => {
   return CryptoJS.AES.encrypt(data, ENCRYPTION_SECRET_KEY).toString();
 };
 
-export const SaveUserData = (data: string) => {
-  localStorage.setItem("user", encryptData(JSON.stringify(data)));
+export const saveUserLocally = (data: string) => {
+  localStorage.setItem("token", encryptData(JSON.stringify(data)));
 };
