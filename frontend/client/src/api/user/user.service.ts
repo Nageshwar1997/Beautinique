@@ -1,6 +1,6 @@
 import { useMutation } from "@tanstack/react-query";
 import { RegisterInputProps } from "../../types";
-import { register_user } from "./user.api";
+import { register_user } from "./auth.api";
 import { useNavigate } from "react-router-dom";
 import { toastErrorMessage, toastSuccessMessage } from "../../utils/toasts";
 import { saveUserLocally } from "../../utils";
