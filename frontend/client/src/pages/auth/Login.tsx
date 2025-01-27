@@ -23,8 +23,11 @@ import Button from "../../components/button/Button";
 import Checkbox from "../../components/input/Checkbox";
 import { Link } from "react-router-dom";
 import { BottomGradient, TopGradient } from "../../components/Gradients";
+import { useLoginUser } from "../../api/user/user.service";
 
 const Login = () => {
+  const loginMutation = useLoginUser();
+
   const [showGradient, containerRef] = useVerticalScrollable();
 
   const [loginUsing, setLoginUsing] = useState<"email" | "phoneNumber">(
@@ -74,7 +77,9 @@ const Login = () => {
       return;
     }
 
-    console.log("data", data);
+    loginMutation.mutate(data);
+
+    console.log("data page", data);
   };
 
   return (
