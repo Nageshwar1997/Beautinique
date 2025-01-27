@@ -23,7 +23,7 @@ export const isValidName = (value: string): boolean => {
  * @returns {boolean} True if the string is a valid email address, false otherwise.
  */
 export const isValidEmail = (value: string): boolean => {
-  return /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/.test(value.trim());
+  return /^\w+([.-]?\w+)*@\w+([.-]?\w+)*(\.\w{2,3})+$/.test(value.trim());
 };
 
 /**
@@ -56,7 +56,7 @@ export const isValidPassword = (value: string): boolean => {
  */
 export const hasSymbol = (value: string): boolean => {
   return /[!@#$%^&*\-_=+.><?/\\|()[\]{}]/.test(value.trim());
-}
+};
 
 /**
  * Checks if a given string contains at least one uppercase letter.
@@ -76,7 +76,7 @@ export const hasUppercase = (value: string): boolean => {
  */
 export const hasLowercase = (value: string): boolean => {
   return /[a-z]/.test(value.trim());
-}
+};
 
 /**
  * Checks if a given string contains at least one number.
@@ -86,7 +86,7 @@ export const hasLowercase = (value: string): boolean => {
  */
 export const hasNumber = (value: string): boolean => {
   return /[0-9]/.test(value.trim());
-}
+};
 
 /**
  * Checks if a given string has a valid length.
@@ -99,9 +99,7 @@ export const hasNumber = (value: string): boolean => {
  */
 export const hasValidLength = (value: string): boolean => {
   return /^.{6,}$/.test(value.trim());
-}
-
-
+};
 
 /**
  * Checks if a given email address is unique in the database.
@@ -118,7 +116,6 @@ export const isEmailUnique = async (value: string): Promise<boolean> => {
   const count = await models.User.countDocuments({ email: value });
   return count === 0;
 };
-
 
 /**
  * Validates if a given string is a valid phone number.
