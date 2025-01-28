@@ -18,52 +18,48 @@ interface IFormInput {
 // Define the yup validation schema
 const schema = yup
   .object({
-    firstName: yup
-      .string()
-      .required("First name is required")
-      .min(2, "First name must be at least 2 characters")
-      .max(50, "First name cannot exceed 50 characters"),
-    lastName: yup
-      .string()
-      .required("Last name is required")
-      .min(2, "Last name must be at least 2 characters")
-      .max(50, "Last name cannot exceed 50 characters"),
+    firstName: yup.string().required("First name is required"),
+    //   .min(2, "First name must be at least 2 characters")
+    //   .max(50, "First name cannot exceed 50 characters"),
+    lastName: yup.string().required("Last name is required"),
+    //   .min(2, "Last name must be at least 2 characters")
+    //   .max(50, "Last name cannot exceed 50 characters"),
     email: yup
       .string()
       .email("Invalid email address")
-      .matches(/^\w+([.-]?\w+)*@\w+([.-]?\w+)*(\.\w{2,3})+$/, {
-        message: "Invalid email address",
-        excludeEmptyString: true,
-      })
+      //   .matches(/^\w+([.-]?\w+)*@\w+([.-]?\w+)*(\.\w{2,3})+$/, {
+      //     message: "Invalid email address",
+      //     excludeEmptyString: true,
+      //   })
       .required("Email is required"),
     phoneNumber: yup
       .string()
-      .matches(/^[0-9]{10}$/, "Mobile number must be exactly 10 digits")
+      //   .matches(/^[0-9]{10}$/, "Mobile number must be exactly 10 digits")
       .required("Mobile number is required"),
     password: yup
       .string()
-      .min(6, "Password must be at least 6 characters")
-      .max(20, "Password cannot exceed 20 characters")
-      .matches(/[A-Z]/, "Password must contain at least one uppercase letter")
-      .matches(/[a-z]/, "Password must contain at least one lowercase letter")
-      .matches(/\d/, "Password must contain at least one number")
-      .matches(
-        /[@$!%*?&]/,
-        "Password must contain at least one special character"
-      )
+      //   .min(6, "Password must be at least 6 characters")
+      //   .max(20, "Password cannot exceed 20 characters")
+      //   .matches(/[A-Z]/, "Password must contain at least one uppercase letter")
+      //   .matches(/[a-z]/, "Password must contain at least one lowercase letter")
+      //   .matches(/\d/, "Password must contain at least one number")
+      //   .matches(
+      //     /[@$!%*?&]/,
+      //     "Password must contain at least one special character"
+      //   )
       .required("Password is required"),
     confirmPassword: yup
       .string()
-      .min(6, "Password must be at least 6 characters")
-      .max(20, "Password cannot exceed 20 characters")
-      .matches(/[A-Z]/, "Password must contain at least one uppercase letter")
-      .matches(/[a-z]/, "Password must contain at least one lowercase letter")
-      .matches(/\d/, "Password must contain at least one number")
-      .matches(
-        /[@$!%*?&]/,
-        "Password must contain at least one special character"
-      )
-      .oneOf([yup.ref("password"), undefined], "Passwords must match")
+      //   .min(6, "Password must be at least 6 characters")
+      //   .max(20, "Password cannot exceed 20 characters")
+      //   .matches(/[A-Z]/, "Password must contain at least one uppercase letter")
+      //   .matches(/[a-z]/, "Password must contain at least one lowercase letter")
+      //   .matches(/\d/, "Password must contain at least one number")
+      //   .matches(
+      //     /[@$!%*?&]/,
+      //     "Password must contain at least one special character"
+      //   )
+      //   .oneOf([yup.ref("password"), undefined], "Passwords must match")
       .required("Confirm password is required"),
     profilePic: yup
       .mixed<FileList>()
@@ -84,7 +80,7 @@ const schema = yup
   })
   .required();
 
-const Home = () => {
+const XYZ = () => {
   const {
     register,
     handleSubmit,
@@ -119,7 +115,7 @@ const Home = () => {
     // });
 
     try {
-      const response = await api.post("/auth/register", formData, {
+      const response = await api.post("/test", formData, {
         headers: {
           "Content-Type": "multipart/form-data", // Ensure you're sending form data as multipart
         },
@@ -281,4 +277,4 @@ const Home = () => {
   );
 };
 
-export default Home;
+export default XYZ;
