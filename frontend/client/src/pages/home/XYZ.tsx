@@ -3,6 +3,7 @@ import * as yup from "yup";
 import { yupResolver } from "@hookform/resolvers/yup";
 import api from "../../configs/axios.instance.config";
 import TestInput from "./TestInput";
+import { useState } from "react";
 
 interface IFormInput {
   firstName: string;
@@ -12,55 +13,72 @@ interface IFormInput {
   password: string;
   confirmPassword: string;
   profilePic: FileList; // Correctly type the file input
-  rememberMe?: boolean;
+  remember?: boolean;
 }
 
 // Define the yup validation schema
 const schema = yup
   .object({
-    firstName: yup.string().required("First name is required"),
-    //   .min(2, "First name must be at least 2 characters")
-    //   .max(50, "First name cannot exceed 50 characters"),
-    lastName: yup.string().required("Last name is required"),
-    //   .min(2, "Last name must be at least 2 characters")
-    //   .max(50, "Last name cannot exceed 50 characters"),
+    firstName: yup
+      .string()
+      .required("First name is required")
+      .min(2, "First name must be at least 2 characters")
+      .max(50, "First name cannot exceed 50 characters")
+      .test(
+        "no-multiple-spaces",
+        "Only one space is allowed between words",
+        (value) => !(value && (value.match(/\s{2,}/) || []).length > 0) // Check if there are two or more spaces in the string
+      )
+      .matches(
+        /^[a-zA-Z]+( [a-zA-Z]+)*$/,
+        "Contains only letters and 1 space between words"
+      ),
+    lastName: yup
+      .string()
+      .required("Last name is required")
+      .min(2, "Last name must be at least 2 characters")
+      .max(50, "Last name cannot exceed 50 characters")
+      .test(
+        "no-multiple-spaces",
+        "Only one space is allowed between words",
+        (value) => !(value && (value.match(/\s{2,}/) || []).length > 0) // Check if there are two or more spaces in the string
+      )
+      .matches(
+        /^[a-zA-Z]+( [a-zA-Z]+)*$/,
+        "Contains only letters and 1 space between words"
+      ),
     email: yup
       .string()
+      .required("Email is required")
       .email("Invalid email address")
-      //   .matches(/^\w+([.-]?\w+)*@\w+([.-]?\w+)*(\.\w{2,3})+$/, {
-      //     message: "Invalid email address",
-      //     excludeEmptyString: true,
-      //   })
-      .required("Email is required"),
+      .matches(/^\w+([.-]?\w+)*@\w+([.-]?\w+)*(\.\w{2,3})+$/, {
+        message: "Invalid email address",
+        excludeEmptyString: true,
+      })
+      .matches(/^\S*$/, "Email cannot contain spaces"),
     phoneNumber: yup
       .string()
-      //   .matches(/^[0-9]{10}$/, "Mobile number must be exactly 10 digits")
+      .matches(/^[0-9]{10}$/, "Mobile number must be exactly 10 digits")
       .required("Mobile number is required"),
     password: yup
       .string()
-      //   .min(6, "Password must be at least 6 characters")
-      //   .max(20, "Password cannot exceed 20 characters")
-      //   .matches(/[A-Z]/, "Password must contain at least one uppercase letter")
-      //   .matches(/[a-z]/, "Password must contain at least one lowercase letter")
-      //   .matches(/\d/, "Password must contain at least one number")
-      //   .matches(
-      //     /[@$!%*?&]/,
-      //     "Password must contain at least one special character"
-      //   )
-      .required("Password is required"),
+      .required("Password is required")
+      .min(6, "Password must be at least 6 characters")
+      .max(20, "Password cannot exceed 20 characters")
+      .matches(/[A-Z]/, "Password must contain at least one uppercase letter")
+      .matches(/[a-z]/, "Password must contain at least one lowercase letter")
+      .matches(/\d/, "Password must contain at least one number")
+      .matches(
+        /[@$!%*?&#]/,
+        "Password must contain at least one special character"
+      )
+      .matches(/^\S*$/, "Password can't contain spaces"),
+
     confirmPassword: yup
       .string()
-      //   .min(6, "Password must be at least 6 characters")
-      //   .max(20, "Password cannot exceed 20 characters")
-      //   .matches(/[A-Z]/, "Password must contain at least one uppercase letter")
-      //   .matches(/[a-z]/, "Password must contain at least one lowercase letter")
-      //   .matches(/\d/, "Password must contain at least one number")
-      //   .matches(
-      //     /[@$!%*?&]/,
-      //     "Password must contain at least one special character"
-      //   )
-      //   .oneOf([yup.ref("password"), undefined], "Passwords must match")
-      .required("Confirm password is required"),
+      .required("Password is required")
+      .oneOf([yup.ref("password")], "Passwords must match"),
+
     profilePic: yup
       .mixed<FileList>()
       .required("File is required")
@@ -76,11 +94,15 @@ const schema = yup
         }
         return true;
       }),
-    rememberMe: yup.boolean(),
+    remember: yup.boolean(),
   })
   .required();
 
 const XYZ = () => {
+  const [showPasswords, setShowPasswords] = useState({
+    password: false,
+    confirmPassword: false,
+  });
   const {
     register,
     handleSubmit,
@@ -88,6 +110,13 @@ const XYZ = () => {
   } = useForm<IFormInput>({
     resolver: yupResolver(schema), // Use yup resolver for validation
   });
+
+  const togglePasswordVisibility = (field: "password" | "confirmPassword") => {
+    setShowPasswords((prevState) => ({
+      ...prevState,
+      [field]: !prevState[field],
+    }));
+  };
 
   const onSubmit = async (data: IFormInput) => {
     // Access the file from profilePic
@@ -98,24 +127,18 @@ const XYZ = () => {
     formData.append("email", data.email);
     formData.append("phoneNumber", data.phoneNumber);
     formData.append("password", data.password);
-    // formData.append("confirmPassword", data.confirmPassword);
-    // formData.append("rememberMe", data.rememberMe ? "true" : "false");
+    formData.append("confirmPassword", data.confirmPassword);
+    formData.append("remember", data.remember ? "true" : "false");
 
-    if (data.profilePic && data.profilePic.length > 0) {
-      const blob = new Blob([data.profilePic[0]], {
-        type: data.profilePic[0].type,
-      });
-      formData.append("profilePic", blob);
+    if (data?.profilePic?.length > 0) {
+      const file = data.profilePic[0];
+      const blob = new Blob([file], { type: file.type });
+      formData.append("profilePic", blob, file.name);
+      formData.append("folderName", "Profile_Pictures");
     }
 
-    // console.log("data", new Blob(formData));
-
-    // formData.forEach((value, key) => {
-    //   console.log(key, value); // Logs key-value pairs inside formData
-    // });
-
     try {
-      const response = await api.post("/test", formData, {
+      const response = await api.post("/auth/register", formData, {
         headers: {
           "Content-Type": "multipart/form-data", // Ensure you're sending form data as multipart
         },
@@ -127,8 +150,6 @@ const XYZ = () => {
       console.error("API Error", error);
       // Handle the error
     }
-
-    // console.log("formData", formData);
   };
 
   return (
@@ -207,11 +228,19 @@ const XYZ = () => {
           <label className="block text-sm font-medium text-gray-600">
             Password
           </label>
-          <input
-            type="password"
-            {...register("password")}
-            className="mt-1 block w-full p-3 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
-          />
+          <div className="relative">
+            <input
+              type={showPasswords.password ? "text" : "password"}
+              {...register("password")}
+              className="mt-1 block w-full p-3 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+            />
+            <span
+              className="absolute p-2 border right-0 top-1/2 transform -translate-y-1/2"
+              onClick={() => togglePasswordVisibility("password")}
+            >
+              {showPasswords.password ? "H" : "S"}
+            </span>
+          </div>
           {errors.password && (
             <p className="text-red-500 text-xs mt-1">
               {errors.password.message}
@@ -223,11 +252,19 @@ const XYZ = () => {
           <label className="block text-sm font-medium text-gray-600">
             Confirm Password
           </label>
-          <input
-            type="password"
-            {...register("confirmPassword")}
-            className="mt-1 block w-full p-3 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
-          />
+          <div className="relative">
+            <input
+              type={showPasswords.confirmPassword ? "text" : "password"}
+              {...register("confirmPassword")}
+              className="mt-1 block w-full p-3 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+            />
+            <span
+              className="absolute p-2 border right-0 top-1/2 transform -translate-y-1/2"
+              onClick={() => togglePasswordVisibility("confirmPassword")}
+            >
+              {showPasswords.confirmPassword ? "H" : "S"}
+            </span>
+          </div>
           {errors.confirmPassword && (
             <p className="text-red-500 text-xs mt-1">
               {errors.confirmPassword.message}
@@ -254,14 +291,14 @@ const XYZ = () => {
           <label className="flex items-center text-sm text-gray-600">
             <input
               type="checkbox"
-              {...register("rememberMe")}
+              {...register("remember")}
               className="mr-2 h-4 w-4 text-indigo-600 focus:ring-indigo-500"
             />
             Remember Me
           </label>
-          {errors.rememberMe && (
+          {errors.remember && (
             <p className="text-red-500 text-xs mt-1">
-              {errors.rememberMe.message}
+              {errors.remember.message}
             </p>
           )}
         </div>
