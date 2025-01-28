@@ -6,8 +6,7 @@ const PhoneInput = ({
   name = "",
   type = "text",
   label = "",
-  value = "",
-  onChange,
+  register,
   className = "",
   errorText = "",
   successText = "",
@@ -15,6 +14,7 @@ const PhoneInput = ({
   labelClassName = "",
   autoComplete = "off",
   iconClick,
+  // onKeyDown
 }: InputProps) => {
   return (
     <div className="w-full space-y-1.5">
@@ -38,9 +38,8 @@ const PhoneInput = ({
             type={type}
             id={name}
             name={name}
-            value={value}
-            onChange={onChange}
             placeholder={placeholder}
+            {...register}
             className={`w-full outline-none focus:outline-none font-normal overflow-hidden bg-transparent px-3 py-3 2xl:py-4  placeholder:text-primary-inverted-50 placeholder:text-sm ${
               icon && "pr-10"
             } autofill-effect ${className}`}

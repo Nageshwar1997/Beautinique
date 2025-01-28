@@ -1,15 +1,14 @@
 import { useLocation } from "react-router-dom";
 import { CameraIcon } from "../../../components/icons";
-import { ChangeEvent } from "react";
 
 const UploadProfile = ({
   imageUrl,
-  onChange,
+  register,
   name = "image",
 }: {
   imageUrl?: string | null;
   name?: string;
-  onChange?: (e: ChangeEvent<HTMLInputElement>) => void;
+  register: object;
 }) => {
   const { pathname } = useLocation();
   return (
@@ -36,7 +35,7 @@ const UploadProfile = ({
             type="file"
             className="hidden"
             accept="image/*"
-            onChange={onChange}
+            {...register}
           />
         </div>
       )}
