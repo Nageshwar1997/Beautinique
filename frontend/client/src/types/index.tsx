@@ -1,5 +1,4 @@
 import {
-  ChangeEvent,
   HTMLInputAutoCompleteAttribute,
   KeyboardEvent,
   ReactNode,
@@ -8,21 +7,19 @@ import {
 export type ThemeTypes = "light" | "dark";
 
 export interface InputProps {
+  type?: string;
   label?: string;
   name?: string;
-  value?: string;
   icon?: ReactNode;
+  register?: object;
   errorText?: string;
   className?: string;
   placeholder?: string;
   successText?: string;
-  defaultValue?: string;
   labelClassName?: string;
   iconClick?: () => void;
-  type?: string;
   autoComplete?: HTMLInputAutoCompleteAttribute | undefined;
   onKeyDown?: (e: KeyboardEvent<HTMLInputElement>) => void;
-  onChange?: (e: ChangeEvent<HTMLInputElement>) => void;
 }
 
 export interface TextItem {
