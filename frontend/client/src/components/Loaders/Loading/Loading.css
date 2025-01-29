@@ -1,0 +1,186 @@
+/* 🔹 Main Container */
+.container {
+  width: 40vmin; /* Responsive size */
+  height: 40vmin; /* Responsive size */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  position: relative;
+  filter: drop-shadow(0px 0px 10px rgba(255, 255, 255, 0.1));
+}
+
+/* 🔹 Animated Rings */
+.rings {
+  width: 50%;
+  height: 50%;
+  border: 0px solid transparent;
+  border-radius: 50%;
+  position: absolute;
+  box-shadow: 0px 0px 10px rgba(255, 255, 255, 0.1);
+}
+
+/* 🔹 Ring 1 */
+.rings:nth-child(1) {
+  border-bottom-width: 0.6vmin;
+  /* border-color: rgba(255, 0, 255, 0.9); */
+  border-color: red;
+  animation: rotate1 2s linear infinite;
+}
+
+/* 🔹 Ring 2 */
+.rings:nth-child(2) {
+  border-right-width: 0.6vmin;
+  /* border-color: rgba(0, 162, 255, 0.9); */
+  border-color: green;
+  animation: rotate2 2s linear infinite;
+}
+
+/* 🔹 Ring 3 */
+.rings:nth-child(3) {
+  border-top-width: 0.6vmin;
+  /* border-color: rgba(0, 255, 13, 0.9); */
+  border-color: blue;
+  animation: rotate3 2s linear infinite;
+}
+
+/* 🔹 Ring 4 */
+.rings:nth-child(4) {
+  border-left-width: 0.6vmin;
+  /* border-color: rgba(255, 255, 0, 0.9); */
+  border-color: yellow;
+  animation: rotate4 2s linear infinite;
+}
+
+/* 🔹 Loading Text Container */
+.loading-text {
+  font-size: 4vmin; /* Scales with screen size */
+  color: rgba(255, 255, 255, 0.9);
+  text-transform: uppercase;
+  display: flex;
+  gap: 0.5vmin;
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+/* 🔹 Each Letter Animation */
+.loading-text span {
+  opacity: 0;
+  background-clip: text;
+  color: transparent;
+  background-image: var(--accent-duo);
+  -webkit-background-clip: text;
+  transform: translateY(10px);
+  animation: fadeInOneByOne 3s ease-in-out infinite;
+}
+
+/* 🔹 Staggered Delay for Each Letter */
+.loading-text span:nth-child(1) {
+  animation-delay: 0s;
+}
+.loading-text span:nth-child(2) {
+  animation-delay: 0.1s;
+}
+.loading-text span:nth-child(3) {
+  animation-delay: 0.2s;
+}
+.loading-text span:nth-child(4) {
+  animation-delay: 0.3s;
+}
+.loading-text span:nth-child(5) {
+  animation-delay: 0.4s;
+}
+.loading-text span:nth-child(6) {
+  animation-delay: 0.5s;
+}
+.loading-text span:nth-child(7) {
+  animation-delay: 0.6s;
+}
+.loading-text span:nth-child(8) {
+  animation-delay: 0.7s;
+}
+.loading-text span:nth-child(9) {
+  animation-delay: 0.8s;
+}
+.loading-text span:nth-child(10) {
+  animation-delay: 0.9s;
+}
+.loading-text span:nth-child(11) {
+  animation-delay: 1s;
+}
+/* 🔄 Fade-In & Float Animation */
+@keyframes fadeInOneByOne {
+  0% {
+    opacity: 0;
+    transform: translateY(5px);
+  }
+  50% {
+    opacity: 1;
+    transform: translateY(0px);
+  }
+  100% {
+    opacity: 0.5;
+    transform: translateY(-5px);
+  }
+}
+
+/* 🔄 Improved Animations */
+@keyframes rotate1 {
+  0% {
+    transform: rotateX(45deg) rotateY(-45deg) rotateZ(0deg);
+  }
+  100% {
+    transform: rotateX(45deg) rotateY(-45deg) rotateZ(360deg);
+  }
+}
+
+@keyframes rotate2 {
+  0% {
+    transform: rotateX(55deg) rotateY(15deg) rotateZ(0deg);
+  }
+  100% {
+    transform: rotateX(55deg) rotateY(15deg) rotateZ(360deg);
+  }
+}
+
+@keyframes rotate3 {
+  0% {
+    transform: rotateX(40deg) rotateY(65deg) rotateZ(0deg);
+  }
+  100% {
+    transform: rotateX(40deg) rotateY(65deg) rotateZ(360deg);
+  }
+}
+
+@keyframes rotate4 {
+  0% {
+    transform: rotateX(50deg) rotateY(-25deg) rotateZ(0deg);
+  }
+  100% {
+    transform: rotateX(50deg) rotateY(-25deg) rotateZ(360deg);
+  }
+}
+
+/* 🔹 Responsive Adjustments */
+@media (max-width: 768px) {
+  .container {
+    width: 50vmin;
+    height: 50vmin;
+  }
+
+  .loading-text {
+    font-size: 5vmin;
+  }
+}
+
+@media (max-width: 480px) {
+  .container {
+    width: 60vmin;
+    height: 60vmin;
+  }
+
+  .loading-text {
+    font-size: 6vmin;
+  }
+}
