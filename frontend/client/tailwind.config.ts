@@ -6,10 +6,10 @@ export default {
       colors: {
         primary: "var(--primary)",
         "primary-10": "var(--primary-10)",
-        "primary-14": "var(--primary-14)",
+        "primary-8": "var(--primary-8)",
         "primary-inverted": "var(--primary-inverted)",
         "primary-inverted-10": "var(--primary-inverted-10)",
-        "primary-inverted-14": "var(--primary-inverted-14)",
+        "primary-inverted-8": "var(--primary-inverted-8)",
         "primary-inverted-50": "var(--primary-inverted-50)",
         "smoke-eerie": "var(--smoke-eerie)",
         // "smoke-eerie-inverted": "var(--smoke-eerie-inverted)",
