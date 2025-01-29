@@ -6,10 +6,8 @@ const MainPage = lazy(() => import("../pages/main/MainPage"));
 const Home = lazy(() => import("../pages/home/Home"));
 const Register = lazy(() => import("../pages/auth/Register"));
 const Login = lazy(() => import("../pages/auth/Login"));
-const NotFound = lazy(() => import("../pages/error/NotFound"));
-const SomethingWentWrong = lazy(
-  () => import("../pages/error/SomethingWentWrong")
-);
+import NotFound from "../pages/error/NotFound";
+import SomethingWentWrong from "../pages/error/SomethingWentWrong";
 
 const router = createBrowserRouter([
   {
