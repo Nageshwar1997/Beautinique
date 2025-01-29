@@ -1,11 +1,15 @@
+/* eslint-disable react-refresh/only-export-components */
 import { createBrowserRouter } from "react-router-dom";
+import { lazy } from "react";
 
-import Home from "../pages/home/Home";
-import MainPage from "../pages/main/MainPage";
-import Register from "../pages/auth/Register";
-import Login from "../pages/auth/Login";
-import NotFound from "../pages/error/NotFound";
-import SomethingWentWrong from "../pages/error/SomethingWentWrong";
+const MainPage = lazy(() => import("../pages/main/MainPage"));
+const Home = lazy(() => import("../pages/home/Home"));
+const Register = lazy(() => import("../pages/auth/Register"));
+const Login = lazy(() => import("../pages/auth/Login"));
+const NotFound = lazy(() => import("../pages/error/NotFound"));
+const SomethingWentWrong = lazy(
+  () => import("../pages/error/SomethingWentWrong")
+);
 
 const router = createBrowserRouter([
   {
