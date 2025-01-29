@@ -1,8 +1,4 @@
-import {
-  HTMLInputAutoCompleteAttribute,
-  KeyboardEvent,
-  ReactNode,
-} from "react";
+import { HTMLInputAutoCompleteAttribute, ReactNode } from "react";
 
 export type ThemeTypes = "light" | "dark";
 
@@ -19,7 +15,6 @@ export interface InputProps {
   labelClassName?: string;
   iconClick?: () => void;
   autoComplete?: HTMLInputAutoCompleteAttribute | undefined;
-  onKeyDown?: (e: KeyboardEvent<HTMLInputElement>) => void;
 }
 
 export interface TextItem {
@@ -28,23 +23,29 @@ export interface TextItem {
   break?: boolean;
 }
 
-export type ContentItem = TextItem;
-
 export interface TextDisplayProps {
-  content: ContentItem[];
+  content: TextItem[];
   className?: string;
   contentClassName?: string;
 }
 
-export interface RegisterInputProps {
+export interface RegisterFormInputProps {
   firstName: string;
   lastName: string;
   email: string;
   phoneNumber: string;
   password: string;
   confirmPassword: string;
-  profilePic?: string;
+  profilePic?: FileList; // Correctly type the file input
   remember?: boolean;
+}
+
+export interface RegisterInputMapDataProps {
+  name: keyof RegisterFormInputProps;
+  label?: string;
+  type?: string;
+  placeholder?: string;
+  autoComplete?: string;
 }
 
 export interface LoginInputProps {
@@ -54,14 +55,7 @@ export interface LoginInputProps {
   remember?: boolean;
 }
 
-export type PasswordVisibilityTypes = {
-  password: boolean;
-  confirmPassword: boolean;
-};
-
 export type LoginField = "email" | "password" | "phoneNumber" | "remember";
-
-export type RegisterField = "firstName" | "lastName" | "email" | "phoneNumber";
 
 export interface RadioProps {
   value: string;
