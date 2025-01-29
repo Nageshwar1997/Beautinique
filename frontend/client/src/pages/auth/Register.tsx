@@ -1,22 +1,9 @@
-import { ChangeEvent, FormEvent, RefObject, useState } from "react";
-import {
-  getPasswordFieldType,
-  initialRegisterData,
-  registerInputMapData,
-  RegisterTextContent,
-  validateRegisterForm,
-} from "./constants";
-import {
-  validateEmail,
-  validateName,
-  validateNumber,
-  validatePassword,
-} from "../../validators";
-import {
-  PasswordVisibilityTypes,
-  RegisterField,
-  VerticalScrollType,
-} from "../../types";
+import { RefObject, useEffect, useState } from "react";
+import { useForm } from "react-hook-form";
+import * as yup from "yup";
+import { yupResolver } from "@hookform/resolvers/yup";
+import { RegisterTextContent } from "./constants";
+import { VerticalScrollType } from "../../types";
 import AuthRobot from "./components/AuthRobot";
 import UploadProfile from "./components/UploadProfile";
 import TextDisplay from "../../components/TextDisplay";
@@ -27,120 +14,240 @@ import { EyeIcon, EyeOffIcon } from "../../components/icons";
 import PhoneInput from "../../components/input/PhoneInput";
 import { Link } from "react-router-dom";
 import Checkbox from "../../components/input/Checkbox";
-import axios from "axios";
-import toast from "react-hot-toast";
 import useVerticalScrollable from "../../hooks/useVerticalScrollable";
 import { BottomGradient, TopGradient } from "../../components/Gradients";
-import { useRegisterUser } from "../../api/user/user.service";
-import { toastCatchErrorMessage } from "../../utils/toasts";
+import { useMutation } from "@tanstack/react-query";
+import api from "../../configs/axios.instance.config";
+
+export interface IFormInput {
+  firstName: string;
+  lastName: string;
+  email: string;
+  phoneNumber: string;
+  password: string;
+  confirmPassword: string;
+  profilePic?: FileList; // Correctly type the file input
+  remember?: boolean;
+}
+
+interface InputProps {
+  name: keyof IFormInput;
+  label?: string;
+  type?: string;
+  placeholder?: string;
+}
+
+const inputFields: InputProps[] = [
+  {
+    label: "First Name",
+    name: "firstName",
+    type: "text",
+    placeholder: "Enter FIrst Name",
+  },
+  {
+    label: "Last Name",
+    name: "lastName",
+    type: "text",
+    placeholder: "Enter last Name",
+  },
+  {
+    label: "Email",
+    name: "email",
+    type: "text",
+    placeholder: "Enter email address",
+  },
+  {
+    label: "Phone Number",
+    name: "phoneNumber",
+    type: "number",
+    placeholder: "Enter phone number",
+  },
+  {
+    label: "Password",
+    name: "password",
+    type: "password",
+    placeholder: "Enter password",
+  },
+  {
+    label: "Confirm Password",
+    name: "confirmPassword",
+    type: "password",
+    placeholder: "Reenter Password",
+  },
+];
+
+// Define the yup validation schema
+const schema = yup
+  .object({
+    firstName: yup
+      .string()
+      .required("First name is required")
+      .min(2, "First name must be at least 2 characters")
+      .max(50, "First name cannot exceed 50 characters")
+      .test(
+        "no-multiple-spaces",
+        "Only one space is allowed between words",
+        (value) => !(value && (value.match(/\s{2,}/) || []).length > 0) // Check if there are two or more spaces in the string
+      )
+      .matches(
+        /^[a-zA-Z]+( [a-zA-Z]+)*$/,
+        "Contains only letters and 1 space between words"
+      ),
+    lastName: yup
+      .string()
+      .required("Last name is required")
+      .min(2, "Last name must be at least 2 characters")
+      .max(50, "Last name cannot exceed 50 characters")
+      .test(
+        "no-multiple-spaces",
+        "Only one space is allowed between words",
+        (value) => !(value && (value.match(/\s{2,}/) || []).length > 0) // Check if there are two or more spaces in the string
+      )
+      .matches(
+        /^[a-zA-Z]+( [a-zA-Z]+)*$/,
+        "Contains only letters and 1 space between words"
+      ),
+    email: yup
+      .string()
+      .required("Email is required")
+      .email("Invalid email address")
+      .matches(/^\w+([.-]?\w+)*@\w+([.-]?\w+)*(\.\w{2,3})+$/, {
+        message: "Invalid email address",
+        excludeEmptyString: true,
+      })
+      .matches(/^\S*$/, "Email cannot contain spaces"),
+    phoneNumber: yup
+      .string()
+      .matches(/^[0-9]{10}$/, "Mobile number must be exactly 10 digits")
+      .required("Mobile number is required"),
+    password: yup
+      .string()
+      .required("Password is required")
+      .matches(/[A-Z]/, "Password must contain at least one uppercase letter")
+      .matches(/[a-z]/, "Password must contain at least one lowercase letter")
+      .matches(/\d/, "Password must contain at least one number")
+      .matches(
+        /[@$!%*?&#]/,
+        "Password must contain at least one special character"
+      )
+      .matches(/^\S*$/, "Password can't contain spaces")
+      .min(6, "Password must be at least 6 characters")
+      .max(20, "Password cannot exceed 20 characters"),
+    confirmPassword: yup
+      .string()
+      .required("Password is required")
+      .oneOf([yup.ref("password")], "Passwords must match"),
+
+    profilePic: yup
+      .mixed<FileList>()
+      .test("fileSize", "File too large", (value) => {
+        if (value && value[0]) {
+          return value[0].size <= 5 * 1024 * 1024; // 5MB
+        }
+        return true;
+      })
+      .test("fileType", "Unsupported file type", (value) => {
+        if (value && value[0]) {
+          return value[0].type.startsWith("image/");
+        }
+        return true;
+      }),
+    remember: yup.boolean(),
+  })
+  .required();
 
 const Register = () => {
   // Hooks
+
   const [showGradient, containerRef] = useVerticalScrollable();
 
-  // States
-  const [data, setData] = useState(initialRegisterData);
-  const [errors, setErrors] = useState<Partial<Record<RegisterField, string>>>(
-    {}
-  );
-  const [passwordVisibility, setPasswordVisibility] =
-    useState<PasswordVisibilityTypes>({
-      password: false,
-      confirmPassword: false,
-    });
+  const [showPasswords, setShowPasswords] = useState<{
+    password: boolean;
+    confirmPassword: boolean;
+  }>({
+    password: false,
+    confirmPassword: false,
+  });
+  const [previewURL, setPreviewURL] = useState<string | null>(null);
 
-  const userMutation = useRegisterUser();
-  // Functions
-  const togglePasswordVisibility = (type: keyof PasswordVisibilityTypes) => {
-    setPasswordVisibility((prev) => ({ ...prev, [type]: !prev[type] }));
+  const {
+    watch,
+    register,
+    handleSubmit,
+    formState: { errors },
+  } = useForm<IFormInput>({
+    resolver: yupResolver(schema), // Use yup resolver for validation
+  });
+
+  const togglePasswordVisibility = (field: "password" | "confirmPassword") => {
+    setShowPasswords((prevState) => ({
+      ...prevState,
+      [field]: !prevState[field],
+    }));
   };
 
-  const handleImageChange = async (file: File) => {
-    setData((prev) => ({ ...prev, profilePic: "" }));
-    if (!file) {
-      alert("Please select a file");
-      return;
+  // React Query Mutation
+  const { mutate } = useMutation({
+    mutationFn: async (formData: FormData) => {
+      const response = await api.post("/auth/register", formData, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      });
+      return response.data;
+    },
+    onSuccess: (data) => {
+      console.log("Registration successful:", data);
+    },
+    onError: (err) => {
+      console.error("Registration failed:", err);
+    },
+  });
+
+  const onSubmit = async (data: IFormInput) => {
+    // const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
+    //   e.preventDefault();
+
+    // console.log("Hi");
+
+    // Access the file from profilePic
+    const formData = new FormData();
+
+    formData.append("firstName", data.firstName);
+    formData.append("lastName", data.lastName);
+    formData.append("email", data.email);
+    formData.append("phoneNumber", data.phoneNumber);
+    formData.append("password", data.password);
+    formData.append("confirmPassword", data.confirmPassword);
+    formData.append("remember", data.remember ? "true" : "false");
+
+    if (data?.profilePic && data?.profilePic.length > 0) {
+      const file = data.profilePic[0];
+      const blob = new Blob([file], { type: file.type });
+      formData.append("profilePic", blob, file.name);
+      formData.append("folderName", "Profile_Pictures");
     }
 
-    if (file) {
-      // Set image preview
-      const preview = URL.createObjectURL(file);
-      setData((prev) => ({ ...prev, profilePic: preview }));
-
-      // Upload image to backend
-      try {
-        const formData = new FormData();
-        formData.append("profilePic", file);
-
-        const folderName = "Profile Pics"; // You can hardcode any folder name here between two quotes use space or hyphen or underscore
-        formData.append("folder", folderName);
-
-        const response = await axios.post(
-          "http://localhost:8080/api/upload/profile-pic", // Replace with your backend URL
-          formData,
-          {
-            headers: {
-              "Content-Type": "multipart/form-data",
-            },
-          }
-        );
-
-        const responseData = response?.data;
-
-        // Update the profile picture URL (you can save this to state or context)
-        if (responseData?.success) {
-          setData((prevData) => ({
-            ...prevData,
-            profilePic: responseData.imageUrl,
-          }));
-          toast.success("Profile Pic uploaded successfully!");
-        }
-      } catch (error: unknown) {
-        setData((prev) => ({ ...prev, profilePic: "" }));
-        console.error("Error uploading profile pic:", error);
-        toastCatchErrorMessage(error, "Failed to upload profile pic!");
-      }
-    }
+    console.log("data", data);
+    mutate(formData);
   };
 
-  const handleInputChange = (e: ChangeEvent<HTMLInputElement>) => {
-    const { name, value, type, checked, files } = e.target;
-    if (type === "file" && name === "profilePic") {
-      const file = files?.[0];
-      handleImageChange(file as File);
-    } else if (
-      (name === "firstName" || name === "lastName") &&
-      validateName(value)
-    ) {
-      setData((prevData) => ({ ...prevData, [name]: value }));
-    } else if (name === "email" && validateEmail(value)) {
-      setData((prevData) => ({ ...prevData, [name]: value }));
-    } else if (
-      (name === "password" || name === "confirmPassword") &&
-      validatePassword(value)
-    ) {
-      setData((prevData) => ({ ...prevData, [name]: value }));
-    } else if (name === "phoneNumber") {
-      const newValue = validateNumber(value);
-      setData((prevData) => ({ ...prevData, [name]: newValue }));
-    } else if (type === "checkbox" && name === "remember") {
-      setData((prevData) => ({ ...prevData, [name]: checked }));
+  // Watch the profilePic field
+  const profilePicFile = watch("profilePic");
+
+  // Generate preview when profilePic changes
+  useEffect(() => {
+    if (profilePicFile && profilePicFile[0]) {
+      const file = profilePicFile[0];
+      const url = URL.createObjectURL(file);
+      setPreviewURL(url);
+
+      // Cleanup URL object to avoid memory leaks
+      return () => URL.revokeObjectURL(url);
     }
-    setErrors((prevErrors) => ({ ...prevErrors, [name]: "" }));
-  };
+  }, [profilePicFile]);
 
-  const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-
-    const updatedErrors = validateRegisterForm(data);
-
-    if (Object.values(updatedErrors).some((error) => error !== "")) {
-      setErrors(updatedErrors);
-      return;
-    }
-
-    userMutation.mutate(data);
-  };
+  // // States
 
   return (
     <div className="w-full min-h-dvh max-h-dvh h-full p-4 flex gap-4 overflow-hidden relative">
@@ -156,7 +263,7 @@ const Register = () => {
       >
         {(showGradient as VerticalScrollType).top && <TopGradient />}
         <form
-          onSubmit={handleSubmit}
+          onSubmit={handleSubmit(onSubmit)}
           autoComplete="off"
           className="w-full flex flex-col gap-4"
         >
@@ -166,8 +273,8 @@ const Register = () => {
               contentClassName="mb-3 font-semibold"
             />
             <UploadProfile
-              imageUrl={data.profilePic}
-              onChange={handleInputChange}
+              imageUrl={previewURL}
+              register={{ ...register("profilePic" as keyof IFormInput) }}
               name="profilePic"
             />
           </div>
@@ -175,64 +282,60 @@ const Register = () => {
           <div className="w-full max-w-[400px] lg:max-w-[500px] sm:w-[90%] lg:w-[500px] border-gradient p-px rounded-3xl overflow-hidden mx-auto">
             <div className="shadow-light-dark-soft bg-platinum-black p-6 md:p-8 rounded-3xl space-y-6">
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-x-4 gap-y-5 lg:gap-y-6">
-                {registerInputMapData?.map((item, ind) => {
+                {inputFields.map((field, index) => {
+                  const { label, name, type, placeholder } = field;
                   return (
                     <div
-                      key={ind}
+                      key={index}
                       className={`${
                         ![
                           "firstName",
                           "lastName",
                           "password",
                           "confirmPassword",
-                        ].includes(item?.name) && "lg:col-span-2"
+                        ].includes(name) && "lg:col-span-2"
                       }`}
                     >
-                      {item.name === "phoneNumber" ? (
+                      {name === "phoneNumber" ? (
                         <PhoneInput
-                          autoComplete={item?.autoComplete}
-                          label={item?.label}
-                          type={item?.type}
-                          placeholder={item?.placeholder}
-                          name={item?.name}
-                          value={data[item?.name] as string}
-                          onChange={handleInputChange}
-                          errorText={errors[item?.name as RegisterField]}
+                          label={label}
+                          type={type}
+                          placeholder={placeholder}
+                          name={name}
+                          register={{ ...register(name) }}
+                          errorText={errors[name]?.message}
                         />
                       ) : (
                         <Input
-                          autoComplete={item?.autoComplete}
-                          label={item?.label}
-                          type={getPasswordFieldType(
-                            item?.name as keyof PasswordVisibilityTypes,
-                            passwordVisibility
-                          )}
-                          placeholder={item?.placeholder}
-                          name={item?.name}
-                          value={data[item?.name] as string}
-                          onChange={handleInputChange}
+                          type={
+                            ["password", "confirmPassword"].includes(name)
+                              ? showPasswords[
+                                  name as "password" | "confirmPassword"
+                                ]
+                                ? "text"
+                                : type
+                              : type
+                          }
+                          label={label}
+                          placeholder={placeholder}
+                          name={name}
+                          register={{ ...register(name) }}
+                          errorText={errors[name]?.message}
                           icon={
-                            item?.icon &&
-                            ["password", "confirmPassword"].includes(
-                              item?.name
-                            ) &&
-                            (passwordVisibility[
-                              item?.name as keyof PasswordVisibilityTypes
+                            ["password", "confirmPassword"].includes(name) &&
+                            (showPasswords[
+                              name as "password" | "confirmPassword"
                             ] ? (
-                              <EyeOffIcon className="fill-primary-inverted-50 hover:fill-primary-inverted" />
+                              <EyeOffIcon />
                             ) : (
-                              <EyeIcon className="fill-primary-inverted-50 hover:fill-primary-inverted" />
+                              <EyeIcon />
                             ))
                           }
                           iconClick={() =>
-                            ["password", "confirmPassword"].includes(
-                              item?.name
-                            ) &&
                             togglePasswordVisibility(
-                              item?.name as keyof PasswordVisibilityTypes
+                              name as "password" | "confirmPassword"
                             )
                           }
-                          errorText={errors[item?.name as RegisterField]}
                         />
                       )}
                     </div>
@@ -242,17 +345,14 @@ const Register = () => {
               <div className="space-y-3">
                 <div className="flex items-center justify-between gap-3">
                   <div className="flex items-center space-x-3">
-                    <Checkbox
-                      checked={data?.remember as boolean}
-                      onChange={handleInputChange as () => void}
-                    />
+                    <Checkbox register={{ ...register("remember") }} />
                     <span className="text-sm text-primary-inverted-50 font-medium">
                       Remember me
                     </span>
                   </div>
                   <Link
                     to="/"
-                    className="text-primary-inverted-50 font-medium hover:font-extrabold hover:bg-clip-text hover:text-transparent hover:bg-accent-duo"
+                    className="bg-clip-text text-transparent bg-silver-duo-gradient hover:bg-accent-duo"
                   >
                     Back
                   </Link>
