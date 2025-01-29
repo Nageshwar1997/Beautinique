@@ -14,7 +14,6 @@ const PhoneInput = ({
   labelClassName = "",
   autoComplete = "off",
   iconClick,
-  // onKeyDown
 }: InputProps) => {
   return (
     <div className="w-full space-y-1.5">
@@ -42,7 +41,8 @@ const PhoneInput = ({
             {...register}
             className={`w-full outline-none focus:outline-none font-normal overflow-hidden bg-transparent px-3 py-3 2xl:py-4  placeholder:text-primary-inverted-50 placeholder:text-sm ${
               icon && "pr-10"
-            } autofill-effect ${className}`}
+            } autofill-effect number-input-mouse-control-none ${className}`}
+            onWheel={(event) => event.currentTarget.blur()}
           />
         </div>
 

@@ -1,19 +1,18 @@
 import {
-  RegisterInputProps,
   LoginInputProps,
-  ContentItem,
-  PasswordVisibilityTypes,
+  TextItem,
+  RegisterInputMapDataProps,
 } from "../../../types";
 import { isValidEmail, isValidPassword } from "../../../validators";
 
-export const RegisterTextContent: ContentItem[] = [
+export const RegisterTextContent: TextItem[] = [
   {
     text: "Register",
     isHighlighted: true,
   },
 ];
 
-export const LoginTextContent: ContentItem[] = [
+export const LoginTextContent: TextItem[] = [
   {
     text: "Login",
     isHighlighted: true,
@@ -39,16 +38,6 @@ export const socialMediaAccounts = [
   },
 ];
 
-export const initialRegisterData: RegisterInputProps = {
-  firstName: "",
-  lastName: "",
-  email: "",
-  phoneNumber: "",
-  password: "",
-  confirmPassword: "",
-  profilePic: "",
-  remember: false,
-};
 export const initialLoginData: LoginInputProps = {
   email: "",
   phoneNumber: "",
@@ -56,68 +45,48 @@ export const initialLoginData: LoginInputProps = {
   remember: false,
 };
 
-export const getPasswordFieldType = (
-  field: keyof PasswordVisibilityTypes,
-  passwordVisibility: PasswordVisibilityTypes
-): "password" | "text" => {
-  if (["password", "confirmPassword"].includes(field)) {
-    return passwordVisibility[field] ? "text" : "password";
-  }
-  return "text";
-};
-
-// Define the inputMapData outside the component
-export const registerInputMapData: {
-  name: keyof RegisterInputProps;
-  label: string;
-  type: string;
-  autoComplete: string;
-  placeholder: string;
-  icon?: boolean;
-}[] = [
+export const registerInputMapData: RegisterInputMapDataProps[] = [
   {
     name: "firstName",
     label: "First Name",
     type: "text",
     autoComplete: "given-name",
-    placeholder: "Enter your first name",
+    placeholder: "Enter first name",
   },
   {
     name: "lastName",
     label: "Last Name",
     type: "text",
     autoComplete: "given-name",
-    placeholder: "Enter your last name",
+    placeholder: "Enter last name",
   },
   {
     name: "email",
     label: "Email",
     type: "text",
     autoComplete: "email",
-    placeholder: "Enter your email address",
+    placeholder: "Enter email address",
   },
   {
     name: "phoneNumber",
     label: "Phone Number",
-    type: "text",
+    type: "number",
     autoComplete: "tel",
-    placeholder: "Enter your phone number",
+    placeholder: "Enter phone number",
   },
   {
-    name: "password",
     label: "Password",
+    name: "password",
     type: "password",
     autoComplete: "new-password",
-    icon: true,
-    placeholder: "Enter new password",
+    placeholder: "Enter password",
   },
   {
     name: "confirmPassword",
     label: "Confirm Password",
     type: "password",
     autoComplete: "new-password",
-    icon: true,
-    placeholder: "Confirm new password",
+    placeholder: "Reenter password",
   },
 ];
 
@@ -152,49 +121,6 @@ export const loginInputMapData: {
     placeholder: "Enter your password",
   },
 ];
-
-export const validateRegisterForm = (data: RegisterInputProps) => {
-  const { firstName, lastName, email, phoneNumber, password, confirmPassword } =
-    data;
-
-  const updatedErrors: { [key: string]: string } = {};
-
-  if (!firstName) {
-    updatedErrors.firstName = "First name is required.";
-  }
-
-  if (!lastName) {
-    updatedErrors.lastName = "Last name is required.";
-  }
-
-  if (!email) {
-    updatedErrors.email = "Email is required.";
-  } else if (!isValidEmail(email)) {
-    updatedErrors.email = "Invalid email address.";
-  }
-
-  if (!phoneNumber) {
-    updatedErrors.phoneNumber = "Phone number is required.";
-  }
-
-  if (!password) {
-    updatedErrors.password = "Password is required.";
-  } else if (!isValidPassword(password)) {
-    updatedErrors.password = "1 Upper, 1 Lower, 1 Num, 1 Symbol, 6+ chars.";
-  }
-
-  if (!confirmPassword) {
-    updatedErrors.confirmPassword = "Confirm password is required.";
-  }
-
-  if (password !== confirmPassword) {
-    updatedErrors.confirmPassword = "Passwords do not match.";
-  } else {
-    updatedErrors.confirmPassword = "";
-  }
-
-  return updatedErrors;
-};
 
 export const validateLoginForm = (
   data: LoginInputProps,

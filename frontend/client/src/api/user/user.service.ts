@@ -1,5 +1,5 @@
 import { useMutation } from "@tanstack/react-query";
-import { LoginInputProps, RegisterInputProps } from "../../types";
+import { LoginInputProps } from "../../types";
 import { login_user, register_user } from "./auth.api";
 import { useNavigate } from "react-router-dom";
 import { toastErrorMessage, toastSuccessMessage } from "../../utils/toasts";
@@ -8,7 +8,7 @@ import { saveUserLocal, saveUserSession } from "../../utils";
 export const useRegisterUser = () => {
   const navigate = useNavigate();
   return useMutation({
-    mutationFn: (bodyData: RegisterInputProps) => register_user(bodyData),
+    mutationFn: (bodyData: FormData) => register_user(bodyData),
     onSuccess: (data) => {
       toastSuccessMessage(data?.message || "Registration successful!");
     },
@@ -19,10 +19,14 @@ export const useRegisterUser = () => {
     },
     onSettled(data, error, variables) {
       if (data && !error) {
-        if (variables?.remember) {
-          saveUserLocal(data?.token);
-        } else {
-          saveUserSession(data?.token);
+        if (variables instanceof FormData && variables.has("remember")) {
+          const rememberMe = variables.get("remember");
+
+          if (rememberMe === "true") {
+            saveUserLocal(data?.token);
+          } else {
+            saveUserSession(data?.token);
+          }
         }
         navigate("/");
       }

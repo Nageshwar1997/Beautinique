@@ -8,16 +8,18 @@ interface ButtonProps {
   rightIcon?: ReactNode;
   content: ReactNode | string;
   onClick?: () => void;
+  disable?: boolean;
 }
 
 const Button = ({
   type = "button",
   pattern,
-  className,
+  className = "",
   content,
   leftIcon,
   rightIcon,
   onClick,
+  disable = false,
 }: ButtonProps) => {
   const buttonCss = () => {
     if (pattern === "primary") {
@@ -40,6 +42,7 @@ const Button = ({
       type={type}
       onClick={onClick ? onClick : () => {}}
       typeof="button"
+      disabled={disable}
     >
       {leftIcon && <span>{leftIcon}</span>}
       {content && <span>{content}</span>}

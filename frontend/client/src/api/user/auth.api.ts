@@ -1,9 +1,9 @@
 import { AxiosError } from "axios";
 import api from "../../configs/axios.instance.config";
-import { LoginInputProps, RegisterInputProps } from "../../types";
+import { LoginInputProps } from "../../types";
 
 // Manually Register
-export const register_user = async (bodyData: RegisterInputProps) => {
+export const register_user = async (bodyData: FormData) => {
   try {
     const response = await api.post("/auth/register", bodyData);
     return response.data;
