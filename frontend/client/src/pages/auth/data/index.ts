@@ -1,9 +1,8 @@
 import {
-  LoginInputProps,
   TextItem,
   RegisterInputMapDataProps,
+  LoginInputMapDataProps,
 } from "../../../types";
-import { isValidEmail, isValidPassword } from "../../../validators";
 
 export const RegisterTextContent: TextItem[] = [
   {
@@ -37,13 +36,6 @@ export const socialMediaAccounts = [
     url: "https://ctruhcdn.azureedge.net/public/images/login/linkedin.webp",
   },
 ];
-
-export const initialLoginData: LoginInputProps = {
-  email: "",
-  phoneNumber: "",
-  password: "",
-  remember: false,
-};
 
 export const registerInputMapData: RegisterInputMapDataProps[] = [
   {
@@ -90,14 +82,7 @@ export const registerInputMapData: RegisterInputMapDataProps[] = [
   },
 ];
 
-export const loginInputMapData: {
-  name: keyof LoginInputProps;
-  label: string;
-  type: string;
-  autoComplete: string;
-  placeholder: string;
-  icon?: boolean;
-}[] = [
+export const loginInputMapData: LoginInputMapDataProps[] = [
   {
     name: "email",
     label: "Email",
@@ -108,7 +93,7 @@ export const loginInputMapData: {
   {
     name: "phoneNumber",
     label: "Phone Number",
-    type: "text",
+    type: "number",
     autoComplete: "tel",
     placeholder: "Enter your phone number",
   },
@@ -117,39 +102,6 @@ export const loginInputMapData: {
     label: "Password",
     type: "password",
     autoComplete: "new-password",
-    icon: true,
     placeholder: "Enter your password",
   },
 ];
-
-export const validateLoginForm = (
-  data: LoginInputProps,
-  loginUsing: "email" | "phoneNumber"
-) => {
-  const { email, phoneNumber, password } = data;
-
-  const updatedErrors: { [key: string]: string } = {};
-
-  if (loginUsing === "email") {
-    // Validate email if loginUsing is email
-    if (!email) {
-      updatedErrors.email = "Email is required.";
-    } else if (!isValidEmail(email)) {
-      updatedErrors.email = "Invalid email address.";
-    }
-  } else if (loginUsing === "phoneNumber") {
-    // Validate phoneNumber if loginUsing is phoneNumber
-    if (!phoneNumber) {
-      updatedErrors.phoneNumber = "Phone number is required.";
-    }
-  }
-
-  // Validate password (common for both cases)
-  if (!password) {
-    updatedErrors.password = "Password is required.";
-  } else if (!isValidPassword(password)) {
-    updatedErrors.password = "1 Upper, 1 Lower, 1 Num, 1 Symbol, 6+ chars.";
-  }
-
-  return updatedErrors;
-};

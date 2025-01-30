@@ -58,7 +58,13 @@ export interface LoginFormInputProps {
   remember?: boolean;
 }
 
-export type LoginField = "email" | "password" | "phoneNumber" | "remember";
+export interface LoginInputMapDataProps {
+  name: keyof LoginFormInputProps;
+  label?: string;
+  type?: string;
+  placeholder?: string;
+  autoComplete?: string;
+}
 
 export interface RadioProps {
   value: string;

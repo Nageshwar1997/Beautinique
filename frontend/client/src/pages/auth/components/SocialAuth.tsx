@@ -1,4 +1,4 @@
-import { socialMediaAccounts } from "../constants";
+import { socialMediaAccounts } from "../data";
 
 const SocialAuth = () => {
   return (

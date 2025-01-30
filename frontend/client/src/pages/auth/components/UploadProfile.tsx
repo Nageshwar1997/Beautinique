@@ -24,7 +24,7 @@ const UploadProfile = ({
         }
         alt="Profile Picture"
         className="object-cover bg-accent-duo rounded-full w-full h-full shadow-inner border-2 border-smoke-eerie"
-        // loading="lazy"
+        loading="lazy"
       />
       {pathname === "/register" && (
         <div className="absolute bottom-0 left-0 right-0 bg-smoke-eerie flex items-center justify-center">

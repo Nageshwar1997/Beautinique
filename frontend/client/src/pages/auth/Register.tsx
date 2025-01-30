@@ -1,7 +1,7 @@
 import { RefObject, useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
-import { RegisterTextContent, registerInputMapData } from "./constants";
+import { RegisterTextContent, registerInputMapData } from "./data";
 import { VerticalScrollType, RegisterFormInputProps } from "../../types";
 import AuthRobot from "./components/AuthRobot";
 import UploadProfile from "./components/UploadProfile";
@@ -15,7 +15,7 @@ import { Link } from "react-router-dom";
 import Checkbox from "../../components/input/Checkbox";
 import useVerticalScrollable from "../../hooks/useVerticalScrollable";
 import { BottomGradient, TopGradient } from "../../components/Gradients";
-import { registerSchema } from "./helpers";
+import { registerSchema } from "./helpers/auth.schema";
 import { useRegisterUser } from "../../api/user/user.service";
 import Loading from "../../components/Loaders/Loading/Loading";
 

@@ -1,8 +1,8 @@
 import { RefObject, useState } from "react";
 import { Controller, SubmitHandler, useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
-import { loginSchema } from "./helpers";
-import { loginInputMapData, LoginTextContent } from "./constants";
+import { loginSchema } from "./helpers/auth.schema";
+import { loginInputMapData, LoginTextContent } from "./data";
 import useVerticalScrollable from "../../hooks/useVerticalScrollable";
 import {
   LoginFormInputProps,
