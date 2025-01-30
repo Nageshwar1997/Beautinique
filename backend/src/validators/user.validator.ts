@@ -31,7 +31,7 @@ export const isValidEmail = (value: string): boolean => {
  *
  * The regular expression used to validate the password is a commonly used one
  * in the industry, and requires the following:
- *  - At least 6 characters long
+ *  - At least 6 to 20 characters long
  *  - At least one letter
  *  - At least one number
  *  - At least one special character from the set @$!%*#?&

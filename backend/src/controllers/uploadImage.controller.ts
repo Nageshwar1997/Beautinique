@@ -1,5 +1,5 @@
 import { NextFunction, Request, Response } from "express";
-import cloudinary from "../configs/uploadProfilePic.config";
+import cloudinary from "../configs/cloudinary/cloudinary.config";
 import AppError from "../utils/AppError";
 
 const uploadProfilePicController = async (

@@ -1,4 +1,5 @@
-import cloudinary from "../configs/uploadProfilePic.config";
+import cloudinary from "../configs/cloudinary/cloudinary.config";
+import testCloudinaryConnection from "../configs/cloudinary/cloudinary.connection";
 import { ImageUploaderProps, UploadImageResult } from "../types";
 import AppError from "../utils/AppError";
 
@@ -20,6 +21,19 @@ const imageUploader = async ({
     .split(".")
     .slice(0, -1)
     .join("")}`;
+
+  // Cloudinary Connectivity Test
+  const cloudinaryConnectionResult = await testCloudinaryConnection();
+
+  if (cloudinaryConnectionResult.error) {
+    console.error(
+      "cloudinaryConnectionResult",
+      cloudinaryConnectionResult.data
+    );
+    throw new AppError(cloudinaryConnectionResult.message, 500);
+  } else {
+    console.log("cloudinaryConnectionResult", cloudinaryConnectionResult.data);
+  }
 
   try {
     const result: UploadImageResult = await new Promise((resolve, reject) => {
