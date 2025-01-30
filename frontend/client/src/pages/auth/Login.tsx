@@ -14,6 +14,7 @@ import { BottomGradient, TopGradient } from "../../components/Gradients";
 import { LoginTextContent } from "./constants";
 import Checkbox from "../../components/input/Checkbox";
 import Input from "../../components/input/Input";
+import Radio from "../../components/input/Radio";
 
 interface Test {
   loginMethod: "phoneNumber" | "email";
@@ -147,28 +148,24 @@ const Login = () => {
           />
           <SocialAuth />
           <div className="flex gap-4">
-            {["email", "phoneNumber"].map((method) => (
-              <label key={method}>
-                <Controller
-                  name="loginMethod"
-                  control={control}
-                  render={({ field }) => (
-                    <input
-                      type="radio"
-                      {...field}
-                      value={method}
-                      checked={selectedMethod === method}
-                      onChange={() =>
-                        handleLoginMethodChange(
-                          method as "email" | "phoneNumber"
-                        )
-                      }
-                    />
-                  )}
+            <Controller
+              name="loginMethod"
+              control={control}
+              render={({ field }) => (
+                <Radio
+                  value={field.value}
+                  onChange={(value) => {
+                    // Trigger the custom method change function
+                    handleLoginMethodChange(value as "email" | "phoneNumber");
+                    field.onChange(value); // Make sure to call the field onChange
+                  }}
+                  options={[
+                    { label: "Email", value: "email" },
+                    { label: "Phone", value: "phoneNumber" },
+                  ]}
                 />
-                Login using {method === "email" ? "Email" : "Phone Number"}
-              </label>
-            ))}
+              )}
+            />
           </div>
 
           <div className="w-full max-w-[400px] lg:max-w-[500px] sm:w-[90%] lg:w-[500px] border-gradient p-px rounded-3xl overflow-hidden mx-auto">
