@@ -69,7 +69,6 @@ const Register = () => {
       }
     });
 
-    console.log("data register", data);
     userRegisterMutation.mutate(formData);
   };
 
@@ -91,19 +90,20 @@ const Register = () => {
   return (
     <div className="w-full min-h-dvh max-h-dvh h-full p-4 flex gap-4 overflow-hidden relative">
       <AuthRobot />
-      {userRegisterMutation.isPending ? (
-        <Loading content="Loading...." />
-      ) : (
-        <div
-          ref={containerRef as RefObject<HTMLDivElement>}
-          className={`w-full md:w-1/2 flex flex-col items-center gap-4 overflow-hidden overflow-y-scroll ${
-            !(showGradient as VerticalScrollType).bottom &&
-            !(showGradient as VerticalScrollType).top
-              ? "justify-center"
-              : "justify-start"
-          }`}
-        >
-          {(showGradient as VerticalScrollType).top && <TopGradient />}
+
+      <div
+        ref={containerRef as RefObject<HTMLDivElement>}
+        className={`w-full md:w-1/2 flex flex-col items-center gap-4 overflow-hidden overflow-y-scroll ${
+          !(showGradient as VerticalScrollType).bottom &&
+          !(showGradient as VerticalScrollType).top
+            ? "justify-center"
+            : "justify-start"
+        }`}
+      >
+        {(showGradient as VerticalScrollType).top && <TopGradient />}
+        {userRegisterMutation.isPending ? (
+          <Loading content="Loading...." />
+        ) : (
           <form
             onSubmit={handleSubmit(onSubmit)}
             autoComplete="off"
@@ -222,9 +222,9 @@ const Register = () => {
               </div>
             </div>
           </form>
-          {(showGradient as VerticalScrollType).bottom && <BottomGradient />}
-        </div>
-      )}
+        )}
+        {(showGradient as VerticalScrollType).bottom && <BottomGradient />}
+      </div>
     </div>
   );
 };

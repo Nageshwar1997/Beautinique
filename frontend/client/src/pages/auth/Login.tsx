@@ -20,11 +20,15 @@ import Radio from "../../components/input/Radio";
 import Button from "../../components/button/Button";
 import Checkbox from "../../components/input/Checkbox";
 import { Link } from "react-router-dom";
+import { useLoginUser } from "../../api/user/user.service";
+import Loading from "../../components/Loaders/Loading/Loading";
 
 const Login = () => {
   const [showGradient, containerRef] = useVerticalScrollable();
   const [loginMethod, setLoginMethod] = useState<LoginTypes>("email");
   const [showPassword, setShowPassword] = useState<boolean>(false);
+
+  const userLoginMutation = useLoginUser();
 
   const {
     control,
@@ -56,7 +60,9 @@ const Login = () => {
     });
   };
 
-  const onSubmit: SubmitHandler<LoginFormInputProps> = (data) => {
+  const onSubmit: SubmitHandler<LoginFormInputProps> = (
+    data: LoginFormInputProps
+  ) => {
     const cleanedData = {
       ...Object.fromEntries(
         Object.entries(data).filter(
@@ -64,8 +70,10 @@ const Login = () => {
           ([_, value]) => value !== "" && value !== undefined
         )
       ),
-      remember: data.remember ?? false,
+      remember: data?.remember ?? false,
     };
+
+    userLoginMutation.mutate(cleanedData as LoginFormInputProps);
 
     console.log("Login data submitted:", cleanedData);
   };
@@ -83,140 +91,150 @@ const Login = () => {
         }`}
       >
         {(showGradient as VerticalScrollType).top && <TopGradient />}
-        <form
-          onSubmit={handleSubmit(onSubmit)}
-          autoComplete="off"
-          className="w-full flex flex-col gap-4"
-        >
-          <TextDisplay
-            content={LoginTextContent}
-            contentClassName="mb-3 font-semibold"
-          />
-          <SocialAuth />
-          <div className="w-full max-w-[400px] lg:max-w-[500px] sm:w-[90%] lg:w-[500px] border-gradient p-px rounded-3xl overflow-hidden mx-auto">
-            <div className="shadow-light-dark-soft bg-platinum-black p-6 md:p-8 rounded-3xl space-y-6">
-              <Controller
-                name="loginMethod"
-                control={control}
-                render={({ field }) => (
-                  <Radio
-                    value={field.value}
-                    onChange={(value) => {
-                      // Trigger the custom method change function
-                      handleLoginMethodChange(value as "email" | "phoneNumber");
-                      field.onChange(value); // Make sure to call the field onChange
-                    }}
-                    options={[
-                      { label: "Email", value: "email" },
-                      { label: "Phone", value: "phoneNumber" },
-                    ]}
-                  />
-                )}
-              />
-              <div className="flex flex-col gap-5 lg:gap-6">
-                {loginInputMapData?.map((item, index) => {
-                  if (
-                    item.name === "phoneNumber" &&
-                    selectedMethod !== "phoneNumber"
-                  ) {
-                    return null; // Skip PhoneInput if not using phoneNumber
-                  }
-
-                  if (item.name === "email" && selectedMethod !== "email") {
-                    return null; // Skip Input for email if not using email
-                  }
-                  return (
-                    <div key={index}>
-                      <Controller
-                        name={item.name as keyof LoginFormInputProps}
-                        control={control}
-                        render={({ field }) =>
-                          item.name === "phoneNumber" ? (
-                            <PhoneInput
-                              label={item.label}
-                              register={field}
-                              name={item.name as string}
-                              type={item.type}
-                              placeholder={item.placeholder}
-                              errorText={
-                                errors?.[item.name as keyof LoginFormInputProps]
-                                  ?.message || ""
-                              }
-                            />
-                          ) : (
-                            <Input
-                              label={item.label}
-                              register={field}
-                              name={item.name as string}
-                              placeholder={item.placeholder}
-                              errorText={
-                                errors?.[item.name as keyof LoginFormInputProps]
-                                  ?.message || ""
-                              }
-                              type={
-                                item.name === "password"
-                                  ? showPassword
-                                    ? "text"
-                                    : item.type
-                                  : item.type
-                              }
-                              icon={
-                                item.name === "password" &&
-                                (showPassword ? (
-                                  <EyeOffIcon className="!fill-primary-inverted opacity-50 hover:opacity-100 h-full" />
-                                ) : (
-                                  <EyeIcon className="!fill-primary-inverted opacity-50 hover:opacity-100 h-full" />
-                                ))
-                              }
-                              iconClick={() => setShowPassword((prev) => !prev)}
-                            />
-                          )
-                        }
-                      />
-                    </div>
-                  );
-                })}
-              </div>
-              <div className="space-y-3">
-                <div className="flex justify-between items-center">
-                  <div className="flex items-center space-x-3">
-                    <Controller
-                      name="remember"
-                      control={control}
-                      render={({ field }) => <Checkbox register={field} />}
+        {userLoginMutation.isPending ? (
+          <Loading content="Loading...." />
+        ) : (
+          <form
+            onSubmit={handleSubmit(onSubmit)}
+            autoComplete="off"
+            className="w-full flex flex-col gap-4"
+          >
+            <TextDisplay
+              content={LoginTextContent}
+              contentClassName="mb-3 font-semibold"
+            />
+            <SocialAuth />
+            <div className="w-full max-w-[400px] lg:max-w-[500px] sm:w-[90%] lg:w-[500px] border-gradient p-px rounded-3xl overflow-hidden mx-auto">
+              <div className="shadow-light-dark-soft bg-platinum-black p-6 md:p-8 rounded-3xl space-y-6">
+                <Controller
+                  name="loginMethod"
+                  control={control}
+                  render={({ field }) => (
+                    <Radio
+                      value={field.value}
+                      onChange={(value) => {
+                        // Trigger the custom method change function
+                        handleLoginMethodChange(
+                          value as "email" | "phoneNumber"
+                        );
+                        field.onChange(value); // Make sure to call the field onChange
+                      }}
+                      options={[
+                        { label: "Email", value: "email" },
+                        { label: "Phone", value: "phoneNumber" },
+                      ]}
                     />
-                    <span className="text-sm text-primary-inverted-50 font-medium">
-                      Remember me
-                    </span>
+                  )}
+                />
+                <div className="flex flex-col gap-5 lg:gap-6">
+                  {loginInputMapData?.map((item, index) => {
+                    if (
+                      item.name === "phoneNumber" &&
+                      selectedMethod !== "phoneNumber"
+                    ) {
+                      return null; // Skip PhoneInput if not using phoneNumber
+                    }
+
+                    if (item.name === "email" && selectedMethod !== "email") {
+                      return null; // Skip Input for email if not using email
+                    }
+                    return (
+                      <div key={index}>
+                        <Controller
+                          name={item.name as keyof LoginFormInputProps}
+                          control={control}
+                          render={({ field }) =>
+                            item.name === "phoneNumber" ? (
+                              <PhoneInput
+                                label={item.label}
+                                register={field}
+                                name={item.name as string}
+                                type={item.type}
+                                placeholder={item.placeholder}
+                                errorText={
+                                  errors?.[
+                                    item.name as keyof LoginFormInputProps
+                                  ]?.message || ""
+                                }
+                              />
+                            ) : (
+                              <Input
+                                label={item.label}
+                                register={field}
+                                name={item.name as string}
+                                placeholder={item.placeholder}
+                                errorText={
+                                  errors?.[
+                                    item.name as keyof LoginFormInputProps
+                                  ]?.message || ""
+                                }
+                                type={
+                                  item.name === "password"
+                                    ? showPassword
+                                      ? "text"
+                                      : item.type
+                                    : item.type
+                                }
+                                icon={
+                                  item.name === "password" &&
+                                  (showPassword ? (
+                                    <EyeOffIcon className="!fill-primary-inverted opacity-50 hover:opacity-100 h-full" />
+                                  ) : (
+                                    <EyeIcon className="!fill-primary-inverted opacity-50 hover:opacity-100 h-full" />
+                                  ))
+                                }
+                                iconClick={() =>
+                                  setShowPassword((prev) => !prev)
+                                }
+                              />
+                            )
+                          }
+                        />
+                      </div>
+                    );
+                  })}
+                </div>
+                <div className="space-y-3">
+                  <div className="flex justify-between items-center">
+                    <div className="flex items-center space-x-3">
+                      <Controller
+                        name="remember"
+                        control={control}
+                        render={({ field }) => <Checkbox register={field} />}
+                      />
+                      <span className="text-sm text-primary-inverted-50 font-medium">
+                        Remember me
+                      </span>
+                    </div>
+                    <Link
+                      to={"/forgot-password"}
+                      className={`bg-clip-text text-transparent bg-accent-duo text-sm mr-2 hover:underline`}
+                    >
+                      Forgot Password?
+                    </Link>
                   </div>
+                  <Button
+                    pattern="primary"
+                    type="submit"
+                    content="Login"
+                    className="!text-base"
+                  />
+                </div>
+                <div className="flex items-center justify-center gap-2">
+                  <p className="bg-clip-text text-transparent bg-silver-duo-gradient">
+                    Don't have an account?
+                  </p>
                   <Link
-                    to={"/forgot-password"}
-                    className={`bg-clip-text text-transparent bg-accent-duo text-sm mr-2 hover:underline`}
+                    to={"/register"}
+                    className={`bg-clip-text text-transparent bg-accent-duo text-lg hover:font-extrabold`}
                   >
-                    Forgot Password?
+                    Register
                   </Link>
                 </div>
-                <Button
-                  pattern="primary"
-                  type="submit"
-                  content="Login"
-                  className="!text-base"
-                />
-              </div>
-              <div className="flex items-center justify-center gap-2">
-                <p className="bg-clip-text text-transparent bg-silver-duo-gradient">
-                  Don't have an account?
-                </p>
-                <Link
-                  to={"/register"}
-                  className={`bg-clip-text text-transparent bg-accent-duo text-lg hover:font-extrabold`}
-                >
-                  Register
-                </Link>
               </div>
             </div>
-          </div>
-        </form>
+          </form>
+        )}
         {(showGradient as VerticalScrollType).bottom && <BottomGradient />}
       </div>
     </div>
