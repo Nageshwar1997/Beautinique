@@ -1,149 +1,92 @@
-import { RefObject, useState } from "react";
-import { useForm, Controller, Control, SubmitHandler } from "react-hook-form";
-import { yupResolver } from "@hookform/resolvers/yup";
-import * as yup from "yup";
-import { Link } from "react-router-dom";
-
+import { ChangeEvent, FormEvent, RefObject, useState } from "react";
+import {
+  initialLoginData,
+  loginInputMapData,
+  LoginTextContent,
+  validateLoginForm,
+} from "./constants";
+import {
+  validateEmail,
+  validateNumber,
+  validatePassword,
+} from "../../validators";
 import AuthRobot from "./components/AuthRobot";
 import TextDisplay from "../../components/TextDisplay";
 import SocialAuth from "./components/SocialAuth";
-import useVerticalScrollable from "../../hooks/useVerticalScrollable";
-import { VerticalScrollType } from "../../types";
-import Button from "../../components/button/Button";
-import { BottomGradient, TopGradient } from "../../components/Gradients";
-import { LoginTextContent } from "./constants";
-import Checkbox from "../../components/input/Checkbox";
+import PhoneInput from "../../components/input/PhoneInput";
 import Input from "../../components/input/Input";
+import { EyeIcon, EyeOffIcon } from "../../components/icons";
+import useIsScrollable from "../../hooks/useIsScrollable";
 import Radio from "../../components/input/Radio";
-
-interface Test {
-  loginMethod: "phoneNumber" | "email";
-  email?: string;
-  phoneNumber?: string;
-  password: string;
-  remember?: boolean;
-}
-
-// Validation Schema with Conditional Fields
-const schema = yup.object().shape({
-  loginMethod: yup.string().oneOf(["email", "phoneNumber"]).required(),
-  email: yup.string().when("loginMethod", {
-    is: "email",
-    then: (schema) =>
-      schema.email("Invalid email format").required("Email is required"),
-    otherwise: (schema) => schema.notRequired(),
-  }),
-  phoneNumber: yup.string().when("loginMethod", {
-    is: "phoneNumber",
-    then: (schema) =>
-      schema
-        .matches(/^\d{10}$/, "Phone number must be 10 digits")
-        .required("Phone number is required"),
-    otherwise: (schema) => schema.notRequired(),
-  }),
-  password: yup
-    .string()
-    .min(6, "Password must be at least 6 characters")
-    .required(),
-  remember: yup.boolean(),
-});
-
-const LoginInput = ({
-  name,
-  type,
-  placeholder,
-  control,
-  error,
-}: {
-  name: string;
-  type: string;
-  placeholder: string;
-  control: Control<Test>;
-  error: string;
-}) => (
-  <div>
-    <Controller
-      name={name as keyof Test}
-      control={control}
-      render={({ field }) => (
-        <Input
-          register={field} // Controller से आए हुए props
-          name={name} // name को pass करना
-          type={type} // type को pass करना
-          placeholder={placeholder} // placeholder को pass करना
-          errorText={error} // Error message pass करना
-        />
-      )}
-    />
-  </div>
-);
+import { LoginField } from "../../types";
+import Button from "../../components/button/Button";
+import Checkbox from "../../components/input/Checkbox";
+import { Link } from "react-router-dom";
 
 const Login = () => {
-  const [showGradient, containerRef] = useVerticalScrollable();
-  const [loginMethod, setLoginMethod] = useState<"email" | "phoneNumber">(
-    "email"
+  const [scrollRef, isScrollable] = useIsScrollable();
+
+  const [loginUsing, setLoginUsing] = useState<"email" | "phoneNumber">(
+    "phoneNumber"
   );
+  const [data, setData] = useState(initialLoginData);
+  const [showPassword, setShowPassword] = useState<boolean>(false);
+  const [errors, setErrors] = useState<Partial<Record<LoginField, string>>>({});
 
-  const {
-    control,
-    handleSubmit,
-    formState: { errors },
-    reset,
-    watch,
-  } = useForm({
-    resolver: yupResolver(schema),
-    defaultValues: {
-      loginMethod: loginMethod,
-      email: "",
-      phoneNumber: "",
-      password: "",
-      remember: false, // ✅ Default value set to false
-    },
-  });
+  const handleInputChange = (e: ChangeEvent<HTMLInputElement>) => {
+    const { name, value, type, checked } = e.target;
 
-  const selectedMethod = watch("loginMethod");
-
-  // This method will reset the form based on the login method
-  const handleLoginMethodChange = (method: "email" | "phoneNumber") => {
-    setLoginMethod(method);
-    reset({
-      loginMethod: method,
-      email: method === "email" ? "" : undefined,
-      phoneNumber: method === "phoneNumber" ? "" : undefined,
-      password: "",
-      remember: false,
-    });
+    if (name === "email" && validateEmail(value)) {
+      setData((prevData) => ({ ...prevData, [name]: value }));
+    } else if (name === "password" && validatePassword(value)) {
+      setData((prevData) => ({ ...prevData, [name]: value }));
+    } else if (name === "phoneNumber") {
+      const newValue = validateNumber(value);
+      setData((prevData) => ({ ...prevData, [name]: newValue }));
+    } else if (type === "checkbox" && name === "remember") {
+      setData((prevData) => ({ ...prevData, [name]: checked }));
+    }
+    setErrors((prevErrors) => ({ ...prevErrors, [name]: "" }));
   };
 
-  const onSubmit: SubmitHandler<Test> = (data: Test) => {
-    const cleanedData = {
-      ...Object.fromEntries(
-        Object.entries(data).filter(
-          // eslint-disable-next-line @typescript-eslint/no-unused-vars
-          ([_, value]) => value !== "" && value !== undefined
-        )
-      ),
-      remember: data.remember ?? false,
-    };
+  const toggleRadio = (value: string) => {
+    setLoginUsing(value as "email" | "phoneNumber");
+    setErrors((prevErrors) => ({
+      ...prevErrors,
+      phoneNumber: "",
+      email: "",
+    }));
+    setData((prevData) => ({
+      ...prevData,
+      phoneNumber: "",
+      email: "",
+    }));
+  };
 
-    console.log("Login data submitted:", cleanedData);
+  const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+
+    const updatedErrors = validateLoginForm(data, loginUsing);
+
+    if (Object.values(updatedErrors).some((error) => error !== "")) {
+      setErrors(updatedErrors);
+      return;
+    }
+
+    console.log("data", data);
   };
 
   return (
-    <div className="w-full min-h-dvh max-h-dvh h-full p-4 flex gap-4 overflow-hidden relative">
+    <div className="w-full min-h-dvh max-h-dvh h-full p-4 flex gap-4 overflow-hidden">
       <AuthRobot />
       <div
-        ref={containerRef as RefObject<HTMLDivElement>}
+        ref={scrollRef as RefObject<HTMLDivElement>}
         className={`w-full md:w-1/2 flex flex-col items-center gap-4 overflow-hidden overflow-y-scroll ${
-          !(showGradient as VerticalScrollType).bottom &&
-          !(showGradient as VerticalScrollType).top
-            ? "justify-center"
-            : "justify-start"
+          isScrollable ? "justify-start" : "justify-center"
         }`}
       >
-        {(showGradient as VerticalScrollType).top && <TopGradient />}
         <form
-          onSubmit={handleSubmit(onSubmit)}
+          onSubmit={handleSubmit}
           autoComplete="off"
           className="w-full flex flex-col gap-4"
         >
@@ -152,76 +95,88 @@ const Login = () => {
             contentClassName="mb-3 font-semibold"
           />
           <SocialAuth />
-          <div className="flex gap-4">
-            <Controller
-              name="loginMethod"
-              control={control}
-              render={({ field }) => (
-                <Radio
-                  value={field.value}
-                  onChange={(value) => {
-                    // Trigger the custom method change function
-                    handleLoginMethodChange(value as "email" | "phoneNumber");
-                    field.onChange(value); // Make sure to call the field onChange
-                  }}
-                  options={[
-                    { label: "Email", value: "email" },
-                    { label: "Phone", value: "phoneNumber" },
-                  ]}
-                />
-              )}
-            />
-          </div>
-
           <div className="w-full max-w-[400px] lg:max-w-[500px] sm:w-[90%] lg:w-[500px] border-gradient p-px rounded-3xl overflow-hidden mx-auto">
             <div className="shadow-light-dark-soft bg-platinum-black p-6 md:p-8 rounded-3xl space-y-6">
+              <Radio
+                value={loginUsing}
+                onChange={(value) => toggleRadio(value)}
+                options={[
+                  { label: "Phone", value: "phoneNumber" },
+                  { label: "Email", value: "email" },
+                ]}
+              />
               <div className="flex flex-col gap-5 lg:gap-6">
-                <div className="flex flex-col gap-3 w-full">
-                  {selectedMethod === "email" && (
-                    <LoginInput
-                      name="email"
-                      type="text"
-                      placeholder="Email"
-                      control={control}
-                      error={errors.email?.message || ""}
-                    />
-                  )}
-                  {selectedMethod === "phoneNumber" && (
-                    <LoginInput
-                      name="phoneNumber"
-                      type="text"
-                      placeholder="Phone Number"
-                      control={control}
-                      error={errors.phoneNumber?.message || ""}
-                    />
-                  )}
-                  <LoginInput
-                    name="password"
-                    type="password"
-                    placeholder="Password"
-                    control={control}
-                    error={errors.password?.message || ""}
-                  />
-                </div>
+                {loginInputMapData.map((item, ind) => {
+                  if (
+                    item.name === "phoneNumber" &&
+                    loginUsing !== "phoneNumber"
+                  ) {
+                    return null; // Skip PhoneInput if not using phoneNumber
+                  }
+
+                  if (item.name === "email" && loginUsing !== "email") {
+                    return null; // Skip Input for email if not using email
+                  }
+
+                  return (
+                    <div key={ind}>
+                      {item.name === "phoneNumber" ? (
+                        <PhoneInput
+                          autoComplete={item?.autoComplete}
+                          label={item?.label}
+                          type={item?.type}
+                          placeholder={item?.placeholder}
+                          name={item?.name}
+                          value={data[item?.name] as string}
+                          onChange={handleInputChange}
+                          errorText={errors[item?.name]}
+                        />
+                      ) : (
+                        <Input
+                          autoComplete={item?.autoComplete}
+                          label={item?.label}
+                          type={
+                            item.name === "password"
+                              ? "password" // Always show password as a password field
+                              : item?.type
+                          }
+                          placeholder={item?.placeholder}
+                          name={item?.name}
+                          value={data[item?.name] as string}
+                          onChange={handleInputChange}
+                          icon={
+                            item.name === "password" &&
+                            (showPassword ? (
+                              <EyeOffIcon className="fill-primary-inverted-50 hover:fill-primary-inverted" />
+                            ) : (
+                              <EyeIcon className="fill-primary-inverted-50 hover:fill-primary-inverted" />
+                            ))
+                          }
+                          iconClick={() =>
+                            item.name === "password" &&
+                            setShowPassword(!showPassword)
+                          }
+                          errorText={errors[item?.name]}
+                        />
+                      )}
+                    </div>
+                  );
+                })}
               </div>
               <div className="space-y-3">
                 <div className="flex justify-between items-center">
                   <div className="flex items-center space-x-3">
-                    <Controller
-                      name="remember"
-                      control={control}
-                      render={({ field }) => <Checkbox register={field} />}
+                    <Checkbox
+                      checked={data?.remember as boolean}
+                      onChange={handleInputChange as () => void}
                     />
-                    <label
-                      htmlFor="remember"
-                      className="text-sm text-primary-inverted-50 font-medium"
-                    >
+                    <span className="text-sm text-primary-inverted-50 font-medium">
                       Remember me
-                    </label>
+                    </span>
                   </div>
                   <Link
                     to={"/forgot-password"}
-                    className="bg-clip-text text-transparent bg-accent-duo text-sm mr-2 hover:underline"
+                    className={`bg-clip-text text-transparent bg-accent-duo text-sm mr-2 hover:underline`}
                   >
                     Forgot Password?
                   </Link>
@@ -234,12 +189,12 @@ const Login = () => {
                 />
               </div>
               <div className="flex items-center justify-center gap-2">
-                <p className="bg-clip-text text-transparent bg-silver-duo-gradient text-xs md:text-sm">
+                <p className="bg-clip-text text-transparent bg-silver-duo-gradient">
                   Don't have an account?
                 </p>
                 <Link
                   to={"/register"}
-                  className="bg-clip-text text-transparent bg-accent-duo hover:font-extrabold text-sm md:text-base"
+                  className={`bg-clip-text text-transparent bg-accent-duo text-lg hover:font-extrabold`}
                 >
                   Register
                 </Link>
@@ -247,7 +202,6 @@ const Login = () => {
             </div>
           </div>
         </form>
-        {(showGradient as VerticalScrollType).bottom && <BottomGradient />}
       </div>
     </div>
   );
