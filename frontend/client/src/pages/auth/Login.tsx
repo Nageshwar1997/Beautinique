@@ -1,5 +1,5 @@
 import { RefObject, useState } from "react";
-import { useForm, Controller, Control } from "react-hook-form";
+import { useForm, Controller, Control, SubmitHandler } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import * as yup from "yup";
 import { Link } from "react-router-dom";
@@ -88,7 +88,7 @@ const Login = () => {
     control,
     handleSubmit,
     formState: { errors },
-    setValue,
+    reset,
     watch,
   } = useForm({
     resolver: yupResolver(schema),
@@ -103,14 +103,19 @@ const Login = () => {
 
   const selectedMethod = watch("loginMethod");
 
+  // This method will reset the form based on the login method
   const handleLoginMethodChange = (method: "email" | "phoneNumber") => {
     setLoginMethod(method);
-    setValue("loginMethod", method);
-    setValue("email", method === "email" ? "" : undefined);
-    setValue("phoneNumber", method === "phoneNumber" ? "" : undefined);
+    reset({
+      loginMethod: method,
+      email: method === "email" ? "" : undefined,
+      phoneNumber: method === "phoneNumber" ? "" : undefined,
+      password: "",
+      remember: false,
+    });
   };
 
-  const onSubmit = (data: Test) => {
+  const onSubmit: SubmitHandler<Test> = (data: Test) => {
     const cleanedData = {
       ...Object.fromEntries(
         Object.entries(data).filter(
@@ -178,7 +183,7 @@ const Login = () => {
                       type="text"
                       placeholder="Email"
                       control={control}
-                      error={errors.email?.message as string}
+                      error={errors.email?.message || ""}
                     />
                   )}
                   {selectedMethod === "phoneNumber" && (
@@ -187,7 +192,7 @@ const Login = () => {
                       type="text"
                       placeholder="Phone Number"
                       control={control}
-                      error={errors.phoneNumber?.message as string}
+                      error={errors.phoneNumber?.message || ""}
                     />
                   )}
                   <LoginInput
@@ -195,7 +200,7 @@ const Login = () => {
                     type="password"
                     placeholder="Password"
                     control={control}
-                    error={errors.password?.message as string}
+                    error={errors.password?.message || ""}
                   />
                 </div>
               </div>
