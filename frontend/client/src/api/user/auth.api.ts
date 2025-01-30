@@ -5,7 +5,11 @@ import { LoginInputProps } from "../../types";
 // Manually Register
 export const register_user = async (bodyData: FormData) => {
   try {
-    const response = await api.post("/auth/register", bodyData);
+    const response = await api.post("/auth/register", bodyData, {
+      headers: {
+        "Content-Type": "multipart/form-data",
+      },
+    });
     return response.data;
   } catch (error) {
     if (error instanceof AxiosError) {

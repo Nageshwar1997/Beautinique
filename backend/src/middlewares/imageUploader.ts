@@ -14,7 +14,6 @@ const imageUploader = async ({
   const mainFolder = "Beauty_Shop";
   const subFolder = folder?.split(" ").join("_") || "Common_Folder";
 
-  console.log("file", file);
   const publicId = `${Date.now().toString()}_${file?.originalname
     .split(" ")
     .join("_")

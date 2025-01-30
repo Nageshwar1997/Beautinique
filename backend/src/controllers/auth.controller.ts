@@ -28,7 +28,7 @@ const registerController = async (
       imageFile,
       folderName,
     } = {
-      imageFile: req?.body?.profilePic,
+      imageFile: req?.file,
       firstName: req?.body?.firstName?.trim().toLowerCase(),
       lastName: req?.body?.lastName?.trim().toLowerCase(),
       email: req?.body?.email?.trim().toLowerCase(),
@@ -36,9 +36,6 @@ const registerController = async (
       phoneNumber: req?.body?.phoneNumber?.trim(),
       folderName: req?.body?.folderName || "Profile_Pictures", // this is for storing profile images
     };
-
-    console.log("req.body", req.body);
-    // console.log("req.file", req.file);
 
     if (!firstName) {
       return next(new AppError("First name is required", 400));
