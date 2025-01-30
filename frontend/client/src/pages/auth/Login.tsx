@@ -137,8 +137,8 @@ const Login = () => {
                           type={item?.type}
                           placeholder={item?.placeholder}
                           name={item?.name}
-                          value={data[item?.name] as string}
-                          onChange={handleInputChange}
+                          // value={data[item?.name] as string}
+                          // onChange={handleInputChange}
                           errorText={errors[item?.name]}
                         />
                       ) : (
@@ -152,8 +152,8 @@ const Login = () => {
                           }
                           placeholder={item?.placeholder}
                           name={item?.name}
-                          value={data[item?.name] as string}
-                          onChange={handleInputChange}
+                          // value={data[item?.name] as string}
+                          // onChange={handleInputChange}
                           icon={
                             item.name === "password" &&
                             (showPassword ? (
@@ -176,10 +176,10 @@ const Login = () => {
               <div className="space-y-3">
                 <div className="flex justify-between items-center">
                   <div className="flex items-center space-x-3">
-                    <Checkbox
-                      checked={data?.remember as boolean}
-                      onChange={handleInputChange as () => void}
-                    />
+                    {/* <Checkbox
+                    // checked={data?.remember as boolean}
+                    // onChange={handleInputChange as () => void}
+                    /> */}
                     <span className="text-sm text-primary-inverted-50 font-medium">
                       Remember me
                     </span>
