@@ -64,7 +64,6 @@ const LoadingScreen = () => {
         ...prevState,
         loadingText: beautyFacts[getRandomFactIndex],
       }));
-      console.log("loading text", loadingState.loadingText);
     }, TEXT_CHANGE_INTERVAL);
 
     return () => clearInterval(textIntervalId);

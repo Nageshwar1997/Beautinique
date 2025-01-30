@@ -74,8 +74,6 @@ const Login = () => {
     };
 
     userLoginMutation.mutate(cleanedData as LoginFormInputProps);
-
-    console.log("Login data submitted:", cleanedData);
   };
 
   return (

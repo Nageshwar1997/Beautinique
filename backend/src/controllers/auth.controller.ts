@@ -118,8 +118,6 @@ const registerController = async (
         folder: folderName,
       } as ImageUploaderProps));
 
-    console.log("imageResult", imageResult);
-
     const hashPassword = await bcrypt.hash(password, 10);
 
     const user = await userServices.createUser({

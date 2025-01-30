@@ -26,13 +26,7 @@ const imageUploader = async ({
   const cloudinaryConnectionResult = await testCloudinaryConnection();
 
   if (cloudinaryConnectionResult.error) {
-    console.error(
-      "cloudinaryConnectionResult",
-      cloudinaryConnectionResult.data
-    );
     throw new AppError(cloudinaryConnectionResult.message, 500);
-  } else {
-    console.log("cloudinaryConnectionResult", cloudinaryConnectionResult.data);
   }
 
   try {

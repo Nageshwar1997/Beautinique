@@ -3,7 +3,7 @@ import cloudinary from "./cloudinary.config";
 const testCloudinaryConnection = async () => {
   try {
     const res = await cloudinary.api.ping();
-    // console.log("Cloudinary Connected ✅", res);
+    console.log("Cloudinary Connected ✅", res);
     return {
       success: true,
       error: false,
@@ -11,7 +11,7 @@ const testCloudinaryConnection = async () => {
       data: res,
     };
   } catch (err: any) {
-    // console.error("Cloudinary Connection Error ❌", err.message);
+    console.error("Cloudinary Connection Error ❌", err.message);
     return {
       success: false,
       error: true,
