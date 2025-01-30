@@ -3,7 +3,7 @@ import {
   loginController,
   registerController,
 } from "../controllers/auth.controller";
-import upload from "../configs/upload";
+import upload from "../configs/upload.multer.config";
 
 const authRouter = Router();
 
