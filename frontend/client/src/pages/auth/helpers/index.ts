@@ -41,7 +41,8 @@ export const registerSchema = yup
       .matches(/^\S*$/, "Email cannot contain spaces"),
     phoneNumber: yup
       .string()
-      .matches(/^[0-9]{10}$/, "Mobile number must be exactly 10 digits")
+      .matches(/^[6-9]/, "Mobile number must start with 6, 7, 8, or 9")
+      .matches(/^\d{10}$/, "Mobile number must be exactly 10 digits")
       .required("Mobile number is required"),
     password: yup
       .string()
