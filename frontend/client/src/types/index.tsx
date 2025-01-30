@@ -48,9 +48,12 @@ export interface RegisterInputMapDataProps {
   autoComplete?: string;
 }
 
-export interface LoginInputProps {
-  email: string;
-  phoneNumber: string;
+export type LoginTypes = "email" | "phoneNumber";
+
+export interface LoginFormInputProps {
+  loginMethod: LoginTypes;
+  email?: string;
+  phoneNumber?: string;
   password: string;
   remember?: boolean;
 }
