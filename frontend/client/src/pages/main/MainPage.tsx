@@ -7,13 +7,13 @@ import LoadingScreen from "../../components/Loaders/LoadingScreen";
 const MainPage = () => {
   return (
     <Fragment>
-      <Header />
-      <main>
-        <Suspense fallback={<LoadingScreen />}>
+      <Suspense fallback={<LoadingScreen />}>
+        <Header />
+        <main>
           <Outlet />
-        </Suspense>
-      </main>
-      <Footer />
+        </main>
+        <Footer />
+      </Suspense>
     </Fragment>
   );
 };

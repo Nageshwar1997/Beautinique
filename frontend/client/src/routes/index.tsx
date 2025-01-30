@@ -3,9 +3,9 @@ import { createBrowserRouter } from "react-router-dom";
 import { lazy } from "react";
 
 const MainPage = lazy(() => import("../pages/main/MainPage"));
-const Home = lazy(() => import("../pages/home/Home"));
-const Register = lazy(() => import("../pages/auth/Register"));
-const Login = lazy(() => import("../pages/auth/Login"));
+import Home from "../pages/home/Home";
+import Register from "../pages/auth/Register";
+import Login from "../pages/auth/Login";
 import NotFound from "../pages/error/NotFound";
 import SomethingWentWrong from "../pages/error/SomethingWentWrong";
 
