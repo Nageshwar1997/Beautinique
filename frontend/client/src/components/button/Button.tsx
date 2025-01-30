@@ -8,20 +8,22 @@ interface ButtonProps {
   rightIcon?: ReactNode;
   content: ReactNode | string;
   onClick?: () => void;
+  disable?: boolean;
 }
 
 const Button = ({
   type = "button",
   pattern,
-  className,
+  className = "",
   content,
   leftIcon,
   rightIcon,
   onClick,
+  disable = false,
 }: ButtonProps) => {
   const buttonCss = () => {
     if (pattern === "primary") {
-      return "text-primary-inverted bg-sky-blue-burst shadow-primary-btn hover:shadow-primary-btn-hover border-none focus-within:border-none";
+      return "text-white bg-sky-blue-burst shadow-primary-btn hover:shadow-primary-btn-hover border-none focus-within:border-none";
     } else if (pattern === "secondary") {
       return "secondary";
     } else if (pattern === "outline") {
@@ -36,10 +38,11 @@ const Button = ({
   const getButtonCSS = buttonCss();
   return (
     <button
-      className={`w-full text-sm font-semibold font-metropolis leading-4 rounded-xl bg- flex justify-center items-center gap-1  py-[18px] px-[22px] outline-none focus-within:outline-none ${getButtonCSS} ${className}`}
+      className={`w-full text-sm xl:text-base font-semibold font-metropolis leading-4 rounded-xl flex justify-center items-center gap-1 py-3 lg:py-4 px-4 lg:px-5 outline-none focus-within:outline-none ${getButtonCSS} ${className}`}
       type={type}
       onClick={onClick ? onClick : () => {}}
       typeof="button"
+      disabled={disable}
     >
       {leftIcon && <span>{leftIcon}</span>}
       {content && <span>{content}</span>}

@@ -16,15 +16,19 @@ import SocialAuth from "./components/SocialAuth";
 import PhoneInput from "../../components/input/PhoneInput";
 import Input from "../../components/input/Input";
 import { EyeIcon, EyeOffIcon } from "../../components/icons";
-import useIsScrollable from "../../hooks/useIsScrollable";
+import useVerticalScrollable from "../../hooks/useVerticalScrollable";
 import Radio from "../../components/input/Radio";
-import { LoginField } from "../../types";
+import { LoginField, VerticalScrollType } from "../../types";
 import Button from "../../components/button/Button";
 import Checkbox from "../../components/input/Checkbox";
 import { Link } from "react-router-dom";
+import { BottomGradient, TopGradient } from "../../components/Gradients";
+import { useLoginUser } from "../../api/user/user.service";
 
 const Login = () => {
-  const [scrollRef, isScrollable] = useIsScrollable();
+  const loginMutation = useLoginUser();
+
+  const [showGradient, containerRef] = useVerticalScrollable();
 
   const [loginUsing, setLoginUsing] = useState<"email" | "phoneNumber">(
     "phoneNumber"
@@ -73,27 +77,33 @@ const Login = () => {
       return;
     }
 
-    console.log("data", data);
+    loginMutation.mutate(data);
+
+    console.log("data page", data);
   };
 
   return (
-    <div className="w-full min-h-dvh max-h-dvh h-full p-4 flex gap-4 overflow-hidden">
+    <div className="w-full min-h-dvh max-h-dvh h-full p-4 flex gap-4 overflow-hidden relative">
       <AuthRobot />
       <div
-        ref={scrollRef as RefObject<HTMLDivElement>}
+        ref={containerRef as RefObject<HTMLDivElement>}
         className={`w-full md:w-1/2 flex flex-col items-center gap-4 overflow-hidden overflow-y-scroll ${
-          isScrollable ? "justify-start" : "justify-center"
+          !(showGradient as VerticalScrollType).bottom &&
+          !(showGradient as VerticalScrollType).top
+            ? "justify-center"
+            : "justify-start"
         }`}
       >
+        {(showGradient as VerticalScrollType).top && <TopGradient />}
         <form
           onSubmit={handleSubmit}
           autoComplete="off"
           className="w-full flex flex-col gap-4"
         >
-            <TextDisplay
-              content={LoginTextContent}
-              contentClassName="mb-3 font-semibold"
-            />
+          <TextDisplay
+            content={LoginTextContent}
+            contentClassName="mb-3 font-semibold"
+          />
           <SocialAuth />
           <div className="w-full max-w-[400px] lg:max-w-[500px] sm:w-[90%] lg:w-[500px] border-gradient p-px rounded-3xl overflow-hidden mx-auto">
             <div className="shadow-light-dark-soft bg-platinum-black p-6 md:p-8 rounded-3xl space-y-6">
@@ -127,8 +137,8 @@ const Login = () => {
                           type={item?.type}
                           placeholder={item?.placeholder}
                           name={item?.name}
-                          value={data[item?.name] as string}
-                          onChange={handleInputChange}
+                          // value={data[item?.name] as string}
+                          // onChange={handleInputChange}
                           errorText={errors[item?.name]}
                         />
                       ) : (
@@ -142,8 +152,8 @@ const Login = () => {
                           }
                           placeholder={item?.placeholder}
                           name={item?.name}
-                          value={data[item?.name] as string}
-                          onChange={handleInputChange}
+                          // value={data[item?.name] as string}
+                          // onChange={handleInputChange}
                           icon={
                             item.name === "password" &&
                             (showPassword ? (
@@ -166,10 +176,10 @@ const Login = () => {
               <div className="space-y-3">
                 <div className="flex justify-between items-center">
                   <div className="flex items-center space-x-3">
-                    <Checkbox
-                      checked={data?.remember as boolean}
-                      onChange={handleInputChange as () => void}
-                    />
+                    {/* <Checkbox
+                    // checked={data?.remember as boolean}
+                    // onChange={handleInputChange as () => void}
+                    /> */}
                     <span className="text-sm text-primary-inverted-50 font-medium">
                       Remember me
                     </span>
@@ -189,12 +199,12 @@ const Login = () => {
                 />
               </div>
               <div className="flex items-center justify-center gap-2">
-                <p className="bg-clip-text text-transparent bg-silver-duo-gradient">
+                <p className="bg-clip-text text-transparent bg-silver-duo-gradient text-xs md:text-sm">
                   Don't have an account?
                 </p>
                 <Link
                   to={"/register"}
-                  className={`bg-clip-text text-transparent bg-accent-duo text-lg hover:font-extrabold`}
+                  className={`bg-clip-text text-transparent bg-accent-duo hover:font-extrabold text-sm md:text-base`}
                 >
                   Register
                 </Link>
@@ -202,6 +212,7 @@ const Login = () => {
             </div>
           </div>
         </form>
+        {(showGradient as VerticalScrollType).bottom && <BottomGradient />}
       </div>
     </div>
   );

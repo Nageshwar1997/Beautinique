@@ -1,11 +1,17 @@
-import { ObjectId, Types } from "mongoose"
+import { ObjectId } from "mongoose";
 
-type UserType = {
-    _id: Types.ObjectId,
-    firstName: string,
-    lastName: string,
-    email: string,
-    password: string,
-    profileImage?: string,
-    role?: string
+export interface UploadImageResult {
+  url: string;
+  secure_url: string;
+  public_id: string;
+  api_key?: string;
+  folder?: string;
+  original_filename?: string;
+  asset_id?: string;
+  [key: string]: any; // Add more fields as needed
+}
+
+export interface ImageUploaderProps {
+  file: Express.Multer.File;
+  folder?: string;
 }

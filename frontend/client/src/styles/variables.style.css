@@ -4,8 +4,8 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Common variables */
 :root {
-  /* Common variables */
   --picton-blue-c: #25adf9;
   --blue-crayola-c: #07f;
   --sky-blue-burst: radial-gradient(
@@ -14,15 +14,17 @@
       rgba(0, 0, 0, 0) 100%
     ),
     linear-gradient(107deg, #2579f9 -65.15%, #244cf8 90.95%);
+}
 
-  /* Light Theme Variables */
+/* Light Theme Variables */
+[theme="light"] {
   /* Colors */
   --primary: #ffffff;
+  --primary-8: #ffffff14;
   --primary-10: #ffffff1a;
-  --primary-14: #ffffff14;
   --primary-inverted: #000000;
+  --primary-inverted-8: #00000014;
   --primary-inverted-10: #0000001a;
-  --primary-inverted-14: #00000014;
   --primary-inverted-50: #00000080;
   --smoke-eerie: #f2f2f2;
   /* --smoke-eerie-inverted: #1a1a1a; */
@@ -54,13 +56,12 @@
 
 [theme="dark"] {
   /* Colors */
-  --default: #080808;
   --primary: #000000;
   --primary-10: #0000001a;
-  --primary-14: #00000014;
+  --primary-8: #00000014;
   --primary-inverted: #ffffff;
   --primary-inverted-10: #ffffff1a;
-  --primary-inverted-14: #ffffff14;
+  --primary-inverted-8: #ffffff14;
   --primary-inverted-50: #ffffff80;
   --smoke-eerie: #1a1a1a;
   /* --smoke-eerie-inverted: #f2f2f2; */

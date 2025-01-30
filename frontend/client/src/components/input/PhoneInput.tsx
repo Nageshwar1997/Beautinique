@@ -6,8 +6,7 @@ const PhoneInput = ({
   name = "",
   type = "text",
   label = "",
-  value = "",
-  onChange,
+  register,
   className = "",
   errorText = "",
   successText = "",
@@ -28,8 +27,8 @@ const PhoneInput = ({
           </label>
         )}
         {/* Input */}
-        <div className="w-full text-base flex bg-smoke-eerie rounded-lg border border-primary-inverted-10 text-primary-inverted">
-          <p className="w-[16%] text-primary-inverted-50 content-center text-center border-r border-primary-inverted-10 py-2 lg:py-3 2xl:py-4">
+        <div className="w-full text-sm xl:text-base flex bg-smoke-eerie rounded-lg border border-primary-inverted-10 text-primary-inverted">
+          <p className="w-[16%] text-primary-inverted-50 content-center text-center border-r border-primary-inverted-10 py-3 2xl:py-4">
             +91
           </p>
           <input
@@ -38,12 +37,12 @@ const PhoneInput = ({
             type={type}
             id={name}
             name={name}
-            value={value}
-            onChange={onChange}
             placeholder={placeholder}
-            className={`w-full outline-none focus:outline-none font-normal overflow-hidden bg-transparent px-3 py-2 lg:py-3 2xl:py-4  placeholder:text-primary-inverted-50 placeholder:text-sm ${
+            {...register}
+            className={`w-full outline-none focus:outline-none font-normal overflow-hidden bg-transparent px-3 py-3 2xl:py-4  placeholder:text-primary-inverted-50 placeholder:text-sm ${
               icon && "pr-10"
-            } autofill-effect ${className}`}
+            } autofill-effect number-input-mouse-control-none ${className}`}
+            onWheel={(event) => event.currentTarget.blur()}
           />
         </div>
 

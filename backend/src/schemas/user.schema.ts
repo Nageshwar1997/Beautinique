@@ -1,43 +1,36 @@
 import { Schema } from "mongoose";
 
-const userSchema = new Schema({
+const userSchema = new Schema(
+  {
     firstName: {
-        type: String,
-        required: true,
-        lowercase: true,
+      type: String,
+      lowercase: true,
     },
     lastName: {
-        type: String,
-        required: true,
-        lowercase: true,
+      type: String,
+      lowercase: true,
+    },
+    phoneNumber: {
+      type: String,
+      unique: true,
     },
     email: {
-        type: String,
-        required: true,
-        unique: true,
-        lowercase: true,
+      type: String,
+      unique: true,
     },
-
-    profileImage: {
-        type: String,
-        default: "",
+    profilePic: {
+      type: String,
+      default: "",
     },
     role: {
-        type: String,
-        enum: ["USER", "SELLER", "ADMIN", "MASTER"],
-        default: "USER",
+      type: String,
+      enum: ["USER", "SELLER", "ADMIN", "MASTER"],
+      default: "MASTER",
     },
 
     password: {
-        type: String,
-        required: true,
-        minlength: 6,
+      type: String,
     },
-    DOB: Date,
-    createdAt: {
-        type: Date,
-        default: Date.now(),
-    }
     // addresses: [{ type: Schema.Types.ObjectId, ref: "Address" }],
     // cart: [{ type: Schema.Types.ObjectId, ref: "Cart" }],
     // wishlist: [{ type: Schema.Types.ObjectId, ref: "Wishlist" }],
@@ -45,9 +38,11 @@ const userSchema = new Schema({
     // reviews: [{ type: Schema.Types.ObjectId, ref: "Review" }],
     // ratings: [{ type: Schema.Types.ObjectId, ref: "Rating" }],
     // payments: [{ type: Schema.Types.ObjectId, ref: "Payment" }],
-
-}, {
+  },
+  {
     versionKey: false,
-});
+    timestamps: true,
+  }
+);
 
 export default userSchema;

@@ -1,17 +1,45 @@
+import "dotenv/config";
 import express, { NextFunction, Request, Response } from "express";
+import cors from "cors";
 import connectDB from "./configs/db.config";
-import errorHandler from "./middlewares/errorHandler.middleware";
-import notFoundHandler from "./middlewares/notFoundHandler.middleware";
-
 
 const app = express();
-const PORT = process.env.PORT || 8080;
+const PORT = process.env.PORT || 5454;
+
+// Routes
+// Auth routes
+import authRouter from "./routes/auth.routes";
+import uploadRouter from "./routes/upload.routes";
+
+// Error handling middleware
+import NotFoundHandler from "./middlewares/notFoundHandler.middleware";
+import ErrorHandler from "./middlewares/errorHandler.middleware";
 
 // Middleware to parse JSON
 app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+const allowedOrigins = [
+  process.env.FRONTEND_LOCAL_HOST_URL,
+  process.env.FRONTEND_PRODUCTION_URL,
+];
+
+app.use(
+  cors({
+    origin: (origin, callback) => {
+      if (!origin || allowedOrigins?.includes(origin)) {
+        callback(null, true);
+      } else {
+        callback(new Error("Not allowed by CORS"));
+      }
+    },
+    methods: ["GET", "POST", "PUT", "PATCH", "DELETE"],
+    allowedHeaders: ["Content-Type", "Authorization"],
+    credentials: true,
+  })
+);
 
 // Example route
-app.get("/", (req: Request, res: Response, next: NextFunction) => {
+app.get("/", (_: Request, res: Response) => {
   res.status(200).json({
     success: true,
     error: false,
@@ -19,16 +47,15 @@ app.get("/", (req: Request, res: Response, next: NextFunction) => {
   });
 });
 
-// Routes
-// Auth routes
-import authRouter from "./routes/auth.routes";
-app.use("/api/auth", authRouter)
+app.use("/api/auth", authRouter);
+
+app.use("/api/upload", uploadRouter);
 
 // Catch undefined routes
-app.use(notFoundHandler);
+app.use(NotFoundHandler);
 
 // Error handling middleware
-app.use(errorHandler);
+app.use(ErrorHandler);
 
 // Start the server
 app.listen(PORT, async () => {
