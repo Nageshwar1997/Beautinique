@@ -12,7 +12,7 @@ export interface InputProps {
   className?: string;
   placeholder?: string;
   successText?: string;
-  labelClassName?: string;
+  containerClassName?: string;
   iconClick?: () => void;
   autoComplete?: HTMLInputAutoCompleteAttribute | undefined;
 }

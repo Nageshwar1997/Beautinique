@@ -11,17 +11,17 @@ const Input = ({
   errorText = "",
   successText = "",
   placeholder = "",
-  labelClassName = "",
+  containerClassName = "",
   autoComplete = "off",
   iconClick,
 }: InputProps) => {
   return (
-    <div className="w-full space-y-1.5">
+    <div className={`w-full space-y-1.5 ${containerClassName}`}>
       <div className="relative min-h-10 lg:min-h-12">
         {label && (
           <label
             htmlFor={name}
-            className={`text-[10px] lg:text-xs text-primary-inverted-50 absolute top-0 left-3 transform -translate-y-1/2 duration-200 border border-primary-inverted-10 leading-none px-1 md:px-2 py-0.5 md:py-1 bg-smoke-eerie rounded cursor-pointer ${labelClassName}`}
+            className={`text-[10px] lg:text-xs text-primary-inverted-50 absolute top-0 left-3 transform -translate-y-1/2 border border-primary-inverted-10 leading-none px-1 md:px-2 py-0.5 xl:py-1 bg-smoke-eerie rounded cursor-pointer`}
           >
             {label}
           </label>
@@ -44,7 +44,7 @@ const Input = ({
         {icon && (
           <span
             onClick={iconClick && iconClick}
-            className="h-full absolute top-0 right-3 flex justify-center items-center cursor-pointer"
+            className="h-full absolute top-0 right-0 pr-2 flex justify-center items-center cursor-pointer"
           >
             {icon}
           </span>

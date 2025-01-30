@@ -170,9 +170,9 @@ const Register = () => {
                               (showPasswords[
                                 name as keyof PasswordVisibilityType
                               ] ? (
-                                <EyeOffIcon className="!fill-primary-inverted opacity-50 hover:opacity-100" />
+                                <EyeOffIcon className="!fill-primary-inverted opacity-50 hover:opacity-100 h-full" />
                               ) : (
-                                <EyeIcon className="!fill-primary-inverted opacity-50 hover:opacity-100" />
+                                <EyeIcon className="!fill-primary-inverted opacity-50 hover:opacity-100 h-full" />
                               ))
                             }
                             iconClick={() =>
