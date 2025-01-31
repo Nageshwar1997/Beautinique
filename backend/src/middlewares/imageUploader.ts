@@ -12,7 +12,7 @@ const imageUploader = async ({
     throw new AppError("No file provided for upload", 400);
   }
 
-  const mainFolder = "Beauty_Shop";
+  const mainFolder = process.env.CLOUDINARY_MAIN_FOLDER;
   const subFolder = folder?.split(" ").join("_") || "Common_Folder";
 
   const publicId = `${Date.now().toString()}_${file?.originalname
