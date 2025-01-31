@@ -109,22 +109,20 @@ const Register = () => {
             autoComplete="off"
             className="w-full flex flex-col gap-4"
           >
-            <div className="text-center mb-3">
-              <TextDisplay
-                content={RegisterTextContent}
-                contentClassName="mb-3 font-semibold"
-              />
-              <UploadProfile
-                imageUrl={previewURL}
-                register={{
-                  ...register("profilePic" as keyof RegisterFormInputProps),
-                }}
-                name="profilePic"
-              />
-            </div>
+            <TextDisplay
+              content={RegisterTextContent}
+              contentClassName="mb-3 font-semibold"
+            />
             <SocialAuth />
             <div className="w-full max-w-[400px] lg:max-w-[500px] sm:w-[90%] lg:w-[500px] border-gradient p-px rounded-3xl overflow-hidden mx-auto">
-              <div className="shadow-light-dark-soft bg-platinum-black p-6 md:p-8 rounded-3xl space-y-6">
+              <div className="shadow-light-dark-soft bg-platinum-black p-6 md:px-8 rounded-3xl space-y-6">
+                <UploadProfile
+                  imageUrl={previewURL}
+                  register={{
+                    ...register("profilePic"),
+                  }}
+                  name="profilePic"
+                />
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-x-4 gap-y-5 lg:gap-y-6">
                   {registerInputMapData?.map((field, index) => {
                     const { label, name, type, placeholder } = field;

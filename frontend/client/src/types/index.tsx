@@ -2,6 +2,13 @@ import { HTMLInputAutoCompleteAttribute, ReactNode } from "react";
 
 export type ThemeTypes = "light" | "dark";
 
+export interface FileInputProps {
+  imageUrl?: string | null;
+  name?: string;
+  className?: string;
+  register?: object;
+}
+
 export interface InputProps {
   type?: string;
   label?: string;

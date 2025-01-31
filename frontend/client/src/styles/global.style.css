@@ -40,7 +40,8 @@ select:-webkit-autofill:focus  */
 
 /* Loading Screen Page */
 .loadingHighlight {
-  color: var(--picton-blue-c);
-  -webkit-background-clip: text;
+  color: transparent;
+  background-clip: text;
+  background-image: var(--accent-duo);
   display: inline;
 }
