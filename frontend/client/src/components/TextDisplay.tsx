@@ -21,9 +21,7 @@ const TextDisplay = ({
                 <span
                   key={`${index}-${wordIndex}`}
                   className={`mr-2 bg-clip-text text-transparent font-degular ${
-                    item.isHighlighted
-                      ? "bg-accent-duo"
-                      : "bg-silver-duo-gradient"
+                    item.isHighlighted ? "bg-accent-duo" : "bg-silver-duo"
                   }`}
                 >
                   {word}

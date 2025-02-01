@@ -4,14 +4,24 @@ export default {
   theme: {
     extend: {
       colors: {
-        primary: "var(--primary)",
-        "primary-8": "var(--primary-8)",
-        "primary-10": "var(--primary-10)",
-        "primary-50": "var(--primary-50)",
-        "primary-inverted": "var(--primary-inverted)",
-        "primary-inverted-10": "var(--primary-inverted-10)",
-        "primary-inverted-8": "var(--primary-inverted-8)",
-        "primary-inverted-50": "var(--primary-inverted-50)",
+        primary: {
+          DEFAULT: "var(--primary)",
+          8: "var(--primary-8)",
+          10: "var(--primary-10)",
+          50: "var(--primary-50)",
+          inverted: {
+            DEFAULT: "var(--primary-inverted)",
+            8: "var(--primary-inverted-8)",
+            10: "var(--primary-inverted-10)",
+            50: "var(--primary-inverted-50)",
+          },
+        },
+        secondary: {
+          DEFAULT: "var(--secondary)",
+        },
+        tertiary: {
+          DEFAULT: "var(--tertiary)",
+        },
         "smoke-eerie": "var(--smoke-eerie)",
         "smoke-eerie-inverted": "var(--smoke-eerie-inverted)",
         "seasalt-black": "var(--seasalt-black)",
@@ -21,7 +31,7 @@ export default {
       },
       backgroundImage: {
         "accent-duo": "var(--accent-duo)",
-        "silver-duo-gradient": "var(--silver-duo-gradient)",
+        "silver-duo": "var(--silver-duo)",
         "sky-blue-burst": "var(--sky-blue-burst)",
       },
       boxShadow: {

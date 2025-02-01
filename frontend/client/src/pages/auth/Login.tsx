@@ -219,7 +219,7 @@ const Login = () => {
                   />
                 </div>
                 <div className="flex items-center justify-center gap-2">
-                  <p className="bg-clip-text text-transparent bg-silver-duo-gradient text-xs md:text-sm">
+                  <p className="bg-clip-text text-transparent bg-silver-duo text-xs md:text-sm">
                     Don't have an account?
                   </p>
                   <Link
