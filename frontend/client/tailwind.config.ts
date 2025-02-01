@@ -18,9 +18,15 @@ export default {
         },
         secondary: {
           DEFAULT: "var(--secondary)",
+          inverted: {
+            DEFAULT: "var(--secondary-inverted)",
+          },
         },
         tertiary: {
           DEFAULT: "var(--tertiary)",
+          inverted: {
+            DEFAULT: "var(--tertiary-inverted)",
+          },
         },
         "smoke-eerie": "var(--smoke-eerie)",
         "smoke-eerie-inverted": "var(--smoke-eerie-inverted)",
