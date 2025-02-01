@@ -21,7 +21,7 @@ const Input = ({
         {label && (
           <label
             htmlFor={name}
-            className={`text-[10px] lg:text-xs text-primary-inverted-50 absolute top-0 left-3 transform -translate-y-1/2 border border-primary-inverted-10 leading-none px-1 md:px-2 py-0.5 xl:py-1 bg-smoke-eerie rounded cursor-pointer`}
+            className={`text-[10px] lg:text-xs text-primary-50 absolute top-0 left-3 transform -translate-y-1/2 border border-primary-10 leading-none px-1 md:px-2 py-0.5 xl:py-1 bg-smoke-eerie rounded cursor-pointer`}
           >
             {label}
           </label>
@@ -35,7 +35,7 @@ const Input = ({
           name={name}
           {...register}
           placeholder={placeholder}
-          className={`w-full flex-grow outline-none focus:outline-none font-normal text-sm xl:text-base overflow-hidden bg-smoke-eerie rounded-lg border border-primary-inverted-10 px-3 py-3 2xl:py-4 text-primary-inverted placeholder:text-primary-inverted-50 placeholder:text-sm ${
+          className={`w-full flex-grow outline-none focus:outline-none font-normal text-sm xl:text-base overflow-hidden bg-smoke-eerie rounded-lg border border-primary-10 px-3 py-3 2xl:py-4 text-primary placeholder:text-primary-50 placeholder:text-sm ${
             icon && "pr-10"
           } autofill-effect ${className}`}
         />

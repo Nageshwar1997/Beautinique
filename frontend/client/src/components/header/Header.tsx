@@ -26,7 +26,7 @@ const Header = () => {
 
   return (
     <div className="w-full h-28 sticky -top-8 z-50">
-      <div className="w-full h-8 bg-primary-inverted text-primary text-center content-center">
+      <div className="w-full h-8 bg-primary text-primary text-center content-center">
         <p className="cursor-pointer underline text-xs tracking-widest">
           Use code: TREAT10 and enjoy 10% OFF on all orders
         </p>

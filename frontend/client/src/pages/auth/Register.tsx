@@ -168,9 +168,9 @@ const Register = () => {
                               (showPasswords[
                                 name as keyof PasswordVisibilityType
                               ] ? (
-                                <EyeOffIcon className="!fill-primary-inverted opacity-50 hover:opacity-100 h-full" />
+                                <EyeOffIcon className="!fill-primary opacity-50 hover:opacity-100 h-full" />
                               ) : (
-                                <EyeIcon className="!fill-primary-inverted opacity-50 hover:opacity-100 h-full" />
+                                <EyeIcon className="!fill-primary opacity-50 hover:opacity-100 h-full" />
                               ))
                             }
                             iconClick={() =>
@@ -185,19 +185,11 @@ const Register = () => {
                   })}
                 </div>
                 <div className="space-y-3">
-                  <div className="flex items-center justify-between gap-3">
-                    <div className="flex items-center space-x-3">
-                      <Checkbox register={{ ...register("remember") }} />
-                      <span className="text-sm text-primary-inverted-50 font-medium">
-                        Remember me
-                      </span>
-                    </div>
-                    <Link
-                      to="/"
-                      className="bg-clip-text text-transparent bg-silver-duo-gradient hover:bg-accent-duo"
-                    >
-                      Back
-                    </Link>
+                  <div className="flex items-center space-x-3">
+                    <Checkbox register={{ ...register("remember") }} />
+                    <span className="text-sm text-primary-50 font-medium">
+                      Remember me
+                    </span>
                   </div>
                   <Button
                     pattern="primary"

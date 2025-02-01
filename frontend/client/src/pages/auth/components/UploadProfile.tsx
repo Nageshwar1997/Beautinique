@@ -14,7 +14,7 @@ const UploadProfile = ({
       className={`w-20 h-20 mx-auto rounded-full shadow-primary-btn-hover overflow-hidden group ${className}`}
     >
       <label htmlFor={name} className="relative cursor-pointer">
-        <div className="absolute inset-0 bg-gradient-to-br from-primary via-transparent to-gray-400 rounded-full blur-sm animate-pulse cursor-pointer" />
+        <div className="absolute inset-0 bg-gradient-to-br from-primary-inverted via-transparent to-gray-400 rounded-full blur-sm animate-pulse cursor-pointer" />
         <img
           src={
             imageUrl ||
@@ -26,7 +26,7 @@ const UploadProfile = ({
         />
         {pathname === "/register" && (
           <div className="absolute bottom-0 left-0 right-0 bg-smoke-eerie flex items-center justify-center">
-            <CameraIcon className="fill-primary-inverted opacity-70 group-hover:opacity-100" />
+            <CameraIcon className="fill-primary opacity-70 group-hover:opacity-100" />
             <input
               id={name}
               name={name}

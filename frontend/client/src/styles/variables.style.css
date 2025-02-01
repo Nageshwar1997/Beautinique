@@ -19,15 +19,16 @@
 /* Light Theme Variables */
 [theme="light"] {
   /* Colors */
-  --primary: #ffffff;
-  --primary-8: #ffffff14;
-  --primary-10: #ffffff1a;
-  --primary-inverted: #000000;
-  --primary-inverted-8: #00000014;
-  --primary-inverted-10: #0000001a;
-  --primary-inverted-50: #00000080;
+  --primary: #000000;
+  --primary-8: #00000014;
+  --primary-10: #0000001a;
+  --primary-50: #00000080;
+  --primary-inverted: #ffffff;
+  --primary-inverted-8: #ffffff14;
+  --primary-inverted-10: #ffffff1a;
+  --primary-inverted-50: #ffffff80;
   --smoke-eerie: #f2f2f2;
-  /* --smoke-eerie-inverted: #1a1a1a; */
+  --smoke-eerie-inverted: #1a1a1a;
   --seasalt-black: #f5f1ef;
   --battleship-davys-gray: #8a8a8a4d;
   --timberwolf-eerie-black: #d8d8d853;
@@ -56,15 +57,16 @@
 
 [theme="dark"] {
   /* Colors */
-  --primary: #000000;
-  --primary-10: #0000001a;
-  --primary-8: #00000014;
-  --primary-inverted: #ffffff;
-  --primary-inverted-10: #ffffff1a;
-  --primary-inverted-8: #ffffff14;
-  --primary-inverted-50: #ffffff80;
+  --primary: #ffffff;
+  --primary-8: #ffffff14;
+  --primary-10: #ffffff1a;
+  --primary-50: #ffffff80;
+  --primary-inverted: #000000;
+  --primary-inverted-8: #00000014;
+  --primary-inverted-10: #0000001a;
+  --primary-inverted-50: #00000080;
   --smoke-eerie: #1a1a1a;
-  /* --smoke-eerie-inverted: #f2f2f2; */
+  --smoke-eerie-inverted: #f2f2f2;
   --seasalt-black: #f7fafc;
   --battleship-davys-gray: #4d4d4d;
   --timberwolf-eerie-black: #191919;

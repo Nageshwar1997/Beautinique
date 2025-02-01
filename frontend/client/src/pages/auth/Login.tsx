@@ -176,9 +176,9 @@ const Login = () => {
                                 icon={
                                   item.name === "password" &&
                                   (showPassword ? (
-                                    <EyeOffIcon className="!fill-primary-inverted opacity-50 hover:opacity-100 h-full" />
+                                    <EyeOffIcon className="!fill-primary opacity-50 hover:opacity-100 h-full" />
                                   ) : (
-                                    <EyeIcon className="!fill-primary-inverted opacity-50 hover:opacity-100 h-full" />
+                                    <EyeIcon className="!fill-primary opacity-50 hover:opacity-100 h-full" />
                                   ))
                                 }
                                 iconClick={() =>
@@ -200,7 +200,7 @@ const Login = () => {
                         control={control}
                         render={({ field }) => <Checkbox register={field} />}
                       />
-                      <span className="text-sm text-primary-inverted-50 font-medium">
+                      <span className="text-sm text-primary-50 font-medium">
                         Remember me
                       </span>
                     </div>
@@ -219,12 +219,12 @@ const Login = () => {
                   />
                 </div>
                 <div className="flex items-center justify-center gap-2">
-                  <p className="bg-clip-text text-transparent bg-silver-duo-gradient">
+                  <p className="bg-clip-text text-transparent bg-silver-duo-gradient text-xs md:text-sm">
                     Don't have an account?
                   </p>
                   <Link
                     to={"/register"}
-                    className={`bg-clip-text text-transparent bg-accent-duo text-lg hover:font-extrabold`}
+                    className={`bg-clip-text text-transparent bg-accent-duo hover:font-extrabold text-sm md:text-base`}
                   >
                     Register
                   </Link>

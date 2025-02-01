@@ -21,14 +21,14 @@ const PhoneInput = ({
         {label && (
           <label
             htmlFor={name}
-            className={`text-[10px] lg:text-xs text-primary-inverted-50 absolute top-0 left-3 transform -translate-y-1/2 border border-primary-inverted-10 leading-none px-1 md:px-2 py-0.5 xl:py-1 bg-smoke-eerie rounded cursor-pointer`}
+            className={`text-[10px] lg:text-xs text-primary-50 absolute top-0 left-3 transform -translate-y-1/2 border border-primary-10 leading-none px-1 md:px-2 py-0.5 xl:py-1 bg-smoke-eerie rounded cursor-pointer`}
           >
             {label}
           </label>
         )}
         {/* Input */}
-        <div className="w-full text-sm xl:text-base flex bg-smoke-eerie rounded-lg border border-primary-inverted-10 text-primary-inverted">
-          <p className="w-[16%] text-primary-inverted-50 content-center text-center border-r border-primary-inverted-10 py-3 2xl:py-4">
+        <div className="w-full text-sm xl:text-base flex bg-smoke-eerie rounded-lg border border-primary-10 text-primary">
+          <p className="w-[16%] text-primary-50 content-center text-center border-r border-primary-10 py-3 2xl:py-4">
             +91
           </p>
           <input
@@ -39,7 +39,7 @@ const PhoneInput = ({
             name={name}
             placeholder={placeholder}
             {...register}
-            className={`w-full outline-none focus:outline-none font-normal overflow-hidden bg-transparent px-3 py-3 2xl:py-4 placeholder:text-primary-inverted-50 placeholder:text-sm ${
+            className={`w-full outline-none focus:outline-none font-normal overflow-hidden bg-transparent px-3 py-3 2xl:py-4 placeholder:text-primary-50 placeholder:text-sm ${
               icon && "pr-10"
             } autofill-effect number-input-mouse-control-none ${className}`}
             onWheel={(event) => event.currentTarget.blur()}
