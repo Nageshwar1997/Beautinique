@@ -1,7 +1,9 @@
 import { useEffect, useState, useRef } from "react";
 
 const Header = () => {
-  const [isTop, setIsTop] = useState(false); // State to check if the header is at the top
+  const [isTop, setIsTop] = useState(false);
+  const [isHovered, setIsHovered] = useState(false);
+  // State to check if the header is at the top
   const headerRef = useRef<HTMLElement>(null); // Create a reference for the header
 
   // Function to handle scroll event
@@ -24,6 +26,9 @@ const Header = () => {
     };
   }, []);
 
+  console.log("isTop", isTop);
+  console.log("isHovered", isHovered);
+
   return (
     <div className="w-full h-28 sticky -top-8 z-50">
       <div className="w-full h-8 bg-primary-inverted text-primary text-center content-center">
@@ -33,9 +38,11 @@ const Header = () => {
       </div>
       <header
         ref={headerRef} // Pass the ref to the header element
-        className={`group w-full max-h-20 h-20 border flex items-center justify-center gap-24 px-5 transition-all ${
+        className={`w-full max-h-20 h-20 border flex items-center justify-center gap-24 px-5 transition-all ${
           isTop ? "bg-secondary" : "bg-transparent"
         } hover:bg-secondary`}
+        onMouseEnter={() => setIsHovered(true)}
+        onMouseLeave={() => setIsHovered(false)}
       >
         <div className="">
           <img
@@ -46,38 +53,50 @@ const Header = () => {
         </div>
         <div
           className={`flex items-center gap-10 text-sm ${
-            isTop ? "text-secondary-inverted" : "text-seasalt-black"
-          } group-hover:text-secondary-inverted`}
+            isTop || isHovered
+              ? "text-secondary-inverted"
+              : "text-seasalt-black"
+          }`}
         >
-          <p className="hover:font-semibold cursor-pointer hover:underline">
+          <p className="relative cursor-pointer font-medium group">
             New
+            <span className="absolute left-0 bottom-0 w-0 h-[2px] bg-accent-duo transition-all duration-500 ease-in-out group-hover:w-full rounded-full" />
           </p>
-          <p className="hover:font-semibold cursor-pointer hover:underline">
+          <p className="relative cursor-pointer font-medium group">
             Lips
+            <span className="absolute left-0 bottom-0 w-0 h-[2px] bg-accent-duo transition-all duration-500 ease-in-out group-hover:w-full rounded-full" />
           </p>
-          <p className="hover:font-semibold cursor-pointer hover:underline">
+          <p className="relative cursor-pointer font-medium group">
             Eyes
+            <span className="absolute left-0 bottom-0 w-0 h-[2px] bg-accent-duo transition-all duration-500 ease-in-out group-hover:w-full rounded-full" />
           </p>
-          <p className="hover:font-semibold cursor-pointer hover:underline">
+          <p className="relative cursor-pointer font-medium group">
             Face
+            <span className="absolute left-0 bottom-0 w-0 h-[2px] bg-accent-duo transition-all duration-500 ease-in-out group-hover:w-full rounded-full" />
           </p>
-          <p className="hover:font-semibold cursor-pointer hover:underline">
+          <p className="relative cursor-pointer font-medium group">
             Nails
+            <span className="absolute left-0 bottom-0 w-0 h-[2px] bg-accent-duo transition-all duration-500 ease-in-out group-hover:w-full rounded-full" />
           </p>
-          <p className="hover:font-semibold cursor-pointer hover:underline">
+          <p className="relative cursor-pointer font-medium group">
             Skin
+            <span className="absolute left-0 bottom-0 w-0 h-[2px] bg-accent-duo transition-all duration-500 ease-in-out group-hover:w-full rounded-full" />
           </p>
-          <p className="hover:font-semibold cursor-pointer hover:underline">
+          <p className="relative cursor-pointer font-medium group">
             Offers
+            <span className="absolute left-0 bottom-0 w-0 h-[2px] bg-accent-duo transition-all duration-500 ease-in-out group-hover:w-full rounded-full" />
           </p>
-          <p className="hover:font-semibold cursor-pointer hover:underline">
+          <p className="relative cursor-pointer font-medium group">
             Gifting
+            <span className="absolute left-0 bottom-0 w-0 h-[2px] bg-accent-duo transition-all duration-500 ease-in-out group-hover:w-full rounded-full" />
           </p>
-          <p className="hover:font-semibold cursor-pointer hover:underline">
+          <p className="relative cursor-pointer font-medium group">
             Sugar Pop
+            <span className="absolute left-0 bottom-0 w-0 h-[2px] bg-accent-duo transition-all duration-500 ease-in-out group-hover:w-full rounded-full" />
           </p>
-          <p className="hover:font-semibold cursor-pointer hover:underline">
+          <p className="relative cursor-pointer font-medium group">
             Sugar Play
+            <span className="absolute left-0 bottom-0 w-0 h-[2px] bg-accent-duo transition-all duration-500 ease-in-out group-hover:w-full rounded-full" />
           </p>
         </div>
         <div className="flex items-center gap-5 text-white">
