@@ -1,4 +1,6 @@
-export const navbarCategoryData = [
+import { Category } from "../../../types";
+
+export const navbarCategoryData: Category[] = [
   // New
   {
     id: 1,

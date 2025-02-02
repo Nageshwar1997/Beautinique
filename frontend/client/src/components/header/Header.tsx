@@ -1,7 +1,16 @@
 import { useEffect, useState, useRef } from "react";
+import { navbarCategoryData } from "./data";
+import { Category, Subcategory } from "../../types";
 
 const Header = () => {
   const [isHoverOrTop, setIsHoverOrTop] = useState(false);
+  const [levelTwoCategories, setLevelTwoCategories] = useState<
+    Subcategory[] | []
+  >([]);
+  const [levelThreeCategories, setLevelThreeCategories] = useState<
+    Subcategory[] | []
+  >([]);
+
   // State to check if the header is at the top
   const headerRef = useRef<HTMLElement>(null); // Create a reference for the header
 
@@ -25,6 +34,8 @@ const Header = () => {
     };
   }, []);
 
+  console.log("SubCategories", levelTwoCategories);
+
   return (
     <div className="w-full h-28 sticky -top-8 z-50">
       <div className="w-full h-8 bg-primary-inverted text-primary text-center content-center">
@@ -47,51 +58,59 @@ const Header = () => {
             className="max-h-20 object-contain"
           />
         </div>
-        <div
-          className={`flex items-center gap-10 text-sm ${
-            isHoverOrTop ? "text-secondary-inverted" : "text-seasalt-black"
-          }`}
-        >
-          <p className="relative cursor-pointer font-medium group">
-            New
-            <span className="absolute left-0 bottom-0 w-0 h-[2px] bg-accent-duo transition-all duration-500 ease-in-out group-hover:w-full rounded-full" />
-          </p>
-          <p className="relative cursor-pointer font-medium group">
-            Lips
-            <span className="absolute left-0 bottom-0 w-0 h-[2px] bg-accent-duo transition-all duration-500 ease-in-out group-hover:w-full rounded-full" />
-          </p>
-          <p className="relative cursor-pointer font-medium group">
-            Eyes
-            <span className="absolute left-0 bottom-0 w-0 h-[2px] bg-accent-duo transition-all duration-500 ease-in-out group-hover:w-full rounded-full" />
-          </p>
-          <p className="relative cursor-pointer font-medium group">
-            Face
-            <span className="absolute left-0 bottom-0 w-0 h-[2px] bg-accent-duo transition-all duration-500 ease-in-out group-hover:w-full rounded-full" />
-          </p>
-          <p className="relative cursor-pointer font-medium group">
-            Nails
-            <span className="absolute left-0 bottom-0 w-0 h-[2px] bg-accent-duo transition-all duration-500 ease-in-out group-hover:w-full rounded-full" />
-          </p>
-          <p className="relative cursor-pointer font-medium group">
-            Skin
-            <span className="absolute left-0 bottom-0 w-0 h-[2px] bg-accent-duo transition-all duration-500 ease-in-out group-hover:w-full rounded-full" />
-          </p>
-          <p className="relative cursor-pointer font-medium group">
-            Offers
-            <span className="absolute left-0 bottom-0 w-0 h-[2px] bg-accent-duo transition-all duration-500 ease-in-out group-hover:w-full rounded-full" />
-          </p>
-          <p className="relative cursor-pointer font-medium group">
-            Gifting
-            <span className="absolute left-0 bottom-0 w-0 h-[2px] bg-accent-duo transition-all duration-500 ease-in-out group-hover:w-full rounded-full" />
-          </p>
-          <p className="relative cursor-pointer font-medium group">
-            Sugar Pop
-            <span className="absolute left-0 bottom-0 w-0 h-[2px] bg-accent-duo transition-all duration-500 ease-in-out group-hover:w-full rounded-full" />
-          </p>
-          <p className="relative cursor-pointer font-medium group">
-            Sugar Play
-            <span className="absolute left-0 bottom-0 w-0 h-[2px] bg-accent-duo transition-all duration-500 ease-in-out group-hover:w-full rounded-full" />
-          </p>
+        <div className="relative">
+          <div
+            className={`flex items-center gap-10 text-sm ${
+              isHoverOrTop ? "text-secondary-inverted" : "text-seasalt-black"
+            }`}
+          >
+            {navbarCategoryData?.map((item: Category, index) => {
+              // const { label, subcategories } = item;
+              return (
+                <div
+                  key={index}
+                  onMouseEnter={() =>
+                    setLevelTwoCategories(item?.subcategories as Subcategory[])
+                  }
+                  className="cursor-pointer font-medium group flex flex-col items-start relative"
+                >
+                  <p>{item?.label}</p>
+                  <div className="w-0 h-0.5 bg-accent-duo transition-all duration-500 ease-in-out group-hover:w-full rounded-full" />
+                </div>
+              );
+            })}
+            <div className="absolute top-12 w-fit border border-[red] h-fit bg-white flex gap-10 py-3 px-5">
+              <div className="border px-2 flex flex-col gap-4">
+                {levelTwoCategories?.map((item: Subcategory, index) => {
+                  return (
+                    <div
+                      key={index}
+                      onMouseEnter={() =>
+                        setLevelThreeCategories(
+                          item?.subcategories as Subcategory[]
+                        )
+                      }
+                    >
+                      <div className="h-full flex flex-col">
+                        <div>{item.label}</div>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+              <div className="">
+                {levelThreeCategories?.map((item: Subcategory, index) => {
+                  return (
+                    <div key={index} className="">
+                      <div className="h-full flex flex-col">
+                        <div>{item.label}</div>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          </div>
         </div>
         <div className="flex items-center gap-5 text-white">
           <p>1</p>
