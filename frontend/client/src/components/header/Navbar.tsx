@@ -9,7 +9,7 @@ const Navbar = () => {
       <div className="min-h-[calc(100%-36px)] h-full flex items-center justify-center">
         <img
           src="./images/logo/B_Q.png"
-          alt=""
+          alt="Logo"
           className="object-cover w-fit max-h-[calc(100%-36px)] sticky top-0"
         />
       </div>

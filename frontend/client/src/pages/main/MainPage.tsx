@@ -8,13 +8,11 @@ const MainPage = () => {
   return (
     <Fragment>
       <Suspense fallback={<LoadingScreen />}>
-        <div className="w-dvw h-dvh min-w-dvw min-h-dvh bg-primary text-primary-inverted">
-          <Navbar />
-          <main>
-            <Outlet />
-          </main>
-          <Footer />
-        </div>
+        <Navbar />
+        <main>
+          <Outlet />
+        </main>
+        <Footer />
       </Suspense>
     </Fragment>
   );

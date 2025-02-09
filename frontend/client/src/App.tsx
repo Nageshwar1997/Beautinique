@@ -10,7 +10,7 @@ function App() {
   return (
     <QueryClientProvider client={queryClient}>
       <Toaster position="top-center" />
-      <div className="bg-primary-inverted relative">
+      <div className="w-full h-full bg-primary-inverted text-primary relative">
         <div className="fixed top-14 right-4 bg-red-500 p-4 z-[100] rounded-full">
           <DarkMode />
         </div>
