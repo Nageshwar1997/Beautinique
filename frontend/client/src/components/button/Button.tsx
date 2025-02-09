@@ -23,7 +23,7 @@ const Button = ({
 }: ButtonProps) => {
   const buttonCss = () => {
     if (pattern === "primary") {
-      return "text-white bg-sky-blue-burst shadow-primary-btn hover:shadow-primary-btn-hover border-none focus-within:border-none";
+      return "text-white bg-sky-blue-burst shadow-primary-btn hover:shadow-primary-btn-hover transition duration-300 border-none focus-within:border-none";
     } else if (pattern === "secondary") {
       return "secondary";
     } else if (pattern === "outline") {
