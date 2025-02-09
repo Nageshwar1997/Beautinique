@@ -1,6 +1,6 @@
 import { GiftIcon, MakeupKitIcon, TestIcon, ValueSetsIcon } from "../../icons";
 
-const for_you = {
+export const for_you = {
   id: 1,
   level: 1,
   label: "For You",
@@ -13,6 +13,7 @@ const for_you = {
       label: "New",
       category: "new",
       icon: <TestIcon />,
+      videoUrl: "./videos/header/new.mp4",
       subCategories: [
         {
           id: 1,
@@ -29,6 +30,7 @@ const for_you = {
       label: "Sugar Play",
       category: "sugar_play",
       icon: <TestIcon />,
+      videoUrl: "./videos/header/sugar_play.mp4",
       subCategories: [
         {
           id: 1,
@@ -45,6 +47,7 @@ const for_you = {
       label: "Offers",
       category: "offers",
       icon: <TestIcon />,
+      videoUrl: "./videos/header/offers.mp4",
       subCategories: [
         {
           id: 1,
@@ -61,6 +64,7 @@ const for_you = {
       label: "Blogs",
       category: "blogs",
       icon: <TestIcon />,
+      videoUrl: "./videos/header/blogs.mp4",
       subCategories: [
         {
           id: 1,
