@@ -78,11 +78,11 @@ export const for_you = {
   ],
 };
 
-const special_collection = {
+const collections = {
   id: 2,
   level: 1,
-  label: "Special Collection",
-  category: "special_collection",
+  label: "Collections",
+  category: "collections",
   icon: <TestIcon />,
   subCategories: [
     {
@@ -334,14 +334,13 @@ const special_collection = {
   ],
 };
 
-const skin_and_face = {
+const skin = {
   id: 3,
   level: 1,
-  label: "Skin & Face",
-  category: "skin_and_face",
+  label: "Skin",
+  category: "skin",
   icon: <TestIcon />,
   subCategories: [
-    // Skin
     {
       id: 1,
       level: 2,
@@ -529,9 +528,17 @@ const skin_and_face = {
         },
       ],
     },
-    // Face
+  ],
+};
+const face = {
+  id: 4,
+  level: 1,
+  label: "Face",
+  category: "face",
+  icon: <TestIcon />,
+  subCategories: [
     {
-      id: 7,
+      id: 1,
       level: 2,
       label: "Face Makeup",
       category: "face_makeup",
@@ -589,7 +596,7 @@ const skin_and_face = {
       ],
     },
     {
-      id: 8,
+      id: 2,
       level: 2,
       label: "Setting & Finishing",
       category: "setting_and_finishing",
@@ -626,7 +633,7 @@ const skin_and_face = {
       ],
     },
     {
-      id: 9,
+      id: 3,
       level: 2,
       label: "Foundation Types",
       category: "foundation_types",
@@ -691,7 +698,7 @@ const skin_and_face = {
       ],
     },
     {
-      id: 10,
+      id: 4,
       level: 2,
       label: "Cheeks & Glow",
       category: "cheeks_and_glow",
@@ -735,7 +742,7 @@ const skin_and_face = {
       ],
     },
     {
-      id: 11,
+      id: 5,
       level: 2,
       label: "Traditional & Essentials",
       category: "traditional_and_essentials",
@@ -758,7 +765,7 @@ const skin_and_face = {
       ],
     },
     {
-      id: 12,
+      id: 6,
       level: 2,
       label: "Primers & Removers",
       category: "primers_and_removers",
@@ -788,7 +795,7 @@ const skin_and_face = {
       ],
     },
     {
-      id: 13,
+      id: 7,
       level: 2,
       label: "Bronzers & Contour",
       category: "bronzers_and_contour",
@@ -818,7 +825,7 @@ const skin_and_face = {
       ],
     },
     {
-      id: 14,
+      id: 8,
       level: 2,
       label: "Concealers & Correctors",
       category: "concealers_and_correctors",
@@ -850,11 +857,11 @@ const skin_and_face = {
   ],
 };
 
-const lips_and_eyes = {
-  id: 4,
+const lips = {
+  id: 5,
   level: 1,
-  label: "Lips & Eyes",
-  category: "lips_and_eyes",
+  label: "Lips",
+  category: "lips",
   icon: <TestIcon />,
   subCategories: [
     {
@@ -1031,8 +1038,17 @@ const lips_and_eyes = {
         },
       ],
     },
+  ],
+};
+const eyes = {
+  id: 6,
+  level: 1,
+  label: "Eyes",
+  category: "eyes",
+  icon: <TestIcon />,
+  subCategories: [
     {
-      id: 4,
+      id: 1,
       level: 2,
       label: "Kohl & Kajal",
       category: "kohl_and_kajal",
@@ -1062,7 +1078,7 @@ const lips_and_eyes = {
       ],
     },
     {
-      id: 5,
+      id: 2,
       level: 2,
       label: "Mascaras",
       category: "mascaras",
@@ -1092,7 +1108,7 @@ const lips_and_eyes = {
       ],
     },
     {
-      id: 6,
+      id: 3,
       level: 2,
       label: "Eyeliner",
       category: "eyeliner",
@@ -1129,7 +1145,7 @@ const lips_and_eyes = {
       ],
     },
     {
-      id: 7,
+      id: 4,
       level: 2,
       label: "Eyeshadow",
       category: "eyeshadow",
@@ -1166,7 +1182,7 @@ const lips_and_eyes = {
       ],
     },
     {
-      id: 8,
+      id: 5,
       level: 2,
       label: "Eyebrow",
       category: "eyebrow",
@@ -1196,7 +1212,7 @@ const lips_and_eyes = {
       ],
     },
     {
-      id: 8,
+      id: 6,
       level: 2,
       label: "Eye Value Sets",
       category: "eye_value_sets",
@@ -1221,4 +1237,4 @@ const lips_and_eyes = {
   ],
 };
 
-export const data = [for_you, special_collection, skin_and_face, lips_and_eyes];
+export const data = [for_you, skin, face, lips, eyes, collections];
