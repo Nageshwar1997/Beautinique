@@ -2,6 +2,13 @@ import { HTMLInputAutoCompleteAttribute, ReactNode } from "react";
 
 export type ThemeTypes = "light" | "dark";
 
+export interface FileInputProps {
+  imageUrl?: string | null;
+  name?: string;
+  className?: string;
+  register?: object;
+}
+
 export interface InputProps {
   type?: string;
   label?: string;
@@ -12,7 +19,7 @@ export interface InputProps {
   className?: string;
   placeholder?: string;
   successText?: string;
-  labelClassName?: string;
+  containerClassName?: string;
   iconClick?: () => void;
   autoComplete?: HTMLInputAutoCompleteAttribute | undefined;
 }
@@ -48,14 +55,23 @@ export interface RegisterInputMapDataProps {
   autoComplete?: string;
 }
 
-export interface LoginInputProps {
-  email: string;
-  phoneNumber: string;
+export type LoginTypes = "email" | "phoneNumber";
+
+export interface LoginFormInputProps {
+  loginMethod: LoginTypes;
+  email?: string;
+  phoneNumber?: string;
   password: string;
   remember?: boolean;
 }
 
-export type LoginField = "email" | "password" | "phoneNumber" | "remember";
+export interface LoginInputMapDataProps {
+  name: keyof LoginFormInputProps;
+  label?: string;
+  type?: string;
+  placeholder?: string;
+  autoComplete?: string;
+}
 
 export interface RadioProps {
   value: string;
@@ -73,3 +89,20 @@ export interface HorizontalScrollType {
   left: boolean;
   right: boolean;
 }
+
+// Navbar Or Header
+export type Subcategory = {
+  id: number;
+  category: string;
+  label: string;
+  level: number;
+  subcategories?: Subcategory[]; // Recursive type for nested subcategories
+};
+
+export type Category = {
+  id: number;
+  category: string;
+  label: string;
+  level: number;
+  subcategories?: Subcategory[]; // Top-level category containing subcategories
+};

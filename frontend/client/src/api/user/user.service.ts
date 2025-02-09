@@ -1,5 +1,5 @@
 import { useMutation } from "@tanstack/react-query";
-import { LoginInputProps } from "../../types";
+import { LoginFormInputProps } from "../../types";
 import { login_user, register_user } from "./auth.api";
 import { useNavigate } from "react-router-dom";
 import { toastErrorMessage, toastSuccessMessage } from "../../utils/toasts";
@@ -40,7 +40,7 @@ export const useRegisterUser = () => {
 export const useLoginUser = () => {
   const navigate = useNavigate();
   return useMutation({
-    mutationFn: (bodyData: LoginInputProps) => login_user(bodyData),
+    mutationFn: (bodyData: LoginFormInputProps) => login_user(bodyData),
     onSuccess: (data) => {
       toastSuccessMessage(data?.message || "Login successful!");
     },

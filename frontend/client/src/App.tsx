@@ -9,9 +9,9 @@ const queryClient = new QueryClient();
 function App() {
   return (
     <QueryClientProvider client={queryClient}>
-      <Toaster position="top-center"/>
-      <div className="bg-primary relative">
-        <div className="absolute top-4 right-4 bg-red-500 p-4 z-10 rounded-full">
+      <Toaster position="top-center" />
+      <div className="bg-primary-inverted relative">
+        <div className="fixed top-14 right-4 bg-red-500 p-4 z-[100] rounded-full">
           <DarkMode />
         </div>
         <RouterProvider router={router} />

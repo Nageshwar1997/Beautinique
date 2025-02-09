@@ -1,13 +1,11 @@
-import  { FC } from "react";
+import { FC } from "react";
 import { RadioProps } from "../../types";
-
-
 
 const Radio: FC<RadioProps> = ({
   value,
   onChange,
   options,
-  className="",
+  className = "",
 }) => {
   return (
     <div
@@ -27,7 +25,7 @@ const Radio: FC<RadioProps> = ({
             className={`relative z-10 flex-1 text-center text-sm cursor-pointer ${
               value === option.value
                 ? "text-white/90 font-semibold"
-                : "text-primary-inverted-50 font-medium"
+                : "text-primary-50 font-medium"
             }`}
           >
             <input

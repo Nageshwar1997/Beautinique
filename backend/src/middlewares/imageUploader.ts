@@ -12,7 +12,7 @@ const imageUploader = async ({
     throw new AppError("No file provided for upload", 400);
   }
 
-  const mainFolder = "Beauty_Shop";
+  const mainFolder = process.env.CLOUDINARY_MAIN_FOLDER;
   const subFolder = folder?.split(" ").join("_") || "Common_Folder";
 
   const publicId = `${Date.now().toString()}_${file?.originalname
@@ -26,13 +26,7 @@ const imageUploader = async ({
   const cloudinaryConnectionResult = await testCloudinaryConnection();
 
   if (cloudinaryConnectionResult.error) {
-    console.error(
-      "cloudinaryConnectionResult",
-      cloudinaryConnectionResult.data
-    );
     throw new AppError(cloudinaryConnectionResult.message, 500);
-  } else {
-    console.log("cloudinaryConnectionResult", cloudinaryConnectionResult.data);
   }
 
   try {

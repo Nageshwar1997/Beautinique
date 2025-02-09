@@ -1,4 +1,3 @@
-/* eslint-disable react-hooks/exhaustive-deps */
 import { useEffect, useMemo, useState } from "react";
 
 const LoadingScreen = () => {
@@ -18,11 +17,11 @@ const LoadingScreen = () => {
       `<span class=loadingHighlight>Hyaluronic Acid</span> is a powerful hydrating ingredient that can hold up to 1,000 times its weight in water.`,
       `<span class=loadingHighlight>Retinol</span> is a dermatologist-approved ingredient known for reducing fine lines and improving skin texture.`,
       `<span class=loadingHighlight>Green Beauty</span> focuses on sustainable packaging and eco-friendly formulations to reduce environmental impact.`,
-      `<span class=loadingHighlight>Sheet masks</span> originated in Korea and have become a staple in self-care and skincare routines worldwide.`,
+      `<span class=loadingHighlight>Sheet masks</span> originated in Indian and have become a staple in self-care and skincare routines worldwide.`,
       `The global <span class=loadingHighlight>cosmetic industry</span> is expected to reach <span class=loadingHighlight>$500 billion</span> by <span class=loadingHighlight>2026</span>.`,
       `The first-ever <span class=loadingHighlight>waterproof mascara</span> was developed in <span class=loadingHighlight>1938</span> and changed the beauty game.`,
       `The first <span class=loadingHighlight>liquid foundation</span> was launched in the <span class=loadingHighlight>1950s</span>, offering a more natural finish.`,
-      `The term "glass skin" was popularized by <span class=loadingHighlight>Korean beauty</span> trends, emphasizing dewy, radiant skin.`,
+      `The term "glass skin" was popularized by <span class=loadingHighlight>Indian beauty</span> trends, emphasizing dewy, radiant skin.`,
       `The first commercial <span class=loadingHighlight>lip gloss</span> was introduced by Max Factor in <span class=loadingHighlight>1930</span>.`,
       `In the early <span class=loadingHighlight>2000s</span>, mineral makeup became a sought-after trend for its natural ingredients and skin benefits.`,
       `The <span class=loadingHighlight>Beauty Blender,</span> launched in <span class=loadingHighlight>2007</span>, transformed the way people applied foundation.`,
@@ -30,15 +29,15 @@ const LoadingScreen = () => {
       `Some brands are experimenting with <span class=loadingHighlight>AI makeup try-ons</span> to help users choose the perfect shade before purchasing.`,
       `The concept of a <span class=loadingHighlight>beauty subscription box</span> allows customers to try new products every month.`,
       `Some experts believe that <span class=loadingHighlight>customized skincare</span> could be the future of the beauty industry.`,
-      "Others caution about potential risks of certain skincare ingredients, such as parabens and sulfates.",
+      "Others caution about potential risks of certain <span class=loadingHighlight>skincare ingredients,</span> such as parabens and sulfates.",
       `The development of <span class=loadingHighlight>sustainable beauty</span> aims to reduce plastic waste and promote ethical sourcing.`,
       `Despite trends, timeless beauty practices like <span class=loadingHighlight>hydration</span> and <span class=loadingHighlight>healthy eating</span> remain essential for glowing skin.`,
-      `The first known use of the term "cosmeceuticals" was in <span class=loadingHighlight>1984</span> to describe skincare products with medical benefits.`,
+      `The first known use of the term <span class=loadingHighlight>"cosmeceuticals"</span> was in <span class=loadingHighlight>1984</span> to describe skincare products with medical benefits.`,
       `<span class=loadingHighlight>Fermented skincare</span> is gaining popularity for its probiotic benefits that improve skin health.`,
       `<span class=loadingHighlight>Beauty influencers</span> have a huge impact on the cosmetic industry, shaping trends and product demands.`,
-      "AR beauty apps are helping customers try on makeup virtually before making a purchase.",
+      "<span class=loadingHighlight>AR beauty</span> apps are helping customers try on makeup virtually before making a purchase.",
       `The concept of <span class=loadingHighlight>smart skincare devices</span> is transforming beauty routines with AI-powered technology.`,
-      "Some companies are developing biodegradable glitter to make beauty more sustainable.",
+      "Some companies are developing <span class=loadingHighlight>biodegradable glitter</span> to make beauty more sustainable.",
       `The future of <span class=loadingHighlight>clean beauty</span> is focused on transparency, sustainability, and effective formulations.`,
       `The first <span class=loadingHighlight>fragrance-free makeup line</span> was launched in <span class=loadingHighlight>1980</span> to cater to sensitive skin.`,
       `The term <span class=loadingHighlight>dermocosmetics</span> is used for products that bridge the gap between skincare and dermatology.`,
@@ -64,7 +63,6 @@ const LoadingScreen = () => {
         ...prevState,
         loadingText: beautyFacts[getRandomFactIndex],
       }));
-      console.log("loading text", loadingState.loadingText);
     }, TEXT_CHANGE_INTERVAL);
 
     return () => clearInterval(textIntervalId);
@@ -74,7 +72,7 @@ const LoadingScreen = () => {
     () => (
       <p
         dangerouslySetInnerHTML={{ __html: loadingState.loadingText }}
-        className="absolute top-[320px] bg-primary-50 border border-white/60 p-2 rounded-xl text-white font-light md:font-normal mt-5 text-sm md:text-lg leading-6 md:leading-6 text-center"
+        className="absolute top-[320px] bg-primary-50 border border-white/60 p-2 rounded-xl text-white/80 font-light md:font-normal mt-5 text-sm md:text-lg leading-6 md:leading-6 text-center"
       />
     ),
     [loadingState.loadingText]

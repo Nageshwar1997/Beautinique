@@ -63,6 +63,6 @@ app.listen(PORT, async () => {
     await connectDB();
     console.log(`Server is running on http://localhost:${PORT}`);
   } catch (error: any) {
-    console.log(`${error.message} - Server is not running`);
+    console.error(`${error.message} - Server is not running`);
   }
 });

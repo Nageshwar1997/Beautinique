@@ -1,5 +1,5 @@
 import { Fragment, Suspense } from "react";
-import Header from "../../components/header/Header";
+import Navbar from "../../components/header/Navbar";
 import { Outlet } from "react-router-dom";
 import Footer from "../../components/footer/Footer";
 import LoadingScreen from "../../components/Loaders/LoadingScreen";
@@ -7,13 +7,15 @@ import LoadingScreen from "../../components/Loaders/LoadingScreen";
 const MainPage = () => {
   return (
     <Fragment>
-      <Header />
-      <main>
-        <Suspense fallback={<LoadingScreen />}>
-          <Outlet />
-        </Suspense>
-      </main>
-      <Footer />
+      <Suspense fallback={<LoadingScreen />}>
+        <div className="w-dvw h-dvh min-w-dvw min-h-dvh bg-primary text-primary-inverted">
+          <Navbar />
+          <main>
+            <Outlet />
+          </main>
+          <Footer />
+        </div>
+      </Suspense>
     </Fragment>
   );
 };

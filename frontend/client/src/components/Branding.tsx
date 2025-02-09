@@ -14,7 +14,7 @@ const Branding = ({
           type === "light" ? "text-white" : "text-black"
         }`}
       >
-        Powered by BEAUTY SHOP
+        Powered by BQ
       </p>
     </div>
   );

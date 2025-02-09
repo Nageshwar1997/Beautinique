@@ -22,7 +22,7 @@ select:-webkit-autofill:focus  */
 /* input:-webkit-autofill:hover,  */
 /* input:-webkit-autofill:focus */
 .autofill-effect:-webkit-autofill {
-  -webkit-text-fill-color: var(--primary-inverted);
+  -webkit-text-fill-color: var(--primary);
   transition: background-color 5000s ease-in-out 0s;
 }
 
@@ -40,7 +40,8 @@ select:-webkit-autofill:focus  */
 
 /* Loading Screen Page */
 .loadingHighlight {
-  color: var(--picton-blue-c);
-  -webkit-background-clip: text;
+  color: transparent;
+  background-clip: text;
+  background-image: var(--accent-duo);
   display: inline;
 }

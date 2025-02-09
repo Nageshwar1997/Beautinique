@@ -15,7 +15,7 @@
   border: 0px solid transparent;
   border-radius: 50%;
   position: absolute;
-  box-shadow: 0px 0px 10px var(--primary-inverted-10);
+  box-shadow: 0px 0px 10px var(--primary-10);
 }
 
 /* 🔹 Ring 1 */

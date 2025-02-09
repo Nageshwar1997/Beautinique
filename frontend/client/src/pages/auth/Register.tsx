@@ -1,7 +1,7 @@
 import { RefObject, useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
-import { RegisterTextContent, registerInputMapData } from "./constants";
+import { RegisterTextContent, registerInputMapData } from "./data";
 import { VerticalScrollType, RegisterFormInputProps } from "../../types";
 import AuthRobot from "./components/AuthRobot";
 import UploadProfile from "./components/UploadProfile";
@@ -15,7 +15,7 @@ import { Link } from "react-router-dom";
 import Checkbox from "../../components/input/Checkbox";
 import useVerticalScrollable from "../../hooks/useVerticalScrollable";
 import { BottomGradient, TopGradient } from "../../components/Gradients";
-import { registerSchema } from "./helpers";
+import { registerSchema } from "./helpers/auth.schema";
 import { useRegisterUser } from "../../api/user/user.service";
 import Loading from "../../components/Loaders/Loading/Loading";
 
@@ -69,7 +69,6 @@ const Register = () => {
       }
     });
 
-    console.log("data register", data);
     userRegisterMutation.mutate(formData);
   };
 
@@ -91,40 +90,39 @@ const Register = () => {
   return (
     <div className="w-full min-h-dvh max-h-dvh h-full p-4 flex gap-4 overflow-hidden relative">
       <AuthRobot />
-      {userRegisterMutation.isPending ? (
-        <Loading content="Loading...." />
-      ) : (
-        <div
-          ref={containerRef as RefObject<HTMLDivElement>}
-          className={`w-full md:w-1/2 flex flex-col items-center gap-4 overflow-hidden overflow-y-scroll ${
-            !(showGradient as VerticalScrollType).bottom &&
-            !(showGradient as VerticalScrollType).top
-              ? "justify-center"
-              : "justify-start"
-          }`}
-        >
-          {(showGradient as VerticalScrollType).top && <TopGradient />}
+
+      <div
+        ref={containerRef as RefObject<HTMLDivElement>}
+        className={`w-full md:w-1/2 flex flex-col items-center gap-4 overflow-hidden overflow-y-scroll ${
+          !(showGradient as VerticalScrollType).bottom &&
+          !(showGradient as VerticalScrollType).top
+            ? "justify-center"
+            : "justify-start"
+        }`}
+      >
+        {(showGradient as VerticalScrollType).top && <TopGradient />}
+        {userRegisterMutation.isPending ? (
+          <Loading content="Loading...." />
+        ) : (
           <form
             onSubmit={handleSubmit(onSubmit)}
             autoComplete="off"
             className="w-full flex flex-col gap-4"
           >
-            <div className="text-center mb-3">
-              <TextDisplay
-                content={RegisterTextContent}
-                contentClassName="mb-3 font-semibold"
-              />
-              <UploadProfile
-                imageUrl={previewURL}
-                register={{
-                  ...register("profilePic" as keyof RegisterFormInputProps),
-                }}
-                name="profilePic"
-              />
-            </div>
+            <TextDisplay
+              content={RegisterTextContent}
+              contentClassName="mb-3 font-semibold"
+            />
             <SocialAuth />
             <div className="w-full max-w-[400px] lg:max-w-[500px] sm:w-[90%] lg:w-[500px] border-gradient p-px rounded-3xl overflow-hidden mx-auto">
-              <div className="shadow-light-dark-soft bg-platinum-black p-6 md:p-8 rounded-3xl space-y-6">
+              <div className="shadow-light-dark-soft bg-platinum-black p-6 md:px-8 rounded-3xl space-y-6">
+                <UploadProfile
+                  imageUrl={previewURL}
+                  register={{
+                    ...register("profilePic"),
+                  }}
+                  name="profilePic"
+                />
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-x-4 gap-y-5 lg:gap-y-6">
                   {registerInputMapData?.map((field, index) => {
                     const { label, name, type, placeholder } = field;
@@ -170,9 +168,9 @@ const Register = () => {
                               (showPasswords[
                                 name as keyof PasswordVisibilityType
                               ] ? (
-                                <EyeOffIcon className="!fill-primary-inverted opacity-50 hover:opacity-100" />
+                                <EyeOffIcon className="!fill-primary opacity-50 hover:opacity-100 h-full" />
                               ) : (
-                                <EyeIcon className="!fill-primary-inverted opacity-50 hover:opacity-100" />
+                                <EyeIcon className="!fill-primary opacity-50 hover:opacity-100 h-full" />
                               ))
                             }
                             iconClick={() =>
@@ -187,19 +185,11 @@ const Register = () => {
                   })}
                 </div>
                 <div className="space-y-3">
-                  <div className="flex items-center justify-between gap-3">
-                    <div className="flex items-center space-x-3">
-                      <Checkbox register={{ ...register("remember") }} />
-                      <span className="text-sm text-primary-inverted-50 font-medium">
-                        Remember me
-                      </span>
-                    </div>
-                    <Link
-                      to="/"
-                      className="bg-clip-text text-transparent bg-silver-duo-gradient hover:bg-accent-duo"
-                    >
-                      Back
-                    </Link>
+                  <div className="flex items-center space-x-3">
+                    <Checkbox register={{ ...register("remember") }} />
+                    <span className="text-sm text-primary-50 font-medium">
+                      Remember me
+                    </span>
                   </div>
                   <Button
                     pattern="primary"
@@ -208,7 +198,7 @@ const Register = () => {
                     className="!text-base"
                   />
                   <div className="flex items-center justify-center gap-2">
-                    <p className="bg-clip-text text-transparent bg-silver-duo-gradient text-xs md:text-sm">
+                    <p className="bg-clip-text text-transparent bg-silver-duo text-xs md:text-sm">
                       Already have an account?
                     </p>
                     <Link
@@ -222,9 +212,9 @@ const Register = () => {
               </div>
             </div>
           </form>
-          {(showGradient as VerticalScrollType).bottom && <BottomGradient />}
-        </div>
-      )}
+        )}
+        {(showGradient as VerticalScrollType).bottom && <BottomGradient />}
+      </div>
     </div>
   );
 };
