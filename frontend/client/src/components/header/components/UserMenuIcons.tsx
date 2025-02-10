@@ -1,0 +1,36 @@
+import DarkMode from "../../DarkMode";
+import {
+  BuildingIcon,
+  HeartIcon,
+  SearchIcon,
+  ShoppingBag,
+  UserCircleIcon,
+} from "../../icons";
+
+const UserMenuIcons = () => {
+  return (
+    <div className="flex gap-5">
+      {/* Search Icon (Hidden on XL screens) */}
+      <span className="xl:hidden">
+        <SearchIcon className="[&>path]:stroke-tertiary-inverted" />
+      </span>
+      <span>
+        <UserCircleIcon className="[&>path]:stroke-tertiary-inverted" />
+      </span>
+      <span>
+        <BuildingIcon className="[&>path]:stroke-tertiary-inverted" />
+      </span>
+      <span>
+        <ShoppingBag className="[&>path]:stroke-tertiary-inverted" />
+      </span>
+      <span>
+        <HeartIcon className="[&>path]:stroke-tertiary-inverted" />
+      </span>
+      <span>
+        <DarkMode />
+      </span>
+    </div>
+  );
+};
+
+export default UserMenuIcons;

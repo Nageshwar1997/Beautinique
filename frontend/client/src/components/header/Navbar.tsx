@@ -1,46 +1,58 @@
-import { DropdownIcon, TestIcon } from "../icons";
+import {
+  CareIcon,
+  CashIcon,
+  DropdownIcon,
+  GiftCardIcon,
+  SearchIcon,
+
+  TrackIcon,
+
+} from "../icons";
+import UserMenuIcons from "./components/UserMenuIcons";
 import { data } from "./data/newData";
 
 const Navbar = () => {
   const levelOneCategories = data.filter((item) => item.level === 1);
 
   return (
-    <div className="h-[100px] w-full flex justify-between items-center gap-3 sticky -top-9 px-10 bg-tertiary">
-      <div className="min-h-[calc(100%-36px)] h-full flex items-center justify-center">
+    <div className="h-16 lg:h-[100px] w-full flex justify-between items-center gap-3 sticky top-0 left-0 lg:-top-9 px-10 bg-tertiary">
+      <div className="min-h-16 h-full flex items-center justify-center">
         <img
           src="./images/logo/B_Q.png"
           alt="Logo"
-          className="object-cover w-fit max-h-[calc(100%-36px)] sticky top-0"
+          className="object-cover w-fit max-h-16 h-full sticky top-0 left-0"
         />
       </div>
-      <div className="w-full h-full px-5">
+      <div className="w-full h-full px-5 hidden lg:block">
         <div className="h-9 flex items-center justify-between px-5 bg-secondary text-secondary-inverted rounded-b-md">
-          <p className="text-sm text-nowrap">Beautinique Luxury</p>
+          <p className="text-sm text-nowrap cursor-pointer lg:opacity-90 hover:opacity-100 transition-all duration-300">
+            Beautinique Luxury
+          </p>
           <div className="flex items-center gap-3 text-xs">
-            <p className="flex items-center gap-1">
-              <TestIcon className="stroke-secondary-inverted fill-secondary-inverted" />
+            <p className="flex items-center gap-0.5 cursor-pointer lg:opacity-90 hover:opacity-100 transition-all duration-300">
+              <CashIcon className="w-3.5 h-3.5 pb-px [&>path]:stroke-secondary-inverted" />
               <span className="text-nowrap">BQ Cash</span>
             </p>
-            <p className="flex items-center gap-1">
-              <TestIcon className="!stroke-secondary-inverted fill-secondary-inverted" />
+            <p className="flex items-center gap-0.5 cursor-pointer lg:opacity-90 hover:opacity-100 transition-all duration-300">
+              <GiftCardIcon className="w-3.5 h-3.5 pb-px fill-secondary-inverted" />
               <span className="text-nowrap">Gift Card</span>
             </p>
-            <p className="flex items-center gap-1">
-              <TestIcon className="stroke-secondary-inverted fill-secondary-inverted" />
+            <p className="flex items-center gap-0.5 cursor-pointer lg:opacity-90 hover:opacity-100 transition-all duration-300">
+              <CareIcon className="w-3.5 h-3.5 pb-px fill-secondary-inverted" />
               <span className="text-nowrap">BQ Care</span>
             </p>
-            <p className="flex items-center gap-1">
-              <TestIcon className="stroke-secondary-inverted fill-secondary-inverted" />
+            <p className="flex items-center gap-0.5 cursor-pointer lg:opacity-90 hover:opacity-100 transition-all duration-300">
+              <TrackIcon className="w-3.5 h-3.5 pb-px [&>path]:stroke-secondary-inverted" />
               <span className="text-nowrap">Track Orders</span>
             </p>
           </div>
         </div>
-        <div className="h-[calc(100%-36px)] flex items-center gap-7 justify-between px-5 bg-tertiary text-tertiary-inverted">
+        <div className="h-16 flex items-center gap-7 justify-between px-5 bg-tertiary text-tertiary-inverted">
           <div className="flex items-center gap-5">
             {levelOneCategories.map((item) => (
               <div
                 key={item.id}
-                className="flex items-center gap-1 text-sm text-nowrap"
+                className="flex items-center gap-1 text-sm text-nowrap font-semibold"
               >
                 <p>{item.label}</p>
                 <DropdownIcon />
@@ -51,32 +63,15 @@ const Navbar = () => {
             <input
               type="text"
               placeholder="Search Beautinique"
-              className="w-full h-full px-3 py-1 text-sm focus:outline-none focus:border-none bg-transparent placeholder:text-primary-50"
+              className="w-full h-full pl-4 pr-1 py-1 text-sm focus:outline-none focus:border-none bg-transparent placeholder:text-primary-50"
             />
-            <TestIcon className="stroke-secondary-inverted fill-secondary-inverted mr-2" />
+            <SearchIcon className="w-5 h-5 [&>path]:stroke-primary-50 mr-3" />
           </div>
-          <div className="flex gap-3">
-            {/* Search Icon */}
-            <span className="xl:hidden">
-              <TestIcon className="stroke-secondary-inverted fill-secondary-inverted" />
-            </span>
-            <span>
-              <TestIcon className="stroke-secondary-inverted fill-secondary-inverted" />
-            </span>
-            <span>
-              <TestIcon className="stroke-secondary-inverted fill-secondary-inverted" />
-            </span>
-            <span>
-              <TestIcon className="stroke-secondary-inverted fill-secondary-inverted" />
-            </span>
-            <span>
-              <TestIcon className="stroke-secondary-inverted fill-secondary-inverted" />
-            </span>
-            <span>
-              <TestIcon className="stroke-secondary-inverted fill-secondary-inverted" />
-            </span>
-          </div>
+          <UserMenuIcons />
         </div>
+      </div>
+      <div className="border px-5 lg:hidden">
+        {/* <UserMenuIcons /> */}
       </div>
     </div>
   );

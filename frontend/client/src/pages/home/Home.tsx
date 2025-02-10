@@ -11,7 +11,7 @@ const Home = () => {
     //     controls
     //   ></video>
     // </div>
-    <div className="min-h-[120vh]">Home</div>
+    <div className="">Home</div>
   );
 };
 
