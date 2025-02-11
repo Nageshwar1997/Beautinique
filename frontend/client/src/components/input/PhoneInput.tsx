@@ -1,4 +1,4 @@
-import { CheckMark, InfoIcon } from "../icons";
+import { CheckMark, InfoIcon } from "../../icons";
 import { InputProps } from "../../types";
 
 const PhoneInput = ({

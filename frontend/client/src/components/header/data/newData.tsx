@@ -1,4 +1,9 @@
-import { GiftIcon, MakeupKitIcon, TestIcon, ValueSetsIcon } from "../../icons";
+import {
+  GiftIcon,
+  MakeupKitIcon,
+  TestIcon,
+  ValueSetsIcon,
+} from "../../../icons";
 
 export const for_you = {
   id: 1,

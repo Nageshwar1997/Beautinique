@@ -1,5 +1,5 @@
 import { useLocation } from "react-router-dom";
-import { CameraIcon } from "../../../components/icons";
+import { CameraIcon } from "../../../icons";
 import { FileInputProps } from "../../../types";
 
 const UploadProfile = ({

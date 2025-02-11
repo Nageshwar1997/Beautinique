@@ -5,26 +5,26 @@ import {
   SearchIcon,
   ShoppingBag,
   UserCircleIcon,
-} from "../../icons";
+} from "../../../icons";
 
 const UserMenuIcons = () => {
   return (
-    <div className="flex gap-5">
+    <div className="flex gap-2 md:gap-3 lg:gap-5">
       {/* Search Icon (Hidden on XL screens) */}
       <span className="xl:hidden">
-        <SearchIcon className="[&>path]:stroke-tertiary-inverted" />
+        <SearchIcon className="[&>path]:stroke-tertiary-inverted w-5 h-5 md:w-6 md:h-6" />
       </span>
       <span>
-        <UserCircleIcon className="[&>path]:stroke-tertiary-inverted" />
+        <UserCircleIcon className="[&>path]:stroke-tertiary-inverted w-5 h-5 md:w-6 md:h-6" />
       </span>
       <span>
-        <BuildingIcon className="[&>path]:stroke-tertiary-inverted" />
+        <BuildingIcon className="[&>path]:stroke-tertiary-inverted w-5 h-5 md:w-6 md:h-6" />
       </span>
       <span>
-        <ShoppingBag className="[&>path]:stroke-tertiary-inverted" />
+        <ShoppingBag className="[&>path]:stroke-tertiary-inverted w-5 h-5 md:w-6 md:h-6" />
       </span>
       <span>
-        <HeartIcon className="[&>path]:stroke-tertiary-inverted" />
+        <HeartIcon className="[&>path]:stroke-tertiary-inverted w-5 h-5 md:w-6 md:h-6" />
       </span>
       <span>
         <DarkMode />

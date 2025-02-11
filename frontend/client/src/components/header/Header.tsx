@@ -79,7 +79,7 @@ const Header = () => {
                 </div>
               );
             })}
-            <div className="absolute top-12 w-fit border border-[red] h-fit bg-white flex gap-10 py-3 px-5">
+            <div className="absolute top-12 w-fit h-fit bg-white flex gap-10 py-3 px-5">
               <div className="border px-2 flex flex-col gap-4">
                 {levelTwoCategories?.map((item: Subcategory, index) => {
                   return (

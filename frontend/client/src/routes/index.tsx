@@ -1,22 +1,28 @@
-/* eslint-disable react-refresh/only-export-components */
 import { createBrowserRouter } from "react-router-dom";
-import { lazy } from "react";
+import { lazy, Suspense } from "react";
 
-const MainPage = lazy(() => import("../pages/main/MainPage"));
-import Home from "../pages/home/Home";
+// Lazy load route components
+const Home = lazy(() => import("../pages/home/Home"));
+
+import Main from "../pages/main/Main";
 import Register from "../pages/auth/Register";
 import Login from "../pages/auth/Login";
 import NotFound from "../pages/error/NotFound";
 import SomethingWentWrong from "../pages/error/SomethingWentWrong";
+import LoadingScreen from "../components/loaders/LoadingScreen";
 
 const router = createBrowserRouter([
   {
     path: "/",
-    element: <MainPage />,
+    element: <Main />,
     children: [
       {
-        index: true, // This is the default route
-        element: <Home />,
+        index: true,
+        element: (
+          <Suspense fallback={<LoadingScreen />}>
+            <Home />
+          </Suspense>
+        ),
       },
     ],
   },

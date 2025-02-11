@@ -1,6 +1,11 @@
 import { HTMLInputAutoCompleteAttribute, ReactNode } from "react";
 
-export type ThemeTypes = "light" | "dark";
+export type ThemeType = "light" | "dark";
+
+export type ThemeStoreType = {
+  theme: ThemeType;
+  toggleTheme: () => void;
+};
 
 export interface FileInputProps {
   imageUrl?: string | null;
