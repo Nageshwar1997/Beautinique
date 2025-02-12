@@ -7,7 +7,7 @@ import {
 import Collections from "../components/Collections";
 import Eyes from "../components/Eyes";
 import Face from "../components/Face";
-import ForYou from "../components/ForYou";
+import ForYou from "../components/for-you/ForYou";
 import Lips from "../components/Lips";
 import Skin from "../components/Skin";
 
@@ -22,10 +22,12 @@ export const for_you = {
     {
       id: 1,
       level: 2,
+      heading: "Latest Trends",
       label: "New",
       category: "new",
       icon: <TestIcon />,
       videoUrl: "./videos/header/new.mp4",
+      description: "Discover new beauty arrivals for a fresh, trendy style.",
       subCategories: [
         {
           id: 1,
@@ -39,10 +41,12 @@ export const for_you = {
     {
       id: 2,
       level: 2,
+      heading: "Best Sellers",
       label: "Sugar Play",
       category: "sugar_play",
       icon: <TestIcon />,
       videoUrl: "./videos/header/sugar_play.mp4",
+      description: "Shop beauty products top-rated & loved by enthusiasts.",
       subCategories: [
         {
           id: 1,
@@ -56,10 +60,12 @@ export const for_you = {
     {
       id: 3,
       level: 2,
+      heading: "Exclusive Deals",
       label: "Offers",
       category: "offers",
       icon: <TestIcon />,
       videoUrl: "./videos/header/offers.mp4",
+      description: "Grab discounts on premium cosmetics for a limited time.",
       subCategories: [
         {
           id: 1,
@@ -73,10 +79,12 @@ export const for_you = {
     {
       id: 4,
       level: 2,
+      heading: "Beauty Insights",
       label: "Blogs",
       category: "blogs",
       icon: <TestIcon />,
       videoUrl: "./videos/header/blogs.mp4",
+      description: "Explore top beauty tips, trends, & skincare routines.",
       subCategories: [
         {
           id: 1,

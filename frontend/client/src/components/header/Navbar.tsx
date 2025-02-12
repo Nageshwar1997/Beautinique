@@ -91,7 +91,7 @@ const Navbar = () => {
 
   return (
     <div
-      className={`h-16 lg:h-[100px] w-full flex justify-between items-center gap-3 sticky top-0 left-0 lg:-top-9 px-2 sm:px-5 md:px-10 bg-tertiary text-tertiary-inverted shadow-lg shadow-primary-inverted-50 z-50`}
+      className={`h-16 lg:h-[100px] w-full flex justify-between items-center gap-3 sticky top-0 left-0 lg:-top-9 px-2 sm:px-5 md:px-10 bg-tertiary-inverted text-tertiary shadow-lg shadow-primary-inverted-50 z-50`}
       onMouseLeave={handleMouseLeave}
     >
       <div className="h-12 sm:h-14 md:min-h-16 md:h-full flex items-center justify-center">
@@ -162,10 +162,13 @@ const Navbar = () => {
           <UserMenuIcons />
           {(hoveredIndex !== null || isContainerHovered) && (
             <div
-              className={`absolute border left-0 top-16 w-full h-[400px] bg-primary-inverted-50 z-[99]`}
+              className={`rounded-2xl absolute left-0 top-16 w-full h-fit z-[99]`}
               ref={containerRef}
               onMouseEnter={handleContainerMouseEnter}
               onMouseLeave={handleMouseLeave}
+              style={{
+                boxShadow: "rgba(0, 0, 0, 0.24) 0px 3px 8px",
+              }}
             >
               {/* <div className="flex justify-center items-start"> */}
               {/* {hoveredIndex} */}
@@ -184,9 +187,9 @@ const Navbar = () => {
           onClick={() => setIsMobileNavbarOpened((prev) => !prev)}
         >
           {isMobileNavbarOpened ? (
-            <CloseIcon className="[&>path]:stroke-tertiary-inverted w-5 h-5 md:w-6 md:h-6" />
+            <CloseIcon className="[&>path]:stroke-tertiary w-5 h-5 md:w-6 md:h-6" />
           ) : (
-            <MenuIcon className="[&>path]:stroke-tertiary-inverted w-5 h-5 md:w-6 md:h-6" />
+            <MenuIcon className="[&>path]:stroke-tertiary w-5 h-5 md:w-6 md:h-6" />
           )}
         </div>
       </div>
