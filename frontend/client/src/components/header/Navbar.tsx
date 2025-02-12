@@ -21,7 +21,7 @@ const Navbar = () => {
 
   const [isMobileNavbarOpened, setIsMobileNavbarOpened] =
     useState<boolean>(false);
-  const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
+  const [hoveredIndex, setHoveredIndex] = useState<number | null>(1);
   const [activeIndices, setActiveIndices] = useState<number[]>([]);
   const [isContainerHovered, setIsContainerHovered] = useState<boolean>(false);
 
@@ -40,23 +40,23 @@ const Navbar = () => {
   };
 
   // Handles the event when the user clicks outside the navbar.
-  useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      if (
-        containerRef.current &&
-        navbarRef.current &&
-        !containerRef.current.contains(event.target as Node) &&
-        !navbarRef.current.contains(event.target as Node)
-      ) {
-        handleMouseLeave();
-      }
-    };
+  // useEffect(() => {
+  //   const handleClickOutside = (event: MouseEvent) => {
+  //     if (
+  //       containerRef.current &&
+  //       navbarRef.current &&
+  //       !containerRef.current.contains(event.target as Node) &&
+  //       !navbarRef.current.contains(event.target as Node)
+  //     ) {
+  //       handleMouseLeave();
+  //     }
+  //   };
 
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => {
-      document.removeEventListener("mousedown", handleClickOutside);
-    };
-  }, []);
+  //   document.addEventListener("mousedown", handleClickOutside);
+  //   return () => {
+  //     document.removeEventListener("mousedown", handleClickOutside);
+  //   };
+  // }, []);
 
   // Disables body scroll when the mobile navbar is opened
   useEffect(() => {
@@ -78,17 +78,17 @@ const Navbar = () => {
   };
 
   // Close navbar when pathname changes
-  useEffect(() => {
-    setHoveredIndex(null);
-    setIsContainerHovered(false);
-    setIsMobileNavbarOpened(false);
-    setActiveIndices([]);
-  }, [pathname]);
+  // useEffect(() => {
+  //   setHoveredIndex(1);
+  //   setIsContainerHovered(false);
+  //   setIsMobileNavbarOpened(false);
+  //   setActiveIndices([]);
+  // }, [pathname]);
 
   return (
     <div
       className={`h-16 lg:h-[100px] w-full flex justify-between items-center gap-3 sticky top-0 left-0 lg:-top-9 px-2 sm:px-5 md:px-10 bg-tertiary text-tertiary-inverted shadow-lg shadow-primary-inverted-50 z-50`}
-      onMouseLeave={handleMouseLeave}
+      // onMouseLeave={handleMouseLeave}
     >
       <div className="h-12 sm:h-14 md:min-h-16 md:h-full flex items-center justify-center">
         <img
@@ -127,7 +127,7 @@ const Navbar = () => {
               <div
                 key={item.id}
                 className="flex items-center gap-1 text-sm text-nowrap font-semibold transition-all duration-300 cursor-pointer relative"
-                onMouseEnter={() => handleMouseEnter(index)}
+                // onMouseEnter={() => handleMouseEnter(index)}
               >
                 <p
                   className={`${
@@ -164,7 +164,7 @@ const Navbar = () => {
               onMouseLeave={handleMouseLeave}
             >
               <div className="flex justify-center items-start">
-                {hoveredIndex}
+                {/* {hoveredIndex} */}
                 {/* <HoveredContent hoveredIndex={hoveredIndex} /> */}
               </div>
             </div>

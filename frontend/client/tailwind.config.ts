@@ -34,6 +34,7 @@ export default {
         "platinum-black": "var(--platinum-black)",
         "platinum-black-inverted": "var(--platinum-black-inverted)",
         "battleship-davys-gray": "var(--battleship-davys-gray)",
+        "blue-crayola-c": "var(--blue-crayola-c)",
       },
       backgroundImage: {
         "accent-duo": "var(--accent-duo)",
