@@ -1,16 +1,20 @@
+import { useState } from "react";
 import {
   CareIcon,
   CashIcon,
+  CloseIcon,
   DropdownIcon,
   GiftCardIcon,
-  MoonIcon,
-  SearchIcon,
+  MenuIcon,
   TrackIcon,
 } from "../../icons";
 import UserMenuIcons from "./components/UserMenuIcons";
 import { data } from "./data/newData";
+import SearchInput from "./components/SearchInput";
 
 const Navbar = () => {
+  const [open, setOpen] = useState(false);
+
   const levelOneCategories = data.filter((item) => item.level === 1);
 
   return (
@@ -58,20 +62,20 @@ const Navbar = () => {
               </div>
             ))}
           </div>
-          <div className="flex-grow h-9 hidden rounded-md overflow-hidden bg-secondary xl:flex items-center focus-within:border focus-within:shadow-lg focus-within:shadow-primary-10 focus-within:border-primary-50">
-            <input
-              type="text"
-              placeholder="Search Beautinique"
-              className="w-full h-full pl-4 pr-1 py-1 text-sm focus:outline-none focus:border-none bg-transparent placeholder:text-primary-50"
-            />
-            <SearchIcon className="w-5 h-5 [&>path]:stroke-primary-50 mr-3" />
-          </div>
+          <SearchInput />
           <UserMenuIcons />
         </div>
       </div>
-      <div className="px-1 sm:px-3 md:px-5 lg:hidden flex items-center gap-3">
+      <SearchInput className="sm:!flex lg:!hidden" />
+      <div className="px-1 sm:px-3 md:px-5 lg:hidden flex items-center gap-5">
         <UserMenuIcons />
-        <MoonIcon className="[&>path]:stroke-tertiary-inverted w-5 h-5 md:w-6 md:h-6" />
+        <div className="" onClick={() => setOpen((prev) => !prev)}>
+          {open ? (
+            <CloseIcon className="[&>path]:stroke-tertiary-inverted w-5 h-5 md:w-6 md:h-6" />
+          ) : (
+            <MenuIcon className="[&>path]:stroke-tertiary-inverted w-5 h-5 md:w-6 md:h-6" />
+          )}
+        </div>
       </div>
     </div>
   );
