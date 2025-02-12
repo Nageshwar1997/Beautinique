@@ -46,8 +46,8 @@ const Header = () => {
       <header
         ref={headerRef} // Pass the ref to the header element
         className={`w-full max-h-20 h-20 border flex items-center justify-center gap-24 px-5 transition-all ${
-          isHoverOrTop ? "bg-secondary" : "bg-transparent"
-        } hover:bg-secondary`}
+          isHoverOrTop ? "bg-secondary-inverted" : "bg-transparent"
+        } hover:bg-secondary-inverted`}
         onMouseEnter={() => setIsHoverOrTop(true)}
         onMouseLeave={() => setIsHoverOrTop(false)}
       >
@@ -61,7 +61,7 @@ const Header = () => {
         <div className="relative">
           <div
             className={`flex items-center gap-10 text-sm ${
-              isHoverOrTop ? "text-secondary-inverted" : "text-seasalt-black"
+              isHoverOrTop ? "text-secondary" : "text-seasalt-black"
             }`}
           >
             {navbarCategoryData?.map((item: Category, index) => {

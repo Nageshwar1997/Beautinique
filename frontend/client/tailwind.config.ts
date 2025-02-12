@@ -31,10 +31,12 @@ export default {
         "smoke-eerie": "var(--smoke-eerie)",
         "smoke-eerie-inverted": "var(--smoke-eerie-inverted)",
         "seasalt-black": "var(--seasalt-black)",
+        "platinum-jet": "var(--platinum-jet)",
         "platinum-black": "var(--platinum-black)",
         "platinum-black-inverted": "var(--platinum-black-inverted)",
         "battleship-davys-gray": "var(--battleship-davys-gray)",
         "blue-crayola-c": "var(--blue-crayola-c)",
+        "white-smoke-night": "var(--white-smoke-night)",
       },
       backgroundImage: {
         "accent-duo": "var(--accent-duo)",

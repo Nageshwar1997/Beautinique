@@ -29,8 +29,8 @@
   --primary-inverted-50: #00000080;
 
   /* Secondary */
-  --secondary: #1c1c1c;
-  --secondary-inverted: #f5f5f5;
+  --secondary: #f5f5f5;
+  --secondary-inverted: #1c1c1c;
 
   /* Tertiary */
   --tertiary: #2e2e2e;
@@ -42,8 +42,10 @@
   --seasalt-black: #f7fafc;
   --battleship-davys-gray: #4d4d4d;
   --timberwolf-eerie-black: #191919;
+  --platinum-jet: #333333;
   --platinum-black: #080808;
   --platinum-black-inverted: #e6e6e6;
+  --white-smoke-night: #f2f2f2;
 
   /* Gradients */
   --accent-duo: linear-gradient(
@@ -77,8 +79,8 @@
   --primary-inverted-50: #ffffff80;
 
   /* Secondary */
-  --secondary: #f5f5f5;
-  --secondary-inverted: #1c1c1c;
+  --secondary: #1c1c1c;
+  --secondary-inverted: #f5f5f5;
 
   /* Tertiary */
   --tertiary: #e0e0e0;
@@ -90,8 +92,10 @@
   --seasalt-black: #f5f1ef;
   --battleship-davys-gray: #8a8a8a4d;
   --timberwolf-eerie-black: #d8d8d853;
+  --platinum-jet: #e5e5e5;
   --platinum-black: #e6e6e6;
   --platinum-black-inverted: #080808;
+  --white-smoke-night: #0d0d0d;
 
   /* Gradients */
   --accent-duo: linear-gradient(

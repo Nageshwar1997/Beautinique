@@ -4,12 +4,19 @@ import {
   TestIcon,
   ValueSetsIcon,
 } from "../../../icons";
+import Collections from "../components/Collections";
+import Eyes from "../components/Eyes";
+import Face from "../components/Face";
+import ForYou from "../components/ForYou";
+import Lips from "../components/Lips";
+import Skin from "../components/Skin";
 
 export const for_you = {
   id: 1,
   level: 1,
   label: "For You",
   category: "for_you",
+  component: ForYou,
   icon: <TestIcon />,
   subCategories: [
     {
@@ -83,267 +90,12 @@ export const for_you = {
   ],
 };
 
-const collections = {
-  id: 2,
-  level: 1,
-  label: "Collections",
-  category: "collections",
-  icon: <TestIcon />,
-  subCategories: [
-    {
-      id: 1,
-      level: 2,
-      label: "Gifting",
-      category: "gifting",
-      icon: <TestIcon />,
-      subCategories: [
-        {
-          id: 1,
-          level: 3,
-          label: "Lipstick Sets",
-          category: "lipstick_sets",
-          icon: <TestIcon />,
-        },
-        {
-          id: 2,
-          level: 3,
-          label: "Sugar Merch",
-          category: "sugar_merch",
-          icon: <TestIcon />,
-        },
-        {
-          id: 3,
-          level: 3,
-          label: "Value Sets",
-          category: "value_sets",
-          icon: <ValueSetsIcon />,
-        },
-        {
-          id: 4,
-          level: 3,
-          label: "Makeup Kits",
-          category: "makeup_kits",
-          icon: <MakeupKitIcon />,
-        },
-        {
-          id: 5,
-          level: 3,
-          label: "Corporate Gifting",
-          category: "corporate_gifting",
-          icon: <GiftIcon />,
-        },
-        {
-          id: 6,
-          level: 3,
-          label: "Sugar Sets",
-          category: "sugar_sets",
-          icon: <TestIcon />,
-        },
-        {
-          id: 7,
-          level: 3,
-          label: "View All",
-          category: "view_all",
-          icon: <TestIcon />,
-        },
-      ],
-    },
-    {
-      id: 2,
-      level: 2,
-      label: "Sugar Pop",
-      category: "sugar_pop",
-      icon: <TestIcon />,
-      subCategories: [
-        {
-          id: 1,
-          level: 3,
-          label: "Lips",
-          category: "lips",
-          icon: <TestIcon />,
-        },
-        {
-          id: 2,
-          level: 3,
-          label: "Eyes",
-          category: "eyes",
-          icon: <TestIcon />,
-        },
-        {
-          id: 3,
-          level: 3,
-          label: "Face",
-          category: "face",
-          icon: <TestIcon />,
-        },
-        {
-          id: 4,
-          level: 3,
-          label: "Nails",
-          category: "nails",
-          icon: <TestIcon />,
-        },
-        {
-          id: 5,
-          level: 3,
-          label: "Skincare",
-          category: "skincare",
-          icon: <TestIcon />,
-        },
-        {
-          id: 6,
-          level: 3,
-          label: "Body Care",
-          category: "body_care",
-          icon: <TestIcon />,
-        },
-        {
-          id: 7,
-          level: 3,
-          label: "Best of Sugar Pop",
-          category: "best_of_sugar_pop",
-          icon: <TestIcon />,
-        },
-        {
-          id: 8,
-          level: 3,
-          label: "View All",
-          category: "view_all",
-          icon: <TestIcon />,
-        },
-      ],
-    },
-    {
-      id: 3,
-      level: 2,
-      label: "Bath & Body",
-      category: "bath_and_body",
-      icon: <TestIcon />,
-      subCategories: [
-        {
-          id: 1,
-          level: 3,
-          label: "Shower Gels",
-          category: "shower_gels",
-          icon: <TestIcon />,
-        },
-        {
-          id: 2,
-          level: 3,
-          label: "Soaps",
-          category: "soaps",
-          icon: <TestIcon />,
-        },
-        {
-          id: 3,
-          level: 3,
-          label: "Body Lotion",
-          category: "body_lotion",
-          icon: <TestIcon />,
-        },
-        {
-          id: 4,
-          level: 3,
-          label: "Body Sprays",
-          category: "body_sprays",
-          icon: <TestIcon />,
-        },
-        {
-          id: 5,
-          level: 3,
-          label: "Hand Wash",
-          category: "hand_wash",
-          icon: <TestIcon />,
-        },
-        {
-          id: 6,
-          level: 3,
-          label: "Foot Cream",
-          category: "foot_cream",
-          icon: <TestIcon />,
-        },
-        {
-          id: 7,
-          level: 3,
-          label: "Hand Cream",
-          category: "hand_cream",
-          icon: <TestIcon />,
-        },
-        {
-          id: 8,
-          level: 3,
-          label: "View All",
-          category: "view_all",
-          icon: <TestIcon />,
-        },
-      ],
-    },
-    {
-      id: 4,
-      level: 2,
-      label: "Hair Care",
-      category: "hair_care",
-      icon: <TestIcon />,
-      subCategories: [
-        {
-          id: 1,
-          level: 3,
-          label: "Shampoo",
-          category: "shampoo",
-          icon: <TestIcon />,
-        },
-        {
-          id: 2,
-          level: 3,
-          label: "Conditioner",
-          category: "conditioner",
-          icon: <TestIcon />,
-        },
-        {
-          id: 3,
-          level: 3,
-          label: "Hair Oil",
-          category: "hair_oil",
-          icon: <TestIcon />,
-        },
-        {
-          id: 4,
-          level: 3,
-          label: "Serum",
-          category: "serum",
-          icon: <TestIcon />,
-        },
-        {
-          id: 5,
-          level: 3,
-          label: "Hair Mask",
-          category: "hair_mask",
-          icon: <TestIcon />,
-        },
-        {
-          id: 6,
-          level: 3,
-          label: "Combos",
-          category: "combos",
-          icon: <TestIcon />,
-        },
-        {
-          id: 7,
-          level: 3,
-          label: "View All",
-          category: "view_all",
-          icon: <TestIcon />,
-        },
-      ],
-    },
-  ],
-};
-
-const skin = {
+export const skin = {
   id: 3,
   level: 1,
   label: "Skin",
   category: "skin",
+  component: Skin,
   icon: <TestIcon />,
   subCategories: [
     {
@@ -535,11 +287,13 @@ const skin = {
     },
   ],
 };
-const face = {
+
+export const face = {
   id: 4,
   level: 1,
   label: "Face",
   category: "face",
+  component: Face,
   icon: <TestIcon />,
   subCategories: [
     {
@@ -862,11 +616,12 @@ const face = {
   ],
 };
 
-const lips = {
+export const lips = {
   id: 5,
   level: 1,
   label: "Lips",
   category: "lips",
+  component: Lips,
   icon: <TestIcon />,
   subCategories: [
     {
@@ -1045,11 +800,13 @@ const lips = {
     },
   ],
 };
-const eyes = {
+
+export const eyes = {
   id: 6,
   level: 1,
   label: "Eyes",
   category: "eyes",
+  component: Eyes,
   icon: <TestIcon />,
   subCategories: [
     {
@@ -1242,4 +999,261 @@ const eyes = {
   ],
 };
 
-export const data = [for_you, skin, face, lips, eyes, collections];
+export const collections = {
+  id: 2,
+  level: 1,
+  label: "Collections",
+  category: "collections",
+  component: Collections,
+  icon: <TestIcon />,
+  subCategories: [
+    {
+      id: 1,
+      level: 2,
+      label: "Gifting",
+      category: "gifting",
+      icon: <TestIcon />,
+      subCategories: [
+        {
+          id: 1,
+          level: 3,
+          label: "Lipstick Sets",
+          category: "lipstick_sets",
+          icon: <TestIcon />,
+        },
+        {
+          id: 2,
+          level: 3,
+          label: "Sugar Merch",
+          category: "sugar_merch",
+          icon: <TestIcon />,
+        },
+        {
+          id: 3,
+          level: 3,
+          label: "Value Sets",
+          category: "value_sets",
+          icon: <ValueSetsIcon />,
+        },
+        {
+          id: 4,
+          level: 3,
+          label: "Makeup Kits",
+          category: "makeup_kits",
+          icon: <MakeupKitIcon />,
+        },
+        {
+          id: 5,
+          level: 3,
+          label: "Corporate Gifting",
+          category: "corporate_gifting",
+          icon: <GiftIcon />,
+        },
+        {
+          id: 6,
+          level: 3,
+          label: "Sugar Sets",
+          category: "sugar_sets",
+          icon: <TestIcon />,
+        },
+        {
+          id: 7,
+          level: 3,
+          label: "View All",
+          category: "view_all",
+          icon: <TestIcon />,
+        },
+      ],
+    },
+    {
+      id: 2,
+      level: 2,
+      label: "Sugar Pop",
+      category: "sugar_pop",
+      icon: <TestIcon />,
+      subCategories: [
+        {
+          id: 1,
+          level: 3,
+          label: "Lips",
+          category: "lips",
+          icon: <TestIcon />,
+        },
+        {
+          id: 2,
+          level: 3,
+          label: "Eyes",
+          category: "eyes",
+          icon: <TestIcon />,
+        },
+        {
+          id: 3,
+          level: 3,
+          label: "Face",
+          category: "face",
+          icon: <TestIcon />,
+        },
+        {
+          id: 4,
+          level: 3,
+          label: "Nails",
+          category: "nails",
+          icon: <TestIcon />,
+        },
+        {
+          id: 5,
+          level: 3,
+          label: "Skincare",
+          category: "skincare",
+          icon: <TestIcon />,
+        },
+        {
+          id: 6,
+          level: 3,
+          label: "Body Care",
+          category: "body_care",
+          icon: <TestIcon />,
+        },
+        {
+          id: 7,
+          level: 3,
+          label: "Best of Sugar Pop",
+          category: "best_of_sugar_pop",
+          icon: <TestIcon />,
+        },
+        {
+          id: 8,
+          level: 3,
+          label: "View All",
+          category: "view_all",
+          icon: <TestIcon />,
+        },
+      ],
+    },
+    {
+      id: 3,
+      level: 2,
+      label: "Bath & Body",
+      category: "bath_and_body",
+      icon: <TestIcon />,
+      subCategories: [
+        {
+          id: 1,
+          level: 3,
+          label: "Shower Gels",
+          category: "shower_gels",
+          icon: <TestIcon />,
+        },
+        {
+          id: 2,
+          level: 3,
+          label: "Soaps",
+          category: "soaps",
+          icon: <TestIcon />,
+        },
+        {
+          id: 3,
+          level: 3,
+          label: "Body Lotion",
+          category: "body_lotion",
+          icon: <TestIcon />,
+        },
+        {
+          id: 4,
+          level: 3,
+          label: "Body Sprays",
+          category: "body_sprays",
+          icon: <TestIcon />,
+        },
+        {
+          id: 5,
+          level: 3,
+          label: "Hand Wash",
+          category: "hand_wash",
+          icon: <TestIcon />,
+        },
+        {
+          id: 6,
+          level: 3,
+          label: "Foot Cream",
+          category: "foot_cream",
+          icon: <TestIcon />,
+        },
+        {
+          id: 7,
+          level: 3,
+          label: "Hand Cream",
+          category: "hand_cream",
+          icon: <TestIcon />,
+        },
+        {
+          id: 8,
+          level: 3,
+          label: "View All",
+          category: "view_all",
+          icon: <TestIcon />,
+        },
+      ],
+    },
+    {
+      id: 4,
+      level: 2,
+      label: "Hair Care",
+      category: "hair_care",
+      icon: <TestIcon />,
+      subCategories: [
+        {
+          id: 1,
+          level: 3,
+          label: "Shampoo",
+          category: "shampoo",
+          icon: <TestIcon />,
+        },
+        {
+          id: 2,
+          level: 3,
+          label: "Conditioner",
+          category: "conditioner",
+          icon: <TestIcon />,
+        },
+        {
+          id: 3,
+          level: 3,
+          label: "Hair Oil",
+          category: "hair_oil",
+          icon: <TestIcon />,
+        },
+        {
+          id: 4,
+          level: 3,
+          label: "Serum",
+          category: "serum",
+          icon: <TestIcon />,
+        },
+        {
+          id: 5,
+          level: 3,
+          label: "Hair Mask",
+          category: "hair_mask",
+          icon: <TestIcon />,
+        },
+        {
+          id: 6,
+          level: 3,
+          label: "Combos",
+          category: "combos",
+          icon: <TestIcon />,
+        },
+        {
+          id: 7,
+          level: 3,
+          label: "View All",
+          category: "view_all",
+          icon: <TestIcon />,
+        },
+      ],
+    },
+  ],
+};
+
+export const navData = [for_you, skin, face, lips, eyes, collections];

@@ -3,7 +3,7 @@ import { SearchIcon } from "../../../icons";
 const SearchInput = ({ className }: { className?: string }) => {
   return (
     <div
-      className={`max-w-96 w-full flex-grow h-9 hidden rounded-md overflow-hidden bg-secondary xl:flex items-center focus-within:border focus-within:shadow-lg focus-within:shadow-primary-10 focus-within:border-primary-50 ${className}`}
+      className={`max-w-96 w-full flex-grow h-9 hidden rounded-md overflow-hidden bg-secondary-inverted xl:flex items-center focus-within:border focus-within:shadow-lg focus-within:shadow-primary-10 focus-within:border-primary-50 ${className}`}
     >
       <input
         type="text"

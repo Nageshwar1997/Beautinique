@@ -9,9 +9,10 @@ import {
   TrackIcon,
 } from "../../icons";
 import UserMenuIcons from "./components/UserMenuIcons";
-import { data } from "./data/newData";
+import { navData } from "./data/newData";
 import SearchInput from "./components/SearchInput";
 import { useLocation } from "react-router-dom";
+import HoveredComponent from "./components/HoveredComponent";
 
 const Navbar = () => {
   const containerRef = useRef<HTMLDivElement>(null);
@@ -21,11 +22,11 @@ const Navbar = () => {
 
   const [isMobileNavbarOpened, setIsMobileNavbarOpened] =
     useState<boolean>(false);
-  const [hoveredIndex, setHoveredIndex] = useState<number | null>(1);
+  const [hoveredIndex, setHoveredIndex] = useState<number | null>(0); // replace it with null after testing
   const [activeIndices, setActiveIndices] = useState<number[]>([]);
   const [isContainerHovered, setIsContainerHovered] = useState<boolean>(false);
 
-  const levelOneCategories = data.filter((item) => item.level === 1);
+  const levelOneCategories = navData.filter((item) => item.level === 1);
 
   // Sets the hovered index when mouse enters an element
   const handleMouseEnter = (index: number) => setHoveredIndex(index);
@@ -40,23 +41,23 @@ const Navbar = () => {
   };
 
   // Handles the event when the user clicks outside the navbar.
-  // useEffect(() => {
-  //   const handleClickOutside = (event: MouseEvent) => {
-  //     if (
-  //       containerRef.current &&
-  //       navbarRef.current &&
-  //       !containerRef.current.contains(event.target as Node) &&
-  //       !navbarRef.current.contains(event.target as Node)
-  //     ) {
-  //       handleMouseLeave();
-  //     }
-  //   };
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (
+        containerRef.current &&
+        navbarRef.current &&
+        !containerRef.current.contains(event.target as Node) &&
+        !navbarRef.current.contains(event.target as Node)
+      ) {
+        handleMouseLeave();
+      }
+    };
 
-  //   document.addEventListener("mousedown", handleClickOutside);
-  //   return () => {
-  //     document.removeEventListener("mousedown", handleClickOutside);
-  //   };
-  // }, []);
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, []);
 
   // Disables body scroll when the mobile navbar is opened
   useEffect(() => {
@@ -78,17 +79,20 @@ const Navbar = () => {
   };
 
   // Close navbar when pathname changes
-  // useEffect(() => {
-  //   setHoveredIndex(1);
-  //   setIsContainerHovered(false);
-  //   setIsMobileNavbarOpened(false);
-  //   setActiveIndices([]);
-  // }, [pathname]);
+  useEffect(() => {
+    // setHoveredIndex(null);
+    setHoveredIndex(0); // remove it after testing
+    setIsContainerHovered(false);
+    setIsMobileNavbarOpened(false);
+    setActiveIndices([]);
+  }, [pathname]);
+
+  console.log("navData[hoveredIndex]", navData[hoveredIndex as number]);
 
   return (
     <div
       className={`h-16 lg:h-[100px] w-full flex justify-between items-center gap-3 sticky top-0 left-0 lg:-top-9 px-2 sm:px-5 md:px-10 bg-tertiary text-tertiary-inverted shadow-lg shadow-primary-inverted-50 z-50`}
-      // onMouseLeave={handleMouseLeave}
+      onMouseLeave={handleMouseLeave}
     >
       <div className="h-12 sm:h-14 md:min-h-16 md:h-full flex items-center justify-center">
         <img
@@ -98,25 +102,25 @@ const Navbar = () => {
         />
       </div>
       <div className="w-full h-full px-5 hidden lg:block">
-        <div className="h-9 flex items-center justify-between px-5 bg-secondary text-secondary-inverted rounded-b-md">
+        <div className="h-9 flex items-center justify-between px-5 bg-secondary-inverted text-secondary rounded-b-md">
           <p className="text-sm text-nowrap cursor-pointer lg:opacity-90 hover:opacity-100 transition-all duration-300">
             Beautinique Luxury
           </p>
           <div className="flex items-center gap-3 text-xs">
             <p className="flex items-center gap-0.5 cursor-pointer lg:opacity-90 hover:opacity-100 transition-all duration-300">
-              <CashIcon className="w-3.5 h-3.5 pb-px [&>path]:stroke-secondary-inverted" />
+              <CashIcon className="w-3.5 h-3.5 pb-px [&>path]:stroke-secondary" />
               <span className="text-nowrap">BQ Cash</span>
             </p>
             <p className="flex items-center gap-0.5 cursor-pointer lg:opacity-90 hover:opacity-100 transition-all duration-300">
-              <GiftCardIcon className="w-3.5 h-3.5 pb-px fill-secondary-inverted" />
+              <GiftCardIcon className="w-3.5 h-3.5 pb-px fill-secondary" />
               <span className="text-nowrap">Gift Card</span>
             </p>
             <p className="flex items-center gap-0.5 cursor-pointer lg:opacity-90 hover:opacity-100 transition-all duration-300">
-              <CareIcon className="w-3.5 h-3.5 pb-px fill-secondary-inverted" />
+              <CareIcon className="w-3.5 h-3.5 pb-px fill-secondary" />
               <span className="text-nowrap">BQ Care</span>
             </p>
             <p className="flex items-center gap-0.5 cursor-pointer lg:opacity-90 hover:opacity-100 transition-all duration-300">
-              <TrackIcon className="w-3.5 h-3.5 pb-px [&>path]:stroke-secondary-inverted" />
+              <TrackIcon className="w-3.5 h-3.5 pb-px [&>path]:stroke-secondary" />
               <span className="text-nowrap">Track Orders</span>
             </p>
           </div>
@@ -127,7 +131,7 @@ const Navbar = () => {
               <div
                 key={item.id}
                 className="flex items-center gap-1 text-sm text-nowrap font-semibold transition-all duration-300 cursor-pointer relative"
-                // onMouseEnter={() => handleMouseEnter(index)}
+                onMouseEnter={() => handleMouseEnter(index)}
               >
                 <p
                   className={`${
@@ -163,10 +167,11 @@ const Navbar = () => {
               onMouseEnter={handleContainerMouseEnter}
               onMouseLeave={handleMouseLeave}
             >
-              <div className="flex justify-center items-start">
-                {/* {hoveredIndex} */}
-                {/* <HoveredContent hoveredIndex={hoveredIndex} /> */}
-              </div>
+              {/* <div className="flex justify-center items-start"> */}
+              {/* {hoveredIndex} */}
+              {/* <HoveredContent hoveredIndex={hoveredIndex} /> */}
+              {<HoveredComponent index={hoveredIndex as number} />}
+              {/* </div> */}
             </div>
           )}
         </div>
