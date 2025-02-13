@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 
-const LoadingScreen = () => {
+const LoadingPage = () => {
   const beautyFacts = useMemo(
     () => [
       `The term <span class=loadingHighlight>"Clean Beauty"</span> refers to skincare and makeup products made without harmful chemicals and toxins.`,
@@ -99,4 +99,4 @@ const LoadingScreen = () => {
     </div>
   );
 };
-export default LoadingScreen;
+export default LoadingPage;
