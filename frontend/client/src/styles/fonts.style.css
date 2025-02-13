@@ -2,8 +2,7 @@
 /* Metropolis - Light (Weight: 300) */
 @font-face {
   font-family: "metropolis";
-  src: url("/fonts/metropolis/Metropolis-Light.woff2") format("woff2"),
-    url("/fonts/metropolis/Metropolis-Light.woff") format("woff");
+  src: url("/fonts/metropolis/Metropolis-Light.woff2") format("woff2");
   font-style: normal;
   font-weight: 300; /* Light */
 }
@@ -11,8 +10,7 @@
 /* Metropolis - Regular (Weight: 400) */
 @font-face {
   font-family: "metropolis";
-  src: url("/fonts/metropolis/Metropolis-Regular.woff2") format("woff2"),
-    url("/fonts/metropolis/Metropolis-Regular.woff") format("woff");
+  src: url("/fonts/metropolis/Metropolis-Regular.woff2") format("woff2");
   font-style: normal;
   font-weight: 400; /* Regular */
 }
@@ -20,8 +18,7 @@
 /* Metropolis - Medium (Weight: 500) */
 @font-face {
   font-family: "metropolis";
-  src: url("/fonts/metropolis/Metropolis-Medium.woff2") format("woff2"),
-    url("/fonts/metropolis/Metropolis-Medium.woff") format("woff");
+  src: url("/fonts/metropolis/Metropolis-Medium.woff2") format("woff2");
   font-style: normal;
   font-weight: 500; /* Medium */
 }
@@ -29,8 +26,7 @@
 /* Metropolis - SemiBold (Weight: 600) */
 @font-face {
   font-family: "metropolis";
-  src: url("/fonts/metropolis/Metropolis-SemiBold.woff2") format("woff2"),
-    url("/fonts/metropolis/Metropolis-SemiBold.woff") format("woff");
+  src: url("/fonts/metropolis/Metropolis-SemiBold.woff2") format("woff2");
   font-style: normal;
   font-weight: 600; /* SemiBold */
 }
@@ -38,8 +34,7 @@
 /* Metropolis - Bold (Weight: 700) */
 @font-face {
   font-family: "metropolis";
-  src: url("/fonts/metropolis/Metropolis-Bold.woff2") format("woff2"),
-    url("/fonts/metropolis/Metropolis-Bold.woff") format("woff");
+  src: url("/fonts/metropolis/Metropolis-Bold.woff2") format("woff2");
   font-style: normal;
   font-weight: 700; /* Bold */
 }

@@ -2,20 +2,20 @@ import { createBrowserRouter } from "react-router-dom";
 import { lazy, Suspense } from "react";
 
 // Lazy load route components
-const Home = lazy(() => import("../pages/home/Home"));
+const Main = lazy(() => import("../pages/main/Main"));
 
-import Main from "../pages/main/Main";
+import Home from "../pages/home/Home";
 import Register from "../pages/auth/Register";
 import Login from "../pages/auth/Login";
 import NotFound from "../pages/error/NotFound";
 import SomethingWentWrong from "../pages/error/SomethingWentWrong";
-import LoadingScreen from "../components/LoadingScreen";
+import LoadingPage from "../components/loaders/LoadingPage";
 
 const router = createBrowserRouter([
   {
     path: "/",
     element: (
-      <Suspense fallback={<LoadingScreen />}>
+      <Suspense fallback={<LoadingPage />}>
         <Main />
       </Suspense>
     ),
