@@ -15,11 +15,23 @@ export default {
             10: "var(--primary-inverted-10)",
             50: "var(--primary-inverted-50)",
           },
+          "battleship-davys-gray": {
+            DEFAULT: "var(--primary-battleship-davys-gray)",
+            inverted: {
+              DEFAULT: "var(--primary-battleship-davys-gray-inverted)",
+            },
+          },
         },
         secondary: {
           DEFAULT: "var(--secondary)",
           inverted: {
             DEFAULT: "var(--secondary-inverted)",
+          },
+          "battleship-davys-gray": {
+            DEFAULT: "var(--secondary-battleship-davys-gray)",
+            inverted: {
+              DEFAULT: "var(--secondary-battleship-davys-gray-inverted)",
+            },
           },
         },
         tertiary: {
@@ -34,9 +46,6 @@ export default {
         "platinum-jet": "var(--platinum-jet)",
         "platinum-black": "var(--platinum-black)",
         "platinum-black-inverted": "var(--platinum-black-inverted)",
-        "battleship-davys-gray": "var(--battleship-davys-gray)",
-        "battleship-davys-gray-inverted":
-          "var(--battleship-davys-gray-inverted)",
         "blue-crayola-c": "var(--blue-crayola-c)",
         "white-smoke-night": "var(--white-smoke-night)",
         "white-smoke-night-inverted": "var(--white-smoke-night-inverted)",

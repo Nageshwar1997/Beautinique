@@ -14,6 +14,7 @@ import SearchInput from "./components/SearchInput";
 import { Link, useLocation } from "react-router-dom";
 import HoveredComponent from "./components/HoveredComponent";
 import Button from "../button/Button";
+import { BottomGradient } from "../Gradients";
 
 const Navbar = () => {
   const containerRef = useRef<HTMLDivElement>(null);
@@ -89,6 +90,18 @@ const Navbar = () => {
     setActiveIndices([]);
   }, [pathname]);
 
+  // Disables body scroll when the mobile navbar is opened
+  useEffect(() => {
+    if (isMobileNavbarOpened) {
+      document.body.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "unset";
+    }
+    return () => {
+      document.body.style.overflow = "unset";
+    };
+  }, [isMobileNavbarOpened]);
+
   return (
     <div
       className={`h-16 lg:h-[100px] w-full flex justify-between items-center gap-3 sticky top-0 left-0 lg:-top-9 px-2 sm:px-5 md:px-10 bg-tertiary-inverted text-tertiary shadow-lg shadow-primary-inverted-50 z-50`}
@@ -134,13 +147,13 @@ const Navbar = () => {
                 {/* Left Curve */}
                 {hoveredIndex === index && (
                   <div className="absolute left-px transform -translate-x-full bg-secondary-inverted bottom-0 h-3 w-3 z-[52]">
-                    <div className="bg-tertiary-inverted h-full w-full rounded-br-full z-[51] border-b border-r border-battleship-davys-gray" />
+                    <div className="bg-tertiary-inverted h-full w-full rounded-br-full z-[51] border-b border-r border-primary-battleship-davys-gray" />
                   </div>
                 )}
                 <div
                   className={`h-[calc(100%-8px)] mt-2 px-3 flex items-center gap-1 text-sm text-nowrap font-semibold cursor-pointer rounded-t-lg border-t border-l border-r relative ${
                     hoveredIndex === index
-                      ? "bg-secondary-inverted border-battleship-davys-gray z-50"
+                      ? "bg-secondary-inverted border-primary-battleship-davys-gray z-50"
                       : "border-transparent"
                   }`}
                   onMouseEnter={() => handleMouseEnter(index)}
@@ -165,7 +178,7 @@ const Navbar = () => {
                 {/* Right Curve */}
                 {hoveredIndex === index && (
                   <div className="absolute right-px transform translate-x-full bg-secondary-inverted bottom-0 h-3 w-3 z-[52]">
-                    <div className="bg-tertiary-inverted h-full w-full rounded-bl-full border-b border-l border-battleship-davys-gray" />
+                    <div className="bg-tertiary-inverted h-full w-full rounded-bl-full border-b border-l border-primary-battleship-davys-gray" />
                   </div>
                 )}
               </div>
@@ -219,7 +232,7 @@ const Navbar = () => {
                   className={`relative ${isLastItem && "mb-36"}`}
                 >
                   <div
-                    className="flex items-center justify-between cursor-pointer sticky top-0 z-50 bg-secondary-inverted border-b border-battleship-davys-gray-inverted pl-6 pr-4 py-4"
+                    className="flex items-center justify-between cursor-pointer sticky top-0 z-50 bg-secondary-inverted border-b border-primary-battleship-davys-gray-inverted pl-6 pr-4 py-4"
                     onClick={() => toggleAccordionIndex(index)}
                   >
                     <p className="text-primary">{category.label}</p>
@@ -239,19 +252,20 @@ const Navbar = () => {
             })}
           </div>
 
-          <div className="fixed bottom-0 left-0 w-full flex gap-5 justify-around items-center px-6 py-2 z-[51] bg-gradient-to-t from-primary-inverted via-primary-inverted-50 to-transparent">
-            <Link to={"/login"} className="w-1/2 z-[51]">
+          <div className="fixed bottom-0 left-0 w-full flex gap-5 md:gap-10 justify-center items-center px-6 py-2 pt-8 z-[51]">
+            <BottomGradient />
+            <Link to={"/login"} className="w-1/2 sm:w-1/3 md:w-1/4 z-[51]">
               <Button
                 content="Login"
                 pattern="primary"
                 className="!rounded-lg !px-6 !py-3"
               />
             </Link>
-            <Link to={"/register"} className="w-1/2 z-[51]">
+            <Link to={"/register"} className="w-1/2 sm:w-1/3 md:w-1/4 z-[51]">
               <Button
                 content="Register"
                 pattern="secondary"
-                className="!rounded-lg lg:!py-2 shadow-md"
+                className="!rounded-lg !px-6 !py-3"
               />
             </Link>
           </div>

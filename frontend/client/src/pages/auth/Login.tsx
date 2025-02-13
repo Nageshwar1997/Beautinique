@@ -202,13 +202,13 @@ const Login = () => {
                         control={control}
                         render={({ field }) => <Checkbox register={field} />}
                       />
-                      <span className="text-sm text-primary-50 font-medium">
+                      <span className="text-[13px] md:text-sm text-primary-50 font-medium whitespace-nowrap">
                         Remember me
                       </span>
                     </div>
                     <Link
                       to={"/forgot-password"}
-                      className={`bg-clip-text text-transparent bg-accent-duo text-sm mr-2 hover:underline`}
+                      className={`bg-clip-text text-transparent bg-accent-duo text-[13px] md:text-sm mr-2 hover:underline whitespace-nowrap`}
                     >
                       Forgot Password?
                     </Link>
