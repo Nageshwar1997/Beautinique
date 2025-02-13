@@ -9,7 +9,7 @@ import Register from "../pages/auth/Register";
 import Login from "../pages/auth/Login";
 import NotFound from "../pages/error/NotFound";
 import SomethingWentWrong from "../pages/error/SomethingWentWrong";
-import LoadingScreen from "../components/loaders/LoadingScreen";
+import LoadingScreen from "../components/LoadingScreen";
 
 const router = createBrowserRouter([
   {
