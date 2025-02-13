@@ -92,7 +92,6 @@ const Navbar = () => {
   return (
     <div
       className={`h-16 lg:h-[100px] w-full flex justify-between items-center gap-3 sticky top-0 left-0 lg:-top-9 px-2 sm:px-5 md:px-10 bg-tertiary-inverted text-tertiary shadow-lg shadow-primary-inverted-50 z-50`}
-      onMouseLeave={handleMouseLeave}
     >
       <div className="h-12 sm:h-14 md:min-h-16 md:h-full flex items-center justify-center">
         <img
@@ -126,35 +125,50 @@ const Navbar = () => {
           </div>
         </div>
         <div className="h-16 flex items-center gap-7 justify-between px-5 relative">
-          <div className="flex items-center gap-5">
+          <div
+            className="flex items-center gap-5 h-full"
+            onMouseLeave={handleMouseLeave}
+          >
             {levelOneCategories.map((item, index) => (
-              <div
-                key={item.id}
-                className="flex items-center gap-1 text-sm text-nowrap font-semibold transition-all duration-300 cursor-pointer relative"
-                onMouseEnter={() => handleMouseEnter(index)}
-              >
-                <p
-                  className={`${
-                    hoveredIndex === index
-                      ? "bg-clip-text text-transparent bg-accent-duo"
-                      : ""
-                  }`}
-                >
-                  {item.label}
-                </p>
-                <DropdownIcon
-                  className={`${
-                    hoveredIndex === index
-                      ? "rotate-180 [&>path]:stroke-blue-crayola-c"
-                      : ""
-                  } transition-all duration-300`}
-                />
-
+              <div className="h-full relative">
+                {hoveredIndex === index && (
+                  <>
+                    <div className="absolute left-px transform -translate-x-full bg-secondary-inverted bottom-0 h-4 w-4 z-[52]">
+                      <div className="bg-tertiary-inverted h-full w-full rounded-br-full z-[51] border-b border-r border-battleship-davys-gray"></div>
+                    </div>
+                  </>
+                )}
                 <div
-                  className={`absolute -bottom-1 left-0 h-0.5 bg-accent-duo transition-all duration-300 ease-in-out ${
-                    hoveredIndex === index ? "w-full" : "w-0"
-                  } rounded-full`}
-                />
+                  key={item.id}
+                  className={`h-[calc(100%-8px)] mt-2 px-3 flex items-center gap-0.5 text-sm text-nowrap font-semibold transition-all duration-300 cursor-pointer relative ${
+                    hoveredIndex === index
+                      ? "bg-secondary-inverted rounded-t-md border-t border-l border-r border-battleship-davys-gray z-50"
+                      : "border-transparent"
+                  }`}
+                  onMouseEnter={() => handleMouseEnter(index)}
+                >
+                  <p
+                    className={`${
+                      hoveredIndex === index
+                        ? "bg-clip-text text-transparent bg-accent-duo"
+                        : ""
+                    }`}
+                  >
+                    {item.label}
+                  </p>
+                  <DropdownIcon
+                    className={`${
+                      hoveredIndex === index
+                        ? "rotate-180 [&>path]:stroke-blue-crayola-c"
+                        : ""
+                    } transition-all duration-300`}
+                  />
+                </div>
+                {hoveredIndex === index && (
+                  <div className="absolute right-px transform translate-x-full bg-secondary-inverted bottom-0 h-4 w-4 z-[52]">
+                    <div className="bg-tertiary-inverted h-full w-full rounded-bl-full border-b border-l border-battleship-davys-gray"></div>
+                  </div>
+                )}
               </div>
             ))}
           </div>
@@ -162,17 +176,12 @@ const Navbar = () => {
           <UserMenuIcons />
           {(hoveredIndex !== null || isContainerHovered) && (
             <div
-              className={`rounded-2xl absolute left-0 top-16 w-full h-fit z-[99]`}
+              className={`rounded-2xl absolute -left-12 top-[63px] w-full h-fit z-[49] justify-self-center transition-all duration-300`}
               ref={containerRef}
               onMouseEnter={handleContainerMouseEnter}
               onMouseLeave={handleMouseLeave}
-              style={{
-                boxShadow: "rgba(0, 0, 0, 0.24) 0px 3px 8px",
-              }}
             >
               {/* <div className="flex justify-center items-start"> */}
-              {/* {hoveredIndex} */}
-              {/* <HoveredContent hoveredIndex={hoveredIndex} /> */}
               {<HoveredComponent index={hoveredIndex as number} />}
               {/* </div> */}
             </div>

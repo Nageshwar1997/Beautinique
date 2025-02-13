@@ -54,6 +54,7 @@ export default {
           "0px 4px 4px 0px rgba(0, 0, 0, 0.25), 0px 2px 32px 0px rgba(37, 166, 249, 0.3)",
         "primary-btn-hover":
           "0px 4px 4px 0px rgba(0, 0, 0, 0.25), 0px 2px 64px 0px rgba(37, 166, 249, 0.1), 0px 2px 32px 0px rgba(37, 166, 249, 0.5)",
+        "navbar-card": "var(--primary-inverted-50) 0px 3px 8px",
       },
       fontFamily: {
         metropolis: ["metropolis", "sans-serif"],

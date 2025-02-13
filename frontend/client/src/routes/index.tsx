@@ -14,15 +14,15 @@ import LoadingScreen from "../components/loaders/LoadingScreen";
 const router = createBrowserRouter([
   {
     path: "/",
-    element: <Main />,
+    element: (
+      <Suspense fallback={<LoadingScreen />}>
+        <Main />
+      </Suspense>
+    ),
     children: [
       {
         index: true,
-        element: (
-          <Suspense fallback={<LoadingScreen />}>
-            <Home />
-          </Suspense>
-        ),
+        element: <Home />,
       },
     ],
   },

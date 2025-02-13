@@ -18,7 +18,7 @@ const socialCommunity: SocialCommunityItem[] = [
     id: 1,
     icon: PlayIcon,
     label: "Founder's Story: Watch Now",
-    link: "https://youtu.be/92kcChL74ZE?si=e63hRhe9zrOKm_8w",
+    link: "https://www.youtube.com/watch?v=92kcChL74ZE",
   },
   {
     id: 2,
@@ -31,7 +31,7 @@ const socialCommunity: SocialCommunityItem[] = [
 const ForYou = () => {
   console.log("foryou", for_you);
   return (
-    <div className="lg:p-px lg:bg-primary-50 light:lg:bg-primary-inverted-50 lg:rounded-2xl w-full h-full backdrop-blur-3xl max-">
+    <div className="lg:p-px lg:bg-battleship-davys-gray lg:rounded-2xl w-full h-full backdrop-blur-3xl max-w-[1300px] shadow-navbar-card">
       <div className="bg-platinum-black text-secondary lg:w-full lg:p-5 lg:bg-secondary-inverted lg:rounded-2xl lg:font-metropolis">
         <div className="grid grid-cols-1 lg:grid-cols-4 lg:gap-4">
           {for_you?.subCategories?.map((category, index) => {
@@ -42,7 +42,7 @@ const ForYou = () => {
                   <p className="uppercase text-battleship-davys-gray-inverted text-sm font-semibold font-degular tracking-wide leading-5 pl-3">
                     {category?.heading}
                   </p>
-                  <div className="flex flex-col gap-1 p-3 hover:bg-tertiary-inverted rounded-2xl cursor-pointer group relative">
+                  <div className="flex flex-col gap-1 p-3 hover:bg-platinum-black  rounded-2xl cursor-pointer group relative">
                     <p className="text-silver-jet text-base font-semibold leading-5 group-hover:text-primary">
                       {category?.label}
                     </p>
@@ -72,7 +72,7 @@ const ForYou = () => {
         </div>
         {/* Only show the section below on desktop */}
         <div className="hidden lg:block">
-          <div className="border border-primary-50 rounded-[20px] my-4" />
+          <div className="bg bg-primary-50 h-px rounded-full my-4" />
           <div className="flex flex-col md:flex-row items-center gap-4 justify-between">
             <div className="flex gap-6 items-center font-normal text-sm">
               {socialCommunity.map((data) => {
@@ -84,8 +84,8 @@ const ForYou = () => {
                     target="_blank"
                     className="flex gap-2 items-center group"
                   >
-                    <Icon className="w-5 h-5 fill-battleship-davys-gray-inverted group-hover:fill-tertiary" />
-                    <span className="text-sm font-normal leading-[21px] text-battleship-davys-gray-inverted group-hover:text-tertiary">
+                    <Icon className="w-5 h-5 fill-tertiary opacity-70 group-hover:opacity-100" />
+                    <span className="text-sm font-normal leading-[21px] text-tertiary opacity-70 group-hover:opacity-100">
                       {data.label}
                     </span>
                   </Link>
@@ -96,11 +96,11 @@ const ForYou = () => {
               <span className="text-tertiary text-sm font-normal">
                 Ready to get started?
               </span>
-              <Link to={"register"}>
+              <Link to={"/register"}>
                 <Button
                   content="Register"
                   pattern="outline"
-                  className="text-secondary hover:bg-secondary hover:text-tertiary-inverted border border-tertiary !rounded-lg lg:py-2 shadow-md"
+                  className="!rounded-lg lg:!py-2 shadow-md"
                 />
               </Link>
             </div>

@@ -27,7 +27,7 @@ const Button = ({
     } else if (pattern === "secondary") {
       return "secondary";
     } else if (pattern === "outline") {
-      return "outline";
+      return "text-secondary hover:bg-tertiary hover:text-tertiary-inverted border border-tertiary";
     } else if (pattern === "transparent") {
       return "transparent";
     } else {

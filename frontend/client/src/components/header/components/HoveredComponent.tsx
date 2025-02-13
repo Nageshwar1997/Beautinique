@@ -1,4 +1,3 @@
-import React from "react";
 import { navData } from "../data/newData";
 
 const HoveredComponent = ({ index }: { index: number }) => {
