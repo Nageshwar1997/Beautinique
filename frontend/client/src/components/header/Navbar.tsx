@@ -11,8 +11,9 @@ import {
 import UserMenuIcons from "./components/UserMenuIcons";
 import { navData } from "./data/newData";
 import SearchInput from "./components/SearchInput";
-import { useLocation } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import HoveredComponent from "./components/HoveredComponent";
+import Button from "../button/Button";
 
 const Navbar = () => {
   const containerRef = useRef<HTMLDivElement>(null);
@@ -21,8 +22,8 @@ const Navbar = () => {
   const { pathname } = useLocation();
 
   const [isMobileNavbarOpened, setIsMobileNavbarOpened] =
-    useState<boolean>(false);
-  const [hoveredIndex, setHoveredIndex] = useState<number | null>(0); // replace it with null after testing
+    useState<boolean>(false); // make it false after testing
+  const [hoveredIndex, setHoveredIndex] = useState<number | null>(null); // replace it with null after testing
   const [activeIndices, setActiveIndices] = useState<number[]>([]);
   const [isContainerHovered, setIsContainerHovered] = useState<boolean>(false);
 
@@ -80,14 +81,13 @@ const Navbar = () => {
 
   // Close navbar when pathname changes
   useEffect(() => {
-    // setHoveredIndex(null);
-    setHoveredIndex(0); // remove it after testing
+    setHoveredIndex(null);
+    // setHoveredIndex(0); // remove it after testing
     setIsContainerHovered(false);
     setIsMobileNavbarOpened(false);
+    // setIsMobileNavbarOpened(true); // remove it after testing
     setActiveIndices([]);
   }, [pathname]);
-
-  console.log("navData[hoveredIndex]", navData[hoveredIndex as number]);
 
   return (
     <div
@@ -100,7 +100,10 @@ const Navbar = () => {
           className="object-cover w-fit max-h-16 h-full sticky top-0 left-0"
         />
       </div>
-      <div className="w-full h-full px-5 hidden lg:block">
+      <div
+        className="w-full h-full px-5 hidden lg:block"
+        onMouseLeave={handleMouseLeave}
+      >
         <div className="h-9 flex items-center justify-between px-5 bg-secondary-inverted text-secondary rounded-b-md">
           <p className="text-sm text-nowrap cursor-pointer lg:opacity-90 hover:opacity-100 transition-all duration-300">
             Beautinique Luxury
@@ -125,24 +128,19 @@ const Navbar = () => {
           </div>
         </div>
         <div className="h-16 flex items-center gap-7 justify-between px-5 relative">
-          <div
-            className="flex items-center gap-5 h-full"
-            onMouseLeave={handleMouseLeave}
-          >
+          <div className="flex items-center gap-5 h-full">
             {levelOneCategories.map((item, index) => (
-              <div className="h-full relative">
+              <div className="h-full relative" key={item.id}>
+                {/* Left Curve */}
                 {hoveredIndex === index && (
-                  <>
-                    <div className="absolute left-px transform -translate-x-full bg-secondary-inverted bottom-0 h-4 w-4 z-[52]">
-                      <div className="bg-tertiary-inverted h-full w-full rounded-br-full z-[51] border-b border-r border-battleship-davys-gray"></div>
-                    </div>
-                  </>
+                  <div className="absolute left-px transform -translate-x-full bg-secondary-inverted bottom-0 h-3 w-3 z-[52]">
+                    <div className="bg-tertiary-inverted h-full w-full rounded-br-full z-[51] border-b border-r border-battleship-davys-gray" />
+                  </div>
                 )}
                 <div
-                  key={item.id}
-                  className={`h-[calc(100%-8px)] mt-2 px-3 flex items-center gap-0.5 text-sm text-nowrap font-semibold transition-all duration-300 cursor-pointer relative ${
+                  className={`h-[calc(100%-8px)] mt-2 px-3 flex items-center gap-1 text-sm text-nowrap font-semibold cursor-pointer rounded-t-lg border-t border-l border-r relative ${
                     hoveredIndex === index
-                      ? "bg-secondary-inverted rounded-t-md border-t border-l border-r border-battleship-davys-gray z-50"
+                      ? "bg-secondary-inverted border-battleship-davys-gray z-50"
                       : "border-transparent"
                   }`}
                   onMouseEnter={() => handleMouseEnter(index)}
@@ -164,9 +162,10 @@ const Navbar = () => {
                     } transition-all duration-300`}
                   />
                 </div>
+                {/* Right Curve */}
                 {hoveredIndex === index && (
-                  <div className="absolute right-px transform translate-x-full bg-secondary-inverted bottom-0 h-4 w-4 z-[52]">
-                    <div className="bg-tertiary-inverted h-full w-full rounded-bl-full border-b border-l border-battleship-davys-gray"></div>
+                  <div className="absolute right-px transform translate-x-full bg-secondary-inverted bottom-0 h-3 w-3 z-[52]">
+                    <div className="bg-tertiary-inverted h-full w-full rounded-bl-full border-b border-l border-battleship-davys-gray" />
                   </div>
                 )}
               </div>
@@ -190,18 +189,74 @@ const Navbar = () => {
       </div>
       <SearchInput className="sm:!flex lg:!hidden" />
       <div className="px-1 sm:px-3 md:px-5 lg:hidden flex items-center gap-5">
-        <UserMenuIcons />
-        <div
-          className=""
-          onClick={() => setIsMobileNavbarOpened((prev) => !prev)}
+        {!isMobileNavbarOpened && <UserMenuIcons />}
+        <span
+          className="flex items-center justify-center"
+          onClick={() => {
+            setIsMobileNavbarOpened((prev) => !prev);
+            setActiveIndices([]);
+          }}
         >
           {isMobileNavbarOpened ? (
-            <CloseIcon className="[&>path]:stroke-tertiary w-5 h-5 md:w-6 md:h-6" />
+            <CloseIcon className="[&>path]:stroke-tertiary w-6 h-6 md:w-8 md:h-8" />
           ) : (
             <MenuIcon className="[&>path]:stroke-tertiary w-5 h-5 md:w-6 md:h-6" />
           )}
-        </div>
+        </span>
       </div>
+
+      {isMobileNavbarOpened && (
+        <div className="absolute top-16 left-0 w-full h-dvh bg-secondary-inverted flex flex-col z-50">
+          <div className="h-[calc(100%-64px)] overflow-hidden overflow-y-scroll flex-grow">
+            {levelOneCategories.map((category, index) => {
+              const AccordionContentComponent = category.component;
+              const isActive = activeIndices.includes(index);
+              const isLastItem = index === levelOneCategories.length - 1;
+
+              return (
+                <div
+                  key={category.id}
+                  className={`relative ${isLastItem && "mb-36"}`}
+                >
+                  <div
+                    className="flex items-center justify-between cursor-pointer sticky top-0 z-50 bg-secondary-inverted border-b border-battleship-davys-gray-inverted pl-6 pr-4 py-4"
+                    onClick={() => toggleAccordionIndex(index)}
+                  >
+                    <p className="text-primary">{category.label}</p>
+                    <DropdownIcon
+                      className={`[&>path]:stroke-2 ${
+                        isActive ? "rotate-180" : ""
+                      }`}
+                    />
+                  </div>
+                  {isActive && AccordionContentComponent && (
+                    <div className="overflow-y-scroll">
+                      <AccordionContentComponent />
+                    </div>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+
+          <div className="fixed bottom-0 left-0 w-full flex gap-5 justify-around items-center px-6 py-2 z-[51] bg-gradient-to-t from-primary-inverted via-primary-inverted-50 to-transparent">
+            <Link to={"/login"} className="w-1/2 z-[51]">
+              <Button
+                content="Login"
+                pattern="primary"
+                className="!rounded-lg !px-6 !py-3"
+              />
+            </Link>
+            <Link to={"/register"} className="w-1/2 z-[51]">
+              <Button
+                content="Register"
+                pattern="secondary"
+                className="!rounded-lg lg:!py-2 shadow-md"
+              />
+            </Link>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

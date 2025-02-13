@@ -2,7 +2,7 @@ import React from 'react'
 
 const Skin = () => {
   return (
-    <div>Skin</div>
+    <div className='h-20'>Skin</div>
   )
 }
 

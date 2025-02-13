@@ -1,9 +1,7 @@
 import React from 'react'
 
 const Face = () => {
-  return (
-    <div>Face</div>
-  )
+  return <div className="h-20">Face</div>;
 }
 
 export default Face

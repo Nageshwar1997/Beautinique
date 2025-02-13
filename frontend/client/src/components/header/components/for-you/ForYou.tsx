@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import { for_you } from "../../data/newData";
 import ImageCadDots from "./ImageCadDots";
 import Button from "../../../button/Button";
@@ -29,20 +29,25 @@ const socialCommunity: SocialCommunityItem[] = [
 ];
 
 const ForYou = () => {
-  console.log("foryou", for_you);
+  const [playingVideoIndex, setPlayingVideoIndex] = useState<null | number>(
+    null
+  );
   return (
-    <div className="lg:p-px lg:bg-battleship-davys-gray lg:rounded-2xl w-full h-full backdrop-blur-3xl max-w-[1300px] shadow-navbar-card">
-      <div className="bg-platinum-black text-secondary lg:w-full lg:p-5 lg:bg-secondary-inverted lg:rounded-2xl lg:font-metropolis">
+    <div className="lg:p-px lg:bg-battleship-davys-gray lg:rounded-xl w-full h-full backdrop-blur-3xl max-w-[1300px] shadow-navbar-card">
+      <div className="bg-platinum-black text-secondary lg:w-full lg:p-5 lg:bg-secondary-inverted lg:rounded-xl lg:font-metropolis">
         <div className="grid grid-cols-1 lg:grid-cols-4 lg:gap-4">
           {for_you?.subCategories?.map((category, index) => {
             return (
               <div key={index} className="">
                 {/* Desktop View */}
-                <div className="hidden lg:flex lg:flex-col lg:gap-6">
+                <div className="hidden lg:flex flex-col gap-6">
                   <p className="uppercase text-battleship-davys-gray-inverted text-sm font-semibold font-degular tracking-wide leading-5 pl-3">
                     {category?.heading}
                   </p>
-                  <div className="flex flex-col gap-1 p-3 hover:bg-platinum-black  rounded-2xl cursor-pointer group relative">
+                  <div
+                    className="flex flex-col gap-1 p-3 hover:bg-platinum-black  rounded-2xl cursor-pointer group relative"
+                    onMouseEnter={() => setPlayingVideoIndex(index)}
+                  >
                     <p className="text-silver-jet text-base font-semibold leading-5 group-hover:text-primary">
                       {category?.label}
                     </p>
@@ -55,10 +60,20 @@ const ForYou = () => {
                       <video
                         src={category.videoUrl}
                         className="w-full h-full object-cover absolute top-5 left-5 rounded-md transform group-hover:translate-x-[-4px] group-hover:translate-y-[-4px] transition-transform duration-300"
-                        autoPlay
                         loop
                         muted
                         controls={false}
+                        ref={(video) => {
+                          if (video) {
+                            // Play or pause the video based on hover state
+                            if (playingVideoIndex === index) {
+                              video.play();
+                            } else {
+                              video.pause();
+                              video.currentTime = 0;
+                            }
+                          }
+                        }}
                       />
                     </div>
                   </div>
