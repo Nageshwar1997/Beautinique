@@ -46,14 +46,19 @@ export default {
         "accent-duo": "var(--accent-duo)",
         "silver-duo": "var(--silver-duo)",
         "sky-blue-burst": "var(--sky-blue-burst)",
+        "gradient-dark-fade-bottom": "var(--gradient-dark-fade-bottom)",
       },
       boxShadow: {
         "neumorphic-layered": "var(--shadow-neumorphic-layered)",
         "light-dark-soft": "var(--shadow-light-dark-soft)",
         "primary-btn":
-          "0px 4px 4px 0px rgba(0, 0, 0, 0.25), 0px 2px 32px 0px rgba(37, 166, 249, 0.3)",
+          "0px 4px 4px 0px rgba(0, 0, 0, 0.25), 0px 2px 16px 0px rgba(37, 166, 249, 0.3)",
         "primary-btn-hover":
-          "0px 4px 4px 0px rgba(0, 0, 0, 0.25), 0px 2px 64px 0px rgba(37, 166, 249, 0.1), 0px 2px 32px 0px rgba(37, 166, 249, 0.5)",
+          "0px 4px 4px 0px rgba(0, 0, 0, 0.25), 0px 2px 32px 0px rgba(37, 166, 249, 0.1), 0px 2px 16px 0px rgba(37, 166, 249, 0.5)",
+        "secondary-btn":
+          "0px 4px 4px 0px rgba(0, 0, 0, 0.25), 0px 2px 16px 0px var(--primary-50)",
+        "secondary-btn-hover":
+          "0px 4px 4px 0px rgba(0, 0, 0, 0.25), 0px 2px 32px 0px var(--primary-50), 0px 2px 16px 0px var(--primary-10)",
         "navbar-card": "var(--primary-inverted-50) 0px 3px 8px",
       },
       fontFamily: {

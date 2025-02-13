@@ -58,6 +58,13 @@
     var(--blue-crayola-c) 94.85%
   );
   --silver-duo: linear-gradient(180deg, #fff 24.54%, #b2b2b2 87.96%);
+  --gradient-dark-fade-bottom: linear-gradient(
+    180deg,
+    rgba(8, 8, 8, 0) 0%,
+    rgba(8, 8, 8, 0.5) 25%,
+    rgba(8, 8, 8, 0.75) 50%,
+    #080808 100%
+  );
 
   /* Shadows */
   --shadow-neumorphic-layered: 0px 0px 4px 0px var(--primary-10),
@@ -110,6 +117,13 @@
     var(--blue-crayola-c) 41.65%
   );
   --silver-duo: linear-gradient(180deg, #4d4d4d 24.54%, #080808 87.96%);
+  --gradient-dark-fade-bottom: linear-gradient(
+    180deg,
+    rgba(247, 247, 247, 0) 0%,
+    rgba(247, 247, 247, 0.5) 25%,
+    rgba(247, 247, 247, 0.75) 50%,
+    #ffffff 100%
+  );
 
   /* Shadows */
   --shadow-neumorphic-layered: 0px 0px 4px 0px var(--primary-10),
