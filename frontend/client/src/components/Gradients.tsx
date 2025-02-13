@@ -1,4 +1,4 @@
-import { IconProps } from "./icons";
+import { IconProps } from "../icons";
 
 export const TopGradient = ({ className }: IconProps) => {
   return (

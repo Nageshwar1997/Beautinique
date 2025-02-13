@@ -15,13 +15,14 @@ import TextDisplay from "../../components/TextDisplay";
 import SocialAuth from "./components/SocialAuth";
 import PhoneInput from "../../components/input/PhoneInput";
 import Input from "../../components/input/Input";
-import { EyeIcon, EyeOffIcon } from "../../components/icons";
+import { EyeIcon, EyeOffIcon } from "../../icons";
 import Radio from "../../components/input/Radio";
 import Button from "../../components/button/Button";
 import Checkbox from "../../components/input/Checkbox";
 import { Link } from "react-router-dom";
 import { useLoginUser } from "../../api/user/user.service";
-import Loading from "../../components/Loaders/Loading/Loading";
+import Loading from "../../components/loaders/loading/Loading";
+import DarkMode from "../../components/DarkMode";
 
 const Login = () => {
   const [showGradient, containerRef] = useVerticalScrollable();
@@ -79,6 +80,7 @@ const Login = () => {
   return (
     <div className="w-full min-h-dvh max-h-dvh h-full p-4 flex gap-4 overflow-hidden relative">
       <AuthRobot />
+      <DarkMode className="border absolute top-5 right-5 h-fit p-2 md:p-3 rounded-full bg-secondary-inverted [&_path]:!stroke-secondary z-10" />
       <div
         ref={containerRef as RefObject<HTMLDivElement>}
         className={`w-full md:w-1/2 flex flex-col items-center gap-4 overflow-hidden overflow-y-scroll ${
@@ -200,13 +202,13 @@ const Login = () => {
                         control={control}
                         render={({ field }) => <Checkbox register={field} />}
                       />
-                      <span className="text-sm text-primary-50 font-medium">
+                      <span className="text-[13px] md:text-sm text-primary-50 font-medium whitespace-nowrap">
                         Remember me
                       </span>
                     </div>
                     <Link
                       to={"/forgot-password"}
-                      className={`bg-clip-text text-transparent bg-accent-duo text-sm mr-2 hover:underline`}
+                      className={`bg-clip-text text-transparent bg-accent-duo text-[13px] md:text-sm mr-2 hover:underline whitespace-nowrap`}
                     >
                       Forgot Password?
                     </Link>

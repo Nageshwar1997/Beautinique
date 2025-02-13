@@ -9,7 +9,7 @@ import TextDisplay from "../../components/TextDisplay";
 import SocialAuth from "./components/SocialAuth";
 import Input from "../../components/input/Input";
 import Button from "../../components/button/Button";
-import { EyeIcon, EyeOffIcon } from "../../components/icons";
+import { EyeIcon, EyeOffIcon } from "../../icons";
 import PhoneInput from "../../components/input/PhoneInput";
 import { Link } from "react-router-dom";
 import Checkbox from "../../components/input/Checkbox";
@@ -17,7 +17,8 @@ import useVerticalScrollable from "../../hooks/useVerticalScrollable";
 import { BottomGradient, TopGradient } from "../../components/Gradients";
 import { registerSchema } from "./helpers/auth.schema";
 import { useRegisterUser } from "../../api/user/user.service";
-import Loading from "../../components/Loaders/Loading/Loading";
+import Loading from "../../components/loaders/loading/Loading";
+import DarkMode from "../../components/DarkMode";
 
 interface PasswordVisibilityType {
   password: boolean;
@@ -90,7 +91,7 @@ const Register = () => {
   return (
     <div className="w-full min-h-dvh max-h-dvh h-full p-4 flex gap-4 overflow-hidden relative">
       <AuthRobot />
-
+      <DarkMode className="border absolute top-5 right-5 h-fit p-2 md:p-3 rounded-full bg-secondary-inverted [&_path]:!stroke-secondary z-10" />
       <div
         ref={containerRef as RefObject<HTMLDivElement>}
         className={`w-full md:w-1/2 flex flex-col items-center gap-4 overflow-hidden overflow-y-scroll ${

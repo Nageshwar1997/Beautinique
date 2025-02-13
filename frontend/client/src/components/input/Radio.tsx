@@ -9,7 +9,7 @@ const Radio: FC<RadioProps> = ({
 }) => {
   return (
     <div
-      className={`flex items-center justify-center gap-4 border border-battleship-davys-gray w-min mx-auto rounded-full ${className}`}
+      className={`flex items-center justify-center gap-4 border border-primary-battleship-davys-gray w-min mx-auto rounded-full ${className}`}
     >
       <div className="relative flex items-center justify-between w-36 h-9 bg-smoke-eerie rounded-full shadow-primary-btn">
         {/* Toggle Background */}

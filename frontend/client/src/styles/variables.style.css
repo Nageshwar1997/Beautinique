@@ -27,23 +27,30 @@
   --primary-inverted-8: #00000014;
   --primary-inverted-10: #0000001a;
   --primary-inverted-50: #00000080;
+  --primary-battleship-davys-gray: #4d4d4d;
+  --primary-battleship-davys-gray-inverted: #999999;
 
   /* Secondary */
-  --secondary: #1c1c1c;
-  --secondary-inverted: #f5f5f5;
+  --secondary: #f5f5f5;
+  --secondary-inverted: #1c1c1c;
+  --secondary-battleship-davys-gray: #4d4d4d;
+  --secondary-battleship-davys-gray-inverted: #8a8a8a4d;
 
   /* Tertiary */
-  --tertiary: #2e2e2e;
-  --tertiary-inverted: #e0e0e0;
+  --tertiary: #e0e0e0;
+  --tertiary-inverted: #2e2e2e;
 
   /* Other */
   --smoke-eerie: #1a1a1a;
   --smoke-eerie-inverted: #f2f2f2;
   --seasalt-black: #f7fafc;
-  --battleship-davys-gray: #4d4d4d;
   --timberwolf-eerie-black: #191919;
+  --platinum-jet: #333333;
   --platinum-black: #080808;
   --platinum-black-inverted: #e6e6e6;
+  --white-smoke-night: #f2f2f2;
+  --white-smoke-night-inverted: #141414;
+  --silver-jet: #bfbfbf;
 
   /* Gradients */
   --accent-duo: linear-gradient(
@@ -53,6 +60,13 @@
     var(--blue-crayola-c) 94.85%
   );
   --silver-duo: linear-gradient(180deg, #fff 24.54%, #b2b2b2 87.96%);
+  --gradient-dark-fade-bottom: linear-gradient(
+    180deg,
+    rgba(8, 8, 8, 0) 0%,
+    rgba(8, 8, 8, 0.5) 25%,
+    rgba(8, 8, 8, 0.75) 50%,
+    #080808 100%
+  );
 
   /* Shadows */
   --shadow-neumorphic-layered: 0px 0px 4px 0px var(--primary-10),
@@ -75,23 +89,30 @@
   --primary-inverted-8: #ffffff14;
   --primary-inverted-10: #ffffff1a;
   --primary-inverted-50: #ffffff80;
+  --primary-battleship-davys-gray: #999999;
+  --primary-battleship-davys-gray-inverted: #4d4d4d;
 
   /* Secondary */
-  --secondary: #f5f5f5;
-  --secondary-inverted: #1c1c1c;
+  --secondary: #1c1c1c;
+  --secondary-inverted: #f5f5f5;
+  --secondary-battleship-davys-gray: #8a8a8a4d;
+  --secondary-battleship-davys-gray-inverted: #4d4d4d;
 
   /* Tertiary */
-  --tertiary: #e0e0e0;
-  --tertiary-inverted: #2e2e2e;
+  --tertiary: #2e2e2e;
+  --tertiary-inverted: #e0e0e0;
 
   /* Other */
   --smoke-eerie: #f2f2f2;
   --smoke-eerie-inverted: #1a1a1a;
   --seasalt-black: #f5f1ef;
-  --battleship-davys-gray: #8a8a8a4d;
   --timberwolf-eerie-black: #d8d8d853;
+  --platinum-jet: #e5e5e5;
   --platinum-black: #e6e6e6;
   --platinum-black-inverted: #080808;
+  --white-smoke-night: #141414;
+  --white-smoke-night-inverted: #f2f2f2;
+  --silver-jet: #333333;
 
   /* Gradients */
   --accent-duo: linear-gradient(
@@ -100,6 +121,13 @@
     var(--blue-crayola-c) 41.65%
   );
   --silver-duo: linear-gradient(180deg, #4d4d4d 24.54%, #080808 87.96%);
+  --gradient-dark-fade-bottom: linear-gradient(
+    180deg,
+    rgba(247, 247, 247, 0) 0%,
+    rgba(247, 247, 247, 0.5) 25%,
+    rgba(247, 247, 247, 0.75) 50%,
+    #ffffff 100%
+  );
 
   /* Shadows */
   --shadow-neumorphic-layered: 0px 0px 4px 0px var(--primary-10),

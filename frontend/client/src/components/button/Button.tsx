@@ -2,7 +2,7 @@ import { ReactNode } from "react";
 
 interface ButtonProps {
   type?: "submit" | "button";
-  pattern: "primary" | "secondary" | "outline" | "transparent";
+  pattern: "primary" | "secondary" | "tertiary" | "outline" | "transparent";
   className?: string;
   leftIcon?: ReactNode;
   rightIcon?: ReactNode;
@@ -25,13 +25,13 @@ const Button = ({
     if (pattern === "primary") {
       return "text-white bg-sky-blue-burst shadow-primary-btn hover:shadow-primary-btn-hover transition duration-300 border-none focus-within:border-none";
     } else if (pattern === "secondary") {
-      return "secondary";
+      return "text-secondary-inverted bg-secondary shadow-secondary-btn hover:shadow-secondary-btn-hover transition duration-300 border-none focus-within:border-none";
+    } else if (pattern === "tertiary") {
+      return "tertiary";
     } else if (pattern === "outline") {
-      return "outline";
-    } else if (pattern === "transparent") {
-      return "transparent";
+      return "text-secondary hover:bg-tertiary hover:text-tertiary-inverted border border-tertiary";
     } else {
-      return "";
+      return "transparent";
     }
   };
 
