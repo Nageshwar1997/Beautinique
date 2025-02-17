@@ -1,10 +1,9 @@
-import React, { useState } from "react";
+import { FC, SVGProps, useState } from "react";
 import { for_you } from "../../data/newData";
-import ImageCadDots from "./ImageCadDots";
 import Button from "../../../button/Button";
 import { Link } from "react-router-dom";
 import { ChatIcon, PlayIcon } from "../../../../icons";
-type IconType = React.FC<React.SVGProps<SVGSVGElement>>;
+type IconType = FC<SVGProps<SVGSVGElement>>;
 
 interface SocialCommunityItem {
   id: number;
@@ -38,14 +37,14 @@ const ForYou = () => {
         <div className="grid grid-cols-1 lg:grid-cols-4 lg:gap-4">
           {for_you?.subCategories?.map((category, index) => {
             return (
-              <div key={index} className="bg-primary-inverted-50">
+              <div key={index} className="">
                 {/* Desktop View */}
                 <div className="hidden lg:flex flex-col gap-6">
                   <p className="uppercase text-primary-battleship-davys-gray-inverted text-sm font-semibold font-degular tracking-wide leading-5 pl-3">
                     {category?.heading}
                   </p>
                   <div
-                    className="flex flex-col gap-1 p-3 hover:bg-platinum-black  rounded-2xl cursor-pointer group relative"
+                    className="flex flex-col border gap-1 p-3 hover:bg-platinum-black rounded-2xl cursor-pointer group relative"
                     onMouseEnter={() => setPlayingVideoIndex(index)}
                   >
                     <p className="text-silver-jet text-base font-semibold leading-5 group-hover:text-primary">
@@ -55,17 +54,15 @@ const ForYou = () => {
                       {category.description}
                     </p>
 
-                    <div className="relative max-w-[250px] h-[150px] lg:mt-1 overflow-hidden rounded-lg bg-platinum-black group-hover:bg-smoke-eerie">
-                      <ImageCadDots className="w-full h-full [&>g]:fill-smoke-eerie-inverted p-1" />
+                    {/* <div className="relative max-w-[250px] h-[150px] mt-1">
                       <video
                         src={category.videoUrl}
-                        className="w-full h-full object-cover absolute top-5 left-5 rounded-md transform group-hover:translate-x-[-4px] group-hover:translate-y-[-4px] transition-transform duration-300"
+                        className="w-full h-full object-cover rounded-lg"
                         loop
                         muted
                         controls={false}
                         ref={(video) => {
                           if (video) {
-                            // Play or pause the video based on hover state
                             if (playingVideoIndex === index) {
                               video.play();
                             } else {
@@ -74,6 +71,20 @@ const ForYou = () => {
                             }
                           }
                         }}
+                      />
+                    </div> */}
+                    <div className="relative max-w-[250px] h-[140px] w-full max-h-full mt-1 mx-auto">
+                      <video
+                        src={category.videoUrl}
+                        className="w-full h-full object-cover rounded-lg hidden group-hover:block transition-all duration-1000"
+                        loop
+                        muted
+                        autoPlay
+                      />
+                      <img
+                        src={category.thumbnail}
+                        alt="Video Thumbnail"
+                        className="w-full h-full object-cover rounded-lg block group-hover:hidden transition-all duration-1000"
                       />
                     </div>
                   </div>
@@ -115,7 +126,7 @@ const ForYou = () => {
         </div>
         {/* Only show the section below on desktop */}
         <div className="hidden lg:block">
-          <div className="bg bg-primary-50 h-px rounded-full my-4" />
+          <div className="bg bg-primary-50 h-px rounded-full my-6" />
           <div className="flex flex-col md:flex-row items-center gap-4 justify-between">
             <div className="flex gap-6 items-center font-normal text-sm">
               {socialCommunity.map((data) => {
