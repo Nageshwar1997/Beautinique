@@ -140,8 +140,8 @@ const Navbar = () => {
             </p>
           </div>
         </div>
-        <div className="h-16 flex items-center gap-7 justify-between px-5 relative">
-          <div className="flex items-center gap-5 h-full">
+        <div className="h-16 flex items-center gap-7 justify-between px-3 relative">
+          <div className="flex items-center gap-2 h-full">
             {levelOneCategories.map((item, index) => (
               <div className="h-full relative" key={item.id}>
                 {/* Left Curve */}
@@ -151,7 +151,7 @@ const Navbar = () => {
                   </div>
                 )}
                 <div
-                  className={`h-[calc(100%-8px)] mt-2 px-3 flex items-center gap-1 text-sm text-nowrap font-semibold cursor-pointer rounded-t-lg border-t border-l border-r relative ${
+                  className={`h-[calc(100%-8px)] mt-2 px-3 flex items-center justify-center gap-0.5 text-sm text-nowrap font-semibold cursor-pointer rounded-t-lg border-t border-l border-r relative ${
                     hoveredIndex === index
                       ? "bg-secondary-inverted border-primary-battleship-davys-gray z-50"
                       : "border-transparent"

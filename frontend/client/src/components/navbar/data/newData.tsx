@@ -4,6 +4,7 @@ import {
   TestIcon,
   ValueSetsIcon,
 } from "../../../icons";
+import About from "../components/about/About";
 import Collections from "../components/Collections";
 import Eyes from "../components/Eyes";
 import Face from "../components/Face";
@@ -105,7 +106,7 @@ export const for_you = {
 };
 
 export const skin = {
-  id: 3,
+  id: 2,
   level: 1,
   label: "Skin",
   category: "skin",
@@ -303,7 +304,7 @@ export const skin = {
 };
 
 export const face = {
-  id: 4,
+  id: 3,
   level: 1,
   label: "Face",
   category: "face",
@@ -631,7 +632,7 @@ export const face = {
 };
 
 export const lips = {
-  id: 5,
+  id: 4,
   level: 1,
   label: "Lips",
   category: "lips",
@@ -816,7 +817,7 @@ export const lips = {
 };
 
 export const eyes = {
-  id: 6,
+  id: 5,
   level: 1,
   label: "Eyes",
   category: "eyes",
@@ -1014,7 +1015,7 @@ export const eyes = {
 };
 
 export const collections = {
-  id: 2,
+  id: 6,
   level: 1,
   label: "Collections",
   category: "collections",
@@ -1270,4 +1271,32 @@ export const collections = {
   ],
 };
 
-export const navData = [for_you, skin, face, lips, eyes, collections];
+export const about = {
+  id: 7,
+  level: 1,
+  label: "About",
+  category: "about",
+  component: About,
+  icon: <TestIcon />,
+  subCategories: [
+    {
+      id: 1,
+      level: 2,
+      heading: "",
+      label: "",
+      category: "",
+      icon: <TestIcon />,
+      subCategories: [
+        {
+          id: 1,
+          level: 3,
+          label: "",
+          category: "",
+          icon: <TestIcon />,
+        },
+      ],
+    },
+  ],
+};
+
+export const navData = [for_you, skin, face, lips, eyes, collections, about];
