@@ -1,4 +1,4 @@
-import HLSVideoPlayer from "../../components/videoPlayers/HLSVideoPlayer";
+// import HLSVideoPlayer from "../../components/videoPlayers/HLSVideoPlayer";
 
 const Home = () => {
   return (
@@ -12,12 +12,12 @@ const Home = () => {
         muted
         controls
       ></video> */}
-      <HLSVideoPlayer
+      {/* <HLSVideoPlayer
         videoUrl="https://res.cloudinary.com/drbhw0nwt/video/upload/sp_auto/v1739693059/videos/wvq939qkdpzgchfpzk2m.m3u8"
         className="w-full object-contain"
-      />
+      /> */}
+      Home
     </div>
-    // <div className="h-[200vh]">Home</div>
   );
 };
 
