@@ -46,7 +46,7 @@ const ForYou = () => {
                     {category?.heading}
                   </p>
                   <div
-                    className="flex flex-col border gap-1 p-3 hover:bg-platinum-black rounded-2xl cursor-pointer group relative"
+                    className="flex flex-col gap-1 p-3 hover:bg-platinum-black rounded-2xl cursor-pointer group relative"
                     onMouseEnter={() => setPlayingVideoIndex(index)}
                   >
                     <p className="text-silver-jet text-base font-semibold leading-5 group-hover:text-primary">
@@ -56,10 +56,10 @@ const ForYou = () => {
                       {category.description}
                     </p>
 
-                    <div className="relative max-w-[250px] h-[150px] overflow-hidden rounded-lg group-hover:border group-hover:border-primary-10">
+                    <div className="relative max-w-[250px] h-[150px] overflow-hidden rounded-lg group-hover:shadow-sm group-hover:shadow-primary-inverted">
                       {playingVideoIndex === index ? (
                         <HLSVideoPlayer
-                          className="w-full h-full object-cover rounded-lg"
+                          className="w-full h-full object-cover"
                           videoUrl={category.videoUrl}
                           posterURL="https://res.cloudinary.com/drbhw0nwt/video/upload/w_1920,h_1080,c_fill,so_1/v1739693059/videos/wvq939qkdpzgchfpzk2m.jpg"
                         />
