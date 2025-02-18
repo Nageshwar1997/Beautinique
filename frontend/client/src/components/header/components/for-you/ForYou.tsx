@@ -56,7 +56,7 @@ const ForYou = () => {
                       {category.description}
                     </p>
 
-                    <div className="relative max-w-[250px] h-[150px] overflow-hidden rounded-lg group-hover:border group-hover:border-primary-10 transition-transform duration-700">
+                    <div className="relative max-w-[250px] h-[150px] overflow-hidden rounded-lg group-hover:border group-hover:border-primary-10">
                       {playingVideoIndex === index ? (
                         <HLSVideoPlayer
                           className="w-full h-full object-cover rounded-lg"
