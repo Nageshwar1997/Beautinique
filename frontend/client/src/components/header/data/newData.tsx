@@ -26,7 +26,8 @@ export const for_you = {
       label: "New",
       category: "new",
       icon: <TestIcon />,
-      videoUrl: "./videos/header/new.mp4",
+      videoUrl:
+        "https://res.cloudinary.com/drbhw0nwt/video/upload/sp_auto/v1739693059/videos/wvq939qkdpzgchfpzk2m.m3u8",
       thumbnail:
         "https://www.cosmeticsdesign-asia.com/resizer/v2/DFI3RWMPJJMNBF3E6P4SBJ7HZQ.jpg?auth=474f1eceade4c82457720b986e47fa3a6aea0ea968cc8fa505b74d50fd0353c1&width=1802&height=1013&smart=true",
       description: "Discover new beauty arrivals for a fresh, trendy style.",
@@ -47,9 +48,8 @@ export const for_you = {
       label: "Sugar Play",
       category: "sugar_play",
       icon: <TestIcon />,
-      videoUrl: "./videos/header/sugar_play.mp4",
-      thumbnail:
-        "https://adn-static1.nykaa.com/media/wysiwyg/SUGAR00000767_1.jpg?tr=w-400,pr-true",
+      videoUrl:
+        "https://res.cloudinary.com/drbhw0nwt/video/upload/sp_auto/v1739693059/videos/wvq939qkdpzgchfpzk2m.m3u8",
       description: "Shop beauty products top-rated & loved by enthusiasts.",
       subCategories: [
         {
@@ -68,9 +68,8 @@ export const for_you = {
       label: "Offers",
       category: "offers",
       icon: <TestIcon />,
-      videoUrl: "./videos/header/offers.mp4",
-      thumbnail:
-        "https://couponswala.com/blog/wp-content/uploads/2022/03/sugar-cosmetics-offers.jpg.webp",
+      videoUrl:
+        "https://res.cloudinary.com/drbhw0nwt/video/upload/sp_auto/v1739693059/videos/wvq939qkdpzgchfpzk2m.m3u8",
       description: "Grab discounts on premium cosmetics for a limited time.",
       subCategories: [
         {
@@ -89,8 +88,8 @@ export const for_you = {
       label: "Blogs",
       category: "blogs",
       icon: <TestIcon />,
-      videoUrl: "./videos/header/blogs.mp4",
-      thumbnail: "https://i.ytimg.com/vi/a5RiQXOnqAM/maxresdefault.jpg",
+      videoUrl:
+        "https://res.cloudinary.com/drbhw0nwt/video/upload/sp_auto/v1739693059/videos/wvq939qkdpzgchfpzk2m.m3u8",
       description: "Explore top beauty tips, trends, & skincare routines.",
       subCategories: [
         {
