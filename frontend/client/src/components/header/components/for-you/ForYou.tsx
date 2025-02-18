@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { Fragment, useState } from "react";
 import { for_you } from "../../data/newData";
 import Button from "../../../button/Button";
 import { Link } from "react-router-dom";
@@ -39,10 +39,7 @@ const ForYou = () => {
         <div className="grid grid-cols-1 lg:grid-cols-4 lg:gap-4">
           {for_you?.subCategories?.map((category, index) => {
             return (
-              <div
-                key={index}
-                className="bg-primary-inverted-50 lg:bg-transparent"
-              >
+              <Fragment key={index}>
                 {/* Desktop View */}
                 <div className="hidden lg:flex flex-col gap-6">
                   <p className="uppercase text-primary-battleship-davys-gray-inverted text-sm font-semibold font-degular tracking-wide leading-5 pl-3">
@@ -125,7 +122,7 @@ const ForYou = () => {
                     )}
                   </div>
                 </div>
-              </div>
+              </Fragment>
             );
           })}
         </div>
