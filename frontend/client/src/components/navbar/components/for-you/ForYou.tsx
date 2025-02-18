@@ -33,10 +33,11 @@ const ForYou = () => {
   const [playingVideoIndex, setPlayingVideoIndex] = useState<null | number>(
     null
   );
+  const categories = for_you?.subCategories;
   return (
     <Fragment>
       <div className="grid grid-cols-1 lg:grid-cols-4 lg:gap-4">
-        {for_you?.subCategories?.map((category, index) => {
+        {categories?.map((category, index) => {
           return (
             <Fragment key={index}>
               {/* Desktop View */}
