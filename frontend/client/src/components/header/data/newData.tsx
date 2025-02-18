@@ -28,6 +28,8 @@ export const for_you = {
       icon: <TestIcon />,
       videoUrl:
         "https://res.cloudinary.com/drbhw0nwt/video/upload/sp_auto/v1739693059/videos/wvq939qkdpzgchfpzk2m.m3u8",
+      thumbnail:
+        "https://www.cosmeticsdesign-asia.com/resizer/v2/DFI3RWMPJJMNBF3E6P4SBJ7HZQ.jpg?auth=474f1eceade4c82457720b986e47fa3a6aea0ea968cc8fa505b74d50fd0353c1&width=1802&height=1013&smart=true",
       description: "Discover new beauty arrivals for a fresh, trendy style.",
       subCategories: [
         {

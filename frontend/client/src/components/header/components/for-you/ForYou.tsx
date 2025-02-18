@@ -1,11 +1,11 @@
-import React, { Fragment, useState } from "react";
+import  { FC, Fragment, SVGProps, useState } from "react";
 import { for_you } from "../../data/newData";
 import Button from "../../../button/Button";
 import { Link } from "react-router-dom";
 import { ChatIcon, PlayIcon } from "../../../../icons";
 import HLSVideoPlayer from "../../../videoPlayers/HLSVideoPlayer";
 
-type IconType = React.FC<React.SVGProps<SVGSVGElement>>;
+type IconType = FC<SVGProps<SVGSVGElement>>;
 
 interface SocialCommunityItem {
   id: number;
@@ -46,7 +46,7 @@ const ForYou = () => {
                     {category?.heading}
                   </p>
                   <div
-                    className="flex flex-col gap-1 p-3 hover:bg-platinum-black  rounded-2xl cursor-pointer group relative"
+                    className="flex flex-col border gap-1 p-3 hover:bg-platinum-black rounded-2xl cursor-pointer group relative"
                     onMouseEnter={() => setPlayingVideoIndex(index)}
                   >
                     <p className="text-silver-jet text-base font-semibold leading-5 group-hover:text-primary">
@@ -128,7 +128,7 @@ const ForYou = () => {
         </div>
         {/* Only show the section below on desktop */}
         <div className="hidden lg:block">
-          <div className="bg bg-primary-50 h-px rounded-full my-4" />
+          <div className="bg bg-primary-50 h-px rounded-full my-6" />
           <div className="flex flex-col md:flex-row items-center gap-4 justify-between">
             <div className="flex gap-6 items-center font-normal text-sm">
               {socialCommunity.map((data) => {
