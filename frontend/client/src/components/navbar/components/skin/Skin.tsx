@@ -1,9 +1,5 @@
-import React from 'react'
-
 const Skin = () => {
-  return (
-    <div>Skin</div>
-  )
-}
+  return <div>Skin</div>;
+};
 
-export default Skin
+export default Skin;

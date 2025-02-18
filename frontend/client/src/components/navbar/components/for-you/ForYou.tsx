@@ -70,6 +70,7 @@ const ForYou = () => {
                         } // Replace with a thumbnail URL
                         alt="Video Thumbnail"
                         className="w-full h-full object-cover rounded-lg"
+                        loading="lazy"
                       />
                     )}
                   </div>
@@ -109,6 +110,7 @@ const ForYou = () => {
                         src="https://res.cloudinary.com/drbhw0nwt/video/upload/so_5/videos/wvq939qkdpzgchfpzk2m.jpg"
                         alt="Video Thumbnail"
                         className="w-full h-full object-cover rounded-md"
+                        loading="lazy"
                       />
                       {/* Play Button */}
                       <button

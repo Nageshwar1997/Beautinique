@@ -9,7 +9,7 @@ import Eyes from "../components/Eyes";
 import Face from "../components/Face";
 import ForYou from "../components/for-you/ForYou";
 import Lips from "../components/Lips";
-import Skin from "../components/Skin";
+import Skin from "../components/skin/Skin";
 
 export const for_you = {
   id: 1,
