@@ -1,9 +1,10 @@
 import React, { useState } from "react";
 import { for_you } from "../../data/newData";
-import ImageCadDots from "./ImageCadDots";
 import Button from "../../../button/Button";
 import { Link } from "react-router-dom";
 import { ChatIcon, PlayIcon } from "../../../../icons";
+import HLSVideoPlayer from "../../../videoPlayers/HLSVideoPlayer";
+
 type IconType = React.FC<React.SVGProps<SVGSVGElement>>;
 
 interface SocialCommunityItem {
@@ -38,7 +39,10 @@ const ForYou = () => {
         <div className="grid grid-cols-1 lg:grid-cols-4 lg:gap-4">
           {for_you?.subCategories?.map((category, index) => {
             return (
-              <div key={index} className="bg-primary-inverted-50">
+              <div
+                key={index}
+                className="bg-primary-inverted-50 lg:bg-transparent"
+              >
                 {/* Desktop View */}
                 <div className="hidden lg:flex flex-col gap-6">
                   <p className="uppercase text-primary-battleship-davys-gray-inverted text-sm font-semibold font-degular tracking-wide leading-5 pl-3">
@@ -51,30 +55,27 @@ const ForYou = () => {
                     <p className="text-silver-jet text-base font-semibold leading-5 group-hover:text-primary">
                       {category?.label}
                     </p>
-                    <p className="group-hover:text-silver-jet text--primary-battleship-davys-gray-inverted text-xs font-normal tracking-tight leading-5 line-clamp-2">
+                    <p className="group-hover:text-silver-jet text-primary-battleship-davys-gray-inverted text-xs font-normal tracking-tight leading-5 line-clamp-2">
                       {category.description}
                     </p>
 
-                    <div className="relative max-w-[250px] h-[150px] lg:mt-1 overflow-hidden rounded-lg bg-platinum-black group-hover:bg-smoke-eerie">
-                      <ImageCadDots className="w-full h-full [&>g]:fill-smoke-eerie-inverted p-1" />
-                      <video
-                        src={category.videoUrl}
-                        className="w-full h-full object-cover absolute top-5 left-5 rounded-md transform group-hover:translate-x-[-4px] group-hover:translate-y-[-4px] transition-transform duration-300"
-                        loop
-                        muted
-                        controls={false}
-                        ref={(video) => {
-                          if (video) {
-                            // Play or pause the video based on hover state
-                            if (playingVideoIndex === index) {
-                              video.play();
-                            } else {
-                              video.pause();
-                              video.currentTime = 0;
-                            }
-                          }
-                        }}
-                      />
+                    <div className="relative max-w-[250px] h-[150px] overflow-hidden rounded-lg group-hover:border group-hover:border-primary-10 transition-transform duration-700">
+                      {playingVideoIndex === index ? (
+                        <HLSVideoPlayer
+                          className="w-full h-full object-cover rounded-lg"
+                          videoUrl={category.videoUrl}
+                          posterURL="https://res.cloudinary.com/drbhw0nwt/video/upload/w_1920,h_1080,c_fill,so_1/v1739693059/videos/wvq939qkdpzgchfpzk2m.jpg"
+                        />
+                      ) : (
+                        <img
+                          src={
+                            "https://res.cloudinary.com/drbhw0nwt/video/upload/so_5/videos/wvq939qkdpzgchfpzk2m.jpg" //LINK - Without width, height, quality & timestamp
+                            // "https://res.cloudinary.com/drbhw0nwt/video/upload/w_1920,h_1080,c_fill,so_1/v1739693059/videos/wvq939qkdpzgchfpzk2m.jpg" //LINK - With width, height, quality & timestamp
+                          } // Replace with a thumbnail URL
+                          alt="Video Thumbnail"
+                          className="w-full h-full object-cover rounded-lg"
+                        />
+                      )}
                     </div>
                   </div>
                 </div>
@@ -98,15 +99,30 @@ const ForYou = () => {
                       {/* <DropdownIcon className="-rotate-90 [&>path]:fill-primary" /> */}
                     </div>
                   </div>
-                  <div className="max-w-[200px] h-[120px] border border-primary-10 w-1/2 sm:w-1/3 overflow-hidden rounded-lg bg-platinum-black group-hover:bg-smoke-eerie flex items-center justify-center">
-                    <video
-                      src={category.videoUrl}
-                      className="w-full h-full object-cover rounded-md"
-                      loop
-                      muted
-                      autoPlay
-                      controls={false}
-                    />
+                  <div className="relative max-w-[200px] h-[120px] border border-primary-10 w-1/2 sm:w-1/3 overflow-hidden rounded-lg bg-platinum-black group-hover:bg-smoke-eerie flex items-center justify-center">
+                    {playingVideoIndex === index ? (
+                      <HLSVideoPlayer
+                        className="w-full h-full object-cover rounded-lg"
+                        videoUrl={category.videoUrl}
+                        // posterURL="https://res.cloudinary.com/drbhw0nwt/video/upload/w_1920,h_1080,c_fill,so_1/v1739693059/videos/wvq939qkdpzgchfpzk2m.jpg"
+                      />
+                    ) : (
+                      <>
+                        {/* Show Poster */}
+                        <img
+                          src="https://res.cloudinary.com/drbhw0nwt/video/upload/so_5/videos/wvq939qkdpzgchfpzk2m.jpg"
+                          alt="Video Thumbnail"
+                          className="w-full h-full object-cover rounded-md"
+                        />
+                        {/* Play Button */}
+                        <button
+                          className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-50 text-white rounded-md"
+                          onClick={() => setPlayingVideoIndex(index)}
+                        >
+                          <PlayIcon className="w-10 h-10 fill-white/50" />
+                        </button>
+                      </>
+                    )}
                   </div>
                 </div>
               </div>

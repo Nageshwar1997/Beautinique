@@ -26,7 +26,8 @@ export const for_you = {
       label: "New",
       category: "new",
       icon: <TestIcon />,
-      videoUrl: "./videos/header/new.mp4",
+      videoUrl:
+        "https://res.cloudinary.com/drbhw0nwt/video/upload/sp_auto/v1739693059/videos/wvq939qkdpzgchfpzk2m.m3u8",
       description: "Discover new beauty arrivals for a fresh, trendy style.",
       subCategories: [
         {
@@ -45,7 +46,8 @@ export const for_you = {
       label: "Sugar Play",
       category: "sugar_play",
       icon: <TestIcon />,
-      videoUrl: "./videos/header/sugar_play.mp4",
+      videoUrl:
+        "https://res.cloudinary.com/drbhw0nwt/video/upload/sp_auto/v1739693059/videos/wvq939qkdpzgchfpzk2m.m3u8",
       description: "Shop beauty products top-rated & loved by enthusiasts.",
       subCategories: [
         {
@@ -64,7 +66,8 @@ export const for_you = {
       label: "Offers",
       category: "offers",
       icon: <TestIcon />,
-      videoUrl: "./videos/header/offers.mp4",
+      videoUrl:
+        "https://res.cloudinary.com/drbhw0nwt/video/upload/sp_auto/v1739693059/videos/wvq939qkdpzgchfpzk2m.m3u8",
       description: "Grab discounts on premium cosmetics for a limited time.",
       subCategories: [
         {
@@ -83,7 +86,8 @@ export const for_you = {
       label: "Blogs",
       category: "blogs",
       icon: <TestIcon />,
-      videoUrl: "./videos/header/blogs.mp4",
+      videoUrl:
+        "https://res.cloudinary.com/drbhw0nwt/video/upload/sp_auto/v1739693059/videos/wvq939qkdpzgchfpzk2m.m3u8",
       description: "Explore top beauty tips, trends, & skincare routines.",
       subCategories: [
         {
