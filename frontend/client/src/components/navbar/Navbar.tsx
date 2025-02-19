@@ -61,18 +61,6 @@ const Navbar = () => {
     };
   }, []);
 
-  // Disables body scroll when the mobile navbar is opened
-  useEffect(() => {
-    if (isMobileNavbarOpened) {
-      document.body.style.overflow = "hidden";
-    } else {
-      document.body.style.overflow = "unset";
-    }
-    return () => {
-      document.body.style.overflow = "unset";
-    };
-  }, [isMobileNavbarOpened]);
-
   // Toggles the accordion index: adds index if not present, removes if already active.
   const toggleAccordionIndex = (index: number) => {
     setActiveIndices((prev) =>
@@ -188,7 +176,7 @@ const Navbar = () => {
           <UserMenuIcons />
           {(hoveredIndex !== null || isContainerHovered) && (
             <div
-              className={`rounded-2xl absolute -left-12 top-[63px] w-full h-fit z-[49] justify-self-center transition-all duration-300`}
+              className={`rounded-2xl absolute -left-5 top-[63px] w-auto h-fit z-[49] justify-self-center transition-all duration-300`}
               ref={containerRef}
               onMouseEnter={handleContainerMouseEnter}
               onMouseLeave={handleMouseLeave}
@@ -253,7 +241,7 @@ const Navbar = () => {
           </div>
 
           <div className="fixed bottom-0 left-0 w-full flex gap-5 md:gap-10 justify-center items-center px-6 py-2 pt-8 z-[51]">
-            <BottomGradient />
+            <BottomGradient className="!w-full" />
             <Link to={"/login"} className="w-1/2 sm:w-1/3 md:w-1/4 z-[51]">
               <Button
                 content="Login"

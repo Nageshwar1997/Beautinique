@@ -837,6 +837,8 @@ export const skin = {
           label: "Night Cream",
           category: "night_cream",
           icon: <TestIcon />,
+          description:
+            "Deeply hydrates and repairs tired skin while you sleep.",
         },
         {
           id: 2,
@@ -844,6 +846,8 @@ export const skin = {
           label: "Eye Cream",
           category: "eye_cream",
           icon: <TestIcon />,
+          description:
+            "Reduces puffiness, dark circles, and fine lines quickly.",
         },
         {
           id: 3,
@@ -851,13 +855,17 @@ export const skin = {
           label: "Serums",
           category: "serums",
           icon: <TestIcon />,
+          description:
+            "Nourishes skin with essential vitamins for a radiant glow.",
         },
         {
           id: 4,
           level: 3,
-          label: "Skincare Kits", // Moved from Skin Care Kits
+          label: "Skincare Kits",
           category: "skincare_kits",
           icon: <TestIcon />,
+          description:
+            "Complete care sets for all skin types and beauty concerns.",
         },
       ],
     },
@@ -874,6 +882,8 @@ export const skin = {
           label: "Cleansers",
           category: "cleansers",
           icon: <TestIcon />,
+          description:
+            "Gently removes dirt, excess oil, and makeup for clean skin.",
         },
         {
           id: 2,
@@ -881,6 +891,8 @@ export const skin = {
           label: "Face Wash",
           category: "face_wash",
           icon: <TestIcon />,
+          description:
+            "Refreshing daily wash for soft and healthy-looking skin tone.",
         },
         {
           id: 3,
@@ -888,13 +900,17 @@ export const skin = {
           label: "Exfoliators & Scrubs",
           category: "exfoliators_and_scrubs",
           icon: <TestIcon />,
+          description:
+            "Removes dead skin cells to reveal a fresh and smooth glow.",
         },
         {
           id: 4,
           level: 3,
-          label: "Sunscreen", // Moved from Sun Protection
+          label: "Sunscreen",
           category: "sunscreen",
           icon: <TestIcon />,
+          description:
+            "Shields skin from harmful UV rays and sun damage daily.",
         },
       ],
     },
@@ -911,6 +927,8 @@ export const skin = {
           label: "Aquaholic",
           category: "aquaholic",
           icon: <TestIcon />,
+          description:
+            "Hydration-rich formulas to deeply quench dry, dull skin.",
         },
         {
           id: 2,
@@ -918,6 +936,8 @@ export const skin = {
           label: "Coffee Culture",
           category: "coffee_culture",
           icon: <TestIcon />,
+          description:
+            "Energizing coffee extracts for a firm, smooth, youthful feel.",
         },
         {
           id: 3,
@@ -925,6 +945,8 @@ export const skin = {
           label: "Citrus Got Real",
           category: "citrus_got_real",
           icon: <TestIcon />,
+          description:
+            "Vitamin C boost for brighter, fresher, healthier-looking skin.",
         },
         {
           id: 4,
@@ -932,6 +954,8 @@ export const skin = {
           label: "View All",
           category: "view_all",
           icon: <TestIcon />,
+          description:
+            "Explore all skincare essentials, perfectly tailored for you.",
         },
       ],
     },
@@ -948,6 +972,8 @@ export const skin = {
           label: "Sheet Masks",
           category: "sheet_masks",
           icon: <TestIcon />,
+          description:
+            "Instant hydration and glowing effect in just a few minutes.",
         },
         {
           id: 2,
@@ -955,6 +981,8 @@ export const skin = {
           label: "Face Packs",
           category: "face_packs",
           icon: <TestIcon />,
+          description:
+            "Detox and refresh your skin naturally with herbal extracts.",
         },
         {
           id: 3,
@@ -962,6 +990,8 @@ export const skin = {
           label: "View All",
           category: "view_all",
           icon: <TestIcon />,
+          description:
+            "Browse all skincare must-haves for a flawless glowing look.",
         },
       ],
     },

@@ -80,11 +80,10 @@ const ForYou = () => {
 
               {/* Mobile View */}
               <div className="lg:hidden p-4 flex justify-between gap-2 w-full border-b border-primary-50">
-                <div className="w-1/2 sm:w-2/3 flex flex-col items-start justify-between">
-                  <p className="uppercase text-sm font-degular font-semibold tracking-[1px] py-1 border-secondary-battleship-davys-gray text-primary-battleship-davys-gray-inverted">
+                <div className="w-1/2 sm:w-2/3 flex flex-col items-start justify-start gap-1 sm:gap-3">
+                  <p className="uppercase text-sm font-degular font-semibold tracking-[1px] py-1 border-b border-secondary-battleship-davys-gray text-primary-battleship-davys-gray-inverted">
                     {category.heading}
                   </p>
-                  <hr className="border-b border-primary-8 w-full" />
                   <div className="flex gap-4 cursor-pointer justify-between items-center pt-1">
                     <div className="flex gap-1 flex-col items-start">
                       <span className="text-sm leading-5 font-semibold text-[--ctruh-light-primary]">
