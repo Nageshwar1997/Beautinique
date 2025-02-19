@@ -20,11 +20,13 @@ const Skin = () => {
                 <div
                   key={index}
                   className={`flex justify-start gap-2 p-2 border border-transparent hover:bg-white-smoke-night-inverted rounded-xl cursor-pointer ${
-                    isSerums ? "hover:border-[#07f]" : "hover:border-primary-8"
+                    isSerums
+                      ? "hover:border-blue-crayola-c"
+                      : "hover:border-primary-8"
                   } group`}
                 >
                   <div
-                    className={`min-w-10 min-h-10 max-w-10 max-h-10 xl:min-w-14 xl:min-h-14 xl:max-w-14 xl:max-h-14 bg-primary-inverted z-10 rounded-lg flex items-center justify-center ${
+                    className={`min-w-10 min-h-10 max-w-10 max-h-10 xl:min-w-14 xl:min-h-14 xl:max-w-14 xl:max-h-14 bg-secondary-inverted group-hover:bg-primary-inverted z-10 rounded-lg flex items-center justify-center ${
                       isSerums
                         ? "bg-accent-duo group-hover:shadow-primary-btn-hover [&>svg]:!fill-white opacity-100"
                         : "shadow-inner shadow-primary-battleship-davys-gray"
