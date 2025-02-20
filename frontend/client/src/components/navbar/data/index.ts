@@ -472,14 +472,14 @@ export const navbarCategoryData: Category[] = [
       },
       {
         id: 4,
-        category: "masks_and_serums",
-        label: "Masks & Serums",
+        category: "mask_and_serum",
+        label: "Mask & Serum",
         level: 2,
         subcategories: [
           {
             id: 1,
-            category: "serums",
-            label: "Serums",
+            category: "serum",
+            label: "Serum",
             level: 3,
           },
         ],

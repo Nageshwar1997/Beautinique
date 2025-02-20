@@ -9,6 +9,22 @@ import Collections from "../components/Collections";
 import Eyes from "../components/Eyes";
 import Face from "../components/Face";
 import ForYou from "../components/for-you/ForYou";
+import {
+  AllIcon,
+  AquaholicIcon,
+  CitrusIcon,
+  CleanserIcon,
+  CoffeeCultureIcon,
+  ExfoliatorIcon,
+  EyeCreamIcon,
+  FacePackIcon,
+  FaceWashIcon,
+  NightCreamIcon,
+  SerumIcon,
+  SheetMaskIcon,
+  SkinCareKitIcon,
+  SunscreenIcon,
+} from "../components/icons";
 import Lips from "../components/Lips";
 import Skin from "../components/skin/Skin";
 
@@ -836,7 +852,7 @@ export const skin = {
           level: 3,
           label: "Night Cream",
           category: "night_cream",
-          icon: <TestIcon />,
+          icon: NightCreamIcon,
           description:
             "Deeply hydrates and repairs tired skin while you sleep.",
         },
@@ -845,25 +861,25 @@ export const skin = {
           level: 3,
           label: "Eye Cream",
           category: "eye_cream",
-          icon: <TestIcon />,
+          icon: EyeCreamIcon,
           description:
             "Reduces puffiness, dark circles, and fine lines quickly.",
         },
         {
           id: 3,
           level: 3,
-          label: "Serums",
-          category: "serums",
-          icon: <TestIcon />,
+          label: "Serum",
+          category: "serum",
+          icon: SerumIcon,
           description:
             "Nourishes skin with essential vitamins for a radiant glow.",
         },
         {
           id: 4,
           level: 3,
-          label: "Skincare Kits",
-          category: "skincare_kits",
-          icon: <TestIcon />,
+          label: "Skincare Kit",
+          category: "skincare_kit",
+          icon: SkinCareKitIcon,
           description:
             "Complete care sets for all skin types and beauty concerns.",
         },
@@ -879,9 +895,9 @@ export const skin = {
         {
           id: 1,
           level: 3,
-          label: "Cleansers",
-          category: "cleansers",
-          icon: <TestIcon />,
+          label: "Cleanser",
+          category: "cleanser",
+          icon: CleanserIcon,
           description:
             "Gently removes dirt, excess oil, and makeup for clean skin.",
         },
@@ -890,16 +906,16 @@ export const skin = {
           level: 3,
           label: "Face Wash",
           category: "face_wash",
-          icon: <TestIcon />,
+          icon: FaceWashIcon,
           description:
             "Refreshing daily wash for soft and healthy-looking skin tone.",
         },
         {
           id: 3,
           level: 3,
-          label: "Exfoliators & Scrubs",
-          category: "exfoliators_and_scrubs",
-          icon: <TestIcon />,
+          label: "Exfoliator & Scrub",
+          category: "exfoliator_and_scrub",
+          icon: ExfoliatorIcon,
           description:
             "Removes dead skin cells to reveal a fresh and smooth glow.",
         },
@@ -908,7 +924,7 @@ export const skin = {
           level: 3,
           label: "Sunscreen",
           category: "sunscreen",
-          icon: <TestIcon />,
+          icon: SunscreenIcon,
           description:
             "Shields skin from harmful UV rays and sun damage daily.",
         },
@@ -926,7 +942,7 @@ export const skin = {
           level: 3,
           label: "Aquaholic",
           category: "aquaholic",
-          icon: <TestIcon />,
+          icon: AquaholicIcon,
           description:
             "Hydration-rich formulas to deeply quench dry, dull skin.",
         },
@@ -935,7 +951,7 @@ export const skin = {
           level: 3,
           label: "Coffee Culture",
           category: "coffee_culture",
-          icon: <TestIcon />,
+          icon: CoffeeCultureIcon,
           description:
             "Energizing coffee extracts for a firm, smooth, youthful feel.",
         },
@@ -944,7 +960,7 @@ export const skin = {
           level: 3,
           label: "Citrus Got Real",
           category: "citrus_got_real",
-          icon: <TestIcon />,
+          icon: CitrusIcon,
           description:
             "Vitamin C boost for brighter, fresher, healthier-looking skin.",
         },
@@ -953,7 +969,7 @@ export const skin = {
           level: 3,
           label: "View All",
           category: "view_all",
-          icon: <TestIcon />,
+          icon: AllIcon,
           description:
             "Explore all skincare essentials, perfectly tailored for you.",
         },
@@ -962,25 +978,25 @@ export const skin = {
     {
       id: 4,
       level: 2,
-      label: "Face Masks",
-      category: "face_masks",
+      label: "Face Mask",
+      category: "face_mask",
       icon: <TestIcon />,
       subCategories: [
         {
           id: 1,
           level: 3,
-          label: "Sheet Masks",
-          category: "sheet_masks",
-          icon: <TestIcon />,
+          label: "Sheet Mask",
+          category: "sheet_mask",
+          icon: SheetMaskIcon,
           description:
             "Instant hydration and glowing effect in just a few minutes.",
         },
         {
           id: 2,
           level: 3,
-          label: "Face Packs",
-          category: "face_packs",
-          icon: <TestIcon />,
+          label: "Face Pack",
+          category: "face_pack",
+          icon: FacePackIcon,
           description:
             "Detox and refresh your skin naturally with herbal extracts.",
         },
@@ -989,7 +1005,7 @@ export const skin = {
           level: 3,
           label: "View All",
           category: "view_all",
-          icon: <TestIcon />,
+          icon: AllIcon,
           description:
             "Browse all skincare must-haves for a flawless glowing look.",
         },
