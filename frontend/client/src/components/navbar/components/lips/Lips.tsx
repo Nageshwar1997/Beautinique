@@ -181,7 +181,7 @@ const Lips = () => {
             src="./images/navbar/1341.jpg"
             alt=""
             className="w-full h-full object-cover object-center opacity-95 hover:opacity-100 cursor-pointer"
-            loading="eager"
+            loading="lazy"
           />
         </div>
         <div className="w-full max-h-[300px] col-span-2 overflow-y-scroll hidden lg:block shadow-lg shadow-secondary-inverted rounded-2xl">
@@ -189,7 +189,7 @@ const Lips = () => {
             src="./images/navbar/1346.jpg"
             alt=""
             className="w-full h-full object-cover object-center"
-            loading="eager"
+            loading="lazy"
           />
         </div>
       </div>
