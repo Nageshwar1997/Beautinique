@@ -9,7 +9,7 @@ import {
   TrackIcon,
 } from "../../icons";
 import UserMenuIcons from "./components/UserMenuIcons";
-import { navData } from "./data/newData";
+import { navbarCategoriesData } from "./data";
 import SearchInput from "./components/SearchInput";
 import { Link, useLocation } from "react-router-dom";
 import HoveredComponent from "./components/HoveredComponent";
@@ -28,7 +28,9 @@ const Navbar = () => {
   const [activeIndices, setActiveIndices] = useState<number[]>([]);
   const [isContainerHovered, setIsContainerHovered] = useState<boolean>(false);
 
-  const levelOneCategories = navData.filter((item) => item.level === 1);
+  const levelOneCategories = navbarCategoriesData.filter(
+    (item) => item.level === 1
+  );
 
   // Sets the hovered index when mouse enters an element
   const handleMouseEnter = (index: number) => setHoveredIndex(index);
@@ -38,8 +40,8 @@ const Navbar = () => {
 
   // Resets hovered index and container hover state when mouse leaves
   const handleMouseLeave = () => {
-    setHoveredIndex(null);
-    setIsContainerHovered(false);
+    // setHoveredIndex(null);
+    // setIsContainerHovered(false);
   };
 
   // Handles the event when the user clicks outside the navbar.
@@ -61,18 +63,6 @@ const Navbar = () => {
     };
   }, []);
 
-  // Disables body scroll when the mobile navbar is opened
-  useEffect(() => {
-    if (isMobileNavbarOpened) {
-      document.body.style.overflow = "hidden";
-    } else {
-      document.body.style.overflow = "unset";
-    }
-    return () => {
-      document.body.style.overflow = "unset";
-    };
-  }, [isMobileNavbarOpened]);
-
   // Toggles the accordion index: adds index if not present, removes if already active.
   const toggleAccordionIndex = (index: number) => {
     setActiveIndices((prev) =>
@@ -83,8 +73,8 @@ const Navbar = () => {
   // Close navbar when pathname changes
   useEffect(() => {
     setHoveredIndex(null);
-    // setHoveredIndex(0); // remove it after testing
-    setIsContainerHovered(false);
+    setHoveredIndex(1); // remove it after testing
+    setIsContainerHovered(true);
     setIsMobileNavbarOpened(false);
     // setIsMobileNavbarOpened(true); // remove it after testing
     setActiveIndices([]);
@@ -140,8 +130,8 @@ const Navbar = () => {
             </p>
           </div>
         </div>
-        <div className="h-16 flex items-center gap-7 justify-between px-5 relative">
-          <div className="flex items-center gap-5 h-full">
+        <div className="h-16 flex items-center gap-7 justify-between px-3 relative">
+          <div className="flex items-center gap-2 h-full">
             {levelOneCategories.map((item, index) => (
               <div className="h-full relative" key={item.id}>
                 {/* Left Curve */}
@@ -151,7 +141,7 @@ const Navbar = () => {
                   </div>
                 )}
                 <div
-                  className={`h-[calc(100%-8px)] mt-2 px-3 flex items-center gap-1 text-sm text-nowrap font-semibold cursor-pointer rounded-t-lg border-t border-l border-r relative ${
+                  className={`h-[calc(100%-8px)] mt-2 px-3 flex items-center justify-center gap-0.5 text-sm text-nowrap font-semibold cursor-pointer rounded-t-lg border-t border-l border-r relative ${
                     hoveredIndex === index
                       ? "bg-secondary-inverted border-primary-battleship-davys-gray z-50"
                       : "border-transparent"
@@ -188,14 +178,12 @@ const Navbar = () => {
           <UserMenuIcons />
           {(hoveredIndex !== null || isContainerHovered) && (
             <div
-              className={`rounded-2xl absolute -left-12 top-[63px] w-full h-fit z-[49] justify-self-center transition-all duration-300`}
+              className={`rounded-2xl absolute -left-5 top-[63px] w-auto h-fit z-[49] justify-self-center transition-all duration-300`}
               ref={containerRef}
               onMouseEnter={handleContainerMouseEnter}
               onMouseLeave={handleMouseLeave}
             >
-              {/* <div className="flex justify-center items-start"> */}
               {<HoveredComponent index={hoveredIndex as number} />}
-              {/* </div> */}
             </div>
           )}
         </div>
@@ -253,7 +241,7 @@ const Navbar = () => {
           </div>
 
           <div className="fixed bottom-0 left-0 w-full flex gap-5 md:gap-10 justify-center items-center px-6 py-2 pt-8 z-[51]">
-            <BottomGradient />
+            <BottomGradient className="!w-full" />
             <Link to={"/login"} className="w-1/2 sm:w-1/3 md:w-1/4 z-[51]">
               <Button
                 content="Login"

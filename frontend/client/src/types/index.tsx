@@ -1,4 +1,4 @@
-import { HTMLInputAutoCompleteAttribute, ReactNode } from "react";
+import { FC, HTMLInputAutoCompleteAttribute, ReactNode, SVGProps } from "react";
 
 export type ThemeType = "light" | "dark";
 
@@ -95,19 +95,8 @@ export interface HorizontalScrollType {
   right: boolean;
 }
 
-// Navbar Or Header
-export type Subcategory = {
-  id: number;
-  category: string;
-  label: string;
-  level: number;
-  subcategories?: Subcategory[]; // Recursive type for nested subcategories
-};
+export interface IconType {
+  className?: string;
+}
 
-export type Category = {
-  id: number;
-  category: string;
-  label: string;
-  level: number;
-  subcategories?: Subcategory[]; // Top-level category containing subcategories
-};
+export type SVGType = FC<SVGProps<SVGSVGElement>>;
