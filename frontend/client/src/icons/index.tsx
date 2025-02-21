@@ -1,3 +1,5 @@
+import { IconType } from "../types";
+
 export type IconProps = {
   className?: string;
   onClick?: () => void;
@@ -108,7 +110,7 @@ export const EyeIcon = ({ className, onClick }: IconProps) => (
   </svg>
 );
 
-export const GiftIcon = ({ className }: IconProps) => (
+export const GiftIcon = ({ className }: IconType) => (
   <svg
     xmlns="http://www.w3.org/2000/svg"
     width="24px"
@@ -133,7 +135,7 @@ export const GiftIcon = ({ className }: IconProps) => (
   </svg>
 );
 
-export const MakeupKitIcon = ({ className }: IconProps) => (
+export const MakeupKitIcon = ({ className }: IconType) => (
   <svg
     xmlns="http://www.w3.org/2000/svg"
     width="24px"
@@ -157,7 +159,7 @@ export const MakeupKitIcon = ({ className }: IconProps) => (
   </svg>
 );
 
-export const ValueSetsIcon = ({ className }: IconProps) => (
+export const ValueSetsIcon = ({ className }: IconType) => (
   <svg
     xmlns="http://www.w3.org/2000/svg"
     width="24px"
@@ -178,7 +180,7 @@ export const ValueSetsIcon = ({ className }: IconProps) => (
   </svg>
 );
 
-export const TestIcon = ({ className }: IconProps) => (
+export const TestIcon = ({ className }: IconType) => (
   <svg
     xmlns="http://www.w3.org/2000/svg"
     version="1.1"
@@ -414,7 +416,7 @@ export const CloseIcon = ({ className }: IconProps) => (
   </svg>
 );
 
-export const PlayIcon = ({ className }: { className?: string }) => (
+export const PlayIcon = ({ className }: IconType) => (
   <svg
     xmlns="http://www.w3.org/2000/svg"
     width="17"
@@ -430,7 +432,7 @@ export const PlayIcon = ({ className }: { className?: string }) => (
     />
   </svg>
 );
-export const ChatIcon = ({ className }: { className?: string }) => (
+export const ChatIcon = ({ className }: IconType) => (
   <svg
     xmlns="http://www.w3.org/2000/svg"
     width="24"

@@ -1,6 +1,6 @@
-import { IconProps } from "../../../icons";
+import { IconType } from "../../../types";
 
-export const NightCreamIcon = ({ className }: IconProps) => (
+export const NightCreamIcon = ({ className }: IconType) => (
   <svg
     height="24"
     width="24"
@@ -29,7 +29,7 @@ export const NightCreamIcon = ({ className }: IconProps) => (
   </svg>
 );
 
-export const EyeCreamIcon = ({ className }: IconProps) => (
+export const EyeCreamIcon = ({ className }: IconType) => (
   <svg
     height="24"
     width="24"
@@ -45,7 +45,7 @@ export const EyeCreamIcon = ({ className }: IconProps) => (
   </svg>
 );
 
-export const SerumIcon = ({ className }: IconProps) => (
+export const SerumIcon = ({ className }: IconType) => (
   <svg
     width="24"
     height="24"
@@ -67,7 +67,7 @@ export const SerumIcon = ({ className }: IconProps) => (
   </svg>
 );
 
-export const SkinCareKitIcon = ({ className }: IconProps) => (
+export const SkinCareKitIcon = ({ className }: IconType) => (
   <svg
     width="24"
     height="24"
@@ -82,7 +82,7 @@ export const SkinCareKitIcon = ({ className }: IconProps) => (
   </svg>
 );
 
-export const CleanserIcon = ({ className }: IconProps) => (
+export const CleanserIcon = ({ className }: IconType) => (
   <svg
     width={24}
     height={24}
@@ -117,7 +117,7 @@ export const CleanserIcon = ({ className }: IconProps) => (
   </svg>
 );
 
-export const FaceWashIcon = ({ className }: IconProps) => (
+export const FaceWashIcon = ({ className }: IconType) => (
   <svg
     height="24"
     width="24"
@@ -141,7 +141,7 @@ export const FaceWashIcon = ({ className }: IconProps) => (
   </svg>
 );
 
-export const ExfoliatorIcon = ({ className }: IconProps) => (
+export const ExfoliatorIcon = ({ className }: IconType) => (
   <svg
     width={24}
     height={24}
@@ -153,7 +153,7 @@ export const ExfoliatorIcon = ({ className }: IconProps) => (
   </svg>
 );
 
-export const SunscreenIcon = ({ className }: IconProps) => (
+export const SunscreenIcon = ({ className }: IconType) => (
   <svg
     height="24"
     width="24"
@@ -183,7 +183,7 @@ export const SunscreenIcon = ({ className }: IconProps) => (
   </svg>
 );
 
-export const AquaholicIcon = ({ className }: IconProps) => (
+export const AquaholicIcon = ({ className }: IconType) => (
   <svg
     height="26"
     width="26"
@@ -198,7 +198,7 @@ export const AquaholicIcon = ({ className }: IconProps) => (
   </svg>
 );
 
-export const CoffeeCultureIcon = ({ className }: IconProps) => (
+export const CoffeeCultureIcon = ({ className }: IconType) => (
   <svg
     height="24"
     width="24"
@@ -235,7 +235,7 @@ export const CoffeeCultureIcon = ({ className }: IconProps) => (
   </svg>
 );
 
-export const CitrusIcon = ({ className }: IconProps) => (
+export const CitrusIcon = ({ className }: IconType) => (
   <svg
     height="24"
     width="24"
@@ -256,7 +256,7 @@ export const CitrusIcon = ({ className }: IconProps) => (
   </svg>
 );
 
-export const SheetMaskIcon = ({ className }: IconProps) => (
+export const SheetMaskIcon = ({ className }: IconType) => (
   <svg
     width="24"
     height="24"
@@ -282,7 +282,7 @@ export const SheetMaskIcon = ({ className }: IconProps) => (
   </svg>
 );
 
-export const FacePackIcon = ({ className }: IconProps) => (
+export const FacePackIcon = ({ className }: IconType) => (
   <svg
     width="24"
     height="24"
@@ -294,7 +294,7 @@ export const FacePackIcon = ({ className }: IconProps) => (
   </svg>
 );
 
-export const AllIcon = ({ className }: IconProps) => (
+export const AllIcon = ({ className }: IconType) => (
   <svg
     width="24"
     height="24"
@@ -312,7 +312,7 @@ export const AllIcon = ({ className }: IconProps) => (
   </svg>
 );
 
-export const TransferLipstickIcon = ({ className }: IconProps) => (
+export const TransferLipstickIcon = ({ className }: IconType) => (
   <svg
     xmlns="http://www.w3.org/2000/svg"
     viewBox="0 0 511.999 511.999"
@@ -342,7 +342,7 @@ export const TransferLipstickIcon = ({ className }: IconProps) => (
   </svg>
 );
 
-export const MatteLipstickIcon = ({ className }: IconProps) => (
+export const MatteLipstickIcon = ({ className }: IconType) => (
   <svg
     height="24"
     viewBox="-80 0 512 512"
@@ -357,7 +357,7 @@ export const MatteLipstickIcon = ({ className }: IconProps) => (
   </svg>
 );
 
-export const LiquidLipstickIcon = ({ className }: IconProps) => (
+export const LiquidLipstickIcon = ({ className }: IconType) => (
   <svg
     height="24"
     width="24"
@@ -371,7 +371,7 @@ export const LiquidLipstickIcon = ({ className }: IconProps) => (
   </svg>
 );
 
-export const PowderLipstickIcon = ({ className }: IconProps) => (
+export const PowderLipstickIcon = ({ className }: IconType) => (
   <svg
     height="24"
     width="24"
@@ -390,7 +390,7 @@ export const PowderLipstickIcon = ({ className }: IconProps) => (
   </svg>
 );
 
-export const CrayonLipstickIcon = ({ className }: IconProps) => (
+export const CrayonLipstickIcon = ({ className }: IconType) => (
   <svg
     xmlns="http://www.w3.org/2000/svg"
     height="24"
@@ -439,7 +439,7 @@ export const CrayonLipstickIcon = ({ className }: IconProps) => (
   </svg>
 );
 
-export const SatinLipstickIcon = ({ className }: IconProps) => (
+export const SatinLipstickIcon = ({ className }: IconType) => (
   <svg
     xmlns="http://www.w3.org/2000/svg"
     height="24"
@@ -454,7 +454,7 @@ export const SatinLipstickIcon = ({ className }: IconProps) => (
   </svg>
 );
 
-export const BulletLipstickIcon = ({ className }: IconProps) => (
+export const BulletLipstickIcon = ({ className }: IconType) => (
   <svg
     xmlns="http://www.w3.org/2000/svg"
     height="24"
@@ -470,7 +470,7 @@ export const BulletLipstickIcon = ({ className }: IconProps) => (
   </svg>
 );
 
-export const LipGlossIcon = ({ className }: IconProps) => (
+export const LipGlossIcon = ({ className }: IconType) => (
   <svg
     xmlns="http://www.w3.org/2000/svg"
     height="24"
@@ -487,7 +487,7 @@ export const LipGlossIcon = ({ className }: IconProps) => (
   </svg>
 );
 
-export const HiShineLipstickIcon = ({ className }: IconProps) => (
+export const HiShineLipstickIcon = ({ className }: IconType) => (
   <svg
     xmlns="http://www.w3.org/2000/svg"
     height="24"
@@ -514,7 +514,7 @@ export const HiShineLipstickIcon = ({ className }: IconProps) => (
   </svg>
 );
 
-export const LipLinerIcon = ({ className }: IconProps) => (
+export const LipLinerIcon = ({ className }: IconType) => (
   <svg
     height="24"
     width="24"
@@ -536,7 +536,7 @@ export const LipLinerIcon = ({ className }: IconProps) => (
   </svg>
 );
 
-export const LipGlitterIcon = ({ className }: IconProps) => (
+export const LipGlitterIcon = ({ className }: IconType) => (
   <svg
     xmlns="http://www.w3.org/2000/svg"
     height="24"
@@ -551,7 +551,7 @@ export const LipGlitterIcon = ({ className }: IconProps) => (
   </svg>
 );
 
-export const LipTintAndSatinIcon = ({ className }: IconProps) => (
+export const LipTintAndSatinIcon = ({ className }: IconType) => (
   <svg
     height="24"
     width="24"
@@ -570,7 +570,7 @@ export const LipTintAndSatinIcon = ({ className }: IconProps) => (
   </svg>
 );
 
-export const LipPrimerIcon = ({ className }: IconProps) => (
+export const LipPrimerIcon = ({ className }: IconType) => (
   <svg
     xmlns="http://www.w3.org/2000/svg"
     height="24"
@@ -588,7 +588,7 @@ export const LipPrimerIcon = ({ className }: IconProps) => (
   </svg>
 );
 
-export const LipstickRemoverIcon = ({ className }: IconProps) => (
+export const LipstickRemoverIcon = ({ className }: IconType) => (
   <svg
     xmlns="http://www.w3.org/2000/svg"
     height="24"
@@ -607,7 +607,7 @@ export const LipstickRemoverIcon = ({ className }: IconProps) => (
   </svg>
 );
 
-export const LipBalmIcon = ({ className }: IconProps) => (
+export const LipBalmIcon = ({ className }: IconType) => (
   <svg
     xmlns="http://www.w3.org/2000/svg"
     height="24"
@@ -623,7 +623,7 @@ export const LipBalmIcon = ({ className }: IconProps) => (
   </svg>
 );
 
-export const TintedLipBalmIcon = ({ className }: IconProps) => (
+export const TintedLipBalmIcon = ({ className }: IconType) => (
   <svg
     xmlns="http://www.w3.org/2000/svg"
     height="24"
@@ -635,7 +635,7 @@ export const TintedLipBalmIcon = ({ className }: IconProps) => (
   </svg>
 );
 
-export const LipstickSetIcon = ({ className }: IconProps) => (
+export const LipstickSetIcon = ({ className }: IconType) => (
   <svg
     xmlns="http://www.w3.org/2000/svg"
     height="24"
@@ -651,7 +651,7 @@ export const LipstickSetIcon = ({ className }: IconProps) => (
   </svg>
 );
 
-export const LipstickComboIcon = ({ className }: IconProps) => (
+export const LipstickComboIcon = ({ className }: IconType) => (
   <svg
     xmlns="http://www.w3.org/2000/svg"
     height="24"
@@ -667,7 +667,7 @@ export const LipstickComboIcon = ({ className }: IconProps) => (
   </svg>
 );
 
-export const LipPaletteIcon = ({ className }: IconProps) => (
+export const LipPaletteIcon = ({ className }: IconType) => (
   <svg
     xmlns="http://www.w3.org/2000/svg"
     height="24"
@@ -695,7 +695,7 @@ export const LipPaletteIcon = ({ className }: IconProps) => (
   </svg>
 );
 
-export const FaceMakeupIcon = ({ className }: IconProps) => (
+export const FaceMakeupIcon = ({ className }: IconType) => (
   <svg
     height="24"
     width="24"
