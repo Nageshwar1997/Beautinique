@@ -1,7 +1,8 @@
+import { LevelTwoCategoryType } from "../../types";
 import { skin } from "../../data";
 
 const Skin = () => {
-  const categories = skin.subCategories;
+  const categories: LevelTwoCategoryType[] = skin.subCategories;
   return (
     <div className="p-4 xl:p-0 grid base:grid-cols-2 md:grid-cols-3 md:gap-4 lg:grid-cols-4 lg:gap-6 justify-start w-full">
       {categories.map((category, index) => (

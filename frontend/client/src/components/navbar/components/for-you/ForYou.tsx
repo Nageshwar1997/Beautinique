@@ -1,37 +1,16 @@
-import { FC, Fragment, SVGProps, useState } from "react";
-import { for_you } from "../../data";
+import { Fragment, useState } from "react";
+import { for_you, socialCommunity } from "../../data";
 import Button from "../../../button/Button";
 import { Link } from "react-router-dom";
-import { ChatIcon, PlayIcon } from "../../../../icons";
+import { PlayIcon } from "../../../../icons";
 import HLSVideoPlayer from "../../../videoPlayers/HLSVideoPlayer";
-
-export interface SocialCommunityItem {
-  id: number;
-  icon: FC<SVGProps<SVGSVGElement>>;
-  label: string;
-  link: string;
-}
-
-const socialCommunity: SocialCommunityItem[] = [
-  {
-    id: 1,
-    icon: PlayIcon,
-    label: "Founder's Story: Watch Now",
-    link: "https://www.youtube.com/watch?v=92kcChL74ZE",
-  },
-  {
-    id: 2,
-    icon: ChatIcon,
-    label: "Chat with our team",
-    link: "/contact-us",
-  },
-];
+import { LevelTwoCategoryType } from "../../types";
 
 const ForYou = () => {
   const [playingVideoIndex, setPlayingVideoIndex] = useState<null | number>(
     null
   );
-  const categories = for_you?.subCategories;
+  const categories: LevelTwoCategoryType[] = for_you?.subCategories;
   return (
     <Fragment>
       <div className="grid grid-cols-1 lg:grid-cols-4 lg:gap-4">

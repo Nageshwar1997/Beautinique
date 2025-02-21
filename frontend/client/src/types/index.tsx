@@ -95,38 +95,8 @@ export interface HorizontalScrollType {
   right: boolean;
 }
 
-export interface LevelOneCategoryType {
-  id: number;
-  level: number;
-  label: string;
-  category: string;
-  component: FC;
-  icon: FC<SVGProps<SVGSVGElement>>;
-  subCategories: LevelTwoCategoryType[];
-}
-
-export interface LevelTwoCategoryType {
-  id: number;
-  level: number;
-  label: string;
-  category: string;
-  icon: FC<SVGProps<SVGSVGElement>>;
-  subCategories: LevelThreeCategoryType[];
-  heading?: string;
-  videoUrl?: string;
-  thumbnail?: string;
-  description?: string;
-}
-
-export interface LevelThreeCategoryType {
-  id: number;
-  level: number;
-  label: string;
-  category: string;
-  icon: FC<SVGProps<SVGSVGElement>>;
-  description?: string;
-}
-
 export interface IconType {
   className?: string;
 }
+
+export type SVGType = FC<SVGProps<SVGSVGElement>>;
