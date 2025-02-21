@@ -39,7 +39,8 @@ select:-webkit-autofill:focus  */
 }
 
 /* Loading Screen Page */
-.loadingHighlight {
+.loadingHighlight,
+.highlight {
   color: transparent;
   background-clip: text;
   background-image: var(--accent-duo);
