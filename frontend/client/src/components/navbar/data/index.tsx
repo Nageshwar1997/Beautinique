@@ -261,6 +261,7 @@ export const lips = {
           label: "Lip Primer & Scrub",
           category: "lip_primer_and_scrub",
           icon: LipPrimerIcon,
+          description: "Preps lips for smooth application.",
         },
         {
           id: 2,
@@ -268,6 +269,7 @@ export const lips = {
           label: "Lipstick Fixer & Remover",
           category: "lipstick_fixer_and_remover",
           icon: LipstickRemoverIcon,
+          description: "Ensures long wear and easy removal.",
         },
         {
           id: 3,
@@ -275,6 +277,7 @@ export const lips = {
           label: "Lip Balm",
           category: "lip_balm",
           icon: LipBalmIcon,
+          description: "Moisturizes and nourishes dry lips.",
         },
         {
           id: 4,
@@ -282,6 +285,7 @@ export const lips = {
           label: "Tinted Lip Balm",
           category: "tinted_lip_balm",
           icon: TintedLipBalmIcon,
+          description: "Hydration with a hint of color.",
         },
       ],
     },
@@ -298,6 +302,7 @@ export const lips = {
           label: "Lipstick Set",
           category: "lipstick_set",
           icon: LipstickSetIcon,
+          description: "Multiple shades in one set.",
         },
         {
           id: 2,
@@ -305,6 +310,7 @@ export const lips = {
           label: "Lipstick Combo",
           category: "lipstick_combo",
           icon: LipstickComboIcon,
+          description: "Perfectly paired lip products.",
         },
         {
           id: 3,
@@ -312,6 +318,7 @@ export const lips = {
           label: "Lip Palette",
           category: "lip_palette",
           icon: LipPaletteIcon,
+          description: "Versatile palette with various shades.",
         },
         {
           id: 4,
@@ -319,11 +326,13 @@ export const lips = {
           label: "View All",
           category: "view_all",
           icon: AllIcon,
+          description: "Explore all sets and combos.",
         },
       ],
     },
   ],
 };
+
 
 export const eyes = {
   id: 3,

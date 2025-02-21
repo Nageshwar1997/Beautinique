@@ -156,8 +156,7 @@ const Lips = () => {
                           {subCategory.label}
                         </p>
                         <p className="text-[8px] xl:text-[10px] leading-none md:leading-3 break-words line-clamp-2 text-silver-jet group-hover:text-tertiary">
-                          {/* {subCategory.description} */}
-                          Lorem ipsum dolor sit amet, consectetur
+                          {subCategory.description}
                         </p>
                       </div>
                     </div>
