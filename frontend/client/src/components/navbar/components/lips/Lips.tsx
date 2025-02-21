@@ -110,7 +110,7 @@ const Lips = () => {
               }`}
             >
               <p
-                className={`uppercase text-primary-battleship-davys-gray-inverted text-base sm:text-sm font-semibold font-degular tracking-wide leading-5 px-3 cursor-pointer mt-3 sm:mt-0 ${
+                className={`uppercase mt-3 sm:mt-0 text-primary-battleship-davys-gray-inverted text-base sm:text-sm font-semibold font-degular tracking-wide leading-5 px-3 cursor-pointer ${
                   category.category === "lipstick_sets_and_combos"
                     ? "lg:border-b lg:border-primary-battleship-davys-gray w-fit lg:mx-auto"
                     : ""
