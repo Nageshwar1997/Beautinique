@@ -40,8 +40,8 @@ const Navbar = () => {
 
   // Resets hovered index and container hover state when mouse leaves
   const handleMouseLeave = () => {
-    setHoveredIndex(null);
-    setIsContainerHovered(false);
+    // setHoveredIndex(null);
+    // setIsContainerHovered(false);
   };
 
   // Handles the event when the user clicks outside the navbar.
@@ -73,8 +73,8 @@ const Navbar = () => {
   // Close navbar when pathname changes
   useEffect(() => {
     setHoveredIndex(null);
-    // setHoveredIndex(0); // remove it after testing
-    setIsContainerHovered(false);
+    setHoveredIndex(1); // remove it after testing
+    setIsContainerHovered(true);
     setIsMobileNavbarOpened(false);
     // setIsMobileNavbarOpened(true); // remove it after testing
     setActiveIndices([]);

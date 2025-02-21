@@ -14,20 +14,25 @@ const Skin = () => {
           </p>
           <div className="flex flex-col gap-1 md:gap-2 lg:gap-5">
             {category.subCategories.map((subCategory, index) => {
-              const isSerum = subCategory.label === "Serum";
+              const isHighlighted = [
+                "serum",
+                "sunscreen",
+                "aquaholic",
+                "face_pack",
+              ].includes(subCategory.category);
               const Icon = subCategory.icon;
               return (
                 <div
                   key={index}
                   className={`flex justify-start gap-2 p-2 border border-transparent hover:bg-white-smoke-night-inverted rounded-xl cursor-pointer ${
-                    isSerum
+                    isHighlighted
                       ? "hover:border-blue-crayola-c"
                       : "hover:border-primary-8"
                   } group`}
                 >
                   <div
                     className={`min-w-10 min-h-10 max-w-10 max-h-10 xl:min-w-14 xl:min-h-14 xl:max-w-14 xl:max-h-14 bg-secondary-inverted group-hover:bg-primary-inverted rounded-lg flex items-center justify-center ${
-                      isSerum
+                      isHighlighted
                         ? "bg-accent-duo group-hover:shadow-primary-btn-hover [&>svg]:!fill-white"
                         : "shadow-inner shadow-primary-battleship-davys-gray"
                     }`}

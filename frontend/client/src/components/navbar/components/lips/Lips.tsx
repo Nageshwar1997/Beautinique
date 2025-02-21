@@ -126,9 +126,12 @@ const Lips = () => {
                 }`}
               >
                 {category.subCategories.map((subCategory, i) => {
-                  const isHighlighted = subCategory.label === "Lipstick Combos";
+                  const isHighlighted = [
+                    "lipstick_combo",
+                    "lipstick_fixer_and_remover",
+                  ].includes(subCategory.category);
                   const Icon = subCategory.icon;
-                  return ["lip_care", "lipstick_sets_and_combos"].includes(
+                  return ["lip_care", "lipstick_set_and_combo"].includes(
                     category.category
                   ) ? (
                     <div
@@ -140,7 +143,7 @@ const Lips = () => {
                       } group`}
                     >
                       <div
-                        className={`min-w-6 min-h-6 max-w-6 max-h-6 xl:min-w-8 xl:min-h-8 xl:max-w-8 xl:max-h-8 bg-secondary-inverted group-hover:bg-primary-inverted p-1 rounded-lg flex items-center justify-center ${
+                        className={`min-w-6 min-h-6 max-w-6 max-h-6 xl:min-w-8 xl:min-h-8 xl:max-w-8 xl:max-h-8 bg-secondary-inverted group-hover:bg-primary-inverted p-1.5 rounded-lg flex items-center justify-center ${
                           isHighlighted
                             ? "bg-accent-duo group-hover:shadow-primary-btn-hover [&>svg]:!fill-white"
                             : "shadow-inner shadow-primary-battleship-davys-gray"
@@ -159,14 +162,11 @@ const Lips = () => {
                       </div>
                     </div>
                   ) : (
-                    <div
-                      key={i}
-                      className="flex items-center gap-1 sm:gap-2 group"
-                    >
+                    <div key={i} className="flex items-center gap-2 group">
                       <span>
-                        <Icon className="fill-secondary w-5 h-5 sm:w-6 sm:h-6" />
+                        <Icon className="fill-secondary group-hover:fill-primary w-4 h-4 base:w-5 base:h-5 sm:w-6 sm:h-6" />
                       </span>
-                      <p className="text-sm sm:text-[13px] md:text-sm xl:text-sm w-full lg:font-medium tracking-wide leading-3 text-left text-tertiary group-hover:text-primary">
+                      <p className="text-sm sm:text-[13px] md:text-sm xl:text-base w-full lg:font-medium tracking-wide leading-3 text-left text-secondary group-hover:text-primary">
                         {subCategory.label}
                       </p>
                     </div>
