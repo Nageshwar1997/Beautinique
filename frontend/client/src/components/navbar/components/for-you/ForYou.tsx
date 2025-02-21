@@ -1,5 +1,5 @@
 import { FC, Fragment, SVGProps, useState } from "react";
-import { for_you } from "../../data/newData";
+import { for_you } from "../../data";
 import Button from "../../../button/Button";
 import { Link } from "react-router-dom";
 import { ChatIcon, PlayIcon } from "../../../../icons";

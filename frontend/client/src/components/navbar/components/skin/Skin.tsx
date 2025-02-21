@@ -1,4 +1,4 @@
-import { skin } from "../../data/newData";
+import { skin } from "../../data";
 
 const Skin = () => {
   const categories = skin.subCategories;

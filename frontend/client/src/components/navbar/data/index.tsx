@@ -1299,4 +1299,12 @@ export const about = {
   ],
 };
 
-export const navData = [for_you, lips, eyes, face, skin, collections, about];
+export const navbarCategoriesData = [
+  for_you,
+  lips,
+  eyes,
+  face,
+  skin,
+  collections,
+  about,
+];

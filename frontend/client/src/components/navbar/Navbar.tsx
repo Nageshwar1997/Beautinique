@@ -9,7 +9,7 @@ import {
   TrackIcon,
 } from "../../icons";
 import UserMenuIcons from "./components/UserMenuIcons";
-import { navData } from "./data/newData";
+import { navbarCategoriesData } from "./data";
 import SearchInput from "./components/SearchInput";
 import { Link, useLocation } from "react-router-dom";
 import HoveredComponent from "./components/HoveredComponent";
@@ -28,7 +28,9 @@ const Navbar = () => {
   const [activeIndices, setActiveIndices] = useState<number[]>([]);
   const [isContainerHovered, setIsContainerHovered] = useState<boolean>(false);
 
-  const levelOneCategories = navData.filter((item) => item.level === 1);
+  const levelOneCategories = navbarCategoriesData.filter(
+    (item) => item.level === 1
+  );
 
   // Sets the hovered index when mouse enters an element
   const handleMouseEnter = (index: number) => setHoveredIndex(index);
@@ -181,9 +183,7 @@ const Navbar = () => {
               onMouseEnter={handleContainerMouseEnter}
               onMouseLeave={handleMouseLeave}
             >
-              {/* <div className="flex justify-center items-start"> */}
               {<HoveredComponent index={hoveredIndex as number} />}
-              {/* </div> */}
             </div>
           )}
         </div>

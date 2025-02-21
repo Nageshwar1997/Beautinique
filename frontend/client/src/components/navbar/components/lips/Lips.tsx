@@ -1,6 +1,6 @@
 import { MessageIcon } from "../../../../icons";
 import TextDisplay from "../../../TextDisplay";
-import { lips } from "../../data/newData";
+import { lips } from "../../data";
 const feedbacks = [
   [
     { text: "Great variety of lipsticks! Loved the" },

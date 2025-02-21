@@ -94,20 +94,3 @@ export interface HorizontalScrollType {
   left: boolean;
   right: boolean;
 }
-
-// Navbar Or Header
-export type Subcategory = {
-  id: number;
-  category: string;
-  label: string;
-  level: number;
-  subcategories?: Subcategory[]; // Recursive type for nested subcategories
-};
-
-export type Category = {
-  id: number;
-  category: string;
-  label: string;
-  level: number;
-  subcategories?: Subcategory[]; // Top-level category containing subcategories
-};

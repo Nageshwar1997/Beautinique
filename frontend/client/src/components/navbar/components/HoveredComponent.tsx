@@ -1,11 +1,11 @@
-import { navData } from "../data/newData";
+import { navbarCategoriesData } from "../data";
 
 const HoveredComponent = ({ index }: { index: number }) => {
-  if (index === null || index >= navData.length) {
+  if (index === null || index >= navbarCategoriesData.length) {
     return null;
   }
 
-  const Component = navData[index].component;
+  const Component = navbarCategoriesData[index].component;
 
   return (
     <div className="lg:p-px lg:bg-primary-battleship-davys-gray lg:rounded-xl w-full h-full backdrop-blur-3xl max-w-[1300px] shadow-navbar-card">
