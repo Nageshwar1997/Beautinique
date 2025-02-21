@@ -100,17 +100,17 @@ const Lips = () => {
 
   return (
     <div className="w-full space-y-2">
-      <div className="p-4 xl:p-0 grid sm:grid-cols-3 md:gap-4 lg:grid-flow-col gap-6 lg:auto-cols-fr justify-center w-full">
+      <div className="p-4 xl:p-0 grid base:grid-cols-2 sm:grid-cols-3 gap-6 sm:gap-3 md:gap-4 lg:grid-flow-col lg:auto-cols-fr justify-start w-full">
         {categories.map((category, index) => {
           return (
             <div
               key={index}
-              className={`space-y-4 min-w-[200px] max-w-[300px] pb-4 lg:pb-0 border-b border-primary-battleship-davys-gray lg:border-none ${
+              className={`space-y-4 min-w-[250px]  base:min-w-[200px] base:max-w-[300px] w-full pb-4 lg:pb-0 border-b border-primary-battleship-davys-gray lg:border-none ${
                 ["lipsticks"].includes(category.category) ? "row-span-2" : ""
               }`}
             >
               <p
-                className={`uppercase text-center text-primary-battleship-davys-gray-inverted text-base sm:text-sm font-semibold font-degular tracking-wide leading-5 px-3 cursor-pointer ${
+                className={`uppercase text-primary-battleship-davys-gray-inverted text-base sm:text-sm font-semibold font-degular tracking-wide leading-5 px-3 cursor-pointer pt-3 sm:pt-0 ${
                   category.category === "lipstick_sets_and_combos"
                     ? "lg:border-b lg:border-primary-battleship-davys-gray w-fit lg:mx-auto"
                     : ""
@@ -121,8 +121,8 @@ const Lips = () => {
               <div
                 className={`flex flex-col ${
                   category.category === "lipsticks"
-                    ? "gap-4 lg:gap-5 lg:py-2"
-                    : "lg:gap-3 gap-1 md:gap-2"
+                    ? "gap-4 lg:gap-[18px] lg:py-2"
+                    : "gap-1 sm:gap-2 lg:gap-3"
                 }`}
               >
                 {category.subCategories.map((subCategory, i) => {
@@ -148,7 +148,7 @@ const Lips = () => {
                       >
                         <Icon className="fill-secondary w-full h-full" />
                       </div>
-                      <div className="flex flex-col justify-center lg:justify-start w-full text-silver-jet group-hover:text-secondary">
+                      <div className="flex flex-col gap-0.5 justify-center lg:justify-start w-full text-silver-jet group-hover:text-secondary">
                         <p className="text-xs sm:text-[11px] xl:text-sm tracking-wide leading-3 text-left w-full text-secondary group-hover:text-primary lg:font-medium">
                           {subCategory.label}
                         </p>
@@ -159,11 +159,14 @@ const Lips = () => {
                       </div>
                     </div>
                   ) : (
-                    <div key={i} className="flex items-center gap-2 group">
+                    <div
+                      key={i}
+                      className="flex items-center gap-1 sm:gap-2 group"
+                    >
                       <span>
-                        <Icon className="fill-secondary sm:w-5 sm:h-5 md:w-6 md:h-6" />
+                        <Icon className="fill-secondary w-5 h-5 sm:w-6 sm:h-6" />
                       </span>
-                      <p className="text-base sm:text-xs xl:text-sm w-full lg:font-medium tracking-wide leading-3 text-left text-tertiary group-hover:text-primary">
+                      <p className="text-sm sm:text-[13px] md:text-sm xl:text-sm w-full lg:font-medium tracking-wide leading-3 text-left text-tertiary group-hover:text-primary">
                         {subCategory.label}
                       </p>
                     </div>
@@ -175,7 +178,7 @@ const Lips = () => {
         })}
         <div className="w-full max-h-[300px] col-span-2 overflow-y-scroll shadow-lg shadow-secondary-inverted hidden sm:block rounded-2xl">
           <img
-            src="../../../../../public/images/navbar/1341.jpg"
+            src="./images/navbar/1341.jpg"
             alt=""
             className="w-full h-full object-cover object-center opacity-95 hover:opacity-100 cursor-pointer"
             loading="eager"
@@ -183,7 +186,7 @@ const Lips = () => {
         </div>
         <div className="w-full max-h-[300px] col-span-2 overflow-y-scroll hidden lg:block shadow-lg shadow-secondary-inverted rounded-2xl">
           <img
-            src="../../../../../public/images/navbar/1346.jpg"
+            src="./images/navbar/1346.jpg"
             alt=""
             className="w-full h-full object-cover object-center"
             loading="eager"
@@ -191,7 +194,7 @@ const Lips = () => {
         </div>
       </div>
       <hr className="hidden lg:block h-0.5 bg-primary-50" />
-      <div className="w-full hidden lg:flex items-center gap-0.5">
+      <div className="w-full hidden lg:flex items-center gap-2">
         <div className="flex items-center gap-2 w-fit">
           <MessageIcon className="w-3 h-3 fill-secondary" />
           <p className="text-[11px] xl:text-sm font-medium text-secondary text-nowrap">
@@ -200,7 +203,7 @@ const Lips = () => {
         </div>
         <TextDisplay
           content={todayFeedback}
-          contentClassName="text-[11px] xl:text-sm w-fit"
+          contentClassName="text-[11px] xl:text-sm w-fit [&>span]:mr-1.5"
         />
       </div>
     </div>
