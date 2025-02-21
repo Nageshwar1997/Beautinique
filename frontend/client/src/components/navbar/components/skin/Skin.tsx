@@ -26,19 +26,19 @@ const Skin = () => {
                   } group`}
                 >
                   <div
-                    className={`min-w-10 min-h-10 max-w-10 max-h-10 xl:min-w-14 xl:min-h-14 xl:max-w-14 xl:max-h-14 bg-secondary-inverted group-hover:bg-primary-inverted z-10 rounded-lg flex items-center justify-center ${
+                    className={`min-w-10 min-h-10 max-w-10 max-h-10 xl:min-w-14 xl:min-h-14 xl:max-w-14 xl:max-h-14 bg-secondary-inverted group-hover:bg-primary-inverted rounded-lg flex items-center justify-center ${
                       isSerum
-                        ? "bg-accent-duo group-hover:shadow-primary-btn-hover [&>svg]:!fill-white opacity-100"
+                        ? "bg-accent-duo group-hover:shadow-primary-btn-hover [&>svg]:!fill-white"
                         : "shadow-inner shadow-primary-battleship-davys-gray"
                     }`}
                   >
-                    <Icon className="z-20 fill-secondary" />
+                    <Icon className="fill-secondary" />
                   </div>
                   <div className="flex flex-col justify-center lg:justify-start gap-1 w-full">
-                    <p className="text-xs xl:text-sm tracking-wide leading-3 text-left w-full">
+                    <p className="text-xs xl:text-sm tracking-wide leading-3 text-left w-full text-secondary group-hover:text-primary">
                       {subCategory.label}
                     </p>
-                    <p className="text-[8px] xl:text-[10px] leading-1 break-words line-clamp-2">
+                    <p className="text-[8px] xl:text-[10px] leading-1 break-words line-clamp-2 text-silver-jet group-hover:text-tertiary">
                       {subCategory.description}
                     </p>
                   </div>

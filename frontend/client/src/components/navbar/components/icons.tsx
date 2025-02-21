@@ -6,10 +6,9 @@ export const NightCreamIcon = ({ className }: IconProps) => (
     width="24"
     viewBox="0 0 48 48"
     xmlns="http://www.w3.org/2000/svg"
-    data-name="Layer 26"
     className={className}
   >
-    <g fill="currentColor">
+    <g>
       <path d="m34 28.18v-3.18c0-1.43-1-2.62-2.34-2.92-.61-1.5-2.1-3.54-4.72-3.54-3.43 0-6.38-1.81-8.53-3.12-.77-.47-1.43-.88-2-1.12-.89-.39-1.79-.38-2.59.02-1.47.73-2.26 2.59-2.58 3.55-3.61 1.11-4.7 3.1-5.02 4.26-1.27.35-2.21 1.5-2.21 2.88v3.18c-1.16.41-2 1.51-2 2.82v10c0 2.76 2.24 5 5 5h24c2.76 0 5-2.24 5-5v-10c0-1.3-.84-2.4-2-2.82zm-21.71-8.55c.35-.09.63-.37.71-.73.18-.74.84-2.39 1.7-2.81.19-.09.46-.17.91.02.44.19 1.05.56 1.76 1 2.22 1.36 5.59 3.42 9.58 3.42 1.2 0 1.97.75 2.43 1.46h-20.96c.46-.75 1.49-1.74 3.87-2.36zm-5.29 4.36h24c.55 0 1 .45 1 1v3h-26v-3c0-.55.45-1 1-1zm27 17c0 1.65-1.35 3-3 3h-24c-1.65 0-3-1.35-3-3v-10c0-.55.45-1 1-1h28c.55 0 1 .45 1 1z" />
       <path d="m23 40h-8c-.55 0-1 .45-1 1s.45 1 1 1h8c.55 0 1-.45 1-1s-.45-1-1-1z" />
       <path d="m23 37h-8c-.55 0-1 .45-1 1s.45 1 1 1h8c.55 0 1-.45 1-1s-.45-1-1-1z" />
@@ -120,10 +119,9 @@ export const CleanserIcon = ({ className }: IconProps) => (
 
 export const FaceWashIcon = ({ className }: IconProps) => (
   <svg
-    enable-background="new 0 0 511.998 511.998"
     height="24"
     width="24"
-    viewBox="0 0 511.998 511.998"
+    viewBox="0 0 511 511"
     xmlns="http://www.w3.org/2000/svg"
     className={className}
   >
@@ -157,8 +155,6 @@ export const ExfoliatorIcon = ({ className }: IconProps) => (
 
 export const SunscreenIcon = ({ className }: IconProps) => (
   <svg
-    id="fi_5169814"
-    enable-background="new 0 0 512 512"
     height="24"
     width="24"
     viewBox="0 0 512 512"
@@ -191,7 +187,6 @@ export const AquaholicIcon = ({ className }: IconProps) => (
   <svg
     height="26"
     width="26"
-    enable-background="new 0 0 68 68"
     viewBox="0 0 68 68"
     xmlns="http://www.w3.org/2000/svg"
     className={className}
@@ -208,8 +203,6 @@ export const CoffeeCultureIcon = ({ className }: IconProps) => (
     height="24"
     width="24"
     xmlns="http://www.w3.org/2000/svg"
-    x="0px"
-    y="0px"
     viewBox="0 0 512 512"
     className={className}
   >
@@ -244,10 +237,9 @@ export const CoffeeCultureIcon = ({ className }: IconProps) => (
 
 export const CitrusIcon = ({ className }: IconProps) => (
   <svg
-    enable-background="new 0 0 512.001 512.001"
     height="24"
     width="24"
-    viewBox="0 0 512.001 512.001"
+    viewBox="0 0 512 512"
     xmlns="http://www.w3.org/2000/svg"
     className={className}
   >
@@ -266,7 +258,6 @@ export const CitrusIcon = ({ className }: IconProps) => (
 
 export const SheetMaskIcon = ({ className }: IconProps) => (
   <svg
-    enable-background="new 0 0 512 512"
     width="24"
     height="24"
     viewBox="0 0 512 512"
@@ -306,9 +297,8 @@ export const FacePackIcon = ({ className }: IconProps) => (
 export const AllIcon = ({ className }: IconProps) => (
   <svg
     width="24"
-    enable-background="new 0 0 512.457 512.457"
     height="24"
-    viewBox="0 0 512.457 512.457"
+    viewBox="0 0 512 512"
     xmlns="http://www.w3.org/2000/svg"
     className={className}
   >
