@@ -660,20 +660,20 @@ export const eyes: LevelOneCategoryType = {
         {
           id: 2,
           level: 3,
-          label: "Eye Combo",
-          category: "eye_combo",
-          icon: EyeComboIcon,
-          description:
-            "Convenient sets with eye essentials for a complete, coordinated eye look.",
-        },
-        {
-          id: 3,
-          level: 3,
           label: "Eye Gift Set",
           category: "eye_gift_set",
           icon: EyeGiftSetIcon,
           description:
             "Perfect gift sets featuring popular eye products for makeup lovers' delight.",
+        },
+        {
+          id: 3,
+          level: 3,
+          label: "Eye Combo",
+          category: "eye_combo",
+          icon: EyeComboIcon,
+          description:
+            "Convenient sets with eye essentials for a complete, coordinated eye look.",
         },
       ],
     },

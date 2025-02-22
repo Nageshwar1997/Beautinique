@@ -25,7 +25,7 @@ const Eyes = () => {
                 "liquid_eyeliner",
                 "glitter_eyeshadow",
                 "brow_pencil",
-                "eye_gift_set",
+                "eye_combo",
               ].includes(subCategory.category);
               const Icon = subCategory.icon;
               return (
