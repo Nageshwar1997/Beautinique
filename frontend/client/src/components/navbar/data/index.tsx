@@ -9,7 +9,7 @@ import {
 import { LevelOneCategoryType } from "../types";
 import About from "../components/about/About";
 import Collections from "../components/Collections";
-import Eyes from "../components/Eyes";
+import Eyes from "../components/eyes/Eyes";
 import Face from "../components/Face";
 import ForYou from "../components/for-you/ForYou";
 import {
