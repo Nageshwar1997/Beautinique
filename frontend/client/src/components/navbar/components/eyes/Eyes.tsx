@@ -62,7 +62,7 @@ const Eyes = () => {
       ))}
       <div className="hidden lg:block w-full max-h-[280px] col-span-2 overflow-y-scroll shadow-lg shadow-secondary-inverted rounded-2xl">
         <img
-          src="./images/navbar/moisturizer.jpg"
+          src="./images/navbar/Mascara.jpg"
           alt=""
           className="w-full h-full object-cover object-center opacity-95 hover:opacity-100 cursor-pointer"
           loading="lazy"
