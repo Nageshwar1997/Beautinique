@@ -73,7 +73,7 @@ const Navbar = () => {
   // Close navbar when pathname changes
   useEffect(() => {
     setHoveredIndex(null);
-    setHoveredIndex(1); // remove it after testing
+    // setHoveredIndex(1); // remove it after testing
     setIsContainerHovered(true);
     setIsMobileNavbarOpened(false);
     // setIsMobileNavbarOpened(true); // remove it after testing

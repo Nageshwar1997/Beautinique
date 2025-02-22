@@ -86,11 +86,11 @@ export const CleanserIcon = ({ className }: IconType) => (
   <svg
     width={24}
     height={24}
-    clip-rule="evenodd"
-    fill-rule="evenodd"
-    image-rendering="optimizeQuality"
-    shape-rendering="geometricPrecision"
-    text-rendering="geometricPrecision"
+    clipRule="evenodd"
+    fillRule="evenodd"
+    imageRendering="optimizeQuality"
+    shapeRendering="geometricPrecision"
+    textRendering="geometricPrecision"
     viewBox="0 0 512 512"
     xmlns="http://www.w3.org/2000/svg"
     className={className}
@@ -104,11 +104,11 @@ export const CleanserIcon = ({ className }: IconType) => (
         <path d="m288 87c-4 0-8-3-8-7v-66h-73c-7 0-13 4-16 10h73c3 0 7 3 7 7v49c0 4-4 7-7 7-4 0-8-3-8-7v-42h-73c-4 0-7-3-7-7 0-17 14-31 31-31h81c3 0 7 3 7 7v73c-1 4-4 7-7 7z"></path>
         <path
           d="m171 67c-12 21-14 36-11 45 2 5 7 8 11 8 3 0 8-3 10-8 3-9 1-24-10-45zm-24 49c-5-13-2-35 18-66 0-1 1-1 2-2 3-2 7-1 9 2 20 31 23 53 18 66-5 12-14 18-23 18-10 0-19-6-24-18z"
-          fill-rule="nonzero"
+          fillRule="nonzero"
         ></path>
         <path
           d="m129 147c-12 21-14 36-11 45 2 5 7 8 11 8 3 0 8-3 10-8 3-9 1-24-10-45zm-24 49c-5-13-2-35 18-66 0-1 1-1 2-2 3-2 7-1 9 2 20 31 23 53 18 66-5 12-14 18-23 18-10 0-19-6-24-18z"
-          fill-rule="nonzero"
+          fillRule="nonzero"
         ></path>
         <path d="m425 159c-7 0-15-3-21-8-3 1-6 1-9 1-18 0-34-15-34-33 0-3 1-6 2-10-7-6-12-15-12-24 0-14 10-26 23-31 2-16 16-28 33-28 9 0 18 4 25 12 4-3 10-4 16-4 17 0 32 14 32 32 0 4-1 8-2 11 6 6 10 15 10 24 0 17-13 31-30 32-3 15-16 26-33 26zm-20-24c2 0 5 1 6 3 4 4 9 7 14 7 11 0 19-8 19-19 0-4 4-7 8-7h3c11 0 18-8 18-18 0-7-2-13-8-16-2-2-3-6-2-9 2-3 2-6 2-10 0-10-7-18-18-18-5 0-9 2-13 5-2 1-4 1-6 1-2-1-4-2-5-4-3-6-10-10-17-10-9 0-17 7-18 16v3c1 3-2 7-5 7-10 1-18 10-18 19 0 7 5 13 10 16 3 2 4 6 3 9-2 3-3 6-3 9 0 10 9 19 20 19 2 0 5-1 7-2 1-1 2-1 3-1z"></path>
         <path d="m99 369c-8 0-16-3-22-9-3 1-6 2-9 2-19 0-33-15-33-33 0-3 0-6 1-10-7-6-11-15-11-24 0-14 9-27 22-31 2-15 16-28 33-28 9 0 19 5 25 12 5-3 10-4 15-4 18 0 32 15 32 33 0 3 0 7-1 11 6 5 9 14 9 23 0 17-13 32-29 33-3 14-17 25-32 25zm-20-24c2 0 4 1 5 3 4 4 9 7 15 7 10 0 19-8 19-18v-1c0-4 3-7 7-7 1 0 3 1 4 1 10 0 18-9 18-19 0-7-3-12-8-15-3-2-4-6-3-9 2-3 3-7 3-10 0-11-8-19-18-19-5 0-9 2-14 6-2 1-4 1-6 1-2-1-4-2-5-4-3-7-9-11-16-11-11 0-20 9-20 19v1c0 4-2 7-6 7-8 1-15 9-15 18 0 8 4 13 9 16 3 2 4 6 3 9-2 3-2 6-2 9 0 11 8 19 19 19 2 0 5-1 7-2 1-1 2-1 4-1z"></path>
@@ -494,8 +494,8 @@ export const HiShineLipstickIcon = ({ className }: IconType) => (
     width="24"
     viewBox="0 0 1.70666 1.70666"
     className={className}
-    clip-rule="evenodd"
-    fill-rule="evenodd"
+    clipRule="evenodd"
+    fillRule="evenodd"
   >
     <g>
       <path d="m1.21692 1.70664h-.727173c-.0220984 0-.04-.0178976-.04-.0399961v-.557319c0-.0220984.0179016-.04.04-.04h.727161c.0220984 0 .04.0179016.04.04v.306602c0 .0220984-.0179016.0399961-.04.0399961s-.04-.0178976-.04-.0399961v-.266602h-.647161v.477319h.647173v-.0564016c0-.0220984.0179016-.04.04-.04s.0399961.0179016.0399961.04v.0963858c0 .0221142-.0178976.0400118-.0399961.0400118z"></path>
@@ -520,8 +520,8 @@ export const LipLinerIcon = ({ className }: IconType) => (
     width="24"
     viewBox="0 0 512 512"
     xmlns="http://www.w3.org/2000/svg"
-    clip-rule="evenodd"
-    fill-rule="evenodd"
+    clipRule="evenodd"
+    fillRule="evenodd"
     className={className}
   >
     <g>
