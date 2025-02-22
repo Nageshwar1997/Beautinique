@@ -25,9 +25,9 @@ const Lips = () => {
           return (
             <div
               key={index}
-              className={`space-y-4 min-w-[250px]  base:min-w-[200px] base:max-w-[300px] w-full pb-4 lg:pb-0 border-b border-primary-battleship-davys-gray lg:border-none ${
+              className={`space-y-4 min-w-[250px] base:min-w-[200px] base:max-w-[300px] w-full pb-4 lg:pb-0 border-b border-primary-battleship-davys-gray ${
                 ["lipsticks"].includes(category.category) ? "row-span-2" : ""
-              }`}
+              } ${category.category !== "lip_care" ? "lg:border-none" : ""}`}
             >
               <p
                 className={`uppercase mt-3 sm:mt-0 text-primary-battleship-davys-gray-inverted text-base sm:text-sm font-semibold font-degular tracking-wide leading-5 px-3 cursor-pointer ${
