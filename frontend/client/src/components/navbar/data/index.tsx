@@ -453,16 +453,20 @@ export const eyes: LevelOneCategoryType = {
         {
           id: 1,
           level: 3,
-          label: "Kohls",
-          category: "kohls",
+          label: "Kohl",
+          category: "kohl",
           icon: TestIcon,
+          description:
+            "Intensely pigmented kohls for bold, long-lasting eye definition all day.",
         },
         {
           id: 2,
           level: 3,
-          label: "Kajals",
-          category: "kajals",
+          label: "Kajal",
+          category: "kajal",
           icon: TestIcon,
+          description:
+            "Smooth kajals for a dramatic look, perfect for waterline application.",
         },
         {
           id: 3,
@@ -470,6 +474,8 @@ export const eyes: LevelOneCategoryType = {
           label: "Smudge Proof Kajal",
           category: "smudge_proof_kajal",
           icon: TestIcon,
+          description:
+            "Long-lasting, smudge-proof kajal for sharp, defined eyes all day long.",
         },
       ],
     },
@@ -486,6 +492,8 @@ export const eyes: LevelOneCategoryType = {
           label: "Volumizing Mascara",
           category: "volumizing_mascara",
           icon: TestIcon,
+          description:
+            "Boosts lash volume for a fuller, more dramatic look with each coat.",
         },
         {
           id: 2,
@@ -493,6 +501,8 @@ export const eyes: LevelOneCategoryType = {
           label: "Curl Lengthening Mascara",
           category: "curl_lengthening_mascara",
           icon: TestIcon,
+          description:
+            "Lifts and curls lashes for a wide-eyed look with added length and volume.",
         },
         {
           id: 3,
@@ -500,6 +510,8 @@ export const eyes: LevelOneCategoryType = {
           label: "Waterproof Mascara",
           category: "waterproof_mascara",
           icon: TestIcon,
+          description:
+            "Water-resistant formula for long-lasting wear without smudging or flaking.",
         },
       ],
     },
@@ -516,6 +528,8 @@ export const eyes: LevelOneCategoryType = {
           label: "Liquid Eyeliner",
           category: "liquid_eyeliner",
           icon: TestIcon,
+          description:
+            "Precision tip for sharp lines, perfect for bold cat-eye or winged looks.",
         },
         {
           id: 2,
@@ -523,6 +537,8 @@ export const eyes: LevelOneCategoryType = {
           label: "Gel Eyeliner",
           category: "gel_eyeliner",
           icon: TestIcon,
+          description:
+            "Creamy, blendable gel eyeliner for versatile looks, from bold to subtle.",
         },
         {
           id: 3,
@@ -530,6 +546,8 @@ export const eyes: LevelOneCategoryType = {
           label: "Pen Eyeliner",
           category: "pen_eyeliner",
           icon: TestIcon,
+          description:
+            "Easy-to-use pen for precise lines, ideal for beginners and quick touch-ups.",
         },
       ],
     },
@@ -543,9 +561,11 @@ export const eyes: LevelOneCategoryType = {
         {
           id: 1,
           level: 3,
-          label: "Eyeshadow Palettes",
-          category: "eyeshadow_palettes",
+          label: "Eyeshadow Palette",
+          category: "eyeshadow_palette",
           icon: TestIcon,
+          description:
+            "Versatile palettes with coordinated shades for endless eye makeup looks.",
         },
         {
           id: 2,
@@ -553,6 +573,8 @@ export const eyes: LevelOneCategoryType = {
           label: "Liquid Eyeshadow",
           category: "liquid_eyeshadow",
           icon: TestIcon,
+          description:
+            "High-pigment liquid shadows for easy application and long-lasting shimmer.",
         },
         {
           id: 3,
@@ -560,6 +582,8 @@ export const eyes: LevelOneCategoryType = {
           label: "Glitter Eyeshadow",
           category: "glitter_eyeshadow",
           icon: TestIcon,
+          description:
+            "Sparkling glitter shadows for a bold, glamorous look on special occasions.",
         },
       ],
     },
@@ -576,6 +600,8 @@ export const eyes: LevelOneCategoryType = {
           label: "Brow Definer",
           category: "brow_definer",
           icon: TestIcon,
+          description:
+            "Defines brows with precision for a well-groomed and polished appearance.",
         },
         {
           id: 2,
@@ -583,6 +609,8 @@ export const eyes: LevelOneCategoryType = {
           label: "Brow Pencil",
           category: "brow_pencil",
           icon: TestIcon,
+          description:
+            "Easy-to-use pencil for filling and shaping brows with natural-looking color.",
         },
         {
           id: 3,
@@ -590,14 +618,16 @@ export const eyes: LevelOneCategoryType = {
           label: "Brow Gel",
           category: "brow_gel",
           icon: TestIcon,
+          description:
+            "Sets and tames brows, providing a long-lasting hold with a natural finish.",
         },
       ],
     },
     {
       id: 6,
       level: 2,
-      label: "Eye Value Sets",
-      category: "eye_value_sets",
+      label: "Eye Value Set",
+      category: "eye_value_set",
       icon: TestIcon,
       subCategories: [
         {
@@ -606,20 +636,26 @@ export const eyes: LevelOneCategoryType = {
           label: "Eyelashes",
           category: "eyelashes",
           icon: TestIcon,
+          description:
+            "Enhance your eyes with faux lashes for added volume and captivating charm.",
         },
         {
           id: 2,
           level: 3,
-          label: "Eye Combos",
-          category: "eye_combos",
+          label: "Eye Combo",
+          category: "eye_combo",
           icon: TestIcon,
+          description:
+            "Convenient sets with eye essentials for a complete, coordinated eye look.",
         },
         {
           id: 3,
           level: 3,
-          label: "Eye Gift Sets",
-          category: "eye_gift_sets",
+          label: "Eye Gift Set",
+          category: "eye_gift_set",
           icon: TestIcon,
+          description:
+            "Perfect gift sets featuring popular eye products for makeup lovers' delight.",
         },
       ],
     },

@@ -20,10 +20,12 @@ const Eyes = () => {
           <div className="flex flex-col gap-1 md:gap-2 lg:gap-5">
             {category.subCategories.map((subCategory, index) => {
               const isHighlighted = [
-                "serum",
-                "sunscreen",
-                "aquaholic",
-                "face_pack",
+                "kohls",
+                "curl_lengthening_mascara",
+                "liquid_eyeliner",
+                "glitter_eyeshadow",
+                "brow_pencil",
+                "eye_gift_set",
               ].includes(subCategory.category);
               const Icon = subCategory.icon;
               return (
@@ -45,13 +47,11 @@ const Eyes = () => {
                     <Icon className="fill-secondary" />
                   </div>
                   <div className="flex flex-col justify-center lg:justify-start gap-1 w-full">
-                    <p className="text-xs xl:text-sm tracking-wide leading-3 text-left w-full text-secondary group-hover:text-primary">
+                    <p className="text-xs xl:text-sm tracking-wide leading-3 text-left w-full text-secondary group-hover:text-primary line-clamp-1">
                       {subCategory.label}
                     </p>
                     <p className="text-[8px] xl:text-[10px] leading-1 break-words line-clamp-2 text-silver-jet group-hover:text-tertiary">
-                      {/* {subCategory.description} */}
-                      Lorem ipsum dolor sit amet consectetur adipisicing
-                      consectetur adipisicing.
+                      {subCategory.description}
                     </p>
                   </div>
                 </div>
