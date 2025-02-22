@@ -72,7 +72,7 @@ const Lips = () => {
                         <Icon className="fill-secondary w-full h-full" />
                       </div>
                       <div className="flex flex-col gap-0.5 justify-center lg:justify-start w-full text-silver-jet group-hover:text-secondary">
-                        <p className="text-xs sm:text-[11px] xl:text-sm tracking-wide leading-3 text-left w-full text-secondary group-hover:text-primary lg:font-medium">
+                        <p className="text-xs sm:text-[11px] xl:text-sm tracking-wide leading-3 text-left w-full text-secondary group-hover:text-primary lg:font-medium line-clamp-1">
                           {subCategory.label}
                         </p>
                         <p className="text-[8px] xl:text-[10px] leading-none md:leading-3 break-words line-clamp-2 text-silver-jet group-hover:text-tertiary">
@@ -85,7 +85,7 @@ const Lips = () => {
                       <span>
                         <Icon className="fill-secondary group-hover:fill-primary w-4 h-4 base:w-5 base:h-5 sm:w-6 sm:h-6" />
                       </span>
-                      <p className="text-sm sm:text-[13px] md:text-sm xl:text-base w-full lg:font-medium tracking-wide leading-3 text-left text-secondary group-hover:text-primary">
+                      <p className="text-sm sm:text-[13px] md:text-sm xl:text-base w-full lg:font-medium tracking-wide leading-3 text-left text-secondary group-hover:text-primary line-clamp-1">
                         {subCategory.label}
                       </p>
                     </div>

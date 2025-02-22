@@ -41,7 +41,7 @@ const Skin = () => {
                     <Icon className="fill-secondary" />
                   </div>
                   <div className="flex flex-col justify-center lg:justify-start gap-1 w-full">
-                    <p className="text-xs xl:text-sm tracking-wide leading-3 text-left w-full text-secondary group-hover:text-primary">
+                    <p className="text-xs xl:text-sm tracking-wide leading-3 text-left w-full text-secondary group-hover:text-primary line-clamp-1">
                       {subCategory.label}
                     </p>
                     <p className="text-[8px] xl:text-[10px] leading-1 break-words line-clamp-2 text-silver-jet group-hover:text-tertiary">
