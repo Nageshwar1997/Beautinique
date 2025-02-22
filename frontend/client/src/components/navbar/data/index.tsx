@@ -10,7 +10,7 @@ import { LevelOneCategoryType } from "../types";
 import About from "../components/about/About";
 import Collections from "../components/Collections";
 import Eyes from "../components/eyes/Eyes";
-import Face from "../components/Face";
+import Face from "../components/face/Face";
 import ForYou from "../components/for-you/ForYou";
 import {
   AllIcon,
@@ -737,13 +737,6 @@ export const face: LevelOneCategoryType = {
           category: "spf_foundation",
           icon: TestIcon,
         },
-        {
-          id: 7,
-          level: 3,
-          label: "View All",
-          category: "view_all",
-          icon: TestIcon,
-        },
       ],
     },
     {
@@ -772,13 +765,6 @@ export const face: LevelOneCategoryType = {
           level: 3,
           label: "Fixers",
           category: "fixers",
-          icon: TestIcon,
-        },
-        {
-          id: 4,
-          level: 3,
-          label: "View All",
-          category: "view_all",
           icon: TestIcon,
         },
       ],
@@ -839,13 +825,6 @@ export const face: LevelOneCategoryType = {
           category: "stick_foundation",
           icon: TestIcon,
         },
-        {
-          id: 8,
-          level: 3,
-          label: "View All",
-          category: "view_all",
-          icon: TestIcon,
-        },
       ],
     },
     {
@@ -883,13 +862,6 @@ export const face: LevelOneCategoryType = {
           category: "cheek_stains",
           icon: TestIcon,
         },
-        {
-          id: 8,
-          level: 3,
-          label: "View All",
-          category: "view_all",
-          icon: TestIcon,
-        },
       ],
     },
     {
@@ -904,13 +876,6 @@ export const face: LevelOneCategoryType = {
           level: 3,
           label: "Sindoor",
           category: "sindoor",
-          icon: TestIcon,
-        },
-        {
-          id: 2,
-          level: 3,
-          label: "View All",
-          category: "view_all",
           icon: TestIcon,
         },
       ],
@@ -936,13 +901,6 @@ export const face: LevelOneCategoryType = {
           category: "primers",
           icon: TestIcon,
         },
-        {
-          id: 3,
-          level: 3,
-          label: "View All",
-          category: "view_all",
-          icon: TestIcon,
-        },
       ],
     },
     {
@@ -966,13 +924,6 @@ export const face: LevelOneCategoryType = {
           category: "contour",
           icon: TestIcon,
         },
-        {
-          id: 3,
-          level: 3,
-          label: "View All",
-          category: "view_all",
-          icon: TestIcon,
-        },
       ],
     },
     {
@@ -994,13 +945,6 @@ export const face: LevelOneCategoryType = {
           level: 3,
           label: "Color Correctors",
           category: "color_correctors",
-          icon: TestIcon,
-        },
-        {
-          id: 3,
-          level: 3,
-          label: "View All",
-          category: "view_all",
           icon: TestIcon,
         },
       ],
