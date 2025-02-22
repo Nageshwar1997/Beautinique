@@ -15,7 +15,7 @@ const Eyes = () => {
           }`}
         >
           <p className="uppercase mt-3 md:mt-0 text-primary-battleship-davys-gray-inverted text-base base:text-sm font-semibold font-degular tracking-wide leading-5 px-3 cursor-pointer">
-            {category?.label} {index}
+            {category?.label}
           </p>
           <div className="flex flex-col gap-1 md:gap-2 lg:gap-5">
             {category.subCategories.map((subCategory, index) => {
