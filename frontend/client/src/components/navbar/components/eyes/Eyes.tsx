@@ -20,7 +20,7 @@ const Eyes = () => {
           <div className="flex flex-col gap-1 md:gap-2 lg:gap-5">
             {category.subCategories.map((subCategory, index) => {
               const isHighlighted = [
-                "kohls",
+                "kohl",
                 "curl_lengthening_mascara",
                 "liquid_eyeliner",
                 "glitter_eyeshadow",
