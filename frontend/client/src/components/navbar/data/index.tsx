@@ -467,8 +467,8 @@ export const eyes: LevelOneCategoryType = {
         {
           id: 3,
           level: 3,
-          label: "View All",
-          category: "view_all",
+          label: "Smudge Proof Kajal",
+          category: "smudge_proof_kajal",
           icon: TestIcon,
         },
       ],
@@ -497,8 +497,8 @@ export const eyes: LevelOneCategoryType = {
         {
           id: 3,
           level: 3,
-          label: "View All",
-          category: "view_all",
+          label: "Waterproof Mascara",
+          category: "waterproof_mascara",
           icon: TestIcon,
         },
       ],
@@ -531,13 +531,6 @@ export const eyes: LevelOneCategoryType = {
           category: "pen_eyeliner",
           icon: TestIcon,
         },
-        {
-          id: 4,
-          level: 3,
-          label: "View All",
-          category: "view_all",
-          icon: TestIcon,
-        },
       ],
     },
     {
@@ -568,20 +561,13 @@ export const eyes: LevelOneCategoryType = {
           category: "glitter_eyeshadow",
           icon: TestIcon,
         },
-        {
-          id: 4,
-          level: 3,
-          label: "View All",
-          category: "view_all",
-          icon: TestIcon,
-        },
       ],
     },
     {
       id: 5,
       level: 2,
-      label: "Eyebrow",
-      category: "eyebrow",
+      label: "Eyebrows",
+      category: "eyebrows",
       icon: TestIcon,
       subCategories: [
         {
@@ -601,8 +587,8 @@ export const eyes: LevelOneCategoryType = {
         {
           id: 3,
           level: 3,
-          label: "View All",
-          category: "view_all",
+          label: "Brow Gel",
+          category: "brow_gel",
           icon: TestIcon,
         },
       ],
@@ -626,6 +612,13 @@ export const eyes: LevelOneCategoryType = {
           level: 3,
           label: "Eye Combos",
           category: "eye_combos",
+          icon: TestIcon,
+        },
+        {
+          id: 3,
+          level: 3,
+          label: "Eye Gift Sets",
+          category: "eye_gift_sets",
           icon: TestIcon,
         },
       ],
