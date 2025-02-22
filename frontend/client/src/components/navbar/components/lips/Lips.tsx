@@ -107,7 +107,7 @@ const Lips = () => {
           <img
             src="./images/navbar/1346.jpg"
             alt=""
-            className="w-full h-full object-cover object-center"
+            className="w-full h-full object-cover object-center opacity-95 hover:opacity-100 cursor-pointer"
             loading="lazy"
           />
         </div>
