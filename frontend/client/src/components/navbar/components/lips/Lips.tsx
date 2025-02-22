@@ -97,7 +97,7 @@ const Lips = () => {
         })}
         <div className="w-full max-h-[300px] col-span-2 overflow-y-scroll shadow-lg shadow-secondary-inverted hidden sm:block rounded-2xl">
           <img
-            src="./images/navbar/1341.jpg"
+            src="./images/navbar/Lipstick1.jpg"
             alt=""
             className="w-full h-full object-cover object-center opacity-95 hover:opacity-100 cursor-pointer"
             loading="lazy"
@@ -105,7 +105,7 @@ const Lips = () => {
         </div>
         <div className="w-full max-h-[300px] col-span-2 overflow-y-scroll hidden lg:block shadow-lg shadow-secondary-inverted rounded-2xl">
           <img
-            src="./images/navbar/1346.jpg"
+            src="./images/navbar/Lipstick2.jpg"
             alt=""
             className="w-full h-full object-cover object-center opacity-95 hover:opacity-100 cursor-pointer"
             loading="lazy"
