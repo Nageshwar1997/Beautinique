@@ -161,7 +161,6 @@ export const for_you: LevelOneCategoryType = {
   label: "For You",
   category: "for_you",
   component: ForYou,
-  icon: TestIcon,
   subCategories: [
     new_new, // only new is reserved keyword we can't use new
     sugar_play,
@@ -176,7 +175,6 @@ export const lips: LevelOneCategoryType = {
   label: "Lips",
   category: "lips",
   component: Lips,
-  icon: TestIcon,
   subCategories: [lipsticks, lip_care, lipstick_set_and_combo],
 };
 
@@ -186,7 +184,6 @@ export const eyes: LevelOneCategoryType = {
   label: "Eyes",
   category: "eyes",
   component: Eyes,
-  icon: TestIcon,
   subCategories: [
     kohl_and_kajal,
     mascaras,
@@ -203,7 +200,6 @@ export const face: LevelOneCategoryType = {
   label: "Face",
   category: "face",
   component: Face,
-  icon: TestIcon,
   subCategories: [
     face_makeup,
     traditional_and_essentials,
@@ -223,7 +219,6 @@ export const skin: LevelOneCategoryType = {
   label: "Skin",
   category: "skin",
   component: Skin,
-  icon: TestIcon,
   subCategories: [
     {
       id: 1,
@@ -405,7 +400,6 @@ export const collections: LevelOneCategoryType = {
   label: "Collections",
   category: "collections",
   component: Collections,
-  icon: TestIcon,
   subCategories: [
     {
       id: 1,
@@ -662,7 +656,6 @@ export const about: LevelOneCategoryType = {
   label: "About",
   category: "about",
   component: About,
-  icon: TestIcon,
   subCategories: [
     {
       id: 1,
