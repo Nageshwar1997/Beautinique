@@ -96,7 +96,7 @@ const Lips = () => {
             </div>
           );
         })}
-        <div className="w-full max-h-[300px] col-span-2 overflow-y-scroll shadow-lg shadow-secondary-inverted hidden sm:block rounded-2xl">
+        <div className="w-full max-h-[280px] col-span-2 overflow-y-scroll shadow-lg shadow-secondary-inverted hidden sm:block rounded-2xl">
           <img
             src="./images/navbar/Lipstick1.jpg"
             alt=""
@@ -104,7 +104,7 @@ const Lips = () => {
             loading="lazy"
           />
         </div>
-        <div className="w-full max-h-[300px] col-span-2 overflow-y-scroll hidden lg:block shadow-lg shadow-secondary-inverted rounded-2xl">
+        <div className="w-full max-h-[280px] col-span-2 overflow-y-scroll hidden lg:block shadow-lg shadow-secondary-inverted rounded-2xl">
           <img
             src="./images/navbar/Lipstick2.jpg"
             alt=""
