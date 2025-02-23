@@ -59,6 +59,13 @@ export const careers = {
       category: "openings",
       icon: TestIcon,
     },
+    {
+      id: 3,
+      level: 3,
+      label: "Retail/E-Commerce",
+      category: "retail_e_commerce",
+      icon: TestIcon,
+    },
   ],
 };
 
