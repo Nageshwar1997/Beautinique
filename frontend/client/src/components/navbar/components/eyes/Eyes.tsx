@@ -4,7 +4,7 @@ import { LevelTwoCategoryType } from "../../types";
 const Eyes = () => {
   const categories: LevelTwoCategoryType[] = eyes.subCategories;
   return (
-    <div className="p-4 xl:p-0 grid base:grid-cols-2 md:grid-cols-3 md:gap-4 lg:grid-cols-4 lg:gap-5 justify-start w-full">
+    <div className="p-4 xl:p-0 grid base:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2 base:gap-3 md:gap-4 lg:gap-5 justify-start w-full">
       {categories.map((category, index) => (
         <div
           key={index}
