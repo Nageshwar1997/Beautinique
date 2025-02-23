@@ -123,7 +123,7 @@ export const collections: LevelOneCategoryType = {
   label: "Collections",
   category: "collections",
   component: Collections,
-  subCategories: [gifting, sugar_pop, bath_and_body, hair_care],
+  subCategories: [bath_and_body, sugar_pop, hair_care, gifting],
 };
 
 export const about: LevelOneCategoryType = {
