@@ -1,4 +1,3 @@
-import { TestIcon } from "../../../icons";
 import { LevelOneCategoryType } from "../types";
 import About from "../components/about/About";
 import Collections from "../components/collections/Collections";
@@ -44,6 +43,13 @@ import {
   hair_care,
   sugar_pop,
 } from "../components/collections/data";
+import {
+  careers,
+  company,
+  legal,
+  press,
+  trust_center,
+} from "../components/about/data";
 
 export const for_you: LevelOneCategoryType = {
   id: 1,
@@ -132,24 +138,7 @@ export const about: LevelOneCategoryType = {
   label: "About",
   category: "about",
   component: About,
-  subCategories: [
-    {
-      id: 1,
-      level: 2,
-      heading: "",
-      label: "",
-      category: "",
-      subCategories: [
-        {
-          id: 1,
-          level: 3,
-          label: "",
-          category: "",
-          icon: TestIcon,
-        },
-      ],
-    },
-  ],
+  subCategories: [company, careers, press, trust_center, legal],
 };
 
 export const navbarCategoriesData: LevelOneCategoryType[] = [
