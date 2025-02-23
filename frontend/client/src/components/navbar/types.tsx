@@ -14,7 +14,6 @@ export interface LevelOneCategoryType {
   label: string;
   category: string;
   component: FC;
-  icon?: SVGType;
   subCategories: LevelTwoCategoryType[];
 }
 
@@ -23,7 +22,6 @@ export interface LevelTwoCategoryType {
   level: number;
   label: string;
   category: string;
-  icon?: SVGType;
   subCategories: LevelThreeCategoryType[];
   heading?: string;
   videoUrl?: string;

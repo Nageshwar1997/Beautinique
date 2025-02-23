@@ -1,4 +1,3 @@
-import { TestIcon } from "../../../../icons";
 import {
   TransferLipstickIcon,
   MatteLipstickIcon,
@@ -27,7 +26,6 @@ export const lipsticks = {
   level: 2,
   label: "Lipsticks",
   category: "lipsticks",
-  icon: TestIcon,
   subCategories: [
     {
       id: 1,
@@ -127,7 +125,6 @@ export const lip_care = {
   level: 2,
   label: "Lip Care",
   category: "lip_care",
-  icon: TestIcon,
   subCategories: [
     {
       id: 1,
@@ -168,7 +165,6 @@ export const lipstick_set_and_combo = {
   level: 2,
   label: "Lipstick Set & Combo",
   category: "lipstick_set_and_combo",
-  icon: TestIcon,
   subCategories: [
     {
       id: 1,

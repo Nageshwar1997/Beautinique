@@ -5,7 +5,6 @@ export const face_makeup = {
   level: 2,
   label: "Face Makeup",
   category: "face_makeup",
-  icon: TestIcon,
   subCategories: [
     {
       id: 1,
@@ -57,7 +56,6 @@ export const traditional_and_essentials = {
   level: 2,
   label: "Traditional & Essentials",
   category: "traditional_and_essentials",
-  icon: TestIcon,
   subCategories: [
     {
       id: 1,
@@ -74,7 +72,6 @@ export const cheeks_and_glow = {
   level: 2,
   label: "Cheeks & Glow",
   category: "cheeks_and_glow",
-  icon: TestIcon,
   subCategories: [
     {
       id: 1,
@@ -112,7 +109,6 @@ export const setting_and_finishing = {
   level: 2,
   label: "Setting & Finishing",
   category: "setting_and_finishing",
-  icon: TestIcon,
   subCategories: [
     {
       id: 1,
@@ -143,7 +139,6 @@ export const foundation_by_finish = {
   level: 2,
   label: "Foundation by Finish",
   category: "foundation_by_finish",
-  icon: TestIcon,
   subCategories: [
     {
       id: 1,
@@ -188,7 +183,6 @@ export const foundation_by_skin_type = {
   level: 2,
   label: "Foundation by Skin Type",
   category: "foundation_by_skin_type",
-  icon: TestIcon,
   subCategories: [
     {
       id: 1,
@@ -212,7 +206,6 @@ export const primers_and_removers = {
   level: 2,
   label: "Primers & Removers",
   category: "primers_and_removers",
-  icon: TestIcon,
   subCategories: [
     {
       id: 1,
@@ -236,7 +229,6 @@ export const bronzers_and_contour = {
   level: 2,
   label: "Bronzers & Contour",
   category: "bronzers_and_contour",
-  icon: TestIcon,
   subCategories: [
     {
       id: 1,
@@ -260,7 +252,6 @@ export const concealers_and_correctors = {
   level: 2,
   label: "Concealers & Correctors",
   category: "concealers_and_correctors",
-  icon: TestIcon,
   subCategories: [
     {
       id: 1,

@@ -1,12 +1,9 @@
-import { TestIcon } from "../../../../icons";
-
 export const new_new = {
   id: 1,
   level: 2,
   heading: "Latest Trends",
   label: "New",
   category: "new",
-  icon: TestIcon,
   videoUrl:
     "https://res.cloudinary.com/drbhw0nwt/video/upload/sp_auto/v1739693059/videos/wvq939qkdpzgchfpzk2m.m3u8",
   thumbnail:
@@ -18,7 +15,7 @@ export const new_new = {
       level: 3,
       label: "",
       category: "",
-      icon: TestIcon,
+      icon: () => <svg />, // not in use only for typescript warning
     },
   ],
 };
@@ -29,7 +26,6 @@ export const sugar_play = {
   heading: "Best Sellers",
   label: "Sugar Play",
   category: "sugar_play",
-  icon: TestIcon,
   videoUrl:
     "https://res.cloudinary.com/drbhw0nwt/video/upload/sp_auto/v1739693059/videos/wvq939qkdpzgchfpzk2m.m3u8",
   description: "Shop beauty products top-rated & loved by enthusiasts.",
@@ -39,7 +35,7 @@ export const sugar_play = {
       level: 3,
       label: "",
       category: "",
-      icon: TestIcon,
+      icon: () => <svg />, // not in use only for typescript warning
     },
   ],
 };
@@ -50,7 +46,6 @@ export const offers = {
   heading: "Exclusive Deals",
   label: "Offers",
   category: "offers",
-  icon: TestIcon,
   videoUrl:
     "https://res.cloudinary.com/drbhw0nwt/video/upload/sp_auto/v1739693059/videos/wvq939qkdpzgchfpzk2m.m3u8",
   description: "Grab discounts on premium cosmetics for a limited time.",
@@ -60,7 +55,7 @@ export const offers = {
       level: 3,
       label: "",
       category: "",
-      icon: TestIcon,
+      icon: () => <svg />, // not in use only for typescript warning
     },
   ],
 };
@@ -71,7 +66,6 @@ export const blogs = {
   heading: "Beauty Insights",
   label: "Blogs",
   category: "blogs",
-  icon: TestIcon,
   videoUrl:
     "https://res.cloudinary.com/drbhw0nwt/video/upload/sp_auto/v1739693059/videos/wvq939qkdpzgchfpzk2m.m3u8",
   description: "Explore top beauty tips, trends, & skincare routines.",
@@ -81,7 +75,7 @@ export const blogs = {
       level: 3,
       label: "",
       category: "",
-      icon: TestIcon,
+      icon: () => <svg />, // not in use only for typescript warning
     },
   ],
 };

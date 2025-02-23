@@ -225,7 +225,6 @@ export const skin: LevelOneCategoryType = {
       level: 2,
       label: "Moisturizers",
       category: "moisturizers",
-      icon: TestIcon,
       subCategories: [
         {
           id: 1,
@@ -270,7 +269,6 @@ export const skin: LevelOneCategoryType = {
       level: 2,
       label: "Cleansing & Exfoliation",
       category: "cleansing_and_exfoliation",
-      icon: TestIcon,
       subCategories: [
         {
           id: 1,
@@ -315,7 +313,6 @@ export const skin: LevelOneCategoryType = {
       level: 2,
       label: "Nature's Blend",
       category: "natures_blend",
-      icon: TestIcon,
       subCategories: [
         {
           id: 1,
@@ -360,7 +357,6 @@ export const skin: LevelOneCategoryType = {
       level: 2,
       label: "Face Mask",
       category: "face_mask",
-      icon: TestIcon,
       subCategories: [
         {
           id: 1,
@@ -406,7 +402,6 @@ export const collections: LevelOneCategoryType = {
       level: 2,
       label: "Gifting",
       category: "gifting",
-      icon: TestIcon,
       subCategories: [
         {
           id: 1,
@@ -464,7 +459,6 @@ export const collections: LevelOneCategoryType = {
       level: 2,
       label: "Sugar Pop",
       category: "sugar_pop",
-      icon: TestIcon,
       subCategories: [
         {
           id: 1,
@@ -529,7 +523,6 @@ export const collections: LevelOneCategoryType = {
       level: 2,
       label: "Bath & Body",
       category: "bath_and_body",
-      icon: TestIcon,
       subCategories: [
         {
           id: 1,
@@ -594,7 +587,6 @@ export const collections: LevelOneCategoryType = {
       level: 2,
       label: "Hair Care",
       category: "hair_care",
-      icon: TestIcon,
       subCategories: [
         {
           id: 1,
@@ -663,7 +655,6 @@ export const about: LevelOneCategoryType = {
       heading: "",
       label: "",
       category: "",
-      icon: TestIcon,
       subCategories: [
         {
           id: 1,

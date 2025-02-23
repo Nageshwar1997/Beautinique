@@ -1,4 +1,3 @@
-import { TestIcon } from "../../../../icons";
 import {
   BrowDefinerIcon,
   BrowGelIcon,
@@ -25,7 +24,6 @@ export const kohl_and_kajal = {
   level: 2,
   label: "Kohl & Kajal",
   category: "kohl_and_kajal",
-  icon: TestIcon,
   subCategories: [
     {
       id: 1,
@@ -62,7 +60,6 @@ export const mascaras = {
   level: 2,
   label: "Mascaras",
   category: "mascaras",
-  icon: TestIcon,
   subCategories: [
     {
       id: 1,
@@ -99,7 +96,6 @@ export const eyeliners = {
   level: 2,
   label: "Eyeliners",
   category: "eyeliners",
-  icon: TestIcon,
   subCategories: [
     {
       id: 1,
@@ -136,7 +132,6 @@ export const eyeshadow = {
   level: 2,
   label: "Eyeshadow",
   category: "eyeshadow",
-  icon: TestIcon,
   subCategories: [
     {
       id: 1,
@@ -173,7 +168,6 @@ export const eyebrows = {
   level: 2,
   label: "Eyebrows",
   category: "eyebrows",
-  icon: TestIcon,
   subCategories: [
     {
       id: 1,
@@ -210,7 +204,6 @@ export const eye_value_set = {
   level: 2,
   label: "Eye Value Set",
   category: "eye_value_set",
-  icon: TestIcon,
   subCategories: [
     {
       id: 1,
