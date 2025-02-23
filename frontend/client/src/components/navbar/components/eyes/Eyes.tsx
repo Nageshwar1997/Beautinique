@@ -1,14 +1,18 @@
+import { eyes } from "../../data";
 import { LevelTwoCategoryType } from "../../types";
-import { skin } from "../../data";
 
-const Skin = () => {
-  const categories: LevelTwoCategoryType[] = skin.subCategories;
+const Eyes = () => {
+  const categories: LevelTwoCategoryType[] = eyes.subCategories;
   return (
-    <div className="p-4 xl:p-0 grid base:grid-cols-2 md:grid-cols-3 md:gap-4 lg:grid-cols-4 lg:gap-6 justify-start w-full">
+    <div className="p-4 xl:p-0 grid base:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2 base:gap-3 md:gap-4 lg:gap-5 justify-start w-full">
       {categories.map((category, index) => (
         <div
           key={index}
-          className="space-y-4 min-w-[200px] max-w-[300px] pb-4 lg:pb-0 border-b border-primary-battleship-davys-gray lg:border-none"
+          className={`space-y-4 min-w-[200px] max-w-[300px] pb-4 lg:pb-0 border-b border-primary-battleship-davys-gray ${
+            !["kohl_and_kajal", "mascaras"].includes(category.category)
+              ? "lg:border-none lg:pb-2"
+              : ""
+          }`}
         >
           <p className="uppercase mt-3 md:mt-0 text-primary-battleship-davys-gray-inverted text-base base:text-sm font-semibold font-degular tracking-wide leading-5 px-3 cursor-pointer">
             {category?.label}
@@ -16,10 +20,12 @@ const Skin = () => {
           <div className="flex flex-col gap-1 md:gap-2 lg:gap-5">
             {category.subCategories.map((subCategory, index) => {
               const isHighlighted = [
-                "serum",
-                "sunscreen",
-                "aquaholic",
-                "face_pack",
+                "kohl",
+                "curl_lengthening_mascara",
+                "liquid_eyeliner",
+                "glitter_eyeshadow",
+                "brow_pencil",
+                "eye_combo",
               ].includes(subCategory.category);
               const Icon = subCategory.icon;
               return (
@@ -54,9 +60,9 @@ const Skin = () => {
           </div>
         </div>
       ))}
-      <div className="hidden md:block lg:hidden w-full max-h-[250px] col-span-2 overflow-y-scroll shadow-lg shadow-secondary-inverted rounded-2xl">
+      <div className="hidden lg:block w-full max-h-[280px] col-span-2 overflow-y-scroll shadow-lg shadow-secondary-inverted rounded-2xl">
         <img
-          src="./images/navbar/moisturizer.jpg"
+          src="./images/navbar/Mascara.jpg"
           alt=""
           className="w-full h-full object-cover object-center opacity-95 hover:opacity-100 cursor-pointer"
           loading="lazy"
@@ -66,4 +72,4 @@ const Skin = () => {
   );
 };
 
-export default Skin;
+export default Eyes;

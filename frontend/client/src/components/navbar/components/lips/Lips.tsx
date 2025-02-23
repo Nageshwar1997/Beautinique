@@ -1,7 +1,8 @@
 import { MessageIcon } from "../../../../icons";
 import { LevelTwoCategoryType } from "../../types";
 import TextDisplay from "../../../TextDisplay";
-import { lips, lipstickFeedbacks } from "../../data";
+import { lips } from "../../data";
+import { lipstickFeedbacks } from "./data";
 
 const Lips = () => {
   const categories: LevelTwoCategoryType[] = lips.subCategories;
@@ -25,9 +26,9 @@ const Lips = () => {
           return (
             <div
               key={index}
-              className={`space-y-4 min-w-[250px]  base:min-w-[200px] base:max-w-[300px] w-full pb-4 lg:pb-0 border-b border-primary-battleship-davys-gray lg:border-none ${
+              className={`space-y-4 min-w-[250px] base:min-w-[200px] base:max-w-[300px] w-full pb-4 lg:pb-0 border-b border-primary-battleship-davys-gray ${
                 ["lipsticks"].includes(category.category) ? "row-span-2" : ""
-              }`}
+              } ${category.category !== "lip_care" ? "lg:border-none" : ""}`}
             >
               <p
                 className={`uppercase mt-3 sm:mt-0 text-primary-battleship-davys-gray-inverted text-base sm:text-sm font-semibold font-degular tracking-wide leading-5 px-3 cursor-pointer ${
@@ -72,7 +73,7 @@ const Lips = () => {
                         <Icon className="fill-secondary w-full h-full" />
                       </div>
                       <div className="flex flex-col gap-0.5 justify-center lg:justify-start w-full text-silver-jet group-hover:text-secondary">
-                        <p className="text-xs sm:text-[11px] xl:text-sm tracking-wide leading-3 text-left w-full text-secondary group-hover:text-primary lg:font-medium">
+                        <p className="text-xs sm:text-[11px] xl:text-sm tracking-wide leading-3 text-left w-full text-secondary group-hover:text-primary lg:font-medium line-clamp-1">
                           {subCategory.label}
                         </p>
                         <p className="text-[8px] xl:text-[10px] leading-none md:leading-3 break-words line-clamp-2 text-silver-jet group-hover:text-tertiary">
@@ -85,7 +86,7 @@ const Lips = () => {
                       <span>
                         <Icon className="fill-secondary group-hover:fill-primary w-4 h-4 base:w-5 base:h-5 sm:w-6 sm:h-6" />
                       </span>
-                      <p className="text-sm sm:text-[13px] md:text-sm xl:text-base w-full lg:font-medium tracking-wide leading-3 text-left text-secondary group-hover:text-primary">
+                      <p className="text-sm sm:text-[13px] md:text-sm xl:text-base w-full lg:font-medium tracking-wide leading-3 text-left text-secondary group-hover:text-primary line-clamp-1">
                         {subCategory.label}
                       </p>
                     </div>
@@ -95,19 +96,19 @@ const Lips = () => {
             </div>
           );
         })}
-        <div className="w-full max-h-[300px] col-span-2 overflow-y-scroll shadow-lg shadow-secondary-inverted hidden sm:block rounded-2xl">
+        <div className="w-full max-h-[280px] col-span-2 overflow-y-scroll shadow-lg shadow-secondary-inverted hidden sm:block rounded-2xl">
           <img
-            src="./images/navbar/1341.jpg"
+            src="./images/navbar/Lipstick1.jpg"
             alt=""
             className="w-full h-full object-cover object-center opacity-95 hover:opacity-100 cursor-pointer"
             loading="lazy"
           />
         </div>
-        <div className="w-full max-h-[300px] col-span-2 overflow-y-scroll hidden lg:block shadow-lg shadow-secondary-inverted rounded-2xl">
+        <div className="w-full max-h-[280px] col-span-2 overflow-y-scroll hidden lg:block shadow-lg shadow-secondary-inverted rounded-2xl">
           <img
-            src="./images/navbar/1346.jpg"
+            src="./images/navbar/Lipstick2.jpg"
             alt=""
-            className="w-full h-full object-cover object-center"
+            className="w-full h-full object-cover object-center opacity-95 hover:opacity-100 cursor-pointer"
             loading="lazy"
           />
         </div>
