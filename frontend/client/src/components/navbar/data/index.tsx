@@ -8,7 +8,7 @@ import {
 } from "../../../icons";
 import { LevelOneCategoryType } from "../types";
 import About from "../components/about/About";
-import Collections from "../components/Collections";
+import Collections from "../components/collections/Collections";
 import Eyes from "../components/eyes/Eyes";
 import Face from "../components/face/Face";
 import ForYou from "../components/for-you/ForYou";
