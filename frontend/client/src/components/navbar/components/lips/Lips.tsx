@@ -1,7 +1,8 @@
 import { MessageIcon } from "../../../../icons";
 import { LevelTwoCategoryType } from "../../types";
 import TextDisplay from "../../../TextDisplay";
-import { lips, lipstickFeedbacks } from "../../data";
+import { lips } from "../../data";
+import { lipstickFeedbacks } from "./data";
 
 const Lips = () => {
   const categories: LevelTwoCategoryType[] = lips.subCategories;

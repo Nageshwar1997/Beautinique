@@ -1,3 +1,4 @@
+import { TextItem } from "../../../../types";
 import {
   TransferLipstickIcon,
   MatteLipstickIcon,
@@ -200,3 +201,85 @@ export const lipstick_set_and_combo = {
     },
   ],
 };
+
+export const lipstickFeedbacks: TextItem[][] = [
+  [
+    { text: "Great variety of lipsticks! Loved the" },
+    { text: "shades", isHighlighted: true },
+    { text: "and" },
+    { text: "textures.", isHighlighted: true },
+    { text: "Long-lasting", isHighlighted: true },
+    {
+      text: "and comfortable. Perfect for every occasion. Highly recommended!",
+    },
+  ],
+  [
+    { text: "Amazing" },
+    { text: "pigmentation", isHighlighted: true },
+    { text: "and" },
+    { text: "smooth application.", isHighlighted: true },
+    { text: "Stays on for hours" },
+    { text: "without drying out lips. Definitely a" },
+    { text: "must-have!", isHighlighted: true },
+    { text: "Long-lasting and" },
+    { text: "comfortable.", isHighlighted: true },
+  ],
+  [
+    { text: "Beautiful" },
+    { text: "shades", isHighlighted: true },
+    { text: "and great" },
+    { text: "texture!", isHighlighted: true },
+    { text: "Perfect" },
+    { text: "matte", isHighlighted: true },
+    { text: "finish without feeling heavy. Love the" },
+    { text: "Long-lasting", isHighlighted: true },
+    { text: "effect! Amazing quality and" },
+    { text: "pigmentation.", isHighlighted: true },
+  ],
+
+  [
+    { text: "Excellent" },
+    { text: "color payoff!", isHighlighted: true },
+    { text: "Super" },
+    { text: "comfortable", isHighlighted: true },
+    { text: "to wear all day. My" },
+    { text: "go-to lipstick", isHighlighted: true },
+    {
+      text: "for every event. Worth every penny! Absolutely stunning luxurious.",
+    },
+  ],
+  [
+    { text: "Lovely" },
+    { text: "shades", isHighlighted: true },
+    { text: "with a" },
+    { text: "creamy texture.", isHighlighted: true },
+    { text: "No" },
+    { text: "smudging", isHighlighted: true },
+    {
+      text: "and lasts all day. Received so many compliments. Absolutely love them! Truly fantastic.",
+    },
+  ],
+
+  [
+    { text: "The" },
+    { text: "colors", isHighlighted: true },
+    { text: "are vibrant and bold. Great for all" },
+    { text: "skin tones.", isHighlighted: true },
+    { text: "Stays" },
+    { text: "intact", isHighlighted: true },
+    { text: "and flawless" },
+    { text: "even after meals. Highly recommended! Truly amazing." },
+  ],
+  [
+    { text: "Impressive" },
+    { text: "quality", isHighlighted: true },
+    { text: "and" },
+    { text: "shade range.", isHighlighted: true },
+    { text: "Glides" },
+    { text: "so" },
+    { text: "smoothly", isHighlighted: true },
+    {
+      text: "and feels so lightweight. Absolutely perfect for both daily wear and special occasions!",
+    },
+  ],
+];

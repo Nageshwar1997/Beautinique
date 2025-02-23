@@ -1,5 +1,6 @@
 import { Fragment, useState } from "react";
-import { for_you, socialCommunity } from "../../data";
+import { for_you } from "../../data";
+import { socialCommunity } from "./data";
 import Button from "../../../button/Button";
 import { Link } from "react-router-dom";
 import { PlayIcon } from "../../../../icons";
