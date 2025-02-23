@@ -1,4 +1,16 @@
-import { TestIcon } from "../../../../icons";
+import {
+  AboutUsIcon,
+  AwardsIcon,
+  ComplianceIcon,
+  ContactUsIcon,
+  MissionVisionValuesIcon,
+  NewsRoomIcon,
+  OpeningsIcon,
+  Policies,
+  RetailECommerceIcon,
+  TeamIcon,
+  ValuesAndCultureIcon,
+} from "../icons";
 
 export const company = {
   id: 1,
@@ -12,28 +24,28 @@ export const company = {
       level: 3,
       label: "About Us",
       category: "about_us",
-      icon: TestIcon,
+      icon: AboutUsIcon,
     },
     {
       id: 2,
       level: 3,
       label: "Mission Vision Values",
       category: "mission_vision_values",
-      icon: TestIcon,
+      icon: MissionVisionValuesIcon,
     },
     {
       id: 3,
       level: 3,
       label: "Team",
       category: "team",
-      icon: TestIcon,
+      icon: TeamIcon,
     },
     {
       id: 4,
       level: 3,
       label: "Contact Us",
       category: "contact_us",
-      icon: TestIcon,
+      icon: ContactUsIcon,
     },
   ],
 };
@@ -50,21 +62,21 @@ export const careers = {
       level: 3,
       label: "Values/Culture",
       category: "values_culture",
-      icon: TestIcon,
+      icon: ValuesAndCultureIcon,
     },
     {
       id: 2,
       level: 3,
       label: "Openings",
       category: "openings",
-      icon: TestIcon,
+      icon: OpeningsIcon,
     },
     {
       id: 3,
       level: 3,
       label: "Retail/E-Commerce",
       category: "retail_e_commerce",
-      icon: TestIcon,
+      icon: RetailECommerceIcon,
     },
   ],
 };
@@ -81,14 +93,14 @@ export const press = {
       level: 3,
       label: "Newsroom",
       category: "newsroom",
-      icon: TestIcon,
+      icon: NewsRoomIcon,
     },
     {
       id: 2,
       level: 3,
       label: "Awards",
       category: "awards",
-      icon: TestIcon,
+      icon: AwardsIcon,
     },
   ],
 };
@@ -105,7 +117,7 @@ export const trust_center = {
       level: 3,
       label: "Compliance",
       category: "compliance",
-      icon: TestIcon,
+      icon: ComplianceIcon,
     },
   ],
 };
@@ -122,7 +134,7 @@ export const legal = {
       level: 3,
       label: "Policies Document",
       category: "policies_document",
-      icon: TestIcon,
+      icon: Policies,
     },
   ],
 };
