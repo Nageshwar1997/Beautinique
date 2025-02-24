@@ -4,20 +4,22 @@ import { LevelTwoCategoryType } from "../../types";
 const Eyes = () => {
   const categories: LevelTwoCategoryType[] = eyes.subCategories;
   return (
-    <div className="p-4 xl:p-0 grid base:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2 base:gap-3 md:gap-4 lg:gap-5 justify-start w-full">
+    <div className="p-4 lg:p-0 grid base:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2 base:gap-3 md:gap-4 lg:gap-5 justify-start w-full">
       {categories.map((category, index) => (
         <div
           key={index}
           className={`space-y-4 min-w-[200px] max-w-[300px] pb-4 lg:pb-0 border-b border-primary-battleship-davys-gray ${
-            !["kohl_and_kajal", "mascaras"].includes(category.category)
-              ? "lg:border-none lg:pb-2"
-              : ""
+            !["kohl_and_kajal", "mascaras", "eyeliners", "eyeshadow"].includes(
+              category.category
+            )
+              ? "lg:border-none"
+              : "lg:pb-2"
           }`}
         >
           <p className="uppercase mt-3 md:mt-0 text-primary-battleship-davys-gray-inverted text-base base:text-sm font-semibold font-degular tracking-wide leading-5 px-3 cursor-pointer">
             {category?.label}
           </p>
-          <div className="flex flex-col gap-1 md:gap-2 lg:gap-5">
+          <div className="flex flex-col gap-1 md:gap-2">
             {category.subCategories.map((subCategory, index) => {
               const isHighlighted = [
                 "kohl",
@@ -38,7 +40,7 @@ const Eyes = () => {
                   } group`}
                 >
                   <div
-                    className={`min-w-10 min-h-10 max-w-10 max-h-10 xl:min-w-14 xl:min-h-14 xl:max-w-14 xl:max-h-14 bg-secondary-inverted group-hover:bg-primary-inverted rounded-lg flex items-center justify-center ${
+                    className={`min-w-10 min-h-10 max-w-10 max-h-10 xl:min-w-14 xl:min-h-14 xl:max-w-14 xl:max-h-14 p-2 bg-secondary-inverted group-hover:bg-primary-inverted rounded-lg flex items-center justify-center ${
                       isHighlighted
                         ? "bg-accent-duo group-hover:shadow-primary-btn-hover [&>svg]:!fill-white"
                         : "shadow-inner shadow-primary-battleship-davys-gray"
@@ -60,7 +62,7 @@ const Eyes = () => {
           </div>
         </div>
       ))}
-      <div className="hidden lg:block w-full max-h-[280px] col-span-2 overflow-y-scroll shadow-lg shadow-secondary-inverted rounded-2xl">
+      <div className="hidden lg:block w-full max-h-[190px] xl:max-h-[240px] col-span-2 overflow-hidden shadow-lg shadow-secondary-inverted rounded-xl mt-9">
         <img
           src="./images/navbar/Mascara.jpg"
           alt=""

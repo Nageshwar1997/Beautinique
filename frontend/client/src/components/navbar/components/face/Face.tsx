@@ -1,10 +1,10 @@
 import {
-  bronzers_and_contour,
+  bronzers_and_contours,
   cheeks_and_glow,
   concealers_and_correctors,
   face_makeup,
-  foundation_by_finish,
-  foundation_by_skin_type,
+  foundations_by_finish,
+  foundations_by_skin_type,
   primers_and_removers,
   setting_and_finishing,
   traditional_and_essentials,
@@ -13,22 +13,22 @@ import {
 const Face = () => {
   const colOneData = [face_makeup, traditional_and_essentials];
   const colTwoData = [cheeks_and_glow, setting_and_finishing];
-  const colThreeData = [foundation_by_finish, foundation_by_skin_type];
+  const colThreeData = [foundations_by_finish, foundations_by_skin_type];
   const colFourData = [
     primers_and_removers,
-    bronzers_and_contour,
+    bronzers_and_contours,
     concealers_and_correctors,
   ];
   const categories = [colOneData, colTwoData, colThreeData, colFourData];
 
   return (
-    <div className="w-full h-full grid grid-cols-1 base:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2 base:gap-3 md:gap-4 lg:gap-5 content-center">
+    <div className="p-4 lg:p-0 w-full h-full grid grid-cols-1 base:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2 base:gap-3 md:gap-4 lg:gap-5 content-center">
       {categories.map((item, i) => (
         <div
           key={i}
           className={`flex flex-col gap-2 ${
             i === 3
-              ? "md:col-span-3 md:flex-row md:justify-around lg:col-span-1 lg:flex-col lg:justify-start md:gap-4 lg:gap-2"
+              ? "md:col-span-3 md:flex-row md:justify-around lg:col-span-1 lg:flex-col lg:justify-start md:gap-4 lg:gap-[18px] xl:gap-6"
               : ""
           }`}
         >
@@ -40,23 +40,31 @@ const Face = () => {
                   [
                     "traditional_and_essentials",
                     "setting_and_finishing",
-                    "foundation_by_skin_type",
+                    "foundations_by_skin_type",
                     "concealers_and_correctors",
                   ].includes(category.category)
                     ? "lg:border-none"
                     : "lg:pb-2"
                 } ${
-                  category.category === "foundation_by_skin_type"
+                  category.category === "foundations_by_skin_type"
                     ? "base:pb-6 md:pb-4"
                     : ""
                 }`}
               >
-                <p className="uppercase mt-3 md:mt-0 text-primary-battleship-davys-gray-inverted text-base base:text-sm font-semibold font-degular tracking-wide leading-5 px-3 cursor-pointer">
+                <p className="uppercase mt-3 md:mt-0 text-primary-battleship-davys-gray-inverted text-base base:text-sm font-semibold font-degular tracking-wide leading-5 px-3 cursor-pointer line-clamp-1">
                   {category?.label}
                 </p>
                 <div className="flex flex-col gap-1 md:gap-2">
                   {category.subCategories.map((subCategory, ind) => {
-                    const isHighlighted = [""].includes(subCategory.category);
+                    const isHighlighted = [
+                      "color_corrector",
+                      "compact",
+                      "makeup_remover",
+                      "matte_foundation",
+                      "cheek_stain",
+                      "sindoor",
+                      "compact_powder",
+                    ].includes(subCategory.category);
                     const Icon = subCategory.icon;
 
                     return (
@@ -82,9 +90,7 @@ const Face = () => {
                             {subCategory.label}
                           </p>
                           <p className="text-[8px] xl:text-[10px] leading-1 break-words line-clamp-2 text-silver-jet group-hover:text-tertiary">
-                            {/* {subCategory.description} */}
-                            Lorem ipsum dolor sit amet consectetur adipisicing
-                            elit. Necessitatibus!
+                            {subCategory.description}
                           </p>
                         </div>
                       </div>

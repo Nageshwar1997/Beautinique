@@ -37,16 +37,20 @@ export const bath_and_body = {
     {
       id: 1,
       level: 3,
-      label: "Shower Gels",
-      category: "shower_gels",
+      label: "Shower Gel",
+      category: "shower_gel",
       icon: ShowerGelIcon,
+      description:
+        "Refreshing shower gel that cleanses and hydrates for soft skin.",
     },
     {
       id: 2,
       level: 3,
-      label: "Soaps",
-      category: "soaps",
+      label: "Soap",
+      category: "soap",
       icon: SoapIcon,
+      description:
+        "Gentle soap for daily cleansing, leaving skin fresh and nourished.",
     },
     {
       id: 3,
@@ -54,13 +58,17 @@ export const bath_and_body = {
       label: "Body Lotion",
       category: "body_lotion",
       icon: BodyLotionIcon,
+      description:
+        "Moisturizing body lotion that keeps skin smooth and hydrated all day.",
     },
     {
       id: 4,
       level: 3,
-      label: "Body Sprays",
-      category: "body_sprays",
+      label: "Body Spray",
+      category: "body_spray",
       icon: BodySprayIcon,
+      description:
+        "Light body spray with a refreshing fragrance for all-day freshness.",
     },
     {
       id: 5,
@@ -68,6 +76,8 @@ export const bath_and_body = {
       label: "Hand Wash",
       category: "hand_wash",
       icon: HandWashIcon,
+      description:
+        "Cleansing hand wash that leaves hands soft and hygienically clean.",
     },
     {
       id: 6,
@@ -75,6 +85,8 @@ export const bath_and_body = {
       label: "Foot Cream",
       category: "foot_cream",
       icon: FootCreamIcon,
+      description:
+        "Nourishing foot cream that soothes and softens tired, dry feet.",
     },
     {
       id: 7,
@@ -82,6 +94,8 @@ export const bath_and_body = {
       label: "Hand Cream",
       category: "hand_cream",
       icon: HandCreamIcon,
+      description:
+        "Hydrating hand cream for soft, smooth hands with lasting moisture.",
     },
   ],
 };
@@ -98,6 +112,8 @@ export const sugar_pop = {
       label: "Lips",
       category: "lips",
       icon: LipIcon,
+      description:
+        "Lip products for bold, vibrant color and deep nourishing moisture.",
     },
     {
       id: 2,
@@ -105,6 +121,8 @@ export const sugar_pop = {
       label: "Eyes",
       category: "eyes",
       icon: EyeOutlineIcon,
+      description:
+        "Eye makeup essentials for creating stunning looks that last all day.",
     },
     {
       id: 3,
@@ -112,6 +130,8 @@ export const sugar_pop = {
       label: "Face",
       category: "face",
       icon: FaceIcon,
+      description:
+        "Face products to enhance complexion with flawless coverage.",
     },
     {
       id: 4,
@@ -119,6 +139,8 @@ export const sugar_pop = {
       label: "Nails",
       category: "nails",
       icon: NailIcon,
+      description:
+        "Vibrant nail colors and effective treatments for stylish, healthy nails.",
     },
     {
       id: 5,
@@ -126,6 +148,8 @@ export const sugar_pop = {
       label: "Skincare",
       category: "skincare",
       icon: SkincareIcon,
+      description:
+        "Skincare essentials for a radiant, nourished, and clear complexion.",
     },
     {
       id: 6,
@@ -133,6 +157,8 @@ export const sugar_pop = {
       label: "Body Care",
       category: "body_care",
       icon: BodyCareIcon,
+      description:
+        "Body care products for soft, smooth skin with lasting hydration.",
     },
     {
       id: 7,
@@ -140,6 +166,8 @@ export const sugar_pop = {
       label: "Best of Sugar Pop",
       category: "best_of_sugar_pop",
       icon: BestOfSugarPopIcon,
+      description:
+        "Top-rated Sugar Pop products loved for their quality and results.",
     },
   ],
 };
@@ -156,6 +184,8 @@ export const hair_care = {
       label: "Shampoo",
       category: "shampoo",
       icon: ShampooIcon,
+      description:
+        "Cleansing shampoo that effectively revitalizes hair for healthy shine.",
     },
     {
       id: 2,
@@ -163,6 +193,8 @@ export const hair_care = {
       label: "Conditioner",
       category: "conditioner",
       icon: ConditionerIcon,
+      description:
+        "Nourishing conditioner that detangles and softens hair beautifully.",
     },
     {
       id: 3,
@@ -170,6 +202,8 @@ export const hair_care = {
       label: "Hair Oil",
       category: "hair_oil",
       icon: HairOilIcon,
+      description:
+        "Hair oil that deeply nourishes hair for strong, shiny, healthy hair.",
     },
     {
       id: 4,
@@ -177,6 +211,8 @@ export const hair_care = {
       label: "Serum",
       category: "serum",
       icon: HairSerumIcon,
+      description:
+        "Lightweight hair serum for frizz control and a silky, smooth finish.",
     },
     {
       id: 5,
@@ -184,13 +220,17 @@ export const hair_care = {
       label: "Hair Mask",
       category: "hair_mask",
       icon: HairMaskIcon,
+      description:
+        "Deep conditioning hair mask for intense repair and hydration.",
     },
     {
       id: 6,
       level: 3,
-      label: "Combos",
-      category: "combos",
+      label: "Combo",
+      category: "combo",
       icon: ComboIcon,
+      description:
+        "Value packs of hair care products for a complete hair routine.",
     },
     {
       id: 7,
@@ -198,6 +238,8 @@ export const hair_care = {
       label: "View All",
       category: "view_all",
       icon: AllIcon,
+      description:
+        "Browse all hair care products for your perfect hair solution.",
     },
   ],
 };
@@ -211,9 +253,11 @@ export const gifting = {
     {
       id: 1,
       level: 3,
-      label: "Lipstick Sets",
-      category: "lipstick_sets",
+      label: "Lipstick Set",
+      category: "lipstick_set",
       icon: LipstickSetGiftIcon,
+      description:
+        "Beautiful lipstick sets perfect for gifting on any special occasion.",
     },
     {
       id: 2,
@@ -221,20 +265,26 @@ export const gifting = {
       label: "Sugar Merch",
       category: "sugar_merch",
       icon: SugarMerchIcon,
+      description:
+        "Trendy Sugar-branded merchandise for fans and beauty lovers.",
     },
     {
       id: 3,
       level: 3,
-      label: "Value Sets",
-      category: "value_sets",
+      label: "Value Set",
+      category: "value_set",
       icon: ValueSetIcon,
+      description:
+        "Curated value sets for a complete beauty experience and savings.",
     },
     {
       id: 4,
       level: 3,
-      label: "Makeup Kits",
-      category: "makeup_kits",
+      label: "Makeup Kit",
+      category: "makeup_kit",
       icon: MakeupKitIcon,
+      description:
+        "Comprehensive makeup kits with essentials for a flawless look.",
     },
     {
       id: 5,
@@ -242,13 +292,17 @@ export const gifting = {
       label: "Corporate Gifting",
       category: "corporate_gifting",
       icon: CorporateGiftingIcon,
+      description:
+        "Elegant corporate gifts to leave a lasting impression with style.",
     },
     {
       id: 6,
       level: 3,
-      label: "Sugar Sets",
-      category: "sugar_sets",
+      label: "Sugar Set",
+      category: "sugar_set",
       icon: SugarSetIcon,
+      description:
+        "Exclusive Sugar sets curated for beauty enthusiasts and gifting.",
     },
   ],
 };

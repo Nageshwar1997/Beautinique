@@ -1,4 +1,5 @@
 import CryptoJS from "crypto-js";
+import { dummyFeedbacks } from "../components/navbar/data";
 
 const ENCRYPTION_SECRET_KEY = import.meta.env.VITE_ENCRYPTION_SECRET_KEY;
 
@@ -22,4 +23,19 @@ export const removeUserLocal = () => {
 
 export const removeUserSession = () => {
   sessionStorage.removeItem("token");
+};
+
+export const getTodaysFeedback = (
+  forwardIndex: 0 | 1 | 2 | 3 | 4 | 5 | 6 = 0
+) => {
+  // Get the current date
+  const today = new Date();
+  // Get the day of the month (1 to 31)
+  const day = today.getDate();
+  // Calculate the feedback index for today
+  const feedbackIndex = (day + forwardIndex) % dummyFeedbacks.length;
+  // Get the feedback for today
+  const todayFeedback = dummyFeedbacks[feedbackIndex];
+
+  return todayFeedback;
 };
