@@ -50,7 +50,6 @@ import {
 import {
   careers,
   company,
-  legal,
   press,
   trust_center,
 } from "../components/about/data";
@@ -149,7 +148,7 @@ export const about: LevelOneCategoryType = {
   label: "About",
   category: "about",
   component: About,
-  subCategories: [company, careers, press, trust_center, legal],
+  subCategories: [company, careers, press, trust_center],
 };
 
 export const navbarCategoriesData: LevelOneCategoryType[] = [

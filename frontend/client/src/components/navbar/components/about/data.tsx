@@ -6,9 +6,10 @@ import {
   MissionVisionValuesIcon,
   NewsRoomIcon,
   OpeningsIcon,
-  Policies,
+  PrivacyPolicyIcon,
   RetailECommerceIcon,
   TeamIcon,
+  TermsAndConditionsIcon,
   ValuesAndCultureIcon,
 } from "../icons";
 
@@ -16,8 +17,8 @@ export const company = {
   id: 1,
   level: 2,
   heading: "",
-  label: "",
-  category: "",
+  label: "Company",
+  category: "company",
   subCategories: [
     {
       id: 1,
@@ -50,12 +51,36 @@ export const company = {
   ],
 };
 
+export const press = {
+  id: 1,
+  level: 2,
+  heading: "",
+  label: "Press",
+  category: "press",
+  subCategories: [
+    {
+      id: 1,
+      level: 3,
+      label: "Newsroom",
+      category: "newsroom",
+      icon: NewsRoomIcon,
+    },
+    {
+      id: 2,
+      level: 3,
+      label: "Awards",
+      category: "awards",
+      icon: AwardsIcon,
+    },
+  ],
+};
+
 export const careers = {
   id: 1,
   level: 2,
   heading: "",
-  label: "",
-  category: "",
+  label: "Careers",
+  category: "careers",
   subCategories: [
     {
       id: 1,
@@ -81,36 +106,12 @@ export const careers = {
   ],
 };
 
-export const press = {
-  id: 1,
-  level: 2,
-  heading: "",
-  label: "",
-  category: "",
-  subCategories: [
-    {
-      id: 1,
-      level: 3,
-      label: "Newsroom",
-      category: "newsroom",
-      icon: NewsRoomIcon,
-    },
-    {
-      id: 2,
-      level: 3,
-      label: "Awards",
-      category: "awards",
-      icon: AwardsIcon,
-    },
-  ],
-};
-
 export const trust_center = {
   id: 1,
   level: 2,
   heading: "",
-  label: "",
-  category: "",
+  label: "Trust Center & Legal",
+  category: "trust_center_and_legal",
   subCategories: [
     {
       id: 1,
@@ -119,22 +120,19 @@ export const trust_center = {
       category: "compliance",
       icon: ComplianceIcon,
     },
-  ],
-};
-
-export const legal = {
-  id: 1,
-  level: 2,
-  heading: "",
-  label: "",
-  category: "",
-  subCategories: [
     {
-      id: 1,
+      id: 2,
       level: 3,
-      label: "Policies Document",
-      category: "policies_document",
-      icon: Policies,
+      label: "Privacy/Policy",
+      category: "privacy_policy",
+      icon: PrivacyPolicyIcon,
+    },
+    {
+      id: 3,
+      level: 3,
+      label: "Terms & Conditions",
+      category: "terms_and_conditions",
+      icon: TermsAndConditionsIcon,
     },
   ],
 };
