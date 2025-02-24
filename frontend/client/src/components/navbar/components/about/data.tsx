@@ -136,3 +136,31 @@ export const trust_center = {
     },
   ],
 };
+
+export const testimonials = [
+  {
+    id: 1,
+    content:
+      "I absolutely love the range of products on this website! The quality is unmatched, and my skin has never felt better. I always get compliments!",
+    name: "Nageshwar Pawar",
+    role: "Founder",
+    image:
+      "https://ctruhcdn.azureedge.net/main-webiste/public/images/navbar/krishna-gupta.webp",
+  },
+  {
+    id: 2,
+    content: `Finding the perfect shade was so easy. The product descriptions and customer reviews helped me make the right choice. Fast delivery too!`,
+    name: "Manjusha Magar",
+    role: "CEO",
+    image:
+      "https://ctruhcdn.azureedge.net/main-webiste/public/images/navbar/aarav-joshi.webp",
+  },
+  {
+    id: 3,
+    content: `I love how the products feel on my skin. They are lightweight, long-lasting, and make me feel confident all day. Highly recommended!`,
+    name: "Sanket Pawar",
+    role: "Manager",
+    image:
+      "https://ctruhcdn.azureedge.net/main-webiste/public/images/navbar/lucas-smith.webp",
+  },
+];
