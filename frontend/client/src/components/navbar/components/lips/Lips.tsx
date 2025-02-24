@@ -60,9 +60,7 @@ const Lips = () => {
                       {subCategory.label}
                     </p>
                     <p className="text-[8px] xl:text-[10px] leading-1 break-words line-clamp-2 text-silver-jet group-hover:text-tertiary">
-                      {/* {subCategory.description} */}
-                      Lorem ipsum dolor sit amet consectetur adipisicing elit.
-                      Necessitatibus!
+                      {subCategory.description}
                     </p>
                   </div>
                 </div>

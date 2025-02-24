@@ -31,7 +31,7 @@ import {
   lip_care,
   lip_enhancers_and_others,
   lipstick_forms,
-  lipstick_set_and_combo,
+  lipstick_sets_and_combos,
   long_lasting_lipsticks,
 } from "../components/lips/data";
 import { blogs, new_new, offers, sugar_play } from "../components/for-you/data";
@@ -80,7 +80,7 @@ export const lips: LevelOneCategoryType = {
     long_lasting_lipsticks,
     lip_care,
     lip_enhancers_and_others,
-    lipstick_set_and_combo,
+    lipstick_sets_and_combos,
   ],
 };
 

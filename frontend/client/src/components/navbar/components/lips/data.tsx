@@ -33,6 +33,8 @@ export const finish_types = {
       label: "Matte Lipstick",
       category: "matte_lipstick",
       icon: MatteLipstickIcon,
+      description:
+        "Velvety matte finish with long-lasting, intense color payoff everywhere.",
     },
     {
       id: 2,
@@ -40,6 +42,8 @@ export const finish_types = {
       label: "Satin Lipstick",
       category: "satin_lipstick",
       icon: SatinLipstickIcon,
+      description:
+        "Smooth, creamy texture with a luminous, semi-matte finish always.",
     },
     {
       id: 3,
@@ -47,6 +51,8 @@ export const finish_types = {
       label: "Hi-Shine Lipstick",
       category: "hi_shine_lipstick",
       icon: HiShineLipstickIcon,
+      description:
+        "Glossy finish for a shiny, luscious look with rich pigment beautifully.",
     },
     {
       id: 4,
@@ -54,6 +60,8 @@ export const finish_types = {
       label: "Lip Gloss",
       category: "lip_gloss",
       icon: LipGlossIcon,
+      description:
+        "Sheer to medium coverage with a high-shine, glossy finish flawlessly.",
     },
   ],
 };
@@ -70,6 +78,8 @@ export const lipstick_forms = {
       label: "Liquid Lipstick",
       category: "liquid_lipstick",
       icon: LiquidLipstickIcon,
+      description:
+        "Rich, long-lasting color with a lightweight, matte finish beautifully.",
     },
     {
       id: 2,
@@ -77,6 +87,8 @@ export const lipstick_forms = {
       label: "Powder Lipstick",
       category: "powder_lipstick",
       icon: PowderLipstickIcon,
+      description:
+        "Weightless powder formula with a soft-focus, matte effect perfectly.",
     },
     {
       id: 3,
@@ -84,6 +96,8 @@ export const lipstick_forms = {
       label: "Crayon Lipstick",
       category: "crayon_lipstick",
       icon: CrayonLipstickIcon,
+      description:
+        "Easy-to-apply crayon for precise lines and bold color payoff smoothly.",
     },
     {
       id: 4,
@@ -91,6 +105,8 @@ export const lipstick_forms = {
       label: "Bullet Lipstick",
       category: "bullet_lipstick",
       icon: BulletLipstickIcon,
+      description:
+        "Classic bullet shape with smooth, creamy, full-coverage color always.",
     },
   ],
 };
@@ -107,6 +123,8 @@ export const long_lasting_lipsticks = {
       label: "Transfer Proof Lipstick",
       category: "transfer_proof_lipstick",
       icon: TransferLipstickIcon,
+      description:
+        "Stays put all day without smudging or fading for long-lasting wear.",
     },
     {
       id: 2,
@@ -114,6 +132,8 @@ export const long_lasting_lipsticks = {
       label: "Water Proof Lipstick",
       category: "water_proof_lipstick",
       icon: TransferLipstickIcon,
+      description:
+        "Resistant to water and sweat, ensuring color stays vibrant always.",
     },
     {
       id: 3,
@@ -121,6 +141,8 @@ export const long_lasting_lipsticks = {
       label: "Lip Tint & Stain",
       category: "lip_tint_and_stain",
       icon: LipTintAndSatinIcon,
+      description:
+        "Lightweight tint with a natural finish that lasts for hours smoothly.",
     },
     {
       id: 4,
@@ -128,6 +150,8 @@ export const long_lasting_lipsticks = {
       label: "Smudge Proof",
       category: "smudge_proof_lipstick",
       icon: TransferLipstickIcon,
+      description:
+        "No smudging or transferring, providing a flawless look perfectly.",
     },
   ],
 };
@@ -144,7 +168,8 @@ export const lip_care = {
       label: "Lip Primer & Scrub",
       category: "lip_primer_and_scrub",
       icon: LipPrimerIcon,
-      description: "Preps lips for smooth application.",
+      description:
+        "Preps lips for smooth application and enhances color beautifully.",
     },
     {
       id: 2,
@@ -152,7 +177,8 @@ export const lip_care = {
       label: "Lipstick Fixer & Remover",
       category: "lipstick_fixer_and_remover",
       icon: LipstickRemoverIcon,
-      description: "Ensures long wear and easy removal.",
+      description:
+        "Ensures long wear and easy removal without residue effortlessly.",
     },
     {
       id: 3,
@@ -160,7 +186,8 @@ export const lip_care = {
       label: "Lip Balm",
       category: "lip_balm",
       icon: LipBalmIcon,
-      description: "Moisturizes and nourishes dry lips.",
+      description:
+        "Deeply hydrates and protects lips from dryness and cracking.",
     },
     {
       id: 4,
@@ -168,7 +195,8 @@ export const lip_care = {
       label: "Tinted Lip Balm",
       category: "tinted_lip_balm",
       icon: TintedLipBalmIcon,
-      description: "Hydration with a hint of color.",
+      description:
+        "Hydration with a hint of color for a natural, radiant look daily.",
     },
   ],
 };
@@ -185,6 +213,8 @@ export const lip_enhancers_and_others = {
       label: "Lip Liner",
       category: "lip_liner",
       icon: LipLinerIcon,
+      description:
+        "Defines lips with precision, shaping and preventing feathering daily.",
     },
     {
       id: 2,
@@ -192,6 +222,8 @@ export const lip_enhancers_and_others = {
       label: "Lip Glitter",
       category: "lip_glitter",
       icon: LipGlitterIcon,
+      description:
+        "Adds sparkle and shine for a glamorous, bold look on special occasions.",
     },
     {
       id: 3,
@@ -199,11 +231,13 @@ export const lip_enhancers_and_others = {
       label: "View All",
       category: "view_all",
       icon: AllIcon,
+      description:
+        "Explore the complete range of lip products for every need beautifully.",
     },
   ],
 };
 
-export const lipstick_set_and_combo = {
+export const lipstick_sets_and_combos = {
   id: 6,
   level: 2,
   label: "Lipstick Set & Combo",
@@ -215,7 +249,8 @@ export const lipstick_set_and_combo = {
       label: "Lipstick Set",
       category: "lipstick_set",
       icon: LipstickSetIcon,
-      description: "Multiple shades in one set.",
+      description:
+        "Multiple shades in one set for versatile, everyday looks beautifully.",
     },
     {
       id: 2,
@@ -223,7 +258,8 @@ export const lipstick_set_and_combo = {
       label: "Lipstick Combo",
       category: "lipstick_combo",
       icon: LipstickComboIcon,
-      description: "Perfectly paired lip products.",
+      description:
+        "Perfectly paired lip products for a complete, cohesive look always.",
     },
     {
       id: 3,
@@ -231,7 +267,8 @@ export const lipstick_set_and_combo = {
       label: "Lip Palette",
       category: "lip_palette",
       icon: LipPaletteIcon,
-      description: "Versatile palette with various shades.",
+      description:
+        "Versatile palette with various shades for creative, bold looks daily.",
     },
   ],
 };
