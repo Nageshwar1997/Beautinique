@@ -26,6 +26,8 @@ export const company = {
       label: "About Us",
       category: "about_us",
       icon: AboutUsIcon,
+      description:
+        "Learn about our journey, mission, and values that define our brand.",
     },
     {
       id: 2,
@@ -33,6 +35,8 @@ export const company = {
       label: "Mission Vision Values",
       category: "mission_vision_values",
       icon: MissionVisionValuesIcon,
+      description:
+        "Discover our purpose, vision, and values driving our company's success.",
     },
     {
       id: 3,
@@ -40,6 +44,8 @@ export const company = {
       label: "Team",
       category: "team",
       icon: TeamIcon,
+      description:
+        "Meet our talented team committed to delivering excellence every day.",
     },
     {
       id: 4,
@@ -47,6 +53,8 @@ export const company = {
       label: "Contact Us",
       category: "contact_us",
       icon: ContactUsIcon,
+      description:
+        "Get in touch with us for inquiries, support, or collaboration opportunities.",
     },
   ],
 };
@@ -64,6 +72,8 @@ export const press = {
       label: "Newsroom",
       category: "newsroom",
       icon: NewsRoomIcon,
+      description:
+        "Stay updated with our latest news, events, and media announcements.",
     },
     {
       id: 2,
@@ -71,6 +81,8 @@ export const press = {
       label: "Awards",
       category: "awards",
       icon: AwardsIcon,
+      description:
+        "Explore the recognitions and awards we have received for excellence.",
     },
   ],
 };
@@ -88,6 +100,8 @@ export const careers = {
       label: "Values/Culture",
       category: "values_culture",
       icon: ValuesAndCultureIcon,
+      description:
+        "Experience our vibrant culture driven by values of growth and innovation.",
     },
     {
       id: 2,
@@ -95,6 +109,8 @@ export const careers = {
       label: "Openings",
       category: "openings",
       icon: OpeningsIcon,
+      description:
+        "Discover exciting career opportunities and join our dynamic team today.",
     },
     {
       id: 3,
@@ -102,6 +118,8 @@ export const careers = {
       label: "Retail/E-Commerce",
       category: "retail_e_commerce",
       icon: RetailECommerceIcon,
+      description:
+        "Explore roles in retail and e-commerce driving our digital success.",
     },
   ],
 };
@@ -119,6 +137,8 @@ export const trust_center = {
       label: "Compliance",
       category: "compliance",
       icon: ComplianceIcon,
+      description:
+        "Understand our compliance standards ensuring trust and transparency.",
     },
     {
       id: 2,
@@ -126,6 +146,8 @@ export const trust_center = {
       label: "Privacy/Policy",
       category: "privacy_policy",
       icon: PrivacyPolicyIcon,
+      description:
+        "Learn about our privacy practices and data protection commitments.",
     },
     {
       id: 3,
@@ -133,6 +155,8 @@ export const trust_center = {
       label: "Terms & Conditions",
       category: "terms_and_conditions",
       icon: TermsAndConditionsIcon,
+      description:
+        "Review our terms and conditions for using our products and services.",
     },
   ],
 };
