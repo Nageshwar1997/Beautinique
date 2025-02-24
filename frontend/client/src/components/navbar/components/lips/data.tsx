@@ -201,11 +201,11 @@ export const lip_care = {
   ],
 };
 
-export const lip_enhancers_and_others = {
+export const lip_enhancers_and_other = {
   id: 5,
   level: 2,
-  label: "Lip Enhancers & Others",
-  category: "lip_enhancers_and_others",
+  label: "Lip Enhancers & Other",
+  category: "lip_enhancers_and_other",
   subCategories: [
     {
       id: 1,

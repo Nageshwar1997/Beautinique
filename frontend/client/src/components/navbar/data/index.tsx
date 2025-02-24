@@ -29,7 +29,7 @@ import {
 import {
   finish_types,
   lip_care,
-  lip_enhancers_and_others,
+  lip_enhancers_and_other,
   lipstick_forms,
   lipstick_sets_and_combos,
   long_lasting_lipsticks,
@@ -79,7 +79,7 @@ export const lips: LevelOneCategoryType = {
     lipstick_forms,
     long_lasting_lipsticks,
     lip_care,
-    lip_enhancers_and_others,
+    lip_enhancers_and_other,
     lipstick_sets_and_combos,
   ],
 };
