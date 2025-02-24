@@ -40,6 +40,8 @@ export const face_makeup = {
       label: "Foundation",
       category: "foundation",
       icon: FoundationIcon,
+      description:
+        "Provides coverage for a flawless base with a natural, smooth finish.",
     },
     {
       id: 2,
@@ -47,6 +49,8 @@ export const face_makeup = {
       label: "BB Cream",
       category: "bb_cream",
       icon: BBCreamIcon,
+      description:
+        "Lightweight formula that hydrates, evens skin tone, and protects skin.",
     },
     {
       id: 3,
@@ -54,6 +58,8 @@ export const face_makeup = {
       label: "Compact Powder",
       category: "compact_powder",
       icon: CompactPowderIcon,
+      description:
+        "Sets makeup, reduces shine, and ensures a long-lasting matte finish.",
     },
     {
       id: 4,
@@ -61,6 +67,8 @@ export const face_makeup = {
       label: "Loose Powder",
       category: "loose_powder",
       icon: LoosePowderIcon,
+      description:
+        "Finely milled powder for a smooth, shine-free finish that lasts all day.",
     },
     {
       id: 5,
@@ -68,6 +76,8 @@ export const face_makeup = {
       label: "Banana Powder",
       category: "banana_powder",
       icon: BananaPowderIcon,
+      description:
+        "Brightens the complexion, reduces shine, and sets makeup beautifully.",
     },
     {
       id: 6,
@@ -75,6 +85,8 @@ export const face_makeup = {
       label: "SPF Foundation",
       category: "spf_foundation",
       icon: SPFFoundationIcon,
+      description:
+        "Combines sun protection, coverage for a flawless, radiant look.",
     },
   ],
 };
@@ -91,6 +103,8 @@ export const traditional_and_essentials = {
       label: "Sindoor",
       category: "sindoor",
       icon: SindoorIcon,
+      description:
+        "Symbolic powder for the hairline, enhancing traditional elegance.",
     },
   ],
 };
@@ -107,6 +121,8 @@ export const cheeks_and_glow = {
       label: "Highlighter",
       category: "highlighter",
       icon: HighlighterIcon,
+      description:
+        "Adds a radiant, enhancing features with a luminous, dewy look.",
     },
     {
       id: 2,
@@ -114,6 +130,8 @@ export const cheeks_and_glow = {
       label: "Liquid Highlighter",
       category: "liquid_highlighter",
       icon: LiquidHighlighterIcon,
+      description:
+        "Blendable liquid formula for a glowing, buildable, natural look.",
     },
     {
       id: 3,
@@ -121,6 +139,8 @@ export const cheeks_and_glow = {
       label: "Blush",
       category: "blush",
       icon: BlushIcon,
+      description:
+        "Adds a pop of color to cheeks, creating a youthful, healthy look.",
     },
     {
       id: 4,
@@ -128,6 +148,8 @@ export const cheeks_and_glow = {
       label: "Cheek Stain",
       category: "cheek_stain",
       icon: CheekStainIcon,
+      description:
+        "Long-lasting tint for a natural, flushed look that stays vibrant.",
     },
   ],
 };
@@ -144,6 +166,8 @@ export const setting_and_finishing = {
       label: "Setting Spray",
       category: "setting_spray",
       icon: SettingSprayIcon,
+      description:
+        "Locks makeup for long wear, maintaining a fresh look without.",
     },
     {
       id: 2,
@@ -151,6 +175,8 @@ export const setting_and_finishing = {
       label: "Compact",
       category: "compact",
       icon: CompactIcon,
+      description:
+        "Portable powder for touch-ups, controls shine, sets makeup place.",
     },
     {
       id: 3,
@@ -158,6 +184,8 @@ export const setting_and_finishing = {
       label: "Fixer",
       category: "fixer",
       icon: FixerIcon,
+      description:
+        "Enhances makeup longevity, ensuring a smudge-proof, flawless.",
     },
   ],
 };
@@ -174,6 +202,8 @@ export const foundations_by_finish = {
       label: "Liquid Foundation",
       category: "liquid_foundation",
       icon: LiquidFoundationIcon,
+      description:
+        "Buildable coverage with a natural finish that blends seamlessly skin.",
     },
     {
       id: 2,
@@ -181,6 +211,8 @@ export const foundations_by_finish = {
       label: "Matte Foundation",
       category: "matte_foundation",
       icon: MatteFoundationIcon,
+      description:
+        "Oil-absorbing formula for a shine-free, velvety matte look lasts.",
     },
     {
       id: 3,
@@ -188,6 +220,8 @@ export const foundations_by_finish = {
       label: "Water Resistant Foundation",
       category: "water_resistant_foundation",
       icon: WaterResistantFoundationIcon,
+      description:
+        "Long-wearing, water-resistant foundation that stays flawless day.",
     },
     {
       id: 4,
@@ -195,6 +229,8 @@ export const foundations_by_finish = {
       label: "High Coverage Foundation",
       category: "high_coverage_foundation",
       icon: HighCoverageFoundationIcon,
+      description:
+        "Conceals imperfections with full coverage, ensuring flawless look.",
     },
     {
       id: 5,
@@ -202,6 +238,8 @@ export const foundations_by_finish = {
       label: "Stick Foundation",
       category: "stick_foundation",
       icon: StickFoundationIcon,
+      description:
+        "Convenient stick format for easy application and buildable coverage.",
     },
   ],
 };
@@ -218,6 +256,8 @@ export const foundations_by_skin_type = {
       label: "Best for Dry Skin",
       category: "best_for_dry_skin",
       icon: BestForDrySkinIcon,
+      description:
+        "Hydrating formula that nourishes and enhances radiance for dry skin.",
     },
     {
       id: 2,
@@ -225,6 +265,8 @@ export const foundations_by_skin_type = {
       label: "Best for Oily Skin",
       category: "best_for_oily_skin",
       icon: BestForOilySkinIcon,
+      description:
+        "Oil-controlling foundation that reduces shine, prevents breakouts.",
     },
   ],
 };
@@ -241,13 +283,17 @@ export const primers_and_removers = {
       label: "Makeup Remover",
       category: "makeup_remover",
       icon: MakeupRemoverIcon,
+      description:
+        "Gently removes makeup while hydrating and refreshing the skin.",
     },
     {
-      id: 1,
+      id: 2,
       level: 3,
       label: "Primer",
       category: "primer",
       icon: PrimerIcon,
+      description:
+        "Prepares skin, creating a smooth base for long-lasting makeup.",
     },
   ],
 };
@@ -264,6 +310,8 @@ export const bronzers_and_contours = {
       label: "Bronzer",
       category: "bronzer",
       icon: BronzerIcon,
+      description:
+        "Adds warmth and a sun-kissed glow for a radiant complexion.",
     },
     {
       id: 2,
@@ -271,6 +319,8 @@ export const bronzers_and_contours = {
       label: "Contour",
       category: "contour",
       icon: ContourIcon,
+      description:
+        "Defines features with shadows, enhancing structure and depth.",
     },
   ],
 };
@@ -287,6 +337,8 @@ export const concealers_and_correctors = {
       label: "Color Concealer",
       category: "color_concealer",
       icon: ColorConcealerIcon,
+      description:
+        "It covers flaws with precision, delivering a flawless, airbrushed.",
     },
     {
       id: 2,
@@ -294,6 +346,8 @@ export const concealers_and_correctors = {
       label: "Color Corrector",
       category: "color_corrector",
       icon: ColorCorrectorIcon,
+      description:
+        "Neutralizes discoloration, balancing skin tone for a radiant finish.",
     },
   ],
 };
