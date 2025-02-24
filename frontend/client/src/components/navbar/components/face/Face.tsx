@@ -1,10 +1,10 @@
 import {
-  bronzers_and_contour,
+  bronzers_and_contours,
   cheeks_and_glow,
   concealers_and_correctors,
   face_makeup,
-  foundation_by_finish,
-  foundation_by_skin_type,
+  foundations_by_finish,
+  foundations_by_skin_type,
   primers_and_removers,
   setting_and_finishing,
   traditional_and_essentials,
@@ -13,10 +13,10 @@ import {
 const Face = () => {
   const colOneData = [face_makeup, traditional_and_essentials];
   const colTwoData = [cheeks_and_glow, setting_and_finishing];
-  const colThreeData = [foundation_by_finish, foundation_by_skin_type];
+  const colThreeData = [foundations_by_finish, foundations_by_skin_type];
   const colFourData = [
     primers_and_removers,
-    bronzers_and_contour,
+    bronzers_and_contours,
     concealers_and_correctors,
   ];
   const categories = [colOneData, colTwoData, colThreeData, colFourData];
@@ -40,13 +40,13 @@ const Face = () => {
                   [
                     "traditional_and_essentials",
                     "setting_and_finishing",
-                    "foundation_by_skin_type",
+                    "foundations_by_skin_type",
                     "concealers_and_correctors",
                   ].includes(category.category)
                     ? "lg:border-none"
                     : "lg:pb-2"
                 } ${
-                  category.category === "foundation_by_skin_type"
+                  category.category === "foundations_by_skin_type"
                     ? "base:pb-6 md:pb-4"
                     : ""
                 }`}
@@ -56,7 +56,15 @@ const Face = () => {
                 </p>
                 <div className="flex flex-col gap-1 md:gap-2">
                   {category.subCategories.map((subCategory, ind) => {
-                    const isHighlighted = [""].includes(subCategory.category);
+                    const isHighlighted = [
+                      "color_corrector",
+                      "compact",
+                      "makeup_remover",
+                      "matte_foundation",
+                      "cheek_stain",
+                      "sindoor",
+                      "compact_powder",
+                    ].includes(subCategory.category);
                     const Icon = subCategory.icon;
 
                     return (

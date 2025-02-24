@@ -104,29 +104,29 @@ export const cheeks_and_glow = {
     {
       id: 1,
       level: 3,
-      label: "Highlighters",
-      category: "highlighters",
+      label: "Highlighter",
+      category: "highlighter",
       icon: HighlighterIcon,
     },
     {
       id: 2,
       level: 3,
-      label: "Liquid Highlighters",
-      category: "liquid_highlighters",
+      label: "Liquid Highlighter",
+      category: "liquid_highlighter",
       icon: LiquidHighlighterIcon,
     },
     {
       id: 3,
       level: 3,
-      label: "Blushes",
-      category: "blushes",
+      label: "Blush",
+      category: "blush",
       icon: BlushIcon,
     },
     {
       id: 4,
       level: 3,
-      label: "Cheek Stains",
-      category: "cheek_stains",
+      label: "Cheek Stain",
+      category: "cheek_stain",
       icon: CheekStainIcon,
     },
   ],
@@ -141,8 +141,8 @@ export const setting_and_finishing = {
     {
       id: 1,
       level: 3,
-      label: "Setting Sprays",
-      category: "setting_sprays",
+      label: "Setting Spray",
+      category: "setting_spray",
       icon: SettingSprayIcon,
     },
     {
@@ -155,18 +155,18 @@ export const setting_and_finishing = {
     {
       id: 3,
       level: 3,
-      label: "Fixers",
-      category: "fixers",
+      label: "Fixer",
+      category: "fixer",
       icon: FixerIcon,
     },
   ],
 };
 
-export const foundation_by_finish = {
+export const foundations_by_finish = {
   id: 5,
   level: 2,
-  label: "Foundation by Finish",
-  category: "foundation_by_finish",
+  label: "Foundations by Finish",
+  category: "foundations_by_finish",
   subCategories: [
     {
       id: 1,
@@ -178,8 +178,8 @@ export const foundation_by_finish = {
     {
       id: 2,
       level: 3,
-      label: "Matte Foundations",
-      category: "matte_foundations",
+      label: "Matte Foundation",
+      category: "matte_foundation",
       icon: MatteFoundationIcon,
     },
     {
@@ -206,11 +206,11 @@ export const foundation_by_finish = {
   ],
 };
 
-export const foundation_by_skin_type = {
+export const foundations_by_skin_type = {
   id: 6,
   level: 2,
-  label: "Foundation by Skin Type",
-  category: "foundation_by_skin_type",
+  label: "Foundations by Skin Type",
+  category: "foundations_by_skin_type",
   subCategories: [
     {
       id: 1,
@@ -238,31 +238,31 @@ export const primers_and_removers = {
     {
       id: 1,
       level: 3,
-      label: "Makeup Removers",
-      category: "makeup_removers",
+      label: "Makeup Remover",
+      category: "makeup_remover",
       icon: MakeupRemoverIcon,
     },
     {
       id: 1,
       level: 3,
-      label: "Primers",
-      category: "primers",
+      label: "Primer",
+      category: "primer",
       icon: PrimerIcon,
     },
   ],
 };
 
-export const bronzers_and_contour = {
+export const bronzers_and_contours = {
   id: 8,
   level: 2,
-  label: "Bronzers & Contour",
-  category: "bronzers_and_contour",
+  label: "Bronzers & Contours",
+  category: "bronzers_and_contours",
   subCategories: [
     {
       id: 1,
       level: 3,
-      label: "Bronzers",
-      category: "bronzers",
+      label: "Bronzer",
+      category: "bronzer",
       icon: BronzerIcon,
     },
     {
@@ -284,15 +284,15 @@ export const concealers_and_correctors = {
     {
       id: 1,
       level: 3,
-      label: "Color Concealers",
-      category: "color_concealers",
+      label: "Color Concealer",
+      category: "color_concealer",
       icon: ColorConcealerIcon,
     },
     {
       id: 2,
       level: 3,
-      label: "Color Correctors",
-      category: "color_correctors",
+      label: "Color Corrector",
+      category: "color_corrector",
       icon: ColorCorrectorIcon,
     },
   ],

@@ -8,12 +8,12 @@ import Lips from "../components/lips/Lips";
 import Skin from "../components/skin/Skin";
 import { TextItem } from "../../../types";
 import {
-  bronzers_and_contour,
+  bronzers_and_contours,
   cheeks_and_glow,
   concealers_and_correctors,
   face_makeup,
-  foundation_by_finish,
-  foundation_by_skin_type,
+  foundations_by_finish,
+  foundations_by_skin_type,
   primers_and_removers,
   setting_and_finishing,
   traditional_and_essentials,
@@ -112,10 +112,10 @@ export const face: LevelOneCategoryType = {
     cheeks_and_glow,
     setting_and_finishing,
     primers_and_removers,
-    bronzers_and_contour,
+    bronzers_and_contours,
     concealers_and_correctors,
-    foundation_by_skin_type,
-    foundation_by_finish,
+    foundations_by_skin_type,
+    foundations_by_finish,
   ],
 };
 
