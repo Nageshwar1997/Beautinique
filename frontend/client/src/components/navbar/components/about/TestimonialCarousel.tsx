@@ -43,6 +43,7 @@ const TestimonialCarousel: React.FC<{ testimonials: Testimonial[] }> = ({
     >
       {testimonials.map((testimonial, index) => (
         <div
+          key={testimonial.id}
           className={`w-full flex flex-col gap-2 group ${
             index === currentIndex ? "block" : "hidden"
           }`}
