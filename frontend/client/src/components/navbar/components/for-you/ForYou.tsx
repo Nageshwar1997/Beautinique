@@ -13,7 +13,7 @@ const ForYou = () => {
   );
   const categories: LevelTwoCategoryType[] = for_you?.subCategories;
   return (
-    <Fragment>
+    <div className="p-4 lg:p-0 w-full h-full space-y-4">
       <div className="grid grid-cols-1 lg:grid-cols-4 lg:gap-4">
         {categories?.map((category, index) => {
           return (
@@ -143,7 +143,7 @@ const ForYou = () => {
           </div>
         </div>
       </div>
-    </Fragment>
+    </div>
   );
 };
 

@@ -22,13 +22,13 @@ const Face = () => {
   const categories = [colOneData, colTwoData, colThreeData, colFourData];
 
   return (
-    <div className="w-full h-full grid grid-cols-1 base:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2 base:gap-3 md:gap-4 lg:gap-5 content-center">
+    <div className="p-4 lg:p-0 w-full h-full grid grid-cols-1 base:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2 base:gap-3 md:gap-4 lg:gap-5 content-center">
       {categories.map((item, i) => (
         <div
           key={i}
           className={`flex flex-col gap-2 ${
             i === 3
-              ? "md:col-span-3 md:flex-row md:justify-around lg:col-span-1 lg:flex-col lg:justify-start md:gap-4 lg:gap-2"
+              ? "md:col-span-3 md:flex-row md:justify-around lg:col-span-1 lg:flex-col lg:justify-start md:gap-4 lg:gap-[18px] xl:gap-6"
               : ""
           }`}
         >
@@ -51,7 +51,7 @@ const Face = () => {
                     : ""
                 }`}
               >
-                <p className="uppercase mt-3 md:mt-0 text-primary-battleship-davys-gray-inverted text-base base:text-sm font-semibold font-degular tracking-wide leading-5 px-3 cursor-pointer">
+                <p className="uppercase mt-3 md:mt-0 text-primary-battleship-davys-gray-inverted text-base base:text-sm font-semibold font-degular tracking-wide leading-5 px-3 cursor-pointer line-clamp-1">
                   {category?.label}
                 </p>
                 <div className="flex flex-col gap-1 md:gap-2">
