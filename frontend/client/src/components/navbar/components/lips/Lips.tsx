@@ -28,8 +28,12 @@ const Lips = () => {
           <div className={`flex flex-col gap-1 md:gap-2`}>
             {category.subCategories.map((subCategory, ind) => {
               const isHighlighted = [
-                "lipstick_combo",
+                "lip_gloss",
+                "liquid_lipstick",
+                "lip_tint_and_stain",
                 "lipstick_fixer_and_remover",
+                "lip_glitter",
+                "lip_palette",
               ].includes(subCategory.category);
               const Icon = subCategory.icon;
 
