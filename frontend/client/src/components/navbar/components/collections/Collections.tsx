@@ -29,7 +29,12 @@ const Collections = () => {
               }`}
             >
               {category.subCategories.map((subCategory, ind) => {
-                const isHighlighted = [""].includes(subCategory.category);
+                const isHighlighted = [
+                  "body_care",
+                  "body_spray",
+                  "conditioner",
+                  "corporate_gifting",
+                ].includes(subCategory.category);
                 const Icon = subCategory.icon;
 
                 const isHairCareViewAll =
@@ -59,9 +64,9 @@ const Collections = () => {
                         {subCategory.label}
                       </p>
                       <p className="text-[8px] xl:text-[10px] leading-1 break-words line-clamp-2 text-silver-jet group-hover:text-tertiary">
-                        {/* {subCategory.description} */}
-                        Lorem ipsum dolor sit amet consectetur adipisicing elit.
-                        Necessitatibus!
+                        {subCategory.category}
+                        {/* Lorem ipsum dolor sit amet consectetur adipisicing elit.
+                        Necessitatibus! */}
                       </p>
                     </div>
                   </div>

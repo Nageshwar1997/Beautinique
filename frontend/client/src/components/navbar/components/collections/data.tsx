@@ -37,15 +37,15 @@ export const bath_and_body = {
     {
       id: 1,
       level: 3,
-      label: "Shower Gels",
-      category: "shower_gels",
+      label: "Shower Gel",
+      category: "shower_gel",
       icon: ShowerGelIcon,
     },
     {
       id: 2,
       level: 3,
-      label: "Soaps",
-      category: "soaps",
+      label: "Soap",
+      category: "soap",
       icon: SoapIcon,
     },
     {
@@ -58,8 +58,8 @@ export const bath_and_body = {
     {
       id: 4,
       level: 3,
-      label: "Body Sprays",
-      category: "body_sprays",
+      label: "Body Spray",
+      category: "body_spray",
       icon: BodySprayIcon,
     },
     {
@@ -188,8 +188,8 @@ export const hair_care = {
     {
       id: 6,
       level: 3,
-      label: "Combos",
-      category: "combos",
+      label: "Combo",
+      category: "combo",
       icon: ComboIcon,
     },
     {
@@ -211,8 +211,8 @@ export const gifting = {
     {
       id: 1,
       level: 3,
-      label: "Lipstick Sets",
-      category: "lipstick_sets",
+      label: "Lipstick Set",
+      category: "lipstick_set",
       icon: LipstickSetGiftIcon,
     },
     {
@@ -225,15 +225,15 @@ export const gifting = {
     {
       id: 3,
       level: 3,
-      label: "Value Sets",
-      category: "value_sets",
+      label: "Value Set",
+      category: "value_set",
       icon: ValueSetIcon,
     },
     {
       id: 4,
       level: 3,
-      label: "Makeup Kits",
-      category: "makeup_kits",
+      label: "Makeup Kit",
+      category: "makeup_kit",
       icon: MakeupKitIcon,
     },
     {
@@ -246,8 +246,8 @@ export const gifting = {
     {
       id: 6,
       level: 3,
-      label: "Sugar Sets",
-      category: "sugar_sets",
+      label: "Sugar Set",
+      category: "sugar_set",
       icon: SugarSetIcon,
     },
   ],
