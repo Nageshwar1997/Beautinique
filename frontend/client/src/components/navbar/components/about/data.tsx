@@ -16,7 +16,6 @@ import {
 export const company = {
   id: 1,
   level: 2,
-  heading: "",
   label: "Company",
   category: "company",
   subCategories: [
@@ -60,9 +59,8 @@ export const company = {
 };
 
 export const press = {
-  id: 1,
+  id: 2,
   level: 2,
-  heading: "",
   label: "Press",
   category: "press",
   subCategories: [
@@ -88,9 +86,8 @@ export const press = {
 };
 
 export const careers = {
-  id: 1,
+  id: 3,
   level: 2,
-  heading: "",
   label: "Careers",
   category: "careers",
   subCategories: [
@@ -125,9 +122,8 @@ export const careers = {
 };
 
 export const trust_center = {
-  id: 1,
+  id: 4,
   level: 2,
-  heading: "",
   label: "Trust Center & Legal",
   category: "trust_center_and_legal",
   subCategories: [
