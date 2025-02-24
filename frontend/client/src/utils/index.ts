@@ -1,5 +1,5 @@
 import CryptoJS from "crypto-js";
-import { dummyFeedbacks } from "../components/navbar/components/lips/data";
+import { dummyFeedbacks } from "../components/navbar/data";
 
 const ENCRYPTION_SECRET_KEY = import.meta.env.VITE_ENCRYPTION_SECRET_KEY;
 

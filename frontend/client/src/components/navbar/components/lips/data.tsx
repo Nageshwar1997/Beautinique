@@ -1,4 +1,3 @@
-import { TextItem } from "../../../../types";
 import {
   TransferLipstickIcon,
   MatteLipstickIcon,
@@ -22,11 +21,85 @@ import {
   LipPaletteIcon,
 } from "../icons";
 
-export const lipsticks = {
+export const finish_types = {
   id: 1,
   level: 2,
-  label: "Lipsticks",
-  category: "lipsticks",
+  label: "Finish Types",
+  category: "finish_types",
+  subCategories: [
+    {
+      id: 1,
+      level: 3,
+      label: "Matte Lipstick",
+      category: "matte_lipstick",
+      icon: MatteLipstickIcon,
+    },
+    {
+      id: 2,
+      level: 3,
+      label: "Satin Lipstick",
+      category: "satin_lipstick",
+      icon: SatinLipstickIcon,
+    },
+    {
+      id: 3,
+      level: 3,
+      label: "Hi-Shine Lipstick",
+      category: "hi_shine_lipstick",
+      icon: HiShineLipstickIcon,
+    },
+    {
+      id: 4,
+      level: 3,
+      label: "Lip Gloss",
+      category: "lip_gloss",
+      icon: LipGlossIcon,
+    },
+  ],
+};
+
+export const lipstick_forms = {
+  id: 2,
+  level: 2,
+  label: "Lipstick Forms",
+  category: "lipstick_forms",
+  subCategories: [
+    {
+      id: 1,
+      level: 3,
+      label: "Liquid Lipstick",
+      category: "liquid_lipstick",
+      icon: LiquidLipstickIcon,
+    },
+    {
+      id: 2,
+      level: 3,
+      label: "Powder Lipstick",
+      category: "powder_lipstick",
+      icon: PowderLipstickIcon,
+    },
+    {
+      id: 3,
+      level: 3,
+      label: "Crayon Lipstick",
+      category: "crayon_lipstick",
+      icon: CrayonLipstickIcon,
+    },
+    {
+      id: 4,
+      level: 3,
+      label: "Bullet Lipstick",
+      category: "bullet_lipstick",
+      icon: BulletLipstickIcon,
+    },
+  ],
+};
+
+export const long_lasting_lipsticks = {
+  id: 3,
+  level: 2,
+  label: "Long-Lasting Lipsticks",
+  category: "long_lasting_lipsticks",
   subCategories: [
     {
       id: 1,
@@ -38,91 +111,29 @@ export const lipsticks = {
     {
       id: 2,
       level: 3,
-      label: "Matte Lipstick",
-      category: "matte_lipstick",
-      icon: MatteLipstickIcon,
+      label: "Water Proof Lipstick",
+      category: "water_proof_lipstick",
+      icon: TransferLipstickIcon,
     },
     {
       id: 3,
-      level: 3,
-      label: "Liquid Lipstick",
-      category: "liquid_lipstick",
-      icon: LiquidLipstickIcon,
-    },
-    {
-      id: 4,
-      level: 3,
-      label: "Powder Lipstick",
-      category: "powder_lipstick",
-      icon: PowderLipstickIcon,
-    },
-    {
-      id: 5,
-      level: 3,
-      label: "Crayon Lipstick",
-      category: "crayon_lipstick",
-      icon: CrayonLipstickIcon,
-    },
-    {
-      id: 6,
-      level: 3,
-      label: "Satin Lipstick",
-      category: "satin_lipstick",
-      icon: SatinLipstickIcon,
-    },
-    {
-      id: 7,
-      level: 3,
-      label: "Bullet Lipstick",
-      category: "bullet_lipstick",
-      icon: BulletLipstickIcon,
-    },
-    {
-      id: 8,
-      level: 3,
-      label: "Lip Gloss",
-      category: "lip_gloss",
-      icon: LipGlossIcon,
-    },
-    {
-      id: 9,
-      level: 3,
-      label: "Hi-Shine Lipstick",
-      category: "hi_shine_lipstick",
-      icon: HiShineLipstickIcon,
-    },
-    {
-      id: 10,
-      level: 3,
-      label: "Lip Liner",
-      category: "lip_liner",
-      icon: LipLinerIcon,
-    },
-    {
-      id: 11,
-      level: 3,
-      label: "Lip Glitter",
-      category: "lip_glitter",
-      icon: LipGlitterIcon,
-    },
-    {
-      id: 12,
       level: 3,
       label: "Lip Tint & Stain",
       category: "lip_tint_and_stain",
       icon: LipTintAndSatinIcon,
     },
     {
-      id: 13,
+      id: 4,
       level: 3,
-      label: "View All",
-      category: "view_all",
-      icon: AllIcon,
+      label: "Smudge Proof",
+      category: "smudge_proof_lipstick",
+      icon: TransferLipstickIcon,
     },
   ],
 };
+
 export const lip_care = {
-  id: 2,
+  id: 4,
   level: 2,
   label: "Lip Care",
   category: "lip_care",
@@ -161,8 +172,39 @@ export const lip_care = {
     },
   ],
 };
+
+export const lip_enhancers_and_others = {
+  id: 5,
+  level: 2,
+  label: "Lip Enhancers & Others",
+  category: "lip_enhancers_and_others",
+  subCategories: [
+    {
+      id: 1,
+      level: 3,
+      label: "Lip Liner",
+      category: "lip_liner",
+      icon: LipLinerIcon,
+    },
+    {
+      id: 2,
+      level: 3,
+      label: "Lip Glitter",
+      category: "lip_glitter",
+      icon: LipGlitterIcon,
+    },
+    {
+      id: 3,
+      level: 3,
+      label: "View All",
+      category: "view_all",
+      icon: AllIcon,
+    },
+  ],
+};
+
 export const lipstick_set_and_combo = {
-  id: 3,
+  id: 6,
   level: 2,
   label: "Lipstick Set & Combo",
   category: "lipstick_set_and_combo",
@@ -191,95 +233,5 @@ export const lipstick_set_and_combo = {
       icon: LipPaletteIcon,
       description: "Versatile palette with various shades.",
     },
-    {
-      id: 4,
-      level: 3,
-      label: "View All",
-      category: "view_all",
-      icon: AllIcon,
-      description: "Explore all sets and combos.",
-    },
   ],
 };
-
-export const lipstickFeedbacks: TextItem[][] = [
-  [
-    { text: "Great variety of lipsticks! Loved the" },
-    { text: "shades", isHighlighted: true },
-    { text: "and" },
-    { text: "textures.", isHighlighted: true },
-    { text: "Long-lasting", isHighlighted: true },
-    {
-      text: "and comfortable. Perfect for every occasion. Highly recommended!",
-    },
-  ],
-  [
-    { text: "Amazing" },
-    { text: "pigmentation", isHighlighted: true },
-    { text: "and" },
-    { text: "smooth application.", isHighlighted: true },
-    { text: "Stays on for hours" },
-    { text: "without drying out lips. Definitely a" },
-    { text: "must-have!", isHighlighted: true },
-    { text: "Long-lasting and" },
-    { text: "comfortable.", isHighlighted: true },
-  ],
-  [
-    { text: "Beautiful" },
-    { text: "shades", isHighlighted: true },
-    { text: "and great" },
-    { text: "texture!", isHighlighted: true },
-    { text: "Perfect" },
-    { text: "matte", isHighlighted: true },
-    { text: "finish without feeling heavy. Love the" },
-    { text: "Long-lasting", isHighlighted: true },
-    { text: "effect! Amazing quality and" },
-    { text: "pigmentation.", isHighlighted: true },
-  ],
-
-  [
-    { text: "Excellent" },
-    { text: "color payoff!", isHighlighted: true },
-    { text: "Super" },
-    { text: "comfortable", isHighlighted: true },
-    { text: "to wear all day. My" },
-    { text: "go-to lipstick", isHighlighted: true },
-    {
-      text: "for every event. Worth every penny! Absolutely stunning luxurious.",
-    },
-  ],
-  [
-    { text: "Lovely" },
-    { text: "shades", isHighlighted: true },
-    { text: "with a" },
-    { text: "creamy texture.", isHighlighted: true },
-    { text: "No" },
-    { text: "smudging", isHighlighted: true },
-    {
-      text: "and lasts all day. Received so many compliments. Absolutely love them! Truly fantastic.",
-    },
-  ],
-
-  [
-    { text: "The" },
-    { text: "colors", isHighlighted: true },
-    { text: "are vibrant and bold. Great for all" },
-    { text: "skin tones.", isHighlighted: true },
-    { text: "Stays" },
-    { text: "intact", isHighlighted: true },
-    { text: "and flawless" },
-    { text: "even after meals. Highly recommended! Truly amazing." },
-  ],
-  [
-    { text: "Impressive" },
-    { text: "quality", isHighlighted: true },
-    { text: "and" },
-    { text: "shade range.", isHighlighted: true },
-    { text: "Glides" },
-    { text: "so" },
-    { text: "smoothly", isHighlighted: true },
-    {
-      text: "and feels so lightweight. Absolutely perfect for both daily wear and special occasions!",
-    },
-  ],
-];
