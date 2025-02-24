@@ -94,7 +94,7 @@ const Navbar = () => {
 
   return (
     <div
-      className={`h-16 lg:h-[100px] w-full flex justify-between items-center gap-3 sticky top-0 left-0 lg:-top-9 px-2 sm:px-5 md:px-10 bg-tertiary-inverted text-tertiary shadow-lg shadow-primary-inverted-50 z-50`}
+      className={`h-16 lg:h-[100px] w-full flex justify-between items-center gap-3 lg:gap-0 xl:gap-5 sticky top-0 left-0 lg:-top-9 px-2 sm:px-5 bg-tertiary-inverted text-tertiary shadow-lg shadow-primary-inverted-50 z-50`}
     >
       <div className="h-12 sm:h-14 md:min-h-16 md:h-full flex items-center justify-center">
         <img
@@ -104,10 +104,10 @@ const Navbar = () => {
         />
       </div>
       <div
-        className="w-full h-full px-5 hidden lg:block"
+        className="w-full h-full px-2 xl:px-5 hidden lg:block"
         onMouseLeave={handleMouseLeave}
       >
-        <div className="h-9 flex items-center justify-between px-5 bg-secondary-inverted text-secondary rounded-b-md">
+        <div className="h-9 flex items-center justify-between px-3 xl:px-5 bg-secondary-inverted text-secondary rounded-b-md">
           <p className="text-sm text-nowrap cursor-pointer lg:opacity-90 hover:opacity-100 transition-all duration-300">
             Beautinique Luxury
           </p>
@@ -130,7 +130,7 @@ const Navbar = () => {
             </p>
           </div>
         </div>
-        <div className="h-16 flex items-center gap-7 justify-between px-3 relative">
+        <div className="h-16 flex items-center gap-7 justify-between px-1 xl:px-3 relative">
           <div className="flex items-center gap-2 h-full">
             {levelOneCategories.map((item, index) => (
               <div className="h-full relative" key={item.id}>

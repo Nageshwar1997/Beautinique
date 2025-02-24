@@ -9,7 +9,7 @@ import {
 
 const UserMenuIcons = () => {
   return (
-    <div className="flex gap-2 md:gap-3 lg:gap-5">
+    <div className="flex gap-2 md:gap-3 xl:gap-5">
       {/* Search Icon (Hidden on SM & XL screens) */}
       <span className="sm:hidden lg:block xl:hidden">
         <SearchIcon className="[&>path]:stroke-tertiary w-5 h-5 md:w-6 md:h-6" />
