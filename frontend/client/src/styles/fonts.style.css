@@ -38,28 +38,3 @@
   font-style: normal;
   font-weight: 700; /* Bold */
 }
-
-/* Degular */
-/* Degular - Regular (Weight: 400) */
-@font-face {
-  font-family: "degular";
-  src: url("/fonts/degular/Degular-Regular.otf") format("opentype");
-  font-style: normal;
-  font-weight: 400; /* Regular */
-}
-
-/* Degular - Medium (Weight: 500) */
-@font-face {
-  font-family: "degular";
-  src: url("/fonts/degular/Degular-Medium.otf") format("opentype");
-  font-style: normal;
-  font-weight: 500; /* Medium */
-}
-
-/* Degular - Semibold (Weight: 600) */
-@font-face {
-  font-family: "degular";
-  src: url("/fonts/degular/Degular-Semibold.otf") format("opentype");
-  font-style: normal;
-  font-weight: 600; /* Semibold */
-}

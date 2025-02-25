@@ -80,7 +80,6 @@ export default {
       },
       fontFamily: {
         metropolis: ["metropolis", "sans-serif"],
-        degular: ["degular", "sans-serif"],
       },
     },
   },
