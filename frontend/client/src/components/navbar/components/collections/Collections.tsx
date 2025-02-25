@@ -3,12 +3,7 @@ import { getTodaysFeedback } from "../../../../utils";
 import TextDisplay from "../../../TextDisplay";
 import { collections } from "../../data";
 import { LevelTwoCategoryType } from "../../types";
-import {
-  CategoryLabel,
-  SubCategoryDescription,
-  SubCategoryIconBox,
-  SubCategoryLabel,
-} from "../children";
+import { CategoryLabel, SubCategory } from "../children";
 
 const Collections = () => {
   const categories: LevelTwoCategoryType[] = collections.subCategories;
@@ -32,38 +27,9 @@ const Collections = () => {
                   : ""
               }`}
             >
-              {category.subCategories.map((subCategory, ind) => {
-                const isHighlighted = [
-                  "body_care",
-                  "body_spray",
-                  "conditioner",
-                  "corporate_gifting",
-                ].includes(subCategory.category);
-
-                const isHairCareViewAll =
-                  subCategory.category === "view_all" &&
-                  category.category === "hair_care";
-
-                return (
-                  <div
-                    key={ind}
-                    className={`flex justify-start gap-2 p-2 border border-transparent hover:bg-white-smoke-night-inverted rounded-xl cursor-pointer s${
-                      isHighlighted
-                        ? "hover:border-blue-crayola-c"
-                        : "hover:border-primary-8"
-                    } ${isHairCareViewAll ? "base:hidden md:flex" : ""} group`}
-                  >
-                    <SubCategoryIconBox
-                      option={subCategory.category}
-                      icon={subCategory.icon}
-                    />
-                    <div className="flex flex-col justify-center lg:justify-start w-full">
-                      <SubCategoryLabel text={subCategory.label} />
-                      <SubCategoryDescription text={subCategory.description} />
-                    </div>
-                  </div>
-                );
-              })}
+              {category.subCategories.map((subCategory, index) => (
+                <SubCategory key={index} subCategory={subCategory} />
+              ))}
             </div>
           </div>
         ))}

@@ -1,11 +1,6 @@
 import { LevelTwoCategoryType } from "../../types";
 import { lips } from "../../data";
-import {
-  CategoryLabel,
-  SubCategoryDescription,
-  SubCategoryIconBox,
-  SubCategoryLabel,
-} from "../children";
+import { CategoryLabel, SubCategory } from "../children";
 
 const Lips = () => {
   const categories: LevelTwoCategoryType[] = lips.subCategories;
@@ -29,37 +24,10 @@ const Lips = () => {
           }`}
         >
           <CategoryLabel text={category?.label} />
-          <div className={`flex flex-col gap-1 md:gap-2`}>
-            {category.subCategories.map((subCategory, ind) => {
-              const isHighlighted = [
-                "lip_gloss",
-                "liquid_lipstick",
-                "lip_tint_and_stain",
-                "lipstick_fixer_and_remover",
-                "lip_glitter",
-                "lip_palette",
-              ].includes(subCategory.category);
-
-              return (
-                <div
-                  key={ind}
-                  className={`flex justify-start gap-2 p-2 border border-transparent hover:bg-white-smoke-night-inverted rounded-xl cursor-pointer ${
-                    isHighlighted
-                      ? "hover:border-blue-crayola-c"
-                      : "hover:border-primary-8"
-                  } group`}
-                >
-                  <SubCategoryIconBox
-                    option={subCategory.category}
-                    icon={subCategory.icon}
-                  />
-                  <div className="flex flex-col justify-center lg:justify-start w-full">
-                    <SubCategoryLabel text={subCategory.label} />
-                    <SubCategoryDescription text={subCategory.description} />
-                  </div>
-                </div>
-              );
-            })}
+          <div className="flex flex-col gap-1 md:gap-2">
+            {category.subCategories.map((subCategory, index) => (
+              <SubCategory key={index} subCategory={subCategory} />
+            ))}
           </div>
         </div>
       ))}

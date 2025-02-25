@@ -3,12 +3,7 @@ import { skin } from "../../data";
 import { MessageIcon } from "../../../../icons";
 import TextDisplay from "../../../TextDisplay";
 import { getTodaysFeedback } from "../../../../utils";
-import {
-  CategoryLabel,
-  SubCategoryDescription,
-  SubCategoryIconBox,
-  SubCategoryLabel,
-} from "../children";
+import { CategoryLabel, SubCategory } from "../children";
 
 const Skin = () => {
   const categories: LevelTwoCategoryType[] = skin.subCategories;
@@ -21,35 +16,10 @@ const Skin = () => {
             className="space-y-4 min-w-[200px] max-w-[300px] pb-4 lg:pb-0 border-b border-primary-battleship-davys-gray lg:border-none"
           >
             <CategoryLabel text={category?.label} />
-            <div className="flex flex-col gap-1 md:gap-2 lg:gap-5">
-              {category.subCategories.map((subCategory, index) => {
-                const isHighlighted = [
-                  "serum",
-                  "sunscreen",
-                  "aquaholic",
-                  "face_pack",
-                ].includes(subCategory.category);
-                return (
-                  <div
-                    key={index}
-                    className={`flex justify-start gap-2 p-2 border border-transparent hover:bg-white-smoke-night-inverted rounded-xl cursor-pointer ${
-                      isHighlighted
-                        ? "hover:border-blue-crayola-c"
-                        : "hover:border-primary-8"
-                    } group`}
-                  >
-                    <SubCategoryIconBox
-                      option={subCategory.category}
-                      icon={subCategory.icon}
-                      className="xl:min-w-14 xl:min-h-14 xl:max-w-14 xl:max-h-14"
-                    />
-                    <div className="flex flex-col justify-center lg:justify-start gap-1 w-full">
-                      <SubCategoryLabel text={subCategory.label} />
-                      <SubCategoryDescription text={subCategory.description} />
-                    </div>
-                  </div>
-                );
-              })}
+            <div className="flex flex-col gap-1 md:gap-2">
+              {category.subCategories.map((subCategory, index) => (
+                <SubCategory key={index} subCategory={subCategory} />
+              ))}
             </div>
           </div>
         ))}

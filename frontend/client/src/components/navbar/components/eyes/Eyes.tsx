@@ -1,11 +1,6 @@
 import { eyes } from "../../data";
 import { LevelTwoCategoryType } from "../../types";
-import {
-  CategoryLabel,
-  SubCategoryDescription,
-  SubCategoryIconBox,
-  SubCategoryLabel,
-} from "../children";
+import { CategoryLabel, SubCategory } from "../children";
 
 const Eyes = () => {
   const categories: LevelTwoCategoryType[] = eyes.subCategories;
@@ -24,37 +19,9 @@ const Eyes = () => {
         >
           <CategoryLabel text={category?.label} />
           <div className="flex flex-col gap-1 md:gap-2">
-            {category.subCategories.map((subCategory, index) => {
-              const isHighlighted = [
-                "kohl",
-                "curl_lengthening_mascara",
-                "liquid_eyeliner",
-                "glitter_eyeshadow",
-                "brow_pencil",
-                "eye_combo",
-              ].includes(subCategory.category);
-
-              return (
-                <div
-                  key={index}
-                  className={`flex justify-start gap-2 p-2 border border-transparent hover:bg-white-smoke-night-inverted rounded-xl cursor-pointer ${
-                    isHighlighted
-                      ? "hover:border-blue-crayola-c"
-                      : "hover:border-primary-8"
-                  } group`}
-                >
-                  <SubCategoryIconBox
-                    option={subCategory.category}
-                    icon={subCategory.icon}
-                    className="xl:min-w-14 xl:min-h-14 xl:max-w-14 xl:max-h-14"
-                  />
-                  <div className="flex flex-col justify-center lg:justify-start gap-1 w-full">
-                    <SubCategoryLabel text={subCategory.label} />
-                    <SubCategoryDescription text={subCategory.description} />
-                  </div>
-                </div>
-              );
-            })}
+            {category.subCategories.map((subCategory, index) => (
+              <SubCategory key={index} subCategory={subCategory} />
+            ))}
           </div>
         </div>
       ))}

@@ -1,5 +1,6 @@
 import { SVGType } from "../../../../types";
 import { isHighlightedOption } from "../../../../utils";
+import { LevelThreeCategoryType } from "../../types";
 
 export interface CategoryLabelProps {
   text: string;
@@ -7,6 +8,30 @@ export interface CategoryLabelProps {
 }
 type SubCategoryLabel = CategoryLabelProps;
 type SubCategoryDescriptionProps = CategoryLabelProps;
+
+export const SubCategory = ({
+  subCategory,
+}: {
+  subCategory: LevelThreeCategoryType;
+}) => {
+  const isHighlighted = isHighlightedOption(subCategory.category);
+  return (
+    <div
+      className={`flex justify-start gap-2 p-2 border border-transparent hover:bg-white-smoke-night-inverted rounded-xl cursor-pointer ${
+        isHighlighted ? "hover:border-blue-crayola-c" : "hover:border-primary-8"
+      } group`}
+    >
+      <SubCategoryIconBox
+        option={subCategory.category}
+        icon={subCategory.icon}
+      />
+      <div className="flex flex-col justify-center lg:justify-start w-full">
+        <SubCategoryLabel text={subCategory.label} />
+        <SubCategoryDescription text={subCategory.description} />
+      </div>
+    </div>
+  );
+};
 
 export const CategoryLabel = ({ text, className = "" }: CategoryLabelProps) => (
   <p
