@@ -59,19 +59,18 @@ const ForYou = () => {
               {/* Mobile View */}
               <div className="lg:hidden p-4 flex justify-between gap-2 w-full border-b border-primary-50">
                 <div className="w-1/2 sm:w-2/3 flex flex-col items-start justify-start gap-1 sm:gap-3">
-                  <p className="uppercase text-sm font-degular font-semibold tracking-[1px] py-1 border-b border-secondary-battleship-davys-gray text-primary-battleship-davys-gray-inverted">
+                  <p className="uppercase text-base base:text-sm font-degular font-semibold tracking-wide py-1 border-b border-secondary-battleship-davys-gray text-primary-battleship-davys-gray-inverted">
                     {category.heading}
                   </p>
                   <div className="flex gap-4 cursor-pointer justify-between items-center pt-1">
                     <div className="flex gap-1 flex-col items-start">
-                      <span className="text-sm leading-5 font-semibold text-[--ctruh-light-primary]">
+                      <span className="text-sm leading-5 font-semibold text-silver-jet">
                         {category.label}
                       </span>
-                      <p className="text-[10.5px] sm:text-xs md:text-sm pt-1 leading-[18px] text-light-secondary">
+                      <p className="text-[10.5px] sm:text-xs md:text-sm pt-1 leading-[18px] text-primary-battleship-davys-gray-inverted">
                         {category.description}
                       </p>
                     </div>
-                    {/* <DropdownIcon className="-rotate-90 [&>path]:fill-primary" /> */}
                   </div>
                 </div>
                 <div className="relative max-w-[200px] h-[120px] border border-primary-10 w-1/2 sm:w-1/3 overflow-hidden rounded-lg bg-platinum-black group-hover:bg-smoke-eerie flex items-center justify-center">
@@ -121,8 +120,8 @@ const ForYou = () => {
                   target="_blank"
                   className="flex gap-2 items-center group"
                 >
-                  <Icon className="w-5 h-5 fill-tertiary opacity-70 group-hover:opacity-100" />
-                  <span className="text-sm font-normal leading-[21px] text-tertiary opacity-70 group-hover:opacity-100">
+                  <Icon className="w-5 h-5 fill-secondary opacity-80 group-hover:opacity-100" />
+                  <span className="text-sm font-normal leading-[21px] text-secondary opacity-80 group-hover:opacity-100">
                     {data.label}
                   </span>
                 </Link>
