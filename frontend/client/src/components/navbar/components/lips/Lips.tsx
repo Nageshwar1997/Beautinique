@@ -31,7 +31,7 @@ const Lips = () => {
           </div>
         );
       })}
-      <div className="w-full min-h-[190px] xl:max-h-[220px] mt-9 col-span-2 shadow-lg shadow-secondary-inverted hidden xl:flex items-center justify-center gap-5">
+      <div className="w-full min-h-[190px] xl:max-h-[220px] mt-10 col-span-2 shadow-lg shadow-secondary-inverted hidden xl:flex items-center justify-center gap-5">
         <span className="w-1/2 h-full rounded-xl overflow-hidden">
           <img
             src="./images/navbar/Lipstick1.jpg"
