@@ -1,4 +1,5 @@
 import Button from "../../../button/Button";
+import CategoryLabel from "../children/CategoryLabel";
 import { careers, company, press, testimonials, trust_center } from "./data";
 import TestimonialCarousel from "./TestimonialCarousel";
 
@@ -24,9 +25,7 @@ const Collections = () => {
                     : "lg:pb-2"
                 }`}
               >
-                <p className="uppercase mt-3 md:mt-0 text-primary-battleship-davys-gray-inverted text-base base:text-sm font-semibold font-degular tracking-wide leading-5 px-3 cursor-pointer line-clamp-1">
-                  {category?.label}
-                </p>
+                <CategoryLabel label={category?.label} />
                 <div className="flex flex-col gap-1 md:gap-2">
                   {category.subCategories.map((subCategory, ind) => {
                     const isHighlighted = [""].includes(subCategory.category);
@@ -69,15 +68,11 @@ const Collections = () => {
       ))}
       <div className="grid base:grid-cols-2 md:grid-cols-1 gap-2 base:col-span-2 md:col-span-1 w-full">
         <div className="space-y-4 min-w-[200px] max-w-[300px] pb-4 lg:pb-2 border-b border-primary-battleship-davys-gray">
-          <p className="uppercase mt-3 md:mt-0 text-primary-battleship-davys-gray-inverted text-base base:text-sm font-semibold font-degular tracking-wide leading-5 px-3 cursor-pointer line-clamp-1">
-            Peoples Love BQ
-          </p>
+          <CategoryLabel label={"Peoples Love BQ"} />
           <TestimonialCarousel testimonials={testimonials} />
         </div>
         <div className="space-y-4 min-w-[200px] max-w-[300px] pb-4 lg:pb-2 border-b border-primary-battleship-davys-gray lg:border-none">
-          <p className="uppercase mt-3 md:mt-0 text-primary-battleship-davys-gray-inverted text-base base:text-sm font-semibold font-degular tracking-wide leading-5 px-3 cursor-pointer">
-            Partner with us
-          </p>
+          <CategoryLabel label={"Partner with us"} />
           <div className="px-3 space-y-4">
             <span className="bg-accent-duo bg-clip-text text-transparent italic text-sm font-medium leading-[21px]">
               Together, we're Unstoppable!

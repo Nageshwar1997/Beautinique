@@ -3,6 +3,7 @@ import { getTodaysFeedback } from "../../../../utils";
 import TextDisplay from "../../../TextDisplay";
 import { collections } from "../../data";
 import { LevelTwoCategoryType } from "../../types";
+import CategoryLabel from "../children/CategoryLabel";
 
 const Collections = () => {
   const categories: LevelTwoCategoryType[] = collections.subCategories;
@@ -18,9 +19,7 @@ const Collections = () => {
                 : ""
             }`}
           >
-            <p className="uppercase mt-3 md:mt-0 text-primary-battleship-davys-gray-inverted text-base base:text-sm font-semibold font-degular tracking-wide leading-5 px-3 cursor-pointer">
-              {category?.label}
-            </p>
+            <CategoryLabel label={category?.label} />
             <div
               className={`flex flex-col gap-1 md:gap-2 ${
                 category.category === "gifting"

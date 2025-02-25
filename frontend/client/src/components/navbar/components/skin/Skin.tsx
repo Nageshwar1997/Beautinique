@@ -3,6 +3,7 @@ import { skin } from "../../data";
 import { MessageIcon } from "../../../../icons";
 import TextDisplay from "../../../TextDisplay";
 import { getTodaysFeedback } from "../../../../utils";
+import CategoryLabel from "../children/CategoryLabel";
 
 const Skin = () => {
   const categories: LevelTwoCategoryType[] = skin.subCategories;
@@ -14,9 +15,7 @@ const Skin = () => {
             key={index}
             className="space-y-4 min-w-[200px] max-w-[300px] pb-4 lg:pb-0 border-b border-primary-battleship-davys-gray lg:border-none"
           >
-            <p className="uppercase mt-3 md:mt-0 text-primary-battleship-davys-gray-inverted text-base base:text-sm font-semibold font-degular tracking-wide leading-5 px-3 cursor-pointer">
-              {category?.label}
-            </p>
+            <CategoryLabel label={category?.label} />
             <div className="flex flex-col gap-1 md:gap-2 lg:gap-5">
               {category.subCategories.map((subCategory, index) => {
                 const isHighlighted = [

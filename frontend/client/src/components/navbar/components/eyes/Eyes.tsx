@@ -1,5 +1,6 @@
 import { eyes } from "../../data";
 import { LevelTwoCategoryType } from "../../types";
+import CategoryLabel from "../children/CategoryLabel";
 
 const Eyes = () => {
   const categories: LevelTwoCategoryType[] = eyes.subCategories;
@@ -16,9 +17,7 @@ const Eyes = () => {
               : "lg:pb-2"
           }`}
         >
-          <p className="uppercase mt-3 md:mt-0 text-primary-battleship-davys-gray-inverted text-base base:text-sm font-semibold font-degular tracking-wide leading-5 px-3 cursor-pointer">
-            {category?.label}
-          </p>
+          <CategoryLabel label={category?.label} />
           <div className="flex flex-col gap-1 md:gap-2">
             {category.subCategories.map((subCategory, index) => {
               const isHighlighted = [

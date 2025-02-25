@@ -1,5 +1,6 @@
 import { LevelTwoCategoryType } from "../../types";
 import { lips } from "../../data";
+import CategoryLabel from "../children/CategoryLabel";
 
 const Lips = () => {
   const categories: LevelTwoCategoryType[] = lips.subCategories;
@@ -22,9 +23,7 @@ const Lips = () => {
               : "lg:border-none"
           }`}
         >
-          <p className="uppercase mt-3 md:mt-0 text-primary-battleship-davys-gray-inverted text-base base:text-sm font-semibold font-degular tracking-wide leading-5 px-3 cursor-pointer">
-            {category?.label}
-          </p>
+          <CategoryLabel label={category?.label} />
           <div className={`flex flex-col gap-1 md:gap-2`}>
             {category.subCategories.map((subCategory, ind) => {
               const isHighlighted = [

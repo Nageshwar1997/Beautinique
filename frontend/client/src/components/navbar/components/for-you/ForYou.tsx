@@ -6,6 +6,7 @@ import { Link } from "react-router-dom";
 import { PlayIcon } from "../../../../icons";
 import HLSVideoPlayer from "../../../videoPlayers/HLSVideoPlayer";
 import { LevelTwoCategoryType } from "../../types";
+import CategoryLabel from "../children/CategoryLabel";
 
 const ForYou = () => {
   const [playingVideoIndex, setPlayingVideoIndex] = useState<null | number>(
@@ -20,9 +21,7 @@ const ForYou = () => {
             <Fragment key={index}>
               {/* Desktop View */}
               <div className="hidden lg:flex flex-col gap-6">
-                <p className="uppercase text-primary-battleship-davys-gray-inverted text-sm font-semibold font-degular tracking-wide leading-5 pl-3">
-                  {category?.heading}
-                </p>
+                <CategoryLabel label={category?.heading as string} />
                 <div
                   className="flex flex-col gap-1 p-3 hover:bg-platinum-black rounded-2xl cursor-pointer group relative"
                   onMouseEnter={() => setPlayingVideoIndex(index)}
