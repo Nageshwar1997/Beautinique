@@ -21,14 +21,16 @@ const ForYou = () => {
             <Fragment key={index}>
               {/* Desktop View */}
               <div className="hidden lg:flex flex-col gap-6">
+                {/* Top Heading Label */}
                 <CategoryLabel label={category?.heading as string} />
                 <div
                   className="flex flex-col gap-1 p-3 hover:bg-platinum-black rounded-2xl cursor-pointer group relative"
                   onMouseEnter={() => setPlayingVideoIndex(index)}
                 >
-                  <p className="text-silver-jet text-base font-semibold leading-5 group-hover:text-primary">
-                    {category?.label}
-                  </p>
+                  <CategoryLabel
+                    label={category?.label}
+                    className="text-silver-jet !text-base font-semibold leading-5 group-hover:text-primary px-0"
+                  />
                   <p className="group-hover:text-silver-jet text-primary-battleship-davys-gray-inverted text-xs font-normal tracking-tight leading-5 line-clamp-2">
                     {category.description}
                   </p>
