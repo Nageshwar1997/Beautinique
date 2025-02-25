@@ -28,7 +28,7 @@ const Eyes = () => {
           </div>
         );
       })}
-      <div className="hidden lg:block w-full max-h-[190px] xl:max-h-[240px] col-span-2 overflow-hidden shadow-lg shadow-secondary-inverted rounded-xl mt-9">
+      <div className="hidden lg:block w-full max-h-[185px] xl:max-h-[220px] col-span-2 overflow-hidden shadow-lg shadow-secondary-inverted rounded-xl mt-10">
         <img
           src="./images/navbar/Mascara.jpg"
           alt=""
