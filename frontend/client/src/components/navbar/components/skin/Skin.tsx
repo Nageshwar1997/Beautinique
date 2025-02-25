@@ -3,26 +3,26 @@ import { skin } from "../../data";
 import { MessageIcon } from "../../../../icons";
 import TextDisplay from "../../../TextDisplay";
 import { getTodaysFeedback } from "../../../../utils";
-import { CategoryLabel, SubCategory } from "../children";
+import { CategoryLabel } from "../children";
+import SubCategories from "../SubCategories";
 
 const Skin = () => {
   const categories: LevelTwoCategoryType[] = skin.subCategories;
   return (
     <div className="p-4 lg:p-0 w-full h-full space-y-4">
       <div className="grid base:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2 base:gap-3 md:gap-4 lg:gap-5 justify-start w-full">
-        {categories.map((category, index) => (
-          <div
-            key={index}
-            className="space-y-4 min-w-[200px] max-w-[300px] pb-4 lg:pb-0 border-b border-primary-battleship-davys-gray lg:border-none"
-          >
-            <CategoryLabel text={category?.label} />
-            <div className="flex flex-col gap-1 md:gap-2">
-              {category.subCategories.map((subCategory, index) => (
-                <SubCategory key={index} subCategory={subCategory} />
-              ))}
+        {categories.map((category, index) => {
+          const { subCategories, label } = category;
+          return (
+            <div
+              key={index}
+              className="space-y-4 min-w-[200px] max-w-[300px] pb-4 lg:pb-0 border-b border-primary-battleship-davys-gray lg:border-none"
+            >
+              <CategoryLabel text={label} />
+              <SubCategories subCategories={subCategories} />
             </div>
-          </div>
-        ))}
+          );
+        })}
         <div className="hidden md:block lg:hidden w-full max-h-[250px] col-span-2 overflow-y-scroll shadow-lg shadow-secondary-inverted rounded-2xl">
           <img
             src="./images/navbar/moisturizer.jpg"

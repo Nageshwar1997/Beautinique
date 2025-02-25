@@ -35,12 +35,13 @@ export const SubCategory = ({
 
 export const CategoryLabel = ({ text, className = "" }: CategoryLabelProps) => (
   <p
-    className={`uppercase mt-3 md:mt-0 text-primary-battleship-davys-gray-inverted text-base base:text-sm font-semibold font-degular tracking-wide leading-5 px-3 cursor-pointer ${className}`}
+    className={`uppercase mt-3 md:mt-0 text-primary-battleship-davys-gray-inverted text-base base:text-sm font-semibold font-degular tracking-wide leading-5 px-3 cursor-pointer line-clamp-1 ${className}`}
   >
     {text}
   </p>
 );
 
+// Remove it
 export const SubCategoryLabel = ({
   text,
   className = "",
@@ -52,6 +53,7 @@ export const SubCategoryLabel = ({
   </p>
 );
 
+// Remove it
 export const SubCategoryDescription = ({
   text,
   className = "",
@@ -63,6 +65,7 @@ export const SubCategoryDescription = ({
   </p>
 );
 
+// Remove it
 export const SubCategoryIconBox = ({
   option,
   icon,

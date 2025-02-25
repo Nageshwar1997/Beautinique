@@ -1,5 +1,6 @@
 import Button from "../../../button/Button";
-import { CategoryLabel, SubCategory } from "../children";
+import { CategoryLabel } from "../children";
+import SubCategories from "../SubCategories";
 import { careers, company, press, testimonials, trust_center } from "./data";
 import TestimonialCarousel from "./TestimonialCarousel";
 
@@ -14,6 +15,7 @@ const Collections = () => {
       {categories.map((item, i) => (
         <div key={i} className={`flex flex-col gap-2 w-fit`}>
           {item.map((category, index) => {
+            const { subCategories, label } = category;
             return (
               <div
                 key={index}
@@ -25,12 +27,8 @@ const Collections = () => {
                     : "lg:pb-2"
                 }`}
               >
-                <CategoryLabel text={category?.label} />
-                <div className="flex flex-col gap-1 md:gap-2">
-                  {category.subCategories.map((subCategory, index) => (
-                    <SubCategory key={index} subCategory={subCategory} />
-                  ))}
-                </div>
+                <CategoryLabel text={label} />
+                <SubCategories subCategories={subCategories} />
               </div>
             );
           })}

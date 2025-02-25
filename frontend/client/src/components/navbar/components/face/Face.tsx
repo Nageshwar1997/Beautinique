@@ -1,4 +1,5 @@
-import { CategoryLabel, SubCategory } from "../children";
+import { CategoryLabel } from "../children";
+import SubCategories from "../SubCategories";
 import {
   bronzers_and_contours,
   cheeks_and_glow,
@@ -34,6 +35,7 @@ const Face = () => {
           }`}
         >
           {item.map((category, index) => {
+            const { subCategories, label } = category;
             return (
               <div
                 key={index}
@@ -48,16 +50,12 @@ const Face = () => {
                     : "lg:pb-2"
                 } ${
                   category.category === "foundations_by_skin_type"
-                    ? "base:pb-6 md:pb-4"
+                    ? "base:pb-[23px] md:pb-4"
                     : ""
                 }`}
               >
-                <CategoryLabel text={category?.label} />
-                <div className="flex flex-col gap-1 md:gap-2">
-                  {category.subCategories.map((subCategory, index) => (
-                    <SubCategory key={index} subCategory={subCategory} />
-                  ))}
-                </div>
+                <CategoryLabel text={label} />
+                <SubCategories subCategories={subCategories} />
               </div>
             );
           })}
