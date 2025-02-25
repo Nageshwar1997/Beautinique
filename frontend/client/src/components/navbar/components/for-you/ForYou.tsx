@@ -6,7 +6,7 @@ import { Link } from "react-router-dom";
 import { PlayIcon } from "../../../../icons";
 import HLSVideoPlayer from "../../../videoPlayers/HLSVideoPlayer";
 import { LevelTwoCategoryType } from "../../types";
-import CategoryLabel from "../children/CategoryLabel";
+import { CategoryLabel, SubCategoryDescription } from "../children";
 
 const ForYou = () => {
   const [playingVideoIndex, setPlayingVideoIndex] = useState<null | number>(
@@ -22,19 +22,19 @@ const ForYou = () => {
               {/* Desktop View */}
               <div className="hidden lg:flex flex-col gap-6">
                 {/* Top Heading Label */}
-                <CategoryLabel label={category?.heading as string} />
+                <CategoryLabel text={category?.heading as string} />
                 <div
-                  className="flex flex-col gap-1 p-3 hover:bg-platinum-black rounded-2xl cursor-pointer group relative"
+                  className="flex flex-col gap-2 p-3 hover:bg-platinum-black rounded-xl cursor-pointer group relative"
                   onMouseEnter={() => setPlayingVideoIndex(index)}
                 >
                   <CategoryLabel
-                    label={category?.label}
-                    className="text-silver-jet !text-base font-semibold leading-5 group-hover:text-primary px-0"
+                    text={category?.label}
+                    className="text-silver-jet !text-base group-hover:text-primary px-0"
                   />
-                  <p className="group-hover:text-silver-jet text-primary-battleship-davys-gray-inverted text-xs font-normal tracking-tight leading-5 line-clamp-2">
-                    {category.description}
-                  </p>
-
+                  <SubCategoryDescription
+                    text={category.description as string}
+                    className="!text-xs !text-primary-battleship-davys-gray-inverted group-hover:!text-silver-jet font-normal tracking-tight"
+                  />
                   <div className="relative max-w-[250px] h-[150px] overflow-hidden rounded-lg group-hover:shadow-sm group-hover:shadow-primary-inverted">
                     {playingVideoIndex === index ? (
                       <HLSVideoPlayer
@@ -59,18 +59,20 @@ const ForYou = () => {
 
               {/* Mobile View */}
               <div className="lg:hidden p-4 flex justify-between gap-2 w-full border-b border-primary-50">
-                <div className="w-1/2 sm:w-2/3 flex flex-col items-start justify-start gap-1 sm:gap-3">
-                  <p className="uppercase text-base base:text-sm font-degular font-semibold tracking-wide py-1 border-b border-secondary-battleship-davys-gray text-primary-battleship-davys-gray-inverted">
-                    {category.heading}
-                  </p>
+                <div className="w-1/2 sm:w-2/3 flex flex-col items-start justify-start gap-1 sm:gap-3 border">
+                  <CategoryLabel
+                    text={category?.heading as string}
+                    className="px-0 mt-0 py-1 border-b border-secondary-battleship-davys-gray"
+                  />
                   <div className="flex gap-4 cursor-pointer justify-between items-center pt-1">
                     <div className="flex gap-1 flex-col items-start">
                       <span className="text-sm leading-5 font-semibold text-silver-jet">
                         {category.label}
                       </span>
-                      <p className="text-[10.5px] sm:text-xs md:text-sm pt-1 leading-[18px] text-primary-battleship-davys-gray-inverted">
-                        {category.description}
-                      </p>
+                      <SubCategoryDescription
+                        text={category.description as string}
+                        className="text-[10.5px] sm:text-xs md:text-sm pt-1 leading-[18px] !text-primary-battleship-davys-gray-inverted"
+                      />
                     </div>
                   </div>
                 </div>

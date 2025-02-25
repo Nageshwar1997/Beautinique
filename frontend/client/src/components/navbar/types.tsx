@@ -35,7 +35,7 @@ export interface LevelThreeCategoryType {
   label: string;
   category: string;
   icon: SVGType;
-  description?: string;
+  description: string;
 }
 
 export interface Testimonial {

@@ -1,5 +1,5 @@
 import Button from "../../../button/Button";
-import CategoryLabel from "../children/CategoryLabel";
+import { CategoryLabel, SubCategoryDescription } from "../children";
 import { careers, company, press, testimonials, trust_center } from "./data";
 import TestimonialCarousel from "./TestimonialCarousel";
 
@@ -25,7 +25,7 @@ const Collections = () => {
                     : "lg:pb-2"
                 }`}
               >
-                <CategoryLabel label={category?.label} />
+                <CategoryLabel text={category?.label} />
                 <div className="flex flex-col gap-1 md:gap-2">
                   {category.subCategories.map((subCategory, ind) => {
                     const isHighlighted = [""].includes(subCategory.category);
@@ -53,9 +53,9 @@ const Collections = () => {
                           <p className="text-xs xl:text-sm tracking-wide leading-3 text-left w-full text-secondary group-hover:text-primary line-clamp-1">
                             {subCategory.label}
                           </p>
-                          <p className="text-[8px] xl:text-[10px] leading-1 break-words line-clamp-2 text-silver-jet group-hover:text-tertiary">
-                            {subCategory.description}
-                          </p>
+                          <SubCategoryDescription
+                            text={subCategory.description}
+                          />
                         </div>
                       </div>
                     );
@@ -68,11 +68,11 @@ const Collections = () => {
       ))}
       <div className="grid base:grid-cols-2 md:grid-cols-1 gap-2 base:col-span-2 md:col-span-1 w-full">
         <div className="space-y-4 min-w-[200px] max-w-[300px] pb-4 lg:pb-2 border-b border-primary-battleship-davys-gray">
-          <CategoryLabel label={"Peoples Love BQ"} />
+          <CategoryLabel text={"Peoples Love BQ"} />
           <TestimonialCarousel testimonials={testimonials} />
         </div>
         <div className="space-y-4 min-w-[200px] max-w-[300px] pb-4 lg:pb-2 border-b border-primary-battleship-davys-gray lg:border-none">
-          <CategoryLabel label={"Partner with us"} />
+          <CategoryLabel text={"Partner with us"} />
           <div className="px-3 space-y-4">
             <span className="bg-accent-duo bg-clip-text text-transparent italic text-sm font-medium leading-[21px]">
               Together, we're Unstoppable!
