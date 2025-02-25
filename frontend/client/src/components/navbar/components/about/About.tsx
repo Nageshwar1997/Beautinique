@@ -1,9 +1,6 @@
 import Button from "../../../button/Button";
-import {
-  CategoryLabel,
-  SubCategoryDescription,
-  SubCategoryLabel,
-} from "../children";
+import CategoryLabel from "../CategoryLabel";
+import SubCategories from "../SubCategories";
 import { careers, company, press, testimonials, trust_center } from "./data";
 import TestimonialCarousel from "./TestimonialCarousel";
 
@@ -18,6 +15,7 @@ const Collections = () => {
       {categories.map((item, i) => (
         <div key={i} className={`flex flex-col gap-2 w-fit`}>
           {item.map((category, index) => {
+            const { subCategories, label } = category;
             return (
               <div
                 key={index}
@@ -29,42 +27,8 @@ const Collections = () => {
                     : "lg:pb-2"
                 }`}
               >
-                <CategoryLabel text={category?.label} />
-                <div className="flex flex-col gap-1 md:gap-2">
-                  {category.subCategories.map((subCategory, ind) => {
-                    const isHighlighted = ["mission_vision_values"].includes(
-                      subCategory.category
-                    );
-                    const Icon = subCategory.icon;
-
-                    return (
-                      <div
-                        key={ind}
-                        className={`flex justify-start gap-2 p-2 border border-transparent hover:bg-white-smoke-night-inverted rounded-xl cursor-pointer ${
-                          isHighlighted
-                            ? "hover:border-blue-crayola-c"
-                            : "hover:border-primary-8"
-                        } group`}
-                      >
-                        <div
-                          className={`min-w-10 min-h-10 max-w-10 max-h-10 xl:min-w-12 xl:min-h-12 xl:max-w-12 xl:max-h-12 bg-secondary-inverted group-hover:bg-primary-inverted rounded-lg flex items-center justify-center ${
-                            isHighlighted
-                              ? "bg-accent-duo group-hover:shadow-primary-btn-hover [&>svg]:!fill-white"
-                              : "shadow-inner shadow-primary-battleship-davys-gray"
-                          }`}
-                        >
-                          <Icon className="fill-secondary" />
-                        </div>
-                        <div className="flex flex-col justify-center lg:justify-start w-full">
-                          <SubCategoryLabel text={subCategory.label} />
-                          <SubCategoryDescription
-                            text={subCategory.description}
-                          />
-                        </div>
-                      </div>
-                    );
-                  })}
-                </div>
+                <CategoryLabel text={label} />
+                <SubCategories subCategories={subCategories} />
               </div>
             );
           })}

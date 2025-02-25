@@ -19,6 +19,8 @@ import {
   LipstickSetIcon,
   LipstickComboIcon,
   LipPaletteIcon,
+  WaterproofLipstickIcon,
+  SmudgeProofLipstickIcon,
 } from "../icons";
 
 export const finish_types = {
@@ -131,7 +133,7 @@ export const long_lasting_lipsticks = {
       level: 3,
       label: "Water Proof Lipstick",
       category: "water_proof_lipstick",
-      icon: TransferLipstickIcon,
+      icon: WaterproofLipstickIcon,
       description:
         "Resistant to water and sweat, ensuring color stays vibrant always.",
     },
@@ -149,7 +151,7 @@ export const long_lasting_lipsticks = {
       level: 3,
       label: "Smudge Proof",
       category: "smudge_proof_lipstick",
-      icon: TransferLipstickIcon,
+      icon: SmudgeProofLipstickIcon,
       description:
         "No smudging or transferring, providing a flawless look perfectly.",
     },
@@ -272,3 +274,12 @@ export const lipstick_sets_and_combos = {
     },
   ],
 };
+
+export const highlightedLipsOptions = [
+  "lip_gloss",
+  "liquid_lipstick",
+  "lip_tint_and_stain",
+  "lipstick_fixer_and_remover",
+  "lip_glitter",
+  "lip_palette",
+];

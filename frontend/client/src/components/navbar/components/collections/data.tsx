@@ -306,3 +306,10 @@ export const gifting = {
     },
   ],
 };
+
+export const highlightedCollectionsOptions: string[] = [
+  "best_of_sugar_pop",
+  "soap",
+  // "serum", // already in skin->moisturizers
+  "sugar_set",
+];

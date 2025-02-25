@@ -3,8 +3,14 @@ import Branding from "../../../components/Branding";
 
 const AuthRobot = () => {
   return (
-    <div className="w-1/2 max-h-dvh hidden relative lg:block rounded-2xl text-center bg-[url(./images/auth/bg-gradient.svg)] bg-center bg-cover bg-no-repeat overflow-hidden">
-      <div className="w-full absolute top-[10vh] left-1/2 transform -translate-x-1/2 flex flex-col items-center gap-2 text-white">
+    <div
+      className="w-1/2 max-h-dvh hidden relative lg:block rounded-2xl text-center overflow-hidden"
+      style={{
+        background:
+          "linear-gradient(270deg, var(--primary-inverted) 1%, var(--blue-crayola-c) 40%, #001B99 100%)",
+      }}
+    >
+      <div className="w-full absolute top-[8vh] left-1/2 transform -translate-x-1/2 flex flex-col items-center gap-2 text-white">
         <h1 className="text-xl md:text-2xl lg:text-3xl font-semibold">
           Welcome to Beautinique
         </h1>
@@ -14,16 +20,9 @@ const AuthRobot = () => {
         <Branding type="light" />
       </div>
       <div className="relative h-full flex flex-col items-center justify-center">
-        <div
-          className="w-full h-full absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-10 rounded-[25px] overflow-hidden animate-pulse mix-blend-overlay"
-          style={{
-            backgroundImage:
-              "radial-gradient(circle 250px at center 60%, rgb(0, 163, 255) 50px, transparent)",
-          }}
-        />
         <Spline
           scene="https://prod.spline.design/EDAPwzBU58Csa1Gc/scene.splinecode"
-          className="z-20"
+          className="z-20 bg-transparent"
         />
       </div>
     </div>

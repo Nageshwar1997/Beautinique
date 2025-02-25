@@ -234,3 +234,12 @@ export const eye_value_set = {
     },
   ],
 };
+
+export const highlightedEyesOptions: string[] = [
+  "kohl",
+  "curl_lengthening_mascara",
+  "liquid_eyeliner",
+  "glitter_eyeshadow",
+  "brow_pencil",
+  "eye_combo",
+];

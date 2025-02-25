@@ -157,6 +157,11 @@ export const trust_center = {
   ],
 };
 
+export const highlightedAboutOptions = [
+  "mission_vision_values",
+  "retail_e_commerce",
+];
+
 export const testimonials = [
   {
     id: 1,

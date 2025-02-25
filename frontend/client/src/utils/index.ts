@@ -1,5 +1,8 @@
 import CryptoJS from "crypto-js";
-import { dummyFeedbacks } from "../components/navbar/data";
+import {
+  dummyFeedbacks,
+  highlightedCategoryOptions,
+} from "../components/navbar/data";
 
 const ENCRYPTION_SECRET_KEY = import.meta.env.VITE_ENCRYPTION_SECRET_KEY;
 
@@ -39,3 +42,7 @@ export const getTodaysFeedback = (
 
   return todayFeedback;
 };
+
+// It return a boolean value is level 3 category option is highlighted or not
+export const isHighlightedOption = (option: string) =>
+  highlightedCategoryOptions.includes(option);

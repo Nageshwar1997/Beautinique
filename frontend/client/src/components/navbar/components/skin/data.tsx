@@ -175,3 +175,10 @@ export const face_mask = {
     },
   ],
 };
+
+export const highlightedSkinOptions: string[] = [
+  "serum",
+  "sunscreen",
+  "aquaholic",
+  "face_pack",
+];
