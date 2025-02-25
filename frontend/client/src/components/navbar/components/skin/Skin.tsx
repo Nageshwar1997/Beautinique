@@ -3,6 +3,11 @@ import { skin } from "../../data";
 import { MessageIcon } from "../../../../icons";
 import TextDisplay from "../../../TextDisplay";
 import { getTodaysFeedback } from "../../../../utils";
+import {
+  CategoryLabel,
+  SubCategoryDescription,
+  SubCategoryLabel,
+} from "../children";
 
 const Skin = () => {
   const categories: LevelTwoCategoryType[] = skin.subCategories;
@@ -14,9 +19,7 @@ const Skin = () => {
             key={index}
             className="space-y-4 min-w-[200px] max-w-[300px] pb-4 lg:pb-0 border-b border-primary-battleship-davys-gray lg:border-none"
           >
-            <p className="uppercase mt-3 md:mt-0 text-primary-battleship-davys-gray-inverted text-base base:text-sm font-semibold font-degular tracking-wide leading-5 px-3 cursor-pointer">
-              {category?.label}
-            </p>
+            <CategoryLabel text={category?.label} />
             <div className="flex flex-col gap-1 md:gap-2 lg:gap-5">
               {category.subCategories.map((subCategory, index) => {
                 const isHighlighted = [
@@ -45,12 +48,8 @@ const Skin = () => {
                       <Icon className="fill-secondary" />
                     </div>
                     <div className="flex flex-col justify-center lg:justify-start gap-1 w-full">
-                      <p className="text-xs xl:text-sm tracking-wide leading-3 text-left w-full text-secondary group-hover:text-primary line-clamp-1">
-                        {subCategory.label}
-                      </p>
-                      <p className="text-[8px] xl:text-[10px] leading-1 break-words line-clamp-2 text-silver-jet group-hover:text-tertiary">
-                        {subCategory.description}
-                      </p>
+                      <SubCategoryLabel text={subCategory.label} />
+                      <SubCategoryDescription text={subCategory.description} />
                     </div>
                   </div>
                 );

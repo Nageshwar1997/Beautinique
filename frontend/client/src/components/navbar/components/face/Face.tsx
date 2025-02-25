@@ -1,4 +1,9 @@
 import {
+  CategoryLabel,
+  SubCategoryDescription,
+  SubCategoryLabel,
+} from "../children";
+import {
   bronzers_and_contours,
   cheeks_and_glow,
   concealers_and_correctors,
@@ -51,9 +56,7 @@ const Face = () => {
                     : ""
                 }`}
               >
-                <p className="uppercase mt-3 md:mt-0 text-primary-battleship-davys-gray-inverted text-base base:text-sm font-semibold font-degular tracking-wide leading-5 px-3 cursor-pointer line-clamp-1">
-                  {category?.label}
-                </p>
+                <CategoryLabel text={category?.label} />
                 <div className="flex flex-col gap-1 md:gap-2">
                   {category.subCategories.map((subCategory, ind) => {
                     const isHighlighted = [
@@ -86,12 +89,10 @@ const Face = () => {
                           <Icon className="fill-secondary" />
                         </div>
                         <div className="flex flex-col justify-center lg:justify-start w-full">
-                          <p className="text-xs xl:text-sm tracking-wide leading-3 text-left w-full text-secondary group-hover:text-primary line-clamp-1">
-                            {subCategory.label}
-                          </p>
-                          <p className="text-[8px] xl:text-[10px] leading-1 break-words line-clamp-2 text-silver-jet group-hover:text-tertiary">
-                            {subCategory.description}
-                          </p>
+                          <SubCategoryLabel text={subCategory.label} />
+                          <SubCategoryDescription
+                            text={subCategory.description}
+                          />
                         </div>
                       </div>
                     );

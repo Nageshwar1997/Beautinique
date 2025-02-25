@@ -17,6 +17,7 @@ export const new_new = {
       level: 3,
       label: "",
       category: "",
+      description: "",
       icon: () => <svg />, // not in use only for typescript warning
     },
   ],
@@ -37,6 +38,7 @@ export const sugar_play = {
       level: 3,
       label: "",
       category: "",
+      description: "",
       icon: () => <svg />, // not in use only for typescript warning
     },
   ],
@@ -57,6 +59,7 @@ export const offers = {
       level: 3,
       label: "",
       category: "",
+      description: "",
       icon: () => <svg />, // not in use only for typescript warning
     },
   ],
@@ -77,6 +80,7 @@ export const blogs = {
       level: 3,
       label: "",
       category: "",
+      description: "",
       icon: () => <svg />, // not in use only for typescript warning
     },
   ],

@@ -6,6 +6,7 @@ import { Link } from "react-router-dom";
 import { PlayIcon } from "../../../../icons";
 import HLSVideoPlayer from "../../../videoPlayers/HLSVideoPlayer";
 import { LevelTwoCategoryType } from "../../types";
+import { CategoryLabel, SubCategoryDescription } from "../children";
 
 const ForYou = () => {
   const [playingVideoIndex, setPlayingVideoIndex] = useState<null | number>(
@@ -20,20 +21,20 @@ const ForYou = () => {
             <Fragment key={index}>
               {/* Desktop View */}
               <div className="hidden lg:flex flex-col gap-6">
-                <p className="uppercase text-primary-battleship-davys-gray-inverted text-sm font-semibold font-degular tracking-wide leading-5 pl-3">
-                  {category?.heading}
-                </p>
+                {/* Top Heading Label */}
+                <CategoryLabel text={category?.heading as string} />
                 <div
-                  className="flex flex-col gap-1 p-3 hover:bg-platinum-black rounded-2xl cursor-pointer group relative"
+                  className="flex flex-col gap-2 p-3 hover:bg-platinum-black rounded-xl cursor-pointer group relative"
                   onMouseEnter={() => setPlayingVideoIndex(index)}
                 >
-                  <p className="text-silver-jet text-base font-semibold leading-5 group-hover:text-primary">
-                    {category?.label}
-                  </p>
-                  <p className="group-hover:text-silver-jet text-primary-battleship-davys-gray-inverted text-xs font-normal tracking-tight leading-5 line-clamp-2">
-                    {category.description}
-                  </p>
-
+                  <CategoryLabel
+                    text={category?.label}
+                    className="text-silver-jet !text-base group-hover:text-primary px-0"
+                  />
+                  <SubCategoryDescription
+                    text={category.description as string}
+                    className="!text-xs !text-primary-battleship-davys-gray-inverted group-hover:!text-silver-jet font-normal tracking-tight"
+                  />
                   <div className="relative max-w-[250px] h-[150px] overflow-hidden rounded-lg group-hover:shadow-sm group-hover:shadow-primary-inverted">
                     {playingVideoIndex === index ? (
                       <HLSVideoPlayer
@@ -59,19 +60,21 @@ const ForYou = () => {
               {/* Mobile View */}
               <div className="lg:hidden p-4 flex justify-between gap-2 w-full border-b border-primary-50">
                 <div className="w-1/2 sm:w-2/3 flex flex-col items-start justify-start gap-1 sm:gap-3">
-                  <p className="uppercase text-sm font-degular font-semibold tracking-[1px] py-1 border-b border-secondary-battleship-davys-gray text-primary-battleship-davys-gray-inverted">
-                    {category.heading}
-                  </p>
+                  <CategoryLabel
+                    text={category?.heading as string}
+                    className="px-0 mt-0 py-1 border-b border-secondary-battleship-davys-gray"
+                  />
                   <div className="flex gap-4 cursor-pointer justify-between items-center pt-1">
                     <div className="flex gap-1 flex-col items-start">
-                      <span className="text-sm leading-5 font-semibold text-[--ctruh-light-primary]">
-                        {category.label}
-                      </span>
-                      <p className="text-[10.5px] sm:text-xs md:text-sm pt-1 leading-[18px] text-light-secondary">
-                        {category.description}
-                      </p>
+                      <CategoryLabel
+                        text={category.label}
+                        className="capitalize text-sm font-metropolis text-silver-jet px-0 mt-0"
+                      />
+                      <SubCategoryDescription
+                        text={category.description as string}
+                        className="text-[10.5px] sm:text-xs md:text-sm pt-1 leading-[18px] !text-primary-battleship-davys-gray-inverted"
+                      />
                     </div>
-                    {/* <DropdownIcon className="-rotate-90 [&>path]:fill-primary" /> */}
                   </div>
                 </div>
                 <div className="relative max-w-[200px] h-[120px] border border-primary-10 w-1/2 sm:w-1/3 overflow-hidden rounded-lg bg-platinum-black group-hover:bg-smoke-eerie flex items-center justify-center">
@@ -121,8 +124,8 @@ const ForYou = () => {
                   target="_blank"
                   className="flex gap-2 items-center group"
                 >
-                  <Icon className="w-5 h-5 fill-tertiary opacity-70 group-hover:opacity-100" />
-                  <span className="text-sm font-normal leading-[21px] text-tertiary opacity-70 group-hover:opacity-100">
+                  <Icon className="w-5 h-5 fill-secondary opacity-80 group-hover:opacity-100" />
+                  <span className="text-sm font-normal leading-[21px] text-secondary opacity-80 group-hover:opacity-100">
                     {data.label}
                   </span>
                 </Link>
