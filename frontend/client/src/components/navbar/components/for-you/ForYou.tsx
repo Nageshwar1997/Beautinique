@@ -61,13 +61,13 @@ const ForYou = () => {
                 <div className="w-1/2 sm:w-2/3 flex flex-col items-start justify-start gap-1 sm:gap-3">
                   <CategoryLabel
                     text={category?.heading as string}
-                    className="px-0 mt-0 py-1 border-b border-secondary-battleship-davys-gray"
+                    className="!px-0 !mt-0 py-1 border border-secondary-battleship-davys-gray border-[red]"
                   />
                   <div className="flex gap-4 cursor-pointer justify-between items-center pt-1">
                     <div className="flex gap-1 flex-col items-start">
                       <CategoryLabel
                         text={category.label}
-                        className="capitalize text-sm font-metropolis text-silver-jet px-0 mt-0"
+                        className="capitalize text-sm font-metropolis text-silver-jet !px-0 !mt-0 border"
                       />
                       <p className="text-[10.5px] sm:text-xs md:text-sm pt-1 leading-[18px] text-primary-battleship-davys-gray-inverted">
                         {category.description}
