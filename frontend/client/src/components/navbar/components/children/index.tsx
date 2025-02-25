@@ -1,3 +1,6 @@
+import { SVGType } from "../../../../types";
+import { isHighlightedOption } from "../../../../utils";
+
 export interface CategoryLabelProps {
   text: string;
   className?: string;
@@ -34,3 +37,27 @@ export const SubCategoryDescription = ({
     {text}
   </p>
 );
+
+export const SubCategoryIconBox = ({
+  option,
+  icon,
+  className = "",
+}: {
+  option: string;
+  icon: SVGType;
+  className?: string;
+}) => {
+  const Icon = icon;
+  const isHighlighted = isHighlightedOption(option);
+  return (
+    <div
+      className={`min-w-10 min-h-10 max-w-10 max-h-10 xl:min-w-12 xl:min-h-12 xl:max-w-12 xl:max-h-12 bg-secondary-inverted group-hover:bg-primary-inverted rounded-lg flex items-center justify-center ${
+        isHighlighted
+          ? "bg-accent-duo group-hover:shadow-primary-btn-hover [&>svg]:!fill-white"
+          : "shadow-inner shadow-primary-battleship-davys-gray"
+      } ${className}`}
+    >
+      <Icon className="fill-secondary" />
+    </div>
+  );
+};

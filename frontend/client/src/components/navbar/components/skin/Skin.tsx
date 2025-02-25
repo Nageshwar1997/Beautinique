@@ -6,6 +6,7 @@ import { getTodaysFeedback } from "../../../../utils";
 import {
   CategoryLabel,
   SubCategoryDescription,
+  SubCategoryIconBox,
   SubCategoryLabel,
 } from "../children";
 
@@ -28,7 +29,6 @@ const Skin = () => {
                   "aquaholic",
                   "face_pack",
                 ].includes(subCategory.category);
-                const Icon = subCategory.icon;
                 return (
                   <div
                     key={index}
@@ -38,15 +38,11 @@ const Skin = () => {
                         : "hover:border-primary-8"
                     } group`}
                   >
-                    <div
-                      className={`min-w-10 min-h-10 max-w-10 max-h-10 xl:min-w-14 xl:min-h-14 xl:max-w-14 xl:max-h-14 bg-secondary-inverted group-hover:bg-primary-inverted rounded-lg flex items-center justify-center ${
-                        isHighlighted
-                          ? "bg-accent-duo group-hover:shadow-primary-btn-hover [&>svg]:!fill-white"
-                          : "shadow-inner shadow-primary-battleship-davys-gray"
-                      }`}
-                    >
-                      <Icon className="fill-secondary" />
-                    </div>
+                    <SubCategoryIconBox
+                      option={subCategory.category}
+                      icon={subCategory.icon}
+                      className="xl:min-w-14 xl:min-h-14 xl:max-w-14 xl:max-h-14"
+                    />
                     <div className="flex flex-col justify-center lg:justify-start gap-1 w-full">
                       <SubCategoryLabel text={subCategory.label} />
                       <SubCategoryDescription text={subCategory.description} />

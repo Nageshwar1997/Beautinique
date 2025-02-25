@@ -14,6 +14,7 @@ import {
   face_makeup,
   foundations_by_finish,
   foundations_by_skin_type,
+  highlightedFaceOptions,
   primers_and_removers,
   setting_and_finishing,
   traditional_and_essentials,
@@ -23,11 +24,13 @@ import {
   eyebrows,
   eyeliners,
   eyeshadow,
+  highlightedEyesOptions,
   kohl_and_kajal,
   mascaras,
 } from "../components/eyes/data";
 import {
   finish_types,
+  highlightedLipsOptions,
   lip_care,
   lip_enhancers_and_other,
   lipstick_forms,
@@ -40,16 +43,19 @@ import {
   cleansing_and_exfoliation,
   natures_blend,
   face_mask,
+  highlightedSkinOptions,
 } from "../components/skin/data";
 import {
   bath_and_body,
   gifting,
   hair_care,
+  highlightedCollectionsOptions,
   sugar_pop,
 } from "../components/collections/data";
 import {
   careers,
   company,
+  highlightedAboutOptions,
   press,
   trust_center,
 } from "../components/about/data";
@@ -159,6 +165,15 @@ export const navbarCategoriesData: LevelOneCategoryType[] = [
   skin,
   collections,
   about,
+];
+
+export const highlightedCategoryOptions: string[] = [
+  ...highlightedLipsOptions,
+  ...highlightedFaceOptions,
+  ...highlightedCollectionsOptions,
+  ...highlightedAboutOptions,
+  ...highlightedSkinOptions,
+  ...highlightedEyesOptions,
 ];
 
 export const dummyFeedbacks: TextItem[][] = [

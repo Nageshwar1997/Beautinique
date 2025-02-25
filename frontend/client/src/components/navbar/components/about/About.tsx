@@ -2,6 +2,7 @@ import Button from "../../../button/Button";
 import {
   CategoryLabel,
   SubCategoryDescription,
+  SubCategoryIconBox,
   SubCategoryLabel,
 } from "../children";
 import { careers, company, press, testimonials, trust_center } from "./data";
@@ -35,7 +36,6 @@ const Collections = () => {
                     const isHighlighted = ["mission_vision_values"].includes(
                       subCategory.category
                     );
-                    const Icon = subCategory.icon;
 
                     return (
                       <div
@@ -46,15 +46,10 @@ const Collections = () => {
                             : "hover:border-primary-8"
                         } group`}
                       >
-                        <div
-                          className={`min-w-10 min-h-10 max-w-10 max-h-10 xl:min-w-12 xl:min-h-12 xl:max-w-12 xl:max-h-12 bg-secondary-inverted group-hover:bg-primary-inverted rounded-lg flex items-center justify-center ${
-                            isHighlighted
-                              ? "bg-accent-duo group-hover:shadow-primary-btn-hover [&>svg]:!fill-white"
-                              : "shadow-inner shadow-primary-battleship-davys-gray"
-                          }`}
-                        >
-                          <Icon className="fill-secondary" />
-                        </div>
+                        <SubCategoryIconBox
+                          option={subCategory.category}
+                          icon={subCategory.icon}
+                        />
                         <div className="flex flex-col justify-center lg:justify-start w-full">
                           <SubCategoryLabel text={subCategory.label} />
                           <SubCategoryDescription
