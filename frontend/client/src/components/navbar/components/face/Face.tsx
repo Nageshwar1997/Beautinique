@@ -1,4 +1,4 @@
-import { CategoryLabel } from "../children";
+import CategoryLabel from "../CategoryLabel";
 import SubCategories from "../SubCategories";
 import {
   bronzers_and_contours,

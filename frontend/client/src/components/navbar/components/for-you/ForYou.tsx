@@ -6,7 +6,7 @@ import { Link } from "react-router-dom";
 import { PlayIcon } from "../../../../icons";
 import HLSVideoPlayer from "../../../videoPlayers/HLSVideoPlayer";
 import { LevelTwoCategoryType } from "../../types";
-import { CategoryLabel, SubCategoryDescription } from "../children";
+import CategoryLabel from "../CategoryLabel";
 
 const ForYou = () => {
   const [playingVideoIndex, setPlayingVideoIndex] = useState<null | number>(
@@ -31,10 +31,9 @@ const ForYou = () => {
                     text={category?.label}
                     className="text-silver-jet !text-base group-hover:text-primary px-0"
                   />
-                  <SubCategoryDescription
-                    text={category.description as string}
-                    className="!text-xs !text-primary-battleship-davys-gray-inverted group-hover:!text-silver-jet font-normal tracking-tight"
-                  />
+                  <p className="text-xs text-primary-battleship-davys-gray-inverted group-hover:text-silver-jet font-normal tracking-tight leading-5 line-clamp-2">
+                    {category.description}
+                  </p>
                   <div className="relative max-w-[250px] h-[150px] overflow-hidden rounded-lg group-hover:shadow-sm group-hover:shadow-primary-inverted">
                     {playingVideoIndex === index ? (
                       <HLSVideoPlayer
@@ -70,10 +69,9 @@ const ForYou = () => {
                         text={category.label}
                         className="capitalize text-sm font-metropolis text-silver-jet px-0 mt-0"
                       />
-                      <SubCategoryDescription
-                        text={category.description as string}
-                        className="text-[10.5px] sm:text-xs md:text-sm pt-1 leading-[18px] !text-primary-battleship-davys-gray-inverted"
-                      />
+                      <p className="text-[10.5px] sm:text-xs md:text-sm pt-1 leading-[18px] text-primary-battleship-davys-gray-inverted">
+                        {category.description}
+                      </p>
                     </div>
                   </div>
                 </div>

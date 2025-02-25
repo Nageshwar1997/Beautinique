@@ -3,7 +3,7 @@ import { skin } from "../../data";
 import { MessageIcon } from "../../../../icons";
 import TextDisplay from "../../../TextDisplay";
 import { getTodaysFeedback } from "../../../../utils";
-import { CategoryLabel } from "../children";
+import CategoryLabel from "../CategoryLabel";
 import SubCategories from "../SubCategories";
 
 const Skin = () => {

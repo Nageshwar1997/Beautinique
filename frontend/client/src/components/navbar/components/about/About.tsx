@@ -1,5 +1,5 @@
 import Button from "../../../button/Button";
-import { CategoryLabel } from "../children";
+import CategoryLabel from "../CategoryLabel";
 import SubCategories from "../SubCategories";
 import { careers, company, press, testimonials, trust_center } from "./data";
 import TestimonialCarousel from "./TestimonialCarousel";

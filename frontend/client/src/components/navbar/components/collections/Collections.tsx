@@ -3,7 +3,7 @@ import { getTodaysFeedback } from "../../../../utils";
 import TextDisplay from "../../../TextDisplay";
 import { collections } from "../../data";
 import { LevelTwoCategoryType } from "../../types";
-import { CategoryLabel } from "../children";
+import CategoryLabel from "../CategoryLabel";
 import SubCategories from "../SubCategories";
 
 const Collections = () => {

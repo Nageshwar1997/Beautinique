@@ -1,6 +1,6 @@
 import { LevelTwoCategoryType } from "../../types";
 import { lips } from "../../data";
-import { CategoryLabel } from "../children";
+import CategoryLabel from "../CategoryLabel";
 import SubCategories from "../SubCategories";
 
 const Lips = () => {

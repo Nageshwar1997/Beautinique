@@ -1,6 +1,6 @@
 import { eyes } from "../../data";
 import { LevelTwoCategoryType } from "../../types";
-import { CategoryLabel } from "../children";
+import CategoryLabel from "../CategoryLabel";
 import SubCategories from "../SubCategories";
 
 const Eyes = () => {
