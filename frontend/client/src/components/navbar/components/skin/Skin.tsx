@@ -3,7 +3,11 @@ import { skin } from "../../data";
 import { MessageIcon } from "../../../../icons";
 import TextDisplay from "../../../TextDisplay";
 import { getTodaysFeedback } from "../../../../utils";
-import { CategoryLabel, SubCategoryDescription } from "../children";
+import {
+  CategoryLabel,
+  SubCategoryDescription,
+  SubCategoryLabel,
+} from "../children";
 
 const Skin = () => {
   const categories: LevelTwoCategoryType[] = skin.subCategories;
@@ -44,9 +48,7 @@ const Skin = () => {
                       <Icon className="fill-secondary" />
                     </div>
                     <div className="flex flex-col justify-center lg:justify-start gap-1 w-full">
-                      <p className="text-xs xl:text-sm tracking-wide leading-3 text-left w-full text-secondary group-hover:text-primary line-clamp-1">
-                        {subCategory.label}
-                      </p>
+                      <SubCategoryLabel text={subCategory.label} />
                       <SubCategoryDescription text={subCategory.description} />
                     </div>
                   </div>

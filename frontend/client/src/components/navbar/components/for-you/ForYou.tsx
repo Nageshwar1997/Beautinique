@@ -59,16 +59,17 @@ const ForYou = () => {
 
               {/* Mobile View */}
               <div className="lg:hidden p-4 flex justify-between gap-2 w-full border-b border-primary-50">
-                <div className="w-1/2 sm:w-2/3 flex flex-col items-start justify-start gap-1 sm:gap-3 border">
+                <div className="w-1/2 sm:w-2/3 flex flex-col items-start justify-start gap-1 sm:gap-3">
                   <CategoryLabel
                     text={category?.heading as string}
                     className="px-0 mt-0 py-1 border-b border-secondary-battleship-davys-gray"
                   />
                   <div className="flex gap-4 cursor-pointer justify-between items-center pt-1">
                     <div className="flex gap-1 flex-col items-start">
-                      <span className="text-sm leading-5 font-semibold text-silver-jet">
-                        {category.label}
-                      </span>
+                      <CategoryLabel
+                        text={category.label}
+                        className="capitalize text-sm font-metropolis text-silver-jet px-0 mt-0"
+                      />
                       <SubCategoryDescription
                         text={category.description as string}
                         className="text-[10.5px] sm:text-xs md:text-sm pt-1 leading-[18px] !text-primary-battleship-davys-gray-inverted"

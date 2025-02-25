@@ -1,6 +1,10 @@
 import { LevelTwoCategoryType } from "../../types";
 import { lips } from "../../data";
-import { CategoryLabel, SubCategoryDescription } from "../children";
+import {
+  CategoryLabel,
+  SubCategoryDescription,
+  SubCategoryLabel,
+} from "../children";
 
 const Lips = () => {
   const categories: LevelTwoCategoryType[] = lips.subCategories;
@@ -55,9 +59,7 @@ const Lips = () => {
                     <Icon className="fill-secondary" />
                   </div>
                   <div className="flex flex-col justify-center lg:justify-start w-full">
-                    <p className="text-xs xl:text-sm tracking-wide leading-3 text-left w-full text-secondary group-hover:text-primary line-clamp-1">
-                      {subCategory.label}
-                    </p>
+                    <SubCategoryLabel text={subCategory.label} />
                     <SubCategoryDescription text={subCategory.description} />
                   </div>
                 </div>

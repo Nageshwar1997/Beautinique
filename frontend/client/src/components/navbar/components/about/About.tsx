@@ -1,5 +1,9 @@
 import Button from "../../../button/Button";
-import { CategoryLabel, SubCategoryDescription } from "../children";
+import {
+  CategoryLabel,
+  SubCategoryDescription,
+  SubCategoryLabel,
+} from "../children";
 import { careers, company, press, testimonials, trust_center } from "./data";
 import TestimonialCarousel from "./TestimonialCarousel";
 
@@ -28,7 +32,9 @@ const Collections = () => {
                 <CategoryLabel text={category?.label} />
                 <div className="flex flex-col gap-1 md:gap-2">
                   {category.subCategories.map((subCategory, ind) => {
-                    const isHighlighted = [""].includes(subCategory.category);
+                    const isHighlighted = ["mission_vision_values"].includes(
+                      subCategory.category
+                    );
                     const Icon = subCategory.icon;
 
                     return (
@@ -50,9 +56,7 @@ const Collections = () => {
                           <Icon className="fill-secondary" />
                         </div>
                         <div className="flex flex-col justify-center lg:justify-start w-full">
-                          <p className="text-xs xl:text-sm tracking-wide leading-3 text-left w-full text-secondary group-hover:text-primary line-clamp-1">
-                            {subCategory.label}
-                          </p>
+                          <SubCategoryLabel text={subCategory.label} />
                           <SubCategoryDescription
                             text={subCategory.description}
                           />
