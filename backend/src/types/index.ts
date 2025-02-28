@@ -1,6 +1,4 @@
-import { ObjectId } from "mongoose";
-
-export interface UploadImageResult {
+export interface CloudinaryImageUploadResultType {
   url: string;
   secure_url: string;
   public_id: string;

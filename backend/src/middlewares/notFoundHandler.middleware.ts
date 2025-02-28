@@ -1,11 +1,11 @@
 import { Request, Response, NextFunction } from "express";
-import AppError from "../utils/AppError";
+import { AppError } from "../constructors";
 
 // Middleware to handle undefined routes
-const NotFoundHandler = (req: Request, res: Response, next: NextFunction) => {
+const notFoundHandler = (req: Request, _: Response, next: NextFunction) => {
   return next(
     new AppError(`Cannot find ${req.originalUrl} on this server`, 404)
   );
 };
 
-export default NotFoundHandler;
+export default notFoundHandler;

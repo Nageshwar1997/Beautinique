@@ -1,7 +1,8 @@
 import "dotenv/config";
-import express, { NextFunction, Request, Response } from "express";
+import express, { Request, Response } from "express";
 import cors from "cors";
 import connectDB from "./configs/db.config";
+import { SuccessResponse } from "./utils";
 
 const app = express();
 const PORT = process.env.PORT || 5454;
@@ -9,18 +10,18 @@ const PORT = process.env.PORT || 5454;
 // Routes
 // Auth routes
 import authRouter from "./routes/auth.routes";
-import uploadRouter from "./routes/upload.routes";
 
 // Error handling middleware
-import NotFoundHandler from "./middlewares/notFoundHandler.middleware";
-import ErrorHandler from "./middlewares/errorHandler.middleware";
+import notFoundHandler from "./middlewares/notFoundHandler.middleware";
+import errorHandler from "./middlewares/errorHandler.middleware";
 
 // Middleware to parse JSON
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 const allowedOrigins = [
-  process.env.FRONTEND_LOCAL_HOST_URL,
-  process.env.FRONTEND_PRODUCTION_URL,
+  process.env.FRONTEND_LOCAL_HOST_CLIENT_URL,
+  process.env.FRONTEND_LOCAL_HOST_ADMIN_URL,
+  process.env.FRONTEND_CLIENT_PRODUCTION_URL,
 ];
 
 app.use(
@@ -38,24 +39,19 @@ app.use(
   })
 );
 
-// Example route
+// Home route
 app.get("/", (_: Request, res: Response) => {
-  res.status(200).json({
-    success: true,
-    error: false,
-    message: "Welcome to the MERN Beauty Shop API",
-  });
+  SuccessResponse(res, 200, "Welcome to the MERN Beautinique API");
 });
 
+// Auth routes
 app.use("/api/auth", authRouter);
 
-app.use("/api/upload", uploadRouter);
-
-// Catch undefined routes
-app.use(NotFoundHandler);
+// Catch undefined routes or routes that don't exist
+app.use(notFoundHandler);
 
 // Error handling middleware
-app.use(ErrorHandler);
+app.use(errorHandler);
 
 // Start the server
 app.listen(PORT, async () => {
@@ -64,5 +60,6 @@ app.listen(PORT, async () => {
     console.log(`Server is running on http://localhost:${PORT}`);
   } catch (error: any) {
     console.error(`${error.message} - Server is not running`);
+    process.exit(1);
   }
 });
