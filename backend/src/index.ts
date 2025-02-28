@@ -19,7 +19,8 @@ import ErrorHandler from "./middlewares/errorHandler.middleware";
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 const allowedOrigins = [
-  process.env.FRONTEND_LOCAL_HOST_URL,
+  process.env.FRONTEND_LOCAL_HOST_CLIENT_URL,
+  process.env.FRONTEND_LOCAL_HOST_ADMIN_URL,
   process.env.FRONTEND_PRODUCTION_URL,
 ];
 
