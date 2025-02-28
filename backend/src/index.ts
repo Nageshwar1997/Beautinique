@@ -12,8 +12,8 @@ import authRouter from "./routes/auth.routes";
 import uploadRouter from "./routes/upload.routes";
 
 // Error handling middleware
-import NotFoundHandler from "./middlewares/NotFoundHandler.middleware";
-import ErrorHandler from "./middlewares/ErrorHandler.middleware";
+import NotFoundHandler from "./middlewares/notFoundHandler.middleware";
+import ErrorHandler from "./middlewares/errorHandler.middleware";
 
 // Middleware to parse JSON
 app.use(express.json());
