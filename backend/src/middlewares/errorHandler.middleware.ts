@@ -1,20 +1,53 @@
-import { Request, Response, NextFunction } from "express";
-import AppError from "../utils/AppError";
+import { NextFunction, Request, Response } from "express";
+import { AppError } from "../constructors";
 
-const ErrorHandler = (
-  err: AppError,
-  _: Request, // _ is the request object
-  res: Response,
-  __: NextFunction // __ is the next function
-) => {
-  const statusCode = err.statusCode || 500;
-  res.status(statusCode).json({
+// Error Handling in Development
+const handleDevelopmentError = (err: AppError, res: Response) => {
+  //   res.setHeader("Content-Type", "application/json"); // Force JSON output
+  res.status(err.statusCode).json({
     success: false,
     error: true,
-    status: statusCode,
-    message: err?.message || "Internal Server Error",
+    message: err.message,
+    statusCode: err.statusCode,
+    stack: err.stack,
   });
-  return;
 };
 
-export default ErrorHandler;
+// Production Error Handling
+const handleProductionError = (err: AppError, res: Response) => {
+  if (err.isOperational) {
+    // Operational Error: Safe to show to client
+    res.status(err.statusCode).json({
+      success: false,
+      error: true,
+      message: err.message,
+      statusCode: err.statusCode,
+    });
+  } else {
+    // Unknown Error: Don't leak details to the client
+    console.error("ERROR 💥:", err);
+    res.status(500).json({
+      success: false,
+      error: true,
+      message: "Something went wrong!",
+    });
+  }
+};
+
+// Main Error Handler Middleware
+const errorHandler = (
+  err: AppError,
+  _: Request,
+  res: Response,
+  __: NextFunction
+) => {
+  err.statusCode = err.statusCode || 500;
+
+  if (process.env.NODE_ENV === "development") {
+    handleDevelopmentError(err, res);
+  } else {
+    handleProductionError(err, res);
+  }
+};
+
+export default errorHandler;

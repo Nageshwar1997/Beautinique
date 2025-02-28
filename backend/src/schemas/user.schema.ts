@@ -3,33 +3,39 @@ import { Schema } from "mongoose";
 const userSchema = new Schema(
   {
     firstName: {
-      type: String,
+      type: Schema.Types.String,
       lowercase: true,
+      trim: true,
     },
     lastName: {
-      type: String,
+      type: Schema.Types.String,
       lowercase: true,
+      trim: true,
     },
     phoneNumber: {
-      type: String,
+      type: Schema.Types.String,
       unique: true,
+      trim: true,
     },
     email: {
-      type: String,
+      type: Schema.Types.String,
       unique: true,
+      trim: true,
     },
     profilePic: {
-      type: String,
+      type: Schema.Types.String,
       default: "",
+      trim: true,
     },
     role: {
-      type: String,
+      type: Schema.Types.String,
       enum: ["USER", "SELLER", "ADMIN", "MASTER"],
       default: "MASTER",
     },
 
     password: {
-      type: String,
+      type: Schema.Types.String,
+      trim: true,
     },
     // addresses: [{ type: Schema.Types.ObjectId, ref: "Address" }],
     // cart: [{ type: Schema.Types.ObjectId, ref: "Cart" }],
