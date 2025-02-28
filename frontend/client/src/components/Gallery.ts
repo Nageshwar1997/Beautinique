@@ -1,4 +1,4 @@
-// import { ContentItem } from "../../../business/types";
+// import { TextItem } from "../../../business/types";
 // import { UseCaseIntroSectionProps } from "../../../solutions/usecases/types";
 // import {
 //   BuildPortfolioIcon,
@@ -54,7 +54,7 @@
 //   },
 // ];
 
-// export const ENTERPRISES: ContentItem[] = [
+// export const ENTERPRISES: TextItem[] = [
 //   { type: "text", text: "Generate income from" },
 //   { type: "text", text: "Likes, Comments, Downloads", isHighlighted: true },
 //   { type: "text", text: "and even" },
@@ -1338,7 +1338,7 @@ export const DUMMY_PROFILES = [
   },
 ];
 
-// export const PLATFORM_HERO_HEADING: ContentItem[] = [
+// export const PLATFORM_HERO_HEADING: TextItem[] = [
 //   {
 //     type: "text",
 //     text: "Home to the",

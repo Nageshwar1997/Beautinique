@@ -8,6 +8,7 @@
   font-family: "metropolis", sans-serif;
 }
 
+/* Scrollbar Hide */
 ::-webkit-scrollbar {
   display: none;
 }
@@ -21,6 +22,27 @@ select:-webkit-autofill:focus  */
 /* input:-webkit-autofill:hover,  */
 /* input:-webkit-autofill:focus */
 .autofill-effect:-webkit-autofill {
-  -webkit-text-fill-color: var(--primary-inverted);
+  -webkit-text-fill-color: var(--primary);
   transition: background-color 5000s ease-in-out 0s;
+}
+
+/* Hide spinner in WebKit browsers (Chrome, Edge, Safari) */
+.number-input-mouse-control-none::-webkit-inner-spin-button,
+.number-input-mouse-control-none::-webkit-outer-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+/* Hide spinner in Firefox */
+.number-input-mouse-control-none[type="number"] {
+  appearance: textfield;
+}
+
+/* Loading Screen Page */
+.loadingHighlight,
+.highlight {
+  color: transparent;
+  background-clip: text;
+  background-image: var(--accent-duo);
+  display: inline;
 }

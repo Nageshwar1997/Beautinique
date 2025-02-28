@@ -20,10 +20,8 @@ const TextDisplay = ({
               {words.map((word, wordIndex) => (
                 <span
                   key={`${index}-${wordIndex}`}
-                  className={`mr-2 bg-clip-text text-transparent font-degular ${
-                    item.isHighlighted
-                      ? "bg-accent-duo"
-                      : "bg-silver-duo-gradient"
+                  className={`mr-2 bg-clip-text text-transparent ${
+                    item.isHighlighted ? "bg-accent-duo" : "bg-silver-duo"
                   }`}
                 >
                   {word}

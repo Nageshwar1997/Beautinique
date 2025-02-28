@@ -1,5 +1,5 @@
 import { NextFunction, Request, Response } from "express";
-import cloudinary from "../configs/uploadProfilePic.config";
+import cloudinary from "../configs/cloudinary/cloudinary.config";
 import AppError from "../utils/AppError";
 
 const uploadProfilePicController = async (
@@ -12,7 +12,7 @@ const uploadProfilePicController = async (
       return next(new AppError("No file uploaded", 400));
     }
 
-    const mainFolder = "Beauty_Shop";
+    const mainFolder = process.env.CLOUDINARY_MAIN_FOLDER;
     const subFolder = req.body.folder.split(" ").join("_") || "Common_Folder";
 
     const finalFolder = `${mainFolder}/${subFolder}`;

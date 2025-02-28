@@ -10,7 +10,8 @@ import {
 } from "../validators/user.validator";
 import SuccessResponse from "../middlewares/SuccessHandler.middleware";
 import userServices from "../services/user.service";
-import { User } from "../models";
+import imageUploader from "../middlewares/imageUploader";
+import { ImageUploaderProps } from "../types";
 
 const registerController = async (
   req: Request,
@@ -18,13 +19,22 @@ const registerController = async (
   next: NextFunction
 ) => {
   try {
-    const { firstName, lastName, email, password, profilePic, phoneNumber } = {
+    const {
+      firstName,
+      lastName,
+      email,
+      password,
+      phoneNumber,
+      imageFile,
+      folderName,
+    } = {
+      imageFile: req?.file,
       firstName: req?.body?.firstName?.trim().toLowerCase(),
       lastName: req?.body?.lastName?.trim().toLowerCase(),
       email: req?.body?.email?.trim().toLowerCase(),
       password: req?.body?.password?.trim(),
-      profilePic: req?.body?.profilePic?.trim(),
       phoneNumber: req?.body?.phoneNumber?.trim(),
+      folderName: req?.body?.folderName || "Profile_Pictures", // this is for storing profile images
     };
 
     if (!firstName) {
@@ -34,7 +44,7 @@ const registerController = async (
         return next(
           new AppError("First name must be at least 2 characters long", 400)
         );
-      } else if (firstName.length > 30) {
+      } else if (firstName.length > 50) {
         return next(
           new AppError("First name must be at most 30 characters long", 400)
         );
@@ -50,7 +60,7 @@ const registerController = async (
         return next(
           new AppError("Last name must be at least 2 characters long", 400)
         );
-      } else if (lastName.length > 30) {
+      } else if (lastName.length > 50) {
         return next(
           new AppError("Last name must be at most 30 characters long", 400)
         );
@@ -101,6 +111,13 @@ const registerController = async (
       }
     }
 
+    const imageResult =
+      imageFile &&
+      (await imageUploader({
+        file: imageFile,
+        folder: folderName,
+      } as ImageUploaderProps));
+
     const hashPassword = await bcrypt.hash(password, 10);
 
     const user = await userServices.createUser({
@@ -109,7 +126,7 @@ const registerController = async (
       email: email,
       phoneNumber: phoneNumber,
       password: hashPassword,
-      profilePic,
+      profilePic: imageResult?.secure_url ?? "",
     });
 
     if (!user) {

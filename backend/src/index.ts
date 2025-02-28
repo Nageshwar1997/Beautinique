@@ -18,7 +18,25 @@ import ErrorHandler from "./middlewares/errorHandler.middleware";
 // Middleware to parse JSON
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-app.use(cors());
+const allowedOrigins = [
+  process.env.FRONTEND_LOCAL_HOST_URL,
+  process.env.FRONTEND_PRODUCTION_URL,
+];
+
+app.use(
+  cors({
+    origin: (origin, callback) => {
+      if (!origin || allowedOrigins?.includes(origin)) {
+        callback(null, true);
+      } else {
+        callback(new Error("Not allowed by CORS"));
+      }
+    },
+    methods: ["GET", "POST", "PUT", "PATCH", "DELETE"],
+    allowedHeaders: ["Content-Type", "Authorization"],
+    credentials: true,
+  })
+);
 
 // Example route
 app.get("/", (_: Request, res: Response) => {
@@ -45,6 +63,6 @@ app.listen(PORT, async () => {
     await connectDB();
     console.log(`Server is running on http://localhost:${PORT}`);
   } catch (error: any) {
-    console.log(`${error.message} - Server is not running`);
+    console.error(`${error.message} - Server is not running`);
   }
 });

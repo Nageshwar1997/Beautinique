@@ -1,17 +1,15 @@
-import  { FC } from "react";
+import { FC } from "react";
 import { RadioProps } from "../../types";
-
-
 
 const Radio: FC<RadioProps> = ({
   value,
   onChange,
   options,
-  className="",
+  className = "",
 }) => {
   return (
     <div
-      className={`flex items-center justify-center gap-4 border border-battleship-davys-gray w-min mx-auto rounded-full ${className}`}
+      className={`flex items-center justify-center gap-4 border border-primary-battleship-davys-gray w-min mx-auto rounded-full ${className}`}
     >
       <div className="relative flex items-center justify-between w-36 h-9 bg-smoke-eerie rounded-full shadow-primary-btn">
         {/* Toggle Background */}
@@ -27,7 +25,7 @@ const Radio: FC<RadioProps> = ({
             className={`relative z-10 flex-1 text-center text-sm cursor-pointer ${
               value === option.value
                 ? "text-white/90 font-semibold"
-                : "text-primary-inverted-50 font-medium"
+                : "text-primary-50 font-medium"
             }`}
           >
             <input
