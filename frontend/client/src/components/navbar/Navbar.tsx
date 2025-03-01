@@ -40,8 +40,8 @@ const Navbar = () => {
 
   // Resets hovered index and container hover state when mouse leaves
   const handleMouseLeave = () => {
-    // setHoveredIndex(null);
-    // setIsContainerHovered(false);
+    setHoveredIndex(null);
+    setIsContainerHovered(false);
   };
 
   // Handles the event when the user clicks outside the navbar.
