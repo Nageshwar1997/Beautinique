@@ -3,6 +3,7 @@ import {
   dummyFeedbacks,
   highlightedCategoryOptions,
 } from "../components/navbar/data";
+import { toastErrorMessage } from "./toasts";
 
 const ENCRYPTION_SECRET_KEY = import.meta.env.VITE_ENCRYPTION_SECRET_KEY;
 
@@ -26,6 +27,23 @@ export const removeUserLocal = () => {
 
 export const removeUserSession = () => {
   sessionStorage.removeItem("token");
+};
+
+export const getUserToken = () => {
+  const token =
+    localStorage.getItem("token") || sessionStorage.getItem("token");
+
+  if (!token) {
+    toastErrorMessage("Please login first!");
+    window.location.href = "/login";
+    return null;
+  }
+
+  return JSON.parse(
+    CryptoJS.AES.decrypt(token, ENCRYPTION_SECRET_KEY).toString(
+      CryptoJS.enc.Utf8
+    )
+  );
 };
 
 export const getTodaysFeedback = (

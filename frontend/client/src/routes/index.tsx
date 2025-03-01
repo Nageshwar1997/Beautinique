@@ -10,6 +10,16 @@ import Login from "../pages/auth/Login";
 import NotFound from "../pages/error/NotFound";
 import SomethingWentWrong from "../pages/error/SomethingWentWrong";
 import LoadingPage from "../components/LoadingPage";
+// import { useUserStore } from "../store/user.store";
+
+// const PrivateRoute = ({ children }: { children: JSX.Element }) => {
+//   const { isAuthenticated, logout } = useUserStore();
+//   if (!isAuthenticated) {
+//     logout();
+//     return <Navigate to="/login" />;
+//   }
+//   return children;
+// };
 
 const router = createBrowserRouter([
   {
