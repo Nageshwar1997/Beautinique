@@ -69,7 +69,10 @@ export const registerUserValidationSchema = Joi.object({
   email: validateEmail,
   phoneNumber: validatePhoneNumber,
   password: validatePassword,
+  confirmPassword: Joi.string().valid(Joi.ref("password")).required(),
   folderName: Joi.string().optional().default("Profile_Pictures"),
+  profilePic: Joi.string().optional().default(""),
+  remember: Joi.boolean().optional().default(false),
 });
 
 export const loginUserValidationSchema = Joi.object({
