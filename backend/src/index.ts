@@ -7,14 +7,6 @@ import { SuccessResponse } from "./utils";
 const app = express();
 const PORT = process.env.PORT || 5454;
 
-// Routes
-// Auth routes
-import authRouter from "./routes/auth.routes";
-
-// Error handling middleware
-import notFoundHandler from "./middlewares/notFoundHandler.middleware";
-import errorHandler from "./middlewares/errorHandler.middleware";
-
 // Middleware to parse JSON
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
@@ -45,12 +37,19 @@ app.get("/", (_: Request, res: Response) => {
 });
 
 // Auth routes
+import authRouter from "./routes/auth.routes";
 app.use("/api/auth", authRouter);
 
+// User routes
+import userRouter from "./routes/user.routes";
+app.use("/api/user", userRouter);
+
 // Catch undefined routes or routes that don't exist
+import notFoundHandler from "./middlewares/notFoundHandler.middleware";
 app.use(notFoundHandler);
 
 // Error handling middleware
+import errorHandler from "./middlewares/errorHandler.middleware";
 app.use(errorHandler);
 
 // Start the server
