@@ -1,9 +1,117 @@
-import { AllIcon } from "../navbar/components/icons";
+import {
+  BankIcon,
+  BoxIcon,
+  CalendarIcon,
+  ChatIcon,
+  ClapperIcon,
+  GrowingSalesIcon,
+  HandCoinIcon,
+  HeadsetIcon,
+  HomeIcon,
+  ReviewIcon,
+  SettingIcon,
+  ShopIcon,
+  SpeakerIcon,
+  TeamIcon,
+  TruckIcon,
+  UsersIcon,
+} from "./icons";
 
-const sidebarData = [
+export const sidebarData = [
   {
     id: 1,
     label: "Dashboard",
-    icon: AllIcon,
+    icon: HomeIcon,
+    path: "/",
+  },
+  {
+    id: 2,
+    label: "Users",
+    icon: UsersIcon,
+    path: "/users",
+  },
+  {
+    id: 3,
+    label: "Team",
+    icon: TeamIcon,
+    path: "/team",
+  },
+  {
+    id: 4,
+    label: "Vendors",
+    icon: ShopIcon,
+    path: "/vendors",
+  },
+  {
+    id: 5,
+    label: "Products",
+    icon: BoxIcon,
+    path: "/products",
+  },
+  {
+    id: 6,
+    label: "Orders",
+    icon: TruckIcon,
+    path: "/orders",
+  },
+  {
+    id: 7,
+    label: "Transactions",
+    icon: BankIcon,
+    path: "/transactions",
+  },
+  {
+    id: 8,
+    label: "Calendar",
+    icon: CalendarIcon,
+    path: "/calendar",
+  },
+  {
+    id: 9,
+    label: "Blogs & Videos",
+    icon: ClapperIcon,
+    path: "/blogs-videos",
+  },
+  {
+    id: 10,
+    label: "Marketing & Ads",
+    icon: SpeakerIcon,
+    path: "/marketing-ads",
+  },
+  {
+    id: 11,
+    label: "Sales Reports",
+    icon: GrowingSalesIcon,
+    path: "/sales-reports",
+  },
+  {
+    id: 12,
+    label: "Refunds & Returns",
+    icon: HandCoinIcon,
+    path: "/refunds-returns",
+  },
+  {
+    id: 13,
+    label: "Reviews & Ratings",
+    icon: ReviewIcon,
+    path: "/reviews-ratings",
+  },
+  {
+    id: 14,
+    label: "Customer Support",
+    icon: HeadsetIcon,
+    path: "/customer-support",
+  },
+  {
+    id: 15,
+    label: "Chat & Messages",
+    icon: ChatIcon,
+    path: "/chat-messages",
+  },
+  {
+    id: 16,
+    label: "Settings",
+    icon: SettingIcon,
+    path: "/settings",
   },
 ];

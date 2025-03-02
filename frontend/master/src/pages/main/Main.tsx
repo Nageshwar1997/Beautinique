@@ -18,9 +18,9 @@ const Main = () => {
 
   return (
     <ErrorBoundary>
-      <div className="w-dvw h-dvh flex border">
+      <div className="w-dvw h-dvh flex">
         <Sidebar />
-        <div className="border border-[red] w-full h-full flex flex-col gap-3 pt-16 pl-[250px] overflow-y-scroll">
+        <div className="w-full h-full flex flex-col gap-3 pt-16 pl-[250px] overflow-y-scroll">
           <Navbar />
           <main>
             <Outlet />
