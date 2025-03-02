@@ -1,5 +1,4 @@
 import { Outlet } from "react-router-dom";
-
 import Navbar from "../../components/navbar/Navbar";
 import Footer from "../../components/footer/Footer";
 import ErrorBoundary from "../error/ErrorBoundary";
@@ -8,7 +7,7 @@ import { useGetUserDetails } from "../../api/user/user.service";
 import { useEffect } from "react";
 
 const Main = () => {
-  const { isAuthenticated, setUser } = useUserStore();
+  const { isAuthenticated, setUser, logout } = useUserStore();
   const { data } = useGetUserDetails();
   useEffect(() => {
     if (data && !isAuthenticated) {
@@ -22,6 +21,7 @@ const Main = () => {
       <main>
         <Outlet />
       </main>
+      <button onClick={logout}>Logout</button>
       <Footer />
     </ErrorBoundary>
   );

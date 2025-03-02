@@ -3,7 +3,6 @@ import {
   dummyFeedbacks,
   highlightedCategoryOptions,
 } from "../components/navbar/data";
-import { toastErrorMessage } from "./toasts";
 
 const ENCRYPTION_SECRET_KEY = import.meta.env.VITE_ENCRYPTION_SECRET_KEY;
 
@@ -34,8 +33,7 @@ export const getUserToken = () => {
     localStorage.getItem("token") || sessionStorage.getItem("token");
 
   if (!token) {
-    toastErrorMessage("Please login first!");
-    window.location.href = "/login";
+    console.log("No token found");
     return null;
   }
 
