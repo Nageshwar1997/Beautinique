@@ -1,6 +1,7 @@
 import { create } from "zustand";
 import { UserStoreType } from "../types/index";
 import { removeUserLocal, removeUserSession } from "../utils";
+import { useQueryStore } from "./query.store";
 
 export const useUserStore = create<UserStoreType>((set) => ({
   user: null,
@@ -11,6 +12,11 @@ export const useUserStore = create<UserStoreType>((set) => ({
   logout: () => {
     removeUserLocal();
     removeUserSession();
-    set({ user: null, isAuthenticated: false });
+
+    set(() => {
+      const { queryClient } = useQueryStore.getState();
+      queryClient.removeQueries({ queryKey: ["get_user_details"] });
+      return { user: null, isAuthenticated: false };
+    });
   },
 }));
