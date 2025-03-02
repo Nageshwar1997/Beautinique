@@ -7,7 +7,7 @@ import { useGetUserDetails } from "../../api/user/user.service";
 import { useEffect } from "react";
 
 const Main = () => {
-  const { isAuthenticated, setUser, logout } = useUserStore();
+  const { isAuthenticated, setUser } = useUserStore();
   const { data } = useGetUserDetails();
   useEffect(() => {
     if (data && !isAuthenticated) {
@@ -21,7 +21,7 @@ const Main = () => {
       <main>
         <Outlet />
       </main>
-      <button onClick={logout}>Logout</button>
+
       <Footer />
     </ErrorBoundary>
   );
