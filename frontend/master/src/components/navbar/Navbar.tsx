@@ -1,14 +1,18 @@
 import Button from "../button/Button";
+import DarkMode from "../DarkMode";
 
 const Navbar = () => {
   return (
-    <div className="h-16 max-w-[calc(100%-250px)] w-full lg:gap-0 xl:gap-5 fixed left-[250px] top-0 px-2 sm:px-5 bg-tertiary-inverted text-tertiary shadow-lg shadow-primary-inverted-50 z-50 flex items-center justify-between">
+    <div className="h-16 w-full px-2 flex items-center justify-between bg-tertiary-inverted text-tertiary shadow-lg shadow-tertiary-inverted rounded-lg z-50">
       <p>Hello, Nageshwar</p>
-      <Button
-        content="Manage Account"
-        pattern="primary"
-        className="max-w-[180px] !rounded-[10px] !py-2 "
-      />
+      <div className="flex items-center gap-8">
+        <DarkMode />
+        <Button
+          content="Manage Account"
+          pattern="primary"
+          className="max-w-[180px] !rounded-[10px] !py-2 "
+        />
+      </div>
     </div>
   );
 };

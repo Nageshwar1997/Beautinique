@@ -18,14 +18,18 @@ const Main = () => {
 
   return (
     <ErrorBoundary>
-      <div className="w-dvw h-dvh flex">
+      <div className="max-h-dvh min-h-dvh max-w-full min-w-full w-dvw h-dvh flex gap-2 overflow-hidden p-2">
         <Sidebar />
-        <div className="w-full h-full flex flex-col gap-3 pt-16 pl-[250px] overflow-y-scroll">
-          <Navbar />
-          <main>
-            <Outlet />
-          </main>
-          <Footer />
+        <div className="grow max-w-full h-full overflow-y-scroll">
+          <div className="bg-primary-inverted w-full sticky top-0">
+            <Navbar />
+          </div>
+          <div className="w-full">
+            <main className="w-full py-2">
+              <Outlet />
+            </main>
+            <Footer />
+          </div>
         </div>
       </div>
     </ErrorBoundary>

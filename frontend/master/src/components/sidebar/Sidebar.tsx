@@ -9,7 +9,7 @@ const Sidebar = () => {
   const [showGradient, containerRef] = useVerticalScrollable();
 
   return (
-    <div className="w-[250px] h-full fixed left-0 top-0 bg-tertiary-inverted text-tertiary shadow-lg shadow-primary-inverted-50 z-50">
+    <div className="max-w-[250px] w-full h-full bg-tertiary-inverted text-tertiary rounded-lg shadow-lg shadow-secondary-inverted z-50">
       <div className="h-16 w-full px-2">
         <div className="w-full h-full border-b border-primary-50 flex justify-center">
           <img
@@ -40,7 +40,7 @@ const Sidebar = () => {
         </div>
         <div className="w-full h-[calc(100%-152px)] relative">
           {(showGradient as VerticalScrollType).top && (
-            <TopGradient className="!w-full h-8 from-secondary-inverted" />
+            <TopGradient className="!w-full h-8 from-secondary-inverted rounded-t-lg" />
           )}
           <div
             className="w-full h-full overflow-y-scroll p-2 flex flex-col gap-3 pb-10"
@@ -65,7 +65,7 @@ const Sidebar = () => {
             })}
           </div>
           {(showGradient as VerticalScrollType).bottom && (
-            <BottomGradient className="!w-full h-8 from-secondary-inverted" />
+            <BottomGradient className="!w-full h-8 from-secondary-inverted rounded-b-lg" />
           )}
         </div>
       </div>
