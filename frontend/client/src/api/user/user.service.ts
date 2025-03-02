@@ -11,6 +11,7 @@ export const useGetUserDetails = () => {
     queryFn: get_user_details,
     enabled: !!token,
     staleTime: Infinity,
+    gcTime: Infinity,
     placeholderData: keepPreviousData,
   });
 };
