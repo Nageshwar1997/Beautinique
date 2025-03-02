@@ -16,6 +16,7 @@ const Sidebar = () => {
             src="/images/logo/B_Q.png"
             alt="Logo"
             className="object-cover w-fit h-full"
+            draggable={false}
           />
         </div>
       </div>
@@ -27,6 +28,7 @@ const Sidebar = () => {
               src="/images/sidebar/user.png"
               alt="Logo"
               className="object-cover w-full h-full rounded-full"
+              draggable={false}
             />
           </div>
           <div className="text-center grow">
@@ -51,7 +53,7 @@ const Sidebar = () => {
               return (
                 <div
                   key={index}
-                  className="w-full flex items-center justify-between gap-2 group cursor-pointer p-2 border border-primary-8 rounded-lg hover:bg-primary-inverted-10 shadow-lg hover:shadow-primary-inverted-50"
+                  className="w-full flex items-center justify-between gap-2 group cursor-pointer p-2 border border-primary-10 rounded-lg hover:bg-primary-inverted-10 shadow-lg hover:shadow-primary-inverted-50 light:hover:shadow-primary-50 hover:scale-[1.02] duration-300"
                 >
                   <div className="flex items-center gap-2">
                     <Icon className="w-5 h-5 [&>path]:stroke-tertiary group-hover:[&>path]:stroke-primary" />
