@@ -4,8 +4,10 @@ import { DropdownIcon } from "../../icons";
 import { VerticalScrollType } from "../../types";
 import { BottomGradient, TopGradient } from "../Gradients";
 import { sidebarData } from "./data";
+import { useNavigate } from "react-router-dom";
 
 const Sidebar = () => {
+  const navigate = useNavigate();
   const [showGradient, containerRef] = useVerticalScrollable();
 
   return (
@@ -53,7 +55,8 @@ const Sidebar = () => {
               return (
                 <div
                   key={index}
-                  className="w-full flex items-center justify-between gap-2 group cursor-pointer p-2 border border-primary-10 rounded-lg hover:bg-primary-inverted-10 shadow-lg hover:shadow-primary-inverted-50 light:hover:shadow-primary-50 hover:scale-[1.02] duration-300"
+                  onClick={() => navigate(item.path)}
+                  className={`w-full flex items-center justify-between gap-2 group cursor-pointer p-2 border border-primary-10 rounded-lg hover:bg-primary-inverted-10 shadow-lg hover:shadow-primary-inverted-50 light:hover:shadow-primary-50 hover:scale-[1.02] duration-300 ${item.disable ? "pointer-events-none opacity-60" : ""}`}
                 >
                   <div className="flex items-center gap-2">
                     <Icon className="w-5 h-5 [&>path]:stroke-tertiary group-hover:[&>path]:stroke-primary" />
