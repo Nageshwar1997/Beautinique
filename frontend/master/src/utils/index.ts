@@ -12,33 +12,34 @@ export const encryptData = (data: string): string => {
 
 export const saveUserLocal = (data: string) => {
   removeUserSession();
-  localStorage.setItem("token", encryptData(JSON.stringify(data)));
+  localStorage.setItem("master_token", encryptData(JSON.stringify(data)));
 };
 
 export const saveUserSession = (data: string) => {
   removeUserLocal();
-  sessionStorage.setItem("token", encryptData(JSON.stringify(data)));
+  sessionStorage.setItem("master_token", encryptData(JSON.stringify(data)));
 };
 
 export const removeUserLocal = () => {
-  localStorage.removeItem("token");
+  localStorage.removeItem("master_token");
 };
 
 export const removeUserSession = () => {
-  sessionStorage.removeItem("token");
+  sessionStorage.removeItem("master_token");
 };
 
 export const getUserToken = () => {
-  const token =
-    localStorage.getItem("token") || sessionStorage.getItem("token");
+  const master_token =
+    localStorage.getItem("master_token") ||
+    sessionStorage.getItem("master_token");
 
-  if (!token) {
-    console.log("No token found");
+  if (!master_token) {
+    console.log("No Master Token found");
     return null;
   }
 
   return JSON.parse(
-    CryptoJS.AES.decrypt(token, ENCRYPTION_SECRET_KEY).toString(
+    CryptoJS.AES.decrypt(master_token, ENCRYPTION_SECRET_KEY).toString(
       CryptoJS.enc.Utf8
     )
   );
