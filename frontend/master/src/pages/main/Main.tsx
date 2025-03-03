@@ -24,7 +24,7 @@ const Main = () => {
           <div className="bg-primary-inverted w-full sticky top-0">
             <Navbar />
           </div>
-          <div className="w-full">
+          <div className="w-full p-2">
             <main className="w-full py-2">
               <Outlet />
             </main>
