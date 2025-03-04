@@ -29,6 +29,18 @@ export interface InputProps {
   autoComplete?: HTMLInputAutoCompleteAttribute | undefined;
 }
 
+export interface TextareaProps {
+  rows?: number;
+  label?: string;
+  name?: string;
+  register?: object;
+  errorText?: string;
+  className?: string;
+  placeholder?: string;
+  successText?: string;
+  containerClassName?: string;
+}
+
 export interface TextItem {
   text: string;
   isHighlighted?: boolean;

@@ -25,6 +25,10 @@ import Team from "../pages/team/Team";
 import Transactions from "../pages/transactions/Transactions";
 import Users from "../pages/users/Users";
 import Vendors from "../pages/vendors/Vendors";
+import UploadBlog from "../pages/blogs_and_videos/blog/UploadBlog";
+import EditBlog from "../pages/blogs_and_videos/blog/EditBlog";
+import ViewBlog from "../pages/blogs_and_videos/blog/ViewBlog";
+import AllBlogsAndVideos from "../pages/blogs_and_videos/blog/all_blogs_and_videos/AllBlogsAndVideos";
 // import { useUserStore } from "../store/user.store";
 
 // const PrivateRoute = ({ children }: { children: JSX.Element }) => {
@@ -52,6 +56,24 @@ const router = createBrowserRouter([
       {
         path: "blogs_and_videos",
         element: <BlogsAndVideos />,
+        children: [
+          {
+            index: true,
+            element: <AllBlogsAndVideos />,
+          },
+          {
+            path: "upload_blog",
+            element: <UploadBlog />,
+          },
+          {
+            path: "edit_blog",
+            element: <EditBlog />,
+          },
+          {
+            path: "view_blog",
+            element: <ViewBlog />,
+          },
+        ],
       },
       {
         path: "calendar",

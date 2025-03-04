@@ -19,10 +19,12 @@
     "cloudinary-video-player": "^2.3.3",
     "crypto-js": "^4.2.0",
     "react": "^19.0.0",
+    "react-calendar": "^5.1.0",
     "react-dom": "^19.0.0",
     "react-hook-form": "^7.54.2",
     "react-hot-toast": "^2.5.1",
     "react-lazy-load-image-component": "^1.6.3",
+    "react-quill": "^2.0.0",
     "react-router-dom": "^7.1.5",
     "yup": "^1.6.1",
     "zustand": "^5.0.3"
