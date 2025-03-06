@@ -5,7 +5,6 @@ import { AppError } from "../constructors";
 import { CatchErrorResponse, SuccessResponse } from "../utils";
 import { User } from "../models";
 import imageUploader from "../utils/imageUploader";
-import { ImageUploaderProps } from "../types";
 
 const registerController = async (
   req: Request,
@@ -13,16 +12,7 @@ const registerController = async (
   next: NextFunction
 ) => {
   try {
-    const {
-      firstName,
-      lastName,
-      email,
-      password,
-      phoneNumber,
-      imageFile,
-      folderName,
-    } = {
-      imageFile: req?.file,
+    const { firstName, lastName, email, password, phoneNumber, folderName } = {
       firstName: req?.body?.firstName?.trim().toLowerCase(),
       lastName: req?.body?.lastName?.trim().toLowerCase(),
       email: req?.body?.email?.trim().toLowerCase(),
@@ -43,12 +33,14 @@ const registerController = async (
       throw new AppError("Phone number already exists", 400);
     }
 
-    const imageResult =
-      imageFile &&
-      (await imageUploader({
-        file: imageFile,
+    let profilePic = "";
+    if (req.file) {
+      const imageResult = await imageUploader({
+        file: req.file,
         folder: folderName,
-      } as ImageUploaderProps));
+      });
+      profilePic = imageResult.secure_url ?? "";
+    }
 
     const hashedPassword = await bcrypt.hash(password, 10);
 
@@ -58,7 +50,7 @@ const registerController = async (
       email,
       phoneNumber,
       password: hashedPassword,
-      profilePic: imageResult?.secure_url || "",
+      profilePic,
     });
 
     if (!user) {
@@ -83,7 +75,6 @@ const registerController = async (
       },
     });
   } catch (error) {
-    console.error("Error in registerController", error);
     return CatchErrorResponse(error, next);
   }
 };
@@ -136,7 +127,6 @@ const loginController = async (
 
     return;
   } catch (error) {
-    console.error("Error in loginController", error);
     return CatchErrorResponse(error, next);
   }
 };
