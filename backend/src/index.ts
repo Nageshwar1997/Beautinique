@@ -14,6 +14,7 @@ const allowedOrigins = [
   process.env.FRONTEND_LOCAL_HOST_CLIENT_URL,
   process.env.FRONTEND_LOCAL_HOST_ADMIN_URL,
   process.env.FRONTEND_CLIENT_PRODUCTION_URL,
+  "http://localhost:5173",
 ];
 
 app.use(
@@ -43,6 +44,10 @@ app.use("/api/auth", authRouter);
 // User routes
 import userRouter from "./routes/user.routes";
 app.use("/api/user", userRouter);
+
+// Upload Images routes
+import uploadRouter from "./routes/upload.routes";
+app.use("/api/upload", uploadRouter);
 
 // Catch undefined routes or routes that don't exist
 import notFoundHandler from "./middlewares/notFoundHandler.middleware";
