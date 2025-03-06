@@ -1,6 +1,7 @@
 import { NextFunction, Request, Response } from "express";
 import { AppError, AppSuccess } from "../constructors";
 import { ObjectSchema } from "joi";
+import { Types } from "mongoose";
 
 export const SuccessResponse = (
   res: Response,
@@ -40,4 +41,8 @@ export const validateSchema = (schema: ObjectSchema) => {
     }
     next();
   };
+};
+
+export const isValidMongoId = (id: string): boolean => {
+  return Types.ObjectId.isValid(id);
 };

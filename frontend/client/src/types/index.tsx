@@ -100,3 +100,21 @@ export interface IconType {
 }
 
 export type SVGType = FC<SVGProps<SVGSVGElement>>;
+
+export interface UserTypes {
+  _id: string;
+  firstName: string;
+  lastName: string;
+  email: string;
+  phoneNumber: string;
+  profilePic: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface UserStoreType {
+  user: UserTypes | null;
+  isAuthenticated: boolean;
+  setUser: (user: UserTypes) => void;
+  logout: () => void;
+}

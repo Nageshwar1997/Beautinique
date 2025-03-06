@@ -20,7 +20,7 @@ import Radio from "../../components/input/Radio";
 import Button from "../../components/button/Button";
 import Checkbox from "../../components/input/Checkbox";
 import { Link } from "react-router-dom";
-import { useLoginUser } from "../../api/user/user.service";
+import { useLoginUser } from "../../api/user/auth.service";
 import Loading from "../../components/Loading";
 import DarkMode from "../../components/DarkMode";
 

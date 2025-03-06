@@ -16,7 +16,7 @@ import Checkbox from "../../components/input/Checkbox";
 import useVerticalScrollable from "../../hooks/useVerticalScrollable";
 import { BottomGradient, TopGradient } from "../../components/Gradients";
 import { registerSchema } from "./helpers/auth.schema";
-import { useRegisterUser } from "../../api/user/user.service";
+import { useRegisterUser } from "../../api/user/auth.service";
 import Loading from "../../components/Loading";
 import DarkMode from "../../components/DarkMode";
 

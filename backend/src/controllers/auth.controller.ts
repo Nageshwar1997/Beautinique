@@ -100,13 +100,7 @@ const loginController = async (
       phoneNumber: req?.body?.phoneNumber?.trim(),
     };
 
-    let user = null;
-
-    if (email) {
-      user = await User.findOne({ email });
-    } else if (phoneNumber) {
-      user = await User.findOne({ phoneNumber });
-    }
+    const user = await User.findOne({ $or: [{ email }, { phoneNumber }] });
 
     if (!user) {
       throw new AppError("User not found", 404);
