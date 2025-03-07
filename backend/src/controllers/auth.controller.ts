@@ -1,17 +1,10 @@
 import bcrypt from "bcryptjs";
-import { Request, Response, NextFunction } from "express";
+import { NextFunction, Request, Response } from "express";
 import generateToken from "../providers/jwt.provider";
-import AppError from "../utils/AppError";
-import {
-  isValidName,
-  isValidEmail,
-  isValidPassword,
-  isValidPhoneNumber,
-} from "../validators/user.validator";
-import SuccessResponse from "../middlewares/SuccessHandler.middleware";
-import userServices from "../services/user.service";
-import imageUploader from "../middlewares/imageUploader";
-import { ImageUploaderProps } from "../types";
+import { AppError } from "../constructors";
+import { CatchErrorResponse, SuccessResponse } from "../utils";
+import { User } from "../models";
+import imageUploader from "../utils/imageUploader";
 
 const registerController = async (
   req: Request,
@@ -19,16 +12,7 @@ const registerController = async (
   next: NextFunction
 ) => {
   try {
-    const {
-      firstName,
-      lastName,
-      email,
-      password,
-      phoneNumber,
-      imageFile,
-      folderName,
-    } = {
-      imageFile: req?.file,
+    const { firstName, lastName, email, password, phoneNumber, folderName } = {
       firstName: req?.body?.firstName?.trim().toLowerCase(),
       lastName: req?.body?.lastName?.trim().toLowerCase(),
       email: req?.body?.email?.trim().toLowerCase(),
@@ -37,124 +21,61 @@ const registerController = async (
       folderName: req?.body?.folderName || "Profile_Pictures", // this is for storing profile images
     };
 
-    if (!firstName) {
-      return next(new AppError("First name is required", 400));
-    } else if (firstName) {
-      if (firstName.length < 2) {
-        return next(
-          new AppError("First name must be at least 2 characters long", 400)
-        );
-      } else if (firstName.length > 50) {
-        return next(
-          new AppError("First name must be at most 30 characters long", 400)
-        );
-      } else if (!isValidName(firstName)) {
-        return next(new AppError("Please provide valid first name", 400));
-      }
+    const isEmailExists = await User.findOne({ email });
+
+    if (isEmailExists) {
+      throw new AppError("Email already exists", 400);
     }
 
-    if (!lastName) {
-      return next(new AppError("Last name is required", 400));
-    } else if (lastName) {
-      if (lastName.length < 2) {
-        return next(
-          new AppError("Last name must be at least 2 characters long", 400)
-        );
-      } else if (lastName.length > 50) {
-        return next(
-          new AppError("Last name must be at most 30 characters long", 400)
-        );
-      } else if (!isValidName(lastName)) {
-        return next(new AppError("Please provide valid last name", 400));
-      }
+    const isPhoneNumberExists = await User.findOne({ phoneNumber });
+
+    if (isPhoneNumberExists) {
+      throw new AppError("Phone number already exists", 400);
     }
 
-    if (!phoneNumber) {
-      return next(new AppError("Phone number is required", 400));
-    } else if (phoneNumber) {
-      if (!isValidPhoneNumber(phoneNumber)) {
-        return next(
-          new AppError("Please provide a valid 10 digit phone number", 400)
-        );
-      }
-      const isUnique = await userServices.findUserByValue({ phoneNumber });
-
-      if (isUnique) {
-        return next(new AppError("Phone number already exist", 400));
-      }
-    }
-
-    if (!email) {
-      return next(new AppError("Email is required", 400));
-    } else if (email) {
-      if (!isValidEmail(email)) {
-        return next(new AppError("Please provide a valid email", 400));
-      }
-
-      const isUnique = await userServices.findUserByValue({ email });
-
-      if (isUnique) {
-        return next(new AppError("Email already exist", 400));
-      }
-    }
-
-    if (!password) {
-      return next(new AppError("Password is required", 400));
-    } else if (password) {
-      if (!isValidPassword(password)) {
-        return next(
-          new AppError(
-            "Password must be at least 6 characters long and contain at least one letter, one number, and one special character",
-            400
-          )
-        );
-      }
-    }
-
-    const imageResult =
-      imageFile &&
-      (await imageUploader({
-        file: imageFile,
+    let profilePic = "";
+    if (req.file) {
+      const imageResult = await imageUploader({
+        file: req.file,
         folder: folderName,
-      } as ImageUploaderProps));
+      });
+      profilePic = imageResult.secure_url ?? "";
+    }
 
-    const hashPassword = await bcrypt.hash(password, 10);
+    const hashedPassword = await bcrypt.hash(password, 10);
 
-    const user = await userServices.createUser({
-      firstName: firstName,
-      lastName: lastName,
-      email: email,
-      phoneNumber: phoneNumber,
-      password: hashPassword,
-      profilePic: imageResult?.secure_url ?? "",
+    const user = await User.create({
+      firstName,
+      lastName,
+      email,
+      phoneNumber,
+      password: hashedPassword,
+      profilePic,
     });
 
     if (!user) {
-      return next(new AppError("Error registering user", 500));
+      throw new AppError("Error creating user", 500);
     }
 
     const token = await generateToken(user._id, next);
 
     if (!token) {
-      return next(new AppError("Error generating token", 500));
+      throw new AppError("Failed to generate token", 500);
     }
 
     SuccessResponse(res, 201, "User registered successfully", {
       token,
       user: {
-        _id: user._id,
         firstName: user.firstName,
         lastName: user.lastName,
-        phoneNumber: user.phoneNumber,
         email: user.email,
+        phoneNumber: user.phoneNumber,
         profilePic: user.profilePic,
         role: user.role,
       },
     });
-
-    return;
-  } catch (err: any) {
-    next(new AppError(err.message || "Error registering user", 500));
+  } catch (error) {
+    return CatchErrorResponse(error, next);
   }
 };
 
@@ -170,33 +91,10 @@ const loginController = async (
       phoneNumber: req?.body?.phoneNumber?.trim(),
     };
 
-    if (!email && !phoneNumber) {
-      return next(new AppError("Email or phone number is required", 400));
-    }
-
-    if (!password) {
-      return next(new AppError("Password is required", 400));
-    }
-
-    let user = null;
-
-    if (email) {
-      if (!isValidEmail(email)) {
-        return next(new AppError("Please provide a valid email", 400));
-      }
-
-      user = await userServices.findUserByValue({ email });
-    } else if (phoneNumber) {
-      if (!isValidPhoneNumber(phoneNumber)) {
-        return next(
-          new AppError("Please provide a valid 10 digit phone number", 400)
-        );
-      }
-      user = await userServices.findUserByValue({ phoneNumber });
-    }
+    const user = await User.findOne({ $or: [{ email }, { phoneNumber }] });
 
     if (!user) {
-      return next(new AppError("User not found", 404));
+      throw new AppError("User not found", 404);
     }
 
     const isPasswordMatch = await bcrypt.compare(
@@ -205,12 +103,13 @@ const loginController = async (
     );
 
     if (!isPasswordMatch) {
-      return next(new AppError("Wrong password", 400));
+      throw new AppError("Wrong password", 400);
     }
 
     const token = await generateToken(user._id, next);
+
     if (!token) {
-      return next(new AppError("Error generating token", 500));
+      throw new AppError("Error generating token", 500);
     }
 
     SuccessResponse(res, 200, "User logged in successfully", {
@@ -227,8 +126,8 @@ const loginController = async (
     });
 
     return;
-  } catch (err: any) {
-    return next(new AppError(err.message || "Error Logging user", 500));
+  } catch (error) {
+    return CatchErrorResponse(error, next);
   }
 };
 

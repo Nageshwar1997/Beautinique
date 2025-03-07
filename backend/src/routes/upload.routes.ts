@@ -1,18 +1,19 @@
 import { Router } from "express";
-import multer from "multer";
-import uploadProfilePicController from "../controllers/uploadImage.controller";
+import upload from "../configs/upload.multer.config";
+import {
+  uploadImagesController,
+  uploadSingleImageController,
+} from "../controllers/uploadFile.controller";
 
 const uploadRouter = Router();
 
-// Multer setup
-const storage = multer.memoryStorage();
-const upload = multer({ storage });
-
-// Async upload handler
+// For Multiple Images Upload
+uploadRouter.post("/images", upload.array("images"), uploadImagesController);
+// For Single Image Upload
 uploadRouter.post(
-  "/profile-pic",
-  upload.single("profilePic"),
-  uploadProfilePicController
+  "/image",
+  upload.single("image"),
+  uploadSingleImageController
 );
 
 export default uploadRouter;

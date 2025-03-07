@@ -28,6 +28,22 @@ export const removeUserSession = () => {
   sessionStorage.removeItem("token");
 };
 
+export const getUserToken = () => {
+  const token =
+    localStorage.getItem("token") || sessionStorage.getItem("token");
+
+  if (!token) {
+    console.log("No token found");
+    return null;
+  }
+
+  return JSON.parse(
+    CryptoJS.AES.decrypt(token, ENCRYPTION_SECRET_KEY).toString(
+      CryptoJS.enc.Utf8
+    )
+  );
+};
+
 export const getTodaysFeedback = (
   forwardIndex: 0 | 1 | 2 | 3 | 4 | 5 | 6 = 0
 ) => {
