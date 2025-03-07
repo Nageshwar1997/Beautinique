@@ -1,0 +1,138 @@
+/* Variable name format dark-light */
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Common variables */
+:root {
+  --picton-blue-c: #25adf9;
+  --blue-crayola-c: #07f;
+  --sky-blue-burst: radial-gradient(
+      50% 50% at 50% 50%,
+      rgba(0, 0, 0, 0.2) 0%,
+      rgba(0, 0, 0, 0) 100%
+    ),
+    linear-gradient(107deg, #2579f9 -65.15%, #244cf8 90.95%);
+}
+
+[theme="dark"] {
+  /* Colors */
+  /* Primary */
+  --primary: #ffffff;
+  --primary-8: #ffffff14;
+  --primary-10: #ffffff1a;
+  --primary-50: #ffffff80;
+  --primary-inverted: #000000;
+  --primary-inverted-8: #00000014;
+  --primary-inverted-10: #0000001a;
+  --primary-inverted-50: #00000080;
+  --primary-battleship-davys-gray: #4d4d4d;
+  --primary-battleship-davys-gray-inverted: #999999;
+
+  /* Secondary */
+  --secondary: #f5f5f5;
+  --secondary-inverted: #1c1c1c;
+  --secondary-battleship-davys-gray: #4d4d4d;
+  --secondary-battleship-davys-gray-inverted: #8a8a8a4d;
+
+  /* Tertiary */
+  --tertiary: #c8c8c8;
+  --tertiary-inverted: #2e2e2e;
+
+  /* Other */
+  --smoke-eerie: #1a1a1a;
+  --smoke-eerie-inverted: #f2f2f2;
+  --seasalt-black: #f7fafc;
+  --timberwolf-eerie-black: #191919;
+  --platinum-jet: #333333;
+  --platinum-black: #080808;
+  --platinum-black-inverted: #e6e6e6;
+  --white-smoke-night: #f2f2f2;
+  --white-smoke-night-inverted: #141414;
+  --silver-jet: #bfbfbf;
+
+  /* Gradients */
+  --accent-duo: linear-gradient(
+    114deg,
+    #00e5d1 6.19%,
+    var(--picton-blue-c) 37.23%,
+    var(--blue-crayola-c) 94.85%
+  );
+  --silver-duo: linear-gradient(180deg, #fff 24.54%, #b2b2b2 87.96%);
+  --gradient-dark-fade-bottom: linear-gradient(
+    180deg,
+    rgba(8, 8, 8, 0) 0%,
+    rgba(8, 8, 8, 0.5) 25%,
+    rgba(8, 8, 8, 0.75) 50%,
+    #080808 100%
+  );
+
+  /* Shadows */
+  --shadow-neumorphic-layered: 0px 0px 4px 0px var(--primary-10),
+    2px 2px 4px 0px rgba(50, 50, 50, 0.1),
+    -1px -1px 4px 0px rgba(254, 254, 254, 0.05),
+    -2px -2px 6px 0px rgba(252, 252, 252, 0.33);
+  --shadow-light-dark-soft: 0px 0px 250px 0px rgba(255, 255, 255, 0.03),
+    0px 0px 95px 0px rgba(255, 255, 255, 0.1) inset;
+}
+
+/* Light Theme Variables */
+[theme="light"] {
+  /* Colors */
+  /* Primary */
+  --primary: #000000;
+  --primary-8: #00000014;
+  --primary-10: #0000001a;
+  --primary-50: #00000080;
+  --primary-inverted: #ffffff;
+  --primary-inverted-8: #ffffff14;
+  --primary-inverted-10: #ffffff1a;
+  --primary-inverted-50: #ffffff80;
+  --primary-battleship-davys-gray: #999999;
+  --primary-battleship-davys-gray-inverted: #4d4d4d;
+
+  /* Secondary */
+  --secondary: #1c1c1c;
+  --secondary-inverted: #f5f5f5;
+  --secondary-battleship-davys-gray: #8a8a8a4d;
+  --secondary-battleship-davys-gray-inverted: #4d4d4d;
+
+  /* Tertiary */
+  --tertiary: #2e2e2e;
+  --tertiary-inverted: #c8c8c8;
+
+  /* Other */
+  --smoke-eerie: #f2f2f2;
+  --smoke-eerie-inverted: #1a1a1a;
+  --seasalt-black: #f5f1ef;
+  --timberwolf-eerie-black: #d8d8d853;
+  --platinum-jet: #e5e5e5;
+  --platinum-black: #e6e6e6;
+  --platinum-black-inverted: #080808;
+  --white-smoke-night: #141414;
+  --white-smoke-night-inverted: #f2f2f2;
+  --silver-jet: #333333;
+
+  /* Gradients */
+  --accent-duo: linear-gradient(
+    114deg,
+    var(--picton-blue-c) 6.19%,
+    var(--blue-crayola-c) 41.65%
+  );
+  --silver-duo: linear-gradient(180deg, #4d4d4d 24.54%, #080808 87.96%);
+  --gradient-dark-fade-bottom: linear-gradient(
+    180deg,
+    rgba(247, 247, 247, 0) 0%,
+    rgba(247, 247, 247, 0.5) 25%,
+    rgba(247, 247, 247, 0.75) 50%,
+    #ffffff 100%
+  );
+
+  /* Shadows */
+  --shadow-neumorphic-layered: 0px 0px 4px 0px var(--primary-10),
+    -2px -2px 4px 0px rgba(205, 205, 205, 0.1),
+    1px 1px 4px 0px rgba(1, 1, 1, 0.05), 2px 2px 6px 0px rgba(3, 3, 3, 0.33);
+  --shadow-light-dark-soft: 0px 0px 250px 0px rgba(0, 0, 0, 0.03),
+    0px 0px 95px 0px rgba(0, 0, 0, 0.1) inset;
+}
