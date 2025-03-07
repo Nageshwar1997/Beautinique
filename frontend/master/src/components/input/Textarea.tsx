@@ -1,17 +1,19 @@
 import { CheckMark, InfoIcon } from "../../icons";
-import { TextareaProps } from "../../types";
+import { InputProps } from "../../types";
 
 const Textarea = ({
+  icon,
   name = "",
   label = "",
-  rows = 5,
+  rows = 4,
   register,
   className = "",
   errorText = "",
   successText = "",
   placeholder = "",
   containerClassName = "",
-}: TextareaProps) => {
+  autoComplete = "off",
+}: InputProps & { rows?: number }) => {
   return (
     <div className={`w-full space-y-1.5 ${containerClassName}`}>
       <div className="relative min-h-10 lg:min-h-12">
@@ -25,12 +27,16 @@ const Textarea = ({
         )}
         {/* Input */}
         <textarea
+          autoComplete={autoComplete}
+          aria-autocomplete="none"
           id={name}
           name={name}
           rows={rows}
           {...register}
           placeholder={placeholder}
-          className={`w-full flex-grow outline-none focus:outline-none font-normal text-sm xl:text-base overflow-hidden bg-smoke-eerie rounded-lg border border-primary-10 px-3 py-3 2xl:py-4 text-primary placeholder:text-primary-50 placeholder:text-sm autofill-effect ${className}`}
+          className={`w-full flex-grow outline-none focus:outline-none font-normal text-sm xl:text-base overflow-hidden bg-smoke-eerie rounded-lg border border-primary-10 px-3 py-3 2xl:py-4 text-primary placeholder:text-primary-50 placeholder:text-sm ${
+            icon && "pr-10"
+          } autofill-effect ${className}`}
         />
       </div>
       {/* Error Message */}

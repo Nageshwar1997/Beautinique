@@ -1,306 +1,186 @@
-import { useNavigate } from "react-router-dom";
-import { LeftArrowIcon } from "../../../icons";
-import ImageUpload from "./components/ImageUpload";
-import { Controller, useForm } from "react-hook-form";
-import { yupResolver } from "@hookform/resolvers/yup";
-import { blogFormSchema } from "./blogFormSchema";
-import { InferType } from "yup";
-import { useRef, useState } from "react";
-import { add_image_to_cdn, useAddBlogs } from "./apis";
-import ReactQuill from "react-quill";
+import { FormEvent, useRef } from "react";
+
+import Quill, { Delta, Range } from "quill";
+import QuillEditor from "./components/QuillEditor";
 import Input from "../../../components/input/Input";
-import TagInput from "./components/TagInput";
+import Textarea from "../../../components/input/Textarea";
+import { UploadCloudIcon } from "../../../icons";
 import DatePicker from "./components/DatePicker";
-import MarkUpEditor from "./components/MarkUpEditor";
 import Button from "../../../components/button/Button";
 
-export type BlogFormValues = Omit<
-  InferType<typeof blogFormSchema>,
-  | "publishedDate"
-  | "smallThumbnail"
-  | "largeThumbnail"
-  | "seoKeywords"
-  | "seoTitle"
-  | "seoDescription"
-  | "seoAuthor"
-> & {
-  _id?: string;
-  publishedDate: Date | null;
-  largeThumbnail: File | null | string;
-  smallThumbnail: File | null | string;
-  seo?: {
-    title: string;
-    author: string;
-    description: string;
-    keywords: string[];
-  };
-};
-
-const initialValues: BlogFormValues = {
-  _id: undefined, // Optional ID
-  title: "",
-  content: "",
-  url: "",
-  publishedDate: null,
-  smallThumbnail: null,
-  largeThumbnail: null,
-  seo: {
-    title: "",
-    author: "",
-    description: "",
-    keywords: [],
-  },
-};
-
 const UploadBlog = () => {
-  const navigate = useNavigate();
-  const addBlogs = useAddBlogs();
-  const [imageList, setImageList] = useState<string[]>([]);
-  const quillRef = useRef<ReactQuill | null>(null);
-  const [isExecuting, setIsExecuting] = useState(false);
-  const {
-    register,
-    handleSubmit,
-    setValue,
-    reset,
-    control,
-    trigger,
-    watch,
-    formState: { errors },
-  } = useForm<BlogFormValues>({
-    resolver: yupResolver(blogFormSchema),
-    defaultValues: initialValues,
-  });
+  const quillRef = useRef<Quill | null>(null);
+  const blobUrlsRef = useRef<string[]>([]); // Store blob URLs for cleanup
+  const contentRef = useRef("");
 
-  const handleReset = () => {
-    reset();
-  };
-
-  const onSubmit = async (data: BlogFormValues) => {
-    if (addBlogs.isPending || isExecuting) return;
-    if (!quillRef?.current) return;
-
-    setIsExecuting(true);
-
-    const quillEditor = quillRef.current.getEditor();
-    let editorContent = quillEditor.root.innerHTML;
-
-    try {
-      const addFormData = new FormData();
-
-      // Handle images inside editor
-      if (imageList.length > 0) {
-        const formData = new FormData();
-
-        const uploadPromises = imageList.map(async (localUrl) => {
-          const response = await fetch(localUrl);
-          const blob = await response.blob();
-          const file = new File([blob], `image-${Date.now()}.webp`, {
-            type: "image/webp",
-          });
-          formData.append("files", file);
-        });
-
-        await Promise.all(uploadPromises);
-        const cdnUrls = await add_image_to_cdn(formData);
-
-        if (cdnUrls?.data?.data?.length) {
-          cdnUrls.data.data.forEach((cdnUrl: string, index: number) => {
-            editorContent = editorContent.replace(imageList[index], cdnUrl);
-          });
-        }
-      }
-
-      // Append form fields
-      addFormData.append(
-        "seo",
-        JSON.stringify({
-          title: data.seo?.title || "",
-          author: data.seo?.author || "",
-          description: data.seo?.description || "",
-          keywords: data.seo?.keywords || [],
-        })
-      );
-      addFormData.append("title", data.title);
-      addFormData.append("url", data.url);
-      addFormData.append(
-        "publishedDate",
-        data.publishedDate ? data.publishedDate.toISOString() : ""
-      );
-      addFormData.append("content", editorContent);
-
-      // Append thumbnails only if they exist
-      if (data.smallThumbnail instanceof File) {
-        addFormData.append("smallThumbnail", data.smallThumbnail);
-      }
-      if (data.largeThumbnail instanceof File) {
-        addFormData.append("largeThumbnail", data.largeThumbnail);
-      }
-
-      // Submit data
-      // addBlogs.mutate(addFormData, {
-      //   onSuccess: () => {
-      //     navigate(-1);
-      //   },
-      //   onSettled: () => {
-      //     setIsExecuting(false);
-      //   },
-      // });
-    } catch (error) {
-      console.error("Error during submission:", error);
-      setIsExecuting(false);
+  const handleTextChange = () => {
+    if (quillRef.current) {
+      contentRef.current = quillRef.current.root.innerHTML; // Storing HTML content
+      console.log("Updated Content:", contentRef.current);
     }
   };
 
+  const handleSelectionChange = (
+    range: Range | null,
+    oldRange: Range | null,
+    source: string
+  ) => {
+    if (!range) return;
+    console.log("Old Selection:", oldRange);
+    console.log("New Selection:", range);
+    console.log("Source:", source);
+  };
+
+  const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    if (!quillRef.current) return;
+
+    const quill = quillRef.current;
+    let content = quill.root.innerHTML; // Get the current Quill content
+    console.log("Before Upload - Content:", content);
+
+    // Map each blob URL to Cloudinary upload and get URLs
+    const uploadPromises = blobUrlsRef.current.map(async (blobUrl, index) => {
+      try {
+        const response = await fetch(blobUrl);
+        const blob = await response.blob();
+        const file = new File([blob], `image-${index}.png`, {
+          type: blob.type,
+        });
+
+        console.log("file", file);
+
+        const formData = new FormData();
+        formData.append("image", file);
+        formData.append("folderName", "Blog_Images"); // Replace with your Cloudinary preset
+
+        const resp = await fetch("http://localhost:8080/api/upload/image", {
+          method: "POST",
+          body: formData,
+        });
+
+        const data = await resp.json();
+        console.log("Uploaded Image URL:", data);
+
+        // return data.cloudUrl;
+
+        // console.log(`Uploaded Image ${index}:`, data.secure_url);
+
+        return { blobUrl, cloudUrl: data.cloudUrl };
+      } catch (error) {
+        console.error("Upload error:", error);
+        return null;
+      }
+    });
+
+    const uploadedImages = await Promise.all(uploadPromises);
+
+    console.log("uploadedImages", uploadedImages);
+
+    // Filter out null values to ensure type safety
+    const validUploadedImages = uploadedImages.filter(
+      (img): img is { blobUrl: string; cloudUrl: string } => img !== null
+    );
+
+    validUploadedImages.forEach(({ blobUrl, cloudUrl }) => {
+      content = content.replace(blobUrl, cloudUrl);
+    });
+
+    console.log("After Upload - Updated Content:", content);
+
+    // Update Quill editor with the new content
+    quill.root.innerHTML = content;
+
+    // Clear blob URL references
+    blobUrlsRef.current = [];
+  };
   return (
     <div className="p-4 mx-auto rounded-lg shadow-md bg-tertiary text-tertiary-inverted">
-      <div className="flex justify-start gap-4 items-center">
-        <LeftArrowIcon
-          className="cursor-pointer [&>path]:!fill-tertiary-inverted w-5 h-5"
-          onClick={() => navigate(-1)}
-        />
-        <h1 className="font-semibold text-xl">New Blog</h1>
-      </div>
-      <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-4">
-        <ImageUpload
-          onChange={(fileList) => {
-            const file = fileList?.[0];
-            if (file) {
-              setValue("largeThumbnail", file, { shouldValidate: true });
-              trigger("largeThumbnail");
-            }
-          }}
-          title="Upload large thumbnail"
-          label="Large thumbnail"
-          errorText={errors.largeThumbnail?.message}
-          className="items-start [&>div]:w-full [&>div]:h-48 [&>div>div]:w-full [&>div>div]:h-48 [&>div>div]:rounded-md [&>div>label]:rounded-md"
-          previewImage={
-            watch("largeThumbnail")
-              ? URL.createObjectURL(watch("largeThumbnail") as File)
-              : null
-          }
-        />
-        <ImageUpload
-          onChange={(fileList) => {
-            const file = fileList?.[0];
-            if (file) {
-              setValue("smallThumbnail", file);
-              trigger("smallThumbnail");
-            }
-          }}
-          title="Upload small thumbnail"
-          label="Small thumbnail"
-          errorText={errors.smallThumbnail?.message}
-          className="items-start [&>div]:w-full [&>div>div]:w-full [&>div>div]:rounded-md [&>div>label]:rounded-md"
-          previewImage={
-            watch("smallThumbnail")
-              ? URL.createObjectURL(watch("smallThumbnail") as File)
-              : null
-          }
-        />
-        <div className="flex items-center gap-2 mt-4">
-          <h1 className="font-semibold text-lg">SEO</h1>
-          <div className="h-px bg-primary-inverted w-full" />
-        </div>
-        <div className="">
-          <p>Title</p>
-          <Input
-            placeholder="Enter title"
-            {...register("seo.title")}
-            errorText={errors.seo?.title?.message}
-          />
-        </div>
-        <div className="">
-          <p>Description</p>
-          <Input
-            placeholder={"Enter description"}
-            register={register("seo.description")}
-            errorText={errors?.seo?.description?.message}
-          />
-        </div>
-        <div className="">
-          <p>Keywords</p>
-          <Controller
-            name="seo.keywords"
-            control={control}
-            defaultValue={[]}
-            render={({ field: { onChange, value }, fieldState: { error } }) => (
-              <TagInput
-                label="Keywords"
-                setValue={onChange}
-                placeholder={"Enter keywords"}
-                tagsData={["3D models", "Render Quality", "Meta-Verse"]}
-                errorText={error?.message ?? ""}
-                selectedTagsData={value}
-              />
-            )}
-          />
-        </div>
-        <div className="">
-          <p>Author</p>
-          <Input
-            placeholder={"Enter author"}
-            register={register("seo.author")}
-            errorText={errors.seo?.author?.message}
-          />
-        </div>
-        <div className="flex items-center gap-2 mt-4">
-          <h1 className="font-semibold text-lg">Info</h1>
-          <div className="h-px bg-primary-inverted w-full" />
-        </div>
-        <div className="">
-          <p>Title</p>
-          <Input
-            placeholder={"Enter title"}
-            register={register("title")}
-            errorText={errors.title?.message}
-          />
-        </div>
-        <div className="">
-          <p>Slug / URL</p>
-          <Input
-            placeholder={"Enter Slug / URL"}
-            register={register("url")}
-            errorText={errors.url?.message}
-          />
-        </div>
-        <Controller
-          name="publishedDate"
-          control={control}
-          defaultValue={null}
-          render={({ field: { onChange, value }, fieldState: { error } }) => (
-            <DatePicker
-              label="Published date"
-              selectedDate={value}
-              onDateChange={onChange}
-              errorText={error?.message ?? ""}
+      <form onSubmit={handleSubmit} className="flex flex-col gap-5 w-full">
+        <div className="flex gap-4 w-full">
+          <label
+            htmlFor="smallThumbnail"
+            className="block w-1/3 h-56 border border-primary-battleship-davys-gray rounded-xl overflow-hidden relative"
+          >
+            <img
+              src="/images/test/small.jpg"
+              alt="small"
+              className="w-full h-full object-cover"
             />
-          )}
-        />
-        <div className="flex items-center gap-2 mt-4">
-          <h1 className="font-semibold text-lg">Content</h1>
-          <div className="h-px bg-primary-inverted w-full" />
+            <input
+              name="smallThumbnail"
+              id="smallThumbnail"
+              type="file"
+              className="hidden"
+            />
+            <div className="absolute inset-0 w-full h-full bg-tertiary-inverted opacity-65 flex flex-col items-center justify-center gap-1">
+              <UploadCloudIcon className="w-10 h-10 [&>path]:stroke-secondary" />
+              <p className="text-secondary text-lg font-medium">
+                Small Thumbnail
+              </p>
+            </div>
+          </label>
+          <label
+            htmlFor="largeThumbnail"
+            className="w-2/3 h-56 border border-primary-battleship-davys-gray rounded-xl overflow-hidden relative"
+          >
+            <img
+              src="/images/test/large.jpg"
+              alt="large"
+              className="w-full h-full object-cover"
+            />
+            <input
+              name="largeThumbnail"
+              id="largeThumbnail"
+              type="file"
+              className="hidden"
+            />
+            <div className="absolute inset-0 w-full h-full bg-tertiary-inverted opacity-65 flex flex-col items-center justify-center gap-1">
+              <UploadCloudIcon className="w-10 h-10 [&>path]:stroke-secondary" />
+              <p className="text-secondary text-lg font-medium">
+                Large Thumbnail
+              </p>
+            </div>
+          </label>
         </div>
-        <MarkUpEditor
-          errors={errors.content?.message}
-          setValue={setValue}
-          setImageList={setImageList}
-          quillRef={quillRef}
-        />
-        <div className="flex w-1/2 mx-auto gap-5">
-          <Button
-            pattern="primary"
-            onClick={handleReset}
-            // className="!bg-surface-light-contrast1 !text-surface-dark-primary !leading-0 !max-w-full"
-            content={"Reset"}
-          />
-          <Button
-            pattern="secondary"
-            type="submit"
-            // className="!bg-surface-light-contrast1 !text-surface-dark-primary !leading-0 !max-w-full"
-            content={"Reset"}
+        <div className="flex flex-col gap-5 w-full">
+          <div className="w-full">
+            <Input label="Main Title" />
+          </div>
+          <div className="w-full">
+            <Input label="Tags" />
+          </div>
+          <div className="w-full">
+            <Input label="Author" />
+          </div>
+          <div className="w-full">
+            <Input label="Sub-Title" />
+          </div>
+          <div className="w-full">
+            <Textarea label="Description" rows={3} />
+          </div>
+          <div className="w-full">
+            <DatePicker
+              label="Published Date"
+              onDateChange={() => {}}
+              placeholder="YYYY-MM-DD"
+              selectedDate={new Date()}
+              key={"publishedDate"}
+              errorText=""
+            />
+          </div>
+        </div>
+
+        <div className="border border-[red]">
+          <QuillEditor
+            ref={quillRef}
+            defaultValue={new Delta().insert("Hello, world!\n")}
+            blobUrlsRef={blobUrlsRef}
+            onTextChange={handleTextChange}
+            onSelectionChange={handleSelectionChange}
           />
         </div>
+        <Button pattern="primary" content="Submit" />
       </form>
     </div>
   );
