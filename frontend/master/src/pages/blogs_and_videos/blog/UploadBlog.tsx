@@ -18,6 +18,8 @@ interface FormBodyType {
   description: string;
   content: string;
   publishedDate: Date | null; // Allow null explicitly
+  smallThumbnail: File | string;
+  largeThumbnail: File | string;
 }
 
 const initialValues = {
@@ -27,9 +29,13 @@ const initialValues = {
   description: "",
   content: "",
   publishedDate: null,
+  smallThumbnail: "",
+  largeThumbnail: "",
 };
 
 const schema: yup.ObjectSchema<FormBodyType> = yup.object().shape({
+  smallThumbnail: yup.mixed<File | string>().required("Thumbnail is required"),
+  largeThumbnail: yup.mixed<File | string>().required("Thumbnail is required"),
   mainTitle: yup.string().required("Title is required"),
   subTitle: yup.string().required("Subtitle is required"),
   author: yup.string().required("Author is required"),
