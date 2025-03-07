@@ -1,45 +1,74 @@
-import { FormEvent, useRef } from "react";
-
-import Quill, { Delta, Range } from "quill";
-import QuillEditor from "./components/QuillEditor";
+import * as yup from "yup";
+import { yupResolver } from "@hookform/resolvers/yup";
 import Input from "../../../components/input/Input";
-import Textarea from "../../../components/input/Textarea";
-import { UploadCloudIcon } from "../../../icons";
-import DatePicker from "./components/DatePicker";
+
 import Button from "../../../components/button/Button";
+import { Controller, useForm } from "react-hook-form";
+import Textarea from "../../../components/input/Textarea";
+import DatePicker from "./components/DatePicker";
+import { useRef } from "react";
+import Quill from "quill";
+import QuillEditor from "./components/QuillEditor";
+import { UploadCloudIcon } from "../../../icons";
+
+interface FormBodyType {
+  mainTitle: string;
+  subTitle: string;
+  author: string;
+  description: string;
+  content: string;
+  publishedDate: Date | null; // Allow null explicitly
+}
+
+const initialValues = {
+  mainTitle: "",
+  subTitle: "",
+  author: "",
+  description: "",
+  content: "",
+  publishedDate: null,
+};
+
+const schema: yup.ObjectSchema<FormBodyType> = yup.object().shape({
+  mainTitle: yup.string().required("Title is required"),
+  subTitle: yup.string().required("Subtitle is required"),
+  author: yup.string().required("Author is required"),
+  description: yup.string().required("Description is required"),
+  publishedDate: yup
+    .date()
+    .nullable() // Allow null values
+    .transform((curr, orig) => (orig === "" ? null : curr)) // Convert empty strings to null
+    .typeError("Invalid date format")
+    .required("Date is required"),
+  content: yup.string().required("Content is required"),
+});
 
 const UploadBlog = () => {
   const quillRef = useRef<Quill | null>(null);
   const blobUrlsRef = useRef<string[]>([]); // Store blob URLs for cleanup
-  const contentRef = useRef("");
-
+  const {
+    register,
+    handleSubmit,
+    setValue,
+    control,
+    formState: { errors },
+  } = useForm<FormBodyType>({
+    resolver: yupResolver(schema),
+    defaultValues: initialValues,
+  });
   const handleTextChange = () => {
     if (quillRef.current) {
-      contentRef.current = quillRef.current.root.innerHTML; // Storing HTML content
-      console.log("Updated Content:", contentRef.current);
+      const content = quillRef.current.root.innerHTML;
+      setValue("content", content);
     }
   };
 
-  const handleSelectionChange = (
-    range: Range | null,
-    oldRange: Range | null,
-    source: string
-  ) => {
-    if (!range) return;
-    console.log("Old Selection:", oldRange);
-    console.log("New Selection:", range);
-    console.log("Source:", source);
-  };
-
-  const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
+  const onSubmit = async (data: FormBodyType) => {
+    console.log("Form Data", data);
     if (!quillRef.current) return;
-
     const quill = quillRef.current;
-    let content = quill.root.innerHTML; // Get the current Quill content
-    console.log("Before Upload - Content:", content);
+    let content = quill.root.innerHTML;
 
-    // Map each blob URL to Cloudinary upload and get URLs
     const uploadPromises = blobUrlsRef.current.map(async (blobUrl, index) => {
       try {
         const response = await fetch(blobUrl);
@@ -93,10 +122,14 @@ const UploadBlog = () => {
 
     // Clear blob URL references
     blobUrlsRef.current = [];
+    console.log("Submit Data", data);
   };
   return (
     <div className="p-4 mx-auto rounded-lg shadow-md bg-tertiary text-tertiary-inverted">
-      <form onSubmit={handleSubmit} className="flex flex-col gap-5 w-full">
+      <form
+        onSubmit={handleSubmit(onSubmit)}
+        className="flex flex-col gap-5 w-full"
+      >
         <div className="flex gap-4 w-full">
           <label
             htmlFor="smallThumbnail"
@@ -145,42 +178,63 @@ const UploadBlog = () => {
         </div>
         <div className="flex flex-col gap-5 w-full">
           <div className="w-full">
-            <Input label="Main Title" />
-          </div>
-          <div className="w-full">
-            <Input label="Tags" />
-          </div>
-          <div className="w-full">
-            <Input label="Author" />
-          </div>
-          <div className="w-full">
-            <Input label="Sub-Title" />
-          </div>
-          <div className="w-full">
-            <Textarea label="Description" rows={3} />
-          </div>
-          <div className="w-full">
-            <DatePicker
-              label="Published Date"
-              onDateChange={() => {}}
-              placeholder="YYYY-MM-DD"
-              selectedDate={new Date()}
-              key={"publishedDate"}
-              errorText=""
+            <Input
+              label="Main Title"
+              register={register("mainTitle")}
+              errorText={errors?.mainTitle?.message}
             />
           </div>
+          <div className="w-full">
+            <Input
+              label="Main Title"
+              register={register("subTitle")}
+              errorText={errors?.subTitle?.message}
+            />
+          </div>
+          <div className="w-full">
+            <Input
+              label="Author"
+              register={register("author")}
+              errorText={errors?.author?.message}
+            />
+          </div>
+          <div className="w-full">
+            <Textarea
+              label="Description"
+              rows={3}
+              register={register("description")}
+              errorText={errors?.description?.message}
+            />
+          </div>
+          <div className="w-full">
+            <Controller
+              name="publishedDate"
+              control={control}
+              defaultValue={null}
+              render={({
+                field: { onChange, value },
+                fieldState: { error },
+              }) => (
+                <DatePicker
+                  label="Published date"
+                  onDateChange={onChange}
+                  placeholder="Select date"
+                  selectedDate={value ?? null}
+                  errorText={error?.message ?? ""}
+                />
+              )}
+            />
+          </div>
+          <div className="w-full border border-[red]">
+            <QuillEditor
+              ref={quillRef}
+              blobUrlsRef={blobUrlsRef}
+              onTextChange={handleTextChange}
+            />
+            <p className="text-[red]">{errors?.content?.message}</p>
+          </div>
         </div>
-
-        <div className="border border-[red]">
-          <QuillEditor
-            ref={quillRef}
-            defaultValue={new Delta().insert("Hello, world!\n")}
-            blobUrlsRef={blobUrlsRef}
-            onTextChange={handleTextChange}
-            onSelectionChange={handleSelectionChange}
-          />
-        </div>
-        <Button pattern="primary" content="Submit" />
+        <Button pattern="primary" content="Submit" type="submit" />
       </form>
     </div>
   );

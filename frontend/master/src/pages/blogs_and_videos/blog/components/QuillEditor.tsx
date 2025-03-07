@@ -1,5 +1,8 @@
 import { forwardRef, RefObject, useEffect, useRef } from "react";
-import Quill, { Delta, Range } from "quill";
+import Quill, {
+  Delta,
+  // Range
+} from "quill";
 import "quill/dist/quill.snow.css";
 
 // Import Image format from Quill
@@ -28,16 +31,22 @@ interface EditorProps {
   defaultValue?: Delta;
   onTextChange?: (delta: Delta, oldDelta: Delta, source: string) => void;
   blobUrlsRef: RefObject<string[]>;
-  onSelectionChange?: (
-    range: Range | null,
-    oldRange: Range | null,
-    source: string
-  ) => void;
+  // onSelectionChange?: (
+  //   range: Range | null,
+  //   oldRange: Range | null,
+  //   source: string
+  // ) => void;
 }
 
-const NewEditor = forwardRef<Quill | null, EditorProps>(
+const QuillEditor = forwardRef<Quill | null, EditorProps>(
   (
-    { readOnly, defaultValue, onTextChange, onSelectionChange, blobUrlsRef },
+    {
+      readOnly,
+      defaultValue,
+      onTextChange,
+      // onSelectionChange,
+      blobUrlsRef,
+    },
     ref
   ) => {
     const containerRef = useRef<HTMLDivElement>(null);
@@ -82,9 +91,9 @@ const NewEditor = forwardRef<Quill | null, EditorProps>(
         removeUnusedBlobUrls(quill, blobUrlsRef);
       });
 
-      quill.on("selection-change", (range, oldRange, source) => {
-        onSelectionChange?.(range, oldRange, source);
-      });
+      // quill.on("selection-change", (range, oldRange, source) => {
+      //   onSelectionChange?.(range, oldRange, source);
+      // });
 
       // ✅ Set ref directly (no need for `quillInstance`)
       if (typeof ref === "function") {
@@ -103,7 +112,13 @@ const NewEditor = forwardRef<Quill | null, EditorProps>(
         blobUrlsRef.current.forEach((url) => URL.revokeObjectURL(url));
         blobUrlsRef.current = [];
       };
-    }, [blobUrlsRef, defaultValue, onSelectionChange, onTextChange, ref]);
+    }, [
+      blobUrlsRef,
+      defaultValue,
+      // onSelectionChange,
+      onTextChange,
+      ref,
+    ]);
 
     useEffect(() => {
       if (ref && typeof ref !== "function" && ref.current) {
@@ -115,17 +130,14 @@ const NewEditor = forwardRef<Quill | null, EditorProps>(
   }
 );
 
-NewEditor.displayName = "Editor";
+// NewEditor.displayName = "Editor";
 
-export default NewEditor;
+export default QuillEditor;
 
 /**
  * Handles image uploads and inserts them into Quill
  */
-const handleImageUpload = (
-  quill: Quill,
-  blobUrlsRef: RefObject<string[]>
-) => {
+const handleImageUpload = (quill: Quill, blobUrlsRef: RefObject<string[]>) => {
   const input = document.createElement("input");
   input.setAttribute("type", "file");
   input.setAttribute("accept", "image/*");
