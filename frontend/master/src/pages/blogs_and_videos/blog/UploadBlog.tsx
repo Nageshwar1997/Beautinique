@@ -1,7 +1,6 @@
 import * as yup from "yup";
 import { yupResolver } from "@hookform/resolvers/yup";
 import Input from "../../../components/input/Input";
-
 import Button from "../../../components/button/Button";
 import { Controller, useForm } from "react-hook-form";
 import Textarea from "../../../components/input/Textarea";
@@ -9,7 +8,7 @@ import DatePicker from "./components/DatePicker";
 import { useRef } from "react";
 import Quill from "quill";
 import QuillEditor from "./components/QuillEditor";
-import { UploadCloudIcon } from "../../../icons";
+import ImageUpload from "./components/ImageUpload";
 
 interface FormBodyType {
   mainTitle: string;
@@ -57,6 +56,7 @@ const UploadBlog = () => {
     handleSubmit,
     setValue,
     control,
+    watch,
     formState: { errors },
   } = useForm<FormBodyType>({
     resolver: yupResolver(schema),
@@ -120,50 +120,18 @@ const UploadBlog = () => {
         className="flex flex-col gap-5 w-full"
       >
         <div className="flex gap-4 w-full">
-          <label
-            htmlFor="smallThumbnail"
-            className="block w-1/3 h-56 border border-primary-battleship-davys-gray rounded-xl overflow-hidden relative"
-          >
-            <img
-              src="/images/test/small.jpg"
-              alt="small"
-              className="w-full h-full object-cover"
-            />
-            <input
-              name="smallThumbnail"
-              id="smallThumbnail"
-              type="file"
-              className="hidden"
-            />
-            <div className="absolute inset-0 w-full h-full bg-tertiary-inverted opacity-65 flex flex-col items-center justify-center gap-1">
-              <UploadCloudIcon className="w-10 h-10 [&>path]:stroke-secondary" />
-              <p className="text-secondary text-lg font-medium">
-                Small Thumbnail
-              </p>
-            </div>
-          </label>
-          <label
-            htmlFor="largeThumbnail"
-            className="w-2/3 h-56 border border-primary-battleship-davys-gray rounded-xl overflow-hidden relative"
-          >
-            <img
-              src="/images/test/large.jpg"
-              alt="large"
-              className="w-full h-full object-cover"
-            />
-            <input
-              name="largeThumbnail"
-              id="largeThumbnail"
-              type="file"
-              className="hidden"
-            />
-            <div className="absolute inset-0 w-full h-full bg-tertiary-inverted opacity-65 flex flex-col items-center justify-center gap-1">
-              <UploadCloudIcon className="w-10 h-10 [&>path]:stroke-secondary" />
-              <p className="text-secondary text-lg font-medium">
-                Large Thumbnail
-              </p>
-            </div>
-          </label>
+          <ImageUpload
+            wrapperClassName="!w-1/3"
+            className="!h-56"
+            previewUrl={watch("smallThumbnail") as string}
+            errorText={errors?.smallThumbnail?.message}
+          />
+          <ImageUpload
+            wrapperClassName="!w-2/3"
+            className="!h-56"
+            previewUrl={watch("largeThumbnail") as string}
+            errorText={errors?.largeThumbnail?.message}
+          />
         </div>
         <div className="flex flex-col gap-5 w-full">
           <div className="w-full">
