@@ -64,7 +64,6 @@ const UploadBlog = () => {
   };
 
   const onSubmit = async (data: FormBodyType) => {
-    console.log("Form Data", data);
     if (!quillRef.current) return;
     const quill = quillRef.current;
     let content = quill.root.innerHTML;
@@ -77,11 +76,9 @@ const UploadBlog = () => {
           type: blob.type,
         });
 
-        console.log("file", file);
-
         const formData = new FormData();
         formData.append("image", file);
-        formData.append("folderName", "Blog_Images"); // Replace with your Cloudinary preset
+        formData.append("folderName", "Blog_Images");
 
         const resp = await fetch("http://localhost:8080/api/upload/image", {
           method: "POST",
@@ -89,12 +86,6 @@ const UploadBlog = () => {
         });
 
         const data = await resp.json();
-        console.log("Uploaded Image URL:", data);
-
-        // return data.cloudUrl;
-
-        // console.log(`Uploaded Image ${index}:`, data.secure_url);
-
         return { blobUrl, cloudUrl: data.cloudUrl };
       } catch (error) {
         console.error("Upload error:", error);
@@ -103,10 +94,6 @@ const UploadBlog = () => {
     });
 
     const uploadedImages = await Promise.all(uploadPromises);
-
-    console.log("uploadedImages", uploadedImages);
-
-    // Filter out null values to ensure type safety
     const validUploadedImages = uploadedImages.filter(
       (img): img is { blobUrl: string; cloudUrl: string } => img !== null
     );
@@ -115,14 +102,10 @@ const UploadBlog = () => {
       content = content.replace(blobUrl, cloudUrl);
     });
 
-    console.log("After Upload - Updated Content:", content);
+    setValue("content", content);
+    quill.root.innerHTML = content; // Ensure editor updates
 
-    // Update Quill editor with the new content
-    quill.root.innerHTML = content;
-
-    // Clear blob URL references
-    blobUrlsRef.current = [];
-    console.log("Submit Data", data);
+    console.log("Submit Data", { ...data, content });
   };
   return (
     <div className="p-4 mx-auto rounded-lg shadow-md bg-tertiary text-tertiary-inverted">

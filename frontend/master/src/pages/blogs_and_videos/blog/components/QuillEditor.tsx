@@ -5,7 +5,7 @@ import Quill, {
 } from "quill";
 import "quill/dist/quill.snow.css";
 
-// Import Image format from Quill
+// Import & Modify Quill Image Format to Allow Blob URLs
 const Image = Quill.import("formats/image") as {
   sanitize?: (url: string) => string;
 };
@@ -50,7 +50,7 @@ const QuillEditor = forwardRef<Quill | null, EditorProps>(
     ref
   ) => {
     const containerRef = useRef<HTMLDivElement>(null);
-
+    const editorRef = useRef<Quill | null>(null);
     useEffect(() => {
       if (!containerRef.current) return;
 
@@ -82,7 +82,7 @@ const QuillEditor = forwardRef<Quill | null, EditorProps>(
         },
       });
 
-      if (defaultValue) {
+      if (defaultValue && quill.getText().trim().length === 0) {
         quill.setContents(defaultValue);
       }
 
@@ -95,7 +95,8 @@ const QuillEditor = forwardRef<Quill | null, EditorProps>(
       //   onSelectionChange?.(range, oldRange, source);
       // });
 
-      // ✅ Set ref directly (no need for `quillInstance`)
+      editorRef.current = quill;
+
       if (typeof ref === "function") {
         ref(quill);
       } else if (ref && "current" in ref) {
@@ -106,31 +107,25 @@ const QuillEditor = forwardRef<Quill | null, EditorProps>(
         if (ref && "current" in ref) {
           ref.current = null;
         }
-        container.innerHTML = ""; // Cleanup
 
-        // Revoke all blob URLs to free memory
+        container.innerHTML = ""; // ✅ Always use the stored container reference
+
+        // Revoke all blob URLs
         blobUrlsRef.current.forEach((url) => URL.revokeObjectURL(url));
         blobUrlsRef.current = [];
       };
-    }, [
-      blobUrlsRef,
-      defaultValue,
-      // onSelectionChange,
-      onTextChange,
-      ref,
-    ]);
+      // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, []);
 
     useEffect(() => {
-      if (ref && typeof ref !== "function" && ref.current) {
-        ref.current.enable(!readOnly);
+      if (editorRef.current) {
+        editorRef.current.enable(!readOnly);
       }
-    }, [readOnly, ref]);
+    }, [readOnly]);
 
     return <div ref={containerRef} />;
   }
 );
-
-// NewEditor.displayName = "Editor";
 
 export default QuillEditor;
 
@@ -154,51 +149,35 @@ const handleImageUpload = (quill: Quill, blobUrlsRef: RefObject<string[]>) => {
       return;
     }
 
-    // Create a Blob URL for the image
     const blobUrl = URL.createObjectURL(file);
-    console.log("✅ Image Blob URL:", blobUrl);
 
-    // Get the current selection in the Quill editor
     const range = quill.getSelection();
     if (!range) return;
 
-    // Store blob URL for cleanup
     blobUrlsRef.current.push(blobUrl);
-
     console.log("blobUrlsRef", blobUrlsRef.current);
 
-    // Insert the image with the blob URL
     quill.insertEmbed(range.index, "image", blobUrl, "user");
 
-    // Move cursor forward to prevent infinite loop issues
     quill.setSelection(range.index + 1);
   };
 };
 
-/**
- * Removes unused blob URLs when an image is deleted from the editor
- */
 const removeUnusedBlobUrls = (
   quill: Quill,
   blobUrlsRef: RefObject<string[]>
 ) => {
-  // Get all current images inside the editor
   const editorImages = Array.from(quill.root.querySelectorAll("img")).map(
     (img) => img.getAttribute("src")
   );
 
-  // Find blob URLs that are no longer in the editor
   const removedBlobUrls = blobUrlsRef.current.filter(
     (url) => !editorImages.includes(url)
   );
 
-  // Revoke removed blob URLs
   removedBlobUrls.forEach((url) => URL.revokeObjectURL(url));
 
-  // Update blob URLs list
   blobUrlsRef.current = blobUrlsRef.current.filter((url) =>
     editorImages.includes(url)
   );
-
-  console.log("blobUrlsRef removed", blobUrlsRef.current);
 };
