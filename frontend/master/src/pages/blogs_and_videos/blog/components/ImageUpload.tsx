@@ -1,5 +1,5 @@
 import { ChangeEvent, useCallback, useState } from "react";
-import { InfoIcon, UploadCloudIcon } from "../../../../icons";
+import { InfoIcon, RefreshIcon, UploadCloudIcon } from "../../../../icons";
 import { toastErrorMessage } from "../../../../utils/toasts";
 interface ImageUploadProps {
   id: string;
@@ -50,7 +50,7 @@ const ImageUpload = ({
     <div className={`w-full h-full flex flex-col gap-0.5 ${wrapperClassName}`}>
       <label
         htmlFor={id}
-        className={`w-full h-full border border-primary-battleship-davys-gray rounded-xl relative overflow-hidden ${className}`}
+        className={`w-full h-full border border-primary-10 shadow-primary-50 rounded-xl relative overflow-hidden cursor-pointer group ${className}`}
       >
         <input
           name={id}
@@ -60,14 +60,33 @@ const ImageUpload = ({
           className="hidden"
           onChange={handleImageChange}
         />
-        <div className="absolute left-0 top-0 w-full h-full bg-tertiary-inverted opacity-65 flex flex-col items-center justify-center gap-1">
-          <img
-            src={previewUrl || "/images/test/small.jpg"}
-            alt="small"
-            className="w-full h-full object-cover absolute inset-0 z-[-1]"
-          />
-          <UploadCloudIcon className="w-10 h-10 [&>path]:stroke-secondary" />
-          <p className="text-secondary text-center text-lg font-medium">
+        <div
+          className={`absolute left-0 top-0 w-full h-full hover:bg-tertiary-inverted flex flex-col items-center justify-center gap-1 ${
+            previewUrl ? "" : "bg-smoke-eerie"
+          }`}
+        >
+          {previewUrl && (
+            <img
+              src={previewUrl || "/images/test/small.jpg"}
+              alt={id}
+              className="w-full h-full object-cover absolute inset-0 group-hover:hidden"
+            />
+          )}
+          {previewUrl ? (
+            <RefreshIcon
+              className={`w-10 h-10 [&>path]:stroke-primary hidden group-hover:block`}
+            />
+          ) : (
+            <UploadCloudIcon
+              className={`w-10 h-10 [&>path]:stroke-primary opacity-50 group-hover:opacity-100`}
+            />
+          )}
+
+          <p
+            className={`text-primary opacity-50 group-hover:opacity-100 text-center text-lg font-medium ${
+              previewUrl ? "hidden group-hover:block" : ""
+            }`}
+          >
             {title}
           </p>
         </div>
