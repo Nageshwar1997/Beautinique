@@ -6,7 +6,7 @@ import { Controller, useForm } from "react-hook-form";
 import Textarea from "../../../components/input/Textarea";
 import DatePicker from "./components/DatePicker";
 import { useRef } from "react";
-import Quill from "quill";
+import Quill, { Delta } from "quill";
 import QuillEditor from "./components/QuillEditor";
 import ImageUpload from "./components/ImageUpload";
 import TagInput from "./components/TagInput";
@@ -122,7 +122,7 @@ const UploadBlog = () => {
     console.log("Submit Data", { ...data, content });
   };
   return (
-    <div className="p-4 mx-auto rounded-lg shadow-md bg-tertiary text-tertiary-inverted">
+    <div className="p-4 mx-auto rounded-lg shadow-md bg-tertiary-inverted text-tertiary-inverted">
       <form
         onSubmit={handleSubmit(onSubmit)}
         className="flex flex-col gap-5 w-full"
@@ -236,6 +236,7 @@ const UploadBlog = () => {
             <QuillEditor
               ref={quillRef}
               blobUrlsRef={blobUrlsRef}
+              defaultValue={new Delta().insert("Write content here...")}
               onTextChange={handleTextChange}
             />
             <p className="text-[red]">{errors?.content?.message}</p>
