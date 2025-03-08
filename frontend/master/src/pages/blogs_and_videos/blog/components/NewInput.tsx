@@ -106,7 +106,7 @@ const NewInput = ({
         )}
       </div>
       {hasError && (
-        <span className="flex gap-1 items-start justify-start text-error text-xs font-normal">
+        <span className="flex gap-1 items-start justify-start text-red-600 text-xs font-normal">
           <InfoIcon className="min-w-4 h-4 fill-red-600" />
           {errorText}
         </span>

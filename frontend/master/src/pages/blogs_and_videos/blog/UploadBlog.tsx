@@ -9,6 +9,7 @@ import { useRef } from "react";
 import Quill from "quill";
 import QuillEditor from "./components/QuillEditor";
 import ImageUpload from "./components/ImageUpload";
+import TagInput from "./components/TagInput";
 
 interface FormBodyType {
   mainTitle: string;
@@ -16,6 +17,7 @@ interface FormBodyType {
   author: string;
   description: string;
   content: string;
+  tags: string[];
   publishedDate: Date | null;
   smallThumbnail: File | string | null;
   largeThumbnail: File | string | null;
@@ -27,6 +29,7 @@ const initialValues = {
   author: "",
   description: "",
   content: "",
+  tags: [],
   publishedDate: null,
   smallThumbnail: null,
   largeThumbnail: null,
@@ -39,6 +42,10 @@ const schema: yup.ObjectSchema<FormBodyType> = yup.object().shape({
   subTitle: yup.string().required("Subtitle is required"),
   author: yup.string().required("Author is required"),
   description: yup.string().required("Description is required"),
+  tags: yup
+    .array(yup.string().required())
+    .min(1, "At least one tag is required")
+    .defined(),
   publishedDate: yup
     .date()
     .nullable() // Allow null values
@@ -166,7 +173,7 @@ const UploadBlog = () => {
           </div>
           <div className="w-full">
             <Input
-              label="Main Title"
+              label="Sub Title"
               register={register("subTitle")}
               errorText={errors?.subTitle?.message}
             />
@@ -176,6 +183,26 @@ const UploadBlog = () => {
               label="Author"
               register={register("author")}
               errorText={errors?.author?.message}
+            />
+          </div>
+          <div className="w-ful">
+            <Controller
+              name="tags"
+              control={control}
+              defaultValue={[]}
+              render={({
+                field: { onChange, value },
+                fieldState: { error },
+              }) => (
+                <TagInput
+                  label="tags"
+                  setValue={onChange}
+                  placeholder={"Enter Tags"}
+                  tagsData={["3D models", "Render Quality", "Meta-Verse"]}
+                  errorText={error?.message ?? ""}
+                  selectedTagsData={value}
+                />
+              )}
             />
           </div>
           <div className="w-full">
