@@ -21,7 +21,7 @@ const Main = () => {
       <div className="max-h-dvh min-h-dvh max-w-full min-w-full w-dvw h-dvh flex gap-2 overflow-hidden p-2">
         <Sidebar />
         <div className="grow max-w-full h-full overflow-y-scroll">
-          <div className="bg-primary-inverted w-full sticky top-0">
+          <div className="bg-primary-inverted w-full sticky top-0 z-50">
             <Navbar />
           </div>
           <div className="w-full p-2">
