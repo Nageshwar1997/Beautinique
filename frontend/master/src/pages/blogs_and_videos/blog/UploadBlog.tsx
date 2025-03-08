@@ -16,9 +16,9 @@ interface FormBodyType {
   author: string;
   description: string;
   content: string;
-  publishedDate: Date | null; // Allow null explicitly
-  smallThumbnail: File | string;
-  largeThumbnail: File | string;
+  publishedDate: Date | null;
+  smallThumbnail: File | string | null;
+  largeThumbnail: File | string | null;
 }
 
 const initialValues = {
@@ -28,8 +28,8 @@ const initialValues = {
   description: "",
   content: "",
   publishedDate: null,
-  smallThumbnail: "",
-  largeThumbnail: "",
+  smallThumbnail: null,
+  largeThumbnail: null,
 };
 
 const schema: yup.ObjectSchema<FormBodyType> = yup.object().shape({
@@ -52,10 +52,11 @@ const UploadBlog = () => {
   const quillRef = useRef<Quill | null>(null);
   const blobUrlsRef = useRef<string[]>([]); // Store blob URLs for cleanup
   const {
-    register,
-    handleSubmit,
-    setValue,
     control,
+    handleSubmit,
+    register,
+    setValue,
+    trigger,
     watch,
     formState: { errors },
   } = useForm<FormBodyType>({
@@ -78,7 +79,7 @@ const UploadBlog = () => {
       try {
         const response = await fetch(blobUrl);
         const blob = await response.blob();
-        const file = new File([blob], `image-${index}.png`, {
+        const file = new File([blob], `image_${index}.webp`, {
           type: blob.type,
         });
 
@@ -121,16 +122,38 @@ const UploadBlog = () => {
       >
         <div className="flex gap-4 w-full">
           <ImageUpload
+            id="smallThumbnail"
             wrapperClassName="!w-1/3"
             className="!h-56"
-            previewUrl={watch("smallThumbnail") as string}
             errorText={errors?.smallThumbnail?.message}
+            previewImage={
+              watch("smallThumbnail") instanceof File
+                ? URL.createObjectURL(watch("smallThumbnail") as File)
+                : ""
+            }
+            onChange={(file) => {
+              if (file) {
+                setValue("smallThumbnail", file);
+                trigger("smallThumbnail");
+              }
+            }}
           />
           <ImageUpload
+            id="largeThumbnail"
             wrapperClassName="!w-2/3"
             className="!h-56"
-            previewUrl={watch("largeThumbnail") as string}
             errorText={errors?.largeThumbnail?.message}
+            previewImage={
+              watch("largeThumbnail") instanceof File
+                ? URL.createObjectURL(watch("largeThumbnail") as File)
+                : ""
+            }
+            onChange={(file) => {
+              if (file) {
+                setValue("largeThumbnail", file);
+                trigger("largeThumbnail");
+              }
+            }}
           />
         </div>
         <div className="flex flex-col gap-5 w-full">

@@ -1,29 +1,64 @@
+import { ChangeEvent, useCallback, useState } from "react";
 import { InfoIcon, UploadCloudIcon } from "../../../../icons";
+import { toastErrorMessage } from "../../../../utils/toasts";
 interface ImageUploadProps {
+  id: string;
   wrapperClassName?: string;
   title?: string;
   className?: string;
   previewUrl?: string;
   errorText?: string;
+  previewImage?: string;
+  onChange: (file: File | null) => void;
 }
 const ImageUpload = ({
   className = "",
+  id = "",
   wrapperClassName = "",
   errorText = "",
-  previewUrl = "",
+  previewImage = "",
   title = "Upload",
+  onChange = () => {},
 }: ImageUploadProps) => {
+  const [previewUrl, setPreviewUrl] = useState<string>(previewImage);
+
+  const handleImageChange = useCallback(
+    (e: ChangeEvent<HTMLInputElement>) => {
+      const file = e.target.files?.[0];
+      if (file) {
+        if (!file.type.startsWith("image/")) {
+          toastErrorMessage(
+            "Invalid file type. Please upload a JPEG, PNG, or JPG file."
+          );
+          return;
+        }
+
+        const blobUrl = URL.createObjectURL(file);
+        setPreviewUrl(blobUrl);
+
+        onChange(file);
+
+        return () => URL.revokeObjectURL(blobUrl);
+      }
+      setPreviewUrl("");
+      onChange(null);
+    },
+    [onChange]
+  );
+
   return (
     <div className={`w-full h-full flex flex-col gap-0.5 ${wrapperClassName}`}>
       <label
-        htmlFor="smallThumbnail"
+        htmlFor={id}
         className={`w-full h-full border border-primary-battleship-davys-gray rounded-xl relative overflow-hidden ${className}`}
       >
         <input
-          name="smallThumbnail"
-          id="smallThumbnail"
+          name={id}
+          id={id}
           type="file"
+          accept="image/*"
           className="hidden"
+          onChange={handleImageChange}
         />
         <div className="absolute left-0 top-0 w-full h-full bg-tertiary-inverted opacity-65 flex flex-col items-center justify-center gap-1">
           <img
