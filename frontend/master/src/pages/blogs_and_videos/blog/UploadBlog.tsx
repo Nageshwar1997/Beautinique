@@ -122,7 +122,7 @@ const UploadBlog = () => {
     console.log("Submit Data", { ...data, content });
   };
   return (
-    <div className="p-4 mx-auto rounded-lg shadow-md bg-tertiary-inverted text-tertiary-inverted">
+    <div className="p-4 mx-auto rounded-lg shadow-light-dark-soft bg-platinum-black">
       <form
         onSubmit={handleSubmit(onSubmit)}
         className="flex flex-col gap-5 w-full"
@@ -130,6 +130,7 @@ const UploadBlog = () => {
         <div className="flex gap-4 w-full">
           <ImageUpload
             id="smallThumbnail"
+            title="Small Thumbnail"
             wrapperClassName="!w-1/3"
             className="!h-56"
             errorText={errors?.smallThumbnail?.message}
@@ -147,6 +148,7 @@ const UploadBlog = () => {
           />
           <ImageUpload
             id="largeThumbnail"
+            title="Large Thumbnail"
             wrapperClassName="!w-2/3"
             className="!h-56"
             errorText={errors?.largeThumbnail?.message}

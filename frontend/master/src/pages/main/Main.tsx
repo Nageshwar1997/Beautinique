@@ -27,7 +27,7 @@ const Main = () => {
         <div className="w-full h-full relative">
           <div
             ref={containerRef as RefObject<HTMLDivElement>}
-            className="grow max-w-full h-full overflow-y-scroll rounded-lg border relative"
+            className="grow max-w-full h-full overflow-y-scroll rounded-lg relative"
           >
             <div className="bg-primary-inverted w-full sticky top-0 z-50">
               <Navbar />
