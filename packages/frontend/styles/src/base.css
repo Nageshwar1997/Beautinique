@@ -1,0 +1,144 @@
+/**
+ * @beautinique/frontend-styles: base styles.
+ *
+ * Beautinique defaults on top of Tailwind's preflight. Everything sits in @layer base,
+ * so any utility class still wins (focus:outline-none, leading-tight, border-brand ...).
+ */
+@layer base {
+  /* `border` alone gives the theme border, not currentcolor. */
+  *,
+  ::before,
+  ::after,
+  ::backdrop,
+  ::file-selector-button {
+    border-color: var(--border, currentcolor);
+  }
+
+  html {
+    background-color: var(--background);
+    color: var(--foreground);
+    /* themed page scrollbar only (the viewport takes it from <html>) */
+    scrollbar-color: var(--border-strong) transparent;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  body {
+    min-height: 100dvh;
+    overflow-wrap: break-word;
+    /* scrollbar-color is inherited, and any non-auto value disables ::-webkit-scrollbar rules in Chromium */
+    scrollbar-color: auto;
+  }
+
+  /* text-wrap-style, not the text-wrap shorthand: the shorthand would also reset the inherited
+     wrap mode and break whitespace-nowrap / truncate on parents */
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    text-wrap-style: balance;
+  }
+
+  p,
+  li,
+  figcaption,
+  blockquote {
+    text-wrap-style: pretty;
+  }
+
+  /* Always-visible keyboard focus (WCAG 2.4.7). Outline, not box-shadow, so forced-colors mode keeps it. */
+  :focus-visible {
+    outline: 2px solid var(--focus-ring);
+    outline-offset: 2px;
+  }
+
+  ::selection {
+    background-color: rgba(var(--brand-rgb), 0.22);
+  }
+
+  ::placeholder {
+    color: var(--foreground-subtle);
+  }
+
+  /* Modal <dialog> backdrop only (popovers and fullscreen keep the browser's own). The fallback covers
+     browsers where ::backdrop does not inherit variables. */
+  dialog::backdrop {
+    background-color: rgba(var(--overlay-rgb, 28, 22, 25), 0.5);
+  }
+
+  button:not(:disabled),
+  [role='button']:not([aria-disabled='true']),
+  summary {
+    cursor: pointer;
+  }
+
+  [aria-busy='true'] {
+    cursor: progress;
+  }
+
+  table,
+  output,
+  input[type='number'] {
+    font-variant-numeric: tabular-nums;
+  }
+
+  /* No spinner arrows on number inputs (quantity and price fields have their own controls). */
+  input[type='number'] {
+    appearance: textfield;
+  }
+
+  input[type='number']::-webkit-inner-spin-button,
+  input[type='number']::-webkit-outer-spin-button {
+    appearance: none;
+    margin: 0;
+  }
+
+  /**
+   * Hindi and Marathi (Devanagari) need room for matras above the headline and below the line,
+   * and letter-spacing breaks the headline (shirorekha). Set on the element that carries `lang`
+   * (usually <html>); the variables flow down, so text-* and leading-* utilities pick them up too.
+   */
+  [lang|='hi'],
+  [lang|='mr'] {
+    line-height: 1.7;
+
+    --text-xs--line-height: 1.7;
+    --text-sm--line-height: 1.7;
+    --text-base--line-height: 1.7;
+    --text-lg--line-height: 1.7;
+    --text-xl--line-height: 1.6;
+    --text-2xl--line-height: 1.5;
+    --text-3xl--line-height: 1.45;
+    --text-4xl--line-height: 1.4;
+    --text-5xl--line-height: 1.3;
+    --text-6xl--line-height: 1.3;
+    --text-7xl--line-height: 1.3;
+    --text-8xl--line-height: 1.3;
+    --text-9xl--line-height: 1.3;
+
+    --leading-tight: 1.4;
+    --leading-snug: 1.5;
+    --leading-normal: 1.7;
+    --leading-relaxed: 1.85;
+
+    --tracking-tighter: 0;
+    --tracking-tight: 0;
+    --tracking-wide: 0;
+    --tracking-wider: 0;
+    --tracking-widest: 0;
+  }
+
+  /* Stops third-party animations too; our own durations are already 0 (variables.css). Opt out with data-motion="allow". */
+  @media (prefers-reduced-motion: reduce) {
+    :not([data-motion='allow']),
+    :not([data-motion='allow'])::before,
+    :not([data-motion='allow'])::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+      scroll-behavior: auto !important;
+    }
+  }
+}

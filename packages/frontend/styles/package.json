@@ -1,0 +1,77 @@
+{
+  "name": "@beautinique/frontend-styles",
+  "version": "2.0.0",
+  "description": "Beautinique design tokens, self-hosted fonts and base styles (Tailwind v4) for every frontend app.",
+  "keywords": [
+    "beautinique",
+    "styles",
+    "design-tokens",
+    "tailwind",
+    "css",
+    "fonts"
+  ],
+  "author": "Nageshwar Pawar",
+  "license": "MIT AND OFL-1.1",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Nageshwar1997/Beautinique.git",
+    "directory": "packages/frontend/styles"
+  },
+  "type": "module",
+  "style": "./src/index.css",
+  "files": [
+    "src"
+  ],
+  "sideEffects": [
+    "*.css"
+  ],
+  "exports": {
+    ".": {
+      "style": "./src/index.css",
+      "default": "./src/index.css"
+    },
+    "./index.css": "./src/index.css",
+    "./variables.css": "./src/variables.css",
+    "./fonts.css": "./src/fonts.css",
+    "./base.css": "./src/base.css",
+    "./fonts/*": "./src/fonts/*",
+    "./vite": {
+      "types": "./src/vite.d.ts",
+      "default": "./src/vite.js"
+    },
+    "./package.json": "./package.json"
+  },
+  "scripts": {
+    "palette": "node scripts/palette.mjs",
+    "fonts": "node scripts/fonts.mjs",
+    "fonts:check": "node scripts/fonts.mjs --check",
+    "check": "node scripts/palette.mjs --check && node scripts/fonts.mjs --check",
+    "playground": "vite playground",
+    "test": "node --test test/*.test.mjs"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "engines": {
+    "node": ">=24"
+  },
+  "peerDependencies": {
+    "tailwindcss": "^4.0.0",
+    "vite": ">=6.0.0"
+  },
+  "devDependencies": {
+    "@capsizecss/metrics": "^4.4.0",
+    "@capsizecss/unpack": "^4.0.1",
+    "@tailwindcss/vite": "^4.3.3",
+    "fontkit": "^2.0.4",
+    "harfbuzzjs": "^1.6.3",
+    "subset-font": "^2.9.0",
+    "tailwindcss": "^4.3.3",
+    "vite": "^8.3.4"
+  },
+  "peerDependenciesMeta": {
+    "vite": {
+      "optional": true
+    }
+  }
+}

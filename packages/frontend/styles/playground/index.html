@@ -1,0 +1,57 @@
+<!doctype html>
+<html lang="en" theme="light">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Beautinique Styles</title>
+    <script type="module" src="./main.js"></script>
+  </head>
+  <body class="px-4 py-6 sm:px-8">
+    <header class="mb-6 flex flex-wrap items-center gap-3">
+      <h1 class="font-display mr-auto text-3xl font-medium">Beautinique styles</h1>
+      <div class="flex gap-1" role="group" aria-label="Language">
+        <button type="button" data-lang="en" class="rounded-md border px-3 py-1.5 text-sm">EN</button>
+        <button type="button" data-lang="hi" class="rounded-md border px-3 py-1.5 text-sm">हिंदी</button>
+        <button type="button" data-lang="mr" class="rounded-md border px-3 py-1.5 text-sm">मराठी</button>
+      </div>
+      <button type="button" id="toggle" class="border-border-strong bg-surface rounded-full border px-4 py-1.5 text-sm">Toggle theme</button>
+    </header>
+
+    <main class="space-y-10">
+      <section aria-labelledby="fonts">
+        <h2 id="fonts" class="text-foreground-muted mb-3 text-sm font-semibold uppercase tracking-wider">Fonts</h2>
+        <div id="type" class="grid gap-6 lg:grid-cols-2"></div>
+      </section>
+
+      <section aria-labelledby="scale">
+        <h2 id="scale" class="text-foreground-muted mb-3 text-sm font-semibold uppercase tracking-wider">Text scale (line-height follows the language)</h2>
+        <div id="sizes" class="bg-surface divide-y rounded-2xl border px-4"></div>
+      </section>
+
+      <section aria-labelledby="base">
+        <h2 id="base" class="text-foreground-muted mb-3 text-sm font-semibold uppercase tracking-wider">Base styles</h2>
+        <div class="bg-surface flex flex-wrap items-center gap-3 rounded-2xl border p-4">
+          <button type="button" class="bg-brand text-brand-foreground hover:bg-brand-hover rounded-lg px-4 py-2 font-semibold">Tab to me</button>
+          <a href="#base" class="text-brand-text underline">A link</a>
+          <input class="rounded-lg border px-3 py-2" placeholder="Search lipstick, serum…" aria-label="Search" />
+          <input class="w-24 rounded-lg border px-3 py-2" type="number" value="1299" aria-label="Price" />
+          <button type="button" id="open-dialog" class="rounded-lg border px-4 py-2">Open dialog</button>
+          <dialog id="dialog" class="bg-surface text-foreground m-auto rounded-2xl border p-6">
+            <p class="mb-4">Native dialog with the theme backdrop.</p>
+            <form method="dialog"><button class="bg-brand text-brand-foreground rounded-lg px-4 py-2">Close</button></form>
+          </dialog>
+        </div>
+      </section>
+
+      <section aria-labelledby="semantic-h">
+        <h2 id="semantic-h" class="text-foreground-muted mb-3 text-sm font-semibold uppercase tracking-wider">Semantic pairs</h2>
+        <div class="flex flex-wrap gap-1.5" id="semantic"></div>
+      </section>
+
+      <section aria-labelledby="palette-h">
+        <h2 id="palette-h" class="text-foreground-muted mb-3 text-sm font-semibold uppercase tracking-wider">Palette</h2>
+        <div id="palette" class="space-y-3"></div>
+      </section>
+    </main>
+  </body>
+</html>

@@ -1,6 +1,6 @@
 # DESIGN — BQ
 
-> **Status:** v1.0 (2026-10-19). UI aur UX ke niyam saare 11 apps ke liye. Design ka **source of truth code hai**: `@beautinique/frontend-styles` (tokens) aur `@beautinique/frontend-components` (components). [RULES.md](RULES.md) §5 frontend ke coding niyam batata hai; ye file batati hai ki cheezein **dikhengi aur chalengi kaise**.
+> **Status:** v1.1 (2026-10-19). UI aur UX ke niyam saare 11 apps ke liye. Design ka **source of truth code hai**: `@beautinique/frontend-styles` (tokens) aur `@beautinique/frontend-components` (components). [RULES.md](RULES.md) §5 frontend ke coding niyam batata hai; ye file batati hai ki cheezein **dikhengi aur chalengi kaise**.
 
 ## 1. Design principles
 
@@ -62,8 +62,10 @@ Grey ke baaki tokens (`timberwolf-eerie-black`, `platinum-black`, `silver`, `sil
 
 ## 4. Typography
 
-- **Latin:** Metropolis (300 Light, 400 Regular, 500 Medium, 600 SemiBold, 700 Bold), self-hosted.
-- **Hindi aur Marathi (Devanagari):** Noto Sans Devanagari ya Mukta, self-hosted, `font-family` fallback chain me Metropolis ke baad.
+- **Body aur UI (`font-sans`):** Plus Jakarta Sans, weights 300–700 + italic.
+- **Headings aur banners (`font-display`):** Fraunces (opsz 72, sharp), weights 300–700 + italic. Prices hamesha `font-sans` me (Fraunces me tabular figures nahi).
+- **Hindi aur Marathi (Devanagari):** Noto Sans Devanagari, dono families me (Marathi ke ल/श `lang="mr"` se).
+- Teeno self-hosted variable woff2 (OFL), `styles` package me. Loading aur flicker ke niyam package ke README me.
 - **Scale:** Tailwind `text-xs` se `text-4xl`. Body 16 px (`text-base`) se chhota nahi; internal apps ke dense tables me 14 px tak.
 - **Line height:** Devanagari ke liye thoda zyada (≥ 1.6).
 - **Numbers:** prices aur tables me `tabular-nums`. INR aur dates `Intl` se (`en-IN`, `hi-IN`, `mr-IN`).
@@ -165,3 +167,4 @@ Har screen ye states dikhati hai:
 | Version | Date | Badlav |
 |---|---|---|
 | v1.0 | 2026-10-19 | Pehla version: principles, tokens (aaj ke `styles` package se), typography, components, states, commerce UI rules, accessibility, languages, har app ka look, media aur icons. |
+| v1.1 | 2026-10-19 | Typography: Metropolis ki jagah Plus Jakarta Sans (body) + Fraunces (headings) + Noto Sans Devanagari. |

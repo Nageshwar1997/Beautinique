@@ -1,0 +1,16 @@
+# Dependencies and build output
+node_modules/
+dist/
+coverage/
+.turbo/
+*.tsbuildinfo
+
+# Secrets: never commit env files (public repo). Only .env.example is allowed.
+.env
+.env.*
+!.env.example
+
+# Logs and OS files
+*.log
+.DS_Store
+Thumbs.db

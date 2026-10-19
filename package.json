@@ -1,0 +1,12 @@
+{
+  "name": "beautinique",
+  "private": true,
+  "description": "Beautinique monorepo: packages, frontend apps and backend services.",
+  "license": "MIT",
+  "workspaces": [
+    "packages/*/*"
+  ],
+  "engines": {
+    "node": ">=24"
+  }
+}

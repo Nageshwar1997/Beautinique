@@ -1,0 +1,5 @@
+# `npm run check` compares these generated files byte for byte: keep them exactly as written,
+# even on Windows with core.autocrlf (licences must match the upstream sha256).
+src/fonts/** -text
+src/*.css text eol=lf
+scripts/*.mjs text eol=lf
