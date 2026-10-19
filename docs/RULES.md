@@ -1,6 +1,6 @@
 # RULES — BQ
 
-> **Status:** v1.0 (2026-10-19). Ye niyam Beautinique ke har code, doc aur deploy pe lagu hain. [PRD.md](PRD.md) batata hai **kya** banana hai, [ARCHITECTURE.md](ARCHITECTURE.md) batata hai **kaise**, aur ye file batati hai ki **kin niyamon ke saath**. Koi rule todna ho to pehle is file me badlav aur change log entry.
+> **Status:** v1.1 (2026-10-20). Ye niyam Beautinique ke har code, doc aur deploy pe lagu hain. [PRD.md](PRD.md) batata hai **kya** banana hai, [ARCHITECTURE.md](ARCHITECTURE.md) batata hai **kaise**, aur ye file batati hai ki **kin niyamon ke saath**. Koi rule todna ho to pehle is file me badlav aur change log entry.
 
 ## 1. Kaam karne ke niyam
 
@@ -11,7 +11,6 @@
 5. **"Done" ki definition:**
    - Code + unit tests + zaroori integration ya E2E test.
    - Accessibility check (axe) aur 360 / 768 / 1280 px pe responsive.
-   - EN/HI/MR translations.
    - Docs (README ya doc section) update.
    - CI green.
    - **Asli user wala action karke check kiya** (§6.4).
@@ -51,20 +50,20 @@
 12. **Redis:** har cache key pe TTL. Free mode me har deployable ki ek queue. Redis kisi cheez ka source of truth nahi.
 13. **Atlas M0:** har sort ke liye index, `$where`/map-reduce nahi, `.watch(` sirf relay module me, bade exports cursor + batches me.
 14. **Migrations:** forward-only, idempotent, expand/contract; boot pe chalti hain.
-15. **Errors:** `AppError` + common response envelope; error codes contracts me; user ko message i18n key se.
+15. **Errors:** `AppError` + common response envelope; error codes contracts me; user ko message error code se (English text ek jagah).
 16. **Cache headers:** login wale aur personal responses `private, no-store`; `s-maxage` sirf `cache: 'public'` contracts pe, aur unpe cookies upstream nahi jaati.
 
 ## 5. Frontend
 
-1. **Pehle packages dekho:** `@beautinique/frontend-components`, hooks, stores, styles aur naye shared packages (app-shell, data-table, auth-ui, authz, maps, i18n). Wahan hai to haath se UI mat likho.
+1. **Pehle packages dekho:** `@beautinique/frontend-components`, hooks, stores, styles aur naye shared packages (app-shell, data-table, auth-ui, authz, maps). Wahan hai to haath se UI mat likho.
 2. **Components props se chalein, app se jude na hon.** App-specific cheez prop ya config se aaye.
 3. **Naya hook ya component:** pehle app me banao, **asli browser me prove karo**, phir package me le jao.
 4. **Icons:** sirf `icons` package ke apne components (`IconCart`, ...). Naya icon chahiye to seedha package me jodo, usi PR me jisme wo use ho raha hai (Iconify se SVG copy + license note). Monorepo me `workspace:*` ki wajah se wo turant saare apps me milta hai; app me alag icons file nahi. App me inline SVG ya Iconify import nahi.
 5. **Accessibility (WCAG 2.1 AA):** keyboard se chalne layak, labels, colour contrast, dikhne wala focus. `outline-hidden` jaisi class lagao to apna focus ring zaroor do.
 6. **Responsive:** har screen 360, 768 aur 1280 px pe; light aur dark dono theme.
-7. **i18n:** user ko dikhne wala koi text hard-coded nahi; EN/HI/MR keys sab me hon (CI parity check). INR aur dates `Intl` se.
+7. **Text aur formats:** apps sirf English me. INR, numbers aur dates `Intl` (`en-IN`) se, haath se format nahi.
 8. **API:** sirf generated `api-client` aur contracts ke query keys; seedha `axios`/`fetch` nahi.
-9. **User data browser storage me nahi.** App `GET /api/v1/iam/me` se shuru hoti hai. `localStorage` sirf UI preferences (theme, language) ke liye.
+9. **User data browser storage me nahi.** App `GET /api/v1/iam/me` se shuru hoti hai. `localStorage` sirf UI preferences (jaise theme) ke liye.
 10. **Permissions UI:** `<Can>` / `usePermission`; nav permission se filter. Backend phir bhi check karta hai.
 
 ## 6. Testing
@@ -104,3 +103,4 @@
 | Version | Date | Badlav |
 |---|---|---|
 | v1.0 | 2026-10-19 | Pehla version: kaam, git, code, backend, frontend, testing, security, docs aur AI assistant ke niyam. |
+| v1.1 | 2026-10-20 | Apps sirf English; INR aur dates `en-IN`. |

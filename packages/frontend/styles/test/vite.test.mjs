@@ -44,20 +44,6 @@ function emitted(assets, name) {
   return files[0];
 }
 
-/** Runs the inline preload script against a fake document; returns the href it added, or null. */
-function runInlineScript(html, savedLanguage) {
-  const code = html.match(/<script>([\s\S]*?)<\/script>/)?.[1];
-  assert.ok(code, 'inline preload script is present');
-  const links = [];
-  const document = { createElement: () => ({}), head: { appendChild: (l) => links.push(l) } };
-  const localStorage = { getItem: () => savedLanguage };
-  new Function('document', 'localStorage', code)(document, localStorage);
-  assert.ok(links.length <= 1);
-  if (!links.length) return null;
-  assert.deepEqual({ rel: links[0].rel, as: links[0].as, type: links[0].type, crossOrigin: links[0].crossOrigin }, { rel: 'preload', as: 'font', type: 'font/woff2', crossOrigin: 'anonymous' });
-  return links[0].href;
-}
-
 describe('beautiniqueFonts() in a build', () => {
   test('preloads exactly the hashed files the CSS uses', async () => {
     const { html, css, assets } = await buildFixture({ preload: ['sans', 'display'] });
@@ -67,30 +53,13 @@ describe('beautiniqueFonts() in a build', () => {
       assert.ok(html.includes(`<link rel="preload" as="font" type="font/woff2" href="/assets/${file}" crossorigin>`), `index.html preloads ${file}`);
     }
     assert.equal((html.match(/rel="preload"/g) ?? []).length, 2);
+    assert.ok(!html.includes('<script>'), 'no inline script (nothing for a CSP to allow)');
   });
 
   test('defaults to the sans font only', async () => {
     const { html, assets } = await buildFixture();
     assert.ok(html.includes(`/assets/${emitted(assets, 'plus-jakarta-sans-latin')}`));
     assert.equal((html.match(/rel="preload"/g) ?? []).length, 1);
-  });
-
-  test('Devanagari is preloaded only for a saved hi/mr language, before the stylesheet', async () => {
-    const { html, css, assets } = await buildFixture({ devanagari: { storageKey: 'bq-lang' } });
-    const file = emitted(assets, 'noto-sans-devanagari');
-    assert.ok(css.includes(`/assets/${file}`));
-    assert.ok(!html.includes(`<link rel="preload" as="font" type="font/woff2" href="/assets/${file}"`), 'no unconditional Devanagari preload');
-    assert.ok(html.indexOf('<script>') < html.indexOf('rel="stylesheet"'), 'inline script runs before the CSS link');
-    assert.equal(runInlineScript(html, 'hi'), `/assets/${file}`);
-    assert.equal(runInlineScript(html, 'mr'), `/assets/${file}`);
-    assert.equal(runInlineScript(html, 'en'), null);
-    assert.equal(runInlineScript(html, null), null);
-  });
-
-  test('custom language values', async () => {
-    const { html } = await buildFixture({ devanagari: { storageKey: 'lang', values: ['hi-IN'] } });
-    assert.ok(runInlineScript(html, 'hi-IN'));
-    assert.equal(runInlineScript(html, 'hi'), null);
   });
 
   test('respects an absolute base', async () => {
@@ -125,11 +94,9 @@ describe('beautiniqueFonts() in a build', () => {
   });
 
   test('multi-page build: only pages that load the styles get the preloads', async () => {
-    const { htmls, assets } = await buildFixture({ preload: ['sans'], devanagari: { storageKey: 'bq-lang' } }, { pages: ['index.html', 'nocss.html'] });
-    assert.ok(htmls['index.html'].includes(`/assets/${emitted(assets, 'plus-jakarta-sans-latin')}`));
-    assert.ok(htmls['index.html'].includes('<script>'));
+    const { htmls, assets } = await buildFixture({ preload: ['sans', 'display'] }, { pages: ['index.html', 'nocss.html'] });
+    for (const name of ['plus-jakarta-sans-latin', 'fraunces-latin']) assert.ok(htmls['index.html'].includes(`/assets/${emitted(assets, name)}`));
     assert.ok(!htmls['nocss.html'].includes('rel="preload"'), 'no preload on a page without the styles');
-    assert.ok(!htmls['nocss.html'].includes('<script>'), 'no Devanagari script on a page without the styles');
   });
 
   test('fails loudly when the app does not import the styles', async () => {
@@ -140,11 +107,7 @@ describe('beautiniqueFonts() in a build', () => {
 describe('beautiniqueFonts() options', () => {
   test('rejects unknown fonts', () => {
     assert.throws(() => beautiniqueFonts({ preload: ['serif'] }), /unknown font "serif"/);
-    assert.throws(() => beautiniqueFonts({ preload: ['devanagari'] }), /devanagari option/);
-  });
-
-  test('requires a storage key for Devanagari', () => {
-    assert.throws(() => beautiniqueFonts({ devanagari: {} }), /storageKey/);
+    assert.throws(() => beautiniqueFonts({ preload: ['toString'] }), /unknown font "toString"/);
   });
 });
 

@@ -1,13 +1,13 @@
 # DESIGN — BQ
 
-> **Status:** v1.1 (2026-10-19). UI aur UX ke niyam saare 11 apps ke liye. Design ka **source of truth code hai**: `@beautinique/frontend-styles` (tokens) aur `@beautinique/frontend-components` (components). [RULES.md](RULES.md) §5 frontend ke coding niyam batata hai; ye file batati hai ki cheezein **dikhengi aur chalengi kaise**.
+> **Status:** v1.2 (2026-10-20). UI aur UX ke niyam saare 11 apps ke liye. Design ka **source of truth code hai**: `@beautinique/frontend-styles` (tokens) aur `@beautinique/frontend-components` (components). [RULES.md](RULES.md) §5 frontend ke coding niyam batata hai; ye file batati hai ki cheezein **dikhengi aur chalengi kaise**.
 
 ## 1. Design principles
 
 1. **Bharosa pehle:** beauty products pe customer ko asli shade, saaf price aur saari legal jaankari chahiye. Kuch chhupana nahi.
 2. **Ek design system, 11 apps:** saare apps ek hi tokens aur components use karte hain. Har app ka layout uske kaam ke hisaab se hai (§10).
 3. **Mobile-first jahan zaroori:** Customer aur Delivery app phone pe sabse zyada chalenge. Internal apps desktop pe zyada, par phone pe bhi poore chalenge.
-4. **Sabke liye:** WCAG 2.1 AA, English/Hindi/Marathi, light aur dark theme.
+4. **Sabke liye:** WCAG 2.1 AA, light aur dark theme.
 5. **Koi dark pattern nahi:** fake urgency, chhupe charges, pre-ticked boxes kabhi nahi (§7).
 
 ## 2. Source of truth
@@ -24,30 +24,30 @@ Theme `<html theme="light">` ya `theme="dark"` attribute se badalti hai. Default
 
 ### 3.2 Base colours (semantic)
 
-| Token | Light | Dark | Use |
-|---|---|---|---|
-| `primary` | `#000000` | `#FFFFFF` | Main text, primary button |
-| `primary-invert` | `#FFFFFF` | `#000000` | Page background, primary button text |
-| `secondary` | `rgb(28,28,28)` | `rgb(245,245,245)` | Secondary text aur surfaces |
-| `tertiary` | `rgb(46,46,46)` | `rgb(200,200,200)` | Muted text, borders |
-| `smoke-eerie` | `#F2F2F2` | `#1A1A1A` | Cards aur sections ka background |
-| `battleship-davys-gray` | `#999999` | `#4D4D4D` | Placeholder, disabled |
-| `primary-red` | `rgb(220,38,38)` | `rgb(248,113,113)` | Error, destructive |
-| `primary-green` | `rgb(22,163,74)` | `rgb(74,222,128)` | Success |
-| `primary-yellow` | `rgb(234,179,8)` | `rgb(253,224,71)` | Warning |
+| Token                   | Light            | Dark               | Use                                  |
+| ----------------------- | ---------------- | ------------------ | ------------------------------------ |
+| `primary`               | `#000000`        | `#FFFFFF`          | Main text, primary button            |
+| `primary-invert`        | `#FFFFFF`        | `#000000`          | Page background, primary button text |
+| `secondary`             | `rgb(28,28,28)`  | `rgb(245,245,245)` | Secondary text aur surfaces          |
+| `tertiary`              | `rgb(46,46,46)`  | `rgb(200,200,200)` | Muted text, borders                  |
+| `smoke-eerie`           | `#F2F2F2`        | `#1A1A1A`          | Cards aur sections ka background     |
+| `battleship-davys-gray` | `#999999`        | `#4D4D4D`          | Placeholder, disabled                |
+| `primary-red`           | `rgb(220,38,38)` | `rgb(248,113,113)` | Error, destructive                   |
+| `primary-green`         | `rgb(22,163,74)` | `rgb(74,222,128)`  | Success                              |
+| `primary-yellow`        | `rgb(234,179,8)` | `rgb(253,224,71)`  | Warning                              |
 
 Grey ke baaki tokens (`timberwolf-eerie-black`, `platinum-black`, `silver`, `silver-jet`, `platinum-jet`) borders aur layers ke liye hain.
 
 ### 3.3 Accent palette (dono theme me same)
 
-| Token | Hex | Token | Hex |
-|---|---|---|---|
-| `picton-blue-c` | `#25ADF9` | `razzle-dazzle-rose-c` | `#EE46BC` |
-| `blue-crayola-c` | `rgb(0,119,255)` | `veronica-c` | `#9747FF` |
-| `dodger-blue-c` | `#2E90FA` | `jade-c` | `#12B76A` |
-| `princeton-orange-c` | `#F79009` | `turquoise-c` | `#00E5D1` |
-| `naples-yellow-c` | `#F7D158` | `rose-c` | `#FE026C` |
-| `electric-purple-c` | `#B519DF` | | |
+| Token                | Hex              | Token                  | Hex       |
+| -------------------- | ---------------- | ---------------------- | --------- |
+| `picton-blue-c`      | `#25ADF9`        | `razzle-dazzle-rose-c` | `#EE46BC` |
+| `blue-crayola-c`     | `rgb(0,119,255)` | `veronica-c`           | `#9747FF` |
+| `dodger-blue-c`      | `#2E90FA`        | `jade-c`               | `#12B76A` |
+| `princeton-orange-c` | `#F79009`        | `turquoise-c`          | `#00E5D1` |
+| `naples-yellow-c`    | `#F7D158`        | `rose-c`               | `#FE026C` |
+| `electric-purple-c`  | `#B519DF`        |                        |           |
 
 - **Brand gradient (`accent-duo`):** turquoise → picton blue → blue crayola. Highlights, hero aur special badges ke liye.
 - **Contrast rule:** accent colours white pe chhote text ke liye AA pass nahi karte (jaise picton blue). Isliye accent sirf decoration, icons, bade text aur buttons ke background ke liye; padhne wala text hamesha `primary`/`secondary` me.
@@ -64,11 +64,9 @@ Grey ke baaki tokens (`timberwolf-eerie-black`, `platinum-black`, `silver`, `sil
 
 - **Body aur UI (`font-sans`):** Plus Jakarta Sans, weights 300–700 + italic.
 - **Headings aur banners (`font-display`):** Fraunces (opsz 72, sharp), weights 300–700 + italic. Prices hamesha `font-sans` me (Fraunces me tabular figures nahi).
-- **Hindi aur Marathi (Devanagari):** Noto Sans Devanagari, dono families me (Marathi ke ल/श `lang="mr"` se).
-- Teeno self-hosted variable woff2 (OFL), `styles` package me. Loading aur flicker ke niyam package ke README me.
+- Dono self-hosted variable woff2 (OFL), `styles` package me. Loading aur flicker ke niyam package ke README me.
 - **Scale:** Tailwind `text-xs` se `text-4xl`. Body 16 px (`text-base`) se chhota nahi; internal apps ke dense tables me 14 px tak.
-- **Line height:** Devanagari ke liye thoda zyada (≥ 1.6).
-- **Numbers:** prices aur tables me `tabular-nums`. INR aur dates `Intl` se (`en-IN`, `hi-IN`, `mr-IN`).
+- **Numbers:** prices aur tables me `tabular-nums`. INR aur dates `Intl` se (`en-IN`).
 
 ## 5. Components
 
@@ -81,29 +79,29 @@ Grey ke baaki tokens (`timberwolf-eerie-black`, `platinum-black`, `silver`, `sil
 
 ### 5.2 Naye shared components (ARCHITECTURE §9.2)
 
-app-shell (layout, nav, switchers, wake-up screen), data-table, review-screens, auth-ui (OTP input, TOTP, My Devices, step-up dialog), maps, forms, pwa-kit.
+app-shell (layout, nav, theme switcher, wake-up screen), data-table, review-screens, auth-ui (OTP input, TOTP, My Devices, step-up dialog), maps, forms, pwa-kit.
 
 ### 5.3 Product-specific (packages me banenge)
 
-| Component | Kaam |
-|---|---|
-| ProductCard | Image, brand, naam, PriceBlock, rating, shade dots, try-on badge. |
-| PriceBlock | MRP, selling price, discount, prior price (§7), Pro price label. |
-| ShadeSwatch / ShadePicker | Asli rang ka swatch (hex), naam, out-of-stock state. |
-| LegalDeclarations | Product page ki saari declarations (§7). |
-| SellerInfo | Seller ka naam, address, customer care, grievance officer, rating. |
-| RatingStars + ReviewCard | Rating, photo reviews, "verified purchase", incentivised label. |
-| OrderTimeline | Order state machine ke steps, live status. |
-| RunSheetCard | Delivery app me ek stop: address, payment, OTP, actions. |
-| Labels | `DummyBadge`, `ProPriceLabel`, `SponsoredLabel`, `HouseBrandBadge`. |
-| EmptyState, ErrorState, PermissionDenied | Saare apps me ek jaisa. |
+| Component                                | Kaam                                                                |
+| ---------------------------------------- | ------------------------------------------------------------------- |
+| ProductCard                              | Image, brand, naam, PriceBlock, rating, shade dots, try-on badge.   |
+| PriceBlock                               | MRP, selling price, discount, prior price (§7), Pro price label.    |
+| ShadeSwatch / ShadePicker                | Asli rang ka swatch (hex), naam, out-of-stock state.                |
+| LegalDeclarations                        | Product page ki saari declarations (§7).                            |
+| SellerInfo                               | Seller ka naam, address, customer care, grievance officer, rating.  |
+| RatingStars + ReviewCard                 | Rating, photo reviews, "verified purchase", incentivised label.     |
+| OrderTimeline                            | Order state machine ke steps, live status.                          |
+| RunSheetCard                             | Delivery app me ek stop: address, payment, OTP, actions.            |
+| Labels                                   | `DummyBadge`, `ProPriceLabel`, `SponsoredLabel`, `HouseBrandBadge`. |
+| EmptyState, ErrorState, PermissionDenied | Saare apps me ek jaisa.                                             |
 
 ## 6. States
 
 Har screen ye states dikhati hai:
 - **Loading:** Skeleton (shape jaisi), spinner sirf chhote actions pe.
 - **Empty:** kya hai aur aage kya karein, ek action button ke saath.
-- **Error:** saaf message (i18n), retry, aur request-id (support ke liye).
+- **Error:** saaf message, retry, aur request-id (support ke liye).
 - **Offline:** NetworkStatusToaster; Delivery app me offline queue ka count.
 - **Wake-up screen:** Render cold start pe (~1 min) "server jaag raha hai" screen, progress ke saath.
 - **Permission denied:** kis permission ki zaroorat hai, aur kisse maangein.
@@ -130,22 +128,21 @@ Har screen ye states dikhati hai:
 - `prefers-reduced-motion` pe animations band ya halki.
 - Har page pe ek `h1`, sahi heading order, aur skip-to-content link.
 
-## 9. Language (EN / HI / MR)
+## 9. Text aur formats
 
-- Har app me language switcher (header ya profile me). `<html lang>` language ke saath badalta hai.
-- Hindi aur Marathi text English se 30–40% lamba ho sakta hai: buttons aur labels fixed width me nahi.
-- Images me text nahi (translate nahi ho sakta).
-- Brand aur product naam translate nahi hote; categories, UI aur messages translate hote hain.
+- Apps **English** me hain (`<html lang="en">`).
+- INR, numbers aur dates `Intl` se `en-IN` me (₹1,299, 20 Oct 2026).
+- Images me zaroori text nahi (screen reader aur zoom ke liye); har image ka alt text.
 
 ## 10. Har app ka look
 
-| App | Look |
-|---|---|
-| Customer | Brand-forward aur image-led: bade product images, shades, try-on CTA. Phone pe bottom nav (Home, Categories, Search, Cart, Account). |
-| Seller, Creator | Clean dashboard: sidebar + top bar, cards aur tables, onboarding stepper. |
-| Admin, Super Admin, Master, Support Desk, Finance, Growth Studio | Data-dense: sidebar nav, filters + data-table, review queues, side panel me detail, keyboard shortcuts. |
-| Logistics Ops | Data-dense + maps: network map, control tower live map, scan-friendly bade inputs. |
-| Delivery (PWA) | Phone ke liye: high contrast (dhoop me bhi padh sakein), bade buttons, ek haath se chalne layak, neeche fixed action bar, offline state hamesha dikhe. |
+| App                                                              | Look                                                                                                                                                   |
+| ---------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Customer                                                         | Brand-forward aur image-led: bade product images, shades, try-on CTA. Phone pe bottom nav (Home, Categories, Search, Cart, Account).                   |
+| Seller, Creator                                                  | Clean dashboard: sidebar + top bar, cards aur tables, onboarding stepper.                                                                              |
+| Admin, Super Admin, Master, Support Desk, Finance, Growth Studio | Data-dense: sidebar nav, filters + data-table, review queues, side panel me detail, keyboard shortcuts.                                                |
+| Logistics Ops                                                    | Data-dense + maps: network map, control tower live map, scan-friendly bade inputs.                                                                     |
+| Delivery (PWA)                                                   | Phone ke liye: high contrast (dhoop me bhi padh sakein), bade buttons, ek haath se chalne layak, neeche fixed action bar, offline state hamesha dikhe. |
 
 ## 11. Media, motion, icons
 
@@ -164,7 +161,8 @@ Har screen ye states dikhati hai:
 
 ## Change log
 
-| Version | Date | Badlav |
-|---|---|---|
-| v1.0 | 2026-10-19 | Pehla version: principles, tokens (aaj ke `styles` package se), typography, components, states, commerce UI rules, accessibility, languages, har app ka look, media aur icons. |
-| v1.1 | 2026-10-19 | Typography: Metropolis ki jagah Plus Jakarta Sans (body) + Fraunces (headings) + Noto Sans Devanagari. |
+| Version | Date       | Badlav                                                                                                                                                                                |
+| ------- | ---------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| v1.0    | 2026-10-19 | Pehla version: principles, tokens (aaj ke `styles` package se), typography, components, states, commerce UI rules, accessibility, text aur formats, har app ka look, media aur icons. |
+| v1.1    | 2026-10-19 | Typography: Metropolis ki jagah Plus Jakarta Sans (body) + Fraunces (headings).                                                                                                       |
+| v1.2    | 2026-10-20 | §9 Text aur formats: apps sirf English me.                                                                                                                                            |

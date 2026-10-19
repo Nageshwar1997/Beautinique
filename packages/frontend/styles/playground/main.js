@@ -1,41 +1,15 @@
 import './playground.css';
 
-const LANG_KEY = 'bq-playground-lang';
-
-const COPY = {
-  en: {
-    eyebrow: 'New · Skincare',
-    hero: 'Glow that’s <em class="text-brand-text">truly</em> yours',
-    title: 'Bestsellers in Skincare',
-    name: 'Rose Glow Vitamin C Serum, 30 ml',
-    off: '19% off',
-    ratings: '2,341 ratings',
-    desc: 'Lightweight serum with 10% vitamin C and rose extract. Brightens dull skin in 4 weeks. Dermatologically tested, for all skin types.',
-    cta: 'Add to Bag',
-    line: 'Beauty that feels like you',
-  },
-  hi: {
-    eyebrow: 'नया · स्किनकेयर',
-    hero: 'आपकी अपनी असली चमक',
-    title: 'स्किनकेयर के बेस्टसेलर',
-    name: 'रोज़ ग्लो विटामिन C सीरम, 30 ml',
-    off: '19% छूट',
-    ratings: '2,341 रेटिंग',
-    desc: '10% विटामिन C और गुलाब के अर्क वाला हल्का सीरम। 4 हफ़्तों में बेजान त्वचा को निखारता है। त्वचा विशेषज्ञ द्वारा परीक्षित।',
-    cta: 'बैग में डालें',
-    line: 'सुंदरता जो आप जैसी लगे',
-  },
-  mr: {
-    eyebrow: 'नवीन · स्किनकेअर',
-    hero: 'तुमची स्वतःची खरी चमक',
-    title: 'स्किनकेअरमधील बेस्टसेलर',
-    name: 'रोझ ग्लो व्हिटॅमिन C सीरम, 30 ml',
-    off: '19% सूट',
-    ratings: '2,341 रेटिंग',
-    desc: '10% व्हिटॅमिन C आणि गुलाबाच्या अर्कासह हलके सीरम. 4 आठवड्यांत निस्तेज त्वचा उजळते. विशेष ऑफर फक्त आज.',
-    cta: 'बॅगमध्ये टाका',
-    line: 'तुमच्यासारखे वाटणारे सौंदर्य',
-  },
+const T = {
+  eyebrow: 'New · Skincare',
+  hero: 'Glow that’s <em class="text-brand-text">truly</em> yours',
+  title: 'Bestsellers in Skincare',
+  name: 'Rose Glow Vitamin C Serum, 30 ml',
+  off: '19% off',
+  ratings: '2,341 ratings',
+  desc: 'Lightweight serum with 10% vitamin C and rose extract. Brightens dull skin in 4 weeks. Dermatologically tested, for all skin types.',
+  cta: 'Add to Bag',
+  line: 'Beauty that feels like you',
 };
 
 const WEIGHTS = [
@@ -47,14 +21,14 @@ const WEIGHTS = [
 ];
 const SIZES = ['text-xs', 'text-sm', 'text-base', 'text-lg', 'text-xl', 'text-2xl', 'text-3xl', 'text-4xl'];
 
-function renderType(lang) {
-  const t = COPY[lang];
+function renderType() {
+  const t = T;
   document.getElementById('type').innerHTML = `
     <article class="bg-surface rounded-2xl border p-6">
       <p class="text-brand-text text-xs font-semibold uppercase tracking-widest">${t.eyebrow}</p>
       <p class="font-display mt-2 text-5xl font-medium leading-tight">${t.hero}</p>
       <p class="font-display mt-4 text-3xl font-medium">${t.title}</p>
-      <p class="text-foreground-muted mt-6 text-xs font-semibold">font-display · Fraunces + Noto Sans Devanagari</p>
+      <p class="text-foreground-muted mt-6 text-xs font-semibold">font-display · Fraunces</p>
       <div class="font-display mt-2 flex flex-wrap gap-x-4 text-2xl">
         ${WEIGHTS.map(([w, c]) => `<span class="${c}">${w}</span>`).join('')}<span class="italic">Italic</span>
       </div>
@@ -70,7 +44,7 @@ function renderType(lang) {
       <p class="text-foreground-muted text-sm"><span class="text-rating">★</span> 4.6 · ${t.ratings}</p>
       <p class="mt-3">${t.desc}</p>
       <button type="button" class="bg-brand text-brand-foreground hover:bg-brand-hover mt-4 rounded-lg px-5 py-2.5 font-semibold">${t.cta}</button>
-      <p class="text-foreground-muted mt-6 text-xs font-semibold">font-sans · Plus Jakarta Sans + Noto Sans Devanagari</p>
+      <p class="text-foreground-muted mt-6 text-xs font-semibold">font-sans · Plus Jakarta Sans</p>
       <div class="mt-2 flex flex-wrap gap-x-4 text-lg">
         ${WEIGHTS.map(([w, c]) => `<span class="${c}">${w} ₹1,299</span>`).join('')}<span class="italic">${t.line}</span>
       </div>
@@ -80,21 +54,7 @@ function renderType(lang) {
   ).join('');
 }
 
-function setLang(lang) {
-  document.documentElement.lang = lang;
-  try {
-    localStorage.setItem(LANG_KEY, lang);
-  } catch {}
-  for (const b of document.querySelectorAll('[data-lang]')) b.setAttribute('aria-pressed', String(b.dataset.lang === lang));
-  renderType(lang);
-}
-
-let saved = 'en';
-try {
-  saved = localStorage.getItem(LANG_KEY) ?? 'en';
-} catch {}
-setLang(COPY[saved] ? saved : 'en');
-for (const b of document.querySelectorAll('[data-lang]')) b.addEventListener('click', () => setLang(b.dataset.lang));
+renderType();
 
 document.getElementById('toggle').addEventListener('click', () => {
   const html = document.documentElement;

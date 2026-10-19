@@ -1,6 +1,6 @@
 # TASKS — BQ
 
-> **Status:** v1.0 (2026-10-19). Poore project ki task list, [ARCHITECTURE.md](ARCHITECTURE.md) §16 ke phases ke hisaab se. Har task "done" tabhi jab [RULES.md](RULES.md) §1.5 ki Definition of Done poori ho.
+> **Status:** v1.1 (2026-10-20). Poore project ki task list, [ARCHITECTURE.md](ARCHITECTURE.md) §16 ke phases ke hisaab se. Har task "done" tabhi jab [RULES.md](RULES.md) §1.5 ki Definition of Done poori ho.
 
 **Kaise use karein:**
 - `[ ]` baaki, `[~]` chal raha hai, `[x]` done.
@@ -97,7 +97,7 @@
 ## Phase 5. Notify + Payments (2 hafte)
 
 - [ ] T5.1 Notify: Brevo HTTPS email, SMS/WhatsApp sandbox, web push, in-app inbox.
-- [ ] T5.2 Templates EN/HI/MR, preferences aur consent, delivery log, OTP fast lane.
+- [ ] T5.2 English templates, preferences aur consent, delivery log, OTP fast lane.
 - [ ] T5.3 Payments: skeleton, fake driver, `razorpay:simulate` webhook CLI.
 - [ ] T5.4 bq-notify ki Dockerfile. **Docker Lesson 3.**
 
@@ -105,16 +105,16 @@
 
 ## Phase 6. Frontend foundation (3 hafte, saath-saath)
 
-- [ ] T6.1 Packages: app-shell, auth-ui, authz, i18n, api-client, data-table, review-screens, maps, forms, pwa-kit.
+- [ ] T6.1 Packages: app-shell, auth-ui, authz, api-client, data-table, review-screens, maps, forms, pwa-kit.
 - [ ] T6.1a `icons` package: apne icon components; components package ki 12 `*-icons.ts` files ke icons yahan; icon credits (licenses) page.
-- [ ] T6.2 Devanagari font, EN/HI/MR namespaces, key-parity check.
+- [ ] T6.2 Styles package v2: fonts (Plus Jakarta Sans + Fraunces) aur preload plugin, base styles.
 - [ ] T6.3 Customer app → React Router 7 framework mode (SSR).
 - [ ] T6.4 Onboarding Customer → Seller app; Super Admin checkbox hatana; Admin/Master se AddProduct aur category CRUD hatana.
 - [ ] T6.5 7 naye apps template se (superadmin, support, finance, logistics, delivery, growth, creator).
 - [ ] T6.6 Har app ka `vercel.json` (routes transform, security headers), Ola Maps key per app.
 - [ ] T6.7 `apps` profile: split mode containers. **Docker Lesson 4.**
 
-**Milestone 6:** saare 11 apps laptop pe login karke apna empty dashboard dikhate hain, teeno languages aur dono themes me.
+**Milestone 6:** saare 11 apps laptop pe login karke apna empty dashboard dikhate hain, dono themes me.
 
 ## Phase 7. Commerce + payments (4–5 hafte)
 
@@ -184,3 +184,4 @@
 | Version | Date | Badlav |
 |---|---|---|
 | v1.0 | 2026-10-19 | Pehla version: owner ke kaam, docs, Phase 0–11 (milestones aur Docker lessons ke saath), aur deploy pe verify list. |
+| v1.1 | 2026-10-20 | Apps sirf English: T5.2, T6.1 aur T6.2 badle. |

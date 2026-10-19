@@ -2,11 +2,10 @@
  * @beautinique/frontend-styles/vite: preloads the brand fonts so text renders in them from the first paint.
  *
  * It adds <link rel="preload" as="font"> to index.html with exactly the URL Vite gives the same file in the
- * CSS, so the browser downloads each font once. The Devanagari font is preloaded only for visitors whose saved
- * language is Hindi or Marathi (a tiny inline script reads localStorage before the CSS loads).
+ * CSS, so the browser downloads each font once.
  *
  *   import { beautiniqueFonts } from '@beautinique/frontend-styles/vite';
- *   plugins: [react(), tailwindcss(), beautiniqueFonts({ preload: ['sans', 'display'], devanagari: { storageKey: 'bq-lang' } })]
+ *   plugins: [react(), tailwindcss(), beautiniqueFonts({ preload: ['sans', 'display'] })]
  */
 import { readFileSync, realpathSync } from 'node:fs';
 import path from 'node:path';
@@ -20,29 +19,18 @@ const toPosix = (p) => p.replaceAll('\\', '/');
 const sameFile = (a, b) => (process.platform === 'win32' ? a.toLowerCase() === b.toLowerCase() : a === b);
 const joinUrl = (a, b) => (a.endsWith('/') ? a : `${a}/`) + b.replace(/^\/+/, '');
 
-/** Inline script: preload the font only if localStorage[storageKey] is one of values. */
-const conditionalPreload = (href, storageKey, values) =>
-  `(function(){try{var v=localStorage.getItem(${JSON.stringify(storageKey)});` +
-  `if(${JSON.stringify(values)}.indexOf(v)<0)return;var l=document.createElement('link');` +
-  `l.rel='preload';l.as='font';l.type='font/woff2';l.crossOrigin='anonymous';` +
-  `l.href=${JSON.stringify(href)};document.head.appendChild(l)}catch(e){}})()`;
-
 /**
  * @param {import('./vite.d.ts').BeautiniqueFontsOptions} [options]
  * @returns {import('vite').Plugin}
  */
-export function beautiniqueFonts({ preload = ['sans'], devanagari = false } = {}) {
+export function beautiniqueFonts({ preload = ['sans'] } = {}) {
   for (const key of preload) {
-    if (key === 'devanagari' || !manifest.preload[key]) {
-      throw new Error(`[${NAME}] preload: unknown font "${key}". Use ${Object.keys(manifest.preload).filter((k) => k !== 'devanagari').map((k) => `"${k}"`).join(' or ')}; Devanagari goes in the devanagari option.`);
+    if (!Object.hasOwn(manifest.preload, key)) {
+      throw new Error(`[${NAME}] preload: unknown font "${key}". Use ${Object.keys(manifest.preload).map((k) => `"${k}"`).join(' or ')}.`);
     }
   }
-  if (devanagari && typeof devanagari.storageKey !== 'string') throw new Error(`[${NAME}] devanagari.storageKey must be the localStorage key that holds the language`);
 
-  const fonts = [
-    ...preload.map((key) => ({ file: manifest.preload[key] })),
-    ...(devanagari ? [{ file: manifest.preload.devanagari, when: { storageKey: devanagari.storageKey, values: devanagari.values ?? ['hi', 'mr'] } }] : []),
-  ].map((f) => ({ ...f, path: toPosix(realpathSync(path.join(FONTS_DIR, f.file))) }));
+  const fonts = preload.map((key) => ({ file: manifest.preload[key], path: toPosix(realpathSync(path.join(FONTS_DIR, manifest.preload[key]))) }));
 
   /** @type {import('vite').ResolvedConfig} */
   let config;
@@ -63,10 +51,7 @@ export function beautiniqueFonts({ preload = ['sans'], devanagari = false } = {}
             if (!pageUsesFont(html, ctx, asset)) return [];
             href = builtHref(asset, ctx);
           } else href = devHref(font);
-          return font.when
-            ? // before the stylesheet <link>, otherwise the inline script waits for the CSS
-              { tag: 'script', children: conditionalPreload(href, font.when.storageKey, font.when.values), injectTo: 'head-prepend' }
-            : { tag: 'link', attrs: { rel: 'preload', as: 'font', type: 'font/woff2', href, crossorigin: true }, injectTo: 'head' };
+          return { tag: 'link', attrs: { rel: 'preload', as: 'font', type: 'font/woff2', href, crossorigin: true }, injectTo: 'head' };
         });
       },
     },

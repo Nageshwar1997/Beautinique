@@ -2,13 +2,10 @@
 /**
  * Beautinique font pipeline.
  *
- *   npm run fonts                 download the pinned sources (cached in node_modules/.cache), subset them and
- *                                 write src/fonts/*.woff2, the licences, src/fonts/manifest.json and the
- *                                 generated part of src/fonts.css
- *   npm run fonts:check           offline: shipped files match the manifest, fonts.css is current, and the files
- *                                 still have the rupee sign, the weight axis, tabular figures and Marathi forms
- *   node scripts/fonts.mjs --measure <font file> [postscriptName]
- *                                 print the metrics of a local font (used once for the Nirmala UI numbers below)
+ *   npm run fonts         download the pinned sources (cached in node_modules/.cache), subset them and write
+ *                         src/fonts/*.woff2, the licences, src/fonts/manifest.json and the generated part of src/fonts.css
+ *   npm run fonts:check   offline: shipped files match the manifest, fonts.css is current, and the files still have
+ *                         the rupee sign, the weight axis and tabular figures
  *
  * Sources: google/fonts at a pinned commit, checked by sha256. Every family is OFL-1.1 with no Reserved Font Name,
  * so subsetting is allowed; each family's OFL.txt ships next to the files and the copyright/licence name records
@@ -19,7 +16,6 @@ import { existsSync, mkdirSync, readFileSync, readdirSync, writeFileSync } from 
 import { createRequire } from 'node:module';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import * as hb from 'harfbuzzjs';
 import { fromBuffer } from '@capsizecss/unpack';
 
 const require = createRequire(import.meta.url);
@@ -43,13 +39,11 @@ const SOURCES = {
   jakartaItalic: { path: 'ofl/plusjakartasans/PlusJakartaSans-Italic[wght].ttf', sha256: '9529eb888668b6a3c6dd75b6341a2fc5263fb6c9e788822e6117c29dd9e8b115' },
   fraunces: { path: 'ofl/fraunces/Fraunces[SOFT,WONK,opsz,wght].ttf', sha256: '177ff6c0f14e5550a3c624247cd1189611d4eb65d000b14944c63d967958abbb' },
   frauncesItalic: { path: 'ofl/fraunces/Fraunces-Italic[SOFT,WONK,opsz,wght].ttf', sha256: 'b24448c43702fac4ee856781d461a0dfba8d8e594b6e8e190234b75fed2c0e01' },
-  notoDevanagari: { path: 'ofl/notosansdevanagari/NotoSansDevanagari[wdth,wght].ttf', sha256: '14ec4af41f27482216d1c2229f417ff9b1425e1babb014e57d1d40d03229853e' },
 };
 
 const LICENSES = {
   'plus-jakarta-sans-OFL.txt': { path: 'ofl/plusjakartasans/OFL.txt', sha256: '995c7199cab65954f545996326755daee7b63cc6b42b06c13da1f9502ab08a99' },
   'fraunces-OFL.txt': { path: 'ofl/fraunces/OFL.txt', sha256: 'bdf4c22802eaf804f998195871c6b8938aac2ac14b2d78a8bd66a6f1eced833b' },
-  'noto-sans-devanagari-OFL.txt': { path: 'ofl/notosansdevanagari/OFL.txt', sha256: 'a216f6f8d85c7228093e0ee5e258d9d377e6671f68acb4db1930b29583d0f331' },
 };
 
 /** Every face covers exactly these weights (the variable wght axis is cut to this range). */
@@ -58,10 +52,9 @@ const WEIGHT = { min: 300, max: 700 };
 /** Fraunces: sharp (SOFT 0), no wonky letters (WONK 0), the refined display cut (opsz 72). */
 const FRAUNCES_AXES = { SOFT: 0, WONK: 0, opsz: 72 };
 
-/** Subsets (code points). Latin includes the rupee sign, so an English page needs one file per family. */
+/** Subsets (code points). Latin includes the rupee sign, so a page needs one file per family. */
 const SUBSETS = {
-  latin: cps('0000-00FF 0131 0152-0153 02BB-02BC 02C6 02DA 02DC 0304 0308 0329 2000-200B 200E-206F 20AC 20B9 2122 2190-2193 2212 2215 FEFF FFFD'),
-  devanagari: cps('0900-097F 1CD0-1CF9 200C-200D 20F0 25CC A830-A839 A8E0-A8FF'),
+  latin: cps('0000-00FF 0131 0152-0153 02BB-02BC 02C6 02DA 02DC 0304 0308 0329 2000-206F 20AC 20B9 2122 2190-2193 2212 2215 FEFF FFFD'),
 };
 SUBSETS['latin-ext'] = cps('0100-02BA 02BD-02C5 02C7-02CC 02CE-02D7 02DD-02FF 1D00-1DBF 1E00-1E9F 1EF2-1EFF 20A0-20C0 2113 2C60-2C7F A720-A7FF').filter((c) => !SUBSETS.latin.includes(c));
 
@@ -78,13 +71,11 @@ const FILES = {
   'fraunces-latin-ext': { source: 'fraunces', subset: 'latin-ext', axes: FRAUNCES_AXES },
   'fraunces-italic-latin': { source: 'frauncesItalic', subset: 'latin', axes: FRAUNCES_AXES },
   'fraunces-italic-latin-ext': { source: 'frauncesItalic', subset: 'latin-ext', axes: FRAUNCES_AXES },
-  'noto-sans-devanagari': { source: 'notoDevanagari', subset: 'devanagari', axes: { wdth: 100 } },
 };
 
 /**
  * Families. Each style lists its files; each file becomes one @font-face with the unicode-range it really covers.
  * All faces of a family share font-weight/style descriptors, otherwise browsers do not merge them into one family.
- * Devanagari has no italic, so the italic style reuses the upright file (one download, no fake slant).
  */
 const FAMILIES = [
   {
@@ -92,31 +83,28 @@ const FAMILIES = [
     token: '--font-sans',
     generic: 'ui-sans-serif, system-ui, sans-serif',
     styles: {
-      normal: ['plus-jakarta-sans-latin', 'plus-jakarta-sans-latin-ext', 'noto-sans-devanagari'],
-      italic: ['plus-jakarta-sans-italic-latin', 'plus-jakarta-sans-italic-latin-ext', 'noto-sans-devanagari'],
+      normal: ['plus-jakarta-sans-latin', 'plus-jakarta-sans-latin-ext'],
+      italic: ['plus-jakarta-sans-italic-latin', 'plus-jakarta-sans-italic-latin-ext'],
     },
-    metricsFrom: { latin: 'jakarta', devanagari: 'notoDevanagari' },
-    /** Devanagari is drawn 4% larger so its headline sits between the Latin x-height and cap height. */
-    devanagariSizeAdjust: 1.04,
-    fallbacks: ['arial', 'roboto', 'nirmala'],
+    metricsFrom: 'jakarta',
+    fallbacks: ['arial', 'roboto'],
   },
   {
     name: 'Beautinique Display',
     token: '--font-display',
     generic: 'ui-serif, Georgia, serif',
     styles: {
-      normal: ['fraunces-latin', 'fraunces-latin-ext', 'noto-sans-devanagari'],
-      italic: ['fraunces-italic-latin', 'fraunces-italic-latin-ext', 'noto-sans-devanagari'],
+      normal: ['fraunces-latin', 'fraunces-latin-ext'],
+      italic: ['fraunces-italic-latin', 'fraunces-italic-latin-ext'],
     },
-    metricsFrom: { latin: 'fraunces', devanagari: 'notoDevanagari' },
-    devanagariSizeAdjust: 1.06,
-    fallbacks: ['timesNewRoman', 'notoSerif', 'nirmala'],
+    metricsFrom: 'fraunces',
+    fallbacks: ['timesNewRoman', 'notoSerif'],
   },
 ];
 
 /**
  * Local fonts used while the web font loads, sized to match it (no reflow when it swaps in).
- * Latin metrics come from @capsizecss/metrics. Liberation Sans/Serif are metric clones of Arial/Times (Linux).
+ * Metrics come from @capsizecss/metrics. Liberation Sans/Serif are metric clones of Arial/Times (Linux).
  */
 const LOCAL_FONTS = {
   arial: {
@@ -143,27 +131,7 @@ const LOCAL_FONTS = {
     regular: ['Noto Serif', 'NotoSerif-Regular', 'NotoSerif'],
     bold: ['Noto Serif Bold', 'NotoSerif-Bold'],
   },
-  /**
-   * Windows' Devanagari font. capsize has no Devanagari data, so the width is the shaped average advance of
-   * DEVANAGARI_SAMPLE, measured with `--measure C:/Windows/Fonts/Nirmala.ttc NirmalaUI` (and NirmalaUI-Bold)
-   * on Windows 11 (Nirmala UI version 1.46).
-   */
-  nirmala: {
-    label: 'Devanagari',
-    devanagari: true,
-    regular: ['Nirmala UI', 'NirmalaUI'],
-    bold: ['Nirmala UI Bold', 'NirmalaUI-Bold'],
-    metrics: {
-      regular: { unitsPerEm: 2048, ascent: 2210, descent: -514, lineGap: 0, avgWidth: 860.9 },
-      bold: { unitsPerEm: 2048, ascent: 2210, descent: -514, lineGap: 0, avgWidth: 939.37 },
-    },
-  },
 };
-
-/** Hindi + Marathi words for the Devanagari width measurement. */
-const DEVANAGARI_SAMPLE =
-  'सौंदर्य उत्पाद लिपस्टिक काजल त्वचा देखभाल मॉइस्चराइज़र सनस्क्रीन खरीदें में जोड़ें मुफ़्त डिलीवरी ऑर्डर सुरक्षित भुगतान प्राकृतिक सामग्री क्रीम ' +
-  'शाळा झाडे आणि फुले आमच्या दुकानात स्वागत आहे किंमत सवलत नवीन उत्पादने त्वचेसाठी केसांसाठी सुगंध श्रेणी';
 
 /** OpenType name records kept in every file: copyright, family, style, unique id, full name, version, PostScript name, licence, licence URL. */
 const NAME_IDS = [0, 1, 2, 3, 4, 5, 6, 13, 14];
@@ -197,7 +165,7 @@ const quote = (s) => `'${s}'`;
 const lf = (text) => text.replaceAll('\r\n', '\n');
 
 /** Anything that shapes the output: this script (config + code) and the subsetting/measuring tools. */
-const TOOLS = ['subset-font', 'harfbuzzjs', 'fontkit', '@capsizecss/unpack', '@capsizecss/metrics'];
+const TOOLS = ['subset-font', 'fontkit', '@capsizecss/unpack', '@capsizecss/metrics'];
 const configHash = () =>
   sha256(JSON.stringify({ script: lf(readFileSync(fileURLToPath(import.meta.url), 'utf8')), tools: TOOLS.map((pkg) => `${pkg}@${version(pkg)}`) }));
 
@@ -225,46 +193,13 @@ function codePointsText(codePoints) {
 
 /** A static instance (TrueType) of a variable font, for measuring. */
 function instance(buf, axes) {
-  const text = codePointsText([...SUBSETS.latin, ...SUBSETS.devanagari]);
-  return subsetFont(buf, text, { targetFormat: 'truetype', variationAxes: axes });
+  return subsetFont(buf, codePointsText(SUBSETS.latin), { targetFormat: 'truetype', variationAxes: axes });
 }
 
-/** Average shaped advance per code point of DEVANAGARI_SAMPLE, in font units. */
-function devanagariWidth(buf, { index = 0, variations = {} } = {}) {
-  const font = new hb.Font(new hb.Face(new hb.Blob(new Uint8Array(buf)), index));
-  font.setVariations(Object.entries(variations).map(([tag, value]) => new hb.Variation(tag, value)));
-  let advance = 0;
-  let count = 0;
-  for (const word of DEVANAGARI_SAMPLE.split(' ')) {
-    const buffer = new hb.Buffer();
-    buffer.addText(word);
-    buffer.setLanguage('hi');
-    buffer.guessSegmentProperties();
-    hb.shape(font, buffer);
-    advance += buffer.getGlyphPositions().reduce((sum, p) => sum + p.xAdvance, 0);
-    count += [...word].length;
-  }
-  return advance / count;
-}
-
-/** Shaped glyph ids, for the Marathi/conjunct checks. */
-function shapeIds(sfnt, text, language) {
-  const font = new hb.Font(new hb.Face(new hb.Blob(new Uint8Array(sfnt))));
-  const buffer = new hb.Buffer();
-  buffer.addText(text);
-  buffer.setLanguage(language);
-  buffer.guessSegmentProperties();
-  hb.shape(font, buffer);
-  return buffer.getGlyphInfos().map((g) => g.codepoint);
-}
-
-/**
- * Fallback overrides (capsize / next/font formula), generalised for a face that itself has a size-adjust:
- * the fallback must take the same width and the same ascent/descent as the web face.
- */
-function overrides(web, local, faceSizeAdjust = 1) {
-  const sizeAdjust = (faceSizeAdjust * (web.avgWidth / web.unitsPerEm)) / (local.avgWidth / local.unitsPerEm);
-  const em = (web.unitsPerEm * sizeAdjust) / faceSizeAdjust;
+/** Fallback overrides (capsize / next/font formula): the fallback takes the web font's width, ascent and descent. */
+function overrides(web, local) {
+  const sizeAdjust = web.avgWidth / web.unitsPerEm / (local.avgWidth / local.unitsPerEm);
+  const em = web.unitsPerEm * sizeAdjust;
   return {
     sizeAdjust: pct(sizeAdjust),
     ascentOverride: pct(web.ascent / em),
@@ -283,10 +218,9 @@ async function build() {
   const files = {};
   for (const [name, spec] of Object.entries(FILES)) {
     const subset = SUBSETS[spec.subset];
-    const axes = { ...spec.axes, wght: WEIGHT };
     const woff2 = await subsetFont(sources[spec.source], codePointsText(subset), {
       targetFormat: 'woff2',
-      variationAxes: axes,
+      variationAxes: { ...spec.axes, wght: WEIGHT },
       preserveNameIds: NAME_IDS,
     });
     writeFileSync(join(FONTS_DIR, `${name}.woff2`), woff2);
@@ -297,55 +231,35 @@ async function build() {
 
   const licenses = {};
   for (const [out, entry] of Object.entries(LICENSES)) {
-    const text = await download(entry);
-    writeFileSync(join(FONTS_DIR, out), text);
+    writeFileSync(join(FONTS_DIR, out), await download(entry));
     licenses[out] = { sha256: entry.sha256 };
   }
 
   const metrics = {};
   for (const family of FAMILIES) {
-    const latinSource = SOURCES[family.metricsFrom.latin] && family.metricsFrom.latin;
-    const latinAxes = Object.values(FILES).find((f) => f.source === latinSource)?.axes ?? {};
-    const devaSource = family.metricsFrom.devanagari;
-    const devaAxes = Object.values(FILES).find((f) => f.source === devaSource)?.axes ?? {};
-    const latin = {};
-    const devanagari = {};
+    const axes = Object.values(FILES).find((f) => f.source === family.metricsFrom)?.axes ?? {};
+    const web = {};
     for (const [weight, value] of [['regular', 400], ['bold', 700]]) {
-      const m = await fromBuffer(await instance(sources[latinSource], { ...latinAxes, wght: value }));
-      latin[weight] = { unitsPerEm: m.unitsPerEm, ascent: m.ascent, descent: m.descent, lineGap: m.lineGap, avgWidth: m.xWidthAvg };
-      const d = await fromBuffer(await instance(sources[devaSource], { ...devaAxes, wght: value }));
-      devanagari[weight] = {
-        unitsPerEm: d.unitsPerEm,
-        ascent: d.ascent,
-        descent: d.descent,
-        lineGap: d.lineGap,
-        avgWidth: devanagariWidth(sources[devaSource], { variations: { ...devaAxes, wght: value } }),
-      };
+      const m = await fromBuffer(await instance(sources[family.metricsFrom], { ...axes, wght: value }));
+      web[weight] = { unitsPerEm: m.unitsPerEm, ascent: m.ascent, descent: m.descent, lineGap: m.lineGap, avgWidth: m.xWidthAvg };
     }
     const fallbacks = {};
     for (const key of family.fallbacks) {
-      const local = LOCAL_FONTS[key];
       fallbacks[key] = {};
-      for (const weight of ['regular', 'bold']) {
-        const localMetrics = local.devanagari ? local.metrics[weight] : await capsizeMetrics(local.capsize, weight);
-        fallbacks[key][weight] = local.devanagari
-          ? overrides(devanagari[weight], localMetrics, family.devanagariSizeAdjust)
-          : overrides(latin[weight], localMetrics);
-      }
+      for (const weight of ['regular', 'bold']) fallbacks[key][weight] = overrides(web[weight], await capsizeMetrics(LOCAL_FONTS[key].capsize, weight));
     }
-    metrics[family.name] = { latin, devanagari, fallbacks };
+    metrics[family.name] = { web, fallbacks };
   }
 
-  // the files the Vite plugin (src/vite.js) can preload: each family's upright Latin file, plus Devanagari
+  // the files the Vite plugin (src/vite.js) can preload: each family's upright Latin file
   const preload = {};
   for (const family of FAMILIES) preload[family.token.replace('--font-', '')] = `${family.styles.normal.find((n) => FILES[n].subset === 'latin')}.woff2`;
-  preload.devanagari = `${Object.keys(FILES).find((n) => FILES[n].subset === 'devanagari')}.woff2`;
 
   const manifest = {
     note: 'Generated by scripts/fonts.mjs. Do not edit.',
     configHash: configHash(),
     preload,
-    tools: { 'subset-font': version('subset-font'), harfbuzzjs: version('harfbuzzjs'), harfbuzz: hb.versionString() },
+    tools: Object.fromEntries(TOOLS.map((pkg) => [pkg, version(pkg)])),
     sources: Object.fromEntries(Object.entries(SOURCES).map(([k, v]) => [k, GOOGLE_FONTS + v.path])),
     files,
     licenses,
@@ -379,7 +293,6 @@ function render(manifest) {
     blocks.push(`/* ${family.name} */`);
     for (const [style, names] of Object.entries(family.styles)) {
       for (const name of names) {
-        const isDeva = FILES[name].subset === 'devanagari';
         blocks.push(
           [
             '@font-face {',
@@ -388,7 +301,6 @@ function render(manifest) {
             `  font-weight: ${WEIGHT.min} ${WEIGHT.max};`,
             '  font-display: swap;',
             `  src: url('./fonts/${name}.woff2') format('woff2');`,
-            ...(isDeva ? [`  size-adjust: ${pct(family.devanagariSizeAdjust)};`] : []),
             `  unicode-range: ${manifest.files[name].unicodeRange};`,
             '}',
           ].join('\n'),
@@ -445,7 +357,6 @@ function check() {
   const expected = new Set([...Object.keys(FILES).map((n) => `${n}.woff2`), ...Object.keys(LICENSES), 'manifest.json']);
   for (const f of readdirSync(FONTS_DIR)) if (!expected.has(f)) problems.push(`unexpected file src/fonts/${f}`);
 
-  const sfnts = {};
   for (const [name, spec] of Object.entries(FILES)) {
     const file = join(FONTS_DIR, `${name}.woff2`);
     if (!existsSync(file)) {
@@ -462,7 +373,6 @@ function check() {
       if (!font.characterSet.includes(0x20b9)) problems.push(`${name}: no rupee sign (U+20B9)`);
       if (spec.tnum && !font.availableFeatures.includes('tnum')) problems.push(`${name}: no tabular figures (tnum)`);
     }
-    if (spec.subset === 'devanagari') sfnts[name] = font;
   }
 
   for (const [out, entry] of Object.entries(LICENSES)) {
@@ -475,65 +385,15 @@ function check() {
     if (css !== withGenerated(css, render(manifest))) problems.push('src/fonts.css is stale; run `npm run fonts`');
   } else problems.push('src/fonts.css is missing');
 
-  return { problems, devanagari: Object.keys(sfnts) };
-}
-
-async function checkShaping(names) {
-  const problems = [];
-  for (const name of names) {
-    const sfnt = await subsetFont(readFileSync(join(FONTS_DIR, `${name}.woff2`)), codePointsText(SUBSETS.devanagari), { targetFormat: 'truetype' });
-    // Marathi uses its own forms of ल and श (OpenType locl for MAR)
-    if (shapeIds(sfnt, 'ल श', 'mr').join() === shapeIds(sfnt, 'ल श', 'hi').join()) problems.push(`${name}: Marathi forms (locl) are missing`);
-    // क्ष must form one conjunct glyph, not क + visible virama + ष
-    if (shapeIds(sfnt, 'क्ष', 'hi').length !== 1) problems.push(`${name}: the conjunct क्ष does not form`);
-    // eyelash ra: र + virama + ZWJ + य must not show a visible virama (the cmap glyph, or the one र् ends with)
-    const virama = [fontkit.create(Buffer.from(sfnt)).glyphForCodePoint(0x94d).id, shapeIds(sfnt, 'र्', 'mr').at(-1)];
-    if (shapeIds(sfnt, 'र्\u200dय', 'mr').some((id) => virama.includes(id))) problems.push(`${name}: eyelash ra (ZWJ) does not form`);
-  }
   return problems;
-}
-
-/* ---------------------------------------------------------------- measure */
-
-/** harfbuzzjs cannot read WOFF/WOFF2: decompress those to TrueType (all glyphs kept). */
-async function shapeable(buf) {
-  const signature = buf.subarray(0, 4).toString('latin1');
-  return signature === 'wOF2' || signature === 'wOFF' ? subsetFont(buf, '', { targetFormat: 'truetype', keepAllGlyphs: true }) : buf;
-}
-
-async function measure(file, postscriptName) {
-  const buf = readFileSync(file);
-  let font = fontkit.create(buf);
-  let index = 0;
-  if (font.fonts) {
-    index = font.fonts.findIndex((f) => f.postscriptName === postscriptName);
-    if (index < 0) fail(`${postscriptName} not in ${file}: ${font.fonts.map((f) => f.postscriptName).join(', ')}`);
-    font = font.fonts[index];
-  }
-  console.log(
-    JSON.stringify({
-      fullName: font.fullName,
-      postscriptName: font.postscriptName,
-      version: font.version,
-      unitsPerEm: font.unitsPerEm,
-      ascent: font.ascent,
-      descent: font.descent,
-      lineGap: font.lineGap,
-      avgWidth: font.characterSet.includes(0x915) ? Number(devanagariWidth(await shapeable(buf), { index }).toFixed(2)) : null,
-    }),
-  );
 }
 
 /* ---------------------------------------------------------------- main */
 
-const args = process.argv.slice(2);
-if (args[0] === '--measure') {
-  await measure(args[1], args[2]);
-} else if (args[0] === '--check') {
-  const { problems, devanagari } = check();
-  problems.push(...(await checkShaping(devanagari)));
+if (process.argv.includes('--check')) {
+  const problems = check();
   if (problems.length) fail(`${problems.length} problem(s):\n  - ${problems.join('\n  - ')}`);
-  console.log(`fonts: ok (${Object.keys(FILES).length} files, ${Object.keys(LICENSES).length} licences, fonts.css current, rupee + tnum + Marathi forms present)`);
+  console.log(`fonts: ok (${Object.keys(FILES).length} files, ${Object.keys(LICENSES).length} licences, fonts.css current, rupee + tnum present)`);
 } else {
   await build();
 }

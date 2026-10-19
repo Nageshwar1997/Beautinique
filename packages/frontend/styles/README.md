@@ -16,37 +16,32 @@ import tailwindcss from '@tailwindcss/vite';
 import { beautiniqueFonts } from '@beautinique/frontend-styles/vite';
 
 export default {
-  plugins: [react(), tailwindcss(), beautiniqueFonts({ preload: ['sans', 'display'], devanagari: { storageKey: 'bq-lang' } })],
+  plugins: [react(), tailwindcss(), beautiniqueFonts({ preload: ['sans', 'display'] })],
 };
 ```
 
 - Theme `<html theme="light">` ya `theme="dark"` se badalti hai. Attribute na ho to system setting follow hoti hai.
-- Bhasha `<html lang="en | hi | mr">` se. Hindi/Marathi pe line-height aur letter-spacing khud sahi ho jaate hain.
+- Apps sirf English me hain: `<html lang="en">`.
 - Package sirf bundler ke through chalta hai (`@tailwindcss/vite`). `@tailwindcss/cli` font files ke `url()` copy nahi karta.
 
 ## Fonts
 
-| Class | Family | Latin | Hindi / Marathi |
-|---|---|---|---|
-| `font-sans` (default) | Beautinique Sans | Plus Jakarta Sans | Noto Sans Devanagari |
-| `font-display` (headings, banners) | Beautinique Display | Fraunces (opsz 72, sharp) | Noto Sans Devanagari |
+| Class | Family | Font |
+|---|---|---|
+| `font-sans` (default) | Beautinique Sans | Plus Jakarta Sans |
+| `font-display` (headings, banners) | Beautinique Display | Fraunces (opsz 72, sharp) |
 
-- Weights `font-light` (300) se `font-bold` (700), aur `italic`. Devanagari ka italic nahi hota, wo seedha rehta hai.
-- Prices ke liye `tabular-nums`. ₹ dono fonts me hai.
-- Marathi ke apne akshar-roop (ल, श) `lang="mr"` se aate hain.
+- Weights `font-light` (300) se `font-bold` (700), aur `italic`.
+- Prices ke liye `tabular-nums` (sirf `font-sans` me; Fraunces me tabular figures nahi). ₹ dono fonts me hai.
 
 ### Kaise load hote hain (flicker nahi)
 
-1. **Variable woff2, sirf zaroori characters.** Har style ki ek file saare weights deti hai. Sizes: Jakarta 32 KB, Fraunces 36 KB, Noto Sans Devanagari 108 KB.
-2. **unicode-range.** Browser wahi file laata hai jiske characters page pe hain. English page = ek file per family. Devanagari file tabhi aati hai jab Hindi/Marathi text ho, aur dono families ek hi file share karti hain (ek download). Ek apvaad: ZWJ wale emoji (👩‍💻, 🤷‍♀️) bhi Devanagari file mangwa dete hain, kyunki eyelash र्‍य ke liye ZWJ usi file me rehna zaroori hai.
-3. **Preload** (`/vite` plugin). `index.html` me `<link rel="preload">` wahi hashed URL deta hai jo CSS use karti hai, isliye font JS ke saath hi download ho jata hai aur pehle render pe tayyar rehta hai. Devanagari sirf unke liye preload hota hai jinki saved language (`localStorage[storageKey]`) `hi`/`mr` hai.
-4. **`font-display: swap` + matched fallback.** Font aane tak local font (Arial/Roboto/Times/Noto Serif/Nirmala UI) dikhta hai, jiska size web font jaisa set hai (`size-adjust`, `ascent-override`...). Latin me fark 1% se kam (bina iske 4–6%), isliye swap pe text nahi khiskta. `optional` nahi liya: SPA me wo poore session ke liye brand font hata sakta hai.
+1. **Variable woff2, sirf zaroori characters.** Har style ki ek file saare weights deti hai. Sizes: Jakarta 32 KB, Fraunces 36 KB.
+2. **unicode-range.** Browser wahi file laata hai jiske characters page pe hain: ek page = ek file per family. `latin-ext` files sirf accent wale naamon (ā, ł ...) pe aur italic files sirf italic text pe aati hain.
+3. **Preload** (`/vite` plugin). `index.html` me `<link rel="preload">` wahi hashed URL deta hai jo CSS use karti hai, isliye font JS ke saath hi download ho jata hai aur pehle render pe tayyar rehta hai.
+4. **`font-display: swap` + matched fallback.** Font aane tak local font (Arial/Roboto/Times/Noto Serif) dikhta hai, jiska size web font jaisa set hai (`size-adjust`, `ascent-override`...). Latin me fark 1% se kam (bina iske 4–6%), isliye swap pe text nahi khiskta. `optional` nahi liya: SPA me wo poore session ke liye brand font hata sakta hai.
 
-Plugin options: `preload` = `['sans']` (default) ya `['sans', 'display']` (jis app ki pehli screen pe `font-display` heading ho). `devanagari` = `{ storageKey, values? }` (default values `['hi', 'mr']`). Plugin ek chhota inline script lagata hai. Strict CSP ho to uska hash allow karo. Multi-page build me preload sirf un pages pe lagta hai jinki CSS ye fonts use karti hai. `experimental.renderBuiltUrl` (CDN) ka URL bhi wahi lagta hai jo CSS me hai.
-
-Pata hai, chhoda gaya:
-- Hindi line ke spaces fallback ke waqt Arial se aate hain. Isliye Devanagari text font aane tak ~5% chauda dikhta hai. Ye sirf pehli baar bhasha badalne pe, font aane tak.
-- Apple (Kohinoor Devanagari) ka Devanagari fallback size-matched nahi hai.
+Plugin options: `preload` = `['sans']` (default) ya `['sans', 'display']` (jis app ki pehli screen pe `font-display` heading ho). Plugin koi inline script nahi lagata, isliye CSP me kuch allow nahi karna. Multi-page build me preload sirf un pages pe lagta hai jinki CSS ye fonts use karti hai. `experimental.renderBuiltUrl` (CDN) ka URL bhi wahi lagta hai jo CSS me hai.
 
 ### Fonts badalna
 
@@ -62,9 +57,9 @@ Ye google/fonts ke pinned commit se fonts laata hai (sha256 check), subset karta
 npm run fonts:check
 ```
 
-Ye offline chalta hai (CI): files manifest se milti hain, `fonts.css` current hai, script ya tools badle nahi, aur files me ₹, weight axis, tabular figures, Marathi forms, क्ष conjunct aur eyelash र्‍य (bina dikhne wale virama ke) sahi hain. Windows (`core.autocrlf`) pe bhi chalta hai: `.gitattributes` generated files ko byte-for-byte rakhta hai, aur check CRLF ko LF maan ke compare karta hai.
+Ye offline chalta hai (CI): files manifest se milti hain, `fonts.css` current hai, script ya tools badle nahi, aur files me ₹, weight axis, aur tabular figures sahi hain. Windows (`core.autocrlf`) pe bhi chalta hai: `.gitattributes` generated files ko byte-for-byte rakhta hai, aur check CRLF ko LF maan ke compare karta hai.
 
-**Licence:** teeno fonts OFL-1.1 hain, bina Reserved Font Name ke, isliye subset karna allowed hai. Har family ka `OFL.txt` files ke saath ship hota hai, aur copyright/licence records har woff2 ke andar rehte hain. Package ka licence `MIT AND OFL-1.1` hai (code MIT, fonts OFL).
+**Licence:** dono fonts OFL-1.1 hain, bina Reserved Font Name ke, isliye subset karna allowed hai. Har family ka `OFL.txt` files ke saath ship hota hai, aur copyright/licence records har woff2 ke andar rehte hain. Package ka licence `MIT AND OFL-1.1` hai (code MIT, fonts OFL).
 
 ## Colours
 
@@ -101,7 +96,6 @@ Sab `@layer base` me hain, isliye koi bhi utility class jeet-ti hai.
 - Buttons pe pointer cursor, `aria-busy` pe progress cursor.
 - Tables, `output` aur number inputs me `tabular-nums`. Number inputs me spinner arrows nahi.
 - Headings `text-wrap-style: balance`, paragraphs `pretty`. Sirf style badalta hai, isliye `whitespace-nowrap`/`truncate` waise hi kaam karte hain. Lambe shabd toot jaate hain (`overflow-wrap`).
-- **Hindi/Marathi:** jis element pe `lang="hi"` ya `lang="mr"` ho (aam taur pe `<html>`), wahan line-height 1.6–1.7 (badi headings 1.3–1.5), `text-*` aur `leading-tight/snug/normal/relaxed` bhi badal jaate hain, aur `tracking-*` 0 ho jata hai (shirorekha na toote).
 - Reduced motion pe saari animations/transitions band (third-party bhi). Kisi element ko chhoot deni ho to `data-motion="allow"`.
 
 ## Baaki tokens
@@ -118,13 +112,13 @@ Sab `@layer base` me hain, isliye koi bhi utility class jeet-ti hai.
 npm run playground
 ```
 
-`http://localhost:5180`: Vite + Tailwind + font plugin, bilkul apps jaisa. Fonts (EN/HI/MR switch), text scale, base styles, semantic pairs aur palette, light/dark toggle ke saath.
+`http://localhost:5180`: Vite + Tailwind + font plugin, bilkul apps jaisa. Fonts, text scale, base styles, semantic pairs aur palette, light/dark toggle ke saath.
 
 ```bash
 npm test
 ```
 
-Real Vite builds (aur dev server) me plugin test: preload URL = CSS URL, har font ek baar, base path, Devanagari condition, galat setup pe saaf error.
+Real Vite builds (aur dev server) me plugin test: preload URL = CSS URL, har font ek baar, base path, CDN URL, multi-page, galat setup pe saaf error.
 
 ```bash
 npm run check

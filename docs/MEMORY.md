@@ -1,6 +1,6 @@
 # MEMORY — BQ
 
-> **Status:** v1.0 (2026-10-19). Project ki yaaddasht: **kya tay hua aur kyun**, **pichhle kaam se kya seekha**, aur **kaunse jaal (traps) se bachna hai**. Poori detail baaki docs me hai; yahan short version aur pointers. Naya sabak ya decision aaye to yahan ek line jodo.
+> **Status:** v1.1 (2026-10-20). Project ki yaaddasht: **kya tay hua aur kyun**, **pichhle kaam se kya seekha**, aur **kaunse jaal (traps) se bachna hai**. Poori detail baaki docs me hai; yahan short version aur pointers. Naya sabak ya decision aaye to yahan ek line jodo.
 
 ## 1. Decision log
 
@@ -24,6 +24,7 @@
 | 2026-10-19 | Ola Maps: 4 accounts × 3 domains, har app ka key | Ek account me 3 hi domains | ARCH §10 |
 | 2026-10-19 | `Beautinique` monorepo public | Free unlimited CI, portfolio | ARCH §13 |
 | 2026-10-19 | Master ke doosre roles alag staff account pe | Master pe koi approval bypass nahi | ARCH §2 |
+| 2026-10-20 | Apps sirf English me | Owner ka faisla | PRD §2 |
 
 ## 2. Pichhle kaam se seekhe sabak
 
@@ -83,3 +84,4 @@
 | Version | Date | Badlav |
 |---|---|---|
 | v1.0 | 2026-10-19 | Pehla version: decision log, pichhle kaam ke 18 sabak, environment, repos aur glossary. |
+| v1.1 | 2026-10-20 | Decision: apps sirf English me. |

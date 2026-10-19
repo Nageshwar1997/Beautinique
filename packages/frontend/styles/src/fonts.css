@@ -1,14 +1,13 @@
 /**
  * @beautinique/frontend-styles: fonts.
  *
- *   font-sans      Beautinique Sans     = Plus Jakarta Sans (Latin + ₹) + Noto Sans Devanagari (Hindi, Marathi)
- *   font-display   Beautinique Display  = Fraunces (Latin + ₹) + Noto Sans Devanagari
+ *   font-sans      Beautinique Sans     = Plus Jakarta Sans (with ₹)
+ *   font-display   Beautinique Display  = Fraunces (with ₹)
  *
- * Self-hosted variable woff2 files (weights 300-700), cut to the characters we use. The browser downloads a
- * file only when the page has text in its unicode-range, so an English page loads one file per family
- * (emoji ZWJ sequences also fetch the Devanagari file: ZWJ must stay in it for the eyelash र्‍य).
+ * Self-hosted variable woff2 files (weights 300-700), cut to the characters we use. A page loads one file per
+ * family; the latin-ext files come only for accented names (ā, ł ...) and the italic files only for italic text.
  * While a font loads, a local font sized to match it is shown (the "Fallback" faces), so text does not jump.
- * Preload the Latin files with the Vite plugin (README) so they are ready before the first render.
+ * Preload the upright files with the Vite plugin (README) so they are ready before the first render.
  *
  * Everything between the @generated markers comes from scripts/fonts.mjs (`npm run fonts`).
  */
@@ -36,16 +35,6 @@
 
 @font-face {
   font-family: 'Beautinique Sans';
-  font-style: normal;
-  font-weight: 300 700;
-  font-display: swap;
-  src: url('./fonts/noto-sans-devanagari.woff2') format('woff2');
-  size-adjust: 104.00%;
-  unicode-range: U+0900-097F, U+1CD0-1CF6, U+1CF8-1CF9, U+200C-200D, U+20F0, U+25CC, U+A830-A839, U+A8E0-A8FF;
-}
-
-@font-face {
-  font-family: 'Beautinique Sans';
   font-style: italic;
   font-weight: 300 700;
   font-display: swap;
@@ -60,16 +49,6 @@
   font-display: swap;
   src: url('./fonts/plus-jakarta-sans-italic-latin-ext.woff2') format('woff2');
   unicode-range: U+0100-0130, U+0132-0148, U+014A-0151, U+0154-017E, U+018F, U+0192, U+01A0-01A1, U+01AF-01B0, U+01C4-01CC, U+01E6-01E7, U+01EA-01EB, U+01FA-021B, U+022A-022D, U+0230-0233, U+0237, U+0259, U+02C7, U+02DD, U+1E08-1E09, U+1E0C-1E0F, U+1E14-1E17, U+1E1C-1E1D, U+1E20-1E21, U+1E24-1E25, U+1E2A-1E2B, U+1E2E-1E2F, U+1E36-1E37, U+1E3A-1E3B, U+1E42-1E49, U+1E4C-1E53, U+1E5A-1E5B, U+1E5E-1E69, U+1E6C-1E6F, U+1E78-1E7B, U+1E80-1E85, U+1E8E-1E8F, U+1E92-1E93, U+1E97, U+1E9E, U+1EF2-1EF9, U+20A1, U+20A3-20A4, U+20A6-20AB, U+20AD-20AE, U+20B1-20B5, U+20B8, U+20BA, U+20BC-20BF, U+2113;
-}
-
-@font-face {
-  font-family: 'Beautinique Sans';
-  font-style: italic;
-  font-weight: 300 700;
-  font-display: swap;
-  src: url('./fonts/noto-sans-devanagari.woff2') format('woff2');
-  size-adjust: 104.00%;
-  unicode-range: U+0900-097F, U+1CD0-1CF6, U+1CF8-1CF9, U+200C-200D, U+20F0, U+25CC, U+A830-A839, U+A8E0-A8FF;
 }
 
 @font-face {
@@ -112,26 +91,6 @@
   line-gap-override: 0.00%;
 }
 
-@font-face {
-  font-family: 'Beautinique Sans Fallback Devanagari';
-  font-weight: 100 549;
-  src: local('Nirmala UI'), local('NirmalaUI');
-  size-adjust: 95.80%;
-  ascent-override: 97.27%;
-  descent-override: 44.29%;
-  line-gap-override: 0.00%;
-}
-
-@font-face {
-  font-family: 'Beautinique Sans Fallback Devanagari';
-  font-weight: 550 900;
-  src: local('Nirmala UI Bold'), local('NirmalaUI-Bold');
-  size-adjust: 95.96%;
-  ascent-override: 97.11%;
-  descent-override: 44.22%;
-  line-gap-override: 0.00%;
-}
-
 /* Beautinique Display */
 
 @font-face {
@@ -154,16 +113,6 @@
 
 @font-face {
   font-family: 'Beautinique Display';
-  font-style: normal;
-  font-weight: 300 700;
-  font-display: swap;
-  src: url('./fonts/noto-sans-devanagari.woff2') format('woff2');
-  size-adjust: 106.00%;
-  unicode-range: U+0900-097F, U+1CD0-1CF6, U+1CF8-1CF9, U+200C-200D, U+20F0, U+25CC, U+A830-A839, U+A8E0-A8FF;
-}
-
-@font-face {
-  font-family: 'Beautinique Display';
   font-style: italic;
   font-weight: 300 700;
   font-display: swap;
@@ -178,16 +127,6 @@
   font-display: swap;
   src: url('./fonts/fraunces-italic-latin-ext.woff2') format('woff2');
   unicode-range: U+0100-0130, U+0132-0148, U+014A-0151, U+0154-017E, U+018F, U+0192, U+01A0-01A1, U+01AF-01B0, U+01C4-01CC, U+01D9-01DA, U+01E6-01E7, U+01EA-01EB, U+01FA-021B, U+022A-022D, U+0230-0233, U+0237, U+0259, U+02B9-02BA, U+02C7, U+02DD, U+1E08-1E09, U+1E0C-1E0F, U+1E14-1E17, U+1E1C-1E1D, U+1E20-1E21, U+1E24-1E25, U+1E2A-1E2B, U+1E2E-1E2F, U+1E36-1E37, U+1E3A-1E3B, U+1E42-1E43, U+1E46-1E49, U+1E4C-1E53, U+1E5A-1E5B, U+1E5E-1E5F, U+1E62-1E65, U+1E6C-1E6F, U+1E78-1E7B, U+1E80-1E85, U+1E92-1E93, U+1E97, U+1E9E, U+1EF2-1EF9, U+20A1, U+20A3-20A4, U+20A6-20A7, U+20A9, U+20AB, U+20AD, U+20B1-20B2, U+20B5, U+20BA, U+20BC-20BD;
-}
-
-@font-face {
-  font-family: 'Beautinique Display';
-  font-style: italic;
-  font-weight: 300 700;
-  font-display: swap;
-  src: url('./fonts/noto-sans-devanagari.woff2') format('woff2');
-  size-adjust: 106.00%;
-  unicode-range: U+0900-097F, U+1CD0-1CF6, U+1CF8-1CF9, U+200C-200D, U+20F0, U+25CC, U+A830-A839, U+A8E0-A8FF;
 }
 
 @font-face {
@@ -230,28 +169,8 @@
   line-gap-override: 0.00%;
 }
 
-@font-face {
-  font-family: 'Beautinique Display Fallback Devanagari';
-  font-weight: 100 549;
-  src: local('Nirmala UI'), local('NirmalaUI');
-  size-adjust: 97.64%;
-  ascent-override: 97.27%;
-  descent-override: 44.29%;
-  line-gap-override: 0.00%;
-}
-
-@font-face {
-  font-family: 'Beautinique Display Fallback Devanagari';
-  font-weight: 550 900;
-  src: local('Nirmala UI Bold'), local('NirmalaUI-Bold');
-  size-adjust: 97.81%;
-  ascent-override: 97.11%;
-  descent-override: 44.22%;
-  line-gap-override: 0.00%;
-}
-
 @theme {
-  --font-sans: 'Beautinique Sans', 'Beautinique Sans Fallback Arial', 'Beautinique Sans Fallback Roboto', 'Beautinique Sans Fallback Devanagari', ui-sans-serif, system-ui, sans-serif;
-  --font-display: 'Beautinique Display', 'Beautinique Display Fallback Times', 'Beautinique Display Fallback Noto Serif', 'Beautinique Display Fallback Devanagari', ui-serif, Georgia, serif;
+  --font-sans: 'Beautinique Sans', 'Beautinique Sans Fallback Arial', 'Beautinique Sans Fallback Roboto', ui-sans-serif, system-ui, sans-serif;
+  --font-display: 'Beautinique Display', 'Beautinique Display Fallback Times', 'Beautinique Display Fallback Noto Serif', ui-serif, Georgia, serif;
 }
 /* @generated:end */

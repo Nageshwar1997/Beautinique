@@ -1,6 +1,6 @@
 # PRD — BQ
 
-> **Status:** v1.0 (2026-10-18), **approved**. §6 ke flows ki technical detail aur §7 ke performance numbers ARCHITECTURE.md me aayenge.
+> **Status:** v1.1 (2026-10-20), **approved**. §6 ke flows ki technical detail aur §7 ke performance numbers ARCHITECTURE.md me aayenge.
 
 ## 1. Product overview
 
@@ -38,7 +38,7 @@ Beautinique (BQ) ek Indian e-commerce platform hai jo sirf **beauty aur personal
 | Docs ki language       | Saari planning `.md` files **Hinglish** me likhi jayengi.                                                                                                                                                                                                                                                                                                                                                                | 2026-10-18  |
 | Project ka type        | **Education + portfolio project**, dummy brand, bechne ke liye nahi. Lekin banana **asli production-grade** tareeke se hai. Kanooni cheezein dummy data ke saath system me banengi (§7.1).                                                                                                                                                                                                                               | 2026-10-18  |
 | Market aur tax         | **Sirf India, prices INR me.** Har order ka **GST-compliant invoice**.                                                                                                                                                                                                                                                                                                                                                   | 2026-10-18  |
-| App languages          | **English, Hindi aur Marathi**, teeno launch pe. Har app me language switcher aur proper translations (i18n), sirf machine page-translator nahi.                                                                                                                                                                                                                                                                         | 2026-10-18  |
+| App language           | **Sirf English** (INR aur dates `en-IN` me). | 2026-10-20  |
 | Platform type          | **Fully responsive web apps** (mobile, tablet, desktop). Delivery app mobile-first PWA hoga, jo phone pe install ho sake aur kamzor network me bhi chale. Native mobile apps abhi scope me nahi.                                                                                                                                                                                                                         | 2026-10-18  |
 | Pune pehle din         | **Poora Pune district:** Pune shehar, Pimpri-Chinchwad aur saare gaon wale talukas. Phir bhi kisi bhi area ko kabhi bhi on/off karne ka switch rahega (§7.2).                                                                                                                                                                                                                                                            | 2026-10-18  |
 | Agla district ya state | Notify-me waitlist se suggestion milega, **lekin Master kisi bhi district ya state ko seedha bhi khol sakta hai**. Koi fixed order nahi. **Shart:** us area ki **team ready honi chahiye**; go-live checklist poori hue bina wo live nahi hoga (§7.2).                                                                                                                                                                   | 2026-10-18  |
@@ -274,7 +274,7 @@ Notes:
 - **Saare 11 apps launch pe banenge:** 4 pehle se hain, 7 naye banenge.
 - **Review screens** (seller applications, listing review, appeals aur takedowns) ek shared package module honge. Wo Admin aur Super Admin dono apps me lagenge, taaki Super Admin app me ye screens dobara na likhni padein.
 - Har app ek hi common login aur permissions system use karega, taaki naye sub-roles sirf data se ban sakein.
-- Saare apps **fully responsive** hain aur English, Hindi aur Marathi me chalenge (§7.4).
+- Saare apps **fully responsive** hain aur English me chalenge (§7.4).
 
 ## 5. Features
 
@@ -286,7 +286,7 @@ Saare features **launch pe** honge. Pehle wo features jo saare apps me common ha
 - **Roles aur permissions:** ek common RBAC system, scope ke saath (self, brand, state, category, city, warehouse, hub, global). Naye sub-roles sirf data se ban sakein.
 - **Audit log:** har zaroori action ka record (kisne, kab, kya, kahan se). Saare apps ka ek hi log.
 - **Notifications:** in-app, email (Brevo), SMS (DLT templates), WhatsApp aur browser push. User har channel ki consent khud set kare.
-- **Language:** English, Hindi aur Marathi switcher. **Theme:** light aur dark.
+- **Theme:** light aur dark.
 - **Fully responsive** aur accessible (keyboard, screen reader, colour contrast).
 - **Online/offline status**, error pages, loading states, aur Sentry error tracking.
 - **Search, filters, sort, pagination** aur CSV export, jahan bhi list hai.
@@ -295,12 +295,12 @@ Saare features **launch pe** honge. Pehle wo features jo saare apps me common ha
 ### 5.1 Customer app
 
 - **Discovery:** home page (banners, collections, offers), categories (Skin, Makeup, Hair, Fragrance, Bath & Body, Men's Grooming), brand pages, creator storefronts, beauty magazine aur tutorials.
-- **Search:** autosuggest, Hindi/Hinglish synonyms, typo tolerance, recent searches.
+- **Search:** autosuggest, synonyms (jaise kajal = kohl), typo tolerance, recent searches.
 - **Filters:** brand, price, shade, skin type, concern, finish, ingredients, vegan/cruelty-free, rating, aur country of origin (kanoon ke hisaab se).
 - **Product page:** shade aur size variants, swatches, **virtual try-on**, shade finder, INCI ingredients, how to use. Saari legal declarations: MRP, net quantity, manufacturing aur expiry date, country of origin, manufacturer ya importer, customer care. Seller ki details aur grievance officer, ratings, photo reviews aur Q&A, pincode check aur delivery date, notify-me (stock ya area na ho to), related products, share, wishlist.
 - **Cart aur checkout:** cart, save for later, coupons, free samples aur gifts, address book (Ola Maps pin aur pincode check), poora price breakdown pehle se (koi hidden charge nahi). Payment Razorpay se (UPI, cards, netbanking, wallets) ya delivery pe UPI QR. Pro Buyer ke liye GSTIN wala invoice.
 - **Orders:** live tracking (rider kahan hai), dispatch se pehle cancel, delivery OTP, GST invoice download, return ya exchange request photo ke saath (leak, melted, galat shade, near-expiry, damaged, missing), refund status, reorder.
-- **Account:** phone OTP login, 18+ declaration, profile, beauty aur shade profile, addresses, wishlist, notification preferences, language, aur apna data download ya delete karna (DPDP).
+- **Account:** phone OTP login, 18+ declaration, profile, beauty aur shade profile, addresses, wishlist, notification preferences, aur apna data download ya delete karna (DPDP).
 - **Loyalty aur rewards:** points, tiers, referrals, birthday perks, gift cards aur store credit.
 - **Expert help:** Beauty Advisor se chat ya video, aur Skin & Hair Expert ka teleconsultation booking.
 - **Pro Buyer:** application, verification status, pro prices, pro pack sizes, aur bulk ya corporate gifting quote request.
@@ -397,7 +397,7 @@ Saare features **launch pe** honge. Pehle wo features jo saare apps me common ha
 - Return pickup: doorstep pe seal, shade aur batch check; exchange ek hi trip me.
 - Hub handover scans.
 - Earnings aur payouts; documents aur unke expiry reminders.
-- SOS button, support tickets, English/Hindi/Marathi.
+- SOS button aur support tickets.
 - Kamzor network me bhi kaam karega (offline queue).
 - **Rider Team Lead view:** squad ke live trips, atke shipments reassign karna.
 
@@ -516,7 +516,7 @@ Ye saare naam aur contacts **dummy** hain, sirf education project ke liye. Kisi 
 ### 7.4 Basic product requirements
 
 - **Fully responsive:** saare apps mobile, tablet aur desktop pe poori tarah kaam karenge.
-- **Languages:** English, Hindi aur Marathi. Har app me switcher aur proper translation files (i18n), sirf machine translation nahi. Default English.
+- **Language:** sirf English. INR aur dates `en-IN` me.
 - **Accessibility:** WCAG 2.1 AA ke hisaab se: keyboard se chalne layak, screen reader labels, sahi colour contrast, aur dikhne wala focus.
 - **Delivery app:** mobile-first PWA. Phone pe install ho, aur kamzor network me offline queue ke saath chale.
 - **Security:** internal staff ke liye MFA, har role ko sirf zaroori permissions, aur saare apps ka audit log.
@@ -545,7 +545,7 @@ Ye locations dummy planning data hain. Network & Serviceability Planner inhe kab
 
 ## 9. Assumptions
 
-Saari assumptions confirm ho gayi hain aur ab §2 me decisions ki tarah likhi hain: India aur INR, GST invoices, English/Hindi/Marathi apps, Hinglish docs, aur fully responsive web apps.
+Saari assumptions confirm ho gayi hain aur ab §2 me decisions ki tarah likhi hain: India aur INR, GST invoices, English apps, Hinglish docs, aur fully responsive web apps.
 
 ## 10. Open questions
 
@@ -575,5 +575,6 @@ Abhi koi open question nahi hai. Naye sawaal aaye to yahan likhe jayenge.
 | v0.6    | 2026-10-18 | Coverage phases me: pehle Pune district (Maharashtra), phir Maharashtra ke baaki districts, phir baaki states. §7.2 joda: expansion sirf configuration se.                                                                                                                                                                                                                                                                                                                                                                                                                                                             |
 | v0.7    | 2026-10-18 | Poora PRD **Hinglish** me. **Saare roles aur saare 11 apps launch pe**; growth ya scale me kuch nahi. Verification ke fixes: Pro Buyer me saare buyer types; `SELLER_TYPES` ki 15 values ka plan; Master ka approval bypass aur login bypass hatega; Admin ka category aur contact-inbox ka kaam shift hoga; brands ke liye warehouse-state GSTIN ki shart; IT Rules, dark patterns, rider TDS, plastic EPR aur labour registrations jode gaye; legal table ki galtiyan theek ki gayi. Hierarchy poori ki gayi. Naye open questions 6 aur 9, aur naye risks.                                                           |
 | v0.8    | 2026-10-18 | Decision: jin brands ke paas warehouse-state (Maharashtra) GSTIN nahi hai, wo registration lenge, aur Beautinique onboarding me guide aur checklist dega (purana open question 6 band). Legal table ke fixes: apne brand ki sales pe TCS nahi; seller TDS me ₹5 lakh wali chhoot; DPDP aur labour rows pe †; fire NOC "lawyer se confirm"; gig uploads "real time ya roz"; rule 5(6)(a) aur poore citations; † footnote saaf. Tax role me seller TDS gross sales pe. Hierarchy ki external line poori.                                                                                                                 |
-| v0.9    | 2026-10-18 | Project type: education aur portfolio project, lekin production-grade; legal cheezein dummy data ke saath. Assumptions confirm: India aur INR, GST invoices, apps English/Hindi/Marathi me, fully responsive. Pune pehle din poora district. Kisi bhi district ya state ko seedha kholne ki suvidha. Chakan warehouse aur 21 hubs (dummy). Stock transport ka suggestion. Drug items kabhi nahi. Head of Operations joda. EPR: MSE nahi. Dummy legal contacts (§7.3), basic requirements (§7.4), Pune network (§7.5). §5 me saare 11 apps ke features ka pehla draft. Seller onboarding Customer app se Seller app me. |
+| v0.9    | 2026-10-18 | Project type: education aur portfolio project, lekin production-grade; legal cheezein dummy data ke saath. Assumptions confirm: India aur INR, GST invoices, apps English me, fully responsive. Pune pehle din poora district. Kisi bhi district ya state ko seedha kholne ki suvidha. Chakan warehouse aur 21 hubs (dummy). Stock transport ka suggestion. Drug items kabhi nahi. Head of Operations joda. EPR: MSE nahi. Dummy legal contacts (§7.3), basic requirements (§7.4), Pune network (§7.5). §5 me saare 11 apps ke features ka pehla draft. Seller onboarding Customer app se Seller app me. |
 | v1.0    | 2026-10-18 | PRD **approved**. §5 features final. Stock transport aur "Pune pehle din poora district" confirm. Open questions band. Kisi bhi district ya state ko seedha kholne ki shart: team ready (go-live checklist). §6 aur §7 ki technical detail ARCHITECTURE.md me jayegi.                                                                                                                                                                                                                                                                                                                                                  |
+| v1.1    | 2026-10-20 | Decision: apps **sirf English** me. |

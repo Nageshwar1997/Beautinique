@@ -4,6 +4,6 @@ import { defineConfig } from 'vite';
 import { beautiniqueFonts } from '../src/vite.js';
 
 export default defineConfig({
-  plugins: [tailwindcss(), beautiniqueFonts({ preload: ['sans', 'display'], devanagari: { storageKey: 'bq-playground-lang' } })],
+  plugins: [tailwindcss(), beautiniqueFonts({ preload: ['sans', 'display'] })],
   server: { port: 5180, strictPort: true },
 });
