@@ -57,7 +57,7 @@
 | Folder | Kya hai |
 |---|---|
 | `Beautinique` | Naya monorepo (public): `backend/`, `frontend/`, `packages/`, `docs/` |
-| `Beautinique-Docs` | Ye planning docs |
+| `Beautinique/docs` | Ye planning docs (monorepo ke andar; purana `Beautinique-Docs` repo ab khaali hai) |
 | `BQ-Client`, `BQ-Seller`, `BQ-Admin`, `BQ-Master` | Purane frontend repos (migration ke baad archive) |
 | `BQ-Packages` | Purane shared npm packages (`@beautinique/*`) |
 | `BQ-Microservices`, `Beautinique-Gateway` | Purana backend (migration ke baad archive) |

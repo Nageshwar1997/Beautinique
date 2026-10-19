@@ -89,7 +89,7 @@
 1. Saari planning `.md` files **Hinglish** me. Code identifiers, laws aur product names English me.
 2. Har doc ke top pe status (version + date) aur neeche change log.
 3. Har package me README + playground.
-4. Naye docs zaroorat pe `Beautinique-Docs` me jod sakte hain (jaise `infra/ola-maps.md`, ADRs).
+4. Naye docs zaroorat pe `Beautinique/docs` me jod sakte hain; platform-wise docs `docs/backend`, `docs/frontend` aur `docs/packages` me (jaise `infra/ola-maps.md`, ADRs).
 
 ## 9. AI assistant ke saath kaam
 
