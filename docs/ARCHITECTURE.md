@@ -1,0 +1,617 @@
+# ARCHITECTURE — BQ
+
+> **Status:** v1.1 draft (2026-10-19). [PRD.md](PRD.md) v1.0 pe based. Design ek multi-agent review se aaya (3 architecture proposals + review board + owner ke decisions), aur v1.1 me free tier ke official docs ke against verify hua.
+
+## 0. Ek nazar me
+
+- **Backend:** 1 **API Gateway** + 3 **microservices** (Identity, Payments, Notify) + 1 **modular monolith** (Core, ~23 modules).
+- **Code:** sab kuch owner ke naye monorepo **`Beautinique`** me (github `Nageshwar1997/Beautinique`): `backend/`, `frontend/`, `packages/`, `docs/`, `infra/`, `data/`.
+- **Kharcha: ₹0/mahina.** Render free, Vercel Hobby, Atlas M0 aur free Redis. Koi domain nahi.
+- **Render pe "bundle mode":** paancho backend deployables **ek hi free web service** me chalte hain. Code me wo poori tarah alag hain.
+- **Laptop pe "split mode":** Docker me har microservice ka apna container.
+- **Paise lagane ka faisla ho to:** sirf config badlegi, aur har deployable alag Render service ban jayega. Code change nahi (§11.6).
+
+Ek line me: **ek ghar, 5 alag kamre.** Har kamre ka apna tala hai (apna database, apne secrets), aur kamre sirf tay raston (contracts aur events) se baat karte hain. Free plan me ek hi ghar ka kiraya milta hai, isliye sab ek ghar me rehte hain.
+
+## 1. Big picture
+
+```
+ 11 apps (Vercel Hobby, *.vercel.app)
+   customer · seller · admin · superadmin · master · support · finance
+   logistics · delivery · growth · creator
+        │   har app:  /api/*  ──(Vercel rewrite, same-origin)──►
+        ▼
+ ┌──────────────────── Render free web service: "bq-live" (bundle mode) ─────────────────────┐
+ │  bq-gateway  ──►  bq-identity   (login, OTP, MFA, sessions, roles aur permissions)          │
+ │      │       ──►  bq-payments   (Razorpay: checkout, UPI QR, refunds, payouts, webhooks)    │
+ │      │       ──►  bq-notify     (email, SMS, WhatsApp, push, in-app; EN/HI/MR)              │
+ │      │       ──►  bq-core       (modular monolith: catalog, orders, warehouse, logistics,   │
+ │      │                           finance, support, growth, creators, expansion, ...)        │
+ │      └─ har deployable apne localhost port pe HTTP server; gateway unhe route karta hai     │
+ └───────────────┬─────────────────────────────┬──────────────────────────────┬──────────────┘
+                 ▼                             ▼                              ▼
+     MongoDB Atlas M0 (free)        Render Key Value (free Redis)      Cloudinary, Brevo, Razorpay
+     har deployable ka DB              BullMQ queues + cache              (test mode), Ola Maps, Sentry
+```
+
+## 2. Approved decisions
+
+| #   | Decision                                                                                                                                                                                                                                                        | Kyun                                                                                                                                                                                                                       |
+| --- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 1   | **Microservices: Identity, Payments, Notify.** Baaki sab Core (modular monolith) me.                                                                                                                                                                            | Teeno asli boundaries hain: security keys, paise aur Razorpay ke secrets, aur bahar ke providers ka fan-out.                                                                                                               |
+| 2   | **Microservice banne ka rule:** koi domain tabhi alag service banega jab wo security, paise ya secret ki boundary ho, ya zyaadatar bahar ke side effects ho. **Aur** use kabhi bhi orders, stock, ledger ya go-live data ke saath ek hi transaction na chahiye. | Checkout, packing aur invoice, return QC aur go-live ko ek hi transaction chahiye. Unhe todne se har flow saga ban jata.                                                                                                   |
+| 3   | **Kharcha ₹0.** Render free, Vercel Hobby, Atlas M0 aur free Redis.                                                                                                                                                                                             | Education aur portfolio project hai.                                                                                                                                                                                       |
+| 4   | **Render pe bundle mode:** 5 deployables ek free web service me. Laptop pe Docker split mode.                                                                                                                                                                   | Render free me 750 ghante/mahina saari services milake milte hain, aur ek service poora mahina ~744 ghante leti hai. 5 alag services 6 din me ghante khatam kar deti, aur har ek ke so jaane pe ~1 min ka cold start hota. |
+| 5   | **Database:** har environment ka 1 Atlas cluster. Har deployable ka apna database aur apna DB user. Core ke andar module-prefixed collections.                                                                                                                  | Identity ke passwords aur Payments ka data alag credentials ke peeche rehta hai, aur Core ke cross-module transactions saste rehte hain.                                                                                   |
+| 6 | **Redis:** development me **local Redis** (Docker Valkey, Render jaisi limits ke saath). Production me **Render Key Value** (Redis-compatible; free: 25 MB, 50 connections, disk pe save nahi). Sab `REDIS_URL` setting se. | Free hai, aur production me Render ke private network pe. Redis sirf fast copy hai: outbox, timers ki due dates, DLQ aur revoke/freeze ka source of truth MongoDB hai, aur Redis wipe pe recovery chalti hai (§6.6). |
+| 7   | **Domain nahi.** Har Vercel app `/api/*` ko Render gateway pe rewrite karti hai.                                                                                                                                                                                | Browser ke liye API same-origin hai, isliye cookies first-party rehti hain aur third-party cookie blocking ka asar nahi padta.                                                                                             |
+| 8   | **Monorepo:** `Beautinique` repo, npm workspaces + Turborepo.                                                                                                                                                                                                   | 11 apps aur 5 deployables ke liye ek jagah code, shared packages, aur sirf badle hue hisson ka build.                                                                                                                      |
+| 9 | **Master ke doosre launch roles** (Trust & Safety Lead, Marketing Head) **ek alag staff account** pe, usi insaan ke liye. | Master role ke paas koi `*.decide` permission nahi (seller, listing, appeal, ban appeal, risk rules); wo sirf second signature deta hai (PRD §3.6, §5.5). Trust & Safety Lead ban appeals decide karta hai aur risk rules approve karta hai, isliye ye kaam alag account pe. Audit me owner aur operator alag dikhte hain. |
+| 10  | **Performance targets** sirf tab lagu jab service jaagi hui ho (§14.6).                                                                                                                                                                                         | Free tier me CPU aur RAM kam hai.                                                                                                                                                                                          |
+
+## 3. Backend deployables
+
+| Deployable      | Type             | Kaam                                                                                                                                                                                                                             | Data                               |
+| --------------- | ---------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------- |
+| **bq-gateway**  | Gateway          | Akela public darwaza. Har request ka app pehchanna, access token verify karna, session revoke ya freeze check (Redis), rate limits, request-id, routing, webhooks ka entry.                                                      | Koi DB nahi. Redis me rate limits. |
+| **bq-identity** | Microservice | Login (phone OTP, email + password + TOTP, Google), sessions aur devices, token signing (ES256 + JWKS), 11 apps, permission catalogue, 79 roles, scoped grants, invitations, account freeze, 18+ declaration, legal acceptances, aur **API clients**: Seller API Integration aur Affiliate Partner ke liye client-credentials token (`aud = bq:partner-api`, ek sellerOrg ya affiliate tak scoped). Gateway pe inki alag `partner-api` rate limit hai. | `bq_identity` |
+| **bq-payments** | Microservice     | Razorpay ke saare secrets **sirf yahan**: orders, checkout verification, webhooks, delivery pe UPI QR, refunds, payouts (Route), settlement reports. **Cash ka koi code path nahi.**                                             | `bq_payments`                      |
+| **bq-notify**   | Microservice     | Email (Brevo), SMS (DLT sandbox), WhatsApp (sandbox), web push, in-app inbox. EN/HI/MR templates, consent aur preferences, delivery log, OTP ka fast lane.                                                                       | `bq_notify`                        |
+| **bq-core**     | Modular monolith | Baaki saare business modules (§4). Ek hi process me API, workers aur schedulers.                                                                                                                                                 | `bq_core` + `bq_audit`             |
+
+**Bundle mode me kaise chalte hain:** ek Node process (`backend/bundle`) paancho ke HTTP servers alag localhost ports pe start karta hai, aur Core ke workers aur schedulers bhi. Gateway public port pe hai aur baaki ko localhost pe route karta hai. Har deployable ka apna database user aur apna config hai. **Split mode** me yahi code alag processes ya containers me chalta hai, aur bas URLs badalte hain.
+
+**Bundle mode me secrets:** ek process hone se saare env vars ek hi `process.env` me hote hain. Isliye har deployable ki keys namespaced hain (`PAYMENTS__RAZORPAY_KEY_SECRET`, `IDENTITY__JWT_PRIVATE_KEY`, ...). `backend/bundle` boot pe har deployable ka config object alag banata hai aur phir un keys ko `process.env` se hata deta hai. ESLint `process.env` ko config modules ke bahar rokta hai, aur dependency-cruiser Core ko Payments ya Identity ka code import nahi karne deta. Process-level asli isolation sirf split mode me hai; bundle mode me ye boundary code aur lint se hai.
+
+## 4. bq-core ke modules
+
+Har module ka apna folder hai (`index.ts` facade, `http`, `application`, `domain`, `infra`, `events`, `jobs`, `permissions.ts`, `settings.ts`) aur apne collections ka prefix. Ek module doosre module ke models import nahi kar sakta: CI me dependency-cruiser ise rokta hai. Side effects sirf outbox events se doosre module tak jaate hain.
+
+| Module               | Kaam                                                                                                                                                                                                                                                                               |
+| -------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| platform kernel      | Transactions (commit ke baad hi reply), outbox relay, inbox dedupe, idempotency keys, authorize/scopeFilter, area-settings resolver, CSV export, job schedulers.                                                                                                                   |
+| location             | Poore India ke states, districts, sub-districts (LGD codes) aur pincodes (India Post), versioned import.                                                                                                                                                                           |
+| network              | Warehouses, hubs, cities, Ola zones, lanes, areas, area settings, serviceability API.                                                                                                                                                                                              |
+| expansion            | Waitlist, district rollups, suggestions, expansion requests, checklist templates, go-live.                                                                                                                                                                                         |
+| sellers              | Seller organisations (house brand ek flag), eligibility aur legal form, har warehouse-state ka GST registration, bank account (encrypted), agreement, grievance officer, Udyam, brand registry, distributor authorisations, documents, onboarding drafts, own-brand restock plans, brand partnerships pipeline aur invite links, seller health score. |
+| customers            | Profiles, beauty aur shade profile, addresses (Ola pin), wishlist, Pro Buyer applications, B2B quotes.                                                                                                                                                                             |
+| review               | Casework engine: seller aur Pro Buyer applications, listings, regulatory, shades, brand documents, creators, appeals, takedowns, UGC. Routing: sabse kam load wala scope holder → backup → SLA ke baad Super Admin pool.                                                           |
+| catalog              | Category tree aur attributes, products, variants, shades, EAN check, INCI, MRP aur declarations, versioned listing edits, CSV import, regulatory docs, drug blocklist, safety cases aur recalls, try-on config.                                                                    |
+| pricing              | Selling aur pro prices (MRP se kam ya barabar), price history, pichhle 30 din ka sabse kam price.                                                                                                                                                                                  |
+| promotions           | Coupons, free samples aur gifts (cart rules, stock reservation ke saath), funding split, budget caps (atomic), auto-stop, cap se upar approvals.                                                                                                                                                                                                    |
+| discovery            | Storefront read API, Atlas Search (EN/HI/MR/Hinglish synonyms), autosuggest, ranking disclosure, sponsored slots.                                                                                                                                                                  |
+| commerce             | Cart, checkout, place-order transaction, order state machine, cancellation, returns aur exchanges, reorder.                                                                                                                                                                        |
+| inventory (WMS)      | ASN aur inbound slot booking, GRN (batch, mfg, expiry) aur GRN differences ke disputes, quarantine, putaway, bins, lots, append-only movements, balances, reservations, FEFO, cycle counts, near-expiry block, pick aur pack, returns QC, RTV, liquidation aur destruction, recall tasks, own-brand batch release, demand planning.                         |
+| logistics            | Line-haul, hub sort aur handover scans, run sheets (Ola routing), shifts, attempts (OTP, photo, geo), reattempts, RTO, exchanges, disputes, control tower, SOS, loss prevention, rider onboarding aur documents, squads, earnings, GPS, Delivery PWA sync.                         |
+| finance | Double-entry journal, fees aur commission (maker-checker), settlement engine, payout batches, reconciliation, chargebacks, GST invoices aur credit notes (gapless), TCS/TDS registers, gig aggregator contribution aur state welfare fee (area setting ke rate se, journal me), labour registrations tracker (Shops & Establishments, OSH, ESIC, EPFO; har site aur company ke liye, expiry reminders ke saath), procurement, books export. |
+| support              | Tickets, SLAs, macros, L1 → L2 → Grievance Officer, grievance register, IT Rules content complaints, contact-us, BPO vendors, refund caps, advisor aur expert consults, L3 repairs, CSAT.                                                                                          |
+| ugc                  | Ratings, photo reviews, Q&A, seller replies, moderation.                                                                                                                                                                                                                           |
+| growth               | Banners, collections, layouts, A/B tests, CMS, CRM journeys, loyalty, gift cards, retail media, Pro & B2B, city growth, marketing calendar.                                                                                                                                        |
+| creators | Creators, affiliates, agencies, storefronts, looks, tutorials (automatic disclosure label ke saath), campaigns, content approval, tracked links aur codes, attribution, commissions, gift log, live shopping, Affiliate Partner portal (product feed, postbacks). |
+| governance + privacy | Second signatures, emergency switches, feature flags, policy versions, takedown register, audits, CERT-In incident register, access reviews, DPDP consents, data requests, breach register, CPCB EPR register aur yearly targets, `marketing.own_brand` consent ka audit.                                                                                        |
+| risk                 | Fraud rules, flags, blocks, ban appeals, payout holds, brand protection, test buys.                                                                                                                                                                                                |
+| audit                | Append-only, hash-chained audit log saare apps ka, query aur CSV export.                                                                                                                                                                                                           |
+| media                | Cloudinary signed uploads, asset registry, private documents ke liye 5 minute ke signed URLs.                                                                                                                                                                                      |
+| insights             | Daily rollups: company, Head of Operations, admin performance, seller analytics, logistics KPIs, aur data analyst ke liye masked BI export.                                                                                                                                                                                   |
+
+**Baad me alag karne ke candidates:** discovery (storefront p95 300 ms se upar lagataar 7 din, ya storefront reads Core ke load ka 60% se zyada), logistics + inventory (alag team ya alag deploy cadence), finance (alag audit ya compliance zaroorat). Har candidate pe pehle §2 ka decision 2 wala rule check hoga.
+
+## 5. Communication
+
+### 5.1 Sync (HTTP)
+
+- Browser → Vercel rewrite → **bq-gateway** → jis deployable ka route hai.
+- **Contracts-first:** har endpoint `packages/contracts` me **ek hi baar** declare hota hai: method, path, zod input aur output, apps, permission key, rate-limit class, idempotency, step-up, owner. Isi se OpenAPI, typed frontend client aur TanStack Query keys, aur gateway ka route metadata generate hota hai. Naya endpoint = contract + handler. Aaj ki tarah 3 jagah edit aur package republish nahi.
+- **Passport token:** gateway user ka access token verify karta hai, phir upstream ko 60 second ka passport JWT bhejta hai (`aud` = upstream). Aaj ka `X-Service-Secret` aur `X-User-Role` header ka bharosa khatam ho jata hai.
+- **Service se service sync calls sirf do:** core → payments (payment intent, delivery QR, status) aur core → identity (go-live ke liye grant snapshot). Har call pe 2 second timeout, 1 retry Idempotency-Key ke saath, aur circuit breaker. Microservices kabhi core ko call nahi karti.
+- **Core ke andar:** modules sirf ek doosre ke `index.ts` facade se baat karte hain, aur facade caller ka Mongo session le sakta hai, taaki ek transaction bana rahe.
+
+### 5.2 Async (events)
+
+- **Outbox → BullMQ → inbox:** har deployable apne events state change ke saath **usi transaction me** apne outbox me likhta hai. HTTP reply commit ke baad hi jata hai.
+- **Relay:** har deployable ka relay apne outbox ko padhta hai aur har subscriber ke liye ek job banata hai (`jobId = eventId:subscriber`). Relay mode config se chunta hai (`outbox.relay = poll | changestream`):
+  - **Live (Atlas free) me `poll`:** har 1 second polling (`{status, createdAt}` index ke saath). Atlas free cluster pe poore cluster me **max 5 change streams** khul sakti hain, aur deploy ke waqt purana aur naya instance dono khulein to 4 relays × 2 = 8 ho jaati. 4 deployables × 1 query/second = ~4 ops/s, jo M0 ke 100 ops/s me theek hai.
+  - Laptop aur paid mode me `changestream` + 5 second sweeper.
+  - Relay ek Mongo lease lock (`platform_locks`, 15 s TTL) ke peeche chalta hai, taaki deploy overlap me ek hi instance relay kare.
+  - Atlas free pe koi aur change stream nahi khulegi. CI me lint rule `.watch(` ko sirf relay module me allow karta hai.
+- Consumer apna effect aur `processed_events` entry ek hi transaction me likhta hai. Delivery at-least-once hai, effect effectively-once.
+- **Event envelope:** `{eventId (UUIDv7), type '<context>.<aggregate>.<pastTense>', version, occurredAt, producer, aggregate, actor, correlationId, causationId, scope, data}`. Zod se validate hota hai. Breaking change = naya version, aur CI compatibility check karta hai.
+- **Retries:** 5–8 baar, exponential backoff. Final fail pe job MongoDB `platform_dead_letters` collection me jaata hai (14 din TTL) aur Sentry alert jaata hai. Redis me sirf aakhri 20 failed jobs rehte hain.
+- **Read models:** Identity users aur grants ke snapshot events bhejta hai. Core aur Notify unki local copies rakhte hain, isliye unhe Identity ko call nahi karna padta.
+- **Grants events se:** Core ke domain events Identity ke inbox me jaate hain: `sellers.org.approved` → Seller Account Owner grant (scope sellerOrg) aur applicant grant khatam; `creators.creator.approved` → Creator grant; `logistics.rider.activated` / `deactivated` → Delivery Partner grant dena ya hatana.
+
+### 5.3 Idempotency aur timers
+
+- **Idempotency-Key header zaroori:** place-order, payment retry, refund, goodwill, coupon redeem, payout approval, ASN, GRN, delivery attempt aur POD, Delivery app ke offline-sync batches. Response 48 ghante store hota hai.
+- **Timers:** saare `setInterval` hat jayenge. BullMQ job schedulers aur delayed jobs use honge. **Due dates MongoDB me** rehti hain, aur sweeps safety net hain. Agar service so bhi gayi ya Redis ka data mit gaya, to jaagte hi overdue kaam pakda jayega. Redis wipe ke baad schedulers §6.6 ki recovery se wapas aate hain, sirf boot pe nahi. Sentry free me sirf 1 cron monitor hai, isliye ek `scheduler-heartbeat` job saare schedulers ka last-run (MongoDB) check karke usi ek monitor pe check-in karta hai.
+
+## 6. Data design
+
+### 6.1 Databases
+
+| Database      | Kiska                          | Note                                                                                                                                                                                                                |
+| ------------- | ------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `bq_identity` | bq-identity                    | Users, credentials, MFA (encrypted), sessions, refresh tokens (hashed), signing keys (encrypted), apps, permissions, roles, grants, invitations.                                                                    |
+| `bq_payments` | bq-payments                    | Payment intents, payments, UPI QR, refunds, disputes, PSP events (unique), linked accounts, transfers, settlement reports.                                                                                          |
+| `bq_notify`   | bq-notify                      | Templates, recipients, preferences, consents, push subscriptions, inbox, deliveries.                                                                                                                                |
+| `bq_core`     | bq-core                        | Module-prefixed collections (`location_`, `network_`, `catalog_`, `commerce_`, `inventory_`, `finance_`, ...) aur platform collections (outbox, processed events, idempotency keys, migrations, identity replicas). |
+| `bq_audit`    | bq-core (sirf insert aur find) | Audit events, hash chain. Update aur delete ka right kisi ke paas nahi.                                                                                                                                             |
+
+- Har database ka apna Atlas DB user hai, jiske paas sirf apne database pe readWrite ka right hai.
+- **Atlas free (M0) ki limits** (mongodb.com free cluster limits se verified, 2026-10-19):
+  - 512 MB storage (documents + indexes).
+  - **100 operations/second**, aur 7 din me 10 GB in + 10 GB out. Bulk imports (LGD, India Post) laptop se, batches me, throttle ke saath.
+  - Max 100 databases aur **500 collections total** (saare databases milake). Namespace 95 bytes, database naam 38 bytes. CI me `collections-budget` check: M0 mode me 400 se zyada collections pe fail.
+  - Aggregation me max 50 stages, `allowDiskUse` ignore hota hai, aur in-memory sort sirf 32 MB tak. Isliye har export, rollup aur dashboard query ka sort index se hona chahiye (CI me `explain` check), aur bade exports cursor + batches me.
+  - `$where` aur map-reduce nahi chalte.
+  - Max 500 connections: har deployable ka `maxPoolSize` 5.
+  - Max 5 change streams poore cluster me (isliye relay `poll`, §5.2).
+  - 3 search indexes (search + vector milake). Hamare 3: storefront, catalog dashboard, content. Chautha index M0 pe nahi ban sakta.
+  - Transactions aur Atlas Search M0 pe chalte hain (MongoDB 8.0 replica set).
+
+### 6.2 Transactions
+
+- `withTransaction()` helper: transient errors pe retry, majority write concern, **reply sirf commit ke baad**, aur outbox aur audit rows usi transaction me. Ye aaj ka "commit se pehle response" wala bug theek karta hai.
+- Orders, listing versions, applications, settlements aur inventory balances pe optimistic concurrency (version field).
+- Lambe jobs transaction nahi pakadte. Chhote, idempotent steps me chalte hain.
+
+### 6.3 Paisa
+
+- Har amount **integer paise** me. GST rates basis points me.
+- GST har line pe: place of supply ke hisaab se CGST + SGST ya IGST. Rounding order line pe snapshot hoti hai.
+- Selling price MRP se kam ya barabar: likhte waqt bhi check, checkout pe bhi.
+- **Double-entry journal:** entries kabhi badalti nahi, galti sirf reversal se theek hoti hai, aur raat ko balances dobara verify hote hain. Accounts data hain: seller payable, rider payable, creator payable, TCS payable per state, TDS payable, gig contribution payable, welfare fee payable per state, commission income, own-brand sales (commission se alag), gateway clearing, UPI-on-delivery clearing, refunds, store credit, gift cards.
+- **GST invoices aur credit notes:** har GSTIN aur har financial year ka gapless counter, packing transaction ke andar hi. Marketplace items ka supplier seller hai, house brand ka supplier Beautinique. **Apne brand ki sales pe TCS nahi.** Pro Buyer ke GSTIN pe B2B invoice banta hai.
+- Settlement = order value − commission − fees − TCS − TDS ± returns aur claims, journal se calculate hota hai.
+
+### 6.4 Stock aur orders
+
+- `inventory_movements` append-only ledger hai (lot: batch, mfg, expiry; owner seller; bin).
+- `inventory_balances` usi transaction me conditional update se badalta hai (`available >= qty`), isliye **oversell nahi ho sakta.** CI me 10 units pe 50 parallel orders ka test chalta hai.
+- Order confirm hone pe FEFO allocation hoti hai. Har category ke near-expiry thresholds area settings me hain.
+- **Order state machine:** `PENDING_PAYMENT → CONFIRMED → ALLOCATED → PICKED → PACKED → DISPATCHED → AT_HUB → OUT_FOR_DELIVERY → DELIVERED`, saath me `CANCELLED`, `RTO`, aur `RETURN_REQUESTED → RETURNED`. `order_events` append-only hai.
+
+### 6.5 Audit, search, privacy
+
+- **Audit:** actor (user, roles, app, session), action (permission key), resource, scope, before aur after (PII masked), reason, result, ip, userAgent, requestId, time, aur roz ki hash chain. Core ise usi transaction me likhta hai. Identity, Payments aur Notify events se bhejte hain. 400 din TTL. Viewer Master app me hai, aur Internal Auditor ke paas read-only access.
+- **Search:** Atlas Search indexes code me define hote hain aur migration se apply hote hain. Local me bina atlas-local ke "basic" text-index fallback chalta hai.
+- **PII encryption:** PAN, bank account, rider DL aur RC numbers, TOTP secrets aur consult notes AES-256-GCM se encrypt hote hain. Lookup ke liye HMAC blind index, aur dikhane ke liye masked copy.
+- **Retention:** OTP 5–10 min, reservations 15 min, idempotency 48 ghante, carts 30 din, in-app 180 din, deliveries aur login events 400 din, audit 400 din. Invoices, ledger, tax registers, grievance register aur contact queries ka koi TTL nahi.
+- **DPDP erasure:** delete request pe account aur profile data mitaya jata hai. Jo records kanoon ki wajah se rakhne hain (invoices, ledger, tax registers, grievance register), unme naam, phone, email aur address pseudonymise hote hain (HMAC id); record khud nahi mitta. Identity `identity.user.erased` event bhejta hai, jisse Core aur Notify apni copies saaf karte hain.
+- **Apne brand ke liye alag consent:** DPDP consents me ek alag purpose `marketing.own_brand` hai. CRM journeys, retail media targeting aur personalised recommendations me house-brand products tabhi bheje ya dikhaye jaate hain jab is purpose ki consent ho. Ye check Notify aur discovery dono me hai, aur Fairness Analyst iska audit dekhta hai.
+- **Backups:** Atlas free cluster ka backup add-on paid hai (card chahiye), isliye ₹0 plan me nahi. Hafte me ek `mongodump` (finance, audit, payments) laptop se chalega, `age` se encrypt hoga, aur owner ki private storage me rahega. Dump kabhi GitHub Actions artifact ya repo me nahi jayega, kyunki public repo ke artifacts read access wala koi bhi download kar sakta hai.
+
+### 6.6 Redis
+
+- Ek Redis instance, `noeviction` policy.
+- Key prefixes:
+
+| Prefix                       | Kaam                                       |
+| ---------------------------- | ------------------------------------------ |
+| `bull:<queue>`               | BullMQ                                     |
+| `bq:<deployable>:<module>:*` | Cache, hamesha TTL ke saath                |
+| `bq:id:*`                    | Identity: OTP, revoke, freeze, authz cache |
+| `bq:gw:rl:*`                 | Rate limits                                |
+| `bq:svc:pin:*`               | Serviceability cache                       |
+| `bq:track:*`                 | Rider ki live location                     |
+
+- **Free Redis bahut chhota hai:** Render free Key Value = **25 MB RAM, 50 connections, koi persistence nahi** (2026-10-19 ko verified). Memory budget (25 MB):
+  - BullMQ ≤ 12 MB: har queue pe `streams.events.maxLen: 200` (BullMQ ka default ~10,000 events per queue hai, jo akele 25 MB kha sakta hai), `removeOnComplete: true`, `removeOnFail: { count: 20 }`. Job data me sirf `{eventId, type}`; poora payload MongoDB outbox me.
+  - Identity (OTP, revoke, freeze) aur rate limits ≤ 6 MB, sab TTL ke saath.
+  - Caches ≤ 4 MB: free mode me sirf serviceability aur Ola token cache; baaki `cache.enabled = false`.
+  - ~3 MB khaali.
+- **Connection budget:** ek instance ≤ 20 connections, kyunki deploy ke waqt purana aur naya instance dono jude rehte hain (Render free = 50).
+  - Har deployable ka ek shared command client (5), plus har Worker ka ek blocking connection.
+  - Free mode me **har deployable ki ek hi queue** (`q.identity`, `q.payments`, `q.notify`, `q.core`); job ka `name` handler chunta hai. Core ki heavy jobs (PDF, CSV) ke liye ek `q.core.heavy`. Yaani 5 Workers = 5 blocking connections. ~11 queues wala layout paid mode me sirf config hai (`queues.layout = split`).
+  - `QueueEvents` nahi (har ek blocking connection leta hai); Worker events aur outbox status use honge.
+  - Boot pe aur `ops.snapshot` me connection count log hota hai; 40 se upar Sentry alert.
+  - Laptop ka Docker Valkey bhi isi budget aur limits pe chalta hai, taaki dikkatein pehle hi pakdi jayein.
+- `noeviction` ki wajah se memory full = writes pe OOM error. Isliye alert 60% (15 MB) pe. Redis write fail ho to OTP bhejna `503` deta hai ("thodi der baad try karein"), auth routes pe rate limiter fail-closed, baaki routes pe fail-open.
+- **Redis wipe recovery:** Render free Key Value kabhi bhi restart ho sakta hai aur restart pe saara data mit jaata hai, jabki Node process chalta rehta hai (ioredis bas reconnect karta hai). Isliye:
+  - Boot pe `bq:epoch` key (random id, bina TTL) likhi jaati hai. Ek process-level watchdog har 30 s check karta hai; key gayab = Redis wipe. (BullMQ ke schedulers bhi wipe me mit jaate hain, isliye ye watchdog §5.3 ke "setInterval hatao" rule ka akela exception hai.)
+  - Wipe pe recovery (ek Mongo lock ke peeche): (1) saare job schedulers dobara upsert. (2) **Outbox redrive:** pichhle 48 ghante (max retry window) ke outbox events 200-200 ke batches me, same `jobId` ke saath, dobara enqueue; agla batch tabhi jab queue me 100 se kam waiting jobs hon. Consumers `processed_events` se duplicate rok lete hain. (3) Pichhle 15 min me logout, revoke ya freeze hue sessions MongoDB se padh ke Redis keys dobara likhna. (4) Nayi `bq:epoch`.
+  - Jab tak recovery poori na ho, gateway revoke aur freeze MongoDB `sessions` se check karta hai (internal apps ke liye fail closed). **Revoke aur freeze ka source of truth hamesha MongoDB hai**; Redis sirf fast copy hai.
+  - OTP aur rate-limit counters khona chalega: user OTP dobara maang leta hai.
+  - Isi recovery ki wajah se Redis ka data mitne pe bhi koi business event nahi khoyega. CI me "Redis wipe drill" isse check karta hai (§13).
+
+### 6.7 Files aur media
+
+- **Storage port:** saari files ek `StoragePort` interface ke peeche hain: `createUpload` (signed direct upload), `getUrl` (public ya signed), `delete`, `copy`. Aaj ka adapter **Cloudinary** hai; kal **AWS S3 (+ CloudFront)** ya koi aur adapter sirf config (`storage.provider`) se aa jayega.
+- **Asset registry (`media_assets`):** har file ka record: `assetId`, provider, provider key, owner entity (product, seller document, POD...), purpose, visibility (public/private), size, status. Baaki collections sirf `assetId` rakhti hain, **provider ka URL kabhi nahi**. URL hamesha `getUrl()` se banta hai, isliye provider badalne pe data nahi badalta.
+- **Lifecycle:** upload → `UNUSED` → koi record use kare → `USED` → record hata ya file badli → `DELETING` → provider se delete → `DELETED`. Delete outbox event se hota hai (transaction ke baad), retry ke saath.
+- **Unused cleanup:** daily job 24 ghante se purane `UNUSED` uploads (adhoore forms, chhode hue drafts) aur `DELETING` me atke assets provider se hataata hai. Weekly reconcile job provider ki list ko registry se milata hai; registry me nahi to orphan, delete. Legal files (invoices, KYC) apne purpose ke retention tak rehti hain.
+- **Migration (Cloudinary → S3):** ek resumable job registry ke har asset ko naye provider pe copy karta hai, `provider` aur key update karta hai, aur verify ke baad purani file delete karta hai. Copy ke dauran `getUrl()` dono providers samajhta hai, isliye downtime nahi.
+- **Quill (rich text) ki images:**
+  - Editor me nayi image pehle `blob:` preview ke saath dikhti hai (aaj ka `quill` package).
+  - Save pe har image `StoragePort` se upload hoti hai aur registry me ek `assetId` banta hai. Cloudinary ka `public_id` registry me provider key ki tarah rehta hai.
+  - Content me `<img data-asset-id="...">` save hota hai. **`src` me koi provider URL ya `public_id` nahi.**
+  - Content padhne wala API har `data-asset-id` ko registry se `getUrl()` me badal ke bhejta hai (Cloudinary: `f_auto,q_auto`, width ke hisaab se `srcset`). Public content CDN pe cache hota hai. Private content (jaise support tickets) me short-lived signed URL.
+  - `QuillContent` viewer ek `resolveAsset` prop bhi leta hai.
+  - Save pe purane aur naye `assetId` ka diff hota hai: hati hui images `DELETING`, nayi `USED`.
+  - Server check karta hai ki har `assetId` usi user aur purpose ka ho.
+  - Provider badla (S3) to content me kuch nahi badalta, sirf registry.
+
+### 6.8 Price kisko kya dikhega
+
+Kai platforms alag users ko alag price dikhate hain. BQ ka rule: **ek product ka base selling price sabke liye ek hai** (MRP se kam ya barabar). Farak sirf **dikhne wale aur label wale** tareekon se aata hai:
+
+| Farak | Kisko | Kaise dikhega |
+|---|---|---|
+| Pro price | Verified Beauty Pro Buyers | Product page pe "Pro price" label, base price ke saath. |
+| Coupons aur offers | Jo shart poori kare | Cart aur checkout me alag line. Personal coupon bhi coupon ki tarah dikhta hai, chhupi price ki tarah nahi. |
+| Loyalty points, store credit | Account wale customers | Checkout me alag line. |
+| Delivery fee | Area aur order value ke hisaab se | Product page pe hi dikhta hai (koi drip pricing nahi). |
+
+- **Kabhi nahi:** device, location history, browsing ya profile ke hisaab se chupke se alag base price (personal dynamic pricing), aur price pe A/B test. Ye dark pattern ka risk hai (PRD §7.1).
+- **Technical:** public catalog response me sirf base price aur offers (CDN cache safe). Pro price, personal coupons aur loyalty private endpoint se (§7.2 Cache). Checkout me server price dobara calculate karta hai; client ka bheja price kabhi nahi maana jata. Har order line pe price breakdown snapshot hota hai, jise Fairness Analyst audit kar sakta hai.
+
+## 7. Auth aur RBAC
+
+### 7.1 Identity
+
+- Ek login account = ek `users` record (phone aur/ya email). Aam taur pe ek insaan ka ek hi account hota hai. Sirf exception: Master ka doosra staff account (alag email, alag MFA, §2 decision 9), jo `personRef` se pehle account se juda hai, taaki audit me dono ek hi insaan ke dikhein aur ek account freeze ho to doosra bhi review me aaye.
+- **Apps data hain:** 11 records. Har ek me origins, audience, login methods, MFA policy, session lifetimes.
+- **Login sirf us app me** jahan user ke paas kam se kam ek active grant ho. Aaj ka `X-Login-Role` header aur Admin app ka "Login as Super Admin" checkbox hat jayenge. Naye seller aur creator ke liye Seller aur Creator app me sign-up pe ek system grant milta hai (`seller.applicant` ya `creator.applicant`, scope self), jo sirf onboarding ya apply aur status screens kholta hai. Ye system grants PRD ke 79 roles me nahi gine jaate.
+
+| App             | Login                                                                                                                                        |
+| --------------- | -------------------------------------------------------------------------------------------------------------------------------------------- |
+| Customer        | Phone OTP (Google optional). 18+ declaration ke baad customer role milta hai.                                                                |
+| Delivery        | Phone OTP, device binding ke saath.                                                                                                                  |
+| Seller, Creator | Email + password ya phone OTP. Seller Account Owner aur Seller Finance ke liye TOTP zaroori.                                                 |
+| 7 internal apps | Email + argon2id password + har login pe TOTP.                                                                                               |
+| Master          | Upar wala sab, plus second signatures, switches, payouts aur role grants ke liye step-up MFA (5 min ke andar). Max 2 seats. Sirf Master app. |
+
+- **OTP:** crypto-random, hashed, 5 attempts, 3 resends, phone, IP aur device limits. **Kabhi log nahi hota.**
+
+### 7.2 Tokens, sessions aur cookies (bina domain ke)
+
+- **Access JWT:** ES256, 10 min, `aud = bq:<app>`. Token me roles nahi hote, sirf session aur authz version.
+- **Refresh token:** random, hashed store, har use pe rotate hota hai. Purana token dobara use hua to poori family revoke ho jati hai aur security alert jata hai.
+- **Lifetimes:** customer aur creator 30 din (max 90), seller 7 din, delivery 7–14 din (device-bound), internal 12 ghante (30 min idle).
+- **Cookies:** har app apne `*.vercel.app` host pe hai, aur `/api/*` Vercel ke through Render tak jata hai. Isliye browser ke liye API same-origin hai. Cookies: `__Host-bq_<app>_at` (access; HttpOnly, Secure, SameSite=Lax, Path=/) aur `__Secure-bq_<app>_rt` (refresh; HttpOnly, Secure, SameSite=Strict, **Path=/api/v1/auth**, Domain nahi, isliye host-only). Refresh token sirf refresh aur logout calls pe jata hai, har request pe nahi. Har app ki cookies apne host pe alag rehti hain, to ek insaan kai apps me ek saath login reh sakta hai. Customer app ke SSR loaders anonymous fetch karte hain: cookies upstream forward nahi hoti.
+- **CSRF:** SameSite=Lax + Origin aur `x-forwarded-host` ka allow-list + `X-BQ-App` header.
+- **Origin secret:** har app ki `vercel.json` me `/api/(.*)` ke liye ek `routes` entry hai, jiska `transforms` (`type: request.headers`, `op: set`) `x-origin-secret` header lagata hai. Value `$ORIGIN_SECRET` env var se aati hai (`"env": ["ORIGIN_SECRET"]`). Plain `rewrites` request header nahi jod sakta. Secret kabhi `vercel.json` ya repo me nahi, sirf Vercel env (Sensitive) aur Render env me. `set` client ka bheja header overwrite kar deta hai. Gateway timing-safe compare karta hai, aur rotation ke waqt purani aur nayi dono values maanta hai. Gateway bina is header ki seedhi `onrender.com` requests reject karta hai. Sirf webhooks aur health isse bahar hain; webhooks ki apni signature check hoti hai.
+- **Client IP:** browser ka IP sirf tab use hoga jab request pe sahi `x-origin-secret` ho. Tab gateway `x-real-ip` padhta hai, jo Vercel khud set karta hai. Express ka generic `trust proxy` is raaste pe galat IP dega, kyunki Render ka proxy Vercel ka IP jodta hai aur saare users kuch hi Vercel IPs pe dikhte. Rate limits, OTP IP limits aur audit ka `ip`, sab ek hi `clientIp()` helper se aate hain, aur iska unit test hai.
+- **Cache:** Vercel CDN external rewrite ke upstream cache headers maanta hai (2026-04-06 ke baad bane projects me default). Vercel **Cookie request header dekh ke cache skip nahi karta**; sirf `Authorization` header, response ka `Set-Cookie`, `private`/`no-store`, ya `Vary: Cookie` caching rokte hain. Isliye:
+  - Login wale aur personal responses pe `Cache-Control: private, no-store`.
+  - `s-maxage` sirf un endpoints pe jo contract me `cache: 'public'` mark hain. Gateway in routes pe upstream ko cookies aur passport forward hi nahi karta, taaki response kabhi user pe depend na kare. Pro price, wishlist flag aur profile ke pincode wala promise date alag private endpoint se aate hain.
+  - Public responses pe `Set-Cookie` kabhi nahi, aur `Vercel-Cache-Tag` header, taaki price ya listing badalne pe tag se purge ho sake.
+  - Isse free server pe load bhi kam padta hai aur Render ka 5 GB bandwidth bachta hai.
+- Refresh pe user ka status aur grants dobara padhe jaate hain, jo aaj ka "7 din purana role" wala bug theek karta hai.
+- Logout, freeze ya grant change Redis me revoke ya freeze key likhta hai. Gateway har request pe ise check karta hai, isliye asar turant hota hai.
+- Har app me **"My devices"**: sessions dekhna, ek ya saare logout. Security Officer kisi ka bhi session revoke kar sakta hai.
+- Frontend user ko browser storage me save nahi karta. Aaj ka crypto-js localStorage store hatega. Har app `GET /api/v1/iam/me` se shuru hoti hai.
+
+### 7.3 RBAC data hai
+
+- **Permission keys code me hain** (har module ki `permissions.ts`), jaise `seller.application.decide`, `network.area.go_live.request`, `finance.payout_batch.approve`. Har key me allowed scope types, risk, MFA aur second signature ki zaroorat likhi hoti hai.
+- **Roles data hain:** 79 roles (11 main + 68 sub-roles). Master ya app head deploy kiye bina naye sub-roles bana sakte hain.
+- **Grants:** `{user, role, scope {type, ids}, validFrom, validTo, grantedBy, approvedBy}`. Scope types: self, brand, state, district, category, city, warehouse, hub, global, sellerOrg, creatorAgency. Containment: global ⊇ state ⊇ district ⊇ city ⊇ hub.
+- **Kaun kise appoint kar sakta hai:** Master: Super Admins, State Admins, Head of Operations aur app heads. Logistics Head: Warehouse, Hub, City Managers aur Network Planner. Hub Manager: Hub Ops aur Rider Onboarding. Seller Account Owner: apna staff. Super Admin states assign nahi kar sakta.
+- **Separation of duties** (tests ke saath):
+  - Appeal decide karne wala reject karne wala nahi ho sakta.
+  - Fees, payouts, over-cap coupons aur policy publishing me maker aur checker alag hone chahiye.
+  - **Master role ke paas koi `*.decide` permission nahi**, isliye koi bypass nahi, apne brand ki listings pe bhi nahi.
+  - Own-Brand Manager aur house-brand staff apni listings QC nahi kar sakte.
+- **Enforcement:** gateway mote checks karta hai (login, app, session, step-up). Services `authorize(ctx, permission, scope)` aur `scopeFilter()` use karti hain. `scopeFilter()` ek Mongo filter deta hai, isliye queues, dashboards aur exports apne aap scope ke andar rehte hain.
+- **Aaj ke chaaro MASTER bypass hatenge:** gateway authorize, login controller, `authorizeSellerOwnership` aur `authorizeProductOwnership`. ESLint role-name comparison pe rok lagata hai, aur ek test check karta hai ki bypass wapas na aaye.
+
+## 8. Expansion sirf configuration se (PRD §7.2)
+
+1. **Location master:** LGD states, districts aur sub-districts (EN/HI/MR naam), aur India Post pincodes. Pehle din poore India ka data versioned import se aata hai. Pincode → district mapping data hai, overrides ke saath. `STATES_AND_UTS` aur `STATE_MAP_COORDINATES` jaise hard-coded lists hat jayengi.
+2. **Network records:** warehouses (address, Ola point, state GST registration, hours, cut-offs, licences with expiry), hubs (city ya taluka, zone polygon, pincodes, capacity, status), cities, lanes, aur areas (STATE / DISTRICT / PINCODE; status `CLOSED | PLANNED | READYING | LIVE | PAUSED`). Chakan MIDC aur 21 hubs bas seed rows hain.
+3. **Area settings:** global → state → district → pincode, jo sabse specific ho wo jeetta hai. Versioned aur audited. Keys: delivery promise, cut-off, holidays, max reattempts, UPI-on-delivery (on/off, max order value), `orders.paused`, gig rules, tax refs, near-expiry days, support languages, go-live minimums (riders per hub, hub staff per hub), review SLA, waitlist weights.
+4. **Serviceability API:** pincode → served hai ya nahi, state, district, hub, promise date, orders paused, UPI on delivery, waitlist. Redis me cache hota hai, par checkout transaction ke andar MongoDB se dobara check hota hai.
+5. **Waitlist → suggestion:** "Notify me" district-wise entry banata hai (consent ke saath). Har ghante rollups hote hain, aur roz ranking: demand trend, nazdeeki ready warehouse ya hub ki doori, aur same-state bonus. Ye **sirf salah** hai, koi fixed order nahi.
+6. **Do darwaze, ek gate:**
+   - Door A (planned): Planner koi bhi district chunta hai → Logistics Head approval → naye state ke liye Master ka second signature → READYING.
+   - Door B (direct): Master step-up MFA ke saath koi bhi district ya state seedha kholta hai → READYING.
+   - Phir READYING → READY (saare items PASS) → LIVE.
+   - **Kisi ke paas "force live" permission nahi hai, Master ke paas bhi nahi.** Koi item fail hai to LIVE ka raasta code me hai hi nahi. Unit aur mutation tests is baat ko pakad ke rakhte hain.
+7. **Go-live checklist, team ready pehle:** versioned templates (data). Items generic predicates hain, jaise role assignment count, riders ready count, site status, lane exists, setting present, support coverage, registration active, pincode mapping complete, aur manual attestation. Default items:
+   - Har hub pe Hub Manager.
+   - Har hub pe minimum hub staff.
+   - Minimum riders: active, KYC aur training complete, gig registration done, DL, RC aur insurance 30 din me expire na ho.
+   - Hubs ready, aur City Logistics Manager ka sign-off.
+   - Warehouse link aur lane.
+   - Support coverage (languages aur hours).
+   - Saare pincodes mapped.
+   - Promise, cut-off aur holidays set.
+   - Logistics Head ka sign-off.
+   - Naye state ke liye: State Admin + backup, GST aur TCS registration (dummy), aur state rules.
+8. **`goLive(areaId)`:** saare items transaction ke andar dobara check hote hain. Identity ke grants sync call se padhe jaate hain, aur Identity down ho to go-live fail hota hai. District tabhi live hoga jab uske state ka checklist pass ho. Success pe: area LIVE, pincodes served, hubs ACTIVE, aur `expansion.area.went_live` event. Is event se cache warm hota hai, waitlist walon ko "ab hum yahan deliver karte hain" message jata hai, aur CRM journey shuru hoti hai.
+9. **Go-live ke baad:** checklist chalti rehti hai. Koi item toota (jaise hub manager hata), to Logistics Head ko alert jata hai. Pause ya close karna hamesha allowed hai.
+10. **CI ka saboot:** `open-district-by-config` test Pune ke bahar ka ek random district sirf public APIs se kholta hai. Har missing item pe refusal check karta hai (MASTER_DIRECT pe bhi), phir live karke prepaid aur UPI-on-delivery orders deliver karta hai, aur pause karke checkout rukna check karta hai. Har PR pe no-hardcoded-geo lint bhi chalta hai.
+
+## 9. Frontend
+
+### 9.1 Apps (`frontend/<app>`)
+
+| App                                                                             | Tech                                                                                                                                                                                                                                                                                                                                                        |
+| ------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| customer                                                                        | Vercel pe React Router 7 framework mode. Home, product listing, product page, brand, category, creator storefront aur magazine pages SSR + CDN cache ke saath. Legal pages prerender. Account, cart aur checkout client-side. Meta, OG, JSON-LD, sitemap.                                                                                                   |
+| seller, admin, superadmin, master, support, finance, logistics, growth, creator | Vite + React SPAs, React Router data router, lazy routes, route guards. Har app sirf route table, pages aur nav config hai. Baaki packages se aata hai.                                                                                                                                                                                                     |
+| delivery                                                                        | Mobile-first **PWA**: app-shell precache, run sheet NetworkFirst, IndexedDB action queue (har action ka UUID aur Idempotency-Key), POD photos blob me queue aur online hote hi upload, `/api/v1/logistics/sync` batch, pre-generated UPI QR, geolocation, camera, wake lock, install prompt, push. SOS offline bhi queue hota hai, aur `tel:` fallback hai. |
+
+**Code moves:** seller onboarding Customer app se Seller app me. Super Admin Admin app se alag. Admin aur Master se AddProduct aur category CRUD hatenge. Contact-us Support Desk me.
+
+### 9.2 Shared packages (`packages/`)
+
+| Package                                                           | Kaam                                                                                                                                                        |
+| ----------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| contracts                                                         | Zod DTOs, routes, events, permission keys, error codes, area-setting keys. OpenAPI aur clients generate karta hai.                                          |
+| api-client                                                        | Single-flight refresh, request queue, `X-BQ-App`, Idempotency-Key helper, generated typed calls aur query keys.                                             |
+| auth-ui                                                           | Phone OTP, email + password + TOTP, Google, 18+ declaration, My Devices, step-up dialog.                                                                    |
+| authz                                                             | Permission matcher, `<Can>`, `usePermission`, route guards, nav filtering.                                                                                  |
+| app-shell | Responsive layout, permission-filtered nav, language aur theme switchers, help link, error, 404 aur offline pages, wake-up screen (Render cold start ke liye), Sentry, idle logout. |
+| i18n                                                              | i18next + ICU. en/hi/mr namespaces, API error codes ke translations, INR aur dates `en-IN`/`hi-IN`/`mr-IN` me, CI me key-parity check.                      |
+| review-screens                                                    | Casework queue, subject renderers, decision panel, reason library. Admin aur Super Admin dono me lagta hai, aur Growth me creator applications ke liye bhi. |
+| data-table                                                        | Cursor pagination, URL-synced filters, saved views, CSV export.                                                                                             |
+| maps                                                              | Ola pin picker, zone editor, territory map, live map.                                                                                                       |
+| icons | Apne icon components (`IconCart`, `IconSearch`, ...). SVG Iconify ke sets se copy kiya, sirf jo use hote hain. Ek `BaseIcon` (size, `currentColor`, aria). Runtime pe Iconify dependency nahi; har icon alag export, isliye tree-shaking. |
+| pwa-kit, forms, config-eslint, config-ts, config-vite, test-utils | Tooling aur common pieces.                                                                                                                                  |
+
+**Published packages** (components, hooks, stores, styles, quill, tryon, tryon-assets, aur naya icons) apne ~2,600 tests ke saath monorepo me aate hain. Changesets inhe npm pe publish karta rahega, aur apps `workspace:*` use karti hain.
+
+### 9.3 Vercel (Hobby, ₹0)
+
+- 11 projects ek repo se: har project ka root `frontend/<app>`, build `turbo run build --filter=<app>`, aur **`npx turbo-ignore`**, kyunki Hobby pe ek waqt me sirf 1 deployment aur din me 100 deployments allowed hain.
+- Har app ki `vercel.json`:
+  - `/api/*` → Render gateway: `routes` entry (`dest` = `$BQ_GATEWAY_URL/api/$1`), jisme `x-origin-secret` ka `transforms` hai (§7.2). Value sirf Vercel env me.
+  - SPA rewrite (customer ke liye nahi).
+  - Security headers: CSP, HSTS, `frame-ancestors 'none'`, Referrer-Policy, Permissions-Policy (camera sirf try-on aur photo wale apps me, geolocation sirf delivery aur customer me).
+  - Internal apps pe `noindex`.
+- Hobby sirf non-commercial use ke liye hai. Ye education project hai, isliye theek hai.
+- Repo personal GitHub account pe rahega, kyunki Hobby organisation-owned repos se connect nahi hota.
+
+### 9.4 Quality
+
+Vitest + Testing Library + vitest-axe. Playwright + axe (WCAG 2.1 AA) 360, 768 aur 1280 px pe, light aur dark dono themes me. Har app ke bundle size ka budget, CI me check hota hai.
+
+## 10. Integrations
+
+**Pattern:** har third party ek "port" ke peeche hai, jiske 3 adapters hain:
+- **real**
+- **fake:** local, CI aur E2E ke liye.
+- **dummy:** PRD §7.1 ki legal cheezon ke liye. UI pe DUMMY badge dikhta hai, aur `provider = 'dummy'` store hota hai.
+
+Kaunsa adapter chalega, ye config tay karta hai. Har call pe timeout, retries, circuit breaker aur metrics.
+
+| Integration          | Kahan                                  | Kaise                                                                                                                                                                                                                                                                                                 |
+| -------------------- | -------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Razorpay (test mode) | bq-payments                            | Orders + Standard Checkout, HMAC-verified aur deduped webhooks, delivery pe dynamic UPI QR (single use, fixed amount, run sheet banate waqt pehle se generate), refunds, Route payouts (on hold, approval ke baad release), settlements pull. Fake driver + `razorpay:simulate` webhook CLI.          |
+| Ola Maps             | core (network, logistics), browser SDK | Address pin, autocomplete, zone editor, maps, live tracking, geocode (token cache Redis me, pincode cache 90 din), distance matrix, directions. Fallbacks: sirf pincode serviceability, haversine ETA.                                                                                                |
+| Cloudinary           | core media                             | Browser se seedhe signed uploads, isliye file Render se nahi guzarti. Product aur content public type. KYC, rider documents, POD, invoices aur exports authenticated type, jo permission check ke baad 5 min ke signed URL se milte hain. Aaj ka "KYC documents 2 din me delete" wala bug theek hoga. |
+| Brevo | bq-notify | Email, HTTPS API se (SMTP nahi, kyunki Render free pe ports 25/465/587 band hain). **Domain nahi hai**, isliye ek verified single sender use hoga, aur emails spam me ja sakte hain. Demo ke liye ye theek hai. Brevo account me authorised IPs ki rok hai: ya to Render Singapore ke outbound IP ranges add karne honge, ya API key se IP restriction hatani hogi, warna live pe email nahi jayega. Local me Mailpit. |
+| SMS, WhatsApp        | bq-notify                              | Sandbox adapters (DLT dummy).                                                                                                                                                                                                                                                                         |
+| Web Push             | bq-notify                              | VAPID.                                                                                                                                                                                                                                                                                                |
+| Google OAuth         | bq-identity                            | Har app ka redirect, PKCE ke saath. LinkedIn aur GitHub hatenge.                                                                                                                                                                                                                                      |
+| Sentry (free) | Saare 5 deployables + 11 apps | Errors, traces (backend `tracesSampleRate` 0.05), releases. Free plan me sirf 1 cron monitor hai, isliye `scheduler-heartbeat` (§5.3) usi ek monitor pe check-in karta hai. |
+| Dummy legal          | core                                   | GSTIN (format, checksum, state), PAN, Udyam, penny-drop, agreement e-sign, e-invoice (IRN + QR), e-way bill, GSTR-8/TCS aur TDS exports, gig portal uploads, CPCB EPR, DLT registry, CERT-In 6-ghante report draft, DPDP breach draft, masked calling.                                                |
+| Documents            | core worker                            | Invoices, labels, run sheets, certificates ke liye pdfkit (headless Chrome nahi, kyunki memory kam hai).                                                                                                                                                                                              |
+| Video (Jitsi Meet, free) | core support, creators | Beauty Advisor aur Skin & Hair Expert consults ke liye har booking pe ek random room link, jo sirf booking ke dono logon ko dikhta hai. Live shopping: creator ka stream Jitsi ya YouTube Live pe, BQ page use embed karta hai; pinned products aur offers polling se. |
+| Inbound email (tickets) | core support | Domain nahi hai, isliye inbound email ka port: local me Mailpit, live pe dummy adapter (Support app me "email aaya" simulate karna, DUMMY badge ke saath). Domain aane pe Brevo inbound parsing webhook, sirf config badal ke. |
+
+**Ola Maps keys:** ek Ola Maps account me sirf 3 frontend domains allow hain, isliye owner 4 accounts banayega (12 slots). Har app ka apna browser key env me (`VITE_OLA_MAPS_KEY`), aur `packages/maps` wahi use karta hai; jin apps me map nahi, wo SDK load hi nahi karti. Server-side calls (geocode, distance, directions) Core me ek account ke OAuth client credentials se. Kaunsa domain kis account pe hai, ye `infra/ola-maps.md` me likha rahega. Localhost ports bhi slots lete hain, isliye ek account local development ke liye rakhna behtar hai. Preview URLs pe map nahi chalega (fallback: sirf pincode wala address). Multiple accounts ke liye Ola Maps ke terms ek baar check karne hain.
+
+## 11. Deployment (₹0)
+
+### 11.1 Render: ek free web service, `bq-live`
+
+- **Bundle mode:** `backend/bundle` paancho deployables aur Core ke workers ko ek Node process me chalata hai.
+- Region: Singapore (Render pe India region nahi hai).
+- **Render health check path `/health`:** sirf ye check ki process aur event loop zinda hain aur boot ke release steps khatam hain; Mongo ya Redis nahi. Render 5 second me jawab maangta hai, 15 s fail pe traffic rok deta hai aur 60 s fail pe restart karta hai. Deep `/ready` (Mongo, Redis, worker, outbox lag) Render health check **nahi** hai, warna Redis ya Atlas ki chhoti maintenance pe poora bundle restart ho jata. `/ready` sirf bahar ke monitors aur Master app ke System health page ke liye hai. Fail hua deploy purana version chalta rehne deta hai.
+- **Release steps boot pe (free plan me pre-deploy command nahi milta):** Render ka pre-deploy command sirf paid services ke liye hai, aur free web service me shell ya one-off jobs bhi nahi hain. Isliye `backend/bundle` HTTP listen karne se **pehle** `platform_locks` me ek Mongo lease lock (TTL 10 min) leta hai, phir migrations, index sync, search-index sync aur permission sync chalata hai. Har step idempotent hai aur expand/contract rule follow karta hai, kyunki deploy ke waqt purana instance naye schema ke saath kuch der chalta rehta hai. Boot ke saare steps 60 s ke andar khatam hone chahiye. Seed aur ek-baar wale scripts laptop se live Atlas pe chalenge (`npm run db:migrate -- --env live`). Paid mode (§11.6) me yahi script `preDeployCommand` ban jayegi, code wahi rahega.
+- **Jaagta rakhna:** do free monitors (UptimeRobot aur cron-job.org) `/ready` ko har ~10 minute ping karte hain, ek doosre se 5 minute ke farak pe; ek fail ho to doosra service ko jagaye rakhta hai. Isse ~744 ghante/mahina lagte hain, jo 750 ke andar hai, par margin sirf ~6 ghante ka hai, aur deploy ke waqt kuch der purana aur naya dono instance chalte hain. Isliye har hafte Render dashboard me free instance hours dekhna. Kisi mahine 20 tareekh se pehle 600 ghante cross ho jayein to us mahine raat 02:00–05:00 IST ping pause karna; service so jayegi aur MongoDB due-date sweeps jaagte hi kaam pakad lenge. **Koi doosri free web service nahi chalani**, warna ghante khatam hoke saari services band ho jayengi.
+- **Policy risk:** Render docs ping ko mana nahi karte, par Acceptable Use Policy usage restrictions ko bypass karne se rokti hai, aur Render community pe staff ne free service ko zabardasti jagaye rakhne ko abuse kaha hai (forum, official policy nahi). Render ki taraf se warning aaye to ping turant band; app wake-up screen aur MongoDB due dates ke saath sone-jaagne wale mode me bina code change chalegi.
+- **Free instance = 512 MB RAM aur 0.1 CPU** (render.com/docs/compute-plans se verified, 2026-10-19). Ek Node process me 5 HTTP servers aur workers chal jaate hain; asli rukawat CPU hai, kyunki 0.1 CPU = ek core ka 10%, aur CPU wala har kaam ~10 guna dheema hota hai:
+  - Production me compiled JS (`node dist/...`), tsx nahi. `--max-old-space-size=300`, `UV_THREADPOOL_SIZE=2`.
+  - argon2id OWASP minimum pe (m=19 MiB, t=2, p=1), aur ek semaphore se **ek waqt me sirf 1 hash**, taaki memory spike se poora bundle OOM na ho.
+  - Heavy jobs (PDF, CSV, imports) ki concurrency 1 aur `lockDuration` 60 s, taaki CPU throttle me stalled jobs na banein.
+  - Sentry poore process me ek hi baar init hota hai. Har deployable ka MongoClient `maxPoolSize` 5.
+  - Bade imports (LGD, India Post) live server pe nahi, laptop se Atlas pe script chalegi.
+  - Memory alarm 400 MB RSS pe.
+
+### 11.2 Render free ki seemaayein (render.com/docs/free se verified, 2026-10-19)
+
+| Niyam                                                                      | Hamara jawab                                                     |
+| -------------------------------------------------------------------------- | ---------------------------------------------------------------- |
+| 750 ghante/mahina, saari free web services milake. Khatam hue to sab band. | Sirf ek service (`bq-live`).                                     |
+| 15 min koi request na aaye to service so jaati hai. Jaagne me ~1 min.      | Har ~10 min ping. Saare apps me wake-up screen bhi rahegi.       |
+| Free web service private network se request nahi le sakti.                 | Bundle mode me saari internal calls localhost pe hain.           |
+| Sirf 1 free Key Value, jo disk pe save nahi hota.                          | Outbox MongoDB me hai, aur timers ki due dates bhi MongoDB me.   |
+| Bahut zyada traffic bhejne wali free service suspend ho sakti hai.         | Ping kam rakhna (har ~10 min), aur bahar ki API calls pe limits. |
+| Hobby workspace me **5 GB/mahina outbound bandwidth**. Bina card ke khatam hua to workspace ki saari services mahine ke ant tak band. | Render se bahar jaane wala har byte ginta hai (Vercel ko API responses, Sentry, log archive). Gzip/brotli, list APIs pe pagination aur 100 KB response budget, polling pe ETag aur `304`, public catalog Vercel CDN se, Sentry traces 5%. Hafte me ek baar dashboard me bandwidth dekhna; 3.5 GB pe alert (§14). |
+| Hobby me **500 pipeline minutes/mahina** (builds). Bina card ke khatam hue to mahine bhar koi build nahi (purana build chalta rehta hai). | Auto-deploy sirf CI pass hone ke baad (`checksPass`). Build me sirf backend workspaces install aur build; frontend packages badalne pe backend build nahi (§11.5). |
+| Free web service me shell aur one-off jobs nahi; pre-deploy command bhi nahi. | Release steps boot pe (§11.1); seeds aur scripts laptop se. |
+| Free pe outbound SMTP ports (25, 465, 587) band. | Email sirf Brevo HTTPS API se (§10). |
+
+### 11.3 Data stores
+
+- **MongoDB:** Atlas M0 (free), project `bq-live`, AWS Singapore (Render ke paas).
+- **Redis:** production me Render Key Value (`bq-live` ke saath, same region, internal URL). Development me local Docker Valkey (Render jaisi limits ke saath, §12). Limits aur budget §6.6 me.
+- **Media:** Cloudinary free.
+
+### 11.4 Environments
+
+| Environment | Kahan                                           | Note                                                                                               |
+| ----------- | ----------------------------------------------- | -------------------------------------------------------------------------------------------------- |
+| prerelease (laptop) | Docker | `prerelease` branch yahin chalti hai: Docker split mode, live jaisi limits (§12). Release se pehle saare E2E yahin. |
+| CI          | GitHub Actions                                  | Service containers + mongodb-memory-server.                                                        |
+| live        | Render `bq-live` + Vercel production + Atlas M0 | `release` branch se deploy. Demo data, Razorpay test mode. Ek hi backend environment, kyunki free ghante sirf ek ke liye hain. |
+| previews | Vercel PR previews | Sirf badle hue apps. Live API ko call karte hain (sirf demo data). Gateway ka app allow-list har app ke liye exact production host aur ek strict regex maanta hai: `^<project>-(git-[a-z0-9-]+\|[a-z0-9]{9})-<scope-slug>\.vercel\.app$` (63-char truncation dhyan me rakhte hue). `*.vercel.app` kabhi allow nahi. Previews pe Vercel Deployment Protection on, aur `ORIGIN_SECRET` Preview environment me bhi set. Previews me Google login nahi chalega (Google wildcard redirect nahi maanta), sirf OTP aur password. |
+
+### 11.5 Deploy aur rollback
+
+- Render: sirf **`release`** branch se auto-deploy, CI pass hone ke baad (`checksPass`). Build filter sirf `backend/**`, `packages/contracts/**`, `packages/server-*/**`, `packages/authz/**` aur `package-lock.json`; frontend packages (components, hooks, quill...) badalne pe backend build nahi hoga. Build me sirf backend workspaces install aur build hote hain.
+- Vercel: har app ka apna project, production branch `release`, `turbo-ignore` ke saath.
+- Rollback: Render pe pichhla deploy wapas, Vercel pe instant rollback. Migrations expand/contract hain, isliye pichhla release compatible rehta hai.
+
+### 11.6 Upgrade path (paise lagane ka faisla ho to)
+
+Sirf config badlegi, code nahi:
+- `render.yaml` Blueprint: gateway (web) + identity, core, payments, notify (private services) + paid Key Value.
+- Atlas Flex ya M10, custom domain (`__Host-` cookies `api.<domain>` pe), aur SSE realtime. Config switches: `outbox.relay = changestream`, `queues.layout = split`, `realtime.transport = sse`, `preDeployCommand`.
+- Pehle ka andaza: ~$72–79/mahina (2026-10-19 ka estimate).
+
+## 12. Local development (Docker)
+
+- Laptop pe default **split mode** hai (owner ka decision): `infra` + `apps` profiles, har microservice ka apna container (~2.1 GB). Jaldi edit-reload ke liye bundle mode bhi chalta hai. Production me Docker nahi; Render native Node chalata hai.
+- File: `infra/docker-compose.yml`, Hinglish comments ke saath. Har profile ek lesson hai.
+
+| Profile                              | Kya chalta hai                                                                                                                                                         | RAM                    |
+| ------------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------- |
+| `infra` (default, Lesson 2)          | `mongo:8.0` single-node replica set (transactions aur change streams ke liye), `valkey:8` Render free jaisi limits ke saath (`--maxmemory 25mb --maxmemory-policy noeviction --maxclients 50`, appendonly off), `mailpit` (email, SMS sandbox, OTP yahan dikhenge) | ~0.85 GB               |
+| `apps` (default **split mode**, Lessons 3–4) | gateway, identity, core, payments, notify, har ek ka apna container. Multi-stage Dockerfile, non-root user, healthcheck, har container 256 MB                          | infra ke saath ~2.1 GB |
+| `search` (Lesson 5, opt-in)          | `mongodb-atlas-local` (Atlas Search). Sirf valkey aur mailpit ke saath chalana, kyunki ise ~2 GB khaali RAM chahiye.                                                   | ~2 GB+                 |
+| `tools` (optional)                   | redis-insight                                                                                                                                                          | chhota                 |
+
+- **Bundle mode (jaldi edit-reload ke liye):** `npm run dev:backend` ek Node process (tsx watch) me paancho deployables chalata hai (~400 MB). Live server bhi isi mode me chalta hai.
+- Frontend: `turbo dev --filter=<app>`, sirf jis app pe kaam ho raha hai. 7.9 GB RAM pe saare 11 ek saath kabhi mat chalana.
+- **Scripts:**
+  - `infra:up`, `infra:down`, `infra:reset`, `infra:logs`
+  - `db:seed`: geo fixture (Maharashtra + 2 states), Pune network (Chakan + 21 hubs), 79 roles aur permission catalogue, har main role ka ek demo user (test credentials gitignored seed file me), sample brands aur catalog, PRD §7.3 dummy contacts
+  - `db:indexes`, `test:int`, `razorpay:simulate`, `infra:redis-wipe`
+- **Config:** har deployable ka `.env.example` committed hai. Zod env schema sirf enabled adapters ki keys maangta hai. Har provider default me fake hai, isliye boot karne ke liye koi real key nahi chahiye.
+- **Live jaisi limits laptop pe:** local aur CI me `ATLAS_TIER=M0` mode hota hai: `outbox.relay = poll`, collections budget check, aur `.watch(` lint. Valkey Render free jaisi limits pe chalta hai, aur `infra:redis-wipe` script (`FLUSHALL`) §6.6 ki recovery ka drill hai. Isse free tier ki dikkatein laptop pe hi pakdi jaati hain.
+- **Lesson map:**
+  - L2: infra compose (image, container, volume, port, healthcheck, replica set kyun)
+  - L3: bq-notify ki Dockerfile (layers, cache, multi-stage, .dockerignore, non-root)
+  - L4: apps profile, yaani split mode (networks, depends_on, env_file, mem_limit)
+  - L5: atlas-local aur search indexes
+  - L6: render.yaml se comparison (prod me native Node kyun)
+
+## 13. CI/CD
+
+- **Git flow:** feature branch → PR → **`prerelease`** → **`release`**.
+  - `prerelease`: laptop pe Docker (split mode, live jaisi limits) me chalti hai. Integration aur E2E tests yahin aur CI me pass hone chahiye.
+  - `release`: yahi branch Render (`bq-live`) aur Vercel production pe deploy hoti hai. `prerelease` → `release` merge sirf CI green hone pe.
+  - Branch protection, required checks, Conventional Commits. Renovate har hafte grouped dependency PRs `prerelease` pe kholta hai.
+- **GitHub Actions:**
+  - `ci.yml`: lint, typecheck, test, build (sirf affected), dependency-cruiser, no-hardcoded-geo lint, no role-name comparisons, i18n key parity, OpenAPI diff, event compatibility, har route pe permission, rate class aur owner, permission catalogue ↔ seed sync, bundle budgets, gitleaks, npm audit. ~2,600 package tests merge rokte hain.
+  - `integration.yml`: open-district-by-config (saare refusal paths ke saath), fake Razorpay ke saath checkout saga, outbox/inbox exactly-once, no-oversell (50 parallel orders), ledger zero-sum aur gapless invoices, authz scope aur separation of duties, idempotency, review routing, Redis wipe drill (`FLUSHALL` ke beech koi event miss na ho, revoked session reject ho, schedulers wapas aayein), aur `ATLAS_TIER=M0` mode me relay poll.
+  - `e2e.yml` (Playwright + axe):
+    1. Customer OTP → prepaid checkout
+    2. UPI on delivery, aur Delivery PWA ka offline replay
+    3. Seller onboarding → approval → QC → storefront
+    4. Waitlist → Master direct open blocked → team ready → live
+    5. Return → QC → refund
+    6. Second signature ke saath payout batch
+  - `nightly.yml`: finance, inventory reservations, authz, go-live aur checkout pe Stryker mutation tests, aur poora LGD import test.
+  - `release.yml`: Changesets se public frontend packages publish (npm provenance), Sentry release aur source maps.
+- **CI minutes aur repo visibility:** repo **public** hai (owner ka decision, 2026-10-19). Public repo pe standard GitHub-hosted runners free aur unlimited hain (larger runners nahi, wo hamesha paid hain). Private kiya to GitHub Free me sirf 2,000 minutes/mahina aur 500 MB artifact storage milega; tab `e2e.yml` sirf `main` pe aur `nightly.yml` hafte me ek baar. Public repo ka matlab: koi secret, test password ya DB dump repo, logs ya artifacts me nahi (gitleaks + gitignored seed file).
+
+## 14. Observability
+
+1. **Errors aur traces:** Sentry (free), saare deployables aur apps me. Session Replay sirf error pe (customer aur delivery). Gateway request-id aur traceparent banata hai, jo passport, outbox envelope aur BullMQ jobs tak jaata hai. Isse checkout → webhook → confirmation → notification ek hi trace me dikhta hai.
+2. **Logs:** pino JSON stdout pe. File logger hatega. Redaction me otp, password, token, cookie, PAN, account number, IFSC, DL/RC, TOTP secret aur partial phone/email. Ye aaj ka "mail-service failure logs me OTP" wala leak theek karta hai. Render se Loki ya koi live log shipping nahi (bandwidth bachane ke liye); legal archive item 3 me.
+3. **Compliance retention (data dummy, feature asli):** `bq_audit` me 400 din (business aur security events, gateway access summary aur Identity ke auth events bhi). Iske alawa **logs ka archive zaroori hai, optional nahi**: pino ka doosra stream har ghante gzip NDJSON batch private object storage me daalta hai (Cloudflare R2 free; agar R2 card maange to Cloudinary ke private raw files), 400 din lifecycle. Isse CERT-In ke 180 din aur DPDP ka 1 saal dono poore hote hain. Archive ~300 MB/mahina se kam rakha jayega, kyunki ye bhi Render ke 5 GB bandwidth me ginta hai. Saare timestamps UTC me. Data aur logs Singapore me hain (Render aur Atlas pe India region nahi); CERT-In maange to turant export ho sakte hain, aur ye faisla Security Officer register me likha jayega. PaaS pe NTP traceability ek known limitation hai.
+4. **Health:** har deployable `/health` (liveness) aur `/ready` (Mongo, Redis, worker, outbox lag 30 s se kam) serve karta hai. Gateway ka `/status` (authenticated) sab jodta hai. Render ka health check `/health` hai; `/ready` sirf monitors aur dashboards ke liye (§11.1).
+5. **Metrics aur alerts:** Core har minute ek `ops.snapshot` log line likhta hai: queue depth, DLQ, outbox lag, heap, Redis memory, Atlas usage. Alerts:
+   - 5xx 2% se upar
+   - Queue ya outbox lag 60 s se upar, ya DLQ 0 se upar
+   - Redis memory 60% (15 MB) se upar, ya connections 40 se upar
+   - Redis wipe (`bq:epoch` badla), aur recovery fail hui ya nahi (§6.6)
+   - Atlas ke apne M0 alerts: Opscounter 80/s se upar, Logical Size 400 MB se upar, Connections 400 se upar, Network
+   - Render usage (hafte me ek baar dashboard): outbound bandwidth 3.5 GB, pipeline minutes 400, free instance hours 600 (20 tareekh se pehle)
+   - Outbox relay errors
+   - Ledger ya inventory drift
+   - Compliance timers breach ke 20% paas (grievance 48 ghante / 1 mahina, IT Rules, CERT-In 6 ghante, DPDP 72 ghante, data requests 90 din)
+   - Refresh-token reuse
+   Master app me "System health" page, aur Core me Bull Board (`ops.queues.manage` permission ke peeche).
+6. **SLOs (service jaagi hui ho tab):**
+   - Storefront p95 300 ms se kam
+   - Place-order p95 800 ms se kam
+   - Webhook → order confirm p95 10 s se kam
+   - Outbox lag p99 5 s se kam
+   - 99.5% availability
+   - Ledger aur inventory drift zero
+
+   Free tier pe ye best-effort hain.
+7. **Business dashboards:** company, Head of Operations, har state ki admin performance, logistics KPIs, waitlist aur expansion funnel.
+
+## 15. Core flows (PRD §6 ki technical detail)
+
+1. **Prepaid checkout:**
+   - Core ka ek transaction: area LIVE aur orders paused nahi, dobara price, coupon budget ka conditional `$inc`, stock reservation ka conditional `$inc`, order `PENDING_PAYMENT`, outbox.
+   - Phir payments ko sync call (`createPaymentIntent`), aur client pe Razorpay checkout.
+   - Webhook → `payments.payment.captured` → core order confirm karta hai, FEFO lots allocate karta hai aur journal entries post karta hai.
+   - Reservation 15 min me expire hota hai. Der se capture hua to auto-refund.
+2. **UPI on delivery:**
+   - Area setting + risk rules + value cap ke hisaab se allowed.
+   - Run sheet banate waqt QR pehle se generate hota hai → `qr_code.credited` → `payments.upi_qr.paid` → core order ko paid mark karta hai → rider ki app polling se update dekhti hai → OTP → POD.
+3. **Returns:** pickup → Returns QC grade → refund command → `payments.refund.processed` → finance journal aur settlement adjustment.
+4. **Payouts:** finance batch approve (maker-checker, threshold se upar Master ka second signature) → payments Route transfer release → `payments.payout.settled`.
+5. **Go-live:** §8.
+6. **Live updates:** free mode me **polling**: order out for delivery ho tab har 15–30 s, aur rider ki location har 15–30 s Redis GEO me. Support chat, Beauty Advisor chat, control tower ka live map aur Rider Team Lead view bhi polling se (screen khuli ho tab har 5–15 s, ETag ke saath). SSE ka code Notify me rahega, par setting se band (`realtime.transport = poll`). Paid mode aur domain ke saath SSE chalu hoga.
+7. **Seller apply → approval:** Seller app me sign-up (applicant grant) → wizard (drafts) → `sellers.application.submitted` → review item (state = warehouse-state GSTIN ka state) → us state ka sabse kam load wala State Admin → backup → SLA ke baad Super Admin pool → approve, reject (reason library) ya send back. Approve pe `sellers.org.approved` → Identity Seller Account Owner grant deta hai. Reject pe appeal Super Admin ke paas (reject karne wala decide nahi kar sakta).
+8. **Listing → QC → regulatory:** naya listing version → `catalog.listing.submitted` → category scope wale Catalog QC ka review item → regulatory item (Cosmetics Regulatory) aur shade item (Try-on & Shade) → sab pass pe version publish → outbox event se discovery index update.
+9. **Apne brand ki supply:** Own-Brand Manager ka restock plan → finance procurement me PO → inventory GRN (batch, mfg, expiry; lot QUARANTINE) → Own-Brand QA batch release → lot AVAILABLE.
+10. **Brands ka stock andar:** seller ka ASN (Idempotency-Key) aur inbound slot → GRN scan (batch, expiry) → farak ho to dispute ticket → quarantine ya putaway → `inventory_movements` entry.
+11. **Warehouse → hub:** transfer order → e-way bill (dummy) → trip scan-out aur hub pe scan-in → hub balances.
+12. **Pick, pack, invoice:** allocated order → scan-to-pick (galat shade pe rok) → pack photo → ek hi transaction me shipment + gapless GST invoice + label → `commerce.order.packed`.
+13. **Last mile aur failed delivery:** hub sort → run sheet (Ola route, UPI QR pehle se) → attempt (OTP, photo, geo) → fail pe reason → `maxReattempts` tak automatic reattempt → phir RTO. Customer reschedule L1 karta hai. Disputes evidence ke saath Control Tower ke paas.
+14. **Complaints:** ticket L1 → L2 → Grievance Officer. Grievance register me ticket number, 48 ghante ack aur 1 mahina resolve ki due dates MongoDB me. IT Rules wali complaints moderator ko, unke timers ke saath.
+15. **Skin reaction ya recall:** Support ya UGC se case → Cosmetics Regulatory ka ek case ya recall record → inventory me batch block → Inventory Controller, Hub Ops, Support aur brand ko recall tasks → prabhavit customers ko notify.
+16. **Reviews:** sirf delivered order pe review → UGC moderation queue → publish ya hide (reversible, audited) → seller reply.
+17. **Fraud:** order, coupon, return aur review events pe risk rules → flag → Fraud & Risk analyst → block ya payout hold. Ban appeal Trust & Safety Lead decide karta hai.
+18. **Delivery partner ka payment:** logistics earnings (per attempt aur delivery) → finance me rider payable journal → payout batch (threshold ke baad 1% TDS) → payments Route transfer.
+
+## 16. Aaj ke code se migration
+
+**Principle:** code reuse karo, structure nahi. Atlas ka aaj ka data demo data hai, isliye idempotent aur dry-run wale import scripts (users, admins, sellers, categories, products, media) chalenge, aur baaki sab dobara seed hoga.
+
+| Phase                            | Kaam                                                                                                                                                                                                                                                                                                                                                                                      | Andaza                |
+| -------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------- |
+| 0. Monorepo + CI                 | `BQ-Packages` → `packages/` (git subtree, history ke saath), 4 apps → `frontend/`, gateway aur services → `backend/` (port sources). Media-service ka nested `.git` aur `.kilo` worktree hatana. npm workspaces + Turborepo. Pehli baar CI me ~2,600 package tests.                                                                                                                       | 1–2 hafte             |
+| 1. Server kit + contracts        | 13 backend + 5 shared packages ko server-kit, server-mongo (commit ke baad reply), server-queue (outbox, inbox, schedulers), server-crypto, contracts (versioned event catalogue) aur authz me merge karna. Unit + mutation tests.                                                                                                                                                        | 1–2 hafte             |
+| 2. Gateway                       | Rakhna: bootstrap, CORS, trust-proxy rate limit (Redis store), proxy-before-body-parser. Hatana: module facades, `METHODS_AND_PATHS`, 1,351-line `openapi.ts`, JWT signing, wake-up fan-out, MASTER bypass, keep-alive workflow. Jodna: prefix table, JWKS, Origin/`x-forwarded-host` → app, per-app cookies, passport, origin secret, helmet, request-id, Sentry.                        | 1 hafta               |
+| 3. bq-identity (user-service se) | OTP flow reuse (crypto-random, hashed, attempt counter), Google OAuth, bcrypt → argon2id next login pe. Jodna: phone OTP, TOTP, sessions, ES256 + JWKS, apps, permissions, roles, grants, events. Import: USER → customer, SELLER → seller owner, ADMIN → state_admin (state naam LGD codes pe mapping file se), SUPER_ADMIN → super_admin, MASTER → master (pehle login pe MFA zaroori). | 2–3 hafte             |
+| 4. Core foundations              | Platform, location, network, expansion (config-only tests ke saath), sellers + review (aaj ka `resolveStateAdmin`, reassign aur SLA logic data-driven banake), catalog + discovery, media (signed uploads), support (contact-us bina TTL). Imports: products → listings (`NEEDS_REQC`), sellers → `LEGACY_NEEDS_REKYC` (SELLER_TYPES split).                                              | 4–5 hafte             |
+| 5. Notify + Payments             | Mail-service se notify: Brevo transporter rakhna, template builders ko locale files banana, OTP log leak theek karna, channels jodna. Payments: skeleton, fake driver aur webhook simulator banana.                                                                                                                                                                                               | 2 hafte               |
+| 6. Frontend foundation           | Duplicate files packages me, i18n aur Devanagari font, customer app RR7 framework mode me, onboarding Seller app me, Super Admin checkbox hatana, 7 naye apps template se, crypto-js user store hatana.                                                                                                                                                                                   | 3 hafte (saath-saath) |
+| 7. Commerce + payments | Cart, checkout, order state machine, Razorpay (fake + test mode), pack transaction me invoice, returns. | 4–5 hafte |
+| 8. WMS + logistics + Delivery PWA | ASN, GRN, FEFO, pick aur pack, line-haul, hubs, run sheets, UPI QR, offline sync, control tower. | 5–6 hafte |
+| 9. Finance + support | Ledger, settlements, payouts, TCS/TDS, reconciliation; tickets, grievance register, IT Rules timers, consults. | 4–5 hafte |
+| 10. UGC, growth, creators, governance | Reviews, CMS, CRM, loyalty, retail media, creators aur affiliates, DPDP, CERT-In register, switches. | 5–6 hafte |
+| 11. Launch hardening | Saare flows ke E2E, mutation tests, warm load check, legal pages, seed data. | 2 hafte |
+
+- **Kul andaza (solo + AI):** ~13–17 hafte me aaj ke features nayi foundation pe, phir ~20–25 hafte PRD ka naya kaam (commerce, WMS, logistics + Delivery PWA, finance, support, UGC, growth, creators, governance). **Total ~33–42 hafte.** Saare 11 apps saath launch honge, isliye har phase ek internal milestone pe khatam hoga.
+- **Cutover:** (1) `bq-live` banane se pehle purani services ka keep-alive band, taaki wo so jayein aur sirf use pe free ghante lein; (2) cutover tak `bq-live` pe 10-min ping nahi, sirf zaroorat pe jagana; (3) naye stack ko imported data pe chalana, Vercel ka API URL badalna, aur usi din se `bq-live` ka ping chalu; (4) purani 6 Render services turant suspend, aur 2 hafte baad delete. Jab tak dono saath hain, Render dashboard pe free hours roz dekhna.
+- **Jo reuse nahi hoga:** multi-repo publish-then-bump model, setInterval schedulers, `X-Service-Secret`/`X-User-Role` trust, `USER_ROLES`, `STATES_AND_UTS`, `SELLER_TYPES` enums, browser me bana AuditLog.
+
+## 17. Risks
+
+| Risk                                                                  | Bachaav                                                                                                            |
+| --------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------ |
+| **Scope bahut bada:** 11 apps, 79 roles, ~23 modules, ek developer.   | Contracts se codegen, shared packages, roles as data, fake adapters, phase milestones.                             |
+| **Free server (512 MB, 0.1 CPU) me sab kuch.** | Compiled JS, heap cap, ek waqt me ek password hash, heavy jobs ki concurrency 1, pdfkit, memory alarm, aur paid upgrade path (§11.6). |
+| **Ping na chale to cold start (~1 min) aur timers late.**             | Do monitors (UptimeRobot + cron-job.org), wake-up screen, aur due dates MongoDB me (jaagte hi sweep).              |
+| **750 ghante khatam to sab band.**                                    | Sirf ek free web service. Koi staging service nahi.                                                                |
+| **Free Redis chhota (25 MB, 50 connections) aur restart pe data mitta hai.** | Memory aur connection budget, ek queue per deployable, DLQ MongoDB me, `bq:epoch` watchdog se wipe recovery, aur revoke/freeze ka source of truth MongoDB (§6.6). |
+| **Atlas M0: 512 MB, 100 ops/s, 5 change streams, backups nahi.** | Relay poll mode, collections budget, index se sort, hafte ka encrypted `mongodump`, aur storage, ops aur connections ke alerts. |
+| **Bina domain: email spam me, `vercel.app`/`onrender.com` URLs.**     | Demo ke liye theek. Domain upgrade path me hai.                                                                    |
+| **Vercel rewrite pe SSE aur timeouts verify nahi.**                   | Free mode me polling.                                                                                              |
+| **Core ki module boundaries deadline ke dabaav me toot sakti hain.**  | Module manifests, prefixed collections, facade-only imports, dependency-cruiser, outbox.                           |
+| **Identity aur Core ke beech grants ki thodi der.**                   | Go-live sync grant snapshot padhta hai aur fail closed hota hai. Revoke aur freeze Redis se turant lagu hote hain. |
+| **Razorpay test mode me Route, QR aur settlements poore na chalein.** | Fake driver E2E cover karta hai, aur demo me "simulated" label.                                                    |
+| **Dummy legal flows ko asli samjha ja sakta hai.**                    | `isDummy` flags, UI badges, aur PRD ki † list lawyer-verification backlog ki tarah.                                |
+| **Monorepo migration me feature work ruk sakta hai.**                 | git subtree, wahi package names, aur purane repos cutover ke baad hi archive.                                      |
+| **Render keep-alive ping ko policy violation maana ja sakta hai.** | Ping band karna sirf monitor off karna hai; wake-up screen aur due-date sweeps pehle se hain (§11.1). |
+| **Render ka 5 GB bandwidth ya 500 build minutes khatam.** | Compression, CDN cache, pagination, CI pass hone pe hi deploy, aur hafte ka usage check (§11.2). |
+
+## 18. Abhi verify karna baaki
+
+- **Verified (2026-10-19):** Render free = 512 MB RAM, 0.1 CPU. Render free Key Value = 25 MB, 50 connections, koi persistence nahi. Atlas M0 pe transactions, change streams (max 5) aur Atlas Search (3 indexes) chalte hain. Vercel external rewrite ka timeout **120 s** (pehle byte tak), aur routes transform se secret header Hobby pe bhi lag sakta hai. Public repo pe GitHub Actions free.
+- **Pehle deploy pe test karna (docs me likha nahi):** rewrite ke through `Set-Cookie` aur `__Host-`/`__Secure-` cookies ka set hona, request body ki max size (file ya CSV kabhi API body me nahi, seedhe Cloudinary), aur preview URLs pe `x-forwarded-host` ki value. Cold start (~1 min) 120 s ke andar hai, par koi sync endpoint 20 s se lamba nahi hoga.
+- Cloudflare R2 free tier ke liye card chahiye ya nahi (nahi chahiye to R2, warna Cloudinary ke private raw files).
+- Cloudinary, Brevo, Sentry aur Ola Maps ki free limits.
+- Atlas ka aaj ka cluster tier aur region.
+- atlas-local ki asli RAM, Lesson 5 me `docker stats` se.
+
+## Change log
+
+| Version | Date       | Badlav                                                                                                                                                                                                                                                        |
+| ------- | ---------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| v1.0    | 2026-10-19 | Pehla draft. Gateway + Identity, Payments, Notify microservices + Core modular monolith. ₹0 plan: Render free pe bundle mode, laptop pe Docker split mode, Atlas M0, free Redis, domain nahi (Vercel rewrites). Master ke doosre roles alag staff account pe. |
+| v1.1 | 2026-10-19 | Verification ke fixes (free tier ke official docs se): pre-deploy ki jagah boot pe release steps; shallow `/health`; Redis memory aur connection budget, ek queue per deployable, DLQ MongoDB me, Redis wipe recovery; Atlas free pe relay poll (5 change streams ki limit) aur M0 limits; 0.1 CPU ke hisaab se tuning; keep-alive ka policy risk; 5 GB bandwidth aur 500 build minutes; cookies (refresh path), origin secret routes transform se, client IP, CDN cache rules; strict preview allow-list; laptop pe split mode default; seller/creator applicant grants aur grants events; partner API clients; video (Jitsi), inbound email dummy, labour/gig/EPR ke ghar, own-brand consent, DPDP erasure; log archive zaroori; backups ka sahi tareeka; §15 me saare PRD flows; §16 me phases 7–11; Master ka alag account clear. Owner ke naye decisions: `release` branch → Render/Vercel, `prerelease` → laptop Docker; dev me local Redis, production me Render Key Value; files ke liye storage port (Cloudinary → S3 migration) aur unused cleanup (§6.7); price rules (§6.8); Ola Maps keys (4 accounts). |
