@@ -1,10 +1,10 @@
 # HANDOFF — BQ
 
-> **Status:** v1.0 (2026-10-20). Is project pe 2 log kaam karte hain. Ye file batati hai ki **abhi kya halat hai, kisne kya chhoda, agla kaam kya hai** aur kaunse sawal khule hain, taaki doosra insaan (aur uska Claude) bina poora itihaas padhe kaam utha sake. Jo bhi kaam roke, wo ye file update kare (neeche §8).
+> **Status:** v1.1 (2026-10-20). Is project pe 2 log kaam karte hain. Ye file batati hai ki **abhi kya halat hai, kisne kya chhoda, agla kaam kya hai** aur kaunse sawal khule hain, taaki doosra insaan (aur uska Claude) bina poora itihaas padhe kaam utha sake. Jo bhi kaam roke, wo ye file update kare (neeche §8).
 
 ## 0. Pehle ye (handoff ke din)
 
-- **Owner:** `Beautinique` repo ka bacha hua kaam commit karke `main` push karna (`git status` saaf, `main...origin/main` me "ahead" na ho; detail §3 me). Iske bina doosre insaan ke clone me ye kaam nahi hoga.
+- **Owner (ho gaya, 2026-10-20):** `Beautinique` repo ka bacha hua kaam commit karke `main` push karna (`git status` saaf, `main...origin/main` me "ahead" na ho; detail §3 me). Iske bina doosre insaan ke clone me ye kaam nahi hoga.
 - **Doosra insaan:** `git pull` (branch `main`), phir setup (§2). Push ke baad `git status` saaf hona chahiye aur `git log` me ye kaam dikhna chahiye.
 - Baaki saare purane repos (§7) pehle se clean aur GitHub ke saath sync hain.
 
@@ -33,7 +33,7 @@
 - **Package CLI** (`scripts/packages/`): `login`, `logout`, `status`, `create`, `publish`, `republish`, `verify`, `build`. 75 tests (fast 55, e2e 9 fake npm registry ke saath, create 11), sab green; 23 mutation checks, sab pakde gaye. Guide: [packages/README.md](packages/README.md).
 - **Docs:** PRD v1.0, ARCHITECTURE v1.4 draft, RULES, DESIGN, TASKS v1.3, MEMORY, packages/README v1.1, ye HANDOFF.
 
-**Git (2026-10-20):** saara kaam `main` pe 3 commits me hai: "build: initialize monorepo structure and package management tooling", "feat(packages)!: release packages only from the release branch" aur "docs: add teammate handoff guide and record package decisions". Owner inhe push karega (§0); `git log` me ye teeno dikhne chahiye.
+**Git (2026-10-20):** saara kaam `main` pe 3 commits me hai: "build: initialize monorepo structure and package management tooling", "feat(packages)!: release packages only from the release branch" aur "docs: add teammate handoff guide and record package decisions". Ye push ho chuke hain, aur `main`, `prerelease`, `release` teeno isi point se shuru hui hain; `git log` me ye teeno dikhne chahiye.
 
 **2026-10-20 ke faisle (docs me likhe hue):**
 
@@ -44,7 +44,7 @@
 
 ## 4. Agla kaam (is order me)
 
-1. **T0.7 branches:** GitHub pe `prerelease` aur `release` branch banana, branch protection, required checks (CI ka `check` job). Iske bina packages release nahi ho sakte (CLI sirf `release` branch se chalta hai). Dhyan: GitHub "Run workflow" button tabhi dikhata hai jab `release.yml` default branch (`main`) pe bhi ho.
+1. **T0.7 baaki hissa:** `prerelease` aur `release` branches GitHub pe ban gayi hain (2026-10-20), par abhi kisi branch pe protection ya ruleset nahi hai. Baaki: GitHub → Settings → Rules → Rulesets me `prerelease` aur `release` ke liye PR zaroori, required status check `check` (CI job; ye list me tab dikhta hai jab CI ek baar chal chuka ho), force push aur delete band. Repo settings sirf owner badal sakta hai. Dhyan: GitHub "Run workflow" button tabhi dikhata hai jab `release.yml` default branch (`main`) pe bhi ho (hai).
 2. **T0.1 styles package ke baaki hisse:** utilities, animations (`animations.css`, DESIGN.md "Motion"), component CSS (quill wagairah). Phir doosre packages naye banana (`npm run create`), purane `BQ-Packages` ko sirf dekh ke. ARCHITECTURE §9.2 ke flat naam (contracts, server-kit, ...) ko `shared/frontend/backend` layout me map karna.
 3. **Styles 2.0.0 ka pehla publish:** owner ka npm account chahiye (`npm run login`, phir `release` branch pe `npm run publish`). Doosre insaan ko publish karna ho to owner pehle use npm org `@beautinique` me jode.
 4. **Package CLI follow-up:** `update-deps` command (purane repo me tha; naya republish external dependencies upgrade nahi karta). Scope: outdated deps ki list, select (all / category / packages), ranges update, install, build + checks, fail pe sab wapas.
@@ -90,3 +90,4 @@
 | Version | Date | Badlav |
 |---|---|---|
 | v1.0 | 2026-10-20 | Pehla handoff (owner → doosra developer): setup, halat, agla kaam, khule sawal, traps, purane repos. |
+| v1.1 | 2026-10-20 | Branches `prerelease` aur `release` ban gayi; T0.7 me sirf protection baaki. |
