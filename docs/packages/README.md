@@ -1,6 +1,6 @@
 # Packages — banana, publish aur republish
 
-> **Status:** v1.4 (2026-10-20). `packages/` ke saare npm packages ka kaam, aur naye frontend apps aur backend apps banana, is repo ke apne CLI (`scripts/packages/`) se hota hai. Ye guide batati hai ki kaunsa command kab chalana hai aur andar kya hota hai.
+> **Status:** v1.5 (2026-10-21). **Abhi publish/republish nahi (owner ka faisla, 2026-10-21):** apps isi monorepo se package lete hain (npm workspaces), live deploy pe bhi. Publish sirf zaroorat pe; packages public hi rahenge. `packages/` ke saare npm packages ka kaam, aur naye frontend apps aur backend apps banana, is repo ke apne CLI (`scripts/packages/`) se hota hai. Ye guide batati hai ki kaunsa command kab chalana hai aur andar kya hota hai.
 
 ## 1. Packages kahan aur kis naam se
 
@@ -112,3 +112,4 @@ Kisi package ka naya version agar kisi published dependent ki range tod de, to C
 | v1.2 | 2026-10-20 | Release ke baad `release` → `main` back-merge; release commit ka push ruleset bypass se. |
 | v1.3 | 2026-10-20 | Peer aur dev range same (CLI check), aur dist me copy hue dependency types pe verify fail. |
 | v1.4 | 2026-10-20 | `npm run create` ab frontend apps (§3.1) aur backend apps (§3.2) bhi banata hai. |
+| v1.5 | 2026-10-21 | Abhi publish/republish nahi, zaroorat pe; packages public hi. |

@@ -1,6 +1,6 @@
 # TASKS — BQ
 
-> **Status:** v1.13 (2026-10-20). Poore project ki task list, [ARCHITECTURE.md](ARCHITECTURE.md) §16 ke phases ke hisaab se. Har task "done" tabhi jab [RULES.md](RULES.md) §1.5 ki Definition of Done poori ho.
+> **Status:** v1.14 (2026-10-21). Poore project ki task list, [ARCHITECTURE.md](ARCHITECTURE.md) §16 ke phases ke hisaab se. Har task "done" tabhi jab [RULES.md](RULES.md) §1.5 ki Definition of Done poori ho.
 
 **Kaise use karein:**
 - `[ ]` baaki, `[~]` chal raha hai, `[x]` done.
@@ -34,7 +34,7 @@
 
 ## Phase 0. Monorepo + CI (1–2 hafte)
 
-- [~] T0.1 Packages naye bante hain, `packages/<shared|frontend|backend>/<name>` me (`@beautinique/<category>-<name>`). `BQ-Packages` sirf reference hai, copy ya subtree nahi (owner ka faisla, 2026-10-19). Pehla package `frontend-styles` 2.0.0 poora hai (tokens, tones, order status, charts, high contrast, print, animations, utilities, rich text; publish baaki). Saare packages **public** hain (npm pe; monorepo me apne aap jude rehte hain). Neev ke baad baaki packages **app ki zaroorat ke saath** bante hain, pehle se nahi: jo cheez do apps ko chahiye, ya saaf taur pe sabki hai (login, API client, layout), wo turant package me jati hai, app me copy nahi hoti. Andaazan order (dependency pehle):
+- [~] T0.1 Packages naye bante hain, `packages/<shared|frontend|backend>/<name>` me (`@beautinique/<category>-<name>`). `BQ-Packages` sirf reference hai, copy ya subtree nahi (owner ka faisla, 2026-10-19). Pehla package `frontend-styles` 2.0.0 poora hai (tokens, tones, order status, charts, high contrast, print, animations, utilities, rich text). Saare packages **public** hain, par **abhi publish nahi karna, zaroorat pe hi (owner ka faisla, 2026-10-21)**: saare apps isi monorepo se package lete hain (npm workspaces), live deploy pe bhi. Publish tabhi jab repo ke bahar kisi ko package chahiye. (npm pe; monorepo me apne aap jude rehte hain). Neev ke baad baaki packages **app ki zaroorat ke saath** bante hain, pehle se nahi: jo cheez do apps ko chahiye, ya saaf taur pe sabki hai (login, API client, layout), wo turant package me jati hai, app me copy nahi hoti. Andaazan order (dependency pehle):
   1. **Neev (ho gaya, 2026-10-20):** `shared-zod`, `shared-utils`, `shared-contracts`, `shared-authz`.
   2. **Backend (Phase 1 ke saath):** `backend-server-kit` (1.0.0 bana, 2026-10-20), `backend-server-mongo`, `backend-server-queue`, `backend-server-crypto`, `backend-storage`.
   3. **Frontend (Phase 6 ke saath):** `frontend-test-utils`, `frontend-icons`, `frontend-hooks`, `frontend-components`, `frontend-stores`, `frontend-api-client`, `frontend-authz`, `frontend-forms`, `frontend-app-shell`, `frontend-auth-ui`, `frontend-data-table`, `frontend-review-screens`, `frontend-maps`, `frontend-pwa-kit`, `frontend-config-vite`.
@@ -53,7 +53,7 @@
 
 ## Phase 1. Server kit + contracts (1–2 hafte)
 
-- [~] T1.1 `server-kit`: AppError, response envelope, logger (redaction), Express app factory, bootstrap/shutdown. (2026-10-20: `@beautinique/backend-server-kit` 1.0.0: AppError + contracts error body, request id, access log, redacting logger, `createApp`, `/health` + `/ready`, `loadConfig` (namespaced, `strip`), `startServer` graceful stop; 15 tests, 25/25 mutations. Success envelope helper aur npm publish baaki.)
+- [~] T1.1 `server-kit`: AppError, response envelope, logger (redaction), Express app factory, bootstrap/shutdown. (2026-10-20: `@beautinique/backend-server-kit` 1.0.0: AppError + contracts error body, request id, access log, redacting logger, `createApp`, `/health` + `/ready`, `loadConfig` (namespaced, `strip`), `startServer` graceful stop; 15 tests, 25/25 mutations. Success envelope helper baaki.)
 - [ ] T1.2 `server-mongo`: `withTransaction()` (reply commit ke baad) + regression test.
 - [ ] T1.3 `server-queue`: outbox relay (`poll` aur `changestream`), inbox dedupe, job schedulers, `bq:epoch` watchdog aur Redis wipe recovery.
 - [ ] T1.4 `server-crypto`: AES-GCM field encryption, HMAC blind index.
@@ -202,3 +202,4 @@
 | v1.11   | 2026-10-20 | `backend-server-kit` bana (T1.1 ka zyada hissa); app aur backend generators (T0.2, T0.3, T0.9, T2.1, T2.5 ke notes). |
 | v1.12 | 2026-10-20 | OTP sirf email se (T3.1, T5.2). |
 | v1.13 | 2026-10-20 | T5.1: SMS aur WhatsApp channel hate. |
+| v1.14 | 2026-10-21 | T0.1: packages public rahenge, par abhi publish/republish nahi, zaroorat pe hi. |
