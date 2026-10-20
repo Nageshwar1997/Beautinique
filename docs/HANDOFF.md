@@ -1,6 +1,6 @@
 # HANDOFF — BQ
 
-> **Status:** v1.1 (2026-10-20). Is project pe 2 log kaam karte hain. Ye file batati hai ki **abhi kya halat hai, kisne kya chhoda, agla kaam kya hai** aur kaunse sawal khule hain, taaki doosra insaan (aur uska Claude) bina poora itihaas padhe kaam utha sake. Jo bhi kaam roke, wo ye file update kare (neeche §8).
+> **Status:** v1.3 (2026-10-20). Is project pe 2 log kaam karte hain. Ye file batati hai ki **abhi kya halat hai, kisne kya chhoda, agla kaam kya hai** aur kaunse sawal khule hain, taaki doosra insaan (aur uska Claude) bina poora itihaas padhe kaam utha sake. Jo bhi kaam roke, wo ye file update kare (neeche §8).
 
 ## 0. Pehle ye (handoff ke din)
 
@@ -20,7 +20,8 @@
 2. `npm install`, phir `npm run build` (packages ek doosre ka `dist` import karte hain).
 3. Checks: `npm run format:check`, `npm run lint`, `npm run typecheck`, `npm test`. Package CLI ke tests me e2e ~4 minute aur create ~1 minute lete hain.
 4. Styles ka playground: `npm run playground --workspace @beautinique/frontend-styles` (http://localhost:5180).
-5. Docker sirf local dev ke liye hai (owner Docker seekh raha hai; TASKS me "Docker Lesson" wale tasks owner ke saath karne hain).
+5. **Roz ka git flow** (ARCHITECTURE §13, RULES §2): `git switch main` → `git pull` → `git switch -c feat/<kaam>` → commits (Conventional Commits) → PR **`main`** pe. Batch ready ho to PR `main` → `prerelease` (laptop Docker pe integration/E2E), phir PR `prerelease` → `release` (live + npm). Package release ke baad PR `release` → `main` (back-merge).
+6. Docker sirf local dev ke liye hai (owner Docker seekh raha hai; TASKS me "Docker Lesson" wale tasks owner ke saath karne hain).
 
 ## 3. Abhi ki halat (2026-10-20)
 
@@ -44,7 +45,7 @@
 
 ## 4. Agla kaam (is order me)
 
-1. **T0.7 baaki hissa:** `prerelease` aur `release` branches GitHub pe ban gayi hain (2026-10-20), par abhi kisi branch pe protection ya ruleset nahi hai. Baaki: GitHub → Settings → Rules → Rulesets me `prerelease` aur `release` ke liye PR zaroori, required status check `check` (CI job; ye list me tab dikhta hai jab CI ek baar chal chuka ho), force push aur delete band. Repo settings sirf owner badal sakta hai. Dhyan: GitHub "Run workflow" button tabhi dikhata hai jab `release.yml` default branch (`main`) pe bhi ho (hai).
+1. **T0.7 ho gaya.** 2026-10-20: branches ban gayi, CI teeno pe green; ruleset `protected-branches` (`main`, `prerelease`, `release`: delete aur force push band, PR + 1 approval, `check` required aur up to date, bypass sirf Repository admin); tag ruleset `release-tags` (`@beautinique/*` tags sirf owner bana, badal ya mita sakta hai); environment `npm` sirf `release` branch se, owner ki approval ke saath. Iska matlab: har PR pe CI `check` green + 1 approval chahiye (owner bypass kar sakta hai); `release` pe seedha push sirf owner (package release); npm publish job owner ke approve karne pe hi chalta hai. Owner ne Actions permissions aur Advanced Security bhi set ki (ye public API se check nahi hote).
 2. **T0.1 styles package ke baaki hisse:** utilities, animations (`animations.css`, DESIGN.md "Motion"), component CSS (quill wagairah). Phir doosre packages naye banana (`npm run create`), purane `BQ-Packages` ko sirf dekh ke. ARCHITECTURE §9.2 ke flat naam (contracts, server-kit, ...) ko `shared/frontend/backend` layout me map karna.
 3. **Styles 2.0.0 ka pehla publish:** owner ka npm account chahiye (`npm run login`, phir `release` branch pe `npm run publish`). Doosre insaan ko publish karna ho to owner pehle use npm org `@beautinique` me jode.
 4. **Package CLI follow-up:** `update-deps` command (purane repo me tha; naya republish external dependencies upgrade nahi karta). Scope: outdated deps ki list, select (all / category / packages), ranges update, install, build + checks, fail pe sab wapas.
@@ -91,3 +92,5 @@
 |---|---|---|
 | v1.0 | 2026-10-20 | Pehla handoff (owner → doosra developer): setup, halat, agla kaam, khule sawal, traps, purane repos. |
 | v1.1 | 2026-10-20 | Branches `prerelease` aur `release` ban gayi; T0.7 me sirf protection baaki. |
+| v1.2 | 2026-10-20 | CI fix ke baad teeno branches green; `main` default branch wala git flow (§2) aur T0.7 ki settings list (§4). |
+| v1.3 | 2026-10-20 | T0.7 done (rulesets, tag ruleset, `npm` environment). |

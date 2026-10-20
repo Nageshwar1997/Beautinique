@@ -1,6 +1,6 @@
 # Packages — banana, publish aur republish
 
-> **Status:** v1.1 (2026-10-20). `packages/` ke saare npm packages ka kaam is repo ke apne CLI (`scripts/packages/`) se hota hai. Ye guide batati hai ki kaunsa command kab chalana hai aur andar kya hota hai.
+> **Status:** v1.2 (2026-10-20). `packages/` ke saare npm packages ka kaam is repo ke apne CLI (`scripts/packages/`) se hota hai. Ye guide batati hai ki kaunsa command kab chalana hai aur andar kya hota hai.
 
 ## 1. Packages kahan aur kis naam se
 
@@ -61,7 +61,8 @@ Kisi package ka naya version agar kisi published dependent ki range tod de, to C
 6. CHANGELOG.md: har package ke commits (Conventional Commits) uske pichhle tag se.
 7. **Publish**, dependencies pehle, ek-ek karke; npm ka apna 2FA (browser link) dikhta hai. Publish se theek pehle login dobara check hota hai (checks me 2 ghante ka session khatam ho sakta hai); fail ho to saari files wapas. Jo version npm pe pehle se hai wo skip, isliye dobara chalana safe hai. Ctrl+C: kuch publish nahi hua to saari files wapas.
 8. Fail ho (2FA, network): "Try again" ya "Stop". Stop pe jo publish ho chuke wo rehte hain, baaki package.json me "waiting" rehte hain; `npm run publish` baad me unhe pura karta hai.
-9. **Commit** `chore(release): publish packages` + har package ka tag `@beautinique/<name>@<version>`. **Push aap karte ho**: `git push --follow-tags`.
+9. **Commit** `chore(release): publish packages` + har package ka tag `@beautinique/<name>@<version>`. **Push aap karte ho**: `git push --follow-tags` (`release` pe ye ek hi seedha push allowed hai, owner ke ruleset bypass se).
+10. **Back-merge:** PR `release` → `main`, taaki naye versions aur changelogs `main` (default branch) pe bhi aa jayein.
 
 `--dry-run`: naye versions ke saath saare checks aur `npm publish --dry-run`, phir saari files wapas; koi git ya npm badlav nahi. Dry run me login/branch ki jaanch nahi hoti.
 
@@ -87,3 +88,4 @@ Kisi package ka naya version agar kisi published dependent ki range tod de, to C
 |---|---|---|
 | v1.0 | 2026-10-20 | Pehla version: create, publish, republish, login, logout, status, verify, build; GitHub release workflow. |
 | v1.1 | 2026-10-20 | Review ke baad: release sirf `release` branch se, jaanch sawalon se pehle, behind/taken versions pe rok, peer/re-export/prerelease cascade, npm jaisa install check, Ctrl+C aur login-expire pe files wapas, dry run naye versions ke saath, release workflow build + publish jobs me (tag check), CI me build step, sab commands pe `--help`, changelog me markdown escape. |
+| v1.2 | 2026-10-20 | Release ke baad `release` → `main` back-merge; release commit ka push ruleset bypass se. |
