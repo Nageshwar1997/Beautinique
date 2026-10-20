@@ -16,6 +16,7 @@ import { join } from 'node:path';
 
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 
+import { DEPLOYABLES } from '../../../packages/shared/contracts/src/platform.ts';
 import { makeRepo } from './helpers.ts';
 import { type FakeRegistry, startRegistry } from './registry-server.ts';
 
@@ -166,8 +167,10 @@ describe('backend apps pass every check', () => {
   beforeAll(() => {
     backend = fixtureRepo();
     mkdirSync(modules());
+    // this repo's own backend apps are linked in its node_modules too; the fixture links its own
+    const own = new Set<string>([...DEPLOYABLES, 'bundle']);
     for (const entry of readdirSync(join(REPO_ROOT, 'node_modules'), { withFileTypes: true })) {
-      if (entry.isDirectory() || entry.isSymbolicLink()) {
+      if ((entry.isDirectory() || entry.isSymbolicLink()) && !own.has(entry.name)) {
         symlinkSync(
           join(REPO_ROOT, 'node_modules', entry.name),
           join(modules(), entry.name),
