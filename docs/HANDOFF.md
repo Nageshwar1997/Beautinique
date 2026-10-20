@@ -1,6 +1,6 @@
 # HANDOFF — BQ
 
-> **Status:** v1.2 (2026-10-20). Is project pe 2 log kaam karte hain. Ye file batati hai ki **abhi kya halat hai, kisne kya chhoda, agla kaam kya hai** aur kaunse sawal khule hain, taaki doosra insaan (aur uska Claude) bina poora itihaas padhe kaam utha sake. Jo bhi kaam roke, wo ye file update kare (neeche §8).
+> **Status:** v1.3 (2026-10-20). Is project pe 2 log kaam karte hain. Ye file batati hai ki **abhi kya halat hai, kisne kya chhoda, agla kaam kya hai** aur kaunse sawal khule hain, taaki doosra insaan (aur uska Claude) bina poora itihaas padhe kaam utha sake. Jo bhi kaam roke, wo ye file update kare (neeche §8).
 
 ## 0. Pehle ye (handoff ke din)
 
@@ -45,7 +45,7 @@
 
 ## 4. Agla kaam (is order me)
 
-1. **T0.7 baaki hissa (owner):** `prerelease` aur `release` branches ban gayi hain aur CI teeno branches pe green hai (2026-10-20), par abhi kisi branch pe ruleset nahi hai. Baaki: Settings → Rules → Rulesets → branch ruleset jo `main`, `prerelease`, `release` teeno pe ho: PR zaroori (1 approval), required status check `check`, force push aur delete band; bypass list me Repository admin "Always" (sirf package CLI ka release commit + tags push karne ke liye). Saath me: Environment `npm` (sirf `release` branch, required reviewer owner), Actions ki workflow permissions "Read", Dependabot alerts + secret scanning + push protection on. `main` hi default branch rahega.
+1. **T0.7 ho gaya.** 2026-10-20: branches ban gayi, CI teeno pe green; ruleset `protected-branches` (`main`, `prerelease`, `release`: delete aur force push band, PR + 1 approval, `check` required aur up to date, bypass sirf Repository admin); tag ruleset `release-tags` (`@beautinique/*` tags sirf owner bana, badal ya mita sakta hai); environment `npm` sirf `release` branch se, owner ki approval ke saath. Iska matlab: har PR pe CI `check` green + 1 approval chahiye (owner bypass kar sakta hai); `release` pe seedha push sirf owner (package release); npm publish job owner ke approve karne pe hi chalta hai. Owner ne Actions permissions aur Advanced Security bhi set ki (ye public API se check nahi hote).
 2. **T0.1 styles package ke baaki hisse:** utilities, animations (`animations.css`, DESIGN.md "Motion"), component CSS (quill wagairah). Phir doosre packages naye banana (`npm run create`), purane `BQ-Packages` ko sirf dekh ke. ARCHITECTURE §9.2 ke flat naam (contracts, server-kit, ...) ko `shared/frontend/backend` layout me map karna.
 3. **Styles 2.0.0 ka pehla publish:** owner ka npm account chahiye (`npm run login`, phir `release` branch pe `npm run publish`). Doosre insaan ko publish karna ho to owner pehle use npm org `@beautinique` me jode.
 4. **Package CLI follow-up:** `update-deps` command (purane repo me tha; naya republish external dependencies upgrade nahi karta). Scope: outdated deps ki list, select (all / category / packages), ranges update, install, build + checks, fail pe sab wapas.
@@ -93,3 +93,4 @@
 | v1.0 | 2026-10-20 | Pehla handoff (owner → doosra developer): setup, halat, agla kaam, khule sawal, traps, purane repos. |
 | v1.1 | 2026-10-20 | Branches `prerelease` aur `release` ban gayi; T0.7 me sirf protection baaki. |
 | v1.2 | 2026-10-20 | CI fix ke baad teeno branches green; `main` default branch wala git flow (§2) aur T0.7 ki settings list (§4). |
+| v1.3 | 2026-10-20 | T0.7 done (rulesets, tag ruleset, `npm` environment). |

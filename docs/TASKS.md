@@ -1,6 +1,6 @@
 # TASKS — BQ
 
-> **Status:** v1.5 (2026-10-20). Poore project ki task list, [ARCHITECTURE.md](ARCHITECTURE.md) §16 ke phases ke hisaab se. Har task "done" tabhi jab [RULES.md](RULES.md) §1.5 ki Definition of Done poori ho.
+> **Status:** v1.6 (2026-10-20). Poore project ki task list, [ARCHITECTURE.md](ARCHITECTURE.md) §16 ke phases ke hisaab se. Har task "done" tabhi jab [RULES.md](RULES.md) §1.5 ki Definition of Done poori ho.
 
 **Kaise use karein:**
 - `[ ]` baaki, `[~]` chal raha hai, `[x]` done.
@@ -40,7 +40,7 @@
 - [ ] T0.4 Media-service ka nested `.git` aur `.kilo` worktree hatana.
 - [ ] T0.5 Turborepo. (npm workspaces, root scripts, shared configs aur package CLI ho gaye: [packages/README.md](packages/README.md).)
 - [ ] T0.6 `ci.yml`: build (affected) aur gitleaks baaki. (Format, lint, typecheck, test, packages verify aur npm audit wala pehla `ci.yml`, plus `release.yml`, ho gaye.)
-- [~] T0.7 Branches `prerelease` aur `release`, branch protection, required checks. (Dono branches GitHub pe ban gayi aur CI teeno pe green hai, 2026-10-20. Baaki: `main`, `prerelease`, `release` teeno pe ruleset, flow ARCHITECTURE §13 jaisa.) Packages bhi sirf `release` branch se publish hote hain (package CLI aur `release.yml` yahi maante hain).
+- [x] T0.7 Branches `prerelease` aur `release`, branch protection, required checks. (2026-10-20: branches ban gayi, CI teeno pe green; ruleset `protected-branches` (`main`, `prerelease`, `release`: delete aur force push band, PR + 1 approval, `check` required aur up to date, bypass sirf Repository admin); tag ruleset `release-tags` (`@beautinique/*` tags sirf owner bana, badal ya mita sakta hai); environment `npm` sirf `release` branch se, owner ki approval ke saath.) Packages bhi sirf `release` branch se publish hote hain (package CLI aur `release.yml` yahi maante hain).
 - [ ] T0.8 `infra/docker-compose.yml` ka `infra` profile: Mongo replica set, Valkey (Render jaisi limits), Mailpit. **Docker Lesson 2.**
 - [ ] T0.9 Har deployable ka `.env.example` aur zod env schema.
 
@@ -189,3 +189,4 @@
 | v1.3 | 2026-10-20 | T0.1: packages naye bante hain (`BQ-Packages` sirf reference). T0.7: packages bhi `release` branch se. |
 | v1.4 | 2026-10-20 | T0.7: `prerelease` aur `release` branches ban gayi; protection baaki. |
 | v1.5 | 2026-10-20 | T0.7: `main` default branch wala flow; ruleset teeno branches pe. |
+| v1.6 | 2026-10-20 | T0.7 done: rulesets, tag ruleset aur `npm` environment lag gaye. |
