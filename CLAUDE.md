@@ -34,6 +34,8 @@ launch jaisi banti hai. Legal cheezein dummy data ke saath implement hoti hain.
   output ke saath batao.
 - **Public repo:** koi secret, `.env`, token, password, DB dump ya asli personal data commit nahi; sirf
   `.env.example`. Claude `.env`/`.env.*` files aur repo ke bahar ka `All-ENVs` folder kabhi nahi kholta.
+- **Git flow:** feature branch → PR → `main` (default) → `prerelease` → `release`; teeno pe seedha
+  push nahi. Package release ke baad `release` → `main` back-merge (RULES §2).
 - **Commit/push sirf jo insaan kaam kar raha hai uske kehne pe.** Destructive kaam se pehle poochho.
 - **npm pe kuch bhi publish, `npm login/logout` ya `npm trust` sirf insaan ke kehne pe**; tests kabhi
   asli registry ko nahi chhoote (fake registry hai).
