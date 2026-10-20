@@ -1,4 +1,4 @@
-import type * as z from 'zod';
+import type { output, ZodType } from '@beautinique/shared-zod';
 
 /** Area settings levels, widest first. The most specific value set wins (ARCHITECTURE §8). */
 export const AREA_LEVELS = ['global', 'state', 'district', 'pincode'] as const;
@@ -8,17 +8,17 @@ const SETTING_KEY = /^[a-z][a-z0-9_]*(?:\.[a-z][a-z0-9_]*)+$/;
 
 export interface AreaSettingDefinition<
   Key extends string = string,
-  Schema extends z.ZodType = z.ZodType,
+  Schema extends ZodType = ZodType,
 > {
   key: Key;
   description: string;
   schema: Schema;
   /** Used where no level sets a value. */
-  defaultValue: z.output<Schema>;
+  defaultValue: output<Schema>;
 }
 
 /** Declares an area setting key (delivery promise, cut-off, UPI-on-delivery ...). The default must be valid. */
-export function defineAreaSetting<const Key extends string, Schema extends z.ZodType>(
+export function defineAreaSetting<const Key extends string, Schema extends ZodType>(
   definition: AreaSettingDefinition<Key, Schema>,
 ): Readonly<AreaSettingDefinition<Key, Schema>> {
   if (!SETTING_KEY.test(definition.key)) {
@@ -54,12 +54,12 @@ export interface AreaLocation {
 }
 
 /** The value for a location: pincode, then district, then state, then global, then the default. */
-export function resolveAreaSetting<Schema extends z.ZodType>(
+export function resolveAreaSetting<Schema extends ZodType>(
   definition: AreaSettingDefinition<string, Schema>,
-  values: AreaSettingValues<z.output<Schema>>,
+  values: AreaSettingValues<output<Schema>>,
   location: AreaLocation,
-): { value: z.output<Schema>; level: AreaLevel | 'default' } {
-  type Value = z.output<Schema>;
+): { value: output<Schema>; level: AreaLevel | 'default' } {
+  type Value = output<Schema>;
   // own keys only: an id like "constructor" must not find Object.prototype
   const pick = (map: Readonly<Record<string, Value>> | undefined, id: string | undefined) =>
     id !== undefined && map !== undefined && Object.hasOwn(map, id) ? map[id] : undefined;

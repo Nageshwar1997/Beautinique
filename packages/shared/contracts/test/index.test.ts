@@ -1,6 +1,14 @@
-import { mobileNumber, objectId, paise } from '@beautinique/shared-zod';
+import {
+  array,
+  boolean,
+  mobileNumberZod,
+  number,
+  object,
+  objectIdZod,
+  paiseZod,
+  string,
+} from '@beautinique/shared-zod';
 import { describe, expect, expectTypeOf, it } from 'vitest';
-import * as z from 'zod';
 
 import {
   APPS,
@@ -33,7 +41,7 @@ import {
   toOpenApi,
 } from '../src/index';
 
-const product = z.object({ id: objectId, name: z.string(), price: paise });
+const product = object({ id: objectIdZod, name: string(), price: paiseZod });
 
 const getProduct = defineRoute({
   id: 'catalog.products.get',
@@ -46,7 +54,7 @@ const getProduct = defineRoute({
   idempotency: false,
   stepUp: false,
   owner: 'core',
-  input: { params: z.object({ productId: objectId }), query: cursorQuery },
+  input: { params: object({ productId: objectIdZod }), query: cursorQuery },
   output: product,
 });
 
@@ -62,10 +70,10 @@ const updateContact = defineRoute({
   stepUp: true,
   owner: 'core',
   input: {
-    params: z.object({ sellerId: objectId, contactId: objectId }),
-    body: z.object({ phone: mobileNumber }),
+    params: object({ sellerId: objectIdZod, contactId: objectIdZod }),
+    body: object({ phone: mobileNumberZod }),
   },
-  output: z.object({ updated: z.boolean() }),
+  output: object({ updated: boolean() }),
 });
 
 /** A valid route to break one field at a time. */
@@ -81,7 +89,7 @@ const base = (): RouteDefinition => ({
   stepUp: false,
   owner: 'core',
   input: {},
-  output: z.array(product),
+  output: array(product),
 });
 
 describe('platform constants', () => {
@@ -134,15 +142,15 @@ describe('routes', () => {
       [{ access: { type: 'permission', permission: 'Seller.Update' } }, 'is not a permission key'],
       [{ stepUp: true }, 'step-up needs a permission route'],
       [{ idempotency: true }, 'GET routes cannot need an Idempotency-Key'],
-      [{ input: { body: z.object({}) } }, 'GET routes cannot have a body'],
-      [{ method: 'DELETE', input: { body: z.object({}) } }, 'DELETE routes cannot have a body'],
+      [{ input: { body: object({}) } }, 'GET routes cannot have a body'],
+      [{ method: 'DELETE', input: { body: object({}) } }, 'DELETE routes cannot have a body'],
       [{ path: '/catalog/products/:id' }, 'path parameters (id) and input.params (none) differ'],
       [
-        { input: { params: z.object({ id: objectId }) } },
+        { input: { params: object({ id: objectIdZod }) } },
         'path parameters (none) and input.params (id) differ',
       ],
       [
-        { path: '/a/:id/b/:id', input: { params: z.object({ id: objectId }) } },
+        { path: '/a/:id/b/:id', input: { params: object({ id: objectIdZod }) } },
         'path repeats a parameter',
       ],
     ];
@@ -183,7 +191,7 @@ describe('routes', () => {
       ...getProduct,
       id: 'catalog.products.byId',
       path: '/catalog/products/:id',
-      input: { params: z.object({ id: objectId }) },
+      input: { params: object({ id: objectIdZod }) },
     });
     expect(() => routeTable([getProduct, sameShape])).toThrow(
       'both match GET /catalog/products/:id',
@@ -263,7 +271,7 @@ describe('events', () => {
     version: 1,
     producer: 'core',
     description: 'A seller organisation was approved',
-    data: z.object({ sellerOrgId: objectId }),
+    data: object({ sellerOrgId: objectIdZod }),
   });
   const event = {
     eventId: '0192f3a4-5b6c-7d8e-9f01-23456789abcd',
@@ -304,7 +312,7 @@ describe('events', () => {
       version: 1,
       producer: 'core' as const,
       description: 'x',
-      data: z.object({}),
+      data: object({}),
     };
     expect(() => defineEvent({ ...def, type: 'sellers.approved' })).toThrow(
       '<context>.<aggregate>.<pastTense>',
@@ -326,7 +334,7 @@ describe('events', () => {
     const v2 = defineEvent({
       ...approved,
       version: 2,
-      data: z.object({ sellerOrgId: objectId, tier: z.string() }),
+      data: object({ sellerOrgId: objectIdZod, tier: string() }),
     });
     const catalogue = eventCatalogue([approved, v2]);
     expect(catalogue.get('sellers.org.approved', 1)).toBe(approved);
@@ -342,7 +350,7 @@ describe('area settings', () => {
   const promise = defineAreaSetting({
     key: 'delivery.promise_days',
     description: 'Days from order to delivery shown to customers',
-    schema: z.number().int().min(1).max(15),
+    schema: number().int().min(1).max(15),
     defaultValue: 4,
   });
 
@@ -354,10 +362,18 @@ describe('area settings', () => {
       pincode: { '411001': 1 },
     };
     expect(
-      resolveAreaSetting(promise, values, { stateId: '27', districtId: '519', pincode: '411001' }),
+      resolveAreaSetting(promise, values, {
+        stateId: '27',
+        districtId: '519',
+        pincode: '411001',
+      }),
     ).toEqual({ value: 1, level: 'pincode' });
     expect(
-      resolveAreaSetting(promise, values, { stateId: '27', districtId: '519', pincode: '411002' }),
+      resolveAreaSetting(promise, values, {
+        stateId: '27',
+        districtId: '519',
+        pincode: '411002',
+      }),
     ).toEqual({ value: 2, level: 'district' });
     expect(resolveAreaSetting(promise, values, { stateId: '27', districtId: '520' })).toEqual({
       value: 4,
@@ -408,13 +424,13 @@ describe('http bodies', () => {
   });
 
   it('success bodies and cursor pagination', () => {
-    expect(successBody(z.number()).parse({ data: 3 })).toEqual({ data: 3 });
+    expect(successBody(number()).parse({ data: 3 })).toEqual({ data: 3 });
     expect(cursorQuery.parse({})).toEqual({ limit: 20 });
     expect(cursorQuery.parse({ cursor: 'abc', limit: '50' })).toEqual({ cursor: 'abc', limit: 50 });
     for (const bad of [{ limit: 0 }, { limit: 101 }, { limit: 2.5 }, { cursor: '' }]) {
       expect(cursorQuery.safeParse(bad).success, JSON.stringify(bad)).toBe(false);
     }
-    expect(cursorPage(z.string()).parse({ items: ['a'], nextCursor: null })).toEqual({
+    expect(cursorPage(string()).parse({ items: ['a'], nextCursor: null })).toEqual({
       items: ['a'],
       nextCursor: null,
     });

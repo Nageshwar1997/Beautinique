@@ -47,8 +47,5 @@
   },
   "dependencies": {
     "@beautinique/shared-contracts": "^1.0.0"
-  },
-  "devDependencies": {
-    "zod": "^4.6.7"
   }
 }

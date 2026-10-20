@@ -24,8 +24,17 @@ const GLOBALS = {
  * @param {boolean} [options.react] add the React hooks rules
  * @param {string} options.tsconfigRootDir pass `import.meta.dirname`
  * @param {string[]} [options.ignores] extra paths to skip
+ * @param {boolean} [options.zodPackage] only for @beautinique/shared-zod: the one package that imports zod
  */
-export function packageConfig({ platform, react = false, tsconfigRootDir, ignores = [] }) {
+export function packageConfig({
+  platform,
+  react = false,
+  tsconfigRootDir,
+  ignores = [],
+  zodPackage = false,
+}) {
+  const ZOD_MESSAGE =
+    "Import z from '@beautinique/shared-zod' (the repo has one zod and one import path).";
   return defineConfig(
     { ignores: ['dist', 'coverage', 'node_modules', ...ignores] },
     js.configs.recommended,
@@ -48,6 +57,15 @@ export function packageConfig({ platform, react = false, tsconfigRootDir, ignore
         'no-console': ['error', { allow: ['warn', 'error'] }],
         eqeqeq: ['error', 'always'],
         curly: ['error', 'all'],
+        'no-restricted-imports': zodPackage
+          ? 'off'
+          : [
+              'error',
+              {
+                paths: [{ name: 'zod', message: ZOD_MESSAGE }],
+                patterns: [{ group: ['zod/*'], message: ZOD_MESSAGE }],
+              },
+            ],
       },
     },
     // Plain JS config files (eslint.config.js) are not part of a tsconfig project.

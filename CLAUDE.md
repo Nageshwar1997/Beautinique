@@ -68,6 +68,8 @@ npm run build
 - `frontend/`, `backend/`: abhi khaali (TASKS T0.2, T0.3).
 - `scripts/packages/`: package CLI (Node 24 TypeScript seedha chalata hai, build nahi). Tests:
   `scripts/packages/test/`.
+- **Zod:** `import { object, string, gstinZod } from '@beautinique/shared-zod'` (named, `z.` nahi); seedha `zod` sirf
+  `packages/shared/zod` me (ESLint rokta hai). Hamare schemas `...Zod`, `enum as zodEnum`.
 - `configs/`: shared ESLint factory (`eslint-config.js`, naam `eslint.config.js` nahi ho sakta) aur
   tsconfig presets.
 - `.github/workflows/`: `ci.yml` (har PR, aur `main`/`prerelease`/`release` pe push), `release.yml`

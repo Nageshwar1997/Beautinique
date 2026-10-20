@@ -8,7 +8,7 @@ Abhi isme **system** hai (`defineRoute`, `defineEvent` ...); asli endpoints aur 
 
 ```ts
 import { defineRoute, cursorQuery } from '@beautinique/shared-contracts';
-import { objectId } from '@beautinique/shared-zod';
+import { number, object, objectIdZod } from '@beautinique/shared-zod';
 
 export const getProduct = defineRoute({
   id: 'catalog.products.get',
@@ -21,7 +21,7 @@ export const getProduct = defineRoute({
   idempotency: false, // true = client ko Idempotency-Key bhejna hoga (GET pe nahi)
   stepUp: false, // true = haal hi ka MFA (sirf permission routes)
   owner: 'core',
-  input: { params: z.object({ productId: objectId }), query: cursorQuery },
+  input: { params: object({ productId: objectIdZod }), query: cursorQuery },
   output: productSchema,
 });
 ```
@@ -58,7 +58,7 @@ export const sellerApproved = defineEvent({
   version: 1,
   producer: 'core',
   description: 'A seller organisation was approved',
-  data: z.object({ sellerOrgId: objectId }),
+  data: object({ sellerOrgId: objectIdZod }),
 });
 
 sellerApproved.envelope.parse(message); // poora envelope: eventId (UUIDv7), type, version, occurredAt, producer, aggregate, actor, correlationId, causationId, scope, data
@@ -87,7 +87,7 @@ definePermission({
 const promise = defineAreaSetting({
   key: 'delivery.promise_days',
   description: 'Days from order to delivery shown to customers',
-  schema: z.number().int().min(1).max(15),
+  schema: number().int().min(1).max(15),
   defaultValue: 4, // schema se valid hona chahiye
 });
 

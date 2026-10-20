@@ -1,4 +1,4 @@
-import * as z from 'zod';
+import { string } from 'zod';
 
 const BASE36 = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ';
 
@@ -6,8 +6,7 @@ const BASE36 = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ';
  * Indian mobile number. Accepts what people type (`+91 98765 43210`, `098765-43210`, `(987) 654 3210`)
  * and outputs the 10 digits (`9876543210`). Mobile numbers start with 6, 7, 8 or 9.
  */
-export const mobileNumber = z
-  .string()
+export const mobileNumberZod = string()
   .transform((value) => {
     const digits = value.replace(/[\s\-().]/g, '');
     if (/^\+91\d{10}$/.test(digits)) return digits.slice(3);
@@ -15,11 +14,10 @@ export const mobileNumber = z
     if (/^0\d{10}$/.test(digits)) return digits.slice(1);
     return digits;
   })
-  .pipe(z.string().regex(/^[6-9]\d{9}$/, 'Enter a valid 10-digit mobile number'));
+  .pipe(string().regex(/^[6-9]\d{9}$/, 'Enter a valid 10-digit mobile number'));
 
 /** India Post PIN code: 6 digits, never starting with 0. */
-export const pincode = z
-  .string()
+export const pincodeZod = string()
   .trim()
   .regex(/^[1-9]\d{5}$/, 'Enter a valid 6-digit PIN code');
 
@@ -27,8 +25,7 @@ export const pincode = z
  * PAN: 5 letters, 4 digits, 1 letter; the 4th letter is the holder type (P person, C company,
  * F firm, H HUF, A AOP, B BOI, G government, J artificial juridical person, L local authority, T trust).
  */
-export const pan = z
-  .string()
+export const panZod = string()
   .trim()
   .toUpperCase()
   .regex(/^[A-Z]{3}[ABCFGHJLPT][A-Z]\d{4}[A-Z]$/, 'Enter a valid PAN');
@@ -58,8 +55,7 @@ const isGstStateCode = (code: number) => (code >= 1 && code <= 38) || code === 9
  * GSTIN: state code + PAN + entity number + `Z` + check digit, and the check digit must match.
  * Lower case is accepted and upper-cased.
  */
-export const gstin = z
-  .string()
+export const gstinZod = string()
   .trim()
   .toUpperCase()
   .regex(/^\d{2}[A-Z]{3}[ABCFGHJLPT][A-Z]\d{4}[A-Z][1-9A-Z]Z[0-9A-Z]$/, 'Enter a valid GSTIN')
@@ -70,21 +66,18 @@ export const gstin = z
   );
 
 /** IFSC: 4 letters (bank), 0, then 6 letters or digits (branch). */
-export const ifsc = z
-  .string()
+export const ifscZod = string()
   .trim()
   .toUpperCase()
   .regex(/^[A-Z]{4}0[A-Z0-9]{6}$/, 'Enter a valid IFSC');
 
 /** Bank account number: 9 to 18 digits. */
-export const bankAccountNumber = z
-  .string()
+export const bankAccountNumberZod = string()
   .trim()
   .regex(/^\d{9,18}$/, 'Enter a valid account number (9 to 18 digits)');
 
 /** UPI ID (VPA), e.g. `name@okhdfcbank`; stored in lower case. */
-export const upiId = z
-  .string()
+export const upiIdZod = string()
   .trim()
   .toLowerCase()
   .regex(/^[a-z0-9][a-z0-9._-]{1,255}@[a-z][a-z0-9]{1,63}$/, 'Enter a valid UPI ID');

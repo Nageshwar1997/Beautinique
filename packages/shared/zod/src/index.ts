@@ -1,24 +1,32 @@
+/**
+ * The whole of zod (`string`, `object`, `enum`, `ZodType` ...) plus Beautinique's schemas. Apps and
+ * packages import zod only from here, by name, so the repo has one zod and one import path:
+ *   import { gstinZod, mobileNumberZod, object, string } from '@beautinique/shared-zod';
+ * Beautinique's own schemas end in `Zod`, so they never clash with zod's names. `enum` is a reserved
+ * word: import it as `enum as zodEnum`.
+ */
 export {
-  basisPoints,
-  hexColor,
-  httpsUrl,
-  isoDate,
-  isoDateTime,
-  objectId,
-  paise,
-  signedPaise,
-  slug,
-  uuid,
-  uuidv7,
+  basisPointsZod,
+  hexColorZod,
+  httpsUrlZod,
+  isoDateTimeZod,
+  isoDateZod,
+  objectIdZod,
+  paiseZod,
+  signedPaiseZod,
+  slugZod,
+  uuidv7Zod,
+  uuidZod,
 } from './common';
-export { email, otp, password, personName } from './identity';
+export { emailZod, otpZod, passwordZod, personNameZod } from './identity';
 export {
-  bankAccountNumber,
-  gstin,
+  bankAccountNumberZod,
   gstinCheckDigit,
-  ifsc,
-  mobileNumber,
-  pan,
-  pincode,
-  upiId,
+  gstinZod,
+  ifscZod,
+  mobileNumberZod,
+  panZod,
+  pincodeZod,
+  upiIdZod,
 } from './india';
+export * from 'zod';

@@ -1,16 +1,14 @@
-import * as z from 'zod';
+import { email, string } from 'zod';
 
 /** Email address, trimmed and stored in lower case. */
-export const email = z
-  .string()
+export const emailZod = string()
   .trim()
   .toLowerCase()
   .max(254, 'Email address is too long')
-  .pipe(z.email('Enter a valid email address'));
+  .pipe(email('Enter a valid email address'));
 
 /** One-time code: 6 digits (SMS OTP and authenticator app codes). */
-export const otp = z
-  .string()
+export const otpZod = string()
   .trim()
   .regex(/^\d{6}$/, 'Enter the 6-digit code');
 
@@ -19,8 +17,7 @@ export const otp = z
  * too), and no forced mix of character types. Never trimmed: what the user typed is the password.
  * Checking it against known breached passwords is the server's job.
  */
-export const password = z
-  .string()
+export const passwordZod = string()
   .min(8, 'Use at least 8 characters')
   .max(128, 'Use at most 128 characters')
   .refine((value) => value.trim().length > 0, 'Password cannot be only spaces');
@@ -29,12 +26,10 @@ export const password = z
  * A person's name as written: letters (any script's letters and accents), spaces, dots, apostrophes
  * and hyphens, starting with a letter. Extra spaces are collapsed. 1 to 100 characters.
  */
-export const personName = z
-  .string()
+export const personNameZod = string()
   .transform((value) => value.trim().replace(/\s+/g, ' '))
   .pipe(
-    z
-      .string()
+    string()
       .min(1, 'Enter a name')
       .max(100, 'Name is too long')
       .regex(/^\p{L}[\p{L}\p{M} .'-]*$/u, 'Use letters, spaces, dots, apostrophes and hyphens'),

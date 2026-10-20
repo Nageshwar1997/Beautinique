@@ -1,4 +1,4 @@
-import type * as z from 'zod';
+import type { input, output, ZodObject, ZodType } from '@beautinique/shared-zod';
 
 import { isPermissionKey } from './permissions';
 import { type AppId, APPS, type Deployable, DEPLOYABLES } from './platform';
@@ -26,7 +26,7 @@ export type RateLimitClass = (typeof RATE_LIMIT_CLASSES)[number];
 export type RouteAccess =
   { type: 'public' } | { type: 'signed-in' } | { type: 'permission'; permission: string };
 
-type ObjectSchema = z.ZodObject;
+type ObjectSchema = ZodObject;
 
 export interface RouteDefinition {
   /** Unique operation id, `<module>.<resource>.<action>` in camelCase parts, e.g. `catalog.products.list`. */
@@ -43,8 +43,8 @@ export interface RouteDefinition {
   /** Needs a recent MFA step-up (only for permission routes). */
   stepUp: boolean;
   owner: Deployable;
-  input: { params?: ObjectSchema; query?: ObjectSchema; body?: z.ZodType };
-  output: z.ZodType;
+  input: { params?: ObjectSchema; query?: ObjectSchema; body?: ZodType };
+  output: ZodType;
 }
 
 const ROUTE_ID = /^[a-z][a-zA-Z0-9]*(?:\.[a-z][a-zA-Z0-9]*){2,}$/;
@@ -180,7 +180,7 @@ export function gatewayManifest(routes: readonly RouteDefinition[]) {
   }));
 }
 
-type InputOf<Schema> = Schema extends z.ZodType ? z.input<Schema> : undefined;
+type InputOf<Schema> = Schema extends ZodType ? input<Schema> : undefined;
 
 /** What the client sends: `{ params, query, body }` with the route's input types. */
 export interface RouteRequest<Route extends RouteDefinition> {
@@ -191,10 +191,10 @@ export interface RouteRequest<Route extends RouteDefinition> {
 
 /** What the handler receives after validation (zod output types). */
 export interface RouteInput<Route extends RouteDefinition> {
-  params: Route['input'] extends { params: infer P extends z.ZodType } ? z.output<P> : undefined;
-  query: Route['input'] extends { query: infer Q extends z.ZodType } ? z.output<Q> : undefined;
-  body: Route['input'] extends { body: infer B extends z.ZodType } ? z.output<B> : undefined;
+  params: Route['input'] extends { params: infer P extends ZodType } ? output<P> : undefined;
+  query: Route['input'] extends { query: infer Q extends ZodType } ? output<Q> : undefined;
+  body: Route['input'] extends { body: infer B extends ZodType } ? output<B> : undefined;
 }
 
 /** The `data` of the route's success response. */
-export type RouteOutput<Route extends RouteDefinition> = z.output<Route['output']>;
+export type RouteOutput<Route extends RouteDefinition> = output<Route['output']>;

@@ -43,14 +43,8 @@
     "lint": "eslint .",
     "test": "vitest run"
   },
-  "peerDependencies": {
-    "zod": "^4.0.0"
-  },
   "dependencies": {
     "@beautinique/shared-zod": "^2.0.0"
-  },
-  "devDependencies": {
-    "zod": "^4.6.7"
   },
   "engines": {
     "node": ">=24"

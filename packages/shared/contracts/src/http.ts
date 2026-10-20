@@ -1,4 +1,5 @@
-import * as z from 'zod';
+import type { output, ZodType } from '@beautinique/shared-zod';
+import { array, coerce, number, object, string, union } from '@beautinique/shared-zod';
 
 /** Error codes every deployable uses, with their HTTP status. Modules add their own codes the same way. */
 export const ERROR_CODES = {
@@ -23,37 +24,33 @@ export const ERROR_CODES = {
 export type CommonErrorCode = keyof typeof ERROR_CODES;
 
 /** Error codes are UPPER_SNAKE_CASE. */
-export const errorCode = z
-  .string()
-  .regex(/^[A-Z][A-Z0-9]*(?:_[A-Z0-9]+)*$/, 'Use UPPER_SNAKE_CASE');
+export const errorCode = string().regex(/^[A-Z][A-Z0-9]*(?:_[A-Z0-9]+)*$/, 'Use UPPER_SNAKE_CASE');
 
 /** The body of every error response. `details` lists field problems (validation). */
-export const errorBody = z.object({
-  error: z.object({
+export const errorBody = object({
+  error: object({
     code: errorCode,
-    message: z.string(),
-    details: z
-      .array(
-        z.object({
-          path: z.array(z.union([z.string(), z.number()])),
-          message: z.string(),
-        }),
-      )
-      .optional(),
-    requestId: z.string(),
+    message: string(),
+    details: array(
+      object({
+        path: array(union([string(), number()])),
+        message: string(),
+      }),
+    ).optional(),
+    requestId: string(),
   }),
 });
-export type ErrorBody = z.infer<typeof errorBody>;
+export type ErrorBody = output<typeof errorBody>;
 
 /** The body of every success response: `{ data }`. */
-export const successBody = <Data extends z.ZodType>(data: Data) => z.object({ data });
+export const successBody = <Data extends ZodType>(data: Data) => object({ data });
 
 /** Query of a cursor-paginated list. */
-export const cursorQuery = z.object({
-  cursor: z.string().min(1).max(512).optional(),
-  limit: z.coerce.number().int().min(1).max(100).default(20),
+export const cursorQuery = object({
+  cursor: string().min(1).max(512).optional(),
+  limit: coerce.number().int().min(1).max(100).default(20),
 });
 
 /** One page of a cursor-paginated list; `nextCursor` is null on the last page. */
-export const cursorPage = <Item extends z.ZodType>(item: Item) =>
-  z.object({ items: z.array(item), nextCursor: z.string().nullable() });
+export const cursorPage = <Item extends ZodType>(item: Item) =>
+  object({ items: array(item), nextCursor: string().nullable() });

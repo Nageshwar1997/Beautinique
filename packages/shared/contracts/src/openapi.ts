@@ -1,4 +1,5 @@
-import * as z from 'zod';
+import type { ZodObject, ZodType } from '@beautinique/shared-zod';
+import { toJSONSchema } from '@beautinique/shared-zod';
 
 import { errorBody } from './http';
 import { HEADERS } from './platform';
@@ -7,12 +8,12 @@ import type { RouteDefinition } from './routes';
 type JsonSchema = Record<string, unknown>;
 
 /** JSON Schema (draft 2020-12, as OpenAPI 3.1 uses) of a zod schema, without the $schema line. */
-function jsonSchema(schema: z.ZodType, io: 'input' | 'output'): JsonSchema {
-  const { $schema: _ignored, ...rest } = z.toJSONSchema(schema, { io, unrepresentable: 'throw' });
+function jsonSchema(schema: ZodType, io: 'input' | 'output'): JsonSchema {
+  const { $schema: _ignored, ...rest } = toJSONSchema(schema, { io, unrepresentable: 'throw' });
   return rest;
 }
 
-function parameters(schema: z.ZodObject | undefined, location: 'path' | 'query') {
+function parameters(schema: ZodObject | undefined, location: 'path' | 'query') {
   if (!schema) return [];
   const object = jsonSchema(schema, 'input');
   const properties = (object.properties ?? {}) as Record<string, JsonSchema>;

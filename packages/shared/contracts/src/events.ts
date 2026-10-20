@@ -1,5 +1,20 @@
-import { isoDateTime, uuidv7 } from '@beautinique/shared-zod';
-import * as z from 'zod';
+import type {
+  output,
+  ZodLiteral,
+  ZodNullable,
+  ZodObject,
+  ZodString,
+  ZodType,
+} from '@beautinique/shared-zod';
+import {
+  array,
+  enum as zodEnum,
+  isoDateTimeZod,
+  literal,
+  object,
+  string,
+  uuidv7Zod,
+} from '@beautinique/shared-zod';
 
 import { type Deployable, DEPLOYABLES, SCOPE_TYPES } from './platform';
 
@@ -7,21 +22,21 @@ import { type Deployable, DEPLOYABLES, SCOPE_TYPES } from './platform';
 const EVENT_TYPE = /^[a-z][a-zA-Z0-9]*\.[a-z][a-zA-Z0-9]*\.[a-z][a-zA-Z0-9]*$/;
 
 /** Who caused an event. */
-export const eventActor = z.object({
-  type: z.enum(['user', 'system', 'partner']),
-  id: z.string().min(1),
+export const eventActor = object({
+  type: zodEnum(['user', 'system', 'partner']),
+  id: string().min(1),
 });
 
 /** The scope an event belongs to (for routing reviews and filtering read models). */
-export const eventScope = z.object({
-  type: z.enum(SCOPE_TYPES),
-  ids: z.array(z.string().min(1)),
+export const eventScope = object({
+  type: zodEnum(SCOPE_TYPES),
+  ids: array(string().min(1)),
 });
 
 export interface EventDefinition<
   Type extends string = string,
   Version extends number = number,
-  Data extends z.ZodType = z.ZodType,
+  Data extends ZodType = ZodType,
 > {
   type: Type;
   version: Version;
@@ -29,17 +44,17 @@ export interface EventDefinition<
   description: string;
   data: Data;
   /** The whole envelope (ARCHITECTURE §5.2), validated by producer and consumer alike. */
-  envelope: z.ZodObject<{
-    eventId: typeof uuidv7;
-    type: z.ZodLiteral<Type>;
-    version: z.ZodLiteral<Version>;
-    occurredAt: typeof isoDateTime;
-    producer: z.ZodLiteral<Deployable>;
-    aggregate: z.ZodObject<{ type: z.ZodString; id: z.ZodString }>;
+  envelope: ZodObject<{
+    eventId: typeof uuidv7Zod;
+    type: ZodLiteral<Type>;
+    version: ZodLiteral<Version>;
+    occurredAt: typeof isoDateTimeZod;
+    producer: ZodLiteral<Deployable>;
+    aggregate: ZodObject<{ type: ZodString; id: ZodString }>;
     actor: typeof eventActor;
-    correlationId: z.ZodString;
-    causationId: z.ZodNullable<z.ZodString>;
-    scope: z.ZodNullable<typeof eventScope>;
+    correlationId: ZodString;
+    causationId: ZodNullable<ZodString>;
+    scope: ZodNullable<typeof eventScope>;
     data: Data;
   }>;
 }
@@ -51,7 +66,7 @@ export interface EventDefinition<
 export function defineEvent<
   const Type extends string,
   const Version extends number,
-  Data extends z.ZodType,
+  Data extends ZodType,
 >(definition: {
   type: Type;
   version: Version;
@@ -72,16 +87,16 @@ export function defineEvent<
   if (description.trim() === '') {
     throw new Error(`Event "${type}" needs a description`);
   }
-  const envelope = z.object({
-    eventId: uuidv7,
-    type: z.literal(type),
-    version: z.literal(version),
-    occurredAt: isoDateTime,
-    producer: z.literal(producer),
-    aggregate: z.object({ type: z.string().min(1), id: z.string().min(1) }),
+  const envelope = object({
+    eventId: uuidv7Zod,
+    type: literal(type),
+    version: literal(version),
+    occurredAt: isoDateTimeZod,
+    producer: literal(producer),
+    aggregate: object({ type: string().min(1), id: string().min(1) }),
     actor: eventActor,
-    correlationId: z.string().min(1),
-    causationId: z.string().min(1).nullable(),
+    correlationId: string().min(1),
+    causationId: string().min(1).nullable(),
     scope: eventScope.nullable(),
     data,
   });
@@ -89,7 +104,7 @@ export function defineEvent<
 }
 
 /** The full event envelope type of a definition. */
-export type EventEnvelope<Definition extends EventDefinition> = z.output<Definition['envelope']>;
+export type EventEnvelope<Definition extends EventDefinition> = output<Definition['envelope']>;
 
 /**
  * All events of the platform by `type@vN`. Duplicates throw, and so does a type whose versions do
