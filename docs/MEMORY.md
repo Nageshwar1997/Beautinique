@@ -24,10 +24,12 @@
 | 2026-10-19 | Ola Maps: 4 accounts × 3 domains, har app ka key | Ek account me 3 hi domains | ARCH §10 |
 | 2026-10-19 | `Beautinique` monorepo public | Free unlimited CI, portfolio | ARCH §13 |
 | 2026-10-19 | Master ke doosre roles alag staff account pe | Master pe koi approval bypass nahi | ARCH §2 |
+| 2026-10-19 | Packages naye bante hain `packages/<shared\|frontend\|backend>/<name>` me; `BQ-Packages` sirf reference | Saaf shuruaat, har package ka side (shared/frontend/backend) naam se dikhe | TASKS T0.1 |
 | 2026-10-20 | Apps sirf English me | Owner ka faisla | PRD §2 |
 | 2026-10-20 | Packages ka apna CLI: create, publish, republish, login, logout (Changesets nahi) | Category ke hisaab se selection, sabka ek bump ya alag-alag | [packages/README.md](packages/README.md) |
 | 2026-10-20 | Publish laptop se (2FA) aur GitHub Actions se (provenance); release ke baad commit + tags, push khud | Owner ka faisla | [packages/README.md](packages/README.md) |
 | 2026-10-20 | Naye TypeScript packages sirf ESM, tsdown se build; TypeScript 6.0 (typescript-eslint abhi 7 support nahi karta) | Node 24 aur Vite ke liye kaafi, kam files | [packages/README.md](packages/README.md) |
+| 2026-10-20 | Packages sirf `release` branch se publish | Wahi branch jo apps live karti hai: npm pe sirf tested code | ARCH §13 |
 
 ## 2. Pichhle kaam se seekhe sabak
 
