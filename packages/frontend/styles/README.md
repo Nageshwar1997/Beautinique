@@ -57,6 +57,22 @@ export default {
 
 Plugin options: `preload` = `['sans']` (default) ya `['sans', 'display']` (jis app ki pehli screen pe `font-display` heading ho). Plugin koi inline script nahi lagata, isliye CSP me kuch allow nahi karna. Multi-page build me preload sirf un pages pe lagta hai jinki CSS ye fonts use karti hai. `experimental.renderBuiltUrl` (CDN) ka URL bhi wahi lagta hai jo CSS me hai.
 
+**Server-rendered app (React Router framework mode, jaise customer):** wahan `index.html` nahi hota, isliye plugin kaam nahi karta. `app/root.tsx` ke `links` me fonts aur CSS `?url` se do; Vite inhe wahi URL deta hai jo CSS use karti hai:
+
+```tsx
+import displayFont from '@beautinique/frontend-styles/fonts/fraunces-latin.woff2?url';
+import sansFont from '@beautinique/frontend-styles/fonts/plus-jakarta-sans-latin.woff2?url';
+import stylesheet from './app.css?url';
+
+export const links: Route.LinksFunction = () => [
+  { rel: 'preload', href: sansFont, as: 'font', type: 'font/woff2', crossOrigin: 'anonymous' },
+  { rel: 'preload', href: displayFont, as: 'font', type: 'font/woff2', crossOrigin: 'anonymous' },
+  { rel: 'stylesheet', href: stylesheet },
+];
+```
+
+CSS ko `import './app.css'` (side-effect) se mat lo: dev me React Router pehle `critical.css` link deta hai aur hydration ke baad Vite usi CSS ko `<style>` se badal deta hai. Naye `@font-face` rules ke saath fonts dobara load hote hain, aur refresh pe text ek pal fallback font me dikh ke "flicker" karta hai.
+
 ### Fonts badalna
 
 Fonts `scripts/fonts.mjs` me config hain (families, files, axes, subsets, fallbacks). Wahan badlo, phir:

@@ -405,11 +405,25 @@ export default {
 } satisfies Config;
 `;
 
-const ssrRoot = (spec: AppSpec) => `import './app.css';
-
+const ssrRoot = (
+  spec: AppSpec,
+) => `import displayFont from '@beautinique/frontend-styles/fonts/fraunces-latin.woff2?url';
+import sansFont from '@beautinique/frontend-styles/fonts/plus-jakarta-sans-latin.woff2?url';
 import { isRouteErrorResponse, Links, Meta, Outlet, Scripts, ScrollRestoration } from 'react-router';
 
 import type { Route } from './+types/root';
+import stylesheet from './app.css?url';
+
+/**
+ * The stylesheet as a <link> (in development too, so it is never swapped for a <style> after hydration,
+ * which would load the fonts again and flash the fallback font), and the brand fonts preloaded so the
+ * first paint already uses them. Vite gives these files the same URLs the stylesheet uses.
+ */
+export const links: Route.LinksFunction = () => [
+  { rel: 'preload', href: sansFont, as: 'font', type: 'font/woff2', crossOrigin: 'anonymous' },
+  { rel: 'preload', href: displayFont, as: 'font', type: 'font/woff2', crossOrigin: 'anonymous' },
+  { rel: 'stylesheet', href: stylesheet },
+];
 
 export function Layout({ children }: { children: React.ReactNode }) {
   return (
