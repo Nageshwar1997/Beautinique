@@ -54,7 +54,7 @@ function setup(packages: FixturePackage[]) {
   userconfig = join(repo.root, '..', `${repo.root.split(/[\\/]/).pop() ?? 'x'}.npmrc`);
   const host = registry.url.replace(/^http:/, '');
   writeFileSync(userconfig, `registry=${registry.url}\n${host}:_authToken=${registry.token}\n`);
-  git('init', '-q', '-b', 'main');
+  git('init', '-q', '-b', 'release');
   git('config', 'user.name', 'Test');
   git('config', 'user.email', 'test@example.test');
   git('config', 'commit.gpgsign', 'false');
@@ -270,12 +270,12 @@ describe('package CLI end to end', () => {
     expect(git('status', '--porcelain')).toBe('');
   });
 
-  it('releases only from main', async () => {
+  it('releases only from the release branch', async () => {
     setup(family().slice(0, 1));
     git('switch', '-q', '-c', 'feature');
     const res = await cli('publish', '--all', '--yes');
     expect(res.code).toBe(1);
-    expect(res.out).toContain('You are on "feature"; releases are made from "main" only.');
+    expect(res.out).toContain('You are on "feature"; releases are made from "release" only.');
     expect(registry.published).toEqual([]);
   });
 

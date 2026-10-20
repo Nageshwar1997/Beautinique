@@ -86,8 +86,11 @@ export async function lastTag(ctx: Context, packageName: string): Promise<string
   return newest === null ? null : `${prefix}${newest}`;
 }
 
-/** The release branch: releases are made from it only (never a feature branch or a detached HEAD). */
-export const RELEASE_BRANCH = 'main';
+/**
+ * The release branch: releases are made from it only (never a feature branch or a detached HEAD). It is
+ * the same branch that deploys the apps (ARCHITECTURE §13), so only tested code reaches npm.
+ */
+export const RELEASE_BRANCH = 'release';
 
 export async function requireReleaseBranch(ctx: Context): Promise<void> {
   const branch = await currentBranch(ctx);

@@ -21,7 +21,7 @@ Other options:
   --yes, -y            do not ask; selection and --bump flags are then required
   --help, -h           this help
 
-Releases are made from the main branch, with a clean working tree and an npm login (npm run login).`;
+Releases are made from the release branch, with a clean working tree and an npm login (npm run login).`;
 
 await main(async () => {
   const flags = parseCommonFlags(process.argv.slice(2));

@@ -53,7 +53,7 @@ Kisi package ka naya version agar kisi published dependent ki range tod de, to C
 
 ### Har release me kya hota hai
 
-1. **Pehle jaanch, koi sawal se pehle:** working tree clean, branch `main` (release sirf main se), git user.name/email, npm login (offline aur session expire alag bataye jate hain).
+1. **Pehle jaanch, koi sawal se pehle:** working tree clean, branch `release` (packages sirf `release` branch se jate hain, wahi branch jo apps live karti hai), git user.name/email, npm login (offline aur session expire alag bataye jate hain).
 2. **Plan:** dependency order, versions, range changes. Local version npm se peeche ho (`behind`) ya naya version npm pe pehle se ho to yahin ruk jata hai (pehle latest code pull karo). Har published package npm jaisa resolve karke install ho sakega (private ya missing dependency ho to yahin ruk jata hai, kuch likha nahi jata).
 3. **Confirm**, default **No** (Enter dabane se publish nahi hota).
 4. package.json likhna + `npm install`.
@@ -68,12 +68,12 @@ Kisi package ka naya version agar kisi published dependent ki range tod de, to C
 ### Laptop ya GitHub Actions
 
 - **Laptop** (`--target laptop`): abhi publish, har package pe 2FA.
-- **GitHub Actions** (`--target github`): laptop pe versions, changelog, commit aur tags banta hai, aur har package ke liye npm trusted publishing set hota hai (`npm trust github`, 2FA). Phir `git push --follow-tags` aur GitHub pe **Actions → Release → Run workflow** (48 ghante ke andar, warna npm naya trust config hata deta hai). Workflow sirf `main` pe chalta hai aur do jobs me bata hai: **build** job (`npm ci`, `npm run publish -- --ci`: har waiting version ka tag isi commit pe hona chahiye, saare checks, phir tarballs + `release.json` artifact) aur **publish** job (environment `npm`, OIDC `id-token`; kuch install nahi karta, koi package code nahi chalata; `.github/scripts/publish-tarballs.mjs` tarballs ko dependency order me publish karta hai, npm pe pehle se wale skip). Provenance (npm pe verified badge) npm khud lagata hai, kisi npm token ke bina. Fail ho to workflow dobara chalao.
+- **GitHub Actions** (`--target github`): laptop pe versions, changelog, commit aur tags banta hai, aur har package ke liye npm trusted publishing set hota hai (`npm trust github`, 2FA). Phir `git push --follow-tags` aur GitHub pe **Actions → Release → Run workflow** (48 ghante ke andar, warna npm naya trust config hata deta hai). Workflow sirf `release` branch pe chalta hai aur do jobs me bata hai: **build** job (`npm ci`, `npm run publish -- --ci`: har waiting version ka tag isi commit pe hona chahiye, saare checks, phir tarballs + `release.json` artifact) aur **publish** job (environment `npm`, OIDC `id-token`; kuch install nahi karta, koi package code nahi chalata; `.github/scripts/publish-tarballs.mjs` tarballs ko dependency order me publish karta hai, npm pe pehle se wale skip). Provenance (npm pe verified badge) npm khud lagata hai, kisi npm token ke bina. Fail ho to workflow dobara chalao.
 - Bilkul naya package pehli baar **laptop se** hi publish hota hai (npm kisi package pe trust tabhi lagata hai jab wo exist kare).
 
 ## 5. CI
 
-`.github/workflows/ci.yml` main pe push aur har PR pe: `npm ci`, `npm run build`, format check, lint, typecheck, tests (CLI ke 70+ tests, fake npm registry ke saath asli publish aur GitHub release flows bhi), `npm run verify -- --all`, `npm audit`. npm 12.2.0 pin hai (Node 24 ke saath npm 11 aata hai).
+`.github/workflows/ci.yml` `main`, `prerelease` aur `release` pe push aur har PR pe: `npm ci`, `npm run build`, format check, lint, typecheck, tests (CLI ke 70+ tests, fake npm registry ke saath asli publish aur GitHub release flows bhi), `npm run verify -- --all`, `npm audit`. npm 12.2.0 pin hai (Node 24 ke saath npm 11 aata hai).
 
 ## 6. CLI ka code
 
@@ -86,4 +86,4 @@ Kisi package ka naya version agar kisi published dependent ki range tod de, to C
 | Version | Date | Badlav |
 |---|---|---|
 | v1.0 | 2026-10-20 | Pehla version: create, publish, republish, login, logout, status, verify, build; GitHub release workflow. |
-| v1.1 | 2026-10-20 | Review ke baad: release sirf main se, jaanch sawalon se pehle, behind/taken versions pe rok, peer/re-export/prerelease cascade, npm jaisa install check, Ctrl+C aur login-expire pe files wapas, dry run naye versions ke saath, release workflow build + publish jobs me (tag check), CI me build step, sab commands pe `--help`, changelog me markdown escape. |
+| v1.1 | 2026-10-20 | Review ke baad: release sirf `release` branch se, jaanch sawalon se pehle, behind/taken versions pe rok, peer/re-export/prerelease cascade, npm jaisa install check, Ctrl+C aur login-expire pe files wapas, dry run naye versions ke saath, release workflow build + publish jobs me (tag check), CI me build step, sab commands pe `--help`, changelog me markdown escape. |

@@ -32,7 +32,7 @@ npm run status
 | `npm run build`                                  | build every package, dependencies first                      |
 | `npm run lint` / `typecheck` / `test` / `format` | code quality                                                 |
 
-Releases are made from `main` only. Every command explains itself with `-- --help`.
+Packages are released from the `release` branch only. Every command explains itself with `-- --help`.
 
 ## License
 

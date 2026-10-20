@@ -19,7 +19,7 @@ Other options:
   --pack-dir    with --ci: where the tarballs and release.json go (default release-tarballs)
   --help, -h    this help
 
-Releases are made from the main branch, with a clean working tree and an npm login (npm run login).`;
+Releases are made from the release branch, with a clean working tree and an npm login (npm run login).`;
 
 await main(async () => {
   const flags = parseCommonFlags(process.argv.slice(2));

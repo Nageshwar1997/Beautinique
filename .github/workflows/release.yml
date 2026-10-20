@@ -1,9 +1,9 @@
 # Publishes every package version that is in the repo but not on npm yet, with provenance.
 #
-# Prepare it on the laptop: npm run republish -- --target github (versions, changelogs, commit, tags;
-# it also sets up trusted publishing), then git push --follow-tags, then run this workflow from the
-# Actions tab on main. Brand-new packages are published once from the laptop (npm run publish); npm
-# trusts a package only after it exists.
+# Prepare it on the laptop, on the release branch: npm run republish -- --target github (versions,
+# changelogs, commit, tags; it also sets up trusted publishing), then git push --follow-tags, then run
+# this workflow from the Actions tab with "Use workflow from: release". Brand-new packages are published
+# once from the laptop (npm run publish); npm trusts a package only after it exists.
 #
 # Two jobs, so the job that can publish never runs package code:
 # - build: installs, checks and packs (no publish rights). Every version must be tagged on this commit.
@@ -21,7 +21,7 @@ concurrency:
 
 jobs:
   build:
-    if: github.ref == 'refs/heads/main'
+    if: github.ref == 'refs/heads/release'
     runs-on: ubuntu-latest
     timeout-minutes: 30
     permissions:
@@ -63,7 +63,7 @@ jobs:
 
   publish:
     needs: build
-    if: github.ref == 'refs/heads/main' && needs.build.outputs.ready == 'true'
+    if: github.ref == 'refs/heads/release' && needs.build.outputs.ready == 'true'
     runs-on: ubuntu-latest
     timeout-minutes: 15
     # Must match the environment in each package's npm trusted publishing settings.
