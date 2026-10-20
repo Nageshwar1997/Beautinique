@@ -186,17 +186,17 @@
 
 ## Change log
 
-| Version | Date | Badlav |
-|---|---|---|
-| v1.0 | 2026-10-19 | Pehla version: owner ke kaam, docs, Phase 0–11 (milestones aur Docker lessons ke saath), aur deploy pe verify list. |
-| v1.1 | 2026-10-20 | Apps sirf English: T5.2, T6.1 aur T6.2 badle. |
-| v1.2 | 2026-10-20 | T0.5 aur T0.6 ka pehla hissa ho gaya (workspaces, package CLI, ci.yml, release.yml). |
-| v1.3 | 2026-10-20 | T0.1: packages naye bante hain (`BQ-Packages` sirf reference). T0.7: packages bhi `release` branch se. |
-| v1.4 | 2026-10-20 | T0.7: `prerelease` aur `release` branches ban gayi; protection baaki. |
-| v1.5 | 2026-10-20 | T0.7: `main` default branch wala flow; ruleset teeno branches pe. |
-| v1.6 | 2026-10-20 | T0.7 done: rulesets, tag ruleset aur `npm` environment lag gaye. |
-| v1.7 | 2026-10-20 | T0.1: `frontend-styles` poora (animations, utilities, rich text, tones, charts, high contrast, print). |
-| v1.8 | 2026-10-20 | T0.1: packages ki list aur order (neev, backend, frontend, feature), public/private ke saath. |
-| v1.9 | 2026-10-20 | T0.1 neev ke 4 packages bane: shared-zod, shared-utils, shared-contracts, shared-authz. |
-| v1.10 | 2026-10-20 | T0.1: saare packages public; neev ke baad packages app ki zaroorat ke saath. |
-| v1.11 | 2026-10-20 | `backend-server-kit` bana (T1.1 ka zyada hissa); app aur backend generators (T0.2, T0.3, T0.9, T2.1, T2.5 ke notes). |
+| Version | Date       | Badlav                                                                                                               |
+| ------- | ---------- | -------------------------------------------------------------------------------------------------------------------- |
+| v1.0    | 2026-10-19 | Pehla version: owner ke kaam, docs, Phase 0–11 (milestones aur Docker lessons ke saath), aur deploy pe verify list.  |
+| v1.1    | 2026-10-20 | Apps sirf English: T5.2, T6.1 aur T6.2 badle.                                                                        |
+| v1.2    | 2026-10-20 | T0.5 aur T0.6 ka pehla hissa ho gaya (workspaces, package CLI, ci.yml, release.yml).                                 |
+| v1.3    | 2026-10-20 | T0.1: packages naye bante hain (`BQ-Packages` sirf reference). T0.7: packages bhi `release` branch se.               |
+| v1.4    | 2026-10-20 | T0.7: `prerelease` aur `release` branches ban gayi; protection baaki.                                                |
+| v1.5    | 2026-10-20 | T0.7: `main` default branch wala flow; ruleset teeno branches pe.                                                    |
+| v1.6    | 2026-10-20 | T0.7 done: rulesets, tag ruleset aur `npm` environment lag gaye.                                                     |
+| v1.7    | 2026-10-20 | T0.1: `frontend-styles` poora (animations, utilities, rich text, tones, charts, high contrast, print).               |
+| v1.8    | 2026-10-20 | T0.1: packages ki list aur order (neev, backend, frontend, feature), public/private ke saath.                        |
+| v1.9    | 2026-10-20 | T0.1 neev ke 4 packages bane: shared-zod, shared-utils, shared-contracts, shared-authz.                              |
+| v1.10   | 2026-10-20 | T0.1: saare packages public; neev ke baad packages app ki zaroorat ke saath.                                         |
+| v1.11   | 2026-10-20 | `backend-server-kit` bana (T1.1 ka zyada hissa); app aur backend generators (T0.2, T0.3, T0.9, T2.1, T2.5 ke notes). |

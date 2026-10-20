@@ -79,12 +79,12 @@
 
 ## 7. Purane repos (sab clean, GitHub ke saath sync, 2026-10-20)
 
-| Repo | Kya hai | Ab kya role |
-|---|---|---|
-| `BQ-Client`, `BQ-Admin`, `BQ-Seller`, `BQ-Master` | Purane apps (React + Vite) | T0.2 me `frontend/` me aayenge; tab tak reference |
-| `BQ-Packages` (branch `feat/components-package`) | Purane `@beautinique/*` packages | Sirf reference; naye packages monorepo me |
-| `BQ-Microservices`, `Beautinique-Gateway` | Purana backend (Express + Mongoose + BullMQ) | T0.3 me `backend/` me port; naya design ARCHITECTURE ke hisaab se |
-| `Beautinique-Docs` | Purani docs repo | Istemal nahi hota; docs ab `Beautinique/docs` me (owner ke laptop se folder hata diya gaya) |
+| Repo                                              | Kya hai                                      | Ab kya role                                                                                 |
+| ------------------------------------------------- | -------------------------------------------- | ------------------------------------------------------------------------------------------- |
+| `BQ-Client`, `BQ-Admin`, `BQ-Seller`, `BQ-Master` | Purane apps (React + Vite)                   | T0.2 me `frontend/` me aayenge; tab tak reference                                           |
+| `BQ-Packages` (branch `feat/components-package`)  | Purane `@beautinique/*` packages             | Sirf reference; naye packages monorepo me                                                   |
+| `BQ-Microservices`, `Beautinique-Gateway`         | Purana backend (Express + Mongoose + BullMQ) | T0.3 me `backend/` me port; naya design ARCHITECTURE ke hisaab se                           |
+| `Beautinique-Docs`                                | Purani docs repo                             | Istemal nahi hota; docs ab `Beautinique/docs` me (owner ke laptop se folder hata diya gaya) |
 
 ## 8. Kaam rokte waqt (dono ke liye)
 
@@ -95,13 +95,13 @@
 
 ## Change log
 
-| Version | Date | Badlav |
-|---|---|---|
-| v1.0 | 2026-10-20 | Pehla handoff (owner → doosra developer): setup, halat, agla kaam, khule sawal, traps, purane repos. |
-| v1.1 | 2026-10-20 | Branches `prerelease` aur `release` ban gayi; T0.7 me sirf protection baaki. |
-| v1.2 | 2026-10-20 | CI fix ke baad teeno branches green; `main` default branch wala git flow (§2) aur T0.7 ki settings list (§4). |
-| v1.3 | 2026-10-20 | T0.7 done (rulesets, tag ruleset, `npm` environment). |
-| v1.4 | 2026-10-20 | Styles package poora (§3, §4). |
-| v1.5 | 2026-10-20 | Neev ke 4 shared packages bane (§3, §4). |
-| v1.6 | 2026-10-20 | Saare packages public; ab main code, packages zaroorat ke saath. |
-| v1.7 | 2026-10-20 | `backend-server-kit` aur app/backend generators bane (§3, §4); 3 naye traps (§6). |
+| Version | Date       | Badlav                                                                                                        |
+| ------- | ---------- | ------------------------------------------------------------------------------------------------------------- |
+| v1.0    | 2026-10-20 | Pehla handoff (owner → doosra developer): setup, halat, agla kaam, khule sawal, traps, purane repos.          |
+| v1.1    | 2026-10-20 | Branches `prerelease` aur `release` ban gayi; T0.7 me sirf protection baaki.                                  |
+| v1.2    | 2026-10-20 | CI fix ke baad teeno branches green; `main` default branch wala git flow (§2) aur T0.7 ki settings list (§4). |
+| v1.3    | 2026-10-20 | T0.7 done (rulesets, tag ruleset, `npm` environment).                                                         |
+| v1.4    | 2026-10-20 | Styles package poora (§3, §4).                                                                                |
+| v1.5    | 2026-10-20 | Neev ke 4 shared packages bane (§3, §4).                                                                      |
+| v1.6    | 2026-10-20 | Saare packages public; ab main code, packages zaroorat ke saath.                                              |
+| v1.7    | 2026-10-20 | `backend-server-kit` aur app/backend generators bane (§3, §4); 3 naye traps (§6).                             |

@@ -26,14 +26,14 @@ Theme `<html theme="light">` ya `theme="dark"` attribute se badalti hai. Default
 
 Brand: **rose** rgb(214, 51, 108), deep **plum** rgb(92, 26, 70), **champagne gold** accent rgb(196, 154, 82), warm neutrals (ivory se ink tak). Har colour RGB channels me hai (`rgba(var(--brand-rgb), 0.12)` chalta hai). Poori list aur use package README me.
 
-| Token                                                      | Kaam                                                     |
-| ---------------------------------------------------------- | -------------------------------------------------------- |
-| `background`, `surface`, `surface-muted`, `surface-inverse` | Page, card, section, ulta (dark strip)                   |
-| `foreground` (+ `-muted`, `-subtle`, `-inverse`)           | Padhne wala text                                         |
-| `border`, `border-strong`                                  | Halki lines; inputs aur boundaries                       |
-| `brand`, `secondary`, `accent`                             | Rose, plum, gold (har ek ke saath `-hover`, `-foreground`, `-subtle`, `-subtle-foreground`) |
-| `success`, `warning`, `error`, `info`, `neutral`           | Status (same set)                                        |
-| `brand-text`, `price-discount`, `rating`, `focus-ring`     | Link/brand text, discount, stars, keyboard focus         |
+| Token                                                       | Kaam                                                                                        |
+| ----------------------------------------------------------- | ------------------------------------------------------------------------------------------- |
+| `background`, `surface`, `surface-muted`, `surface-inverse` | Page, card, section, ulta (dark strip)                                                      |
+| `foreground` (+ `-muted`, `-subtle`, `-inverse`)            | Padhne wala text                                                                            |
+| `border`, `border-strong`                                   | Halki lines; inputs aur boundaries                                                          |
+| `brand`, `secondary`, `accent`                              | Rose, plum, gold (har ek ke saath `-hover`, `-foreground`, `-subtle`, `-subtle-foreground`) |
+| `success`, `warning`, `error`, `info`, `neutral`            | Status (same set)                                                                           |
+| `brand-text`, `price-discount`, `rating`, `focus-ring`      | Link/brand text, discount, stars, keyboard focus                                            |
 
 - **Contrast niyam:** padhne wala text sirf `foreground*`, `brand-text`, `price-discount` ya kisi tone ke `-foreground`/`-subtle-foreground` me. Palette script har jodi ka WCAG contrast har theme me check karta hai (abhi 310/310); naya colour bhi wahi se.
 - `teal` aur `violet` scales sirf charts aur category tags ke liye.
@@ -165,4 +165,4 @@ Har screen ye states dikhati hai:
 | v1.0    | 2026-10-19 | Pehla version: principles, tokens (aaj ke `styles` package se), typography, components, states, commerce UI rules, accessibility, text aur formats, har app ka look, media aur icons. |
 | v1.1    | 2026-10-19 | Typography: Metropolis ki jagah Plus Jakarta Sans (body) + Fraunces (headings).                                                                                                       |
 | v1.2    | 2026-10-20 | §9 Text aur formats: apps sirf English me.                                                                                                                                            |
-| v1.3    | 2026-10-20 | §3 naye `styles` package ke tokens se: Rose + Plum colours, tones, order status, charts, high contrast, print, gradients, layout; §6, §8, §11 me package ki utilities. |
+| v1.3    | 2026-10-20 | §3 naye `styles` package ke tokens se: Rose + Plum colours, tones, order status, charts, high contrast, print, gradients, layout; §6, §8, §11 me package ki utilities.                |

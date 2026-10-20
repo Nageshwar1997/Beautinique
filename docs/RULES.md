@@ -100,10 +100,10 @@
 
 ## Change log
 
-| Version | Date | Badlav |
-|---|---|---|
-| v1.0 | 2026-10-19 | Pehla version: kaam, git, code, backend, frontend, testing, security, docs aur AI assistant ke niyam. |
-| v1.1 | 2026-10-20 | Apps sirf English; INR aur dates `en-IN`. |
-| v1.2 | 2026-10-20 | Icons rule: `workspace:*` ki jagah npm workspaces ka local link. |
-| v1.3 | 2026-10-20 | §2: `main` default branch; flow `main` → `prerelease` → `release`; package release ka apwaad aur back-merge; Renovate `main` pe. |
-| v1.4 | 2026-10-20 | §3.2: zod sirf shared-zod se, named imports, schemas ke naam `...Zod`. |
+| Version | Date       | Badlav                                                                                                                           |
+| ------- | ---------- | -------------------------------------------------------------------------------------------------------------------------------- |
+| v1.0    | 2026-10-19 | Pehla version: kaam, git, code, backend, frontend, testing, security, docs aur AI assistant ke niyam.                            |
+| v1.1    | 2026-10-20 | Apps sirf English; INR aur dates `en-IN`.                                                                                        |
+| v1.2    | 2026-10-20 | Icons rule: `workspace:*` ki jagah npm workspaces ka local link.                                                                 |
+| v1.3    | 2026-10-20 | §2: `main` default branch; flow `main` → `prerelease` → `release`; package release ka apwaad aur back-merge; Renovate `main` pe. |
+| v1.4    | 2026-10-20 | §3.2: zod sirf shared-zod se, named imports, schemas ke naam `...Zod`.                                                           |

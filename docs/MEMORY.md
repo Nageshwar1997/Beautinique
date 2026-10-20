@@ -4,39 +4,39 @@
 
 ## 1. Decision log
 
-| Date | Decision | Kyun | Detail |
-|---|---|---|---|
-| 2026-10-18 | Sirf beauty aur personal care | Focus, aur try-on pehle se bana hai | PRD §2 |
-| 2026-10-18 | Beautinique (house brand) + doosre brand sellers | Hybrid marketplace | PRD §2 |
-| 2026-10-18 | Sirf brand owners aur authorised distributors bechenge | Nakli products se bachaav | PRD §2 |
-| 2026-10-18 | Saara stock Beautinique warehouse me | Batch aur expiry ek jagah check | PRD §2 |
-| 2026-10-18 | Delivery sirf apne gig partners (apni gaadi); cash nahi, UPI on delivery | Control aur safety | PRD §2 |
-| 2026-10-18 | 11 apps, har main role ka ek (Super Admin alag); 79 roles, sab launch pe | Owner ka faisla; "baad me bhool sakte hain" | PRD §3–4 |
-| 2026-10-18 | Launch Pune district (poora), phir district-by-district; naya area sirf config se, team ready hone pe | Chhote se shuru, aasaan expansion | PRD §2, §7.2 |
-| 2026-10-18 | Education + portfolio project, par production-grade; legal cheezein dummy | Bechna nahi, seekhna aur dikhana hai | PRD §1, §7.1 |
-| 2026-10-18 | Docs Hinglish me | Owner ke liye padhne me aasaan | RULES §8 |
-| 2026-10-19 | Gateway + Identity, Payments, Notify microservices + Core modular monolith | Security, paisa aur providers alag; transactions wale kaam ek jagah | ARCH §2 |
-| 2026-10-19 | ₹0 budget: Render free (bundle mode), Vercel Hobby, Atlas M0, Render Key Value; domain nahi | Education project | ARCH §11 |
-| 2026-10-19 | Laptop pe Docker split mode; dev me local Redis | Microservices seekhna | ARCH §12 |
-| 2026-10-19 | Branches: `prerelease` (laptop) → `release` (Render + Vercel) | Live pe sirf tested code | ARCH §13 |
-| 2026-10-19 | Files StoragePort ke peeche (Cloudinary aaj, S3 kal), unused cleanup | Provider badalna aasaan | ARCH §6.7 |
-| 2026-10-19 | Base price sabke liye ek; farak sirf label se | Bharosa, dark pattern se bachaav | ARCH §6.8 |
-| 2026-10-19 | Ola Maps: 4 accounts × 3 domains, har app ka key | Ek account me 3 hi domains | ARCH §10 |
-| 2026-10-19 | `Beautinique` monorepo public | Free unlimited CI, portfolio | ARCH §13 |
-| 2026-10-19 | Master ke doosre roles alag staff account pe | Master pe koi approval bypass nahi | ARCH §2 |
-| 2026-10-19 | Packages naye bante hain `packages/<shared\|frontend\|backend>/<name>` me; `BQ-Packages` sirf reference | Saaf shuruaat, har package ka side (shared/frontend/backend) naam se dikhe | TASKS T0.1 |
-| 2026-10-20 | Apps sirf English me | Owner ka faisla | PRD §2 |
-| 2026-10-20 | Packages ka apna CLI: create, publish, republish, login, logout (Changesets nahi) | Category ke hisaab se selection, sabka ek bump ya alag-alag | [packages/README.md](packages/README.md) |
-| 2026-10-20 | Publish laptop se (2FA) aur GitHub Actions se (provenance); release ke baad commit + tags, push khud | Owner ka faisla | [packages/README.md](packages/README.md) |
-| 2026-10-20 | Naye TypeScript packages sirf ESM, tsdown se build; TypeScript 6.0 (typescript-eslint abhi 7 support nahi karta) | Node 24 aur Vite ke liye kaafi, kam files | [packages/README.md](packages/README.md) |
-| 2026-10-20 | `main` default branch: feature → PR → `main` → `prerelease` → `release`; release ke baad `release` → `main` back-merge | Owner ka faisla; roz ka kaam default branch pe | ARCH §13, RULES §2 |
-| 2026-10-20 | Saare packages npm pe public | Owner ka faisla; monorepo me apne aap jude rehte hain | TASKS T0.1 |
-| 2026-10-20 | Neev ke baad packages app ki zaroorat ke saath bante hain, pehle se nahi; do apps ki cheez turant package me | Asli zaroorat se API banta hai, andaaze se nahi | TASKS T0.1 |
-| 2026-10-20 | Packages sirf `release` branch se publish | Wahi branch jo apps live karti hai: npm pe sirf tested code | ARCH §13 |
-| 2026-10-20 | Apps aur services npm packages nahi: `frontend/<app>`, `backend/<name>`, simple naam, `private` | Owner ka faisla; ye deploy hote hain, publish nahi | [packages/README.md](packages/README.md) §3.1–3.2 |
-| 2026-10-20 | Ek `npm run create` (Package / Frontend app / Backend app); sirf contracts ke `APPS` aur `DEPLOYABLES` | Owner ka faisla; naya feature Core module, naya deployable nahi | ARCH §3, §4 |
-| 2026-10-20 | Service ka common code `backend-server-kit` me, har service me copy nahi | Ek jagah fix, sab services me | TASKS T1.1 |
-| 2026-10-20 | Backend Node 24 type stripping se (tsx nahi), production `tsdown` `dist/`; bundle internal deployables `127.0.0.1` ke khaali ports pe | Kam tools; bahar se sirf gateway | ARCH §12 |
+| Date       | Decision                                                                                                                              | Kyun                                                                       | Detail                                            |
+| ---------- | ------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------- | ------------------------------------------------- |
+| 2026-10-18 | Sirf beauty aur personal care                                                                                                         | Focus, aur try-on pehle se bana hai                                        | PRD §2                                            |
+| 2026-10-18 | Beautinique (house brand) + doosre brand sellers                                                                                      | Hybrid marketplace                                                         | PRD §2                                            |
+| 2026-10-18 | Sirf brand owners aur authorised distributors bechenge                                                                                | Nakli products se bachaav                                                  | PRD §2                                            |
+| 2026-10-18 | Saara stock Beautinique warehouse me                                                                                                  | Batch aur expiry ek jagah check                                            | PRD §2                                            |
+| 2026-10-18 | Delivery sirf apne gig partners (apni gaadi); cash nahi, UPI on delivery                                                              | Control aur safety                                                         | PRD §2                                            |
+| 2026-10-18 | 11 apps, har main role ka ek (Super Admin alag); 79 roles, sab launch pe                                                              | Owner ka faisla; "baad me bhool sakte hain"                                | PRD §3–4                                          |
+| 2026-10-18 | Launch Pune district (poora), phir district-by-district; naya area sirf config se, team ready hone pe                                 | Chhote se shuru, aasaan expansion                                          | PRD §2, §7.2                                      |
+| 2026-10-18 | Education + portfolio project, par production-grade; legal cheezein dummy                                                             | Bechna nahi, seekhna aur dikhana hai                                       | PRD §1, §7.1                                      |
+| 2026-10-18 | Docs Hinglish me                                                                                                                      | Owner ke liye padhne me aasaan                                             | RULES §8                                          |
+| 2026-10-19 | Gateway + Identity, Payments, Notify microservices + Core modular monolith                                                            | Security, paisa aur providers alag; transactions wale kaam ek jagah        | ARCH §2                                           |
+| 2026-10-19 | ₹0 budget: Render free (bundle mode), Vercel Hobby, Atlas M0, Render Key Value; domain nahi                                           | Education project                                                          | ARCH §11                                          |
+| 2026-10-19 | Laptop pe Docker split mode; dev me local Redis                                                                                       | Microservices seekhna                                                      | ARCH §12                                          |
+| 2026-10-19 | Branches: `prerelease` (laptop) → `release` (Render + Vercel)                                                                         | Live pe sirf tested code                                                   | ARCH §13                                          |
+| 2026-10-19 | Files StoragePort ke peeche (Cloudinary aaj, S3 kal), unused cleanup                                                                  | Provider badalna aasaan                                                    | ARCH §6.7                                         |
+| 2026-10-19 | Base price sabke liye ek; farak sirf label se                                                                                         | Bharosa, dark pattern se bachaav                                           | ARCH §6.8                                         |
+| 2026-10-19 | Ola Maps: 4 accounts × 3 domains, har app ka key                                                                                      | Ek account me 3 hi domains                                                 | ARCH §10                                          |
+| 2026-10-19 | `Beautinique` monorepo public                                                                                                         | Free unlimited CI, portfolio                                               | ARCH §13                                          |
+| 2026-10-19 | Master ke doosre roles alag staff account pe                                                                                          | Master pe koi approval bypass nahi                                         | ARCH §2                                           |
+| 2026-10-19 | Packages naye bante hain `packages/<shared\|frontend\|backend>/<name>` me; `BQ-Packages` sirf reference                               | Saaf shuruaat, har package ka side (shared/frontend/backend) naam se dikhe | TASKS T0.1                                        |
+| 2026-10-20 | Apps sirf English me                                                                                                                  | Owner ka faisla                                                            | PRD §2                                            |
+| 2026-10-20 | Packages ka apna CLI: create, publish, republish, login, logout (Changesets nahi)                                                     | Category ke hisaab se selection, sabka ek bump ya alag-alag                | [packages/README.md](packages/README.md)          |
+| 2026-10-20 | Publish laptop se (2FA) aur GitHub Actions se (provenance); release ke baad commit + tags, push khud                                  | Owner ka faisla                                                            | [packages/README.md](packages/README.md)          |
+| 2026-10-20 | Naye TypeScript packages sirf ESM, tsdown se build; TypeScript 6.0 (typescript-eslint abhi 7 support nahi karta)                      | Node 24 aur Vite ke liye kaafi, kam files                                  | [packages/README.md](packages/README.md)          |
+| 2026-10-20 | `main` default branch: feature → PR → `main` → `prerelease` → `release`; release ke baad `release` → `main` back-merge                | Owner ka faisla; roz ka kaam default branch pe                             | ARCH §13, RULES §2                                |
+| 2026-10-20 | Saare packages npm pe public                                                                                                          | Owner ka faisla; monorepo me apne aap jude rehte hain                      | TASKS T0.1                                        |
+| 2026-10-20 | Neev ke baad packages app ki zaroorat ke saath bante hain, pehle se nahi; do apps ki cheez turant package me                          | Asli zaroorat se API banta hai, andaaze se nahi                            | TASKS T0.1                                        |
+| 2026-10-20 | Packages sirf `release` branch se publish                                                                                             | Wahi branch jo apps live karti hai: npm pe sirf tested code                | ARCH §13                                          |
+| 2026-10-20 | Apps aur services npm packages nahi: `frontend/<app>`, `backend/<name>`, simple naam, `private`                                       | Owner ka faisla; ye deploy hote hain, publish nahi                         | [packages/README.md](packages/README.md) §3.1–3.2 |
+| 2026-10-20 | Ek `npm run create` (Package / Frontend app / Backend app); sirf contracts ke `APPS` aur `DEPLOYABLES`                                | Owner ka faisla; naya feature Core module, naya deployable nahi            | ARCH §3, §4                                       |
+| 2026-10-20 | Service ka common code `backend-server-kit` me, har service me copy nahi                                                              | Ek jagah fix, sab services me                                              | TASKS T1.1                                        |
+| 2026-10-20 | Backend Node 24 type stripping se (tsx nahi), production `tsdown` `dist/`; bundle internal deployables `127.0.0.1` ke khaali ports pe | Kam tools; bahar se sirf gateway                                           | ARCH §12                                          |
 
 ## 2. Pichhle kaam se seekhe sabak
 
@@ -68,38 +68,38 @@
 
 ## 4. Repos aur folders (`C:\Users\nages\Desktop\BQ`)
 
-| Folder | Kya hai |
-|---|---|
-| `Beautinique` | Naya monorepo (public): `backend/`, `frontend/`, `packages/`, `docs/` |
-| `Beautinique/docs` | Ye planning docs (monorepo ke andar; purana `Beautinique-Docs` repo ab khaali hai) |
-| `BQ-Client`, `BQ-Seller`, `BQ-Admin`, `BQ-Master` | Purane frontend repos (migration ke baad archive) |
-| `BQ-Packages` | Purane shared npm packages (`@beautinique/*`) |
-| `BQ-Microservices`, `Beautinique-Gateway` | Purana backend (migration ke baad archive) |
-| `All-ENVs` | Env files. **Private; kabhi public repo me nahi.** |
+| Folder                                            | Kya hai                                                                            |
+| ------------------------------------------------- | ---------------------------------------------------------------------------------- |
+| `Beautinique`                                     | Naya monorepo (public): `backend/`, `frontend/`, `packages/`, `docs/`              |
+| `Beautinique/docs`                                | Ye planning docs (monorepo ke andar; purana `Beautinique-Docs` repo ab khaali hai) |
+| `BQ-Client`, `BQ-Seller`, `BQ-Admin`, `BQ-Master` | Purane frontend repos (migration ke baad archive)                                  |
+| `BQ-Packages`                                     | Purane shared npm packages (`@beautinique/*`)                                      |
+| `BQ-Microservices`, `Beautinique-Gateway`         | Purana backend (migration ke baad archive)                                         |
+| `All-ENVs`                                        | Env files. **Private; kabhi public repo me nahi.**                                 |
 
 ## 5. Shabdkosh (glossary)
 
-| Shabd | Matlab |
-|---|---|
-| Bundle mode | Paancho backend deployables ek Render free service me |
-| Split mode | Har microservice alag process ya container me (laptop) |
-| House brand | Beautinique ka apna brand, Seller app me ek seller account |
-| Grant | User ko kisi scope me ek role dena (jaise State Admin, scope: Maharashtra) |
-| Scope | Permission kahan lagu: self, brand, state, district, city, hub, global... |
-| Area | State, district ya pincode; status CLOSED → READYING → LIVE |
-| Go-live checklist | Area live karne se pehle ki list; team ready pehli shart |
-| Outbox | Events pehle MongoDB me, phir queue me; koi event nahi khota |
-| Passport | Gateway ka 60 second ka token jo services ko bhejta hai |
-| DUMMY | Education project ke liye nakli legal data ya registration ka label |
+| Shabd             | Matlab                                                                     |
+| ----------------- | -------------------------------------------------------------------------- |
+| Bundle mode       | Paancho backend deployables ek Render free service me                      |
+| Split mode        | Har microservice alag process ya container me (laptop)                     |
+| House brand       | Beautinique ka apna brand, Seller app me ek seller account                 |
+| Grant             | User ko kisi scope me ek role dena (jaise State Admin, scope: Maharashtra) |
+| Scope             | Permission kahan lagu: self, brand, state, district, city, hub, global...  |
+| Area              | State, district ya pincode; status CLOSED → READYING → LIVE                |
+| Go-live checklist | Area live karne se pehle ki list; team ready pehli shart                   |
+| Outbox            | Events pehle MongoDB me, phir queue me; koi event nahi khota               |
+| Passport          | Gateway ka 60 second ka token jo services ko bhejta hai                    |
+| DUMMY             | Education project ke liye nakli legal data ya registration ka label        |
 
 ## Change log
 
-| Version | Date | Badlav |
-|---|---|---|
-| v1.0 | 2026-10-19 | Pehla version: decision log, pichhle kaam ke 18 sabak, environment, repos aur glossary. |
-| v1.1 | 2026-10-20 | Decision: apps sirf English me. |
-| v1.2 | 2026-10-20 | Decisions: package CLI, publish ka tarika, ESM-only. |
-| v1.3 | 2026-10-20 | Decisions: packages naye bante hain, `release` branch se publish, `main` default branch wala flow. |
-| v1.4 | 2026-10-20 | Decision: packages public ya private. |
-| v1.5 | 2026-10-20 | Decisions: saare packages public; packages zaroorat ke saath. |
-| v1.6 | 2026-10-20 | Decisions: apps/services packages nahi, ek create command, server-kit, Node type stripping. Sabak 19. |
+| Version | Date       | Badlav                                                                                                |
+| ------- | ---------- | ----------------------------------------------------------------------------------------------------- |
+| v1.0    | 2026-10-19 | Pehla version: decision log, pichhle kaam ke 18 sabak, environment, repos aur glossary.               |
+| v1.1    | 2026-10-20 | Decision: apps sirf English me.                                                                       |
+| v1.2    | 2026-10-20 | Decisions: package CLI, publish ka tarika, ESM-only.                                                  |
+| v1.3    | 2026-10-20 | Decisions: packages naye bante hain, `release` branch se publish, `main` default branch wala flow.    |
+| v1.4    | 2026-10-20 | Decision: packages public ya private.                                                                 |
+| v1.5    | 2026-10-20 | Decisions: saare packages public; packages zaroorat ke saath.                                         |
+| v1.6    | 2026-10-20 | Decisions: apps/services packages nahi, ek create command, server-kit, Node type stripping. Sabak 19. |
