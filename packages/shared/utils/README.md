@@ -53,15 +53,15 @@ istDateKey('2026-10-19T20:00:00Z'); // '2026-10-20'  (India me agla din: cut-off
 
 ## Text
 
-| Function                       | Example                                                 |
-| ------------------------------ | ------------------------------------------------------- |
-| `formatNumber(n)`              | `123456` → `1,23,456`                                   |
-| `plural(count, word, plural?)` | `plural(2341, 'rating')` → `2,341 ratings`              |
-| `slugify(text)`                | `Rosé Glow & Vitamin C` → `rose-glow-and-vitamin-c`     |
-| `maskPhone(phone)`             | `9876543210` → `98******10` (logs, "OTP sent to")       |
-| `maskEmail(email)`             | `priya.sharma@example.com` → `pr**********@example.com` |
-| `initials(name)`               | `Priya Sharma` → `PS`                                   |
-| `truncate(text, max)`          | `…` ke saath, emoji ko beech se nahi todta              |
+| Function                       | Example                                                                       |
+| ------------------------------ | ----------------------------------------------------------------------------- |
+| `formatNumber(n)`              | `123456` → `1,23,456`                                                         |
+| `plural(count, word, plural?)` | `plural(2341, 'rating')` → `2,341 ratings`                                    |
+| `slugify(text)`                | `Rosé Glow & Vitamin C` → `rose-glow-and-vitamin-c`                           |
+| `maskPhone(phone)`             | `9876543210` → `98******10` (logs, support screens)                           |
+| `maskEmail(email)`             | `priya.sharma@example.com` → `pr**********@example.com` (logs, "OTP sent to") |
+| `initials(name)`               | `Priya Sharma` → `PS`                                                         |
+| `truncate(text, max)`          | `…` ke saath, emoji ko beech se nahi todta                                    |
 
 ## Ids aur assertions
 

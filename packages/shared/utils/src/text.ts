@@ -33,7 +33,7 @@ export function slugify(text: string): string {
   return (at > 0 ? cut.slice(0, at) : slug.slice(0, 120)).replace(/-+$/, '');
 }
 
-/** `9876543210` → `98******10` (logs, support screens, OTP sent-to messages). */
+/** `9876543210` → `98******10` (logs, support screens; a phone is only a contact, never an OTP target). */
 export function maskPhone(phone: string): string {
   const digits = phone.replace(/\D/g, '');
   if (digits.length < 5) {
@@ -42,7 +42,7 @@ export function maskPhone(phone: string): string {
   return `${digits.slice(0, 2)}${'*'.repeat(digits.length - 4)}${digits.slice(-2)}`;
 }
 
-/** `priya.sharma@example.com` → `pr**********@example.com` */
+/** `priya.sharma@example.com` → `pr**********@example.com` (logs, "OTP sent to" messages). */
 export function maskEmail(email: string): string {
   const at = email.lastIndexOf('@');
   if (at <= 0) {

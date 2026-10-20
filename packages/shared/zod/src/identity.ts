@@ -7,7 +7,7 @@ export const emailZod = string()
   .max(254, 'Email address is too long')
   .pipe(email('Enter a valid email address'));
 
-/** One-time code: 6 digits (SMS OTP and authenticator app codes). */
+/** One-time code: 6 digits (email OTP and authenticator app codes). */
 export const otpZod = string()
   .trim()
   .regex(/^\d{6}$/, 'Enter the 6-digit code');

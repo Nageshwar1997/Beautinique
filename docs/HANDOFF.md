@@ -1,6 +1,6 @@
 # HANDOFF — BQ
 
-> **Status:** v1.7 (2026-10-20). Is project pe 2 log kaam karte hain. Ye file batati hai ki **abhi kya halat hai, kisne kya chhoda, agla kaam kya hai** aur kaunse sawal khule hain, taaki doosra insaan (aur uska Claude) bina poora itihaas padhe kaam utha sake. Jo bhi kaam roke, wo ye file update kare (neeche §8).
+> **Status:** v1.9 (2026-10-20). Is project pe 2 log kaam karte hain. Ye file batati hai ki **abhi kya halat hai, kisne kya chhoda, agla kaam kya hai** aur kaunse sawal khule hain, taaki doosra insaan (aur uska Claude) bina poora itihaas padhe kaam utha sake. Jo bhi kaam roke, wo ye file update kare (neeche §8).
 
 ## 0. Pehle ye (handoff ke din)
 
@@ -44,6 +44,8 @@
 - Apps sirf English me.
 - Packages naye bante hain; `BQ-Packages` sirf reference (TASKS T0.1).
 - Packages sirf `release` branch se publish (ARCH §13, TASKS T0.7).
+- **Frozen:** mobile pe koi message nahi: na SMS, na WhatsApp (na login OTP, na delivery OTP, na order updates). OTP sirf email se; notifications in-app, email aur browser push. Phone sirf contact (PRD §2, ARCH §7.1).
+- Jis product ka order hua wo archive hota hai, delete nahi; har image ka ek owner, reuse = copy (ARCH §6.7).
 - Package CLI ke owner decisions: publish laptop (2FA) + GitHub Actions; release ke baad commit + tags (push insaan karta hai); dependents default "Yes"; naye packages sirf ESM, TypeScript ~6.0.3.
 
 ## 4. Agla kaam (is order me)
@@ -105,3 +107,5 @@
 | v1.5    | 2026-10-20 | Neev ke 4 shared packages bane (§3, §4).                                                                      |
 | v1.6    | 2026-10-20 | Saare packages public; ab main code, packages zaroorat ke saath.                                              |
 | v1.7    | 2026-10-20 | `backend-server-kit` aur app/backend generators bane (§3, §4); 3 naye traps (§6).                             |
+| v1.8 | 2026-10-20 | Faisle: OTP sirf email se (frozen), product archive, ek image ek owner. |
+| v1.9 | 2026-10-20 | Faisla: SMS aur WhatsApp channel poore hate (frozen). |

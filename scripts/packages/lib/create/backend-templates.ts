@@ -33,7 +33,7 @@ const SUMMARIES: Record<BackendTarget, string> = {
     'The one public entry: checks the app, finds the route and streams it to the deployable that owns it.',
   identity: 'Sign-in, sessions, tokens, apps, roles and scoped grants.',
   payments: 'Razorpay orders, webhooks, refunds and payouts; the only place with payment secrets.',
-  notify: 'Email, SMS, WhatsApp, web push and the in-app inbox.',
+  notify: 'Email, web push and the in-app inbox.',
   core: 'Every other business module, as a modular monolith.',
   bundle: 'Runs every deployable in one Node process (bundle mode, the Render live server).',
 };

@@ -1,6 +1,6 @@
 # TASKS — BQ
 
-> **Status:** v1.11 (2026-10-20). Poore project ki task list, [ARCHITECTURE.md](ARCHITECTURE.md) §16 ke phases ke hisaab se. Har task "done" tabhi jab [RULES.md](RULES.md) §1.5 ki Definition of Done poori ho.
+> **Status:** v1.13 (2026-10-20). Poore project ki task list, [ARCHITECTURE.md](ARCHITECTURE.md) §16 ke phases ke hisaab se. Har task "done" tabhi jab [RULES.md](RULES.md) §1.5 ki Definition of Done poori ho.
 
 **Kaise use karein:**
 - `[ ]` baaki, `[~]` chal raha hai, `[x]` done.
@@ -76,7 +76,7 @@
 
 ## Phase 3. bq-identity (2–3 hafte)
 
-- [ ] T3.1 Users, credentials (argon2id), phone OTP, email + password, TOTP, Google OAuth (PKCE).
+- [ ] T3.1 Users, credentials (argon2id), email OTP, email + password, TOTP, Google OAuth (PKCE).
 - [ ] T3.2 Sessions, refresh rotation + reuse detection, ES256 + JWKS, My Devices.
 - [ ] T3.3 Apps, permission catalogue, 79 roles ka seed, scoped grants, invitations, applicant grants.
 - [ ] T3.4 API clients (Seller API Integration, Affiliate Partner).
@@ -101,8 +101,8 @@
 
 ## Phase 5. Notify + Payments (2 hafte)
 
-- [ ] T5.1 Notify: Brevo HTTPS email, SMS/WhatsApp sandbox, web push, in-app inbox.
-- [ ] T5.2 English templates, preferences aur consent, delivery log, OTP fast lane.
+- [ ] T5.1 Notify: Brevo HTTPS email, web push, in-app inbox (SMS aur WhatsApp nahi).
+- [ ] T5.2 English templates, preferences aur consent, delivery log, OTP fast lane, Brevo ka daily budget (300/din, ARCH §7.1).
 - [ ] T5.3 Payments: skeleton, fake driver, `razorpay:simulate` webhook CLI.
 - [ ] T5.4 bq-notify ki Dockerfile. **Docker Lesson 3.**
 
@@ -200,3 +200,5 @@
 | v1.9    | 2026-10-20 | T0.1 neev ke 4 packages bane: shared-zod, shared-utils, shared-contracts, shared-authz.                              |
 | v1.10   | 2026-10-20 | T0.1: saare packages public; neev ke baad packages app ki zaroorat ke saath.                                         |
 | v1.11   | 2026-10-20 | `backend-server-kit` bana (T1.1 ka zyada hissa); app aur backend generators (T0.2, T0.3, T0.9, T2.1, T2.5 ke notes). |
+| v1.12 | 2026-10-20 | OTP sirf email se (T3.1, T5.2). |
+| v1.13 | 2026-10-20 | T5.1: SMS aur WhatsApp channel hate. |

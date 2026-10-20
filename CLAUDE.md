@@ -26,6 +26,9 @@ launch jaisi banti hai. Legal cheezein dummy data ke saath implement hoti hain.
   koi language feature propose mat karo. Owner ka sakht niyam hai.
 - **Docs Hinglish me** (jaise ye file). Code, identifiers, comments aur app UI
   English me. Har doc ke top pe status (version + date), neeche change log; har badlav ki ek line.
+- **Mobile pe koi message nahi (owner ka frozen faisla, 2026-10-20).** Na SMS, na WhatsApp: na OTP, na
+  notification. Har OTP sirf email se; notifications in-app, email aur browser push. Inka flow mat banao aur
+  propose mat karo. Phone number sirf contact ke liye hai.
 - **Production-grade, kuch bhi "baad me" nahi.** Koi role ya feature "growth/later" mat banao; rokna ho
   to insaan se poochho.
 - **Business decision owner ka hai** (doosra developer bhi owner se poochhe). Docs chup hon to

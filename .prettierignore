@@ -1,6 +1,9 @@
 node_modules
 dist
 coverage
+# React Router (customer SSR) build output and generated route types
+build/
+.react-router/
 package-lock.json
 
 # Planning docs are hand-formatted (wide tables).

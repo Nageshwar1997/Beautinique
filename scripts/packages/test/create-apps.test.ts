@@ -38,6 +38,7 @@ function fixtureRepo() {
   );
   cpSync(join(REPO_ROOT, 'configs'), join(fixture.root, 'configs'), { recursive: true });
   cpSync(join(REPO_ROOT, '.prettierrc.json'), join(fixture.root, '.prettierrc.json'));
+  cpSync(join(REPO_ROOT, '.prettierignore'), join(fixture.root, '.prettierignore'));
   return fixture;
 }
 
@@ -121,6 +122,12 @@ describe('frontend apps pass every check', () => {
         expect(result.code, `${app} ${step}:\n${result.out}`).toBe(0);
       }
       expect(existsSync(join(repo.root, 'frontend', app, built))).toBe(true);
+      // the build output must not trip the repo's format check (CI runs it after npm run build)
+      const after = await run(join(REPO_ROOT, 'node_modules', 'prettier', 'bin', 'prettier.cjs'), [
+        '--check',
+        '.',
+      ]);
+      expect(after.out).toContain('All matched files use Prettier code style');
     });
   }
 

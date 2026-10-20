@@ -1,6 +1,6 @@
 # MEMORY — BQ
 
-> **Status:** v1.6 (2026-10-20). Project ki yaaddasht: **kya tay hua aur kyun**, **pichhle kaam se kya seekha**, aur **kaunse jaal (traps) se bachna hai**. Poori detail baaki docs me hai; yahan short version aur pointers. Naya sabak ya decision aaye to yahan ek line jodo.
+> **Status:** v1.9 (2026-10-20). Project ki yaaddasht: **kya tay hua aur kyun**, **pichhle kaam se kya seekha**, aur **kaunse jaal (traps) se bachna hai**. Poori detail baaki docs me hai; yahan short version aur pointers. Naya sabak ya decision aaye to yahan ek line jodo.
 
 ## 1. Decision log
 
@@ -37,6 +37,10 @@
 | 2026-10-20 | Ek `npm run create` (Package / Frontend app / Backend app); sirf contracts ke `APPS` aur `DEPLOYABLES`                                | Owner ka faisla; naya feature Core module, naya deployable nahi            | ARCH §3, §4                                       |
 | 2026-10-20 | Service ka common code `backend-server-kit` me, har service me copy nahi                                                              | Ek jagah fix, sab services me                                              | TASKS T1.1                                        |
 | 2026-10-20 | Backend Node 24 type stripping se (tsx nahi), production `tsdown` `dist/`; bundle internal deployables `127.0.0.1` ke khaali ports pe | Kam tools; bahar se sirf gateway                                           | ARCH §12                                          |
+| 2026-10-20 | Ordered product archive hota hai, delete nahi; sirf bina order wala product delete (images bhi) | Order history, returns, invoices aur disputes ko details aur images chahiye | ARCH §6.7, PRD §5 |
+| 2026-10-20 | Har file ka ek owner; doosri jagah wahi image chahiye to copy | Ek record ka delete doosre ki image nahi todta | ARCH §6.7 |
+| 2026-10-20 | **Frozen:** OTP sirf email se; mobile pe OTP nahi (login aur delivery), phone sirf contact | SMS ke liye DLT (registered business) chahiye; baaki raaste paid ya card wale | ARCH §7.1, PRD §2 |
+| 2026-10-20 | **Frozen:** SMS aur WhatsApp channel bilkul nahi (poore hate); notifications sirf in-app, email, browser push | Mobile pe asli message ke liye DLT ya paid raasta chahiye; sandbox ka koi fayda nahi | ARCH §3, §10; PRD §5 |
 
 ## 2. Pichhle kaam se seekhe sabak
 
@@ -103,3 +107,6 @@
 | v1.4    | 2026-10-20 | Decision: packages public ya private.                                                                 |
 | v1.5    | 2026-10-20 | Decisions: saare packages public; packages zaroorat ke saath.                                         |
 | v1.6    | 2026-10-20 | Decisions: apps/services packages nahi, ek create command, server-kit, Node type stripping. Sabak 19. |
+| v1.7    | 2026-10-20 | Decisions: ordered product archive, ek file ek owner. |
+| v1.8    | 2026-10-20 | Decision (frozen): OTP sirf email se. |
+| v1.9    | 2026-10-20 | Decision (frozen): SMS aur WhatsApp channel hate. |
