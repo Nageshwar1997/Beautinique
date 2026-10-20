@@ -92,7 +92,8 @@ function manifest(spec: AppSpec): Record<string, unknown> {
           build: 'react-router build',
           start: 'react-router-serve ./build/server/index.js',
           typecheck: 'react-router typegen && tsc',
-          lint: 'eslint .',
+          // route types (.react-router/, not committed) must exist before type-aware lint rules run
+          lint: 'react-router typegen && eslint .',
           test: 'vitest run',
         }
       : {

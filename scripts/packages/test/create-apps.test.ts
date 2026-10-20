@@ -117,7 +117,8 @@ describe('frontend apps pass every check', () => {
       );
       expect(prettier.out).toContain('All matched files use Prettier code style');
 
-      for (const step of ['typecheck', 'lint', 'test', 'build']) {
+      // the order CI uses: build first, then lint before typecheck (lint must not need typecheck's output)
+      for (const step of ['build', 'lint', 'typecheck', 'test']) {
         const result = await script(step, app);
         expect(result.code, `${app} ${step}:\n${result.out}`).toBe(0);
       }
@@ -228,8 +229,8 @@ describe('backend apps pass every check', () => {
   });
 
   for (const workspace of ['gateway', 'identity', 'core', 'bundle']) {
-    it(`${workspace} passes typecheck, lint, test and build`, async () => {
-      await check(workspace, ['typecheck', 'lint', 'test', 'build']);
+    it(`${workspace} passes build, lint, typecheck and test (CI order)`, async () => {
+      await check(workspace, ['build', 'lint', 'typecheck', 'test']);
     });
   }
 
