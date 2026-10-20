@@ -1,6 +1,6 @@
 # RULES — BQ
 
-> **Status:** v1.1 (2026-10-20). Ye niyam Beautinique ke har code, doc aur deploy pe lagu hain. [PRD.md](PRD.md) batata hai **kya** banana hai, [ARCHITECTURE.md](ARCHITECTURE.md) batata hai **kaise**, aur ye file batati hai ki **kin niyamon ke saath**. Koi rule todna ho to pehle is file me badlav aur change log entry.
+> **Status:** v1.3 (2026-10-20). Ye niyam Beautinique ke har code, doc aur deploy pe lagu hain. [PRD.md](PRD.md) batata hai **kya** banana hai, [ARCHITECTURE.md](ARCHITECTURE.md) batata hai **kaise**, aur ye file batati hai ki **kin niyamon ke saath**. Koi rule todna ho to pehle is file me badlav aur change log entry.
 
 ## 1. Kaam karne ke niyam
 
@@ -18,11 +18,11 @@
 
 ## 2. Git aur release
 
-1. **Branches:** feature branch → PR → **`prerelease`** (laptop pe Docker) → **`release`** (Render + Vercel). `release` pe seedha push nahi.
+1. **Branches:** feature branch → PR → **`main`** (default branch) → **`prerelease`** (laptop pe Docker) → **`release`** (Render + Vercel, npm packages). Teeno pe seedha push nahi, sirf PR. Ek hi apwaad: package release ka commit + tags owner `release` pe push karta hai (package CLI), aur uske baad PR `release` → `main` (back-merge).
 2. **Commits:** Conventional Commits (`feat:`, `fix:`, `docs:`, `refactor:`, `test:`, `chore:`). Ek commit me ek hi baat.
 3. **PR:** chhota rakho, description me kya aur kyun, aur kaise test kiya. CI green hue bina merge nahi.
 4. **Public repo:** koi secret, `.env`, token, test password, DB dump ya asli personal data kabhi commit nahi. Sirf `.env.example`. Gitleaks har PR pe chalega.
-5. **Dependencies:** Renovate ke weekly PRs `prerelease` pe; major version upgrade alag PR me.
+5. **Dependencies:** Renovate ke weekly PRs `main` pe; major version upgrade alag PR me.
 
 ## 3. Code: sabke liye
 
@@ -105,3 +105,4 @@
 | v1.0 | 2026-10-19 | Pehla version: kaam, git, code, backend, frontend, testing, security, docs aur AI assistant ke niyam. |
 | v1.1 | 2026-10-20 | Apps sirf English; INR aur dates `en-IN`. |
 | v1.2 | 2026-10-20 | Icons rule: `workspace:*` ki jagah npm workspaces ka local link. |
+| v1.3 | 2026-10-20 | §2: `main` default branch; flow `main` → `prerelease` → `release`; package release ka apwaad aur back-merge; Renovate `main` pe. |

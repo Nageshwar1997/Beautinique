@@ -1,6 +1,6 @@
 # MEMORY — BQ
 
-> **Status:** v1.1 (2026-10-20). Project ki yaaddasht: **kya tay hua aur kyun**, **pichhle kaam se kya seekha**, aur **kaunse jaal (traps) se bachna hai**. Poori detail baaki docs me hai; yahan short version aur pointers. Naya sabak ya decision aaye to yahan ek line jodo.
+> **Status:** v1.3 (2026-10-20). Project ki yaaddasht: **kya tay hua aur kyun**, **pichhle kaam se kya seekha**, aur **kaunse jaal (traps) se bachna hai**. Poori detail baaki docs me hai; yahan short version aur pointers. Naya sabak ya decision aaye to yahan ek line jodo.
 
 ## 1. Decision log
 
@@ -29,6 +29,7 @@
 | 2026-10-20 | Packages ka apna CLI: create, publish, republish, login, logout (Changesets nahi) | Category ke hisaab se selection, sabka ek bump ya alag-alag | [packages/README.md](packages/README.md) |
 | 2026-10-20 | Publish laptop se (2FA) aur GitHub Actions se (provenance); release ke baad commit + tags, push khud | Owner ka faisla | [packages/README.md](packages/README.md) |
 | 2026-10-20 | Naye TypeScript packages sirf ESM, tsdown se build; TypeScript 6.0 (typescript-eslint abhi 7 support nahi karta) | Node 24 aur Vite ke liye kaafi, kam files | [packages/README.md](packages/README.md) |
+| 2026-10-20 | `main` default branch: feature → PR → `main` → `prerelease` → `release`; release ke baad `release` → `main` back-merge | Owner ka faisla; roz ka kaam default branch pe | ARCH §13, RULES §2 |
 | 2026-10-20 | Packages sirf `release` branch se publish | Wahi branch jo apps live karti hai: npm pe sirf tested code | ARCH §13 |
 
 ## 2. Pichhle kaam se seekhe sabak
@@ -91,3 +92,4 @@
 | v1.0 | 2026-10-19 | Pehla version: decision log, pichhle kaam ke 18 sabak, environment, repos aur glossary. |
 | v1.1 | 2026-10-20 | Decision: apps sirf English me. |
 | v1.2 | 2026-10-20 | Decisions: package CLI, publish ka tarika, ESM-only. |
+| v1.3 | 2026-10-20 | Decisions: packages naye bante hain, `release` branch se publish, `main` default branch wala flow. |

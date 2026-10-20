@@ -1,6 +1,6 @@
 # ARCHITECTURE — BQ
 
-> **Status:** v1.4 draft (2026-10-20). [PRD.md](PRD.md) v1.0 pe based. Design ek multi-agent review se aaya (3 architecture proposals + review board + owner ke decisions), aur v1.1 me free tier ke official docs ke against verify hua.
+> **Status:** v1.5 draft (2026-10-20). [PRD.md](PRD.md) v1.0 pe based. Design ek multi-agent review se aaya (3 architecture proposals + review board + owner ke decisions), aur v1.1 me free tier ke official docs ke against verify hua.
 
 ## 0. Ek nazar me
 
@@ -482,10 +482,12 @@ Sirf config badlegi, code nahi:
 
 ## 13. CI/CD
 
-- **Git flow:** feature branch → PR → **`prerelease`** → **`release`**.
-  - `prerelease`: laptop pe Docker (split mode, live jaisi limits) me chalti hai. Integration aur E2E tests yahin aur CI me pass hone chahiye.
-  - `release`: yahi branch Render (`bq-live`) aur Vercel production pe deploy hoti hai. `prerelease` → `release` merge sirf CI green hone pe.
-  - Branch protection, required checks, Conventional Commits. Renovate har hafte grouped dependency PRs `prerelease` pe kholta hai.
+- **Git flow:** feature branch → PR → **`main`** (default) → **`prerelease`** → **`release`**.
+  - `main`: default branch. Roz ka kaam feature branch se PR ke through yahin aata hai (CI green + review).
+  - `prerelease`: `main` se PR (`main` → `prerelease`) jab ek batch integration ke liye ready ho. Laptop pe Docker (split mode, live jaisi limits) me chalti hai; integration aur E2E tests yahin aur CI me pass hone chahiye.
+  - `release`: `prerelease` se PR. Yahi branch Render (`bq-live`) aur Vercel production pe deploy hoti hai, aur npm packages sirf yahin se publish hote hain. Merge sirf CI green hone pe.
+  - **Back-merge:** package release ka commit (versions, changelogs) `release` pe banta hai, isliye har release ke baad PR `release` → `main`, taaki agla kaam naye versions pe ho.
+  - Branch protection (ruleset) teeno branches pe: PR zaroori, required check `check`, force push aur delete band. Owner ka bypass sirf package CLI ke release commit + tags push karne ke liye. Conventional Commits. Renovate har hafte grouped dependency PRs `main` pe kholta hai.
 - **GitHub Actions:**
   - `ci.yml`: lint, typecheck, test, build (sirf affected), dependency-cruiser, no-hardcoded-geo lint, no role-name comparisons, OpenAPI diff, event compatibility, har route pe permission, rate class aur owner, permission catalogue ↔ seed sync, bundle budgets, gitleaks, npm audit. ~2,600 package tests merge rokte hain.
   - `integration.yml`: open-district-by-config (saare refusal paths ke saath), fake Razorpay ke saath checkout saga, outbox/inbox exactly-once, no-oversell (50 parallel orders), ledger zero-sum aur gapless invoices, authz scope aur separation of duties, idempotency, review routing, Redis wipe drill (`FLUSHALL` ke beech koi event miss na ho, revoked session reject ho, schedulers wapas aayein), aur `ATLAS_TIER=M0` mode me relay poll.
@@ -617,3 +619,4 @@ Sirf config badlegi, code nahi:
 | v1.2 | 2026-10-20 | Apps sirf English me. |
 | v1.3 | 2026-10-20 | Packages ka publish Changesets ki jagah apne package CLI se; internal packages semver range se (`workspace:*` nahi); shared configs root `configs/` me. |
 | v1.4 | 2026-10-20 | §16 Phase 0: packages naye bante hain (`BQ-Packages` sirf reference). §13: packages bhi sirf `release` branch se publish (build + publish jobs). |
+| v1.5 | 2026-10-20 | §13: `main` default branch; flow feature → PR → `main` → `prerelease` → `release`, release ke baad `release` → `main` back-merge; teeno branches pe ruleset. |
