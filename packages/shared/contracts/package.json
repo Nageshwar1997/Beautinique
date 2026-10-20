@@ -1,7 +1,6 @@
 {
   "name": "@beautinique/shared-contracts",
   "version": "1.0.0",
-  "private": true,
   "description": "Beautinique API contracts: routes, events, permissions, error codes and area settings, declared once with zod; OpenAPI and gateway manifest from them.",
   "keywords": [
     "beautinique",
@@ -43,10 +42,19 @@
     "lint": "eslint .",
     "test": "vitest run"
   },
+  "peerDependencies": {
+    "zod": "^4.6.7"
+  },
   "dependencies": {
     "@beautinique/shared-zod": "^2.0.0"
   },
+  "devDependencies": {
+    "zod": "^4.6.7"
+  },
   "engines": {
     "node": ">=24"
+  },
+  "publishConfig": {
+    "access": "public"
   }
 }

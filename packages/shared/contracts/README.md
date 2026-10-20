@@ -1,8 +1,16 @@
 # @beautinique/shared-contracts
 
-Private package (sirf monorepo). Beautinique ke "contracts": har endpoint, event, permission, error code aur area setting **ek hi baar** yahan zod ke saath declare hota hai (ARCHITECTURE §5). Isi se backend handlers, typed frontend client, gateway ka route manifest aur OpenAPI docs bante hain, isliye teeno kabhi alag nahi hote.
+Beautinique ke "contracts": har endpoint, event, permission, error code aur area setting **ek hi baar** yahan zod ke saath declare hota hai (ARCHITECTURE §5). Isi se backend handlers, typed frontend client, gateway ka route manifest aur OpenAPI docs bante hain, isliye teeno kabhi alag nahi hote.
 
 Abhi isme **system** hai (`defineRoute`, `defineEvent` ...); asli endpoints aur events har module ke saath judte jayenge.
+
+## Install
+
+```bash
+npm install @beautinique/shared-contracts zod
+```
+
+`zod` (v4) `@beautinique/shared-zod` ki peer dependency hai.
 
 ## Routes
 

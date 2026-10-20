@@ -1,6 +1,12 @@
 # @beautinique/shared-authz
 
-Private package (sirf monorepo). Beautinique ka permission matcher (ARCHITECTURE §7.3), jo backend (`authorize`, `scopeFilter`) aur frontend (`<Can>`, nav, buttons) dono use karte hain, taaki dono jagah faisla ek hi niyam se ho.
+Beautinique ka permission matcher (ARCHITECTURE §7.3), jo backend (`authorize`, `scopeFilter`) aur frontend (`<Can>`, nav, buttons) dono use karte hain, taaki dono jagah faisla ek hi niyam se ho.
+
+## Install
+
+```bash
+npm install @beautinique/shared-authz zod
+```
 
 ## Model
 

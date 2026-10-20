@@ -1,7 +1,6 @@
 {
   "name": "@beautinique/shared-authz",
   "version": "1.0.0",
-  "private": true,
   "description": "Beautinique permission matcher: scoped grants with location containment, validity windows, decisions with reasons and scope specs for query filters.",
   "keywords": [
     "beautinique",
@@ -47,5 +46,8 @@
   },
   "dependencies": {
     "@beautinique/shared-contracts": "^1.0.0"
+  },
+  "publishConfig": {
+    "access": "public"
   }
 }

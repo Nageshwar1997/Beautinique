@@ -61,8 +61,8 @@
     "node": ">=24"
   },
   "peerDependencies": {
-    "tailwindcss": "^4.0.0",
-    "vite": ">=6.0.0"
+    "tailwindcss": "^4.3.3",
+    "vite": "^8.3.4"
   },
   "devDependencies": {
     "@capsizecss/metrics": "^4.4.0",

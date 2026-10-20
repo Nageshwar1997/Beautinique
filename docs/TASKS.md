@@ -1,6 +1,6 @@
 # TASKS — BQ
 
-> **Status:** v1.9 (2026-10-20). Poore project ki task list, [ARCHITECTURE.md](ARCHITECTURE.md) §16 ke phases ke hisaab se. Har task "done" tabhi jab [RULES.md](RULES.md) §1.5 ki Definition of Done poori ho.
+> **Status:** v1.10 (2026-10-20). Poore project ki task list, [ARCHITECTURE.md](ARCHITECTURE.md) §16 ke phases ke hisaab se. Har task "done" tabhi jab [RULES.md](RULES.md) §1.5 ki Definition of Done poori ho.
 
 **Kaise use karein:**
 - `[ ]` baaki, `[~]` chal raha hai, `[x]` done.
@@ -34,11 +34,11 @@
 
 ## Phase 0. Monorepo + CI (1–2 hafte)
 
-- [~] T0.1 Packages naye bante hain, `packages/<shared|frontend|backend>/<name>` me (`@beautinique/<category>-<name>`). `BQ-Packages` sirf reference hai, copy ya subtree nahi (owner ka faisla, 2026-10-19). Pehla package `frontend-styles` 2.0.0 poora hai (tokens, tones, order status, charts, high contrast, print, animations, utilities, rich text; publish baaki). Baaki packages is order me (dependency pehle; public = npm pe, private = sirf monorepo):
-  1. **Neev (ho gaya, 2026-10-20):** `shared-zod` (public), `shared-utils` (public), `shared-contracts` (private), `shared-authz` (private).
-  2. **Backend (Phase 1 ke saath):** `backend-server-kit`, `backend-server-mongo`, `backend-server-queue`, `backend-server-crypto`, `backend-storage` (sab private).
-  3. **Frontend (Phase 6 ke saath):** `frontend-test-utils` (private), `frontend-icons`, `frontend-hooks`, `frontend-components`, `frontend-stores` (public); `frontend-api-client`, `frontend-authz`, `frontend-forms`, `frontend-app-shell`, `frontend-auth-ui`, `frontend-data-table`, `frontend-review-screens`, `frontend-maps`, `frontend-pwa-kit`, `frontend-config-vite` (private).
-  4. **Feature packages (jab app ko chahiye):** `frontend-quill`, `frontend-tryon`, `frontend-tryon-assets` (public).
+- [~] T0.1 Packages naye bante hain, `packages/<shared|frontend|backend>/<name>` me (`@beautinique/<category>-<name>`). `BQ-Packages` sirf reference hai, copy ya subtree nahi (owner ka faisla, 2026-10-19). Pehla package `frontend-styles` 2.0.0 poora hai (tokens, tones, order status, charts, high contrast, print, animations, utilities, rich text; publish baaki). Saare packages **public** hain (npm pe; monorepo me apne aap jude rehte hain). Neev ke baad baaki packages **app ki zaroorat ke saath** bante hain, pehle se nahi: jo cheez do apps ko chahiye, ya saaf taur pe sabki hai (login, API client, layout), wo turant package me jati hai, app me copy nahi hoti. Andaazan order (dependency pehle):
+  1. **Neev (ho gaya, 2026-10-20):** `shared-zod`, `shared-utils`, `shared-contracts`, `shared-authz`.
+  2. **Backend (Phase 1 ke saath):** `backend-server-kit`, `backend-server-mongo`, `backend-server-queue`, `backend-server-crypto`, `backend-storage`.
+  3. **Frontend (Phase 6 ke saath):** `frontend-test-utils`, `frontend-icons`, `frontend-hooks`, `frontend-components`, `frontend-stores`, `frontend-api-client`, `frontend-authz`, `frontend-forms`, `frontend-app-shell`, `frontend-auth-ui`, `frontend-data-table`, `frontend-review-screens`, `frontend-maps`, `frontend-pwa-kit`, `frontend-config-vite`.
+  4. **Feature packages (jab app ko chahiye):** `frontend-quill`, `frontend-tryon`, `frontend-tryon-assets`.
   Neev ke baad backend aur frontend ek saath chal sakte hain (do log ho to ek-ek track).
 - [ ] T0.2 4 apps → `frontend/` (customer, seller, admin, master).
 - [ ] T0.3 Gateway aur services → `backend/` (port sources ki tarah).
@@ -198,3 +198,4 @@
 | v1.7 | 2026-10-20 | T0.1: `frontend-styles` poora (animations, utilities, rich text, tones, charts, high contrast, print). |
 | v1.8 | 2026-10-20 | T0.1: packages ki list aur order (neev, backend, frontend, feature), public/private ke saath. |
 | v1.9 | 2026-10-20 | T0.1 neev ke 4 packages bane: shared-zod, shared-utils, shared-contracts, shared-authz. |
+| v1.10 | 2026-10-20 | T0.1: saare packages public; neev ke baad packages app ki zaroorat ke saath. |

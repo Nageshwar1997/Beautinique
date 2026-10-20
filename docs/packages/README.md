@@ -1,6 +1,6 @@
 # Packages — banana, publish aur republish
 
-> **Status:** v1.2 (2026-10-20). `packages/` ke saare npm packages ka kaam is repo ke apne CLI (`scripts/packages/`) se hota hai. Ye guide batati hai ki kaunsa command kab chalana hai aur andar kya hota hai.
+> **Status:** v1.3 (2026-10-20). `packages/` ke saare npm packages ka kaam is repo ke apne CLI (`scripts/packages/`) se hota hai. Ye guide batati hai ki kaunsa command kab chalana hai aur andar kya hota hai.
 
 ## 1. Packages kahan aur kis naam se
 
@@ -10,6 +10,8 @@
 - **public** package npm pe jata hai (`publishConfig.access: "public"`, LICENSE ke saath). **private** (`"private": true`) sirf monorepo ke andar.
 - Internal packages normal semver range se lete hain (`"@beautinique/shared-x": "^2.0.0"`). npm workspaces local version link kar deta hai. `workspace:*` npm me nahi chalta.
 - Naye TypeScript packages **sirf ESM** hain, tsdown se build hote hain (`dist/index.js` + `dist/index.d.ts`). TypeScript 6.0 (typescript-eslint abhi TS 7 support nahi karta).
+- **Bahar ki library pe peer dependency** (zod, react, tailwindcss, vite ...) devDependencies me bhi **bilkul same range** ke saath hoti hai: package wahi vaada karta hai jis version pe test hota hai. CLI har run pe ye check karta hai. Apne workspace packages is niyam se bahar hain (unki ranges CLI sambhalta hai).
+- Jis library ke types package ki public types me aate hain (jaise contracts me zod), wo `peerDependencies` me honi chahiye; warna tsdown uske types `dist` me copy kar deta hai. `npm run verify` aisi copy pe fail hota hai.
 
 ## 2. Commands
 
@@ -89,3 +91,4 @@ Kisi package ka naya version agar kisi published dependent ki range tod de, to C
 | v1.0 | 2026-10-20 | Pehla version: create, publish, republish, login, logout, status, verify, build; GitHub release workflow. |
 | v1.1 | 2026-10-20 | Review ke baad: release sirf `release` branch se, jaanch sawalon se pehle, behind/taken versions pe rok, peer/re-export/prerelease cascade, npm jaisa install check, Ctrl+C aur login-expire pe files wapas, dry run naye versions ke saath, release workflow build + publish jobs me (tag check), CI me build step, sab commands pe `--help`, changelog me markdown escape. |
 | v1.2 | 2026-10-20 | Release ke baad `release` → `main` back-merge; release commit ka push ruleset bypass se. |
+| v1.3 | 2026-10-20 | Peer aur dev range same (CLI check), aur dist me copy hue dependency types pe verify fail. |
