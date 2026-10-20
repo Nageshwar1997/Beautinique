@@ -21,13 +21,22 @@ jobs:
         with:
           persist-credentials: false
 
+      # No cache here: setup-node's cache step runs `npm config get cache` with the bundled npm 11,
+      # which the repo's devEngines (npm >=12.2.0, onFail error) rejects (EBADDEVENGINES).
       - uses: actions/setup-node@v7
         with:
           node-version: 24
-          cache: npm
+          package-manager-cache: false
 
-      # The repo needs npm 12 (allowScripts, devEngines); Node 24 ships npm 11.
+      # The repo needs npm 12 (devEngines); Node 24 ships npm 11. A global install is not checked
+      # against devEngines, so this runs fine with npm 11.
       - run: npm install --global npm@12.2.0
+
+      - uses: actions/cache@v6
+        with:
+          path: ~/.npm
+          key: npm-${{ runner.os }}-${{ hashFiles('package-lock.json') }}
+          restore-keys: npm-${{ runner.os }}-
 
       - run: npm ci
       # Packages import each other's dist (types too), so build them before lint, typecheck and tests.

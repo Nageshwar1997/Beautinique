@@ -59,7 +59,7 @@
 
 ## 6. Traps (pehle hi pata ho)
 
-- **npm 12 chahiye:** root `package.json` ka `devEngines` Node >=24 aur npm >=12.2.0 maangta hai (`onFail: error`), isliye purane npm pe `npm install` ruk jata hai.
+- **npm 12 chahiye:** root `package.json` ka `devEngines` Node >=24 aur npm >=12.2.0 maangta hai (`onFail: error`), isliye purane npm pe `npm install` ruk jata hai. CI me bhi isi wajah se `setup-node` ka npm cache band hai (wo npm 11 se `npm config get cache` chalata hai aur `EBADDEVENGINES` aata hai); npm 12 install hone ke baad `actions/cache` `~/.npm` cache karta hai.
 - **TypeScript ~6.0.3 pinned hai:** TS 7 aa gaya hai, par typescript-eslint sirf <6.1 support karta hai. Upgrade mat karna jab tak typescript-eslint support na de.
 - **ESLint factory ka naam `configs/eslint-config.js` hi rahe:** `eslint.config.js` naam dene pe ESLint use config samajh leta hai.
 - **tsdown:** `fixedExtension: false` zaroori (warna platform node pe `.mjs` banta hai). CSS wale entry points arethetypeswrong ko nahi diye jate.
