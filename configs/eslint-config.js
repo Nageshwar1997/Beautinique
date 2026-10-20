@@ -25,6 +25,7 @@ const GLOBALS = {
  * @param {string} options.tsconfigRootDir pass `import.meta.dirname`
  * @param {string[]} [options.ignores] extra paths to skip
  * @param {boolean} [options.zodPackage] only for @beautinique/shared-zod: the one package that imports zod
+ * @param {string[]} [options.envFiles] backend apps: the only files that may read process.env (ARCHITECTURE §3)
  */
 export function packageConfig({
   platform,
@@ -32,6 +33,7 @@ export function packageConfig({
   tsconfigRootDir,
   ignores = [],
   zodPackage = false,
+  envFiles,
 }) {
   const ZOD_MESSAGE =
     "Import z from '@beautinique/shared-zod' (the repo has one zod and one import path).";
@@ -82,6 +84,24 @@ export function packageConfig({
             ],
           },
         }
+      : {},
+    envFiles
+      ? [
+          {
+            files: ['**/*.ts'],
+            rules: {
+              'no-restricted-properties': [
+                'error',
+                {
+                  object: 'process',
+                  property: 'env',
+                  message: `Read settings in ${envFiles.join(' or ')} (namespaced config, ARCHITECTURE §3).`,
+                },
+              ],
+            },
+          },
+          { files: envFiles, rules: { 'no-restricted-properties': 'off' } },
+        ]
       : {},
     prettier,
   );

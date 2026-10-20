@@ -1,6 +1,6 @@
 # TASKS — BQ
 
-> **Status:** v1.10 (2026-10-20). Poore project ki task list, [ARCHITECTURE.md](ARCHITECTURE.md) §16 ke phases ke hisaab se. Har task "done" tabhi jab [RULES.md](RULES.md) §1.5 ki Definition of Done poori ho.
+> **Status:** v1.11 (2026-10-20). Poore project ki task list, [ARCHITECTURE.md](ARCHITECTURE.md) §16 ke phases ke hisaab se. Har task "done" tabhi jab [RULES.md](RULES.md) §1.5 ki Definition of Done poori ho.
 
 **Kaise use karein:**
 - `[ ]` baaki, `[~]` chal raha hai, `[x]` done.
@@ -36,24 +36,24 @@
 
 - [~] T0.1 Packages naye bante hain, `packages/<shared|frontend|backend>/<name>` me (`@beautinique/<category>-<name>`). `BQ-Packages` sirf reference hai, copy ya subtree nahi (owner ka faisla, 2026-10-19). Pehla package `frontend-styles` 2.0.0 poora hai (tokens, tones, order status, charts, high contrast, print, animations, utilities, rich text; publish baaki). Saare packages **public** hain (npm pe; monorepo me apne aap jude rehte hain). Neev ke baad baaki packages **app ki zaroorat ke saath** bante hain, pehle se nahi: jo cheez do apps ko chahiye, ya saaf taur pe sabki hai (login, API client, layout), wo turant package me jati hai, app me copy nahi hoti. Andaazan order (dependency pehle):
   1. **Neev (ho gaya, 2026-10-20):** `shared-zod`, `shared-utils`, `shared-contracts`, `shared-authz`.
-  2. **Backend (Phase 1 ke saath):** `backend-server-kit`, `backend-server-mongo`, `backend-server-queue`, `backend-server-crypto`, `backend-storage`.
+  2. **Backend (Phase 1 ke saath):** `backend-server-kit` (1.0.0 bana, 2026-10-20), `backend-server-mongo`, `backend-server-queue`, `backend-server-crypto`, `backend-storage`.
   3. **Frontend (Phase 6 ke saath):** `frontend-test-utils`, `frontend-icons`, `frontend-hooks`, `frontend-components`, `frontend-stores`, `frontend-api-client`, `frontend-authz`, `frontend-forms`, `frontend-app-shell`, `frontend-auth-ui`, `frontend-data-table`, `frontend-review-screens`, `frontend-maps`, `frontend-pwa-kit`, `frontend-config-vite`.
   4. **Feature packages (jab app ko chahiye):** `frontend-quill`, `frontend-tryon`, `frontend-tryon-assets`.
   Neev ke baad backend aur frontend ek saath chal sakte hain (do log ho to ek-ek track).
-- [ ] T0.2 4 apps → `frontend/` (customer, seller, admin, master).
-- [ ] T0.3 Gateway aur services → `backend/` (port sources ki tarah).
+- [ ] T0.2 4 apps → `frontend/` (customer, seller, admin, master). (Har app `npm run create -- --type app` se banta hai: SPA, customer SSR, delivery PWA; [packages/README.md](packages/README.md) §3.1. Abhi koi app bana nahi.)
+- [ ] T0.3 Gateway aur services → `backend/` (port sources ki tarah). (Har deployable aur bundle `npm run create -- --type backend` se banta hai, §3.2. Abhi koi bana nahi.)
 - [ ] T0.4 Media-service ka nested `.git` aur `.kilo` worktree hatana.
 - [ ] T0.5 Turborepo. (npm workspaces, root scripts, shared configs aur package CLI ho gaye: [packages/README.md](packages/README.md).)
 - [ ] T0.6 `ci.yml`: build (affected) aur gitleaks baaki. (Format, lint, typecheck, test, packages verify aur npm audit wala pehla `ci.yml`, plus `release.yml`, ho gaye.)
 - [x] T0.7 Branches `prerelease` aur `release`, branch protection, required checks. (2026-10-20: branches ban gayi, CI teeno pe green; ruleset `protected-branches` (`main`, `prerelease`, `release`: delete aur force push band, PR + 1 approval, `check` required aur up to date, bypass sirf Repository admin); tag ruleset `release-tags` (`@beautinique/*` tags sirf owner bana, badal ya mita sakta hai); environment `npm` sirf `release` branch se, owner ki approval ke saath.) Packages bhi sirf `release` branch se publish hote hain (package CLI aur `release.yml` yahi maante hain).
 - [ ] T0.8 `infra/docker-compose.yml` ka `infra` profile: Mongo replica set, Valkey (Render jaisi limits), Mailpit. **Docker Lesson 2.**
-- [ ] T0.9 Har deployable ka `.env.example` aur zod env schema.
+- [~] T0.9 Har deployable ka `.env.example` aur zod env schema. (Generator har deployable ko `src/config.ts` (zod, `<NAME>__*`) aur `.env.example` deta hai: port, log level, gateway ke upstream URLs. Provider keys apne feature ke saath judti hain.)
 
 **Milestone 0:** CI green, saare package tests chal rahe hain, `infra:up` se local infra chalta hai.
 
 ## Phase 1. Server kit + contracts (1–2 hafte)
 
-- [ ] T1.1 `server-kit`: AppError, response envelope, logger (redaction), Express app factory, bootstrap/shutdown.
+- [~] T1.1 `server-kit`: AppError, response envelope, logger (redaction), Express app factory, bootstrap/shutdown. (2026-10-20: `@beautinique/backend-server-kit` 1.0.0: AppError + contracts error body, request id, access log, redacting logger, `createApp`, `/health` + `/ready`, `loadConfig` (namespaced, `strip`), `startServer` graceful stop; 15 tests, 25/25 mutations. Success envelope helper aur npm publish baaki.)
 - [ ] T1.2 `server-mongo`: `withTransaction()` (reply commit ke baad) + regression test.
 - [ ] T1.3 `server-queue`: outbox relay (`poll` aur `changestream`), inbox dedupe, job schedulers, `bq:epoch` watchdog aur Redis wipe recovery.
 - [ ] T1.4 `server-crypto`: AES-GCM field encryption, HMAC blind index.
@@ -65,11 +65,11 @@
 
 ## Phase 2. Gateway (1 hafta)
 
-- [ ] T2.1 Prefix routing table, app registry (11 apps), Origin aur `x-forwarded-host` → app.
+- [ ] T2.1 Prefix routing table, app registry (11 apps), Origin aur `x-forwarded-host` → app. (Generator ka gateway: `X-BQ-App` check, contracts manifest se route aur owner tak stream, `..` path ka bachav. Origin aur `x-forwarded-host` → app baaki.)
 - [ ] T2.2 JWKS verification, per-app cookies, passport token, origin secret, `clientIp()`.
 - [ ] T2.3 Redis rate limits (classes), cache headers, helmet, request-id, Sentry.
 - [ ] T2.4 `/health` (shallow) aur `/ready` (deep), `/status`.
-- [ ] T2.5 `backend/bundle`: paancho deployables ek process me, boot pe release steps.
+- [ ] T2.5 `backend/bundle`: paancho deployables ek process me, boot pe release steps. (Generator ka bundle saare deployables chalata hai aur config keys env se hatata hai; boot ke release steps baaki.)
 - [ ] T2.6 Purani cheezein hatana: facades, `METHODS_AND_PATHS`, MASTER bypass, wake-up fan-out, keep-alive workflow.
 
 **Milestone 2:** bundle mode laptop pe chalta hai, gateway sahi deployable tak route karta hai.
@@ -199,3 +199,4 @@
 | v1.8 | 2026-10-20 | T0.1: packages ki list aur order (neev, backend, frontend, feature), public/private ke saath. |
 | v1.9 | 2026-10-20 | T0.1 neev ke 4 packages bane: shared-zod, shared-utils, shared-contracts, shared-authz. |
 | v1.10 | 2026-10-20 | T0.1: saare packages public; neev ke baad packages app ki zaroorat ke saath. |
+| v1.11 | 2026-10-20 | `backend-server-kit` bana (T1.1 ka zyada hissa); app aur backend generators (T0.2, T0.3, T0.9, T2.1, T2.5 ke notes). |

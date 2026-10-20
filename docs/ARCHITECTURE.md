@@ -1,6 +1,6 @@
 # ARCHITECTURE — BQ
 
-> **Status:** v1.5 draft (2026-10-20). [PRD.md](PRD.md) v1.0 pe based. Design ek multi-agent review se aaya (3 architecture proposals + review board + owner ke decisions), aur v1.1 me free tier ke official docs ke against verify hua.
+> **Status:** v1.6 draft (2026-10-20). [PRD.md](PRD.md) v1.0 pe based. Design ek multi-agent review se aaya (3 architecture proposals + review board + owner ke decisions), aur v1.1 me free tier ke official docs ke against verify hua.
 
 ## 0. Ek nazar me
 
@@ -329,7 +329,7 @@ Kai platforms alag users ko alag price dikhate hain. BQ ka rule: **ek product ka
 
 | App                                                                             | Tech                                                                                                                                                                                                                                                                                                                                                        |
 | ------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| customer                                                                        | Vercel pe React Router 7 framework mode. Home, product listing, product page, brand, category, creator storefront aur magazine pages SSR + CDN cache ke saath. Legal pages prerender. Account, cart aur checkout client-side. Meta, OG, JSON-LD, sitemap.                                                                                                   |
+| customer                                                                        | Vercel pe React Router 8 framework mode. Home, product listing, product page, brand, category, creator storefront aur magazine pages SSR + CDN cache ke saath. Legal pages prerender. Account, cart aur checkout client-side. Meta, OG, JSON-LD, sitemap.                                                                                                   |
 | seller, admin, superadmin, master, support, finance, logistics, growth, creator | Vite + React SPAs, React Router data router, lazy routes, route guards. Har app sirf route table, pages aur nav config hai. Baaki packages se aata hai.                                                                                                                                                                                                     |
 | delivery                                                                        | Mobile-first **PWA**: app-shell precache, run sheet NetworkFirst, IndexedDB action queue (har action ka UUID aur Idempotency-Key), POD photos blob me queue aur online hote hi upload, `/api/v1/logistics/sync` batch, pre-generated UPI QR, geolocation, camera, wake lock, install prompt, push. SOS offline bhi queue hota hai, aur `tel:` fallback hai. |
 
@@ -465,7 +465,8 @@ Sirf config badlegi, code nahi:
 | `search` (Lesson 5, opt-in)          | `mongodb-atlas-local` (Atlas Search). Sirf valkey aur mailpit ke saath chalana, kyunki ise ~2 GB khaali RAM chahiye.                                                   | ~2 GB+                 |
 | `tools` (optional)                   | redis-insight                                                                                                                                                          | chhota                 |
 
-- **Bundle mode (jaldi edit-reload ke liye):** `npm run dev:backend` ek Node process (tsx watch) me paancho deployables chalata hai (~400 MB). Live server bhi isi mode me chalta hai.
+- **Bundle mode (jaldi edit-reload ke liye):** `npm run dev:backend` ek Node process (`node --watch`, Node 24 TypeScript seedha chalata hai, tsx nahi) me paancho deployables chalata hai (~400 MB). Live server bhi isi mode me chalta hai, compiled `dist/` se.
+- **Naye apps aur deployables** `npm run create` se bante hain (`--type app` / `--type backend`, [packages/README.md](packages/README.md) §3.1–3.2). Local ports: apps 3001–3011 (`APPS` ke order me), gateway 8080, identity 8081, payments 8082, notify 8083, core 8084. Bundle me internal deployables `127.0.0.1` ke khaali ports pe hote hain; sirf gateway public port pe.
 - Frontend: `turbo dev --filter=<app>`, sirf jis app pe kaam ho raha hai. 7.9 GB RAM pe saare 11 ek saath kabhi mat chalana.
 - **Scripts:**
   - `infra:up`, `infra:down`, `infra:reset`, `infra:logs`
@@ -620,3 +621,4 @@ Sirf config badlegi, code nahi:
 | v1.3 | 2026-10-20 | Packages ka publish Changesets ki jagah apne package CLI se; internal packages semver range se (`workspace:*` nahi); shared configs root `configs/` me. |
 | v1.4 | 2026-10-20 | §16 Phase 0: packages naye bante hain (`BQ-Packages` sirf reference). §13: packages bhi sirf `release` branch se publish (build + publish jobs). |
 | v1.5 | 2026-10-20 | §13: `main` default branch; flow feature → PR → `main` → `prerelease` → `release`, release ke baad `release` → `main` back-merge; teeno branches pe ruleset. |
+| v1.6 | 2026-10-20 | §9.1 React Router 8. §12: backend Node 24 type stripping se (tsx nahi), apps aur deployables `npm run create` se, local ports. |

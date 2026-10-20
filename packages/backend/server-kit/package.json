@@ -1,0 +1,68 @@
+{
+  "name": "@beautinique/backend-server-kit",
+  "version": "1.0.0",
+  "description": "Beautinique service basics: Express app, request ids, errors in the contracts format, health and ready routes, redacting logger, namespaced config and graceful shutdown.",
+  "keywords": [
+    "beautinique",
+    "backend",
+    "express",
+    "server",
+    "logging",
+    "config",
+    "health"
+  ],
+  "author": "Nageshwar Pawar",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Nageshwar1997/Beautinique.git",
+    "directory": "packages/backend/server-kit"
+  },
+  "homepage": "https://github.com/Nageshwar1997/Beautinique/tree/main/packages/backend/server-kit#readme",
+  "bugs": {
+    "url": "https://github.com/Nageshwar1997/Beautinique/issues"
+  },
+  "type": "module",
+  "sideEffects": false,
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    },
+    "./package.json": "./package.json"
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsdown",
+    "typecheck": "tsc --noEmit",
+    "lint": "eslint .",
+    "test": "vitest run"
+  },
+  "peerDependencies": {
+    "@types/express": "^5.0.6",
+    "express": "^5.3.0",
+    "zod": "^4.6.7"
+  },
+  "dependencies": {
+    "@beautinique/shared-contracts": "^1.0.0",
+    "@beautinique/shared-utils": "^2.0.0",
+    "@beautinique/shared-zod": "^2.0.0",
+    "helmet": "^8.3.0",
+    "pino": "^10.4.0"
+  },
+  "devDependencies": {
+    "@types/express": "^5.0.6",
+    "express": "^5.3.0",
+    "zod": "^4.6.7"
+  },
+  "engines": {
+    "node": ">=24"
+  },
+  "publishConfig": {
+    "access": "public"
+  }
+}

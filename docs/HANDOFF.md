@@ -1,6 +1,6 @@
 # HANDOFF — BQ
 
-> **Status:** v1.6 (2026-10-20). Is project pe 2 log kaam karte hain. Ye file batati hai ki **abhi kya halat hai, kisne kya chhoda, agla kaam kya hai** aur kaunse sawal khule hain, taaki doosra insaan (aur uska Claude) bina poora itihaas padhe kaam utha sake. Jo bhi kaam roke, wo ye file update kare (neeche §8).
+> **Status:** v1.7 (2026-10-20). Is project pe 2 log kaam karte hain. Ye file batati hai ki **abhi kya halat hai, kisne kya chhoda, agla kaam kya hai** aur kaunse sawal khule hain, taaki doosra insaan (aur uska Claude) bina poora itihaas padhe kaam utha sake. Jo bhi kaam roke, wo ye file update kare (neeche §8).
 
 ## 0. Pehle ye (handoff ke din)
 
@@ -32,6 +32,8 @@
 - **Release:** `.github/workflows/release.yml`, sirf `release` branch pe, haath se. Do jobs: build (check + pack, har version ka tag isi commit pe zaroori) aur publish (OIDC trusted publishing, kuch install nahi karta, `.github/scripts/publish-tarballs.mjs`). Ye abhi tak GitHub pe chala nahi hai.
 - **`@beautinique/frontend-styles` 2.0.0** (`packages/frontend/styles`), poora: Tailwind v4 tokens (Rose + Plum, tones, order status, 8 chart colours, layout/touch/media sizes), light/dark/high-contrast/print themes (310 colour checks: WCAG contrast aur colour-blind chart check), fonts (Plus Jakarta Sans + Fraunces, `/vite` preload plugin), `base.css`, `animations.css`, `utilities.css` (focus-ring, touch-target, skip-link, container-page, gradients, skeleton, progress, marquee, safe areas), `content.css` (`rich-text`, Quill 2 output bhi), `print.css`. 26 tests (real Vite + Tailwind builds; mutation-checked), Vite playground. Guide: package README. **npm pe abhi publish nahi hua** (npm pe purana 1.1.2 hai).
 - **Neev ke 4 packages** (`packages/shared/`): `shared-zod` 2.0.0 (public; Indian mobile, PIN, GSTIN check digit, PAN, IFSC, UPI, paise ...), `shared-utils` 2.0.0 (public; INR/GST/discount/allocate BigInt me, IST dates, masking, slug, UUIDv7), `shared-contracts` 1.0.0 (public; `defineRoute`, `defineEvent`, `definePermission`, `defineAreaSetting`, error codes, envelope, pagination, OpenAPI 3.1, gateway manifest), `shared-authz` 1.0.0 (public; grants, containment, validity, decision reasons, scope spec, step-up). 66 tests, 33/33 mutations pakde, `npm run verify -- --category shared` pass. npm pe abhi kuch publish nahi hua.
+- **`@beautinique/backend-server-kit` 1.0.0** (`packages/backend/server-kit`, public, publish baaki): har deployable ki neev (AppError + contracts error body, request id, access log, secrets chhupane wala pino logger, `createApp`, `/health` + `/ready`, namespaced `loadConfig`, graceful `startServer`). 15 tests, 25/25 mutations. Uncommitted.
+- **App aur backend generators** (`npm run create`, pehla sawal Package / Frontend app / Backend app): 11 apps (SPA, customer SSR, delivery PWA) aur 5 deployables + bundle. Bane hue apps/services npm packages nahi, `private` workspaces hain (owner ka faisla). Smoke tests har kind ko throwaway repo me bana ke uske typecheck, lint, test, build chalate hain, aur compiled bundle ko asli chala ke `/ready` dekhte hain; generated gateway + bundle ke tests 22/22 mutations pakadte hain. Abhi `frontend/` aur `backend/` me kuch bana nahi. Guide: [packages/README.md](packages/README.md) §3.1–3.2. Uncommitted.
 - **Package CLI** (`scripts/packages/`): `login`, `logout`, `status`, `create`, `publish`, `republish`, `verify`, `build`. 75 tests (fast 55, e2e 9 fake npm registry ke saath, create 11), sab green; 23 mutation checks, sab pakde gaye. Guide: [packages/README.md](packages/README.md).
 - **Docs:** PRD v1.0, ARCHITECTURE v1.4 draft, RULES, DESIGN, TASKS v1.3, MEMORY, packages/README v1.1, ye HANDOFF.
 
@@ -50,7 +52,8 @@
 2. **Main code shuru (owner ka faisla, 2026-10-20):** neev ke packages ke baad ab apps aur backend ka asli kaam; baaki packages tabhi bante hain jab app ko chahiye. Niyam: jo cheez do apps ko chahiye ya saaf taur pe sabki hai (login, API client, layout), wo turant `npm run create` se package me, app me copy nahi. Saare packages public. Andaazan package order TASKS T0.1 me.
 3. **Styles 2.0.0 ka pehla publish:** owner ka npm account chahiye (`npm run login`, phir `release` branch pe `npm run publish`). Doosre insaan ko publish karna ho to owner pehle use npm org `@beautinique` me jode.
 4. **Package CLI follow-up:** `update-deps` command (purane repo me tha; naya republish external dependencies upgrade nahi karta). Scope: outdated deps ki list, select (all / category / packages), ranges update, install, build + checks, fail pe sab wapas.
-5. **Phase 0 ke baaki tasks:** T0.2 (4 apps → `frontend/`), T0.3 (gateway + services → `backend/`), T0.4, T0.5 Turborepo, T0.6 (affected build + gitleaks), T0.8 (Docker infra, owner ke saath), T0.9 (`.env.example` + zod env schema). Milestone 0 ke bina Phase 1 nahi.
+5. **Apps aur deployables banana:** generator taiyaar hai (`npm run create -- --type app` / `--type backend`). Pehle gateway, phir identity/core, phir `bundle`; har ek ka commit alag.
+6. **Phase 0 ke baaki tasks:** T0.2 (4 apps → `frontend/`), T0.3 (gateway + services → `backend/`), T0.4, T0.5 Turborepo, T0.6 (affected build + gitleaks), T0.8 (Docker infra, owner ke saath), T0.9 (`.env.example` + zod env schema). Milestone 0 ke bina Phase 1 nahi.
 
 ## 5. Khule sawal aur owner ke kaam
 
@@ -70,6 +73,9 @@
 - **`npm run x --flag` (bina `--`):** npm flag ko `npm_config_*` bana deta hai; CLI `--dry-run` ko maanta hai aur baaki ko child npm se hata deta hai.
 - **Docker Desktop (owner ka laptop):** install se pehle khula terminal `docker` nahi dhoondh pata; naya terminal kholo.
 - **Claude ke liye:** Bash heredoc/`node -e` me backslashes aur quotes toot jaate hain; regex aur source files Write/Edit tool se likho.
+- **Backend apps ki export condition:** TypeScript me `customConditions: ["development"]` mat lagao: TS phir libraries (jaise arethetypeswrong) ka `.ts` source padhne lagta hai. Deployables ke `exports` me `types` source pe hai, aur Node/Vitest apni condition `beautinique-source` se source lete hain.
+- **`http.request(urlString)`** URL ko pehle saaf karta hai (`..`, `%2e%2e` hat jaate hain); raw path test karna ho to `{ hostname, port, path }` do.
+- **Band server ka handle** (`process.getActiveResourcesInfo()`) Windows pe ~50 ms baad hatta hai; ginti se pehle settle hone do.
 
 ## 7. Purane repos (sab clean, GitHub ke saath sync, 2026-10-20)
 
@@ -98,3 +104,4 @@
 | v1.4 | 2026-10-20 | Styles package poora (§3, §4). |
 | v1.5 | 2026-10-20 | Neev ke 4 shared packages bane (§3, §4). |
 | v1.6 | 2026-10-20 | Saare packages public; ab main code, packages zaroorat ke saath. |
+| v1.7 | 2026-10-20 | `backend-server-kit` aur app/backend generators bane (§3, §4); 3 naye traps (§6). |

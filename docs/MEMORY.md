@@ -1,6 +1,6 @@
 # MEMORY — BQ
 
-> **Status:** v1.5 (2026-10-20). Project ki yaaddasht: **kya tay hua aur kyun**, **pichhle kaam se kya seekha**, aur **kaunse jaal (traps) se bachna hai**. Poori detail baaki docs me hai; yahan short version aur pointers. Naya sabak ya decision aaye to yahan ek line jodo.
+> **Status:** v1.6 (2026-10-20). Project ki yaaddasht: **kya tay hua aur kyun**, **pichhle kaam se kya seekha**, aur **kaunse jaal (traps) se bachna hai**. Poori detail baaki docs me hai; yahan short version aur pointers. Naya sabak ya decision aaye to yahan ek line jodo.
 
 ## 1. Decision log
 
@@ -33,6 +33,10 @@
 | 2026-10-20 | Saare packages npm pe public | Owner ka faisla; monorepo me apne aap jude rehte hain | TASKS T0.1 |
 | 2026-10-20 | Neev ke baad packages app ki zaroorat ke saath bante hain, pehle se nahi; do apps ki cheez turant package me | Asli zaroorat se API banta hai, andaaze se nahi | TASKS T0.1 |
 | 2026-10-20 | Packages sirf `release` branch se publish | Wahi branch jo apps live karti hai: npm pe sirf tested code | ARCH §13 |
+| 2026-10-20 | Apps aur services npm packages nahi: `frontend/<app>`, `backend/<name>`, simple naam, `private` | Owner ka faisla; ye deploy hote hain, publish nahi | [packages/README.md](packages/README.md) §3.1–3.2 |
+| 2026-10-20 | Ek `npm run create` (Package / Frontend app / Backend app); sirf contracts ke `APPS` aur `DEPLOYABLES` | Owner ka faisla; naya feature Core module, naya deployable nahi | ARCH §3, §4 |
+| 2026-10-20 | Service ka common code `backend-server-kit` me, har service me copy nahi | Ek jagah fix, sab services me | TASKS T1.1 |
+| 2026-10-20 | Backend Node 24 type stripping se (tsx nahi), production `tsdown` `dist/`; bundle internal deployables `127.0.0.1` ke khaali ports pe | Kam tools; bahar se sirf gateway | ARCH §12 |
 
 ## 2. Pichhle kaam se seekhe sabak
 
@@ -54,6 +58,7 @@
 16. **`outline-hidden`** focus ring hata deta hai; apna focus style do.
 17. **React concurrent transition** me query-param input ka trap (`useQueryParamInput`): hook ko pehle app me browser pe prove karo.
 18. **`npx tsc -p`** scratch folder se chalaya to output package me likh deta hai; dhyan rakho.
+19. **Test ne kuch parakha hi nahi:** gateway ka `..` test `http.request(urlString)` se tha, jo `..` pehle hi hata deta hai, aur method/`..` tests status 404 dekhte the jo upstream bhi deta. Mutation check ne pakda. **Sabak:** har security test ke liye ek mutation chalao; fake upstream me "leak" route rakho taaki galat forward 200 de.
 
 ## 3. Environment
 
@@ -97,3 +102,4 @@
 | v1.3 | 2026-10-20 | Decisions: packages naye bante hain, `release` branch se publish, `main` default branch wala flow. |
 | v1.4 | 2026-10-20 | Decision: packages public ya private. |
 | v1.5 | 2026-10-20 | Decisions: saare packages public; packages zaroorat ke saath. |
+| v1.6 | 2026-10-20 | Decisions: apps/services packages nahi, ek create command, server-kit, Node type stripping. Sabak 19. |
