@@ -1,6 +1,6 @@
 # HANDOFF — BQ
 
-> **Status:** v1.3 (2026-10-20). Is project pe 2 log kaam karte hain. Ye file batati hai ki **abhi kya halat hai, kisne kya chhoda, agla kaam kya hai** aur kaunse sawal khule hain, taaki doosra insaan (aur uska Claude) bina poora itihaas padhe kaam utha sake. Jo bhi kaam roke, wo ye file update kare (neeche §8).
+> **Status:** v1.4 (2026-10-20). Is project pe 2 log kaam karte hain. Ye file batati hai ki **abhi kya halat hai, kisne kya chhoda, agla kaam kya hai** aur kaunse sawal khule hain, taaki doosra insaan (aur uska Claude) bina poora itihaas padhe kaam utha sake. Jo bhi kaam roke, wo ye file update kare (neeche §8).
 
 ## 0. Pehle ye (handoff ke din)
 
@@ -30,7 +30,7 @@
 - **Monorepo root (T0.5, T0.6 ka pehla hissa):** npm workspaces `packages/*/*`, root scripts, `configs/` (ESLint factory + tsconfig presets), Prettier, `.gitattributes` (LF), `LICENSE` (MIT).
 - **CI:** `.github/workflows/ci.yml`: `npm ci` → `npm run build` → format, lint, typecheck, test, `verify --all`, `npm audit`. Har PR pe, aur `main`, `prerelease`, `release` pe push.
 - **Release:** `.github/workflows/release.yml`, sirf `release` branch pe, haath se. Do jobs: build (check + pack, har version ka tag isi commit pe zaroori) aur publish (OIDC trusted publishing, kuch install nahi karta, `.github/scripts/publish-tarballs.mjs`). Ye abhi tak GitHub pe chala nahi hai.
-- **`@beautinique/frontend-styles` 2.0.0** (`packages/frontend/styles`): Tailwind v4, Rose + Plum palette (RGB channel vars, OKLCH + WCAG check), fonts Plus Jakarta Sans + Fraunces (`scripts/fonts.mjs`, `/vite` preload plugin), `base.css`, Vite playground. **npm pe abhi publish nahi hua** (npm pe purana 1.1.2 hai).
+- **`@beautinique/frontend-styles` 2.0.0** (`packages/frontend/styles`), poora: Tailwind v4 tokens (Rose + Plum, tones, order status, 8 chart colours, layout/touch/media sizes), light/dark/high-contrast/print themes (310 colour checks: WCAG contrast aur colour-blind chart check), fonts (Plus Jakarta Sans + Fraunces, `/vite` preload plugin), `base.css`, `animations.css`, `utilities.css` (focus-ring, touch-target, skip-link, container-page, gradients, skeleton, progress, marquee, safe areas), `content.css` (`rich-text`, Quill 2 output bhi), `print.css`. 26 tests (real Vite + Tailwind builds; mutation-checked), Vite playground. Guide: package README. **npm pe abhi publish nahi hua** (npm pe purana 1.1.2 hai).
 - **Package CLI** (`scripts/packages/`): `login`, `logout`, `status`, `create`, `publish`, `republish`, `verify`, `build`. 75 tests (fast 55, e2e 9 fake npm registry ke saath, create 11), sab green; 23 mutation checks, sab pakde gaye. Guide: [packages/README.md](packages/README.md).
 - **Docs:** PRD v1.0, ARCHITECTURE v1.4 draft, RULES, DESIGN, TASKS v1.3, MEMORY, packages/README v1.1, ye HANDOFF.
 
@@ -46,7 +46,7 @@
 ## 4. Agla kaam (is order me)
 
 1. **T0.7 ho gaya.** 2026-10-20: branches ban gayi, CI teeno pe green; ruleset `protected-branches` (`main`, `prerelease`, `release`: delete aur force push band, PR + 1 approval, `check` required aur up to date, bypass sirf Repository admin); tag ruleset `release-tags` (`@beautinique/*` tags sirf owner bana, badal ya mita sakta hai); environment `npm` sirf `release` branch se, owner ki approval ke saath. Iska matlab: har PR pe CI `check` green + 1 approval chahiye (owner bypass kar sakta hai); `release` pe seedha push sirf owner (package release); npm publish job owner ke approve karne pe hi chalta hai. Owner ne Actions permissions aur Advanced Security bhi set ki (ye public API se check nahi hote).
-2. **T0.1 styles package ke baaki hisse:** utilities, animations (`animations.css`, DESIGN.md "Motion"), component CSS (quill wagairah). Phir doosre packages naye banana (`npm run create`), purane `BQ-Packages` ko sirf dekh ke. ARCHITECTURE §9.2 ke flat naam (contracts, server-kit, ...) ko `shared/frontend/backend` layout me map karna.
+2. **T0.1 baaki packages:** styles poora ho gaya. Ab ARCHITECTURE §9.2 ke packages naye banana (`npm run create`), purane `BQ-Packages` ko sirf dekh ke, aur flat naam (contracts, server-kit, ...) ko `shared/frontend/backend` layout me map karna. Editor (Quill) aur colour-picker ka CSS unke apne packages me jayega, styles me nahi.
 3. **Styles 2.0.0 ka pehla publish:** owner ka npm account chahiye (`npm run login`, phir `release` branch pe `npm run publish`). Doosre insaan ko publish karna ho to owner pehle use npm org `@beautinique` me jode.
 4. **Package CLI follow-up:** `update-deps` command (purane repo me tha; naya republish external dependencies upgrade nahi karta). Scope: outdated deps ki list, select (all / category / packages), ranges update, install, build + checks, fail pe sab wapas.
 5. **Phase 0 ke baaki tasks:** T0.2 (4 apps → `frontend/`), T0.3 (gateway + services → `backend/`), T0.4, T0.5 Turborepo, T0.6 (affected build + gitleaks), T0.8 (Docker infra, owner ke saath), T0.9 (`.env.example` + zod env schema). Milestone 0 ke bina Phase 1 nahi.
@@ -94,3 +94,4 @@
 | v1.1 | 2026-10-20 | Branches `prerelease` aur `release` ban gayi; T0.7 me sirf protection baaki. |
 | v1.2 | 2026-10-20 | CI fix ke baad teeno branches green; `main` default branch wala git flow (§2) aur T0.7 ki settings list (§4). |
 | v1.3 | 2026-10-20 | T0.7 done (rulesets, tag ruleset, `npm` environment). |
+| v1.4 | 2026-10-20 | Styles package poora (§3, §4). |

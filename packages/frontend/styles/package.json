@@ -1,14 +1,15 @@
 {
   "name": "@beautinique/frontend-styles",
   "version": "2.0.0",
-  "description": "Beautinique design tokens, self-hosted fonts and base styles (Tailwind v4) for every frontend app.",
+  "description": "Beautinique design tokens, self-hosted fonts, base styles, animations, utilities and rich-text styles (Tailwind v4) for every frontend app.",
   "keywords": [
     "beautinique",
     "styles",
     "design-tokens",
     "tailwind",
     "css",
-    "fonts"
+    "fonts",
+    "animations"
   ],
   "author": "Nageshwar Pawar",
   "license": "MIT AND OFL-1.1",
@@ -34,6 +35,10 @@
     "./variables.css": "./src/variables.css",
     "./fonts.css": "./src/fonts.css",
     "./base.css": "./src/base.css",
+    "./animations.css": "./src/animations.css",
+    "./utilities.css": "./src/utilities.css",
+    "./content.css": "./src/content.css",
+    "./print.css": "./src/print.css",
     "./fonts/*": "./src/fonts/*",
     "./vite": {
       "types": "./src/vite.d.ts",

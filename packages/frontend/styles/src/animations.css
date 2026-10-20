@@ -1,0 +1,145 @@
+/**
+ * @beautinique/frontend-styles: animations.
+ *
+ * Tailwind: animate-fade-in, animate-scale-out, animate-slide-in-from-bottom ... (Tailwind's own
+ * animate-spin, -ping, -pulse and -bounce stay). Keyframes are emitted only when a class is used.
+ *
+ * Durations come from the motion tokens, so prefers-reduced-motion turns them into 0ms (variables.css)
+ * and base.css stops any other animation. Exit animations still fire `animationend`, so a component
+ * that waits for it before unmounting keeps working with reduced motion.
+ *
+ * Which one where:
+ *   fade-in / fade-out              overlays, backdrops, swapping content
+ *   scale-in / scale-out            popover, dropdown menu, dialog (set transform-origin on the element)
+ *   rise-in / sink-out              toast, tooltip, small hints
+ *   slide-in-from-* / slide-out-to-* sheet, drawer, side panel (the full width or height of the element)
+ *   shake                           a form that failed to submit (also show the error text)
+ *   pop                             wishlist heart, cart count change
+ */
+@theme {
+  --animate-fade-in: fade-in var(--duration-base) var(--ease-enter) both;
+  --animate-fade-out: fade-out var(--duration-fast) var(--ease-exit) both;
+  --animate-scale-in: scale-in var(--duration-base) var(--ease-enter) both;
+  --animate-scale-out: scale-out var(--duration-fast) var(--ease-exit) both;
+  --animate-rise-in: rise-in var(--duration-base) var(--ease-enter) both;
+  --animate-sink-out: sink-out var(--duration-fast) var(--ease-exit) both;
+  --animate-slide-in-from-top: slide-in-from-top var(--duration-slow) var(--ease-enter) both;
+  --animate-slide-in-from-bottom: slide-in-from-bottom var(--duration-slow) var(--ease-enter) both;
+  --animate-slide-in-from-left: slide-in-from-left var(--duration-slow) var(--ease-enter) both;
+  --animate-slide-in-from-right: slide-in-from-right var(--duration-slow) var(--ease-enter) both;
+  --animate-slide-out-to-top: slide-out-to-top var(--duration-base) var(--ease-exit) both;
+  --animate-slide-out-to-bottom: slide-out-to-bottom var(--duration-base) var(--ease-exit) both;
+  --animate-slide-out-to-left: slide-out-to-left var(--duration-base) var(--ease-exit) both;
+  --animate-slide-out-to-right: slide-out-to-right var(--duration-base) var(--ease-exit) both;
+  --animate-shake: shake calc(var(--duration-slow) * 1.5) var(--ease-standard) both;
+  --animate-pop: pop var(--duration-slow) var(--ease-spring) both;
+
+  @keyframes fade-in {
+    from {
+      opacity: 0;
+    }
+  }
+
+  @keyframes fade-out {
+    to {
+      opacity: 0;
+    }
+  }
+
+  @keyframes scale-in {
+    from {
+      opacity: 0;
+      scale: 0.96;
+    }
+  }
+
+  @keyframes scale-out {
+    to {
+      opacity: 0;
+      scale: 0.96;
+    }
+  }
+
+  @keyframes rise-in {
+    from {
+      opacity: 0;
+      translate: 0 0.5rem;
+    }
+  }
+
+  @keyframes sink-out {
+    to {
+      opacity: 0;
+      translate: 0 0.5rem;
+    }
+  }
+
+  @keyframes slide-in-from-top {
+    from {
+      translate: 0 -100%;
+    }
+  }
+
+  @keyframes slide-in-from-bottom {
+    from {
+      translate: 0 100%;
+    }
+  }
+
+  @keyframes slide-in-from-left {
+    from {
+      translate: -100% 0;
+    }
+  }
+
+  @keyframes slide-in-from-right {
+    from {
+      translate: 100% 0;
+    }
+  }
+
+  @keyframes slide-out-to-top {
+    to {
+      translate: 0 -100%;
+    }
+  }
+
+  @keyframes slide-out-to-bottom {
+    to {
+      translate: 0 100%;
+    }
+  }
+
+  @keyframes slide-out-to-left {
+    to {
+      translate: -100% 0;
+    }
+  }
+
+  @keyframes slide-out-to-right {
+    to {
+      translate: 100% 0;
+    }
+  }
+
+  @keyframes shake {
+    0%,
+    100% {
+      translate: 0 0;
+    }
+    20%,
+    60% {
+      translate: -0.375rem 0;
+    }
+    40%,
+    80% {
+      translate: 0.375rem 0;
+    }
+  }
+
+  @keyframes pop {
+    50% {
+      scale: 1.2;
+    }
+  }
+}

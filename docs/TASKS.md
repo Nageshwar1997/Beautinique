@@ -1,6 +1,6 @@
 # TASKS — BQ
 
-> **Status:** v1.6 (2026-10-20). Poore project ki task list, [ARCHITECTURE.md](ARCHITECTURE.md) §16 ke phases ke hisaab se. Har task "done" tabhi jab [RULES.md](RULES.md) §1.5 ki Definition of Done poori ho.
+> **Status:** v1.7 (2026-10-20). Poore project ki task list, [ARCHITECTURE.md](ARCHITECTURE.md) §16 ke phases ke hisaab se. Har task "done" tabhi jab [RULES.md](RULES.md) §1.5 ki Definition of Done poori ho.
 
 **Kaise use karein:**
 - `[ ]` baaki, `[~]` chal raha hai, `[x]` done.
@@ -34,7 +34,7 @@
 
 ## Phase 0. Monorepo + CI (1–2 hafte)
 
-- [~] T0.1 Packages naye bante hain, `packages/<shared|frontend|backend>/<name>` me (`@beautinique/<category>-<name>`). `BQ-Packages` sirf reference hai, copy ya subtree nahi (owner ka faisla, 2026-10-19). Pehla package `frontend-styles` 2.0.0 bana hai (publish baaki); agla: styles ke utilities, animations aur component CSS.
+- [~] T0.1 Packages naye bante hain, `packages/<shared|frontend|backend>/<name>` me (`@beautinique/<category>-<name>`). `BQ-Packages` sirf reference hai, copy ya subtree nahi (owner ka faisla, 2026-10-19). Pehla package `frontend-styles` 2.0.0 poora hai (tokens, tones, order status, charts, high contrast, print, animations, utilities, rich text; publish baaki). Agla: ARCHITECTURE §9.2 ke baaki packages naye banana.
 - [ ] T0.2 4 apps → `frontend/` (customer, seller, admin, master).
 - [ ] T0.3 Gateway aur services → `backend/` (port sources ki tarah).
 - [ ] T0.4 Media-service ka nested `.git` aur `.kilo` worktree hatana.
@@ -190,3 +190,4 @@
 | v1.4 | 2026-10-20 | T0.7: `prerelease` aur `release` branches ban gayi; protection baaki. |
 | v1.5 | 2026-10-20 | T0.7: `main` default branch wala flow; ruleset teeno branches pe. |
 | v1.6 | 2026-10-20 | T0.7 done: rulesets, tag ruleset aur `npm` environment lag gaye. |
+| v1.7 | 2026-10-20 | T0.1: `frontend-styles` poora (animations, utilities, rich text, tones, charts, high contrast, print). |

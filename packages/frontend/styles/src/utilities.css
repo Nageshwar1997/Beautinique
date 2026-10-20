@@ -1,0 +1,247 @@
+/**
+ * @beautinique/frontend-styles: utilities that Tailwind does not have.
+ *
+ * Tone utilities (tone-brand, tone-success ...) come from the palette script (variables.css).
+ */
+
+/* Keyboard focus for custom controls that hide the native outline (outline-hidden): the same ring
+   as base.css. focus-ring-inset for items inside a scroll box or list, where an outside ring is clipped;
+   focus-ring-within for a wrapper whose input has focus (input with icons). */
+@utility focus-ring {
+  &:focus-visible {
+    outline: var(--focus-ring-width) solid var(--focus-ring);
+    outline-offset: var(--focus-ring-offset);
+  }
+}
+
+@utility focus-ring-inset {
+  &:focus-visible {
+    outline: var(--focus-ring-width) solid var(--focus-ring);
+    outline-offset: calc(var(--focus-ring-width) * -1);
+  }
+}
+
+@utility focus-ring-within {
+  &:has(:focus-visible) {
+    outline: var(--focus-ring-width) solid var(--focus-ring);
+    outline-offset: var(--focus-ring-offset);
+  }
+}
+
+/* A small control (icon button, close x, shade dot) with a 44px hit area (48px with touch-target-lg),
+   without changing its looks. Uses ::before, so the element itself must not need it. */
+@utility touch-target {
+  position: relative;
+
+  &::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    translate: -50% -50%;
+    width: 100%;
+    height: 100%;
+    min-width: var(--spacing-touch);
+    min-height: var(--spacing-touch);
+  }
+}
+
+@utility touch-target-lg {
+  position: relative;
+
+  &::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    translate: -50% -50%;
+    width: 100%;
+    height: 100%;
+    min-width: var(--spacing-touch-lg);
+    min-height: var(--spacing-touch-lg);
+  }
+}
+
+/* "Skip to content" link (DESIGN §8): the first focusable element of every page, shown only on focus.
+   <a href="#main" class="skip-link">Skip to content</a> */
+@utility skip-link {
+  position: fixed;
+  top: 0.75rem;
+  left: 0.75rem;
+  z-index: var(--z-tooltip);
+  padding: 0.75rem 1rem;
+  border-radius: 0.75rem;
+  background-color: var(--surface);
+  color: var(--foreground);
+  font-weight: 600;
+  box-shadow: 0 10px 15px -3px rgba(var(--shadow-color-rgb), 0.1);
+  translate: 0 calc(-100% - 1.5rem);
+  transition: translate var(--duration-fast) var(--ease-standard);
+
+  &:focus,
+  &:focus-visible {
+    translate: 0 0;
+  }
+}
+
+/* Page width with responsive side padding: <main class="container-page"> */
+@utility container-page {
+  width: 100%;
+  max-width: var(--container-page);
+  margin-inline: auto;
+  padding-inline: 1rem;
+
+  @variant sm {
+    padding-inline: 1.5rem;
+  }
+
+  @variant lg {
+    padding-inline: 2rem;
+  }
+}
+
+/* Brand gradient. bg-brand-gradient also sets its text colour (white passes on both stops);
+   text-brand-gradient is for large text only (headings, banners: 3:1). Forced-colors mode gets
+   plain text, because gradient text would disappear there. */
+@utility bg-brand-gradient {
+  background-image: linear-gradient(135deg, var(--gradient-from), var(--gradient-to));
+  color: var(--gradient-foreground);
+}
+
+@utility text-brand-gradient {
+  background-image: linear-gradient(135deg, var(--gradient-text-from), var(--gradient-text-to));
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  -webkit-text-fill-color: transparent;
+
+  @media (forced-colors: active) {
+    background-image: none;
+    color: CanvasText;
+    -webkit-text-fill-color: CanvasText;
+  }
+}
+
+/* Loading placeholder in the shape of the content (DESIGN §6). Hide it from screen readers
+   (aria-hidden) and mark the region aria-busy. The shimmer stops with reduced motion. */
+@utility skeleton {
+  position: relative;
+  overflow: hidden;
+  background-color: var(--surface-muted);
+  color: transparent;
+
+  &::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    translate: -100% 0;
+    background-image: linear-gradient(
+      90deg,
+      transparent,
+      rgba(var(--foreground-rgb), 0.06),
+      transparent
+    );
+    animation: skeleton-shimmer 1.6s linear infinite;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    &::after {
+      display: none;
+    }
+  }
+}
+
+@keyframes skeleton-shimmer {
+  to {
+    translate: 100% 0;
+  }
+}
+
+/* Indeterminate progress bar (page loads, the server wake-up screen). Put it on the track; the bar is
+   ::before in currentColor. With reduced motion it shows a still, half-filled bar instead.
+   <div role="progressbar" aria-label="Loading" class="progress-indeterminate h-1 text-brand bg-brand/20"> */
+@utility progress-indeterminate {
+  position: relative;
+  overflow: hidden;
+
+  &::before {
+    content: '';
+    position: absolute;
+    inset-block: 0;
+    left: 0;
+    width: 40%;
+    border-radius: inherit;
+    background-color: currentColor;
+    animation: progress-indeterminate 1.4s var(--ease-standard) infinite;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    &::before {
+      width: 50%;
+      animation: none;
+    }
+  }
+}
+
+@keyframes progress-indeterminate {
+  from {
+    translate: -100% 0;
+  }
+  to {
+    translate: 250% 0;
+  }
+}
+
+/* Scrolling strip (announcement bar). Put the content in twice inside the element, so the loop is
+   seamless. It pauses on hover and keyboard focus and stops with reduced motion; anything that moves
+   for longer than 5 seconds also needs a visible pause button (WCAG 2.2.2). Speed: --marquee-duration. */
+@utility marquee {
+  display: flex;
+  width: max-content;
+  animation: marquee var(--marquee-duration, 40s) linear infinite;
+
+  &:hover,
+  &:focus-within {
+    animation-play-state: paused;
+  }
+
+  &[data-paused] {
+    animation-play-state: paused;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    animation: none;
+  }
+}
+
+@keyframes marquee {
+  to {
+    translate: -50% 0;
+  }
+}
+
+/* Scrollbars: Tailwind has them (scrollbar-none, scrollbar-thin, scrollbar-thumb-border-strong,
+   scrollbar-track-transparent), so this package adds none. */
+
+/* Safe areas (notch, home indicator) for fixed bars on phones. Needs viewport-fit=cover in the
+   viewport meta tag. pb-safe on the Customer bottom nav and the Delivery action bar. */
+@utility pt-safe {
+  padding-top: env(safe-area-inset-top, 0px);
+}
+
+@utility pb-safe {
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+}
+
+@utility pl-safe {
+  padding-left: env(safe-area-inset-left, 0px);
+}
+
+@utility pr-safe {
+  padding-right: env(safe-area-inset-right, 0px);
+}
+
+@utility px-safe {
+  padding-left: env(safe-area-inset-left, 0px);
+  padding-right: env(safe-area-inset-right, 0px);
+}

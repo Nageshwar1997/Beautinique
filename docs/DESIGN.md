@@ -1,6 +1,6 @@
 # DESIGN — BQ
 
-> **Status:** v1.2 (2026-10-20). UI aur UX ke niyam saare 11 apps ke liye. Design ka **source of truth code hai**: `@beautinique/frontend-styles` (tokens) aur `@beautinique/frontend-components` (components). [RULES.md](RULES.md) §5 frontend ke coding niyam batata hai; ye file batati hai ki cheezein **dikhengi aur chalengi kaise**.
+> **Status:** v1.3 (2026-10-20). UI aur UX ke niyam saare 11 apps ke liye. Design ka **source of truth code hai**: `@beautinique/frontend-styles` (tokens) aur `@beautinique/frontend-components` (components). [RULES.md](RULES.md) §5 frontend ke coding niyam batata hai; ye file batati hai ki cheezein **dikhengi aur chalengi kaise**.
 
 ## 1. Design principles
 
@@ -22,42 +22,40 @@
 
 Theme `<html theme="light">` ya `theme="dark"` attribute se badalti hai. Default user ki system setting, aur user ka choice yaad rakha jata hai (`localStorage` me sirf preference).
 
-### 3.2 Base colours (semantic)
+### 3.2 Colours (Rose + Plum)
 
-| Token                   | Light            | Dark               | Use                                  |
-| ----------------------- | ---------------- | ------------------ | ------------------------------------ |
-| `primary`               | `#000000`        | `#FFFFFF`          | Main text, primary button            |
-| `primary-invert`        | `#FFFFFF`        | `#000000`          | Page background, primary button text |
-| `secondary`             | `rgb(28,28,28)`  | `rgb(245,245,245)` | Secondary text aur surfaces          |
-| `tertiary`              | `rgb(46,46,46)`  | `rgb(200,200,200)` | Muted text, borders                  |
-| `smoke-eerie`           | `#F2F2F2`        | `#1A1A1A`          | Cards aur sections ka background     |
-| `battleship-davys-gray` | `#999999`        | `#4D4D4D`          | Placeholder, disabled                |
-| `primary-red`           | `rgb(220,38,38)` | `rgb(248,113,113)` | Error, destructive                   |
-| `primary-green`         | `rgb(22,163,74)` | `rgb(74,222,128)`  | Success                              |
-| `primary-yellow`        | `rgb(234,179,8)` | `rgb(253,224,71)`  | Warning                              |
+Brand: **rose** rgb(214, 51, 108), deep **plum** rgb(92, 26, 70), **champagne gold** accent rgb(196, 154, 82), warm neutrals (ivory se ink tak). Har colour RGB channels me hai (`rgba(var(--brand-rgb), 0.12)` chalta hai). Poori list aur use package README me.
 
-Grey ke baaki tokens (`timberwolf-eerie-black`, `platinum-black`, `silver`, `silver-jet`, `platinum-jet`) borders aur layers ke liye hain.
+| Token                                                      | Kaam                                                     |
+| ---------------------------------------------------------- | -------------------------------------------------------- |
+| `background`, `surface`, `surface-muted`, `surface-inverse` | Page, card, section, ulta (dark strip)                   |
+| `foreground` (+ `-muted`, `-subtle`, `-inverse`)           | Padhne wala text                                         |
+| `border`, `border-strong`                                  | Halki lines; inputs aur boundaries                       |
+| `brand`, `secondary`, `accent`                             | Rose, plum, gold (har ek ke saath `-hover`, `-foreground`, `-subtle`, `-subtle-foreground`) |
+| `success`, `warning`, `error`, `info`, `neutral`           | Status (same set)                                        |
+| `brand-text`, `price-discount`, `rating`, `focus-ring`     | Link/brand text, discount, stars, keyboard focus         |
 
-### 3.3 Accent palette (dono theme me same)
+- **Contrast niyam:** padhne wala text sirf `foreground*`, `brand-text`, `price-discount` ya kisi tone ke `-foreground`/`-subtle-foreground` me. Palette script har jodi ka WCAG contrast har theme me check karta hai (abhi 310/310); naya colour bhi wahi se.
+- `teal` aur `violet` scales sirf charts aur category tags ke liye.
 
-| Token                | Hex              | Token                  | Hex       |
-| -------------------- | ---------------- | ---------------------- | --------- |
-| `picton-blue-c`      | `#25ADF9`        | `razzle-dazzle-rose-c` | `#EE46BC` |
-| `blue-crayola-c`     | `rgb(0,119,255)` | `veronica-c`           | `#9747FF` |
-| `dodger-blue-c`      | `#2E90FA`        | `jade-c`               | `#12B76A` |
-| `princeton-orange-c` | `#F79009`        | `turquoise-c`          | `#00E5D1` |
-| `naples-yellow-c`    | `#F7D158`        | `rose-c`               | `#FE026C` |
-| `electric-purple-c`  | `#B519DF`        |                        |           |
+### 3.3 Tones, order status, charts
 
-- **Brand gradient (`accent-duo`):** turquoise → picton blue → blue crayola. Highlights, hero aur special badges ke liye.
-- **Contrast rule:** accent colours white pe chhote text ke liye AA pass nahi karte (jaise picton blue). Isliye accent sirf decoration, icons, bade text aur buttons ke background ke liye; padhne wala text hamesha `primary`/`secondary` me.
-- Order status, charts aur tags ke liye accents ka ek tay mapping `styles` package me rahega, taaki har app me ek hi matlab ho.
+- **Tones:** `tone-success` jaisi class ek element ka rang tay karti hai, aur component `bg-tone`, `text-tone-foreground`, `bg-tone-subtle` use karta hai. Isse Badge, Alert, Button ek hi code me har rang ke.
+- **Order status** ka rang har app me ek: `data-order-status="DELIVERED"` (mapping package README me). Rang ke saath status ka text hamesha.
+- **Charts:** `chart-1` … `chart-8`, isi order me. Dono themes me series ka hue same, har colour 3:1, aur padosi series colour-blind aankhon ke liye bhi alag. Legend ya labels phir bhi zaroori (sirf rang se matlab nahi).
 
-### 3.4 Shadows, gradients, breakpoints
+### 3.4 High contrast aur print
 
-- **Shadows:** `shadow-primary-btn`, `secondary-btn`, `tertiary-btn`, `outline-btn` (aur unke `-hover`), `shadow-light-dark-soft`. Naye shadows tokens me hi.
-- **Gradients:** `accent-duo`, `silver-duo`, `border-gradient`, `hr-line`, `sky-blue-burst`.
-- **Breakpoints:** `base` 450, `sm` 640, `md` 768, `lg` 1024, `xl` 1280, `xxl` 1536 px. Har screen 360, 768 aur 1280 px pe test hoti hai.
+- `<html contrast="more">` (ya system setting): text 7:1, borders saaf, focus ring 3px. **Delivery app** ise dhoop ke liye use karta hai; baaki apps me system setting se apne aap.
+- Print me hamesha light theme (invoice, labels, run sheets).
+
+### 3.5 Gradients, shadows, layout, breakpoints
+
+- **Brand gradient:** rose → plum (`bg-brand-gradient`, white text dono stops pe pass), dono themes me same. Gradient text (`text-brand-gradient`) sirf bade text ke liye.
+- **Shadows:** `shadow-xs` … `shadow-xl`, `shadow-brand`, `shadow-focus` (theme ke shadow colour se). Naye shadows tokens me hi.
+- **Breakpoints:** `base` 450, `sm` 640, `md` 768, `lg` 1024, `xl` 1280, `2xl` 1536 px. Har screen 360, 768 aur 1280 px pe test hoti hai.
+- **Layout:** header 64 px (`h-header`), Customer bottom nav 64 px, Delivery action bar 72 px, sidebar 256/72 px, page max 1280 px (`container-page`), dialog 512 px, sheet 448 px. Phone pe fixed bars `pb-safe`.
+- **Media:** product 1:1, banner 3:1 (phone 16:9), creator/UGC 4:5.
 - **Spacing aur radius:** Tailwind ka default 4 px scale; ek component ke andar ek hi radius family.
 
 ## 4. Typography
@@ -99,7 +97,7 @@ app-shell (layout, nav, theme switcher, wake-up screen), data-table, review-scre
 ## 6. States
 
 Har screen ye states dikhati hai:
-- **Loading:** Skeleton (shape jaisi), spinner sirf chhote actions pe.
+- **Loading:** Skeleton (shape jaisi, `skeleton` utility), spinner sirf chhote actions pe, page/wake-up pe `progress-indeterminate` bar.
 - **Empty:** kya hai aur aage kya karein, ek action button ke saath.
 - **Error:** saaf message, retry, aur request-id (support ke liye).
 - **Offline:** NetworkStatusToaster; Delivery app me offline queue ka count.
@@ -122,11 +120,12 @@ Har screen ye states dikhati hai:
 
 - Text contrast ≥ 4.5:1 (bade text ≥ 3:1). Accent colour rule §3.3.
 - **Focus ring hamesha dikhe.** `outline-hidden` lagao to apna focus style do.
-- Touch target kam se kam 44 px (Delivery app me 48 px).
+- Touch target kam se kam 44 px (Delivery app me 48 px): `size-touch`, ya chhote control pe `touch-target` / `touch-target-lg`.
 - Icon-only button pe `aria-label`; images pe alt text (product images me product ka naam aur shade).
 - Form errors input se jude hon (`aria-describedby`), aur sirf colour se error na batayein.
 - `prefers-reduced-motion` pe animations band ya halki.
-- Har page pe ek `h1`, sahi heading order, aur skip-to-content link.
+- Har page pe ek `h1`, sahi heading order, aur skip-to-content link (`skip-link`).
+- High contrast (`contrast="more"` ya system setting) har app me chalna chahiye; Delivery app me hamesha on.
 
 ## 9. Text aur formats
 
@@ -149,7 +148,7 @@ Har screen ye states dikhati hai:
 - **Images:** Cloudinary `f_auto,q_auto`, sahi `sizes`/`srcset`, lazy loading. Product images 1:1, banners ka ratio component me fix.
 - **Shade images:** asli rang ke swatches (hex + photo), Indian skin tones pe.
 - **Try-on:** camera se pehle consent screen; camera frames device se bahar nahi jaate.
-- **Motion:** `animations.css` ke tokens; chhote aur kaam ke animations, reduced-motion respect.
+- **Motion:** `animations.css` ki classes (fade, scale, rise, slide, shake, pop) aur motion tokens; chhote aur kaam ke animations. Reduced motion pe sab ruk jata hai; 5 second se lambi chalti cheez (marquee) ke saath pause button.
 - **Icons:** apna `icons` package, jisme **apne icon components** hain (`IconCart`, `IconSearch`, ...):
   - SVG Iconify ke sets se copy kiya jata hai, sirf jo icons use hote hain. Runtime pe Iconify nahi, isliye offline aur PWA safe.
   - Saare icons ek `BaseIcon` pe bane hain: size, `currentColor`, stroke ek jaisa.
@@ -166,3 +165,4 @@ Har screen ye states dikhati hai:
 | v1.0    | 2026-10-19 | Pehla version: principles, tokens (aaj ke `styles` package se), typography, components, states, commerce UI rules, accessibility, text aur formats, har app ka look, media aur icons. |
 | v1.1    | 2026-10-19 | Typography: Metropolis ki jagah Plus Jakarta Sans (body) + Fraunces (headings).                                                                                                       |
 | v1.2    | 2026-10-20 | §9 Text aur formats: apps sirf English me.                                                                                                                                            |
+| v1.3    | 2026-10-20 | §3 naye `styles` package ke tokens se: Rose + Plum colours, tones, order status, charts, high contrast, print, gradients, layout; §6, §8, §11 me package ki utilities. |
