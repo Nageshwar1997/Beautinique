@@ -19,7 +19,16 @@ const WEIGHTS = [
   [600, 'font-semibold'],
   [700, 'font-bold'],
 ];
-const SIZES = ['text-xs', 'text-sm', 'text-base', 'text-lg', 'text-xl', 'text-2xl', 'text-3xl', 'text-4xl'];
+const SIZES = [
+  'text-xs',
+  'text-sm',
+  'text-base',
+  'text-lg',
+  'text-xl',
+  'text-2xl',
+  'text-3xl',
+  'text-4xl',
+];
 
 function renderType() {
   const t = T;
@@ -50,7 +59,8 @@ function renderType() {
       </div>
     </article>`;
   document.getElementById('sizes').innerHTML = SIZES.map(
-    (s) => `<div class="flex flex-col gap-1 py-2 sm:flex-row sm:items-baseline sm:gap-4"><code class="text-foreground-subtle w-20 shrink-0 text-xs">${s}</code><p class="${s} min-w-0 max-w-3xl">${t.desc}</p></div>`,
+    (s) =>
+      `<div class="flex flex-col gap-1 py-2 sm:flex-row sm:items-baseline sm:gap-4"><code class="text-foreground-subtle w-20 shrink-0 text-xs">${s}</code><p class="${s} min-w-0 max-w-3xl">${t.desc}</p></div>`,
   ).join('');
 }
 
@@ -60,7 +70,9 @@ document.getElementById('toggle').addEventListener('click', () => {
   const html = document.documentElement;
   html.setAttribute('theme', html.getAttribute('theme') === 'dark' ? 'light' : 'dark');
 });
-document.getElementById('open-dialog').addEventListener('click', () => document.getElementById('dialog').showModal());
+document
+  .getElementById('open-dialog')
+  .addEventListener('click', () => document.getElementById('dialog').showModal());
 
 const scales = ['rose', 'plum', 'gold', 'neutral', 'success', 'warning', 'error', 'info'];
 const steps = [50, 100, 200, 300, 400, 500, 600, 700, 800, 900, 950];
@@ -68,20 +80,35 @@ document.getElementById('palette').innerHTML = scales
   .map(
     (s) =>
       `<div><p class="mb-1 text-sm font-semibold">${s}</p><div class="flex flex-wrap gap-1.5">${steps
-        .map((n) => `<div class="bg-surface w-20 overflow-hidden rounded-lg border text-xs"><div class="h-11" style="background:rgb(var(--${s}-${n}-rgb))"></div><span class="text-foreground-muted block px-1.5 py-1">${n}</span></div>`)
+        .map(
+          (n) =>
+            `<div class="bg-surface w-20 overflow-hidden rounded-lg border text-xs"><div class="h-11" style="background:rgb(var(--${s}-${n}-rgb))"></div><span class="text-foreground-muted block px-1.5 py-1">${n}</span></div>`,
+        )
         .join('')}</div></div>`,
   )
   .join('');
 
 const pairs = [
-  ['background', 'foreground'], ['surface', 'foreground'], ['surface-muted', 'foreground-muted'],
-  ['surface', 'foreground-subtle'], ['surface', 'brand-text'], ['brand', 'brand-foreground'],
-  ['brand-subtle', 'brand-subtle-foreground'], ['secondary', 'secondary-foreground'],
-  ['secondary-subtle', 'secondary-subtle-foreground'], ['accent', 'accent-foreground'],
-  ['accent-subtle', 'accent-subtle-foreground'], ['success', 'success-foreground'],
-  ['warning', 'warning-foreground'], ['error', 'error-foreground'], ['info', 'info-foreground'],
+  ['background', 'foreground'],
+  ['surface', 'foreground'],
+  ['surface-muted', 'foreground-muted'],
+  ['surface', 'foreground-subtle'],
+  ['surface', 'brand-text'],
+  ['brand', 'brand-foreground'],
+  ['brand-subtle', 'brand-subtle-foreground'],
+  ['secondary', 'secondary-foreground'],
+  ['secondary-subtle', 'secondary-subtle-foreground'],
+  ['accent', 'accent-foreground'],
+  ['accent-subtle', 'accent-subtle-foreground'],
+  ['success', 'success-foreground'],
+  ['warning', 'warning-foreground'],
+  ['error', 'error-foreground'],
+  ['info', 'info-foreground'],
   ['surface-inverse', 'foreground-inverse'],
 ];
 document.getElementById('semantic').innerHTML = pairs
-  .map(([bg, fg]) => `<span class="inline-flex min-w-44 items-center rounded-lg border px-3.5 py-2.5 text-sm" style="background:var(--${bg});color:var(--${fg})">${fg} on ${bg}</span>`)
+  .map(
+    ([bg, fg]) =>
+      `<span class="inline-flex min-w-44 items-center rounded-lg border px-3.5 py-2.5 text-sm" style="background:var(--${bg});color:var(--${fg})">${fg} on ${bg}</span>`,
+  )
   .join('');

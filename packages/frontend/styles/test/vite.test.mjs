@@ -24,11 +24,17 @@ async function buildFixture(options, { base, pages = ['index.html'], experimenta
     configFile: false,
     logLevel: 'silent',
     plugins: [tailwindcss(), beautiniqueFonts(options)],
-    build: { outDir, emptyOutDir: true, rolldownOptions: { input: pages.map((p) => join(root, p)) } },
+    build: {
+      outDir,
+      emptyOutDir: true,
+      rolldownOptions: { input: pages.map((p) => join(root, p)) },
+    },
   });
   const assets = await readdir(join(outDir, 'assets'));
   const cssFile = assets.find((a) => a.endsWith('.css'));
-  const htmls = Object.fromEntries(await Promise.all(pages.map(async (p) => [p, await readFile(join(outDir, p), 'utf8')])));
+  const htmls = Object.fromEntries(
+    await Promise.all(pages.map(async (p) => [p, await readFile(join(outDir, p), 'utf8')])),
+  );
   return {
     html: htmls[pages[0]],
     htmls,
@@ -50,7 +56,12 @@ describe('beautiniqueFonts() in a build', () => {
     for (const name of ['plus-jakarta-sans-latin', 'fraunces-latin']) {
       const file = emitted(assets, name);
       assert.ok(css.includes(`/assets/${file}`), `CSS references ${file}`);
-      assert.ok(html.includes(`<link rel="preload" as="font" type="font/woff2" href="/assets/${file}" crossorigin>`), `index.html preloads ${file}`);
+      assert.ok(
+        html.includes(
+          `<link rel="preload" as="font" type="font/woff2" href="/assets/${file}" crossorigin>`,
+        ),
+        `index.html preloads ${file}`,
+      );
     }
     assert.equal((html.match(/rel="preload"/g) ?? []).length, 2);
     assert.ok(!html.includes('<script>'), 'no inline script (nothing for a CSP to allow)');
@@ -83,24 +94,43 @@ describe('beautiniqueFonts() in a build', () => {
   });
 
   test('renderBuiltUrl { relative: true } gives a page-relative preload', async () => {
-    const { html, assets } = await buildFixture({}, { experimental: { renderBuiltUrl: () => ({ relative: true }) } });
+    const { html, assets } = await buildFixture(
+      {},
+      { experimental: { renderBuiltUrl: () => ({ relative: true }) } },
+    );
     assert.ok(html.includes(`href="./assets/${emitted(assets, 'plus-jakarta-sans-latin')}"`));
   });
 
   test('rejects a runtime renderBuiltUrl (a preload needs a static URL)', async () => {
     // only for the fonts: Vite itself refuses runtime URLs for its own HTML assets
-    const runtime = (file, { hostType }) => (hostType === 'html' && file.endsWith('.woff2') ? { runtime: `window.cdn(${JSON.stringify(file)})` } : undefined);
-    await assert.rejects(buildFixture({}, { experimental: { renderBuiltUrl: runtime } }), /runtime URL/);
+    const runtime = (file, { hostType }) =>
+      hostType === 'html' && file.endsWith('.woff2')
+        ? { runtime: `window.cdn(${JSON.stringify(file)})` }
+        : undefined;
+    await assert.rejects(
+      buildFixture({}, { experimental: { renderBuiltUrl: runtime } }),
+      /runtime URL/,
+    );
   });
 
   test('multi-page build: only pages that load the styles get the preloads', async () => {
-    const { htmls, assets } = await buildFixture({ preload: ['sans', 'display'] }, { pages: ['index.html', 'nocss.html'] });
-    for (const name of ['plus-jakarta-sans-latin', 'fraunces-latin']) assert.ok(htmls['index.html'].includes(`/assets/${emitted(assets, name)}`));
-    assert.ok(!htmls['nocss.html'].includes('rel="preload"'), 'no preload on a page without the styles');
+    const { htmls, assets } = await buildFixture(
+      { preload: ['sans', 'display'] },
+      { pages: ['index.html', 'nocss.html'] },
+    );
+    for (const name of ['plus-jakarta-sans-latin', 'fraunces-latin'])
+      assert.ok(htmls['index.html'].includes(`/assets/${emitted(assets, name)}`));
+    assert.ok(
+      !htmls['nocss.html'].includes('rel="preload"'),
+      'no preload on a page without the styles',
+    );
   });
 
   test('fails loudly when the app does not import the styles', async () => {
-    await assert.rejects(buildFixture({}, { pages: ['nocss.html'] }), /plus-jakarta-sans-latin\.woff2 is not in the build/);
+    await assert.rejects(
+      buildFixture({}, { pages: ['nocss.html'] }),
+      /plus-jakarta-sans-latin\.woff2 is not in the build/,
+    );
   });
 });
 
@@ -113,12 +143,20 @@ describe('beautiniqueFonts() options', () => {
 
 describe('beautiniqueFonts() in dev', () => {
   test('preload URLs are served and match the CSS', async () => {
-    const server = await createServer({ root, configFile: false, logLevel: 'silent', plugins: [tailwindcss(), beautiniqueFonts({ preload: ['sans', 'display'] })], server: { port: 0, strictPort: false } });
+    const server = await createServer({
+      root,
+      configFile: false,
+      logLevel: 'silent',
+      plugins: [tailwindcss(), beautiniqueFonts({ preload: ['sans', 'display'] })],
+      server: { port: 0, strictPort: false },
+    });
     await server.listen();
     try {
       const origin = server.resolvedUrls.local[0].replace(/\/$/, '');
       const html = await (await fetch(`${origin}/`)).text();
-      const hrefs = [...html.matchAll(/rel="preload" as="font" type="font\/woff2" href="([^"]+)"/g)].map((m) => m[1]);
+      const hrefs = [
+        ...html.matchAll(/rel="preload" as="font" type="font\/woff2" href="([^"]+)"/g),
+      ].map((m) => m[1]);
       assert.equal(hrefs.length, 2);
       const css = await (await fetch(`${origin}/style.css?direct`)).text();
       for (const href of hrefs) {

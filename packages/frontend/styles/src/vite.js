@@ -16,7 +16,8 @@ const FONTS_DIR = fileURLToPath(new URL('./fonts/', import.meta.url));
 const manifest = JSON.parse(readFileSync(path.join(FONTS_DIR, 'manifest.json'), 'utf8'));
 
 const toPosix = (p) => p.replaceAll('\\', '/');
-const sameFile = (a, b) => (process.platform === 'win32' ? a.toLowerCase() === b.toLowerCase() : a === b);
+const sameFile = (a, b) =>
+  process.platform === 'win32' ? a.toLowerCase() === b.toLowerCase() : a === b;
 const joinUrl = (a, b) => (a.endsWith('/') ? a : `${a}/`) + b.replace(/^\/+/, '');
 
 /**
@@ -26,11 +27,18 @@ const joinUrl = (a, b) => (a.endsWith('/') ? a : `${a}/`) + b.replace(/^\/+/, ''
 export function beautiniqueFonts({ preload = ['sans'] } = {}) {
   for (const key of preload) {
     if (!Object.hasOwn(manifest.preload, key)) {
-      throw new Error(`[${NAME}] preload: unknown font "${key}". Use ${Object.keys(manifest.preload).map((k) => `"${k}"`).join(' or ')}.`);
+      throw new Error(
+        `[${NAME}] preload: unknown font "${key}". Use ${Object.keys(manifest.preload)
+          .map((k) => `"${k}"`)
+          .join(' or ')}.`,
+      );
     }
   }
 
-  const fonts = preload.map((key) => ({ file: manifest.preload[key], path: toPosix(realpathSync(path.join(FONTS_DIR, manifest.preload[key]))) }));
+  const fonts = preload.map((key) => ({
+    file: manifest.preload[key],
+    path: toPosix(realpathSync(path.join(FONTS_DIR, manifest.preload[key]))),
+  }));
 
   /** @type {import('vite').ResolvedConfig} */
   let config;
@@ -51,7 +59,11 @@ export function beautiniqueFonts({ preload = ['sans'] } = {}) {
             if (!pageUsesFont(html, ctx, asset)) return [];
             href = builtHref(asset, ctx);
           } else href = devHref(font);
-          return { tag: 'link', attrs: { rel: 'preload', as: 'font', type: 'font/woff2', href, crossorigin: true }, injectTo: 'head' };
+          return {
+            tag: 'link',
+            attrs: { rel: 'preload', as: 'font', type: 'font/woff2', href, crossorigin: true },
+            injectTo: 'head',
+          };
         });
       },
     },
@@ -59,7 +71,11 @@ export function beautiniqueFonts({ preload = ['sans'] } = {}) {
 
   function builtAsset(font, ctx) {
     const asset = Object.values(ctx.bundle).find(
-      (o) => o.type === 'asset' && (o.originalFileNames ?? []).some((name) => sameFile(toPosix(path.resolve(config.root, name)), font.path)),
+      (o) =>
+        o.type === 'asset' &&
+        (o.originalFileNames ?? []).some((name) =>
+          sameFile(toPosix(path.resolve(config.root, name)), font.path),
+        ),
     );
     if (!asset) {
       throw new Error(
@@ -74,7 +90,11 @@ export function beautiniqueFonts({ preload = ['sans'] } = {}) {
   function pageUsesFont(html, ctx, asset) {
     const fontName = path.posix.basename(asset.fileName);
     return Object.values(ctx.bundle).some(
-      (o) => o.type === 'asset' && o.fileName.endsWith('.css') && html.includes(o.fileName) && String(o.source).includes(fontName),
+      (o) =>
+        o.type === 'asset' &&
+        o.fileName.endsWith('.css') &&
+        html.includes(o.fileName) &&
+        String(o.source).includes(fontName),
     );
   }
 
@@ -92,7 +112,10 @@ export function beautiniqueFonts({ preload = ['sans'] } = {}) {
     });
     if (typeof custom === 'string') return custom;
     if (custom?.relative) return relative();
-    if (custom?.runtime) throw new Error(`[${NAME}] renderBuiltUrl returned a runtime URL for ${asset.fileName}; a preload in index.html needs a static URL`);
+    if (custom?.runtime)
+      throw new Error(
+        `[${NAME}] renderBuiltUrl returned a runtime URL for ${asset.fileName}; a preload in index.html needs a static URL`,
+      );
     if (config.base === '' || config.base.startsWith('.')) return relative();
     return joinUrl(config.base, asset.fileName);
   }
@@ -100,7 +123,9 @@ export function beautiniqueFonts({ preload = ['sans'] } = {}) {
   // mirrors Vite's own dev URL for a file: root-relative inside the app, /@fs/ outside it (workspace packages)
   function devHref(font) {
     const root = toPosix(config.root).replace(/\/?$/, '/');
-    const url = font.path.toLowerCase().startsWith(root.toLowerCase()) ? `/${font.path.slice(root.length)}` : path.posix.join('/@fs/', font.path);
+    const url = font.path.toLowerCase().startsWith(root.toLowerCase())
+      ? `/${font.path.slice(root.length)}`
+      : path.posix.join('/@fs/', font.path);
     return joinUrl(joinUrl(config.server.origin ?? '', config.base), url);
   }
 }

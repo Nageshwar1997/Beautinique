@@ -348,9 +348,9 @@ Kai platforms alag users ko alag price dikhate hain. BQ ka rule: **ek product ka
 | data-table                                                        | Cursor pagination, URL-synced filters, saved views, CSV export.                                                                                             |
 | maps                                                              | Ola pin picker, zone editor, territory map, live map.                                                                                                       |
 | icons | Apne icon components (`IconCart`, `IconSearch`, ...). SVG Iconify ke sets se copy kiya, sirf jo use hote hain. Ek `BaseIcon` (size, `currentColor`, aria). Runtime pe Iconify dependency nahi; har icon alag export, isliye tree-shaking. |
-| pwa-kit, forms, config-eslint, config-ts, config-vite, test-utils | Tooling aur common pieces.                                                                                                                                  |
+| pwa-kit, forms, config-vite, test-utils | Tooling aur common pieces (ESLint aur TypeScript ke shared configs root `configs/` me hain).                                                                                                                                  |
 
-**Published packages** (components, hooks, stores, styles, quill, tryon, tryon-assets, aur naya icons) apne ~2,600 tests ke saath monorepo me aate hain. Changesets inhe npm pe publish karta rahega, aur apps `workspace:*` use karti hain.
+**Published packages** (components, hooks, stores, styles, quill, tryon, tryon-assets, aur naya icons) apne ~2,600 tests ke saath monorepo me aate hain. Inhe repo ka apna package CLI (`scripts/packages/`, guide: [packages/README.md](packages/README.md)) npm pe publish karta hai: laptop se 2FA ke saath, ya GitHub Actions `release.yml` se trusted publishing aur provenance ke saath. Apps aur packages internal packages ko normal semver range (`^2.0.0`) se lete hain; npm workspaces local version link kar deta hai (npm `workspace:*` support nahi karta).
 
 ### 9.3 Vercel (Hobby, ₹0)
 
@@ -497,7 +497,7 @@ Sirf config badlegi, code nahi:
     5. Return → QC → refund
     6. Second signature ke saath payout batch
   - `nightly.yml`: finance, inventory reservations, authz, go-live aur checkout pe Stryker mutation tests, aur poora LGD import test.
-  - `release.yml`: Changesets se public frontend packages publish (npm provenance), Sentry release aur source maps.
+  - `release.yml`: repo ke package CLI se public packages publish (`npm run publish -- --ci`, trusted publishing + provenance, haath se chalaya jata hai), Sentry release aur source maps.
 - **CI minutes aur repo visibility:** repo **public** hai (owner ka decision, 2026-10-19). Public repo pe standard GitHub-hosted runners free aur unlimited hain (larger runners nahi, wo hamesha paid hain). Private kiya to GitHub Free me sirf 2,000 minutes/mahina aur 500 MB artifact storage milega; tab `e2e.yml` sirf `main` pe aur `nightly.yml` hafte me ek baar. Public repo ka matlab: koi secret, test password ya DB dump repo, logs ya artifacts me nahi (gitleaks + gitignored seed file).
 
 ## 14. Observability
@@ -615,3 +615,4 @@ Sirf config badlegi, code nahi:
 | v1.0    | 2026-10-19 | Pehla draft. Gateway + Identity, Payments, Notify microservices + Core modular monolith. ₹0 plan: Render free pe bundle mode, laptop pe Docker split mode, Atlas M0, free Redis, domain nahi (Vercel rewrites). Master ke doosre roles alag staff account pe. |
 | v1.1 | 2026-10-19 | Verification ke fixes (free tier ke official docs se): pre-deploy ki jagah boot pe release steps; shallow `/health`; Redis memory aur connection budget, ek queue per deployable, DLQ MongoDB me, Redis wipe recovery; Atlas free pe relay poll (5 change streams ki limit) aur M0 limits; 0.1 CPU ke hisaab se tuning; keep-alive ka policy risk; 5 GB bandwidth aur 500 build minutes; cookies (refresh path), origin secret routes transform se, client IP, CDN cache rules; strict preview allow-list; laptop pe split mode default; seller/creator applicant grants aur grants events; partner API clients; video (Jitsi), inbound email dummy, labour/gig/EPR ke ghar, own-brand consent, DPDP erasure; log archive zaroori; backups ka sahi tareeka; §15 me saare PRD flows; §16 me phases 7–11; Master ka alag account clear. Owner ke naye decisions: `release` branch → Render/Vercel, `prerelease` → laptop Docker; dev me local Redis, production me Render Key Value; files ke liye storage port (Cloudinary → S3 migration) aur unused cleanup (§6.7); price rules (§6.8); Ola Maps keys (4 accounts). |
 | v1.2 | 2026-10-20 | Apps sirf English me. |
+| v1.3 | 2026-10-20 | Packages ka publish Changesets ki jagah apne package CLI se; internal packages semver range se (`workspace:*` nahi); shared configs root `configs/` me. |

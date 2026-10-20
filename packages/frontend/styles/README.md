@@ -26,9 +26,9 @@ export default {
 
 ## Fonts
 
-| Class | Family | Font |
-|---|---|---|
-| `font-sans` (default) | Beautinique Sans | Plus Jakarta Sans |
+| Class                              | Family              | Font                      |
+| ---------------------------------- | ------------------- | ------------------------- |
+| `font-sans` (default)              | Beautinique Sans    | Plus Jakarta Sans         |
 | `font-display` (headings, banners) | Beautinique Display | Fraunces (opsz 72, sharp) |
 
 - Weights `font-light` (300) se `font-bold` (700), aur `italic`.
@@ -66,15 +66,15 @@ Ye offline chalta hai (CI): files manifest se milti hain, `fonts.css` current ha
 Har colour **RGB channels** me hai, plus ek ready colour, taaki alpha kahin bhi de sako:
 
 ```css
-color: var(--brand);                        /* rgb(214, 51, 108) */
-background: rgba(var(--brand-rgb), 0.12);   /* 12% rose */
+color: var(--brand); /* rgb(214, 51, 108) */
+background: rgba(var(--brand-rgb), 0.12); /* 12% rose */
 ```
 
-| Layer | Example | Kab use karein |
-|---|---|---|
-| Palette | `--rose-600-rgb`, `--neutral-50-rgb` | Bahut kam; pehle semantic dekho |
-| Semantic | `--brand`, `--foreground-muted`, `--surface` | Hamesha; light aur dark khud sambhalte hain |
-| Tailwind | `bg-brand`, `text-foreground-muted`, `bg-brand/20`, `bg-rose-600` | Components me |
+| Layer    | Example                                                           | Kab use karein                              |
+| -------- | ----------------------------------------------------------------- | ------------------------------------------- |
+| Palette  | `--rose-600-rgb`, `--neutral-50-rgb`                              | Bahut kam; pehle semantic dekho             |
+| Semantic | `--brand`, `--foreground-muted`, `--surface`                      | Hamesha; light aur dark khud sambhalte hain |
+| Tailwind | `bg-brand`, `text-foreground-muted`, `bg-brand/20`, `bg-rose-600` | Components me                               |
 
 Semantic tokens: `background`, `surface`, `surface-muted`, `surface-inverse`, `foreground` (+ `-muted`, `-subtle`, `-inverse`), `border`, `border-strong`, `brand`, `secondary`, `accent`, `success`, `warning`, `error`, `info` (har ek ke saath `-hover`, `-foreground`, `-subtle`, `-subtle-foreground`), `brand-text`, `price-discount`, `rating`, `focus-ring`, `overlay`, `shadow-color`.
 

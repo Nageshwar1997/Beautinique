@@ -1,0 +1,8 @@
+# LF everywhere (Windows checkouts too), so formatting and byte-for-byte checks match CI.
+* text=auto eol=lf
+
+*.woff2 binary
+*.png binary
+*.jpg binary
+*.webp binary
+*.ico binary

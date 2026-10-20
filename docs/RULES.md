@@ -58,7 +58,7 @@
 1. **Pehle packages dekho:** `@beautinique/frontend-components`, hooks, stores, styles aur naye shared packages (app-shell, data-table, auth-ui, authz, maps). Wahan hai to haath se UI mat likho.
 2. **Components props se chalein, app se jude na hon.** App-specific cheez prop ya config se aaye.
 3. **Naya hook ya component:** pehle app me banao, **asli browser me prove karo**, phir package me le jao.
-4. **Icons:** sirf `icons` package ke apne components (`IconCart`, ...). Naya icon chahiye to seedha package me jodo, usi PR me jisme wo use ho raha hai (Iconify se SVG copy + license note). Monorepo me `workspace:*` ki wajah se wo turant saare apps me milta hai; app me alag icons file nahi. App me inline SVG ya Iconify import nahi.
+4. **Icons:** sirf `icons` package ke apne components (`IconCart`, ...). Naya icon chahiye to seedha package me jodo, usi PR me jisme wo use ho raha hai (Iconify se SVG copy + license note). Monorepo me npm workspaces local package link karta hai, isliye wo turant saare apps me milta hai; app me alag icons file nahi. App me inline SVG ya Iconify import nahi.
 5. **Accessibility (WCAG 2.1 AA):** keyboard se chalne layak, labels, colour contrast, dikhne wala focus. `outline-hidden` jaisi class lagao to apna focus ring zaroor do.
 6. **Responsive:** har screen 360, 768 aur 1280 px pe; light aur dark dono theme.
 7. **Text aur formats:** apps sirf English me. INR, numbers aur dates `Intl` (`en-IN`) se, haath se format nahi.
@@ -104,3 +104,4 @@
 |---|---|---|
 | v1.0 | 2026-10-19 | Pehla version: kaam, git, code, backend, frontend, testing, security, docs aur AI assistant ke niyam. |
 | v1.1 | 2026-10-20 | Apps sirf English; INR aur dates `en-IN`. |
+| v1.2 | 2026-10-20 | Icons rule: `workspace:*` ki jagah npm workspaces ka local link. |

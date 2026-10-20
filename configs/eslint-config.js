@@ -1,0 +1,70 @@
+// @ts-check
+/**
+ * Shared ESLint setup. Each package's eslint.config.js is one line:
+ *
+ *   export default packageConfig({ platform: 'browser', react: true, tsconfigRootDir: import.meta.dirname });
+ */
+import js from '@eslint/js';
+import { defineConfig } from 'eslint/config';
+import prettier from 'eslint-config-prettier';
+import reactHooks from 'eslint-plugin-react-hooks';
+import simpleImportSort from 'eslint-plugin-simple-import-sort';
+import globals from 'globals';
+import tseslint from 'typescript-eslint';
+
+const GLOBALS = {
+  neutral: {},
+  browser: globals.browser,
+  node: globals.node,
+};
+
+/**
+ * @param {object} options
+ * @param {'neutral' | 'browser' | 'node'} options.platform where the code runs (decides the allowed globals)
+ * @param {boolean} [options.react] add the React hooks rules
+ * @param {string} options.tsconfigRootDir pass `import.meta.dirname`
+ * @param {string[]} [options.ignores] extra paths to skip
+ */
+export function packageConfig({ platform, react = false, tsconfigRootDir, ignores = [] }) {
+  return defineConfig(
+    { ignores: ['dist', 'coverage', 'node_modules', ...ignores] },
+    js.configs.recommended,
+    tseslint.configs.strictTypeChecked,
+    tseslint.configs.stylisticTypeChecked,
+    {
+      languageOptions: {
+        globals: GLOBALS[platform],
+        parserOptions: { projectService: true, tsconfigRootDir },
+      },
+      plugins: { 'simple-import-sort': simpleImportSort },
+      rules: {
+        'simple-import-sort/imports': 'error',
+        'simple-import-sort/exports': 'error',
+        '@typescript-eslint/consistent-type-imports': 'error',
+        '@typescript-eslint/no-unused-vars': [
+          'error',
+          { argsIgnorePattern: '^_', varsIgnorePattern: '^_', caughtErrorsIgnorePattern: '^_' },
+        ],
+        'no-console': ['error', { allow: ['warn', 'error'] }],
+        eqeqeq: ['error', 'always'],
+        curly: ['error', 'all'],
+      },
+    },
+    // Plain JS config files (eslint.config.js) are not part of a tsconfig project.
+    { files: ['**/*.js', '**/*.mjs', '**/*.cjs'], extends: [tseslint.configs.disableTypeChecked] },
+    react
+      ? {
+          files: ['**/*.{ts,tsx}'],
+          extends: [reactHooks.configs.flat['recommended-latest']],
+          rules: {
+            // async event handlers are normal in React
+            '@typescript-eslint/no-misused-promises': [
+              'error',
+              { checksVoidReturn: { attributes: false } },
+            ],
+          },
+        }
+      : {},
+    prettier,
+  );
+}

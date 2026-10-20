@@ -13,7 +13,11 @@ const BASES = {
   rose: { rgb: [214, 51, 108] }, // brand
   plum: { rgb: [92, 26, 70] }, // brand deep
   gold: { rgb: [196, 154, 82] }, // champagne accent
-  neutral: { rgb: [240, 225, 215], chroma: 0.012, pins: { 50: [253, 248, 245], 200: [240, 225, 215], 950: [28, 22, 25] } },
+  neutral: {
+    rgb: [240, 225, 215],
+    chroma: 0.012,
+    pins: { 50: [253, 248, 245], 200: [240, 225, 215], 950: [28, 22, 25] },
+  },
   success: { rgb: [22, 163, 74] },
   warning: { rgb: [217, 119, 6] },
   error: { rgb: [220, 38, 38] },
@@ -21,8 +25,32 @@ const BASES = {
 };
 
 const STEPS = [50, 100, 200, 300, 400, 500, 600, 700, 800, 900, 950];
-const LIGHTNESS = { 50: 0.975, 100: 0.945, 200: 0.89, 300: 0.82, 400: 0.74, 500: 0.66, 600: 0.58, 700: 0.5, 800: 0.42, 900: 0.35, 950: 0.27 };
-const CHROMA = { 50: 0.12, 100: 0.25, 200: 0.45, 300: 0.68, 400: 0.88, 500: 1, 600: 1, 700: 0.92, 800: 0.82, 900: 0.72, 950: 0.6 };
+const LIGHTNESS = {
+  50: 0.975,
+  100: 0.945,
+  200: 0.89,
+  300: 0.82,
+  400: 0.74,
+  500: 0.66,
+  600: 0.58,
+  700: 0.5,
+  800: 0.42,
+  900: 0.35,
+  950: 0.27,
+};
+const CHROMA = {
+  50: 0.12,
+  100: 0.25,
+  200: 0.45,
+  300: 0.68,
+  400: 0.88,
+  500: 1,
+  600: 1,
+  700: 0.92,
+  800: 0.82,
+  900: 0.72,
+  950: 0.6,
+};
 
 const STATUS = ['success', 'warning', 'error', 'info'];
 const tone = (name, base, fg, subtle, subtleFg, hover) => ({
@@ -75,7 +103,10 @@ const THEMES = {
     'brand-text': 'rose-300',
     ...tone('secondary', 'plum-300', 'neutral-950', 'plum-950', 'plum-200', 'plum-200'),
     ...tone('accent', 'gold-400', 'neutral-950', 'gold-950', 'gold-200', 'gold-300'),
-    ...Object.assign({}, ...STATUS.map((s) => tone(s, `${s}-400`, 'neutral-950', `${s}-950`, `${s}-200`, `${s}-300`))),
+    ...Object.assign(
+      {},
+      ...STATUS.map((s) => tone(s, `${s}-400`, 'neutral-950', `${s}-950`, `${s}-200`, `${s}-300`)),
+    ),
     'price-discount': 'success-300',
     rating: 'gold-400',
     'focus-ring': 'rose-400',
@@ -86,22 +117,35 @@ const THEMES = {
 
 // [foreground token, background token, minimum ratio]
 const PAIRS = [
-  ['foreground', 'background', 4.5], ['foreground', 'surface', 4.5], ['foreground', 'surface-muted', 4.5],
-  ['foreground-muted', 'background', 4.5], ['foreground-muted', 'surface', 4.5],
-  ['foreground-subtle', 'surface', 4.5], ['foreground-subtle', 'background', 4.5],
+  ['foreground', 'background', 4.5],
+  ['foreground', 'surface', 4.5],
+  ['foreground', 'surface-muted', 4.5],
+  ['foreground-muted', 'background', 4.5],
+  ['foreground-muted', 'surface', 4.5],
+  ['foreground-subtle', 'surface', 4.5],
+  ['foreground-subtle', 'background', 4.5],
   ['foreground-inverse', 'surface-inverse', 4.5],
-  ['border-strong', 'surface', 3], ['border-strong', 'background', 3],
-  ['focus-ring', 'background', 3], ['focus-ring', 'surface', 3],
-  ['brand-text', 'background', 4.5], ['brand-text', 'surface', 4.5],
-  ['price-discount', 'surface', 4.5], ['rating', 'surface', 3],
+  ['border-strong', 'surface', 3],
+  ['border-strong', 'background', 3],
+  ['focus-ring', 'background', 3],
+  ['focus-ring', 'surface', 3],
+  ['brand-text', 'background', 4.5],
+  ['brand-text', 'surface', 4.5],
+  ['price-discount', 'surface', 4.5],
+  ['rating', 'surface', 3],
   ...['brand', 'secondary', 'accent', ...STATUS].flatMap((t) => [
-    [`${t}-foreground`, t, 4.5], [`${t}-foreground`, `${t}-hover`, 4.5],
-    [`${t}-subtle-foreground`, `${t}-subtle`, 4.5], [t, 'surface', 3],
+    [`${t}-foreground`, t, 4.5],
+    [`${t}-foreground`, `${t}-hover`, 4.5],
+    [`${t}-subtle-foreground`, `${t}-subtle`, 4.5],
+    [t, 'surface', 3],
   ]),
 ];
 
 /* ---------- Colour maths (sRGB <-> OKLab/OKLCH) ---------- */
-const toLin = (c) => { c /= 255; return c <= 0.04045 ? c / 12.92 : ((c + 0.055) / 1.055) ** 2.4; };
+const toLin = (c) => {
+  c /= 255;
+  return c <= 0.04045 ? c / 12.92 : ((c + 0.055) / 1.055) ** 2.4;
+};
 const fromLin = (c) => (c <= 0.0031308 ? 12.92 * c : 1.055 * c ** (1 / 2.4) - 0.055);
 function rgbToOklch([r8, g8, b8]) {
   const [r, g, b] = [r8, g8, b8].map(toLin);
@@ -114,7 +158,8 @@ function rgbToOklch([r8, g8, b8]) {
   return [L, Math.hypot(a, bb), Math.atan2(bb, a)];
 }
 function oklchToLinear(L, C, h) {
-  const a = C * Math.cos(h), b = C * Math.sin(h);
+  const a = C * Math.cos(h),
+    b = C * Math.sin(h);
   const l = (L + 0.3963377774 * a + 0.2158037573 * b) ** 3;
   const m = (L - 0.1055613458 * a - 0.0638541728 * b) ** 3;
   const s = (L - 0.0894841775 * a - 1.291485548 * b) ** 3;
@@ -126,24 +171,45 @@ function oklchToLinear(L, C, h) {
 }
 const inGamut = (lin) => lin.every((c) => c >= -1e-4 && c <= 1 + 1e-4);
 function oklchToRgb(L, C, h) {
-  let lo = 0, hi = C, lin = oklchToLinear(L, C, h);
+  let lo = 0,
+    hi = C,
+    lin = oklchToLinear(L, C, h);
   if (!inGamut(lin)) {
-    for (let i = 0; i < 30; i++) { const mid = (lo + hi) / 2; if (inGamut(oklchToLinear(L, mid, h))) lo = mid; else hi = mid; }
+    for (let i = 0; i < 30; i++) {
+      const mid = (lo + hi) / 2;
+      if (inGamut(oklchToLinear(L, mid, h))) lo = mid;
+      else hi = mid;
+    }
     lin = oklchToLinear(L, lo, h);
   }
   return lin.map((c) => Math.round(Math.min(1, Math.max(0, fromLin(c))) * 255));
 }
-const luminance = (rgb) => { const [r, g, b] = rgb.map(toLin); return 0.2126 * r + 0.7152 * g + 0.0722 * b; };
-const contrast = (a, b) => { const [x, y] = [luminance(a), luminance(b)].sort((p, q) => q - p); return (x + 0.05) / (y + 0.05); };
+const luminance = (rgb) => {
+  const [r, g, b] = rgb.map(toLin);
+  return 0.2126 * r + 0.7152 * g + 0.0722 * b;
+};
+const contrast = (a, b) => {
+  const [x, y] = [luminance(a), luminance(b)].sort((p, q) => q - p);
+  return (x + 0.05) / (y + 0.05);
+};
 
 /* ---------- Build scales ---------- */
 const palette = { white: [255, 255, 255], black: [0, 0, 0] };
 for (const [name, base] of Object.entries(BASES)) {
   const [bL, bC, h] = rgbToOklch(base.rgb);
-  const anchor = STEPS.reduce((best, s) => (Math.abs(LIGHTNESS[s] - bL) < Math.abs(LIGHTNESS[best] - bL) ? s : best), STEPS[0]);
+  const anchor = STEPS.reduce(
+    (best, s) => (Math.abs(LIGHTNESS[s] - bL) < Math.abs(LIGHTNESS[best] - bL) ? s : best),
+    STEPS[0],
+  );
   for (const s of STEPS) {
     const C = base.chroma ?? (bC * CHROMA[s]) / CHROMA[anchor];
-    palette[`${name}-${s}`] = base.pins?.[s] ?? (base.pins ? oklchToRgb(LIGHTNESS[s], C, h) : s === anchor ? base.rgb : oklchToRgb(LIGHTNESS[s], C, h));
+    palette[`${name}-${s}`] =
+      base.pins?.[s] ??
+      (base.pins
+        ? oklchToRgb(LIGHTNESS[s], C, h)
+        : s === anchor
+          ? base.rgb
+          : oklchToRgb(LIGHTNESS[s], C, h));
   }
 }
 
@@ -154,19 +220,30 @@ for (const [theme, map] of Object.entries(THEMES)) {
   for (const [fg, bg, min] of PAIRS) {
     const ratio = contrast(palette[map[fg]], palette[map[bg]]);
     if (ratio < min) failures++;
-    report.push(`${ratio < min ? 'FAIL' : 'ok  '} ${theme.padEnd(5)} ${fg} on ${bg}: ${ratio.toFixed(2)} (min ${min})`);
+    report.push(
+      `${ratio < min ? 'FAIL' : 'ok  '} ${theme.padEnd(5)} ${fg} on ${bg}: ${ratio.toFixed(2)} (min ${min})`,
+    );
   }
 }
 
 /* ---------- CSS output ---------- */
 const ch = (rgb) => rgb.join(', ');
-const paletteCss = Object.entries(palette).map(([k, v]) => `  --${k}-rgb: ${ch(v)};`).join('\n');
+const paletteCss = Object.entries(palette)
+  .map(([k, v]) => `  --${k}-rgb: ${ch(v)};`)
+  .join('\n');
 const themeVars = (map, indent) =>
-  Object.entries(map).map(([k, v]) => `${indent}--${k}-rgb: var(--${v}-rgb);\n${indent}--${k}: rgb(var(--${k}-rgb));`).join('\n');
-const themeMap = Object.keys(palette).map((k) => `  --color-${k}: rgb(var(--${k}-rgb));`).join('\n');
+  Object.entries(map)
+    .map(
+      ([k, v]) => `${indent}--${k}-rgb: var(--${v}-rgb);\n${indent}--${k}: rgb(var(--${k}-rgb));`,
+    )
+    .join('\n');
+const themeMap = Object.keys(palette)
+  .map((k) => `  --color-${k}: rgb(var(--${k}-rgb));`)
+  .join('\n');
 const semanticMap = Object.keys(THEMES.light)
   .filter((k) => !['overlay', 'shadow-color'].includes(k))
-  .map((k) => `  --color-${k}: var(--${k});`).join('\n');
+  .map((k) => `  --color-${k}: var(--${k});`)
+  .join('\n');
 
 const generated = `${START}
 
@@ -216,7 +293,10 @@ const next = css.slice(0, i) + generated + css.slice(j + END.length);
 console.log(report.filter((l) => l.startsWith('FAIL')).join('\n') || 'All contrast checks passed.');
 console.log(`${report.length - failures}/${report.length} pairs pass.`);
 if (process.argv.includes('--check')) {
-  if (next !== css) { console.error('variables.css is out of date: run npm run palette'); process.exit(1); }
+  if (next !== css) {
+    console.error('variables.css is out of date: run npm run palette');
+    process.exit(1);
+  }
   process.exit(failures ? 1 : 0);
 }
 if (failures) process.exitCode = 1;

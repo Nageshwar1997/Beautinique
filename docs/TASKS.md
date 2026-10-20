@@ -38,8 +38,8 @@
 - [ ] T0.2 4 apps → `frontend/` (customer, seller, admin, master).
 - [ ] T0.3 Gateway aur services → `backend/` (port sources ki tarah).
 - [ ] T0.4 Media-service ka nested `.git` aur `.kilo` worktree hatana.
-- [ ] T0.5 npm workspaces + Turborepo; root scripts.
-- [ ] T0.6 `ci.yml`: lint, typecheck, test, build (affected), gitleaks, npm audit.
+- [ ] T0.5 Turborepo. (npm workspaces, root scripts, shared configs aur package CLI ho gaye: [packages/README.md](packages/README.md).)
+- [ ] T0.6 `ci.yml`: build (affected) aur gitleaks baaki. (Format, lint, typecheck, test, packages verify aur npm audit wala pehla `ci.yml`, plus `release.yml`, ho gaye.)
 - [ ] T0.7 Branches `prerelease` aur `release`, branch protection, required checks.
 - [ ] T0.8 `infra/docker-compose.yml` ka `infra` profile: Mongo replica set, Valkey (Render jaisi limits), Mailpit. **Docker Lesson 2.**
 - [ ] T0.9 Har deployable ka `.env.example` aur zod env schema.
@@ -185,3 +185,4 @@
 |---|---|---|
 | v1.0 | 2026-10-19 | Pehla version: owner ke kaam, docs, Phase 0–11 (milestones aur Docker lessons ke saath), aur deploy pe verify list. |
 | v1.1 | 2026-10-20 | Apps sirf English: T5.2, T6.1 aur T6.2 badle. |
+| v1.2 | 2026-10-20 | T0.5 aur T0.6 ka pehla hissa ho gaya (workspaces, package CLI, ci.yml, release.yml). |

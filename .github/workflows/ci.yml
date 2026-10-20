@@ -1,0 +1,41 @@
+name: CI
+
+on:
+  push:
+    branches: [main, prerelease, release]
+  pull_request:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24
+          cache: npm
+
+      # The repo needs npm 12 (allowScripts, devEngines); Node 24 ships npm 11.
+      - run: npm install --global npm@12.2.0
+
+      - run: npm ci
+      # Packages import each other's dist (types too), so build them before lint, typecheck and tests.
+      - run: npm run build
+      - run: npm run format:check
+      - run: npm run lint
+      - run: npm run typecheck
+      - run: npm test
+      # Every check a publish runs (build, tests, package contents, publint, types), nothing published.
+      - run: npm run verify -- --all --yes
+      - run: npm audit --audit-level=high

@@ -1,0 +1,94 @@
+# Publishes every package version that is in the repo but not on npm yet, with provenance.
+#
+# Prepare it on the laptop: npm run republish -- --target github (versions, changelogs, commit, tags;
+# it also sets up trusted publishing), then git push --follow-tags, then run this workflow from the
+# Actions tab on main. Brand-new packages are published once from the laptop (npm run publish); npm
+# trusts a package only after it exists.
+#
+# Two jobs, so the job that can publish never runs package code:
+# - build: installs, checks and packs (no publish rights). Every version must be tagged on this commit.
+# - publish: only downloads the tarballs and runs npm publish with the short-lived OIDC identity.
+name: Release
+
+on:
+  workflow_dispatch:
+
+permissions: {}
+
+concurrency:
+  group: release
+  cancel-in-progress: false
+
+jobs:
+  build:
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    permissions:
+      contents: read
+    outputs:
+      ready: ${{ steps.pack.outputs.ready }}
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0 # the release tags must be checked against this commit
+          fetch-tags: true
+          persist-credentials: false
+
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24
+          # never restore a cache in a release build
+          package-manager-cache: false
+
+      - run: npm install --global npm@12.2.0
+      - run: npm ci
+
+      - id: pack
+        run: |
+          npm run publish -- --ci --pack-dir release-tarballs
+          if [ -f release-tarballs/release.json ]; then
+            echo "ready=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "ready=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - if: steps.pack.outputs.ready == 'true'
+        uses: actions/upload-artifact@v7
+        with:
+          name: release-tarballs
+          path: release-tarballs
+          if-no-files-found: error
+          retention-days: 7
+
+  publish:
+    needs: build
+    if: github.ref == 'refs/heads/main' && needs.build.outputs.ready == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    # Must match the environment in each package's npm trusted publishing settings.
+    environment: npm
+    permissions:
+      contents: read
+      id-token: write # npm trusted publishing (OIDC): no npm token is stored anywhere
+    steps:
+      # Only for the publish script; nothing is installed and no package code runs here.
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+          sparse-checkout: .github/scripts
+
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24
+          registry-url: https://registry.npmjs.org
+          package-manager-cache: false
+
+      - run: npm install --global npm@12.2.0
+
+      - uses: actions/download-artifact@v8
+        with:
+          name: release-tarballs
+          path: release-tarballs
+
+      - run: node .github/scripts/publish-tarballs.mjs release-tarballs
