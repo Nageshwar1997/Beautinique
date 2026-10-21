@@ -6,3 +6,9 @@
 # The URI points at 127.0.0.1:1, where nothing listens, and its password "secret" exists only so the
 # test can check that it never appears in the error. No real credential.
 e533ace71e5d9adc7d5b04d70e6f870dffb5b78a:packages/backend/server-mongo/test/index.test.ts:url-with-password:184
+
+# 2026-10-21: docs written about the entry above (commit 3fdfb49) quoted that same fake test URL, and
+# the HANDOFF trap gave fake example URLs; no real credential. The docs now describe them in words.
+3fdfb4997cf6bbe6f2cbb0b3c0a17128a0375020:docs/HANDOFF.md:url-with-password:33
+3fdfb4997cf6bbe6f2cbb0b3c0a17128a0375020:docs/TASKS.md:url-with-password:47
+3fdfb4997cf6bbe6f2cbb0b3c0a17128a0375020:docs/HANDOFF.md:url-with-password:74
