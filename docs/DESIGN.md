@@ -1,6 +1,6 @@
 # DESIGN — BQ
 
-> **Status:** v1.3 (2026-10-20). UI aur UX ke niyam saare 11 apps ke liye. Design ka **source of truth code hai**: `@beautinique/frontend-styles` (tokens) aur `@beautinique/frontend-components` (components). [RULES.md](RULES.md) §5 frontend ke coding niyam batata hai; ye file batati hai ki cheezein **dikhengi aur chalengi kaise**.
+> **Status:** v1.5 (2026-10-21). UI aur UX ke niyam saare 11 apps ke liye. Design ka **source of truth code hai**: `@beautinique/frontend-styles` (tokens) aur `@beautinique/frontend-components` (components). [RULES.md](RULES.md) §5 frontend ke coding niyam batata hai; ye file batati hai ki cheezein **dikhengi aur chalengi kaise**.
 
 ## 1. Design principles
 
@@ -33,9 +33,11 @@ Brand: **rose** rgb(214, 51, 108), deep **plum** rgb(92, 26, 70), **champagne go
 | `border`, `border-strong`                                   | Halki lines; inputs aur boundaries                                                          |
 | `brand`, `secondary`, `accent`                              | Rose, plum, gold (har ek ke saath `-hover`, `-foreground`, `-subtle`, `-subtle-foreground`) |
 | `success`, `warning`, `error`, `info`, `neutral`            | Status (same set)                                                                           |
-| `brand-text`, `price-discount`, `rating`, `focus-ring`      | Link/brand text, discount, stars, keyboard focus                                            |
+| `brand-text`, `price-discount`, `rating`, `focus-ring`      | Link/brand text, discount, stars, keyboard focus (ulti patti pe `focus-ring-inverse`)       |
 
-- **Contrast niyam:** padhne wala text sirf `foreground*`, `brand-text`, `price-discount` ya kisi tone ke `-foreground`/`-subtle-foreground` me. Palette script har jodi ka WCAG contrast har theme me check karta hai (abhi 310/310); naya colour bhi wahi se.
+- **Contrast niyam:** padhne wala text sirf `foreground*`, `brand-text`, `price-discount` ya kisi tone ke `-foreground`/`-subtle-foreground` me. Palette script har jodi ka WCAG contrast har theme me check karta hai, aur rangon ka matlab bhi (tint/text ulta nahi, hover sahi disha me, hue har theme me same, teal/violet sirf charts; styles README); naya colour bhi wahi se.
+- Muted section (`surface-muted`) pe `foreground-subtle` text mat lagao: dark theme me wo sirf 3.66:1 hai (AA ko 4.5 chahiye). Wahan `foreground-muted` ya `foreground` lo (owner ka faisla, 2026-10-21: rang wahi, ye niyam).
+- Ulti patti (dark footer, announcement bar) pe `surface-inverse` utility lagao, sirf `bg-surface-inverse` nahi: wahi us patti pe dikhne wala focus ring deti hai.
 - `teal` aur `violet` scales sirf charts aur category tags ke liye.
 
 ### 3.3 Tones, order status, charts
@@ -46,7 +48,7 @@ Brand: **rose** rgb(214, 51, 108), deep **plum** rgb(92, 26, 70), **champagne go
 
 ### 3.4 High contrast aur print
 
-- `<html contrast="more">` (ya system setting): text 7:1, borders saaf, focus ring 3px. **Delivery app** ise dhoop ke liye use karta hai; baaki apps me system setting se apne aap.
+- `<html contrast="more">` (ya system setting): saara text 7:1, buttons aur badges ka bhi (tones ek step gehre), borders saaf, focus ring 3px. **Delivery app** ise dhoop ke liye use karta hai; baaki apps me system setting se apne aap.
 - Print me hamesha light theme (invoice, labels, run sheets).
 
 ### 3.5 Gradients, shadows, layout, breakpoints
@@ -166,3 +168,5 @@ Har screen ye states dikhati hai:
 | v1.1    | 2026-10-19 | Typography: Metropolis ki jagah Plus Jakarta Sans (body) + Fraunces (headings).                                                                                                       |
 | v1.2    | 2026-10-20 | §9 Text aur formats: apps sirf English me.                                                                                                                                            |
 | v1.3    | 2026-10-20 | §3 naye `styles` package ke tokens se: Rose + Plum colours, tones, order status, charts, high contrast, print, gradients, layout; §6, §8, §11 me package ki utilities.                |
+| v1.4    | 2026-10-21 | §3: palette script ab rangon ka matlab bhi check karta hai; checks ki ginti hata di (wo badalti rehti hai). |
+| v1.5    | 2026-10-21 | Owner ke faisle: muted section pe subtle text nahi (rang wahi); ulti patti ke liye `focus-ring-inverse` + `surface-inverse`; high contrast me tones gehre, saara text 7:1. |

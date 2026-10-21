@@ -173,6 +173,14 @@ describe('the build', () => {
     assert.match(css, /\[contrast="more"\] \{\s+--focus-ring-width: 3px/);
   });
 
+  test('surface-inverse sets the strip colours and the inverse focus ring for everything inside', () => {
+    const inverse = rule('.surface-inverse');
+    assert.match(inverse, /background-color: var\(--surface-inverse\)/);
+    assert.match(inverse, /color: var\(--foreground-inverse\)/);
+    assert.match(inverse, /--focus-ring: var\(--focus-ring-inverse\)/);
+    assert.match(inverse, /--focus-ring-rgb: var\(--focus-ring-inverse-rgb\)/);
+  });
+
   test('moving things stop with reduced motion', () => {
     // the build writes 0ms as 0s
     assert.match(

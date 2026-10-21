@@ -1,6 +1,6 @@
 # MEMORY — BQ
 
-> **Status:** v1.10 (2026-10-21). Project ki yaaddasht: **kya tay hua aur kyun**, **pichhle kaam se kya seekha**, aur **kaunse jaal (traps) se bachna hai**. Poori detail baaki docs me hai; yahan short version aur pointers. Naya sabak ya decision aaye to yahan ek line jodo.
+> **Status:** v1.11 (2026-10-21). Project ki yaaddasht: **kya tay hua aur kyun**, **pichhle kaam se kya seekha**, aur **kaunse jaal (traps) se bachna hai**. Poori detail baaki docs me hai; yahan short version aur pointers. Naya sabak ya decision aaye to yahan ek line jodo.
 
 ## 1. Decision log
 
@@ -33,6 +33,9 @@
 | 2026-10-20 | Saare packages npm pe public                                                                                                          | Owner ka faisla; monorepo me apne aap jude rehte hain                      | TASKS T0.1                                        |
 | 2026-10-20 | Neev ke baad packages app ki zaroorat ke saath bante hain, pehle se nahi; do apps ki cheez turant package me                          | Asli zaroorat se API banta hai, andaaze se nahi                            | TASKS T0.1                                        |
 | 2026-10-21 | Packages public rahenge, par abhi publish/republish nahi; sirf zaroorat pe (repo ke bahar koi user). `private` nahi karne | Saare apps monorepo se package lete hain (workspaces), live pe bhi; publish ka kharcha (versions, 2FA, release branch) abhi bekaar | TASKS T0.1, HANDOFF §4 |
+| 2026-10-21 | Dark me subtle text muted section pe 3.66:1: rang nahi badla, niyam bana (muted section pe subtle text nahi) | Owner ka faisla | DESIGN §3, styles README |
+| 2026-10-21 | Ulti patti ke liye `focus-ring-inverse` token + `surface-inverse` utility | Purana ring dark me 2.37:1 tha (chahiye 3) | DESIGN §3, styles README |
+| 2026-10-21 | High contrast me har tone ek step gehri/halki, gradient bhi: saara text 7:1, script check karti hai | Docs ka 7:1 vaada sach ho; Delivery app dhoop me | DESIGN §3.4, palette.mjs |
 | 2026-10-20 | Packages sirf `release` branch se publish                                                                                             | Wahi branch jo apps live karti hai: npm pe sirf tested code                | ARCH §13                                          |
 | 2026-10-20 | Apps aur services npm packages nahi: `frontend/<app>`, `backend/<name>`, simple naam, `private`                                       | Owner ka faisla; ye deploy hote hain, publish nahi                         | [packages/README.md](packages/README.md) §3.1–3.2 |
 | 2026-10-20 | Ek `npm run create` (Package / Frontend app / Backend app); sirf contracts ke `APPS` aur `DEPLOYABLES`                                | Owner ka faisla; naya feature Core module, naya deployable nahi            | ARCH §3, §4                                       |
@@ -112,3 +115,4 @@
 | v1.8    | 2026-10-20 | Decision (frozen): OTP sirf email se. |
 | v1.9    | 2026-10-20 | Decision (frozen): SMS aur WhatsApp channel hate. |
 | v1.10   | 2026-10-21 | Decision: abhi publish nahi, zaroorat pe; packages public hi. |
+| v1.11   | 2026-10-21 | Decisions: muted section niyam, focus-ring-inverse, high contrast tones 7:1. |

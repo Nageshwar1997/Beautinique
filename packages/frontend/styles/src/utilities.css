@@ -28,6 +28,15 @@
   }
 }
 
+/* An inverse strip (a dark footer or bar on a light page, a light one on a dark page): its background
+   and text, and a focus ring that shows on it. Every ring inside (base.css, focus-ring-*) uses it. */
+@utility surface-inverse {
+  background-color: var(--surface-inverse);
+  color: var(--foreground-inverse);
+  --focus-ring-rgb: var(--focus-ring-inverse-rgb);
+  --focus-ring: var(--focus-ring-inverse);
+}
+
 /* A small control (icon button, close x, shade dot) with a 44px hit area (48px with touch-target-lg),
    without changing its looks. Uses ::before, so the element itself must not need it. */
 @utility touch-target {

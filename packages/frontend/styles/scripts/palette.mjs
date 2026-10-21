@@ -24,8 +24,8 @@ const BASES = {
   error: { rgb: [220, 38, 38] },
   info: { rgb: [37, 99, 235] },
   // Extra hues for charts and category tags only (never for text or status meaning).
-  teal: { rgb: [13, 148, 136] },
-  violet: { rgb: [124, 58, 237] },
+  teal: { rgb: [13, 148, 136], chartOnly: true },
+  violet: { rgb: [124, 58, 237], chartOnly: true },
 };
 
 const STEPS = [50, 100, 200, 300, 400, 500, 600, 700, 800, 900, 950];
@@ -59,6 +59,8 @@ const CHROMA = {
 const STATUS = ['success', 'warning', 'error', 'info'];
 // Every tone gets base, -hover, -foreground, -subtle, -subtle-foreground and a `tone-<name>` utility.
 const TONES = ['brand', 'secondary', 'accent', ...STATUS, 'neutral'];
+// The tone every element has until a tone-* class or an order status sets another (README: Tones).
+const DEFAULT_TONE = 'brand';
 const CHARTS = 8;
 
 // Order state machine (ARCHITECTURE: commerce) -> tone. <span data-order-status="DELIVERED">
@@ -83,6 +85,12 @@ const tone = (name, base, fg, subtle, subtleFg, hover) => ({
   [`${name}-foreground`]: fg,
   [`${name}-subtle`]: subtle,
   [`${name}-subtle-foreground`]: subtleFg,
+});
+// High contrast for a tone: a deeper (light) or lighter (dark) solid colour, so its text reaches 7:1.
+const strongTone = (name, base, fg, hover) => ({
+  [name]: base,
+  [`${name}-hover`]: hover,
+  [`${name}-foreground`]: fg,
 });
 
 const THEMES = {
@@ -110,6 +118,8 @@ const THEMES = {
     'price-discount': 'success-700',
     rating: 'gold-500',
     'focus-ring': 'rose-600',
+    // the ring on an inverse strip (surface-inverse utility): light rose shows on the dark strip
+    'focus-ring-inverse': 'rose-400',
     // Chart series: the same hue order in both themes (a series keeps its hue when the theme changes),
     // no green (red/green is the most common deficiency), neighbours apart for colour-blind eyes too.
     'chart-1': 'rose-600',
@@ -152,6 +162,7 @@ const THEMES = {
     'price-discount': 'success-300',
     rating: 'gold-400',
     'focus-ring': 'rose-400',
+    'focus-ring-inverse': 'rose-700',
     'chart-1': 'rose-400',
     'chart-2': 'info-300',
     'chart-3': 'teal-500',
@@ -171,7 +182,9 @@ const THEMES = {
 };
 
 // High contrast (`<html contrast="more">`, or the system setting): every text pair reaches 7:1 (WCAG
-// AAA) and borders become visible boundaries. The Delivery app uses it for reading in sunlight.
+// AAA), including the text on tones (buttons, badges) and on the brand gradient, and borders become
+// visible boundaries. The Delivery app uses it for reading in sunlight. Light and dark override the
+// same tokens (some keep their normal colour, which is already strong enough).
 const MORE = {
   light: {
     'foreground-muted': 'neutral-950',
@@ -181,6 +194,14 @@ const MORE = {
     'brand-text': 'rose-800',
     'price-discount': 'success-800',
     'focus-ring': 'rose-800',
+    'focus-ring-inverse': 'rose-300',
+    ...strongTone('brand', 'rose-800', 'white', 'rose-900'),
+    ...strongTone('secondary', 'plum-800', 'white', 'plum-900'),
+    ...strongTone('accent', 'gold-800', 'white', 'gold-900'),
+    ...Object.assign({}, ...STATUS.map((s) => strongTone(s, `${s}-800`, 'white', `${s}-900`))),
+    ...strongTone('neutral', 'neutral-800', 'white', 'neutral-900'),
+    'neutral-subtle-foreground': 'neutral-900',
+    'gradient-from': 'rose-800',
   },
   dark: {
     'foreground-muted': 'neutral-50',
@@ -190,6 +211,17 @@ const MORE = {
     'brand-text': 'rose-200',
     'price-discount': 'success-200',
     'focus-ring': 'rose-300',
+    'focus-ring-inverse': 'rose-800',
+    ...strongTone('brand', 'rose-300', 'neutral-950', 'rose-200'),
+    ...strongTone('secondary', 'plum-300', 'neutral-950', 'plum-200'),
+    ...strongTone('accent', 'gold-300', 'neutral-950', 'gold-200'),
+    ...Object.assign(
+      {},
+      ...STATUS.map((s) => strongTone(s, `${s}-300`, 'neutral-950', `${s}-200`)),
+    ),
+    ...strongTone('neutral', 'neutral-300', 'neutral-950', 'neutral-200'),
+    'neutral-subtle-foreground': 'neutral-100',
+    'gradient-from': 'rose-800',
   },
 };
 
@@ -207,6 +239,7 @@ const PAIRS = [
   ['border-strong', 'background', 3],
   ['focus-ring', 'background', 3],
   ['focus-ring', 'surface', 3],
+  ['focus-ring-inverse', 'surface-inverse', 3],
   ['brand-text', 'background', 4.5],
   ['brand-text', 'surface', 4.5],
   ['price-discount', 'surface', 4.5],
@@ -231,8 +264,17 @@ const PAIRS = [
   ]).flat(),
 ];
 
-// Extra pairs for the high-contrast themes: text at AAA, borders as real boundaries.
+// Extra pairs for the high-contrast themes: all text at AAA (also on tones and the gradient), borders
+// as real boundaries, the focus ring stronger than normal.
 const MORE_PAIRS = [
+  ...TONES.flatMap((t) => [
+    [`${t}-foreground`, t, 7],
+    [`${t}-foreground`, `${t}-hover`, 7],
+    [`${t}-subtle-foreground`, `${t}-subtle`, 7],
+  ]),
+  ['gradient-foreground', 'gradient-from', 7],
+  ['gradient-foreground', 'gradient-to', 7],
+  ['focus-ring-inverse', 'surface-inverse', 4.5],
   ['foreground-muted', 'surface', 7],
   ['foreground-muted', 'background', 7],
   ['foreground-subtle', 'surface', 7],
@@ -318,9 +360,45 @@ for (const [name, base] of Object.entries(BASES)) {
   }
 }
 
-/* ---------- Contrast report ---------- */
 let failures = 0;
 const report = [];
+const check = (ok, line) => {
+  if (!ok) failures++;
+  report.push(`${ok ? 'ok  ' : 'FAIL'} ${line}`);
+};
+
+/* ---------- Every theme has every token, and every token is a palette colour ---------- */
+// First, so a missing or misspelled token is named here instead of breaking the maths below.
+const lightTokens = Object.keys(THEMES.light);
+for (const [theme, map] of Object.entries(THEMES)) {
+  const missing = lightTokens.filter((token) => !(token in map));
+  const extra = Object.keys(map).filter((token) => !(token in THEMES.light));
+  check(
+    missing.length === 0 && extra.length === 0,
+    `${theme} has the same tokens as light${missing.length ? `; missing: ${missing.join(', ')}` : ''}${
+      extra.length ? `; only in ${theme}: ${extra.join(', ')}` : ''
+    }`,
+  );
+}
+for (const [theme, overrides] of Object.entries(MORE)) {
+  const unknown = Object.keys(overrides).filter((token) => !(token in (THEMES[theme] ?? {})));
+  check(
+    theme in THEMES && unknown.length === 0,
+    `high contrast for ${theme} overrides only ${theme} tokens${unknown.length ? `; unknown: ${unknown.join(', ')}` : ''}`,
+  );
+}
+for (const [name, map] of [
+  ...Object.entries(THEMES),
+  ...Object.entries(MORE).map(([theme, overrides]) => [`${theme}+more`, overrides]),
+]) {
+  const bad = Object.entries(map).filter(([, colour]) => !palette[colour]);
+  check(
+    bad.length === 0,
+    `every ${name} token is a palette colour${bad.length ? `; not in the palette: ${bad.map(([t, c]) => `${t}: ${c}`).join(', ')}` : ''}`,
+  );
+}
+
+/* ---------- Contrast report ---------- */
 const variants = Object.keys(THEMES).flatMap((theme) => [
   { name: theme, map: THEMES[theme], pairs: PAIRS },
   {
@@ -331,11 +409,13 @@ const variants = Object.keys(THEMES).flatMap((theme) => [
 ]);
 for (const { name, map, pairs } of variants) {
   for (const [fg, bg, min] of pairs) {
-    const ratio = contrast(palette[map[fg]], palette[map[bg]]);
-    if (ratio < min) failures++;
-    report.push(
-      `${ratio < min ? 'FAIL' : 'ok  '} ${name.padEnd(10)} ${fg} on ${bg}: ${ratio.toFixed(2)} (min ${min})`,
-    );
+    const [a, b] = [palette[map[fg]], palette[map[bg]]];
+    if (!a || !b) {
+      check(false, `${name.padEnd(10)} ${fg} on ${bg}: ${a ? bg : fg} is not defined`);
+      continue;
+    }
+    const ratio = contrast(a, b);
+    check(ratio >= min, `${name.padEnd(10)} ${fg} on ${bg}: ${ratio.toFixed(2)} (min ${min})`);
   }
 }
 
@@ -379,6 +459,10 @@ for (const theme of Object.keys(THEMES)) {
     { length: CHARTS },
     (_, i) => palette[THEMES[theme][`chart-${i + 1}`]],
   );
+  if (colours.some((c) => !c)) {
+    check(false, `${theme.padEnd(10)} charts: chart-1 … chart-${CHARTS} are not all defined`);
+    continue;
+  }
   for (const [vision, matrix] of Object.entries(CVD)) {
     const seen = colours.map((c) => simulate(c, matrix));
     const pairs =
@@ -396,19 +480,209 @@ for (const theme of Object.keys(THEMES)) {
   }
 }
 
+/* ---------- Meaning: what a contrast ratio cannot see ---------- */
+// The colour family of a palette entry: rose-600 → rose. White, black and every grey scale (a family
+// whose mid step has almost no chroma, like neutral) count as one "grey" family.
+const GREYS = new Set([
+  'white',
+  'black',
+  ...Object.keys(BASES).filter((f) => rgbToOklch(palette[`${f}-500`])[1] < 0.03),
+]);
+const family = (colour) => {
+  const name = colour.replace(/-\d+$/, '');
+  return GREYS.has(name) ? 'grey' : name;
+};
+// Tokens whose hue means something: a tone, a status, a chart series, the brand, a rating. Text on a
+// solid colour (-foreground), the plain text, surfaces, borders, the overlay and shadows may change hue.
+const carriesHue = (token) =>
+  !/^(foreground|background|surface|border|overlay|shadow-color)/.test(token) &&
+  !(token.endsWith('-foreground') && !token.endsWith('-subtle-foreground'));
+const CHART_ONLY = Object.keys(BASES).filter((f) => BASES[f].chartOnly);
+// The smallest contrast against the surface that still reads as a tint or a line (1.00 = invisible).
+const VISIBLE = 1.05;
+
+for (const { name, map } of variants) {
+  const rgb = (token) => palette[map[token]];
+  // a missing or misspelled token was named above; skip what needs it instead of failing on it twice
+  const has = (...tokens) => tokens.every((token) => palette[map[token]]);
+  for (const t of TONES) {
+    if (
+      !has(
+        'surface',
+        ...['', '-hover', '-foreground', '-subtle', '-subtle-foreground'].map((p) => `${t}${p}`),
+      )
+    ) {
+      continue;
+    }
+    // Contrast is the same both ways, so a swapped pair passes it: the subtle background must sit near
+    // the surface and its text far from it, and the tint must still be visible.
+    const tint = contrast(rgb(`${t}-subtle`), rgb('surface'));
+    check(
+      tint < contrast(rgb(`${t}-subtle-foreground`), rgb('surface')),
+      `${name.padEnd(10)} ${t}-subtle is the tint, ${t}-subtle-foreground its text`,
+    );
+    check(
+      tint >= VISIBLE,
+      `${name.padEnd(10)} ${t}-subtle is visible on the surface: ${tint.toFixed(2)} (min ${VISIBLE})`,
+    );
+    // Hover moves away from the label (darker under white text, lighter under dark text), never back.
+    check(
+      contrast(rgb(`${t}-foreground`), rgb(`${t}-hover`)) >
+        contrast(rgb(`${t}-foreground`), rgb(t)),
+      `${name.padEnd(10)} ${t}-hover gives its text more contrast than ${t}`,
+    );
+    // A tone is one hue: hover, tint and tint text are shades of it (a brand button never hovers plum).
+    const off = ['-hover', '-subtle', '-subtle-foreground']
+      .map((part) => `${t}${part}`)
+      .filter((token) => family(map[token]) !== family(map[t]));
+    check(
+      off.length === 0,
+      `${name.padEnd(10)} ${t}: hover and tint stay in its hue${off.length ? ` (${off.map((x) => `${x}: ${map[x]}`).join(', ')})` : ''}`,
+    );
+  }
+  if (has('border', 'surface')) {
+    const line = contrast(rgb('border'), rgb('surface'));
+    check(
+      line >= VISIBLE,
+      `${name.padEnd(10)} border is visible on the surface: ${line.toFixed(2)} (min ${VISIBLE})`,
+    );
+  }
+  // Contrast is symmetric here too: the inverse strip must be the opposite of the page, not a copy of it.
+  if (has('surface-inverse', 'background')) {
+    const inverse = contrast(rgb('surface-inverse'), rgb('background'));
+    check(
+      inverse >= 4.5,
+      `${name.padEnd(10)} surface-inverse is the opposite of the page: ${inverse.toFixed(2)} (min 4.5)`,
+    );
+  }
+  const misuse = Object.entries(map).filter(
+    ([token, colour]) => !token.startsWith('chart-') && CHART_ONLY.includes(family(colour)),
+  );
+  check(
+    misuse.length === 0,
+    `${name.padEnd(10)} ${CHART_ONLY.join(' and ')} only in charts${misuse.length ? ` (${misuse.map(([t, c]) => `${t}: ${c}`).join(', ')})` : ''}`,
+  );
+}
+
+// A token keeps its hue when the theme changes (a chart series, a status, the brand), and high contrast
+// only makes it lighter or darker. The brand gradient is the same in every theme.
+for (const [theme, map] of Object.entries(THEMES)) {
+  if (theme === 'light') continue;
+  for (const token of lightTokens.filter(
+    (t) => carriesHue(t) && palette[map[t]] && palette[THEMES.light[t]],
+  )) {
+    check(
+      family(map[token]) === family(THEMES.light[token]),
+      `${token} keeps its hue in ${theme} (${THEMES.light[token]} / ${map[token]})`,
+    );
+  }
+  for (const token of ['gradient-from', 'gradient-to', 'gradient-foreground']) {
+    check(
+      map[token] === THEMES.light[token],
+      `${token} is the same in ${theme} and light (${THEMES.light[token]} / ${map[token]})`,
+    );
+  }
+}
+for (const [theme, overrides] of Object.entries(MORE)) {
+  for (const [token, colour] of Object.entries(overrides)) {
+    const base = THEMES[theme]?.[token];
+    if (!base || !carriesHue(token) || !palette[colour] || !palette[base]) continue;
+    check(
+      family(colour) === family(base),
+      `${theme}+more ${token} keeps its hue (${base} / ${colour})`,
+    );
+  }
+}
+
+// What the README documents must be what the code does: the order status table, the default tone and
+// the chart hue order. Only the README's "### Order status" section is read.
+const readme = readFileSync(new URL('../README.md', import.meta.url), 'utf8').replaceAll(
+  '\r\n',
+  '\n',
+);
+const toneList = TONES.join(', ');
+const section = /^### Order status\n([\s\S]*?)(?=^#{1,3} )/m.exec(readme)?.[1] ?? '';
+const rows = section.split('\n').filter((l) => l.trim().startsWith('|'));
+const header = (rows[0] ?? '').split('|').map((c) => c.trim().toLowerCase());
+const [toneCol, statusCol] = [header.indexOf('tone'), header.indexOf('status')];
+check(
+  toneCol > 0 && statusCol > 0,
+  'the README has a Tone | Status table under "### Order status"',
+);
+const documented = {};
+for (const row of rows.slice(2)) {
+  const cells = row.split('|').map((c) => c.trim());
+  const tone = cells[toneCol]?.replaceAll('`', '');
+  const statuses = [...(cells[statusCol] ?? '').matchAll(/`([A-Z][A-Z0-9_]*)`/g)].map((m) => m[1]);
+  if (!tone || statuses.length === 0) {
+    check(false, `README order status row is not "tone | \`STATUS\`, ...": ${row.trim()}`);
+    continue;
+  }
+  check(
+    TONES.includes(tone),
+    `README order status row uses ${tone}${TONES.includes(tone) ? '' : `, which is not a tone (${toneList})`}`,
+  );
+  for (const status of statuses) (documented[status] ??= []).push(tone);
+}
+for (const [status, tone] of Object.entries(ORDER_STATUS)) {
+  if (!TONES.includes(tone))
+    check(false, `order status ${status} uses ${tone}, which is not a tone (${toneList})`);
+}
+for (const status of new Set([...Object.keys(ORDER_STATUS), ...Object.keys(documented)])) {
+  const tones = documented[status] ?? [];
+  if (tones.length > 1) {
+    check(
+      false,
+      `order status ${status} is listed more than once in the README (${tones.join(', ')})`,
+    );
+    continue;
+  }
+  check(
+    tones[0] === ORDER_STATUS[status],
+    `order status ${status} is ${ORDER_STATUS[status] ?? 'missing'} here and ${tones[0] ?? 'missing'} in the README`,
+  );
+}
+const documentedDefault = /Default tone:?\s*`([a-z]+)`/.exec(readme)?.[1];
+if (!TONES.includes(DEFAULT_TONE))
+  check(false, `DEFAULT_TONE ${DEFAULT_TONE} is not a tone (${toneList})`);
+check(
+  documentedDefault === DEFAULT_TONE,
+  `default tone is ${DEFAULT_TONE} here and ${documentedDefault ?? 'missing'} in the README ("Default tone \`name\`")`,
+);
+// A chart series is named by its hue in the README: (rose, blue, teal, red, orange, gold, violet, plum)
+const HUE_NAMES = { info: 'blue', error: 'red', warning: 'orange', success: 'green' };
+const chartHues = Array.from({ length: CHARTS }, (_, i) =>
+  family(THEMES.light[`chart-${i + 1}`] ?? ''),
+)
+  .map((f) => HUE_NAMES[f] ?? f)
+  .join(', ');
+const documentedHues = /series ka hue same rehta hai \(([a-z, ]+)\)/.exec(readme)?.[1];
+check(
+  documentedHues === chartHues,
+  `chart hue order is (${chartHues}) here and (${documentedHues ?? 'missing'}) in the README`,
+);
+
 /* ---------- CSS output ---------- */
 const ch = (rgb) => rgb.join(', ');
 const paletteCss = Object.entries(palette)
   .map(([k, v]) => `  --${k}-rgb: ${ch(v)};`)
   .join('\n');
+// Luminance where black and white text have the same contrast: darker backgrounds are dark schemes.
+const SCHEME_CROSSOVER = 0.179;
+const schemeOf = (colour) => (luminance(palette[colour]) < SCHEME_CROSSOVER ? 'dark' : 'light');
 const themeVars = (map, indent, important = false) => {
   const imp = important ? ' !important' : '';
-  return Object.entries(map)
-    .map(
+  // a block that sets the page background also tells the browser its scheme (native controls, scrollbars)
+  const scheme = map.background
+    ? [`${indent}color-scheme: ${schemeOf(map.background)}${imp};`]
+    : [];
+  return [
+    ...scheme,
+    ...Object.entries(map).map(
       ([k, v]) =>
         `${indent}--${k}-rgb: var(--${v}-rgb)${imp};\n${indent}--${k}: rgb(var(--${k}-rgb))${imp};`,
-    )
-    .join('\n');
+    ),
+  ].join('\n');
 };
 const TONE_PARTS = ['', '-hover', '-foreground', '-subtle', '-subtle-foreground'];
 const toneVars = (t, indent) =>
@@ -442,20 +716,17 @@ ${paletteCss}
 /* Light theme (default) */
 :root,
 [theme='light'] {
-  color-scheme: light;
 ${themeVars(THEMES.light, '  ')}
 }
 
 /* Dark theme */
 [theme='dark'] {
-  color-scheme: dark;
 ${themeVars(THEMES.dark, '  ')}
 }
 
 /* No theme attribute yet (before JS runs): follow the system setting */
 @media (prefers-color-scheme: dark) {
   :root:not([theme]) {
-    color-scheme: dark;
 ${themeVars(THEMES.dark, '    ')}
   }
 }
@@ -498,7 +769,6 @@ ${themeVars(MORE.dark, '    ')}
 @media print {
   :root,
   [theme] {
-    color-scheme: light !important;
 ${themeVars(THEMES.light, '    ', true)}
   }
 }
@@ -517,11 +787,11 @@ ${toneMap}
 
 /* Tones: one component, any colour. tone-success sets --tone, --tone-hover, --tone-foreground,
    --tone-subtle and --tone-subtle-foreground (and --tone-rgb); the component uses bg-tone,
-   text-tone-foreground, bg-tone-subtle ... The default tone is brand. */
+   text-tone-foreground, bg-tone-subtle ... The default tone is ${DEFAULT_TONE}. */
 @layer base {
   :root,
   [theme] {
-${toneVars('brand', '    ')}
+${toneVars(DEFAULT_TONE, '    ')}
   }
 }
 
@@ -534,13 +804,50 @@ ${orderStatusCss}
 }
 ${END}`;
 
+// The generated CSS itself: every block that sets the page background declares exactly the scheme of
+// that background (native controls, scrollbars and form fields then match it), and no other block sets
+// a scheme. The default tone block is there and uses DEFAULT_TONE.
+const blocksOut = [...generated.matchAll(/([^{}]+)\{([^{}]*)\}/g)].map(([, selector, body]) => [
+  selector
+    .replace(/\/\*[\s\S]*?\*\//g, '')
+    .trim()
+    .replace(/\s+/g, ' '),
+  body,
+]);
+const withBackground = blocksOut.filter(([, body]) => /--background-rgb:/.test(body));
+check(withBackground.length >= 4, 'light, dark, automatic dark and print blocks are generated');
+for (const [selector, body] of blocksOut) {
+  const background = /--background-rgb: var\(--([\w-]+)-rgb\)/.exec(body)?.[1];
+  const schemes = [...body.matchAll(/color-scheme:\s*([^;]*);/g)].map((m) =>
+    m[1].replace(/\s*!important$/, ''),
+  );
+  if (!background) {
+    if (schemes.length) check(false, `${selector}: sets color-scheme but not the background`);
+    continue;
+  }
+  const expected = palette[background] ? schemeOf(background) : 'unknown';
+  check(
+    schemes.length === 1 && schemes[0] === expected,
+    `${selector}: color-scheme ${schemes.join(' + ') || 'missing'} on a ${expected} background (${background})`,
+  );
+}
+const defaultTone = /@layer base \{\s*:root,\s*\[theme\] \{([^{}]*)\}/.exec(generated)?.[1] ?? '';
+check(
+  defaultTone.includes(`--tone: var(--${DEFAULT_TONE});`) &&
+    defaultTone.includes(`--tone-rgb: var(--${DEFAULT_TONE}-rgb);`),
+  `the default tone block (@layer base > :root, [theme]) is generated with ${DEFAULT_TONE}`,
+);
+
 // LF everywhere: a Windows checkout with core.autocrlf must not look "out of date"
 const css = readFileSync(FILE, 'utf8').replaceAll('\r\n', '\n');
 const [i, j] = [css.indexOf(START), css.indexOf(END)];
 if (i < 0 || j < 0) throw new Error('generated markers not found in src/variables.css');
 const next = css.slice(0, i) + generated + css.slice(j + END.length);
 
-console.log(report.filter((l) => l.startsWith('FAIL')).join('\n') || 'All colour checks passed.');
+// --verbose prints every check with its number, not only the failures
+if (process.argv.includes('--verbose')) console.log(report.join('\n'));
+else
+  console.log(report.filter((l) => l.startsWith('FAIL')).join('\n') || 'All colour checks passed.');
 console.log(`${report.length - failures}/${report.length} checks pass.`);
 if (process.argv.includes('--check')) {
   if (next !== css) {

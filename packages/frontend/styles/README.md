@@ -106,7 +106,9 @@ background: rgba(var(--brand-rgb), 0.12); /* 12% rose */
 | Semantic | `--brand`, `--foreground-muted`, `--surface`                      | Hamesha; light aur dark khud sambhalte hain |
 | Tailwind | `bg-brand`, `text-foreground-muted`, `bg-brand/20`, `bg-rose-600` | Components me                               |
 
-Semantic tokens: `background`, `surface`, `surface-muted`, `surface-inverse`, `foreground` (+ `-muted`, `-subtle`, `-inverse`), `border`, `border-strong`, `brand`, `secondary`, `accent`, `success`, `warning`, `error`, `info` (har ek ke saath `-hover`, `-foreground`, `-subtle`, `-subtle-foreground`), `brand-text`, `price-discount`, `rating`, `focus-ring`, `overlay`, `shadow-color`.
+Semantic tokens: `background`, `surface`, `surface-muted`, `surface-inverse`, `foreground` (+ `-muted`, `-subtle`, `-inverse`), `border`, `border-strong`, `brand`, `secondary`, `accent`, `success`, `warning`, `error`, `info` (har ek ke saath `-hover`, `-foreground`, `-subtle`, `-subtle-foreground`), `brand-text`, `price-discount`, `rating`, `focus-ring`, `focus-ring-inverse` (ulti patti pe ring, `surface-inverse` utility ke saath), `overlay`, `shadow-color`.
+
+Muted section (`surface-muted`) pe `foreground-subtle` text mat lagao: dark theme me wo sirf 3.66:1 hai (AA ko 4.5 chahiye). Wahan `foreground-muted` ya `foreground` lo (owner ka faisla, 2026-10-21: rang wahi, ye niyam).
 
 Tailwind ke default colours aur shadows hata diye gaye hain: sirf Beautinique tokens milte hain. `teal` aur `violet` scales sirf charts aur category tags ke liye hain, text ya status ke liye nahi.
 
@@ -154,7 +156,7 @@ Element pe `tone-*` class ho to wo jeet-ti hai. Rang ke saath status ka text ham
 
 ### High contrast
 
-`<html contrast="more">` (ya system ki "increase contrast" setting, jab attribute na ho) me saara text 7:1 (AAA) pe aata hai, borders saaf dikhte hain, aur focus ring 3px ki ho jati hai. Delivery app ise dhoop me padhne ke liye use karta hai. `contrast="normal"` system setting ko band karta hai. Light aur dark dono ke saath chalta hai.
+`<html contrast="more">` (ya system ki "increase contrast" setting, jab attribute na ho) me saara text 7:1 (AAA) pe aata hai, buttons aur badges (tones) aur brand gradient ka text bhi: har tone ek step gehri (light) ya halki (dark) ho jati hai. Borders saaf dikhte hain, aur focus ring 3px ki aur zyada gehri ho jati hai. Delivery app ise dhoop me padhne ke liye use karta hai. `contrast="normal"` system setting ko band karta hai. Light aur dark dono ke saath chalta hai.
 
 ### Print
 
@@ -162,11 +164,20 @@ Print me hamesha light theme lagti hai (dark page ink barbaad karta hai). Screen
 
 ### Colours badalna
 
-Colours `scripts/palette.mjs` me hain (Rose + Plum, gold accent, warm neutrals, plus chart hues). Tones, order status aur charts bhi wahin hain. Wahan badlo, phir `npm run palette`. Ye 50–950 scales (OKLCH) banata hai, `src/variables.css` ka generated hissa update karta hai, aur ye check karta hai (abhi 310/310 pass):
+Colours `scripts/palette.mjs` me hain (Rose + Plum, gold accent, warm neutrals, plus chart hues). Tones, order status aur charts bhi wahin hain. Wahan badlo, phir `npm run palette`. Ye 50–950 scales (OKLCH) banata hai, `src/variables.css` ka generated hissa update karta hai, aur ye check karta hai (`--verbose` har check ka number dikhata hai):
 
+- har theme me har token hai, aur har token palette ka asli colour hai (galat naam saaf bataya jata hai, script crash nahi hoti);
 - har semantic aur tone jodi ka WCAG contrast (light, dark, aur dono ke high-contrast);
-- brand gradient pe white text, aur gradient text;
-- chart colours ka contrast aur aapas ka farak (normal aur colour-blind).
+- brand gradient pe white text, aur gradient text; gradient har theme me same;
+- chart colours ka contrast aur aapas ka farak (normal aur colour-blind);
+- **matlab**, jo contrast nahi dekh pata (contrast dono taraf barabar hota hai):
+  - har tone ka `-subtle` tint hai aur `-subtle-foreground` uska text, ulta nahi; tint aur border surface pe dikhte hain;
+  - `-hover` text ka contrast badhata hai, kabhi ghatata nahi; hover aur tint apni tone ke hue me rehte hain;
+  - `surface-inverse` page ka ulta hai;
+  - jis token ke hue ka matlab hai (tone, status, chart series, brand, rating), uska hue dark aur high contrast me nahi badalta;
+  - `teal` aur `violet` sirf charts me hain;
+- generated CSS: page ka background set karne wala har block apne background jaisa `color-scheme` (light ya dark) deta hai, aur default tone ka block `DEFAULT_TONE` se banta hai;
+- docs aur code ek hain: neeche wali order status table, "Default tone", aur chart hue order (README) wahi hain jo script me hai. Ek badlo to doosra bhi badlo.
 
 ## Base styles (`base.css`)
 
@@ -203,6 +214,7 @@ Tailwind ke `animate-spin`, `-ping`, `-pulse`, `-bounce` bhi hain. Durations mot
 ## Utilities (`utilities.css`)
 
 - **`focus-ring`, `focus-ring-inset`, `focus-ring-within`:** custom controls ke liye wahi focus ring jo base me hai (jab `outline-hidden` lagaya ho). `-inset` scroll box ke andar, `-within` input wale wrapper ke liye.
+- **`surface-inverse`:** ulti patti (light page pe dark footer ya bar, dark pe light): background, text aur aisa focus ring jo us patti pe dikhe. Andar ka har focus ring (base, `focus-ring-*`) apne aap wahi leta hai: `<footer class="surface-inverse">`. Sirf `bg-surface-inverse` lagaya to ring nahi dikhega.
 - **`touch-target`, `touch-target-lg`:** chhote control (icon button, close, shade dot) ko 44px / 48px ka click area, bina dikhawat badle (`::before` use karta hai).
 - **`skip-link`:** har page ka pehla element, sirf focus pe dikhta hai: `<a href="#main" class="skip-link">Skip to content</a>`.
 - **`container-page`:** page ki width (`max-w-page`) aur responsive side padding.
@@ -247,6 +259,16 @@ npm test
 
 - **Font plugin** (real Vite builds aur dev server): preload URL = CSS URL, har font ek baar, base path, CDN URL, multi-page, galat setup pe saaf error.
 - **CSS** (real Vite + Tailwind build, `test/fixture/classes.html`): build me use hua har `var(--x)` define hai; tones, order status, charts, layout tokens, touch targets, focus ring, reduced motion, sirf use hue keyframes, forced colors, safe areas, high contrast, print aur Quill lists sahi bante hain; hand-written CSS me koi rang seedha nahi likha (sirf tokens); har module `index.css` aur `exports` me hai. Tests mutation-check kiye gaye hain.
+- **Saare tokens ek saath** (`test/tokens.test.mjs`): naam ki koi list nahi, sirf niyam. Har token pe apne aap lagte hain, isliye naya token jodne pe test me kuch nahi likhna:
+  - light, dark, automatic dark aur print ek jaise tokens define karte hain; automatic dark = `[theme='dark']`, print = light;
+  - high contrast ke saare raaste (attribute aur OS setting) ek jaise rang dete hain, light aur dark dono me, aur ek doosre ko override karne wale blocks sahi order me hain (barabar selector pe baad wala jeet-ta hai: dark wala light ke baad, print sabse aakhir);
+  - har tone aur order status wahi tone tokens set karta hai; har rang aur uske `-rgb` channels ek hi rang ke hain; `@theme` ka har colour apna hi token padhta hai;
+  - rang aur `-rgb` channels kabhi mix nahi hote (`rgba()` ke andar sirf `-rgb`, aur `-rgb` akela rang ki jagah nahi);
+  - har `var(--x)` hamare kisi token pe jaata hai. Fallback wala `var(--x, 40s)` ek element setting hai, aur wo README me likha hona chahiye. Hand-written CSS palette ke fixed rang (`--rose-600`) nahi, sirf semantic tokens use karti hai. `print.css` ka sab kuch sirf `@media print` me hai;
+  - values sahi roop me hain (spacing/size/radius me unit, aspect `16 / 9`, easing, duration, z-index), aur z-index scale likhe gaye order me badhta hai;
+  - `@theme` ka har token (abhi 231: colours, spacing, radius, shadows, animations, fonts...) Tailwind ke compiler se apni utility banata hai (`--color-x` → `bg-x`, `--spacing-x` → `h-x`...). Tailwind ke default colours aur shadows bahar rehte hain (`bg-red-500` nahi banta). Har animation apni keyframes chalata hai aur `both` se apni aakhri haalat me rukta hai. Naya namespace aaye to test saaf batata hai ki use `UTILITY` me jodo.
+  - Ek cheez ye test nahi pakad sakta: koi token poora hata do to uska niyam bhi saath me chala jata hai. Hand edit `npm run check` pakadta hai (`variables.css` generator se byte-byte milti hai); jaan-boojh ke hataya token apps ke tests aur browser check se pakda jayega.
+- **`test/fixture/classes.html`** sirf un cheezon ke liye hai jo asli Vite build me hi dikhti hain (keyframes sirf use hone pe, fonts, `@layer` order). Naya token jodne pe ise mat chhedo. Tailwind ki apni classes (`flex`, `p-4`) aur apps ki classes yahan kabhi nahi aati: har app ka build apni files khud scan karta hai.
 
 ```bash
 npm run check
