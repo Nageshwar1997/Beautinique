@@ -71,7 +71,7 @@
 
 ## 6. Traps (pehle hi pata ho)
 
-- **Naya backend package jo kisi service pe test kare** (Mongo, Valkey, aage Mailpit): `ci.yml` aur `release.yml` ke "Start MongoDB and Valkey" step me wo service jodo, warna CI pe uske tests "These tests need ..." se fail hote hain (server-queue ke pehle push pe Valkey chhoot gaya tha).
+- **Naya backend package jo kisi service pe test kare** (Mongo, Valkey, aage Mailpit): `ci.yml` aur `release.yml` ke "Start MongoDB and Valkey" step me wo service jodo, warna CI pe uske tests "These tests need ..." se fail hote hain (server-queue ke pehle push pe Valkey chhoot gaya tha). Service shuru na ho to ye step `docker compose ps` aur uske aakhri 200 log lines print karta hai: wahi wajah batate hain.
 - **Test me password wala nakli URL bhi gitleaks pakadta hai** (koi bhi Mongo ya Redis URL jisme scheme ke baad user, colon, password aur `@` ho; docs ki example bhi): CI fail. Aisa test ya doc likho to password ko URL me literal mat likho (docs me `<password>` jaisa placeholder chalta hai), ya push se pehle local scan (`gitleaks git --config .gitleaks.toml --redact .`) chala ke finding ko `.gitleaksignore` me fingerprint + wajah ke saath daalo. Push hui history badli nahi ja sakti.
 - **npm 12 chahiye:** root `package.json` ka `devEngines` Node >=24 aur npm >=12.2.0 maangta hai (`onFail: error`), isliye purane npm pe `npm install` ruk jata hai. CI me bhi isi wajah se `setup-node` ka npm cache band hai (wo npm 11 se `npm config get cache` chalata hai aur `EBADDEVENGINES` aata hai); npm 12 install hone ke baad `actions/cache` `~/.npm` cache karta hai.
 - **TypeScript ~6.0.3 pinned hai:** TS 7 aa gaya hai, par typescript-eslint sirf <6.1 support karta hai. Upgrade mat karna jab tak typescript-eslint support na de.

@@ -66,7 +66,13 @@ jobs:
       # services as on the laptops (`npm run infra:up`), so CI and local runs see the same servers and
       # limits. Every backend package that needs another service adds it here and in release.yml.
       - name: Start MongoDB and Valkey for the tests
-        run: docker compose -f infra/docker-compose.yml up --detach --wait --wait-timeout 180 mongo valkey
+        run: |
+          if ! docker compose -f infra/docker-compose.yml up --detach --wait --wait-timeout 180 mongo valkey; then
+            # compose only says "exited (1)"; the servers' own logs say why
+            docker compose -f infra/docker-compose.yml ps --all
+            docker compose -f infra/docker-compose.yml logs --no-color --tail 200 mongo valkey
+            exit 1
+          fi
       - run: npm test
       # Every check a publish runs (build, tests, package contents, publint, types), nothing published.
       - run: npm run verify -- --all --yes
