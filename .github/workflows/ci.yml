@@ -62,10 +62,11 @@ jobs:
       - run: npm run format:check
       - run: npm run lint
       - run: npm run typecheck
-      # Backend packages test against a real MongoDB replica set: the same compose service as on the
-      # laptops (`npm run infra:up`), so CI and local runs see the same server and settings.
-      - name: Start MongoDB for the tests
-        run: docker compose -f infra/docker-compose.yml up --detach --wait --wait-timeout 180 mongo
+      # Backend packages test against a real MongoDB replica set and Valkey (Redis): the same compose
+      # services as on the laptops (`npm run infra:up`), so CI and local runs see the same servers and
+      # limits. Every backend package that needs another service adds it here and in release.yml.
+      - name: Start MongoDB and Valkey for the tests
+        run: docker compose -f infra/docker-compose.yml up --detach --wait --wait-timeout 180 mongo valkey
       - run: npm test
       # Every check a publish runs (build, tests, package contents, publint, types), nothing published.
       - run: npm run verify -- --all --yes

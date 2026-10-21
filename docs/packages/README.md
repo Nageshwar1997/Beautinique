@@ -1,6 +1,6 @@
 # Packages — banana, publish aur republish
 
-> **Status:** v1.6 (2026-10-21). **Abhi publish/republish nahi (owner ka faisla, 2026-10-21):** apps isi monorepo se package lete hain (npm workspaces), live deploy pe bhi. Publish sirf zaroorat pe; packages public hi rahenge. `packages/` ke saare npm packages ka kaam, aur naye frontend apps aur backend apps banana, is repo ke apne CLI (`scripts/packages/`) se hota hai. Ye guide batati hai ki kaunsa command kab chalana hai aur andar kya hota hai.
+> **Status:** v1.7 (2026-10-21). **Abhi publish/republish nahi (owner ka faisla, 2026-10-21):** apps isi monorepo se package lete hain (npm workspaces), live deploy pe bhi. Publish sirf zaroorat pe; packages public hi rahenge. `packages/` ke saare npm packages ka kaam, aur naye frontend apps aur backend apps banana, is repo ke apne CLI (`scripts/packages/`) se hota hai. Ye guide batati hai ki kaunsa command kab chalana hai aur andar kya hota hai.
 
 ## 1. Packages kahan aur kis naam se
 
@@ -95,7 +95,7 @@ Kisi package ka naya version agar kisi published dependent ki range tod de, to C
 
 ## 5. CI
 
-`.github/workflows/ci.yml` `main`, `prerelease` aur `release` pe push aur har PR pe: `npm ci`, `npm run build`, format check, lint, typecheck, tests (CLI ke 70+ tests, fake npm registry ke saath asli publish aur GitHub release flows bhi), `npm run verify -- --all`, `npm audit`. Tests se pehle `infra/docker-compose.yml` ka `mongo` chalta hai (`release.yml` me bhi, publish ke checks se pehle). npm 12.2.0 pin hai (Node 24 ke saath npm 11 aata hai).
+`.github/workflows/ci.yml` `main`, `prerelease` aur `release` pe push aur har PR pe: `npm ci`, `npm run build`, format check, lint, typecheck, tests (CLI ke 70+ tests, fake npm registry ke saath asli publish aur GitHub release flows bhi), `npm run verify -- --all`, `npm audit`. Tests se pehle `infra/docker-compose.yml` ke `mongo` aur `valkey` chalte hain (`release.yml` me bhi, publish ke checks se pehle). npm 12.2.0 pin hai (Node 24 ke saath npm 11 aata hai).
 
 ## 6. CLI ka code
 
@@ -114,3 +114,4 @@ Kisi package ka naya version agar kisi published dependent ki range tod de, to C
 | v1.4 | 2026-10-20 | `npm run create` ab frontend apps (§3.1) aur backend apps (§3.2) bhi banata hai. |
 | v1.5 | 2026-10-21 | Abhi publish/republish nahi, zaroorat pe; packages public hi. |
 | v1.6 | 2026-10-21 | verify/publish ke tests ko Mongo chahiye (`infra:up`); CI aur release Mongo chalate hain. |
+| v1.7 | 2026-10-21 | CI aur release tests se pehle `valkey` bhi chalate hain. |

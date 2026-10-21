@@ -76,13 +76,17 @@ const SUBSCRIBERS = { 'commerce.order.placed': ['notify.emails', 'identity.grant
 
 let mongo: Mongo;
 let redis: RedisConnection;
+/** What beforeAll managed to open: if it failed half way, afterAll closes only that. */
+const opened: { mongo?: Mongo; redis?: RedisConnection } = {};
 const inspectors: Queue[] = [];
 const relays: Relay[] = [];
 
 beforeAll(async () => {
   try {
     mongo = await connectMongo({ uri: MONGO_URI, dbName, appName: 'server-queue-test', logger });
+    opened.mongo = mongo;
     redis = await connectRedis({ url: REDIS_URL, name: 'server-queue-test', logger });
+    opened.redis = redis;
   } catch (error) {
     throw new Error(
       'These tests need MongoDB and Valkey: run `npm run infra:up` (or set MONGO_TEST_URI and REDIS_TEST_URL).',
@@ -183,12 +187,14 @@ async function redisProxy(): Promise<RedisProxy> {
 afterAll(async () => {
   try {
     await Promise.all(inspectors.map((queue) => queue.close()));
-    const keys = await redis.client.keys(`${prefix}:*`);
-    if (keys.length > 0) await redis.client.del(...keys);
-    await mongo.db.dropDatabase();
+    if (opened.redis) {
+      const keys = await opened.redis.client.keys(`${prefix}:*`);
+      if (keys.length > 0) await opened.redis.client.del(...keys);
+    }
+    await opened.mongo?.db.dropDatabase();
   } finally {
-    await redis.close();
-    await mongo.close();
+    await opened.redis?.close();
+    await opened.mongo?.close();
   }
 });
 

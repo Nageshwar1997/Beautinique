@@ -51,6 +51,8 @@ const logger = createLogger({
 let mongo: Mongo;
 /** A second client, like another process: it only sees what was committed. */
 let other: MongoClient;
+/** What beforeAll managed to open: if it failed half way, afterAll closes only that. */
+const opened: { mongo?: Mongo; other?: MongoClient } = {};
 
 beforeAll(async () => {
   try {
@@ -61,6 +63,7 @@ beforeAll(async () => {
       logger,
       serverSelectionTimeoutMS: 3000,
     });
+    opened.mongo = mongo;
   } catch (error) {
     throw new Error(
       'These tests need the MongoDB replica set: run `npm run infra:up` (or set MONGO_TEST_URI).',
@@ -70,14 +73,15 @@ beforeAll(async () => {
     );
   }
   other = new MongoClient(URI, { readConcernLevel: 'majority' });
+  opened.other = other;
   await other.connect();
 });
 afterAll(async () => {
   try {
-    await mongo.db.dropDatabase();
+    await opened.mongo?.db.dropDatabase();
   } finally {
-    await mongo.close();
-    await other.close();
+    await opened.mongo?.close();
+    await opened.other?.close();
   }
 });
 let failPointOn = false;

@@ -1,6 +1,6 @@
 # infra — laptop ka local infra (Docker)
 
-> **Status:** v1.1 (2026-10-21). Docker Lesson 2 (TASKS T0.8). Docker sirf laptop ke liye hai; live server (Render) Docker nahi chalata, wahan Atlas, Render Key Value aur Brevo hain (ARCHITECTURE §11, §12).
+> **Status:** v1.2 (2026-10-21). Docker Lesson 2 (TASKS T0.8). Docker sirf laptop ke liye hai; live server (Render) Docker nahi chalata, wahan Atlas, Render Key Value aur Brevo hain (ARCHITECTURE §11, §12).
 
 ## Kya chalta hai
 
@@ -12,7 +12,7 @@
 
 Saare ports sirf `127.0.0.1` pe khulte hain: Wi-Fi pe baitha koi aur in bina password wali services tak nahi pahunch sakta.
 
-Mongo test commands (`--setParameter enableTestCommands=1`) ke saath chalta hai. Isse tests `failCommand` fail point se Mongo ko jaan-boojh ke fail ya dheema karwate hain (jaise commit ka "result pata nahi" error) aur dekhte hain ki retry sahi hai. Ye sirf laptop, CI aur release build pe hai; Atlas pe ye kabhi nahi hota. `ci.yml` aur `release.yml` bhi tests se pehle isi file ka `mongo` chalate hain.
+Mongo test commands (`--setParameter enableTestCommands=1`) ke saath chalta hai. Isse tests `failCommand` fail point se Mongo ko jaan-boojh ke fail ya dheema karwate hain (jaise commit ka "result pata nahi" error) aur dekhte hain ki retry sahi hai. Ye sirf laptop, CI aur release build pe hai; Atlas pe ye kabhi nahi hota. `ci.yml` aur `release.yml` bhi tests se pehle isi file ke `mongo` aur `valkey` chalate hain; naya backend package kisi aur service pe test kare to use dono workflows ke us step me jodo.
 
 Abhi idle pe teeno milake ~250 MB RAM lete hain (Mongo ~234 MB, cache 256 MB pe band). Docker Desktop ko is laptop pe ~2.8 GB mili hai.
 
@@ -83,3 +83,4 @@ docker volume ls
 | ------- | ---------- | ------------------------------------------------------------------------------------------------ |
 | v1.0    | 2026-10-21 | Pehla version: Mongo replica set, Valkey (Render limits), Mailpit; scripts.                      |
 | v1.1    | 2026-10-21 | Mongo `enableTestCommands=1` (tests ke fail points); CI aur release bhi yahi mongo chalate hain. |
+| v1.2    | 2026-10-21 | CI aur release `valkey` bhi chalate hain (server-queue ke tests).                                |

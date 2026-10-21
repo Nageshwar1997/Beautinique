@@ -1,6 +1,6 @@
 # HANDOFF — BQ
 
-> **Status:** v1.17 (2026-10-21). Is project pe 2 log kaam karte hain. Ye file batati hai ki **abhi kya halat hai, kisne kya chhoda, agla kaam kya hai** aur kaunse sawal khule hain, taaki doosra insaan (aur uska Claude) bina poora itihaas padhe kaam utha sake. Jo bhi kaam roke, wo ye file update kare (neeche §8).
+> **Status:** v1.18 (2026-10-21). Is project pe 2 log kaam karte hain. Ye file batati hai ki **abhi kya halat hai, kisne kya chhoda, agla kaam kya hai** aur kaunse sawal khule hain, taaki doosra insaan (aur uska Claude) bina poora itihaas padhe kaam utha sake. Jo bhi kaam roke, wo ye file update kare (neeche §8).
 
 ## 0. Pehle ye (handoff ke din)
 
@@ -71,6 +71,7 @@
 
 ## 6. Traps (pehle hi pata ho)
 
+- **Naya backend package jo kisi service pe test kare** (Mongo, Valkey, aage Mailpit): `ci.yml` aur `release.yml` ke "Start MongoDB and Valkey" step me wo service jodo, warna CI pe uske tests "These tests need ..." se fail hote hain (server-queue ke pehle push pe Valkey chhoot gaya tha).
 - **Test me password wala nakli URL bhi gitleaks pakadta hai** (koi bhi Mongo ya Redis URL jisme scheme ke baad user, colon, password aur `@` ho; docs ki example bhi): CI fail. Aisa test ya doc likho to password ko URL me literal mat likho (docs me `<password>` jaisa placeholder chalta hai), ya push se pehle local scan (`gitleaks git --config .gitleaks.toml --redact .`) chala ke finding ko `.gitleaksignore` me fingerprint + wajah ke saath daalo. Push hui history badli nahi ja sakti.
 - **npm 12 chahiye:** root `package.json` ka `devEngines` Node >=24 aur npm >=12.2.0 maangta hai (`onFail: error`), isliye purane npm pe `npm install` ruk jata hai. CI me bhi isi wajah se `setup-node` ka npm cache band hai (wo npm 11 se `npm config get cache` chalata hai aur `EBADDEVENGINES` aata hai); npm 12 install hone ke baad `actions/cache` `~/.npm` cache karta hai.
 - **TypeScript ~6.0.3 pinned hai:** TS 7 aa gaya hai, par typescript-eslint sirf <6.1 support karta hai. Upgrade mat karna jab tak typescript-eslint support na de.
@@ -123,3 +124,4 @@
 | v1.15 | 2026-10-21 | Faisla: production Redis = Render Key Value free; khula sawal band (§4). |
 | v1.16 | 2026-10-21 | Pehle GitHub gitleaks run ki finding (nakli test URL) `.gitleaksignore` se; naya trap (§6). |
 | v1.17 | 2026-10-21 | v1.16 ke trap ki example URLs ne khud gitleaks fail karaya: shabdon me likha; `3fdfb49` ki 3 findings ignore. |
+| v1.18 | 2026-10-21 | CI aur release Valkey bhi chalate hain; naya trap (§6). |
