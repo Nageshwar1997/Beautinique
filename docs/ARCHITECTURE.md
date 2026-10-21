@@ -1,6 +1,6 @@
 # ARCHITECTURE — BQ
 
-> **Status:** v1.11 draft (2026-10-21). [PRD.md](PRD.md) v1.0 pe based. Design ek multi-agent review se aaya (3 architecture proposals + review board + owner ke decisions), aur v1.1 me free tier ke official docs ke against verify hua.
+> **Status:** v1.12 draft (2026-10-21). [PRD.md](PRD.md) v1.0 pe based. Design ek multi-agent review se aaya (3 architecture proposals + review board + owner ke decisions), aur v1.1 me free tier ke official docs ke against verify hua.
 
 ## 0. Ek nazar me
 
@@ -151,7 +151,7 @@ Har module ka apna folder hai (`index.ts` facade, `http`, `application`, `domain
 
 ### 6.2 Transactions
 
-- `withTransaction()` helper: transient errors pe retry, majority write concern, **reply sirf commit ke baad**, aur outbox aur audit rows usi transaction me. Ye aaj ka "commit se pehle response" wala bug theek karta hai.
+- `withTransaction()` helper: transient errors pe retry, majority write concern, **reply sirf commit ke baad**, aur outbox aur audit rows usi transaction me. Ye aaj ka "commit se pehle response" wala bug theek karta hai. Package: `@beautinique/backend-server-mongo` (native `mongodb` driver; services driver bhi isi se import karti hain). Har attempt ka naya session; retry chhote backoff ke saath, `timeoutMs` (10 s) ke baad 503. Transaction ke andar queries ek ke baad ek (ESLint `Promise.all` rokta hai, runtime pe `ParallelTransactionError`), aur query ka error pakad ke aage nahi (`TransactionAbortedError`); "naya ho to daalo" `$setOnInsert` upsert se.
 - Orders, listing versions, applications, settlements aur inventory balances pe optimistic concurrency (version field).
 - Lambe jobs transaction nahi pakadte. Chhote, idempotent steps me chalte hain.
 
@@ -630,3 +630,4 @@ Sirf config badlegi, code nahi:
 | v1.9    | 2026-10-20 | Owner ka frozen faisla: SMS aur WhatsApp channel poore hate (notifications sirf in-app, email, browser push). §1, §3, §7.1, §10 (dummy legal se DLT registry bhi), §12. |
 | v1.10   | 2026-10-20 | §16: customer app React Router 8 (RR7 likha reh gaya tha). |
 | v1.11   | 2026-10-21 | §12: infra ke exact images, Mailpit HTTP API notify ke liye, ports sirf localhost, idle RAM naapi. |
+| v1.12   | 2026-10-21 | §6.2: `backend-server-mongo` (native driver), har attempt naya session, `Promise.all` aur caught query error nahi, backoff aur timeout. |

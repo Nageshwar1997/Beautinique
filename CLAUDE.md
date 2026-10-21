@@ -55,17 +55,17 @@ npm install
 npm run build
 ```
 
-| Command                                                       | Kaam                                                                      |
-| ------------------------------------------------------------- | ------------------------------------------------------------------------- |
-| `npm run lint` / `typecheck` / `test` / `format:check`        | Saare checks (CI yahi chalata hai, `npm run build` ke baad)               |
-| `npm run test:scripts`                                        | Sirf CLI ke tests (~10 min; e2e aur app/backend sabse lambe)              |
-| `npm run status`                                              | Har package: local vs npm version, login                                  |
-| `npm run verify -- --all --yes`                               | Publish wale saare checks, bina publish ke                                |
-| `npm run create` (`create:app`, `create:backend`)             | Naya package, frontend app ya backend app                                 |
-| `npm run publish` / `republish`                               | Packages ka CLI; har command `-- --help` deta hai                         |
-| `npm run dev:backend`                                         | `backend/bundle`: saare deployables ek process me                         |
-| `npm run infra:up` / `infra:down` / `infra:reset`             | Local Mongo, Valkey, Mailpit (Docker; [infra/README.md](infra/README.md)) |
-| `npm run playground --workspace @beautinique/frontend-styles` | Styles ka Vite playground (port 5180)                                     |
+| Command                                                       | Kaam                                                                                           |
+| ------------------------------------------------------------- | ---------------------------------------------------------------------------------------------- |
+| `npm run lint` / `typecheck` / `test` / `format:check`        | Saare checks (CI yahi chalata hai, `npm run build` ke baad; test ko Mongo chahiye: `infra:up`) |
+| `npm run test:scripts`                                        | Sirf CLI ke tests (~10 min; e2e aur app/backend sabse lambe)                                   |
+| `npm run status`                                              | Har package: local vs npm version, login                                                       |
+| `npm run verify -- --all --yes`                               | Publish wale saare checks, bina publish ke                                                     |
+| `npm run create` (`create:app`, `create:backend`)             | Naya package, frontend app ya backend app                                                      |
+| `npm run publish` / `republish`                               | Packages ka CLI; har command `-- --help` deta hai                                              |
+| `npm run dev:backend`                                         | `backend/bundle`: saare deployables ek process me                                              |
+| `npm run infra:up` / `infra:down` / `infra:reset`             | Local Mongo, Valkey, Mailpit (Docker; [infra/README.md](infra/README.md))                      |
+| `npm run playground --workspace @beautinique/frontend-styles` | Styles ka Vite playground (port 5180)                                                          |
 
 ## Repo ka naksha
 
@@ -76,6 +76,9 @@ npm run build
 - `infra/`: laptop ka Docker infra (Mongo replica set, Valkey, Mailpit); live pe Docker nahi.
 - `scripts/packages/`: package CLI (Node 24 TypeScript seedha chalata hai, build nahi). Tests:
   `scripts/packages/test/`.
+- **MongoDB:** `import { ObjectId, withTransaction } from '@beautinique/backend-server-mongo'`; seedha `mongodb` sirf
+  `packages/backend/server-mongo` me (ESLint rokta hai). Transaction me queries ek ke baad ek (`Promise.all` ESLint rokta hai),
+  aur query ka error pakad ke aage nahi (dedupe `$setOnInsert` upsert se).
 - **Zod:** `import { object, string, gstinZod } from '@beautinique/shared-zod'` (named, `z.` nahi); seedha `zod` sirf
   `packages/shared/zod` me (ESLint rokta hai). Hamare schemas `...Zod`, `enum as zodEnum`.
 - `configs/`: shared ESLint factory (`eslint-config.js`, naam `eslint.config.js` nahi ho sakta) aur

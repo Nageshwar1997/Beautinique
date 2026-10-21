@@ -1,6 +1,6 @@
 # infra — laptop ka local infra (Docker)
 
-> **Status:** v1.0 (2026-10-21). Docker Lesson 2 (TASKS T0.8). Docker sirf laptop ke liye hai; live server (Render) Docker nahi chalata, wahan Atlas, Render Key Value aur Brevo hain (ARCHITECTURE §11, §12).
+> **Status:** v1.1 (2026-10-21). Docker Lesson 2 (TASKS T0.8). Docker sirf laptop ke liye hai; live server (Render) Docker nahi chalata, wahan Atlas, Render Key Value aur Brevo hain (ARCHITECTURE §11, §12).
 
 ## Kya chalta hai
 
@@ -11,6 +11,8 @@
 | `mailpit` | `axllent/mailpit:v1.31.6` | Inbox <http://localhost:8025>, SMTP `1025` | Brevo (HTTPS API)  |
 
 Saare ports sirf `127.0.0.1` pe khulte hain: Wi-Fi pe baitha koi aur in bina password wali services tak nahi pahunch sakta.
+
+Mongo test commands (`--setParameter enableTestCommands=1`) ke saath chalta hai. Isse tests `failCommand` fail point se Mongo ko jaan-boojh ke fail ya dheema karwate hain (jaise commit ka "result pata nahi" error) aur dekhte hain ki retry sahi hai. Ye sirf laptop, CI aur release build pe hai; Atlas pe ye kabhi nahi hota. `ci.yml` aur `release.yml` bhi tests se pehle isi file ka `mongo` chalate hain.
 
 Abhi idle pe teeno milake ~250 MB RAM lete hain (Mongo ~234 MB, cache 256 MB pe band). Docker Desktop ko is laptop pe ~2.8 GB mili hai.
 
@@ -77,6 +79,7 @@ docker volume ls
 
 ## Change log
 
-| Version | Date       | Badlav                                                                      |
-| ------- | ---------- | --------------------------------------------------------------------------- |
-| v1.0    | 2026-10-21 | Pehla version: Mongo replica set, Valkey (Render limits), Mailpit; scripts. |
+| Version | Date       | Badlav                                                                                           |
+| ------- | ---------- | ------------------------------------------------------------------------------------------------ |
+| v1.0    | 2026-10-21 | Pehla version: Mongo replica set, Valkey (Render limits), Mailpit; scripts.                      |
+| v1.1    | 2026-10-21 | Mongo `enableTestCommands=1` (tests ke fail points); CI aur release bhi yahi mongo chalate hain. |

@@ -1,6 +1,6 @@
 # MEMORY — BQ
 
-> **Status:** v1.11 (2026-10-21). Project ki yaaddasht: **kya tay hua aur kyun**, **pichhle kaam se kya seekha**, aur **kaunse jaal (traps) se bachna hai**. Poori detail baaki docs me hai; yahan short version aur pointers. Naya sabak ya decision aaye to yahan ek line jodo.
+> **Status:** v1.12 (2026-10-21). Project ki yaaddasht: **kya tay hua aur kyun**, **pichhle kaam se kya seekha**, aur **kaunse jaal (traps) se bachna hai**. Poori detail baaki docs me hai; yahan short version aur pointers. Naya sabak ya decision aaye to yahan ek line jodo.
 
 ## 1. Decision log
 
@@ -36,6 +36,10 @@
 | 2026-10-21 | Dark me subtle text muted section pe 3.66:1: rang nahi badla, niyam bana (muted section pe subtle text nahi) | Owner ka faisla | DESIGN §3, styles README |
 | 2026-10-21 | Ulti patti ke liye `focus-ring-inverse` token + `surface-inverse` utility | Purana ring dark me 2.37:1 tha (chahiye 3) | DESIGN §3, styles README |
 | 2026-10-21 | High contrast me har tone ek step gehri/halki, gradient bhi: saara text 7:1, script check karti hai | Docs ka 7:1 vaada sach ho; Delivery app dhoop me | DESIGN §3.4, palette.mjs |
+| 2026-10-21 | MongoDB: native `mongodb` driver (Mongoose nahi); services sirf `@beautinique/backend-server-mongo` se import karti hain (ESLint rokta hai) | Owner ka faisla; session aur transaction pe seedha control, ek driver version | TASKS T1.2, server-mongo README |
+| 2026-10-21 | Transaction me queries ek ke baad ek: ESLint `withTransaction` ke andar `Promise.all/allSettled/any/race` rokta hai, runtime check saath me wire pe aayi queries pe `ParallelTransactionError` | MongoDB transaction me parallel queries support nahi karta; purana random 500. Runtime check akela pakka nahi (busy pool me queries ek ke baad ek jaati hain) | MEMORY §2 sabak 1 aur 20, ARCH §6.2 |
+| 2026-10-21 | Transaction ke andar query ka error pakad ke aage nahi; dedupe `$setOnInsert` upsert se | MongoDB transaction pehle hi cancel kar deta hai; `TransactionAbortedError` turant batata hai | server-mongo README |
+| 2026-10-21 | Mongo wale tests asli replica set pe (mock nahi); local, CI aur release Mongo `enableTestCommands=1` (fail points) | Commit retry jaise raaste sirf asli server pe sach me parakhte hain | infra README, ci.yml, release.yml |
 | 2026-10-20 | Packages sirf `release` branch se publish                                                                                             | Wahi branch jo apps live karti hai: npm pe sirf tested code                | ARCH §13                                          |
 | 2026-10-20 | Apps aur services npm packages nahi: `frontend/<app>`, `backend/<name>`, simple naam, `private`                                       | Owner ka faisla; ye deploy hote hain, publish nahi                         | [packages/README.md](packages/README.md) §3.1–3.2 |
 | 2026-10-20 | Ek `npm run create` (Package / Frontend app / Backend app); sirf contracts ke `APPS` aur `DEPLOYABLES`                                | Owner ka faisla; naya feature Core module, naya deployable nahi            | ARCH §3, §4                                       |
@@ -67,6 +71,7 @@
 17. **React concurrent transition** me query-param input ka trap (`useQueryParamInput`): hook ko pehle app me browser pe prove karo.
 18. **`npx tsc -p`** scratch folder se chalaya to output package me likh deta hai; dhyan rakho.
 19. **Test ne kuch parakha hi nahi:** gateway ka `..` test `http.request(urlString)` se tha, jo `..` pehle hi hata deta hai, aur method/`..` tests status 404 dekhte the jo upstream bhi deta. Mutation check ne pakda. **Sabak:** har security test ke liye ek mutation chalao; fake upstream me "leak" route rakho taaki galat forward 200 de.
+20. **Ek session, kai attempts:** `withTransaction` ka pehla version har retry me wahi session leta tha. Fail hue attempt ki late `Promise.all` branch transaction ke bahar save ho jaati thi (201 ke saath extra outbox rows). Mere 25 tests aur 37/41 mutations ye nahi pakad paaye; independent review (asli Mongo pe probe ke saath) ne pakda. Fix ke baad doosre review ne fix ki 5 kamiyan aur pakdi (aakhri line ka bhula `await`, network error ke baad bacha transaction). **Sabak:** har attempt ka naya session; naye infra code pe independent review + probe, aur fix ke baad dobara review.
 
 ## 3. Environment
 
@@ -116,3 +121,4 @@
 | v1.9    | 2026-10-20 | Decision (frozen): SMS aur WhatsApp channel hate. |
 | v1.10   | 2026-10-21 | Decision: abhi publish nahi, zaroorat pe; packages public hi. |
 | v1.11   | 2026-10-21 | Decisions: muted section niyam, focus-ring-inverse, high contrast tones 7:1. |
+| v1.12   | 2026-10-21 | Decisions: native mongodb driver ek import path, transaction me Promise.all nahi (ESLint), caught query error nahi, Mongo tests asli server pe; sabak 20. |

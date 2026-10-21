@@ -1,6 +1,6 @@
 # Packages — banana, publish aur republish
 
-> **Status:** v1.5 (2026-10-21). **Abhi publish/republish nahi (owner ka faisla, 2026-10-21):** apps isi monorepo se package lete hain (npm workspaces), live deploy pe bhi. Publish sirf zaroorat pe; packages public hi rahenge. `packages/` ke saare npm packages ka kaam, aur naye frontend apps aur backend apps banana, is repo ke apne CLI (`scripts/packages/`) se hota hai. Ye guide batati hai ki kaunsa command kab chalana hai aur andar kya hota hai.
+> **Status:** v1.6 (2026-10-21). **Abhi publish/republish nahi (owner ka faisla, 2026-10-21):** apps isi monorepo se package lete hain (npm workspaces), live deploy pe bhi. Publish sirf zaroorat pe; packages public hi rahenge. `packages/` ke saare npm packages ka kaam, aur naye frontend apps aur backend apps banana, is repo ke apne CLI (`scripts/packages/`) se hota hai. Ye guide batati hai ki kaunsa command kab chalana hai aur andar kya hota hai.
 
 ## 1. Packages kahan aur kis naam se
 
@@ -23,7 +23,7 @@
 | `npm run create` | Pehla sawal: Package, Frontend app ya Backend app (`npm run create:app` / `create:backend` seedhe). Phir use banata hai, `npm install` se jodta hai aur uske saare checks chalata hai. |
 | `npm run publish` | Jinka package.json version npm pe nahi hai (naye packages, ya republish ke baad bache hue) unhe publish karta hai. |
 | `npm run republish` | Published packages ka naya version: bump, dependents, ranges, checks, phir publish (laptop) ya GitHub ke liye taiyari. |
-| `npm run verify` | Publish wale saare checks, bina publish ke. Chune packages ki internal dependencies pehle build hoti hain, isliye fresh clone pe bhi chalta hai. CI isse `--all` ke saath chalata hai. |
+| `npm run verify` | Publish wale saare checks, bina publish ke. Chune packages ki internal dependencies pehle build hoti hain, isliye fresh clone pe bhi chalta hai. CI isse `--all` ke saath chalata hai. Package tests chalte hain, isliye backend packages (jaise `backend-server-mongo`) ke liye pehle `npm run infra:up`. |
 | `npm run build` | Saare packages build, dependencies pehle (devDependencies bhi). Fresh clone ke baad `npm install` ke turant baad chalao. |
 
 Har command `-- --help` se apne flags batata hai (`npm run publish -- --help`); galat flag pe command ruk jata hai. Flags `--` ke baad do; `npm run publish --dry-run` (bina `--`) bhi samjha jata hai.
@@ -95,7 +95,7 @@ Kisi package ka naya version agar kisi published dependent ki range tod de, to C
 
 ## 5. CI
 
-`.github/workflows/ci.yml` `main`, `prerelease` aur `release` pe push aur har PR pe: `npm ci`, `npm run build`, format check, lint, typecheck, tests (CLI ke 70+ tests, fake npm registry ke saath asli publish aur GitHub release flows bhi), `npm run verify -- --all`, `npm audit`. npm 12.2.0 pin hai (Node 24 ke saath npm 11 aata hai).
+`.github/workflows/ci.yml` `main`, `prerelease` aur `release` pe push aur har PR pe: `npm ci`, `npm run build`, format check, lint, typecheck, tests (CLI ke 70+ tests, fake npm registry ke saath asli publish aur GitHub release flows bhi), `npm run verify -- --all`, `npm audit`. Tests se pehle `infra/docker-compose.yml` ka `mongo` chalta hai (`release.yml` me bhi, publish ke checks se pehle). npm 12.2.0 pin hai (Node 24 ke saath npm 11 aata hai).
 
 ## 6. CLI ka code
 
@@ -113,3 +113,4 @@ Kisi package ka naya version agar kisi published dependent ki range tod de, to C
 | v1.3 | 2026-10-20 | Peer aur dev range same (CLI check), aur dist me copy hue dependency types pe verify fail. |
 | v1.4 | 2026-10-20 | `npm run create` ab frontend apps (§3.1) aur backend apps (§3.2) bhi banata hai. |
 | v1.5 | 2026-10-21 | Abhi publish/republish nahi, zaroorat pe; packages public hi. |
+| v1.6 | 2026-10-21 | verify/publish ke tests ko Mongo chahiye (`infra:up`); CI aur release Mongo chalate hain. |

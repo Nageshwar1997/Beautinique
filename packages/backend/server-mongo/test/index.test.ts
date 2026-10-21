@@ -501,6 +501,11 @@ describe('withTransaction', () => {
   it('refuses a query started without await on the last line of the work', async () => {
     await own('late_inbox').insertOne({ _id: 'dupe' });
     let attempts = 0;
+    let commits = 0;
+    const countCommits = (event: CommandStartedEvent) => {
+      if (event.commandName === 'commitTransaction') commits += 1;
+    };
+    mongo.client.on('commandStarted', countCommits);
     const started = Date.now();
     const attempt = withTransaction(mongo, async (session) => {
       attempts += 1;
@@ -511,11 +516,46 @@ describe('withTransaction', () => {
       return 'placed';
     });
     await expect(attempt).rejects.toBeInstanceOf(ParallelTransactionError);
+    mongo.client.off('commandStarted', countCommits);
     expect(attempts).toBe(1);
+    // caught before the commit: one turn of the event loop put the forgotten query on the wire
+    expect(commits).toBe(0);
     expect(Date.now() - started).toBeLessThan(2000);
     await sleep(100);
     expect(await committed('late_inbox').find().toArray()).toEqual([{ _id: 'dupe' }]);
     expect(mongo.guard.watching).toBe(0);
+  });
+
+  it('sees a late query that waited for a busy connection until after the work finished', async () => {
+    const tight = await connectMongo({ uri: URI, dbName, appName, logger, maxPoolSize: 1 });
+    try {
+      const tightOwn = tight.db.collection<Doc>('tight');
+      await tightOwn.insertOne({ _id: 'dupe' });
+      // the next ping keeps the only connection busy for 300 ms
+      await failPoint(
+        { times: 1 },
+        { failCommands: ['ping'], blockConnection: true, blockTimeMS: 300 },
+      );
+      const attempt = withTransaction(tight, async (session) => {
+        await tightOwn.insertOne({ _id: 'order' }, { session });
+        void tight.db.command({ ping: 1 }).catch(() => undefined);
+        void tightOwn.insertOne({ _id: 'dupe' }, { session }).catch(() => undefined);
+        return 'placed';
+      });
+      await expect(attempt).rejects.toBeInstanceOf(ParallelTransactionError);
+      expect(await committed('tight').find().toArray()).toEqual([{ _id: 'dupe' }]);
+    } finally {
+      await tight.close();
+    }
+  });
+
+  it('passes on a query error the work did not catch, as it is', async () => {
+    await own('plain_dupes').insertOne({ _id: 'taken' });
+    const attempt = withTransaction(mongo, async (session) => {
+      await own('plain_dupes').insertOne({ _id: 'taken' }, { session });
+    });
+    await expect(attempt).rejects.toMatchObject({ code: 11000 });
+    await expect(attempt).rejects.not.toBeInstanceOf(TransactionAbortedError);
   });
 
   it('still retries when the work caught a write conflict (a retry can fix that)', async () => {

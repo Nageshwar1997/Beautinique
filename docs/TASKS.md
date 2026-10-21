@@ -1,6 +1,6 @@
 # TASKS — BQ
 
-> **Status:** v1.16 (2026-10-21). Poore project ki task list, [ARCHITECTURE.md](ARCHITECTURE.md) §16 ke phases ke hisaab se. Har task "done" tabhi jab [RULES.md](RULES.md) §1.5 ki Definition of Done poori ho.
+> **Status:** v1.17 (2026-10-21). Poore project ki task list, [ARCHITECTURE.md](ARCHITECTURE.md) §16 ke phases ke hisaab se. Har task "done" tabhi jab [RULES.md](RULES.md) §1.5 ki Definition of Done poori ho.
 
 **Kaise use karein:**
 - `[ ]` baaki, `[~]` chal raha hai, `[x]` done.
@@ -54,7 +54,7 @@
 ## Phase 1. Server kit + contracts (1–2 hafte)
 
 - [~] T1.1 `server-kit`: AppError, response envelope, logger (redaction), Express app factory, bootstrap/shutdown. (2026-10-20: `@beautinique/backend-server-kit` 1.0.0: AppError + contracts error body, request id, access log, redacting logger, `createApp`, `/health` + `/ready`, `loadConfig` (namespaced, `strip`), `startServer` graceful stop; 15 tests, 25/25 mutations. Success envelope helper baaki.)
-- [ ] T1.2 `server-mongo`: `withTransaction()` (reply commit ke baad) + regression test.
+- [x] T1.2 `server-mongo`: `withTransaction()` (reply commit ke baad) + regression test. (2026-10-21: `@beautinique/backend-server-mongo` 1.0.0, public, publish nahi; native `mongodb` 7.7 driver (owner ka faisla), services isi se import karti hain (ESLint seedha `mongodb` rokta hai); server-kit peer dependency. `connectMongo` (pool 5, majority, primary, `ignoreUndefined`, replica set check, saaf error bina URI ke), `ready` (2 s ping), `withTransaction` (snapshot + majority, value commit ke baad, har attempt ka naya session, transient pe 10–200 ms backoff ke saath dobara, unknown commit result pe sirf commit dobara, `timeoutMs` 10 s ke baad 503 `TransactionTimeoutError`, network error se phenka gaya session server pe kill), `ParallelTransactionError` (queries saath me wire pe, ya bhula `await` jo commit tak dikhe; ESLint `withTransaction` ke andar `Promise.all/allSettled/any/race` rokta hai), `TransactionAbortedError` (work ne aisi query ka error pakad ke aage kaam kiya jise retry nahi badalta: turant 500, 10 s retry nahi). 36 tests asli local replica set pe (Express route: 201 sirf commit ke baad, fail/parallel pe 500 aur kuch save nahi; fail points se commit failures; late `Promise.all` branch kabhi save nahi); 55 mutations me 50 pakde (bache 5: 3 equivalent, 1 sirf timing ≤200 ms, aur lone server pe client band hona haath se check kiya). Do independent review (har baar reviewers + skeptic, asli Mongo pe probe): pehle me 7, doosre me fixes ki 5 asli kamiyan; sab theek. CI aur `release.yml` tests se pehle compose ka mongo chalate hain; GitHub pe abhi chala nahi.)
 - [ ] T1.3 `server-queue`: outbox relay (`poll` aur `changestream`), inbox dedupe, job schedulers, `bq:epoch` watchdog aur Redis wipe recovery.
 - [ ] T1.4 `server-crypto`: AES-GCM field encryption, HMAC blind index.
 - [ ] T1.5 `contracts`: routes, events, permissions, error codes, area-setting keys; OpenAPI, typed client aur gateway metadata ka codegen.
@@ -205,3 +205,4 @@
 | v1.14 | 2026-10-21 | T0.1: packages public rahenge, par abhi publish/republish nahi, zaroorat pe hi. |
 | v1.15 | 2026-10-21 | T0.8 done: local infra (Mongo replica set, Valkey, Mailpit), Docker Lesson 2. |
 | v1.16 | 2026-10-21 | T0.6: gitleaks secret scan CI ke `check` job me; sirf affected build baaki. |
+| v1.17 | 2026-10-21 | T1.2 done: `backend-server-mongo` (withTransaction, reply commit ke baad). |
