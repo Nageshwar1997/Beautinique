@@ -1,6 +1,6 @@
 # HANDOFF — BQ
 
-> **Status:** v1.18 (2026-10-21). Is project pe 2 log kaam karte hain. Ye file batati hai ki **abhi kya halat hai, kisne kya chhoda, agla kaam kya hai** aur kaunse sawal khule hain, taaki doosra insaan (aur uska Claude) bina poora itihaas padhe kaam utha sake. Jo bhi kaam roke, wo ye file update kare (neeche §8).
+> **Status:** v1.19 (2026-10-22). Is project pe 2 log kaam karte hain. Ye file batati hai ki **abhi kya halat hai, kisne kya chhoda, agla kaam kya hai** aur kaunse sawal khule hain, taaki doosra insaan (aur uska Claude) bina poora itihaas padhe kaam utha sake. Jo bhi kaam roke, wo ye file update kare (neeche §8).
 
 ## 0. Pehle ye (handoff ke din)
 
@@ -71,6 +71,7 @@
 
 ## 6. Traps (pehle hi pata ho)
 
+- **MongoDB 8.0 aur Linux kernel 6.19+:** `mongo:8.0.x` naye kernel pe shuru hi nahi hota ("MongoDB cannot start: Linux kernel versions 6.19 and newer has a known incompatibility", SERVER-121912; Ubuntu ke `7.0.0-xx` kernel bhi block, SERVER-136848). GitHub ka `ubuntu-26.04` kernel 7.0 pe hai, isliye CI aur release `ubuntu-24.04` (kernel 6.17) pe pin hain, aur start step kernel print karta hai. **Laptop:** Docker ka WSL2 kernel abhi `6.18` hai (2026-10-22), 6.19 se ek step neeche. `wsl --update` ya Docker Desktop update ke baad local Mongo "cannot start" de to update se pehle wala kernel wapas lao, ya owner se poochh ke dekho ki MongoDB 8.0 ka koi naya version us kernel pe chalta hai (version badalna Atlas M0 ke 8.0 se mel khana chahiye).
 - **Naya backend package jo kisi service pe test kare** (Mongo, Valkey, aage Mailpit): `ci.yml` aur `release.yml` ke "Start MongoDB and Valkey" step me wo service jodo, warna CI pe uske tests "These tests need ..." se fail hote hain (server-queue ke pehle push pe Valkey chhoot gaya tha). Service shuru na ho to ye step `docker compose ps` aur uske aakhri 200 log lines print karta hai: wahi wajah batate hain.
 - **Test me password wala nakli URL bhi gitleaks pakadta hai** (koi bhi Mongo ya Redis URL jisme scheme ke baad user, colon, password aur `@` ho; docs ki example bhi): CI fail. Aisa test ya doc likho to password ko URL me literal mat likho (docs me `<password>` jaisa placeholder chalta hai), ya push se pehle local scan (`gitleaks git --config .gitleaks.toml --redact .`) chala ke finding ko `.gitleaksignore` me fingerprint + wajah ke saath daalo. Push hui history badli nahi ja sakti.
 - **npm 12 chahiye:** root `package.json` ka `devEngines` Node >=24 aur npm >=12.2.0 maangta hai (`onFail: error`), isliye purane npm pe `npm install` ruk jata hai. CI me bhi isi wajah se `setup-node` ka npm cache band hai (wo npm 11 se `npm config get cache` chalata hai aur `EBADDEVENGINES` aata hai); npm 12 install hone ke baad `actions/cache` `~/.npm` cache karta hai.
@@ -125,3 +126,4 @@
 | v1.16 | 2026-10-21 | Pehle GitHub gitleaks run ki finding (nakli test URL) `.gitleaksignore` se; naya trap (§6). |
 | v1.17 | 2026-10-21 | v1.16 ke trap ki example URLs ne khud gitleaks fail karaya: shabdon me likha; `3fdfb49` ki 3 findings ignore. |
 | v1.18 | 2026-10-21 | CI aur release Valkey bhi chalate hain; naya trap (§6). |
+| v1.19 | 2026-10-22 | CI `ubuntu-24.04` pe pin (MongoDB 8.0 kernel 6.19+ pe nahi chalta); trap (§6). |

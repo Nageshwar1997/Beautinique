@@ -1,6 +1,6 @@
 # infra — laptop ka local infra (Docker)
 
-> **Status:** v1.2 (2026-10-21). Docker Lesson 2 (TASKS T0.8). Docker sirf laptop ke liye hai; live server (Render) Docker nahi chalata, wahan Atlas, Render Key Value aur Brevo hain (ARCHITECTURE §11, §12).
+> **Status:** v1.3 (2026-10-22). Docker Lesson 2 (TASKS T0.8). Docker sirf laptop ke liye hai; live server (Render) Docker nahi chalata, wahan Atlas, Render Key Value aur Brevo hain (ARCHITECTURE §11, §12).
 
 ## Kya chalta hai
 
@@ -72,6 +72,7 @@ docker volume ls
 
 ## Jaal (traps)
 
+- **MongoDB 8.0 aur Linux kernel 6.19+:** `mongo:8.0.x` naye kernel pe shuru hi nahi hota ("MongoDB cannot start: Linux kernel versions 6.19 and newer has a known incompatibility", SERVER-121912; Ubuntu ke `7.0.0-xx` kernel bhi block, SERVER-136848). GitHub ka `ubuntu-26.04` kernel 7.0 pe hai, isliye CI aur release `ubuntu-24.04` (kernel 6.17) pe pin hain, aur start step kernel print karta hai. **Laptop:** Docker ka WSL2 kernel abhi `6.18` hai (2026-10-22), 6.19 se ek step neeche. `wsl --update` ya Docker Desktop update ke baad local Mongo "cannot start" de to update se pehle wala kernel wapas lao, ya owner se poochh ke dekho ki MongoDB 8.0 ka koi naya version us kernel pe chalta hai (version badalna Atlas M0 ke 8.0 se mel khana chahiye).
 - **Port pehle se busy** (`port is already allocated`): laptop pe Windows ki MongoDB service ya koi purana container 27017/6379 pe chal raha hai. Use band karo (`services.msc` me MongoDB, ya `docker ps`).
 - **Containers ke andar se Mongo (Lesson 4, split mode):** replica set ka member `localhost:27017` hai, jo laptop se sahi hai par doosre container ke andar nahi. Wahan connection string `mongodb://mongo:27017/<db>?directConnection=true` hogi.
 - **`infra:reset` data mitata hai:** seed data dobara daalna padega (`db:seed`, T4.x).
@@ -84,3 +85,4 @@ docker volume ls
 | v1.0    | 2026-10-21 | Pehla version: Mongo replica set, Valkey (Render limits), Mailpit; scripts.                      |
 | v1.1    | 2026-10-21 | Mongo `enableTestCommands=1` (tests ke fail points); CI aur release bhi yahi mongo chalate hain. |
 | v1.2    | 2026-10-21 | CI aur release `valkey` bhi chalate hain (server-queue ke tests).                                |
+| v1.3    | 2026-10-22 | Trap: MongoDB 8.0 Linux kernel 6.19+ pe shuru nahi hota (CI pin, laptop 6.18).                   |

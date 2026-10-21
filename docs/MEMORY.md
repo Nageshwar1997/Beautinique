@@ -1,6 +1,6 @@
 # MEMORY — BQ
 
-> **Status:** v1.14 (2026-10-21). Project ki yaaddasht: **kya tay hua aur kyun**, **pichhle kaam se kya seekha**, aur **kaunse jaal (traps) se bachna hai**. Poori detail baaki docs me hai; yahan short version aur pointers. Naya sabak ya decision aaye to yahan ek line jodo.
+> **Status:** v1.15 (2026-10-22). Project ki yaaddasht: **kya tay hua aur kyun**, **pichhle kaam se kya seekha**, aur **kaunse jaal (traps) se bachna hai**. Poori detail baaki docs me hai; yahan short version aur pointers. Naya sabak ya decision aaye to yahan ek line jodo.
 
 ## 1. Decision log
 
@@ -44,6 +44,7 @@
 | 2026-10-21 | bullmq aur ioredis ke latest versions (6.4.0, 6.0.0) | Owner: "latest wale hi lelo" | server-queue package.json |
 | 2026-10-21 | Relay ka `jobId = <eventId>@<subscriber>` (ARCH me `:` tha) | BullMQ custom job id me `:` mana karta hai | ARCH §5.2 |
 | 2026-10-21 | Relayed outbox events 72 ghante rakhe (TTL index), lease ka waqt MongoDB ki ghadi (`$$NOW`) se | Redis wipe redrive 48 ghante peeche jaata hai; instances ki ghadiyon ka farak na pade | server-queue README |
+| 2026-10-22 | CI aur release ke runners `ubuntu-24.04` pe pin, `ubuntu-latest` nahi; Mongo image 8.0 hi | `ubuntu-latest` 26.04 (kernel 7.0) pe ja raha hai, aur MongoDB 8.0 kernel 6.19+ pe shuru nahi hota (SERVER-121912). Version badalna Atlas M0 (8.0) se farak laata | ci.yml, release.yml, infra README |
 | 2026-10-20 | Packages sirf `release` branch se publish                                                                                             | Wahi branch jo apps live karti hai: npm pe sirf tested code                | ARCH §13                                          |
 | 2026-10-20 | Apps aur services npm packages nahi: `frontend/<app>`, `backend/<name>`, simple naam, `private`                                       | Owner ka faisla; ye deploy hote hain, publish nahi                         | [packages/README.md](packages/README.md) §3.1–3.2 |
 | 2026-10-20 | Ek `npm run create` (Package / Frontend app / Backend app); sirf contracts ke `APPS` aur `DEPLOYABLES`                                | Owner ka faisla; naya feature Core module, naya deployable nahi            | ARCH §3, §4                                       |
@@ -128,3 +129,4 @@
 | v1.12   | 2026-10-21 | Decisions: native mongodb driver ek import path, transaction me Promise.all nahi (ESLint), caught query error nahi, Mongo tests asli server pe; sabak 20. |
 | v1.13   | 2026-10-21 | Decisions: Redis local Valkey + production free tier, bullmq/ioredis latest, jobId `@`, outbox 72 ghante, lease `$$NOW`. |
 | v1.14   | 2026-10-21 | Decision: production Redis = Render Key Value free (internal URL); laptop se kabhi nahi. |
+| v1.15   | 2026-10-22 | Decision: CI runner `ubuntu-24.04` pin (MongoDB 8.0 aur kernel 6.19+). |
