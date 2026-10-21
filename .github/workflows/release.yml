@@ -43,6 +43,10 @@ jobs:
 
       - run: npm install --global npm@12.2.0
       - run: npm ci
+      # The publish checks run each package's tests; backend packages test against a real MongoDB
+      # replica set (the same compose service as CI and the laptops).
+      - name: Start MongoDB for the tests
+        run: docker compose -f infra/docker-compose.yml up --detach --wait --wait-timeout 180 mongo
 
       - id: pack
         run: |

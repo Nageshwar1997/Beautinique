@@ -24,7 +24,18 @@ services:
     # --bind_ip_all: container ke andar har network se baat sune (warna bahar se port kaam nahi karta).
     # --wiredTigerCacheSizeGB 0.25: Mongo apne cache ke liye sirf 256 MB le. Default me wo RAM ka
     #   aadha le leta, jo 7.9 GB ke laptop pe baaki sab ko dheema kar deta.
-    command: ['mongod', '--replSet', 'rs0', '--bind_ip_all', '--wiredTigerCacheSizeGB', '0.25']
+    # --setParameter enableTestCommands=1: test commands chalu, jaise "failCommand" fail point. Tests isse
+    #   Mongo se jaan-boojh ke commit fail karwate hain aur dekhte hain ki retry sahi hai. Sirf laptop
+    #   aur CI ka Mongo; Atlas pe ye kabhi nahi hota.
+    command:
+      - mongod
+      - --replSet
+      - rs0
+      - --bind_ip_all
+      - --wiredTigerCacheSizeGB
+      - '0.25'
+      - --setParameter
+      - enableTestCommands=1
     ports:
       # "host:container". 127.0.0.1 = sirf aapka laptop is port se jud sakta hai, Wi-Fi pe baitha
       # koi aur nahi (bina password ka local DB kabhi network pe mat kholo).

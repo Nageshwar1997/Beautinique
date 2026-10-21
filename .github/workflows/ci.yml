@@ -62,6 +62,10 @@ jobs:
       - run: npm run format:check
       - run: npm run lint
       - run: npm run typecheck
+      # Backend packages test against a real MongoDB replica set: the same compose service as on the
+      # laptops (`npm run infra:up`), so CI and local runs see the same server and settings.
+      - name: Start MongoDB for the tests
+        run: docker compose -f infra/docker-compose.yml up --detach --wait --wait-timeout 180 mongo
       - run: npm test
       # Every check a publish runs (build, tests, package contents, publint, types), nothing published.
       - run: npm run verify -- --all --yes
