@@ -117,7 +117,11 @@ async function attemptOnce<T>(
     seen = mongo.guard.release(key);
   }
   if (result === 'committed') {
-    if (seen.parallel) mongo.logger.warn('a query in the transaction was not awaited');
+    // committed already, so it cannot be undone; a bug to fix: that query may have run outside it
+    if (seen.parallel)
+      mongo.logger.error(
+        'a query in the transaction was not awaited: it may have run outside the transaction',
+      );
     return { value };
   }
   if (seen.parallel) throw new ParallelTransactionError({ cause: result.transient });
