@@ -1,6 +1,6 @@
 # TASKS — BQ
 
-> **Status:** v1.14 (2026-10-21). Poore project ki task list, [ARCHITECTURE.md](ARCHITECTURE.md) §16 ke phases ke hisaab se. Har task "done" tabhi jab [RULES.md](RULES.md) §1.5 ki Definition of Done poori ho.
+> **Status:** v1.15 (2026-10-21). Poore project ki task list, [ARCHITECTURE.md](ARCHITECTURE.md) §16 ke phases ke hisaab se. Har task "done" tabhi jab [RULES.md](RULES.md) §1.5 ki Definition of Done poori ho.
 
 **Kaise use karein:**
 - `[ ]` baaki, `[~]` chal raha hai, `[x]` done.
@@ -46,7 +46,7 @@
 - [ ] T0.5 Turborepo. (npm workspaces, root scripts, shared configs aur package CLI ho gaye: [packages/README.md](packages/README.md).)
 - [ ] T0.6 `ci.yml`: build (affected) aur gitleaks baaki. (Format, lint, typecheck, test, packages verify aur npm audit wala pehla `ci.yml`, plus `release.yml`, ho gaye.)
 - [x] T0.7 Branches `prerelease` aur `release`, branch protection, required checks. (2026-10-20: branches ban gayi, CI teeno pe green; ruleset `protected-branches` (`main`, `prerelease`, `release`: delete aur force push band, PR + 1 approval, `check` required aur up to date, bypass sirf Repository admin); tag ruleset `release-tags` (`@beautinique/*` tags sirf owner bana, badal ya mita sakta hai); environment `npm` sirf `release` branch se, owner ki approval ke saath.) Packages bhi sirf `release` branch se publish hote hain (package CLI aur `release.yml` yahi maante hain).
-- [ ] T0.8 `infra/docker-compose.yml` ka `infra` profile: Mongo replica set, Valkey (Render jaisi limits), Mailpit. **Docker Lesson 2.**
+- [x] T0.8 `infra/docker-compose.yml` ka `infra` profile: Mongo replica set, Valkey (Render jaisi limits), Mailpit. **Docker Lesson 2.** (2026-10-21: `mongo:8.0.34` replica set `rs0`, `valkey/valkey:8.1.10` (25 MB, noeviction, 50 clients, disk pe kuch nahi), `axllent/mailpit:v1.31.6`; ports sirf `127.0.0.1`; `npm run infra:up/down/reset/logs`. Laptop pe chala ke dekha: transaction commit/abort, Valkey ka OOM error, Mailpit inbox me email, restart ke baad Mongo data bacha aur Valkey khaali. Notes: [infra/README.md](../infra/README.md).)
 - [~] T0.9 Har deployable ka `.env.example` aur zod env schema. (Generator har deployable ko `src/config.ts` (zod, `<NAME>__*`) aur `.env.example` deta hai: port, log level, gateway ke upstream URLs. Provider keys apne feature ke saath judti hain.)
 
 **Milestone 0:** CI green, saare package tests chal rahe hain, `infra:up` se local infra chalta hai.
@@ -203,3 +203,4 @@
 | v1.12 | 2026-10-20 | OTP sirf email se (T3.1, T5.2). |
 | v1.13 | 2026-10-20 | T5.1: SMS aur WhatsApp channel hate. |
 | v1.14 | 2026-10-21 | T0.1: packages public rahenge, par abhi publish/republish nahi, zaroorat pe hi. |
+| v1.15 | 2026-10-21 | T0.8 done: local infra (Mongo replica set, Valkey, Mailpit), Docker Lesson 2. |

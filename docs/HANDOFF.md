@@ -1,6 +1,6 @@
 # HANDOFF — BQ
 
-> **Status:** v1.10 (2026-10-21). Is project pe 2 log kaam karte hain. Ye file batati hai ki **abhi kya halat hai, kisne kya chhoda, agla kaam kya hai** aur kaunse sawal khule hain, taaki doosra insaan (aur uska Claude) bina poora itihaas padhe kaam utha sake. Jo bhi kaam roke, wo ye file update kare (neeche §8).
+> **Status:** v1.11 (2026-10-21). Is project pe 2 log kaam karte hain. Ye file batati hai ki **abhi kya halat hai, kisne kya chhoda, agla kaam kya hai** aur kaunse sawal khule hain, taaki doosra insaan (aur uska Claude) bina poora itihaas padhe kaam utha sake. Jo bhi kaam roke, wo ye file update kare (neeche §8).
 
 ## 0. Pehle ye (handoff ke din)
 
@@ -28,6 +28,7 @@
 **Bana hua (sab `Beautinique` repo me):**
 
 - **Monorepo root (T0.5, T0.6 ka pehla hissa):** npm workspaces `packages/*/*`, root scripts, `configs/` (ESLint factory + tsconfig presets), Prettier, `.gitattributes` (LF), `LICENSE` (MIT).
+- **Local infra (T0.8, Docker Lesson 2):** `infra/docker-compose.yml`: Mongo 8.0 replica set, Valkey (Render free jaisi limits) aur Mailpit, sab sirf `127.0.0.1` pe. Pehle Docker Desktop kholo, phir `npm run infra:up`. Guide: [infra/README.md](../infra/README.md).
 - **CI:** `.github/workflows/ci.yml`: `npm ci` → `npm run build` → format, lint, typecheck, test, `verify --all`, `npm audit`. Har PR pe, aur `main`, `prerelease`, `release` pe push.
 - **Release:** `.github/workflows/release.yml`, sirf `release` branch pe, haath se. Do jobs: build (check + pack, har version ka tag isi commit pe zaroori) aur publish (OIDC trusted publishing, kuch install nahi karta, `.github/scripts/publish-tarballs.mjs`). Ye abhi tak GitHub pe chala nahi hai.
 - **`@beautinique/frontend-styles` 2.0.0** (`packages/frontend/styles`), poora: Tailwind v4 tokens (Rose + Plum, tones, order status, 8 chart colours, layout/touch/media sizes), light/dark/high-contrast/print themes (310 colour checks: WCAG contrast aur colour-blind chart check), fonts (Plus Jakarta Sans + Fraunces, `/vite` preload plugin), `base.css`, `animations.css`, `utilities.css` (focus-ring, touch-target, skip-link, container-page, gradients, skeleton, progress, marquee, safe areas), `content.css` (`rich-text`, Quill 2 output bhi), `print.css`. 26 tests (real Vite + Tailwind builds; mutation-checked), Vite playground. Guide: package README. npm pe publish nahi kiya (npm pe purana 1.1.2 hai), aur abhi karna bhi nahi (§4).
@@ -54,8 +55,8 @@
 2. **Main code shuru (owner ka faisla, 2026-10-20):** neev ke packages ke baad ab apps aur backend ka asli kaam; baaki packages tabhi bante hain jab app ko chahiye. Niyam: jo cheez do apps ko chahiye ya saaf taur pe sabki hai (login, API client, layout), wo turant `npm run create` se package me, app me copy nahi. Saare packages public. Andaazan package order TASKS T0.1 me.
 3. **Packages ka publish abhi nahi (owner ka faisla, 2026-10-21):** saare apps isi monorepo se package lete hain (npm workspaces), live deploy pe bhi, isliye `npm run publish` / `republish` mat chalao. Packages `private` bhi mat karo: wo public hi rahenge, taaki zaroorat pe (jaise repo ke bahar koi package chahiye) seedha publish ho sake. Tab owner ka npm account chahiye (`npm run login`, phir `release` branch pe `npm run publish`); doosre insaan ko publish karna ho to owner pehle use npm org `@beautinique` me jode.
 4. **Package CLI follow-up:** `update-deps` command (purane repo me tha; naya republish external dependencies upgrade nahi karta). Scope: outdated deps ki list, select (all / category / packages), ranges update, install, build + checks, fail pe sab wapas.
-5. **Apps aur deployables banana:** generator taiyaar hai (`npm run create -- --type app` / `--type backend`). Pehle gateway, phir identity/core, phir `bundle`; har ek ka commit alag.
-6. **Phase 0 ke baaki tasks:** T0.2 (4 apps → `frontend/`), T0.3 (gateway + services → `backend/`), T0.4, T0.5 Turborepo, T0.6 (affected build + gitleaks), T0.8 (Docker infra, owner ke saath), T0.9 (`.env.example` + zod env schema). Milestone 0 ke bina Phase 1 nahi.
+5. **Apps aur deployables:** gateway, identity, core, bundle (`backend/`) aur customer, admin (`frontend/`) owner ne generator se bana liye (2026-10-21). Baaki apps aur payments/notify tab, jab unka kaam shuru ho.
+6. **Phase 0 ke baaki tasks:** T0.2 (4 apps → `frontend/`), T0.3 (gateway + services → `backend/`), T0.4, T0.5 Turborepo, T0.6 (affected build + gitleaks; gitleaks alag session me chal raha hai), T0.8 ho gaya, T0.9 (`.env.example` + zod env schema). Milestone 0 ke bina Phase 1 nahi.
 
 ## 5. Khule sawal aur owner ke kaam
 
@@ -110,3 +111,4 @@
 | v1.8 | 2026-10-20 | Faisle: OTP sirf email se (frozen), product archive, ek image ek owner. |
 | v1.9 | 2026-10-20 | Faisla: SMS aur WhatsApp channel poore hate (frozen). |
 | v1.10 | 2026-10-21 | Faisla: packages public, par abhi publish/republish nahi, zaroorat pe hi (§3, §4). |
+| v1.11 | 2026-10-21 | T0.8 local infra bana (§3); bane hue apps aur deployables (§4). |

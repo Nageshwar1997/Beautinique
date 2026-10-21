@@ -1,6 +1,6 @@
 # ARCHITECTURE — BQ
 
-> **Status:** v1.10 draft (2026-10-20). [PRD.md](PRD.md) v1.0 pe based. Design ek multi-agent review se aaya (3 architecture proposals + review board + owner ke decisions), aur v1.1 me free tier ke official docs ke against verify hua.
+> **Status:** v1.11 draft (2026-10-21). [PRD.md](PRD.md) v1.0 pe based. Design ek multi-agent review se aaya (3 architecture proposals + review board + owner ke decisions), aur v1.1 me free tier ke official docs ke against verify hua.
 
 ## 0. Ek nazar me
 
@@ -463,7 +463,7 @@ Sirf config badlegi, code nahi:
 
 | Profile                                      | Kya chalta hai                                                                                                                                                                                                                                                     | RAM                    |
 | -------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ---------------------- |
-| `infra` (default, Lesson 2)                  | `mongo:8.0` single-node replica set (transactions aur change streams ke liye), `valkey:8` Render free jaisi limits ke saath (`--maxmemory 25mb --maxmemory-policy noeviction --maxclients 50`, appendonly off), `mailpit` (saare emails, email OTP bhi, yahan dikhenge) | ~0.85 GB               |
+| `infra` (default, Lesson 2)                  | `mongo:8.0.34` single-node replica set `rs0` (transactions aur change streams ke liye; WiredTiger cache 256 MB), `valkey/valkey:8.1.10` Render free jaisi limits ke saath (`--maxmemory 25mb --maxmemory-policy noeviction --maxclients 50`, appendonly aur save off), `axllent/mailpit:v1.31.6` (saare emails, email OTP bhi, yahan dikhenge; notify ka local adapter Mailpit ke HTTP API se bhejta hai, jaise live pe Brevo). Ports sirf `127.0.0.1` pe. [infra/README.md](../infra/README.md) | ~0.85 GB load pe (idle ~250 MB, 2026-10-21) |
 | `apps` (default **split mode**, Lessons 3–4) | gateway, identity, core, payments, notify, har ek ka apna container. Multi-stage Dockerfile, non-root user, healthcheck, har container 256 MB                                                                                                                      | infra ke saath ~2.1 GB |
 | `search` (Lesson 5, opt-in)                  | `mongodb-atlas-local` (Atlas Search). Sirf valkey aur mailpit ke saath chalana, kyunki ise ~2 GB khaali RAM chahiye.                                                                                                                                               | ~2 GB+                 |
 | `tools` (optional)                           | redis-insight                                                                                                                                                                                                                                                      | chhota                 |
@@ -629,3 +629,4 @@ Sirf config badlegi, code nahi:
 | v1.8    | 2026-10-20 | §7.1 (frozen): OTP sirf email se, mobile pe OTP nahi (login aur delivery); phone sirf contact; Brevo ka 300/din budget. §3, §9.2, §10, §11.4, §12, §16 usi hisaab se. |
 | v1.9    | 2026-10-20 | Owner ka frozen faisla: SMS aur WhatsApp channel poore hate (notifications sirf in-app, email, browser push). §1, §3, §7.1, §10 (dummy legal se DLT registry bhi), §12. |
 | v1.10   | 2026-10-20 | §16: customer app React Router 8 (RR7 likha reh gaya tha). |
+| v1.11   | 2026-10-21 | §12: infra ke exact images, Mailpit HTTP API notify ke liye, ports sirf localhost, idle RAM naapi. |

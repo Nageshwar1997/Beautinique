@@ -1,0 +1,105 @@
+# Beautinique ka local infra (Docker Lesson 2). Sirf laptop ke liye: live server (Render) Docker nahi
+# chalata, wahan Atlas, Render Key Value aur Brevo hain (ARCHITECTURE §11, §12).
+#
+# Chalana:   npm run infra:up      (repo root se; teeno services healthy hone tak rukta hai)
+# Band:      npm run infra:down    (containers hatte hain, Mongo ka data volume me bacha rehta hai)
+# Saaf:      npm run infra:reset   (data volume bhi mitata hai: Mongo bilkul khaali)
+# Logs:      npm run infra:logs
+#
+# Image  = tayyar dabba (software + setup), ek baar download.
+# Container = us image ka chalta hua roop; mitao to image bachi rehti hai.
+
+# Project ka naam: containers beautinique-mongo-1 jaise naam se bante hain.
+name: beautinique
+
+services:
+  # ---------------------------------------------------------------------------------------------
+  # MongoDB: hamara database (live pe Atlas M0 hai, wahi version line: 8.0).
+  mongo:
+    # Exact version pin: dono developers ke laptop pe bilkul same Mongo. Badalna ho to soch ke badlo.
+    image: mongo:8.0.34
+    # --replSet rs0: Mongo ko "replica set" bana do, chahe ek hi member ho. Kyun? Transactions
+    #   (order + stock ek saath) aur change streams sirf replica set pe chalte hain. Atlas bhi
+    #   replica set hai, isliye laptop pe bhi wahi.
+    # --bind_ip_all: container ke andar har network se baat sune (warna bahar se port kaam nahi karta).
+    # --wiredTigerCacheSizeGB 0.25: Mongo apne cache ke liye sirf 256 MB le. Default me wo RAM ka
+    #   aadha le leta, jo 7.9 GB ke laptop pe baaki sab ko dheema kar deta.
+    command: ['mongod', '--replSet', 'rs0', '--bind_ip_all', '--wiredTigerCacheSizeGB', '0.25']
+    ports:
+      # "host:container". 127.0.0.1 = sirf aapka laptop is port se jud sakta hai, Wi-Fi pe baitha
+      # koi aur nahi (bina password ka local DB kabhi network pe mat kholo).
+      - '127.0.0.1:27017:27017'
+    volumes:
+      # Volume = container ke bahar rakha data. Container hata do, phir bhi data bacha rehta hai.
+      - mongo-data:/data/db
+    healthcheck:
+      # Har 5 second ye command chalti hai. Pehli baar replica set shuru (rs.initiate) karti hai, phir
+      # tab tak "unhealthy" deti hai jab tak Mongo primary (likhne layak) na ban jaye.
+      # Member ka naam localhost:27017 hai, kyunki apps abhi laptop se seedha judti hain.
+      test:
+        - CMD
+        - mongosh
+        - --quiet
+        - --eval
+        - >-
+          try { rs.status() } catch (e) {
+          rs.initiate({ _id: 'rs0', members: [{ _id: 0, host: 'localhost:27017' }] }) };
+          quit(db.hello().isWritablePrimary ? 0 : 1)
+      interval: 5s
+      timeout: 10s
+      retries: 30
+      start_period: 10s
+
+  # ---------------------------------------------------------------------------------------------
+  # Valkey: Redis jaisa (live pe Render Key Value). Rate limits, OTP counters, BullMQ queues.
+  valkey:
+    image: valkey/valkey:8.1.10
+    # Render free Key Value jaisi seemaayein, taaki unki dikkatein laptop pe hi pakdi jaayein
+    # (ARCHITECTURE §6.6, §12):
+    #   --maxmemory 25mb              Render free me itni hi memory
+    #   --maxmemory-policy noeviction memory bhar jaye to purana data chupke se mat mitao, error do
+    #   --maxclients 50               ek saath 50 connections
+    #   --appendonly no, --save ''    disk pe kuch save nahi (Render free bhi nahi karta);
+    #                                 restart = khaali Valkey, isliye app ko ye jhelna aana chahiye
+    command:
+      - valkey-server
+      - --maxmemory
+      - 25mb
+      - --maxmemory-policy
+      - noeviction
+      - --maxclients
+      - '50'
+      - --appendonly
+      - 'no'
+      - --save
+      - ''
+    ports:
+      - '127.0.0.1:6379:6379'
+    healthcheck:
+      # PING ka jawab PONG aaya to healthy
+      test: ['CMD', 'valkey-cli', 'ping']
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  # ---------------------------------------------------------------------------------------------
+  # Mailpit: nakli email server. Login OTP aur saari emails yahan aati hain, kisi asli inbox me
+  # nahi. Browser me dekho: http://localhost:8025
+  mailpit:
+    image: axllent/mailpit:v1.31.6
+    environment:
+      # Purani emails apne aap hatti rahein (sirf aakhri 500)
+      MP_MAX_MESSAGES: '500'
+    ports:
+      - '127.0.0.1:8025:8025' # web inbox + HTTP API (notify isi se bhejega, jaise live pe Brevo ka HTTPS API)
+      - '127.0.0.1:1025:1025' # SMTP, agar kabhi zaroorat pade
+    healthcheck:
+      # Mailpit ka apna /readyz check
+      test: ['CMD', '/mailpit', 'readyz']
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+# Named volume: Docker isse khud sambhalta hai. `npm run infra:reset` ise mitata hai.
+volumes:
+  mongo-data:
