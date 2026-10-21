@@ -79,6 +79,9 @@ npm run build
 - **MongoDB:** `import { ObjectId, withTransaction } from '@beautinique/backend-server-mongo'`; seedha `mongodb` sirf
   `packages/backend/server-mongo` me (ESLint rokta hai). Transaction me queries ek ke baad ek (`Promise.all` ESLint rokta hai),
   aur query ka error pakad ke aage nahi (dedupe `$setOnInsert` upsert se).
+- **Events:** `writeEvent` (`@beautinique/backend-server-queue`) usi `withTransaction` me jisme data badla; relay BullMQ tak le jaata hai.
+  Change stream (`.watch(`) sirf us relay me (ESLint rokta hai). Redis: laptop/CI pe Docker Valkey, production me Render Key Value free (internal URL), `REDIS_URL` se;
+  production Redis laptop ya tests se kabhi nahi.
 - **Zod:** `import { object, string, gstinZod } from '@beautinique/shared-zod'` (named, `z.` nahi); seedha `zod` sirf
   `packages/shared/zod` me (ESLint rokta hai). Hamare schemas `...Zod`, `enum as zodEnum`.
 - `configs/`: shared ESLint factory (`eslint-config.js`, naam `eslint.config.js` nahi ho sakta) aur

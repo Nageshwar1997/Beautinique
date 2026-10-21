@@ -1,6 +1,6 @@
 # MEMORY — BQ
 
-> **Status:** v1.12 (2026-10-21). Project ki yaaddasht: **kya tay hua aur kyun**, **pichhle kaam se kya seekha**, aur **kaunse jaal (traps) se bachna hai**. Poori detail baaki docs me hai; yahan short version aur pointers. Naya sabak ya decision aaye to yahan ek line jodo.
+> **Status:** v1.14 (2026-10-21). Project ki yaaddasht: **kya tay hua aur kyun**, **pichhle kaam se kya seekha**, aur **kaunse jaal (traps) se bachna hai**. Poori detail baaki docs me hai; yahan short version aur pointers. Naya sabak ya decision aaye to yahan ek line jodo.
 
 ## 1. Decision log
 
@@ -40,6 +40,10 @@
 | 2026-10-21 | Transaction me queries ek ke baad ek: ESLint `withTransaction` ke andar `Promise.all/allSettled/any/race` rokta hai, runtime check saath me wire pe aayi queries pe `ParallelTransactionError` | MongoDB transaction me parallel queries support nahi karta; purana random 500. Runtime check akela pakka nahi (busy pool me queries ek ke baad ek jaati hain) | MEMORY §2 sabak 1 aur 20, ARCH §6.2 |
 | 2026-10-21 | Transaction ke andar query ka error pakad ke aage nahi; dedupe `$setOnInsert` upsert se | MongoDB transaction pehle hi cancel kar deta hai; `TransactionAbortedError` turant batata hai | server-mongo README |
 | 2026-10-21 | Mongo wale tests asli replica set pe (mock nahi); local, CI aur release Mongo `enableTestCommands=1` (fail points) | Commit retry jaise raaste sirf asli server pe sach me parakhte hain | infra README, ci.yml, release.yml |
+| 2026-10-21 | Redis: development, tests aur CI me local Docker Valkey (Render free jaisi limits); production me **Render Key Value free**, sirf internal URL (bahar se band). Production Redis laptop se kabhi nahi; staging chahiye to alag instance | Owner ka faisla. Render KV: 50 connections (deploy overlap me ~40 chahiye; Redis Cloud free ke ~30 me nahi aate), same private network (<1 ms), endpoint public nahi. Laptop se production Redis: tests uska data mita dete, limits bant jaatin, latency | ARCH decision 6, §6.6; server-queue README |
+| 2026-10-21 | bullmq aur ioredis ke latest versions (6.4.0, 6.0.0) | Owner: "latest wale hi lelo" | server-queue package.json |
+| 2026-10-21 | Relay ka `jobId = <eventId>@<subscriber>` (ARCH me `:` tha) | BullMQ custom job id me `:` mana karta hai | ARCH §5.2 |
+| 2026-10-21 | Relayed outbox events 72 ghante rakhe (TTL index), lease ka waqt MongoDB ki ghadi (`$$NOW`) se | Redis wipe redrive 48 ghante peeche jaata hai; instances ki ghadiyon ka farak na pade | server-queue README |
 | 2026-10-20 | Packages sirf `release` branch se publish                                                                                             | Wahi branch jo apps live karti hai: npm pe sirf tested code                | ARCH §13                                          |
 | 2026-10-20 | Apps aur services npm packages nahi: `frontend/<app>`, `backend/<name>`, simple naam, `private`                                       | Owner ka faisla; ye deploy hote hain, publish nahi                         | [packages/README.md](packages/README.md) §3.1–3.2 |
 | 2026-10-20 | Ek `npm run create` (Package / Frontend app / Backend app); sirf contracts ke `APPS` aur `DEPLOYABLES`                                | Owner ka faisla; naya feature Core module, naya deployable nahi            | ARCH §3, §4                                       |
@@ -122,3 +126,5 @@
 | v1.10   | 2026-10-21 | Decision: abhi publish nahi, zaroorat pe; packages public hi. |
 | v1.11   | 2026-10-21 | Decisions: muted section niyam, focus-ring-inverse, high contrast tones 7:1. |
 | v1.12   | 2026-10-21 | Decisions: native mongodb driver ek import path, transaction me Promise.all nahi (ESLint), caught query error nahi, Mongo tests asli server pe; sabak 20. |
+| v1.13   | 2026-10-21 | Decisions: Redis local Valkey + production free tier, bullmq/ioredis latest, jobId `@`, outbox 72 ghante, lease `$$NOW`. |
+| v1.14   | 2026-10-21 | Decision: production Redis = Render Key Value free (internal URL); laptop se kabhi nahi. |

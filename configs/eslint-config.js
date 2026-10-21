@@ -26,6 +26,7 @@ const GLOBALS = {
  * @param {string[]} [options.ignores] extra paths to skip
  * @param {boolean} [options.zodPackage] only for @beautinique/shared-zod: the one package that imports zod
  * @param {boolean} [options.mongoPackage] only for @beautinique/backend-server-mongo: the one package that imports mongodb
+ * @param {boolean} [options.changeStreamPackage] only for @beautinique/backend-server-queue: the outbox relay, the one place that opens MongoDB change streams
  * @param {string[]} [options.envFiles] backend apps: the only files that may read process.env (ARCHITECTURE §3)
  */
 export function packageConfig({
@@ -35,6 +36,7 @@ export function packageConfig({
   ignores = [],
   zodPackage = false,
   mongoPackage = false,
+  changeStreamPackage = false,
   envFiles,
 }) {
   const ZOD_MESSAGE =
@@ -85,6 +87,16 @@ export function packageConfig({
             message:
               'No Promise.all/allSettled/any/race inside withTransaction: MongoDB does not support parallel queries in a transaction. Await them one after another.',
           },
+          // Atlas free allows 5 change streams for the whole cluster (ARCHITECTURE §5.2)
+          ...(platform === 'node' && !mongoPackage && !changeStreamPackage
+            ? [
+                {
+                  selector: "CallExpression[callee.property.name='watch']",
+                  message:
+                    'Change streams (.watch) only in the outbox relay of @beautinique/backend-server-queue: Atlas free allows 5 for the whole cluster (ARCHITECTURE §5.2).',
+                },
+              ]
+            : []),
         ],
       },
     },
