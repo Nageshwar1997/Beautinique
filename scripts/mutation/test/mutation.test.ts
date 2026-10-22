@@ -130,7 +130,9 @@ describe('runMutations on a real package', () => {
   };
   const git = (...args: string[]) =>
     execFileSync('git', args, { cwd: root, encoding: 'utf8', stdio: 'pipe' });
-  const list = (entries: unknown[]) => { write(`${pkg}/test/mutations.ts`, `export default ${JSON.stringify(entries)};\n`); };
+  const list = (entries: unknown[]) => {
+    write(`${pkg}/test/mutations.ts`, `export default ${JSON.stringify(entries)};\n`);
+  };
   const run = async (options: { only?: number[]; changedSince?: string } = {}) => {
     const lines: string[] = [];
     const summary = await runMutations({
