@@ -760,6 +760,11 @@ describe('startConsumer', () => {
     const placed = await placeOrder('c2');
     await deliver(placed, placed.eventId);
     await waitFor(async () => (await emails().countDocuments()) === 1);
+    // the effect is committed before BullMQ finishes the job; while the job is still in Redis,
+    // adding the same job id again is ignored (which is not a redelivery), so wait until it is gone
+    const queue = inspect('q.notify');
+    const jobId = jobIdOf(placed.eventId, 'notify.emails');
+    await waitFor(async () => (await queue.getJob(jobId)) === undefined);
     await deliver(placed, placed.eventId);
     await waitFor(() => lines.some((l) => l.msg === 'event seen again, skipped'));
     expect(await emails().countDocuments()).toBe(1);

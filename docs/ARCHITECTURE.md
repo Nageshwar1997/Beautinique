@@ -1,6 +1,6 @@
 # ARCHITECTURE — BQ
 
-> **Status:** v1.16 draft (2026-10-22). [PRD.md](PRD.md) v1.0 pe based. Design ek multi-agent review se aaya (3 architecture proposals + review board + owner ke decisions), aur v1.1 me free tier ke official docs ke against verify hua.
+> **Status:** v1.17 draft (2026-10-22). [PRD.md](PRD.md) v1.0 pe based. Design ek multi-agent review se aaya (3 architecture proposals + review board + owner ke decisions), aur v1.1 me free tier ke official docs ke against verify hua.
 
 ## 0. Ek nazar me
 
@@ -216,7 +216,7 @@ Har module ka apna folder hai (`index.ts` facade, `http`, `application`, `domain
 
 ### 6.7 Files aur media
 
-- **Storage port:** saari files ek `StoragePort` interface ke peeche hain: `createUpload` (signed direct upload), `getUrl` (public ya signed), `delete`, `copy`. Aaj ka adapter **Cloudinary** hai; kal **AWS S3 (+ CloudFront)** ya koi aur adapter sirf config (`storage.provider`) se aa jayega.
+- **Storage port:** saari files ek `StoragePort` interface ke peeche hain: `createUpload` (signed direct upload), `getUrl` (public ya signed), `stat` (file sach me upload hui ya nahi: `USED` karne se pehle), `delete` (jo nahi hai uspe bhi theek), `copy` (naya, alag asset; overwrite kabhi nahi) aur `list` (pages me, reconcile job ke liye). Key ek hi format: `<visibility>/<purpose>/<assetId>`. Har adapter ko package ke shared contract tests (`storageContract`) pass karne hain. Aaj ka adapter **Cloudinary** hai; kal **AWS S3 (+ CloudFront)** ya koi aur adapter sirf config (`storage.provider`) se aa jayega.
 - **Asset registry (`media_assets`):** har file ka record: `assetId`, provider, provider key, owner entity (product, seller document, POD...), purpose, visibility (public/private), size, status. Baaki collections sirf `assetId` rakhti hain, **provider ka URL kabhi nahi**. URL hamesha `getUrl()` se banta hai, isliye provider badalne pe data nahi badalta.
 - **Lifecycle:** upload → `UNUSED` → koi record use kare → `USED` → record hata ya file badli → `DELETING` → provider se delete → `DELETED`. Delete outbox event se hota hai (transaction ke baad), retry ke saath.
 - **Unused cleanup:** daily job 24 ghante se purane `UNUSED` uploads (adhoore forms, chhode hue drafts) aur `DELETING` me atke assets provider se hataata hai. Weekly reconcile job provider ki list ko registry se milata hai; registry me nahi to orphan, delete. Reconcile pichhle 24 ghante me upload hui files ko chhodta hai (upload chal raha ho sakta hai), aur provider ki list pages me padhta hai (Cloudinary Admin API ki hourly limit). Legal files (invoices, KYC) apne purpose ke retention tak rehti hain.
@@ -635,3 +635,4 @@ Sirf config badlegi, code nahi:
 | v1.14   | 2026-10-21 | Decision 6: production Redis sirf internal URL se; laptop/tests/CI kabhi production Redis nahi. |
 | v1.15 | 2026-10-22 | §6.6: job data me poora envelope (16 KB tak), kyunki consumer doosre deployable ka DB nahi padhta. |
 | v1.16 | 2026-10-22 | §6.6: har deployable apna recovered `bq:epoch` apne DB me yaad rakhta hai (ek ki likhi key se doosre ki recovery na chhoote). |
+| v1.17 | 2026-10-22 | §6.7: `StoragePort` me `stat` aur `list` bhi, ek key format, adapters ke shared contract tests. |

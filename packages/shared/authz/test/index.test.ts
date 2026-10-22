@@ -56,12 +56,15 @@ describe('public API', () => {
     expect(Object.keys(api).sort()).toEqual(
       [
         'can',
+        'checkSeparation',
         'decide',
+        'grantProblems',
         'isGrantActive',
         'isStepUpFresh',
         'reachesAnything',
         'scopeCovers',
         'scopeSpec',
+        'scopeWithin',
       ].sort(),
     );
   });
@@ -251,6 +254,7 @@ describe('step-up', () => {
   it('is fresh for 5 minutes by default', () => {
     expect(isStepUpFresh('2026-10-20T07:55:00Z', now)).toBe(true);
     expect(isStepUpFresh('2026-10-20T07:54:59Z', now)).toBe(false);
+    expect(isStepUpFresh('2026-10-20T07:54:59.999Z', now)).toBe(false); // 1 ms past the limit
     expect(isStepUpFresh('2026-10-20T08:00:01Z', now)).toBe(false); // in the future: not trusted
     expect(isStepUpFresh('2026-10-20T07:59:00Z', now, 30_000)).toBe(false);
     expect(isStepUpFresh(null, now)).toBe(false);
