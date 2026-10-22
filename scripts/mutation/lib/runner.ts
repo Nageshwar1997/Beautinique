@@ -26,6 +26,7 @@ export const MUTATION_ENV = {
 /** The parts of a package a test run needs. */
 const PACKAGE_PARTS = [
   'src',
+  'generated',
   'test',
   'package.json',
   'tsconfig.json',

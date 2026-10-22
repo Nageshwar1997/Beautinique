@@ -8,7 +8,7 @@ import type { RouteDefinition } from './routes';
 type JsonSchema = Record<string, unknown>;
 
 /** JSON Schema (draft 2020-12, as OpenAPI 3.1 uses) of a zod schema, without the $schema line. */
-function jsonSchema(schema: ZodType, io: 'input' | 'output'): JsonSchema {
+export function jsonSchema(schema: ZodType, io: 'input' | 'output'): JsonSchema {
   const { $schema: _ignored, ...rest } = toJSONSchema(schema, { io, unrepresentable: 'throw' });
   return rest;
 }

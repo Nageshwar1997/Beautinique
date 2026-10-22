@@ -1,6 +1,6 @@
 # MEMORY — BQ
 
-> **Status:** v1.19 (2026-10-22). Project ki yaaddasht: **kya tay hua aur kyun**, **pichhle kaam se kya seekha**, aur **kaunse jaal (traps) se bachna hai**. Poori detail baaki docs me hai; yahan short version aur pointers. Naya sabak ya decision aaye to yahan ek line jodo.
+> **Status:** v1.20 (2026-10-22). Project ki yaaddasht: **kya tay hua aur kyun**, **pichhle kaam se kya seekha**, aur **kaunse jaal (traps) se bachna hai**. Poori detail baaki docs me hai; yahan short version aur pointers. Naya sabak ya decision aaye to yahan ek line jodo.
 
 ## 1. Decision log
 
@@ -50,6 +50,7 @@
 | 2026-10-22 | Scheduled task ka fail run dead letter nahi; cron pattern default India time (`Asia/Kolkata`) | Agla run aata hi hai, dead letters insaan ke liye hain; business din India ka | server-queue README |
 | 2026-10-22 | Mutation testing 3 hisse: kernel packages pehli baar poora run (background) aur baad me badli lines; nazuk logic (paisa, stock, permissions) badli lines; baaki modules aur apps me nahi | Owner: har badlav pe poora run (server-queue: 95 mutations ~45 min) se project saalon me khatam hota | RULES §6 |
 | 2026-10-22 | PII encryption: versioned keys (`k2,k1`: pehli seal kare, baaki rotation), sealed value me key id aur format version, context (`<collection>.<field>:<id>`) AES-GCM ke AAD me, blind index HMAC(field + value), `{ enc, idx, masked }` | Bina downtime key rotation; ek record ka sealed value doosre me chipka ke chalaya na ja sake; ek hi value do fields me alag index | server-crypto README, ARCH §6.5 |
+| 2026-10-22 | Imports/exports ka order sirf ESLint (`simple-import-sort`) tay karta hai, aur CI (`npm run lint`) wahi check karta hai; VS Code ka Organize Imports (`source.organizeImports`) is repo me save pe band (`.vscode/settings.json`, tab lagti hai jab `Beautinique` folder window ka root ho) | Dono order alag hain (VS Code `type` names aakhir me, case-sensitive; ESLint alphabet me, `type` beech me) aur Ctrl+S pe ek doosre ka kiya ulta karte the. Owner ne dono options dekh ke ESLint wala chuna (2026-10-22); CI usi ko maanta hai, aur uska order har machine/editor pe ek jaisa hai | HANDOFF §2 aur §6 (trap) |
 | 2026-10-22 | MongoDB 8.0 ke liye compose me `GLIBC_TUNABLES=glibc.pthread.rseq=1`; image 8.0 hi, runners `ubuntu-latest` | MongoDB 8.0 Linux 6.19+ pe shuru nahi hota (SERVER-121912) aur GitHub ke saare Ubuntu runners kernel 7.0 pe hain (`ubuntu-24.04` pin bhi kaam nahi aaya). Version badalna Atlas M0 (8.0) se farak laata | infra/docker-compose.yml, infra README |
 | 2026-10-20 | Packages sirf `release` branch se publish                                                                                             | Wahi branch jo apps live karti hai: npm pe sirf tested code                | ARCH §13                                          |
 | 2026-10-20 | Apps aur services npm packages nahi: `frontend/<app>`, `backend/<name>`, simple naam, `private`                                       | Owner ka faisla; ye deploy hote hain, publish nahi                         | [packages/README.md](packages/README.md) §3.1–3.2 |
@@ -140,3 +141,4 @@
 | v1.17 | 2026-10-22 | Decision: mutation testing 3 hisse (kernel, nazuk logic, baaki nahi). |
 | v1.18 | 2026-10-22 | Decisions: deployable apna epoch yaad rakhe, task fail dead letter nahi, cron India time. |
 | v1.19 | 2026-10-22 | Decision: PII encryption ka format (versioned keys, context AAD, field wala blind index). |
+| v1.20 | 2026-10-22 | Decision: imports/exports ka order ESLint tay karta hai (CI), VS Code Organize Imports band. |

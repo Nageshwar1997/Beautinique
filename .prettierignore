@@ -13,3 +13,4 @@ docs
 packages/frontend/styles/src/variables.css
 packages/frontend/styles/src/fonts.css
 packages/frontend/styles/src/fonts
+packages/shared/contracts/generated
