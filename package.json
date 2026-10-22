@@ -23,6 +23,7 @@
     "logout": "node scripts/packages/bin/logout.ts",
     "status": "node scripts/packages/bin/status.ts",
     "create": "node scripts/packages/bin/create.ts",
+    "mutate": "node scripts/mutation/bin/mutate.ts",
     "create:app": "node scripts/packages/bin/create.ts --type app",
     "create:backend": "node scripts/packages/bin/create.ts --type backend",
     "publish": "node scripts/packages/bin/publish.ts",
