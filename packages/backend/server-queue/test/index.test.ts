@@ -16,19 +16,29 @@ import * as api from '../src/index';
 import {
   assertNoEviction,
   connectRedis,
+  type Consumer,
+  type ConsumerOptions,
+  DEAD_LETTER_KEEP_SECONDS,
+  DEAD_LETTERS,
+  ensureConsumerIndexes,
   ensureOutboxIndexes,
+  EVENT_MAX_BYTES,
   jobIdOf,
   LOCKS,
   OUTBOX,
   OUTBOX_KEEP_SECONDS,
   type OutboxRecord,
   parseRedisInfo,
+  PROCESSED_EVENTS,
+  PROCESSED_KEEP_SECONDS,
   type RedisConnection,
   type Relay,
   RELAY_LEASE,
   type RelayOptions,
   releaseLease,
+  startConsumer,
   startRelay,
+  subscribe,
   tryLease,
   writeEvent,
 } from '../src/index';
@@ -76,8 +86,11 @@ const SUBSCRIBERS = { 'commerce.order.placed': ['notify.emails', 'identity.grant
 
 let mongo: Mongo;
 let redis: RedisConnection;
+/** A consumer deployable's own database (like bq_notify): it never reads the producer's. */
+let consumerMongo: Mongo;
 /** What beforeAll managed to open: if it failed half way, afterAll closes only that. */
-const opened: { mongo?: Mongo; redis?: RedisConnection } = {};
+const opened: { mongo?: Mongo; redis?: RedisConnection; consumer?: Mongo } = {};
+const consumers: Consumer[] = [];
 const inspectors: Queue[] = [];
 const relays: Relay[] = [];
 
@@ -87,6 +100,13 @@ beforeAll(async () => {
     opened.mongo = mongo;
     redis = await connectRedis({ url: REDIS_URL, name: 'server-queue-test', logger });
     opened.redis = redis;
+    consumerMongo = await connectMongo({
+      uri: MONGO_URI,
+      dbName: `${dbName}_notify`,
+      appName: 'server-queue-test',
+      logger,
+    });
+    opened.consumer = consumerMongo;
   } catch (error) {
     throw new Error(
       'These tests need MongoDB and Valkey: run `npm run infra:up` (or set MONGO_TEST_URI and REDIS_TEST_URL).',
@@ -94,6 +114,7 @@ beforeAll(async () => {
     );
   }
   await ensureOutboxIndexes(mongo);
+  await ensureConsumerIndexes(consumerMongo);
 });
 /** Removes this run's BullMQ keys, so each test counts only its own jobs. */
 async function clearQueues(): Promise<void> {
@@ -112,12 +133,16 @@ async function failPoint(mode: { times: number }, data: Record<string, unknown>)
 }
 afterEach(async () => {
   await Promise.all(relays.splice(0).map((relay) => relay.stop()));
+  await Promise.all(consumers.splice(0).map((consumer) => consumer.stop()));
   if (failPointOn) {
     await mongo.client.db('admin').command({ configureFailPoint: 'failCommand', mode: 'off' });
     failPointOn = false;
   }
   await mongo.db.collection(OUTBOX).deleteMany({});
   await mongo.db.collection(LOCKS).deleteMany({});
+  for (const name of [PROCESSED_EVENTS, DEAD_LETTERS, 'emails']) {
+    await consumerMongo.db.collection(name).deleteMany({});
+  }
   await clearQueues();
   lines.length = 0;
 });
@@ -192,9 +217,11 @@ afterAll(async () => {
       if (keys.length > 0) await opened.redis.client.del(...keys);
     }
     await opened.mongo?.db.dropDatabase();
+    await opened.consumer?.db.dropDatabase();
   } finally {
     await opened.redis?.close();
     await opened.mongo?.close();
+    await opened.consumer?.close();
   }
 });
 
@@ -459,7 +486,8 @@ describe('startRelay', () => {
     ] as const) {
       const job = await inspect(queueName).getJob(jobIdOf(placed.eventId, subscriber));
       expect(job?.name).toBe(subscriber);
-      expect(job?.data).toEqual({ eventId: placed.eventId, type: 'commerce.order.placed' });
+      // the whole event: a consumer may only read its own database
+      expect(job?.data).toEqual(placed);
       expect(job?.opts).toMatchObject({
         attempts: 6,
         backoff: { type: 'exponential', delay: 1000 },
@@ -646,5 +674,241 @@ describe('startRelay', () => {
         /must be <deployable>\.<module>|lists a subscriber twice/,
       );
     }
+  });
+});
+
+describe('writeEvent size limit', () => {
+  it('refuses an event over 16 KB, so Redis stays small', async () => {
+    await expect(
+      withTransaction(mongo, (session) =>
+        writeEvent(mongo, session, orderPlaced, {
+          ...order('big'),
+          data: { orderId: 'x'.repeat(EVENT_MAX_BYTES), total: 1 },
+        }),
+      ),
+    ).rejects.toThrow(/^Event "commerce.order.placed" is \d+ bytes; the limit is 16384/);
+    expect(await outbox().countDocuments()).toBe(0);
+  });
+});
+
+describe('startConsumer', () => {
+  const emails = () => consumerMongo.db.collection<{ _id: string; orderId: string }>('emails');
+  const deadLetters = () => consumerMongo.db.collection<{ _id: string }>(DEAD_LETTERS);
+  /** Sends the welcome email row for an order: the consumer's own database work. */
+  const sendEmail = subscribe('notify.emails', orderPlaced, async (event, session) => {
+    await emails().insertOne({ _id: event.eventId, orderId: event.data.orderId }, { session });
+  });
+  const consume = (options: Partial<ConsumerOptions> = {}): Consumer => {
+    const started = startConsumer({
+      mongo: consumerMongo,
+      redis: redis.client,
+      logger,
+      queue: 'q.notify',
+      subscriptions: [sendEmail],
+      prefix,
+      ...options,
+    });
+    consumers.push(started);
+    return started;
+  };
+  /** Puts an event on q.notify the way a redelivery would, with quick retries for the test. */
+  const deliver = (envelope: unknown, eventId: string, attempts = 3) =>
+    inspect('q.notify').add('notify.emails', envelope, {
+      jobId: jobIdOf(eventId, 'notify.emails'),
+      attempts,
+      backoff: { type: 'fixed', delay: 50 },
+      removeOnComplete: true,
+    });
+
+  it('handles a relayed event in its own database, and marks it handled in the same transaction', async () => {
+    relay();
+    consume();
+    const placed = await placeOrder('c1');
+    await waitFor(async () => (await emails().countDocuments()) === 1, 5000);
+    expect(await emails().findOne({ _id: placed.eventId })).toEqual({
+      _id: placed.eventId,
+      orderId: 'c1',
+    });
+    expect(
+      await consumerMongo.db
+        .collection<{ _id: string }>(PROCESSED_EVENTS)
+        .findOne({ _id: jobIdOf(placed.eventId, 'notify.emails') }),
+    ).toMatchObject({
+      eventId: placed.eventId,
+      subscriber: 'notify.emails',
+      type: 'commerce.order.placed',
+    });
+    // the producer's database got nothing from the consumer
+    expect(await mongo.db.collection('emails').countDocuments()).toBe(0);
+  });
+
+  it('skips an event delivered again: no second effect', async () => {
+    consume();
+    const placed = await placeOrder('c2');
+    await deliver(placed, placed.eventId);
+    await waitFor(async () => (await emails().countDocuments()) === 1);
+    await deliver(placed, placed.eventId);
+    await waitFor(() => lines.some((l) => l.msg === 'event seen again, skipped'));
+    expect(await emails().countDocuments()).toBe(1);
+  });
+
+  it('retries a failing handler, rolls back each failed try, and applies the effect once', async () => {
+    let calls = 0;
+    consume({
+      subscriptions: [
+        subscribe('notify.emails', orderPlaced, async (event, session) => {
+          calls += 1;
+          await emails().insertOne(
+            { _id: event.eventId, orderId: event.data.orderId },
+            { session },
+          );
+          if (calls < 3) throw new Error('mail service busy');
+        }),
+      ],
+    });
+    const placed = await placeOrder('c3');
+    await deliver(placed, placed.eventId, 3);
+    await waitFor(async () => (await emails().countDocuments()) === 1);
+    await sleep(100);
+    expect(calls).toBe(3);
+    expect(await emails().countDocuments()).toBe(1);
+    expect(lines.filter((l) => l.msg === 'event handling failed, will retry')).toHaveLength(2);
+    expect(await deadLetters().countDocuments()).toBe(0);
+  });
+
+  it('dead-letters an event after its last try, with the error', async () => {
+    consume({
+      subscriptions: [
+        subscribe('notify.emails', orderPlaced, () =>
+          Promise.reject(new Error(`smtp down ${'x'.repeat(600)}`)),
+        ),
+      ],
+    });
+    const placed = await placeOrder('c4');
+    await deliver(placed, placed.eventId, 2);
+    await waitFor(async () => (await deadLetters().countDocuments()) === 1);
+    const letter = await deadLetters().findOne({});
+    expect(letter).toMatchObject({
+      _id: jobIdOf(placed.eventId, 'notify.emails'),
+      queue: 'q.notify',
+      subscriber: 'notify.emails',
+      eventId: placed.eventId,
+      type: 'commerce.order.placed',
+      envelope: { eventId: placed.eventId, data: { orderId: 'c4' } },
+      error: { name: 'Error' },
+      attempts: 2,
+    });
+    // long errors are cut to 500 characters
+    const { message } = (letter as unknown as { error: { message: string } }).error;
+    expect(message.startsWith('smtp down xxx')).toBe(true);
+    expect(message).toHaveLength(500);
+    expect(lines.find((l) => l.msg === 'event dead-lettered')).toMatchObject({
+      eventId: placed.eventId,
+      attempts: 2,
+    });
+    expect(await consumerMongo.db.collection(PROCESSED_EVENTS).countDocuments()).toBe(0);
+  });
+
+  it('dead-letters at once what no retry can fix: unknown version, broken contract, handler bug', async () => {
+    consume({
+      subscriptions: [
+        sendEmail,
+        subscribe('notify.emails', reviewAdded, async (event, session) => {
+          if (event.data.reviewId === 'parallel') {
+            // a handler bug: parallel queries in one transaction
+            await Promise.all([
+              emails().insertOne({ _id: 'p1', orderId: 'p' }, { session }),
+              emails().insertOne({ _id: 'p2', orderId: 'p' }, { session }),
+              emails().insertOne({ _id: 'p3', orderId: 'p' }, { session }),
+            ]);
+            return;
+          }
+          // a handler bug: a query error caught and ignored (MongoDB has cancelled the transaction)
+          try {
+            await emails().insertOne({ _id: 'taken', orderId: 't' }, { session });
+          } catch {
+            // ignored on purpose
+          }
+        }),
+      ],
+    });
+    const placed = await placeOrder('c5');
+    const newer = { ...placed, eventId: '0193a2b4-0000-7000-8000-000000000001', version: 9 };
+    const broken = {
+      ...placed,
+      eventId: '0193a2b4-0000-7000-8000-000000000002',
+      data: { orderId: 'c5', total: 'many' },
+    };
+    const review = (eventId: string, reviewId: string) => ({
+      ...placed,
+      eventId,
+      type: 'catalog.review.added',
+      data: { reviewId },
+    });
+    await emails().insertOne({ _id: 'taken', orderId: 't' });
+    for (const envelope of [
+      newer,
+      broken,
+      review('0193a2b4-0000-7000-8000-000000000003', 'parallel'),
+      review('0193a2b4-0000-7000-8000-000000000004', 'swallow'),
+    ]) {
+      await deliver(envelope, envelope.eventId, 5);
+    }
+    await waitFor(async () => (await deadLetters().countDocuments()) === 4, 5000);
+    const letters = await deadLetters().find({}).toArray();
+    expect(letters.map((letter) => (letter as unknown as { attempts: number }).attempts)).toEqual([
+      1, 1, 1, 1,
+    ]);
+    const messages = letters.map(
+      (letter) => (letter as unknown as { error: { message: string } }).error.message,
+    );
+    expect(
+      messages.some((m) =>
+        m.startsWith('No handler for commerce.order.placed v9 at notify.emails'),
+      ),
+    ).toBe(true);
+    expect(messages.some((m) => m.includes('breaks its contract at: data.total'))).toBe(true);
+    expect(messages.some((m) => m.includes('ran at the same time'))).toBe(true);
+    expect(messages.some((m) => m.includes('(MongoDB error 11000)'))).toBe(true);
+    expect(await emails().countDocuments()).toBe(1);
+  });
+
+  it('refuses wrong subscriptions at start', () => {
+    expect(() => subscribe('mail', orderPlaced, () => Promise.resolve())).toThrow(
+      'must be <deployable>.<module>',
+    );
+    expect(() => consume({ subscriptions: [sendEmail, sendEmail] })).toThrow(
+      'Subscription notify.emails|commerce.order.placed@v1 is declared twice',
+    );
+  });
+
+  it('stops after the job in hand and leaves the shared Redis client open', async () => {
+    const running = consume();
+    expect(await running.ready()).toBe(true);
+    await running.stop();
+    await running.stop();
+    expect(await running.ready()).toBe(false);
+    expect(await redis.ready()).toBe(true);
+    expect(lines.filter((l) => l.msg === 'event consumer stopped')).toHaveLength(1);
+    // a stopped consumer takes no more work
+    const placed = await placeOrder('c6');
+    await deliver(placed, placed.eventId);
+    await sleep(500);
+    expect(await emails().countDocuments()).toBe(0);
+  });
+
+  it('keeps handled marks 7 days and dead letters 14 days', async () => {
+    await ensureConsumerIndexes(consumerMongo);
+    const processedIndexes = await consumerMongo.db.collection(PROCESSED_EVENTS).indexes();
+    expect(processedIndexes.find((i) => i.name === 'processed_expiry')).toMatchObject({
+      key: { processedAt: 1 },
+      expireAfterSeconds: PROCESSED_KEEP_SECONDS,
+    });
+    const deadIndexes = await consumerMongo.db.collection(DEAD_LETTERS).indexes();
+    expect(deadIndexes.find((i) => i.name === 'dead_letter_expiry')).toMatchObject({
+      key: { failedAt: 1 },
+      expireAfterSeconds: DEAD_LETTER_KEEP_SECONDS,
+    });
+    expect([PROCESSED_KEEP_SECONDS, DEAD_LETTER_KEEP_SECONDS]).toEqual([7 * 86_400, 14 * 86_400]);
   });
 });

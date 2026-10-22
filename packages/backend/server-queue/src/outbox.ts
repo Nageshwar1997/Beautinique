@@ -8,6 +8,12 @@ export const OUTBOX = 'platform_outbox';
 /** Relayed events stay this long: the Redis wipe redrive replays the last 48 hours (ARCHITECTURE §6.6). */
 export const OUTBOX_KEEP_SECONDS = 72 * 60 * 60;
 
+/**
+ * The largest envelope (as JSON): every job carries its whole event, because a consumer may only read
+ * its own database (ARCHITECTURE §6.1), and Redis is small. Events hold ids and small facts.
+ */
+export const EVENT_MAX_BYTES = 16 * 1024;
+
 export interface OutboxRecord {
   /** The event id (UUIDv7, so ids sort by time). */
   _id: string;
@@ -73,6 +79,13 @@ export async function writeEvent<Definition extends EventDefinition>(
     scope: input.scope ?? null,
     data: input.data,
   }) as EventEnvelope<Definition>;
+  const bytes = Buffer.byteLength(JSON.stringify(envelope));
+  if (bytes > EVENT_MAX_BYTES) {
+    throw new Error(
+      `Event "${definition.type}" is ${String(bytes)} bytes; the limit is ${String(EVENT_MAX_BYTES)}. ` +
+        'Put ids and small facts in an event; the details stay in your database.',
+    );
+  }
   await mongo.db.collection<OutboxRecord>(OUTBOX).insertOne(
     {
       _id: envelope.eventId,

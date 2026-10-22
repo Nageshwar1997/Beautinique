@@ -1,6 +1,6 @@
 # ARCHITECTURE — BQ
 
-> **Status:** v1.14 draft (2026-10-21). [PRD.md](PRD.md) v1.0 pe based. Design ek multi-agent review se aaya (3 architecture proposals + review board + owner ke decisions), aur v1.1 me free tier ke official docs ke against verify hua.
+> **Status:** v1.15 draft (2026-10-22). [PRD.md](PRD.md) v1.0 pe based. Design ek multi-agent review se aaya (3 architecture proposals + review board + owner ke decisions), aur v1.1 me free tier ke official docs ke against verify hua.
 
 ## 0. Ek nazar me
 
@@ -196,7 +196,7 @@ Har module ka apna folder hai (`index.ts` facade, `http`, `application`, `domain
 | `bq:track:*`                 | Rider ki live location                     |
 
 - **Free Redis bahut chhota hai:** Render free Key Value = **25 MB RAM, 50 connections, koi persistence nahi** (2026-10-19 ko verified). Memory budget (25 MB):
-  - BullMQ ≤ 12 MB: har queue pe `streams.events.maxLen: 200` (BullMQ ka default ~10,000 events per queue hai, jo akele 25 MB kha sakta hai), `removeOnComplete: true`, `removeOnFail: { count: 20 }`. Job data me sirf `{eventId, type}`; poora payload MongoDB outbox me.
+  - BullMQ ≤ 12 MB: har queue pe `streams.events.maxLen: 200` (BullMQ ka default ~10,000 events per queue hai, jo akele 25 MB kha sakta hai), `removeOnComplete: true`, `removeOnFail: { count: 20 }`. Job data me poora event envelope (max 16 KB; owner ka faisla 2026-10-22): consumer sirf apna DB padh sakta hai (§6.1), outbox producer ke DB me hai. Event me sirf ids aur chhoti baatein.
   - Identity (OTP, revoke, freeze) aur rate limits ≤ 6 MB, sab TTL ke saath.
   - Caches ≤ 4 MB: free mode me sirf serviceability aur Ola token cache; baaki `cache.enabled = false`.
   - ~3 MB khaali.
@@ -633,3 +633,4 @@ Sirf config badlegi, code nahi:
 | v1.12   | 2026-10-21 | §6.2: `backend-server-mongo` (native driver), har attempt naya session, `Promise.all` aur caught query error nahi, backoff aur timeout. |
 | v1.13   | 2026-10-21 | §5.2: relay ka jobId `<eventId>@<subscriber>` (BullMQ `:` nahi leta). |
 | v1.14   | 2026-10-21 | Decision 6: production Redis sirf internal URL se; laptop/tests/CI kabhi production Redis nahi. |
+| v1.15 | 2026-10-22 | §6.6: job data me poora envelope (16 KB tak), kyunki consumer doosre deployable ka DB nahi padhta. |

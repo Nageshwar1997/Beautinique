@@ -68,27 +68,31 @@ const LAG_LIMIT_MS = 30_000;
 
 const defaultQueueOf = (subscriber: string): string => `q.${subscriber.split('.')[0] ?? ''}`;
 
+/** A subscriber is `<deployable>.<module>`, e.g. `notify.emails`; anything else throws. */
+export function assertSubscriber(subscriber: string, of: string): void {
+  const deployable = SUBSCRIBER.exec(subscriber)?.[1];
+  if (!deployable || !(DEPLOYABLES as readonly string[]).includes(deployable)) {
+    throw new Error(
+      `Subscriber "${subscriber}" of "${of}" must be <deployable>.<module> (deployables: ${DEPLOYABLES.join(', ')})`,
+    );
+  }
+}
+
 /** Wrong subscriber lists throw at start, not when the first event arrives. */
 function checkSubscribers(subscribers: RelayOptions['subscribers']): void {
   for (const [type, list] of Object.entries(subscribers)) {
     if (new Set(list).size !== list.length) {
       throw new Error(`Event "${type}" lists a subscriber twice`);
     }
-    for (const subscriber of list) {
-      const deployable = SUBSCRIBER.exec(subscriber)?.[1];
-      if (!deployable || !(DEPLOYABLES as readonly string[]).includes(deployable)) {
-        throw new Error(
-          `Subscriber "${subscriber}" of "${type}" must be <deployable>.<module> (deployables: ${DEPLOYABLES.join(', ')})`,
-        );
-      }
-    }
+    for (const subscriber of list) assertSubscriber(subscriber, type);
   }
 }
 
 /**
- * Sends the outbox on to BullMQ: one job per subscriber (`jobId = <eventId>@<subscriber>`, data
- * `{ eventId, type }`; the payload stays in MongoDB), then marks the event relayed. Events go in the
- * order they were written; if Redis is away the relay stops at that event and tries again on the
+ * Sends the outbox on to BullMQ: one job per subscriber (`jobId = <eventId>@<subscriber>`, data =
+ * the whole envelope, since a consumer may only read its own database), then marks the event
+ * relayed. Events go in the order they were written; if Redis is away the relay stops at that event
+ * and tries again on the
  * next round. Only the instance holding the MongoDB lease relays. Delivery is at least once (a crash
  * between the job and the mark sends the event again under the same job id); consumers dedupe.
  */
@@ -158,11 +162,10 @@ export function startRelay(options: RelayOptions): Relay {
       if (!leader || stopped) return 0;
       const targets = subscribers[record.type] ?? [];
       for (const subscriber of targets) {
-        await queue(queueOf(subscriber)).add(
-          subscriber,
-          { eventId: record._id, type: record.type },
-          { ...RELAY_JOB_OPTIONS, jobId: jobIdOf(record._id, subscriber) },
-        );
+        await queue(queueOf(subscriber)).add(subscriber, record.envelope, {
+          ...RELAY_JOB_OPTIONS,
+          jobId: jobIdOf(record._id, subscriber),
+        });
       }
       await outbox.updateOne(
         { _id: record._id, status: 'pending' },
