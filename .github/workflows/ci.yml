@@ -14,9 +14,7 @@ concurrency:
 
 jobs:
   check:
-    # Pinned, not ubuntu-latest: MongoDB 8.0 (Atlas M0's line) refuses to start on Linux 6.19+
-    # (SERVER-121912, SERVER-136848), and ubuntu-26.04 runs 7.0. Move on when Mongo 8.0 starts there.
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-latest
     timeout-minutes: 30
     steps:
       - uses: actions/checkout@v7
@@ -69,7 +67,7 @@ jobs:
       # limits. Every backend package that needs another service adds it here and in release.yml.
       - name: Start MongoDB and Valkey for the tests
         run: |
-          # the kernel decides whether this MongoDB version starts at all (see runs-on)
+          # MongoDB 8.0 needs a workaround on Linux 6.19+ (infra/docker-compose.yml)
           echo "kernel $(uname -r)"
           if ! docker compose -f infra/docker-compose.yml up --detach --wait --wait-timeout 180 mongo valkey; then
             # compose only says "exited (1)"; the servers' own logs say why

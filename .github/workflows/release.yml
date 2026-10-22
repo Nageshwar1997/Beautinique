@@ -22,9 +22,7 @@ concurrency:
 jobs:
   build:
     if: github.ref == 'refs/heads/release'
-    # Pinned, not ubuntu-latest: MongoDB 8.0 (Atlas M0's line) refuses to start on Linux 6.19+
-    # (SERVER-121912, SERVER-136848), and ubuntu-26.04 runs 7.0. Move on when Mongo 8.0 starts there.
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-latest
     timeout-minutes: 30
     permissions:
       contents: read
@@ -49,7 +47,7 @@ jobs:
       # replica set and Valkey (the same compose services as CI and the laptops).
       - name: Start MongoDB and Valkey for the tests
         run: |
-          # the kernel decides whether this MongoDB version starts at all (see runs-on)
+          # MongoDB 8.0 needs a workaround on Linux 6.19+ (infra/docker-compose.yml)
           echo "kernel $(uname -r)"
           if ! docker compose -f infra/docker-compose.yml up --detach --wait --wait-timeout 180 mongo valkey; then
             # compose only says "exited (1)"; the servers' own logs say why
@@ -78,9 +76,7 @@ jobs:
   publish:
     needs: build
     if: github.ref == 'refs/heads/release' && needs.build.outputs.ready == 'true'
-    # Pinned, not ubuntu-latest: MongoDB 8.0 (Atlas M0's line) refuses to start on Linux 6.19+
-    # (SERVER-121912, SERVER-136848), and ubuntu-26.04 runs 7.0. Move on when Mongo 8.0 starts there.
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-latest
     timeout-minutes: 15
     # Must match the environment in each package's npm trusted publishing settings.
     environment: npm

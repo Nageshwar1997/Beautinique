@@ -18,6 +18,12 @@ services:
   mongo:
     # Exact version pin: dono developers ke laptop pe bilkul same Mongo. Badalna ho to soch ke badlo.
     image: mongo:8.0.34
+    # Linux kernel 6.19+ (GitHub ke runners abhi 7.0 pe) pe MongoDB 8.0 ka memory allocator (tcmalloc)
+    # ek kernel badlav se toot jaata hai, isliye MongoDB shuru hi nahi hota (SERVER-121912). Ye setting
+    # glibc ko rseq sambhalne deti hai aur tcmalloc purane, safe raaste pe chalta hai: thoda dheema, par
+    # sahi. Laptop ke purane kernel pe bhi kuch nahi bigadta. MongoDB ka fix aane pe ye hata dena.
+    environment:
+      GLIBC_TUNABLES: glibc.pthread.rseq=1
     # --replSet rs0: Mongo ko "replica set" bana do, chahe ek hi member ho. Kyun? Transactions
     #   (order + stock ek saath) aur change streams sirf replica set pe chalte hain. Atlas bhi
     #   replica set hai, isliye laptop pe bhi wahi.
