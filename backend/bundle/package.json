@@ -20,6 +20,8 @@
     "identity": "^0.0.0"
   },
   "devDependencies": {
+    "@beautinique/backend-server-mongo": "^1.0.0",
+    "@beautinique/backend-server-queue": "^1.0.0",
     "@types/node": "^26.6.5",
     "tsdown": "^0.23.1",
     "typescript": "~6.0.3",

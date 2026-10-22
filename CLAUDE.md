@@ -89,6 +89,7 @@ npm run build
   production Redis laptop ya tests se kabhi nahi.
 - **Zod:** `import { object, string, gstinZod } from '@beautinique/shared-zod'` (named, `z.` nahi); seedha `zod` sirf
   `packages/shared/zod` me (ESLint rokta hai). Hamare schemas `...Zod`, `enum as zodEnum`.
+- **Routes:** contract pehle (`defineRoute`), handler `mountRoute(router, route, handler)` (`@beautinique/backend-server-kit`) se: input/output contract se check hota hai. Namuna: `backend/core/src/modules/platform/` (endpoint + event + subscriber); core ke tests ko `infra:up` chahiye.
 - `configs/`: shared ESLint factory (`eslint-config.js`, naam `eslint.config.js` nahi ho sakta) aur
   tsconfig presets.
 - `.github/workflows/`: `ci.yml` (har PR, aur `main`/`prerelease`/`release` pe push), `release.yml`

@@ -76,6 +76,7 @@ describe('public API', () => {
         'errorHandler',
         'healthRoutes',
         'loadConfig',
+        'mountRoute',
         'notFound',
         'requestId',
         'requestIdOf',
