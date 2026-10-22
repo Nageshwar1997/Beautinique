@@ -21,6 +21,19 @@
     scrollbar-color: var(--border-strong) transparent;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
+    /* native checkbox, radio, range and progress in the brand colour */
+    accent-color: var(--brand);
+    /* lets height/width transition to and from `auto` (accordions, <details>) where supported */
+    interpolate-size: allow-keywords;
+  }
+
+  /* Set while the app switches theme (one frame), so every colour changes at once instead of
+     animating: <html theme-switching> */
+  [theme-switching],
+  [theme-switching] *,
+  [theme-switching] *::before,
+  [theme-switching] *::after {
+    transition: none !important;
   }
 
   body {
@@ -48,10 +61,11 @@
     text-wrap-style: pretty;
   }
 
-  /* Always-visible keyboard focus (WCAG 2.4.7). Outline, not box-shadow, so forced-colors mode keeps it. */
+  /* Always-visible keyboard focus (WCAG 2.4.7). Outline, not box-shadow, so forced-colors mode keeps it.
+     Thicker in high contrast (--focus-ring-width). */
   :focus-visible {
-    outline: 2px solid var(--focus-ring);
-    outline-offset: 2px;
+    outline: var(--focus-ring-width) solid var(--focus-ring);
+    outline-offset: var(--focus-ring-offset);
   }
 
   ::selection {
@@ -60,6 +74,43 @@
 
   ::placeholder {
     color: var(--foreground-subtle);
+  }
+
+  input,
+  textarea {
+    caret-color: var(--brand);
+  }
+
+  /* Browser autofill keeps our colours (no yellow or blue box): the browser's background is held back
+     by a very long transition, and the text keeps the theme colour. */
+  input:autofill,
+  textarea:autofill,
+  select:autofill {
+    -webkit-text-fill-color: var(--foreground);
+    transition:
+      background-color 0s 600000s,
+      color 0s 600000s;
+  }
+
+  /* Search highlights and keyboard shortcuts (internal apps) */
+  mark {
+    background-color: rgba(var(--accent-rgb), 0.35);
+    color: inherit;
+    border-radius: 0.125rem;
+  }
+
+  kbd {
+    display: inline-block;
+    min-width: 1.5em;
+    padding: 0 0.375em;
+    border: 1px solid var(--border-strong);
+    border-bottom-width: 2px;
+    border-radius: 0.25rem;
+    background-color: var(--surface-muted);
+    font-family: var(--font-mono);
+    font-size: 0.8125em;
+    line-height: 1.5;
+    text-align: center;
   }
 
   /* Modal <dialog> backdrop only (popovers and fullscreen keep the browser's own). The fallback covers

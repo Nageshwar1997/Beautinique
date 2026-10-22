@@ -111,7 +111,7 @@ describe('create: templates', () => {
   it('React packages peer-depend on react and test in jsdom', () => {
     const s = spec({ category: 'frontend', kind: 'react' });
     expect(manifest(s)).toMatchObject({
-      peerDependencies: { react: '^19.0.0' },
+      peerDependencies: { react: '^19.3.1' },
       devDependencies: { react: '^19.3.1' },
     });
     expect(renderPackage(s).get('vitest.config.ts')).toContain("environment: 'jsdom'");

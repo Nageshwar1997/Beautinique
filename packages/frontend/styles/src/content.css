@@ -1,0 +1,433 @@
+/**
+ * @beautinique/frontend-styles: rich text.
+ *
+ * <div class="rich-text"> around HTML we did not style ourselves: product descriptions, policies,
+ * static pages, help articles, review text. Works for plain semantic HTML and for what the Quill 2
+ * editor saves (its lists are <ol><li data-list="bullet|ordered|checked|unchecked">, indents are
+ * .ql-indent-1..8, plus .ql-align-*, .ql-size-*, .ql-font-*, code blocks and videos).
+ *
+ * Sizes are in em, so text-sm / text-lg on the same element scales everything. It sits in the
+ * components layer and uses :where(), so any utility on a child still wins.
+ */
+@layer components {
+  .rich-text {
+    color: var(--foreground);
+    line-height: 1.7;
+    overflow-wrap: break-word;
+
+    & :where(p, ul, ol, blockquote, pre, figure, table, hr, h1, h2, h3, h4, h5, h6, iframe) {
+      margin-block: 0;
+    }
+
+    & :where(.ql-code-block-container) {
+      margin-block: 0;
+    }
+
+    /* Flow spacing between blocks; more room above headings. */
+    & > :where(* + *) {
+      margin-block-start: 1em;
+    }
+
+    & > :where(* + h1, * + h2, * + h3) {
+      margin-block-start: 1.75em;
+    }
+
+    & > :where(h1, h2, h3, h4, h5, h6) + :where(*) {
+      margin-block-start: 0.5em;
+    }
+
+    & :where(h1, h2, h3, h4) {
+      font-family: var(--font-display);
+      font-weight: 500;
+      line-height: 1.25;
+    }
+
+    & :where(h5, h6) {
+      font-weight: 600;
+      line-height: 1.4;
+    }
+
+    & :where(h1) {
+      font-size: 2em;
+    }
+
+    & :where(h2) {
+      font-size: 1.5em;
+    }
+
+    & :where(h3) {
+      font-size: 1.25em;
+    }
+
+    & :where(h4) {
+      font-size: 1.125em;
+    }
+
+    & :where(h6) {
+      font-size: 0.875em;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      color: var(--foreground-muted);
+    }
+
+    & :where(a) {
+      color: var(--brand-text);
+      text-decoration: underline;
+      text-decoration-thickness: from-font;
+      text-underline-offset: 0.2em;
+    }
+
+    & :where(a:hover) {
+      text-decoration-thickness: 2px;
+    }
+
+    & :where(strong, b) {
+      font-weight: 600;
+    }
+
+    & :where(ul) {
+      list-style: disc;
+      padding-inline-start: 1.5em;
+    }
+
+    & :where(ol) {
+      list-style: decimal;
+      padding-inline-start: 1.5em;
+    }
+
+    & :where(li + li, li > ul, li > ol) {
+      margin-block-start: 0.375em;
+    }
+
+    & :where(li)::marker {
+      color: var(--foreground-subtle);
+    }
+
+    & :where(blockquote) {
+      border-inline-start: 3px solid var(--brand);
+      padding-inline-start: 1em;
+      color: var(--foreground-muted);
+      font-style: italic;
+    }
+
+    & :where(code) {
+      font-family: var(--font-mono);
+      font-size: 0.875em;
+      background-color: var(--surface-muted);
+      padding: 0.125em 0.375em;
+      border-radius: 0.25rem;
+    }
+
+    & :where(pre, .ql-code-block-container) {
+      font-family: var(--font-mono);
+      font-size: 0.875em;
+      line-height: 1.6;
+      background-color: var(--surface-muted);
+      padding: 1em;
+      border-radius: 0.5rem;
+      overflow-x: auto;
+      white-space: pre;
+    }
+
+    & :where(pre code) {
+      font-size: inherit;
+      background: none;
+      padding: 0;
+    }
+
+    & :where(img, video) {
+      max-width: 100%;
+      height: auto;
+      border-radius: 0.5rem;
+    }
+
+    & :where(iframe.ql-video) {
+      display: block;
+      width: 100%;
+      height: auto;
+      aspect-ratio: 16 / 9;
+      border: 0;
+      border-radius: 0.5rem;
+    }
+
+    & :where(figcaption) {
+      margin-block-start: 0.5em;
+      font-size: 0.875em;
+      color: var(--foreground-muted);
+    }
+
+    & :where(hr) {
+      border: 0;
+      border-block-start: 1px solid var(--border);
+    }
+
+    & :where(table) {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.9375em;
+      font-variant-numeric: tabular-nums;
+    }
+
+    & :where(th, td) {
+      border: 1px solid var(--border);
+      padding: 0.5em 0.75em;
+      text-align: start;
+      vertical-align: top;
+    }
+
+    & :where(th) {
+      background-color: var(--surface-muted);
+      font-weight: 600;
+    }
+
+    /* ---- Quill 2 formats ---- */
+
+    & :where(.ql-align-center) {
+      text-align: center;
+    }
+
+    & :where(.ql-align-right) {
+      text-align: right;
+    }
+
+    & :where(.ql-align-justify) {
+      text-align: justify;
+    }
+
+    & :where(.ql-size-small) {
+      font-size: 0.75em;
+    }
+
+    & :where(.ql-size-large) {
+      font-size: 1.5em;
+    }
+
+    & :where(.ql-size-huge) {
+      font-size: 2.5em;
+    }
+
+    & :where(.ql-font-serif) {
+      font-family: var(--font-display);
+    }
+
+    & :where(.ql-font-monospace) {
+      font-family: var(--font-mono);
+    }
+
+    /* Quill 2 lists: every list is an <ol>; the item says what it is and the marker sits in .ql-ui. */
+    & :where(ol:has(> li[data-list])) {
+      list-style: none;
+      padding-inline-start: 0;
+      counter-reset: ql-0 ql-1 ql-2 ql-3 ql-4 ql-5 ql-6 ql-7 ql-8;
+    }
+
+    & :where(li[data-list]) {
+      position: relative;
+      padding-inline-start: 1.5em;
+    }
+
+    & :where(li[data-list] > .ql-ui) {
+      position: absolute;
+      inset-inline-start: 0;
+      width: 1.2em;
+      text-align: end;
+      white-space: nowrap;
+      color: var(--foreground-subtle);
+    }
+
+    & :where(li[data-list='bullet'] > .ql-ui)::before {
+      content: '\2022';
+    }
+
+    & :where(li[data-list='checked'] > .ql-ui)::before {
+      content: '\2611';
+    }
+
+    & :where(li[data-list='unchecked'] > .ql-ui)::before {
+      content: '\2610';
+    }
+
+    /* Numbering per indent level: 1. a. i. and again; a shallower item restarts the deeper levels. */
+    & :where(li[data-list]) {
+      counter-set: ql-1 ql-2 ql-3 ql-4 ql-5 ql-6 ql-7 ql-8;
+    }
+
+    & :where(li[data-list='ordered']) {
+      counter-increment: ql-0;
+    }
+
+    & :where(li[data-list='ordered'] > .ql-ui)::before {
+      content: counter(ql-0, decimal) '.';
+    }
+
+    & :where(li[data-list].ql-indent-1) {
+      counter-set: ql-2 ql-3 ql-4 ql-5 ql-6 ql-7 ql-8;
+    }
+
+    & :where(li[data-list='ordered'].ql-indent-1) {
+      counter-increment: ql-1;
+    }
+
+    & :where(li[data-list='ordered'].ql-indent-1 > .ql-ui)::before {
+      content: counter(ql-1, lower-alpha) '.';
+    }
+
+    & :where(li[data-list].ql-indent-2) {
+      counter-set: ql-3 ql-4 ql-5 ql-6 ql-7 ql-8;
+    }
+
+    & :where(li[data-list='ordered'].ql-indent-2) {
+      counter-increment: ql-2;
+    }
+
+    & :where(li[data-list='ordered'].ql-indent-2 > .ql-ui)::before {
+      content: counter(ql-2, lower-roman) '.';
+    }
+
+    & :where(li[data-list].ql-indent-3) {
+      counter-set: ql-4 ql-5 ql-6 ql-7 ql-8;
+    }
+
+    & :where(li[data-list='ordered'].ql-indent-3) {
+      counter-increment: ql-3;
+    }
+
+    & :where(li[data-list='ordered'].ql-indent-3 > .ql-ui)::before {
+      content: counter(ql-3, decimal) '.';
+    }
+
+    & :where(li[data-list].ql-indent-4) {
+      counter-set: ql-5 ql-6 ql-7 ql-8;
+    }
+
+    & :where(li[data-list='ordered'].ql-indent-4) {
+      counter-increment: ql-4;
+    }
+
+    & :where(li[data-list='ordered'].ql-indent-4 > .ql-ui)::before {
+      content: counter(ql-4, lower-alpha) '.';
+    }
+
+    & :where(li[data-list].ql-indent-5) {
+      counter-set: ql-6 ql-7 ql-8;
+    }
+
+    & :where(li[data-list='ordered'].ql-indent-5) {
+      counter-increment: ql-5;
+    }
+
+    & :where(li[data-list='ordered'].ql-indent-5 > .ql-ui)::before {
+      content: counter(ql-5, lower-roman) '.';
+    }
+
+    & :where(li[data-list].ql-indent-6) {
+      counter-set: ql-7 ql-8;
+    }
+
+    & :where(li[data-list='ordered'].ql-indent-6) {
+      counter-increment: ql-6;
+    }
+
+    & :where(li[data-list='ordered'].ql-indent-6 > .ql-ui)::before {
+      content: counter(ql-6, decimal) '.';
+    }
+
+    & :where(li[data-list].ql-indent-7) {
+      counter-set: ql-8;
+    }
+
+    & :where(li[data-list='ordered'].ql-indent-7) {
+      counter-increment: ql-7;
+    }
+
+    & :where(li[data-list='ordered'].ql-indent-7 > .ql-ui)::before {
+      content: counter(ql-7, lower-alpha) '.';
+    }
+
+    & :where(li[data-list].ql-indent-8) {
+      counter-set: none;
+    }
+
+    & :where(li[data-list='ordered'].ql-indent-8) {
+      counter-increment: ql-8;
+    }
+
+    & :where(li[data-list='ordered'].ql-indent-8 > .ql-ui)::before {
+      content: counter(ql-8, lower-roman) '.';
+    }
+
+    /* Indents: 3em per level for blocks, plus the marker room for list items. */
+    & :where(.ql-indent-1) {
+      padding-inline-start: 3em;
+    }
+
+    & :where(.ql-indent-2) {
+      padding-inline-start: 6em;
+    }
+
+    & :where(.ql-indent-3) {
+      padding-inline-start: 9em;
+    }
+
+    & :where(.ql-indent-4) {
+      padding-inline-start: 12em;
+    }
+
+    & :where(.ql-indent-5) {
+      padding-inline-start: 15em;
+    }
+
+    & :where(.ql-indent-6) {
+      padding-inline-start: 18em;
+    }
+
+    & :where(.ql-indent-7) {
+      padding-inline-start: 21em;
+    }
+
+    & :where(.ql-indent-8) {
+      padding-inline-start: 24em;
+    }
+
+    & :where(li[data-list].ql-indent-1) {
+      padding-inline-start: 4.5em;
+    }
+
+    & :where(li[data-list].ql-indent-2) {
+      padding-inline-start: 7.5em;
+    }
+
+    & :where(li[data-list].ql-indent-3) {
+      padding-inline-start: 10.5em;
+    }
+
+    & :where(li[data-list].ql-indent-4) {
+      padding-inline-start: 13.5em;
+    }
+
+    & :where(li[data-list].ql-indent-5) {
+      padding-inline-start: 16.5em;
+    }
+
+    & :where(li[data-list].ql-indent-6) {
+      padding-inline-start: 19.5em;
+    }
+
+    & :where(li[data-list].ql-indent-7) {
+      padding-inline-start: 22.5em;
+    }
+
+    & :where(li[data-list].ql-indent-8) {
+      padding-inline-start: 25.5em;
+    }
+
+    & :where(li[data-list][class*='ql-indent-'] > .ql-ui) {
+      inset-inline-start: auto;
+      margin-inline-start: -1.5em;
+    }
+
+    & :where(.ql-code-block) {
+      white-space: pre;
+    }
+  }
+}

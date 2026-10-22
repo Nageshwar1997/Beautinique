@@ -1,0 +1,9 @@
+{
+  "extends": "../../configs/tsconfig/frontend.json",
+  "compilerOptions": {
+    "types": ["node", "vite/client"],
+    "rootDirs": [".", "./.react-router/types"]
+  },
+  "include": ["**/*", "**/.server/**/*", "**/.client/**/*", ".react-router/types/**/*"],
+  "exclude": ["build", "node_modules"]
+}

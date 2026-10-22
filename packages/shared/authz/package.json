@@ -1,0 +1,53 @@
+{
+  "name": "@beautinique/shared-authz",
+  "version": "1.0.0",
+  "description": "Beautinique permission matcher: scoped grants with location containment, validity windows, decisions with reasons and scope specs for query filters.",
+  "keywords": [
+    "beautinique",
+    "shared",
+    "authz",
+    "permissions",
+    "rbac",
+    "scopes"
+  ],
+  "author": "Nageshwar Pawar",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Nageshwar1997/Beautinique.git",
+    "directory": "packages/shared/authz"
+  },
+  "homepage": "https://github.com/Nageshwar1997/Beautinique/tree/main/packages/shared/authz#readme",
+  "bugs": {
+    "url": "https://github.com/Nageshwar1997/Beautinique/issues"
+  },
+  "type": "module",
+  "sideEffects": false,
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    },
+    "./package.json": "./package.json"
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsdown",
+    "typecheck": "tsc --noEmit",
+    "lint": "eslint .",
+    "test": "vitest run"
+  },
+  "engines": {
+    "node": ">=24"
+  },
+  "dependencies": {
+    "@beautinique/shared-contracts": "^1.0.0"
+  },
+  "publishConfig": {
+    "access": "public"
+  }
+}

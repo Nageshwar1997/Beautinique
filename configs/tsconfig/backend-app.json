@@ -1,0 +1,10 @@
+{
+  "$schema": "https://json.schemastore.org/tsconfig",
+  "extends": "./backend.json",
+  "compilerOptions": {
+    // backend/<app> code runs on Node 24 as TypeScript (type stripping): imports name the .ts file,
+    // and only erasable syntax (no enums or parameter properties)
+    "allowImportingTsExtensions": true,
+    "erasableSyntaxOnly": true
+  }
+}

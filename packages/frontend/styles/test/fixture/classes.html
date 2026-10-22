@@ -1,0 +1,45 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>classes fixture</title>
+  </head>
+  <body>
+    <!-- Every class the CSS tests look for. Nobody renders this page: css.test.mjs builds it with
+         Tailwind and checks the CSS, and Tailwind only has to see each class name once. Classes that
+         set the same property (touch-target and touch-target-lg, max-w-dialog and max-w-sheet) each
+         get their own element: no editor conflict warning. No sm:/md: variants, because the tests look
+         for the plain rules (.touch-target-lg), which a variant (sm:touch-target-lg) does not build.
+         Unused animations (pop, slide-*) are left out on purpose: their keyframes must not be in the
+         build. -->
+    <a href="#main" class="skip-link">Skip to content</a>
+    <header class="h-header pt-safe px-safe">header</header>
+    <main id="main" class="container-page max-w-page pb-bottom-nav">
+      <span class="tone-success bg-tone text-tone-foreground">tone</span>
+      <span class="tone-neutral bg-tone-subtle text-tone-subtle-foreground hover:bg-tone-hover"
+        >x</span
+      >
+      <span data-order-status="DELIVERED" class="bg-tone-subtle">Delivered</span>
+      <i class="bg-chart-1 text-gradient-foreground"></i>
+      <i class="bg-chart-8"></i>
+      <p class="animate-fade-in">anim</p>
+      <p class="animate-scale-out">anim</p>
+      <p class="animate-rise-in">anim</p>
+      <p class="animate-shake">anim</p>
+      <button class="touch-target focus-ring size-touch">x</button>
+      <button class="touch-target-lg focus-ring-inset">x</button>
+      <label class="focus-ring-within"><input /></label>
+      <footer class="surface-inverse"><a href="#main">inverse</a></footer>
+      <div class="skeleton aspect-banner"></div>
+      <div class="aspect-portrait"></div>
+      <div class="progress-indeterminate"></div>
+      <div class="marquee"></div>
+      <div class="pb-safe pl-safe pr-safe w-sidebar"></div>
+      <h1 class="text-brand-gradient">Glow</h1>
+      <section class="bg-brand-gradient max-w-dialog">banner</section>
+      <section class="max-w-sheet">sheet</section>
+      <article class="rich-text"><p>text</p></article>
+    </main>
+    <script type="module" src="./main.js"></script>
+  </body>
+</html>

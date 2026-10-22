@@ -6,9 +6,12 @@
     <title>Beautinique Styles</title>
     <script type="module" src="./main.js"></script>
   </head>
-  <body class="px-4 py-6 sm:px-8">
-    <header class="mb-6 flex flex-wrap items-center gap-3">
-      <h1 class="font-display mr-auto text-3xl font-medium">Beautinique styles</h1>
+  <body class="py-6">
+    <a href="#main" class="skip-link">Skip to content</a>
+    <header class="container-page mb-6 flex flex-wrap items-center gap-3">
+      <h1 class="font-display text-brand-gradient mr-auto text-3xl font-medium">
+        Beautinique styles
+      </h1>
       <button
         type="button"
         id="toggle"
@@ -16,9 +19,17 @@
       >
         Toggle theme
       </button>
+      <button
+        type="button"
+        id="contrast"
+        aria-pressed="false"
+        class="border-border-strong bg-surface rounded-full border px-4 py-1.5 text-sm"
+      >
+        High contrast
+      </button>
     </header>
 
-    <main class="space-y-10">
+    <main id="main" class="container-page space-y-10">
       <section aria-labelledby="fonts">
         <h2
           id="fonts"
@@ -85,6 +96,114 @@
           Semantic pairs
         </h2>
         <div class="flex flex-wrap gap-1.5" id="semantic"></div>
+      </section>
+
+      <section aria-labelledby="tones-h">
+        <h2
+          id="tones-h"
+          class="text-foreground-muted mb-3 text-sm font-semibold uppercase tracking-wider"
+        >
+          Tones and order status
+        </h2>
+        <div id="tones" class="flex flex-wrap gap-2"></div>
+        <div id="statuses" class="mt-3 flex flex-wrap gap-2"></div>
+      </section>
+
+      <section aria-labelledby="charts-h">
+        <h2
+          id="charts-h"
+          class="text-foreground-muted mb-3 text-sm font-semibold uppercase tracking-wider"
+        >
+          Chart colours
+        </h2>
+        <div id="charts" class="bg-surface flex h-40 items-end gap-3 rounded-2xl border p-4"></div>
+      </section>
+
+      <section aria-labelledby="motion-h">
+        <h2
+          id="motion-h"
+          class="text-foreground-muted mb-3 text-sm font-semibold uppercase tracking-wider"
+        >
+          Animations and loading
+        </h2>
+        <div class="bg-surface space-y-4 rounded-2xl border p-4">
+          <div id="anim-buttons" class="flex flex-wrap gap-2"></div>
+          <div
+            id="anim-box"
+            class="bg-brand-gradient grid h-20 w-48 place-items-center rounded-xl font-semibold"
+          >
+            Rose Glow
+          </div>
+          <div class="flex flex-wrap items-center gap-4" aria-busy="true" aria-label="Loading">
+            <div aria-hidden="true" class="skeleton size-16 rounded-xl"></div>
+            <div aria-hidden="true" class="space-y-2">
+              <div class="skeleton h-4 w-48 rounded"></div>
+              <div class="skeleton h-4 w-32 rounded"></div>
+            </div>
+          </div>
+          <div
+            role="progressbar"
+            aria-label="Waking the server"
+            class="progress-indeterminate text-brand bg-brand/20 h-1.5 rounded-full"
+          ></div>
+          <div class="bg-surface-muted overflow-hidden rounded-lg py-2" aria-label="Offers">
+            <div id="marquee" class="marquee gap-8 text-sm" tabindex="0"></div>
+          </div>
+        </div>
+      </section>
+
+      <section aria-labelledby="utils-h">
+        <h2
+          id="utils-h"
+          class="text-foreground-muted mb-3 text-sm font-semibold uppercase tracking-wider"
+        >
+          Utilities
+        </h2>
+        <div class="bg-surface flex flex-wrap items-center gap-6 rounded-2xl border p-4">
+          <button
+            type="button"
+            aria-label="Add to wishlist"
+            id="heart"
+            class="touch-target text-brand-text grid size-6 place-items-center rounded-full outline-hidden focus-ring"
+          >
+            ♥
+          </button>
+          <label
+            class="focus-ring-within bg-surface flex items-center gap-2 rounded-lg border px-3 py-2"
+          >
+            <span aria-hidden="true">⌕</span>
+            <input class="outline-hidden" placeholder="Search" aria-label="Search" />
+          </label>
+          <p>Press <kbd>Ctrl</kbd> + <kbd>K</kbd> to <mark>search</mark> orders.</p>
+          <span class="text-foreground-subtle text-sm"
+            >Tab here: the heart has a 44px hit area and a focus ring.</span
+          >
+        </div>
+        <footer
+          id="inverse"
+          class="surface-inverse mt-4 flex flex-wrap items-center gap-4 rounded-2xl p-4"
+        >
+          <span>surface-inverse strip</span>
+          <a href="#inverse" class="underline"
+            >Tab to this link: its focus ring shows on the strip</a
+          >
+          <button
+            type="button"
+            class="tone-brand bg-tone text-tone-foreground rounded-lg px-3 py-1.5"
+          >
+            Button
+          </button>
+        </footer>
+      </section>
+
+      <section aria-labelledby="rich-h">
+        <h2
+          id="rich-h"
+          class="text-foreground-muted mb-3 text-sm font-semibold uppercase tracking-wider"
+        >
+          Rich text (Quill 2 output)
+        </h2>
+        <article id="rich" class="rich-text bg-surface max-w-3xl rounded-2xl border p-6"></article>
       </section>
 
       <section aria-labelledby="palette-h">

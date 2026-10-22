@@ -1,6 +1,6 @@
 # RULES — BQ
 
-> **Status:** v1.3 (2026-10-20). Ye niyam Beautinique ke har code, doc aur deploy pe lagu hain. [PRD.md](PRD.md) batata hai **kya** banana hai, [ARCHITECTURE.md](ARCHITECTURE.md) batata hai **kaise**, aur ye file batati hai ki **kin niyamon ke saath**. Koi rule todna ho to pehle is file me badlav aur change log entry.
+> **Status:** v1.4 (2026-10-20). Ye niyam Beautinique ke har code, doc aur deploy pe lagu hain. [PRD.md](PRD.md) batata hai **kya** banana hai, [ARCHITECTURE.md](ARCHITECTURE.md) batata hai **kaise**, aur ye file batati hai ki **kin niyamon ke saath**. Koi rule todna ho to pehle is file me badlav aur change log entry.
 
 ## 1. Kaam karne ke niyam
 
@@ -27,7 +27,7 @@
 ## 3. Code: sabke liye
 
 1. **TypeScript strict.** `any` nahi; `unknown` + zod parse.
-2. **Bahar se aane wala har data zod se validate** (API input, env, webhooks, files, events).
+2. **Bahar se aane wala har data zod se validate** (API input, env, webhooks, files, events). zod hamesha `@beautinique/shared-zod` se aur naam se import hota hai (`import { object, string, gstinZod } ...`), `z.` nahi; seedha `zod` sirf us package ke andar (ESLint rokta hai). Hamare schemas ke naam `Zod` pe khatam (`emailZod`); `enum` ko `enum as zodEnum`.
 3. **Config sirf config module se.** `process.env` config module ke bahar nahi padhna (ESLint rule).
 4. **Kuch bhi hard-coded nahi jo data hai:** states, districts, pincodes, warehouses, hubs, roles, permissions, rates (GST, TCS, TDS, fees), legal limits. Ye data ya settings me rehte hain (no-hardcoded-geo lint).
 5. **Role ke naam se comparison nahi** (`role === 'MASTER'` jaisa). Hamesha permission + scope se check.
@@ -100,9 +100,10 @@
 
 ## Change log
 
-| Version | Date | Badlav |
-|---|---|---|
-| v1.0 | 2026-10-19 | Pehla version: kaam, git, code, backend, frontend, testing, security, docs aur AI assistant ke niyam. |
-| v1.1 | 2026-10-20 | Apps sirf English; INR aur dates `en-IN`. |
-| v1.2 | 2026-10-20 | Icons rule: `workspace:*` ki jagah npm workspaces ka local link. |
-| v1.3 | 2026-10-20 | §2: `main` default branch; flow `main` → `prerelease` → `release`; package release ka apwaad aur back-merge; Renovate `main` pe. |
+| Version | Date       | Badlav                                                                                                                           |
+| ------- | ---------- | -------------------------------------------------------------------------------------------------------------------------------- |
+| v1.0    | 2026-10-19 | Pehla version: kaam, git, code, backend, frontend, testing, security, docs aur AI assistant ke niyam.                            |
+| v1.1    | 2026-10-20 | Apps sirf English; INR aur dates `en-IN`.                                                                                        |
+| v1.2    | 2026-10-20 | Icons rule: `workspace:*` ki jagah npm workspaces ka local link.                                                                 |
+| v1.3    | 2026-10-20 | §2: `main` default branch; flow `main` → `prerelease` → `release`; package release ka apwaad aur back-merge; Renovate `main` pe. |
+| v1.4    | 2026-10-20 | §3.2: zod sirf shared-zod se, named imports, schemas ke naam `...Zod`.                                                           |

@@ -1,6 +1,6 @@
 # TASKS — BQ
 
-> **Status:** v1.6 (2026-10-20). Poore project ki task list, [ARCHITECTURE.md](ARCHITECTURE.md) §16 ke phases ke hisaab se. Har task "done" tabhi jab [RULES.md](RULES.md) §1.5 ki Definition of Done poori ho.
+> **Status:** v1.22 (2026-10-22). Poore project ki task list, [ARCHITECTURE.md](ARCHITECTURE.md) §16 ke phases ke hisaab se. Har task "done" tabhi jab [RULES.md](RULES.md) §1.5 ki Definition of Done poori ho.
 
 **Kaise use karein:**
 - `[ ]` baaki, `[~]` chal raha hai, `[x]` done.
@@ -34,23 +34,28 @@
 
 ## Phase 0. Monorepo + CI (1–2 hafte)
 
-- [~] T0.1 Packages naye bante hain, `packages/<shared|frontend|backend>/<name>` me (`@beautinique/<category>-<name>`). `BQ-Packages` sirf reference hai, copy ya subtree nahi (owner ka faisla, 2026-10-19). Pehla package `frontend-styles` 2.0.0 bana hai (publish baaki); agla: styles ke utilities, animations aur component CSS.
-- [ ] T0.2 4 apps → `frontend/` (customer, seller, admin, master).
-- [ ] T0.3 Gateway aur services → `backend/` (port sources ki tarah).
+- [~] T0.1 Packages naye bante hain, `packages/<shared|frontend|backend>/<name>` me (`@beautinique/<category>-<name>`). `BQ-Packages` sirf reference hai, copy ya subtree nahi (owner ka faisla, 2026-10-19). Pehla package `frontend-styles` 2.0.0 poora hai (tokens, tones, order status, charts, high contrast, print, animations, utilities, rich text). Saare packages **public** hain, par **abhi publish nahi karna, zaroorat pe hi (owner ka faisla, 2026-10-21)**: saare apps isi monorepo se package lete hain (npm workspaces), live deploy pe bhi. Publish tabhi jab repo ke bahar kisi ko package chahiye. (npm pe; monorepo me apne aap jude rehte hain). Neev ke baad baaki packages **app ki zaroorat ke saath** bante hain, pehle se nahi: jo cheez do apps ko chahiye, ya saaf taur pe sabki hai (login, API client, layout), wo turant package me jati hai, app me copy nahi hoti. Andaazan order (dependency pehle):
+  1. **Neev (ho gaya, 2026-10-20):** `shared-zod`, `shared-utils`, `shared-contracts`, `shared-authz`.
+  2. **Backend (Phase 1 ke saath):** `backend-server-kit` (1.0.0 bana, 2026-10-20), `backend-server-mongo`, `backend-server-queue`, `backend-server-crypto`, `backend-storage`.
+  3. **Frontend (Phase 6 ke saath):** `frontend-test-utils`, `frontend-icons`, `frontend-hooks`, `frontend-components`, `frontend-stores`, `frontend-api-client`, `frontend-authz`, `frontend-forms`, `frontend-app-shell`, `frontend-auth-ui`, `frontend-data-table`, `frontend-review-screens`, `frontend-maps`, `frontend-pwa-kit`, `frontend-config-vite`.
+  4. **Feature packages (jab app ko chahiye):** `frontend-quill`, `frontend-tryon`, `frontend-tryon-assets`.
+  Neev ke baad backend aur frontend ek saath chal sakte hain (do log ho to ek-ek track).
+- [ ] T0.2 4 apps → `frontend/` (customer, seller, admin, master). (Har app `npm run create -- --type app` se banta hai: SPA, customer SSR, delivery PWA; [packages/README.md](packages/README.md) §3.1. Abhi koi app bana nahi.)
+- [ ] T0.3 Gateway aur services → `backend/` (port sources ki tarah). (Har deployable aur bundle `npm run create -- --type backend` se banta hai, §3.2. Abhi koi bana nahi.)
 - [ ] T0.4 Media-service ka nested `.git` aur `.kilo` worktree hatana.
 - [ ] T0.5 Turborepo. (npm workspaces, root scripts, shared configs aur package CLI ho gaye: [packages/README.md](packages/README.md).)
-- [ ] T0.6 `ci.yml`: build (affected) aur gitleaks baaki. (Format, lint, typecheck, test, packages verify aur npm audit wala pehla `ci.yml`, plus `release.yml`, ho gaye.)
+- [ ] T0.6 `ci.yml`: build (affected) baaki. (Format, lint, typecheck, test, packages verify aur npm audit wala pehla `ci.yml`, plus `release.yml`, ho gaye. 2026-10-21 gitleaks ho gaya: required `check` job ka pehla step, gitleaks 8.30.1 binary (version + SHA-256 pinned, koi action/licence nahi) har PR aur `main`/`prerelease`/`release` push pe tested commit ki poori history `--redact` ke saath scan karta hai, finding = job fail; `.gitleaks.toml` = default rules + password wale connection URL (Mongo, Valkey, Cloudinary) ka rule, path allow-list koi nahi kyunki repo ke fake values kisi rule pe nahi aate; poori history ka local scan: 0 findings; Ubuntu container me ci.yml ka step chala ke dekha: planted fake secret (tip, PR merge commit, add ke baad delete) fail, asli tree pass. GitHub ka pehla run (2026-10-21) `server-mongo` test ke nakli password wale Mongo URL (host `127.0.0.1:1`, jahan kuch nahi chalta) pe fail hua (commit `e533ace`, push ho chuka, history badal nahi sakte). Wo test sirf ye dekhta hai ki password error me na chhape, isliye ye ek finding fingerprint se `.gitleaksignore` me hai, wajah ke saath (poora path allow-list nahi). Local gitleaks 8.30.1 se poori history: no leaks; asli jaisa password URL ab bhi pakda jaata hai.)
 - [x] T0.7 Branches `prerelease` aur `release`, branch protection, required checks. (2026-10-20: branches ban gayi, CI teeno pe green; ruleset `protected-branches` (`main`, `prerelease`, `release`: delete aur force push band, PR + 1 approval, `check` required aur up to date, bypass sirf Repository admin); tag ruleset `release-tags` (`@beautinique/*` tags sirf owner bana, badal ya mita sakta hai); environment `npm` sirf `release` branch se, owner ki approval ke saath.) Packages bhi sirf `release` branch se publish hote hain (package CLI aur `release.yml` yahi maante hain).
-- [ ] T0.8 `infra/docker-compose.yml` ka `infra` profile: Mongo replica set, Valkey (Render jaisi limits), Mailpit. **Docker Lesson 2.**
-- [ ] T0.9 Har deployable ka `.env.example` aur zod env schema.
+- [x] T0.8 `infra/docker-compose.yml` ka `infra` profile: Mongo replica set, Valkey (Render jaisi limits), Mailpit. **Docker Lesson 2.** (2026-10-21: `mongo:8.0.34` replica set `rs0`, `valkey/valkey:8.1.10` (25 MB, noeviction, 50 clients, disk pe kuch nahi), `axllent/mailpit:v1.31.6`; ports sirf `127.0.0.1`; `npm run infra:up/down/reset/logs`. Laptop pe chala ke dekha: transaction commit/abort, Valkey ka OOM error, Mailpit inbox me email, restart ke baad Mongo data bacha aur Valkey khaali. Notes: [infra/README.md](../infra/README.md).)
+- [~] T0.9 Har deployable ka `.env.example` aur zod env schema. (Generator har deployable ko `src/config.ts` (zod, `<NAME>__*`) aur `.env.example` deta hai: port, log level, gateway ke upstream URLs. Provider keys apne feature ke saath judti hain.)
 
 **Milestone 0:** CI green, saare package tests chal rahe hain, `infra:up` se local infra chalta hai.
 
 ## Phase 1. Server kit + contracts (1–2 hafte)
 
-- [ ] T1.1 `server-kit`: AppError, response envelope, logger (redaction), Express app factory, bootstrap/shutdown.
-- [ ] T1.2 `server-mongo`: `withTransaction()` (reply commit ke baad) + regression test.
-- [ ] T1.3 `server-queue`: outbox relay (`poll` aur `changestream`), inbox dedupe, job schedulers, `bq:epoch` watchdog aur Redis wipe recovery.
+- [~] T1.1 `server-kit`: AppError, response envelope, logger (redaction), Express app factory, bootstrap/shutdown. (2026-10-20: `@beautinique/backend-server-kit` 1.0.0: AppError + contracts error body, request id, access log, redacting logger, `createApp`, `/health` + `/ready`, `loadConfig` (namespaced, `strip`), `startServer` graceful stop; 15 tests, 25/25 mutations. Success envelope helper baaki.)
+- [x] T1.2 `server-mongo`: `withTransaction()` (reply commit ke baad) + regression test. (2026-10-21: `@beautinique/backend-server-mongo` 1.0.0, public, publish nahi; native `mongodb` 7.7 driver (owner ka faisla), services isi se import karti hain (ESLint seedha `mongodb` rokta hai); server-kit peer dependency. `connectMongo` (pool 5, majority, primary, `ignoreUndefined`, replica set check, saaf error bina URI ke), `ready` (2 s ping), `withTransaction` (snapshot + majority, value commit ke baad, har attempt ka naya session, transient pe 10–200 ms backoff ke saath dobara, unknown commit result pe sirf commit dobara, `timeoutMs` 10 s ke baad 503 `TransactionTimeoutError`, network error se phenka gaya session server pe kill), `ParallelTransactionError` (queries saath me wire pe, ya bhula `await` jo commit tak dikhe; ESLint `withTransaction` ke andar `Promise.all/allSettled/any/race` rokta hai), `TransactionAbortedError` (work ne aisi query ka error pakad ke aage kaam kiya jise retry nahi badalta: turant 500, 10 s retry nahi). 36 tests asli local replica set pe (Express route: 201 sirf commit ke baad, fail/parallel pe 500 aur kuch save nahi; fail points se commit failures; late `Promise.all` branch kabhi save nahi); 55 mutations me 50 pakde (bache 5: 3 equivalent, 1 sirf timing ≤200 ms, aur lone server pe client band hona haath se check kiya). Do independent review (har baar reviewers + skeptic, asli Mongo pe probe): pehle me 7, doosre me fixes ki 5 asli kamiyan; sab theek. CI aur `release.yml` tests se pehle compose ka mongo chalate hain; GitHub pe abhi chala nahi.)
+- [~] T1.3 `server-queue`: outbox relay (`poll` aur `changestream`), inbox dedupe, job schedulers, `bq:epoch` watchdog aur Redis wipe recovery. (2026-10-21 part 1: `@beautinique/backend-server-queue` 1.0.0 (public, publish nahi; bullmq 6.4.0 + ioredis 6.0.0, owner: latest). `connectRedis` (shared client, `noeviction` check, memory/connections log bina URL, `connectionLimit` ke 80% pe warning, jaldi fail + khud reconnect), `writeEvent` (sirf `withTransaction` ke andar, envelope contract se check, `platform_outbox`), `ensureOutboxIndexes` (relayed 72 ghante), `tryLease` (`platform_locks`, MongoDB ki ghadi `$$NOW`), `startRelay` (`poll`/`changestream` + sweep, lease ke peeche, order me, batches, `jobId = <eventId>@<subscriber>`, `/ready` lag 30 s). 28 tests asli Mongo + Valkey pe (Redis outage TCP proxy se); 41 mutations me 36 pakde (bache 5: 4 equivalent, 1 timer unref jo process ke andar test nahi hota). Baaki: part 2 consumer/inbox dedupe, retries, DLQ; part 3 schedulers, `bq:epoch` watchdog, Redis wipe recovery. CI aur `release.yml` tests se pehle `mongo` ke saath `valkey` bhi chalate hain (pehle push pe ye chhoot gaya tha, tests Redis na milne pe fail hue). 2026-10-22 part 2: consumer: `subscribe` (handler event contract se typed), `startConsumer` (BullMQ worker, apne 2 connection; envelope contract se check; handler + `platform_processed_events` nishaan ek transaction me, dobara aaya event skip; retry job ki backoff se, har fail try rollback; aakhri try ke baad ya turant jab retry bekaar ho (anjaan type/version, toota contract, `ParallelTransactionError`, `TransactionAbortedError`) `platform_dead_letters` me, 14 din), `ensureConsumerIndexes` (nishaan 7 din). Owner ka faisla: job me poora envelope (max 16 KB, `writeEvent` bade event pe error), kyunki consumer sirf apna DB padh sakta hai. 37 tests asli Mongo + Valkey pe (consumer ka alag DB); 62 mutations me 55 pakde (bache 7: 4 equivalent, timer unref process ke andar test nahi hota, worker ka reconnect option sirf reconnect pe dikhta, concurrency 1 ek policy). Baaki: part 3 job schedulers, `bq:epoch` watchdog, Redis wipe recovery, dead letters redrive.)
 - [ ] T1.4 `server-crypto`: AES-GCM field encryption, HMAC blind index.
 - [ ] T1.5 `contracts`: routes, events, permissions, error codes, area-setting keys; OpenAPI, typed client aur gateway metadata ka codegen.
 - [ ] T1.6 `authz` matcher (scopes, containment) + `StoragePort` interface.
@@ -60,18 +65,18 @@
 
 ## Phase 2. Gateway (1 hafta)
 
-- [ ] T2.1 Prefix routing table, app registry (11 apps), Origin aur `x-forwarded-host` → app.
+- [ ] T2.1 Prefix routing table, app registry (11 apps), Origin aur `x-forwarded-host` → app. (Generator ka gateway: `X-BQ-App` check, contracts manifest se route aur owner tak stream, `..` path ka bachav. Origin aur `x-forwarded-host` → app baaki.)
 - [ ] T2.2 JWKS verification, per-app cookies, passport token, origin secret, `clientIp()`.
 - [ ] T2.3 Redis rate limits (classes), cache headers, helmet, request-id, Sentry.
 - [ ] T2.4 `/health` (shallow) aur `/ready` (deep), `/status`.
-- [ ] T2.5 `backend/bundle`: paancho deployables ek process me, boot pe release steps.
+- [ ] T2.5 `backend/bundle`: paancho deployables ek process me, boot pe release steps. (Generator ka bundle saare deployables chalata hai aur config keys env se hatata hai; boot ke release steps baaki.)
 - [ ] T2.6 Purani cheezein hatana: facades, `METHODS_AND_PATHS`, MASTER bypass, wake-up fan-out, keep-alive workflow.
 
 **Milestone 2:** bundle mode laptop pe chalta hai, gateway sahi deployable tak route karta hai.
 
 ## Phase 3. bq-identity (2–3 hafte)
 
-- [ ] T3.1 Users, credentials (argon2id), phone OTP, email + password, TOTP, Google OAuth (PKCE).
+- [ ] T3.1 Users, credentials (argon2id), email OTP, email + password, TOTP, Google OAuth (PKCE).
 - [ ] T3.2 Sessions, refresh rotation + reuse detection, ES256 + JWKS, My Devices.
 - [ ] T3.3 Apps, permission catalogue, 79 roles ka seed, scoped grants, invitations, applicant grants.
 - [ ] T3.4 API clients (Seller API Integration, Affiliate Partner).
@@ -96,8 +101,8 @@
 
 ## Phase 5. Notify + Payments (2 hafte)
 
-- [ ] T5.1 Notify: Brevo HTTPS email, SMS/WhatsApp sandbox, web push, in-app inbox.
-- [ ] T5.2 English templates, preferences aur consent, delivery log, OTP fast lane.
+- [ ] T5.1 Notify: Brevo HTTPS email, web push, in-app inbox (SMS aur WhatsApp nahi).
+- [ ] T5.2 English templates, preferences aur consent, delivery log, OTP fast lane, Brevo ka daily budget (300/din, ARCH §7.1).
 - [ ] T5.3 Payments: skeleton, fake driver, `razorpay:simulate` webhook CLI.
 - [ ] T5.4 bq-notify ki Dockerfile. **Docker Lesson 3.**
 
@@ -181,12 +186,28 @@
 
 ## Change log
 
-| Version | Date | Badlav |
-|---|---|---|
-| v1.0 | 2026-10-19 | Pehla version: owner ke kaam, docs, Phase 0–11 (milestones aur Docker lessons ke saath), aur deploy pe verify list. |
-| v1.1 | 2026-10-20 | Apps sirf English: T5.2, T6.1 aur T6.2 badle. |
-| v1.2 | 2026-10-20 | T0.5 aur T0.6 ka pehla hissa ho gaya (workspaces, package CLI, ci.yml, release.yml). |
-| v1.3 | 2026-10-20 | T0.1: packages naye bante hain (`BQ-Packages` sirf reference). T0.7: packages bhi `release` branch se. |
-| v1.4 | 2026-10-20 | T0.7: `prerelease` aur `release` branches ban gayi; protection baaki. |
-| v1.5 | 2026-10-20 | T0.7: `main` default branch wala flow; ruleset teeno branches pe. |
-| v1.6 | 2026-10-20 | T0.7 done: rulesets, tag ruleset aur `npm` environment lag gaye. |
+| Version | Date       | Badlav                                                                                                               |
+| ------- | ---------- | -------------------------------------------------------------------------------------------------------------------- |
+| v1.0    | 2026-10-19 | Pehla version: owner ke kaam, docs, Phase 0–11 (milestones aur Docker lessons ke saath), aur deploy pe verify list.  |
+| v1.1    | 2026-10-20 | Apps sirf English: T5.2, T6.1 aur T6.2 badle.                                                                        |
+| v1.2    | 2026-10-20 | T0.5 aur T0.6 ka pehla hissa ho gaya (workspaces, package CLI, ci.yml, release.yml).                                 |
+| v1.3    | 2026-10-20 | T0.1: packages naye bante hain (`BQ-Packages` sirf reference). T0.7: packages bhi `release` branch se.               |
+| v1.4    | 2026-10-20 | T0.7: `prerelease` aur `release` branches ban gayi; protection baaki.                                                |
+| v1.5    | 2026-10-20 | T0.7: `main` default branch wala flow; ruleset teeno branches pe.                                                    |
+| v1.6    | 2026-10-20 | T0.7 done: rulesets, tag ruleset aur `npm` environment lag gaye.                                                     |
+| v1.7    | 2026-10-20 | T0.1: `frontend-styles` poora (animations, utilities, rich text, tones, charts, high contrast, print).               |
+| v1.8    | 2026-10-20 | T0.1: packages ki list aur order (neev, backend, frontend, feature), public/private ke saath.                        |
+| v1.9    | 2026-10-20 | T0.1 neev ke 4 packages bane: shared-zod, shared-utils, shared-contracts, shared-authz.                              |
+| v1.10   | 2026-10-20 | T0.1: saare packages public; neev ke baad packages app ki zaroorat ke saath.                                         |
+| v1.11   | 2026-10-20 | `backend-server-kit` bana (T1.1 ka zyada hissa); app aur backend generators (T0.2, T0.3, T0.9, T2.1, T2.5 ke notes). |
+| v1.12 | 2026-10-20 | OTP sirf email se (T3.1, T5.2). |
+| v1.13 | 2026-10-20 | T5.1: SMS aur WhatsApp channel hate. |
+| v1.14 | 2026-10-21 | T0.1: packages public rahenge, par abhi publish/republish nahi, zaroorat pe hi. |
+| v1.15 | 2026-10-21 | T0.8 done: local infra (Mongo replica set, Valkey, Mailpit), Docker Lesson 2. |
+| v1.16 | 2026-10-21 | T0.6: gitleaks secret scan CI ke `check` job me; sirf affected build baaki. |
+| v1.17 | 2026-10-21 | T1.2 done: `backend-server-mongo` (withTransaction, reply commit ke baad). |
+| v1.18 | 2026-10-21 | T1.3 part 1: Redis connection, outbox writer, relay (poll + changestream, lease). |
+| v1.19 | 2026-10-21 | T0.6: GitHub pe pehli gitleaks finding (nakli test URL) `.gitleaksignore` se, wajah ke saath. |
+| v1.20 | 2026-10-21 | T0.6: docs me password jaisa URL nahi (v1.19 ke note ne khud gitleaks fail karaya); `3fdfb49` ki 3 findings ignore. |
+| v1.21 | 2026-10-21 | T1.3: CI aur release me Valkey bhi (server-queue ke tests). |
+| v1.22 | 2026-10-22 | T1.3 part 2: consumer, inbox dedupe, retries, dead letters; job me poora envelope. |

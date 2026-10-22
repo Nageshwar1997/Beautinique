@@ -1,6 +1,6 @@
 # Packages — banana, publish aur republish
 
-> **Status:** v1.2 (2026-10-20). `packages/` ke saare npm packages ka kaam is repo ke apne CLI (`scripts/packages/`) se hota hai. Ye guide batati hai ki kaunsa command kab chalana hai aur andar kya hota hai.
+> **Status:** v1.7 (2026-10-21). **Abhi publish/republish nahi (owner ka faisla, 2026-10-21):** apps isi monorepo se package lete hain (npm workspaces), live deploy pe bhi. Publish sirf zaroorat pe; packages public hi rahenge. `packages/` ke saare npm packages ka kaam, aur naye frontend apps aur backend apps banana, is repo ke apne CLI (`scripts/packages/`) se hota hai. Ye guide batati hai ki kaunsa command kab chalana hai aur andar kya hota hai.
 
 ## 1. Packages kahan aur kis naam se
 
@@ -10,6 +10,8 @@
 - **public** package npm pe jata hai (`publishConfig.access: "public"`, LICENSE ke saath). **private** (`"private": true`) sirf monorepo ke andar.
 - Internal packages normal semver range se lete hain (`"@beautinique/shared-x": "^2.0.0"`). npm workspaces local version link kar deta hai. `workspace:*` npm me nahi chalta.
 - Naye TypeScript packages **sirf ESM** hain, tsdown se build hote hain (`dist/index.js` + `dist/index.d.ts`). TypeScript 6.0 (typescript-eslint abhi TS 7 support nahi karta).
+- **Bahar ki library pe peer dependency** (zod, react, tailwindcss, vite ...) devDependencies me bhi **bilkul same range** ke saath hoti hai: package wahi vaada karta hai jis version pe test hota hai. CLI har run pe ye check karta hai. Apne workspace packages is niyam se bahar hain (unki ranges CLI sambhalta hai).
+- Jis library ke types package ki public types me aate hain (jaise contracts me zod), wo `peerDependencies` me honi chahiye; warna tsdown uske types `dist` me copy kar deta hai. `npm run verify` aisi copy pe fail hota hai.
 
 ## 2. Commands
 
@@ -18,10 +20,10 @@
 | `npm run login` | npm login (browser me). Session 2 ghante chalta hai; publish pe 2FA har baar. Pehle se logged in ho to kuch nahi karta. |
 | `npm run logout` | Logout; npm server pe bhi session khatam. |
 | `npm run status` | Har package: category, local version, npm version, status (published / waiting / new / behind / private), aur login ki halat. |
-| `npm run create` | Naya package banata hai, `npm install` se jodta hai aur uske saare checks chalata hai. |
+| `npm run create` | Pehla sawal: Package, Frontend app ya Backend app (`npm run create:app` / `create:backend` seedhe). Phir use banata hai, `npm install` se jodta hai aur uske saare checks chalata hai. |
 | `npm run publish` | Jinka package.json version npm pe nahi hai (naye packages, ya republish ke baad bache hue) unhe publish karta hai. |
 | `npm run republish` | Published packages ka naya version: bump, dependents, ranges, checks, phir publish (laptop) ya GitHub ke liye taiyari. |
-| `npm run verify` | Publish wale saare checks, bina publish ke. Chune packages ki internal dependencies pehle build hoti hain, isliye fresh clone pe bhi chalta hai. CI isse `--all` ke saath chalata hai. |
+| `npm run verify` | Publish wale saare checks, bina publish ke. Chune packages ki internal dependencies pehle build hoti hain, isliye fresh clone pe bhi chalta hai. CI isse `--all` ke saath chalata hai. Package tests chalte hain, isliye backend packages (jaise `backend-server-mongo`) ke liye pehle `npm run infra:up`. |
 | `npm run build` | Saare packages build, dependencies pehle (devDependencies bhi). Fresh clone ke baad `npm install` ke turant baad chalao. |
 
 Har command `-- --help` se apne flags batata hai (`npm run publish -- --help`); galat flag pe command ruk jata hai. Flags `--` ke baad do; `npm run publish --dry-run` (bina `--`) bhi samjha jata hai.
@@ -36,6 +38,25 @@ Sawal: category → kind (TypeScript library / React library / CSS package; Reac
 - Har TypeScript package ke saath ek pehla test (`test/index.test.ts`) aata hai; `npm test` bina test ke pass nahi hota.
 - Bana package turant build, typecheck, lint, test aur publish checks pass karta hai (CLI ke tests ye har kind ke liye sach me chala ke dekhte hain).
 - Bina sawal: `npm run create -- --yes --category shared --kind ts --name date-format --description "..." --keywords dates --visibility public --extends none`.
+
+### 3.1 Frontend app (`--type app`)
+
+- Sirf 11 apps me se (contracts `APPS`); naya app pehle `packages/shared/contracts/src/platform.ts` me judta hai. Bana hua app list me disabled dikhta hai.
+- Folder `frontend/<app>`, naam simple (`seller`), `private: true`: apps npm package nahi hain.
+- Teen tarah (ARCHITECTURE §9.1): customer = React Router framework mode (SSR), delivery = PWA, baaki = Vite + React SPA (Vite ke react-ts jaisa layout: `tsconfig.app.json` + `tsconfig.node.json`).
+- Dev ports 3001 (customer) se 3011 (creator), `APPS` ke order me. `/api` local gateway (8080) pe jata hai, jaise Vercel rewrite.
+- Bina sawal: `npm run create -- --yes --type app --app seller`.
+
+### 3.2 Backend app (`--type backend`)
+
+- Sirf 5 deployables (contracts `DEPLOYABLES`): `gateway`, `identity`, `payments`, `notify`, `core`, aur `bundle`. Naya business feature naya deployable nahi, Core ka module hai (ARCHITECTURE §4).
+- Folder `backend/<name>`, naam simple, `private: true`. Express 5 + `@beautinique/backend-server-kit` (errors, health, logs, config, shutdown har service me copy nahi hote).
+- Har deployable: `src/config.ts` (`<NAME>__*` env vars, zod; ESLint `process.env` sirf yahan allow karta hai), `src/service.ts` (`readConfig` + `start`), `src/server.ts` (split mode), `.env.example`, tests. Gateway me `X-BQ-App` check, contracts manifest se route aur owner tak stream; Core me `src/modules/`.
+- Ports: gateway 8080, identity 8081, payments 8082, notify 8083, core 8084.
+- `bundle` gateway ke baad hi banta hai. Wo saare deployables ek process me chalata hai: internal wale `127.0.0.1` ke khaali ports pe, gateway `PORT` pe. Baad me naya deployable banao to CLI use bundle me khud jod deta hai (`src/deployables.ts` + dependency).
+- Node 24 TypeScript seedha chalata hai (`node --watch src/server.ts`, tsx nahi); production `tsdown` ka `dist/`. Bundle dev aur tests deployables ko source se chalate hain (export condition `beautinique-source`).
+- Dockerfile abhi nahi: Docker Lesson 3 me.
+- Bina sawal: `npm run create -- --yes --type backend --deployable identity`.
 
 ## 4. Publish aur republish
 
@@ -74,7 +95,7 @@ Kisi package ka naya version agar kisi published dependent ki range tod de, to C
 
 ## 5. CI
 
-`.github/workflows/ci.yml` `main`, `prerelease` aur `release` pe push aur har PR pe: `npm ci`, `npm run build`, format check, lint, typecheck, tests (CLI ke 70+ tests, fake npm registry ke saath asli publish aur GitHub release flows bhi), `npm run verify -- --all`, `npm audit`. npm 12.2.0 pin hai (Node 24 ke saath npm 11 aata hai).
+`.github/workflows/ci.yml` `main`, `prerelease` aur `release` pe push aur har PR pe: `npm ci`, `npm run build`, format check, lint, typecheck, tests (CLI ke 70+ tests, fake npm registry ke saath asli publish aur GitHub release flows bhi), `npm run verify -- --all`, `npm audit`. Tests se pehle `infra/docker-compose.yml` ke `mongo` aur `valkey` chalte hain (`release.yml` me bhi, publish ke checks se pehle). npm 12.2.0 pin hai (Node 24 ke saath npm 11 aata hai).
 
 ## 6. CLI ka code
 
@@ -89,3 +110,8 @@ Kisi package ka naya version agar kisi published dependent ki range tod de, to C
 | v1.0 | 2026-10-20 | Pehla version: create, publish, republish, login, logout, status, verify, build; GitHub release workflow. |
 | v1.1 | 2026-10-20 | Review ke baad: release sirf `release` branch se, jaanch sawalon se pehle, behind/taken versions pe rok, peer/re-export/prerelease cascade, npm jaisa install check, Ctrl+C aur login-expire pe files wapas, dry run naye versions ke saath, release workflow build + publish jobs me (tag check), CI me build step, sab commands pe `--help`, changelog me markdown escape. |
 | v1.2 | 2026-10-20 | Release ke baad `release` → `main` back-merge; release commit ka push ruleset bypass se. |
+| v1.3 | 2026-10-20 | Peer aur dev range same (CLI check), aur dist me copy hue dependency types pe verify fail. |
+| v1.4 | 2026-10-20 | `npm run create` ab frontend apps (§3.1) aur backend apps (§3.2) bhi banata hai. |
+| v1.5 | 2026-10-21 | Abhi publish/republish nahi, zaroorat pe; packages public hi. |
+| v1.6 | 2026-10-21 | verify/publish ke tests ko Mongo chahiye (`infra:up`); CI aur release Mongo chalate hain. |
+| v1.7 | 2026-10-21 | CI aur release tests se pehle `valkey` bhi chalate hain. |
