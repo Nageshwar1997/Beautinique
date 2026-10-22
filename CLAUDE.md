@@ -42,7 +42,9 @@ launch jaisi banti hai. Legal cheezein dummy data ke saath implement hoti hain.
 - **Commit/push sirf jo insaan kaam kar raha hai uske kehne pe.** Destructive kaam se pehle poochho.
 - **npm pe kuch bhi publish, `npm login/logout` ya `npm trust` sirf insaan ke kehne pe**; tests kabhi
   asli registry ko nahi chhoote (fake registry hai).
-- **Mutation testing copy me karo**, asli files me nahi (dev server file badalte hi reload hota hai).
+- **Mutation testing copy me karo**, asli files me nahi (dev server file badalte hi reload hota hai). Sirf 3 jagah (RULES §6):
+  kernel packages pehli baar poora run (background) aur baad me badli lines; paisa/stock/permissions me badli lines; baaki apps
+  aur modules me mutation nahi.
 - **Kam tokens:** targeted edits, file ka zaroori hissa hi padho, bade multi-agent workflows sirf
   zaroorat pe aur pehle bata ke.
 
@@ -55,17 +57,18 @@ npm install
 npm run build
 ```
 
-| Command                                                       | Kaam                                                                                           |
-| ------------------------------------------------------------- | ---------------------------------------------------------------------------------------------- |
-| `npm run lint` / `typecheck` / `test` / `format:check`        | Saare checks (CI yahi chalata hai, `npm run build` ke baad; test ko Mongo chahiye: `infra:up`) |
-| `npm run test:scripts`                                        | Sirf CLI ke tests (~10 min; e2e aur app/backend sabse lambe)                                   |
-| `npm run status`                                              | Har package: local vs npm version, login                                                       |
-| `npm run verify -- --all --yes`                               | Publish wale saare checks, bina publish ke                                                     |
-| `npm run create` (`create:app`, `create:backend`)             | Naya package, frontend app ya backend app                                                      |
-| `npm run publish` / `republish`                               | Packages ka CLI; har command `-- --help` deta hai                                              |
-| `npm run dev:backend`                                         | `backend/bundle`: saare deployables ek process me                                              |
-| `npm run infra:up` / `infra:down` / `infra:reset`             | Local Mongo, Valkey, Mailpit (Docker; [infra/README.md](infra/README.md))                      |
-| `npm run playground --workspace @beautinique/frontend-styles` | Styles ka Vite playground (port 5180)                                                          |
+| Command                                                       | Kaam                                                                                                 |
+| ------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------- |
+| `npm run lint` / `typecheck` / `test` / `format:check`        | Saare checks (CI yahi chalata hai, `npm run build` ke baad; test ko Mongo chahiye: `infra:up`)       |
+| `npm run test:scripts`                                        | Sirf CLI ke tests (~10 min; e2e aur app/backend sabse lambe)                                         |
+| `npm run status`                                              | Har package: local vs npm version, login                                                             |
+| `npm run verify -- --all --yes`                               | Publish wale saare checks, bina publish ke                                                           |
+| `npm run create` (`create:app`, `create:backend`)             | Naya package, frontend app ya backend app                                                            |
+| `npm run publish` / `republish`                               | Packages ka CLI; har command `-- --help` deta hai                                                    |
+| `npm run dev:backend`                                         | `backend/bundle`: saare deployables ek process me                                                    |
+| `npm run infra:up` / `infra:down` / `infra:reset`             | Local Mongo, Valkey, Mailpit (Docker; [infra/README.md](infra/README.md))                            |
+| `npm run infra:mutation:up` / `infra:mutation:down`           | Mutation runs ke liye alag Mongo (27018) aur Valkey (6380): normal kaam saath chalta rahe (RULES §6) |
+| `npm run playground --workspace @beautinique/frontend-styles` | Styles ka Vite playground (port 5180)                                                                |
 
 ## Repo ka naksha
 

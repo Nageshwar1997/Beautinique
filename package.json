@@ -34,6 +34,8 @@
     "infra:down": "docker compose -f infra/docker-compose.yml down",
     "infra:reset": "docker compose -f infra/docker-compose.yml down --volumes",
     "infra:logs": "docker compose -f infra/docker-compose.yml logs --follow",
+    "infra:mutation:up": "docker compose -f infra/docker-compose.yml --profile mutation up --detach --wait --wait-timeout 180 mongo-mutation valkey-mutation",
+    "infra:mutation:down": "docker compose -f infra/docker-compose.yml --profile mutation rm --stop --force mongo-mutation valkey-mutation",
     "lint": "eslint . && npm run lint --workspaces --if-present",
     "typecheck": "tsc -p scripts && npm run typecheck --workspaces --if-present",
     "test": "vitest run --config scripts/vitest.config.ts && npm run test --workspaces --if-present",

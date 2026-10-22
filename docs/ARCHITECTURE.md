@@ -1,6 +1,6 @@
 # ARCHITECTURE — BQ
 
-> **Status:** v1.15 draft (2026-10-22). [PRD.md](PRD.md) v1.0 pe based. Design ek multi-agent review se aaya (3 architecture proposals + review board + owner ke decisions), aur v1.1 me free tier ke official docs ke against verify hua.
+> **Status:** v1.16 draft (2026-10-22). [PRD.md](PRD.md) v1.0 pe based. Design ek multi-agent review se aaya (3 architecture proposals + review board + owner ke decisions), aur v1.1 me free tier ke official docs ke against verify hua.
 
 ## 0. Ek nazar me
 
@@ -208,7 +208,7 @@ Har module ka apna folder hai (`index.ts` facade, `http`, `application`, `domain
   - Laptop ka Docker Valkey bhi isi budget aur limits pe chalta hai, taaki dikkatein pehle hi pakdi jayein.
 - `noeviction` ki wajah se memory full = writes pe OOM error. Isliye alert 60% (15 MB) pe. Redis write fail ho to OTP bhejna `503` deta hai ("thodi der baad try karein"), auth routes pe rate limiter fail-closed, baaki routes pe fail-open.
 - **Redis wipe recovery:** Render free Key Value kabhi bhi restart ho sakta hai aur restart pe saara data mit jaata hai, jabki Node process chalta rehta hai (ioredis bas reconnect karta hai). Isliye:
-  - Boot pe `bq:epoch` key (random id, bina TTL) likhi jaati hai. Ek process-level watchdog har 30 s check karta hai; key gayab = Redis wipe. (BullMQ ke schedulers bhi wipe me mit jaate hain, isliye ye watchdog §5.3 ke "setInterval hatao" rule ka akela exception hai.)
+  - Boot pe `bq:epoch` key (random id, bina TTL) likhi jaati hai. Ek process-level watchdog har 30 s check karta hai; key gayab = Redis wipe. Key sab deployables ki ek hai, isliye har deployable apna aakhri recovered epoch apne DB (`platform_state`) me yaad rakhta hai: key gayab ho ya anjaan value ho (koi aur deployable nayi likh chuka), dono me wo recover karta hai. (BullMQ ke schedulers bhi wipe me mit jaate hain, isliye ye watchdog §5.3 ke "setInterval hatao" rule ka akela exception hai.)
   - Wipe pe recovery (ek Mongo lock ke peeche): (1) saare job schedulers dobara upsert. (2) **Outbox redrive:** pichhle 48 ghante (max retry window) ke outbox events 200-200 ke batches me, same `jobId` ke saath, dobara enqueue; agla batch tabhi jab queue me 100 se kam waiting jobs hon. Consumers `processed_events` se duplicate rok lete hain. (3) Pichhle 15 min me logout, revoke ya freeze hue sessions MongoDB se padh ke Redis keys dobara likhna. (4) Nayi `bq:epoch`.
   - Jab tak recovery poori na ho, gateway revoke aur freeze MongoDB `sessions` se check karta hai (internal apps ke liye fail closed). **Revoke aur freeze ka source of truth hamesha MongoDB hai**; Redis sirf fast copy hai.
   - OTP aur rate-limit counters khona chalega: user OTP dobara maang leta hai.
@@ -634,3 +634,4 @@ Sirf config badlegi, code nahi:
 | v1.13   | 2026-10-21 | §5.2: relay ka jobId `<eventId>@<subscriber>` (BullMQ `:` nahi leta). |
 | v1.14   | 2026-10-21 | Decision 6: production Redis sirf internal URL se; laptop/tests/CI kabhi production Redis nahi. |
 | v1.15 | 2026-10-22 | §6.6: job data me poora envelope (16 KB tak), kyunki consumer doosre deployable ka DB nahi padhta. |
+| v1.16 | 2026-10-22 | §6.6: har deployable apna recovered `bq:epoch` apne DB me yaad rakhta hai (ek ki likhi key se doosre ki recovery na chhoote). |
