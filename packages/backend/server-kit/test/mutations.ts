@@ -3,13 +3,7 @@
 // runner refuses a list whose `from` text no longer occurs exactly once. For now it covers
 // mountRoute, the place where a request meets its contract.
 
-interface Mutation {
-  file: string;
-  name: string;
-  change: [string, string][];
-  tests?: string;
-  survives?: string;
-}
+import type { Mutation } from '../../../../scripts/mutation/lib/list';
 
 const mutations: Mutation[] = [
   {

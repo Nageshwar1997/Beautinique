@@ -3,13 +3,7 @@
 // refuses a list whose `from` text no longer occurs exactly once. It covers money.ts, the paise and
 // GST arithmetic; dates, ids and text helpers are not kernel code.
 
-interface Mutation {
-  file: string;
-  name: string;
-  change: [string, string][];
-  tests?: string;
-  survives?: string;
-}
+import type { Mutation } from '../../../../scripts/mutation/lib/list';
 
 const mutations: Mutation[] = [
   // guards
