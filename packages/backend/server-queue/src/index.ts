@@ -3,6 +3,7 @@ export {
   type ConsumerOptions,
   DEAD_LETTER_KEEP_SECONDS,
   DEAD_LETTERS,
+  type DeadLetter,
   ensureConsumerIndexes,
   PROCESSED_EVENTS,
   PROCESSED_KEEP_SECONDS,
@@ -10,6 +11,11 @@ export {
   subscribe,
   type Subscription,
 } from './consumer';
+export {
+  redriveDeadLetters,
+  type RedriveDeadLettersOptions,
+  type RedriveResult,
+} from './dead-letters';
 export { LOCKS, releaseLease, tryLease } from './lock';
 export {
   ensureOutboxIndexes,
@@ -20,6 +26,16 @@ export {
   type OutboxRecord,
   writeEvent,
 } from './outbox';
+export {
+  EPOCH_KEY,
+  PLATFORM_STATE,
+  RECOVERY_LEASE,
+  redriveOutbox,
+  type RedriveOutboxOptions,
+  startWipeWatchdog,
+  type WipeWatchdog,
+  type WipeWatchdogOptions,
+} from './recovery';
 export {
   assertNoEviction,
   connectRedis,
@@ -37,3 +53,14 @@ export {
   type RelayOptions,
   startRelay,
 } from './relay';
+export {
+  defineTask,
+  heartbeatTask,
+  lateTasks,
+  type Schedule,
+  type Task,
+  TASK_RUNS,
+  type TaskRun,
+  upsertSchedules,
+  type UpsertSchedulesOptions,
+} from './schedules';

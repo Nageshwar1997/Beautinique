@@ -11,6 +11,7 @@ import { type Job, type RedisOptions, UnrecoverableError, Worker } from 'bullmq'
 import type { Redis } from 'ioredis';
 
 import { assertSubscriber, jobIdOf } from './relay';
+import { type Task, TASK_RUNS, type TaskRun } from './schedules';
 
 /** Events a subscriber has handled: its effect and this row commit together, so a repeat is skipped. */
 export const PROCESSED_EVENTS = 'platform_processed_events';
@@ -55,6 +56,8 @@ export interface ConsumerOptions {
   /** The queue to work (`q.<deployable>` on the free plan). */
   queue: string;
   subscriptions: readonly Subscription[];
+  /** Scheduled tasks this queue runs (their schedules come from upsertSchedules). */
+  tasks?: readonly Task[];
   /** BullMQ key prefix (default `bull`). */
   prefix?: string;
   /** Jobs at a time (default 1: Atlas free has about 100 operations a second for everything). */
@@ -68,7 +71,7 @@ export interface Consumer {
   stop(): Promise<void>;
 }
 
-interface DeadLetter {
+export interface DeadLetter {
   _id: string;
   queue: string;
   subscriber: string;
@@ -134,6 +137,7 @@ export function startConsumer({
   logger,
   queue,
   subscriptions,
+  tasks = [],
   prefix = 'bull',
   concurrency = 1,
 }: ConsumerOptions): Consumer {
@@ -146,6 +150,43 @@ export function startConsumer({
   }
   const processed = mongo.db.collection<{ _id: string }>(PROCESSED_EVENTS);
   const deadLetters = mongo.db.collection<DeadLetter>(DEAD_LETTERS);
+  const taskRuns = mongo.db.collection<TaskRun>(TASK_RUNS);
+  const taskByName = new Map<string, Task>();
+  for (const task of tasks) {
+    if (taskByName.has(task.name)) throw new Error(`Task ${task.name} is declared twice`);
+    taskByName.set(task.name, task);
+  }
+
+  /**
+   * A scheduled run. Its start, finish or error go to platform_task_runs for the heartbeat; a failed
+   * run is not a dead letter (the next run comes anyway) but stays in Redis's failed list.
+   */
+  async function runTask(job: Job, name: string): Promise<void> {
+    const task = taskByName.get(name);
+    if (!task) {
+      logger.error({ task: name }, 'scheduled task has no handler');
+      throw new UnrecoverableError(`No task ${name} on ${queue}`);
+    }
+    await taskRuns.updateOne(
+      { _id: name },
+      { $set: { lastStartedAt: new Date() }, $setOnInsert: { firstSeenAt: new Date() } },
+      { upsert: true },
+    );
+    try {
+      await task.run({ firedAt: new Date(job.timestamp) });
+    } catch (error) {
+      await taskRuns.updateOne(
+        { _id: name },
+        { $set: { lastFailedAt: new Date(), lastError: describe(error) } },
+      );
+      logger.error({ task: name, err: describe(error) }, 'scheduled task failed');
+      throw error;
+    }
+    await taskRuns.updateOne(
+      { _id: name },
+      { $set: { lastFinishedAt: new Date(), lastError: null } },
+    );
+  }
 
   async function handle(job: Job): Promise<void> {
     const data = job.data as { eventId?: unknown; type?: unknown; version?: unknown };
@@ -219,6 +260,11 @@ export function startConsumer({
   const worker = new Worker(
     queue,
     async (job: Job) => {
+      const { task } = job.data as { task?: unknown };
+      if (typeof task === 'string') {
+        await runTask(job, task);
+        return;
+      }
       const attempt = job.attemptsMade + 1;
       try {
         await handle(job);

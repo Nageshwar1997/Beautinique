@@ -20,26 +20,39 @@ import {
   type ConsumerOptions,
   DEAD_LETTER_KEEP_SECONDS,
   DEAD_LETTERS,
+  defineTask,
   ensureConsumerIndexes,
   ensureOutboxIndexes,
   EVENT_MAX_BYTES,
+  heartbeatTask,
   jobIdOf,
+  lateTasks,
   LOCKS,
   OUTBOX,
   OUTBOX_KEEP_SECONDS,
   type OutboxRecord,
   parseRedisInfo,
+  PLATFORM_STATE,
   PROCESSED_EVENTS,
   PROCESSED_KEEP_SECONDS,
   type RedisConnection,
+  redriveDeadLetters,
+  redriveOutbox,
   type Relay,
   RELAY_LEASE,
   type RelayOptions,
   releaseLease,
+  type Schedule,
   startConsumer,
   startRelay,
+  startWipeWatchdog,
   subscribe,
+  type Subscription,
+  TASK_RUNS,
+  type TaskRun,
   tryLease,
+  upsertSchedules,
+  type WipeWatchdog,
   writeEvent,
 } from '../src/index';
 
@@ -140,7 +153,7 @@ afterEach(async () => {
   }
   await mongo.db.collection(OUTBOX).deleteMany({});
   await mongo.db.collection(LOCKS).deleteMany({});
-  for (const name of [PROCESSED_EVENTS, DEAD_LETTERS, 'emails']) {
+  for (const name of [PROCESSED_EVENTS, DEAD_LETTERS, 'emails', TASK_RUNS, PLATFORM_STATE]) {
     await consumerMongo.db.collection(name).deleteMany({});
   }
   await clearQueues();
@@ -802,6 +815,8 @@ describe('startConsumer', () => {
     const { message } = (letter as unknown as { error: { message: string } }).error;
     expect(message.startsWith('smtp down xxx')).toBe(true);
     expect(message).toHaveLength(500);
+    // the log line follows the saved dead letter
+    await waitFor(() => lines.some((l) => l.msg === 'event dead-lettered'));
     expect(lines.find((l) => l.msg === 'event dead-lettered')).toMatchObject({
       eventId: placed.eventId,
       attempts: 2,
@@ -910,5 +925,449 @@ describe('startConsumer', () => {
       expireAfterSeconds: DEAD_LETTER_KEEP_SECONDS,
     });
     expect([PROCESSED_KEEP_SECONDS, DEAD_LETTER_KEEP_SECONDS]).toEqual([7 * 86_400, 14 * 86_400]);
+  });
+});
+
+/** A consumer of q.notify that writes an email row per order, in the consumer's own database. */
+function emailConsumer(handle?: Subscription<typeof orderPlaced>['handle']): Consumer {
+  const started = startConsumer({
+    mongo: consumerMongo,
+    redis: redis.client,
+    logger,
+    queue: 'q.notify',
+    subscriptions: [
+      subscribe(
+        'notify.emails',
+        orderPlaced,
+        handle ??
+          (async (event, session) => {
+            await consumerMongo.db
+              .collection<{ _id: string; orderId: string }>('emails')
+              .insertOne({ _id: event.eventId, orderId: event.data.orderId }, { session });
+          }),
+      ),
+    ],
+    prefix,
+  });
+  consumers.push(started);
+  return started;
+}
+const emailCount = () => consumerMongo.db.collection('emails').countDocuments();
+const taskRuns = () => consumerMongo.db.collection<TaskRun>(TASK_RUNS);
+
+describe('upsertSchedules and scheduled tasks', () => {
+  const set = (schedules: Schedule[], queue = 'q.core') =>
+    upsertSchedules({
+      mongo: consumerMongo,
+      redis: redis.client,
+      logger,
+      queue,
+      schedules,
+      prefix,
+    });
+
+  it('makes the queue schedulers exactly the given schedules, in India time by default', async () => {
+    await set([
+      { task: 'commerce.expireCarts', every: 60_000 },
+      { task: 'finance.closeDay', pattern: '0 30 23 * * *', maxGapMs: 26 * 3_600_000 },
+    ]);
+    let found = await inspect('q.core').getJobSchedulers();
+    expect(found.map((scheduler) => scheduler.key).toSorted()).toEqual([
+      'commerce.expireCarts',
+      'finance.closeDay',
+    ]);
+    expect(found.find((scheduler) => scheduler.key === 'commerce.expireCarts')).toMatchObject({
+      every: 60_000,
+    });
+    expect(found.find((scheduler) => scheduler.key === 'finance.closeDay')).toMatchObject({
+      pattern: '0 30 23 * * *',
+      tz: 'Asia/Kolkata',
+    });
+    // a schedule left out of the code is removed
+    await set([{ task: 'commerce.expireCarts', every: 60_000 }]);
+    found = await inspect('q.core').getJobSchedulers();
+    expect(found.map((scheduler) => scheduler.key)).toEqual(['commerce.expireCarts']);
+    expect(lines.some((l) => l.msg === 'schedules set')).toBe(true);
+  });
+
+  it('refuses wrong schedules before touching Redis', async () => {
+    for (const [schedule, message] of [
+      [
+        { task: 'commerce.expire', every: 1000, pattern: '* * * * *' },
+        'exactly one of every or pattern',
+      ],
+      [{ task: 'commerce.expire' }, 'exactly one of every or pattern'],
+      [{ task: 'expire', every: 1000 }, 'must be <module>.<task>'],
+      [{ task: 'commerce.expire', every: 0 }, 'every must be above 0 ms'],
+      [{ task: 'commerce.expire', pattern: '0 0 * * *' }, 'give it maxGapMs'],
+    ] as const) {
+      await expect(set([schedule]), message).rejects.toThrow(message);
+    }
+    await expect(
+      set([
+        { task: 'commerce.expire', every: 1000 },
+        { task: 'commerce.expire', every: 2000 },
+      ]),
+    ).rejects.toThrow('is scheduled twice');
+    expect(await inspect('q.core').getJobSchedulers()).toEqual([]);
+    expect(() => defineTask('expire', () => Promise.resolve())).toThrow('must be <module>.<task>');
+  });
+
+  it('runs scheduled tasks on the queue and records each run', async () => {
+    let runs = 0;
+    await set([{ task: 'commerce.expireCarts', every: 200 }]);
+    const started = startConsumer({
+      mongo: consumerMongo,
+      redis: redis.client,
+      logger,
+      queue: 'q.core',
+      subscriptions: [],
+      tasks: [
+        defineTask('commerce.expireCarts', () => {
+          runs += 1;
+          return Promise.resolve();
+        }),
+      ],
+      prefix,
+    });
+    consumers.push(started);
+    await waitFor(() => runs >= 2, 3000);
+    const run = await taskRuns().findOne({ _id: 'commerce.expireCarts' });
+    expect(run?.lastFinishedAt).toBeInstanceOf(Date);
+    expect(run?.lastError).toBeNull();
+    expect(run?.firstSeenAt).toBeInstanceOf(Date);
+  });
+
+  it('records a failed run without making a dead letter (the next run comes anyway)', async () => {
+    await set([{ task: 'commerce.expireCarts', every: 200 }]);
+    consumers.push(
+      startConsumer({
+        mongo: consumerMongo,
+        redis: redis.client,
+        logger,
+        queue: 'q.core',
+        subscriptions: [],
+        tasks: [
+          defineTask('commerce.expireCarts', () => Promise.reject(new Error('index missing'))),
+        ],
+        prefix,
+      }),
+    );
+    await waitFor(
+      async () =>
+        ((await taskRuns().findOne({ _id: 'commerce.expireCarts' }))?.lastError ?? null) !== null,
+    );
+    const run = await taskRuns().findOne({ _id: 'commerce.expireCarts' });
+    expect(run).toMatchObject({ lastError: { name: 'Error', message: 'index missing' } });
+    expect(run?.lastFailedAt).toBeInstanceOf(Date);
+    expect(await consumerMongo.db.collection(DEAD_LETTERS).countDocuments()).toBe(0);
+    expect(lines.some((l) => l.msg === 'scheduled task failed')).toBe(true);
+  });
+
+  it('refuses the same task twice in one consumer', () => {
+    const task = defineTask('commerce.expireCarts', () => Promise.resolve());
+    expect(() =>
+      startConsumer({
+        mongo: consumerMongo,
+        redis: redis.client,
+        logger,
+        queue: 'q.core',
+        subscriptions: [],
+        tasks: [task, task],
+        prefix,
+      }),
+    ).toThrow('Task commerce.expireCarts is declared twice');
+  });
+
+  it('tells which tasks are late, and the heartbeat logs them', async () => {
+    const schedules: Schedule[] = [
+      { task: 'commerce.expireCarts', every: 1000 },
+      { task: 'finance.closeDay', pattern: '0 0 * * *', maxGapMs: 5000 },
+      { task: 'platform.heartbeat', every: 1000 },
+    ];
+    await set(schedules);
+    const later = (ms: number) => new Date(Date.now() + ms);
+    expect(await lateTasks(consumerMongo, schedules)).toEqual([]);
+    // the default gap is twice `every`: 1.5 s after a 1 s schedule is not late yet
+    expect(await lateTasks(consumerMongo, schedules, later(1500))).toEqual([]);
+    expect(await lateTasks(consumerMongo, schedules, later(3000))).toEqual([
+      'commerce.expireCarts',
+      'platform.heartbeat',
+    ]);
+    expect(await lateTasks(consumerMongo, schedules, later(6000))).toEqual([
+      'commerce.expireCarts',
+      'finance.closeDay',
+      'platform.heartbeat',
+    ]);
+    // a finished run restarts the clock
+    await taskRuns().updateOne(
+      { _id: 'commerce.expireCarts' },
+      { $set: { lastFinishedAt: later(2500) } },
+    );
+    expect(await lateTasks(consumerMongo, schedules.slice(0, 1), later(3000))).toEqual([]);
+    // a task never seen is late
+    expect(await lateTasks(consumerMongo, [{ task: 'catalog.reindex', every: 1000 }])).toEqual([
+      'catalog.reindex',
+    ]);
+    const beat = heartbeatTask(consumerMongo, schedules, logger);
+    await beat.run({ firedAt: new Date() });
+    expect(lines.some((l) => l.msg === 'scheduled tasks on time')).toBe(true);
+    // the heartbeat's own record is old too: it never reports itself, only the others
+    await taskRuns().updateMany(
+      { _id: { $in: ['finance.closeDay', 'platform.heartbeat'] } },
+      { $set: { firstSeenAt: new Date(Date.now() - 10_000) } },
+    );
+    await beat.run({ firedAt: new Date() });
+    expect(lines.find((l) => l.msg === 'scheduled tasks are late')).toMatchObject({
+      tasks: ['finance.closeDay'],
+    });
+  });
+});
+
+describe('startWipeWatchdog', () => {
+  const epochKey = `${prefix}:epoch`;
+  const watchdogs: WipeWatchdog[] = [];
+  afterEach(async () => {
+    await Promise.all(watchdogs.splice(0).map((watchdog) => watchdog.stop()));
+  });
+  const watch = (recover: () => Promise<void>): WipeWatchdog => {
+    const started = startWipeWatchdog({
+      mongo: consumerMongo,
+      redis: redis.client,
+      logger,
+      recover,
+      intervalMs: 60_000,
+      epochKey,
+    });
+    watchdogs.push(started);
+    return started;
+  };
+  const known = async () =>
+    (
+      await consumerMongo.db
+        .collection<{ _id: string; value: string }>(PLATFORM_STATE)
+        .findOne({ _id: 'redis-epoch' })
+    )?.value;
+
+  it('recovers once on its first start (a new Redis), and remembers the epoch', async () => {
+    let recovered = 0;
+    const running = watch(() => {
+      recovered += 1;
+      return Promise.resolve();
+    });
+    await waitFor(() => recovered === 1);
+    await waitFor(async () => (await known()) !== undefined);
+    expect(await running.check()).toBe(false);
+    expect(recovered).toBe(1);
+    expect(await known()).toBe(await redis.client.get(epochKey));
+    expect(lines.some((l) => l.msg === 'redis recovery done')).toBe(true);
+  });
+
+  it('recovers again after a wipe, under a new epoch', async () => {
+    let recovered = 0;
+    const running = watch(() => {
+      recovered += 1;
+      return Promise.resolve();
+    });
+    await waitFor(() => recovered === 1);
+    await waitFor(async () => (await known()) !== undefined);
+    const before = await redis.client.get(epochKey);
+    await redis.client.del(epochKey);
+    expect(await running.check()).toBe(true);
+    expect(recovered).toBe(2);
+    const after = await redis.client.get(epochKey);
+    expect(after).not.toBe(before);
+    expect(await known()).toBe(after);
+  });
+
+  it('recovers when another deployable already named the new epoch', async () => {
+    let recovered = 0;
+    const running = watch(() => {
+      recovered += 1;
+      return Promise.resolve();
+    });
+    await waitFor(() => recovered === 1);
+    await waitFor(async () => (await known()) !== undefined);
+    await redis.client.set(epochKey, 'set-by-identity');
+    expect(await running.check()).toBe(true);
+    expect(await known()).toBe('set-by-identity');
+  });
+
+  it('tries a failed recovery again on the next look', async () => {
+    let tries = 0;
+    const running = watch(() => {
+      tries += 1;
+      return tries === 1 ? Promise.reject(new Error('mongo busy')) : Promise.resolve();
+    });
+    await waitFor(() => tries === 1);
+    await waitFor(() =>
+      lines.some((l) => l.msg === 'redis recovery failed, retrying on the next look'),
+    );
+    expect(await known()).toBeUndefined();
+    expect(lines.some((l) => l.msg === 'redis recovery failed, retrying on the next look')).toBe(
+      true,
+    );
+    expect(await running.check()).toBe(true);
+    expect(await known()).toBe(await redis.client.get(epochKey));
+  });
+
+  it('hands the next recovery to another instance (the lease is given back)', async () => {
+    let recovered = 0;
+    const count = () => {
+      recovered += 1;
+      return Promise.resolve();
+    };
+    const first = watch(count);
+    await waitFor(async () => (await known()) !== undefined);
+    await first.stop();
+    await redis.client.del(epochKey);
+    const second = watch(count);
+    await waitFor(() => recovered === 2, 2000);
+    expect(await second.check()).toBe(false);
+  });
+
+  it('lets one instance of the deployable recover', async () => {
+    let recovered = 0;
+    const slow = async () => {
+      recovered += 1;
+      await sleep(300);
+    };
+    const first = watch(slow);
+    const second = watch(slow);
+    await Promise.all([first.check(), second.check()]);
+    await sleep(400);
+    expect(recovered).toBe(1);
+  });
+});
+
+describe('redriveOutbox', () => {
+  const subscribers = { 'commerce.order.placed': ['notify.emails'] };
+
+  /** Relays `count` orders, then empties Redis: the state right after a wipe. */
+  async function relayedThenWiped(count: number): Promise<string[]> {
+    const running = relay({ subscribers });
+    const ids: string[] = [];
+    for (let i = 0; i < count; i += 1) ids.push((await placeOrder(`w${String(i)}`)).eventId);
+    await waitFor(allRelayed);
+    await running.stop();
+    await clearQueues();
+    return ids;
+  }
+
+  it('sends the last 48 hours again under the same job ids, and nothing older', async () => {
+    const [old, ...recent] = await relayedThenWiped(3);
+    await outbox().updateOne(
+      { _id: old },
+      { $set: { createdAt: new Date(Date.now() - 3 * 24 * 3_600_000) } },
+    );
+    const sent = await redriveOutbox({ mongo, redis: redis.client, logger, subscribers, prefix });
+    expect(sent).toBe(2);
+    for (const id of recent) {
+      expect(await inspect('q.notify').getJob(jobIdOf(id, 'notify.emails'))).toBeTruthy();
+    }
+    expect(await inspect('q.notify').getJob(jobIdOf(old ?? '', 'notify.emails'))).toBeUndefined();
+    expect(lines.find((l) => l.msg === 'outbox redriven')).toMatchObject({ jobs: 2 });
+  });
+
+  it('waits for the queues to drain between batches, so a small Redis does not fill up', async () => {
+    await relayedThenWiped(5);
+    emailConsumer();
+    const sent = await redriveOutbox({
+      mongo,
+      redis: redis.client,
+      logger,
+      subscribers,
+      prefix,
+      batchSize: 2,
+      maxWaiting: 1,
+    });
+    expect(sent).toBe(5);
+    await waitFor(async () => (await emailCount()) === 5);
+  });
+
+  it('gives up when a queue does not drain, so the watchdog can try again later', async () => {
+    await relayedThenWiped(3);
+    await expect(
+      redriveOutbox({
+        mongo,
+        redis: redis.client,
+        logger,
+        subscribers,
+        prefix,
+        batchSize: 1,
+        maxWaiting: 1,
+        drainTimeoutMs: 300,
+      }),
+    ).rejects.toThrow('Queue q.notify did not drain below 1 waiting jobs');
+  });
+});
+
+describe('redriveDeadLetters', () => {
+  /** Puts an event on q.notify with a single try, so a failure is a dead letter at once. */
+  const deliverOnce = (envelope: { eventId: string }) =>
+    inspect('q.notify').add('notify.emails', envelope, {
+      jobId: jobIdOf(envelope.eventId, 'notify.emails'),
+      attempts: 1,
+      removeOnFail: { count: 20 },
+    });
+
+  it('sends fixed dead letters to their queue again and removes them', async () => {
+    let broken = true;
+    emailConsumer(async (event, session) => {
+      if (broken) throw new Error('template missing');
+      await consumerMongo.db
+        .collection<{ _id: string; orderId: string }>('emails')
+        .insertOne({ _id: event.eventId, orderId: event.data.orderId }, { session });
+    });
+    const first = await placeOrder('d1');
+    const second = await placeOrder('d2');
+    await deliverOnce(first);
+    await deliverOnce(second);
+    const letters = consumerMongo.db.collection(DEAD_LETTERS);
+    await waitFor(async () => (await letters.countDocuments()) === 2);
+    broken = false;
+    // only the one asked for
+    const result = await redriveDeadLetters({
+      mongo: consumerMongo,
+      redis: redis.client,
+      logger,
+      ids: [jobIdOf(first.eventId, 'notify.emails')],
+      prefix,
+    });
+    expect(result).toEqual({ sent: [jobIdOf(first.eventId, 'notify.emails')], skipped: [] });
+    await waitFor(async () => (await emailCount()) === 1);
+    expect(await letters.countDocuments()).toBe(1);
+    // then all the rest
+    expect(
+      (await redriveDeadLetters({ mongo: consumerMongo, redis: redis.client, logger, prefix }))
+        .sent,
+    ).toHaveLength(1);
+    await waitFor(async () => (await emailCount()) === 2);
+    expect(await letters.countDocuments()).toBe(0);
+  });
+
+  it('leaves a dead letter alone while its job is still running', async () => {
+    emailConsumer(async () => {
+      await sleep(1500);
+    });
+    const placed = await placeOrder('d3');
+    const id = jobIdOf(placed.eventId, 'notify.emails');
+    await deliverOnce(placed);
+    await waitFor(async () => (await inspect('q.notify').getJob(id))?.isActive() ?? false);
+    await consumerMongo.db.collection<{ _id: string }>(DEAD_LETTERS).insertOne({
+      _id: id,
+      queue: 'q.notify',
+      subscriber: 'notify.emails',
+      eventId: placed.eventId,
+      type: placed.type,
+      envelope: placed,
+      error: { name: 'Error', message: 'old' },
+      attempts: 1,
+      failedAt: new Date(),
+    } as never);
+    expect(
+      await redriveDeadLetters({ mongo: consumerMongo, redis: redis.client, logger, prefix }),
+    ).toEqual({ sent: [], skipped: [id] });
+    expect(await consumerMongo.db.collection(DEAD_LETTERS).countDocuments()).toBe(1);
   });
 });

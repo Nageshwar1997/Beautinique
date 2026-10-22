@@ -66,7 +66,28 @@ export const RELAY_LEASE = 'outbox-relay';
 const SUBSCRIBER = /^([a-z]+)\.[a-z][a-zA-Z0-9]*$/;
 const LAG_LIMIT_MS = 30_000;
 
-const defaultQueueOf = (subscriber: string): string => `q.${subscriber.split('.')[0] ?? ''}`;
+/** A subscriber's queue on the free plan: one per deployable, `q.<deployable>`. */
+export const defaultQueueOf = (subscriber: string): string => `q.${subscriber.split('.')[0] ?? ''}`;
+
+/**
+ * A BullMQ queue on the shared client (never closed by the queue), with Redis kept small (stream of
+ * at most 200 events) and its 'error' events handled: without a listener they crash the process,
+ * and Redis away is normal on Render.
+ */
+export function openQueue(
+  name: string,
+  redis: Redis,
+  prefix: string,
+  onError: (error: Error) => void,
+): Queue {
+  const queue = new Queue(name, {
+    connection: redis,
+    prefix,
+    streams: { events: { maxLen: 200 } },
+  });
+  queue.on('error', onError);
+  return queue;
+}
 
 /** A subscriber is `<deployable>.<module>`, e.g. `notify.emails`; anything else throws. */
 export function assertSubscriber(subscriber: string, of: string): void {
@@ -79,7 +100,7 @@ export function assertSubscriber(subscriber: string, of: string): void {
 }
 
 /** Wrong subscriber lists throw at start, not when the first event arrives. */
-function checkSubscribers(subscribers: RelayOptions['subscribers']): void {
+export function checkSubscribers(subscribers: RelayOptions['subscribers']): void {
   for (const [type, list] of Object.entries(subscribers)) {
     if (new Set(list).size !== list.length) {
       throw new Error(`Event "${type}" lists a subscriber twice`);
@@ -137,13 +158,7 @@ export function startRelay(options: RelayOptions): Relay {
   const queue = (name: string): Queue => {
     let existing = queues.get(name);
     if (!existing) {
-      existing = new Queue(name, {
-        connection: redis,
-        prefix,
-        streams: { events: { maxLen: 200 } },
-      });
-      // an 'error' event without a listener crashes the process (Redis away is normal on Render)
-      existing.on('error', (error) => {
+      existing = openQueue(name, redis, prefix, (error) => {
         problem(error, 'outbox relay queue error');
       });
       queues.set(name, existing);
