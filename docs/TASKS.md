@@ -1,14 +1,41 @@
 # TASKS — BQ
 
-> **Status:** v1.27 (2026-10-22). Poore project ki task list, [ARCHITECTURE.md](ARCHITECTURE.md) §16 ke phases ke hisaab se. Har task "done" tabhi jab [RULES.md](RULES.md) §1.5 ki Definition of Done poori ho.
+> **Status:** v1.28 (2026-10-23). Poore project ki task list, [ARCHITECTURE.md](ARCHITECTURE.md) §16 ke phases ke hisaab se. Har task "done" tabhi jab [RULES.md](RULES.md) §1.5 ki Definition of Done poori ho.
 
 **Kaise use karein:**
 - `[ ]` baaki, `[~]` chal raha hai, `[x]` done.
 - Task ID: `T<phase>.<number>`.
-- Har phase ke end me ek **milestone** hai. Milestone poora hue bina agla phase shuru nahi.
+- Har phase ke end me ek **milestone** hai. Milestone poora hue bina agla phase shuru nahi. **2026-10-23 se milestone tabhi poora jab wo live ho aur uska demo dikh sake** (section D); laptop pe chalna kaafi nahi.
 - Naya task aaye to sahi phase me jodo, aur bada badlav change log me likho.
+- Har milestone me kaam do hisson me: **Claude** (risky: backend, paisa/stock/permissions, kernel packages, review) aur **Cursor** (UI screens, forms, CRUD, tests ka boilerplate). Flow: [AGENTS.md](../AGENTS.md) "Claude ke baad Cursor".
 
-**Abhi ka focus:** docs poore karna, phir Phase 0.
+**Abhi ka focus:** Milestone 2: gateway + pehla live deploy (section D).
+
+## D. Deploy-first plan (owner ka faisla, 2026-10-23)
+
+Har milestone ke end me kuch **live** dikhana hai. Ek hi live environment, free stack: `backend/bundle` Render free web service pe, Atlas M0, Render Key Value free, apps Vercel pe. Deploy `release` branch se (feature → `main` → `prerelease` → `release`, RULES §2). Section C ki jaanch pehle deploy (M2) pe hi. Phase 11 me sirf hardening bachti hai (monitors, legal pages, cutover).
+
+| Milestone | Kya live hoga | Demo (kya dikha sakte ho) | Claude | Cursor |
+|---|---|---|---|---|
+| M2 Gateway + pehla deploy | bundle (gateway + core) Render pe, Atlas M0, Render Key Value; customer app ka shell Vercel pe | live URL khulta hai, `/status` hara, sample ping endpoint live | gateway, deploy setup, env, section C | customer shell + landing page |
+| M3 Identity | login: email OTP (T5.1 ka Brevo email hissa yahin pehle), password + TOTP, Google; customer + admin apps | live pe signup/login, My Devices; Master doosre app me login nahi | identity service, sessions, JWKS | auth screens (auth-ui) |
+| M4 Core | seller apply → approve → listing QC → storefront (Pune) | live storefront pe products, product page, area check | core modules, authz, media | seller/admin review screens, storefront UI |
+| M5 Notify + Payments | email (Brevo), web push, in-app inbox, Razorpay test webhook | live pe email/push aate hain, test payment event | notify, payments | inbox UI, preferences |
+| M6 Frontend foundation | saare 11 apps Vercel pe, login + khaali dashboard, dono themes | har app ka live URL | `vercel.json`, security headers, review | apps template se, app-shell |
+| M7 Commerce | cart → checkout → order, Razorpay test mode, delivery pe UPI QR, invoice | live pe test order shuru se aakhir tak | checkout, order states, payments, GST invoice | cart, checkout, order screens |
+| M8 WMS + Delivery PWA | warehouse → rider → delivery/return; PWA install | phone pe Delivery PWA se dummy delivery | inventory ledger, state machines, routing | PWA screens, warehouse screens |
+| M9 Finance + support | ledger, payouts (test), tickets + grievance timers | ek order ka ledger aur ticket ka SLA | journal, settlements, registers | support desk UI |
+| M10 UGC, growth, governance | reviews, CMS, creators, privacy, risk | PRD §5 ke features live | governance, privacy, risk | reviews, CMS, creator screens |
+| M11 Launch hardening | monitors, alerts, legal pages, cutover | launch | sab | E2E flows ke screens |
+
+**Har milestone ke end ki checklist:**
+1. CI green; `main` → `prerelease` → `release` PR merge (owner).
+2. Render aur Vercel deploy; HANDOFF §3 me live URLs.
+3. Demo script live pe chalao (upar wala "Demo" column), jo dikha uska note.
+
+**Niyam:**
+- Phase 6 (frontend foundation) M2 se hi saath-saath (Cursor): har live milestone ko UI chahiye.
+- Free tier: Render free service 15 min khaali rehne pe so jaati hai (pehli request slow), demo se pehle ek baar khol lo. Brevo me "authorized IPs" on ho to band karo (Render ke outbound IP badalte hain).
 
 ## A. Owner ke kaam (sirf aap kar sakte ho)
 
@@ -216,3 +243,4 @@
 | v1.25 | 2026-10-22 | T1.5 done: typed client, codegen (`generated/`), platform catalogue (Milestone 1 sample route + event). |
 | v1.26 | 2026-10-22 | T1.6 done: authz `scopeWithin`, `grantProblems`, `checkSeparation` + mutations; naya `backend-server-storage` (`StoragePort`, in-memory adapter, contract tests). |
 | v1.27 | 2026-10-22 | Phase 1 done: T1.1 (`mountRoute`), T1.7 (audit, `shared-utils` mutations), Milestone 1 (core sample endpoint, event, inbox, Redis wipe drill). |
+| v1.28 | 2026-10-23 | Deploy-first plan (section D): har milestone live + demo, Claude/Cursor bantwara; focus Milestone 2. |

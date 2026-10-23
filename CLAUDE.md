@@ -101,3 +101,7 @@ npm run build
 
 [docs/HANDOFF.md](docs/HANDOFF.md) ke "Abhi ki halat" aur "Agla kaam" update karo: kya kiya, kya
 adhoora hai, kya uncommitted hai, kaunsa sawal kiske liye khula hai. Change log me ek line jodo.
+
+**Claude → Cursor relay (owner, 2026-10-23):** weekly usage ~85% pe Claude naya kaam nahi uthata: kaam
+commit-ready, HANDOFF §4 me Cursor ka agla kaam (TASKS section D ka "Cursor" column). Limit wapas aane pe
+pehla kaam Cursor ki `cursor/<task>` branches ka review aur PR. Poora flow [AGENTS.md](AGENTS.md) me.

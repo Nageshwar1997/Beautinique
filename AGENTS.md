@@ -1,6 +1,6 @@
 # AGENTS.md — Beautinique
 
-> **Status:** v1.1 (2026-10-23). Doosre AI coding tools (Codex, Cursor, Copilot, Gemini ...) ke liye. Asli niyam [CLAUDE.md](CLAUDE.md) me hain; yahan sirf wo hai jo kaam shuru karne se pehle jaanna zaroori hai. Farak ho to `CLAUDE.md` sahi hai.
+> **Status:** v1.2 (2026-10-23). Doosre AI coding tools (Codex, Cursor, Copilot, Gemini ...) ke liye. Asli niyam [CLAUDE.md](CLAUDE.md) me hain; yahan sirf wo hai jo kaam shuru karne se pehle jaanna zaroori hai. Farak ho to `CLAUDE.md` sahi hai.
 
 Beautinique: Indian beauty e-commerce monorepo (npm workspaces, Node 24, npm 12.2+). Education + portfolio project hai, par har cheez asli production jaisi banti hai. Is pe 2 log kaam karte hain, aur kaam alag-alag AI tools ke beech haath badalta rehta hai.
 
@@ -37,13 +37,25 @@ npm run verify -- --all --yes
 - Imports/exports ka order **ESLint** (`simple-import-sort`) tay karta hai. File badalne ke baad `npx eslint <file> --fix`, phir `npx prettier --write <file>`. Editor ka "Organize Imports" mat chalao: wo alag order deta hai aur lint fail hota hai.
 - `zod` sirf `@beautinique/shared-zod` se, `mongodb` sirf `@beautinique/backend-server-mongo` se; transaction ke andar `Promise.all` nahi. ESLint inhe rokta hai.
 
+## Claude ke baad Cursor (owner ka relay flow, 2026-10-23)
+
+Pehle Claude ki weekly limit use hoti hai; khatam hone pe owner agla kaam Cursor ko deta hai.
+
+1. **Shuru:** `git checkout main && git pull`, phir nayi branch `cursor/<task>` (jaise `cursor/t6-1-auth-ui`). **Ek task, ek branch**: chhoti branch ka review sasta hai.
+2. **Kaunsa kaam:** [docs/HANDOFF.md](docs/HANDOFF.md) §4 aur [docs/TASKS.md](docs/TASKS.md) section D ka "Cursor" column: UI screens, forms, CRUD, tests ka boilerplate. Paisa/stock/permissions, kernel packages (`packages/backend/*`, `packages/shared/*`) aur architecture Claude ke liye chhodo; zaroorat pade to HANDOFF me sawal likho.
+3. **Khatam:** upar wale CI checks chalao, commit karo, branch push karo, HANDOFF §3/§4 me likho kya hua aur branch ka naam.
+4. **Review:** Claude ki limit wapas aane pe Claude branch ka diff review karta hai, plan ke hisaab se theek/optimize karta hai, aur owner ki haan pe `main` ke liye PR banata hai.
+
+Claude ki taraf se: weekly usage ~85% pe Claude naya kaam nahi uthata; kaam commit-ready chhodta hai aur HANDOFF §4 me Cursor ka agla kaam saaf likhta hai.
+
 ## Kaam rokte waqt
 
 Chhote commits (Conventional Commits, jaise `feat(scope): ...`), sirf apne task ki files. [docs/HANDOFF.md](docs/HANDOFF.md) ke "Abhi ki halat" aur "Agla kaam" update karo: kya kiya, kya adhoora hai, kya uncommitted hai, kaunsa sawal kiske liye khula hai.
 
 ## Change log
 
-| Version | Date       | Badlav                                          |
-| ------- | ---------- | ----------------------------------------------- |
-| v1.0    | 2026-10-23 | Pehla version: doosre AI tools ke liye pointer. |
-| v1.1    | 2026-10-23 | Dependencies sirf `npm run update-deps` se.     |
+| Version | Date       | Badlav                                                                         |
+| ------- | ---------- | ------------------------------------------------------------------------------ |
+| v1.0    | 2026-10-23 | Pehla version: doosre AI tools ke liye pointer.                                |
+| v1.1    | 2026-10-23 | Dependencies sirf `npm run update-deps` se.                                    |
+| v1.2    | 2026-10-23 | Claude ke baad Cursor: relay flow, `cursor/<task>` branches, kaam ka bantwara. |
