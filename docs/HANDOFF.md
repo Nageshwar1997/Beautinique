@@ -1,6 +1,6 @@
 # HANDOFF — BQ
 
-> **Status:** v1.30 (2026-10-22). Is project pe 2 log kaam karte hain. Ye file batati hai ki **abhi kya halat hai, kisne kya chhoda, agla kaam kya hai** aur kaunse sawal khule hain, taaki doosra insaan (aur uska Claude) bina poora itihaas padhe kaam utha sake. Jo bhi kaam roke, wo ye file update kare (neeche §8).
+> **Status:** v1.31 (2026-10-23). Is project pe 2 log kaam karte hain. Ye file batati hai ki **abhi kya halat hai, kisne kya chhoda, agla kaam kya hai** aur kaunse sawal khule hain, taaki doosra insaan (aur uska Claude) bina poora itihaas padhe kaam utha sake. Jo bhi kaam roke, wo ye file update kare (neeche §8).
 
 ## 0. Pehle ye (handoff ke din)
 
@@ -23,6 +23,7 @@
 5. **Roz ka git flow** (ARCHITECTURE §13, RULES §2): `git switch main` → `git pull` → `git switch -c feat/<kaam>` → commits (Conventional Commits) → PR **`main`** pe. Batch ready ho to PR `main` → `prerelease` (laptop Docker pe integration/E2E), phir PR `prerelease` → `release` (live + npm). Package release ke baad PR `release` → `main` (back-merge).
 6. Docker sirf local dev ke liye hai (owner Docker seekh raha hai; TASKS me "Docker Lesson" wale tasks owner ke saath karne hain).
 7. **VS Code:** `Beautinique` folder seedha kholo (File → Open Folder), parent `BQ` nahi: VS Code nested `.vscode` nahi padhta. Repo ki `.vscode/settings.json` save pe ESLint se order theek karti hai (VS Code ka Organize Imports band) aur bekaar imports hatati hai (`source.removeUnusedImports`: sirf hatata hai, order nahi chhedta), aur `extensions.json` ESLint + Prettier extensions batata hai.
+8. **Doosre AI tools:** root ka `AGENTS.md` unhe `CLAUDE.md`, HANDOFF aur RULES ki taraf bhejta hai (zyadatar tools `CLAUDE.md` nahi, `AGENTS.md` padhte hain). Unse bhi kaam rokte waqt HANDOFF update karwao; unka diff baad me review hota hai (`git log <commit>..HEAD`).
 
 ## 3. Abhi ki halat (2026-10-20)
 
@@ -149,3 +150,4 @@
 | v1.28 | 2026-10-22 | `server-queue` test "skips an event delivered again": CI timeout ka race theek (duplicate jobId ignore hota hai); trap (§6). |
 | v1.29 | 2026-10-22 | Phase 1 poora: `mountRoute`, `core` me sample endpoint + event + inbox + Redis wipe drill, `shared-utils` mutations (§3, §4). |
 | v1.30 | 2026-10-22 | Mutation lists me `Mutation` type ek jagah (`scripts/mutation/lib/list`) se import hota hai, 8 packages ki copy hata di (§3). |
+| v1.31 | 2026-10-23 | Root `AGENTS.md`: doosre AI tools ke liye pointer (§2). |
