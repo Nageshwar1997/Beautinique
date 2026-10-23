@@ -94,6 +94,51 @@ export function parseCommonFlags(argv: string[]): CommonFlags {
   };
 }
 
+export interface UpdateDepsFlags {
+  help: boolean;
+  yes: boolean;
+  dryRun: boolean;
+  level: BumpType;
+}
+
+/**
+ * Flags of update-deps. Without `--`, npm 12 refuses --level itself (EUNKNOWNCONFIG); --dry-run is an
+ * npm flag, so it only reaches us as npm_config_dry_run and is honoured like in publish.
+ */
+export function parseUpdateDepsFlags(argv: string[], env = process.env): UpdateDepsFlags {
+  let values;
+  try {
+    ({ values } = parseArgs({
+      args: argv,
+      strict: true,
+      options: {
+        help: { type: 'boolean', short: 'h', default: false },
+        yes: { type: 'boolean', short: 'y', default: false },
+        'dry-run': { type: 'boolean', default: false },
+        level: { type: 'string' },
+      },
+    }));
+  } catch (error) {
+    throw new CliError((error as Error).message, {
+      code: 'BAD_FLAGS',
+      hint: 'Flags go after --, e.g. npm run update-deps -- --level minor (see --help).',
+    });
+  }
+  const level = values.level ?? 'major';
+  if (!(BUMP_TYPES as readonly string[]).includes(level)) {
+    throw new CliError(`--level must be ${BUMP_TYPES.join(', ')} (got "${level}").`, {
+      code: 'BAD_FLAGS',
+      hint: 'Flags go after --, e.g. npm run update-deps -- --level minor.',
+    });
+  }
+  return {
+    help: values.help,
+    yes: values.yes,
+    dryRun: values['dry-run'] || env.npm_config_dry_run === 'true',
+    level: level as BumpType,
+  };
+}
+
 /** For commands without options (login, logout, status, build): true when help was asked for. */
 export function parseHelpOnly(argv: string[]): boolean {
   try {

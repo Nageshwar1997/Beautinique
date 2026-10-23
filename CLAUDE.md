@@ -17,7 +17,7 @@ launch jaisi banti hai. Legal cheezein dummy data ke saath implement hoti hain.
 3. [docs/TASKS.md](docs/TASKS.md): phases aur tasks (`T<phase>.<n>`), owner ke kaam (section A).
 4. [docs/MEMORY.md](docs/MEMORY.md): decision log, purane sabak, traps.
 5. [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md), [docs/PRD.md](docs/PRD.md), [docs/DESIGN.md](docs/DESIGN.md): zaroorat ke hisaab se, poore nahi.
-6. [docs/packages/README.md](docs/packages/README.md): packages ka CLI (create, publish, republish).
+6. [docs/packages/README.md](docs/packages/README.md): packages ka CLI (create, publish, republish, update-deps).
 
 ## Hamesha laagu niyam (detail RULES.md me)
 
@@ -57,19 +57,20 @@ npm install
 npm run build
 ```
 
-| Command                                                                         | Kaam                                                                                                 |
-| ------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------- |
-| `npm run lint` / `typecheck` / `test` / `format:check`                          | Saare checks (CI yahi chalata hai, `npm run build` ke baad; test ko Mongo chahiye: `infra:up`)       |
-| `npm run test:scripts`                                                          | Sirf CLI ke tests (~10 min; e2e aur app/backend sabse lambe)                                         |
-| `npm run status`                                                                | Har package: local vs npm version, login                                                             |
-| `npm run verify -- --all --yes`                                                 | Publish wale saare checks, bina publish ke                                                           |
-| `npm run create` (`create:app`, `create:backend`)                               | Naya package, frontend app ya backend app                                                            |
-| `npm run publish` / `republish`                                                 | Packages ka CLI; har command `-- --help` deta hai                                                    |
-| `npm run dev:backend`                                                           | `backend/bundle`: saare deployables ek process me                                                    |
-| `npm run infra:up` / `infra:down` / `infra:reset`                               | Local Mongo, Valkey, Mailpit (Docker; [infra/README.md](infra/README.md))                            |
-| `npm run infra:mutation:up` / `infra:mutation:down`                             | Mutation runs ke liye alag Mongo (27018) aur Valkey (6380): normal kaam saath chalta rahe (RULES §6) |
-| `npm run mutate -- --package backend-server-queue` (`--changed`, `--base main`) | Mutation testing (RULES §6): package ki `test/mutations.ts`, temp copy me                            |
-| `npm run playground --workspace @beautinique/frontend-styles`                   | Styles ka Vite playground (port 5180)                                                                |
+| Command                                                                          | Kaam                                                                                                                                                             |
+| -------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `npm run lint` / `typecheck` / `test` / `format:check`                           | Saare checks (CI yahi chalata hai, `npm run build` ke baad; test ko Mongo chahiye: `infra:up`)                                                                   |
+| `npm run test:scripts`                                                           | Sirf CLI ke tests (~10 min; e2e aur app/backend sabse lambe)                                                                                                     |
+| `npm run status`                                                                 | Har package: local vs npm version, login                                                                                                                         |
+| `npm run verify -- --all --yes`                                                  | Publish wale saare checks, bina publish ke                                                                                                                       |
+| `npm run create` (`create:app`, `create:backend`)                                | Naya package, frontend app ya backend app                                                                                                                        |
+| `npm run publish` / `republish`                                                  | Packages ka CLI; har command `-- --help` deta hai                                                                                                                |
+| `npm run update-deps` (`update-deps:minor`, `update-deps:patch`, `-- --dry-run`) | Saare package.json ki dependencies naye versions pe (default major), phir `npm install`; `typescript` hold pe ([packages/README.md](docs/packages/README.md) §7) |
+| `npm run dev:backend`                                                            | `backend/bundle`: saare deployables ek process me                                                                                                                |
+| `npm run infra:up` / `infra:down` / `infra:reset`                                | Local Mongo, Valkey, Mailpit (Docker; [infra/README.md](infra/README.md))                                                                                        |
+| `npm run infra:mutation:up` / `infra:mutation:down`                              | Mutation runs ke liye alag Mongo (27018) aur Valkey (6380): normal kaam saath chalta rahe (RULES §6)                                                             |
+| `npm run mutate -- --package backend-server-queue` (`--changed`, `--base main`)  | Mutation testing (RULES §6): package ki `test/mutations.ts`, temp copy me                                                                                        |
+| `npm run playground --workspace @beautinique/frontend-styles`                    | Styles ka Vite playground (port 5180)                                                                                                                            |
 
 ## Repo ka naksha
 

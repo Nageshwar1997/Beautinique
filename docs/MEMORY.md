@@ -1,6 +1,6 @@
 # MEMORY — BQ
 
-> **Status:** v1.22 (2026-10-22). Project ki yaaddasht: **kya tay hua aur kyun**, **pichhle kaam se kya seekha**, aur **kaunse jaal (traps) se bachna hai**. Poori detail baaki docs me hai; yahan short version aur pointers. Naya sabak ya decision aaye to yahan ek line jodo.
+> **Status:** v1.23 (2026-10-23). Project ki yaaddasht: **kya tay hua aur kyun**, **pichhle kaam se kya seekha**, aur **kaunse jaal (traps) se bachna hai**. Poori detail baaki docs me hai; yahan short version aur pointers. Naya sabak ya decision aaye to yahan ek line jodo.
 
 ## 1. Decision log
 
@@ -65,6 +65,7 @@
 | 2026-10-20 | Har file ka ek owner; doosri jagah wahi image chahiye to copy | Ek record ka delete doosre ki image nahi todta | ARCH §6.7 |
 | 2026-10-20 | **Frozen:** OTP sirf email se; mobile pe OTP nahi (login aur delivery), phone sirf contact | SMS ke liye DLT (registered business) chahiye; baaki raaste paid ya card wale | ARCH §7.1, PRD §2 |
 | 2026-10-20 | **Frozen:** SMS aur WhatsApp channel bilkul nahi (poore hate); notifications sirf in-app, email, browser push | Mobile pe asli message ke liye DLT ya paid raasta chahiye; sandbox ka koi fayda nahi | ARCH §3, §10; PRD §5 |
+| 2026-10-23 | Dependencies update sirf `npm run update-deps` se: saare package.json ek saath, `--level patch / minor / major` (default major), installed version (lockfile) se shuru, pehle exact version pe `npm install` phir range apne style me, peer ranges ke hisaab se peeche, `typescript` hold (`HELD`) | Owner ne saare package.json aur default major maange; `^` range pe npm `patch` me bhi naya minor le leta; range ke shuru se chalna installed version ko downgrade karta; TS 7 typescript-eslint nahi maanta | [packages/README.md](packages/README.md) §7 |
 
 ## 2. Pichhle kaam se seekhe sabak
 
@@ -148,3 +149,4 @@
 | v1.20 | 2026-10-22 | Decision: imports/exports ka order ESLint tay karta hai (CI), VS Code Organize Imports band. |
 | v1.21 | 2026-10-22 | Decisions: `backend-server-storage` ka naam, `StoragePort` me `stat` aur `list`, ek key format, adapter contract tests; authz me scope-in-scope, grant checks, separation of duties. |
 | v1.22 | 2026-10-22 | Decisions: Milestone 1 `core` me (sample module, `mountRoute` ki hadd), scoped Redis wipe drill. |
+| v1.23 | 2026-10-23 | Decision: dependencies sirf `npm run update-deps` se (levels, installed se shuru, exact install phir range, typescript hold). |

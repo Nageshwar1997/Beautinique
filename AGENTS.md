@@ -1,6 +1,6 @@
 # AGENTS.md — Beautinique
 
-> **Status:** v1.0 (2026-10-23). Doosre AI coding tools (Codex, Cursor, Copilot, Gemini ...) ke liye. Asli niyam [CLAUDE.md](CLAUDE.md) me hain; yahan sirf wo hai jo kaam shuru karne se pehle jaanna zaroori hai. Farak ho to `CLAUDE.md` sahi hai.
+> **Status:** v1.1 (2026-10-23). Doosre AI coding tools (Codex, Cursor, Copilot, Gemini ...) ke liye. Asli niyam [CLAUDE.md](CLAUDE.md) me hain; yahan sirf wo hai jo kaam shuru karne se pehle jaanna zaroori hai. Farak ho to `CLAUDE.md` sahi hai.
 
 Beautinique: Indian beauty e-commerce monorepo (npm workspaces, Node 24, npm 12.2+). Education + portfolio project hai, par har cheez asli production jaisi banti hai. Is pe 2 log kaam karte hain, aur kaam alag-alag AI tools ke beech haath badalta rehta hai.
 
@@ -19,6 +19,7 @@ Beautinique: Indian beauty e-commerce monorepo (npm workspaces, Node 24, npm 12.
 - Business decision owner ka hai: docs chup hon to recommendation ke saath poochho, phir jawab doc me likho.
 - Production-grade, kuch bhi "baad me" nahi: naye code ke saath tests aur README. Mutation testing sirf [RULES §6](docs/RULES.md) ke hisaab se (kernel packages, paisa/stock/permissions), copy me, asli files me nahi: `npm run mutate -- --package <category>-<name>`.
 - "Verified" tabhi likho jab asli action karke dekha ho. Test fail ho to output ke saath batao.
+- Dependencies update sirf `npm run update-deps` se (`:minor`, `:patch`, `-- --dry-run`), haath se `npm install x@latest` nahi: `typescript` hold pe hai (typescript-eslint naya TypeScript nahi maanta), aur script peer ranges aur lockfile sambhalta hai. Nayi dependency jodni ho to `@latest` hi lo.
 
 ## CI jo pakadta hai (push se pehle khud chalao)
 
@@ -45,3 +46,4 @@ Chhote commits (Conventional Commits, jaise `feat(scope): ...`), sirf apne task 
 | Version | Date       | Badlav                                          |
 | ------- | ---------- | ----------------------------------------------- |
 | v1.0    | 2026-10-23 | Pehla version: doosre AI tools ke liye pointer. |
+| v1.1    | 2026-10-23 | Dependencies sirf `npm run update-deps` se.     |
