@@ -13,3 +13,9 @@ to an "Icon credits" page built from `ICON_CREDITS` (`src/credits.ts`).
   (delivery-linear), `IconFaceScan` (face-scan-circle-linear), `IconMonitor` (monitor-linear),
   `IconMoon` (moon-linear), `IconPalette` (pallete-2-linear), `IconShieldCheck`
   (shield-check-linear), `IconSun` (sun-2-linear), `IconTagPrice` (tag-price-linear).
+
+## Beautinique logo
+
+`BrandMark`, `BrandLogo` (`src/brand/`) and their source `brand/logo-master.webp` are the
+project's own artwork for this portfolio project, not one of the sets above, so they need no
+credit.

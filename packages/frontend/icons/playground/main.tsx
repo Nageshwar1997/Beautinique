@@ -34,6 +34,15 @@ function Playground() {
         </button>
       </header>
       <main id="main" className="container-page">
+        <section className="bg-surface border-border mb-6 rounded-lg border p-4" aria-label="Logo">
+          <div className="flex flex-wrap items-end gap-6">
+            <icons.BrandLogo size={40} label="Beautinique" />
+            <icons.BrandLogo layout="stacked" size={120} label="Beautinique, stacked" />
+            <icons.BrandMark size={32} label="Beautinique mark" />
+            <icons.BrandMark size={16} label="Beautinique mark, small" />
+            <icons.BrandLogo size={24} monochrome label="Beautinique, one colour" />
+          </div>
+        </section>
         <ul className="grid grid-cols-[repeat(auto-fill,minmax(10rem,1fr))] gap-3">
           {all.map(([name, Component]) => (
             <li key={name} className="bg-surface border-border rounded-lg border p-4">

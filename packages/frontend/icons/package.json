@@ -1,13 +1,14 @@
 {
   "name": "@beautinique/frontend-icons",
   "version": "1.0.0",
-  "description": "Beautinique's own icon components: SVG copied from Iconify sets (only the icons we use), one BaseIcon, no runtime Iconify.",
+  "description": "Beautinique's own icon components (SVG copied from Iconify sets, only the icons we use, one BaseIcon, no runtime Iconify) and the Beautinique logo.",
   "keywords": [
     "beautinique",
     "frontend",
     "icons",
     "react",
-    "svg"
+    "svg",
+    "logo"
   ],
   "author": "Nageshwar Pawar",
   "license": "MIT",

@@ -57,5 +57,19 @@ describe('bundling', () => {
       expect(two).toContain('IconMoon');
       expect(two).not.toContain('IconBox');
     });
+
+    it.skipIf(!existsSync(file))(`the logo's paths come only with the logo (${name})`, async () => {
+      const markPath = 'M33.9 0.1C28.8';
+      const namePath = 'M1.5 0.1C0.9';
+      const icon = await appImporting(file, ['IconSun']);
+      expect(icon).not.toContain(markPath);
+      expect(icon).not.toContain(namePath);
+      const mark = await appImporting(file, ['BrandMark']);
+      expect(mark).toContain(markPath);
+      expect(mark).not.toContain(namePath);
+      const logo = await appImporting(file, ['BrandLogo']);
+      expect(logo).toContain(markPath);
+      expect(logo).toContain(namePath);
+    });
   }
 });
