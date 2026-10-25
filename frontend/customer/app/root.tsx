@@ -62,13 +62,44 @@ export default function App() {
   return <Outlet />;
 }
 
-/** Unknown paths (a real 404 status) and unexpected errors. */
+const isNotFound = (error: unknown) => isRouteErrorResponse(error) && error.status === 404;
+
+/** What a developer needs to see. Production shows none of it (React Router hides server errors there too). */
+function technicalDetails(error: unknown): string | undefined {
+  if (!import.meta.env.DEV) return undefined;
+  if (isRouteErrorResponse(error)) {
+    return `${String(error.status)} ${error.statusText}\n${JSON.stringify(error.data, null, 2)}`;
+  }
+  return error instanceof Error ? (error.stack ?? error.message) : String(error);
+}
+
+/** Unknown paths (a real 404 status) and unexpected errors, inside the normal header and footer. */
 export function ErrorBoundary({ error }: Route.ErrorBoundaryProps) {
-  return isRouteErrorResponse(error) && error.status === 404 ? (
-    <ErrorPage title="Page not found" message="We could not find this page." />
-  ) : (
-    <ErrorPage title="Something went wrong" message="Please try again in a moment." />
+  if (isNotFound(error)) {
+    return (
+      <ErrorPage
+        status={404}
+        title="Page not found"
+        message="We looked everywhere, even under the vanity. The page may have moved, or the link may have a typo."
+      />
+    );
+  }
+  return (
+    <ErrorPage
+      kind="error"
+      status={isRouteErrorResponse(error) ? error.status : undefined}
+      title="Something went wrong"
+      message="A little spill on our side. Please try again in a moment."
+      details={technicalDetails(error)}
+    />
   );
 }
 
-export const meta: Route.MetaFunction = () => [{ title: 'Beautinique' }];
+/** Error pages get their own title and stay out of search results. */
+export const meta: Route.MetaFunction = ({ error }) =>
+  error === undefined
+    ? [{ title: 'Beautinique' }]
+    : [
+        { title: `${isNotFound(error) ? 'Page not found' : 'Something went wrong'} | Beautinique` },
+        { name: 'robots', content: 'noindex' },
+      ];

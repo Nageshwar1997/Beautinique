@@ -5,7 +5,7 @@ import { afterEach, describe, expect, it } from 'vitest';
 
 import { SiteFooter } from '../app/components/SiteFooter';
 import { SiteHeader } from '../app/components/SiteHeader';
-import { ErrorBoundary } from '../app/root';
+import { ErrorBoundary, meta as rootMeta } from '../app/root';
 import Credits from '../app/routes/credits';
 import Home, { meta } from '../app/routes/home';
 
@@ -143,24 +143,72 @@ describe('other pages', () => {
     );
     expect(await violations(container)).toEqual([]);
   });
+});
 
-  it('unknown paths and errors get the shared error page', () => {
-    const Stub = createRoutesStub([
-      {
-        path: '/',
-        Component: () => (
-          <ErrorBoundary
-            {...({
-              error: { status: 404, statusText: 'Not Found', internal: true, data: '' },
-            } as unknown as Parameters<typeof ErrorBoundary>[0])}
-          />
-        ),
-      },
-    ]);
-    render(<Stub initialEntries={['/']} />);
+describe('error pages', () => {
+  /** What React Router hands the boundary for a thrown or unmatched response. */
+  const response = (status: number, statusText: string) => ({
+    status,
+    statusText,
+    internal: true,
+    data: `${String(status)} ${statusText}`,
+  });
+  type BoundaryProps = Parameters<typeof ErrorBoundary>[0];
+  const boundary = (error: unknown) =>
+    page(() => <ErrorBoundary {...({ error } as BoundaryProps)} />);
+  type MetaArgs = Parameters<typeof rootMeta>[0];
+  const titleOf = (error: unknown) => {
+    const tag = rootMeta({ error } as MetaArgs).find((entry) => 'title' in entry);
+    return tag !== undefined && 'title' in tag ? tag.title : undefined;
+  };
+
+  it('an unknown path says so, with the code in text and a way home', async () => {
+    const { container } = boundary(response(404, 'Not Found'));
     expect(screen.getByRole('heading', { level: 1, name: 'Page not found' })).toBeTruthy();
+    expect(screen.getByText('Error 404')).toBeTruthy();
     expect(screen.getByRole('link', { name: 'Go to the home page' }).getAttribute('href')).toBe(
       '/',
     );
+    // the big 404 is art: hidden from screen readers, its zero an empty compact
+    const art = container.querySelector('[data-error-code="404"]');
+    expect(art?.getAttribute('aria-hidden')).toBe('true');
+    expect(art?.querySelectorAll('[data-compact="empty"]')).toHaveLength(1);
+    expect(screen.queryByText('Technical details')).toBeNull();
+    expect(await violations(container)).toEqual([]);
+  });
+
+  it('an unexpected error offers to try again, and shows developers what broke', async () => {
+    const { container } = boundary(new Error('product card exploded'));
+    expect(screen.getByRole('heading', { level: 1, name: 'Something went wrong' })).toBeTruthy();
+    expect(screen.getByRole('button', { name: 'Try again' })).toBeTruthy();
+    expect(screen.getByRole('link', { name: 'Go to the home page' })).toBeTruthy();
+    expect(
+      container.querySelector('[data-error-code="Oops"] [data-compact="cracked"]'),
+    ).toBeTruthy();
+    // tests run in development: the details are there, closed
+    expect(screen.getByText('Technical details').closest('details')?.open).toBe(false);
+    expect(container.querySelector('pre')?.textContent).toContain('product card exploded');
+    expect(await violations(container)).toEqual([]);
+  });
+
+  it('another status is named and drawn', () => {
+    const { container } = boundary(response(503, 'Service Unavailable'));
+    expect(screen.getByText('Error 503')).toBeTruthy();
+    expect(screen.getByRole('heading', { level: 1, name: 'Something went wrong' })).toBeTruthy();
+    expect(
+      container.querySelectorAll('[data-error-code="503"] [data-compact="cracked"]'),
+    ).toHaveLength(1);
+  });
+
+  it('error pages get their own title and stay out of search results', () => {
+    expect(titleOf(undefined)).toBe('Beautinique');
+    expect(titleOf(response(404, 'Not Found'))).toBe('Page not found | Beautinique');
+    expect(titleOf(new Error('x'))).toBe('Something went wrong | Beautinique');
+    const tags = rootMeta({ error: new Error('x') } as MetaArgs);
+    expect(tags).toContainEqual({ name: 'robots', content: 'noindex' });
+    expect(rootMeta({ error: undefined } as MetaArgs)).not.toContainEqual({
+      name: 'robots',
+      content: 'noindex',
+    });
   });
 });

@@ -1,6 +1,6 @@
 # TASKS — BQ
 
-> **Status:** v1.37 (2026-10-26). Poore project ki task list, [ARCHITECTURE.md](ARCHITECTURE.md) §16 ke phases ke hisaab se. Har task "done" tabhi jab [RULES.md](RULES.md) §1.5 ki Definition of Done poori ho.
+> **Status:** v1.38 (2026-10-26). Poore project ki task list, [ARCHITECTURE.md](ARCHITECTURE.md) §16 ke phases ke hisaab se. Har task "done" tabhi jab [RULES.md](RULES.md) §1.5 ki Definition of Done poori ho.
 
 **Kaise use karein:**
 - `[ ]` baaki, `[~]` chal raha hai, `[x]` done.
@@ -145,7 +145,7 @@ Har milestone ke end me kuch **live** dikhana hai. Ek hi live environment, free 
 
 ## Phase 6. Frontend foundation (3 hafte, saath-saath)
 
-- [~] T6.1 Packages: app-shell, auth-ui, authz, api-client, data-table, review-screens, maps, forms, pwa-kit. (2026-10-25, `feat/m2-customer-landing`: `@beautinique/frontend-app-shell` 1.0.0 bana: `AppFrame`, `ThemeSwitcher` + `ThemeScript` (bina flash, CSP hash), `NavList`, `ErrorPage`, `tailwind.css`. Header/footer har app ka apna (owner). Baaki app-shell (wake-up screen T2.7 ke saath, sidebar layout, offline page, idle logout) aur baaki packages jab app ko chahiye.)
+- [~] T6.1 Packages: app-shell, auth-ui, authz, api-client, data-table, review-screens, maps, forms, pwa-kit. (2026-10-25, `feat/m2-customer-landing`: `@beautinique/frontend-app-shell` 1.0.0 bana: `AppFrame`, `ThemeSwitcher` + `ThemeScript` (bina flash, CSP hash), `NavList`, `ErrorPage`, `tailwind.css`. Header/footer har app ka apna (owner). 2026-10-26: `ErrorPage` naya design (404/error, compact art, "Go back" history se, reference, dev details). Baaki app-shell (wake-up screen T2.7 ke saath, sidebar layout, offline page, idle logout) aur baaki packages jab app ko chahiye.)
 - [~] T6.1a `icons` package: apne icon components; components package ki 12 `*-icons.ts` files ke icons yahan; icon credits (licenses) page. (2026-10-25: `@beautinique/frontend-icons` 1.0.0: `BaseIcon`, har icon apna component (pure `createIcon`, sirf import hue icons bundle me, Vite build test se pakka), converter script `npm run add-icons` (Iconify JSON → TSX, code/bahar ke links mana), `ICON_CREDITS` + `LICENSES.md`; 10 Solar icons. Customer app me "Icon credits" page. Purane components ke icons un components ke saath aayenge. 2026-10-26: logo `BrandLogo` (horizontal/stacked) + `BrandMark`, master image se trace; customer header/footer aur install icons me.)
 - [ ] T6.2 Styles package v2: fonts (Plus Jakarta Sans + Fraunces) aur preload plugin, base styles.
 - [ ] T6.3 Customer app → React Router 7 framework mode (SSR).
@@ -261,3 +261,4 @@ Har milestone ke end me kuch **live** dikhana hai. Ek hi live environment, free 
 | v1.35   | 2026-10-25 | T2.8 Metrics Lessons 1–5 (owner sikhna chahte hain; laptop only, gateway PR ke baad).                                                                             |
 | v1.36 | 2026-10-25 | T6.1 (app-shell) aur T6.1a (icons) ke pehle hisse, M2 customer landing ke saath. |
 | v1.37 | 2026-10-26 | T6.1a: logo (`BrandLogo`, `BrandMark`) icons package me. |
+| v1.38 | 2026-10-26 | T6.1: naya `ErrorPage` (404 aur error). |

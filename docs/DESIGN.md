@@ -1,6 +1,6 @@
 # DESIGN — BQ
 
-> **Status:** v1.6 (2026-10-26). UI aur UX ke niyam saare 11 apps ke liye. Design ka **source of truth code hai**: `@beautinique/frontend-styles` (tokens) aur `@beautinique/frontend-components` (components). [RULES.md](RULES.md) §5 frontend ke coding niyam batata hai; ye file batati hai ki cheezein **dikhengi aur chalengi kaise**.
+> **Status:** v1.7 (2026-10-26). UI aur UX ke niyam saare 11 apps ke liye. Design ka **source of truth code hai**: `@beautinique/frontend-styles` (tokens) aur `@beautinique/frontend-components` (components). [RULES.md](RULES.md) §5 frontend ke coding niyam batata hai; ye file batati hai ki cheezein **dikhengi aur chalengi kaise**.
 
 ## 1. Design principles
 
@@ -101,7 +101,7 @@ app-shell (layout, nav, theme switcher, wake-up screen), data-table, review-scre
 Har screen ye states dikhati hai:
 - **Loading:** Skeleton (shape jaisi, `skeleton` utility), spinner sirf chhote actions pe, page/wake-up pe `progress-indeterminate` bar.
 - **Empty:** kya hai aur aage kya karein, ek action button ke saath.
-- **Error:** saaf message, retry, aur request-id (support ke liye).
+- **Error:** saaf message, retry, aur request-id (support ke liye). Poore page ka error aur 404: app-shell ka `ErrorPage` (bade code ke 0 powder compact: 404 pe khaali, error pe toota; "Go back" sirf jab app ka pichhla page ho; asli status code, apna title, `noindex`; technical details sirf development me).
 - **Offline:** NetworkStatusToaster; Delivery app me offline queue ka count.
 - **Wake-up screen:** Render cold start pe (~1 min) "server jaag raha hai" screen, progress ke saath.
 - **Permission denied:** kis permission ki zaroorat hai, aur kisse maangein.
@@ -177,3 +177,4 @@ Har screen ye states dikhati hai:
 | v1.4    | 2026-10-21 | §3: palette script ab rangon ka matlab bhi check karta hai; checks ki ginti hata di (wo badalti rehti hai).                                                                           |
 | v1.5    | 2026-10-21 | Owner ke faisle: muted section pe subtle text nahi (rang wahi); ulti patti ke liye `focus-ring-inverse` + `surface-inverse`; high contrast me tones gehre, saara text 7:1.            |
 | v1.6    | 2026-10-26 | §11 Logo: master image, `BrandLogo`/`BrandMark` (icons package), rang theme se, favicon alag, install icons.                                                                          |
+| v1.7    | 2026-10-26 | §6 Error: 404 aur error page ka design (`ErrorPage`, compact art).                                                                                                                   |

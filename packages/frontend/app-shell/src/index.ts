@@ -1,5 +1,5 @@
 export { AppFrame, type AppFrameProps } from './AppFrame';
-export { ErrorPage, type ErrorPageProps } from './ErrorPage';
+export { ErrorPage, type ErrorPageAction, type ErrorPageProps } from './ErrorPage';
 export { type NavItem, NavList, type NavListProps } from './NavList';
 export {
   readThemeChoice,

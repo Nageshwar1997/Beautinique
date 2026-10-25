@@ -50,7 +50,28 @@ export function Layout({ children }) {
 | `THEME_SCRIPT`, `THEME_SCRIPT_HASH`                     | Script ka text, aur CSP `script-src` ke liye uska hash (`unsafe-inline` ke bina); test hash check karta hai                                                                                             |
 | `useThemeChoice()`, `setThemeChoice`, `readThemeChoice` | Choice padhna aur badalna (`'light' \| 'dark' \| 'system'`); server pe hamesha `system`, isliye hydration match                                                                                         |
 | `NavList({ items, label })`                             | Nav landmark + links; chalu page pe `aria-current="page"`. Khaali `items` = kuch render nahi, isliye app sirf bane pages deti hai (koi dead link nahi)                                                  |
-| `ErrorPage({ title, message, action })`                 | Error/404 ka content: ek `h1`, message, aur link (default home). Apna `<main>` nahi jodta                                                                                                               |
+| `ErrorPage(props)`                                      | Error/404 ka content (neeche). Apna `<main>` nahi jodta                                                                                                                                                 |
+
+### ErrorPage
+
+```tsx
+<ErrorPage status={404} title="Page not found" message="..." />                 // 404: khaali compact
+<ErrorPage kind="error" title="Something went wrong" details={devOnlyStack} />   // "Oops": toota compact, "Try again"
+<ErrorPage kind="error" status={503} title="We will be right back" reference={requestId} />
+```
+
+| Prop        | Kaam                                                                                                                     |
+| ----------- | ------------------------------------------------------------------------------------------------------------------------ |
+| `title`     | Page ka ek `h1`                                                                                                          |
+| `message`   | Ek-do line, kya hua aur ab kya karein                                                                                    |
+| `kind`      | `not-found` (default): bade code ke 0 khaali compact. `error`: compact toota, powder girta hai                           |
+| `status`    | "Error 404" text me aur bada bana hua. Na ho to not-found pe `404`, error pe `Oops` (O compact)                          |
+| `actions`   | `{ label, to }` (link) ya `{ label, onClick }` (button); pehla main. Default: home; error pe "Try again" (reload) + home |
+| `reference` | Request id jo user support ko bata sake (DESIGN §6)                                                                      |
+| `details`   | Developer ke liye message/stack, band `<details>` me. **Sirf development me do**                                         |
+
+- **"Go back"** apne aap aata hai jab tab me isi app ka pichhla page ho: React Router ki `history.state.idx` > 0 (pehle page ko bhi key milti hai, isliye `location.key` se pata nahi chalta). Server ko history nahi pata, isliye wo hamesha "nahi" kehta hai aur browser hydration ke baad decide karta hai (`useSyncExternalStore`): reload pe hydration mismatch nahi.
+- **Art** (`src/error-art.tsx`): code ka har `0`/`O` ek powder compact (rose case, khaali metal pan ya toota gold powder), peeche powder ke dhabbe aur specks. Sab `aria-hidden`; code text me "Error 404" se aata hai. Rang sirf theme tokens (light, dark, high contrast). Motion `tailwind.css` ke keyframes se (`compact-float`, `compact-jolt`, `crumb-fall`, `sparkle`, `powder-drift`, `speck-twinkle`); reduced motion pe sab ruk jata hai.
 
 Theme `<html theme="light|dark">` pe lagta hai; attribute na ho to system setting ([frontend-styles](../styles/README.md)). Badalte waqt ek frame `theme-switching`, taaki saare rang ek saath badlein.
 
@@ -58,7 +79,7 @@ Theme `<html theme="light|dark">` pe lagta hai; attribute na ho to system settin
 
 ## Tests
 
-`npm test --workspace @beautinique/frontend-app-shell`: theme script (saved theme, junk, storage band, CSP hash), switcher (keyboard, do switchers, doosra tab, server render), frame, nav, error page, aur har component pe axe (WCAG) check.
+`npm test --workspace @beautinique/frontend-app-shell`: theme script (saved theme, junk, storage band, CSP hash), switcher (keyboard, do switchers, doosra tab, server render), frame, nav, error page (dono kind, actions, browser history pe "Go back", reload ke baad bina mismatch hydration, server render, reference, details), aur har component pe axe (WCAG) check.
 
 ## Playground
 
@@ -66,4 +87,4 @@ Theme `<html theme="light|dark">` pe lagta hai; attribute na ho to system settin
 npm run playground --workspace @beautinique/frontend-app-shell
 ```
 
-http://localhost:5182: sample header/footer ke saath shell; Tab se skip link, arrow keys se theme, reload pe bina flash.
+http://localhost:5182: sample header/footer ke saath shell; Tab se skip link, arrow keys se theme, reload pe bina flash. Error pages: `/missing` (404), `/error` (Oops + details), `/503`.

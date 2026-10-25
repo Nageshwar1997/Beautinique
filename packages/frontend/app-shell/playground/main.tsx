@@ -9,7 +9,9 @@ import { AppFrame, ErrorPage, NavList, THEME_SCRIPT, ThemeSwitcher } from '../sr
 
 const NAV = [
   { label: 'Home', to: '/', end: true },
-  { label: 'Error page', to: '/missing' },
+  { label: '404', to: '/missing' },
+  { label: 'Error', to: '/error' },
+  { label: '503', to: '/503' },
 ];
 
 function Shell() {
@@ -55,9 +57,38 @@ const router = createBrowserRouter([
         ),
       },
       {
+        path: 'error',
+        Component: () => (
+          <ErrorPage
+            kind="error"
+            title="Something went wrong"
+            message="A little spill on our side. Please try again in a moment."
+            details={[
+              'TypeError: Cannot read properties of undefined',
+              '    at ProductCard (product-card.tsx:12:7)',
+            ].join('\n')}
+          />
+        ),
+      },
+      {
+        path: '503',
+        Component: () => (
+          <ErrorPage
+            kind="error"
+            status={503}
+            title="We will be right back"
+            message="The store is taking a short break. Please try again in a minute."
+          />
+        ),
+      },
+      {
         path: '*',
         Component: () => (
-          <ErrorPage title="Page not found" message="This is the shared error page." />
+          <ErrorPage
+            status={404}
+            title="Page not found"
+            message="We looked everywhere, even under the vanity. The page may have moved, or the link may have a typo."
+          />
         ),
       },
     ],
