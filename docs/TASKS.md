@@ -1,6 +1,6 @@
 # TASKS — BQ
 
-> **Status:** v1.31 (2026-10-25). Poore project ki task list, [ARCHITECTURE.md](ARCHITECTURE.md) §16 ke phases ke hisaab se. Har task "done" tabhi jab [RULES.md](RULES.md) §1.5 ki Definition of Done poori ho.
+> **Status:** v1.32 (2026-10-25). Poore project ki task list, [ARCHITECTURE.md](ARCHITECTURE.md) §16 ke phases ke hisaab se. Har task "done" tabhi jab [RULES.md](RULES.md) §1.5 ki Definition of Done poori ho.
 
 **Kaise use karein:**
 - `[ ]` baaki, `[~]` chal raha hai, `[x]` done.
@@ -93,10 +93,10 @@ Har milestone ke end me kuch **live** dikhana hai. Ek hi live environment, free 
 
 ## Phase 2. Gateway (1 hafta)
 
-- [ ] T2.1 Prefix routing table, app registry (11 apps), Origin aur `x-forwarded-host` → app. (Generator ka gateway: `X-BQ-App` check, contracts manifest se route aur owner tak stream, `..` path ka bachav. Origin aur `x-forwarded-host` → app baaki.)
-- [ ] T2.2 JWKS verification, per-app cookies, passport token, origin secret, `clientIp()`.
-- [ ] T2.3 Redis rate limits (classes), cache headers, helmet, request-id, Sentry.
-- [ ] T2.4 `/health` (shallow) aur `/ready` (deep), `/status`.
+- [x] T2.1 Prefix routing table, app registry (11 apps), Origin aur `x-forwarded-host` → app. (2026-10-25, `feat/m2-gateway`: route table contracts catalogue se, `GATEWAY__APP_HOSTS` + Vercel previews ka strict pattern, `x-forwarded-host`/`Host`/`Origin` usi app ke hon.)
+- [~] T2.2 JWKS verification, per-app cookies, passport token, origin secret, `clientIp()`. (Origin secret (rotation ke saath, timing-safe) aur `clientIp()` ho gaye 2026-10-25; sign-in tak non-public routes 401. JWKS, cookies, passport identity ke saath M3 me.)
+- [~] T2.3 Redis rate limits (classes), cache headers, helmet, request-id, Sentry. (2026-10-25: rate limits naye `@beautinique/backend-server-ratelimit` se, cache headers contract ke `cache` se, helmet + request-id server-kit me. **Sentry baaki:** poore process me ek init, owner ka DSN chahiye, M2 deploy branch me.)
+- [x] T2.4 `/health` (shallow) aur `/ready` (deep), `/status`. (2026-10-25: gateway `/ready` me Redis bhi; `/status` public summary, owner ka faisla.)
 - [ ] T2.5 `backend/bundle`: paancho deployables ek process me, boot pe release steps. (Generator ka bundle saare deployables chalata hai aur config keys env se hatata hai; boot ke release steps baaki.)
 - [ ] T2.6 Purani cheezein hatana: facades, `METHODS_AND_PATHS`, MASTER bypass, wake-up fan-out, keep-alive workflow.
 
@@ -246,5 +246,6 @@ Har milestone ke end me kuch **live** dikhana hai. Ek hi live environment, free 
 | v1.27   | 2026-10-22 | Phase 1 done: T1.1 (`mountRoute`), T1.7 (audit, `shared-utils` mutations), Milestone 1 (core sample endpoint, event, inbox, Redis wipe drill).                    |
 | v1.28   | 2026-10-23 | Deploy-first plan (section D): har milestone live + demo, Claude/Cursor bantwara; focus Milestone 2.                                                              |
 | v1.29   | 2026-10-25 | Cursor nahi: 2 developers baari-baari Claude ke saath; section D me ek "Kaam" column.                                                                             |
-| v1.30 | 2026-10-25 | T0.7: ruleset me PR approvals 0 (owner). |
-| v1.31 | 2026-10-25 | Section D: deploy flow `prerelease` → `release` → `main`; checklist me `release` → `main` aur back-merge. |
+| v1.30   | 2026-10-25 | T0.7: ruleset me PR approvals 0 (owner).                                                                                                                          |
+| v1.31   | 2026-10-25 | Section D: deploy flow `prerelease` → `release` → `main`; checklist me `release` → `main` aur back-merge.                                                         |
+| v1.32   | 2026-10-25 | M2 gateway (`feat/m2-gateway`): T2.1, T2.4 done; T2.2 me origin secret + `clientIp()`; T2.3 me Sentry baaki (deploy branch).                                      |

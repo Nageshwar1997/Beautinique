@@ -96,6 +96,75 @@ const mutations: Mutation[] = [
     name: 'ping note has no length limit',
     change: [['const noteZod = string().min(1).max(200);', 'const noteZod = string();']],
   },
+  // route cache (M2 gateway, 2026-10-25): a cached answer must never be a personal one
+  {
+    file: 'routes',
+    name: 'a non-GET route may be cached',
+    change: [
+      [
+        "if (route.method !== 'GET' || route.access.type !== 'public') {",
+        "if (route.access.type !== 'public') {",
+      ],
+    ],
+    tests: 'wrong declarations',
+  },
+  {
+    file: 'routes',
+    name: 'a signed-in route may be cached',
+    change: [
+      [
+        "if (route.method !== 'GET' || route.access.type !== 'public') {",
+        "if (route.method !== 'GET') {",
+      ],
+    ],
+    tests: 'wrong declarations',
+  },
+  {
+    file: 'routes',
+    name: 'sMaxAge 0 is accepted',
+    change: [['sMaxAge < 1 ||', 'sMaxAge < 0 ||']],
+    tests: 'wrong declarations',
+  },
+  {
+    file: 'routes',
+    name: 'sMaxAge above the maximum is accepted',
+    change: [['sMaxAge > MAX_S_MAX_AGE)', 'sMaxAge > MAX_S_MAX_AGE + 1)']],
+    tests: 'wrong declarations',
+  },
+  {
+    file: 'routes',
+    name: 'a negative stale window is accepted',
+    change: [['      staleWhileRevalidate < 0 ||\n', '']],
+    tests: 'wrong declarations',
+  },
+  {
+    file: 'routes',
+    name: 'the maximum stale window is refused',
+    change: [
+      [
+        'staleWhileRevalidate > MAX_STALE_WHILE_REVALIDATE\n',
+        'staleWhileRevalidate >= MAX_STALE_WHILE_REVALIDATE\n',
+      ],
+    ],
+    tests: 'wrong declarations',
+  },
+  {
+    file: 'routes',
+    name: 'the gateway manifest loses the cache',
+    change: [['cache: route.cache ? { ...route.cache } : null,', 'cache: null,']],
+    tests: 'gateway manifest',
+  },
+  {
+    file: 'openapi',
+    name: 'OpenAPI x-bq loses the cache',
+    change: [['cache: route.cache ? { ...route.cache } : null,', 'cache: null,']],
+    tests: 'x-bq',
+  },
+  {
+    file: 'catalogue/platform',
+    name: 'record ping needs sign-in again',
+    change: [["  access: { type: 'public' },", "  access: { type: 'signed-in' },"]],
+  },
 ];
 
 export default mutations;

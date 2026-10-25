@@ -18,7 +18,11 @@ import {
 } from '@beautinique/backend-server-queue';
 
 import type { Config } from './config.ts';
-import { subscribers, subscriptionsOf } from './modules/index.ts';
+import {
+  ensureIndexes as ensureModuleIndexes,
+  subscribers,
+  subscriptionsOf,
+} from './modules/index.ts';
 
 /** core's queue: its worker runs core's subscribers and scheduled tasks (one queue per deployable). */
 export const QUEUE = 'q.core';
@@ -78,6 +82,7 @@ export async function startRuntime(config: Config, options: RuntimeOptions): Pro
     closers.push(() => redis.close());
     await ensureOutboxIndexes(mongo);
     await ensureConsumerIndexes(mongo);
+    await ensureModuleIndexes({ mongo });
 
     const relay = startRelay({
       mongo,
