@@ -17,7 +17,7 @@ launch jaisi banti hai. Legal cheezein dummy data ke saath implement hoti hain.
 3. [docs/TASKS.md](docs/TASKS.md): phases aur tasks (`T<phase>.<n>`), owner ke kaam (section A).
 4. [docs/MEMORY.md](docs/MEMORY.md): decision log, purane sabak, traps.
 5. [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md), [docs/PRD.md](docs/PRD.md), [docs/DESIGN.md](docs/DESIGN.md): zaroorat ke hisaab se, poore nahi.
-6. [docs/packages/README.md](docs/packages/README.md): packages ka CLI (create, publish, republish).
+6. [docs/packages/README.md](docs/packages/README.md): packages ka CLI (create, publish, republish, update-deps).
 
 ## Hamesha laagu niyam (detail RULES.md me)
 
@@ -42,7 +42,9 @@ launch jaisi banti hai. Legal cheezein dummy data ke saath implement hoti hain.
 - **Commit/push sirf jo insaan kaam kar raha hai uske kehne pe.** Destructive kaam se pehle poochho.
 - **npm pe kuch bhi publish, `npm login/logout` ya `npm trust` sirf insaan ke kehne pe**; tests kabhi
   asli registry ko nahi chhoote (fake registry hai).
-- **Mutation testing copy me karo**, asli files me nahi (dev server file badalte hi reload hota hai).
+- **Mutation testing copy me karo**, asli files me nahi (dev server file badalte hi reload hota hai). Sirf 3 jagah (RULES §6):
+  kernel packages pehli baar poora run (background) aur baad me badli lines; paisa/stock/permissions me badli lines; baaki apps
+  aur modules me mutation nahi.
 - **Kam tokens:** targeted edits, file ka zaroori hissa hi padho, bade multi-agent workflows sirf
   zaroorat pe aur pehle bata ke.
 
@@ -55,17 +57,20 @@ npm install
 npm run build
 ```
 
-| Command                                                       | Kaam                                                                                           |
-| ------------------------------------------------------------- | ---------------------------------------------------------------------------------------------- |
-| `npm run lint` / `typecheck` / `test` / `format:check`        | Saare checks (CI yahi chalata hai, `npm run build` ke baad; test ko Mongo chahiye: `infra:up`) |
-| `npm run test:scripts`                                        | Sirf CLI ke tests (~10 min; e2e aur app/backend sabse lambe)                                   |
-| `npm run status`                                              | Har package: local vs npm version, login                                                       |
-| `npm run verify -- --all --yes`                               | Publish wale saare checks, bina publish ke                                                     |
-| `npm run create` (`create:app`, `create:backend`)             | Naya package, frontend app ya backend app                                                      |
-| `npm run publish` / `republish`                               | Packages ka CLI; har command `-- --help` deta hai                                              |
-| `npm run dev:backend`                                         | `backend/bundle`: saare deployables ek process me                                              |
-| `npm run infra:up` / `infra:down` / `infra:reset`             | Local Mongo, Valkey, Mailpit (Docker; [infra/README.md](infra/README.md))                      |
-| `npm run playground --workspace @beautinique/frontend-styles` | Styles ka Vite playground (port 5180)                                                          |
+| Command                                                                          | Kaam                                                                                                                                                             |
+| -------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `npm run lint` / `typecheck` / `test` / `format:check`                           | Saare checks (CI yahi chalata hai, `npm run build` ke baad; test ko Mongo chahiye: `infra:up`)                                                                   |
+| `npm run test:scripts`                                                           | Sirf CLI ke tests (~10 min; e2e aur app/backend sabse lambe)                                                                                                     |
+| `npm run status`                                                                 | Har package: local vs npm version, login                                                                                                                         |
+| `npm run verify -- --all --yes`                                                  | Publish wale saare checks, bina publish ke                                                                                                                       |
+| `npm run create` (`create:app`, `create:backend`)                                | Naya package, frontend app ya backend app                                                                                                                        |
+| `npm run publish` / `republish`                                                  | Packages ka CLI; har command `-- --help` deta hai                                                                                                                |
+| `npm run update-deps` (`update-deps:minor`, `update-deps:patch`, `-- --dry-run`) | Saare package.json ki dependencies naye versions pe (default major), phir `npm install`; `typescript` hold pe ([packages/README.md](docs/packages/README.md) §7) |
+| `npm run dev:backend`                                                            | `backend/bundle`: saare deployables ek process me                                                                                                                |
+| `npm run infra:up` / `infra:down` / `infra:reset`                                | Local Mongo, Valkey, Mailpit (Docker; [infra/README.md](infra/README.md))                                                                                        |
+| `npm run infra:mutation:up` / `infra:mutation:down`                              | Mutation runs ke liye alag Mongo (27018) aur Valkey (6380): normal kaam saath chalta rahe (RULES §6)                                                             |
+| `npm run mutate -- --package backend-server-queue` (`--changed`, `--base main`)  | Mutation testing (RULES §6): package ki `test/mutations.ts`, temp copy me                                                                                        |
+| `npm run playground --workspace @beautinique/frontend-styles`                    | Styles ka Vite playground (port 5180)                                                                                                                            |
 
 ## Repo ka naksha
 
@@ -74,6 +79,7 @@ npm run build
 - `frontend/<app>`, `backend/<name>`: `npm run create` se bante hain, npm packages nahi (abhi: customer, admin;
   gateway, identity, core, bundle).
 - `infra/`: laptop ka Docker infra (Mongo replica set, Valkey, Mailpit); live pe Docker nahi.
+- `scripts/mutation/`: mutation runner (`npm run mutate`); lists har package ke `test/mutations.ts` me.
 - `scripts/packages/`: package CLI (Node 24 TypeScript seedha chalata hai, build nahi). Tests:
   `scripts/packages/test/`.
 - **MongoDB:** `import { ObjectId, withTransaction } from '@beautinique/backend-server-mongo'`; seedha `mongodb` sirf
@@ -84,8 +90,10 @@ npm run build
   production Redis laptop ya tests se kabhi nahi.
 - **Zod:** `import { object, string, gstinZod } from '@beautinique/shared-zod'` (named, `z.` nahi); seedha `zod` sirf
   `packages/shared/zod` me (ESLint rokta hai). Hamare schemas `...Zod`, `enum as zodEnum`.
+- **Routes:** contract pehle (`defineRoute`), handler `mountRoute(router, route, handler)` (`@beautinique/backend-server-kit`) se: input/output contract se check hota hai. Namuna: `backend/core/src/modules/platform/` (endpoint + event + subscriber); core ke tests ko `infra:up` chahiye.
 - `configs/`: shared ESLint factory (`eslint-config.js`, naam `eslint.config.js` nahi ho sakta) aur
   tsconfig presets.
+- `AGENTS.md`: doosre AI tools (Codex, Cursor, Copilot, Gemini ...) ke liye chhota pointer; niyam yahin (`CLAUDE.md`) rehte hain. Niyam badlo to dono dekho.
 - `.github/workflows/`: `ci.yml` (har PR, aur `main`/`prerelease`/`release` pe push), `release.yml`
   (packages publish, sirf `release` branch, haath se).
 
@@ -93,3 +101,8 @@ npm run build
 
 [docs/HANDOFF.md](docs/HANDOFF.md) ke "Abhi ki halat" aur "Agla kaam" update karo: kya kiya, kya
 adhoora hai, kya uncommitted hai, kaunsa sawal kiske liye khula hai. Change log me ek line jodo.
+
+**Baari-baari (owner, 2026-10-25):** 2 developers, dono Claude Code ke saath. Weekly usage ~85% pe Claude
+naya kaam nahi uthata: kaam commit-ready, branch push, HANDOFF §4 me adhoora aur agla kaam saaf; doosra
+developer wahin se aage. Har task apni branch `feat/<task>` → PR → `main`; approval zaroori nahi, CI `check` green zaroori.
+Poora flow [docs/HANDOFF.md](docs/HANDOFF.md) §8.

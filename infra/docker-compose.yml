@@ -117,6 +117,72 @@ services:
       timeout: 3s
       retries: 10
 
+  # ---------------------------------------------------------------------------------------------
+  # Mutation testing ke liye alag Mongo aur Valkey (RULES §6). `profiles` ki wajah se ye `infra:up`
+  # se nahi chalte, sirf `npm run infra:mutation:up` se. Alag kyun? Mutation run MongoDB ka fail
+  # point (poore server ka ek) aur timing wale tests chalata hai; apne server pe chale to normal
+  # kaam aur tests saath me chal sakte hain. Data volume nahi: ye data phenkne layak hai.
+  mongo-mutation:
+    profiles: ['mutation']
+    image: mongo:8.0.34
+    environment:
+      GLIBC_TUNABLES: glibc.pthread.rseq=1
+    # Container ke andar bhi port 27018: replica set member ka naam (localhost:27018) laptop aur
+    # container dono jagah sahi hona chahiye.
+    command:
+      - mongod
+      - --port
+      - '27018'
+      - --replSet
+      - rs0
+      - --bind_ip_all
+      - --wiredTigerCacheSizeGB
+      - '0.25'
+      - --setParameter
+      - enableTestCommands=1
+    ports:
+      - '127.0.0.1:27018:27018'
+    healthcheck:
+      test:
+        - CMD
+        - mongosh
+        - --port
+        - '27018'
+        - --quiet
+        - --eval
+        - >-
+          try { rs.status() } catch (e) {
+          rs.initiate({ _id: 'rs0', members: [{ _id: 0, host: 'localhost:27018' }] }) };
+          quit(db.hello().isWritablePrimary ? 0 : 1)
+      interval: 5s
+      timeout: 10s
+      retries: 30
+      start_period: 10s
+
+  valkey-mutation:
+    profiles: ['mutation']
+    image: valkey/valkey:8.1.10
+    # wahi Render free jaisi seemaayein, sirf port alag
+    command:
+      - valkey-server
+      - --maxmemory
+      - 25mb
+      - --maxmemory-policy
+      - noeviction
+      - --maxclients
+      - '50'
+      - --appendonly
+      - 'no'
+      - --save
+      - ''
+    ports:
+      - '127.0.0.1:6380:6379'
+    healthcheck:
+      test: ['CMD', 'valkey-cli', 'ping']
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
 # Named volume: Docker isse khud sambhalta hai. `npm run infra:reset` ise mitata hai.
 volumes:
   mongo-data:

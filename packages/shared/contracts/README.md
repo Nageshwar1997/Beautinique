@@ -111,6 +111,31 @@ resolveAreaSetting(promise, values, { stateId: '27', districtId: '519', pincode:
 - `cursorQuery` (`cursor`, `limit` 1–100, default 20) aur `cursorPage(item)` (`items`, `nextCursor`).
 - `APPS` (11 apps), `DEPLOYABLES` (5), `HEADERS` (`X-BQ-App`, `Idempotency-Key`, `X-Request-Id`).
 
+## Typed client
+
+```ts
+import { createClient, queryKey, ApiError, getPing } from '@beautinique/shared-contracts';
+
+const client = createClient({ baseUrl: gatewayUrl, app: 'admin', getToken: () => token });
+const ping = await client.call(getPing, { params: { pingId } }); // return type route ke output se
+```
+
+- `call(route, { params, query, body }, { signal, idempotencyKey })`: path ban-ta hai (encode ke saath), query me `null`/`undefined` chhoot jaate hain aur arrays repeat hote hain, `X-BQ-App` + Bearer token jaata hai, aur `idempotency: true` routes pe `Idempotency-Key` apne aap (retry pe wahi key do: `idempotencyKey`). Request tab hi zaroori hai jab route me input ho.
+- Galti pe `ApiError` (`code`, `status`, `requestId`, `details`): server ka error body, ya body hamari na ho to `BAD_REQUEST`/`INTERNAL`; server na mile to `NETWORK_ERROR` (status 0); `data` na ho ya route ke output se na mile to `INVALID_RESPONSE` (`validateResponses: false` se band). Abort jaisa ka waisa dobara phenka jaata hai.
+- TanStack Query keys: `queryKey(route, { params, query })` = `[module, route.id, { params, query }]` (body kabhi nahi); `queryKeyPrefix('platform')` ya `queryKeyPrefix('platform', 'platform.ping.get')` invalidate ke liye.
+
+## Catalogue aur codegen
+
+Platform ka poora catalogue `src/catalogue/` me hai (`routes`, `events`, `permissions`); har module apni list wahan jodta hai. Abhi Milestone 1 ka sample hai: route `platform.ping.record` (POST, signed-in, idempotent, har app) jo `platform.ping.recorded` event usi transaction me likhta hai, route `platform.ping.get` (permission `platform.ping.read`).
+
+```bash
+npm run build --workspace @beautinique/shared-contracts
+npm run generate --workspace @beautinique/shared-contracts   # generated/ likhta hai
+npm run check --workspace @beautinique/shared-contracts      # generated/ purana ho to fail (CI)
+```
+
+`generated/` me 4 files (commit hoti hain, test unhe catalogue se milata hai): `openapi.json` (OpenAPI 3.1), `gateway-manifest.json` (gateway ko har route ka app/access/rate-limit/idempotency/step-up/owner), `events.json` (har event version ka JSON Schema) aur `permissions.json`. Ek hi input se hamesha ek hi bytes. Code se: `import { generateFiles, writeGenerated, staleGenerated } from '@beautinique/shared-contracts/codegen'` (sirf Node).
+
 ## Aage
 
 Event schema ka backward-compatibility check (CI) aur OpenAPI diff ARCHITECTURE §13 ke CI kaam me aayenge.

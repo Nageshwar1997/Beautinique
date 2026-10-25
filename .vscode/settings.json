@@ -1,0 +1,16 @@
+{
+  // One tool decides the order of imports and exports: ESLint (simple-import-sort). VS Code's own
+  // "Organize Imports" sorts differently (type names last, case rules of its own), so on every
+  // Ctrl+S it undid ESLint's order and lint failed. Keep it off here. "Remove Unused Imports" is
+  // fine: it only deletes unused imports and leaves the order alone.
+  "editor.codeActionsOnSave": {
+    "source.organizeImports": "never",
+    "source.removeUnusedImports": "always",
+    "source.fixAll.eslint": "always"
+  },
+  // The root eslint.config.js ignores packages/, frontend/ and backend/ (each lints itself), so the
+  // extension must look for the nearest config of the file being saved.
+  "eslint.workingDirectories": [{ "mode": "auto" }],
+  "editor.formatOnSave": true,
+  "editor.defaultFormatter": "esbenp.prettier-vscode"
+}

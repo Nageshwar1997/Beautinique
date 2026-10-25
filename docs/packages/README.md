@@ -1,6 +1,6 @@
 # Packages — banana, publish aur republish
 
-> **Status:** v1.7 (2026-10-21). **Abhi publish/republish nahi (owner ka faisla, 2026-10-21):** apps isi monorepo se package lete hain (npm workspaces), live deploy pe bhi. Publish sirf zaroorat pe; packages public hi rahenge. `packages/` ke saare npm packages ka kaam, aur naye frontend apps aur backend apps banana, is repo ke apne CLI (`scripts/packages/`) se hota hai. Ye guide batati hai ki kaunsa command kab chalana hai aur andar kya hota hai.
+> **Status:** v1.8 (2026-10-23). **Abhi publish/republish nahi (owner ka faisla, 2026-10-21):** apps isi monorepo se package lete hain (npm workspaces), live deploy pe bhi. Publish sirf zaroorat pe; packages public hi rahenge. `packages/` ke saare npm packages ka kaam, aur naye frontend apps aur backend apps banana, is repo ke apne CLI (`scripts/packages/`) se hota hai. Ye guide batati hai ki kaunsa command kab chalana hai aur andar kya hota hai.
 
 ## 1. Packages kahan aur kis naam se
 
@@ -25,6 +25,7 @@
 | `npm run republish` | Published packages ka naya version: bump, dependents, ranges, checks, phir publish (laptop) ya GitHub ke liye taiyari. |
 | `npm run verify` | Publish wale saare checks, bina publish ke. Chune packages ki internal dependencies pehle build hoti hain, isliye fresh clone pe bhi chalta hai. CI isse `--all` ke saath chalata hai. Package tests chalte hain, isliye backend packages (jaise `backend-server-mongo`) ke liye pehle `npm run infra:up`. |
 | `npm run build` | Saare packages build, dependencies pehle (devDependencies bhi). Fresh clone ke baad `npm install` ke turant baad chalao. |
+| `npm run update-deps` | Saare package.json (root, packages, apps, backend) ki bahar wali dependencies naye versions pe: plan dikhata hai, poochhta hai, phir `npm install`. `--level patch / minor / major` (default major); shortcuts `update-deps:minor`, `update-deps:patch`. Detail §7. |
 
 Har command `-- --help` se apne flags batata hai (`npm run publish -- --help`); galat flag pe command ruk jata hai. Flags `--` ke baad do; `npm run publish --dry-run` (bina `--`) bhi samjha jata hai.
 
@@ -103,6 +104,25 @@ Kisi package ka naya version agar kisi published dependent ki range tod de, to C
 - Node 24 TypeScript seedha chalata hai, build step nahi. `npm run test:scripts` sirf CLI ke tests.
 - npm bina shell ke chalta hai (Windows quoting ki dikkat nahi); npm ki 2FA prompt terminal me dikhti hai.
 
+## 7. Dependencies update (`npm run update-deps`)
+
+```bash
+npm run update-deps                  # major (default): sabse naya release
+npm run update-deps:minor            # kuch tootne wala nahi
+npm run update-deps:patch            # sirf bug fixes
+npm run update-deps -- --dry-run     # sirf plan, kuch nahi badalta
+```
+
+- **Kahan:** root aur har workspace ka package.json (`dependencies`, `devDependencies`, `peerDependencies`, `optionalDependencies`). Apne `@beautinique/*` packages nahi (unki ranges release CLI sambhalta hai). Jo range seedha version nahi (`>=1 <3`, `^1 || ^2`, `npm:`), wo chhoot jaati hai aur report me dikhti hai.
+- **Level:** `patch` = jo `~` aur `^` dono maante hain (1.2.3 → 1.2.9); `minor` = jo `^` maanta hai (1.2.3 → 1.9.0; 0.x me 0.3.1 → 0.3.9, kyunki 0.3 → 0.4 tod sakta hai); `major` = npm ka `latest`. Range ka style wahi rehta hai (`^`, `~`, exact).
+- **Kahan se shuru:** `package-lock.json` ka installed version (agar range me fit ho), range ka shuru nahi. Isliye `^19.0.0` pe 19.3.1 installed ho to `--level patch` 19.3.x deta hai, kabhi 19.0.x pe downgrade nahi. Jo version pehle se installed hai uski range bhi usi tak aa jaati hai ("range only").
+- **Kabhi nahi:** `latest` tag se upar (next/canary), deprecated version, prerelease, ya jo version chalte Node.js ko support na kare.
+- **Peers:** kisi dependency ka naya version kisi doosri ki peer range me fit na ho, to dono me se ek peeche rehta hai (pehle peer, jaise eslint 10 pe jab tak typescript-eslint 11 na maane; warna dependent). Report me wajah ke saath.
+- **Hold:** `typescript` kabhi nahi chhuta (typescript-eslint sirf <6.1 maanta hai). Report batata hai ki naya TypeScript aaya ya nahi, aur kab hold hata sakte ho (`HELD` in `scripts/packages/lib/dependencies.ts`).
+- **Install do baar:** pehle har badli line exact version ke saath `npm install` (warna `^` range pe npm `--level patch` me bhi naya minor le leta), phir range apne style me aur dobara `npm install` (installed version range me fit hai, npm wahi rakhta hai). Aakhir me lockfile me versions plan se milaye jaate hain.
+- **Fail ya Ctrl+C:** saare package.json aur `package-lock.json` wapas jaise the. npm beech me ruka ho to `npm install` chalao.
+- **Baad me (insaan):** `npm run build`, `lint`, `typecheck`, `npm test` (`infra:up` ke saath). Major update code badalwa sakta hai, isliye checks fail hone pe script khud wapas nahi karta; release notes padho, phir commit.
+
 ## Change log
 
 | Version | Date | Badlav |
@@ -115,3 +135,4 @@ Kisi package ka naya version agar kisi published dependent ki range tod de, to C
 | v1.5 | 2026-10-21 | Abhi publish/republish nahi, zaroorat pe; packages public hi. |
 | v1.6 | 2026-10-21 | verify/publish ke tests ko Mongo chahiye (`infra:up`); CI aur release Mongo chalate hain. |
 | v1.7 | 2026-10-21 | CI aur release tests se pehle `valkey` bhi chalate hain. |
+| v1.8 | 2026-10-23 | `npm run update-deps` (§2, §7): saare package.json ki dependencies, `--level patch/minor/major` (default major), typescript hold. |

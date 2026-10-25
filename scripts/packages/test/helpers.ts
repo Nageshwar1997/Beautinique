@@ -115,7 +115,9 @@ export function fakeFetch(packages: Record<string, RegistryPackage>): typeof fet
     if (!pkg) {
       return Promise.resolve(new Response('{"error":"Not found"}', { status: 404 }));
     }
-    const versions = Object.fromEntries(pkg.versions.map((v) => [v, { version: v }]));
+    const versions = Object.fromEntries(
+      pkg.versions.map((v) => [v, { ...pkg.details?.[v], version: v }]),
+    );
     return Promise.resolve(Response.json({ name, versions, 'dist-tags': pkg.distTags }));
   };
 }

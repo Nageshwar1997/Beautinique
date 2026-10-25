@@ -260,3 +260,25 @@ describe('assertions', () => {
     expect(() => assertNever('x' as never, 'Unknown status')).toThrow('Unknown status: "x"');
   });
 });
+
+describe('money: limits and bad input', () => {
+  it('refuses an amount too large to be whole paise, instead of rounding it', () => {
+    expect(rupeesToPaise('90071992547409.91')).toBe(Number.MAX_SAFE_INTEGER);
+    expect(() => rupeesToPaise('90071992547409.92')).toThrow('too large for paise');
+  });
+
+  it('names a number that is not an amount at all', () => {
+    expect(() => rupeesToPaise(Infinity)).toThrow('Not an amount in rupees: Infinity');
+    expect(() => rupeesToPaise(Number.NaN)).toThrow('Not an amount in rupees: NaN');
+  });
+
+  it('refuses a negative selling price whatever the MRP is', () => {
+    expect(() => discountPercent(0, -100)).toThrow('sellingPaise cannot be negative');
+    expect(() => discountPercent(100_000, -100)).toThrow('sellingPaise cannot be negative');
+  });
+
+  it('refuses weights that are not whole numbers, saying so', () => {
+    expect(() => allocate(100, [1.5, 2])).toThrow('weights must be whole numbers');
+    expect(() => allocate(100, [-1, 2])).toThrow('weights must be whole numbers');
+  });
+});

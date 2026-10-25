@@ -1,6 +1,6 @@
 # infra — laptop ka local infra (Docker)
 
-> **Status:** v1.3 (2026-10-22). Docker Lesson 2 (TASKS T0.8). Docker sirf laptop ke liye hai; live server (Render) Docker nahi chalata, wahan Atlas, Render Key Value aur Brevo hain (ARCHITECTURE §11, §12).
+> **Status:** v1.4 (2026-10-22). Docker Lesson 2 (TASKS T0.8). Docker sirf laptop ke liye hai; live server (Render) Docker nahi chalata, wahan Atlas, Render Key Value aur Brevo hain (ARCHITECTURE §11, §12).
 
 ## Kya chalta hai
 
@@ -18,12 +18,16 @@ Abhi idle pe teeno milake ~250 MB RAM lete hain (Mongo ~234 MB, cache 256 MB pe 
 
 ## Commands (repo root se)
 
-| Command               | Kaam                                                                                       |
-| --------------------- | ------------------------------------------------------------------------------------------ |
-| `npm run infra:up`    | Teeno start, aur tab tak rukta hai jab tak teeno "healthy" na ho jayein (pehli baar ~20 s) |
-| `npm run infra:down`  | Containers hatate hain. Mongo ka data volume me bacha rehta hai                            |
-| `npm run infra:reset` | Containers + Mongo ka data volume, dono mitate hain (Mongo bilkul khaali). Soch ke chalao  |
-| `npm run infra:logs`  | Teeno ke logs live (Ctrl+C se band)                                                        |
+| Command                       | Kaam                                                                                                                |
+| ----------------------------- | ------------------------------------------------------------------------------------------------------------------- |
+| `npm run infra:up`            | Teeno start, aur tab tak rukta hai jab tak teeno "healthy" na ho jayein (pehli baar ~20 s)                          |
+| `npm run infra:down`          | Containers hatate hain. Mongo ka data volume me bacha rehta hai                                                     |
+| `npm run infra:reset`         | Containers + Mongo ka data volume, dono mitate hain (Mongo bilkul khaali). Soch ke chalao                           |
+| `npm run infra:logs`          | Teeno ke logs live (Ctrl+C se band)                                                                                 |
+| `npm run infra:mutation:up`   | Mutation testing ke liye alag Mongo (`localhost:27018`) aur Valkey (`localhost:6380`); `infra:up` inhe nahi chalata |
+| `npm run infra:mutation:down` | Wo do containers hatata hai (unka data phenkne layak hai, volume nahi)                                              |
+
+**Mutation wale containers kyun alag (RULES §6)?** Mutation run MongoDB ka fail point chalata hai, jo poore server ka ek hota hai, aur kuch tests timing pe chalte hain. Agar wo usi Mongo pe chale jis pe aap kaam kar rahe ho, to dono ek doosre ko bigaadte hain aur aapko run khatam hone tak rukna padta hai. Alag server pe chalao (`MONGO_TEST_URI=mongodb://localhost:27018/?replicaSet=rs0`, `REDIS_TEST_URL=redis://localhost:6380`), to normal tests aur kaam saath chalte rehte hain. Ye `profiles: ['mutation']` se hota hai: profile wali service sirf naam lene pe chalti hai.
 
 Pehle Docker Desktop kholo. `failed to connect to the docker API` error ka matlab hai Docker Desktop band hai.
 
@@ -80,9 +84,10 @@ docker volume ls
 
 ## Change log
 
-| Version | Date       | Badlav                                                                                           |
-| ------- | ---------- | ------------------------------------------------------------------------------------------------ |
-| v1.0    | 2026-10-21 | Pehla version: Mongo replica set, Valkey (Render limits), Mailpit; scripts.                      |
-| v1.1    | 2026-10-21 | Mongo `enableTestCommands=1` (tests ke fail points); CI aur release bhi yahi mongo chalate hain. |
-| v1.2    | 2026-10-21 | CI aur release `valkey` bhi chalate hain (server-queue ke tests).                                |
-| v1.3    | 2026-10-22 | Trap: MongoDB 8.0 Linux kernel 6.19+ pe shuru nahi hota (CI pin, laptop 6.18).                   |
+| Version | Date       | Badlav                                                                                                       |
+| ------- | ---------- | ------------------------------------------------------------------------------------------------------------ |
+| v1.0    | 2026-10-21 | Pehla version: Mongo replica set, Valkey (Render limits), Mailpit; scripts.                                  |
+| v1.1    | 2026-10-21 | Mongo `enableTestCommands=1` (tests ke fail points); CI aur release bhi yahi mongo chalate hain.             |
+| v1.2    | 2026-10-21 | CI aur release `valkey` bhi chalate hain (server-queue ke tests).                                            |
+| v1.3    | 2026-10-22 | Trap: MongoDB 8.0 Linux kernel 6.19+ pe shuru nahi hota (CI pin, laptop 6.18).                               |
+| v1.4    | 2026-10-22 | Mutation testing ke liye alag Mongo (27018) aur Valkey (6380), `mutation` profile; `infra:mutation:up/down`. |

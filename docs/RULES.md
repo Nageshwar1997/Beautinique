@@ -1,6 +1,6 @@
 # RULES — BQ
 
-> **Status:** v1.4 (2026-10-20). Ye niyam Beautinique ke har code, doc aur deploy pe lagu hain. [PRD.md](PRD.md) batata hai **kya** banana hai, [ARCHITECTURE.md](ARCHITECTURE.md) batata hai **kaise**, aur ye file batati hai ki **kin niyamon ke saath**. Koi rule todna ho to pehle is file me badlav aur change log entry.
+> **Status:** v1.7 (2026-10-25). Ye niyam Beautinique ke har code, doc aur deploy pe lagu hain. [PRD.md](PRD.md) batata hai **kya** banana hai, [ARCHITECTURE.md](ARCHITECTURE.md) batata hai **kaise**, aur ye file batati hai ki **kin niyamon ke saath**. Koi rule todna ho to pehle is file me badlav aur change log entry.
 
 ## 1. Kaam karne ke niyam
 
@@ -18,7 +18,7 @@
 
 ## 2. Git aur release
 
-1. **Branches:** feature branch → PR → **`main`** (default branch) → **`prerelease`** (laptop pe Docker) → **`release`** (Render + Vercel, npm packages). Teeno pe seedha push nahi, sirf PR. Ek hi apwaad: package release ka commit + tags owner `release` pe push karta hai (package CLI), aur uske baad PR `release` → `main` (back-merge).
+1. **Branches:** feature branch → PR → **`main`** (default branch) → **`prerelease`** (laptop pe Docker) → **`release`** (Render + Vercel, npm packages). Teeno pe seedha push nahi, sirf PR. PR pe approval zaroori nahi (owner, 2026-10-25: ruleset me approvals 0); merge sirf jab CI `check` green ho (ruleset me zaroori). Ek hi apwaad: package release ka commit + tags owner `release` pe push karta hai (package CLI), aur uske baad PR `release` → `main` (back-merge).
 2. **Commits:** Conventional Commits (`feat:`, `fix:`, `docs:`, `refactor:`, `test:`, `chore:`). Ek commit me ek hi baat.
 3. **PR:** chhota rakho, description me kya aur kyun, aur kaise test kiya. CI green hue bina merge nahi.
 4. **Public repo:** koi secret, `.env`, token, test password, DB dump ya asli personal data kabhi commit nahi. Sirf `.env.example`. Gitleaks har PR pe chalega.
@@ -69,7 +69,7 @@
 ## 6. Testing
 
 1. **Har change ke saath tests.** Unit (Vitest), integration (Mongo replica set + Valkey), E2E (Playwright + axe).
-2. **Mutation tests** zaroori: paisa, stock reservation, authz, go-live, checkout.
+2. **Mutation tests, 3 hisse (owner ka faisla 2026-10-22; har badlav pe poora run bahut dheema tha):** (a) **Kernel packages** (`backend-server-mongo`, `server-queue`, `server-crypto`, authz/login, paisa/ledger): package pehli baar bante waqt ek poora run, background me, kaam roke bina; baad me badlav ho to sirf **badli lines ke mutations**. (b) **Nazuk logic** (paisa ka hisaab, stock reservation, permissions/authz, go-live, checkout): badli lines ke mutations. (c) **Baaki backend modules aur apps** (CRUD, UI, screens): mutation nahi; tests, lint, types, review aur asli flow/browser check. Speed: har mutation pe sirf us hisse ke tests, aur mutation runs alag Docker Mongo/Valkey pe (normal kaam saath chalta rahe). Bacha mutation (survivor) ya test jodo, ya likho kyun equivalent hai. Tool: `npm run mutate -- --package <category>-<name>` (`scripts/mutation/`): package ki `test/mutations.ts` ki har galti ek temp copy me daal ke tests chalata hai (asli files kabhi nahi badalti), pehle saare anchors check karta hai (purani list turant error), aur bina `survives` wajah ke bacha mutation = exit code 1. Badli lines: `--changed` (uncommitted) ya `--changed --base main` (branch). `--only 3,5`, `--show-fails`. Backend packages ke liye pehle `npm run infra:mutation:up`. Har mutation me `tests: "<naam ka hissa>"` do to sirf wahi tests chalte hain (bahut tez).
 3. **Refusal paths bhi test hon:** galat permission, galat scope, go-live ka har missing item, duplicate Idempotency-Key.
 4. **"Verified" tabhi** jab asli user wala action kiya ho (browser me click, API ka asli flow). Sirf DB me entry ya build pass hona verify nahi hai.
 5. **Fake adapters** se tests: Razorpay, Ola, Cloudinary, Brevo. Real keys ke bina sab test chalein.
@@ -107,3 +107,6 @@
 | v1.2    | 2026-10-20 | Icons rule: `workspace:*` ki jagah npm workspaces ka local link.                                                                 |
 | v1.3    | 2026-10-20 | §2: `main` default branch; flow `main` → `prerelease` → `release`; package release ka apwaad aur back-merge; Renovate `main` pe. |
 | v1.4    | 2026-10-20 | §3.2: zod sirf shared-zod se, named imports, schemas ke naam `...Zod`.                                                           |
+| v1.5 | 2026-10-22 | Mutation testing 3 hisse me: kernel packages (pehli baar poora, phir badli lines), nazuk logic (badli lines), baaki nahi. |
+| v1.6 | 2026-10-22 | Mutation ka tool `npm run mutate` (scripts/mutation), lists har package ke `test/mutations.ts` me. |
+| v1.7 | 2026-10-25 | §2: PR pe approval zaroori nahi (ruleset approvals 0), CI `check` green zaroori. |

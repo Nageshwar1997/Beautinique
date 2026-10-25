@@ -31,16 +31,23 @@
       "types": "./dist/index.d.ts",
       "default": "./dist/index.js"
     },
+    "./codegen": {
+      "types": "./dist/codegen.d.ts",
+      "default": "./dist/codegen.js"
+    },
     "./package.json": "./package.json"
   },
   "files": [
-    "dist"
+    "dist",
+    "generated"
   ],
   "scripts": {
     "build": "tsdown",
     "typecheck": "tsc --noEmit",
     "lint": "eslint .",
-    "test": "vitest run"
+    "test": "vitest run",
+    "generate": "node scripts/generate.ts",
+    "check": "node scripts/generate.ts --check"
   },
   "peerDependencies": {
     "zod": "^4.6.7"

@@ -59,6 +59,30 @@ await startServer(app, { port: config.port, logger, onStop: [() => db.close()] }
 | `createLogger({ name, level, destination })`                                     | pino JSON logger: `service` naam, ISO time, `REDACTED_PATHS` pe `[redacted]`                                                                                                                                                                                                                                                      |
 | `REDACTED_PATHS`                                                                 | password, otp, token, secret, apiKey, PAN, account number, IFSC, Aadhaar, licence, RC... 3 level tak gehraai me, aur `authorization`, `cookie`, `set-cookie`, `x-origin-secret` headers                                                                                                                                           |
 
+## Contract route: `mountRoute`
+
+Endpoint pehle contract me (`defineRoute`, RULES §4.1), handler baad me:
+
+```ts
+import { mountRoute } from '@beautinique/backend-server-kit';
+import { recordPing } from '@beautinique/shared-contracts';
+
+mountRoute(
+  router,
+  recordPing,
+  async ({ body }, { requestId }) => {
+    // body route ke schema se check ho chuka aur typed hai; params aur query bhi
+    return { pingId, note: body.note, recordedAt }; // route.output ka data
+  },
+  { status: 201 },
+);
+```
+
+- Path aur method route se aate hain. `params`, `query`, `body` handler se pehle route ke schema se check hote hain; galat request `VALIDATION_FAILED` + field list, handler chalta hi nahi. Jis part ka schema route me nahi, handler ko `undefined` milta hai.
+- Jawab `{ data }` me, route ke `output` schema se check hokar: jo field contract me nahi, wo bahar nahi jaata. Output contract todta ho to ye server ka bug hai: `INTERNAL`, log me poori wajah, client ko kuch nahi.
+- Handler jo `AppError` phenke wo apne status ke saath jaata hai. Success status default 200, banane wale route `{ status: 201 }` dein.
+- Kaun call kar sakta hai (`access`, `apps`, `stepUp`, `rateLimit`) gateway dekhta hai (Phase 2); idempotency key aur `authorize()` platform kernel ke hain (T4.1). Ye sirf HTTP wala hissa karta hai.
+
 ## Niyam
 
 - Har deployable isi se app banata hai, apna error/health/logger code nahi likhta. Kuch naya chahiye jo do services me lagega to yahin jodo.

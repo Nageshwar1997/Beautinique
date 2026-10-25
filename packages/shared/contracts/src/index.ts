@@ -8,6 +8,25 @@ export {
   resolveAreaSetting,
 } from './area-settings';
 export {
+  events,
+  getPing,
+  permissions,
+  pingRead,
+  pingRecorded,
+  recordPing,
+  routes,
+} from './catalogue';
+export {
+  ApiError,
+  type CallArgs,
+  type CallOptions,
+  type Client,
+  type ClientOptions,
+  createClient,
+  queryKey,
+  queryKeyPrefix,
+} from './client';
+export {
   defineEvent,
   eventActor,
   eventCatalogue,

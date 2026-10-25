@@ -55,7 +55,31 @@ Faisla aise hota hai, aur pehli rukawat hi `reason` banti hai:
 | `reachesAnything(spec)`                  | `scopeSpec` kuch bhi tak pahunchta hai ya nahi (khaali = kuch nahi dikhana) |
 | `isStepUpFresh(lastStepUpAt, now?, ms?)` | Step-up MFA haal hi ka hai ya nahi (default 5 minute; future time pe false) |
 
-MFA, second signature aur separation of duties (maker ≠ checker) ki enforcement gateway aur modules karte hain. Permission ki definition (`mfa`, `secondSignature`) `shared-contracts` me hai.
+## Grant dena (appoint) aur separation of duties
+
+| Function                                | Kaam                                                                                                                                                                                                                          |
+| --------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `scopeWithin(outer, inner, chainOf)`    | `inner` ki har jagah `outer` ke andar hai ya nahi: appoint karne wala apne scope se bada scope nahi de sakta. `chainOf(type, id)` location master se id ki poori chain deta hai                                               |
+| `grantProblems(grant, { permissions })` | Grant save hone se pehle galtiyan: khaali role, anjaan ya doharai permission, global pe ids / baaki pe ids nahi, doharai ids, scope type jo role ki kisi permission ke kaam ka nahi, galat ya ulti dates. Khaali list = theek |
+| `checkSeparation(actorId, earlier)`     | Kaam karne wala un logon me se nahi ho jinhone usi item pe ulta step kiya (maker ≠ checker, rejecter ≠ appeal decider, apni listing ka QC nahi). `{ allowed, reason: 'same-person', conflictsWith }`                          |
+
+```ts
+import { checkSeparation, grantProblems, scopeWithin } from '@beautinique/shared-authz';
+
+// Logistics Head (state MH) ek district ka City Manager banata hai
+scopeWithin({ type: 'state', ids: ['MH'] }, { type: 'district', ids: ['PUNE'] }, chainOf); // true
+scopeWithin({ type: 'state', ids: ['MH'] }, { type: 'district', ids: ['SURAT'] }, chainOf); // false
+
+grantProblems(grant, { permissions }); // [{ field: 'scope', message: 'A hub scope needs at least one id' }]
+
+checkSeparation(currentUser.id, [{ by: payout.makerId, as: 'maker' }]);
+// { allowed: false, reason: 'same-person', conflictsWith: 'maker' }
+```
+
+- `scopeWithin` me khaali ya anjaan id (location master me nahi) kabhi andar nahi maani jaati. Location ids ki chain adhoori ho to error aata hai (`scopeCovers` jaisa).
+- `checkSeparation` me ids ek jaise (jaise DB me) do, case ya space se farak nahi dekhta. System ne jo step kiya use list me mat do; khaali id bug hai, isliye error.
+
+`authorize(ctx, permission, scope)` aur `scopeFilter()` (Mongo filter) platform kernel me banenge (TASKS T4.1), aur MFA/second signature ki enforcement gateway aur modules karte hain. Permission ki definition (`mfa`, `secondSignature`) `shared-contracts` me hai.
 
 ## License
 

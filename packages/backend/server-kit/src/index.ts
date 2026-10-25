@@ -4,5 +4,6 @@ export { AppError, type ErrorDetail, errorHandler, notFound, toErrorResponse } f
 export { healthRoutes, type ReadyCheck } from './health';
 export { createLogger, type LoggerOptions, REDACTED_PATHS } from './logger';
 export { accessLog, requestId, requestIdOf } from './request';
+export { mountRoute, type MountRouteOptions, type RouteContext, type RouteHandler } from './route';
 export { type RunningServer, startServer, type StartServerOptions } from './server';
 export type { Logger } from 'pino';

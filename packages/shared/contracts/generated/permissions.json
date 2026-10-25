@@ -1,0 +1,15 @@
+{
+  "version": "1.0.0",
+  "permissions": [
+    {
+      "key": "platform.ping.read",
+      "description": "Read recorded pings",
+      "scopeTypes": [
+        "global"
+      ],
+      "risk": "low",
+      "mfa": false,
+      "secondSignature": false
+    }
+  ]
+}

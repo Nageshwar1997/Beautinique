@@ -116,11 +116,11 @@ export function taxFromInclusive(
 export function discountPercent(mrpPaise: number, sellingPaise: number): number {
   assertPaise(mrpPaise, 'mrpPaise');
   assertPaise(sellingPaise, 'sellingPaise');
-  if (mrpPaise <= 0 || sellingPaise >= mrpPaise) {
-    return 0;
-  }
   if (sellingPaise < 0) {
     throw new RangeError('sellingPaise cannot be negative');
+  }
+  if (mrpPaise <= 0 || sellingPaise >= mrpPaise) {
+    return 0;
   }
   return Number((BigInt(mrpPaise - sellingPaise) * 100n) / BigInt(mrpPaise));
 }

@@ -1,14 +1,37 @@
+import { randomUUID } from 'node:crypto';
 import { type AddressInfo, createServer } from 'node:net';
 
-import { ConfigError } from '@beautinique/backend-server-kit';
-import { describe, expect, it } from 'vitest';
+import { ConfigError, createLogger } from '@beautinique/backend-server-kit';
+import { connectMongo } from '@beautinique/backend-server-mongo';
+import { connectRedis } from '@beautinique/backend-server-queue';
+import { afterAll, describe, expect, it } from 'vitest';
 
 import { startBundle } from '../src/bundle.ts';
 import { readBundleConfig } from '../src/config.ts';
 import { names } from '../src/deployables.ts';
 
-const quiet = () =>
-  Object.fromEntries(names.map((name) => [`${name.toUpperCase()}__LOG_LEVEL`, 'silent']));
+// core needs MongoDB and Redis: the laptop's and CI's local ones (`npm run infra:up`). The test uses
+// its own database and Redis database 5, so it never touches the data of a running dev server.
+const MONGO_URI = 'mongodb://localhost:27017/?replicaSet=rs0';
+const REDIS_DB = 'redis://localhost:6379/5';
+const dbName = `bq_test_bundle_${randomUUID().slice(0, 8)}`;
+
+afterAll(async () => {
+  const logger = createLogger({ name: 'bundle-test', level: 'silent' });
+  const mongo = await connectMongo({ uri: MONGO_URI, dbName, appName: 'bundle-test', logger });
+  await mongo.db.dropDatabase();
+  await mongo.close();
+  const redis = await connectRedis({ url: REDIS_DB, name: 'bundle-test', logger });
+  await redis.client.flushdb();
+  await redis.close();
+});
+
+const quiet = () => ({
+  ...Object.fromEntries(names.map((name) => [`${name.toUpperCase()}__LOG_LEVEL`, 'silent'])),
+  CORE__MONGO_URI: MONGO_URI,
+  CORE__MONGO_DB_NAME: dbName,
+  CORE__REDIS_URL: REDIS_DB,
+});
 
 describe('bundle', () => {
   it('runs every deployable behind the gateway, then stops them all', async () => {

@@ -760,6 +760,11 @@ describe('startConsumer', () => {
     const placed = await placeOrder('c2');
     await deliver(placed, placed.eventId);
     await waitFor(async () => (await emails().countDocuments()) === 1);
+    // the effect is committed before BullMQ finishes the job; while the job is still in Redis,
+    // adding the same job id again is ignored (which is not a redelivery), so wait until it is gone
+    const queue = inspect('q.notify');
+    const jobId = jobIdOf(placed.eventId, 'notify.emails');
+    await waitFor(async () => (await queue.getJob(jobId)) === undefined);
     await deliver(placed, placed.eventId);
     await waitFor(() => lines.some((l) => l.msg === 'event seen again, skipped'));
     expect(await emails().countDocuments()).toBe(1);
@@ -1286,7 +1291,8 @@ describe('redriveOutbox', () => {
   });
 
   it('gives up when a queue does not drain, so the watchdog can try again later', async () => {
-    await relayedThenWiped(3);
+    // exactly maxWaiting jobs waiting is already too many: it waits for fewer than 2
+    await relayedThenWiped(2);
     await expect(
       redriveOutbox({
         mongo,
@@ -1294,11 +1300,11 @@ describe('redriveOutbox', () => {
         logger,
         subscribers,
         prefix,
-        batchSize: 1,
-        maxWaiting: 1,
+        batchSize: 2,
+        maxWaiting: 2,
         drainTimeoutMs: 300,
       }),
-    ).rejects.toThrow('Queue q.notify did not drain below 1 waiting jobs');
+    ).rejects.toThrow('Queue q.notify did not drain below 2 waiting jobs');
   });
 });
 

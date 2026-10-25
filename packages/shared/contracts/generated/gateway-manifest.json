@@ -1,0 +1,48 @@
+{
+  "version": "1.0.0",
+  "routes": [
+    {
+      "id": "platform.ping.record",
+      "method": "POST",
+      "path": "/platform/pings",
+      "owner": "core",
+      "apps": [
+        "customer",
+        "seller",
+        "admin",
+        "superadmin",
+        "master",
+        "support",
+        "finance",
+        "logistics",
+        "delivery",
+        "growth",
+        "creator"
+      ],
+      "access": {
+        "type": "signed-in"
+      },
+      "rateLimit": "write",
+      "idempotency": true,
+      "stepUp": false
+    },
+    {
+      "id": "platform.ping.get",
+      "method": "GET",
+      "path": "/platform/pings/:pingId",
+      "owner": "core",
+      "apps": [
+        "admin",
+        "superadmin",
+        "master"
+      ],
+      "access": {
+        "type": "permission",
+        "permission": "platform.ping.read"
+      },
+      "rateLimit": "read",
+      "idempotency": false,
+      "stepUp": false
+    }
+  ]
+}
