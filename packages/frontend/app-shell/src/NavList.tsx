@@ -30,7 +30,8 @@ export function NavList({ items, label, className = '', linkClassName = '' }: Na
             <NavLink
               to={item.to}
               end={item.end}
-              className={`min-h-touch hover:text-foreground aria-[current=page]:text-brand-text inline-flex items-center rounded-md px-3 font-medium aria-[current=page]:underline aria-[current=page]:underline-offset-4 ${linkClassName}`}
+              // hover underlines instead of recolouring, so it shows on any surface (inverse footer too)
+              className={`min-h-touch aria-[current=page]:text-brand-text inline-flex items-center rounded-md px-3 font-medium underline-offset-4 hover:underline hover:decoration-[1.5px] aria-[current=page]:underline ${linkClassName}`}
             >
               {item.label}
             </NavLink>
