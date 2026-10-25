@@ -110,7 +110,16 @@ describe('packageDirOf and parseOnly', () => {
   it('maps package names and mutation numbers, and refuses anything else', () => {
     expect(packageDirOf('backend-server-queue')).toBe('packages/backend/server-queue');
     expect(packageDirOf('shared-zod')).toBe('packages/shared/zod');
-    for (const bad of ['server-queue', 'backend-', 'backend-Server', 'other-x']) {
+    expect(packageDirOf('gateway')).toBe('backend/gateway');
+    expect(packageDirOf('core')).toBe('backend/core');
+    for (const bad of [
+      'server-queue',
+      'backend-',
+      'backend-Server',
+      'other-x',
+      'bundle',
+      'gateways',
+    ]) {
       expect(() => packageDirOf(bad), bad).toThrow('--package must look like');
     }
     expect(parseOnly('3, 5,12')).toEqual([3, 5, 12]);

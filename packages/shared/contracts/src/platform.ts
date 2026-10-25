@@ -41,9 +41,13 @@ export type ScopeType = (typeof SCOPE_TYPES)[number];
 export const LOCATION_SCOPES = ['global', 'state', 'district', 'city', 'hub'] as const;
 export type LocationScope = (typeof LOCATION_SCOPES)[number];
 
-/** Request headers every client and the gateway agree on. */
+/**
+ * Request headers every client and the gateway agree on. `clientIp` is set by the gateway alone (it
+ * drops one sent by a client) and tells a deployable who the caller is (OTP IP limits, audit).
+ */
 export const HEADERS = {
   app: 'X-BQ-App',
   idempotencyKey: 'Idempotency-Key',
   requestId: 'X-Request-Id',
+  clientIp: 'X-BQ-Client-Ip',
 } as const;

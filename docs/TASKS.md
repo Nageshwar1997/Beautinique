@@ -1,6 +1,6 @@
 # TASKS — BQ
 
-> **Status:** v1.31 (2026-10-25). Poore project ki task list, [ARCHITECTURE.md](ARCHITECTURE.md) §16 ke phases ke hisaab se. Har task "done" tabhi jab [RULES.md](RULES.md) §1.5 ki Definition of Done poori ho.
+> **Status:** v1.35 (2026-10-25). Poore project ki task list, [ARCHITECTURE.md](ARCHITECTURE.md) §16 ke phases ke hisaab se. Har task "done" tabhi jab [RULES.md](RULES.md) §1.5 ki Definition of Done poori ho.
 
 **Kaise use karein:**
 - `[ ]` baaki, `[~]` chal raha hai, `[x]` done.
@@ -47,7 +47,7 @@ Har milestone ke end me kuch **live** dikhana hai. Ek hi live environment, free 
 - [ ] A.5 Cloudinary, Sentry (free), Razorpay (test keys), Google OAuth client (har app ka redirect).
 - [ ] A.6 Brevo: authorised IPs ki rok hatana, ya Render Singapore ke IPs jodna.
 - [ ] A.7 Cloudflare R2 free tier: card maangta hai ya nahi, check karna (nahi to logs archive Cloudinary private files me).
-- [ ] A.8 UptimeRobot aur cron-job.org free accounts (keep-alive aur alerts ke liye).
+- ~~A.8 UptimeRobot aur cron-job.org free accounts (keep-alive aur alerts ke liye).~~ Nahi (owner, 2026-10-25): bahar ka pinger nahi; service app khulte hi aur GitHub Actions se din me har ghante jaagti hai (T2.7, ARCHITECTURE §11.1).
 - [ ] A.9 Vercel: apps ready hone pe 11 projects (production branch `release`).
 
 ## B. Docs
@@ -93,12 +93,19 @@ Har milestone ke end me kuch **live** dikhana hai. Ek hi live environment, free 
 
 ## Phase 2. Gateway (1 hafta)
 
-- [ ] T2.1 Prefix routing table, app registry (11 apps), Origin aur `x-forwarded-host` → app. (Generator ka gateway: `X-BQ-App` check, contracts manifest se route aur owner tak stream, `..` path ka bachav. Origin aur `x-forwarded-host` → app baaki.)
-- [ ] T2.2 JWKS verification, per-app cookies, passport token, origin secret, `clientIp()`.
-- [ ] T2.3 Redis rate limits (classes), cache headers, helmet, request-id, Sentry.
-- [ ] T2.4 `/health` (shallow) aur `/ready` (deep), `/status`.
+- [x] T2.1 Prefix routing table, app registry (11 apps), Origin aur `x-forwarded-host` → app. (2026-10-25, `feat/m2-gateway`: route table contracts catalogue se, `GATEWAY__APP_HOSTS` + Vercel previews ka strict pattern, `x-forwarded-host`/`Host`/`Origin` usi app ke hon.)
+- [~] T2.2 JWKS verification, per-app cookies, passport token, origin secret, `clientIp()`. (Origin secret (rotation ke saath, timing-safe) aur `clientIp()` ho gaye 2026-10-25; sign-in tak non-public routes 401. JWKS, cookies, passport identity ke saath M3 me.)
+- [~] T2.3 Redis rate limits (classes), cache headers, helmet, request-id, Sentry. (2026-10-25: rate limits naye `@beautinique/backend-server-ratelimit` se, cache headers contract ke `cache` se, helmet + request-id server-kit me. **Sentry baaki:** poore process me ek init, owner ka DSN chahiye, M2 deploy branch me.)
+- [x] T2.4 `/health` (shallow) aur `/ready` (deep), `/status`. (2026-10-25: gateway `/ready` me Redis bhi; `/status` public summary, owner ka faisla.)
 - [ ] T2.5 `backend/bundle`: paancho deployables ek process me, boot pe release steps. (Generator ka bundle saare deployables chalata hai aur config keys env se hatata hai; boot ke release steps baaki.)
 - [ ] T2.6 Purani cheezein hatana: facades, `METHODS_AND_PATHS`, MASTER bypass, wake-up fan-out, keep-alive workflow.
+- [ ] T2.7 Jagana (owner, 2026-10-25; ARCHITECTURE §11.1): public route `GET /api/v1/platform/wake`, apps ki wake-up screen usi ko call kare (M2 customer shell se); GitHub Actions workflow `cron: '30 4-15 * * *'` (10:00–21:00 IST) Render ka `/health` call kare (retry, 2 min timeout; M2 deploy ke saath, default branch pe). Aage ke business sweeps (Phase 4+) boot pe turant ek baar chalein, test ke saath.
+- [ ] T2.8 **Metrics Lessons 1–5** (owner ke saath, sikhne ke liye; owner, 2026-10-25). Sirf laptop pe (Docker), live pe kuch nahi badalta (ARCHITECTURE §14, §11.1). Order: `feat/m2-gateway` PR merge ke baad, M2 customer landing ke saath-saath; ek lesson poora hone pe hi agla. Har lesson me pehle samjhana, phir owner khud commands chalaye.
+  - **Lesson 1, metrics ki neev:** counter, gauge, histogram; RED (Rate, Errors, Duration); labels aur cardinality. Gateway me `/metrics` (requests, status, route, latency, rate-limit refusals), setting se band (`GATEWAY__METRICS`, default off; live pe off), tests ke saath.
+  - **Lesson 2, Prometheus + Grafana:** `infra/` me alag compose profile (sirf zaroorat pe chale), Prometheus laptop ke bundle se scrape kare; Grafana datasource aur dashboard repo me code ki tarah.
+  - **Lesson 3, PromQL aur alerts:** `rate()`, p95 (`histogram_quantile`), error ratio; alert rules ARCHITECTURE §14.5 ke thresholds se (jaise 5xx 2% se upar).
+  - **Lesson 4, Loki:** pino JSON logs Loki me, LogQL; graph ke spike se `requestId` se logs tak.
+  - **Lesson 5, load test (optional):** k6 se traffic, dashboard pe rate limits aur 429 dekhna.
 
 **Milestone 2:** bundle mode laptop pe chalta hai, gateway sahi deployable tak route karta hai.
 
@@ -246,5 +253,9 @@ Har milestone ke end me kuch **live** dikhana hai. Ek hi live environment, free 
 | v1.27   | 2026-10-22 | Phase 1 done: T1.1 (`mountRoute`), T1.7 (audit, `shared-utils` mutations), Milestone 1 (core sample endpoint, event, inbox, Redis wipe drill).                    |
 | v1.28   | 2026-10-23 | Deploy-first plan (section D): har milestone live + demo, Claude/Cursor bantwara; focus Milestone 2.                                                              |
 | v1.29   | 2026-10-25 | Cursor nahi: 2 developers baari-baari Claude ke saath; section D me ek "Kaam" column.                                                                             |
-| v1.30 | 2026-10-25 | T0.7: ruleset me PR approvals 0 (owner). |
-| v1.31 | 2026-10-25 | Section D: deploy flow `prerelease` → `release` → `main`; checklist me `release` → `main` aur back-merge. |
+| v1.30   | 2026-10-25 | T0.7: ruleset me PR approvals 0 (owner).                                                                                                                          |
+| v1.31   | 2026-10-25 | Section D: deploy flow `prerelease` → `release` → `main`; checklist me `release` → `main` aur back-merge.                                                         |
+| v1.32   | 2026-10-25 | M2 gateway (`feat/m2-gateway`): T2.1, T2.4 done; T2.2 me origin secret + `clientIp()`; T2.3 me Sentry baaki (deploy branch).                                      |
+| v1.33   | 2026-10-25 | A.8 hata (owner): UptimeRobot / cron-job.org nahi.                                                                                                                |
+| v1.34   | 2026-10-25 | T2.7 jagana: wake route + GitHub Actions hourly 10:00–21:00 IST (owner).                                                                                          |
+| v1.35   | 2026-10-25 | T2.8 Metrics Lessons 1–5 (owner sikhna chahte hain; laptop only, gateway PR ke baad).                                                                             |

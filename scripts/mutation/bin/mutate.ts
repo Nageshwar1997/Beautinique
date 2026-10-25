@@ -13,7 +13,8 @@ throwaway copy one by one and checks that the tests catch each. The real files a
 Backend packages run against the mutation MongoDB and Valkey: start them with
 \`npm run infra:mutation:up\` (or set MONGO_TEST_URI / REDIS_TEST_URL).
 
-  --package <p>     e.g. backend-server-queue (packages/backend/server-queue)
+  --package <p>     e.g. backend-server-queue (packages/backend/server-queue), or a deployable
+                    such as gateway (backend/gateway: its security checks, RULES §6)
   --changed         only mutations on code changed since --base (RULES §6: changed lines)
   --base <ref>      git ref for --changed (default HEAD: the uncommitted changes)
   --only <list>     only these mutation numbers, e.g. 3,5,12

@@ -29,7 +29,7 @@ function parameters(schema: ZodObject | undefined, location: 'path' | 'query') {
 /**
  * An OpenAPI 3.1 document for the routes: path, query and header parameters, request body, the
  * `{ data }` success body and the shared error body. Beautinique details (apps, access, rate limit,
- * idempotency, step-up, owner) go in `x-bq`.
+ * idempotency, step-up, owner, cache) go in `x-bq`.
  */
 export function toOpenApi(
   routes: readonly RouteDefinition[],
@@ -97,6 +97,7 @@ export function toOpenApi(
         idempotency: route.idempotency,
         stepUp: route.stepUp,
         owner: route.owner,
+        cache: route.cache ? { ...route.cache } : null,
       },
     };
   }

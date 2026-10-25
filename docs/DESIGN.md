@@ -168,5 +168,5 @@ Har screen ye states dikhati hai:
 | v1.1    | 2026-10-19 | Typography: Metropolis ki jagah Plus Jakarta Sans (body) + Fraunces (headings).                                                                                                       |
 | v1.2    | 2026-10-20 | §9 Text aur formats: apps sirf English me.                                                                                                                                            |
 | v1.3    | 2026-10-20 | §3 naye `styles` package ke tokens se: Rose + Plum colours, tones, order status, charts, high contrast, print, gradients, layout; §6, §8, §11 me package ki utilities.                |
-| v1.4    | 2026-10-21 | §3: palette script ab rangon ka matlab bhi check karta hai; checks ki ginti hata di (wo badalti rehti hai). |
-| v1.5    | 2026-10-21 | Owner ke faisle: muted section pe subtle text nahi (rang wahi); ulti patti ke liye `focus-ring-inverse` + `surface-inverse`; high contrast me tones gehre, saara text 7:1. |
+| v1.4    | 2026-10-21 | §3: palette script ab rangon ka matlab bhi check karta hai; checks ki ginti hata di (wo badalti rehti hai).                                                                           |
+| v1.5    | 2026-10-21 | Owner ke faisle: muted section pe subtle text nahi (rang wahi); ulti patti ke liye `focus-ring-inverse` + `surface-inverse`; high contrast me tones gehre, saara text 7:1.            |
