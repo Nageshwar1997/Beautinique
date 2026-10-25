@@ -1,6 +1,6 @@
 # DESIGN — BQ
 
-> **Status:** v1.5 (2026-10-21). UI aur UX ke niyam saare 11 apps ke liye. Design ka **source of truth code hai**: `@beautinique/frontend-styles` (tokens) aur `@beautinique/frontend-components` (components). [RULES.md](RULES.md) §5 frontend ke coding niyam batata hai; ye file batati hai ki cheezein **dikhengi aur chalengi kaise**.
+> **Status:** v1.6 (2026-10-26). UI aur UX ke niyam saare 11 apps ke liye. Design ka **source of truth code hai**: `@beautinique/frontend-styles` (tokens) aur `@beautinique/frontend-components` (components). [RULES.md](RULES.md) §5 frontend ke coding niyam batata hai; ye file batati hai ki cheezein **dikhengi aur chalengi kaise**.
 
 ## 1. Design principles
 
@@ -158,6 +158,12 @@ Har screen ye states dikhati hai:
   - Ek main set rakhna (aaj sabse zyada **Solar**), taaki style ek jaisa rahe. Brand ke custom icons (logo, beauty icons) bhi isi package me.
   - **License:** copy karne pe bhi license lagu hai. Solar aur Pepicons CC BY 4.0 hain (credit zaroori), Lucide ISC, Line MD MIT, Logos CC0. Package me `LICENSES.md`, aur apps me "Icon credits" page.
   - Decorative icon pe `aria-hidden`, aur akele icon wale button pe `aria-label` (BaseIcon me `label` prop).
+- **Logo** (owner, 2026-10-26): master `packages/frontend/icons/brand/logo-master.webp` ("B" me ek aurat ki profile, rose baal aur pankhudiyan, neeche "Beautinique"), usi se trace hue vectors `@beautinique/frontend-icons` me:
+  - `BrandLogo` (mark + naam; `horizontal` header ke liye, `stacked` master jaisa) aur `BrandMark` (sirf mark, chhoti jagah). `size` = height, width shape se.
+  - Rang: ink = `currentColor`, rose = theme ka `--brand`, isliye light, dark aur high contrast me apne aap. Inverse surface (footer) aur print pe `monochrome`.
+  - Link ke andar logo decorative (naam link pe, jaise "Beautinique home"); akela ho to `label="Beautinique"`.
+  - Browser tab ka favicon alag rehta hai: rose tile pe safed "B" (`favicon.svg`/`.ico`), kyunki 16 px pe mark ki details nahi dikhti.
+  - Install icons (manifest, apple-touch): ivory pe mark; maskable me mark 80% safe circle ke andar. Home screen aur splash pe naam OS khud manifest ke `name` se dikhata hai.
 - **Dark mode:** product images invert nahi hote; brand gradient dono theme me same.
 
 ## Change log
@@ -170,3 +176,4 @@ Har screen ye states dikhati hai:
 | v1.3    | 2026-10-20 | §3 naye `styles` package ke tokens se: Rose + Plum colours, tones, order status, charts, high contrast, print, gradients, layout; §6, §8, §11 me package ki utilities.                |
 | v1.4    | 2026-10-21 | §3: palette script ab rangon ka matlab bhi check karta hai; checks ki ginti hata di (wo badalti rehti hai).                                                                           |
 | v1.5    | 2026-10-21 | Owner ke faisle: muted section pe subtle text nahi (rang wahi); ulti patti ke liye `focus-ring-inverse` + `surface-inverse`; high contrast me tones gehre, saara text 7:1.            |
+| v1.6    | 2026-10-26 | §11 Logo: master image, `BrandLogo`/`BrandMark` (icons package), rang theme se, favicon alag, install icons.                                                                          |

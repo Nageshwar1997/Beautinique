@@ -1,6 +1,6 @@
 # MEMORY — BQ
 
-> **Status:** v1.30 (2026-10-25). Project ki yaaddasht: **kya tay hua aur kyun**, **pichhle kaam se kya seekha**, aur **kaunse jaal (traps) se bachna hai**. Poori detail baaki docs me hai; yahan short version aur pointers. Naya sabak ya decision aaye to yahan ek line jodo.
+> **Status:** v1.31 (2026-10-26). Project ki yaaddasht: **kya tay hua aur kyun**, **pichhle kaam se kya seekha**, aur **kaunse jaal (traps) se bachna hai**. Poori detail baaki docs me hai; yahan short version aur pointers. Naya sabak ya decision aaye to yahan ek line jodo.
 
 ## 1. Decision log
 
@@ -76,6 +76,7 @@
 | 2026-10-25 | App shell package me, par **header aur footer har app ka apna** (owner): `@beautinique/frontend-app-shell` sirf saanjha hissa deta hai (`AppFrame`, `ThemeSwitcher`/`ThemeScript`, `NavList`, `ErrorPage`); nav me sirf bane pages | Customer ka brand header aur internal apps ka sidebar/top bar alag hain; ek hi header sab pe thopna galat; dead links se bachna | packages/frontend/app-shell README, TASKS T6.1 |
 | 2026-10-25 | Icons: Iconify library kabhi nahi (owner); apna `@beautinique/frontend-icons`: har icon ek component (pure `createIcon`, shapes ek baar), SVG Iconify se copy, `npm run add-icons` converter (code aur bahar ke links mana), `ICON_CREDITS` + `LICENSES.md`, har app me "Icon credits" page | Offline/PWA safe, app me sirf use hue icons; Solar CC BY 4.0 hai, credit zaroori | packages/frontend/icons README, DESIGN §11, TASKS T6.1a |
 | 2026-10-25 | Customer landing (M2): "Launching soon", koi shehar/state ka naam code me nahi; categories PRD ki 6, bina link ke; theme `<html theme>` pe inline script se (HTML sabke liye same, CDN cache theek) | PRD §7.2 (jagah data hai, code nahi); catalog M4 me asli category pages laayega; cookie se theme dene pe CDN cache toot-ta | frontend/customer README |
+| 2026-10-26 | Logo (owner): "B" me aurat ki profile + rose baal/pankhudiyan + "Beautinique"; owner ki do images (sirf mark vs master) ek jaisi nahi thi (89.6% pixel match), isliye **sirf master** se trace; header aur install icons me naya logo, **browser tab ka favicon wahi rose "B"** | Mark aur naam ek hi source se, ek jaisa; vectors theme ke rang lete hain (ink `currentColor`, rose `--brand`); 16 px pe mark ki details nahi dikhti, isliye favicon simple | DESIGN §11, packages/frontend/icons README "Logo" |
 
 ## 2. Pichhle kaam se seekhe sabak
 
@@ -167,3 +168,4 @@
 | v1.28   | 2026-10-25 | Decision: keep-alive pinger (UptimeRobot / cron-job.org) nahi.                                                                                                                       |
 | v1.29   | 2026-10-25 | Decision badla: keep-alive nahi, par app khulte hi aur GitHub Actions se din me har ghante jagana.                                                                                   |
 | v1.30   | 2026-10-25 | Decisions: app shell + har app ka apna header/footer, apna icons package (Iconify library nahi), landing pe koi jagah ka naam nahi. |
+| v1.31 | 2026-10-26 | Decision: logo sirf master image se, favicon alag (rose "B"). |
