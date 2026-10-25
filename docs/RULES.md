@@ -1,6 +1,6 @@
 # RULES — BQ
 
-> **Status:** v1.7 (2026-10-25). Ye niyam Beautinique ke har code, doc aur deploy pe lagu hain. [PRD.md](PRD.md) batata hai **kya** banana hai, [ARCHITECTURE.md](ARCHITECTURE.md) batata hai **kaise**, aur ye file batati hai ki **kin niyamon ke saath**. Koi rule todna ho to pehle is file me badlav aur change log entry.
+> **Status:** v1.8 (2026-10-25). Ye niyam Beautinique ke har code, doc aur deploy pe lagu hain. [PRD.md](PRD.md) batata hai **kya** banana hai, [ARCHITECTURE.md](ARCHITECTURE.md) batata hai **kaise**, aur ye file batati hai ki **kin niyamon ke saath**. Koi rule todna ho to pehle is file me badlav aur change log entry.
 
 ## 1. Kaam karne ke niyam
 
@@ -18,11 +18,17 @@
 
 ## 2. Git aur release
 
-1. **Branches:** feature branch → PR → **`main`** (default branch) → **`prerelease`** (laptop pe Docker) → **`release`** (Render + Vercel, npm packages). Teeno pe seedha push nahi, sirf PR. PR pe approval zaroori nahi (owner, 2026-10-25: ruleset me approvals 0); merge sirf jab CI `check` green ho (ruleset me zaroori). Ek hi apwaad: package release ka commit + tags owner `release` pe push karta hai (package CLI), aur uske baad PR `release` → `main` (back-merge).
+1. **Branches (owner, 2026-10-25):**
+   - **`prerelease` = development.** Har kaam `prerelease` se nayi branch (`feat/<kaam>`, `fix/<kaam>`), PR wapas `prerelease` pe. Laptop pe Docker se integration.
+   - **`release` = production** (Render + Vercel, npm packages). Sirf `prerelease` se PR (ya `hotfix/<naam>` se, neeche).
+   - **`main` = master: sirf final code.** Release safal hone (deploy + demo check) ke baad hi PR `release` → `main`. `main` pe kabhi seedha kaam ya feature PR nahi.
+   - **Back-merge:** `release` pe bane commits (package CLI ka release commit + tags, hotfix) ke baad PR `release` → `prerelease`, taaki development naye versions pe chale.
+   - **Hotfix:** production me turant fix chahiye to `release` se `hotfix/<naam>` → PR `release`; phir `release` → `prerelease` aur release safal hone pe `release` → `main`.
+   - Teeno pe seedha push nahi, sirf PR. PR pe approval zaroori nahi (owner, 2026-10-25: ruleset me approvals 0); merge sirf jab CI `check` green ho (ruleset me zaroori). CI ka `check` ye flow bhi jaanchta hai: `main` me sirf `release` se, `release` me sirf `prerelease` ya `hotfix/*` se PR. Ek hi apwaad: package release ka commit + tags owner `release` pe push karta hai (package CLI).
 2. **Commits:** Conventional Commits (`feat:`, `fix:`, `docs:`, `refactor:`, `test:`, `chore:`). Ek commit me ek hi baat.
 3. **PR:** chhota rakho, description me kya aur kyun, aur kaise test kiya. CI green hue bina merge nahi.
 4. **Public repo:** koi secret, `.env`, token, test password, DB dump ya asli personal data kabhi commit nahi. Sirf `.env.example`. Gitleaks har PR pe chalega.
-5. **Dependencies:** Renovate ke weekly PRs `main` pe; major version upgrade alag PR me.
+5. **Dependencies:** `npm run update-deps` (ya Renovate/Dependabot) ke PRs `prerelease` pe; major version upgrade alag PR me.
 
 ## 3. Code: sabke liye
 
@@ -110,3 +116,4 @@
 | v1.5 | 2026-10-22 | Mutation testing 3 hisse me: kernel packages (pehli baar poora, phir badli lines), nazuk logic (badli lines), baaki nahi. |
 | v1.6 | 2026-10-22 | Mutation ka tool `npm run mutate` (scripts/mutation), lists har package ke `test/mutations.ts` me. |
 | v1.7 | 2026-10-25 | §2: PR pe approval zaroori nahi (ruleset approvals 0), CI `check` green zaroori. |
+| v1.8 | 2026-10-25 | §2: naya flow: `prerelease` = development, `release` = production, `main` = sirf final code (release safal hone ke baad); back-merge `release` → `prerelease`, hotfix, CI flow check; dependency PRs `prerelease` pe. |
