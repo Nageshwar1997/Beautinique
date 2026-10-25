@@ -1,6 +1,6 @@
 # MEMORY — BQ
 
-> **Status:** v1.24 (2026-10-25). Project ki yaaddasht: **kya tay hua aur kyun**, **pichhle kaam se kya seekha**, aur **kaunse jaal (traps) se bachna hai**. Poori detail baaki docs me hai; yahan short version aur pointers. Naya sabak ya decision aaye to yahan ek line jodo.
+> **Status:** v1.26 (2026-10-25). Project ki yaaddasht: **kya tay hua aur kyun**, **pichhle kaam se kya seekha**, aur **kaunse jaal (traps) se bachna hai**. Poori detail baaki docs me hai; yahan short version aur pointers. Naya sabak ya decision aaye to yahan ek line jodo.
 
 ## 1. Decision log
 
@@ -29,7 +29,9 @@
 | 2026-10-20 | Packages ka apna CLI: create, publish, republish, login, logout (Changesets nahi)                                                     | Category ke hisaab se selection, sabka ek bump ya alag-alag                | [packages/README.md](packages/README.md)          |
 | 2026-10-20 | Publish laptop se (2FA) aur GitHub Actions se (provenance); release ke baad commit + tags, push khud                                  | Owner ka faisla                                                            | [packages/README.md](packages/README.md)          |
 | 2026-10-20 | Naye TypeScript packages sirf ESM, tsdown se build; TypeScript 6.0 (typescript-eslint abhi 7 support nahi karta)                      | Node 24 aur Vite ke liye kaafi, kam files                                  | [packages/README.md](packages/README.md)          |
-| 2026-10-20 | `main` default branch: feature → PR → `main` → `prerelease` → `release`; release ke baad `release` → `main` back-merge                | Owner ka faisla; roz ka kaam default branch pe                             | ARCH §13, RULES §2                                |
+| 2026-10-20 | ~~`main` default branch: feature → PR → `main` → `prerelease` → `release`~~ (2026-10-25 ko badla, neeche)                | Owner ka faisla; roz ka kaam default branch pe                             | ARCH §13, RULES §2                                |
+| 2026-10-25 | Naya git flow: `prerelease` = development (feature PRs yahin), `release` = production, `main` = sirf final code (release safal hone ke baad `release` → `main`); release pe bane commits ke baad `release` → `prerelease`; hotfix `release` se; CI `check` flow jaanchta hai | Owner ka faisla: `main` hamesha wahi code jo live safal chala | ARCH §13, RULES §2 |
+| 2026-10-25 | `prerelease` pe chhota fix seedha push (1–3 files, local checks ke baad, force push nahi); naya feature, paisa/stock/permissions, kernel logic, dependency, CI hamesha PR se | Owner: chhoti cheez ke liye PR ka bojh nahi; push ke baad CI chalta hai | RULES §2 |
 | 2026-10-20 | Saare packages npm pe public                                                                                                          | Owner ka faisla; monorepo me apne aap jude rehte hain                      | TASKS T0.1                                        |
 | 2026-10-20 | Neev ke baad packages app ki zaroorat ke saath bante hain, pehle se nahi; do apps ki cheez turant package me                          | Asli zaroorat se API banta hai, andaaze se nahi                            | TASKS T0.1                                        |
 | 2026-10-21 | Packages public rahenge, par abhi publish/republish nahi; sirf zaroorat pe (repo ke bahar koi user). `private` nahi karne | Saare apps monorepo se package lete hain (workspaces), live pe bhi; publish ka kharcha (versions, 2FA, release branch) abhi bekaar | TASKS T0.1, HANDOFF §4 |
@@ -152,3 +154,5 @@
 | v1.22 | 2026-10-22 | Decisions: Milestone 1 `core` me (sample module, `mountRoute` ki hadd), scoped Redis wipe drill. |
 | v1.23 | 2026-10-23 | Decision: dependencies sirf `npm run update-deps` se (levels, installed se shuru, exact install phir range, typescript hold). |
 | v1.24 | 2026-10-25 | Decision: PR pe approval zaroori nahi, CI `check` zaroori. |
+| v1.25 | 2026-10-25 | Decision: naya git flow (`prerelease` development, `release` production, `main` sirf final). |
+| v1.26 | 2026-10-25 | Decision: `prerelease` pe chhota fix seedha push. |
