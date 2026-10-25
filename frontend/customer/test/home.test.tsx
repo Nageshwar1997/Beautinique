@@ -111,9 +111,10 @@ describe('header and footer', () => {
   it('the header has the home link and the theme switcher, and no nav while there is one page', () => {
     page(Home);
     const banner = screen.getByRole('banner');
-    expect(
-      within(banner).getByRole('link', { name: 'Beautinique home' }).getAttribute('href'),
-    ).toBe('/');
+    const home = within(banner).getByRole('link', { name: 'Beautinique home' });
+    expect(home.getAttribute('href')).toBe('/');
+    // the logo inside the link is decorative: the link already names it
+    expect(home.querySelector('svg')?.getAttribute('aria-hidden')).toBe('true');
     expect(within(banner).getByRole('group', { name: 'Theme' })).toBeTruthy();
     expect(within(banner).queryByRole('navigation')).toBeNull();
   });
@@ -121,6 +122,7 @@ describe('header and footer', () => {
   it('the footer says this is a demo and links the icon credits', () => {
     page(Home);
     const footer = screen.getByRole('contentinfo');
+    expect(within(footer).getByRole('img', { name: 'Beautinique' })).toBeTruthy();
     expect(footer.textContent).toContain('not a real store');
     expect(footer.textContent).toContain(`© ${String(new Date().getFullYear())} Beautinique`);
     expect(within(footer).getByRole('link', { name: 'Icon credits' }).getAttribute('href')).toBe(

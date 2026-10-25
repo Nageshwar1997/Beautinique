@@ -1,4 +1,5 @@
 import { NavList } from '@beautinique/frontend-app-shell';
+import { BrandLogo } from '@beautinique/frontend-icons';
 
 import { FOOTER_NAV } from '../nav';
 
@@ -8,8 +9,9 @@ export function SiteFooter() {
     <footer className="surface-inverse">
       <div className="container-page grid gap-6 py-10 md:grid-cols-[1fr_auto] md:items-start">
         <div>
-          <p className="font-display text-2xl font-medium">Beautinique</p>
-          <p className="mt-2 max-w-prose text-sm">
+          {/* one colour: the theme's rose is not made for the inverse surface */}
+          <BrandLogo size={36} monochrome label="Beautinique" className="block" />
+          <p className="mt-3 max-w-prose text-sm">
             Beautinique is a portfolio project, not a real store: nothing here can be bought, and
             the brand is made up.
           </p>

@@ -32,3 +32,52 @@ describe('favicon', () => {
     expect(readFileSync(join(publicDir, 'favicon.svg'), 'utf8')).toContain('<svg');
   });
 });
+
+/** A PNG's width and height from its IHDR chunk. */
+function pngSize(file: string): [number, number] {
+  const png = readFileSync(join(publicDir, file));
+  expect(png.subarray(0, 8).toString('hex'), file).toBe(PNG_SIGNATURE);
+  return [png.readUInt32BE(16), png.readUInt32BE(20)];
+}
+
+describe('install (web app manifest)', () => {
+  interface ManifestIcon {
+    src: string;
+    sizes: string;
+    type: string;
+    purpose: string;
+  }
+  const manifest = JSON.parse(readFileSync(join(publicDir, 'manifest.webmanifest'), 'utf8')) as {
+    name: string;
+    short_name: string;
+    start_url: string;
+    display: string;
+    icons: ManifestIcon[];
+  };
+
+  it('names the app and opens the store standalone', () => {
+    expect(manifest.name).toBe('Beautinique');
+    expect(manifest.short_name).toBe('Beautinique');
+    expect(manifest.start_url).toBe('/');
+    expect(manifest.display).toBe('standalone');
+  });
+
+  it('every icon is a PNG of the size it claims', () => {
+    for (const icon of manifest.icons) {
+      expect(icon.type, icon.src).toBe('image/png');
+      const [width, height] = pngSize(icon.src.replace(/^\//, ''));
+      expect(`${String(width)}x${String(height)}`, icon.src).toBe(icon.sizes);
+    }
+  });
+
+  it('has 192 and 512 px icons for any use and as maskable (Android crops those to a shape)', () => {
+    const have = manifest.icons.map((icon) => `${icon.purpose} ${icon.sizes}`);
+    for (const purpose of ['any', 'maskable']) {
+      for (const size of ['192x192', '512x512']) expect(have).toContain(`${purpose} ${size}`);
+    }
+  });
+
+  it('iOS gets its own 180 px touch icon', () => {
+    expect(pngSize('apple-touch-icon.png')).toEqual([180, 180]);
+  });
+});

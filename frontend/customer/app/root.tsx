@@ -41,6 +41,9 @@ export function Layout({ children }: { children: React.ReactNode }) {
         {/* .ico for browsers and tools that ask for /favicon.ico; the rest take the SVG */}
         <link rel="icon" href="/favicon.ico" sizes="32x32" />
         <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+        {/* install: the mark on ivory (home screen, app switcher, splash with the app's name) */}
+        <link rel="manifest" href="/manifest.webmanifest" />
+        <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
         <Meta />
         <Links />
       </head>
