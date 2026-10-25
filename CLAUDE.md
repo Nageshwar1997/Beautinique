@@ -39,7 +39,8 @@ launch jaisi banti hai. Legal cheezein dummy data ke saath implement hoti hain.
   `.env.example`. Claude `.env`/`.env.*` files aur repo ke bahar ka `All-ENVs` folder kabhi nahi kholta.
 - **Git flow (owner, 2026-10-25):** `prerelease` se feature branch → PR → **`prerelease`** (development)
   → PR → **`release`** (production) → release safal hone ke baad PR `release` → **`main`** (sirf final code).
-  `main` pe kabhi seedha kaam ya feature PR nahi; teeno pe seedha push nahi. Release pe bane commits
+  `main` pe kabhi seedha kaam ya feature PR nahi; `main` aur `release` pe seedha push nahi. `prerelease` pe sirf
+  chhota fix seedha push ho sakta hai (1–3 files, local checks ke baad, force push nahi; RULES §2). Release pe bane commits
   (package release, hotfix) ke baad `release` → `prerelease` back-merge bhi. CI ye flow check karta hai (RULES §2).
 - **Commit/push sirf jo insaan kaam kar raha hai uske kehne pe.** Destructive kaam se pehle poochho.
 - **npm pe kuch bhi publish, `npm login/logout` ya `npm trust` sirf insaan ke kehne pe**; tests kabhi

@@ -1,6 +1,6 @@
 # HANDOFF — BQ
 
-> **Status:** v1.36 (2026-10-25). Is project pe 2 log kaam karte hain. Ye file batati hai ki **abhi kya halat hai, kisne kya chhoda, agla kaam kya hai** aur kaunse sawal khule hain, taaki doosra insaan (aur uska Claude) bina poora itihaas padhe kaam utha sake. Jo bhi kaam roke, wo ye file update kare (neeche §8).
+> **Status:** v1.37 (2026-10-25). Is project pe 2 log kaam karte hain. Ye file batati hai ki **abhi kya halat hai, kisne kya chhoda, agla kaam kya hai** aur kaunse sawal khule hain, taaki doosra insaan (aur uska Claude) bina poora itihaas padhe kaam utha sake. Jo bhi kaam roke, wo ye file update kare (neeche §8).
 
 ## 0. Pehle ye (handoff ke din)
 
@@ -20,7 +20,7 @@
 2. `npm install`, phir `npm run build` (packages ek doosre ka `dist` import karte hain).
 3. Checks: `npm run format:check`, `npm run lint`, `npm run typecheck`, `npm test` (backend packages ke tests asli Mongo pe chalte hain: pehle Docker Desktop kholo aur `npm run infra:up`; `verify` aur `publish` ke liye bhi). Package CLI ke tests me e2e ~4 minute aur create ~1 minute lete hain.
 4. Styles ka playground: `npm run playground --workspace @beautinique/frontend-styles` (http://localhost:5180).
-5. **Roz ka git flow** (owner, 2026-10-25; ARCHITECTURE §13, RULES §2): `git switch prerelease` → `git pull` → `git switch -c feat/<kaam>` → commits (Conventional Commits) → PR **`prerelease`** pe (development). Batch ready ho to PR `prerelease` → `release` (production: live + npm). Release safal (deploy + demo check) → PR `release` → `main` (sirf final code). Release pe bane commits (package release, hotfix) ke baad PR `release` → `prerelease` bhi. `main` pe kabhi seedha kaam nahi.
+5. **Roz ka git flow** (owner, 2026-10-25; ARCHITECTURE §13, RULES §2): `git switch prerelease` → `git pull` → `git switch -c feat/<kaam>` → commits (Conventional Commits) → PR **`prerelease`** pe (development). Batch ready ho to PR `prerelease` → `release` (production: live + npm). Release safal (deploy + demo check) → PR `release` → `main` (sirf final code). Release pe bane commits (package release, hotfix) ke baad PR `release` → `prerelease` bhi. `main` pe kabhi seedha kaam nahi. **Chhota fix** (1–3 files: typo, doc line, flaky test, ek-do line ka bug) `prerelease` pe seedha push ho sakta hai: `git pull --rebase`, local format/lint/typecheck + us package ka test, phir push; force push kabhi nahi (poori list RULES §2).
 6. Docker sirf local dev ke liye hai (owner Docker seekh raha hai; TASKS me "Docker Lesson" wale tasks owner ke saath karne hain).
 7. **VS Code:** `Beautinique` folder seedha kholo (File → Open Folder), parent `BQ` nahi: VS Code nested `.vscode` nahi padhta. Repo ki `.vscode/settings.json` save pe ESLint se order theek karti hai (VS Code ka Organize Imports band) aur bekaar imports hatati hai (`source.removeUnusedImports`: sirf hatata hai, order nahi chhedta), aur `extensions.json` ESLint + Prettier extensions batata hai.
 8. **Doosre AI tools:** root ka `AGENTS.md` unhe `CLAUDE.md`, HANDOFF aur RULES ki taraf bhejta hai (zyadatar tools `CLAUDE.md` nahi, `AGENTS.md` padhte hain). Unse bhi kaam rokte waqt HANDOFF update karwao; unka diff baad me review hota hai (`git log <commit>..HEAD`).
@@ -66,7 +66,8 @@
 
 **Abhi (2026-10-25): plan [TASKS.md](TASKS.md) section D (har milestone live), agla Milestone 2. Jo developer ab kaam utha raha hai (baari-baari, §8), wo ye kare:**
 
-- **Naye git flow pe aane ke liye ek baar (owner):** PR `main` → `prerelease` merge karo (abhi `main` me docs aur server-kit test fix `prerelease` se aage hain). Uske baad `main` me sirf `release` se PR aata hai (CI rokta hai). GitHub ka default branch `prerelease` karna (Settings → General → Default branch) owner ka faisla hai: tab naye PR aur clone apne-aap development pe jaate hain.
+- **Naye git flow pe aane ke liye ek baar (owner):** PR `main` → `prerelease` (sync) ho gaya (PR #7). Uske baad `main` me sirf `release` se PR aata hai (CI rokta hai). GitHub ka default branch `prerelease` karna (Settings → General → Default branch) owner ka faisla hai: tab naye PR aur clone apne-aap development pe jaate hain.
+- **`prerelease` pe seedha push ke liye ruleset (owner, GitHub Settings → Rules → Rulesets):** `protected-branches` ki target list se `prerelease` hatao (wo `main` aur `release` ke liye waisa hi rahe), aur `prerelease` ka naya ruleset banao jisme sirf "Restrict deletions" aur "Block force pushes" ho (PR aur required check nahi; dono hon to seedha push rukta hai). Jab tak ye nahi hota, `prerelease` pe bhi sirf PR chalega.
 - `git switch prerelease && git pull`; ek baar `gh auth login -h github.com` (PR ke liye).
 - **M2, is order me; har task apni branch `feat/<task>` (`prerelease` se) → PR → `prerelease`, CI `check` green hone pe merge:**
   1. `feat/m2-gateway`: T2.1, T2.3, T2.4 (routing, rate limits, `/health` `/ready` `/status`). T2.2 ka JWKS hissa identity ke saath (M3), kyunki keys identity banata hai.
@@ -173,3 +174,4 @@
 | v1.34 | 2026-10-25 | Cursor nahi: 2 developers baari-baari Claude ke saath (§8); M2 ke tasks `feat/` branches me (§4). |
 | v1.35 | 2026-10-25 | PR approval zaroori nahi (ruleset approvals 0), CI `check` zaroori (§4, §8). |
 | v1.36 | 2026-10-25 | Naya git flow: `prerelease` development, `release` production, `main` sirf final; ek baar `main` → `prerelease` sync (§2, §4, §8). |
+| v1.37 | 2026-10-25 | `prerelease` pe chhota fix seedha push (§2, RULES §2); ruleset ka badlav owner ke paas (§4). |
