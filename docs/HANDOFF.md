@@ -1,6 +1,6 @@
 # HANDOFF — BQ
 
-> **Status:** v1.39 (2026-10-25). Is project pe 2 log kaam karte hain. Ye file batati hai ki **abhi kya halat hai, kisne kya chhoda, agla kaam kya hai** aur kaunse sawal khule hain, taaki doosra insaan (aur uska Claude) bina poora itihaas padhe kaam utha sake. Jo bhi kaam roke, wo ye file update kare (neeche §8).
+> **Status:** v1.42 (2026-10-25). Is project pe 2 log kaam karte hain. Ye file batati hai ki **abhi kya halat hai, kisne kya chhoda, agla kaam kya hai** aur kaunse sawal khule hain, taaki doosra insaan (aur uska Claude) bina poora itihaas padhe kaam utha sake. Jo bhi kaam roke, wo ye file update kare (neeche §8).
 
 ## 0. Pehle ye (handoff ke din)
 
@@ -72,8 +72,9 @@
 - `git switch prerelease && git pull`; ek baar `gh auth login -h github.com` (PR ke liye).
 - **M2, is order me; har task apni branch `feat/<task>` (`prerelease` se) → PR → `prerelease`, CI `check` green hone pe merge:**
   1. `feat/m2-gateway`: **code + tests + docs taiyaar (2026-10-25, §3), uncommitted**: owner ke kehne pe commit, push, PR → `prerelease`. T2.2 ka JWKS/cookies/passport hissa identity ke saath (M3).
+  - **Saath-saath (item 1 merge ke baad, owner ke saath):** TASKS T2.8 Metrics Lessons 1–5 (Prometheus, Grafana, Loki sirf laptop pe; live pe kuch nahi badalta). Ek lesson poora hone pe hi agla.
   2. `feat/m2-customer-landing`: `frontend/customer` ka app shell (header, footer, light/dark toggle) aur landing page, `@beautinique/frontend-styles` ke tokens aur [DESIGN.md](DESIGN.md) se; keyboard aur screen reader se chale, tests ke saath.
-  3. `feat/m2-deploy`: `backend/bundle` Render pe, `frontend/customer` Vercel pe, env, section C ki jaanch, live `/status` + ping demo (TASKS D checklist). **Isi me Sentry (T2.3 ka bacha hissa):** poore process me ek init, DSN owner se. Har app ki `vercel.json` me `/api/(.*)` route + `x-origin-secret` transform (ARCHITECTURE §7.2).
+  3. `feat/m2-deploy`: `backend/bundle` Render pe, `frontend/customer` Vercel pe, env, section C ki jaanch, live `/status` + ping demo (TASKS D checklist). **Isi me Sentry (T2.3 ka bacha hissa):** poore process me ek init, DSN owner se. Har app ki `vercel.json` me `/api/(.*)` route + `x-origin-secret` transform (ARCHITECTURE §7.2). **T2.7 jagana (owner, 2026-10-25):** public `GET /api/v1/platform/wake` (customer shell ki wake-up screen isi ko call kare, item 2) aur GitHub Actions hourly wake 10:00–21:00 IST (`cron: '30 4-15 * * *'`, Render `/health`); 24×7 keep-alive nahi.
 - **Owner (deploy se pehle; secrets sirf dashboards me, repo me kabhi nahi):** Atlas M0 cluster + DB user, Render Key Value (free), Render web service `backend/bundle` ke liye, Vercel pe `frontend/customer` project, Sentry DSN. **Naya:** ek origin secret banao (`node -e "console.log(require('node:crypto').randomBytes(32).toString('base64url'))"`) aur wahi Render me `GATEWAY__ORIGIN_SECRETS` aur Vercel project me `ORIGIN_SECRET` (Sensitive) me; Render me `GATEWAY__APP_HOSTS=customer=<vercel production host>` aur `GATEWAY__REDIS_URL` (Key Value internal URL).
 - **Dono developers, laptop pe:** gateway ab `GATEWAY__REDIS_URL` aur `GATEWAY__ORIGIN_SECRETS` ke bina start nahi hota. Apni `backend/gateway/.env` (ya `backend/bundle/.env`) me `.env.example` se ye keys aur `GATEWAY__APP_HOSTS` jod lo; `backend/bundle/.env.example` ab bina badle laptop pe chalta hai.
 
@@ -87,7 +88,7 @@
 
 ## 5. Khule sawal aur owner ke kaam
 
-- **Owner ke kaam:** [TASKS.md](TASKS.md) section A (A.1–A.9): `gh auth login`, Ola Maps, Render, Atlas, Cloudinary/Sentry/Razorpay/Google OAuth, Brevo, R2, UptimeRobot, Vercel. Ye doosra insaan nahi kar sakta.
+- **Owner ke kaam:** [TASKS.md](TASKS.md) section A (A.1–A.9): `gh auth login`, Ola Maps, Render, Atlas, Cloudinary/Sentry/Razorpay/Google OAuth, Brevo, R2, Vercel (UptimeRobot/cron-job.org nahi: owner, 2026-10-25). Ye doosra insaan nahi kar sakta.
 - **Doosre insaan ke access:** GitHub repo pe collaborator, aur publish karna ho to npm org `@beautinique` me member (owner dega).
 - **Trusted publishing:** GitHub se publish karne se pehle har package pe `npm trust github` (republish `--target github` ye khud karta hai, owner ke npm 2FA ke saath).
 - Docs me jahan koi business sawal khula ho, wahan khud faisla mat lo: owner se poochho aur jawab doc + change log me likho.
@@ -181,3 +182,6 @@
 | v1.37   | 2026-10-25 | `prerelease` pe chhota fix seedha push (§2, RULES §2); ruleset ka badlav owner ke paas (§4).                                                                                                                         |
 | v1.38   | 2026-10-25 | M2 gateway (`feat/m2-gateway`, uncommitted): origin secret, app hosts, rate limits (naya `backend-server-ratelimit`), sign-in tak 401, cache headers, `/status`; owner/laptop ke naye kaam aur 3 traps (§3, §4, §6). |
 | v1.39   | 2026-10-25 | M2 gateway ka independent review: 7 confirmed findings theek (smuggling, stall, ping cap, Origin = host, limiter microseconds, client-gone, contracts README); gateway tests `REDIS_TEST_URL` (§3).                  |
+| v1.40   | 2026-10-25 | Owner: keep-alive pinger nahi (§5).                                                                                                                                                                                  |
+| v1.41   | 2026-10-25 | Owner: T2.7 jagana (wake route + GitHub Actions hourly 10:00–21:00 IST), M2 deploy me (§4).                                                                                                                          |
+| v1.42   | 2026-10-25 | T2.8 Metrics Lessons, gateway PR ke baad saath-saath (§4).                                                                                                                                                           |
