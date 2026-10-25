@@ -1,13 +1,13 @@
 # TASKS — BQ
 
-> **Status:** v1.28 (2026-10-23). Poore project ki task list, [ARCHITECTURE.md](ARCHITECTURE.md) §16 ke phases ke hisaab se. Har task "done" tabhi jab [RULES.md](RULES.md) §1.5 ki Definition of Done poori ho.
+> **Status:** v1.29 (2026-10-25). Poore project ki task list, [ARCHITECTURE.md](ARCHITECTURE.md) §16 ke phases ke hisaab se. Har task "done" tabhi jab [RULES.md](RULES.md) §1.5 ki Definition of Done poori ho.
 
 **Kaise use karein:**
 - `[ ]` baaki, `[~]` chal raha hai, `[x]` done.
 - Task ID: `T<phase>.<number>`.
 - Har phase ke end me ek **milestone** hai. Milestone poora hue bina agla phase shuru nahi. **2026-10-23 se milestone tabhi poora jab wo live ho aur uska demo dikh sake** (section D); laptop pe chalna kaafi nahi.
 - Naya task aaye to sahi phase me jodo, aur bada badlav change log me likho.
-- Har milestone me kaam do hisson me: **Claude** (risky: backend, paisa/stock/permissions, kernel packages, review) aur **Cursor** (UI screens, forms, CRUD, tests ka boilerplate). Flow: [AGENTS.md](../AGENTS.md) "Claude ke baad Cursor".
+- **2 developers, baari-baari (owner ka faisla, 2026-10-25):** dono Claude Code use karte hain. Ek ki weekly limit khatam → wo kaam commit-ready chhod ke HANDOFF update karta hai, doosra wahin se aage badhta hai. Flow: [HANDOFF.md](HANDOFF.md) §8.
 
 **Abhi ka focus:** Milestone 2: gateway + pehla live deploy (section D).
 
@@ -15,18 +15,18 @@
 
 Har milestone ke end me kuch **live** dikhana hai. Ek hi live environment, free stack: `backend/bundle` Render free web service pe, Atlas M0, Render Key Value free, apps Vercel pe. Deploy `release` branch se (feature → `main` → `prerelease` → `release`, RULES §2). Section C ki jaanch pehle deploy (M2) pe hi. Phase 11 me sirf hardening bachti hai (monitors, legal pages, cutover).
 
-| Milestone | Kya live hoga | Demo (kya dikha sakte ho) | Claude | Cursor |
-|---|---|---|---|---|
-| M2 Gateway + pehla deploy | bundle (gateway + core) Render pe, Atlas M0, Render Key Value; customer app ka shell Vercel pe | live URL khulta hai, `/status` hara, sample ping endpoint live | gateway, deploy setup, env, section C | customer shell + landing page |
-| M3 Identity | login: email OTP (T5.1 ka Brevo email hissa yahin pehle), password + TOTP, Google; customer + admin apps | live pe signup/login, My Devices; Master doosre app me login nahi | identity service, sessions, JWKS | auth screens (auth-ui) |
-| M4 Core | seller apply → approve → listing QC → storefront (Pune) | live storefront pe products, product page, area check | core modules, authz, media | seller/admin review screens, storefront UI |
-| M5 Notify + Payments | email (Brevo), web push, in-app inbox, Razorpay test webhook | live pe email/push aate hain, test payment event | notify, payments | inbox UI, preferences |
-| M6 Frontend foundation | saare 11 apps Vercel pe, login + khaali dashboard, dono themes | har app ka live URL | `vercel.json`, security headers, review | apps template se, app-shell |
-| M7 Commerce | cart → checkout → order, Razorpay test mode, delivery pe UPI QR, invoice | live pe test order shuru se aakhir tak | checkout, order states, payments, GST invoice | cart, checkout, order screens |
-| M8 WMS + Delivery PWA | warehouse → rider → delivery/return; PWA install | phone pe Delivery PWA se dummy delivery | inventory ledger, state machines, routing | PWA screens, warehouse screens |
-| M9 Finance + support | ledger, payouts (test), tickets + grievance timers | ek order ka ledger aur ticket ka SLA | journal, settlements, registers | support desk UI |
-| M10 UGC, growth, governance | reviews, CMS, creators, privacy, risk | PRD §5 ke features live | governance, privacy, risk | reviews, CMS, creator screens |
-| M11 Launch hardening | monitors, alerts, legal pages, cutover | launch | sab | E2E flows ke screens |
+| Milestone                   | Kya live hoga                                                                                            | Demo (kya dikha sakte ho)                                         | Kaam (backend + frontend)                                                    |
+| --------------------------- | -------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------- | ---------------------------------------------------------------------------- |
+| M2 Gateway + pehla deploy   | bundle (gateway + core) Render pe, Atlas M0, Render Key Value; customer app ka shell Vercel pe           | live URL khulta hai, `/status` hara, sample ping endpoint live    | gateway, deploy setup, env, section C; customer shell + landing page         |
+| M3 Identity                 | login: email OTP (T5.1 ka Brevo email hissa yahin pehle), password + TOTP, Google; customer + admin apps | live pe signup/login, My Devices; Master doosre app me login nahi | identity service, sessions, JWKS; auth screens (auth-ui)                     |
+| M4 Core                     | seller apply → approve → listing QC → storefront (Pune)                                                  | live storefront pe products, product page, area check             | core modules, authz, media; seller/admin review screens, storefront UI       |
+| M5 Notify + Payments        | email (Brevo), web push, in-app inbox, Razorpay test webhook                                             | live pe email/push aate hain, test payment event                  | notify, payments; inbox UI, preferences                                      |
+| M6 Frontend foundation      | saare 11 apps Vercel pe, login + khaali dashboard, dono themes                                           | har app ka live URL                                               | apps template se, app-shell, `vercel.json`, security headers                 |
+| M7 Commerce                 | cart → checkout → order, Razorpay test mode, delivery pe UPI QR, invoice                                 | live pe test order shuru se aakhir tak                            | checkout, order states, payments, GST invoice; cart, checkout, order screens |
+| M8 WMS + Delivery PWA       | warehouse → rider → delivery/return; PWA install                                                         | phone pe Delivery PWA se dummy delivery                           | inventory ledger, state machines, routing; PWA aur warehouse screens         |
+| M9 Finance + support        | ledger, payouts (test), tickets + grievance timers                                                       | ek order ka ledger aur ticket ka SLA                              | journal, settlements, registers; support desk UI                             |
+| M10 UGC, growth, governance | reviews, CMS, creators, privacy, risk                                                                    | PRD §5 ke features live                                           | governance, privacy, risk; reviews, CMS, creator screens                     |
+| M11 Launch hardening        | monitors, alerts, legal pages, cutover                                                                   | launch                                                            | sab; E2E flows                                                               |
 
 **Har milestone ke end ki checklist:**
 1. CI green; `main` → `prerelease` → `release` PR merge (owner).
@@ -34,7 +34,7 @@ Har milestone ke end me kuch **live** dikhana hai. Ek hi live environment, free 
 3. Demo script live pe chalao (upar wala "Demo" column), jo dikha uska note.
 
 **Niyam:**
-- Phase 6 (frontend foundation) M2 se hi saath-saath (Cursor): har live milestone ko UI chahiye.
+- Phase 6 (frontend foundation) M2 se hi saath-saath: har live milestone ko UI chahiye, isliye har milestone me backend ke saath uski screens bhi.
 - Free tier: Render free service 15 min khaali rehne pe so jaati hai (pehli request slow), demo se pehle ek baar khol lo. Brevo me "authorized IPs" on ho to band karo (Render ke outbound IP badalte hain).
 
 ## A. Owner ke kaam (sirf aap kar sakte ho)
@@ -213,34 +213,35 @@ Har milestone ke end me kuch **live** dikhana hai. Ek hi live environment, free 
 
 ## Change log
 
-| Version | Date       | Badlav                                                                                                               |
-| ------- | ---------- | -------------------------------------------------------------------------------------------------------------------- |
-| v1.0    | 2026-10-19 | Pehla version: owner ke kaam, docs, Phase 0–11 (milestones aur Docker lessons ke saath), aur deploy pe verify list.  |
-| v1.1    | 2026-10-20 | Apps sirf English: T5.2, T6.1 aur T6.2 badle.                                                                        |
-| v1.2    | 2026-10-20 | T0.5 aur T0.6 ka pehla hissa ho gaya (workspaces, package CLI, ci.yml, release.yml).                                 |
-| v1.3    | 2026-10-20 | T0.1: packages naye bante hain (`BQ-Packages` sirf reference). T0.7: packages bhi `release` branch se.               |
-| v1.4    | 2026-10-20 | T0.7: `prerelease` aur `release` branches ban gayi; protection baaki.                                                |
-| v1.5    | 2026-10-20 | T0.7: `main` default branch wala flow; ruleset teeno branches pe.                                                    |
-| v1.6    | 2026-10-20 | T0.7 done: rulesets, tag ruleset aur `npm` environment lag gaye.                                                     |
-| v1.7    | 2026-10-20 | T0.1: `frontend-styles` poora (animations, utilities, rich text, tones, charts, high contrast, print).               |
-| v1.8    | 2026-10-20 | T0.1: packages ki list aur order (neev, backend, frontend, feature), public/private ke saath.                        |
-| v1.9    | 2026-10-20 | T0.1 neev ke 4 packages bane: shared-zod, shared-utils, shared-contracts, shared-authz.                              |
-| v1.10   | 2026-10-20 | T0.1: saare packages public; neev ke baad packages app ki zaroorat ke saath.                                         |
-| v1.11   | 2026-10-20 | `backend-server-kit` bana (T1.1 ka zyada hissa); app aur backend generators (T0.2, T0.3, T0.9, T2.1, T2.5 ke notes). |
-| v1.12 | 2026-10-20 | OTP sirf email se (T3.1, T5.2). |
-| v1.13 | 2026-10-20 | T5.1: SMS aur WhatsApp channel hate. |
-| v1.14 | 2026-10-21 | T0.1: packages public rahenge, par abhi publish/republish nahi, zaroorat pe hi. |
-| v1.15 | 2026-10-21 | T0.8 done: local infra (Mongo replica set, Valkey, Mailpit), Docker Lesson 2. |
-| v1.16 | 2026-10-21 | T0.6: gitleaks secret scan CI ke `check` job me; sirf affected build baaki. |
-| v1.17 | 2026-10-21 | T1.2 done: `backend-server-mongo` (withTransaction, reply commit ke baad). |
-| v1.18 | 2026-10-21 | T1.3 part 1: Redis connection, outbox writer, relay (poll + changestream, lease). |
-| v1.19 | 2026-10-21 | T0.6: GitHub pe pehli gitleaks finding (nakli test URL) `.gitleaksignore` se, wajah ke saath. |
-| v1.20 | 2026-10-21 | T0.6: docs me password jaisa URL nahi (v1.19 ke note ne khud gitleaks fail karaya); `3fdfb49` ki 3 findings ignore. |
-| v1.21 | 2026-10-21 | T1.3: CI aur release me Valkey bhi (server-queue ke tests). |
-| v1.22 | 2026-10-22 | T1.3 part 2: consumer, inbox dedupe, retries, dead letters; job me poora envelope. |
-| v1.23 | 2026-10-22 | T1.3 done: part 3 schedules, tasks, heartbeat, wipe watchdog, outbox aur dead letters redrive. |
-| v1.24 | 2026-10-22 | T1.4 done: `backend-server-crypto` (AES-GCM field encryption, key rotation, HMAC blind index). |
-| v1.25 | 2026-10-22 | T1.5 done: typed client, codegen (`generated/`), platform catalogue (Milestone 1 sample route + event). |
-| v1.26 | 2026-10-22 | T1.6 done: authz `scopeWithin`, `grantProblems`, `checkSeparation` + mutations; naya `backend-server-storage` (`StoragePort`, in-memory adapter, contract tests). |
-| v1.27 | 2026-10-22 | Phase 1 done: T1.1 (`mountRoute`), T1.7 (audit, `shared-utils` mutations), Milestone 1 (core sample endpoint, event, inbox, Redis wipe drill). |
-| v1.28 | 2026-10-23 | Deploy-first plan (section D): har milestone live + demo, Claude/Cursor bantwara; focus Milestone 2. |
+| Version | Date       | Badlav                                                                                                                                                            |
+| ------- | ---------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| v1.0    | 2026-10-19 | Pehla version: owner ke kaam, docs, Phase 0–11 (milestones aur Docker lessons ke saath), aur deploy pe verify list.                                               |
+| v1.1    | 2026-10-20 | Apps sirf English: T5.2, T6.1 aur T6.2 badle.                                                                                                                     |
+| v1.2    | 2026-10-20 | T0.5 aur T0.6 ka pehla hissa ho gaya (workspaces, package CLI, ci.yml, release.yml).                                                                              |
+| v1.3    | 2026-10-20 | T0.1: packages naye bante hain (`BQ-Packages` sirf reference). T0.7: packages bhi `release` branch se.                                                            |
+| v1.4    | 2026-10-20 | T0.7: `prerelease` aur `release` branches ban gayi; protection baaki.                                                                                             |
+| v1.5    | 2026-10-20 | T0.7: `main` default branch wala flow; ruleset teeno branches pe.                                                                                                 |
+| v1.6    | 2026-10-20 | T0.7 done: rulesets, tag ruleset aur `npm` environment lag gaye.                                                                                                  |
+| v1.7    | 2026-10-20 | T0.1: `frontend-styles` poora (animations, utilities, rich text, tones, charts, high contrast, print).                                                            |
+| v1.8    | 2026-10-20 | T0.1: packages ki list aur order (neev, backend, frontend, feature), public/private ke saath.                                                                     |
+| v1.9    | 2026-10-20 | T0.1 neev ke 4 packages bane: shared-zod, shared-utils, shared-contracts, shared-authz.                                                                           |
+| v1.10   | 2026-10-20 | T0.1: saare packages public; neev ke baad packages app ki zaroorat ke saath.                                                                                      |
+| v1.11   | 2026-10-20 | `backend-server-kit` bana (T1.1 ka zyada hissa); app aur backend generators (T0.2, T0.3, T0.9, T2.1, T2.5 ke notes).                                              |
+| v1.12   | 2026-10-20 | OTP sirf email se (T3.1, T5.2).                                                                                                                                   |
+| v1.13   | 2026-10-20 | T5.1: SMS aur WhatsApp channel hate.                                                                                                                              |
+| v1.14   | 2026-10-21 | T0.1: packages public rahenge, par abhi publish/republish nahi, zaroorat pe hi.                                                                                   |
+| v1.15   | 2026-10-21 | T0.8 done: local infra (Mongo replica set, Valkey, Mailpit), Docker Lesson 2.                                                                                     |
+| v1.16   | 2026-10-21 | T0.6: gitleaks secret scan CI ke `check` job me; sirf affected build baaki.                                                                                       |
+| v1.17   | 2026-10-21 | T1.2 done: `backend-server-mongo` (withTransaction, reply commit ke baad).                                                                                        |
+| v1.18   | 2026-10-21 | T1.3 part 1: Redis connection, outbox writer, relay (poll + changestream, lease).                                                                                 |
+| v1.19   | 2026-10-21 | T0.6: GitHub pe pehli gitleaks finding (nakli test URL) `.gitleaksignore` se, wajah ke saath.                                                                     |
+| v1.20   | 2026-10-21 | T0.6: docs me password jaisa URL nahi (v1.19 ke note ne khud gitleaks fail karaya); `3fdfb49` ki 3 findings ignore.                                               |
+| v1.21   | 2026-10-21 | T1.3: CI aur release me Valkey bhi (server-queue ke tests).                                                                                                       |
+| v1.22   | 2026-10-22 | T1.3 part 2: consumer, inbox dedupe, retries, dead letters; job me poora envelope.                                                                                |
+| v1.23   | 2026-10-22 | T1.3 done: part 3 schedules, tasks, heartbeat, wipe watchdog, outbox aur dead letters redrive.                                                                    |
+| v1.24   | 2026-10-22 | T1.4 done: `backend-server-crypto` (AES-GCM field encryption, key rotation, HMAC blind index).                                                                    |
+| v1.25   | 2026-10-22 | T1.5 done: typed client, codegen (`generated/`), platform catalogue (Milestone 1 sample route + event).                                                           |
+| v1.26   | 2026-10-22 | T1.6 done: authz `scopeWithin`, `grantProblems`, `checkSeparation` + mutations; naya `backend-server-storage` (`StoragePort`, in-memory adapter, contract tests). |
+| v1.27   | 2026-10-22 | Phase 1 done: T1.1 (`mountRoute`), T1.7 (audit, `shared-utils` mutations), Milestone 1 (core sample endpoint, event, inbox, Redis wipe drill).                    |
+| v1.28   | 2026-10-23 | Deploy-first plan (section D): har milestone live + demo, Claude/Cursor bantwara; focus Milestone 2.                                                              |
+| v1.29   | 2026-10-25 | Cursor nahi: 2 developers baari-baari Claude ke saath; section D me ek "Kaam" column.                                                                             |

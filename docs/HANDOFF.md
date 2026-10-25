@@ -1,6 +1,6 @@
 # HANDOFF — BQ
 
-> **Status:** v1.33 (2026-10-23). Is project pe 2 log kaam karte hain. Ye file batati hai ki **abhi kya halat hai, kisne kya chhoda, agla kaam kya hai** aur kaunse sawal khule hain, taaki doosra insaan (aur uska Claude) bina poora itihaas padhe kaam utha sake. Jo bhi kaam roke, wo ye file update kare (neeche §8).
+> **Status:** v1.34 (2026-10-25). Is project pe 2 log kaam karte hain. Ye file batati hai ki **abhi kya halat hai, kisne kya chhoda, agla kaam kya hai** aur kaunse sawal khule hain, taaki doosra insaan (aur uska Claude) bina poora itihaas padhe kaam utha sake. Jo bhi kaam roke, wo ye file update kare (neeche §8).
 
 ## 0. Pehle ye (handoff ke din)
 
@@ -64,14 +64,14 @@
 
 ## 4. Agla kaam (is order me)
 
-**Abhi (2026-10-23): Claude ki weekly limit 95%, reset 25 Oct ~1:30 AM IST. Plan: [TASKS.md](TASKS.md) section D (har milestone live), agla Milestone 2.**
+**Abhi (2026-10-25): plan [TASKS.md](TASKS.md) section D (har milestone live), agla Milestone 2. Jo developer ab kaam utha raha hai (baari-baari, §8), wo ye kare:**
 
-- **Owner, Cursor se pehle:** update-deps commit `45c9483` + `962e6b0` me hai (`962e6b0` abhi push nahi). Ye plan wale docs (`AGENTS.md`, `CLAUDE.md`, `docs/HANDOFF.md`, `docs/TASKS.md`) commit karke sab push karo, taaki Cursor ki branch `main` se sab le. Phir `gh auth login -h github.com` (PR ke liye).
-- **Cursor ab (ek task, ek branch, [AGENTS.md](../AGENTS.md) "Claude ke baad Cursor"):**
-  1. `cursor/m2-customer-landing`: `frontend/customer` ka app shell (header, footer, light/dark theme toggle) aur landing page ("jaldi aa raha hai" wala brand page), `@beautinique/frontend-styles` ke tokens se, [DESIGN.md](DESIGN.md) ke hisaab se; keyboard aur screen reader se chale, tests ke saath. Backend ko haath nahi.
-  2. Waqt bache to `cursor/m2-admin-shell`: `frontend/admin` ka wahi shell (login page abhi sirf UI, bina API ke).
-- **Owner (M2 ke deploy ke liye, secrets sirf dashboards me, repo me kabhi nahi):** Atlas M0 cluster + DB user, Render Key Value (free), Render web service `backend/bundle` ke liye, Vercel pe `frontend/customer` project.
-- **Claude, reset ke baad:** pehle Cursor ki branches ka review + PR; phir M2: gateway (T2.1–T2.4), bundle ka Render deploy, env, section C ki jaanch, live `/status` + ping demo.
+- `git pull`; ek baar `gh auth login -h github.com` (PR ke liye).
+- **M2, is order me; har task apni branch `feat/<task>` → PR → `main`, doosra developer approve kare:**
+  1. `feat/m2-gateway`: T2.1, T2.3, T2.4 (routing, rate limits, `/health` `/ready` `/status`). T2.2 ka JWKS hissa identity ke saath (M3), kyunki keys identity banata hai.
+  2. `feat/m2-customer-landing`: `frontend/customer` ka app shell (header, footer, light/dark toggle) aur landing page, `@beautinique/frontend-styles` ke tokens aur [DESIGN.md](DESIGN.md) se; keyboard aur screen reader se chale, tests ke saath.
+  3. `feat/m2-deploy`: `backend/bundle` Render pe, `frontend/customer` Vercel pe, env, section C ki jaanch, live `/status` + ping demo (TASKS D checklist).
+- **Owner (deploy se pehle; secrets sirf dashboards me, repo me kabhi nahi):** Atlas M0 cluster + DB user, Render Key Value (free), Render web service `backend/bundle` ke liye, Vercel pe `frontend/customer` project.
 
 1. **T0.7 ho gaya.** 2026-10-20: branches ban gayi, CI teeno pe green; ruleset `protected-branches` (`main`, `prerelease`, `release`: delete aur force push band, PR + 1 approval, `check` required aur up to date, bypass sirf Repository admin); tag ruleset `release-tags` (`@beautinique/*` tags sirf owner bana, badal ya mita sakta hai); environment `npm` sirf `release` branch se, owner ki approval ke saath. Iska matlab: har PR pe CI `check` green + 1 approval chahiye (owner bypass kar sakta hai); `release` pe seedha push sirf owner (package release); npm publish job owner ke approve karne pe hi chalta hai. Owner ne Actions permissions aur Advanced Security bhi set ki (ye public API se check nahi hote).
 2. **Main code shuru (owner ka faisla, 2026-10-20):** neev ke packages ke baad ab apps aur backend ka asli kaam; baaki packages tabhi bante hain jab app ko chahiye. Niyam: jo cheez do apps ko chahiye ya saaf taur pe sabki hai (login, API client, layout), wo turant `npm run create` se package me, app me copy nahi. Saare packages public. Andaazan package order TASKS T0.1 me.
@@ -125,6 +125,12 @@
 3. Commit + push (Conventional Commits), taaki doosre ke paas sab pahunche.
 4. Neeche change log me ek line: date, kaun, kya.
 
+**Baari-baari (owner ka faisla, 2026-10-25):** hum 2 developers hain, dono Claude Code use karte hain. Ek ki weekly limit khatam hone pe doosra wahin se aage badhta hai.
+
+- **Limit ~85% pe:** naya kaam mat uthao. Chalu kaam commit-ready karo (tests green), branch push karo, upar ke 1–4 karo: §4 me adhoora kaam (file + task ID) aur agla kaam saaf likho. Doosre developer ko bata do. Claude khud usage dekh sakta hai; developer Settings → Usage me.
+- **Kaam uthane wala:** `git pull`, ye file padho, §4 ke pehle khule kaam se shuru. Adhoori branch ho to wahi branch lo.
+- **Ek branch pe ek waqt me ek hi developer.** Har task apni branch `feat/<task>`; PR → `main`. `main` ka ruleset 1 approval maangta hai: doosra developer review karke approve kare (apna PR khud approve nahi hota).
+
 ## Change log
 
 | Version | Date       | Badlav                                                                                                        |
@@ -163,3 +169,4 @@
 | v1.31 | 2026-10-23 | Root `AGENTS.md`: doosre AI tools ke liye pointer (§2). |
 | v1.32 | 2026-10-23 | `npm run update-deps` bana: saare package.json, `--level patch/minor/major` (default major), typescript hold (§3, §4, §6). |
 | v1.33 | 2026-10-23 | Deploy-first plan (TASKS D) aur Claude → Cursor relay; handoff 95% pe: Cursor ka agla kaam M2 landing/shell, Claude reset ke baad review + M2 (§4). |
+| v1.34 | 2026-10-25 | Cursor nahi: 2 developers baari-baari Claude ke saath (§8); M2 ke tasks `feat/` branches me (§4). |
