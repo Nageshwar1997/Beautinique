@@ -1,6 +1,6 @@
 # TASKS — BQ
 
-> **Status:** v1.30 (2026-10-25). Poore project ki task list, [ARCHITECTURE.md](ARCHITECTURE.md) §16 ke phases ke hisaab se. Har task "done" tabhi jab [RULES.md](RULES.md) §1.5 ki Definition of Done poori ho.
+> **Status:** v1.31 (2026-10-25). Poore project ki task list, [ARCHITECTURE.md](ARCHITECTURE.md) §16 ke phases ke hisaab se. Har task "done" tabhi jab [RULES.md](RULES.md) §1.5 ki Definition of Done poori ho.
 
 **Kaise use karein:**
 - `[ ]` baaki, `[~]` chal raha hai, `[x]` done.
@@ -13,7 +13,7 @@
 
 ## D. Deploy-first plan (owner ka faisla, 2026-10-23)
 
-Har milestone ke end me kuch **live** dikhana hai. Ek hi live environment, free stack: `backend/bundle` Render free web service pe, Atlas M0, Render Key Value free, apps Vercel pe. Deploy `release` branch se (feature → `main` → `prerelease` → `release`, RULES §2). Section C ki jaanch pehle deploy (M2) pe hi. Phase 11 me sirf hardening bachti hai (monitors, legal pages, cutover).
+Har milestone ke end me kuch **live** dikhana hai. Ek hi live environment, free stack: `backend/bundle` Render free web service pe, Atlas M0, Render Key Value free, apps Vercel pe. Deploy `release` branch se (feature → `prerelease` → `release`, phir release safal hone pe `release` → `main`; RULES §2). Section C ki jaanch pehle deploy (M2) pe hi. Phase 11 me sirf hardening bachti hai (monitors, legal pages, cutover).
 
 | Milestone                   | Kya live hoga                                                                                            | Demo (kya dikha sakte ho)                                         | Kaam (backend + frontend)                                                    |
 | --------------------------- | -------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------- | ---------------------------------------------------------------------------- |
@@ -29,9 +29,10 @@ Har milestone ke end me kuch **live** dikhana hai. Ek hi live environment, free 
 | M11 Launch hardening        | monitors, alerts, legal pages, cutover                                                                   | launch                                                            | sab; E2E flows                                                               |
 
 **Har milestone ke end ki checklist:**
-1. CI green; `main` → `prerelease` → `release` PR merge (owner).
+1. CI green; PR `prerelease` → `release` merge (owner).
 2. Render aur Vercel deploy; HANDOFF §3 me live URLs.
 3. Demo script live pe chalao (upar wala "Demo" column), jo dikha uska note.
+4. Demo theek chala → PR `release` → `main` (sirf final code); release pe naye commits bane hon to `release` → `prerelease` bhi.
 
 **Niyam:**
 - Phase 6 (frontend foundation) M2 se hi saath-saath: har live milestone ko UI chahiye, isliye har milestone me backend ke saath uski screens bhi.
@@ -246,3 +247,4 @@ Har milestone ke end me kuch **live** dikhana hai. Ek hi live environment, free 
 | v1.28   | 2026-10-23 | Deploy-first plan (section D): har milestone live + demo, Claude/Cursor bantwara; focus Milestone 2.                                                              |
 | v1.29   | 2026-10-25 | Cursor nahi: 2 developers baari-baari Claude ke saath; section D me ek "Kaam" column.                                                                             |
 | v1.30 | 2026-10-25 | T0.7: ruleset me PR approvals 0 (owner). |
+| v1.31 | 2026-10-25 | Section D: deploy flow `prerelease` → `release` → `main`; checklist me `release` → `main` aur back-merge. |

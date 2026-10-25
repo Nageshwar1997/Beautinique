@@ -2,5 +2,7 @@ version: 2
 updates:
   - package-ecosystem: github-actions
     directory: /
+    # Development branch (RULES §2): main only takes release.
+    target-branch: prerelease
     schedule:
       interval: monthly
