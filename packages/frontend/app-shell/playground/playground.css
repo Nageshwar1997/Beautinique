@@ -1,0 +1,6 @@
+@import 'tailwindcss';
+@import '@beautinique/frontend-styles';
+
+/* the shell's own source and the playground, so Tailwind sees their classes */
+@source '../src';
+@source '.';
