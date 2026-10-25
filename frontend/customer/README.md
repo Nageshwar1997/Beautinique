@@ -18,6 +18,7 @@ npm test --workspace customer
 - `app/routes.ts`: route table; pages `app/routes/*.tsx` me.
   - `home.tsx`: landing (M2): hero, "Why Beautinique", launch categories (abhi links nahi; M4 me catalog se), "How it works". **Kisi shehar ya state ka naam code me nahi** (PRD §7.2: jagah data hai); launch area baad me network data se aayega.
   - `credits.tsx`: "Icon credits" (Solar CC BY 4.0 ka credit zaroori hai; `ICON_CREDITS` se).
+  - `devtools-json.ts`: Chrome DevTools localhost pe `/.well-known/appspecific/com.chrome.devtools.json` maangta hai; ye route chup-chaap `404` deta hai, warna React Router har baar server log me "No route matches URL" error stack chhaapta.
 - `react-router.config.ts`: SSR on.
 - Styles: `@beautinique/frontend-styles` + `@beautinique/frontend-app-shell/tailwind.css` (`app/app.css`).
 
