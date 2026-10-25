@@ -1,0 +1,34 @@
+{
+  "name": "identity",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Sign-in, sessions, tokens, apps, roles and scoped grants.",
+  "type": "module",
+  "exports": {
+    ".": {
+      "types": "./src/service.ts",
+      "beautinique-source": "./src/service.ts",
+      "default": "./dist/service.js"
+    }
+  },
+  "scripts": {
+    "dev": "node --env-file-if-exists=.env --watch src/server.ts",
+    "build": "tsdown",
+    "start": "node --enable-source-maps dist/server.js",
+    "typecheck": "tsc --noEmit",
+    "lint": "eslint .",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "@beautinique/backend-server-kit": "^1.0.0",
+    "@beautinique/shared-zod": "^2.0.0",
+    "express": "^5.3.0"
+  },
+  "devDependencies": {
+    "@types/express": "^5.0.6",
+    "@types/node": "^26.6.5",
+    "tsdown": "^0.23.1",
+    "typescript": "~6.0.3",
+    "vitest": "^5.0.5"
+  }
+}

@@ -24,8 +24,33 @@ const GLOBALS = {
  * @param {boolean} [options.react] add the React hooks rules
  * @param {string} options.tsconfigRootDir pass `import.meta.dirname`
  * @param {string[]} [options.ignores] extra paths to skip
+ * @param {boolean} [options.zodPackage] only for @beautinique/shared-zod: the one package that imports zod
+ * @param {boolean} [options.mongoPackage] only for @beautinique/backend-server-mongo: the one package that imports mongodb
+ * @param {boolean} [options.changeStreamPackage] only for @beautinique/backend-server-queue: the outbox relay, the one place that opens MongoDB change streams
+ * @param {string[]} [options.envFiles] backend apps: the only files that may read process.env (ARCHITECTURE §3)
  */
-export function packageConfig({ platform, react = false, tsconfigRootDir, ignores = [] }) {
+export function packageConfig({
+  platform,
+  react = false,
+  tsconfigRootDir,
+  ignores = [],
+  zodPackage = false,
+  mongoPackage = false,
+  changeStreamPackage = false,
+  envFiles,
+}) {
+  const ZOD_MESSAGE =
+    "Import z from '@beautinique/shared-zod' (the repo has one zod and one import path).";
+  const MONGO_MESSAGE =
+    "Import from '@beautinique/backend-server-mongo' (the repo has one MongoDB driver and one import path).";
+  const restrictedPaths = [
+    ...(zodPackage ? [] : [{ name: 'zod', message: ZOD_MESSAGE }]),
+    ...(mongoPackage ? [] : [{ name: 'mongodb', message: MONGO_MESSAGE }]),
+  ];
+  const restrictedPatterns = [
+    ...(zodPackage ? [] : [{ group: ['zod/*'], message: ZOD_MESSAGE }]),
+    ...(mongoPackage ? [] : [{ group: ['mongodb/*'], message: MONGO_MESSAGE }]),
+  ];
   return defineConfig(
     { ignores: ['dist', 'coverage', 'node_modules', ...ignores] },
     js.configs.recommended,
@@ -48,6 +73,31 @@ export function packageConfig({ platform, react = false, tsconfigRootDir, ignore
         'no-console': ['error', { allow: ['warn', 'error'] }],
         eqeqeq: ['error', 'always'],
         curly: ['error', 'all'],
+        'no-restricted-imports': [
+          'error',
+          { paths: restrictedPaths, patterns: restrictedPatterns },
+        ],
+        // MongoDB runs a transaction's queries one at a time; the runtime check in withTransaction
+        // only sees queries that reach the server together, this one sees every inline case.
+        'no-restricted-syntax': [
+          'error',
+          {
+            selector:
+              "CallExpression:matches([callee.name='withTransaction'], [callee.property.name='withTransaction']) CallExpression[callee.object.name='Promise'][callee.property.name=/^(all|allSettled|any|race)$/]",
+            message:
+              'No Promise.all/allSettled/any/race inside withTransaction: MongoDB does not support parallel queries in a transaction. Await them one after another.',
+          },
+          // Atlas free allows 5 change streams for the whole cluster (ARCHITECTURE §5.2)
+          ...(platform === 'node' && !mongoPackage && !changeStreamPackage
+            ? [
+                {
+                  selector: "CallExpression[callee.property.name='watch']",
+                  message:
+                    'Change streams (.watch) only in the outbox relay of @beautinique/backend-server-queue: Atlas free allows 5 for the whole cluster (ARCHITECTURE §5.2).',
+                },
+              ]
+            : []),
+        ],
       },
     },
     // Plain JS config files (eslint.config.js) are not part of a tsconfig project.
@@ -64,6 +114,24 @@ export function packageConfig({ platform, react = false, tsconfigRootDir, ignore
             ],
           },
         }
+      : {},
+    envFiles
+      ? [
+          {
+            files: ['**/*.ts'],
+            rules: {
+              'no-restricted-properties': [
+                'error',
+                {
+                  object: 'process',
+                  property: 'env',
+                  message: `Read settings in ${envFiles.join(' or ')} (namespaced config, ARCHITECTURE §3).`,
+                },
+              ],
+            },
+          },
+          { files: envFiles, rules: { 'no-restricted-properties': 'off' } },
+        ]
       : {},
     prettier,
   );

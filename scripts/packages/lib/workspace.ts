@@ -121,6 +121,7 @@ export function expectedName(scope: string, category: Category, folder: string):
  * - the name is <scope>/<category>-<folder>
  * - the version is valid semver
  * - public packages have publishConfig.access "public" (scoped packages are private on npm otherwise)
+ * - every peer dependency is also a devDependency with the same range
  */
 export function loadWorkspace(ctx: Pick<Context, 'root' | 'scope'>): Workspace {
   const rootManifest = readManifest(ctx.root) as { workspaces?: string[] };
@@ -184,6 +185,26 @@ export function loadWorkspace(ctx: Pick<Context, 'root' | 'scope'>): Workspace {
       problems.push(`${pkg.relDir}: name "${pkg.name}" is also used by ${existing.relDir}.`);
     }
     byName.set(pkg.name, pkg);
+  }
+
+  // A package promises (peer) exactly the versions of an outside library it is built and tested
+  // with (dev). Workspace packages are left out: they are linked locally and the release CLI manages
+  // their ranges (a peer range is only raised when it breaks).
+  for (const pkg of packages) {
+    if (pkg.category === null) continue;
+    for (const [dep, range] of Object.entries(pkg.manifest.peerDependencies ?? {})) {
+      if (byName.has(dep)) continue;
+      const dev = pkg.manifest.devDependencies?.[dep];
+      if (dev === undefined) {
+        problems.push(
+          `${pkg.relDir}: peer dependency "${dep}" must also be a devDependency with the same range ("${range}").`,
+        );
+      } else if (dev !== range) {
+        problems.push(
+          `${pkg.relDir}: "${dep}" is "${range}" in peerDependencies but "${dev}" in devDependencies; use the same range.`,
+        );
+      }
+    }
   }
 
   if (problems.length > 0) {

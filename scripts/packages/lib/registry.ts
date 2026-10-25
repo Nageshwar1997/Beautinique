@@ -1,10 +1,41 @@
 import type { Context } from './context.ts';
 import { CliError } from './errors.ts';
 
+/** The parts of one published version that update-deps looks at (npm's own field names). */
+export interface VersionDetails {
+  deprecated?: string;
+  engines?: { node?: string };
+  peerDependencies?: Record<string, string>;
+}
+
 /** What npm knows about a package. null from fetchPackage means "never published". */
 export interface RegistryPackage {
   versions: string[];
   distTags: Record<string, string>;
+  /** per version; missing for a version means it has none of these fields */
+  details?: Record<string, VersionDetails>;
+}
+
+const isStringRecord = (value: unknown): value is Record<string, string> =>
+  typeof value === 'object' &&
+  value !== null &&
+  !Array.isArray(value) &&
+  Object.values(value).every((v) => typeof v === 'string');
+
+/** Keeps only well-formed fields: old packages have odd shapes (engines as an array, deprecated: ""). */
+export function versionDetails(raw: unknown): VersionDetails {
+  const doc = (typeof raw === 'object' && raw !== null ? raw : {}) as Record<string, unknown>;
+  const node =
+    typeof doc.engines === 'object' && doc.engines !== null && !Array.isArray(doc.engines)
+      ? (doc.engines as { node?: unknown }).node
+      : undefined;
+  return {
+    ...(typeof doc.deprecated === 'string' && doc.deprecated !== ''
+      ? { deprecated: doc.deprecated }
+      : {}),
+    ...(typeof node === 'string' ? { engines: { node } } : {}),
+    ...(isStringRecord(doc.peerDependencies) ? { peerDependencies: doc.peerDependencies } : {}),
+  };
 }
 
 const TIMEOUT_MS = 15_000;
@@ -40,7 +71,14 @@ export async function fetchPackage(
           versions?: Record<string, unknown>;
           'dist-tags'?: Record<string, string>;
         };
-        return { versions: Object.keys(doc.versions ?? {}), distTags: doc['dist-tags'] ?? {} };
+        const versions = doc.versions ?? {};
+        return {
+          versions: Object.keys(versions),
+          distTags: doc['dist-tags'] ?? {},
+          details: Object.fromEntries(
+            Object.entries(versions).map(([v, raw]) => [v, versionDetails(raw)]),
+          ),
+        };
       }
       lastError = `HTTP ${String(res.status)}`;
       if (res.status < 500 && res.status !== 429) {

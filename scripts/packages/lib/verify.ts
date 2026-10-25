@@ -89,6 +89,36 @@ export function checkPackedFiles(pkg: WorkspacePackage, files: string[]): string
   return problems;
 }
 
+/**
+ * Declaration files that carry a copy of another package's types. The type bundler (tsdown) copies
+ * in the types of anything that is not a dependency or peer dependency, and marks each copied file
+ * with a `//#region .../node_modules/<package>/...` line. A copy makes the package heavy and gives
+ * consumers two incompatible versions of the same types.
+ */
+export function inlinedDependencyTypes(pkg: WorkspacePackage, files: string[]): string[] {
+  const problems: string[] = [];
+  for (const file of files.filter((f) => /\.d\.[cm]?ts$/.test(f))) {
+    let text: string;
+    try {
+      text = readFileSync(join(pkg.dir, file), 'utf8');
+    } catch {
+      continue;
+    }
+    const copied = new Set<string>();
+    for (const [, path = ''] of text.matchAll(/^\/\/#region (.*node_modules\/.*)$/gm)) {
+      const after = path.slice(path.lastIndexOf('node_modules/') + 'node_modules/'.length);
+      const parts = after.split('/');
+      copied.add(after.startsWith('@') ? `${parts[0] ?? ''}/${parts[1] ?? ''}` : (parts[0] ?? ''));
+    }
+    for (const name of copied) {
+      problems.push(
+        `${file} carries a copy of the types of "${name}": add "${name}" to dependencies or peerDependencies, so it stays outside the build.`,
+      );
+    }
+  }
+  return problems;
+}
+
 const SCRIPT_TARGET = /\.(d\.)?[cm]?[jt]s$/;
 
 /**
@@ -209,12 +239,8 @@ export async function verifyPackages(ctx: Context, packages: WorkspacePackage[])
     const problems: string[] = [];
     if (pkg.publishable) {
       const pack = await packDryRun(ctx, pkg);
-      problems.push(
-        ...checkPackedFiles(
-          pkg,
-          pack.files.map((f) => f.path),
-        ),
-      );
+      const packed = pack.files.map((f) => f.path);
+      problems.push(...checkPackedFiles(pkg, packed), ...inlinedDependencyTypes(pkg, packed));
 
       const { messages, pkg: packageJson } = await publint({
         pkgDir: pkg.dir,

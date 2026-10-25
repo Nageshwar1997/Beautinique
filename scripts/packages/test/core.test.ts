@@ -109,6 +109,47 @@ describe('workspace', () => {
     ]);
     expect(() => loadWorkspace({ root, scope: '@beautinique' })).toThrow(/is also used by/);
   });
+
+  it('a package promises exactly the peer versions it is built and tested with', () => {
+    const ok = repo([
+      publicPackage('shared', 'a', '1.0.0', {
+        peerDependencies: { zod: '^4.6.7' },
+        devDependencies: { zod: '^4.6.7' },
+      }),
+      // workspace packages as peers are managed by the release CLI, not held to it
+      publicPackage('backend', 'b', '1.0.0', {
+        peerDependencies: { '@beautinique/shared-a': '^1.0.0' },
+        devDependencies: { '@beautinique/shared-a': '^1.2.0' },
+      }),
+      publicPackage('frontend', 'c', '1.0.0', {
+        peerDependencies: { '@beautinique/shared-a': '^1.0.0' },
+      }),
+      // apps outside packages/ are not held to it
+      privatePackage('frontend/app', 'app', { peerDependencies: { zod: '^4.0.0' } }),
+    ]);
+    expect(() => loadWorkspace({ root: ok.root, scope: '@beautinique' })).not.toThrow();
+
+    const bad = repo([
+      publicPackage('shared', 'a', '1.0.0', {
+        peerDependencies: { zod: '^4.0.0', react: '^19.3.1' },
+        devDependencies: { zod: '^4.6.7' },
+      }),
+    ]);
+    const error = (() => {
+      try {
+        loadWorkspace({ root: bad.root, scope: '@beautinique' });
+        return '';
+      } catch (e) {
+        return (e as Error).message;
+      }
+    })();
+    expect(error).toContain(
+      'packages/shared/a: "zod" is "^4.0.0" in peerDependencies but "^4.6.7" in devDependencies; use the same range.',
+    );
+    expect(error).toContain(
+      'packages/shared/a: peer dependency "react" must also be a devDependency with the same range ("^19.3.1").',
+    );
+  });
 });
 
 describe('graph', () => {

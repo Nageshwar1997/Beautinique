@@ -74,7 +74,161 @@ document
   .getElementById('open-dialog')
   .addEventListener('click', () => document.getElementById('dialog').showModal());
 
-const scales = ['rose', 'plum', 'gold', 'neutral', 'success', 'warning', 'error', 'info'];
+document.getElementById('contrast').addEventListener('click', (event) => {
+  const html = document.documentElement;
+  const more = html.getAttribute('contrast') !== 'more';
+  html.setAttribute('contrast', more ? 'more' : 'normal');
+  event.currentTarget.setAttribute('aria-pressed', String(more));
+});
+
+// Full class names: Tailwind only builds classes it can read whole in the source (never `tone-${t}`).
+const TONES = {
+  brand: 'tone-brand',
+  secondary: 'tone-secondary',
+  accent: 'tone-accent',
+  success: 'tone-success',
+  warning: 'tone-warning',
+  error: 'tone-error',
+  info: 'tone-info',
+  neutral: 'tone-neutral',
+};
+document.getElementById('tones').innerHTML = Object.entries(TONES)
+  .map(
+    ([name, tone]) =>
+      `<span class="${tone} inline-flex overflow-hidden rounded-full text-sm font-medium"><span class="bg-tone text-tone-foreground px-3 py-1">${name}</span><span class="bg-tone-subtle text-tone-subtle-foreground px-3 py-1">subtle</span></span>`,
+  )
+  .join('');
+
+const STATUSES = [
+  'PENDING_PAYMENT',
+  'CONFIRMED',
+  'ALLOCATED',
+  'PICKED',
+  'PACKED',
+  'DISPATCHED',
+  'AT_HUB',
+  'OUT_FOR_DELIVERY',
+  'DELIVERED',
+  'CANCELLED',
+  'RTO',
+  'RETURN_REQUESTED',
+  'RETURNED',
+];
+document.getElementById('statuses').innerHTML = STATUSES.map(
+  (s) =>
+    `<span data-order-status="${s}" class="bg-tone-subtle text-tone-subtle-foreground rounded-full px-3 py-1 text-xs font-semibold">${s
+      .toLowerCase()
+      .replaceAll('_', ' ')}</span>`,
+).join('');
+
+const CHARTS = [
+  ['bg-chart-1', 62],
+  ['bg-chart-2', 88],
+  ['bg-chart-3', 45],
+  ['bg-chart-4', 70],
+  ['bg-chart-5', 53],
+  ['bg-chart-6', 95],
+  ['bg-chart-7', 38],
+  ['bg-chart-8', 76],
+];
+document.getElementById('charts').innerHTML = CHARTS.map(
+  ([bg, h]) =>
+    `<div class="flex flex-1 flex-col items-center gap-1"><div class="${bg} w-full rounded-t-md" style="height:${h}px"></div><span class="text-foreground-muted text-xs">${bg.slice(3)}</span></div>`,
+).join('');
+
+const ANIMATIONS = [
+  'fade-in',
+  'scale-in',
+  'rise-in',
+  'slide-in-from-left',
+  'slide-in-from-bottom',
+  'shake',
+  'pop',
+  'fade-out',
+  'scale-out',
+  'sink-out',
+  'slide-out-to-right',
+];
+// Tailwind sees these full class names here, so their keyframes are built.
+const ANIMATION_CLASSES = {
+  'fade-in': 'animate-fade-in',
+  'scale-in': 'animate-scale-in',
+  'rise-in': 'animate-rise-in',
+  'slide-in-from-left': 'animate-slide-in-from-left',
+  'slide-in-from-bottom': 'animate-slide-in-from-bottom',
+  shake: 'animate-shake',
+  pop: 'animate-pop',
+  'fade-out': 'animate-fade-out',
+  'scale-out': 'animate-scale-out',
+  'sink-out': 'animate-sink-out',
+  'slide-out-to-right': 'animate-slide-out-to-right',
+};
+const box = document.getElementById('anim-box');
+document.getElementById('anim-buttons').innerHTML = ANIMATIONS.map(
+  (a) =>
+    `<button type="button" data-animation="${a}" class="rounded-lg border px-3 py-1.5 text-sm">${a}</button>`,
+).join('');
+document.getElementById('anim-buttons').addEventListener('click', (event) => {
+  const name = event.target.closest('button')?.dataset.animation;
+  if (!name) return;
+  box.className = box.className.replace(/\banimate-\S+/g, '').trim();
+  void box.offsetWidth; // restart the animation
+  box.classList.add(ANIMATION_CLASSES[name]);
+});
+
+const offers = [
+  'Free delivery above ₹499',
+  'New: Rose Glow serum',
+  'Try shades on with your camera',
+];
+document.getElementById('marquee').innerHTML = [...offers, ...offers]
+  .map((o) => `<span class="shrink-0">${o}</span>`)
+  .join('');
+
+document.getElementById('heart').addEventListener('click', (event) => {
+  const heart = event.currentTarget;
+  heart.classList.remove('animate-pop');
+  void heart.offsetWidth;
+  heart.classList.add('animate-pop');
+});
+
+// What the Quill 2 editor saves (lists are <ol> with data-list, markers in .ql-ui).
+document.getElementById('rich').innerHTML = `
+  <h2>Rose Glow Vitamin C Serum</h2>
+  <p>Lightweight serum with <strong>10% vitamin C</strong> and rose extract. <a href="#rich">Read the full ingredient list</a>.</p>
+  <h3>How to use</h3>
+  <ol>
+    <li data-list="ordered"><span class="ql-ui" contenteditable="false"></span>Cleanse your face.</li>
+    <li data-list="ordered"><span class="ql-ui" contenteditable="false"></span>Apply 3–4 drops:</li>
+    <li data-list="ordered" class="ql-indent-1"><span class="ql-ui" contenteditable="false"></span>morning, under sunscreen</li>
+    <li data-list="ordered" class="ql-indent-1"><span class="ql-ui" contenteditable="false"></span>night, before moisturiser</li>
+    <li data-list="ordered" class="ql-indent-2"><span class="ql-ui" contenteditable="false"></span>skip on peeling nights</li>
+    <li data-list="ordered"><span class="ql-ui" contenteditable="false"></span>Pat gently.</li>
+  </ol>
+  <h3>Good for</h3>
+  <ol>
+    <li data-list="bullet"><span class="ql-ui" contenteditable="false"></span>Dull skin</li>
+    <li data-list="bullet" class="ql-indent-1"><span class="ql-ui" contenteditable="false"></span>uneven tone</li>
+    <li data-list="checked"><span class="ql-ui" contenteditable="false"></span>Dermatologically tested</li>
+    <li data-list="unchecked"><span class="ql-ui" contenteditable="false"></span>Fragrance free</li>
+  </ol>
+  <p class="ql-align-center"><span class="ql-size-small">Patch test before first use.</span></p>
+  <blockquote>My skin looks brighter after three weeks. (verified purchase)</blockquote>
+  <table><thead><tr><th>Size</th><th>MRP</th></tr></thead><tbody><tr><td>30 ml</td><td>₹1,599</td></tr><tr><td>50 ml</td><td>₹2,299</td></tr></tbody></table>
+  <div class="ql-code-block-container" spellcheck="false"><div class="ql-code-block">Batch: RG-2026-10</div><div class="ql-code-block">Use before: Oct 2028</div></div>`;
+
+const scales = [
+  'rose',
+  'plum',
+  'gold',
+  'neutral',
+  'success',
+  'warning',
+  'error',
+  'info',
+  'teal',
+  'violet',
+];
 const steps = [50, 100, 200, 300, 400, 500, 600, 700, 800, 900, 950];
 document.getElementById('palette').innerHTML = scales
   .map(

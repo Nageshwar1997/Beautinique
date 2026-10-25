@@ -1,0 +1,52 @@
+/**
+ * @beautinique/frontend-styles: print (invoices, shipping labels, run sheets, policies).
+ *
+ * The light theme is forced for print in variables.css. Hide screen-only parts with print:hidden
+ * and show print-only parts with hidden print:block.
+ */
+@layer base {
+  @media print {
+    @page {
+      margin: 12mm;
+    }
+
+    *,
+    ::before,
+    ::after {
+      box-shadow: none !important;
+      text-shadow: none !important;
+    }
+
+    html {
+      background-color: transparent;
+    }
+
+    /* Keep things whole across pages, and repeat table headers on every page. */
+    img,
+    svg,
+    figure,
+    tr,
+    blockquote,
+    pre {
+      break-inside: avoid;
+    }
+
+    h1,
+    h2,
+    h3,
+    h4,
+    h5,
+    h6 {
+      break-after: avoid;
+    }
+
+    thead {
+      display: table-header-group;
+    }
+
+    p {
+      orphans: 3;
+      widows: 3;
+    }
+  }
+}

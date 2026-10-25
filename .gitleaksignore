@@ -1,0 +1,14 @@
+# Reviewed gitleaks findings that are provably fake (see the rules at the top of .gitleaks.toml).
+# One fingerprint per finding (commit:file:rule:line), never a whole path, so a real key added to the
+# same file later is still caught. Add an entry only with a reason above it.
+
+# 2026-10-21: server-mongo test "fails clearly when MongoDB is not there, without printing the URI".
+# The URI points at 127.0.0.1:1, where nothing listens, and its password "secret" exists only so the
+# test can check that it never appears in the error. No real credential.
+e533ace71e5d9adc7d5b04d70e6f870dffb5b78a:packages/backend/server-mongo/test/index.test.ts:url-with-password:184
+
+# 2026-10-21: docs written about the entry above (commit 3fdfb49) quoted that same fake test URL, and
+# the HANDOFF trap gave fake example URLs; no real credential. The docs now describe them in words.
+3fdfb4997cf6bbe6f2cbb0b3c0a17128a0375020:docs/HANDOFF.md:url-with-password:33
+3fdfb4997cf6bbe6f2cbb0b3c0a17128a0375020:docs/TASKS.md:url-with-password:47
+3fdfb4997cf6bbe6f2cbb0b3c0a17128a0375020:docs/HANDOFF.md:url-with-password:74

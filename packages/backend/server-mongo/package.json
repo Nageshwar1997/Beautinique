@@ -1,0 +1,59 @@
+{
+  "name": "@beautinique/backend-server-mongo",
+  "version": "1.0.0",
+  "description": "Beautinique MongoDB basics: one pooled client per deployable, a ready check, and withTransaction that retries safely and returns only after the commit.",
+  "keywords": [
+    "beautinique",
+    "backend",
+    "mongodb",
+    "transactions"
+  ],
+  "author": "Nageshwar Pawar",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Nageshwar1997/Beautinique.git",
+    "directory": "packages/backend/server-mongo"
+  },
+  "homepage": "https://github.com/Nageshwar1997/Beautinique/tree/main/packages/backend/server-mongo#readme",
+  "bugs": {
+    "url": "https://github.com/Nageshwar1997/Beautinique/issues"
+  },
+  "type": "module",
+  "sideEffects": false,
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    },
+    "./package.json": "./package.json"
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsdown",
+    "typecheck": "tsc --noEmit",
+    "lint": "eslint .",
+    "test": "vitest run"
+  },
+  "engines": {
+    "node": ">=24"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "peerDependencies": {
+    "@beautinique/backend-server-kit": "^1.0.0"
+  },
+  "dependencies": {
+    "mongodb": "^7.7.0"
+  },
+  "devDependencies": {
+    "@beautinique/backend-server-kit": "^1.0.0",
+    "@types/express": "^5.0.6",
+    "express": "^5.3.0"
+  }
+}

@@ -3,9 +3,14 @@ import { describe, expect, it } from 'vitest';
 import { groupCommits, prependEntry, renderEntry } from '../lib/changelog.ts';
 import { classifyPublishError, packDryRun, whoami } from '../lib/npm.ts';
 import { serializeManifest } from '../lib/release.ts';
-import { checkPackedFiles, entryTargets, typedEntrypoints } from '../lib/verify.ts';
+import {
+  checkPackedFiles,
+  entryTargets,
+  inlinedDependencyTypes,
+  typedEntrypoints,
+} from '../lib/verify.ts';
 import type { WorkspacePackage } from '../lib/workspace.ts';
-import { testContext } from './helpers.ts';
+import { makeRepo, testContext } from './helpers.ts';
 
 const pkg = (manifest: Partial<WorkspacePackage['manifest']>): WorkspacePackage => ({
   name: '@beautinique/shared-x',
@@ -97,6 +102,44 @@ describe('package contents', () => {
       '.env.local is an .env file and must not be published.',
       'dist/tsconfig.tsbuildinfo is a TypeScript build cache and must not be published.',
     ]);
+  });
+});
+
+describe('copied dependency types', () => {
+  it('finds types the bundler copied in from node_modules, once per package', () => {
+    const repo = makeRepo([]);
+    try {
+      repo.write(
+        'pkg/dist/index.d.ts',
+        [
+          'import { ZodType } from "@beautinique/shared-zod";',
+          '//#region src/routes.d.ts',
+          'interface A {}',
+          '//#region ../../../node_modules/zod/v4/core/json-schema.d.cts',
+          'type B = 1;',
+          '//#region ../../../node_modules/zod/v4/core/util.d.cts',
+          'type C = 2;',
+          '//#region ../../node_modules/@scope/lib/dist/index.d.ts',
+          'type D = 3;',
+        ].join('\n'),
+      );
+      repo.write('pkg/dist/clean.d.ts', '//#region src/index.d.ts\nexport {};\n');
+      repo.write('pkg/dist/index.js', '//#region ../node_modules/x/index.js\n');
+      const pkgAt = { ...pkg({}), dir: `${repo.root}/pkg` };
+      expect(
+        inlinedDependencyTypes(pkgAt, [
+          'dist/index.d.ts',
+          'dist/clean.d.ts',
+          'dist/index.js',
+          'dist/missing.d.ts',
+        ]),
+      ).toEqual([
+        'dist/index.d.ts carries a copy of the types of "zod": add "zod" to dependencies or peerDependencies, so it stays outside the build.',
+        'dist/index.d.ts carries a copy of the types of "@scope/lib": add "@scope/lib" to dependencies or peerDependencies, so it stays outside the build.',
+      ]);
+    } finally {
+      repo.cleanup();
+    }
   });
 });
 

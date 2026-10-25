@@ -103,7 +103,7 @@ function manifest(spec: PackageSpec): Record<string, unknown> {
       : {}),
     ...(react
       ? {
-          peerDependencies: { react: '^19.0.0' },
+          peerDependencies: { react: tool('react') },
           devDependencies: { react: tool('react'), '@types/react': tool('@types/react') },
         }
       : {}),
