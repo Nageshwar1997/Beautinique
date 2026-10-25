@@ -1,6 +1,6 @@
 # RULES — BQ
 
-> **Status:** v1.6 (2026-10-22). Ye niyam Beautinique ke har code, doc aur deploy pe lagu hain. [PRD.md](PRD.md) batata hai **kya** banana hai, [ARCHITECTURE.md](ARCHITECTURE.md) batata hai **kaise**, aur ye file batati hai ki **kin niyamon ke saath**. Koi rule todna ho to pehle is file me badlav aur change log entry.
+> **Status:** v1.7 (2026-10-25). Ye niyam Beautinique ke har code, doc aur deploy pe lagu hain. [PRD.md](PRD.md) batata hai **kya** banana hai, [ARCHITECTURE.md](ARCHITECTURE.md) batata hai **kaise**, aur ye file batati hai ki **kin niyamon ke saath**. Koi rule todna ho to pehle is file me badlav aur change log entry.
 
 ## 1. Kaam karne ke niyam
 
@@ -18,7 +18,7 @@
 
 ## 2. Git aur release
 
-1. **Branches:** feature branch → PR → **`main`** (default branch) → **`prerelease`** (laptop pe Docker) → **`release`** (Render + Vercel, npm packages). Teeno pe seedha push nahi, sirf PR. Ek hi apwaad: package release ka commit + tags owner `release` pe push karta hai (package CLI), aur uske baad PR `release` → `main` (back-merge).
+1. **Branches:** feature branch → PR → **`main`** (default branch) → **`prerelease`** (laptop pe Docker) → **`release`** (Render + Vercel, npm packages). Teeno pe seedha push nahi, sirf PR. PR pe approval zaroori nahi (owner, 2026-10-25: ruleset me approvals 0); merge sirf jab CI `check` green ho (ruleset me zaroori). Ek hi apwaad: package release ka commit + tags owner `release` pe push karta hai (package CLI), aur uske baad PR `release` → `main` (back-merge).
 2. **Commits:** Conventional Commits (`feat:`, `fix:`, `docs:`, `refactor:`, `test:`, `chore:`). Ek commit me ek hi baat.
 3. **PR:** chhota rakho, description me kya aur kyun, aur kaise test kiya. CI green hue bina merge nahi.
 4. **Public repo:** koi secret, `.env`, token, test password, DB dump ya asli personal data kabhi commit nahi. Sirf `.env.example`. Gitleaks har PR pe chalega.
@@ -109,3 +109,4 @@
 | v1.4    | 2026-10-20 | §3.2: zod sirf shared-zod se, named imports, schemas ke naam `...Zod`.                                                           |
 | v1.5 | 2026-10-22 | Mutation testing 3 hisse me: kernel packages (pehli baar poora, phir badli lines), nazuk logic (badli lines), baaki nahi. |
 | v1.6 | 2026-10-22 | Mutation ka tool `npm run mutate` (scripts/mutation), lists har package ke `test/mutations.ts` me. |
+| v1.7 | 2026-10-25 | §2: PR pe approval zaroori nahi (ruleset approvals 0), CI `check` green zaroori. |

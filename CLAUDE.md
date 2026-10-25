@@ -104,5 +104,5 @@ adhoora hai, kya uncommitted hai, kaunsa sawal kiske liye khula hai. Change log 
 
 **Baari-baari (owner, 2026-10-25):** 2 developers, dono Claude Code ke saath. Weekly usage ~85% pe Claude
 naya kaam nahi uthata: kaam commit-ready, branch push, HANDOFF §4 me adhoora aur agla kaam saaf; doosra
-developer wahin se aage. Har task apni branch `feat/<task>` → PR → `main`, doosra developer approve karta hai.
+developer wahin se aage. Har task apni branch `feat/<task>` → PR → `main`; approval zaroori nahi, CI `check` green zaroori.
 Poora flow [docs/HANDOFF.md](docs/HANDOFF.md) §8.
