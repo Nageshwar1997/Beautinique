@@ -209,11 +209,13 @@ describe('mountRoute', () => {
     });
     const response = await fetch(`${url}/demo/items/abc`);
     expect(response.status).toBe(500);
-    const text = await response.text();
-    expect(JSON.parse(text)).toMatchObject({ error: { code: 'INTERNAL' } });
-    expect(text).not.toContain('42');
-    expect(text).not.toContain('many');
-    expect(text).not.toContain('contract');
+    const body = JSON.parse(await response.text()) as { error: { requestId?: string } };
+    expect(body).toMatchObject({ error: { code: 'INTERNAL' } });
+    // The request id is random and can contain "42" by chance: look at everything else.
+    const shown = JSON.stringify({ ...body.error, requestId: undefined });
+    expect(shown).not.toContain('42');
+    expect(shown).not.toContain('many');
+    expect(shown).not.toContain('contract');
     const logged = lines.find((l) => l.msg === 'request failed');
     expect(JSON.stringify(logged)).toContain(
       'demo.items.get returned data that breaks its contract',
