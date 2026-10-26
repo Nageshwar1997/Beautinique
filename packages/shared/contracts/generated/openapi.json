@@ -237,6 +237,96 @@
           "cache": null
         }
       }
+    },
+    "/platform/wake": {
+      "get": {
+        "operationId": "platform.server.wake",
+        "summary": "Wake the live server; answers once the gateway and core are up",
+        "tags": [
+          "platform"
+        ],
+        "parameters": [
+          {
+            "name": "X-BQ-App",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "customer",
+                "seller",
+                "admin",
+                "superadmin",
+                "master",
+                "support",
+                "finance",
+                "logistics",
+                "delivery",
+                "growth",
+                "creator"
+              ]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "awakeAt": {
+                          "type": "string",
+                          "format": "date-time",
+                          "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
+                        }
+                      },
+                      "required": [
+                        "awakeAt"
+                      ],
+                      "additionalProperties": false
+                    }
+                  },
+                  "required": [
+                    "data"
+                  ]
+                }
+              }
+            }
+          },
+          "default": {
+            "$ref": "#/components/responses/Error"
+          }
+        },
+        "security": [],
+        "x-bq": {
+          "apps": [
+            "customer",
+            "seller",
+            "admin",
+            "superadmin",
+            "master",
+            "support",
+            "finance",
+            "logistics",
+            "delivery",
+            "growth",
+            "creator"
+          ],
+          "access": {
+            "type": "public"
+          },
+          "rateLimit": "public",
+          "idempotency": false,
+          "stepUp": false,
+          "owner": "core",
+          "cache": null
+        }
+      }
     }
   },
   "components": {

@@ -45,6 +45,32 @@
       "idempotency": false,
       "stepUp": false,
       "cache": null
+    },
+    {
+      "id": "platform.server.wake",
+      "method": "GET",
+      "path": "/platform/wake",
+      "owner": "core",
+      "apps": [
+        "customer",
+        "seller",
+        "admin",
+        "superadmin",
+        "master",
+        "support",
+        "finance",
+        "logistics",
+        "delivery",
+        "growth",
+        "creator"
+      ],
+      "access": {
+        "type": "public"
+      },
+      "rateLimit": "public",
+      "idempotency": false,
+      "stepUp": false,
+      "cache": null
     }
   ]
 }
