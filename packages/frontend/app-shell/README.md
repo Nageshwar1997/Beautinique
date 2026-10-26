@@ -86,8 +86,9 @@ Free Render service 15 min khaali rehne pe so jaati hai aur jaagne me ~1 min let
 - App turant dikhta hai (SSR HTML waisa hi). Browser me hydration ke baad ek baar `GET /api/v1/platform/wake` (contracts `platform.server.wake`, header `X-BQ-App`, `cache: 'no-store'`). Server 1.5 s me jawab de to kuch nahi dikhta.
 - Der ho to poori screen pe modal (`role="dialog"`, `aria-modal`): powder compact, "Waking up the server", `progress-indeterminate` bar aur "Waiting 0:42". Peeche ka app `inert` rehta hai, focus screen pe. Jawab aate hi screen hat jaati hai.
 - 5xx, 429, network error ya 30 s tak jawab nahi = "abhi nahi jaaga": 3 s baad dobara. Koi bhi aur jawab (error bhi) = server jaaga hua hai.
+- **`kickUrl`** (server ka apna `/wake`, seedha): "abhi nahi jaaga" pe ek `no-cors` request bhi jaati hai, 15 s me max ek baar (`kickEveryMs`). Soye Render service ko app ke Vercel route ki request nahi jagati, seedhi request jagati hai (live jaanch 2026-10-26). Jawab padha nahi jaata, zaroorat bhi nahi; isme app ka header ya secret nahi jaata. `kickUrl` na ho to ye request nahi.
 - 150 s me na jaage to "The server is taking too long", focus "Try again" pe; "Continue anyway" screen hata deta hai (static pages chalte rahen).
-- Timings props se badalti hain (`slowAfterMs`, `attemptTimeoutMs`, `retryDelayMs`, `giveUpAfterMs`); `fetch` sirf tests aur playground ke liye (wahi function rakho, naya function hook ko dobara shuru karta hai).
+- Timings props se badalti hain (`slowAfterMs`, `attemptTimeoutMs`, `retryDelayMs`, `giveUpAfterMs`, `kickEveryMs`); `fetch` sirf tests aur playground ke liye (wahi function rakho, naya function hook ko dobara shuru karta hai).
 - Laptop pe backend band ho to dev server ka proxy 502 deta hai, isliye wake-up screen dikhti hai: `npm run dev:backend` chalao (wahi asli raasta).
 
 **Abhi nahi, jab app ko chahiye tab:** sidebar layout (internal apps), offline page, idle logout.
