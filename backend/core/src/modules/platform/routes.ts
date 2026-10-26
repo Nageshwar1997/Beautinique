@@ -1,7 +1,7 @@
 import { AppError, mountRoute } from '@beautinique/backend-server-kit';
 import { type Mongo, withTransaction } from '@beautinique/backend-server-mongo';
 import { writeEvent } from '@beautinique/backend-server-queue';
-import { getPing, pingRecorded, recordPing } from '@beautinique/shared-contracts';
+import { getPing, pingRecorded, recordPing, wake } from '@beautinique/shared-contracts';
 import { uuidv7 } from '@beautinique/shared-utils';
 import { Router } from 'express';
 
@@ -59,6 +59,9 @@ export function platformRouter({ mongo }: { mongo: Mongo }): Router {
     },
     { status: 201 },
   );
+
+  // answering is the whole job: the request itself woke the server (ARCHITECTURE §11.1)
+  mountRoute(router, wake, () => ({ awakeAt: new Date().toISOString() }));
 
   mountRoute(router, getPing, async ({ params }) => {
     const ping = await pings.findOne({ _id: params.pingId });

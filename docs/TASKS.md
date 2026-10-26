@@ -1,6 +1,6 @@
 # TASKS — BQ
 
-> **Status:** v1.38 (2026-10-26). Poore project ki task list, [ARCHITECTURE.md](ARCHITECTURE.md) §16 ke phases ke hisaab se. Har task "done" tabhi jab [RULES.md](RULES.md) §1.5 ki Definition of Done poori ho.
+> **Status:** v1.42 (2026-10-26). Poore project ki task list, [ARCHITECTURE.md](ARCHITECTURE.md) §16 ke phases ke hisaab se. Har task "done" tabhi jab [RULES.md](RULES.md) §1.5 ki Definition of Done poori ho.
 
 **Kaise use karein:**
 - `[ ]` baaki, `[~]` chal raha hai, `[x]` done.
@@ -95,11 +95,11 @@ Har milestone ke end me kuch **live** dikhana hai. Ek hi live environment, free 
 
 - [x] T2.1 Prefix routing table, app registry (11 apps), Origin aur `x-forwarded-host` → app. (2026-10-25, `feat/m2-gateway`: route table contracts catalogue se, `GATEWAY__APP_HOSTS` + Vercel previews ka strict pattern, `x-forwarded-host`/`Host`/`Origin` usi app ke hon.)
 - [~] T2.2 JWKS verification, per-app cookies, passport token, origin secret, `clientIp()`. (Origin secret (rotation ke saath, timing-safe) aur `clientIp()` ho gaye 2026-10-25; sign-in tak non-public routes 401. JWKS, cookies, passport identity ke saath M3 me.)
-- [~] T2.3 Redis rate limits (classes), cache headers, helmet, request-id, Sentry. (2026-10-25: rate limits naye `@beautinique/backend-server-ratelimit` se, cache headers contract ke `cache` se, helmet + request-id server-kit me. **Sentry baaki:** poore process me ek init, owner ka DSN chahiye, M2 deploy branch me.)
+- [~] T2.3 Redis rate limits (classes), cache headers, helmet, request-id, Sentry. (2026-10-25: rate limits naye `@beautinique/backend-server-ratelimit` se, cache headers contract ke `cache` se, helmet + request-id server-kit me. 2026-10-26, `feat/m2-deploy`: Sentry server-kit ke naye `monitoring` me (`initMonitoring` process me ek hi baar, DSN na ho to band; 5xx `reportError` request id ke saath; headers, cookies, bodies, query, queue/DB data aur local variables Sentry tak nahi), bundle `src/instrument.ts` `node --import` se Express aur drivers se pehle init karta hai, start fail aur band hone pe flush. DSN `bq-backend` Render me (2026-10-26); live traces Sentry me `environment: live` aur release = deploy commit ke saath, URL se query hati hui, IP nahi (laptop se error event BQ-BACKEND-1 bhi). v11 me spans stream hote hain, isliye `beforeSendSpan` (`scrubSpan`). **Baaki:** live pe pehla asli error event.)
 - [x] T2.4 `/health` (shallow) aur `/ready` (deep), `/status`. (2026-10-25: gateway `/ready` me Redis bhi; `/status` public summary, owner ka faisla.)
 - [ ] T2.5 `backend/bundle`: paancho deployables ek process me, boot pe release steps. (Generator ka bundle saare deployables chalata hai aur config keys env se hatata hai; boot ke release steps baaki.)
 - [ ] T2.6 Purani cheezein hatana: facades, `METHODS_AND_PATHS`, MASTER bypass, wake-up fan-out, keep-alive workflow.
-- [ ] T2.7 Jagana (owner, 2026-10-25; ARCHITECTURE §11.1): public route `GET /api/v1/platform/wake`, apps ki wake-up screen usi ko call kare (M2 customer shell se); GitHub Actions workflow `cron: '30 4-15 * * *'` (10:00–21:00 IST) Render ka `/health` call kare (retry, 2 min timeout; M2 deploy ke saath, default branch pe). Aage ke business sweeps (Phase 4+) boot pe turant ek baar chalein, test ke saath.
+- [~] T2.7 Jagana (owner, 2026-10-25; ARCHITECTURE §11.1): public route `GET /api/v1/platform/wake`, apps ki wake-up screen usi ko call kare (M2 customer shell se); GitHub Actions workflow `cron: '30 4-15 * * *'` (10:00–21:00 IST) Render ka `/health` call kare (retry, 2 min timeout; M2 deploy ke saath, default branch pe). Aage ke business sweeps (Phase 4+) boot pe turant ek baar chalein, test ke saath. (2026-10-26, `feat/m2-deploy`: route `platform.server.wake` core me (DB nahi chhoota, kabhi CDN cache nahi); app-shell `ServerWake` (1.5 s ke baad screen, 150 s pe "Try again" / "Continue anyway") customer me laga, laptop pe asli browser me light/dark/375 px check; `.github/workflows/wake.yml` (repo variable `BQ_RENDER_URL`, curl retry 2 min). Live (2026-10-26): `https://bq-customer.vercel.app` wake call Vercel ke raaste 200, wake-up screen nahi (server jaaga tha); repo variable `BQ_RENDER_URL`, workflow haath se chala: `/health` 200. **Cold start pe kami (2026-10-26, 14:52 UTC):** screen 2.6 s pe aayi, par Vercel ke raaste har wake call ko Render ne turant 502 `x-render-routing: no-deploy` diya, 150 s tak server jaaga hi nahi (screen "taking too long" pe gayi); usi waqt seedhi request `bq-live.onrender.com/health` ne 52.6 s me jagaya. Matlab soye server ko Vercel ka route nahi jagata. Fix (owner ka faisla: jagane ke liye `/health` nahi, alag endpoint; env me sirf base URL), branch `feat/m2-wake-kick`: gateway `GET /wake` (204, `no-store`, origin secret ke bina), app-shell `ServerWake` "abhi nahi" pe use seedha `no-cors` bulata hai (15 s me max ek baar), customer build `BQ_GATEWAY_URL` + `/wake` deta hai (sirf ye ek key browser tak); laptop pe asli browser me: backend band → 502 + kick, backend chalu → wake 200, screen hati. **Live cold start (2026-10-26, 17:02 UTC, deploy `2f95380`): pass.** Page ke 8.0 s pe seedhi kick `bq-live.onrender.com/wake` gayi aur Render ne use 57 s roka jab tak server jaaga; screen 9.3 s se 66.3 s tak, phir wake 200 aur app chalu (pehle 150 s baad "taking too long"). **Baaki:** pehla scheduled run: workflow `active` hai par 09:27 UTC se ek bhi schedule run nahi hua.)
 - [ ] T2.8 **Metrics Lessons 1–5** (owner ke saath, sikhne ke liye; owner, 2026-10-25). Sirf laptop pe (Docker), live pe kuch nahi badalta (ARCHITECTURE §14, §11.1). Order: `feat/m2-gateway` PR merge ke baad, M2 customer landing ke saath-saath; ek lesson poora hone pe hi agla. Har lesson me pehle samjhana, phir owner khud commands chalaye.
   - **Lesson 1, metrics ki neev:** counter, gauge, histogram; RED (Rate, Errors, Duration); labels aur cardinality. Gateway me `/metrics` (requests, status, route, latency, rate-limit refusals), setting se band (`GATEWAY__METRICS`, default off; live pe off), tests ke saath.
   - **Lesson 2, Prometheus + Grafana:** `infra/` me alag compose profile (sirf zaroorat pe chale), Prometheus laptop ke bundle se scrape kare; Grafana datasource aur dashboard repo me code ki tarah.
@@ -145,13 +145,13 @@ Har milestone ke end me kuch **live** dikhana hai. Ek hi live environment, free 
 
 ## Phase 6. Frontend foundation (3 hafte, saath-saath)
 
-- [~] T6.1 Packages: app-shell, auth-ui, authz, api-client, data-table, review-screens, maps, forms, pwa-kit. (2026-10-25, `feat/m2-customer-landing`: `@beautinique/frontend-app-shell` 1.0.0 bana: `AppFrame`, `ThemeSwitcher` + `ThemeScript` (bina flash, CSP hash), `NavList`, `ErrorPage`, `tailwind.css`. Header/footer har app ka apna (owner). 2026-10-26: `ErrorPage` naya design (404/error, compact art, "Go back" history se, reference, dev details). Baaki app-shell (wake-up screen T2.7 ke saath, sidebar layout, offline page, idle logout) aur baaki packages jab app ko chahiye.)
+- [~] T6.1 Packages: app-shell, auth-ui, authz, api-client, data-table, review-screens, maps, forms, pwa-kit. (2026-10-25, `feat/m2-customer-landing`: `@beautinique/frontend-app-shell` 1.0.0 bana: `AppFrame`, `ThemeSwitcher` + `ThemeScript` (bina flash, CSP hash), `NavList`, `ErrorPage`, `tailwind.css`. Header/footer har app ka apna (owner). 2026-10-26: `ErrorPage` naya design (404/error, compact art, "Go back" history se, reference, dev details). 2026-10-26: wake-up screen `ServerWake` (T2.7). Baaki app-shell (sidebar layout, offline page, idle logout) aur baaki packages jab app ko chahiye.)
 - [~] T6.1a `icons` package: apne icon components; components package ki 12 `*-icons.ts` files ke icons yahan; icon credits (licenses) page. (2026-10-25: `@beautinique/frontend-icons` 1.0.0: `BaseIcon`, har icon apna component (pure `createIcon`, sirf import hue icons bundle me, Vite build test se pakka), converter script `npm run add-icons` (Iconify JSON → TSX, code/bahar ke links mana), `ICON_CREDITS` + `LICENSES.md`; 10 Solar icons. Customer app me "Icon credits" page. Purane components ke icons un components ke saath aayenge. 2026-10-26: logo `BrandLogo` (horizontal/stacked) + `BrandMark`, master image se trace; customer header/footer aur install icons me.)
 - [ ] T6.2 Styles package v2: fonts (Plus Jakarta Sans + Fraunces) aur preload plugin, base styles.
 - [ ] T6.3 Customer app → React Router 7 framework mode (SSR).
 - [ ] T6.4 Onboarding Customer → Seller app; Super Admin checkbox hatana; Admin/Master se AddProduct aur category CRUD hatana.
 - [ ] T6.5 7 naye apps template se (superadmin, support, finance, logistics, delivery, growth, creator).
-- [ ] T6.6 Har app ka `vercel.json` (routes transform, security headers), Ola Maps key per app.
+- [ ] T6.6 Har app ka `vercel.json` (routes transform, security headers), Ola Maps key per app. (2026-10-26: customer ka `vercel.json`: npm 12 install, `npm run build -- --for customer`, `/api` route + `x-origin-secret` transform env se, functions `bom1`. Security headers baaki.)
 - [ ] T6.7 `apps` profile: split mode containers. **Docker Lesson 4.**
 
 **Milestone 6:** saare 11 apps laptop pe login karke apna empty dashboard dikhate hain, dono themes me.
@@ -214,8 +214,8 @@ Har milestone ke end me kuch **live** dikhana hai. Ek hi live environment, free 
 
 ## C. Pehle deploy pe verify karna (ARCHITECTURE §18)
 
-- [ ] C.1 Vercel rewrite ke through `Set-Cookie`, `__Host-`/`__Secure-` cookies aur `x-forwarded-host`.
-- [ ] C.2 Request body ki max size (files hamesha seedhe Cloudinary).
+- [~] C.1 Vercel rewrite ke through `Set-Cookie`, `__Host-`/`__Secure-` cookies aur `x-forwarded-host`. (2026-10-26, live: Vercel ka `/api` route gateway tak app ka host le jaata hai: customer ki wake call 200; doosri site ka `Origin` 403, customer host se `admin` app id 403; browser ka bheja nakli `x-origin-secret` Vercel badal deta hai (200). Cookies login (M3) ke saath baaki.)
+- [x] C.2 Request body ki max size (files hamesha seedhe Cloudinary). (2026-10-26, live: Vercel ka route 900 KB aur 5 MB dono body gateway tak bhejta hai; hamari seema core ki 1 MB JSON hai: 5 MB pe hamara `413 PAYLOAD_TOO_LARGE`, request id ke saath.)
 - [ ] C.3 Cloudinary, Brevo, Sentry aur Ola Maps ki free limits.
 - [ ] C.4 atlas-local ki asli RAM (`docker stats`).
 
@@ -262,3 +262,7 @@ Har milestone ke end me kuch **live** dikhana hai. Ek hi live environment, free 
 | v1.36 | 2026-10-25 | T6.1 (app-shell) aur T6.1a (icons) ke pehle hisse, M2 customer landing ke saath. |
 | v1.37 | 2026-10-26 | T6.1a: logo (`BrandLogo`, `BrandMark`) icons package me. |
 | v1.38 | 2026-10-26 | T6.1: naya `ErrorPage` (404 aur error). |
+| v1.39 | 2026-10-26 | M2 deploy (`feat/m2-deploy`): T2.7 wake route + screen + workflow, T2.3 Sentry code, customer `vercel.json` (T6.6 ka hissa); live check baaki. |
+| v1.40 | 2026-10-26 | M2 live: C.1 (host ka hissa) aur C.2 jaanch, T2.3 Sentry live traces, T2.7 wake live; cold start aur cookies baaki. |
+| v1.41 | 2026-10-26 | T2.7: soye Render ka fix (gateway `/wake` + seedhi kick), live jaanch baaki. |
+| v1.42 | 2026-10-26 | T2.7: `/wake` kick ke saath live cold start pass (~57 s me jaaga). |

@@ -8,7 +8,7 @@ import {
   requireReleaseBranch,
   tagCommit,
 } from './git.ts';
-import { buildOrder, internalClosure } from './graph.ts';
+import { buildOrder, buildSelection, internalClosure } from './graph.ts';
 import { requireLogin, runScript } from './npm.ts';
 import {
   chooseVersions,
@@ -198,16 +198,10 @@ export async function verifyCommand(ctx: Context, flags: CommonFlags): Promise<v
 }
 
 /** npm run build: every workspace with a build script, dependencies (devDependencies too) first. */
-export async function buildCommand(ctx: Context): Promise<void> {
+export async function buildCommand(ctx: Context, targets: readonly string[] = []): Promise<void> {
   const ws = loadWorkspace(ctx);
   let built = 0;
-  for (const pkg of packages(
-    ws,
-    buildOrder(
-      ws.packages.map((p) => p.name),
-      ws,
-    ),
-  )) {
+  for (const pkg of packages(ws, buildSelection(targets, ws))) {
     const result = await runScript(ctx, pkg, 'build');
     if (!result.ran) {
       continue;

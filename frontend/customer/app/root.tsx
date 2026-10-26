@@ -1,4 +1,4 @@
-import { AppFrame, ErrorPage, ThemeScript } from '@beautinique/frontend-app-shell';
+import { AppFrame, ErrorPage, ServerWake, ThemeScript } from '@beautinique/frontend-app-shell';
 import displayFont from '@beautinique/frontend-styles/fonts/fraunces-latin.woff2?url';
 import sansFont from '@beautinique/frontend-styles/fonts/plus-jakarta-sans-latin.woff2?url';
 import {
@@ -15,6 +15,11 @@ import stylesheet from './app.css?url';
 import { SiteFooter } from './components/SiteFooter';
 import { SiteHeader } from './components/SiteHeader';
 
+/** The server's own wake address (gateway /wake), straight; none where the build had no address. */
+const GATEWAY_URL = import.meta.env.BQ_GATEWAY_URL;
+const WAKE_KICK_URL =
+  GATEWAY_URL === undefined || GATEWAY_URL === '' ? undefined : `${GATEWAY_URL}/wake`;
+
 /**
  * The stylesheet as a <link> (in development too, so it is never swapped for a <style> after hydration,
  * which would load the fonts again and flash the fallback font), and the brand fonts preloaded so the
@@ -28,7 +33,8 @@ export const links: Route.LinksFunction = () => [
 
 /**
  * Every page, error pages too: the saved theme applied before the first paint (ThemeScript; it sets
- * `<html theme>`, hence suppressHydrationWarning), then the shared frame with this app's header and footer.
+ * `<html theme>`, hence suppressHydrationWarning), then the shared frame with this app's header and
+ * footer, which the wake-up screen covers while the live server starts.
  */
 export function Layout({ children }: { children: React.ReactNode }) {
   return (
@@ -48,9 +54,13 @@ export function Layout({ children }: { children: React.ReactNode }) {
         <Links />
       </head>
       <body>
-        <AppFrame header={<SiteHeader />} footer={<SiteFooter />}>
-          {children}
-        </AppFrame>
+        {/* the free live server sleeps when idle: wake it, behind a screen only when it is slow;
+            a sleeping one wakes only for a call straight to it, so its /wake is rung too */}
+        <ServerWake app="customer" kickUrl={WAKE_KICK_URL}>
+          <AppFrame header={<SiteHeader />} footer={<SiteFooter />}>
+            {children}
+          </AppFrame>
+        </ServerWake>
         <ScrollRestoration />
         <Scripts />
       </body>

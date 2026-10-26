@@ -3,6 +3,7 @@ import { ZodError } from '@beautinique/shared-zod';
 import type { ErrorRequestHandler, RequestHandler } from 'express';
 import type { Logger } from 'pino';
 
+import { reportError } from './monitoring';
 import { requestIdOf } from './request';
 
 export interface ErrorDetail {
@@ -86,7 +87,7 @@ export function toErrorResponse(
 
 /**
  * The last middleware: every error becomes the contracts error body. Server errors are logged with
- * their stack; their real message never reaches the client.
+ * their stack and sent to Sentry when it is on; their real message never reaches the client.
  */
 export function errorHandler(logger: Logger): ErrorRequestHandler {
   return (error: unknown, req, res, next) => {
@@ -98,6 +99,7 @@ export function errorHandler(logger: Logger): ErrorRequestHandler {
     const { status, body } = toErrorResponse(error, requestId);
     if (status >= 500) {
       logger.error({ err: error, requestId, method: req.method, path: req.path }, 'request failed');
+      reportError(error, { requestId, method: req.method, path: req.path });
     }
     res.status(status).json(body);
   };

@@ -163,7 +163,32 @@ const mutations: Mutation[] = [
   {
     file: 'catalogue/platform',
     name: 'record ping needs sign-in again',
-    change: [["  access: { type: 'public' },", "  access: { type: 'signed-in' },"]],
+    change: [
+      [
+        "  access: { type: 'public' },\n  rateLimit: 'write',",
+        "  access: { type: 'signed-in' },\n  rateLimit: 'write',",
+      ],
+    ],
+  },
+  {
+    file: 'catalogue/platform',
+    name: 'wake needs sign-in (a sleeping app could never wake it)',
+    change: [
+      [
+        "  access: { type: 'public' },\n  rateLimit: 'public',",
+        "  access: { type: 'signed-in' },\n  rateLimit: 'public',",
+      ],
+    ],
+  },
+  {
+    file: 'catalogue/platform',
+    name: 'wake answered from the CDN cache',
+    change: [
+      [
+        "  owner: 'core',\n  input: {},",
+        "  owner: 'core',\n  cache: { sMaxAge: 60, staleWhileRevalidate: 0 },\n  input: {},",
+      ],
+    ],
   },
 ];
 

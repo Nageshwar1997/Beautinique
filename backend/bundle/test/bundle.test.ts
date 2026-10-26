@@ -100,6 +100,29 @@ describe('bundle', () => {
     }
   });
 
+  it('answers the apps’ wake call through the gateway from core, never cached (T2.7)', async () => {
+    const bundle = await startBundle({ port: 0, env: quiet() });
+    try {
+      const before = Date.now();
+      const woken = await fetch(`${bundle.url}/api/v1/platform/wake`, {
+        headers: { 'X-BQ-App': 'customer', 'x-origin-secret': ORIGIN_SECRET },
+      });
+      expect(woken.status).toBe(200);
+      // a CDN copy would answer without waking the server
+      expect(woken.headers.get('cache-control')).toBe('private, no-store');
+      expect(woken.headers.get('ratelimit-policy')).toBe('"public";q=600;w=60');
+      const { data } = (await woken.json()) as { data: { awakeAt: string } };
+      expect(Date.parse(data.awakeAt)).toBeGreaterThanOrEqual(before - 1000);
+      // like every /api route, not straight to the server without the apps' secret
+      const direct = await fetch(`${bundle.url}/api/v1/platform/wake`, {
+        headers: { 'X-BQ-App': 'customer' },
+      });
+      expect(direct.status).toBe(403);
+    } finally {
+      await bundle.stop();
+    }
+  });
+
   it('starts nothing when a config is wrong', async () => {
     await expect(
       startBundle({ port: 0, env: { ...quiet(), GATEWAY__PORT: 'abc' } }),

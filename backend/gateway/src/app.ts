@@ -37,8 +37,9 @@ async function isHealthy(origin: string): Promise<boolean> {
 
 /**
  * The gateway: the server-kit basics (security headers, request id, access log, /health), /ready
- * over Redis and every upstream, /status, and the proxy under /api/v1. /health, /ready and /status
- * stay outside the origin-secret check: Render and the monitors call them directly (§7.2, §11.1).
+ * over Redis and every upstream, /status, /wake, and the proxy under /api/v1. /health, /ready,
+ * /status and /wake stay outside the origin-secret check: Render, the monitors and the apps'
+ * wake-up screen call them directly (§7.2, §11.1).
  * Bodies are not parsed here; they stream to the owner unchanged.
  */
 export function buildApp({
@@ -65,6 +66,17 @@ export function buildApp({
     },
     routes: (app) => {
       app.get('/status', statusRoute({ own: { redis: redisReady }, upstreams }));
+      // The apps' wake-up screen calls this straight, not through their Vercel route: a request on
+      // that route does not wake a sleeping free Render service, one sent here does (2026-10-26,
+      // ARCHITECTURE §11.1). A browser cannot send the origin secret, so it stays outside that check
+      // like /health; it touches nothing and is never cached. Render's own check stays /health.
+      app.get('/wake', (_req, res) => {
+        res.setHeader('Cache-Control', 'no-store');
+        // the apps' pages call it from their own host (no-cors): an empty answer they may receive,
+        // instead of helmet's same-origin rule failing the call in the browser
+        res.setHeader('Cross-Origin-Resource-Policy', 'cross-origin');
+        res.status(204).end();
+      });
       app.use(
         API_PREFIX,
         proxy({

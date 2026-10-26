@@ -129,6 +129,25 @@ export function internalClosure(names: string[], ws: Workspace): string[] {
   return out;
 }
 
+/**
+ * What `npm run build` builds, dependencies first: every workspace, or only `targets` and the internal
+ * packages they need (a deploy builds one app or deployable, ARCHITECTURE §9.3, §11.5).
+ */
+export function buildSelection(targets: readonly string[], ws: Workspace): string[] {
+  const unknown = targets.filter((name) => !ws.byName.has(name));
+  if (unknown.length > 0) {
+    throw new CliError(`No workspace named ${unknown.join(', ')}.`, {
+      code: 'UNKNOWN_PACKAGE',
+      hint: 'Use the name in its package.json, e.g. customer, bundle or @beautinique/frontend-styles.',
+    });
+  }
+  const names =
+    targets.length === 0
+      ? ws.packages.map((p) => p.name)
+      : [...new Set(targets), ...internalClosure([...new Set(targets)], ws)];
+  return buildOrder(names, ws);
+}
+
 const ENTRY_FILES = ['src/index.ts', 'src/index.tsx', 'src/index.js', 'src/index.mjs', 'index.js'];
 
 /** Does `pkg` re-export `dep` from its entry file (`export * from 'dep'`, `export { x } from 'dep'`)? */

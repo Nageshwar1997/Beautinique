@@ -51,6 +51,88 @@ const mutations: Mutation[] = [
     name: 'handler gets no request id',
     change: [['requestId: requestIdOf(res)', "requestId: ''"]],
   },
+  // monitoring (Sentry): one init per process, nothing personal sent, server errors only
+  {
+    file: 'monitoring',
+    name: 'a second init replaces the first',
+    change: [['if (Sentry.isInitialized()) return true;\n  if (dsn', 'if (dsn']],
+    tests: 'monitoring',
+  },
+  {
+    file: 'monitoring',
+    name: 'a blank DSN starts Sentry',
+    change: [["dsn === undefined || dsn.trim() === ''", 'dsn === undefined']],
+    tests: 'monitoring',
+  },
+  {
+    file: 'monitoring',
+    name: 'what a request carried is sent',
+    change: [['if (request) {', 'if (false) {']],
+    tests: 'scrubEvent|monitoring',
+  },
+  {
+    file: 'monitoring',
+    name: 'the query stays in the URL',
+    change: [['url: withoutQuery(request.url)', 'url: request.url']],
+    tests: 'scrubEvent|monitoring',
+  },
+  {
+    file: 'monitoring',
+    name: 'no request id on the error',
+    change: [["if (requestId !== undefined) scope.setTag('request_id', requestId);", '']],
+    tests: 'monitoring',
+  },
+  {
+    file: 'monitoring',
+    name: 'errors not sent before exit',
+    change: [['if (Sentry.isInitialized()) await Sentry.flush(timeoutMs);', '']],
+    tests: 'monitoring',
+  },
+  {
+    file: 'monitoring',
+    name: 'Sentry collects headers again',
+    change: [['httpHeaders: false,', 'httpHeaders: true,']],
+    tests: 'monitoring',
+    survives: 'beforeSend (scrubEvent) drops the headers anyway: the two guard each other',
+  },
+  {
+    file: 'monitoring',
+    name: 'span headers, IP and user kept',
+    change: [['if (PRIVATE_ATTRIBUTE.test(key)) continue;', '']],
+    tests: 'scrubSpan',
+  },
+  {
+    file: 'monitoring',
+    name: 'span URL keeps its query',
+    change: [['? withoutQuery(value) : value', '? value : value']],
+    tests: 'scrubSpan',
+  },
+  {
+    file: 'monitoring',
+    name: 'span name keeps its query',
+    change: [['name: withoutQuery(span.name)', 'name: span.name']],
+    tests: 'scrubSpan',
+  },
+  {
+    file: 'monitoring',
+    name: 'spans not scrubbed',
+    change: [['beforeSendSpan: scrubSpan,', '']],
+    tests: 'monitoring',
+    survives:
+      'dataCollection already keeps headers, queries and users out of spans; scrubSpan is the second lock (a probe with tracesSampleRate 1 found none of them in sent spans)',
+  },
+  {
+    file: 'errors',
+    name: 'server errors not reported',
+    change: [['reportError(error, { requestId, method: req.method, path: req.path });', '']],
+    tests: 'monitoring',
+  },
+  {
+    file: 'errors',
+    name: 'client errors reported too',
+    change: [['if (status >= 500) {', 'if (status >= 400) {']],
+    tests: 'monitoring',
+  },
 ];
 
 export default mutations;
