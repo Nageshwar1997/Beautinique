@@ -25,7 +25,7 @@ Dev aur start dono `src/instrument.ts` (build me `dist/instrument.js`) ko `node 
 
 ## Settings
 
-`.env.example` ko `.env` me copy karo (commit kabhi nahi). Har deployable ki keys (`backend/<name>/.env.example`) bhi isi `.env` me daalo, kyunki bundle ek hi process hai.
+`.env.example` ko `.env` me copy karo (commit kabhi nahi). Har deployable ki keys (`backend/<name>/.env.example`) bhi isi `.env` me daalo, kyunki bundle ek hi process hai. Live values Render ke Environment me, aur unki private copy `.env.production` me (koi code use nahi padhta); har key ki live value kahan se, ye `.env.example` me likha hai.
 
 ## Render (`bq-live`)
 
