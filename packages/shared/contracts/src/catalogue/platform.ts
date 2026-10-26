@@ -49,6 +49,27 @@ export const recordPing = defineRoute({
   output: pingData,
 });
 
+/**
+ * Wakes the live server (ARCHITECTURE §11.1): the free Render service sleeps after 15 idle minutes,
+ * and every app calls this when it opens, behind its wake-up screen. Core owns it, so an answer means
+ * the gateway and a deployable both run; it touches no database. Never CDN-cached: a cached answer
+ * would wake nothing.
+ */
+export const wake = defineRoute({
+  id: 'platform.server.wake',
+  method: 'GET',
+  path: '/platform/wake',
+  summary: 'Wake the live server; answers once the gateway and core are up',
+  apps: APPS,
+  access: { type: 'public' },
+  rateLimit: 'public',
+  idempotency: false,
+  stepUp: false,
+  owner: 'core',
+  input: {},
+  output: object({ awakeAt: isoDateTimeZod }),
+});
+
 export const getPing = defineRoute({
   id: 'platform.ping.get',
   method: 'GET',

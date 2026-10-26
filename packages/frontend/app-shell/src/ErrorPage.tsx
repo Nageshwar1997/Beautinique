@@ -1,6 +1,7 @@
 import { useSyncExternalStore } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router';
 
+import { PRIMARY, SECONDARY } from './buttons';
 import { ErrorCode, PowderBackdrop } from './error-art';
 
 /** A way out of the error page: a link, or a button (e.g. reload). */
@@ -51,10 +52,6 @@ const hasPageBehind = () => {
 };
 /** The router re-renders this page on every navigation, which reads the history again. */
 const noSubscription = () => () => undefined;
-
-const BUTTON = 'min-h-touch inline-flex items-center justify-center rounded-full px-6 font-medium';
-const PRIMARY = `${BUTTON} bg-brand-gradient shadow-brand transition-[filter] hover:brightness-110`;
-const SECONDARY = `${BUTTON} border-border-strong bg-surface text-foreground hover:bg-surface-muted border transition-colors`;
 
 function ActionControl({ action, primary }: { action: ErrorPageAction; primary: boolean }) {
   const className = primary ? PRIMARY : SECONDARY;

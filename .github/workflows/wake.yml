@@ -1,0 +1,35 @@
+name: Wake
+
+# Wakes the free Render service once an hour from 10:00 to 21:00 IST (ARCHITECTURE §11.1, TASKS T2.7),
+# so its sweeps run even on a day nobody opens an app. Not a keep-alive: the service sleeps again after
+# 15 idle minutes, and nights stay asleep. GitHub runs schedules only from the default branch, may run
+# them late or drop them under load, and turns them off after 60 days without repository activity.
+on:
+  schedule:
+    # UTC: 04:30 to 15:30 = 10:00 to 21:00 IST, 12 runs a day
+    - cron: '30 4-15 * * *'
+  workflow_dispatch:
+
+permissions: {}
+
+concurrency:
+  group: wake
+  cancel-in-progress: false
+
+jobs:
+  wake:
+    # the live server's address is a repository variable (Settings → Secrets and variables → Actions →
+    # Variables → BQ_RENDER_URL, e.g. https://bq-live.onrender.com); without it there is nothing to wake
+    if: vars.BQ_RENDER_URL != ''
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      # /health answers once the process is up (ARCHITECTURE §11.1); a cold start takes about a minute,
+      # so each call may wait 90 s, and failed calls are tried again for up to 2 minutes
+      - name: Call /health on the live server
+        env:
+          RENDER_URL: ${{ vars.BQ_RENDER_URL }}
+        run: |
+          curl --fail --silent --show-error --output /dev/null --write-out 'HTTP %{http_code} in %{time_total} s\n' \
+            --max-time 90 --retry 6 --retry-delay 10 --retry-all-errors --retry-max-time 120 \
+            "${RENDER_URL%/}/health"

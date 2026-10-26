@@ -1,0 +1,22 @@
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "installCommand": "cd ../.. && npm install --global npm@12.2.0 && npm ci",
+  "buildCommand": "cd ../.. && npm run build -- --for customer",
+  "regions": ["bom1"],
+  "routes": [
+    {
+      "src": "/api/(.*)",
+      "dest": "${BQ_GATEWAY_URL}/api/$1",
+      "env": ["BQ_GATEWAY_URL"],
+      "transforms": [
+        {
+          "type": "request.headers",
+          "op": "set",
+          "target": { "key": "x-origin-secret" },
+          "args": "$ORIGIN_SECRET",
+          "env": ["ORIGIN_SECRET"]
+        }
+      ]
+    }
+  ]
+}

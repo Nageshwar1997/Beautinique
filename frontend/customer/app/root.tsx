@@ -1,4 +1,4 @@
-import { AppFrame, ErrorPage, ThemeScript } from '@beautinique/frontend-app-shell';
+import { AppFrame, ErrorPage, ServerWake, ThemeScript } from '@beautinique/frontend-app-shell';
 import displayFont from '@beautinique/frontend-styles/fonts/fraunces-latin.woff2?url';
 import sansFont from '@beautinique/frontend-styles/fonts/plus-jakarta-sans-latin.woff2?url';
 import {
@@ -28,7 +28,8 @@ export const links: Route.LinksFunction = () => [
 
 /**
  * Every page, error pages too: the saved theme applied before the first paint (ThemeScript; it sets
- * `<html theme>`, hence suppressHydrationWarning), then the shared frame with this app's header and footer.
+ * `<html theme>`, hence suppressHydrationWarning), then the shared frame with this app's header and
+ * footer, which the wake-up screen covers while the live server starts.
  */
 export function Layout({ children }: { children: React.ReactNode }) {
   return (
@@ -48,9 +49,12 @@ export function Layout({ children }: { children: React.ReactNode }) {
         <Links />
       </head>
       <body>
-        <AppFrame header={<SiteHeader />} footer={<SiteFooter />}>
-          {children}
-        </AppFrame>
+        {/* the free live server sleeps when idle: wake it, behind a screen only when it is slow */}
+        <ServerWake app="customer">
+          <AppFrame header={<SiteHeader />} footer={<SiteFooter />}>
+            {children}
+          </AppFrame>
+        </ServerWake>
         <ScrollRestoration />
         <Scripts />
       </body>
