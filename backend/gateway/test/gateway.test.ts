@@ -375,6 +375,17 @@ describe('who may call', () => {
     for (const open of ['/health', '/ready', '/status']) {
       expect((await fetch(`${gw.url}${open}`)).status, open).toBe(200);
     }
+    // and the apps' wake-up screen calls /wake straight from the browser: nothing in it, never cached
+    const woken = await fetch(`${gw.url}/wake`);
+    expect(woken.status).toBe(204);
+    expect(woken.headers.get('cache-control')).toBe('no-store');
+    // the apps' pages may receive it from their own host; every other answer stays same-origin
+    expect(woken.headers.get('cross-origin-resource-policy')).toBe('cross-origin');
+    expect((await fetch(`${gw.url}/health`)).headers.get('cross-origin-resource-policy')).toBe(
+      'same-origin',
+    );
+    expect(await woken.text()).toBe('');
+    expect((await fetch(`${gw.url}/wake`, { method: 'POST' })).status).toBe(404);
   });
 
   it('lets only a known app through, and only to its own routes', async () => {

@@ -16,12 +16,15 @@ function required(env: Record<string, string>, key: string): string {
 }
 
 export default defineConfig(({ command, mode }) => {
-  // the dev server only: a build (Vercel, react-router typegen in lint) never reads env here, so it
-  // needs no .env, and .env.production's secret stays out of it
   const serving = command === 'serve';
-  const env = serving ? loadEnv(mode, import.meta.dirname, '') : {};
+  // .env on the laptop, Vercel's env in its build (and nothing in CI, where the key stays empty)
+  const env = loadEnv(mode, import.meta.dirname, '');
+  const gatewayUrl = (env.BQ_GATEWAY_URL ?? '').trim().replace(/\/+$/, '');
   return {
     plugins: [tailwindcss(), reactRouter()],
+    // the one key the browser gets: the server's public address, for the wake-up screen's straight
+    // call to its /wake (ARCHITECTURE §11.1). Nothing else of the env reaches the bundle.
+    define: { 'import.meta.env.BQ_GATEWAY_URL': JSON.stringify(gatewayUrl) },
     server: {
       port,
       strictPort: true,

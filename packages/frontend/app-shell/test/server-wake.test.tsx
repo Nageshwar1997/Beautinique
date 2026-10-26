@@ -9,10 +9,21 @@ import { ServerWake, WAKE_URL, wakeServer } from '../src/index';
 /** How one call goes: an answer after `after` ms, a network error, or no answer at all. */
 type Step = { after: number; status: number } | { after: number; error: true } | { hang: true };
 
-/** A fetch that plays `steps` in order (the last one repeats) and honours aborts like the real one. */
+/** The server's own wake address in these tests (the gateway's /wake, called straight). */
+const KICK_URL = 'https://bq-live.example.test/wake';
+
+/**
+ * A fetch that plays `steps` in order (the last one repeats) and honours aborts like the real one.
+ * Calls to KICK_URL are kept apart in `kicks` and answer at once (opaque, as no-cors answers are).
+ */
 function scriptedFetch(...steps: Step[]) {
   const calls: { url: string; init: RequestInit }[] = [];
+  const kicks: { url: string; init: RequestInit; at: number }[] = [];
   const fetchStub = vi.fn((url: string, init: RequestInit) => {
+    if (url === KICK_URL) {
+      kicks.push({ url, init, at: Date.now() });
+      return Promise.resolve({ status: 0, type: 'opaque' } as Response);
+    }
     calls.push({ url, init });
     const step = steps[Math.min(calls.length - 1, steps.length - 1)];
     return new Promise<Response>((resolve, reject) => {
@@ -30,7 +41,7 @@ function scriptedFetch(...steps: Step[]) {
             }, step.after);
     });
   });
-  return { fetch: fetchStub as unknown as typeof fetch, calls };
+  return { fetch: fetchStub as unknown as typeof fetch, calls, kicks };
 }
 
 const advance = async (ms: number) => {
@@ -108,6 +119,45 @@ describe('wakeServer', () => {
     expect(await done).toBe(false);
     expect(calls).toHaveLength(2);
     expect(calls.every((call) => call.init.signal?.aborted)).toBe(true);
+  });
+
+  it('rings the server straight (no-cors) while the route says "not up yet", at most every 15 s', async () => {
+    // Render answers 502 on the app's Vercel route until the straight call wakes it (2026-10-26)
+    const { fetch, calls, kicks } = scriptedFetch(
+      { after: 100, status: 502 },
+      { after: 100, error: true },
+      { after: 100, status: 502 },
+      { after: 100, status: 502 },
+      { after: 100, status: 502 },
+      { after: 100, status: 502 },
+      { after: 100, status: 502 },
+      { after: 100, status: 502 },
+      { after: 100, status: 200 },
+    );
+    const start = Date.now();
+    const done = wakeServer({ app: 'customer', fetch, kickUrl: KICK_URL, retryDelayMs: 3000 });
+    await vi.advanceTimersByTimeAsync(8 * 3100 + 100);
+    expect(await done).toBe(true);
+    expect(calls).toHaveLength(9);
+    // the first "not up yet" rings at once, the next one 15 s later at the earliest
+    expect(kicks.map((kick) => kick.at - start)).toEqual([100, 15_600]);
+    expect(kicks[0]?.init).toMatchObject({ mode: 'no-cors', cache: 'no-store' });
+    // the bell carries nothing of the app: no app header, no secret
+    expect(kicks[0]?.init.headers).toBeUndefined();
+  });
+
+  it('rings nothing when the server answers, or when there is no wake address', async () => {
+    const awake = scriptedFetch({ after: 50, status: 200 });
+    const first = wakeServer({ app: 'customer', fetch: awake.fetch, kickUrl: KICK_URL });
+    await vi.advanceTimersByTimeAsync(50);
+    expect(await first).toBe(true);
+    expect(awake.kicks).toEqual([]);
+
+    const asleep = scriptedFetch({ after: 50, status: 502 }, { after: 50, status: 200 });
+    const second = wakeServer({ app: 'customer', fetch: asleep.fetch, retryDelayMs: 1000 });
+    await vi.advanceTimersByTimeAsync(1100);
+    expect(await second).toBe(true);
+    expect(asleep.kicks).toEqual([]);
   });
 
   it('stops at once when its signal aborts', async () => {

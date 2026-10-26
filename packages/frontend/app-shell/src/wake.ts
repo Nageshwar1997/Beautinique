@@ -25,12 +25,21 @@ export interface WakeTimings {
   retryDelayMs?: number;
   /** Stop after this long: Render's cold start takes about a minute (default 150 s). */
   giveUpAfterMs?: number;
+  /** At most one call to `kickUrl` this often while the server is not up (default 15 s). */
+  kickEveryMs?: number;
 }
 
 export interface WakeServerOptions extends WakeTimings {
   /** The app's id, e.g. `customer`. */
   app: string;
   url?: string;
+  /**
+   * The server's own wake address (the gateway's `/wake`, straight, not through the app's Vercel
+   * route), called when the route says "not up yet": a request on that route does not wake a
+   * sleeping free Render service, one sent straight there does (ARCHITECTURE §11.1). The call is
+   * `no-cors`: its answer cannot be read and is not needed. Without it, no such call.
+   */
+  kickUrl?: string | undefined;
   signal?: AbortSignal;
   /** For tests and the playground; keep it the same function, as useServerWake starts over on a new one. */
   fetch?: typeof fetch;
@@ -73,8 +82,18 @@ export async function wakeServer({
   attemptTimeoutMs = 30_000,
   retryDelayMs = 3000,
   giveUpAfterMs = 150_000,
+  kickUrl,
+  kickEveryMs = 15_000,
 }: WakeServerOptions): Promise<boolean> {
   const deadline = Date.now() + giveUpAfterMs;
+  let kickedAt = -Infinity;
+  /** Rings the server's own bell (fire and forget), at most once per kickEveryMs. */
+  const kick = () => {
+    if (signal.aborted || kickUrl === undefined || kickUrl === '') return;
+    if (Date.now() - kickedAt < kickEveryMs) return;
+    kickedAt = Date.now();
+    void fetchImpl(kickUrl, { mode: 'no-cors', cache: 'no-store', signal }).catch(() => undefined);
+  };
   while (!signal.aborted) {
     const attempt = new AbortController();
     const stop = () => {
@@ -89,8 +108,10 @@ export async function wakeServer({
         signal: attempt.signal,
       });
       if (!notUpYet(response.status)) return !signal.aborted;
+      kick();
     } catch {
       // offline, refused or timed out: the server may still be on its way up
+      kick();
     } finally {
       clearTimeout(timer);
       signal.removeEventListener('abort', stop);
@@ -123,6 +144,8 @@ export function useServerWake({
   attemptTimeoutMs,
   retryDelayMs,
   giveUpAfterMs,
+  kickUrl,
+  kickEveryMs,
 }: Omit<WakeServerOptions, 'signal'>): ServerWakeStatus {
   const [state, setState] = useState<WakeState>('checking');
   const [since, setSince] = useState(0);
@@ -146,6 +169,8 @@ export function useServerWake({
       attemptTimeoutMs,
       retryDelayMs,
       giveUpAfterMs,
+      kickUrl,
+      kickEveryMs,
       signal: controller.signal,
     }).then((answered) => {
       if (controller.signal.aborted) return;
@@ -156,7 +181,18 @@ export function useServerWake({
       controller.abort();
       clearTimeout(slow);
     };
-  }, [run, app, url, fetch, slowAfterMs, attemptTimeoutMs, retryDelayMs, giveUpAfterMs]);
+  }, [
+    run,
+    app,
+    url,
+    fetch,
+    slowAfterMs,
+    attemptTimeoutMs,
+    retryDelayMs,
+    giveUpAfterMs,
+    kickUrl,
+    kickEveryMs,
+  ]);
 
   const retry = useCallback(() => {
     setSince(Date.now());

@@ -15,6 +15,11 @@ import stylesheet from './app.css?url';
 import { SiteFooter } from './components/SiteFooter';
 import { SiteHeader } from './components/SiteHeader';
 
+/** The server's own wake address (gateway /wake), straight; none where the build had no address. */
+const GATEWAY_URL = import.meta.env.BQ_GATEWAY_URL;
+const WAKE_KICK_URL =
+  GATEWAY_URL === undefined || GATEWAY_URL === '' ? undefined : `${GATEWAY_URL}/wake`;
+
 /**
  * The stylesheet as a <link> (in development too, so it is never swapped for a <style> after hydration,
  * which would load the fonts again and flash the fallback font), and the brand fonts preloaded so the
@@ -49,8 +54,9 @@ export function Layout({ children }: { children: React.ReactNode }) {
         <Links />
       </head>
       <body>
-        {/* the free live server sleeps when idle: wake it, behind a screen only when it is slow */}
-        <ServerWake app="customer">
+        {/* the free live server sleeps when idle: wake it, behind a screen only when it is slow;
+            a sleeping one wakes only for a call straight to it, so its /wake is rung too */}
+        <ServerWake app="customer" kickUrl={WAKE_KICK_URL}>
           <AppFrame header={<SiteHeader />} footer={<SiteFooter />}>
             {children}
           </AppFrame>
