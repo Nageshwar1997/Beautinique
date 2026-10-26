@@ -345,6 +345,8 @@
   --focus-ring: rgb(var(--focus-ring-rgb));
   --focus-ring-inverse-rgb: var(--rose-400-rgb);
   --focus-ring-inverse: rgb(var(--focus-ring-inverse-rgb));
+  --brand-text-inverse-rgb: var(--rose-300-rgb);
+  --brand-text-inverse: rgb(var(--brand-text-inverse-rgb));
   --chart-1-rgb: var(--rose-600-rgb);
   --chart-1: rgb(var(--chart-1-rgb));
   --chart-2-rgb: var(--info-500-rgb);
@@ -490,6 +492,8 @@
   --focus-ring: rgb(var(--focus-ring-rgb));
   --focus-ring-inverse-rgb: var(--rose-700-rgb);
   --focus-ring-inverse: rgb(var(--focus-ring-inverse-rgb));
+  --brand-text-inverse-rgb: var(--rose-700-rgb);
+  --brand-text-inverse: rgb(var(--brand-text-inverse-rgb));
   --chart-1-rgb: var(--rose-400-rgb);
   --chart-1: rgb(var(--chart-1-rgb));
   --chart-2-rgb: var(--info-300-rgb);
@@ -636,6 +640,8 @@
     --focus-ring: rgb(var(--focus-ring-rgb));
     --focus-ring-inverse-rgb: var(--rose-700-rgb);
     --focus-ring-inverse: rgb(var(--focus-ring-inverse-rgb));
+    --brand-text-inverse-rgb: var(--rose-700-rgb);
+    --brand-text-inverse: rgb(var(--brand-text-inverse-rgb));
     --chart-1-rgb: var(--rose-400-rgb);
     --chart-1: rgb(var(--chart-1-rgb));
     --chart-2-rgb: var(--info-300-rgb);
@@ -689,6 +695,8 @@
   --focus-ring: rgb(var(--focus-ring-rgb));
   --focus-ring-inverse-rgb: var(--rose-300-rgb);
   --focus-ring-inverse: rgb(var(--focus-ring-inverse-rgb));
+  --brand-text-inverse-rgb: var(--rose-200-rgb);
+  --brand-text-inverse: rgb(var(--brand-text-inverse-rgb));
   --brand-rgb: var(--rose-800-rgb);
   --brand: rgb(var(--brand-rgb));
   --brand-hover-rgb: var(--rose-900-rgb);
@@ -760,6 +768,8 @@
   --focus-ring: rgb(var(--focus-ring-rgb));
   --focus-ring-inverse-rgb: var(--rose-800-rgb);
   --focus-ring-inverse: rgb(var(--focus-ring-inverse-rgb));
+  --brand-text-inverse-rgb: var(--rose-800-rgb);
+  --brand-text-inverse: rgb(var(--brand-text-inverse-rgb));
   --brand-rgb: var(--rose-300-rgb);
   --brand: rgb(var(--brand-rgb));
   --brand-hover-rgb: var(--rose-200-rgb);
@@ -832,6 +842,8 @@
     --focus-ring: rgb(var(--focus-ring-rgb));
     --focus-ring-inverse-rgb: var(--rose-800-rgb);
     --focus-ring-inverse: rgb(var(--focus-ring-inverse-rgb));
+    --brand-text-inverse-rgb: var(--rose-800-rgb);
+    --brand-text-inverse: rgb(var(--brand-text-inverse-rgb));
     --brand-rgb: var(--rose-300-rgb);
     --brand: rgb(var(--brand-rgb));
     --brand-hover-rgb: var(--rose-200-rgb);
@@ -906,6 +918,8 @@
     --focus-ring: rgb(var(--focus-ring-rgb));
     --focus-ring-inverse-rgb: var(--rose-300-rgb);
     --focus-ring-inverse: rgb(var(--focus-ring-inverse-rgb));
+    --brand-text-inverse-rgb: var(--rose-200-rgb);
+    --brand-text-inverse: rgb(var(--brand-text-inverse-rgb));
     --brand-rgb: var(--rose-800-rgb);
     --brand: rgb(var(--brand-rgb));
     --brand-hover-rgb: var(--rose-900-rgb);
@@ -977,6 +991,8 @@
     --focus-ring: rgb(var(--focus-ring-rgb));
     --focus-ring-inverse-rgb: var(--rose-800-rgb);
     --focus-ring-inverse: rgb(var(--focus-ring-inverse-rgb));
+    --brand-text-inverse-rgb: var(--rose-800-rgb);
+    --brand-text-inverse: rgb(var(--brand-text-inverse-rgb));
     --brand-rgb: var(--rose-300-rgb);
     --brand: rgb(var(--brand-rgb));
     --brand-hover-rgb: var(--rose-200-rgb);
@@ -1050,6 +1066,8 @@
     --focus-ring: rgb(var(--focus-ring-rgb));
     --focus-ring-inverse-rgb: var(--rose-800-rgb);
     --focus-ring-inverse: rgb(var(--focus-ring-inverse-rgb));
+    --brand-text-inverse-rgb: var(--rose-800-rgb);
+    --brand-text-inverse: rgb(var(--brand-text-inverse-rgb));
     --brand-rgb: var(--rose-300-rgb);
     --brand: rgb(var(--brand-rgb));
     --brand-hover-rgb: var(--rose-200-rgb);
@@ -1220,6 +1238,8 @@
     --focus-ring: rgb(var(--focus-ring-rgb)) !important;
     --focus-ring-inverse-rgb: var(--rose-400-rgb) !important;
     --focus-ring-inverse: rgb(var(--focus-ring-inverse-rgb)) !important;
+    --brand-text-inverse-rgb: var(--rose-300-rgb) !important;
+    --brand-text-inverse: rgb(var(--brand-text-inverse-rgb)) !important;
     --chart-1-rgb: var(--rose-600-rgb) !important;
     --chart-1: rgb(var(--chart-1-rgb)) !important;
     --chart-2-rgb: var(--info-500-rgb) !important;
@@ -1427,6 +1447,7 @@
   --color-rating: var(--rating);
   --color-focus-ring: var(--focus-ring);
   --color-focus-ring-inverse: var(--focus-ring-inverse);
+  --color-brand-text-inverse: var(--brand-text-inverse);
   --color-chart-1: var(--chart-1);
   --color-chart-2: var(--chart-2);
   --color-chart-3: var(--chart-3);

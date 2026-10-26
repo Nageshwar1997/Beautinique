@@ -120,6 +120,8 @@ const THEMES = {
     'focus-ring': 'rose-600',
     // the ring on an inverse strip (surface-inverse utility): light rose shows on the dark strip
     'focus-ring-inverse': 'rose-400',
+    // brand text (links, current page) on that strip: the surface-inverse utility swaps it in
+    'brand-text-inverse': 'rose-300',
     // Chart series: the same hue order in both themes (a series keeps its hue when the theme changes),
     // no green (red/green is the most common deficiency), neighbours apart for colour-blind eyes too.
     'chart-1': 'rose-600',
@@ -163,6 +165,7 @@ const THEMES = {
     rating: 'gold-400',
     'focus-ring': 'rose-400',
     'focus-ring-inverse': 'rose-700',
+    'brand-text-inverse': 'rose-700',
     'chart-1': 'rose-400',
     'chart-2': 'info-300',
     'chart-3': 'teal-500',
@@ -195,6 +198,7 @@ const MORE = {
     'price-discount': 'success-800',
     'focus-ring': 'rose-800',
     'focus-ring-inverse': 'rose-300',
+    'brand-text-inverse': 'rose-200',
     ...strongTone('brand', 'rose-800', 'white', 'rose-900'),
     ...strongTone('secondary', 'plum-800', 'white', 'plum-900'),
     ...strongTone('accent', 'gold-800', 'white', 'gold-900'),
@@ -212,6 +216,7 @@ const MORE = {
     'price-discount': 'success-200',
     'focus-ring': 'rose-300',
     'focus-ring-inverse': 'rose-800',
+    'brand-text-inverse': 'rose-800',
     ...strongTone('brand', 'rose-300', 'neutral-950', 'rose-200'),
     ...strongTone('secondary', 'plum-300', 'neutral-950', 'plum-200'),
     ...strongTone('accent', 'gold-300', 'neutral-950', 'gold-200'),
@@ -242,6 +247,7 @@ const PAIRS = [
   ['focus-ring-inverse', 'surface-inverse', 3],
   ['brand-text', 'background', 4.5],
   ['brand-text', 'surface', 4.5],
+  ['brand-text-inverse', 'surface-inverse', 4.5],
   ['price-discount', 'surface', 4.5],
   ['rating', 'surface', 3],
   ...TONES.flatMap((t) => [
@@ -281,6 +287,7 @@ const MORE_PAIRS = [
   ['foreground-subtle', 'background', 7],
   ['brand-text', 'surface', 7],
   ['brand-text', 'background', 7],
+  ['brand-text-inverse', 'surface-inverse', 7],
   ['price-discount', 'surface', 7],
   ['border', 'surface', 3],
   ['border', 'background', 3],
