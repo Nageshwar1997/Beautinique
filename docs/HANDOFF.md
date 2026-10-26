@@ -1,6 +1,6 @@
 # HANDOFF — BQ
 
-> **Status:** v1.50 (2026-10-26). Is project pe 2 log kaam karte hain. Ye file batati hai ki **abhi kya halat hai, kisne kya chhoda, agla kaam kya hai** aur kaunse sawal khule hain, taaki doosra insaan (aur uska Claude) bina poora itihaas padhe kaam utha sake. Jo bhi kaam roke, wo ye file update kare (neeche §8).
+> **Status:** v1.51 (2026-10-26). Is project pe 2 log kaam karte hain. Ye file batati hai ki **abhi kya halat hai, kisne kya chhoda, agla kaam kya hai** aur kaunse sawal khule hain, taaki doosra insaan (aur uska Claude) bina poora itihaas padhe kaam utha sake. Jo bhi kaam roke, wo ye file update kare (neeche §8).
 
 ## 0. Pehle ye (handoff ke din)
 
@@ -17,7 +17,7 @@
 ## 2. Setup (naya laptop)
 
 1. Node 24, aur npm 12.2+: `npm install --global npm@12.2.0` (Node 24 ke saath npm 11 aata hai; repo `devEngines` se npm 12 maangta hai).
-2. `npm install`, phir `npm run build` (packages ek doosre ka `dist` import karte hain).
+2. `npm install`, phir `npm run build` (packages ek doosre ka `dist` import karte hain). Envs: har `backend/<name>` (aur `frontend/<app>` jahan ho) me `.env.example` ko `.env` me copy karo; live values sirf Render/Vercel me aur owner ki private `.env.production` me (RULES §2.4).
 3. Checks: `npm run format:check`, `npm run lint`, `npm run typecheck`, `npm test` (backend packages ke tests asli Mongo pe chalte hain: pehle Docker Desktop kholo aur `npm run infra:up`; `verify` aur `publish` ke liye bhi). Package CLI ke tests me e2e ~4 minute aur create ~1 minute lete hain.
 4. Styles ka playground: `npm run playground --workspace @beautinique/frontend-styles` (http://localhost:5180).
 5. **Roz ka git flow** (owner, 2026-10-25; ARCHITECTURE §13, RULES §2): `git switch prerelease` → `git pull` → `git switch -c feat/<kaam>` → commits (Conventional Commits) → PR **`prerelease`** pe (development). Batch ready ho to PR `prerelease` → `release` (production: live + npm). Release safal (deploy + demo check) → PR `release` → `main` (sirf final code). Release pe bane commits (package release, hotfix) ke baad PR `release` → `prerelease` bhi. `main` pe kabhi seedha kaam nahi. **Chhota fix** (1–3 files: typo, doc line, flaky test, ek-do line ka bug) `prerelease` pe seedha push ho sakta hai: `git pull --rebase`, local format/lint/typecheck + us package ka test, phir push; force push kabhi nahi (poori list RULES §2).
@@ -195,3 +195,4 @@
 | v1.48 | 2026-10-26 | §4: M2 #3 `feat/m2-deploy` ka code hissa (wake route + screen + workflow, Sentry, customer `vercel.json`, build `--for`); commit + push; live deploy baaki. Owner ke envs ki poori list. |
 | v1.49 | 2026-10-26 | §4: Render ke build/start commands badle (global npm read-only; npm 12 `.npm12` me, start seedha `node`). |
 | v1.50 | 2026-10-26 | Render ke commands repo ki `scripts/render/*.sh` me (dashboard me purane commands se deploy fail); purani free Render services ka trap. |
+| v1.51 | 2026-10-26 | §2: env files ka niyam (`.env.example` / `.env` / `.env.production`); har `.env.example` me live value kahan se. |

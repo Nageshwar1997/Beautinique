@@ -1,6 +1,6 @@
 # Beautinique (`frontend/customer`)
 
-SSR: React Router framework mode (server-rendered). Dev server http://localhost:3001; `/api` gateway (localhost:8080) pe jata hai, bilkul Vercel rewrite jaisa.
+SSR: React Router framework mode (server-rendered). Dev server http://localhost:3001; `/api` gateway pe jata hai, bilkul Vercel route jaisa. Pehli baar `.env.example` ko `.env` me copy karo: dev server ka proxy `BQ_GATEWAY_URL` (laptop: `http://localhost:8080`) aur `ORIGIN_SECRET` (laptop ka public secret) wahi se leta hai, Vercel wale naamon se; `.env` na ho to dev server saaf error deta hai. Build aur lint ko `.env` nahi chahiye.
 
 ## Commands
 

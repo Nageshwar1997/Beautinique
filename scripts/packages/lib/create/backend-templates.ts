@@ -227,7 +227,8 @@ GATEWAY__UPSTREAM_TIMEOUT_MS=30000
 `
       : '';
   return `# ${deployable} settings: ${prefix}__<SETTING>, namespaced so backend/bundle can run every deployable in
-# one process (ARCHITECTURE §3). Copy this file to .env for local runs. Never commit .env.
+# one process (ARCHITECTURE §3). Laptop: copy this file to .env (never committed). Live runs these
+# keys in backend/bundle: their live values go in Render and in your private backend/bundle/.env.production.
 ${prefix}__PORT=${String(deployablePort(deployable))}
 # fatal, error, warn, info, debug, trace or silent
 ${prefix}__LOG_LEVEL=info
@@ -1069,10 +1070,18 @@ describe('bundle', () => {
 });
 `;
 
-const bundleEnvExample = `# backend/bundle runs every deployable in one process (ARCHITECTURE §3). Copy this file to .env for
-# local runs; never commit .env. Each deployable reads its own <NAME>__* keys from the same env, so
-# put them here too (see backend/<name>/.env.example).
-# The public port (Render sets PORT itself, plus UV_THREADPOOL_SIZE=2 in its environment, §11.1)
+const bundleEnvExample = `# backend/bundle runs every deployable in one process (ARCHITECTURE §3): the Render live server \`bq-live\`.
+# Each deployable reads its own <NAME>__* keys from the same env, so they all go here
+# (backend/<name>/.env.example explains each one).
+#
+# Three files, the same keys:
+#   .env.example     this file, in git: the laptop's values and what live needs. No secret, ever.
+#   .env             your laptop (npm run dev:backend reads it). Copy this file. Never committed.
+#   .env.production  your private copy of the live values you set in Render. Never committed, and
+#                    nothing reads it: the live server takes its env from Render's dashboard.
+# (.gitignore keeps every .env* out of git except .env.example.)
+
+# The public port. Live: not set, Render sets PORT itself.
 PORT=8080
 `;
 

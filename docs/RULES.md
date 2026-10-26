@@ -1,6 +1,6 @@
 # RULES — BQ
 
-> **Status:** v1.11 (2026-10-25). Ye niyam Beautinique ke har code, doc aur deploy pe lagu hain. [PRD.md](PRD.md) batata hai **kya** banana hai, [ARCHITECTURE.md](ARCHITECTURE.md) batata hai **kaise**, aur ye file batati hai ki **kin niyamon ke saath**. Koi rule todna ho to pehle is file me badlav aur change log entry.
+> **Status:** v1.12 (2026-10-26). Ye niyam Beautinique ke har code, doc aur deploy pe lagu hain. [PRD.md](PRD.md) batata hai **kya** banana hai, [ARCHITECTURE.md](ARCHITECTURE.md) batata hai **kaise**, aur ye file batati hai ki **kin niyamon ke saath**. Koi rule todna ho to pehle is file me badlav aur change log entry.
 
 ## 1. Kaam karne ke niyam
 
@@ -29,6 +29,7 @@
 2. **Commits:** Conventional Commits (`feat:`, `fix:`, `docs:`, `refactor:`, `test:`, `chore:`). Ek commit me ek hi baat.
 3. **PR:** chhota rakho, description me kya aur kyun, aur kaise test kiya. CI green hue bina merge nahi.
 4. **Public repo:** koi secret, `.env`, token, test password, DB dump ya asli personal data kabhi commit nahi. Sirf `.env.example`. Gitleaks har PR pe chalega.
+   - **Env files (owner, 2026-10-26), har us folder me jahan envs hain** (`backend/<name>`, `frontend/<app>`): `.env.example` git me (laptop ki values + har key ki live value kahan se, secret kabhi nahi); `.env` laptop (dev scripts padhti hain); `.env.production` owner ki private copy un live values ki jo Render/Vercel me daali (koi code nahi padhta, live server dashboard se env leta hai). `.gitignore` `.env` aur `.env.*` rokta hai, sirf `.env.example` chhod ke. Claude `.env`/`.env.*` kabhi nahi kholta.
 5. **Dependencies:** `npm run update-deps` (ya Renovate/Dependabot) ke PRs `prerelease` pe; major version upgrade alag PR me.
 
 ## 3. Code: sabke liye
@@ -121,3 +122,4 @@
 | v1.9    | 2026-10-25 | §2: `prerelease` pe chhota fix seedha push (kya chhota hai, push se pehle checks, kya kabhi seedha nahi); `main` aur `release` pe sirf PR.                                                                            |
 | v1.10   | 2026-10-25 | §6: mutation runner deployable bhi leta hai (`--package gateway`).                                                                                                                                                    |
 | v1.11   | 2026-10-25 | §9: agents sirf extreme zaroorat pe, ek ek karke (parallel nahi), owner.                                                                                                                                              |
+| v1.12 | 2026-10-26 | §2.4: env files: `.env.example` (git), `.env` (laptop), `.env.production` (owner ki private copy, koi code nahi padhta). |
