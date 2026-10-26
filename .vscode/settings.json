@@ -16,5 +16,5 @@
   // VS Code downloads a JSON schema only from trusted domains; the apps' vercel.json use Vercel's
   // (its own defaults stay trusted: object settings merge)
   "json.schemaDownload.trustedDomains": { "https://openapi.vercel.sh/": true },
-  "cSpell.words": ["colour", "COLOURS"]
+  "cSpell.words": ["colour", "COLOURS", "dsphere", "rediss", "redrive", "uuidv", "Valkey"]
 }
