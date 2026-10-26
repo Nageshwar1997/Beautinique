@@ -1,5 +1,6 @@
 export {
   type Consumer,
+  CONSUMER_INDEXES,
   type ConsumerOptions,
   DEAD_LETTER_KEEP_SECONDS,
   DEAD_LETTERS,
@@ -22,6 +23,7 @@ export {
   EVENT_MAX_BYTES,
   type EventInput,
   OUTBOX,
+  OUTBOX_INDEXES,
   OUTBOX_KEEP_SECONDS,
   type OutboxRecord,
   writeEvent,

@@ -34,6 +34,7 @@
     "update-deps:minor": "node scripts/packages/bin/update-deps.ts --level minor",
     "update-deps:patch": "node scripts/packages/bin/update-deps.ts --level patch",
     "dev:backend": "npm run dev --workspace bundle",
+    "db:release": "npm run release --workspace bundle --",
     "infra:up": "docker compose -f infra/docker-compose.yml up --detach --wait --wait-timeout 180",
     "infra:down": "docker compose -f infra/docker-compose.yml down",
     "infra:reset": "docker compose -f infra/docker-compose.yml down --volumes",

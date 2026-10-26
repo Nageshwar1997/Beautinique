@@ -23,7 +23,8 @@ Core ko MongoDB aur Redis chahiye (start pe connect hota hai, tests bhi asli pe 
 
 - `src/service.ts`: `readConfig` + `start` (split mode me `src/server.ts`, bundle mode me `backend/bundle` isse chalata hai).
 - `src/app.ts`: `@beautinique/backend-server-kit` ka `createApp` (health, errors, logs, request id) aur `/ready` ke checks (mongo, redis, outbox, events).
-- `src/runtime.ts`: MongoDB + Redis connect karta hai aur peeche ke kaam chalata hai: outbox relay, queue worker (`q.core`) schedules ke saath, aur Redis wipe watchdog. Beech me kuch fail ho to pehle khola hua sab band hota hai.
+- `src/release.ts`: core ke release steps (migrations aur saare indexes: outbox, consumer, modules), har start pe listen se pehle (`@beautinique/backend-server-release`, ARCHITECTURE §11.1). Nayi migration list ke aakhir me; module ke indexes `src/modules/index.ts` me. `npm run db:release` inhe bina server chalaye chalata hai.
+- `src/runtime.ts`: MongoDB se judta hai, release steps chalata hai, phir Redis aur peeche ke kaam: outbox relay, queue worker (`q.core`) schedules ke saath, aur Redis wipe watchdog. Beech me kuch fail ho to pehle khola hua sab band hota hai.
 - `src/modules/<module>/`: har business module ka folder (ARCHITECTURE §4): `index.ts` facade, `http`, `application`, `domain`, `infra`, `events`, `jobs`, `permissions.ts`, `settings.ts`.
 - `src/modules/index.ts`: har module apna router, apne event subscribers aur subscriptions yahan jodta hai. Ek module doosre ke models import nahi karta, sirf facade se baat karta hai.
 

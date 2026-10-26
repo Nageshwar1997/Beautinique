@@ -1,4 +1,10 @@
-import type { ClientSession, Document, Mongo } from '@beautinique/backend-server-mongo';
+import {
+  type ClientSession,
+  type Document,
+  type IndexSpec,
+  type Mongo,
+  syncIndexes,
+} from '@beautinique/backend-server-mongo';
 import type { EventDefinition, EventEnvelope } from '@beautinique/shared-contracts';
 import { uuidv7 } from '@beautinique/shared-utils';
 
@@ -39,14 +45,23 @@ export interface EventInput<Definition extends EventDefinition> {
   data: EventEnvelope<Definition>['data'];
 }
 
-/** The outbox's indexes: pending events by age (relay), and expiry of relayed ones. Safe to repeat. */
+/** The outbox's indexes: pending events by age (relay), and expiry of relayed ones. */
+export const OUTBOX_INDEXES: readonly IndexSpec[] = [
+  { collection: OUTBOX, name: 'status_createdAt', key: { status: 1, createdAt: 1 } },
+  {
+    collection: OUTBOX,
+    name: 'relayed_expiry',
+    key: { relayedAt: 1 },
+    expireAfterSeconds: OUTBOX_KEEP_SECONDS,
+  },
+];
+
+/**
+ * Makes the outbox's indexes (safe to repeat). A deployable's release steps sync OUTBOX_INDEXES with
+ * its other indexes instead (@beautinique/backend-server-release); this is for tests and tools.
+ */
 export async function ensureOutboxIndexes(mongo: Mongo): Promise<void> {
-  const outbox = mongo.db.collection<OutboxRecord>(OUTBOX);
-  await outbox.createIndex({ status: 1, createdAt: 1 }, { name: 'status_createdAt' });
-  await outbox.createIndex(
-    { relayedAt: 1 },
-    { name: 'relayed_expiry', expireAfterSeconds: OUTBOX_KEEP_SECONDS },
-  );
+  await syncIndexes(mongo, OUTBOX_INDEXES);
 }
 
 /**

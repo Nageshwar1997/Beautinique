@@ -13,6 +13,8 @@ Sign-in, sessions, tokens, apps, roles and scoped grants. (ARCHITECTURE §3)
 
 Sab deployables ek process me: `npm run dev:backend` (`backend/bundle`).
 
+Identity ko MongoDB (apna DB `bq_identity`) aur Redis chahiye (start pe connect hota hai, `/ready` dono check karta hai, tests bhi asli pe chalte hain): pehle `npm run infra:up`. Outbox relay aur queue worker pehle event ke saath aate hain (TASKS T3.1).
+
 ## Settings
 
 `.env.example` ko `.env` me copy karo (commit kabhi nahi). Har key `IDENTITY__` se shuru hoti hai, taaki bundle mode me ek process me sab deployables ki keys alag rahein. Settings sirf [src/config.ts](src/config.ts) padhta hai (zod se check; ESLint baaki jagah `process.env` rokta hai). Nayi setting = `configZod` me key + `.env.example` me line.
@@ -20,6 +22,7 @@ Sab deployables ek process me: `npm run dev:backend` (`backend/bundle`).
 ## Code kahan hai
 
 - `src/service.ts`: `readConfig` + `start` (split mode me `src/server.ts`, bundle mode me `backend/bundle` isse chalata hai).
+- `src/release.ts` + `src/runtime.ts`: start pe Mongo se judte hi release steps (migrations, indexes; `@beautinique/backend-server-release`, ARCHITECTURE §11.1), phir Redis. Nayi migration list ke aakhir me, naye collection ke indexes `indexes` me; permission sync step T3.3 me.
 - `src/app.ts`: `@beautinique/backend-server-kit` ka `createApp` (health, errors, logs, request id).
 - `src/routes/index.ts`: identity ke routes. Har route contracts me declare hota hai (owner `identity`), yahan sirf handler.
 

@@ -10,6 +10,7 @@ import type { Config } from './config.ts';
 import { type Runtime, type RuntimeOptions, startRuntime } from './runtime.ts';
 
 export { type Config, readConfig } from './config.ts';
+export { release, releaseDefinition } from './release.ts';
 
 export interface StartOptions {
   /** default: config.port (0 picks a free one) */

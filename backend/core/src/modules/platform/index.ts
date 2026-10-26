@@ -1,4 +1,4 @@
-import type { Mongo } from '@beautinique/backend-server-mongo';
+import type { IndexSpec, Mongo } from '@beautinique/backend-server-mongo';
 import { subscribe, type Subscription } from '@beautinique/backend-server-queue';
 import { pingRecorded } from '@beautinique/shared-contracts';
 import type { Router } from 'express';
@@ -33,17 +33,13 @@ interface PingAudit {
 
 export const routerOf = (deps: { mongo: Mongo }): Router => platformRouter(deps);
 
-/** The module's indexes; safe to run on every start. */
-export async function ensureIndexes({ mongo }: { mongo: Mongo }): Promise<void> {
-  for (const name of [PINGS, PING_AUDIT_COLLECTION]) {
-    await mongo.db
-      .collection(name)
-      .createIndex(
-        { recordedAt: 1 },
-        { name: 'recordedAt_ttl', expireAfterSeconds: PING_TTL_SECONDS },
-      );
-  }
-}
+/** The module's indexes: the release steps make them before core listens (ARCHITECTURE §11.1). */
+export const indexes: readonly IndexSpec[] = [PINGS, PING_AUDIT_COLLECTION].map((collection) => ({
+  collection,
+  name: 'recordedAt_ttl',
+  key: { recordedAt: 1 },
+  expireAfterSeconds: PING_TTL_SECONDS,
+}));
 
 /** What the queue worker runs for this module's subscribers: DB work only, safe to run again. */
 export function subscriptionsOf({ mongo }: { mongo: Mongo }): Subscription[] {
