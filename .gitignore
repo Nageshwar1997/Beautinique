@@ -17,3 +17,6 @@ Thumbs.db
 
 # Release workflow tarballs (npm run publish -- --ci)
 release-tarballs/
+
+# npm 12 that the Render build installs inside the repo (backend/bundle/README.md "Render")
+.npm12/
