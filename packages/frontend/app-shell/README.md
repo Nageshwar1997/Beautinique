@@ -1,6 +1,6 @@
 # @beautinique/frontend-app-shell
 
-Har Beautinique app ka **saanjha dhaancha** (ARCHITECTURE §9.2): skip link, header/footer ki jagah, ek `<main>`, bina flash ka theme switcher, nav list aur error page. **Header aur footer ka content har app ka apna hai** (customer: logo aur brand nav; internal apps: sidebar aur top bar), isliye ye package sirf unke tukde deta hai, poora header nahi.
+Har Beautinique app ka **saanjha dhaancha** (ARCHITECTURE §9.2): skip link, header/footer ki jagah, ek `<main>`, bina flash ka theme switcher, nav list, error page aur wake-up screen. **Header aur footer ka content har app ka apna hai** (customer: logo aur brand nav; internal apps: sidebar aur top bar), isliye ye package sirf unke tukde deta hai, poora header nahi.
 
 ## Install
 
@@ -21,7 +21,7 @@ Tailwind `node_modules` nahi padhta, jahan ye package app me hota hai; `tailwind
 ## Server-rendered app (customer) me
 
 ```tsx
-import { AppFrame, ErrorPage, ThemeScript } from '@beautinique/frontend-app-shell';
+import { AppFrame, ErrorPage, ServerWake, ThemeScript } from '@beautinique/frontend-app-shell';
 
 export function Layout({ children }) {
   return (
@@ -31,9 +31,11 @@ export function Layout({ children }) {
         {/* meta, links ... */}
       </head>
       <body>
-        <AppFrame header={<SiteHeader />} footer={<SiteFooter />}>
-          {children}
-        </AppFrame>
+        <ServerWake app="customer">
+          <AppFrame header={<SiteHeader />} footer={<SiteFooter />}>
+            {children}
+          </AppFrame>
+        </ServerWake>
       </body>
     </html>
   );
@@ -51,6 +53,8 @@ export function Layout({ children }) {
 | `useThemeChoice()`, `setThemeChoice`, `readThemeChoice` | Choice padhna aur badalna (`'light' \| 'dark' \| 'system'`); server pe hamesha `system`, isliye hydration match                                                                                         |
 | `NavList({ items, label })`                             | Nav landmark + links; chalu page pe `aria-current="page"`. Khaali `items` = kuch render nahi, isliye app sirf bane pages deti hai (koi dead link nahi)                                                  |
 | `ErrorPage(props)`                                      | Error/404 ka content (neeche). Apna `<main>` nahi jodta                                                                                                                                                 |
+| `ServerWake({ app, children })`                         | Live server jagana aur wake-up screen (neeche)                                                                                                                                                          |
+| `wakeServer`, `useServerWake`, `WAKE_URL`               | Wahi bina screen ke: wake call (retry, timeout, signal) aur uska React hook                                                                                                                             |
 
 ### ErrorPage
 
@@ -75,11 +79,22 @@ export function Layout({ children }) {
 
 Theme `<html theme="light|dark">` pe lagta hai; attribute na ho to system setting ([frontend-styles](../styles/README.md)). Badalte waqt ek frame `theme-switching`, taaki saare rang ek saath badlein.
 
-**Abhi nahi, jab app ko chahiye tab:** wake-up screen (Render cold start; T2.7 ke wake route ke saath), sidebar layout (internal apps), offline page, idle logout.
+### ServerWake (DESIGN §6, ARCHITECTURE §11.1, TASKS T2.7)
+
+Free Render service 15 min khaali rehne pe so jaati hai aur jaagne me ~1 min leti hai. Har app apne frame ko `ServerWake` me lapet-ta hai:
+
+- App turant dikhta hai (SSR HTML waisa hi). Browser me hydration ke baad ek baar `GET /api/v1/platform/wake` (contracts `platform.server.wake`, header `X-BQ-App`, `cache: 'no-store'`). Server 1.5 s me jawab de to kuch nahi dikhta.
+- Der ho to poori screen pe modal (`role="dialog"`, `aria-modal`): powder compact, "Waking up the server", `progress-indeterminate` bar aur "Waiting 0:42". Peeche ka app `inert` rehta hai, focus screen pe. Jawab aate hi screen hat jaati hai.
+- 5xx, 429, network error ya 30 s tak jawab nahi = "abhi nahi jaaga": 3 s baad dobara. Koi bhi aur jawab (error bhi) = server jaaga hua hai.
+- 150 s me na jaage to "The server is taking too long", focus "Try again" pe; "Continue anyway" screen hata deta hai (static pages chalte rahen).
+- Timings props se badalti hain (`slowAfterMs`, `attemptTimeoutMs`, `retryDelayMs`, `giveUpAfterMs`); `fetch` sirf tests aur playground ke liye (wahi function rakho, naya function hook ko dobara shuru karta hai).
+- Laptop pe backend band ho to dev server ka proxy 502 deta hai, isliye wake-up screen dikhti hai: `npm run dev:backend` chalao (wahi asli raasta).
+
+**Abhi nahi, jab app ko chahiye tab:** sidebar layout (internal apps), offline page, idle logout.
 
 ## Tests
 
-`npm test --workspace @beautinique/frontend-app-shell`: theme script (saved theme, junk, storage band, CSP hash), switcher (keyboard, do switchers, doosra tab, server render), frame, nav, error page (dono kind, actions, browser history pe "Go back", reload ke baad bina mismatch hydration, server render, reference, details), aur har component pe axe (WCAG) check.
+`npm test --workspace @beautinique/frontend-app-shell`: theme script (saved theme, junk, storage band, CSP hash), switcher (keyboard, do switchers, doosra tab, server render), frame, nav, error page (dono kind, actions, browser history pe "Go back", reload ke baad bina mismatch hydration, server render, reference, details), wake-up (`wakeServer`: retry, har call ka timeout, deadline, abort; `ServerWake`: jaldi jawab pe koi screen nahi, der pe screen + `inert` + focus, "Try again", "Continue anyway", server render me sirf app, path contracts ke route se), aur har component pe axe (WCAG) check.
 
 ## Playground
 
@@ -87,4 +102,4 @@ Theme `<html theme="light|dark">` pe lagta hai; attribute na ho to system settin
 npm run playground --workspace @beautinique/frontend-app-shell
 ```
 
-http://localhost:5182: sample header/footer ke saath shell; Tab se skip link, arrow keys se theme, reload pe bina flash. Error pages: `/missing` (404), `/error` (Oops + details), `/503`.
+http://localhost:5182: sample header/footer ke saath shell; Tab se skip link, arrow keys se theme, reload pe bina flash. Error pages: `/missing` (404), `/error` (Oops + details), `/503`. Wake-up screen: `/wake` (nakli server: 8 s me jawab, ya kabhi nahi; 10 s me "taking too long").
