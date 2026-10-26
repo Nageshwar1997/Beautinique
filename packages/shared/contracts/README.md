@@ -29,6 +29,9 @@ export const getProduct = defineRoute({
   idempotency: false, // true = client ko Idempotency-Key bhejna hoga (GET pe nahi)
   stepUp: false, // true = haal hi ka MFA (sirf permission routes)
   owner: 'core',
+  // optional, sirf public GET: Vercel CDN pe cache (gateway `public, max-age=0, s-maxage=300, stale-while-revalidate=60` lagata hai,
+  // owner ko cookies nahi bhejta, Set-Cookie wapas nahi). Seconds; max MAX_S_MAX_AGE (1 din) aur MAX_STALE_WHILE_REVALIDATE (7 din)
+  cache: { sMaxAge: 300, staleWhileRevalidate: 60 },
   input: { params: object({ productId: objectIdZod }), query: cursorQuery },
   output: productSchema,
 });
@@ -41,6 +44,7 @@ export const getProduct = defineRoute({
 - GET/DELETE pe body;
 - GET pe idempotency;
 - bina permission ke step-up;
+- `cache` kisi aur route pe (sirf public GET), ya seconds hadd ke bahar;
 - anjaan app, owner ya rate-limit class.
 
 Types route se hi aate hain:
@@ -52,7 +56,7 @@ Types route se hi aate hain:
 | Helper                    | Kaam                                                                                     |
 | ------------------------- | ---------------------------------------------------------------------------------------- |
 | `routeTable(routes)`      | Saare routes; duplicate id ya same method + path shape (`/a/:id` vs `/a/:slug`) pe error |
-| `gatewayManifest(routes)` | Gateway ke liye plain JSON: app, access, rate limit, idempotency, step-up, owner         |
+| `gatewayManifest(routes)` | Gateway ke liye plain JSON: app, access, rate limit, idempotency, step-up, owner, cache  |
 | `toOpenApi(routes, info)` | OpenAPI 3.1 document (zod 4 ka JSON Schema), Beautinique details `x-bq` me               |
 | `buildPath`, `matchPath`  | `/products/:id` bharna (encode ke saath) aur padhna                                      |
 
@@ -109,7 +113,7 @@ resolveAreaSetting(promise, values, { stateId: '27', districtId: '519', pincode:
 - `errorBody`: har error response `{ error: { code, message, details?, requestId } }`.
 - `successBody(schema)`: har success response `{ data }`.
 - `cursorQuery` (`cursor`, `limit` 1–100, default 20) aur `cursorPage(item)` (`items`, `nextCursor`).
-- `APPS` (11 apps), `DEPLOYABLES` (5), `HEADERS` (`X-BQ-App`, `Idempotency-Key`, `X-Request-Id`).
+- `APPS` (11 apps), `DEPLOYABLES` (5), `HEADERS` (`X-BQ-App`, `Idempotency-Key`, `X-Request-Id`, `X-BQ-Client-Ip`). `X-BQ-Client-Ip` sirf gateway likhta hai (client ka bheja hua hata deta hai): deployable caller ka IP isi se padhta hai (OTP IP limits, audit).
 
 ## Typed client
 
@@ -126,7 +130,7 @@ const ping = await client.call(getPing, { params: { pingId } }); // return type 
 
 ## Catalogue aur codegen
 
-Platform ka poora catalogue `src/catalogue/` me hai (`routes`, `events`, `permissions`); har module apni list wahan jodta hai. Abhi Milestone 1 ka sample hai: route `platform.ping.record` (POST, signed-in, idempotent, har app) jo `platform.ping.recorded` event usi transaction me likhta hai, route `platform.ping.get` (permission `platform.ping.read`).
+Platform ka poora catalogue `src/catalogue/` me hai (`routes`, `events`, `permissions`); har module apni list wahan jodta hai. Abhi Milestone 1 ka sample hai: route `platform.ping.record` (POST, **public** (owner ka faisla 2026-10-25: login se pehle live demo; gateway ka `write` rate limit, core 7 din TTL aur max 5,000 pings), idempotent, har app) jo `platform.ping.recorded` event usi transaction me likhta hai, route `platform.ping.get` (permission `platform.ping.read`).
 
 ```bash
 npm run build --workspace @beautinique/shared-contracts

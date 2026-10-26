@@ -1,0 +1,11 @@
+{
+  "$schema": "https://json.schemastore.org/tsconfig",
+  // the icon tools run on Node 24 as TypeScript: imports name the .ts file
+  "extends": "../../../../configs/tsconfig/frontend.json",
+  "compilerOptions": {
+    "allowImportingTsExtensions": true,
+    "erasableSyntaxOnly": true,
+    "types": ["node"]
+  },
+  "include": ["."]
+}

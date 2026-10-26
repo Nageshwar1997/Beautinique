@@ -3,8 +3,12 @@ import { OUTBOX, PROCESSED_EVENTS } from '@beautinique/backend-server-queue';
 import { createClient, getPing, recordPing } from '@beautinique/shared-contracts';
 import { afterAll, afterEach, beforeAll, describe, expect, it } from 'vitest';
 
-import { PING_AUDIT, PING_AUDIT_COLLECTION } from '../src/modules/platform/index.ts';
-import { PINGS } from '../src/modules/platform/routes.ts';
+import {
+  PING_AUDIT,
+  PING_AUDIT_COLLECTION,
+  PING_TTL_SECONDS,
+} from '../src/modules/platform/index.ts';
+import { PING_CAP, PINGS } from '../src/modules/platform/routes.ts';
 import { QUEUE } from '../src/runtime.ts';
 import {
   captureLogger,
@@ -81,6 +85,9 @@ describe('the sample endpoint, from the contract to the inbox', () => {
     });
     expect(await handled().countDocuments({ eventId: events[0]?._id })).toBe(1);
     expect(await audit().countDocuments()).toBe(1);
+    expect(await audit().findOne({ pingId: recorded.pingId })).toMatchObject({
+      recordedAt: new Date(recorded.recordedAt),
+    });
 
     expect(await client.call(getPing, { params: { pingId: recorded.pingId } })).toEqual(recorded);
   });
@@ -112,6 +119,37 @@ describe('the sample endpoint, from the contract to the inbox', () => {
     const bad = await fetch(`${core.url}/platform/pings/not-an-id`);
     expect(bad.status).toBe(400);
     expect(await pings().countDocuments()).toBe(0);
+    expect(await outbox().countDocuments()).toBe(0);
+  });
+
+  it('deletes pings and their audit copies 7 days after they were recorded (public demo route)', async () => {
+    await startCore();
+    for (const collection of [pings(), audit()]) {
+      const ttl = (await collection.indexes()).find((index) => index.name === 'recordedAt_ttl');
+      expect(ttl, collection.collectionName).toMatchObject({
+        key: { recordedAt: 1 },
+        expireAfterSeconds: PING_TTL_SECONDS,
+      });
+    }
+    expect(PING_TTL_SECONDS).toBe(604_800);
+  });
+
+  it('keeps at most PING_CAP pings, so the public demo cannot fill the free cluster', async () => {
+    const core = await startCore();
+    await pings().insertMany(
+      Array.from({ length: PING_CAP }, (_, index) => ({
+        _id: `filler-${String(index)}`,
+        note: 'x',
+      })),
+    );
+    const response = await fetch(`${core.url}/platform/pings`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ note: 'one too many' }),
+    });
+    expect(response.status).toBe(503);
+    expect(await response.json()).toMatchObject({ error: { code: 'PING_LIMIT_REACHED' } });
+    expect(await pings().countDocuments()).toBe(PING_CAP);
     expect(await outbox().countDocuments()).toBe(0);
   });
 });

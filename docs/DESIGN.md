@@ -1,6 +1,6 @@
 # DESIGN — BQ
 
-> **Status:** v1.5 (2026-10-21). UI aur UX ke niyam saare 11 apps ke liye. Design ka **source of truth code hai**: `@beautinique/frontend-styles` (tokens) aur `@beautinique/frontend-components` (components). [RULES.md](RULES.md) §5 frontend ke coding niyam batata hai; ye file batati hai ki cheezein **dikhengi aur chalengi kaise**.
+> **Status:** v1.8 (2026-10-26). UI aur UX ke niyam saare 11 apps ke liye. Design ka **source of truth code hai**: `@beautinique/frontend-styles` (tokens) aur `@beautinique/frontend-components` (components). [RULES.md](RULES.md) §5 frontend ke coding niyam batata hai; ye file batati hai ki cheezein **dikhengi aur chalengi kaise**.
 
 ## 1. Design principles
 
@@ -37,7 +37,7 @@ Brand: **rose** rgb(214, 51, 108), deep **plum** rgb(92, 26, 70), **champagne go
 
 - **Contrast niyam:** padhne wala text sirf `foreground*`, `brand-text`, `price-discount` ya kisi tone ke `-foreground`/`-subtle-foreground` me. Palette script har jodi ka WCAG contrast har theme me check karta hai, aur rangon ka matlab bhi (tint/text ulta nahi, hover sahi disha me, hue har theme me same, teal/violet sirf charts; styles README); naya colour bhi wahi se.
 - Muted section (`surface-muted`) pe `foreground-subtle` text mat lagao: dark theme me wo sirf 3.66:1 hai (AA ko 4.5 chahiye). Wahan `foreground-muted` ya `foreground` lo (owner ka faisla, 2026-10-21: rang wahi, ye niyam).
-- Ulti patti (dark footer, announcement bar) pe `surface-inverse` utility lagao, sirf `bg-surface-inverse` nahi: wahi us patti pe dikhne wala focus ring deti hai.
+- Ulti patti (dark footer, announcement bar) pe `surface-inverse` utility lagao, sirf `bg-surface-inverse` nahi: wahi us patti pe dikhne wala focus ring deti hai, aur `brand-text` (links, nav ka chalu page) ko `brand-text-inverse` pe badal deti hai, taaki wo bhi padha jaye (4.5:1, high contrast me 7:1).
 - `teal` aur `violet` scales sirf charts aur category tags ke liye.
 
 ### 3.3 Tones, order status, charts
@@ -101,7 +101,7 @@ app-shell (layout, nav, theme switcher, wake-up screen), data-table, review-scre
 Har screen ye states dikhati hai:
 - **Loading:** Skeleton (shape jaisi, `skeleton` utility), spinner sirf chhote actions pe, page/wake-up pe `progress-indeterminate` bar.
 - **Empty:** kya hai aur aage kya karein, ek action button ke saath.
-- **Error:** saaf message, retry, aur request-id (support ke liye).
+- **Error:** saaf message, retry, aur request-id (support ke liye). Poore page ka error aur 404: app-shell ka `ErrorPage` (bade code ke 0 powder compact: 404 pe khaali, error pe toota; "Go back" sirf jab app ka pichhla page ho; asli status code, apna title, `noindex`; technical details sirf development me).
 - **Offline:** NetworkStatusToaster; Delivery app me offline queue ka count.
 - **Wake-up screen:** Render cold start pe (~1 min) "server jaag raha hai" screen, progress ke saath.
 - **Permission denied:** kis permission ki zaroorat hai, aur kisse maangein.
@@ -158,6 +158,12 @@ Har screen ye states dikhati hai:
   - Ek main set rakhna (aaj sabse zyada **Solar**), taaki style ek jaisa rahe. Brand ke custom icons (logo, beauty icons) bhi isi package me.
   - **License:** copy karne pe bhi license lagu hai. Solar aur Pepicons CC BY 4.0 hain (credit zaroori), Lucide ISC, Line MD MIT, Logos CC0. Package me `LICENSES.md`, aur apps me "Icon credits" page.
   - Decorative icon pe `aria-hidden`, aur akele icon wale button pe `aria-label` (BaseIcon me `label` prop).
+- **Logo** (owner, 2026-10-26): master `packages/frontend/icons/brand/logo-master.webp` ("B" me ek aurat ki profile, rose baal aur pankhudiyan, neeche "Beautinique"), usi se trace hue vectors `@beautinique/frontend-icons` me:
+  - `BrandLogo` (mark + naam; `horizontal` header ke liye, `stacked` master jaisa) aur `BrandMark` (sirf mark, chhoti jagah). `size` = height, width shape se.
+  - Rang: ink = `currentColor`, rose = theme ka `--brand`, isliye light, dark aur high contrast me apne aap. Inverse surface (footer) aur print pe `monochrome`.
+  - Link ke andar logo decorative (naam link pe, jaise "Beautinique home"); akela ho to `label="Beautinique"`.
+  - Browser tab ka favicon alag rehta hai: rose tile pe safed "B" (`favicon.svg`/`.ico`), kyunki 16 px pe mark ki details nahi dikhti.
+  - Install icons (manifest, apple-touch): ivory pe mark; maskable me mark 80% safe circle ke andar. Home screen aur splash pe naam OS khud manifest ke `name` se dikhata hai.
 - **Dark mode:** product images invert nahi hote; brand gradient dono theme me same.
 
 ## Change log
@@ -168,5 +174,8 @@ Har screen ye states dikhati hai:
 | v1.1    | 2026-10-19 | Typography: Metropolis ki jagah Plus Jakarta Sans (body) + Fraunces (headings).                                                                                                       |
 | v1.2    | 2026-10-20 | §9 Text aur formats: apps sirf English me.                                                                                                                                            |
 | v1.3    | 2026-10-20 | §3 naye `styles` package ke tokens se: Rose + Plum colours, tones, order status, charts, high contrast, print, gradients, layout; §6, §8, §11 me package ki utilities.                |
-| v1.4    | 2026-10-21 | §3: palette script ab rangon ka matlab bhi check karta hai; checks ki ginti hata di (wo badalti rehti hai). |
-| v1.5    | 2026-10-21 | Owner ke faisle: muted section pe subtle text nahi (rang wahi); ulti patti ke liye `focus-ring-inverse` + `surface-inverse`; high contrast me tones gehre, saara text 7:1. |
+| v1.4    | 2026-10-21 | §3: palette script ab rangon ka matlab bhi check karta hai; checks ki ginti hata di (wo badalti rehti hai).                                                                           |
+| v1.5    | 2026-10-21 | Owner ke faisle: muted section pe subtle text nahi (rang wahi); ulti patti ke liye `focus-ring-inverse` + `surface-inverse`; high contrast me tones gehre, saara text 7:1.            |
+| v1.6    | 2026-10-26 | §11 Logo: master image, `BrandLogo`/`BrandMark` (icons package), rang theme se, favicon alag, install icons.                                                                          |
+| v1.7    | 2026-10-26 | §6 Error: 404 aur error page ka design (`ErrorPage`, compact art).                                                                                                                   |
+| v1.8    | 2026-10-26 | §3: `surface-inverse` ab `brand-text` bhi badalta hai (`brand-text-inverse`); footer me chalu page ka link padhne layak.                                                                   |

@@ -20,11 +20,12 @@
         "creator"
       ],
       "access": {
-        "type": "signed-in"
+        "type": "public"
       },
       "rateLimit": "write",
       "idempotency": true,
-      "stepUp": false
+      "stepUp": false,
+      "cache": null
     },
     {
       "id": "platform.ping.get",
@@ -42,7 +43,8 @@
       },
       "rateLimit": "read",
       "idempotency": false,
-      "stepUp": false
+      "stepUp": false,
+      "cache": null
     }
   ]
 }

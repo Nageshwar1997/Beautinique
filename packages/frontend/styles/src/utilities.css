@@ -35,6 +35,9 @@
   color: var(--foreground-inverse);
   --focus-ring-rgb: var(--focus-ring-inverse-rgb);
   --focus-ring: var(--focus-ring-inverse);
+  /* brand text inside (links, the current page in a nav) stays readable on the strip */
+  --brand-text-rgb: var(--brand-text-inverse-rgb);
+  --brand-text: var(--brand-text-inverse);
 }
 
 /* A small control (icon button, close x, shade dot) with a 44px hit area (48px with touch-target-lg),

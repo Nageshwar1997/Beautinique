@@ -111,11 +111,7 @@
             "$ref": "#/components/responses/Error"
           }
         },
-        "security": [
-          {
-            "bearerAuth": []
-          }
-        ],
+        "security": [],
         "x-bq": {
           "apps": [
             "customer",
@@ -131,12 +127,13 @@
             "creator"
           ],
           "access": {
-            "type": "signed-in"
+            "type": "public"
           },
           "rateLimit": "write",
           "idempotency": true,
           "stepUp": false,
-          "owner": "core"
+          "owner": "core",
+          "cache": null
         }
       }
     },
@@ -236,7 +233,8 @@
           "rateLimit": "read",
           "idempotency": false,
           "stepUp": false,
-          "owner": "core"
+          "owner": "core",
+          "cache": null
         }
       }
     }

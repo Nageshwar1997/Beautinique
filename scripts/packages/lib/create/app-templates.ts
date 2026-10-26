@@ -43,6 +43,26 @@ export const APP_TITLES: Record<AppId, string> = {
 /** The gateway's local port: every app's dev server sends /api there (like the Vercel rewrite). */
 export const GATEWAY_PORT = 8080;
 
+/**
+ * The laptop's origin secret (backend/gateway/.env.example): public, for local runs only. Live, each
+ * Vercel project's route sends its own from the ORIGIN_SECRET env (ARCHITECTURE §7.2).
+ */
+export const LOCAL_ORIGIN_SECRET = 'not-a-secret-not-a-secret-not-a-secret';
+
+/** The dev server's /api proxy: to the local gateway, with the origin secret the Vercel route adds live. */
+const apiProxy = `  // /api goes to the local gateway, the same path the Vercel rewrite takes in production, with the
+  // laptop's origin secret (public; live, Vercel sends its own, ARCHITECTURE §7.2)
+  server: {
+    port,
+    strictPort: true,
+    proxy: {
+      '/api': {
+        target: 'http://localhost:${String(GATEWAY_PORT)}',
+        headers: { 'x-origin-secret': '${LOCAL_ORIGIN_SECRET}' },
+      },
+    },
+  },`;
+
 export interface AppSpec {
   app: AppId;
   kind: AppKind;
@@ -200,8 +220,7 @@ export default defineConfig({
         : ''
     }
   ],
-  // /api goes to the local gateway, the same path the Vercel rewrite takes in production
-  server: { port, strictPort: true, proxy: { '/api': 'http://localhost:${String(GATEWAY_PORT)}' } },
+${apiProxy}
   preview: { port, strictPort: true },
 });
 `;
@@ -392,8 +411,7 @@ const port = ${String(spec.port)};
 
 export default defineConfig({
   plugins: [tailwindcss(), reactRouter()],
-  // /api goes to the local gateway, the same path the Vercel rewrite takes in production
-  server: { port, strictPort: true, proxy: { '/api': 'http://localhost:${String(GATEWAY_PORT)}' } },
+${apiProxy}
 });
 `;
 

@@ -23,14 +23,16 @@ describe('platform catalogue (Milestone 1 sample)', () => {
     expect(isPermissionKey(pingRead.key)).toBe(true);
   });
 
-  it('record is a signed-in, idempotent write for every app; get needs the read permission', () => {
+  it('record is a public, idempotent write for every app; get needs the read permission', () => {
     expect(recordPing).toMatchObject({
       method: 'POST',
       idempotency: true,
       rateLimit: 'write',
       owner: 'core',
     });
-    expect(recordPing.access).toEqual({ type: 'signed-in' });
+    expect(recordPing.access).toEqual({ type: 'public' });
+    // a write is never CDN-cached
+    expect('cache' in recordPing).toBe(false);
     expect(recordPing.apps).toEqual(APPS);
     expect(getPing.access).toEqual({ type: 'permission', permission: 'platform.ping.read' });
     expect(getPing.method).toBe('GET');

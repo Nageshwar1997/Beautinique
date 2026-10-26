@@ -26,6 +26,20 @@ export type RateLimitClass = (typeof RATE_LIMIT_CLASSES)[number];
 export type RouteAccess =
   { type: 'public' } | { type: 'signed-in' } | { type: 'permission'; permission: string };
 
+/**
+ * Shared (CDN) caching of a route's 200 answers (ARCHITECTURE §7.2), seconds. Only public GET routes
+ * may have it: the gateway then sends the owner no cookies, drops any Set-Cookie and answers
+ * `public, max-age=0, s-maxage, stale-while-revalidate`. Every other answer is `private, no-store`.
+ */
+export interface RouteCache {
+  sMaxAge: number;
+  staleWhileRevalidate: number;
+}
+
+/** Longest CDN freshness (1 day) and stale window (7 days) a route may ask for. */
+export const MAX_S_MAX_AGE = 86_400;
+export const MAX_STALE_WHILE_REVALIDATE = 604_800;
+
 type ObjectSchema = ZodObject;
 
 export interface RouteDefinition {
@@ -43,6 +57,8 @@ export interface RouteDefinition {
   /** Needs a recent MFA step-up (only for permission routes). */
   stepUp: boolean;
   owner: Deployable;
+  /** CDN caching (public GET routes only); left out = never cached */
+  cache?: RouteCache;
   input: { params?: ObjectSchema; query?: ObjectSchema; body?: ZodType };
   output: ZodType;
 }
@@ -96,6 +112,24 @@ export function defineRoute<const Route extends RouteDefinition>(route: Route): 
     fail('GET routes cannot need an Idempotency-Key');
   if (route.input.body && (route.method === 'GET' || route.method === 'DELETE')) {
     fail(`${route.method} routes cannot have a body`);
+  }
+  if (route.cache) {
+    if (route.method !== 'GET' || route.access.type !== 'public') {
+      fail('only public GET routes can be cached');
+    }
+    const { sMaxAge, staleWhileRevalidate } = route.cache;
+    if (!Number.isInteger(sMaxAge) || sMaxAge < 1 || sMaxAge > MAX_S_MAX_AGE) {
+      fail(`cache.sMaxAge must be a whole number of seconds from 1 to ${String(MAX_S_MAX_AGE)}`);
+    }
+    if (
+      !Number.isInteger(staleWhileRevalidate) ||
+      staleWhileRevalidate < 0 ||
+      staleWhileRevalidate > MAX_STALE_WHILE_REVALIDATE
+    ) {
+      fail(
+        `cache.staleWhileRevalidate must be a whole number of seconds from 0 to ${String(MAX_STALE_WHILE_REVALIDATE)}`,
+      );
+    }
   }
   const declared = pathParams(route.path);
   if (new Set(declared).size !== declared.length) fail('path repeats a parameter');
@@ -177,6 +211,7 @@ export function gatewayManifest(routes: readonly RouteDefinition[]) {
     rateLimit: route.rateLimit,
     idempotency: route.idempotency,
     stepUp: route.stepUp,
+    cache: route.cache ? { ...route.cache } : null,
   }));
 }
 

@@ -1,4 +1,4 @@
-import { randomUUID } from 'node:crypto';
+import { randomBytes, randomUUID } from 'node:crypto';
 import { type AddressInfo, createServer } from 'node:net';
 
 import { ConfigError, createLogger } from '@beautinique/backend-server-kit';
@@ -15,6 +15,8 @@ import { names } from '../src/deployables.ts';
 const MONGO_URI = 'mongodb://localhost:27017/?replicaSet=rs0';
 const REDIS_DB = 'redis://localhost:6379/5';
 const dbName = `bq_test_bundle_${randomUUID().slice(0, 8)}`;
+// made per run, so no secret-looking literal sits in the repo (gitleaks)
+const ORIGIN_SECRET = randomBytes(32).toString('base64url');
 
 afterAll(async () => {
   const logger = createLogger({ name: 'bundle-test', level: 'silent' });
@@ -31,6 +33,8 @@ const quiet = () => ({
   CORE__MONGO_URI: MONGO_URI,
   CORE__MONGO_DB_NAME: dbName,
   CORE__REDIS_URL: REDIS_DB,
+  GATEWAY__REDIS_URL: REDIS_DB,
+  GATEWAY__ORIGIN_SECRETS: ORIGIN_SECRET,
 });
 
 describe('bundle', () => {
@@ -44,12 +48,56 @@ describe('bundle', () => {
       expect(ready.status).toBe(200);
       expect(await ready.json()).toEqual({
         status: 'ready',
-        checks: Object.fromEntries(names.filter((n) => n !== 'gateway').map((n) => [n, 'ok'])),
+        checks: {
+          redis: 'ok',
+          ...Object.fromEntries(names.filter((n) => n !== 'gateway').map((n) => [n, 'ok'])),
+        },
+      });
+      const status = await fetch(`${bundle.url}/status`);
+      expect(status.status).toBe(200);
+      expect(await status.json()).toMatchObject({
+        status: 'ok',
+        deployables: { core: { status: 'ok' }, identity: { status: 'ok' } },
       });
     } finally {
       await bundle.stop();
     }
     await expect(fetch(`${bundle.url}/health`)).rejects.toThrow();
+  });
+
+  it('takes the live demo ping from an app through the gateway to core (Milestone 2)', async () => {
+    const bundle = await startBundle({ port: 0, env: quiet() });
+    try {
+      const headers = {
+        'X-BQ-App': 'customer',
+        'x-origin-secret': ORIGIN_SECRET,
+        'content-type': 'application/json',
+      };
+      const recorded = await fetch(`${bundle.url}/api/v1/platform/pings`, {
+        method: 'POST',
+        headers: { ...headers, 'Idempotency-Key': randomUUID() },
+        body: JSON.stringify({ note: 'hello from the bundle' }),
+      });
+      expect(recorded.status).toBe(201);
+      expect(recorded.headers.get('cache-control')).toBe('private, no-store');
+      expect(recorded.headers.get('ratelimit-policy')).toBe('"write";q=20;w=60');
+      const { data } = (await recorded.json()) as { data: { pingId: string; note: string } };
+      expect(data.note).toBe('hello from the bundle');
+      // reading a ping needs a permission: refused until sign-in exists
+      const read = await fetch(`${bundle.url}/api/v1/platform/pings/${data.pingId}`, {
+        headers: { ...headers, 'X-BQ-App': 'admin' },
+      });
+      expect(read.status).toBe(401);
+      // straight to the server, without the apps' secret
+      const direct = await fetch(`${bundle.url}/api/v1/platform/pings`, {
+        method: 'POST',
+        headers: { 'X-BQ-App': 'customer', 'content-type': 'application/json' },
+        body: '{"note":"x"}',
+      });
+      expect(direct.status).toBe(403);
+    } finally {
+      await bundle.stop();
+    }
   });
 
   it('starts nothing when a config is wrong', async () => {

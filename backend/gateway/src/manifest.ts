@@ -1,9 +1,7 @@
-import { gatewayManifest, type RouteDefinition } from '@beautinique/shared-contracts';
+import { gatewayManifest, routes } from '@beautinique/shared-contracts';
 
 /**
- * Every platform route the gateway serves. The route table lives in @beautinique/shared-contracts
- * (TASKS T1.5); until it is there this list is empty and every /api/v1 path answers NOT_FOUND.
+ * Every platform route the gateway serves: the route table of @beautinique/shared-contracts
+ * (`src/catalogue`). A module's new route is there, so the gateway knows it after a build.
  */
-const routes: readonly RouteDefinition[] = [];
-
 export const manifest = gatewayManifest(routes);
