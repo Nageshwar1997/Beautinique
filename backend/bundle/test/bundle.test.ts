@@ -15,6 +15,8 @@ import { names } from '../src/deployables.ts';
 const MONGO_URI = 'mongodb://localhost:27017/?replicaSet=rs0';
 const REDIS_DB = 'redis://localhost:6379/5';
 const dbName = `bq_test_bundle_${randomUUID().slice(0, 8)}`;
+// every deployable has a database of its own, live and here
+const identityDbName = `${dbName}_identity`;
 // made per run, so no secret-looking literal sits in the repo (gitleaks)
 const ORIGIN_SECRET = randomBytes(32).toString('base64url');
 
@@ -22,6 +24,7 @@ afterAll(async () => {
   const logger = createLogger({ name: 'bundle-test', level: 'silent' });
   const mongo = await connectMongo({ uri: MONGO_URI, dbName, appName: 'bundle-test', logger });
   await mongo.db.dropDatabase();
+  await mongo.client.db(identityDbName).dropDatabase();
   await mongo.close();
   const redis = await connectRedis({ url: REDIS_DB, name: 'bundle-test', logger });
   await redis.client.flushdb();
@@ -33,6 +36,9 @@ const quiet = () => ({
   CORE__MONGO_URI: MONGO_URI,
   CORE__MONGO_DB_NAME: dbName,
   CORE__REDIS_URL: REDIS_DB,
+  IDENTITY__MONGO_URI: MONGO_URI,
+  IDENTITY__MONGO_DB_NAME: identityDbName,
+  IDENTITY__REDIS_URL: REDIS_DB,
   GATEWAY__REDIS_URL: REDIS_DB,
   GATEWAY__ORIGIN_SECRETS: ORIGIN_SECRET,
 });

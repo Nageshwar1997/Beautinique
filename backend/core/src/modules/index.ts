@@ -1,4 +1,4 @@
-import type { Mongo } from '@beautinique/backend-server-mongo';
+import type { IndexSpec, Mongo } from '@beautinique/backend-server-mongo';
 import type { Subscription } from '@beautinique/backend-server-queue';
 import { Router } from 'express';
 
@@ -28,7 +28,5 @@ export function subscriptionsOf(deps: ModuleDeps): Subscription[] {
   return [...platform.subscriptionsOf(deps)];
 }
 
-/** Every module's indexes, made (or found) at start. */
-export async function ensureIndexes(deps: ModuleDeps): Promise<void> {
-  await platform.ensureIndexes(deps);
-}
+/** Every module's indexes, for the release steps (src/release.ts). Merge a module's list in here. */
+export const indexes: readonly IndexSpec[] = [...platform.indexes];

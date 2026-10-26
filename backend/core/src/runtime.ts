@@ -3,8 +3,6 @@ import { connectMongo, type Mongo } from '@beautinique/backend-server-mongo';
 import {
   connectRedis,
   type Consumer,
-  ensureConsumerIndexes,
-  ensureOutboxIndexes,
   heartbeatTask,
   type RedisConnection,
   redriveOutbox,
@@ -18,11 +16,8 @@ import {
 } from '@beautinique/backend-server-queue';
 
 import type { Config } from './config.ts';
-import {
-  ensureIndexes as ensureModuleIndexes,
-  subscribers,
-  subscriptionsOf,
-} from './modules/index.ts';
+import { subscribers, subscriptionsOf } from './modules/index.ts';
+import { runReleaseSteps } from './release.ts';
 
 /** core's queue: its worker runs core's subscribers and scheduled tasks (one queue per deployable). */
 export const QUEUE = 'q.core';
@@ -59,8 +54,9 @@ export interface Runtime {
 }
 
 /**
- * Connects to MongoDB and Redis and starts what the platform needs behind every deployable
- * (ARCHITECTURE §5, §6): the outbox relay, the queue worker with its scheduled tasks, and the
+ * Connects to MongoDB, runs the release steps (migrations, indexes), connects to Redis and starts
+ * what the platform needs behind every deployable (ARCHITECTURE §5, §6): the outbox relay, the
+ * queue worker with its scheduled tasks, and the
  * watchdog that rebuilds queue state after a Redis wipe. If one step fails, the ones before it are
  * closed again and the error goes on.
  */
@@ -78,12 +74,10 @@ export async function startRuntime(config: Config, options: RuntimeOptions): Pro
       logger,
     });
     closers.push(() => mongo.close());
+    // migrations and indexes before anything uses the database (ARCHITECTURE §11.1)
+    await runReleaseSteps(mongo, logger);
     const redis = await connectRedis({ url: config.redisUrl, name: 'core', logger });
     closers.push(() => redis.close());
-    await ensureOutboxIndexes(mongo);
-    await ensureConsumerIndexes(mongo);
-    await ensureModuleIndexes({ mongo });
-
     const relay = startRelay({
       mongo,
       redis: redis.client,

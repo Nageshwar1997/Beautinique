@@ -1,6 +1,6 @@
 # RULES — BQ
 
-> **Status:** v1.12 (2026-10-26). Ye niyam Beautinique ke har code, doc aur deploy pe lagu hain. [PRD.md](PRD.md) batata hai **kya** banana hai, [ARCHITECTURE.md](ARCHITECTURE.md) batata hai **kaise**, aur ye file batati hai ki **kin niyamon ke saath**. Koi rule todna ho to pehle is file me badlav aur change log entry.
+> **Status:** v1.13 (2026-10-27). Ye niyam Beautinique ke har code, doc aur deploy pe lagu hain. [PRD.md](PRD.md) batata hai **kya** banana hai, [ARCHITECTURE.md](ARCHITECTURE.md) batata hai **kaise**, aur ye file batati hai ki **kin niyamon ke saath**. Koi rule todna ho to pehle is file me badlav aur change log entry.
 
 ## 1. Kaam karne ke niyam
 
@@ -29,7 +29,7 @@
 2. **Commits:** Conventional Commits (`feat:`, `fix:`, `docs:`, `refactor:`, `test:`, `chore:`). Ek commit me ek hi baat.
 3. **PR:** chhota rakho, description me kya aur kyun, aur kaise test kiya. CI green hue bina merge nahi.
 4. **Public repo:** koi secret, `.env`, token, test password, DB dump ya asli personal data kabhi commit nahi. Sirf `.env.example`. Gitleaks har PR pe chalega.
-   - **Env files (owner, 2026-10-26), har us folder me jahan envs hain** (`backend/<name>`, `frontend/<app>`): `.env.example` git me (laptop ki values + har key ki live value kahan se, secret kabhi nahi); `.env` laptop (dev scripts padhti hain); `.env.production` owner ki private copy un live values ki jo Render/Vercel me daali (koi code nahi padhta, live server dashboard se env leta hai). `.gitignore` `.env` aur `.env.*` rokta hai, sirf `.env.example` chhod ke. Claude `.env`/`.env.*` kabhi nahi kholta.
+   - **Env files (owner, 2026-10-26), har us folder me jahan envs hain** (`backend/<name>`, `frontend/<app>`): `.env.example` git me (laptop ki values + har key ki live value kahan se, secret kabhi nahi); `.env` laptop (dev scripts padhti hain); `.env.production` owner ki private copy un live values ki jo Render/Vercel me daali (live server dashboard se env leta hai; sirf `npm run db:release -- --env live` `backend/bundle/.env.production` padhta hai, `live` type karne ke baad: owner, 2026-10-27). `.gitignore` `.env` aur `.env.*` rokta hai, sirf `.env.example` chhod ke. Claude `.env`/`.env.*` kabhi nahi kholta.
 5. **Dependencies:** `npm run update-deps` (ya Renovate/Dependabot) ke PRs `prerelease` pe; major version upgrade alag PR me.
 
 ## 3. Code: sabke liye
@@ -57,7 +57,7 @@
 11. **Timers:** BullMQ job schedulers + due dates MongoDB me. `setInterval` nahi (sirf Redis watchdog exception).
 12. **Redis:** har cache key pe TTL. Free mode me har deployable ki ek queue. Redis kisi cheez ka source of truth nahi.
 13. **Atlas M0:** har sort ke liye index, `$where`/map-reduce nahi, `.watch(` sirf relay module me, bade exports cursor + batches me.
-14. **Migrations:** forward-only, idempotent, expand/contract; boot pe chalti hain.
+14. **Migrations:** forward-only, idempotent, expand/contract; boot pe chalti hain (har deployable ki `src/release.ts`, `@beautinique/backend-server-release`). Id `YYYYMMDD-NNN-words`, list ke aakhir me; chal chuki migration ki id ya `up` kabhi nahi badalti (galti = nayi migration). Lambi backfill migration me nahi, queue task me (boot ke saare steps 60 s). Index uske naam ke neeche kabhi nahi badalta: nayi shakal = naya naam, purana baad me migration se hatao.
 15. **Errors:** `AppError` + common response envelope; error codes contracts me; user ko message error code se (English text ek jagah).
 16. **Cache headers:** login wale aur personal responses `private, no-store`; `s-maxage` sirf `cache: 'public'` contracts pe, aur unpe cookies upstream nahi jaati.
 
@@ -123,3 +123,4 @@
 | v1.10   | 2026-10-25 | §6: mutation runner deployable bhi leta hai (`--package gateway`).                                                                                                                                                    |
 | v1.11   | 2026-10-25 | §9: agents sirf extreme zaroorat pe, ek ek karke (parallel nahi), owner.                                                                                                                                              |
 | v1.12 | 2026-10-26 | §2.4: env files: `.env.example` (git), `.env` (laptop), `.env.production` (owner ki private copy, koi code nahi padhta). |
+| v1.13 | 2026-10-27 | §1.14: migrations ke niyam (id, kabhi nahi badalti, 60 s, index ka naam); §2.4: `.env.production` sirf `npm run db:release -- --env live` padhta hai (owner). |

@@ -134,6 +134,8 @@ describe('public API', () => {
       'ParallelTransactionError',
       'TransactionAbortedError',
       'TransactionTimeoutError',
+      'syncIndexes',
+      'IndexConflictError',
     ]) {
       expect(api, name).toHaveProperty(name);
     }
