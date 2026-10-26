@@ -122,5 +122,5 @@
 | v1.9    | 2026-10-25 | §2: `prerelease` pe chhota fix seedha push (kya chhota hai, push se pehle checks, kya kabhi seedha nahi); `main` aur `release` pe sirf PR.                                                                            |
 | v1.10   | 2026-10-25 | §6: mutation runner deployable bhi leta hai (`--package gateway`).                                                                                                                                                    |
 | v1.11   | 2026-10-25 | §9: agents sirf extreme zaroorat pe, ek ek karke (parallel nahi), owner.                                                                                                                                              |
-| v1.12 | 2026-10-26 | §2.4: env files: `.env.example` (git), `.env` (laptop), `.env.production` (owner ki private copy, koi code nahi padhta). |
-| v1.13 | 2026-10-27 | §1.14: migrations ke niyam (id, kabhi nahi badalti, 60 s, index ka naam); §2.4: `.env.production` sirf `npm run db:release -- --env live` padhta hai (owner). |
+| v1.12   | 2026-10-26 | §2.4: env files: `.env.example` (git), `.env` (laptop), `.env.production` (owner ki private copy, koi code nahi padhta).                                                                                              |
+| v1.13   | 2026-10-27 | §1.14: migrations ke niyam (id, kabhi nahi badalti, 60 s, index ka naam); §2.4: `.env.production` sirf `npm run db:release -- --env live` padhta hai (owner).                                                         |
