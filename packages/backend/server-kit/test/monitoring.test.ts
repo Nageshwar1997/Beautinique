@@ -16,7 +16,7 @@ import {
   type RunningServer,
   startServer,
 } from '../src/index';
-import { scrubEvent } from '../src/monitoring';
+import { scrubEvent, scrubSpan } from '../src/monitoring';
 
 /** A stand-in for Sentry's ingest: keeps every envelope it is sent, as text. */
 async function fakeSentry() {
@@ -155,5 +155,42 @@ describe('scrubEvent', () => {
     });
     expect(event.request).toEqual({ method: 'POST', url: 'https://bq.test/api/v1/x' });
     expect(scrubEvent({ message: 'no request' })).toEqual({ message: 'no request' });
+  });
+});
+
+describe('scrubSpan', () => {
+  it('keeps a span’s timings and route, never a header, an IP, a user or a query', () => {
+    const span = {
+      trace_id: 't',
+      span_id: 's',
+      name: 'GET /api/v1/x?email=a@b.c',
+      start_timestamp: 1,
+      end_timestamp: 2,
+      status: 'ok' as const,
+      is_segment: true,
+      attributes: {
+        'http.request.method': 'GET',
+        'http.route': '/api/v1/x',
+        'http.response.status_code': 200,
+        'url.full': 'https://bq.test/api/v1/x?email=a@b.c',
+        'http.target': '/api/v1/x?email=a@b.c',
+        'url.query': 'email=a@b.c',
+        'http.request.header.x_origin_secret': 's',
+        'http.request.header.cookie': 'session=c',
+        'client.address': '203.0.113.7',
+        'user.email': 'a@b.c',
+      },
+    };
+    expect(scrubSpan(span)).toEqual({
+      ...span,
+      name: 'GET /api/v1/x',
+      attributes: {
+        'http.request.method': 'GET',
+        'http.route': '/api/v1/x',
+        'http.response.status_code': 200,
+        'url.full': 'https://bq.test/api/v1/x',
+        'http.target': '/api/v1/x',
+      },
+    });
   });
 });
