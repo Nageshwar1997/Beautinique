@@ -1,6 +1,6 @@
 # MEMORY — BQ
 
-> **Status:** v1.34 (2026-10-26). Project ki yaaddasht: **kya tay hua aur kyun**, **pichhle kaam se kya seekha**, aur **kaunse jaal (traps) se bachna hai**. Poori detail baaki docs me hai; yahan short version aur pointers. Naya sabak ya decision aaye to yahan ek line jodo.
+> **Status:** v1.35 (2026-10-27). Project ki yaaddasht: **kya tay hua aur kyun**, **pichhle kaam se kya seekha**, aur **kaunse jaal (traps) se bachna hai**. Poori detail baaki docs me hai; yahan short version aur pointers. Naya sabak ya decision aaye to yahan ek line jodo.
 
 ## 1. Decision log
 
@@ -82,6 +82,8 @@
 | 2026-10-26 | Vercel: Turborepo tak `npm run build -- --for <app>` (repo root, npm 12.2.0 install ke baad `npm ci`); functions `bom1`; `@vercel/react-router` preset nahi | Root `devEngines` npm 12 maangta hai (Vercel pe npm 11); `dist` commit nahi hota; preset sirf React Router 7 maangta hai, hum 8 pe | ARCHITECTURE §9.3; customer README |
 | 2026-10-26 | Soye Render service ko jagana (owner): wake-up screen app ke Vercel route ke saath gateway ka alag `GET /wake` seedha bulati hai (`no-cors`), `/health` nahi (wo Render ka health check hai); env me sirf base URL (`BQ_GATEWAY_URL`, wahi key jo `vercel.json` leta hai), path code me | Live jaanch: Vercel ke raaste ki request soye service ko nahi jagati (Render turant 502 `no-deploy`), seedhi request 52 s me jaga deti hai | ARCHITECTURE §11.1; TASKS T2.7 |
 | 2026-10-26 | Social login sirf Customer app me: Google, LinkedIn, GitHub (owner); baaki apps email OTP / password + TOTP hi | Customer ke liye aasaan login, aur teen providers se OAuth/OIDC sikhna; seller, staff aur Master pe TOTP ka niyam na toote | ARCHITECTURE §7.1, §10; TASKS T3.1 |
+| 2026-10-27 | Release steps (T2.5, owner ne teeno recommendations maani): naya package `@beautinique/backend-server-release` (`server-mongo` me nahi); lease 30 s + har 10 s renew, 60 s tak intezaar (10 min nahi); fingerprint `platform_release` me, same ho to boot sirf ek read; index sync `server-mongo` ke `syncIndexes` se (naam ke neeche shakal kabhi nahi badalti, faltu index kabhi apne aap nahi hatta); `npm run db:release -- --env live` (`db:migrate` nahi) owner ki `.env.production` padhta hai, `live` type karne ke baad | 10 min ki lease crash ke baad agla boot 10 min rokti (wake-up screen 150 s pe haar maanti); free service har ghante jaagti hai, har boot pe index list Atlas tak na jaaye; purana instance deploy ke waqt purane index pe chalta hai; T3.3 ke 79 roles ka seed live pe isi se | ARCHITECTURE §11.1, RULES §1.14 aur §2.4, TASKS T2.5 |
+| 2026-10-27 | Identity ka live deploy fix aur T2.5 seedha `prerelease` pe, bina feature branch (owner, is baar ke liye) | Owner ne kaha | HANDOFF §4 |
 
 ## 2. Pichhle kaam se seekhe sabak
 
@@ -105,6 +107,7 @@
 18. **`npx tsc -p`** scratch folder se chalaya to output package me likh deta hai; dhyan rakho.
 19. **Test ne kuch parakha hi nahi:** gateway ka `..` test `http.request(urlString)` se tha, jo `..` pehle hi hata deta hai, aur method/`..` tests status 404 dekhte the jo upstream bhi deta. Mutation check ne pakda. **Sabak:** har security test ke liye ek mutation chalao; fake upstream me "leak" route rakho taaki galat forward 200 de.
 20. **Ek session, kai attempts:** `withTransaction` ka pehla version har retry me wahi session leta tha. Fail hue attempt ki late `Promise.all` branch transaction ke bahar save ho jaati thi (201 ke saath extra outbox rows). Mere 25 tests aur 37/41 mutations ye nahi pakad paaye; independent review (asli Mongo pe probe ke saath) ne pakda. Fix ke baad doosre review ne fix ki 5 kamiyan aur pakdi (aakhri line ka bhula `await`, network error ke baad bacha transaction). **Sabak:** har attempt ka naya session; naye infra code pe independent review + probe, aur fix ke baad dobara review.
+21. **Env key code se pehle (2026-10-26):** owner ne Render me `IDENTITY__MONGO_URI`/`IDENTITY__REDIS_URL` daale jab identity ka code unhe padhta nahi tha; `loadConfig` ka typo check (anjaan `<NAME>__*` key = error) live deploy rok gaya (purana deploy chalta raha). Fix: identity ne keys padhna shuru kiya. Kisi chalte deployable ki nayi key tabhi daalo jab code use padhe (HANDOFF §6); payments/notify banane wali PR me unke `MONGO_URI`/`REDIS_URL` config me ho.
 
 ## 3. Environment
 
@@ -177,3 +180,4 @@
 | v1.32 | 2026-10-26 | Decisions: Sentry me personal data nahi aur ek init; wake-up screen ka vyavhaar; Vercel build bina Turborepo. |
 | v1.33 | 2026-10-26 | Decision: soye Render ko gateway ke `/wake` se seedha jagana; env me sirf base URL. |
 | v1.34 | 2026-10-26 | Decision: customer me Google, LinkedIn, GitHub login. |
+| v1.35 | 2026-10-27 | Decisions: release steps (naya package, lease 30 s, fingerprint, `db:release --env live`); fix aur T2.5 seedha `prerelease` pe. Sabak 21: Render me key code se pehle. |
