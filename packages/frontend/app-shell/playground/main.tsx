@@ -1,18 +1,91 @@
 // Playground: the shell with a sample header and footer, as an app would build them.
 import './playground.css';
 
-import { StrictMode } from 'react';
+import { StrictMode, useMemo, useState } from 'react';
 import { createRoot } from 'react-dom/client';
 import { createBrowserRouter, Link, Outlet, RouterProvider } from 'react-router';
 
-import { AppFrame, ErrorPage, NavList, THEME_SCRIPT, ThemeSwitcher } from '../src/index';
+import {
+  AppFrame,
+  ErrorPage,
+  NavList,
+  ServerWake,
+  THEME_SCRIPT,
+  ThemeSwitcher,
+} from '../src/index';
 
 const NAV = [
   { label: 'Home', to: '/', end: true },
   { label: '404', to: '/missing' },
   { label: 'Error', to: '/error' },
   { label: '503', to: '/503' },
+  { label: 'Wake-up', to: '/wake' },
 ];
+
+/** A pretend server for the wake-up screen: it answers after `ms`, or never (null). */
+const pretendServer =
+  (ms: number | null): typeof fetch =>
+  (_url, init) =>
+    new Promise((resolve, reject) => {
+      const timer =
+        ms === null
+          ? undefined
+          : setTimeout(() => {
+              resolve(new Response(null, { status: 200 }));
+            }, ms);
+      init?.signal?.addEventListener('abort', () => {
+        clearTimeout(timer);
+        reject(new DOMException('Aborted', 'AbortError'));
+      });
+    });
+
+function WakeDemo() {
+  const [run, setRun] = useState<{ key: number; ms: number | null } | null>(null);
+  // the hook starts over when fetch changes, so one per run
+  const fetchStub = useMemo(() => (run ? pretendServer(run.ms) : undefined), [run]);
+  const button = 'border-border-strong min-h-touch rounded-full border px-5 font-medium';
+  return (
+    <section className="container-page py-10">
+      <h1 className="font-display text-3xl font-medium">Wake-up screen</h1>
+      <p className="text-foreground-muted mt-2 max-w-prose">
+        Apps wrap their frame in ServerWake. A server that answers within 1.5 s shows nothing; a
+        slow one shows the screen until it answers; one that never answers (here after 10 s instead
+        of 150 s) offers to try again or to continue.
+      </p>
+      <div className="mt-6 flex flex-wrap gap-3">
+        <button
+          type="button"
+          className={button}
+          onClick={() => {
+            setRun({ key: Date.now(), ms: 8000 });
+          }}
+        >
+          Slow server (8 s)
+        </button>
+        <button
+          type="button"
+          className={button}
+          onClick={() => {
+            setRun({ key: Date.now(), ms: null });
+          }}
+        >
+          No answer
+        </button>
+      </div>
+      {run && (
+        <ServerWake
+          key={run.key}
+          app="customer"
+          fetch={fetchStub}
+          attemptTimeoutMs={10_000}
+          giveUpAfterMs={10_000}
+        >
+          <span />
+        </ServerWake>
+      )}
+    </section>
+  );
+}
 
 function Shell() {
   return (
@@ -70,6 +143,7 @@ const router = createBrowserRouter([
           />
         ),
       },
+      { path: 'wake', Component: WakeDemo },
       {
         path: '503',
         Component: () => (

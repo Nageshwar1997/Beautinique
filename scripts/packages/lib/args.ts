@@ -139,7 +139,28 @@ export function parseUpdateDepsFlags(argv: string[], env = process.env): UpdateD
   };
 }
 
-/** For commands without options (login, logout, status, build): true when help was asked for. */
+/** `npm run build -- --for customer`: the workspaces to build (with what they need); empty = all. */
+export function parseBuildArgs(argv: string[]): { help: boolean; for: string[] } {
+  try {
+    const { values } = parseArgs({
+      args: argv,
+      strict: true,
+      options: {
+        help: { type: 'boolean', short: 'h', default: false },
+        for: { type: 'string', multiple: true, default: [] },
+      },
+    });
+    const targets = values.for.flatMap((value) => value.split(',')).map((name) => name.trim());
+    return { help: values.help, for: targets.filter(Boolean) };
+  } catch (error) {
+    throw new CliError((error as Error).message, {
+      code: 'BAD_FLAGS',
+      hint: 'Flags go after --, e.g. npm run build -- --for customer (see --help).',
+    });
+  }
+}
+
+/** For commands without options (login, logout, status): true when help was asked for. */
 export function parseHelpOnly(argv: string[]): boolean {
   try {
     const { values } = parseArgs({

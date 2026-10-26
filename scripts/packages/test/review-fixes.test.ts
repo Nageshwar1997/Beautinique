@@ -4,11 +4,12 @@ import { join } from 'node:path';
 
 import { afterEach, describe, expect, it } from 'vitest';
 
-import { parseCommonFlags, parseHelpOnly } from '../lib/args.ts';
+import { parseBuildArgs, parseCommonFlags, parseHelpOnly } from '../lib/args.ts';
 import { escapeMarkdown, groupCommits } from '../lib/changelog.ts';
 import { verifyCommand } from '../lib/commands.ts';
+import { CliError } from '../lib/errors.ts';
 import { lastTag } from '../lib/git.ts';
-import { buildOrder, internalClosure, reexports } from '../lib/graph.ts';
+import { buildOrder, buildSelection, internalClosure, reexports } from '../lib/graph.ts';
 import { firstErrorLine } from '../lib/npm.ts';
 import {
   chooseVersions,
@@ -249,6 +250,42 @@ describe('build order and re-exports', () => {
       '@beautinique/shared-d',
     ]);
     expect(internalClosure(['@beautinique/shared-a'], ws)).toEqual(['@beautinique/shared-b']);
+  });
+
+  it('builds only the asked workspaces and what they need (deploys), or everything', () => {
+    const { ws } = workspace(
+      [
+        publicPackage('shared', 'a', '1.0.0'),
+        publicPackage('shared', 'b', '1.0.0', {
+          dependencies: { '@beautinique/shared-a': '^1.0.0' },
+        }),
+        publicPackage('shared', 'c', '1.0.0', {
+          devDependencies: { '@beautinique/shared-b': '^1.0.0' },
+        }),
+        publicPackage('shared', 'd', '1.0.0'),
+      ],
+      {},
+    );
+    expect(buildSelection(['@beautinique/shared-c'], ws)).toEqual([
+      '@beautinique/shared-a',
+      '@beautinique/shared-b',
+      '@beautinique/shared-c',
+    ]);
+    expect(buildSelection([], ws)).toEqual([
+      '@beautinique/shared-a',
+      '@beautinique/shared-b',
+      '@beautinique/shared-c',
+      '@beautinique/shared-d',
+    ]);
+    expect(() => buildSelection(['@beautinique/shared-x'], ws)).toThrow(
+      'No workspace named @beautinique/shared-x.',
+    );
+    expect(parseBuildArgs(['--for', 'customer, bundle', '--for', 'core'])).toEqual({
+      help: false,
+      for: ['customer', 'bundle', 'core'],
+    });
+    expect(parseBuildArgs([])).toEqual({ help: false, for: [] });
+    expect(() => parseBuildArgs(['--all'])).toThrow(CliError);
   });
 
   it('detects re-exports in the entry file only', () => {

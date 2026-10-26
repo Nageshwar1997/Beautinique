@@ -1,6 +1,6 @@
 import type { Logger } from '@beautinique/backend-server-kit';
 import { OUTBOX, PROCESSED_EVENTS } from '@beautinique/backend-server-queue';
-import { createClient, getPing, recordPing } from '@beautinique/shared-contracts';
+import { createClient, getPing, recordPing, wake } from '@beautinique/shared-contracts';
 import { afterAll, afterEach, beforeAll, describe, expect, it } from 'vitest';
 
 import {
@@ -150,6 +150,19 @@ describe('the sample endpoint, from the contract to the inbox', () => {
     expect(response.status).toBe(503);
     expect(await response.json()).toMatchObject({ error: { code: 'PING_LIMIT_REACHED' } });
     expect(await pings().countDocuments()).toBe(PING_CAP);
+    expect(await outbox().countDocuments()).toBe(0);
+  });
+});
+
+describe('the wake route (T2.7)', () => {
+  it('answers with the time it woke and writes nothing', async () => {
+    const core = await startCore({ consume: false });
+    const client = createClient({ baseUrl: core.url, app: 'customer' });
+    const before = Date.now();
+    const { awakeAt } = await client.call(wake);
+    expect(Date.parse(awakeAt)).toBeGreaterThanOrEqual(before - 1000);
+    expect(Date.parse(awakeAt)).toBeLessThanOrEqual(Date.now() + 1000);
+    expect(await pings().countDocuments()).toBe(0);
     expect(await outbox().countDocuments()).toBe(0);
   });
 });

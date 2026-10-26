@@ -45,13 +45,18 @@ describe('generateFiles', () => {
     expect(Object.keys(parsed('openapi.json').paths as object)).toEqual([
       '/platform/pings',
       '/platform/pings/{pingId}',
+      '/platform/wake',
     ]);
     const manifest = parsed('gateway-manifest.json') as {
       version: string;
       routes: { id: string }[];
     };
     expect(manifest.version).toBe('1.0.0');
-    expect(manifest.routes.map((r) => r.id)).toEqual(['platform.ping.record', 'platform.ping.get']);
+    expect(manifest.routes.map((r) => r.id)).toEqual([
+      'platform.ping.record',
+      'platform.ping.get',
+      'platform.server.wake',
+    ]);
   });
 
   it('lists every event version with the JSON Schema of its envelope', () => {

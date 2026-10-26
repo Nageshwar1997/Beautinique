@@ -10,6 +10,7 @@ import {
   pingRecorded,
   recordPing,
   routes,
+  wake,
 } from '../src';
 
 const id = '0190a1b2-c3d4-7e5f-8a9b-0c1d2e3f4a5b';
@@ -17,7 +18,11 @@ const data = { pingId: id, note: 'hello', recordedAt: '2026-10-22T10:00:00.000Z'
 
 describe('platform catalogue (Milestone 1 sample)', () => {
   it('has the sample routes, event and permission, all registered', () => {
-    expect(routes.map((r) => r.id)).toEqual(['platform.ping.record', 'platform.ping.get']);
+    expect(routes.map((r) => r.id)).toEqual([
+      'platform.ping.record',
+      'platform.ping.get',
+      'platform.server.wake',
+    ]);
     expect(events.latest('platform.ping.recorded')).toBe(pingRecorded);
     expect(permissions.get(pingRead.key)).toBe(pingRead);
     expect(isPermissionKey(pingRead.key)).toBe(true);
@@ -36,6 +41,13 @@ describe('platform catalogue (Milestone 1 sample)', () => {
     expect(recordPing.apps).toEqual(APPS);
     expect(getPing.access).toEqual({ type: 'permission', permission: 'platform.ping.read' });
     expect(getPing.method).toBe('GET');
+    // wake is a public GET for every app that core answers, never from the CDN (a cached answer
+    // would wake nothing)
+    expect(wake).toMatchObject({ method: 'GET', path: '/platform/wake', owner: 'core' });
+    expect(wake.access).toEqual({ type: 'public' });
+    expect(wake.apps).toEqual(APPS);
+    expect('cache' in wake).toBe(false);
+    expect(wake.output.safeParse({ awakeAt: '2026-10-26T10:00:00.000Z' }).success).toBe(true);
     for (const route of routes) {
       if (route.access.type === 'permission') {
         expect(permissions.has(route.access.permission)).toBe(true);

@@ -1,6 +1,6 @@
 # TASKS — BQ
 
-> **Status:** v1.38 (2026-10-26). Poore project ki task list, [ARCHITECTURE.md](ARCHITECTURE.md) §16 ke phases ke hisaab se. Har task "done" tabhi jab [RULES.md](RULES.md) §1.5 ki Definition of Done poori ho.
+> **Status:** v1.39 (2026-10-26). Poore project ki task list, [ARCHITECTURE.md](ARCHITECTURE.md) §16 ke phases ke hisaab se. Har task "done" tabhi jab [RULES.md](RULES.md) §1.5 ki Definition of Done poori ho.
 
 **Kaise use karein:**
 - `[ ]` baaki, `[~]` chal raha hai, `[x]` done.
@@ -95,11 +95,11 @@ Har milestone ke end me kuch **live** dikhana hai. Ek hi live environment, free 
 
 - [x] T2.1 Prefix routing table, app registry (11 apps), Origin aur `x-forwarded-host` → app. (2026-10-25, `feat/m2-gateway`: route table contracts catalogue se, `GATEWAY__APP_HOSTS` + Vercel previews ka strict pattern, `x-forwarded-host`/`Host`/`Origin` usi app ke hon.)
 - [~] T2.2 JWKS verification, per-app cookies, passport token, origin secret, `clientIp()`. (Origin secret (rotation ke saath, timing-safe) aur `clientIp()` ho gaye 2026-10-25; sign-in tak non-public routes 401. JWKS, cookies, passport identity ke saath M3 me.)
-- [~] T2.3 Redis rate limits (classes), cache headers, helmet, request-id, Sentry. (2026-10-25: rate limits naye `@beautinique/backend-server-ratelimit` se, cache headers contract ke `cache` se, helmet + request-id server-kit me. **Sentry baaki:** poore process me ek init, owner ka DSN chahiye, M2 deploy branch me.)
+- [~] T2.3 Redis rate limits (classes), cache headers, helmet, request-id, Sentry. (2026-10-25: rate limits naye `@beautinique/backend-server-ratelimit` se, cache headers contract ke `cache` se, helmet + request-id server-kit me. 2026-10-26, `feat/m2-deploy`: Sentry server-kit ke naye `monitoring` me (`initMonitoring` process me ek hi baar, DSN na ho to band; 5xx `reportError` request id ke saath; headers, cookies, bodies, query, queue/DB data aur local variables Sentry tak nahi), bundle `src/instrument.ts` `node --import` se Express aur drivers se pehle init karta hai, start fail aur band hone pe flush. **Baaki:** owner ka DSN Render me, phir live pe ek asli event dekhna.)
 - [x] T2.4 `/health` (shallow) aur `/ready` (deep), `/status`. (2026-10-25: gateway `/ready` me Redis bhi; `/status` public summary, owner ka faisla.)
 - [ ] T2.5 `backend/bundle`: paancho deployables ek process me, boot pe release steps. (Generator ka bundle saare deployables chalata hai aur config keys env se hatata hai; boot ke release steps baaki.)
 - [ ] T2.6 Purani cheezein hatana: facades, `METHODS_AND_PATHS`, MASTER bypass, wake-up fan-out, keep-alive workflow.
-- [ ] T2.7 Jagana (owner, 2026-10-25; ARCHITECTURE §11.1): public route `GET /api/v1/platform/wake`, apps ki wake-up screen usi ko call kare (M2 customer shell se); GitHub Actions workflow `cron: '30 4-15 * * *'` (10:00–21:00 IST) Render ka `/health` call kare (retry, 2 min timeout; M2 deploy ke saath, default branch pe). Aage ke business sweeps (Phase 4+) boot pe turant ek baar chalein, test ke saath.
+- [~] T2.7 Jagana (owner, 2026-10-25; ARCHITECTURE §11.1): public route `GET /api/v1/platform/wake`, apps ki wake-up screen usi ko call kare (M2 customer shell se); GitHub Actions workflow `cron: '30 4-15 * * *'` (10:00–21:00 IST) Render ka `/health` call kare (retry, 2 min timeout; M2 deploy ke saath, default branch pe). Aage ke business sweeps (Phase 4+) boot pe turant ek baar chalein, test ke saath. (2026-10-26, `feat/m2-deploy`: route `platform.server.wake` core me (DB nahi chhoota, kabhi CDN cache nahi); app-shell `ServerWake` (1.5 s ke baad screen, 150 s pe "Try again" / "Continue anyway") customer me laga, laptop pe asli browser me light/dark/375 px check; `.github/workflows/wake.yml` (repo variable `BQ_RENDER_URL`, curl retry 2 min). **Baaki:** live pe cold start aur workflow ka pehla run (default branch `prerelease` pe merge ke baad).)
 - [ ] T2.8 **Metrics Lessons 1–5** (owner ke saath, sikhne ke liye; owner, 2026-10-25). Sirf laptop pe (Docker), live pe kuch nahi badalta (ARCHITECTURE §14, §11.1). Order: `feat/m2-gateway` PR merge ke baad, M2 customer landing ke saath-saath; ek lesson poora hone pe hi agla. Har lesson me pehle samjhana, phir owner khud commands chalaye.
   - **Lesson 1, metrics ki neev:** counter, gauge, histogram; RED (Rate, Errors, Duration); labels aur cardinality. Gateway me `/metrics` (requests, status, route, latency, rate-limit refusals), setting se band (`GATEWAY__METRICS`, default off; live pe off), tests ke saath.
   - **Lesson 2, Prometheus + Grafana:** `infra/` me alag compose profile (sirf zaroorat pe chale), Prometheus laptop ke bundle se scrape kare; Grafana datasource aur dashboard repo me code ki tarah.
@@ -145,13 +145,13 @@ Har milestone ke end me kuch **live** dikhana hai. Ek hi live environment, free 
 
 ## Phase 6. Frontend foundation (3 hafte, saath-saath)
 
-- [~] T6.1 Packages: app-shell, auth-ui, authz, api-client, data-table, review-screens, maps, forms, pwa-kit. (2026-10-25, `feat/m2-customer-landing`: `@beautinique/frontend-app-shell` 1.0.0 bana: `AppFrame`, `ThemeSwitcher` + `ThemeScript` (bina flash, CSP hash), `NavList`, `ErrorPage`, `tailwind.css`. Header/footer har app ka apna (owner). 2026-10-26: `ErrorPage` naya design (404/error, compact art, "Go back" history se, reference, dev details). Baaki app-shell (wake-up screen T2.7 ke saath, sidebar layout, offline page, idle logout) aur baaki packages jab app ko chahiye.)
+- [~] T6.1 Packages: app-shell, auth-ui, authz, api-client, data-table, review-screens, maps, forms, pwa-kit. (2026-10-25, `feat/m2-customer-landing`: `@beautinique/frontend-app-shell` 1.0.0 bana: `AppFrame`, `ThemeSwitcher` + `ThemeScript` (bina flash, CSP hash), `NavList`, `ErrorPage`, `tailwind.css`. Header/footer har app ka apna (owner). 2026-10-26: `ErrorPage` naya design (404/error, compact art, "Go back" history se, reference, dev details). 2026-10-26: wake-up screen `ServerWake` (T2.7). Baaki app-shell (sidebar layout, offline page, idle logout) aur baaki packages jab app ko chahiye.)
 - [~] T6.1a `icons` package: apne icon components; components package ki 12 `*-icons.ts` files ke icons yahan; icon credits (licenses) page. (2026-10-25: `@beautinique/frontend-icons` 1.0.0: `BaseIcon`, har icon apna component (pure `createIcon`, sirf import hue icons bundle me, Vite build test se pakka), converter script `npm run add-icons` (Iconify JSON → TSX, code/bahar ke links mana), `ICON_CREDITS` + `LICENSES.md`; 10 Solar icons. Customer app me "Icon credits" page. Purane components ke icons un components ke saath aayenge. 2026-10-26: logo `BrandLogo` (horizontal/stacked) + `BrandMark`, master image se trace; customer header/footer aur install icons me.)
 - [ ] T6.2 Styles package v2: fonts (Plus Jakarta Sans + Fraunces) aur preload plugin, base styles.
 - [ ] T6.3 Customer app → React Router 7 framework mode (SSR).
 - [ ] T6.4 Onboarding Customer → Seller app; Super Admin checkbox hatana; Admin/Master se AddProduct aur category CRUD hatana.
 - [ ] T6.5 7 naye apps template se (superadmin, support, finance, logistics, delivery, growth, creator).
-- [ ] T6.6 Har app ka `vercel.json` (routes transform, security headers), Ola Maps key per app.
+- [ ] T6.6 Har app ka `vercel.json` (routes transform, security headers), Ola Maps key per app. (2026-10-26: customer ka `vercel.json`: npm 12 install, `npm run build -- --for customer`, `/api` route + `x-origin-secret` transform env se, functions `bom1`. Security headers baaki.)
 - [ ] T6.7 `apps` profile: split mode containers. **Docker Lesson 4.**
 
 **Milestone 6:** saare 11 apps laptop pe login karke apna empty dashboard dikhate hain, dono themes me.
@@ -262,3 +262,4 @@ Har milestone ke end me kuch **live** dikhana hai. Ek hi live environment, free 
 | v1.36 | 2026-10-25 | T6.1 (app-shell) aur T6.1a (icons) ke pehle hisse, M2 customer landing ke saath. |
 | v1.37 | 2026-10-26 | T6.1a: logo (`BrandLogo`, `BrandMark`) icons package me. |
 | v1.38 | 2026-10-26 | T6.1: naya `ErrorPage` (404 aur error). |
+| v1.39 | 2026-10-26 | M2 deploy (`feat/m2-deploy`): T2.7 wake route + screen + workflow, T2.3 Sentry code, customer `vercel.json` (T6.6 ka hissa); live check baaki. |

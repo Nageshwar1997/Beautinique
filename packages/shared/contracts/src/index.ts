@@ -15,6 +15,7 @@ export {
   pingRecorded,
   recordPing,
   routes,
+  wake,
 } from './catalogue';
 export {
   ApiError,
