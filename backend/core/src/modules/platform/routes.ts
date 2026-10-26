@@ -7,6 +7,13 @@ import { Router } from 'express';
 
 export const PINGS = 'platform_pings';
 
+/**
+ * Most pings kept at once. The route is public (live demo) and the gateway's limit is per client,
+ * so many clients together could still fill the free Atlas cluster (512 MB) before the 7-day TTL
+ * empties it; with this cap pings, their audit copies and events stay a few MB.
+ */
+export const PING_CAP = 5000;
+
 interface PingRecord {
   _id: string;
   note: string;
@@ -28,13 +35,21 @@ export function platformRouter({ mongo }: { mongo: Mongo }): Router {
     router,
     recordPing,
     async ({ body }, { requestId }) => {
+      // the collection's own count (no scan); a few parallel requests may pass it by a few, that is fine
+      if ((await pings.estimatedDocumentCount()) >= PING_CAP) {
+        throw new AppError(
+          'PING_LIMIT_REACHED',
+          'The demo has all the pings it can keep for now. Please try again in a few days.',
+          { status: 503 },
+        );
+      }
       const ping: PingRecord = { _id: uuidv7(), note: body.note, recordedAt: new Date() };
       // the ping and its event are written in one transaction, and the reply goes out after commit
       await withTransaction(mongo, async (session) => {
         await pings.insertOne(ping, { session });
         await writeEvent(mongo, session, pingRecorded, {
           aggregate: { type: 'ping', id: ping._id },
-          // no signed-in user reaches core yet (the gateway and identity come in Phase 2)
+          // a public route: no signed-in user reaches core (sign-in comes with identity, M3)
           actor: { type: 'system', id: 'core.platform' },
           correlationId: requestId,
           data: dataOf(ping),

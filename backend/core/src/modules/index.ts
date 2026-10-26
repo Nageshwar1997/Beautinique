@@ -27,3 +27,8 @@ export function routerOf(deps: ModuleDeps): Router {
 export function subscriptionsOf(deps: ModuleDeps): Subscription[] {
   return [...platform.subscriptionsOf(deps)];
 }
+
+/** Every module's indexes, made (or found) at start. */
+export async function ensureIndexes(deps: ModuleDeps): Promise<void> {
+  await platform.ensureIndexes(deps);
+}

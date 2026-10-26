@@ -1,0 +1,99 @@
+/*
+ * Import after tailwindcss in the app's CSS: `@import '@beautinique/frontend-app-shell/tailwind.css';`
+ * Tailwind skips node_modules, where this package lives in an app, so without this line the classes
+ * its components use would never be generated.
+ */
+@source './dist';
+
+/*
+ * The error page's motion (ErrorPage): Tailwind emits each keyframe only when its class is used.
+ * Reduced motion stops all of them (styles' base.css): the loops stand still, the crumbs lie where
+ * they fell.
+ */
+@theme {
+  --animate-compact-float: compact-float 6s var(--ease-standard) infinite;
+  --animate-compact-jolt: compact-jolt 700ms var(--ease-standard) 150ms both;
+  --animate-crumb-fall: crumb-fall 900ms var(--ease-enter) both;
+  --animate-sparkle: sparkle 2.4s var(--ease-standard) infinite;
+  --animate-powder-drift: powder-drift 16s var(--ease-standard) infinite alternate;
+  --animate-speck-twinkle: speck-twinkle 3.2s var(--ease-standard) infinite;
+
+  @keyframes compact-float {
+    0%,
+    100% {
+      translate: 0 0;
+      rotate: -3deg;
+    }
+    50% {
+      translate: 0 -0.05em;
+      rotate: 3deg;
+    }
+  }
+
+  /* dropped: a knock, a wobble, still */
+  @keyframes compact-jolt {
+    0% {
+      translate: 0 -0.12em;
+      rotate: -8deg;
+    }
+    35% {
+      translate: 0 0;
+      rotate: 5deg;
+    }
+    60% {
+      rotate: -3deg;
+    }
+    80% {
+      rotate: 1deg;
+    }
+    100% {
+      translate: 0 0;
+      rotate: 0deg;
+    }
+  }
+
+  /* from inside the pan to where it lies */
+  @keyframes crumb-fall {
+    from {
+      opacity: 0;
+      translate: -18px -28px;
+    }
+    to {
+      opacity: 1;
+      translate: 0 0;
+    }
+  }
+
+  @keyframes sparkle {
+    0%,
+    100% {
+      opacity: 0.25;
+      scale: 0.7;
+    }
+    50% {
+      opacity: 1;
+      scale: 1;
+    }
+  }
+
+  @keyframes powder-drift {
+    from {
+      translate: 0 0;
+      scale: 1;
+    }
+    to {
+      translate: 2rem 1.5rem;
+      scale: 1.15;
+    }
+  }
+
+  @keyframes speck-twinkle {
+    0%,
+    100% {
+      opacity: 0.25;
+    }
+    50% {
+      opacity: 0.9;
+    }
+  }
+}

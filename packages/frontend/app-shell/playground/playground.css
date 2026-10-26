@@ -1,0 +1,8 @@
+@import 'tailwindcss';
+@import '@beautinique/frontend-styles';
+/* what apps import: the shell's own keyframes (its @source points at dist, which the line below covers) */
+@import '../tailwind.css';
+
+/* the shell's own source and the playground, so Tailwind sees their classes */
+@source '../src';
+@source '.';

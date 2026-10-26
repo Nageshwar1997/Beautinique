@@ -48,8 +48,9 @@ launch jaisi banti hai. Legal cheezein dummy data ke saath implement hoti hain.
 - **Mutation testing copy me karo**, asli files me nahi (dev server file badalte hi reload hota hai). Sirf 3 jagah (RULES §6):
   kernel packages pehli baar poora run (background) aur baad me badli lines; paisa/stock/permissions me badli lines; baaki apps
   aur modules me mutation nahi.
-- **Kam tokens:** targeted edits, file ka zaroori hissa hi padho, bade multi-agent workflows sirf
-  zaroorat pe aur pehle bata ke.
+- **Kam tokens:** targeted edits, file ka zaroori hissa hi padho. Review, checks aur research Claude khud
+  kare. Agent sirf extreme zaroorat pe, pehle bata ke, aur **ek waqt me ek hi**: kabhi parallel nahi,
+  agla tabhi jab pichhla poora ho jaye (owner, 2026-10-25; RULES §9).
 
 ## Setup aur commands
 

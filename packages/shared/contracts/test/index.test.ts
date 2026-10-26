@@ -28,6 +28,8 @@ import {
   HEADERS,
   LOCATION_SCOPES,
   matchPath,
+  MAX_S_MAX_AGE,
+  MAX_STALE_WHILE_REVALIDATE,
   pathParams,
   permissionCatalogue,
   resolveAreaSetting,
@@ -54,6 +56,7 @@ const getProduct = defineRoute({
   idempotency: false,
   stepUp: false,
   owner: 'core',
+  cache: { sMaxAge: 300, staleWhileRevalidate: 60 },
   input: { params: object({ productId: objectIdZod }), query: cursorQuery },
   output: product,
 });
@@ -103,6 +106,7 @@ describe('platform constants', () => {
       app: 'X-BQ-App',
       idempotencyKey: 'Idempotency-Key',
       requestId: 'X-Request-Id',
+      clientIp: 'X-BQ-Client-Ip',
     });
   });
 });
@@ -153,11 +157,36 @@ describe('routes', () => {
         { path: '/a/:id/b/:id', input: { params: object({ id: objectIdZod }) } },
         'path repeats a parameter',
       ],
+      [{ cache: { sMaxAge: 60, staleWhileRevalidate: 0 } }, 'only public GET routes can be cached'],
+      [
+        {
+          method: 'POST',
+          access: { type: 'public' },
+          cache: { sMaxAge: 60, staleWhileRevalidate: 0 },
+        },
+        'only public GET routes can be cached',
+      ],
+      ...[0, 1.5, MAX_S_MAX_AGE + 1].map((sMaxAge): [Partial<RouteDefinition>, string] => [
+        { access: { type: 'public' }, cache: { sMaxAge, staleWhileRevalidate: 0 } },
+        `cache.sMaxAge must be a whole number of seconds from 1 to ${String(MAX_S_MAX_AGE)}`,
+      ]),
+      ...[-1, 0.5, MAX_STALE_WHILE_REVALIDATE + 1].map(
+        (staleWhileRevalidate): [Partial<RouteDefinition>, string] => [
+          { access: { type: 'public' }, cache: { sMaxAge: 60, staleWhileRevalidate } },
+          'cache.staleWhileRevalidate must be a whole number of seconds',
+        ],
+      ),
     ];
     for (const [change, message] of bad) {
       expect(() => defineRoute({ ...base(), ...change }), JSON.stringify(change)).toThrow(message);
     }
     expect(() => defineRoute(base())).not.toThrow();
+    for (const cache of [
+      { sMaxAge: 1, staleWhileRevalidate: 0 },
+      { sMaxAge: MAX_S_MAX_AGE, staleWhileRevalidate: MAX_STALE_WHILE_REVALIDATE },
+    ]) {
+      expect(() => defineRoute({ ...base(), access: { type: 'public' }, cache })).not.toThrow();
+    }
   });
 
   it('path helpers build, read and match paths', () => {
@@ -217,6 +246,11 @@ describe('routes', () => {
       rateLimit: 'write',
       idempotency: true,
       stepUp: true,
+      cache: null,
+    });
+    expect(gatewayManifest([getProduct])[0]?.cache).toEqual({
+      sMaxAge: 300,
+      staleWhileRevalidate: 60,
     });
   });
 });
@@ -497,6 +531,11 @@ describe('OpenAPI', () => {
       idempotency: true,
       stepUp: true,
       owner: 'core',
+      cache: null,
+    });
+    expect((get['x-bq'] as { cache: unknown }).cache).toEqual({
+      sMaxAge: 300,
+      staleWhileRevalidate: 60,
     });
     const ok = (
       get.responses as Record<

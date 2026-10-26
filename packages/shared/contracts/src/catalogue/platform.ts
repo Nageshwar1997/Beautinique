@@ -30,13 +30,17 @@ export const pingRead = definePermission({
   secondSignature: false,
 });
 
+/**
+ * Public so the live demo works before login exists (owner, 2026-10-25): the `write` rate limit per
+ * IP holds it back, and core deletes pings after 7 days.
+ */
 export const recordPing = defineRoute({
   id: 'platform.ping.record',
   method: 'POST',
   path: '/platform/pings',
   summary: 'Record a ping (writes the platform.ping.recorded event in the same transaction)',
   apps: APPS,
-  access: { type: 'signed-in' },
+  access: { type: 'public' },
   rateLimit: 'write',
   idempotency: true,
   stepUp: false,

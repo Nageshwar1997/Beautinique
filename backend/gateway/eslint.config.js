@@ -4,5 +4,5 @@ import { packageConfig } from '../../configs/eslint-config.js';
 export default packageConfig({
   platform: 'node',
   tsconfigRootDir: import.meta.dirname,
-  envFiles: ['src/config.ts'],
+  envFiles: ['src/config.ts', 'test/env.ts'],
 });

@@ -106,7 +106,7 @@ background: rgba(var(--brand-rgb), 0.12); /* 12% rose */
 | Semantic | `--brand`, `--foreground-muted`, `--surface`                      | Hamesha; light aur dark khud sambhalte hain |
 | Tailwind | `bg-brand`, `text-foreground-muted`, `bg-brand/20`, `bg-rose-600` | Components me                               |
 
-Semantic tokens: `background`, `surface`, `surface-muted`, `surface-inverse`, `foreground` (+ `-muted`, `-subtle`, `-inverse`), `border`, `border-strong`, `brand`, `secondary`, `accent`, `success`, `warning`, `error`, `info` (har ek ke saath `-hover`, `-foreground`, `-subtle`, `-subtle-foreground`), `brand-text`, `price-discount`, `rating`, `focus-ring`, `focus-ring-inverse` (ulti patti pe ring, `surface-inverse` utility ke saath), `overlay`, `shadow-color`.
+Semantic tokens: `background`, `surface`, `surface-muted`, `surface-inverse`, `foreground` (+ `-muted`, `-subtle`, `-inverse`), `border`, `border-strong`, `brand`, `secondary`, `accent`, `success`, `warning`, `error`, `info` (har ek ke saath `-hover`, `-foreground`, `-subtle`, `-subtle-foreground`), `brand-text`, `price-discount`, `rating`, `focus-ring`, `focus-ring-inverse` (ulti patti pe ring, `surface-inverse` utility ke saath), `brand-text-inverse` (ulti patti pe brand text; `surface-inverse` andar `brand-text` ko isi pe badal deta hai), `overlay`, `shadow-color`.
 
 Muted section (`surface-muted`) pe `foreground-subtle` text mat lagao: dark theme me wo sirf 3.66:1 hai (AA ko 4.5 chahiye). Wahan `foreground-muted` ya `foreground` lo (owner ka faisla, 2026-10-21: rang wahi, ye niyam).
 
@@ -214,7 +214,7 @@ Tailwind ke `animate-spin`, `-ping`, `-pulse`, `-bounce` bhi hain. Durations mot
 ## Utilities (`utilities.css`)
 
 - **`focus-ring`, `focus-ring-inset`, `focus-ring-within`:** custom controls ke liye wahi focus ring jo base me hai (jab `outline-hidden` lagaya ho). `-inset` scroll box ke andar, `-within` input wale wrapper ke liye.
-- **`surface-inverse`:** ulti patti (light page pe dark footer ya bar, dark pe light): background, text aur aisa focus ring jo us patti pe dikhe. Andar ka har focus ring (base, `focus-ring-*`) apne aap wahi leta hai: `<footer class="surface-inverse">`. Sirf `bg-surface-inverse` lagaya to ring nahi dikhega.
+- **`surface-inverse`:** ulti patti (light page pe dark footer ya bar, dark pe light): background, text, aisa focus ring jo us patti pe dikhe, aur `brand-text` (links, nav ka chalu page) jo us patti pe padha jaye. Andar ka har focus ring (base, `focus-ring-*`) aur `text-brand-text` apne aap wahi leta hai: `<footer class="surface-inverse">`. Sirf `bg-surface-inverse` lagaya to ring nahi dikhega.
 - **`touch-target`, `touch-target-lg`:** chhote control (icon button, close, shade dot) ko 44px / 48px ka click area, bina dikhawat badle (`::before` use karta hai).
 - **`skip-link`:** har page ka pehla element, sirf focus pe dikhta hai: `<a href="#main" class="skip-link">Skip to content</a>`.
 - **`container-page`:** page ki width (`max-w-page`) aur responsive side padding.

@@ -12,5 +12,6 @@
   // extension must look for the nearest config of the file being saved.
   "eslint.workingDirectories": [{ "mode": "auto" }],
   "editor.formatOnSave": true,
-  "editor.defaultFormatter": "esbenp.prettier-vscode"
+  "editor.defaultFormatter": "esbenp.prettier-vscode",
+  "cSpell.words": ["colour", "COLOURS"]
 }
