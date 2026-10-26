@@ -1,6 +1,6 @@
 # DESIGN — BQ
 
-> **Status:** v1.7 (2026-10-26). UI aur UX ke niyam saare 11 apps ke liye. Design ka **source of truth code hai**: `@beautinique/frontend-styles` (tokens) aur `@beautinique/frontend-components` (components). [RULES.md](RULES.md) §5 frontend ke coding niyam batata hai; ye file batati hai ki cheezein **dikhengi aur chalengi kaise**.
+> **Status:** v1.8 (2026-10-26). UI aur UX ke niyam saare 11 apps ke liye. Design ka **source of truth code hai**: `@beautinique/frontend-styles` (tokens) aur `@beautinique/frontend-components` (components). [RULES.md](RULES.md) §5 frontend ke coding niyam batata hai; ye file batati hai ki cheezein **dikhengi aur chalengi kaise**.
 
 ## 1. Design principles
 
@@ -37,7 +37,7 @@ Brand: **rose** rgb(214, 51, 108), deep **plum** rgb(92, 26, 70), **champagne go
 
 - **Contrast niyam:** padhne wala text sirf `foreground*`, `brand-text`, `price-discount` ya kisi tone ke `-foreground`/`-subtle-foreground` me. Palette script har jodi ka WCAG contrast har theme me check karta hai, aur rangon ka matlab bhi (tint/text ulta nahi, hover sahi disha me, hue har theme me same, teal/violet sirf charts; styles README); naya colour bhi wahi se.
 - Muted section (`surface-muted`) pe `foreground-subtle` text mat lagao: dark theme me wo sirf 3.66:1 hai (AA ko 4.5 chahiye). Wahan `foreground-muted` ya `foreground` lo (owner ka faisla, 2026-10-21: rang wahi, ye niyam).
-- Ulti patti (dark footer, announcement bar) pe `surface-inverse` utility lagao, sirf `bg-surface-inverse` nahi: wahi us patti pe dikhne wala focus ring deti hai.
+- Ulti patti (dark footer, announcement bar) pe `surface-inverse` utility lagao, sirf `bg-surface-inverse` nahi: wahi us patti pe dikhne wala focus ring deti hai, aur `brand-text` (links, nav ka chalu page) ko `brand-text-inverse` pe badal deti hai, taaki wo bhi padha jaye (4.5:1, high contrast me 7:1).
 - `teal` aur `violet` scales sirf charts aur category tags ke liye.
 
 ### 3.3 Tones, order status, charts
@@ -178,3 +178,4 @@ Har screen ye states dikhati hai:
 | v1.5    | 2026-10-21 | Owner ke faisle: muted section pe subtle text nahi (rang wahi); ulti patti ke liye `focus-ring-inverse` + `surface-inverse`; high contrast me tones gehre, saara text 7:1.            |
 | v1.6    | 2026-10-26 | §11 Logo: master image, `BrandLogo`/`BrandMark` (icons package), rang theme se, favicon alag, install icons.                                                                          |
 | v1.7    | 2026-10-26 | §6 Error: 404 aur error page ka design (`ErrorPage`, compact art).                                                                                                                   |
+| v1.8    | 2026-10-26 | §3: `surface-inverse` ab `brand-text` bhi badalta hai (`brand-text-inverse`); footer me chalu page ka link padhne layak.                                                                   |
