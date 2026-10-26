@@ -44,7 +44,7 @@ Har milestone ke end me kuch **live** dikhana hai. Ek hi live environment, free 
 - [ ] A.2 Ola Maps ke 4 accounts banana aur har app ke domain ke hisaab se browser keys dena (ARCHITECTURE §10). Multiple accounts ke terms ek baar padhna.
 - [ ] A.3 Render workspace: sirf ek free web service (`bq-live`), aur Singapore me ek free Key Value.
 - [ ] A.4 Atlas: project `bq-live`, M0 cluster AWS Singapore, har deployable ka alag DB user.
-- [ ] A.5 Cloudinary, Sentry (free), Razorpay (test keys), Google OAuth client (har app ka redirect).
+- [ ] A.5 Cloudinary, Sentry (free), Razorpay (test keys), customer app ke liye Google, LinkedIn aur GitHub OAuth clients (live + laptop redirect; owner, 2026-10-26).
 - [ ] A.6 Brevo: authorised IPs ki rok hatana, ya Render Singapore ke IPs jodna.
 - [ ] A.7 Cloudflare R2 free tier: card maangta hai ya nahi, check karna (nahi to logs archive Cloudinary private files me).
 - ~~A.8 UptimeRobot aur cron-job.org free accounts (keep-alive aur alerts ke liye).~~ Nahi (owner, 2026-10-25): bahar ka pinger nahi; service app khulte hi aur GitHub Actions se din me har ghante jaagti hai (T2.7, ARCHITECTURE §11.1).
@@ -111,7 +111,7 @@ Har milestone ke end me kuch **live** dikhana hai. Ek hi live environment, free 
 
 ## Phase 3. bq-identity (2–3 hafte)
 
-- [ ] T3.1 Users, credentials (argon2id), email OTP, email + password, TOTP, Google OAuth (PKCE).
+- [ ] T3.1 Users, credentials (argon2id), email OTP, email + password, TOTP, customer ke liye Google, LinkedIn, GitHub OAuth (PKCE; owner, 2026-10-26).
 - [ ] T3.2 Sessions, refresh rotation + reuse detection, ES256 + JWKS, My Devices.
 - [ ] T3.3 Apps, permission catalogue, 79 roles ka seed, scoped grants, invitations, applicant grants.
 - [ ] T3.4 API clients (Seller API Integration, Affiliate Partner).

@@ -1,6 +1,6 @@
 # MEMORY — BQ
 
-> **Status:** v1.33 (2026-10-26). Project ki yaaddasht: **kya tay hua aur kyun**, **pichhle kaam se kya seekha**, aur **kaunse jaal (traps) se bachna hai**. Poori detail baaki docs me hai; yahan short version aur pointers. Naya sabak ya decision aaye to yahan ek line jodo.
+> **Status:** v1.34 (2026-10-26). Project ki yaaddasht: **kya tay hua aur kyun**, **pichhle kaam se kya seekha**, aur **kaunse jaal (traps) se bachna hai**. Poori detail baaki docs me hai; yahan short version aur pointers. Naya sabak ya decision aaye to yahan ek line jodo.
 
 ## 1. Decision log
 
@@ -81,6 +81,7 @@
 | 2026-10-26 | Wake-up screen: server 1.5 s me na bole to poori screen (peeche app inert), 5xx/429/timeout pe 3 s baad dobara, 150 s pe "Try again" / "Continue anyway"; koi bhi aur jawab = jaaga hua | Jaagta server pe screen kabhi na dikhe; cold start ~1 min; static pages server ke bina bhi chalein | app-shell README; TASKS T2.7 |
 | 2026-10-26 | Vercel: Turborepo tak `npm run build -- --for <app>` (repo root, npm 12.2.0 install ke baad `npm ci`); functions `bom1`; `@vercel/react-router` preset nahi | Root `devEngines` npm 12 maangta hai (Vercel pe npm 11); `dist` commit nahi hota; preset sirf React Router 7 maangta hai, hum 8 pe | ARCHITECTURE §9.3; customer README |
 | 2026-10-26 | Soye Render service ko jagana (owner): wake-up screen app ke Vercel route ke saath gateway ka alag `GET /wake` seedha bulati hai (`no-cors`), `/health` nahi (wo Render ka health check hai); env me sirf base URL (`BQ_GATEWAY_URL`, wahi key jo `vercel.json` leta hai), path code me | Live jaanch: Vercel ke raaste ki request soye service ko nahi jagati (Render turant 502 `no-deploy`), seedhi request 52 s me jaga deti hai | ARCHITECTURE §11.1; TASKS T2.7 |
+| 2026-10-26 | Social login sirf Customer app me: Google, LinkedIn, GitHub (owner); baaki apps email OTP / password + TOTP hi | Customer ke liye aasaan login, aur teen providers se OAuth/OIDC sikhna; seller, staff aur Master pe TOTP ka niyam na toote | ARCHITECTURE §7.1, §10; TASKS T3.1 |
 
 ## 2. Pichhle kaam se seekhe sabak
 
@@ -175,3 +176,4 @@
 | v1.31 | 2026-10-26 | Decision: logo sirf master image se, favicon alag (rose "B"). |
 | v1.32 | 2026-10-26 | Decisions: Sentry me personal data nahi aur ek init; wake-up screen ka vyavhaar; Vercel build bina Turborepo. |
 | v1.33 | 2026-10-26 | Decision: soye Render ko gateway ke `/wake` se seedha jagana; env me sirf base URL. |
+| v1.34 | 2026-10-26 | Decision: customer me Google, LinkedIn, GitHub login. |

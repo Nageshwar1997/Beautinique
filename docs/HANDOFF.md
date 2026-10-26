@@ -1,6 +1,6 @@
 # HANDOFF — BQ
 
-> **Status:** v1.55 (2026-10-26). Is project pe 2 log kaam karte hain. Ye file batati hai ki **abhi kya halat hai, kisne kya chhoda, agla kaam kya hai** aur kaunse sawal khule hain, taaki doosra insaan (aur uska Claude) bina poora itihaas padhe kaam utha sake. Jo bhi kaam roke, wo ye file update kare (neeche §8).
+> **Status:** v1.56 (2026-10-26). Is project pe 2 log kaam karte hain. Ye file batati hai ki **abhi kya halat hai, kisne kya chhoda, agla kaam kya hai** aur kaunse sawal khule hain, taaki doosra insaan (aur uska Claude) bina poora itihaas padhe kaam utha sake. Jo bhi kaam roke, wo ye file update kare (neeche §8).
 
 ## 0. Pehle ye (handoff ke din)
 
@@ -72,7 +72,7 @@
 1. **M2 ke bache chhote kaam:** PR #18 merge (owner, demo ke baad). Hourly wake: pehla scheduled run 2026-10-26 16:16 UTC pe success (15:30 wala slot, GitHub ~46 min der se); agle din 10:00 IST se runs dekhna. M2 demo note (TASKS D checklist ka 3). TASKS C.3 (Sentry, Brevo, Cloudinary ki free limits).
 2. **M3 se pehle owner:** Brevo account + API key aur authorised IPs ki rok hatana (email OTP; A.6), Google OAuth client customer + admin ke redirects ke saath (A.5), identity ka alag Atlas DB user (A.4).
 3. **M3 code, is order me (har ek `feat/<task>` → PR → `prerelease`):** T2.5 bundle ke boot release steps (lease lock, migrations, index sync; identity ke DB se pehle zaroori) → T3.1 (users, argon2id, email OTP, password, TOTP, Google) → T3.2 (sessions, refresh rotation, ES256 + JWKS, My Devices) + T2.2 ka bacha hissa (gateway me JWKS, per-app cookies, passport; TASKS C.1 cookies yahin) → T3.3 (permission catalogue, 79 roles seed, grants) → customer + admin me auth screens (auth-ui) → live signup/login aur My Devices demo.
-4. **Owner ke khule kaam:** `prerelease` ka alag ruleset (seedha push bina bypass), customer app (browser) me Sentry kab (faisla baaki).
+4. **Owner ke khule kaam:** `prerelease` ka alag ruleset ho gaya (2026-10-26: `prerelease-basics`, sirf delete aur force push band; `main`/`release` pe `protected-branches` waisa hi). **Frontend Sentry (owner, 2026-10-26): saare apps me**, M3 me customer + admin se shuru (app-shell me ek browser init, errors; Sentry project ka faisla tab).
 
 **Pichhla plan (M2, ab live):**
 
@@ -208,3 +208,4 @@
 | v1.53 | 2026-10-26 | §3: cold start fix branch `feat/m2-wake-kick` (gateway `/wake`, seedhi kick). |
 | v1.54 | 2026-10-26 | §3: live cold start pass (`/wake` kick). |
 | v1.55 | 2026-10-26 | §4: M2 live; agla M3 (Identity) ka order, M2 ke bache kaam, owner ke kaam; pehla scheduled wake run 16:16 UTC. |
+| v1.56 | 2026-10-26 | §4: `prerelease` ka alag ruleset (seedha push); frontend Sentry saare apps me (owner). |
