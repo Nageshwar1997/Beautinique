@@ -29,17 +29,18 @@ Dev aur start dono `src/instrument.ts` (build me `dist/instrument.js`) ko `node 
 
 ## Render (`bq-live`)
 
-| Setting           | Value                                                                                                                                                      |
-| ----------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Root Directory    | khaali (repo root)                                                                                                                                         |
-| Build Command     | `npm install --prefix .npm12 --no-audit --no-fund npm@12.2.0 && .npm12/node_modules/.bin/npm ci && .npm12/node_modules/.bin/npm run build -- --for bundle` |
-| Start Command     | `cd backend/bundle && node --enable-source-maps --max-old-space-size=300 --import ./dist/instrument.js dist/start.js`                                      |
-| Health Check Path | `/health`                                                                                                                                                  |
-| Branch            | `release`, Auto-Deploy "After CI checks pass"                                                                                                              |
-| Env               | `.env.example` ki keys, live values ke saath ([HANDOFF](../../docs/HANDOFF.md) §4); `NODE_VERSION=24`, `UV_THREADPOOL_SIZE=2`; `PORT` aur `NODE_ENV` nahi  |
+| Setting           | Value                                                                                                                                                     |
+| ----------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Root Directory    | khaali (repo root)                                                                                                                                        |
+| Build Command     | `sh scripts/render/build.sh`                                                                                                                              |
+| Start Command     | `sh scripts/render/start.sh`                                                                                                                              |
+| Health Check Path | `/health`                                                                                                                                                 |
+| Branch            | `release`, Auto-Deploy "After CI checks pass"                                                                                                             |
+| Env               | `.env.example` ki keys, live values ke saath ([HANDOFF](../../docs/HANDOFF.md) §4); `NODE_VERSION=24`, `UV_THREADPOOL_SIZE=2`; `PORT` aur `NODE_ENV` nahi |
 
+- **Commands repo me:** asli commands [scripts/render/build.sh](../../scripts/render/build.sh) aur [start.sh](../../scripts/render/start.sh) me hain, dashboard me sirf unka naam. Commands badalna = code ka badlav (`release` pe deploy ke saath); dashboard dobara nahi chhoona. Pehle dashboard me poore commands the: repo me badle, par Render purane hi chalata raha (2026-10-26).
 - **npm 12 `.npm12` me:** root `devEngines` npm 12 maangta hai, aur Render ka npm 11 is repo me `npm ci` ya `npm run` pe `EBADDEVENGINES` deta hai. Global install nahi ho sakta (Render pe `/usr/lib/node_modules` read-only, `EROFS`), isliye npm 12 repo ke andar ek folder me.
-- **Start bina npm ke:** `package.json` ki `start` script jaisa hi command, seedha `node`: Render ka npm 11 `npm run` chala hi nahi sakta, 512 MB me npm ka ~40–50 MB bachta hai, aur SIGTERM seedha app ko milta hai (graceful stop). `start` script badlo to ye command bhi.
+- **Start bina npm ke:** `package.json` ki `start` script jaisa hi command, seedha `node`: Render ka npm 11 `npm run` chala hi nahi sakta, 512 MB me npm ka ~40–50 MB bachta hai, aur SIGTERM seedha app ko milta hai (graceful stop). `start` script badlo to `start.sh` bhi. `exec` se `node` hi Render ka process ban jaata hai.
 - `NODE_ENV=production` mat daalo: build me devDependencies (tsdown waghera) nahi aati.
 
 Boot ke release steps (lease lock, migrations, index sync) TASKS T2.5 me jodne hain.
