@@ -2,16 +2,23 @@ import { randomUUID } from 'node:crypto';
 
 import { createLogger } from '@beautinique/backend-server-kit';
 import { connectMongo } from '@beautinique/backend-server-mongo';
-import { describe, expect, it } from 'vitest';
+import { RELEASE_STATE } from '@beautinique/backend-server-release';
+import { afterAll, describe, expect, it } from 'vitest';
 
 import { readConfig } from '../src/config.ts';
-import { start } from '../src/service.ts';
+import { release, start } from '../src/service.ts';
 
-// The laptop's and CI's local services (`npm run infra:up`). identity writes nothing yet, so its
-// test database never comes into being and there is nothing to clean up.
+// The laptop's and CI's local services (`npm run infra:up`), in a test database of its own.
 const MONGO_URI = 'mongodb://localhost:27017/?replicaSet=rs0';
 const REDIS_URL = 'redis://localhost:6379';
 const dbName = `bq_test_identity_${randomUUID().slice(0, 8)}`;
+const logger = createLogger({ name: 'identity-test', level: 'silent' });
+
+afterAll(async () => {
+  const mongo = await connectMongo({ uri: MONGO_URI, dbName, appName: 'identity-test', logger });
+  await mongo.db.dropDatabase();
+  await mongo.close();
+});
 
 const testEnv = (): Record<string, string> => ({
   IDENTITY__LOG_LEVEL: 'silent',
@@ -70,8 +77,26 @@ describe('identity', () => {
     );
   });
 
+  it('runs its release steps in its own database before it listens, and only once per release', async () => {
+    const server = await start(readConfig({ env: testEnv() }), {
+      port: 0,
+      host: '127.0.0.1',
+      handleSignals: false,
+    });
+    try {
+      const state = await server.runtime.mongo.db.collection(RELEASE_STATE).findOne({});
+      expect(state).toMatchObject({ _id: 'current', fingerprint: expect.any(String) as unknown });
+    } finally {
+      await server.stop();
+    }
+    // npm run db:release: the same release, so nothing runs
+    const report = await release(readConfig({ env: testEnv() }), { logger });
+    expect(report).toMatchObject({ upToDate: true, migrations: [], steps: [] });
+    const forced = await release(readConfig({ env: testEnv() }), { logger, force: true });
+    expect(forced).toMatchObject({ upToDate: false });
+  });
+
   it('does not start when Redis is unreachable, and closes the MongoDB connection it had opened', async () => {
-    const logger = createLogger({ name: 'identity-test', level: 'silent' });
     const look = await connectMongo({ uri: MONGO_URI, dbName, appName: 'identity-test', logger });
     try {
       const connections = async () => {

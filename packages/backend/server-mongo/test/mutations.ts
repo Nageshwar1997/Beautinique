@@ -381,6 +381,163 @@ const mutations: Mutation[] = [
     name: 'close does not close',
     change: [['await client.close();\n      logger', 'logger']],
   },
+
+  // syncIndexes (2026-10-27)
+  {
+    file: 'indexes',
+    name: 'one index listed twice',
+    change: [['if (list.some((other) => other.name === spec.name)) {', 'if (false) {']],
+    tests: 'syncIndexes',
+  },
+  {
+    file: 'indexes',
+    name: 'spec dropped from its collection',
+    change: [['    list.push(spec);\n', '']],
+    tests: 'syncIndexes',
+  },
+  {
+    file: 'indexes',
+    name: 'missing index not made',
+    change: [['if (!existing) missing.push(spec);', 'if (!existing) void spec;']],
+    tests: 'syncIndexes',
+  },
+  {
+    file: 'indexes',
+    name: 'changed shape accepted',
+    change: [['else if (!sameShape(existing, spec)) {', 'else if (false) {']],
+    tests: 'syncIndexes',
+  },
+  {
+    file: 'indexes',
+    name: 'shape: keys not compared',
+    change: [
+      ['isDeepStrictEqual(Object.entries(found.key), Object.entries(spec.key)) &&', 'true &&'],
+    ],
+    tests: 'syncIndexes',
+  },
+  {
+    file: 'indexes',
+    name: 'shape: key order not compared',
+    change: [
+      [
+        'isDeepStrictEqual(Object.entries(found.key), Object.entries(spec.key)) &&',
+        'isDeepStrictEqual(found.key, spec.key) &&',
+      ],
+    ],
+    tests: 'syncIndexes',
+  },
+  {
+    file: 'indexes',
+    name: 'shape: unique not compared',
+    change: [['Boolean(found.unique) === Boolean(spec.unique) &&', 'true &&']],
+    tests: 'syncIndexes',
+  },
+  {
+    file: 'indexes',
+    name: 'shape: sparse not compared',
+    change: [['Boolean(found.sparse) === Boolean(spec.sparse) &&', 'true &&']],
+    tests: 'syncIndexes',
+  },
+  {
+    file: 'indexes',
+    name: 'shape: TTL not compared',
+    change: [['found.expireAfterSeconds === spec.expireAfterSeconds &&', 'true &&']],
+    tests: 'syncIndexes',
+  },
+  {
+    file: 'indexes',
+    name: 'shape: partial filter not compared',
+    change: [
+      ['isDeepStrictEqual(found.partialFilterExpression, spec.partialFilterExpression)', 'true'],
+    ],
+    tests: 'syncIndexes',
+  },
+  {
+    file: 'indexes',
+    name: '_id_ called extra',
+    change: [["if (name !== '_id_' && !wanted", 'if (!wanted']],
+    tests: 'syncIndexes',
+  },
+  {
+    file: 'indexes',
+    name: 'extra indexes not reported',
+    change: [['        extra.push(`${collection}.${name}`);\n', '']],
+    tests: 'syncIndexes',
+  },
+  {
+    file: 'indexes',
+    name: 'new collection is an error',
+    change: [
+      [
+        'if (error instanceof MongoServerError && error.code === NAMESPACE_NOT_FOUND) return [];',
+        '',
+      ],
+    ],
+    tests: 'syncIndexes',
+  },
+  {
+    file: 'indexes',
+    name: 'every listing error means a new collection',
+    change: [
+      [
+        'if (error instanceof MongoServerError && error.code === NAMESPACE_NOT_FOUND) return [];',
+        'return [];',
+      ],
+    ],
+    survives:
+      'listIndexes fails only for a missing collection or a lost connection, and a lost connection fails the createIndex right after',
+  },
+  {
+    file: 'indexes',
+    name: 'conflict not named',
+    change: [
+      [
+        'if (error instanceof MongoServerError && CONFLICT_CODES.has(Number(error.code))) {',
+        'if (false) {',
+      ],
+    ],
+    tests: 'syncIndexes',
+  },
+  {
+    file: 'indexes',
+    name: 'every error called a conflict',
+    change: [
+      [
+        'if (error instanceof MongoServerError && CONFLICT_CODES.has(Number(error.code))) {',
+        'if (error instanceof MongoServerError) {',
+      ],
+    ],
+    tests: 'syncIndexes',
+  },
+  {
+    file: 'indexes',
+    name: 'same-keys conflict code dropped',
+    change: [
+      ['const CONFLICT_CODES = new Set([85, 86]);', 'const CONFLICT_CODES = new Set([86]);'],
+    ],
+    tests: 'syncIndexes',
+  },
+  {
+    file: 'indexes',
+    name: 'same-name conflict code dropped',
+    change: [
+      ['const CONFLICT_CODES = new Set([85, 86]);', 'const CONFLICT_CODES = new Set([85]);'],
+    ],
+    survives:
+      'race guard: a name taken with other keys is found before createIndex; 86 only comes when another instance makes it in between',
+  },
+  {
+    file: 'indexes',
+    name: 'options not passed on',
+    change: [['{ ...options, name }', '{ name }']],
+    tests: 'syncIndexes',
+  },
+  {
+    file: 'indexes',
+    name: 'made index not reported',
+    change: [['    created.push(`${collection}.${name}`);\n', '']],
+    tests: 'syncIndexes',
+  },
 ];
 
 export default mutations;

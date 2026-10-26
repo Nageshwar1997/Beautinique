@@ -8,12 +8,14 @@
     "dev": "node --env-file-if-exists=.env --conditions=beautinique-source --import ./src/instrument.ts --watch src/start.ts",
     "build": "tsdown",
     "start": "node --enable-source-maps --max-old-space-size=300 --import ./dist/instrument.js dist/start.js",
+    "release": "node --conditions=beautinique-source src/db-release.ts",
     "typecheck": "tsc --noEmit",
     "lint": "eslint .",
     "test": "vitest run"
   },
   "dependencies": {
     "@beautinique/backend-server-kit": "^1.0.0",
+    "@beautinique/backend-server-release": "^1.0.0",
     "@beautinique/shared-zod": "^2.0.0",
     "core": "^0.0.0",
     "gateway": "^0.0.0",

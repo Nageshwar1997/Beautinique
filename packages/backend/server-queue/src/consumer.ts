@@ -1,8 +1,10 @@
 import type { Logger, ReadyCheck } from '@beautinique/backend-server-kit';
 import {
   type ClientSession,
+  type IndexSpec,
   type Mongo,
   ParallelTransactionError,
+  syncIndexes,
   TransactionAbortedError,
   withTransaction,
 } from '@beautinique/backend-server-mongo';
@@ -83,20 +85,28 @@ export interface DeadLetter {
   failedAt: Date;
 }
 
-/** The consumer's indexes: handled events and dead letters expire on their own. Safe to repeat. */
+/** The consumer's indexes: handled events and dead letters expire on their own. */
+export const CONSUMER_INDEXES: readonly IndexSpec[] = [
+  {
+    collection: PROCESSED_EVENTS,
+    name: 'processed_expiry',
+    key: { processedAt: 1 },
+    expireAfterSeconds: PROCESSED_KEEP_SECONDS,
+  },
+  {
+    collection: DEAD_LETTERS,
+    name: 'dead_letter_expiry',
+    key: { failedAt: 1 },
+    expireAfterSeconds: DEAD_LETTER_KEEP_SECONDS,
+  },
+];
+
+/**
+ * Makes the consumer's indexes (safe to repeat). A deployable's release steps sync CONSUMER_INDEXES
+ * with its other indexes instead (@beautinique/backend-server-release); this is for tests and tools.
+ */
 export async function ensureConsumerIndexes(mongo: Mongo): Promise<void> {
-  await mongo.db
-    .collection(PROCESSED_EVENTS)
-    .createIndex(
-      { processedAt: 1 },
-      { name: 'processed_expiry', expireAfterSeconds: PROCESSED_KEEP_SECONDS },
-    );
-  await mongo.db
-    .collection(DEAD_LETTERS)
-    .createIndex(
-      { failedAt: 1 },
-      { name: 'dead_letter_expiry', expireAfterSeconds: DEAD_LETTER_KEEP_SECONDS },
-    );
+  await syncIndexes(mongo, CONSUMER_INDEXES);
 }
 
 /** The shared client's address and reconnect rules, for the worker's own connections. */

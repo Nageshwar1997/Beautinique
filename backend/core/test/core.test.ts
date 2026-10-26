@@ -1,6 +1,8 @@
+import { RELEASE_STATE, releaseFingerprint } from '@beautinique/backend-server-release';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 
 import { readConfig } from '../src/config.ts';
+import { releaseDefinition } from '../src/release.ts';
 import {
   type Inspector,
   inspector,
@@ -41,6 +43,33 @@ describe('core', () => {
       const missing = await fetch(`${server.url}/nope`);
       expect(missing.status).toBe(404);
       expect(await missing.json()).toMatchObject({ error: { code: 'NOT_FOUND' } });
+    } finally {
+      await server.stop();
+    }
+  });
+
+  it('makes every index in its release steps before it listens, and records the release', async () => {
+    const server = await start(testConfig(dbName), {
+      port: 0,
+      host: '127.0.0.1',
+      handleSignals: false,
+      runtime: { queuePrefix: prefix, epochKey, consume: false },
+    });
+    try {
+      for (const { collection, name } of releaseDefinition.indexes) {
+        const names = (await look.mongo.db.collection(collection).indexes()).map((i) => i.name);
+        expect(names, `${collection}.${name}`).toContain(name);
+      }
+      expect(releaseDefinition.indexes.map((i) => `${i.collection}.${i.name}`)).toEqual(
+        expect.arrayContaining([
+          'platform_outbox.status_createdAt',
+          'platform_processed_events.processed_expiry',
+          'platform_pings.recordedAt_ttl',
+        ]) as unknown,
+      );
+      expect(await look.mongo.db.collection(RELEASE_STATE).findOne({})).toMatchObject({
+        fingerprint: releaseFingerprint(releaseDefinition),
+      });
     } finally {
       await server.stop();
     }

@@ -22,6 +22,7 @@ Identity ko MongoDB (apna DB `bq_identity`) aur Redis chahiye (start pe connect 
 ## Code kahan hai
 
 - `src/service.ts`: `readConfig` + `start` (split mode me `src/server.ts`, bundle mode me `backend/bundle` isse chalata hai).
+- `src/release.ts` + `src/runtime.ts`: start pe Mongo se judte hi release steps (migrations, indexes; `@beautinique/backend-server-release`, ARCHITECTURE §11.1), phir Redis. Nayi migration list ke aakhir me, naye collection ke indexes `indexes` me; permission sync step T3.3 me.
 - `src/app.ts`: `@beautinique/backend-server-kit` ka `createApp` (health, errors, logs, request id).
 - `src/routes/index.ts`: identity ke routes. Har route contracts me declare hota hai (owner `identity`), yahan sirf handler.
 

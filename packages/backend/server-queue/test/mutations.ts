@@ -86,7 +86,7 @@ const mutations: Mutation[] = [
     file: 'outbox',
     name: 'no pending index',
     change: [
-      ["await outbox.createIndex({ status: 1, createdAt: 1 }, { name: 'status_createdAt' });", ''],
+      ["{ collection: OUTBOX, name: 'status_createdAt', key: { status: 1, createdAt: 1 } },", ''],
     ],
   },
   {

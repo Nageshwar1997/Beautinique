@@ -3,6 +3,7 @@ import { connectMongo, type Mongo } from '@beautinique/backend-server-mongo';
 import { connectRedis, type RedisConnection } from '@beautinique/backend-server-queue';
 
 import type { Config } from './config.ts';
+import { runReleaseSteps } from './release.ts';
 
 /** identity's connections: its own MongoDB database and Redis. */
 export interface Runtime {
@@ -15,9 +16,9 @@ export interface Runtime {
 }
 
 /**
- * Connects to identity's MongoDB database and to Redis. The outbox relay and the queue worker come
- * with identity's first event (TASKS T3.1). If one step fails, the ones before it are closed again
- * and the error goes on.
+ * Connects to identity's MongoDB database, runs the release steps (migrations, indexes) and connects
+ * to Redis. The outbox relay and the queue worker come with identity's first event (TASKS T3.1).
+ * If one step fails, the ones before it are closed again and the error goes on.
  */
 export async function startRuntime(
   config: Config,
@@ -35,6 +36,8 @@ export async function startRuntime(
       logger,
     });
     closers.push(() => mongo.close());
+    // migrations and indexes before anything uses the database (ARCHITECTURE §11.1)
+    await runReleaseSteps(mongo, logger);
     const redis = await connectRedis({ url: config.redisUrl, name: 'identity', logger });
     closers.push(() => redis.close());
     return { mongo, redis, ready: { mongo: mongo.ready, redis: redis.ready }, stop };
