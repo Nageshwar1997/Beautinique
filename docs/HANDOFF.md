@@ -1,6 +1,6 @@
 # HANDOFF — BQ
 
-> **Status:** v1.54 (2026-10-26). Is project pe 2 log kaam karte hain. Ye file batati hai ki **abhi kya halat hai, kisne kya chhoda, agla kaam kya hai** aur kaunse sawal khule hain, taaki doosra insaan (aur uska Claude) bina poora itihaas padhe kaam utha sake. Jo bhi kaam roke, wo ye file update kare (neeche §8).
+> **Status:** v1.55 (2026-10-26). Is project pe 2 log kaam karte hain. Ye file batati hai ki **abhi kya halat hai, kisne kya chhoda, agla kaam kya hai** aur kaunse sawal khule hain, taaki doosra insaan (aur uska Claude) bina poora itihaas padhe kaam utha sake. Jo bhi kaam roke, wo ye file update kare (neeche §8).
 
 ## 0. Pehle ye (handoff ke din)
 
@@ -67,7 +67,14 @@
 
 ## 4. Agla kaam (is order me)
 
-**Abhi (2026-10-25): plan [TASKS.md](TASKS.md) section D (har milestone live), agla Milestone 2. Jo developer ab kaam utha raha hai (baari-baari, §8), wo ye kare:**
+**Abhi (2026-10-26): M2 live hai** (customer https://bq-customer.vercel.app, backend https://bq-live.onrender.com, Sentry `bq-backend`; §3). `release` = `prerelease` (`494c20d`); PR #18 `release` → `main` khula. **Agla: Milestone 3 (Identity)**, TASKS section D ki M3 row aur Phase 3. Is order me:
+
+1. **M2 ke bache chhote kaam:** PR #18 merge (owner, demo ke baad). Hourly wake: pehla scheduled run 2026-10-26 16:16 UTC pe success (15:30 wala slot, GitHub ~46 min der se); agle din 10:00 IST se runs dekhna. M2 demo note (TASKS D checklist ka 3). TASKS C.3 (Sentry, Brevo, Cloudinary ki free limits).
+2. **M3 se pehle owner:** Brevo account + API key aur authorised IPs ki rok hatana (email OTP; A.6), Google OAuth client customer + admin ke redirects ke saath (A.5), identity ka alag Atlas DB user (A.4).
+3. **M3 code, is order me (har ek `feat/<task>` → PR → `prerelease`):** T2.5 bundle ke boot release steps (lease lock, migrations, index sync; identity ke DB se pehle zaroori) → T3.1 (users, argon2id, email OTP, password, TOTP, Google) → T3.2 (sessions, refresh rotation, ES256 + JWKS, My Devices) + T2.2 ka bacha hissa (gateway me JWKS, per-app cookies, passport; TASKS C.1 cookies yahin) → T3.3 (permission catalogue, 79 roles seed, grants) → customer + admin me auth screens (auth-ui) → live signup/login aur My Devices demo.
+4. **Owner ke khule kaam:** `prerelease` ka alag ruleset (seedha push bina bypass), customer app (browser) me Sentry kab (faisla baaki).
+
+**Pichhla plan (M2, ab live):**
 
 - **Naye git flow pe aane ke liye ek baar (owner):** PR `main` → `prerelease` (sync) ho gaya (PR #7). Uske baad `main` me sirf `release` se PR aata hai (CI rokta hai). GitHub ka default branch `prerelease` karna (Settings → General → Default branch) owner ka faisla hai: tab naye PR aur clone apne-aap development pe jaate hain.
 - **`prerelease` pe seedha push ke liye ruleset (owner, GitHub Settings → Rules → Rulesets):** `protected-branches` ki target list se `prerelease` hatao (wo `main` aur `release` ke liye waisa hi rahe), aur `prerelease` ka naya ruleset banao jisme sirf "Restrict deletions" aur "Block force pushes" ho (PR aur required check nahi; dono hon to seedha push rukta hai). Jab tak ye nahi hota, `prerelease` pe bhi sirf PR chalega.
@@ -99,7 +106,7 @@
 
 - **MongoDB 8.0 aur Linux kernel 6.19+:** naye kernel pe `mongo:8.0.x` shuru hi nahi hota ("MongoDB cannot start: Linux kernel versions 6.19 and newer ...", SERVER-121912), kyunki uska tcmalloc kernel ke ek badlav se toot jaata hai. Ubuntu/Azure ke `7.0.0-xx` kernel bhi block hote hain (SERVER-136848). GitHub ke `ubuntu-latest` aur `ubuntu-24.04` dono runners kernel `7.0.0-azure` pe hain (2026-10-22), isliye runner pin karna kaam nahi aaya. **Hal:** compose ke `mongo` service me `GLIBC_TUNABLES=glibc.pthread.rseq=1` (JIRA pe bataya gaya workaround; tcmalloc safe raaste pe chalta hai). Laptop (WSL2 kernel 6.18) pe bhi yahi chalta hai. MongoDB ka asli fix aane pe ye setting hata do. CI ka start step kernel version print karta hai.
 - **Naya backend package jo kisi service pe test kare** (Mongo, Valkey, aage Mailpit): `ci.yml` aur `release.yml` ke "Start MongoDB and Valkey" step me wo service jodo, warna CI pe uske tests "These tests need ..." se fail hote hain (server-queue ke pehle push pe Valkey chhoot gaya tha). Service shuru na ho to ye step `docker compose ps` aur uske aakhri 200 log lines print karta hai: wahi wajah batate hain.
-- **Render ka build/start command dashboard se chalta hai, repo se nahi** (2026-10-26): repo me command badle par dashboard me purana raha, to deploy purane se hi fail hua. Isliye dashboard me sirf `sh scripts/render/build.sh` / `sh scripts/render/start.sh`; commands badalne ho to ye scripts badlo. Render workspace me purani free services (BQ-Microservices, Beautinique-Gateway; branch `main`) abhi bhi chalu hain: saari free services 750 ghante/mahina saath me baantti hain (ARCHITECTURE §11.2), unhe suspend karna owner ka kaam (TASKS T11.5).
+- **Render ka build/start command dashboard se chalta hai, repo se nahi** (2026-10-26): repo me command badle par dashboard me purana raha, to deploy purane se hi fail hua. Isliye dashboard me sirf `sh scripts/render/build.sh` / `sh scripts/render/start.sh`; commands badalne ho to ye scripts badlo. Render workspace ki purani free services (BQ-Microservices, Beautinique-Gateway, BQ-Backend) owner ne 2026-10-26 ko suspend kar di; ab sirf `bq-live` chalti hai. Koi nayi free service mat chalana: saari free services 750 ghante/mahina saath me baantti hain (ARCHITECTURE §11.2). Unhe hatana TASKS T11.5 me.
 - **Gateway sign-in tak fail closed hai** (2026-10-25): `access` `public` na ho to har route 401. Isliye login (M3) se pehle koi naya route jo live pe chalna chahiye, sirf `public` ho sakta hai, aur public write pe sakht rate limit + TTL soch ke (jaise demo ping: owner ka faisla). Seedha Render URL pe `/api` bina origin secret ke 403.
 - **Test ya `.env.example` me secret jaisa literal** (`SECRET = '...'`, `..._SECRETS=...` lambi random-si value) gitleaks ka generic rule pakad sakta hai (entropy > 3.5): CI fail. Tests me secret `randomBytes` se runtime pe banao; laptop ki public value kam entropy wali hai (`not-a-secret-...`).
 - **Dev server ka `/api` proxy origin secret bhejta hai** (`vite.config.ts`, app generator template): naya app ya proxy badlo to `headers: { 'x-origin-secret': ... }` mat hatao, warna gateway 403 deta hai.
@@ -200,3 +207,4 @@
 | v1.52 | 2026-10-26 | §3: M2 live URLs aur live jaanch ke nateeje; baaki: cold start, scheduled wake, `release` → `main`. |
 | v1.53 | 2026-10-26 | §3: cold start fix branch `feat/m2-wake-kick` (gateway `/wake`, seedhi kick). |
 | v1.54 | 2026-10-26 | §3: live cold start pass (`/wake` kick). |
+| v1.55 | 2026-10-26 | §4: M2 live; agla M3 (Identity) ka order, M2 ke bache kaam, owner ke kaam; pehla scheduled wake run 16:16 UTC. |
