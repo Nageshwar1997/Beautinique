@@ -96,6 +96,32 @@ const mutations: Mutation[] = [
     survives: 'beforeSend (scrubEvent) drops the headers anyway: the two guard each other',
   },
   {
+    file: 'monitoring',
+    name: 'span headers, IP and user kept',
+    change: [['if (PRIVATE_ATTRIBUTE.test(key)) continue;', '']],
+    tests: 'scrubSpan',
+  },
+  {
+    file: 'monitoring',
+    name: 'span URL keeps its query',
+    change: [['? withoutQuery(value) : value', '? value : value']],
+    tests: 'scrubSpan',
+  },
+  {
+    file: 'monitoring',
+    name: 'span name keeps its query',
+    change: [['name: withoutQuery(span.name)', 'name: span.name']],
+    tests: 'scrubSpan',
+  },
+  {
+    file: 'monitoring',
+    name: 'spans not scrubbed',
+    change: [['beforeSendSpan: scrubSpan,', '']],
+    tests: 'monitoring',
+    survives:
+      'dataCollection already keeps headers, queries and users out of spans; scrubSpan is the second lock (a probe with tracesSampleRate 1 found none of them in sent spans)',
+  },
+  {
     file: 'errors',
     name: 'server errors not reported',
     change: [['reportError(error, { requestId, method: req.method, path: req.path });', '']],

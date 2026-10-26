@@ -771,6 +771,15 @@ describe('a route that replies after the commit', () => {
 
   it('answers 500 and saves nothing when the transaction fails, or runs queries in parallel', async () => {
     for (const mode of ['broken', 'parallel']) {
+      // the guard sees only queries on the wire together, and on a fast runner one of the two inserts
+      // could finish before the other starts (CI, 2026-10-26): hold this request's three inserts for
+      // 200 ms each, so the two in Promise.all surely overlap
+      if (mode === 'parallel') {
+        await failPoint(
+          { times: 3 },
+          { failCommands: ['insert'], blockConnection: true, blockTimeMS: 200 },
+        );
+      }
       const res = await fetch(`${server.url}/orders/${mode}`, { method: 'POST' });
       expect(res.status, mode).toBe(500);
       expect(await res.json()).toMatchObject({ error: { code: 'INTERNAL' } });

@@ -34,6 +34,27 @@ export function scrubEvent<Scrubbed extends Sentry.Event>(event: Scrubbed): Scru
   return event;
 }
 
+/** A trace span as Sentry v11 streams it (traceLifecycle 'stream', its default). */
+type StreamedSpan = Parameters<NonNullable<Sentry.NodeOptions['beforeSendSpan']>>[0];
+
+/** Span attributes that may carry a secret or personal data: headers, the client's IP, the user, queries. */
+const PRIVATE_ATTRIBUTE =
+  /^(?:http\.(?:request|response)\.header\.|user\.|enduser\.|client\.address$|http\.client_ip$|net\.peer\.ip$|url\.query$|http\.query$)/;
+
+/**
+ * The same rule for traces: a span keeps its timings and route, never a header, an IP, a user or a
+ * query string (in its name or in a URL attribute). Exported for its test.
+ */
+export function scrubSpan(span: StreamedSpan): StreamedSpan {
+  const attributes: Record<string, unknown> = {};
+  for (const [key, value] of Object.entries(span.attributes)) {
+    if (PRIVATE_ATTRIBUTE.test(key)) continue;
+    attributes[key] =
+      typeof value === 'string' && /url|target/.test(key) ? withoutQuery(value) : value;
+  }
+  return { ...span, name: withoutQuery(span.name), attributes };
+}
+
 /**
  * Starts Sentry for the whole process. In bundle mode every deployable shares the process, and a
  * second init would replace the first, so any later call keeps the first (ARCHITECTURE §11.1).
@@ -64,9 +85,10 @@ export function initMonitoring({
       queues: false,
       stackFrameVariables: false,
     },
-    // and in case a default changes: whatever a request carried is dropped before sending
+    // and in case a default changes: whatever a request carried is dropped before sending, from
+    // errors and from trace spans (v11 streams spans, so beforeSendTransaction would never run)
     beforeSend: scrubEvent,
-    beforeSendTransaction: scrubEvent,
+    beforeSendSpan: scrubSpan,
     beforeBreadcrumb(breadcrumb) {
       const url: unknown = breadcrumb.data?.url;
       if (typeof url === 'string') breadcrumb.data = { ...breadcrumb.data, url: withoutQuery(url) };
