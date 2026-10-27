@@ -66,6 +66,56 @@ function checkSchedules(schedules: readonly Schedule[]): void {
   }
 }
 
+export interface TaskTriggerOptions {
+  redis: Redis;
+  logger: Logger;
+  /** The deployable's queue: its consumer runs the task. */
+  queue: string;
+  /** BullMQ key prefix (default `bull`). */
+  prefix?: string;
+}
+
+/** Runs a queue's task now instead of at its next scheduled time. */
+export interface TaskTrigger {
+  /**
+   * Adds one run of `task` to the queue. Runs may pile up and overlap a scheduled one: a task picks
+   * up whatever is due, so an extra run finds nothing. Called from a subscription's handler, the
+   * run starts after the handler's transaction has committed, as long as the queue's consumer works
+   * one job at a time (the default); otherwise the next scheduled run picks the work up.
+   */
+  runSoon(task: string): Promise<void>;
+  /** Closes the trigger's queue handle, not the shared Redis client. */
+  close(): Promise<void>;
+}
+
+/**
+ * Lets work that just became due start at once, without waiting for the schedule: notify sends a
+ * sign-in code seconds after the event, while its every-minute run stays the safety net.
+ */
+export function startTaskTrigger({
+  redis,
+  logger,
+  queue,
+  prefix = 'bull',
+}: TaskTriggerOptions): TaskTrigger {
+  const open = openQueue(queue, redis, prefix, (error) => {
+    logger.warn({ err: { name: error.name, message: error.message } }, 'task trigger queue error');
+  });
+  let closed = false;
+  return {
+    runSoon: async (task) => {
+      if (!TASK_NAME.test(task)) throw new Error(`Task "${task}" must be <module>.<task>`);
+      if (closed) throw new Error(`The task trigger of ${queue} is closed`);
+      await open.add(task, { task }, { removeOnComplete: true, removeOnFail: { count: 20 } });
+    },
+    close: async () => {
+      if (closed) return;
+      closed = true;
+      await open.close();
+    },
+  };
+}
+
 export interface UpsertSchedulesOptions {
   /** The deployable's own database (task run times live there). */
   mongo: Mongo;

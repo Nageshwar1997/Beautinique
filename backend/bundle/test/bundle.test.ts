@@ -17,6 +17,7 @@ const REDIS_DB = 'redis://localhost:6379/5';
 const dbName = `bq_test_bundle_${randomUUID().slice(0, 8)}`;
 // every deployable has a database of its own, live and here
 const identityDbName = `${dbName}_identity`;
+const notifyDbName = `${dbName}_notify`;
 // made per run, so no secret-looking literal sits in the repo (gitleaks)
 const ORIGIN_SECRET = randomBytes(32).toString('base64url');
 
@@ -25,6 +26,7 @@ afterAll(async () => {
   const mongo = await connectMongo({ uri: MONGO_URI, dbName, appName: 'bundle-test', logger });
   await mongo.db.dropDatabase();
   await mongo.client.db(identityDbName).dropDatabase();
+  await mongo.client.db(notifyDbName).dropDatabase();
   await mongo.close();
   const redis = await connectRedis({ url: REDIS_DB, name: 'bundle-test', logger });
   await redis.client.flushdb();
@@ -39,6 +41,13 @@ const quiet = () => ({
   IDENTITY__MONGO_URI: MONGO_URI,
   IDENTITY__MONGO_DB_NAME: identityDbName,
   IDENTITY__REDIS_URL: REDIS_DB,
+  NOTIFY__MONGO_URI: MONGO_URI,
+  NOTIFY__MONGO_DB_NAME: notifyDbName,
+  NOTIFY__REDIS_URL: REDIS_DB,
+  NOTIFY__EMAIL_TRANSPORT: 'mailpit',
+  NOTIFY__EMAIL_FROM: 'no-reply@beautinique.example',
+  // made per run, like the origin secret: 32 random bytes
+  NOTIFY__OTP_EVENT_KEYS: `e1:${randomBytes(32).toString('base64')}`,
   GATEWAY__REDIS_URL: REDIS_DB,
   GATEWAY__ORIGIN_SECRETS: ORIGIN_SECRET,
 });
@@ -63,7 +72,11 @@ describe('bundle', () => {
       expect(status.status).toBe(200);
       expect(await status.json()).toMatchObject({
         status: 'ok',
-        deployables: { core: { status: 'ok' }, identity: { status: 'ok' } },
+        deployables: {
+          core: { status: 'ok' },
+          identity: { status: 'ok' },
+          notify: { status: 'ok' },
+        },
       });
     } finally {
       await bundle.stop();

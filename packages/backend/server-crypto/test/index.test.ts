@@ -8,6 +8,7 @@ import {
   encryptField,
   generateKey,
   loadCryptoKeys,
+  loadSealingKeys,
   maskTail,
   needsReencrypt,
   sealPii,
@@ -23,6 +24,7 @@ describe('public API', () => {
   it('exports the key loader, the field functions and the error', () => {
     for (const name of [
       'loadCryptoKeys',
+      'loadSealingKeys',
       'generateKey',
       'encryptField',
       'decryptField',
@@ -74,6 +76,25 @@ describe('loadCryptoKeys', () => {
       expect((caught as Error).message).not.toContain(K1);
       expect((caught as Error).message).not.toContain(short);
     }
+  });
+
+  it('reads sealing-only keys under the setting it is told, for a value two deployables share', () => {
+    const ring = loadSealingKeys(`e2:${K2}, e1:${K1}`, 'OTP_EVENT_KEYS');
+    expect(ring.encryption.current).toBe('e2');
+    expect([...ring.encryption.keys.keys()]).toEqual(['e2', 'e1']);
+    expect(ring).not.toHaveProperty('blindIndex');
+    const sealed = encryptField(ring, '482913', 'identity.otp:1');
+    expect(decryptField(loadSealingKeys(`e1:${K1},e2:${K2}`), sealed, 'identity.otp:1')).toBe(
+      '482913',
+    );
+    for (const [fieldKeys, message] of [
+      ['', 'OTP_EVENT_KEYS: give at least one key'],
+      [`e1:${K1},e1:${K2}`, 'OTP_EVENT_KEYS: key e1 is listed twice'],
+      [K1, 'OTP_EVENT_KEYS: each key must be "<id>:<base64>"'],
+    ] as const) {
+      expect(() => loadSealingKeys(fieldKeys, 'OTP_EVENT_KEYS'), message).toThrow(message);
+    }
+    expect(() => loadSealingKeys('')).toThrow('FIELD_KEYS: give at least one key');
   });
 
   it('makes random 32-byte keys', () => {

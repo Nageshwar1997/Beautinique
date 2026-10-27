@@ -19,7 +19,8 @@
     "@beautinique/shared-zod": "^2.0.0",
     "core": "^0.0.0",
     "gateway": "^0.0.0",
-    "identity": "^0.0.0"
+    "identity": "^0.0.0",
+    "notify": "^0.0.0"
   },
   "devDependencies": {
     "@beautinique/backend-server-mongo": "^1.0.0",

@@ -82,7 +82,7 @@ npm run build
 - `packages/<shared|frontend|backend>/<name>` → `@beautinique/<category>-<name>` (npm workspaces).
   Packages naye bante hain; purana `BQ-Packages` repo sirf reference hai.
 - `frontend/<app>`, `backend/<name>`: `npm run create` se bante hain, npm packages nahi (abhi: customer, admin;
-  gateway, identity, core, bundle).
+  gateway, identity, notify, core, bundle).
 - `infra/`: laptop ka Docker infra (Mongo replica set, Valkey, Mailpit); live pe Docker nahi.
 - `scripts/mutation/`: mutation runner (`npm run mutate`); lists har package ke `test/mutations.ts` me.
 - `scripts/packages/`: package CLI (Node 24 TypeScript seedha chalata hai, build nahi). Tests:

@@ -5,6 +5,9 @@ import {
   events,
   getPing,
   isPermissionKey,
+  OTP_PURPOSES,
+  otpRequested,
+  otpSealContext,
   permissions,
   pingRead,
   pingRecorded,
@@ -75,5 +78,42 @@ describe('platform catalogue (Milestone 1 sample)', () => {
       pingRecorded.envelope.safeParse({ ...envelope, data: { ...data, note: '' } }).success,
     ).toBe(false);
     expect(recordPing.input.body.safeParse({ note: 'x'.repeat(201) }).success).toBe(false);
+  });
+});
+
+describe('identity catalogue', () => {
+  const challengeId = '0190a1b2-c3d4-7e5f-8a9b-0c1d2e3f4a5c';
+  const otp = {
+    challengeId,
+    email: ' Riya@Beautinique.Example ',
+    app: 'customer',
+    purpose: 'sign-in',
+    sealedCode: 'v1.e1.AAAAAAAAAAAAAAAA.BBBBBBBB.CCCCCCCCCCCCCCCCCCCCCC',
+    expiresAt: '2026-10-27T10:10:00.000Z',
+  };
+
+  it('registers identity.otp.requested from identity, with a sealed code and a normalised email', () => {
+    expect(events.latest('identity.otp.requested')).toBe(otpRequested);
+    expect(otpRequested.producer).toBe('identity');
+    const parsed = otpRequested.data.parse(otp);
+    expect(parsed.email).toBe('riya@beautinique.example');
+    expect(OTP_PURPOSES).toEqual(['sign-in', 'sign-up']);
+    expect(otpSealContext(challengeId)).toBe(`identity.otp:${challengeId}`);
+  });
+
+  it('refuses a plain code, another purpose and an app that does not exist', () => {
+    for (const change of [
+      { sealedCode: '482913' },
+      { sealedCode: 'v2.e1.a.b.c' },
+      { sealedCode: `v1.e1.${'a'.repeat(200)}.b.c` },
+      { purpose: 'reset' },
+      { app: 'shop' },
+      { email: 'not-an-email' },
+    ]) {
+      expect(
+        otpRequested.data.safeParse({ ...otp, ...change }).success,
+        JSON.stringify(change),
+      ).toBe(false);
+    }
   });
 });
