@@ -1,6 +1,6 @@
 # TASKS — BQ
 
-> **Status:** v1.46 (2026-10-27). Poore project ki task list, [ARCHITECTURE.md](ARCHITECTURE.md) §16 ke phases ke hisaab se. Har task "done" tabhi jab [RULES.md](RULES.md) §1.5 ki Definition of Done poori ho.
+> **Status:** v1.48 (2026-10-27). Poore project ki task list, [ARCHITECTURE.md](ARCHITECTURE.md) §16 ke phases ke hisaab se. Har task "done" tabhi jab [RULES.md](RULES.md) §1.5 ki Definition of Done poori ho.
 
 **Kaise use karein:**
 - `[ ]` baaki, `[~]` chal raha hai, `[x]` done.
@@ -114,7 +114,7 @@ Har milestone ke end me kuch **live** dikhana hai. Ek hi live environment, free 
 
 ## Phase 3. bq-identity (2–3 hafte)
 
-- [ ] T3.1 Users, credentials (argon2id), email OTP, email + password, TOTP, customer ke liye Google, LinkedIn, GitHub OAuth (PKCE; owner, 2026-10-26).
+- [~] T3.1 Users, credentials (argon2id), email OTP, email + password, TOTP, customer ke liye Google, LinkedIn, GitHub OAuth (PKCE; owner, 2026-10-26). **Plan (owner ne maana, 2026-10-27), 4 PR:** (1) `feat/t3.1-notify-email`: `backend/notify` ka email hissa (Brevo HTTPS, Mailpit, fake), OTP fast lane, 300/din ginti, event `identity.otp.requested` (code encrypted); (2) `feat/t3.1-otp`: users, OTP (Redis), customer signup + 18+ + terms, identity me relay + worker; (3) `feat/t3.1-password-totp`: argon2id (Node `crypto.argon2`), password 12–128 + HIBP, TOTP + 10 recovery codes, login flow, har app ki login policy; (4) `feat/t3.1-social`: Google, LinkedIn, GitHub (`openid-client`, PKCE), live A.5 ke baad. Login flow ka aakhri step `issueSession` port pe rukta hai; asli session T3.2 me (ARCHITECTURE §7.1). **PR 1 (2026-10-27, `feat/t3.1-notify-email`):** `backend/notify` (email ka hissa, [README](../backend/notify/README.md)): event `identity.otp.requested` v1 (contracts), subscriber `notify.otpEmail` → `notify_deliveries` → task `email.sendDue` (turant `startTaskTrigger` se, aur har minute), Brevo HTTPS / Mailpit, lanes, 300/250 budget (UTC din), 5 retry, expiry; kernel me `loadSealingKeys` (server-crypto) aur `startTaskTrigger` (server-queue). Tests: notify 21 (asli Mailpit pe event se inbox tak), server-queue 55, crypto 15, contracts 40, bundle 18; mutations crypto 24/25 (1 equivalent), trigger 4/4; compiled bundle laptop pe `/status` notify ok. Live: Render keys ke baad (HANDOFF §4); asli user wala raasta (OTP maangna) PR 2 me.
 - [ ] T3.2 Sessions, refresh rotation + reuse detection, ES256 + JWKS, My Devices.
 - [ ] T3.3 Apps, permission catalogue, 79 roles ka seed, scoped grants, invitations, applicant grants.
 - [ ] T3.4 API clients (Seller API Integration, Affiliate Partner).
@@ -273,3 +273,5 @@ Har milestone ke end me kuch **live** dikhana hai. Ek hi live environment, free 
 | v1.44   | 2026-10-27 | T2.5 done: `backend-server-release` (lease 30 s, migrations, index sync, fingerprint), `db:release`.                                                              |
 | v1.45   | 2026-10-27 | T2.5 aur A.4 ki live jaanch (deploy `cfd7a04`): release steps, fast cold start, `bq-identity`/`bq-core` users.                                                    |
 | v1.46 | 2026-10-27 | T2.7: 10-27 ke pehle 5 wake slots me 0 chale; A.4: owner ne users ke DBs pakke kiye; C.3 done (Ola Maps: 100K free per API, rate limits, terms). |
+| v1.47 | 2026-10-27 | T3.1 shuru: 4 PR ka plan aur owner ke faisle (notify email pehle, password, recovery codes). |
+| v1.48 | 2026-10-27 | T3.1 PR 1: notify ka email hissa, OTP event, kernel helpers, tests. |
