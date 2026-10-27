@@ -221,6 +221,41 @@ const mutations: Mutation[] = [
     ],
     tests: 'sign-in routes',
   },
+  {
+    file: 'catalogue/identity',
+    name: 'an internal app without the authenticator',
+    change: [["  'support',\n  'finance',", "  'finance',"]],
+    tests: 'authenticator',
+  },
+  {
+    file: 'catalogue/identity',
+    name: 'new passwords without the rules',
+    change: [
+      [
+        'body: object({ code: otpZod, password: passwordZod })',
+        'body: object({ code: otpZod, password: string() })',
+      ],
+    ],
+    tests: 'new password',
+  },
+  {
+    file: 'catalogue/identity',
+    name: 'recovery codes of any length',
+    change: [['/^[A-Z2-7]{5}-?[A-Z2-7]{5}$/', '/^[A-Z2-7-]+$/']],
+    tests: 'recovery code',
+  },
+  {
+    file: 'catalogue/identity',
+    name: 'recovery codes not upper-cased',
+    change: [['  .trim()\n  .toUpperCase()\n', '  .trim()\n']],
+    tests: 'recovery code',
+  },
+  {
+    file: 'catalogue/identity',
+    name: 'any number of recovery codes',
+    change: [['recoveryCodes: array(string()).length(10)', 'recoveryCodes: array(string())']],
+    tests: 'recovery code',
+  },
 ];
 
 export default mutations;
