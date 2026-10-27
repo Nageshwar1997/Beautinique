@@ -46,6 +46,9 @@ describe('generateFiles', () => {
       '/platform/pings',
       '/platform/pings/{pingId}',
       '/platform/wake',
+      '/auth/otp',
+      '/auth/otp/{challengeId}/resend',
+      '/auth/otp/{challengeId}/verify',
     ]);
     const manifest = parsed('gateway-manifest.json') as {
       version: string;
@@ -56,6 +59,9 @@ describe('generateFiles', () => {
       'platform.ping.record',
       'platform.ping.get',
       'platform.server.wake',
+      'auth.otp.request',
+      'auth.otp.resend',
+      'auth.otp.verify',
     ]);
   });
 
@@ -65,9 +71,11 @@ describe('generateFiles', () => {
         events: { type: string; version: number; schema: { required: string[] } }[];
       }
     ).events;
-    expect(list).toHaveLength(1);
-    expect(list[0]).toMatchObject({ type: 'platform.ping.recorded', version: 1 });
-    expect(list[0]?.schema.required).toEqual(expect.arrayContaining(['eventId', 'data', 'scope']));
+    expect(list.map((e) => [e.type, e.version])).toEqual([
+      ['identity.otp.requested', 1],
+      ['platform.ping.recorded', 1],
+    ]);
+    expect(list[1]?.schema.required).toEqual(expect.arrayContaining(['eventId', 'data', 'scope']));
   });
 
   it('lists permissions sorted by key', () => {

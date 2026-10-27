@@ -177,5 +177,5 @@ Har screen ye states dikhati hai:
 | v1.4    | 2026-10-21 | §3: palette script ab rangon ka matlab bhi check karta hai; checks ki ginti hata di (wo badalti rehti hai).                                                                           |
 | v1.5    | 2026-10-21 | Owner ke faisle: muted section pe subtle text nahi (rang wahi); ulti patti ke liye `focus-ring-inverse` + `surface-inverse`; high contrast me tones gehre, saara text 7:1.            |
 | v1.6    | 2026-10-26 | §11 Logo: master image, `BrandLogo`/`BrandMark` (icons package), rang theme se, favicon alag, install icons.                                                                          |
-| v1.7    | 2026-10-26 | §6 Error: 404 aur error page ka design (`ErrorPage`, compact art).                                                                                                                   |
-| v1.8    | 2026-10-26 | §3: `surface-inverse` ab `brand-text` bhi badalta hai (`brand-text-inverse`); footer me chalu page ka link padhne layak.                                                                   |
+| v1.7    | 2026-10-26 | §6 Error: 404 aur error page ka design (`ErrorPage`, compact art).                                                                                                                    |
+| v1.8    | 2026-10-26 | §3: `surface-inverse` ab `brand-text` bhi badalta hai (`brand-text-inverse`); footer me chalu page ka link padhne layak.                                                              |

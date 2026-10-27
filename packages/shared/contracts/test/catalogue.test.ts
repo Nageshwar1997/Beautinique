@@ -2,14 +2,24 @@ import { describe, expect, it } from 'vitest';
 
 import {
   APPS,
+  consentProblems,
   events,
   getPing,
+  IDENTITY_ERROR_CODES,
   isPermissionKey,
+  OTP_APPS,
+  OTP_PURPOSES,
+  otpRequested,
+  otpSealContext,
   permissions,
   pingRead,
   pingRecorded,
   recordPing,
+  requestOtp,
+  resendOtp,
   routes,
+  SIGN_UP_APPS,
+  verifyOtp,
   wake,
 } from '../src';
 
@@ -22,6 +32,9 @@ describe('platform catalogue (Milestone 1 sample)', () => {
       'platform.ping.record',
       'platform.ping.get',
       'platform.server.wake',
+      'auth.otp.request',
+      'auth.otp.resend',
+      'auth.otp.verify',
     ]);
     expect(events.latest('platform.ping.recorded')).toBe(pingRecorded);
     expect(permissions.get(pingRead.key)).toBe(pingRead);
@@ -75,5 +88,88 @@ describe('platform catalogue (Milestone 1 sample)', () => {
       pingRecorded.envelope.safeParse({ ...envelope, data: { ...data, note: '' } }).success,
     ).toBe(false);
     expect(recordPing.input.body.safeParse({ note: 'x'.repeat(201) }).success).toBe(false);
+  });
+});
+
+describe('identity catalogue', () => {
+  const challengeId = '0190a1b2-c3d4-7e5f-8a9b-0c1d2e3f4a5c';
+  const otp = {
+    challengeId,
+    email: ' Riya@Beautinique.Example ',
+    app: 'customer',
+    purpose: 'sign-in',
+    sealedCode: 'v1.e1.AAAAAAAAAAAAAAAA.BBBBBBBB.CCCCCCCCCCCCCCCCCCCCCC',
+    expiresAt: '2026-10-27T10:10:00.000Z',
+  };
+
+  it('registers identity.otp.requested from identity, with a sealed code and a normalised email', () => {
+    expect(events.latest('identity.otp.requested')).toBe(otpRequested);
+    expect(otpRequested.producer).toBe('identity');
+    const parsed = otpRequested.data.parse(otp);
+    expect(parsed.email).toBe('riya@beautinique.example');
+    expect(OTP_PURPOSES).toEqual(['sign-in', 'sign-up']);
+    expect(otpSealContext(challengeId)).toBe(`identity.otp:${challengeId}`);
+  });
+
+  it('refuses a plain code, another purpose and an app that does not exist', () => {
+    for (const change of [
+      { sealedCode: '482913' },
+      { sealedCode: 'v2.e1.a.b.c' },
+      { sealedCode: `v1.e1.${'a'.repeat(200)}.b.c` },
+      { purpose: 'reset' },
+      { app: 'shop' },
+      { email: 'not-an-email' },
+    ]) {
+      expect(
+        otpRequested.data.safeParse({ ...otp, ...change }).success,
+        JSON.stringify(change),
+      ).toBe(false);
+    }
+  });
+});
+
+describe('sign-in routes', () => {
+  it('are public identity routes for the email-code apps, under the otp and auth limits', () => {
+    for (const route of [requestOtp, resendOtp, verifyOtp]) {
+      expect(route).toMatchObject({
+        owner: 'identity',
+        access: { type: 'public' },
+        apps: OTP_APPS,
+      });
+      expect(route.idempotency).toBe(false);
+    }
+    expect([requestOtp.rateLimit, resendOtp.rateLimit, verifyOtp.rateLimit]).toEqual([
+      'otp',
+      'otp',
+      'auth',
+    ]);
+    expect(OTP_APPS).not.toContain('admin');
+    expect(SIGN_UP_APPS).not.toContain('delivery');
+    expect(IDENTITY_ERROR_CODES).toMatchObject({ OTP_INVALID: 400, OTP_EMAIL_LIMIT: 429 });
+  });
+
+  it('take a normalised email and a six-digit code', () => {
+    expect(requestOtp.input.body.parse({ email: ' Riya@Beautinique.Example ' }).email).toBe(
+      'riya@beautinique.example',
+    );
+    expect(verifyOtp.input.body.safeParse({ code: '48291' }).success).toBe(false);
+    expect(verifyOtp.input.body.safeParse({ code: '482913' }).success).toBe(true);
+    expect(
+      requestOtp.input.body.safeParse({ email: 'a@b.example', consent: { terms: false } }).success,
+    ).toBe(false);
+  });
+
+  it('ask the terms in every sign-up app, and 18 or older in the customer app only', () => {
+    expect(consentProblems('customer', undefined).map((p) => p.path.join('.'))).toEqual([
+      'consent.terms',
+      'consent.adult',
+    ]);
+    expect(consentProblems('customer', { terms: true }).map((p) => p.path.join('.'))).toEqual([
+      'consent.adult',
+    ]);
+    expect(consentProblems('customer', { terms: true, adult: true })).toEqual([]);
+    expect(consentProblems('seller', { terms: true })).toEqual([]);
+    expect(consentProblems('creator', undefined)).toHaveLength(1);
+    expect(consentProblems('delivery', undefined)).toEqual([]);
   });
 });

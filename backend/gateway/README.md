@@ -16,7 +16,7 @@ Sab deployables ek process me: `npm run dev:backend` (`backend/bundle`).
 
 ## Settings
 
-`.env.example` ko `.env` me copy karo (commit kabhi nahi). Har key `GATEWAY__` se shuru hoti hai, taaki bundle mode me ek process me sab deployables ki keys alag rahein. Settings sirf [src/config.ts](src/config.ts) padhta hai (zod se check; ESLint baaki jagah `process.env` rokta hai). Nayi setting = `configZod` me key + `.env.example` me line.
+`.env.example` ka LOCAL hissa `.env` me copy karo (commit kabhi nahi); OPTIONAL me defaults, PRODUCTION me live ki keys dummy values ke saath. Har key `GATEWAY__` se shuru hoti hai, taaki bundle mode me ek process me sab deployables ki keys alag rahein. Settings sirf [src/config.ts](src/config.ts) padhta hai (zod se check; ESLint baaki jagah `process.env` rokta hai). Nayi setting = `configZod` me key + `.env.example` me line.
 
 Zaroori (bina inke start nahi hota): `GATEWAY__REDIS_URL` aur `GATEWAY__ORIGIN_SECRETS`. Laptop ki value `.env.example` me hai (public, sirf laptop; dev servers yahi bhejte hain). Live pe apni nayi value, Render aur har Vercel project (`ORIGIN_SECRET`, Sensitive) me ek jaisi.
 
