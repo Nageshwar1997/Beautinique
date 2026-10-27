@@ -8,6 +8,17 @@ export {
   sealPii,
 } from './fields';
 export {
+  generateSigningKey,
+  type JwtClaims,
+  JwtError,
+  type PublicJwk,
+  publicKeyFromJwk,
+  type SigningKey,
+  signJwt,
+  verifyJwt,
+  type VerifyJwtOptions,
+} from './jwt';
+export {
   CryptoError,
   type CryptoKeys,
   type CryptoKeysConfig,
