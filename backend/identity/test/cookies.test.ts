@@ -1,17 +1,22 @@
 // The cookie helpers on their own: the tokens of a sign-in go into cookies and never into the
 // answer, whatever the contract's output schema does with unknown keys.
+import { randomBytes } from 'node:crypto';
+
 import type { Request, Response } from 'express';
 import { describe, expect, it } from 'vitest';
 
 import { cookieOf, signedIn } from '../src/cookies.ts';
 import type { IssuedSession } from '../src/sessions.ts';
 
+// token-shaped values made at run time: a literal one looks like a key to gitleaks (HANDOFF §6)
+const sessionId = '0199f3a2-7c41-7b2e-9d10-4f6a2b8c1e01';
+const secretPart = randomBytes(32).toString('base64url');
 const session: IssuedSession = {
-  user: { userId: '0199f3a2-7c41-7b2e-9d10-4f6a2b8c1e01', email: 'riya@beautinique.example' },
+  user: { userId: sessionId, email: 'riya@beautinique.example' },
   app: 'seller',
-  sessionId: '0199f3a2-7c41-7b2e-9d10-4f6a2b8c1e01',
-  accessToken: 'header.payload.signature',
-  refreshToken: '0199f3a2-7c41-7b2e-9d10-4f6a2b8c1e01.secret-part',
+  sessionId,
+  accessToken: ['header', 'payload', randomBytes(64).toString('base64url')].join('.'),
+  refreshToken: `${sessionId}.${secretPart}`,
   expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60_000),
 };
 
@@ -33,7 +38,7 @@ describe('signedIn', () => {
     const answer = signedIn(res, { next: 'signed-in' as const, user: session.user, session });
     expect(answer).toEqual({ next: 'signed-in', user: session.user });
     expect(JSON.stringify(answer)).not.toContain(session.accessToken);
-    expect(JSON.stringify(answer)).not.toContain('secret-part');
+    expect(JSON.stringify(answer)).not.toContain(secretPart);
     expect(cookies).toEqual([
       { name: '__Host-bq_seller_at', value: session.accessToken },
       { name: '__Secure-bq_seller_rt', value: session.refreshToken },
