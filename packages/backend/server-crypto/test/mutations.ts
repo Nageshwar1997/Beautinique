@@ -144,6 +144,74 @@ const mutations: Mutation[] = [
     name: 'mask before normalising',
     change: [['masked: maskTail(normalized, visible),', 'masked: maskTail(value, visible),']],
   },
+  // authenticator codes
+  {
+    file: 'totp',
+    name: 'no dynamic truncation offset',
+    change: [['const offset = (mac.at(-1) ?? 0) & 15;', 'const offset = 0;']],
+  },
+  {
+    file: 'totp',
+    name: 'sign bit kept',
+    change: [['& 0x7f_ff_ff_ff;', '& 0xff_ff_ff_ff;']],
+  },
+  {
+    file: 'totp',
+    name: 'counter in 32 bits',
+    change: [
+      [
+        'message.writeBigUInt64BE(BigInt(counter));',
+        'message.writeUInt32BE(counter % 2 ** 32, 4);',
+      ],
+    ],
+  },
+  {
+    file: 'totp',
+    name: 'algorithm ignored',
+    change: [
+      ['createHmac(algorithm, secretBytes(secret))', "createHmac('sha1', secretBytes(secret))"],
+    ],
+  },
+  {
+    file: 'totp',
+    name: 'window only forward',
+    change: [['for (let step = current - window;', 'for (let step = current;']],
+  },
+  {
+    file: 'totp',
+    name: 'window one wider',
+    change: [['step <= current + window;', 'step <= current + window + 1;']],
+  },
+  {
+    file: 'totp',
+    name: 'a longer code fits',
+    change: [['if (fits && lengthFits) found = step;', 'if (fits) found = step;']],
+  },
+  {
+    file: 'totp',
+    name: 'any digits',
+    change: [['digits < 6 || digits > 10', 'digits < 1 || digits > 10']],
+  },
+  {
+    file: 'totp',
+    name: 'base32 skips a bad character',
+    change: [
+      [
+        "if (index === -1) throw new CryptoError('Not a base32 value');",
+        'if (index === -1) continue;',
+      ],
+    ],
+  },
+  {
+    file: 'totp',
+    name: 'short secret',
+    change: [['const SECRET_BYTES = 20;', 'const SECRET_BYTES = 10;']],
+  },
+  {
+    file: 'totp',
+    name: 'uri without the issuer parameter',
+    change: [['    issuer,\n    algorithm', '    algorithm']],
+  },
 ];
 
 export default mutations;
