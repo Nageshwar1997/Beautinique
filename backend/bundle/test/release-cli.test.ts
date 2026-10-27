@@ -16,6 +16,7 @@ const MONGO_URI = 'mongodb://localhost:27017/?replicaSet=rs0';
 const id = randomUUID().slice(0, 8);
 const coreDb = `bq_test_cli_core_${id}`;
 const identityDb = `bq_test_cli_identity_${id}`;
+const notifyDb = `bq_test_cli_notify_${id}`;
 const logger = createLogger({ name: 'release-cli-test', level: 'silent' });
 let dir: string;
 
@@ -27,6 +28,12 @@ const envText = (mongoUri: string) =>
     `IDENTITY__MONGO_URI=${mongoUri}`,
     `IDENTITY__MONGO_DB_NAME=${identityDb}`,
     'IDENTITY__REDIS_URL=redis://localhost:6379/5',
+    `NOTIFY__MONGO_URI=${mongoUri}`,
+    `NOTIFY__MONGO_DB_NAME=${notifyDb}`,
+    'NOTIFY__REDIS_URL=redis://localhost:6379/5',
+    'NOTIFY__EMAIL_TRANSPORT=mailpit',
+    'NOTIFY__EMAIL_FROM=no-reply@beautinique.example',
+    `NOTIFY__OTP_EVENT_KEYS=e1:${randomBytes(32).toString('base64')}`,
   ].join('\n');
 
 beforeAll(async () => {
@@ -39,6 +46,7 @@ afterAll(async () => {
   const mongo = await connectMongo({ uri: MONGO_URI, dbName: coreDb, appName: 'cli-test', logger });
   await mongo.db.dropDatabase();
   await mongo.client.db(identityDb).dropDatabase();
+  await mongo.client.db(notifyDb).dropDatabase();
   await mongo.close();
 });
 
@@ -72,7 +80,7 @@ describe('npm run db:release', () => {
     [['--env', 'staging'], '--env takes only "live"'],
     [
       ['--deployable', 'shop'],
-      'There is no deployable "shop". Deployables: identity, core, gateway.',
+      'There is no deployable "shop". Deployables: identity, notify, core, gateway.',
     ],
     [['--deployable', 'gateway'], 'gateway has no database, so it has no release steps.'],
   ])('refuses %j', async (args, message) => {
@@ -102,6 +110,11 @@ describe('npm run db:release', () => {
     expect(first.printed).toMatch(
       new RegExp(
         `core \\(${coreDb} on localhost:27017\\): 0 migration\\(s\\), \\d+ index\\(es\\) made`,
+      ),
+    );
+    expect(first.printed).toMatch(
+      new RegExp(
+        `notify \\(${notifyDb} on localhost:27017\\): 0 migration\\(s\\), \\d+ index\\(es\\) made`,
       ),
     );
     expect(first.printed).not.toContain('gateway');

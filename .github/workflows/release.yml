@@ -45,14 +45,14 @@ jobs:
       - run: npm ci
       # The publish checks run each package's tests; backend packages test against a real MongoDB
       # replica set and Valkey (the same compose services as CI and the laptops).
-      - name: Start MongoDB and Valkey for the tests
+      - name: Start MongoDB, Valkey and Mailpit for the tests
         run: |
           # MongoDB 8.0 needs a workaround on Linux 6.19+ (infra/docker-compose.yml)
           echo "kernel $(uname -r)"
-          if ! docker compose -f infra/docker-compose.yml up --detach --wait --wait-timeout 180 mongo valkey; then
+          if ! docker compose -f infra/docker-compose.yml up --detach --wait --wait-timeout 180 mongo valkey mailpit; then
             # compose only says "exited (1)"; the servers' own logs say why
             docker compose -f infra/docker-compose.yml ps --all
-            docker compose -f infra/docker-compose.yml logs --no-color --tail 200 mongo valkey
+            docker compose -f infra/docker-compose.yml logs --no-color --tail 200 mongo valkey mailpit
             exit 1
           fi
 
