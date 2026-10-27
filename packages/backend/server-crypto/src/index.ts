@@ -13,4 +13,6 @@ export {
   type CryptoKeysConfig,
   generateKey,
   loadCryptoKeys,
+  loadSealingKeys,
+  type SealingKeys,
 } from './keys';

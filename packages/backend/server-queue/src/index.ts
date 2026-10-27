@@ -60,9 +60,12 @@ export {
   heartbeatTask,
   lateTasks,
   type Schedule,
+  startTaskTrigger,
   type Task,
   TASK_RUNS,
   type TaskRun,
+  type TaskTrigger,
+  type TaskTriggerOptions,
   upsertSchedules,
   type UpsertSchedulesOptions,
 } from './schedules';

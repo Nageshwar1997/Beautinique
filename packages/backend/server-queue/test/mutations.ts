@@ -393,6 +393,24 @@ const mutations: Mutation[] = [
   },
   {
     file: 'schedules',
+    name: 'trigger takes any task name',
+    tests: 'triggered',
+    change: [['if (!TASK_NAME.test(task)) throw', 'if (false) throw']],
+  },
+  {
+    file: 'schedules',
+    name: 'trigger works after close',
+    tests: 'triggered',
+    change: [['if (closed) throw new Error(', 'if (false) throw new Error(']],
+  },
+  {
+    file: 'schedules',
+    name: 'triggered job names no task',
+    tests: 'triggered',
+    change: [['await open.add(task, { task },', 'await open.add(task, {},']],
+  },
+  {
+    file: 'schedules',
     name: 'task scheduled twice allowed',
     change: [['if (names.has(schedule.task)) throw', 'if (false) throw']],
   },

@@ -50,27 +50,42 @@ function parseKey(entry: string, setting: string): [string, Buffer] {
 }
 
 /**
- * Reads the keys from config once at start. Wrong config fails the start with a message that names
- * the setting and key id, never the key.
+ * Keys that only seal and open, without a blind index: for a value two deployables share, like the
+ * code in identity's OTP event that only notify may open (ARCHITECTURE §7.1).
  */
-export function loadCryptoKeys({ fieldKeys, blindIndexKey }: CryptoKeysConfig): CryptoKeys {
+export type SealingKeys = Pick<CryptoKeys, 'encryption'>;
+
+/**
+ * Reads `id:base64,id:base64...` once at start: the first key seals, the rest only open. `setting`
+ * names the config key in errors (`OTP_EVENT_KEYS`); messages never hold key material.
+ */
+export function loadSealingKeys(fieldKeys: string, setting = 'FIELD_KEYS'): SealingKeys {
   const entries = fieldKeys
     .split(',')
     .map((entry) => entry.trim())
     .filter(Boolean)
-    .map((entry) => parseKey(entry, 'FIELD_KEYS'));
+    .map((entry) => parseKey(entry, setting));
   const [first] = entries;
-  if (!first) throw new CryptoError('FIELD_KEYS: give at least one key');
+  if (!first) throw new CryptoError(`${setting}: give at least one key`);
   const keys = new Map<string, Buffer>();
   for (const [id, key] of entries) {
-    if (keys.has(id)) throw new CryptoError(`FIELD_KEYS: key ${id} is listed twice`);
+    if (keys.has(id)) throw new CryptoError(`${setting}: key ${id} is listed twice`);
     keys.set(id, key);
   }
+  return { encryption: { current: first[0], keys } };
+}
+
+/**
+ * Reads the keys from config once at start. Wrong config fails the start with a message that names
+ * the setting and key id, never the key.
+ */
+export function loadCryptoKeys({ fieldKeys, blindIndexKey }: CryptoKeysConfig): CryptoKeys {
+  const { encryption } = loadSealingKeys(fieldKeys);
   const [indexId, indexKey] = parseKey(blindIndexKey.trim(), 'BLIND_INDEX_KEY');
-  for (const key of keys.values()) {
+  for (const key of encryption.keys.values()) {
     if (key.equals(indexKey)) {
       throw new CryptoError('BLIND_INDEX_KEY must differ from every FIELD_KEYS key');
     }
   }
-  return { encryption: { current: first[0], keys }, blindIndex: { id: indexId, key: indexKey } };
+  return { encryption, blindIndex: { id: indexId, key: indexKey } };
 }

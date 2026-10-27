@@ -45,6 +45,7 @@ import {
   type Schedule,
   startConsumer,
   startRelay,
+  startTaskTrigger,
   startWipeWatchdog,
   subscribe,
   type Subscription,
@@ -286,6 +287,7 @@ describe('public API', () => {
       'releaseLease',
       'startRelay',
       'jobIdOf',
+      'startTaskTrigger',
     ]) {
       expect(api, name).toHaveProperty(name);
     }
@@ -1067,6 +1069,50 @@ describe('upsertSchedules and scheduled tasks', () => {
     expect(run?.lastFailedAt).toBeInstanceOf(Date);
     expect(await consumerMongo.db.collection(DEAD_LETTERS).countDocuments()).toBe(0);
     expect(lines.some((l) => l.msg === 'scheduled task failed')).toBe(true);
+  });
+
+  it('runs a task at once when triggered, after the transaction of the handler that asked', async () => {
+    const trigger = startTaskTrigger({ redis: redis.client, logger, queue: 'q.notify', prefix });
+    const seen: number[] = [];
+    try {
+      consumers.push(
+        startConsumer({
+          mongo: consumerMongo,
+          redis: redis.client,
+          logger,
+          queue: 'q.notify',
+          subscriptions: [
+            subscribe('notify.emails', orderPlaced, async (event, session) => {
+              await consumerMongo.db
+                .collection<{ _id: string }>('emails')
+                .insertOne({ _id: event.eventId }, { session });
+              // asked before the commit; the run must still see the row
+              await trigger.runSoon('notify.sendEmails');
+            }),
+          ],
+          tasks: [
+            defineTask('notify.sendEmails', async () => {
+              seen.push(await emailCount());
+            }),
+          ],
+          prefix,
+        }),
+      );
+      relay();
+      await placeOrder('o-trigger');
+      // the run is recorded after the task returns: wait for the record, not only the task
+      await waitFor(
+        async () =>
+          (await taskRuns().findOne({ _id: 'notify.sendEmails' }))?.lastFinishedAt !== undefined,
+      );
+      expect(seen).toEqual([1]);
+      await expect(trigger.runSoon('sendEmails')).rejects.toThrow('must be <module>.<task>');
+    } finally {
+      await trigger.close();
+      await trigger.close();
+    }
+    await expect(trigger.runSoon('notify.sendEmails')).rejects.toThrow('is closed');
+    expect(redis.client.status).toBe('ready');
   });
 
   it('refuses the same task twice in one consumer', () => {

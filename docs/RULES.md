@@ -1,6 +1,6 @@
 # RULES — BQ
 
-> **Status:** v1.13 (2026-10-27). Ye niyam Beautinique ke har code, doc aur deploy pe lagu hain. [PRD.md](PRD.md) batata hai **kya** banana hai, [ARCHITECTURE.md](ARCHITECTURE.md) batata hai **kaise**, aur ye file batati hai ki **kin niyamon ke saath**. Koi rule todna ho to pehle is file me badlav aur change log entry.
+> **Status:** v1.15 (2026-10-27). Ye niyam Beautinique ke har code, doc aur deploy pe lagu hain. [PRD.md](PRD.md) batata hai **kya** banana hai, [ARCHITECTURE.md](ARCHITECTURE.md) batata hai **kaise**, aur ye file batati hai ki **kin niyamon ke saath**. Koi rule todna ho to pehle is file me badlav aur change log entry.
 
 ## 1. Kaam karne ke niyam
 
@@ -24,12 +24,12 @@
    - **`main` = master: sirf final code.** Release safal hone (deploy + demo check) ke baad hi PR `release` → `main`. `main` pe kabhi seedha kaam ya feature PR nahi.
    - **Back-merge:** `release` pe bane commits (package CLI ka release commit + tags, hotfix) ke baad PR `release` → `prerelease`, taaki development naye versions pe chale.
    - **Hotfix:** production me turant fix chahiye to `release` se `hotfix/<naam>` → PR `release`; phir `release` → `prerelease` aur release safal hone pe `release` → `main`.
-   - **`prerelease` pe chhota fix seedha push ho sakta hai (owner, 2026-10-25).** Chhota fix = ek chhoti baat, 1–3 files: typo, doc ki line, galat message ya config value, flaky test, ek-do line ka bug fix. Push se pehle: `git pull --rebase`, phir local `npm run format:check`, `npm run lint`, `npm run typecheck` aur badle package ka test (push ke baad CI `prerelease` pe chalta hai; laal ho to turant theek karo). Force push kabhi nahi. Seedha push **nahi**, branch + PR hi: naya feature, paisa/stock/permissions, kernel packages (`packages/backend/*`, `packages/shared/*`) ka logic, data ya schema badlav, dependency update, CI/workflows ya ruleset.
+   - **`prerelease` pe chhota fix seedha push ho sakta hai (owner, 2026-10-25).** Chhota fix = ek chhoti baat, 1–10 files: typo, doc ki line, galat message ya config value, flaky test, ek-do line ka bug fix. Push se pehle: `git pull --rebase`, phir local `npm run format:check`, `npm run lint`, `npm run typecheck` aur badle package ka test (push ke baad CI `prerelease` pe chalta hai; laal ho to turant theek karo). Force push aur branch delete kabhi nahi (`prerelease` ka ruleset sirf yahi do rokta hai, baaki niyam hamein khud nibhane hain). Seedha push **nahi**, branch + PR hi: naya feature, paisa/stock/permissions, kernel packages (`packages/backend/*`, `packages/shared/*`) ka logic, data ya schema badlav, dependency update, CI/workflows ya ruleset.
    - `main` aur `release` pe seedha push nahi, sirf PR. PR pe approval zaroori nahi (owner, 2026-10-25: ruleset me approvals 0); merge sirf jab CI `check` green ho (ruleset me zaroori). CI ka `check` ye flow bhi jaanchta hai: `main` me sirf `release` se, `release` me sirf `prerelease` ya `hotfix/*` se PR. Ek hi apwaad: package release ka commit + tags owner `release` pe push karta hai (package CLI).
 2. **Commits:** Conventional Commits (`feat:`, `fix:`, `docs:`, `refactor:`, `test:`, `chore:`). Ek commit me ek hi baat.
 3. **PR:** chhota rakho, description me kya aur kyun, aur kaise test kiya. CI green hue bina merge nahi.
 4. **Public repo:** koi secret, `.env`, token, test password, DB dump ya asli personal data kabhi commit nahi. Sirf `.env.example`. Gitleaks har PR pe chalega.
-   - **Env files (owner, 2026-10-26), har us folder me jahan envs hain** (`backend/<name>`, `frontend/<app>`): `.env.example` git me (laptop ki values + har key ki live value kahan se, secret kabhi nahi); `.env` laptop (dev scripts padhti hain); `.env.production` owner ki private copy un live values ki jo Render/Vercel me daali (live server dashboard se env leta hai; sirf `npm run db:release -- --env live` `backend/bundle/.env.production` padhta hai, `live` type karne ke baad: owner, 2026-10-27). `.gitignore` `.env` aur `.env.*` rokta hai, sirf `.env.example` chhod ke. Claude `.env`/`.env.*` kabhi nahi kholta.
+   - **Env files (owner, 2026-10-26), har us folder me jahan envs hain** (`backend/<name>`, `frontend/<app>`): `.env.example` git me, teen hisson me (owner, 2026-10-27): **LOCAL** (sirf wo keys jo laptop pe chahiye, laptop ki public values), **OPTIONAL** (default wali settings, commented), **PRODUCTION** (Render/Vercel ki keys, dummy values `<...>` ke saath; secret kabhi nahi); bundle me har hissa deployable-wise sections (`# ── <name> ──`) me; `.env` laptop = sirf LOCAL hissa (jo key hatane se config na badle, wo `.env` me nahi; dev scripts padhti hain); `.env.production` owner ki private copy un live values ki jo Render/Vercel me daali (live server dashboard se env leta hai; sirf `npm run db:release -- --env live` `backend/bundle/.env.production` padhta hai, `live` type karne ke baad: owner, 2026-10-27). `.gitignore` `.env` aur `.env.*` rokta hai, sirf `.env.example` chhod ke. Claude `.env`/`.env.*` kabhi nahi kholta.
 5. **Dependencies:** `npm run update-deps` (ya Renovate/Dependabot) ke PRs `prerelease` pe; major version upgrade alag PR me.
 
 ## 3. Code: sabke liye
@@ -100,11 +100,15 @@
 
 ## 9. AI assistant ke saath kaam
 
-1. Assistant **kam se kam tokens** use kare: targeted edits, zaroorat ke hisaab se padhna. Review, checks aur research assistant khud kare. Agents sirf extreme zaroorat pe, pehle bata ke, aur **ek ek karke**: ek waqt me ek hi agent (parallel nahi), agla tabhi jab pichhla poora ho jaye (owner, 2026-10-25: parallel review agents ne ek run me ~0.7M tokens liye aur limit pe ruk gaye).
+1. Assistant **kam se kam tokens** use kare: targeted edits, zaroorat ke hisaab se padhna. Review, checks aur research assistant khud kare. Agents sirf extreme zaroorat pe, pehle bata ke, aur **ek ek karke**: ek waqt me ek hi agent (parallel nahi), agla tabhi jab pichhla poora ho jaye (owner, 2026-10-25: parallel review agents ne ek run me ~0.7M tokens liye aur limit pe ruk gaye). **Ultracode ya workflow mode on dikhe tab bhi yahi niyam** (owner, 2026-10-27): mode ki wajah se agents ya workflow nahi chalte.
 2. Destructive kaam (delete, force push, data hatana) se pehle owner se poochho.
 3. Commit ya push sirf owner ke kehne pe.
 4. Mutation testing (code me jaan-boojh ke galti daal ke dekhna ki tests pakadte hain) app files me seedha nahi, ek copy me, kyunki owner ka dev server file badalte hi reload hota hai.
 5. Har claim (pricing, limits, kanoon) official source se check karke likhna, aur jo verify nahi hua wo saaf likhna.
+6. **Har UI badlav asli browser me** light, dark aur mobile (360 px) pe check, phir hi "done" (§5.6, §6.4).
+7. **Secrets:** assistant `.env`/`.env.*` files aur repo ke bahar ka `All-ENVs` folder kabhi nahi kholta; `.env.example` padh aur badal sakta hai (§2.4).
+8. **Nayi env key (jaise `IDENTITY__*`) Render/Vercel me tabhi daali jaati hai jab code use padhta ho.** Pehle code, phir assistant owner ko batata hai kaunsi keys (naam + live value kahan se) daalni hain; khud dashboard me nahi daalta (HANDOFF §6 ka trap: bina padhe wali key se boot fail).
+9. **Kaam rokte waqt** [HANDOFF.md](HANDOFF.md) update: kya kiya, kya adhoora, kya uncommitted, kaunsa sawal kiske liye khula.
 
 ## Change log
 
@@ -122,5 +126,7 @@
 | v1.9    | 2026-10-25 | §2: `prerelease` pe chhota fix seedha push (kya chhota hai, push se pehle checks, kya kabhi seedha nahi); `main` aur `release` pe sirf PR.                                                                            |
 | v1.10   | 2026-10-25 | §6: mutation runner deployable bhi leta hai (`--package gateway`).                                                                                                                                                    |
 | v1.11   | 2026-10-25 | §9: agents sirf extreme zaroorat pe, ek ek karke (parallel nahi), owner.                                                                                                                                              |
-| v1.12 | 2026-10-26 | §2.4: env files: `.env.example` (git), `.env` (laptop), `.env.production` (owner ki private copy, koi code nahi padhta). |
-| v1.13 | 2026-10-27 | §1.14: migrations ke niyam (id, kabhi nahi badalti, 60 s, index ka naam); §2.4: `.env.production` sirf `npm run db:release -- --env live` padhta hai (owner). |
+| v1.12   | 2026-10-26 | §2.4: env files: `.env.example` (git), `.env` (laptop), `.env.production` (owner ki private copy, koi code nahi padhta).                                                                                              |
+| v1.13   | 2026-10-27 | §1.14: migrations ke niyam (id, kabhi nahi badalti, 60 s, index ka naam); §2.4: `.env.production` sirf `npm run db:release -- --env live` padhta hai (owner).                                                         |
+| v1.14   | 2026-10-27 | §2.1: `prerelease` pe branch delete bhi nahi; §9: ultracode/workflow mode me bhi ek agent, UI har badlav light/dark/mobile, secrets, nayi env key sirf code ke baad, kaam rokte waqt HANDOFF (owner).                 |
+| v1.15   | 2026-10-27 | §2.4: `.env.example` teen hisson me (LOCAL, OPTIONAL, PRODUCTION dummy values ke saath), bundle me deployable-wise; `.env` = sirf LOCAL (owner).                                                                      |

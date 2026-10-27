@@ -17,14 +17,18 @@ const REDIS_DB = 'redis://localhost:6379/5';
 const dbName = `bq_test_bundle_${randomUUID().slice(0, 8)}`;
 // every deployable has a database of its own, live and here
 const identityDbName = `${dbName}_identity`;
+const notifyDbName = `${dbName}_notify`;
 // made per run, so no secret-looking literal sits in the repo (gitleaks)
 const ORIGIN_SECRET = randomBytes(32).toString('base64url');
+// identity seals sign-in codes with it, notify opens them: one value for both (ARCHITECTURE §7.1)
+const OTP_EVENT_KEYS = `e1:${randomBytes(32).toString('base64')}`;
 
 afterAll(async () => {
   const logger = createLogger({ name: 'bundle-test', level: 'silent' });
   const mongo = await connectMongo({ uri: MONGO_URI, dbName, appName: 'bundle-test', logger });
   await mongo.db.dropDatabase();
   await mongo.client.db(identityDbName).dropDatabase();
+  await mongo.client.db(notifyDbName).dropDatabase();
   await mongo.close();
   const redis = await connectRedis({ url: REDIS_DB, name: 'bundle-test', logger });
   await redis.client.flushdb();
@@ -39,6 +43,15 @@ const quiet = () => ({
   IDENTITY__MONGO_URI: MONGO_URI,
   IDENTITY__MONGO_DB_NAME: identityDbName,
   IDENTITY__REDIS_URL: REDIS_DB,
+  IDENTITY__FIELD_KEYS: `k1:${randomBytes(32).toString('base64')}`,
+  IDENTITY__BLIND_INDEX_KEY: `b1:${randomBytes(32).toString('base64')}`,
+  IDENTITY__OTP_EVENT_KEYS: OTP_EVENT_KEYS,
+  NOTIFY__MONGO_URI: MONGO_URI,
+  NOTIFY__MONGO_DB_NAME: notifyDbName,
+  NOTIFY__REDIS_URL: REDIS_DB,
+  NOTIFY__EMAIL_TRANSPORT: 'mailpit',
+  NOTIFY__EMAIL_FROM: 'no-reply@beautinique.example',
+  NOTIFY__OTP_EVENT_KEYS: OTP_EVENT_KEYS,
   GATEWAY__REDIS_URL: REDIS_DB,
   GATEWAY__ORIGIN_SECRETS: ORIGIN_SECRET,
 });
@@ -63,7 +76,11 @@ describe('bundle', () => {
       expect(status.status).toBe(200);
       expect(await status.json()).toMatchObject({
         status: 'ok',
-        deployables: { core: { status: 'ok' }, identity: { status: 'ok' } },
+        deployables: {
+          core: { status: 'ok' },
+          identity: { status: 'ok' },
+          notify: { status: 'ok' },
+        },
       });
     } finally {
       await bundle.stop();
@@ -103,6 +120,56 @@ describe('bundle', () => {
       expect(direct.status).toBe(403);
     } finally {
       await bundle.stop();
+    }
+  });
+
+  it('signs a customer up with an emailed code: app, gateway, identity, notify, Mailpit (M3)', async () => {
+    const bundle = await startBundle({ port: 0, env: quiet() });
+    const email = `bundle-${randomUUID().slice(0, 8)}@beautinique.example`;
+    const search = `http://localhost:8025/api/v1/search?query=${encodeURIComponent(`to:${email}`)}`;
+    let mailIds: string[] = [];
+    try {
+      const headers = {
+        'X-BQ-App': 'customer',
+        'x-origin-secret': ORIGIN_SECRET,
+        'content-type': 'application/json',
+      };
+      const asked = await fetch(`${bundle.url}/api/v1/auth/otp`, {
+        method: 'POST',
+        headers,
+        body: JSON.stringify({ email, consent: { terms: true, adult: true } }),
+      });
+      expect(asked.status).toBe(200);
+      expect(asked.headers.get('cache-control')).toBe('private, no-store');
+      expect(asked.headers.get('ratelimit-policy')).toBe('"otp";q=10;w=600');
+      const { data } = (await asked.json()) as { data: { challengeId: string } };
+      interface Found {
+        messages: { ID: string; Subject: string; Snippet: string }[];
+      }
+      let found: Found = { messages: [] };
+      const end = Date.now() + 10_000;
+      while (found.messages.length === 0) {
+        if (Date.now() > end) throw new Error('no email reached Mailpit');
+        await new Promise((resolve) => setTimeout(resolve, 100));
+        found = (await (await fetch(search)).json()) as Found;
+      }
+      mailIds = found.messages.map((m) => m.ID);
+      expect(found.messages[0]?.Subject).toBe('Confirm your email for Beautinique');
+      const code = /\b(\d{6})\b/.exec(found.messages[0]?.Snippet ?? '')?.[1] ?? '';
+      const verified = await fetch(`${bundle.url}/api/v1/auth/otp/${data.challengeId}/verify`, {
+        method: 'POST',
+        headers,
+        body: JSON.stringify({ code }),
+      });
+      expect(verified.status).toBe(200);
+      expect(await verified.json()).toMatchObject({ data: { email, isNewUser: true } });
+    } finally {
+      await bundle.stop();
+      await fetch('http://localhost:8025/api/v1/messages', {
+        method: 'DELETE',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({ IDs: mailIds }),
+      });
     }
   });
 

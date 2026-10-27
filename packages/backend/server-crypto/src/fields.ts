@@ -1,6 +1,6 @@
 import { createCipheriv, createDecipheriv, createHmac, randomBytes } from 'node:crypto';
 
-import { CryptoError, type CryptoKeys } from './keys';
+import { CryptoError, type CryptoKeys, type SealingKeys } from './keys';
 
 /** The sealed format's version: `v1.<keyId>.<iv>.<ciphertext>.<tag>`, parts in base64url. */
 const VERSION = 'v1';
@@ -18,7 +18,7 @@ function checkContext(context: string): void {
  * is bound in as associated data: a sealed value copied to another record or field does not open.
  * Every call uses a fresh random IV, so equal values seal differently.
  */
-export function encryptField(keys: CryptoKeys, plaintext: string, context: string): string {
+export function encryptField(keys: SealingKeys, plaintext: string, context: string): string {
   checkContext(context);
   const keyId = keys.encryption.current;
   const key = keys.encryption.keys.get(keyId);
@@ -65,7 +65,7 @@ function parseSealed(sealed: string): Sealed {
  * Opens a sealed value with the key it names and the same context it was sealed with. A wrong
  * context, a changed byte or a wrong key all fail the same way, without saying which.
  */
-export function decryptField(keys: CryptoKeys, sealed: string, context: string): string {
+export function decryptField(keys: SealingKeys, sealed: string, context: string): string {
   checkContext(context);
   const { keyId, iv, data, tag } = parseSealed(sealed);
   const key = keys.encryption.keys.get(keyId);
@@ -90,7 +90,7 @@ export function decryptField(keys: CryptoKeys, sealed: string, context: string):
 }
 
 /** True when a value was sealed with an older key: a re-encrypt job should seal it again. */
-export function needsReencrypt(keys: CryptoKeys, sealed: string): boolean {
+export function needsReencrypt(keys: SealingKeys, sealed: string): boolean {
   return parseSealed(sealed).keyId !== keys.encryption.current;
 }
 

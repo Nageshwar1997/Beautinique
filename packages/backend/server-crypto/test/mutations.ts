@@ -20,8 +20,8 @@ const mutations: Mutation[] = [
     name: 'no key accepted',
     change: [
       [
-        "if (!first) throw new CryptoError('FIELD_KEYS: give at least one key');",
-        "if (!first) return { encryption: { current: '', keys: new Map() }, blindIndex: { id: '', key: Buffer.alloc(0) } };",
+        'if (!first) throw new CryptoError(`${setting}: give at least one key`);',
+        "if (!first) return { encryption: { current: '', keys: new Map() } };",
       ],
     ],
   },
@@ -39,6 +39,21 @@ const mutations: Mutation[] = [
     file: 'keys',
     name: 'last key seals',
     change: [['current: first[0]', 'current: entries.at(-1)?.[0] ?? first[0]']],
+  },
+  {
+    file: 'keys',
+    name: 'sealing keys name the wrong setting',
+    change: [
+      [
+        '.map((entry) => parseKey(entry, setting));',
+        ".map((entry) => parseKey(entry, 'FIELD_KEYS'));",
+      ],
+    ],
+  },
+  {
+    file: 'keys',
+    name: 'sealing keys default to another setting',
+    change: [["setting = 'FIELD_KEYS'", "setting = 'KEYS'"]],
   },
   {
     file: 'keys',
