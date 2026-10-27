@@ -1,138 +1,48 @@
-// Sign-in with an email code, against the local MongoDB replica set and Valkey (`npm run infra:up`),
-// in a database and BullMQ prefix of its own. The test plays notify: it opens the sealed code from
-// identity's outbox, as notify does from the event.
-import { randomUUID } from 'node:crypto';
-
-import { decryptField, generateKey, loadSealingKeys } from '@beautinique/backend-server-crypto';
-import { createLogger } from '@beautinique/backend-server-kit';
-import { connectMongo } from '@beautinique/backend-server-mongo';
+// Email codes: sign-up (with the new password) and setting a password, against the local MongoDB
+// replica set and Valkey (`npm run infra:up`). See helpers.ts.
 import { OUTBOX } from '@beautinique/backend-server-queue';
-import { otpSealContext } from '@beautinique/shared-contracts';
+import { uuidv7 } from '@beautinique/shared-utils';
 import { Queue } from 'bullmq';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 
-import { readConfig } from '../src/config.ts';
 import { challengeKey, OTP_MIN_ANSWER_MS } from '../src/otp.ts';
-import { type RunningIdentity, start } from '../src/service.ts';
-import { LEGAL_ACCEPTANCES, type LegalAcceptance, type User, USERS } from '../src/users.ts';
+import {
+  acceptances,
+  allowResend,
+  BREACHED,
+  codeOf,
+  consent,
+  credentials,
+  events,
+  type Harness,
+  hibp,
+  makeAccount,
+  PASSWORD,
+  passwordCode,
+  post,
+  providers,
+  signUpCode,
+  startHarness,
+  users,
+  verify,
+} from './helpers.ts';
 
-const MONGO_URI = 'mongodb://localhost:27017/?replicaSet=rs0';
-const REDIS_URL = 'redis://localhost:6379';
-const runId = randomUUID().slice(0, 8);
-const dbName = `bq_test_identity_otp_${runId}`;
-const prefix = `bqtestidotp${runId}`;
-const logger = createLogger({ name: 'identity-otp-test', level: 'silent' });
-const OTP_EVENT_KEYS = `e1:${generateKey()}`;
-const otpKeys = loadSealingKeys(OTP_EVENT_KEYS);
-
-const env = (more: Record<string, string> = {}): Record<string, string> => ({
-  IDENTITY__LOG_LEVEL: 'silent',
-  IDENTITY__MONGO_URI: MONGO_URI,
-  IDENTITY__MONGO_DB_NAME: dbName,
-  IDENTITY__REDIS_URL: REDIS_URL,
-  IDENTITY__FIELD_KEYS: `k1:${generateKey()}`,
-  IDENTITY__BLIND_INDEX_KEY: `b1:${generateKey()}`,
-  IDENTITY__OTP_EVENT_KEYS: OTP_EVENT_KEYS,
-  ...more,
-});
-
-let server: RunningIdentity;
-
-const startIdentity = (more: Record<string, string> = {}) =>
-  start(readConfig({ env: env(more) }), {
-    port: 0,
-    host: '127.0.0.1',
-    handleSignals: false,
-    runtime: { queuePrefix: prefix, epochKey: `${prefix}:epoch`, pollMs: 100 },
-  });
+let harness: Harness;
+const email = (name: string) => `${name}-${harness.runId}@beautinique.example`;
 
 beforeAll(async () => {
-  server = await startIdentity();
+  harness = await startHarness('otp');
 });
 
 afterAll(async () => {
-  await server.stop();
-  const mongo = await connectMongo({ uri: MONGO_URI, dbName, appName: 'cleanup', logger });
-  await mongo.db.dropDatabase();
-  await mongo.close();
-  const queue = new Queue('q.notify', { connection: { url: REDIS_URL }, prefix });
-  await queue.obliterate({ force: true });
-  await queue.close();
+  await harness.stop();
 });
 
-interface Answer {
-  status: number;
-  body: {
-    data?: Record<string, unknown>;
-    error?: { code: string; message: string; details?: unknown };
-  };
-}
-
-async function post(
-  path: string,
-  body: unknown = {},
-  {
-    app = 'customer',
-    ip = '203.0.113.7',
-    to = server,
-  }: { app?: string | null; ip?: string; to?: RunningIdentity } = {},
-): Promise<Answer> {
-  const headers: Record<string, string> = {
-    'content-type': 'application/json',
-    'X-BQ-Client-Ip': ip,
-  };
-  if (app !== null) headers['X-BQ-App'] = app;
-  const response = await fetch(`${to.url}${path}`, {
-    method: 'POST',
-    headers,
-    body: JSON.stringify(body),
-  });
-  return { status: response.status, body: (await response.json()) as Answer['body'] };
-}
-
-const consent = { terms: true, adult: true };
-const email = (name: string) => `${name}-${runId}@beautinique.example`;
-
-interface OtpEvent {
-  _id: string;
-  type: string;
-  envelope: {
-    data: { challengeId: string; email: string; app: string; purpose: string; sealedCode: string };
-  };
-}
-const events = (challengeId: string) =>
-  server.runtime.mongo.db
-    .collection<OtpEvent>(OUTBOX)
-    .find({ 'envelope.data.challengeId': challengeId })
-    .sort({ _id: 1 })
-    .toArray();
-/** The code notify would email: the latest event of the challenge, opened with the shared key. */
-async function codeOf(challengeId: string): Promise<string> {
-  const event = (await events(challengeId)).at(-1);
-  if (!event) throw new Error('no code was sent');
-  return decryptField(otpKeys, event.envelope.data.sealedCode, otpSealContext(challengeId));
-}
-const requestFor = async (address: string, app = 'customer') => {
-  const answer = await post('/auth/otp', { email: address, consent }, { app });
-  expect(answer.status, JSON.stringify(answer.body)).toBe(200);
-  return answer.body.data as {
-    challengeId: string;
-    expiresAt: string;
-    resendAfter: string;
-    resendsLeft: number;
-  };
-};
-const users = () => server.runtime.mongo.db.collection<User>(USERS);
-const acceptances = () => server.runtime.mongo.db.collection<LegalAcceptance>(LEGAL_ACCEPTANCES);
-/** Moves a challenge's resend wait into the past (instead of waiting a minute). */
-const allowResend = (challengeId: string) =>
-  server.runtime.redis.client.hset(challengeKey(challengeId), 'resendAfter', '0');
-
-describe('sign-up with an email code (customer app)', () => {
-  it('sends a sealed code to notify, and the right code makes the account with the consent', async () => {
+describe('sign-up with an email code', () => {
+  it('sends a sealed code to notify; the right code with a password makes the account, signed in', async () => {
     const address = email('riya');
     const before = Date.now();
-    const challenge = await requestFor(` ${address.toUpperCase()} `);
+    const challenge = await signUpCode(` ${address.toUpperCase()} `);
     expect(challenge.resendsLeft).toBe(3);
     const expires = Date.parse(challenge.expiresAt) - before;
     expect(expires).toBeGreaterThan(9.9 * 60_000);
@@ -148,7 +58,10 @@ describe('sign-up with an email code (customer app)', () => {
     expect(code).toMatch(/^\d{6}$/);
     expect(event?.envelope.data.sealedCode).not.toContain(code);
     // the relay hands it to notify's queue under notify's subscriber
-    const queue = new Queue('q.notify', { connection: server.runtime.redis.client, prefix });
+    const queue = new Queue('q.notify', {
+      connection: harness.server.runtime.redis.client,
+      prefix: harness.prefix,
+    });
     try {
       await expect
         .poll(async () => (await queue.getJob(`${String(event?._id)}@notify.otpEmail`))?.name, {
@@ -159,15 +72,21 @@ describe('sign-up with an email code (customer app)', () => {
       await queue.close();
     }
     // Redis holds the hash only, under the challenge id, for 10 minutes
-    const stored = await server.runtime.redis.client.hgetall(challengeKey(challenge.challengeId));
+    const redis = harness.server.runtime.redis.client;
+    const stored = await redis.hgetall(challengeKey(challenge.challengeId));
     expect(JSON.stringify(stored)).not.toContain(code);
-    expect(
-      await server.runtime.redis.client.pttl(challengeKey(challenge.challengeId)),
-    ).toBeGreaterThan(9 * 60_000);
+    expect(await redis.pttl(challengeKey(challenge.challengeId))).toBeGreaterThan(9 * 60_000);
 
-    const verified = await post(`/auth/otp/${challenge.challengeId}/verify`, { code });
+    const verified = await post(`/auth/otp/${challenge.challengeId}/verify`, {
+      code,
+      password: `  ${PASSWORD}  `,
+    });
     expect(verified.status).toBe(200);
-    expect(verified.body.data).toMatchObject({ email: address, isNewUser: true });
+    expect(verified.body.data).toMatchObject({
+      email: address,
+      outcome: 'account-made',
+      signedIn: true,
+    });
     const user = await users().findOne({ email: address });
     expect(user).toMatchObject({ status: 'active', signUpApp: 'customer' });
     expect(user?.ageDeclaredAt).toBeInstanceOf(Date);
@@ -181,72 +100,128 @@ describe('sign-up with an email code (customer app)', () => {
         ip: '203.0.113.7',
       },
     ]);
+    // the password as an argon2id hash only, and `password` as the way it signs in
+    const saved = await credentials().findOne({ _id: user?._id });
+    expect(saved?.password?.hash).toMatch(/^\$argon2id\$v=19\$m=19456,t=2,p=1\$/);
+    expect(JSON.stringify(saved)).not.toContain(PASSWORD);
+    expect(await providers().find({ userId: user?._id }).toArray()).toMatchObject([
+      { provider: 'password', subject: null, lastUsedAt: null },
+    ]);
     // a code works once
-    const again = await post(`/auth/otp/${challenge.challengeId}/verify`, { code });
+    const again = await post(`/auth/otp/${challenge.challengeId}/verify`, {
+      code,
+      password: PASSWORD,
+    });
     expect([again.status, again.body.error?.code]).toEqual([400, 'OTP_EXPIRED']);
   });
 
-  it('asks the terms and 18 or older before any code, for every email', async () => {
-    const answer = await post('/auth/otp', { email: email('young'), consent: { terms: true } });
+  it('asks the terms and 18 or older before any code; only the sign-up apps sign up', async () => {
+    const answer = await post('/auth/sign-up/code', {
+      email: email('young'),
+      consent: { terms: true },
+    });
     expect([answer.status, answer.body.error?.code]).toEqual([400, 'VALIDATION_FAILED']);
     expect(answer.body.error?.details).toEqual([
       { path: ['consent', 'adult'], message: 'Confirm that you are 18 or older' },
     ]);
-    const none = await post('/auth/otp', { email: email('young') });
+    const none = await post('/auth/sign-up/code', { email: email('young') });
     expect((none.body.error?.details as unknown[]).length).toBe(2);
-    // the delivery app asks nothing
-    const rider = await post('/auth/otp', { email: email('rider') }, { app: 'delivery' });
-    expect(rider.status).toBe(200);
+    // the seller app asks only the terms
+    expect((await signUpCode(email('young-seller'), 'seller')).resendsLeft).toBe(3);
+    for (const app of ['delivery', 'admin']) {
+      const refused = await post('/auth/sign-up/code', { email: email('rider'), consent }, { app });
+      expect([refused.status, refused.body.error?.code], app).toEqual([403, 'APP_NOT_ALLOWED']);
+    }
   });
 
-  it('signs an existing account in, and records consent only when something is new', async () => {
+  it('keeps the password of an account that has one, and records the new app’s consent', async () => {
     const address = email('meera');
-    const first = await requestFor(address);
-    await post(`/auth/otp/${first.challengeId}/verify`, { code: await codeOf(first.challengeId) });
-    const second = await requestFor(address);
-    expect((await events(second.challengeId))[0]?.envelope.data.purpose).toBe('sign-in');
-    const signedIn = await post(`/auth/otp/${second.challengeId}/verify`, {
-      code: await codeOf(second.challengeId),
-    });
-    expect(signedIn.body.data).toMatchObject({ email: address, isNewUser: false });
+    await makeAccount(address);
     const user = await users().findOne({ email: address });
-    expect(await acceptances().countDocuments({ userId: user?._id })).toBe(1);
+    const before = (await credentials().findOne({ _id: user?._id }))?.password?.hash;
+    // the same person signs up in the seller app: one account, one password
+    const seller = await signUpCode(address, 'seller');
+    const kept = await verify(seller.challengeId, 'another password entirely', 'seller');
+    expect(kept.body.data).toMatchObject({
+      userId: user?._id,
+      outcome: 'password-kept',
+      signedIn: false,
+    });
+    expect((await credentials().findOne({ _id: user?._id }))?.password?.hash).toBe(before);
+    expect(await users().countDocuments({ email: address })).toBe(1);
+    expect(
+      await acceptances()
+        .find({ userId: user?._id })
+        .sort({ acceptedAt: 1 })
+        .map((a) => a.app)
+        .toArray(),
+    ).toEqual(['customer', 'seller']);
+    // the same app and version again adds nothing
+    await verify((await signUpCode(address, 'seller')).challengeId, PASSWORD, 'seller');
+    expect(await acceptances().countDocuments({ userId: user?._id })).toBe(2);
 
-    // a new legal version is accepted again at the next sign-in
-    const later = await startIdentity({ IDENTITY__LEGAL_VERSION: 'dummy-2' });
+    // a new legal version is accepted again
+    const later = await harness.start({ IDENTITY__LEGAL_VERSION: 'dummy-2' });
     try {
-      const answer = await post('/auth/otp', { email: address, consent }, { to: later });
+      const answer = await post('/auth/sign-up/code', { email: address, consent }, { to: later });
       const { challengeId } = answer.body.data as { challengeId: string };
       await post(
         `/auth/otp/${challengeId}/verify`,
-        { code: await codeOf(challengeId) },
+        { code: await codeOf(challengeId, later), password: PASSWORD },
         { to: later },
       );
-      const versions = await acceptances()
-        .find({ userId: user?._id })
-        .sort({ acceptedAt: 1 })
-        .map((a) => a.version)
-        .toArray();
-      expect(versions).toEqual(['dummy-1', 'dummy-2']);
+      expect(
+        await acceptances()
+          .find({ userId: user?._id, app: 'customer' })
+          .sort({ acceptedAt: 1 })
+          .map((a) => a.version)
+          .toArray(),
+      ).toEqual(['dummy-1', 'dummy-2']);
     } finally {
       await later.stop();
     }
   });
 
+  it('adds a password to an account without one (made with Google), and does not sign in', async () => {
+    const address = email('google');
+    const userId = uuidv7();
+    const now = new Date();
+    await users().insertOne({
+      _id: userId,
+      email: address,
+      status: 'active',
+      emailVerifiedAt: now,
+      ageDeclaredAt: now,
+      signUpApp: 'customer',
+      createdAt: now,
+      updatedAt: now,
+    });
+    await providers().insertOne({
+      _id: uuidv7(),
+      userId,
+      provider: 'google',
+      subject: '104857392018475620193',
+      linkedAt: now,
+      lastUsedAt: now,
+    });
+    const answer = await verify(
+      (await signUpCode(address, 'seller')).challengeId,
+      PASSWORD,
+      'seller',
+    );
+    expect(answer.body.data).toMatchObject({ userId, outcome: 'password-set', signedIn: false });
+    expect(
+      (await providers().find({ userId }).toArray()).map((p) => p.provider).toSorted(),
+    ).toEqual(['google', 'password']);
+    expect((await credentials().findOne({ _id: userId }))?.password?.hash).toMatch(/^\$argon2id\$/);
+  });
+
   it('records a first 18-or-older declaration of an account made elsewhere', async () => {
     const address = email('seller');
     // the seller app asks only the terms; an adult flag sent there is not a declaration
-    const made = await requestFor(address, 'seller');
-    await post(
-      `/auth/otp/${made.challengeId}/verify`,
-      { code: await codeOf(made.challengeId) },
-      { app: 'seller' },
-    );
+    await verify((await signUpCode(address, 'seller')).challengeId, PASSWORD, 'seller');
     expect((await users().findOne({ email: address }))?.ageDeclaredAt).toBeNull();
-    const customer = await requestFor(address);
-    await post(`/auth/otp/${customer.challengeId}/verify`, {
-      code: await codeOf(customer.challengeId),
-    });
+    await verify((await signUpCode(address)).challengeId);
     const user = await users().findOne({ email: address });
     expect(user?.ageDeclaredAt).toBeInstanceOf(Date);
     expect(user?.signUpApp).toBe('seller');
@@ -254,14 +229,113 @@ describe('sign-up with an email code (customer app)', () => {
   });
 });
 
+describe('password codes', () => {
+  it('set a new password for an account, from any app, without signing in', async () => {
+    const address = email('rider');
+    const userId = await makeAccount(address);
+    const before = (await credentials().findOne({ _id: userId }))?.password?.hash;
+    const challenge = await passwordCode(address, 'delivery');
+    expect((await events(challenge.challengeId))[0]?.envelope.data).toMatchObject({
+      purpose: 'password',
+      app: 'delivery',
+    });
+    const answer = await verify(challenge.challengeId, 'a brand new password', 'delivery');
+    expect(answer.body.data).toMatchObject({ userId, outcome: 'password-set', signedIn: false });
+    expect((await credentials().findOne({ _id: userId }))?.password?.hash).not.toBe(before);
+    expect(await providers().countDocuments({ userId, provider: 'password' })).toBe(1);
+  });
+
+  it('answer an unknown email like any other, in the same time, and send nothing', async () => {
+    await makeAccount(email('timed'));
+    for (const [name, sends] of [
+      ['timed', 1],
+      ['stranger', 0],
+    ] as const) {
+      const startedAt = performance.now();
+      const asked = await post('/auth/password/code', { email: email(name) }, { app: 'delivery' });
+      expect(performance.now() - startedAt, name).toBeGreaterThanOrEqual(OTP_MIN_ANSWER_MS);
+      const { challengeId } = asked.body.data as { challengeId: string };
+      expect(Object.keys(asked.body.data ?? {}).toSorted()).toEqual([
+        'challengeId',
+        'expiresAt',
+        'resendAfter',
+        'resendsLeft',
+      ]);
+      await allowResend(challengeId);
+      const resentAt = performance.now();
+      const resent = await post(`/auth/otp/${challengeId}/resend`, {}, { app: 'delivery' });
+      expect(resent.status).toBe(200);
+      expect(performance.now() - resentAt, name).toBeGreaterThanOrEqual(OTP_MIN_ANSWER_MS);
+      expect(await events(challengeId), name).toHaveLength(sends * 2);
+      if (sends === 0) {
+        for (const code of ['000000', '123456']) {
+          const answer = await post(
+            `/auth/otp/${challengeId}/verify`,
+            { code, password: PASSWORD },
+            { app: 'delivery' },
+          );
+          expect(answer.body.error?.code).toBe('OTP_INVALID');
+        }
+      }
+    }
+    expect(await users().countDocuments({ email: email('stranger') })).toBe(0);
+  });
+
+  it('refuse a breached password before the code is used up, and allow it when the check is away', async () => {
+    const challenge = await signUpCode(email('breach'));
+    const code = await codeOf(challenge.challengeId);
+    const leaked = await post(`/auth/otp/${challenge.challengeId}/verify`, {
+      code,
+      password: `  ${BREACHED}  `,
+    });
+    expect([leaked.status, leaked.body.error?.code]).toEqual([400, 'PASSWORD_BREACHED']);
+    expect(leaked.body.error?.details).toEqual([
+      { path: ['password'], message: 'Choose a password that has not been leaked' },
+    ]);
+    // only 5 hex characters of the SHA-1 left the server
+    expect(hibp.asked.at(-1)).toMatch(/^[0-9A-F]{5}$/);
+    // the same code works with another password
+    const good = await post(`/auth/otp/${challenge.challengeId}/verify`, {
+      code,
+      password: PASSWORD,
+    });
+    expect(good.body.data?.outcome).toBe('account-made');
+
+    for (const mode of ['down', 'hang'] as const) {
+      hibp.mode = mode;
+      try {
+        const other = await signUpCode(email(`breach-${mode}`));
+        const allowed = await verify(other.challengeId, BREACHED);
+        expect(allowed.body.data?.outcome, mode).toBe('account-made');
+      } finally {
+        hibp.mode = 'answer';
+      }
+    }
+  });
+
+  it('a challenge from before sign-in by password no longer works', async () => {
+    const challenge = await passwordCode(email('rider'));
+    await harness.server.runtime.redis.client.hset(
+      challengeKey(challenge.challengeId),
+      'purpose',
+      'sign-in',
+    );
+    const answer = await verify(challenge.challengeId);
+    expect(answer.body.error?.code).toBe('OTP_EXPIRED');
+  });
+});
+
 describe('codes that do not fit', () => {
   it('gives 5 tries, says how many are left, then the challenge is gone', async () => {
-    const challenge = await requestFor(email('tries'));
+    const challenge = await signUpCode(email('tries'));
     const code = await codeOf(challenge.challengeId);
     const wrong = code === '000000' ? '111111' : '000000';
     const messages: string[] = [];
     for (let i = 0; i < 4; i += 1) {
-      const answer = await post(`/auth/otp/${challenge.challengeId}/verify`, { code: wrong });
+      const answer = await post(`/auth/otp/${challenge.challengeId}/verify`, {
+        code: wrong,
+        password: PASSWORD,
+      });
       expect(answer.body.error?.code).toBe('OTP_INVALID');
       messages.push(answer.body.error?.message ?? '');
     }
@@ -271,88 +345,48 @@ describe('codes that do not fit', () => {
       'That code is not right. You have 2 more tries.',
       'That code is not right. You have 1 more try.',
     ]);
-    const last = await post(`/auth/otp/${challenge.challengeId}/verify`, { code: wrong });
+    const last = await post(`/auth/otp/${challenge.challengeId}/verify`, {
+      code: wrong,
+      password: PASSWORD,
+    });
     expect(last.body.error?.code).toBe('OTP_EXPIRED');
-    const right = await post(`/auth/otp/${challenge.challengeId}/verify`, { code });
+    const right = await post(`/auth/otp/${challenge.challengeId}/verify`, {
+      code,
+      password: PASSWORD,
+    });
     expect(right.body.error?.code).toBe('OTP_EXPIRED');
-    expect(await server.runtime.redis.client.exists(challengeKey(challenge.challengeId))).toBe(0);
+    expect(
+      await harness.server.runtime.redis.client.exists(challengeKey(challenge.challengeId)),
+    ).toBe(0);
   });
 
   it('gives a new code its own 5 tries', async () => {
-    const challenge = await requestFor(email('fresh'));
+    const challenge = await signUpCode(email('fresh'));
     const wrongFor = (code: string) => (code === '000000' ? '111111' : '000000');
     const first = await codeOf(challenge.challengeId);
     for (let i = 0; i < 4; i += 1) {
-      await post(`/auth/otp/${challenge.challengeId}/verify`, { code: wrongFor(first) });
+      await post(`/auth/otp/${challenge.challengeId}/verify`, {
+        code: wrongFor(first),
+        password: PASSWORD,
+      });
     }
     await allowResend(challenge.challengeId);
     await post(`/auth/otp/${challenge.challengeId}/resend`);
     const second = await codeOf(challenge.challengeId);
     const wrong = await post(`/auth/otp/${challenge.challengeId}/verify`, {
       code: wrongFor(second),
+      password: PASSWORD,
     });
     expect(wrong.body.error?.message).toBe('That code is not right. You have 4 more tries.');
-    expect((await post(`/auth/otp/${challenge.challengeId}/verify`, { code: second })).status).toBe(
-      200,
-    );
-  });
-
-  it('answers an unknown email in an app without sign-up like any other, and sends nothing', async () => {
-    const challenge = await requestFor(email('stranger'), 'delivery');
-    expect(Object.keys(challenge).toSorted()).toEqual([
-      'challengeId',
-      'expiresAt',
-      'resendAfter',
-      'resendsLeft',
-    ]);
-    expect(await events(challenge.challengeId)).toEqual([]);
-    for (const code of ['000000', '123456']) {
-      const answer = await post(
-        `/auth/otp/${challenge.challengeId}/verify`,
-        { code },
-        { app: 'delivery' },
-      );
-      expect(answer.body.error?.code).toBe('OTP_INVALID');
-    }
-    expect(await users().countDocuments({ email: email('stranger') })).toBe(0);
-  });
-
-  it('answers an unknown email in an app without sign-up in the same time as an account', async () => {
-    // an account, made in the customer app
-    const made = await requestFor(email('timed'));
-    const madeCode = await codeOf(made.challengeId);
-    expect((await post(`/auth/otp/${made.challengeId}/verify`, { code: madeCode })).status).toBe(
-      200,
-    );
-    const timed = async (path: string, body: unknown = {}) => {
-      const startedAt = performance.now();
-      const answer = await post(path, body, { app: 'delivery' });
-      expect(answer.status, JSON.stringify(answer.body)).toBe(200);
-      return {
-        ms: performance.now() - startedAt,
-        data: answer.body.data as { challengeId: string },
-      };
-    };
-    for (const [name, sends] of [
-      ['timed', 1],
-      ['stranger-timed', 0],
-    ] as const) {
-      const asked = await timed('/auth/otp', { email: email(name) });
-      expect(asked.ms, name).toBeGreaterThanOrEqual(OTP_MIN_ANSWER_MS);
-      await allowResend(asked.data.challengeId);
-      const resent = await timed(`/auth/otp/${asked.data.challengeId}/resend`);
-      expect(resent.ms, name).toBeGreaterThanOrEqual(OTP_MIN_ANSWER_MS);
-      // the account got its codes, the unknown email none
-      expect(await events(asked.data.challengeId), name).toHaveLength(sends * 2);
-    }
+    expect((await verify(challenge.challengeId)).status).toBe(200);
   });
 
   it('takes a code only in the app that asked for it, and only from a known app', async () => {
-    const challenge = await requestFor(email('apps'));
+    const challenge = await signUpCode(email('apps'));
     const code = await codeOf(challenge.challengeId);
     const elsewhere = await post(
       `/auth/otp/${challenge.challengeId}/verify`,
-      { code },
+      { code, password: PASSWORD },
       { app: 'seller' },
     );
     expect(elsewhere.body.error?.code).toBe('OTP_EXPIRED');
@@ -363,20 +397,24 @@ describe('codes that do not fit', () => {
       { app: 'seller' },
     );
     expect(resentElsewhere.body.error?.code).toBe('OTP_EXPIRED');
-    const noApp = await post(`/auth/otp/${challenge.challengeId}/verify`, { code }, { app: null });
+    const noApp = await post(
+      `/auth/otp/${challenge.challengeId}/verify`,
+      { code, password: PASSWORD },
+      { app: null },
+    );
     expect([noApp.status, noApp.body.error?.code]).toEqual([403, 'APP_NOT_ALLOWED']);
-    const admin = await post('/auth/otp', { email: email('apps') }, { app: 'admin' });
-    expect(admin.body.error?.code).toBe('APP_NOT_ALLOWED');
+    const unknown = await post('/auth/password/code', { email: email('apps') }, { app: 'shop' });
+    expect(unknown.body.error?.code).toBe('APP_NOT_ALLOWED');
     // the right app still works
-    expect((await post(`/auth/otp/${challenge.challengeId}/verify`, { code })).status).toBe(200);
+    expect((await verify(challenge.challengeId)).status).toBe(200);
   });
 
   it('lets only one of two requests with the same right code through', async () => {
-    const challenge = await requestFor(email('race'));
+    const challenge = await signUpCode(email('race'));
     const code = await codeOf(challenge.challengeId);
     const answers = await Promise.all([
-      post(`/auth/otp/${challenge.challengeId}/verify`, { code }),
-      post(`/auth/otp/${challenge.challengeId}/verify`, { code }),
+      post(`/auth/otp/${challenge.challengeId}/verify`, { code, password: PASSWORD }),
+      post(`/auth/otp/${challenge.challengeId}/verify`, { code, password: PASSWORD }),
     ]);
     expect(answers.map((a) => a.status).toSorted()).toEqual([200, 400]);
     expect(await users().countDocuments({ email: email('race') })).toBe(1);
@@ -385,7 +423,7 @@ describe('codes that do not fit', () => {
 
 describe('new codes and limits', () => {
   it('sends a new code a minute later, at most 3 times; the old code stops working', async () => {
-    const challenge = await requestFor(email('resend'));
+    const challenge = await signUpCode(email('resend'));
     const first = await codeOf(challenge.challengeId);
     const soon = await post(`/auth/otp/${challenge.challengeId}/resend`);
     expect([soon.status, soon.body.error?.code]).toEqual([429, 'OTP_RESEND_TOO_SOON']);
@@ -394,9 +432,13 @@ describe('new codes and limits', () => {
     expect(resent.status).toBe(200);
     expect(resent.body.data).toMatchObject({ challengeId: challenge.challengeId, resendsLeft: 2 });
     expect(await events(challenge.challengeId)).toHaveLength(2);
+    expect((await events(challenge.challengeId))[1]?.envelope.data.purpose).toBe('sign-up');
     const second = await codeOf(challenge.challengeId);
     if (second !== first) {
-      const old = await post(`/auth/otp/${challenge.challengeId}/verify`, { code: first });
+      const old = await post(`/auth/otp/${challenge.challengeId}/verify`, {
+        code: first,
+        password: PASSWORD,
+      });
       expect(old.body.error?.code).toBe('OTP_INVALID');
     }
     for (const left of [1, 0]) {
@@ -408,27 +450,26 @@ describe('new codes and limits', () => {
     const over = await post(`/auth/otp/${challenge.challengeId}/resend`);
     expect([over.status, over.body.error?.code]).toEqual([429, 'OTP_RESEND_LIMIT']);
     // tries start again with each new code, and the latest code works
-    const latest = await codeOf(challenge.challengeId);
-    expect((await post(`/auth/otp/${challenge.challengeId}/verify`, { code: latest })).status).toBe(
-      200,
-    );
+    expect((await verify(challenge.challengeId)).status).toBe(200);
     const gone = await post(`/auth/otp/${challenge.challengeId}/resend`);
     expect(gone.body.error?.code).toBe('OTP_EXPIRED');
   });
 
-  it('sends one email at most the hourly limit of codes, for any app, without saying why else', async () => {
-    const limited = await startIdentity({ IDENTITY__OTP_EMAIL_LIMIT_PER_HOUR: '2' });
+  it('sends one email at most the hourly limit of codes, for any purpose, without saying why else', async () => {
+    const limited = await harness.start({ IDENTITY__OTP_EMAIL_LIMIT_PER_HOUR: '2' });
     try {
       const address = email('busy');
-      const ask = () => post('/auth/otp', { email: address, consent }, { to: limited });
+      const ask = () => post('/auth/sign-up/code', { email: address, consent }, { to: limited });
       expect((await ask()).status).toBe(200);
       const second = await ask();
       expect(second.status).toBe(200);
       const third = await ask();
       expect([third.status, third.body.error?.code]).toEqual([429, 'OTP_EMAIL_LIMIT']);
+      const reset = await post('/auth/password/code', { email: address }, { to: limited });
+      expect(reset.body.error?.code).toBe('OTP_EMAIL_LIMIT');
       // a resend counts too
       const { challengeId } = second.body.data as { challengeId: string };
-      await allowResend(challengeId);
+      await allowResend(challengeId, limited);
       const resend = await post(`/auth/otp/${challengeId}/resend`, {}, { to: limited });
       expect(resend.body.error?.code).toBe('OTP_EMAIL_LIMIT');
       // the counter key names no email
@@ -440,13 +481,17 @@ describe('new codes and limits', () => {
   });
 
   it('refuses with 503 when Redis is away, sending no code it could not check', async () => {
-    const cut = await startIdentity();
+    const cut = await harness.start();
     try {
       cut.runtime.redis.client.disconnect();
-      const answer = await post('/auth/otp', { email: email('cut'), consent }, { to: cut });
+      const answer = await post(
+        '/auth/sign-up/code',
+        { email: email('cut'), consent },
+        { to: cut },
+      );
       expect([answer.status, answer.body.error?.code]).toEqual([503, 'SERVICE_UNAVAILABLE']);
       expect(
-        await server.runtime.mongo.db
+        await harness.server.runtime.mongo.db
           .collection(OUTBOX)
           .countDocuments({ 'envelope.data.email': email('cut') }),
       ).toBe(0);
@@ -456,10 +501,10 @@ describe('new codes and limits', () => {
   });
 
   it('refuses to start with keys it cannot read, naming the setting', async () => {
-    await expect(startIdentity({ IDENTITY__OTP_EVENT_KEYS: 'e1:short' })).rejects.toThrow(
+    await expect(harness.start({ IDENTITY__OTP_EVENT_KEYS: 'e1:short' })).rejects.toThrow(
       'IDENTITY__OTP_EVENT_KEYS: key e1 must be 32 bytes',
     );
-    await expect(startIdentity({ IDENTITY__BLIND_INDEX_KEY: 'b1:short' })).rejects.toThrow(
+    await expect(harness.start({ IDENTITY__BLIND_INDEX_KEY: 'b1:short' })).rejects.toThrow(
       'BLIND_INDEX_KEY',
     );
   });

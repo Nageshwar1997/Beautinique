@@ -14,7 +14,9 @@ import { otpRequested } from '@beautinique/shared-contracts';
 
 import type { Config } from './config.ts';
 import type { OtpDeps } from './otp.ts';
+import { hibpBreachCheck } from './password.ts';
 import { runReleaseSteps } from './release.ts';
+import { namesOnlySessions } from './sessions.ts';
 
 /**
  * Who gets identity's events (the relay's list): notify emails the sign-in code (its subscriber
@@ -42,7 +44,7 @@ export interface Runtime {
   redis: RedisConnection;
   relay: Relay;
   watchdog: WipeWatchdog;
-  /** What the sign-in routes need */
+  /** What the sign-up and sign-in routes need */
   otp: OtpDeps;
   /** The checks for GET /ready. */
   ready: Readonly<Record<string, ReadyCheck>>;
@@ -119,6 +121,8 @@ export async function startRuntime(config: Config, options: RuntimeOptions): Pro
         logger,
         emailLimitPerHour: config.otpEmailLimitPerHour,
         legalVersion: config.legalVersion,
+        breached: hibpBreachCheck({ url: config.hibpUrl, logger }),
+        sessions: namesOnlySessions(logger),
       },
       ready: { mongo: mongo.ready, redis: redis.ready, outbox: relay.ready },
       stop,
