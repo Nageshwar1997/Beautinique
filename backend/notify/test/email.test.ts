@@ -52,6 +52,21 @@ describe('otpEmail', () => {
     expect(seller.text).toContain('It works for 5 minutes');
   });
 
+  it('gives a password code its own subject, words and tag', () => {
+    const reset = otpEmail({
+      to: 'rider@beautinique.example',
+      code: '246810',
+      app: 'delivery',
+      purpose: 'password',
+      minutes: 10,
+    });
+    expect(reset.subject).toBe('Set your Beautinique Delivery password');
+    expect(reset.text).toContain('set a new password for your Beautinique Delivery account');
+    expect(reset.text).toContain('Nobody can change your password without it.');
+    expect(reset.subject).not.toContain('246810');
+    expect(reset.tags).toEqual(['otp-password']);
+  });
+
   it('escapes what goes into the HTML', () => {
     const email = otpEmail({
       to: 'x@beautinique.example',
