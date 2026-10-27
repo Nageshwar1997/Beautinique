@@ -71,12 +71,12 @@ GSTIN ka check digit typing ki galti pakadta hai: koi bhi ek character badlo to 
 
 ### Pehchaan
 
-| Export          | Niyam                                                                                                    |
-| --------------- | -------------------------------------------------------------------------------------------------------- |
-| `emailZod`      | Trim + lower case, max 254                                                                               |
-| `otpZod`        | 6 digits (email OTP aur authenticator app dono)                                                          |
-| `passwordZod`   | NIST SP 800-63B: 8–128 characters, koi bhi character, "ek capital ek number" jaisa niyam nahi, trim nahi |
-| `personNameZod` | Kisi bhi script ke letters, space, `.`, `'`, `-`; letter se shuru; extra spaces ek; 1–100                |
+| Export          | Niyam                                                                                                                                                  |
+| --------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `emailZod`      | Trim + lower case, max 254                                                                                                                             |
+| `otpZod`        | 6 digits (email OTP aur authenticator app dono)S|
+| `passwordZod`   | NIST SP 800-63B: 12–128 characters (owner), koi bhi character, "ek capital ek number" jaisa niyam nahi; aage-peeche ke spaces trim (owner, 2026-10-27) |
+| `personNameZod` | Kisi bhi script ke letters, space, `.`, `'`, `-`; letter se shuru; trim + extra spaces ek (`.overwrite`); 1–100                                        |
 
 Leaked passwords ki list se check server karta hai, ye package nahi.
 
