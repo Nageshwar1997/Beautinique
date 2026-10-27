@@ -16,3 +16,17 @@ export {
   loadSealingKeys,
   type SealingKeys,
 } from './keys';
+export {
+  decodeBase32,
+  encodeBase32,
+  hotp,
+  newTotpSecret,
+  type TotpAlgorithm,
+  totpCode,
+  type TotpOptions,
+  totpStep,
+  totpUri,
+  type TotpUriInput,
+  verifyTotp,
+  type VerifyTotpOptions,
+} from './totp';

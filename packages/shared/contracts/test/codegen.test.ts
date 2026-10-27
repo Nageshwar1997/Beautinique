@@ -46,9 +46,15 @@ describe('generateFiles', () => {
       '/platform/pings',
       '/platform/pings/{pingId}',
       '/platform/wake',
-      '/auth/otp',
+      '/auth/sign-up/code',
+      '/auth/password/code',
       '/auth/otp/{challengeId}/resend',
       '/auth/otp/{challengeId}/verify',
+      '/auth/login',
+      '/auth/login/{loginId}/totp',
+      '/auth/login/{loginId}/recovery',
+      '/auth/login/{loginId}/totp/enroll',
+      '/auth/login/{loginId}/totp/confirm',
     ]);
     const manifest = parsed('gateway-manifest.json') as {
       version: string;
@@ -59,9 +65,15 @@ describe('generateFiles', () => {
       'platform.ping.record',
       'platform.ping.get',
       'platform.server.wake',
-      'auth.otp.request',
+      'auth.signUp.code',
+      'auth.password.code',
       'auth.otp.resend',
       'auth.otp.verify',
+      'auth.login.password',
+      'auth.login.totp',
+      'auth.login.recovery',
+      'auth.login.totpEnroll',
+      'auth.login.totpConfirm',
     ]);
   });
 

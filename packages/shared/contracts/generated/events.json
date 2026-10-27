@@ -5,7 +5,7 @@
       "type": "identity.otp.requested",
       "version": 1,
       "producer": "identity",
-      "description": "A sign-in code was asked for; notify emails it (the code is sealed for notify only)",
+      "description": "An email code was asked for; notify emails it (the code is sealed for notify only)",
       "schema": {
         "type": "object",
         "properties": {
@@ -159,7 +159,8 @@
                 "type": "string",
                 "enum": [
                   "sign-in",
-                  "sign-up"
+                  "sign-up",
+                  "password"
                 ]
               },
               "sealedCode": {

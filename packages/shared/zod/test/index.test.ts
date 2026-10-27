@@ -224,19 +224,24 @@ describe('identity', () => {
       'Enter a valid email address',
     );
     expectInvalid(emailZod, [`${'a'.repeat(250)}@x.co`], 'Email address is too long');
+    expectInvalid(emailZod, ['', '   '], 'Enter your email address');
+    expectInvalid(emailZod, [undefined, 42], 'Email is required');
   });
 
   it('otp: exactly 6 digits', () => {
     expectValid(otpZod, ['123456', ' 000000 ']);
     expectInvalid(otpZod, ['12345', '1234567', '12a456', ''], 'Enter the 6-digit code');
+    expectInvalid(otpZod, [undefined], 'Code is required');
   });
 
-  it('password: 8 to 128 characters, no composition rules, never trimmed', () => {
-    expect(passwordZod.parse('  long enough  ')).toBe('  long enough  ');
-    expectValid(passwordZod, ['abcdefgh', 'correct horse battery staple', 'x'.repeat(128)]);
-    expectInvalid(passwordZod, ['abc1234'], 'Use at least 8 characters');
+  it('password: 12 to 128 characters, no composition rules, trimmed', () => {
+    expect(passwordZod.parse('  long enough!  ')).toBe('long enough!');
+    expectValid(passwordZod, ['abcdefghijkl', 'correct horse battery staple', 'x'.repeat(128)]);
+    expectInvalid(passwordZod, ['abcdefghijk', ' abcdefghijk '], 'Use at least 12 characters');
     expectInvalid(passwordZod, ['x'.repeat(129)], 'Use at most 128 characters');
-    expectInvalid(passwordZod, ['         '], 'Password cannot be only spaces');
+    // only spaces trim to nothing
+    expectInvalid(passwordZod, ['', ' '.repeat(12)], 'Enter a password');
+    expectInvalid(passwordZod, [undefined, null], 'Password is required');
   });
 
   it('person names: letters of any script, common punctuation, extra spaces collapsed', () => {
@@ -247,8 +252,9 @@ describe('identity', () => {
       ['Priya2', '-Priya', '.Priya', 'Priya@Sharma'],
       'Use letters, spaces, dots, apostrophes and hyphens',
     );
-    expectInvalid(personNameZod, ['   '], 'Enter a name');
+    expectInvalid(personNameZod, ['', '   '], 'Enter a name');
     expectInvalid(personNameZod, ['a'.repeat(101)], 'Name is too long');
+    expectInvalid(personNameZod, [undefined], 'Name is required');
   });
 });
 

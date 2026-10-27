@@ -2,35 +2,55 @@ import { eventCatalogue } from '../events';
 import { permissionCatalogue } from '../permissions';
 import { routeTable } from '../routes';
 import {
+  confirmTotpEnroll,
   consentProblems,
   IDENTITY_ERROR_CODES,
-  OTP_APPS,
+  LOGIN_NEXT,
+  loginRecovery,
+  loginTotp,
+  OTP_OUTCOMES,
   OTP_PURPOSES,
   otpConsentZod,
   otpRequested,
   otpSealContext,
-  requestOtp,
+  passwordLogin,
+  recoveryCodeZod,
+  requestPasswordCode,
+  requestSignUpCode,
   resendOtp,
   SIGN_UP_APPS,
+  signedInZod,
+  startTotpEnroll,
+  TOTP_REQUIRED_APPS,
   verifyOtp,
 } from './identity';
 import { getPing, pingRead, pingRecorded, recordPing, wake } from './platform';
 
 export {
+  confirmTotpEnroll,
   consentProblems,
   getPing,
   IDENTITY_ERROR_CODES,
-  OTP_APPS,
+  LOGIN_NEXT,
+  loginRecovery,
+  loginTotp,
+  OTP_OUTCOMES,
   OTP_PURPOSES,
   otpConsentZod,
   otpRequested,
   otpSealContext,
+  passwordLogin,
   pingRead,
   pingRecorded,
   recordPing,
-  requestOtp,
+  recoveryCodeZod,
+  requestPasswordCode,
+  requestSignUpCode,
   resendOtp,
   SIGN_UP_APPS,
+  signedInZod,
+  startTotpEnroll,
+  TOTP_REQUIRED_APPS,
   verifyOtp,
   wake,
 };
@@ -39,6 +59,19 @@ export {
  * Every route, event and permission of the platform. A module adds its own list here, and the
  * generated OpenAPI, gateway manifest and clients follow (ARCHITECTURE §5.1).
  */
-export const routes = routeTable([recordPing, getPing, wake, requestOtp, resendOtp, verifyOtp]);
+export const routes = routeTable([
+  recordPing,
+  getPing,
+  wake,
+  requestSignUpCode,
+  requestPasswordCode,
+  resendOtp,
+  verifyOtp,
+  passwordLogin,
+  loginTotp,
+  loginRecovery,
+  startTotpEnroll,
+  confirmTotpEnroll,
+]);
 export const events = eventCatalogue([pingRecorded, otpRequested]);
 export const permissions = permissionCatalogue([pingRead]);

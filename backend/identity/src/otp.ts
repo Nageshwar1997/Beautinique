@@ -1,4 +1,5 @@
 import { randomInt, timingSafeEqual } from 'node:crypto';
+import { setTimeout as sleep } from 'node:timers/promises';
 
 import {
   blindIndex,
@@ -10,11 +11,11 @@ import { AppError, type Logger } from '@beautinique/backend-server-kit';
 import { type Mongo, withTransaction } from '@beautinique/backend-server-mongo';
 import { writeEvent } from '@beautinique/backend-server-queue';
 import {
+  type AppId,
   consentProblems,
-  type OTP_APPS,
+  type OTP_OUTCOMES,
   otpRequested,
   otpSealContext,
-  SIGN_UP_APPS,
 } from '@beautinique/shared-contracts';
 import { uuidv7 } from '@beautinique/shared-utils';
 import type { Redis } from 'ioredis';
@@ -26,8 +27,12 @@ import {
   otpResendLimit,
   otpResendTooSoon,
   otpUnavailable,
+  passwordBreached,
 } from './errors.ts';
-import { userForCode, USERS } from './users.ts';
+import { clearFailures } from './lockout.ts';
+import { type BreachCheck, hashPassword } from './password.ts';
+import type { SessionPort } from './sessions.ts';
+import { setPasswordWithCode, signUpWithCode, USERS } from './users.ts';
 
 /** ARCHITECTURE §7.1: a code works 10 minutes, takes 5 tries, and up to 3 new codes a minute apart. */
 export const OTP_TTL_MS = 10 * 60_000;
@@ -35,21 +40,28 @@ export const OTP_MAX_TRIES = 5;
 export const OTP_MAX_RESENDS = 3;
 export const OTP_RESEND_AFTER_MS = 60_000;
 const EMAIL_WINDOW_MS = 60 * 60_000;
+/**
+ * A code request or resend answers no sooner than this, whether a code went out or not: sending
+ * one writes to the outbox, and without the wait an unknown email in an app without sign-up
+ * answered faster, so the time told who has an account. Above the outbox write's usual time.
+ */
+export const OTP_MIN_ANSWER_MS = 400;
 
 /** Redis keys (`bq:id:*`, ARCHITECTURE §6.6), each with a TTL. The email is never in a key. */
 export const challengeKey = (challengeId: string): string => `bq:id:otp:${challengeId}`;
 const emailCountKey = (index: string): string => `bq:id:otp-email:${index}`;
 
-type OtpApp = (typeof OTP_APPS)[number];
+/** Why the code is sent: to make an account, or to set a password (ARCHITECTURE §7.1). */
+export type CodePurpose = 'sign-up' | 'password';
 
 /**
- * A challenge in Redis. `send` is 0 for an email without an account in an app without sign-up: it
+ * A challenge in Redis. `send` is 0 for a password code to an email without an account: it
  * answers like any other but no code goes out, and no code ever fits it.
  */
 interface Challenge {
   email: string;
-  app: OtpApp;
-  purpose: 'sign-in' | 'sign-up';
+  app: AppId;
+  purpose: CodePurpose;
   codeHash: string;
   send: '0' | '1';
   terms: '0' | '1';
@@ -70,6 +82,10 @@ export interface OtpDeps {
   logger: Logger;
   emailLimitPerHour: number;
   legalVersion: string;
+  /** Have I Been Pwned (fail-open) */
+  breached: BreachCheck;
+  /** The last step of a sign-in (T3.2: the real session) */
+  sessions: SessionPort;
 }
 
 /** What the app sees of a challenge (contracts otpChallengeZod). */
@@ -91,6 +107,17 @@ async function inRedis<T>(work: () => Promise<T>): Promise<T> {
   } catch (error) {
     if (error instanceof AppError) throw error;
     throw otpUnavailable(error);
+  }
+}
+
+/** Runs the work, then waits out the rest of OTP_MIN_ANSWER_MS, on an error too. */
+async function evenly<T>(work: () => Promise<T>): Promise<T> {
+  const until = performance.now() + OTP_MIN_ANSWER_MS;
+  try {
+    return await work();
+  } finally {
+    const left = until - performance.now();
+    if (left > 0) await sleep(left);
   }
 }
 
@@ -142,21 +169,28 @@ const viewOf = (challengeId: string, expiresAt: number, resendAfter: number, res
 });
 
 export interface RequestCodeInput {
-  app: OtpApp;
+  app: AppId;
   email: string;
-  consent: { terms?: true; adult?: true } | undefined;
+  purpose: CodePurpose;
+  consent?: { terms?: true; adult?: true } | undefined;
   requestId: string;
 }
 
 /**
- * POST /auth/otp. The same answer for every email: an account gets a sign-in code, an unknown
- * email in a sign-up app a code to make one, any other unknown email nothing (and nothing fits).
+ * POST /auth/sign-up/code and /auth/password/code. The same answer for every email, in the same
+ * time (OTP_MIN_ANSWER_MS): a sign-up code goes to every email (an account there already learns
+ * it only after its code); a password code only to an email with an account, and nothing fits
+ * the others.
  */
-export async function requestCode(
+export const requestCode = (deps: OtpDeps, input: RequestCodeInput): Promise<ChallengeView> =>
+  evenly(() => requestCodeNow(deps, input));
+
+async function requestCodeNow(
   deps: OtpDeps,
-  { app, email, consent, requestId }: RequestCodeInput,
+  { app, email, purpose, consent, requestId }: RequestCodeInput,
 ): Promise<ChallengeView> {
-  const problems = consentProblems(app, consent);
+  const signUp = purpose === 'sign-up';
+  const problems = signUp ? consentProblems(app, consent) : [];
   if (problems.length > 0) {
     throw new AppError('VALIDATION_FAILED', 'Please check the highlighted fields.', {
       details: problems,
@@ -167,8 +201,7 @@ export async function requestCode(
     (await deps.mongo.db
       .collection<{ email: string }>(USERS)
       .countDocuments({ email }, { limit: 1 })) > 0;
-  const signUp = !hasAccount && (SIGN_UP_APPS as readonly string[]).includes(app);
-  const send = hasAccount || signUp;
+  const send = signUp || hasAccount;
   const challengeId = uuidv7();
   const code = newCode();
   const now = Date.now();
@@ -177,15 +210,15 @@ export async function requestCode(
   const challenge: Challenge = {
     email,
     app,
-    purpose: signUp ? 'sign-up' : 'sign-in',
+    purpose,
     // nothing fits a challenge that sends no code
     codeHash: send
       ? hashOf(deps.keys, challengeId, code)
       : hashOf(deps.keys, challengeId, uuidv7()),
     send: send ? '1' : '0',
-    terms: consent?.terms ? '1' : '0',
+    terms: signUp && consent?.terms ? '1' : '0',
     // 18 or older is the customer app's rule (PRD §2): another app's answer is not a declaration
-    adult: app === 'customer' && consent?.adult ? '1' : '0',
+    adult: signUp && app === 'customer' && consent?.adult ? '1' : '0',
     attempts: '0',
     resends: '0',
     expiresAt: String(expiresAt),
@@ -211,10 +244,19 @@ redis.call('PEXPIRE', KEYS[1], ARGV[6])
 return resends + 1
 `;
 
-/** POST /auth/otp/:challengeId/resend: a new code, the old one stops working. */
-export async function resendCode(
+interface ResendCodeInput {
+  app: AppId;
+  challengeId: string;
+  requestId: string;
+}
+
+/** POST /auth/otp/:challengeId/resend: a new code, the old one stops working (OTP_MIN_ANSWER_MS). */
+export const resendCode = (deps: OtpDeps, input: ResendCodeInput): Promise<ChallengeView> =>
+  evenly(() => resendCodeNow(deps, input));
+
+async function resendCodeNow(
   deps: OtpDeps,
-  { app, challengeId, requestId }: { app: OtpApp; challengeId: string; requestId: string },
+  { app, challengeId, requestId }: ResendCodeInput,
 ): Promise<ChallengeView> {
   const key = challengeKey(challengeId);
   const challenge = (await inRedis(() => deps.redis.hgetall(key))) as Partial<Challenge>;
@@ -251,7 +293,7 @@ export async function resendCode(
     await emitCode(
       deps,
       challengeId,
-      { email: challenge.email, app, purpose: challenge.purpose ?? 'sign-in' },
+      { email: challenge.email, app, purpose: challenge.purpose ?? 'sign-up' },
       code,
       expiresAt,
       requestId,
@@ -273,25 +315,43 @@ const sameHash = (a: string, b: string): boolean => {
 };
 
 export interface VerifyCodeInput {
-  app: OtpApp;
+  app: AppId;
   challengeId: string;
   code: string;
+  /** The new password (passwordZod: trimmed, 12 to 128) */
+  password: string;
   ip: string;
+}
+
+export interface VerifiedCode {
+  userId: string;
+  email: string;
+  outcome: (typeof OTP_OUTCOMES)[number];
+  signedIn: boolean;
 }
 
 /**
  * POST /auth/otp/:challengeId/verify. Five tries; a right code works once (the challenge is
- * deleted, and only the request that deleted it goes on), then signs in or makes the account.
+ * deleted, and only the request that deleted it goes on). A breached password is refused before
+ * that, so the same code works with another password. Then a sign-up code makes the account
+ * (signed in) or adds the password to one without; a password code sets the password and lifts a
+ * lock. A challenge from before sign-in by password (`sign-in`) no longer works.
  */
 export async function verifyCode(
   deps: OtpDeps,
-  { app, challengeId, code, ip }: VerifyCodeInput,
-): Promise<{ userId: string; email: string; isNewUser: boolean }> {
+  { app, challengeId, code, password, ip }: VerifyCodeInput,
+): Promise<VerifiedCode> {
   const key = challengeKey(challengeId);
   const challenge = (await inRedis(() => deps.redis.hgetall(key))) as Partial<Challenge>;
-  if (challenge.email === undefined || challenge.codeHash === undefined || challenge.app !== app) {
+  if (
+    challenge.email === undefined ||
+    challenge.codeHash === undefined ||
+    challenge.app !== app ||
+    (challenge.purpose !== 'sign-up' && challenge.purpose !== 'password')
+  ) {
     throw otpExpired();
   }
+  const { email, purpose } = challenge;
   const tries = Number(await inRedis(() => deps.redis.eval(TRY, 1, key)));
   if (tries === -1) throw otpExpired();
   if (tries > OTP_MAX_TRIES) {
@@ -307,20 +367,39 @@ export async function verifyCode(
     }
     throw otpInvalid(OTP_MAX_TRIES - tries);
   }
+  if (await deps.breached(password)) throw passwordBreached();
+  const passwordHash = await hashPassword(password);
   // a code works once: of two requests with it, only the one that deletes it goes on
   if ((await inRedis(() => deps.redis.del(key))) === 0) throw otpExpired();
-  const found = await userForCode(deps.mongo, {
-    email: challenge.email,
+
+  if (purpose === 'password') {
+    const user = await setPasswordWithCode(deps.mongo, { email, passwordHash });
+    if (!user) throw otpExpired();
+    await clearFailures(deps.redis, deps.keys, email, { unlock: true });
+    deps.logger.info({ userId: user._id, app }, 'password set with an email code');
+    return { userId: user._id, email: user.email, outcome: 'password-set', signedIn: false };
+  }
+
+  const { user, outcome } = await signUpWithCode(deps.mongo, {
+    email,
     app,
-    signUp: challenge.purpose === 'sign-up',
     consent: { terms: challenge.terms === '1', adult: challenge.adult === '1' },
     legalVersion: deps.legalVersion,
     ip,
+    passwordHash,
   });
-  if (!found) throw otpExpired();
-  deps.logger.info(
-    { userId: found.user._id, app, isNewUser: found.isNewUser },
-    found.isNewUser ? 'account made with an email code' : 'signed in with an email code',
-  );
-  return { userId: found.user._id, email: found.user.email, isNewUser: found.isNewUser };
+  deps.logger.info({ userId: user._id, app, outcome }, 'sign-up code used');
+  if (outcome === 'password-set') {
+    await clearFailures(deps.redis, deps.keys, email, { unlock: true });
+  }
+  if (outcome !== 'account-made') {
+    return { userId: user._id, email: user.email, outcome, signedIn: false };
+  }
+  const signedIn = await deps.sessions.issue({
+    userId: user._id,
+    email: user.email,
+    app,
+    methods: ['email-code', 'password'],
+  });
+  return { ...signedIn, outcome, signedIn: true };
 }

@@ -328,10 +328,10 @@
         }
       }
     },
-    "/auth/otp": {
+    "/auth/sign-up/code": {
       "post": {
-        "operationId": "auth.otp.request",
-        "summary": "Email a sign-in code (the same answer for every email)",
+        "operationId": "auth.signUp.code",
+        "summary": "Email a code to make an account (the same answer for every email)",
         "tags": [
           "auth"
         ],
@@ -345,8 +345,7 @@
               "enum": [
                 "customer",
                 "seller",
-                "creator",
-                "delivery"
+                "creator"
               ]
             }
           }
@@ -360,6 +359,7 @@
                 "properties": {
                   "email": {
                     "type": "string",
+                    "minLength": 1,
                     "maxLength": 254
                   },
                   "consent": {
@@ -443,8 +443,135 @@
           "apps": [
             "customer",
             "seller",
-            "creator",
-            "delivery"
+            "creator"
+          ],
+          "access": {
+            "type": "public"
+          },
+          "rateLimit": "otp",
+          "idempotency": false,
+          "stepUp": false,
+          "owner": "identity",
+          "cache": null
+        }
+      }
+    },
+    "/auth/password/code": {
+      "post": {
+        "operationId": "auth.password.code",
+        "summary": "Email a code to set a password (the same answer for every email)",
+        "tags": [
+          "auth"
+        ],
+        "parameters": [
+          {
+            "name": "X-BQ-App",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "customer",
+                "seller",
+                "admin",
+                "superadmin",
+                "master",
+                "support",
+                "finance",
+                "logistics",
+                "delivery",
+                "growth",
+                "creator"
+              ]
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "email": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 254
+                  }
+                },
+                "required": [
+                  "email"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "challengeId": {
+                          "type": "string",
+                          "format": "uuid",
+                          "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-7[0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12})$"
+                        },
+                        "expiresAt": {
+                          "type": "string",
+                          "format": "date-time",
+                          "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
+                        },
+                        "resendAfter": {
+                          "type": "string",
+                          "format": "date-time",
+                          "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
+                        },
+                        "resendsLeft": {
+                          "type": "integer",
+                          "minimum": 0,
+                          "maximum": 9007199254740991
+                        }
+                      },
+                      "required": [
+                        "challengeId",
+                        "expiresAt",
+                        "resendAfter",
+                        "resendsLeft"
+                      ],
+                      "additionalProperties": false
+                    }
+                  },
+                  "required": [
+                    "data"
+                  ]
+                }
+              }
+            }
+          },
+          "default": {
+            "$ref": "#/components/responses/Error"
+          }
+        },
+        "security": [],
+        "x-bq": {
+          "apps": [
+            "customer",
+            "seller",
+            "admin",
+            "superadmin",
+            "master",
+            "support",
+            "finance",
+            "logistics",
+            "delivery",
+            "growth",
+            "creator"
           ],
           "access": {
             "type": "public"
@@ -460,7 +587,7 @@
     "/auth/otp/{challengeId}/resend": {
       "post": {
         "operationId": "auth.otp.resend",
-        "summary": "Email a new sign-in code for the same challenge",
+        "summary": "Email a new code for the same challenge",
         "tags": [
           "auth"
         ],
@@ -484,8 +611,15 @@
               "enum": [
                 "customer",
                 "seller",
-                "creator",
-                "delivery"
+                "admin",
+                "superadmin",
+                "master",
+                "support",
+                "finance",
+                "logistics",
+                "delivery",
+                "growth",
+                "creator"
               ]
             }
           }
@@ -547,8 +681,15 @@
           "apps": [
             "customer",
             "seller",
-            "creator",
-            "delivery"
+            "admin",
+            "superadmin",
+            "master",
+            "support",
+            "finance",
+            "logistics",
+            "delivery",
+            "growth",
+            "creator"
           ],
           "access": {
             "type": "public"
@@ -564,7 +705,7 @@
     "/auth/otp/{challengeId}/verify": {
       "post": {
         "operationId": "auth.otp.verify",
-        "summary": "Check a sign-in code; a right one signs in or makes the account",
+        "summary": "Check an email code and set the password; a sign-up code makes the account",
         "tags": [
           "auth"
         ],
@@ -588,8 +729,303 @@
               "enum": [
                 "customer",
                 "seller",
-                "creator",
-                "delivery"
+                "admin",
+                "superadmin",
+                "master",
+                "support",
+                "finance",
+                "logistics",
+                "delivery",
+                "growth",
+                "creator"
+              ]
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "code": {
+                    "type": "string",
+                    "pattern": "^\\d{6}$"
+                  },
+                  "password": {
+                    "type": "string",
+                    "minLength": 12,
+                    "maxLength": 128
+                  }
+                },
+                "required": [
+                  "code",
+                  "password"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "userId": {
+                          "type": "string",
+                          "format": "uuid",
+                          "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-7[0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12})$"
+                        },
+                        "email": {
+                          "type": "string",
+                          "format": "email",
+                          "pattern": "^(?:[A-Za-z0-9_'+\\-]+\\.)*[A-Za-z0-9_'+\\-]*[A-Za-z0-9_+-]@(?:[A-Za-z0-9][A-Za-z0-9\\-]*\\.)+[A-Za-z]{2,}$"
+                        },
+                        "outcome": {
+                          "type": "string",
+                          "enum": [
+                            "account-made",
+                            "password-set",
+                            "password-kept"
+                          ]
+                        },
+                        "signedIn": {
+                          "type": "boolean"
+                        }
+                      },
+                      "required": [
+                        "userId",
+                        "email",
+                        "outcome",
+                        "signedIn"
+                      ],
+                      "additionalProperties": false
+                    }
+                  },
+                  "required": [
+                    "data"
+                  ]
+                }
+              }
+            }
+          },
+          "default": {
+            "$ref": "#/components/responses/Error"
+          }
+        },
+        "security": [],
+        "x-bq": {
+          "apps": [
+            "customer",
+            "seller",
+            "admin",
+            "superadmin",
+            "master",
+            "support",
+            "finance",
+            "logistics",
+            "delivery",
+            "growth",
+            "creator"
+          ],
+          "access": {
+            "type": "public"
+          },
+          "rateLimit": "auth",
+          "idempotency": false,
+          "stepUp": false,
+          "owner": "identity",
+          "cache": null
+        }
+      }
+    },
+    "/auth/login": {
+      "post": {
+        "operationId": "auth.login.password",
+        "summary": "Sign in with email and password",
+        "tags": [
+          "auth"
+        ],
+        "parameters": [
+          {
+            "name": "X-BQ-App",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "customer",
+                "seller",
+                "admin",
+                "superadmin",
+                "master",
+                "support",
+                "finance",
+                "logistics",
+                "delivery",
+                "growth",
+                "creator"
+              ]
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "email": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 254
+                  },
+                  "password": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 128
+                  }
+                },
+                "required": [
+                  "email",
+                  "password"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "next": {
+                          "type": "string",
+                          "enum": [
+                            "totp",
+                            "totp-enroll",
+                            "signed-in"
+                          ]
+                        },
+                        "loginId": {
+                          "type": "string",
+                          "format": "uuid",
+                          "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-7[0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12})$"
+                        },
+                        "user": {
+                          "type": "object",
+                          "properties": {
+                            "userId": {
+                              "type": "string",
+                              "format": "uuid",
+                              "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-7[0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12})$"
+                            },
+                            "email": {
+                              "type": "string",
+                              "format": "email",
+                              "pattern": "^(?:[A-Za-z0-9_'+\\-]+\\.)*[A-Za-z0-9_'+\\-]*[A-Za-z0-9_+-]@(?:[A-Za-z0-9][A-Za-z0-9\\-]*\\.)+[A-Za-z]{2,}$"
+                            }
+                          },
+                          "required": [
+                            "userId",
+                            "email"
+                          ],
+                          "additionalProperties": false
+                        }
+                      },
+                      "required": [
+                        "next"
+                      ],
+                      "additionalProperties": false
+                    }
+                  },
+                  "required": [
+                    "data"
+                  ]
+                }
+              }
+            }
+          },
+          "default": {
+            "$ref": "#/components/responses/Error"
+          }
+        },
+        "security": [],
+        "x-bq": {
+          "apps": [
+            "customer",
+            "seller",
+            "admin",
+            "superadmin",
+            "master",
+            "support",
+            "finance",
+            "logistics",
+            "delivery",
+            "growth",
+            "creator"
+          ],
+          "access": {
+            "type": "public"
+          },
+          "rateLimit": "auth",
+          "idempotency": false,
+          "stepUp": false,
+          "owner": "identity",
+          "cache": null
+        }
+      }
+    },
+    "/auth/login/{loginId}/totp": {
+      "post": {
+        "operationId": "auth.login.totp",
+        "summary": "Finish a sign-in with the authenticator code",
+        "tags": [
+          "auth"
+        ],
+        "parameters": [
+          {
+            "name": "loginId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-7[0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12})$"
+            }
+          },
+          {
+            "name": "X-BQ-App",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "customer",
+                "seller",
+                "admin",
+                "superadmin",
+                "master",
+                "support",
+                "finance",
+                "logistics",
+                "delivery",
+                "growth",
+                "creator"
               ]
             }
           }
@@ -624,24 +1060,29 @@
                     "data": {
                       "type": "object",
                       "properties": {
-                        "userId": {
-                          "type": "string",
-                          "format": "uuid",
-                          "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-7[0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12})$"
-                        },
-                        "email": {
-                          "type": "string",
-                          "format": "email",
-                          "pattern": "^(?:[A-Za-z0-9_'+\\-]+\\.)*[A-Za-z0-9_'+\\-]*[A-Za-z0-9_+-]@(?:[A-Za-z0-9][A-Za-z0-9\\-]*\\.)+[A-Za-z]{2,}$"
-                        },
-                        "isNewUser": {
-                          "type": "boolean"
+                        "user": {
+                          "type": "object",
+                          "properties": {
+                            "userId": {
+                              "type": "string",
+                              "format": "uuid",
+                              "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-7[0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12})$"
+                            },
+                            "email": {
+                              "type": "string",
+                              "format": "email",
+                              "pattern": "^(?:[A-Za-z0-9_'+\\-]+\\.)*[A-Za-z0-9_'+\\-]*[A-Za-z0-9_+-]@(?:[A-Za-z0-9][A-Za-z0-9\\-]*\\.)+[A-Za-z]{2,}$"
+                            }
+                          },
+                          "required": [
+                            "userId",
+                            "email"
+                          ],
+                          "additionalProperties": false
                         }
                       },
                       "required": [
-                        "userId",
-                        "email",
-                        "isNewUser"
+                        "user"
                       ],
                       "additionalProperties": false
                     }
@@ -662,8 +1103,400 @@
           "apps": [
             "customer",
             "seller",
-            "creator",
-            "delivery"
+            "admin",
+            "superadmin",
+            "master",
+            "support",
+            "finance",
+            "logistics",
+            "delivery",
+            "growth",
+            "creator"
+          ],
+          "access": {
+            "type": "public"
+          },
+          "rateLimit": "auth",
+          "idempotency": false,
+          "stepUp": false,
+          "owner": "identity",
+          "cache": null
+        }
+      }
+    },
+    "/auth/login/{loginId}/recovery": {
+      "post": {
+        "operationId": "auth.login.recovery",
+        "summary": "Finish a sign-in with a recovery code",
+        "tags": [
+          "auth"
+        ],
+        "parameters": [
+          {
+            "name": "loginId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-7[0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12})$"
+            }
+          },
+          {
+            "name": "X-BQ-App",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "customer",
+                "seller",
+                "admin",
+                "superadmin",
+                "master",
+                "support",
+                "finance",
+                "logistics",
+                "delivery",
+                "growth",
+                "creator"
+              ]
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "code": {
+                    "type": "string",
+                    "pattern": "^[A-Z2-7]{5}-?[A-Z2-7]{5}$"
+                  }
+                },
+                "required": [
+                  "code"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "user": {
+                          "type": "object",
+                          "properties": {
+                            "userId": {
+                              "type": "string",
+                              "format": "uuid",
+                              "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-7[0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12})$"
+                            },
+                            "email": {
+                              "type": "string",
+                              "format": "email",
+                              "pattern": "^(?:[A-Za-z0-9_'+\\-]+\\.)*[A-Za-z0-9_'+\\-]*[A-Za-z0-9_+-]@(?:[A-Za-z0-9][A-Za-z0-9\\-]*\\.)+[A-Za-z]{2,}$"
+                            }
+                          },
+                          "required": [
+                            "userId",
+                            "email"
+                          ],
+                          "additionalProperties": false
+                        },
+                        "recoveryCodesLeft": {
+                          "type": "integer",
+                          "minimum": 0,
+                          "maximum": 9007199254740991
+                        }
+                      },
+                      "required": [
+                        "user",
+                        "recoveryCodesLeft"
+                      ],
+                      "additionalProperties": false
+                    }
+                  },
+                  "required": [
+                    "data"
+                  ]
+                }
+              }
+            }
+          },
+          "default": {
+            "$ref": "#/components/responses/Error"
+          }
+        },
+        "security": [],
+        "x-bq": {
+          "apps": [
+            "customer",
+            "seller",
+            "admin",
+            "superadmin",
+            "master",
+            "support",
+            "finance",
+            "logistics",
+            "delivery",
+            "growth",
+            "creator"
+          ],
+          "access": {
+            "type": "public"
+          },
+          "rateLimit": "auth",
+          "idempotency": false,
+          "stepUp": false,
+          "owner": "identity",
+          "cache": null
+        }
+      }
+    },
+    "/auth/login/{loginId}/totp/enroll": {
+      "post": {
+        "operationId": "auth.login.totpEnroll",
+        "summary": "Start setting up the authenticator",
+        "tags": [
+          "auth"
+        ],
+        "parameters": [
+          {
+            "name": "loginId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-7[0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12})$"
+            }
+          },
+          {
+            "name": "X-BQ-App",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "customer",
+                "seller",
+                "admin",
+                "superadmin",
+                "master",
+                "support",
+                "finance",
+                "logistics",
+                "delivery",
+                "growth",
+                "creator"
+              ]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "secret": {
+                          "type": "string"
+                        },
+                        "uri": {
+                          "type": "string"
+                        }
+                      },
+                      "required": [
+                        "secret",
+                        "uri"
+                      ],
+                      "additionalProperties": false
+                    }
+                  },
+                  "required": [
+                    "data"
+                  ]
+                }
+              }
+            }
+          },
+          "default": {
+            "$ref": "#/components/responses/Error"
+          }
+        },
+        "security": [],
+        "x-bq": {
+          "apps": [
+            "customer",
+            "seller",
+            "admin",
+            "superadmin",
+            "master",
+            "support",
+            "finance",
+            "logistics",
+            "delivery",
+            "growth",
+            "creator"
+          ],
+          "access": {
+            "type": "public"
+          },
+          "rateLimit": "auth",
+          "idempotency": false,
+          "stepUp": false,
+          "owner": "identity",
+          "cache": null
+        }
+      }
+    },
+    "/auth/login/{loginId}/totp/confirm": {
+      "post": {
+        "operationId": "auth.login.totpConfirm",
+        "summary": "Finish setting up the authenticator and get the recovery codes",
+        "tags": [
+          "auth"
+        ],
+        "parameters": [
+          {
+            "name": "loginId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-7[0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12})$"
+            }
+          },
+          {
+            "name": "X-BQ-App",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "customer",
+                "seller",
+                "admin",
+                "superadmin",
+                "master",
+                "support",
+                "finance",
+                "logistics",
+                "delivery",
+                "growth",
+                "creator"
+              ]
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "code": {
+                    "type": "string",
+                    "pattern": "^\\d{6}$"
+                  }
+                },
+                "required": [
+                  "code"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "user": {
+                          "type": "object",
+                          "properties": {
+                            "userId": {
+                              "type": "string",
+                              "format": "uuid",
+                              "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-7[0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12})$"
+                            },
+                            "email": {
+                              "type": "string",
+                              "format": "email",
+                              "pattern": "^(?:[A-Za-z0-9_'+\\-]+\\.)*[A-Za-z0-9_'+\\-]*[A-Za-z0-9_+-]@(?:[A-Za-z0-9][A-Za-z0-9\\-]*\\.)+[A-Za-z]{2,}$"
+                            }
+                          },
+                          "required": [
+                            "userId",
+                            "email"
+                          ],
+                          "additionalProperties": false
+                        },
+                        "recoveryCodes": {
+                          "minItems": 10,
+                          "maxItems": 10,
+                          "type": "array",
+                          "items": {
+                            "type": "string"
+                          }
+                        }
+                      },
+                      "required": [
+                        "user",
+                        "recoveryCodes"
+                      ],
+                      "additionalProperties": false
+                    }
+                  },
+                  "required": [
+                    "data"
+                  ]
+                }
+              }
+            }
+          },
+          "default": {
+            "$ref": "#/components/responses/Error"
+          }
+        },
+        "security": [],
+        "x-bq": {
+          "apps": [
+            "customer",
+            "seller",
+            "admin",
+            "superadmin",
+            "master",
+            "support",
+            "finance",
+            "logistics",
+            "delivery",
+            "growth",
+            "creator"
           ],
           "access": {
             "type": "public"

@@ -64,6 +64,27 @@ const plain = decryptField(keys, seller.pan.enc, `sellers.pan:${sellerId}`);
 | `maskTail(value, visible = 4)`                                 | `XXXXXX1234`; chhota value poora chhupa                                                                                                                                                                                          |
 | `CryptoError`                                                  | Is package ka error; message me kabhi key ya data nahi                                                                                                                                                                           |
 
+## Authenticator codes (TOTP)
+
+RFC 6238 (TOTP) aur RFC 4226 (HOTP), dono RFC ke test vectors ke saath. Google/Microsoft Authenticator, Authy waghera QR ke `otpauth://` link se wahi codes phone pe bina internet banate hain; phone pe kuch bheja nahi jaata.
+
+```ts
+import { newTotpSecret, totpUri, verifyTotp } from '@beautinique/backend-server-crypto';
+
+const secret = newTotpSecret(); // 160-bit, base32; encryptField se sealed rakho
+const uri = totpUri({ secret, issuer: 'Beautinique', account: email }); // QR browser me
+const step = verifyTotp(secret, code); // number | null; step save karo, wahi ya purana dobara mat lo
+```
+
+| Function                                        | Kaam                                                                                     |
+| ----------------------------------------------- | ---------------------------------------------------------------------------------------- |
+| `newTotpSecret()`                               | Naya random secret (20 bytes, base32)                                                    |
+| `totpCode(secret, timeMs, options)`             | Us waqt ka code (default 6 digit, 30 s, SHA-1; `digits` 6–10, `algorithm` sha256/sha512) |
+| `verifyTotp(secret, code, { now, window = 1 })` | Code kis time step ka hai (±window), ya `null`; har step constant time me compare        |
+| `totpStep(timeMs)`, `hotp(secret, counter)`     | RFC ke building blocks                                                                   |
+| `totpUri({ secret, issuer, account })`          | `otpauth://totp/...` link                                                                |
+| `encodeBase32` / `decodeBase32`                 | RFC 4648 base32 (decode: case, space, hyphen, `=` chalte hain)                           |
+
 ## Niyam
 
 - Personal field kabhi plain save nahi: `sealPii` (dhoondhna ho) ya `encryptField` (sirf rakhna ho, jaise TOTP secret).

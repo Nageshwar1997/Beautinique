@@ -1,4 +1,5 @@
 import {
+  array,
   boolean,
   emailZod,
   enum as zodEnum,
@@ -7,26 +8,40 @@ import {
   number,
   object,
   otpZod,
+  passwordZod,
   string,
   uuidv7Zod,
 } from '@beautinique/shared-zod';
 
 import { defineEvent } from '../events';
-import { APPS } from '../platform';
+import { type AppId, APPS } from '../platform';
 import { defineRoute } from '../routes';
 
-/** Apps that sign in with an email code (ARCHITECTURE §7.1); the internal apps use password + TOTP. */
-export const OTP_APPS = ['customer', 'seller', 'creator', 'delivery'] as const;
-
 /**
- * Apps where an unknown email makes a new account. A delivery partner is onboarded by a hub, never
- * signs up. The consent each of them asks for is in `consentProblems`.
+ * Apps where an unknown email makes a new account (email code + password). A delivery partner is
+ * onboarded by a hub, staff by their admins: they never sign up. The consent each of them asks for
+ * is in `consentProblems`.
  */
 export const SIGN_UP_APPS = ['customer', 'seller', 'creator'] as const;
 
 /**
- * Error codes of sign-in (RULES §4.15: codes in contracts, the text in one place). None of them tells whether an
- * email has an account.
+ * Apps where every sign-in also asks for the authenticator code, and that make a person set one up
+ * at the first sign-in (ARCHITECTURE §7.1). Elsewhere it is the person's choice; once set up, every
+ * app asks for it.
+ */
+export const TOTP_REQUIRED_APPS = [
+  'admin',
+  'superadmin',
+  'master',
+  'support',
+  'finance',
+  'logistics',
+  'growth',
+] as const satisfies readonly AppId[];
+
+/**
+ * Error codes of sign-in (RULES §4.15: codes in contracts, the text in one place). None of them
+ * tells whether an email has an account before the person proved the email is theirs.
  */
 export const IDENTITY_ERROR_CODES = {
   /** Wrong code; the challenge still takes tries */
@@ -39,10 +54,24 @@ export const IDENTITY_ERROR_CODES = {
   OTP_RESEND_LIMIT: 429,
   /** Too many codes for this email in the last hour */
   OTP_EMAIL_LIMIT: 429,
+  /** Wrong email or password, or too many wrong tries: the same answer for all three */
+  INVALID_CREDENTIALS: 401,
+  /** The password is in a known data breach (Have I Been Pwned): choose another */
+  PASSWORD_BREACHED: 400,
+  /** No such sign-in step any more: it expired, finished, or ran out of tries. Sign in again. */
+  LOGIN_EXPIRED: 400,
+  /** Wrong authenticator code, or one already used */
+  TOTP_INVALID: 400,
+  /** Wrong recovery code, or one already used */
+  RECOVERY_CODE_INVALID: 400,
 } as const satisfies Record<string, number>;
 
-/** Why a sign-in code was sent: to sign in to an account, or to make a new one (customer sign-up). */
-export const OTP_PURPOSES = ['sign-in', 'sign-up'] as const;
+/**
+ * Why an email code was sent: to make an account (sign-up), or to set a password (the first one,
+ * or a forgotten one). Every app signs in with email + password, never with a code (owner,
+ * 2026-10-27, ARCHITECTURE §7.1); `sign-in` stays only so events already in an outbox still read.
+ */
+export const OTP_PURPOSES = ['sign-in', 'sign-up', 'password'] as const;
 
 /**
  * The associated data that binds a sealed code to its challenge: a code sealed for one challenge
@@ -51,7 +80,7 @@ export const OTP_PURPOSES = ['sign-in', 'sign-up'] as const;
 export const otpSealContext = (challengeId: string): string => `identity.otp:${challengeId}`;
 
 /**
- * A sign-in code was asked for, and notify emails it at once (the OTP fast lane, ARCHITECTURE §7.1).
+ * An email code was asked for, and notify emails it at once (the OTP fast lane, ARCHITECTURE §7.1).
  * The code travels sealed (AES-256-GCM, a key only identity and notify hold), so the outbox, Redis
  * and logs never see it; identity itself keeps only its hash.
  */
@@ -59,8 +88,7 @@ export const otpRequested = defineEvent({
   type: 'identity.otp.requested',
   version: 1,
   producer: 'identity',
-  description:
-    'A sign-in code was asked for; notify emails it (the code is sealed for notify only)',
+  description: 'An email code was asked for; notify emails it (the code is sealed for notify only)',
   data: object({
     challengeId: uuidv7Zod,
     email: emailZod,
@@ -85,9 +113,9 @@ export const otpConsentZod = object({
   adult: literal(true).optional(),
 });
 
-/** The consent `app` needs before a code goes out; empty when it is complete. */
+/** The consent `app` needs before a sign-up code goes out; empty when it is complete. */
 export function consentProblems(
-  app: (typeof OTP_APPS)[number],
+  app: AppId,
   consent: { terms?: true; adult?: true } | undefined,
 ): { path: string[]; message: string }[] {
   if (!(SIGN_UP_APPS as readonly string[]).includes(app)) return [];
@@ -112,15 +140,15 @@ const otpChallengeZod = object({
 const challengeParams = object({ challengeId: uuidv7Zod });
 
 /**
- * Sends a sign-in code to an email (OTP only by email, ARCHITECTURE §7.1). The answer is the same
- * whether or not the email has an account; in a sign-up app an unknown email gets a code to make one.
+ * Sign-up, step 1: an email code to prove the email, with the consent of the sign-up app. The same
+ * answer for every email; an account that is there already is told so only after its code.
  */
-export const requestOtp = defineRoute({
-  id: 'auth.otp.request',
+export const requestSignUpCode = defineRoute({
+  id: 'auth.signUp.code',
   method: 'POST',
-  path: '/auth/otp',
-  summary: 'Email a sign-in code (the same answer for every email)',
-  apps: OTP_APPS,
+  path: '/auth/sign-up/code',
+  summary: 'Email a code to make an account (the same answer for every email)',
+  apps: SIGN_UP_APPS,
   access: { type: 'public' },
   rateLimit: 'otp',
   idempotency: false,
@@ -130,13 +158,33 @@ export const requestOtp = defineRoute({
   output: otpChallengeZod,
 });
 
+/**
+ * An email code to set a password: the first one (an account made with Google, a rider or a staff
+ * account) or a forgotten one. Any app; an email without an account gets no email, and the same
+ * answer in the same time.
+ */
+export const requestPasswordCode = defineRoute({
+  id: 'auth.password.code',
+  method: 'POST',
+  path: '/auth/password/code',
+  summary: 'Email a code to set a password (the same answer for every email)',
+  apps: APPS,
+  access: { type: 'public' },
+  rateLimit: 'otp',
+  idempotency: false,
+  stepUp: false,
+  owner: 'identity',
+  input: { body: object({ email: emailZod }) },
+  output: otpChallengeZod,
+});
+
 /** A new code for the same challenge: at most 3, a minute apart; the old code stops working. */
 export const resendOtp = defineRoute({
   id: 'auth.otp.resend',
   method: 'POST',
   path: '/auth/otp/:challengeId/resend',
-  summary: 'Email a new sign-in code for the same challenge',
-  apps: OTP_APPS,
+  summary: 'Email a new code for the same challenge',
+  apps: APPS,
   access: { type: 'public' },
   rateLimit: 'otp',
   idempotency: false,
@@ -146,21 +194,150 @@ export const resendOtp = defineRoute({
   output: otpChallengeZod,
 });
 
+/** Who signed in. The session (cookies) comes with T3.2. */
+export const signedInZod = object({ userId: uuidv7Zod, email: emailZod });
+
 /**
- * Checks a code: 5 tries per challenge, each code works once. A right code signs in, or makes the
- * account in a sign-up app. The session (cookies) comes with T3.2.
+ * What a right code did. `account-made`: a new account, signed in. `password-set`: the password
+ * of an account (a password code; or a sign-up code for an account without one, made with
+ * Google). `password-kept`: a sign-up code for an account that has a password already; the app's
+ * consent is recorded, the password is not changed: sign in with it, or reset it.
+ */
+export const OTP_OUTCOMES = ['account-made', 'password-set', 'password-kept'] as const;
+
+/**
+ * Checks an email code together with the new password: 5 tries per challenge, each code works
+ * once (OTP_OUTCOMES). A breached password is refused before the code is used up.
  */
 export const verifyOtp = defineRoute({
   id: 'auth.otp.verify',
   method: 'POST',
   path: '/auth/otp/:challengeId/verify',
-  summary: 'Check a sign-in code; a right one signs in or makes the account',
-  apps: OTP_APPS,
+  summary: 'Check an email code and set the password; a sign-up code makes the account',
+  apps: APPS,
   access: { type: 'public' },
   rateLimit: 'auth',
   idempotency: false,
   stepUp: false,
   owner: 'identity',
-  input: { params: challengeParams, body: object({ code: otpZod }) },
-  output: object({ userId: uuidv7Zod, email: emailZod, isNewUser: boolean() }),
+  input: { params: challengeParams, body: object({ code: otpZod, password: passwordZod }) },
+  output: object({
+    userId: uuidv7Zod,
+    email: emailZod,
+    outcome: zodEnum(OTP_OUTCOMES),
+    /** true only for a new account; after setting a password, sign in with it */
+    signedIn: boolean(),
+  }),
+});
+
+/** Where a sign-in goes next: the authenticator, setting one up, or signed in. */
+export const LOGIN_NEXT = ['totp', 'totp-enroll', 'signed-in'] as const;
+
+const loginParams = object({ loginId: uuidv7Zod });
+
+/**
+ * Sign-in in every app: email + password. A wrong email, a wrong password and a locked account (10
+ * wrong tries in 15 minutes lock it for an hour) all answer INVALID_CREDENTIALS, in the same time.
+ */
+export const passwordLogin = defineRoute({
+  id: 'auth.login.password',
+  method: 'POST',
+  path: '/auth/login',
+  summary: 'Sign in with email and password',
+  apps: APPS,
+  access: { type: 'public' },
+  rateLimit: 'auth',
+  idempotency: false,
+  stepUp: false,
+  owner: 'identity',
+  // not passwordZod: a sign-in checks the password it is given (trimmed like a new one); the
+  // length rules are for new ones
+  input: {
+    body: object({
+      email: emailZod,
+      password: string('Password is required')
+        .trim()
+        .nonempty('Enter your password')
+        .max(128, 'Use at most 128 characters'),
+    }),
+  },
+  output: object({
+    next: zodEnum(LOGIN_NEXT),
+    /** The sign-in in progress, for the next step (5 minutes; 10 to set up an authenticator) */
+    loginId: uuidv7Zod.optional(),
+    user: signedInZod.optional(),
+  }),
+});
+
+/** Sign-in, second step: the authenticator code (each code works once). */
+export const loginTotp = defineRoute({
+  id: 'auth.login.totp',
+  method: 'POST',
+  path: '/auth/login/:loginId/totp',
+  summary: 'Finish a sign-in with the authenticator code',
+  apps: APPS,
+  access: { type: 'public' },
+  rateLimit: 'auth',
+  idempotency: false,
+  stepUp: false,
+  owner: 'identity',
+  input: { params: loginParams, body: object({ code: otpZod }) },
+  output: object({ user: signedInZod }),
+});
+
+/** A recovery code: `ABCDE-FGHIJ` (base32, any case, the hyphen optional). */
+export const recoveryCodeZod = string()
+  .trim()
+  .toUpperCase()
+  .regex(/^[A-Z2-7]{5}-?[A-Z2-7]{5}$/, 'Enter a recovery code like ABCDE-FGHIJ');
+
+/** Sign-in, second step without the phone: one of the 10 recovery codes (each works once). */
+export const loginRecovery = defineRoute({
+  id: 'auth.login.recovery',
+  method: 'POST',
+  path: '/auth/login/:loginId/recovery',
+  summary: 'Finish a sign-in with a recovery code',
+  apps: APPS,
+  access: { type: 'public' },
+  rateLimit: 'auth',
+  idempotency: false,
+  stepUp: false,
+  owner: 'identity',
+  input: { params: loginParams, body: object({ code: recoveryCodeZod }) },
+  output: object({ user: signedInZod, recoveryCodesLeft: number().int().min(0) }),
+});
+
+/**
+ * Sets up the authenticator during a sign-in that needs one: the secret to type in, and the
+ * otpauth link for the QR code (drawn in the browser, never by another site).
+ */
+export const startTotpEnroll = defineRoute({
+  id: 'auth.login.totpEnroll',
+  method: 'POST',
+  path: '/auth/login/:loginId/totp/enroll',
+  summary: 'Start setting up the authenticator',
+  apps: APPS,
+  access: { type: 'public' },
+  rateLimit: 'auth',
+  idempotency: false,
+  stepUp: false,
+  owner: 'identity',
+  input: { params: loginParams },
+  output: object({ secret: string(), uri: string() }),
+});
+
+/** The first authenticator code saves it: 10 recovery codes (shown once), and signed in. */
+export const confirmTotpEnroll = defineRoute({
+  id: 'auth.login.totpConfirm',
+  method: 'POST',
+  path: '/auth/login/:loginId/totp/confirm',
+  summary: 'Finish setting up the authenticator and get the recovery codes',
+  apps: APPS,
+  access: { type: 'public' },
+  rateLimit: 'auth',
+  idempotency: false,
+  stepUp: false,
+  owner: 'identity',
+  input: { params: loginParams, body: object({ code: otpZod }) },
+  output: object({ user: signedInZod, recoveryCodes: array(string()).length(10) }),
 });

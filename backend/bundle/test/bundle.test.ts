@@ -46,6 +46,9 @@ const quiet = () => ({
   IDENTITY__FIELD_KEYS: `k1:${randomBytes(32).toString('base64')}`,
   IDENTITY__BLIND_INDEX_KEY: `b1:${randomBytes(32).toString('base64')}`,
   IDENTITY__OTP_EVENT_KEYS: OTP_EVENT_KEYS,
+  // nothing listens there: the breached-password check is away, so it lets passwords through
+  // (fail-open), and the tests never reach the internet
+  IDENTITY__HIBP_URL: 'http://127.0.0.1:9',
   NOTIFY__MONGO_URI: MONGO_URI,
   NOTIFY__MONGO_DB_NAME: notifyDbName,
   NOTIFY__REDIS_URL: REDIS_DB,
@@ -123,7 +126,7 @@ describe('bundle', () => {
     }
   });
 
-  it('signs a customer up with an emailed code: app, gateway, identity, notify, Mailpit (M3)', async () => {
+  it('signs a customer up with an emailed code and a password, then in: app, gateway, identity, notify, Mailpit (M3)', async () => {
     const bundle = await startBundle({ port: 0, env: quiet() });
     const email = `bundle-${randomUUID().slice(0, 8)}@beautinique.example`;
     const search = `http://localhost:8025/api/v1/search?query=${encodeURIComponent(`to:${email}`)}`;
@@ -134,7 +137,7 @@ describe('bundle', () => {
         'x-origin-secret': ORIGIN_SECRET,
         'content-type': 'application/json',
       };
-      const asked = await fetch(`${bundle.url}/api/v1/auth/otp`, {
+      const asked = await fetch(`${bundle.url}/api/v1/auth/sign-up/code`, {
         method: 'POST',
         headers,
         body: JSON.stringify({ email, consent: { terms: true, adult: true } }),
@@ -159,10 +162,20 @@ describe('bundle', () => {
       const verified = await fetch(`${bundle.url}/api/v1/auth/otp/${data.challengeId}/verify`, {
         method: 'POST',
         headers,
-        body: JSON.stringify({ code }),
+        body: JSON.stringify({ code, password: 'pink lipstick on a rainy day' }),
       });
       expect(verified.status).toBe(200);
-      expect(await verified.json()).toMatchObject({ data: { email, isNewUser: true } });
+      expect(await verified.json()).toMatchObject({
+        data: { email, outcome: 'account-made', signedIn: true },
+      });
+      const signedIn = await fetch(`${bundle.url}/api/v1/auth/login`, {
+        method: 'POST',
+        headers,
+        body: JSON.stringify({ email, password: 'pink lipstick on a rainy day' }),
+      });
+      expect(signedIn.status).toBe(200);
+      expect(signedIn.headers.get('ratelimit-policy')).toBe('"auth";q=30;w=300');
+      expect(await signedIn.json()).toMatchObject({ data: { next: 'signed-in', user: { email } } });
     } finally {
       await bundle.stop();
       await fetch('http://localhost:8025/api/v1/messages', {

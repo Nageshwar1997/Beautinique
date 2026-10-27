@@ -74,6 +74,7 @@ describe('identity', () => {
       otpEventKeys: OTP_EVENT_KEYS,
       otpEmailLimitPerHour: 5,
       legalVersion: 'dummy-1',
+      hibpUrl: 'https://api.pwnedpasswords.com',
     });
     expect(readConfig({ env: { ...env, IDENTITY__PORT: '9001' } }).port).toBe(9001);
     expect(() => readConfig({ env: { ...env, IDENTITY__PORT: 'abc' } })).toThrow('IDENTITY__PORT');
@@ -89,6 +90,12 @@ describe('identity', () => {
     expect(() => readConfig({ env: { ...env, IDENTITY__REDIS_URL: 'localhost:6379' } })).toThrow(
       /IDENTITY__REDIS_URL: Use a Redis URL$/,
     );
+    expect(readConfig({ env: { ...env, IDENTITY__HIBP_URL: 'http://127.0.0.1:9' } }).hibpUrl).toBe(
+      'http://127.0.0.1:9',
+    );
+    expect(() =>
+      readConfig({ env: { ...env, IDENTITY__HIBP_URL: 'https://api.pwnedpasswords.com/range' } }),
+    ).toThrow('IDENTITY__HIBP_URL: Use a base URL');
   });
 
   it('runs its release steps in its own database before it listens, and only once per release', async () => {
