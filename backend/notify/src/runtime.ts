@@ -17,7 +17,7 @@ import {
 } from '@beautinique/backend-server-queue';
 
 import type { Config } from './config.ts';
-import { otpSubscription, SEND_TASK, sendDue } from './deliveries.ts';
+import { otpSubscription, securitySubscription, SEND_TASK, sendDue } from './deliveries.ts';
 import { brevoSender } from './email/brevo.ts';
 import { mailpitSender } from './email/mailpit.ts';
 import type { EmailSender } from './email/port.ts';
@@ -122,7 +122,10 @@ export async function startRuntime(config: Config, options: RuntimeOptions): Pro
         redis: redis.client,
         logger,
         queue: QUEUE,
-        subscriptions: [otpSubscription({ mongo, trigger, logger })],
+        subscriptions: [
+          otpSubscription({ mongo, trigger, logger }),
+          securitySubscription({ mongo, trigger, logger }),
+        ],
         tasks,
         prefix,
       });
