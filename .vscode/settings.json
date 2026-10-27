@@ -22,6 +22,7 @@
     "bullmq",
     "colour",
     "COLOURS",
+    "deployables",
     "dsphere",
     "mailin",
     "mailpit",
@@ -29,6 +30,7 @@
     "redrive",
     "riya",
     "superadmin",
+    "THREADPOOL",
     "uuidv",
     "Valkey"
   ]

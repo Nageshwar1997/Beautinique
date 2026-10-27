@@ -39,7 +39,7 @@ Gateway ka DB nahi, uske steps nahi. Naya deployable `src/service.ts` se `releas
 
 ## Settings
 
-`.env.example` ko `.env` me copy karo (commit kabhi nahi). Har deployable ki keys (`backend/<name>/.env.example`) bhi isi `.env` me daalo, kyunki bundle ek hi process hai. Live values Render ke Environment me, aur unki private copy `.env.production` me (sirf `npm run db:release -- --env live` use padhta hai); har key ki live value kahan se, ye `.env.example` me likha hai.
+`.env.example` ka LOCAL hissa `.env` me copy karo (commit kabhi nahi); OPTIONAL me defaults, PRODUCTION me Render ki saari keys dummy values ke saath, deployable-wise sections me. Har deployable ki keys (`backend/<name>/.env.example`) bhi isi `.env` me daalo, kyunki bundle ek hi process hai. Live values Render ke Environment me, aur unki private copy `.env.production` me (sirf `npm run db:release -- --env live` use padhta hai); har key ki live value kahan se, ye `.env.example` me likha hai.
 
 ## Render (`bq-live`)
 

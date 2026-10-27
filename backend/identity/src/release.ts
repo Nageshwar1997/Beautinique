@@ -1,5 +1,6 @@
 import type { Logger } from '@beautinique/backend-server-kit';
 import { connectMongo, type Mongo } from '@beautinique/backend-server-mongo';
+import { OUTBOX_INDEXES } from '@beautinique/backend-server-queue';
 import {
   defineMigrations,
   type ReleaseDefinition,
@@ -8,6 +9,7 @@ import {
 } from '@beautinique/backend-server-release';
 
 import type { Config } from './config.ts';
+import { indexes as userIndexes } from './users.ts';
 
 /**
  * identity's release steps (ARCHITECTURE §11.1), run on every start before identity listens:
@@ -16,7 +18,7 @@ import type { Config } from './config.ts';
  */
 export const releaseDefinition: ReleaseDefinition = {
   migrations: defineMigrations([]),
-  indexes: [],
+  indexes: [...OUTBOX_INDEXES, ...userIndexes],
 };
 
 /** The release steps on identity's database (a start, or `npm run db:release`). */

@@ -28,6 +28,9 @@ const envText = (mongoUri: string) =>
     `IDENTITY__MONGO_URI=${mongoUri}`,
     `IDENTITY__MONGO_DB_NAME=${identityDb}`,
     'IDENTITY__REDIS_URL=redis://localhost:6379/5',
+    `IDENTITY__FIELD_KEYS=k1:${randomBytes(32).toString('base64')}`,
+    `IDENTITY__BLIND_INDEX_KEY=b1:${randomBytes(32).toString('base64')}`,
+    `IDENTITY__OTP_EVENT_KEYS=e1:${randomBytes(32).toString('base64')}`,
     `NOTIFY__MONGO_URI=${mongoUri}`,
     `NOTIFY__MONGO_DB_NAME=${notifyDb}`,
     'NOTIFY__REDIS_URL=redis://localhost:6379/5',
@@ -104,7 +107,7 @@ describe('npm run db:release', () => {
     expect(first.code).toBe(0);
     expect(first.printed).toMatch(
       new RegExp(
-        `identity \\(${identityDb} on localhost:27017\\): 0 migration\\(s\\), 0 index\\(es\\) made`,
+        `identity \\(${identityDb} on localhost:27017\\): 0 migration\\(s\\), \\d+ index\\(es\\) made`,
       ),
     );
     expect(first.printed).toMatch(

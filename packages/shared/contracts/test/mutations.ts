@@ -190,6 +190,37 @@ const mutations: Mutation[] = [
       ],
     ],
   },
+  {
+    file: 'catalogue/identity',
+    name: 'consent asked in no app',
+    change: [['if (!(SIGN_UP_APPS as readonly string[]).includes(app)) return [];', 'return [];']],
+    tests: 'sign-up app',
+  },
+  {
+    file: 'catalogue/identity',
+    name: 'terms not asked',
+    change: [['if (consent?.terms !== true) {', 'if (false) {']],
+    tests: 'sign-up app',
+  },
+  {
+    file: 'catalogue/identity',
+    name: '18 or older asked in every sign-up app',
+    change: [
+      ["if (app === 'customer' && consent?.adult !== true) {", 'if (consent?.adult !== true) {'],
+    ],
+    tests: 'sign-up app',
+  },
+  {
+    file: 'catalogue/identity',
+    name: 'delivery partners may sign up',
+    change: [
+      [
+        "export const SIGN_UP_APPS = ['customer', 'seller', 'creator'] as const;",
+        "export const SIGN_UP_APPS = ['customer', 'seller', 'creator', 'delivery'] as const;",
+      ],
+    ],
+    tests: 'sign-in routes',
+  },
 ];
 
 export default mutations;

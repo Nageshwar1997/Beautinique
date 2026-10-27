@@ -46,6 +46,9 @@ describe('generateFiles', () => {
       '/platform/pings',
       '/platform/pings/{pingId}',
       '/platform/wake',
+      '/auth/otp',
+      '/auth/otp/{challengeId}/resend',
+      '/auth/otp/{challengeId}/verify',
     ]);
     const manifest = parsed('gateway-manifest.json') as {
       version: string;
@@ -56,6 +59,9 @@ describe('generateFiles', () => {
       'platform.ping.record',
       'platform.ping.get',
       'platform.server.wake',
+      'auth.otp.request',
+      'auth.otp.resend',
+      'auth.otp.verify',
     ]);
   });
 
