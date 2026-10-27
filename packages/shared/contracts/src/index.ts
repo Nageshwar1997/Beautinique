@@ -8,16 +8,24 @@ export {
   resolveAreaSetting,
 } from './area-settings';
 export {
+  consentProblems,
   events,
   getPing,
+  IDENTITY_ERROR_CODES,
+  OTP_APPS,
   OTP_PURPOSES,
+  otpConsentZod,
   otpRequested,
   otpSealContext,
   permissions,
   pingRead,
   pingRecorded,
   recordPing,
+  requestOtp,
+  resendOtp,
   routes,
+  SIGN_UP_APPS,
+  verifyOtp,
   wake,
 } from './catalogue';
 export {

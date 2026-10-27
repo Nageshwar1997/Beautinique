@@ -71,6 +71,63 @@
       "idempotency": false,
       "stepUp": false,
       "cache": null
+    },
+    {
+      "id": "auth.otp.request",
+      "method": "POST",
+      "path": "/auth/otp",
+      "owner": "identity",
+      "apps": [
+        "customer",
+        "seller",
+        "creator",
+        "delivery"
+      ],
+      "access": {
+        "type": "public"
+      },
+      "rateLimit": "otp",
+      "idempotency": false,
+      "stepUp": false,
+      "cache": null
+    },
+    {
+      "id": "auth.otp.resend",
+      "method": "POST",
+      "path": "/auth/otp/:challengeId/resend",
+      "owner": "identity",
+      "apps": [
+        "customer",
+        "seller",
+        "creator",
+        "delivery"
+      ],
+      "access": {
+        "type": "public"
+      },
+      "rateLimit": "otp",
+      "idempotency": false,
+      "stepUp": false,
+      "cache": null
+    },
+    {
+      "id": "auth.otp.verify",
+      "method": "POST",
+      "path": "/auth/otp/:challengeId/verify",
+      "owner": "identity",
+      "apps": [
+        "customer",
+        "seller",
+        "creator",
+        "delivery"
+      ],
+      "access": {
+        "type": "public"
+      },
+      "rateLimit": "auth",
+      "idempotency": false,
+      "stepUp": false,
+      "cache": null
     }
   ]
 }

@@ -1,5 +1,6 @@
 import { randomUUID } from 'node:crypto';
 
+import { generateKey } from '@beautinique/backend-server-crypto';
 import { createLogger } from '@beautinique/backend-server-kit';
 import { connectMongo } from '@beautinique/backend-server-mongo';
 import { RELEASE_STATE } from '@beautinique/backend-server-release';
@@ -13,6 +14,10 @@ const MONGO_URI = 'mongodb://localhost:27017/?replicaSet=rs0';
 const REDIS_URL = 'redis://localhost:6379';
 const dbName = `bq_test_identity_${randomUUID().slice(0, 8)}`;
 const logger = createLogger({ name: 'identity-test', level: 'silent' });
+// made per run, so no key-looking literal sits in the repo (gitleaks)
+const FIELD_KEYS = `k1:${generateKey()}`;
+const BLIND_INDEX_KEY = `b1:${generateKey()}`;
+const OTP_EVENT_KEYS = `e1:${generateKey()}`;
 
 afterAll(async () => {
   const mongo = await connectMongo({ uri: MONGO_URI, dbName, appName: 'identity-test', logger });
@@ -25,6 +30,9 @@ const testEnv = (): Record<string, string> => ({
   IDENTITY__MONGO_URI: MONGO_URI,
   IDENTITY__MONGO_DB_NAME: dbName,
   IDENTITY__REDIS_URL: REDIS_URL,
+  IDENTITY__FIELD_KEYS: FIELD_KEYS,
+  IDENTITY__BLIND_INDEX_KEY: BLIND_INDEX_KEY,
+  IDENTITY__OTP_EVENT_KEYS: OTP_EVENT_KEYS,
 });
 
 describe('identity', () => {
@@ -41,7 +49,7 @@ describe('identity', () => {
       expect(ready.status).toBe(200);
       expect(await ready.json()).toEqual({
         status: 'ready',
-        checks: { mongo: 'ok', redis: 'ok' },
+        checks: { mongo: 'ok', redis: 'ok', outbox: 'ok' },
       });
       expect(server.runtime.mongo.db.databaseName).toBe(dbName);
       const missing = await fetch(`${server.url}/nope`);
@@ -60,6 +68,12 @@ describe('identity', () => {
       mongoUri: MONGO_URI,
       mongoDbName: 'bq_identity',
       redisUrl: REDIS_URL,
+      outboxRelay: 'poll',
+      fieldKeys: FIELD_KEYS,
+      blindIndexKey: BLIND_INDEX_KEY,
+      otpEventKeys: OTP_EVENT_KEYS,
+      otpEmailLimitPerHour: 5,
+      legalVersion: 'dummy-1',
     });
     expect(readConfig({ env: { ...env, IDENTITY__PORT: '9001' } }).port).toBe(9001);
     expect(() => readConfig({ env: { ...env, IDENTITY__PORT: 'abc' } })).toThrow('IDENTITY__PORT');

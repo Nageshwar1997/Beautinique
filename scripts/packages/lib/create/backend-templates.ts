@@ -221,18 +221,32 @@ function envExample(deployable: Deployable): string {
 # (backend/bundle passes the URLs of its own internal servers instead.)
 ${others()
   .map((d) => `GATEWAY__${envPrefix(d)}_URL=http://127.0.0.1:${String(deployablePort(d))}`)
-  .join('\n')}
-# An upstream that sends nothing back for this many milliseconds gets a 504
-GATEWAY__UPSTREAM_TIMEOUT_MS=30000
-`
+  .join('\n')}`
       : '';
-  return `# ${deployable} settings: ${prefix}__<SETTING>, namespaced so backend/bundle can run every deployable in
-# one process (ARCHITECTURE §3). Laptop: copy this file to .env (never committed). Live runs these
-# keys in backend/bundle: their live values go in Render and in your private backend/bundle/.env.production.
-${prefix}__PORT=${String(deployablePort(deployable))}
-# fatal, error, warn, info, debug, trace or silent
-${prefix}__LOG_LEVEL=info
-${gateway}`;
+  const optionalGateway =
+    deployable === 'gateway'
+      ? '\n# GATEWAY__UPSTREAM_TIMEOUT_MS=30000           an upstream silent this long gets a 504'
+      : '';
+  return `# ${deployable} settings: ${prefix}__<SETTING>, namespaced so backend/bundle can run every deployable in one
+# process (ARCHITECTURE §3). Only src/config.ts reads them.
+#
+# Three parts:
+#   LOCAL       what ${deployable} alone needs on the laptop. Your .env is this part: copy it. Public laptop
+#               values, never secrets.
+#   OPTIONAL    settings with a default: set one only to change it.
+#   PRODUCTION  dummy values (<...> = the real one). Live runs backend/bundle: the real values go in
+#               Render and your private backend/bundle/.env.production, never here.
+
+# ═══ LOCAL (your .env) ══════════════════════════════════════════════════════════════════════════
+# A setting without a default goes here (its laptop value), and its live value under PRODUCTION.${gateway}
+
+# ═══ OPTIONAL (defaults) ════════════════════════════════════════════════════════════════════════
+# ${prefix}__PORT=${String(deployablePort(deployable))}
+# ${prefix}__LOG_LEVEL=info                    fatal, error, warn, info, debug, trace or silent${optionalGateway}
+
+# ═══ PRODUCTION (Render; dummy values) ══════════════════════════════════════════════════════════
+# (none yet)
+`;
 }
 
 const serverTs = (
@@ -1074,15 +1088,23 @@ const bundleEnvExample = `# backend/bundle runs every deployable in one process 
 # Each deployable reads its own <NAME>__* keys from the same env, so they all go here
 # (backend/<name>/.env.example explains each one).
 #
-# Three files, the same keys:
-#   .env.example     this file, in git: the laptop's values and what live needs. No secret, ever.
-#   .env             your laptop (npm run dev:backend reads it). Copy this file. Never committed.
-#   .env.production  your private copy of the live values you set in Render. Never committed, and
-#                    nothing reads it: the live server takes its env from Render's dashboard.
-# (.gitignore keeps every .env* out of git except .env.example.)
+# Three parts:
+#   LOCAL       only what the laptop needs (npm run dev:backend). Your .env is this part: copy it.
+#               Public laptop values, never secrets.
+#   OPTIONAL    settings with a default: set one only to change it.
+#   PRODUCTION  what Render needs, with dummy values (<...> = the real one). The real ones go in
+#               Render's dashboard and your private .env.production.
+# (.gitignore keeps every .env* out of git except .env.example. No secret in this file, ever.)
 
-# The public port. Live: not set, Render sets PORT itself.
-PORT=8080
+# ═══ LOCAL (your .env) ══════════════════════════════════════════════════════════════════════════
+# One section per deployable (# ── <name> ──): the keys of its LOCAL part.
+
+# ═══ OPTIONAL (defaults) ════════════════════════════════════════════════════════════════════════
+# bundle:   PORT=8080 (Render sets it itself)
+
+# ═══ PRODUCTION (Render; dummy values) ══════════════════════════════════════════════════════════
+# NODE_VERSION=24
+# UV_THREADPOOL_SIZE=2
 `;
 
 /* ---------------- READMEs (Hinglish) ---------------- */
@@ -1115,7 +1137,7 @@ Kaunse deployables chalenge, ye [src/deployables.ts](src/deployables.ts) me hai.
 
 ## Settings
 
-\`.env.example\` ko \`.env\` me copy karo (commit kabhi nahi). Har deployable ki keys (\`backend/<name>/.env.example\`) bhi isi \`.env\` me daalo, kyunki bundle ek hi process hai.
+\`.env.example\` ka LOCAL hissa \`.env\` me copy karo (commit kabhi nahi); OPTIONAL me defaults, PRODUCTION me Render ki keys dummy values ke saath. Har deployable ki LOCAL keys apne section (\`# ── <name> ──\`) me isi \`.env\` me, kyunki bundle ek hi process hai.
 
 Boot ke release steps (lease lock, migrations, index sync) TASKS T2.5 me jodne hain.
 `;
@@ -1149,7 +1171,7 @@ Sab deployables ek process me: \`npm run dev:backend\` (\`backend/bundle\`).
 
 ## Settings
 
-\`.env.example\` ko \`.env\` me copy karo (commit kabhi nahi). Har key \`${prefix}__\` se shuru hoti hai, taaki bundle mode me ek process me sab deployables ki keys alag rahein. Settings sirf [src/config.ts](src/config.ts) padhta hai (zod se check; ESLint baaki jagah \`process.env\` rokta hai). Nayi setting = \`configZod\` me key + \`.env.example\` me line.
+\`.env.example\` ka LOCAL hissa \`.env\` me copy karo (commit kabhi nahi); OPTIONAL me defaults, PRODUCTION me live ki keys dummy values ke saath. Har key \`${prefix}__\` se shuru hoti hai, taaki bundle mode me ek process me sab deployables ki keys alag rahein. Settings sirf [src/config.ts](src/config.ts) padhta hai (zod se check; ESLint baaki jagah \`process.env\` rokta hai). Nayi setting = \`configZod\` me key + \`.env.example\` me line.
 
 ## Code kahan hai
 

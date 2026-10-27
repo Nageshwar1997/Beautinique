@@ -2,7 +2,7 @@ import { createLogger, type RunningServer, startServer } from '@beautinique/back
 
 import { buildApp } from './app.ts';
 import type { Config } from './config.ts';
-import { type Runtime, startRuntime } from './runtime.ts';
+import { type Runtime, type RuntimeOptions, startRuntime } from './runtime.ts';
 
 export { type Config, readConfig } from './config.ts';
 export { release, releaseDefinition } from './release.ts';
@@ -14,6 +14,8 @@ export interface StartOptions {
   host?: string;
   /** stop on SIGTERM and SIGINT (default true; backend/bundle does it for every deployable) */
   handleSignals?: boolean;
+  /** Runtime knobs for tests (own queue prefix, faster relay ...). */
+  runtime?: Omit<RuntimeOptions, 'logger'>;
 }
 
 /** A running identity. Its `runtime` is there for tests that look inside (MongoDB, Redis). */
@@ -22,7 +24,7 @@ export type RunningIdentity = RunningServer & { runtime: Runtime };
 /** Starts identity: src/server.ts in split mode, backend/bundle in bundle mode. */
 export async function start(config: Config, options: StartOptions = {}): Promise<RunningIdentity> {
   const logger = createLogger({ name: 'identity', level: config.logLevel });
-  const runtime = await startRuntime(config, { logger });
+  const runtime = await startRuntime(config, { ...options.runtime, logger });
   try {
     const server = await startServer(buildApp({ logger, runtime }), {
       port: options.port ?? config.port,
