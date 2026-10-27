@@ -1,4 +1,5 @@
 import { randomInt, timingSafeEqual } from 'node:crypto';
+import { setTimeout as sleep } from 'node:timers/promises';
 
 import {
   blindIndex,
@@ -35,6 +36,12 @@ export const OTP_MAX_TRIES = 5;
 export const OTP_MAX_RESENDS = 3;
 export const OTP_RESEND_AFTER_MS = 60_000;
 const EMAIL_WINDOW_MS = 60 * 60_000;
+/**
+ * A code request or resend answers no sooner than this, whether a code went out or not: sending
+ * one writes to the outbox, and without the wait an unknown email in an app without sign-up
+ * answered faster, so the time told who has an account. Above the outbox write's usual time.
+ */
+export const OTP_MIN_ANSWER_MS = 400;
 
 /** Redis keys (`bq:id:*`, ARCHITECTURE §6.6), each with a TTL. The email is never in a key. */
 export const challengeKey = (challengeId: string): string => `bq:id:otp:${challengeId}`;
@@ -94,6 +101,17 @@ async function inRedis<T>(work: () => Promise<T>): Promise<T> {
   }
 }
 
+/** Runs the work, then waits out the rest of OTP_MIN_ANSWER_MS, on an error too. */
+async function evenly<T>(work: () => Promise<T>): Promise<T> {
+  const until = performance.now() + OTP_MIN_ANSWER_MS;
+  try {
+    return await work();
+  } finally {
+    const left = until - performance.now();
+    if (left > 0) await sleep(left);
+  }
+}
+
 /** Counts a code for this email in the last hour (resends too); over the limit refuses. */
 async function countEmail(deps: OtpDeps, email: string): Promise<void> {
   const key = emailCountKey(blindIndex(deps.keys, 'otp-email', email));
@@ -150,9 +168,13 @@ export interface RequestCodeInput {
 
 /**
  * POST /auth/otp. The same answer for every email: an account gets a sign-in code, an unknown
- * email in a sign-up app a code to make one, any other unknown email nothing (and nothing fits).
+ * email in a sign-up app a code to make one, any other unknown email nothing (and nothing fits),
+ * all in the same time (OTP_MIN_ANSWER_MS).
  */
-export async function requestCode(
+export const requestCode = (deps: OtpDeps, input: RequestCodeInput): Promise<ChallengeView> =>
+  evenly(() => requestCodeNow(deps, input));
+
+async function requestCodeNow(
   deps: OtpDeps,
   { app, email, consent, requestId }: RequestCodeInput,
 ): Promise<ChallengeView> {
@@ -211,10 +233,19 @@ redis.call('PEXPIRE', KEYS[1], ARGV[6])
 return resends + 1
 `;
 
-/** POST /auth/otp/:challengeId/resend: a new code, the old one stops working. */
-export async function resendCode(
+interface ResendCodeInput {
+  app: OtpApp;
+  challengeId: string;
+  requestId: string;
+}
+
+/** POST /auth/otp/:challengeId/resend: a new code, the old one stops working (OTP_MIN_ANSWER_MS). */
+export const resendCode = (deps: OtpDeps, input: ResendCodeInput): Promise<ChallengeView> =>
+  evenly(() => resendCodeNow(deps, input));
+
+async function resendCodeNow(
   deps: OtpDeps,
-  { app, challengeId, requestId }: { app: OtpApp; challengeId: string; requestId: string },
+  { app, challengeId, requestId }: ResendCodeInput,
 ): Promise<ChallengeView> {
   const key = challengeKey(challengeId);
   const challenge = (await inRedis(() => deps.redis.hgetall(key))) as Partial<Challenge>;

@@ -37,6 +37,12 @@ const mutations: Mutation[] = [
   },
   {
     file: 'otp',
+    name: 'no even answer time',
+    change: [['    if (left > 0) await sleep(left);\n', '']],
+    tests: 'same time as an account',
+  },
+  {
+    file: 'otp',
     name: 'adult declared from any app',
     change: [
       [

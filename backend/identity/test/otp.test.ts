@@ -12,7 +12,7 @@ import { Queue } from 'bullmq';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 
 import { readConfig } from '../src/config.ts';
-import { challengeKey } from '../src/otp.ts';
+import { challengeKey, OTP_MIN_ANSWER_MS } from '../src/otp.ts';
 import { type RunningIdentity, start } from '../src/service.ts';
 import { LEGAL_ACCEPTANCES, type LegalAcceptance, type User, USERS } from '../src/users.ts';
 
@@ -315,6 +315,36 @@ describe('codes that do not fit', () => {
       expect(answer.body.error?.code).toBe('OTP_INVALID');
     }
     expect(await users().countDocuments({ email: email('stranger') })).toBe(0);
+  });
+
+  it('answers an unknown email in an app without sign-up in the same time as an account', async () => {
+    // an account, made in the customer app
+    const made = await requestFor(email('timed'));
+    const madeCode = await codeOf(made.challengeId);
+    expect((await post(`/auth/otp/${made.challengeId}/verify`, { code: madeCode })).status).toBe(
+      200,
+    );
+    const timed = async (path: string, body: unknown = {}) => {
+      const startedAt = performance.now();
+      const answer = await post(path, body, { app: 'delivery' });
+      expect(answer.status, JSON.stringify(answer.body)).toBe(200);
+      return {
+        ms: performance.now() - startedAt,
+        data: answer.body.data as { challengeId: string },
+      };
+    };
+    for (const [name, sends] of [
+      ['timed', 1],
+      ['stranger-timed', 0],
+    ] as const) {
+      const asked = await timed('/auth/otp', { email: email(name) });
+      expect(asked.ms, name).toBeGreaterThanOrEqual(OTP_MIN_ANSWER_MS);
+      await allowResend(asked.data.challengeId);
+      const resent = await timed(`/auth/otp/${asked.data.challengeId}/resend`);
+      expect(resent.ms, name).toBeGreaterThanOrEqual(OTP_MIN_ANSWER_MS);
+      // the account got its codes, the unknown email none
+      expect(await events(asked.data.challengeId), name).toHaveLength(sends * 2);
+    }
   });
 
   it('takes a code only in the app that asked for it, and only from a known app', async () => {

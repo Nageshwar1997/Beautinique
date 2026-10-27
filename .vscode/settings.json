@@ -17,6 +17,7 @@
   // (its own defaults stay trusted: object settings merge)
   "json.schemaDownload.trustedDomains": { "https://openapi.vercel.sh/": true },
   "cSpell.words": [
+    "bqtestidotp",
     "bqtestnotify",
     "Brevo",
     "bullmq",
@@ -24,10 +25,15 @@
     "COLOURS",
     "deployables",
     "dsphere",
+    "hgetall",
+    "hset",
     "mailin",
     "mailpit",
+    "meera",
+    "pttl",
     "rediss",
     "redrive",
+    "resends",
     "riya",
     "superadmin",
     "THREADPOOL",
