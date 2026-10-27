@@ -297,6 +297,58 @@
       "idempotency": false,
       "stepUp": false,
       "cache": null
+    },
+    {
+      "id": "auth.session.refresh",
+      "method": "POST",
+      "path": "/auth/refresh",
+      "owner": "identity",
+      "apps": [
+        "customer",
+        "seller",
+        "admin",
+        "superadmin",
+        "master",
+        "support",
+        "finance",
+        "logistics",
+        "delivery",
+        "growth",
+        "creator"
+      ],
+      "access": {
+        "type": "public"
+      },
+      "rateLimit": "auth",
+      "idempotency": false,
+      "stepUp": false,
+      "cache": null
+    },
+    {
+      "id": "auth.session.logout",
+      "method": "POST",
+      "path": "/auth/logout",
+      "owner": "identity",
+      "apps": [
+        "customer",
+        "seller",
+        "admin",
+        "superadmin",
+        "master",
+        "support",
+        "finance",
+        "logistics",
+        "delivery",
+        "growth",
+        "creator"
+      ],
+      "access": {
+        "type": "public"
+      },
+      "rateLimit": "auth",
+      "idempotency": false,
+      "stepUp": false,
+      "cache": null
     }
   ]
 }

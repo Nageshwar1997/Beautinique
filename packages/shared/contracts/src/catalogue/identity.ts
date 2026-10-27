@@ -62,6 +62,10 @@ export const IDENTITY_ERROR_CODES = {
   LOGIN_EXPIRED: 400,
   /** Wrong authenticator code, or one already used */
   TOTP_INVALID: 400,
+  /** No session to refresh: no cookie, ended, expired, or an unknown token. Sign in again. */
+  SESSION_EXPIRED: 401,
+  /** Another request refreshed this session a moment ago: try again with the new cookie */
+  REFRESH_IN_PROGRESS: 409,
   /** Wrong recovery code, or one already used */
   RECOVERY_CODE_INVALID: 400,
 } as const satisfies Record<string, number>;
@@ -341,3 +345,112 @@ export const confirmTotpEnroll = defineRoute({
   input: { params: loginParams, body: object({ code: otpZod }) },
   output: object({ user: signedInZod, recoveryCodes: array(string()).length(10) }),
 });
+
+/** Who signs the access tokens (`iss`), and for which app a token is (`aud`, ARCHITECTURE §7.2). */
+export const TOKEN_ISSUER = 'bq:identity';
+export const tokenAudience = (app: AppId): string => `bq:${app}`;
+/** An access token works 10 minutes; the refresh token gets the next one. */
+export const ACCESS_TOKEN_SECONDS = 600;
+
+/**
+ * How long a session lasts per app (ARCHITECTURE §7.2). `slidingMs`: each refresh moves the end
+ * this far ahead, never past `maxMs` from the sign-in. `idleMs`: no refresh for this long ends it.
+ */
+export interface SessionPolicy {
+  slidingMs: number;
+  maxMs: number;
+  idleMs?: number;
+}
+const DAY_MS = 24 * 60 * 60_000;
+const internal: SessionPolicy = {
+  slidingMs: 12 * 60 * 60_000,
+  maxMs: 12 * 60 * 60_000,
+  idleMs: 30 * 60_000,
+};
+export const SESSION_POLICIES: Readonly<Record<AppId, SessionPolicy>> = {
+  customer: { slidingMs: 30 * DAY_MS, maxMs: 90 * DAY_MS },
+  creator: { slidingMs: 30 * DAY_MS, maxMs: 90 * DAY_MS },
+  seller: { slidingMs: 7 * DAY_MS, maxMs: 7 * DAY_MS },
+  delivery: { slidingMs: 14 * DAY_MS, maxMs: 14 * DAY_MS },
+  admin: internal,
+  superadmin: internal,
+  master: internal,
+  support: internal,
+  finance: internal,
+  logistics: internal,
+  growth: internal,
+};
+
+/**
+ * The cookies of an app's session, on its own host (no Domain), HttpOnly and Secure. The access
+ * cookie goes with every /api request; the refresh cookie only to /api/v1/auth (refresh, logout).
+ */
+export const accessCookieName = (app: AppId): string => `__Host-bq_${app}_at`;
+export const refreshCookieName = (app: AppId): string => `__Secure-bq_${app}_rt`;
+export const REFRESH_COOKIE_PATH = '/api/v1/auth';
+
+/**
+ * A new access token (and refresh token) for the session in the refresh cookie; the old refresh
+ * token stops working. One used again after its successor means it was copied: the session ends
+ * and the person gets an email. No cookie, an ended session or an unknown token: SESSION_EXPIRED.
+ */
+export const refreshSession = defineRoute({
+  id: 'auth.session.refresh',
+  method: 'POST',
+  path: '/auth/refresh',
+  summary: 'Get a new access token with the refresh cookie',
+  apps: APPS,
+  access: { type: 'public' },
+  rateLimit: 'auth',
+  idempotency: false,
+  stepUp: false,
+  owner: 'identity',
+  input: {},
+  output: object({ user: signedInZod, sessionId: uuidv7Zod, expiresAt: isoDateTimeZod }),
+});
+
+/** Ends the session in the refresh cookie (if any) and clears the app's cookies. */
+export const logout = defineRoute({
+  id: 'auth.session.logout',
+  method: 'POST',
+  path: '/auth/logout',
+  summary: 'Sign out of this app on this device',
+  apps: APPS,
+  access: { type: 'public' },
+  rateLimit: 'auth',
+  idempotency: false,
+  stepUp: false,
+  owner: 'identity',
+  input: {},
+  output: object({ signedOut: literal(true) }),
+});
+
+/**
+ * A refresh token was used after it had been replaced: someone else has a copy. The session is
+ * ended, and notify tells the person by email (ARCHITECTURE §7.2).
+ */
+export const sessionReuseDetected = defineEvent({
+  type: 'identity.session.reuseDetected',
+  version: 1,
+  producer: 'identity',
+  description: 'An old refresh token came back; the session was ended and the person is told',
+  data: object({
+    sessionId: uuidv7Zod,
+    userId: uuidv7Zod,
+    email: emailZod,
+    app: zodEnum(APPS),
+    /** What the session's browser called itself at sign-in, e.g. `Chrome on Windows` */
+    device: string().max(120),
+    detectedAt: isoDateTimeZod,
+  }),
+});
+
+/**
+ * Redis keys identity writes and the gateway reads at every request (ARCHITECTURE §7.2), so an
+ * ended session stops at once instead of when its access token runs out: a session that ended,
+ * and since when every session of an account ended (a new password). Both live as long as an
+ * access token.
+ */
+export const revokedSessionKey = (sessionId: string): string =>
+  `bq:id:session-revoked:${sessionId}`;
+export const revokedUserKey = (userId: string): string => `bq:id:user-revoked:${userId}`;
