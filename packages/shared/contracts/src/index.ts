@@ -10,6 +10,9 @@ export {
 export {
   events,
   getPing,
+  OTP_PURPOSES,
+  otpRequested,
+  otpSealContext,
   permissions,
   pingRead,
   pingRecorded,
