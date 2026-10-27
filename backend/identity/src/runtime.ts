@@ -10,20 +10,22 @@ import {
   startWipeWatchdog,
   type WipeWatchdog,
 } from '@beautinique/backend-server-queue';
-import { otpRequested } from '@beautinique/shared-contracts';
+import { otpRequested, sessionReuseDetected } from '@beautinique/shared-contracts';
 
 import type { Config } from './config.ts';
 import type { OtpDeps } from './otp.ts';
 import { hibpBreachCheck } from './password.ts';
 import { runReleaseSteps } from './release.ts';
-import { namesOnlySessions } from './sessions.ts';
+import { sessions } from './sessions.ts';
+import { type SigningKeys, signingKeys } from './signing-keys.ts';
 
 /**
- * Who gets identity's events (the relay's list): notify emails the sign-in code (its subscriber
- * `notify.otpEmail`, backend/notify).
+ * Who gets identity's events (the relay's list): notify emails the code, and tells a person when
+ * a copied refresh token ended their session (backend/notify).
  */
 export const SUBSCRIBERS: Readonly<Record<string, readonly string[]>> = {
   [otpRequested.type]: ['notify.otpEmail'],
+  [sessionReuseDetected.type]: ['notify.securityEmail'],
 };
 
 export interface RuntimeOptions {
@@ -46,6 +48,8 @@ export interface Runtime {
   watchdog: WipeWatchdog;
   /** What the sign-up and sign-in routes need */
   otp: OtpDeps;
+  /** The token keys: the JWKS the gateway reads */
+  signing: SigningKeys;
   /** The checks for GET /ready. */
   ready: Readonly<Record<string, ReadyCheck>>;
   /** Stops the relay and watchdog, then closes Redis and MongoDB. Safe to call twice. */
@@ -108,11 +112,13 @@ export async function startRuntime(config: Config, options: RuntimeOptions): Pro
     });
     closers.push(() => watchdog.stop());
 
+    const signing = signingKeys({ mongo, keys });
     return {
       mongo,
       redis,
       relay,
       watchdog,
+      signing,
       otp: {
         mongo,
         redis: redis.client,
@@ -122,7 +128,7 @@ export async function startRuntime(config: Config, options: RuntimeOptions): Pro
         emailLimitPerHour: config.otpEmailLimitPerHour,
         legalVersion: config.legalVersion,
         breached: hibpBreachCheck({ url: config.hibpUrl, logger }),
-        sessions: namesOnlySessions(logger),
+        sessions: sessions({ mongo, redis: redis.client, keys, signing, logger }),
       },
       ready: { mongo: mongo.ready, redis: redis.ready, outbox: relay.ready },
       stop,

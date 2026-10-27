@@ -31,7 +31,7 @@ import {
 } from './errors.ts';
 import { clearFailures } from './lockout.ts';
 import { type BreachCheck, hashPassword } from './password.ts';
-import type { SessionPort } from './sessions.ts';
+import type { Client, IssuedSession, Sessions } from './sessions.ts';
 import { setPasswordWithCode, signUpWithCode, USERS } from './users.ts';
 
 /** ARCHITECTURE §7.1: a code works 10 minutes, takes 5 tries, and up to 3 new codes a minute apart. */
@@ -85,7 +85,7 @@ export interface OtpDeps {
   /** Have I Been Pwned (fail-open) */
   breached: BreachCheck;
   /** The last step of a sign-in (T3.2: the real session) */
-  sessions: SessionPort;
+  sessions: Sessions;
 }
 
 /** What the app sees of a challenge (contracts otpChallengeZod). */
@@ -320,7 +320,7 @@ export interface VerifyCodeInput {
   code: string;
   /** The new password (passwordZod: trimmed, 12 to 128) */
   password: string;
-  ip: string;
+  client: Client;
 }
 
 export interface VerifiedCode {
@@ -328,6 +328,8 @@ export interface VerifiedCode {
   email: string;
   outcome: (typeof OTP_OUTCOMES)[number];
   signedIn: boolean;
+  /** A new account's session (the route sets its cookies) */
+  session?: IssuedSession;
 }
 
 /**
@@ -339,7 +341,7 @@ export interface VerifiedCode {
  */
 export async function verifyCode(
   deps: OtpDeps,
-  { app, challengeId, code, password, ip }: VerifyCodeInput,
+  { app, challengeId, code, password, client }: VerifyCodeInput,
 ): Promise<VerifiedCode> {
   const key = challengeKey(challengeId);
   const challenge = (await inRedis(() => deps.redis.hgetall(key))) as Partial<Challenge>;
@@ -376,6 +378,7 @@ export async function verifyCode(
     const user = await setPasswordWithCode(deps.mongo, { email, passwordHash });
     if (!user) throw otpExpired();
     await clearFailures(deps.redis, deps.keys, email, { unlock: true });
+    await deps.sessions.endAll(user._id, 'password-changed');
     deps.logger.info({ userId: user._id, app }, 'password set with an email code');
     return { userId: user._id, email: user.email, outcome: 'password-set', signedIn: false };
   }
@@ -385,21 +388,23 @@ export async function verifyCode(
     app,
     consent: { terms: challenge.terms === '1', adult: challenge.adult === '1' },
     legalVersion: deps.legalVersion,
-    ip,
+    ip: client.ip,
     passwordHash,
   });
   deps.logger.info({ userId: user._id, app, outcome }, 'sign-up code used');
   if (outcome === 'password-set') {
     await clearFailures(deps.redis, deps.keys, email, { unlock: true });
+    await deps.sessions.endAll(user._id, 'password-changed');
   }
   if (outcome !== 'account-made') {
     return { userId: user._id, email: user.email, outcome, signedIn: false };
   }
-  const signedIn = await deps.sessions.issue({
+  const session = await deps.sessions.issue({
     userId: user._id,
     email: user.email,
     app,
     methods: ['email-code', 'password'],
+    client,
   });
-  return { ...signedIn, outcome, signedIn: true };
+  return { ...session.user, outcome, signedIn: true, session };
 }

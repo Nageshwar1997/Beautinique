@@ -30,7 +30,7 @@ import {
 import { clearFailures, isLocked, recordFailure } from './lockout.ts';
 import type { OtpDeps } from './otp.ts';
 import { dummyHash, hashPassword, needsRehash, verifyPassword } from './password.ts';
-import type { AuthMethod } from './sessions.ts';
+import type { AuthMethod, Client, IssuedSession } from './sessions.ts';
 import { type User, USERS } from './users.ts';
 
 /** A sign-in waits 5 minutes for its second step, 10 while an authenticator is set up. */
@@ -60,8 +60,8 @@ const enrollContext = (loginId: string): string => `identity.totp-enroll:${login
 export type LoginDeps = OtpDeps;
 
 export type LoginStep =
-  | { next: 'totp' | 'totp-enroll'; loginId: string }
-  | { next: 'signed-in'; user: { userId: string; email: string } };
+  | { next: 'totp' | 'totp-enroll'; loginId: string; session?: undefined }
+  | { next: 'signed-in'; user: { userId: string; email: string }; session: IssuedSession };
 
 async function inRedis<T>(work: () => Promise<T>): Promise<T> {
   try {
@@ -74,11 +74,16 @@ async function inRedis<T>(work: () => Promise<T>): Promise<T> {
 
 const credentialsOf = (deps: LoginDeps) => deps.mongo.db.collection<Credentials>(CREDENTIALS);
 
-const signIn = (
+/** The last step: a session for the app (cookies), as `{ user, session }`. */
+async function signIn(
   deps: LoginDeps,
-  user: { userId: string; email: string; app: AppId },
+  { userId, email, app }: { userId: string; email: string; app: AppId },
   methods: AuthMethod[],
-) => deps.sessions.issue({ ...user, methods });
+  client: Client,
+): Promise<{ user: { userId: string; email: string }; session: IssuedSession }> {
+  const session = await deps.sessions.issue({ userId, email, app, methods, client });
+  return { user: session.user, session };
+}
 
 async function startLogin(deps: LoginDeps, login: Omit<Login, 'attempts'>): Promise<string> {
   const loginId = uuidv7();
@@ -102,7 +107,7 @@ async function startLogin(deps: LoginDeps, login: Omit<Login, 'attempts'>): Prom
  */
 export async function passwordLogin(
   deps: LoginDeps,
-  { app, email, password }: { app: AppId; email: string; password: string },
+  { app, email, password, client }: { app: AppId; email: string; password: string; client: Client },
 ): Promise<LoginStep> {
   const locked = await isLocked(deps.redis, deps.keys, email);
   const user = await deps.mongo.db.collection<User>(USERS).findOne({ email });
@@ -134,7 +139,7 @@ export async function passwordLogin(
   // the count starts again only after a whole sign-in: a right password alone must not give a
   // second step new tries
   await clearFailures(deps.redis, deps.keys, email);
-  return { next: 'signed-in', user: await signIn(deps, who, ['password']) };
+  return { next: 'signed-in', ...(await signIn(deps, who, ['password'], client)) };
 }
 
 /** One more try on a sign-in that is still there: -1 when it is gone (never makes a key). */
@@ -197,8 +202,8 @@ async function finish(deps: LoginDeps, loginId: string): Promise<void> {
  */
 export async function loginWithTotp(
   deps: LoginDeps,
-  { app, loginId, code }: { app: AppId; loginId: string; code: string },
-): Promise<{ user: { userId: string; email: string } }> {
+  { app, loginId, code, client }: { app: AppId; loginId: string; code: string; client: Client },
+): Promise<{ user: { userId: string; email: string }; session: IssuedSession }> {
   const { login, tries } = await loginAt(deps, { app, loginId, stage: 'totp' });
   const credentials = await credentialsOf(deps).findOne({ _id: login.userId });
   if (!credentials?.totp) throw loginExpired();
@@ -215,7 +220,7 @@ export async function loginWithTotp(
   if (!fresh) return wrongTry(deps, loginId, login, tries, totpInvalid);
   await finish(deps, loginId);
   await clearFailures(deps.redis, deps.keys, login.email);
-  return { user: await signIn(deps, login, ['password', 'totp']) };
+  return signIn(deps, login, ['password', 'totp'], client);
 }
 
 const recoveryHash = (deps: LoginDeps, userId: string, code: string): string =>
@@ -224,8 +229,12 @@ const recoveryHash = (deps: LoginDeps, userId: string, code: string): string =>
 /** POST /auth/login/:loginId/recovery: one of the 10 codes, each works once. */
 export async function loginWithRecoveryCode(
   deps: LoginDeps,
-  { app, loginId, code }: { app: AppId; loginId: string; code: string },
-): Promise<{ user: { userId: string; email: string }; recoveryCodesLeft: number }> {
+  { app, loginId, code, client }: { app: AppId; loginId: string; code: string; client: Client },
+): Promise<{
+  user: { userId: string; email: string };
+  session: IssuedSession;
+  recoveryCodesLeft: number;
+}> {
   const { login, tries } = await loginAt(deps, { app, loginId, stage: 'totp' });
   const hash = recoveryHash(deps, login.userId, code);
   const used = await credentialsOf(deps).findOneAndUpdate(
@@ -239,7 +248,7 @@ export async function loginWithRecoveryCode(
   deps.logger.info({ userId: login.userId, app }, 'signed in with a recovery code');
   const recoveryCodesLeft = (used.recoveryCodes ?? []).filter((c) => c.usedAt === null).length;
   return {
-    user: await signIn(deps, login, ['password', 'recovery-code']),
+    ...(await signIn(deps, login, ['password', 'recovery-code'], client)),
     recoveryCodesLeft,
   };
 }
@@ -276,8 +285,12 @@ const newRecoveryCodes = (): string[] =>
  */
 export async function confirmTotpEnroll(
   deps: LoginDeps,
-  { app, loginId, code }: { app: AppId; loginId: string; code: string },
-): Promise<{ user: { userId: string; email: string }; recoveryCodes: string[] }> {
+  { app, loginId, code, client }: { app: AppId; loginId: string; code: string; client: Client },
+): Promise<{
+  user: { userId: string; email: string };
+  session: IssuedSession;
+  recoveryCodes: string[];
+}> {
   const { login, tries } = await loginAt(deps, { app, loginId, stage: 'enroll' });
   if (login.pending === undefined) throw loginExpired();
   const secret = decryptField(deps.keys, login.pending, enrollContext(loginId));
@@ -307,5 +320,5 @@ export async function confirmTotpEnroll(
   if (saved.modifiedCount !== 1) throw loginExpired();
   await clearFailures(deps.redis, deps.keys, login.email);
   deps.logger.info({ userId: login.userId, app }, 'authenticator set up');
-  return { user: await signIn(deps, login, ['password', 'totp']), recoveryCodes };
+  return { ...(await signIn(deps, login, ['password', 'totp'], client)), recoveryCodes };
 }

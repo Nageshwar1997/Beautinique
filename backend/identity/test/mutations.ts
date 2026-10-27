@@ -164,8 +164,8 @@ const mutations: Mutation[] = [
     name: 'a new password leaves the lock',
     change: [
       [
-        "    await clearFailures(deps.redis, deps.keys, email, { unlock: true });\n    deps.logger.info({ userId: user._id, app }, 'password set with an email code');",
-        "    deps.logger.info({ userId: user._id, app }, 'password set with an email code');",
+        "    await clearFailures(deps.redis, deps.keys, email, { unlock: true });\n    await deps.sessions.endAll(user._id, 'password-changed');\n    deps.logger",
+        "    await deps.sessions.endAll(user._id, 'password-changed');\n    deps.logger",
       ],
     ],
     tests: 'locks an account',
@@ -473,6 +473,218 @@ const mutations: Mutation[] = [
       ],
     ],
     tests: 'locks an account',
+  },
+  // sessions (T3.2)
+  {
+    file: 'sessions',
+    name: 'access token for every app',
+    change: [
+      ['        aud: tokenAudience(session.app),', "        aud: tokenAudience('customer'),"],
+    ],
+    tests: 'JWKS verifies',
+  },
+  {
+    file: 'sessions',
+    name: 'access token lives an hour',
+    change: [['exp: iat + ACCESS_TOKEN_SECONDS,', 'exp: iat + 3600,']],
+    tests: 'JWKS verifies',
+  },
+  {
+    file: 'sessions',
+    name: 'refresh without the token',
+    change: [
+      ['          refreshHash: hash,\n          revokedAt: null,', '          revokedAt: null,'],
+    ],
+    tests: 'made-up token|parallel tab',
+  },
+  {
+    file: 'sessions',
+    name: 'an ended session refreshes',
+    change: [
+      ['          refreshHash: hash,\n          revokedAt: null,', '          refreshHash: hash,'],
+    ],
+    tests: 'logs out',
+  },
+  {
+    file: 'sessions',
+    name: 'an expired session refreshes',
+    change: [['          expiresAt: { $gt: new Date(at) },\n', '']],
+    tests: '90 days',
+  },
+  {
+    file: 'sessions',
+    name: 'no idle end',
+    change: [
+      [
+        '            : { lastSeenAt: { $gt: new Date(at - policy.idleMs) } }),',
+        '            : {}),',
+      ],
+    ],
+    tests: 'idle minutes',
+  },
+  {
+    file: 'sessions',
+    name: 'no 90-day cap',
+    change: [
+      [
+        "expiresAt: { $min: [{ $add: ['$createdAt', policy.maxMs] }, until] },",
+        'expiresAt: until,',
+      ],
+    ],
+    tests: '90 days',
+  },
+  {
+    file: 'sessions',
+    name: 'a copy taken for a parallel tab',
+    change: [['at - found.rotatedAt.getTime() < REFRESH_RACE_MS', 'true']],
+    tests: 'parallel tab',
+  },
+  {
+    file: 'sessions',
+    name: 'a parallel tab taken for a copy',
+    change: [
+      [
+        'if (found.rotatedAt && at - found.rotatedAt.getTime() < REFRESH_RACE_MS) {',
+        'if (false) {',
+      ],
+    ],
+    tests: 'parallel tab',
+  },
+  {
+    file: 'sessions',
+    name: 'any old token taken for a copy',
+    change: [
+      [
+        'found?.revokedAt !== null || found.previousRefreshHash !== hash',
+        'found?.revokedAt !== null',
+      ],
+    ],
+    tests: 'made-up token',
+  },
+  {
+    file: 'sessions',
+    name: 'alarm for a session that ran out',
+    change: [['      if (found.expiresAt.getTime() <= at || idle) throw sessionExpired();\n', '']],
+    tests: 'idle minutes',
+  },
+  {
+    file: 'sessions',
+    name: 'logout leaves the gateway in the dark',
+    change: [
+      [
+        "      if (ended.modifiedCount === 1) {\n        await revokeAtGateway(sessionId);\n        logger.info({ app, sessionId }, 'signed out');",
+        "      if (ended.modifiedCount === 1) {\n        logger.info({ app, sessionId }, 'signed out');",
+      ],
+    ],
+    tests: 'logs out',
+  },
+  {
+    file: 'sessions',
+    name: 'logout without the token',
+    change: [
+      [
+        '{ _id: sessionId, app, refreshHash: refreshHashOf(keys, refreshToken), revokedAt: null },',
+        '{ _id: sessionId, app, revokedAt: null },',
+      ],
+    ],
+    tests: 'logs out',
+  },
+  {
+    file: 'sessions',
+    name: 'a new password ends no session',
+    change: [
+      ['        { userId, revokedAt: null },', '        { userId: null, revokedAt: null },'],
+    ],
+    tests: 'every session of an account',
+  },
+  {
+    file: 'sessions',
+    name: 'a new password not told to the gateway',
+    change: [
+      [
+        "      await inRedis(() => redis.set(revokedUserKey(userId), String(at), 'PX', REVOKE_TTL_MS));\n",
+        '',
+      ],
+    ],
+    tests: 'every session of an account',
+  },
+  {
+    file: 'otp',
+    name: 'a new password keeps the sessions',
+    change: [
+      [
+        "    await clearFailures(deps.redis, deps.keys, email, { unlock: true });\n    await deps.sessions.endAll(user._id, 'password-changed');\n    deps.logger",
+        '    await clearFailures(deps.redis, deps.keys, email, { unlock: true });\n    deps.logger',
+      ],
+    ],
+    tests: 'every session of an account',
+  },
+  {
+    file: 'signing-keys',
+    name: 'keys never rotate',
+    change: [['now() - newest.createdAt.getTime() >= ROTATE_AFTER_MS', 'false']],
+    tests: 'signing keys',
+  },
+  {
+    file: 'signing-keys',
+    name: 'JWKS drops the old key at once',
+    change: [['new Date(now() - PUBLISH_FOR_MS)', 'new Date(now() - ROTATE_AFTER_MS)']],
+    tests: 'signing keys',
+  },
+  {
+    file: 'cookies',
+    name: 'access cookie readable by scripts',
+    change: [
+      [
+        '  res.cookie(accessCookieName(session.app), session.accessToken, {\n    httpOnly: true,\n',
+        '  res.cookie(accessCookieName(session.app), session.accessToken, {\n',
+      ],
+    ],
+    tests: 'two cookies',
+  },
+  {
+    file: 'cookies',
+    name: 'refresh cookie sent everywhere',
+    change: [
+      [
+        "    sameSite: 'strict',\n    path: REFRESH_COOKIE_PATH,\n    maxAge:",
+        "    sameSite: 'strict',\n    path: '/',\n    maxAge:",
+      ],
+    ],
+    tests: 'two cookies',
+  },
+  {
+    file: 'cookies',
+    name: 'refresh cookie Lax',
+    change: [
+      [
+        "    sameSite: 'strict',\n    path: REFRESH_COOKIE_PATH,\n    maxAge:",
+        "    sameSite: 'lax',\n    path: REFRESH_COOKIE_PATH,\n    maxAge:",
+      ],
+    ],
+    tests: 'two cookies',
+  },
+  {
+    file: 'cookies',
+    name: 'tokens left in the answer',
+    change: [
+      [
+        '  const { session, ...answer } = result;\n  if (session) setSessionCookies(res, session);\n  return answer as WithoutSession<T>;',
+        '  if (result.session) setSessionCookies(res, result.session);\n  return result as WithoutSession<T>;',
+      ],
+    ],
+    tests: 'keeps every token out',
+  },
+  {
+    file: 'routes/index',
+    name: 'an ended session keeps its cookies',
+    change: [
+      [
+        "      if (error instanceof AppError && error.code === 'SESSION_EXPIRED') {",
+        '      if (false) {',
+      ],
+    ],
+    tests: 'made-up token',
   },
 ];
 
