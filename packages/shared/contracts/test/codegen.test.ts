@@ -55,6 +55,8 @@ describe('generateFiles', () => {
       '/auth/login/{loginId}/recovery',
       '/auth/login/{loginId}/totp/enroll',
       '/auth/login/{loginId}/totp/confirm',
+      '/auth/refresh',
+      '/auth/logout',
     ]);
     const manifest = parsed('gateway-manifest.json') as {
       version: string;
@@ -74,6 +76,8 @@ describe('generateFiles', () => {
       'auth.login.recovery',
       'auth.login.totpEnroll',
       'auth.login.totpConfirm',
+      'auth.session.refresh',
+      'auth.session.logout',
     ]);
   });
 
@@ -85,9 +89,10 @@ describe('generateFiles', () => {
     ).events;
     expect(list.map((e) => [e.type, e.version])).toEqual([
       ['identity.otp.requested', 1],
+      ['identity.session.reuseDetected', 1],
       ['platform.ping.recorded', 1],
     ]);
-    expect(list[1]?.schema.required).toEqual(expect.arrayContaining(['eventId', 'data', 'scope']));
+    expect(list[2]?.schema.required).toEqual(expect.arrayContaining(['eventId', 'data', 'scope']));
   });
 
   it('lists permissions sorted by key', () => {

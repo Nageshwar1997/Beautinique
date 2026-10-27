@@ -1,6 +1,8 @@
 import { describe, expect, it } from 'vitest';
 
 import {
+  ACCESS_TOKEN_SECONDS,
+  accessCookieName,
   APPS,
   confirmTotpEnroll,
   consentProblems,
@@ -10,6 +12,7 @@ import {
   isPermissionKey,
   loginRecovery,
   loginTotp,
+  logout,
   OTP_PURPOSES,
   otpRequested,
   otpSealContext,
@@ -19,12 +22,19 @@ import {
   pingRecorded,
   recordPing,
   recoveryCodeZod,
+  REFRESH_COOKIE_PATH,
+  refreshCookieName,
+  refreshSession,
   requestPasswordCode,
   requestSignUpCode,
   resendOtp,
   routes,
+  SESSION_POLICIES,
+  sessionReuseDetected,
   SIGN_UP_APPS,
   startTotpEnroll,
+  TOKEN_ISSUER,
+  tokenAudience,
   TOTP_REQUIRED_APPS,
   verifyOtp,
   wake,
@@ -48,6 +58,8 @@ describe('platform catalogue (Milestone 1 sample)', () => {
       'auth.login.recovery',
       'auth.login.totpEnroll',
       'auth.login.totpConfirm',
+      'auth.session.refresh',
+      'auth.session.logout',
     ]);
     expect(events.latest('platform.ping.recorded')).toBe(pingRecorded);
     expect(permissions.get(pingRead.key)).toBe(pingRead);
@@ -238,5 +250,37 @@ describe('sign-in routes', () => {
     expect(consentProblems('creator', undefined)).toHaveLength(1);
     expect(consentProblems('delivery', undefined)).toEqual([]);
     expect(consentProblems('admin', undefined)).toEqual([]);
+  });
+});
+
+describe('sessions', () => {
+  it('last 30 days (up to 90) in customer and creator, 7 seller, 14 delivery, 12 hours internal', () => {
+    const day = 24 * 60 * 60_000;
+    expect(SESSION_POLICIES.customer).toEqual({ slidingMs: 30 * day, maxMs: 90 * day });
+    expect(SESSION_POLICIES.creator).toEqual(SESSION_POLICIES.customer);
+    expect(SESSION_POLICIES.seller).toEqual({ slidingMs: 7 * day, maxMs: 7 * day });
+    expect(SESSION_POLICIES.delivery).toEqual({ slidingMs: 14 * day, maxMs: 14 * day });
+    for (const app of TOTP_REQUIRED_APPS) {
+      expect(SESSION_POLICIES[app], app).toEqual({
+        slidingMs: 12 * 60 * 60_000,
+        maxMs: 12 * 60 * 60_000,
+        idleMs: 30 * 60_000,
+      });
+    }
+    expect(Object.keys(SESSION_POLICIES).toSorted()).toEqual([...APPS].toSorted());
+    expect(ACCESS_TOKEN_SECONDS).toBe(600);
+  });
+
+  it('keep each app’s cookies on its own host; the refresh cookie only for /api/v1/auth', () => {
+    expect(accessCookieName('seller')).toBe('__Host-bq_seller_at');
+    expect(refreshCookieName('seller')).toBe('__Secure-bq_seller_rt');
+    expect(REFRESH_COOKIE_PATH).toBe('/api/v1/auth');
+    expect(tokenAudience('admin')).toBe('bq:admin');
+    expect(TOKEN_ISSUER).toBe('bq:identity');
+    for (const route of [refreshSession, logout]) {
+      expect(route).toMatchObject({ access: { type: 'public' }, rateLimit: 'auth', apps: APPS });
+      expect(`/api/v1${route.path}`.startsWith(REFRESH_COOKIE_PATH)).toBe(true);
+    }
+    expect(events.latest('identity.session.reuseDetected')).toBe(sessionReuseDetected);
   });
 });

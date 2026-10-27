@@ -9,7 +9,7 @@ import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { brevoSender } from '../src/email/brevo.ts';
 import { mailpitSender } from '../src/email/mailpit.ts';
 import { type EmailMessage, EmailSendError } from '../src/email/port.ts';
-import { otpEmail } from '../src/email/templates.ts';
+import { otpEmail, sessionReuseEmail } from '../src/email/templates.ts';
 
 const MAILPIT_URL = 'http://localhost:8025';
 const from = { email: 'no-reply@beautinique.example', name: 'Beautinique' };
@@ -223,5 +223,28 @@ describe('mailpitSender', () => {
     const gone = mailpitSender({ url: 'http://127.0.0.1:1', from });
     const missing = await failureOf(gone.send(message('x@beautinique.example')));
     expect([missing.code, missing.retry]).toEqual(['MAILPIT_UNREACHABLE', true]);
+  });
+});
+
+describe('the session-reuse email', () => {
+  it('says what happened, when (IST) and what to do, with no secret', () => {
+    const email = sessionReuseEmail({
+      to: 'riya@beautinique.example',
+      app: 'seller',
+      device: 'Chrome on Windows',
+      detectedAt: '2026-10-28T09:30:00.000Z',
+    });
+    expect(email.subject).toBe('We signed you out of Beautinique Seller');
+    expect(email.text).toContain('(Chrome on Windows)');
+    expect(email.text).toContain('28 Oct 2026, 3:00 pm IST');
+    expect(email.text).toContain('"Forgot password"');
+    expect(email.tags).toEqual(['security-session-reuse']);
+    const escaped = sessionReuseEmail({
+      to: 'x@beautinique.example',
+      app: 'customer',
+      device: '<script>',
+      detectedAt: '2026-10-28T09:30:00.000Z',
+    });
+    expect(escaped.html).not.toContain('<script>');
   });
 });

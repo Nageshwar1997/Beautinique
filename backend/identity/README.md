@@ -40,6 +40,15 @@ Owner ke faisle (2026-10-27): **sabhi 11 apps email + password se sign-in** kart
 - Errors (`IDENTITY_ERROR_CODES`): `OTP_*`, `INVALID_CREDENTIALS`, `PASSWORD_BREACHED`, `LOGIN_EXPIRED`, `TOTP_INVALID`, `RECOVERY_CODE_INVALID`; text ek jagah [src/errors.ts](src/errors.ts).
 - Mutations (RULES §6, login): `npm run mutate -- --package identity` ([test/mutations.ts](test/mutations.ts)). Tests asli Mongo + Valkey pe, HIBP ka nakli server ([test/helpers.ts](test/helpers.ts)); internet kabhi nahi.
 
+## Sessions (TASKS T3.2, ARCHITECTURE §7.2)
+
+- Har sign-in (password, authenticator, recovery code, authenticator lagana, naya account) ke aakhir me `identity_sessions` me ek session aur app ki do cookies: `__Host-bq_<app>_at` (ES256 access token, 10 min, Path /, Lax) aur `__Secure-bq_<app>_rt` (refresh, Path `/api/v1/auth`, Strict). Dono HttpOnly + Secure, Domain nahi. Jawab ke body me koi token nahi.
+- Session ki lambai `SESSION_POLICIES` (contracts): customer/creator 30 din, har refresh pe aage, max 90; seller 7; delivery 14; internal 12 ghante aur 30 min idle.
+- `POST /auth/refresh`: naya token pair, purana band. Purana token 10 s ke andar = parallel tab (409 `REFRESH_IN_PROGRESS`); baad me = chori: session band, Redis `bq:id:session-revoked:<sid>`, event `identity.session.reuseDetected` → notify ka "We signed you out" email. Session khatam (idle/expire) ho chuka ho to chupchaap `SESSION_EXPIRED`, alarm nahi.
+- `POST /auth/logout`: session band + Redis key + cookies saaf. Email code se naya password = account ke **saare** sessions band + `bq:id:user-revoked:<userId>`.
+- Token keys: `identity_signing_keys`, private key `IDENTITY__FIELD_KEYS` se sealed, har 30 din nayi; `GET /.well-known/jwks.json` (sirf gateway ke liye, `/api` route nahi).
+- Gateway ka token check, passport, `/iam/me` aur My Devices: T3.2 PR B.
+
 ## Settings
 
 `.env.example` ka LOCAL hissa `.env` me copy karo (commit kabhi nahi); OPTIONAL me defaults, PRODUCTION me live ki keys dummy values ke saath. Har key `IDENTITY__` se shuru hoti hai, taaki bundle mode me ek process me sab deployables ki keys alag rahein. Settings sirf [src/config.ts](src/config.ts) padhta hai (zod se check; ESLint baaki jagah `process.env` rokta hai). Nayi setting = `configZod` me key + `.env.example` me line.
@@ -50,6 +59,6 @@ Owner ke faisle (2026-10-27): **sabhi 11 apps email + password se sign-in** kart
 - `src/release.ts` + `src/runtime.ts`: start pe Mongo se judte hi release steps (migrations, indexes; `@beautinique/backend-server-release`, ARCHITECTURE §11.1), phir Redis. Nayi migration list ke aakhir me, naye collection ke indexes `indexes` me; permission sync step T3.3 me.
 - `src/app.ts`: `@beautinique/backend-server-kit` ka `createApp` (health, errors, logs, request id).
 - `src/routes/index.ts`: identity ke routes (app `X-BQ-App` se, IP `X-BQ-Client-Ip` se, dono gateway ke). Har route contracts me declare hota hai (owner `identity`), yahan sirf handler.
-- `src/otp.ts`: email code maangna, naya code, check + password (Redis + outbox). `src/login.ts`: password sign-in, authenticator, recovery codes. `src/password.ts`: argon2id + HIBP. `src/lockout.ts`: galat koshishein aur rok. `src/credentials.ts`: secrets aur login ke tareeke. `src/users.ts`: accounts aur consent. `src/sessions.ts`: session port. `src/errors.ts`: error text.
+- `src/otp.ts`: email code maangna, naya code, check + password (Redis + outbox). `src/login.ts`: password sign-in, authenticator, recovery codes. `src/password.ts`: argon2id + HIBP. `src/lockout.ts`: galat koshishein aur rok. `src/credentials.ts`: secrets aur login ke tareeke. `src/users.ts`: accounts aur consent. `src/sessions.ts`: sessions, refresh rotation, logout. `src/signing-keys.ts`: token keys + JWKS. `src/cookies.ts`: cookies. `src/errors.ts`: error text.
 
 Node 24 TypeScript seedha chalata hai: imports me `.ts` likho, enum ya parameter properties nahi.

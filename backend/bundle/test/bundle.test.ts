@@ -176,6 +176,68 @@ describe('bundle', () => {
       expect(signedIn.status).toBe(200);
       expect(signedIn.headers.get('ratelimit-policy')).toBe('"auth";q=30;w=300');
       expect(await signedIn.json()).toMatchObject({ data: { next: 'signed-in', user: { email } } });
+
+      // the session (T3.2): cookies through the gateway, a refresh, a copied refresh token
+      const refreshCookie = (answer: Response) =>
+        /__Secure-bq_customer_rt=([^;]+)/.exec(answer.headers.getSetCookie().join(', '))?.[1] ?? '';
+      const first = refreshCookie(signedIn);
+      expect(
+        signedIn.headers.getSetCookie().some((c) => c.startsWith('__Host-bq_customer_at=')),
+      ).toBe(true);
+      const refresh = (token: string) =>
+        fetch(`${bundle.url}/api/v1/auth/refresh`, {
+          method: 'POST',
+          headers: { ...headers, cookie: `__Secure-bq_customer_rt=${token}` },
+        });
+      const refreshed = await refresh(first);
+      expect(refreshed.status).toBe(200);
+      expect(refreshed.headers.get('cache-control')).toBe('private, no-store');
+      const second = refreshCookie(refreshed);
+      expect(second).not.toBe(first);
+      // the first token again, past the 10 s a parallel tab gets: someone had a copy
+      const logger = createLogger({ name: 'bundle-test', level: 'silent' });
+      const mongo = await connectMongo({
+        uri: MONGO_URI,
+        dbName: identityDbName,
+        appName: 'bundle-test',
+        logger,
+      });
+      try {
+        await mongo.db
+          .collection<{ _id: string; rotatedAt: Date }>('identity_sessions')
+          .updateOne(
+            { _id: first.split('.')[0] ?? '' },
+            { $set: { rotatedAt: new Date(Date.now() - 11_000) } },
+          );
+      } finally {
+        await mongo.close();
+      }
+      expect((await refresh(first)).status).toBe(401);
+      expect((await refresh(second)).status).toBe(401);
+      const alert = `http://localhost:8025/api/v1/search?query=${encodeURIComponent(`to:${email} subject:"signed you out"`)}`;
+      let warned: Found = { messages: [] };
+      const by = Date.now() + 10_000;
+      while (warned.messages.length === 0) {
+        if (Date.now() > by) throw new Error('no security email reached Mailpit');
+        await new Promise((resolve) => setTimeout(resolve, 100));
+        warned = (await (await fetch(alert)).json()) as Found;
+      }
+      mailIds.push(...warned.messages.map((m) => m.ID));
+      expect(warned.messages[0]?.Subject).toBe('We signed you out of Beautinique');
+
+      // a new sign-in, then logout: its token stops
+      const again = await fetch(`${bundle.url}/api/v1/auth/login`, {
+        method: 'POST',
+        headers,
+        body: JSON.stringify({ email, password: 'pink lipstick on a rainy day' }),
+      });
+      const token = refreshCookie(again);
+      const out = await fetch(`${bundle.url}/api/v1/auth/logout`, {
+        method: 'POST',
+        headers: { ...headers, cookie: `__Secure-bq_customer_rt=${token}` },
+      });
+      expect(await out.json()).toEqual({ data: { signedOut: true } });
+      expect((await refresh(token)).status).toBe(401);
     } finally {
       await bundle.stop();
       await fetch('http://localhost:8025/api/v1/messages', {

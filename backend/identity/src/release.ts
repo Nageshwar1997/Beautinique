@@ -10,6 +10,8 @@ import {
 
 import type { Config } from './config.ts';
 import { indexes as credentialIndexes } from './credentials.ts';
+import { indexes as sessionIndexes } from './sessions.ts';
+import { indexes as signingKeyIndexes } from './signing-keys.ts';
 import { indexes as userIndexes } from './users.ts';
 
 /**
@@ -19,7 +21,13 @@ import { indexes as userIndexes } from './users.ts';
  */
 export const releaseDefinition: ReleaseDefinition = {
   migrations: defineMigrations([]),
-  indexes: [...OUTBOX_INDEXES, ...userIndexes, ...credentialIndexes],
+  indexes: [
+    ...OUTBOX_INDEXES,
+    ...userIndexes,
+    ...credentialIndexes,
+    ...sessionIndexes,
+    ...signingKeyIndexes,
+  ],
 };
 
 /** The release steps on identity's database (a start, or `npm run db:release`). */
