@@ -1,6 +1,6 @@
 # TASKS — BQ
 
-> **Status:** v1.53 (2026-10-27). Poore project ki task list, [ARCHITECTURE.md](ARCHITECTURE.md) §16 ke phases ke hisaab se. Har task "done" tabhi jab [RULES.md](RULES.md) §1.5 ki Definition of Done poori ho.
+> **Status:** v1.54 (2026-10-27). Poore project ki task list, [ARCHITECTURE.md](ARCHITECTURE.md) §16 ke phases ke hisaab se. Har task "done" tabhi jab [RULES.md](RULES.md) §1.5 ki Definition of Done poori ho.
 
 **Kaise use karein:**
 - `[ ]` baaki, `[~]` chal raha hai, `[x]` done.
@@ -47,10 +47,10 @@ Har milestone ke end me kuch **live** dikhana hai. Ek hi live environment, free 
 - [ ] A.2 Ola Maps ke 4 accounts banana aur har app ke domain ke hisaab se browser keys dena (ARCHITECTURE §10). Multiple accounts ke terms ek baar padhna.
 - [ ] A.3 Render workspace: sirf ek free web service (`bq-live`), aur Singapore me ek free Key Value.
 - [x] A.4 Atlas: project `bq-live`, M0 cluster AWS Singapore, har deployable ka alag DB user. (2026-10-27, owner: 4 users `bq-core`, `bq-identity`, `bq-payments`, `bq-notify`, har ek sirf apne database pe readWrite (naam ARCHITECTURE §3 wale: `bq_core`, `bq_identity`, `bq_payments`, `bq_notify`; code ke default yahi hain, alag naam ho to `<NAME>__MONGO_DB_NAME` dena). Render me chaaron ke `<NAME>__MONGO_URI` aur `<NAME>__REDIS_URL` (Redis URL ek hi, keys alag). Atlas ka MCP access org me band hai, isliye users ki list Claude ne khud nahi dekhi. Live: naye env wala deploy (2026-10-26 18:40 UTC) fail hua, kyunki identity ka code `IDENTITY__MONGO_URI`/`IDENTITY__REDIS_URL` nahi padhta tha (fix `prerelease` pe, 2026-10-27; `release` tak jaana baaki); abhi purana deploy (17:20 UTC) purane env pe chal raha hai (`/status` me core `mongo: ok`), isliye `bq-core` aur `bq-identity` users live pe fix ke deploy ke baad hi jaanchenge. **Live (2026-10-27, deploy `cfd7a04`):** naye env ke saath identity ne `bq_identity` me aur core ne `bq_core` me release ka record likha, `/status` me dono `mongo: ok`: dono users ka readWrite chalta hai (kaunsa user laga, ye env me hai, Claude ne nahi dekha). **Owner ne Atlas me pakka kiya (2026-10-27):** chaaron users ka readWrite exactly `bq_core`, `bq_identity`, `bq_payments`, `bq_notify` pe hai (har user sirf apne DB pe). **Aage:** core ka `bq_audit` DB (ARCHITECTURE §3) aaye to `bq-core` ko us pe bhi readWrite.)
-- [ ] A.5 Cloudinary, Sentry (free), Razorpay (test keys), customer app ke liye Google, LinkedIn aur GitHub OAuth clients (live + laptop redirect; owner, 2026-10-26).
+- [x] A.5 Cloudinary, Sentry (free), Razorpay (test keys), customer app ke liye Google, LinkedIn aur GitHub OAuth clients (live + laptop redirect; owner, 2026-10-26). Owner: sab ready (2026-10-28); OAuth keys Render me PR 4 ke code ke saath hi (RULES §9).
 - [x] A.6 Brevo: authorised IPs ki rok hatana, ya Render Singapore ke IPs jodna. (2026-10-27, owner: account bana; API keys ke liye "Blocking unauthorized IP addresses" band kiya (Render ke outbound IP badalte hain). SMTP wala block on hai: hum SMTP nahi, Brevo ka HTTPS API use karte hain (ARCHITECTURE §11.2). API key Render me notify/OTP ka code aane pe (M3).)
 - [ ] A.7 Cloudflare R2 free tier: card maangta hai ya nahi, check karna (nahi to logs archive Cloudinary private files me).
-- ~~A.8 UptimeRobot aur cron-job.org free accounts (keep-alive aur alerts ke liye).~~ Nahi (owner, 2026-10-25): bahar ka pinger nahi; service app khulte hi aur GitHub Actions se din me har ghante jaagti hai (T2.7, ARCHITECTURE §11.1).
+- ~~A.8 UptimeRobot aur cron-job.org free accounts (keep-alive aur alerts ke liye).~~ Nahi (owner, 2026-10-25): bahar ka pinger nahi; service app khulte hi aur GitHub Actions se din me har ghante jaagti hai (T2.7, ARCHITECTURE §11.1). **Badla (owner, 2026-10-28):** GitHub schedule pe bharosa nahi (2 din me ~18 me se 2 chale), isliye cron-job.org (owner, 2026-10-28; GitHub wala bhi chalta rahe): job `GET https://bq-live.onrender.com/wake` (gateway ka wake, 204, origin secret nahi), timezone Asia/Kolkata, har ghante :30 pe 10:30–21:30 (GitHub ke saath hi, taaki dono me se ek chale; dono chale to doosra jaage server pe padta hai), timeout 120 s, failure pe email. Account aur job owner banata hai (Claude account nahi banata). UptimeRobot ab bhi nahi.
 - [ ] A.9 Vercel: apps ready hone pe 11 projects (production branch `release`).
 
 ## B. Docs
@@ -280,3 +280,4 @@ Har milestone ke end me kuch **live** dikhana hai. Ek hi live environment, free 
 | v1.51 | 2026-10-27 | T2.7: 10-27 ke 11 wake slots me 1 chala; T3.1: OTP jawab ka samay barabar (400 ms floor). |
 | v1.52 | 2026-10-27 | T3.1 PR 3: owner ke login faisle (sab apps password, code sirf sign-up, rok 1 ghanta, TOTP, OAuth providers). |
 | v1.53 | 2026-10-27 | T3.1 PR 3: password + authenticator sign-in, owner ke faisle, tests aur mutations. |
+| v1.54 | 2026-10-28 | A.5 ready (owner); A.8 badla: cron-job.org wake GitHub ke saath; release T3.2 ke baad. |
