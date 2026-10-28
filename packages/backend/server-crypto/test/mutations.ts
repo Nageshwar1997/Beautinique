@@ -212,6 +212,61 @@ const mutations: Mutation[] = [
     name: 'uri without the issuer parameter',
     change: [['    issuer,\n    algorithm', '    algorithm']],
   },
+  // ES256 tokens
+  {
+    file: 'jwt',
+    name: 'any algorithm accepted',
+    change: [["  if (header.alg !== 'ES256') throw new JwtError('algorithm');\n", '']],
+  },
+  {
+    file: 'jwt',
+    name: 'signature not checked',
+    change: [["  if (!signed) throw new JwtError('signature');\n", '']],
+  },
+  {
+    file: 'jwt',
+    name: 'expiry not checked',
+    change: [['seconds > claims.exp + leewaySeconds', 'false']],
+  },
+  {
+    file: 'jwt',
+    name: 'no expiry leeway',
+    change: [['seconds > claims.exp + leewaySeconds', 'seconds > claims.exp']],
+  },
+  {
+    file: 'jwt',
+    name: 'future tokens accepted',
+    change: [['claims.iat > seconds + leewaySeconds', 'false']],
+  },
+  {
+    file: 'jwt',
+    name: 'audience not checked',
+    change: [["  if (claims.aud !== audience) throw new JwtError('audience');\n", '']],
+  },
+  {
+    file: 'jwt',
+    name: 'issuer not checked',
+    change: [["  if (claims.iss !== issuer) throw new JwtError('issuer');\n", '']],
+  },
+  {
+    file: 'jwt',
+    name: 'a short signature reaches verify',
+    change: [["  if (signature.length !== 64) throw new JwtError('signature');\n", '']],
+    survives:
+      'equivalent: Node refuses a P-1363 signature of the wrong length, the same signature error',
+  },
+  {
+    file: 'jwt',
+    name: 'DER signatures',
+    change: [
+      ["dsaEncoding: 'ieee-p1363',\n  });\n  return", "dsaEncoding: 'der',\n  });\n  return"],
+    ],
+  },
+  {
+    file: 'jwt',
+    name: 'any key type read from a JWKS',
+    change: [["    key?.kty !== 'EC' ||\n", '']],
+  },
 ];
 
 export default mutations;

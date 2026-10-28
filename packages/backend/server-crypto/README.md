@@ -85,6 +85,17 @@ const step = verifyTotp(secret, code); // number | null; step save karo, wahi ya
 | `totpUri({ secret, issuer, account })`          | `otpauth://totp/...` link                                                                |
 | `encodeBase32` / `decodeBase32`                 | RFC 4648 base32 (decode: case, space, hyphen, `=` chalte hain)                           |
 
+## ES256 tokens (JWT)
+
+Sirf Node ka `crypto`: P-256 keys, signature JOSE form (r || s, 64 bytes; WebCrypto se cross-check). Sirf ES256 sign aur accept hota hai, isliye `alg: none` ya public key ko HMAC secret banana kaam nahi karta.
+
+| Function                                                                | Kaam                                                                                          |
+| ----------------------------------------------------------------------- | --------------------------------------------------------------------------------------------- |
+| `generateSigningKey()`                                                  | Naya key pair: `kid`, PKCS #8 PEM (save se pehle `encryptField`), public JWK                  |
+| `signJwt(claims, { kid, privateKey })`                                  | ES256 token; claims me `iss`, `sub`, `aud`, `iat`, `exp` zaroori                              |
+| `verifyJwt(token, { keys, audience, issuer, now, leewaySeconds = 30 })` | Sab check (algorithm, `kid`, signature, exp/iat, aud, iss); galat pe `JwtError` with `reason` |
+| `publicKeyFromJwk(jwk)`                                                 | JWKS entry se verify key; sirf ES256 P-256                                                    |
+
 ## Niyam
 
 - Personal field kabhi plain save nahi: `sealPii` (dhoondhna ho) ya `encryptField` (sirf rakhna ho, jaise TOTP secret).

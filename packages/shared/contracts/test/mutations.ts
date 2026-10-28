@@ -256,6 +256,34 @@ const mutations: Mutation[] = [
     change: [['recoveryCodes: array(string()).length(10)', 'recoveryCodes: array(string())']],
     tests: 'recovery code',
   },
+  {
+    file: 'catalogue/identity',
+    name: 'no idle end for internal apps',
+    change: [['  idleMs: 30 * 60_000,\n', '']],
+    tests: 'sessions',
+  },
+  {
+    file: 'catalogue/identity',
+    name: 'customer sessions without the 90-day cap',
+    change: [
+      [
+        'customer: { slidingMs: 30 * DAY_MS, maxMs: 90 * DAY_MS },',
+        'customer: { slidingMs: 30 * DAY_MS, maxMs: 365 * DAY_MS },',
+      ],
+    ],
+    tests: 'sessions',
+  },
+  {
+    file: 'catalogue/identity',
+    name: 'refresh cookie on every path',
+    change: [
+      [
+        "export const REFRESH_COOKIE_PATH = '/api/v1/auth';",
+        "export const REFRESH_COOKIE_PATH = '/';",
+      ],
+    ],
+    tests: 'own host',
+  },
 ];
 
 export default mutations;

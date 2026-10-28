@@ -1,6 +1,6 @@
 # ARCHITECTURE — BQ
 
-> **Status:** v1.31 draft (2026-10-27). [PRD.md](PRD.md) v1.0 pe based. Design ek multi-agent review se aaya (3 architecture proposals + review board + owner ke decisions), aur v1.1 me free tier ke official docs ke against verify hua.
+> **Status:** v1.34 draft (2026-10-27). [PRD.md](PRD.md) v1.0 pe based. Design ek multi-agent review se aaya (3 architecture proposals + review board + owner ke decisions), aur v1.1 me free tier ke official docs ke against verify hua.
 
 ## 0. Ek nazar me
 
@@ -274,7 +274,10 @@ Kai platforms alag users ko alag price dikhate hain. BQ ka rule: **ek product ka
 ### 7.2 Tokens, sessions aur cookies (bina domain ke)
 
 - **Access JWT:** ES256, 10 min, `aud = bq:<app>`. Token me roles nahi hote, sirf session aur authz version.
-- **Refresh token:** random, hashed store, har use pe rotate hota hai. Purana token dobara use hua to poori family revoke ho jati hai aur security alert jata hai.
+- **Refresh token:** random, hashed store, har use pe rotate hota hai. Purana token dobara use hua to poori family revoke ho jati hai aur security alert jata hai. Ek session pe ek waqt me ek refresh: purana token 10 s ke andar aaye to parallel tab (409, naye cookie ke saath dobara), uske baad chori (owner, 2026-10-28). Token `<sessionId>.<32 random bytes>`, DB me sirf HMAC.
+- **Token keys:** ES256 keys identity ke DB me (`identity_signing_keys`), private key `IDENTITY__FIELD_KEYS` se sealed, har 30 din nayi, JWKS me 1 din zyada; gateway JWKS identity se padhta hai (anjaan `kid` pe dobara). Env me koi naya secret nahi.
+- **Passport (owner, 2026-10-28):** gateway har start pe apni nayi ES256 key banata hai aur public key apne endpoint pe deta hai; passport 60 s ka, isliye env me shared secret nahi.
+- **My Devices (owner, 2026-10-28):** account ke saare apps ke sessions ek list me, current alag nishaan ke saath. Delivery ka device binding delivery app (PWA) ke saath.
 - **Lifetimes:** customer aur creator 30 din (max 90), seller 7 din, delivery 7–14 din (device-bound), internal 12 ghante (30 min idle).
 - **Cookies:** har app apne `*.vercel.app` host pe hai, aur `/api/*` Vercel ke through Render tak jata hai. Isliye browser ke liye API same-origin hai. Cookies: `__Host-bq_<app>_at` (access; HttpOnly, Secure, SameSite=Lax, Path=/) aur `__Secure-bq_<app>_rt` (refresh; HttpOnly, Secure, SameSite=Strict, **Path=/api/v1/auth**, Domain nahi, isliye host-only). Refresh token sirf refresh aur logout calls pe jata hai, har request pe nahi. Har app ki cookies apne host pe alag rehti hain, to ek insaan kai apps me ek saath login reh sakta hai. Customer app ke SSR loaders anonymous fetch karte hain: cookies upstream forward nahi hoti.
 - **CSRF:** SameSite=Lax + Origin aur `x-forwarded-host` ka allow-list + `X-BQ-App` header.
@@ -573,14 +576,14 @@ Sirf config badlegi, code nahi:
 
 ## 16. Aaj ke code se migration
 
-**Principle:** code reuse karo, structure nahi. Atlas ka aaj ka data demo data hai, isliye idempotent aur dry-run wale import scripts (users, admins, sellers, categories, products, media) chalenge, aur baaki sab dobara seed hoga.
+**Principle:** code reuse karo, structure nahi. **Purane data ka poora import nahi hota (owner, 2026-10-28):** naya stack khaali data se shuru hota hai. Purane data me se **jo zaroori hai wahi naye packages me use hota hai** (owner, 2026-10-28), jab us feature ka kaam ho: chun ke, naye format me, naye package ya seed ke raaste. Kya zaroori hai, ye har feature ke kaam ke waqt owner ke saath tay hota hai.
 
 | Phase                                 | Kaam                                                                                                                                                                                                                                                                                                                                                                           | Andaza                |
 | ------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | --------------------- |
 | 0. Monorepo + CI                      | Packages naye `packages/<category>/<name>` me (`BQ-Packages` sirf reference), 4 apps → `frontend/`, gateway aur services → `backend/` (port sources). Media-service ka nested `.git` aur `.kilo` worktree hatana. npm workspaces + Turborepo. CI me saare package tests.                                                                                                       | 1–2 hafte             |
 | 1. Server kit + contracts             | 13 backend + 5 shared packages ko server-kit, server-mongo (commit ke baad reply), server-queue (outbox, inbox, schedulers), server-crypto, contracts (versioned event catalogue) aur authz me merge karna. Unit + mutation tests.                                                                                                                                             | 1–2 hafte             |
 | 2. Gateway                            | Rakhna: bootstrap, CORS, trust-proxy rate limit (Redis store), proxy-before-body-parser. Hatana: module facades, `METHODS_AND_PATHS`, 1,351-line `openapi.ts`, JWT signing, wake-up fan-out, MASTER bypass, keep-alive workflow. Jodna: prefix table, JWKS, Origin/`x-forwarded-host` → app, per-app cookies, passport, origin secret, helmet, request-id, Sentry.             | 1 hafta               |
-| 3. bq-identity (user-service se)      | OTP flow reuse (crypto-random, hashed, attempt counter), Google OAuth, bcrypt → argon2id next login pe. Jodna: TOTP, sessions, ES256 + JWKS, apps, permissions, roles, grants, events. Import: USER → customer, SELLER → seller owner, ADMIN → state_admin (state naam LGD codes pe mapping file se), SUPER_ADMIN → super_admin, MASTER → master (pehle login pe MFA zaroori). | 2–3 hafte             |
+| 3. bq-identity (user-service se)      | OTP flow reuse (crypto-random, hashed, attempt counter), Google OAuth, bcrypt → argon2id next login pe. Jodna: TOTP, sessions, ES256 + JWKS, apps, permissions, roles, grants, events. Purane users ka import nahi (owner, 2026-10-28): sab naye sign-up se. | 2–3 hafte             |
 | 4. Core foundations                   | Platform, location, network, expansion (config-only tests ke saath), sellers + review (aaj ka `resolveStateAdmin`, reassign aur SLA logic data-driven banake), catalog + discovery, media (signed uploads), support (contact-us bina TTL). Imports: products → listings (`NEEDS_REQC`), sellers → `LEGACY_NEEDS_REKYC` (SELLER_TYPES split).                                   | 4–5 hafte             |
 | 5. Notify + Payments                  | Mail-service se notify: Brevo transporter rakhna, template builders ko saaf template files banana, OTP log leak theek karna, channels jodna. Payments: skeleton, fake driver aur webhook simulator banana.                                                                                                                                                                     | 2 hafte               |
 | 6. Frontend foundation                | Duplicate files packages me, naye fonts (styles package), customer app React Router 8 framework mode me, onboarding Seller app me, Super Admin checkbox hatana, 7 naye apps template se, crypto-js user store hatana.                                                                                                                                                          | 3 hafte (saath-saath) |
@@ -591,7 +594,7 @@ Sirf config badlegi, code nahi:
 | 11. Launch hardening                  | Saare flows ke E2E, mutation tests, warm load check, legal pages, seed data.                                                                                                                                                                                                                                                                                                   | 2 hafte               |
 
 - **Kul andaza (solo + AI):** ~13–17 hafte me aaj ke features nayi foundation pe, phir ~20–25 hafte PRD ka naya kaam (commerce, WMS, logistics + Delivery PWA, finance, support, UGC, growth, creators, governance). **Total ~33–42 hafte.** Saare 11 apps saath launch honge, isliye har phase ek internal milestone pe khatam hoga.
-- **Cutover:** (1) `bq-live` banane se pehle purani services ka keep-alive band, taaki wo so jayein aur sirf use pe free ghante lein; (2) `bq-live` jaagta nahi rakha jaata (owner, 2026-10-25): use pe aur din me har ghante GitHub Actions se jaagta hai (§11.1); (3) naye stack ko imported data pe chalana aur Vercel ka API URL badalna; (4) purani 6 Render services turant suspend, aur 2 hafte baad delete. Jab tak dono saath hain, Render dashboard pe free hours roz dekhna.
+- **Cutover:** (1) `bq-live` banane se pehle purani services ka keep-alive band, taaki wo so jayein aur sirf use pe free ghante lein; (2) `bq-live` jaagta nahi rakha jaata (owner, 2026-10-25): use pe aur din me har ghante GitHub Actions se jaagta hai (§11.1); (3) naya stack khaali data se (poora import nahi; zaroori purana data naye packages me, owner 2026-10-28) aur Vercel ka API URL badalna; (4) purani 6 Render services turant suspend, aur 2 hafte baad delete. Jab tak dono saath hain, Render dashboard pe free hours roz dekhna.
 - **Jo reuse nahi hoga:** multi-repo publish-then-bump model, setInterval schedulers, `X-Service-Secret`/`X-User-Role` trust, `USER_ROLES`, `STATES_AND_UTS`, `SELLER_TYPES` enums, browser me bana AuditLog.
 
 ## 17. Risks
@@ -659,3 +662,6 @@ Sirf config badlegi, code nahi:
 | v1.29   | 2026-10-27 | §7.1: authenticator chaalu ho to har app me (owner); password banane ka ek raasta, OAuth account seller bane to wahi account. |
 | v1.30   | 2026-10-27 | §7.1: ek account ek password sabhi apps me; sign-up = account + app ka profile (owner). |
 | v1.31 | 2026-10-28 | §11.1: cron-job.org wake GitHub Actions ke saath (owner). |
+| v1.32 | 2026-10-28 | §7.2: refresh race 10 s, token keys DB me sealed, passport ki key, My Devices saare apps (owner). |
+| v1.33 | 2026-10-28 | §16 migration aur cutover: purana data import nahi, naya stack khaali data se (owner). |
+| v1.34 | 2026-10-28 | §16: zaroori purana data naye packages me use hota hai, poora import nahi (owner). |
