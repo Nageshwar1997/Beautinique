@@ -1,0 +1,1 @@
+gitleaks git --config .gitleaks.toml --redact .
