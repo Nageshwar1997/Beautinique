@@ -1,4 +1,4 @@
-import type { Logger } from '@beautinique/backend-server-kit';
+import { type Logger, LOOPBACK_HOST } from '@beautinique/backend-server-kit';
 import { OUTBOX, PROCESSED_EVENTS } from '@beautinique/backend-server-queue';
 import { createClient, getPing, recordPing, wake } from '@beautinique/shared-contracts';
 import { afterAll, afterEach, beforeAll, describe, expect, it } from 'vitest';
@@ -44,7 +44,7 @@ afterAll(async () => {
 async function startCore(options: { consume?: boolean } = {}, logger?: Logger) {
   const core = await start(testConfig(dbName), {
     port: 0,
-    host: '127.0.0.1',
+    host: LOOPBACK_HOST,
     handleSignals: false,
     logger,
     runtime: { queuePrefix: prefix, epochKey, pollMs: 50, watchdogMs: 200, ...options },

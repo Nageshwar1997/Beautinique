@@ -10,7 +10,7 @@ export { release, releaseDefinition } from './release.ts';
 export interface StartOptions {
   /** default: config.port (0 picks a free one) */
   port?: number;
-  /** default 0.0.0.0; backend/bundle keeps the internal deployables on 127.0.0.1 */
+  /** default 0.0.0.0; backend/bundle keeps the internal deployables on LOOPBACK_HOST */
   host?: string;
   /** stop on SIGTERM and SIGINT (default true; backend/bundle does it for every deployable) */
   handleSignals?: boolean;

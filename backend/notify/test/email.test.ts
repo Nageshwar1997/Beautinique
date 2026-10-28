@@ -4,6 +4,7 @@ import { randomUUID } from 'node:crypto';
 import { createServer, type IncomingMessage, type Server } from 'node:http';
 import type { AddressInfo } from 'node:net';
 
+import { LOOPBACK_HOST } from '@beautinique/backend-server-kit';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 
 import { brevoSender } from '../src/email/brevo.ts';
@@ -112,8 +113,8 @@ beforeAll(async () => {
       }, answer.delayMs ?? 0);
     });
   });
-  await new Promise<void>((resolve) => brevo.listen(0, '127.0.0.1', resolve));
-  brevoUrl = `http://127.0.0.1:${String((brevo.address() as AddressInfo).port)}`;
+  await new Promise<void>((resolve) => brevo.listen(0, LOOPBACK_HOST, resolve));
+  brevoUrl = `http://${LOOPBACK_HOST}:${String((brevo.address() as AddressInfo).port)}`;
 });
 
 afterAll(async () => {
