@@ -3,6 +3,14 @@ import type { AddressInfo } from 'node:net';
 
 import type { Logger } from 'pino';
 
+/**
+ * The machine's own loopback address: a server that listens here is reached from this machine only,
+ * never from the network. backend/bundle keeps the internal deployables on it (on the laptop and on
+ * Render alike, every container has it), so every request from outside goes through the gateway on
+ * the public port; tests keep their servers on it too. Not a setting: 0.0.0.0 would open them up.
+ */
+export const LOOPBACK_HOST = '127.0.0.1';
+
 export interface StartServerOptions {
   /** 0 picks a free port (tests) */
   port: number;
@@ -86,6 +94,6 @@ export async function startServer(
   if (handleSignals) {
     for (const signal of signals) process.once(signal, onSignal);
   }
-  const shown = host === '0.0.0.0' || host === '::' ? '127.0.0.1' : host;
+  const shown = host === '0.0.0.0' || host === '::' ? LOOPBACK_HOST : host;
   return { port: actual, url: `http://${shown}:${String(actual)}`, stop };
 }

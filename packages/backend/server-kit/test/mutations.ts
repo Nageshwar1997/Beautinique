@@ -133,6 +133,70 @@ const mutations: Mutation[] = [
     change: [['if (status >= 500) {', 'if (status >= 400) {']],
     tests: 'monitoring',
   },
+  // tokens (T3.2 PR B)
+  {
+    file: 'tokens',
+    name: 'a cookie found by part of its name',
+    change: [['pair.slice(0, at).trim() === name', 'pair.slice(0, at).trim().includes(name)']],
+    tests: 'cookieOf',
+  },
+  {
+    file: 'tokens',
+    name: 'JWKS never read again',
+    change: [
+      [
+        'const stale = now() - loadedAt >= maxAgeMs;',
+        'const stale = loadedAt === Number.NEGATIVE_INFINITY;',
+      ],
+    ],
+    tests: 'jwksCache',
+  },
+  {
+    file: 'tokens',
+    name: 'JWKS read for every unknown key',
+    change: [['!keys.has(kid) && now() - loadedAt >= minRefetchMs', '!keys.has(kid)']],
+    tests: 'jwksCache',
+  },
+  {
+    file: 'tokens',
+    name: 'a failed read empties the keys',
+    change: [
+      [
+        '  const reload = async () => {\n    loadedAt = now();',
+        '  const reload = async () => {\n    keys = new Map();\n    loadedAt = now();',
+      ],
+    ],
+    tests: 'jwksCache',
+  },
+  {
+    file: 'tokens',
+    name: 'passport for every owner',
+    change: [['          aud: audience,', "          aud: 'bq:identity',"]],
+    tests: 'passports',
+  },
+  {
+    file: 'tokens',
+    name: 'passport lives an hour',
+    change: [['exp: iat + PASSPORT_SECONDS,', 'exp: iat + 3600,']],
+    tests: 'passports',
+  },
+  {
+    file: 'tokens',
+    name: 'an old passport passes',
+    change: [['        leewaySeconds: 5,', '        leewaySeconds: 600,']],
+    tests: 'passports',
+  },
+  {
+    file: 'tokens',
+    name: 'unreadable keys taken for a bad passport',
+    change: [
+      [
+        "      throw new AppError('SERVICE_UNAVAILABLE', 'Sign-in is not available right now.', {",
+        "      throw new AppError('UNAUTHENTICATED', 'Sign-in is not available right now.', {",
+      ],
+    ],
+    tests: '503',
+  },
 ];
 
 export default mutations;

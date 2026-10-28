@@ -12,6 +12,7 @@ import {
   createLogger,
   flushMonitoring,
   initMonitoring,
+  LOOPBACK_HOST,
   reportError,
   type RunningServer,
   startServer,
@@ -32,10 +33,10 @@ async function fakeSentry() {
       res.writeHead(200, { 'content-type': 'application/json' }).end('{}');
     });
   });
-  await new Promise<void>((resolve) => server.listen(0, '127.0.0.1', resolve));
+  await new Promise<void>((resolve) => server.listen(0, LOOPBACK_HOST, resolve));
   const { port } = server.address() as AddressInfo;
   return {
-    dsn: `http://public@127.0.0.1:${String(port)}/1`,
+    dsn: `http://public@${LOOPBACK_HOST}:${String(port)}/1`,
     envelopes,
     close: () =>
       new Promise<void>((resolve) => {
@@ -65,7 +66,7 @@ beforeAll(async () => {
       });
     },
   });
-  running = await startServer(app, { port: 0, host: '127.0.0.1', logger, handleSignals: false });
+  running = await startServer(app, { port: 0, host: LOOPBACK_HOST, logger, handleSignals: false });
 });
 afterAll(async () => {
   await running.stop();
