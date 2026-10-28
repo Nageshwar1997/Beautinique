@@ -1,10 +1,21 @@
-import { createApp, type Logger, type ReadyCheck } from '@beautinique/backend-server-kit';
+import {
+  createApp,
+  type Logger,
+  type PassportSigner,
+  type ReadyCheck,
+} from '@beautinique/backend-server-kit';
 import type { RateLimiter, RateLimitRule } from '@beautinique/backend-server-ratelimit';
-import { type Deployable, DEPLOYABLES, type RateLimitClass } from '@beautinique/shared-contracts';
+import {
+  type Deployable,
+  DEPLOYABLES,
+  PASSPORT_JWKS_PATH,
+  type RateLimitClass,
+} from '@beautinique/shared-contracts';
 import type { Express } from 'express';
 
 import type { AppRegistry } from './apps.ts';
 import { API_PREFIX, type GatewayRoute, proxy } from './proxy.ts';
+import type { SessionGate } from './sessions.ts';
 import { statusRoute } from './status.ts';
 
 export interface GatewayAppOptions {
@@ -22,6 +33,10 @@ export interface GatewayAppOptions {
   rateLimits: Readonly<Record<RateLimitClass, RateLimitRule>>;
   /** the gateway's own dependency (Redis) for /ready and /status */
   redisReady: ReadyCheck;
+  /** who signed in: the apps' access cookies, checked with identity's JWKS and Redis */
+  sessions: SessionGate;
+  /** signs the owners' passports; its public key is at PASSPORT_JWKS_PATH */
+  passport: PassportSigner;
 }
 
 /** Does the deployable's /health answer within 2 seconds? */
@@ -52,6 +67,8 @@ export function buildApp({
   limiter,
   rateLimits,
   redisReady,
+  sessions,
+  passport,
 }: GatewayAppOptions): Express {
   const running = DEPLOYABLES.flatMap((name) => {
     const origin = upstreams[name];
@@ -66,6 +83,11 @@ export function buildApp({
     },
     routes: (app) => {
       app.get('/status', statusRoute({ own: { redis: redisReady }, upstreams }));
+      // the deployables check passports with this public key (not an /api route: a key is no secret)
+      app.get(PASSPORT_JWKS_PATH, (_req, res) => {
+        res.setHeader('Cache-Control', 'no-store');
+        res.json({ keys: passport.jwks });
+      });
       // The apps' wake-up screen calls this straight, not through their Vercel route: a request on
       // that route does not wake a sleeping free Render service, one sent here does (2026-10-26,
       // ARCHITECTURE §11.1). A browser cannot send the origin secret, so it stays outside that check
@@ -88,6 +110,8 @@ export function buildApp({
           limiter,
           rateLimits,
           logger,
+          sessions,
+          passport,
         }),
       );
     },

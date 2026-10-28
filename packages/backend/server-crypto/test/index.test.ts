@@ -33,6 +33,14 @@ describe('public API', () => {
       'sealPii',
       'maskTail',
       'CryptoError',
+      'newTotpSecret',
+      'totpCode',
+      'totpStep',
+      'verifyTotp',
+      'totpUri',
+      'hotp',
+      'encodeBase32',
+      'decodeBase32',
     ]) {
       expect(api, name).toHaveProperty(name);
     }

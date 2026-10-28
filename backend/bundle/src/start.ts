@@ -26,7 +26,10 @@ try {
   process.once('SIGINT', stop);
 } catch (error) {
   logger.fatal({ err: error }, 'bundle failed to start');
-  process.exitCode = 1;
   reportError(error);
   await flushMonitoring();
+  // exit at once: Sentry's open connections (or a half-started deployable) would keep the process
+  // alive without a port, and Render then waits 15 minutes for a port before it calls the deploy
+  // failed (seen live on 2026-10-27, a start without its settings)
+  process.exit(1);
 }

@@ -1,5 +1,15 @@
-import { loadCryptoKeys, loadSealingKeys } from '@beautinique/backend-server-crypto';
-import type { Logger, ReadyCheck } from '@beautinique/backend-server-kit';
+import {
+  loadCryptoKeys,
+  loadSealingKeys,
+  type PublicJwk,
+} from '@beautinique/backend-server-crypto';
+import {
+  jwksCache,
+  jwksFromUrl,
+  type Logger,
+  passportVerifier,
+  type ReadyCheck,
+} from '@beautinique/backend-server-kit';
 import { connectMongo, type Mongo } from '@beautinique/backend-server-mongo';
 import {
   connectRedis,
@@ -10,18 +20,26 @@ import {
   startWipeWatchdog,
   type WipeWatchdog,
 } from '@beautinique/backend-server-queue';
-import { otpRequested } from '@beautinique/shared-contracts';
+import {
+  otpRequested,
+  passportAudience,
+  sessionReuseDetected,
+} from '@beautinique/shared-contracts';
 
 import type { Config } from './config.ts';
 import type { OtpDeps } from './otp.ts';
+import { hibpBreachCheck } from './password.ts';
 import { runReleaseSteps } from './release.ts';
+import { sessions } from './sessions.ts';
+import { type SigningKeys, signingKeys } from './signing-keys.ts';
 
 /**
- * Who gets identity's events (the relay's list): notify emails the sign-in code (its subscriber
- * `notify.otpEmail`, backend/notify).
+ * Who gets identity's events (the relay's list): notify emails the code, and tells a person when
+ * a copied refresh token ended their session (backend/notify).
  */
 export const SUBSCRIBERS: Readonly<Record<string, readonly string[]>> = {
   [otpRequested.type]: ['notify.otpEmail'],
+  [sessionReuseDetected.type]: ['notify.securityEmail'],
 };
 
 export interface RuntimeOptions {
@@ -34,6 +52,8 @@ export interface RuntimeOptions {
   pollMs?: number;
   /** How often the wipe watchdog looks (default 30 s). */
   watchdogMs?: number;
+  /** The gateway's passport keys, in memory (backend/bundle); otherwise read from the config URL */
+  passportJwks?: readonly PublicJwk[];
 }
 
 /** identity's connections and background work: MongoDB, Redis, the outbox relay, the wipe watchdog. */
@@ -42,8 +62,10 @@ export interface Runtime {
   redis: RedisConnection;
   relay: Relay;
   watchdog: WipeWatchdog;
-  /** What the sign-in routes need */
+  /** What the sign-up and sign-in routes need */
   otp: OtpDeps;
+  /** The token keys: the JWKS the gateway reads */
+  signing: SigningKeys;
   /** The checks for GET /ready. */
   ready: Readonly<Record<string, ReadyCheck>>;
   /** Stops the relay and watchdog, then closes Redis and MongoDB. Safe to call twice. */
@@ -58,7 +80,7 @@ export interface Runtime {
  * ones before it are closed again and the error goes on.
  */
 export async function startRuntime(config: Config, options: RuntimeOptions): Promise<Runtime> {
-  const { logger, queuePrefix: prefix, epochKey, pollMs, watchdogMs } = options;
+  const { logger, queuePrefix: prefix, epochKey, pollMs, watchdogMs, passportJwks } = options;
   const keys = loadCryptoKeys({ fieldKeys: config.fieldKeys, blindIndexKey: config.blindIndexKey });
   const otpKeys = loadSealingKeys(config.otpEventKeys, 'IDENTITY__OTP_EVENT_KEYS');
   const closers: (() => Promise<void>)[] = [];
@@ -106,11 +128,13 @@ export async function startRuntime(config: Config, options: RuntimeOptions): Pro
     });
     closers.push(() => watchdog.stop());
 
+    const signing = signingKeys({ mongo, keys });
     return {
       mongo,
       redis,
       relay,
       watchdog,
+      signing,
       otp: {
         mongo,
         redis: redis.client,
@@ -119,6 +143,16 @@ export async function startRuntime(config: Config, options: RuntimeOptions): Pro
         logger,
         emailLimitPerHour: config.otpEmailLimitPerHour,
         legalVersion: config.legalVersion,
+        breached: hibpBreachCheck({ url: config.hibpUrl, logger }),
+        sessions: sessions({ mongo, redis: redis.client, keys, signing, logger }),
+        passport: passportVerifier({
+          keys: jwksCache({
+            load: passportJwks
+              ? () => Promise.resolve({ keys: passportJwks })
+              : jwksFromUrl(config.passportJwksUrl),
+          }),
+          audience: passportAudience('identity'),
+        }),
       },
       ready: { mongo: mongo.ready, redis: redis.ready, outbox: relay.ready },
       stop,
