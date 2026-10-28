@@ -144,6 +144,129 @@ const mutations: Mutation[] = [
     name: 'mask before normalising',
     change: [['masked: maskTail(normalized, visible),', 'masked: maskTail(value, visible),']],
   },
+  // authenticator codes
+  {
+    file: 'totp',
+    name: 'no dynamic truncation offset',
+    change: [['const offset = (mac.at(-1) ?? 0) & 15;', 'const offset = 0;']],
+  },
+  {
+    file: 'totp',
+    name: 'sign bit kept',
+    change: [['& 0x7f_ff_ff_ff;', '& 0xff_ff_ff_ff;']],
+  },
+  {
+    file: 'totp',
+    name: 'counter in 32 bits',
+    change: [
+      [
+        'message.writeBigUInt64BE(BigInt(counter));',
+        'message.writeUInt32BE(counter % 2 ** 32, 4);',
+      ],
+    ],
+  },
+  {
+    file: 'totp',
+    name: 'algorithm ignored',
+    change: [
+      ['createHmac(algorithm, secretBytes(secret))', "createHmac('sha1', secretBytes(secret))"],
+    ],
+  },
+  {
+    file: 'totp',
+    name: 'window only forward',
+    change: [['for (let step = current - window;', 'for (let step = current;']],
+  },
+  {
+    file: 'totp',
+    name: 'window one wider',
+    change: [['step <= current + window;', 'step <= current + window + 1;']],
+  },
+  {
+    file: 'totp',
+    name: 'a longer code fits',
+    change: [['if (fits && lengthFits) found = step;', 'if (fits) found = step;']],
+  },
+  {
+    file: 'totp',
+    name: 'any digits',
+    change: [['digits < 6 || digits > 10', 'digits < 1 || digits > 10']],
+  },
+  {
+    file: 'totp',
+    name: 'base32 skips a bad character',
+    change: [
+      [
+        "if (index === -1) throw new CryptoError('Not a base32 value');",
+        'if (index === -1) continue;',
+      ],
+    ],
+  },
+  {
+    file: 'totp',
+    name: 'short secret',
+    change: [['const SECRET_BYTES = 20;', 'const SECRET_BYTES = 10;']],
+  },
+  {
+    file: 'totp',
+    name: 'uri without the issuer parameter',
+    change: [['    issuer,\n    algorithm', '    algorithm']],
+  },
+  // ES256 tokens
+  {
+    file: 'jwt',
+    name: 'any algorithm accepted',
+    change: [["  if (header.alg !== 'ES256') throw new JwtError('algorithm');\n", '']],
+  },
+  {
+    file: 'jwt',
+    name: 'signature not checked',
+    change: [["  if (!signed) throw new JwtError('signature');\n", '']],
+  },
+  {
+    file: 'jwt',
+    name: 'expiry not checked',
+    change: [['seconds > claims.exp + leewaySeconds', 'false']],
+  },
+  {
+    file: 'jwt',
+    name: 'no expiry leeway',
+    change: [['seconds > claims.exp + leewaySeconds', 'seconds > claims.exp']],
+  },
+  {
+    file: 'jwt',
+    name: 'future tokens accepted',
+    change: [['claims.iat > seconds + leewaySeconds', 'false']],
+  },
+  {
+    file: 'jwt',
+    name: 'audience not checked',
+    change: [["  if (claims.aud !== audience) throw new JwtError('audience');\n", '']],
+  },
+  {
+    file: 'jwt',
+    name: 'issuer not checked',
+    change: [["  if (claims.iss !== issuer) throw new JwtError('issuer');\n", '']],
+  },
+  {
+    file: 'jwt',
+    name: 'a short signature reaches verify',
+    change: [["  if (signature.length !== 64) throw new JwtError('signature');\n", '']],
+    survives:
+      'equivalent: Node refuses a P-1363 signature of the wrong length, the same signature error',
+  },
+  {
+    file: 'jwt',
+    name: 'DER signatures',
+    change: [
+      ["dsaEncoding: 'ieee-p1363',\n  });\n  return", "dsaEncoding: 'der',\n  });\n  return"],
+    ],
+  },
+  {
+    file: 'jwt',
+    name: 'any key type read from a JWKS',
+    change: [["    key?.kty !== 'EC' ||\n", '']],
+  },
 ];
 
 export default mutations;

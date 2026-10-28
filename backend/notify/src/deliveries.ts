@@ -7,15 +7,18 @@ import {
   type OTP_PURPOSES,
   otpRequested,
   otpSealContext,
+  sessionReuseDetected,
 } from '@beautinique/shared-contracts';
 
 import { type EmailSender, EmailSendError } from './email/port.ts';
-import { otpEmail } from './email/templates.ts';
+import { otpEmail, sessionReuseEmail } from './email/templates.ts';
 
 export const DELIVERIES = 'notify_deliveries';
 export const EMAIL_DAYS = 'notify_email_days';
 /** The subscriber identity's relay sends identity.otp.requested to. */
 export const OTP_EMAIL = 'notify.otpEmail';
+/** The subscriber identity's relay sends identity.session.reuseDetected to. */
+export const SECURITY_EMAIL = 'notify.securityEmail';
 /** The task that sends what is due; it runs every minute and at once after each new email. */
 export const SEND_TASK = 'email.sendDue';
 
@@ -47,7 +50,7 @@ export interface Delivery {
   lane: Lane;
   /** LANES[lane]: the order a run sends in */
   priority: number;
-  template: 'otp';
+  template: 'otp' | 'session-reuse';
   to: string;
   /** The sign-in code, still sealed; removed once the email went, failed or ran out. */
   otp?: {
@@ -57,6 +60,8 @@ export interface Delivery {
     purpose: (typeof OTP_PURPOSES)[number];
     minutes: number;
   };
+  /** A session ended because its refresh token was copied (no secret in it) */
+  security?: { app: AppId; device: string; detectedAt: string };
   status: Status;
   attempts: number;
   /** Not sent before this */
@@ -160,6 +165,52 @@ export function otpSubscription({
   });
 }
 
+/**
+ * identity.session.reuseDetected → a security email in the transactional lane (after codes,
+ * before everything else; ARCHITECTURE §7.1), then a send run at once.
+ */
+export function securitySubscription({
+  mongo,
+  trigger,
+  logger,
+}: {
+  mongo: Mongo;
+  trigger: TaskTrigger;
+  logger: Logger;
+}): Subscription {
+  const deliveries = deliveriesOf(mongo);
+  return subscribe(SECURITY_EMAIL, sessionReuseDetected, async (event, session) => {
+    const { email, app, device, detectedAt } = event.data;
+    const now = new Date();
+    await deliveries.insertOne(
+      {
+        _id: event.eventId,
+        channel: 'email',
+        lane: 'transactional',
+        priority: LANES.transactional,
+        template: 'session-reuse',
+        to: email,
+        security: { app, device, detectedAt },
+        status: 'queued',
+        attempts: 0,
+        dueAt: now,
+        expiresAt: null,
+        createdAt: now,
+      },
+      { session },
+    );
+    try {
+      await trigger.runSoon(SEND_TASK);
+    } catch (error) {
+      // the every-minute run sends it anyway
+      logger.warn(
+        { err: describe(error), deliveryId: event.eventId },
+        'email send not started at once',
+      );
+    }
+  });
+}
+
 export interface SendDueDeps {
   mongo: Mongo;
   sender: EmailSender;
@@ -232,6 +283,11 @@ export async function sendDue({
     );
 
   const render = (delivery: Delivery) => {
+    if (delivery.template === 'session-reuse') {
+      const { security } = delivery;
+      if (!security) throw new EmailSendError('SECURITY_DETAILS_MISSING', { retry: false });
+      return sessionReuseEmail({ to: delivery.to, ...security });
+    }
     const { otp } = delivery;
     if (!otp?.sealedCode) throw new EmailSendError('OTP_CODE_MISSING', { retry: false });
     const code = decryptField(otpKeys, otp.sealedCode, otpSealContext(otp.challengeId));

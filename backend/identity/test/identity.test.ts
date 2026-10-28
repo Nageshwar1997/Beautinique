@@ -1,7 +1,7 @@
 import { randomUUID } from 'node:crypto';
 
 import { generateKey } from '@beautinique/backend-server-crypto';
-import { createLogger } from '@beautinique/backend-server-kit';
+import { createLogger, LOOPBACK_HOST } from '@beautinique/backend-server-kit';
 import { connectMongo } from '@beautinique/backend-server-mongo';
 import { RELEASE_STATE } from '@beautinique/backend-server-release';
 import { afterAll, describe, expect, it } from 'vitest';
@@ -39,7 +39,7 @@ describe('identity', () => {
   it('answers /health and /ready, and turns unknown paths into the contracts error body', async () => {
     const server = await start(readConfig({ env: testEnv() }), {
       port: 0,
-      host: '127.0.0.1',
+      host: LOOPBACK_HOST,
       handleSignals: false,
     });
     try {
@@ -74,6 +74,8 @@ describe('identity', () => {
       otpEventKeys: OTP_EVENT_KEYS,
       otpEmailLimitPerHour: 5,
       legalVersion: 'dummy-1',
+      hibpUrl: 'https://api.pwnedpasswords.com',
+      passportJwksUrl: 'http://localhost:8080/.well-known/passport-jwks.json',
     });
     expect(readConfig({ env: { ...env, IDENTITY__PORT: '9001' } }).port).toBe(9001);
     expect(() => readConfig({ env: { ...env, IDENTITY__PORT: 'abc' } })).toThrow('IDENTITY__PORT');
@@ -89,12 +91,18 @@ describe('identity', () => {
     expect(() => readConfig({ env: { ...env, IDENTITY__REDIS_URL: 'localhost:6379' } })).toThrow(
       /IDENTITY__REDIS_URL: Use a Redis URL$/,
     );
+    expect(readConfig({ env: { ...env, IDENTITY__HIBP_URL: 'http://127.0.0.1:9' } }).hibpUrl).toBe(
+      'http://127.0.0.1:9',
+    );
+    expect(() =>
+      readConfig({ env: { ...env, IDENTITY__HIBP_URL: 'https://api.pwnedpasswords.com/range' } }),
+    ).toThrow('IDENTITY__HIBP_URL: Use a base URL');
   });
 
   it('runs its release steps in its own database before it listens, and only once per release', async () => {
     const server = await start(readConfig({ env: testEnv() }), {
       port: 0,
-      host: '127.0.0.1',
+      host: LOOPBACK_HOST,
       handleSignals: false,
     });
     try {
@@ -120,7 +128,7 @@ describe('identity', () => {
       const before = await connections();
       const config = { ...readConfig({ env: testEnv() }), redisUrl: 'redis://127.0.0.1:1' };
       await expect(
-        start(config, { port: 0, host: '127.0.0.1', handleSignals: false }),
+        start(config, { port: 0, host: LOOPBACK_HOST, handleSignals: false }),
       ).rejects.toThrow();
       const end = Date.now() + 8000;
       while ((await connections()) > before) {

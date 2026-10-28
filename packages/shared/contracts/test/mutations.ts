@@ -221,6 +221,86 @@ const mutations: Mutation[] = [
     ],
     tests: 'sign-in routes',
   },
+  {
+    file: 'catalogue/identity',
+    name: 'an internal app without the authenticator',
+    change: [["  'support',\n  'finance',", "  'finance',"]],
+    tests: 'authenticator',
+  },
+  {
+    file: 'catalogue/identity',
+    name: 'new passwords without the rules',
+    change: [
+      [
+        'body: object({ code: otpZod, password: passwordZod })',
+        'body: object({ code: otpZod, password: string() })',
+      ],
+    ],
+    tests: 'new password',
+  },
+  {
+    file: 'catalogue/identity',
+    name: 'recovery codes of any length',
+    change: [['/^[A-Z2-7]{5}-?[A-Z2-7]{5}$/', '/^[A-Z2-7-]+$/']],
+    tests: 'recovery code',
+  },
+  {
+    file: 'catalogue/identity',
+    name: 'recovery codes not upper-cased',
+    change: [['  .trim()\n  .toUpperCase()\n', '  .trim()\n']],
+    tests: 'recovery code',
+  },
+  {
+    file: 'catalogue/identity',
+    name: 'any number of recovery codes',
+    change: [['recoveryCodes: array(string()).length(10)', 'recoveryCodes: array(string())']],
+    tests: 'recovery code',
+  },
+  {
+    file: 'catalogue/identity',
+    name: 'no idle end for internal apps',
+    change: [['  idleMs: 30 * 60_000,\n', '']],
+    tests: 'sessions',
+  },
+  {
+    file: 'catalogue/identity',
+    name: 'customer sessions without the 90-day cap',
+    change: [
+      [
+        'customer: { slidingMs: 30 * DAY_MS, maxMs: 90 * DAY_MS },',
+        'customer: { slidingMs: 30 * DAY_MS, maxMs: 365 * DAY_MS },',
+      ],
+    ],
+    tests: 'sessions',
+  },
+  {
+    file: 'catalogue/identity',
+    name: 'refresh cookie on every path',
+    change: [
+      [
+        "export const REFRESH_COOKIE_PATH = '/api/v1/auth';",
+        "export const REFRESH_COOKIE_PATH = '/';",
+      ],
+    ],
+    tests: 'own host',
+  },
+  {
+    file: 'platform',
+    name: 'passport lives an hour',
+    change: [['export const PASSPORT_SECONDS = 60;', 'export const PASSPORT_SECONDS = 3600;']],
+    tests: 'passport',
+  },
+  {
+    file: 'catalogue/identity',
+    name: 'who signed in, answered to anyone',
+    change: [
+      [
+        "  path: '/iam/me',\n  summary: 'Who is signed in, and this session',\n  apps: APPS,\n  access: { type: 'signed-in' },",
+        "  path: '/iam/me',\n  summary: 'Who is signed in, and this session',\n  apps: APPS,\n  access: { type: 'public' },",
+      ],
+    ],
+    tests: 'need a session',
+  },
 ];
 
 export default mutations;

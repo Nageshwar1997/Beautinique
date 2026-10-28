@@ -12,5 +12,16 @@ export {
 } from './monitoring';
 export { accessLog, requestId, requestIdOf } from './request';
 export { mountRoute, type MountRouteOptions, type RouteContext, type RouteHandler } from './route';
-export { type RunningServer, startServer, type StartServerOptions } from './server';
+export { LOOPBACK_HOST, type RunningServer, startServer, type StartServerOptions } from './server';
+export {
+  cookieOf,
+  type JwksCache,
+  jwksCache,
+  jwksFromUrl,
+  type Passport,
+  type PassportSigner,
+  passportSigner,
+  passportVerifier,
+  tokenKeyId,
+} from './tokens';
 export type { Logger } from 'pino';

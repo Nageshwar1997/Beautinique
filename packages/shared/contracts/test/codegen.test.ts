@@ -46,9 +46,21 @@ describe('generateFiles', () => {
       '/platform/pings',
       '/platform/pings/{pingId}',
       '/platform/wake',
-      '/auth/otp',
+      '/auth/sign-up/code',
+      '/auth/password/code',
       '/auth/otp/{challengeId}/resend',
       '/auth/otp/{challengeId}/verify',
+      '/auth/login',
+      '/auth/login/{loginId}/totp',
+      '/auth/login/{loginId}/recovery',
+      '/auth/login/{loginId}/totp/enroll',
+      '/auth/login/{loginId}/totp/confirm',
+      '/auth/refresh',
+      '/auth/logout',
+      '/iam/me',
+      '/auth/sessions',
+      '/auth/sessions/{sessionId}',
+      '/auth/sessions/end-others',
     ]);
     const manifest = parsed('gateway-manifest.json') as {
       version: string;
@@ -59,9 +71,21 @@ describe('generateFiles', () => {
       'platform.ping.record',
       'platform.ping.get',
       'platform.server.wake',
-      'auth.otp.request',
+      'auth.signUp.code',
+      'auth.password.code',
       'auth.otp.resend',
       'auth.otp.verify',
+      'auth.login.password',
+      'auth.login.totp',
+      'auth.login.recovery',
+      'auth.login.totpEnroll',
+      'auth.login.totpConfirm',
+      'auth.session.refresh',
+      'auth.session.logout',
+      'iam.me.get',
+      'auth.sessions.list',
+      'auth.sessions.end',
+      'auth.sessions.endOthers',
     ]);
   });
 
@@ -73,9 +97,10 @@ describe('generateFiles', () => {
     ).events;
     expect(list.map((e) => [e.type, e.version])).toEqual([
       ['identity.otp.requested', 1],
+      ['identity.session.reuseDetected', 1],
       ['platform.ping.recorded', 1],
     ]);
-    expect(list[1]?.schema.required).toEqual(expect.arrayContaining(['eventId', 'data', 'scope']));
+    expect(list[2]?.schema.required).toEqual(expect.arrayContaining(['eventId', 'data', 'scope']));
   });
 
   it('lists permissions sorted by key', () => {

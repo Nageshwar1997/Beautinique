@@ -1,24 +1,52 @@
 import { describe, expect, it } from 'vitest';
 
 import {
+  ACCESS_TOKEN_SECONDS,
+  accessCookieName,
   APPS,
+  AUTH_PROVIDERS,
+  confirmTotpEnroll,
   consentProblems,
+  endOtherSessions,
+  endSession,
   events,
+  getMe,
   getPing,
+  HEADERS,
   IDENTITY_ERROR_CODES,
+  IDENTITY_JWKS_PATH,
   isPermissionKey,
-  OTP_APPS,
+  listSessions,
+  loginRecovery,
+  loginTotp,
+  logout,
   OTP_PURPOSES,
   otpRequested,
   otpSealContext,
+  PASSPORT_ISSUER,
+  PASSPORT_JWKS_PATH,
+  PASSPORT_SECONDS,
+  passportAudience,
+  passwordLogin,
   permissions,
   pingRead,
   pingRecorded,
   recordPing,
-  requestOtp,
+  recoveryCodeZod,
+  REFRESH_COOKIE_PATH,
+  refreshCookieName,
+  refreshSession,
+  requestPasswordCode,
+  requestSignUpCode,
   resendOtp,
   routes,
+  SESSION_POLICIES,
+  sessionReuseDetected,
   SIGN_UP_APPS,
+  startTotpEnroll,
+  TOKEN_ISSUER,
+  tokenAudience,
+  TOTP_REQUIRED_APPS,
   verifyOtp,
   wake,
 } from '../src';
@@ -32,9 +60,21 @@ describe('platform catalogue (Milestone 1 sample)', () => {
       'platform.ping.record',
       'platform.ping.get',
       'platform.server.wake',
-      'auth.otp.request',
+      'auth.signUp.code',
+      'auth.password.code',
       'auth.otp.resend',
       'auth.otp.verify',
+      'auth.login.password',
+      'auth.login.totp',
+      'auth.login.recovery',
+      'auth.login.totpEnroll',
+      'auth.login.totpConfirm',
+      'auth.session.refresh',
+      'auth.session.logout',
+      'iam.me.get',
+      'auth.sessions.list',
+      'auth.sessions.end',
+      'auth.sessions.endOthers',
     ]);
     expect(events.latest('platform.ping.recorded')).toBe(pingRecorded);
     expect(permissions.get(pingRead.key)).toBe(pingRead);
@@ -107,7 +147,7 @@ describe('identity catalogue', () => {
     expect(otpRequested.producer).toBe('identity');
     const parsed = otpRequested.data.parse(otp);
     expect(parsed.email).toBe('riya@beautinique.example');
-    expect(OTP_PURPOSES).toEqual(['sign-in', 'sign-up']);
+    expect(OTP_PURPOSES).toEqual(['sign-in', 'sign-up', 'password']);
     expect(otpSealContext(challengeId)).toBe(`identity.otp:${challengeId}`);
   });
 
@@ -129,33 +169,86 @@ describe('identity catalogue', () => {
 });
 
 describe('sign-in routes', () => {
-  it('are public identity routes for the email-code apps, under the otp and auth limits', () => {
-    for (const route of [requestOtp, resendOtp, verifyOtp]) {
-      expect(route).toMatchObject({
-        owner: 'identity',
-        access: { type: 'public' },
-        apps: OTP_APPS,
-      });
+  const all = [
+    requestSignUpCode,
+    requestPasswordCode,
+    resendOtp,
+    verifyOtp,
+    passwordLogin,
+    loginTotp,
+    loginRecovery,
+    startTotpEnroll,
+    confirmTotpEnroll,
+  ];
+
+  it('are public identity routes; sign-up only in the sign-up apps, the rest in every app', () => {
+    for (const route of all) {
+      expect(route, route.id).toMatchObject({ owner: 'identity', access: { type: 'public' } });
       expect(route.idempotency).toBe(false);
+      expect(route.apps).toEqual(route === requestSignUpCode ? SIGN_UP_APPS : APPS);
     }
-    expect([requestOtp.rateLimit, resendOtp.rateLimit, verifyOtp.rateLimit]).toEqual([
+    expect(all.map((route) => route.rateLimit)).toEqual([
+      'otp',
       'otp',
       'otp',
       'auth',
+      'auth',
+      'auth',
+      'auth',
+      'auth',
+      'auth',
     ]);
-    expect(OTP_APPS).not.toContain('admin');
     expect(SIGN_UP_APPS).not.toContain('delivery');
-    expect(IDENTITY_ERROR_CODES).toMatchObject({ OTP_INVALID: 400, OTP_EMAIL_LIMIT: 429 });
+    expect(SIGN_UP_APPS).not.toContain('admin');
+    expect(IDENTITY_ERROR_CODES).toMatchObject({
+      OTP_INVALID: 400,
+      OTP_EMAIL_LIMIT: 429,
+      INVALID_CREDENTIALS: 401,
+      LOGIN_EXPIRED: 400,
+    });
   });
 
-  it('take a normalised email and a six-digit code', () => {
-    expect(requestOtp.input.body.parse({ email: ' Riya@Beautinique.Example ' }).email).toBe(
+  it('ask the authenticator at every sign-in of the 7 internal apps', () => {
+    expect(TOTP_REQUIRED_APPS.toSorted()).toEqual(
+      APPS.filter((app) => !['customer', 'seller', 'creator', 'delivery'].includes(app)).toSorted(),
+    );
+  });
+
+  it('take a normalised email, a six-digit code and a new password of 12 to 128 characters', () => {
+    expect(requestSignUpCode.input.body.parse({ email: ' Riya@Beautinique.Example ' }).email).toBe(
       'riya@beautinique.example',
     );
-    expect(verifyOtp.input.body.safeParse({ code: '48291' }).success).toBe(false);
-    expect(verifyOtp.input.body.safeParse({ code: '482913' }).success).toBe(true);
+    const password = 'a long enough one';
+    expect(verifyOtp.input.body.safeParse({ code: '48291', password }).success).toBe(false);
+    expect(verifyOtp.input.body.safeParse({ code: '482913', password }).success).toBe(true);
+    expect(verifyOtp.input.body.safeParse({ code: '482913', password: 'short' }).success).toBe(
+      false,
+    );
     expect(
-      requestOtp.input.body.safeParse({ email: 'a@b.example', consent: { terms: false } }).success,
+      requestSignUpCode.input.body.safeParse({ email: 'a@b.example', consent: { terms: false } })
+        .success,
+    ).toBe(false);
+    expect(requestPasswordCode.input.body.safeParse({ email: 'a@b.example' }).success).toBe(true);
+  });
+
+  it('sign in with any password the person gives (the rules are for new ones), up to 128', () => {
+    const body = passwordLogin.input.body;
+    expect(body.safeParse({ email: 'a@b.example', password: 'old' }).success).toBe(true);
+    expect(body.safeParse({ email: 'a@b.example', password: '' }).success).toBe(false);
+    expect(body.safeParse({ email: 'a@b.example', password: 'x'.repeat(129) }).success).toBe(false);
+  });
+
+  it('take a recovery code in any case, with or without the hyphen', () => {
+    expect(recoveryCodeZod.parse(' abcde-fgh23 ')).toBe('ABCDE-FGH23');
+    expect(recoveryCodeZod.parse('ABCDEFGH23')).toBe('ABCDEFGH23');
+    for (const code of ['ABCDE-FGH1', 'ABCD-EFGH23', 'ABCDE--FGH23', '']) {
+      expect(recoveryCodeZod.safeParse(code).success, code).toBe(false);
+    }
+    expect(
+      confirmTotpEnroll.output.safeParse({
+        user: { userId: '0190a1b2-c3d4-7e5f-8a9b-0c1d2e3f4a5b', email: 'a@b.example' },
+        recoveryCodes: ['ABCDE-FGH23'],
+      }).success,
     ).toBe(false);
   });
 
@@ -171,5 +264,64 @@ describe('sign-in routes', () => {
     expect(consentProblems('seller', { terms: true })).toEqual([]);
     expect(consentProblems('creator', undefined)).toHaveLength(1);
     expect(consentProblems('delivery', undefined)).toEqual([]);
+    expect(consentProblems('admin', undefined)).toEqual([]);
+  });
+});
+
+describe('sessions', () => {
+  it('last 30 days (up to 90) in customer and creator, 7 seller, 14 delivery, 12 hours internal', () => {
+    const day = 24 * 60 * 60_000;
+    expect(SESSION_POLICIES.customer).toEqual({ slidingMs: 30 * day, maxMs: 90 * day });
+    expect(SESSION_POLICIES.creator).toEqual(SESSION_POLICIES.customer);
+    expect(SESSION_POLICIES.seller).toEqual({ slidingMs: 7 * day, maxMs: 7 * day });
+    expect(SESSION_POLICIES.delivery).toEqual({ slidingMs: 14 * day, maxMs: 14 * day });
+    for (const app of TOTP_REQUIRED_APPS) {
+      expect(SESSION_POLICIES[app], app).toEqual({
+        slidingMs: 12 * 60 * 60_000,
+        maxMs: 12 * 60 * 60_000,
+        idleMs: 30 * 60_000,
+      });
+    }
+    expect(Object.keys(SESSION_POLICIES).toSorted()).toEqual([...APPS].toSorted());
+    expect(ACCESS_TOKEN_SECONDS).toBe(600);
+  });
+
+  it('keep each app’s cookies on its own host; the refresh cookie only for /api/v1/auth', () => {
+    expect(accessCookieName('seller')).toBe('__Host-bq_seller_at');
+    expect(refreshCookieName('seller')).toBe('__Secure-bq_seller_rt');
+    expect(REFRESH_COOKIE_PATH).toBe('/api/v1/auth');
+    expect(tokenAudience('admin')).toBe('bq:admin');
+    expect(TOKEN_ISSUER).toBe('bq:identity');
+    for (const route of [refreshSession, logout]) {
+      expect(route).toMatchObject({ access: { type: 'public' }, rateLimit: 'auth', apps: APPS });
+      expect(`/api/v1${route.path}`.startsWith(REFRESH_COOKIE_PATH)).toBe(true);
+    }
+    expect(events.latest('identity.session.reuseDetected')).toBe(sessionReuseDetected);
+  });
+});
+
+describe('signed-in routes and the passport (T3.2 PR B)', () => {
+  it('need a session in every app, and identity answers them', () => {
+    for (const route of [getMe, listSessions, endSession, endOtherSessions]) {
+      expect(route, route.id).toMatchObject({
+        access: { type: 'signed-in' },
+        owner: 'identity',
+        apps: APPS,
+      });
+    }
+    expect([getMe.rateLimit, listSessions.rateLimit]).toEqual(['read', 'read']);
+    expect([endSession.rateLimit, endOtherSessions.rateLimit]).toEqual(['auth', 'auth']);
+    expect(AUTH_PROVIDERS).toEqual(['password', 'google', 'linkedin', 'github']);
+  });
+
+  it('give each owner its own 60-second passport from the gateway', () => {
+    expect(PASSPORT_ISSUER).toBe('bq:gateway');
+    expect(PASSPORT_SECONDS).toBe(60);
+    expect(passportAudience('identity')).toBe('bq:identity');
+    expect(HEADERS.passport).toBe('X-BQ-Passport');
+    expect([PASSPORT_JWKS_PATH, IDENTITY_JWKS_PATH]).toEqual([
+      '/.well-known/passport-jwks.json',
+      '/.well-known/jwks.json',
+    ]);
   });
 });

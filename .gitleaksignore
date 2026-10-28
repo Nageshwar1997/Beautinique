@@ -12,3 +12,8 @@ e533ace71e5d9adc7d5b04d70e6f870dffb5b78a:packages/backend/server-mongo/test/inde
 3fdfb4997cf6bbe6f2cbb0b3c0a17128a0375020:docs/HANDOFF.md:url-with-password:33
 3fdfb4997cf6bbe6f2cbb0b3c0a17128a0375020:docs/TASKS.md:url-with-password:47
 3fdfb4997cf6bbe6f2cbb0b3c0a17128a0375020:docs/HANDOFF.md:url-with-password:74
+
+# 2026-10-28: identity cookies test (T3.2 PR A) built a fake session with a literal refresh token
+# (`<uuid>.secret-part`) only to check that tokens stay out of the answer; no real token. The test
+# now makes its token-shaped values at run time.
+924617192d5f3d50e0682a5f8dc5986334567c57:backend/identity/test/cookies.test.ts:generic-api-key:14

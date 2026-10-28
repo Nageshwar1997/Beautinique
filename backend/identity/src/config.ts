@@ -35,6 +35,23 @@ export const configZod = object({
    * legal module, RULES §7.4); a new version is accepted again at the next sign-in.
    */
   legalVersion: string().trim().min(1).max(40).default('dummy-1'),
+  /**
+   * Have I Been Pwned's Pwned Passwords range API (ARCHITECTURE §7.1): new passwords are checked
+   * against known breaches. Tests point it at a stand-in; nothing to set live.
+   */
+  hibpUrl: string()
+    .regex(/^https?:\/\/[^/]+$/, 'Use a base URL like https://api.pwnedpasswords.com')
+    .default('https://api.pwnedpasswords.com'),
+  /**
+   * The gateway's passport keys (ARCHITECTURE §7.2), for split mode only: backend/bundle hands the
+   * key over in memory, so nothing to set live.
+   */
+  passportJwksUrl: string()
+    .regex(
+      /^https?:\/\/\S+$/,
+      'Use a URL like http://localhost:8080/.well-known/passport-jwks.json',
+    )
+    .default('http://localhost:8080/.well-known/passport-jwks.json'),
 });
 export type Config = output<typeof configZod>;
 

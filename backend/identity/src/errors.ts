@@ -45,3 +45,56 @@ export const otpUnavailable = (cause: unknown): AppError =>
       cause,
     },
   );
+
+/** Wrong email, wrong password, or a locked account: one answer for all three (ARCHITECTURE §7.1). */
+export const invalidCredentials = (): AppError =>
+  new AppError('INVALID_CREDENTIALS', 'The email or password is not right.', {
+    status: IDENTITY_ERROR_CODES.INVALID_CREDENTIALS,
+  });
+
+/** The new password is in a known data breach (Have I Been Pwned). */
+export const passwordBreached = (): AppError =>
+  new AppError(
+    'PASSWORD_BREACHED',
+    'This password has appeared in a data breach. Please choose another one.',
+    {
+      status: IDENTITY_ERROR_CODES.PASSWORD_BREACHED,
+      details: [{ path: ['password'], message: 'Choose a password that has not been leaked' }],
+    },
+  );
+
+/** The sign-in step is gone: expired, finished, or out of tries. */
+export const loginExpired = (): AppError =>
+  new AppError('LOGIN_EXPIRED', 'This sign-in has expired. Please sign in again.', {
+    status: IDENTITY_ERROR_CODES.LOGIN_EXPIRED,
+  });
+
+export const totpInvalid = (triesLeft: number): AppError =>
+  new AppError(
+    'TOTP_INVALID',
+    triesLeft === 1
+      ? 'That authenticator code is not right. You have 1 more try.'
+      : `That authenticator code is not right. You have ${String(triesLeft)} more tries.`,
+    { status: IDENTITY_ERROR_CODES.TOTP_INVALID },
+  );
+
+export const recoveryCodeInvalid = (triesLeft: number): AppError =>
+  new AppError(
+    'RECOVERY_CODE_INVALID',
+    triesLeft === 1
+      ? 'That recovery code is not right, or was used already. You have 1 more try.'
+      : `That recovery code is not right, or was used already. You have ${String(triesLeft)} more tries.`,
+    { status: IDENTITY_ERROR_CODES.RECOVERY_CODE_INVALID },
+  );
+
+/** Too many passwords being checked at once (one at a time on the free server, ARCHITECTURE §11.1). */
+export const passwordsBusy = (): AppError =>
+  new AppError('SERVICE_UNAVAILABLE', 'Too many sign-ins right now. Please try again in a moment.');
+
+/** Redis is away: wrong tries cannot be counted, so no sign-in goes on (ARCHITECTURE §6.6). */
+export const signInUnavailable = (cause: unknown): AppError =>
+  new AppError(
+    'SERVICE_UNAVAILABLE',
+    'Sign-in is not available right now. Please try again in a little while.',
+    { cause },
+  );

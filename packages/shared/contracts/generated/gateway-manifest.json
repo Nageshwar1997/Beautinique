@@ -73,15 +73,40 @@
       "cache": null
     },
     {
-      "id": "auth.otp.request",
+      "id": "auth.signUp.code",
       "method": "POST",
-      "path": "/auth/otp",
+      "path": "/auth/sign-up/code",
       "owner": "identity",
       "apps": [
         "customer",
         "seller",
-        "creator",
-        "delivery"
+        "creator"
+      ],
+      "access": {
+        "type": "public"
+      },
+      "rateLimit": "otp",
+      "idempotency": false,
+      "stepUp": false,
+      "cache": null
+    },
+    {
+      "id": "auth.password.code",
+      "method": "POST",
+      "path": "/auth/password/code",
+      "owner": "identity",
+      "apps": [
+        "customer",
+        "seller",
+        "admin",
+        "superadmin",
+        "master",
+        "support",
+        "finance",
+        "logistics",
+        "delivery",
+        "growth",
+        "creator"
       ],
       "access": {
         "type": "public"
@@ -99,8 +124,15 @@
       "apps": [
         "customer",
         "seller",
-        "creator",
-        "delivery"
+        "admin",
+        "superadmin",
+        "master",
+        "support",
+        "finance",
+        "logistics",
+        "delivery",
+        "growth",
+        "creator"
       ],
       "access": {
         "type": "public"
@@ -118,11 +150,304 @@
       "apps": [
         "customer",
         "seller",
-        "creator",
-        "delivery"
+        "admin",
+        "superadmin",
+        "master",
+        "support",
+        "finance",
+        "logistics",
+        "delivery",
+        "growth",
+        "creator"
       ],
       "access": {
         "type": "public"
+      },
+      "rateLimit": "auth",
+      "idempotency": false,
+      "stepUp": false,
+      "cache": null
+    },
+    {
+      "id": "auth.login.password",
+      "method": "POST",
+      "path": "/auth/login",
+      "owner": "identity",
+      "apps": [
+        "customer",
+        "seller",
+        "admin",
+        "superadmin",
+        "master",
+        "support",
+        "finance",
+        "logistics",
+        "delivery",
+        "growth",
+        "creator"
+      ],
+      "access": {
+        "type": "public"
+      },
+      "rateLimit": "auth",
+      "idempotency": false,
+      "stepUp": false,
+      "cache": null
+    },
+    {
+      "id": "auth.login.totp",
+      "method": "POST",
+      "path": "/auth/login/:loginId/totp",
+      "owner": "identity",
+      "apps": [
+        "customer",
+        "seller",
+        "admin",
+        "superadmin",
+        "master",
+        "support",
+        "finance",
+        "logistics",
+        "delivery",
+        "growth",
+        "creator"
+      ],
+      "access": {
+        "type": "public"
+      },
+      "rateLimit": "auth",
+      "idempotency": false,
+      "stepUp": false,
+      "cache": null
+    },
+    {
+      "id": "auth.login.recovery",
+      "method": "POST",
+      "path": "/auth/login/:loginId/recovery",
+      "owner": "identity",
+      "apps": [
+        "customer",
+        "seller",
+        "admin",
+        "superadmin",
+        "master",
+        "support",
+        "finance",
+        "logistics",
+        "delivery",
+        "growth",
+        "creator"
+      ],
+      "access": {
+        "type": "public"
+      },
+      "rateLimit": "auth",
+      "idempotency": false,
+      "stepUp": false,
+      "cache": null
+    },
+    {
+      "id": "auth.login.totpEnroll",
+      "method": "POST",
+      "path": "/auth/login/:loginId/totp/enroll",
+      "owner": "identity",
+      "apps": [
+        "customer",
+        "seller",
+        "admin",
+        "superadmin",
+        "master",
+        "support",
+        "finance",
+        "logistics",
+        "delivery",
+        "growth",
+        "creator"
+      ],
+      "access": {
+        "type": "public"
+      },
+      "rateLimit": "auth",
+      "idempotency": false,
+      "stepUp": false,
+      "cache": null
+    },
+    {
+      "id": "auth.login.totpConfirm",
+      "method": "POST",
+      "path": "/auth/login/:loginId/totp/confirm",
+      "owner": "identity",
+      "apps": [
+        "customer",
+        "seller",
+        "admin",
+        "superadmin",
+        "master",
+        "support",
+        "finance",
+        "logistics",
+        "delivery",
+        "growth",
+        "creator"
+      ],
+      "access": {
+        "type": "public"
+      },
+      "rateLimit": "auth",
+      "idempotency": false,
+      "stepUp": false,
+      "cache": null
+    },
+    {
+      "id": "auth.session.refresh",
+      "method": "POST",
+      "path": "/auth/refresh",
+      "owner": "identity",
+      "apps": [
+        "customer",
+        "seller",
+        "admin",
+        "superadmin",
+        "master",
+        "support",
+        "finance",
+        "logistics",
+        "delivery",
+        "growth",
+        "creator"
+      ],
+      "access": {
+        "type": "public"
+      },
+      "rateLimit": "auth",
+      "idempotency": false,
+      "stepUp": false,
+      "cache": null
+    },
+    {
+      "id": "auth.session.logout",
+      "method": "POST",
+      "path": "/auth/logout",
+      "owner": "identity",
+      "apps": [
+        "customer",
+        "seller",
+        "admin",
+        "superadmin",
+        "master",
+        "support",
+        "finance",
+        "logistics",
+        "delivery",
+        "growth",
+        "creator"
+      ],
+      "access": {
+        "type": "public"
+      },
+      "rateLimit": "auth",
+      "idempotency": false,
+      "stepUp": false,
+      "cache": null
+    },
+    {
+      "id": "iam.me.get",
+      "method": "GET",
+      "path": "/iam/me",
+      "owner": "identity",
+      "apps": [
+        "customer",
+        "seller",
+        "admin",
+        "superadmin",
+        "master",
+        "support",
+        "finance",
+        "logistics",
+        "delivery",
+        "growth",
+        "creator"
+      ],
+      "access": {
+        "type": "signed-in"
+      },
+      "rateLimit": "read",
+      "idempotency": false,
+      "stepUp": false,
+      "cache": null
+    },
+    {
+      "id": "auth.sessions.list",
+      "method": "GET",
+      "path": "/auth/sessions",
+      "owner": "identity",
+      "apps": [
+        "customer",
+        "seller",
+        "admin",
+        "superadmin",
+        "master",
+        "support",
+        "finance",
+        "logistics",
+        "delivery",
+        "growth",
+        "creator"
+      ],
+      "access": {
+        "type": "signed-in"
+      },
+      "rateLimit": "read",
+      "idempotency": false,
+      "stepUp": false,
+      "cache": null
+    },
+    {
+      "id": "auth.sessions.end",
+      "method": "DELETE",
+      "path": "/auth/sessions/:sessionId",
+      "owner": "identity",
+      "apps": [
+        "customer",
+        "seller",
+        "admin",
+        "superadmin",
+        "master",
+        "support",
+        "finance",
+        "logistics",
+        "delivery",
+        "growth",
+        "creator"
+      ],
+      "access": {
+        "type": "signed-in"
+      },
+      "rateLimit": "auth",
+      "idempotency": false,
+      "stepUp": false,
+      "cache": null
+    },
+    {
+      "id": "auth.sessions.endOthers",
+      "method": "POST",
+      "path": "/auth/sessions/end-others",
+      "owner": "identity",
+      "apps": [
+        "customer",
+        "seller",
+        "admin",
+        "superadmin",
+        "master",
+        "support",
+        "finance",
+        "logistics",
+        "delivery",
+        "growth",
+        "creator"
+      ],
+      "access": {
+        "type": "signed-in"
       },
       "rateLimit": "auth",
       "idempotency": false,

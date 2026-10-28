@@ -5,7 +5,7 @@ import { Writable } from 'node:stream';
 import { setTimeout as sleep } from 'node:timers/promises';
 
 import { encryptField, generateKey, loadSealingKeys } from '@beautinique/backend-server-crypto';
-import { createLogger } from '@beautinique/backend-server-kit';
+import { createLogger, LOOPBACK_HOST } from '@beautinique/backend-server-kit';
 import { connectMongo, type Mongo, withTransaction } from '@beautinique/backend-server-mongo';
 import {
   type Relay,
@@ -408,7 +408,7 @@ describe('notify end to end', () => {
     const { sender, sent } = fakeSender();
     const server = await start(readConfig({ env: testEnv() }), {
       port: 0,
-      host: '127.0.0.1',
+      host: LOOPBACK_HOST,
       handleSignals: false,
       runtime: { sender, queuePrefix: prefix, epochKey: `${prefix}:epoch` },
     });
@@ -469,7 +469,7 @@ describe('notify end to end', () => {
   it('puts a requested code into the laptop’s Mailpit inbox (the settings’ own sender)', async () => {
     const server = await start(readConfig({ env: testEnv() }), {
       port: 0,
-      host: '127.0.0.1',
+      host: LOOPBACK_HOST,
       handleSignals: false,
       runtime: { queuePrefix: `${prefix}m`, epochKey: `${prefix}m:epoch` },
     });

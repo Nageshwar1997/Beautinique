@@ -1,7 +1,12 @@
 import { request } from 'node:http';
 import { pipeline } from 'node:stream';
 
-import { AppError, type Logger, requestIdOf } from '@beautinique/backend-server-kit';
+import {
+  AppError,
+  type Logger,
+  type PassportSigner,
+  requestIdOf,
+} from '@beautinique/backend-server-kit';
 import {
   ipKey,
   type RateLimiter,
@@ -16,12 +21,14 @@ import {
   type gatewayManifest,
   HEADERS,
   matchPath,
+  passportAudience,
   type RateLimitClass,
 } from '@beautinique/shared-contracts';
 import type { Request, RequestHandler, Response } from 'express';
 
 import { type AppRegistry, normalizeHost, originHost } from './apps.ts';
 import { FAIL_CLOSED, rateLimitHeaders } from './rate-limits.ts';
+import type { SessionGate } from './sessions.ts';
 import { clientIp, ORIGIN_SECRET_HEADER } from './trust.ts';
 
 /** One route as the gateway sees it (contracts gatewayManifest). */
@@ -46,6 +53,7 @@ const NOT_FORWARDED = new Set([
   'host',
   ORIGIN_SECRET_HEADER,
   HEADERS.clientIp.toLowerCase(),
+  HEADERS.passport.toLowerCase(),
   'x-real-ip',
   'x-forwarded-for',
   'forwarded',
@@ -72,6 +80,10 @@ export interface ProxyOptions {
   limiter: RateLimiter;
   rateLimits: Readonly<Record<RateLimitClass, RateLimitRule>>;
   logger: Logger;
+  /** who signed in (the app's access cookie) */
+  sessions: SessionGate;
+  /** the passport the owner gets for a signed-in request */
+  passport: PassportSigner;
 }
 
 /** The route for a method and a path below API_PREFIX, with its decoded parameters. */
@@ -140,6 +152,7 @@ function forwardHeaders(
   route: GatewayRoute,
   requestId: string,
   ip: string,
+  passport: string | undefined,
 ): Record<string, string | string[]> {
   const headers: Record<string, string | string[]> = {};
   for (const [name, value] of Object.entries(req.headers)) {
@@ -149,6 +162,7 @@ function forwardHeaders(
   }
   headers[HEADERS.requestId.toLowerCase()] = requestId;
   headers[HEADERS.clientIp.toLowerCase()] = ip;
+  if (passport) headers[HEADERS.passport.toLowerCase()] = passport;
   return headers;
 }
 
@@ -165,11 +179,12 @@ function forward(
   route: GatewayRoute,
   ip: string,
   timeoutMs: number,
+  passport: string | undefined,
 ): void {
   let timedOut = false;
   const upstream = request(
     target,
-    { method: req.method, headers: forwardHeaders(req, route, requestIdOf(res), ip) },
+    { method: req.method, headers: forwardHeaders(req, route, requestIdOf(res), ip, passport) },
     (answer) => {
       const status = answer.statusCode ?? 502;
       res.status(status);
@@ -224,7 +239,8 @@ function forward(
  * 2. a known app in X-BQ-App, coming from that app's own host;
  * 3. a route of the manifest that this app may use;
  * 4. the route's rate-limit class, per client IP;
- * 5. access: until sign-in exists (T2.2) only public routes pass, the rest answer 401;
+ * 5. access: a public route passes; any other needs the app's access cookie (sessions), and its
+ *    owner gets a passport of who signed in; a permission route answers 403 until grants (T3.3);
  * 6. the Idempotency-Key the route needs.
  */
 export function proxy({
@@ -236,6 +252,8 @@ export function proxy({
   limiter,
   rateLimits,
   logger,
+  sessions,
+  passport,
 }: ProxyOptions): RequestHandler {
   // a down Redis would log on every request; once a minute is enough
   let lastLimitsWarning = 0;
@@ -291,8 +309,14 @@ export function proxy({
       }
     }
 
+    let passportToken: string | undefined;
     if (route.access.type !== 'public') {
-      throw new AppError('UNAUTHENTICATED', 'Please sign in to continue.');
+      const signedIn = await sessions.check(req, app);
+      if (route.access.type === 'permission') {
+        // grants and the permission check come with T3.3: until then no permission is held
+        throw new AppError('FORBIDDEN', 'You do not have access to this.');
+      }
+      passportToken = passport.sign({ ...signedIn, app }, passportAudience(route.owner));
     }
     if (route.idempotency && !IDEMPOTENCY_KEY.test(req.get(HEADERS.idempotencyKey) ?? '')) {
       throw new AppError(
@@ -308,6 +332,6 @@ export function proxy({
     const query = queryAt === -1 ? '' : req.originalUrl.slice(queryAt);
     const target = new URL(buildPath(route.path, params) + query, origin);
     if (caller.gone) return;
-    forward(req, res, next, target, route, ip, timeoutMs);
+    forward(req, res, next, target, route, ip, timeoutMs, passportToken);
   };
 }

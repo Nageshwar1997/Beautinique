@@ -46,6 +46,9 @@ const quiet = () => ({
   IDENTITY__FIELD_KEYS: `k1:${randomBytes(32).toString('base64')}`,
   IDENTITY__BLIND_INDEX_KEY: `b1:${randomBytes(32).toString('base64')}`,
   IDENTITY__OTP_EVENT_KEYS: OTP_EVENT_KEYS,
+  // nothing listens there: the breached-password check is away, so it lets passwords through
+  // (fail-open), and the tests never reach the internet
+  IDENTITY__HIBP_URL: 'http://127.0.0.1:9',
   NOTIFY__MONGO_URI: MONGO_URI,
   NOTIFY__MONGO_DB_NAME: notifyDbName,
   NOTIFY__REDIS_URL: REDIS_DB,
@@ -123,7 +126,7 @@ describe('bundle', () => {
     }
   });
 
-  it('signs a customer up with an emailed code: app, gateway, identity, notify, Mailpit (M3)', async () => {
+  it('signs a customer up with an emailed code and a password, then in: app, gateway, identity, notify, Mailpit (M3)', async () => {
     const bundle = await startBundle({ port: 0, env: quiet() });
     const email = `bundle-${randomUUID().slice(0, 8)}@beautinique.example`;
     const search = `http://localhost:8025/api/v1/search?query=${encodeURIComponent(`to:${email}`)}`;
@@ -134,7 +137,7 @@ describe('bundle', () => {
         'x-origin-secret': ORIGIN_SECRET,
         'content-type': 'application/json',
       };
-      const asked = await fetch(`${bundle.url}/api/v1/auth/otp`, {
+      const asked = await fetch(`${bundle.url}/api/v1/auth/sign-up/code`, {
         method: 'POST',
         headers,
         body: JSON.stringify({ email, consent: { terms: true, adult: true } }),
@@ -159,10 +162,102 @@ describe('bundle', () => {
       const verified = await fetch(`${bundle.url}/api/v1/auth/otp/${data.challengeId}/verify`, {
         method: 'POST',
         headers,
-        body: JSON.stringify({ code }),
+        body: JSON.stringify({ code, password: 'pink lipstick on a rainy day' }),
       });
       expect(verified.status).toBe(200);
-      expect(await verified.json()).toMatchObject({ data: { email, isNewUser: true } });
+      expect(await verified.json()).toMatchObject({
+        data: { email, outcome: 'account-made', signedIn: true },
+      });
+      const signedIn = await fetch(`${bundle.url}/api/v1/auth/login`, {
+        method: 'POST',
+        headers,
+        body: JSON.stringify({ email, password: 'pink lipstick on a rainy day' }),
+      });
+      expect(signedIn.status).toBe(200);
+      expect(signedIn.headers.get('ratelimit-policy')).toBe('"auth";q=30;w=300');
+      expect(await signedIn.json()).toMatchObject({ data: { next: 'signed-in', user: { email } } });
+
+      // the session (T3.2): cookies through the gateway, a refresh, a copied refresh token
+      const refreshCookie = (answer: Response) =>
+        /__Secure-bq_customer_rt=([^;]+)/.exec(answer.headers.getSetCookie().join(', '))?.[1] ?? '';
+      const first = refreshCookie(signedIn);
+      expect(
+        signedIn.headers.getSetCookie().some((c) => c.startsWith('__Host-bq_customer_at=')),
+      ).toBe(true);
+      const refresh = (token: string) =>
+        fetch(`${bundle.url}/api/v1/auth/refresh`, {
+          method: 'POST',
+          headers: { ...headers, cookie: `__Secure-bq_customer_rt=${token}` },
+        });
+      const refreshed = await refresh(first);
+      expect(refreshed.status).toBe(200);
+      expect(refreshed.headers.get('cache-control')).toBe('private, no-store');
+      const second = refreshCookie(refreshed);
+      expect(second).not.toBe(first);
+      // the first token again, past the 10 s a parallel tab gets: someone had a copy
+      const logger = createLogger({ name: 'bundle-test', level: 'silent' });
+      const mongo = await connectMongo({
+        uri: MONGO_URI,
+        dbName: identityDbName,
+        appName: 'bundle-test',
+        logger,
+      });
+      try {
+        await mongo.db
+          .collection<{ _id: string; rotatedAt: Date }>('identity_sessions')
+          .updateOne(
+            { _id: first.split('.')[0] ?? '' },
+            { $set: { rotatedAt: new Date(Date.now() - 11_000) } },
+          );
+      } finally {
+        await mongo.close();
+      }
+      expect((await refresh(first)).status).toBe(401);
+      expect((await refresh(second)).status).toBe(401);
+      const alert = `http://localhost:8025/api/v1/search?query=${encodeURIComponent(`to:${email} subject:"signed you out"`)}`;
+      let warned: Found = { messages: [] };
+      const by = Date.now() + 10_000;
+      while (warned.messages.length === 0) {
+        if (Date.now() > by) throw new Error('no security email reached Mailpit');
+        await new Promise((resolve) => setTimeout(resolve, 100));
+        warned = (await (await fetch(alert)).json()) as Found;
+      }
+      mailIds.push(...warned.messages.map((m) => m.ID));
+      expect(warned.messages[0]?.Subject).toBe('We signed you out of Beautinique');
+
+      // a new sign-in, then logout: its token stops
+      const again = await fetch(`${bundle.url}/api/v1/auth/login`, {
+        method: 'POST',
+        headers,
+        body: JSON.stringify({ email, password: 'pink lipstick on a rainy day' }),
+      });
+      const token = refreshCookie(again);
+      // signed in through the gateway: its access cookie, a passport to identity (T3.2 PR B)
+      const access =
+        /__Host-bq_customer_at=([^;]+)/.exec(again.headers.getSetCookie().join(', '))?.[1] ?? '';
+      const signedInGet = (path: string) =>
+        fetch(`${bundle.url}/api/v1${path}`, {
+          headers: { ...headers, cookie: `__Host-bq_customer_at=${access}` },
+        });
+      const me = await signedInGet('/iam/me');
+      expect(me.status).toBe(200);
+      expect(me.headers.get('cache-control')).toBe('private, no-store');
+      expect(await me.json()).toMatchObject({
+        data: { user: { email, providers: ['password'] }, session: { app: 'customer' } },
+      });
+      const devices = (await (await signedInGet('/auth/sessions')).json()) as {
+        data: { sessions: { current: boolean }[] };
+      };
+      expect(devices.data.sessions.filter((s) => s.current)).toHaveLength(1);
+      expect((await signedInGet('/iam/me')).status).toBe(200);
+      const out = await fetch(`${bundle.url}/api/v1/auth/logout`, {
+        method: 'POST',
+        headers: { ...headers, cookie: `__Secure-bq_customer_rt=${token}` },
+      });
+      expect(await out.json()).toEqual({ data: { signedOut: true } });
+      expect((await refresh(token)).status).toBe(401);
+      // the same access cookie stops at once (Redis), not when its 10 minutes run out
+      expect((await signedInGet('/iam/me')).status).toBe(401);
     } finally {
       await bundle.stop();
       await fetch('http://localhost:8025/api/v1/messages', {

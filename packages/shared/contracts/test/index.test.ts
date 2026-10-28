@@ -107,6 +107,7 @@ describe('platform constants', () => {
       idempotencyKey: 'Idempotency-Key',
       requestId: 'X-Request-Id',
       clientIp: 'X-BQ-Client-Ip',
+      passport: 'X-BQ-Passport',
     });
   });
 });

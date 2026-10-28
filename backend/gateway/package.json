@@ -20,6 +20,7 @@
     "test": "vitest run"
   },
   "dependencies": {
+    "@beautinique/backend-server-crypto": "^1.0.0",
     "@beautinique/backend-server-kit": "^1.0.0",
     "@beautinique/backend-server-mongo": "^1.0.0",
     "@beautinique/backend-server-queue": "^1.0.0",

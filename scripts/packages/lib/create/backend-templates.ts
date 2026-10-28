@@ -301,7 +301,7 @@ export { type Config, readConfig } from './config.ts';
 export interface StartOptions {
   /** default: config.port (0 picks a free one) */
   port?: number;
-  /** default 0.0.0.0; backend/bundle keeps the internal deployables on 127.0.0.1 */
+  /** default 0.0.0.0; backend/bundle keeps the internal deployables on LOOPBACK_HOST */
   host?: string;
   /** stop on SIGTERM and SIGINT (default true; backend/bundle does it for every deployable) */
   handleSignals?: boolean;${upstreamOption}
@@ -359,7 +359,8 @@ export const router = Router();
 
 const serviceTest = (deployable: Deployable) => {
   const prefix = envPrefix(deployable);
-  return `import { describe, expect, it } from 'vitest';
+  return `import { LOOPBACK_HOST } from '@beautinique/backend-server-kit';
+import { describe, expect, it } from 'vitest';
 
 import { readConfig } from '../src/config.ts';
 import { start } from '../src/service.ts';
@@ -367,7 +368,7 @@ import { start } from '../src/service.ts';
 describe('${deployable}', () => {
   it('answers /health and turns unknown paths into the contracts error body', async () => {
     const config = readConfig({ env: { ${prefix}__LOG_LEVEL: 'silent' } });
-    const server = await start(config, { port: 0, host: '127.0.0.1', handleSignals: false });
+    const server = await start(config, { port: 0, host: LOOPBACK_HOST, handleSignals: false });
     try {
       const health = await fetch(\`\${server.url}/health\`);
       expect(await health.json()).toEqual({ status: 'ok' });
@@ -606,6 +607,7 @@ const gatewayTest = `import { request, type RequestListener } from 'node:http';
 import {
   createApp,
   createLogger,
+  LOOPBACK_HOST,
   type RunningServer,
   startServer,
 } from '@beautinique/backend-server-kit';
@@ -625,7 +627,7 @@ afterEach(async () => {
 });
 
 async function listen(app: RequestListener): Promise<RunningServer> {
-  const server = await startServer(app, { port: 0, host: '127.0.0.1', logger, handleSignals: false });
+  const server = await startServer(app, { port: 0, host: LOOPBACK_HOST, logger, handleSignals: false });
   servers.push(server);
   return server;
 }
@@ -804,7 +806,7 @@ describe('gateway', () => {
   });
 
   it('answers 503 when the owner does not run or is down, and 504 when it is too slow', async () => {
-    const down = await startServer(fakeCore(), { port: 0, host: '127.0.0.1', logger, handleSignals: false });
+    const down = await startServer(fakeCore(), { port: 0, host: LOOPBACK_HOST, logger, handleSignals: false });
     await down.stop();
     const slow = await listen(fakeCore(1000));
     const status = async (upstreams: GatewayAppOptions['upstreams'], path: string, app: string) => {
@@ -914,7 +916,7 @@ export function prepare<Config, Options extends StartOptions>(
 }
 `;
 
-const bundleTs = `import type { RunningServer } from '@beautinique/backend-server-kit';
+const bundleTs = `import { LOOPBACK_HOST, type RunningServer } from '@beautinique/backend-server-kit';
 
 import { prepareAll } from './deployables.ts';
 import type { Env } from './prepare.ts';
@@ -932,7 +934,8 @@ export interface Bundle {
 /**
  * Bundle mode (ARCHITECTURE §3, §11.1): every deployable in this one process. All configs are read
  * before anything starts, and each deployable's keys leave env. The internal deployables listen on
- * free 127.0.0.1 ports, and the gateway, on the public port, gets their URLs.
+ * free LOOPBACK_HOST ports (never reachable from outside), and the gateway, on the public port,
+ * gets their URLs.
  */
 export async function startBundle({ port, env }: { port: number; env: Env }): Promise<Bundle> {
   const { internal, gateway } = prepareAll(env);
@@ -945,7 +948,7 @@ export async function startBundle({ port, env }: { port: number; env: Env }): Pr
   let front: RunningServer;
   try {
     for (const deployable of internal) {
-      const server = await deployable.start({ port: 0, host: '127.0.0.1', handleSignals: false });
+      const server = await deployable.start({ port: 0, host: LOOPBACK_HOST, handleSignals: false });
       running.push({ name: deployable.name, server });
     }
     const upstreams = Object.fromEntries(running.map(({ name, server }) => [name, server.url]));

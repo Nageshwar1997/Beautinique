@@ -2,10 +2,15 @@ import { randomBytes, randomUUID } from 'node:crypto';
 import { createServer, request, type RequestListener } from 'node:http';
 import { type AddressInfo, connect } from 'node:net';
 
+import { generateSigningKey, signJwt } from '@beautinique/backend-server-crypto';
 import {
   ConfigError,
   createApp,
   createLogger,
+  jwksCache,
+  LOOPBACK_HOST,
+  passportSigner,
+  passportVerifier,
   type RunningServer,
   startServer,
 } from '@beautinique/backend-server-kit';
@@ -15,7 +20,15 @@ import {
   type RateLimiter,
   RateLimitUnavailableError,
 } from '@beautinique/backend-server-ratelimit';
-import { defineRoute, gatewayManifest } from '@beautinique/shared-contracts';
+import {
+  type AppId,
+  defineRoute,
+  gatewayManifest,
+  HEADERS,
+  PASSPORT_JWKS_PATH,
+  revokedSessionKey,
+  revokedUserKey,
+} from '@beautinique/shared-contracts';
 import { object, string, unknown } from '@beautinique/shared-zod';
 import type { Express } from 'express';
 import { afterAll, afterEach, beforeAll, describe, expect, it } from 'vitest';
@@ -27,6 +40,7 @@ import { manifest as platformManifest } from '../src/manifest.ts';
 import { API_PREFIX } from '../src/proxy.ts';
 import { DEFAULT_RATE_LIMITS } from '../src/rate-limits.ts';
 import { start } from '../src/service.ts';
+import { sessionGate } from '../src/sessions.ts';
 import type { StatusBody } from '../src/status.ts';
 import { clientIp, originSecretCheck } from '../src/trust.ts';
 import { REDIS_URL } from './env.ts';
@@ -62,7 +76,7 @@ afterEach(async () => {
 async function listen(app: RequestListener): Promise<RunningServer> {
   const server = await startServer(app, {
     port: 0,
-    host: '127.0.0.1',
+    host: LOOPBACK_HOST,
     logger,
     handleSignals: false,
   });
@@ -116,7 +130,7 @@ const manifest = gatewayManifest([
     id: 'customers.profile.get',
     method: 'GET',
     path: '/customers/profile',
-    apps: ['customer'],
+    apps: ['customer', 'seller'],
     access: { type: 'signed-in' },
     rateLimit: 'read',
   }),
@@ -166,6 +180,7 @@ function fakeCore(delayMs = 0): Express {
           forwardedFor: req.get('x-forwarded-for') ?? null,
           realIp: req.get('x-real-ip') ?? null,
           cookie: req.get('cookie') ?? null,
+          passport: req.get('x-bq-passport') ?? null,
         });
       });
       app.get('/catalog/banners', (req, res) => {
@@ -176,6 +191,9 @@ function fakeCore(delayMs = 0): Express {
           cookie: req.get('cookie') ?? null,
           authorization: req.get('authorization') ?? null,
         });
+      });
+      app.get('/customers/profile', (req, res) => {
+        res.json({ passport: req.get('x-bq-passport') ?? null, cookie: req.get('cookie') ?? null });
       });
       app.post('/commerce/orders', (req, res) => {
         res.setHeader('Cache-Control', 'public, max-age=600');
@@ -202,15 +220,49 @@ const apps = appRegistry({
   vercelScope: 'team-slug',
 });
 
+// identity's token key in these tests, and the access tokens it would sign
+const identityKey = generateSigningKey();
+const identityKeys = jwksCache({ load: () => Promise.resolve({ keys: [identityKey.publicJwk] }) });
+const accessToken = ({
+  app = 'customer',
+  sessionId = randomUUID(),
+  userId = randomUUID(),
+  issuedAt = Math.floor(Date.now() / 1000),
+  seconds = 600,
+  key = identityKey,
+}: {
+  app?: AppId;
+  sessionId?: string;
+  userId?: string;
+  issuedAt?: number;
+  seconds?: number;
+  key?: ReturnType<typeof generateSigningKey>;
+} = {}) =>
+  signJwt(
+    {
+      iss: 'bq:identity',
+      sub: userId,
+      aud: `bq:${app}`,
+      iat: issuedAt,
+      exp: issuedAt + seconds,
+      sid: sessionId,
+      amr: ['password'],
+      av: 0,
+    },
+    { kid: key.kid, privateKey: key.privateKeyPem },
+  );
+
 interface GatewayOptions {
   timeoutMs?: number;
   limiter?: RateLimiter;
   rateLimits?: Partial<GatewayAppOptions['rateLimits']>;
+  sessions?: GatewayAppOptions['sessions'];
+  passport?: GatewayAppOptions['passport'];
 }
 
 async function gateway(
   upstreams: GatewayAppOptions['upstreams'],
-  { timeoutMs = 2000, limiter, rateLimits }: GatewayOptions = {},
+  { timeoutMs = 2000, limiter, rateLimits, sessions, passport }: GatewayOptions = {},
 ) {
   return listen(
     buildApp({
@@ -226,6 +278,8 @@ async function gateway(
         createRateLimiter({ redis: redis.client, prefix: `${testPrefix}${randomUUID()}:` }),
       rateLimits: { ...DEFAULT_RATE_LIMITS, ...rateLimits },
       redisReady: redis.ready,
+      sessions: sessions ?? sessionGate({ keys: identityKeys, redis: redis.client }),
+      passport: passport ?? passportSigner(),
     }),
   );
 }
@@ -278,6 +332,7 @@ describe('gateway routing', () => {
       forwardedFor: null,
       realIp: null,
       cookie: null,
+      passport: null,
     });
   });
 
@@ -323,7 +378,7 @@ describe('gateway routing', () => {
   it('answers 503 when the owner does not run or is down, and 504 when it is too slow', async () => {
     const down = await startServer(fakeCore(), {
       port: 0,
-      host: '127.0.0.1',
+      host: LOOPBACK_HOST,
       logger,
       handleSignals: false,
     });
@@ -488,7 +543,7 @@ describe('who may call', () => {
     );
   });
 
-  it('answers 401 on every route that needs sign-in, until sign-in exists (T2.2)', async () => {
+  it('answers 401 on every route that needs sign-in, to a request without the access cookie', async () => {
     const core = await listen(fakeCore());
     const gw = await gateway({ core: core.url, payments: core.url });
     expect(
@@ -606,7 +661,7 @@ describe('streams', () => {
     owner.on('connection', () => {
       connections += 1;
     });
-    await new Promise<void>((resolve) => owner.listen(0, '127.0.0.1', resolve));
+    await new Promise<void>((resolve) => owner.listen(0, LOOPBACK_HOST, resolve));
     try {
       // a slow Redis: the rate limit takes 300 ms
       const slow: RateLimiter = {
@@ -618,7 +673,7 @@ describe('streams', () => {
       };
       const { port: ownerPort } = owner.address() as AddressInfo;
       const gw = await gateway(
-        { core: `http://127.0.0.1:${String(ownerPort)}` },
+        { core: `http://${LOOPBACK_HOST}:${String(ownerPort)}` },
         { limiter: slow },
       );
       const { hostname, port } = new URL(gw.url);
@@ -846,7 +901,7 @@ describe('health', () => {
     const coreServer = await listen(core.app);
     const down = await startServer(fakeCore(), {
       port: 0,
-      host: '127.0.0.1',
+      host: LOOPBACK_HOST,
       logger,
       handleSignals: false,
     });
@@ -877,7 +932,7 @@ describe('service', () => {
     });
     const gw = await start(config, {
       port: 0,
-      host: '127.0.0.1',
+      host: LOOPBACK_HOST,
       handleSignals: false,
       upstreams: { core: core.url },
     });
@@ -994,5 +1049,149 @@ describe('config', () => {
     expect(() =>
       readConfig({ env: { ...required, GATEWAY__ORIGIN_SECRETS: 'short-secret' } }),
     ).not.toThrow(/short-secret/);
+  });
+});
+
+describe('sign-in at the gateway (T3.2)', () => {
+  const profile = (gw: RunningServer, cookie?: string, more: Record<string, string> = {}) =>
+    fetch(`${gw.url}${API_PREFIX}/customers/profile`, {
+      headers: { ...customer, ...(cookie ? { cookie } : {}), ...more },
+    });
+  const atCookie = (token: string, app: AppId = 'customer') => `__Host-bq_${app}_at=${token}`;
+
+  it('gives the owner a 60-second passport of who signed in, for that owner only', async () => {
+    const core = await listen(fakeCore());
+    const signer = passportSigner();
+    const gw = await gateway({ core: core.url }, { passport: signer });
+    const userId = randomUUID();
+    const sessionId = randomUUID();
+    const res = await profile(gw, atCookie(accessToken({ userId, sessionId })), {
+      // a passport a client sends is dropped
+      'X-BQ-Passport': 'forged',
+    });
+    expect(res.status).toBe(200);
+    expect(res.headers.get('cache-control')).toBe('private, no-store');
+    const { passport } = (await res.json()) as { passport: string };
+    expect(passport).not.toBe('forged');
+    // the public key is served like /health, and checks the passport for core alone
+    const jwks = await fetch(`${gw.url}${PASSPORT_JWKS_PATH}`);
+    expect(jwks.headers.get('cache-control')).toBe('no-store');
+    const keys = jwksCache({ load: () => jwks.json() });
+    const request = { get: (name: string) => (name === HEADERS.passport ? passport : undefined) };
+    const verify = (audience: string) =>
+      passportVerifier({ keys, audience })(
+        request as Parameters<ReturnType<typeof passportVerifier>>[0],
+      );
+    expect(await verify('bq:core')).toEqual({
+      userId,
+      sessionId,
+      app: 'customer',
+      methods: ['password'],
+      authzVersion: 0,
+    });
+    await expect(verify('bq:identity')).rejects.toThrow('Please sign in');
+  });
+
+  it('sends no passport for a public route, even if a client sends one', async () => {
+    const core = await listen(fakeCore());
+    const gw = await gateway({ core: core.url });
+    const res = await fetch(`${gw.url}${API_PREFIX}/catalog/products/p1`, {
+      headers: { ...customer, 'X-BQ-Passport': 'forged', cookie: atCookie(accessToken()) },
+    });
+    expect(res.status).toBe(200);
+    const body = (await res.json()) as Record<string, unknown>;
+    expect(JSON.stringify(body)).not.toContain('forged');
+  });
+
+  it('refuses another app’s token, an expired one, another key’s, and junk, with 401', async () => {
+    const core = await listen(fakeCore());
+    const gw = await gateway({ core: core.url });
+    // a customer token in the seller app's own cookie is still the customer app's
+    const asSeller = await profile(gw, atCookie(accessToken(), 'seller'), {
+      'X-BQ-App': 'seller',
+      host: 'seller.example',
+    });
+    expect(await errorOf(asSeller)).toEqual([401, 'UNAUTHENTICATED']);
+    const seller = await profile(gw, atCookie(accessToken({ app: 'seller' }), 'seller'), {
+      'X-BQ-App': 'seller',
+      host: 'seller.example',
+    });
+    expect(seller.status).toBe(200);
+    for (const cookie of [
+      atCookie(accessToken({ app: 'seller' })),
+      atCookie(accessToken({ app: 'seller' }), 'seller'),
+      atCookie(accessToken({ issuedAt: Math.floor(Date.now() / 1000) - 700 })),
+      atCookie(accessToken({ key: generateSigningKey() })),
+      atCookie('not.a.token'),
+      'other=1',
+    ]) {
+      expect(await errorOf(await profile(gw, cookie)), cookie.slice(0, 40)).toEqual([
+        401,
+        'UNAUTHENTICATED',
+      ]);
+    }
+  });
+
+  it('refuses a session ended in Redis, and every token of an account issued before its end', async () => {
+    const core = await listen(fakeCore());
+    const gw = await gateway({ core: core.url });
+    const sessionId = randomUUID();
+    const userId = randomUUID();
+    const now = Math.floor(Date.now() / 1000);
+    expect((await profile(gw, atCookie(accessToken({ sessionId, userId })))).status).toBe(200);
+    await redis.client.set(revokedSessionKey(sessionId), '1', 'PX', 60_000);
+    expect(await errorOf(await profile(gw, atCookie(accessToken({ sessionId, userId }))))).toEqual([
+      401,
+      'UNAUTHENTICATED',
+    ]);
+    // every session of another account ended a second ago
+    const other = randomUUID();
+    await redis.client.set(revokedUserKey(other), String((now - 1) * 1000), 'PX', 60_000);
+    const before = atCookie(accessToken({ userId: other, issuedAt: now - 5 }));
+    const after = atCookie(accessToken({ userId: other, issuedAt: now }));
+    expect((await profile(gw, before)).status).toBe(401);
+    expect((await profile(gw, after)).status).toBe(200);
+    await redis.client.del(revokedSessionKey(sessionId), revokedUserKey(other));
+  });
+
+  it('answers 403 on a permission route to someone signed in, until grants (T3.3)', async () => {
+    const payments = await listen(fakeCore());
+    const gw = await gateway({ payments: payments.url });
+    const res = await fetch(`${gw.url}${API_PREFIX}/payments/refunds`, {
+      headers: {
+        ...customer,
+        'X-BQ-App': 'finance',
+        cookie: atCookie(accessToken({ app: 'finance' }), 'finance'),
+      },
+    });
+    expect(await errorOf(res)).toEqual([403, 'FORBIDDEN']);
+  });
+
+  it('fails closed with 503 when Redis or identity’s keys are away', async () => {
+    const core = await listen(fakeCore());
+    const down = await connectRedis({ url: REDIS_URL, name: 'gateway-test-down', logger });
+    down.client.disconnect();
+    const noRedis = await gateway(
+      { core: core.url },
+      { sessions: sessionGate({ keys: identityKeys, redis: down.client }) },
+    );
+    expect(await errorOf(await profile(noRedis, atCookie(accessToken())))).toEqual([
+      503,
+      'SERVICE_UNAVAILABLE',
+    ]);
+    await down.close();
+    const noKeys = await gateway(
+      { core: core.url },
+      {
+        sessions: sessionGate({
+          keys: jwksCache({ load: () => Promise.reject(new Error('identity is away')) }),
+          redis: redis.client,
+        }),
+      },
+    );
+    expect(await errorOf(await profile(noKeys, atCookie(accessToken())))).toEqual([
+      503,
+      'SERVICE_UNAVAILABLE',
+    ]);
   });
 });
