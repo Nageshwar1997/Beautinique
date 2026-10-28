@@ -4,9 +4,14 @@ import { routeTable } from '../routes';
 import {
   ACCESS_TOKEN_SECONDS,
   accessCookieName,
+  AUTH_PROVIDERS,
   confirmTotpEnroll,
   consentProblems,
+  endOtherSessions,
+  endSession,
+  getMe,
   IDENTITY_ERROR_CODES,
+  listSessions,
   LOGIN_NEXT,
   loginRecovery,
   loginTotp,
@@ -42,10 +47,15 @@ import { getPing, pingRead, pingRecorded, recordPing, wake } from './platform';
 export {
   ACCESS_TOKEN_SECONDS,
   accessCookieName,
+  AUTH_PROVIDERS,
   confirmTotpEnroll,
   consentProblems,
+  endOtherSessions,
+  endSession,
+  getMe,
   getPing,
   IDENTITY_ERROR_CODES,
+  listSessions,
   LOGIN_NEXT,
   loginRecovery,
   loginTotp,
@@ -100,6 +110,10 @@ export const routes = routeTable([
   confirmTotpEnroll,
   refreshSession,
   logout,
+  getMe,
+  listSessions,
+  endSession,
+  endOtherSessions,
 ]);
 export const events = eventCatalogue([pingRecorded, otpRequested, sessionReuseDetected]);
 export const permissions = permissionCatalogue([pingRead]);

@@ -42,12 +42,26 @@ export const LOCATION_SCOPES = ['global', 'state', 'district', 'city', 'hub'] as
 export type LocationScope = (typeof LOCATION_SCOPES)[number];
 
 /**
- * Request headers every client and the gateway agree on. `clientIp` is set by the gateway alone (it
- * drops one sent by a client) and tells a deployable who the caller is (OTP IP limits, audit).
+ * Request headers every client and the gateway agree on. `clientIp` and `passport` are set by the
+ * gateway alone (it drops ones sent by a client): who the caller is (OTP IP limits, audit) and
+ * who signed in (ARCHITECTURE §7.2).
  */
 export const HEADERS = {
   app: 'X-BQ-App',
   idempotencyKey: 'Idempotency-Key',
   requestId: 'X-Request-Id',
   clientIp: 'X-BQ-Client-Ip',
+  passport: 'X-BQ-Passport',
 } as const;
+
+/**
+ * The passport (ARCHITECTURE §7.2): after checking the access token, the gateway sends the owner a
+ * 60-second ES256 token of who signed in, for that owner only (`aud`). The gateway makes its key at
+ * every start and publishes the public key at PASSPORT_JWKS_PATH; no secret lives in env.
+ */
+export const PASSPORT_ISSUER = 'bq:gateway';
+export const PASSPORT_SECONDS = 60;
+export const passportAudience = (owner: Deployable): string => `bq:${owner}`;
+export const PASSPORT_JWKS_PATH = '/.well-known/passport-jwks.json';
+/** Where identity publishes the public keys of its access tokens, for the gateway. */
+export const IDENTITY_JWKS_PATH = '/.well-known/jwks.json';

@@ -4,18 +4,29 @@ import {
   ACCESS_TOKEN_SECONDS,
   accessCookieName,
   APPS,
+  AUTH_PROVIDERS,
   confirmTotpEnroll,
   consentProblems,
+  endOtherSessions,
+  endSession,
   events,
+  getMe,
   getPing,
+  HEADERS,
   IDENTITY_ERROR_CODES,
+  IDENTITY_JWKS_PATH,
   isPermissionKey,
+  listSessions,
   loginRecovery,
   loginTotp,
   logout,
   OTP_PURPOSES,
   otpRequested,
   otpSealContext,
+  PASSPORT_ISSUER,
+  PASSPORT_JWKS_PATH,
+  PASSPORT_SECONDS,
+  passportAudience,
   passwordLogin,
   permissions,
   pingRead,
@@ -60,6 +71,10 @@ describe('platform catalogue (Milestone 1 sample)', () => {
       'auth.login.totpConfirm',
       'auth.session.refresh',
       'auth.session.logout',
+      'iam.me.get',
+      'auth.sessions.list',
+      'auth.sessions.end',
+      'auth.sessions.endOthers',
     ]);
     expect(events.latest('platform.ping.recorded')).toBe(pingRecorded);
     expect(permissions.get(pingRead.key)).toBe(pingRead);
@@ -282,5 +297,31 @@ describe('sessions', () => {
       expect(`/api/v1${route.path}`.startsWith(REFRESH_COOKIE_PATH)).toBe(true);
     }
     expect(events.latest('identity.session.reuseDetected')).toBe(sessionReuseDetected);
+  });
+});
+
+describe('signed-in routes and the passport (T3.2 PR B)', () => {
+  it('need a session in every app, and identity answers them', () => {
+    for (const route of [getMe, listSessions, endSession, endOtherSessions]) {
+      expect(route, route.id).toMatchObject({
+        access: { type: 'signed-in' },
+        owner: 'identity',
+        apps: APPS,
+      });
+    }
+    expect([getMe.rateLimit, listSessions.rateLimit]).toEqual(['read', 'read']);
+    expect([endSession.rateLimit, endOtherSessions.rateLimit]).toEqual(['auth', 'auth']);
+    expect(AUTH_PROVIDERS).toEqual(['password', 'google', 'linkedin', 'github']);
+  });
+
+  it('give each owner its own 60-second passport from the gateway', () => {
+    expect(PASSPORT_ISSUER).toBe('bq:gateway');
+    expect(PASSPORT_SECONDS).toBe(60);
+    expect(passportAudience('identity')).toBe('bq:identity');
+    expect(HEADERS.passport).toBe('X-BQ-Passport');
+    expect([PASSPORT_JWKS_PATH, IDENTITY_JWKS_PATH]).toEqual([
+      '/.well-known/passport-jwks.json',
+      '/.well-known/jwks.json',
+    ]);
   });
 });
