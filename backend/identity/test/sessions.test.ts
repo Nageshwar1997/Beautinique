@@ -4,6 +4,7 @@
 import { type KeyObject } from 'node:crypto';
 
 import { publicKeyFromJwk, verifyJwt } from '@beautinique/backend-server-crypto';
+import { passportSigner } from '@beautinique/backend-server-kit';
 import { OUTBOX } from '@beautinique/backend-server-queue';
 import {
   type AppId,
@@ -378,5 +379,135 @@ describe('device names', () => {
     ).toBe('Firefox on macOS');
     expect(deviceName('')).toBe('Unknown device');
     expect(deviceName('curl/8.5')).toBe('Unknown device');
+  });
+});
+
+describe('signed in (the gateway’s passport)', () => {
+  /** A request as the gateway sends it for someone signed in. */
+  async function asSignedIn(
+    path: string,
+    {
+      userId,
+      sessionId,
+      app = 'customer',
+      method = 'GET',
+    }: {
+      userId: string;
+      sessionId: string;
+      app?: AppId;
+      method?: 'GET' | 'POST' | 'DELETE';
+    },
+    passport = harness.passport,
+  ) {
+    const response = await fetch(`${harness.server.url}${path}`, {
+      method,
+      headers: {
+        'X-BQ-App': app,
+        'X-BQ-Passport': passport.sign(
+          { userId, sessionId, app, methods: ['password'], authzVersion: 0 },
+          'bq:identity',
+        ),
+      },
+    });
+    return {
+      status: response.status,
+      body: (await response.json()) as Raw['body'],
+      cookies: response.headers.getSetCookie(),
+    };
+  }
+  const signedInAs = async (address: string, app: AppId = 'customer') => {
+    const answer = await signIn(address, app);
+    const sessionId = refreshOf(answer, app).split('.')[0] ?? '';
+    const session = await sessionsDb().findOne({ _id: sessionId });
+    return { sessionId, userId: String(session?.userId), answer };
+  };
+
+  it('tells the app who signed in, how the account signs in, and this session', async () => {
+    const address = email('me');
+    await makeAccount(address);
+    const { userId, sessionId } = await signedInAs(address);
+    const answer = await asSignedIn('/iam/me', { userId, sessionId });
+    expect(answer.status).toBe(200);
+    expect(answer.body.data).toMatchObject({
+      user: {
+        userId,
+        email: address,
+        signUpApp: 'customer',
+        providers: ['password'],
+        authenticator: false,
+      },
+      session: { sessionId, app: 'customer' },
+    });
+    expect((answer.body.data?.user as { ageDeclaredAt: string }).ageDeclaredAt).toMatch(/^2\d{3}-/);
+  });
+
+  it('refuses no passport, another key’s and an ended session', async () => {
+    const address = email('me-refused');
+    await makeAccount(address);
+    const { userId, sessionId, answer } = await signedInAs(address);
+    const none = await fetch(`${harness.server.url}/iam/me`, {
+      headers: { 'X-BQ-App': 'customer' },
+    });
+    expect(none.status).toBe(401);
+    const forged = await asSignedIn('/iam/me', { userId, sessionId }, passportSigner());
+    expect(forged.status).toBe(401);
+    await call('/auth/logout', { cookie: `__Secure-bq_customer_rt=${refreshOf(answer)}` });
+    const ended = await asSignedIn('/iam/me', { userId, sessionId });
+    expect([ended.status, ended.body.error?.code]).toEqual([401, 'SESSION_EXPIRED']);
+  });
+
+  it('lists the account’s sessions in every app as My Devices, this one marked', async () => {
+    const address = email('devices');
+    await makeAccount(address);
+    const customer = await signedInAs(address);
+    const seller = await signedInAs(address, 'seller');
+    const answer = await asSignedIn('/auth/sessions', customer);
+    const sessions = (answer.body.data as { sessions: Record<string, unknown>[] }).sessions;
+    // the sign-up's session and the two sign-ins
+    expect(sessions).toHaveLength(3);
+    expect(sessions.filter((s) => s.current).map((s) => s.sessionId)).toEqual([customer.sessionId]);
+    expect(sessions.map((s) => s.app).toSorted()).toEqual(['customer', 'customer', 'seller']);
+    expect(sessions.find((s) => s.sessionId === seller.sessionId)).toMatchObject({
+      device: 'Chrome on Windows',
+      ip: '203.0.113.9',
+    });
+  });
+
+  it('signs one device out, or every other one; never another account’s', async () => {
+    const address = email('sign-out');
+    await makeAccount(address);
+    const here = await signedInAs(address);
+    const there = await signedInAs(address, 'seller');
+    await makeAccount(email('stranger'));
+    const stranger = await signedInAs(email('stranger'));
+    // another account's session is not this person's to end
+    const foreign = await asSignedIn(`/auth/sessions/${stranger.sessionId}`, {
+      ...here,
+      method: 'DELETE',
+    });
+    expect(foreign.body.data).toEqual({ ended: false });
+    expect((await sessionsDb().findOne({ _id: stranger.sessionId }))?.revokedAt).toBeNull();
+    // the seller device
+    const ended = await asSignedIn(`/auth/sessions/${there.sessionId}`, {
+      ...here,
+      method: 'DELETE',
+    });
+    expect(ended.body.data).toEqual({ ended: true });
+    expect(ended.cookies).toEqual([]);
+    expect(await redis().exists(revokedSessionKey(there.sessionId))).toBe(1);
+    expect(await sessionsDb().findOne({ _id: there.sessionId })).toMatchObject({
+      revokeReason: 'signed-out-elsewhere',
+    });
+    // every other one: the sign-up session; this one stays
+    const others = await asSignedIn('/auth/sessions/end-others', { ...here, method: 'POST' });
+    expect(others.body.data).toEqual({ ended: 1 });
+    expect((await sessionsDb().findOne({ _id: here.sessionId }))?.revokedAt).toBeNull();
+    // this device itself: its cookies go too
+    const self = await asSignedIn(`/auth/sessions/${here.sessionId}`, {
+      ...here,
+      method: 'DELETE',
+    });
+    expect(self.body.data).toEqual({ ended: true });
+    expect(self.cookies.some((c) => c.startsWith('__Host-bq_customer_at=;'))).toBe(true);
   });
 });

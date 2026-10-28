@@ -1,5 +1,15 @@
-import { loadCryptoKeys, loadSealingKeys } from '@beautinique/backend-server-crypto';
-import type { Logger, ReadyCheck } from '@beautinique/backend-server-kit';
+import {
+  loadCryptoKeys,
+  loadSealingKeys,
+  type PublicJwk,
+} from '@beautinique/backend-server-crypto';
+import {
+  jwksCache,
+  jwksFromUrl,
+  type Logger,
+  passportVerifier,
+  type ReadyCheck,
+} from '@beautinique/backend-server-kit';
 import { connectMongo, type Mongo } from '@beautinique/backend-server-mongo';
 import {
   connectRedis,
@@ -10,7 +20,11 @@ import {
   startWipeWatchdog,
   type WipeWatchdog,
 } from '@beautinique/backend-server-queue';
-import { otpRequested, sessionReuseDetected } from '@beautinique/shared-contracts';
+import {
+  otpRequested,
+  passportAudience,
+  sessionReuseDetected,
+} from '@beautinique/shared-contracts';
 
 import type { Config } from './config.ts';
 import type { OtpDeps } from './otp.ts';
@@ -38,6 +52,8 @@ export interface RuntimeOptions {
   pollMs?: number;
   /** How often the wipe watchdog looks (default 30 s). */
   watchdogMs?: number;
+  /** The gateway's passport keys, in memory (backend/bundle); otherwise read from the config URL */
+  passportJwks?: readonly PublicJwk[];
 }
 
 /** identity's connections and background work: MongoDB, Redis, the outbox relay, the wipe watchdog. */
@@ -64,7 +80,7 @@ export interface Runtime {
  * ones before it are closed again and the error goes on.
  */
 export async function startRuntime(config: Config, options: RuntimeOptions): Promise<Runtime> {
-  const { logger, queuePrefix: prefix, epochKey, pollMs, watchdogMs } = options;
+  const { logger, queuePrefix: prefix, epochKey, pollMs, watchdogMs, passportJwks } = options;
   const keys = loadCryptoKeys({ fieldKeys: config.fieldKeys, blindIndexKey: config.blindIndexKey });
   const otpKeys = loadSealingKeys(config.otpEventKeys, 'IDENTITY__OTP_EVENT_KEYS');
   const closers: (() => Promise<void>)[] = [];
@@ -129,6 +145,14 @@ export async function startRuntime(config: Config, options: RuntimeOptions): Pro
         legalVersion: config.legalVersion,
         breached: hibpBreachCheck({ url: config.hibpUrl, logger }),
         sessions: sessions({ mongo, redis: redis.client, keys, signing, logger }),
+        passport: passportVerifier({
+          keys: jwksCache({
+            load: passportJwks
+              ? () => Promise.resolve({ keys: passportJwks })
+              : jwksFromUrl(config.passportJwksUrl),
+          }),
+          audience: passportAudience('identity'),
+        }),
       },
       ready: { mongo: mongo.ready, redis: redis.ready, outbox: relay.ready },
       stop,

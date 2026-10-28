@@ -47,7 +47,7 @@ Owner ke faisle (2026-10-27): **sabhi 11 apps email + password se sign-in** kart
 - `POST /auth/refresh`: naya token pair, purana band. Purana token 10 s ke andar = parallel tab (409 `REFRESH_IN_PROGRESS`); baad me = chori: session band, Redis `bq:id:session-revoked:<sid>`, event `identity.session.reuseDetected` → notify ka "We signed you out" email. Session khatam (idle/expire) ho chuka ho to chupchaap `SESSION_EXPIRED`, alarm nahi.
 - `POST /auth/logout`: session band + Redis key + cookies saaf. Email code se naya password = account ke **saare** sessions band + `bq:id:user-revoked:<userId>`.
 - Token keys: `identity_signing_keys`, private key `IDENTITY__FIELD_KEYS` se sealed, har 30 din nayi; `GET /.well-known/jwks.json` (sirf gateway ke liye, `/api` route nahi).
-- Gateway ka token check, passport, `/iam/me` aur My Devices: T3.2 PR B.
+- Signed-in routes gateway ke passport se (`X-BQ-Passport`, server-kit `passportVerifier`; bundle gateway ki public key memory me deta hai, split mode me `IDENTITY__PASSPORT_JWKS_URL`): `GET /iam/me` (account, login ke tareeke, authenticator, ye session), My Devices `GET /auth/sessions` (account ke saare apps ke sessions, current ka nishaan), `DELETE /auth/sessions/:id` (ek device; apna ho to cookies bhi), `POST /auth/sessions/end-others`.
 
 ## Settings
 

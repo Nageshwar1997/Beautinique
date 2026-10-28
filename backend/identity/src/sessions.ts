@@ -167,6 +167,12 @@ export interface Sessions extends SessionPort {
   logout(input: { app: AppId; refreshToken: string | undefined }): Promise<void>;
   /** Ends every session of an account (a new password). */
   endAll(userId: string, reason: EndReason): Promise<void>;
+  /** My Devices: the account's sessions that have not ended, in every app, the newest first. */
+  list(userId: string): Promise<Session[]>;
+  /** Ends one session of the account; false when it is not the account's or ended already. */
+  end(userId: string, sessionId: string): Promise<boolean>;
+  /** Ends every session of the account but `keep`; how many ended. */
+  endOthers(userId: string, keep: string): Promise<number>;
 }
 
 export function sessions(deps: SessionDeps): Sessions {
@@ -368,6 +374,57 @@ export function sessions(deps: SessionDeps): Sessions {
       // tokens issued before this moment stop at the gateway
       await inRedis(() => redis.set(revokedUserKey(userId), String(at), 'PX', REVOKE_TTL_MS));
       logger.info({ userId, reason }, 'every session of the account ended');
+    },
+
+    list(userId) {
+      return collection
+        .find({ userId, revokedAt: null, expiresAt: { $gt: new Date(now()) } })
+        .sort({ lastSeenAt: -1 })
+        .toArray();
+    },
+
+    async end(userId, sessionId) {
+      const at = now();
+      const ended = await collection.updateOne(
+        { _id: sessionId, userId, revokedAt: null },
+        {
+          $set: {
+            revokedAt: new Date(at),
+            revokeReason: 'signed-out-elsewhere',
+            purgeAt: new Date(at + KEEP_ENDED_MS),
+          },
+        },
+      );
+      if (ended.modifiedCount !== 1) return false;
+      await revokeAtGateway(sessionId);
+      logger.info({ userId, sessionId }, 'a device signed out from My Devices');
+      return true;
+    },
+
+    async endOthers(userId, keep) {
+      const at = now();
+      const others = await collection
+        .find({ userId, revokedAt: null, _id: { $ne: keep } }, { projection: { _id: 1 } })
+        .toArray();
+      if (others.length === 0) return 0;
+      const ids = others.map((session) => session._id);
+      const ended = await collection.updateMany(
+        { _id: { $in: ids }, revokedAt: null },
+        {
+          $set: {
+            revokedAt: new Date(at),
+            revokeReason: 'signed-out-elsewhere',
+            purgeAt: new Date(at + KEEP_ENDED_MS),
+          },
+        },
+      );
+      await inRedis(() => {
+        const batch = redis.multi();
+        for (const id of ids) batch.set(revokedSessionKey(id), '1', 'PX', REVOKE_TTL_MS);
+        return batch.exec();
+      });
+      logger.info({ userId, ended: ended.modifiedCount }, 'every other device signed out');
+      return ended.modifiedCount;
     },
   };
 }

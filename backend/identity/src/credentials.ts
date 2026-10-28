@@ -1,12 +1,12 @@
 import type { ClientSession, IndexSpec, Mongo } from '@beautinique/backend-server-mongo';
+import type { AUTH_PROVIDERS as PROVIDER_NAMES } from '@beautinique/shared-contracts';
 import { uuidv7 } from '@beautinique/shared-utils';
 
 export const CREDENTIALS = 'identity_credentials';
 export const AUTH_PROVIDERS = 'identity_auth_providers';
 
 /** How an account signs in: its password, or one of the customer app's OAuth providers (PR 4). */
-export const PROVIDERS = ['password', 'google', 'linkedin', 'github'] as const;
-export type Provider = (typeof PROVIDERS)[number];
+export type Provider = (typeof PROVIDER_NAMES)[number];
 
 /**
  * An account's secrets, one document per user (`_id` = the user's id), apart from `identity_users`
