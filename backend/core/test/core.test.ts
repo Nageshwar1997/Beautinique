@@ -1,3 +1,4 @@
+import { LOOPBACK_HOST } from '@beautinique/backend-server-kit';
 import { RELEASE_STATE, releaseFingerprint } from '@beautinique/backend-server-release';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 
@@ -27,7 +28,7 @@ describe('core', () => {
   it('answers /health and /ready, and turns unknown paths into the contracts error body', async () => {
     const server = await start(testConfig(dbName), {
       port: 0,
-      host: '127.0.0.1',
+      host: LOOPBACK_HOST,
       handleSignals: false,
       runtime: { queuePrefix: prefix, epochKey },
     });
@@ -51,7 +52,7 @@ describe('core', () => {
   it('makes every index in its release steps before it listens, and records the release', async () => {
     const server = await start(testConfig(dbName), {
       port: 0,
-      host: '127.0.0.1',
+      host: LOOPBACK_HOST,
       handleSignals: false,
       runtime: { queuePrefix: prefix, epochKey, consume: false },
     });
@@ -78,7 +79,7 @@ describe('core', () => {
   it('is not ready while its queue worker is not running', async () => {
     const server = await start(testConfig(dbName), {
       port: 0,
-      host: '127.0.0.1',
+      host: LOOPBACK_HOST,
       handleSignals: false,
       runtime: { queuePrefix: prefix, epochKey, consume: false },
     });
@@ -128,7 +129,7 @@ describe('core', () => {
     const before = await connections();
     const config = { ...testConfig(dbName), redisUrl: 'redis://127.0.0.1:1' };
     await expect(
-      start(config, { port: 0, host: '127.0.0.1', handleSignals: false }),
+      start(config, { port: 0, host: LOOPBACK_HOST, handleSignals: false }),
     ).rejects.toThrow();
     await waitFor(async () => (await connections()) <= before);
   });

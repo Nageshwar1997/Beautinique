@@ -7,7 +7,7 @@ import {
   encryptField,
   type SealingKeys,
 } from '@beautinique/backend-server-crypto';
-import { AppError, type Logger } from '@beautinique/backend-server-kit';
+import { AppError, type Logger, type Passport } from '@beautinique/backend-server-kit';
 import { type Mongo, withTransaction } from '@beautinique/backend-server-mongo';
 import { writeEvent } from '@beautinique/backend-server-queue';
 import {
@@ -18,6 +18,7 @@ import {
   otpSealContext,
 } from '@beautinique/shared-contracts';
 import { uuidv7 } from '@beautinique/shared-utils';
+import type { Request } from 'express';
 import type { Redis } from 'ioredis';
 
 import {
@@ -84,8 +85,10 @@ export interface OtpDeps {
   legalVersion: string;
   /** Have I Been Pwned (fail-open) */
   breached: BreachCheck;
-  /** The last step of a sign-in (T3.2: the real session) */
+  /** The last step of a sign-in, and the sessions of My Devices */
   sessions: Sessions;
+  /** Who signed in, from the gateway's passport (signed-in routes) */
+  passport: (req: Request) => Promise<Passport>;
 }
 
 /** What the app sees of a challenge (contracts otpChallengeZod). */

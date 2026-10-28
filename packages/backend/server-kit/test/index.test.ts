@@ -11,6 +11,7 @@ import {
   createApp,
   createLogger,
   loadConfig,
+  LOOPBACK_HOST,
   type RunningServer,
   startServer,
   toEnvKey,
@@ -39,7 +40,7 @@ async function serve(options: Parameters<typeof createApp>[0]) {
   const app = createApp(options);
   const server = await startServer(app, {
     port: 0,
-    host: '127.0.0.1',
+    host: LOOPBACK_HOST,
     logger: options.logger,
     handleSignals: false,
   });
@@ -86,6 +87,13 @@ describe('public API', () => {
         'startServer',
         'toEnvKey',
         'toErrorResponse',
+        'LOOPBACK_HOST',
+        'cookieOf',
+        'jwksCache',
+        'jwksFromUrl',
+        'passportSigner',
+        'passportVerifier',
+        'tokenKeyId',
       ].sort(),
     );
   });
@@ -362,7 +370,7 @@ describe('startServer', () => {
     });
     const server = await startServer(app, {
       port: 0,
-      host: '127.0.0.1',
+      host: LOOPBACK_HOST,
       logger,
       handleSignals: false,
       onStop: [
@@ -388,14 +396,18 @@ describe('startServer', () => {
   it('listens for SIGTERM and SIGINT only when asked, and removes the listeners on stop', async () => {
     const { logger } = captureLogger();
     const before = process.listenerCount('SIGTERM');
-    const server = await startServer(createApp({ logger }), { port: 0, host: '127.0.0.1', logger });
+    const server = await startServer(createApp({ logger }), {
+      port: 0,
+      host: LOOPBACK_HOST,
+      logger,
+    });
     expect(process.listenerCount('SIGTERM')).toBe(before + 1);
     expect(process.listenerCount('SIGINT')).toBeGreaterThan(0);
     await server.stop();
     expect(process.listenerCount('SIGTERM')).toBe(before);
     const quiet = await startServer(createApp({ logger }), {
       port: 0,
-      host: '127.0.0.1',
+      host: LOOPBACK_HOST,
       logger,
       handleSignals: false,
     });
@@ -409,7 +421,7 @@ describe('startServer', () => {
     await expect(
       startServer(createApp({ logger }), {
         port: first.port,
-        host: '127.0.0.1',
+        host: LOOPBACK_HOST,
         logger,
         handleSignals: false,
       }),

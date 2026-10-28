@@ -3,7 +3,11 @@ import {
   type AppId,
   APPS,
   confirmTotpEnroll,
+  endOtherSessions,
+  endSession,
+  getMe,
   HEADERS,
+  listSessions,
   loginRecovery,
   loginTotp,
   logout,
@@ -21,6 +25,7 @@ import { type Request, Router } from 'express';
 
 import { clearSessionCookies, cookieOf, setSessionCookies, signedIn } from '../cookies.ts';
 import * as login from '../login.ts';
+import { me, myDevices } from '../me.ts';
 import { type OtpDeps, requestCode, resendCode, verifyCode } from '../otp.ts';
 import type { Client } from '../sessions.ts';
 
@@ -164,6 +169,26 @@ export function routesOf(deps: OtpDeps): Router {
     await deps.sessions.logout({ app, refreshToken: cookieOf(req, refreshCookieName(app)) });
     clearSessionCookies(res, app);
     return { signedOut: true as const };
+  });
+
+  // signed in: the gateway checked the access cookie and vouches with a passport
+  mountRoute(router, getMe, async (_input, { req }) => me(deps, await deps.passport(req)));
+
+  mountRoute(router, listSessions, async (_input, { req }) =>
+    myDevices(deps, await deps.passport(req)),
+  );
+
+  mountRoute(router, endSession, async ({ params }, { req, res }) => {
+    const passport = await deps.passport(req);
+    const ended = await deps.sessions.end(passport.userId, params.sessionId);
+    // this device's own session: its cookies go too
+    if (ended && params.sessionId === passport.sessionId) clearSessionCookies(res, passport.app);
+    return { ended };
+  });
+
+  mountRoute(router, endOtherSessions, async (_input, { req }) => {
+    const passport = await deps.passport(req);
+    return { ended: await deps.sessions.endOthers(passport.userId, passport.sessionId) };
   });
 
   return router;

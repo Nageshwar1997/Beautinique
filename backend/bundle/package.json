@@ -14,6 +14,7 @@
     "test": "vitest run"
   },
   "dependencies": {
+    "@beautinique/backend-server-crypto": "^1.0.0",
     "@beautinique/backend-server-kit": "^1.0.0",
     "@beautinique/backend-server-release": "^1.0.0",
     "@beautinique/shared-zod": "^2.0.0",

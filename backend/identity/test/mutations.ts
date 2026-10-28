@@ -686,6 +686,47 @@ const mutations: Mutation[] = [
     ],
     tests: 'made-up token',
   },
+  // signed-in routes (T3.2 PR B)
+  {
+    file: 'me',
+    name: 'an ended session still answers',
+    change: [
+      [
+        '.findOne({ _id: passport.sessionId, userId: passport.userId, revokedAt: null });',
+        '.findOne({ _id: passport.sessionId, userId: passport.userId });',
+      ],
+    ],
+    tests: 'ended session',
+  },
+  {
+    file: 'me',
+    name: 'every session marked current',
+    change: [['current: session._id === passport.sessionId,', 'current: true,']],
+    tests: 'My Devices',
+  },
+  {
+    file: 'sessions',
+    name: 'another account’s session ends',
+    change: [
+      [
+        '        { _id: sessionId, userId, revokedAt: null },',
+        '        { _id: sessionId, revokedAt: null },',
+      ],
+    ],
+    tests: 'never another account',
+  },
+  {
+    file: 'sessions',
+    name: 'end-others ends this one too',
+    change: [['_id: { $ne: keep } }', '}']],
+    tests: 'never another account',
+  },
+  {
+    file: 'routes/index',
+    name: 'any device’s end clears this one’s cookies',
+    change: [['if (ended && params.sessionId === passport.sessionId)', 'if (ended)']],
+    tests: 'never another account',
+  },
 ];
 
 export default mutations;

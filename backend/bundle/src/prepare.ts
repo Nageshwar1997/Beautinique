@@ -1,3 +1,4 @@
+import type { PublicJwk } from '@beautinique/backend-server-crypto';
 import type { RunningServer } from '@beautinique/backend-server-kit';
 
 export type Env = Record<string, string | undefined>;
@@ -6,6 +7,8 @@ export interface StartOptions {
   port?: number;
   host?: string;
   handleSignals?: boolean;
+  /** The gateway's passport keys, for the deployables behind it (in memory, never in env) */
+  passportJwks?: readonly PublicJwk[];
 }
 
 /** What every backend/<deployable> exports from src/service.ts. */

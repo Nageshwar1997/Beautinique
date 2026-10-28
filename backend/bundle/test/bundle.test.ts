@@ -232,12 +232,32 @@ describe('bundle', () => {
         body: JSON.stringify({ email, password: 'pink lipstick on a rainy day' }),
       });
       const token = refreshCookie(again);
+      // signed in through the gateway: its access cookie, a passport to identity (T3.2 PR B)
+      const access =
+        /__Host-bq_customer_at=([^;]+)/.exec(again.headers.getSetCookie().join(', '))?.[1] ?? '';
+      const signedInGet = (path: string) =>
+        fetch(`${bundle.url}/api/v1${path}`, {
+          headers: { ...headers, cookie: `__Host-bq_customer_at=${access}` },
+        });
+      const me = await signedInGet('/iam/me');
+      expect(me.status).toBe(200);
+      expect(me.headers.get('cache-control')).toBe('private, no-store');
+      expect(await me.json()).toMatchObject({
+        data: { user: { email, providers: ['password'] }, session: { app: 'customer' } },
+      });
+      const devices = (await (await signedInGet('/auth/sessions')).json()) as {
+        data: { sessions: { current: boolean }[] };
+      };
+      expect(devices.data.sessions.filter((s) => s.current)).toHaveLength(1);
+      expect((await signedInGet('/iam/me')).status).toBe(200);
       const out = await fetch(`${bundle.url}/api/v1/auth/logout`, {
         method: 'POST',
         headers: { ...headers, cookie: `__Secure-bq_customer_rt=${token}` },
       });
       expect(await out.json()).toEqual({ data: { signedOut: true } });
       expect((await refresh(token)).status).toBe(401);
+      // the same access cookie stops at once (Redis), not when its 10 minutes run out
+      expect((await signedInGet('/iam/me')).status).toBe(401);
     } finally {
       await bundle.stop();
       await fetch('http://localhost:8025/api/v1/messages', {

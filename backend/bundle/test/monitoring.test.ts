@@ -4,6 +4,7 @@ import type { AddressInfo } from 'node:net';
 import { join } from 'node:path';
 import { gunzipSync } from 'node:zlib';
 
+import { LOOPBACK_HOST } from '@beautinique/backend-server-kit';
 import { describe, expect, it } from 'vitest';
 
 import { monitoringOptions } from '../src/monitoring.ts';
@@ -46,7 +47,7 @@ describe('the bundle process with Sentry preloaded (node --import)', () => {
         res.writeHead(200).end('{}');
       });
     });
-    await new Promise<void>((resolve) => sentry.listen(0, '127.0.0.1', resolve));
+    await new Promise<void>((resolve) => sentry.listen(0, LOOPBACK_HOST, resolve));
     const { port } = sentry.address() as AddressInfo;
     try {
       // a wrong setting: the bundle refuses to start, as on a broken Render deploy
@@ -57,7 +58,7 @@ describe('the bundle process with Sentry preloaded (node --import)', () => {
           cwd: root,
           // only these settings: nothing from the developer's own environment
           env: {
-            SENTRY_DSN: `http://public@127.0.0.1:${String(port)}/1`,
+            SENTRY_DSN: `http://public@${LOOPBACK_HOST}:${String(port)}/1`,
             RENDER: 'true',
             RENDER_GIT_COMMIT: 'commit-under-test',
             GATEWAY__PORT: 'not-a-port',
@@ -85,7 +86,7 @@ describe('the bundle process with Sentry preloaded (node --import)', () => {
     // takes the connection and never replies: Sentry's open request used to keep the process alive
     // without a port, so Render waited for a port until its deploy timed out (2026-10-27)
     const silent = createServer(() => undefined);
-    await new Promise<void>((resolve) => silent.listen(0, '127.0.0.1', resolve));
+    await new Promise<void>((resolve) => silent.listen(0, LOOPBACK_HOST, resolve));
     const { port } = silent.address() as AddressInfo;
     try {
       const child = spawn(
@@ -94,7 +95,7 @@ describe('the bundle process with Sentry preloaded (node --import)', () => {
         {
           cwd: root,
           env: {
-            SENTRY_DSN: `http://public@127.0.0.1:${String(port)}/1`,
+            SENTRY_DSN: `http://public@${LOOPBACK_HOST}:${String(port)}/1`,
             RENDER: 'true',
             GATEWAY__PORT: 'not-a-port',
             GATEWAY__LOG_LEVEL: 'silent',

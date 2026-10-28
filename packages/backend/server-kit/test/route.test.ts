@@ -9,6 +9,7 @@ import {
   AppError,
   createApp,
   createLogger,
+  LOOPBACK_HOST,
   mountRoute,
   type RunningServer,
   startServer,
@@ -84,7 +85,7 @@ async function serve(mount: (router: Router) => void) {
   const app = createApp({ logger, routes: (app) => app.use(router) });
   const server = await startServer(app, {
     port: 0,
-    host: '127.0.0.1',
+    host: LOOPBACK_HOST,
     logger,
     handleSignals: false,
   });

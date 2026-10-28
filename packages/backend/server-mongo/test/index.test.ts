@@ -7,6 +7,7 @@ import {
   AppError,
   createApp,
   createLogger,
+  LOOPBACK_HOST,
   type RunningServer,
   startServer,
   toErrorResponse,
@@ -757,7 +758,7 @@ describe('a route that replies after the commit', () => {
         });
       },
     });
-    server = await startServer(app, { port: 0, host: '127.0.0.1', logger, handleSignals: false });
+    server = await startServer(app, { port: 0, host: LOOPBACK_HOST, logger, handleSignals: false });
   });
   afterAll(async () => {
     await server.stop();

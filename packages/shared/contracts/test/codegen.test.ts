@@ -57,6 +57,10 @@ describe('generateFiles', () => {
       '/auth/login/{loginId}/totp/confirm',
       '/auth/refresh',
       '/auth/logout',
+      '/iam/me',
+      '/auth/sessions',
+      '/auth/sessions/{sessionId}',
+      '/auth/sessions/end-others',
     ]);
     const manifest = parsed('gateway-manifest.json') as {
       version: string;
@@ -78,6 +82,10 @@ describe('generateFiles', () => {
       'auth.login.totpConfirm',
       'auth.session.refresh',
       'auth.session.logout',
+      'iam.me.get',
+      'auth.sessions.list',
+      'auth.sessions.end',
+      'auth.sessions.endOthers',
     ]);
   });
 

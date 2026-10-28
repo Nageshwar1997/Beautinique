@@ -454,3 +454,105 @@ export const sessionReuseDetected = defineEvent({
 export const revokedSessionKey = (sessionId: string): string =>
   `bq:id:session-revoked:${sessionId}`;
 export const revokedUserKey = (userId: string): string => `bq:id:user-revoked:${userId}`;
+
+/** The ways an account signs in (identity_auth_providers). */
+export const AUTH_PROVIDERS = ['password', 'google', 'linkedin', 'github'] as const;
+
+/**
+ * Who is signed in, the first call of every app (ARCHITECTURE §7.2): the account, how it signs
+ * in, and this session. The app keeps nothing of it in browser storage. Grants come with T3.3.
+ */
+export const getMe = defineRoute({
+  id: 'iam.me.get',
+  method: 'GET',
+  path: '/iam/me',
+  summary: 'Who is signed in, and this session',
+  apps: APPS,
+  access: { type: 'signed-in' },
+  rateLimit: 'read',
+  idempotency: false,
+  stepUp: false,
+  owner: 'identity',
+  input: {},
+  output: object({
+    user: object({
+      userId: uuidv7Zod,
+      email: emailZod,
+      /** When the person declared being 18 or older (customer app); null until then */
+      ageDeclaredAt: isoDateTimeZod.nullable(),
+      signUpApp: zodEnum(APPS),
+      /** An account made with Google alone has no `password`: the app suggests setting one */
+      providers: array(zodEnum(AUTH_PROVIDERS)),
+      authenticator: boolean(),
+    }),
+    session: object({
+      sessionId: uuidv7Zod,
+      app: zodEnum(APPS),
+      expiresAt: isoDateTimeZod,
+    }),
+  }),
+});
+
+const sessionViewZod = object({
+  sessionId: uuidv7Zod,
+  app: zodEnum(APPS),
+  /** `Chrome on Windows` */
+  device: string(),
+  ip: string(),
+  createdAt: isoDateTimeZod,
+  lastSeenAt: isoDateTimeZod,
+  expiresAt: isoDateTimeZod,
+  /** This browser's session in this app */
+  current: boolean(),
+});
+
+/**
+ * My Devices: every session of the account that has not ended, in every app (owner, 2026-10-28),
+ * the newest first.
+ */
+export const listSessions = defineRoute({
+  id: 'auth.sessions.list',
+  method: 'GET',
+  path: '/auth/sessions',
+  summary: 'My Devices: the account’s sessions in every app',
+  apps: APPS,
+  access: { type: 'signed-in' },
+  rateLimit: 'read',
+  idempotency: false,
+  stepUp: false,
+  owner: 'identity',
+  input: {},
+  output: object({ sessions: array(sessionViewZod) }),
+});
+
+/** Ends one session of the account (another device, or this one). */
+export const endSession = defineRoute({
+  id: 'auth.sessions.end',
+  method: 'DELETE',
+  path: '/auth/sessions/:sessionId',
+  summary: 'Sign one device out',
+  apps: APPS,
+  access: { type: 'signed-in' },
+  rateLimit: 'auth',
+  idempotency: false,
+  stepUp: false,
+  owner: 'identity',
+  input: { params: object({ sessionId: uuidv7Zod }) },
+  output: object({ ended: boolean() }),
+});
+
+/** Ends every session of the account except this one. */
+export const endOtherSessions = defineRoute({
+  id: 'auth.sessions.endOthers',
+  method: 'POST',
+  path: '/auth/sessions/end-others',
+  summary: 'Sign every other device out',
+  apps: APPS,
+  access: { type: 'signed-in' },
+  rateLimit: 'auth',
+  idempotency: false,
+  stepUp: false,
+  owner: 'identity',
+  input: {},
+  output: object({ ended: number().int().min(0) }),
+});

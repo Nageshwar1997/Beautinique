@@ -284,6 +284,23 @@ const mutations: Mutation[] = [
     ],
     tests: 'own host',
   },
+  {
+    file: 'platform',
+    name: 'passport lives an hour',
+    change: [['export const PASSPORT_SECONDS = 60;', 'export const PASSPORT_SECONDS = 3600;']],
+    tests: 'passport',
+  },
+  {
+    file: 'catalogue/identity',
+    name: 'who signed in, answered to anyone',
+    change: [
+      [
+        "  path: '/iam/me',\n  summary: 'Who is signed in, and this session',\n  apps: APPS,\n  access: { type: 'signed-in' },",
+        "  path: '/iam/me',\n  summary: 'Who is signed in, and this session',\n  apps: APPS,\n  access: { type: 'public' },",
+      ],
+    ],
+    tests: 'need a session',
+  },
 ];
 
 export default mutations;

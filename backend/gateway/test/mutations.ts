@@ -305,6 +305,70 @@ const mutations: Mutation[] = [
     change: [['if (last === undefined || now - last.at >= reuseMs) {', 'if (true) {']],
     tests: 'every deployable and its checks',
   },
+  // sign-in at the gateway (T3.2 PR B)
+  {
+    file: 'sessions',
+    name: 'a token of any app',
+    change: [
+      ['          audience: tokenAudience(app),', "          audience: tokenAudience('customer'),"],
+    ],
+    tests: 'another app',
+  },
+  {
+    file: 'sessions',
+    name: 'an ended session passes',
+    change: [['ended === 1 || (since', '(since']],
+    tests: 'ended in Redis',
+  },
+  {
+    file: 'sessions',
+    name: 'a new password ends no token',
+    change: [
+      ['ended === 1 || (since !== null && claims.iat * 1000 <= Number(since))', 'ended === 1'],
+    ],
+    tests: 'ended in Redis',
+  },
+  {
+    file: 'sessions',
+    name: 'tokens issued after the end refused too',
+    change: [['claims.iat * 1000 <= Number(since)', 'since !== ""']],
+    tests: 'ended in Redis',
+  },
+  {
+    file: 'sessions',
+    name: 'unreadable keys taken for a bad token',
+    change: [
+      [
+        '        known = await keys.keysFor(tokenKeyId(token));\n      } catch (error) {\n        throw unavailable(error);',
+        '        known = await keys.keysFor(tokenKeyId(token));\n      } catch (error) {\n        throw signIn(error);',
+      ],
+    ],
+    tests: 'fails closed',
+  },
+  {
+    file: 'proxy',
+    name: 'a client’s passport goes on',
+    change: [['  HEADERS.passport.toLowerCase(),\n', '']],
+    tests: 'no passport for a public route',
+  },
+  {
+    file: 'proxy',
+    name: 'permission routes open to anyone signed in',
+    change: [["      if (route.access.type === 'permission') {", '      if (false) {']],
+    tests: 'permission route',
+  },
+  {
+    file: 'proxy',
+    name: 'passport for every owner',
+    change: [['passportAudience(route.owner)', "passportAudience('identity')"]],
+    tests: '60-second passport',
+  },
+  {
+    file: 'proxy',
+    name: 'no passport to the owner',
+    change: [['  if (passport) headers[HEADERS.passport.toLowerCase()] = passport;\n', '']],
+    tests: '60-second passport',
+  },
 ];
 
 export default mutations;

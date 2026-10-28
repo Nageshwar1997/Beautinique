@@ -52,6 +52,7 @@
     "zod": "^4.6.7"
   },
   "dependencies": {
+    "@beautinique/backend-server-crypto": "^1.0.0",
     "@beautinique/shared-contracts": "^1.0.0",
     "@beautinique/shared-utils": "^2.0.0",
     "@beautinique/shared-zod": "^2.0.0",

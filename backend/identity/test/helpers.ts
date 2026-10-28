@@ -7,7 +7,12 @@ import { createServer, type Server } from 'node:http';
 import type { AddressInfo } from 'node:net';
 
 import { decryptField, generateKey, loadSealingKeys } from '@beautinique/backend-server-crypto';
-import { createLogger } from '@beautinique/backend-server-kit';
+import {
+  createLogger,
+  LOOPBACK_HOST,
+  type PassportSigner,
+  passportSigner,
+} from '@beautinique/backend-server-kit';
 import { connectMongo } from '@beautinique/backend-server-mongo';
 import { OUTBOX } from '@beautinique/backend-server-queue';
 import { otpSealContext } from '@beautinique/shared-contracts';
@@ -55,14 +60,19 @@ async function startHibp(): Promise<{ url: string; server: Server }> {
     if (prefix === sha1.slice(0, 5)) lines.push(`${sha1.slice(5)}:52`);
     res.writeHead(200, { 'content-type': 'text/plain' }).end(lines.join('\r\n'));
   });
-  await new Promise<void>((resolve) => server.listen(0, '127.0.0.1', resolve));
-  return { url: `http://127.0.0.1:${String((server.address() as AddressInfo).port)}`, server };
+  await new Promise<void>((resolve) => server.listen(0, LOOPBACK_HOST, resolve));
+  return {
+    url: `http://${LOOPBACK_HOST}:${String((server.address() as AddressInfo).port)}`,
+    server,
+  };
 }
 
 export interface Harness {
   server: RunningIdentity;
   runId: string;
   prefix: string;
+  /** Signs passports the way the gateway does (identity has its public key) */
+  passport: PassportSigner;
   start(more?: Record<string, string>): Promise<RunningIdentity>;
   stop(): Promise<void>;
 }
@@ -87,12 +97,14 @@ export async function startHarness(name: string): Promise<Harness> {
     IDENTITY__HIBP_URL: fake.url,
     ...more,
   });
+  const passport = passportSigner();
   const startOne = (more: Record<string, string> = {}) =>
     start(readConfig({ env: env(more) }), {
       port: 0,
-      host: '127.0.0.1',
+      host: LOOPBACK_HOST,
       handleSignals: false,
       runtime: { queuePrefix: prefix, epochKey: `${prefix}:epoch`, pollMs: 100 },
+      passportJwks: passport.jwks,
     });
   const server = await startOne();
   otpKeysOf.set(server, loadSealingKeys(otpEventKeys));
@@ -100,6 +112,7 @@ export async function startHarness(name: string): Promise<Harness> {
   return {
     server,
     runId,
+    passport,
     prefix,
     start: async (more) => {
       const other = await startOne(more);
