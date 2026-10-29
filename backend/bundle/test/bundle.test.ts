@@ -2,8 +2,10 @@ import { randomBytes, randomUUID } from 'node:crypto';
 import { type AddressInfo, createServer } from 'node:net';
 
 import { ConfigError, createLogger } from '@beautinique/backend-server-kit';
-import { connectMongo } from '@beautinique/backend-server-mongo';
-import { connectRedis } from '@beautinique/backend-server-queue';
+import { connectMongo, withTransaction } from '@beautinique/backend-server-mongo';
+import { connectRedis, writeEvent } from '@beautinique/backend-server-queue';
+import { invitationCreated } from '@beautinique/shared-contracts';
+import { uuidv7 } from '@beautinique/shared-utils';
 import { afterAll, describe, expect, it } from 'vitest';
 
 import { startBundle } from '../src/bundle.ts';
@@ -259,6 +261,141 @@ describe('bundle', () => {
       // the same access cookie stops at once (Redis), not when its 10 minutes run out
       expect((await signedInGet('/iam/me')).status).toBe(401);
     } finally {
+      await bundle.stop();
+      await fetch('http://localhost:8025/api/v1/messages', {
+        method: 'DELETE',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({ IDs: mailIds }),
+      });
+    }
+  });
+
+  it('takes an invitation from identity’s outbox to the inbox, and its acceptance through the gateway (T3.3)', async () => {
+    const bundle = await startBundle({ port: 0, env: quiet() });
+    const email = `invited-${randomUUID().slice(0, 8)}@beautinique.example`;
+    const logger = createLogger({ name: 'bundle-test', level: 'silent' });
+    const identityDb = await connectMongo({
+      uri: MONGO_URI,
+      dbName: identityDbName,
+      appName: 'bundle-test',
+      logger,
+    });
+    const mailIds: string[] = [];
+    interface Found {
+      messages: { ID: string; Subject: string; Snippet: string }[];
+    }
+    /** The newest email to the invited address with this subject, once it reached Mailpit. */
+    const mail = async (subject: string) => {
+      const search = `http://localhost:8025/api/v1/search?query=${encodeURIComponent(`to:${email} subject:"${subject}"`)}`;
+      const end = Date.now() + 10_000;
+      for (;;) {
+        const found = (await (await fetch(search)).json()) as Found;
+        const first = found.messages[0];
+        if (first) {
+          mailIds.push(...found.messages.map((m) => m.ID));
+          return first;
+        }
+        if (Date.now() > end) throw new Error(`no "${subject}" email reached Mailpit`);
+        await new Promise((resolve) => setTimeout(resolve, 100));
+      }
+    };
+    try {
+      // what POST /iam/invitations writes (its route opens at the gateway with T3.3 PR C): a
+      // Master who invites, the invitation, and its event in the same transaction
+      const inviter = uuidv7();
+      const invitationId = uuidv7();
+      const now = new Date();
+      const expiresAt = new Date(now.getTime() + 7 * 86_400_000);
+      await withTransaction(identityDb, async (session) => {
+        await identityDb.db
+          .collection<Record<string, unknown> & { _id: string }>('identity_grants')
+          .insertOne(
+            {
+              _id: uuidv7(),
+              userId: inviter,
+              role: 'master.master',
+              app: 'master',
+              scope: { type: 'global', ids: [] },
+              validFrom: null,
+              validTo: null,
+              grantedBy: null,
+              approvedBy: null,
+              via: 'bootstrap',
+              active: true,
+              createdAt: now,
+              endedAt: null,
+              endedBy: null,
+            },
+            { session },
+          );
+        await identityDb.db
+          .collection<Record<string, unknown> & { _id: string }>('identity_invitations')
+          .insertOne(
+            {
+              _id: invitationId,
+              email,
+              role: 'support.l1_agent',
+              app: 'support',
+              scope: { type: 'global', ids: [] },
+              validFrom: null,
+              validTo: null,
+              invitedBy: inviter,
+              invitedFrom: 'master',
+              status: 'pending',
+              expiresAt,
+              createdAt: now,
+              endedAt: null,
+              endedBy: null,
+            },
+            { session },
+          );
+        await writeEvent(identityDb, session, invitationCreated, {
+          aggregate: { type: 'invitation', id: invitationId },
+          actor: { type: 'user', id: inviter },
+          correlationId: `bundle-${invitationId}`,
+          data: {
+            invitationId,
+            email,
+            app: 'support',
+            roleName: 'Customer Support Agent (L1)',
+            expiresAt: expiresAt.toISOString(),
+          },
+        });
+      });
+      const invited = await mail('You are invited to Beautinique Support');
+      expect(invited.Snippet).toContain('Customer Support Agent (L1)');
+
+      const headers = {
+        'X-BQ-App': 'support',
+        'x-origin-secret': ORIGIN_SECRET,
+        'content-type': 'application/json',
+      };
+      const asked = await fetch(`${bundle.url}/api/v1/auth/invitations/code`, {
+        method: 'POST',
+        headers,
+        body: JSON.stringify({ email }),
+      });
+      expect(asked.status).toBe(200);
+      const { data } = (await asked.json()) as { data: { challengeId: string } };
+      const coded = await mail('Accept your Beautinique Support invitation');
+      const code = /\b(\d{6})\b/.exec(coded.Snippet)?.[1] ?? '';
+      const accepted = await fetch(`${bundle.url}/api/v1/auth/otp/${data.challengeId}/verify`, {
+        method: 'POST',
+        headers,
+        body: JSON.stringify({ code, password: 'a support desk password, long' }),
+      });
+      expect(accepted.status).toBe(200);
+      expect(await accepted.json()).toMatchObject({
+        data: { email, outcome: 'invite-accepted', signedIn: false },
+      });
+      const signIn = await fetch(`${bundle.url}/api/v1/auth/login`, {
+        method: 'POST',
+        headers,
+        body: JSON.stringify({ email, password: 'a support desk password, long' }),
+      });
+      expect(await signIn.json()).toMatchObject({ data: { next: 'totp-enroll' } });
+    } finally {
+      await identityDb.close();
       await bundle.stop();
       await fetch('http://localhost:8025/api/v1/messages', {
         method: 'DELETE',

@@ -21,6 +21,7 @@ import {
   type WipeWatchdog,
 } from '@beautinique/backend-server-queue';
 import {
+  invitationCreated,
   otpRequested,
   passportAudience,
   sessionReuseDetected,
@@ -35,11 +36,13 @@ import { type SigningKeys, signingKeys } from './signing-keys.ts';
 
 /**
  * Who gets identity's events (the relay's list): notify emails the code, and tells a person when
- * a copied refresh token ended their session (backend/notify).
+ * a copied refresh token ended their session, and tells an invited person how to accept
+ * (backend/notify).
  */
 export const SUBSCRIBERS: Readonly<Record<string, readonly string[]>> = {
   [otpRequested.type]: ['notify.otpEmail'],
   [sessionReuseDetected.type]: ['notify.securityEmail'],
+  [invitationCreated.type]: ['notify.invitationEmail'],
 };
 
 export interface RuntimeOptions {

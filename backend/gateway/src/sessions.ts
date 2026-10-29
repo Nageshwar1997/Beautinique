@@ -4,6 +4,7 @@ import type { RedisConnection } from '@beautinique/backend-server-queue';
 import {
   accessCookieName,
   type AppId,
+  authzVersionKey,
   revokedSessionKey,
   revokedUserKey,
   TOKEN_ISSUER,
@@ -38,8 +39,8 @@ const unavailable = (cause: unknown) =>
 /**
  * The gateway's sign-in check (ARCHITECTURE §7.2): the app's own access cookie, an ES256 token of
  * identity's (its JWKS) for this app (`aud`), not expired; and in Redis, not ended since it was
- * issued (logout, a copied refresh token, a new password). Redis or the JWKS away: 503, never a
- * pass (fail closed).
+ * issued (logout, a copied refresh token, a new password), and no grant change since (its `av`).
+ * Redis or the JWKS away: 503, never a pass (fail closed).
  */
 export function sessionGate({
   keys,
@@ -74,27 +75,35 @@ export function sessionGate({
         throw error;
       }
       const sessionId = String(claims.sid);
+      const authzVersion = typeof claims.av === 'number' ? claims.av : 0;
       let ended: number;
       let since: string | null;
+      let current: string | null;
       try {
         const answers = (await redis
           .multi()
           .exists(revokedSessionKey(sessionId))
           .get(revokedUserKey(claims.sub))
-          .exec()) as [[Error | null, number], [Error | null, string | null]] | null;
-        if (!answers || answers[0][0] || answers[1][0]) throw new Error('Redis did not answer');
-        [[, ended], [, since]] = answers;
+          .get(authzVersionKey(claims.sub))
+          .exec()) as
+          | [[Error | null, number], [Error | null, string | null], [Error | null, string | null]]
+          | null;
+        if (!answers || answers.some(([error]) => error)) throw new Error('Redis did not answer');
+        [[, ended], [, since], [, current]] = answers;
       } catch (error) {
         throw unavailable(error);
       }
       // a token issued before every session of the account ended (in whole seconds: one issued in
       // the same second as the end counts as before it)
       if (ended === 1 || (since !== null && claims.iat * 1000 <= Number(since))) throw signIn();
+      // the account's grants changed after this token (ARCHITECTURE §7.2): 401, so the app
+      // refreshes and the new token carries the grants of now (or the session ends there)
+      if (current !== null && Number(current) > authzVersion) throw signIn();
       return {
         userId: claims.sub,
         sessionId,
         methods: Array.isArray(claims.amr) ? claims.amr.map(String) : [],
-        authzVersion: typeof claims.av === 'number' ? claims.av : 0,
+        authzVersion,
       };
     },
   };

@@ -23,6 +23,8 @@ Sab deployables ek process me: `npm run dev:backend` (`backend/bundle`).
 4. `email.sendDue` (transaction ke bahar) jo due hai wo bhejta hai: pehle OTP, phir transactional, phir baaki. Har row lease ke saath claim hoti hai, code wahin khulta hai, provider ko jaata hai, aur `sent` hone pe (ya `failed`/`expired`) sealed code row se hat jaata hai.
 5. Har minute bhi `email.sendDue` chalta hai: retries aur chhoota hua trigger.
 
+**Doosre emails (transactional lane):** `identity.session.reuseDetected` → `notify.securityEmail` ("We signed you out"); `identity.invitation.created` → `notify.invitationEmail` ("You are invited to <app>": role, accept kaise karein, kab tak; koi secret nahi, invitation ke khatam hone ke baad nahi jaata). App ka link `NOTIFY__APP_URLS` se; us app ka URL na ho to email me sirf app ka naam. Invitation accept karne ka code purpose `invite` ke saath OTP lane me ("Accept your <app> invitation").
+
 **Niyam:**
 
 - **Din ka budget** (Brevo free 300/din): `notify_email_days` me UTC din ki ginti. `NOTIFY__EMAIL_OTHER_LIMIT` (250) ke baad sirf OTP aur transactional; baaki agle UTC din. `NOTIFY__EMAIL_DAILY_LIMIT` (300) pe OTP bhi `failed` (`DAILY_LIMIT`, error log). Brevo ka din kab reset hota hai, docs me nahi mila, isliye UTC.
@@ -35,14 +37,15 @@ Sab deployables ek process me: `npm run dev:backend` (`backend/bundle`).
 
 `.env.example` ka LOCAL hissa `.env` me copy karo (commit kabhi nahi); OPTIONAL me defaults, PRODUCTION me live ki keys dummy values ke saath. Har key `NOTIFY__` se shuru hoti hai, taaki bundle mode me ek process me sab deployables ki keys alag rahein. Settings sirf [src/config.ts](src/config.ts) padhta hai (zod se check; ESLint baaki jagah `process.env` rokta hai). Nayi setting = `configZod` me key + `.env.example` me line.
 
-| Key                                                       | Laptop                            | Live (Render)                                     |
-| --------------------------------------------------------- | --------------------------------- | ------------------------------------------------- |
-| `NOTIFY__MONGO_URI`, `NOTIFY__REDIS_URL`                  | local Mongo, Valkey               | Atlas user `bq-notify`, Render Key Value internal |
-| `NOTIFY__EMAIL_TRANSPORT`                                 | `mailpit`                         | `brevo` (koi default nahi)                        |
-| `NOTIFY__BREVO_API_KEY`                                   | khaali                            | Brevo API key (secret)                            |
-| `NOTIFY__EMAIL_FROM` / `NOTIFY__EMAIL_FROM_NAME`          | `no-reply@beautinique.example`    | Brevo me verified sender                          |
-| `NOTIFY__OTP_EVENT_KEYS`                                  | public laptop key (32 zero bytes) | nayi random key, `IDENTITY__OTP_EVENT_KEYS` jaisi |
-| `NOTIFY__EMAIL_DAILY_LIMIT` / `NOTIFY__EMAIL_OTHER_LIMIT` | 300 / 250                         | 300 / 250                                         |
+| Key                                                       | Laptop                                                       | Live (Render)                                                 |
+| --------------------------------------------------------- | ------------------------------------------------------------ | ------------------------------------------------------------- |
+| `NOTIFY__MONGO_URI`, `NOTIFY__REDIS_URL`                  | local Mongo, Valkey                                          | Atlas user `bq-notify`, Render Key Value internal             |
+| `NOTIFY__EMAIL_TRANSPORT`                                 | `mailpit`                                                    | `brevo` (koi default nahi)                                    |
+| `NOTIFY__BREVO_API_KEY`                                   | khaali                                                       | Brevo API key (secret)                                        |
+| `NOTIFY__EMAIL_FROM` / `NOTIFY__EMAIL_FROM_NAME`          | `no-reply@beautinique.example`                               | Brevo me verified sender                                      |
+| `NOTIFY__OTP_EVENT_KEYS`                                  | public laptop key (32 zero bytes)                            | nayi random key, `IDENTITY__OTP_EVENT_KEYS` jaisi             |
+| `NOTIFY__EMAIL_DAILY_LIMIT` / `NOTIFY__EMAIL_OTHER_LIMIT` | 300 / 250                                                    | 300 / 250                                                     |
+| `NOTIFY__APP_URLS` (optional)                             | `customer=http://localhost:3001,admin=http://localhost:3003` | `customer=https://<customer host>`, har app live hone pe jodo |
 
 Laptop pe emails http://localhost:8025 (Mailpit) me dikhti hain, kisi asli inbox me nahi.
 

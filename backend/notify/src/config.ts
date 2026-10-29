@@ -1,4 +1,5 @@
 import { loadConfig, type LoadConfigOptions } from '@beautinique/backend-server-kit';
+import { type AppId, APPS } from '@beautinique/shared-contracts';
 import {
   coerce,
   emailZod,
@@ -8,6 +9,9 @@ import {
   string,
   url,
 } from '@beautinique/shared-zod';
+
+/** An app's address: https, or http on the laptop. */
+const APP_URL = /^(?:https:\/\/[a-z0-9.-]+(?::\d+)?|http:\/\/localhost(?::\d+)?)$/;
 
 /**
  * notify settings from NOTIFY__* env vars, namespaced so backend/bundle can run every deployable
@@ -43,6 +47,35 @@ export const configZod = object({
   emailDailyLimit: coerce.number().int().min(1).default(300),
   /** After this many in a day, only sign-in codes and transactional emails go; the rest wait a day. */
   emailOtherLimit: coerce.number().int().min(0).default(250),
+  /**
+   * Where each app lives, for the links in emails: `customer=https://bq-customer.vercel.app,admin=...`
+   * (https, or http on localhost). An app left out gets an email without a link.
+   */
+  appUrls: string()
+    .default('')
+    .transform((value, ctx) => {
+      const urls = new Map<AppId, string>();
+      for (const entry of value
+        .split(',')
+        .map((part) => part.trim())
+        .filter(Boolean)) {
+        const at = entry.indexOf('=');
+        const app = entry.slice(0, at).trim();
+        const link = entry
+          .slice(at + 1)
+          .trim()
+          .replace(/\/+$/, '');
+        if (at < 1 || !(APPS as readonly string[]).includes(app) || !APP_URL.test(link)) {
+          ctx.addIssue({
+            code: 'custom',
+            message: `"${entry}" is not <app>=<https url> (apps: ${APPS.join(', ')})`,
+          });
+          continue;
+        }
+        urls.set(app as AppId, link);
+      }
+      return urls;
+    }),
 }).superRefine((config, context) => {
   if (config.emailTransport === 'brevo' && config.brevoApiKey === undefined) {
     context.addIssue({

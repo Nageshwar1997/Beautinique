@@ -3,10 +3,17 @@ import {
   type AppId,
   APPS,
   confirmTotpEnroll,
+  createInvitation,
+  createRole,
+  endGrant,
   endOtherSessions,
   endSession,
   getMe,
+  giveGrant,
   HEADERS,
+  listGrants,
+  listInvitations,
+  listRoles,
   listSessions,
   loginRecovery,
   loginTotp,
@@ -14,11 +21,14 @@ import {
   passwordLogin,
   refreshCookieName,
   refreshSession,
+  requestInvitationCode,
   requestPasswordCode,
   requestSignUpCode,
   resendOtp,
+  revokeInvitation,
   SIGN_UP_APPS,
   startTotpEnroll,
+  updateRole,
   verifyOtp,
 } from '@beautinique/shared-contracts';
 import { type Request, Router } from 'express';
@@ -27,6 +37,8 @@ import { clearSessionCookies, cookieOf, setSessionCookies, signedIn } from '../c
 import * as login from '../login.ts';
 import { me, myDevices } from '../me.ts';
 import { type OtpDeps, requestCode, resendCode, verifyCode } from '../otp.ts';
+import * as invitations from '../rbac/invitations.ts';
+import * as manage from '../rbac/manage.ts';
 import type { Client } from '../sessions.ts';
 
 /**
@@ -190,6 +202,53 @@ export function routesOf(deps: OtpDeps): Router {
     const passport = await deps.passport(req);
     return { ended: await deps.sessions.endOthers(passport.userId, passport.sessionId) };
   });
+
+  // roles, grants and invitations (TASKS T3.3): identity checks who may, from its own grants
+  mountRoute(router, listRoles, async ({ query }, { req }) =>
+    manage.listRoles(deps, await deps.passport(req), query),
+  );
+
+  mountRoute(router, createRole, async ({ body }, { req }) =>
+    manage.createRole(deps, await deps.passport(req), body),
+  );
+
+  mountRoute(router, updateRole, async ({ params, body }, { req }) =>
+    manage.updateRole(deps, await deps.passport(req), params.roleKey, body),
+  );
+
+  mountRoute(router, listGrants, async ({ query }, { req }) =>
+    manage.listGrants(deps, await deps.passport(req), query),
+  );
+
+  mountRoute(router, giveGrant, async ({ body }, { req }) =>
+    manage.giveGrant(deps, await deps.passport(req), body),
+  );
+
+  mountRoute(router, endGrant, async ({ params }, { req }) =>
+    manage.endGrant(deps, await deps.passport(req), params.grantId),
+  );
+
+  mountRoute(router, createInvitation, async ({ body }, { req, requestId }) =>
+    invitations.createInvitation(deps, await deps.passport(req), body, requestId),
+  );
+
+  mountRoute(router, listInvitations, async ({ query }, { req }) =>
+    invitations.listInvitations(deps, await deps.passport(req), query),
+  );
+
+  mountRoute(router, revokeInvitation, async ({ params }, { req }) =>
+    invitations.revokeInvitation(deps, await deps.passport(req), params.invitationId),
+  );
+
+  mountRoute(router, requestInvitationCode, ({ body }, { req, requestId }) =>
+    requestCode(deps, {
+      app: appOf(req),
+      email: body.email,
+      purpose: 'invite',
+      consent: body.consent,
+      requestId,
+    }),
+  );
 
   return router;
 }

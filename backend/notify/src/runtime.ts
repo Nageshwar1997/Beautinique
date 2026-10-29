@@ -17,7 +17,13 @@ import {
 } from '@beautinique/backend-server-queue';
 
 import type { Config } from './config.ts';
-import { otpSubscription, securitySubscription, SEND_TASK, sendDue } from './deliveries.ts';
+import {
+  invitationSubscription,
+  otpSubscription,
+  securitySubscription,
+  SEND_TASK,
+  sendDue,
+} from './deliveries.ts';
 import { brevoSender } from './email/brevo.ts';
 import { mailpitSender } from './email/mailpit.ts';
 import type { EmailSender } from './email/port.ts';
@@ -111,6 +117,7 @@ export async function startRuntime(config: Config, options: RuntimeOptions): Pro
           logger,
           trigger,
           limits: { daily: config.emailDailyLimit, other: config.emailOtherLimit },
+          appUrls: config.appUrls,
         });
       }),
       heartbeatTask(mongo, SCHEDULES, logger),
@@ -125,6 +132,7 @@ export async function startRuntime(config: Config, options: RuntimeOptions): Pro
         subscriptions: [
           otpSubscription({ mongo, trigger, logger }),
           securitySubscription({ mongo, trigger, logger }),
+          invitationSubscription({ mongo, trigger, logger }),
         ],
         tasks,
         prefix,

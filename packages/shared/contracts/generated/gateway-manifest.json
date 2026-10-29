@@ -453,6 +453,275 @@
       "idempotency": false,
       "stepUp": false,
       "cache": null
+    },
+    {
+      "id": "iam.roles.list",
+      "method": "GET",
+      "path": "/iam/roles",
+      "owner": "identity",
+      "apps": [
+        "customer",
+        "seller",
+        "admin",
+        "superadmin",
+        "master",
+        "support",
+        "finance",
+        "logistics",
+        "delivery",
+        "growth",
+        "creator"
+      ],
+      "access": {
+        "type": "permission",
+        "permission": "iam.grant.read"
+      },
+      "rateLimit": "read",
+      "idempotency": false,
+      "stepUp": false,
+      "cache": null
+    },
+    {
+      "id": "iam.roles.create",
+      "method": "POST",
+      "path": "/iam/roles",
+      "owner": "identity",
+      "apps": [
+        "customer",
+        "seller",
+        "admin",
+        "superadmin",
+        "master",
+        "support",
+        "finance",
+        "logistics",
+        "delivery",
+        "growth",
+        "creator"
+      ],
+      "access": {
+        "type": "permission",
+        "permission": "iam.role.manage"
+      },
+      "rateLimit": "write",
+      "idempotency": false,
+      "stepUp": true,
+      "cache": null
+    },
+    {
+      "id": "iam.roles.update",
+      "method": "PATCH",
+      "path": "/iam/roles/:roleKey",
+      "owner": "identity",
+      "apps": [
+        "customer",
+        "seller",
+        "admin",
+        "superadmin",
+        "master",
+        "support",
+        "finance",
+        "logistics",
+        "delivery",
+        "growth",
+        "creator"
+      ],
+      "access": {
+        "type": "permission",
+        "permission": "iam.role.manage"
+      },
+      "rateLimit": "write",
+      "idempotency": false,
+      "stepUp": true,
+      "cache": null
+    },
+    {
+      "id": "iam.grants.list",
+      "method": "GET",
+      "path": "/iam/grants",
+      "owner": "identity",
+      "apps": [
+        "customer",
+        "seller",
+        "admin",
+        "superadmin",
+        "master",
+        "support",
+        "finance",
+        "logistics",
+        "delivery",
+        "growth",
+        "creator"
+      ],
+      "access": {
+        "type": "permission",
+        "permission": "iam.grant.read"
+      },
+      "rateLimit": "read",
+      "idempotency": false,
+      "stepUp": false,
+      "cache": null
+    },
+    {
+      "id": "iam.grants.give",
+      "method": "POST",
+      "path": "/iam/grants",
+      "owner": "identity",
+      "apps": [
+        "customer",
+        "seller",
+        "admin",
+        "superadmin",
+        "master",
+        "support",
+        "finance",
+        "logistics",
+        "delivery",
+        "growth",
+        "creator"
+      ],
+      "access": {
+        "type": "permission",
+        "permission": "iam.grant.manage"
+      },
+      "rateLimit": "write",
+      "idempotency": false,
+      "stepUp": true,
+      "cache": null
+    },
+    {
+      "id": "iam.grants.end",
+      "method": "POST",
+      "path": "/iam/grants/:grantId/end",
+      "owner": "identity",
+      "apps": [
+        "customer",
+        "seller",
+        "admin",
+        "superadmin",
+        "master",
+        "support",
+        "finance",
+        "logistics",
+        "delivery",
+        "growth",
+        "creator"
+      ],
+      "access": {
+        "type": "permission",
+        "permission": "iam.grant.manage"
+      },
+      "rateLimit": "write",
+      "idempotency": false,
+      "stepUp": true,
+      "cache": null
+    },
+    {
+      "id": "iam.invitations.create",
+      "method": "POST",
+      "path": "/iam/invitations",
+      "owner": "identity",
+      "apps": [
+        "customer",
+        "seller",
+        "admin",
+        "superadmin",
+        "master",
+        "support",
+        "finance",
+        "logistics",
+        "delivery",
+        "growth",
+        "creator"
+      ],
+      "access": {
+        "type": "permission",
+        "permission": "iam.grant.manage"
+      },
+      "rateLimit": "write",
+      "idempotency": false,
+      "stepUp": true,
+      "cache": null
+    },
+    {
+      "id": "iam.invitations.list",
+      "method": "GET",
+      "path": "/iam/invitations",
+      "owner": "identity",
+      "apps": [
+        "customer",
+        "seller",
+        "admin",
+        "superadmin",
+        "master",
+        "support",
+        "finance",
+        "logistics",
+        "delivery",
+        "growth",
+        "creator"
+      ],
+      "access": {
+        "type": "permission",
+        "permission": "iam.grant.read"
+      },
+      "rateLimit": "read",
+      "idempotency": false,
+      "stepUp": false,
+      "cache": null
+    },
+    {
+      "id": "iam.invitations.revoke",
+      "method": "POST",
+      "path": "/iam/invitations/:invitationId/revoke",
+      "owner": "identity",
+      "apps": [
+        "customer",
+        "seller",
+        "admin",
+        "superadmin",
+        "master",
+        "support",
+        "finance",
+        "logistics",
+        "delivery",
+        "growth",
+        "creator"
+      ],
+      "access": {
+        "type": "permission",
+        "permission": "iam.grant.manage"
+      },
+      "rateLimit": "write",
+      "idempotency": false,
+      "stepUp": true,
+      "cache": null
+    },
+    {
+      "id": "auth.invitations.code",
+      "method": "POST",
+      "path": "/auth/invitations/code",
+      "owner": "identity",
+      "apps": [
+        "customer",
+        "seller",
+        "admin",
+        "superadmin",
+        "master",
+        "support",
+        "finance",
+        "logistics",
+        "delivery",
+        "growth",
+        "creator"
+      ],
+      "access": {
+        "type": "public"
+      },
+      "rateLimit": "otp",
+      "idempotency": false,
+      "stepUp": false,
+      "cache": null
     }
   ]
 }

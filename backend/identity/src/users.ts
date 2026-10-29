@@ -1,4 +1,4 @@
-import type { IndexSpec, Mongo } from '@beautinique/backend-server-mongo';
+import type { ClientSession, IndexSpec, Mongo } from '@beautinique/backend-server-mongo';
 import { withTransaction } from '@beautinique/backend-server-mongo';
 import type { AppId, OTP_OUTCOMES } from '@beautinique/shared-contracts';
 import { uuidv7 } from '@beautinique/shared-utils';
@@ -73,72 +73,115 @@ export interface SignUpWithCode {
  */
 export async function signUpWithCode(
   mongo: Mongo,
-  { email, app, consent, legalVersion, ip, passwordHash }: SignUpWithCode,
+  input: SignUpWithCode,
 ): Promise<{ user: User; outcome: (typeof OTP_OUTCOMES)[number] }> {
-  const users = mongo.db.collection<User>(USERS);
-  const acceptances = mongo.db.collection<LegalAcceptance>(LEGAL_ACCEPTANCES);
   return withTransaction(mongo, async (session) => {
     const now = new Date();
-    const made = await users.updateOne(
-      { email },
-      {
-        $setOnInsert: {
-          _id: uuidv7(),
-          email,
-          status: 'active',
-          emailVerifiedAt: now,
-          ageDeclaredAt: consent.adult ? now : null,
-          signUpApp: app,
-          createdAt: now,
-          updatedAt: now,
-        },
-      },
-      { upsert: true, session },
-    );
-    const isNewUser = made.upsertedCount === 1;
-    const user = await users.findOne({ email }, { session });
-    if (!user) throw new Error('the account just written is not there');
-    let declaredNow = false;
-    if (!isNewUser && consent.adult && user.ageDeclaredAt === null) {
-      await users.updateOne(
-        { _id: user._id },
-        { $set: { ageDeclaredAt: now, updatedAt: now } },
-        { session },
-      );
-      user.ageDeclaredAt = now;
-      declaredNow = true;
-    }
-    if (consent.terms) {
-      // one row per new consent: per app and legal version, not per code
-      const known = await acceptances.findOne(
-        { userId: user._id, app, version: legalVersion },
-        { session, projection: { _id: 1 } },
-      );
-      if (isNewUser || declaredNow || !known) {
-        await acceptances.insertOne(
-          {
-            _id: uuidv7(),
-            userId: user._id,
-            documents: ['terms', 'privacy'],
-            version: legalVersion,
-            adult: consent.adult,
-            app,
-            ip,
-            acceptedAt: now,
-          },
-          { session },
-        );
-      }
-    }
+    const { user, isNewUser } = await accountWithCode(mongo, session, { ...input, now });
     // the app's sign-up role (ARCHITECTURE §7.1); a customer sign-up never gets here without the
     // 18+ declaration (consentProblems), so Customer always follows it
-    await giveSignUpGrant(mongo, session, { userId: user._id, app, now });
-    if (!isNewUser && (await hasPassword(mongo, user._id, session))) {
-      return { user, outcome: 'password-kept' as const };
-    }
-    await storePassword(mongo, session, { userId: user._id, hash: passwordHash, now });
-    return { user, outcome: isNewUser ? ('account-made' as const) : ('password-set' as const) };
+    await giveSignUpGrant(mongo, session, { userId: user._id, app: input.app, now });
+    const password = await passwordWithCode(mongo, session, {
+      user,
+      isNewUser,
+      passwordHash: input.passwordHash,
+      now,
+    });
+    return { user, outcome: password };
   });
+}
+
+/**
+ * What a right code with a password does to the password: a new account gets it
+ * (`account-made`), an account without one gets it (`password-set`), an account with one keeps
+ * it (`password-kept`, one password for every app).
+ */
+export async function passwordWithCode(
+  mongo: Mongo,
+  session: ClientSession,
+  {
+    user,
+    isNewUser,
+    passwordHash,
+    now,
+  }: { user: User; isNewUser: boolean; passwordHash: string; now: Date },
+): Promise<'account-made' | 'password-set' | 'password-kept'> {
+  if (!isNewUser && (await hasPassword(mongo, user._id, session))) return 'password-kept';
+  await storePassword(mongo, session, { userId: user._id, hash: passwordHash, now });
+  return isNewUser ? 'account-made' : 'password-set';
+}
+
+/**
+ * The account of a right code (email proven): made if there is none (an upsert, so two codes at
+ * once make one), with the app's consent as legal evidence: a first one in this app, a new legal
+ * version, or a first 18-or-older declaration is recorded.
+ */
+export async function accountWithCode(
+  mongo: Mongo,
+  session: ClientSession,
+  {
+    email,
+    app,
+    consent,
+    legalVersion,
+    ip,
+    now,
+  }: Omit<SignUpWithCode, 'passwordHash'> & { now: Date },
+): Promise<{ user: User; isNewUser: boolean }> {
+  const users = mongo.db.collection<User>(USERS);
+  const acceptances = mongo.db.collection<LegalAcceptance>(LEGAL_ACCEPTANCES);
+  const made = await users.updateOne(
+    { email },
+    {
+      $setOnInsert: {
+        _id: uuidv7(),
+        email,
+        status: 'active',
+        emailVerifiedAt: now,
+        ageDeclaredAt: consent.adult ? now : null,
+        signUpApp: app,
+        createdAt: now,
+        updatedAt: now,
+      },
+    },
+    { upsert: true, session },
+  );
+  const isNewUser = made.upsertedCount === 1;
+  const user = await users.findOne({ email }, { session });
+  if (!user) throw new Error('the account just written is not there');
+  let declaredNow = false;
+  if (!isNewUser && consent.adult && user.ageDeclaredAt === null) {
+    await users.updateOne(
+      { _id: user._id },
+      { $set: { ageDeclaredAt: now, updatedAt: now } },
+      { session },
+    );
+    user.ageDeclaredAt = now;
+    declaredNow = true;
+  }
+  if (consent.terms) {
+    // one row per new consent: per app and legal version, not per code
+    const known = await acceptances.findOne(
+      { userId: user._id, app, version: legalVersion },
+      { session, projection: { _id: 1 } },
+    );
+    if (isNewUser || declaredNow || !known) {
+      await acceptances.insertOne(
+        {
+          _id: uuidv7(),
+          userId: user._id,
+          documents: ['terms', 'privacy'],
+          version: legalVersion,
+          adult: consent.adult,
+          app,
+          ip,
+          acceptedAt: now,
+        },
+        { session },
+      );
+    }
+  }
+  return { user, isNewUser };
 }
 
 /**

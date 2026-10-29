@@ -71,11 +71,12 @@ export const IDENTITY_ERROR_CODES = {
 } as const satisfies Record<string, number>;
 
 /**
- * Why an email code was sent: to make an account (sign-up), or to set a password (the first one,
- * or a forgotten one). Every app signs in with email + password, never with a code (owner,
+ * Why an email code was sent: to make an account (sign-up), to set a password (the first one, or a
+ * forgotten one), or to accept an invitation (TASKS T3.3: the email proven, then the password, as
+ * ARCHITECTURE §7.1 asks). Every app signs in with email + password, never with a code (owner,
  * 2026-10-27, ARCHITECTURE §7.1); `sign-in` stays only so events already in an outbox still read.
  */
-export const OTP_PURPOSES = ['sign-in', 'sign-up', 'password'] as const;
+export const OTP_PURPOSES = ['sign-in', 'sign-up', 'password', 'invite'] as const;
 
 /**
  * The associated data that binds a sealed code to its challenge: a code sealed for one challenge
@@ -134,7 +135,7 @@ export function consentProblems(
 }
 
 /** A code on its way: when it stops working, and when another may be asked for. */
-const otpChallengeZod = object({
+export const otpChallengeZod = object({
   challengeId: uuidv7Zod,
   expiresAt: isoDateTimeZod,
   resendAfter: isoDateTimeZod,
@@ -206,8 +207,16 @@ export const signedInZod = object({ userId: uuidv7Zod, email: emailZod });
  * of an account (a password code; or a sign-up code for an account without one, made with
  * Google). `password-kept`: a sign-up code for an account that has a password already; the app's
  * consent is recorded, the password is not changed: sign in with it, or reset it.
+ * `invite-accepted`: an invitation code; the invited roles are given (a new account gets the
+ * password, an account that has one keeps it). Never signed in: the app's sign-in comes next, with
+ * its authenticator (TASKS T3.3).
  */
-export const OTP_OUTCOMES = ['account-made', 'password-set', 'password-kept'] as const;
+export const OTP_OUTCOMES = [
+  'account-made',
+  'password-set',
+  'password-kept',
+  'invite-accepted',
+] as const;
 
 /**
  * Checks an email code together with the new password: 5 tries per challenge, each code works

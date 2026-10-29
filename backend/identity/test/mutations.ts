@@ -22,13 +22,18 @@ const mutations: Mutation[] = [
   {
     file: 'otp',
     name: 'a password code goes out for an unknown email',
-    change: [['const send = signUp || hasAccount;', 'const send = true;']],
+    change: [
+      [
+        '.countDocuments({ email }, { limit: 1 })) > 0);',
+        '.countDocuments({ email }, { limit: 1 })) >= 0);',
+      ],
+    ],
     tests: 'unknown email',
   },
   {
     file: 'otp',
     name: 'no sign-up code for an unknown email',
-    change: [['const send = signUp || hasAccount;', 'const send = hasAccount;']],
+    change: [['  const send =\n    signUp ||', '  const send =\n    false ||']],
     tests: 'makes the account',
   },
   {
@@ -42,8 +47,8 @@ const mutations: Mutation[] = [
     name: 'adult declared from any app',
     change: [
       [
-        "adult: signUp && app === 'customer' && consent?.adult ? '1' : '0',",
-        "adult: signUp && consent?.adult ? '1' : '0',",
+        "adult: asksConsent && app === 'customer' && consent?.adult ? '1' : '0',",
+        "adult: asksConsent && consent?.adult ? '1' : '0',",
       ],
     ],
     tests: 'made elsewhere',
@@ -113,7 +118,10 @@ const mutations: Mutation[] = [
     file: 'otp',
     name: 'a code of the old sign-in kind still works',
     change: [
-      [" ||\n    (challenge.purpose !== 'sign-up' && challenge.purpose !== 'password')", ''],
+      [
+        " ||\n    (challenge.purpose !== 'sign-up' &&\n      challenge.purpose !== 'password' &&\n      challenge.purpose !== 'invite')",
+        '',
+      ],
     ],
     tests: 'before sign-in by password',
   },
@@ -228,7 +236,10 @@ const mutations: Mutation[] = [
     file: 'users',
     name: 'a sign-up replaces the password',
     change: [
-      ['if (!isNewUser && (await hasPassword(mongo, user._id, session))) {', 'if (false) {'],
+      [
+        "if (!isNewUser && (await hasPassword(mongo, user._id, session))) return 'password-kept';",
+        "if (false) return 'password-kept';",
+      ],
     ],
     tests: 'keeps the password',
   },
@@ -796,13 +807,23 @@ const mutations: Mutation[] = [
   {
     file: 'rbac/grants',
     name: 'roles that ask an authenticator never do',
-    change: [['mfaRequired: strict > 0, authzVersion', 'mfaRequired: false, authzVersion']],
+    change: [
+      [
+        'mfaRequired: roles.some((role) => role.mfaRequired), authzVersion',
+        'mfaRequired: false, authzVersion',
+      ],
+    ],
     tests: 'Seller Finance or Account Owner',
   },
   {
     file: 'users',
     name: 'no grant at sign-up',
-    change: [['    await giveSignUpGrant(mongo, session, { userId: user._id, app, now });\n', '']],
+    change: [
+      [
+        '    await giveSignUpGrant(mongo, session, { userId: user._id, app: input.app, now });\n',
+        '',
+      ],
+    ],
     tests: 'sign-up grants',
   },
   {
@@ -828,6 +849,219 @@ const mutations: Mutation[] = [
     name: 'the sync retires Master’s own sub-roles',
     change: [['{ system: true, retired: false, _id: { $nin:', '{ retired: false, _id: { $nin:']],
     tests: 'never touches Master',
+  },
+
+  // T3.3 PR B: giving, ending and seeing roles, invitations
+  {
+    file: 'rbac/grants',
+    name: 'a retired role still opens its app',
+    change: [
+      [
+        '{ _id: { $in: grants.map((grant) => grant.role) }, retired: false },',
+        '{ _id: { $in: grants.map((grant) => grant.role) } },',
+      ],
+    ],
+    tests: 'renews their holders',
+  },
+  {
+    file: 'rbac/grants',
+    name: 'grant changes never reach the gateway',
+    change: [['if tonumber(ARGV[1]) > current then', 'if false then']],
+    tests: 'State Admin a state|ends a role at once|renews their holders',
+  },
+  {
+    file: 'rbac/grants',
+    name: 'ending a grant does not raise the authz version',
+    change: [
+      [
+        '  await raiseAuthzVersion(mongo, session, ended.userId, now);\n  return ended;',
+        '  return ended;',
+      ],
+    ],
+    tests: 'ends a role at once',
+  },
+  {
+    file: 'rbac/authority',
+    name: 'an appointer role without the right to give still gives',
+    change: [['      own.permissions.includes(grantManage.key) &&\n', '']],
+    tests: 'keeps the right to give',
+  },
+  {
+    file: 'rbac/authority',
+    name: 'any role gives any role',
+    change: [['      role.appointedBy.includes(own._id) &&\n', '']],
+    tests: 'only the roles they appoint',
+  },
+  {
+    file: 'rbac/authority',
+    name: 'a scope wider than the giver’s',
+    change: [['      scopeWithin(grant.scope, inner, chainOf),', '      true,']],
+    tests: 'only the roles they appoint',
+  },
+  {
+    file: 'rbac/authority',
+    name: 'unknown state ids',
+    change: [["if (scope.type === 'state' && !scope.ids.every(isStateId)) {", 'if (false) {']],
+    tests: 'refuses what does not fit',
+  },
+  {
+    file: 'rbac/authority',
+    name: 'hubs and cities before the location master',
+    change: [['  if (NOT_KNOWN_YET.has(scope.type)) {', '  if (false) {']],
+    tests: 'refuses what does not fit',
+  },
+  {
+    file: 'rbac/authority',
+    name: 'a self scope for someone else',
+    change: [['    if (scope.ids.join() !== wanted.join()) {', '    if (false) {']],
+    tests: 'own account',
+  },
+  {
+    file: 'rbac/authority',
+    name: 'an end in the past',
+    change: [['validTo.getTime() <= now.getTime()', 'false']],
+    tests: 'refuses what does not fit',
+  },
+  {
+    file: 'rbac/authority',
+    name: 'a retired role is given',
+    change: [
+      [
+        "  if (role.retired) problems.push({ path: ['role'], message: 'This role is retired' });\n",
+        '',
+      ],
+    ],
+    tests: 'renews their holders',
+  },
+  {
+    file: 'rbac/authority',
+    name: 'a reviewer sees nothing',
+    change: [
+      ['const reviewer = !own.permissions.includes(grantManage.key);', 'const reviewer = false;'],
+    ],
+    tests: 'who sees which grants|a reviewer every role',
+  },
+  {
+    file: 'rbac/authority',
+    name: 'an appointer sees every role',
+    change: [['...(reviewer ? {} : { role: { $in: givable } })', '...{}']],
+    tests: 'a reviewer every role',
+  },
+  {
+    file: 'rbac/authority',
+    name: 'an appointer sees every scope',
+    change: [["        grant.scope.type === 'global'\n", '        true\n']],
+    tests: 'a reviewer every role',
+  },
+  {
+    file: 'rbac/manage',
+    name: 'a role to oneself',
+    change: [
+      [
+        "  if (body.userId === passport.userId) throw forbidden('Nobody gives a role to themselves.');\n",
+        '',
+      ],
+    ],
+    tests: 'refuses what does not fit',
+  },
+  {
+    file: 'rbac/manage',
+    name: 'ending one’s own role',
+    change: [
+      [
+        "  if (grant.userId === passport.userId) throw forbidden('Nobody ends their own role.');\n",
+        '',
+      ],
+    ],
+    tests: 'ends a role at once',
+  },
+  {
+    file: 'rbac/manage',
+    name: 'anyone ends a role',
+    change: [['if (!role || !appointingGrant(caller, role, grant.scope)) {', 'if (!role) {']],
+    tests: 'ends a role at once',
+  },
+  {
+    file: 'rbac/manage',
+    name: 'a shipped role changes through the API',
+    change: [["  if (role.system) throw forbidden('A shipped role changes only in code.');\n", '']],
+    tests: 'renews their holders',
+  },
+  {
+    file: 'rbac/manage',
+    name: 'holders keep their old tokens after a change',
+    change: [['const renew = allows(role) !== allows(next);', 'const renew = false;']],
+    tests: 'renews their holders',
+  },
+  {
+    file: 'rbac/manage',
+    name: 'an appointer role loses the right to give',
+    change: [
+      ['if (!next.permissions.includes(grantManage.key) || next.retired) {', 'if (false) {'],
+    ],
+    tests: 'keeps the right to give',
+  },
+  {
+    file: 'rbac/manage',
+    name: 'a sub-role that makes roles',
+    change: [['if (role.permissions.includes(roleManage.key)) {', 'if (false) {']],
+    tests: 'make a sub-role',
+  },
+  {
+    file: 'rbac/manage',
+    name: 'grants listed without the right to read them',
+    change: [['  requirePermission(caller, grantRead.key);\n  const visible', '  const visible']],
+    tests: 'a reviewer every role',
+  },
+  {
+    file: 'rbac/invitations',
+    name: 'an invitation outlives its inviter’s right',
+    change: [
+      [
+        'if (role && !role.retired && appointingGrant(inviter, role, invitation.scope)) {',
+        'if (role) {',
+      ],
+    ],
+    tests: 'dies with the inviter',
+  },
+  {
+    file: 'rbac/invitations',
+    name: 'inviting oneself',
+    change: [
+      ["  if (me?.email === body.email) throw forbidden('Nobody invites themselves.');\n", ''],
+    ],
+    tests: 'inviting oneself',
+  },
+  {
+    file: 'rbac/invitations',
+    name: 'a code for an invitation that ran out',
+    change: [
+      [
+        "      { email, app, status: 'pending', expiresAt: { $gt: now } },\n      { limit: 1 },",
+        "      { email, app, status: 'pending' },\n      { limit: 1 },",
+      ],
+    ],
+    tests: 'runs out',
+  },
+  {
+    file: 'rbac/invitations',
+    name: 'an accepted invitation stays pending',
+    change: [["{ $set: { status: 'accepted', endedAt: now, endedBy: userId } }", '{ $set: {} }']],
+    tests: 'accepts with an email code',
+  },
+  {
+    file: 'otp',
+    name: 'an invitation code for any email',
+    change: [['? await hasInvitation(deps.mongo, { email, app })', '? true']],
+    tests: 'accepts with an email code',
+  },
+  {
+    file: 'otp',
+    name: 'an invitation into a sign-up app without its consent',
+    change: [
+      ["const asksConsent = signUp || purpose === 'invite';", 'const asksConsent = signUp;'],
+    ],
+    tests: 'consent',
   },
 ];
 
