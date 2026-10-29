@@ -10,7 +10,12 @@ import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { brevoSender } from '../src/email/brevo.ts';
 import { mailpitSender } from '../src/email/mailpit.ts';
 import { type EmailMessage, EmailSendError } from '../src/email/port.ts';
-import { invitationEmail, otpEmail, sessionReuseEmail } from '../src/email/templates.ts';
+import {
+  authenticatorResetEmail,
+  invitationEmail,
+  otpEmail,
+  sessionReuseEmail,
+} from '../src/email/templates.ts';
 
 const MAILPIT_URL = 'http://localhost:8025';
 const from = { email: 'no-reply@beautinique.example', name: 'Beautinique' };
@@ -265,6 +270,20 @@ describe('the invitation emails', () => {
     expect(email.text).toContain('accept your invitation to Beautinique Admin');
     expect(email.subject).not.toContain('123456');
     expect(email.tags).toEqual(['otp-invite']);
+  });
+});
+
+describe('the authenticator-reset email', () => {
+  it('says what happened, when (IST), and what to do if it was not asked for', () => {
+    const email = authenticatorResetEmail({
+      to: 'asha@beautinique.example',
+      resetAt: '2026-10-29T09:30:00.000Z',
+    });
+    expect(email.subject).toBe('Your Beautinique authenticator was reset');
+    expect(email.text).toContain('29 Oct 2026, 3:00 pm IST');
+    expect(email.text).toContain('signed out everywhere');
+    expect(email.text).toContain('"Forgot password"');
+    expect(email.tags).toEqual(['security-authenticator-reset']);
   });
 });
 

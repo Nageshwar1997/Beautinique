@@ -8,6 +8,7 @@ import {
   endGrant,
   endOtherSessions,
   endSession,
+  endUserSessions,
   getMe,
   giveGrant,
   HEADERS,
@@ -25,20 +26,30 @@ import {
   requestPasswordCode,
   requestSignUpCode,
   resendOtp,
+  resetAuthenticator,
   revokeInvitation,
   SIGN_UP_APPS,
   startTotpEnroll,
+  STEP_UP_SECONDS,
+  stepUp,
   updateRole,
   verifyOtp,
 } from '@beautinique/shared-contracts';
 import { type Request, Router } from 'express';
 
-import { clearSessionCookies, cookieOf, setSessionCookies, signedIn } from '../cookies.ts';
+import {
+  clearSessionCookies,
+  cookieOf,
+  setAccessCookie,
+  setSessionCookies,
+  signedIn,
+} from '../cookies.ts';
 import * as login from '../login.ts';
 import { me, myDevices } from '../me.ts';
 import { type OtpDeps, requestCode, resendCode, verifyCode } from '../otp.ts';
 import * as invitations from '../rbac/invitations.ts';
 import * as manage from '../rbac/manage.ts';
+import * as security from '../rbac/security.ts';
 import type { Client } from '../sessions.ts';
 
 /**
@@ -248,6 +259,28 @@ export function routesOf(deps: OtpDeps): Router {
       consent: body.consent,
       requestId,
     }),
+  );
+
+  // step-up and the Security Officer (TASKS T3.3 PR C)
+  mountRoute(router, stepUp, async ({ body }, { req, res }) => {
+    const passport = await deps.passport(req);
+    const stepped = await login.stepUpWithTotp(deps, {
+      userId: passport.userId,
+      sessionId: passport.sessionId,
+      code: body.code,
+    });
+    setAccessCookie(res, stepped.app, stepped.accessToken);
+    return {
+      stepUpUntil: new Date(stepped.stepUpAt.getTime() + STEP_UP_SECONDS * 1000).toISOString(),
+    };
+  });
+
+  mountRoute(router, resetAuthenticator, async ({ params }, { req, requestId }) =>
+    security.resetAuthenticator(deps, await deps.passport(req), params.userId, requestId),
+  );
+
+  mountRoute(router, endUserSessions, async ({ params }, { req }) =>
+    security.endUserSessions(deps, await deps.passport(req), params.userId),
   );
 
   return router;

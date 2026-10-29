@@ -6,6 +6,7 @@ import {
   isoDateTimeZod,
   number,
   object,
+  otpZod,
   string,
   uuidv7Zod,
 } from '@beautinique/shared-zod';
@@ -13,7 +14,7 @@ import {
 import { defineEvent } from '../events';
 import { cursorPage, cursorQuery } from '../http';
 import { definePermission } from '../permissions';
-import { APPS, SCOPE_TYPES } from '../platform';
+import { type AppId, APPS, SCOPE_TYPES } from '../platform';
 import { defineRoute } from '../routes';
 import { otpChallengeZod, otpConsentZod } from './identity';
 
@@ -261,6 +262,8 @@ export const listGrants = defineRoute({
   input: {
     query: cursorQuery.extend({
       userId: uuidv7Zod.optional(),
+      /** The account with this email (a Security Officer finds a person by it) */
+      email: emailZod.optional(),
       role: roleKeyZod.optional(),
       app: zodEnum(APPS).optional(),
       status: zodEnum(['active', 'ended']).default('active'),
@@ -394,4 +397,92 @@ export const invitationCreated = defineEvent({
     roleName: string().min(1).max(80),
     expiresAt: isoDateTimeZod,
   }),
+});
+
+// ---- The gateway's permission check and step-up (TASKS T3.3 PR C, ARCHITECTURE §7.2, §7.3) ----
+
+/**
+ * What an account may do in an app, in Redis (identity writes it at every sign-in and refresh):
+ * the permission keys of its grants there and the authz version they belong to. The gateway's
+ * coarse check: a permission route passes only when the key is in it (the scope is the
+ * service's check, T4.1). Lives a little longer than an access token.
+ */
+export const appPermissionsKey = (userId: string, app: AppId): string =>
+  `bq:id:perms:${userId}:${app}`;
+
+/** The value at appPermissionsKey (JSON). */
+export interface AppPermissions {
+  /** The authz version these keys belong to: an access token with another `av` refreshes */
+  v: number;
+  keys: string[];
+}
+
+/** A step-up counts this long (ARCHITECTURE §7.1: 5 minutes). */
+export const STEP_UP_SECONDS = 300;
+
+/**
+ * Step-up: the authenticator code again, so a high-risk permission route works for the next
+ * STEP_UP_SECONDS (the access token carries when, `su`). Counts toward the account's lock like
+ * a sign-in. An account without an authenticator answers AUTHENTICATOR_REQUIRED.
+ */
+export const stepUp = defineRoute({
+  id: 'auth.stepUp.verify',
+  method: 'POST',
+  path: '/auth/step-up',
+  summary: 'Confirm with the authenticator for a high-risk action',
+  apps: APPS,
+  access: { type: 'signed-in' },
+  rateLimit: 'auth',
+  idempotency: false,
+  stepUp: false,
+  owner: 'identity',
+  input: { body: object({ code: otpZod }) },
+  output: object({ stepUpUntil: isoDateTimeZod }),
+});
+
+const userParams = object({ userId: uuidv7Zod });
+
+/**
+ * A Security Officer takes away a lost authenticator (ARCHITECTURE §7.1): the authenticator and
+ * its recovery codes go, every session of the account ends, and the person is emailed. Their
+ * next sign-in sets up a new one where it is required. Never one's own.
+ */
+export const resetAuthenticator = defineRoute({
+  id: 'iam.users.resetAuthenticator',
+  method: 'POST',
+  path: '/iam/users/:userId/authenticator/reset',
+  summary: 'Reset someone’s authenticator',
+  apps: APPS,
+  access: { type: 'permission', permission: totpReset.key },
+  rateLimit: 'write',
+  idempotency: false,
+  stepUp: totpReset.mfa,
+  owner: 'identity',
+  input: { params: userParams },
+  output: object({ reset: boolean(), sessionsEnded: number().int().min(0) }),
+});
+
+/** A Security Officer ends every session of an account (ARCHITECTURE §7.2). Never one's own. */
+export const endUserSessions = defineRoute({
+  id: 'iam.users.endSessions',
+  method: 'POST',
+  path: '/iam/users/:userId/sessions/end',
+  summary: 'End every session of someone',
+  apps: APPS,
+  access: { type: 'permission', permission: sessionRevoke.key },
+  rateLimit: 'write',
+  idempotency: false,
+  stepUp: sessionRevoke.mfa,
+  owner: 'identity',
+  input: { params: userParams },
+  output: object({ ended: number().int().min(0) }),
+});
+
+/** An authenticator was reset; notify tells the person (a security email, no secret in it). */
+export const authenticatorReset = defineEvent({
+  type: 'identity.authenticator.reset',
+  version: 1,
+  producer: 'identity',
+  description: 'A Security Officer reset an account’s authenticator; the person is told',
+  data: object({ userId: uuidv7Zod, email: emailZod, resetAt: isoDateTimeZod }),
 });

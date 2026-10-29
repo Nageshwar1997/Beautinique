@@ -68,6 +68,9 @@ describe('generateFiles', () => {
       '/iam/invitations',
       '/iam/invitations/{invitationId}/revoke',
       '/auth/invitations/code',
+      '/auth/step-up',
+      '/iam/users/{userId}/authenticator/reset',
+      '/iam/users/{userId}/sessions/end',
     ]);
     const manifest = parsed('gateway-manifest.json') as {
       version: string;
@@ -84,12 +87,13 @@ describe('generateFiles', () => {
       }
     ).events;
     expect(list.map((e) => [e.type, e.version])).toEqual([
+      ['identity.authenticator.reset', 1],
       ['identity.invitation.created', 1],
       ['identity.otp.requested', 1],
       ['identity.session.reuseDetected', 1],
       ['platform.ping.recorded', 1],
     ]);
-    expect(list[3]?.schema.required).toEqual(expect.arrayContaining(['eventId', 'data', 'scope']));
+    expect(list[4]?.schema.required).toEqual(expect.arrayContaining(['eventId', 'data', 'scope']));
   });
 
   it('lists permissions sorted by key', () => {

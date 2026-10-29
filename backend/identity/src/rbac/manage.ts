@@ -363,6 +363,8 @@ export interface GrantQuery {
   cursor?: string | undefined;
   limit: number;
   userId?: string | undefined;
+  /** The account with this email (a Security Officer finds a person by it) */
+  email?: string | undefined;
   role?: string | undefined;
   app?: AppId | undefined;
   status: 'active' | 'ended';
@@ -374,11 +376,23 @@ export async function listGrants(deps: ManageDeps, passport: Passport, query: Gr
   requirePermission(caller, grantRead.key);
   const visible = visibleFilter(caller, await rolesOf(deps.mongo).find().toArray());
   if (!visible) return { items: [], nextCursor: null };
+  let { userId } = query;
+  if (query.email !== undefined) {
+    const owner = await usersOf(deps.mongo).findOne(
+      { email: query.email },
+      { projection: { _id: 1 } },
+    );
+    // no such account, or another one than userId: nothing
+    if (!owner || (userId !== undefined && userId !== owner._id)) {
+      return { items: [], nextCursor: null };
+    }
+    userId = owner._id;
+  }
   const page = await grantsOf(deps.mongo)
     .find({
       ...visible,
       active: query.status === 'active',
-      ...(query.userId === undefined ? {} : { userId: query.userId }),
+      ...(userId === undefined ? {} : { userId }),
       ...(query.role === undefined ? {} : { role: query.role }),
       ...(query.app === undefined ? {} : { app: query.app }),
       ...(query.cursor === undefined ? {} : { _id: { $lt: query.cursor } }),

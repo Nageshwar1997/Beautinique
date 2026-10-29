@@ -383,6 +383,77 @@ const mutations: Mutation[] = [
     change: [['Number(current) > authzVersion', 'Number(current) >= authzVersion']],
     tests: 'grants changed',
   },
+  // T3.3 PR C: the coarse permission check and step-up
+  {
+    file: 'sessions',
+    name: 'no list from identity lets through',
+    change: [["if (raw === null) return 'stale';", "if (raw === null) return 'yes';"]],
+    tests: 'permission route through only',
+  },
+  {
+    file: 'sessions',
+    name: 'a list of any authz version counts',
+    change: [
+      [
+        'if (list.v !== signedIn.authzVersion || !Array.isArray(list.keys))',
+        'if (!Array.isArray(list.keys))',
+      ],
+    ],
+    tests: 'permission route through only',
+  },
+  {
+    file: 'sessions',
+    name: 'any key passes',
+    change: [["return list.keys.includes(permission) ? 'yes' : 'no';", "return 'yes';"]],
+    tests: 'permission route through only',
+  },
+  {
+    file: 'sessions',
+    name: 'the token’s step-up is not read',
+    change: [
+      ["stepUpAt: typeof claims.su === 'number' ? claims.su * 1000 : null,", 'stepUpAt: null,'],
+    ],
+    tests: 'permission route through only',
+  },
+  {
+    file: 'proxy',
+    name: 'a stale list lets through',
+    change: [["        if (held === 'stale') {", '        if (false) {']],
+    tests: 'permission route through only',
+  },
+  {
+    file: 'proxy',
+    name: 'a permission route without the key',
+    change: [
+      [
+        "        if (held === 'no') throw new AppError('FORBIDDEN', 'You do not have access to this.');\n",
+        '',
+      ],
+    ],
+    tests: 'permission route through only',
+  },
+  {
+    file: 'proxy',
+    name: 'step-up never asked',
+    change: [
+      ['if (route.stepUp && !stepUpFresh(signedIn.stepUpAt, Date.now())) {', 'if (false) {'],
+    ],
+    tests: 'permission route through only',
+  },
+  {
+    file: 'proxy',
+    name: 'a step-up lasts a moment longer',
+    change: [
+      ['now - stepUpAt <= STEP_UP_SECONDS * 1000', 'now - stepUpAt < STEP_UP_SECONDS * 1000'],
+    ],
+    tests: 'fresh for 5 minutes',
+  },
+  {
+    file: 'proxy',
+    name: 'a step-up from the future counts',
+    change: [['stepUpAt <= now + 30_000 && ', '']],
+    tests: 'fresh for 5 minutes|permission route through only',
+  },
 ];
 
 export default mutations;

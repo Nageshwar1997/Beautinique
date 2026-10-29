@@ -7,6 +7,8 @@ import { writeEvent } from '@beautinique/backend-server-queue';
 import {
   ACCESS_TOKEN_SECONDS,
   type AppId,
+  type AppPermissions,
+  appPermissionsKey,
   IDENTITY_ERROR_CODES,
   revokedSessionKey,
   revokedUserKey,
@@ -19,7 +21,7 @@ import { uuidv7 } from '@beautinique/shared-utils';
 import type { Redis } from 'ioredis';
 
 import { invalidCredentials, signInUnavailable } from './errors.ts';
-import { signInAccess } from './rbac/grants.ts';
+import { type SignInAccess, signInAccess } from './rbac/grants.ts';
 import type { SigningKeys } from './signing-keys.ts';
 
 /** What proved who the person is in a sign-in (the session keeps it: `amr`). */
@@ -62,7 +64,16 @@ export const KEEP_ENDED_MS = 30 * 24 * 60 * 60_000;
 export const REFRESH_RACE_MS = 10_000;
 
 export type EndReason =
-  'logout' | 'reuse' | 'password-changed' | 'signed-out-elsewhere' | 'access-ended';
+  | 'logout'
+  | 'reuse'
+  | 'password-changed'
+  | 'signed-out-elsewhere'
+  | 'access-ended'
+  | 'authenticator-reset'
+  | 'security-officer';
+
+/** A sign-in with these counts as a step-up at that moment (ARCHITECTURE §7.1). */
+const STEP_UP_METHODS: readonly AuthMethod[] = ['totp', 'recovery-code'];
 
 export interface Session {
   _id: string;
@@ -85,6 +96,11 @@ export interface Session {
   revokeReason: EndReason | null;
   /** TTL: the record goes this long after the session ended (KEEP_ENDED_MS) */
   purgeAt: Date;
+  /**
+   * When the session last confirmed with the authenticator (a sign-in with it, or POST
+   * /auth/step-up); access tokens carry it as `su`. Missing = never (sessions from before T3.3).
+   */
+  stepUpAt?: Date | null;
 }
 
 export const indexes: readonly IndexSpec[] = [
@@ -167,8 +183,17 @@ export interface Sessions extends SessionPort {
   }): Promise<IssuedSession>;
   /** Ends the session of a refresh token (nothing when there is none). */
   logout(input: { app: AppId; refreshToken: string | undefined }): Promise<void>;
-  /** Ends every session of an account (a new password). */
-  endAll(userId: string, reason: EndReason): Promise<void>;
+  /** Ends every session of an account (a new password, a Security Officer); how many ended. */
+  endAll(userId: string, reason: EndReason): Promise<number>;
+  /**
+   * Step-up (ARCHITECTURE §7.1): the session confirmed with the authenticator now; a new access
+   * token carries it. SESSION_EXPIRED when the session ended or its app has no grant left.
+   */
+  stepUp(input: { userId: string; sessionId: string }): Promise<{
+    app: AppId;
+    accessToken: string;
+    stepUpAt: Date;
+  }>;
   /** My Devices: the account's sessions that have not ended, in every app, the newest first. */
   list(userId: string): Promise<Session[]>;
   /** Ends one session of the account; false when it is not the account's or ended already. */
@@ -183,10 +208,11 @@ export function sessions(deps: SessionDeps): Sessions {
   const collection = mongo.db.collection<Session>(SESSIONS);
 
   async function accessToken(
-    session: Pick<Session, '_id' | 'userId' | 'app' | 'methods'>,
+    session: Pick<Session, '_id' | 'userId' | 'app' | 'methods' | 'stepUpAt'>,
     at: number,
     authzVersion: number,
   ) {
+    const stepUpAt = session.stepUpAt ?? null;
     const { kid, privateKey } = await signing.current();
     const iat = Math.floor(at / 1000);
     return signJwt(
@@ -200,8 +226,22 @@ export function sessions(deps: SessionDeps): Sessions {
         amr: session.methods,
         // a grant change raises it, so a token from before is turned back (ARCHITECTURE §7.2)
         av: authzVersion,
+        // the gateway lets step-up routes through for STEP_UP_SECONDS after it
+        ...(stepUpAt === null ? {} : { su: Math.floor(stepUpAt.getTime() / 1000) }),
       },
       { kid, privateKey },
+    );
+  }
+
+  /**
+   * The gateway's list of what the account may do in the app (contracts appPermissionsKey), for
+   * this authz version; written at every sign-in, refresh and step-up, living a little longer
+   * than the access token. Redis away: 503, like the revoke keys.
+   */
+  async function listPermissions(userId: string, app: AppId, access: SignInAccess) {
+    const value: AppPermissions = { v: access.authzVersion, keys: access.permissions };
+    await inRedis(() =>
+      redis.set(appPermissionsKey(userId, app), JSON.stringify(value), 'PX', REVOKE_TTL_MS),
     );
   }
 
@@ -237,8 +277,10 @@ export function sessions(deps: SessionDeps): Sessions {
         revokedAt: null,
         revokeReason: null,
         purgeAt: new Date(expiresAt.getTime() + KEEP_ENDED_MS),
+        stepUpAt: methods.some((method) => STEP_UP_METHODS.includes(method)) ? new Date(at) : null,
       };
       await collection.insertOne(session);
+      await listPermissions(userId, app, access);
       logger.info({ userId, app, sessionId, methods }, 'session started');
       return {
         user: { userId, email },
@@ -307,6 +349,7 @@ export function sessions(deps: SessionDeps): Sessions {
           logger.info({ userId: rotated.userId, app, sessionId }, 'session ended: no grant left');
           throw sessionExpired();
         }
+        await listPermissions(rotated.userId, app, access);
         return {
           user: { userId: rotated.userId, email: rotated.email },
           app,
@@ -388,7 +431,7 @@ export function sessions(deps: SessionDeps): Sessions {
 
     async endAll(userId, reason) {
       const at = now();
-      await collection.updateMany(
+      const ended = await collection.updateMany(
         { userId, revokedAt: null },
         {
           $set: {
@@ -400,7 +443,30 @@ export function sessions(deps: SessionDeps): Sessions {
       );
       // tokens issued before this moment stop at the gateway
       await inRedis(() => redis.set(revokedUserKey(userId), String(at), 'PX', REVOKE_TTL_MS));
-      logger.info({ userId, reason }, 'every session of the account ended');
+      logger.info(
+        { userId, reason, ended: ended.modifiedCount },
+        'every session of the account ended',
+      );
+      return ended.modifiedCount;
+    },
+
+    async stepUp({ userId, sessionId }) {
+      const at = now();
+      const session = await collection.findOneAndUpdate(
+        { _id: sessionId, userId, revokedAt: null, expiresAt: { $gt: new Date(at) } },
+        { $set: { stepUpAt: new Date(at), lastSeenAt: new Date(at) } },
+        { returnDocument: 'after' },
+      );
+      if (!session) throw sessionExpired();
+      const access = await signInAccess(mongo, { userId, app: session.app, now: new Date(at) });
+      if (!access.allowed) throw sessionExpired();
+      await listPermissions(userId, session.app, access);
+      logger.info({ userId, app: session.app, sessionId }, 'stepped up');
+      return {
+        app: session.app,
+        accessToken: await accessToken(session, at, access.authzVersion),
+        stepUpAt: new Date(at),
+      };
     },
 
     list(userId) {

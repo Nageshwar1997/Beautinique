@@ -85,6 +85,9 @@ describe('platform catalogue (Milestone 1 sample)', () => {
       'iam.invitations.list',
       'iam.invitations.revoke',
       'auth.invitations.code',
+      'auth.stepUp.verify',
+      'iam.users.resetAuthenticator',
+      'iam.users.endSessions',
     ]);
     expect(events.latest('platform.ping.recorded')).toBe(pingRecorded);
     expect(permissions.get(pingRead.key)).toBe(pingRead);

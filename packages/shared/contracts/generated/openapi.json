@@ -3061,6 +3061,16 @@
             }
           },
           {
+            "name": "email",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 254
+            }
+          },
+          {
             "name": "role",
             "in": "query",
             "required": false,
@@ -4889,6 +4899,333 @@
           "rateLimit": "otp",
           "idempotency": false,
           "stepUp": false,
+          "owner": "identity",
+          "cache": null
+        }
+      }
+    },
+    "/auth/step-up": {
+      "post": {
+        "operationId": "auth.stepUp.verify",
+        "summary": "Confirm with the authenticator for a high-risk action",
+        "tags": [
+          "auth"
+        ],
+        "parameters": [
+          {
+            "name": "X-BQ-App",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "customer",
+                "seller",
+                "admin",
+                "superadmin",
+                "master",
+                "support",
+                "finance",
+                "logistics",
+                "delivery",
+                "growth",
+                "creator"
+              ]
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "code": {
+                    "type": "string",
+                    "pattern": "^\\d{6}$"
+                  }
+                },
+                "required": [
+                  "code"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "stepUpUntil": {
+                          "type": "string",
+                          "format": "date-time",
+                          "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
+                        }
+                      },
+                      "required": [
+                        "stepUpUntil"
+                      ],
+                      "additionalProperties": false
+                    }
+                  },
+                  "required": [
+                    "data"
+                  ]
+                }
+              }
+            }
+          },
+          "default": {
+            "$ref": "#/components/responses/Error"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "x-bq": {
+          "apps": [
+            "customer",
+            "seller",
+            "admin",
+            "superadmin",
+            "master",
+            "support",
+            "finance",
+            "logistics",
+            "delivery",
+            "growth",
+            "creator"
+          ],
+          "access": {
+            "type": "signed-in"
+          },
+          "rateLimit": "auth",
+          "idempotency": false,
+          "stepUp": false,
+          "owner": "identity",
+          "cache": null
+        }
+      }
+    },
+    "/iam/users/{userId}/authenticator/reset": {
+      "post": {
+        "operationId": "iam.users.resetAuthenticator",
+        "summary": "Reset someone’s authenticator",
+        "tags": [
+          "iam"
+        ],
+        "parameters": [
+          {
+            "name": "userId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-7[0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12})$"
+            }
+          },
+          {
+            "name": "X-BQ-App",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "customer",
+                "seller",
+                "admin",
+                "superadmin",
+                "master",
+                "support",
+                "finance",
+                "logistics",
+                "delivery",
+                "growth",
+                "creator"
+              ]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "reset": {
+                          "type": "boolean"
+                        },
+                        "sessionsEnded": {
+                          "type": "integer",
+                          "minimum": 0,
+                          "maximum": 9007199254740991
+                        }
+                      },
+                      "required": [
+                        "reset",
+                        "sessionsEnded"
+                      ],
+                      "additionalProperties": false
+                    }
+                  },
+                  "required": [
+                    "data"
+                  ]
+                }
+              }
+            }
+          },
+          "default": {
+            "$ref": "#/components/responses/Error"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "x-bq": {
+          "apps": [
+            "customer",
+            "seller",
+            "admin",
+            "superadmin",
+            "master",
+            "support",
+            "finance",
+            "logistics",
+            "delivery",
+            "growth",
+            "creator"
+          ],
+          "access": {
+            "type": "permission",
+            "permission": "iam.totp.reset"
+          },
+          "rateLimit": "write",
+          "idempotency": false,
+          "stepUp": true,
+          "owner": "identity",
+          "cache": null
+        }
+      }
+    },
+    "/iam/users/{userId}/sessions/end": {
+      "post": {
+        "operationId": "iam.users.endSessions",
+        "summary": "End every session of someone",
+        "tags": [
+          "iam"
+        ],
+        "parameters": [
+          {
+            "name": "userId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-7[0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12})$"
+            }
+          },
+          {
+            "name": "X-BQ-App",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "customer",
+                "seller",
+                "admin",
+                "superadmin",
+                "master",
+                "support",
+                "finance",
+                "logistics",
+                "delivery",
+                "growth",
+                "creator"
+              ]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "ended": {
+                          "type": "integer",
+                          "minimum": 0,
+                          "maximum": 9007199254740991
+                        }
+                      },
+                      "required": [
+                        "ended"
+                      ],
+                      "additionalProperties": false
+                    }
+                  },
+                  "required": [
+                    "data"
+                  ]
+                }
+              }
+            }
+          },
+          "default": {
+            "$ref": "#/components/responses/Error"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "x-bq": {
+          "apps": [
+            "customer",
+            "seller",
+            "admin",
+            "superadmin",
+            "master",
+            "support",
+            "finance",
+            "logistics",
+            "delivery",
+            "growth",
+            "creator"
+          ],
+          "access": {
+            "type": "permission",
+            "permission": "iam.session.revoke"
+          },
+          "rateLimit": "write",
+          "idempotency": false,
+          "stepUp": true,
           "owner": "identity",
           "cache": null
         }

@@ -23,6 +23,7 @@ import {
   matchPath,
   passportAudience,
   type RateLimitClass,
+  STEP_UP_SECONDS,
 } from '@beautinique/shared-contracts';
 import type { Request, RequestHandler, Response } from 'express';
 
@@ -233,6 +234,10 @@ function forward(
   }
 }
 
+/** A step-up in the last STEP_UP_SECONDS (and not from the future: a clock-skew allowance of 30 s). */
+export const stepUpFresh = (stepUpAt: number | null, now: number): boolean =>
+  stepUpAt !== null && stepUpAt <= now + 30_000 && now - stepUpAt <= STEP_UP_SECONDS * 1000;
+
 /**
  * The gateway's checks, in order, then the owner (ARCHITECTURE §5.1, §7.2):
  * 1. the origin secret of the apps' Vercel routes (direct requests to Render are refused);
@@ -240,7 +245,8 @@ function forward(
  * 3. a route of the manifest that this app may use;
  * 4. the route's rate-limit class, per client IP;
  * 5. access: a public route passes; any other needs the app's access cookie (sessions), and its
- *    owner gets a passport of who signed in; a permission route answers 403 until grants (T3.3);
+ *    owner gets a passport of who signed in; a permission route needs the key in one of the
+ *    person's grants in this app (else 403), and a step-up route a step-up in the last 5 minutes;
  * 6. the Idempotency-Key the route needs.
  */
 export function proxy({
@@ -313,8 +319,20 @@ export function proxy({
     if (route.access.type !== 'public') {
       const signedIn = await sessions.check(req, app);
       if (route.access.type === 'permission') {
-        // grants and the permission check come with T3.3: until then no permission is held
-        throw new AppError('FORBIDDEN', 'You do not have access to this.');
+        // the coarse check: the key in one of the person's grants in this app (T3.3); the scope
+        // is the owner's check (T4.1)
+        const held = await sessions.holds(signedIn, app, route.access.permission);
+        if (held === 'stale') {
+          // identity's list belongs to another authz version: refresh, then try again
+          throw new AppError('UNAUTHENTICATED', 'Please sign in to continue.');
+        }
+        if (held === 'no') throw new AppError('FORBIDDEN', 'You do not have access to this.');
+        if (route.stepUp && !stepUpFresh(signedIn.stepUpAt, Date.now())) {
+          throw new AppError(
+            'STEP_UP_REQUIRED',
+            'Please confirm with your authenticator code to continue.',
+          );
+        }
       }
       passportToken = passport.sign({ ...signedIn, app }, passportAudience(route.owner));
     }

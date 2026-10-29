@@ -22,6 +22,7 @@ import {
 } from '@beautinique/backend-server-ratelimit';
 import {
   type AppId,
+  appPermissionsKey,
   authzVersionKey,
   defineRoute,
   gatewayManifest,
@@ -38,7 +39,7 @@ import { buildApp, type GatewayAppOptions } from '../src/app.ts';
 import { appRegistry } from '../src/apps.ts';
 import { readConfig } from '../src/config.ts';
 import { manifest as platformManifest } from '../src/manifest.ts';
-import { API_PREFIX } from '../src/proxy.ts';
+import { API_PREFIX, stepUpFresh } from '../src/proxy.ts';
 import { DEFAULT_RATE_LIMITS } from '../src/rate-limits.ts';
 import { start } from '../src/service.ts';
 import { sessionGate } from '../src/sessions.ts';
@@ -145,6 +146,17 @@ const manifest = gatewayManifest([
     owner: 'payments',
   }),
   route({
+    id: 'payments.refunds.approve',
+    method: 'POST',
+    path: '/payments/refunds/:refundId/approve',
+    apps: ['finance'],
+    access: { type: 'permission', permission: 'payments.refunds.approve' },
+    rateLimit: 'write',
+    stepUp: true,
+    owner: 'payments',
+    input: { params: object({ refundId: string() }) },
+  }),
+  route({
     id: 'payments.methods.list',
     method: 'GET',
     path: '/payments/methods',
@@ -193,6 +205,12 @@ function fakeCore(delayMs = 0): Express {
           authorization: req.get('authorization') ?? null,
         });
       });
+      app.get('/payments/refunds', (req, res) => {
+        res.json({ refunds: [], passport: req.get('x-bq-passport') !== undefined });
+      });
+      app.post('/payments/refunds/:refundId/approve', (_req, res) => {
+        res.json({ approved: true });
+      });
       app.get('/customers/profile', (req, res) => {
         res.json({ passport: req.get('x-bq-passport') ?? null, cookie: req.get('cookie') ?? null });
       });
@@ -232,6 +250,7 @@ const accessToken = ({
   seconds = 600,
   key = identityKey,
   av = 0,
+  su,
 }: {
   app?: AppId;
   sessionId?: string;
@@ -240,6 +259,8 @@ const accessToken = ({
   seconds?: number;
   key?: ReturnType<typeof generateSigningKey>;
   av?: number;
+  /** when the session last stepped up (seconds) */
+  su?: number;
 } = {}) =>
   signJwt(
     {
@@ -251,6 +272,7 @@ const accessToken = ({
       sid: sessionId,
       amr: ['password'],
       av,
+      ...(su === undefined ? {} : { su }),
     },
     { kid: key.kid, privateKey: key.privateKeyPem },
   );
@@ -1173,17 +1195,64 @@ describe('sign-in at the gateway (T3.2)', () => {
     await redis.client.del(authzVersionKey(userId));
   });
 
-  it('answers 403 on a permission route to someone signed in, until grants (T3.3)', async () => {
+  it('lets a permission route through only with its key in identity’s list for this token, and a step-up route only after a recent step-up (T3.3)', async () => {
     const payments = await listen(fakeCore());
     const gw = await gateway({ payments: payments.url });
-    const res = await fetch(`${gw.url}${API_PREFIX}/payments/refunds`, {
-      headers: {
-        ...customer,
-        'X-BQ-App': 'finance',
-        cookie: atCookie(accessToken({ app: 'finance' }), 'finance'),
-      },
-    });
-    expect(await errorOf(res)).toEqual([403, 'FORBIDDEN']);
+    const userId = randomUUID();
+    const key = appPermissionsKey(userId, 'finance');
+    const token = (more: { av?: number; su?: number } = {}) =>
+      accessToken({ app: 'finance', userId, av: 2, ...more });
+    const call = (cookieToken: string, path = '/payments/refunds', method = 'GET') =>
+      fetch(`${gw.url}${API_PREFIX}${path}`, {
+        method,
+        headers: {
+          ...customer,
+          'X-BQ-App': 'finance',
+          cookie: atCookie(cookieToken, 'finance'),
+        },
+      });
+    const list = (v: number, keys: string[]) =>
+      redis.client.set(key, JSON.stringify({ v, keys }), 'PX', 60_000);
+
+    // no list from identity (lost, or never written): refresh first
+    expect(await errorOf(await call(token()))).toEqual([401, 'UNAUTHENTICATED']);
+    // signed in to the app, but not this key
+    await list(2, ['iam.app.sign_in']);
+    expect(await errorOf(await call(token()))).toEqual([403, 'FORBIDDEN']);
+    // the key, and the owner gets a passport
+    await list(2, ['iam.app.sign_in', 'payments.refunds.read', 'payments.refunds.approve']);
+    const read = await call(token());
+    expect(read.status).toBe(200);
+    expect(await read.json()).toMatchObject({ passport: true });
+    // a list of another authz version, or one that does not read: refresh first
+    expect(await errorOf(await call(token({ av: 1 })))).toEqual([401, 'UNAUTHENTICATED']);
+    expect(await errorOf(await call(token({ av: 3 })))).toEqual([401, 'UNAUTHENTICATED']);
+
+    // a step-up route: only within 5 minutes of a step-up
+    const now = Math.floor(Date.now() / 1000);
+    const approve = (su?: number) =>
+      call(token(su === undefined ? {} : { su }), '/payments/refunds/r1/approve', 'POST');
+    expect(await errorOf(await approve())).toEqual([401, 'STEP_UP_REQUIRED']);
+    expect(await errorOf(await approve(now - 301))).toEqual([401, 'STEP_UP_REQUIRED']);
+    expect(await errorOf(await approve(now + 120))).toEqual([401, 'STEP_UP_REQUIRED']);
+    expect((await approve(now - 60)).status).toBe(200);
+    // the key first: no step-up question for what one may not do at all
+    await list(2, ['iam.app.sign_in', 'payments.refunds.read']);
+    expect(await errorOf(await approve(now - 60))).toEqual([403, 'FORBIDDEN']);
+
+    await redis.client.set(key, 'not json', 'PX', 60_000);
+    expect(await errorOf(await call(token()))).toEqual([401, 'UNAUTHENTICATED']);
+    await redis.client.del(key);
+  });
+
+  it('counts a step-up fresh for 5 minutes, allowing 30 s of clock skew', () => {
+    const now = 1_000_000_000;
+    expect(stepUpFresh(null, now)).toBe(false);
+    expect(stepUpFresh(now, now)).toBe(true);
+    expect(stepUpFresh(now - 300_000, now)).toBe(true);
+    expect(stepUpFresh(now - 300_001, now)).toBe(false);
+    expect(stepUpFresh(now + 30_000, now)).toBe(true);
+    expect(stepUpFresh(now + 30_001, now)).toBe(false);
   });
 
   it('fails closed with 503 when Redis or identity’s keys are away', async () => {

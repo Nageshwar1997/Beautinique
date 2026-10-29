@@ -650,8 +650,8 @@ const mutations: Mutation[] = [
     name: 'access cookie readable by scripts',
     change: [
       [
-        '  res.cookie(accessCookieName(session.app), session.accessToken, {\n    httpOnly: true,\n',
-        '  res.cookie(accessCookieName(session.app), session.accessToken, {\n',
+        '  res.cookie(accessCookieName(app), accessToken, {\n    httpOnly: true,\n',
+        '  res.cookie(accessCookieName(app), accessToken, {\n',
       ],
     ],
     tests: 'two cookies',
@@ -807,12 +807,7 @@ const mutations: Mutation[] = [
   {
     file: 'rbac/grants',
     name: 'roles that ask an authenticator never do',
-    change: [
-      [
-        'mfaRequired: roles.some((role) => role.mfaRequired), authzVersion',
-        'mfaRequired: false, authzVersion',
-      ],
-    ],
+    change: [['mfaRequired: roles.some((role) => role.mfaRequired),', 'mfaRequired: false,']],
     tests: 'Seller Finance or Account Owner',
   },
   {
@@ -1062,6 +1057,135 @@ const mutations: Mutation[] = [
       ["const asksConsent = signUp || purpose === 'invite';", 'const asksConsent = signUp;'],
     ],
     tests: 'consent',
+  },
+
+  // T3.3 PR C: the gateway's permission list, step-up, the Security Officer
+  {
+    file: 'sessions',
+    name: 'no permission list at sign-in',
+    change: [['      await listPermissions(userId, app, access);\n', '']],
+    tests: 'written at every sign-in',
+  },
+  {
+    file: 'sessions',
+    name: 'no permission list at refresh',
+    change: [['        await listPermissions(rotated.userId, app, access);\n', '']],
+    tests: 'written at every sign-in',
+  },
+  {
+    file: 'rbac/grants',
+    name: 'the list holds only sign-in',
+    change: [
+      [
+        'permissions: [...new Set(roles.flatMap((role) => role.permissions))].sort(),',
+        "permissions: ['iam.app.sign_in'],",
+      ],
+    ],
+    tests: 'keys of the roles there',
+  },
+  {
+    file: 'sessions',
+    name: 'a sign-in with the authenticator is no step-up',
+    change: [
+      [
+        'stepUpAt: methods.some((method) => STEP_UP_METHODS.includes(method)) ? new Date(at) : null,',
+        'stepUpAt: null,',
+      ],
+    ],
+    tests: 'is a step-up',
+  },
+  {
+    file: 'sessions',
+    name: 'every sign-in is a step-up',
+    change: [
+      [
+        'stepUpAt: methods.some((method) => STEP_UP_METHODS.includes(method)) ? new Date(at) : null,',
+        'stepUpAt: new Date(at),',
+      ],
+    ],
+    tests: 'is a step-up',
+  },
+  {
+    file: 'sessions',
+    name: 'tokens never carry the step-up',
+    change: [
+      [
+        '        ...(stepUpAt === null ? {} : { su: Math.floor(stepUpAt.getTime() / 1000) }),\n',
+        '',
+      ],
+    ],
+    tests: 'step-up',
+  },
+  {
+    file: 'sessions',
+    name: 'an ended session steps up',
+    change: [
+      [
+        '{ _id: sessionId, userId, revokedAt: null, expiresAt: { $gt: new Date(at) } },',
+        '{ _id: sessionId, userId, expiresAt: { $gt: new Date(at) } },',
+      ],
+    ],
+    tests: 'signed out',
+  },
+  {
+    file: 'login',
+    name: 'a step-up without an authenticator',
+    change: [['  if (!credentials?.totp) throw authenticatorRequired();\n', '']],
+    tests: 'set one up',
+  },
+  {
+    file: 'login',
+    name: 'a locked account steps up',
+    change: [
+      ['  if (await isLocked(deps.redis, deps.keys, user.email)) throw stepUpLocked();\n', ''],
+    ],
+    tests: 'lock',
+  },
+  {
+    file: 'login',
+    name: 'a step-up code works twice',
+    change: [["{ _id: userId, 'totp.lastStep': { $lt: step } },", '{ _id: userId },']],
+    tests: 'confirms with a new authenticator code',
+  },
+  {
+    file: 'login',
+    name: 'wrong step-up codes are not counted',
+    change: [
+      [
+        '    await recordFailure(deps.redis, deps.keys, user.email);\n    throw stepUpCodeInvalid();',
+        '    throw stepUpCodeInvalid();',
+      ],
+    ],
+    tests: 'lock',
+  },
+  {
+    file: 'rbac/security',
+    name: 'anyone acts as a Security Officer',
+    change: [['  requirePermission(caller, permission);\n', '']],
+    tests: 'nobody else may',
+  },
+  {
+    file: 'rbac/security',
+    name: 'a Security Officer acts on their own account',
+    change: [
+      [
+        "  if (userId === passport.userId) throw forbidden('Use My Devices and your own settings for this.');\n",
+        '',
+      ],
+    ],
+    tests: 'their own account',
+  },
+  {
+    file: 'rbac/security',
+    name: 'recovery codes outlive a reset',
+    change: [["{ $unset: { totp: '', recoveryCodes: '' }", "{ $unset: { totp: '' }"]],
+    tests: 'lost authenticator',
+  },
+  {
+    file: 'rbac/manage',
+    name: 'an email and another account’s id find the email’s grants',
+    change: [['if (!owner || (userId !== undefined && userId !== owner._id)) {', 'if (!owner) {']],
+    tests: 'by email',
   },
 ];
 

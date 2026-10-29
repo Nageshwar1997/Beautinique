@@ -174,3 +174,36 @@ ${button}
 </html>`;
   return { to, subject, text, html, tags: ['invitation'] };
 }
+
+export interface AuthenticatorResetEmailInput {
+  to: string;
+  /** When it was reset (ISO) */
+  resetAt: string;
+}
+
+/**
+ * A Security Officer reset the account's authenticator (ARCHITECTURE §7.1): what happened, when,
+ * and what to do if it was not asked for. Every session of the account ended with it.
+ */
+export function authenticatorResetEmail({
+  to,
+  resetAt,
+}: AuthenticatorResetEmailInput): EmailMessage {
+  const appName = APP_NAMES.customer;
+  const subject = 'Your Beautinique authenticator was reset';
+  const lead = `Your authenticator app was removed from your Beautinique account on ${formatDateTime(resetAt)} IST, and you were signed out everywhere. Where an authenticator is required, you set up a new one at your next sign-in.`;
+  const next =
+    'If you did not ask for this, set a new password with "Forgot password" on the sign-in page and tell your manager or Beautinique support at once.';
+  const text = [lead, '', next, '', `– ${appName}`].join('\n');
+  const html = `<!doctype html>
+<html lang="en">
+<body style="margin:0;padding:24px;background:#f7f4f2;font-family:Arial,Helvetica,sans-serif;color:#1f1a1c">
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:480px;margin:0 auto;background:#ffffff;border-radius:12px">
+<tr><td style="padding:28px 28px 8px;font-size:16px;line-height:24px">${escapeHtml(lead)}</td></tr>
+<tr><td style="padding:8px 28px 28px;font-size:14px;line-height:22px">${escapeHtml(next)}</td></tr>
+</table>
+<p style="max-width:480px;margin:16px auto 0;font-size:12px;color:#5c5357;text-align:center">${escapeHtml(appName)}</p>
+</body>
+</html>`;
+  return { to, subject, text, html, tags: ['security-authenticator-reset'] };
+}

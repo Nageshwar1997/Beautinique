@@ -21,17 +21,20 @@ import {
   totpContext,
 } from './credentials.ts';
 import {
+  authenticatorRequired,
   invalidCredentials,
   loginExpired,
   recoveryCodeInvalid,
   signInUnavailable,
+  stepUpCodeInvalid,
+  stepUpLocked,
   totpInvalid,
 } from './errors.ts';
 import { clearFailures, isLocked, recordFailure } from './lockout.ts';
 import type { OtpDeps } from './otp.ts';
 import { dummyHash, hashPassword, needsRehash, verifyPassword } from './password.ts';
 import { signInAccess } from './rbac/grants.ts';
-import type { AuthMethod, Client, IssuedSession } from './sessions.ts';
+import { type AuthMethod, type Client, type IssuedSession, sessionExpired } from './sessions.ts';
 import { type User, USERS } from './users.ts';
 
 /** A sign-in waits 5 minutes for its second step, 10 while an authenticator is set up. */
@@ -326,4 +329,39 @@ export async function confirmTotpEnroll(
   await clearFailures(deps.redis, deps.keys, login.email);
   deps.logger.info({ userId: login.userId, app }, 'authenticator set up');
   return { ...(await signIn(deps, login, ['password', 'totp'], client)), recoveryCodes };
+}
+
+/**
+ * POST /auth/step-up (ARCHITECTURE §7.1): the authenticator code again, for a high-risk action in
+ * the next STEP_UP_SECONDS. A wrong code counts toward the account's lock like a sign-in, a locked
+ * account is refused, and a code used before never works again. An account without an
+ * authenticator: AUTHENTICATOR_REQUIRED.
+ */
+export async function stepUpWithTotp(
+  deps: LoginDeps,
+  { userId, sessionId, code }: { userId: string; sessionId: string; code: string },
+): Promise<{ app: AppId; accessToken: string; stepUpAt: Date }> {
+  const user = await deps.mongo.db
+    .collection<User>(USERS)
+    .findOne({ _id: userId }, { projection: { email: 1 } });
+  if (!user) throw sessionExpired();
+  const credentials = await credentialsOf(deps).findOne({ _id: userId });
+  if (!credentials?.totp) throw authenticatorRequired();
+  if (await isLocked(deps.redis, deps.keys, user.email)) throw stepUpLocked();
+  const secret = decryptField(deps.keys, credentials.totp.secret, totpContext(userId));
+  const step = verifyTotp(secret, code);
+  const fresh =
+    step !== null &&
+    (
+      await credentialsOf(deps).updateOne(
+        { _id: userId, 'totp.lastStep': { $lt: step } },
+        { $set: { 'totp.lastStep': step } },
+      )
+    ).modifiedCount === 1;
+  if (!fresh) {
+    await recordFailure(deps.redis, deps.keys, user.email);
+    throw stepUpCodeInvalid();
+  }
+  await clearFailures(deps.redis, deps.keys, user.email);
+  return deps.sessions.stepUp({ userId, sessionId });
 }
