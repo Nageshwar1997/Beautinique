@@ -4,6 +4,7 @@ import type { AppId, OTP_OUTCOMES } from '@beautinique/shared-contracts';
 import { uuidv7 } from '@beautinique/shared-utils';
 
 import { hasPassword, storePassword } from './credentials.ts';
+import { giveSignUpGrant } from './rbac/grants.ts';
 
 export const USERS = 'identity_users';
 export const LEGAL_ACCEPTANCES = 'identity_legal_acceptances';
@@ -23,6 +24,8 @@ export interface User {
   ageDeclaredAt: Date | null;
   /** The app the account was made in */
   signUpApp: AppId;
+  /** Goes up at every grant change; access tokens carry it as `av` (ARCHITECTURE §7.2). Missing = 0 */
+  authzVersion?: number;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -127,6 +130,9 @@ export async function signUpWithCode(
         );
       }
     }
+    // the app's sign-up role (ARCHITECTURE §7.1); a customer sign-up never gets here without the
+    // 18+ declaration (consentProblems), so Customer always follows it
+    await giveSignUpGrant(mongo, session, { userId: user._id, app, now });
     if (!isNewUser && (await hasPassword(mongo, user._id, session))) {
       return { user, outcome: 'password-kept' as const };
     }

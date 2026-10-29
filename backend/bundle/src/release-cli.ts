@@ -50,13 +50,13 @@ export interface ReleaseCliIo {
   load?: (name: string) => Promise<unknown>;
 }
 
-const defaultFiles = {
+export const defaultFiles = {
   laptop: fileURLToPath(new URL('../.env', import.meta.url)),
   live: fileURLToPath(new URL('../.env.production', import.meta.url)),
 };
 
 /** The host of a MongoDB URI, never its user or password. */
-function hostOf(uri: string): string {
+export function hostOf(uri: string): string {
   try {
     return new URL(uri).host;
   } catch {
@@ -64,7 +64,7 @@ function hostOf(uri: string): string {
   }
 }
 
-async function readEnvFile(path: string, live: boolean): Promise<Env> {
+export async function readEnvFile(path: string, live: boolean): Promise<Env> {
   let text: string;
   try {
     text = await readFile(path, 'utf8');

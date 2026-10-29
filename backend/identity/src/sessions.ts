@@ -18,7 +18,8 @@ import {
 import { uuidv7 } from '@beautinique/shared-utils';
 import type { Redis } from 'ioredis';
 
-import { signInUnavailable } from './errors.ts';
+import { invalidCredentials, signInUnavailable } from './errors.ts';
+import { signInAccess } from './rbac/grants.ts';
 import type { SigningKeys } from './signing-keys.ts';
 
 /** What proved who the person is in a sign-in (the session keeps it: `amr`). */
@@ -49,7 +50,7 @@ export interface IssuedSession {
   expiresAt: Date;
 }
 
-/** The last step of every sign-in (ARCHITECTURE §7.1); T3.3 adds the grant check here. */
+/** The last step of every sign-in (ARCHITECTURE §7.1): only in an app where the account holds a grant. */
 export interface SessionPort {
   issue(input: IssueSessionInput): Promise<IssuedSession>;
 }
@@ -60,7 +61,8 @@ export const KEEP_ENDED_MS = 30 * 24 * 60 * 60_000;
 /** A second refresh with the token just replaced, this soon, is a parallel tab, not a copy. */
 export const REFRESH_RACE_MS = 10_000;
 
-export type EndReason = 'logout' | 'reuse' | 'password-changed' | 'signed-out-elsewhere';
+export type EndReason =
+  'logout' | 'reuse' | 'password-changed' | 'signed-out-elsewhere' | 'access-ended';
 
 export interface Session {
   _id: string;
@@ -183,6 +185,7 @@ export function sessions(deps: SessionDeps): Sessions {
   async function accessToken(
     session: Pick<Session, '_id' | 'userId' | 'app' | 'methods'>,
     at: number,
+    authzVersion: number,
   ) {
     const { kid, privateKey } = await signing.current();
     const iat = Math.floor(at / 1000);
@@ -195,8 +198,8 @@ export function sessions(deps: SessionDeps): Sessions {
         exp: iat + ACCESS_TOKEN_SECONDS,
         sid: session._id,
         amr: session.methods,
-        // grants (T3.3) bump it, so an older token is read again
-        av: 0,
+        // a grant change raises it, so a token from before is turned back (ARCHITECTURE §7.2)
+        av: authzVersion,
       },
       { kid, privateKey },
     );
@@ -210,6 +213,9 @@ export function sessions(deps: SessionDeps): Sessions {
   return {
     async issue({ userId, email, app, methods, client }) {
       const at = now();
+      // every sign-in ends here, so no way around it: only an app where a grant is (T3.3)
+      const access = await signInAccess(mongo, { userId, app, now: new Date(at) });
+      if (!access.allowed) throw invalidCredentials();
       const policy = SESSION_POLICIES[app];
       const sessionId = uuidv7();
       const refreshToken = newRefreshToken(sessionId);
@@ -238,7 +244,7 @@ export function sessions(deps: SessionDeps): Sessions {
         user: { userId, email },
         app,
         sessionId,
-        accessToken: await accessToken(session, at),
+        accessToken: await accessToken(session, at, access.authzVersion),
         refreshToken,
         expiresAt,
       };
@@ -280,11 +286,32 @@ export function sessions(deps: SessionDeps): Sessions {
         { returnDocument: 'after' },
       );
       if (rotated) {
+        // grants are read again at every refresh: the last grant in the app gone = signed out
+        const access = await signInAccess(mongo, {
+          userId: rotated.userId,
+          app,
+          now: new Date(at),
+        });
+        if (!access.allowed) {
+          await collection.updateOne(
+            { _id: sessionId, revokedAt: null },
+            {
+              $set: {
+                revokedAt: new Date(at),
+                revokeReason: 'access-ended',
+                purgeAt: new Date(at + KEEP_ENDED_MS),
+              },
+            },
+          );
+          await revokeAtGateway(sessionId);
+          logger.info({ userId: rotated.userId, app, sessionId }, 'session ended: no grant left');
+          throw sessionExpired();
+        }
         return {
           user: { userId: rotated.userId, email: rotated.email },
           app,
           sessionId,
-          accessToken: await accessToken(rotated, at),
+          accessToken: await accessToken(rotated, at, access.authzVersion),
           refreshToken: next,
           expiresAt: rotated.expiresAt,
         };

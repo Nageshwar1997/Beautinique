@@ -2,6 +2,16 @@ import { eventCatalogue } from '../events';
 import { permissionCatalogue } from '../permissions';
 import { routeTable } from '../routes';
 import {
+  appSignIn,
+  authzVersionKey,
+  grantManage,
+  grantRead,
+  IAM_PERMISSIONS,
+  roleManage,
+  sessionRevoke,
+  totpReset,
+} from './iam';
+import {
   ACCESS_TOKEN_SECONDS,
   accessCookieName,
   AUTH_PROVIDERS,
@@ -47,13 +57,18 @@ import { getPing, pingRead, pingRecorded, recordPing, wake } from './platform';
 export {
   ACCESS_TOKEN_SECONDS,
   accessCookieName,
+  appSignIn,
   AUTH_PROVIDERS,
+  authzVersionKey,
   confirmTotpEnroll,
   consentProblems,
   endOtherSessions,
   endSession,
   getMe,
   getPing,
+  grantManage,
+  grantRead,
+  IAM_PERMISSIONS,
   IDENTITY_ERROR_CODES,
   listSessions,
   LOGIN_NEXT,
@@ -78,15 +93,18 @@ export {
   resendOtp,
   revokedSessionKey,
   revokedUserKey,
+  roleManage,
   SESSION_POLICIES,
   type SessionPolicy,
   sessionReuseDetected,
+  sessionRevoke,
   SIGN_UP_APPS,
   signedInZod,
   startTotpEnroll,
   TOKEN_ISSUER,
   tokenAudience,
   TOTP_REQUIRED_APPS,
+  totpReset,
   verifyOtp,
   wake,
 };
@@ -116,4 +134,4 @@ export const routes = routeTable([
   endOtherSessions,
 ]);
 export const events = eventCatalogue([pingRecorded, otpRequested, sessionReuseDetected]);
-export const permissions = permissionCatalogue([pingRead]);
+export const permissions = permissionCatalogue([pingRead, ...IAM_PERMISSIONS]);

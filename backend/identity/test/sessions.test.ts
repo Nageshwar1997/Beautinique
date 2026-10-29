@@ -26,6 +26,7 @@ import {
   passwordCode,
   signUpCode,
   startHarness,
+  users,
   verify,
 } from './helpers.ts';
 
@@ -122,7 +123,9 @@ describe('signing in', () => {
       audience: tokenAudience('customer'),
       issuer: TOKEN_ISSUER,
     });
-    expect(claims).toMatchObject({ sub: userId, amr: ['password'], av: 0 });
+    const { authzVersion } = (await users().findOne({ _id: userId })) ?? {};
+    expect(authzVersion).toBeGreaterThan(0);
+    expect(claims).toMatchObject({ sub: userId, amr: ['password'], av: authzVersion });
     expect(claims.exp - claims.iat).toBe(600);
     // each app's token is for that app only
     const seller = await signIn(address, 'seller');
