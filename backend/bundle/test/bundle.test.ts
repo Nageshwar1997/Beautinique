@@ -1,6 +1,7 @@
 import { randomBytes, randomUUID } from 'node:crypto';
 import { type AddressInfo, createServer } from 'node:net';
 
+import { totpCode } from '@beautinique/backend-server-crypto';
 import { ConfigError, createLogger } from '@beautinique/backend-server-kit';
 import { connectMongo, withTransaction } from '@beautinique/backend-server-mongo';
 import { connectRedis, writeEvent } from '@beautinique/backend-server-queue';
@@ -24,6 +25,10 @@ const notifyDbName = `${dbName}_notify`;
 const ORIGIN_SECRET = randomBytes(32).toString('base64url');
 // identity seals sign-in codes with it, notify opens them: one value for both (ARCHITECTURE §7.1)
 const OTP_EVENT_KEYS = `e1:${randomBytes(32).toString('base64')}`;
+// identity's own keys, the same for every bundle of the run (one database): its token keys are
+// sealed with them, as live, where they never change
+const FIELD_KEYS = `k1:${randomBytes(32).toString('base64')}`;
+const BLIND_INDEX_KEY = `b1:${randomBytes(32).toString('base64')}`;
 
 afterAll(async () => {
   const logger = createLogger({ name: 'bundle-test', level: 'silent' });
@@ -45,8 +50,8 @@ const quiet = () => ({
   IDENTITY__MONGO_URI: MONGO_URI,
   IDENTITY__MONGO_DB_NAME: identityDbName,
   IDENTITY__REDIS_URL: REDIS_DB,
-  IDENTITY__FIELD_KEYS: `k1:${randomBytes(32).toString('base64')}`,
-  IDENTITY__BLIND_INDEX_KEY: `b1:${randomBytes(32).toString('base64')}`,
+  IDENTITY__FIELD_KEYS: FIELD_KEYS,
+  IDENTITY__BLIND_INDEX_KEY: BLIND_INDEX_KEY,
   IDENTITY__OTP_EVENT_KEYS: OTP_EVENT_KEYS,
   // nothing listens there: the breached-password check is away, so it lets passwords through
   // (fail-open), and the tests never reach the internet
@@ -394,6 +399,141 @@ describe('bundle', () => {
         body: JSON.stringify({ email, password: 'a support desk password, long' }),
       });
       expect(await signIn.json()).toMatchObject({ data: { next: 'totp-enroll' } });
+    } finally {
+      await identityDb.close();
+      await bundle.stop();
+      await fetch('http://localhost:8025/api/v1/messages', {
+        method: 'DELETE',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({ IDs: mailIds }),
+      });
+    }
+  });
+
+  it('opens a permission route through the gateway to someone holding its key, step-up included (T3.3 PR C)', async () => {
+    const bundle = await startBundle({ port: 0, env: quiet() });
+    const email = `master-${randomUUID().slice(0, 8)}@beautinique.example`;
+    const password = 'a master password, long enough';
+    const logger = createLogger({ name: 'bundle-test', level: 'silent' });
+    const identityDb = await connectMongo({
+      uri: MONGO_URI,
+      dbName: identityDbName,
+      appName: 'bundle-test',
+      logger,
+    });
+    const mailIds: string[] = [];
+    const headers = (app: string, cookie?: string) => ({
+      'X-BQ-App': app,
+      'x-origin-secret': ORIGIN_SECRET,
+      'content-type': 'application/json',
+      ...(cookie === undefined ? {} : { cookie }),
+    });
+    const api = (path: string, app: string, body?: unknown, cookie?: string) =>
+      fetch(`${bundle.url}/api/v1${path}`, {
+        method: body === undefined ? 'GET' : 'POST',
+        headers: headers(app, cookie),
+        ...(body === undefined ? {} : { body: JSON.stringify(body) }),
+      });
+    const accessOf = (answer: Response, app: string) =>
+      new RegExp(`__Host-bq_${app}_at=([^;]+)`).exec(
+        answer.headers.getSetCookie().join(', '),
+      )?.[1] ?? '';
+    try {
+      // an account (customer sign-up, the code from Mailpit)
+      const asked = await api('/auth/sign-up/code', 'customer', {
+        email,
+        consent: { terms: true, adult: true },
+      });
+      const { data } = (await asked.json()) as { data: { challengeId: string } };
+      const search = `http://localhost:8025/api/v1/search?query=${encodeURIComponent(`to:${email}`)}`;
+      interface Found {
+        messages: { ID: string; Snippet: string }[];
+      }
+      let found: Found = { messages: [] };
+      const end = Date.now() + 10_000;
+      while (found.messages.length === 0) {
+        if (Date.now() > end) throw new Error('no email reached Mailpit');
+        await new Promise((resolve) => setTimeout(resolve, 100));
+        found = (await (await fetch(search)).json()) as Found;
+      }
+      mailIds.push(...found.messages.map((m) => m.ID));
+      const code = /\b(\d{6})\b/.exec(found.messages[0]?.Snippet ?? '')?.[1] ?? '';
+      const made = await api(`/auth/otp/${data.challengeId}/verify`, 'customer', {
+        code,
+        password,
+      });
+      expect(made.status).toBe(200);
+      const { data: account } = (await made.json()) as { data: { userId: string } };
+
+      // a customer reads no grants: the gateway says no before identity hears of it
+      const customer = accessOf(made, 'customer');
+      const refused = await api(
+        '/iam/grants',
+        'customer',
+        undefined,
+        `__Host-bq_customer_at=${customer}`,
+      );
+      expect(refused.status).toBe(403);
+
+      // the first Master, as `npm run db:grant-master` gives it
+      const now = new Date();
+      await identityDb.db
+        .collection<Record<string, unknown> & { _id: string }>('identity_grants')
+        .insertOne({
+          _id: uuidv7(),
+          userId: account.userId,
+          role: 'master.master',
+          app: 'master',
+          scope: { type: 'global', ids: [] },
+          validFrom: null,
+          validTo: null,
+          grantedBy: null,
+          approvedBy: null,
+          via: 'bootstrap',
+          active: true,
+          createdAt: now,
+          endedAt: null,
+          endedBy: null,
+        });
+
+      // Master signs in to the master app, setting up the authenticator (a step-up too)
+      const started = await api('/auth/login', 'master', { email, password });
+      const { data: step } = (await started.json()) as { data: { next: string; loginId: string } };
+      expect(step.next).toBe('totp-enroll');
+      const enrolled = await api(`/auth/login/${step.loginId}/totp/enroll`, 'master', {});
+      const { data: enroll } = (await enrolled.json()) as { data: { secret: string } };
+      const at = Date.now();
+      const confirmed = await api(`/auth/login/${step.loginId}/totp/confirm`, 'master', {
+        code: totpCode(enroll.secret, at),
+      });
+      expect(confirmed.status).toBe(200);
+      const cookie = `__Host-bq_master_at=${accessOf(confirmed, 'master')}`;
+
+      // a permission route: through the gateway to identity
+      const listed = await api('/iam/grants?role=master.master', 'master', undefined, cookie);
+      expect(listed.status).toBe(200);
+      // a step-up route: the authenticator sign-in a moment ago counts
+      const invited = await api(
+        '/iam/invitations',
+        'master',
+        {
+          email: `invitee-${randomUUID().slice(0, 8)}@beautinique.example`,
+          role: 'support.l1_agent',
+          scope: { type: 'global', ids: [] },
+        },
+        cookie,
+      );
+      expect(invited.status).toBe(200);
+      expect(await invited.json()).toMatchObject({ data: { invitation: { status: 'pending' } } });
+      // a step-up of its own, with the next code
+      const stepped = await api(
+        '/auth/step-up',
+        'master',
+        { code: totpCode(enroll.secret, at + 30_000) },
+        cookie,
+      );
+      expect(stepped.status).toBe(200);
+      expect(accessOf(stepped, 'master')).not.toBe('');
     } finally {
       await identityDb.close();
       await bundle.stop();

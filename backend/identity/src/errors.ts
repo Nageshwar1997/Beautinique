@@ -98,3 +98,21 @@ export const signInUnavailable = (cause: unknown): AppError =>
     'Sign-in is not available right now. Please try again in a little while.',
     { cause },
   );
+
+/** A step-up needs an authenticator, and the account has none. */
+export const authenticatorRequired = (): AppError =>
+  new AppError('AUTHENTICATOR_REQUIRED', 'Set up an authenticator app first, then try again.', {
+    status: IDENTITY_ERROR_CODES.AUTHENTICATOR_REQUIRED,
+  });
+
+/** A wrong (or used) authenticator code at a step-up. */
+export const stepUpCodeInvalid = (): AppError =>
+  new AppError('TOTP_INVALID', 'That authenticator code is not right.', {
+    status: IDENTITY_ERROR_CODES.TOTP_INVALID,
+  });
+
+/** Too many wrong codes or passwords for this account lately: wait for the lock to end. */
+export const stepUpLocked = (): AppError =>
+  new AppError('TOTP_INVALID', 'Too many wrong codes. Please try again in an hour.', {
+    status: IDENTITY_ERROR_CODES.TOTP_INVALID,
+  });

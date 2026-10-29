@@ -68,6 +68,8 @@ export const IDENTITY_ERROR_CODES = {
   REFRESH_IN_PROGRESS: 409,
   /** Wrong recovery code, or one already used */
   RECOVERY_CODE_INVALID: 400,
+  /** A step-up needs the account's authenticator, and it has none: set one up first */
+  AUTHENTICATOR_REQUIRED: 400,
 } as const satisfies Record<string, number>;
 
 /**

@@ -4,6 +4,8 @@ import type { RedisConnection } from '@beautinique/backend-server-queue';
 import {
   accessCookieName,
   type AppId,
+  type AppPermissions,
+  appPermissionsKey,
   authzVersionKey,
   revokedSessionKey,
   revokedUserKey,
@@ -18,11 +20,22 @@ export interface SignedIn {
   sessionId: string;
   methods: string[];
   authzVersion: number;
+  /** When the session last confirmed with the authenticator (ms; the token's `su`), or null */
+  stepUpAt: number | null;
 }
+
+/** Whether a signed-in person holds a permission in the app: `stale` = refresh first. */
+export type Holds = 'yes' | 'no' | 'stale';
 
 export interface SessionGate {
   /** The person behind the app's access cookie; 401 when there is none or it no longer counts. */
   check(req: Request, app: AppId): Promise<SignedIn>;
+  /**
+   * The coarse permission check (ARCHITECTURE §7.3): is the key in identity's list for this app,
+   * written for the token's authz version? A list of another version, or none (Redis lost it),
+   * is `stale`: the app refreshes and identity writes it again. Redis away: 503.
+   */
+  holds(signedIn: SignedIn, app: AppId, permission: string): Promise<Holds>;
 }
 
 const signIn = (cause?: unknown) =>
@@ -104,7 +117,26 @@ export function sessionGate({
         sessionId,
         methods: Array.isArray(claims.amr) ? claims.amr.map(String) : [],
         authzVersion,
+        stepUpAt: typeof claims.su === 'number' ? claims.su * 1000 : null,
       };
+    },
+
+    async holds(signedIn, app, permission) {
+      let raw: string | null;
+      try {
+        raw = await redis.get(appPermissionsKey(signedIn.userId, app));
+      } catch (error) {
+        throw unavailable(error);
+      }
+      if (raw === null) return 'stale';
+      let list: Partial<AppPermissions>;
+      try {
+        list = JSON.parse(raw) as Partial<AppPermissions>;
+      } catch {
+        return 'stale';
+      }
+      if (list.v !== signedIn.authzVersion || !Array.isArray(list.keys)) return 'stale';
+      return list.keys.includes(permission) ? 'yes' : 'no';
     },
   };
 }

@@ -722,6 +722,86 @@
       "idempotency": false,
       "stepUp": false,
       "cache": null
+    },
+    {
+      "id": "auth.stepUp.verify",
+      "method": "POST",
+      "path": "/auth/step-up",
+      "owner": "identity",
+      "apps": [
+        "customer",
+        "seller",
+        "admin",
+        "superadmin",
+        "master",
+        "support",
+        "finance",
+        "logistics",
+        "delivery",
+        "growth",
+        "creator"
+      ],
+      "access": {
+        "type": "signed-in"
+      },
+      "rateLimit": "auth",
+      "idempotency": false,
+      "stepUp": false,
+      "cache": null
+    },
+    {
+      "id": "iam.users.resetAuthenticator",
+      "method": "POST",
+      "path": "/iam/users/:userId/authenticator/reset",
+      "owner": "identity",
+      "apps": [
+        "customer",
+        "seller",
+        "admin",
+        "superadmin",
+        "master",
+        "support",
+        "finance",
+        "logistics",
+        "delivery",
+        "growth",
+        "creator"
+      ],
+      "access": {
+        "type": "permission",
+        "permission": "iam.totp.reset"
+      },
+      "rateLimit": "write",
+      "idempotency": false,
+      "stepUp": true,
+      "cache": null
+    },
+    {
+      "id": "iam.users.endSessions",
+      "method": "POST",
+      "path": "/iam/users/:userId/sessions/end",
+      "owner": "identity",
+      "apps": [
+        "customer",
+        "seller",
+        "admin",
+        "superadmin",
+        "master",
+        "support",
+        "finance",
+        "logistics",
+        "delivery",
+        "growth",
+        "creator"
+      ],
+      "access": {
+        "type": "permission",
+        "permission": "iam.session.revoke"
+      },
+      "rateLimit": "write",
+      "idempotency": false,
+      "stepUp": true,
+      "cache": null
     }
   ]
 }

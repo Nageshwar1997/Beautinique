@@ -287,6 +287,8 @@ export interface SignInAccess {
   mfaRequired: boolean;
   /** The account's authz version, for the access token's `av` */
   authzVersion: number;
+  /** The permission keys of those grants' roles: the gateway's coarse check (T3.3) */
+  permissions: string[];
 }
 
 /** Active now: started, not ended, not run out. */
@@ -310,7 +312,7 @@ export async function signInAccess(
     .collection<User>(USERS)
     .findOne({ _id: userId }, { projection: { authzVersion: 1, status: 1 } });
   const authzVersion = user?.authzVersion ?? 0;
-  const none = { allowed: false, mfaRequired: false, authzVersion };
+  const none = { allowed: false, mfaRequired: false, authzVersion, permissions: [] };
   if (user?.status !== 'active') return none;
   const grants = await grantsOf(mongo)
     .find({ userId, app, ...activeAt(now) }, { projection: { role: 1 } })
@@ -320,9 +322,14 @@ export async function signInAccess(
     .collection<RoleRecord>(ROLES)
     .find(
       { _id: { $in: grants.map((grant) => grant.role) }, retired: false },
-      { projection: { mfaRequired: 1 } },
+      { projection: { mfaRequired: 1, permissions: 1 } },
     )
     .toArray();
   if (roles.length === 0) return none;
-  return { allowed: true, mfaRequired: roles.some((role) => role.mfaRequired), authzVersion };
+  return {
+    allowed: true,
+    mfaRequired: roles.some((role) => role.mfaRequired),
+    authzVersion,
+    permissions: [...new Set(roles.flatMap((role) => role.permissions))].sort(),
+  };
 }

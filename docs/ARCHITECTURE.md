@@ -1,6 +1,6 @@
 # ARCHITECTURE — BQ
 
-> **Status:** v1.35 draft (2026-10-29). [PRD.md](PRD.md) v1.0 pe based. Design ek multi-agent review se aaya (3 architecture proposals + review board + owner ke decisions), aur v1.1 me free tier ke official docs ke against verify hua.
+> **Status:** v1.36 draft (2026-10-29). [PRD.md](PRD.md) v1.0 pe based. Design ek multi-agent review se aaya (3 architecture proposals + review board + owner ke decisions), aur v1.1 me free tier ke official docs ke against verify hua.
 
 ## 0. Ek nazar me
 
@@ -353,7 +353,7 @@ Kai platforms alag users ko alag price dikhate hain. BQ ka rule: **ek product ka
 | --------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | contracts                               | Zod DTOs, routes, events, permission keys, error codes, area-setting keys. OpenAPI aur clients generate karta hai.                                                                                                                        |
 | api-client                              | Single-flight refresh, request queue, `X-BQ-App`, Idempotency-Key helper, generated typed calls aur query keys.                                                                                                                           |
-| auth-ui                                 | Email OTP, email + password + TOTP, Google, 18+ declaration, My Devices, step-up dialog.                                                                                                                                                  |
+| auth-ui                                 | Email + password (sign-up, password set aur invitation pe email code), authenticator (TOTP) + recovery codes, invitation accept, Google/LinkedIn/GitHub (sirf customer), 18+ declaration, My Devices, step-up dialog. |
 | authz                                   | Permission matcher, `<Can>`, `usePermission`, route guards, nav filtering.                                                                                                                                                                |
 | app-shell                               | Responsive layout, permission-filtered nav, theme switcher, help link, error, 404 aur offline pages, wake-up screen (Render cold start ke liye), Sentry, idle logout.                                                                     |
 | review-screens                          | Casework queue, subject renderers, decision panel, reason library. Admin aur Super Admin dono me lagta hai, aur Growth me creator applications ke liye bhi.                                                                               |
@@ -363,6 +363,8 @@ Kai platforms alag users ko alag price dikhate hain. BQ ka rule: **ek product ka
 | pwa-kit, forms, config-vite, test-utils | Tooling aur common pieces (ESLint aur TypeScript ke shared configs root `configs/` me hain).                                                                                                                                              |
 
 **Published packages** (components, hooks, stores, styles, quill, tryon, tryon-assets, aur naya icons) apne ~2,600 tests ke saath monorepo me aate hain. Inhe repo ka apna package CLI (`scripts/packages/`, guide: [packages/README.md](packages/README.md)) npm pe publish karta hai: laptop se 2FA ke saath, ya GitHub Actions `release.yml` se trusted publishing aur provenance ke saath. Apps aur packages internal packages ko normal semver range (`^2.0.0`) se lete hain; npm workspaces local version link kar deta hai (npm `workspace:*` support nahi karta).
+
+**Components aur hooks (owner, 2026-10-29):** auth-ui se pehle do naye packages, `@beautinique/frontend-hooks` aur `@beautinique/frontend-components` (purana `BQ-Packages` sirf reference). Components: Button, Input (password dikhao/chhupao, 6 dabbe wala code input), Field (label, hint, error), Checkbox, Radio, Select, DatePicker, ColorPicker, HierarchySelect, Toast, Dialog, Spinner, Tooltip. Select, DatePicker, ColorPicker aur Radio/Checkbox ka andar ka hissa React Aria Components (Adobe: keyboard, screen reader, `en-IN` dates) pe, design poora hamare `styles` tokens se; simple cheezein (Button, Input, Field, Spinner) bina library ke. Hooks: useDebounce, useOutsideClick, useMediaQuery/useIsSmallScreen, useOnlineStatus, useCountdown, useCopyToClipboard, useQueryParams. Form ki state (react-hook-form + hamare zod schemas) `frontend-forms` me, auth-ui ke saath. Animation library (Motion, pehle Framer Motion) ka faisla owner ka khula hai (Claude ki salah: CSS pehle; Motion sirf exit/layout/drag ke liye, `LazyMotion` se, components package ke andar).
 
 ### 9.3 Vercel (Hobby, ₹0)
 
@@ -667,3 +669,4 @@ Sirf config badlegi, code nahi:
 | v1.33 | 2026-10-28 | §16 migration aur cutover: purana data import nahi, naya stack khaali data se (owner). |
 | v1.34 | 2026-10-28 | §16: zaroori purana data naye packages me use hota hai, poora import nahi (owner). |
 | v1.35 | 2026-10-29 | §7.3: T3.3 ke faisle (states + UTs, roles ka seed code me, pehla Master CLI se, gateway ka mota check, bina grant wale app ka jawab) (owner). |
+| v1.36 | 2026-10-29 | §9.2: auth-ui ka kaam aaj ke login ke hisaab se; components + hooks packages auth-ui se pehle, React Aria (owner); Motion ka faisla khula. |

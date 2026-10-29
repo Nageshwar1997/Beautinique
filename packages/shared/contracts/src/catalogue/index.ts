@@ -2,9 +2,11 @@ import { eventCatalogue } from '../events';
 import { permissionCatalogue } from '../permissions';
 import { routeTable } from '../routes';
 import {
+  authenticatorReset,
   createInvitation,
   createRole,
   endGrant,
+  endUserSessions,
   giveGrant,
   IAM_PERMISSIONS,
   invitationCreated,
@@ -12,7 +14,9 @@ import {
   listInvitations,
   listRoles,
   requestInvitationCode,
+  resetAuthenticator,
   revokeInvitation,
+  stepUp,
   updateRole,
 } from './iam';
 import {
@@ -139,11 +143,15 @@ export const routes = routeTable([
   listInvitations,
   revokeInvitation,
   requestInvitationCode,
+  stepUp,
+  resetAuthenticator,
+  endUserSessions,
 ]);
 export const events = eventCatalogue([
   pingRecorded,
   otpRequested,
   sessionReuseDetected,
   invitationCreated,
+  authenticatorReset,
 ]);
 export const permissions = permissionCatalogue([pingRead, ...IAM_PERMISSIONS]);

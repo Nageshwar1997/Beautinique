@@ -4,6 +4,7 @@ import type { IndexSpec, Mongo } from '@beautinique/backend-server-mongo';
 import { subscribe, type Subscription, type TaskTrigger } from '@beautinique/backend-server-queue';
 import {
   type AppId,
+  authenticatorReset,
   invitationCreated,
   type OTP_PURPOSES,
   otpRequested,
@@ -12,7 +13,12 @@ import {
 } from '@beautinique/shared-contracts';
 
 import { type EmailSender, EmailSendError } from './email/port.ts';
-import { invitationEmail, otpEmail, sessionReuseEmail } from './email/templates.ts';
+import {
+  authenticatorResetEmail,
+  invitationEmail,
+  otpEmail,
+  sessionReuseEmail,
+} from './email/templates.ts';
 
 export const DELIVERIES = 'notify_deliveries';
 export const EMAIL_DAYS = 'notify_email_days';
@@ -22,6 +28,8 @@ export const OTP_EMAIL = 'notify.otpEmail';
 export const SECURITY_EMAIL = 'notify.securityEmail';
 /** The subscriber identity's relay sends identity.invitation.created to. */
 export const INVITATION_EMAIL = 'notify.invitationEmail';
+/** The subscriber identity's relay sends identity.authenticator.reset to. */
+export const AUTHENTICATOR_EMAIL = 'notify.authenticatorEmail';
 /** The task that sends what is due; it runs every minute and at once after each new email. */
 export const SEND_TASK = 'email.sendDue';
 
@@ -53,7 +61,7 @@ export interface Delivery {
   lane: Lane;
   /** LANES[lane]: the order a run sends in */
   priority: number;
-  template: 'otp' | 'session-reuse' | 'invitation';
+  template: 'otp' | 'session-reuse' | 'invitation' | 'authenticator-reset';
   to: string;
   /** The sign-in code, still sealed; removed once the email went, failed or ran out. */
   otp?: {
@@ -67,6 +75,8 @@ export interface Delivery {
   security?: { app: AppId; device: string; detectedAt: string };
   /** An invitation to a role (no secret in it: it is accepted with an email code) */
   invitation?: { app: AppId; roleName: string; expiresAt: string };
+  /** A Security Officer reset the authenticator (no secret in it) */
+  authenticator?: { resetAt: string };
   status: Status;
   attempts: number;
   /** Not sent before this */
@@ -262,6 +272,52 @@ export function invitationSubscription({
   });
 }
 
+/**
+ * identity.authenticator.reset → a security email in the transactional lane, then a send run at
+ * once.
+ */
+export function authenticatorSubscription({
+  mongo,
+  trigger,
+  logger,
+}: {
+  mongo: Mongo;
+  trigger: TaskTrigger;
+  logger: Logger;
+}): Subscription {
+  const deliveries = deliveriesOf(mongo);
+  return subscribe(AUTHENTICATOR_EMAIL, authenticatorReset, async (event, session) => {
+    const { email, resetAt } = event.data;
+    const now = new Date();
+    await deliveries.insertOne(
+      {
+        _id: event.eventId,
+        channel: 'email',
+        lane: 'transactional',
+        priority: LANES.transactional,
+        template: 'authenticator-reset',
+        to: email,
+        authenticator: { resetAt },
+        status: 'queued',
+        attempts: 0,
+        dueAt: now,
+        expiresAt: null,
+        createdAt: now,
+      },
+      { session },
+    );
+    try {
+      await trigger.runSoon(SEND_TASK);
+    } catch (error) {
+      // the every-minute run sends it anyway
+      logger.warn(
+        { err: describe(error), deliveryId: event.eventId },
+        'email send not started at once',
+      );
+    }
+  });
+}
+
 export interface SendDueDeps {
   mongo: Mongo;
   sender: EmailSender;
@@ -341,6 +397,12 @@ export async function sendDue({
       const { security } = delivery;
       if (!security) throw new EmailSendError('SECURITY_DETAILS_MISSING', { retry: false });
       return sessionReuseEmail({ to: delivery.to, ...security });
+    }
+    if (delivery.template === 'authenticator-reset') {
+      const { authenticator } = delivery;
+      if (!authenticator)
+        throw new EmailSendError('AUTHENTICATOR_DETAILS_MISSING', { retry: false });
+      return authenticatorResetEmail({ to: delivery.to, ...authenticator });
     }
     if (delivery.template === 'invitation') {
       const { invitation } = delivery;

@@ -23,7 +23,7 @@ Sab deployables ek process me: `npm run dev:backend` (`backend/bundle`).
 4. `email.sendDue` (transaction ke bahar) jo due hai wo bhejta hai: pehle OTP, phir transactional, phir baaki. Har row lease ke saath claim hoti hai, code wahin khulta hai, provider ko jaata hai, aur `sent` hone pe (ya `failed`/`expired`) sealed code row se hat jaata hai.
 5. Har minute bhi `email.sendDue` chalta hai: retries aur chhoota hua trigger.
 
-**Doosre emails (transactional lane):** `identity.session.reuseDetected` → `notify.securityEmail` ("We signed you out"); `identity.invitation.created` → `notify.invitationEmail` ("You are invited to <app>": role, accept kaise karein, kab tak; koi secret nahi, invitation ke khatam hone ke baad nahi jaata). App ka link `NOTIFY__APP_URLS` se; us app ka URL na ho to email me sirf app ka naam. Invitation accept karne ka code purpose `invite` ke saath OTP lane me ("Accept your <app> invitation").
+**Doosre emails (transactional lane):** `identity.session.reuseDetected` → `notify.securityEmail` ("We signed you out"); `identity.authenticator.reset` → `notify.authenticatorEmail` ("Your Beautinique authenticator was reset": kab, sab jagah sign out, na maanga ho to kya karein); `identity.invitation.created` → `notify.invitationEmail` ("You are invited to <app>": role, accept kaise karein, kab tak; koi secret nahi, invitation ke khatam hone ke baad nahi jaata). App ka link `NOTIFY__APP_URLS` se; us app ka URL na ho to email me sirf app ka naam. Invitation accept karne ka code purpose `invite` ke saath OTP lane me ("Accept your <app> invitation").
 
 **Niyam:**
 

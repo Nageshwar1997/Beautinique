@@ -61,7 +61,7 @@ Owner ke faisle (2026-10-27): **sabhi 11 apps email + password se sign-in** kart
 
 ### Roles dena aur hatana (T3.3 PR B, `src/rbac/manage.ts`, `authority.ts`)
 
-Routes (contracts `catalogue/iam.ts`), sab gateway ke passport se; identity khud apne grants se jaanchta hai ki caller kar sakta hai ya nahi (caller ke grants usi app ke gine jaate hain jahan se wo aaya, passport ka `app`). Gateway in permission routes ko abhi 403 deta hai: asli check aur step-up PR C me.
+Routes (contracts `catalogue/iam.ts`), sab gateway ke passport se; identity khud apne grants se jaanchta hai ki caller kar sakta hai ya nahi (caller ke grants usi app ke gine jaate hain jahan se wo aaya, passport ka `app`). Gateway pehle mota check karta hai (neeche "Gateway ka check aur step-up"), phir identity apna poora check.
 
 | Route                                                      | Kaun                                                                                                                                                                        |
 | ---------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -77,6 +77,12 @@ Routes (contracts `catalogue/iam.ts`), sab gateway ke passport se; identity khud
 - **Custom role:** `roleProblems` (shipped jaisa hi check) + `iam.role.manage` nahi; jis role ko doosre roles apna appointer maante hain, us se `iam.grant.manage` hatana ya use retire karna 409; jo scope type kisi active grant me hai, use hatana 409.
 - **Invitations** (`identity_invitations`, `src/rbac/invitations.ts`): email pe, 7 din. Banne pe outbox event `identity.invitation.created` → notify ka "You are invited" email (koi secret nahi). Accept: role ke app me `POST /auth/invitations/code` (sirf us email pe jiske liye is app me invitation ho; sign-up apps me unki consent) → `POST /auth/otp/:challengeId/verify` (code + password) → `invite-accepted`: naya account password ke saath, pehle se password wala account apna password rakhta hai; grant `via: 'invitation'`, `grantedBy` = inviter. Sign in nahi hota: app ka login (authenticator ke saath) agla. Accept ke waqt inviter ka haq dobara dekha jaata hai: haq gaya to invitation `revoked`. `self` scope invitation me ids khaali, account ka id accept pe.
 - **Abhi ki seema:** alag type ka scope (State Admin, scope `state`, se Seller Account Owner, scope `sellerOrg`, ya Pro Buyer, scope `self`) tab tak koi nahi de sakta jab tak seller/pro module nahi batata ki wo org/buyer kis state me hai (unke approval flow ke saath, T4). Master inka appointer nahi (PRD §3.6: seller approval me Master ka bypass nahi).
+
+### Gateway ka check aur step-up (T3.3 PR C)
+
+- **Permission list:** har sign-in, refresh aur step-up pe identity Redis me `bq:id:perms:<userId>:<app>` (contracts `appPermissionsKey`) likhta hai: `{ v: authzVersion, keys }` (us app ke active grants ke non-retired roles ki keys), ~11 min. Gateway permission route pe: key ho to aage, na ho to 403; list na ho ya doosre `av` ki ho to 401 (app refresh karti hai, identity list dobara likhta hai). Scope ka check service ka (T4.1).
+- **Step-up:** session ka `stepUpAt` (authenticator ya recovery code se sign-in, ya `POST /auth/step-up`), access token me `su`; refresh use rakhta hai. Route ka `stepUp` ho to gateway 5 min (`STEP_UP_SECONDS`) ke andar ka step-up maangta hai, warna 401 `STEP_UP_REQUIRED`. `POST /auth/step-up`: authenticator code (galat code account ke lock me gina jaata hai; locked account nahi; purana ya wahi code dobara nahi; authenticator na ho to `AUTHENTICATOR_REQUIRED`), sirf naya access cookie.
+- **Security Officer** (`src/rbac/security.ts`): `POST /iam/users/:userId/authenticator/reset` (authenticator + recovery codes hat'te hain, saare sessions band, event `identity.authenticator.reset` → notify ka email), `POST /iam/users/:userId/sessions/end`. Apne account pe nahi. Person ko email se: `GET /iam/grants?email=`.
 
 ## Settings
 

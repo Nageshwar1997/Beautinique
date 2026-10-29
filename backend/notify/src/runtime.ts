@@ -18,6 +18,7 @@ import {
 
 import type { Config } from './config.ts';
 import {
+  authenticatorSubscription,
   invitationSubscription,
   otpSubscription,
   securitySubscription,
@@ -133,6 +134,7 @@ export async function startRuntime(config: Config, options: RuntimeOptions): Pro
           otpSubscription({ mongo, trigger, logger }),
           securitySubscription({ mongo, trigger, logger }),
           invitationSubscription({ mongo, trigger, logger }),
+          authenticatorSubscription({ mongo, trigger, logger }),
         ],
         tasks,
         prefix,

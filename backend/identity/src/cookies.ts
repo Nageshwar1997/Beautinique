@@ -14,14 +14,19 @@ import type { IssuedSession } from './sessions.ts';
  * access cookie (`__Host-`, Path=/) goes with every /api request; the refresh cookie (Strict) only
  * to /api/v1/auth, so it travels with refresh and logout and nothing else.
  */
-export function setSessionCookies(res: Response, session: IssuedSession): void {
-  res.cookie(accessCookieName(session.app), session.accessToken, {
+/** The app's access cookie alone (a step-up renews the access token, not the refresh one). */
+export function setAccessCookie(res: Response, app: AppId, accessToken: string): void {
+  res.cookie(accessCookieName(app), accessToken, {
     httpOnly: true,
     secure: true,
     sameSite: 'lax',
     path: '/',
     maxAge: ACCESS_TOKEN_SECONDS * 1000,
   });
+}
+
+export function setSessionCookies(res: Response, session: IssuedSession): void {
+  setAccessCookie(res, session.app, session.accessToken);
   res.cookie(refreshCookieName(session.app), session.refreshToken, {
     httpOnly: true,
     secure: true,
