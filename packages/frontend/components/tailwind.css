@@ -1,0 +1,7 @@
+/*
+ * Import after tailwindcss and the styles package in the app's CSS:
+ * `@import '@beautinique/frontend-components/tailwind.css';`
+ * Tailwind skips node_modules, where this package lives in an app, so without this line the classes
+ * its components use would never be generated.
+ */
+@source './dist';
