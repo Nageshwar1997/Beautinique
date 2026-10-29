@@ -1,6 +1,6 @@
 # ARCHITECTURE — BQ
 
-> **Status:** v1.37 draft (2026-10-30). [PRD.md](PRD.md) v1.0 pe based. Design ek multi-agent review se aaya (3 architecture proposals + review board + owner ke decisions), aur v1.1 me free tier ke official docs ke against verify hua.
+> **Status:** v1.38 draft (2026-10-30). [PRD.md](PRD.md) v1.0 pe based. Design ek multi-agent review se aaya (3 architecture proposals + review board + owner ke decisions), aur v1.1 me free tier ke official docs ke against verify hua.
 
 ## 0. Ek nazar me
 
@@ -364,7 +364,7 @@ Kai platforms alag users ko alag price dikhate hain. BQ ka rule: **ek product ka
 
 **Published packages** (components, hooks, stores, styles, quill, tryon, tryon-assets, aur naya icons) apne ~2,600 tests ke saath monorepo me aate hain. Inhe repo ka apna package CLI (`scripts/packages/`, guide: [packages/README.md](packages/README.md)) npm pe publish karta hai: laptop se 2FA ke saath, ya GitHub Actions `release.yml` se trusted publishing aur provenance ke saath. Apps aur packages internal packages ko normal semver range (`^2.0.0`) se lete hain; npm workspaces local version link kar deta hai (npm `workspace:*` support nahi karta).
 
-**Components aur hooks (owner, 2026-10-29):** auth-ui se pehle do naye packages, `@beautinique/frontend-hooks` aur `@beautinique/frontend-components` (purana `BQ-Packages` sirf reference). Components: Button, Input (password dikhao/chhupao, 6 dabbe wala code input), Field (label, hint, error), Checkbox, Radio, Select, DatePicker, ColorPicker, HierarchySelect, Toast, Dialog, Spinner, Tooltip. Select, DatePicker, ColorPicker aur Radio/Checkbox ka andar ka hissa React Aria Components (Adobe: keyboard, screen reader, `en-IN` dates) pe, design poora hamare `styles` tokens se; simple cheezein (Button, Input, Field, Spinner) bina library ke. Hooks (bana, 2026-10-30): useDebounce, useDebouncedValue, useOutsideClick, useMediaQuery/useIsSmallScreen, useOnlineStatus (probe sirf apni site, koi teesri company nahi), useCountdown, useCopyToClipboard; `/router` me useQueryParams, useQueryParamInput, usePathParams. Form ki state (react-hook-form + hamare zod schemas) `frontend-forms` me, auth-ui ke saath. Animation library (Motion, pehle Framer Motion) ka faisla owner ka khula hai (Claude ki salah: CSS pehle; Motion sirf exit/layout/drag ke liye, `LazyMotion` se, components package ke andar).
+**Components aur hooks (owner, 2026-10-29):** auth-ui se pehle do naye packages, `@beautinique/frontend-hooks` aur `@beautinique/frontend-components` (purana `BQ-Packages` sirf reference). Components: Button, Input (password dikhao/chhupao, 6 dabbe wala code input), Field (label, hint, error), Checkbox, Radio, Select, DatePicker, ColorPicker, HierarchySelect, Toast, Dialog, Spinner, Tooltip. Select, DatePicker, ColorPicker aur Radio/Checkbox ka andar ka hissa React Aria Components (Adobe: keyboard, screen reader, `en-IN` dates) pe, design poora hamare `styles` tokens se; simple cheezein (Button, Input, Field, Spinner) bina library ke. Hooks (bana, 2026-10-30): useDebounce, useDebouncedValue, useOutsideClick, useMediaQuery/useIsSmallScreen, useOnlineStatus (probe sirf apni site, koi teesri company nahi), useCountdown, useCopyToClipboard; `/router` me useQueryParams, useQueryParamInput, usePathParams. Form ki state (react-hook-form + hamare zod schemas) `frontend-forms` me, auth-ui ke saath. Animation (owner, 2026-10-30): **Motion** (pehle Framer Motion) liya, is niyam ke saath: simple cheezein (hover, fade, rang, spinner) CSS se; Motion sirf exit (Toast/Dialog jaate hue), layout aur drag/swipe ke liye, `LazyMotion` + `m` se, sirf components package ke andar (apps seedha import nahi karte); `reducedMotion: "user"` (kam animation chunne walon ke liye band). Bundle ka asar build me naap ke README me.
 
 ### 9.3 Vercel (Hobby, ₹0)
 
@@ -671,3 +671,4 @@ Sirf config badlegi, code nahi:
 | v1.35 | 2026-10-29 | §7.3: T3.3 ke faisle (states + UTs, roles ka seed code me, pehla Master CLI se, gateway ka mota check, bina grant wale app ka jawab) (owner). |
 | v1.36 | 2026-10-29 | §9.2: auth-ui ka kaam aaj ke login ke hisaab se; components + hooks packages auth-ui se pehle, React Aria (owner); Motion ka faisla khula. |
 | v1.37 | 2026-10-30 | §9.2: hooks package bana; online probe sirf apni site. |
+| v1.38 | 2026-10-30 | §9.2: Motion liya, CSS pehle ke niyam ke saath (owner). |
