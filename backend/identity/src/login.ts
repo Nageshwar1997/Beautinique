@@ -30,6 +30,7 @@ import {
 import { clearFailures, isLocked, recordFailure } from './lockout.ts';
 import type { OtpDeps } from './otp.ts';
 import { dummyHash, hashPassword, needsRehash, verifyPassword } from './password.ts';
+import { signInAccess } from './rbac/grants.ts';
 import type { AuthMethod, Client, IssuedSession } from './sessions.ts';
 import { type User, USERS } from './users.ts';
 
@@ -118,6 +119,10 @@ export async function passwordLogin(
     await recordFailure(deps.redis, deps.keys, email);
     throw invalidCredentials();
   }
+  // sign-in only where the account holds a grant (ARCHITECTURE §7.1); the same answer as a wrong
+  // password, so an app does not tell who works where. Not a failure: the password was right.
+  const access = await signInAccess(deps.mongo, { userId: user._id, app });
+  if (!access.allowed) throw invalidCredentials();
   const now = new Date();
   if (needsRehash(hash)) {
     // the stored hash is from older settings: keep the same password, with today's
@@ -133,7 +138,7 @@ export async function passwordLogin(
   if (credentials.totp) {
     return { next: 'totp', loginId: await startLogin(deps, { ...who, stage: 'totp' }) };
   }
-  if ((TOTP_REQUIRED_APPS as readonly string[]).includes(app)) {
+  if ((TOTP_REQUIRED_APPS as readonly string[]).includes(app) || access.mfaRequired) {
     return { next: 'totp-enroll', loginId: await startLogin(deps, { ...who, stage: 'enroll' }) };
   }
   // the count starts again only after a whole sign-in: a right password alone must not give a

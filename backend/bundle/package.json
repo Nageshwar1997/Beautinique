@@ -9,6 +9,7 @@
     "build": "tsdown",
     "start": "node --enable-source-maps --max-old-space-size=300 --import ./dist/instrument.js dist/start.js",
     "release": "node --conditions=beautinique-source src/db-release.ts",
+    "grant-master": "node --conditions=beautinique-source src/db-grant-master.ts",
     "typecheck": "tsc --noEmit",
     "lint": "eslint .",
     "test": "vitest run"

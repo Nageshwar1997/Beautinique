@@ -107,8 +107,16 @@ describe('generateFiles', () => {
     const list = (
       parsed('permissions.json') as { permissions: { key: string; scopeTypes: string[] }[] }
     ).permissions;
-    expect(list.map((p) => p.key)).toEqual(['platform.ping.read']);
-    expect(list[0]?.scopeTypes).toEqual(['global']);
+    expect(list.map((p) => p.key)).toEqual([
+      'iam.app.sign_in',
+      'iam.grant.manage',
+      'iam.grant.read',
+      'iam.role.manage',
+      'iam.session.revoke',
+      'iam.totp.reset',
+      'platform.ping.read',
+    ]);
+    expect(list.at(-1)?.scopeTypes).toEqual(['global']);
   });
 });
 

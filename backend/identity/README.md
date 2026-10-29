@@ -49,6 +49,16 @@ Owner ke faisle (2026-10-27): **sabhi 11 apps email + password se sign-in** kart
 - Token keys: `identity_signing_keys`, private key `IDENTITY__FIELD_KEYS` se sealed, har 30 din nayi; `GET /.well-known/jwks.json` (sirf gateway ke liye, `/api` route nahi).
 - Signed-in routes gateway ke passport se (`X-BQ-Passport`, server-kit `passportVerifier`; bundle gateway ki public key memory me deta hai, split mode me `IDENTITY__PASSPORT_JWKS_URL`): `GET /iam/me` (account, login ke tareeke, authenticator, ye session), My Devices `GET /auth/sessions` (account ke saare apps ke sessions, current ka nishaan), `DELETE /auth/sessions/:id` (ek device; apna ho to cookies bhi), `POST /auth/sessions/end-others`.
 
+## Roles aur grants (TASKS T3.3, ARCHITECTURE §7.3)
+
+- **Data, code se:** har start ka release step `rbac-sync` 11 apps (`identity_apps`), permission catalogue (`identity_permissions`, contracts ka `permissions`) aur `src/rbac/roles.ts` ke roles (`identity_roles`, `system: true`) DB me likhta hai. PRD §3.2 ke 79 roles + 2 sign-up roles (`seller.applicant`, `creator.applicant`). Code se hata role/key `retired` banta hai, mitta nahi. Master ke banaye sub-roles (`system: false`) ko sync nahi chhoota.
+- **Har role me:** app, main ya sub, scope types, permission keys (hamesha `iam.app.sign_in`), kaun de sakta hai (`appointedBy`; ARCHITECTURE §7.3, baaki sub-roles Master), `mfaRequired` (Seller Account Owner, Seller Finance, Master), seats (Master 2). Naya module apni keys yahin roles me jodta hai; `roleSeedProblems()` (test bhi) anjaan key, scope ke bahar ki key ya aisa appointer jo role nahi de sakta, pakadta hai.
+- **Grants** (`identity_grants`): `{userId, role, app, scope {type, ids}, validFrom, validTo, grantedBy, approvedBy, via, active}`; ek account, role aur scope id pe ek hi active. Har badlav `identity_grant_log` me aur account ka `authzVersion` badhata hai, jo access token ka `av` hai.
+- **Sign-up pe:** customer app me 18+ ke baad Customer, seller/creator me applicant (scope self), pehle se bane account ko bhi. Purane accounts ko migration `20261029-001-sign-up-grants` ne yahi diya.
+- **Sign-in sirf us app me jahan grant ho:** password sahi ho par us app me active grant na ho to wahi jawab jo galat password pe (`INVALID_CREDENTIALS`), aur ye galat koshish nahi ginta. `SessionPort.issue` bhi yahi check karta hai (koi raasta bina grant ke session nahi bana sakta). Refresh pe grants dobara: app me koi grant na bache to session band (`access-ended`) aur `SESSION_EXPIRED`. Kisi grant ka role `mfaRequired` ho to authenticator lagana zaroori, internal apps ki tarah.
+- **Pehla Master:** `npm run db:grant-master -- --email <email>` ([backend/bundle/README.md](../bundle/README.md)); account pehle se ho, max 2.
+- **States:** `state` scope ke ids contracts ke `INDIAN_STATES` (28 states + 8 UTs, 2-letter id, GST code). District, city, hub aur warehouse ke ids location master ke saath.
+
 ## Settings
 
 `.env.example` ka LOCAL hissa `.env` me copy karo (commit kabhi nahi); OPTIONAL me defaults, PRODUCTION me live ki keys dummy values ke saath. Har key `IDENTITY__` se shuru hoti hai, taaki bundle mode me ek process me sab deployables ki keys alag rahein. Settings sirf [src/config.ts](src/config.ts) padhta hai (zod se check; ESLint baaki jagah `process.env` rokta hai). Nayi setting = `configZod` me key + `.env.example` me line.
@@ -56,9 +66,9 @@ Owner ke faisle (2026-10-27): **sabhi 11 apps email + password se sign-in** kart
 ## Code kahan hai
 
 - `src/service.ts`: `readConfig` + `start` (split mode me `src/server.ts`, bundle mode me `backend/bundle` isse chalata hai).
-- `src/release.ts` + `src/runtime.ts`: start pe Mongo se judte hi release steps (migrations, indexes; `@beautinique/backend-server-release`, ARCHITECTURE §11.1), phir Redis. Nayi migration list ke aakhir me, naye collection ke indexes `indexes` me; permission sync step T3.3 me.
+- `src/release.ts` + `src/runtime.ts`: start pe Mongo se judte hi release steps (migrations, indexes; `@beautinique/backend-server-release`, ARCHITECTURE §11.1), phir Redis. Nayi migration list ke aakhir me, naye collection ke indexes `indexes` me; step `rbac-sync` (T3.3).
 - `src/app.ts`: `@beautinique/backend-server-kit` ka `createApp` (health, errors, logs, request id).
 - `src/routes/index.ts`: identity ke routes (app `X-BQ-App` se, IP `X-BQ-Client-Ip` se, dono gateway ke). Har route contracts me declare hota hai (owner `identity`), yahan sirf handler.
-- `src/otp.ts`: email code maangna, naya code, check + password (Redis + outbox). `src/login.ts`: password sign-in, authenticator, recovery codes. `src/password.ts`: argon2id + HIBP. `src/lockout.ts`: galat koshishein aur rok. `src/credentials.ts`: secrets aur login ke tareeke. `src/users.ts`: accounts aur consent. `src/sessions.ts`: sessions, refresh rotation, logout. `src/signing-keys.ts`: token keys + JWKS. `src/cookies.ts`: cookies. `src/errors.ts`: error text.
+- `src/otp.ts`: email code maangna, naya code, check + password (Redis + outbox). `src/login.ts`: password sign-in, authenticator, recovery codes. `src/password.ts`: argon2id + HIBP. `src/lockout.ts`: galat koshishein aur rok. `src/credentials.ts`: secrets aur login ke tareeke. `src/users.ts`: accounts aur consent. `src/sessions.ts`: sessions, refresh rotation, logout. `src/signing-keys.ts`: token keys + JWKS. `src/cookies.ts`: cookies. `src/errors.ts`: error text. `src/rbac/`: roles (`roles.ts`), apps/permissions/roles ka sync (`sync.ts`), grants aur sign-in ka check (`grants.ts`), migration, pehla Master (`bootstrap.ts`).
 
 Node 24 TypeScript seedha chalata hai: imports me `.ts` likho, enum ya parameter properties nahi.

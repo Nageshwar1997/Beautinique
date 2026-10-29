@@ -331,7 +331,10 @@ const mutations: Mutation[] = [
     file: 'login',
     name: 'internal apps without the authenticator',
     change: [
-      ['  if ((TOTP_REQUIRED_APPS as readonly string[]).includes(app)) {', '  if (false) {'],
+      [
+        '  if ((TOTP_REQUIRED_APPS as readonly string[]).includes(app) || access.mfaRequired) {',
+        '  if (access.mfaRequired) {',
+      ],
     ],
     tests: 'internal app',
   },
@@ -726,6 +729,105 @@ const mutations: Mutation[] = [
     name: 'any device’s end clears this one’s cookies',
     change: [['if (ended && params.sessionId === passport.sessionId)', 'if (ended)']],
     tests: 'never another account',
+  },
+
+  // T3.3: who may sign in where (grants)
+  {
+    file: 'login',
+    name: 'sign-in without a grant in the app',
+    change: [['  if (!access.allowed) throw invalidCredentials();\n', '']],
+    tests: 'like a wrong password',
+  },
+  {
+    file: 'login',
+    name: 'a role that asks an authenticator does not',
+    change: [[' || access.mfaRequired) {', ') {']],
+    tests: 'Seller Finance or Account Owner',
+  },
+  {
+    file: 'sessions',
+    name: 'a session for an app without a grant',
+    change: [['      if (!access.allowed) throw invalidCredentials();\n', '']],
+    tests: 'whoever asks',
+  },
+  {
+    file: 'sessions',
+    name: 'refresh keeps a session whose grant ended',
+    change: [['        if (!access.allowed) {', '        if (false) {']],
+    tests: 'no grant left',
+  },
+  {
+    file: 'sessions',
+    name: 'tokens always carry av 0',
+    change: [['        av: authzVersion,', '        av: 0,']],
+    tests: 'authz version',
+  },
+  {
+    file: 'rbac/grants',
+    name: 'a grant counts before it starts',
+    change: [['{ $or: [{ validFrom: null }, { validFrom: { $lte: now } }] },', '{},']],
+    tests: 'not before it starts',
+  },
+  {
+    file: 'rbac/grants',
+    name: 'a grant counts after it ran out',
+    change: [['{ $or: [{ validTo: null }, { validTo: { $gt: now } }] },', '{},']],
+    tests: 'not before it starts',
+  },
+  {
+    file: 'rbac/grants',
+    name: 'an ended grant still counts',
+    change: [
+      [
+        'export const activeAt = (now: Date) => ({\n  active: true,\n',
+        'export const activeAt = (now: Date) => ({\n',
+      ],
+    ],
+    tests: 'not before it starts|seat comes back',
+  },
+  {
+    file: 'rbac/grants',
+    name: 'a new grant does not raise the authz version',
+    change: [
+      ['{ $inc: { authzVersion: 1 }, $set: { updatedAt: now } }', '{ $set: { updatedAt: now } }'],
+    ],
+    tests: 'authz version|raises the authz version',
+  },
+  {
+    file: 'rbac/grants',
+    name: 'roles that ask an authenticator never do',
+    change: [['mfaRequired: strict > 0, authzVersion', 'mfaRequired: false, authzVersion']],
+    tests: 'Seller Finance or Account Owner',
+  },
+  {
+    file: 'users',
+    name: 'no grant at sign-up',
+    change: [['    await giveSignUpGrant(mongo, session, { userId: user._id, app, now });\n', '']],
+    tests: 'sign-up grants',
+  },
+  {
+    file: 'rbac/migrations',
+    name: 'migration gives Customer without the 18+ declaration',
+    change: [["(app === 'customer' && user.ageDeclaredAt === null)", 'false']],
+    tests: 'before T3.3',
+  },
+  {
+    file: 'rbac/bootstrap',
+    name: 'a third Master',
+    change: [['if (holders.length >= MASTER_SEATS) {', 'if (holders.length > MASTER_SEATS) {']],
+    tests: 'at most two',
+  },
+  {
+    file: 'rbac/bootstrap',
+    name: 'two at once both take the last Master seat',
+    change: [['{ $inc: { seatClaims: 1 } }', '{ $inc: { seatClaims: 0 } }']],
+    tests: 'never to both',
+  },
+  {
+    file: 'rbac/sync',
+    name: 'the sync retires Master’s own sub-roles',
+    change: [['{ system: true, retired: false, _id: { $nin:', '{ retired: false, _id: { $nin:']],
+    tests: 'never touches Master',
   },
 ];
 

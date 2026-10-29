@@ -10,6 +10,9 @@ import {
 
 import type { Config } from './config.ts';
 import { indexes as credentialIndexes } from './credentials.ts';
+import { indexes as grantIndexes } from './rbac/grants.ts';
+import { signUpGrantsMigration } from './rbac/migrations.ts';
+import { rbacSyncStep } from './rbac/sync.ts';
 import { indexes as sessionIndexes } from './sessions.ts';
 import { indexes as signingKeyIndexes } from './signing-keys.ts';
 import { indexes as userIndexes } from './users.ts';
@@ -17,17 +20,20 @@ import { indexes as userIndexes } from './users.ts';
 /**
  * identity's release steps (ARCHITECTURE §11.1), run on every start before identity listens:
  * migrations, then every index. A new migration goes at the end of the list (RULES §1.14), a new
- * collection's indexes into `indexes`; the permission sync joins as a step (TASKS T3.3).
+ * collection's indexes into `indexes`. The rbac step writes the apps, permissions and shipped
+ * roles (TASKS T3.3).
  */
 export const releaseDefinition: ReleaseDefinition = {
-  migrations: defineMigrations([]),
+  migrations: defineMigrations([signUpGrantsMigration]),
   indexes: [
     ...OUTBOX_INDEXES,
     ...userIndexes,
     ...credentialIndexes,
     ...sessionIndexes,
     ...signingKeyIndexes,
+    ...grantIndexes,
   ],
+  steps: [rbacSyncStep],
 };
 
 /** The release steps on identity's database (a start, or `npm run db:release`). */

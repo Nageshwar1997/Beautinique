@@ -2,6 +2,94 @@
   "version": "1.0.0",
   "permissions": [
     {
+      "key": "iam.app.sign_in",
+      "description": "Sign in to the role's app",
+      "scopeTypes": [
+        "global",
+        "state",
+        "district",
+        "city",
+        "hub",
+        "warehouse",
+        "brand",
+        "category",
+        "sellerOrg",
+        "creatorAgency",
+        "self"
+      ],
+      "risk": "low",
+      "mfa": false,
+      "secondSignature": false
+    },
+    {
+      "key": "iam.grant.manage",
+      "description": "Give roles, invite people to them and end them",
+      "scopeTypes": [
+        "global",
+        "state",
+        "district",
+        "city",
+        "hub",
+        "warehouse",
+        "brand",
+        "category",
+        "sellerOrg",
+        "creatorAgency"
+      ],
+      "risk": "high",
+      "mfa": true,
+      "secondSignature": false
+    },
+    {
+      "key": "iam.grant.read",
+      "description": "See the roles people hold",
+      "scopeTypes": [
+        "global",
+        "state",
+        "district",
+        "city",
+        "hub",
+        "warehouse",
+        "brand",
+        "category",
+        "sellerOrg",
+        "creatorAgency"
+      ],
+      "risk": "medium",
+      "mfa": false,
+      "secondSignature": false
+    },
+    {
+      "key": "iam.role.manage",
+      "description": "Make and change sub-roles",
+      "scopeTypes": [
+        "global"
+      ],
+      "risk": "high",
+      "mfa": true,
+      "secondSignature": false
+    },
+    {
+      "key": "iam.session.revoke",
+      "description": "End anyone's sessions",
+      "scopeTypes": [
+        "global"
+      ],
+      "risk": "high",
+      "mfa": true,
+      "secondSignature": false
+    },
+    {
+      "key": "iam.totp.reset",
+      "description": "Reset someone's authenticator",
+      "scopeTypes": [
+        "global"
+      ],
+      "risk": "high",
+      "mfa": true,
+      "secondSignature": false
+    },
+    {
       "key": "platform.ping.read",
       "description": "Read recorded pings",
       "scopeTypes": [

@@ -1,6 +1,6 @@
 # ARCHITECTURE — BQ
 
-> **Status:** v1.34 draft (2026-10-27). [PRD.md](PRD.md) v1.0 pe based. Design ek multi-agent review se aaya (3 architecture proposals + review board + owner ke decisions), aur v1.1 me free tier ke official docs ke against verify hua.
+> **Status:** v1.35 draft (2026-10-29). [PRD.md](PRD.md) v1.0 pe based. Design ek multi-agent review se aaya (3 architecture proposals + review board + owner ke decisions), aur v1.1 me free tier ke official docs ke against verify hua.
 
 ## 0. Ek nazar me
 
@@ -305,6 +305,7 @@ Kai platforms alag users ko alag price dikhate hain. BQ ka rule: **ek product ka
   - **Master role ke paas koi `*.decide` permission nahi**, isliye koi bypass nahi, apne brand ki listings pe bhi nahi.
   - Own-Brand Manager aur house-brand staff apni listings QC nahi kar sakte.
 - **Enforcement:** gateway mote checks karta hai (login, app, session, step-up). Services `authorize(ctx, permission, scope)` aur `scopeFilter()` use karti hain. `scopeFilter()` ek Mongo filter deta hai, isliye queues, dashboards aur exports apne aap scope ke andar rehte hain.
+- **T3.3 ke faisle (owner, 2026-10-29):** `state` scope me 28 states aur 8 union territories (contracts `INDIAN_STATES`: 2-letter id, naam, GST code; UT bhi `state` scope, jaise Delhi `DL`). District, city, hub aur warehouse ke grant location master bane tak nahi (anjaan id). Roles ka seed code me (`backend/identity/src/rbac/roles.ts`), har start pe DB me sync; Master ke sub-roles sirf DB me. Pehla Master `npm run db:grant-master` se (koi env key nahi; max 2). Gateway sirf mota check karta hai (permission key kisi active grant me); scope ka check `authorize()`/`scopeFilter()` se services me (T4.1). Jis app me grant nahi, wahan sahi password pe bhi wahi jawab jo galat password pe.
 - **Aaj ke chaaro MASTER bypass hatenge:** gateway authorize, login controller, `authorizeSellerOwnership` aur `authorizeProductOwnership`. ESLint role-name comparison pe rok lagata hai, aur ek test check karta hai ki bypass wapas na aaye.
 
 ## 8. Expansion sirf configuration se (PRD §7.2)
@@ -665,3 +666,4 @@ Sirf config badlegi, code nahi:
 | v1.32 | 2026-10-28 | §7.2: refresh race 10 s, token keys DB me sealed, passport ki key, My Devices saare apps (owner). |
 | v1.33 | 2026-10-28 | §16 migration aur cutover: purana data import nahi, naya stack khaali data se (owner). |
 | v1.34 | 2026-10-28 | §16: zaroori purana data naye packages me use hota hai, poora import nahi (owner). |
+| v1.35 | 2026-10-29 | §7.3: T3.3 ke faisle (states + UTs, roles ka seed code me, pehla Master CLI se, gateway ka mota check, bina grant wale app ka jawab) (owner). |
