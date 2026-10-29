@@ -1,13 +1,22 @@
 import { describe, expect, it } from 'vitest';
 
 import {
+  APPS,
   appSignIn,
   authzVersionKey,
+  events,
+  giveGrant,
   IAM_PERMISSIONS,
   INDIAN_STATES,
+  invitationCreated,
   isStateId,
+  listGrants,
   permissions,
+  requestInvitationCode,
   revokedUserKey,
+  roleKeyZod,
+  roleSlugZod,
+  routes,
   SCOPE_TYPES,
 } from '../src';
 
@@ -71,5 +80,48 @@ describe('identity permissions', () => {
   it('keeps the authz version key apart from the revoke keys', () => {
     expect(authzVersionKey('u1')).toBe('bq:id:authz-version:u1');
     expect(authzVersionKey('u1')).not.toBe(revokedUserKey('u1'));
+  });
+});
+
+describe('role, grant and invitation routes', () => {
+  it('ask a recent step-up exactly where their permission does', () => {
+    for (const route of routes) {
+      if (route.access.type !== 'permission') continue;
+      const permission = permissions.get(route.access.permission);
+      expect(permission, route.id).toBeDefined();
+      expect(route.stepUp, route.id).toBe(permission?.mfa);
+    }
+    expect(giveGrant.stepUp).toBe(true);
+    expect(listGrants.stepUp).toBe(false);
+  });
+
+  it('let anyone ask an invitation code, in any app, as public', () => {
+    expect(requestInvitationCode.access).toEqual({ type: 'public' });
+    expect(requestInvitationCode.rateLimit).toBe('otp');
+    expect(requestInvitationCode.apps).toEqual(APPS);
+  });
+
+  it('take role keys and the slugs of Master’s sub-roles in one shape', () => {
+    for (const key of ['admin.state_admin', 'admin.c_desk', 'customer.customer']) {
+      expect(roleKeyZod.safeParse(key).success, key).toBe(true);
+    }
+    for (const key of ['Admin.x', 'admin', 'admin.', '.x', 'admin.9x', 'admin.x-y']) {
+      expect(roleKeyZod.safeParse(key).success, key).toBe(false);
+    }
+    expect(roleSlugZod.parse(' night_shift ')).toBe('night_shift');
+    for (const slug of ['x', '9x', 'Night', 'a'.repeat(40)]) {
+      expect(roleSlugZod.safeParse(slug).success, slug).toBe(false);
+    }
+  });
+
+  it('describe the invitation event with no secret in it', () => {
+    expect(events.latest('identity.invitation.created')).toBe(invitationCreated);
+    expect(Object.keys(invitationCreated.data.shape).sort()).toEqual([
+      'app',
+      'email',
+      'expiresAt',
+      'invitationId',
+      'roleName',
+    ]);
   });
 });

@@ -52,6 +52,11 @@ const WORDING: Readonly<
     lead: `Use this code to sign in to ${appName}:`,
     misuse: 'sign in',
   }),
+  invite: (appName) => ({
+    subject: `Accept your ${appName} invitation`,
+    lead: `Use this code to confirm your email and accept your invitation to ${appName}:`,
+    misuse: 'accept your invitation',
+  }),
 };
 
 /**
@@ -117,4 +122,55 @@ export function sessionReuseEmail({
 </body>
 </html>`;
   return { to, subject, text, html, tags: ['security-session-reuse'] };
+}
+
+export interface InvitationEmailInput {
+  to: string;
+  app: AppId;
+  /** The role, as identity names it, e.g. `State Admin` */
+  roleName: string;
+  /** Until when it can be accepted (ISO) */
+  expiresAt: string;
+  /** The app's address (NOTIFY__APP_URLS); left out = no link */
+  url?: string | undefined;
+}
+
+/**
+ * Someone was invited to a role (TASKS T3.3). No secret in it: the person accepts in the app with
+ * this email address and an email code, so a forwarded invitation is no use to anyone else.
+ */
+export function invitationEmail({
+  to,
+  app,
+  roleName,
+  expiresAt,
+  url,
+}: InvitationEmailInput): EmailMessage {
+  const appName = APP_NAMES[app];
+  const subject = `You are invited to ${appName}`;
+  const lead = `You are invited to ${appName} as ${roleName}.`;
+  const where = url === undefined ? `the ${appName} app` : `${appName} (${url})`;
+  const how = `To accept, open ${where}, choose "Accept an invitation" and use this email address. We will send you a code to confirm it, and you set your password there (if you have a Beautinique account already, it keeps its password).`;
+  const until = `The invitation works until ${formatDateTime(expiresAt)} IST.`;
+  const ignore =
+    'If you did not expect this, ignore this email: nothing happens unless you accept.';
+  const text = [lead, '', how, '', until, '', ignore, '', `– ${appName}`].join('\n');
+  const button =
+    url === undefined
+      ? ''
+      : `<tr><td style="padding:8px 28px"><a href="${escapeHtml(url)}" style="display:inline-block;padding:12px 20px;background:#1f1a1c;color:#ffffff;border-radius:8px;text-decoration:none;font-size:15px">Open ${escapeHtml(appName)}</a></td></tr>`;
+  const html = `<!doctype html>
+<html lang="en">
+<body style="margin:0;padding:24px;background:#f7f4f2;font-family:Arial,Helvetica,sans-serif;color:#1f1a1c">
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:480px;margin:0 auto;background:#ffffff;border-radius:12px">
+<tr><td style="padding:28px 28px 8px;font-size:16px;line-height:24px;font-weight:bold">${escapeHtml(lead)}</td></tr>
+<tr><td style="padding:8px 28px;font-size:14px;line-height:22px">${escapeHtml(how)}</td></tr>
+${button}
+<tr><td style="padding:8px 28px;font-size:14px;line-height:22px">${escapeHtml(until)}</td></tr>
+<tr><td style="padding:8px 28px 28px;font-size:13px;line-height:20px;color:#5c5357">${escapeHtml(ignore)}</td></tr>
+</table>
+<p style="max-width:480px;margin:16px auto 0;font-size:12px;color:#5c5357;text-align:center">${escapeHtml(appName)}</p>
+</body>
+</html>`;
+  return { to, subject, text, html, tags: ['invitation'] };
 }

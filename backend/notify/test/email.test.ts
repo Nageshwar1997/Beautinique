@@ -10,7 +10,7 @@ import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { brevoSender } from '../src/email/brevo.ts';
 import { mailpitSender } from '../src/email/mailpit.ts';
 import { type EmailMessage, EmailSendError } from '../src/email/port.ts';
-import { otpEmail, sessionReuseEmail } from '../src/email/templates.ts';
+import { invitationEmail, otpEmail, sessionReuseEmail } from '../src/email/templates.ts';
 
 const MAILPIT_URL = 'http://localhost:8025';
 const from = { email: 'no-reply@beautinique.example', name: 'Beautinique' };
@@ -224,6 +224,47 @@ describe('mailpitSender', () => {
     const gone = mailpitSender({ url: 'http://127.0.0.1:1', from });
     const missing = await failureOf(gone.send(message('x@beautinique.example')));
     expect([missing.code, missing.retry]).toEqual(['MAILPIT_UNREACHABLE', true]);
+  });
+});
+
+describe('the invitation emails', () => {
+  it('names the app, the role, how to accept and until when, with no secret', () => {
+    const email = invitationEmail({
+      to: 'asha@beautinique.example',
+      app: 'admin',
+      roleName: 'State Admin',
+      expiresAt: '2026-11-05T09:30:00.000Z',
+      url: 'https://bq-admin.example',
+    });
+    expect(email.subject).toBe('You are invited to Beautinique Admin');
+    expect(email.text).toContain('as State Admin');
+    expect(email.text).toContain('"Accept an invitation"');
+    expect(email.text).toContain('5 Nov 2026, 3:00 pm IST');
+    expect(email.text).toContain('https://bq-admin.example');
+    expect(email.html).toContain('href="https://bq-admin.example"');
+    expect(email.tags).toEqual(['invitation']);
+    const escaped = invitationEmail({
+      to: 'x@beautinique.example',
+      app: 'seller',
+      roleName: '<b>Owner</b>',
+      expiresAt: '2026-11-05T09:30:00.000Z',
+    });
+    expect(escaped.html).not.toContain('<b>Owner');
+    expect(escaped.html).not.toContain('href=');
+  });
+
+  it('gives the invitation code its own subject, words and tag', () => {
+    const email = otpEmail({
+      to: 'asha@beautinique.example',
+      code: '123456',
+      app: 'admin',
+      purpose: 'invite',
+      minutes: 10,
+    });
+    expect(email.subject).toBe('Accept your Beautinique Admin invitation');
+    expect(email.text).toContain('accept your invitation to Beautinique Admin');
+    expect(email.subject).not.toContain('123456');
+    expect(email.tags).toEqual(['otp-invite']);
   });
 });
 

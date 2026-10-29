@@ -61,32 +61,20 @@ describe('generateFiles', () => {
       '/auth/sessions',
       '/auth/sessions/{sessionId}',
       '/auth/sessions/end-others',
+      '/iam/roles',
+      '/iam/roles/{roleKey}',
+      '/iam/grants',
+      '/iam/grants/{grantId}/end',
+      '/iam/invitations',
+      '/iam/invitations/{invitationId}/revoke',
+      '/auth/invitations/code',
     ]);
     const manifest = parsed('gateway-manifest.json') as {
       version: string;
       routes: { id: string }[];
     };
     expect(manifest.version).toBe('1.0.0');
-    expect(manifest.routes.map((r) => r.id)).toEqual([
-      'platform.ping.record',
-      'platform.ping.get',
-      'platform.server.wake',
-      'auth.signUp.code',
-      'auth.password.code',
-      'auth.otp.resend',
-      'auth.otp.verify',
-      'auth.login.password',
-      'auth.login.totp',
-      'auth.login.recovery',
-      'auth.login.totpEnroll',
-      'auth.login.totpConfirm',
-      'auth.session.refresh',
-      'auth.session.logout',
-      'iam.me.get',
-      'auth.sessions.list',
-      'auth.sessions.end',
-      'auth.sessions.endOthers',
-    ]);
+    expect(manifest.routes.map((r) => r.id)).toEqual(routes.map((r) => r.id));
   });
 
   it('lists every event version with the JSON Schema of its envelope', () => {
@@ -96,11 +84,12 @@ describe('generateFiles', () => {
       }
     ).events;
     expect(list.map((e) => [e.type, e.version])).toEqual([
+      ['identity.invitation.created', 1],
       ['identity.otp.requested', 1],
       ['identity.session.reuseDetected', 1],
       ['platform.ping.recorded', 1],
     ]);
-    expect(list[2]?.schema.required).toEqual(expect.arrayContaining(['eventId', 'data', 'scope']));
+    expect(list[3]?.schema.required).toEqual(expect.arrayContaining(['eventId', 'data', 'scope']));
   });
 
   it('lists permissions sorted by key', () => {

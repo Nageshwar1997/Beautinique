@@ -22,6 +22,7 @@ import {
 } from '@beautinique/backend-server-ratelimit';
 import {
   type AppId,
+  authzVersionKey,
   defineRoute,
   gatewayManifest,
   HEADERS,
@@ -230,6 +231,7 @@ const accessToken = ({
   issuedAt = Math.floor(Date.now() / 1000),
   seconds = 600,
   key = identityKey,
+  av = 0,
 }: {
   app?: AppId;
   sessionId?: string;
@@ -237,6 +239,7 @@ const accessToken = ({
   issuedAt?: number;
   seconds?: number;
   key?: ReturnType<typeof generateSigningKey>;
+  av?: number;
 } = {}) =>
   signJwt(
     {
@@ -247,7 +250,7 @@ const accessToken = ({
       exp: issuedAt + seconds,
       sid: sessionId,
       amr: ['password'],
-      av: 0,
+      av,
     },
     { kid: key.kid, privateKey: key.privateKeyPem },
   );
@@ -1152,6 +1155,22 @@ describe('sign-in at the gateway (T3.2)', () => {
     expect((await profile(gw, before)).status).toBe(401);
     expect((await profile(gw, after)).status).toBe(200);
     await redis.client.del(revokedSessionKey(sessionId), revokedUserKey(other));
+  });
+
+  it('refuses a token from before the account’s grants changed, so the app refreshes (T3.3)', async () => {
+    const core = await listen(fakeCore());
+    const gw = await gateway({ core: core.url });
+    const userId = randomUUID();
+    const at = (av: number) => atCookie(accessToken({ userId, av }));
+    // no version in Redis: nothing changed lately
+    expect((await profile(gw, at(3))).status).toBe(200);
+    await redis.client.set(authzVersionKey(userId), '4', 'PX', 60_000);
+    expect(await errorOf(await profile(gw, at(3)))).toEqual([401, 'UNAUTHENTICATED']);
+    expect((await profile(gw, at(4))).status).toBe(200);
+    expect((await profile(gw, at(5))).status).toBe(200);
+    // another account is not touched
+    expect((await profile(gw, atCookie(accessToken({ av: 0 })))).status).toBe(200);
+    await redis.client.del(authzVersionKey(userId));
   });
 
   it('answers 403 on a permission route to someone signed in, until grants (T3.3)', async () => {

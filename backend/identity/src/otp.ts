@@ -32,8 +32,16 @@ import {
 } from './errors.ts';
 import { clearFailures } from './lockout.ts';
 import { type BreachCheck, hashPassword } from './password.ts';
+import { publishAuthzVersions } from './rbac/grants.ts';
+import { acceptableInvitations, acceptInvitations, hasInvitation } from './rbac/invitations.ts';
 import type { Client, IssuedSession, Sessions } from './sessions.ts';
-import { setPasswordWithCode, signUpWithCode, USERS } from './users.ts';
+import {
+  accountWithCode,
+  passwordWithCode,
+  setPasswordWithCode,
+  signUpWithCode,
+  USERS,
+} from './users.ts';
 
 /** ARCHITECTURE §7.1: a code works 10 minutes, takes 5 tries, and up to 3 new codes a minute apart. */
 export const OTP_TTL_MS = 10 * 60_000;
@@ -52,8 +60,11 @@ export const OTP_MIN_ANSWER_MS = 400;
 export const challengeKey = (challengeId: string): string => `bq:id:otp:${challengeId}`;
 const emailCountKey = (index: string): string => `bq:id:otp-email:${index}`;
 
-/** Why the code is sent: to make an account, or to set a password (ARCHITECTURE §7.1). */
-export type CodePurpose = 'sign-up' | 'password';
+/**
+ * Why the code is sent: to make an account, to set a password (ARCHITECTURE §7.1), or to accept
+ * an invitation (TASKS T3.3).
+ */
+export type CodePurpose = 'sign-up' | 'password' | 'invite';
 
 /**
  * A challenge in Redis. `send` is 0 for a password code to an email without an account: it
@@ -180,10 +191,11 @@ export interface RequestCodeInput {
 }
 
 /**
- * POST /auth/sign-up/code and /auth/password/code. The same answer for every email, in the same
- * time (OTP_MIN_ANSWER_MS): a sign-up code goes to every email (an account there already learns
- * it only after its code); a password code only to an email with an account, and nothing fits
- * the others.
+ * POST /auth/sign-up/code, /auth/password/code and /auth/invitations/code. The same answer for
+ * every email, in the same time (OTP_MIN_ANSWER_MS): a sign-up code goes to every email (an
+ * account there already learns it only after its code); a password code only to an email with
+ * an account, an invitation code only to an email with an invitation waiting in this app, and
+ * nothing fits the others.
  */
 export const requestCode = (deps: OtpDeps, input: RequestCodeInput): Promise<ChallengeView> =>
   evenly(() => requestCodeNow(deps, input));
@@ -193,18 +205,22 @@ async function requestCodeNow(
   { app, email, purpose, consent, requestId }: RequestCodeInput,
 ): Promise<ChallengeView> {
   const signUp = purpose === 'sign-up';
-  const problems = signUp ? consentProblems(app, consent) : [];
+  // an invitation into a sign-up app asks that app's consent too, as its sign-up does
+  const asksConsent = signUp || purpose === 'invite';
+  const problems = asksConsent ? consentProblems(app, consent) : [];
   if (problems.length > 0) {
     throw new AppError('VALIDATION_FAILED', 'Please check the highlighted fields.', {
       details: problems,
     });
   }
   await countEmail(deps, email);
-  const hasAccount =
-    (await deps.mongo.db
-      .collection<{ email: string }>(USERS)
-      .countDocuments({ email }, { limit: 1 })) > 0;
-  const send = signUp || hasAccount;
+  const send =
+    signUp ||
+    (purpose === 'invite'
+      ? await hasInvitation(deps.mongo, { email, app })
+      : (await deps.mongo.db
+          .collection<{ email: string }>(USERS)
+          .countDocuments({ email }, { limit: 1 })) > 0);
   const challengeId = uuidv7();
   const code = newCode();
   const now = Date.now();
@@ -219,9 +235,9 @@ async function requestCodeNow(
       ? hashOf(deps.keys, challengeId, code)
       : hashOf(deps.keys, challengeId, uuidv7()),
     send: send ? '1' : '0',
-    terms: signUp && consent?.terms ? '1' : '0',
+    terms: asksConsent && consent?.terms ? '1' : '0',
     // 18 or older is the customer app's rule (PRD §2): another app's answer is not a declaration
-    adult: signUp && app === 'customer' && consent?.adult ? '1' : '0',
+    adult: asksConsent && app === 'customer' && consent?.adult ? '1' : '0',
     attempts: '0',
     resends: '0',
     expiresAt: String(expiresAt),
@@ -352,7 +368,9 @@ export async function verifyCode(
     challenge.email === undefined ||
     challenge.codeHash === undefined ||
     challenge.app !== app ||
-    (challenge.purpose !== 'sign-up' && challenge.purpose !== 'password')
+    (challenge.purpose !== 'sign-up' &&
+      challenge.purpose !== 'password' &&
+      challenge.purpose !== 'invite')
   ) {
     throw otpExpired();
   }
@@ -386,10 +404,15 @@ export async function verifyCode(
     return { userId: user._id, email: user.email, outcome: 'password-set', signedIn: false };
   }
 
+  const consent = { terms: challenge.terms === '1', adult: challenge.adult === '1' };
+  if (purpose === 'invite') {
+    return acceptWithCode(deps, { email, app, consent, ip: client.ip, passwordHash });
+  }
+
   const { user, outcome } = await signUpWithCode(deps.mongo, {
     email,
     app,
-    consent: { terms: challenge.terms === '1', adult: challenge.adult === '1' },
+    consent,
     legalVersion: deps.legalVersion,
     ip: client.ip,
     passwordHash,
@@ -410,4 +433,59 @@ export async function verifyCode(
     client,
   });
   return { ...session.user, outcome, signedIn: true, session };
+}
+
+/**
+ * A right invitation code (TASKS T3.3): the email is proven, so the roles of its invitations in
+ * this app are given; a new account gets the password, an account that has one keeps it (one
+ * password for every app), an account without one (made with Google) gets it and its sessions
+ * end. Never signed in here: the app's own sign-in comes next, with its authenticator. No
+ * invitation left by now (taken back, run out, the inviter's right gone): like a used code.
+ */
+async function acceptWithCode(
+  deps: OtpDeps,
+  {
+    email,
+    app,
+    consent,
+    ip,
+    passwordHash,
+  }: {
+    email: string;
+    app: AppId;
+    consent: { terms: boolean; adult: boolean };
+    ip: string;
+    passwordHash: string;
+  },
+): Promise<VerifiedCode> {
+  const accepted = await withTransaction(deps.mongo, async (session) => {
+    const now = new Date();
+    const invitations = await acceptableInvitations(deps.mongo, session, { email, app, now });
+    if (invitations.length === 0) return null;
+    const { user, isNewUser } = await accountWithCode(deps.mongo, session, {
+      email,
+      app,
+      consent,
+      legalVersion: deps.legalVersion,
+      ip,
+      now,
+    });
+    const password = await passwordWithCode(deps.mongo, session, {
+      user,
+      isNewUser,
+      passwordHash,
+      now,
+    });
+    await acceptInvitations(deps.mongo, session, { userId: user._id, accepted: invitations, now });
+    return { user, password, roles: invitations.map((invitation) => invitation.role) };
+  });
+  if (!accepted) throw otpExpired();
+  const { user, password, roles } = accepted;
+  if (password === 'password-set') {
+    await clearFailures(deps.redis, deps.keys, email, { unlock: true });
+    await deps.sessions.endAll(user._id, 'password-changed');
+  }
+  await publishAuthzVersions(deps.mongo, deps.redis, [user._id]);
+  deps.logger.info({ userId: user._id, app, roles, password }, 'invitation accepted');
+  return { userId: user._id, email: user.email, outcome: 'invite-accepted', signedIn: false };
 }

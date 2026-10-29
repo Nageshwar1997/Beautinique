@@ -369,6 +369,20 @@ const mutations: Mutation[] = [
     change: [['  if (passport) headers[HEADERS.passport.toLowerCase()] = passport;\n', '']],
     tests: '60-second passport',
   },
+  {
+    file: 'sessions',
+    name: 'a token from before a grant change still counts',
+    change: [
+      ['      if (current !== null && Number(current) > authzVersion) throw signIn();\n', ''],
+    ],
+    tests: 'grants changed',
+  },
+  {
+    file: 'sessions',
+    name: 'a newer token is refused too',
+    change: [['Number(current) > authzVersion', 'Number(current) >= authzVersion']],
+    tests: 'grants changed',
+  },
 ];
 
 export default mutations;

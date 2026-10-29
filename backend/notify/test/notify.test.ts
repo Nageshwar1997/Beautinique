@@ -123,6 +123,7 @@ describe('notify settings', () => {
       otpEventKeys: KEY,
       emailDailyLimit: 300,
       emailOtherLimit: 250,
+      appUrls: new Map(),
     });
     for (const [change, message] of [
       [{ NOTIFY__EMAIL_TRANSPORT: undefined }, 'NOTIFY__EMAIL_TRANSPORT'],
@@ -132,6 +133,10 @@ describe('notify settings', () => {
       [{ NOTIFY__OTP_EVENT_KEYS: undefined }, 'NOTIFY__OTP_EVENT_KEYS'],
       [{ NOTIFY__EMAIL_OTHER_LIMIT: '301' }, 'NOTIFY__EMAIL_OTHER_LIMIT: Must not be above'],
       [{ NOTIFY__SMTP_HOST: 'x' }, 'NOTIFY__SMTP_HOST: not a setting'],
+      [{ NOTIFY__APP_URLS: 'shop=https://a.example' }, 'NOTIFY__APP_URLS'],
+      [{ NOTIFY__APP_URLS: 'customer=http://a.example' }, 'NOTIFY__APP_URLS'],
+      [{ NOTIFY__APP_URLS: 'customer' }, 'NOTIFY__APP_URLS'],
+      [{ NOTIFY__APP_URLS: 'customer=https://a.example/path' }, 'NOTIFY__APP_URLS'],
     ] as const) {
       expect(() => readConfig({ env: { ...testEnv(), ...change } }), message).toThrow(message);
     }
@@ -140,6 +145,20 @@ describe('notify settings', () => {
         env: { ...testEnv(), NOTIFY__EMAIL_TRANSPORT: 'brevo', NOTIFY__BREVO_API_KEY: 'k' },
       }).brevoApiKey,
     ).toBe('k');
+    expect(
+      readConfig({
+        env: {
+          ...testEnv(),
+          NOTIFY__APP_URLS:
+            ' customer=https://bq-customer.vercel.app/ , admin=http://localhost:3003',
+        },
+      }).appUrls,
+    ).toEqual(
+      new Map([
+        ['customer', 'https://bq-customer.vercel.app'],
+        ['admin', 'http://localhost:3003'],
+      ]),
+    );
   });
 });
 
@@ -226,6 +245,41 @@ describe('sendDue', () => {
     // a second run finds nothing
     expect((await run(sender)).sent).toBe(0);
     expect(sent).toHaveLength(1);
+  });
+
+  it('sends an invitation with the app’s link when it has one, never after it ran out', async () => {
+    const { sender, sent } = fakeSender();
+    const invite = (app: 'admin' | 'seller', more: Partial<Delivery> = {}) => {
+      const delivery: Delivery = {
+        _id: uuidv7(),
+        channel: 'email',
+        lane: 'transactional',
+        priority: LANES.transactional,
+        template: 'invitation',
+        to: `asha-${app}@beautinique.example`,
+        invitation: { app, roleName: 'State Admin', expiresAt: '2026-11-03T05:00:00.000Z' },
+        status: 'queued',
+        attempts: 0,
+        dueAt: now,
+        expiresAt: new Date('2026-11-03T05:00:00.000Z'),
+        createdAt: now,
+        ...more,
+      };
+      return deliveries()
+        .insertOne(delivery)
+        .then(() => delivery);
+    };
+    const linked = await invite('admin');
+    const plain = await invite('seller');
+    const late = await invite('admin', { to: 'late@beautinique.example', expiresAt: now });
+    const report = await run(sender, { appUrls: new Map([['admin', 'https://bq-admin.example']]) });
+    expect(report).toMatchObject({ sent: 2, expired: 1 });
+    const byTo = new Map(sent.map((message) => [message.to, message]));
+    expect(byTo.get(linked.to)?.html).toContain('href="https://bq-admin.example"');
+    expect(byTo.get(linked.to)?.subject).toBe('You are invited to Beautinique Admin');
+    expect(byTo.get(plain.to)?.html).not.toContain('href=');
+    expect(byTo.get(plain.to)?.text).toContain('open the Beautinique Seller app');
+    expect((await read(late._id))?.status).toBe('expired');
   });
 
   it('sends codes before other emails, and nothing that is not due yet', async () => {

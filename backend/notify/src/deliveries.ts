@@ -4,6 +4,7 @@ import type { IndexSpec, Mongo } from '@beautinique/backend-server-mongo';
 import { subscribe, type Subscription, type TaskTrigger } from '@beautinique/backend-server-queue';
 import {
   type AppId,
+  invitationCreated,
   type OTP_PURPOSES,
   otpRequested,
   otpSealContext,
@@ -11,7 +12,7 @@ import {
 } from '@beautinique/shared-contracts';
 
 import { type EmailSender, EmailSendError } from './email/port.ts';
-import { otpEmail, sessionReuseEmail } from './email/templates.ts';
+import { invitationEmail, otpEmail, sessionReuseEmail } from './email/templates.ts';
 
 export const DELIVERIES = 'notify_deliveries';
 export const EMAIL_DAYS = 'notify_email_days';
@@ -19,6 +20,8 @@ export const EMAIL_DAYS = 'notify_email_days';
 export const OTP_EMAIL = 'notify.otpEmail';
 /** The subscriber identity's relay sends identity.session.reuseDetected to. */
 export const SECURITY_EMAIL = 'notify.securityEmail';
+/** The subscriber identity's relay sends identity.invitation.created to. */
+export const INVITATION_EMAIL = 'notify.invitationEmail';
 /** The task that sends what is due; it runs every minute and at once after each new email. */
 export const SEND_TASK = 'email.sendDue';
 
@@ -50,7 +53,7 @@ export interface Delivery {
   lane: Lane;
   /** LANES[lane]: the order a run sends in */
   priority: number;
-  template: 'otp' | 'session-reuse';
+  template: 'otp' | 'session-reuse' | 'invitation';
   to: string;
   /** The sign-in code, still sealed; removed once the email went, failed or ran out. */
   otp?: {
@@ -62,6 +65,8 @@ export interface Delivery {
   };
   /** A session ended because its refresh token was copied (no secret in it) */
   security?: { app: AppId; device: string; detectedAt: string };
+  /** An invitation to a role (no secret in it: it is accepted with an email code) */
+  invitation?: { app: AppId; roleName: string; expiresAt: string };
   status: Status;
   attempts: number;
   /** Not sent before this */
@@ -211,6 +216,52 @@ export function securitySubscription({
   });
 }
 
+/**
+ * identity.invitation.created → an invitation email in the transactional lane, then a send run at
+ * once. It is not sent after the invitation ran out.
+ */
+export function invitationSubscription({
+  mongo,
+  trigger,
+  logger,
+}: {
+  mongo: Mongo;
+  trigger: TaskTrigger;
+  logger: Logger;
+}): Subscription {
+  const deliveries = deliveriesOf(mongo);
+  return subscribe(INVITATION_EMAIL, invitationCreated, async (event, session) => {
+    const { email, app, roleName, expiresAt } = event.data;
+    const now = new Date();
+    await deliveries.insertOne(
+      {
+        _id: event.eventId,
+        channel: 'email',
+        lane: 'transactional',
+        priority: LANES.transactional,
+        template: 'invitation',
+        to: email,
+        invitation: { app, roleName, expiresAt },
+        status: 'queued',
+        attempts: 0,
+        dueAt: now,
+        expiresAt: new Date(expiresAt),
+        createdAt: now,
+      },
+      { session },
+    );
+    try {
+      await trigger.runSoon(SEND_TASK);
+    } catch (error) {
+      // the every-minute run sends it anyway
+      logger.warn(
+        { err: describe(error), deliveryId: event.eventId },
+        'email send not started at once',
+      );
+    }
+  });
+}
+
 export interface SendDueDeps {
   mongo: Mongo;
   sender: EmailSender;
@@ -218,6 +269,8 @@ export interface SendDueDeps {
   logger: Logger;
   trigger: TaskTrigger;
   limits: { daily: number; other: number };
+  /** Each app's address for links (NOTIFY__APP_URLS); an app left out gets no link */
+  appUrls?: ReadonlyMap<AppId, string>;
   /** default: the clock; tests move time */
   now?: () => Date;
   batchSize?: number;
@@ -248,6 +301,7 @@ export async function sendDue({
   logger,
   trigger,
   limits,
+  appUrls,
   now = () => new Date(),
   batchSize = SEND_BATCH,
 }: SendDueDeps): Promise<SendReport> {
@@ -287,6 +341,15 @@ export async function sendDue({
       const { security } = delivery;
       if (!security) throw new EmailSendError('SECURITY_DETAILS_MISSING', { retry: false });
       return sessionReuseEmail({ to: delivery.to, ...security });
+    }
+    if (delivery.template === 'invitation') {
+      const { invitation } = delivery;
+      if (!invitation) throw new EmailSendError('INVITATION_DETAILS_MISSING', { retry: false });
+      return invitationEmail({
+        to: delivery.to,
+        ...invitation,
+        url: appUrls?.get(invitation.app),
+      });
     }
     const { otp } = delivery;
     if (!otp?.sealedCode) throw new EmailSendError('OTP_CODE_MISSING', { retry: false });

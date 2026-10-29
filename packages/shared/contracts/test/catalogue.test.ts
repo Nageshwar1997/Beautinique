@@ -75,6 +75,16 @@ describe('platform catalogue (Milestone 1 sample)', () => {
       'auth.sessions.list',
       'auth.sessions.end',
       'auth.sessions.endOthers',
+      'iam.roles.list',
+      'iam.roles.create',
+      'iam.roles.update',
+      'iam.grants.list',
+      'iam.grants.give',
+      'iam.grants.end',
+      'iam.invitations.create',
+      'iam.invitations.list',
+      'iam.invitations.revoke',
+      'auth.invitations.code',
     ]);
     expect(events.latest('platform.ping.recorded')).toBe(pingRecorded);
     expect(permissions.get(pingRead.key)).toBe(pingRead);
@@ -147,7 +157,7 @@ describe('identity catalogue', () => {
     expect(otpRequested.producer).toBe('identity');
     const parsed = otpRequested.data.parse(otp);
     expect(parsed.email).toBe('riya@beautinique.example');
-    expect(OTP_PURPOSES).toEqual(['sign-in', 'sign-up', 'password']);
+    expect(OTP_PURPOSES).toEqual(['sign-in', 'sign-up', 'password', 'invite']);
     expect(otpSealContext(challengeId)).toBe(`identity.otp:${challengeId}`);
   });
 

@@ -78,29 +78,73 @@ export function roleSeedProblems(
   const byKey = new Map(seeds.map((seed) => [seed.key, seed]));
   if (byKey.size !== seeds.length) problems.push('a role key is used twice');
   for (const seed of seeds) {
-    if (!seed.key.startsWith(`${seed.app}.`)) problems.push(`${seed.key}: key must start with app`);
-    if (seed.scopeTypes.length === 0) problems.push(`${seed.key}: no scope type`);
-    if (!seed.permissions.includes('iam.app.sign_in')) {
-      problems.push(`${seed.key}: cannot sign in to its app`);
+    for (const { message } of roleProblems(seed, byKey, catalogue)) {
+      problems.push(`${seed.key}: ${message}`);
     }
-    for (const key of seed.permissions) {
-      const permission = catalogue.get(key);
-      if (!permission) {
-        problems.push(`${seed.key}: unknown permission ${key}`);
-      } else if (!permission.scopeTypes.some((type) => seed.scopeTypes.includes(type))) {
-        problems.push(`${seed.key}: ${key} cannot be used in any of its scope types`);
-      }
+    // `c_` names are Master's own sub-roles: a shipped one with it would take one over
+    if (seed.key.slice(seed.app.length + 1).startsWith(CUSTOM_PREFIX)) {
+      problems.push(`${seed.key}: shipped role keys never start with ${CUSTOM_PREFIX}`);
     }
-    for (const appointer of seed.appointedBy) {
-      const by = byKey.get(appointer);
-      if (!by) problems.push(`${seed.key}: unknown appointer ${appointer}`);
-      else if (!by.permissions.includes('iam.grant.manage')) {
-        problems.push(`${seed.key}: ${appointer} cannot give roles`);
-      }
+  }
+  return problems;
+}
+
+/** Master's own sub-roles are `<app>.c_<slug>`, so a shipped role never takes one's key. */
+export const CUSTOM_PREFIX = 'c_';
+
+type RoleShape = Pick<
+  RoleSeed,
+  'key' | 'app' | 'scopeTypes' | 'permissions' | 'appointedBy' | 'signUp'
+>;
+
+/** One thing wrong with a role, and the field it is in. */
+export interface RoleProblem {
+  field: 'key' | 'scopeTypes' | 'permissions' | 'appointedBy' | 'signUp';
+  message: string;
+}
+
+/**
+ * What is wrong with one role, shipped or Master's: a key not under its app, no scope type, no
+ * sign-in to its app, unknown keys or keys none of its scope types can use, appointers that are
+ * not roles (in `byKey`) or cannot give roles, a sign-up role that is not self-scoped or that
+ * someone could give.
+ */
+export function roleProblems(
+  role: RoleShape,
+  byKey: ReadonlyMap<string, Pick<RoleSeed, 'permissions'>>,
+  catalogue: ReadonlyMap<string, PermissionDefinition> = permissions,
+): RoleProblem[] {
+  const problems: RoleProblem[] = [];
+  const add = (field: RoleProblem['field'], message: string) => {
+    problems.push({ field, message });
+  };
+  if (!role.key.startsWith(`${role.app}.`)) add('key', 'key must start with app');
+  if (role.scopeTypes.length === 0) add('scopeTypes', 'no scope type');
+  if (new Set(role.scopeTypes).size !== role.scopeTypes.length) {
+    add('scopeTypes', 'a scope type is listed twice');
+  }
+  if (!role.permissions.includes('iam.app.sign_in'))
+    add('permissions', 'cannot sign in to its app');
+  if (new Set(role.permissions).size !== role.permissions.length) {
+    add('permissions', 'a permission is listed twice');
+  }
+  for (const key of role.permissions) {
+    const permission = catalogue.get(key);
+    if (!permission) {
+      add('permissions', `unknown permission ${key}`);
+    } else if (!permission.scopeTypes.some((type) => role.scopeTypes.includes(type))) {
+      add('permissions', `${key} cannot be used in any of its scope types`);
     }
-    if (seed.signUp && (seed.appointedBy.length > 0 || seed.scopeTypes.join() !== 'self')) {
-      problems.push(`${seed.key}: a sign-up role is self-scoped and given by identity only`);
+  }
+  for (const appointer of role.appointedBy) {
+    const by = byKey.get(appointer);
+    if (!by) add('appointedBy', `unknown appointer ${appointer}`);
+    else if (!by.permissions.includes('iam.grant.manage')) {
+      add('appointedBy', `${appointer} cannot give roles`);
     }
+  }
+  if (role.signUp && (role.appointedBy.length > 0 || role.scopeTypes.join() !== 'self')) {
+    add('signUp', 'a sign-up role is self-scoped and given by identity only');
   }
   return problems;
 }
