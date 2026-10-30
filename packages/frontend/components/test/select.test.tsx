@@ -76,11 +76,21 @@ describe('Select', () => {
       within(listbox).getByRole('option', { name: 'Sensitive' }).getAttribute('aria-disabled'),
     ).toBe('true');
     await userEvent.keyboard('{ArrowDown}{Enter}');
-    // Sensitive is disabled: still Combination
+    // Sensitive is disabled: still Combination (and Enter closed the list)
     expect(onChange).not.toHaveBeenCalled();
-    await userEvent.keyboard('{Escape}');
+    await waitFor(() => {
+      expect(screen.queryByRole('listbox')).toBeNull();
+    });
+    // each step waits for the list: a slow machine (CI) is still opening it otherwise
     await userEvent.keyboard('{ArrowUp}');
-    await userEvent.keyboard('{ArrowUp}{Enter}');
+    await waitFor(() => {
+      expect(document.activeElement?.textContent).toBe('CombinationOily T-zone');
+    });
+    await userEvent.keyboard('{ArrowUp}');
+    await waitFor(() => {
+      expect(document.activeElement?.textContent).toBe('Oily');
+    });
+    await userEvent.keyboard('{Enter}');
     expect(onChange).toHaveBeenCalledExactlyOnceWith('oily');
   });
 
