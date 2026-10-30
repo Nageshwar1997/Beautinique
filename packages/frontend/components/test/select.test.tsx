@@ -67,7 +67,9 @@ describe('Select', () => {
     render(
       <Select label="Skin type" options={SKIN} defaultValue="combination" onChange={onChange} />,
     );
+    const trigger = screen.getByRole('button', { name: /Skin type/ });
     await userEvent.tab();
+    expect(document.activeElement).toBe(trigger);
     await userEvent.keyboard('{ArrowDown}');
     const listbox = screen.getByRole('listbox');
     // the chosen option has the focus
@@ -78,10 +80,12 @@ describe('Select', () => {
     await userEvent.keyboard('{ArrowDown}{Enter}');
     // Sensitive is disabled: still Combination (and Enter closed the list)
     expect(onChange).not.toHaveBeenCalled();
+    // each step waits: on a slow machine (CI) the list is still closing or opening, and React
+    // Aria gives the focus back to the field a frame after the list goes
     await waitFor(() => {
       expect(screen.queryByRole('listbox')).toBeNull();
+      expect(document.activeElement).toBe(trigger);
     });
-    // each step waits for the list: a slow machine (CI) is still opening it otherwise
     await userEvent.keyboard('{ArrowUp}');
     await waitFor(() => {
       expect(document.activeElement?.textContent).toBe('CombinationOily T-zone');
