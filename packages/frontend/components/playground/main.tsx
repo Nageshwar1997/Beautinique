@@ -34,6 +34,7 @@ import {
   TONES,
   Tooltip,
 } from '../src/index';
+import { Pickers } from './pickers';
 
 function Card({ title, id, children }: { title: string; id: string; children: ReactNode }) {
   return (
@@ -433,6 +434,7 @@ function Page() {
         <Choices />
         <Dialogs />
         <Toasts />
+        <Pickers />
       </div>
       <Toaster />
     </AppFrame>

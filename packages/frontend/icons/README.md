@@ -28,7 +28,7 @@ Akele icon wale button me `label` icon pe nahi, button pe do (`aria-label`), ya 
 
 ## Icons
 
-`IconBox`, `IconCheckCircle`, `IconClose`, `IconDanger`, `IconDelivery`, `IconEye`, `IconEyeClosed`, `IconFaceScan`, `IconInfo`, `IconMonitor`, `IconMoon`, `IconPalette`, `IconShieldCheck`, `IconSun`, `IconTagPrice`, `IconWarning` (sab Solar set ke linear style me). Sab ek saath dekhne ke liye playground.
+`IconBox`, `IconCalendar`, `IconCheckCircle`, `IconChevronDown`, `IconChevronLeft`, `IconChevronRight`, `IconClose`, `IconDanger`, `IconDelivery`, `IconEye`, `IconEyeClosed`, `IconFaceScan`, `IconInfo`, `IconMonitor`, `IconMoon`, `IconPalette`, `IconSearch`, `IconShieldCheck`, `IconSun`, `IconTagPrice`, `IconWarning` (sab Solar set ke linear style me). Sab ek saath dekhne ke liye playground.
 
 **Optimized kaise:** har icon apni file me ek `/* @__PURE__ */ createIcon(...)` hai, uske shapes ek hi baar bante hain (har render pe nahi), aur `sideEffects: false`. Isliye app me sirf wahi icons bundle hote hain jo wo import karti hai (`test/bundle.test.ts` ek asli Vite build se ye `dist` aur `src` dono pe check karta hai).
 

@@ -62,13 +62,16 @@ async function main(): Promise<void> {
   }
   const exports = readdirSync(iconsDir)
     .filter((entry) => entry.endsWith('.tsx'))
+    // sorted without ".tsx", as ESLint sorts the paths: "eye" before "eye-closed"
+    .map((entry) => entry.replace(/\.tsx$/, ''))
     .toSorted()
-    .map((entry) => {
+    .map((name) => {
       const component = /export const (Icon\w+)/.exec(
-        readFileSync(join(iconsDir, entry), 'utf8'),
+        readFileSync(join(iconsDir, `${name}.tsx`), 'utf8'),
       )?.[1];
-      if (component === undefined) throw new Error(`src/icons/${entry} exports no Icon component`);
-      return `export { ${component} } from './${entry.replace(/\.tsx$/, '')}';`;
+      if (component === undefined)
+        throw new Error(`src/icons/${name}.tsx exports no Icon component`);
+      return `export { ${component} } from './${name}';`;
     });
   await write(
     join(iconsDir, 'index.ts'),
