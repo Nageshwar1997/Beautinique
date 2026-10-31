@@ -1,4 +1,4 @@
-import type { AppId, OTP_PURPOSES } from '@beautinique/shared-contracts';
+import type { AppId, AUTHENTICATOR_CHANGES, OTP_PURPOSES } from '@beautinique/shared-contracts';
 import { formatDateTime } from '@beautinique/shared-utils';
 
 import type { EmailMessage } from './port.ts';
@@ -206,4 +206,70 @@ export function authenticatorResetEmail({
 </body>
 </html>`;
   return { to, subject, text, html, tags: ['security-authenticator-reset'] };
+}
+
+export interface AuthenticatorChangedEmailInput {
+  to: string;
+  change: (typeof AUTHENTICATOR_CHANGES)[number];
+  /** The app it was done in */
+  app: AppId;
+  /** `Chrome on Windows` */
+  device: string;
+  /** When (ISO) */
+  changedAt: string;
+}
+
+const AUTHENTICATOR_CHANGE_TEXT: Readonly<
+  Record<AuthenticatorChangedEmailInput['change'], { subject: string; what: string; now: string }>
+> = {
+  enabled: {
+    subject: 'An authenticator was set up for your Beautinique account',
+    what: 'An authenticator app was set up for your account',
+    now: 'From now on, every sign-in asks for its code.',
+  },
+  replaced: {
+    subject: 'Your Beautinique authenticator was replaced',
+    what: 'A new authenticator app replaced the old one on your account',
+    now: 'The old one and its recovery codes no longer work.',
+  },
+  'recovery-codes': {
+    subject: 'New recovery codes for your Beautinique account',
+    what: 'New recovery codes were made for your account',
+    now: 'The old ones no longer work.',
+  },
+  disabled: {
+    subject: 'Your Beautinique authenticator was turned off',
+    what: 'The authenticator app was turned off for your account',
+    now: 'Sign-ins now ask only for your password.',
+  },
+};
+
+/**
+ * The person changed their own authenticator (ARCHITECTURE §9.2): what changed, where and when,
+ * and what to do if it was not them. Their sessions stay, so the way out ends them.
+ */
+export function authenticatorChangedEmail({
+  to,
+  change,
+  app,
+  device,
+  changedAt,
+}: AuthenticatorChangedEmailInput): EmailMessage {
+  const appName = APP_NAMES[app];
+  const { subject, what, now } = AUTHENTICATOR_CHANGE_TEXT[change];
+  const lead = `${what} in ${appName} (${device}) on ${formatDateTime(changedAt)} IST. ${now}`;
+  const next =
+    'If this was not you, set a new password with "Forgot password" on the sign-in page at once (that signs you out everywhere) and contact Beautinique support.';
+  const text = [lead, '', next, '', `– ${appName}`].join('\n');
+  const html = `<!doctype html>
+<html lang="en">
+<body style="margin:0;padding:24px;background:#f7f4f2;font-family:Arial,Helvetica,sans-serif;color:#1f1a1c">
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:480px;margin:0 auto;background:#ffffff;border-radius:12px">
+<tr><td style="padding:28px 28px 8px;font-size:16px;line-height:24px">${escapeHtml(lead)}</td></tr>
+<tr><td style="padding:8px 28px 28px;font-size:14px;line-height:22px">${escapeHtml(next)}</td></tr>
+</table>
+<p style="max-width:480px;margin:16px auto 0;font-size:12px;color:#5c5357;text-align:center">${escapeHtml(appName)}</p>
+</body>
+</html>`;
+  return { to, subject, text, html, tags: [`security-authenticator-${change}`] };
 }

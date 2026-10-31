@@ -111,6 +111,57 @@ export const stepUpCodeInvalid = (): AppError =>
     status: IDENTITY_ERROR_CODES.TOTP_INVALID,
   });
 
+/** A wrong (or used) recovery code at a step-up. */
+export const stepUpRecoveryInvalid = (): AppError =>
+  new AppError('RECOVERY_CODE_INVALID', 'That recovery code is not right, or was used already.', {
+    status: IDENTITY_ERROR_CODES.RECOVERY_CODE_INVALID,
+  });
+
+/** An authenticator was saved meanwhile (another tab): replacing it needs a step-up first. */
+export const authenticatorExists = (): AppError =>
+  new AppError(
+    'AUTHENTICATOR_EXISTS',
+    'You already have an authenticator. Confirm with it (or a recovery code) to replace it.',
+    { status: IDENTITY_ERROR_CODES.AUTHENTICATOR_EXISTS },
+  );
+
+/** The set-up is gone: expired, finished or out of tries. */
+export const authenticatorSetupExpired = (): AppError =>
+  new AppError(
+    'AUTHENTICATOR_SETUP_EXPIRED',
+    'This authenticator set-up has expired. Please start again.',
+    { status: IDENTITY_ERROR_CODES.AUTHENTICATOR_SETUP_EXPIRED },
+  );
+
+/**
+ * Turning the authenticator off while roles need it: their names (and apps) in the message and
+ * `details`, for the person themself (signed in, stepped up).
+ */
+export const authenticatorRequiredByRole = (roles: { name: string; app: string }[]): AppError =>
+  new AppError(
+    'AUTHENTICATOR_REQUIRED_BY_ROLE',
+    `Your ${roles.map((r) => `${r.name} role in the ${r.app} app`).join(', ')} ${roles.length === 1 ? 'needs' : 'need'} an authenticator, so it can't be turned off.`,
+    {
+      status: IDENTITY_ERROR_CODES.AUTHENTICATOR_REQUIRED_BY_ROLE,
+      details: roles.map((r) => ({ path: ['roles', r.app], message: r.name })),
+    },
+  );
+
+/** An account without a password (made with Google ...) sets one before an authenticator. */
+export const passwordRequired = (): AppError =>
+  new AppError(
+    'PASSWORD_REQUIRED',
+    'Set a password for your account first, then set up the authenticator.',
+    { status: IDENTITY_ERROR_CODES.PASSWORD_REQUIRED },
+  );
+
+/** A wrong password while signed in. */
+export const passwordInvalid = (): AppError =>
+  new AppError('PASSWORD_INVALID', 'That password is not right.', {
+    status: IDENTITY_ERROR_CODES.PASSWORD_INVALID,
+    details: [{ path: ['password'], message: 'That password is not right' }],
+  });
+
 /** Too many wrong codes or passwords for this account lately: wait for the lock to end. */
 export const stepUpLocked = (): AppError =>
   new AppError('TOTP_INVALID', 'Too many wrong codes. Please try again in an hour.', {

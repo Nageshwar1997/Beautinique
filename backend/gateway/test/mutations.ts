@@ -454,6 +454,17 @@ const mutations: Mutation[] = [
     change: [['stepUpAt <= now + 30_000 && ', '']],
     tests: 'fresh for 5 minutes|permission route through only',
   },
+  {
+    file: 'proxy',
+    name: 'a signed-in step-up route never asks one',
+    change: [
+      [
+        'if (route.stepUp && !stepUpFresh(signedIn.stepUpAt, Date.now())) {',
+        "if (route.access.type === 'permission' && route.stepUp && !stepUpFresh(signedIn.stepUpAt, Date.now())) {",
+      ],
+    ],
+    tests: 'one’s own account',
+  },
 ];
 
 export default mutations;

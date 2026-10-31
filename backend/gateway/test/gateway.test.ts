@@ -137,6 +137,15 @@ const manifest = gatewayManifest([
     rateLimit: 'read',
   }),
   route({
+    id: 'customers.profile.secure',
+    method: 'POST',
+    path: '/customers/profile/secure',
+    apps: ['customer'],
+    access: { type: 'signed-in' },
+    rateLimit: 'write',
+    stepUp: true,
+  }),
+  route({
     id: 'payments.refunds.list',
     method: 'GET',
     path: '/payments/refunds',
@@ -213,6 +222,9 @@ function fakeCore(delayMs = 0): Express {
       });
       app.get('/customers/profile', (req, res) => {
         res.json({ passport: req.get('x-bq-passport') ?? null, cookie: req.get('cookie') ?? null });
+      });
+      app.post('/customers/profile/secure', (req, res) => {
+        res.json({ passport: req.get('x-bq-passport') !== undefined });
       });
       app.post('/commerce/orders', (req, res) => {
         res.setHeader('Cache-Control', 'public, max-age=600');
@@ -1243,6 +1255,27 @@ describe('sign-in at the gateway (T3.2)', () => {
     await redis.client.set(key, 'not json', 'PX', 60_000);
     expect(await errorOf(await call(token()))).toEqual([401, 'UNAUTHENTICATED']);
     await redis.client.del(key);
+  });
+
+  it('asks a recent step-up on a signed-in route of one’s own account too (ARCHITECTURE §9.2)', async () => {
+    const core = await listen(fakeCore());
+    const gw = await gateway({ core: core.url });
+    const now = Math.floor(Date.now() / 1000);
+    const secure = (su?: number) =>
+      fetch(`${gw.url}${API_PREFIX}/customers/profile/secure`, {
+        method: 'POST',
+        headers: {
+          ...customer,
+          cookie: atCookie(accessToken(su === undefined ? {} : { su })),
+        },
+      });
+    expect(await errorOf(await secure())).toEqual([401, 'STEP_UP_REQUIRED']);
+    expect(await errorOf(await secure(now - 301))).toEqual([401, 'STEP_UP_REQUIRED']);
+    const res = await secure(now - 60);
+    expect(res.status).toBe(200);
+    expect(await res.json()).toMatchObject({ passport: true });
+    // a signed-in route without a step-up never asks one
+    expect((await profile(gw, atCookie(accessToken()))).status).toBe(200);
   });
 
   it('counts a step-up fresh for 5 minutes, allowing 30 s of clock skew', () => {

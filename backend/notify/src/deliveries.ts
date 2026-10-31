@@ -4,6 +4,8 @@ import type { IndexSpec, Mongo } from '@beautinique/backend-server-mongo';
 import { subscribe, type Subscription, type TaskTrigger } from '@beautinique/backend-server-queue';
 import {
   type AppId,
+  type AUTHENTICATOR_CHANGES,
+  authenticatorChanged,
   authenticatorReset,
   invitationCreated,
   type OTP_PURPOSES,
@@ -14,6 +16,7 @@ import {
 
 import { type EmailSender, EmailSendError } from './email/port.ts';
 import {
+  authenticatorChangedEmail,
   authenticatorResetEmail,
   invitationEmail,
   otpEmail,
@@ -30,6 +33,8 @@ export const SECURITY_EMAIL = 'notify.securityEmail';
 export const INVITATION_EMAIL = 'notify.invitationEmail';
 /** The subscriber identity's relay sends identity.authenticator.reset to. */
 export const AUTHENTICATOR_EMAIL = 'notify.authenticatorEmail';
+/** The subscriber identity's relay sends identity.authenticator.changed to. */
+export const AUTHENTICATOR_CHANGED_EMAIL = 'notify.authenticatorChangedEmail';
 /** The task that sends what is due; it runs every minute and at once after each new email. */
 export const SEND_TASK = 'email.sendDue';
 
@@ -61,7 +66,8 @@ export interface Delivery {
   lane: Lane;
   /** LANES[lane]: the order a run sends in */
   priority: number;
-  template: 'otp' | 'session-reuse' | 'invitation' | 'authenticator-reset';
+  template:
+    'otp' | 'session-reuse' | 'invitation' | 'authenticator-reset' | 'authenticator-changed';
   to: string;
   /** The sign-in code, still sealed; removed once the email went, failed or ran out. */
   otp?: {
@@ -77,6 +83,13 @@ export interface Delivery {
   invitation?: { app: AppId; roleName: string; expiresAt: string };
   /** A Security Officer reset the authenticator (no secret in it) */
   authenticator?: { resetAt: string };
+  /** The person changed their own authenticator (no secret in it) */
+  authenticatorChange?: {
+    change: (typeof AUTHENTICATOR_CHANGES)[number];
+    app: AppId;
+    device: string;
+    changedAt: string;
+  };
   status: Status;
   attempts: number;
   /** Not sent before this */
@@ -318,6 +331,52 @@ export function authenticatorSubscription({
   });
 }
 
+/**
+ * identity.authenticator.changed (the person set one up, replaced it, got new recovery codes or
+ * turned it off) → a security email in the transactional lane, then a send run at once.
+ */
+export function authenticatorChangedSubscription({
+  mongo,
+  trigger,
+  logger,
+}: {
+  mongo: Mongo;
+  trigger: TaskTrigger;
+  logger: Logger;
+}): Subscription {
+  const deliveries = deliveriesOf(mongo);
+  return subscribe(AUTHENTICATOR_CHANGED_EMAIL, authenticatorChanged, async (event, session) => {
+    const { email, change, app, device, changedAt } = event.data;
+    const now = new Date();
+    await deliveries.insertOne(
+      {
+        _id: event.eventId,
+        channel: 'email',
+        lane: 'transactional',
+        priority: LANES.transactional,
+        template: 'authenticator-changed',
+        to: email,
+        authenticatorChange: { change, app, device, changedAt },
+        status: 'queued',
+        attempts: 0,
+        dueAt: now,
+        expiresAt: null,
+        createdAt: now,
+      },
+      { session },
+    );
+    try {
+      await trigger.runSoon(SEND_TASK);
+    } catch (error) {
+      // the every-minute run sends it anyway
+      logger.warn(
+        { err: describe(error), deliveryId: event.eventId },
+        'email send not started at once',
+      );
+    }
+  });
+}
+
 export interface SendDueDeps {
   mongo: Mongo;
   sender: EmailSender;
@@ -403,6 +462,12 @@ export async function sendDue({
       if (!authenticator)
         throw new EmailSendError('AUTHENTICATOR_DETAILS_MISSING', { retry: false });
       return authenticatorResetEmail({ to: delivery.to, ...authenticator });
+    }
+    if (delivery.template === 'authenticator-changed') {
+      const { authenticatorChange } = delivery;
+      if (!authenticatorChange)
+        throw new EmailSendError('AUTHENTICATOR_DETAILS_MISSING', { retry: false });
+      return authenticatorChangedEmail({ to: delivery.to, ...authenticatorChange });
     }
     if (delivery.template === 'invitation') {
       const { invitation } = delivery;

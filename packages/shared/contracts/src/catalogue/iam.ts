@@ -9,6 +9,7 @@ import {
   otpZod,
   string,
   uuidv7Zod,
+  xor,
 } from '@beautinique/shared-zod';
 
 import { defineEvent } from '../events';
@@ -16,7 +17,7 @@ import { cursorPage, cursorQuery } from '../http';
 import { definePermission } from '../permissions';
 import { type AppId, APPS, SCOPE_TYPES } from '../platform';
 import { defineRoute } from '../routes';
-import { otpChallengeZod, otpConsentZod } from './identity';
+import { otpChallengeZod, otpConsentZod, recoveryCodeZod } from './identity';
 
 /**
  * Identity's permission keys (ARCHITECTURE §7.3). Every role holds `iam.app.sign_in`: a grant
@@ -421,9 +422,10 @@ export interface AppPermissions {
 export const STEP_UP_SECONDS = 300;
 
 /**
- * Step-up: the authenticator code again, so a high-risk permission route works for the next
- * STEP_UP_SECONDS (the access token carries when, `su`). Counts toward the account's lock like
- * a sign-in. An account without an authenticator answers AUTHENTICATOR_REQUIRED.
+ * Step-up: the authenticator code again, or (a lost phone) one of the recovery codes, which is
+ * then used up, so a high-risk route works for the next STEP_UP_SECONDS (the access token carries
+ * when, `su`). Counts toward the account's lock like a sign-in. An account without an
+ * authenticator answers AUTHENTICATOR_REQUIRED.
  */
 export const stepUp = defineRoute({
   id: 'auth.stepUp.verify',
@@ -436,8 +438,14 @@ export const stepUp = defineRoute({
   idempotency: false,
   stepUp: false,
   owner: 'identity',
-  input: { body: object({ code: otpZod }) },
-  output: object({ stepUpUntil: isoDateTimeZod }),
+  input: {
+    body: xor([object({ code: otpZod }), object({ recoveryCode: recoveryCodeZod })]),
+  },
+  output: object({
+    stepUpUntil: isoDateTimeZod,
+    /** After a recovery code: how many are left; null after an authenticator code */
+    recoveryCodesLeft: number().int().min(0).nullable(),
+  }),
 });
 
 const userParams = object({ userId: uuidv7Zod });
