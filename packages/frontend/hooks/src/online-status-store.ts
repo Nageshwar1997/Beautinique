@@ -1,3 +1,5 @@
+import axios from 'axios';
+
 /**
  * `online`: the internet works (or nothing says it does not).
  * `offline`: the browser says the device has no network, or the network is there (Wi-Fi joined) but
@@ -73,13 +75,19 @@ const defaultRetryDelayMs = (failures: number) =>
 
 // The site itself (its Vercel edge), never another company: no third party learns who is online,
 // and the CSP opens nothing for it. Any answer counts, a 404 too.
-const defaultProbe = (signal: AbortSignal) =>
-  fetch(`/favicon.ico?online-check=${String(Date.now())}`, {
-    method: 'HEAD',
-    cache: 'no-store',
-    credentials: 'omit',
+// axios's fetch adapter (only fetch has `cache`), with a whole URL for its Request; no cookies and
+// none of axios's own headers (`false` drops one)
+const defaultProbe = (signal: AbortSignal) => {
+  const path = `/favicon.ico?online-check=${String(Date.now())}`;
+  return axios.head(typeof location === 'undefined' ? path : new URL(path, location.href).href, {
+    adapter: 'fetch',
+    fetchOptions: { cache: 'no-store' },
+    withCredentials: false,
+    headers: { Accept: false, 'User-Agent': false },
+    validateStatus: () => true,
     signal,
   });
+};
 
 // Without a `navigator` (a server) there is nothing to say the network is down.
 const isNavigatorOnline = () => typeof navigator === 'undefined' || navigator.onLine;

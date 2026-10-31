@@ -1,3 +1,4 @@
+import axios from 'axios';
 import { useCallback, useEffect, useState } from 'react';
 
 /**
@@ -52,6 +53,16 @@ export interface WakeServerOptions extends WakeTimings {
  */
 const notUpYet = (status: number) => status >= 500 || status === 429;
 
+/**
+ * axios's own headers off (`false` drops one): the wake call names only the app, and the straight
+ * call to the server carries nothing at all.
+ */
+const NO_AXIOS_HEADERS = { Accept: false, 'User-Agent': false } as const;
+
+/** A whole URL: axios's fetch adapter makes a Request, which needs one outside a browser too. */
+const whole = (url: string) =>
+  typeof location === 'undefined' ? url : new URL(url, location.href).href;
+
 /** Resolves after `ms`, or at once when `signal` aborts. */
 function pause(ms: number, signal: AbortSignal): Promise<void> {
   return new Promise((resolve) => {
@@ -78,13 +89,20 @@ export async function wakeServer({
   app,
   url = WAKE_URL,
   signal = new AbortController().signal,
-  fetch: fetchImpl = globalThis.fetch,
+  fetch: fetchImpl,
   attemptTimeoutMs = 30_000,
   retryDelayMs = 3000,
   giveUpAfterMs = 150_000,
   kickUrl,
   kickEveryMs = 15_000,
 }: WakeServerOptions): Promise<boolean> {
+  // the fetch adapter: only fetch has `no-cors` and `cache` (axios's XMLHttpRequest has neither)
+  const http = axios.create({
+    adapter: 'fetch',
+    ...(fetchImpl === undefined ? {} : { env: { fetch: fetchImpl } }),
+    // the status decides below, every answer comes back
+    validateStatus: () => true,
+  });
   const deadline = Date.now() + giveUpAfterMs;
   let kickedAt = -Infinity;
   /** Rings the server's own bell (fire and forget), at most once per kickEveryMs. */
@@ -92,7 +110,13 @@ export async function wakeServer({
     if (signal.aborted || kickUrl === undefined || kickUrl === '') return;
     if (Date.now() - kickedAt < kickEveryMs) return;
     kickedAt = Date.now();
-    void fetchImpl(kickUrl, { mode: 'no-cors', cache: 'no-store', signal }).catch(() => undefined);
+    void http
+      .get(whole(kickUrl), {
+        headers: NO_AXIOS_HEADERS,
+        fetchOptions: { mode: 'no-cors', cache: 'no-store' },
+        signal,
+      })
+      .catch(() => undefined);
   };
   while (!signal.aborted) {
     const attempt = new AbortController();
@@ -102,9 +126,9 @@ export async function wakeServer({
     signal.addEventListener('abort', stop, { once: true });
     const timer = setTimeout(stop, Math.max(0, Math.min(attemptTimeoutMs, deadline - Date.now())));
     try {
-      const response = await fetchImpl(url, {
-        headers: { [APP_HEADER]: app },
-        cache: 'no-store',
+      const response = await http.get(whole(url), {
+        headers: { ...NO_AXIOS_HEADERS, [APP_HEADER]: app },
+        fetchOptions: { cache: 'no-store' },
         signal: attempt.signal,
       });
       if (!notUpYet(response.status)) return !signal.aborted;

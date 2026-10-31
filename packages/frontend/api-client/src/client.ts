@@ -1,17 +1,14 @@
 import { type OnlineStatusStore, onlineStatusStore } from '@beautinique/frontend-hooks';
 import {
-  ApiError,
+  type ApiError,
   type AppId,
-  buildPath,
   type CallArgs,
   type CallOptions,
-  errorBody,
-  HEADERS,
+  createClient,
   refreshSession,
   type RouteDefinition,
   type RouteOutput,
 } from '@beautinique/shared-contracts';
-import axios, { AxiosHeaders, type AxiosInstance, type AxiosResponse, isAxiosError } from 'axios';
 
 import { isApiError } from './errors';
 
@@ -83,149 +80,22 @@ const delay = (ms: number) =>
     setTimeout(resolve, ms);
   });
 
-/** Query values as the gateway reads them (like the contracts' client): a name per list item, ISO dates. */
-function queryString(query: unknown): string {
-  if (typeof query !== 'object' || query === null) return '';
-  const search = new URLSearchParams();
-  for (const [name, value] of Object.entries(query)) {
-    for (const item of Array.isArray(value) ? (value as unknown[]) : [value]) {
-      if (item === undefined || item === null) continue;
-      search.append(name, item instanceof Date ? item.toISOString() : String(item));
-    }
-  }
-  const text = search.toString();
-  return text === '' ? '' : `?${text}`;
-}
-
 /**
- * What a failed request becomes: the caller's own abort as the signal gave it, our error body as
- * an ApiError, any other answer by its status, and no answer at all as NETWORK_ERROR.
- */
-function failure(error: unknown, signal: AbortSignal | undefined): unknown {
-  if (signal?.aborted === true) return signal.reason;
-  if (!isAxiosError(error)) return error;
-  const { response } = error;
-  if (response === undefined) {
-    return new ApiError({
-      code: 'NETWORK_ERROR',
-      message: 'The server could not be reached',
-      status: 0,
-    });
-  }
-  const parsed = errorBody.safeParse(response.data);
-  if (parsed.success) {
-    const { code, message, details, requestId } = parsed.data.error;
-    return new ApiError({ code, message, status: response.status, requestId, details });
-  }
-  return new ApiError({
-    code: response.status >= 500 ? 'INTERNAL' : 'BAD_REQUEST',
-    message: `Request failed with status ${String(response.status)}`,
-    status: response.status,
-    requestId: requestIdOf(response.headers),
-  });
-}
-
-function requestIdOf(headers: AxiosResponse['headers']): string | null {
-  // axios answers with AxiosHeaders, whose get() ignores the name's case
-  const value: unknown =
-    headers instanceof AxiosHeaders
-      ? headers.get(HEADERS.requestId)
-      : headers[HEADERS.requestId.toLowerCase()];
-  return typeof value === 'string' ? value : null;
-}
-
-interface Transport {
-  http: AxiosInstance;
-  validate: boolean;
-  online: Pick<OnlineStatusStore, 'confirmOnline' | 'recheck'>;
-}
-
-/**
- * One request of a contract route over axios: the path and query from the route, the body only
- * where the route has one, and the answer's `data` checked against the route's output schema.
- */
-async function send<const Route extends RouteDefinition>(
-  { http, validate, online }: Transport,
-  route: Route,
-  request: unknown,
-  callOptions: CallOptions,
-): Promise<RouteOutput<Route>> {
-  const input = (request ?? {}) as {
-    params?: Record<string, string | number>;
-    query?: unknown;
-    body?: unknown;
-  };
-  const headers: Record<string, string> = {};
-  if (callOptions.idempotencyKey !== undefined) {
-    headers[HEADERS.idempotencyKey] = callOptions.idempotencyKey;
-  }
-  let answer: unknown;
-  let answerHeaders: AxiosResponse['headers'];
-  let status: number;
-  try {
-    const response = await http.request<unknown>({
-      method: route.method,
-      url: `${buildPath(route.path, input.params)}${queryString(input.query)}`,
-      data: route.input.body ? input.body : undefined,
-      headers,
-      signal: callOptions.signal,
-    });
-    answer = response.data;
-    answerHeaders = response.headers;
-    status = response.status;
-  } catch (error) {
-    if (callOptions.signal?.aborted !== true && isAxiosError(error)) {
-      if (error.response === undefined) online.recheck();
-      else online.confirmOnline();
-    }
-    throw failure(error, callOptions.signal);
-  }
-  online.confirmOnline();
-  const data =
-    typeof answer === 'object' && answer !== null ? (answer as { data?: unknown }).data : undefined;
-  if (data === undefined) {
-    throw new ApiError({
-      code: 'INVALID_RESPONSE',
-      message: 'The server sent a response without data',
-      status,
-      requestId: requestIdOf(answerHeaders),
-    });
-  }
-  if (!validate) return data as RouteOutput<Route>;
-  const parsed = route.output.safeParse(data);
-  if (!parsed.success) {
-    throw new ApiError({
-      code: 'INVALID_RESPONSE',
-      message: `The response does not match ${route.id}`,
-      status,
-      requestId: requestIdOf(answerHeaders),
-    });
-  }
-  return parsed.data as RouteOutput<Route>;
-}
-
-/**
- * The app's one client (ARCHITECTURE §9.2): contract routes through the gateway, over axios, with
- * the app's HttpOnly cookies, which the page never sees.
+ * The app's one client (ARCHITECTURE §9.2): contract routes through the gateway with the contracts'
+ * axios client and the app's HttpOnly cookies, which the page never sees.
  */
 export function createApiClient(options: ApiClientOptions): ApiClient {
-  const http = axios.create({
-    baseURL: options.baseUrl ?? API_BASE_URL,
-    headers: { Accept: 'application/json', [HEADERS.app]: options.app },
-    ...(options.fetch === undefined ? {} : { adapter: 'fetch', env: { fetch: options.fetch } }),
+  const online = options.onlineStatus ?? onlineStatusStore;
+  const inner = createClient({
+    baseUrl: options.baseUrl ?? API_BASE_URL,
+    app: options.app,
+    fetch: options.fetch,
+    validateResponses: options.validateResponses,
+    onNetwork: (event) => {
+      if (event === 'answered') online.confirmOnline();
+      else online.recheck();
+    },
   });
-  const transport: Transport = {
-    http,
-    validate: options.validateResponses ?? true,
-    online: options.onlineStatus ?? onlineStatusStore,
-  };
-  const inner = {
-    call: <const Route extends RouteDefinition>(
-      route: Route,
-      request?: unknown,
-      callOptions: CallOptions = {},
-    ) => send(transport, route, request, callOptions),
-  };
 
   const listeners = new Set<(change: SessionChange) => void>();
   const notify = (change: SessionChange) => {
@@ -287,7 +157,7 @@ export function createApiClient(options: ApiClientOptions): ApiClient {
     const sendOptions: CallOptions = route.idempotency
       ? { ...callOptions, idempotencyKey: callOptions?.idempotencyKey ?? crypto.randomUUID() }
       : { ...callOptions };
-    const sendOnce = () => inner.call(route, request, sendOptions);
+    const sendOnce = () => inner.call(route, ...([request, sendOptions] as CallArgs<Route>));
 
     // a call asked for during a refresh waits for it, instead of going out with the old cookie
     if (refreshing !== null) await refreshing.catch(() => false);

@@ -57,6 +57,7 @@
     "@beautinique/shared-utils": "^2.0.0",
     "@beautinique/shared-zod": "^2.0.0",
     "@sentry/node": "^11.9.0",
+    "axios": "^1.21.0",
     "helmet": "^8.3.0",
     "pino": "^10.4.0"
   },

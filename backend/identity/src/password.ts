@@ -1,6 +1,7 @@
 import { argon2, createHash, randomBytes, timingSafeEqual } from 'node:crypto';
 
 import type { Logger } from '@beautinique/backend-server-kit';
+import axios from 'axios';
 
 import { passwordsBusy } from './errors.ts';
 
@@ -108,12 +109,12 @@ export function hibpBreachCheck({
     const prefix = sha1.slice(0, 5);
     const suffix = sha1.slice(5);
     try {
-      const response = await fetch(`${url}/range/${prefix}`, {
+      const response = await axios.get<string>(`${url}/range/${prefix}`, {
         headers: { 'Add-Padding': 'true', 'User-Agent': 'Beautinique-identity' },
         signal: AbortSignal.timeout(timeoutMs),
+        responseType: 'text',
       });
-      if (!response.ok) throw new Error(`HTTP ${String(response.status)}`);
-      for (const line of (await response.text()).split('\n')) {
+      for (const line of response.data.split('\n')) {
         const [hashSuffix, count] = line.trim().split(':');
         // padding lines have a count of 0
         if (hashSuffix === suffix && Number(count) > 0) return true;

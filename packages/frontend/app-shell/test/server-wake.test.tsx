@@ -16,28 +16,47 @@ const KICK_URL = 'https://bq-live.example.test/wake';
  * A fetch that plays `steps` in order (the last one repeats) and honours aborts like the real one.
  * Calls to KICK_URL are kept apart in `kicks` and answer at once (opaque, as no-cors answers are).
  */
+interface Sent {
+  /** the path on the app's own host, the whole URL elsewhere */
+  url: string;
+  init: { headers: Record<string, string>; cache: string; mode: string; signal: AbortSignal };
+}
+
 function scriptedFetch(...steps: Step[]) {
-  const calls: { url: string; init: RequestInit }[] = [];
-  const kicks: { url: string; init: RequestInit; at: number }[] = [];
-  const fetchStub = vi.fn((url: string, init: RequestInit) => {
-    if (url === KICK_URL) {
-      kicks.push({ url, init, at: Date.now() });
-      return Promise.resolve({ status: 0, type: 'opaque' } as Response);
+  const calls: Sent[] = [];
+  const kicks: (Sent & { at: number })[] = [];
+  // axios's fetch adapter hands over a whole Request
+  const fetchStub = vi.fn((input: Request | string | URL, given?: RequestInit) => {
+    const request = new Request(input, given);
+    const where = new URL(request.url);
+    const sent: Sent = {
+      url: where.origin === location.origin ? `${where.pathname}${where.search}` : request.url,
+      init: {
+        headers: Object.fromEntries(request.headers),
+        cache: request.cache,
+        mode: request.mode,
+        signal: request.signal,
+      },
+    };
+    if (request.url === KICK_URL) {
+      kicks.push({ ...sent, at: Date.now() });
+      // a no-cors answer is opaque: nothing in it can be read
+      return Promise.resolve(new Response(null, { status: 200 }));
     }
-    calls.push({ url, init });
+    calls.push(sent);
     const step = steps[Math.min(calls.length - 1, steps.length - 1)];
     return new Promise<Response>((resolve, reject) => {
       const aborted = () => {
         clearTimeout(timer);
         reject(new DOMException('The operation was aborted.', 'AbortError'));
       };
-      init.signal?.addEventListener('abort', aborted, { once: true });
+      request.signal.addEventListener('abort', aborted, { once: true });
       const timer =
         step === undefined || 'hang' in step
           ? undefined
           : setTimeout(() => {
               if ('error' in step) reject(new TypeError('Failed to fetch'));
-              else resolve({ status: step.status } as Response);
+              else resolve(new Response(null, { status: step.status }));
             }, step.after);
     });
   });
@@ -66,7 +85,7 @@ describe('wakeServer', () => {
     expect(await done).toBe(true);
     expect(calls).toHaveLength(1);
     expect(calls[0]?.url).toBe('/api/v1/platform/wake');
-    expect(calls[0]?.init.headers).toEqual({ 'X-BQ-App': 'customer' });
+    expect(calls[0]?.init.headers).toEqual({ 'x-bq-app': 'customer' });
     expect(calls[0]?.init.cache).toBe('no-store');
   });
 
@@ -97,9 +116,9 @@ describe('wakeServer', () => {
     const done = wakeServer({ app: 'customer', fetch, attemptTimeoutMs: 5000, retryDelayMs: 1000 });
     await vi.advanceTimersByTimeAsync(4999);
     expect(calls).toHaveLength(1);
-    expect(calls[0]?.init.signal?.aborted).toBe(false);
+    expect(calls[0]?.init.signal.aborted).toBe(false);
     await vi.advanceTimersByTimeAsync(1);
-    expect(calls[0]?.init.signal?.aborted).toBe(true);
+    expect(calls[0]?.init.signal.aborted).toBe(true);
     await vi.advanceTimersByTimeAsync(1100);
     expect(await done).toBe(true);
     expect(calls).toHaveLength(2);
@@ -118,7 +137,7 @@ describe('wakeServer', () => {
     await vi.advanceTimersByTimeAsync(40_000);
     expect(await done).toBe(false);
     expect(calls).toHaveLength(2);
-    expect(calls.every((call) => call.init.signal?.aborted)).toBe(true);
+    expect(calls.every((call) => call.init.signal.aborted)).toBe(true);
   });
 
   it('rings the server straight (no-cors) while the route says "not up yet", at most every 15 s', async () => {
@@ -142,8 +161,8 @@ describe('wakeServer', () => {
     // the first "not up yet" rings at once, the next one 15 s later at the earliest
     expect(kicks.map((kick) => kick.at - start)).toEqual([100, 15_600]);
     expect(kicks[0]?.init).toMatchObject({ mode: 'no-cors', cache: 'no-store' });
-    // the bell carries nothing of the app: no app header, no secret
-    expect(kicks[0]?.init.headers).toBeUndefined();
+    // the bell carries nothing of the app: no app header, no secret, not even axios's own
+    expect(kicks[0]?.init.headers).toEqual({});
   });
 
   it('rings nothing when the server answers, or when there is no wake address', async () => {
@@ -167,7 +186,7 @@ describe('wakeServer', () => {
     await vi.advanceTimersByTimeAsync(1000);
     controller.abort();
     expect(await done).toBe(false);
-    expect(calls[0]?.init.signal?.aborted).toBe(true);
+    expect(calls[0]?.init.signal.aborted).toBe(true);
     await vi.advanceTimersByTimeAsync(200_000);
     expect(calls).toHaveLength(1);
   });
@@ -179,7 +198,7 @@ describe('wakeServer', () => {
     const done = wakeServer({ app: 'customer', fetch });
     await vi.advanceTimersByTimeAsync(0);
     await done;
-    expect(Object.keys(calls[0]?.init.headers ?? {})).toEqual([HEADERS.app]);
+    expect(Object.keys(calls[0]?.init.headers ?? {})).toEqual([HEADERS.app.toLowerCase()]);
   });
 });
 

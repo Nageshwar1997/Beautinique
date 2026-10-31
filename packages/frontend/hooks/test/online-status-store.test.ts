@@ -1374,10 +1374,11 @@ describe('online status store', () => {
   describe('the default probe', () => {
     /** `fetch` that answers only when `reachable`, like a network that is up or down. */
     const network = (reachable: boolean, status = 204) => {
-      const fetchMock = vi.fn<(url: string, init?: RequestInit) => Promise<Response>>(() =>
-        reachable
-          ? Promise.resolve(new Response(null, { status }))
-          : Promise.reject(new TypeError('Failed to fetch')),
+      const fetchMock = vi.fn<(input: Request | string, init?: RequestInit) => Promise<Response>>(
+        () =>
+          reachable
+            ? Promise.resolve(new Response(null, { status }))
+            : Promise.reject(new TypeError('Failed to fetch')),
       );
       vi.stubGlobal('fetch', fetchMock);
       return fetchMock;
@@ -1397,12 +1398,17 @@ describe('online status store', () => {
       await probeOnce(store);
 
       expect(fetchMock).toHaveBeenCalledTimes(1);
-      const [url, init] = fetchMock.mock.calls[0] as unknown as [string, RequestInit];
-      expect(url).toMatch(/^\/favicon\.ico\?online-check=\d+$/);
-      expect(init.method).toBe('HEAD');
-      expect(init.cache).toBe('no-store');
-      expect(init.credentials).toBe('omit');
-      expect(init.signal).toBeInstanceOf(AbortSignal);
+      // axios's fetch adapter hands over a whole Request
+      const [input, init] = fetchMock.mock.calls[0] as unknown as [Request, RequestInit?];
+      const request = new Request(input, init);
+      const url = new URL(request.url);
+      expect(url.origin).toBe(location.origin);
+      expect(`${url.pathname}${url.search}`).toMatch(/^\/favicon\.ico\?online-check=\d+$/);
+      expect(request.method).toBe('HEAD');
+      expect(request.cache).toBe('no-store');
+      expect(request.credentials).toBe('omit');
+      expect([...request.headers]).toEqual([]);
+      expect(request.signal).toBeInstanceOf(AbortSignal);
       expect(store.getStatus()).toBe('online');
     });
 

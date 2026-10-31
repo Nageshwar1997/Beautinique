@@ -32,18 +32,25 @@ const goOnline = () => {
 /** `fetch` that the test answers: `internet.up()` / `internet.down()` decide the next answers. */
 const createInternet = () => {
   let reachable = true;
-  const fetchMock = vi.fn<(url: string) => Promise<Response>>(() =>
+  // axios's fetch adapter hands over a whole Request
+  const fetchMock = vi.fn<(input: Request | string) => Promise<Response>>(() =>
     reachable
       ? Promise.resolve(new Response(null, { status: 200 }))
       : Promise.reject(new TypeError('Failed to fetch')),
   );
   vi.stubGlobal('fetch', fetchMock);
+  const pathOf = (input: Request | string) => {
+    const url = new URL(typeof input === 'string' ? input : input.url, location.href);
+    return `${url.pathname}${url.search}`;
+  };
 
   return {
     fetchMock,
     /** How many times the internet was asked (the site itself, once per check). */
     probesStarted: () =>
-      fetchMock.mock.calls.filter(([url]) => url.startsWith('/favicon.ico?online-check=')).length,
+      fetchMock.mock.calls.filter(([input]) =>
+        pathOf(input).startsWith('/favicon.ico?online-check='),
+      ).length,
     up: () => {
       reachable = true;
     },

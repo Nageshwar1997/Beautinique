@@ -8,7 +8,7 @@ Har Beautinique app ka **ek hi API client** (ARCHITECTURE §9.2, RULES §5.8): c
 npm install @beautinique/frontend-api-client @tanstack/react-query
 ```
 
-Peers: `react` 19, `@tanstack/react-query` 5. Dependencies: `axios`, `@beautinique/shared-contracts`, `@beautinique/frontend-hooks` (online status).
+Peers: `react` 19, `@tanstack/react-query` 5. Dependencies: `@beautinique/shared-contracts` (uska axios wala `createClient`, RULES §3.8), `@beautinique/frontend-hooks` (online status).
 
 ```tsx
 import { ApiProvider, createApiClient, createQueryClient } from '@beautinique/frontend-api-client';
@@ -45,7 +45,7 @@ const queryClient = createQueryClient();
 6. **Idempotency-Key:** jis route ko chahiye, uski har try (pehli, refresh ke baad, step-up ke baad) pe **ek hi key**; `idempotencyKey` diya ho to wahi.
 7. **Errors:** hamara error body → `ApiError` (code, message, status, requestId, details); doosra jawab status se (`INTERNAL` 5xx, warna `BAD_REQUEST`); jawab hi nahi = `NETWORK_ERROR` (status 0); bina `data` ya contract se alag jawab = `INVALID_RESPONSE`. Caller ka apna abort `signal.reason` (AbortError) hi lautata hai.
 8. **Online status:** koi bhi jawab (error page bhi) = `confirmOnline()`, jawab nahi = `recheck()` (default hooks ka `onlineStatusStore`, jise `useOnlineStatus` padhta hai); caller ka abort kuch nahi kehta.
-9. **Transport:** browser me axios ka apna adapter (XMLHttpRequest), server pe `http`. `fetch` diya ho to axios ka fetch adapter (tests, ya server jo apna fetch laaye); us raaste pe `baseUrl` poora URL ho (`new Request` relative URL nahi leta). Query contracts ke client jaisi: list ke har item ka apna naam (`tag=a&tag=b`), Date ISO me, `null`/`undefined` chhoot.
+9. **Transport:** contracts ka `createClient` (axios) har ek request bhejta hai; ye package uske upar refresh, line, step-up aur key ke niyam rakhta hai (dono jagah ek hi HTTP code). Browser me axios ka XMLHttpRequest, server pe `http`. `fetch` diya ho to axios ka fetch adapter (tests, ya server jo apna fetch laaye); us raaste pe `baseUrl` poora URL ho (`new Request` relative URL nahi leta). Query: list ke har item ka apna naam (`tag=a&tag=b`), Date ISO me, `null`/`undefined` chhoot; bina body wale POST pe `Content-Type` nahi.
 
 ## TanStack Query
 

@@ -1,3 +1,5 @@
+import axios, { AxiosHeaders, type AxiosResponse } from 'axios';
+
 import { errorBody } from './http';
 import type { AppId } from './platform';
 import { HEADERS } from './platform';
@@ -27,16 +29,26 @@ export class ApiError extends Error {
   }
 }
 
+/** What a request found out about the connection: the server answered (an error too), or nothing came back. */
+export type NetworkEvent = 'answered' | 'unanswered';
+
 export interface ClientOptions {
   /** Origin and optional prefix of the gateway, e.g. `https://api.beautinique.example`. */
   baseUrl: string;
   /** Sent as `X-BQ-App` on every request. */
   app: AppId;
+  /**
+   * Send through this fetch, with axios's fetch adapter, instead of axios's own default
+   * (XMLHttpRequest in a browser, `http` on a server). The fetch gets a whole Request, so outside a
+   * browser `baseUrl` must then be a whole URL.
+   */
   fetch?: typeof fetch;
   /** The access token to send as a Bearer token, or null when signed out. */
   getToken?: () => string | null | Promise<string | null>;
   /** Check each `data` against the route's output schema (default true). */
   validateResponses?: boolean;
+  /** Told after every request, never for the caller's own abort (the apps' online status). */
+  onNetwork?: (event: NetworkEvent) => void;
 }
 
 export interface CallOptions {
@@ -69,15 +81,18 @@ function queryString(query: unknown): string {
   return text === '' ? '' : `?${text}`;
 }
 
+function requestIdOf(headers: AxiosResponse['headers']): string | null {
+  // axios answers with AxiosHeaders, whose get() ignores the name's case
+  const value: unknown =
+    headers instanceof AxiosHeaders
+      ? headers.get(HEADERS.requestId)
+      : headers[HEADERS.requestId.toLowerCase()];
+  return typeof value === 'string' ? value : null;
+}
+
 /** Parses an error response; a body that is not our error body still becomes an ApiError. */
-async function failure(response: Response): Promise<ApiError> {
-  let json: unknown;
-  try {
-    json = await response.json();
-  } catch {
-    json = undefined;
-  }
-  const parsed = errorBody.safeParse(json);
+function failure(response: AxiosResponse<unknown>): ApiError {
+  const parsed = errorBody.safeParse(response.data);
   if (parsed.success) {
     const { code, message, details, requestId } = parsed.data.error;
     return new ApiError({ code, message, status: response.status, requestId, details });
@@ -86,17 +101,23 @@ async function failure(response: Response): Promise<ApiError> {
     code: response.status >= 500 ? 'INTERNAL' : 'BAD_REQUEST',
     message: `Request failed with status ${String(response.status)}`,
     status: response.status,
-    requestId: response.headers.get(HEADERS.requestId),
+    requestId: requestIdOf(response.headers),
   });
 }
 
 /**
- * The typed client (ARCHITECTURE §5.1): `client.call(route, { params, query, body })` returns the
- * route's `data` type, or throws an ApiError. Apps use only this, never `fetch` directly.
+ * The typed client (ARCHITECTURE §5.1), over axios: `client.call(route, { params, query, body })`
+ * returns the route's `data` type, or throws an ApiError. Apps use only this (through
+ * `@beautinique/frontend-api-client`), never axios directly.
  */
 export function createClient(options: ClientOptions) {
-  const doFetch = options.fetch ?? fetch;
-  const base = options.baseUrl.replace(/\/+$/, '');
+  const http = axios.create({
+    baseURL: options.baseUrl.replace(/\/+$/, ''),
+    headers: { Accept: 'application/json', [HEADERS.app]: options.app },
+    // every answer comes back here; its status decides below
+    validateStatus: () => true,
+    ...(options.fetch === undefined ? {} : { adapter: 'fetch', env: { fetch: options.fetch } }),
+  });
   const validate = options.validateResponses ?? true;
 
   async function call<const Route extends RouteDefinition>(
@@ -108,48 +129,51 @@ export function createClient(options: ClientOptions) {
       query?: unknown;
       body?: unknown;
     };
-    const headers: Record<string, string> = {
-      Accept: 'application/json',
-      [HEADERS.app]: options.app,
-    };
+    // false keeps axios from calling a POST without a body a form
+    const headers: Record<string, string | false> = { 'Content-Type': false };
     const token = await options.getToken?.();
     if (token) headers.Authorization = `Bearer ${token}`;
     if (route.idempotency) {
       headers[HEADERS.idempotencyKey] = callOptions?.idempotencyKey ?? crypto.randomUUID();
     }
-    let body: string | undefined;
+    let payload: string | undefined;
     if (route.input.body) {
       headers['Content-Type'] = 'application/json';
-      body = JSON.stringify(input.body);
+      payload = JSON.stringify(input.body);
     }
-    let response: Response;
+    const url = `${buildPath(route.path, input.params)}${queryString(input.query)}`;
+    let response: AxiosResponse<unknown>;
     try {
-      response = await doFetch(
-        `${base}${buildPath(route.path, input.params)}${queryString(input.query)}`,
-        { method: route.method, headers, body, signal: callOptions?.signal },
-      );
-    } catch (error) {
-      if (callOptions?.signal?.aborted) throw error;
+      response = await http.request<unknown>({
+        method: route.method,
+        url,
+        headers,
+        data: payload,
+        signal: callOptions?.signal,
+      });
+    } catch {
+      // the caller's own abort comes back as the signal gives it, like fetch's
+      if (callOptions?.signal?.aborted) throw callOptions.signal.reason;
+      options.onNetwork?.('unanswered');
       throw new ApiError({
         code: 'NETWORK_ERROR',
         message: 'The server could not be reached',
         status: 0,
       });
     }
-    if (!response.ok) throw await failure(response);
-    let json: unknown;
-    try {
-      json = await response.json();
-    } catch {
-      json = undefined;
-    }
-    const data = (json as { data?: unknown } | undefined)?.data;
+    options.onNetwork?.('answered');
+    if (response.status < 200 || response.status > 299) throw failure(response);
+    const answer = response.data;
+    const data =
+      typeof answer === 'object' && answer !== null
+        ? (answer as { data?: unknown }).data
+        : undefined;
     if (data === undefined) {
       throw new ApiError({
         code: 'INVALID_RESPONSE',
         message: 'The server sent a response without data',
         status: response.status,
-        requestId: response.headers.get(HEADERS.requestId),
+        requestId: requestIdOf(response.headers),
       });
     }
     if (!validate) return data as RouteOutput<Route>;
@@ -159,7 +183,7 @@ export function createClient(options: ClientOptions) {
         code: 'INVALID_RESPONSE',
         message: `The response does not match ${route.id}`,
         status: response.status,
-        requestId: response.headers.get(HEADERS.requestId),
+        requestId: requestIdOf(response.headers),
       });
     }
     return parsed.data as RouteOutput<Route>;

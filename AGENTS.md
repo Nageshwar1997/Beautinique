@@ -36,6 +36,7 @@ npm run verify -- --all --yes
 
 - Imports/exports ka order **ESLint** (`simple-import-sort`) tay karta hai. File badalne ke baad `npx eslint <file> --fix`, phir `npx prettier --write <file>`. Editor ka "Organize Imports" mat chalao: wo alag order deta hai aur lint fail hota hai.
 - `zod` sirf `@beautinique/shared-zod` se, `mongodb` sirf `@beautinique/backend-server-mongo` se; transaction ke andar `Promise.all` nahi. ESLint inhe rokta hai.
+- HTTP calls sirf axios (apps `@beautinique/frontend-api-client` se); `fetch`/`node:http` request sirf gateway `proxy.ts` aur tests me. ESLint rokta hai.
 
 ## Kaam rokte waqt
 

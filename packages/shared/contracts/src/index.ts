@@ -64,6 +64,7 @@ export {
   type Client,
   type ClientOptions,
   createClient,
+  type NetworkEvent,
   queryKey,
   queryKeyPrefix,
 } from './client';

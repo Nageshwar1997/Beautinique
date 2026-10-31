@@ -1,3 +1,6 @@
+import { createServer, type ServerResponse } from 'node:http';
+import type { AddressInfo } from 'node:net';
+
 import { generateSigningKey, signJwt } from '@beautinique/backend-server-crypto';
 import { HEADERS, PASSPORT_ISSUER } from '@beautinique/shared-contracts';
 import type { Request } from 'express';
@@ -7,6 +10,7 @@ import {
   AppError,
   cookieOf,
   jwksCache,
+  jwksFromUrl,
   passportSigner,
   passportVerifier,
   tokenKeyId,
@@ -97,6 +101,62 @@ describe('jwksCache', () => {
     clock = 11 * 60_000 + 1000;
     // within the refetch wait it keeps what it had
     expect((await cache.keysFor(good.kid)).has(good.kid)).toBe(true);
+  });
+});
+
+describe('jwksFromUrl', () => {
+  /** A server for one test: `answer` handles each request; `hang` never answers. */
+  async function serve(answer: 'hang' | ((response: ServerResponse) => void)) {
+    const server = createServer((_request, response) => {
+      if (answer !== 'hang') answer(response);
+    });
+    await new Promise<void>((resolve) => server.listen(0, '127.0.0.1', resolve));
+    const { port } = server.address() as AddressInfo;
+    return {
+      url: `http://127.0.0.1:${String(port)}/.well-known/jwks.json`,
+      close: () =>
+        new Promise((resolve) => {
+          server.closeAllConnections();
+          server.close(resolve);
+        }),
+    };
+  }
+
+  it('reads the keys a server sends', async () => {
+    const keys = { keys: [{ kty: 'EC', kid: 'k1' }] };
+    const server = await serve((response) => {
+      response.writeHead(200, { 'Content-Type': 'application/json' });
+      response.end(JSON.stringify(keys));
+    });
+    try {
+      await expect(jwksFromUrl(server.url)()).resolves.toEqual(keys);
+    } finally {
+      await server.close();
+    }
+  });
+
+  it('fails on an answer that is not a success', async () => {
+    const server = await serve((response) => {
+      response.writeHead(503, { 'Content-Type': 'application/json' });
+      response.end('{"error":"down"}');
+    });
+    try {
+      await expect(jwksFromUrl(server.url)()).rejects.toThrow('JWKS answered 503');
+    } finally {
+      await server.close();
+    }
+  });
+
+  it('gives up after 2 s when the server does not answer', async () => {
+    const server = await serve('hang');
+    const started = performance.now();
+    try {
+      await expect(jwksFromUrl(server.url)()).rejects.toThrow();
+      expect(performance.now() - started).toBeGreaterThanOrEqual(1_900);
+      expect(performance.now() - started).toBeLessThan(4_000);
+    } finally {
+      await server.close();
+    }
   });
 });
 
