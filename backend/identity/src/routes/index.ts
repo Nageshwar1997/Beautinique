@@ -2,13 +2,16 @@ import { AppError, mountRoute } from '@beautinique/backend-server-kit';
 import {
   type AppId,
   APPS,
+  confirmAuthenticator,
   confirmTotpEnroll,
   createInvitation,
   createRole,
+  disableAuthenticator,
   endGrant,
   endOtherSessions,
   endSession,
   endUserSessions,
+  enrollAuthenticator,
   getMe,
   giveGrant,
   HEADERS,
@@ -19,6 +22,7 @@ import {
   loginRecovery,
   loginTotp,
   logout,
+  newRecoveryCodes,
   passwordLogin,
   refreshCookieName,
   refreshSession,
@@ -37,6 +41,7 @@ import {
 } from '@beautinique/shared-contracts';
 import { type Request, Router } from 'express';
 
+import * as authenticator from '../authenticator.ts';
 import {
   clearSessionCookies,
   cookieOf,
@@ -267,13 +272,31 @@ export function routesOf(deps: OtpDeps): Router {
     const stepped = await login.stepUpWithTotp(deps, {
       userId: passport.userId,
       sessionId: passport.sessionId,
-      code: body.code,
+      proof: body,
     });
     setAccessCookie(res, stepped.app, stepped.accessToken);
     return {
       stepUpUntil: new Date(stepped.stepUpAt.getTime() + STEP_UP_SECONDS * 1000).toISOString(),
+      recoveryCodesLeft: stepped.recoveryCodesLeft,
     };
   });
+
+  // the authenticator from the account's own settings (ARCHITECTURE §9.2)
+  mountRoute(router, enrollAuthenticator, async (_input, { req }) =>
+    authenticator.enrollAuthenticator(deps, await deps.passport(req)),
+  );
+
+  mountRoute(router, confirmAuthenticator, async ({ body }, { req, requestId }) =>
+    authenticator.confirmAuthenticator(deps, await deps.passport(req), { ...body, requestId }),
+  );
+
+  mountRoute(router, newRecoveryCodes, async (_input, { req, requestId }) =>
+    authenticator.renewRecoveryCodes(deps, await deps.passport(req), requestId),
+  );
+
+  mountRoute(router, disableAuthenticator, async (_input, { req, requestId }) =>
+    authenticator.disableAuthenticator(deps, await deps.passport(req), requestId),
+  );
 
   mountRoute(router, resetAuthenticator, async ({ params }, { req, requestId }) =>
     security.resetAuthenticator(deps, await deps.passport(req), params.userId, requestId),

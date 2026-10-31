@@ -1812,6 +1812,18 @@
                             },
                             "authenticator": {
                               "type": "boolean"
+                            },
+                            "recoveryCodesLeft": {
+                              "anyOf": [
+                                {
+                                  "type": "integer",
+                                  "minimum": 0,
+                                  "maximum": 9007199254740991
+                                },
+                                {
+                                  "type": "null"
+                                }
+                              ]
                             }
                           },
                           "required": [
@@ -1820,7 +1832,8 @@
                             "ageDeclaredAt",
                             "signUpApp",
                             "providers",
-                            "authenticator"
+                            "authenticator",
+                            "recoveryCodesLeft"
                           ],
                           "additionalProperties": false
                         },
@@ -2254,6 +2267,413 @@
           "rateLimit": "auth",
           "idempotency": false,
           "stepUp": false,
+          "owner": "identity",
+          "cache": null
+        }
+      }
+    },
+    "/auth/authenticator/enroll": {
+      "post": {
+        "operationId": "auth.authenticator.enroll",
+        "summary": "Start setting up (or replacing) the authenticator",
+        "tags": [
+          "auth"
+        ],
+        "parameters": [
+          {
+            "name": "X-BQ-App",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "customer",
+                "seller",
+                "admin",
+                "superadmin",
+                "master",
+                "support",
+                "finance",
+                "logistics",
+                "delivery",
+                "growth",
+                "creator"
+              ]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "secret": {
+                          "type": "string"
+                        },
+                        "uri": {
+                          "type": "string"
+                        }
+                      },
+                      "required": [
+                        "secret",
+                        "uri"
+                      ],
+                      "additionalProperties": false
+                    }
+                  },
+                  "required": [
+                    "data"
+                  ]
+                }
+              }
+            }
+          },
+          "default": {
+            "$ref": "#/components/responses/Error"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "x-bq": {
+          "apps": [
+            "customer",
+            "seller",
+            "admin",
+            "superadmin",
+            "master",
+            "support",
+            "finance",
+            "logistics",
+            "delivery",
+            "growth",
+            "creator"
+          ],
+          "access": {
+            "type": "signed-in"
+          },
+          "rateLimit": "auth",
+          "idempotency": false,
+          "stepUp": false,
+          "owner": "identity",
+          "cache": null
+        }
+      }
+    },
+    "/auth/authenticator/confirm": {
+      "post": {
+        "operationId": "auth.authenticator.confirm",
+        "summary": "Finish setting up the authenticator and get the recovery codes",
+        "tags": [
+          "auth"
+        ],
+        "parameters": [
+          {
+            "name": "X-BQ-App",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "customer",
+                "seller",
+                "admin",
+                "superadmin",
+                "master",
+                "support",
+                "finance",
+                "logistics",
+                "delivery",
+                "growth",
+                "creator"
+              ]
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "code": {
+                    "type": "string",
+                    "pattern": "^\\d{6}$"
+                  },
+                  "password": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 128
+                  }
+                },
+                "required": [
+                  "code",
+                  "password"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "recoveryCodes": {
+                          "minItems": 10,
+                          "maxItems": 10,
+                          "type": "array",
+                          "items": {
+                            "type": "string"
+                          }
+                        }
+                      },
+                      "required": [
+                        "recoveryCodes"
+                      ],
+                      "additionalProperties": false
+                    }
+                  },
+                  "required": [
+                    "data"
+                  ]
+                }
+              }
+            }
+          },
+          "default": {
+            "$ref": "#/components/responses/Error"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "x-bq": {
+          "apps": [
+            "customer",
+            "seller",
+            "admin",
+            "superadmin",
+            "master",
+            "support",
+            "finance",
+            "logistics",
+            "delivery",
+            "growth",
+            "creator"
+          ],
+          "access": {
+            "type": "signed-in"
+          },
+          "rateLimit": "auth",
+          "idempotency": false,
+          "stepUp": false,
+          "owner": "identity",
+          "cache": null
+        }
+      }
+    },
+    "/auth/authenticator/recovery-codes": {
+      "post": {
+        "operationId": "auth.authenticator.recoveryCodes",
+        "summary": "Get 10 new recovery codes",
+        "tags": [
+          "auth"
+        ],
+        "parameters": [
+          {
+            "name": "X-BQ-App",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "customer",
+                "seller",
+                "admin",
+                "superadmin",
+                "master",
+                "support",
+                "finance",
+                "logistics",
+                "delivery",
+                "growth",
+                "creator"
+              ]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "recoveryCodes": {
+                          "minItems": 10,
+                          "maxItems": 10,
+                          "type": "array",
+                          "items": {
+                            "type": "string"
+                          }
+                        }
+                      },
+                      "required": [
+                        "recoveryCodes"
+                      ],
+                      "additionalProperties": false
+                    }
+                  },
+                  "required": [
+                    "data"
+                  ]
+                }
+              }
+            }
+          },
+          "default": {
+            "$ref": "#/components/responses/Error"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "x-bq": {
+          "apps": [
+            "customer",
+            "seller",
+            "admin",
+            "superadmin",
+            "master",
+            "support",
+            "finance",
+            "logistics",
+            "delivery",
+            "growth",
+            "creator"
+          ],
+          "access": {
+            "type": "signed-in"
+          },
+          "rateLimit": "auth",
+          "idempotency": false,
+          "stepUp": true,
+          "owner": "identity",
+          "cache": null
+        }
+      }
+    },
+    "/auth/authenticator": {
+      "delete": {
+        "operationId": "auth.authenticator.disable",
+        "summary": "Turn the authenticator off",
+        "tags": [
+          "auth"
+        ],
+        "parameters": [
+          {
+            "name": "X-BQ-App",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "customer",
+                "seller",
+                "admin",
+                "superadmin",
+                "master",
+                "support",
+                "finance",
+                "logistics",
+                "delivery",
+                "growth",
+                "creator"
+              ]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "disabled": {
+                          "type": "boolean"
+                        }
+                      },
+                      "required": [
+                        "disabled"
+                      ],
+                      "additionalProperties": false
+                    }
+                  },
+                  "required": [
+                    "data"
+                  ]
+                }
+              }
+            }
+          },
+          "default": {
+            "$ref": "#/components/responses/Error"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "x-bq": {
+          "apps": [
+            "customer",
+            "seller",
+            "admin",
+            "superadmin",
+            "master",
+            "support",
+            "finance",
+            "logistics",
+            "delivery",
+            "growth",
+            "creator"
+          ],
+          "access": {
+            "type": "signed-in"
+          },
+          "rateLimit": "auth",
+          "idempotency": false,
+          "stepUp": true,
           "owner": "identity",
           "cache": null
         }
@@ -4939,15 +5359,31 @@
           "content": {
             "application/json": {
               "schema": {
-                "type": "object",
-                "properties": {
-                  "code": {
-                    "type": "string",
-                    "pattern": "^\\d{6}$"
+                "oneOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "code": {
+                        "type": "string",
+                        "pattern": "^\\d{6}$"
+                      }
+                    },
+                    "required": [
+                      "code"
+                    ]
+                  },
+                  {
+                    "type": "object",
+                    "properties": {
+                      "recoveryCode": {
+                        "type": "string",
+                        "pattern": "^[A-Z2-7]{5}-?[A-Z2-7]{5}$"
+                      }
+                    },
+                    "required": [
+                      "recoveryCode"
+                    ]
                   }
-                },
-                "required": [
-                  "code"
                 ]
               }
             }
@@ -4968,10 +5404,23 @@
                           "type": "string",
                           "format": "date-time",
                           "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
+                        },
+                        "recoveryCodesLeft": {
+                          "anyOf": [
+                            {
+                              "type": "integer",
+                              "minimum": 0,
+                              "maximum": 9007199254740991
+                            },
+                            {
+                              "type": "null"
+                            }
+                          ]
                         }
                       },
                       "required": [
-                        "stepUpUntil"
+                        "stepUpUntil",
+                        "recoveryCodesLeft"
                       ],
                       "additionalProperties": false
                     }

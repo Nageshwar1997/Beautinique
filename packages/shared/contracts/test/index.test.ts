@@ -145,7 +145,7 @@ describe('routes', () => {
       [{ owner: 'billing' as RouteDefinition['owner'] }, 'unknown owner'],
       [{ rateLimit: 'fast' as RouteDefinition['rateLimit'] }, 'unknown rate-limit class'],
       [{ access: { type: 'permission', permission: 'Seller.Update' } }, 'is not a permission key'],
-      [{ stepUp: true }, 'step-up needs a permission route'],
+      [{ stepUp: true, access: { type: 'public' } }, 'step-up needs a signed-in route'],
       [{ idempotency: true }, 'GET routes cannot need an Idempotency-Key'],
       [{ input: { body: object({}) } }, 'GET routes cannot have a body'],
       [{ method: 'DELETE', input: { body: object({}) } }, 'DELETE routes cannot have a body'],
@@ -182,6 +182,8 @@ describe('routes', () => {
       expect(() => defineRoute({ ...base(), ...change }), JSON.stringify(change)).toThrow(message);
     }
     expect(() => defineRoute(base())).not.toThrow();
+    // a step-up on one's own account: signed in, no permission key (ARCHITECTURE §9.2)
+    expect(() => defineRoute({ ...base(), stepUp: true })).not.toThrow();
     for (const cache of [
       { sMaxAge: 1, staleWhileRevalidate: 0 },
       { sMaxAge: MAX_S_MAX_AGE, staleWhileRevalidate: MAX_STALE_WHILE_REVALIDATE },

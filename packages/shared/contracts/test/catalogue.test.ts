@@ -5,10 +5,15 @@ import {
   accessCookieName,
   APPS,
   AUTH_PROVIDERS,
+  AUTHENTICATOR_CHANGES,
+  authenticatorChanged,
+  confirmAuthenticator,
   confirmTotpEnroll,
   consentProblems,
+  disableAuthenticator,
   endOtherSessions,
   endSession,
+  enrollAuthenticator,
   events,
   getMe,
   getPing,
@@ -20,6 +25,7 @@ import {
   loginRecovery,
   loginTotp,
   logout,
+  newRecoveryCodes,
   OTP_PURPOSES,
   otpRequested,
   otpSealContext,
@@ -44,6 +50,7 @@ import {
   sessionReuseDetected,
   SIGN_UP_APPS,
   startTotpEnroll,
+  stepUp,
   TOKEN_ISSUER,
   tokenAudience,
   TOTP_REQUIRED_APPS,
@@ -75,6 +82,10 @@ describe('platform catalogue (Milestone 1 sample)', () => {
       'auth.sessions.list',
       'auth.sessions.end',
       'auth.sessions.endOthers',
+      'auth.authenticator.enroll',
+      'auth.authenticator.confirm',
+      'auth.authenticator.recoveryCodes',
+      'auth.authenticator.disable',
       'iam.roles.list',
       'iam.roles.create',
       'iam.roles.update',
@@ -310,6 +321,85 @@ describe('sessions', () => {
       expect(`/api/v1${route.path}`.startsWith(REFRESH_COOKIE_PATH)).toBe(true);
     }
     expect(events.latest('identity.session.reuseDetected')).toBe(sessionReuseDetected);
+  });
+});
+
+describe('the signed-in authenticator (ARCHITECTURE §9.2)', () => {
+  const all = [enrollAuthenticator, confirmAuthenticator, newRecoveryCodes, disableAuthenticator];
+
+  it('are signed-in identity routes in every app; new codes and turning off need a step-up', () => {
+    for (const route of all) {
+      expect(route, route.id).toMatchObject({
+        access: { type: 'signed-in' },
+        owner: 'identity',
+        rateLimit: 'auth',
+        idempotency: false,
+        apps: APPS,
+      });
+    }
+    expect(all.map((route) => route.stepUp)).toEqual([false, false, true, true]);
+    expect(disableAuthenticator.method).toBe('DELETE');
+    expect(IDENTITY_ERROR_CODES).toMatchObject({
+      AUTHENTICATOR_EXISTS: 409,
+      AUTHENTICATOR_SETUP_EXPIRED: 400,
+      AUTHENTICATOR_REQUIRED_BY_ROLE: 409,
+      PASSWORD_REQUIRED: 400,
+      PASSWORD_INVALID: 400,
+    });
+  });
+
+  it('confirm with a six-digit code and the account’s password, for 10 recovery codes', () => {
+    const body = confirmAuthenticator.input.body;
+    expect(body.safeParse({ code: '482913', password: 'old' }).success).toBe(true);
+    expect(body.safeParse({ code: '482913' }).success).toBe(false);
+    expect(body.safeParse({ code: '48291', password: 'old' }).success).toBe(false);
+    expect(body.safeParse({ code: '482913', password: 'x'.repeat(129) }).success).toBe(false);
+    const ten = Array.from({ length: 10 }, () => 'ABCDE-FGH23');
+    for (const route of [confirmAuthenticator, newRecoveryCodes]) {
+      expect(route.output.safeParse({ recoveryCodes: ten }).success).toBe(true);
+      expect(route.output.safeParse({ recoveryCodes: ten.slice(1) }).success).toBe(false);
+    }
+  });
+
+  it('step up with an authenticator code or a recovery code, never both or neither', () => {
+    const body = stepUp.input.body;
+    expect(body.safeParse({ code: '482913' }).success).toBe(true);
+    expect(body.parse({ recoveryCode: 'abcde-fgh23' })).toEqual({ recoveryCode: 'ABCDE-FGH23' });
+    expect(body.safeParse({}).success).toBe(false);
+    expect(body.safeParse({ code: '482913', recoveryCode: 'ABCDE-FGH23' }).success).toBe(false);
+    expect(body.safeParse({ recoveryCode: '482913' }).success).toBe(false);
+    expect(stepUp.access).toEqual({ type: 'signed-in' });
+  });
+
+  it('count the recovery codes left in /iam/me (null without an authenticator)', () => {
+    const user = getMe.output.shape.user;
+    const me = {
+      userId: id,
+      email: 'a@b.example',
+      ageDeclaredAt: null,
+      signUpApp: 'customer',
+      providers: ['password'],
+      authenticator: true,
+    };
+    expect(user.safeParse({ ...me, recoveryCodesLeft: 3 }).success).toBe(true);
+    expect(user.safeParse({ ...me, authenticator: false, recoveryCodesLeft: null }).success).toBe(
+      true,
+    );
+    expect(user.safeParse({ ...me, recoveryCodesLeft: -1 }).success).toBe(false);
+    expect(user.safeParse(me).success).toBe(false);
+  });
+
+  it('tell the person of every change by a security event with no secret in it', () => {
+    expect(events.latest('identity.authenticator.changed')).toBe(authenticatorChanged);
+    expect(AUTHENTICATOR_CHANGES).toEqual(['enabled', 'replaced', 'recovery-codes', 'disabled']);
+    expect(Object.keys(authenticatorChanged.data.shape).sort()).toEqual([
+      'app',
+      'change',
+      'changedAt',
+      'device',
+      'email',
+      'userId',
+    ]);
   });
 });
 

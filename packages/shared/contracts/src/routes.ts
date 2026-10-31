@@ -54,7 +54,7 @@ export interface RouteDefinition {
   rateLimit: RateLimitClass;
   /** The client must send an Idempotency-Key (never on GET). */
   idempotency: boolean;
-  /** Needs a recent MFA step-up (only for permission routes). */
+  /** Needs a recent MFA step-up (signed-in and permission routes; ARCHITECTURE §9.2). */
   stepUp: boolean;
   owner: Deployable;
   /** CDN caching (public GET routes only); left out = never cached */
@@ -107,7 +107,7 @@ export function defineRoute<const Route extends RouteDefinition>(route: Route): 
   if (route.access.type === 'permission' && !isPermissionKey(route.access.permission)) {
     fail(`"${route.access.permission}" is not a permission key`);
   }
-  if (route.stepUp && route.access.type !== 'permission') fail('step-up needs a permission route');
+  if (route.stepUp && route.access.type === 'public') fail('step-up needs a signed-in route');
   if (route.idempotency && route.method === 'GET')
     fail('GET routes cannot need an Idempotency-Key');
   if (route.input.body && (route.method === 'GET' || route.method === 'DELETE')) {

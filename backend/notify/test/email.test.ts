@@ -11,6 +11,7 @@ import { brevoSender } from '../src/email/brevo.ts';
 import { mailpitSender } from '../src/email/mailpit.ts';
 import { type EmailMessage, EmailSendError } from '../src/email/port.ts';
 import {
+  authenticatorChangedEmail,
   authenticatorResetEmail,
   invitationEmail,
   otpEmail,
@@ -284,6 +285,42 @@ describe('the authenticator-reset email', () => {
     expect(email.text).toContain('signed out everywhere');
     expect(email.text).toContain('"Forgot password"');
     expect(email.tags).toEqual(['security-authenticator-reset']);
+  });
+});
+
+describe('the authenticator-changed email', () => {
+  const input = {
+    to: 'riya@beautinique.example',
+    app: 'customer' as const,
+    device: 'Chrome on Windows',
+    changedAt: '2026-10-31T09:30:00.000Z',
+  };
+
+  it('says what changed, where and when (IST), and the way out if it was not the person', () => {
+    const email = authenticatorChangedEmail({ ...input, change: 'enabled' });
+    expect(email.subject).toBe('An authenticator was set up for your Beautinique account');
+    expect(email.text).toContain('in Beautinique (Chrome on Windows) on 31 Oct 2026, 3:00 pm IST');
+    expect(email.text).toContain('every sign-in asks for its code');
+    expect(email.text).toContain('"Forgot password"');
+    expect(email.text).toContain('signs you out everywhere');
+    expect(email.tags).toEqual(['security-authenticator-enabled']);
+  });
+
+  it('has its own words for each change, and escapes what it shows in the HTML', () => {
+    const subjects = (['enabled', 'replaced', 'recovery-codes', 'disabled'] as const).map(
+      (change) => authenticatorChangedEmail({ ...input, change }).subject,
+    );
+    expect(new Set(subjects).size).toBe(4);
+    const off = authenticatorChangedEmail({ ...input, app: 'seller', change: 'disabled' });
+    expect(off.subject).toBe('Your Beautinique authenticator was turned off');
+    expect(off.text).toContain('in Beautinique Seller');
+    expect(off.text).toContain('only for your password');
+    expect(authenticatorChangedEmail({ ...input, change: 'recovery-codes' }).text).toContain(
+      'The old ones no longer work.',
+    );
+    const odd = authenticatorChangedEmail({ ...input, device: '<b>x</b>', change: 'replaced' });
+    expect(odd.html).not.toContain('<b>x</b>');
+    expect(odd.html).toContain('&#60;b&#62;x');
   });
 });
 

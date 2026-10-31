@@ -61,6 +61,10 @@ describe('generateFiles', () => {
       '/auth/sessions',
       '/auth/sessions/{sessionId}',
       '/auth/sessions/end-others',
+      '/auth/authenticator/enroll',
+      '/auth/authenticator/confirm',
+      '/auth/authenticator/recovery-codes',
+      '/auth/authenticator',
       '/iam/roles',
       '/iam/roles/{roleKey}',
       '/iam/grants',
@@ -87,13 +91,16 @@ describe('generateFiles', () => {
       }
     ).events;
     expect(list.map((e) => [e.type, e.version])).toEqual([
+      ['identity.authenticator.changed', 1],
       ['identity.authenticator.reset', 1],
       ['identity.invitation.created', 1],
       ['identity.otp.requested', 1],
       ['identity.session.reuseDetected', 1],
       ['platform.ping.recorded', 1],
     ]);
-    expect(list[4]?.schema.required).toEqual(expect.arrayContaining(['eventId', 'data', 'scope']));
+    expect(list.at(-1)?.schema.required).toEqual(
+      expect.arrayContaining(['eventId', 'data', 'scope']),
+    );
   });
 
   it('lists permissions sorted by key', () => {

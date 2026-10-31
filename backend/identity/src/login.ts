@@ -28,6 +28,7 @@ import {
   signInUnavailable,
   stepUpCodeInvalid,
   stepUpLocked,
+  stepUpRecoveryInvalid,
   totpInvalid,
 } from './errors.ts';
 import { clearFailures, isLocked, recordFailure } from './lockout.ts';
@@ -44,7 +45,7 @@ export const ENROLL_TTL_MS = 10 * 60_000;
 export const LOGIN_MAX_TRIES = 5;
 export const RECOVERY_CODE_COUNT = 10;
 /** The name an authenticator app shows: one authenticator for the account, every app. */
-const TOTP_ISSUER = 'Beautinique';
+export const TOTP_ISSUER = 'Beautinique';
 
 export const loginKey = (loginId: string): string => `bq:id:login:${loginId}`;
 
@@ -67,7 +68,7 @@ export type LoginStep =
   | { next: 'totp' | 'totp-enroll'; loginId: string; session?: undefined }
   | { next: 'signed-in'; user: { userId: string; email: string }; session: IssuedSession };
 
-async function inRedis<T>(work: () => Promise<T>): Promise<T> {
+export async function inRedis<T>(work: () => Promise<T>): Promise<T> {
   try {
     return await work();
   } catch (error) {
@@ -150,11 +151,15 @@ export async function passwordLogin(
   return { next: 'signed-in', ...(await signIn(deps, who, ['password'], client)) };
 }
 
-/** One more try on a sign-in that is still there: -1 when it is gone (never makes a key). */
+/** One more try on a step that is still there: -1 when it is gone (never makes a key). */
 const TRY = `
 if redis.call('EXISTS', KEYS[1]) == 0 then return -1 end
 return redis.call('HINCRBY', KEYS[1], 'attempts', 1)
 `;
+
+/** Counts one more try at the Redis hash `key` (its `attempts`): -1 when it is gone. */
+export const oneMoreTry = async (deps: LoginDeps, key: string): Promise<number> =>
+  Number(await inRedis(() => deps.redis.eval(TRY, 1, key)));
 
 /**
  * The sign-in at its second step, with one more try counted: gone, finished, from another app, at
@@ -174,7 +179,7 @@ async function loginAt(
   ) {
     throw loginExpired();
   }
-  const tries = Number(await inRedis(() => deps.redis.eval(TRY, 1, key)));
+  const tries = await oneMoreTry(deps, key);
   if (tries === -1) throw loginExpired();
   if (tries > LOGIN_MAX_TRIES || (await isLocked(deps.redis, deps.keys, login.email))) {
     await inRedis(() => deps.redis.del(key));
@@ -234,6 +239,25 @@ export async function loginWithTotp(
 const recoveryHash = (deps: LoginDeps, userId: string, code: string): string =>
   blindIndex(deps.keys, `recovery:${userId}`, code.replace('-', ''));
 
+/** The recovery codes not used yet; null without any (no authenticator). */
+export const recoveryCodesLeft = (codes: Credentials['recoveryCodes']): number | null =>
+  codes === undefined ? null : codes.filter((c) => c.usedAt === null).length;
+
+/** Spends one recovery code of the account: how many are left, or null when it is wrong or used. */
+async function useRecoveryCode(
+  deps: LoginDeps,
+  userId: string,
+  code: string,
+): Promise<number | null> {
+  const hash = recoveryHash(deps, userId, code);
+  const used = await credentialsOf(deps).findOneAndUpdate(
+    { _id: userId, recoveryCodes: { $elemMatch: { hash, usedAt: null } } },
+    { $set: { 'recoveryCodes.$.usedAt': new Date() } },
+    { returnDocument: 'after', projection: { recoveryCodes: 1 } },
+  );
+  return used ? (recoveryCodesLeft(used.recoveryCodes) ?? 0) : null;
+}
+
 /** POST /auth/login/:loginId/recovery: one of the 10 codes, each works once. */
 export async function loginWithRecoveryCode(
   deps: LoginDeps,
@@ -244,20 +268,14 @@ export async function loginWithRecoveryCode(
   recoveryCodesLeft: number;
 }> {
   const { login, tries } = await loginAt(deps, { app, loginId, stage: 'totp' });
-  const hash = recoveryHash(deps, login.userId, code);
-  const used = await credentialsOf(deps).findOneAndUpdate(
-    { _id: login.userId, recoveryCodes: { $elemMatch: { hash, usedAt: null } } },
-    { $set: { 'recoveryCodes.$.usedAt': new Date() } },
-    { returnDocument: 'after', projection: { recoveryCodes: 1 } },
-  );
-  if (!used) return wrongTry(deps, loginId, login, tries, recoveryCodeInvalid);
+  const left = await useRecoveryCode(deps, login.userId, code);
+  if (left === null) return wrongTry(deps, loginId, login, tries, recoveryCodeInvalid);
   await finish(deps, loginId);
   await clearFailures(deps.redis, deps.keys, login.email);
   deps.logger.info({ userId: login.userId, app }, 'signed in with a recovery code');
-  const recoveryCodesLeft = (used.recoveryCodes ?? []).filter((c) => c.usedAt === null).length;
   return {
     ...(await signIn(deps, login, ['password', 'recovery-code'], client)),
-    recoveryCodesLeft,
+    recoveryCodesLeft: left,
   };
 }
 
@@ -279,12 +297,23 @@ export async function startTotpEnroll(
   return { secret, uri: totpUri({ secret, issuer: TOTP_ISSUER, account: login.email }) };
 }
 
-/** 10 codes like `ABCDE-FGH23`: 50 random bits each. */
-const newRecoveryCodes = (): string[] =>
-  Array.from({ length: RECOVERY_CODE_COUNT }, () => {
+/**
+ * 10 new codes like `ABCDE-FGH23` (50 random bits each), shown once, and what is stored of them:
+ * their keyed hashes only.
+ */
+export function newRecoveryCodes(
+  deps: LoginDeps,
+  userId: string,
+): { codes: string[]; stored: NonNullable<Credentials['recoveryCodes']> } {
+  const codes = Array.from({ length: RECOVERY_CODE_COUNT }, () => {
     const code = encodeBase32(randomBytes(7)).slice(0, 10);
     return `${code.slice(0, 5)}-${code.slice(5)}`;
   });
+  return {
+    codes,
+    stored: codes.map((c) => ({ hash: recoveryHash(deps, userId, c), usedAt: null })),
+  };
+}
 
 /**
  * POST /auth/login/:loginId/totp/confirm: the first right code saves the authenticator (sealed
@@ -306,7 +335,7 @@ export async function confirmTotpEnroll(
   if (step === null) return wrongTry(deps, loginId, login, tries, totpInvalid);
   await finish(deps, loginId);
   const now = new Date();
-  const recoveryCodes = newRecoveryCodes();
+  const recovery = newRecoveryCodes(deps, login.userId);
   const saved = await credentialsOf(deps).updateOne(
     // never over an authenticator set up meanwhile (another sign-in)
     { _id: login.userId, totp: { $exists: false } },
@@ -317,10 +346,7 @@ export async function confirmTotpEnroll(
           enrolledAt: now,
           lastStep: step,
         },
-        recoveryCodes: recoveryCodes.map((c) => ({
-          hash: recoveryHash(deps, login.userId, c),
-          usedAt: null,
-        })),
+        recoveryCodes: recovery.stored,
         updatedAt: now,
       },
     },
@@ -328,19 +354,31 @@ export async function confirmTotpEnroll(
   if (saved.modifiedCount !== 1) throw loginExpired();
   await clearFailures(deps.redis, deps.keys, login.email);
   deps.logger.info({ userId: login.userId, app }, 'authenticator set up');
-  return { ...(await signIn(deps, login, ['password', 'totp'], client)), recoveryCodes };
+  return {
+    ...(await signIn(deps, login, ['password', 'totp'], client)),
+    recoveryCodes: recovery.codes,
+  };
 }
 
+/** A step-up's proof: the authenticator code, or (a lost phone) one recovery code. */
+export type StepUpProof = { code: string } | { recoveryCode: string };
+
 /**
- * POST /auth/step-up (ARCHITECTURE §7.1): the authenticator code again, for a high-risk action in
- * the next STEP_UP_SECONDS. A wrong code counts toward the account's lock like a sign-in, a locked
- * account is refused, and a code used before never works again. An account without an
- * authenticator: AUTHENTICATOR_REQUIRED.
+ * POST /auth/step-up (ARCHITECTURE §7.1, §9.2): the authenticator code again, or one recovery
+ * code (spent), for a high-risk action in the next STEP_UP_SECONDS. A wrong one counts toward the
+ * account's lock like a sign-in, a locked account is refused, and a code used before never works
+ * again. An account without an authenticator: AUTHENTICATOR_REQUIRED.
  */
 export async function stepUpWithTotp(
   deps: LoginDeps,
-  { userId, sessionId, code }: { userId: string; sessionId: string; code: string },
-): Promise<{ app: AppId; accessToken: string; stepUpAt: Date }> {
+  { userId, sessionId, proof }: { userId: string; sessionId: string; proof: StepUpProof },
+): Promise<{
+  app: AppId;
+  accessToken: string;
+  stepUpAt: Date;
+  /** After a recovery code: how many are left */
+  recoveryCodesLeft: number | null;
+}> {
   const user = await deps.mongo.db
     .collection<User>(USERS)
     .findOne({ _id: userId }, { projection: { email: 1 } });
@@ -348,20 +386,28 @@ export async function stepUpWithTotp(
   const credentials = await credentialsOf(deps).findOne({ _id: userId });
   if (!credentials?.totp) throw authenticatorRequired();
   if (await isLocked(deps.redis, deps.keys, user.email)) throw stepUpLocked();
-  const secret = decryptField(deps.keys, credentials.totp.secret, totpContext(userId));
-  const step = verifyTotp(secret, code);
-  const fresh =
-    step !== null &&
-    (
-      await credentialsOf(deps).updateOne(
-        { _id: userId, 'totp.lastStep': { $lt: step } },
-        { $set: { 'totp.lastStep': step } },
-      )
-    ).modifiedCount === 1;
-  if (!fresh) {
+  let left: number | null = null;
+  let right: boolean;
+  if ('recoveryCode' in proof) {
+    left = await useRecoveryCode(deps, userId, proof.recoveryCode);
+    right = left !== null;
+  } else {
+    const secret = decryptField(deps.keys, credentials.totp.secret, totpContext(userId));
+    const step = verifyTotp(secret, proof.code);
+    right =
+      step !== null &&
+      (
+        await credentialsOf(deps).updateOne(
+          { _id: userId, 'totp.lastStep': { $lt: step } },
+          { $set: { 'totp.lastStep': step } },
+        )
+      ).modifiedCount === 1;
+  }
+  if (!right) {
     await recordFailure(deps.redis, deps.keys, user.email);
-    throw stepUpCodeInvalid();
+    throw 'recoveryCode' in proof ? stepUpRecoveryInvalid() : stepUpCodeInvalid();
   }
   await clearFailures(deps.redis, deps.keys, user.email);
-  return deps.sessions.stepUp({ userId, sessionId });
+  if (left !== null) deps.logger.info({ userId }, 'stepped up with a recovery code');
+  return { ...(await deps.sessions.stepUp({ userId, sessionId })), recoveryCodesLeft: left };
 }
