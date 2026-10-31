@@ -26,6 +26,12 @@
       "port": 5184
     },
     {
+      "name": "forms-playground",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": ["run", "playground", "--workspace", "@beautinique/frontend-forms"],
+      "port": 5185
+    },
+    {
       "name": "backend",
       "runtimeExecutable": "npm",
       "runtimeArgs": ["run", "dev:backend"],

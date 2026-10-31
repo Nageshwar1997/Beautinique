@@ -120,6 +120,34 @@ describe('Button', () => {
     expect(onClick).toHaveBeenCalledOnce();
   });
 
+  it('a loading submit button does not submit its form again, by click or by Enter', async () => {
+    const user = userEvent.setup();
+    const onSubmit = vi.fn((event: { preventDefault: () => void }) => {
+      event.preventDefault();
+    });
+    const { rerender } = render(
+      <form aria-label="Sign in" onSubmit={onSubmit}>
+        <input aria-label="Email" />
+        <Button type="submit" loading>
+          Sign in
+        </Button>
+      </form>,
+    );
+    await user.click(screen.getByRole('button', { name: 'Sign in' }));
+    await user.type(screen.getByLabelText('Email'), 'a{Enter}');
+    expect(onSubmit).not.toHaveBeenCalled();
+
+    rerender(
+      <form aria-label="Sign in" onSubmit={onSubmit}>
+        <input aria-label="Email" />
+        <Button type="submit">Sign in</Button>
+      </form>,
+    );
+    await user.click(screen.getByRole('button', { name: 'Sign in' }));
+    await user.type(screen.getByLabelText('Email'), '{Enter}');
+    expect(onSubmit).toHaveBeenCalledTimes(2);
+  });
+
   it('a loading icon-only button shows the spinner instead of its icon', () => {
     render(<Button loading icon={<Icon />} aria-label="Refresh" />);
     const button = screen.getByRole('button', { name: 'Refresh' });
