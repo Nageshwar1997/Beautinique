@@ -134,6 +134,7 @@
 - **`npm run x --flag` (bina `--`):** npm flag ko `npm_config_*` bana deta hai; CLI `--dry-run` ko maanta hai aur baaki ko child npm se hata deta hai.
 - **Docker Desktop (owner ka laptop):** install se pehle khula terminal `docker` nahi dhoondh pata; naya terminal kholo.
 - **Claude ke liye:** Bash heredoc/`node -e` me backslashes aur quotes toot jaate hain; regex aur source files Write/Edit tool se likho.
+- **Generator (`npm run create`) ke templates bhi repo ke niyam maante hain** (2026-10-31): naya ESLint niyam ya library lagao to `scripts/packages/lib/create/*-templates.ts` bhi badlo, aur template jo library use kare wo root `package.json` ki devDependencies me bhi ho (generator version wahin se leta hai; tests ki throwaway repo me sirf root manifest hota hai, warna "Could not find <lib> on npm"). `npm run test:scripts` ye pakadta hai: PR #36 ka pehla CI run isi pe fail hua (gateway template me `fetch`).
 - **Backend apps ki export condition:** TypeScript me `customConditions: ["development"]` mat lagao: TS phir libraries (jaise arethetypeswrong) ka `.ts` source padhne lagta hai. Deployables ke `exports` me `types` source pe hai, aur Node/Vitest apni condition `beautinique-source` se source lete hain.
 - **`http.request(urlString)`** URL ko pehle saaf karta hai (`..`, `%2e%2e` hat jaate hain); raw path test karna ho to `{ hostname, port, path }` do.
 - **Band server ka handle** (`process.getActiveResourcesInfo()`) Windows pe ~50 ms baad hatta hai; ginti se pehle settle hone do.

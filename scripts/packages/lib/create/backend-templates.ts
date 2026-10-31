@@ -76,7 +76,8 @@ export function backendLibraries(
     dependencies: [
       ...kit,
       'express',
-      ...(target === 'gateway' ? ['@beautinique/shared-contracts'] : []),
+      // HTTP calls only with axios (RULES §3.8); the gateway asks its owners for /health
+      ...(target === 'gateway' ? ['@beautinique/shared-contracts', 'axios'] : []),
     ],
     devDependencies: [...devDependencies, '@types/express'],
   };
@@ -136,13 +137,19 @@ const tsconfig = `{
 }
 `;
 
-const eslintConfig = `// @ts-check
+const eslintConfig = (target: BackendTarget) => `// @ts-check
 import { packageConfig } from '../../configs/eslint-config.js';
 
 export default packageConfig({
   platform: 'node',
   tsconfigRootDir: import.meta.dirname,
-  envFiles: ['src/config.ts'],
+  envFiles: ['src/config.ts'],${
+    target === 'gateway'
+      ? `
+  // the reverse proxy streams bodies both ways and cuts them off itself (RULES §3.8)
+  httpProxyFiles: ['src/proxy.ts'],`
+      : ''
+  }
 });
 `;
 
@@ -393,6 +400,7 @@ describe('${deployable}', () => {
 
 const gatewayApp = `import { createApp, type Logger } from '@beautinique/backend-server-kit';
 import { type Deployable, DEPLOYABLES } from '@beautinique/shared-contracts';
+import axios from 'axios';
 import type { Express } from 'express';
 
 import { API_PREFIX, type GatewayRoute, proxy } from './proxy.ts';
@@ -409,9 +417,11 @@ export interface GatewayAppOptions {
 /** Does the deployable's /health answer within 2 seconds? */
 async function isHealthy(origin: string): Promise<boolean> {
   try {
-    const res = await fetch(new URL('/health', origin), { signal: AbortSignal.timeout(2000) });
-    await res.arrayBuffer();
-    return res.ok;
+    const res = await axios.get(new URL('/health', origin).href, {
+      signal: AbortSignal.timeout(2000),
+      validateStatus: () => true,
+    });
+    return res.status >= 200 && res.status <= 299;
   } catch {
     return false;
   }
@@ -1192,8 +1202,8 @@ export function renderBackend(spec: BackendSpec): Map<string, string> {
   files.set('package.json', `${JSON.stringify(manifest(spec), null, 2)}\n`);
   files.set('README.md', readme(spec));
   files.set('tsconfig.json', tsconfig);
-  files.set('eslint.config.js', eslintConfig);
   const { target } = spec;
+  files.set('eslint.config.js', eslintConfig(target));
   if (target === 'bundle') {
     files.set('tsdown.config.ts', tsdownConfig(['src/start.ts']));
     files.set('vitest.config.ts', bundleVitestConfig);
