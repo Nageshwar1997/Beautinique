@@ -166,7 +166,12 @@ export function CodeInput({
       className={className}
     >
       {(control) => (
-        <div className="relative inline-flex w-fit gap-2">
+        <div
+          className="relative flex w-full gap-1 sm:gap-2"
+          // the boxes at full size (48 px) where there is room; on a small phone they share the
+          // width, and with the smaller gap stay at least 44 px (touch size) at 360 px
+          style={{ maxWidth: `calc(${String(length)} * 3rem + ${String(length - 1)} * 0.5rem)` }}
+        >
           {Array.from({ length }, (_, index) => {
             const current = focused && index === Math.min(digits.length, length - 1);
             return (
@@ -174,7 +179,7 @@ export function CodeInput({
                 key={index}
                 aria-hidden="true"
                 className={cx(
-                  'bg-surface text-foreground border-border-strong flex size-12 items-center justify-center rounded-lg border font-mono text-xl',
+                  'bg-surface text-foreground border-border-strong flex aspect-square max-w-12 min-w-0 flex-1 items-center justify-center rounded-lg border font-mono text-xl',
                   control['aria-invalid'] && 'border-error',
                   current && 'ring-focus-ring ring-2',
                   disabled && 'opacity-50',

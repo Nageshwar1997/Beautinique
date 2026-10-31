@@ -1,4 +1,4 @@
-import type { ButtonHTMLAttributes, ReactNode, Ref } from 'react';
+import type { ButtonHTMLAttributes, MouseEvent, ReactNode, Ref } from 'react';
 
 import { cx, type Tone, TONE_CLASS } from './cx';
 import { Spinner } from './spinner';
@@ -88,6 +88,10 @@ export type ButtonProps = TextButtonProps | IconButtonProps;
  * <Button variant="ghost" icon={<IconClose />} aria-label="Close" />
  * ```
  */
+const preventWhileBusy = (event: MouseEvent<HTMLButtonElement>) => {
+  event.preventDefault();
+};
+
 export function Button(props: ButtonProps) {
   const {
     variant = 'solid',
@@ -114,8 +118,9 @@ export function Button(props: ButtonProps) {
       type={type}
       disabled={disabled}
       aria-busy={loading || undefined}
-      // a busy button keeps its focus and its place in the tab order, but does nothing
-      onClick={loading ? undefined : onClick}
+      // a busy button keeps its focus and its place in the tab order, but does nothing: not even
+      // the browser's own action, so a busy submit button (or Enter in its form) does not submit again
+      onClick={loading ? preventWhileBusy : onClick}
       className={cx(
         'inline-flex shrink-0 cursor-pointer items-center justify-center rounded-full font-medium whitespace-nowrap transition-[background-color,filter,color] select-none',
         'disabled:cursor-not-allowed disabled:opacity-50 aria-busy:cursor-progress',
