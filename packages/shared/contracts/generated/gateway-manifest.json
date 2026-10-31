@@ -455,6 +455,110 @@
       "cache": null
     },
     {
+      "id": "auth.authenticator.enroll",
+      "method": "POST",
+      "path": "/auth/authenticator/enroll",
+      "owner": "identity",
+      "apps": [
+        "customer",
+        "seller",
+        "admin",
+        "superadmin",
+        "master",
+        "support",
+        "finance",
+        "logistics",
+        "delivery",
+        "growth",
+        "creator"
+      ],
+      "access": {
+        "type": "signed-in"
+      },
+      "rateLimit": "auth",
+      "idempotency": false,
+      "stepUp": false,
+      "cache": null
+    },
+    {
+      "id": "auth.authenticator.confirm",
+      "method": "POST",
+      "path": "/auth/authenticator/confirm",
+      "owner": "identity",
+      "apps": [
+        "customer",
+        "seller",
+        "admin",
+        "superadmin",
+        "master",
+        "support",
+        "finance",
+        "logistics",
+        "delivery",
+        "growth",
+        "creator"
+      ],
+      "access": {
+        "type": "signed-in"
+      },
+      "rateLimit": "auth",
+      "idempotency": false,
+      "stepUp": false,
+      "cache": null
+    },
+    {
+      "id": "auth.authenticator.recoveryCodes",
+      "method": "POST",
+      "path": "/auth/authenticator/recovery-codes",
+      "owner": "identity",
+      "apps": [
+        "customer",
+        "seller",
+        "admin",
+        "superadmin",
+        "master",
+        "support",
+        "finance",
+        "logistics",
+        "delivery",
+        "growth",
+        "creator"
+      ],
+      "access": {
+        "type": "signed-in"
+      },
+      "rateLimit": "auth",
+      "idempotency": false,
+      "stepUp": true,
+      "cache": null
+    },
+    {
+      "id": "auth.authenticator.disable",
+      "method": "DELETE",
+      "path": "/auth/authenticator",
+      "owner": "identity",
+      "apps": [
+        "customer",
+        "seller",
+        "admin",
+        "superadmin",
+        "master",
+        "support",
+        "finance",
+        "logistics",
+        "delivery",
+        "growth",
+        "creator"
+      ],
+      "access": {
+        "type": "signed-in"
+      },
+      "rateLimit": "auth",
+      "idempotency": false,
+      "stepUp": true,
+      "cache": null
+    },
+    {
       "id": "iam.roles.list",
       "method": "GET",
       "path": "/iam/roles",

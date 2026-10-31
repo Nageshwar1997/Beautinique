@@ -283,8 +283,24 @@ const mutations: Mutation[] = [
   {
     file: 'catalogue/identity',
     name: 'any number of recovery codes',
-    change: [['recoveryCodes: array(string()).length(10)', 'recoveryCodes: array(string())']],
+    change: [
+      [
+        'output: object({ user: signedInZod, recoveryCodes: array(string()).length(10) }),',
+        'output: object({ user: signedInZod, recoveryCodes: array(string()) }),',
+      ],
+    ],
     tests: 'recovery code',
+  },
+  {
+    file: 'catalogue/identity',
+    name: 'any number of new recovery codes',
+    change: [
+      [
+        "  summary: 'Get 10 new recovery codes',\n  apps: APPS,\n  access: { type: 'signed-in' },\n  rateLimit: 'auth',\n  idempotency: false,\n  stepUp: true,\n  owner: 'identity',\n  input: {},\n  output: object({ recoveryCodes: array(string()).length(10) }),",
+        "  summary: 'Get 10 new recovery codes',\n  apps: APPS,\n  access: { type: 'signed-in' },\n  rateLimit: 'auth',\n  idempotency: false,\n  stepUp: true,\n  owner: 'identity',\n  input: {},\n  output: object({ recoveryCodes: array(string()) }),",
+      ],
+    ],
+    tests: 'account’s password',
   },
   {
     file: 'catalogue/identity',
@@ -330,6 +346,57 @@ const mutations: Mutation[] = [
       ],
     ],
     tests: 'need a session',
+  },
+  // the signed-in authenticator (ARCHITECTURE §9.2)
+  {
+    file: 'routes',
+    name: 'a public route may ask a step-up',
+    change: [["if (route.stepUp && route.access.type === 'public') fail", 'if (false) fail']],
+    tests: 'wrong declarations',
+  },
+  {
+    file: 'catalogue/identity',
+    name: 'new recovery codes without a step-up',
+    change: [
+      [
+        "  path: '/auth/authenticator/recovery-codes',\n  summary: 'Get 10 new recovery codes',\n  apps: APPS,\n  access: { type: 'signed-in' },\n  rateLimit: 'auth',\n  idempotency: false,\n  stepUp: true,",
+        "  path: '/auth/authenticator/recovery-codes',\n  summary: 'Get 10 new recovery codes',\n  apps: APPS,\n  access: { type: 'signed-in' },\n  rateLimit: 'auth',\n  idempotency: false,\n  stepUp: false,",
+      ],
+    ],
+    tests: 'signed-in authenticator',
+  },
+  {
+    file: 'catalogue/identity',
+    name: 'turned off without a step-up',
+    change: [
+      [
+        "  summary: 'Turn the authenticator off',\n  apps: APPS,\n  access: { type: 'signed-in' },\n  rateLimit: 'auth',\n  idempotency: false,\n  stepUp: true,",
+        "  summary: 'Turn the authenticator off',\n  apps: APPS,\n  access: { type: 'signed-in' },\n  rateLimit: 'auth',\n  idempotency: false,\n  stepUp: false,",
+      ],
+    ],
+    tests: 'signed-in authenticator',
+  },
+  {
+    file: 'catalogue/identity',
+    name: 'set up without the password',
+    change: [
+      [
+        'input: { body: object({ code: otpZod, password: currentPasswordZod }) },',
+        'input: { body: object({ code: otpZod, password: currentPasswordZod.optional() }) },',
+      ],
+    ],
+    tests: 'account’s password',
+  },
+  {
+    file: 'catalogue/iam',
+    name: 'a step-up with both proofs, or neither',
+    change: [
+      [
+        'body: xor([object({ code: otpZod }), object({ recoveryCode: recoveryCodeZod })]),',
+        'body: object({ code: otpZod.optional(), recoveryCode: recoveryCodeZod.optional() }),',
+      ],
+    ],
+    tests: 'never both or neither',
   },
 ];
 

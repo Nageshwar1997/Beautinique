@@ -70,6 +70,16 @@ export const IDENTITY_ERROR_CODES = {
   RECOVERY_CODE_INVALID: 400,
   /** A step-up needs the account's authenticator, and it has none: set one up first */
   AUTHENTICATOR_REQUIRED: 400,
+  /** An authenticator was saved meanwhile (another tab): replace it after a step-up */
+  AUTHENTICATOR_EXISTS: 409,
+  /** No authenticator set-up waiting: it expired (10 minutes), finished or ran out of tries */
+  AUTHENTICATOR_SETUP_EXPIRED: 400,
+  /** A role the account holds needs an authenticator, so it stays on (the roles in `details`) */
+  AUTHENTICATOR_REQUIRED_BY_ROLE: 409,
+  /** The account has no password yet (made with Google ...): set one first */
+  PASSWORD_REQUIRED: 400,
+  /** Wrong password while signed in (a lock counts it like a sign-in) */
+  PASSWORD_INVALID: 400,
 } as const satisfies Record<string, number>;
 
 /**
@@ -251,6 +261,15 @@ export const LOGIN_NEXT = ['totp', 'totp-enroll', 'signed-in'] as const;
 const loginParams = object({ loginId: uuidv7Zod });
 
 /**
+ * The password the account has, to check it (trimmed like a new one). Not passwordZod: the length
+ * rules are for new ones.
+ */
+const currentPasswordZod = string('Password is required')
+  .trim()
+  .nonempty('Enter your password')
+  .max(128, 'Use at most 128 characters');
+
+/**
  * Sign-in in every app: email + password. A wrong email, a wrong password and a locked account (10
  * wrong tries in 15 minutes lock it for an hour) all answer INVALID_CREDENTIALS, in the same time.
  */
@@ -265,17 +284,7 @@ export const passwordLogin = defineRoute({
   idempotency: false,
   stepUp: false,
   owner: 'identity',
-  // not passwordZod: a sign-in checks the password it is given (trimmed like a new one); the
-  // length rules are for new ones
-  input: {
-    body: object({
-      email: emailZod,
-      password: string('Password is required')
-        .trim()
-        .nonempty('Enter your password')
-        .max(128, 'Use at most 128 characters'),
-    }),
-  },
+  input: { body: object({ email: emailZod, password: currentPasswordZod }) },
   output: object({
     next: zodEnum(LOGIN_NEXT),
     /** The sign-in in progress, for the next step (5 minutes; 10 to set up an authenticator) */
@@ -495,6 +504,8 @@ export const getMe = defineRoute({
       /** An account made with Google alone has no `password`: the app suggests setting one */
       providers: array(zodEnum(AUTH_PROVIDERS)),
       authenticator: boolean(),
+      /** Recovery codes not used yet; null without an authenticator */
+      recoveryCodesLeft: number().int().min(0).nullable(),
     }),
     session: object({
       sessionId: uuidv7Zod,
@@ -566,4 +577,106 @@ export const endOtherSessions = defineRoute({
   owner: 'identity',
   input: {},
   output: object({ ended: number().int().min(0) }),
+});
+
+// ---- The authenticator, signed in (ARCHITECTURE §9.2, owner 2026-10-31) ----
+
+/**
+ * Sets up the authenticator from the account's settings (in an app where it is the person's
+ * choice): a new secret to type in, and the otpauth link for the QR code (drawn in the browser).
+ * The secret waits for its first code 10 minutes (5 tries); asking again replaces it. An account
+ * that has one already replaces it (a new phone) only after a step-up: STEP_UP_REQUIRED without
+ * one. An account without a password sets one first (PASSWORD_REQUIRED).
+ */
+export const enrollAuthenticator = defineRoute({
+  id: 'auth.authenticator.enroll',
+  method: 'POST',
+  path: '/auth/authenticator/enroll',
+  summary: 'Start setting up (or replacing) the authenticator',
+  apps: APPS,
+  access: { type: 'signed-in' },
+  rateLimit: 'auth',
+  idempotency: false,
+  stepUp: false,
+  owner: 'identity',
+  input: {},
+  output: object({ secret: string(), uri: string() }),
+});
+
+/**
+ * The first authenticator code and the account's password save it, with 10 new recovery codes
+ * (shown once; any old ones stop working). The person is emailed. Wrong ones count toward the
+ * account's lock like a sign-in.
+ */
+export const confirmAuthenticator = defineRoute({
+  id: 'auth.authenticator.confirm',
+  method: 'POST',
+  path: '/auth/authenticator/confirm',
+  summary: 'Finish setting up the authenticator and get the recovery codes',
+  apps: APPS,
+  access: { type: 'signed-in' },
+  rateLimit: 'auth',
+  idempotency: false,
+  stepUp: false,
+  owner: 'identity',
+  input: { body: object({ code: otpZod, password: currentPasswordZod }) },
+  output: object({ recoveryCodes: array(string()).length(10) }),
+});
+
+/** 10 new recovery codes (shown once); the old ones stop working, and the person is emailed. */
+export const newRecoveryCodes = defineRoute({
+  id: 'auth.authenticator.recoveryCodes',
+  method: 'POST',
+  path: '/auth/authenticator/recovery-codes',
+  summary: 'Get 10 new recovery codes',
+  apps: APPS,
+  access: { type: 'signed-in' },
+  rateLimit: 'auth',
+  idempotency: false,
+  stepUp: true,
+  owner: 'identity',
+  input: {},
+  output: object({ recoveryCodes: array(string()).length(10) }),
+});
+
+/**
+ * Turns the authenticator off, with its recovery codes. Never while a role the account holds needs
+ * one (TOTP_REQUIRED_APPS, Seller Account Owner, Seller Finance ...): AUTHENTICATOR_REQUIRED_BY_ROLE
+ * names them. The person is emailed; their sessions stay.
+ */
+export const disableAuthenticator = defineRoute({
+  id: 'auth.authenticator.disable',
+  method: 'DELETE',
+  path: '/auth/authenticator',
+  summary: 'Turn the authenticator off',
+  apps: APPS,
+  access: { type: 'signed-in' },
+  rateLimit: 'auth',
+  idempotency: false,
+  stepUp: true,
+  owner: 'identity',
+  input: {},
+  output: object({ disabled: boolean() }),
+});
+
+/** What changed about an account's authenticator, by the person themself. */
+export const AUTHENTICATOR_CHANGES = ['enabled', 'replaced', 'recovery-codes', 'disabled'] as const;
+
+/** The person changed their authenticator; notify tells them (a security email, no secret in it). */
+export const authenticatorChanged = defineEvent({
+  type: 'identity.authenticator.changed',
+  version: 1,
+  producer: 'identity',
+  description:
+    'Someone set up, replaced or turned off their authenticator, or got new recovery codes',
+  data: object({
+    userId: uuidv7Zod,
+    email: emailZod,
+    change: zodEnum(AUTHENTICATOR_CHANGES),
+    /** The app it was done in */
+    app: zodEnum(APPS),
+    /** `Chrome on Windows` */
+    device: string().max(120),
+    changedAt: isoDateTimeZod,
+  }),
 });

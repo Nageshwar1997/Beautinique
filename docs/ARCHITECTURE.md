@@ -1,6 +1,6 @@
 # ARCHITECTURE — BQ
 
-> **Status:** v1.41 draft (2026-10-31). [PRD.md](PRD.md) v1.0 pe based. Design ek multi-agent review se aaya (3 architecture proposals + review board + owner ke decisions), aur v1.1 me free tier ke official docs ke against verify hua.
+> **Status:** v1.42 draft (2026-10-31). [PRD.md](PRD.md) v1.0 pe based. Design ek multi-agent review se aaya (3 architecture proposals + review board + owner ke decisions), aur v1.1 me free tier ke official docs ke against verify hua.
 
 ## 0. Ek nazar me
 
@@ -375,6 +375,7 @@ Kai platforms alag users ko alag price dikhate hain. BQ ka rule: **ek product ka
 - **Sign-in aur sign-up alag pages** (`/sign-in`, `/sign-up`; plus `/forgot-password`, `/invitation`); `next` har auth link me aage jaata hai. `next` sirf apni site ka path (`/` se shuru, `//` ya bahar ka domain nahi, auth pages nahi), warna `/`. Email daalte hi account hai ya nahi, nahi batate (backend har email ko ek jaisa jawab deta hai), isliye user khud "Sign in" ya "Create an account" chunta hai.
 - **Seller/creator me koi public page nahi:** customer ke footer me "Sell on Beautinique" aur "Become a creator" unke sign-up page pe.
 - **Signed-in authenticator (customer jaise apps):** naye routes: authenticator lagana (signed-in), naye 10 recovery codes (step-up, purane band), band karna sirf jab account ka koi grant use zaroori na maange (internal apps, Seller Account Owner/Finance) aur step-up + security email ke saath; `/iam/me` me bache recovery codes ki ginti.
+  - **Detail (owner, 2026-10-31):** routes `POST /auth/authenticator/enroll`, `POST /auth/authenticator/confirm` (code + abhi ka password; bina password wale account ko pehle password set karna), `POST /auth/authenticator/recovery-codes` aur `DELETE /auth/authenticator` (dono step-up). Authenticator pehle se ho to taaze step-up ke saath `enroll` use **badalta** hai (naya phone: naya secret, naye codes). Step-up recovery code se bhi hota hai (ek code khatam), taaki phone kho jaye to bhi naye codes, badlav ya band karna ho sake; Security Officer ka reset sirf jab codes bhi kho gaye. Band na ho to sandesh me roles aur apps ke naam. Lagana, naye codes aur band karna: teeno pe security email; baaki sessions chalte rehte hain (email me "aapne nahi kiya?" → password reset, jo saare sessions band karta hai). Password badalna authenticator ko nahi chhoota. Step-up ab `signed-in` routes pe bhi (apne account ke kaam), sirf permission routes pe nahi.
 - **Signed-in password badalna:** naya route nahi; wahi email code wala raasta (`/auth/password/code`). Naya password = saare sessions band (§7.2), phir dobara sign-in.
 - **Customer me dummy `/terms` aur `/privacy`** (prerender, DUMMY badge, version `dummy-1` = `IDENTITY__LEGAL_VERSION`), sign-up consent unhi ke link deta hai.
 - **Admin live:** admin PR me `vercel.json` (SPA rewrite, `noindex`); Vercel project owner banata hai; Render keys (`GATEWAY__APP_HOSTS`, `GATEWAY__VERCEL_PROJECTS`, `NOTIFY__APP_URLS` me admin) code ke baad list.
@@ -691,3 +692,4 @@ Sirf config badlegi, code nahi:
 | v1.39 | 2026-10-30 | §9.2: Motion abhi sirf Toast me (Dialog CSS se), naapa hua size. |
 | v1.40 | 2026-10-30 | §9.2: pickers ke faisle (owner): Select + ComboBox, date + range + time, ColorPicker bina alpha, HierarchySelect single + multiple. |
 | v1.41 | 2026-10-31 | §9.2: forms + auth-ui ke faisle (owner): packages ka order, sign-up/sign-in apps, `next`, cart sign-in ke saath, signed-in authenticator, idle notice, admin live, Playwright. |
+| v1.42 | 2026-10-31 | §9.2: signed-in authenticator ki detail (owner): routes, confirm pe password, badalna, recovery code se step-up, teeno badlav pe email, sessions rehte hain. |

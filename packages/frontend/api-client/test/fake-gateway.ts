@@ -82,6 +82,7 @@ const me = {
     signUpApp: 'customer',
     providers: ['password'],
     authenticator: true,
+    recoveryCodesLeft: 10,
   },
   session: { sessionId: SESSION_ID, app: 'customer', expiresAt: EXPIRES_AT },
 };

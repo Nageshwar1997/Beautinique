@@ -1175,12 +1175,228 @@ const mutations: Mutation[] = [
     file: 'login',
     name: 'wrong step-up codes are not counted',
     change: [
-      [
-        '    await recordFailure(deps.redis, deps.keys, user.email);\n    throw stepUpCodeInvalid();',
-        '    throw stepUpCodeInvalid();',
-      ],
+      ['    await recordFailure(deps.redis, deps.keys, user.email);\n    throw ', '    throw '],
     ],
     tests: 'lock',
+  },
+  // the signed-in authenticator (ARCHITECTURE §9.2, owner 2026-10-31)
+  {
+    file: 'login',
+    name: 'a wrong recovery code steps up',
+    change: [['    right = left !== null;', '    right = true;']],
+    tests: 'spends one code',
+  },
+  {
+    file: 'login',
+    name: 'a step-up does not say how many codes are left',
+    change: [['recoveryCodesLeft: left };', 'recoveryCodesLeft: null };']],
+    tests: 'spends one code',
+  },
+  {
+    file: 'me',
+    name: '/iam/me miscounts the recovery codes left',
+    change: [['? (recoveryCodesLeft(credentials.recoveryCodes) ?? 0)', '? 10']],
+    tests: 'spends one code',
+  },
+  {
+    file: 'authenticator',
+    name: 'replaced without a step-up',
+    change: [['  if (replace && !steppedUp(session, Date.now())) throw stepUpRequired();\n', '']],
+    tests: 'needs a step-up, then swaps',
+  },
+  {
+    file: 'authenticator',
+    name: 'set up without a password on the account',
+    change: [
+      [
+        '  if (!credentials?.password) throw passwordRequired();\n  const replace',
+        '  const replace',
+      ],
+    ],
+    tests: 'without a password',
+  },
+  {
+    file: 'authenticator',
+    name: 'a wrong password sets it up',
+    change: [
+      ['  if (!(await verifyPassword(credentials.password.hash, password))) {', '  if (false) {'],
+    ],
+    tests: 'saves it with the password',
+  },
+  {
+    file: 'authenticator',
+    name: 'a wrong first code sets it up',
+    change: [
+      ['  if (step === null) {\n    return wrongTry', '  if (false) {\n    return wrongTry'],
+    ],
+    tests: 'saves it with the password',
+  },
+  {
+    file: 'authenticator',
+    name: 'a set-up never runs out of tries',
+    change: [
+      ['  if (tries >= LOGIN_MAX_TRIES) {\n    await inRedis', '  if (false) {\n    await inRedis'],
+    ],
+    tests: '5 wrong tries',
+  },
+  {
+    file: 'authenticator',
+    name: 'wrong set-up tries are not counted toward the lock',
+    change: [
+      [
+        '  await recordFailure(deps.redis, deps.keys, email);\n  if (tries >= LOGIN_MAX_TRIES) {',
+        '  if (tries >= LOGIN_MAX_TRIES) {',
+      ],
+    ],
+    tests: '5 wrong tries',
+  },
+  {
+    file: 'authenticator',
+    name: 'a locked account sets one up',
+    change: [
+      [
+        'if (tries > LOGIN_MAX_TRIES || (await isLocked(deps.redis, deps.keys, email))) {',
+        'if (tries > LOGIN_MAX_TRIES) {',
+      ],
+    ],
+    tests: '5 wrong tries',
+  },
+  {
+    file: 'authenticator',
+    name: 'a set-up stays after its confirm',
+    change: [
+      [
+        '  if ((await inRedis(() => deps.redis.del(key))) === 0) throw authenticatorSetupExpired();\n',
+        '',
+      ],
+    ],
+    tests: 'saves it with the password',
+  },
+  {
+    file: 'authenticator',
+    name: 'two confirms of one set-up both go on',
+    change: [
+      [
+        'if ((await inRedis(() => deps.redis.del(key))) === 0) throw authenticatorSetupExpired();',
+        'if ((await inRedis(() => deps.redis.del(key))) < 0) throw authenticatorSetupExpired();',
+      ],
+    ],
+    survives:
+      'two confirms at the same moment: the second finds the set-up gone at its first read; a race no test times',
+  },
+  {
+    file: 'authenticator',
+    name: 'one saved meanwhile is overwritten',
+    change: [
+      [
+        '        : { _id: passport.userId, totp: { $exists: false } },',
+        '        : { _id: passport.userId },',
+      ],
+    ],
+    tests: 'never overwrites',
+  },
+  {
+    file: 'authenticator',
+    name: 'a replace after a reset meanwhile saves anyway',
+    change: [
+      [
+        '        ? { _id: passport.userId, totp: { $exists: true } }\n',
+        '        ? { _id: passport.userId }\n',
+      ],
+    ],
+    survives:
+      'a Security Officer reset between the enroll and the confirm of a replace; a race no test times',
+  },
+  {
+    file: 'authenticator',
+    name: 'a replace is told as a set-up',
+    change: [["change: replace ? 'replaced' : 'enabled',", "change: 'enabled',"]],
+    tests: 'needs a step-up, then swaps',
+  },
+  {
+    file: 'authenticator',
+    name: 'new codes without a step-up',
+    change: [
+      [
+        '  if (!steppedUp(session, Date.now())) throw stepUpRequired();\n  const recovery',
+        '  const recovery',
+      ],
+    ],
+    tests: 'old codes stop working',
+  },
+  {
+    file: 'authenticator',
+    name: 'new codes for an account without an authenticator',
+    change: [['    if (saved.modifiedCount !== 1) throw authenticatorRequired();\n', '']],
+    tests: 'removes it with its codes',
+  },
+  {
+    file: 'authenticator',
+    name: 'turned off without a step-up',
+    change: [
+      [
+        '  if (!steppedUp(session, Date.now())) throw stepUpRequired();\n  const roles',
+        '  const roles',
+      ],
+    ],
+    tests: 'removes it with its codes',
+  },
+  {
+    file: 'authenticator',
+    name: 'a step-up never runs out',
+    change: [['now - session.stepUpAt.getTime() <= STEP_UP_SECONDS * 1000', 'true']],
+    tests: 'older than 5 minutes',
+  },
+  {
+    file: 'authenticator',
+    name: 'turned off while a role needs it',
+    change: [['  if (roles.length > 0) throw authenticatorRequiredByRole(roles);\n', '']],
+    tests: 'while a role needs it',
+  },
+  {
+    file: 'authenticator',
+    name: 'the internal apps’ roles do not need one',
+    change: [
+      [
+        '$or: [{ app: { $in: [...TOTP_REQUIRED_APPS] } }, { mfaRequired: true }],',
+        'mfaRequired: true,',
+      ],
+    ],
+    tests: 'while a role needs it',
+  },
+  {
+    file: 'authenticator',
+    name: 'roles that ask one themselves do not need it',
+    change: [[', { mfaRequired: true }],', '],']],
+    tests: 'while a role needs it',
+  },
+  {
+    file: 'authenticator',
+    name: 'an ended grant still needs one',
+    change: [
+      [
+        '.find({ userId, ...activeAt(now) }, { projection: { role: 1 } })',
+        '.find({ userId }, { projection: { role: 1 } })',
+      ],
+    ],
+    tests: 'while a role needs it',
+  },
+  {
+    file: 'authenticator',
+    name: 'a retired role still needs one',
+    change: [['        retired: false,\n        $or', '        $or']],
+    tests: 'while a role needs it',
+  },
+  {
+    file: 'authenticator',
+    name: 'turning off twice is told twice',
+    change: [
+      [
+        '      { _id: passport.userId, totp: { $exists: true } },\n      { $unset',
+        '      { _id: passport.userId },\n      { $unset',
+      ],
+    ],
+    tests: 'removes it with its codes',
   },
   {
     file: 'rbac/security',

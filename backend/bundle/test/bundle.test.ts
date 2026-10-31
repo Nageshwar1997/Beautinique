@@ -545,6 +545,119 @@ describe('bundle', () => {
     }
   });
 
+  it('sets up, renews and turns off a customer’s authenticator through the gateway, a security email each (ARCHITECTURE §9.2)', async () => {
+    const bundle = await startBundle({ port: 0, env: quiet() });
+    const email = `authenticator-${randomUUID().slice(0, 8)}@beautinique.example`;
+    const password = 'a customer password, long enough';
+    const mailIds: string[] = [];
+    let cookie = '';
+    const api = (method: 'GET' | 'POST' | 'DELETE', path: string, body?: unknown) =>
+      fetch(`${bundle.url}/api/v1${path}`, {
+        method,
+        headers: {
+          'X-BQ-App': 'customer',
+          'x-origin-secret': ORIGIN_SECRET,
+          'content-type': 'application/json',
+          ...(cookie === '' ? {} : { cookie }),
+        },
+        ...(body === undefined ? {} : { body: JSON.stringify(body) }),
+      });
+    const keepAccess = (answer: Response) => {
+      const access = /__Host-bq_customer_at=([^;]+)/.exec(
+        answer.headers.getSetCookie().join(', '),
+      )?.[1];
+      if (access !== undefined) cookie = `__Host-bq_customer_at=${access}`;
+    };
+    interface Found {
+      messages: { ID: string; Subject: string; Snippet: string }[];
+    }
+    /** The emails to the account so far, once there are `count` of them (newest first). */
+    const inbox = async (count: number): Promise<Found['messages']> => {
+      const search = `http://localhost:8025/api/v1/search?query=${encodeURIComponent(`to:${email}`)}`;
+      const end = Date.now() + 10_000;
+      for (;;) {
+        const found = (await (await fetch(search)).json()) as Found;
+        mailIds.push(...found.messages.map((m) => m.ID).filter((id) => !mailIds.includes(id)));
+        if (found.messages.length >= count) return found.messages;
+        if (Date.now() > end) throw new Error(`fewer than ${String(count)} emails reached Mailpit`);
+        await new Promise((resolve) => setTimeout(resolve, 100));
+      }
+    };
+    try {
+      // a customer account, signed in (the sign-up code from Mailpit)
+      const asked = await api('POST', '/auth/sign-up/code', {
+        email,
+        consent: { terms: true, adult: true },
+      });
+      const { data } = (await asked.json()) as { data: { challengeId: string } };
+      const [codeMail] = await inbox(1);
+      const code = /\b(\d{6})\b/.exec(codeMail?.Snippet ?? '')?.[1] ?? '';
+      const made = await api('POST', `/auth/otp/${data.challengeId}/verify`, { code, password });
+      expect(made.status).toBe(200);
+      keepAccess(made);
+
+      // set up from the settings: a secret, then the first code and the password
+      const enrolled = await api('POST', '/auth/authenticator/enroll');
+      expect(enrolled.status).toBe(200);
+      const { data: enroll } = (await enrolled.json()) as { data: { secret: string } };
+      const at = Date.now();
+      const confirmed = await api('POST', '/auth/authenticator/confirm', {
+        code: totpCode(enroll.secret, at),
+        password,
+      });
+      expect(confirmed.status).toBe(200);
+      const { data: saved } = (await confirmed.json()) as { data: { recoveryCodes: string[] } };
+      expect(saved.recoveryCodes).toHaveLength(10);
+      const me = (await (await api('GET', '/iam/me')).json()) as {
+        data: { user: { authenticator: boolean; recoveryCodesLeft: number | null } };
+      };
+      expect(me.data.user).toMatchObject({ authenticator: true, recoveryCodesLeft: 10 });
+
+      // new codes need a step-up: the gateway asks, before identity hears of it
+      const asks = await api('POST', '/auth/authenticator/recovery-codes');
+      expect(asks.status).toBe(401);
+      expect(await asks.json()).toMatchObject({ error: { code: 'STEP_UP_REQUIRED' } });
+      const stepped = await api('POST', '/auth/step-up', {
+        code: totpCode(enroll.secret, at + 30_000),
+      });
+      expect(stepped.status).toBe(200);
+      keepAccess(stepped);
+      const renewed = await api('POST', '/auth/authenticator/recovery-codes');
+      expect(renewed.status).toBe(200);
+      const { data: fresh } = (await renewed.json()) as { data: { recoveryCodes: string[] } };
+      expect(fresh.recoveryCodes).not.toContain(saved.recoveryCodes[0]);
+
+      // turned off, within the same step-up
+      const off = await api('DELETE', '/auth/authenticator');
+      expect(off.status).toBe(200);
+      expect(await off.json()).toEqual({ data: { disabled: true } });
+      const after = (await (await api('GET', '/iam/me')).json()) as {
+        data: { user: { authenticator: boolean; recoveryCodesLeft: number | null } };
+      };
+      expect(after.data.user).toMatchObject({ authenticator: false, recoveryCodesLeft: null });
+
+      // the sign-up code and the three security emails, none with a secret in it
+      const mails = await inbox(4);
+      expect(mails.map((m) => m.Subject).toSorted()).toEqual([
+        'An authenticator was set up for your Beautinique account',
+        'Confirm your email for Beautinique',
+        'New recovery codes for your Beautinique account',
+        'Your Beautinique authenticator was turned off',
+      ]);
+      for (const mail of mails) {
+        expect(mail.Snippet).not.toContain(enroll.secret);
+        expect(mail.Snippet).not.toContain(fresh.recoveryCodes[0]);
+      }
+    } finally {
+      await bundle.stop();
+      await fetch('http://localhost:8025/api/v1/messages', {
+        method: 'DELETE',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({ IDs: mailIds }),
+      });
+    }
+  });
+
   it('answers the apps’ wake call through the gateway from core, never cached (T2.7)', async () => {
     const bundle = await startBundle({ port: 0, env: quiet() });
     try {

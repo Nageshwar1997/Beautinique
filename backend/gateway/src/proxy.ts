@@ -327,12 +327,13 @@ export function proxy({
           throw new AppError('UNAUTHENTICATED', 'Please sign in to continue.');
         }
         if (held === 'no') throw new AppError('FORBIDDEN', 'You do not have access to this.');
-        if (route.stepUp && !stepUpFresh(signedIn.stepUpAt, Date.now())) {
-          throw new AppError(
-            'STEP_UP_REQUIRED',
-            'Please confirm with your authenticator code to continue.',
-          );
-        }
+      }
+      // permission routes and the person's own account (new recovery codes ...; ARCHITECTURE §9.2)
+      if (route.stepUp && !stepUpFresh(signedIn.stepUpAt, Date.now())) {
+        throw new AppError(
+          'STEP_UP_REQUIRED',
+          'Please confirm with your authenticator code to continue.',
+        );
       }
       passportToken = passport.sign({ ...signedIn, app }, passportAudience(route.owner));
     }
