@@ -1,6 +1,6 @@
 # RULES — BQ
 
-> **Status:** v1.15 (2026-10-27). Ye niyam Beautinique ke har code, doc aur deploy pe lagu hain. [PRD.md](PRD.md) batata hai **kya** banana hai, [ARCHITECTURE.md](ARCHITECTURE.md) batata hai **kaise**, aur ye file batati hai ki **kin niyamon ke saath**. Koi rule todna ho to pehle is file me badlav aur change log entry.
+> **Status:** v1.16 (2026-10-31). Ye niyam Beautinique ke har code, doc aur deploy pe lagu hain. [PRD.md](PRD.md) batata hai **kya** banana hai, [ARCHITECTURE.md](ARCHITECTURE.md) batata hai **kaise**, aur ye file batati hai ki **kin niyamon ke saath**. Koi rule todna ho to pehle is file me badlav aur change log entry.
 
 ## 1. Kaam karne ke niyam
 
@@ -41,6 +41,7 @@
 5. **Role ke naam se comparison nahi** (`role === 'MASTER'` jaisa). Hamesha permission + scope se check.
 6. **Naming:** files `kebab-case`, React components `PascalCase`, functions aur variables `camelCase`, constants `UPPER_SNAKE_CASE`, events `<context>.<aggregate>.<pastTense>`, permissions `<module>.<resource>.<action>`.
 7. **Formatting:** Prettier + ESLint, CI me check. Comments sirf "kyun" ke liye, "kya" ke liye nahi.
+8. **HTTP client sirf axios (owner, 2026-10-31), frontend aur backend dono:** apps ki API calls `@beautinique/frontend-api-client` se (andar contracts ka axios wala `createClient`); backend ki bahar ki calls (Brevo, HIBP, JWKS, `/ready`) bhi axios se. `fetch` ya `node:http`/`https` ka request sirf wahan jahan axios kaam nahi kar sakta: **gateway ka reverse proxy** (`backend/gateway/src/proxy.ts`, body dono taraf stream aur khud kaatna) aur **tests** (wo hamare server ko bahar se, browser/curl ki tarah jaanchte hain; kuch ko kachcha HTTP chahiye). Server (`createServer`) is niyam me nahi. ESLint `src/` aur `app/` me `fetch`, `globalThis.fetch` aur `node:http` ka `request`/`get` rokta hai; nayi chhoot = `httpProxyFiles` me file + wajah. axios ki error me request (headers, body) hoti hai: use log ya aage mat bhejo, apna error banao.
 
 ## 4. Backend
 
@@ -70,7 +71,7 @@
 5. **Accessibility (WCAG 2.1 AA):** keyboard se chalne layak, labels, colour contrast, dikhne wala focus. `outline-hidden` jaisi class lagao to apna focus ring zaroor do.
 6. **Responsive:** har screen 360, 768 aur 1280 px pe; light aur dark dono theme.
 7. **Text aur formats:** apps sirf English me. INR, numbers aur dates `Intl` (`en-IN`) se, haath se format nahi.
-8. **API:** sirf generated `api-client` aur contracts ke query keys; seedha `axios`/`fetch` nahi.
+8. **API:** sirf generated `api-client` aur contracts ke query keys; app me seedha `axios`/`fetch` nahi (api-client khud axios use karta hai, §3.8).
 9. **User data browser storage me nahi.** App `GET /api/v1/iam/me` se shuru hoti hai. `localStorage` sirf UI preferences (jaise theme) ke liye.
 10. **Permissions UI:** `<Can>` / `usePermission`; nav permission se filter. Backend phir bhi check karta hai.
 
@@ -130,3 +131,4 @@
 | v1.13   | 2026-10-27 | §1.14: migrations ke niyam (id, kabhi nahi badalti, 60 s, index ka naam); §2.4: `.env.production` sirf `npm run db:release -- --env live` padhta hai (owner).                                                         |
 | v1.14   | 2026-10-27 | §2.1: `prerelease` pe branch delete bhi nahi; §9: ultracode/workflow mode me bhi ek agent, UI har badlav light/dark/mobile, secrets, nayi env key sirf code ke baad, kaam rokte waqt HANDOFF (owner).                 |
 | v1.15   | 2026-10-27 | §2.4: `.env.example` teen hisson me (LOCAL, OPTIONAL, PRODUCTION dummy values ke saath), bundle me deployable-wise; `.env` = sirf LOCAL (owner).                                                                      |
+| v1.16   | 2026-10-31 | §3.8: HTTP client sirf axios (frontend + backend); chhoot sirf gateway proxy aur tests, ESLint se (owner). §5.8 usi ke saath. |

@@ -1,5 +1,6 @@
 import type { ReadyCheck } from '@beautinique/backend-server-kit';
 import { type Deployable, DEPLOYABLES } from '@beautinique/shared-contracts';
+import axios from 'axios';
 import type { RequestHandler } from 'express';
 
 type CheckResult = 'ok' | 'failing';
@@ -19,15 +20,22 @@ const CHECK_NAME = /^[a-z][a-zA-Z0-9.-]{0,39}$/;
 /** A deployable's GET /ready, read with a timeout: its own checks, or failing when it cannot say. */
 async function readyOf(origin: string, timeoutMs: number): Promise<DeployableStatus> {
   try {
-    const res = await fetch(new URL('/ready', origin), { signal: AbortSignal.timeout(timeoutMs) });
-    const body = (await res.json()) as { status?: unknown; checks?: unknown };
+    const res = await axios.get<unknown>(new URL('/ready', origin).href, {
+      signal: AbortSignal.timeout(timeoutMs),
+      // a 503 /ready still names its failing checks
+      validateStatus: () => true,
+    });
+    const body = (typeof res.data === 'object' && res.data !== null ? res.data : {}) as {
+      status?: unknown;
+      checks?: unknown;
+    };
     const checks: Record<string, CheckResult> = {};
     if (typeof body.checks === 'object' && body.checks !== null) {
       for (const [name, value] of Object.entries(body.checks)) {
         if (CHECK_NAME.test(name)) checks[name] = value === 'ok' ? 'ok' : 'failing';
       }
     }
-    const healthy = res.ok && body.status === 'ready';
+    const healthy = res.status >= 200 && res.status <= 299 && body.status === 'ready';
     return { status: healthy ? 'ok' : 'failing', checks };
   } catch {
     return { status: 'failing', checks: {} };

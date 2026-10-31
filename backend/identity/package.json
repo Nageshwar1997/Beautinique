@@ -29,6 +29,7 @@
     "@beautinique/shared-contracts": "^1.0.0",
     "@beautinique/shared-utils": "^2.0.0",
     "@beautinique/shared-zod": "^2.0.0",
+    "axios": "^1.21.0",
     "express": "^5.3.0",
     "ioredis": "^6.0.0"
   },

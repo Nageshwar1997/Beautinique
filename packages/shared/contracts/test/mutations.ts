@@ -34,12 +34,42 @@ const mutations: Mutation[] = [
   {
     file: 'client',
     name: 'abort is wrapped as NETWORK_ERROR',
-    change: [['if (callOptions?.signal?.aborted) throw error;', '']],
+    change: [['if (callOptions?.signal?.aborted) throw callOptions.signal.reason;', '']],
   },
   {
     file: 'client',
     name: 'error responses are treated as success',
-    change: [['if (!response.ok) throw await failure(response);', '']],
+    change: [['if (response.status < 200 || response.status > 299) throw failure(response);', '']],
+  },
+  {
+    file: 'client',
+    name: 'a redirect is treated as success',
+    change: [['response.status > 299', 'response.status > 399']],
+  },
+  {
+    file: 'client',
+    name: 'axios throws on error statuses (they become NETWORK_ERROR)',
+    change: [['validateStatus: () => true,', '']],
+  },
+  {
+    file: 'client',
+    name: 'a POST without a body is sent as a form',
+    change: [["{ 'Content-Type': false }", '{}']],
+  },
+  {
+    file: 'client',
+    name: 'an answer is not told to onNetwork',
+    change: [["options.onNetwork?.('answered');", '']],
+  },
+  {
+    file: 'client',
+    name: 'no answer is not told to onNetwork',
+    change: [["options.onNetwork?.('unanswered');", '']],
+  },
+  {
+    file: 'client',
+    name: 'a given fetch is ignored',
+    change: [["adapter: 'fetch', env: { fetch: options.fetch }", '']],
   },
   {
     file: 'client',

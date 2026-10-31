@@ -280,6 +280,30 @@ const mutations: Mutation[] = [
   },
   {
     file: 'password',
+    name: 'the breach check waits for ever',
+    change: [
+      [
+        '        signal: AbortSignal.timeout(timeoutMs),\n        responseType',
+        '        responseType',
+      ],
+    ],
+    tests: 'breached',
+  },
+  {
+    file: 'password',
+    name: 'an error page from the breach check read as its list',
+    change: [
+      [
+        'axios.get<string>(`${url}/range/${prefix}`, {',
+        'axios.get<string>(`${url}/range/${prefix}`, { validateStatus: () => true,',
+      ],
+    ],
+    tests: 'breached',
+    survives:
+      'a 503 page has no "SUFFIX:COUNT" line for the password, so it reads as "not breached": the same answer as fail-open, without the warning',
+  },
+  {
+    file: 'password',
     name: 'no rehash of older settings',
     change: [['  !hash.startsWith(', '  false && !hash.startsWith(']],
     tests: 'older settings',

@@ -88,7 +88,8 @@ Free Render service 15 min khaali rehne pe so jaati hai aur jaagne me ~1 min let
 - 5xx, 429, network error ya 30 s tak jawab nahi = "abhi nahi jaaga": 3 s baad dobara. Koi bhi aur jawab (error bhi) = server jaaga hua hai.
 - **`kickUrl`** (server ka apna `/wake`, seedha): "abhi nahi jaaga" pe ek `no-cors` request bhi jaati hai, 15 s me max ek baar (`kickEveryMs`). Soye Render service ko app ke Vercel route ki request nahi jagati, seedhi request jagati hai (live jaanch 2026-10-26). Jawab padha nahi jaata, zaroorat bhi nahi; isme app ka header ya secret nahi jaata. `kickUrl` na ho to ye request nahi.
 - 150 s me na jaage to "The server is taking too long", focus "Try again" pe; "Continue anyway" screen hata deta hai (static pages chalte rahen).
-- Timings props se badalti hain (`slowAfterMs`, `attemptTimeoutMs`, `retryDelayMs`, `giveUpAfterMs`, `kickEveryMs`); `fetch` sirf tests aur playground ke liye (wahi function rakho, naya function hook ko dobara shuru karta hai).
+- Dono calls axios se (RULES §3.8), uske **fetch adapter** se: `no-cors` aur `cache: 'no-store'` sirf fetch me hain, axios ke XMLHttpRequest me nahi. Wake call me sirf `X-BQ-App` jaata hai, kick me koi header nahi (axios ke apne `Accept`/`User-Agent` bhi band).
+- Timings props se badalti hain (`slowAfterMs`, `attemptTimeoutMs`, `retryDelayMs`, `giveUpAfterMs`, `kickEveryMs`); `fetch` sirf tests aur playground ke liye, axios ke fetch adapter ko diya jaata hai (wahi function rakho, naya function hook ko dobara shuru karta hai).
 - Laptop pe backend band ho to dev server ka proxy 502 deta hai, isliye wake-up screen dikhti hai: `npm run dev:backend` chalao (wahi asli raasta).
 
 **Abhi nahi, jab app ko chahiye tab:** sidebar layout (internal apps), offline page, idle logout.

@@ -97,6 +97,7 @@ npm run build
   production Redis laptop ya tests se kabhi nahi.
 - **Zod:** `import { object, string, gstinZod } from '@beautinique/shared-zod'` (named, `z.` nahi); seedha `zod` sirf
   `packages/shared/zod` me (ESLint rokta hai). Hamare schemas `...Zod`, `enum as zodEnum`.
+- **HTTP calls sirf axios** (owner, 2026-10-31; RULES §3.8): apps `@beautinique/frontend-api-client` se, backend bhi axios se. `fetch`/`node:http` request sirf gateway `proxy.ts` aur tests me (ESLint rokta hai). axios ka error kabhi log nahi (usme request ke headers/body).
 - **Routes:** contract pehle (`defineRoute`), handler `mountRoute(router, route, handler)` (`@beautinique/backend-server-kit`) se: input/output contract se check hota hai. Namuna: `backend/core/src/modules/platform/` (endpoint + event + subscriber); core ke tests ko `infra:up` chahiye.
 - `configs/`: shared ESLint factory (`eslint-config.js`, naam `eslint.config.js` nahi ho sakta) aur
   tsconfig presets.

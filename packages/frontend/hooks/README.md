@@ -55,7 +55,7 @@ const search = useQueryParamInput('search');
 
 ## Online status ka probe
 
-Browser sirf tab "offline" kehta hai jab device ka network hi jaaye; Wi-Fi juda ho par internet na ho to kuch nahi kehta. Isliye store chhoti `HEAD /favicon.ico?online-check=<time>` request (bina cookies, bina cache) **sirf apni site** ko bhejta hai: kisi teesri company (Google, Cloudflare) ko nahi, aur CSP me kuch nahi kholna. Koi bhi jawab (404 bhi) = online. Online rehte hue tab dikhne pe har 15 s, jawab na aaye to 0.5 s, 1 s, 2 s, phir 3 s pe dobara. Laptop (`localhost`) pe site hamesha milti hai, to wahan cable nikalne ka pata sirf browser ke `offline` event se chalta hai.
+Browser sirf tab "offline" kehta hai jab device ka network hi jaaye; Wi-Fi juda ho par internet na ho to kuch nahi kehta. Isliye store chhoti `HEAD /favicon.ico?online-check=<time>` request (axios ka fetch adapter, RULES §3.8; bina cookies, bina cache, axios ke apne headers bhi nahi) **sirf apni site** ko bhejta hai: kisi teesri company (Google, Cloudflare) ko nahi, aur CSP me kuch nahi kholna. Koi bhi jawab (404 bhi) = online. Online rehte hue tab dikhne pe har 15 s, jawab na aaye to 0.5 s, 1 s, 2 s, phir 3 s pe dobara. Laptop (`localhost`) pe site hamesha milti hai, to wahan cable nikalne ka pata sirf browser ke `offline` event se chalta hai.
 
 ## Server rendering
 

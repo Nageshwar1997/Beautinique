@@ -124,8 +124,9 @@ const client = createClient({ baseUrl: gatewayUrl, app: 'admin', getToken: () =>
 const ping = await client.call(getPing, { params: { pingId } }); // return type route ke output se
 ```
 
+- **axios pe** (owner, 2026-10-31; RULES §3.8): browser me axios ka XMLHttpRequest, Node pe `http`. `fetch` option diya ho to axios ka fetch adapter (tests); us raaste pe Node me `baseUrl` poora URL ho (axios `Request` banata hai). Bina body wale POST (`/auth/refresh`, `/auth/logout`) pe koi `Content-Type` nahi (axios warna form maan leta). `onNetwork('answered' | 'unanswered')` har request ke baad (caller ke abort pe nahi): api-client isse online status batata hai. Apps ye client seedha nahi, `@beautinique/frontend-api-client` se lete hain.
 - `call(route, { params, query, body }, { signal, idempotencyKey })`: path ban-ta hai (encode ke saath), query me `null`/`undefined` chhoot jaate hain aur arrays repeat hote hain, `X-BQ-App` + Bearer token jaata hai, aur `idempotency: true` routes pe `Idempotency-Key` apne aap (retry pe wahi key do: `idempotencyKey`). Request tab hi zaroori hai jab route me input ho.
-- Galti pe `ApiError` (`code`, `status`, `requestId`, `details`): server ka error body, ya body hamari na ho to `BAD_REQUEST`/`INTERNAL`; server na mile to `NETWORK_ERROR` (status 0); `data` na ho ya route ke output se na mile to `INVALID_RESPONSE` (`validateResponses: false` se band). Abort jaisa ka waisa dobara phenka jaata hai.
+- Galti pe `ApiError` (`code`, `status`, `requestId`, `details`): server ka error body, ya body hamari na ho to `BAD_REQUEST`/`INTERNAL`; server na mile to `NETWORK_ERROR` (status 0); `data` na ho ya route ke output se na mile to `INVALID_RESPONSE` (`validateResponses: false` se band); 2xx ke bahar har status (redirect bhi) error. Caller ka abort `signal.reason` (AbortError) hi phenkta hai, fetch jaisa.
 - TanStack Query keys: `queryKey(route, { params, query })` = `[module, route.id, { params, query }]` (body kabhi nahi); `queryKeyPrefix('platform')` ya `queryKeyPrefix('platform', 'platform.ping.get')` invalidate ke liye.
 
 ## Catalogue aur codegen
