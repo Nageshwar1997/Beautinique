@@ -15,8 +15,10 @@ function required(env: Record<string, string>, key: string): string {
   return value;
 }
 
-export default defineConfig(({ command, mode }) => {
-  const serving = command === 'serve';
+export default defineConfig(({ command, mode, isPreview = false }) => {
+  // the dev server only: React Router's prerender (/terms, /privacy) serves the build with a
+  // preview server, which calls no /api and must build without a .env (CI)
+  const serving = command === 'serve' && !isPreview;
   // .env on the laptop, Vercel's env in its build (and nothing in CI, where the key stays empty)
   const env = loadEnv(mode, import.meta.dirname, '');
   const gatewayUrl = (env.BQ_GATEWAY_URL ?? '').trim().replace(/\/+$/, '');

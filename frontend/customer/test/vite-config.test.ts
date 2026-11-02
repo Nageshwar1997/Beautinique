@@ -20,4 +20,10 @@ describe('vite.config.ts', () => {
     // a build has no dev proxy, so it needs no .env
     expect(built.server?.proxy).toBeUndefined();
   });
+
+  it('gives the preview server the prerender runs no dev proxy, so it asks no .env (CI has none)', () => {
+    // without a .env (CI) the dev proxy would throw for its keys; with one (a laptop) it would be set
+    const preview = config({ command: 'serve', mode: 'production', isPreview: true });
+    expect(preview.server?.proxy).toBeUndefined();
+  });
 });
