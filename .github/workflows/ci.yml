@@ -98,6 +98,18 @@ jobs:
             exit 1
           fi
       - run: npm test
+      # The apps' E2E (ARCHITECTURE §9.2): the real app on its dev server and the whole backend
+      # (scripts/e2e/backend.ts) on the services above, Chromium at 360/768/1280 px, light and dark,
+      # axe on every screen (owner, 2026-11-02: Chromium only in CI)
+      - run: npx playwright install --with-deps chromium
+      - run: npm run e2e --workspace customer
+      - name: Keep the E2E traces of a failed run
+        if: failure()
+        uses: actions/upload-artifact@v7
+        with:
+          name: e2e-traces
+          path: frontend/customer/test-results
+          retention-days: 7
       # Every check a publish runs (build, tests, package contents, publint, types), nothing published.
       - run: npm run verify -- --all --yes
       - run: npm audit --audit-level=high

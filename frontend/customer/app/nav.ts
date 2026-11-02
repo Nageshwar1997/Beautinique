@@ -8,4 +8,8 @@ import type { NavItem } from '@beautinique/frontend-app-shell';
 export const MAIN_NAV: readonly NavItem[] = [];
 
 /** Footer links: pages every visitor may need. */
-export const FOOTER_NAV: readonly NavItem[] = [{ label: 'Icon credits', to: '/credits' }];
+export const FOOTER_NAV: readonly NavItem[] = [
+  { label: 'Terms of use', to: '/terms' },
+  { label: 'Privacy notice', to: '/privacy' },
+  { label: 'Icon credits', to: '/credits' },
+];

@@ -1,6 +1,6 @@
 # ARCHITECTURE — BQ
 
-> **Status:** v1.42 draft (2026-10-31). [PRD.md](PRD.md) v1.0 pe based. Design ek multi-agent review se aaya (3 architecture proposals + review board + owner ke decisions), aur v1.1 me free tier ke official docs ke against verify hua.
+> **Status:** v1.43 draft (2026-11-02). [PRD.md](PRD.md) v1.0 pe based. Design ek multi-agent review se aaya (3 architecture proposals + review board + owner ke decisions), aur v1.1 me free tier ke official docs ke against verify hua.
 
 ## 0. Ek nazar me
 
@@ -382,6 +382,7 @@ Kai platforms alag users ko alag price dikhate hain. BQ ka rule: **ek product ka
 - **Internal apps ka idle (30 min):** app-shell me `IdleNotice`: bina activity 28 min pe "Stay signed in" dialog (refresh karta hai), 30 min pe sign-in page saaf sandesh ke saath.
 - **Playwright E2E isi kaam me:** har app ka sign-up/sign-in raasta (bundle + Mailpit), 360/768/1280 px, light/dark, axe; CI me chalta hai.
 - Recovery codes ek baar dikhte hain: copy, `.txt` download, "I've saved them" tick ke bina aage nahi. QR browser me banta hai (koi bahar ki site nahi).
+- **Customer auth-ui ke faisle (owner, 2026-11-02, PR 4):** sign-up me abhi sirf email + password + consent (naam/pincode profile ya checkout module me). Header session aane tak usi size ka khaali placeholder (SSR bina session, flash nahi). Signed-in user `/sign-in` ya `/sign-up` khole to seedha `next` (ya `/`). `/invitation` customer me bhi (Beauty Pro Buyer State Admin ka invite). Playwright CI me sirf Chromium (360 px mobile emulation samet); Firefox/WebKit laptop pe `--project` se. E2E har app ke `frontend/<app>/e2e/` me, shared setup (bundle, Mailpit) root `scripts/e2e/` me. Account pages PR 5 tak nahi: menu me sirf "Sign out"; `RequireSignIn` ready.
 
 ### 9.3 Vercel (Hobby, ₹0)
 
@@ -693,3 +694,4 @@ Sirf config badlegi, code nahi:
 | v1.40 | 2026-10-30 | §9.2: pickers ke faisle (owner): Select + ComboBox, date + range + time, ColorPicker bina alpha, HierarchySelect single + multiple. |
 | v1.41 | 2026-10-31 | §9.2: forms + auth-ui ke faisle (owner): packages ka order, sign-up/sign-in apps, `next`, cart sign-in ke saath, signed-in authenticator, idle notice, admin live, Playwright. |
 | v1.42 | 2026-10-31 | §9.2: signed-in authenticator ki detail (owner): routes, confirm pe password, badalna, recovery code se step-up, teeno badlav pe email, sessions rehte hain. |
+| v1.43 | 2026-11-02 | §9.2: customer auth-ui ke faisle (owner): sign-up fields, header placeholder, signed-in redirect, invitation customer me, Playwright Chromium, e2e folders. |

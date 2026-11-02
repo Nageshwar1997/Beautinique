@@ -4,6 +4,7 @@ import {
   type AppId,
   REFRESH_COOKIE_PATH,
   refreshCookieName,
+  sessionHintCookieName,
 } from '@beautinique/shared-contracts';
 import type { Request, Response } from 'express';
 
@@ -27,12 +28,20 @@ export function setAccessCookie(res: Response, app: AppId, accessToken: string):
 
 export function setSessionCookies(res: Response, session: IssuedSession): void {
   setAccessCookie(res, session.app, session.accessToken);
+  const maxAge = Math.max(0, session.expiresAt.getTime() - Date.now());
   res.cookie(refreshCookieName(session.app), session.refreshToken, {
     httpOnly: true,
     secure: true,
     sameSite: 'strict',
     path: REFRESH_COOKIE_PATH,
-    maxAge: Math.max(0, session.expiresAt.getTime() - Date.now()),
+    maxAge,
+  });
+  // the page's hint that a session may be there (contracts sessionHintCookieName): no secret
+  res.cookie(sessionHintCookieName(session.app), '1', {
+    secure: true,
+    sameSite: 'lax',
+    path: '/',
+    maxAge,
   });
 }
 
@@ -52,8 +61,9 @@ export function signedIn<T extends { session?: IssuedSession }>(
   return answer as WithoutSession<T>;
 }
 
-/** Clears both cookies of the app (logout, an ended session). */
+/** Clears the session cookies of the app and its hint (logout, an ended session). */
 export function clearSessionCookies(res: Response, app: AppId): void {
+  res.clearCookie(sessionHintCookieName(app), { secure: true, sameSite: 'lax', path: '/' });
   res.clearCookie(accessCookieName(app), {
     httpOnly: true,
     secure: true,

@@ -410,6 +410,15 @@ export const refreshCookieName = (app: AppId): string => `__Secure-bq_${app}_rt`
 export const REFRESH_COOKIE_PATH = '/api/v1/auth';
 
 /**
+ * A hint, not a credential (owner, 2026-11-02): `1` while the app may have a session, set and
+ * cleared with the session cookies, as long as the refresh cookie lives. The page reads it (not
+ * HttpOnly) and asks /iam/me only when it is there, so an anonymous visit costs no /iam/me and no
+ * refresh (the `auth` rate limit is per IP, and many share one on mobile networks). No secret and
+ * nothing of the person in it.
+ */
+export const sessionHintCookieName = (app: AppId): string => `__Host-bq_${app}_hint`;
+
+/**
  * A new access token (and refresh token) for the session in the refresh cookie; the old refresh
  * token stops working. One used again after its successor means it was copied: the session ends
  * and the person gets an email. No cookie, an ended session or an unknown token: SESSION_EXPIRED.

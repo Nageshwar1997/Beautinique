@@ -5,7 +5,7 @@ import { randomBytes } from 'node:crypto';
 import type { Request, Response } from 'express';
 import { describe, expect, it } from 'vitest';
 
-import { cookieOf, signedIn } from '../src/cookies.ts';
+import { clearSessionCookies, cookieOf, signedIn } from '../src/cookies.ts';
 import type { IssuedSession } from '../src/sessions.ts';
 
 // token-shaped values made at run time: a literal one looks like a key to gitleaks (HANDOFF §6)
@@ -20,16 +20,28 @@ const session: IssuedSession = {
   expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60_000),
 };
 
-/** A Response that only records the cookies set on it. */
+interface Options {
+  httpOnly?: boolean;
+  secure?: boolean;
+  path?: string;
+  maxAge?: number;
+}
+
+/** A Response that only records the cookies set and cleared on it. */
 function fakeResponse() {
-  const cookies: { name: string; value: string }[] = [];
+  const cookies: { name: string; value: string; options: Options }[] = [];
+  const cleared: { name: string; options: Options }[] = [];
   const res = {
-    cookie(name: string, value: string) {
-      cookies.push({ name, value });
+    cookie(name: string, value: string, options: Options) {
+      cookies.push({ name, value, options });
+      return res;
+    },
+    clearCookie(name: string, options: Options) {
+      cleared.push({ name, options });
       return res;
     },
   };
-  return { res: res as unknown as Response, cookies };
+  return { res: res as unknown as Response, cookies, cleared };
 }
 
 describe('signedIn', () => {
@@ -39,10 +51,33 @@ describe('signedIn', () => {
     expect(answer).toEqual({ next: 'signed-in', user: session.user });
     expect(JSON.stringify(answer)).not.toContain(session.accessToken);
     expect(JSON.stringify(answer)).not.toContain(secretPart);
-    expect(cookies).toEqual([
+    expect(cookies.map(({ name, value }) => ({ name, value }))).toEqual([
       { name: '__Host-bq_seller_at', value: session.accessToken },
       { name: '__Secure-bq_seller_rt', value: session.refreshToken },
+      { name: '__Host-bq_seller_hint', value: '1' },
     ]);
+  });
+
+  it('gives the page a hint it can read, with nothing in it, as long as the refresh cookie', () => {
+    const { res, cookies } = fakeResponse();
+    signedIn(res, { next: 'signed-in' as const, user: session.user, session });
+    const [access, refresh, hint] = cookies;
+    expect(access?.options.httpOnly).toBe(true);
+    expect(refresh?.options.httpOnly).toBe(true);
+    expect(hint?.options).toMatchObject({ secure: true, path: '/' });
+    expect(hint?.options.httpOnly).toBeUndefined();
+    expect(hint?.options.maxAge).toBe(refresh?.options.maxAge);
+  });
+
+  it('clears the hint with the session cookies', () => {
+    const { res, cleared } = fakeResponse();
+    clearSessionCookies(res, 'seller');
+    expect(cleared.map((cookie) => cookie.name).toSorted()).toEqual([
+      '__Host-bq_seller_at',
+      '__Host-bq_seller_hint',
+      '__Secure-bq_seller_rt',
+    ]);
+    expect(cleared.find((c) => c.name === '__Host-bq_seller_hint')?.options.path).toBe('/');
   });
 
   it('sets no cookie for a step that is not a session yet', () => {
