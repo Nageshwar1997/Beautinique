@@ -1,6 +1,6 @@
 import { afterEach, describe, expect, it } from 'vitest';
 
-import config from '../vite.config';
+import config, { devKeys } from '../vite.config';
 
 const saved = process.env.BQ_GATEWAY_URL;
 
@@ -22,8 +22,28 @@ describe('vite.config.ts', () => {
   });
 
   it('gives the preview server the prerender runs no dev proxy, so it asks no .env (CI has none)', () => {
-    // without a .env (CI) the dev proxy would throw for its keys; with one (a laptop) it would be set
     const preview = config({ command: 'serve', mode: 'production', isPreview: true });
     expect(preview.server?.proxy).toBeUndefined();
+    // React Router loads the config again for it without saying it is a preview: loading never
+    // asks the keys (on CI, with no .env, this threw)
+    expect(() => config({ command: 'serve', mode: 'production' })).not.toThrow();
+  });
+
+  it('stops the dev server, and only it, with the missing key named', () => {
+    const start = (env: Record<string, string>) => {
+      const plugin = devKeys(env);
+      expect(plugin.apply).toBe('serve');
+      // Vite calls it for the dev server only (a preview server has configurePreviewServer)
+      (plugin.configureServer as () => void)();
+    };
+    expect(() => {
+      start({});
+    }).toThrow('BQ_GATEWAY_URL is missing in frontend/customer/.env');
+    expect(() => {
+      start({ BQ_GATEWAY_URL: 'http://localhost:8080', ORIGIN_SECRET: ' ' });
+    }).toThrow('ORIGIN_SECRET is missing');
+    expect(() => {
+      start({ BQ_GATEWAY_URL: 'http://localhost:8080', ORIGIN_SECRET: 'a-secret' });
+    }).not.toThrow();
   });
 });
