@@ -207,14 +207,36 @@ export function sessions(deps: SessionDeps): Sessions {
   const now = deps.now ?? Date.now;
   const collection = mongo.db.collection<Session>(SESSIONS);
 
+  /**
+   * The second a new access token is issued in: never the one every session of the account ended
+   * in (a new password a moment ago). The gateway counts tokens of that second as from before the
+   * end (whole seconds, revokedUserKey), so one issued then would be turned back at once, its
+   * refresh too, and the person found signed out right after signing in. Waits for the next
+   * second instead (under one).
+   */
+  async function issueSecond(userId: string, at: number): Promise<number> {
+    const iat = Math.floor(at / 1000);
+    const since = await inRedis(() => redis.get(revokedUserKey(userId)));
+    if (since === null) return iat;
+    const after = Math.floor(Number(since) / 1000) + 1;
+    if (iat >= after) return iat;
+    const wait = after * 1000 - now();
+    if (wait > 0) {
+      await new Promise((resolve) => {
+        setTimeout(resolve, wait);
+      });
+    }
+    return after;
+  }
+
   async function accessToken(
     session: Pick<Session, '_id' | 'userId' | 'app' | 'methods' | 'stepUpAt'>,
     at: number,
     authzVersion: number,
   ) {
     const stepUpAt = session.stepUpAt ?? null;
+    const iat = await issueSecond(session.userId, at);
     const { kid, privateKey } = await signing.current();
-    const iat = Math.floor(at / 1000);
     return signJwt(
       {
         iss: TOKEN_ISSUER,

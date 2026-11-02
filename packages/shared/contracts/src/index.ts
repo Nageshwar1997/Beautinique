@@ -51,6 +51,7 @@ export {
   revokedUserKey,
   routes,
   SESSION_POLICIES,
+  sessionHintCookieName,
   type SessionPolicy,
   sessionReuseDetected,
   SIGN_UP_APPS,

@@ -1,4 +1,5 @@
 import { AppFrame, ErrorPage, ServerWake, ThemeScript } from '@beautinique/frontend-app-shell';
+import { Toaster } from '@beautinique/frontend-components';
 import displayFont from '@beautinique/frontend-styles/fonts/fraunces-latin.woff2?url';
 import sansFont from '@beautinique/frontend-styles/fonts/plus-jakarta-sans-latin.woff2?url';
 import {
@@ -14,6 +15,7 @@ import type { Route } from './+types/root';
 import stylesheet from './app.css?url';
 import { SiteFooter } from './components/SiteFooter';
 import { SiteHeader } from './components/SiteHeader';
+import { Providers } from './providers';
 
 /** The server's own wake address (gateway /wake), straight; none where the build had no address. */
 const GATEWAY_URL = import.meta.env.BQ_GATEWAY_URL;
@@ -56,11 +58,14 @@ export function Layout({ children }: { children: React.ReactNode }) {
       <body>
         {/* the free live server sleeps when idle: wake it, behind a screen only when it is slow;
             a sleeping one wakes only for a call straight to it, so its /wake is rung too */}
-        <ServerWake app="customer" kickUrl={WAKE_KICK_URL}>
-          <AppFrame header={<SiteHeader />} footer={<SiteFooter />}>
-            {children}
-          </AppFrame>
-        </ServerWake>
+        <Providers>
+          <ServerWake app="customer" kickUrl={WAKE_KICK_URL}>
+            <AppFrame header={<SiteHeader />} footer={<SiteFooter />}>
+              {children}
+            </AppFrame>
+          </ServerWake>
+          <Toaster />
+        </Providers>
         <ScrollRestoration />
         <Scripts />
       </body>

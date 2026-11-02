@@ -685,8 +685,8 @@ const mutations: Mutation[] = [
     name: 'refresh cookie sent everywhere',
     change: [
       [
-        "    sameSite: 'strict',\n    path: REFRESH_COOKIE_PATH,\n    maxAge:",
-        "    sameSite: 'strict',\n    path: '/',\n    maxAge:",
+        "    sameSite: 'strict',\n    path: REFRESH_COOKIE_PATH,\n    maxAge,",
+        "    sameSite: 'strict',\n    path: '/',\n    maxAge,",
       ],
     ],
     tests: 'two cookies',
@@ -696,11 +696,33 @@ const mutations: Mutation[] = [
     name: 'refresh cookie Lax',
     change: [
       [
-        "    sameSite: 'strict',\n    path: REFRESH_COOKIE_PATH,\n    maxAge:",
-        "    sameSite: 'lax',\n    path: REFRESH_COOKIE_PATH,\n    maxAge:",
+        "    sameSite: 'strict',\n    path: REFRESH_COOKIE_PATH,\n    maxAge,",
+        "    sameSite: 'lax',\n    path: REFRESH_COOKIE_PATH,\n    maxAge,",
       ],
     ],
     tests: 'two cookies',
+  },
+  {
+    file: 'cookies',
+    name: 'the session hint stays after logout',
+    change: [
+      [
+        "  res.clearCookie(sessionHintCookieName(app), { secure: true, sameSite: 'lax', path: '/' });\n",
+        '',
+      ],
+    ],
+    tests: 'clears the hint',
+  },
+  {
+    file: 'cookies',
+    name: 'the session hint outlives the session',
+    change: [
+      [
+        "  res.cookie(sessionHintCookieName(session.app), '1', {\n    secure: true,\n    sameSite: 'lax',\n    path: '/',\n    maxAge,",
+        "  res.cookie(sessionHintCookieName(session.app), '1', {\n    secure: true,\n    sameSite: 'lax',\n    path: '/',\n    maxAge: maxAge * 2,",
+      ],
+    ],
+    tests: 'hint it can read',
   },
   {
     file: 'cookies',
@@ -1426,6 +1448,20 @@ const mutations: Mutation[] = [
     name: 'an email and another account’s id find the email’s grants',
     change: [['if (!owner || (userId !== undefined && userId !== owner._id)) {', 'if (!owner) {']],
     tests: 'by email',
+  },
+  // a sign-in in the second every session ended (owner's E2E, 2026-11-02)
+  {
+    file: 'sessions',
+    name: 'a token in the second every session ended',
+    change: [['    if (since === null) return iat;\n', '    return iat;\n']],
+    tests: 'later second',
+  },
+  {
+    file: 'sessions',
+    name: 'a token of the next second issued without waiting for it',
+    change: [['    if (wait > 0) {\n', '    if (false) {\n']],
+    survives:
+      'a token under a second ahead of the clock passes every check (the gateway allows clock skew); the wait keeps its time true',
   },
 ];
 

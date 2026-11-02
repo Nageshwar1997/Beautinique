@@ -321,6 +321,28 @@ describe('ending sessions', () => {
     expect((await refreshWith(refreshOf(one))).status).toBe(401);
     expect((await refreshWith(refreshOf(two, 'seller'), 'seller')).status).toBe(401);
   });
+
+  it('issues a sign-in right after every session ended in a later second, so the gateway takes it', async () => {
+    const address = email('same-second');
+    const userId = await makeAccount(address);
+    // every session ended at the very end of the next second (a new password, on a clock a moment
+    // ahead): the gateway turns back tokens of that whole second, so a sign-in now (well under 2 s)
+    // must wait for the one after it
+    const ended = (Math.floor(Date.now() / 1000) + 1) * 1000 + 999;
+    await redis().set(revokedUserKey(userId), String(ended), 'PX', 60_000);
+    const answer = await signIn(address);
+    expect(answer.status).toBe(200);
+    const [, payload = ''] = accessOf(answer).split('.');
+    const { iat } = JSON.parse(Buffer.from(payload, 'base64url').toString()) as { iat: number };
+    expect(iat * 1000).toBeGreaterThan(ended);
+    expect(iat).toBe(Math.floor(ended / 1000) + 1);
+    // the refresh of that session too
+    const refreshed = await refreshWith(refreshOf(answer));
+    expect(refreshed.status).toBe(200);
+    const [, again = ''] = accessOf(refreshed).split('.');
+    const next = JSON.parse(Buffer.from(again, 'base64url').toString()) as { iat: number };
+    expect(next.iat * 1000).toBeGreaterThan(ended);
+  });
 });
 
 describe('signing keys', () => {
