@@ -1,6 +1,6 @@
 # MEMORY — BQ
 
-> **Status:** v1.37 (2026-11-03). Project ki yaaddasht: **kya tay hua aur kyun**, **pichhle kaam se kya seekha**, aur **kaunse jaal (traps) se bachna hai**. Poori detail baaki docs me hai; yahan short version aur pointers. Naya sabak ya decision aaye to yahan ek line jodo.
+> **Status:** v1.38 (2026-11-03). Project ki yaaddasht: **kya tay hua aur kyun**, **pichhle kaam se kya seekha**, aur **kaunse jaal (traps) se bachna hai**. Poori detail baaki docs me hai; yahan short version aur pointers. Naya sabak ya decision aaye to yahan ek line jodo.
 
 ## 1. Decision log
 
@@ -87,6 +87,7 @@
 | 2026-10-31 | Forms + auth-ui (owner ne saari recommendations maani): api-client → forms → auth-ui; sign-up sirf customer/seller/creator; customer ke alawa saare apps sign-in ke peeche; cart/wishlist sign-in ke saath, `next` se wapas usi page pe aur item ek baar; `/sign-in` aur `/sign-up` alag; signed-in authenticator ke naye routes; password badalna email code se; dummy terms/privacy; admin live; internal apps me idle notice; Playwright E2E | Backend har email ko ek jaisa jawab deta hai (account hai ya nahi, pata nahi chalta), isliye ek "email pehle" screen nahi ban sakti; guest cart ke liye browser storage chahiye (RULES §5.9 mana); 30 min idle server pe chupchaap session band karta tha | ARCHITECTURE §9.2; TASKS T6.1 |
 | 2026-11-03 | Customer account screens (owner ne saari recommendations maani, PR 5): `/account/security`, `/account/security/authenticator` (alag page), `/account/devices`; recovery codes bina tick ke chhodne pe warning; My Devices me saare apps + IP, confirm sirf "all other devices" pe; step-up dialog bina auto-submit; QR `qrcode.react` | Phone ke dialog me QR + 2 fields + codes tang; codes ek hi baar dikhte hain; phone pe apni hi screen ka QR scan nahi hota (isliye `otpauth://` link) | ARCHITECTURE §9.2; TASKS T6.1 |
 | 2026-10-27 | Identity ka live deploy fix aur T2.5 seedha `prerelease` pe, bina feature branch (owner, is baar ke liye)                                                                                                                                                                                                                                                                                                                                                                                                                        | Owner ne kaha                                                                                                                                                                                                                                                                                                                                                               | HANDOFF §4                                              |
+| 2026-11-03 | LinkedIn posts repo me `linkedin-posts/` (date ke folder, HISTORY, PDF carousel 1080×1350, images insaan doosre AI se); `/linkedin-post` skill draft banata hai, post insaan khud (koi API/browser automation nahi) | Bina kharche aur LinkedIn terms ke risk ke daily updates | linkedin-posts/README.md |
 
 ## 2. Pichhle kaam se seekhe sabak
 
@@ -186,3 +187,4 @@
 | v1.35   | 2026-10-27 | Decisions: release steps (naya package, lease 30 s, fingerprint, `db:release --env live`); fix aur T2.5 seedha `prerelease` pe. Sabak 21: Render me key code se pehle.               |
 | v1.36   | 2026-10-31 | Decision: forms + auth-ui (packages ka order, sign-in/sign-up apps, `next`, cart sign-in ke saath, idle notice, admin live, Playwright). |
 | v1.37   | 2026-11-03 | Decision: customer account screens (pages, set-up page, leave warning, My Devices, step-up, QR library). |
+| v1.38   | 2026-11-03 | Decision: LinkedIn posts (`linkedin-posts/`, `/linkedin-post` skill). |

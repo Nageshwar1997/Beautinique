@@ -101,6 +101,7 @@ npm run build
 - **Routes:** contract pehle (`defineRoute`), handler `mountRoute(router, route, handler)` (`@beautinique/backend-server-kit`) se: input/output contract se check hota hai. Namuna: `backend/core/src/modules/platform/` (endpoint + event + subscriber); core ke tests ko `infra:up` chahiye.
 - `configs/`: shared ESLint factory (`eslint-config.js`, naam `eslint.config.js` nahi ho sakta) aur
   tsconfig presets.
+- `linkedin-posts/`: build-in-public LinkedIn posts (date ke folder, `HISTORY.md`); `/linkedin-post` skill (`.claude/skills/linkedin-post/`) draft banata hai, post insaan khud karta hai. Niyam: [linkedin-posts/README.md](linkedin-posts/README.md).
 - `AGENTS.md`: doosre AI tools (Codex, Cursor, Copilot, Gemini ...) ke liye chhota pointer; niyam yahin (`CLAUDE.md`) rehte hain. Niyam badlo to dono dekho.
 - `.github/workflows/`: `ci.yml` (har PR, aur `main`/`prerelease`/`release` pe push), `release.yml`
   (packages publish, sirf `release` branch, haath se).
