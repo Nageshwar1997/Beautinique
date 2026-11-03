@@ -251,7 +251,10 @@ interface SignInInput {
   client: Client;
 }
 
-/** The account waits for its consent (a new one, or one new to this app): to the consent page. */
+/**
+ * The account waits for its consent (a new one, or one new to this app): to the consent page, with
+ * `next` in its address like every auth page's, so whatever moves a signed-in page on goes there.
+ */
 async function waitForConsent(deps: SocialDeps, waiting: SignUp): Promise<PageAnswer> {
   const ticket = randomToken();
   await inRedis(() =>
@@ -261,7 +264,8 @@ async function waitForConsent(deps: SocialDeps, waiting: SignUp): Promise<PageAn
       .expire(signUpKey(ticket), OAUTH_SIGN_UP_SECONDS)
       .exec(),
   );
-  return { location: OAUTH_SIGN_UP_PATH, state: null, signUp: ticket };
+  const query = waiting.next === '/' ? '' : `?next=${encodeURIComponent(waiting.next)}`;
+  return { location: `${OAUTH_SIGN_UP_PATH}${query}`, state: null, signUp: ticket };
 }
 
 /**

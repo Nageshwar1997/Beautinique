@@ -161,7 +161,7 @@ async function roundTrip(
 
 /** A new account's consent after its trip. */
 async function consentTo(page: Page, consent: unknown = { terms: true, adult: true }) {
-  expect(page.location).toBe('/sign-up/finish');
+  expect(page.location).toMatch(/^\/sign-up\/finish(?:\?next=[^&#]+)?$/);
   const ticket = page.cookies.get(SIGN_UP) ?? '';
   return call('POST', '/auth/oauth/sign-up', { cookie: `${SIGN_UP}=${ticket}`, body: { consent } });
 }
@@ -211,6 +211,8 @@ describe('a new account', () => {
     const subject = nextSubject();
     const page = await roundTrip('google', { subject, email: address }, { next: '/account' });
     expect(page.status).toBe(303);
+    // `next` in the consent page's address, like every auth page's
+    expect(page.location).toBe('/sign-up/finish?next=%2Faccount');
     // the trip's cookie goes; the sign-up waits with its own
     expect(page.cookies.get(STATE)).toBe('');
     const ticket = page.cookies.get(SIGN_UP) ?? '';

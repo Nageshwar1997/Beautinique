@@ -51,7 +51,7 @@ test('signs up with Google: the consent, then signed in; the next time straight 
   await page.getByRole('link', { name: 'Continue with Google' }).click();
 
   // a new account: its consent first
-  await expect(page).toHaveURL('/sign-up/finish');
+  await expect(page).toHaveURL('/sign-up/finish?next=%2Fcredits');
   await expect(page.getByRole('heading', { level: 1, name: 'Finish signing up' })).toBeVisible();
   await expect(page.getByText(email)).toBeVisible();
   await expectNoAxeViolations(page);

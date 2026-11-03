@@ -1,10 +1,13 @@
 import {
   AUTH_PATHS,
+  authHref,
   AuthLayout,
+  NEXT_PARAM,
   RedirectIfSignedIn,
   SocialSignUpFinish,
   TextLink,
 } from '@beautinique/frontend-auth-ui';
+import { useSearchParams } from 'react-router';
 
 import type { Route } from './+types/sign-up-finish';
 
@@ -18,6 +21,8 @@ export const meta: Route.MetaFunction = () => [
  * sign-up asks (terms, privacy, 18 or older), then signed in.
  */
 export default function SignUpFinish() {
+  const [search] = useSearchParams();
+  const next = search.get(NEXT_PARAM);
   return (
     <RedirectIfSignedIn>
       <AuthLayout
@@ -26,7 +31,7 @@ export default function SignUpFinish() {
         footer={
           <>
             Want to use your email instead?{' '}
-            <TextLink to={AUTH_PATHS.signUp}>Create an account</TextLink>
+            <TextLink to={authHref(AUTH_PATHS.signUp, next)}>Create an account</TextLink>
           </>
         }
       >
