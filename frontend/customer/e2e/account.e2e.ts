@@ -46,6 +46,7 @@ test('the account pages, every size and theme', async ({ page }) => {
   await accountButton(page, email).click();
   await page.getByRole('menuitem', { name: 'My Devices' }).click();
   await expect(page).toHaveURL('/account/devices');
+  await expect(page.getByRole('menu')).toBeHidden();
   await expect(page.getByRole('heading', { level: 1, name: 'My Devices' })).toBeVisible();
   await expect(page.getByText('This device')).toBeVisible();
   await expectNoAxeViolations(page);
@@ -115,7 +116,8 @@ test('signs another browser out from My Devices', async ({ page, browser }, test
   await page.reload();
   const devices = page.getByRole('list', { name: 'Devices' }).getByRole('listitem');
   await expect(devices).toHaveCount(2);
-  await page.getByRole('button', { name: /^Sign out (?!.*this device)/ }).click();
+  // the other device's button: its name ends with the app (this one's with "(this device)")
+  await page.getByRole('button', { name: /^Sign out .+, Beautinique$/ }).click();
   await expect(page.getByText(/is signed out\.$/).first()).toBeVisible();
   await expect(devices).toHaveCount(1);
 

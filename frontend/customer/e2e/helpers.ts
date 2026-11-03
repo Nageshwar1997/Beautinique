@@ -8,8 +8,25 @@ import { codeFor } from '../../../scripts/e2e/mail';
 export const PASSWORD = 'pink lipstick on a rainy day';
 export const NEW_PASSWORD = 'rose gold eyeliner at midnight';
 
-/** axe on the page as it is, colour contrast included (a real layout here). */
+/**
+ * Waits until nothing is fading or moving in or out (a menu, a dialog, a toast): mid-fade text is
+ * paler than it stays, which axe's contrast check would count. Endless ones (a spinner) are skipped.
+ */
+async function animationsDone(page: Page) {
+  await page.waitForFunction(() =>
+    document
+      .getAnimations()
+      .every(
+        (animation) =>
+          animation.playState !== 'running' ||
+          animation.effect?.getComputedTiming().endTime === Infinity,
+      ),
+  );
+}
+
+/** axe on the page once it is still, colour contrast included (a real layout here). */
 export async function expectNoAxeViolations(page: Page) {
+  await animationsDone(page);
   const results = await new AxeBuilder({ page }).analyze();
   expect(
     results.violations.map((v) => `${v.id}: ${v.nodes.map((n) => n.target.join(' ')).join(', ')}`),
