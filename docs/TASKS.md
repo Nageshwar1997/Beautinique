@@ -1,6 +1,6 @@
 # TASKS — BQ
 
-> **Status:** v1.79 (2026-11-03). Poore project ki task list, [ARCHITECTURE.md](ARCHITECTURE.md) §16 ke phases ke hisaab se. Har task "done" tabhi jab [RULES.md](RULES.md) §1.5 ki Definition of Done poori ho.
+> **Status:** v1.80 (2026-11-03). Poore project ki task list, [ARCHITECTURE.md](ARCHITECTURE.md) §16 ke phases ke hisaab se. Har task "done" tabhi jab [RULES.md](RULES.md) §1.5 ki Definition of Done poori ho.
 
 **Kaise use karein:**
 - `[ ]` baaki, `[~]` chal raha hai, `[x]` done.
@@ -11,22 +11,55 @@
 
 **Abhi ka focus:** Milestone 2: gateway + pehla live deploy (section D).
 
+## P. Progress (kitna ho gaya)
+
+**Poora project: 13% (2026-11-03).** Phase 1 poora; Phase 0, 2 aur 3 aadhe ke aas-paas; Phase 5, 6 aur 11 me thoda; Phase 4 aur 7–10 abhi shuru nahi hue.
+
+**Hisaab (har baar isi tarah):**
+- Sirf Phase 0–11 ke tasks gine jaate hain (sections A, B, C, D nahi).
+- Task: `[x]` = 1, `[~]` = ½, `[ ]` = 0. Phase % = in ka jod ÷ phase ke tasks.
+- Poora % = har phase ka % × uske hafte (phase heading ka andaaza, range ka beech: "4–5 hafte" = 4.5), sabka jod ÷ 38 (saare phases ke hafte). Bade phases (Commerce, WMS, Finance) ka wazan zyada, chhote shuruaati tasks ka kam. Poore number tak round.
+- Sirf task ginti se 26% aata hai (21.5 ÷ 82). Wo zyada dikhta hai kyunki shuru ka chhota task bhi utna hi ginta hai jitna Phase 8 ka bada task; isliye upar wala (hafton wala) number hi project ka %.
+- **Kab update:** jis commit/PR me kisi task ka checkbox badle, ya task jude/hate, usi me ye table, upar ka %, neeche ki itihaas line aur [HANDOFF.md](HANDOFF.md) §1 ki "Progress" line.
+
+| Phase                                 | Hafte  | Tasks  | `[x]`  | `[~]`  | `[ ]`  | Phase % |
+| ------------------------------------- | ------ | ------ | ------ | ------ | ------ | ------- |
+| 0. Monorepo + CI                      | 1.5    | 9      | 2      | 4      | 3      | 44%     |
+| 1. Server kit + contracts             | 1.5    | 7      | 7      | 0      | 0      | 100%    |
+| 2. Gateway                            | 1      | 8      | 4      | 2      | 2      | 63%     |
+| 3. bq-identity                        | 2.5    | 6      | 2      | 1      | 3      | 42%     |
+| 4. Core foundations                   | 4.5    | 9      | 0      | 0      | 9      | 0%      |
+| 5. Notify + Payments                  | 2      | 4      | 0      | 2      | 2      | 25%     |
+| 6. Frontend foundation                | 3      | 8      | 0      | 2      | 6      | 13%     |
+| 7. Commerce + payments                | 4.5    | 6      | 0      | 0      | 6      | 0%      |
+| 8. WMS + logistics + Delivery PWA     | 5.5    | 7      | 0      | 0      | 7      | 0%      |
+| 9. Finance + support                  | 4.5    | 6      | 0      | 0      | 6      | 0%      |
+| 10. UGC, growth, creators, governance | 5.5    | 6      | 0      | 0      | 6      | 0%      |
+| 11. Launch hardening                  | 2      | 6      | 1      | 0      | 5      | 17%     |
+| **Kul**                               | **38** | **82** | **16** | **11** | **55** | **13%** |
+
+**Itihaas:**
+
+| Date       | Poora % | Kya badla                                                                                                   |
+| ---------- | ------- | ----------------------------------------------------------------------------------------------------------- |
+| 2026-11-03 | 13%     | Pehli ginti. T0.2, T0.3, T5.1, T5.2 ke purane `[ ]` ko `[~]` kiya (kaam ho chuka tha, checkbox peeche tha). |
+
 ## D. Deploy-first plan (owner ka faisla, 2026-10-23)
 
 Har milestone ke end me kuch **live** dikhana hai. Ek hi live environment, free stack: `backend/bundle` Render free web service pe, Atlas M0, Render Key Value free, apps Vercel pe. Deploy `release` branch se (feature → `prerelease` → `release`, phir release safal hone pe `release` → `main`; RULES §2). Section C ki jaanch pehle deploy (M2) pe hi. Phase 11 me sirf hardening bachti hai (monitors, legal pages, cutover).
 
-| Milestone                   | Kya live hoga                                                                                            | Demo (kya dikha sakte ho)                                         | Kaam (backend + frontend)                                                    |
-| --------------------------- | -------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------- | ---------------------------------------------------------------------------- |
-| M2 Gateway + pehla deploy   | bundle (gateway + core) Render pe, Atlas M0, Render Key Value; customer app ka shell Vercel pe           | live URL khulta hai, `/status` hara, sample ping endpoint live    | gateway, deploy setup, env, section C; customer shell + landing page         |
+| Milestone                   | Kya live hoga                                                                                                                                                                                                                                    | Demo (kya dikha sakte ho)                                         | Kaam (backend + frontend)                                                    |
+| --------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ----------------------------------------------------------------- | ---------------------------------------------------------------------------- |
+| M2 Gateway + pehla deploy   | bundle (gateway + core) Render pe, Atlas M0, Render Key Value; customer app ka shell Vercel pe                                                                                                                                                   | live URL khulta hai, `/status` hara, sample ping endpoint live    | gateway, deploy setup, env, section C; customer shell + landing page         |
 | M3 Identity                 | login: email + password (sign-up, password set aur invitation pe email code; owner 2026-10-27), authenticator + recovery codes, roles/grants/invitations, step-up; customer + admin apps (Google/LinkedIn/GitHub sirf customer, auth-ui ke baad) | live pe signup/login, My Devices; Master doosre app me login nahi | identity service, sessions, JWKS; auth screens (auth-ui)                     |
-| M4 Core                     | seller apply → approve → listing QC → storefront (Pune)                                                  | live storefront pe products, product page, area check             | core modules, authz, media; seller/admin review screens, storefront UI       |
-| M5 Notify + Payments        | email (Brevo), web push, in-app inbox, Razorpay test webhook                                             | live pe email/push aate hain, test payment event                  | notify, payments; inbox UI, preferences                                      |
-| M6 Frontend foundation      | saare 11 apps Vercel pe, login + khaali dashboard, dono themes                                           | har app ka live URL                                               | apps template se, app-shell, `vercel.json`, security headers                 |
-| M7 Commerce                 | cart → checkout → order, Razorpay test mode, delivery pe UPI QR, invoice                                 | live pe test order shuru se aakhir tak                            | checkout, order states, payments, GST invoice; cart, checkout, order screens |
-| M8 WMS + Delivery PWA       | warehouse → rider → delivery/return; PWA install                                                         | phone pe Delivery PWA se dummy delivery                           | inventory ledger, state machines, routing; PWA aur warehouse screens         |
-| M9 Finance + support        | ledger, payouts (test), tickets + grievance timers                                                       | ek order ka ledger aur ticket ka SLA                              | journal, settlements, registers; support desk UI                             |
-| M10 UGC, growth, governance | reviews, CMS, creators, privacy, risk                                                                    | PRD §5 ke features live                                           | governance, privacy, risk; reviews, CMS, creator screens                     |
-| M11 Launch hardening        | monitors, alerts, legal pages, cutover                                                                   | launch                                                            | sab; E2E flows                                                               |
+| M4 Core                     | seller apply → approve → listing QC → storefront (Pune)                                                                                                                                                                                          | live storefront pe products, product page, area check             | core modules, authz, media; seller/admin review screens, storefront UI       |
+| M5 Notify + Payments        | email (Brevo), web push, in-app inbox, Razorpay test webhook                                                                                                                                                                                     | live pe email/push aate hain, test payment event                  | notify, payments; inbox UI, preferences                                      |
+| M6 Frontend foundation      | saare 11 apps Vercel pe, login + khaali dashboard, dono themes                                                                                                                                                                                   | har app ka live URL                                               | apps template se, app-shell, `vercel.json`, security headers                 |
+| M7 Commerce                 | cart → checkout → order, Razorpay test mode, delivery pe UPI QR, invoice                                                                                                                                                                         | live pe test order shuru se aakhir tak                            | checkout, order states, payments, GST invoice; cart, checkout, order screens |
+| M8 WMS + Delivery PWA       | warehouse → rider → delivery/return; PWA install                                                                                                                                                                                                 | phone pe Delivery PWA se dummy delivery                           | inventory ledger, state machines, routing; PWA aur warehouse screens         |
+| M9 Finance + support        | ledger, payouts (test), tickets + grievance timers                                                                                                                                                                                               | ek order ka ledger aur ticket ka SLA                              | journal, settlements, registers; support desk UI                             |
+| M10 UGC, growth, governance | reviews, CMS, creators, privacy, risk                                                                                                                                                                                                            | PRD §5 ke features live                                           | governance, privacy, risk; reviews, CMS, creator screens                     |
+| M11 Launch hardening        | monitors, alerts, legal pages, cutover                                                                                                                                                                                                           | launch                                                            | sab; E2E flows                                                               |
 
 **Har milestone ke end ki checklist:**
 1. CI green; PR `prerelease` → `release` merge (owner).
@@ -71,8 +104,8 @@ Har milestone ke end me kuch **live** dikhana hai. Ek hi live environment, free 
   3. **Frontend (Phase 6 ke saath):** `frontend-test-utils`, `frontend-icons`, `frontend-hooks`, `frontend-components`, `frontend-stores`, `frontend-api-client`, `frontend-authz`, `frontend-forms`, `frontend-app-shell`, `frontend-auth-ui`, `frontend-data-table`, `frontend-review-screens`, `frontend-maps`, `frontend-pwa-kit`, `frontend-config-vite`.
   4. **Feature packages (jab app ko chahiye):** `frontend-quill`, `frontend-tryon`, `frontend-tryon-assets`.
   Neev ke baad backend aur frontend ek saath chal sakte hain (do log ho to ek-ek track).
-- [ ] T0.2 4 apps → `frontend/` (customer, seller, admin, master). (Har app `npm run create -- --type app` se banta hai: SPA, customer SSR, delivery PWA; [packages/README.md](packages/README.md) §3.1. Abhi koi app bana nahi.)
-- [ ] T0.3 Gateway aur services → `backend/` (port sources ki tarah). (Har deployable aur bundle `npm run create -- --type backend` se banta hai, §3.2. Abhi koi bana nahi.)
+- [~] T0.2 4 apps → `frontend/` (customer, seller, admin, master). (Har app `npm run create -- --type app` se banta hai: SPA, customer SSR, delivery PWA; [packages/README.md](packages/README.md) §3.1. customer aur admin bane (owner, 2026-10-21); seller aur master baaki.)
+- [~] T0.3 Gateway aur services → `backend/` (port sources ki tarah). (Har deployable aur bundle `npm run create -- --type backend` se banta hai, §3.2. gateway, identity, core, bundle (2026-10-21) aur notify (2026-10-27) bane; payments baaki.)
 - [ ] T0.4 Media-service ka nested `.git` aur `.kilo` worktree hatana.
 - [ ] T0.5 Turborepo. (npm workspaces, root scripts, shared configs aur package CLI ho gaye: [packages/README.md](packages/README.md).)
 - [ ] T0.6 `ci.yml`: build (affected) baaki. (Format, lint, typecheck, test, packages verify aur npm audit wala pehla `ci.yml`, plus `release.yml`, ho gaye. 2026-10-21 gitleaks ho gaya: required `check` job ka pehla step, gitleaks 8.30.1 binary (version + SHA-256 pinned, koi action/licence nahi) har PR aur `main`/`prerelease`/`release` push pe tested commit ki poori history `--redact` ke saath scan karta hai, finding = job fail; `.gitleaks.toml` = default rules + password wale connection URL (Mongo, Valkey, Cloudinary) ka rule, path allow-list koi nahi kyunki repo ke fake values kisi rule pe nahi aate; poori history ka local scan: 0 findings; Ubuntu container me ci.yml ka step chala ke dekha: planted fake secret (tip, PR merge commit, add ke baad delete) fail, asli tree pass. GitHub ka pehla run (2026-10-21) `server-mongo` test ke nakli password wale Mongo URL (host `127.0.0.1:1`, jahan kuch nahi chalta) pe fail hua (commit `e533ace`, push ho chuka, history badal nahi sakte). Wo test sirf ye dekhta hai ki password error me na chhape, isliye ye ek finding fingerprint se `.gitleaksignore` me hai, wajah ke saath (poora path allow-list nahi). Local gitleaks 8.30.1 se poori history: no leaks; asli jaisa password URL ab bhi pakda jaata hai.)
@@ -139,8 +172,8 @@ Har milestone ke end me kuch **live** dikhana hai. Ek hi live environment, free 
 
 ## Phase 5. Notify + Payments (2 hafte)
 
-- [ ] T5.1 Notify: Brevo HTTPS email, web push, in-app inbox (SMS aur WhatsApp nahi).
-- [ ] T5.2 English templates, preferences aur consent, delivery log, OTP fast lane, Brevo ka daily budget (300/din, ARCH §7.1).
+- [~] T5.1 Notify: Brevo HTTPS email, web push, in-app inbox (SMS aur WhatsApp nahi). (Email ka hissa T3.1 PR 1 me ho gaya, 2026-10-27, [backend/notify](../backend/notify/README.md); web push aur in-app inbox baaki.)
+- [~] T5.2 English templates, preferences aur consent, delivery log, OTP fast lane, Brevo ka daily budget (300/din, ARCH §7.1). (OTP fast lane aur daily budget T3.1 PR 1 me ho gaye, 2026-10-27; baaki T5.1 ke web push aur inbox ke saath.)
 - [ ] T5.3 Payments: skeleton, fake driver, `razorpay:simulate` webhook CLI.
 - [ ] T5.4 bq-notify ki Dockerfile. **Docker Lesson 3.**
 
@@ -289,20 +322,21 @@ Har milestone ke end me kuch **live** dikhana hai. Ek hi live environment, free 
 | v1.60   | 2026-10-29 | T3.3 plan (3 PR) aur owner ke faisle; PR A (roles, grants, sign-in check, pehla Master) ka code.                                                                  |
 | v1.61   | 2026-10-29 | T3.3 PR B: roles/grants/invitations API, gateway authz version, invite email (uncommitted).                                                                       |
 | v1.62   | 2026-10-29 | A.9: har app live hone pe Render me GATEWAY__APP_HOSTS, GATEWAY__VERCEL_PROJECTS aur NOTIFY__APP_URLS me us app ko jodna (owner, saare 11 apps).                  |
-| v1.63 | 2026-10-29 | T3.3 PR C: gateway permission check, step-up, Security Officer routes; PR B merge; M3 row aaj ke login ke hisaab se. |
-| v1.64 | 2026-10-30 | T3.3 done: PR C (#32) merge. |
-| v1.65 | 2026-10-30 | T6.1: naya frontend-hooks package (port + naye hooks, playground). |
-| v1.66 | 2026-10-30 | T6.1: hooks PR #33 merge. |
-| v1.67 | 2026-10-30 | T6.1: components-base (Button, inputs, Checkbox/Radio, Dialog, Tooltip, toast). |
-| v1.68 | 2026-10-30 | T6.1: components-base PR #34 merge. |
-| v1.69 | 2026-10-30 | T6.1: components-pickers (Select, ComboBox, date pickers, ColorPicker, HierarchySelect). |
-| v1.70 | 2026-10-31 | T6.1: components-pickers PR #35 merge (CI ka flaky test theek). |
-| v1.71 | 2026-10-31 | T6.1: forms + auth-ui ka 6 PR plan (owner); api-client (axios, refresh, step-up, TanStack hooks); poore repo ka HTTP axios pe (owner). |
-| v1.72 | 2026-10-31 | T6.1: api-client PR #36 merge. |
-| v1.73 | 2026-10-31 | T6.1: forms package; components ke Button (busy submit) aur CodeInput (chhota phone) theek. |
-| v1.74 | 2026-10-31 | T6.1: forms PR #37 merge. |
-| v1.75 | 2026-10-31 | T3.1: signed-in authenticator (enroll/replace, naye codes, band, recovery code se step-up, security email). |
-| v1.76 | 2026-10-31 | T3.1: signed-in authenticator PR #38 merge. |
-| v1.77 | 2026-11-02 | T6.1: auth-ui package, customer auth pages, hint cookie, dummy legal pages, Playwright E2E. |
-| v1.78 | 2026-11-02 | T6.1: auth-ui customer PR #39 merge; CI build fix aur E2E green. |
-| v1.79 | 2026-11-03 | T6.1: auth-ui account screens (step-up, Security, set-up, recovery codes, My Devices) aur customer ke account pages. |
+| v1.63   | 2026-10-29 | T3.3 PR C: gateway permission check, step-up, Security Officer routes; PR B merge; M3 row aaj ke login ke hisaab se.                                              |
+| v1.64   | 2026-10-30 | T3.3 done: PR C (#32) merge.                                                                                                                                      |
+| v1.65   | 2026-10-30 | T6.1: naya frontend-hooks package (port + naye hooks, playground).                                                                                                |
+| v1.66   | 2026-10-30 | T6.1: hooks PR #33 merge.                                                                                                                                         |
+| v1.67   | 2026-10-30 | T6.1: components-base (Button, inputs, Checkbox/Radio, Dialog, Tooltip, toast).                                                                                   |
+| v1.68   | 2026-10-30 | T6.1: components-base PR #34 merge.                                                                                                                               |
+| v1.69   | 2026-10-30 | T6.1: components-pickers (Select, ComboBox, date pickers, ColorPicker, HierarchySelect).                                                                          |
+| v1.70   | 2026-10-31 | T6.1: components-pickers PR #35 merge (CI ka flaky test theek).                                                                                                   |
+| v1.71   | 2026-10-31 | T6.1: forms + auth-ui ka 6 PR plan (owner); api-client (axios, refresh, step-up, TanStack hooks); poore repo ka HTTP axios pe (owner).                            |
+| v1.72   | 2026-10-31 | T6.1: api-client PR #36 merge.                                                                                                                                    |
+| v1.73   | 2026-10-31 | T6.1: forms package; components ke Button (busy submit) aur CodeInput (chhota phone) theek.                                                                       |
+| v1.74   | 2026-10-31 | T6.1: forms PR #37 merge.                                                                                                                                         |
+| v1.75   | 2026-10-31 | T3.1: signed-in authenticator (enroll/replace, naye codes, band, recovery code se step-up, security email).                                                       |
+| v1.76   | 2026-10-31 | T3.1: signed-in authenticator PR #38 merge.                                                                                                                       |
+| v1.77   | 2026-11-02 | T6.1: auth-ui package, customer auth pages, hint cookie, dummy legal pages, Playwright E2E.                                                                       |
+| v1.78   | 2026-11-02 | T6.1: auth-ui customer PR #39 merge; CI build fix aur E2E green.                                                                                                  |
+| v1.79   | 2026-11-03 | T6.1: auth-ui account screens (step-up, Security, set-up, recovery codes, My Devices) aur customer ke account pages.                                              |
+| v1.80   | 2026-11-03 | §P Progress: poore project ka % (phase ke hafton ke wazan se, pehli ginti 13%), hisaab aur kab update; T0.2, T0.3, T5.1, T5.2 `[~]` (purane checkbox).            |

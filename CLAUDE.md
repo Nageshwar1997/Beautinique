@@ -14,7 +14,7 @@ launch jaisi banti hai. Legal cheezein dummy data ke saath implement hoti hain.
 
 1. [docs/HANDOFF.md](docs/HANDOFF.md): abhi kya chal raha hai, agla kaam.
 2. [docs/RULES.md](docs/RULES.md): kaam ke niyam (Definition of Done, git, code, testing, security, AI).
-3. [docs/TASKS.md](docs/TASKS.md): phases aur tasks (`T<phase>.<n>`), owner ke kaam (section A).
+3. [docs/TASKS.md](docs/TASKS.md): phases aur tasks (`T<phase>.<n>`), owner ke kaam (section A), project ka progress % (section P).
 4. [docs/MEMORY.md](docs/MEMORY.md): decision log, purane sabak, traps.
 5. [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md), [docs/PRD.md](docs/PRD.md), [docs/DESIGN.md](docs/DESIGN.md): zaroorat ke hisaab se, poore nahi.
 6. [docs/packages/README.md](docs/packages/README.md): packages ka CLI (create, publish, republish, update-deps).
@@ -110,6 +110,8 @@ npm run build
 
 [docs/HANDOFF.md](docs/HANDOFF.md) ke "Abhi ki halat" aur "Agla kaam" update karo: kya kiya, kya
 adhoora hai, kya uncommitted hai, kaunsa sawal kiske liye khula hai. Change log me ek line jodo.
+**Progress % (owner, 2026-11-03):** kisi task ka checkbox badla (ya task juda/hata) to usi commit me
+[docs/TASKS.md](docs/TASKS.md) §P ka table, poora % aur itihaas line (hisaab wahin likha hai), aur HANDOFF §1 ki "Progress" line.
 
 **Baari-baari (owner, 2026-10-25):** 2 developers, dono Claude Code ke saath. Weekly usage ~85% pe Claude
 naya kaam nahi uthata: kaam commit-ready, branch push, HANDOFF §4 me adhoora aur agla kaam saaf; doosra
