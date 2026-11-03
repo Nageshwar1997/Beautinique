@@ -5,6 +5,7 @@ import type { Config } from './config.ts';
 import { type Runtime, type RuntimeOptions, startRuntime } from './runtime.ts';
 
 export { type Config, readConfig } from './config.ts';
+export { grantMaster, type MasterGrantOutcome } from './rbac/bootstrap.ts';
 export { release, releaseDefinition } from './release.ts';
 
 export interface StartOptions {

@@ -13,9 +13,9 @@ import {
   type PassportSigner,
   passportSigner,
 } from '@beautinique/backend-server-kit';
-import { connectMongo } from '@beautinique/backend-server-mongo';
+import { connectMongo, withTransaction } from '@beautinique/backend-server-mongo';
 import { OUTBOX } from '@beautinique/backend-server-queue';
-import { otpSealContext } from '@beautinique/shared-contracts';
+import { APPS, otpSealContext } from '@beautinique/shared-contracts';
 import { Queue } from 'bullmq';
 import { expect } from 'vitest';
 
@@ -27,6 +27,8 @@ import {
   type Credentials,
 } from '../src/credentials.ts';
 import { challengeKey } from '../src/otp.ts';
+import { giveSystemGrant, type GrantRecord, GRANTS } from '../src/rbac/grants.ts';
+import { ROLE_SEEDS } from '../src/rbac/roles.ts';
 import { type RunningIdentity, start } from '../src/service.ts';
 import { LEGAL_ACCEPTANCES, type LegalAcceptance, type User, USERS } from '../src/users.ts';
 
@@ -217,11 +219,56 @@ export async function passwordCode(address: string, app = 'customer'): Promise<C
 export const verify = async (challengeId: string, password = PASSWORD, app = 'customer') =>
   post(`/auth/otp/${challengeId}/verify`, { code: await codeOf(challengeId), password }, { app });
 
-/** A new account with a password, made in the customer app. */
-export async function makeAccount(address: string, password = PASSWORD): Promise<string> {
+/**
+ * Gives a role as identity itself does (no appointer), in the role's widest scope: global where it
+ * may, else self, else a made-up id. True when it was new.
+ */
+export async function giveRole(userId: string, role: string, to = current): Promise<boolean> {
+  const seed = ROLE_SEEDS.find((one) => one.key === role);
+  if (!seed) throw new Error(`no role ${role}`);
+  const type = seed.scopeTypes[0] ?? 'self';
+  const scope = seed.scopeTypes.includes('global')
+    ? { type: 'global' as const, ids: [] }
+    : { type, ids: [type === 'self' ? userId : `${type}-1`] };
+  const { mongo } = to.runtime;
+  return withTransaction(mongo, (session) =>
+    giveSystemGrant(mongo, session, {
+      userId,
+      role,
+      app: seed.app,
+      scope,
+      via: 'migration',
+      now: new Date(),
+    }),
+  );
+}
+
+/**
+ * A role in every app, so the account can sign in anywhere: one that does not ask for an
+ * authenticator where the app has one (seller: not the Account Owner), else the main role.
+ */
+export async function giveEveryApp(userId: string, to = current): Promise<void> {
+  for (const app of APPS) {
+    const own = ROLE_SEEDS.filter((seed) => seed.app === app && !seed.signUp);
+    const role = own.find((seed) => !seed.mfaRequired) ?? own.find((seed) => seed.main);
+    if (role) await giveRole(userId, role.key, to);
+  }
+}
+
+/**
+ * A new account with a password, made in the customer app. `everyApp` (default): it also holds
+ * every app's main role, so a test of something else can sign in anywhere.
+ */
+export async function makeAccount(
+  address: string,
+  password = PASSWORD,
+  { everyApp = true }: { everyApp?: boolean } = {},
+): Promise<string> {
   const made = await verify((await signUpCode(address)).challengeId, password);
   expect(made.status, JSON.stringify(made.body)).toBe(200);
-  return String(made.body.data?.userId);
+  const userId = String(made.body.data?.userId);
+  if (everyApp) await giveEveryApp(userId);
+  return userId;
 }
 
 /** Moves a challenge's resend wait into the past (instead of waiting a minute). */
@@ -229,6 +276,7 @@ export const allowResend = (challengeId: string, to = current) =>
   to.runtime.redis.client.hset(challengeKey(challengeId), 'resendAfter', '0');
 
 export const users = (to = current) => to.runtime.mongo.db.collection<User>(USERS);
+export const grants = (to = current) => to.runtime.mongo.db.collection<GrantRecord>(GRANTS);
 export const acceptances = (to = current) =>
   to.runtime.mongo.db.collection<LegalAcceptance>(LEGAL_ACCEPTANCES);
 export const credentials = (to = current) =>

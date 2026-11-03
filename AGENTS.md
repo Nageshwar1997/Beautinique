@@ -1,6 +1,6 @@
 # AGENTS.md — Beautinique
 
-> **Status:** v1.3 (2026-10-25). Doosre AI coding tools (Codex, Cursor, Copilot, Gemini ...) ke liye. Asli niyam [CLAUDE.md](CLAUDE.md) me hain; yahan sirf wo hai jo kaam shuru karne se pehle jaanna zaroori hai. Farak ho to `CLAUDE.md` sahi hai.
+> **Status:** v1.4 (2026-11-03). Doosre AI coding tools (Codex, Cursor, Copilot, Gemini ...) ke liye. Asli niyam [CLAUDE.md](CLAUDE.md) me hain; yahan sirf wo hai jo kaam shuru karne se pehle jaanna zaroori hai. Farak ho to `CLAUDE.md` sahi hai.
 
 Beautinique: Indian beauty e-commerce monorepo (npm workspaces, Node 24, npm 12.2+). Education + portfolio project hai, par har cheez asli production jaisi banti hai. Is pe 2 developers baari-baari kaam karte hain, dono Claude Code ke saath (flow: [docs/HANDOFF.md](docs/HANDOFF.md) §8). Ye file tab kaam aati hai jab koi doosra AI tool repo khole.
 
@@ -36,10 +36,11 @@ npm run verify -- --all --yes
 
 - Imports/exports ka order **ESLint** (`simple-import-sort`) tay karta hai. File badalne ke baad `npx eslint <file> --fix`, phir `npx prettier --write <file>`. Editor ka "Organize Imports" mat chalao: wo alag order deta hai aur lint fail hota hai.
 - `zod` sirf `@beautinique/shared-zod` se, `mongodb` sirf `@beautinique/backend-server-mongo` se; transaction ke andar `Promise.all` nahi. ESLint inhe rokta hai.
+- HTTP calls sirf axios (apps `@beautinique/frontend-api-client` se); `fetch`/`node:http` request sirf gateway `proxy.ts` aur tests me. ESLint rokta hai.
 
 ## Kaam rokte waqt
 
-Chhote commits (Conventional Commits, jaise `feat(scope): ...`), sirf apne task ki files. [docs/HANDOFF.md](docs/HANDOFF.md) ke "Abhi ki halat" aur "Agla kaam" update karo: kya kiya, kya adhoora hai, kya uncommitted hai, kaunsa sawal kiske liye khula hai.
+Chhote commits (Conventional Commits, jaise `feat(scope): ...`), sirf apne task ki files. [docs/HANDOFF.md](docs/HANDOFF.md) ke "Abhi ki halat" aur "Agla kaam" update karo: kya kiya, kya adhoora hai, kya uncommitted hai, kaunsa sawal kiske liye khula hai. Kisi task ka checkbox badla (ya task juda/hata) to [docs/TASKS.md](docs/TASKS.md) §P ka progress % bhi update karo (hisaab wahin likha hai).
 
 ## Change log
 
@@ -49,3 +50,4 @@ Chhote commits (Conventional Commits, jaise `feat(scope): ...`), sirf apne task 
 | v1.1    | 2026-10-23 | Dependencies sirf `npm run update-deps` se.                                        |
 | v1.2    | 2026-10-23 | Claude ke baad Cursor: relay flow, `cursor/<task>` branches, kaam ka bantwara.     |
 | v1.3    | 2026-10-25 | Cursor relay hataya: dono developers Claude Code use karte hain (flow HANDOFF §8). |
+| v1.4    | 2026-11-03 | Kaam rokte waqt: checkbox badle to TASKS §P ka progress % bhi.                     |

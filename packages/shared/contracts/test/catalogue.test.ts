@@ -5,10 +5,15 @@ import {
   accessCookieName,
   APPS,
   AUTH_PROVIDERS,
+  AUTHENTICATOR_CHANGES,
+  authenticatorChanged,
+  confirmAuthenticator,
   confirmTotpEnroll,
   consentProblems,
+  disableAuthenticator,
   endOtherSessions,
   endSession,
+  enrollAuthenticator,
   events,
   getMe,
   getPing,
@@ -20,6 +25,7 @@ import {
   loginRecovery,
   loginTotp,
   logout,
+  newRecoveryCodes,
   OTP_PURPOSES,
   otpRequested,
   otpSealContext,
@@ -44,11 +50,29 @@ import {
   sessionReuseDetected,
   SIGN_UP_APPS,
   startTotpEnroll,
+  stepUp,
   TOKEN_ISSUER,
   tokenAudience,
   TOTP_REQUIRED_APPS,
   verifyOtp,
   wake,
+} from '../src';
+import {
+  finishSocialSignIn,
+  finishSocialSignUp,
+  getSocialSignUp,
+  listSocialProviders,
+  navigationZod,
+  OAUTH_COOKIE_PATH,
+  OAUTH_RESULTS,
+  OAUTH_SIGN_UP_PATH,
+  oauthSignUpCookieName,
+  oauthStateCookieName,
+  removeSignInMethod,
+  safeNextPath,
+  signInMethodChanged,
+  SOCIAL_PROVIDERS,
+  startSocialSignIn,
 } from '../src';
 
 const id = '0190a1b2-c3d4-7e5f-8a9b-0c1d2e3f4a5b';
@@ -75,6 +99,29 @@ describe('platform catalogue (Milestone 1 sample)', () => {
       'auth.sessions.list',
       'auth.sessions.end',
       'auth.sessions.endOthers',
+      'auth.authenticator.enroll',
+      'auth.authenticator.confirm',
+      'auth.authenticator.recoveryCodes',
+      'auth.authenticator.disable',
+      'iam.roles.list',
+      'iam.roles.create',
+      'iam.roles.update',
+      'iam.grants.list',
+      'iam.grants.give',
+      'iam.grants.end',
+      'iam.invitations.create',
+      'iam.invitations.list',
+      'iam.invitations.revoke',
+      'auth.invitations.code',
+      'auth.stepUp.verify',
+      'iam.users.resetAuthenticator',
+      'iam.users.endSessions',
+      'auth.socialProviders.list',
+      'auth.oauth.start',
+      'auth.oauth.callback',
+      'auth.socialSignUp.get',
+      'auth.socialSignUp.finish',
+      'auth.signInMethods.remove',
     ]);
     expect(events.latest('platform.ping.recorded')).toBe(pingRecorded);
     expect(permissions.get(pingRead.key)).toBe(pingRead);
@@ -147,7 +194,7 @@ describe('identity catalogue', () => {
     expect(otpRequested.producer).toBe('identity');
     const parsed = otpRequested.data.parse(otp);
     expect(parsed.email).toBe('riya@beautinique.example');
-    expect(OTP_PURPOSES).toEqual(['sign-in', 'sign-up', 'password']);
+    expect(OTP_PURPOSES).toEqual(['sign-in', 'sign-up', 'password', 'invite']);
     expect(otpSealContext(challengeId)).toBe(`identity.otp:${challengeId}`);
   });
 
@@ -300,6 +347,85 @@ describe('sessions', () => {
   });
 });
 
+describe('the signed-in authenticator (ARCHITECTURE §9.2)', () => {
+  const all = [enrollAuthenticator, confirmAuthenticator, newRecoveryCodes, disableAuthenticator];
+
+  it('are signed-in identity routes in every app; new codes and turning off need a step-up', () => {
+    for (const route of all) {
+      expect(route, route.id).toMatchObject({
+        access: { type: 'signed-in' },
+        owner: 'identity',
+        rateLimit: 'auth',
+        idempotency: false,
+        apps: APPS,
+      });
+    }
+    expect(all.map((route) => route.stepUp)).toEqual([false, false, true, true]);
+    expect(disableAuthenticator.method).toBe('DELETE');
+    expect(IDENTITY_ERROR_CODES).toMatchObject({
+      AUTHENTICATOR_EXISTS: 409,
+      AUTHENTICATOR_SETUP_EXPIRED: 400,
+      AUTHENTICATOR_REQUIRED_BY_ROLE: 409,
+      PASSWORD_REQUIRED: 400,
+      PASSWORD_INVALID: 400,
+    });
+  });
+
+  it('confirm with a six-digit code and the account’s password, for 10 recovery codes', () => {
+    const body = confirmAuthenticator.input.body;
+    expect(body.safeParse({ code: '482913', password: 'old' }).success).toBe(true);
+    expect(body.safeParse({ code: '482913' }).success).toBe(false);
+    expect(body.safeParse({ code: '48291', password: 'old' }).success).toBe(false);
+    expect(body.safeParse({ code: '482913', password: 'x'.repeat(129) }).success).toBe(false);
+    const ten = Array.from({ length: 10 }, () => 'ABCDE-FGH23');
+    for (const route of [confirmAuthenticator, newRecoveryCodes]) {
+      expect(route.output.safeParse({ recoveryCodes: ten }).success).toBe(true);
+      expect(route.output.safeParse({ recoveryCodes: ten.slice(1) }).success).toBe(false);
+    }
+  });
+
+  it('step up with an authenticator code or a recovery code, never both or neither', () => {
+    const body = stepUp.input.body;
+    expect(body.safeParse({ code: '482913' }).success).toBe(true);
+    expect(body.parse({ recoveryCode: 'abcde-fgh23' })).toEqual({ recoveryCode: 'ABCDE-FGH23' });
+    expect(body.safeParse({}).success).toBe(false);
+    expect(body.safeParse({ code: '482913', recoveryCode: 'ABCDE-FGH23' }).success).toBe(false);
+    expect(body.safeParse({ recoveryCode: '482913' }).success).toBe(false);
+    expect(stepUp.access).toEqual({ type: 'signed-in' });
+  });
+
+  it('count the recovery codes left in /iam/me (null without an authenticator)', () => {
+    const user = getMe.output.shape.user;
+    const me = {
+      userId: id,
+      email: 'a@b.example',
+      ageDeclaredAt: null,
+      signUpApp: 'customer',
+      providers: ['password'],
+      authenticator: true,
+    };
+    expect(user.safeParse({ ...me, recoveryCodesLeft: 3 }).success).toBe(true);
+    expect(user.safeParse({ ...me, authenticator: false, recoveryCodesLeft: null }).success).toBe(
+      true,
+    );
+    expect(user.safeParse({ ...me, recoveryCodesLeft: -1 }).success).toBe(false);
+    expect(user.safeParse(me).success).toBe(false);
+  });
+
+  it('tell the person of every change by a security event with no secret in it', () => {
+    expect(events.latest('identity.authenticator.changed')).toBe(authenticatorChanged);
+    expect(AUTHENTICATOR_CHANGES).toEqual(['enabled', 'replaced', 'recovery-codes', 'disabled']);
+    expect(Object.keys(authenticatorChanged.data.shape).sort()).toEqual([
+      'app',
+      'change',
+      'changedAt',
+      'device',
+      'email',
+      'userId',
+    ]);
+  });
+});
+
 describe('signed-in routes and the passport (T3.2 PR B)', () => {
   it('need a session in every app, and identity answers them', () => {
     for (const route of [getMe, listSessions, endSession, endOtherSessions]) {
@@ -323,5 +449,66 @@ describe('signed-in routes and the passport (T3.2 PR B)', () => {
       '/.well-known/passport-jwks.json',
       '/.well-known/jwks.json',
     ]);
+  });
+});
+
+describe('social sign-in (T3.1 PR 4)', () => {
+  it('is the customer app’s only, and its trips to the provider are pages the browser opens', () => {
+    expect(SOCIAL_PROVIDERS).toEqual(['google', 'linkedin', 'github']);
+    for (const provider of SOCIAL_PROVIDERS) expect(AUTH_PROVIDERS).toContain(provider);
+    const social = [
+      listSocialProviders,
+      startSocialSignIn,
+      finishSocialSignIn,
+      getSocialSignUp,
+      finishSocialSignUp,
+      removeSignInMethod,
+    ];
+    for (const route of social) {
+      expect(route.apps, route.id).toEqual(['customer']);
+      expect(route.owner, route.id).toBe('identity');
+    }
+    for (const route of [startSocialSignIn, finishSocialSignIn]) {
+      expect(route).toMatchObject({ method: 'GET', navigation: true, rateLimit: 'auth' });
+      expect(route.output).toBe(navigationZod);
+    }
+    expect('navigation' in listSocialProviders).toBe(false);
+    expect(removeSignInMethod).toMatchObject({ method: 'DELETE', stepUp: false });
+    expect(removeSignInMethod.access).toEqual({ type: 'signed-in' });
+    // a provider the app does not have is no route
+    expect(startSocialSignIn.input.params.safeParse({ provider: 'facebook' }).success).toBe(false);
+    expect(events.latest('identity.signInMethod.changed')).toBe(signInMethodChanged);
+    expect(IDENTITY_ERROR_CODES).toMatchObject({
+      OAUTH_SIGN_UP_EXPIRED: 400,
+      LAST_SIGN_IN_METHOD: 409,
+    });
+  });
+
+  it('keeps its cookies on the app’s host for the OAuth routes only', () => {
+    expect(oauthStateCookieName('customer')).toBe('__Secure-bq_customer_oauth');
+    expect(oauthSignUpCookieName('customer')).toBe('__Secure-bq_customer_oauth_signup');
+    expect(OAUTH_COOKIE_PATH).toBe('/api/v1/auth/oauth');
+    expect(startSocialSignIn.path.startsWith(OAUTH_COOKIE_PATH.replace('/api/v1', ''))).toBe(true);
+    expect(OAUTH_SIGN_UP_PATH).toBe('/sign-up/finish');
+    expect(OAUTH_RESULTS).toContain('cancelled');
+  });
+
+  it('comes back only to a path of the app (no open redirect)', () => {
+    for (const next of ['/', '/account', '/account/security?tab=1#x', '/sign-up/finish']) {
+      expect(safeNextPath(next), next).toBe(next);
+    }
+    for (const next of [
+      undefined,
+      '',
+      'account',
+      '//evil.example',
+      '/\\evil.example',
+      '/a\\b',
+      'https://evil.example',
+      '/a b',
+      `/${'x'.repeat(600)}`,
+    ]) {
+      expect(safeNextPath(next), String(next)).toBe('/');
+    }
   });
 });

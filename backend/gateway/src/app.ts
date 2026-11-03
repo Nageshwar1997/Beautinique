@@ -11,6 +11,7 @@ import {
   PASSPORT_JWKS_PATH,
   type RateLimitClass,
 } from '@beautinique/shared-contracts';
+import axios from 'axios';
 import type { Express } from 'express';
 
 import type { AppRegistry } from './apps.ts';
@@ -42,9 +43,11 @@ export interface GatewayAppOptions {
 /** Does the deployable's /health answer within 2 seconds? */
 async function isHealthy(origin: string): Promise<boolean> {
   try {
-    const res = await fetch(new URL('/health', origin), { signal: AbortSignal.timeout(2000) });
-    await res.arrayBuffer();
-    return res.ok;
+    const res = await axios.get(new URL('/health', origin).href, {
+      signal: AbortSignal.timeout(2000),
+      validateStatus: () => true,
+    });
+    return res.status >= 200 && res.status <= 299;
   } catch {
     return false;
   }

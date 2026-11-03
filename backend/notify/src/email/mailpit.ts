@@ -1,3 +1,5 @@
+import axios, { type AxiosResponse } from 'axios';
+
 import {
   type EmailFrom,
   type EmailMessage,
@@ -23,12 +25,11 @@ export function mailpitSender({ url, from, timeoutMs = 5_000 }: MailpitOptions):
   return {
     name: 'mailpit',
     send: async (message: EmailMessage) => {
-      let response: Response;
+      let response: AxiosResponse<unknown>;
       try {
-        response = await fetch(endpoint, {
-          method: 'POST',
-          headers: { 'content-type': 'application/json', accept: 'application/json' },
-          body: JSON.stringify({
+        response = await axios.post<unknown>(
+          endpoint.href,
+          JSON.stringify({
             From: { Email: from.email, Name: from.name },
             To: [{ Email: message.to }],
             Subject: message.subject,
@@ -36,17 +37,21 @@ export function mailpitSender({ url, from, timeoutMs = 5_000 }: MailpitOptions):
             HTML: message.html,
             Tags: message.tags,
           }),
-          signal: AbortSignal.timeout(timeoutMs),
-        });
+          {
+            headers: { 'content-type': 'application/json', accept: 'application/json' },
+            signal: AbortSignal.timeout(timeoutMs),
+            maxRedirects: 0,
+            validateStatus: () => true,
+          },
+        );
       } catch {
+        // axios's error holds the request (the message): never pass it on
         throw networkFailure('MAILPIT');
       }
-      if (!response.ok) {
-        await response.body?.cancel();
+      if (response.status < 200 || response.status > 299) {
         throw httpFailure('MAILPIT', response.status);
       }
-      const body: unknown = await response.json().catch(() => null);
-      return { providerId: providerIdOf(body, 'ID') };
+      return { providerId: providerIdOf(response.data, 'ID') };
     },
   };
 }

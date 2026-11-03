@@ -201,7 +201,7 @@ const mutations: Mutation[] = [
   {
     file: 'proxy',
     name: 'the gateway does not tell the client IP',
-    change: [['  headers[HEADERS.clientIp.toLowerCase()] = ip;\n', '']],
+    change: [['  headers[HEADERS.clientIp.toLowerCase()] = caller.ip;\n', '']],
     tests: 'sends a request to its owner',
   },
   {
@@ -366,8 +366,135 @@ const mutations: Mutation[] = [
   {
     file: 'proxy',
     name: 'no passport to the owner',
-    change: [['  if (passport) headers[HEADERS.passport.toLowerCase()] = passport;\n', '']],
+    change: [
+      ['  if (caller.passport) headers[HEADERS.passport.toLowerCase()] = caller.passport;\n', ''],
+    ],
     tests: '60-second passport',
+  },
+  {
+    file: 'sessions',
+    name: 'a token from before a grant change still counts',
+    change: [
+      ['      if (current !== null && Number(current) > authzVersion) throw signIn();\n', ''],
+    ],
+    tests: 'grants changed',
+  },
+  {
+    file: 'sessions',
+    name: 'a newer token is refused too',
+    change: [['Number(current) > authzVersion', 'Number(current) >= authzVersion']],
+    tests: 'grants changed',
+  },
+  // T3.3 PR C: the coarse permission check and step-up
+  {
+    file: 'sessions',
+    name: 'no list from identity lets through',
+    change: [["if (raw === null) return 'stale';", "if (raw === null) return 'yes';"]],
+    tests: 'permission route through only',
+  },
+  {
+    file: 'sessions',
+    name: 'a list of any authz version counts',
+    change: [
+      [
+        'if (list.v !== signedIn.authzVersion || !Array.isArray(list.keys))',
+        'if (!Array.isArray(list.keys))',
+      ],
+    ],
+    tests: 'permission route through only',
+  },
+  {
+    file: 'sessions',
+    name: 'any key passes',
+    change: [["return list.keys.includes(permission) ? 'yes' : 'no';", "return 'yes';"]],
+    tests: 'permission route through only',
+  },
+  {
+    file: 'sessions',
+    name: 'the token’s step-up is not read',
+    change: [
+      ["stepUpAt: typeof claims.su === 'number' ? claims.su * 1000 : null,", 'stepUpAt: null,'],
+    ],
+    tests: 'permission route through only',
+  },
+  {
+    file: 'proxy',
+    name: 'a stale list lets through',
+    change: [["        if (held === 'stale') {", '        if (false) {']],
+    tests: 'permission route through only',
+  },
+  {
+    file: 'proxy',
+    name: 'a permission route without the key',
+    change: [
+      [
+        "        if (held === 'no') throw new AppError('FORBIDDEN', 'You do not have access to this.');\n",
+        '',
+      ],
+    ],
+    tests: 'permission route through only',
+  },
+  {
+    file: 'proxy',
+    name: 'step-up never asked',
+    change: [
+      ['if (route.stepUp && !stepUpFresh(signedIn.stepUpAt, Date.now())) {', 'if (false) {'],
+    ],
+    tests: 'permission route through only',
+  },
+  {
+    file: 'proxy',
+    name: 'a step-up lasts a moment longer',
+    change: [
+      ['now - stepUpAt <= STEP_UP_SECONDS * 1000', 'now - stepUpAt < STEP_UP_SECONDS * 1000'],
+    ],
+    tests: 'fresh for 5 minutes',
+  },
+  {
+    file: 'proxy',
+    name: 'a step-up from the future counts',
+    change: [['stepUpAt <= now + 30_000 && ', '']],
+    tests: 'fresh for 5 minutes|permission route through only',
+  },
+  {
+    file: 'proxy',
+    name: 'a signed-in step-up route never asks one',
+    change: [
+      [
+        'if (route.stepUp && !stepUpFresh(signedIn.stepUpAt, Date.now())) {',
+        "if (route.access.type === 'permission' && route.stepUp && !stepUpFresh(signedIn.stepUpAt, Date.now())) {",
+      ],
+    ],
+    tests: 'one’s own account',
+  },
+  // a page the browser opened (navigation routes, T3.1 PR 4)
+  {
+    file: 'proxy',
+    name: 'a page without the app header is never let through',
+    change: [
+      [
+        'const app = req.get(HEADERS.app) ?? pageApp(req, manifest, apps);',
+        'const app = req.get(HEADERS.app);',
+      ],
+    ],
+    tests: 'a page the browser opened',
+  },
+  {
+    file: 'proxy',
+    name: 'every route takes the app from the host',
+    change: [
+      [
+        'if (findRoute(manifest, req.method, req.path)?.route.navigation !== true) return undefined;',
+        '',
+      ],
+    ],
+    tests: 'a page the browser opened',
+  },
+  {
+    file: 'proxy',
+    name: 'the owner never hears which app',
+    change: [['  headers[HEADERS.app.toLowerCase()] = caller.app;\n', '']],
+    tests: 'a page the browser opened',
   },
 ];
 

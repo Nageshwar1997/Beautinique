@@ -1,4 +1,10 @@
-import type { AppId, OTP_PURPOSES } from '@beautinique/shared-contracts';
+import type {
+  AppId,
+  AUTHENTICATOR_CHANGES,
+  OTP_PURPOSES,
+  SIGN_IN_METHOD_CHANGES,
+  SocialProvider,
+} from '@beautinique/shared-contracts';
 import { formatDateTime } from '@beautinique/shared-utils';
 
 import type { EmailMessage } from './port.ts';
@@ -51,6 +57,11 @@ const WORDING: Readonly<
     subject: `Your ${appName} sign-in code`,
     lead: `Use this code to sign in to ${appName}:`,
     misuse: 'sign in',
+  }),
+  invite: (appName) => ({
+    subject: `Accept your ${appName} invitation`,
+    lead: `Use this code to confirm your email and accept your invitation to ${appName}:`,
+    misuse: 'accept your invitation',
   }),
 };
 
@@ -117,4 +128,210 @@ export function sessionReuseEmail({
 </body>
 </html>`;
   return { to, subject, text, html, tags: ['security-session-reuse'] };
+}
+
+export interface InvitationEmailInput {
+  to: string;
+  app: AppId;
+  /** The role, as identity names it, e.g. `State Admin` */
+  roleName: string;
+  /** Until when it can be accepted (ISO) */
+  expiresAt: string;
+  /** The app's address (NOTIFY__APP_URLS); left out = no link */
+  url?: string | undefined;
+}
+
+/**
+ * Someone was invited to a role (TASKS T3.3). No secret in it: the person accepts in the app with
+ * this email address and an email code, so a forwarded invitation is no use to anyone else.
+ */
+export function invitationEmail({
+  to,
+  app,
+  roleName,
+  expiresAt,
+  url,
+}: InvitationEmailInput): EmailMessage {
+  const appName = APP_NAMES[app];
+  const subject = `You are invited to ${appName}`;
+  const lead = `You are invited to ${appName} as ${roleName}.`;
+  const where = url === undefined ? `the ${appName} app` : `${appName} (${url})`;
+  const how = `To accept, open ${where}, choose "Accept an invitation" and use this email address. We will send you a code to confirm it, and you set your password there (if you have a Beautinique account already, it keeps its password).`;
+  const until = `The invitation works until ${formatDateTime(expiresAt)} IST.`;
+  const ignore =
+    'If you did not expect this, ignore this email: nothing happens unless you accept.';
+  const text = [lead, '', how, '', until, '', ignore, '', `– ${appName}`].join('\n');
+  const button =
+    url === undefined
+      ? ''
+      : `<tr><td style="padding:8px 28px"><a href="${escapeHtml(url)}" style="display:inline-block;padding:12px 20px;background:#1f1a1c;color:#ffffff;border-radius:8px;text-decoration:none;font-size:15px">Open ${escapeHtml(appName)}</a></td></tr>`;
+  const html = `<!doctype html>
+<html lang="en">
+<body style="margin:0;padding:24px;background:#f7f4f2;font-family:Arial,Helvetica,sans-serif;color:#1f1a1c">
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:480px;margin:0 auto;background:#ffffff;border-radius:12px">
+<tr><td style="padding:28px 28px 8px;font-size:16px;line-height:24px;font-weight:bold">${escapeHtml(lead)}</td></tr>
+<tr><td style="padding:8px 28px;font-size:14px;line-height:22px">${escapeHtml(how)}</td></tr>
+${button}
+<tr><td style="padding:8px 28px;font-size:14px;line-height:22px">${escapeHtml(until)}</td></tr>
+<tr><td style="padding:8px 28px 28px;font-size:13px;line-height:20px;color:#5c5357">${escapeHtml(ignore)}</td></tr>
+</table>
+<p style="max-width:480px;margin:16px auto 0;font-size:12px;color:#5c5357;text-align:center">${escapeHtml(appName)}</p>
+</body>
+</html>`;
+  return { to, subject, text, html, tags: ['invitation'] };
+}
+
+export interface AuthenticatorResetEmailInput {
+  to: string;
+  /** When it was reset (ISO) */
+  resetAt: string;
+}
+
+/**
+ * A Security Officer reset the account's authenticator (ARCHITECTURE §7.1): what happened, when,
+ * and what to do if it was not asked for. Every session of the account ended with it.
+ */
+export function authenticatorResetEmail({
+  to,
+  resetAt,
+}: AuthenticatorResetEmailInput): EmailMessage {
+  const appName = APP_NAMES.customer;
+  const subject = 'Your Beautinique authenticator was reset';
+  const lead = `Your authenticator app was removed from your Beautinique account on ${formatDateTime(resetAt)} IST, and you were signed out everywhere. Where an authenticator is required, you set up a new one at your next sign-in.`;
+  const next =
+    'If you did not ask for this, set a new password with "Forgot password" on the sign-in page and tell your manager or Beautinique support at once.';
+  const text = [lead, '', next, '', `– ${appName}`].join('\n');
+  const html = `<!doctype html>
+<html lang="en">
+<body style="margin:0;padding:24px;background:#f7f4f2;font-family:Arial,Helvetica,sans-serif;color:#1f1a1c">
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:480px;margin:0 auto;background:#ffffff;border-radius:12px">
+<tr><td style="padding:28px 28px 8px;font-size:16px;line-height:24px">${escapeHtml(lead)}</td></tr>
+<tr><td style="padding:8px 28px 28px;font-size:14px;line-height:22px">${escapeHtml(next)}</td></tr>
+</table>
+<p style="max-width:480px;margin:16px auto 0;font-size:12px;color:#5c5357;text-align:center">${escapeHtml(appName)}</p>
+</body>
+</html>`;
+  return { to, subject, text, html, tags: ['security-authenticator-reset'] };
+}
+
+export interface AuthenticatorChangedEmailInput {
+  to: string;
+  change: (typeof AUTHENTICATOR_CHANGES)[number];
+  /** The app it was done in */
+  app: AppId;
+  /** `Chrome on Windows` */
+  device: string;
+  /** When (ISO) */
+  changedAt: string;
+}
+
+const AUTHENTICATOR_CHANGE_TEXT: Readonly<
+  Record<AuthenticatorChangedEmailInput['change'], { subject: string; what: string; now: string }>
+> = {
+  enabled: {
+    subject: 'An authenticator was set up for your Beautinique account',
+    what: 'An authenticator app was set up for your account',
+    now: 'From now on, every sign-in asks for its code.',
+  },
+  replaced: {
+    subject: 'Your Beautinique authenticator was replaced',
+    what: 'A new authenticator app replaced the old one on your account',
+    now: 'The old one and its recovery codes no longer work.',
+  },
+  'recovery-codes': {
+    subject: 'New recovery codes for your Beautinique account',
+    what: 'New recovery codes were made for your account',
+    now: 'The old ones no longer work.',
+  },
+  disabled: {
+    subject: 'Your Beautinique authenticator was turned off',
+    what: 'The authenticator app was turned off for your account',
+    now: 'Sign-ins now ask only for your password.',
+  },
+};
+
+/**
+ * The person changed their own authenticator (ARCHITECTURE §9.2): what changed, where and when,
+ * and what to do if it was not them. Their sessions stay, so the way out ends them.
+ */
+export function authenticatorChangedEmail({
+  to,
+  change,
+  app,
+  device,
+  changedAt,
+}: AuthenticatorChangedEmailInput): EmailMessage {
+  const appName = APP_NAMES[app];
+  const { subject, what, now } = AUTHENTICATOR_CHANGE_TEXT[change];
+  const lead = `${what} in ${appName} (${device}) on ${formatDateTime(changedAt)} IST. ${now}`;
+  const next =
+    'If this was not you, set a new password with "Forgot password" on the sign-in page at once (that signs you out everywhere) and contact Beautinique support.';
+  const text = [lead, '', next, '', `– ${appName}`].join('\n');
+  const html = `<!doctype html>
+<html lang="en">
+<body style="margin:0;padding:24px;background:#f7f4f2;font-family:Arial,Helvetica,sans-serif;color:#1f1a1c">
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:480px;margin:0 auto;background:#ffffff;border-radius:12px">
+<tr><td style="padding:28px 28px 8px;font-size:16px;line-height:24px">${escapeHtml(lead)}</td></tr>
+<tr><td style="padding:8px 28px 28px;font-size:14px;line-height:22px">${escapeHtml(next)}</td></tr>
+</table>
+<p style="max-width:480px;margin:16px auto 0;font-size:12px;color:#5c5357;text-align:center">${escapeHtml(appName)}</p>
+</body>
+</html>`;
+  return { to, subject, text, html, tags: [`security-authenticator-${change}`] };
+}
+
+export interface SignInMethodEmailInput {
+  to: string;
+  provider: SocialProvider;
+  change: (typeof SIGN_IN_METHOD_CHANGES)[number];
+  /** The app it happened in */
+  app: AppId;
+  /** `Chrome on Windows` */
+  device: string;
+  /** When (ISO) */
+  changedAt: string;
+}
+
+const PROVIDER_NAMES: Readonly<Record<SocialProvider, string>> = {
+  google: 'Google',
+  linkedin: 'LinkedIn',
+  github: 'GitHub',
+};
+
+/**
+ * A social sign-in was linked to the account or taken off it (TASKS T3.1 PR 4): which one, where
+ * and when, and what to do if it was not them.
+ */
+export function signInMethodEmail({
+  to,
+  provider,
+  change,
+  app,
+  device,
+  changedAt,
+}: SignInMethodEmailInput): EmailMessage {
+  const appName = APP_NAMES[app];
+  const name = PROVIDER_NAMES[provider];
+  const subject =
+    change === 'linked'
+      ? `${name} sign-in was added to your Beautinique account`
+      : `${name} sign-in was removed from your Beautinique account`;
+  const lead =
+    change === 'linked'
+      ? `Your Beautinique account can now be signed in to with ${name}. It was added in ${appName} (${device}) on ${formatDateTime(changedAt)} IST.`
+      : `Signing in with ${name} was removed from your Beautinique account in ${appName} (${device}) on ${formatDateTime(changedAt)} IST.`;
+  const next =
+    'If this was not you, set a new password with "Forgot password" on the sign-in page at once (that signs you out everywhere) and contact Beautinique support.';
+  const text = [lead, '', next, '', `– ${appName}`].join('\n');
+  const html = `<!doctype html>
+<html lang="en">
+<body style="margin:0;padding:24px;background:#f7f4f2;font-family:Arial,Helvetica,sans-serif;color:#1f1a1c">
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:480px;margin:0 auto;background:#ffffff;border-radius:12px">
+<tr><td style="padding:28px 28px 8px;font-size:16px;line-height:24px">${escapeHtml(lead)}</td></tr>
+<tr><td style="padding:8px 28px 28px;font-size:14px;line-height:22px">${escapeHtml(next)}</td></tr>
+</table>
+<p style="max-width:480px;margin:16px auto 0;font-size:12px;color:#5c5357;text-align:center">${escapeHtml(appName)}</p>
+</body>
+</html>`;
+  return { to, subject, text, html, tags: [`security-sign-in-${provider}-${change}`] };
 }

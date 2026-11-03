@@ -61,32 +61,32 @@ describe('generateFiles', () => {
       '/auth/sessions',
       '/auth/sessions/{sessionId}',
       '/auth/sessions/end-others',
+      '/auth/authenticator/enroll',
+      '/auth/authenticator/confirm',
+      '/auth/authenticator/recovery-codes',
+      '/auth/authenticator',
+      '/iam/roles',
+      '/iam/roles/{roleKey}',
+      '/iam/grants',
+      '/iam/grants/{grantId}/end',
+      '/iam/invitations',
+      '/iam/invitations/{invitationId}/revoke',
+      '/auth/invitations/code',
+      '/auth/step-up',
+      '/iam/users/{userId}/authenticator/reset',
+      '/iam/users/{userId}/sessions/end',
+      '/auth/oauth/providers',
+      '/auth/oauth/{provider}/start',
+      '/auth/oauth/{provider}/callback',
+      '/auth/oauth/sign-up',
+      '/auth/sign-in-methods/{provider}',
     ]);
     const manifest = parsed('gateway-manifest.json') as {
       version: string;
       routes: { id: string }[];
     };
     expect(manifest.version).toBe('1.0.0');
-    expect(manifest.routes.map((r) => r.id)).toEqual([
-      'platform.ping.record',
-      'platform.ping.get',
-      'platform.server.wake',
-      'auth.signUp.code',
-      'auth.password.code',
-      'auth.otp.resend',
-      'auth.otp.verify',
-      'auth.login.password',
-      'auth.login.totp',
-      'auth.login.recovery',
-      'auth.login.totpEnroll',
-      'auth.login.totpConfirm',
-      'auth.session.refresh',
-      'auth.session.logout',
-      'iam.me.get',
-      'auth.sessions.list',
-      'auth.sessions.end',
-      'auth.sessions.endOthers',
-    ]);
+    expect(manifest.routes.map((r) => r.id)).toEqual(routes.map((r) => r.id));
   });
 
   it('lists every event version with the JSON Schema of its envelope', () => {
@@ -96,19 +96,33 @@ describe('generateFiles', () => {
       }
     ).events;
     expect(list.map((e) => [e.type, e.version])).toEqual([
+      ['identity.authenticator.changed', 1],
+      ['identity.authenticator.reset', 1],
+      ['identity.invitation.created', 1],
       ['identity.otp.requested', 1],
       ['identity.session.reuseDetected', 1],
+      ['identity.signInMethod.changed', 1],
       ['platform.ping.recorded', 1],
     ]);
-    expect(list[2]?.schema.required).toEqual(expect.arrayContaining(['eventId', 'data', 'scope']));
+    expect(list.at(-1)?.schema.required).toEqual(
+      expect.arrayContaining(['eventId', 'data', 'scope']),
+    );
   });
 
   it('lists permissions sorted by key', () => {
     const list = (
       parsed('permissions.json') as { permissions: { key: string; scopeTypes: string[] }[] }
     ).permissions;
-    expect(list.map((p) => p.key)).toEqual(['platform.ping.read']);
-    expect(list[0]?.scopeTypes).toEqual(['global']);
+    expect(list.map((p) => p.key)).toEqual([
+      'iam.app.sign_in',
+      'iam.grant.manage',
+      'iam.grant.read',
+      'iam.role.manage',
+      'iam.session.revoke',
+      'iam.totp.reset',
+      'platform.ping.read',
+    ]);
+    expect(list.at(-1)?.scopeTypes).toEqual(['global']);
   });
 });
 

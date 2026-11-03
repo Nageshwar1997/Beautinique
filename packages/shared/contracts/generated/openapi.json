@@ -133,7 +133,8 @@
           "idempotency": true,
           "stepUp": false,
           "owner": "core",
-          "cache": null
+          "cache": null,
+          "navigation": false
         }
       }
     },
@@ -234,7 +235,8 @@
           "idempotency": false,
           "stepUp": false,
           "owner": "core",
-          "cache": null
+          "cache": null,
+          "navigation": false
         }
       }
     },
@@ -324,7 +326,8 @@
           "idempotency": false,
           "stepUp": false,
           "owner": "core",
-          "cache": null
+          "cache": null,
+          "navigation": false
         }
       }
     },
@@ -452,7 +455,8 @@
           "idempotency": false,
           "stepUp": false,
           "owner": "identity",
-          "cache": null
+          "cache": null,
+          "navigation": false
         }
       }
     },
@@ -580,7 +584,8 @@
           "idempotency": false,
           "stepUp": false,
           "owner": "identity",
-          "cache": null
+          "cache": null,
+          "navigation": false
         }
       }
     },
@@ -698,7 +703,8 @@
           "idempotency": false,
           "stepUp": false,
           "owner": "identity",
-          "cache": null
+          "cache": null,
+          "navigation": false
         }
       }
     },
@@ -793,7 +799,8 @@
                           "enum": [
                             "account-made",
                             "password-set",
-                            "password-kept"
+                            "password-kept",
+                            "invite-accepted"
                           ]
                         },
                         "signedIn": {
@@ -842,7 +849,8 @@
           "idempotency": false,
           "stepUp": false,
           "owner": "identity",
-          "cache": null
+          "cache": null,
+          "navigation": false
         }
       }
     },
@@ -986,7 +994,8 @@
           "idempotency": false,
           "stepUp": false,
           "owner": "identity",
-          "cache": null
+          "cache": null,
+          "navigation": false
         }
       }
     },
@@ -1120,7 +1129,8 @@
           "idempotency": false,
           "stepUp": false,
           "owner": "identity",
-          "cache": null
+          "cache": null,
+          "navigation": false
         }
       }
     },
@@ -1260,7 +1270,8 @@
           "idempotency": false,
           "stepUp": false,
           "owner": "identity",
-          "cache": null
+          "cache": null,
+          "navigation": false
         }
       }
     },
@@ -1362,7 +1373,8 @@
           "idempotency": false,
           "stepUp": false,
           "owner": "identity",
-          "cache": null
+          "cache": null,
+          "navigation": false
         }
       }
     },
@@ -1505,7 +1517,8 @@
           "idempotency": false,
           "stepUp": false,
           "owner": "identity",
-          "cache": null
+          "cache": null,
+          "navigation": false
         }
       }
     },
@@ -1622,7 +1635,8 @@
           "idempotency": false,
           "stepUp": false,
           "owner": "identity",
-          "cache": null
+          "cache": null,
+          "navigation": false
         }
       }
     },
@@ -1711,7 +1725,8 @@
           "idempotency": false,
           "stepUp": false,
           "owner": "identity",
-          "cache": null
+          "cache": null,
+          "navigation": false
         }
       }
     },
@@ -1811,6 +1826,18 @@
                             },
                             "authenticator": {
                               "type": "boolean"
+                            },
+                            "recoveryCodesLeft": {
+                              "anyOf": [
+                                {
+                                  "type": "integer",
+                                  "minimum": 0,
+                                  "maximum": 9007199254740991
+                                },
+                                {
+                                  "type": "null"
+                                }
+                              ]
                             }
                           },
                           "required": [
@@ -1819,7 +1846,8 @@
                             "ageDeclaredAt",
                             "signUpApp",
                             "providers",
-                            "authenticator"
+                            "authenticator",
+                            "recoveryCodesLeft"
                           ],
                           "additionalProperties": false
                         },
@@ -1905,7 +1933,8 @@
           "idempotency": false,
           "stepUp": false,
           "owner": "identity",
-          "cache": null
+          "cache": null,
+          "navigation": false
         }
       }
     },
@@ -2058,7 +2087,8 @@
           "idempotency": false,
           "stepUp": false,
           "owner": "identity",
-          "cache": null
+          "cache": null,
+          "navigation": false
         }
       }
     },
@@ -2160,7 +2190,8 @@
           "idempotency": false,
           "stepUp": false,
           "owner": "identity",
-          "cache": null
+          "cache": null,
+          "navigation": false
         }
       }
     },
@@ -2254,7 +2285,3984 @@
           "idempotency": false,
           "stepUp": false,
           "owner": "identity",
-          "cache": null
+          "cache": null,
+          "navigation": false
+        }
+      }
+    },
+    "/auth/authenticator/enroll": {
+      "post": {
+        "operationId": "auth.authenticator.enroll",
+        "summary": "Start setting up (or replacing) the authenticator",
+        "tags": [
+          "auth"
+        ],
+        "parameters": [
+          {
+            "name": "X-BQ-App",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "customer",
+                "seller",
+                "admin",
+                "superadmin",
+                "master",
+                "support",
+                "finance",
+                "logistics",
+                "delivery",
+                "growth",
+                "creator"
+              ]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "secret": {
+                          "type": "string"
+                        },
+                        "uri": {
+                          "type": "string"
+                        }
+                      },
+                      "required": [
+                        "secret",
+                        "uri"
+                      ],
+                      "additionalProperties": false
+                    }
+                  },
+                  "required": [
+                    "data"
+                  ]
+                }
+              }
+            }
+          },
+          "default": {
+            "$ref": "#/components/responses/Error"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "x-bq": {
+          "apps": [
+            "customer",
+            "seller",
+            "admin",
+            "superadmin",
+            "master",
+            "support",
+            "finance",
+            "logistics",
+            "delivery",
+            "growth",
+            "creator"
+          ],
+          "access": {
+            "type": "signed-in"
+          },
+          "rateLimit": "auth",
+          "idempotency": false,
+          "stepUp": false,
+          "owner": "identity",
+          "cache": null,
+          "navigation": false
+        }
+      }
+    },
+    "/auth/authenticator/confirm": {
+      "post": {
+        "operationId": "auth.authenticator.confirm",
+        "summary": "Finish setting up the authenticator and get the recovery codes",
+        "tags": [
+          "auth"
+        ],
+        "parameters": [
+          {
+            "name": "X-BQ-App",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "customer",
+                "seller",
+                "admin",
+                "superadmin",
+                "master",
+                "support",
+                "finance",
+                "logistics",
+                "delivery",
+                "growth",
+                "creator"
+              ]
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "code": {
+                    "type": "string",
+                    "pattern": "^\\d{6}$"
+                  },
+                  "password": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 128
+                  }
+                },
+                "required": [
+                  "code",
+                  "password"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "recoveryCodes": {
+                          "minItems": 10,
+                          "maxItems": 10,
+                          "type": "array",
+                          "items": {
+                            "type": "string"
+                          }
+                        }
+                      },
+                      "required": [
+                        "recoveryCodes"
+                      ],
+                      "additionalProperties": false
+                    }
+                  },
+                  "required": [
+                    "data"
+                  ]
+                }
+              }
+            }
+          },
+          "default": {
+            "$ref": "#/components/responses/Error"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "x-bq": {
+          "apps": [
+            "customer",
+            "seller",
+            "admin",
+            "superadmin",
+            "master",
+            "support",
+            "finance",
+            "logistics",
+            "delivery",
+            "growth",
+            "creator"
+          ],
+          "access": {
+            "type": "signed-in"
+          },
+          "rateLimit": "auth",
+          "idempotency": false,
+          "stepUp": false,
+          "owner": "identity",
+          "cache": null,
+          "navigation": false
+        }
+      }
+    },
+    "/auth/authenticator/recovery-codes": {
+      "post": {
+        "operationId": "auth.authenticator.recoveryCodes",
+        "summary": "Get 10 new recovery codes",
+        "tags": [
+          "auth"
+        ],
+        "parameters": [
+          {
+            "name": "X-BQ-App",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "customer",
+                "seller",
+                "admin",
+                "superadmin",
+                "master",
+                "support",
+                "finance",
+                "logistics",
+                "delivery",
+                "growth",
+                "creator"
+              ]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "recoveryCodes": {
+                          "minItems": 10,
+                          "maxItems": 10,
+                          "type": "array",
+                          "items": {
+                            "type": "string"
+                          }
+                        }
+                      },
+                      "required": [
+                        "recoveryCodes"
+                      ],
+                      "additionalProperties": false
+                    }
+                  },
+                  "required": [
+                    "data"
+                  ]
+                }
+              }
+            }
+          },
+          "default": {
+            "$ref": "#/components/responses/Error"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "x-bq": {
+          "apps": [
+            "customer",
+            "seller",
+            "admin",
+            "superadmin",
+            "master",
+            "support",
+            "finance",
+            "logistics",
+            "delivery",
+            "growth",
+            "creator"
+          ],
+          "access": {
+            "type": "signed-in"
+          },
+          "rateLimit": "auth",
+          "idempotency": false,
+          "stepUp": true,
+          "owner": "identity",
+          "cache": null,
+          "navigation": false
+        }
+      }
+    },
+    "/auth/authenticator": {
+      "delete": {
+        "operationId": "auth.authenticator.disable",
+        "summary": "Turn the authenticator off",
+        "tags": [
+          "auth"
+        ],
+        "parameters": [
+          {
+            "name": "X-BQ-App",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "customer",
+                "seller",
+                "admin",
+                "superadmin",
+                "master",
+                "support",
+                "finance",
+                "logistics",
+                "delivery",
+                "growth",
+                "creator"
+              ]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "disabled": {
+                          "type": "boolean"
+                        }
+                      },
+                      "required": [
+                        "disabled"
+                      ],
+                      "additionalProperties": false
+                    }
+                  },
+                  "required": [
+                    "data"
+                  ]
+                }
+              }
+            }
+          },
+          "default": {
+            "$ref": "#/components/responses/Error"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "x-bq": {
+          "apps": [
+            "customer",
+            "seller",
+            "admin",
+            "superadmin",
+            "master",
+            "support",
+            "finance",
+            "logistics",
+            "delivery",
+            "growth",
+            "creator"
+          ],
+          "access": {
+            "type": "signed-in"
+          },
+          "rateLimit": "auth",
+          "idempotency": false,
+          "stepUp": true,
+          "owner": "identity",
+          "cache": null,
+          "navigation": false
+        }
+      }
+    },
+    "/iam/roles": {
+      "get": {
+        "operationId": "iam.roles.list",
+        "summary": "The roles, shipped and made by Master",
+        "tags": [
+          "iam"
+        ],
+        "parameters": [
+          {
+            "name": "app",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "customer",
+                "seller",
+                "admin",
+                "superadmin",
+                "master",
+                "support",
+                "finance",
+                "logistics",
+                "delivery",
+                "growth",
+                "creator"
+              ]
+            }
+          },
+          {
+            "name": "X-BQ-App",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "customer",
+                "seller",
+                "admin",
+                "superadmin",
+                "master",
+                "support",
+                "finance",
+                "logistics",
+                "delivery",
+                "growth",
+                "creator"
+              ]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "roles": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "key": {
+                                "type": "string",
+                                "maxLength": 80,
+                                "pattern": "^[a-z]+\\.[a-z][a-z0-9_]*$"
+                              },
+                              "app": {
+                                "type": "string",
+                                "enum": [
+                                  "customer",
+                                  "seller",
+                                  "admin",
+                                  "superadmin",
+                                  "master",
+                                  "support",
+                                  "finance",
+                                  "logistics",
+                                  "delivery",
+                                  "growth",
+                                  "creator"
+                                ]
+                              },
+                              "name": {
+                                "type": "string"
+                              },
+                              "main": {
+                                "type": "boolean"
+                              },
+                              "scopeTypes": {
+                                "type": "array",
+                                "items": {
+                                  "type": "string",
+                                  "enum": [
+                                    "global",
+                                    "state",
+                                    "district",
+                                    "city",
+                                    "hub",
+                                    "warehouse",
+                                    "brand",
+                                    "category",
+                                    "sellerOrg",
+                                    "creatorAgency",
+                                    "self"
+                                  ]
+                                }
+                              },
+                              "permissions": {
+                                "type": "array",
+                                "items": {
+                                  "type": "string"
+                                }
+                              },
+                              "appointedBy": {
+                                "type": "array",
+                                "items": {
+                                  "type": "string",
+                                  "maxLength": 80,
+                                  "pattern": "^[a-z]+\\.[a-z][a-z0-9_]*$"
+                                }
+                              },
+                              "mfaRequired": {
+                                "type": "boolean"
+                              },
+                              "signUp": {
+                                "type": "boolean"
+                              },
+                              "maxHolders": {
+                                "anyOf": [
+                                  {
+                                    "type": "integer",
+                                    "minimum": -9007199254740991,
+                                    "maximum": 9007199254740991
+                                  },
+                                  {
+                                    "type": "null"
+                                  }
+                                ]
+                              },
+                              "system": {
+                                "type": "boolean"
+                              },
+                              "retired": {
+                                "type": "boolean"
+                              }
+                            },
+                            "required": [
+                              "key",
+                              "app",
+                              "name",
+                              "main",
+                              "scopeTypes",
+                              "permissions",
+                              "appointedBy",
+                              "mfaRequired",
+                              "signUp",
+                              "maxHolders",
+                              "system",
+                              "retired"
+                            ],
+                            "additionalProperties": false
+                          }
+                        }
+                      },
+                      "required": [
+                        "roles"
+                      ],
+                      "additionalProperties": false
+                    }
+                  },
+                  "required": [
+                    "data"
+                  ]
+                }
+              }
+            }
+          },
+          "default": {
+            "$ref": "#/components/responses/Error"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "x-bq": {
+          "apps": [
+            "customer",
+            "seller",
+            "admin",
+            "superadmin",
+            "master",
+            "support",
+            "finance",
+            "logistics",
+            "delivery",
+            "growth",
+            "creator"
+          ],
+          "access": {
+            "type": "permission",
+            "permission": "iam.grant.read"
+          },
+          "rateLimit": "read",
+          "idempotency": false,
+          "stepUp": false,
+          "owner": "identity",
+          "cache": null,
+          "navigation": false
+        }
+      },
+      "post": {
+        "operationId": "iam.roles.create",
+        "summary": "Make a sub-role",
+        "tags": [
+          "iam"
+        ],
+        "parameters": [
+          {
+            "name": "X-BQ-App",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "customer",
+                "seller",
+                "admin",
+                "superadmin",
+                "master",
+                "support",
+                "finance",
+                "logistics",
+                "delivery",
+                "growth",
+                "creator"
+              ]
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "app": {
+                    "type": "string",
+                    "enum": [
+                      "customer",
+                      "seller",
+                      "admin",
+                      "superadmin",
+                      "master",
+                      "support",
+                      "finance",
+                      "logistics",
+                      "delivery",
+                      "growth",
+                      "creator"
+                    ]
+                  },
+                  "slug": {
+                    "type": "string",
+                    "pattern": "^[a-z][a-z0-9_]{1,38}$"
+                  },
+                  "name": {
+                    "type": "string",
+                    "minLength": 2,
+                    "maxLength": 80
+                  },
+                  "scopeTypes": {
+                    "minItems": 1,
+                    "type": "array",
+                    "items": {
+                      "type": "string",
+                      "enum": [
+                        "global",
+                        "state",
+                        "district",
+                        "city",
+                        "hub",
+                        "warehouse",
+                        "brand",
+                        "category",
+                        "sellerOrg",
+                        "creatorAgency",
+                        "self"
+                      ]
+                    }
+                  },
+                  "permissions": {
+                    "maxItems": 200,
+                    "type": "array",
+                    "items": {
+                      "type": "string",
+                      "maxLength": 120
+                    }
+                  },
+                  "appointedBy": {
+                    "minItems": 1,
+                    "maxItems": 20,
+                    "type": "array",
+                    "items": {
+                      "type": "string",
+                      "maxLength": 80,
+                      "pattern": "^[a-z]+\\.[a-z][a-z0-9_]*$"
+                    }
+                  },
+                  "mfaRequired": {
+                    "type": "boolean"
+                  }
+                },
+                "required": [
+                  "app",
+                  "slug",
+                  "name",
+                  "scopeTypes",
+                  "permissions",
+                  "appointedBy",
+                  "mfaRequired"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "role": {
+                          "type": "object",
+                          "properties": {
+                            "key": {
+                              "type": "string",
+                              "maxLength": 80,
+                              "pattern": "^[a-z]+\\.[a-z][a-z0-9_]*$"
+                            },
+                            "app": {
+                              "type": "string",
+                              "enum": [
+                                "customer",
+                                "seller",
+                                "admin",
+                                "superadmin",
+                                "master",
+                                "support",
+                                "finance",
+                                "logistics",
+                                "delivery",
+                                "growth",
+                                "creator"
+                              ]
+                            },
+                            "name": {
+                              "type": "string"
+                            },
+                            "main": {
+                              "type": "boolean"
+                            },
+                            "scopeTypes": {
+                              "type": "array",
+                              "items": {
+                                "type": "string",
+                                "enum": [
+                                  "global",
+                                  "state",
+                                  "district",
+                                  "city",
+                                  "hub",
+                                  "warehouse",
+                                  "brand",
+                                  "category",
+                                  "sellerOrg",
+                                  "creatorAgency",
+                                  "self"
+                                ]
+                              }
+                            },
+                            "permissions": {
+                              "type": "array",
+                              "items": {
+                                "type": "string"
+                              }
+                            },
+                            "appointedBy": {
+                              "type": "array",
+                              "items": {
+                                "type": "string",
+                                "maxLength": 80,
+                                "pattern": "^[a-z]+\\.[a-z][a-z0-9_]*$"
+                              }
+                            },
+                            "mfaRequired": {
+                              "type": "boolean"
+                            },
+                            "signUp": {
+                              "type": "boolean"
+                            },
+                            "maxHolders": {
+                              "anyOf": [
+                                {
+                                  "type": "integer",
+                                  "minimum": -9007199254740991,
+                                  "maximum": 9007199254740991
+                                },
+                                {
+                                  "type": "null"
+                                }
+                              ]
+                            },
+                            "system": {
+                              "type": "boolean"
+                            },
+                            "retired": {
+                              "type": "boolean"
+                            }
+                          },
+                          "required": [
+                            "key",
+                            "app",
+                            "name",
+                            "main",
+                            "scopeTypes",
+                            "permissions",
+                            "appointedBy",
+                            "mfaRequired",
+                            "signUp",
+                            "maxHolders",
+                            "system",
+                            "retired"
+                          ],
+                          "additionalProperties": false
+                        }
+                      },
+                      "required": [
+                        "role"
+                      ],
+                      "additionalProperties": false
+                    }
+                  },
+                  "required": [
+                    "data"
+                  ]
+                }
+              }
+            }
+          },
+          "default": {
+            "$ref": "#/components/responses/Error"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "x-bq": {
+          "apps": [
+            "customer",
+            "seller",
+            "admin",
+            "superadmin",
+            "master",
+            "support",
+            "finance",
+            "logistics",
+            "delivery",
+            "growth",
+            "creator"
+          ],
+          "access": {
+            "type": "permission",
+            "permission": "iam.role.manage"
+          },
+          "rateLimit": "write",
+          "idempotency": false,
+          "stepUp": true,
+          "owner": "identity",
+          "cache": null,
+          "navigation": false
+        }
+      }
+    },
+    "/iam/roles/{roleKey}": {
+      "patch": {
+        "operationId": "iam.roles.update",
+        "summary": "Change a sub-role Master made",
+        "tags": [
+          "iam"
+        ],
+        "parameters": [
+          {
+            "name": "roleKey",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "maxLength": 80,
+              "pattern": "^[a-z]+\\.[a-z][a-z0-9_]*$"
+            }
+          },
+          {
+            "name": "X-BQ-App",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "customer",
+                "seller",
+                "admin",
+                "superadmin",
+                "master",
+                "support",
+                "finance",
+                "logistics",
+                "delivery",
+                "growth",
+                "creator"
+              ]
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "type": "string",
+                    "minLength": 2,
+                    "maxLength": 80
+                  },
+                  "scopeTypes": {
+                    "minItems": 1,
+                    "type": "array",
+                    "items": {
+                      "type": "string",
+                      "enum": [
+                        "global",
+                        "state",
+                        "district",
+                        "city",
+                        "hub",
+                        "warehouse",
+                        "brand",
+                        "category",
+                        "sellerOrg",
+                        "creatorAgency",
+                        "self"
+                      ]
+                    }
+                  },
+                  "permissions": {
+                    "maxItems": 200,
+                    "type": "array",
+                    "items": {
+                      "type": "string",
+                      "maxLength": 120
+                    }
+                  },
+                  "appointedBy": {
+                    "minItems": 1,
+                    "maxItems": 20,
+                    "type": "array",
+                    "items": {
+                      "type": "string",
+                      "maxLength": 80,
+                      "pattern": "^[a-z]+\\.[a-z][a-z0-9_]*$"
+                    }
+                  },
+                  "mfaRequired": {
+                    "type": "boolean"
+                  },
+                  "retired": {
+                    "type": "boolean"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "role": {
+                          "type": "object",
+                          "properties": {
+                            "key": {
+                              "type": "string",
+                              "maxLength": 80,
+                              "pattern": "^[a-z]+\\.[a-z][a-z0-9_]*$"
+                            },
+                            "app": {
+                              "type": "string",
+                              "enum": [
+                                "customer",
+                                "seller",
+                                "admin",
+                                "superadmin",
+                                "master",
+                                "support",
+                                "finance",
+                                "logistics",
+                                "delivery",
+                                "growth",
+                                "creator"
+                              ]
+                            },
+                            "name": {
+                              "type": "string"
+                            },
+                            "main": {
+                              "type": "boolean"
+                            },
+                            "scopeTypes": {
+                              "type": "array",
+                              "items": {
+                                "type": "string",
+                                "enum": [
+                                  "global",
+                                  "state",
+                                  "district",
+                                  "city",
+                                  "hub",
+                                  "warehouse",
+                                  "brand",
+                                  "category",
+                                  "sellerOrg",
+                                  "creatorAgency",
+                                  "self"
+                                ]
+                              }
+                            },
+                            "permissions": {
+                              "type": "array",
+                              "items": {
+                                "type": "string"
+                              }
+                            },
+                            "appointedBy": {
+                              "type": "array",
+                              "items": {
+                                "type": "string",
+                                "maxLength": 80,
+                                "pattern": "^[a-z]+\\.[a-z][a-z0-9_]*$"
+                              }
+                            },
+                            "mfaRequired": {
+                              "type": "boolean"
+                            },
+                            "signUp": {
+                              "type": "boolean"
+                            },
+                            "maxHolders": {
+                              "anyOf": [
+                                {
+                                  "type": "integer",
+                                  "minimum": -9007199254740991,
+                                  "maximum": 9007199254740991
+                                },
+                                {
+                                  "type": "null"
+                                }
+                              ]
+                            },
+                            "system": {
+                              "type": "boolean"
+                            },
+                            "retired": {
+                              "type": "boolean"
+                            }
+                          },
+                          "required": [
+                            "key",
+                            "app",
+                            "name",
+                            "main",
+                            "scopeTypes",
+                            "permissions",
+                            "appointedBy",
+                            "mfaRequired",
+                            "signUp",
+                            "maxHolders",
+                            "system",
+                            "retired"
+                          ],
+                          "additionalProperties": false
+                        }
+                      },
+                      "required": [
+                        "role"
+                      ],
+                      "additionalProperties": false
+                    }
+                  },
+                  "required": [
+                    "data"
+                  ]
+                }
+              }
+            }
+          },
+          "default": {
+            "$ref": "#/components/responses/Error"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "x-bq": {
+          "apps": [
+            "customer",
+            "seller",
+            "admin",
+            "superadmin",
+            "master",
+            "support",
+            "finance",
+            "logistics",
+            "delivery",
+            "growth",
+            "creator"
+          ],
+          "access": {
+            "type": "permission",
+            "permission": "iam.role.manage"
+          },
+          "rateLimit": "write",
+          "idempotency": false,
+          "stepUp": true,
+          "owner": "identity",
+          "cache": null,
+          "navigation": false
+        }
+      }
+    },
+    "/iam/grants": {
+      "get": {
+        "operationId": "iam.grants.list",
+        "summary": "The grants the caller may see",
+        "tags": [
+          "iam"
+        ],
+        "parameters": [
+          {
+            "name": "cursor",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 512
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "default": 20,
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 100
+            }
+          },
+          {
+            "name": "userId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-7[0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12})$"
+            }
+          },
+          {
+            "name": "email",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 254
+            }
+          },
+          {
+            "name": "role",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "maxLength": 80,
+              "pattern": "^[a-z]+\\.[a-z][a-z0-9_]*$"
+            }
+          },
+          {
+            "name": "app",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "customer",
+                "seller",
+                "admin",
+                "superadmin",
+                "master",
+                "support",
+                "finance",
+                "logistics",
+                "delivery",
+                "growth",
+                "creator"
+              ]
+            }
+          },
+          {
+            "name": "status",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "default": "active",
+              "type": "string",
+              "enum": [
+                "active",
+                "ended"
+              ]
+            }
+          },
+          {
+            "name": "X-BQ-App",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "customer",
+                "seller",
+                "admin",
+                "superadmin",
+                "master",
+                "support",
+                "finance",
+                "logistics",
+                "delivery",
+                "growth",
+                "creator"
+              ]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "items": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "grantId": {
+                                "type": "string",
+                                "format": "uuid",
+                                "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-7[0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12})$"
+                              },
+                              "userId": {
+                                "type": "string",
+                                "format": "uuid",
+                                "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-7[0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12})$"
+                              },
+                              "email": {
+                                "type": "string",
+                                "format": "email",
+                                "pattern": "^(?:[A-Za-z0-9_'+\\-]+\\.)*[A-Za-z0-9_'+\\-]*[A-Za-z0-9_+-]@(?:[A-Za-z0-9][A-Za-z0-9\\-]*\\.)+[A-Za-z]{2,}$"
+                              },
+                              "role": {
+                                "type": "string",
+                                "maxLength": 80,
+                                "pattern": "^[a-z]+\\.[a-z][a-z0-9_]*$"
+                              },
+                              "app": {
+                                "type": "string",
+                                "enum": [
+                                  "customer",
+                                  "seller",
+                                  "admin",
+                                  "superadmin",
+                                  "master",
+                                  "support",
+                                  "finance",
+                                  "logistics",
+                                  "delivery",
+                                  "growth",
+                                  "creator"
+                                ]
+                              },
+                              "scope": {
+                                "type": "object",
+                                "properties": {
+                                  "type": {
+                                    "type": "string",
+                                    "enum": [
+                                      "global",
+                                      "state",
+                                      "district",
+                                      "city",
+                                      "hub",
+                                      "warehouse",
+                                      "brand",
+                                      "category",
+                                      "sellerOrg",
+                                      "creatorAgency",
+                                      "self"
+                                    ]
+                                  },
+                                  "ids": {
+                                    "maxItems": 50,
+                                    "type": "array",
+                                    "items": {
+                                      "type": "string",
+                                      "minLength": 1,
+                                      "maxLength": 64
+                                    }
+                                  }
+                                },
+                                "required": [
+                                  "type",
+                                  "ids"
+                                ],
+                                "additionalProperties": false
+                              },
+                              "validFrom": {
+                                "anyOf": [
+                                  {
+                                    "type": "string",
+                                    "format": "date-time",
+                                    "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
+                                  },
+                                  {
+                                    "type": "null"
+                                  }
+                                ]
+                              },
+                              "validTo": {
+                                "anyOf": [
+                                  {
+                                    "type": "string",
+                                    "format": "date-time",
+                                    "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
+                                  },
+                                  {
+                                    "type": "null"
+                                  }
+                                ]
+                              },
+                              "grantedBy": {
+                                "anyOf": [
+                                  {
+                                    "type": "string",
+                                    "format": "uuid",
+                                    "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-7[0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12})$"
+                                  },
+                                  {
+                                    "type": "null"
+                                  }
+                                ]
+                              },
+                              "via": {
+                                "type": "string",
+                                "enum": [
+                                  "sign-up",
+                                  "migration",
+                                  "bootstrap",
+                                  "appointed",
+                                  "invitation"
+                                ]
+                              },
+                              "active": {
+                                "type": "boolean"
+                              },
+                              "createdAt": {
+                                "type": "string",
+                                "format": "date-time",
+                                "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
+                              },
+                              "endedAt": {
+                                "anyOf": [
+                                  {
+                                    "type": "string",
+                                    "format": "date-time",
+                                    "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
+                                  },
+                                  {
+                                    "type": "null"
+                                  }
+                                ]
+                              }
+                            },
+                            "required": [
+                              "grantId",
+                              "userId",
+                              "email",
+                              "role",
+                              "app",
+                              "scope",
+                              "validFrom",
+                              "validTo",
+                              "grantedBy",
+                              "via",
+                              "active",
+                              "createdAt",
+                              "endedAt"
+                            ],
+                            "additionalProperties": false
+                          }
+                        },
+                        "nextCursor": {
+                          "type": [
+                            "string",
+                            "null"
+                          ]
+                        }
+                      },
+                      "required": [
+                        "items",
+                        "nextCursor"
+                      ],
+                      "additionalProperties": false
+                    }
+                  },
+                  "required": [
+                    "data"
+                  ]
+                }
+              }
+            }
+          },
+          "default": {
+            "$ref": "#/components/responses/Error"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "x-bq": {
+          "apps": [
+            "customer",
+            "seller",
+            "admin",
+            "superadmin",
+            "master",
+            "support",
+            "finance",
+            "logistics",
+            "delivery",
+            "growth",
+            "creator"
+          ],
+          "access": {
+            "type": "permission",
+            "permission": "iam.grant.read"
+          },
+          "rateLimit": "read",
+          "idempotency": false,
+          "stepUp": false,
+          "owner": "identity",
+          "cache": null,
+          "navigation": false
+        }
+      },
+      "post": {
+        "operationId": "iam.grants.give",
+        "summary": "Give a role",
+        "tags": [
+          "iam"
+        ],
+        "parameters": [
+          {
+            "name": "X-BQ-App",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "customer",
+                "seller",
+                "admin",
+                "superadmin",
+                "master",
+                "support",
+                "finance",
+                "logistics",
+                "delivery",
+                "growth",
+                "creator"
+              ]
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "userId": {
+                    "type": "string",
+                    "format": "uuid",
+                    "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-7[0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12})$"
+                  },
+                  "role": {
+                    "type": "string",
+                    "maxLength": 80,
+                    "pattern": "^[a-z]+\\.[a-z][a-z0-9_]*$"
+                  },
+                  "scope": {
+                    "type": "object",
+                    "properties": {
+                      "type": {
+                        "type": "string",
+                        "enum": [
+                          "global",
+                          "state",
+                          "district",
+                          "city",
+                          "hub",
+                          "warehouse",
+                          "brand",
+                          "category",
+                          "sellerOrg",
+                          "creatorAgency",
+                          "self"
+                        ]
+                      },
+                      "ids": {
+                        "maxItems": 50,
+                        "type": "array",
+                        "items": {
+                          "type": "string",
+                          "minLength": 1,
+                          "maxLength": 64
+                        }
+                      }
+                    },
+                    "required": [
+                      "type",
+                      "ids"
+                    ]
+                  },
+                  "validFrom": {
+                    "anyOf": [
+                      {
+                        "type": "string",
+                        "format": "date-time",
+                        "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  },
+                  "validTo": {
+                    "anyOf": [
+                      {
+                        "type": "string",
+                        "format": "date-time",
+                        "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  }
+                },
+                "required": [
+                  "userId",
+                  "role",
+                  "scope"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "grant": {
+                          "type": "object",
+                          "properties": {
+                            "grantId": {
+                              "type": "string",
+                              "format": "uuid",
+                              "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-7[0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12})$"
+                            },
+                            "userId": {
+                              "type": "string",
+                              "format": "uuid",
+                              "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-7[0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12})$"
+                            },
+                            "email": {
+                              "type": "string",
+                              "format": "email",
+                              "pattern": "^(?:[A-Za-z0-9_'+\\-]+\\.)*[A-Za-z0-9_'+\\-]*[A-Za-z0-9_+-]@(?:[A-Za-z0-9][A-Za-z0-9\\-]*\\.)+[A-Za-z]{2,}$"
+                            },
+                            "role": {
+                              "type": "string",
+                              "maxLength": 80,
+                              "pattern": "^[a-z]+\\.[a-z][a-z0-9_]*$"
+                            },
+                            "app": {
+                              "type": "string",
+                              "enum": [
+                                "customer",
+                                "seller",
+                                "admin",
+                                "superadmin",
+                                "master",
+                                "support",
+                                "finance",
+                                "logistics",
+                                "delivery",
+                                "growth",
+                                "creator"
+                              ]
+                            },
+                            "scope": {
+                              "type": "object",
+                              "properties": {
+                                "type": {
+                                  "type": "string",
+                                  "enum": [
+                                    "global",
+                                    "state",
+                                    "district",
+                                    "city",
+                                    "hub",
+                                    "warehouse",
+                                    "brand",
+                                    "category",
+                                    "sellerOrg",
+                                    "creatorAgency",
+                                    "self"
+                                  ]
+                                },
+                                "ids": {
+                                  "maxItems": 50,
+                                  "type": "array",
+                                  "items": {
+                                    "type": "string",
+                                    "minLength": 1,
+                                    "maxLength": 64
+                                  }
+                                }
+                              },
+                              "required": [
+                                "type",
+                                "ids"
+                              ],
+                              "additionalProperties": false
+                            },
+                            "validFrom": {
+                              "anyOf": [
+                                {
+                                  "type": "string",
+                                  "format": "date-time",
+                                  "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
+                                },
+                                {
+                                  "type": "null"
+                                }
+                              ]
+                            },
+                            "validTo": {
+                              "anyOf": [
+                                {
+                                  "type": "string",
+                                  "format": "date-time",
+                                  "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
+                                },
+                                {
+                                  "type": "null"
+                                }
+                              ]
+                            },
+                            "grantedBy": {
+                              "anyOf": [
+                                {
+                                  "type": "string",
+                                  "format": "uuid",
+                                  "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-7[0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12})$"
+                                },
+                                {
+                                  "type": "null"
+                                }
+                              ]
+                            },
+                            "via": {
+                              "type": "string",
+                              "enum": [
+                                "sign-up",
+                                "migration",
+                                "bootstrap",
+                                "appointed",
+                                "invitation"
+                              ]
+                            },
+                            "active": {
+                              "type": "boolean"
+                            },
+                            "createdAt": {
+                              "type": "string",
+                              "format": "date-time",
+                              "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
+                            },
+                            "endedAt": {
+                              "anyOf": [
+                                {
+                                  "type": "string",
+                                  "format": "date-time",
+                                  "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
+                                },
+                                {
+                                  "type": "null"
+                                }
+                              ]
+                            }
+                          },
+                          "required": [
+                            "grantId",
+                            "userId",
+                            "email",
+                            "role",
+                            "app",
+                            "scope",
+                            "validFrom",
+                            "validTo",
+                            "grantedBy",
+                            "via",
+                            "active",
+                            "createdAt",
+                            "endedAt"
+                          ],
+                          "additionalProperties": false
+                        }
+                      },
+                      "required": [
+                        "grant"
+                      ],
+                      "additionalProperties": false
+                    }
+                  },
+                  "required": [
+                    "data"
+                  ]
+                }
+              }
+            }
+          },
+          "default": {
+            "$ref": "#/components/responses/Error"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "x-bq": {
+          "apps": [
+            "customer",
+            "seller",
+            "admin",
+            "superadmin",
+            "master",
+            "support",
+            "finance",
+            "logistics",
+            "delivery",
+            "growth",
+            "creator"
+          ],
+          "access": {
+            "type": "permission",
+            "permission": "iam.grant.manage"
+          },
+          "rateLimit": "write",
+          "idempotency": false,
+          "stepUp": true,
+          "owner": "identity",
+          "cache": null,
+          "navigation": false
+        }
+      }
+    },
+    "/iam/grants/{grantId}/end": {
+      "post": {
+        "operationId": "iam.grants.end",
+        "summary": "End a role",
+        "tags": [
+          "iam"
+        ],
+        "parameters": [
+          {
+            "name": "grantId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-7[0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12})$"
+            }
+          },
+          {
+            "name": "X-BQ-App",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "customer",
+                "seller",
+                "admin",
+                "superadmin",
+                "master",
+                "support",
+                "finance",
+                "logistics",
+                "delivery",
+                "growth",
+                "creator"
+              ]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "grant": {
+                          "type": "object",
+                          "properties": {
+                            "grantId": {
+                              "type": "string",
+                              "format": "uuid",
+                              "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-7[0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12})$"
+                            },
+                            "userId": {
+                              "type": "string",
+                              "format": "uuid",
+                              "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-7[0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12})$"
+                            },
+                            "email": {
+                              "type": "string",
+                              "format": "email",
+                              "pattern": "^(?:[A-Za-z0-9_'+\\-]+\\.)*[A-Za-z0-9_'+\\-]*[A-Za-z0-9_+-]@(?:[A-Za-z0-9][A-Za-z0-9\\-]*\\.)+[A-Za-z]{2,}$"
+                            },
+                            "role": {
+                              "type": "string",
+                              "maxLength": 80,
+                              "pattern": "^[a-z]+\\.[a-z][a-z0-9_]*$"
+                            },
+                            "app": {
+                              "type": "string",
+                              "enum": [
+                                "customer",
+                                "seller",
+                                "admin",
+                                "superadmin",
+                                "master",
+                                "support",
+                                "finance",
+                                "logistics",
+                                "delivery",
+                                "growth",
+                                "creator"
+                              ]
+                            },
+                            "scope": {
+                              "type": "object",
+                              "properties": {
+                                "type": {
+                                  "type": "string",
+                                  "enum": [
+                                    "global",
+                                    "state",
+                                    "district",
+                                    "city",
+                                    "hub",
+                                    "warehouse",
+                                    "brand",
+                                    "category",
+                                    "sellerOrg",
+                                    "creatorAgency",
+                                    "self"
+                                  ]
+                                },
+                                "ids": {
+                                  "maxItems": 50,
+                                  "type": "array",
+                                  "items": {
+                                    "type": "string",
+                                    "minLength": 1,
+                                    "maxLength": 64
+                                  }
+                                }
+                              },
+                              "required": [
+                                "type",
+                                "ids"
+                              ],
+                              "additionalProperties": false
+                            },
+                            "validFrom": {
+                              "anyOf": [
+                                {
+                                  "type": "string",
+                                  "format": "date-time",
+                                  "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
+                                },
+                                {
+                                  "type": "null"
+                                }
+                              ]
+                            },
+                            "validTo": {
+                              "anyOf": [
+                                {
+                                  "type": "string",
+                                  "format": "date-time",
+                                  "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
+                                },
+                                {
+                                  "type": "null"
+                                }
+                              ]
+                            },
+                            "grantedBy": {
+                              "anyOf": [
+                                {
+                                  "type": "string",
+                                  "format": "uuid",
+                                  "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-7[0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12})$"
+                                },
+                                {
+                                  "type": "null"
+                                }
+                              ]
+                            },
+                            "via": {
+                              "type": "string",
+                              "enum": [
+                                "sign-up",
+                                "migration",
+                                "bootstrap",
+                                "appointed",
+                                "invitation"
+                              ]
+                            },
+                            "active": {
+                              "type": "boolean"
+                            },
+                            "createdAt": {
+                              "type": "string",
+                              "format": "date-time",
+                              "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
+                            },
+                            "endedAt": {
+                              "anyOf": [
+                                {
+                                  "type": "string",
+                                  "format": "date-time",
+                                  "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
+                                },
+                                {
+                                  "type": "null"
+                                }
+                              ]
+                            }
+                          },
+                          "required": [
+                            "grantId",
+                            "userId",
+                            "email",
+                            "role",
+                            "app",
+                            "scope",
+                            "validFrom",
+                            "validTo",
+                            "grantedBy",
+                            "via",
+                            "active",
+                            "createdAt",
+                            "endedAt"
+                          ],
+                          "additionalProperties": false
+                        }
+                      },
+                      "required": [
+                        "grant"
+                      ],
+                      "additionalProperties": false
+                    }
+                  },
+                  "required": [
+                    "data"
+                  ]
+                }
+              }
+            }
+          },
+          "default": {
+            "$ref": "#/components/responses/Error"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "x-bq": {
+          "apps": [
+            "customer",
+            "seller",
+            "admin",
+            "superadmin",
+            "master",
+            "support",
+            "finance",
+            "logistics",
+            "delivery",
+            "growth",
+            "creator"
+          ],
+          "access": {
+            "type": "permission",
+            "permission": "iam.grant.manage"
+          },
+          "rateLimit": "write",
+          "idempotency": false,
+          "stepUp": true,
+          "owner": "identity",
+          "cache": null,
+          "navigation": false
+        }
+      }
+    },
+    "/iam/invitations": {
+      "post": {
+        "operationId": "iam.invitations.create",
+        "summary": "Invite someone to a role",
+        "tags": [
+          "iam"
+        ],
+        "parameters": [
+          {
+            "name": "X-BQ-App",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "customer",
+                "seller",
+                "admin",
+                "superadmin",
+                "master",
+                "support",
+                "finance",
+                "logistics",
+                "delivery",
+                "growth",
+                "creator"
+              ]
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "email": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 254
+                  },
+                  "role": {
+                    "type": "string",
+                    "maxLength": 80,
+                    "pattern": "^[a-z]+\\.[a-z][a-z0-9_]*$"
+                  },
+                  "scope": {
+                    "type": "object",
+                    "properties": {
+                      "type": {
+                        "type": "string",
+                        "enum": [
+                          "global",
+                          "state",
+                          "district",
+                          "city",
+                          "hub",
+                          "warehouse",
+                          "brand",
+                          "category",
+                          "sellerOrg",
+                          "creatorAgency",
+                          "self"
+                        ]
+                      },
+                      "ids": {
+                        "maxItems": 50,
+                        "type": "array",
+                        "items": {
+                          "type": "string",
+                          "minLength": 1,
+                          "maxLength": 64
+                        }
+                      }
+                    },
+                    "required": [
+                      "type",
+                      "ids"
+                    ]
+                  },
+                  "validFrom": {
+                    "anyOf": [
+                      {
+                        "type": "string",
+                        "format": "date-time",
+                        "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  },
+                  "validTo": {
+                    "anyOf": [
+                      {
+                        "type": "string",
+                        "format": "date-time",
+                        "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  }
+                },
+                "required": [
+                  "email",
+                  "role",
+                  "scope"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "invitation": {
+                          "type": "object",
+                          "properties": {
+                            "invitationId": {
+                              "type": "string",
+                              "format": "uuid",
+                              "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-7[0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12})$"
+                            },
+                            "email": {
+                              "type": "string",
+                              "format": "email",
+                              "pattern": "^(?:[A-Za-z0-9_'+\\-]+\\.)*[A-Za-z0-9_'+\\-]*[A-Za-z0-9_+-]@(?:[A-Za-z0-9][A-Za-z0-9\\-]*\\.)+[A-Za-z]{2,}$"
+                            },
+                            "role": {
+                              "type": "string",
+                              "maxLength": 80,
+                              "pattern": "^[a-z]+\\.[a-z][a-z0-9_]*$"
+                            },
+                            "app": {
+                              "type": "string",
+                              "enum": [
+                                "customer",
+                                "seller",
+                                "admin",
+                                "superadmin",
+                                "master",
+                                "support",
+                                "finance",
+                                "logistics",
+                                "delivery",
+                                "growth",
+                                "creator"
+                              ]
+                            },
+                            "scope": {
+                              "type": "object",
+                              "properties": {
+                                "type": {
+                                  "type": "string",
+                                  "enum": [
+                                    "global",
+                                    "state",
+                                    "district",
+                                    "city",
+                                    "hub",
+                                    "warehouse",
+                                    "brand",
+                                    "category",
+                                    "sellerOrg",
+                                    "creatorAgency",
+                                    "self"
+                                  ]
+                                },
+                                "ids": {
+                                  "maxItems": 50,
+                                  "type": "array",
+                                  "items": {
+                                    "type": "string",
+                                    "minLength": 1,
+                                    "maxLength": 64
+                                  }
+                                }
+                              },
+                              "required": [
+                                "type",
+                                "ids"
+                              ],
+                              "additionalProperties": false
+                            },
+                            "validFrom": {
+                              "anyOf": [
+                                {
+                                  "type": "string",
+                                  "format": "date-time",
+                                  "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
+                                },
+                                {
+                                  "type": "null"
+                                }
+                              ]
+                            },
+                            "validTo": {
+                              "anyOf": [
+                                {
+                                  "type": "string",
+                                  "format": "date-time",
+                                  "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
+                                },
+                                {
+                                  "type": "null"
+                                }
+                              ]
+                            },
+                            "invitedBy": {
+                              "type": "string",
+                              "format": "uuid",
+                              "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-7[0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12})$"
+                            },
+                            "status": {
+                              "type": "string",
+                              "enum": [
+                                "pending",
+                                "accepted",
+                                "revoked",
+                                "expired"
+                              ]
+                            },
+                            "expiresAt": {
+                              "type": "string",
+                              "format": "date-time",
+                              "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
+                            },
+                            "createdAt": {
+                              "type": "string",
+                              "format": "date-time",
+                              "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
+                            }
+                          },
+                          "required": [
+                            "invitationId",
+                            "email",
+                            "role",
+                            "app",
+                            "scope",
+                            "validFrom",
+                            "validTo",
+                            "invitedBy",
+                            "status",
+                            "expiresAt",
+                            "createdAt"
+                          ],
+                          "additionalProperties": false
+                        }
+                      },
+                      "required": [
+                        "invitation"
+                      ],
+                      "additionalProperties": false
+                    }
+                  },
+                  "required": [
+                    "data"
+                  ]
+                }
+              }
+            }
+          },
+          "default": {
+            "$ref": "#/components/responses/Error"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "x-bq": {
+          "apps": [
+            "customer",
+            "seller",
+            "admin",
+            "superadmin",
+            "master",
+            "support",
+            "finance",
+            "logistics",
+            "delivery",
+            "growth",
+            "creator"
+          ],
+          "access": {
+            "type": "permission",
+            "permission": "iam.grant.manage"
+          },
+          "rateLimit": "write",
+          "idempotency": false,
+          "stepUp": true,
+          "owner": "identity",
+          "cache": null,
+          "navigation": false
+        }
+      },
+      "get": {
+        "operationId": "iam.invitations.list",
+        "summary": "The invitations the caller may see",
+        "tags": [
+          "iam"
+        ],
+        "parameters": [
+          {
+            "name": "cursor",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 512
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "default": 20,
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 100
+            }
+          },
+          {
+            "name": "status",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "pending",
+                "accepted",
+                "revoked",
+                "expired"
+              ]
+            }
+          },
+          {
+            "name": "X-BQ-App",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "customer",
+                "seller",
+                "admin",
+                "superadmin",
+                "master",
+                "support",
+                "finance",
+                "logistics",
+                "delivery",
+                "growth",
+                "creator"
+              ]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "items": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "invitationId": {
+                                "type": "string",
+                                "format": "uuid",
+                                "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-7[0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12})$"
+                              },
+                              "email": {
+                                "type": "string",
+                                "format": "email",
+                                "pattern": "^(?:[A-Za-z0-9_'+\\-]+\\.)*[A-Za-z0-9_'+\\-]*[A-Za-z0-9_+-]@(?:[A-Za-z0-9][A-Za-z0-9\\-]*\\.)+[A-Za-z]{2,}$"
+                              },
+                              "role": {
+                                "type": "string",
+                                "maxLength": 80,
+                                "pattern": "^[a-z]+\\.[a-z][a-z0-9_]*$"
+                              },
+                              "app": {
+                                "type": "string",
+                                "enum": [
+                                  "customer",
+                                  "seller",
+                                  "admin",
+                                  "superadmin",
+                                  "master",
+                                  "support",
+                                  "finance",
+                                  "logistics",
+                                  "delivery",
+                                  "growth",
+                                  "creator"
+                                ]
+                              },
+                              "scope": {
+                                "type": "object",
+                                "properties": {
+                                  "type": {
+                                    "type": "string",
+                                    "enum": [
+                                      "global",
+                                      "state",
+                                      "district",
+                                      "city",
+                                      "hub",
+                                      "warehouse",
+                                      "brand",
+                                      "category",
+                                      "sellerOrg",
+                                      "creatorAgency",
+                                      "self"
+                                    ]
+                                  },
+                                  "ids": {
+                                    "maxItems": 50,
+                                    "type": "array",
+                                    "items": {
+                                      "type": "string",
+                                      "minLength": 1,
+                                      "maxLength": 64
+                                    }
+                                  }
+                                },
+                                "required": [
+                                  "type",
+                                  "ids"
+                                ],
+                                "additionalProperties": false
+                              },
+                              "validFrom": {
+                                "anyOf": [
+                                  {
+                                    "type": "string",
+                                    "format": "date-time",
+                                    "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
+                                  },
+                                  {
+                                    "type": "null"
+                                  }
+                                ]
+                              },
+                              "validTo": {
+                                "anyOf": [
+                                  {
+                                    "type": "string",
+                                    "format": "date-time",
+                                    "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
+                                  },
+                                  {
+                                    "type": "null"
+                                  }
+                                ]
+                              },
+                              "invitedBy": {
+                                "type": "string",
+                                "format": "uuid",
+                                "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-7[0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12})$"
+                              },
+                              "status": {
+                                "type": "string",
+                                "enum": [
+                                  "pending",
+                                  "accepted",
+                                  "revoked",
+                                  "expired"
+                                ]
+                              },
+                              "expiresAt": {
+                                "type": "string",
+                                "format": "date-time",
+                                "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
+                              },
+                              "createdAt": {
+                                "type": "string",
+                                "format": "date-time",
+                                "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
+                              }
+                            },
+                            "required": [
+                              "invitationId",
+                              "email",
+                              "role",
+                              "app",
+                              "scope",
+                              "validFrom",
+                              "validTo",
+                              "invitedBy",
+                              "status",
+                              "expiresAt",
+                              "createdAt"
+                            ],
+                            "additionalProperties": false
+                          }
+                        },
+                        "nextCursor": {
+                          "type": [
+                            "string",
+                            "null"
+                          ]
+                        }
+                      },
+                      "required": [
+                        "items",
+                        "nextCursor"
+                      ],
+                      "additionalProperties": false
+                    }
+                  },
+                  "required": [
+                    "data"
+                  ]
+                }
+              }
+            }
+          },
+          "default": {
+            "$ref": "#/components/responses/Error"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "x-bq": {
+          "apps": [
+            "customer",
+            "seller",
+            "admin",
+            "superadmin",
+            "master",
+            "support",
+            "finance",
+            "logistics",
+            "delivery",
+            "growth",
+            "creator"
+          ],
+          "access": {
+            "type": "permission",
+            "permission": "iam.grant.read"
+          },
+          "rateLimit": "read",
+          "idempotency": false,
+          "stepUp": false,
+          "owner": "identity",
+          "cache": null,
+          "navigation": false
+        }
+      }
+    },
+    "/iam/invitations/{invitationId}/revoke": {
+      "post": {
+        "operationId": "iam.invitations.revoke",
+        "summary": "Take back an invitation",
+        "tags": [
+          "iam"
+        ],
+        "parameters": [
+          {
+            "name": "invitationId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-7[0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12})$"
+            }
+          },
+          {
+            "name": "X-BQ-App",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "customer",
+                "seller",
+                "admin",
+                "superadmin",
+                "master",
+                "support",
+                "finance",
+                "logistics",
+                "delivery",
+                "growth",
+                "creator"
+              ]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "invitation": {
+                          "type": "object",
+                          "properties": {
+                            "invitationId": {
+                              "type": "string",
+                              "format": "uuid",
+                              "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-7[0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12})$"
+                            },
+                            "email": {
+                              "type": "string",
+                              "format": "email",
+                              "pattern": "^(?:[A-Za-z0-9_'+\\-]+\\.)*[A-Za-z0-9_'+\\-]*[A-Za-z0-9_+-]@(?:[A-Za-z0-9][A-Za-z0-9\\-]*\\.)+[A-Za-z]{2,}$"
+                            },
+                            "role": {
+                              "type": "string",
+                              "maxLength": 80,
+                              "pattern": "^[a-z]+\\.[a-z][a-z0-9_]*$"
+                            },
+                            "app": {
+                              "type": "string",
+                              "enum": [
+                                "customer",
+                                "seller",
+                                "admin",
+                                "superadmin",
+                                "master",
+                                "support",
+                                "finance",
+                                "logistics",
+                                "delivery",
+                                "growth",
+                                "creator"
+                              ]
+                            },
+                            "scope": {
+                              "type": "object",
+                              "properties": {
+                                "type": {
+                                  "type": "string",
+                                  "enum": [
+                                    "global",
+                                    "state",
+                                    "district",
+                                    "city",
+                                    "hub",
+                                    "warehouse",
+                                    "brand",
+                                    "category",
+                                    "sellerOrg",
+                                    "creatorAgency",
+                                    "self"
+                                  ]
+                                },
+                                "ids": {
+                                  "maxItems": 50,
+                                  "type": "array",
+                                  "items": {
+                                    "type": "string",
+                                    "minLength": 1,
+                                    "maxLength": 64
+                                  }
+                                }
+                              },
+                              "required": [
+                                "type",
+                                "ids"
+                              ],
+                              "additionalProperties": false
+                            },
+                            "validFrom": {
+                              "anyOf": [
+                                {
+                                  "type": "string",
+                                  "format": "date-time",
+                                  "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
+                                },
+                                {
+                                  "type": "null"
+                                }
+                              ]
+                            },
+                            "validTo": {
+                              "anyOf": [
+                                {
+                                  "type": "string",
+                                  "format": "date-time",
+                                  "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
+                                },
+                                {
+                                  "type": "null"
+                                }
+                              ]
+                            },
+                            "invitedBy": {
+                              "type": "string",
+                              "format": "uuid",
+                              "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-7[0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12})$"
+                            },
+                            "status": {
+                              "type": "string",
+                              "enum": [
+                                "pending",
+                                "accepted",
+                                "revoked",
+                                "expired"
+                              ]
+                            },
+                            "expiresAt": {
+                              "type": "string",
+                              "format": "date-time",
+                              "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
+                            },
+                            "createdAt": {
+                              "type": "string",
+                              "format": "date-time",
+                              "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
+                            }
+                          },
+                          "required": [
+                            "invitationId",
+                            "email",
+                            "role",
+                            "app",
+                            "scope",
+                            "validFrom",
+                            "validTo",
+                            "invitedBy",
+                            "status",
+                            "expiresAt",
+                            "createdAt"
+                          ],
+                          "additionalProperties": false
+                        }
+                      },
+                      "required": [
+                        "invitation"
+                      ],
+                      "additionalProperties": false
+                    }
+                  },
+                  "required": [
+                    "data"
+                  ]
+                }
+              }
+            }
+          },
+          "default": {
+            "$ref": "#/components/responses/Error"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "x-bq": {
+          "apps": [
+            "customer",
+            "seller",
+            "admin",
+            "superadmin",
+            "master",
+            "support",
+            "finance",
+            "logistics",
+            "delivery",
+            "growth",
+            "creator"
+          ],
+          "access": {
+            "type": "permission",
+            "permission": "iam.grant.manage"
+          },
+          "rateLimit": "write",
+          "idempotency": false,
+          "stepUp": true,
+          "owner": "identity",
+          "cache": null,
+          "navigation": false
+        }
+      }
+    },
+    "/auth/invitations/code": {
+      "post": {
+        "operationId": "auth.invitations.code",
+        "summary": "Email a code to accept an invitation (the same answer for every email)",
+        "tags": [
+          "auth"
+        ],
+        "parameters": [
+          {
+            "name": "X-BQ-App",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "customer",
+                "seller",
+                "admin",
+                "superadmin",
+                "master",
+                "support",
+                "finance",
+                "logistics",
+                "delivery",
+                "growth",
+                "creator"
+              ]
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "email": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 254
+                  },
+                  "consent": {
+                    "type": "object",
+                    "properties": {
+                      "terms": {
+                        "type": "boolean",
+                        "const": true
+                      },
+                      "adult": {
+                        "type": "boolean",
+                        "const": true
+                      }
+                    },
+                    "required": [
+                      "terms"
+                    ]
+                  }
+                },
+                "required": [
+                  "email"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "challengeId": {
+                          "type": "string",
+                          "format": "uuid",
+                          "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-7[0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12})$"
+                        },
+                        "expiresAt": {
+                          "type": "string",
+                          "format": "date-time",
+                          "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
+                        },
+                        "resendAfter": {
+                          "type": "string",
+                          "format": "date-time",
+                          "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
+                        },
+                        "resendsLeft": {
+                          "type": "integer",
+                          "minimum": 0,
+                          "maximum": 9007199254740991
+                        }
+                      },
+                      "required": [
+                        "challengeId",
+                        "expiresAt",
+                        "resendAfter",
+                        "resendsLeft"
+                      ],
+                      "additionalProperties": false
+                    }
+                  },
+                  "required": [
+                    "data"
+                  ]
+                }
+              }
+            }
+          },
+          "default": {
+            "$ref": "#/components/responses/Error"
+          }
+        },
+        "security": [],
+        "x-bq": {
+          "apps": [
+            "customer",
+            "seller",
+            "admin",
+            "superadmin",
+            "master",
+            "support",
+            "finance",
+            "logistics",
+            "delivery",
+            "growth",
+            "creator"
+          ],
+          "access": {
+            "type": "public"
+          },
+          "rateLimit": "otp",
+          "idempotency": false,
+          "stepUp": false,
+          "owner": "identity",
+          "cache": null,
+          "navigation": false
+        }
+      }
+    },
+    "/auth/step-up": {
+      "post": {
+        "operationId": "auth.stepUp.verify",
+        "summary": "Confirm with the authenticator for a high-risk action",
+        "tags": [
+          "auth"
+        ],
+        "parameters": [
+          {
+            "name": "X-BQ-App",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "customer",
+                "seller",
+                "admin",
+                "superadmin",
+                "master",
+                "support",
+                "finance",
+                "logistics",
+                "delivery",
+                "growth",
+                "creator"
+              ]
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "oneOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "code": {
+                        "type": "string",
+                        "pattern": "^\\d{6}$"
+                      }
+                    },
+                    "required": [
+                      "code"
+                    ]
+                  },
+                  {
+                    "type": "object",
+                    "properties": {
+                      "recoveryCode": {
+                        "type": "string",
+                        "pattern": "^[A-Z2-7]{5}-?[A-Z2-7]{5}$"
+                      }
+                    },
+                    "required": [
+                      "recoveryCode"
+                    ]
+                  }
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "stepUpUntil": {
+                          "type": "string",
+                          "format": "date-time",
+                          "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
+                        },
+                        "recoveryCodesLeft": {
+                          "anyOf": [
+                            {
+                              "type": "integer",
+                              "minimum": 0,
+                              "maximum": 9007199254740991
+                            },
+                            {
+                              "type": "null"
+                            }
+                          ]
+                        }
+                      },
+                      "required": [
+                        "stepUpUntil",
+                        "recoveryCodesLeft"
+                      ],
+                      "additionalProperties": false
+                    }
+                  },
+                  "required": [
+                    "data"
+                  ]
+                }
+              }
+            }
+          },
+          "default": {
+            "$ref": "#/components/responses/Error"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "x-bq": {
+          "apps": [
+            "customer",
+            "seller",
+            "admin",
+            "superadmin",
+            "master",
+            "support",
+            "finance",
+            "logistics",
+            "delivery",
+            "growth",
+            "creator"
+          ],
+          "access": {
+            "type": "signed-in"
+          },
+          "rateLimit": "auth",
+          "idempotency": false,
+          "stepUp": false,
+          "owner": "identity",
+          "cache": null,
+          "navigation": false
+        }
+      }
+    },
+    "/iam/users/{userId}/authenticator/reset": {
+      "post": {
+        "operationId": "iam.users.resetAuthenticator",
+        "summary": "Reset someone’s authenticator",
+        "tags": [
+          "iam"
+        ],
+        "parameters": [
+          {
+            "name": "userId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-7[0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12})$"
+            }
+          },
+          {
+            "name": "X-BQ-App",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "customer",
+                "seller",
+                "admin",
+                "superadmin",
+                "master",
+                "support",
+                "finance",
+                "logistics",
+                "delivery",
+                "growth",
+                "creator"
+              ]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "reset": {
+                          "type": "boolean"
+                        },
+                        "sessionsEnded": {
+                          "type": "integer",
+                          "minimum": 0,
+                          "maximum": 9007199254740991
+                        }
+                      },
+                      "required": [
+                        "reset",
+                        "sessionsEnded"
+                      ],
+                      "additionalProperties": false
+                    }
+                  },
+                  "required": [
+                    "data"
+                  ]
+                }
+              }
+            }
+          },
+          "default": {
+            "$ref": "#/components/responses/Error"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "x-bq": {
+          "apps": [
+            "customer",
+            "seller",
+            "admin",
+            "superadmin",
+            "master",
+            "support",
+            "finance",
+            "logistics",
+            "delivery",
+            "growth",
+            "creator"
+          ],
+          "access": {
+            "type": "permission",
+            "permission": "iam.totp.reset"
+          },
+          "rateLimit": "write",
+          "idempotency": false,
+          "stepUp": true,
+          "owner": "identity",
+          "cache": null,
+          "navigation": false
+        }
+      }
+    },
+    "/iam/users/{userId}/sessions/end": {
+      "post": {
+        "operationId": "iam.users.endSessions",
+        "summary": "End every session of someone",
+        "tags": [
+          "iam"
+        ],
+        "parameters": [
+          {
+            "name": "userId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-7[0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12})$"
+            }
+          },
+          {
+            "name": "X-BQ-App",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "customer",
+                "seller",
+                "admin",
+                "superadmin",
+                "master",
+                "support",
+                "finance",
+                "logistics",
+                "delivery",
+                "growth",
+                "creator"
+              ]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "ended": {
+                          "type": "integer",
+                          "minimum": 0,
+                          "maximum": 9007199254740991
+                        }
+                      },
+                      "required": [
+                        "ended"
+                      ],
+                      "additionalProperties": false
+                    }
+                  },
+                  "required": [
+                    "data"
+                  ]
+                }
+              }
+            }
+          },
+          "default": {
+            "$ref": "#/components/responses/Error"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "x-bq": {
+          "apps": [
+            "customer",
+            "seller",
+            "admin",
+            "superadmin",
+            "master",
+            "support",
+            "finance",
+            "logistics",
+            "delivery",
+            "growth",
+            "creator"
+          ],
+          "access": {
+            "type": "permission",
+            "permission": "iam.session.revoke"
+          },
+          "rateLimit": "write",
+          "idempotency": false,
+          "stepUp": true,
+          "owner": "identity",
+          "cache": null,
+          "navigation": false
+        }
+      }
+    },
+    "/auth/oauth/providers": {
+      "get": {
+        "operationId": "auth.socialProviders.list",
+        "summary": "The social sign-ins this app offers, and the origin they work from",
+        "tags": [
+          "auth"
+        ],
+        "parameters": [
+          {
+            "name": "X-BQ-App",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "customer"
+              ]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "providers": {
+                          "type": "array",
+                          "items": {
+                            "type": "string",
+                            "enum": [
+                              "google",
+                              "linkedin",
+                              "github"
+                            ]
+                          }
+                        },
+                        "origin": {
+                          "type": [
+                            "string",
+                            "null"
+                          ]
+                        }
+                      },
+                      "required": [
+                        "providers",
+                        "origin"
+                      ],
+                      "additionalProperties": false
+                    }
+                  },
+                  "required": [
+                    "data"
+                  ]
+                }
+              }
+            }
+          },
+          "default": {
+            "$ref": "#/components/responses/Error"
+          }
+        },
+        "security": [],
+        "x-bq": {
+          "apps": [
+            "customer"
+          ],
+          "access": {
+            "type": "public"
+          },
+          "rateLimit": "public",
+          "idempotency": false,
+          "stepUp": false,
+          "owner": "identity",
+          "cache": null,
+          "navigation": false
+        }
+      }
+    },
+    "/auth/oauth/{provider}/start": {
+      "get": {
+        "operationId": "auth.oauth.start",
+        "summary": "Go to the provider to sign in (a page the browser opens)",
+        "tags": [
+          "auth"
+        ],
+        "parameters": [
+          {
+            "name": "provider",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "google",
+                "linkedin",
+                "github"
+              ]
+            }
+          },
+          {
+            "name": "next",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "maxLength": 2048
+            }
+          }
+        ],
+        "responses": {
+          "303": {
+            "description": "The browser goes on to Location",
+            "headers": {
+              "Location": {
+                "required": true,
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "default": {
+            "$ref": "#/components/responses/Error"
+          }
+        },
+        "security": [],
+        "x-bq": {
+          "apps": [
+            "customer"
+          ],
+          "access": {
+            "type": "public"
+          },
+          "rateLimit": "auth",
+          "idempotency": false,
+          "stepUp": false,
+          "owner": "identity",
+          "cache": null,
+          "navigation": true
+        }
+      }
+    },
+    "/auth/oauth/{provider}/callback": {
+      "get": {
+        "operationId": "auth.oauth.callback",
+        "summary": "Back from the provider: sign in, or go on (a page the browser opens)",
+        "tags": [
+          "auth"
+        ],
+        "parameters": [
+          {
+            "name": "provider",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "google",
+                "linkedin",
+                "github"
+              ]
+            }
+          },
+          {
+            "name": "code",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "maxLength": 2048
+            }
+          },
+          {
+            "name": "state",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "maxLength": 256
+            }
+          },
+          {
+            "name": "error",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "maxLength": 256
+            }
+          }
+        ],
+        "responses": {
+          "303": {
+            "description": "The browser goes on to Location",
+            "headers": {
+              "Location": {
+                "required": true,
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "default": {
+            "$ref": "#/components/responses/Error"
+          }
+        },
+        "security": [],
+        "x-bq": {
+          "apps": [
+            "customer"
+          ],
+          "access": {
+            "type": "public"
+          },
+          "rateLimit": "auth",
+          "idempotency": false,
+          "stepUp": false,
+          "owner": "identity",
+          "cache": null,
+          "navigation": true
+        }
+      }
+    },
+    "/auth/oauth/sign-up": {
+      "get": {
+        "operationId": "auth.socialSignUp.get",
+        "summary": "The account a provider is making, waiting for its consent",
+        "tags": [
+          "auth"
+        ],
+        "parameters": [
+          {
+            "name": "X-BQ-App",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "customer"
+              ]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "provider": {
+                          "type": "string",
+                          "enum": [
+                            "google",
+                            "linkedin",
+                            "github"
+                          ]
+                        },
+                        "email": {
+                          "type": "string",
+                          "format": "email",
+                          "pattern": "^(?:[A-Za-z0-9_'+\\-]+\\.)*[A-Za-z0-9_'+\\-]*[A-Za-z0-9_+-]@(?:[A-Za-z0-9][A-Za-z0-9\\-]*\\.)+[A-Za-z]{2,}$"
+                        },
+                        "expiresAt": {
+                          "type": "string",
+                          "format": "date-time",
+                          "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
+                        },
+                        "next": {
+                          "type": "string"
+                        }
+                      },
+                      "required": [
+                        "provider",
+                        "email",
+                        "expiresAt",
+                        "next"
+                      ],
+                      "additionalProperties": false
+                    }
+                  },
+                  "required": [
+                    "data"
+                  ]
+                }
+              }
+            }
+          },
+          "default": {
+            "$ref": "#/components/responses/Error"
+          }
+        },
+        "security": [],
+        "x-bq": {
+          "apps": [
+            "customer"
+          ],
+          "access": {
+            "type": "public"
+          },
+          "rateLimit": "auth",
+          "idempotency": false,
+          "stepUp": false,
+          "owner": "identity",
+          "cache": null,
+          "navigation": false
+        }
+      },
+      "post": {
+        "operationId": "auth.socialSignUp.finish",
+        "summary": "Give the consent and finish signing up with a provider",
+        "tags": [
+          "auth"
+        ],
+        "parameters": [
+          {
+            "name": "X-BQ-App",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "customer"
+              ]
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "consent": {
+                    "type": "object",
+                    "properties": {
+                      "terms": {
+                        "type": "boolean",
+                        "const": true
+                      },
+                      "adult": {
+                        "type": "boolean",
+                        "const": true
+                      }
+                    },
+                    "required": [
+                      "terms"
+                    ]
+                  }
+                },
+                "required": [
+                  "consent"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "next": {
+                          "type": "string",
+                          "enum": [
+                            "totp",
+                            "totp-enroll",
+                            "signed-in"
+                          ]
+                        },
+                        "loginId": {
+                          "type": "string",
+                          "format": "uuid",
+                          "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-7[0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12})$"
+                        },
+                        "user": {
+                          "type": "object",
+                          "properties": {
+                            "userId": {
+                              "type": "string",
+                              "format": "uuid",
+                              "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-7[0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12})$"
+                            },
+                            "email": {
+                              "type": "string",
+                              "format": "email",
+                              "pattern": "^(?:[A-Za-z0-9_'+\\-]+\\.)*[A-Za-z0-9_'+\\-]*[A-Za-z0-9_+-]@(?:[A-Za-z0-9][A-Za-z0-9\\-]*\\.)+[A-Za-z]{2,}$"
+                            }
+                          },
+                          "required": [
+                            "userId",
+                            "email"
+                          ],
+                          "additionalProperties": false
+                        },
+                        "nextPath": {
+                          "type": "string"
+                        }
+                      },
+                      "required": [
+                        "next",
+                        "nextPath"
+                      ],
+                      "additionalProperties": false
+                    }
+                  },
+                  "required": [
+                    "data"
+                  ]
+                }
+              }
+            }
+          },
+          "default": {
+            "$ref": "#/components/responses/Error"
+          }
+        },
+        "security": [],
+        "x-bq": {
+          "apps": [
+            "customer"
+          ],
+          "access": {
+            "type": "public"
+          },
+          "rateLimit": "auth",
+          "idempotency": false,
+          "stepUp": false,
+          "owner": "identity",
+          "cache": null,
+          "navigation": false
+        }
+      }
+    },
+    "/auth/sign-in-methods/{provider}": {
+      "delete": {
+        "operationId": "auth.signInMethods.remove",
+        "summary": "Take a social sign-in off the account",
+        "tags": [
+          "auth"
+        ],
+        "parameters": [
+          {
+            "name": "provider",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "google",
+                "linkedin",
+                "github"
+              ]
+            }
+          },
+          {
+            "name": "X-BQ-App",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "customer"
+              ]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "removed": {
+                          "type": "boolean"
+                        },
+                        "providers": {
+                          "type": "array",
+                          "items": {
+                            "type": "string",
+                            "enum": [
+                              "password",
+                              "google",
+                              "linkedin",
+                              "github"
+                            ]
+                          }
+                        }
+                      },
+                      "required": [
+                        "removed",
+                        "providers"
+                      ],
+                      "additionalProperties": false
+                    }
+                  },
+                  "required": [
+                    "data"
+                  ]
+                }
+              }
+            }
+          },
+          "default": {
+            "$ref": "#/components/responses/Error"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "x-bq": {
+          "apps": [
+            "customer"
+          ],
+          "access": {
+            "type": "signed-in"
+          },
+          "rateLimit": "write",
+          "idempotency": false,
+          "stepUp": false,
+          "owner": "identity",
+          "cache": null,
+          "navigation": false
         }
       }
     }

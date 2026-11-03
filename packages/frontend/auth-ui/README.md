@@ -1,0 +1,113 @@
+# @beautinique/frontend-auth-ui
+
+Har Beautinique app ki auth screens aur session (ARCHITECTURE §7.1, §9.2): sign-in (password, phir authenticator ya recovery code), sign-up (sirf sign-up apps), naya/bhoola password, invitation accept, header ka account menu, aur `next` ke saath pages ki rakhwali. Sab forms `@beautinique/frontend-forms` aur `@beautinique/frontend-components` se; har call `@beautinique/frontend-api-client` se.
+
+## Install
+
+```bash
+npm install @beautinique/frontend-auth-ui @tanstack/react-query react-router
+```
+
+Peers: `react` 19, `react-dom`, `react-router` 8, `@tanstack/react-query` 5. App ki CSS me (Tailwind ke baad, styles, components aur forms ki `tailwind.css` ke saath):
+
+```css
+@import '@beautinique/frontend-auth-ui/tailwind.css';
+```
+
+```tsx
+// app ki root me: API client, Query cache, session (har render tree ka apna; SSR pe har request ka)
+<ApiProvider client={client} queryClient={queryClient}>
+  <SessionProvider>
+    {/* router ke andar: step-up dialog security page ka link deta hai */}
+    <StepUpProvider>
+      <App />
+    </StepUpProvider>
+  </SessionProvider>
+</ApiProvider>
+```
+
+## Session
+
+| Export                                | Kaam                                                                                                                                                                                                                                                                   |
+| ------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `SessionProvider`                     | `/iam/me` **sirf tab** jab identity ki hint cookie `__Host-bq_<app>_hint` ho (owner, 2026-11-02): anonymous visit pe koi call nahi (refresh `auth` rate limit per IP hai, mobile pe bahut log ek IP share karte hain). Doosre tab ke sign-in/out pe dobara padhta hai. |
+| `useSession()`                        | `{ app, state, signedIn(), signOut(), forget() }`. `state.status`: `loading` (server pe aur pehle jawab tak), `signed-out` (app ne khud band kiya ho to `reason: 'idle'`), `signed-in` (`user`, `session`), `unavailable` (offline/server down; signed-out nahi).      |
+| `signedIn()`                          | Sign-in ke baad: `/iam/me` dobara, aur doosre tabs ko khabar.                                                                                                                                                                                                          |
+| `signOut(reason?)`, `forget(reason?)` | `POST /auth/logout` (`forget` bina call ke: server pehle hi band kar chuka), hint hatao, Query cache saaf (is tab me insaan ka kuch nahi bachta), doosre tabs ko khabar; `reason` agle sign-in tak signed-out state pe rehta hai.                                      |
+| `hasSessionHint`, `clearSessionHint`  | Hint cookie padhna/hatana (session doosre device se band hua ho to `/iam/me` ke `SESSION_EXPIRED` pe apne-aap hat'ta hai).                                                                                                                                             |
+
+## Pages ki rakhwali aur `next`
+
+| Export                     | Kaam                                                                                                                             |
+| -------------------------- | -------------------------------------------------------------------------------------------------------------------------------- |
+| `RequireSignIn`            | Signed out → `/sign-in?next=<yahi page>` (idle sign-out ho to sign-in pe uska sandesh); jab tak pata nahi, `fallback` (spinner). |
+| `RedirectIfSignedIn`       | Auth page pe signed-in user seedha `next` (ya `/`) pe (owner, 2026-11-02); page pehle render hota hai (SSR, first paint).        |
+| `safeNext(next)`           | Sirf apni site ka path: ek `/` se shuru, `//` ya `/\` nahi, control characters nahi, 2048 tak, auth page nahi; warna `/`.        |
+| `authHref(path, next)`     | `next` ke saath auth link (`/sign-in?next=%2Forders`); home ke liye `next` nahi.                                                 |
+| `AUTH_PATHS`, `NEXT_PARAM` | `/sign-in`, `/sign-up`, `/forgot-password`, `/invitation`; `next`.                                                               |
+
+## Screens
+
+| Export                                | Kaam                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               |
+| ------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `SignInForm`                          | Email + password; account me authenticator ho to code (`TOTP_INVALID` field pe), "Lost your phone?" se recovery code (3 ya kam bache to toast). Sign-in step khatam (`LOGIN_EXPIRED`) → wajah ke saath shuru se. Jis app me authenticator zaroori hai (contracts `TOTP_REQUIRED_APPS`: admin, superadmin, master ...) aur account me nahi hai (`totp-enroll`): wahin lagana (QR + key, pehla code, recovery codes), codes save hone ke baad hi aage. Signed in → `next`. Galat email/password/rok: ek hi jawab. `email`, `notice` props, ya pichhle auth page ka `location.state`; khule page pe nayi visit (jaise idle sign-out) shuru se, uske sandesh ke saath. |
+| `SignUpForm`                          | Email + consent (app ke hisaab se contracts `consentProblems`: customer me terms + 18+, seller/creator me terms) → code + naya password. Naya account → signed in → `next`. Account pehle se (`password-kept`) → sign-in, email bhara hua (state me, URL me kabhi nahi).                                                                                                                                                                                                                                                                                                                                                                                           |
+| `ForgotPasswordForm`                  | Email (consent nahi) → code + naya password → sign-in, "har device sign out" ke sandesh ke saath.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  |
+| `InvitationForm`                      | Invite wala email (+ sign-up app me consent) → code + password (password wala account apna rakhta hai) → sign-in.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  |
+| `EmailStep`, `CodeStep`               | Upar wale forms ke do step, alag bhi: code step "It works until 5:10 pm", spam hint, resend server ke `resendAfter` countdown ke baad, "Use another email".                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        |
+| `AccountMenu`                         | Header: session pata hone tak usi size ka khaali placeholder (jagah nahi hilti), signed out → "Sign in" (wapas isi page), signed in → email, `links` (account pages) aur "Sign out" (toast).                                                                                                                                                                                                                                                                                                                                                                                                                                                                       |
+| `AuthLayout`, `TextLink`, `TEXT_LINK` | Auth page ka card (phone pe poori chaudai), ek `h1`, footer; brand rang ka underlined link.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        |
+| `LEGAL_LINKS`                         | Consent ke links: `/terms`, `/privacy` (customer app ke dummy pages); `legal` prop se badlo.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       |
+
+`ForgotPasswordForm` signed-in insaan ka email `location.state` (`{ email }`) se pehle se bhar leta hai (URL me kabhi nahi). Sign-in ke beech authenticator lagate waqt cookies code confirm hote hi aa jaati hain, par session (`/iam/me`) "Continue" ke baad hi padha jaata hai: isliye `RedirectIfSignedIn` recovery codes save hone se pehle page nahi badalta (aur badle to bhi codes ka "Leave without saving?" rokta hai).
+
+## Idle sign-out (internal apps; owner, 2026-10-31)
+
+`<IdleNotice />` app ke root pe, `SessionProvider` ke andar, ek baar. Sirf un apps me kuch karta hai jinki session policy me `idleMs` hai (contracts `SESSION_POLICIES`: saare internal apps, 30 min), aur sirf signed in. app-shell me nahi: use Dialog chahiye, aur components ka playground app-shell leta hai (dependency cycle).
+
+- Identity session ko 30 min bina refresh ke band karta hai. Isliye kaam chal raha ho (click, key, scroll, touch, kisi bhi tab me) to page server ki seema se 5 min pehle ek refresh karta hai (`IDLE_RENEW_MS`): kaam ke dauraan ~25 min me ek, kyunki `auth` rate limit IP pe hai aur ek office ek IP share karta hai. Page load pe aakhri refresh pata nahi, isliye ek access token (10 min) pehle maana jaata hai.
+- 28 min bina activity: "Are you still there?" (`alertdialog`, bahar click se band nahi). "Stay signed in" = refresh, "Sign out" = normal sign-out. Sawal khula ho to sirf uske buttons; doosre tab ki activity sawal band karti hai.
+- 30 min: `signOut('idle')`, aur `RequireSignIn` sign-in pe le jaata hai: "You were signed out after 30 minutes without activity. Please sign in again." App ke baaki tabs (`BroadcastChannel` `bq:<app>:idle`) bhi usi sandesh ke saath, server ko dobara poochhe bina.
+- Ghadi har 5 s (`IDLE_TICK_MS`) aur tab dobara dikhne pe padhi jaati hai: soya laptop jaagte hi sign-out.
+
+## Social login (customer app; TASKS T3.1 PR 4)
+
+| Export                                      | Kaam                                                                                                                                                                                                                                                                                    |
+| ------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `SocialSignIn`                              | "Continue with Google / LinkedIn / GitHub": `<a>` links (browser provider tak aur wapas page ki tarah jaata hai; `navigationHref`), `next` ke saath. Sirf us origin pe dikhte hain jo identity batata hai (redirect URL wahi registered): Vercel preview pe nahi. `icons` prop se logo. |
+| `SocialSignUpFinish`                        | `/sign-up/finish`: naye account (ya Customer role ke bina account) ka consent (terms + 18+), phir signed in aur `next`; authenticator wala account `totpStepHref` pe. 15 min baad expired ka sandesh, sign-in/sign-up ke links.                                                         |
+| `oauthNotice`, `totpStepOf`, `totpStepHref` | `SignInForm` khud padhta hai: `?oauth=<cancelled\|expired\|failed\|email-unverified\|locked>` ka sandesh, aur `#totp=<loginId>` pe seedha authenticator step (hydration ke baad; id URL se hat jaati hai).                                                                              |
+| `PROVIDER_NAMES`                            | Google, LinkedIn, GitHub.                                                                                                                                                                                                                                                               |
+
+`SecuritySettings signInMethods` (customer): "Sign-in methods" card, har provider Connected / Not connected, "Remove" (confirm, phir account ke email pe security email); akela tareeka ho to Remove nahi, "set a password" ki salah.
+
+## Account pages (owner, 2026-11-03)
+
+Har app me wahi URLs (`ACCOUNT_PATHS`): `/account/security`, `/account/security/authenticator`, `/account/devices`; app inhe `RequireSignIn` ke andar rakhta hai, page ka `h1` aur nav app ka.
+
+| Export                                                  | Kaam                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   |
+| ------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `StepUpProvider`                                        | api-client ka `setStepUpHandler`: kisi bhi call pe `STEP_UP_REQUIRED` → ek dialog (saath wali calls ke liye bhi ek), authenticator code ya "Lost your phone?" se recovery code (`POST /auth/step-up` `{ code }` / `{ recoveryCode }`). Galat code field pe, sahi pe wahi call dobara (step-up 5 min chalta hai). Cancel/Escape → call `STEP_UP_REQUIRED` se rukti hai, page chup rehta hai. Recovery code ke baad `/iam/me` dobara, 3 ya kam bache to toast. Bina authenticator wale account ko security page ka link. Router aur `SessionProvider` ke andar, ek baar. |
+| `SecuritySettings`                                      | Password card ("Change password" → `/forgot-password`, email state me; naya password har device se sign out). Authenticator card: band → "Set up"; chalu → bache recovery codes (3 ya kam pe warning), "Get new recovery codes" (confirm → step-up → codes ek baar), "Set up on a new phone", "Turn off" (confirm → step-up; 409 `AUTHENTICATOR_REQUIRED_BY_ROLE` ka sandesh roles ke naam ke saath dialog me).                                                                                                                                                        |
+| `AuthenticatorSetup`                                    | 3 step: QR (`qrcode.react` SVG, hamesha safed pe kaala) + "Open in your authenticator app" (`otpauth://`) + key (4-4 ke group, copy) → code + password (`TOTP_INVALID`, `PASSWORD_INVALID` apne field pe; set-up expire/`AUTHENTICATOR_EXISTS` → naya key sandesh ke saath) → recovery codes. Authenticator pehle se ho to API step-up maangta hai (badalna). Bina password → "Set a password". StrictMode me bhi ek hi enroll. `onDone`, `backHref`.                                                                                                                  |
+| `RecoveryCodes`                                         | Codes ek baar: list, Copy, `.txt` download (`RECOVERY_CODES_FILE`, `recoveryCodesText`: account, India time, codes), "I’ve saved my recovery codes" tick ke bina Done pe error + focus; tick se pehle page chhodna (link, Back) "Leave without saving your codes?" dialog (`useBlocker`, data router chahiye), tab band pe browser ki warning.                                                                                                                                                                                                                         |
+| `MyDevices`                                             | `GET /auth/sessions`: saare apps, ye device pehle ("This device"), app ka naam (`APP_NAMES`), IP, last active + signed in (`en-IN`). Doosra device → `DELETE /auth/sessions/:id`; ye device → normal sign out; "Sign out all other devices" confirm ke baad (`POST /auth/sessions/end-others`).                                                                                                                                                                                                                                                                        |
+| `AccountCard`, `LinkButton`, `StatusBadge`, `APP_NAMES` | Account pages ke tukde.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                |
+
+`AccountMenu` ke `links` React Aria ke `RouterProvider` se app ke router me jaate hain (pehle poora page reload hota tha).
+
+## Playground
+
+```bash
+npm run playground --workspace @beautinique/frontend-auth-ui
+```
+
+http://localhost:5186: saari screens (account pages bhi; step-up code `123456` ya recovery code `ABCDE-FGH23`) nakli identity ke saath (test ka `fake-identity`, 500 ms der), jawab chunne ke radio (sirf password, authenticator, galat password, sign-up pe account pehle se), header me account menu aur theme switcher.
+
+## Tests
+
+`npm test --workspace @beautinique/frontend-auth-ui`: jsdom (https URL, kyunki hint cookie Secure hai), nakli identity, asli router, har screen pe axe. Asli backend ke saath poora raasta customer app ke Playwright E2E me.
+
+## License
+
+MIT © Nageshwar Pawar

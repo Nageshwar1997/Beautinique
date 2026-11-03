@@ -54,6 +54,11 @@ export function mountRoute<const Route extends RouteDefinition>(
           cause: checked.error,
         });
       }
+      if (route.navigation) {
+        // a page the browser opened (OAuth): it goes on to the checked location, a GET
+        res.redirect(303, (checked.data as { location: string }).location);
+        return;
+      }
       res.status(options.status ?? 200).json({ data: checked.data });
     },
   );

@@ -21,6 +21,7 @@ Kaunse deployables chalenge, ye [src/deployables.ts](src/deployables.ts) me hai.
 | `npm run start --workspace bundle` | Production jaisa: compiled JS, `--max-old-space-size=300` |
 | `npm run test --workspace bundle`  | Sab deployables ek saath start/stop ka test               |
 | `npm run db:release` (repo root)   | Sirf release steps, bina server chalaye (neeche)          |
+| `npm run db:grant-master` (root)   | Pehla Master, account pehle se (neeche)                   |
 
 Dev aur start dono `src/instrument.ts` (build me `dist/instrument.js`) ko `node --import` se pehle load karte hain: Sentry Express aur drivers se pehle, poore process me ek baar (`SENTRY_DSN` khaali = band).
 
@@ -36,6 +37,15 @@ Har start release steps khud chalata hai; jab DB me yahi release pehle se ho (fi
 | `npm run db:release -- --env live`        | **Live** Atlas pe, `backend/bundle/.env.production` ki values se (sirf owner ke paas). Pehle har deployable ka DB aur host dikhata hai (user/password kabhi nahi), aur `live` type karne pe hi chalta hai. Atlas Network Access me laptop ka IP chahiye |
 
 Gateway ka DB nahi, uske steps nahi. Naya deployable `src/service.ts` se `release(config, { logger, force })` export kare to ye command use apne aap leta hai.
+
+## Pehla Master (`npm run db:grant-master`)
+
+Master ko koi appoint nahi kar sakta (ARCHITECTURE §7.3), isliye pehla Master owner yahan se deta hai. Account pehle se hona chahiye (customer app me sign-up, password ke saath); command pehle identity ke release steps chalata hai (roles), phir grant. Max 2 Master; dobara chalane pe kuch nahi badalta. Pehli baar Master app me login pe authenticator lagta hai.
+
+| Command                                                 | Kaam                                                                                                     |
+| ------------------------------------------------------- | -------------------------------------------------------------------------------------------------------- |
+| `npm run db:grant-master -- --email <email>`            | Laptop ke DB pe (`backend/bundle/.env`)                                                                  |
+| `npm run db:grant-master -- --email <email> --env live` | **Live** pe (`backend/bundle/.env.production`, sirf owner): DB aur host dikha ke `live` type karne pe hi |
 
 ## Settings
 

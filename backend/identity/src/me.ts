@@ -1,12 +1,14 @@
 import type { Passport } from '@beautinique/backend-server-kit';
 
 import { AUTH_PROVIDERS, type AuthProvider, CREDENTIALS, type Credentials } from './credentials.ts';
+import { recoveryCodesLeft } from './login.ts';
 import type { OtpDeps } from './otp.ts';
 import { type Session, sessionExpired, SESSIONS } from './sessions.ts';
 import { type User, USERS } from './users.ts';
 
 /**
- * GET /iam/me: who signed in (ARCHITECTURE §7.2), how the account signs in, and this session. A
+ * GET /iam/me: who signed in (ARCHITECTURE §7.2), how the account signs in (with the recovery
+ * codes left, ARCHITECTURE §9.2), and this session. A
  * session the gateway let through but that ended a moment ago (or an account that went away)
  * answers like an ended session.
  */
@@ -23,7 +25,7 @@ export async function me(deps: OtpDeps, passport: Passport) {
     .toArray();
   const credentials = await db
     .collection<Credentials>(CREDENTIALS)
-    .findOne({ _id: user._id }, { projection: { totp: 1 } });
+    .findOne({ _id: user._id }, { projection: { totp: 1, recoveryCodes: 1 } });
   return {
     user: {
       userId: user._id,
@@ -32,6 +34,9 @@ export async function me(deps: OtpDeps, passport: Passport) {
       signUpApp: user.signUpApp,
       providers: providers.map((p) => p.provider).toSorted(),
       authenticator: credentials?.totp !== undefined,
+      recoveryCodesLeft: credentials?.totp
+        ? (recoveryCodesLeft(credentials.recoveryCodes) ?? 0)
+        : null,
     },
     session: {
       sessionId: session._id,

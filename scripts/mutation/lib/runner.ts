@@ -113,6 +113,10 @@ function makeCopy(root: string, packageDir: string): { dir: string; remove: () =
     if (existsSync(from)) cpSync(from, join(dir, part), { recursive: true });
   }
   cpSync(join(root, 'configs'), join(base, 'configs'), { recursive: true });
+  // the stand-ins tests share across packages (the fake sign-in providers ...), at the same
+  // relative path
+  const standIns = join(root, 'scripts', 'e2e');
+  if (existsSync(standIns)) cpSync(standIns, join(base, 'scripts', 'e2e'), { recursive: true });
   const link = join(base, 'node_modules');
   symlinkSync(join(root, 'node_modules'), link, process.platform === 'win32' ? 'junction' : 'dir');
   return {

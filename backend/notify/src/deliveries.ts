@@ -4,14 +4,28 @@ import type { IndexSpec, Mongo } from '@beautinique/backend-server-mongo';
 import { subscribe, type Subscription, type TaskTrigger } from '@beautinique/backend-server-queue';
 import {
   type AppId,
+  type AUTHENTICATOR_CHANGES,
+  authenticatorChanged,
+  authenticatorReset,
+  invitationCreated,
   type OTP_PURPOSES,
   otpRequested,
   otpSealContext,
   sessionReuseDetected,
+  type SIGN_IN_METHOD_CHANGES,
+  signInMethodChanged,
+  type SocialProvider,
 } from '@beautinique/shared-contracts';
 
 import { type EmailSender, EmailSendError } from './email/port.ts';
-import { otpEmail, sessionReuseEmail } from './email/templates.ts';
+import {
+  authenticatorChangedEmail,
+  authenticatorResetEmail,
+  invitationEmail,
+  otpEmail,
+  sessionReuseEmail,
+  signInMethodEmail,
+} from './email/templates.ts';
 
 export const DELIVERIES = 'notify_deliveries';
 export const EMAIL_DAYS = 'notify_email_days';
@@ -19,6 +33,14 @@ export const EMAIL_DAYS = 'notify_email_days';
 export const OTP_EMAIL = 'notify.otpEmail';
 /** The subscriber identity's relay sends identity.session.reuseDetected to. */
 export const SECURITY_EMAIL = 'notify.securityEmail';
+/** The subscriber identity's relay sends identity.invitation.created to. */
+export const INVITATION_EMAIL = 'notify.invitationEmail';
+/** The subscriber identity's relay sends identity.authenticator.reset to. */
+export const AUTHENTICATOR_EMAIL = 'notify.authenticatorEmail';
+/** The subscriber identity's relay sends identity.authenticator.changed to. */
+export const AUTHENTICATOR_CHANGED_EMAIL = 'notify.authenticatorChangedEmail';
+/** The subscriber identity's relay sends identity.signInMethod.changed to. */
+export const SIGN_IN_METHOD_EMAIL = 'notify.signInMethodEmail';
 /** The task that sends what is due; it runs every minute and at once after each new email. */
 export const SEND_TASK = 'email.sendDue';
 
@@ -50,7 +72,13 @@ export interface Delivery {
   lane: Lane;
   /** LANES[lane]: the order a run sends in */
   priority: number;
-  template: 'otp' | 'session-reuse';
+  template:
+    | 'otp'
+    | 'session-reuse'
+    | 'invitation'
+    | 'authenticator-reset'
+    | 'authenticator-changed'
+    | 'sign-in-method';
   to: string;
   /** The sign-in code, still sealed; removed once the email went, failed or ran out. */
   otp?: {
@@ -62,6 +90,25 @@ export interface Delivery {
   };
   /** A session ended because its refresh token was copied (no secret in it) */
   security?: { app: AppId; device: string; detectedAt: string };
+  /** An invitation to a role (no secret in it: it is accepted with an email code) */
+  invitation?: { app: AppId; roleName: string; expiresAt: string };
+  /** A Security Officer reset the authenticator (no secret in it) */
+  authenticator?: { resetAt: string };
+  /** The person changed their own authenticator (no secret in it) */
+  authenticatorChange?: {
+    change: (typeof AUTHENTICATOR_CHANGES)[number];
+    app: AppId;
+    device: string;
+    changedAt: string;
+  };
+  /** A social sign-in was linked to the account or taken off it (no secret in it) */
+  signInMethodChange?: {
+    provider: SocialProvider;
+    change: (typeof SIGN_IN_METHOD_CHANGES)[number];
+    app: AppId;
+    device: string;
+    changedAt: string;
+  };
   status: Status;
   attempts: number;
   /** Not sent before this */
@@ -211,6 +258,190 @@ export function securitySubscription({
   });
 }
 
+/**
+ * identity.invitation.created → an invitation email in the transactional lane, then a send run at
+ * once. It is not sent after the invitation ran out.
+ */
+export function invitationSubscription({
+  mongo,
+  trigger,
+  logger,
+}: {
+  mongo: Mongo;
+  trigger: TaskTrigger;
+  logger: Logger;
+}): Subscription {
+  const deliveries = deliveriesOf(mongo);
+  return subscribe(INVITATION_EMAIL, invitationCreated, async (event, session) => {
+    const { email, app, roleName, expiresAt } = event.data;
+    const now = new Date();
+    await deliveries.insertOne(
+      {
+        _id: event.eventId,
+        channel: 'email',
+        lane: 'transactional',
+        priority: LANES.transactional,
+        template: 'invitation',
+        to: email,
+        invitation: { app, roleName, expiresAt },
+        status: 'queued',
+        attempts: 0,
+        dueAt: now,
+        expiresAt: new Date(expiresAt),
+        createdAt: now,
+      },
+      { session },
+    );
+    try {
+      await trigger.runSoon(SEND_TASK);
+    } catch (error) {
+      // the every-minute run sends it anyway
+      logger.warn(
+        { err: describe(error), deliveryId: event.eventId },
+        'email send not started at once',
+      );
+    }
+  });
+}
+
+/**
+ * identity.authenticator.reset → a security email in the transactional lane, then a send run at
+ * once.
+ */
+export function authenticatorSubscription({
+  mongo,
+  trigger,
+  logger,
+}: {
+  mongo: Mongo;
+  trigger: TaskTrigger;
+  logger: Logger;
+}): Subscription {
+  const deliveries = deliveriesOf(mongo);
+  return subscribe(AUTHENTICATOR_EMAIL, authenticatorReset, async (event, session) => {
+    const { email, resetAt } = event.data;
+    const now = new Date();
+    await deliveries.insertOne(
+      {
+        _id: event.eventId,
+        channel: 'email',
+        lane: 'transactional',
+        priority: LANES.transactional,
+        template: 'authenticator-reset',
+        to: email,
+        authenticator: { resetAt },
+        status: 'queued',
+        attempts: 0,
+        dueAt: now,
+        expiresAt: null,
+        createdAt: now,
+      },
+      { session },
+    );
+    try {
+      await trigger.runSoon(SEND_TASK);
+    } catch (error) {
+      // the every-minute run sends it anyway
+      logger.warn(
+        { err: describe(error), deliveryId: event.eventId },
+        'email send not started at once',
+      );
+    }
+  });
+}
+
+/**
+ * identity.authenticator.changed (the person set one up, replaced it, got new recovery codes or
+ * turned it off) → a security email in the transactional lane, then a send run at once.
+ */
+export function authenticatorChangedSubscription({
+  mongo,
+  trigger,
+  logger,
+}: {
+  mongo: Mongo;
+  trigger: TaskTrigger;
+  logger: Logger;
+}): Subscription {
+  const deliveries = deliveriesOf(mongo);
+  return subscribe(AUTHENTICATOR_CHANGED_EMAIL, authenticatorChanged, async (event, session) => {
+    const { email, change, app, device, changedAt } = event.data;
+    const now = new Date();
+    await deliveries.insertOne(
+      {
+        _id: event.eventId,
+        channel: 'email',
+        lane: 'transactional',
+        priority: LANES.transactional,
+        template: 'authenticator-changed',
+        to: email,
+        authenticatorChange: { change, app, device, changedAt },
+        status: 'queued',
+        attempts: 0,
+        dueAt: now,
+        expiresAt: null,
+        createdAt: now,
+      },
+      { session },
+    );
+    try {
+      await trigger.runSoon(SEND_TASK);
+    } catch (error) {
+      // the every-minute run sends it anyway
+      logger.warn(
+        { err: describe(error), deliveryId: event.eventId },
+        'email send not started at once',
+      );
+    }
+  });
+}
+
+/**
+ * identity.signInMethod.changed (a social sign-in linked to the account, or taken off it) → a
+ * security email in the transactional lane, then a send run at once.
+ */
+export function signInMethodSubscription({
+  mongo,
+  trigger,
+  logger,
+}: {
+  mongo: Mongo;
+  trigger: TaskTrigger;
+  logger: Logger;
+}): Subscription {
+  const deliveries = deliveriesOf(mongo);
+  return subscribe(SIGN_IN_METHOD_EMAIL, signInMethodChanged, async (event, session) => {
+    const { email, provider, change, app, device, changedAt } = event.data;
+    const now = new Date();
+    await deliveries.insertOne(
+      {
+        _id: event.eventId,
+        channel: 'email',
+        lane: 'transactional',
+        priority: LANES.transactional,
+        template: 'sign-in-method',
+        to: email,
+        signInMethodChange: { provider, change, app, device, changedAt },
+        status: 'queued',
+        attempts: 0,
+        dueAt: now,
+        expiresAt: null,
+        createdAt: now,
+      },
+      { session },
+    );
+    try {
+      await trigger.runSoon(SEND_TASK);
+    } catch (error) {
+      // the every-minute run sends it anyway
+      logger.warn(
+        { err: describe(error), deliveryId: event.eventId },
+        'email send not started at once',
+      );
+    }
+  });
+}
+
 export interface SendDueDeps {
   mongo: Mongo;
   sender: EmailSender;
@@ -218,6 +449,8 @@ export interface SendDueDeps {
   logger: Logger;
   trigger: TaskTrigger;
   limits: { daily: number; other: number };
+  /** Each app's address for links (NOTIFY__APP_URLS); an app left out gets no link */
+  appUrls?: ReadonlyMap<AppId, string>;
   /** default: the clock; tests move time */
   now?: () => Date;
   batchSize?: number;
@@ -248,6 +481,7 @@ export async function sendDue({
   logger,
   trigger,
   limits,
+  appUrls,
   now = () => new Date(),
   batchSize = SEND_BATCH,
 }: SendDueDeps): Promise<SendReport> {
@@ -287,6 +521,33 @@ export async function sendDue({
       const { security } = delivery;
       if (!security) throw new EmailSendError('SECURITY_DETAILS_MISSING', { retry: false });
       return sessionReuseEmail({ to: delivery.to, ...security });
+    }
+    if (delivery.template === 'authenticator-reset') {
+      const { authenticator } = delivery;
+      if (!authenticator)
+        throw new EmailSendError('AUTHENTICATOR_DETAILS_MISSING', { retry: false });
+      return authenticatorResetEmail({ to: delivery.to, ...authenticator });
+    }
+    if (delivery.template === 'authenticator-changed') {
+      const { authenticatorChange } = delivery;
+      if (!authenticatorChange)
+        throw new EmailSendError('AUTHENTICATOR_DETAILS_MISSING', { retry: false });
+      return authenticatorChangedEmail({ to: delivery.to, ...authenticatorChange });
+    }
+    if (delivery.template === 'sign-in-method') {
+      const { signInMethodChange } = delivery;
+      if (!signInMethodChange)
+        throw new EmailSendError('SIGN_IN_METHOD_DETAILS_MISSING', { retry: false });
+      return signInMethodEmail({ to: delivery.to, ...signInMethodChange });
+    }
+    if (delivery.template === 'invitation') {
+      const { invitation } = delivery;
+      if (!invitation) throw new EmailSendError('INVITATION_DETAILS_MISSING', { retry: false });
+      return invitationEmail({
+        to: delivery.to,
+        ...invitation,
+        url: appUrls?.get(invitation.app),
+      });
     }
     const { otp } = delivery;
     if (!otp?.sealedCode) throw new EmailSendError('OTP_CODE_MISSING', { retry: false });

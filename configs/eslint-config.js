@@ -28,6 +28,7 @@ const GLOBALS = {
  * @param {boolean} [options.mongoPackage] only for @beautinique/backend-server-mongo: the one package that imports mongodb
  * @param {boolean} [options.changeStreamPackage] only for @beautinique/backend-server-queue: the outbox relay, the one place that opens MongoDB change streams
  * @param {string[]} [options.envFiles] backend apps: the only files that may read process.env (ARCHITECTURE §3)
+ * @param {string[]} [options.httpProxyFiles] only the gateway's reverse proxy: the one place that streams with node:http instead of calling with axios (RULES §3)
  */
 export function packageConfig({
   platform,
@@ -38,11 +39,14 @@ export function packageConfig({
   mongoPackage = false,
   changeStreamPackage = false,
   envFiles,
+  httpProxyFiles = [],
 }) {
   const ZOD_MESSAGE =
     "Import z from '@beautinique/shared-zod' (the repo has one zod and one import path).";
   const MONGO_MESSAGE =
     "Import from '@beautinique/backend-server-mongo' (the repo has one MongoDB driver and one import path).";
+  const HTTP_MESSAGE =
+    'Make HTTP calls with axios (RULES §3; apps through @beautinique/frontend-api-client). fetch and node:http requests only in tests and the gateway proxy.';
   const restrictedPaths = [
     ...(zodPackage ? [] : [{ name: 'zod', message: ZOD_MESSAGE }]),
     ...(mongoPackage ? [] : [{ name: 'mongodb', message: MONGO_MESSAGE }]),
@@ -51,6 +55,25 @@ export function packageConfig({
     ...(zodPackage ? [] : [{ group: ['zod/*'], message: ZOD_MESSAGE }]),
     ...(mongoPackage ? [] : [{ group: ['mongodb/*'], message: MONGO_MESSAGE }]),
   ];
+  // a server (createServer) is fine: only the client side of node:http is axios's job
+  const httpPaths = ['http', 'https', 'node:http', 'node:https'].map((name) => ({
+    name,
+    importNames: ['request', 'get', 'Agent'],
+    message: HTTP_MESSAGE,
+  }));
+  const undiciPaths = [{ name: 'undici', message: HTTP_MESSAGE }];
+  const processEnv = {
+    object: 'process',
+    property: 'env',
+    message: `Read settings in ${(envFiles ?? []).join(' or ')} (namespaced config, ARCHITECTURE §3).`,
+  };
+  const fetchProperties = ['globalThis', 'window', 'self'].map((object) => ({
+    object,
+    property: 'fetch',
+    message: HTTP_MESSAGE,
+  }));
+  // the code that ships; tests stand where a browser or curl would and use fetch on purpose
+  const SOURCE = ['src/**/*.{ts,tsx}', 'app/**/*.{ts,tsx}'];
   return defineConfig(
     { ignores: ['dist', 'coverage', 'node_modules', ...ignores] },
     js.configs.recommended,
@@ -116,22 +139,42 @@ export function packageConfig({
         }
       : {},
     envFiles
-      ? [
+      ? { files: ['**/*.ts'], rules: { 'no-restricted-properties': ['error', processEnv] } }
+      : {},
+    // HTTP calls with axios only (RULES §3). Each rule repeats the lists above for these files,
+    // because a later block replaces a rule's options instead of adding to them.
+    {
+      files: SOURCE,
+      rules: {
+        'no-restricted-globals': ['error', { name: 'fetch', message: HTTP_MESSAGE }],
+        'no-restricted-properties': [
+          'error',
+          ...(envFiles ? [processEnv] : []),
+          ...fetchProperties,
+        ],
+        'no-restricted-imports': [
+          'error',
           {
-            files: ['**/*.ts'],
-            rules: {
-              'no-restricted-properties': [
-                'error',
-                {
-                  object: 'process',
-                  property: 'env',
-                  message: `Read settings in ${envFiles.join(' or ')} (namespaced config, ARCHITECTURE §3).`,
-                },
-              ],
-            },
+            paths: [...restrictedPaths, ...httpPaths, ...undiciPaths],
+            patterns: restrictedPatterns,
           },
-          { files: envFiles, rules: { 'no-restricted-properties': 'off' } },
-        ]
+        ],
+      },
+    },
+    // the settings files read process.env; fetch stays out of them too
+    envFiles
+      ? { files: envFiles, rules: { 'no-restricted-properties': ['error', ...fetchProperties] } }
+      : {},
+    httpProxyFiles.length > 0
+      ? {
+          files: httpProxyFiles,
+          rules: {
+            'no-restricted-imports': [
+              'error',
+              { paths: [...restrictedPaths, ...undiciPaths], patterns: restrictedPatterns },
+            ],
+          },
+        }
       : {},
     prettier,
   );

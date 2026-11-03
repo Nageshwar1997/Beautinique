@@ -98,3 +98,88 @@ export const signInUnavailable = (cause: unknown): AppError =>
     'Sign-in is not available right now. Please try again in a little while.',
     { cause },
   );
+
+/** A step-up needs an authenticator, and the account has none. */
+export const authenticatorRequired = (): AppError =>
+  new AppError('AUTHENTICATOR_REQUIRED', 'Set up an authenticator app first, then try again.', {
+    status: IDENTITY_ERROR_CODES.AUTHENTICATOR_REQUIRED,
+  });
+
+/** A wrong (or used) authenticator code at a step-up. */
+export const stepUpCodeInvalid = (): AppError =>
+  new AppError('TOTP_INVALID', 'That authenticator code is not right.', {
+    status: IDENTITY_ERROR_CODES.TOTP_INVALID,
+  });
+
+/** A wrong (or used) recovery code at a step-up. */
+export const stepUpRecoveryInvalid = (): AppError =>
+  new AppError('RECOVERY_CODE_INVALID', 'That recovery code is not right, or was used already.', {
+    status: IDENTITY_ERROR_CODES.RECOVERY_CODE_INVALID,
+  });
+
+/** An authenticator was saved meanwhile (another tab): replacing it needs a step-up first. */
+export const authenticatorExists = (): AppError =>
+  new AppError(
+    'AUTHENTICATOR_EXISTS',
+    'You already have an authenticator. Confirm with it (or a recovery code) to replace it.',
+    { status: IDENTITY_ERROR_CODES.AUTHENTICATOR_EXISTS },
+  );
+
+/** The set-up is gone: expired, finished or out of tries. */
+export const authenticatorSetupExpired = (): AppError =>
+  new AppError(
+    'AUTHENTICATOR_SETUP_EXPIRED',
+    'This authenticator set-up has expired. Please start again.',
+    { status: IDENTITY_ERROR_CODES.AUTHENTICATOR_SETUP_EXPIRED },
+  );
+
+/**
+ * Turning the authenticator off while roles need it: their names (and apps) in the message and
+ * `details`, for the person themself (signed in, stepped up).
+ */
+export const authenticatorRequiredByRole = (roles: { name: string; app: string }[]): AppError =>
+  new AppError(
+    'AUTHENTICATOR_REQUIRED_BY_ROLE',
+    `Your ${roles.map((r) => `${r.name} role in the ${r.app} app`).join(', ')} ${roles.length === 1 ? 'needs' : 'need'} an authenticator, so it can't be turned off.`,
+    {
+      status: IDENTITY_ERROR_CODES.AUTHENTICATOR_REQUIRED_BY_ROLE,
+      details: roles.map((r) => ({ path: ['roles', r.app], message: r.name })),
+    },
+  );
+
+/** An account without a password (made with Google ...) sets one before an authenticator. */
+export const passwordRequired = (): AppError =>
+  new AppError(
+    'PASSWORD_REQUIRED',
+    'Set a password for your account first, then set up the authenticator.',
+    { status: IDENTITY_ERROR_CODES.PASSWORD_REQUIRED },
+  );
+
+/** A wrong password while signed in. */
+export const passwordInvalid = (): AppError =>
+  new AppError('PASSWORD_INVALID', 'That password is not right.', {
+    status: IDENTITY_ERROR_CODES.PASSWORD_INVALID,
+    details: [{ path: ['password'], message: 'That password is not right' }],
+  });
+
+/** Too many wrong codes or passwords for this account lately: wait for the lock to end. */
+export const stepUpLocked = (): AppError =>
+  new AppError('TOTP_INVALID', 'Too many wrong codes. Please try again in an hour.', {
+    status: IDENTITY_ERROR_CODES.TOTP_INVALID,
+  });
+
+/** No new account waiting for its consent: 15 minutes went by, or it finished in another tab. */
+export const oauthSignUpExpired = (): AppError =>
+  new AppError(
+    'OAUTH_SIGN_UP_EXPIRED',
+    'This sign-up has expired. Please choose how to sign in again.',
+    { status: IDENTITY_ERROR_CODES.OAUTH_SIGN_UP_EXPIRED },
+  );
+
+/** The account's last way to sign in stays (a provider alone, without a password). */
+export const lastSignInMethod = (): AppError =>
+  new AppError(
+    'LAST_SIGN_IN_METHOD',
+    'This is the only way you sign in. Set a password first, then you can remove it.',
+    { status: IDENTITY_ERROR_CODES.LAST_SIGN_IN_METHOD },
+  );

@@ -5,6 +5,7 @@ import { afterEach, describe, expect, it } from 'vitest';
 
 import { SiteFooter } from '../app/components/SiteFooter';
 import { SiteHeader } from '../app/components/SiteHeader';
+import { Providers } from '../app/providers';
 import { ErrorBoundary, meta as rootMeta } from '../app/root';
 import Credits from '../app/routes/credits';
 import Home, { meta } from '../app/routes/home';
@@ -27,12 +28,24 @@ function page(Component: React.ComponentType, path = '/') {
       ),
     },
   ]);
-  return render(<Stub initialEntries={[path]} />);
+  return render(
+    <Providers>
+      <Stub initialEntries={[path]} />
+    </Providers>,
+  );
 }
 
-/** axe on what is rendered (colour contrast needs a real layout: the browser check covers it). */
+/**
+ * axe on what is rendered. Colour contrast needs a real layout, and label in name a canvas (jsdom
+ * has none: the rule only errors here); the browser check covers both.
+ */
 async function violations(container: HTMLElement) {
-  const results = await axe.run(container, { rules: { 'color-contrast': { enabled: false } } });
+  const results = await axe.run(container, {
+    rules: {
+      'color-contrast': { enabled: false },
+      'label-content-name-mismatch': { enabled: false },
+    },
+  });
   return results.violations.map((violation) => `${violation.id}: ${violation.help}`);
 }
 
@@ -82,10 +95,19 @@ describe('home page', () => {
     ]);
   });
 
-  it('has no dead links: only the in-page link, home and the credits page', () => {
+  it('has no dead links: the in-page link, home, sign-in and the footer pages', async () => {
     page(Home);
-    const hrefs = screen.getAllByRole('link').map((link) => link.getAttribute('href'));
-    expect(hrefs.toSorted()).toEqual(['#how-it-works', '/', '/credits']);
+    // sign-in (the header, once it knows nobody is signed in) and the footer's pages all exist
+    await screen.findByRole('link', { name: 'Sign in' });
+    const all = screen.getAllByRole('link').map((link) => link.getAttribute('href'));
+    expect(all.toSorted()).toEqual([
+      '#how-it-works',
+      '/',
+      '/credits',
+      '/privacy',
+      '/sign-in',
+      '/terms',
+    ]);
     expect(document.getElementById('how-it-works')).toBeTruthy();
   });
 

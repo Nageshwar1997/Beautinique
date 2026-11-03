@@ -2,31 +2,72 @@ import { AppError, mountRoute } from '@beautinique/backend-server-kit';
 import {
   type AppId,
   APPS,
+  confirmAuthenticator,
   confirmTotpEnroll,
+  createInvitation,
+  createRole,
+  disableAuthenticator,
+  endGrant,
   endOtherSessions,
   endSession,
+  endUserSessions,
+  enrollAuthenticator,
+  finishSocialSignIn,
+  finishSocialSignUp,
   getMe,
+  getSocialSignUp,
+  giveGrant,
   HEADERS,
+  listGrants,
+  listInvitations,
+  listRoles,
   listSessions,
+  listSocialProviders,
   loginRecovery,
   loginTotp,
   logout,
+  newRecoveryCodes,
+  OAUTH_SIGN_UP_SECONDS,
+  OAUTH_STATE_SECONDS,
+  oauthSignUpCookieName,
+  oauthStateCookieName,
   passwordLogin,
   refreshCookieName,
   refreshSession,
+  removeSignInMethod,
+  requestInvitationCode,
   requestPasswordCode,
   requestSignUpCode,
   resendOtp,
+  resetAuthenticator,
+  revokeInvitation,
   SIGN_UP_APPS,
+  SOCIAL_APPS,
+  startSocialSignIn,
   startTotpEnroll,
+  STEP_UP_SECONDS,
+  stepUp,
+  updateRole,
   verifyOtp,
 } from '@beautinique/shared-contracts';
-import { type Request, Router } from 'express';
+import { type Request, type Response, Router } from 'express';
 
-import { clearSessionCookies, cookieOf, setSessionCookies, signedIn } from '../cookies.ts';
+import * as authenticator from '../authenticator.ts';
+import {
+  clearSessionCookies,
+  cookieOf,
+  setAccessCookie,
+  setOAuthCookie,
+  setSessionCookies,
+  signedIn,
+} from '../cookies.ts';
 import * as login from '../login.ts';
 import { me, myDevices } from '../me.ts';
+import * as oauth from '../oauth.ts';
 import { type OtpDeps, requestCode, resendCode, verifyCode } from '../otp.ts';
+import * as invitations from '../rbac/invitations.ts';
+import * as manage from '../rbac/manage.ts';
+import * as security from '../rbac/security.ts';
 import type { Client } from '../sessions.ts';
 
 /**
@@ -190,6 +231,172 @@ export function routesOf(deps: OtpDeps): Router {
     const passport = await deps.passport(req);
     return { ended: await deps.sessions.endOthers(passport.userId, passport.sessionId) };
   });
+
+  // roles, grants and invitations (TASKS T3.3): identity checks who may, from its own grants
+  mountRoute(router, listRoles, async ({ query }, { req }) =>
+    manage.listRoles(deps, await deps.passport(req), query),
+  );
+
+  mountRoute(router, createRole, async ({ body }, { req }) =>
+    manage.createRole(deps, await deps.passport(req), body),
+  );
+
+  mountRoute(router, updateRole, async ({ params, body }, { req }) =>
+    manage.updateRole(deps, await deps.passport(req), params.roleKey, body),
+  );
+
+  mountRoute(router, listGrants, async ({ query }, { req }) =>
+    manage.listGrants(deps, await deps.passport(req), query),
+  );
+
+  mountRoute(router, giveGrant, async ({ body }, { req }) =>
+    manage.giveGrant(deps, await deps.passport(req), body),
+  );
+
+  mountRoute(router, endGrant, async ({ params }, { req }) =>
+    manage.endGrant(deps, await deps.passport(req), params.grantId),
+  );
+
+  mountRoute(router, createInvitation, async ({ body }, { req, requestId }) =>
+    invitations.createInvitation(deps, await deps.passport(req), body, requestId),
+  );
+
+  mountRoute(router, listInvitations, async ({ query }, { req }) =>
+    invitations.listInvitations(deps, await deps.passport(req), query),
+  );
+
+  mountRoute(router, revokeInvitation, async ({ params }, { req }) =>
+    invitations.revokeInvitation(deps, await deps.passport(req), params.invitationId),
+  );
+
+  mountRoute(router, requestInvitationCode, ({ body }, { req, requestId }) =>
+    requestCode(deps, {
+      app: appOf(req),
+      email: body.email,
+      purpose: 'invite',
+      consent: body.consent,
+      requestId,
+    }),
+  );
+
+  // step-up and the Security Officer (TASKS T3.3 PR C)
+  mountRoute(router, stepUp, async ({ body }, { req, res }) => {
+    const passport = await deps.passport(req);
+    const stepped = await login.stepUpWithTotp(deps, {
+      userId: passport.userId,
+      sessionId: passport.sessionId,
+      proof: body,
+    });
+    setAccessCookie(res, stepped.app, stepped.accessToken);
+    return {
+      stepUpUntil: new Date(stepped.stepUpAt.getTime() + STEP_UP_SECONDS * 1000).toISOString(),
+      recoveryCodesLeft: stepped.recoveryCodesLeft,
+    };
+  });
+
+  // the authenticator from the account's own settings (ARCHITECTURE §9.2)
+  mountRoute(router, enrollAuthenticator, async (_input, { req }) =>
+    authenticator.enrollAuthenticator(deps, await deps.passport(req)),
+  );
+
+  mountRoute(router, confirmAuthenticator, async ({ body }, { req, requestId }) =>
+    authenticator.confirmAuthenticator(deps, await deps.passport(req), { ...body, requestId }),
+  );
+
+  mountRoute(router, newRecoveryCodes, async (_input, { req, requestId }) =>
+    authenticator.renewRecoveryCodes(deps, await deps.passport(req), requestId),
+  );
+
+  mountRoute(router, disableAuthenticator, async (_input, { req, requestId }) =>
+    authenticator.disableAuthenticator(deps, await deps.passport(req), requestId),
+  );
+
+  mountRoute(router, resetAuthenticator, async ({ params }, { req, requestId }) =>
+    security.resetAuthenticator(deps, await deps.passport(req), params.userId, requestId),
+  );
+
+  mountRoute(router, endUserSessions, async ({ params }, { req }) =>
+    security.endUserSessions(deps, await deps.passport(req), params.userId),
+  );
+
+  // social sign-in, the customer app's (TASKS T3.1 PR 4)
+  /** A page the browser opened: its cookies, then where it goes; never an error page. */
+  const page = async (
+    res: Response,
+    app: AppId,
+    work: () => Promise<oauth.PageAnswer>,
+  ): Promise<{ location: string }> => {
+    let answer: oauth.PageAnswer;
+    try {
+      answer = await work();
+    } catch (error) {
+      deps.logger.error({ err: error }, 'social sign-in failed');
+      answer = oauth.backToSignIn('failed');
+    }
+    if (answer.state !== undefined) {
+      setOAuthCookie(res, oauthStateCookieName(app), answer.state, OAUTH_STATE_SECONDS);
+    }
+    if (answer.signUp !== undefined) {
+      setOAuthCookie(res, oauthSignUpCookieName(app), answer.signUp, OAUTH_SIGN_UP_SECONDS);
+    }
+    if (answer.session) setSessionCookies(res, answer.session);
+    return { location: answer.location };
+  };
+
+  mountRoute(router, listSocialProviders, (_input, { req }) => {
+    appOf(req, SOCIAL_APPS);
+    return oauth.socialProviders(deps);
+  });
+
+  mountRoute(router, startSocialSignIn, ({ params, query }, { req, res }) => {
+    const app = appOf(req, SOCIAL_APPS);
+    return page(res, app, () =>
+      oauth.startTrip(deps, { app, provider: params.provider, next: query.next }),
+    );
+  });
+
+  mountRoute(router, finishSocialSignIn, ({ params, query }, { req, res, requestId }) => {
+    const app = appOf(req, SOCIAL_APPS);
+    return page(res, app, () =>
+      oauth.finishTrip(deps, {
+        app,
+        provider: params.provider,
+        code: query.code,
+        state: query.state,
+        error: query.error,
+        cookie: cookieOf(req, oauthStateCookieName(app)),
+        client: clientOf(req),
+        requestId,
+      }),
+    );
+  });
+
+  mountRoute(router, getSocialSignUp, (_input, { req }) => {
+    const app = appOf(req, SOCIAL_APPS);
+    return oauth.waitingSignUp(deps, { app, ticket: cookieOf(req, oauthSignUpCookieName(app)) });
+  });
+
+  mountRoute(router, finishSocialSignUp, async ({ body }, { req, res, requestId }) => {
+    const app = appOf(req, SOCIAL_APPS);
+    const done = await oauth.finishSignUp(deps, {
+      app,
+      ticket: cookieOf(req, oauthSignUpCookieName(app)),
+      consent: body.consent,
+      ip: clientOf(req).ip,
+      client: clientOf(req),
+      requestId,
+    });
+    setOAuthCookie(res, oauthSignUpCookieName(app), null, 0);
+    return signedIn(res, done);
+  });
+
+  mountRoute(router, removeSignInMethod, async ({ params }, { req, requestId }) =>
+    oauth.removeMethod(deps, await deps.passport(req), {
+      provider: params.provider,
+      client: clientOf(req),
+      requestId,
+    }),
+  );
 
   return router;
 }
