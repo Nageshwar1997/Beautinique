@@ -1,7 +1,7 @@
 ---
 date: 2026-11-04
 day: 2
-status: draft # draft | ready | scheduled | posted (README §2)
+status: ready # draft | ready | scheduled | posted (README §2)
 posted_at:
 link:
 covers: 'PR #3 (Phase 1 part), #4, #7' # Phase 1 commits e533ace..ad98303 (mongo, queue, crypto, contracts, authz, core sample)
