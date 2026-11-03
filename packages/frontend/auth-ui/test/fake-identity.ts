@@ -10,6 +10,23 @@ export const LOGIN_ID = '01920000-0000-7000-8000-000000000003';
 export const CHALLENGE_ID = '01920000-0000-7000-8000-000000000004';
 export const EMAIL = 'asha@beautinique.example';
 export const PASSWORD = 'pink lipstick on a rainy day';
+export const OTHER_SESSION_ID = '01920000-0000-7000-8000-000000000005';
+export const SECRET = 'JBSWY3DPEHPK3PXPJBSWY3DPEHPK3PXP';
+export const OTP_URI = `otpauth://totp/Beautinique:${encodeURIComponent(EMAIL)}?secret=${SECRET}&issuer=Beautinique`;
+/** The authenticator code the fake takes (any other is wrong). */
+export const GOOD_CODE = '123456';
+export const RECOVERY_CODES = [
+  'ABCDE-FGH23',
+  'BCDEF-GH234',
+  'CDEFG-H2345',
+  'DEFGH-23456',
+  'EFGH2-34567',
+  'FGH23-4567A',
+  'GH234-567AB',
+  'H2345-67ABC',
+  'JKLMN-PQRST',
+  'KLMNP-QRSTU',
+];
 
 export const json = (status: number, body: unknown): Response =>
   new Response(JSON.stringify(body), {
@@ -32,6 +49,13 @@ export const dropHint = (app: AppId) => {
 };
 export const hintSet = (app: AppId) => document.cookie.includes(`${sessionHintCookieName(app)}=1`);
 
+export interface FakeState {
+  signedIn: boolean;
+  authenticator: boolean;
+  recoveryCodesLeft: number | null;
+  steppedUp: boolean;
+}
+
 export interface Sent {
   method: string;
   path: string;
@@ -49,8 +73,8 @@ export interface FakeIdentity {
   off: (route: string) => void;
   /** `METHOD /path` of what was sent. */
   paths: () => string[];
-  /** Whether a session is there (the access cookie and the refresh cookie). */
-  state: { signedIn: boolean };
+  /** The session (the access and refresh cookies), the account's authenticator, a fresh step-up. */
+  state: FakeState;
 }
 
 const challenge = (resendAfterMs = 60_000) => ({
@@ -60,25 +84,63 @@ const challenge = (resendAfterMs = 60_000) => ({
   resendsLeft: 3,
 });
 
-const me = (app: AppId) => ({
+const me = (app: AppId, state: FakeState) => ({
   user: {
     userId: USER_ID,
     email: EMAIL,
     ageDeclaredAt: null,
     signUpApp: 'customer',
     providers: ['password'],
-    authenticator: false,
-    recoveryCodesLeft: null,
+    authenticator: state.authenticator,
+    recoveryCodesLeft: state.recoveryCodesLeft,
   },
   session: { sessionId: SESSION_ID, app, expiresAt: '2026-12-31T00:00:00.000Z' },
 });
 
-/** A fake identity for `app`; signed out unless `signedIn`. */
-export function fakeIdentity(app: AppId, { signedIn = false } = {}): FakeIdentity {
+/** This device and a phone, in two apps. */
+const sessions = (app: AppId) => [
+  {
+    sessionId: SESSION_ID,
+    app,
+    device: 'Chrome on Windows',
+    ip: '203.0.113.7',
+    createdAt: '2026-11-01T04:30:00.000Z',
+    lastSeenAt: '2026-11-03T06:00:00.000Z',
+    expiresAt: '2026-12-01T04:30:00.000Z',
+    current: true,
+  },
+  {
+    sessionId: OTHER_SESSION_ID,
+    app: 'seller',
+    device: 'Safari on iPhone',
+    ip: '198.51.100.20',
+    createdAt: '2026-10-20T10:00:00.000Z',
+    lastSeenAt: '2026-11-02T15:45:00.000Z',
+    expiresAt: '2026-11-20T10:00:00.000Z',
+    current: false,
+  },
+];
+
+const stepUpRequired = () =>
+  failure(401, 'STEP_UP_REQUIRED', 'Please confirm with your authenticator code to continue.');
+
+/**
+ * A fake identity for `app`; signed out unless `signedIn`, with an authenticator when
+ * `authenticator` (10 recovery codes left).
+ */
+export function fakeIdentity(
+  app: AppId,
+  { signedIn = false, authenticator = false } = {},
+): FakeIdentity {
   const handlers = new Map<string, Handler>();
   const fake: FakeIdentity = {
     sent: [],
-    state: { signedIn },
+    state: {
+      signedIn,
+      authenticator,
+      recoveryCodesLeft: authenticator ? 10 : null,
+      steppedUp: false,
+    },
     on: (route, handler) => {
       handlers.set(route, handler);
     },
@@ -103,7 +165,7 @@ export function fakeIdentity(app: AppId, { signedIn = false } = {}): FakeIdentit
       switch (route) {
         case 'GET /iam/me':
           return fake.state.signedIn
-            ? json(200, { data: me(app) })
+            ? json(200, { data: me(app, fake.state) })
             : failure(401, 'UNAUTHENTICATED');
         case 'POST /auth/refresh':
           if (!fake.state.signedIn) {
@@ -145,6 +207,47 @@ export function fakeIdentity(app: AppId, { signedIn = false } = {}): FakeIdentit
           return json(200, {
             data: { userId: USER_ID, email: EMAIL, outcome: 'account-made', signedIn: true },
           });
+        case 'GET /auth/sessions':
+          return json(200, { data: { sessions: sessions(app) } });
+        case 'DELETE /auth/sessions/:id':
+          return json(200, { data: { ended: true } });
+        case 'POST /auth/sessions/end-others':
+          return json(200, { data: { ended: 1 } });
+        case 'POST /auth/authenticator/enroll':
+          if (fake.state.authenticator && !fake.state.steppedUp) return stepUpRequired();
+          return json(200, { data: { secret: SECRET, uri: OTP_URI } });
+        case 'POST /auth/authenticator/confirm':
+          fake.state.authenticator = true;
+          fake.state.recoveryCodesLeft = 10;
+          return json(200, { data: { recoveryCodes: RECOVERY_CODES } });
+        case 'POST /auth/authenticator/recovery-codes':
+          if (!fake.state.steppedUp) return stepUpRequired();
+          fake.state.recoveryCodesLeft = 10;
+          return json(200, { data: { recoveryCodes: RECOVERY_CODES } });
+        case 'DELETE /auth/authenticator':
+          if (!fake.state.steppedUp) return stepUpRequired();
+          fake.state.authenticator = false;
+          fake.state.recoveryCodesLeft = null;
+          return json(200, { data: { disabled: true } });
+        case 'POST /auth/step-up': {
+          const { code, recoveryCode } = body as { code?: string; recoveryCode?: string };
+          const stepUpUntil = new Date(Date.now() + 300_000).toISOString();
+          if (code !== undefined) {
+            if (code !== GOOD_CODE) {
+              return failure(400, 'TOTP_INVALID', 'That authenticator code is not right.');
+            }
+            fake.state.steppedUp = true;
+            return json(200, { data: { stepUpUntil, recoveryCodesLeft: null } });
+          }
+          if (recoveryCode !== RECOVERY_CODES[0]) {
+            return failure(400, 'RECOVERY_CODE_INVALID', 'That recovery code is not right.');
+          }
+          fake.state.steppedUp = true;
+          fake.state.recoveryCodesLeft = (fake.state.recoveryCodesLeft ?? 1) - 1;
+          return json(200, {
+            data: { stepUpUntil, recoveryCodesLeft: fake.state.recoveryCodesLeft },
+          });
+        }
         default:
           return failure(404, 'NOT_FOUND', `No fake for ${route}`);
       }

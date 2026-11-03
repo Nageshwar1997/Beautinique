@@ -1,6 +1,6 @@
 # ARCHITECTURE — BQ
 
-> **Status:** v1.43 draft (2026-11-02). [PRD.md](PRD.md) v1.0 pe based. Design ek multi-agent review se aaya (3 architecture proposals + review board + owner ke decisions), aur v1.1 me free tier ke official docs ke against verify hua.
+> **Status:** v1.44 draft (2026-11-03). [PRD.md](PRD.md) v1.0 pe based. Design ek multi-agent review se aaya (3 architecture proposals + review board + owner ke decisions), aur v1.1 me free tier ke official docs ke against verify hua.
 
 ## 0. Ek nazar me
 
@@ -383,6 +383,7 @@ Kai platforms alag users ko alag price dikhate hain. BQ ka rule: **ek product ka
 - **Playwright E2E isi kaam me:** har app ka sign-up/sign-in raasta (bundle + Mailpit), 360/768/1280 px, light/dark, axe; CI me chalta hai.
 - Recovery codes ek baar dikhte hain: copy, `.txt` download, "I've saved them" tick ke bina aage nahi. QR browser me banta hai (koi bahar ki site nahi).
 - **Customer auth-ui ke faisle (owner, 2026-11-02, PR 4):** sign-up me abhi sirf email + password + consent (naam/pincode profile ya checkout module me). Header session aane tak usi size ka khaali placeholder (SSR bina session, flash nahi). Signed-in user `/sign-in` ya `/sign-up` khole to seedha `next` (ya `/`). `/invitation` customer me bhi (Beauty Pro Buyer State Admin ka invite). Playwright CI me sirf Chromium (360 px mobile emulation samet); Firefox/WebKit laptop pe `--project` se. E2E har app ke `frontend/<app>/e2e/` me, shared setup (bundle, Mailpit) root `scripts/e2e/` me. Account pages PR 5 tak nahi: menu me sirf "Sign out"; `RequireSignIn` ready.
+- **Customer account screens ke faisle (owner, 2026-11-03, PR 5; Claude ki saari recommendations maani):** pages `/account` (layout: `RequireSignIn`, Security | My Devices nav, `noindex`, sirf browser me; `/account` → `/account/security`), `/account/security`, `/account/security/authenticator` (set-up alag page pe, dialog me nahi: QR + secret + "Open in authenticator app" `otpauth://` link, phir code + password, phir recovery codes) aur `/account/devices`. Recovery codes ka "I've saved them" tick hone se pehle page chhodne pe "Leave without saving?" dialog (aur tab band pe browser ki warning). My Devices me saare apps ke sessions app ke naam aur IP ke saath; confirm sirf "Sign out all other devices" pe; apne device ka sign out = normal sign out. Step-up dialog (`StepUpProvider`, api-client ka `setStepUpHandler`): authenticator code ya recovery code, 6 digit pe khud submit nahi ("Continue"), cancel pe call chupchaap rukti hai. QR library `qrcode.react` (SVG, 0 dependencies), QR hamesha safed card pe kaala (dark mode me bhi). Account ke reusable hisse (step-up, My Devices, Security, set-up, recovery codes) auth-ui me; routes, layout aur nav app me.
 
 ### 9.3 Vercel (Hobby, ₹0)
 
@@ -695,3 +696,4 @@ Sirf config badlegi, code nahi:
 | v1.41 | 2026-10-31 | §9.2: forms + auth-ui ke faisle (owner): packages ka order, sign-up/sign-in apps, `next`, cart sign-in ke saath, signed-in authenticator, idle notice, admin live, Playwright. |
 | v1.42 | 2026-10-31 | §9.2: signed-in authenticator ki detail (owner): routes, confirm pe password, badalna, recovery code se step-up, teeno badlav pe email, sessions rehte hain. |
 | v1.43 | 2026-11-02 | §9.2: customer auth-ui ke faisle (owner): sign-up fields, header placeholder, signed-in redirect, invitation customer me, Playwright Chromium, e2e folders. |
+| v1.44 | 2026-11-03 | §9.2: customer account screens ke faisle (owner): `/account` pages, set-up alag page, recovery codes ki leave warning, My Devices, step-up dialog, `qrcode.react`. |

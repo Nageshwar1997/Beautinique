@@ -8,9 +8,10 @@ import {
   MenuSection,
   MenuTrigger,
   Popover,
+  RouterProvider,
   Separator,
 } from 'react-aria-components';
-import { Link, useLocation } from 'react-router';
+import { Link, useHref, useLocation, useNavigate } from 'react-router';
 
 import { AUTH_PATHS, authHref } from './next';
 import { useSession } from './session';
@@ -39,6 +40,7 @@ export interface AccountMenuProps {
 export function AccountMenu({ links = [] }: AccountMenuProps) {
   const { state, signOut } = useSession();
   const location = useLocation();
+  const navigate = useNavigate();
   if (state.status === 'signed-out') {
     const here = `${location.pathname}${location.search}`;
     return (
@@ -65,42 +67,47 @@ export function AccountMenu({ links = [] }: AccountMenuProps) {
   };
   return (
     <span className={SLOT}>
-      <MenuTrigger>
-        <AriaButton
-          aria-label={`Account (${email})`}
-          className="tone-brand bg-tone-subtle text-tone-subtle-foreground focus-ring inline-flex size-touch cursor-pointer items-center justify-center rounded-full text-base font-semibold uppercase outline-hidden"
-        >
-          <span aria-hidden="true">{email.slice(0, 1)}</span>
-        </AriaButton>
-        <Popover
-          placement="bottom end"
-          offset={6}
-          className="bg-surface text-foreground border-border data-entering:animate-fade-in data-exiting:animate-fade-out w-64 max-w-[calc(100vw-2rem)] rounded-xl border p-1 shadow-lg outline-hidden"
-        >
-          <Menu className="outline-hidden">
-            <MenuSection>
-              <Header className="text-foreground-muted px-3 py-2 text-xs">
-                Signed in as
-                <span className="text-foreground block truncate text-sm font-medium">{email}</span>
-              </Header>
-            </MenuSection>
-            <Separator className="border-border my-1 border-t" />
-            {links.map((link) => (
-              <MenuItem key={link.href} href={link.href} className={ITEM}>
-                {link.label}
+      {/* the menu's links go through the app's router (no full page load) */}
+      <RouterProvider navigate={(href) => void navigate(href)} useHref={useHref}>
+        <MenuTrigger>
+          <AriaButton
+            aria-label={`Account (${email})`}
+            className="tone-brand bg-tone-subtle text-tone-subtle-foreground focus-ring inline-flex size-touch cursor-pointer items-center justify-center rounded-full text-base font-semibold uppercase outline-hidden"
+          >
+            <span aria-hidden="true">{email.slice(0, 1)}</span>
+          </AriaButton>
+          <Popover
+            placement="bottom end"
+            offset={6}
+            className="bg-surface text-foreground border-border data-entering:animate-fade-in data-exiting:animate-fade-out w-64 max-w-[calc(100vw-2rem)] rounded-xl border p-1 shadow-lg outline-hidden"
+          >
+            <Menu className="outline-hidden">
+              <MenuSection>
+                <Header className="text-foreground-muted px-3 py-2 text-xs">
+                  Signed in as
+                  <span className="text-foreground block truncate text-sm font-medium">
+                    {email}
+                  </span>
+                </Header>
+              </MenuSection>
+              <Separator className="border-border my-1 border-t" />
+              {links.map((link) => (
+                <MenuItem key={link.href} href={link.href} className={ITEM}>
+                  {link.label}
+                </MenuItem>
+              ))}
+              <MenuItem
+                className={cx(ITEM)}
+                onAction={() => {
+                  void signOutNow();
+                }}
+              >
+                Sign out
               </MenuItem>
-            ))}
-            <MenuItem
-              className={cx(ITEM)}
-              onAction={() => {
-                void signOutNow();
-              }}
-            >
-              Sign out
-            </MenuItem>
-          </Menu>
-        </Popover>
-      </MenuTrigger>
+            </Menu>
+          </Popover>
+        </MenuTrigger>
+      </RouterProvider>
     </span>
   );
 }
