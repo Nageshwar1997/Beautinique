@@ -1,6 +1,6 @@
 # LinkedIn posts — Beautinique
 
-> **Status:** v1.4 (2026-11-03). Project ke build-in-public LinkedIn posts: har post ka text, hashtags aur
+> **Status:** v1.5 (2026-11-03). Project ke build-in-public LinkedIn posts: har post ka text, hashtags aur
 > PDF carousel ke slides (prompt + alt text) yahan date ke folder me rehte hain. Post insaan khud
 > LinkedIn pe karta hai; koi API ya browser automation nahi.
 
@@ -38,6 +38,10 @@ linkedin-posts/
 - Post ka text `post.md` me ` ```text ` block me (prettier nahi chhedta, copy aasaan). `hashtags.md` wali
   line post ke end me paste hoti hai.
 - Carousel ke saath text me slides ka chhota saar bhi ho (PDF me alt text nahi jaata).
+- **Bold sirf section titles** (jaise `𝗪𝗵𝗮𝘁 𝗜 𝘀𝗵𝗶𝗽𝗽𝗲𝗱:`, `𝗟𝗲𝘀𝘀𝗼𝗻 𝗼𝗳 𝘁𝗵𝗲 𝗱𝗮𝘆:`; owner, 2026-11-03). LinkedIn me bold
+  ka option nahi, isliye Claude `post.md` me Unicode sans-serif bold akshar likhta hai aur insaan waise hi copy
+  karta hai. Keywords, hashtags, links aur poore vaakya bold nahi: screen reader inhe theek nahi padhte aur
+  LinkedIn search me ye nahi milte.
 
 ## 4. Carousel (PDF)
 
@@ -92,3 +96,4 @@ Naye Claude Code session me (worktree me, taaki chal rahi feature branch pe asar
 | v1.2    | 2026-11-03 | §6: post ki files seedha `prerelease` pe push (owner ka faisla).                                                    |
 | v1.3    | 2026-11-03 | §4: common + slide prompt blocks, ek prompt = ek image, images 3:4 (Flow), files `1.jpg` ...; steps `IMAGES.md` me. |
 | v1.4    | 2026-11-03 | §4: carousel 16:9 (1920 × 1080), mobile feed me poori chaudai; layout niyam (owner ka faisla).                      |
+| v1.5    | 2026-11-03 | §3: section titles Unicode bold me, baaki text normal (owner ka faisla).                                            |
