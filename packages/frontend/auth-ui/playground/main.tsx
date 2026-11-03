@@ -6,24 +6,36 @@ import './playground.css';
 import { ApiProvider, createApiClient, createQueryClient } from '@beautinique/frontend-api-client';
 import { AppFrame, NavList, THEME_SCRIPT, ThemeSwitcher } from '@beautinique/frontend-app-shell';
 import { Radio, RadioGroup, Toaster } from '@beautinique/frontend-components';
-import { StrictMode, useState } from 'react';
+import { type ReactNode, StrictMode, useState } from 'react';
 import { createRoot } from 'react-dom/client';
-import { createBrowserRouter, Outlet, RouterProvider } from 'react-router';
+import { createBrowserRouter, Outlet, RouterProvider, useNavigate } from 'react-router';
 
 import {
+  ACCOUNT_PATHS,
   AccountMenu,
+  AuthenticatorSetup,
   AuthLayout,
   ForgotPasswordForm,
   InvitationForm,
+  MyDevices,
   RedirectIfSignedIn,
   RequireSignIn,
+  SecuritySettings,
   SessionProvider,
   SignInForm,
   SignUpForm,
+  StepUpProvider,
   TextLink,
   useSession,
 } from '../src/index';
-import { failure, fakeIdentity, passwordKept, totpNext } from '../test/fake-identity';
+import {
+  failure,
+  fakeIdentity,
+  GOOD_CODE,
+  passwordKept,
+  RECOVERY_CODES,
+  totpNext,
+} from '../test/fake-identity';
 
 const identity = fakeIdentity('customer');
 const pause = (ms: number) =>
@@ -90,7 +102,8 @@ function Home() {
       <p>
         Session: <strong>{state.status}</strong>
         {state.status === 'signed-in' && ` (${state.user.email})`}. Every code works; choose below
-        what the pretend identity answers.
+        what the pretend identity answers. To confirm it’s you (step-up): {GOOD_CODE}, or the
+        recovery code {RECOVERY_CODES[0]}.
       </p>
       <Scenarios />
     </div>
@@ -113,18 +126,47 @@ function Shell() {
                 { to: '/', label: 'Home', end: true },
                 { to: '/sign-up', label: 'Sign up' },
                 { to: '/invitation', label: 'Invitation' },
-                { to: '/account', label: 'Account' },
+                { to: ACCOUNT_PATHS.security, label: 'Security' },
+                { to: ACCOUNT_PATHS.devices, label: 'My Devices' },
               ]}
             />
-            <AccountMenu links={[{ href: '/account', label: 'Account' }]} />
+            <AccountMenu links={ACCOUNT_LINKS} />
             <ThemeSwitcher />
           </div>
         </header>
       }
     >
-      <Outlet />
+      <StepUpProvider>
+        <Outlet />
+      </StepUpProvider>
       <Toaster />
     </AppFrame>
+  );
+}
+
+const ACCOUNT_LINKS = [
+  { href: ACCOUNT_PATHS.security, label: 'Security' },
+  { href: ACCOUNT_PATHS.devices, label: 'My Devices' },
+];
+
+/** An account page as an app lays it out: signed in only, its heading, the account's nav. */
+function AccountPage({ title, children }: { title: string; children: ReactNode }) {
+  return (
+    <RequireSignIn>
+      <div className="container-page max-w-3xl space-y-6 py-8">
+        <h1 className="font-display text-3xl font-medium">{title}</h1>
+        {children}
+      </div>
+    </RequireSignIn>
+  );
+}
+
+function SetupPage() {
+  const navigate = useNavigate();
+  return (
+    <AccountPage title="Authenticator app">
+      <AuthenticatorSetup onDone={() => void navigate(ACCOUNT_PATHS.security)} />
+    </AccountPage>
   );
 }
 
@@ -184,13 +226,20 @@ const router = createBrowserRouter([
         ),
       },
       {
-        path: '/account',
+        path: ACCOUNT_PATHS.security,
         element: (
-          <RequireSignIn>
-            <div className="container-page py-8">
-              <h1 className="font-display text-3xl font-medium">Your account</h1>
-            </div>
-          </RequireSignIn>
+          <AccountPage title="Security">
+            <SecuritySettings />
+          </AccountPage>
+        ),
+      },
+      { path: ACCOUNT_PATHS.authenticator, Component: SetupPage },
+      {
+        path: ACCOUNT_PATHS.devices,
+        element: (
+          <AccountPage title="My Devices">
+            <MyDevices />
+          </AccountPage>
         ),
       },
       { path: '/terms', element: <p className="container-page py-8">Terms (dummy)</p> },

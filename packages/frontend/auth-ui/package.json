@@ -57,6 +57,7 @@
     "@beautinique/shared-contracts": "^1.0.0",
     "@beautinique/shared-utils": "^2.0.0",
     "@beautinique/shared-zod": "^2.0.0",
+    "qrcode.react": "^4.2.0",
     "react-aria-components": "^1.22.1"
   },
   "devDependencies": {
