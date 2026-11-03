@@ -60,10 +60,10 @@ update the HISTORY row, move the marker to the last covered `prerelease` commit 
 
 ## Commit
 
-Only when the user says so. Post files (anything under `linkedin-posts/`) go straight to `prerelease`, no
-branch or PR (owner, README §6): from a `prerelease` checkout, `git pull --rebase`, `npm run format:check`,
-commit only `linkedin-posts/` paths, `git push`. Never force push, never commit `slides/`. Changes to the
-README rules or this skill still go through a `feat/` branch and PR.
+Only when the user says so. Everything under `linkedin-posts/` (posts, HISTORY, README, `IMAGES.md`,
+`_template/`) and this skill go straight to `prerelease`, no branch or PR (owner, README §6): from a
+`prerelease` checkout, `git pull --rebase`, `npm run format:check`, commit only `linkedin-posts/` and
+`.claude/skills/linkedin-post/` paths, `git push`. Never force push, never commit `slides/`.
 
 ## Never
 
