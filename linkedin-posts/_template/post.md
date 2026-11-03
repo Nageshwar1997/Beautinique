@@ -1,10 +1,10 @@
 ---
 date: YYYY-MM-DD
 day: N
-status: draft # draft | ready | posted
+status: draft # draft | ready | scheduled | posted (README §2)
 posted_at:
 link:
-covers: # PR numbers / commits
+covers: # PR numbers, last commit sha
 ---
 
 # Day N — <topic>
@@ -20,5 +20,7 @@ What we shipped:
 
 Lesson of the day: ...
 
-<repo link>
+Code: https://github.com/Nageshwar1997/Beautinique
 ```
+
+Post ke end me `hashtags.md` wali line paste karo.
