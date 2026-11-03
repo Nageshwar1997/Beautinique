@@ -25,28 +25,35 @@ export type Me = RouteOutput<typeof getMe>;
 /**
  * Who is signed in to this app, as /iam/me says (the app keeps none of it in browser storage):
  * - `loading`: not known yet (on the server and until the first answer); show a placeholder.
- * - `signed-out`: no session (no hint cookie, or /iam/me found the session gone).
+ * - `signed-out`: no session (no hint cookie, or /iam/me found the session gone); `reason` when
+ *   this tab knows why the app ended it (`idle`: 30 minutes without activity, IdleNotice).
  * - `signed-in`: the account and this session.
  * - `unavailable`: /iam/me did not answer (offline, server down); asked again when back online.
  */
 export type SessionState =
   | { status: 'loading' }
-  | { status: 'signed-out' }
+  | { status: 'signed-out'; reason?: SignedOutReason }
   | { status: 'unavailable' }
   | ({ status: 'signed-in' } & Me);
+
+/** Why the app ended a session itself: `idle` (an internal app, no activity for 30 minutes). */
+export type SignedOutReason = 'idle';
 
 export interface Session {
   app: AppId;
   state: SessionState;
   /** After a sign-in (or a new account): reads /iam/me again here and tells the app's other tabs. */
   signedIn: () => Promise<void>;
-  /** Signs this session out, forgets what was cached for the person, and tells the other tabs. */
-  signOut: () => Promise<void>;
   /**
-   * The server ended every session already (a new password, ARCHITECTURE §7.2): forget it here
-   * the same way, without asking it to.
+   * Signs this session out, forgets what was cached for the person, and tells the other tabs.
+   * `reason` stays on the signed-out state, so the sign-in page can say it.
    */
-  forget: () => void;
+  signOut: (reason?: SignedOutReason) => Promise<void>;
+  /**
+   * The server ended every session already (a new password, ARCHITECTURE §7.2), or another tab
+   * signed out for being idle: forget it here the same way, without asking it to.
+   */
+  forget: (reason?: SignedOutReason) => void;
 }
 
 const SessionContext = createContext<Session | null>(null);
@@ -65,6 +72,8 @@ export function SessionProvider({ children }: { children: ReactNode }) {
   const { app } = client;
   // bumped when the cookies changed, so the hint (a cookie, which tells nobody) is read again
   const [, setVersion] = useState(0);
+  // why this tab ended the session, until the next sign-in
+  const [endedBy, setEndedBy] = useState<SignedOutReason | undefined>(undefined);
   const hint = useSyncExternalStore(
     noSubscription,
     () => hasSessionHint(app),
@@ -94,33 +103,45 @@ export function SessionProvider({ children }: { children: ReactNode }) {
 
   const state = useMemo((): SessionState => {
     if (hint === null) return { status: 'loading' };
-    if (!hint || expired) return { status: 'signed-out' };
+    if (!hint || expired) {
+      return endedBy === undefined
+        ? { status: 'signed-out' }
+        : { status: 'signed-out', reason: endedBy };
+    }
     if (me.data) return { status: 'signed-in', ...me.data };
     if (me.error) return { status: 'unavailable' };
     return { status: 'loading' };
-  }, [hint, expired, me.data, me.error]);
+  }, [hint, expired, endedBy, me.data, me.error]);
 
   const signedIn = useCallback(async () => {
+    setEndedBy(undefined);
     setVersion((v) => v + 1);
     client.sessionChanged('signed-in');
     await queryClient.refetchQueries({ queryKey: ME_KEY });
   }, [client, queryClient]);
 
-  const forget = useCallback(() => {
-    clearSessionHint(app);
-    // nothing of the person stays cached in this tab
-    queryClient.clear();
-    setVersion((v) => v + 1);
-    client.sessionChanged('signed-out');
-  }, [client, queryClient, app]);
+  const forget = useCallback(
+    (reason?: SignedOutReason) => {
+      clearSessionHint(app);
+      // nothing of the person stays cached in this tab
+      queryClient.clear();
+      setEndedBy(reason);
+      setVersion((v) => v + 1);
+      client.sessionChanged('signed-out');
+    },
+    [client, queryClient, app],
+  );
 
-  const signOut = useCallback(async () => {
-    try {
-      await client.call(logout);
-    } finally {
-      forget();
-    }
-  }, [client, forget]);
+  const signOut = useCallback(
+    async (reason?: SignedOutReason) => {
+      try {
+        await client.call(logout);
+      } finally {
+        forget(reason);
+      }
+    },
+    [client, forget],
+  );
 
   const session = useMemo(
     () => ({ app, state, signedIn, signOut, forget }),

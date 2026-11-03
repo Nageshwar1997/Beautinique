@@ -196,6 +196,16 @@ export function fakeIdentity(
           return json(200, {
             data: { user: { userId: USER_ID, email: EMAIL }, recoveryCodesLeft: 2 },
           });
+        case 'POST /auth/login/:id/totp/enroll':
+          return json(200, { data: { secret: SECRET, uri: OTP_URI } });
+        case 'POST /auth/login/:id/totp/confirm':
+          // the cookies come with the codes, as identity sets them
+          signIn();
+          fake.state.authenticator = true;
+          fake.state.recoveryCodesLeft = 10;
+          return json(200, {
+            data: { user: { userId: USER_ID, email: EMAIL }, recoveryCodes: RECOVERY_CODES },
+          });
         case 'POST /auth/sign-up/code':
         case 'POST /auth/password/code':
         case 'POST /auth/invitations/code':
@@ -258,6 +268,9 @@ export function fakeIdentity(
 
 /** A sign-in that asks the authenticator code next. */
 export const totpNext = () => json(200, { data: { next: 'totp', loginId: LOGIN_ID } });
+
+/** A sign-in in an app that needs an authenticator, for an account without one: set it up. */
+export const enrollNext = () => json(200, { data: { next: 'totp-enroll', loginId: LOGIN_ID } });
 
 /** A verify for an email that has an account with a password (sign-up does not change it). */
 export const passwordKept = () =>

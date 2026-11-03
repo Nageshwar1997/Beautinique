@@ -40,7 +40,10 @@ const login = (address: string, password = PASSWORD, app = 'customer') =>
 const step = (answer: Answer) =>
   answer.body.data as { next: string; loginId?: string; user?: { userId: string; email: string } };
 
-/** An account with the authenticator set up through the admin app: its secret and codes. */
+/**
+ * An account with the authenticator set up through the admin app: its secret, the time its first
+ * code was for (one more code, at + 30 s, is left in the window), and the codes.
+ */
 async function withAuthenticator(name: string) {
   const address = email(name);
   const userId = await makeAccount(address);
@@ -49,14 +52,15 @@ async function withAuthenticator(name: string) {
   const loginId = String(first.loginId);
   const enroll = await post(`/auth/login/${loginId}/totp/enroll`, {}, { app: 'admin' });
   const { secret } = enroll.body.data as { secret: string; uri: string };
+  const at = Date.now();
   const confirmed = await post(
     `/auth/login/${loginId}/totp/confirm`,
-    { code: totpCode(secret, Date.now()) },
+    { code: totpCode(secret, at) },
     { app: 'admin' },
   );
   expect(confirmed.status, JSON.stringify(confirmed.body)).toBe(200);
   const { recoveryCodes } = confirmed.body.data as { recoveryCodes: string[] };
-  return { address, userId, secret, recoveryCodes, enroll: enroll.body.data, confirmed };
+  return { address, userId, secret, at, recoveryCodes, enroll: enroll.body.data, confirmed };
 }
 
 describe('email + password', () => {
@@ -189,16 +193,16 @@ describe('the authenticator', () => {
   });
 
   it('then asks every app for a code, and each code works once', async () => {
-    const { address, userId, secret } = await withAuthenticator('every-app');
+    const { address, userId, secret, at } = await withAuthenticator('every-app');
     const first = step(await login(address));
     expect(first.next).toBe('totp');
-    // the code that confirmed the set-up is spent
-    const now = Date.now();
+    // the code that confirmed the set-up is spent (its own time: a fresh Date.now() can be the
+    // next 30 s step, whose code is still unused)
     const spent = await post(`/auth/login/${String(first.loginId)}/totp`, {
-      code: totpCode(secret, now),
+      code: totpCode(secret, at),
     });
     expect(spent.body.error?.code).toBe('TOTP_INVALID');
-    const next = totpCode(secret, now + 30_000);
+    const next = totpCode(secret, at + 30_000);
     const signedIn = await post(`/auth/login/${String(first.loginId)}/totp`, { code: next });
     expect(signedIn.body.data).toEqual({ user: { userId, email: address } });
     // the same code in a new sign-in, and the finished sign-in, do not work again
@@ -212,7 +216,7 @@ describe('the authenticator', () => {
     // an older code, still inside the window, does not work after a newer one either
     const older = await post(
       `/auth/login/${String(again.loginId)}/totp`,
-      { code: totpCode(secret, now) },
+      { code: totpCode(secret, at) },
       { app: 'seller' },
     );
     expect(older.body.error?.code).toBe('TOTP_INVALID');

@@ -1,5 +1,6 @@
 export { AppFrame, type AppFrameProps } from './AppFrame';
 export { ErrorPage, type ErrorPageAction, type ErrorPageProps } from './ErrorPage';
+export { IconCreditsPage } from './IconCreditsPage';
 export { type NavItem, NavList, type NavListProps } from './NavList';
 export { ServerWake, type ServerWakeProps } from './ServerWake';
 export {

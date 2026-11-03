@@ -1,43 +1,14 @@
-// What the E2E specs share: the password, axe and side-scroll checks, and signing up, out and in
-// through the customer app's pages.
-import AxeBuilder from '@axe-core/playwright';
+// What the E2E specs share: the password, axe and side-scroll checks (scripts/e2e/checks.ts, every
+// app's), and signing up, out and in through the customer app's pages.
 import { expect, type Page } from '@playwright/test';
 
+import { expectNoAxeViolations, expectNoSideScroll } from '../../../scripts/e2e/checks';
 import { codeFor } from '../../../scripts/e2e/mail';
+
+export { expectNoAxeViolations, expectNoSideScroll };
 
 export const PASSWORD = 'pink lipstick on a rainy day';
 export const NEW_PASSWORD = 'rose gold eyeliner at midnight';
-
-/**
- * Waits until nothing is fading or moving in or out (a menu, a dialog, a toast): mid-fade text is
- * paler than it stays, which axe's contrast check would count. Endless ones (a spinner) are skipped.
- */
-async function animationsDone(page: Page) {
-  await page.waitForFunction(() =>
-    document
-      .getAnimations()
-      .every(
-        (animation) =>
-          animation.playState !== 'running' ||
-          animation.effect?.getComputedTiming().endTime === Infinity,
-      ),
-  );
-}
-
-/** axe on the page once it is still, colour contrast included (a real layout here). */
-export async function expectNoAxeViolations(page: Page) {
-  await animationsDone(page);
-  const results = await new AxeBuilder({ page }).analyze();
-  expect(
-    results.violations.map((v) => `${v.id}: ${v.nodes.map((n) => n.target.join(' ')).join(', ')}`),
-  ).toEqual([]);
-}
-
-/** Nothing wider than the screen (no sideways scroll on a phone). */
-export async function expectNoSideScroll(page: Page) {
-  const wide = await page.evaluate(() => document.documentElement.scrollWidth - window.innerWidth);
-  expect(wide).toBeLessThanOrEqual(0);
-}
 
 /** The header's account control, once the session is known. */
 export const accountButton = (page: Page, email: string) =>
