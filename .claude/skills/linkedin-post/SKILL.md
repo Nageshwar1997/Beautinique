@@ -26,7 +26,7 @@ Read both first, nothing else unless needed (keep tokens low). Ask the user whic
 
 ## Make the PDF
 
-When images are in `<folder>/slides/` (01.png, 02.png ... png/jpg/webp), run from the repo root (uses the
+When images are in `<folder>/slides/` (1.jpg, 2.jpg ... named by slide number; jpg/jpeg/png/webp), run from the repo root (uses the
 repo's Playwright; module resolution needs the repo root as cwd):
 
 ```bash
@@ -35,8 +35,9 @@ const { chromium } = await import('playwright');
 const fs = await import('node:fs');
 const path = await import('node:path');
 const dir = process.argv.at(-1);
-const files = fs.readdirSync(dir).filter((f) => /^\d+\.(png|jpe?g|webp)$/i.test(f)).sort();
-if (files.length === 0) throw new Error(`No slides (01.png, 02.png ...) in ${dir}`);
+const files = fs.readdirSync(dir).filter((f) => /^\d+\.(png|jpe?g|webp)$/i.test(f)).sort((a, b) => parseInt(a) - parseInt(b));
+if (files.length === 0) throw new Error(`No slides (1.jpg, 2.jpg ...) in ${dir}`);
+if (new Set(files.map((f) => parseInt(f))).size !== files.length) throw new Error(`Two files share a slide number: ${files.join(', ')}`);
 const type = (f) => ({ jpg: 'jpeg', jpeg: 'jpeg', png: 'png', webp: 'webp' })[f.split('.').pop().toLowerCase()];
 const pages = files.map((f) => `<div class="p"><img src="data:image/${type(f)};base64,${fs.readFileSync(path.join(dir, f)).toString('base64')}"></div>`).join('');
 const html = `<style>@page{size:1080px 1350px;margin:0}body{margin:0}.p{width:1080px;height:1350px;background:#fff;break-after:page}.p:last-child{break-after:auto}img{width:100%;height:100%;object-fit:contain;display:block}</style>${pages}`;
