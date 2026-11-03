@@ -25,3 +25,6 @@ release-tarballs/
 test-results/
 playwright-report/
 blob-report/
+
+# LinkedIn carousel images and PDFs (prompts stay in git)
+linkedin-posts/*/slides/
