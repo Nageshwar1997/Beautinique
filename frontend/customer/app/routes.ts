@@ -1,4 +1,4 @@
-import { index, route, type RouteConfig } from '@react-router/dev/routes';
+import { index, layout, prefix, route, type RouteConfig } from '@react-router/dev/routes';
 
 /** The app's route table. Add pages here (files in app/routes), and to app/nav.ts when they are ready. */
 export default [
@@ -9,6 +9,15 @@ export default [
   route('sign-up', 'routes/sign-up.tsx'),
   route('forgot-password', 'routes/forgot-password.tsx'),
   route('invitation', 'routes/invitation.tsx'),
+  // the account (signed in only; owner, 2026-11-03): /account goes to its security page
+  ...prefix('account', [
+    layout('routes/account.tsx', [
+      index('routes/account-index.tsx'),
+      route('security', 'routes/account-security.tsx'),
+      route('security/authenticator', 'routes/account-authenticator.tsx'),
+      route('devices', 'routes/account-devices.tsx'),
+    ]),
+  ]),
   // the dummy legal pages the sign-up consent links to (version dummy-1)
   route('terms', 'routes/terms.tsx'),
   route('privacy', 'routes/privacy.tsx'),

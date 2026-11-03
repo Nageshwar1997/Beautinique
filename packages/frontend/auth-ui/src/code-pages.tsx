@@ -5,7 +5,7 @@ import {
   requestSignUpCode,
 } from '@beautinique/shared-contracts';
 import { useState } from 'react';
-import { useNavigate, useSearchParams } from 'react-router';
+import { useLocation, useNavigate, useSearchParams } from 'react-router';
 
 import { type Challenge, CodeStep, type Verified } from './code-step';
 import { EmailStep, type EmailStepValues, type LegalLinks } from './email-step';
@@ -108,7 +108,9 @@ export function SignUpForm({ legal }: CodePageProps) {
 export function ForgotPasswordForm() {
   const client = useApiClient();
   const after = useAfterCode({ endedSessions: true });
-  const [step, setStep] = useState<Step>({ kind: 'email', email: '' });
+  // a signed-in person's own email (the security page hands it over, never in the URL)
+  const handed = signInStateOf(useLocation().state).email ?? '';
+  const [step, setStep] = useState<Step>({ kind: 'email', email: handed });
   if (step.kind === 'email') {
     return (
       <EmailStep

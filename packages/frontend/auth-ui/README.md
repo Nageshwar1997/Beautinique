@@ -18,7 +18,10 @@ Peers: `react` 19, `react-dom`, `react-router` 8, `@tanstack/react-query` 5. App
 // app ki root me: API client, Query cache, session (har render tree ka apna; SSR pe har request ka)
 <ApiProvider client={client} queryClient={queryClient}>
   <SessionProvider>
-    <App />
+    {/* router ke andar: step-up dialog security page ka link deta hai */}
+    <StepUpProvider>
+      <App />
+    </StepUpProvider>
   </SessionProvider>
 </ApiProvider>
 ```
@@ -56,7 +59,22 @@ Peers: `react` 19, `react-dom`, `react-router` 8, `@tanstack/react-query` 5. App
 | `AuthLayout`, `TextLink`, `TEXT_LINK` | Auth page ka card (phone pe poori chaudai), ek `h1`, footer; brand rang ka underlined link.                                                                                                                                                                                                                                                    |
 | `LEGAL_LINKS`                         | Consent ke links: `/terms`, `/privacy` (customer app ke dummy pages); `legal` prop se badlo.                                                                                                                                                                                                                                                   |
 
-Authenticator **lagana** (sign-in ke beech, admin jaise apps) PR 6 me aata hai; tab tak `SignInForm` aise account ko saaf sandesh deta hai.
+`ForgotPasswordForm` signed-in insaan ka email `location.state` (`{ email }`) se pehle se bhar leta hai (URL me kabhi nahi). Authenticator **lagana** sign-in ke beech (admin jaise apps) PR 6 me aata hai; tab tak `SignInForm` aise account ko saaf sandesh deta hai.
+
+## Account pages (owner, 2026-11-03)
+
+Har app me wahi URLs (`ACCOUNT_PATHS`): `/account/security`, `/account/security/authenticator`, `/account/devices`; app inhe `RequireSignIn` ke andar rakhta hai, page ka `h1` aur nav app ka.
+
+| Export                                                  | Kaam                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   |
+| ------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `StepUpProvider`                                        | api-client ka `setStepUpHandler`: kisi bhi call pe `STEP_UP_REQUIRED` → ek dialog (saath wali calls ke liye bhi ek), authenticator code ya "Lost your phone?" se recovery code (`POST /auth/step-up` `{ code }` / `{ recoveryCode }`). Galat code field pe, sahi pe wahi call dobara (step-up 5 min chalta hai). Cancel/Escape → call `STEP_UP_REQUIRED` se rukti hai, page chup rehta hai. Recovery code ke baad `/iam/me` dobara, 3 ya kam bache to toast. Bina authenticator wale account ko security page ka link. Router aur `SessionProvider` ke andar, ek baar. |
+| `SecuritySettings`                                      | Password card ("Change password" → `/forgot-password`, email state me; naya password har device se sign out). Authenticator card: band → "Set up"; chalu → bache recovery codes (3 ya kam pe warning), "Get new recovery codes" (confirm → step-up → codes ek baar), "Set up on a new phone", "Turn off" (confirm → step-up; 409 `AUTHENTICATOR_REQUIRED_BY_ROLE` ka sandesh roles ke naam ke saath dialog me).                                                                                                                                                        |
+| `AuthenticatorSetup`                                    | 3 step: QR (`qrcode.react` SVG, hamesha safed pe kaala) + "Open in your authenticator app" (`otpauth://`) + key (4-4 ke group, copy) → code + password (`TOTP_INVALID`, `PASSWORD_INVALID` apne field pe; set-up expire/`AUTHENTICATOR_EXISTS` → naya key sandesh ke saath) → recovery codes. Authenticator pehle se ho to API step-up maangta hai (badalna). Bina password → "Set a password". StrictMode me bhi ek hi enroll. `onDone`, `backHref`.                                                                                                                  |
+| `RecoveryCodes`                                         | Codes ek baar: list, Copy, `.txt` download (`RECOVERY_CODES_FILE`, `recoveryCodesText`: account, India time, codes), "I’ve saved my recovery codes" tick ke bina Done pe error + focus; tick se pehle page chhodna (link, Back) "Leave without saving your codes?" dialog (`useBlocker`, data router chahiye), tab band pe browser ki warning.                                                                                                                                                                                                                         |
+| `MyDevices`                                             | `GET /auth/sessions`: saare apps, ye device pehle ("This device"), app ka naam (`APP_NAMES`), IP, last active + signed in (`en-IN`). Doosra device → `DELETE /auth/sessions/:id`; ye device → normal sign out; "Sign out all other devices" confirm ke baad (`POST /auth/sessions/end-others`).                                                                                                                                                                                                                                                                        |
+| `AccountCard`, `LinkButton`, `StatusBadge`, `APP_NAMES` | Account pages ke tukde.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                |
+
+`AccountMenu` ke `links` React Aria ke `RouterProvider` se app ke router me jaate hain (pehle poora page reload hota tha).
 
 ## Playground
 
@@ -64,7 +82,7 @@ Authenticator **lagana** (sign-in ke beech, admin jaise apps) PR 6 me aata hai; 
 npm run playground --workspace @beautinique/frontend-auth-ui
 ```
 
-http://localhost:5186: saari screens nakli identity ke saath (test ka `fake-identity`, 500 ms der), jawab chunne ke radio (sirf password, authenticator, galat password, sign-up pe account pehle se), header me account menu aur theme switcher.
+http://localhost:5186: saari screens (account pages bhi; step-up code `123456` ya recovery code `ABCDE-FGH23`) nakli identity ke saath (test ka `fake-identity`, 500 ms der), jawab chunne ke radio (sirf password, authenticator, galat password, sign-up pe account pehle se), header me account menu aur theme switcher.
 
 ## Tests
 

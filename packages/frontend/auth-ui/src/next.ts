@@ -6,6 +6,15 @@ export const AUTH_PATHS = {
   invitation: '/invitation',
 } as const;
 
+/**
+ * The account pages, the same in every app (owner, 2026-11-03): signed in only (`RequireSignIn`).
+ */
+export const ACCOUNT_PATHS = {
+  security: '/account/security',
+  authenticator: '/account/security/authenticator',
+  devices: '/account/devices',
+} as const;
+
 const AUTH_PAGES: readonly string[] = Object.values(AUTH_PATHS);
 
 /** Longer than any page of ours; a longer `next` is someone's mischief. */

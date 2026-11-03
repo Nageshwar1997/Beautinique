@@ -2,10 +2,10 @@ import { ApiProvider, createApiClient, createQueryClient } from '@beautinique/fr
 import { Toaster } from '@beautinique/frontend-components';
 import type { AppId } from '@beautinique/shared-contracts';
 import { render } from '@testing-library/react';
-import type { ReactNode } from 'react';
+import { type ReactNode, StrictMode } from 'react';
 import { createMemoryRouter, RouterProvider, useLocation } from 'react-router';
 
-import { SessionProvider } from '../src/index';
+import { SessionProvider, StepUpProvider } from '../src/index';
 import { BASE_URL, type FakeIdentity } from './fake-identity';
 
 /** Where the router is, for tests: the path, the search and what the page was handed. */
@@ -24,7 +24,12 @@ function Where() {
  */
 export function renderApp(
   pages: Record<string, ReactNode>,
-  { identity, app = 'customer', at = '/' }: { identity: FakeIdentity; app?: AppId; at?: string },
+  {
+    identity,
+    app = 'customer',
+    at = '/',
+    strict = false,
+  }: { identity: FakeIdentity; app?: AppId; at?: string; strict?: boolean },
 ) {
   const client = createApiClient({ app, baseUrl: BASE_URL, fetch: identity.fetch });
   const queryClient = createQueryClient();
@@ -32,22 +37,23 @@ export function renderApp(
     Object.entries(pages).map(([path, element]) => ({
       path,
       element: (
-        <>
+        <StepUpProvider>
           {element}
           <Where />
-        </>
+        </StepUpProvider>
       ),
     })),
     { initialEntries: [at] },
   );
-  const view = render(
+  const tree = (
     <ApiProvider client={client} queryClient={queryClient}>
       <SessionProvider>
         <RouterProvider router={router} />
         <Toaster />
       </SessionProvider>
-    </ApiProvider>,
+    </ApiProvider>
   );
+  const view = render(strict ? <StrictMode>{tree}</StrictMode> : tree);
   return { ...view, router, client, queryClient };
 }
 

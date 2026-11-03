@@ -3,7 +3,10 @@ import { AccountMenu } from '@beautinique/frontend-auth-ui';
 import { BrandLogo, BrandMark } from '@beautinique/frontend-icons';
 import { Link } from 'react-router';
 
-import { MAIN_NAV } from '../nav';
+import { ACCOUNT_NAV, MAIN_NAV } from '../nav';
+
+/** The account menu's pages, above "Sign out". */
+const ACCOUNT_LINKS = ACCOUNT_NAV.map(({ to, label }) => ({ href: to, label }));
 
 /**
  * The customer app's header: the logo (home), the main nav, the theme switcher and the account
@@ -25,7 +28,7 @@ export function SiteHeader() {
         </Link>
         <NavList items={MAIN_NAV} label="Main" className="hidden md:block" />
         <ThemeSwitcher />
-        <AccountMenu />
+        <AccountMenu links={ACCOUNT_LINKS} />
       </div>
     </header>
   );
