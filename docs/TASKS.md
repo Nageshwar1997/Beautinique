@@ -1,6 +1,6 @@
 # TASKS — BQ
 
-> **Status:** v1.84 (2026-11-04). Poore project ki task list, [ARCHITECTURE.md](ARCHITECTURE.md) §16 ke phases ke hisaab se. Har task "done" tabhi jab [RULES.md](RULES.md) §1.5 ki Definition of Done poori ho.
+> **Status:** v1.85 (2026-11-04). Poore project ki task list, [ARCHITECTURE.md](ARCHITECTURE.md) §16 ke phases ke hisaab se. Har task "done" tabhi jab [RULES.md](RULES.md) §1.5 ki Definition of Done poori ho.
 
 **Kaise use karein:**
 - `[ ]` baaki, `[~]` chal raha hai, `[x]` done.
@@ -19,12 +19,12 @@
 - Sirf Phase 0–11 ke tasks gine jaate hain (sections A, B, C, D nahi).
 - Task: `[x]` = 1, `[~]` = ½, `[ ]` = 0. Phase % = in ka jod ÷ phase ke tasks.
 - Poora % = har phase ka % × uske hafte (phase heading ka andaaza, range ka beech: "4–5 hafte" = 4.5), sabka jod ÷ 38 (saare phases ke hafte). Bade phases (Commerce, WMS, Finance) ka wazan zyada, chhote shuruaati tasks ka kam. Poore number tak round.
-- Sirf task ginti se 27% aata hai (22 ÷ 82). Wo zyada dikhta hai kyunki shuru ka chhota task bhi utna hi ginta hai jitna Phase 8 ka bada task; isliye upar wala (hafton wala) number hi project ka %.
+- Sirf task ginti se 27% aata hai (22.5 ÷ 82). Wo zyada dikhta hai kyunki shuru ka chhota task bhi utna hi ginta hai jitna Phase 8 ka bada task; isliye upar wala (hafton wala) number hi project ka %.
 - **Kab update:** jis commit/PR me kisi task ka checkbox badle, ya task jude/hate, usi me ye table, upar ka %, neeche ki itihaas line aur [HANDOFF.md](HANDOFF.md) §1 ki "Progress" line.
 
 | Phase                                 | Hafte  | Tasks  | `[x]`  | `[~]`  | `[ ]`  | Phase % |
 | ------------------------------------- | ------ | ------ | ------ | ------ | ------ | ------- |
-| 0. Monorepo + CI                      | 1.5    | 9      | 2      | 4      | 3      | 44%     |
+| 0. Monorepo + CI                      | 1.5    | 9      | 3      | 3      | 3      | 50%     |
 | 1. Server kit + contracts             | 1.5    | 7      | 7      | 0      | 0      | 100%    |
 | 2. Gateway                            | 1      | 8      | 4      | 2      | 2      | 63%     |
 | 3. bq-identity                        | 2.5    | 6      | 3      | 0      | 3      | 50%     |
@@ -36,7 +36,7 @@
 | 9. Finance + support                  | 4.5    | 6      | 0      | 0      | 6      | 0%      |
 | 10. UGC, growth, creators, governance | 5.5    | 6      | 0      | 0      | 6      | 0%      |
 | 11. Launch hardening                  | 2      | 6      | 1      | 0      | 5      | 17%     |
-| **Kul**                               | **38** | **82** | **17** | **10** | **55** | **14%** |
+| **Kul**                               | **38** | **82** | **18** | **9**  | **55** | **14%** |
 
 **Itihaas:**
 
@@ -44,6 +44,7 @@
 | ---------- | ------- | ----------------------------------------------------------------------------------------------------------- |
 | 2026-11-03 | 13%     | Pehli ginti. T0.2, T0.3, T5.1, T5.2 ke purane `[ ]` ko `[~]` kiya (kaam ho chuka tha, checkbox peeche tha). |
 | 2026-11-04 | 14%     | T3.1 `[x]`: PR 4 social login merge (PR #46). Phase 3: 42% → 50%.                                          |
+| 2026-11-04 | 14%     | T0.2 `[x]`: seller aur master bane (saare 11 apps khaali, Vercel pe; A.9). Phase 0: 44% → 50%. |
 
 ## D. Deploy-first plan (owner ka faisla, 2026-10-23)
 
@@ -85,7 +86,7 @@ Har milestone ke end me kuch **live** dikhana hai. Ek hi live environment, free 
 - [x] A.6 Brevo: authorised IPs ki rok hatana, ya Render Singapore ke IPs jodna. (2026-10-27, owner: account bana; API keys ke liye "Blocking unauthorized IP addresses" band kiya (Render ke outbound IP badalte hain). SMTP wala block on hai: hum SMTP nahi, Brevo ka HTTPS API use karte hain (ARCHITECTURE §11.2). API key Render me notify/OTP ka code aane pe (M3).)
 - [ ] A.7 Cloudflare R2 free tier: card maangta hai ya nahi, check karna (nahi to logs archive Cloudinary private files me).
 - ~~A.8 UptimeRobot aur cron-job.org free accounts (keep-alive aur alerts ke liye).~~ Nahi (owner, 2026-10-25): bahar ka pinger nahi; service app khulte hi aur GitHub Actions se din me har ghante jaagti hai (T2.7, ARCHITECTURE §11.1). **Badla (owner, 2026-10-28):** GitHub schedule pe bharosa nahi (2 din me ~18 me se 2 chale), isliye cron-job.org (owner, 2026-10-28; GitHub wala bhi chalta rahe): job `GET https://bq-live.onrender.com/wake` (gateway ka wake, 204, origin secret nahi), timezone Asia/Kolkata, har ghante :30 pe 10:30–21:30 (GitHub ke saath hi, taaki dono me se ek chale; dono chale to doosra jaage server pe padta hai), timeout 120 s, failure pe email. Account aur job owner banata hai (Claude account nahi banata). UptimeRobot ab bhi nahi.
-- [ ] A.9 Vercel: apps ready hone pe 11 projects (production branch `release`). **Har app live hone pe Render (`bq-live`) me us app ko jodna (owner, 2026-10-29: saare 11 apps ke liye):** `GATEWAY__APP_HOSTS` me `,<app>=<host>` (zaroori: iske bina gateway us app ki requests nahi maanta), `GATEWAY__VERCEL_PROJECTS` me `,<app>=<project name>`, aur `NOTIFY__APP_URLS` me `,<app>=https://<host>` (emails me app ka link, jaise invitation; `https://` ke saath, path nahi, quotes nahi; galat value pe notify aur poora deploy ruk jaata hai). Abhi (2026-11-04) customer aur admin live (Vercel projects `beautinique-customer`, `beautinique-admin`; owner ne 2026-11-04 ko naam badle, pehle `bq-customer`): `GATEWAY__APP_HOSTS=customer=beautinique-customer.vercel.app,admin=beautinique-admin.vercel.app`, `GATEWAY__VERCEL_PROJECTS=customer=beautinique-customer,admin=beautinique-admin`, `NOTIFY__APP_URLS=customer=https://beautinique-customer.vercel.app,admin=https://beautinique-admin.vercel.app`. Apps: customer, seller, admin, superadmin, master, support, finance, logistics, delivery, growth, creator.
+- [ ] A.9 Vercel: apps ready hone pe 11 projects (production branch `release`). **Har app live hone pe Render (`bq-live`) me us app ko jodna (owner, 2026-10-29: saare 11 apps ke liye):** `GATEWAY__APP_HOSTS` me `,<app>=<host>` (zaroori: iske bina gateway us app ki requests nahi maanta), `GATEWAY__VERCEL_PROJECTS` me `,<app>=<project name>`, aur `NOTIFY__APP_URLS` me `,<app>=https://<host>` (emails me app ka link, jaise invitation; `https://` ke saath, path nahi, quotes nahi; galat value pe notify aur poora deploy ruk jaata hai). Abhi (2026-11-04) saare 11 apps live (owner: pehle khaali apps publish karke naam pakke): Vercel projects `beautinique-<app>`, root `frontend/<app>`, Node 24, region `bom1`, env `BQ_GATEWAY_URL`, protection `all_except_custom_domains`, affected-only deploys; customer aur admin ke naam owner ne 2026-11-04 ko badle (pehle `bq-customer`). `beautinique-seller.vercel.app` aur `beautinique-master.vercel.app` abhi owner ke purane projects `bq-seller`, `bq-master` pe hain: owner wahan se hataye, phir naye projects me jode (tab tak `beautinique-seller-lemon.vercel.app`, `beautinique-master-tau.vercel.app`). Owner: har project me `ORIGIN_SECRET` (Sensitive, Production + Preview, sabme ek hi) aur production branch `release`. Render keys (saare 11): `GATEWAY__APP_HOSTS=customer=beautinique-customer.vercel.app,seller=beautinique-seller.vercel.app,admin=beautinique-admin.vercel.app,superadmin=beautinique-superadmin.vercel.app,master=beautinique-master.vercel.app,support=beautinique-support.vercel.app,finance=beautinique-finance.vercel.app,logistics=beautinique-logistics.vercel.app,delivery=beautinique-delivery.vercel.app,growth=beautinique-growth.vercel.app,creator=beautinique-creator.vercel.app`, `GATEWAY__VERCEL_PROJECTS=customer=beautinique-customer,seller=beautinique-seller,admin=beautinique-admin,superadmin=beautinique-superadmin,master=beautinique-master,support=beautinique-support,finance=beautinique-finance,logistics=beautinique-logistics,delivery=beautinique-delivery,growth=beautinique-growth,creator=beautinique-creator`, `NOTIFY__APP_URLS=customer=https://beautinique-customer.vercel.app,seller=https://beautinique-seller.vercel.app,admin=https://beautinique-admin.vercel.app,superadmin=https://beautinique-superadmin.vercel.app,master=https://beautinique-master.vercel.app,support=https://beautinique-support.vercel.app,finance=https://beautinique-finance.vercel.app,logistics=https://beautinique-logistics.vercel.app,delivery=https://beautinique-delivery.vercel.app,growth=https://beautinique-growth.vercel.app,creator=https://beautinique-creator.vercel.app`. Apps: customer, seller, admin, superadmin, master, support, finance, logistics, delivery, growth, creator.
 
 ## B. Docs
 
@@ -105,7 +106,7 @@ Har milestone ke end me kuch **live** dikhana hai. Ek hi live environment, free 
   3. **Frontend (Phase 6 ke saath):** `frontend-test-utils`, `frontend-icons`, `frontend-hooks`, `frontend-components`, `frontend-stores`, `frontend-api-client`, `frontend-authz`, `frontend-forms`, `frontend-app-shell`, `frontend-auth-ui`, `frontend-data-table`, `frontend-review-screens`, `frontend-maps`, `frontend-pwa-kit`, `frontend-config-vite`.
   4. **Feature packages (jab app ko chahiye):** `frontend-quill`, `frontend-tryon`, `frontend-tryon-assets`.
   Neev ke baad backend aur frontend ek saath chal sakte hain (do log ho to ek-ek track).
-- [~] T0.2 4 apps → `frontend/` (customer, seller, admin, master). (Har app `npm run create -- --type app` se banta hai: SPA, customer SSR, delivery PWA; [packages/README.md](packages/README.md) §3.1. customer aur admin bane (owner, 2026-10-21); seller aur master baaki.)
+- [x] T0.2 4 apps → `frontend/` (customer, seller, admin, master). (Har app `npm run create -- --type app` se banta hai: SPA, customer SSR, delivery PWA; [packages/README.md](packages/README.md) §3.1. customer aur admin bane (owner, 2026-10-21); seller, master aur baaki 7 apps 2026-11-04 ko bane (owner: saare 11 apps pehle khaali bana ke Vercel pe publish, taaki naam pakke ho; kaam apne phase me). Har naye app me admin jaisa `vercel.json` aur uska test; lint, build, tests 7/7 har app me.)
 - [~] T0.3 Gateway aur services → `backend/` (port sources ki tarah). (Har deployable aur bundle `npm run create -- --type backend` se banta hai, §3.2. gateway, identity, core, bundle (2026-10-21) aur notify (2026-10-27) bane; payments baaki.)
 - [ ] T0.4 Media-service ka nested `.git` aur `.kilo` worktree hatana.
 - [ ] T0.5 Turborepo. (npm workspaces, root scripts, shared configs aur package CLI ho gaye: [packages/README.md](packages/README.md).)
@@ -345,3 +346,4 @@ Har milestone ke end me kuch **live** dikhana hai. Ek hi live environment, free 
 | v1.82   | 2026-11-03 | T3.1 PR 4: social login (navigation routes, identity OAuth, consent page, Sign-in methods, nakli providers, E2E, mutations).                                       |
 | v1.83   | 2026-11-04 | T3.1 `[x]` (PR #46 merge); §P 13% → 14%; "Abhi ka focus" M3 release.                                                                                               |
 | v1.84   | 2026-11-04 | A.9: Vercel projects ke naye naam (`beautinique-customer`, `beautinique-admin`), admin live, Render ki teeno keys ke naye values. |
+| v1.85   | 2026-11-04 | T0.2 `[x]` (saare 11 apps bane, khaali, Vercel pe); §P Phase 0 44% → 50%, poora 14%; A.9 me 11 projects aur Render keys. |
