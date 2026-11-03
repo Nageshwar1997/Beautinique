@@ -48,7 +48,7 @@ export const configZod = object({
   /** After this many in a day, only sign-in codes and transactional emails go; the rest wait a day. */
   emailOtherLimit: coerce.number().int().min(0).default(250),
   /**
-   * Where each app lives, for the links in emails: `customer=https://bq-customer.vercel.app,admin=...`
+   * Where each app lives, for the links in emails: `customer=https://beautinique-customer.vercel.app,admin=...`
    * (https, or http on localhost). An app left out gets an email without a link.
    */
   appUrls: string()
