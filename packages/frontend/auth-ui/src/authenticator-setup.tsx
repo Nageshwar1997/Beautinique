@@ -139,7 +139,8 @@ export function AuthenticatorSetup({
   }
 }
 
-function StepFrame({
+/** One numbered step of a set-up (also the sign-in that sets up the authenticator). */
+export function StepFrame({
   number,
   title,
   children,
@@ -172,7 +173,8 @@ function Notice({ children }: { children: ReactNode }) {
   );
 }
 
-function Scan({ secret, uri }: Enrolled) {
+/** The QR code, the link for this phone and the key to type: the first step of a set-up. */
+export function Scan({ secret, uri }: Enrolled) {
   const { copy, copied } = useCopyToClipboard();
   return (
     <div className="space-y-5">

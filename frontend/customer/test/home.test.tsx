@@ -35,9 +35,17 @@ function page(Component: React.ComponentType, path = '/') {
   );
 }
 
-/** axe on what is rendered (colour contrast needs a real layout: the browser check covers it). */
+/**
+ * axe on what is rendered. Colour contrast needs a real layout, and label in name a canvas (jsdom
+ * has none: the rule only errors here); the browser check covers both.
+ */
 async function violations(container: HTMLElement) {
-  const results = await axe.run(container, { rules: { 'color-contrast': { enabled: false } } });
+  const results = await axe.run(container, {
+    rules: {
+      'color-contrast': { enabled: false },
+      'label-content-name-mismatch': { enabled: false },
+    },
+  });
   return results.violations.map((violation) => `${violation.id}: ${violation.help}`);
 }
 

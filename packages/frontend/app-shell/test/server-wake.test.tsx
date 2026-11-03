@@ -303,12 +303,18 @@ describe('ServerWake', () => {
 });
 
 /**
- * axe on the whole page, the screen and the inert app behind it (colour contrast needs a real layout:
- * the browser check covers it). axe needs real timers, and the component's fake ones are lost when
- * they go, so this ends what a test can still play.
+ * axe on the whole page, the screen and the inert app behind it (colour contrast needs a real layout,
+ * and label in name a canvas, which jsdom has not: the browser check covers both). axe needs real
+ * timers, and the component's fake ones are lost when they go, so this ends what a test can still
+ * play.
  */
 async function violations() {
   vi.useRealTimers();
-  const results = await axe.run(document.body, { rules: { 'color-contrast': { enabled: false } } });
+  const results = await axe.run(document.body, {
+    rules: {
+      'color-contrast': { enabled: false },
+      'label-content-name-mismatch': { enabled: false },
+    },
+  });
   return results.violations.map((violation) => `${violation.id}: ${violation.help}`);
 }

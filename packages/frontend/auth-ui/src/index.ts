@@ -27,6 +27,13 @@ export {
   type LegalLinks,
 } from './email-step';
 export { RedirectIfSignedIn, RequireSignIn } from './guards';
+export {
+  IDLE_RENEW_MS,
+  IDLE_TICK_MS,
+  IDLE_WARNING_MS,
+  IdleNotice,
+  idleSignOutNotice,
+} from './idle-notice';
 export { AuthLayout, type AuthLayoutProps, TEXT_LINK, TextLink } from './layout';
 export { MyDevices } from './my-devices';
 export { ACCOUNT_PATHS, AUTH_PATHS, authHref, NEXT_PARAM, safeNext } from './next';
@@ -37,7 +44,14 @@ export {
   recoveryCodesText,
 } from './recovery-codes';
 export { SecuritySettings } from './security-settings';
-export { type Me, type Session, SessionProvider, type SessionState, useSession } from './session';
+export {
+  type Me,
+  type Session,
+  SessionProvider,
+  type SessionState,
+  type SignedOutReason,
+  useSession,
+} from './session';
 export { clearSessionHint, hasSessionHint } from './session-hint';
 export { FEW_RECOVERY_CODES, SignInForm, type SignInFormProps } from './sign-in';
 export { StepUpProvider } from './step-up';

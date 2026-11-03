@@ -1,5 +1,5 @@
-import { ApiError, isApiError, useApiClient } from '@beautinique/frontend-api-client';
-import { Button, toast } from '@beautinique/frontend-components';
+import { ApiError, errorMessage, isApiError, useApiClient } from '@beautinique/frontend-api-client';
+import { Button, Spinner, toast } from '@beautinique/frontend-components';
 import {
   CodeField,
   Form,
@@ -8,21 +8,40 @@ import {
   TextField,
   useZodForm,
 } from '@beautinique/frontend-forms';
-import { loginRecovery, loginTotp, passwordLogin } from '@beautinique/shared-contracts';
+import {
+  confirmTotpEnroll,
+  loginRecovery,
+  loginTotp,
+  passwordLogin,
+  type RouteOutput,
+  startTotpEnroll,
+} from '@beautinique/shared-contracts';
 import { plural } from '@beautinique/shared-utils';
-import { type ReactNode, useState } from 'react';
+import { type ReactNode, useCallback, useEffect, useRef, useState } from 'react';
 import { useLocation, useNavigate, useSearchParams } from 'react-router';
 
+import { Scan, StepFrame } from './authenticator-setup';
 import { signInStateOf } from './code-pages';
 import { TextLink } from './layout';
 import { AUTH_PATHS, authHref, NEXT_PARAM, safeNext } from './next';
+import { RecoveryCodes } from './recovery-codes';
 import { useSession } from './session';
 
 /** At or below this many recovery codes left, a sign-in with one says to get new ones. */
 export const FEW_RECOVERY_CODES = 3;
 
 type Step =
-  { kind: 'password'; notice?: ReactNode } | { kind: 'totp' | 'recovery'; loginId: string };
+  | { kind: 'password'; notice?: ReactNode }
+  | { kind: 'totp' | 'recovery'; loginId: string }
+  | { kind: 'enroll'; loginId: string; email: string };
+
+/** The sign-in answer has no loginId for its next step: the API broke its contract. */
+const brokenAnswer = () =>
+  new ApiError({
+    code: 'INTERNAL_ERROR',
+    message: 'Something went wrong on our side. Please try again.',
+    status: 500,
+  });
 
 export interface SignInFormProps {
   /** The email to start with (after setting a password, or "you already have an account"). */
@@ -33,17 +52,24 @@ export interface SignInFormProps {
 
 /**
  * Sign-in, every app (ARCHITECTURE §7.1): email and password, then the authenticator code where
- * the account has one (or one of its recovery codes). Signed in, the person goes on to `next`.
- * A wrong email, a wrong password and a locked account get the same answer.
+ * the account has one (or one of its recovery codes). An app that needs an authenticator (the
+ * internal apps) has an account without one set it up here first: the QR code, the first code,
+ * the recovery codes. Signed in, the person goes on to `next`. A wrong email, a wrong password
+ * and a locked account get the same answer.
  */
 export function SignInForm(props: SignInFormProps) {
   // what another auth page handed over (the email, why), unless given
-  const handed = signInStateOf(useLocation().state);
+  const location = useLocation();
+  const handed = signInStateOf(location.state);
   const email = props.email ?? handed.email ?? '';
-  const [step, setStep] = useState<Step>({
-    kind: 'password',
-    notice: props.notice ?? handed.notice,
-  });
+  const first = (): Step => ({ kind: 'password', notice: props.notice ?? handed.notice });
+  const [step, setStep] = useState<Step>(first);
+  // a new visit while the page is open (signed out for being idle, say): start again, with its note
+  const [visit, setVisit] = useState(location.key);
+  if (visit !== location.key) {
+    setVisit(location.key);
+    setStep(first());
+  }
   const session = useSession();
   const navigate = useNavigate();
   const [search] = useSearchParams();
@@ -69,20 +95,21 @@ export function SignInForm(props: SignInFormProps) {
   if (step.kind === 'password') {
     return (
       <PasswordStep
+        key={location.key}
         email={email}
         notice={step.notice}
         forgotHref={authHref(AUTH_PATHS.forgotPassword, next)}
-        onStep={async (answer) => {
-          if (answer.next === 'signed-in') await finish();
-          else if (answer.next === 'totp' && answer.loginId !== undefined) {
-            setStep({ kind: 'totp', loginId: answer.loginId });
-          } else {
-            throw new ApiError({
-              code: 'AUTHENTICATOR_SETUP_NEEDED',
-              message: 'This account needs an authenticator app before it can sign in here.',
-              status: 400,
-            });
+        onStep={async (answer, typed) => {
+          if (answer.next === 'signed-in') {
+            await finish();
+            return;
           }
+          if (answer.loginId === undefined) throw brokenAnswer();
+          setStep(
+            answer.next === 'totp'
+              ? { kind: 'totp', loginId: answer.loginId }
+              : { kind: 'enroll', loginId: answer.loginId, email: typed },
+          );
         }}
       />
     );
@@ -90,6 +117,17 @@ export function SignInForm(props: SignInFormProps) {
   const back = () => {
     setStep({ kind: 'password' });
   };
+  if (step.kind === 'enroll') {
+    return (
+      <EnrollStep
+        loginId={step.loginId}
+        email={step.email}
+        onExpired={expired}
+        onSignedIn={finish}
+        onBack={back}
+      />
+    );
+  }
   if (step.kind === 'totp') {
     return (
       <TotpStep
@@ -136,7 +174,8 @@ function PasswordStep({
   email: string;
   notice: ReactNode;
   forgotHref: string;
-  onStep: (answer: { next: string; loginId?: string | undefined }) => Promise<void>;
+  /** The answer, and the email as typed (the set-up's recovery codes file names it). */
+  onStep: (answer: RouteOutput<typeof passwordLogin>, email: string) => Promise<void>;
 }) {
   const client = useApiClient();
   const form = useZodForm(passwordLogin.input.body, { defaultValues: { email, password: '' } });
@@ -145,7 +184,7 @@ function PasswordStep({
       form={form}
       className="space-y-4"
       onSubmit={async (body) => {
-        await onStep(await client.call(passwordLogin, { body }));
+        await onStep(await client.call(passwordLogin, { body }), body.email);
       }}
     >
       {notice !== undefined && <Notice>{notice}</Notice>}
@@ -277,5 +316,168 @@ function RecoveryStep({
         </Button>
       </div>
     </div>
+  );
+}
+
+type Enrolled = RouteOutput<typeof startTotpEnroll>;
+
+type EnrollView =
+  | { kind: 'starting' }
+  | { kind: 'failed'; error: unknown }
+  | ({ kind: 'scan' | 'confirm' } & Enrolled)
+  | { kind: 'codes'; codes: string[] };
+
+/**
+ * The sign-in of an account without an authenticator, in an app that needs one (ARCHITECTURE
+ * §7.1): 1. scan the QR code (or open the link, or type the key); 2. the first code, which saves
+ * it; 3. the recovery codes, shown once, and only then on to the app. The password was checked
+ * already, so it is not asked again. The sign-in waits 10 minutes; after that it starts again.
+ */
+function EnrollStep({
+  loginId,
+  email,
+  onExpired,
+  onSignedIn,
+  onBack,
+}: SecondStepProps & { email: string }) {
+  const client = useApiClient();
+  const [view, setView] = useState<EnrollView>({ kind: 'starting' });
+
+  const start = useCallback(async () => {
+    setView({ kind: 'starting' });
+    try {
+      setView({ kind: 'scan', ...(await client.call(startTotpEnroll, { params: { loginId } })) });
+    } catch (error) {
+      if (!onExpired(error)) setView({ kind: 'failed', error });
+    }
+  }, [client, loginId, onExpired]);
+
+  // once per sign-in (a second call would replace the first key; StrictMode runs effects twice)
+  const started = useRef(false);
+  useEffect(() => {
+    if (started.current) return;
+    started.current = true;
+    void start();
+  }, [start]);
+
+  const startAgain = (
+    <Button variant="ghost" size="sm" onClick={onBack}>
+      Start again
+    </Button>
+  );
+
+  switch (view.kind) {
+    case 'starting':
+      return (
+        <div className="flex min-h-48 items-center justify-center">
+          <Spinner label="Getting a new key" />
+        </div>
+      );
+    case 'failed':
+      return (
+        <div className="space-y-4">
+          <p role="alert" className="text-sm">
+            {errorMessage(view.error)}
+          </p>
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            {startAgain}
+            <Button onClick={() => void start()}>Try again</Button>
+          </div>
+        </div>
+      );
+    case 'scan':
+      return (
+        <div className="space-y-6">
+          <Notice>
+            This app asks for a code from an authenticator app each time you sign in. Set one up
+            now: it takes a minute.
+          </Notice>
+          <StepFrame number={1} title="Add Beautinique to your authenticator app">
+            <Scan secret={view.secret} uri={view.uri} />
+            <div className="flex flex-wrap items-center justify-between gap-3">
+              {startAgain}
+              <Button
+                onClick={() => {
+                  setView({ ...view, kind: 'confirm' });
+                }}
+              >
+                Next
+              </Button>
+            </div>
+          </StepFrame>
+        </div>
+      );
+    case 'confirm':
+      return (
+        <StepFrame number={2} title="Enter the code from the app">
+          <EnrollConfirm
+            loginId={loginId}
+            onExpired={onExpired}
+            onBack={() => {
+              setView({ ...view, kind: 'scan' });
+            }}
+            onConfirmed={(codes) => {
+              setView({ kind: 'codes', codes });
+            }}
+          />
+        </StepFrame>
+      );
+    case 'codes':
+      return (
+        <StepFrame number={3} title="Save your recovery codes">
+          <RecoveryCodes
+            codes={view.codes}
+            email={email}
+            doneLabel="Continue"
+            onDone={() => void onSignedIn()}
+          />
+        </StepFrame>
+      );
+  }
+}
+
+function EnrollConfirm({
+  loginId,
+  onExpired,
+  onBack,
+  onConfirmed,
+}: {
+  loginId: string;
+  onExpired: (error: unknown) => boolean;
+  onBack: () => void;
+  onConfirmed: (codes: string[]) => void;
+}) {
+  const client = useApiClient();
+  const form = useZodForm(confirmTotpEnroll.input.body, { defaultValues: { code: '' } });
+  return (
+    <Form
+      form={form}
+      className="space-y-4"
+      errorFields={{ TOTP_INVALID: 'code' }}
+      onSubmit={async (body) => {
+        let codes: string[];
+        try {
+          // signed in from here (the cookies are set), but the codes come first: the session is
+          // read again only after "Continue", so the page does not move on before they are saved
+          ({ recoveryCodes: codes } = await client.call(confirmTotpEnroll, {
+            params: { loginId },
+            body,
+          }));
+        } catch (error) {
+          if (onExpired(error)) return;
+          throw error;
+        }
+        onConfirmed(codes);
+      }}
+    >
+      <p className="text-sm">Enter the 6-digit code the app shows for Beautinique.</p>
+      <CodeField control={form.control} name="code" label="Authenticator code" autoFocus />
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <Button variant="ghost" tone="neutral" onClick={onBack}>
+          Back
+        </Button>
+        <SubmitButton>Turn on</SubmitButton>
+      </div>
+    </Form>
   );
 }
