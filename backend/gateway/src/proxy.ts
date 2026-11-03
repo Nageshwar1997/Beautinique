@@ -148,12 +148,32 @@ function cacheControl(route: GatewayRoute, status: number, upstream: string | un
   return 'private, no-store';
 }
 
+/**
+ * The app of a page the browser opened itself (a navigation route: OAuth start and callback),
+ * which sends no X-BQ-App: the app whose host it came to. Undefined for anything else.
+ */
+function pageApp(
+  req: Request,
+  manifest: readonly GatewayRoute[],
+  apps: AppRegistry,
+): AppId | undefined {
+  if (findRoute(manifest, req.method, req.path)?.route.navigation !== true) return undefined;
+  const host = req.get('x-forwarded-host') ?? req.get('host');
+  return (host === undefined ? null : apps.appOf(host)) ?? undefined;
+}
+
+/** Who the owner hears from: the checked app (a page sends none), the client IP, the passport. */
+interface Caller {
+  app: AppId;
+  ip: string;
+  passport: string | undefined;
+}
+
 function forwardHeaders(
   req: Request,
   route: GatewayRoute,
   requestId: string,
-  ip: string,
-  passport: string | undefined,
+  caller: Caller,
 ): Record<string, string | string[]> {
   const headers: Record<string, string | string[]> = {};
   for (const [name, value] of Object.entries(req.headers)) {
@@ -161,9 +181,10 @@ function forwardHeaders(
       headers[name] = value;
     }
   }
+  headers[HEADERS.app.toLowerCase()] = caller.app;
   headers[HEADERS.requestId.toLowerCase()] = requestId;
-  headers[HEADERS.clientIp.toLowerCase()] = ip;
-  if (passport) headers[HEADERS.passport.toLowerCase()] = passport;
+  headers[HEADERS.clientIp.toLowerCase()] = caller.ip;
+  if (caller.passport) headers[HEADERS.passport.toLowerCase()] = caller.passport;
   return headers;
 }
 
@@ -178,14 +199,13 @@ function forward(
   next: (error: unknown) => void,
   target: URL,
   route: GatewayRoute,
-  ip: string,
+  caller: Caller,
   timeoutMs: number,
-  passport: string | undefined,
 ): void {
   let timedOut = false;
   const upstream = request(
     target,
-    { method: req.method, headers: forwardHeaders(req, route, requestIdOf(res), ip, passport) },
+    { method: req.method, headers: forwardHeaders(req, route, requestIdOf(res), caller) },
     (answer) => {
       const status = answer.statusCode ?? 502;
       res.status(status);
@@ -281,7 +301,7 @@ export function proxy({
     if (!fromVercel) {
       throw new AppError('FORBIDDEN', 'Please use the Beautinique app.');
     }
-    const app = req.get(HEADERS.app);
+    const app = req.get(HEADERS.app) ?? pageApp(req, manifest, apps);
     if (!isApp(app) || !fromAppHost(req, app, apps)) {
       throw new AppError('APP_NOT_ALLOWED', NOT_FROM_APP);
     }
@@ -351,6 +371,6 @@ export function proxy({
     const query = queryAt === -1 ? '' : req.originalUrl.slice(queryAt);
     const target = new URL(buildPath(route.path, params) + query, origin);
     if (caller.gone) return;
-    forward(req, res, next, target, route, ip, timeoutMs, passportToken);
+    forward(req, res, next, target, route, { app, ip, passport: passportToken }, timeoutMs);
   };
 }

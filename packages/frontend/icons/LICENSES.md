@@ -11,6 +11,23 @@ to an "Icon credits" page built from `ICON_CREDITS` (`src/credits.ts`).
 - Changes: the SVG markup is written as React elements; shapes, sizes and strokes are unchanged.
 - Icons: `IconBox` (box-linear), `IconCalendar` (calendar-linear), `IconCheckCircle` (check-circle-linear), `IconChevronDown` (alt-arrow-down-linear), `IconChevronLeft` (alt-arrow-left-linear), `IconChevronRight` (alt-arrow-right-linear), `IconClose` (close-linear), `IconDanger` (danger-circle-linear), `IconDelivery` (delivery-linear), `IconEye` (eye-linear), `IconEyeClosed` (eye-closed-linear), `IconFaceScan` (face-scan-circle-linear), `IconInfo` (info-circle-linear), `IconMonitor` (monitor-linear), `IconMoon` (moon-linear), `IconPalette` (pallete-2-linear), `IconSearch` (magnifier-linear), `IconShieldCheck` (shield-check-linear), `IconSun` (sun-2-linear), `IconTagPrice` (tag-price-linear), `IconWarning` (danger-triangle-linear).
 
+## SVG Logos
+
+- Author: Gil Barbara (https://github.com/gilbarbara/logos)
+- License: CC0 1.0 (https://creativecommons.org/publicdomain/zero/1.0/)
+- Changes: the SVG markup is written as React elements; shapes and colours are unchanged.
+- Icons: `IconGoogle` (google-icon), `IconLinkedin` (linkedin-icon), for "Continue with Google /
+  LinkedIn" in the customer app (TASKS T3.1 PR 4). The marks stay the companies' trademarks:
+  shown only to name their sign-in, as their brand guidelines allow.
+
+## Simple Icons
+
+- Author: Simple Icons Collaborators (https://github.com/simple-icons/simple-icons)
+- License: CC0 1.0 (https://creativecommons.org/publicdomain/zero/1.0/)
+- Changes: the SVG markup is written as React elements; the shape is unchanged (`currentColor`).
+- Icons: `IconGithub` (github), for "Continue with GitHub" (a trademark of GitHub, shown only
+  to name its sign-in).
+
 ## Beautinique logo
 
 `BrandMark`, `BrandLogo` (`src/brand/`) and their source `brand/logo-master.webp` are the

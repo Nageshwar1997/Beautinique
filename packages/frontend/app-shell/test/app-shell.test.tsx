@@ -226,9 +226,11 @@ describe('IconCreditsPage', () => {
     expect(screen.getByRole('link', { name: 'CC BY 4.0' }).getAttribute('href')).toBe(
       'https://creativecommons.org/licenses/by/4.0/',
     );
-    expect(screen.getByRole('listitem').textContent).toBe(
+    expect(screen.getAllByRole('listitem').map((item) => item.textContent)).toEqual([
       'Solar by 480 Design, licensed under CC BY 4.0',
-    );
+      'SVG Logos by Gil Barbara, licensed under CC0 1.0',
+      'Simple Icons by Simple Icons Collaborators, licensed under CC0 1.0',
+    ]);
     expect(await violations(container)).toEqual([]);
   });
 });

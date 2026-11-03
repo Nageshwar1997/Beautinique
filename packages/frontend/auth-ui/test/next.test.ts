@@ -26,6 +26,7 @@ describe('the entry point', () => {
       'LinkButton',
       'MyDevices',
       'NEXT_PARAM',
+      'PROVIDER_NAMES',
       'RECOVERY_CODES_FILE',
       'RecoveryCodes',
       'RedirectIfSignedIn',
@@ -34,6 +35,8 @@ describe('the entry point', () => {
       'SessionProvider',
       'SignInForm',
       'SignUpForm',
+      'SocialSignIn',
+      'SocialSignUpFinish',
       'StatusBadge',
       'StepUpProvider',
       'TEXT_LINK',
@@ -43,11 +46,33 @@ describe('the entry point', () => {
       'groupSecret',
       'hasSessionHint',
       'idleSignOutNotice',
+      'oauthNotice',
       'recoveryCodesText',
       'safeNext',
       'signInStateOf',
+      'totpStepHref',
+      'totpStepOf',
       'useSession',
     ]);
+  });
+});
+
+describe('social sign-in helpers', () => {
+  it('reads the authenticator step a provider sent the browser to, and names why it came back', () => {
+    const loginId = '01920000-0000-7000-8000-000000000003';
+    expect(api.totpStepOf(`#totp=${loginId}`)).toBe(loginId);
+    for (const hash of ['', '#totp=', '#totp=abc', `#other=${loginId}`, `#totp=${loginId}x`]) {
+      expect(api.totpStepOf(hash), hash).toBeNull();
+    }
+    expect(api.totpStepHref(loginId, '/account')).toBe(`/sign-in?next=%2Faccount#totp=${loginId}`);
+    expect(api.totpStepHref(loginId, '/')).toBe(`/sign-in#totp=${loginId}`);
+    expect(api.oauthNotice('cancelled')).toContain('cancelled');
+    expect(api.oauthNotice('locked')).toContain('in an hour');
+    expect(api.oauthNotice('something-else')).toBeUndefined();
+    expect(api.oauthNotice(null)).toBeUndefined();
+    // the consent page is an auth page: never a place to come back to
+    expect(AUTH_PATHS.socialSignUp).toBe('/sign-up/finish');
+    expect(safeNext('/sign-up/finish')).toBe('/');
   });
 });
 

@@ -31,6 +31,7 @@ import {
   passwordBreached,
 } from './errors.ts';
 import { clearFailures } from './lockout.ts';
+import type { SocialSettings } from './oauth-providers.ts';
 import { type BreachCheck, hashPassword } from './password.ts';
 import { publishAuthzVersions } from './rbac/grants.ts';
 import { acceptableInvitations, acceptInvitations, hasInvitation } from './rbac/invitations.ts';
@@ -100,6 +101,8 @@ export interface OtpDeps {
   sessions: Sessions;
   /** Who signed in, from the gateway's passport (signed-in routes) */
   passport: (req: Request) => Promise<Passport>;
+  /** Social sign-in's clients and redirect origin (T3.1 PR 4) */
+  social: SocialSettings;
 }
 
 /** What the app sees of a challenge (contracts otpChallengeZod). */

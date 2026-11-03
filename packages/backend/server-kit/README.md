@@ -86,6 +86,7 @@ mountRoute(
 - Path aur method route se aate hain. `params`, `query`, `body` handler se pehle route ke schema se check hote hain; galat request `VALIDATION_FAILED` + field list, handler chalta hi nahi. Jis part ka schema route me nahi, handler ko `undefined` milta hai.
 - Jawab `{ data }` me, route ke `output` schema se check hokar: jo field contract me nahi, wo bahar nahi jaata. Output contract todta ho to ye server ka bug hai: `INTERNAL`, log me poori wajah, client ko kuch nahi.
 - Handler jo `AppError` phenke wo apne status ke saath jaata hai. Success status default 200, banane wale route `{ status: 201 }` dein.
+- **Navigation route** (`navigation: true`, OAuth): handler `{ location }` lautata hai (`navigationZod` se check), jawab `{ data }` ki jagah **303 redirect** usi location pe. Browser ise page ki tarah kholta hai, isliye handler khud har galti ko kisi page ki location me badle (identity: `/sign-in?oauth=failed`); phenka hua error JSON ban jaata hai.
 - Kaun call kar sakta hai (`access`, `apps`, `stepUp`, `rateLimit`) gateway dekhta hai (Phase 2); idempotency key aur `authorize()` platform kernel ke hain (T4.1). Ye sirf HTTP wala hissa karta hai.
 
 ## Niyam

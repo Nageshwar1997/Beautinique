@@ -16,6 +16,7 @@ import {
   invitationEmail,
   otpEmail,
   sessionReuseEmail,
+  signInMethodEmail,
 } from '../src/email/templates.ts';
 
 const MAILPIT_URL = 'http://localhost:8025';
@@ -319,6 +320,36 @@ describe('the authenticator-changed email', () => {
       'The old ones no longer work.',
     );
     const odd = authenticatorChangedEmail({ ...input, device: '<b>x</b>', change: 'replaced' });
+    expect(odd.html).not.toContain('<b>x</b>');
+    expect(odd.html).toContain('&#60;b&#62;x');
+  });
+});
+
+describe('the sign-in method email', () => {
+  const input = {
+    to: 'riya@beautinique.example',
+    app: 'customer' as const,
+    device: 'Chrome on Windows',
+    changedAt: '2026-11-03T09:30:00.000Z',
+  };
+
+  it('names the provider, what changed, where and when (IST), and the way out', () => {
+    const linked = signInMethodEmail({ ...input, provider: 'google', change: 'linked' });
+    expect(linked.subject).toBe('Google sign-in was added to your Beautinique account');
+    expect(linked.text).toContain('can now be signed in to with Google');
+    expect(linked.text).toContain('in Beautinique (Chrome on Windows) on 3 Nov 2026, 3:00 pm IST');
+    expect(linked.text).toContain('"Forgot password"');
+    expect(linked.tags).toEqual(['security-sign-in-google-linked']);
+    const removed = signInMethodEmail({ ...input, provider: 'linkedin', change: 'removed' });
+    expect(removed.subject).toBe('LinkedIn sign-in was removed from your Beautinique account');
+    expect(removed.text).toContain('Signing in with LinkedIn was removed');
+    const odd = signInMethodEmail({
+      ...input,
+      provider: 'github',
+      change: 'linked',
+      device: '<b>x</b>',
+    });
+    expect(odd.subject).toContain('GitHub');
     expect(odd.html).not.toContain('<b>x</b>');
     expect(odd.html).toContain('&#60;b&#62;x');
   });

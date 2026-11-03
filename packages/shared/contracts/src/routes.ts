@@ -1,4 +1,11 @@
-import type { input, output, ZodObject, ZodType } from '@beautinique/shared-zod';
+import {
+  type input,
+  object,
+  type output,
+  string,
+  type ZodObject,
+  type ZodType,
+} from '@beautinique/shared-zod';
 
 import { isPermissionKey } from './permissions';
 import { type AppId, APPS, type Deployable, DEPLOYABLES } from './platform';
@@ -36,6 +43,17 @@ export interface RouteCache {
   staleWhileRevalidate: number;
 }
 
+/**
+ * Where a navigation route sends the browser: a path of the app itself (`/sign-in?...`, never
+ * `//host`), or an https page such as a sign-in provider's; plain http only on the laptop.
+ */
+export const navigationZod = object({
+  location: string().regex(
+    /^(?:\/(?![/\\])\S*|https:\/\/[^/\s]+(?:\/\S*)?|http:\/\/(?:localhost|127\.0\.0\.1)(?::\d{1,5})?(?:\/\S*)?)$/,
+    'Use a path of the app or an https URL',
+  ),
+});
+
 /** Longest CDN freshness (1 day) and stale window (7 days) a route may ask for. */
 export const MAX_S_MAX_AGE = 86_400;
 export const MAX_STALE_WHILE_REVALIDATE = 604_800;
@@ -59,6 +77,13 @@ export interface RouteDefinition {
   owner: Deployable;
   /** CDN caching (public GET routes only); left out = never cached */
   cache?: RouteCache;
+  /**
+   * A page the browser opens itself, not an API call (OAuth start and callback, ARCHITECTURE §7.1):
+   * a public GET without the app's X-BQ-App header (the gateway takes the app from the host), whose
+   * answer is a 303 redirect to the handler's `location` instead of `{ data }`. Its output schema
+   * is `navigationZod`.
+   */
+  navigation?: true;
   input: { params?: ObjectSchema; query?: ObjectSchema; body?: ZodType };
   output: ZodType;
 }
@@ -130,6 +155,13 @@ export function defineRoute<const Route extends RouteDefinition>(route: Route): 
         `cache.staleWhileRevalidate must be a whole number of seconds from 0 to ${String(MAX_STALE_WHILE_REVALIDATE)}`,
       );
     }
+  }
+  if (route.navigation) {
+    if (route.method !== 'GET' || route.access.type !== 'public') {
+      fail('a navigation route must be a public GET');
+    }
+    if (route.cache) fail('a navigation route is never cached');
+    if (route.output !== navigationZod) fail('a navigation route answers with navigationZod');
   }
   const declared = pathParams(route.path);
   if (new Set(declared).size !== declared.length) fail('path repeats a parameter');
@@ -212,6 +244,7 @@ export function gatewayManifest(routes: readonly RouteDefinition[]) {
     idempotency: route.idempotency,
     stepUp: route.stepUp,
     cache: route.cache ? { ...route.cache } : null,
+    navigation: route.navigation === true,
   }));
 }
 

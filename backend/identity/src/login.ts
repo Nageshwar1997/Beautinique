@@ -10,7 +10,7 @@ import {
   verifyTotp,
 } from '@beautinique/backend-server-crypto';
 import { AppError } from '@beautinique/backend-server-kit';
-import { type AppId, TOTP_REQUIRED_APPS } from '@beautinique/shared-contracts';
+import { type AppId, type SocialProvider, TOTP_REQUIRED_APPS } from '@beautinique/shared-contracts';
 import { uuidv7 } from '@beautinique/shared-utils';
 
 import {
@@ -58,6 +58,8 @@ interface Login {
   attempts: string;
   /** While setting up: the new secret, sealed (enrollContext) */
   pending?: string;
+  /** The first step: `password` (missing in older sign-ins), or the provider (social sign-in) */
+  first?: 'password' | SocialProvider;
 }
 
 const enrollContext = (loginId: string): string => `identity.totp-enroll:${loginId}`;
@@ -90,7 +92,7 @@ async function signIn(
   return { user: session.user, session };
 }
 
-async function startLogin(deps: LoginDeps, login: Omit<Login, 'attempts'>): Promise<string> {
+export async function startLogin(deps: LoginDeps, login: Omit<Login, 'attempts'>): Promise<string> {
   const loginId = uuidv7();
   const key = loginKey(loginId);
   const ttl = login.stage === 'enroll' ? ENROLL_TTL_MS : LOGIN_TTL_MS;
@@ -233,7 +235,7 @@ export async function loginWithTotp(
   if (!fresh) return wrongTry(deps, loginId, login, tries, totpInvalid);
   await finish(deps, loginId);
   await clearFailures(deps.redis, deps.keys, login.email);
-  return signIn(deps, login, ['password', 'totp'], client);
+  return signIn(deps, login, [login.first ?? 'password', 'totp'], client);
 }
 
 const recoveryHash = (deps: LoginDeps, userId: string, code: string): string =>
@@ -274,7 +276,7 @@ export async function loginWithRecoveryCode(
   await clearFailures(deps.redis, deps.keys, login.email);
   deps.logger.info({ userId: login.userId, app }, 'signed in with a recovery code');
   return {
-    ...(await signIn(deps, login, ['password', 'recovery-code'], client)),
+    ...(await signIn(deps, login, [login.first ?? 'password', 'recovery-code'], client)),
     recoveryCodesLeft: left,
   };
 }

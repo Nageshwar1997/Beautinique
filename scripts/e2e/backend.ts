@@ -3,10 +3,12 @@
 // (`npm run infra:up`), with databases and keys of its own made for this run, so a run never touches
 // a dev server's data. Started by each app's playwright.config.ts as its web server:
 //   node --conditions=beautinique-source scripts/e2e/backend.ts
-// Settings from the config (BQ_E2E_*): the port, the origin secret, the run id and the app's host.
+// Settings from the config (BQ_E2E_*): the port, the origin secret, the run id and the app's host;
+// and for social sign-in (the customer app) the stand-in providers' port and the app's origin.
 import { randomBytes } from 'node:crypto';
 
 import { startBundle } from '../../backend/bundle/src/bundle.ts';
+import { startFakeOAuth } from './fake-oauth.ts';
 
 const need = (key: string): string => {
   const value = process.env[key];
@@ -55,10 +57,31 @@ const env: Record<string, string> = {
   GATEWAY__UPSTREAM_TIMEOUT_MS: '90000',
 };
 
+// social sign-in: Google, LinkedIn and GitHub stand-ins on this machine (scripts/e2e/fake-oauth.ts),
+// never the real ones; the specs queue who signs in next at <its url>/fake/next
+const oauthPort = process.env.BQ_E2E_OAUTH_PORT;
+const fake =
+  oauthPort === undefined || oauthPort === ''
+    ? null
+    : await startFakeOAuth({ port: Number(oauthPort) });
+if (fake) {
+  Object.assign(env, {
+    IDENTITY__OAUTH_PROVIDERS_URL: fake.url,
+    IDENTITY__OAUTH_REDIRECT_ORIGIN: need('BQ_E2E_APP_ORIGIN'),
+    // made per run: no secret-looking literal in the repo (gitleaks)
+    ...Object.fromEntries(
+      ['GOOGLE', 'LINKEDIN', 'GITHUB'].flatMap((provider) => [
+        [`IDENTITY__${provider}_CLIENT_ID`, `e2e-${provider.toLowerCase()}`],
+        [`IDENTITY__${provider}_CLIENT_SECRET`, randomBytes(24).toString('base64url')],
+      ]),
+    ),
+  });
+}
+
 const bundle = await startBundle({ port, env });
 console.log(`e2e backend on http://localhost:${String(bundle.port)} (run ${runId})`);
 const stop = () => {
-  bundle.stop().then(
+  Promise.all([bundle.stop(), fake?.stop()]).then(
     () => process.exit(0),
     (error: unknown) => {
       console.error('e2e backend did not stop cleanly', error);

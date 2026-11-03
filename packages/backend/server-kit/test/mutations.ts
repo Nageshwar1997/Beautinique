@@ -223,6 +223,19 @@ const mutations: Mutation[] = [
     ],
     tests: 'jwksFromUrl',
   },
+  // navigation routes (T3.1 PR 4)
+  {
+    file: 'route',
+    name: 'a navigation route answers { data }',
+    change: [['      if (route.navigation) {', '      if (false) {']],
+    tests: 'navigation route',
+  },
+  {
+    file: 'route',
+    name: 'a navigation route redirects with a 302',
+    change: [['res.redirect(303,', 'res.redirect(302,']],
+    tests: 'navigation route',
+  },
 ];
 
 export default mutations;

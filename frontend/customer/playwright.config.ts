@@ -13,6 +13,9 @@ const GATEWAY_PORT = 8090;
 // servers and the tests then share one run
 process.env.BQ_E2E_RUN ??= randomUUID().slice(0, 8);
 process.env.BQ_E2E_ORIGIN_SECRET ??= randomBytes(32).toString('base64url');
+// the stand-in Google, LinkedIn and GitHub (scripts/e2e/fake-oauth.ts): the specs queue who signs
+// in next there
+process.env.BQ_E2E_OAUTH_PORT ??= '8096';
 
 const SIZES = [
   { name: '360', viewport: { width: 360, height: 740 }, mobile: true },
@@ -63,6 +66,9 @@ export default defineConfig({
       env: {
         BQ_E2E_GATEWAY_PORT: String(GATEWAY_PORT),
         BQ_E2E_APP_HOSTS: `customer=localhost:${String(APP_PORT)}`,
+        // social sign-in through the stand-in providers (scripts/e2e/fake-oauth.ts)
+        BQ_E2E_OAUTH_PORT: process.env.BQ_E2E_OAUTH_PORT,
+        BQ_E2E_APP_ORIGIN: `http://localhost:${String(APP_PORT)}`,
       },
     },
     {

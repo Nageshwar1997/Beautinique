@@ -81,6 +81,19 @@ function queryString(query: unknown): string {
   return text === '' ? '' : `?${text}`;
 }
 
+/**
+ * The link to a navigation route (OAuth sign-in): the browser opens it as a page, so it is an
+ * `<a href>`, never a call. `baseUrl` is the app's API base (`/api/v1`).
+ */
+export function navigationHref<const Route extends RouteDefinition & { navigation: true }>(
+  baseUrl: string,
+  route: Route,
+  ...[request]: CallArgs<Route>
+): string {
+  const input = (request ?? {}) as { params?: Record<string, string | number>; query?: unknown };
+  return `${baseUrl.replace(/\/+$/, '')}${buildPath(route.path, input.params)}${queryString(input.query)}`;
+}
+
 function requestIdOf(headers: AxiosResponse['headers']): string | null {
   // axios answers with AxiosHeaders, whose get() ignores the name's case
   const value: unknown =
@@ -124,6 +137,9 @@ export function createClient(options: ClientOptions) {
     route: Route,
     ...[request, callOptions]: CallArgs<Route>
   ): Promise<RouteOutput<Route>> {
+    if (route.navigation) {
+      throw new Error(`${route.id} is a page the browser opens: link to it with navigationHref()`);
+    }
     const input = (request ?? {}) as {
       params?: Record<string, string | number>;
       query?: unknown;

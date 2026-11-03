@@ -167,3 +167,19 @@ export const stepUpLocked = (): AppError =>
   new AppError('TOTP_INVALID', 'Too many wrong codes. Please try again in an hour.', {
     status: IDENTITY_ERROR_CODES.TOTP_INVALID,
   });
+
+/** No new account waiting for its consent: 15 minutes went by, or it finished in another tab. */
+export const oauthSignUpExpired = (): AppError =>
+  new AppError(
+    'OAUTH_SIGN_UP_EXPIRED',
+    'This sign-up has expired. Please choose how to sign in again.',
+    { status: IDENTITY_ERROR_CODES.OAUTH_SIGN_UP_EXPIRED },
+  );
+
+/** The account's last way to sign in stays (a provider alone, without a password). */
+export const lastSignInMethod = (): AppError =>
+  new AppError(
+    'LAST_SIGN_IN_METHOD',
+    'This is the only way you sign in. Set a password first, then you can remove it.',
+    { status: IDENTITY_ERROR_CODES.LAST_SIGN_IN_METHOD },
+  );

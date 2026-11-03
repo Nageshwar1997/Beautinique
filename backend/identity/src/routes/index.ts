@@ -12,20 +12,29 @@ import {
   endSession,
   endUserSessions,
   enrollAuthenticator,
+  finishSocialSignIn,
+  finishSocialSignUp,
   getMe,
+  getSocialSignUp,
   giveGrant,
   HEADERS,
   listGrants,
   listInvitations,
   listRoles,
   listSessions,
+  listSocialProviders,
   loginRecovery,
   loginTotp,
   logout,
   newRecoveryCodes,
+  OAUTH_SIGN_UP_SECONDS,
+  OAUTH_STATE_SECONDS,
+  oauthSignUpCookieName,
+  oauthStateCookieName,
   passwordLogin,
   refreshCookieName,
   refreshSession,
+  removeSignInMethod,
   requestInvitationCode,
   requestPasswordCode,
   requestSignUpCode,
@@ -33,24 +42,28 @@ import {
   resetAuthenticator,
   revokeInvitation,
   SIGN_UP_APPS,
+  SOCIAL_APPS,
+  startSocialSignIn,
   startTotpEnroll,
   STEP_UP_SECONDS,
   stepUp,
   updateRole,
   verifyOtp,
 } from '@beautinique/shared-contracts';
-import { type Request, Router } from 'express';
+import { type Request, type Response, Router } from 'express';
 
 import * as authenticator from '../authenticator.ts';
 import {
   clearSessionCookies,
   cookieOf,
   setAccessCookie,
+  setOAuthCookie,
   setSessionCookies,
   signedIn,
 } from '../cookies.ts';
 import * as login from '../login.ts';
 import { me, myDevices } from '../me.ts';
+import * as oauth from '../oauth.ts';
 import { type OtpDeps, requestCode, resendCode, verifyCode } from '../otp.ts';
 import * as invitations from '../rbac/invitations.ts';
 import * as manage from '../rbac/manage.ts';
@@ -304,6 +317,85 @@ export function routesOf(deps: OtpDeps): Router {
 
   mountRoute(router, endUserSessions, async ({ params }, { req }) =>
     security.endUserSessions(deps, await deps.passport(req), params.userId),
+  );
+
+  // social sign-in, the customer app's (TASKS T3.1 PR 4)
+  /** A page the browser opened: its cookies, then where it goes; never an error page. */
+  const page = async (
+    res: Response,
+    app: AppId,
+    work: () => Promise<oauth.PageAnswer>,
+  ): Promise<{ location: string }> => {
+    let answer: oauth.PageAnswer;
+    try {
+      answer = await work();
+    } catch (error) {
+      deps.logger.error({ err: error }, 'social sign-in failed');
+      answer = oauth.backToSignIn('failed');
+    }
+    if (answer.state !== undefined) {
+      setOAuthCookie(res, oauthStateCookieName(app), answer.state, OAUTH_STATE_SECONDS);
+    }
+    if (answer.signUp !== undefined) {
+      setOAuthCookie(res, oauthSignUpCookieName(app), answer.signUp, OAUTH_SIGN_UP_SECONDS);
+    }
+    if (answer.session) setSessionCookies(res, answer.session);
+    return { location: answer.location };
+  };
+
+  mountRoute(router, listSocialProviders, (_input, { req }) => {
+    appOf(req, SOCIAL_APPS);
+    return oauth.socialProviders(deps);
+  });
+
+  mountRoute(router, startSocialSignIn, ({ params, query }, { req, res }) => {
+    const app = appOf(req, SOCIAL_APPS);
+    return page(res, app, () =>
+      oauth.startTrip(deps, { app, provider: params.provider, next: query.next }),
+    );
+  });
+
+  mountRoute(router, finishSocialSignIn, ({ params, query }, { req, res, requestId }) => {
+    const app = appOf(req, SOCIAL_APPS);
+    return page(res, app, () =>
+      oauth.finishTrip(deps, {
+        app,
+        provider: params.provider,
+        code: query.code,
+        state: query.state,
+        error: query.error,
+        cookie: cookieOf(req, oauthStateCookieName(app)),
+        client: clientOf(req),
+        requestId,
+      }),
+    );
+  });
+
+  mountRoute(router, getSocialSignUp, (_input, { req }) => {
+    const app = appOf(req, SOCIAL_APPS);
+    return oauth.waitingSignUp(deps, { app, ticket: cookieOf(req, oauthSignUpCookieName(app)) });
+  });
+
+  mountRoute(router, finishSocialSignUp, async ({ body }, { req, res, requestId }) => {
+    const app = appOf(req, SOCIAL_APPS);
+    const done = await oauth.finishSignUp(deps, {
+      app,
+      ticket: cookieOf(req, oauthSignUpCookieName(app)),
+      consent: body.consent,
+      ip: clientOf(req).ip,
+      client: clientOf(req),
+      requestId,
+    });
+    setOAuthCookie(res, oauthSignUpCookieName(app), null, 0);
+    return signedIn(res, done);
+  });
+
+  mountRoute(router, removeSignInMethod, async ({ params }, { req, requestId }) =>
+    oauth.removeMethod(deps, await deps.passport(req), {
+      provider: params.provider,
+      client: clientOf(req),
+      requestId,
+    }),
   );
 
   return router;

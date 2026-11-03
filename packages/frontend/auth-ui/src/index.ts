@@ -43,7 +43,7 @@ export {
   type RecoveryCodesProps,
   recoveryCodesText,
 } from './recovery-codes';
-export { SecuritySettings } from './security-settings';
+export { SecuritySettings, type SecuritySettingsProps } from './security-settings';
 export {
   type Me,
   type Session,
@@ -54,4 +54,14 @@ export {
 } from './session';
 export { clearSessionHint, hasSessionHint } from './session-hint';
 export { FEW_RECOVERY_CODES, SignInForm, type SignInFormProps } from './sign-in';
+export {
+  oauthNotice,
+  PROVIDER_NAMES,
+  type ProviderIcons,
+  SocialSignIn,
+  type SocialSignInProps,
+  SocialSignUpFinish,
+  totpStepHref,
+  totpStepOf,
+} from './social';
 export { StepUpProvider } from './step-up';
