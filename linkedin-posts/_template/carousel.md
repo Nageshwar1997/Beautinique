@@ -25,8 +25,3 @@ Slide 2
 Layout: ...
 Text (spell exactly, use nothing else): "..."
 ```
-
-## Alt text (har slide)
-
-1. **cover:** <one sentence>
-2. **<topic>:** ...

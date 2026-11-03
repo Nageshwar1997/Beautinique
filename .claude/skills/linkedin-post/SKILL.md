@@ -1,6 +1,6 @@
 ---
 name: linkedin-post
-description: Draft the next Beautinique LinkedIn post (text, hashtags, PDF carousel prompts and alt text) in linkedin-posts/, turn slide images into carousel.pdf, or mark a post as scheduled/posted. Use when the user asks for a LinkedIn post or runs /linkedin-post.
+description: Draft the next Beautinique LinkedIn post (text, hashtags and one image prompt for all carousel slides) in linkedin-posts/, turn slide images into carousel.pdf, or mark a post as scheduled/posted. Use when the user asks for a LinkedIn post or runs /linkedin-post.
 ---
 
 # LinkedIn post

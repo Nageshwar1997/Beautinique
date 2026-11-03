@@ -1,7 +1,7 @@
 # LinkedIn posts — Beautinique
 
-> **Status:** v1.9 (2026-11-03). Project ke build-in-public LinkedIn posts: har post ka text, hashtags aur
-> PDF carousel ke slides (prompt + alt text) yahan date ke folder me rehte hain. Post insaan khud
+> **Status:** v1.10 (2026-11-03). Project ke build-in-public LinkedIn posts: har post ka text, hashtags aur
+> PDF carousel ki slides ka image prompt yahan date ke folder me rehte hain. Post insaan khud
 > LinkedIn pe karta hai; koi API ya browser automation nahi.
 
 ## 1. Dhaancha
@@ -15,7 +15,7 @@ linkedin-posts/
   YYYY-MM-DD/     post ki date (usi din doosra post: YYYY-MM-DD-2)
     post.md       status + post ka text
     hashtags.md   3–5 hashtags
-    carousel.md   PDF ka title, style, aur har slide: text, image prompt, alt text
+    carousel.md   PDF ka title aur saari slides ka ek image prompt
     slides/       images (1.jpg, 2.jpg ...) aur carousel.pdf — git me nahi (.gitignore)
 ```
 
@@ -40,6 +40,9 @@ linkedin-posts/
 - Post ka text `post.md` me ` ```text ` block me (prettier nahi chhedta, copy aasaan). `hashtags.md` wali
   line post ke end me paste hoti hai.
 - Carousel ke saath text me slides ka chhota saar bhi ho (PDF me alt text nahi jaata).
+- **Alt text sirf akeli image wale post me** (owner, 2026-11-03): carousel (PDF) ke saath LinkedIn alt text nahi
+  leta, isliye `carousel.md` me alt text nahi. Post me ek hi image ho to `post.md` me uska ek line alt text, jo
+  LinkedIn pe image upload karte waqt "Alt text" me jaata hai.
 - **Bold sirf section titles** (jaise `𝗪𝗵𝗮𝘁 𝗜 𝘀𝗵𝗶𝗽𝗽𝗲𝗱:`, `𝗟𝗲𝘀𝘀𝗼𝗻 𝗼𝗳 𝘁𝗵𝗲 𝗱𝗮𝘆:`; owner, 2026-11-03). LinkedIn me bold
   ka option nahi, isliye Claude `post.md` me Unicode sans-serif bold akshar likhta hai aur insaan waise hi copy
   karta hai. Keywords, hashtags, links aur poore vaakya bold nahi: screen reader inhe theek nahi padhte aur
@@ -61,7 +64,7 @@ linkedin-posts/
   ([_template/carousel.md](_template/carousel.md)): kitni images (har slide ki ek, variants nahi), size (landscape
   16:9), style line, layout niyam (text baayein, picture daayein, bada headline: phone pe page ~400 px ooncha
   dikhta hai) aur saari images ek set jaisi. Brand color rose `#D6336C` (`packages/frontend/styles`). Phir har
-  slide ka `Slide N`, `Layout:` aur `Text:` (exact text; spelling check isi se). Alt text block ke neeche list me.
+  slide ka `Slide N`, `Layout:` aur `Text:` (exact text; spelling check isi se).
 - Images insaan doosre AI tool se banata hai. Slide pe text ho to prompt me exact text quotes me, kam words;
   image banne ke baad spelling check. Images banane ke common steps: [IMAGES.md](IMAGES.md) (har
   `carousel.md` me sirf uska link).
@@ -104,3 +107,4 @@ Naye Claude Code session me (worktree me, taaki chal rahi feature branch pe asar
 | v1.7    | 2026-11-03 | §3: har post me hook ke baad "About the project" line (owner ka faisla).                                            |
 | v1.8    | 2026-11-03 | §4: saari slides ek prompt block me, ek saath generate (owner ka faisla).                                           |
 | v1.9    | 2026-11-03 | §6: README, IMAGES.md, template aur skill bhi seedha `prerelease` pe, PR nahi (owner ka faisla).                    |
+| v1.10   | 2026-11-03 | §3: alt text sirf akeli image wale post me; carousel me nahi (owner ka faisla).                                     |

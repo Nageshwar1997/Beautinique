@@ -48,14 +48,3 @@ Slide 8
 Layout: this slide is centred, not split left and right. In the middle, a wide rose #D6336C pill with the URL "github.com/Nageshwar1997/Beautinique" in white. Below it "Follow for Day 3: the gateway and first deploy" with a small arrow. A few soft rose shapes in the corners.
 Text (spell exactly, use nothing else): "github.com/Nageshwar1997/Beautinique" | "Follow for Day 3: the gateway and first deploy"
 ```
-
-## Alt text (har slide)
-
-1. **cover:** Cover slide reading "Day 2, Building Beautinique in public, The server kit", with an open makeup case holding a gear, a database, a key and an envelope.
-2. **kyun: ek shared kernel:** Three service boxes standing on one shared base, with the line "Many services. One shared kernel."
-3. **contract first:** A contract document acting as a gate: one request passes, a wrong one is sent back.
-4. **outbox:** A database and an event envelope saved together in one box, then moved along a conveyor as a queue.
-5. **field encryption:** A form with one masked field and a padlock, next to a key ring with two keys, for encrypted fields with key rotation.
-6. **Redis wipe drill:** A cache box being erased while envelopes flow again from a tray to a worker, each delivered once.
-7. **din ki seekh:** A fully ticked checklist with a magnifying glass finding a bug under it: green tests can still miss bugs.
-8. **repo link + follow:** Closing slide with the repo link github.com/Nageshwar1997/Beautinique and "Follow for Day 3: the gateway and first deploy".
