@@ -1,9 +1,9 @@
 ---
 date: 2026-11-03
 day: 1
-status: ready # draft | ready | scheduled | posted (README §2)
-posted_at:
-link:
+status: posted # draft | ready | scheduled | posted (README §2)
+posted_at: '2026-11-03 14:59 IST'
+link: https://lnkd.in/p/dZdHFY7N
 covers: 'PR #1, #2, #3 (Phase 0 part), #8' # Phase 0 commits 3879a7b..c3affa8, plus 215c324 (git flow)
 ---
 
