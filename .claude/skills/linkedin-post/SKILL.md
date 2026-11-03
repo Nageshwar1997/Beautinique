@@ -40,17 +40,17 @@ if (files.length === 0) throw new Error(`No slides (1.jpg, 2.jpg ...) in ${dir}`
 if (new Set(files.map((f) => parseInt(f))).size !== files.length) throw new Error(`Two files share a slide number: ${files.join(', ')}`);
 const type = (f) => ({ jpg: 'jpeg', jpeg: 'jpeg', png: 'png', webp: 'webp' })[f.split('.').pop().toLowerCase()];
 const pages = files.map((f) => `<div class="p"><img src="data:image/${type(f)};base64,${fs.readFileSync(path.join(dir, f)).toString('base64')}"></div>`).join('');
-const html = `<style>@page{size:1080px 1350px;margin:0}body{margin:0}.p{width:1080px;height:1350px;background:#fff;break-after:page}.p:last-child{break-after:auto}img{width:100%;height:100%;object-fit:contain;display:block}</style>${pages}`;
+const html = `<style>@page{size:1920px 1080px;margin:0}body{margin:0}.p{width:1920px;height:1080px;background:#fff;break-after:page}.p:last-child{break-after:auto}img{width:100%;height:100%;object-fit:contain;display:block}</style>${pages}`;
 const browser = await chromium.launch();
 const page = await browser.newPage();
 await page.setContent(html);
-await page.pdf({ path: path.join(dir, 'carousel.pdf'), width: '1080px', height: '1350px', printBackground: true });
+await page.pdf({ path: path.join(dir, 'carousel.pdf'), width: '1920px', height: '1080px', printBackground: true });
 await browser.close();
 console.log(`${files.length} slides -> ${path.join(dir, 'carousel.pdf')}`);
 EOF
 ```
 
-Check the printed slide count matches `carousel.md`, warn if any image is far from 4:5 (it is fitted, not
+Check the printed slide count matches `carousel.md`, warn if any image is far from 16:9 (it is fitted, not
 cropped, so it gets white bars). If Chromium is missing: `npx playwright install chromium`. Then set `status: ready`.
 
 ## Mark as scheduled / posted

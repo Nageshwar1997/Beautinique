@@ -1,6 +1,6 @@
 # LinkedIn posts — Beautinique
 
-> **Status:** v1.3 (2026-11-03). Project ke build-in-public LinkedIn posts: har post ka text, hashtags aur
+> **Status:** v1.4 (2026-11-03). Project ke build-in-public LinkedIn posts: har post ka text, hashtags aur
 > PDF carousel ke slides (prompt + alt text) yahan date ke folder me rehte hain. Post insaan khud
 > LinkedIn pe karta hai; koi API ya browser automation nahi.
 
@@ -42,8 +42,9 @@ linkedin-posts/
 ## 4. Carousel (PDF)
 
 - LinkedIn pe swipe carousel = PDF document post; har page ek slide. Upload pe PDF ka title maanga jaata hai.
-- PDF ka har page **1080 × 1350 px (4:5 portrait)**; images 3:4 me banti hain (neeche). 6–10 slides, is
-  order me:
+- PDF ka har page **1920 × 1080 px (16:9 landscape)** (owner, 2026-11-03): LinkedIn mobile feed me document ke
+  pages ek fixed height pe dikhte hain, to page jitna chauda utna screen bharta hai (4:5 page sirf ~45% leta
+  tha; Day 1 4:5 me tha). 6–10 slides, is order me:
   1. Cover: hook + "Day N"
   2. Problem / kyun banaya
   3. 2–4 slides: kya bana (har slide ek baat)
@@ -51,15 +52,16 @@ linkedin-posts/
   5. Aakhri: repo link + follow
 - **Prompt blocks:** `carousel.md` me ` ```text ` blocks (copy button). Upar ek **Common prompt** block, saare
   posts me same ([\_template/carousel.md](_template/carousel.md)): "Create exactly ONE image" (ek prompt = ek
-  image, 4 variants nahi), size (vertical portrait 3:4, kyunki Flow me 4:5 nahi), aur style line, taaki saari
+  image, 4 variants nahi), size (landscape 16:9), style line aur layout niyam (text baayein, picture daayein, bada headline: phone pe
+  page ~400 px ooncha dikhta hai), taaki saari
   slides aur saare posts ek jaise dikhen. Brand color rose `#D6336C` (`packages/frontend/styles`). Har slide
   ke block me sirf layout aur exact text; image tool me pehle common block, phir slide ka block.
 - Images insaan doosre AI tool se banata hai. Slide pe text ho to prompt me exact text quotes me, kam words;
   image banne ke baad spelling check. Images banane ke common steps: [IMAGES.md](IMAGES.md) (har
   `carousel.md` me sirf uska link).
-- Images `slides/1.jpg`, `2.jpg` ... (slide number = naam; jpg/jpeg/png/webp) me rakho. 3:4 image PDF ke 1080 × 1350 page me bina
-  kate fit hoti hai (left-right ~34 px patli jagah). Landscape (16:9) nahi chalega: beech me patli patti
-  banti hai aur text phone pe padhne layak nahi rehta, dobara banao. Claude `/linkedin-post` se
+- Images `slides/1.jpg`, `2.jpg` ... (slide number = naam; jpg/jpeg/png/webp) me rakho. 16:9 image (Flow: 1376 × 768) PDF ke 1920 × 1080
+  page me poori fit hoti hai. Portrait ya chaukor image nahi chalegi: left-right badi khaali jagah banti hai,
+  dobara banao. Claude `/linkedin-post` se
   `slides/carousel.pdf` banata hai (repo ka Playwright, koi naya package nahi).
 
 ## 5. Process (`/linkedin-post` skill)
@@ -89,3 +91,4 @@ Naye Claude Code session me (worktree me, taaki chal rahi feature branch pe asar
 | v1.1    | 2026-11-03 | Status table, repo link, slide order, style line, PDF fit, folder naam, commit ka tareeka.                          |
 | v1.2    | 2026-11-03 | §6: post ki files seedha `prerelease` pe push (owner ka faisla).                                                    |
 | v1.3    | 2026-11-03 | §4: common + slide prompt blocks, ek prompt = ek image, images 3:4 (Flow), files `1.jpg` ...; steps `IMAGES.md` me. |
+| v1.4    | 2026-11-03 | §4: carousel 16:9 (1920 × 1080), mobile feed me poori chaudai; layout niyam (owner ka faisla).                      |
