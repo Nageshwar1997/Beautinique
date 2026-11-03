@@ -25,6 +25,7 @@ import {
   securitySubscription,
   SEND_TASK,
   sendDue,
+  signInMethodSubscription,
 } from './deliveries.ts';
 import { brevoSender } from './email/brevo.ts';
 import { mailpitSender } from './email/mailpit.ts';
@@ -137,6 +138,7 @@ export async function startRuntime(config: Config, options: RuntimeOptions): Pro
           invitationSubscription({ mongo, trigger, logger }),
           authenticatorSubscription({ mongo, trigger, logger }),
           authenticatorChangedSubscription({ mongo, trigger, logger }),
+          signInMethodSubscription({ mongo, trigger, logger }),
         ],
         tasks,
         prefix,

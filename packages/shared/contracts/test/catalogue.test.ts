@@ -57,6 +57,23 @@ import {
   verifyOtp,
   wake,
 } from '../src';
+import {
+  finishSocialSignIn,
+  finishSocialSignUp,
+  getSocialSignUp,
+  listSocialProviders,
+  navigationZod,
+  OAUTH_COOKIE_PATH,
+  OAUTH_RESULTS,
+  OAUTH_SIGN_UP_PATH,
+  oauthSignUpCookieName,
+  oauthStateCookieName,
+  removeSignInMethod,
+  safeNextPath,
+  signInMethodChanged,
+  SOCIAL_PROVIDERS,
+  startSocialSignIn,
+} from '../src';
 
 const id = '0190a1b2-c3d4-7e5f-8a9b-0c1d2e3f4a5b';
 const data = { pingId: id, note: 'hello', recordedAt: '2026-10-22T10:00:00.000Z' };
@@ -99,6 +116,12 @@ describe('platform catalogue (Milestone 1 sample)', () => {
       'auth.stepUp.verify',
       'iam.users.resetAuthenticator',
       'iam.users.endSessions',
+      'auth.socialProviders.list',
+      'auth.oauth.start',
+      'auth.oauth.callback',
+      'auth.socialSignUp.get',
+      'auth.socialSignUp.finish',
+      'auth.signInMethods.remove',
     ]);
     expect(events.latest('platform.ping.recorded')).toBe(pingRecorded);
     expect(permissions.get(pingRead.key)).toBe(pingRead);
@@ -426,5 +449,66 @@ describe('signed-in routes and the passport (T3.2 PR B)', () => {
       '/.well-known/passport-jwks.json',
       '/.well-known/jwks.json',
     ]);
+  });
+});
+
+describe('social sign-in (T3.1 PR 4)', () => {
+  it('is the customer app’s only, and its trips to the provider are pages the browser opens', () => {
+    expect(SOCIAL_PROVIDERS).toEqual(['google', 'linkedin', 'github']);
+    for (const provider of SOCIAL_PROVIDERS) expect(AUTH_PROVIDERS).toContain(provider);
+    const social = [
+      listSocialProviders,
+      startSocialSignIn,
+      finishSocialSignIn,
+      getSocialSignUp,
+      finishSocialSignUp,
+      removeSignInMethod,
+    ];
+    for (const route of social) {
+      expect(route.apps, route.id).toEqual(['customer']);
+      expect(route.owner, route.id).toBe('identity');
+    }
+    for (const route of [startSocialSignIn, finishSocialSignIn]) {
+      expect(route).toMatchObject({ method: 'GET', navigation: true, rateLimit: 'auth' });
+      expect(route.output).toBe(navigationZod);
+    }
+    expect('navigation' in listSocialProviders).toBe(false);
+    expect(removeSignInMethod).toMatchObject({ method: 'DELETE', stepUp: false });
+    expect(removeSignInMethod.access).toEqual({ type: 'signed-in' });
+    // a provider the app does not have is no route
+    expect(startSocialSignIn.input.params.safeParse({ provider: 'facebook' }).success).toBe(false);
+    expect(events.latest('identity.signInMethod.changed')).toBe(signInMethodChanged);
+    expect(IDENTITY_ERROR_CODES).toMatchObject({
+      OAUTH_SIGN_UP_EXPIRED: 400,
+      LAST_SIGN_IN_METHOD: 409,
+    });
+  });
+
+  it('keeps its cookies on the app’s host for the OAuth routes only', () => {
+    expect(oauthStateCookieName('customer')).toBe('__Secure-bq_customer_oauth');
+    expect(oauthSignUpCookieName('customer')).toBe('__Secure-bq_customer_oauth_signup');
+    expect(OAUTH_COOKIE_PATH).toBe('/api/v1/auth/oauth');
+    expect(startSocialSignIn.path.startsWith(OAUTH_COOKIE_PATH.replace('/api/v1', ''))).toBe(true);
+    expect(OAUTH_SIGN_UP_PATH).toBe('/sign-up/finish');
+    expect(OAUTH_RESULTS).toContain('cancelled');
+  });
+
+  it('comes back only to a path of the app (no open redirect)', () => {
+    for (const next of ['/', '/account', '/account/security?tab=1#x', '/sign-up/finish']) {
+      expect(safeNextPath(next), next).toBe(next);
+    }
+    for (const next of [
+      undefined,
+      '',
+      'account',
+      '//evil.example',
+      '/\\evil.example',
+      '/a\\b',
+      'https://evil.example',
+      '/a b',
+      `/${'x'.repeat(600)}`,
+    ]) {
+      expect(safeNextPath(next), String(next)).toBe('/');
+    }
   });
 });

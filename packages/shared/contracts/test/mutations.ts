@@ -132,8 +132,8 @@ const mutations: Mutation[] = [
     name: 'a non-GET route may be cached',
     change: [
       [
-        "if (route.method !== 'GET' || route.access.type !== 'public') {",
-        "if (route.access.type !== 'public') {",
+        "if (route.method !== 'GET' || route.access.type !== 'public') {\n      fail('only public GET routes can be cached');",
+        "if (route.access.type !== 'public') {\n      fail('only public GET routes can be cached');",
       ],
     ],
     tests: 'wrong declarations',
@@ -143,8 +143,8 @@ const mutations: Mutation[] = [
     name: 'a signed-in route may be cached',
     change: [
       [
-        "if (route.method !== 'GET' || route.access.type !== 'public') {",
-        "if (route.method !== 'GET') {",
+        "if (route.method !== 'GET' || route.access.type !== 'public') {\n      fail('only public GET routes can be cached');",
+        "if (route.method !== 'GET') {\n      fail('only public GET routes can be cached');",
       ],
     ],
     tests: 'wrong declarations',
@@ -397,6 +397,83 @@ const mutations: Mutation[] = [
       ],
     ],
     tests: 'never both or neither',
+  },
+  // navigation routes and social sign-in (T3.1 PR 4)
+  {
+    file: 'routes',
+    name: 'a navigation route may be a POST or signed in',
+    change: [
+      [
+        "    if (route.method !== 'GET' || route.access.type !== 'public') {\n      fail('a navigation route must be a public GET');",
+        "    if (false) {\n      fail('a navigation route must be a public GET');",
+      ],
+    ],
+    tests: 'a navigation route is a public GET',
+  },
+  {
+    file: 'routes',
+    name: 'a navigation route may be cached',
+    change: [["if (route.cache) fail('a navigation route is never cached');", '']],
+    tests: 'a navigation route is a public GET',
+  },
+  {
+    file: 'routes',
+    name: 'a navigation route may answer anything',
+    change: [['if (route.output !== navigationZod) fail(', 'if (false) fail(']],
+    tests: 'a navigation route is a public GET',
+  },
+  {
+    file: 'routes',
+    name: 'a redirect to //another-host passes',
+    change: [['/^(?:\\/(?![/\\\\])\\S*|https:', '/^(?:\\/\\S*|https:']],
+    tests: 'a navigation route is a public GET',
+  },
+  {
+    file: 'routes',
+    name: 'a redirect to any plain-http host passes',
+    change: [['http:\\/\\/(?:localhost|127\\.0\\.0\\.1)', 'http:\\/\\/(?:[^/\\s]+)']],
+    tests: 'a navigation route is a public GET',
+  },
+  {
+    file: 'routes',
+    name: 'the gateway never hears of navigation routes',
+    change: [['    navigation: route.navigation === true,', '    navigation: false,']],
+    tests: 'the gateway manifest',
+  },
+  {
+    file: 'client',
+    name: 'a navigation route can be called',
+    change: [
+      [
+        '    if (route.navigation) {\n      throw new Error(',
+        '    if (false) {\n      throw new Error(',
+      ],
+    ],
+    tests: 'are links the browser opens',
+  },
+  {
+    file: 'openapi',
+    name: 'a navigation route asks for the app header',
+    change: [['      ...(route.navigation\n        ? []', '      ...(false\n        ? []']],
+    tests: 'describes a navigation route',
+  },
+  {
+    file: 'openapi',
+    name: 'a navigation route documented as { data }',
+    change: [['        ...(route.navigation\n', '        ...(false\n']],
+    tests: 'describes a navigation route',
+  },
+  {
+    file: 'catalogue/social',
+    name: 'next may leave for //another-host',
+    change: [['/^\\/(?![/\\\\])[^\\s\\\\]*$/', '/^\\/[^\\s]*$/']],
+    tests: 'no open redirect',
+  },
+  {
+    file: 'catalogue/social',
+    name: 'next of any length',
+    change: [['next.length <= 512 && ', '']],
+    tests: 'no open redirect',
   },
 ];
 

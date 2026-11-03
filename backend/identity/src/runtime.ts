@@ -27,9 +27,11 @@ import {
   otpRequested,
   passportAudience,
   sessionReuseDetected,
+  signInMethodChanged,
 } from '@beautinique/shared-contracts';
 
 import type { Config } from './config.ts';
+import { socialSettings } from './oauth-providers.ts';
 import type { OtpDeps } from './otp.ts';
 import { hibpBreachCheck } from './password.ts';
 import { runReleaseSteps } from './release.ts';
@@ -48,6 +50,7 @@ export const SUBSCRIBERS: Readonly<Record<string, readonly string[]>> = {
   [invitationCreated.type]: ['notify.invitationEmail'],
   [authenticatorReset.type]: ['notify.authenticatorEmail'],
   [authenticatorChanged.type]: ['notify.authenticatorChangedEmail'],
+  [signInMethodChanged.type]: ['notify.signInMethodEmail'],
 };
 
 export interface RuntimeOptions {
@@ -152,6 +155,7 @@ export async function startRuntime(config: Config, options: RuntimeOptions): Pro
         emailLimitPerHour: config.otpEmailLimitPerHour,
         legalVersion: config.legalVersion,
         breached: hibpBreachCheck({ url: config.hibpUrl, logger }),
+        social: socialSettings(config),
         sessions: sessions({ mongo, redis: redis.client, keys, signing, logger }),
         passport: passportVerifier({
           keys: jwksCache({

@@ -2,6 +2,7 @@ import {
   ACCESS_TOKEN_SECONDS,
   accessCookieName,
   type AppId,
+  OAUTH_COOKIE_PATH,
   REFRESH_COOKIE_PATH,
   refreshCookieName,
   sessionHintCookieName,
@@ -76,6 +77,27 @@ export function clearSessionCookies(res: Response, app: AppId): void {
     sameSite: 'strict',
     path: REFRESH_COOKIE_PATH,
   });
+}
+
+/**
+ * A social sign-in's cookie (the trip's state, or the sign-up waiting for consent): HttpOnly, on the
+ * app's host, sent only to the OAuth routes. Lax, so the browser sends it when the provider sends
+ * it back (a top-level GET from another site). `null` clears it.
+ */
+export function setOAuthCookie(
+  res: Response,
+  name: string,
+  value: string | null,
+  seconds: number,
+): void {
+  const options = {
+    httpOnly: true,
+    secure: true,
+    sameSite: 'lax' as const,
+    path: OAUTH_COOKIE_PATH,
+  };
+  if (value === null) res.clearCookie(name, options);
+  else res.cookie(name, value, { ...options, maxAge: seconds * 1000 });
 }
 
 /** One cookie's value from the Cookie header (the first, as browsers send the most specific first). */

@@ -12,6 +12,9 @@ import {
   otpRequested,
   otpSealContext,
   sessionReuseDetected,
+  type SIGN_IN_METHOD_CHANGES,
+  signInMethodChanged,
+  type SocialProvider,
 } from '@beautinique/shared-contracts';
 
 import { type EmailSender, EmailSendError } from './email/port.ts';
@@ -21,6 +24,7 @@ import {
   invitationEmail,
   otpEmail,
   sessionReuseEmail,
+  signInMethodEmail,
 } from './email/templates.ts';
 
 export const DELIVERIES = 'notify_deliveries';
@@ -35,6 +39,8 @@ export const INVITATION_EMAIL = 'notify.invitationEmail';
 export const AUTHENTICATOR_EMAIL = 'notify.authenticatorEmail';
 /** The subscriber identity's relay sends identity.authenticator.changed to. */
 export const AUTHENTICATOR_CHANGED_EMAIL = 'notify.authenticatorChangedEmail';
+/** The subscriber identity's relay sends identity.signInMethod.changed to. */
+export const SIGN_IN_METHOD_EMAIL = 'notify.signInMethodEmail';
 /** The task that sends what is due; it runs every minute and at once after each new email. */
 export const SEND_TASK = 'email.sendDue';
 
@@ -67,7 +73,12 @@ export interface Delivery {
   /** LANES[lane]: the order a run sends in */
   priority: number;
   template:
-    'otp' | 'session-reuse' | 'invitation' | 'authenticator-reset' | 'authenticator-changed';
+    | 'otp'
+    | 'session-reuse'
+    | 'invitation'
+    | 'authenticator-reset'
+    | 'authenticator-changed'
+    | 'sign-in-method';
   to: string;
   /** The sign-in code, still sealed; removed once the email went, failed or ran out. */
   otp?: {
@@ -86,6 +97,14 @@ export interface Delivery {
   /** The person changed their own authenticator (no secret in it) */
   authenticatorChange?: {
     change: (typeof AUTHENTICATOR_CHANGES)[number];
+    app: AppId;
+    device: string;
+    changedAt: string;
+  };
+  /** A social sign-in was linked to the account or taken off it (no secret in it) */
+  signInMethodChange?: {
+    provider: SocialProvider;
+    change: (typeof SIGN_IN_METHOD_CHANGES)[number];
     app: AppId;
     device: string;
     changedAt: string;
@@ -377,6 +396,52 @@ export function authenticatorChangedSubscription({
   });
 }
 
+/**
+ * identity.signInMethod.changed (a social sign-in linked to the account, or taken off it) → a
+ * security email in the transactional lane, then a send run at once.
+ */
+export function signInMethodSubscription({
+  mongo,
+  trigger,
+  logger,
+}: {
+  mongo: Mongo;
+  trigger: TaskTrigger;
+  logger: Logger;
+}): Subscription {
+  const deliveries = deliveriesOf(mongo);
+  return subscribe(SIGN_IN_METHOD_EMAIL, signInMethodChanged, async (event, session) => {
+    const { email, provider, change, app, device, changedAt } = event.data;
+    const now = new Date();
+    await deliveries.insertOne(
+      {
+        _id: event.eventId,
+        channel: 'email',
+        lane: 'transactional',
+        priority: LANES.transactional,
+        template: 'sign-in-method',
+        to: email,
+        signInMethodChange: { provider, change, app, device, changedAt },
+        status: 'queued',
+        attempts: 0,
+        dueAt: now,
+        expiresAt: null,
+        createdAt: now,
+      },
+      { session },
+    );
+    try {
+      await trigger.runSoon(SEND_TASK);
+    } catch (error) {
+      // the every-minute run sends it anyway
+      logger.warn(
+        { err: describe(error), deliveryId: event.eventId },
+        'email send not started at once',
+      );
+    }
+  });
+}
+
 export interface SendDueDeps {
   mongo: Mongo;
   sender: EmailSender;
@@ -468,6 +533,12 @@ export async function sendDue({
       if (!authenticatorChange)
         throw new EmailSendError('AUTHENTICATOR_DETAILS_MISSING', { retry: false });
       return authenticatorChangedEmail({ to: delivery.to, ...authenticatorChange });
+    }
+    if (delivery.template === 'sign-in-method') {
+      const { signInMethodChange } = delivery;
+      if (!signInMethodChange)
+        throw new EmailSendError('SIGN_IN_METHOD_DETAILS_MISSING', { retry: false });
+      return signInMethodEmail({ to: delivery.to, ...signInMethodChange });
     }
     if (delivery.template === 'invitation') {
       const { invitation } = delivery;

@@ -1,6 +1,6 @@
 import { Writable } from 'node:stream';
 
-import { APPS, defineRoute } from '@beautinique/shared-contracts';
+import { APPS, defineRoute, navigationZod } from '@beautinique/shared-contracts';
 import { coerce, int, number, object, string } from '@beautinique/shared-zod';
 import { Router } from 'express';
 import { afterEach, describe, expect, it } from 'vitest';
@@ -57,6 +57,20 @@ const ping = defineRoute({
   summary: 'No input at all',
   input: {},
   output: object({ ok: string() }),
+});
+
+const openPage = defineRoute({
+  ...base,
+  id: 'auth.oauth.start',
+  method: 'GET',
+  path: '/auth/oauth/:provider/start',
+  summary: 'A page the browser opens',
+  access: { type: 'public' },
+  rateLimit: 'auth',
+  owner: 'identity',
+  navigation: true,
+  input: { params: object({ provider: string() }), query: object({ next: string().optional() }) },
+  output: navigationZod,
 });
 
 const lines: Record<string, unknown>[] = [];
@@ -202,6 +216,37 @@ describe('mountRoute', () => {
     const response = await fetch(`${url}/demo/ping`, { headers: { 'X-Request-Id': 'req-77' } });
     expect(response.headers.get('X-Request-Id')).toBe(seen);
     expect(seen).not.toBe('');
+  });
+
+  it('sends the browser on with a 303 from a navigation route, never { data }', async () => {
+    const url = await serve((router) => {
+      mountRoute(router, openPage, ({ params, query }) => ({
+        location:
+          params.provider === 'google'
+            ? 'https://accounts.google.com/o/oauth2/v2/auth?state=s'
+            : `/sign-in?next=${encodeURIComponent(query.next ?? '/')}`,
+      }));
+    });
+    const away = await fetch(`${url}/auth/oauth/google/start`, { redirect: 'manual' });
+    expect(away.status).toBe(303);
+    expect(away.headers.get('location')).toBe(
+      'https://accounts.google.com/o/oauth2/v2/auth?state=s',
+    );
+    const home = await fetch(`${url}/auth/oauth/github/start?next=/account`, {
+      redirect: 'manual',
+    });
+    expect(home.status).toBe(303);
+    expect(home.headers.get('location')).toBe('/sign-in?next=%2Faccount');
+  });
+
+  it('never redirects a navigation route to a place navigationZod refuses', async () => {
+    const url = await serve((router) => {
+      mountRoute(router, openPage, () => ({ location: '//evil.example/x' }));
+    });
+    const response = await fetch(`${url}/auth/oauth/google/start`, { redirect: 'manual' });
+    expect(response.status).toBe(500);
+    expect(response.headers.get('location')).toBeNull();
+    expect(await response.json()).toMatchObject({ error: { code: 'INTERNAL' } });
   });
 
   it('turns an output that breaks the contract into INTERNAL, logs it and shows nothing of it', async () => {

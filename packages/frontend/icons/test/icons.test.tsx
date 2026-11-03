@@ -20,6 +20,9 @@ const icons = Object.entries(api).filter(
   (entry): entry is [string, Icon] => entry[0].startsWith('Icon') && typeof entry[1] === 'function',
 );
 
+/** Sign-in marks shown in their brands' own colours (LICENSES.md); GitHub's is one colour. */
+const BRAND_COLOURED: ReadonlySet<string> = new Set(['IconGoogle', 'IconLinkedin']);
+
 describe('BaseIcon through an icon', () => {
   it('is decorative by default: hidden from screen readers, text size, text colour', () => {
     const svg = svgOf(<IconSun />);
@@ -68,7 +71,9 @@ describe('the icons', () => {
       expect(Component.displayName, name).toBe(name);
       const svg = svgOf(<Component />);
       expect(svg.children.length, name).toBeGreaterThan(0);
-      expect(svg.innerHTML, name).toContain('currentColor');
+      // a brand's sign-in mark keeps the brand's own colours (its guidelines); nothing else does
+      if (BRAND_COLOURED.has(name)) expect(svg.innerHTML, name).not.toContain('currentColor');
+      else expect(svg.innerHTML, name).toContain('currentColor');
       cleanup();
     }
   });

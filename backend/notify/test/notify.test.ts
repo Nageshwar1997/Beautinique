@@ -322,6 +322,47 @@ describe('sendDue', () => {
     });
   });
 
+  it('sends a social sign-in linked or taken off, and fails one without its details for good', async () => {
+    const { sender, sent } = fakeSender();
+    const change = (more: Partial<Delivery> = {}): Promise<Delivery> => {
+      const delivery: Delivery = {
+        _id: uuidv7(),
+        channel: 'email',
+        lane: 'transactional',
+        priority: LANES.transactional,
+        template: 'sign-in-method',
+        to: `riya-${uuidv7().slice(-6)}@beautinique.example`,
+        signInMethodChange: {
+          provider: 'github',
+          change: 'linked',
+          app: 'customer',
+          device: 'Chrome on Windows',
+          changedAt: '2026-11-03T04:59:00.000Z',
+        },
+        status: 'queued',
+        attempts: 0,
+        dueAt: now,
+        expiresAt: null,
+        createdAt: now,
+        ...more,
+      };
+      return deliveries()
+        .insertOne(delivery)
+        .then(() => delivery);
+    };
+    const good = await change();
+    const { signInMethodChange: _dropped, ...withoutDetails } = await change();
+    await deliveries().replaceOne({ _id: withoutDetails._id }, withoutDetails);
+    expect(await run(sender)).toMatchObject({ sent: 1, failed: 1, retried: 0 });
+    expect(sent.map((message) => message.to)).toEqual([good.to]);
+    expect(sent[0]?.subject).toBe('GitHub sign-in was added to your Beautinique account');
+    expect(sent[0]?.tags).toEqual(['security-sign-in-github-linked']);
+    expect(await read(withoutDetails._id)).toMatchObject({
+      status: 'failed',
+      error: 'SIGN_IN_METHOD_DETAILS_MISSING',
+    });
+  });
+
   it('sends codes before other emails, and nothing that is not due yet', async () => {
     const { sender, sent } = fakeSender();
     const other = await queue('111111', {

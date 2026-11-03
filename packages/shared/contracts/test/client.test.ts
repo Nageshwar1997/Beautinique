@@ -9,6 +9,8 @@ import {
   createClient,
   defineRoute,
   getPing,
+  navigationHref,
+  navigationZod,
   type NetworkEvent,
   queryKey,
   queryKeyPrefix,
@@ -61,6 +63,42 @@ const listRoute = defineRoute({
   owner: 'core',
   input: { query: object({ search: string().optional() }) },
   output: object({ ok: string() }),
+});
+
+const oauthPage = defineRoute({
+  id: 'auth.oauth.start',
+  method: 'GET',
+  path: '/auth/oauth/:provider/start',
+  summary: 'Go to the provider',
+  apps: ['customer'],
+  access: { type: 'public' },
+  rateLimit: 'auth',
+  idempotency: false,
+  stepUp: false,
+  owner: 'identity',
+  navigation: true,
+  input: { params: object({ provider: string() }), query: object({ next: string().optional() }) },
+  output: navigationZod,
+});
+
+describe('navigation routes', () => {
+  it('are links the browser opens, never calls', async () => {
+    expect(
+      navigationHref('/api/v1/', oauthPage, {
+        params: { provider: 'google' },
+        query: { next: '/account?tab=a b' },
+      }),
+    ).toBe('/api/v1/auth/oauth/google/start?next=%2Faccount%3Ftab%3Da+b');
+    expect(
+      navigationHref('/api/v1', oauthPage, { params: { provider: 'github' }, query: {} }),
+    ).toBe('/api/v1/auth/oauth/github/start');
+    const { seen, fetchStub } = stub(() => json({ data: {} }));
+    const client = createClient({ baseUrl: 'https://x.test', app: 'customer', fetch: fetchStub });
+    await expect(
+      client.call(oauthPage, { params: { provider: 'google' }, query: {} }),
+    ).rejects.toThrow('auth.oauth.start is a page the browser opens');
+    expect(seen).toHaveLength(0);
+  });
 });
 
 describe('client call', () => {

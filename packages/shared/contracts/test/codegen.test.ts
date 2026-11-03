@@ -75,6 +75,11 @@ describe('generateFiles', () => {
       '/auth/step-up',
       '/iam/users/{userId}/authenticator/reset',
       '/iam/users/{userId}/sessions/end',
+      '/auth/oauth/providers',
+      '/auth/oauth/{provider}/start',
+      '/auth/oauth/{provider}/callback',
+      '/auth/oauth/sign-up',
+      '/auth/sign-in-methods/{provider}',
     ]);
     const manifest = parsed('gateway-manifest.json') as {
       version: string;
@@ -96,6 +101,7 @@ describe('generateFiles', () => {
       ['identity.invitation.created', 1],
       ['identity.otp.requested', 1],
       ['identity.session.reuseDetected', 1],
+      ['identity.signInMethod.changed', 1],
       ['platform.ping.recorded', 1],
     ]);
     expect(list.at(-1)?.schema.required).toEqual(

@@ -70,6 +70,17 @@ Peers: `react` 19, `react-dom`, `react-router` 8, `@tanstack/react-query` 5. App
 - 30 min: `signOut('idle')`, aur `RequireSignIn` sign-in pe le jaata hai: "You were signed out after 30 minutes without activity. Please sign in again." App ke baaki tabs (`BroadcastChannel` `bq:<app>:idle`) bhi usi sandesh ke saath, server ko dobara poochhe bina.
 - Ghadi har 5 s (`IDLE_TICK_MS`) aur tab dobara dikhne pe padhi jaati hai: soya laptop jaagte hi sign-out.
 
+## Social login (customer app; TASKS T3.1 PR 4)
+
+| Export                                      | Kaam                                                                                                                                                                                                                                                                                    |
+| ------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `SocialSignIn`                              | "Continue with Google / LinkedIn / GitHub": `<a>` links (browser provider tak aur wapas page ki tarah jaata hai; `navigationHref`), `next` ke saath. Sirf us origin pe dikhte hain jo identity batata hai (redirect URL wahi registered): Vercel preview pe nahi. `icons` prop se logo. |
+| `SocialSignUpFinish`                        | `/sign-up/finish`: naye account (ya Customer role ke bina account) ka consent (terms + 18+), phir signed in aur `next`; authenticator wala account `totpStepHref` pe. 15 min baad expired ka sandesh, sign-in/sign-up ke links.                                                         |
+| `oauthNotice`, `totpStepOf`, `totpStepHref` | `SignInForm` khud padhta hai: `?oauth=<cancelled\|expired\|failed\|email-unverified\|locked>` ka sandesh, aur `#totp=<loginId>` pe seedha authenticator step (hydration ke baad; id URL se hat jaati hai).                                                                              |
+| `PROVIDER_NAMES`                            | Google, LinkedIn, GitHub.                                                                                                                                                                                                                                                               |
+
+`SecuritySettings signInMethods` (customer): "Sign-in methods" card, har provider Connected / Not connected, "Remove" (confirm, phir account ke email pe security email); akela tareeka ho to Remove nahi, "set a password" ki salah.
+
 ## Account pages (owner, 2026-11-03)
 
 Har app me wahi URLs (`ACCOUNT_PATHS`): `/account/security`, `/account/security/authenticator`, `/account/devices`; app inhe `RequireSignIn` ke andar rakhta hai, page ka `h1` aur nav app ka.

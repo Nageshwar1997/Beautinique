@@ -7,6 +7,8 @@ export default [
   // auth (ARCHITECTURE §9.2): separate pages, each keeps `next`
   route('sign-in', 'routes/sign-in.tsx'),
   route('sign-up', 'routes/sign-up.tsx'),
+  // where Google, LinkedIn or GitHub sends a new account for its consent (T3.1 PR 4)
+  route('sign-up/finish', 'routes/sign-up-finish.tsx'),
   route('forgot-password', 'routes/forgot-password.tsx'),
   route('invitation', 'routes/invitation.tsx'),
   // the account (signed in only; owner, 2026-11-03): /account goes to its security page

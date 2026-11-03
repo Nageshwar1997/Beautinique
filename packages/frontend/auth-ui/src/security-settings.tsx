@@ -9,7 +9,10 @@ import {
   disableAuthenticator,
   getMe,
   newRecoveryCodes,
+  removeSignInMethod,
   type RouteOutput,
+  SOCIAL_PROVIDERS,
+  type SocialProvider,
 } from '@beautinique/shared-contracts';
 import { plural } from '@beautinique/shared-utils';
 import { useQueryClient } from '@tanstack/react-query';
@@ -20,6 +23,7 @@ import { ACCOUNT_PATHS, AUTH_PATHS, authHref } from './next';
 import { RecoveryCodes } from './recovery-codes';
 import { useSession } from './session';
 import { FEW_RECOVERY_CODES } from './sign-in';
+import { PROVIDER_NAMES } from './social';
 
 type User = RouteOutput<typeof getMe>['user'];
 
@@ -31,12 +35,18 @@ function passwordLink(email: string) {
   };
 }
 
+export interface SecuritySettingsProps {
+  /** The social sign-ins linked to the account (the customer app, TASKS T3.1 PR 4). */
+  signInMethods?: boolean;
+}
+
 /**
  * The account's security page (ARCHITECTURE §9.2): the password (changed with an emailed code,
- * which signs every device out) and the authenticator app (set up, a new phone, new recovery
- * codes, turn off; the last three ask a step-up). Inside RequireSignIn and a StepUpProvider.
+ * which signs every device out), the authenticator app (set up, a new phone, new recovery codes,
+ * turn off; the last three ask a step-up) and, in the customer app, the social sign-ins. Inside
+ * RequireSignIn and a StepUpProvider.
  */
-export function SecuritySettings() {
+export function SecuritySettings({ signInMethods = false }: SecuritySettingsProps) {
   const { state } = useSession();
   const [codes, setCodes] = useState<string[] | null>(null);
   const [back, setBack] = useState(false);
@@ -60,6 +70,7 @@ export function SecuritySettings() {
   return (
     <div className="space-y-6">
       <PasswordCard user={user} />
+      {signInMethods && <SignInMethodsCard user={user} />}
       <AuthenticatorCard
         user={user}
         focusTitle={back}
@@ -85,6 +96,88 @@ function PasswordCard({ user }: { user: User }) {
       <LinkButton {...passwordLink(user.email)}>
         {hasPassword ? 'Change password' : 'Set a password'}
       </LinkButton>
+    </AccountCard>
+  );
+}
+
+/**
+ * The social sign-ins (Google, LinkedIn, GitHub): which are linked, and taking one off (the
+ * account's email hears of it). One links by signing in with it, with the account's email. The
+ * last way in stays: an account without a password sets one first.
+ */
+function SignInMethodsCard({ user }: { user: User }) {
+  const queryClient = useQueryClient();
+  const remove = useApiMutation(removeSignInMethod);
+  const [asking, setAsking] = useState<SocialProvider | null>(null);
+  const ways = user.providers.length;
+  return (
+    <AccountCard
+      title="Sign-in methods"
+      description={`Sign in with Google, LinkedIn or GitHub. To add one, sign in with it using ${user.email}.`}
+    >
+      <ul className="divide-border divide-y">
+        {SOCIAL_PROVIDERS.map((provider) => {
+          const linked = user.providers.includes(provider);
+          const name = PROVIDER_NAMES[provider];
+          return (
+            <li key={provider} className="flex flex-wrap items-center justify-between gap-3 py-3">
+              <span className="flex items-center gap-3">
+                <span className="font-medium">{name}</span>
+                {linked ? (
+                  <StatusBadge tone="success">Connected</StatusBadge>
+                ) : (
+                  <StatusBadge tone="neutral">Not connected</StatusBadge>
+                )}
+              </span>
+              {linked &&
+                (ways > 1 ? (
+                  <Button
+                    variant="outline"
+                    tone="error"
+                    size="sm"
+                    aria-label={`Remove ${name} sign-in`}
+                    onClick={() => {
+                      remove.reset();
+                      setAsking(provider);
+                    }}
+                  >
+                    Remove
+                  </Button>
+                ) : (
+                  <span className="text-foreground-muted text-sm">
+                    Your only way in: set a password to remove it.
+                  </span>
+                ))}
+            </li>
+          );
+        })}
+      </ul>
+      <Confirm
+        open={asking !== null}
+        onClose={() => {
+          setAsking(null);
+        }}
+        title={`Remove ${asking === null ? '' : PROVIDER_NAMES[asking]} sign-in?`}
+        description={`You will no longer sign in with ${asking === null ? '' : PROVIDER_NAMES[asking]}. We will email you that it was removed.`}
+        action="Remove"
+        tone="error"
+        busy={remove.isPending}
+        error={remove.error ?? undefined}
+        onConfirm={() => {
+          if (asking === null) return;
+          const name = PROVIDER_NAMES[asking];
+          remove.mutate(
+            { params: { provider: asking } },
+            {
+              onSuccess: () => {
+                setAsking(null);
+                void queryClient.invalidateQueries({ queryKey: queryKey(getMe) });
+                toast({ tone: 'success', title: `${name} sign-in was removed.` });
+              },
+            },
+          );
+        }}
+      />
     </AccountCard>
   );
 }

@@ -10,6 +10,7 @@ import Invitation from '../app/routes/invitation';
 import Privacy from '../app/routes/privacy';
 import SignIn, { meta as signInMeta } from '../app/routes/sign-in';
 import SignUp, { meta as signUpMeta } from '../app/routes/sign-up';
+import SignUpFinish, { meta as finishMeta } from '../app/routes/sign-up-finish';
 import Terms from '../app/routes/terms';
 
 afterEach(cleanup);
@@ -77,11 +78,21 @@ describe('the auth pages', () => {
     expect(await violations(invited.container)).toEqual([]);
   });
 
+  it('finishing a sign-up with a provider: one h1, and the way back to email', async () => {
+    const { container } = page(SignUpFinish, '/sign-up/finish');
+    expect(screen.getByRole('heading', { level: 1, name: 'Finish signing up' })).toBeTruthy();
+    expect(screen.getByRole('link', { name: 'Create an account' }).getAttribute('href')).toBe(
+      '/sign-up',
+    );
+    expect(await violations(container)).toEqual([]);
+  });
+
   it('keep themselves out of search results', () => {
     const noindex = { name: 'robots', content: 'noindex' };
     expect(signInMeta({} as Parameters<typeof signInMeta>[0])).toContainEqual(noindex);
     expect(signUpMeta({} as Parameters<typeof signUpMeta>[0])).toContainEqual(noindex);
     expect(forgotMeta({} as Parameters<typeof forgotMeta>[0])).toContainEqual(noindex);
+    expect(finishMeta({} as Parameters<typeof finishMeta>[0])).toContainEqual(noindex);
   });
 });
 

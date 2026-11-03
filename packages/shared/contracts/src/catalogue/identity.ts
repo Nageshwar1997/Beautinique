@@ -80,6 +80,10 @@ export const IDENTITY_ERROR_CODES = {
   PASSWORD_REQUIRED: 400,
   /** Wrong password while signed in (a lock counts it like a sign-in) */
   PASSWORD_INVALID: 400,
+  /** No new account waiting for its consent: it expired (15 minutes) or finished. Start again. */
+  OAUTH_SIGN_UP_EXPIRED: 400,
+  /** The last way the account signs in cannot go: set a password or keep another one first */
+  LAST_SIGN_IN_METHOD: 409,
 } as const satisfies Record<string, number>;
 
 /**

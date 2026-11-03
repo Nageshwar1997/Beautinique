@@ -1463,6 +1463,98 @@ const mutations: Mutation[] = [
     survives:
       'a token under a second ahead of the clock passes every check (the gateway allows clock skew); the wait keeps its time true',
   },
+  // social sign-in (T3.1 PR 4)
+  {
+    file: 'oauth',
+    name: 'a callback from another browser goes through (login CSRF)',
+    change: [
+      [
+        'const ours = state !== undefined && cookie !== undefined && state === cookie;',
+        'const ours = state !== undefined;',
+      ],
+    ],
+    tests: 'works once, only in the browser',
+  },
+  {
+    file: 'oauth',
+    name: 'a trip ends at another provider',
+    change: [['trip.provider !== provider || ', '']],
+    tests: 'works once, only in the browser',
+  },
+  {
+    file: 'oauth',
+    name: 'an unverified email finds the account',
+    change: [
+      [
+        'if (profile.email === null || !profile.emailVerified) return',
+        'if (profile.email === null) return',
+      ],
+    ],
+    tests: 'never links an email',
+  },
+  {
+    file: 'oauth',
+    name: 'a locked account signs in with a provider',
+    change: [
+      ["if (await isLocked(deps.redis, deps.keys, user.email)) return backToSignIn('locked');", ''],
+    ],
+    tests: 'locked account',
+  },
+  {
+    file: 'oauth',
+    name: 'an account without this app’s role signs in without its consent',
+    change: [['  if (!access.allowed) {', '  if (false) {']],
+    tests: 'without this app',
+  },
+  {
+    file: 'oauth',
+    name: 'a trip or a waiting sign-up works twice',
+    change: [
+      ['deps.redis.multi().hgetall(key).del(key).exec()', 'deps.redis.multi().hgetall(key).exec()'],
+    ],
+    tests: 'works once, only in the browser|asks the consent',
+  },
+  {
+    file: 'oauth',
+    name: 'a new account without the consent',
+    change: [['  if (problems.length > 0) {', '  if (false) {']],
+    tests: 'asks the consent',
+  },
+  {
+    file: 'oauth',
+    name: 'the last way in can go',
+    change: [['if (names.length === 1) throw lastSignInMethod();', '']],
+    tests: 'never the last way in',
+  },
+  {
+    file: 'oauth-providers',
+    name: 'no PKCE challenge',
+    change: [
+      [
+        "...(challenge === null ? {} : { code_challenge: challenge, code_challenge_method: 'S256' }),",
+        '',
+      ],
+    ],
+    tests: 'sends PKCE',
+  },
+  {
+    file: 'oauth-providers',
+    name: 'no PKCE verifier',
+    change: [['...(verifier === null ? {} : { code_verifier: verifier }),', '']],
+    tests: 'sends PKCE',
+  },
+  {
+    file: 'oauth-providers',
+    name: 'GitHub’s unverified primary email is taken',
+    change: [['emails.find((e) => e.primary && e.verified)', 'emails.find((e) => e.primary)']],
+    tests: 'never links an email',
+  },
+  {
+    file: 'config',
+    name: 'a client secret without its ID',
+    change: [['    if (id === undefined && secret !== undefined) {', '    if (false) {']],
+    tests: 'ID and secret pair',
+  },
 ];
 
 export default mutations;

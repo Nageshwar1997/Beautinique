@@ -68,8 +68,18 @@ import {
   verifyOtp,
 } from './identity';
 import { getPing, pingRead, pingRecorded, recordPing, wake } from './platform';
+import {
+  finishSocialSignIn,
+  finishSocialSignUp,
+  getSocialSignUp,
+  listSocialProviders,
+  removeSignInMethod,
+  signInMethodChanged,
+  startSocialSignIn,
+} from './social';
 
 export * from './iam';
+export * from './social';
 export {
   ACCESS_TOKEN_SECONDS,
   accessCookieName,
@@ -164,6 +174,12 @@ export const routes = routeTable([
   stepUp,
   resetAuthenticator,
   endUserSessions,
+  listSocialProviders,
+  startSocialSignIn,
+  finishSocialSignIn,
+  getSocialSignUp,
+  finishSocialSignUp,
+  removeSignInMethod,
 ]);
 export const events = eventCatalogue([
   pingRecorded,
@@ -172,5 +188,6 @@ export const events = eventCatalogue([
   invitationCreated,
   authenticatorReset,
   authenticatorChanged,
+  signInMethodChanged,
 ]);
 export const permissions = permissionCatalogue([pingRead, ...IAM_PERMISSIONS]);

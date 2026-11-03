@@ -23,4 +23,20 @@ export const ICON_CREDITS: readonly IconCredit[] = [
     license: 'CC BY 4.0',
     licenseUrl: 'https://creativecommons.org/licenses/by/4.0/',
   },
+  {
+    prefix: 'logos',
+    name: 'SVG Logos',
+    author: 'Gil Barbara',
+    authorUrl: 'https://github.com/gilbarbara/logos',
+    license: 'CC0 1.0',
+    licenseUrl: 'https://creativecommons.org/publicdomain/zero/1.0/',
+  },
+  {
+    prefix: 'simple-icons',
+    name: 'Simple Icons',
+    author: 'Simple Icons Collaborators',
+    authorUrl: 'https://github.com/simple-icons/simple-icons',
+    license: 'CC0 1.0',
+    licenseUrl: 'https://creativecommons.org/publicdomain/zero/1.0/',
+  },
 ];

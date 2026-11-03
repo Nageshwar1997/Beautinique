@@ -1,4 +1,10 @@
-import type { AppId, AUTHENTICATOR_CHANGES, OTP_PURPOSES } from '@beautinique/shared-contracts';
+import type {
+  AppId,
+  AUTHENTICATOR_CHANGES,
+  OTP_PURPOSES,
+  SIGN_IN_METHOD_CHANGES,
+  SocialProvider,
+} from '@beautinique/shared-contracts';
 import { formatDateTime } from '@beautinique/shared-utils';
 
 import type { EmailMessage } from './port.ts';
@@ -272,4 +278,60 @@ export function authenticatorChangedEmail({
 </body>
 </html>`;
   return { to, subject, text, html, tags: [`security-authenticator-${change}`] };
+}
+
+export interface SignInMethodEmailInput {
+  to: string;
+  provider: SocialProvider;
+  change: (typeof SIGN_IN_METHOD_CHANGES)[number];
+  /** The app it happened in */
+  app: AppId;
+  /** `Chrome on Windows` */
+  device: string;
+  /** When (ISO) */
+  changedAt: string;
+}
+
+const PROVIDER_NAMES: Readonly<Record<SocialProvider, string>> = {
+  google: 'Google',
+  linkedin: 'LinkedIn',
+  github: 'GitHub',
+};
+
+/**
+ * A social sign-in was linked to the account or taken off it (TASKS T3.1 PR 4): which one, where
+ * and when, and what to do if it was not them.
+ */
+export function signInMethodEmail({
+  to,
+  provider,
+  change,
+  app,
+  device,
+  changedAt,
+}: SignInMethodEmailInput): EmailMessage {
+  const appName = APP_NAMES[app];
+  const name = PROVIDER_NAMES[provider];
+  const subject =
+    change === 'linked'
+      ? `${name} sign-in was added to your Beautinique account`
+      : `${name} sign-in was removed from your Beautinique account`;
+  const lead =
+    change === 'linked'
+      ? `Your Beautinique account can now be signed in to with ${name}. It was added in ${appName} (${device}) on ${formatDateTime(changedAt)} IST.`
+      : `Signing in with ${name} was removed from your Beautinique account in ${appName} (${device}) on ${formatDateTime(changedAt)} IST.`;
+  const next =
+    'If this was not you, set a new password with "Forgot password" on the sign-in page at once (that signs you out everywhere) and contact Beautinique support.';
+  const text = [lead, '', next, '', `– ${appName}`].join('\n');
+  const html = `<!doctype html>
+<html lang="en">
+<body style="margin:0;padding:24px;background:#f7f4f2;font-family:Arial,Helvetica,sans-serif;color:#1f1a1c">
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:480px;margin:0 auto;background:#ffffff;border-radius:12px">
+<tr><td style="padding:28px 28px 8px;font-size:16px;line-height:24px">${escapeHtml(lead)}</td></tr>
+<tr><td style="padding:8px 28px 28px;font-size:14px;line-height:22px">${escapeHtml(next)}</td></tr>
+</table>
+<p style="max-width:480px;margin:16px auto 0;font-size:12px;color:#5c5357;text-align:center">${escapeHtml(appName)}</p>
+</body>
+</html>`;
+  return { to, subject, text, html, tags: [`security-sign-in-${provider}-${change}`] };
 }

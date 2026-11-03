@@ -45,7 +45,10 @@ export const getProduct = defineRoute({
 - GET pe idempotency;
 - bina permission ke step-up;
 - `cache` kisi aur route pe (sirf public GET), ya seconds hadd ke bahar;
+- `navigation: true` kisi aur route pe (sirf public GET, bina cache, output `navigationZod`);
 - anjaan app, owner ya rate-limit class.
+
+**Navigation route** (`navigation: true`, 2026-11-03): page jo browser khud kholta hai, API call nahi (OAuth start aur provider ka callback). Handler `{ location }` lautata hai, server-kit use 303 redirect banata hai; `navigationZod` sirf app ka path (`/sign-in?...`, `//host` nahi) ya https URL maanta hai (http sirf localhost). Gateway aise route pe app host se pehchanta hai (browser `X-BQ-App` nahi bhejta). Client se call nahi hota: link `navigationHref(API_BASE_URL, route, { params, query })` se banta hai.
 
 Types route se hi aate hain:
 
@@ -53,12 +56,12 @@ Types route se hi aate hain:
 - `RouteInput<...>`: validate hone ke baad handler ko kya milta hai;
 - `RouteOutput<...>`: response ka `data`.
 
-| Helper                    | Kaam                                                                                     |
-| ------------------------- | ---------------------------------------------------------------------------------------- |
-| `routeTable(routes)`      | Saare routes; duplicate id ya same method + path shape (`/a/:id` vs `/a/:slug`) pe error |
-| `gatewayManifest(routes)` | Gateway ke liye plain JSON: app, access, rate limit, idempotency, step-up, owner, cache  |
-| `toOpenApi(routes, info)` | OpenAPI 3.1 document (zod 4 ka JSON Schema), Beautinique details `x-bq` me               |
-| `buildPath`, `matchPath`  | `/products/:id` bharna (encode ke saath) aur padhna                                      |
+| Helper                    | Kaam                                                                                                |
+| ------------------------- | --------------------------------------------------------------------------------------------------- |
+| `routeTable(routes)`      | Saare routes; duplicate id ya same method + path shape (`/a/:id` vs `/a/:slug`) pe error            |
+| `gatewayManifest(routes)` | Gateway ke liye plain JSON: app, access, rate limit, idempotency, step-up, owner, cache, navigation |
+| `toOpenApi(routes, info)` | OpenAPI 3.1 document (zod 4 ka JSON Schema), Beautinique details `x-bq` me                          |
+| `buildPath`, `matchPath`  | `/products/:id` bharna (encode ke saath) aur padhna                                                 |
 
 **Rate-limit classes** (ARCHITECTURE me naam tay nahi the; ye shuruaati set hai): `public`, `read`, `write`, `search`, `auth`, `otp`, `partner-api`, `webhook`. Har class ka budget gateway config me rahega. `auth` aur `otp` Redis down hone pe fail-closed hain.
 
@@ -131,7 +134,7 @@ const ping = await client.call(getPing, { params: { pingId } }); // return type 
 
 ## Catalogue aur codegen
 
-Platform ka poora catalogue `src/catalogue/` me hai (`routes`, `events`, `permissions`); har module apni list wahan jodta hai. Abhi Milestone 1 ka sample hai: route `platform.ping.record` (POST, **public** (owner ka faisla 2026-10-25: login se pehle live demo; gateway ka `write` rate limit, core 7 din TTL aur max 5,000 pings), idempotent, har app) jo `platform.ping.recorded` event usi transaction me likhta hai, route `platform.ping.get` (permission `platform.ping.read`).
+Platform ka poora catalogue `src/catalogue/` me hai (`routes`, `events`, `permissions`); har module apni list wahan jodta hai. Social login (T3.1 PR 4) `catalogue/social.ts` me: `SOCIAL_PROVIDERS`, 6 routes (providers ki list, start aur callback navigation routes, naye account ka consent, provider hatana), event `identity.signInMethod.changed`, cookies (`oauthStateCookieName`, `oauthSignUpCookieName`, path `OAUTH_COOKIE_PATH`), `?oauth=` ke nateeje (`OAUTH_RESULTS`) aur `safeNextPath`. Abhi Milestone 1 ka sample hai: route `platform.ping.record` (POST, **public** (owner ka faisla 2026-10-25: login se pehle live demo; gateway ka `write` rate limit, core 7 din TTL aur max 5,000 pings), idempotent, har app) jo `platform.ping.recorded` event usi transaction me likhta hai, route `platform.ping.get` (permission `platform.ping.read`).
 
 ```bash
 npm run build --workspace @beautinique/shared-contracts

@@ -64,6 +64,7 @@ export {
   wake,
 } from './catalogue';
 export * from './catalogue/iam';
+export * from './catalogue/social';
 export {
   ApiError,
   type CallArgs,
@@ -71,6 +72,7 @@ export {
   type Client,
   type ClientOptions,
   createClient,
+  navigationHref,
   type NetworkEvent,
   queryKey,
   queryKeyPrefix,
@@ -126,6 +128,7 @@ export {
   matchPath,
   MAX_S_MAX_AGE,
   MAX_STALE_WHILE_REVALIDATE,
+  navigationZod,
   pathParams,
   RATE_LIMIT_CLASSES,
   type RateLimitClass,

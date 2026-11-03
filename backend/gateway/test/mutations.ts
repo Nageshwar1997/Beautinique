@@ -201,7 +201,7 @@ const mutations: Mutation[] = [
   {
     file: 'proxy',
     name: 'the gateway does not tell the client IP',
-    change: [['  headers[HEADERS.clientIp.toLowerCase()] = ip;\n', '']],
+    change: [['  headers[HEADERS.clientIp.toLowerCase()] = caller.ip;\n', '']],
     tests: 'sends a request to its owner',
   },
   {
@@ -366,7 +366,9 @@ const mutations: Mutation[] = [
   {
     file: 'proxy',
     name: 'no passport to the owner',
-    change: [['  if (passport) headers[HEADERS.passport.toLowerCase()] = passport;\n', '']],
+    change: [
+      ['  if (caller.passport) headers[HEADERS.passport.toLowerCase()] = caller.passport;\n', ''],
+    ],
     tests: '60-second passport',
   },
   {
@@ -464,6 +466,35 @@ const mutations: Mutation[] = [
       ],
     ],
     tests: 'one’s own account',
+  },
+  // a page the browser opened (navigation routes, T3.1 PR 4)
+  {
+    file: 'proxy',
+    name: 'a page without the app header is never let through',
+    change: [
+      [
+        'const app = req.get(HEADERS.app) ?? pageApp(req, manifest, apps);',
+        'const app = req.get(HEADERS.app);',
+      ],
+    ],
+    tests: 'a page the browser opened',
+  },
+  {
+    file: 'proxy',
+    name: 'every route takes the app from the host',
+    change: [
+      [
+        'if (findRoute(manifest, req.method, req.path)?.route.navigation !== true) return undefined;',
+        '',
+      ],
+    ],
+    tests: 'a page the browser opened',
+  },
+  {
+    file: 'proxy',
+    name: 'the owner never hears which app',
+    change: [['  headers[HEADERS.app.toLowerCase()] = caller.app;\n', '']],
+    tests: 'a page the browser opened',
   },
 ];
 

@@ -1,9 +1,15 @@
-/** The auth pages every app has (ARCHITECTURE §9.2): sign-up only in the sign-up apps. */
+import { OAUTH_SIGN_UP_PATH } from '@beautinique/shared-contracts';
+
+/**
+ * The auth pages every app has (ARCHITECTURE §9.2): sign-up only in the sign-up apps, and the
+ * consent of an account a provider makes only where social sign-in is (the customer app).
+ */
 export const AUTH_PATHS = {
   signIn: '/sign-in',
   signUp: '/sign-up',
   forgotPassword: '/forgot-password',
   invitation: '/invitation',
+  socialSignUp: OAUTH_SIGN_UP_PATH,
 } as const;
 
 /**

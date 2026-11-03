@@ -12,12 +12,20 @@ import {
   confirmTotpEnroll,
   loginRecovery,
   loginTotp,
+  OAUTH_RESULT_PARAM,
   passwordLogin,
   type RouteOutput,
   startTotpEnroll,
 } from '@beautinique/shared-contracts';
 import { plural } from '@beautinique/shared-utils';
-import { type ReactNode, useCallback, useEffect, useRef, useState } from 'react';
+import {
+  type ReactNode,
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
+  useSyncExternalStore,
+} from 'react';
 import { useLocation, useNavigate, useSearchParams } from 'react-router';
 
 import { Scan, StepFrame } from './authenticator-setup';
@@ -26,6 +34,7 @@ import { TextLink } from './layout';
 import { AUTH_PATHS, authHref, NEXT_PARAM, safeNext } from './next';
 import { RecoveryCodes } from './recovery-codes';
 import { useSession } from './session';
+import { oauthNotice, totpStepOf } from './social';
 
 /** At or below this many recovery codes left, a sign-in with one says to get new ones. */
 export const FEW_RECOVERY_CODES = 3;
@@ -34,6 +43,11 @@ type Step =
   | { kind: 'password'; notice?: ReactNode }
   | { kind: 'totp' | 'recovery'; loginId: string }
   | { kind: 'enroll'; loginId: string; email: string };
+
+/** Hydrated or not, for a value only the browser has (the URL's fragment). */
+const noSubscription = () => () => undefined;
+const onClient = () => true;
+const onServer = () => false;
 
 /** The sign-in answer has no loginId for its next step: the API broke its contract. */
 const brokenAnswer = () =>
@@ -58,11 +72,16 @@ export interface SignInFormProps {
  * and a locked account get the same answer.
  */
 export function SignInForm(props: SignInFormProps) {
-  // what another auth page handed over (the email, why), unless given
+  // what another auth page handed over (the email, why), unless given; or why a social sign-in
+  // came back here (`?oauth=`)
   const location = useLocation();
+  const [search] = useSearchParams();
   const handed = signInStateOf(location.state);
   const email = props.email ?? handed.email ?? '';
-  const first = (): Step => ({ kind: 'password', notice: props.notice ?? handed.notice });
+  const first = (): Step => ({
+    kind: 'password',
+    notice: props.notice ?? handed.notice ?? oauthNotice(search.get(OAUTH_RESULT_PARAM)),
+  });
   const [step, setStep] = useState<Step>(first);
   // a new visit while the page is open (signed out for being idle, say): start again, with its note
   const [visit, setVisit] = useState(location.key);
@@ -70,9 +89,22 @@ export function SignInForm(props: SignInFormProps) {
     setVisit(location.key);
     setStep(first());
   }
+  // a provider proved who it is and the account has an authenticator: its code next
+  // (`#totp=<loginId>`, which a server never sees, so only once hydrated)
+  const hydrated = useSyncExternalStore(noSubscription, onClient, onServer);
+  const fromProvider = hydrated ? totpStepOf(location.hash) : null;
+  const [taken, setTaken] = useState<string | null>(null);
+  if (fromProvider !== null && taken !== fromProvider) {
+    setTaken(fromProvider);
+    setStep({ kind: 'totp', loginId: fromProvider });
+  }
+  // then the id leaves the address bar (and the history)
+  useEffect(() => {
+    if (fromProvider === null) return;
+    window.history.replaceState(window.history.state, '', `${location.pathname}${location.search}`);
+  }, [fromProvider, location.pathname, location.search]);
   const session = useSession();
   const navigate = useNavigate();
-  const [search] = useSearchParams();
   const next = search.get(NEXT_PARAM);
 
   const finish = async (recoveryCodesLeft?: number) => {

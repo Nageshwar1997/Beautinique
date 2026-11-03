@@ -5,10 +5,12 @@ import {
   NEXT_PARAM,
   RedirectIfSignedIn,
   SignInForm,
+  SocialSignIn,
   TextLink,
 } from '@beautinique/frontend-auth-ui';
 import { useSearchParams } from 'react-router';
 
+import { SOCIAL_ICONS } from '../components/social-icons';
 import type { Route } from './+types/sign-in';
 
 export const meta: Route.MetaFunction = () => [
@@ -16,7 +18,10 @@ export const meta: Route.MetaFunction = () => [
   { name: 'robots', content: 'noindex' },
 ];
 
-/** Sign in, then back to the page that sent the person here (`next`). */
+/**
+ * Sign in (email and password, or Google, LinkedIn, GitHub), then back to the page that sent the
+ * person here (`next`).
+ */
 export default function SignIn() {
   const [search] = useSearchParams();
   const next = search.get(NEXT_PARAM);
@@ -32,7 +37,10 @@ export default function SignIn() {
           </>
         }
       >
-        <SignInForm />
+        <div className="space-y-6">
+          <SignInForm />
+          <SocialSignIn next={next} icons={SOCIAL_ICONS} />
+        </div>
       </AuthLayout>
     </RedirectIfSignedIn>
   );

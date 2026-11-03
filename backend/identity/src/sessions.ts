@@ -25,7 +25,8 @@ import { type SignInAccess, signInAccess } from './rbac/grants.ts';
 import type { SigningKeys } from './signing-keys.ts';
 
 /** What proved who the person is in a sign-in (the session keeps it: `amr`). */
-export type AuthMethod = 'email-code' | 'password' | 'totp' | 'recovery-code';
+export type AuthMethod =
+  'email-code' | 'password' | 'totp' | 'recovery-code' | 'google' | 'linkedin' | 'github';
 
 /** Who is at the other end: legal and security evidence, shown in My Devices. */
 export interface Client {

@@ -7,12 +7,12 @@ export const meta: Route.MetaFunction = () => [
   { name: 'robots', content: 'noindex' },
 ];
 
-/** The password and the authenticator app. */
+/** The password, the social sign-ins (Google, LinkedIn, GitHub) and the authenticator app. */
 export default function AccountSecurity() {
   return (
     <>
       <h1 className="font-display text-3xl font-medium">Security</h1>
-      <SecuritySettings />
+      <SecuritySettings signInMethods />
     </>
   );
 }

@@ -30,6 +30,7 @@ import {
   matchPath,
   MAX_S_MAX_AGE,
   MAX_STALE_WHILE_REVALIDATE,
+  navigationZod,
   pathParams,
   permissionCatalogue,
   resolveAreaSetting,
@@ -77,6 +78,23 @@ const updateContact = defineRoute({
     body: object({ phone: mobileNumberZod }),
   },
   output: object({ updated: boolean() }),
+});
+
+/** A page the browser opens (OAuth): a public GET answering with a redirect. */
+const openPage = defineRoute({
+  id: 'auth.oauth.start',
+  method: 'GET',
+  path: '/auth/oauth/:provider/start',
+  summary: 'Go to the provider',
+  apps: ['customer'],
+  access: { type: 'public' },
+  rateLimit: 'auth',
+  idempotency: false,
+  stepUp: false,
+  owner: 'identity',
+  navigation: true,
+  input: { params: object({ provider: string() }), query: object({ next: string().optional() }) },
+  output: navigationZod,
 });
 
 /** A valid route to break one field at a time. */
@@ -250,11 +268,56 @@ describe('routes', () => {
       idempotency: true,
       stepUp: true,
       cache: null,
+      navigation: false,
     });
     expect(gatewayManifest([getProduct])[0]?.cache).toEqual({
       sMaxAge: 300,
       staleWhileRevalidate: 60,
     });
+    expect(gatewayManifest([openPage])[0]?.navigation).toBe(true);
+  });
+
+  it('a navigation route is a public GET page that answers with a redirect', () => {
+    const page = (): RouteDefinition => ({
+      ...base(),
+      access: { type: 'public' },
+      navigation: true,
+      output: navigationZod,
+    });
+    const bad: [Partial<RouteDefinition>, string][] = [
+      [{ access: { type: 'signed-in' } }, 'a navigation route must be a public GET'],
+      [{ method: 'POST' }, 'a navigation route must be a public GET'],
+      [{ cache: { sMaxAge: 60, staleWhileRevalidate: 0 } }, 'a navigation route is never cached'],
+      [{ output: object({ location: string() }) }, 'a navigation route answers with navigationZod'],
+    ];
+    for (const [change, message] of bad) {
+      expect(() => defineRoute({ ...page(), ...change }), message).toThrow(message);
+    }
+    expect(() => defineRoute(page())).not.toThrow();
+    expect(openPage.navigation).toBe(true);
+
+    // a path of the app, an https page, or the laptop; never another site through the request
+    for (const location of [
+      '/sign-in',
+      '/sign-in?error=oauth#totp=1',
+      'https://accounts.google.com/o/oauth2/v2/auth?client_id=x',
+      'http://127.0.0.1:5555/authorize',
+      'http://localhost:3001/',
+    ]) {
+      expect(navigationZod.safeParse({ location }).success, location).toBe(true);
+    }
+    for (const location of [
+      '',
+      '//evil.example/x',
+      '/\\evil.example',
+      'http://evil.example/x',
+      'javascript:alert(1)',
+      'evil.example/x',
+      'https://',
+      '/sign in',
+    ]) {
+      expect(navigationZod.safeParse({ location }).success, location).toBe(false);
+    }
   });
 });
 
@@ -485,6 +548,23 @@ describe('OpenAPI', () => {
     unknown
   >;
 
+  it('describes a navigation route as a redirect the browser follows, without the app header', () => {
+    const page = toOpenApi([openPage], { title: 'Beautinique API', version: '1.0.0' }).paths[
+      '/auth/oauth/{provider}/start'
+    ]?.get as {
+      parameters: { name: string }[];
+      responses: Record<string, unknown>;
+      'x-bq': { navigation: boolean };
+    };
+    expect(page.parameters.map((p) => p.name)).toEqual(['provider', 'next']);
+    expect(Object.keys(page.responses)).toEqual(['303', 'default']);
+    expect(page.responses['303']).toEqual({
+      description: 'The browser goes on to Location',
+      headers: { Location: { required: true, schema: { type: 'string' } } },
+    });
+    expect(page['x-bq'].navigation).toBe(true);
+  });
+
   it('is plain JSON in OpenAPI 3.1 form', () => {
     expect(doc.openapi).toBe('3.1.0');
     expect(JSON.parse(JSON.stringify(doc))).toEqual(doc);
@@ -535,6 +615,7 @@ describe('OpenAPI', () => {
       stepUp: true,
       owner: 'core',
       cache: null,
+      navigation: false,
     });
     expect((get['x-bq'] as { cache: unknown }).cache).toEqual({
       sMaxAge: 300,

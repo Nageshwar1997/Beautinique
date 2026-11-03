@@ -25,7 +25,8 @@
       "rateLimit": "write",
       "idempotency": true,
       "stepUp": false,
-      "cache": null
+      "cache": null,
+      "navigation": false
     },
     {
       "id": "platform.ping.get",
@@ -44,7 +45,8 @@
       "rateLimit": "read",
       "idempotency": false,
       "stepUp": false,
-      "cache": null
+      "cache": null,
+      "navigation": false
     },
     {
       "id": "platform.server.wake",
@@ -70,7 +72,8 @@
       "rateLimit": "public",
       "idempotency": false,
       "stepUp": false,
-      "cache": null
+      "cache": null,
+      "navigation": false
     },
     {
       "id": "auth.signUp.code",
@@ -88,7 +91,8 @@
       "rateLimit": "otp",
       "idempotency": false,
       "stepUp": false,
-      "cache": null
+      "cache": null,
+      "navigation": false
     },
     {
       "id": "auth.password.code",
@@ -114,7 +118,8 @@
       "rateLimit": "otp",
       "idempotency": false,
       "stepUp": false,
-      "cache": null
+      "cache": null,
+      "navigation": false
     },
     {
       "id": "auth.otp.resend",
@@ -140,7 +145,8 @@
       "rateLimit": "otp",
       "idempotency": false,
       "stepUp": false,
-      "cache": null
+      "cache": null,
+      "navigation": false
     },
     {
       "id": "auth.otp.verify",
@@ -166,7 +172,8 @@
       "rateLimit": "auth",
       "idempotency": false,
       "stepUp": false,
-      "cache": null
+      "cache": null,
+      "navigation": false
     },
     {
       "id": "auth.login.password",
@@ -192,7 +199,8 @@
       "rateLimit": "auth",
       "idempotency": false,
       "stepUp": false,
-      "cache": null
+      "cache": null,
+      "navigation": false
     },
     {
       "id": "auth.login.totp",
@@ -218,7 +226,8 @@
       "rateLimit": "auth",
       "idempotency": false,
       "stepUp": false,
-      "cache": null
+      "cache": null,
+      "navigation": false
     },
     {
       "id": "auth.login.recovery",
@@ -244,7 +253,8 @@
       "rateLimit": "auth",
       "idempotency": false,
       "stepUp": false,
-      "cache": null
+      "cache": null,
+      "navigation": false
     },
     {
       "id": "auth.login.totpEnroll",
@@ -270,7 +280,8 @@
       "rateLimit": "auth",
       "idempotency": false,
       "stepUp": false,
-      "cache": null
+      "cache": null,
+      "navigation": false
     },
     {
       "id": "auth.login.totpConfirm",
@@ -296,7 +307,8 @@
       "rateLimit": "auth",
       "idempotency": false,
       "stepUp": false,
-      "cache": null
+      "cache": null,
+      "navigation": false
     },
     {
       "id": "auth.session.refresh",
@@ -322,7 +334,8 @@
       "rateLimit": "auth",
       "idempotency": false,
       "stepUp": false,
-      "cache": null
+      "cache": null,
+      "navigation": false
     },
     {
       "id": "auth.session.logout",
@@ -348,7 +361,8 @@
       "rateLimit": "auth",
       "idempotency": false,
       "stepUp": false,
-      "cache": null
+      "cache": null,
+      "navigation": false
     },
     {
       "id": "iam.me.get",
@@ -374,7 +388,8 @@
       "rateLimit": "read",
       "idempotency": false,
       "stepUp": false,
-      "cache": null
+      "cache": null,
+      "navigation": false
     },
     {
       "id": "auth.sessions.list",
@@ -400,7 +415,8 @@
       "rateLimit": "read",
       "idempotency": false,
       "stepUp": false,
-      "cache": null
+      "cache": null,
+      "navigation": false
     },
     {
       "id": "auth.sessions.end",
@@ -426,7 +442,8 @@
       "rateLimit": "auth",
       "idempotency": false,
       "stepUp": false,
-      "cache": null
+      "cache": null,
+      "navigation": false
     },
     {
       "id": "auth.sessions.endOthers",
@@ -452,7 +469,8 @@
       "rateLimit": "auth",
       "idempotency": false,
       "stepUp": false,
-      "cache": null
+      "cache": null,
+      "navigation": false
     },
     {
       "id": "auth.authenticator.enroll",
@@ -478,7 +496,8 @@
       "rateLimit": "auth",
       "idempotency": false,
       "stepUp": false,
-      "cache": null
+      "cache": null,
+      "navigation": false
     },
     {
       "id": "auth.authenticator.confirm",
@@ -504,7 +523,8 @@
       "rateLimit": "auth",
       "idempotency": false,
       "stepUp": false,
-      "cache": null
+      "cache": null,
+      "navigation": false
     },
     {
       "id": "auth.authenticator.recoveryCodes",
@@ -530,7 +550,8 @@
       "rateLimit": "auth",
       "idempotency": false,
       "stepUp": true,
-      "cache": null
+      "cache": null,
+      "navigation": false
     },
     {
       "id": "auth.authenticator.disable",
@@ -556,7 +577,8 @@
       "rateLimit": "auth",
       "idempotency": false,
       "stepUp": true,
-      "cache": null
+      "cache": null,
+      "navigation": false
     },
     {
       "id": "iam.roles.list",
@@ -583,7 +605,8 @@
       "rateLimit": "read",
       "idempotency": false,
       "stepUp": false,
-      "cache": null
+      "cache": null,
+      "navigation": false
     },
     {
       "id": "iam.roles.create",
@@ -610,7 +633,8 @@
       "rateLimit": "write",
       "idempotency": false,
       "stepUp": true,
-      "cache": null
+      "cache": null,
+      "navigation": false
     },
     {
       "id": "iam.roles.update",
@@ -637,7 +661,8 @@
       "rateLimit": "write",
       "idempotency": false,
       "stepUp": true,
-      "cache": null
+      "cache": null,
+      "navigation": false
     },
     {
       "id": "iam.grants.list",
@@ -664,7 +689,8 @@
       "rateLimit": "read",
       "idempotency": false,
       "stepUp": false,
-      "cache": null
+      "cache": null,
+      "navigation": false
     },
     {
       "id": "iam.grants.give",
@@ -691,7 +717,8 @@
       "rateLimit": "write",
       "idempotency": false,
       "stepUp": true,
-      "cache": null
+      "cache": null,
+      "navigation": false
     },
     {
       "id": "iam.grants.end",
@@ -718,7 +745,8 @@
       "rateLimit": "write",
       "idempotency": false,
       "stepUp": true,
-      "cache": null
+      "cache": null,
+      "navigation": false
     },
     {
       "id": "iam.invitations.create",
@@ -745,7 +773,8 @@
       "rateLimit": "write",
       "idempotency": false,
       "stepUp": true,
-      "cache": null
+      "cache": null,
+      "navigation": false
     },
     {
       "id": "iam.invitations.list",
@@ -772,7 +801,8 @@
       "rateLimit": "read",
       "idempotency": false,
       "stepUp": false,
-      "cache": null
+      "cache": null,
+      "navigation": false
     },
     {
       "id": "iam.invitations.revoke",
@@ -799,7 +829,8 @@
       "rateLimit": "write",
       "idempotency": false,
       "stepUp": true,
-      "cache": null
+      "cache": null,
+      "navigation": false
     },
     {
       "id": "auth.invitations.code",
@@ -825,7 +856,8 @@
       "rateLimit": "otp",
       "idempotency": false,
       "stepUp": false,
-      "cache": null
+      "cache": null,
+      "navigation": false
     },
     {
       "id": "auth.stepUp.verify",
@@ -851,7 +883,8 @@
       "rateLimit": "auth",
       "idempotency": false,
       "stepUp": false,
-      "cache": null
+      "cache": null,
+      "navigation": false
     },
     {
       "id": "iam.users.resetAuthenticator",
@@ -878,7 +911,8 @@
       "rateLimit": "write",
       "idempotency": false,
       "stepUp": true,
-      "cache": null
+      "cache": null,
+      "navigation": false
     },
     {
       "id": "iam.users.endSessions",
@@ -905,7 +939,110 @@
       "rateLimit": "write",
       "idempotency": false,
       "stepUp": true,
-      "cache": null
+      "cache": null,
+      "navigation": false
+    },
+    {
+      "id": "auth.socialProviders.list",
+      "method": "GET",
+      "path": "/auth/oauth/providers",
+      "owner": "identity",
+      "apps": [
+        "customer"
+      ],
+      "access": {
+        "type": "public"
+      },
+      "rateLimit": "public",
+      "idempotency": false,
+      "stepUp": false,
+      "cache": null,
+      "navigation": false
+    },
+    {
+      "id": "auth.oauth.start",
+      "method": "GET",
+      "path": "/auth/oauth/:provider/start",
+      "owner": "identity",
+      "apps": [
+        "customer"
+      ],
+      "access": {
+        "type": "public"
+      },
+      "rateLimit": "auth",
+      "idempotency": false,
+      "stepUp": false,
+      "cache": null,
+      "navigation": true
+    },
+    {
+      "id": "auth.oauth.callback",
+      "method": "GET",
+      "path": "/auth/oauth/:provider/callback",
+      "owner": "identity",
+      "apps": [
+        "customer"
+      ],
+      "access": {
+        "type": "public"
+      },
+      "rateLimit": "auth",
+      "idempotency": false,
+      "stepUp": false,
+      "cache": null,
+      "navigation": true
+    },
+    {
+      "id": "auth.socialSignUp.get",
+      "method": "GET",
+      "path": "/auth/oauth/sign-up",
+      "owner": "identity",
+      "apps": [
+        "customer"
+      ],
+      "access": {
+        "type": "public"
+      },
+      "rateLimit": "auth",
+      "idempotency": false,
+      "stepUp": false,
+      "cache": null,
+      "navigation": false
+    },
+    {
+      "id": "auth.socialSignUp.finish",
+      "method": "POST",
+      "path": "/auth/oauth/sign-up",
+      "owner": "identity",
+      "apps": [
+        "customer"
+      ],
+      "access": {
+        "type": "public"
+      },
+      "rateLimit": "auth",
+      "idempotency": false,
+      "stepUp": false,
+      "cache": null,
+      "navigation": false
+    },
+    {
+      "id": "auth.signInMethods.remove",
+      "method": "DELETE",
+      "path": "/auth/sign-in-methods/:provider",
+      "owner": "identity",
+      "apps": [
+        "customer"
+      ],
+      "access": {
+        "type": "signed-in"
+      },
+      "rateLimit": "write",
+      "idempotency": false,
+      "stepUp": false,
+      "cache": null,
+      "navigation": false
     }
   ]
 }

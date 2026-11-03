@@ -1,4 +1,4 @@
-import { randomUUID } from 'node:crypto';
+import { randomBytes, randomUUID } from 'node:crypto';
 
 import { generateKey } from '@beautinique/backend-server-crypto';
 import { createLogger, LOOPBACK_HOST } from '@beautinique/backend-server-kit';
@@ -97,6 +97,62 @@ describe('identity', () => {
     expect(() =>
       readConfig({ env: { ...env, IDENTITY__HIBP_URL: 'https://api.pwnedpasswords.com/range' } }),
     ).toThrow('IDENTITY__HIBP_URL: Use a base URL');
+  });
+
+  it('reads each social login client as an ID and secret pair, with the customer app origin', () => {
+    const env = testEnv();
+    // made per run, so no secret-looking literal sits in the repo (gitleaks)
+    const secret = randomBytes(24).toString('base64url');
+    const google = {
+      IDENTITY__GOOGLE_CLIENT_ID: '123-abc.apps.googleusercontent.com',
+      IDENTITY__GOOGLE_CLIENT_SECRET: secret,
+      IDENTITY__OAUTH_REDIRECT_ORIGIN: 'http://localhost:3001',
+    };
+    expect(readConfig({ env: { ...env, ...google } })).toMatchObject({
+      googleClientId: '123-abc.apps.googleusercontent.com',
+      googleClientSecret: secret,
+      oauthRedirectOrigin: 'http://localhost:3001',
+    });
+    // none set: social login off, and no origin needed
+    expect(readConfig({ env }).googleClientId).toBeUndefined();
+    const live = { ...google, IDENTITY__OAUTH_REDIRECT_ORIGIN: 'https://bq-customer.vercel.app' };
+    expect(readConfig({ env: { ...env, ...live } }).oauthRedirectOrigin).toBe(
+      'https://bq-customer.vercel.app',
+    );
+
+    const problem = (extra: Record<string, string | undefined>) => {
+      try {
+        readConfig({ env: { ...env, ...extra } });
+      } catch (error) {
+        const message = (error as Error).message;
+        expect(message).not.toContain(secret);
+        return message;
+      }
+      throw new Error('expected a config error');
+    };
+    expect(problem({ ...google, IDENTITY__GOOGLE_CLIENT_ID: undefined })).toContain(
+      'IDENTITY__GOOGLE_CLIENT_ID: Required with IDENTITY__GOOGLE_CLIENT_SECRET',
+    );
+    expect(problem({ IDENTITY__GITHUB_CLIENT_ID: 'Iv1.abc' })).toContain(
+      'IDENTITY__GITHUB_CLIENT_SECRET: Required with IDENTITY__GITHUB_CLIENT_ID',
+    );
+    expect(problem({ IDENTITY__LINKEDIN_CLIENT_SECRET: secret })).toContain(
+      'IDENTITY__LINKEDIN_CLIENT_ID: Required with IDENTITY__LINKEDIN_CLIENT_SECRET',
+    );
+    expect(problem({ ...google, IDENTITY__OAUTH_REDIRECT_ORIGIN: undefined })).toContain(
+      'IDENTITY__OAUTH_REDIRECT_ORIGIN: Required when a social login provider is set',
+    );
+    // plain http only on the laptop, and an origin without a path
+    for (const origin of [
+      'http://bq-customer.vercel.app',
+      'https://bq-customer.vercel.app/',
+      'https://bq-customer.vercel.app/api/v1',
+      'localhost:3001',
+    ]) {
+      expect(problem({ ...google, IDENTITY__OAUTH_REDIRECT_ORIGIN: origin }), origin).toContain(
+        'IDENTITY__OAUTH_REDIRECT_ORIGIN: Use an origin like',
+      );
+    }
   });
 
   it('runs its release steps in its own database before it listens, and only once per release', async () => {
