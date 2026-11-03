@@ -1,6 +1,6 @@
 # LinkedIn posts — Beautinique
 
-> **Status:** v1.10 (2026-11-03). Project ke build-in-public LinkedIn posts: har post ka text, hashtags aur
+> **Status:** v1.11 (2026-11-03). Project ke build-in-public LinkedIn posts: har post ka text, hashtags aur
 > PDF carousel ki slides ka image prompt yahan date ke folder me rehte hain. Post insaan khud
 > LinkedIn pe karta hai; koi API ya browser automation nahi.
 
@@ -12,7 +12,7 @@ linkedin-posts/
   HISTORY.md      kya post hua, kahan tak cover hua, kya baaki hai
   IMAGES.md       images banane ke common steps (har post ke liye same)
   _template/      naye post ki khaali files
-  YYYY-MM-DD/     post ki date (usi din doosra post: YYYY-MM-DD-2)
+  D<N>-YYYY-MM-DD/  Day number + post ki date, jaise D1-2026-11-03 (owner, 2026-11-03)
     post.md       status + post ka text
     hashtags.md   3–5 hashtags
     carousel.md   PDF ka title aur saari slides ka ek image prompt
@@ -108,3 +108,4 @@ Naye Claude Code session me (worktree me, taaki chal rahi feature branch pe asar
 | v1.8    | 2026-11-03 | §4: saari slides ek prompt block me, ek saath generate (owner ka faisla).                                           |
 | v1.9    | 2026-11-03 | §6: README, IMAGES.md, template aur skill bhi seedha `prerelease` pe, PR nahi (owner ka faisla).                    |
 | v1.10   | 2026-11-03 | §3: alt text sirf akeli image wale post me; carousel me nahi (owner ka faisla).                                     |
+| v1.11   | 2026-11-03 | §1: post folder ka naam `D<N>-YYYY-MM-DD` (Day number + date; owner ka faisla).                                     |
