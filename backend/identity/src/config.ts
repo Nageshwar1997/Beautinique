@@ -72,7 +72,10 @@ export const configZod = object({
    * <origin>/api/v1/auth/oauth/<provider>/callback, the URL registered with each of them.
    */
   oauthRedirectOrigin: string()
-    .regex(ORIGIN, 'Use an origin like https://bq-customer.vercel.app (http only for localhost)')
+    .regex(
+      ORIGIN,
+      'Use an origin like https://beautinique-customer.vercel.app (http only for localhost)',
+    )
     .optional(),
   /**
    * Tests and E2E only: every provider's pages and API at one stand-in on this machine,
