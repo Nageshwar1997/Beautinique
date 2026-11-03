@@ -59,8 +59,10 @@ update the HISTORY row, move the marker to the last covered `prerelease` commit 
 
 ## Commit
 
-Only when the user says so: branch `feat/linkedin-<date>` from `origin/prerelease` → PR to `prerelease`
-(until the owner decides README §6). Never commit `slides/`.
+Only when the user says so. Post files (anything under `linkedin-posts/`) go straight to `prerelease`, no
+branch or PR (owner, README §6): from a `prerelease` checkout, `git pull --rebase`, `npm run format:check`,
+commit only `linkedin-posts/` paths, `git push`. Never force push, never commit `slides/`. Changes to the
+README rules or this skill still go through a `feat/` branch and PR.
 
 ## Never
 

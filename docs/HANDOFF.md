@@ -1,6 +1,6 @@
 # HANDOFF — BQ
 
-> **Status:** v1.98 (2026-11-03). Is project pe 2 log kaam karte hain. Ye file batati hai ki **abhi kya halat hai, kisne kya chhoda, agla kaam kya hai** aur kaunse sawal khule hain, taaki doosra insaan (aur uska Claude) bina poora itihaas padhe kaam utha sake. Jo bhi kaam roke, wo ye file update kare (neeche §8).
+> **Status:** v1.99 (2026-11-03). Is project pe 2 log kaam karte hain. Ye file batati hai ki **abhi kya halat hai, kisne kya chhoda, agla kaam kya hai** aur kaunse sawal khule hain, taaki doosra insaan (aur uska Claude) bina poora itihaas padhe kaam utha sake. Jo bhi kaam roke, wo ye file update kare (neeche §8).
 
 ## 0. Pehle ye (handoff ke din)
 
@@ -267,3 +267,4 @@
 | v1.96 | 2026-11-03 | §4: PR 5 (auth-ui account screens), PR #40 → `prerelease`. |
 | v1.97 | 2026-11-03 | §4: follow-up (CI summary me mutation fixtures ki nakli Vitest reports); §6: Dependabot alerts 2 (`glob`) aur 3 (`minimatch`): fix sirf naye major me, koi parent abhi use nahi leta; `overrides` nahi, parents ka intezaar. |
 | v1.98 | 2026-11-03 | `linkedin-posts/` folder aur `/linkedin-post` skill (branch `feat/linkedin-posts`); khula sawal: roz ki files seedha `prerelease` push ya PR (README §5). |
+| v1.99 | 2026-11-03 | PR #42 merge (`linkedin-posts/`, `/linkedin-post`); owner: post files seedha `prerelease` pe push (RULES §2). |

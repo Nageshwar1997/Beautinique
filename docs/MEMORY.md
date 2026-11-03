@@ -1,6 +1,6 @@
 # MEMORY — BQ
 
-> **Status:** v1.38 (2026-11-03). Project ki yaaddasht: **kya tay hua aur kyun**, **pichhle kaam se kya seekha**, aur **kaunse jaal (traps) se bachna hai**. Poori detail baaki docs me hai; yahan short version aur pointers. Naya sabak ya decision aaye to yahan ek line jodo.
+> **Status:** v1.39 (2026-11-03). Project ki yaaddasht: **kya tay hua aur kyun**, **pichhle kaam se kya seekha**, aur **kaunse jaal (traps) se bachna hai**. Poori detail baaki docs me hai; yahan short version aur pointers. Naya sabak ya decision aaye to yahan ek line jodo.
 
 ## 1. Decision log
 
@@ -88,6 +88,7 @@
 | 2026-11-03 | Customer account screens (owner ne saari recommendations maani, PR 5): `/account/security`, `/account/security/authenticator` (alag page), `/account/devices`; recovery codes bina tick ke chhodne pe warning; My Devices me saare apps + IP, confirm sirf "all other devices" pe; step-up dialog bina auto-submit; QR `qrcode.react` | Phone ke dialog me QR + 2 fields + codes tang; codes ek hi baar dikhte hain; phone pe apni hi screen ka QR scan nahi hota (isliye `otpauth://` link) | ARCHITECTURE §9.2; TASKS T6.1 |
 | 2026-10-27 | Identity ka live deploy fix aur T2.5 seedha `prerelease` pe, bina feature branch (owner, is baar ke liye)                                                                                                                                                                                                                                                                                                                                                                                                                        | Owner ne kaha                                                                                                                                                                                                                                                                                                                                                               | HANDOFF §4                                              |
 | 2026-11-03 | LinkedIn posts repo me `linkedin-posts/` (date ke folder, HISTORY, PDF carousel 1080×1350, images insaan doosre AI se); `/linkedin-post` skill draft banata hai, post insaan khud (koi API/browser automation nahi) | Bina kharche aur LinkedIn terms ke risk ke daily updates | linkedin-posts/README.md |
+| 2026-11-03 | `linkedin-posts/` ki post files seedha `prerelease` pe push, bina branch/PR (README/skill ka badlav PR se) | Roz ki PR bhaari; sirf docs, code nahi | RULES §2, linkedin-posts/README.md §6 |
 
 ## 2. Pichhle kaam se seekhe sabak
 
@@ -188,3 +189,4 @@
 | v1.36   | 2026-10-31 | Decision: forms + auth-ui (packages ka order, sign-in/sign-up apps, `next`, cart sign-in ke saath, idle notice, admin live, Playwright). |
 | v1.37   | 2026-11-03 | Decision: customer account screens (pages, set-up page, leave warning, My Devices, step-up, QR library). |
 | v1.38   | 2026-11-03 | Decision: LinkedIn posts (`linkedin-posts/`, `/linkedin-post` skill). |
+| v1.39   | 2026-11-03 | Decision: LinkedIn post files seedha `prerelease` pe push. |

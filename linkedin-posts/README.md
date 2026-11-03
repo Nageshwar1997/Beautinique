@@ -1,6 +1,6 @@
 # LinkedIn posts — Beautinique
 
-> **Status:** v1.1 (2026-11-03). Project ke build-in-public LinkedIn posts: har post ka text, hashtags aur
+> **Status:** v1.2 (2026-11-03). Project ke build-in-public LinkedIn posts: har post ka text, hashtags aur
 > PDF carousel ke slides (prompt + alt text) yahan date ke folder me rehte hain. Post insaan khud
 > LinkedIn pe karta hai; koi API ya browser automation nahi.
 
@@ -66,12 +66,13 @@ Naye Claude Code session me (worktree me, taaki chal rahi feature branch pe asar
 4. Insaan text review karta hai, images banata hai → Claude PDF banata hai (`ready`).
 5. Insaan LinkedIn pe post/schedule karta hai → Claude ko batata hai → `scheduled` / `posted`, link, aur
    "kahan tak cover hua" aage.
-6. Commit: `prerelease` se `feat/linkedin-<date>` branch → PR (§6 ka faisla hone tak).
+6. Commit: post ki files seedha `prerelease` pe push (§6).
 
-## 6. Khula sawal (owner)
+## 6. Commit ka faisla (owner, 2026-11-03)
 
-- Roz ki files kaise jaayengi: `prerelease` pe seedha push (1–10 files, format check ke baad; recommended)
-  ya har post ki PR. Jab tak faisla nahi, har post ki PR.
+- Post ki files (`linkedin-posts/` ke andar: post, hashtags, carousel, HISTORY) **seedha `prerelease` pe push**, bina
+  branch/PR. Pehle `git pull --rebase` aur `npm run format:check`. README ya skill ka badlav normal PR se
+  ([RULES §2](../docs/RULES.md)).
 
 ## Change log
 
@@ -79,3 +80,4 @@ Naye Claude Code session me (worktree me, taaki chal rahi feature branch pe asar
 | ------- | ---------- | ------------------------------------------------------------------------------------------ |
 | v1      | 2026-11-03 | Pehla version: dhaancha, post/carousel ke niyam, skill process.                            |
 | v1.1    | 2026-11-03 | Status table, repo link, slide order, style line, PDF fit, folder naam, commit ka tareeka. |
+| v1.2    | 2026-11-03 | §6: post ki files seedha `prerelease` pe push (owner ka faisla).                           |
