@@ -1,6 +1,6 @@
 # LinkedIn posts — Beautinique
 
-> **Status:** v1.5 (2026-11-03). Project ke build-in-public LinkedIn posts: har post ka text, hashtags aur
+> **Status:** v1.7 (2026-11-03). Project ke build-in-public LinkedIn posts: har post ka text, hashtags aur
 > PDF carousel ke slides (prompt + alt text) yahan date ke folder me rehte hain. Post insaan khud
 > LinkedIn pe karta hai; koi API ya browser automation nahi.
 
@@ -31,6 +31,8 @@ linkedin-posts/
 ## 3. Post ke niyam
 
 - Pehli 2 lines hook (LinkedIn "...see more" se pehle itna hi dikhata hai).
+- Hook ke baad hamesha `𝗔𝗯𝗼𝘂𝘁 𝘁𝗵𝗲 𝗽𝗿𝗼𝗷𝗲𝗰𝘁:` wali ek line, har post me same ([_template/post.md](_template/post.md);
+  owner, 2026-11-03), taaki naya reader samjhe Beautinique kya hai. Facts PRD §1 se.
 - 120–220 words; 3–4 bullets saadi bhasha me (user/developer ab kya kar sakta hai), din ki ek seekh,
   end me repo link: https://github.com/Nageshwar1997/Beautinique. Limit 3000 characters.
 - Koi secret, email, internal URL, personal data ya hype words nahi. Facts sirf PRs/commits se; jo bana
@@ -54,12 +56,13 @@ linkedin-posts/
   3. 2–4 slides: kya bana (har slide ek baat)
   4. Din ki seekh
   5. Aakhri: repo link + follow
-- **Prompt blocks:** `carousel.md` me ` ```text ` blocks (copy button). Upar ek **Common prompt** block, saare
-  posts me same ([\_template/carousel.md](_template/carousel.md)): "Create exactly ONE image" (ek prompt = ek
-  image, 4 variants nahi), size (landscape 16:9), style line aur layout niyam (text baayein, picture daayein, bada headline: phone pe
-  page ~400 px ooncha dikhta hai), taaki saari
-  slides aur saare posts ek jaise dikhen. Brand color rose `#D6336C` (`packages/frontend/styles`). Har slide
-  ke block me sirf layout aur exact text; image tool me pehle common block, phir slide ka block.
+- **Prompt blocks:** `carousel.md` me har slide ka ek ` ```text ` block (copy button), poora self-contained taaki ek click
+  me copy ho (owner, 2026-11-03). Block ki pehli 4 lines saare posts me same
+  ([_template/carousel.md](_template/carousel.md)): "Create exactly ONE image" (ek prompt = ek image, 4 variants
+  nahi), size (landscape 16:9), style line aur layout niyam (text baayein, picture daayein, bada headline: phone
+  pe page ~400 px ooncha dikhta hai), taaki saari slides aur saare posts ek jaise dikhen. Brand color rose
+  `#D6336C` (`packages/frontend/styles`). Phir us slide ki `Layout:` aur `Text:` lines (exact text; spelling
+  check isi se).
 - Images insaan doosre AI tool se banata hai. Slide pe text ho to prompt me exact text quotes me, kam words;
   image banne ke baad spelling check. Images banane ke common steps: [IMAGES.md](IMAGES.md) (har
   `carousel.md` me sirf uska link).
@@ -97,3 +100,5 @@ Naye Claude Code session me (worktree me, taaki chal rahi feature branch pe asar
 | v1.3    | 2026-11-03 | §4: common + slide prompt blocks, ek prompt = ek image, images 3:4 (Flow), files `1.jpg` ...; steps `IMAGES.md` me. |
 | v1.4    | 2026-11-03 | §4: carousel 16:9 (1920 × 1080), mobile feed me poori chaudai; layout niyam (owner ka faisla).                      |
 | v1.5    | 2026-11-03 | §3: section titles Unicode bold me, baaki text normal (owner ka faisla).                                            |
+| v1.6    | 2026-11-03 | §4: har slide ka prompt block poora (common + layout + text), ek click copy (owner ka faisla).                      |
+| v1.7    | 2026-11-03 | §3: har post me hook ke baad "About the project" line (owner ka faisla).                                            |
