@@ -1,7 +1,7 @@
 ---
 date: 2026-11-03
 day: 1
-status: draft # draft | ready | scheduled | posted (README §2)
+status: ready # draft | ready | scheduled | posted (README §2)
 posted_at:
 link:
 covers: 'PR #1, #2, #3 (Phase 0 part), #8' # Phase 0 commits 3879a7b..c3affa8, plus 215c324 (git flow)
