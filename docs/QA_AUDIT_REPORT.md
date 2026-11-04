@@ -1,6 +1,6 @@
 # QA AUDIT REPORT — BQ
 
-> **Status:** v0.5 (2026-11-04). Audit base: `origin/prerelease` @ `ee7f46a` (`ee7f46ae7b2605d99f6b4497d26303aa109fb371`). Auditor: Claude Code (Opus 5.5, `claude-opus-5-5`). Ye report audit ki single source of truth hai; fixes alag se, ek-ek karke.
+> **Status:** v0.8 (2026-11-04). Audit base: `origin/prerelease` @ `ee7f46a` (`ee7f46ae7b2605d99f6b4497d26303aa109fb371`). Auditor: Claude Code (Opus 5.5, `claude-opus-5-5`). Ye report audit ki single source of truth hai; fixes alag se, ek-ek karke.
 
 ## 0. Audit state (har session ke aakhir me update)
 
@@ -11,12 +11,12 @@
   - Public report me security detail: **live pe exploitable khule findings redact** (class, impact, severity, `file:line`); poora repro sirf chat me, fix release ke baad report me. Baaki poori detail.
   - Failure injection: **alag throwaway containers** (pehle se downloaded images, `127.0.0.1`, doosre ports, `--rm`); saanjhe Mongo/Valkey/Mailpit kabhi band nahi.
   - **Owner ki do aur hidayatein (2026-11-04):** (1) har feature ko jitna ho sake todne ki koshish (adversarial; phir bhi sirf local, burst ≤ 100, production off-limits). (2) Owner ke "acceptable" faislon pe bhi sawal uthao: rakhne se kya hoga, fix karna chahiye ya nahi. Ye §9 me `DR-<NNN>` (decision review) rows: bug count me nahi, faisla owner ka. CLAUDE.md ke frozen niyam (mobile messaging, app ki bhasha) is se bahar (CLAUDE.md ki precedence).
-- **Ho chuke modules:** M0, M1, M2 (2026-11-04) | **Chalu:** koi nahi | **Agla:** M3 Identity: sessions and tokens
+- **Ho chuke modules:** M0, M1, M2, M3, M4 (2026-11-04) | **Chalu:** koi nahi | **Agla:** M5 Identity: RBAC and admin actions
 - **QA infra (local, is session ka):** throwaway containers `bq-qa-valkey` (127.0.0.1:6390) aur `bq-qa-mailpit` (127.0.0.1:8035, API `/api/v1`), QA bundle `scratchpad/m1/qa-backend.ts` (gateway 8190, fake OAuth 8196, DBs `bq_qa_m1a_{identity,notify,core}`, origin secret scratchpad me). Session khatam pe: bundle band, `docker stop bq-qa-valkey bq-qa-mailpit` (`--rm`), `bq_qa_*` DBs drop. Live GETs: 12/15 use hue (M1).
 - **Base SHA:** skill ka snapshot `f271b31` tha; `origin/prerelease` ab `ee7f46a` hai. Beech me sirf `ca61487` (`/qa-audit` skill) + merge `ee7f46a` (PR #53): koi code nahi badla, kisi module ko dobara nahi dekhna. Worktree `prerelease` @ `ee7f46a`, `git status` saaf (report ke alawa).
 - **Khule blockers:** koi nahi.
 - **Note (local):** `.claude/worktrees/comprehensive-qa-audit-b02e4c` (git ke `info/exclude` me) aur kai `kilo` worktrees laptop pe hain; audit inhe nahi chhoota, aur repo-wide search me `.claude/worktrees` ko bahar rakhta hai (is folder ka asar: QA-TOOL-001).
-- **Note (M0, 2026-11-04 14:57:22):** `npm test` ke aakhri hisse me `docs/QA_AUDIT_REPORT.md` git index me **staged** ho gayi (`??` → `A`). Repo ka koi test asli repo me `git` nahi chalata (saare git calls temp fixture repos me: `scripts/mutation/test/mutation.test.ts:141`, `scripts/packages/test/e2e.test.ts:38`, `scripts/packages/test/helpers.ts:61`), aur us waqt sirf identity ke tests chal rahe the (git nahi chhoote). Baad me pata chala: 15:19 IST pe commit `0b8353f` ("docs: add QA audit report document", author Nageshwar) `prerelease` pe bana (local, push nahi): staging aur commit insaan/tool ka tha, Claude ka nahi. Skill ke hisaab se audit ki branch `feat/qa-audit` hai; ye faisla owner ka.
+- **Note (M0, 2026-11-04 14:57:22):** `npm test` ke aakhri hisse me `docs/QA_AUDIT_REPORT.md` git index me **staged** ho gayi (`??` → `A`). Repo ka koi test asli repo me `git` nahi chalata (saare git calls temp fixture repos me: `scripts/mutation/test/mutation.test.ts:141`, `scripts/packages/test/e2e.test.ts:38`, `scripts/packages/test/helpers.ts:61`), aur us waqt sirf identity ke tests chal rahe the (git nahi chhoote). Baad me pata chala: 15:19 IST pe commit `0b8353f` ("docs: add QA audit report document", author Nageshwar) `prerelease` pe bana (local, push nahi): staging aur commit insaan/tool ka tha, Claude ka nahi. **Owner (2026-11-04): report `feat/qa-audit` branch pe rahegi**; `0b8353f` usi branch pe gaya aur local `prerelease` wapas `origin/prerelease` (`ee7f46a`) pe. Push/PR owner ke kehne pe.
 - **Gitleaks `dir` scan (M0):** working folder ke scan ne laptop ki gitignored `.env`/`.env.production` files bhi padhi (gitleaks ne, Claude ne nahi). Report me sirf path + rule dekhe, values kabhi nahi; JSON report turant mitayi. Aage sirf `gitleaks git` (tracked history) chalega.
 
 ## 1. Project Overview
@@ -49,21 +49,21 @@
 
 | Metric                                 | Count                                      |
 | -------------------------------------- | ------------------------------------------ |
-| Modules                                | 16 (M0–M15); ho chuke: 3 (M0–M2)           |
+| Modules                                | 16 (M0–M15); ho chuke: 5 (M0–M4)           |
 | Features (inventory, §3)               | 97                                         |
 | Planned test cases                     | 248 (planned-executed 223, planned-static 25) |
-| Executed                               | 69                                         |
-| Static-only                            | 7                                          |
-| PASS                                   | 73                                         |
-| FAIL                                   | 3                                          |
+| Executed                               | 94                                         |
+| Static-only                            | 8                                          |
+| PASS                                   | 98                                         |
+| FAIL                                   | 4                                          |
 | BLOCKED                                | 0                                          |
-| NOT TESTED                             | 172                                        |
+| NOT TESTED                             | 146                                        |
 | NEEDS CLARIFICATION                    | 0                                          |
 | NOT IMPLEMENTED (roadmap)              | 10 (§7 list)                               |
 | KNOWN                                  | 10 (§2a)                                   |
-| Bugs P0 / P1 / P2 / P3 / P4            | 0 / 0 / 1 / 2 / 1                          |
-| Confirmed (E1–E3) / Suspected (E4)     | 4 / 0                                      |
-| Decision reviews (DR, §9)              | 5                                          |
+| Bugs P0 / P1 / P2 / P3 / P4            | 0 / 1 / 1 / 2 / 1                          |
+| Confirmed (E1–E3) / Suspected (E4)     | 5 / 0                                      |
+| Decision reviews (DR, §9)              | 6                                          |
 
 ## 2a. Baseline: checks aur known issues
 
@@ -130,22 +130,22 @@ Abhi sab `NOT TESTED` (Gate 1). Status ke saath `Executed`/`Static` module ke ba
 | M2 Identity auth | Sign-in sirf grant wale app me | T3.3 | PASS | Executed | | customer account admin/seller me `INVALID_CREDENTIALS` (galat password jaisa) |
 | M2 Identity auth | Email normalization | T3.1 | PASS | Executed | | trim + lower-case; Unicode/fullwidth/quoted/trailing-dot reject; plus-address alag account |
 | M2 Identity auth | Input validation + error envelope | T3.1 | PASS | Executed | | NoSQL-style objects 400, extra fields hat jaate; hash queue flood (DR-004) |
-| M3 Sessions | ES256 keys, JWKS, rotation | T3.2 | NOT TESTED | | | |
-| M3 Sessions | Refresh rotation + reuse detection + concurrent tabs | T3.2 | NOT TESTED | | | |
-| M3 Sessions | Per-app cookies (flags, prefix, hint cookie) | T3.2, TASKS C.1 | NOT TESTED | | | |
-| M3 Sessions | CSRF stance (SameSite + Origin) | T3.2 | NOT TESTED | | | |
-| M3 Sessions | Logout, end-others, end one session (IDOR) | T3.2 | NOT TESTED | | | |
-| M3 Sessions | My Devices (privacy) | T3.2 | NOT TESTED | | | |
-| M3 Sessions | Idle timeout, max lifetime | T3.2 | NOT TESTED | | | |
-| M3 Sessions | Step-up (5 min window, binding) | T3.3 PR C | NOT TESTED | | | |
-| M3 Sessions | Signed-in authenticator (enroll, confirm, new codes, disable) | T3.1 (PR #38) | NOT TESTED | | | |
-| M4 OAuth | Providers list, start (state, PKCE, LinkedIn no-PKCE) | T3.1 PR 4 | NOT TESTED | | | |
-| M4 OAuth | Callback (trip binding, single use, expiry, missing cookie) | T3.1 PR 4 | NOT TESTED | | | |
-| M4 OAuth | Account linking (verified email only) | T3.1 PR 4 | NOT TESTED | | | |
-| M4 OAuth | New-account consent (`/auth/oauth/sign-up`, `/sign-up/finish`) | T3.1 PR 4 | NOT TESTED | | | |
-| M4 OAuth | `#totp=<loginId>` for authenticator accounts | T3.1 PR 4 | NOT TESTED | | | |
-| M4 OAuth | Sign-in methods remove (last method, step-up decision) | T3.1 PR 4 | NOT TESTED | | | |
-| M4 OAuth | Provider errors, unknown provider, non-customer app | T3.1 PR 4 | NOT TESTED | | | |
+| M3 Sessions | ES256 keys, JWKS, rotation | T3.2 | PASS | Static + Executed | | 30 din rotation, 31 din JWKS me; private key sealed; JWKS sirf internal |
+| M3 Sessions | Refresh rotation + reuse detection + concurrent tabs | T3.2 | FAIL | Executed | QA-ID-001 | rotation + 10 s parallel-tab (409) + seedha reuse PASS; reuse detection ka bypass (P1) |
+| M3 Sessions | Per-app cookies (flags, prefix, hint cookie) | T3.2, TASKS C.1 | PASS | Executed | | at Lax 10 min, rt Strict `/api/v1/auth` 30 din, dono HttpOnly+Secure, Domain nahi; hint = "1" |
+| M3 Sessions | CSRF stance (SameSite + Origin) | T3.2 | PASS | Executed + Static | | M1 TC-GW-007 + `X-BQ-App` custom header + SameSite |
+| M3 Sessions | Logout, end-others, end one session (IDOR) | T3.2 | PASS | Executed | | doosre ka session id = `{ended:false}`, random jaisa; koi asar nahi |
+| M3 Sessions | My Devices (privacy) | T3.2 | PASS | Executed | | sirf apne sessions; device + IP (owner ka faisla, 2026-11-03) |
+| M3 Sessions | Idle timeout, max lifetime | T3.2 | PASS | Executed | | expired session ka refresh 401; access token apne 10 min tak (design); internal idle M12 me |
+| M3 Sessions | Step-up (5 min window, binding) | T3.3 PR C | PASS | Executed | | `su` claim, session-bound, galat tries lock me gine jaate |
+| M3 Sessions | Signed-in authenticator (enroll, confirm, new codes, disable) | T3.1 (PR #38) | PASS | Executed | | confirm password maangta; naye codes pe purane band; security emails aate |
+| M4 OAuth | Providers list, start (state, PKCE, LinkedIn no-PKCE) | T3.1 PR 4 | PASS | Executed | | state 43 chars, S256 (Google/GitHub), LinkedIn bina PKCE/nonce (owner ka faisla, MEMORY 2026-11-03); state cookie HttpOnly+Secure+Lax, Path `/api/v1/auth/oauth`, 10 min |
+| M4 OAuth | Callback (trip binding, single use, expiry, missing cookie) | T3.1 PR 4 | PASS | Executed | | login CSRF, replay, bina cookie, expired: sab `/sign-in?oauth=expired`, koi session nahi |
+| M4 OAuth | Account linking (verified email only) | T3.1 PR 4 | PASS | Executed | | unverified (Google) → `email-unverified`; GitHub unverified primary → `failed`; verified → link + sign-in |
+| M4 OAuth | New-account consent (`/auth/oauth/sign-up`, `/sign-up/finish`) | T3.1 PR 4 | PASS | Executed | | consent zaroori, ticket ek baar, sirf usi browser me |
+| M4 OAuth | `#totp=<loginId>` for authenticator accounts | T3.1 PR 4 | PASS | Executed | | session TOTP ke baad hi |
+| M4 OAuth | Sign-in methods remove (last method, step-up decision) | T3.1 PR 4 | PASS | Executed | | aakhri method 409 `LAST_SIGN_IN_METHOD`; bina step-up hatana = DR-006 |
+| M4 OAuth | Provider errors, unknown provider, non-customer app | T3.1 PR 4 | PASS | Executed | | cancel → `oauth=cancelled`; anjaan provider 400; admin 403 |
 | M5 RBAC | Roles seed + `rbac-sync` idempotent | T3.3 | NOT TESTED | | | |
 | M5 RBAC | Route × actor matrix (13 `iam`/permission routes) | T3.3 | NOT TESTED | | | |
 | M5 RBAC | `scopeWithin`, self-grant, `appointedBy`, Master via API | T3.3 | NOT TESTED | | | |
@@ -301,39 +301,39 @@ Plan: **E** = planned-executed (local stack, HTTP, browser, scratch script), **S
 
 **M3 Identity: sessions (`ID`, 15)**
 
-| TC | Case | Type | Plan |
-| -- | ---- | ---- | ---- |
-| TC-ID-026 | ES256 key, JWKS, `kid`, rotation | Sec | E |
-| TC-ID-027 | Access token claims (`aud`, `exp`, `sid`, `av`) | Sec | E |
-| TC-ID-028 | Refresh rotation; purana refresh dobara → family band + `identity.session.reuseDetected` | Sec | E |
-| TC-ID-029 | Do tabs ek saath refresh: docs ka irada | R | E |
-| TC-ID-030 | Cookie flags: HttpOnly, Secure, SameSite, Path, Domain nahi, `__Host-` | Sec | E |
-| TC-ID-031 | Session hint cookie me kya hai | Sec | E |
-| TC-ID-032 | CSRF: cross-site POST/DELETE cookies ke saath | Sec | E |
-| TC-ID-033 | Logout: cookies saaf, refresh bekaar, access token Redis me band | Sec | E |
-| TC-ID-034 | `end-others` | F | E |
-| TC-ID-035 | `DELETE /auth/sessions/:sessionId` doosre user ka id (IDOR) | Sec | E |
-| TC-ID-036 | My Devices: sirf apne devices, IP/UA privacy | Sec | E |
-| TC-ID-037 | Idle timeout, server-side max lifetime | Sec | E |
-| TC-ID-038 | Step-up: 5 min, doosre session/user me nahi chalta; recovery code se step-up | Sec | E |
-| TC-ID-039 | Ek app ki cookie doosre app me | Sec | E |
-| TC-ID-040 | Password badla / authenticator badla → doosre sessions + security email | Sec | E |
+| TC | Case | Type | Plan | Result |
+| -- | ---- | ---- | ---- | ------ |
+| TC-ID-026 | ES256 key, JWKS, `kid`, rotation | Sec | E | PASS (Static + Executed) |
+| TC-ID-027 | Access token claims (`aud`, `exp`, `sid`, `av`) | Sec | E | PASS (Executed): iss, sub, aud, iat, exp (600 s), sid, amr, av, su |
+| TC-ID-028 | Refresh rotation; purana refresh dobara → family band + `identity.session.reuseDetected` | Sec | E | FAIL (Executed, 2/2): QA-ID-001; seedha reuse PASS (session band + email) |
+| TC-ID-029 | Do tabs ek saath refresh: docs ka irada | R | E | PASS (Executed): 409, cookies nahi |
+| TC-ID-030 | Cookie flags: HttpOnly, Secure, SameSite, Path, Domain nahi, `__Host-` | Sec | E | PASS (Executed) |
+| TC-ID-031 | Session hint cookie me kya hai | Sec | E | PASS (Executed): `"1"`, HttpOnly nahi (UI hint), koi data nahi |
+| TC-ID-032 | CSRF: cross-site POST/DELETE cookies ke saath | Sec | E | PASS (Executed M1 + Static) |
+| TC-ID-033 | Logout: cookies saaf, refresh bekaar, access token Redis me band | Sec | E | PASS (Executed, M1) |
+| TC-ID-034 | `end-others` | F | E | PASS (Executed) |
+| TC-ID-035 | `DELETE /auth/sessions/:sessionId` doosre user ka id (IDOR) | Sec | E | PASS (Executed) |
+| TC-ID-036 | My Devices: sirf apne devices, IP/UA privacy | Sec | E | PASS (Executed) |
+| TC-ID-037 | Idle timeout, server-side max lifetime | Sec | E | PASS (Executed, QA DB me expiry khiska ke) |
+| TC-ID-038 | Step-up: 5 min, doosre session/user me nahi chalta; recovery code se step-up | Sec | E | PASS (Executed) |
+| TC-ID-039 | Ek app ki cookie doosre app me | Sec | E | PASS (Executed, M1) |
+| TC-ID-040 | Password badla / authenticator badla → doosre sessions + security email | Sec | E | PASS (Executed): reset pe sessions band; authenticator + recovery code emails |
 
 **M4 Identity: OAuth (`ID`, 11)** (sirf `scripts/e2e/fake-oauth.ts`)
 
-| TC | Case | Type | Plan |
-| -- | ---- | ---- | ---- |
-| TC-ID-041 | Providers list (customer), doosre app se | F | E |
-| TC-ID-042 | Start: state + PKCE (Google, GitHub); LinkedIn bina PKCE (state/nonce) | Sec | E |
-| TC-ID-043 | Callback: state galat, cookie missing, replay, expired trip | Sec | E |
-| TC-ID-044 | Trip browser cookie se bandha (doosre browser me callback) | Sec | E |
-| TC-ID-045 | Linking sirf verified email; GitHub unverified/secondary; provider pe badla email | Sec | E |
-| TC-ID-046 | `/sign-up/finish` consent; sign-up token single use + expiry | Sec | E |
-| TC-ID-047 | Authenticator wale account pe `#totp=<loginId>` | F/Sec | E |
-| TC-ID-048 | Sign-in method hatana: aakhri nahi hatta; step-up ka faisla (§9) | Sec | E |
-| TC-ID-049 | Provider error, `access_denied`, anjaan provider | N | E |
-| TC-ID-050 | OAuth ke raaste `next` open redirect | Sec | E |
-| TC-ID-051 | Non-customer app se OAuth start | Sec | E |
+| TC | Case | Type | Plan | Result |
+| -- | ---- | ---- | ---- | ------ |
+| TC-ID-041 | Providers list (customer), doosre app se | F | E | PASS (Executed) |
+| TC-ID-042 | Start: state + PKCE (Google, GitHub); LinkedIn bina PKCE (state/nonce) | Sec | E | PASS (Executed) |
+| TC-ID-043 | Callback: state galat, cookie missing, replay, expired trip | Sec | E | PASS (Executed) |
+| TC-ID-044 | Trip browser cookie se bandha (doosre browser me callback) | Sec | E | PASS (Executed) |
+| TC-ID-045 | Linking sirf verified email; GitHub unverified/secondary; provider pe badla email | Sec | E | PASS (Executed) |
+| TC-ID-046 | `/sign-up/finish` consent; sign-up token single use + expiry | Sec | E | PASS (Executed) |
+| TC-ID-047 | Authenticator wale account pe `#totp=<loginId>` | F/Sec | E | PASS (Executed) |
+| TC-ID-048 | Sign-in method hatana: aakhri nahi hatta; step-up ka faisla (§9) | Sec | E | PASS (Executed); DR-006 |
+| TC-ID-049 | Provider error, `access_denied`, anjaan provider | N | E | PASS (Executed) |
+| TC-ID-050 | OAuth ke raaste `next` open redirect | Sec | E | PASS (Executed): 7 `next` attacks, location hamesha same-origin path; `/%2F%2F…` literal rehta hai, frontend ka decode M10/M11 me |
+| TC-ID-051 | Non-customer app se OAuth start | Sec | E | PASS (Executed, M1 TC-GW-009) |
 
 **M5 Identity: RBAC (`ID`, 15)**
 
@@ -535,6 +535,24 @@ Plan: **E** = planned-executed (local stack, HTTP, browser, scratch script), **S
 
 ## 4. Bug Report
 
+### [QA-ID-001] Refresh-token reuse detection can be bypassed, so a copied refresh token keeps the session without any alert
+
+**Module:** M3 Identity sessions | **Feature:** refresh rotation + reuse detection | **Task/Doc:** T3.2; ARCHITECTURE §7.2 (line 277: "Purana token dobara use hua to poori family revoke ho jati hai aur security alert jata hai"); `backend/identity/README.md` §Sessions ("baad me = chori: session band ... email")
+**Severity:** P1 (ek security control kaafi kamzor: chori pakadne wala control ek aasaan refresh sequence se bekaar) | **Priority:** High | **Status:** Open
+**Testing Type:** Security | **Evidence level:** E1 | **Reproducibility:** Always (2/2) | **Environment:** local QA bundle (`ee7f46a`); live pe bhi yahi code (T3.2 live)
+**Description:** **Live pe khula, isliye Q-003 ke hisaab se repro yahan nahi (owner ko chat me diya gaya; fix release ke baad yahan jodna).** Class: refresh-token reuse detection ka scope bahut chhota hai. Jiske paas kisi ka refresh token ki copy ho, wo ek khaas refresh sequence se aisi halat bana sakta hai jisme asli user ka purana token wapas aane pe sirf chupchaap `SESSION_EXPIRED` milta hai: session band **nahi** hota, `identity.session.reuseDetected` event aur "We signed you out" email **nahi** jaate, aur copy wale ke paas session poori umar (customer: 30 din sliding, max 90) chalta rehta hai (refresh 200, `/iam/me` 200). Asli user ko lagta hai bas sign-out ho gaya. Precondition: refresh token ki copy (HttpOnly + Secure + SameSite=Strict + Path `/api/v1/auth` cookie: malware, device access, logs).
+**Steps to Reproduce:** Owner ke paas (chat, 2026-11-04). Script: `scratchpad/m3/probe-m3a.mjs` (local).
+**Expected Result:** Session ka koi bhi purana (current ke alawa, aur 10 s parallel-tab window ke bahar) refresh token = reuse → session band + event + email (ARCHITECTURE §7.2).
+**Actual Result:** Sirf ek khaas purana token reuse ginta hai; baaki chupchaap `SESSION_EXPIRED`, aur session copy wale ke paas zinda.
+**Evidence:** `scratchpad/m3/m3a.out`, `m3a-thief2.out`: dono runs me owner ka purana token → 401 `SESSION_EXPIRED`, copy wale ka refresh 200 + `/iam/me` 200, owner ke inbox me sirf sign-up email.
+**Root Cause:** Reuse check ka scope (`backend/identity/src/sessions.ts:386-388`) aur session record jo reuse pehchaanne ke liye rakha jaata hai (`:90-92`).
+**Affected Files:** `backend/identity/src/sessions.ts:90`, `:386`
+**Recommended Fix:** Session ke saare jaari kiye refresh tokens ko ek family/generation se pehchano (jaise token me generation number, ya jaari hashes ka chhota set), aur current ke alawa koi bhi token (10 s parallel-tab window ko chhod ke) = reuse → session band + event + email.
+**Fix route (RULES §2):** branch + PR (auth logic); badli lines ke mutations zaroori (RULES §6 authz/login).
+**Regression Risk:** Medium: parallel tabs (409) ka behaviour na toote.
+**Regression test to add:** Integration: woh sequence (fix PR me) → session band + event; plus parallel-tab 409 test waisa hi.
+**Owner decision needed:** Nahi
+
 ### [QA-GW-001] Signed-in requests hang for as long as Redis stalls instead of failing fast with 503
 
 **Module:** M1 Gateway | **Feature:** access check (sessions) | **Task/Doc:** T2.2, T3.2; `backend/gateway/README.md` §"Har request" item 5 ("Redis ya JWKS na mile = 503"); `packages/backend/server-queue/src/redis.ts:63-65` ("Commands fail fast while Redis is away ... answer 503 instead of hanging")
@@ -611,11 +629,12 @@ Plan: **E** = planned-executed (local stack, HTTP, browser, scratch script), **S
 
 | ID | OWASP Top 10 (2021) / ASVS 4.0 | Severity | Live pe exposed? | Note |
 | -- | ------------------------------ | -------- | ---------------- | ---- |
+| QA-ID-001 | A07 Identification and Authentication Failures / ASVS V3.5 (token-based session: refresh rotation) | P1 | Haan (refresh token ki copy ho to); repro redacted (Q-003) | Chori pakadne ka control bypass |
 | QA-GW-002 | A07 Identification and Authentication Failures / ASVS V3.3 (session termination) | P4 (latent) | Nahi (aaj har signed-in route identity ka; identity DB se rokti hai) | Pehla non-identity `signed-in` route aate hi P1 |
 | QA-GW-001 | A04 Insecure Design (availability) / ASVS V1.11 | P2 | Haan, agar Render Key Value atke (band nahi) | fail-closed hi rehta hai, data leak nahi |
 | QA-KRN-001 | A04 (availability) | P3 | Haan, sirf gateway start ke turant baad JWKS fail ho | jhootha sign-out |
 
-**PASS hue controls (M1, executed):** origin secret (8 galat values; timing-safe static), app allow-list + CSRF (Host/x-forwarded-host/Origin, 29 cases), fail-closed 401 (30/30 non-public routes), JWT forgery (`alg:none`, HS256 key confusion, apni ES256 key, embedded `jwk`, tampered claims, galat `kid`/`aud`, junk: 15/15 401), passport (client ka strip; owner seedha bina/forged passport 401), client IP spoofing (XFF, `X-BQ-Client-Ip`, `Forwarded` ignore), rate limits (write/otp/auth budgets, IPv6 /64, IPv4-mapped), `auth`/`otp` fail-closed jab Redis band/atka, request smuggling (9 framing attacks), oversized header/body, path traversal (18 raw paths), security headers (helmet), error envelope, log hygiene, live: `bq-live` `/api` bina secret 403, TLS 1.3. **M2:** OTP (CSPRNG 6-digit, 10 min, 5 tries, resend seema, per-email/ghanta, app binding, replay), enumeration (sign-up/password code/login: same body + same time), argon2id OWASP min, HIBP k-anonymity, lockout, TOTP replay/window, recovery single-use, loginId binding/expiry, grant-based sign-in, email normalization, NoSQL-style input, reset ke baad sessions band, OTP outbox me sealed.
+**PASS hue controls (M1, executed):** origin secret (8 galat values; timing-safe static), app allow-list + CSRF (Host/x-forwarded-host/Origin, 29 cases), fail-closed 401 (30/30 non-public routes), JWT forgery (`alg:none`, HS256 key confusion, apni ES256 key, embedded `jwk`, tampered claims, galat `kid`/`aud`, junk: 15/15 401), passport (client ka strip; owner seedha bina/forged passport 401), client IP spoofing (XFF, `X-BQ-Client-Ip`, `Forwarded` ignore), rate limits (write/otp/auth budgets, IPv6 /64, IPv4-mapped), `auth`/`otp` fail-closed jab Redis band/atka, request smuggling (9 framing attacks), oversized header/body, path traversal (18 raw paths), security headers (helmet), error envelope, log hygiene, live: `bq-live` `/api` bina secret 403, TLS 1.3. **M2:** OTP (CSPRNG 6-digit, 10 min, 5 tries, resend seema, per-email/ghanta, app binding, replay), enumeration (sign-up/password code/login: same body + same time), argon2id OWASP min, HIBP k-anonymity, lockout, TOTP replay/window, recovery single-use, loginId binding/expiry, grant-based sign-in, email normalization, NoSQL-style input, reset ke baad sessions band, OTP outbox me sealed. **M3:** cookie flags/prefixes, refresh rotation, parallel tab 409 (bina cookies), seedha reuse → session band + email, end-others, IDOR (doosre ka session `{ended:false}`), My Devices sirf apne, expiry, step-up (session-bound, `su`, lock me gine jaate), naye recovery codes pe purane band, security emails. **M4:** OAuth state (43 chars) + browser cookie binding (login CSRF band), PKCE S256, trip single-use + expiry, verified-email-only linking (Google `email_verified`, GitHub primary+verified), consent ticket single-use + browser-bound, callback `next` open redirect (7 cases) band, locked account social sign-in band, aakhri method nahi hatta.
 
 ## 6. Performance Findings
 
@@ -663,6 +682,13 @@ Har module ke baad (existing tests + `test/mutations.ts` ke survivors).
 | HIBP 5xx/503 page → "not breached" bina warning (survivor ki wajah me likha) | Fail-open ka log/metric ke bina chhupa raasta | unit |
 | Lock ke dauraan galat tries lock ko phir 1 ghanta badhate hain | DR-003 ka behaviour; faisla jo bhi ho, test me likha ho | integration |
 
+**M3 Identity sessions:**
+
+| Scenario | Kyun zaroori | Test type |
+| -------- | ------------ | --------- |
+| Ek se zyada generation purana refresh token → reuse (session band + event) | QA-ID-001; abhi tests sirf turant-pichhla token jaanchte hain | integration |
+| Doosre user ka session id DELETE → `{ended:false}` aur uska session zinda | IDOR regression | integration |
+
 ## 9. Questions and Unverified Assumptions
 
 | Q-ID  | Sawal | Kyun zaroori | Evidence | Claude ki recommendation | Owner ka jawab |
@@ -678,13 +704,15 @@ Har module ke baad (existing tests + `test/mutations.ts` ke survivors).
 | DR-003 | Lockout account-wide (10 galat / 15 min → 1 ghanta, IP ka hissa nahi) + per-email 5 codes/ghanta (dono owner ke faisle, ARCHITECTURE §7.1) | Rakhne ka asar: koi bhi bina auth kisi ka bhi account 1 ghanta rok sakta hai (10 requests), aur 5 `/auth/password/code` se uska reset raasta bhi ghante bhar band (victim ko 5 emails bhi jaati hain). Lock ke dauraan har 10 try lock ko phir poora ghanta kar dete hain, to har ghante ~15 requests se rok hamesha ke liye. Email code hi ek unlock tha | E1: `scratchpad/m2/m2b.out`: victim reset 429 `OTP_EMAIL_LIMIT`, login 401; lock 20 min → 10 tries ke baad 60 min | Fix karna chahiye: (a) lock IP+account (ya account lock sirf usi IP/device pe), ya progressive delay ki jagah hard lock; (b) lock ke dauraan tries se lock na badhe; (c) per-email code limit me password-reset ka alag, chhota per-IP hissa, taaki attacker victim ka reset na kha sake. Faisla owner ka | — |
 | DR-004 | Argon2 ek waqt me ek hash, 32 se zyada intezaar = 503 (`password.ts:9-38`; 0.1 CPU ki wajah se) + rate limit sirf per IP / IPv6 /64 (owner, 2026-10-25) | Rakhne ka asar: bina auth ~40 parallel galat logins (40 IPs, ya ek IPv6 /56 = 256 /64 buckets) se **saare** sign-in, sign-up verify aur reset 503 ("Too many sign-ins right now") ho jaate hain; asli user ka sahi password bhi. Render 0.1 CPU pe hash dheema, to ye aur sasta. Agar bug maana jaaye to P2 (availability) | E1: `scratchpad/m2/probe-m2d.mjs`: 40 burst → 6×503 aur asli user 503; 60 burst → 27×503 aur asli user 503 | Fix karna chahiye: unauthenticated hash work ka global budget (sab IPs ka), IPv6 ke liye /48 ka doosra coarse bucket `auth`/`otp` pe, aur queue me already-signed-in/known-device ko priority; ya pehle sasta check (lock/grant) phir hash. Faisla owner ka (0.1 CPU trade-off) | — |
 | DR-005 | `/auth/refresh` aur `/auth/logout` bhi `auth` class me: per IP 30 / 5 min (`backend/gateway/src/rate-limits.ts:18`, contracts) | Rakhne ka asar: Indian mobile CGNAT pe ek IPv4 ke peeche sau-sau log hote hain (code comment khud carrier NAT maanta hai). Har khuli app har ~10 min refresh karti hai, to ~60 active users ek IP pe hone se refresh 429 hone lagenge (auth fail-closed), aur users ke sessions toot sakte hain. Login/verify bhi isi bucket me | E1: auth 31st = 429 (TC-GW-022); static budgets | Fix karna chahiye: refresh ko alag class (per session/refresh-token family limit, IP ka bada budget), login/verify ko `auth` me rehne do. Faisla owner ka | — |
+| DR-006 | Social sign-in method (Google/LinkedIn/GitHub) hatana bina step-up (`DELETE /auth/sign-in-methods/:provider`, `write` class). HANDOFF §4 (T3.1 PR 4): "**Claude ka badlav, owner ko batana**"; MEMORY 2026-11-03 decision log me likha, par owner ki manzoori kahin nahi | Rakhne ka asar: 10 min ka chura hua access token wala koi bhi user ka social login hata sakta hai (password bachta hai, aakhri method nahi hatta, security email jaata hai). Naya method jodna is raaste se nahi hota, to takeover nahi; asar sirf pareshani + user ka ek raasta band | E1: `scratchpad/m4/m4.out` (TC-ID-048: remove google 200 bina step-up; aakhri method 409) | Rakh sakte hain (customers ke paas authenticator kam), par behtar: TOTP ke bina accounts ke liye "recent sign-in" (jaise 10 min ke andar password/email code) maango. Owner pehle is badlav ko maane ya badle | — |
 
 ## 10. Recommended Fixing Order
 
-1. **QA-GW-001** (P2): sabse zyada live asar (Redis atke to har signed-in request latakti); kernel + gateway PR.
-2. **QA-KRN-001** (P3): QA-GW-001 jaisa hi "dependency away → 503" ka sawal; dono ek hi PR me ja sakte hain (gateway ka access-check failure handling).
-3. **QA-GW-002** (P4, owner decision): Phase 4 ke pehle `signed-in` route se pehle zaroor; ARCHITECTURE §6.6 ka faisla pehle.
-4. **QA-TOOL-001** (P3): akela chhota fix (`.prettierignore`), kabhi bhi.
+1. **QA-ID-001** (P1): live pe khula security control; sabse pehle, akela PR.
+2. **QA-GW-001** (P2): sabse zyada live asar (Redis atke to har signed-in request latakti); kernel + gateway PR.
+3. **QA-KRN-001** (P3): QA-GW-001 jaisa hi "dependency away → 503" ka sawal; dono ek hi PR me ja sakte hain (gateway ka access-check failure handling).
+4. **QA-GW-002** (P4, owner decision): Phase 4 ke pehle `signed-in` route se pehle zaroor; ARCHITECTURE §6.6 ka faisla pehle.
+5. **QA-TOOL-001** (P3): akela chhota fix (`.prettierignore`), kabhi bhi.
 
 ## Change log
 
@@ -695,3 +723,6 @@ Har module ke baad (existing tests + `test/mutations.ts` ke survivors).
 | v0.3    | 2026-11-04 | M0 Baseline: 13 executed + 3 static, 15 PASS / 1 FAIL; npm test 1720/1720, verify 19 packages, gitleaks history saaf, npm audit sirf KNOWN-01..03. Naya bug QA-TOOL-001 (P3); Q-005 (build flake), PERF-OBS-01. |
 | v0.4    | 2026-11-04 | M1 Gateway: 34 executed + 3 static, 35 PASS / 2 FAIL / 1 NOT TESTED (M5 me); bugs QA-GW-001 (P2), QA-KRN-001 (P3), QA-GW-002 (P4); DR-001, Q-006; 12 live GETs; §5, §8, §10 bhare. |
 | v0.5    | 2026-11-04 | M2 Identity auth: 22 executed + 1 static, 23 PASS / 0 FAIL / 2 NOT TESTED (M5/M12 me); naya bug nahi; DR-002…DR-005 (HIBP fail-open, targeted lockout, hash-queue DoS, CGNAT pe refresh limit). |
+| v0.6    | 2026-11-04 | M3 Identity sessions: 14 executed + 1 static, 14 PASS / 1 FAIL; naya bug QA-ID-001 (P1, refresh reuse detection bypass; repro redacted, Q-003). |
+| v0.7    | 2026-11-04 | M4 OAuth (fake providers): 11 executed, 11 PASS; naya bug nahi; DR-006 (provider hatana bina step-up, owner ki manzoori docs me nahi). |
+| v0.8    | 2026-11-04 | Owner: report ki branch `feat/qa-audit` (§0). |
