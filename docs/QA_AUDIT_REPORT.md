@@ -1,6 +1,6 @@
 # QA AUDIT REPORT — BQ
 
-> **Status:** v0.15 (2026-11-04). Audit base: `origin/prerelease` @ `ee7f46a` (`ee7f46ae7b2605d99f6b4497d26303aa109fb371`). Auditor: Claude Code (Opus 5.5, `claude-opus-5-5`). Ye report audit ki single source of truth hai; fixes alag se, ek-ek karke.
+> **Status:** v0.16 (2026-11-04). Audit base: `origin/prerelease` @ `ee7f46a` (`ee7f46ae7b2605d99f6b4497d26303aa109fb371`). Auditor: Claude Code (Opus 5.5, `claude-opus-5-5`). Ye report audit ki single source of truth hai; fixes alag se, ek-ek karke.
 
 ## 0. Audit state (har session ke aakhir me update)
 
@@ -11,7 +11,8 @@
   - Public report me security detail: **live pe exploitable khule findings redact** (class, impact, severity, `file:line`); poora repro sirf chat me, fix release ke baad report me. Baaki poori detail.
   - Failure injection: **alag throwaway containers** (pehle se downloaded images, `127.0.0.1`, doosre ports, `--rm`); saanjhe Mongo/Valkey/Mailpit kabhi band nahi.
   - **Owner ki do aur hidayatein (2026-11-04):** (1) har feature ko jitna ho sake todne ki koshish (adversarial; phir bhi sirf local, burst ≤ 100, production off-limits). (2) Owner ke "acceptable" faislon pe bhi sawal uthao: rakhne se kya hoga, fix karna chahiye ya nahi. Ye §9 me `DR-<NNN>` (decision review) rows: bug count me nahi, faisla owner ka. CLAUDE.md ke frozen niyam (mobile messaging, app ki bhasha) is se bahar (CLAUDE.md ki precedence).
-- **Ho chuke modules:** M0–M10 (2026-11-04) | **Chalu:** koi nahi | **Agla:** M11 Customer app (browser + QA backend)
+- **Ho chuke modules:** M0–M11 (2026-11-04) | **Chalu:** koi nahi | **Agla:** M12 Admin app (browser + QA backend)
+- **Session 2, M11 (2026-11-04):** QA bundle `scratchpad/m11/qa-backend.ts` ab **port 8080** pe laptop ke public origin secret (`frontend/customer/.env.example` ka `not-a-secret-…`) ke saath, taaki launch.json ka `customer` dev server (3001) bina `.env` padhe usi pe proxy kare (M12 me admin 3003 bhi isi tarah); throwaway Valkey 6390 + Mailpit 8035, fake OAuth 8196, DBs `bq_qa_m11a_*`; helpers `code.mjs` (Mailpit code / TOTP), `device2.mjs` (doosra device), `invite.ts` (Master invitation, QA DBs). Module ke baad sab band: bundle, dev server, `bq_qa_m11a_*` drop, containers stop; scratch secrets mitaye. Customer E2E (`npm run e2e --workspace customer`) chala: 24 pass / 30 skip. Live GETs: abhi bhi 12/15. **M12 me zaroor:** admin invitation accept (`invite.ts`), mandatory authenticator, idle (TC-FE-012 + Q-009), QA-FE-008/009 admin me bhi, admin `vercel.json` (`noindex`, SPA fallback, headers T6.6).
 - **Session 2 (2026-11-04, M10):** sirf playgrounds (components 5184, forms 5185, auth-ui 5186, app-shell 5182; `.claude/launch.json` me styles/icons ke playground nahi, unke checks baaki playgrounds ke axe se) aur ek scratch TCP server (127.0.0.1:8299, jawab nahi deta; band). Koi container ya QA backend nahi chalaya, koi DB nahi bani. Built-in browser pane poore waqt **hidden** raha: screenshots nahi chale aur exit animations rukti hain (dialog band hona/focus wapas aana unit tests pe chhoda); saare checks DOM/JS/axe se. Sab playgrounds band. **M11 me zaroor:** QA-FE-004 ka E1 (QA bundle band karke "Sign out"), QA-FE-001 customer ke root ErrorBoundary me, TC-FE-014 social buttons (fake OAuth), `vercel.json` CSP me `THEME_SCRIPT_HASH`, Q-010 agar slow refresh simulate ho sake. M12 me: TC-FE-012 idle (do tabs, `Date.now` khiska ke) + Q-009.
 - **Session 1 band (2026-11-04, owner ke kehne pe; context 83%):** throwaway containers band, saari `bq_qa_*` DBs drop, koi QA backend nahi chal raha. Agla session `/qa-audit` se M10 (frontend packages, built-in browser + playgrounds) se shuru kare. Session 1 ke probe scripts (`qa-backend.ts`, `lib.mjs`, `probe-*.mjs`) us session ke scratchpad me the: agla session unhe dobara banayega (repo me nahi, skill §3.1). Live GETs: 12/15 use ho chuke (Q-001). P1 QA-ID-001 ka poora repro owner ke paas chat me (Q-003).
 - **M15 ke liye note (M8):** ARCHITECTURE §13 (line ~532) CI me "dependency-cruiser, no-hardcoded-geo lint, no role-name comparisons" kehta hai; `ci.yml` me ye nahi, aur repo me dependency-cruiser config nahi (RULES §4.2 bhi ise naam se kehta hai).
@@ -52,20 +53,20 @@
 
 | Metric                             | Count                                         |
 | ---------------------------------- | --------------------------------------------- |
-| Modules | 16 (M0–M15); ho chuke: 11 (M0–M10) |
+| Modules | 16 (M0–M15); ho chuke: 12 (M0–M11) |
 | Features (inventory, §3)           | 97                                            |
 | Planned test cases | 249 (planned-executed 224, planned-static 25) |
-| Executed | 172 |
-| Static-only | 17 |
-| PASS | 179 |
-| FAIL | 10 |
+| Executed | 196 |
+| Static-only | 15 |
+| PASS | 198 |
+| FAIL | 13 |
 | BLOCKED                            | 0                                             |
-| NOT TESTED | 59 |
+| NOT TESTED | 36 |
 | NEEDS CLARIFICATION                | 0                                             |
-| NOT IMPLEMENTED (roadmap)          | 10 (§7 list)                                  |
+| NOT IMPLEMENTED (roadmap) | 10 (§7 list); 1 test case (TC-CUS-022, T6.6) |
 | KNOWN                              | 10 issues (§2a); 1 test case (TC-ID-066)      |
-| Bugs P0 / P1 / P2 / P3 / P4 | 0 / 1 / 2 / 6 / 3 |
-| Confirmed (E1–E3) / Suspected (E4) | 12 / 0 |
+| Bugs P0 / P1 / P2 / P3 / P4 | 0 / 1 / 4 / 8 / 3 |
+| Confirmed (E1–E3) / Suspected (E4) | 16 / 0 |
 | Decision reviews (DR, §9) | 10 (+ Q-007) |
 
 ## 2a. Baseline: checks aur known issues
@@ -189,11 +190,11 @@ Abhi sab `NOT TESTED` (Gate 1). Status ke saath `Executed`/`Static` module ke ba
 | M10 Frontend pkgs | app-shell (`ServerWake`, `ErrorPage`, theme script) | T6.1, T2.7 | PASS | Executed | QA-FE-005 | asli fetch + atka TCP server: `wakeServer` theek give-up time pe `false`; slow server 8 s pe screen hata; ErrorPage 404/503/error axe 0 (light/dark/high-contrast); stack sirf DEV; theme script hash sahi. Playground ka "No answer" demo kabhi fail nahi hota (QA-FE-005, sirf playground) |
 | M10 Frontend pkgs | auth-ui (guards, `next`, step-up dialog, idle notice, recovery codes, social buttons) | T6.1 | FAIL | Executed (E1) + Static | QA-FE-001, QA-FE-004 | guard deep link (query + hash) → sign-in → wapas; step-up (galat code field pe, sahi pe call dobara); recovery codes (10, tick guard, leave blocker, .txt); axe 0 saare auth pages; `next=/..//x` pe sign-in ke baad crash (QA-FE-001, browser me); logout fail pe bhi signed-out (QA-FE-004); idle + social static (M12/M11 me browser) |
 | M10 Frontend pkgs | styles contrast, icons | T6.1a | PASS | Executed | | 4 playgrounds pe axe color-contrast 0 (light, dark); `contrast="more"` me AAA (`color-contrast-enhanced`) bhi 0; styles 43 + icons 28 tests |
-| M11 Customer       | Har route: SSR/hydration, states, 404, meta/noindex                                               | T6.1, T6.3             | NOT TESTED |                   |                       |                                                                                                                                                                          |
-| M11 Customer       | Auth forms + account pages (flows, double submit, mid-flow nav, expiry)                           | T3.1, T3.2, T6.1       | NOT TESTED |                   |                       |                                                                                                                                                                          |
-| M11 Customer       | Storage, cookies, network, console                                                                | RULES §5.9             | NOT TESTED |                   |                       |                                                                                                                                                                          |
-| M11 Customer       | Responsive × theme, axe, keyboard                                                                 | RULES §1.5, §5.5–5.6   | NOT TESTED |                   |                       |                                                                                                                                                                          |
-| M11 Customer       | `vercel.json` rewrites + security headers; E2E suite                                              | T6.6                   | NOT TESTED |                   |                       |                                                                                                                                                                          |
+| M11 Customer | Har route: SSR/hydration, states, 404, meta/noindex | T6.1, T6.3 | FAIL | Executed | QA-CUS-001, QA-FE-009, QA-FE-007 | 13 routes SSR (curl): sahi status, auth pages `noindex`, asli 404; hydration warning nahi; `/account` ka title "Something went wrong" + `noindex` (QA-CUS-001); `/sign-up/finish` bina ticket "expired" sandesh; server down pe app khule to signed-in pages "Loading" pe atakte (QA-FE-009); 5xx proxy sandesh raw (QA-FE-007) |
+| M11 Customer | Auth forms + account pages (flows, double submit, mid-flow nav, expiry) | T3.1, T3.2, T6.1 | FAIL | Executed (E1) | QA-FE-004, QA-FE-007, QA-FE-008, QA-FE-001 | sign-up (keyboard), password + TOTP + recovery sign-in, social (fake Google) consent, forgot password, authenticator setup, devices, doosre device se session khatam → agli call pe sign-in, 3× Enter = 1 login, 429 sandesh PASS; logout fail pe signed-out (QA-FE-004 E1), raw 502 (QA-FE-007), step focus/announce (QA-FE-008), crafted `next` pe crash (QA-FE-001) |
+| M11 Customer | Storage, cookies, network, console | RULES §5.9 | PASS | Executed | | localStorage sirf `bq-theme`, sessionStorage sirf React Router scroll; cookies: access `__Host-` HttpOnly/Secure/Lax 10 min, refresh `__Secure-` `Path=/api/v1/auth` Strict, hint sirf `1`; har load pe ek `wake` + ek `/iam/me` (dev StrictMode duplicate abort); console me sirf dev/expected errors |
+| M11 Customer | Responsive × theme, axe, keyboard | RULES §1.5, §5.5–5.6 | FAIL | Executed | QA-FE-008 | 13 pages (signed-in + signed-out, error states) axe 0 × light/dark/high-contrast (light+dark); 360/768/1280 overflow nahi; skip link, theme arrows, keyboard sign-up/sign-in; focus step pe nahi jaata (QA-FE-008) |
+| M11 Customer | `vercel.json` rewrites + security headers; E2E suite | T6.6 | PASS (E2E) / NOT IMPLEMENTED (headers, T6.6) | Static + Executed | | `/api` route + `x-origin-secret` transform sahi; security headers NOT IMPLEMENTED (T6.6 `[ ]`, "Security headers baaki"; risk Q-011); E2E: 24 passed, 30 skipped (design: "one screen size is enough here"), 0 fail, 6.0 min; run ki DBs saaf, purani 36 `bq_e2e_*` DBs (adhoore runs) laptop pe padi |
 | M12 Admin          | Sign-in + mandatory authenticator, invitation, forgot password, dashboard, account, idle sign-out | T6.1, RULES §7.1       | NOT TESTED |                   |                       |                                                                                                                                                                          |
 | M12 Admin          | `noindex`, SPA fallback, responsive/theme/axe/keyboard, E2E suite                                 | T6.6                   | NOT TESTED |                   |                       |                                                                                                                                                                          |
 | M13 Shell apps (9) | Build, start, 404, `vercel.json`, dev proxy secret, no fake features                              | T0.2                   | NOT TESTED |                   |                       |                                                                                                                                                                          |
@@ -447,38 +448,38 @@ Plan: **E** = planned-executed (local stack, HTTP, browser, scratch script), **S
 | TC-FE-011 | Step-up dialog | F | E | PASS (Executed): "Get new recovery codes" → confirm → "Confirm it’s you"; `000000` → "That authenticator code is not right." field pe + focus; sahi code → call dobara, naye codes. 5 min ke andar doosra kaam bina dialog = DR-010. Cancel: unit tests |
 | TC-FE-012 | Idle notice 28/30 min, `BroadcastChannel` se cross-tab | F/Sec | E | PASS (Static + 75 tests): clock, renew 25 min, 28 min sawal, 30 min `signOut('idle')` + `timed-out` doosre tabs ko. Playground customer hai (idle nahi), browser test M12 me; naya tab load activity share nahi karta = Q-009 |
 | TC-FE-013 | Recovery codes dikhana/save | F | E | PASS (Executed): 10 unique codes, local/session storage khaali; bina tick "Done" → error + focus; in-app link → "Leave without saving your codes?" (Stay); `.txt` me account email + IST time + codes. Cross-document Back (`beforeunload`) NOT TESTED: JS clicks se user activation nahi |
-| TC-FE-014 | Social buttons | F | E | PASS (Static): href `navigationHref(startSocialSignIn)` + `safeNext`; `#totp=` regex UUID only; playground me social nahi, browser test M11 (customer) me |
+| TC-FE-014 | Social buttons | F | E | PASS (Executed, M11 customer): "Continue with Google" href `/api/v1/auth/oauth/google/start?next=…` (`safeNext`), fake provider → consent → account; `#totp=` regex UUID only (static) |
 | TC-FE-015 | styles contrast spot-check | A11y | E | PASS (Executed): components, forms, auth-ui, app-shell pe axe color-contrast 0 (light, dark); `contrast="more"` light/dark me AAA bhi 0; styles 43 tests |
 | TC-FE-016 | icons | F | E | PASS (Executed): 28 tests; axe runs me icons decorative (`aria-hidden`) |
-| TC-FE-017 | auth-ui sign-out jab `POST /auth/logout` fail ho | Sec | E | FAIL (Static E3): QA-FE-004; playground me network failure simulate nahi hua (axios `Request` pehle se pakadta), E1 M11 me (asli backend band) |
+| TC-FE-017 | auth-ui sign-out jab `POST /auth/logout` fail ho | Sec | E | FAIL (Executed E1, M11, 2 runs): QA-FE-004; UI signed-out, server session zinda (`/iam/me` 200) |
 
 **M11 Customer app (`CUS`, 23)**
 
 | TC         | Case                                                                                                                 | Type | Plan |
 | ---------- | -------------------------------------------------------------------------------------------------------------------- | ---- | ---- |
-| TC-CUS-001 | Har route SSR + hydration, mismatch warning nahi                                                                     | F    | E    |
-| TC-CUS-002 | Loading / empty / error / success states                                                                             | F    | E    |
-| TC-CUS-003 | `/account/*` guard: signed-out deep link → sign-in → safe `next` se wapas                                            | Sec  | E    |
-| TC-CUS-004 | Sign-in (password, code, TOTP)                                                                                       | F    | E    |
-| TC-CUS-005 | Sign-up                                                                                                              | F    | E    |
-| TC-CUS-006 | Sign-up finish (social)                                                                                              | F    | E    |
-| TC-CUS-007 | Forgot password                                                                                                      | F    | E    |
-| TC-CUS-008 | Invitation                                                                                                           | F    | E    |
-| TC-CUS-009 | Account authenticator page                                                                                           | F    | E    |
-| TC-CUS-010 | Account devices page                                                                                                 | F    | E    |
-| TC-CUS-011 | Double submit; back/forward/refresh beech me                                                                         | Ed   | E    |
-| TC-CUS-012 | Action ke beech session khatam                                                                                       | Ed   | E    |
-| TC-CUS-013 | Asli 404 status                                                                                                      | F    | E    |
-| TC-CUS-014 | `/terms`, `/privacy` pe DUMMY label                                                                                  | F    | E    |
-| TC-CUS-015 | Meta tags, `noindex` jahan irada                                                                                     | F    | E    |
-| TC-CUS-016 | `localStorage`/`sessionStorage` me user data nahi                                                                    | Sec  | E    |
-| TC-CUS-017 | Browser me cookie flags                                                                                              | Sec  | E    |
-| TC-CUS-018 | `/iam/me` duplicate nahi, request storm nahi, console saaf                                                           | Perf | E    |
-| TC-CUS-019 | 360 / 768 / 1280 × light / dark (+ high contrast)                                                                    | Resp | E    |
-| TC-CUS-020 | axe 0 violations                                                                                                     | A11y | E    |
-| TC-CUS-021 | Keyboard-only har flow                                                                                               | A11y | E    |
-| TC-CUS-022 | `vercel.json` rewrites + security headers (CSP, HSTS, nosniff, Referrer-Policy, frame-ancestors, Permissions-Policy) | Sec  | S    |
-| TC-CUS-023 | `npm run e2e --workspace customer`                                                                                   | F    | E    |
+| TC-CUS-001 | Har route SSR + hydration, mismatch warning nahi | F | E | PASS (Executed): 13 routes curl se SSR (h1, title, status), har route full load ke baad console me hydration/mismatch warning nahi |
+| TC-CUS-002 | Loading / empty / error / success states | F | E | FAIL (Executed E1): QA-FE-009 (server down/restart ke baad signed-in page "Loading" pe atka), QA-FE-007 (raw "Request failed with status 502"). PASS: loading spinner (SSR account), empty (koi doosra device nahi to "Sign out all other devices" button nahi), error (404, expired sign-up ticket, 429 sandesh), success toasts |
+| TC-CUS-003 | `/account/*` guard: signed-out deep link → sign-in → safe `next` se wapas | Sec | E | PASS (Executed): `/account/devices?x=2#z` → `/sign-in?next=…` → password + authenticator → wahi URL (query + hash); sign-up se bhi (`?x=1#y`) |
+| TC-CUS-004 | Sign-in (password, code, TOTP) | F | E | PASS (Executed): password (email `QA-Asha…Example ` case/space normalise), authenticator code, recovery code (`zrig5a4hc3`, chhote akshar bina dash). Email code se login owner ne hataya (ARCHITECTURE §7.1, 2026-10-27). Focus = QA-FE-008 |
+| TC-CUS-005 | Sign-up | F | E | PASS (Executed, sirf keyboard): email + consent → code (Mailpit) + password → account, signed in, `next` pe |
+| TC-CUS-006 | Sign-up finish (social) | F | E | PASS (Executed, fake Google): consent page, bina tick dono errors, tick ke baad account + `next`; bina ticket "This sign-up has expired" |
+| TC-CUS-007 | Forgot password | F | E | PASS (Executed): Security → "Set a password" (email bhara, `next`), code + 5-char password → "Use at least 12 characters", sahi pe "every device was signed out" + sign-in |
+| TC-CUS-008 | Invitation | F | E | PASS (Executed): admin role ki invitation customer app me → "We sent a code" par code nahi (design: identity README, sirf usi app ki invitation pe; enumeration-safe). Asli accept M12 (admin) |
+| TC-CUS-009 | Account authenticator page | F | E | PASS (Executed): QR + key, otpauth (SHA1, 6, 30 s, issuer), code + password → 10 recovery codes → Security "On"; chalu authenticator pe page `enroll` seedha (taaza step-up, DR-010) |
+| TC-CUS-010 | Account devices page | F | E | PASS (Executed): doosra device (Safari on iOS, IP 198.51.100.44) dikha, alag accessible names, "Sign out" → us device ka `/iam/me` turant 401 |
+| TC-CUS-011 | Double submit; back/forward/refresh beech me | Ed | E | PASS (Executed): sign-in pe 3× Enter = 1 `POST /auth/login`; social ke baad Back → sign-in → signed in → `next`; sign-up code step se reload pe email step (state memory me, theek) |
+| TC-CUS-012 | Action ke beech session khatam | Ed | E | PASS (Executed): doosre device ka "end others" → browser ka agla API call (My Devices) → `/sign-in?next=/account/devices`; tab tak cached UI dikhta (staleTime, design) |
+| TC-CUS-013 | Asli 404 status | F | E | PASS (Executed): `/no-such-page` 404 + "Page not found" + `noindex`; devtools json 404 |
+| TC-CUS-014 | `/terms`, `/privacy` pe DUMMY label | F | E | PASS (Executed): title "(dummy)", body me DUMMY/sample; prerendered |
+| TC-CUS-015 | Meta tags, `noindex` jahan irada | F | E | FAIL (Executed E1): QA-CUS-001 (`/account` error title + `noindex`). Baaki: home description + og tags, auth/account pages `noindex`, legal/credits indexable |
+| TC-CUS-016 | `localStorage`/`sessionStorage` me user data nahi | Sec | E | PASS (Executed): localStorage sirf `bq-theme`; sessionStorage sirf `react-router-scroll-positions`; recovery codes/OTP/email kahin nahi |
+| TC-CUS-017 | Browser me cookie flags | Sec | E | PASS (Executed): `document.cookie` me sirf hint (`1`); login `Set-Cookie` (proxy se): `__Host-bq_customer_at` HttpOnly Secure Lax Path=/ 600 s, `__Secure-bq_customer_rt` HttpOnly Secure Strict `Path=/api/v1/auth` 30 din, hint Secure Lax; `cache-control: private, no-store` |
+| TC-CUS-018 | `/iam/me` duplicate nahi, request storm nahi, console saaf | Perf | E | PASS (Executed): page load pe ek `wake` + ek `/iam/me` (dev StrictMode ka ek aborted duplicate); console me sirf Vite 504 (optimize), apne probe ke 401/400/404; fonts preload warning (§6) |
+| TC-CUS-019 | 360 / 768 / 1280 × light / dark (+ high contrast) | Resp | E | PASS (Executed): 13 pages 360 pe overflow nahi, 768/1280 spot (home, sign-up, terms, sign-in) bhi; themes axe me |
+| TC-CUS-020 | axe 0 violations | A11y | E | PASS (Executed): 13 pages (account pages signed in, auth pages error state ke saath) × light/dark/light+more/dark+more = 0 |
+| TC-CUS-021 | Keyboard-only har flow | A11y | E | FAIL (Executed E1): QA-FE-008 (step badalne pe focus `BODY`, sandesh announce nahi). Skip link (dikhta + `main#main`), theme arrows, roving radios, keyboard sign-up/sign-in poore ho jaate |
+| TC-CUS-022 | `vercel.json` rewrites + security headers (CSP, HSTS, nosniff, Referrer-Policy, frame-ancestors, Permissions-Policy) | Sec | S | NOT IMPLEMENTED (T6.6 `[ ]`: "Security headers baaki"); `/api` route + `x-origin-secret` transform PASS (Static); risk Q-011 |
+| TC-CUS-023 | `npm run e2e --workspace customer` | F | E | PASS (Executed): 24 passed, 30 skipped (har spec ke bhaari tests sirf `chromium-1280-light` pe, design), 0 fail, 363 s; teardown ne run `2de8425e` ki DBs hatai |
 
 **M12 Admin app (`ADM`, 12)**
 
@@ -576,13 +577,13 @@ Plan: **E** = planned-executed (local stack, HTTP, browser, scratch script), **S
 
 ### [QA-FE-004] Sign-out shows the person as signed out even when the server never ended the session
 
-**Module:** M10 (`@beautinique/frontend-auth-ui`) | **Feature:** `useSession().signOut` (AccountMenu, My Devices "This device", IdleNotice ka "Sign out") | **Task/Doc:** T6.1; auth-ui README (`signOut`: `POST /auth/logout`, hint hatao, cache saaf); ARCHITECTURE §7.2 (logout server pe revoke key likhta hai)
+**Module:** M10 + M11 (`@beautinique/frontend-auth-ui`, customer app) | **Feature:** `useSession().signOut` (AccountMenu, My Devices "This device", IdleNotice ka "Sign out") | **Task/Doc:** T6.1; auth-ui README (`signOut`: `POST /auth/logout`, hint hatao, cache saaf); ARCHITECTURE §7.2 (logout server pe revoke key likhta hai)
 **Severity:** P2 (core flow logout ki partial breakage with security impact: server call fail ho to UI "signed out" dikhata hai, par HttpOnly cookies aur server session zinda; customer pe 30 din tak) | **Priority:** Medium | **Status:** Open
-**Testing Type:** Security / Functional | **Evidence level:** E3 (static, poora trace; E1 M11 me asli backend band karke) | **Reproducibility:** Always (jab logout call fail ho) | **Environment:** static @ `ee7f46a`
+**Testing Type:** Security / Functional | **Evidence level:** E1 (M11, 2 runs) + E3 | **Reproducibility:** Always (2/2, jab logout call fail ho) | **Environment:** customer dev server (3001) → QA bundle (8080, `bq_qa_m11a_*`), Chromium
 **Description:** `signOut()` `try { await client.call(logout) } finally { forget(reason) }` hai: call fail ho (offline, gateway/Render ka 5xx/504, Render free ka 15 min neend ke baad ka pehla slow request) tab bhi `forget()` hint cookie mitata hai, Query cache saaf karta hai aur sab tabs ko `signed-out` bolta hai. Access/refresh cookies HttpOnly hain, page unhe mita nahi sakta, aur server pe session revoke hi nahi hua. Caller sirf error toast "Signing out did not finish." dikhata hai, par header ab "Sign in" dikhata hai: dobara sign out karne ka koi button nahi bachta, aur page reload pe bhi hint na hone se app session ko poochhta tak nahi. Shared/public computer pe insaan "signed out" dekh ke chala jaata hai; session cookie usi browser me valid rehti hai (customer 30 din, max 90). Wahi browser use karne wala agla insaan us session ko wapas chala sakta hai (live pe exploitable: tareeka report me nahi, chat me).
 **Steps to Reproduce:** (1) Customer app me sign in. (2) Network band karo ya gateway ko 5xx/timeout karwao (M11 me QA bundle band karke). (3) Account menu → "Sign out". (4) Dekho: toast "Signing out did not finish.", header "Sign in", sign-out button gayab; server pe session `revokedAt` khaali (`GET /auth/sessions` doosre device se ab bhi dikhata).
 **Expected Result:** Server ne session band na kiya ho to app use "signed in" hi rakhe (ya saaf bataye ki is device pe session abhi chalu hai) aur dobara sign out ka raasta de. Source: auth-ui README (`signOut` = `POST /auth/logout`), ARCHITECTURE §7.2 (logout = server pe revoke); "imaandari" niyam (CLAUDE.md) ke hisaab se UI jo kehta hai wahi sach ho.
-**Actual Result:** Local state signed-out, server session + cookies zinda.
+**Actual Result:** Local state signed-out, server session + cookies zinda. **M11 (E1):** run 1: header menu "Sign out" jab QA bundle band → toast "Signing out did not finish. | Request failed with status 502" (raw sandesh = QA-FE-007), header "Sign in", hint cookie gayi, `/sign-in?next=…` pe; bundle wapas (same keys) → usi browser se `GET /api/v1/iam/me` **200, wahi account** (session zinda). Run 2: My Devices ke "This device" → "Sign out" se bilkul wahi; phir `/iam/me` 200, cleanup ke liye seedha `POST /auth/logout` → `/iam/me` 401. Control: backend chalu ho to sign-out ke baad `/iam/me` 401 (PASS).
 **Evidence:** `packages/frontend/auth-ui/src/session.tsx:135-144` (try/finally), `:123-133` (`forget`); callers `account-menu.tsx:56-67`, `my-devices.tsx:72-82`, `idle-notice.tsx:229-240`, `idle-notice.tsx:125` (`signOut('idle').catch(() => undefined)`: internal apps me server ka 30 min idle bachaata hai, customer me koi idle nahi). Tests sirf safal logout dekhte hain (`test/session.test.tsx:155`, `devices.test.tsx:93`, `idle-notice.test.tsx:84`).
 **Root Cause:** `forget()` `finally` me hai, yaani server ka jawab dekhe bina.
 **Affected Files:** `packages/frontend/auth-ui/src/session.tsx:135-144`; `account-menu.tsx:56`, `my-devices.tsx:72`, `idle-notice.tsx:229`
@@ -591,6 +592,42 @@ Plan: **E** = planned-executed (local stack, HTTP, browser, scratch script), **S
 **Regression Risk:** Low: sirf failure path badlega.
 **Regression test to add:** auth-ui unit: fake identity `POST /auth/logout` → `NETWORK_ERROR`/503 → state `signed-in`, hint bacha, toast error; `SESSION_EXPIRED` → signed-out. Customer E2E: backend band → sign out → "still signed in" sandesh.
 **Owner decision needed:** Nahi (behaviour docs ke khilaf); "Try again" ka UX owner dekh le.
+
+### [QA-FE-008] After "Send code" or a correct password, the next step gets no focus and is not announced
+
+**Module:** M11 (customer app) / auth-ui package | **Feature:** multi-step auth forms: email → code (sign-up, forgot password, invitation), password → authenticator code / recovery code (sign-in) | **Task/Doc:** T6.1; RULES §5.5 (WCAG 2.1 AA, keyboard se chalne layak); WCAG 2.4.3 Focus Order, 4.1.3 Status Messages
+**Severity:** P2 (core auth flows pe WCAG 2.1 AA ki kami: screen reader user ko "Send code" ke baad kuch sunai nahi deta, focus page se gayab) | **Priority:** Medium | **Status:** Open
+**Testing Type:** A11y (keyboard / screen reader) | **Evidence level:** E1 | **Reproducibility:** Always (2/2 flows) | **Environment:** customer dev server (3001) → QA bundle, Chromium, sirf keyboard
+**Description:** Submit button wala step hat ke naya step aata hai, par focus kahin nahi jaata (`document.activeElement` = `BODY`), aur naye step ka sandesh ("We sent a 6-digit code to … It works until …") ek saada `<p>` hai (`role="status"` sirf resend note pe). Chrome ka "focus navigation starting point" agla Tab code field pe le aata hai, isliye dikhne wale keyboard user ka nuksan chhota hai; screen reader user ko na naya step pata chalta, na code bhejne ki khabar. Wahi package ka admin `EnrollConfirm` (`sign-in.tsx:506`) aur step-up dialog (`step-up.tsx:149`) `autoFocus` dete hain, yaani irada hai.
+**Steps to Reproduce:** 1. `/sign-up` pe sirf keyboard: email type, Tab+Space se dono consent, Tab se "Send code", Enter. 2. `document.activeElement` dekho. 3. `/sign-in` pe authenticator wale account ka email + password, Enter.
+**Expected Result:** Naye step ka pehla field focus le (ya step ka heading, `tabIndex=-1`), aur "We sent a code…" status message ki tarah announce ho (WCAG 4.1.3).
+**Actual Result:** Dono flows me focus `BODY`; code ka sandesh kisi live region me nahi. Ek Tab ke baad Chrome me focus "Code from the email" pe.
+**Evidence:** sign-up (keyboard, M11), sign-in password → authenticator (keyboard: 3× Enter, phir `activeElement` = `BODY`). Recovery step bhi bina `autoFocus` (`sign-in.tsx:330-338`).
+**Root Cause:** `packages/frontend/auth-ui/src/code-step.tsx:87` (`CodeField` bina `autoFocus`), `:69-73` (sandesh live region me nahi); `packages/frontend/auth-ui/src/sign-in.tsx:283` (TotpStep), `:330-338` (RecoveryStep).
+**Affected Files:** `packages/frontend/auth-ui/src/code-step.tsx:69-87`, `packages/frontend/auth-ui/src/sign-in.tsx:283`, `:330`; customer + admin dono (auth-ui)
+**Recommended Fix:** Step badalne pe pehle field ko `autoFocus` (jaise `EnrollConfirm`), aur "We sent a code…" wale `<p>` ko `role="status"` (ya focus us heading pe jo sandesh padhe).
+**Fix route (RULES §2):** branch + PR (auth-ui); E2E me keyboard assertion.
+**Regression Risk:** Low.
+**Regression test to add:** auth-ui unit: "Send code" ke baad `document.activeElement` = code input; Playwright: keyboard-only sign-up me focus check.
+**Owner decision needed:** Nahi
+
+### [QA-FE-009] If the server is down while the app opens, a signed-in person's pages stay on "Loading" after the server is back
+
+**Module:** M11 (customer app) / auth-ui + app-shell | **Feature:** `SessionProvider` (`/iam/me`) + `ServerWake` + `RequireSignIn` | **Task/Doc:** T6.1, T2.7; auth-ui README / `session.tsx:31` ("`unavailable`: … asked again when back online"); ARCHITECTURE §11.1 (Render free so jaata, ~1 min me jaagta)
+**Severity:** P2 (signed-in core pages kaam ke nahi rehte jab tak insaan tab na badle ya reload na kare; koi sandesh ya retry button nahi) | **Priority:** Medium | **Status:** Open
+**Testing Type:** Reliability / Integration | **Evidence level:** E1 | **Reproducibility:** Always (2/2: `/account/security`, `/account/devices`) | **Environment:** customer dev server (3001) → QA bundle (8080) band karke phir chalu, Chromium
+**Description:** App khulte hi `ServerWake` `/platform/wake` aur `SessionProvider` `/iam/me` saath bhejte hain ("The app renders at once"). Server down/restart ho to `/iam/me` 502 → `retry: false` → state `unavailable`; `RequireSignIn` iske liye sirf fallback ("Loading") dikhata hai, header me na account na "Sign in". Server jaagne pe wake screen hat jaati hai, par `/iam/me` dobara nahi poocha jaata: 502 "answered" ginta hai, isliye online store offline nahi hota aur "back online" wala refetch kabhi nahi aata; `staleTime: Infinity`. Sirf window `visibilitychange` (tab badal ke wapas) ya reload se TanStack refetch karta hai. Live pe yahi Render ke deploy restart ya cold start me Vercel ke 502/504 pe hoga (live trigger verify nahi: production off-limits).
+**Steps to Reproduce:** 1. Customer me sign in. 2. QA bundle band. 3. `/account/security` reload: wake screen + "Loading". 4. Bundle wapas chalao (same keys). 5. Wake screen hat jaati; 20 s+ ruko.
+**Expected Result:** Server jawab dene lage to session dobara poocha jaaye (ya `unavailable` pe "Could not load your account. Try again" + retry), README ke "asked again" ke mutabik.
+**Actual Result:** 23 s (run 1) aur 12 s (run 2) baad bhi `main` = "Loading", jabki usi page se `fetch('/api/v1/iam/me')` 200. Network: `/iam/me` sirf ek baar (502), `wake` 502 × 8 phir 200, phir `/iam/me` nahi. Window `visibilitychange` dispatch karte hi page aur header theek.
+**Evidence:** M11 browser runs (network list aur DOM snapshots), scratch `scratchpad/m11/backend-4.log`, `backend-5.log`.
+**Root Cause:** `packages/frontend/auth-ui/src/session.tsx:82-87` (`retry: false`, `staleTime: Infinity`), `:112` (`unavailable`), `guards.tsx:39` (unavailable = fallback, bina sandesh); `ServerWake` jaagne pe kisi ko nahi batata (`packages/frontend/app-shell/src/ServerWake.tsx:115-131`); api-client 502 ko "answered" maanta (`client.ts:94-96`).
+**Affected Files:** `packages/frontend/auth-ui/src/session.tsx:82-112`, `packages/frontend/auth-ui/src/guards.tsx:39`, `packages/frontend/app-shell/src/ServerWake.tsx:115`
+**Recommended Fix:** `unavailable` me `/iam/me` ko kuch seconds baad dobara (5xx pe 2–3 retry backoff ke saath; 401 pe nahi), ya `ServerWake` "awake" hone pe `/iam/me` invalidate kare; `RequireSignIn` `unavailable` pe saaf sandesh + "Try again".
+**Fix route (RULES §2):** branch + PR (auth-ui, app-shell agar wake se jodna ho).
+**Regression Risk:** Low–Medium (401 pe retry na ho, warna sign-out dheema).
+**Regression test to add:** auth-ui unit: fake identity `/iam/me` 502 phir 200 → state `signed-in` bina focus event; customer E2E: route ko kuch der 502 karwa ke.
+**Owner decision needed:** Nahi
 
 ### [QA-KRN-001] After a failed first JWKS load, the gateway answers 401 (not 503) to every signed-in request for 30 seconds
 
@@ -700,6 +737,42 @@ Plan: **E** = planned-executed (local stack, HTTP, browser, scratch script), **S
 **Regression test to add:** components unit: `userEvent.paste(' 123456 ')` aur `'123-456'` → `onChange('123456')`.
 **Owner decision needed:** Nahi
 
+### [QA-FE-007] A 5xx from the proxy (not the gateway) shows people the raw text "Request failed with status 502"
+
+**Module:** M11 (customer app) / contracts client + api-client | **Feature:** error messages | **Task/Doc:** T6.1; `errorMessage()` ka apna doc ("the client's own ones … are not [written for people]"), RULES §4.15
+**Severity:** P3 (UX: technical English sandesh; koi data/security asar nahi) | **Priority:** Low | **Status:** Open
+**Testing Type:** Functional / UX | **Evidence level:** E1 | **Reproducibility:** Always (2/2) | **Environment:** customer dev server → QA bundle band (Vite proxy 502); live pe Vercel ka 502/504 bhi isi raaste
+**Description:** Gateway ka jawab na ho (Render so raha/band, Vercel 502/504 apne text/HTML ke saath) to contracts `failure()` `ApiError` banata hai: code `INTERNAL`/`BAD_REQUEST`, message `Request failed with status 502`. `errorMessage()` sirf `NETWORK_ERROR` aur `INVALID_RESPONSE` ko insaani sandesh deta hai, baaki me `error.message` jaisa hai waisa. Toast/form me "Request failed with status 502" dikhta hai.
+**Steps to Reproduce:** Signed in customer app, QA bundle band, Account menu → "Sign out" (ya koi bhi form submit).
+**Expected Result:** "Something went wrong. Please try again." ya "We could not reach Beautinique…" jaisa sandesh (`errorMessage` ka irada).
+**Actual Result:** "Signing out did not finish. | Request failed with status 502" (header menu aur My Devices, dono).
+**Evidence:** M11 do runs (QA-FE-004 ke saath).
+**Root Cause:** `packages/shared/contracts/src/client.ts:113-118` (fallback message developer ke liye) + `packages/frontend/api-client/src/errors.ts:15-20` (us fallback ko pehchanta nahi).
+**Affected Files:** `packages/frontend/api-client/src/errors.ts:15-20`, `packages/shared/contracts/src/client.ts:113-118`
+**Recommended Fix:** `errorMessage`: `requestId` na ho aur body hamari envelope na ho (ya status 502/503/504) to "We could not reach Beautinique…" / "Something went wrong…". Ya `failure()` me alag code (`UPSTREAM_UNAVAILABLE`).
+**Fix route (RULES §2):** chhota fix (api-client + test) ya QA-FE-006 wale PR me.
+**Regression Risk:** Low.
+**Regression test to add:** api-client unit: fake gateway 502 `text/html` → `errorMessage` insaani sandesh.
+**Owner decision needed:** Nahi
+
+### [QA-CUS-001] /account is titled "Something went wrong" and marked noindex although nothing failed
+
+**Module:** M11 (customer app) | **Feature:** page meta | **Task/Doc:** T6.3; `root.tsx` ka comment ("Error pages get their own title")
+**Severity:** P3 (cosmetic: tab title galat, aur jo bhi naya route apni `meta` na de usko error title + `noindex` milega) | **Priority:** Low | **Status:** Open
+**Testing Type:** Functional (SSR/meta) | **Evidence level:** E1 | **Reproducibility:** Always | **Environment:** customer dev server (3001), curl + Chromium
+**Description:** Root `meta` `error === undefined` jaanchta hai, par React Router 8.5 bina error ke `error: null` deta hai (`node_modules/react-router/dist/development/lib/dom/ssr/components.js:356-357`: `let error = null`). Jis route ki apni `meta` nahi, uska title root se aata hai: "Something went wrong | Beautinique" + `robots: noindex`. Aaj `/account` (index route, `Navigate` → `/account/security`) pe dikhta: SSR HTML me aur client pe redirect tak tab ka title.
+**Steps to Reproduce:** `curl -s http://localhost:3001/account | grep -o "<title>[^<]*</title>"`; ya browser me `/account` kholo aur turant `document.title` dekho.
+**Expected Result:** Bina error ke "Beautinique" (root meta ka pehla branch), bina `noindex` (ya account ke liye apna title).
+**Actual Result:** `<title>Something went wrong | Beautinique</title>`, `<meta name="robots" content="noindex"/>`, router context me `errors` undefined (koi error nahi).
+**Evidence:** curl (SSR) + browser (`/account` → "Something went wrong | Beautinique" → redirect ke baad "Sign in | Beautinique").
+**Root Cause:** `frontend/customer/app/root.tsx:114-120` (`error === undefined` ki jagah `error == null` chahiye).
+**Affected Files:** `frontend/customer/app/root.tsx:114-120`; `frontend/customer/app/routes/account-index.tsx` (apni meta nahi)
+**Recommended Fix:** `error == null` (ya `!error`); generator template me bhi dekho.
+**Fix route (RULES §2):** chhota fix (1 file + test).
+**Regression Risk:** Low.
+**Regression test to add:** customer unit/SSR: `/account` ka title "Beautinique" aur `noindex` nahi; error route pe abhi bhi error title.
+**Owner decision needed:** Nahi
+
 ### [QA-GW-002] Session revocations are lost when Redis is wiped; ARCHITECTURE says the gateway falls back to MongoDB, the code does not
 
 **Module:** M1 Gateway / M3 sessions | **Feature:** revocation after Redis wipe | **Task/Doc:** T3.2, T1.3; ARCHITECTURE §6.6 (line 213: "Jab tak recovery poori na ho, gateway revoke aur freeze MongoDB `sessions` se check karta hai ... source of truth hamesha MongoDB"), RULES §4.12 ("Redis kisi cheez ka source of truth nahi")
@@ -763,16 +836,20 @@ Plan: **E** = planned-executed (local stack, HTTP, browser, scratch script), **S
 | DR-009     | A04 Insecure Design (availability, abuse of a paid/limited resource)                               | design (DR) | Haan                                                                 | Bina sign-in din ka email budget khatam; ajnabi addresses pe emails |
 | QA-FE-001 | A01 / ASVS V5.1.5 (redirects only to allowed destinations) | P3 | Haan, par redirect nahi: crafted link pe sign-in ke baad error page (React Router 8.5 external target throw karta) | Router ka check hate ya output `href`/`location` me jaaye to auth flow me open redirect |
 | QA-FE-004 | A07 / ASVS V3.3.1 (logout invalidates the session) | P2 | Haan (customer + admin): jab logout call fail ho; tareeka redacted (chat me) | UI "signed out", server session + HttpOnly cookies zinda (customer 30 din) |
+| QA-FE-008 | ASVS V1 / WCAG 2.4.3 + 4.1.3 (a11y, security nahi) | P2 | Haan (customer + admin auth flows) | Screen reader user ko step badalna aur "code bheja" sunai nahi deta |
+| Q-011 | A05 Security Misconfiguration / ASVS V14.4 (HTTP security headers) | NOT IMPLEMENTED (T6.6) | Haan: live sign-in/account pages pe `frame-ancestors`/`X-Frame-Options`, CSP, nosniff, Referrer-Policy nahi | Clickjacking (sign-in, "Turn off" authenticator, sign-out buttons iframe me) |
 | QA-GW-002  | A07 Identification and Authentication Failures / ASVS V3.3 (session termination)                   | P4 (latent) | Nahi (aaj har signed-in route identity ka; identity DB se rokti hai) | Pehla non-identity `signed-in` route aate hi P1                     |
 | QA-GW-001  | A04 Insecure Design (availability) / ASVS V1.11                                                    | P2          | Haan, agar Render Key Value atke (band nahi)                         | fail-closed hi rehta hai, data leak nahi                            |
 | QA-KRN-001 | A04 (availability)                                                                                 | P3          | Haan, sirf gateway start ke turant baad JWKS fail ho                 | jhootha sign-out                                                    |
 
-**PASS hue controls (M1, executed):** origin secret (8 galat values; timing-safe static), app allow-list + CSRF (Host/x-forwarded-host/Origin, 29 cases), fail-closed 401 (30/30 non-public routes), JWT forgery (`alg:none`, HS256 key confusion, apni ES256 key, embedded `jwk`, tampered claims, galat `kid`/`aud`, junk: 15/15 401), passport (client ka strip; owner seedha bina/forged passport 401), client IP spoofing (XFF, `X-BQ-Client-Ip`, `Forwarded` ignore), rate limits (write/otp/auth budgets, IPv6 /64, IPv4-mapped), `auth`/`otp` fail-closed jab Redis band/atka, request smuggling (9 framing attacks), oversized header/body, path traversal (18 raw paths), security headers (helmet), error envelope, log hygiene, live: `bq-live` `/api` bina secret 403, TLS 1.3. **M2:** OTP (CSPRNG 6-digit, 10 min, 5 tries, resend seema, per-email/ghanta, app binding, replay), enumeration (sign-up/password code/login: same body + same time), argon2id OWASP min, HIBP k-anonymity, lockout, TOTP replay/window, recovery single-use, loginId binding/expiry, grant-based sign-in, email normalization, NoSQL-style input, reset ke baad sessions band, OTP outbox me sealed. **M3:** cookie flags/prefixes, refresh rotation, parallel tab 409 (bina cookies), seedha reuse → session band + email, end-others, IDOR (doosre ka session `{ended:false}`), My Devices sirf apne, expiry, step-up (session-bound, `su`, lock me gine jaate), naye recovery codes pe purane band, security emails. **M4:** OAuth state (43 chars) + browser cookie binding (login CSRF band), PKCE S256, trip single-use + expiry, verified-email-only linking (Google `email_verified`, GitHub primary+verified), consent ticket single-use + browser-bound, callback `next` open redirect (7 cases) band, locked account social sign-in band, aakhri method nahi hatta. **M5:** route × actor matrix, appointer chain, `scopeWithin` (custom state role se), self grant/end/invite band, Master API se nahi aur uska grant koi khatam nahi kar sakta, validity windows, MFA roles, Master seats race-safe, invitation (single use, app-bound, revoke, inviter ka haq dobara), `av` bump, `mfa: true` permissions bina authenticator use nahi ho sakte (step-up), rbac-sync idempotent. **M6:** sealed field context binding (copy kiya secret nahi khulta), identity/notify/core DB aur Redis me plaintext secret nahi (value + pattern scan), `/iam/me` saaf, logs saaf. **M7:** OTP code outbox/delivery me sealed aur bhejne ke baad hat jaata, expire hua code kabhi nahi jaata, emails me HTML escape (UA ka `<script>`/CRLF nahi pahuncha), koi secret/recovery code email me nahi, notify logs me email/code nahi. **M8:** start fail pe 1.6 s me exit (Render ka 15 min atkaav nahi), config errors me secret value nahi, typo `<NAME>__` key pe start rukta, release lease + fingerprint, Master ka live raasta `live` likhne pe hi. **M9:** sealing rotation/tamper/context, JWT expiry/nbf/iss/aud, validators (GSTIN check digit ...), paise integer + safe range, storage key traversal, backend `safeNextPath` (20 cases). **M10 (browser):** guard deep link (query + hash) → sign-in → wahi page, browser storage me koi user data nahi (sirf theme), recovery codes ek baar + leave blocker + storage me nahi, step-up dialog (galat code field pe, sahi pe asli call dobara), axios errors log nahi, React Router 8.5 external `navigate` rokta (QA-FE-001 open redirect nahi banta), ErrorPage stack sirf DEV, theme script CSP hash sahi.
+**PASS hue controls (M1, executed):** origin secret (8 galat values; timing-safe static), app allow-list + CSRF (Host/x-forwarded-host/Origin, 29 cases), fail-closed 401 (30/30 non-public routes), JWT forgery (`alg:none`, HS256 key confusion, apni ES256 key, embedded `jwk`, tampered claims, galat `kid`/`aud`, junk: 15/15 401), passport (client ka strip; owner seedha bina/forged passport 401), client IP spoofing (XFF, `X-BQ-Client-Ip`, `Forwarded` ignore), rate limits (write/otp/auth budgets, IPv6 /64, IPv4-mapped), `auth`/`otp` fail-closed jab Redis band/atka, request smuggling (9 framing attacks), oversized header/body, path traversal (18 raw paths), security headers (helmet), error envelope, log hygiene, live: `bq-live` `/api` bina secret 403, TLS 1.3. **M2:** OTP (CSPRNG 6-digit, 10 min, 5 tries, resend seema, per-email/ghanta, app binding, replay), enumeration (sign-up/password code/login: same body + same time), argon2id OWASP min, HIBP k-anonymity, lockout, TOTP replay/window, recovery single-use, loginId binding/expiry, grant-based sign-in, email normalization, NoSQL-style input, reset ke baad sessions band, OTP outbox me sealed. **M3:** cookie flags/prefixes, refresh rotation, parallel tab 409 (bina cookies), seedha reuse → session band + email, end-others, IDOR (doosre ka session `{ended:false}`), My Devices sirf apne, expiry, step-up (session-bound, `su`, lock me gine jaate), naye recovery codes pe purane band, security emails. **M4:** OAuth state (43 chars) + browser cookie binding (login CSRF band), PKCE S256, trip single-use + expiry, verified-email-only linking (Google `email_verified`, GitHub primary+verified), consent ticket single-use + browser-bound, callback `next` open redirect (7 cases) band, locked account social sign-in band, aakhri method nahi hatta. **M5:** route × actor matrix, appointer chain, `scopeWithin` (custom state role se), self grant/end/invite band, Master API se nahi aur uska grant koi khatam nahi kar sakta, validity windows, MFA roles, Master seats race-safe, invitation (single use, app-bound, revoke, inviter ka haq dobara), `av` bump, `mfa: true` permissions bina authenticator use nahi ho sakte (step-up), rbac-sync idempotent. **M6:** sealed field context binding (copy kiya secret nahi khulta), identity/notify/core DB aur Redis me plaintext secret nahi (value + pattern scan), `/iam/me` saaf, logs saaf. **M7:** OTP code outbox/delivery me sealed aur bhejne ke baad hat jaata, expire hua code kabhi nahi jaata, emails me HTML escape (UA ka `<script>`/CRLF nahi pahuncha), koi secret/recovery code email me nahi, notify logs me email/code nahi. **M8:** start fail pe 1.6 s me exit (Render ka 15 min atkaav nahi), config errors me secret value nahi, typo `<NAME>__` key pe start rukta, release lease + fingerprint, Master ka live raasta `live` likhne pe hi. **M9:** sealing rotation/tamper/context, JWT expiry/nbf/iss/aud, validators (GSTIN check digit ...), paise integer + safe range, storage key traversal, backend `safeNextPath` (20 cases). **M10 (browser):** guard deep link (query + hash) → sign-in → wahi page, browser storage me koi user data nahi (sirf theme), recovery codes ek baar + leave blocker + storage me nahi, step-up dialog (galat code field pe, sahi pe asli call dobara), axios errors log nahi, React Router 8.5 external `navigate` rokta (QA-FE-001 open redirect nahi banta), ErrorPage stack sirf DEV, theme script CSP hash sahi. **M11 (customer, asli QA backend):** cookie flags browser tak (`__Host-` access HttpOnly/Lax, `__Secure-` refresh Strict `Path=/api/v1/auth`, hint me sirf `1`), user data storage me nahi, guard + safe `next` (query + hash), doosre device ka session browser se band → turant 401, "end others" ke baad agli call pe sign-in, recovery code single-use format normalise, social consent ticket page reload/back pe dobara use nahi, 429 pe insaani sandesh + `Retry-After`, auth pages `noindex`.
 
 ## 6. Performance Findings
 
 Render free cold start = KNOWN-05.
 
+- **TOOL-OBS-01 (info, M11):** shared laptop Mongo me 36 purani `bq_e2e_<run>_*` DBs (adhoore/rok diye gaye E2E runs; `scripts/e2e/cleanup.ts` sirf Playwright ke `globalTeardown` pe chalta, process maar diya jaaye to nahi). Audit ne inhe nahi chhooa (developer ka data). Ek "purani e2e DBs hatao" command ya start pe sweep soch sakte ho.
+- **M11 notes (info, bug nahi):** har page load pe ek `wake` + ek `/iam/me` (koi storm nahi); dev me Chrome "fraunces-latin.woff2 / plus-jakarta-sans-latin.woff2 was preloaded using link preload but not used within a few seconds" (jis page pe display font nahi, wahan bhi preload; production build pe dekhna, M11 me sirf dev server).
 - **M10 notes (info, bug nahi):** api-client me client timeout nahi (QA-FE-006, reliability). Playgrounds me request storm/duplicate calls nahi dikhe (auth-ui: `/iam/me` sirf hint cookie ke saath); network/bundle size apps me (M11/M12).
 
 - **M9 notes (info, bug nahi):** `maskEmail('a@b.com')` 1-akshar local part ko mask nahi karta (poora email dikhta); `slugify()` sirf symbols wale input pe `''` deta hai (caller ko khaali slug sambhalna hoga).
@@ -796,7 +873,7 @@ Render free cold start = KNOWN-05.
 | Redis atka (connected, chup)                                                                    | FAIL            | QA-GW-001: signed-in requests latakti hain                                                                                            |
 | Redis wipe → epoch recovery (schedules + outbox redrive + dedupe)                               | PASS, ek gap    | TC-NT-014 PASS; revocation markers nahi lautte (QA-GW-002)                                                                            |
 | Mongo outage                                                                                    | NOT TESTED      | shared local Mongo band nahi kiya (Q-004 sirf Valkey/Mailpit ke throwaway); throwaway Mongo replica set chahiye to owner se poochh ke |
-| apps → gateway (browser) | NOT TESTED | M11/M12 me (asli QA backend ke saath) |
+| apps → gateway (browser) | PASS (customer, Executed) / M12 (admin) | dev proxy + laptop public secret → QA gateway 8080; sign-up/sign-in/social (fake Google)/forgot/devices/authenticator; gateway band pe client ka asar QA-FE-004, QA-FE-007 |
 | api-client → atka server (koi jawab nahi) | FAIL | QA-FE-006: koi timeout nahi; `ServerWake` sahi give-up karta (TC-FE-008) |
 
 **NOT IMPLEMENTED (roadmap, bug nahi):**
@@ -886,6 +963,16 @@ Har module ke baad (existing tests + `test/mutations.ts` ke survivors).
 | Recovery codes: Back se doosre document pe jaana (`beforeunload`) | Browser me asli user gesture chahiye; M10 me NOT TESTED | Playwright E2E |
 | DateRangePicker ka `onChange` ulti range bhi deta (error ke saath) | Form schema ko start ≤ end khud check karna hoga; koi schema test nahi (abhi koi form use nahi karta) | unit (forms, jab pehla use aaye) |
 
+**M11 Customer app** (existing: customer unit 38 tests (M0), E2E specs `frontend/customer/e2e/` 3 files × 3 tests × 6 projects):
+
+| Scenario | Kyun zaroori | Test type |
+| --- | --- | --- |
+| `/account` (bina apni meta ka route) ka title/robots | QA-CUS-001 | customer unit (meta) |
+| Keyboard: "Send code"/password ke baad focus naye field pe | QA-FE-008; E2E sirf click karte | Playwright (keyboard) |
+| Sign-out jab gateway 502/down ho | QA-FE-004, QA-FE-007 | Playwright (route ko 502 karwa ke) |
+| App khulte waqt server down, phir jaage: account page recover kare | Q-012 | Playwright / auth-ui unit |
+| Security headers (jab T6.6 bane) | Q-011 | `vercel.json` test / live header check |
+
 ## 9. Questions and Unverified Assumptions
 
 | Q-ID   | Sawal                                                                                                                                                                                                                                                                                                                                                                                                                                                                            | Kyun zaroori                                                                                                                                                                                                                                                                                                                                                                                                                                                   | Evidence                                                                                                                                                                                                                                      | Claude ki recommendation                                                                                                                                                                                                                                                                                                             | Owner ka jawab                    |
@@ -910,20 +997,27 @@ Har module ke baad (existing tests + `test/mutations.ts` ke survivors).
 | Q-009 | Idle (internal apps): naya tab kholna activity nahi ginta jaata (sirf click/key/scroll/touch, README) aur naya tab apni load doosre tabs ko nahi batata. Tab A 29 min idle, insaan tab C kholta aur 1 min bina scroll padhta: 30 min pe A `timed-out` bhejta aur C bhi "signed out after 30 minutes" dikhata | Insaan abhi-abhi aaya, phir bhi sign-out; ulta nahi (koi session lamba nahi khinchta) | E3 static: `idle-notice.tsx:151` (mount pe sirf apna `active`, post nahi), `:158-161` (`timed-out` → `forget`); docs: auth-ui README §idle | Page load ko bhi activity maan ke `post({ type: 'active' })` (ek line); browser me M12 (admin) me chalana | |
 | Q-010 | Do tabs ek saath refresh: identity doosre tab ko 409 (bina cookies, TC-ID-029) deta, api-client 300 ms ruk ke maan leta ki pehle tab ki cookies aa gayi. Pehle tab ka jawab 300 ms se der se aaye (Render/Atlas M0, mobile network) to doosre tab ki retry 401 → `/iam/me` pe `UNAUTHENTICATED` → hint cookie mitti aur tab signed-out dikhta | Session theek hai par insaan ko sign-in pe bheja jaata (aur hint sab tabs ke liye mitti) | E4: `api-client/src/client.ts:121-126` (fixed `OTHER_TAB_REFRESH_WAIT_MS`), `auth-ui/src/session.tsx:98-102`; ARCHITECTURE §7.2 "409, naye cookie ke saath dobara" (server cookies nahi deta) | 409 ke baad retry 401 de to ek baar aur `refresh()` (ab naya cookie hoga), ya pehla tab `BroadcastChannel` pe "refreshed" bheje; ek test jisme fake gateway 409 ke baad cookie der se de | |
 | DR-010 | Step-up 5 min ka window har step-up wale kaam pe chalta (owner: ARCHITECTURE §7.1 roles table, Master row "step-up MFA (5 min ke andar)", identity README §Step-up; authenticator code se sign-in bhi step-up ginta). M10: "Get new recovery codes" ke step-up ke 1 min baad "Turn off" authenticator bina code ke ho gaya | Rakhne ka asar: khule device pe 5 min ke andar koi bhi authenticator band / naya phone / (Master) grants kar sakta, bina code. Hatane ka asar: har high-risk kaam pe code (thoda dheema) | E1 (auth-ui playground, fake identity: "Turn off" confirm ke baad seedha Off) | Window rakho (GitHub ka sudo mode jaisa, aam pattern), par "Turn off authenticator" aur "Set up on a new phone" pe hamesha naya code (window 0); Master ke grants pe owner tay kare | |
+| Q-011 | `vercel.json` me security headers abhi nahi (T6.6 `[ ]`, "Security headers baaki"), jabki customer + admin live hain aur unpe sign-in, sign-out, "Turn off authenticator", My Devices jaise buttons hain. Kya T6.6 ka kam se kam `frame-ancestors 'none'` / `X-Frame-Options: DENY` + `X-Content-Type-Options: nosniff` + `Referrer-Policy` abhi (Phase 4 se pehle) karein? | Clickjacking: doosri site live page ko iframe me rakh ke click karwa sakti (sign-out, authenticator band, social method hatana) | Static: `frontend/customer/vercel.json` (sirf `/api` route); ARCHITECTURE §9.3 headers ki list | Haan: T6.6 ka header hissa alag chhota PR (CSP baad me `THEME_SCRIPT_HASH` ke saath), naya task nahi | |
+| Q-012 | (M11 me bug bana: QA-FE-009) App khulte waqt server down ho to account page recover karta hai? | | E1, §4 QA-FE-009 | | |
 
 ## 10. Recommended Fixing Order
 
 1. **QA-ID-001** (P1): live pe khula security control; sabse pehle, akela PR.
 2. **QA-GW-001** (P2): sabse zyada live asar (Redis atke to har signed-in request latakti); kernel + gateway PR.
-3. **QA-FE-004** (P2): live pe logout fail hone par session zinda; auth-ui ka chhota PR (M11 me E1 ke baad). QA-FE-001 isi auth-ui PR me ja sakta hai.
-4. **QA-KRN-001** (P3): QA-GW-001 jaisa hi "dependency away → 503" ka sawal; dono ek hi PR me ja sakte hain (gateway ka access-check failure handling).
-5. **QA-GW-002** (P4, owner decision): Phase 4 ke pehle `signed-in` route se pehle zaroor; ARCHITECTURE §6.6 ka faisla pehle.
-6. **QA-TOOL-001** (P3): akela chhota fix (`.prettierignore`), kabhi bhi.
-7. **QA-ID-002** (P3): chhota, akela PR (do queries + explain test); social sign-ins badhne se pehle.
-8. **QA-FE-001** (P3): auth-ui `safeNext` + contracts `safeNextPath` ek jaise; aaj crafted link pe crash, isliye QA-FE-004 ke saath ek PR theek.
-9. **QA-FE-003 + QA-FE-002** (P3): ek components PR (dono 1-1 line + test); QA-FE-003 live OTP screens pe, QA-FE-002 Phase 4 ke pehle form se pehle.
-10. **QA-FE-006** (P4, owner: timeout kitna): contracts + api-client PR; QA-GW-001 ke fix ke saath sochna (gateway 503 jaldi de to client timeout bachav ki dusri parat).
-11. **QA-FE-005** (P4): playground ka 1-line fix, kabhi bhi.
+3. **QA-FE-009** (P2): Render ke har restart/cold start pe signed-in log "Loading" pe atak sakte; auth-ui (+ app-shell) PR.
+4. **QA-FE-004** (P2): live pe logout fail hone par session zinda; auth-ui ka chhota PR. QA-FE-001 aur QA-FE-007 isi auth-ui/api-client PR me ja sakte hain.
+5. **QA-FE-008** (P2): auth flows ka focus + status announcement; auth-ui PR (QA-FE-004 wale ke saath bhi chal sakta).
+6. **QA-KRN-001** (P3): QA-GW-001 jaisa hi "dependency away → 503" ka sawal; dono ek hi PR me ja sakte hain (gateway ka access-check failure handling).
+7. **QA-GW-002** (P4, owner decision): Phase 4 ke pehle `signed-in` route se pehle zaroor; ARCHITECTURE §6.6 ka faisla pehle.
+8. **QA-TOOL-001** (P3): akela chhota fix (`.prettierignore`), kabhi bhi.
+9. **QA-ID-002** (P3): chhota, akela PR (do queries + explain test); social sign-ins badhne se pehle.
+10. **QA-FE-001** (P3): auth-ui `safeNext` + contracts `safeNextPath` ek jaise; aaj crafted link pe crash (customer me `ErrorPage`).
+11. **QA-FE-007** (P3): `errorMessage` me proxy 5xx ka insaani sandesh; QA-FE-004 ke saath.
+12. **QA-CUS-001** (P3): customer `root.tsx` 1-line (`error == null`) + test.
+13. **QA-FE-003 + QA-FE-002** (P3): ek components PR (dono 1-1 line + test); QA-FE-003 live OTP screens pe, QA-FE-002 Phase 4 ke pehle form se pehle.
+14. **QA-FE-006** (P4, owner: timeout kitna): contracts + api-client PR; QA-GW-001 ke fix ke saath sochna.
+15. **QA-FE-005** (P4): playground ka 1-line fix, kabhi bhi.
+16. **Q-011 / T6.6** (owner): security headers (`frame-ancestors`, nosniff, Referrer-Policy) ka chhota PR, Phase 4 se pehle.
 
 ## Change log
 
@@ -944,3 +1038,4 @@ Har module ke baad (existing tests + `test/mutations.ts` ke survivors).
 | v0.13   | 2026-11-04 | M9 Kernel + shared: 15 executed + 1 static, 16 PASS; naya bug QA-FE-001 (P3, `safeNext` protocol-relative); TC-FE-010 FAIL; mutation survivors ka saar §8.                                                      |
 | v0.14   | 2026-11-04 | Session 1 band: §0 me agle session ka start (M10), infra saaf; HANDOFF §4 entry.                                                                                                                                |
 | v0.15 | 2026-11-04 | M10 Frontend packages (browser playgrounds): 13 executed + 3 static (+ TC-FE-010 pehle se), 12 PASS / 5 FAIL; naye bug QA-FE-004 (P2, logout fail pe bhi signed-out), QA-FE-002 (P3, HierarchySelect Escape), QA-FE-003 (P3, CodeInput paste), QA-FE-005 (P4, playground wake stub), QA-FE-006 (P4, client timeout nahi); QA-FE-001 browser me E1 (redirect nahi, crash); Q-008–Q-010, DR-010; 850 frontend tests green. |
+| v0.16 | 2026-11-04 | M11 Customer app (browser + QA bundle 8080 + E2E): 22 executed, 1 NOT IMPLEMENTED (T6.6 headers), 19 PASS / 3 FAIL; naye bug QA-FE-009 (P2, server down pe app khule to "Loading" atka), QA-FE-008 (P2, auth steps ka focus/announce), QA-FE-007 (P3, raw 502 sandesh), QA-CUS-001 (P3, `/account` error title); QA-FE-004 aur QA-FE-001 E1; TC-FE-014/017 executed; Q-011 (security headers), TOOL-OBS-01; E2E 24 pass / 30 skip. |
