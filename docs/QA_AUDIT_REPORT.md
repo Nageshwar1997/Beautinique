@@ -49,158 +49,158 @@
 
 ## 2. Overall Testing Summary
 
-| Metric                                 | Count                                      |
-| -------------------------------------- | ------------------------------------------ |
-| Modules                                | 16 (M0–M15); ho chuke: 10 (M0–M9)          |
-| Features (inventory, §3)               | 97                                         |
-| Planned test cases                     | 248 (planned-executed 223, planned-static 25) |
-| Executed                               | 159                                        |
-| Static-only                            | 14                                         |
-| PASS                                   | 167                                        |
-| FAIL                                   | 6                                          |
-| BLOCKED                                | 0                                          |
-| NOT TESTED                             | 74                                         |
-| NEEDS CLARIFICATION                    | 0                                          |
-| NOT IMPLEMENTED (roadmap)              | 10 (§7 list)                               |
-| KNOWN                                  | 10 issues (§2a); 1 test case (TC-ID-066)   |
-| Bugs P0 / P1 / P2 / P3 / P4            | 0 / 1 / 1 / 4 / 1                          |
-| Confirmed (E1–E3) / Suspected (E4)     | 7 / 0                                      |
-| Decision reviews (DR, §9)              | 9 (+ Q-007)                                |
+| Metric                             | Count                                         |
+| ---------------------------------- | --------------------------------------------- |
+| Modules                            | 16 (M0–M15); ho chuke: 10 (M0–M9)             |
+| Features (inventory, §3)           | 97                                            |
+| Planned test cases                 | 248 (planned-executed 223, planned-static 25) |
+| Executed                           | 159                                           |
+| Static-only                        | 14                                            |
+| PASS                               | 167                                           |
+| FAIL                               | 6                                             |
+| BLOCKED                            | 0                                             |
+| NOT TESTED                         | 74                                            |
+| NEEDS CLARIFICATION                | 0                                             |
+| NOT IMPLEMENTED (roadmap)          | 10 (§7 list)                                  |
+| KNOWN                              | 10 issues (§2a); 1 test case (TC-ID-066)      |
+| Bugs P0 / P1 / P2 / P3 / P4        | 0 / 1 / 1 / 4 / 1                             |
+| Confirmed (E1–E3) / Suspected (E4) | 7 / 0                                         |
+| Decision reviews (DR, §9)          | 9 (+ Q-007)                                   |
 
 ## 2a. Baseline: checks aur known issues
 
 **Baseline commands (M0, 2026-11-04, Windows laptop, `ee7f46a`):**
 
-| Command                                  | Result      | Duration | Note                                                   |
-| ---------------------------------------- | ----------- | -------- | ------------------------------------------------------ |
-| `npm ci`                                 | PASS        | 468 s    | lockfile nahi badla; 846 packages; npm 12 ne `msgpackr-extract` ka install script roka (§6) |
-| `npm run build`                          | PASS (1/3 FAIL) | 148 s / 105 s | pehla run (`npm ci` ke turant baad): `customer` ka prerender `/terms` 10 s timeout pe fail; customer akela (8 s) aur poora build dobara (105 s, 34 packages) pass. Q-005 |
-| `npm run format:check`                   | FAIL        | 36 s     | sirf laptop ki untracked `.claude/worktrees/` ki 6 files; usse bahar sab pass (QA-TOOL-001) |
-| `npm run lint`                           | PASS        | 245 s    |                                                        |
-| `npm run typecheck`                      | PASS        | 100 s    |                                                        |
-| `npm test`                               | PASS        | 827 s    | 1720 tests, 0 fail, 0 skip: scripts 123, kernel 285, shared 151, frontend packages 807, apps 119 (customer 38, admin 18, 9 shells × 7), backend 235 (identity 125, gateway 38, notify 32, bundle 27, core 13) |
-| `npm run verify -- --all --yes`          | PASS        | 574 s    | 19 packages "ready to publish", koi warning nahi; publish nahi kiya |
-| `npm audit` (saare levels)               | 24 (2 low, 22 moderate, 0 high/critical) | ~5 s | sirf 3 advisories: KNOWN-01, -02, -03; koi naya nahi |
-| `npm run test:scripts`                   | PASS        | (`npm test` ke andar) | root `npm test` pehle yahi config chalata hai (9 files, 123 tests); alag nahi chalaya |
-| `gitleaks git --config .gitleaks.toml --redact` | PASS (no leaks) | 7 s | 8.30.1 (CI wala version), poori history (208 commits with changes) |
+| Command                                         | Result                                   | Duration              | Note                                                                                                                                                                                                          |
+| ----------------------------------------------- | ---------------------------------------- | --------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `npm ci`                                        | PASS                                     | 468 s                 | lockfile nahi badla; 846 packages; npm 12 ne `msgpackr-extract` ka install script roka (§6)                                                                                                                   |
+| `npm run build`                                 | PASS (1/3 FAIL)                          | 148 s / 105 s         | pehla run (`npm ci` ke turant baad): `customer` ka prerender `/terms` 10 s timeout pe fail; customer akela (8 s) aur poora build dobara (105 s, 34 packages) pass. Q-005                                      |
+| `npm run format:check`                          | FAIL                                     | 36 s                  | sirf laptop ki untracked `.claude/worktrees/` ki 6 files; usse bahar sab pass (QA-TOOL-001)                                                                                                                   |
+| `npm run lint`                                  | PASS                                     | 245 s                 |                                                                                                                                                                                                               |
+| `npm run typecheck`                             | PASS                                     | 100 s                 |                                                                                                                                                                                                               |
+| `npm test`                                      | PASS                                     | 827 s                 | 1720 tests, 0 fail, 0 skip: scripts 123, kernel 285, shared 151, frontend packages 807, apps 119 (customer 38, admin 18, 9 shells × 7), backend 235 (identity 125, gateway 38, notify 32, bundle 27, core 13) |
+| `npm run verify -- --all --yes`                 | PASS                                     | 574 s                 | 19 packages "ready to publish", koi warning nahi; publish nahi kiya                                                                                                                                           |
+| `npm audit` (saare levels)                      | 24 (2 low, 22 moderate, 0 high/critical) | ~5 s                  | sirf 3 advisories: KNOWN-01, -02, -03; koi naya nahi                                                                                                                                                          |
+| `npm run test:scripts`                          | PASS                                     | (`npm test` ke andar) | root `npm test` pehle yahi config chalata hai (9 files, 123 tests); alag nahi chalaya                                                                                                                         |
+| `gitleaks git --config .gitleaks.toml --redact` | PASS (no leaks)                          | 7 s                   | 8.30.1 (CI wala version), poori history (208 commits with changes)                                                                                                                                            |
 
 **KNOWN issues (naye bug nahi, jab tak kuch naya na mile):**
 
-| ID        | Issue                                                                                                   | Source                                  | Abhi bhi sach? |
-| --------- | ------------------------------------------------------------------------------------------------------- | --------------------------------------- | -------------- |
-| KNOWN-01  | Dependabot `deepmerge` GHSA-gcqx-w48m-w2h4 (low), sirf build tool chain (`vite-plugin-pwa` → `workbox-build`) | HANDOFF §6                              | haan (`npm audit`, M0) |
-| KNOWN-02  | Dependabot `glob` GHSA-3g3m-2fjr-6pw4 (moderate), lockfile; fix sirf naye major me (branch `feat/deps-glob-minimatch` origin pe hai) | HANDOFF §6                              | haan (`npm audit`, M0) |
-| KNOWN-03  | Dependabot `minimatch` GHSA-g3hv-75wg-m249 (moderate), lockfile                                          | HANDOFF §6                              | haan (`npm audit`, M0) |
-| KNOWN-04  | T2.7 wake: GitHub scheduled `wake.yml` bharosemand nahi (2 din me ~18 me se 2 slots); owner ka faisla khula | HANDOFF §4 item 1, TASKS T2.7           | M14 me         |
-| KNOWN-05  | Render free cold start (~50–57 s), wake-up screen ke saath                                               | ARCHITECTURE §11.2, HANDOFF §4          | haan (design)  |
-| KNOWN-06  | State Admin abhi Seller Account Owner / Pro Buyer nahi de sakta (alag scope type, seller/pro module ke saath) | HANDOFF §4 (T3.3 PR B "Seema")          | M5 me          |
-| KNOWN-07  | CI job summary me mutation fixtures ki nakli "Vitest Test Report" ❌ (child env me `GITHUB_STEP_SUMMARY`) | HANDOFF §4 item 8                       | M14 me         |
-| KNOWN-08  | MongoDB 8.0 + Linux kernel 6.19+/7.0: compose me `GLIBC_TUNABLES=glibc.pthread.rseq=1` workaround        | HANDOFF §6                              | M14 me         |
-| KNOWN-09  | Frontend Sentry abhi kisi app me nahi (owner ka khula kaam)                                              | HANDOFF §4 item 4                       | haan           |
-| KNOWN-10  | TypeScript ~6.0.3 hold (typescript-eslint <6.1); `server-queue` "skips an event delivered again" CI flake ka fix GitHub pe dobara dekhna baaki | HANDOFF §6                              | TS hold haan (installed 6.0.3); laptop pe server-queue 55/55 pass, CI wala hissa M14 me |
+| ID       | Issue                                                                                                                                          | Source                         | Abhi bhi sach?                                                                          |
+| -------- | ---------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------ | --------------------------------------------------------------------------------------- |
+| KNOWN-01 | Dependabot `deepmerge` GHSA-gcqx-w48m-w2h4 (low), sirf build tool chain (`vite-plugin-pwa` → `workbox-build`)                                  | HANDOFF §6                     | haan (`npm audit`, M0)                                                                  |
+| KNOWN-02 | Dependabot `glob` GHSA-3g3m-2fjr-6pw4 (moderate), lockfile; fix sirf naye major me (branch `feat/deps-glob-minimatch` origin pe hai)           | HANDOFF §6                     | haan (`npm audit`, M0)                                                                  |
+| KNOWN-03 | Dependabot `minimatch` GHSA-g3hv-75wg-m249 (moderate), lockfile                                                                                | HANDOFF §6                     | haan (`npm audit`, M0)                                                                  |
+| KNOWN-04 | T2.7 wake: GitHub scheduled `wake.yml` bharosemand nahi (2 din me ~18 me se 2 slots); owner ka faisla khula                                    | HANDOFF §4 item 1, TASKS T2.7  | M14 me                                                                                  |
+| KNOWN-05 | Render free cold start (~50–57 s), wake-up screen ke saath                                                                                     | ARCHITECTURE §11.2, HANDOFF §4 | haan (design)                                                                           |
+| KNOWN-06 | State Admin abhi Seller Account Owner / Pro Buyer nahi de sakta (alag scope type, seller/pro module ke saath)                                  | HANDOFF §4 (T3.3 PR B "Seema") | M5 me                                                                                   |
+| KNOWN-07 | CI job summary me mutation fixtures ki nakli "Vitest Test Report" ❌ (child env me `GITHUB_STEP_SUMMARY`)                                       | HANDOFF §4 item 8              | M14 me                                                                                  |
+| KNOWN-08 | MongoDB 8.0 + Linux kernel 6.19+/7.0: compose me `GLIBC_TUNABLES=glibc.pthread.rseq=1` workaround                                              | HANDOFF §6                     | M14 me                                                                                  |
+| KNOWN-09 | Frontend Sentry abhi kisi app me nahi (owner ka khula kaam)                                                                                    | HANDOFF §4 item 4              | haan                                                                                    |
+| KNOWN-10 | TypeScript ~6.0.3 hold (typescript-eslint <6.1); `server-queue` "skips an event delivered again" CI flake ka fix GitHub pe dobara dekhna baaki | HANDOFF §6                     | TS hold haan (installed 6.0.3); laptop pe server-queue 55/55 pass, CI wala hissa M14 me |
 
 ## 3. Module-wise Testing Status
 
 Abhi sab `NOT TESTED` (Gate 1). Status ke saath `Executed`/`Static` module ke baad bharega.
 
-| Module | Feature | Task | Status | Executed/Static | Bugs | Notes |
-| ------ | ------- | ---- | ------ | --------------- | ---- | ----- |
-| M0 Baseline | Build, format, lint, typecheck, tests, verify | T0.6, T1.7 | FAIL | Executed | QA-TOOL-001 | build 1/3 flaky (Q-005); format:check sirf `.claude/worktrees` pe fail; baaki PASS, 1720 tests green |
-| M0 Baseline | `npm audit` vs KNOWN alerts | T0.6 | PASS | Executed | | sirf KNOWN-01..03, koi high/critical nahi |
-| M0 Baseline | Secrets hygiene (`.env.example`, gitleaks rules/ignore, `git grep`) | T0.6, RULES §2.4 | PASS | Executed + Static | | history me koi leak nahi; `.env.example` sirf dummy; live config me laptop ki dummy values ka koi guard hai ya nahi: M1/M6 me |
-| M0 Baseline | Package CLI tests (`test:scripts`) | T0.1 | PASS | Executed | | `npm test` ke andar, 123 tests |
-| M1 Gateway | Origin secret (missing, wrong, rotation, timing-safe) | T2.2 | PASS | Executed + Static | | 8 galat values 403; rotation unit test + static (`trust.ts:15-29`) |
-| M1 Gateway | App allow-list (`X-BQ-App`, Host, `x-forwarded-host`, Origin, Vercel previews) | T2.1 | PASS | Executed | | 29 cases; doosre account ka `-<scope>` suffix pattern me aata hai (README me likhi seema), origin secret + Origin=Host se bachav |
-| M1 Gateway | Route table (unknown path/method, traversal, encoding, case, slash) | T2.1 | PASS | Executed | | 18 raw paths, koi 500 nahi, koi doosre route pe nahi gaya |
-| M1 Gateway | Access fail-closed (401 on every non-public route) | T2.2 | PASS | Executed | | 30/30 non-public routes 401 |
-| M1 Gateway | Token verification (alg, kid, exp, aud, JWKS failure/rotation, revocation, `av`) | T2.2, T3.2, T3.3 | FAIL | Executed | QA-KRN-001, QA-GW-002 | 15 forgeries 401; JWKS pehla load fail = 30 s 401; wipe ke baad revoke markers gayab; `av` M5 me |
-| M1 Gateway | Passport + internal header stripping, `clientIp()` | T2.2 | PASS | Executed + Static | | forged passport owner pe 401; session IP sirf `x-real-ip` |
-| M1 Gateway | Rate limits per class, IPv6 /64, Redis down (fail closed/open) | T2.3 | FAIL | Executed | QA-GW-001 | budgets theek; Redis band = fast 503; Redis atka = signed-in requests latakti hain |
-| M1 Gateway | Idempotency-Key validation | T2.3 | PASS | Executed | | dedupe (same key → same answer) NOT IMPLEMENTED, T4.1 |
-| M1 Gateway | Request smuggling, body on GET/DELETE, oversized headers/body | T2.1 | PASS | Executed | | 9 raw framing attacks 400, 20 KB header 431, 2 MB body 413 |
-| M1 Gateway | Proxy: owner down/slow/abort, client abort | T2.1 | PASS | Static | | unit tests `gateway.test.ts:432,766,803`; bundle me ek owner alag band nahi hota |
-| M1 Gateway | Cache headers | T2.3 | PASS | Executed | | koi `cache: public` route abhi nahi (s-maxage sirf unit test) |
-| M1 Gateway | `/health`, `/ready`, `/status`, `/wake`, passport JWKS | T2.4, T2.7 | PASS | Executed | | sirf naam + ok/failing; `/ready` bina memo (DR-001) |
-| M1 Gateway | Navigation routes (303) + open redirect | T3.1 PR 4 | PASS | Executed | | start har `next` leta hai; asli redirect check callback pe (M4) |
-| M1 Gateway | Security headers, error envelope, log hygiene | T2.3 | PASS | Executed | | helmet poora; logs me cookie/token/secret/OTP/email/query nahi |
-| M2 Identity auth | Email-code sign-up / OTP verify / resend | T3.1 | PASS | Executed | | 6-digit CSPRNG, 10 min, 5 tries, 3 resends + 1 min gap, 5/ghanta per email, app binding, replay band |
-| M2 Identity auth | Enumeration (time floor, same responses) | T3.1 | PASS | Executed | | sign-up/password code ~418 ms dono taraf; login unknown vs galat password ~60 ms, same error; invitation M5 me |
-| M2 Identity auth | Password rules, argon2id, HIBP down | T3.1 | PASS | Executed + Static | | 12–128 (trim); argon2id OWASP min; HIBP k-anonymity + fail-open (DR-002) |
-| M2 Identity auth | Forgot password (`/auth/password/code`) | T3.1 | PASS | Executed | | reset pe purane sessions band, rok hatta hai |
-| M2 Identity auth | Lockout (threshold, 1 h, DoS) | T3.1 | PASS | Executed | | 10 galat → 1 ghanta; lock ke dauraan try = lock phir poora ghanta; targeted lockout chain (DR-003) |
-| M2 Identity auth | Login second factor (`/auth/login/:loginId/*`: TOTP, recovery, enroll) | T3.1 | PASS | Executed | | loginId UUIDv7, app-bound, 5 tries, TTL; TOTP replay band; recovery single-use; enroll-at-login M5/M12 me |
-| M2 Identity auth | Sign-in sirf grant wale app me | T3.3 | PASS | Executed | | customer account admin/seller me `INVALID_CREDENTIALS` (galat password jaisa) |
-| M2 Identity auth | Email normalization | T3.1 | PASS | Executed | | trim + lower-case; Unicode/fullwidth/quoted/trailing-dot reject; plus-address alag account |
-| M2 Identity auth | Input validation + error envelope | T3.1 | PASS | Executed | | NoSQL-style objects 400, extra fields hat jaate; hash queue flood (DR-004) |
-| M3 Sessions | ES256 keys, JWKS, rotation | T3.2 | PASS | Static + Executed | | 30 din rotation, 31 din JWKS me; private key sealed; JWKS sirf internal |
-| M3 Sessions | Refresh rotation + reuse detection + concurrent tabs | T3.2 | FAIL | Executed | QA-ID-001 | rotation + 10 s parallel-tab (409) + seedha reuse PASS; reuse detection ka bypass (P1) |
-| M3 Sessions | Per-app cookies (flags, prefix, hint cookie) | T3.2, TASKS C.1 | PASS | Executed | | at Lax 10 min, rt Strict `/api/v1/auth` 30 din, dono HttpOnly+Secure, Domain nahi; hint = "1" |
-| M3 Sessions | CSRF stance (SameSite + Origin) | T3.2 | PASS | Executed + Static | | M1 TC-GW-007 + `X-BQ-App` custom header + SameSite |
-| M3 Sessions | Logout, end-others, end one session (IDOR) | T3.2 | PASS | Executed | | doosre ka session id = `{ended:false}`, random jaisa; koi asar nahi |
-| M3 Sessions | My Devices (privacy) | T3.2 | PASS | Executed | | sirf apne sessions; device + IP (owner ka faisla, 2026-11-03) |
-| M3 Sessions | Idle timeout, max lifetime | T3.2 | PASS | Executed | | expired session ka refresh 401; access token apne 10 min tak (design); internal idle M12 me |
-| M3 Sessions | Step-up (5 min window, binding) | T3.3 PR C | PASS | Executed | | `su` claim, session-bound, galat tries lock me gine jaate |
-| M3 Sessions | Signed-in authenticator (enroll, confirm, new codes, disable) | T3.1 (PR #38) | PASS | Executed | | confirm password maangta; naye codes pe purane band; security emails aate |
-| M4 OAuth | Providers list, start (state, PKCE, LinkedIn no-PKCE) | T3.1 PR 4 | PASS | Executed | | state 43 chars, S256 (Google/GitHub), LinkedIn bina PKCE/nonce (owner ka faisla, MEMORY 2026-11-03); state cookie HttpOnly+Secure+Lax, Path `/api/v1/auth/oauth`, 10 min |
-| M4 OAuth | Callback (trip binding, single use, expiry, missing cookie) | T3.1 PR 4 | PASS | Executed | | login CSRF, replay, bina cookie, expired: sab `/sign-in?oauth=expired`, koi session nahi |
-| M4 OAuth | Account linking (verified email only) | T3.1 PR 4 | PASS | Executed | | unverified (Google) → `email-unverified`; GitHub unverified primary → `failed`; verified → link + sign-in |
-| M4 OAuth | New-account consent (`/auth/oauth/sign-up`, `/sign-up/finish`) | T3.1 PR 4 | PASS | Executed | | consent zaroori, ticket ek baar, sirf usi browser me |
-| M4 OAuth | `#totp=<loginId>` for authenticator accounts | T3.1 PR 4 | PASS | Executed | | session TOTP ke baad hi |
-| M4 OAuth | Sign-in methods remove (last method, step-up decision) | T3.1 PR 4 | PASS | Executed | | aakhri method 409 `LAST_SIGN_IN_METHOD`; bina step-up hatana = DR-006 |
-| M4 OAuth | Provider errors, unknown provider, non-customer app | T3.1 PR 4 | PASS | Executed | | cancel → `oauth=cancelled`; anjaan provider 400; admin 403 |
-| M5 RBAC | Roles seed + `rbac-sync` idempotent | T3.3 | PASS | Executed | | forced release do baar: 85 roles (81 system + 4 custom), 7 permissions, 11 apps, grants same |
-| M5 RBAC | Route × actor matrix (13 `iam`/permission routes) | T3.3 | PASS | Executed | | bina session 401, customer 403, Auditor sirf padhta, Logistics Head apni hadd me, SO/roles routes doosron ko 403 |
-| M5 RBAC | `scopeWithin`, self-grant, `appointedBy`, Master via API | T3.3 | PASS | Executed | | State Admin (MH) ke custom state role se: KA/MH+KA/global/XX refuse; self grant/end/invite refuse; Master API se nahi; Master ka grant koi khatam nahi kar sakta |
-| M5 RBAC | Separation of duties, validity windows, `mfaRequired` | T3.3 | PASS | Executed | | future grant pe sign-in nahi; past/ulti window refuse; MFA custom role → enroll; second signature T10.4 (NOT IMPLEMENTED) |
-| M5 RBAC | Seat limits (`maxHolders`, race) + `db:grant-master` max 2 | T3.3 | PASS | Executed + Static | | 3 ek saath → 2 given, 1 refuse (seatClaims write conflict); 4th refuse |
-| M5 RBAC | Invitations (create, list, revoke, accept by code) | T3.3 PR B | PASS | Executed | | email me secret nahi; accept sirf usi app me; revoke ke baad code nahi; inviter ka haq gaya to accept fail |
-| M5 RBAC | `av` bump on every grant change | T3.3 PR B | PASS | Executed | | grant/end ke baad purana token 401 |
-| M5 RBAC | Security Officer: authenticator reset, end user sessions | T3.3 PR C | PASS | Executed | | apne pe nahi; reset email aata hai; **Master pe bhi chalta hai** (DR-007) |
-| M5 RBAC | Roles create/patch (`iam.role.manage`) | T3.3 | PASS | Executed | | `iam.role.manage` wala custom role refuse, shipped role PATCH 403; khud ko appoint karne wala role ban jaata hai (Q-007) |
-| M6 Data protection | PII sealing (context binding), blind index, masking | T1.4, T3.1 | PASS | Executed | | A ka sealed TOTP secret B pe copy → `CryptoError`, koi code nahi chalta; Redis keys me email ka HMAC; DB/Redis me plaintext secret nahi |
-| M6 Data protection | `/iam/me` me secrets nahi | T3.1 | PASS | Executed | | sirf userId, email, age, sign-up app, providers, authenticator bool, codes left, session |
-| M6 Data protection | Log redaction (identity flows) | T1.1, RULES §7.2 | PASS | Executed | | 3 runs ke logs: known secret values 0, emails 0, IPs 0, user-agent 0 |
-| M6 Data protection | Indexes for every query/sort; migrations | T2.5, RULES §4.13–4.14 | FAIL | Executed | QA-ID-002 | profiler: 73 query shapes; social lookup COLLSCAN; 5 in-memory sorts (§6); migration idempotent |
-| M7 Notify/async | OTP email end-to-end (outbox → relay → queue → consumer → Mailpit) | T3.1 PR 1, T1.3 | PASS | Executed | | ~2 s; row `sent`, sealed code row se hat gaya |
-| M7 Notify/async | Inbox dedupe, retries, dead letters | T1.3 | PASS | Executed | | wipe ke baad redrive pe "event seen again, skipped"; unknown version / toota contract → turant dead letter |
-| M7 Notify/async | Lanes, daily budget, retry 5 + expiry | T5.2 | PASS | Executed + Static | | expire hua OTP der se nahi gaya; budget khatam → `DAILY_LIMIT` (docs jaisa); budget ajnabi kha sakte (DR-009) |
-| M7 Notify/async | Invitation + security emails (content, links, injection) | T3.3 PR B, T3.1 | PASS | Executed | | koi secret/recovery code nahi; UA ka HTML/CRLF email tak nahi |
-| M7 Notify/async | Failure injection (Valkey, Mailpit, restart, Redis wipe, big/unknown event) | T1.3 | PASS | Executed | | Mailpit band → retry; Redis band → outbox me ruka, phir pahuncha; kill + restart → bheja; wipe → koi double email nahi |
-| M8 Core | `platform` ping write (rate, cap, TTL), get by id, audit subscriber | M1 milestone | PASS | Executed + Static | | write 20/min (M1), 5,000 pe 503, TTL 7 din dono collections pe, audit copy (M7); `platform.ping.read` kisi shipped role me nahi |
-| M8 Core | Module boundaries (facade) | RULES §4.2 | PASS | Static | | abhi ek hi module; enforcement (dependency-cruiser) repo me nahi: M15 |
-| M8 Bundle | Start/stop, exit on start failure, Sentry off, `loadConfig` unknown keys | T2.5, T2.3 | PASS | Executed + Static | | compiled `dist/start.js` 7 s me; start fail 1.6 s me `exit 1`; typo key refuse, `PAYMENTS__*` ignore; error me secret value nahi |
-| M8 Bundle | `db:release` (lease, fingerprint, 60 s, concurrent boots) | T2.5 | PASS | Executed | | do boot ek saath: B ne intezaar kiya, A ne chalaya; teesra 2 ms me skip |
-| M8 Bundle | `db:grant-master` guards (local only) | T3.3 | PASS | Static | | `--env` sirf `live`, live pe `Type "live"`; live kabhi nahi chalaya; unit tests M0 me pass |
-| M8 Bundle | `/ready` composition | T2.4 | PASS | Executed | | M1: gateway Redis + har deployable; identity mongo/redis/outbox, notify events, core outbox/events |
-| M9 Kernel | server-kit (`mountRoute`, envelope, request id, redaction, navigation) | T1.1 | PASS | Executed | | M1/M2/M6 me chala: 400 envelope, extra fields hat jaate, request id, logs saaf |
-| M9 Kernel | server-mongo (`withTransaction` retries, timeout, guards) | T1.2 | PASS | Static + unit | | 49 tests (M0); 75 mutations, 7 survivors wajah ke saath |
-| M9 Kernel | server-queue (relay, lease, redrive, scheduler, epoch) | T1.3 | PASS | Executed | | M7: relay lease, wipe recovery, redrive + dedupe, dead letters |
-| M9 Kernel | server-crypto (rotation, malformed, context) | T1.4 | PASS | Executed (E2) | | rotation, `needsReencrypt`, tamper/truncate/garbage/context/short/duplicate key, random IV, JWT leeway/nbf/iss/aud |
-| M9 Kernel | server-ratelimit (GCRA, Lua, cardinality) | T2.3 | PASS | Executed | | M1 bursts + `ipKey` (IPv6 /64, mapped, junk refuse) |
-| M9 Kernel | server-release, server-storage (in-memory adapter) | T2.5, T1.6 | PASS | Executed | | M8 release race; storage keys ka traversal refuse; Cloudinary adapter NOT IMPLEMENTED (T4.7) |
-| M9 Shared | shared-zod validators (GSTIN, PAN, IFSC, UPI, PIN, mobile, paise, password) | T1.5 | PASS | Executed (E2) | | 37 cases: GSTIN check digit + state code, normalisation (upper-case, `+91`) |
-| M9 Shared | shared-utils (money BigInt, IST dates, masking, slugs, UUIDv7) | T1.5 | PASS | Executed (E2) | | paise sirf integer, 2 decimals, safe range; IST midnight/leap/year-end; UUIDv7 20k order; chhote notes §6 |
-| M9 Shared | shared-contracts (codegen drift, `safeNextPath`, error mapping, queryKey) | T1.5 | PASS | Executed | | `check` up to date; 20 `next` cases safe; queryKey order TanStack sort karta hai |
-| M9 Shared | shared-authz (containment, windows, step-up, SoD) | T1.6 | PASS | Executed (E2) | | scopeWithin boundaries, validity edges, step-up 5 min + future refuse |
-| M10 Frontend pkgs | components (a11y, keyboard, pickers edge input) | T6.1 | NOT TESTED | | | |
-| M10 Frontend pkgs | forms, hooks | T6.1 | NOT TESTED | | | |
-| M10 Frontend pkgs | api-client (errors, refresh-on-401 concurrency, timeouts) | T6.1 | NOT TESTED | | | |
-| M10 Frontend pkgs | app-shell (`ServerWake`, `ErrorPage`, theme script) | T6.1, T2.7 | NOT TESTED | | | |
-| M10 Frontend pkgs | auth-ui (guards, `next`, step-up dialog, idle notice, recovery codes, social buttons) | T6.1 | FAIL | Executed (E2) | QA-FE-001 | `safeNext` protocol-relative lautata (M9 me mila); baaki M10 me |
-| M10 Frontend pkgs | styles contrast, icons | T6.1a | NOT TESTED | | | |
-| M11 Customer | Har route: SSR/hydration, states, 404, meta/noindex | T6.1, T6.3 | NOT TESTED | | | |
-| M11 Customer | Auth forms + account pages (flows, double submit, mid-flow nav, expiry) | T3.1, T3.2, T6.1 | NOT TESTED | | | |
-| M11 Customer | Storage, cookies, network, console | RULES §5.9 | NOT TESTED | | | |
-| M11 Customer | Responsive × theme, axe, keyboard | RULES §1.5, §5.5–5.6 | NOT TESTED | | | |
-| M11 Customer | `vercel.json` rewrites + security headers; E2E suite | T6.6 | NOT TESTED | | | |
-| M12 Admin | Sign-in + mandatory authenticator, invitation, forgot password, dashboard, account, idle sign-out | T6.1, RULES §7.1 | NOT TESTED | | | |
-| M12 Admin | `noindex`, SPA fallback, responsive/theme/axe/keyboard, E2E suite | T6.6 | NOT TESTED | | | |
-| M13 Shell apps (9) | Build, start, 404, `vercel.json`, dev proxy secret, no fake features | T0.2 | NOT TESTED | | | |
-| M14 CI/CD | `ci.yml` (branch flow, gitleaks pin, permissions, pinning, untrusted input) | T0.6, T0.7 | NOT TESTED | | | |
-| M14 CI/CD | `release.yml`, `wake.yml` | T0.6, T2.7 | NOT TESTED | | | |
-| M14 Infra | `scripts/render/*.sh`, `infra/docker-compose.yml` | T0.8, T11.4 | NOT TESTED | | | |
-| M14 Tooling | Package CLI, `update-deps`, mutation runner, generator templates | T0.1 | NOT TESTED | | | |
-| M15 Docs | HANDOFF/TASKS/README claims, `.env.example` vs `configZod`, generated vs catalogue | B, RULES §8 | NOT TESTED | | | |
+| Module             | Feature                                                                                           | Task                   | Status     | Executed/Static   | Bugs                  | Notes                                                                                                                                                                    |
+| ------------------ | ------------------------------------------------------------------------------------------------- | ---------------------- | ---------- | ----------------- | --------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| M0 Baseline        | Build, format, lint, typecheck, tests, verify                                                     | T0.6, T1.7             | FAIL       | Executed          | QA-TOOL-001           | build 1/3 flaky (Q-005); format:check sirf `.claude/worktrees` pe fail; baaki PASS, 1720 tests green                                                                     |
+| M0 Baseline        | `npm audit` vs KNOWN alerts                                                                       | T0.6                   | PASS       | Executed          |                       | sirf KNOWN-01..03, koi high/critical nahi                                                                                                                                |
+| M0 Baseline        | Secrets hygiene (`.env.example`, gitleaks rules/ignore, `git grep`)                               | T0.6, RULES §2.4       | PASS       | Executed + Static |                       | history me koi leak nahi; `.env.example` sirf dummy; live config me laptop ki dummy values ka koi guard hai ya nahi: M1/M6 me                                            |
+| M0 Baseline        | Package CLI tests (`test:scripts`)                                                                | T0.1                   | PASS       | Executed          |                       | `npm test` ke andar, 123 tests                                                                                                                                           |
+| M1 Gateway         | Origin secret (missing, wrong, rotation, timing-safe)                                             | T2.2                   | PASS       | Executed + Static |                       | 8 galat values 403; rotation unit test + static (`trust.ts:15-29`)                                                                                                       |
+| M1 Gateway         | App allow-list (`X-BQ-App`, Host, `x-forwarded-host`, Origin, Vercel previews)                    | T2.1                   | PASS       | Executed          |                       | 29 cases; doosre account ka `-<scope>` suffix pattern me aata hai (README me likhi seema), origin secret + Origin=Host se bachav                                         |
+| M1 Gateway         | Route table (unknown path/method, traversal, encoding, case, slash)                               | T2.1                   | PASS       | Executed          |                       | 18 raw paths, koi 500 nahi, koi doosre route pe nahi gaya                                                                                                                |
+| M1 Gateway         | Access fail-closed (401 on every non-public route)                                                | T2.2                   | PASS       | Executed          |                       | 30/30 non-public routes 401                                                                                                                                              |
+| M1 Gateway         | Token verification (alg, kid, exp, aud, JWKS failure/rotation, revocation, `av`)                  | T2.2, T3.2, T3.3       | FAIL       | Executed          | QA-KRN-001, QA-GW-002 | 15 forgeries 401; JWKS pehla load fail = 30 s 401; wipe ke baad revoke markers gayab; `av` M5 me                                                                         |
+| M1 Gateway         | Passport + internal header stripping, `clientIp()`                                                | T2.2                   | PASS       | Executed + Static |                       | forged passport owner pe 401; session IP sirf `x-real-ip`                                                                                                                |
+| M1 Gateway         | Rate limits per class, IPv6 /64, Redis down (fail closed/open)                                    | T2.3                   | FAIL       | Executed          | QA-GW-001             | budgets theek; Redis band = fast 503; Redis atka = signed-in requests latakti hain                                                                                       |
+| M1 Gateway         | Idempotency-Key validation                                                                        | T2.3                   | PASS       | Executed          |                       | dedupe (same key → same answer) NOT IMPLEMENTED, T4.1                                                                                                                    |
+| M1 Gateway         | Request smuggling, body on GET/DELETE, oversized headers/body                                     | T2.1                   | PASS       | Executed          |                       | 9 raw framing attacks 400, 20 KB header 431, 2 MB body 413                                                                                                               |
+| M1 Gateway         | Proxy: owner down/slow/abort, client abort                                                        | T2.1                   | PASS       | Static            |                       | unit tests `gateway.test.ts:432,766,803`; bundle me ek owner alag band nahi hota                                                                                         |
+| M1 Gateway         | Cache headers                                                                                     | T2.3                   | PASS       | Executed          |                       | koi `cache: public` route abhi nahi (s-maxage sirf unit test)                                                                                                            |
+| M1 Gateway         | `/health`, `/ready`, `/status`, `/wake`, passport JWKS                                            | T2.4, T2.7             | PASS       | Executed          |                       | sirf naam + ok/failing; `/ready` bina memo (DR-001)                                                                                                                      |
+| M1 Gateway         | Navigation routes (303) + open redirect                                                           | T3.1 PR 4              | PASS       | Executed          |                       | start har `next` leta hai; asli redirect check callback pe (M4)                                                                                                          |
+| M1 Gateway         | Security headers, error envelope, log hygiene                                                     | T2.3                   | PASS       | Executed          |                       | helmet poora; logs me cookie/token/secret/OTP/email/query nahi                                                                                                           |
+| M2 Identity auth   | Email-code sign-up / OTP verify / resend                                                          | T3.1                   | PASS       | Executed          |                       | 6-digit CSPRNG, 10 min, 5 tries, 3 resends + 1 min gap, 5/ghanta per email, app binding, replay band                                                                     |
+| M2 Identity auth   | Enumeration (time floor, same responses)                                                          | T3.1                   | PASS       | Executed          |                       | sign-up/password code ~418 ms dono taraf; login unknown vs galat password ~60 ms, same error; invitation M5 me                                                           |
+| M2 Identity auth   | Password rules, argon2id, HIBP down                                                               | T3.1                   | PASS       | Executed + Static |                       | 12–128 (trim); argon2id OWASP min; HIBP k-anonymity + fail-open (DR-002)                                                                                                 |
+| M2 Identity auth   | Forgot password (`/auth/password/code`)                                                           | T3.1                   | PASS       | Executed          |                       | reset pe purane sessions band, rok hatta hai                                                                                                                             |
+| M2 Identity auth   | Lockout (threshold, 1 h, DoS)                                                                     | T3.1                   | PASS       | Executed          |                       | 10 galat → 1 ghanta; lock ke dauraan try = lock phir poora ghanta; targeted lockout chain (DR-003)                                                                       |
+| M2 Identity auth   | Login second factor (`/auth/login/:loginId/*`: TOTP, recovery, enroll)                            | T3.1                   | PASS       | Executed          |                       | loginId UUIDv7, app-bound, 5 tries, TTL; TOTP replay band; recovery single-use; enroll-at-login M5/M12 me                                                                |
+| M2 Identity auth   | Sign-in sirf grant wale app me                                                                    | T3.3                   | PASS       | Executed          |                       | customer account admin/seller me `INVALID_CREDENTIALS` (galat password jaisa)                                                                                            |
+| M2 Identity auth   | Email normalization                                                                               | T3.1                   | PASS       | Executed          |                       | trim + lower-case; Unicode/fullwidth/quoted/trailing-dot reject; plus-address alag account                                                                               |
+| M2 Identity auth   | Input validation + error envelope                                                                 | T3.1                   | PASS       | Executed          |                       | NoSQL-style objects 400, extra fields hat jaate; hash queue flood (DR-004)                                                                                               |
+| M3 Sessions        | ES256 keys, JWKS, rotation                                                                        | T3.2                   | PASS       | Static + Executed |                       | 30 din rotation, 31 din JWKS me; private key sealed; JWKS sirf internal                                                                                                  |
+| M3 Sessions        | Refresh rotation + reuse detection + concurrent tabs                                              | T3.2                   | FAIL       | Executed          | QA-ID-001             | rotation + 10 s parallel-tab (409) + seedha reuse PASS; reuse detection ka bypass (P1)                                                                                   |
+| M3 Sessions        | Per-app cookies (flags, prefix, hint cookie)                                                      | T3.2, TASKS C.1        | PASS       | Executed          |                       | at Lax 10 min, rt Strict `/api/v1/auth` 30 din, dono HttpOnly+Secure, Domain nahi; hint = "1"                                                                            |
+| M3 Sessions        | CSRF stance (SameSite + Origin)                                                                   | T3.2                   | PASS       | Executed + Static |                       | M1 TC-GW-007 + `X-BQ-App` custom header + SameSite                                                                                                                       |
+| M3 Sessions        | Logout, end-others, end one session (IDOR)                                                        | T3.2                   | PASS       | Executed          |                       | doosre ka session id = `{ended:false}`, random jaisa; koi asar nahi                                                                                                      |
+| M3 Sessions        | My Devices (privacy)                                                                              | T3.2                   | PASS       | Executed          |                       | sirf apne sessions; device + IP (owner ka faisla, 2026-11-03)                                                                                                            |
+| M3 Sessions        | Idle timeout, max lifetime                                                                        | T3.2                   | PASS       | Executed          |                       | expired session ka refresh 401; access token apne 10 min tak (design); internal idle M12 me                                                                              |
+| M3 Sessions        | Step-up (5 min window, binding)                                                                   | T3.3 PR C              | PASS       | Executed          |                       | `su` claim, session-bound, galat tries lock me gine jaate                                                                                                                |
+| M3 Sessions        | Signed-in authenticator (enroll, confirm, new codes, disable)                                     | T3.1 (PR #38)          | PASS       | Executed          |                       | confirm password maangta; naye codes pe purane band; security emails aate                                                                                                |
+| M4 OAuth           | Providers list, start (state, PKCE, LinkedIn no-PKCE)                                             | T3.1 PR 4              | PASS       | Executed          |                       | state 43 chars, S256 (Google/GitHub), LinkedIn bina PKCE/nonce (owner ka faisla, MEMORY 2026-11-03); state cookie HttpOnly+Secure+Lax, Path `/api/v1/auth/oauth`, 10 min |
+| M4 OAuth           | Callback (trip binding, single use, expiry, missing cookie)                                       | T3.1 PR 4              | PASS       | Executed          |                       | login CSRF, replay, bina cookie, expired: sab `/sign-in?oauth=expired`, koi session nahi                                                                                 |
+| M4 OAuth           | Account linking (verified email only)                                                             | T3.1 PR 4              | PASS       | Executed          |                       | unverified (Google) → `email-unverified`; GitHub unverified primary → `failed`; verified → link + sign-in                                                                |
+| M4 OAuth           | New-account consent (`/auth/oauth/sign-up`, `/sign-up/finish`)                                    | T3.1 PR 4              | PASS       | Executed          |                       | consent zaroori, ticket ek baar, sirf usi browser me                                                                                                                     |
+| M4 OAuth           | `#totp=<loginId>` for authenticator accounts                                                      | T3.1 PR 4              | PASS       | Executed          |                       | session TOTP ke baad hi                                                                                                                                                  |
+| M4 OAuth           | Sign-in methods remove (last method, step-up decision)                                            | T3.1 PR 4              | PASS       | Executed          |                       | aakhri method 409 `LAST_SIGN_IN_METHOD`; bina step-up hatana = DR-006                                                                                                    |
+| M4 OAuth           | Provider errors, unknown provider, non-customer app                                               | T3.1 PR 4              | PASS       | Executed          |                       | cancel → `oauth=cancelled`; anjaan provider 400; admin 403                                                                                                               |
+| M5 RBAC            | Roles seed + `rbac-sync` idempotent                                                               | T3.3                   | PASS       | Executed          |                       | forced release do baar: 85 roles (81 system + 4 custom), 7 permissions, 11 apps, grants same                                                                             |
+| M5 RBAC            | Route × actor matrix (13 `iam`/permission routes)                                                 | T3.3                   | PASS       | Executed          |                       | bina session 401, customer 403, Auditor sirf padhta, Logistics Head apni hadd me, SO/roles routes doosron ko 403                                                         |
+| M5 RBAC            | `scopeWithin`, self-grant, `appointedBy`, Master via API                                          | T3.3                   | PASS       | Executed          |                       | State Admin (MH) ke custom state role se: KA/MH+KA/global/XX refuse; self grant/end/invite refuse; Master API se nahi; Master ka grant koi khatam nahi kar sakta         |
+| M5 RBAC            | Separation of duties, validity windows, `mfaRequired`                                             | T3.3                   | PASS       | Executed          |                       | future grant pe sign-in nahi; past/ulti window refuse; MFA custom role → enroll; second signature T10.4 (NOT IMPLEMENTED)                                                |
+| M5 RBAC            | Seat limits (`maxHolders`, race) + `db:grant-master` max 2                                        | T3.3                   | PASS       | Executed + Static |                       | 3 ek saath → 2 given, 1 refuse (seatClaims write conflict); 4th refuse                                                                                                   |
+| M5 RBAC            | Invitations (create, list, revoke, accept by code)                                                | T3.3 PR B              | PASS       | Executed          |                       | email me secret nahi; accept sirf usi app me; revoke ke baad code nahi; inviter ka haq gaya to accept fail                                                               |
+| M5 RBAC            | `av` bump on every grant change                                                                   | T3.3 PR B              | PASS       | Executed          |                       | grant/end ke baad purana token 401                                                                                                                                       |
+| M5 RBAC            | Security Officer: authenticator reset, end user sessions                                          | T3.3 PR C              | PASS       | Executed          |                       | apne pe nahi; reset email aata hai; **Master pe bhi chalta hai** (DR-007)                                                                                                |
+| M5 RBAC            | Roles create/patch (`iam.role.manage`)                                                            | T3.3                   | PASS       | Executed          |                       | `iam.role.manage` wala custom role refuse, shipped role PATCH 403; khud ko appoint karne wala role ban jaata hai (Q-007)                                                 |
+| M6 Data protection | PII sealing (context binding), blind index, masking                                               | T1.4, T3.1             | PASS       | Executed          |                       | A ka sealed TOTP secret B pe copy → `CryptoError`, koi code nahi chalta; Redis keys me email ka HMAC; DB/Redis me plaintext secret nahi                                  |
+| M6 Data protection | `/iam/me` me secrets nahi                                                                         | T3.1                   | PASS       | Executed          |                       | sirf userId, email, age, sign-up app, providers, authenticator bool, codes left, session                                                                                 |
+| M6 Data protection | Log redaction (identity flows)                                                                    | T1.1, RULES §7.2       | PASS       | Executed          |                       | 3 runs ke logs: known secret values 0, emails 0, IPs 0, user-agent 0                                                                                                     |
+| M6 Data protection | Indexes for every query/sort; migrations                                                          | T2.5, RULES §4.13–4.14 | FAIL       | Executed          | QA-ID-002             | profiler: 73 query shapes; social lookup COLLSCAN; 5 in-memory sorts (§6); migration idempotent                                                                          |
+| M7 Notify/async    | OTP email end-to-end (outbox → relay → queue → consumer → Mailpit)                                | T3.1 PR 1, T1.3        | PASS       | Executed          |                       | ~2 s; row `sent`, sealed code row se hat gaya                                                                                                                            |
+| M7 Notify/async    | Inbox dedupe, retries, dead letters                                                               | T1.3                   | PASS       | Executed          |                       | wipe ke baad redrive pe "event seen again, skipped"; unknown version / toota contract → turant dead letter                                                               |
+| M7 Notify/async    | Lanes, daily budget, retry 5 + expiry                                                             | T5.2                   | PASS       | Executed + Static |                       | expire hua OTP der se nahi gaya; budget khatam → `DAILY_LIMIT` (docs jaisa); budget ajnabi kha sakte (DR-009)                                                            |
+| M7 Notify/async    | Invitation + security emails (content, links, injection)                                          | T3.3 PR B, T3.1        | PASS       | Executed          |                       | koi secret/recovery code nahi; UA ka HTML/CRLF email tak nahi                                                                                                            |
+| M7 Notify/async    | Failure injection (Valkey, Mailpit, restart, Redis wipe, big/unknown event)                       | T1.3                   | PASS       | Executed          |                       | Mailpit band → retry; Redis band → outbox me ruka, phir pahuncha; kill + restart → bheja; wipe → koi double email nahi                                                   |
+| M8 Core            | `platform` ping write (rate, cap, TTL), get by id, audit subscriber                               | M1 milestone           | PASS       | Executed + Static |                       | write 20/min (M1), 5,000 pe 503, TTL 7 din dono collections pe, audit copy (M7); `platform.ping.read` kisi shipped role me nahi                                          |
+| M8 Core            | Module boundaries (facade)                                                                        | RULES §4.2             | PASS       | Static            |                       | abhi ek hi module; enforcement (dependency-cruiser) repo me nahi: M15                                                                                                    |
+| M8 Bundle          | Start/stop, exit on start failure, Sentry off, `loadConfig` unknown keys                          | T2.5, T2.3             | PASS       | Executed + Static |                       | compiled `dist/start.js` 7 s me; start fail 1.6 s me `exit 1`; typo key refuse, `PAYMENTS__*` ignore; error me secret value nahi                                         |
+| M8 Bundle          | `db:release` (lease, fingerprint, 60 s, concurrent boots)                                         | T2.5                   | PASS       | Executed          |                       | do boot ek saath: B ne intezaar kiya, A ne chalaya; teesra 2 ms me skip                                                                                                  |
+| M8 Bundle          | `db:grant-master` guards (local only)                                                             | T3.3                   | PASS       | Static            |                       | `--env` sirf `live`, live pe `Type "live"`; live kabhi nahi chalaya; unit tests M0 me pass                                                                               |
+| M8 Bundle          | `/ready` composition                                                                              | T2.4                   | PASS       | Executed          |                       | M1: gateway Redis + har deployable; identity mongo/redis/outbox, notify events, core outbox/events                                                                       |
+| M9 Kernel          | server-kit (`mountRoute`, envelope, request id, redaction, navigation)                            | T1.1                   | PASS       | Executed          |                       | M1/M2/M6 me chala: 400 envelope, extra fields hat jaate, request id, logs saaf                                                                                           |
+| M9 Kernel          | server-mongo (`withTransaction` retries, timeout, guards)                                         | T1.2                   | PASS       | Static + unit     |                       | 49 tests (M0); 75 mutations, 7 survivors wajah ke saath                                                                                                                  |
+| M9 Kernel          | server-queue (relay, lease, redrive, scheduler, epoch)                                            | T1.3                   | PASS       | Executed          |                       | M7: relay lease, wipe recovery, redrive + dedupe, dead letters                                                                                                           |
+| M9 Kernel          | server-crypto (rotation, malformed, context)                                                      | T1.4                   | PASS       | Executed (E2)     |                       | rotation, `needsReencrypt`, tamper/truncate/garbage/context/short/duplicate key, random IV, JWT leeway/nbf/iss/aud                                                       |
+| M9 Kernel          | server-ratelimit (GCRA, Lua, cardinality)                                                         | T2.3                   | PASS       | Executed          |                       | M1 bursts + `ipKey` (IPv6 /64, mapped, junk refuse)                                                                                                                      |
+| M9 Kernel          | server-release, server-storage (in-memory adapter)                                                | T2.5, T1.6             | PASS       | Executed          |                       | M8 release race; storage keys ka traversal refuse; Cloudinary adapter NOT IMPLEMENTED (T4.7)                                                                             |
+| M9 Shared          | shared-zod validators (GSTIN, PAN, IFSC, UPI, PIN, mobile, paise, password)                       | T1.5                   | PASS       | Executed (E2)     |                       | 37 cases: GSTIN check digit + state code, normalisation (upper-case, `+91`)                                                                                              |
+| M9 Shared          | shared-utils (money BigInt, IST dates, masking, slugs, UUIDv7)                                    | T1.5                   | PASS       | Executed (E2)     |                       | paise sirf integer, 2 decimals, safe range; IST midnight/leap/year-end; UUIDv7 20k order; chhote notes §6                                                                |
+| M9 Shared          | shared-contracts (codegen drift, `safeNextPath`, error mapping, queryKey)                         | T1.5                   | PASS       | Executed          |                       | `check` up to date; 20 `next` cases safe; queryKey order TanStack sort karta hai                                                                                         |
+| M9 Shared          | shared-authz (containment, windows, step-up, SoD)                                                 | T1.6                   | PASS       | Executed (E2)     |                       | scopeWithin boundaries, validity edges, step-up 5 min + future refuse                                                                                                    |
+| M10 Frontend pkgs  | components (a11y, keyboard, pickers edge input)                                                   | T6.1                   | NOT TESTED |                   |                       |                                                                                                                                                                          |
+| M10 Frontend pkgs  | forms, hooks                                                                                      | T6.1                   | NOT TESTED |                   |                       |                                                                                                                                                                          |
+| M10 Frontend pkgs  | api-client (errors, refresh-on-401 concurrency, timeouts)                                         | T6.1                   | NOT TESTED |                   |                       |                                                                                                                                                                          |
+| M10 Frontend pkgs  | app-shell (`ServerWake`, `ErrorPage`, theme script)                                               | T6.1, T2.7             | NOT TESTED |                   |                       |                                                                                                                                                                          |
+| M10 Frontend pkgs  | auth-ui (guards, `next`, step-up dialog, idle notice, recovery codes, social buttons)             | T6.1                   | FAIL       | Executed (E2)     | QA-FE-001             | `safeNext` protocol-relative lautata (M9 me mila); baaki M10 me                                                                                                          |
+| M10 Frontend pkgs  | styles contrast, icons                                                                            | T6.1a                  | NOT TESTED |                   |                       |                                                                                                                                                                          |
+| M11 Customer       | Har route: SSR/hydration, states, 404, meta/noindex                                               | T6.1, T6.3             | NOT TESTED |                   |                       |                                                                                                                                                                          |
+| M11 Customer       | Auth forms + account pages (flows, double submit, mid-flow nav, expiry)                           | T3.1, T3.2, T6.1       | NOT TESTED |                   |                       |                                                                                                                                                                          |
+| M11 Customer       | Storage, cookies, network, console                                                                | RULES §5.9             | NOT TESTED |                   |                       |                                                                                                                                                                          |
+| M11 Customer       | Responsive × theme, axe, keyboard                                                                 | RULES §1.5, §5.5–5.6   | NOT TESTED |                   |                       |                                                                                                                                                                          |
+| M11 Customer       | `vercel.json` rewrites + security headers; E2E suite                                              | T6.6                   | NOT TESTED |                   |                       |                                                                                                                                                                          |
+| M12 Admin          | Sign-in + mandatory authenticator, invitation, forgot password, dashboard, account, idle sign-out | T6.1, RULES §7.1       | NOT TESTED |                   |                       |                                                                                                                                                                          |
+| M12 Admin          | `noindex`, SPA fallback, responsive/theme/axe/keyboard, E2E suite                                 | T6.6                   | NOT TESTED |                   |                       |                                                                                                                                                                          |
+| M13 Shell apps (9) | Build, start, 404, `vercel.json`, dev proxy secret, no fake features                              | T0.2                   | NOT TESTED |                   |                       |                                                                                                                                                                          |
+| M14 CI/CD          | `ci.yml` (branch flow, gitleaks pin, permissions, pinning, untrusted input)                       | T0.6, T0.7             | NOT TESTED |                   |                       |                                                                                                                                                                          |
+| M14 CI/CD          | `release.yml`, `wake.yml`                                                                         | T0.6, T2.7             | NOT TESTED |                   |                       |                                                                                                                                                                          |
+| M14 Infra          | `scripts/render/*.sh`, `infra/docker-compose.yml`                                                 | T0.8, T11.4            | NOT TESTED |                   |                       |                                                                                                                                                                          |
+| M14 Tooling        | Package CLI, `update-deps`, mutation runner, generator templates                                  | T0.1                   | NOT TESTED |                   |                       |                                                                                                                                                                          |
+| M15 Docs           | HANDOFF/TASKS/README claims, `.env.example` vs `configZod`, generated vs catalogue                | B, RULES §8            | NOT TESTED |                   |                       |                                                                                                                                                                          |
 
 ### 3.1 Test plan (Gate 1)
 
@@ -208,331 +208,331 @@ Plan: **E** = planned-executed (local stack, HTTP, browser, scratch script), **S
 
 **M0 Baseline (`BASE`, 16)**
 
-| TC | Case | Type | Plan | Result |
-| -- | ---- | ---- | ---- | ------ |
-| TC-BASE-001 | `npm ci` lockfile ke saath, `git status` saaf rahe | R | E | PASS (Executed): 468 s, lockfile nahi badla |
-| TC-BASE-002 | `npm run build` | F | E | PASS (Executed), 1/3 run me customer prerender timeout (Q-005) |
-| TC-BASE-003 | `npm run format:check` | F | E | FAIL (Executed): QA-TOOL-001 |
-| TC-BASE-004 | `npm run lint` | F | E | PASS (Executed) |
-| TC-BASE-005 | `npm run typecheck` | F | E | PASS (Executed) |
-| TC-BASE-006 | `npm test` (Mongo + Valkey + Mailpit) | F | E | PASS (Executed): 1720/1720 |
-| TC-BASE-007 | `npm run verify -- --all --yes` | F | E | PASS (Executed): 19 packages |
-| TC-BASE-008 | `npm audit` saare levels, KNOWN-01..03 se milan | Sec | E | PASS (Executed): sirf KNOWN-01..03 |
-| TC-BASE-009 | `npm run test:scripts` (background) | F | E | PASS (Executed, `npm test` ke andar): 123 |
-| TC-BASE-010 | Tool versions vs `devEngines` | Ed | E | PASS (Executed): Node 24.21.0 ≥ 24, npm 12.2.0 ≥ 12.2.0; CI bhi Node 24 + npm 12.2.0 |
-| TC-BASE-011 | Har `.env.example`: sirf dummy / low-entropy values, `<...>` placeholders | Sec | S | PASS (Static): 7 files; LOCAL me `not-a-secret-…`, `AQEB…`/`AgIC…`/`AAAA…` keys, PRODUCTION me sirf `<...>` |
-| TC-BASE-012 | `.gitleaks.toml` ke rules aur `.gitleaksignore` ki har entry ki wajah | Sec | S | PASS (Static): default rules + `url-with-password`; 5 fingerprints, har ek ki wajah aur commit-specific (path allow-list nahi) |
-| TC-BASE-013 | gitleaks poori history pe (`--redact`, repo config) | Sec | E | PASS (Executed): no leaks |
-| TC-BASE-014 | `git grep` key patterns (private key, AWS, Mongo/Redis URI with password, JWT, Brevo `xkeysib-`, Sentry DSN, Google client secret), values print kiye bina | Sec | E | PASS (Executed): sirf `server-mongo` test ka nakli `127.0.0.1:1` URI (`.gitleaksignore` me); Atlas host sirf `<cluster>` placeholder |
-| TC-BASE-015 | Tracked files me asli personal data (emails/phones jo example domain ke nahi) | Sec | E | PASS (Executed): emails `@beautinique.example`, `@example.com`, test fixtures (`k@o1.ingest.sentry.io`, `m1@smtp-relay.mailin.fr`, `a@b.in`); phone sirf `9876543210` |
-| TC-BASE-016 | `.gitignore` `.env`/`.env.*` rokta hai, `.env.example` chhodta hai | Sec | S | PASS (Static + `git check-ignore`): laptop ki 4 env files ignored, tracked sirf 7 `.env.example` |
+| TC          | Case                                                                                                                                                       | Type | Plan | Result                                                                                                                                                                |
+| ----------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------- | ---- | ---- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| TC-BASE-001 | `npm ci` lockfile ke saath, `git status` saaf rahe                                                                                                         | R    | E    | PASS (Executed): 468 s, lockfile nahi badla                                                                                                                           |
+| TC-BASE-002 | `npm run build`                                                                                                                                            | F    | E    | PASS (Executed), 1/3 run me customer prerender timeout (Q-005)                                                                                                        |
+| TC-BASE-003 | `npm run format:check`                                                                                                                                     | F    | E    | FAIL (Executed): QA-TOOL-001                                                                                                                                          |
+| TC-BASE-004 | `npm run lint`                                                                                                                                             | F    | E    | PASS (Executed)                                                                                                                                                       |
+| TC-BASE-005 | `npm run typecheck`                                                                                                                                        | F    | E    | PASS (Executed)                                                                                                                                                       |
+| TC-BASE-006 | `npm test` (Mongo + Valkey + Mailpit)                                                                                                                      | F    | E    | PASS (Executed): 1720/1720                                                                                                                                            |
+| TC-BASE-007 | `npm run verify -- --all --yes`                                                                                                                            | F    | E    | PASS (Executed): 19 packages                                                                                                                                          |
+| TC-BASE-008 | `npm audit` saare levels, KNOWN-01..03 se milan                                                                                                            | Sec  | E    | PASS (Executed): sirf KNOWN-01..03                                                                                                                                    |
+| TC-BASE-009 | `npm run test:scripts` (background)                                                                                                                        | F    | E    | PASS (Executed, `npm test` ke andar): 123                                                                                                                             |
+| TC-BASE-010 | Tool versions vs `devEngines`                                                                                                                              | Ed   | E    | PASS (Executed): Node 24.21.0 ≥ 24, npm 12.2.0 ≥ 12.2.0; CI bhi Node 24 + npm 12.2.0                                                                                  |
+| TC-BASE-011 | Har `.env.example`: sirf dummy / low-entropy values, `<...>` placeholders                                                                                  | Sec  | S    | PASS (Static): 7 files; LOCAL me `not-a-secret-…`, `AQEB…`/`AgIC…`/`AAAA…` keys, PRODUCTION me sirf `<...>`                                                           |
+| TC-BASE-012 | `.gitleaks.toml` ke rules aur `.gitleaksignore` ki har entry ki wajah                                                                                      | Sec  | S    | PASS (Static): default rules + `url-with-password`; 5 fingerprints, har ek ki wajah aur commit-specific (path allow-list nahi)                                        |
+| TC-BASE-013 | gitleaks poori history pe (`--redact`, repo config)                                                                                                        | Sec  | E    | PASS (Executed): no leaks                                                                                                                                             |
+| TC-BASE-014 | `git grep` key patterns (private key, AWS, Mongo/Redis URI with password, JWT, Brevo `xkeysib-`, Sentry DSN, Google client secret), values print kiye bina | Sec  | E    | PASS (Executed): sirf `server-mongo` test ka nakli `127.0.0.1:1` URI (`.gitleaksignore` me); Atlas host sirf `<cluster>` placeholder                                  |
+| TC-BASE-015 | Tracked files me asli personal data (emails/phones jo example domain ke nahi)                                                                              | Sec  | E    | PASS (Executed): emails `@beautinique.example`, `@example.com`, test fixtures (`k@o1.ingest.sentry.io`, `m1@smtp-relay.mailin.fr`, `a@b.in`); phone sirf `9876543210` |
+| TC-BASE-016 | `.gitignore` `.env`/`.env.*` rokta hai, `.env.example` chhodta hai                                                                                         | Sec  | S    | PASS (Static + `git check-ignore`): laptop ki 4 env files ignored, tracked sirf 7 `.env.example`                                                                      |
 
 **M1 Gateway (`GW`, 38)**
 
-| TC | Case | Type | Plan | Result |
-| -- | ---- | ---- | ---- | ------ |
-| TC-GW-001 | Origin secret missing → 403 envelope | Sec/N | E | PASS (Executed) |
-| TC-GW-002 | Galat secret, khaali, bahut lamba, whitespace → 403 | Sec/N | E | PASS (Executed): 7 galat values 403; aage/peeche ki space HTTP parser hatata hai (RFC 9110 OWS), ye theek hai |
-| TC-GW-003 | Rotation: dono secrets chalte, hataya hua nahi | Sec | E | PASS (Static + unit test `gateway.test.ts:471`) |
-| TC-GW-004 | Secret compare timing-safe (length leak bhi) | Sec | S | PASS (Static): SHA-256 phir `timingSafeEqual`, early exit nahi (`trust.ts:15-29`) |
-| TC-GW-005 | `/health`, `/ready`, `/status`, `/wake` bina secret; baaki sab secret maange | Sec | E | PASS (Executed): `/HEALTH`, `/health/` bhi 200 (Express case-insensitive, nuksan nahi) |
-| TC-GW-006 | `X-BQ-App` anjaan / missing → 403 `APP_NOT_ALLOWED` | Sec/N | E | PASS (Executed) |
-| TC-GW-007 | Host, `x-forwarded-host`, Origin me farak → 403 | Sec | E | PASS (Executed) |
-| TC-GW-008 | Vercel preview pattern: doosra scope/account, lookalike host, `*.vercel.app` | Sec | E | PASS (Executed): `<project>-git-<b>-evil-<scope>.vercel.app` bhi pattern me (README ki likhi seema; secret + Origin se bachav) |
-| TC-GW-009 | Navigation route pe app sirf host se; app host nahi → 403 | Sec | E | PASS (Executed) |
-| TC-GW-010 | Anjaan path → 404, galat method → contract ke hisaab se | N | E | PASS (Executed) |
-| TC-GW-011 | Traversal raw path: `..`, `%2e%2e`, `%252e%252e`, `\`, `//`, `;` | Sec | E | PASS (Executed) |
-| TC-GW-012 | Trailing slash, letter case, double slash, query edge | Ed | E | PASS (Executed) |
-| TC-GW-013 | Har non-public route (manifest loop) bina cookie → 401 | Sec | E | PASS (Executed): 30/30 |
-| TC-GW-014 | Token forgery: `alg: none`, HS256 with public key, galat `kid`, expired, galat `aud` (doosre app ki cookie), tampered payload | Sec | E | PASS (Executed): 15 forgeries 401 |
-| TC-GW-015 | JWKS fetch fail → 503; anjaan `kid` pe refetch; key rotation | R | E | FAIL (Executed, E2): QA-KRN-001; refetch throttle 30 s + single-flight PASS |
-| TC-GW-016 | Session/user revoked (Redis) → 401 | Sec | E | PASS (Executed): logout ke baad 401; Redis wipe ke baad markers gayab (QA-GW-002) |
-| TC-GW-017 | `av` badla → purana token 401 | Sec | E | PASS (Executed, M5 TC-ID-063) |
-| TC-GW-018 | Permission route: galat permission/scope → 403; step-up wale route bina step-up | Sec | E | PASS (Executed): customer ko 403, step-up routes `STEP_UP_REQUIRED` |
-| TC-GW-019 | Client ka `X-BQ-Passport` strip; owner bina/galat passport pe mana; passport `aud`/expiry | Sec | E | PASS (Executed) |
-| TC-GW-020 | `x-forwarded-for`, `x-real-ip`, `X-BQ-Client-Ip`, `x-origin-secret` owner tak nahi jaate | Sec | E | PASS (Executed) |
-| TC-GW-021 | `clientIp()`: `x-real-ip` sirf sahi secret ke saath; spoofed headers se rate-limit bypass nahi | Sec | E | PASS (Executed + Static); live pe Vercel client ka `x-real-ip` overwrite karta hai ya nahi: unverified |
-| TC-GW-022 | Har class: limit ke baad 429 + `Retry-After` + `RateLimit-*` (chhota burst ≤ 100) | Sec | E | PASS (Executed): write 21st, otp 11th, auth 31st 429 |
-| TC-GW-023 | IPv6 /64 grouping, IPv4-mapped IPv6 | Sec/Ed | E | PASS (Executed) |
-| TC-GW-024 | Redis band: `auth`/`otp` 503, `read`/`write`/`public` docs ke hisaab se | R/Sec | E | FAIL (Executed, 2/2): QA-GW-001 |
-| TC-GW-025 | Idempotency-Key: missing, khaali, 256 chars, non-visible chars | N | E | PASS (Executed); dedupe NOT IMPLEMENTED (T4.1) |
-| TC-GW-026 | GET/DELETE body ke saath (CL aur TE) → 400 | Sec | E | PASS (Executed) |
-| TC-GW-027 | Smuggling: CL + TE dono, `Transfer-Encoding: chunked, identity`, obs-fold | Sec | E | PASS (Executed) |
-| TC-GW-028 | Oversized headers / body → 413/431, process zinda | Sec/R | E | PASS (Executed) |
-| TC-GW-029 | Owner band → 502; slow → 504 (timeout); client abort owner tak | R | E | PASS (Static + unit tests) |
-| TC-GW-030 | Cache headers: personal `private, no-store`; `cache: 'public'` contracts pe `s-maxage`, cookies nahi | Sec | E | PASS (Executed) |
-| TC-GW-031 | `/health`, `/ready`, `/status`: koi internal detail leak nahi; `/status` 5 s memo | Sec | E | PASS (Executed); DR-001 |
-| TC-GW-032 | `/wake`: 204, `no-store`, CORP cross-origin, kuch nahi chhoota | F | E | PASS (Executed) |
-| TC-GW-033 | `/.well-known/passport-jwks.json`: bahar se pahunch, kya leak karta hai | Sec | E | PASS (Executed): sirf public key, `no-store` |
-| TC-GW-034 | Security headers (helmet) har gateway jawab pe | Sec | E | PASS (Executed) |
-| TC-GW-035 | Error envelope har gateway error pe ek jaisa | F | E | PASS (Executed) |
-| TC-GW-036 | Gateway logs me cookie/token/OTP/secret nahi | Sec | E | PASS (Executed) |
-| TC-GW-037 | Navigation 303 + `next` open redirect (`//evil`, `/\evil`, `https:`, encoded) | Sec | E | PASS (Executed, start hissa); callback M4 (TC-ID-050) |
-| TC-GW-038 | Live passive (sirf ijazat pe): `/health`, `/status`, headers, TLS | Sec | E | PASS (Executed, 12 GETs): Q-006 (ek baar FORBIDDEN) |
+| TC        | Case                                                                                                                          | Type   | Plan | Result                                                                                                                         |
+| --------- | ----------------------------------------------------------------------------------------------------------------------------- | ------ | ---- | ------------------------------------------------------------------------------------------------------------------------------ |
+| TC-GW-001 | Origin secret missing → 403 envelope                                                                                          | Sec/N  | E    | PASS (Executed)                                                                                                                |
+| TC-GW-002 | Galat secret, khaali, bahut lamba, whitespace → 403                                                                           | Sec/N  | E    | PASS (Executed): 7 galat values 403; aage/peeche ki space HTTP parser hatata hai (RFC 9110 OWS), ye theek hai                  |
+| TC-GW-003 | Rotation: dono secrets chalte, hataya hua nahi                                                                                | Sec    | E    | PASS (Static + unit test `gateway.test.ts:471`)                                                                                |
+| TC-GW-004 | Secret compare timing-safe (length leak bhi)                                                                                  | Sec    | S    | PASS (Static): SHA-256 phir `timingSafeEqual`, early exit nahi (`trust.ts:15-29`)                                              |
+| TC-GW-005 | `/health`, `/ready`, `/status`, `/wake` bina secret; baaki sab secret maange                                                  | Sec    | E    | PASS (Executed): `/HEALTH`, `/health/` bhi 200 (Express case-insensitive, nuksan nahi)                                         |
+| TC-GW-006 | `X-BQ-App` anjaan / missing → 403 `APP_NOT_ALLOWED`                                                                           | Sec/N  | E    | PASS (Executed)                                                                                                                |
+| TC-GW-007 | Host, `x-forwarded-host`, Origin me farak → 403                                                                               | Sec    | E    | PASS (Executed)                                                                                                                |
+| TC-GW-008 | Vercel preview pattern: doosra scope/account, lookalike host, `*.vercel.app`                                                  | Sec    | E    | PASS (Executed): `<project>-git-<b>-evil-<scope>.vercel.app` bhi pattern me (README ki likhi seema; secret + Origin se bachav) |
+| TC-GW-009 | Navigation route pe app sirf host se; app host nahi → 403                                                                     | Sec    | E    | PASS (Executed)                                                                                                                |
+| TC-GW-010 | Anjaan path → 404, galat method → contract ke hisaab se                                                                       | N      | E    | PASS (Executed)                                                                                                                |
+| TC-GW-011 | Traversal raw path: `..`, `%2e%2e`, `%252e%252e`, `\`, `//`, `;`                                                              | Sec    | E    | PASS (Executed)                                                                                                                |
+| TC-GW-012 | Trailing slash, letter case, double slash, query edge                                                                         | Ed     | E    | PASS (Executed)                                                                                                                |
+| TC-GW-013 | Har non-public route (manifest loop) bina cookie → 401                                                                        | Sec    | E    | PASS (Executed): 30/30                                                                                                         |
+| TC-GW-014 | Token forgery: `alg: none`, HS256 with public key, galat `kid`, expired, galat `aud` (doosre app ki cookie), tampered payload | Sec    | E    | PASS (Executed): 15 forgeries 401                                                                                              |
+| TC-GW-015 | JWKS fetch fail → 503; anjaan `kid` pe refetch; key rotation                                                                  | R      | E    | FAIL (Executed, E2): QA-KRN-001; refetch throttle 30 s + single-flight PASS                                                    |
+| TC-GW-016 | Session/user revoked (Redis) → 401                                                                                            | Sec    | E    | PASS (Executed): logout ke baad 401; Redis wipe ke baad markers gayab (QA-GW-002)                                              |
+| TC-GW-017 | `av` badla → purana token 401                                                                                                 | Sec    | E    | PASS (Executed, M5 TC-ID-063)                                                                                                  |
+| TC-GW-018 | Permission route: galat permission/scope → 403; step-up wale route bina step-up                                               | Sec    | E    | PASS (Executed): customer ko 403, step-up routes `STEP_UP_REQUIRED`                                                            |
+| TC-GW-019 | Client ka `X-BQ-Passport` strip; owner bina/galat passport pe mana; passport `aud`/expiry                                     | Sec    | E    | PASS (Executed)                                                                                                                |
+| TC-GW-020 | `x-forwarded-for`, `x-real-ip`, `X-BQ-Client-Ip`, `x-origin-secret` owner tak nahi jaate                                      | Sec    | E    | PASS (Executed)                                                                                                                |
+| TC-GW-021 | `clientIp()`: `x-real-ip` sirf sahi secret ke saath; spoofed headers se rate-limit bypass nahi                                | Sec    | E    | PASS (Executed + Static); live pe Vercel client ka `x-real-ip` overwrite karta hai ya nahi: unverified                         |
+| TC-GW-022 | Har class: limit ke baad 429 + `Retry-After` + `RateLimit-*` (chhota burst ≤ 100)                                             | Sec    | E    | PASS (Executed): write 21st, otp 11th, auth 31st 429                                                                           |
+| TC-GW-023 | IPv6 /64 grouping, IPv4-mapped IPv6                                                                                           | Sec/Ed | E    | PASS (Executed)                                                                                                                |
+| TC-GW-024 | Redis band: `auth`/`otp` 503, `read`/`write`/`public` docs ke hisaab se                                                       | R/Sec  | E    | FAIL (Executed, 2/2): QA-GW-001                                                                                                |
+| TC-GW-025 | Idempotency-Key: missing, khaali, 256 chars, non-visible chars                                                                | N      | E    | PASS (Executed); dedupe NOT IMPLEMENTED (T4.1)                                                                                 |
+| TC-GW-026 | GET/DELETE body ke saath (CL aur TE) → 400                                                                                    | Sec    | E    | PASS (Executed)                                                                                                                |
+| TC-GW-027 | Smuggling: CL + TE dono, `Transfer-Encoding: chunked, identity`, obs-fold                                                     | Sec    | E    | PASS (Executed)                                                                                                                |
+| TC-GW-028 | Oversized headers / body → 413/431, process zinda                                                                             | Sec/R  | E    | PASS (Executed)                                                                                                                |
+| TC-GW-029 | Owner band → 502; slow → 504 (timeout); client abort owner tak                                                                | R      | E    | PASS (Static + unit tests)                                                                                                     |
+| TC-GW-030 | Cache headers: personal `private, no-store`; `cache: 'public'` contracts pe `s-maxage`, cookies nahi                          | Sec    | E    | PASS (Executed)                                                                                                                |
+| TC-GW-031 | `/health`, `/ready`, `/status`: koi internal detail leak nahi; `/status` 5 s memo                                             | Sec    | E    | PASS (Executed); DR-001                                                                                                        |
+| TC-GW-032 | `/wake`: 204, `no-store`, CORP cross-origin, kuch nahi chhoota                                                                | F      | E    | PASS (Executed)                                                                                                                |
+| TC-GW-033 | `/.well-known/passport-jwks.json`: bahar se pahunch, kya leak karta hai                                                       | Sec    | E    | PASS (Executed): sirf public key, `no-store`                                                                                   |
+| TC-GW-034 | Security headers (helmet) har gateway jawab pe                                                                                | Sec    | E    | PASS (Executed)                                                                                                                |
+| TC-GW-035 | Error envelope har gateway error pe ek jaisa                                                                                  | F      | E    | PASS (Executed)                                                                                                                |
+| TC-GW-036 | Gateway logs me cookie/token/OTP/secret nahi                                                                                  | Sec    | E    | PASS (Executed)                                                                                                                |
+| TC-GW-037 | Navigation 303 + `next` open redirect (`//evil`, `/\evil`, `https:`, encoded)                                                 | Sec    | E    | PASS (Executed, start hissa); callback M4 (TC-ID-050)                                                                          |
+| TC-GW-038 | Live passive (sirf ijazat pe): `/health`, `/status`, headers, TLS                                                             | Sec    | E    | PASS (Executed, 12 GETs): Q-006 (ek baar FORBIDDEN)                                                                            |
 
 **M2 Identity: authentication (`ID`, 25)**
 
-| TC | Case | Type | Plan | Result |
-| -- | ---- | ---- | ---- | ------ |
-| TC-ID-001 | Sign-up code happy path: Mailpit me email, verify, account bana | F | E | PASS (Executed) |
-| TC-ID-002 | Code length/charset/entropy (CSPRNG) | Sec | E | PASS (Executed + Static `randomInt`) |
-| TC-ID-003 | Code expiry | Sec | E | PASS (Executed, TTL fast-forward) |
-| TC-ID-004 | Ek challenge pe attempts ki seema | Sec | E | PASS (Executed) |
-| TC-ID-005 | Resend limits + per-hour email limit | Sec | E | PASS (Executed) |
-| TC-ID-006 | Challenge binding: doosre email/app se verify | Sec | E | PASS (Executed) |
-| TC-ID-007 | Success ke baad replay | Sec | E | PASS (Executed) |
-| TC-ID-008 | Enumeration: sign-up (naya vs maujood email) jawab + samay | Sec | E | PASS (Executed): 418 vs 418 ms median |
-| TC-ID-009 | Enumeration: forgot password | Sec | E | PASS (Executed): 416 vs 418 ms |
-| TC-ID-010 | Enumeration: login (galat password vs user nahi) jawab + samay | Sec | E | PASS (Executed): 60 vs 64 ms median |
-| TC-ID-011 | Enumeration: invitation code | Sec | E | PASS (Executed, M5): invited vs not, same body, ~410 ms dono |
-| TC-ID-012 | `passwordZod` rules (min 12, max, Unicode) | N | E | PASS (Executed): 8 cases |
-| TC-ID-013 | argon2id parameters | Sec | S | PASS (Static): m=19456, t=2, p=1, 16-byte salt |
-| TC-ID-014 | HIBP band/slow: password kabhi bahar nahi (k-anonymity), fail mode docs jaisa | Sec/R | E | PASS (Executed, E2 stand-in): sirf `/range/<5 hex>` + `Add-Padding`; 2 s pe fail-open + warning (DR-002) |
-| TC-ID-015 | Lockout: threshold, 1 ghanta | Sec | E | PASS (Executed) |
-| TC-ID-016 | Lockout per account vs IP; victim pe DoS | Sec | E | PASS (Executed): per account, IP nahi; DR-003, DR-004 |
-| TC-ID-017 | `loginId`: guessable?, expiry, pehle factor se binding, attempts | Sec | E | PASS (Executed) |
-| TC-ID-018 | TOTP login: ± window, ek step me wahi code dobara | Sec | E | PASS (Executed): +1 step chalta, purana step `lastStep` se band, replay band |
-| TC-ID-019 | Recovery code login: single use, ginti | Sec | E | PASS (Executed) |
-| TC-ID-020 | Login pe TOTP enroll/confirm (MFA wale apps) | F/Sec | E | PASS (Executed, M5): Master/SO/LH/Auditor pehle sign-in pe authenticator lagate hain |
-| TC-ID-021 | Sign-in sirf grant wale app me | Sec | E | PASS (Executed) |
-| TC-ID-022 | Email normalization: case, whitespace, Unicode (`ı`/`İ`, fullwidth), plus-addressing docs ke hisaab se | Sec/Ed | E | PASS (Executed) |
-| TC-ID-023 | Password reset: code → naya password → purane sessions | F/Sec | E | PASS (Executed) |
-| TC-ID-024 | Input validation: bade/galat type inputs → 400 envelope | N | E | PASS (Executed) |
-| TC-ID-025 | OTP code sealed (outbox/logs me plaintext nahi) | Sec | E | PASS (Executed): `sealedCode` (v1.e1), email plain (notify ko chahiye) |
+| TC        | Case                                                                                                   | Type   | Plan | Result                                                                                                   |
+| --------- | ------------------------------------------------------------------------------------------------------ | ------ | ---- | -------------------------------------------------------------------------------------------------------- |
+| TC-ID-001 | Sign-up code happy path: Mailpit me email, verify, account bana                                        | F      | E    | PASS (Executed)                                                                                          |
+| TC-ID-002 | Code length/charset/entropy (CSPRNG)                                                                   | Sec    | E    | PASS (Executed + Static `randomInt`)                                                                     |
+| TC-ID-003 | Code expiry                                                                                            | Sec    | E    | PASS (Executed, TTL fast-forward)                                                                        |
+| TC-ID-004 | Ek challenge pe attempts ki seema                                                                      | Sec    | E    | PASS (Executed)                                                                                          |
+| TC-ID-005 | Resend limits + per-hour email limit                                                                   | Sec    | E    | PASS (Executed)                                                                                          |
+| TC-ID-006 | Challenge binding: doosre email/app se verify                                                          | Sec    | E    | PASS (Executed)                                                                                          |
+| TC-ID-007 | Success ke baad replay                                                                                 | Sec    | E    | PASS (Executed)                                                                                          |
+| TC-ID-008 | Enumeration: sign-up (naya vs maujood email) jawab + samay                                             | Sec    | E    | PASS (Executed): 418 vs 418 ms median                                                                    |
+| TC-ID-009 | Enumeration: forgot password                                                                           | Sec    | E    | PASS (Executed): 416 vs 418 ms                                                                           |
+| TC-ID-010 | Enumeration: login (galat password vs user nahi) jawab + samay                                         | Sec    | E    | PASS (Executed): 60 vs 64 ms median                                                                      |
+| TC-ID-011 | Enumeration: invitation code                                                                           | Sec    | E    | PASS (Executed, M5): invited vs not, same body, ~410 ms dono                                             |
+| TC-ID-012 | `passwordZod` rules (min 12, max, Unicode)                                                             | N      | E    | PASS (Executed): 8 cases                                                                                 |
+| TC-ID-013 | argon2id parameters                                                                                    | Sec    | S    | PASS (Static): m=19456, t=2, p=1, 16-byte salt                                                           |
+| TC-ID-014 | HIBP band/slow: password kabhi bahar nahi (k-anonymity), fail mode docs jaisa                          | Sec/R  | E    | PASS (Executed, E2 stand-in): sirf `/range/<5 hex>` + `Add-Padding`; 2 s pe fail-open + warning (DR-002) |
+| TC-ID-015 | Lockout: threshold, 1 ghanta                                                                           | Sec    | E    | PASS (Executed)                                                                                          |
+| TC-ID-016 | Lockout per account vs IP; victim pe DoS                                                               | Sec    | E    | PASS (Executed): per account, IP nahi; DR-003, DR-004                                                    |
+| TC-ID-017 | `loginId`: guessable?, expiry, pehle factor se binding, attempts                                       | Sec    | E    | PASS (Executed)                                                                                          |
+| TC-ID-018 | TOTP login: ± window, ek step me wahi code dobara                                                      | Sec    | E    | PASS (Executed): +1 step chalta, purana step `lastStep` se band, replay band                             |
+| TC-ID-019 | Recovery code login: single use, ginti                                                                 | Sec    | E    | PASS (Executed)                                                                                          |
+| TC-ID-020 | Login pe TOTP enroll/confirm (MFA wale apps)                                                           | F/Sec  | E    | PASS (Executed, M5): Master/SO/LH/Auditor pehle sign-in pe authenticator lagate hain                     |
+| TC-ID-021 | Sign-in sirf grant wale app me                                                                         | Sec    | E    | PASS (Executed)                                                                                          |
+| TC-ID-022 | Email normalization: case, whitespace, Unicode (`ı`/`İ`, fullwidth), plus-addressing docs ke hisaab se | Sec/Ed | E    | PASS (Executed)                                                                                          |
+| TC-ID-023 | Password reset: code → naya password → purane sessions                                                 | F/Sec  | E    | PASS (Executed)                                                                                          |
+| TC-ID-024 | Input validation: bade/galat type inputs → 400 envelope                                                | N      | E    | PASS (Executed)                                                                                          |
+| TC-ID-025 | OTP code sealed (outbox/logs me plaintext nahi)                                                        | Sec    | E    | PASS (Executed): `sealedCode` (v1.e1), email plain (notify ko chahiye)                                   |
 
 **M3 Identity: sessions (`ID`, 15)**
 
-| TC | Case | Type | Plan | Result |
-| -- | ---- | ---- | ---- | ------ |
-| TC-ID-026 | ES256 key, JWKS, `kid`, rotation | Sec | E | PASS (Static + Executed) |
-| TC-ID-027 | Access token claims (`aud`, `exp`, `sid`, `av`) | Sec | E | PASS (Executed): iss, sub, aud, iat, exp (600 s), sid, amr, av, su |
-| TC-ID-028 | Refresh rotation; purana refresh dobara → family band + `identity.session.reuseDetected` | Sec | E | FAIL (Executed, 2/2): QA-ID-001; seedha reuse PASS (session band + email) |
-| TC-ID-029 | Do tabs ek saath refresh: docs ka irada | R | E | PASS (Executed): 409, cookies nahi |
-| TC-ID-030 | Cookie flags: HttpOnly, Secure, SameSite, Path, Domain nahi, `__Host-` | Sec | E | PASS (Executed) |
-| TC-ID-031 | Session hint cookie me kya hai | Sec | E | PASS (Executed): `"1"`, HttpOnly nahi (UI hint), koi data nahi |
-| TC-ID-032 | CSRF: cross-site POST/DELETE cookies ke saath | Sec | E | PASS (Executed M1 + Static) |
-| TC-ID-033 | Logout: cookies saaf, refresh bekaar, access token Redis me band | Sec | E | PASS (Executed, M1) |
-| TC-ID-034 | `end-others` | F | E | PASS (Executed) |
-| TC-ID-035 | `DELETE /auth/sessions/:sessionId` doosre user ka id (IDOR) | Sec | E | PASS (Executed) |
-| TC-ID-036 | My Devices: sirf apne devices, IP/UA privacy | Sec | E | PASS (Executed) |
-| TC-ID-037 | Idle timeout, server-side max lifetime | Sec | E | PASS (Executed, QA DB me expiry khiska ke) |
-| TC-ID-038 | Step-up: 5 min, doosre session/user me nahi chalta; recovery code se step-up | Sec | E | PASS (Executed) |
-| TC-ID-039 | Ek app ki cookie doosre app me | Sec | E | PASS (Executed, M1) |
-| TC-ID-040 | Password badla / authenticator badla → doosre sessions + security email | Sec | E | PASS (Executed): reset pe sessions band; authenticator + recovery code emails |
+| TC        | Case                                                                                     | Type | Plan | Result                                                                        |
+| --------- | ---------------------------------------------------------------------------------------- | ---- | ---- | ----------------------------------------------------------------------------- |
+| TC-ID-026 | ES256 key, JWKS, `kid`, rotation                                                         | Sec  | E    | PASS (Static + Executed)                                                      |
+| TC-ID-027 | Access token claims (`aud`, `exp`, `sid`, `av`)                                          | Sec  | E    | PASS (Executed): iss, sub, aud, iat, exp (600 s), sid, amr, av, su            |
+| TC-ID-028 | Refresh rotation; purana refresh dobara → family band + `identity.session.reuseDetected` | Sec  | E    | FAIL (Executed, 2/2): QA-ID-001; seedha reuse PASS (session band + email)     |
+| TC-ID-029 | Do tabs ek saath refresh: docs ka irada                                                  | R    | E    | PASS (Executed): 409, cookies nahi                                            |
+| TC-ID-030 | Cookie flags: HttpOnly, Secure, SameSite, Path, Domain nahi, `__Host-`                   | Sec  | E    | PASS (Executed)                                                               |
+| TC-ID-031 | Session hint cookie me kya hai                                                           | Sec  | E    | PASS (Executed): `"1"`, HttpOnly nahi (UI hint), koi data nahi                |
+| TC-ID-032 | CSRF: cross-site POST/DELETE cookies ke saath                                            | Sec  | E    | PASS (Executed M1 + Static)                                                   |
+| TC-ID-033 | Logout: cookies saaf, refresh bekaar, access token Redis me band                         | Sec  | E    | PASS (Executed, M1)                                                           |
+| TC-ID-034 | `end-others`                                                                             | F    | E    | PASS (Executed)                                                               |
+| TC-ID-035 | `DELETE /auth/sessions/:sessionId` doosre user ka id (IDOR)                              | Sec  | E    | PASS (Executed)                                                               |
+| TC-ID-036 | My Devices: sirf apne devices, IP/UA privacy                                             | Sec  | E    | PASS (Executed)                                                               |
+| TC-ID-037 | Idle timeout, server-side max lifetime                                                   | Sec  | E    | PASS (Executed, QA DB me expiry khiska ke)                                    |
+| TC-ID-038 | Step-up: 5 min, doosre session/user me nahi chalta; recovery code se step-up             | Sec  | E    | PASS (Executed)                                                               |
+| TC-ID-039 | Ek app ki cookie doosre app me                                                           | Sec  | E    | PASS (Executed, M1)                                                           |
+| TC-ID-040 | Password badla / authenticator badla → doosre sessions + security email                  | Sec  | E    | PASS (Executed): reset pe sessions band; authenticator + recovery code emails |
 
 **M4 Identity: OAuth (`ID`, 11)** (sirf `scripts/e2e/fake-oauth.ts`)
 
-| TC | Case | Type | Plan | Result |
-| -- | ---- | ---- | ---- | ------ |
-| TC-ID-041 | Providers list (customer), doosre app se | F | E | PASS (Executed) |
-| TC-ID-042 | Start: state + PKCE (Google, GitHub); LinkedIn bina PKCE (state/nonce) | Sec | E | PASS (Executed) |
-| TC-ID-043 | Callback: state galat, cookie missing, replay, expired trip | Sec | E | PASS (Executed) |
-| TC-ID-044 | Trip browser cookie se bandha (doosre browser me callback) | Sec | E | PASS (Executed) |
-| TC-ID-045 | Linking sirf verified email; GitHub unverified/secondary; provider pe badla email | Sec | E | PASS (Executed) |
-| TC-ID-046 | `/sign-up/finish` consent; sign-up token single use + expiry | Sec | E | PASS (Executed) |
-| TC-ID-047 | Authenticator wale account pe `#totp=<loginId>` | F/Sec | E | PASS (Executed) |
-| TC-ID-048 | Sign-in method hatana: aakhri nahi hatta; step-up ka faisla (§9) | Sec | E | PASS (Executed); DR-006 |
-| TC-ID-049 | Provider error, `access_denied`, anjaan provider | N | E | PASS (Executed) |
-| TC-ID-050 | OAuth ke raaste `next` open redirect | Sec | E | PASS (Executed): 7 `next` attacks, location hamesha same-origin path; `/%2F%2F…` literal rehta hai, frontend ka decode M10/M11 me |
-| TC-ID-051 | Non-customer app se OAuth start | Sec | E | PASS (Executed, M1 TC-GW-009) |
+| TC        | Case                                                                              | Type  | Plan | Result                                                                                                                            |
+| --------- | --------------------------------------------------------------------------------- | ----- | ---- | --------------------------------------------------------------------------------------------------------------------------------- |
+| TC-ID-041 | Providers list (customer), doosre app se                                          | F     | E    | PASS (Executed)                                                                                                                   |
+| TC-ID-042 | Start: state + PKCE (Google, GitHub); LinkedIn bina PKCE (state/nonce)            | Sec   | E    | PASS (Executed)                                                                                                                   |
+| TC-ID-043 | Callback: state galat, cookie missing, replay, expired trip                       | Sec   | E    | PASS (Executed)                                                                                                                   |
+| TC-ID-044 | Trip browser cookie se bandha (doosre browser me callback)                        | Sec   | E    | PASS (Executed)                                                                                                                   |
+| TC-ID-045 | Linking sirf verified email; GitHub unverified/secondary; provider pe badla email | Sec   | E    | PASS (Executed)                                                                                                                   |
+| TC-ID-046 | `/sign-up/finish` consent; sign-up token single use + expiry                      | Sec   | E    | PASS (Executed)                                                                                                                   |
+| TC-ID-047 | Authenticator wale account pe `#totp=<loginId>`                                   | F/Sec | E    | PASS (Executed)                                                                                                                   |
+| TC-ID-048 | Sign-in method hatana: aakhri nahi hatta; step-up ka faisla (§9)                  | Sec   | E    | PASS (Executed); DR-006                                                                                                           |
+| TC-ID-049 | Provider error, `access_denied`, anjaan provider                                  | N     | E    | PASS (Executed)                                                                                                                   |
+| TC-ID-050 | OAuth ke raaste `next` open redirect                                              | Sec   | E    | PASS (Executed): 7 `next` attacks, location hamesha same-origin path; `/%2F%2F…` literal rehta hai, frontend ka decode M10/M11 me |
+| TC-ID-051 | Non-customer app se OAuth start                                                   | Sec   | E    | PASS (Executed, M1 TC-GW-009)                                                                                                     |
 
 **M5 Identity: RBAC (`ID`, 15)**
 
-| TC | Case | Type | Plan | Result |
-| -- | ---- | ---- | ---- | ------ |
-| TC-ID-052 | Roles seed + `rbac-sync` do baar → same data | R | E | PASS (Executed): forced release × 2, counts same |
-| TC-ID-053 | 13 permission/iam routes × (no session, customer, galat scope admin, sahi role) | Sec | E | PASS (Executed): 8 routes × 4 actors |
-| TC-ID-054 | `scopeWithin`: apne scope ke bahar grant mana | Sec | E | PASS (Executed, custom state role) |
-| TC-ID-055 | Self-grant / self-elevation mana | Sec | E | PASS (Executed) |
-| TC-ID-056 | `appointedBy`; Master API se kabhi nahi (ARCHITECTURE §7.3) | Sec | E | PASS (Executed) |
-| TC-ID-057 | Separation of duties (maker ≠ checker) jahan laagu | Sec | E | PASS (Executed): self-rules; second signature NOT IMPLEMENTED (T10.4) |
-| TC-ID-058 | Grant validity window (shuru se pehle, khatam ke baad) | Sec | E | PASS (Executed) |
-| TC-ID-059 | `mfaRequired` roles: bina TOTP ke grant/sign-in | Sec | E | PASS (Executed) |
-| TC-ID-060 | Seat limits: parallel grants/accepts (2–20) se `maxHolders` paar? | Sec/R | E | PASS (Executed 1 run + Static) |
-| TC-ID-061 | `db:grant-master` max 2 (sirf local) | Sec | E | PASS (Executed, QA DB) |
-| TC-ID-062 | Invitation code: entropy, expiry, single use, revoked, doosra email | Sec | E | PASS (Executed) |
-| TC-ID-063 | Har grant badlav pe `av` bump → purana token 401 | Sec | E | PASS (Executed) |
-| TC-ID-064 | Security Officer: authenticator reset + sessions end (permission, step-up, target) | Sec | E | PASS (Executed); DR-007 |
-| TC-ID-065 | Role create/patch: validation, apne se zyada power wala role? | Sec | E | PASS (Executed); Q-007 |
-| TC-ID-066 | State Admin limitation (KNOWN-06) | — | S | KNOWN (Static): KNOWN-06 |
+| TC        | Case                                                                               | Type  | Plan | Result                                                                |
+| --------- | ---------------------------------------------------------------------------------- | ----- | ---- | --------------------------------------------------------------------- |
+| TC-ID-052 | Roles seed + `rbac-sync` do baar → same data                                       | R     | E    | PASS (Executed): forced release × 2, counts same                      |
+| TC-ID-053 | 13 permission/iam routes × (no session, customer, galat scope admin, sahi role)    | Sec   | E    | PASS (Executed): 8 routes × 4 actors                                  |
+| TC-ID-054 | `scopeWithin`: apne scope ke bahar grant mana                                      | Sec   | E    | PASS (Executed, custom state role)                                    |
+| TC-ID-055 | Self-grant / self-elevation mana                                                   | Sec   | E    | PASS (Executed)                                                       |
+| TC-ID-056 | `appointedBy`; Master API se kabhi nahi (ARCHITECTURE §7.3)                        | Sec   | E    | PASS (Executed)                                                       |
+| TC-ID-057 | Separation of duties (maker ≠ checker) jahan laagu                                 | Sec   | E    | PASS (Executed): self-rules; second signature NOT IMPLEMENTED (T10.4) |
+| TC-ID-058 | Grant validity window (shuru se pehle, khatam ke baad)                             | Sec   | E    | PASS (Executed)                                                       |
+| TC-ID-059 | `mfaRequired` roles: bina TOTP ke grant/sign-in                                    | Sec   | E    | PASS (Executed)                                                       |
+| TC-ID-060 | Seat limits: parallel grants/accepts (2–20) se `maxHolders` paar?                  | Sec/R | E    | PASS (Executed 1 run + Static)                                        |
+| TC-ID-061 | `db:grant-master` max 2 (sirf local)                                               | Sec   | E    | PASS (Executed, QA DB)                                                |
+| TC-ID-062 | Invitation code: entropy, expiry, single use, revoked, doosra email                | Sec   | E    | PASS (Executed)                                                       |
+| TC-ID-063 | Har grant badlav pe `av` bump → purana token 401                                   | Sec   | E    | PASS (Executed)                                                       |
+| TC-ID-064 | Security Officer: authenticator reset + sessions end (permission, step-up, target) | Sec   | E    | PASS (Executed); DR-007                                               |
+| TC-ID-065 | Role create/patch: validation, apne se zyada power wala role?                      | Sec   | E    | PASS (Executed); Q-007                                                |
+| TC-ID-066 | State Admin limitation (KNOWN-06)                                                  | —     | S    | KNOWN (Static): KNOWN-06                                              |
 
 **M6 Identity: data protection (`ID`, 7)**
 
-| TC | Case | Type | Plan | Result |
-| -- | ---- | ---- | ---- | ------ |
-| TC-ID-067 | Sealed field doosre record me copy → decrypt fail (context binding) | Sec | E | PASS (Executed): `CryptoError` (wrong key/context), 500, log me secret nahi |
-| TC-ID-068 | Lookups blind index se | Sec | E | PASS (Executed + Static): Redis keys HMAC; email Mongo me plain (RULES §7.2 ki PII list me nahi) |
-| TC-ID-069 | Jawab me masked values | Sec | E | PASS (Executed): sessions me UA string/refresh hash nahi; IP owner ka faisla; DR-008 |
-| TC-ID-070 | `/iam/me`: hash, TOTP secret, recovery codes, sealed data nahi | Sec | E | PASS (Executed) |
-| TC-ID-071 | Identity logs ki redaction (saare flows ke baad log grep) | Sec | E | PASS (Executed) |
-| TC-ID-072 | Har query/sort ka index (code + `explain` local) | Perf | E | FAIL (Executed, profiler + explain): QA-ID-002; §6 PERF-OBS-02 |
-| TC-ID-073 | Migrations forward-only + idempotent (do baar chalao) | R | E | PASS (Static + Executed, M5 forced release × 2) |
+| TC        | Case                                                                | Type | Plan | Result                                                                                           |
+| --------- | ------------------------------------------------------------------- | ---- | ---- | ------------------------------------------------------------------------------------------------ |
+| TC-ID-067 | Sealed field doosre record me copy → decrypt fail (context binding) | Sec  | E    | PASS (Executed): `CryptoError` (wrong key/context), 500, log me secret nahi                      |
+| TC-ID-068 | Lookups blind index se                                              | Sec  | E    | PASS (Executed + Static): Redis keys HMAC; email Mongo me plain (RULES §7.2 ki PII list me nahi) |
+| TC-ID-069 | Jawab me masked values                                              | Sec  | E    | PASS (Executed): sessions me UA string/refresh hash nahi; IP owner ka faisla; DR-008             |
+| TC-ID-070 | `/iam/me`: hash, TOTP secret, recovery codes, sealed data nahi      | Sec  | E    | PASS (Executed)                                                                                  |
+| TC-ID-071 | Identity logs ki redaction (saare flows ke baad log grep)           | Sec  | E    | PASS (Executed)                                                                                  |
+| TC-ID-072 | Har query/sort ka index (code + `explain` local)                    | Perf | E    | FAIL (Executed, profiler + explain): QA-ID-002; §6 PERF-OBS-02                                   |
+| TC-ID-073 | Migrations forward-only + idempotent (do baar chalao)               | R    | E    | PASS (Static + Executed, M5 forced release × 2)                                                  |
 
 **M7 Notify + async (`NT`, 17)**
 
-| TC | Case | Type | Plan | Result |
-| -- | ---- | ---- | ---- | ------ |
-| TC-NT-001 | OTP: outbox (usi txn me) → relay → BullMQ → consumer → `notify_deliveries` → Mailpit | I | E | PASS (Executed): ~2 s |
-| TC-NT-002 | Relay `poll` aur `changestream`, lease | I/R | E | PASS (Executed `poll` + lease "outbox relay leading"; `changestream` Static + unit tests) |
-| TC-NT-003 | Wahi event do baar → ek hi email (inbox dedupe) | R | E | PASS (Executed): wipe redrive pe dedupe |
-| TC-NT-004 | Retries/backoff, dead letter | R | E | PASS (Executed): retry (attempts 2) + dead letters |
-| TC-NT-005 | Lanes: OTP pehle | F | E | PASS (Static): OTP priority 0, index `status_priority_dueAt` (M6 profiler me use hota dikha) |
-| TC-NT-006 | Daily budget khatam: OTP jaata hai?, user ko kya dikhta hai | R | E | PASS (Executed, docs jaisa): budget ke baad OTP `failed DAILY_LIMIT`, API 200, user ko koi sanket nahi; DR-009 |
-| TC-NT-007 | Retry 5 + expiry: expired OTP der se nahi jaata | Sec/R | E | PASS (Executed) |
-| TC-NT-008 | Invitation email: content, `NOTIFY__APP_URLS` se link | F | E | PASS (Executed, M5): content me secret nahi; link sirf `NOTIFY__APP_URLS` me ho to |
-| TC-NT-009 | Security emails: content, koi secret nahi | Sec | E | PASS (Executed) |
-| TC-NT-010 | Name/email se HTML ya header injection | Sec | E | PASS (Executed) |
-| TC-NT-011 | Valkey beech me band | R | E | PASS (Executed) |
-| TC-NT-012 | Mailpit band | R | E | PASS (Executed) |
-| TC-NT-013 | Bundle restart beech me | R | E | PASS (Executed) |
-| TC-NT-014 | Redis wipe (apna prefix + epoch key) → watchdog recovery | R | E | PASS (Executed) |
-| TC-NT-015 | Event > 16 KB → `writeEvent` error | Ed | E | PASS (Static + unit test `server-queue/test/index.test.ts:696`); seedha outbox me daala 20 KB event relay ne bhi aage bhej diya (seema sirf producer pe) |
-| TC-NT-016 | Anjaan event version → dead letter | R | E | PASS (Executed): v2 → "No handler", toota data → "breaks its contract", dono turant dead letter; anjaan type → koi subscriber nahi |
-| TC-NT-017 | Notify logs me OTP/email nahi | Sec | E | PASS (Executed) |
+| TC        | Case                                                                                 | Type  | Plan | Result                                                                                                                                                   |
+| --------- | ------------------------------------------------------------------------------------ | ----- | ---- | -------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| TC-NT-001 | OTP: outbox (usi txn me) → relay → BullMQ → consumer → `notify_deliveries` → Mailpit | I     | E    | PASS (Executed): ~2 s                                                                                                                                    |
+| TC-NT-002 | Relay `poll` aur `changestream`, lease                                               | I/R   | E    | PASS (Executed `poll` + lease "outbox relay leading"; `changestream` Static + unit tests)                                                                |
+| TC-NT-003 | Wahi event do baar → ek hi email (inbox dedupe)                                      | R     | E    | PASS (Executed): wipe redrive pe dedupe                                                                                                                  |
+| TC-NT-004 | Retries/backoff, dead letter                                                         | R     | E    | PASS (Executed): retry (attempts 2) + dead letters                                                                                                       |
+| TC-NT-005 | Lanes: OTP pehle                                                                     | F     | E    | PASS (Static): OTP priority 0, index `status_priority_dueAt` (M6 profiler me use hota dikha)                                                             |
+| TC-NT-006 | Daily budget khatam: OTP jaata hai?, user ko kya dikhta hai                          | R     | E    | PASS (Executed, docs jaisa): budget ke baad OTP `failed DAILY_LIMIT`, API 200, user ko koi sanket nahi; DR-009                                           |
+| TC-NT-007 | Retry 5 + expiry: expired OTP der se nahi jaata                                      | Sec/R | E    | PASS (Executed)                                                                                                                                          |
+| TC-NT-008 | Invitation email: content, `NOTIFY__APP_URLS` se link                                | F     | E    | PASS (Executed, M5): content me secret nahi; link sirf `NOTIFY__APP_URLS` me ho to                                                                       |
+| TC-NT-009 | Security emails: content, koi secret nahi                                            | Sec   | E    | PASS (Executed)                                                                                                                                          |
+| TC-NT-010 | Name/email se HTML ya header injection                                               | Sec   | E    | PASS (Executed)                                                                                                                                          |
+| TC-NT-011 | Valkey beech me band                                                                 | R     | E    | PASS (Executed)                                                                                                                                          |
+| TC-NT-012 | Mailpit band                                                                         | R     | E    | PASS (Executed)                                                                                                                                          |
+| TC-NT-013 | Bundle restart beech me                                                              | R     | E    | PASS (Executed)                                                                                                                                          |
+| TC-NT-014 | Redis wipe (apna prefix + epoch key) → watchdog recovery                             | R     | E    | PASS (Executed)                                                                                                                                          |
+| TC-NT-015 | Event > 16 KB → `writeEvent` error                                                   | Ed    | E    | PASS (Static + unit test `server-queue/test/index.test.ts:696`); seedha outbox me daala 20 KB event relay ne bhi aage bhej diya (seema sirf producer pe) |
+| TC-NT-016 | Anjaan event version → dead letter                                                   | R     | E    | PASS (Executed): v2 → "No handler", toota data → "breaks its contract", dono turant dead letter; anjaan type → koi subscriber nahi                       |
+| TC-NT-017 | Notify logs me OTP/email nahi                                                        | Sec   | E    | PASS (Executed)                                                                                                                                          |
 
 **M8 Core + bundle (`CORE` 6, `BND` 7)**
 
-| TC | Case | Type | Plan | Result |
-| -- | ---- | ---- | ---- | ------ |
-| TC-CORE-001 | `POST /platform/pings` public, `write` limit 20/min | Sec | E | PASS (Executed, M1 TC-GW-022) |
-| TC-CORE-002 | 5,000 cap → 503 `PING_LIMIT_REACHED` | R | E | PASS (Executed): 5,001 pe 503 `PING_LIMIT_REACHED` |
-| TC-CORE-003 | Pings/audit copies ka TTL index 7 din | R | E | PASS (Executed): `recordedAt` TTL 604800 s dono pe |
-| TC-CORE-004 | `GET /platform/pings/:pingId`: `platform.ping.read` permission | Sec | E | PASS (Static): permission route; koi shipped role `platform.ping.read` nahi rakhta, customer app ko route allowed nahi (M1) |
-| TC-CORE-005 | Audit subscriber copy (event se) | I | E | PASS (Executed, M7 TC-NT-011) |
-| TC-CORE-006 | Module boundaries (sirf facade) | Arch | S | PASS (Static): ek module; dependency-cruiser config nahi (M15) |
-| TC-BND-001 | Start/stop, graceful shutdown | R | E | PASS (Executed compiled start; graceful stop Windows pe signal nahi, unit test) |
-| TC-BND-002 | Start fail → exit (Sentry ke saath bhi) | R | E | PASS (Executed): 1.6 s me exit 1, 3 galat configs me value log me nahi |
-| TC-BND-003 | Sentry DSN na ho to band | F | E | PASS (Static + unit test `monitoring.test.ts`) |
-| TC-BND-004 | `loadConfig` anjaan `<NAME>__` key pe ruk jaata | F | E | PASS (Executed) |
-| TC-BND-005 | `db:release`: lease, fingerprint skip, 60 s budget, do boot ek saath | R | E | PASS (Executed) |
-| TC-BND-006 | `db:grant-master` guards (`live` likhna; sirf local chalaya) | Sec | E | PASS (Static + unit test) |
-| TC-BND-007 | `/ready` ki banawat | F | E | PASS (Executed, M1) |
+| TC          | Case                                                                 | Type | Plan | Result                                                                                                                      |
+| ----------- | -------------------------------------------------------------------- | ---- | ---- | --------------------------------------------------------------------------------------------------------------------------- |
+| TC-CORE-001 | `POST /platform/pings` public, `write` limit 20/min                  | Sec  | E    | PASS (Executed, M1 TC-GW-022)                                                                                               |
+| TC-CORE-002 | 5,000 cap → 503 `PING_LIMIT_REACHED`                                 | R    | E    | PASS (Executed): 5,001 pe 503 `PING_LIMIT_REACHED`                                                                          |
+| TC-CORE-003 | Pings/audit copies ka TTL index 7 din                                | R    | E    | PASS (Executed): `recordedAt` TTL 604800 s dono pe                                                                          |
+| TC-CORE-004 | `GET /platform/pings/:pingId`: `platform.ping.read` permission       | Sec  | E    | PASS (Static): permission route; koi shipped role `platform.ping.read` nahi rakhta, customer app ko route allowed nahi (M1) |
+| TC-CORE-005 | Audit subscriber copy (event se)                                     | I    | E    | PASS (Executed, M7 TC-NT-011)                                                                                               |
+| TC-CORE-006 | Module boundaries (sirf facade)                                      | Arch | S    | PASS (Static): ek module; dependency-cruiser config nahi (M15)                                                              |
+| TC-BND-001  | Start/stop, graceful shutdown                                        | R    | E    | PASS (Executed compiled start; graceful stop Windows pe signal nahi, unit test)                                             |
+| TC-BND-002  | Start fail → exit (Sentry ke saath bhi)                              | R    | E    | PASS (Executed): 1.6 s me exit 1, 3 galat configs me value log me nahi                                                      |
+| TC-BND-003  | Sentry DSN na ho to band                                             | F    | E    | PASS (Static + unit test `monitoring.test.ts`)                                                                              |
+| TC-BND-004  | `loadConfig` anjaan `<NAME>__` key pe ruk jaata                      | F    | E    | PASS (Executed)                                                                                                             |
+| TC-BND-005  | `db:release`: lease, fingerprint skip, 60 s budget, do boot ek saath | R    | E    | PASS (Executed)                                                                                                             |
+| TC-BND-006  | `db:grant-master` guards (`live` likhna; sirf local chalaya)         | Sec  | E    | PASS (Static + unit test)                                                                                                   |
+| TC-BND-007  | `/ready` ki banawat                                                  | F    | E    | PASS (Executed, M1)                                                                                                         |
 
 **M9 Kernel + shared (`KRN` 8, `SHR` 8)**
 
-| TC | Case | Type | Plan | Result |
-| -- | ---- | ---- | ---- | ------ |
-| TC-KRN-001 | server-kit `mountRoute` input/output validation | F/N | E | PASS (Executed, M1/M2) |
-| TC-KRN-002 | Error envelope, request id, redaction list kitni poori, navigation redirects | Sec | E | PASS (Executed, M1/M6) |
-| TC-KRN-003 | server-mongo `withTransaction`: retries, 503 timeout, parallel/forgotten-await guards, abort | R | E | PASS (Static + unit tests) |
-| TC-KRN-004 | server-queue: relay order, lease handover, redrive, scheduler upsert, epoch watchdog | R | E | PASS (Executed, M7) |
-| TC-KRN-005 | server-crypto: key rotation, malformed ciphertext, galat context | Sec | E | PASS (Executed, E2) |
-| TC-KRN-006 | server-ratelimit: GCRA boundaries, Lua atomicity, key cardinality | Sec | E | PASS (Executed) |
-| TC-KRN-007 | server-release | R | E | PASS (Executed, M8) |
-| TC-KRN-008 | server-storage contract + in-memory adapter | F | E | PASS (Executed, E2) |
-| TC-SHR-001 | shared-zod tables: GSTIN (check digit), PAN, IFSC, UPI, PIN, mobile, paise, password | N/Ed | E | PASS (Executed, E2: 37 cases) |
-| TC-SHR-002 | shared-utils money BigInt: INR, GST, discount, allocate (rounding, negative, 0, huge) | Ed | E | PASS (Executed, E2) |
-| TC-SHR-003 | IST dates: midnight, month end, leap year | Ed | E | PASS (Executed, E2) |
-| TC-SHR-004 | Masking, Unicode slugs, UUIDv7 monotonic | Ed | E | PASS (Executed, E2); notes §6 |
-| TC-SHR-005 | Contracts codegen drift (`check` script) | F | E | PASS (Executed): `generated/ is up to date` |
-| TC-SHR-006 | `safeNextPath` fuzz table | Sec | E | PASS (Executed, E2: contracts `safeNextPath`); frontend `safeNext` = QA-FE-001 |
-| TC-SHR-007 | Client error mapping, queryKey stability | F | E | PASS (Executed + Static: TanStack `hashKey` keys sort karta) |
-| TC-SHR-008 | shared-authz: containment, windows, step-up, SoD | Sec | E | PASS (Executed, E2) |
+| TC         | Case                                                                                         | Type | Plan | Result                                                                         |
+| ---------- | -------------------------------------------------------------------------------------------- | ---- | ---- | ------------------------------------------------------------------------------ |
+| TC-KRN-001 | server-kit `mountRoute` input/output validation                                              | F/N  | E    | PASS (Executed, M1/M2)                                                         |
+| TC-KRN-002 | Error envelope, request id, redaction list kitni poori, navigation redirects                 | Sec  | E    | PASS (Executed, M1/M6)                                                         |
+| TC-KRN-003 | server-mongo `withTransaction`: retries, 503 timeout, parallel/forgotten-await guards, abort | R    | E    | PASS (Static + unit tests)                                                     |
+| TC-KRN-004 | server-queue: relay order, lease handover, redrive, scheduler upsert, epoch watchdog         | R    | E    | PASS (Executed, M7)                                                            |
+| TC-KRN-005 | server-crypto: key rotation, malformed ciphertext, galat context                             | Sec  | E    | PASS (Executed, E2)                                                            |
+| TC-KRN-006 | server-ratelimit: GCRA boundaries, Lua atomicity, key cardinality                            | Sec  | E    | PASS (Executed)                                                                |
+| TC-KRN-007 | server-release                                                                               | R    | E    | PASS (Executed, M8)                                                            |
+| TC-KRN-008 | server-storage contract + in-memory adapter                                                  | F    | E    | PASS (Executed, E2)                                                            |
+| TC-SHR-001 | shared-zod tables: GSTIN (check digit), PAN, IFSC, UPI, PIN, mobile, paise, password         | N/Ed | E    | PASS (Executed, E2: 37 cases)                                                  |
+| TC-SHR-002 | shared-utils money BigInt: INR, GST, discount, allocate (rounding, negative, 0, huge)        | Ed   | E    | PASS (Executed, E2)                                                            |
+| TC-SHR-003 | IST dates: midnight, month end, leap year                                                    | Ed   | E    | PASS (Executed, E2)                                                            |
+| TC-SHR-004 | Masking, Unicode slugs, UUIDv7 monotonic                                                     | Ed   | E    | PASS (Executed, E2); notes §6                                                  |
+| TC-SHR-005 | Contracts codegen drift (`check` script)                                                     | F    | E    | PASS (Executed): `generated/ is up to date`                                    |
+| TC-SHR-006 | `safeNextPath` fuzz table                                                                    | Sec  | E    | PASS (Executed, E2: contracts `safeNextPath`); frontend `safeNext` = QA-FE-001 |
+| TC-SHR-007 | Client error mapping, queryKey stability                                                     | F    | E    | PASS (Executed + Static: TanStack `hashKey` keys sort karta)                   |
+| TC-SHR-008 | shared-authz: containment, windows, step-up, SoD                                             | Sec  | E    | PASS (Executed, E2)                                                            |
 
 **M10 Frontend packages (`FE`, 16)**
 
-| TC | Case | Type | Plan | Result |
-| -- | ---- | ---- | ---- | ------ |
-| TC-FE-001 | components: keyboard, visible focus, disabled/busy, axe (playground) | A11y | E |  |
-| TC-FE-002 | ColorPicker, DatePicker, HierarchySelect edge input | Ed | E |  |
-| TC-FE-003 | forms: messages, double submit, server error → field | F | E |  |
-| TC-FE-004 | hooks (existing tests + spot) | F | E |  |
-| TC-FE-005 | api-client: axios error log nahi, `ApiError` mapping | Sec | E |  |
-| TC-FE-006 | api-client: kai requests ek saath 401 → ek refresh, loop nahi | R | E |  |
-| TC-FE-007 | api-client: timeouts/retries | R | E |  |
-| TC-FE-008 | app-shell `ServerWake` (150 s timeout samet) | F | E |  |
-| TC-FE-009 | `ErrorPage`, theme script (flash nahi) | F | E |  |
-| TC-FE-010 | auth-ui guards + `next` | Sec | E | FAIL (Executed E2 + Static E3): QA-FE-001; guards ka baaki hissa M10 me |
-| TC-FE-011 | Step-up dialog | F | E |  |
-| TC-FE-012 | Idle notice 28/30 min, `BroadcastChannel` se cross-tab | F/Sec | E |  |
-| TC-FE-013 | Recovery codes dikhana/save | F | E |  |
-| TC-FE-014 | Social buttons | F | E |  |
-| TC-FE-015 | styles contrast spot-check | A11y | E |  |
-| TC-FE-016 | icons | F | E |  |
+| TC        | Case                                                                 | Type  | Plan | Result                                                                  |
+| --------- | -------------------------------------------------------------------- | ----- | ---- | ----------------------------------------------------------------------- |
+| TC-FE-001 | components: keyboard, visible focus, disabled/busy, axe (playground) | A11y  | E    |                                                                         |
+| TC-FE-002 | ColorPicker, DatePicker, HierarchySelect edge input                  | Ed    | E    |                                                                         |
+| TC-FE-003 | forms: messages, double submit, server error → field                 | F     | E    |                                                                         |
+| TC-FE-004 | hooks (existing tests + spot)                                        | F     | E    |                                                                         |
+| TC-FE-005 | api-client: axios error log nahi, `ApiError` mapping                 | Sec   | E    |                                                                         |
+| TC-FE-006 | api-client: kai requests ek saath 401 → ek refresh, loop nahi        | R     | E    |                                                                         |
+| TC-FE-007 | api-client: timeouts/retries                                         | R     | E    |                                                                         |
+| TC-FE-008 | app-shell `ServerWake` (150 s timeout samet)                         | F     | E    |                                                                         |
+| TC-FE-009 | `ErrorPage`, theme script (flash nahi)                               | F     | E    |                                                                         |
+| TC-FE-010 | auth-ui guards + `next`                                              | Sec   | E    | FAIL (Executed E2 + Static E3): QA-FE-001; guards ka baaki hissa M10 me |
+| TC-FE-011 | Step-up dialog                                                       | F     | E    |                                                                         |
+| TC-FE-012 | Idle notice 28/30 min, `BroadcastChannel` se cross-tab               | F/Sec | E    |                                                                         |
+| TC-FE-013 | Recovery codes dikhana/save                                          | F     | E    |                                                                         |
+| TC-FE-014 | Social buttons                                                       | F     | E    |                                                                         |
+| TC-FE-015 | styles contrast spot-check                                           | A11y  | E    |                                                                         |
+| TC-FE-016 | icons                                                                | F     | E    |                                                                         |
 
 **M11 Customer app (`CUS`, 23)**
 
-| TC | Case | Type | Plan |
-| -- | ---- | ---- | ---- |
-| TC-CUS-001 | Har route SSR + hydration, mismatch warning nahi | F | E |
-| TC-CUS-002 | Loading / empty / error / success states | F | E |
-| TC-CUS-003 | `/account/*` guard: signed-out deep link → sign-in → safe `next` se wapas | Sec | E |
-| TC-CUS-004 | Sign-in (password, code, TOTP) | F | E |
-| TC-CUS-005 | Sign-up | F | E |
-| TC-CUS-006 | Sign-up finish (social) | F | E |
-| TC-CUS-007 | Forgot password | F | E |
-| TC-CUS-008 | Invitation | F | E |
-| TC-CUS-009 | Account authenticator page | F | E |
-| TC-CUS-010 | Account devices page | F | E |
-| TC-CUS-011 | Double submit; back/forward/refresh beech me | Ed | E |
-| TC-CUS-012 | Action ke beech session khatam | Ed | E |
-| TC-CUS-013 | Asli 404 status | F | E |
-| TC-CUS-014 | `/terms`, `/privacy` pe DUMMY label | F | E |
-| TC-CUS-015 | Meta tags, `noindex` jahan irada | F | E |
-| TC-CUS-016 | `localStorage`/`sessionStorage` me user data nahi | Sec | E |
-| TC-CUS-017 | Browser me cookie flags | Sec | E |
-| TC-CUS-018 | `/iam/me` duplicate nahi, request storm nahi, console saaf | Perf | E |
-| TC-CUS-019 | 360 / 768 / 1280 × light / dark (+ high contrast) | Resp | E |
-| TC-CUS-020 | axe 0 violations | A11y | E |
-| TC-CUS-021 | Keyboard-only har flow | A11y | E |
-| TC-CUS-022 | `vercel.json` rewrites + security headers (CSP, HSTS, nosniff, Referrer-Policy, frame-ancestors, Permissions-Policy) | Sec | S |
-| TC-CUS-023 | `npm run e2e --workspace customer` | F | E |
+| TC         | Case                                                                                                                 | Type | Plan |
+| ---------- | -------------------------------------------------------------------------------------------------------------------- | ---- | ---- |
+| TC-CUS-001 | Har route SSR + hydration, mismatch warning nahi                                                                     | F    | E    |
+| TC-CUS-002 | Loading / empty / error / success states                                                                             | F    | E    |
+| TC-CUS-003 | `/account/*` guard: signed-out deep link → sign-in → safe `next` se wapas                                            | Sec  | E    |
+| TC-CUS-004 | Sign-in (password, code, TOTP)                                                                                       | F    | E    |
+| TC-CUS-005 | Sign-up                                                                                                              | F    | E    |
+| TC-CUS-006 | Sign-up finish (social)                                                                                              | F    | E    |
+| TC-CUS-007 | Forgot password                                                                                                      | F    | E    |
+| TC-CUS-008 | Invitation                                                                                                           | F    | E    |
+| TC-CUS-009 | Account authenticator page                                                                                           | F    | E    |
+| TC-CUS-010 | Account devices page                                                                                                 | F    | E    |
+| TC-CUS-011 | Double submit; back/forward/refresh beech me                                                                         | Ed   | E    |
+| TC-CUS-012 | Action ke beech session khatam                                                                                       | Ed   | E    |
+| TC-CUS-013 | Asli 404 status                                                                                                      | F    | E    |
+| TC-CUS-014 | `/terms`, `/privacy` pe DUMMY label                                                                                  | F    | E    |
+| TC-CUS-015 | Meta tags, `noindex` jahan irada                                                                                     | F    | E    |
+| TC-CUS-016 | `localStorage`/`sessionStorage` me user data nahi                                                                    | Sec  | E    |
+| TC-CUS-017 | Browser me cookie flags                                                                                              | Sec  | E    |
+| TC-CUS-018 | `/iam/me` duplicate nahi, request storm nahi, console saaf                                                           | Perf | E    |
+| TC-CUS-019 | 360 / 768 / 1280 × light / dark (+ high contrast)                                                                    | Resp | E    |
+| TC-CUS-020 | axe 0 violations                                                                                                     | A11y | E    |
+| TC-CUS-021 | Keyboard-only har flow                                                                                               | A11y | E    |
+| TC-CUS-022 | `vercel.json` rewrites + security headers (CSP, HSTS, nosniff, Referrer-Policy, frame-ancestors, Permissions-Policy) | Sec  | S    |
+| TC-CUS-023 | `npm run e2e --workspace customer`                                                                                   | F    | E    |
 
 **M12 Admin app (`ADM`, 12)**
 
-| TC | Case | Type | Plan |
-| -- | ---- | ---- | ---- |
-| TC-ADM-001 | Sign-in + mandatory authenticator enrollment | F/Sec | E |
-| TC-ADM-002 | Invitation accept | F | E |
-| TC-ADM-003 | Forgot password | F | E |
-| TC-ADM-004 | Dashboard shell, nav permission se filter | Sec | E |
-| TC-ADM-005 | Account pages | F | E |
-| TC-ADM-006 | Idle sign-out | Sec | E |
-| TC-ADM-007 | `noindex` | F | E |
-| TC-ADM-008 | SPA fallback (`vercel.json`) | F | S |
-| TC-ADM-009 | MFA mandatory (RULES §7.1) | Sec | E |
-| TC-ADM-010 | Responsive × theme, axe, keyboard | A11y/Resp | E |
-| TC-ADM-011 | `npm run e2e --workspace admin` | F | E |
-| TC-ADM-012 | `vercel.json` security headers | Sec | S |
+| TC         | Case                                         | Type      | Plan |
+| ---------- | -------------------------------------------- | --------- | ---- |
+| TC-ADM-001 | Sign-in + mandatory authenticator enrollment | F/Sec     | E    |
+| TC-ADM-002 | Invitation accept                            | F         | E    |
+| TC-ADM-003 | Forgot password                              | F         | E    |
+| TC-ADM-004 | Dashboard shell, nav permission se filter    | Sec       | E    |
+| TC-ADM-005 | Account pages                                | F         | E    |
+| TC-ADM-006 | Idle sign-out                                | Sec       | E    |
+| TC-ADM-007 | `noindex`                                    | F         | E    |
+| TC-ADM-008 | SPA fallback (`vercel.json`)                 | F         | S    |
+| TC-ADM-009 | MFA mandatory (RULES §7.1)                   | Sec       | E    |
+| TC-ADM-010 | Responsive × theme, axe, keyboard            | A11y/Resp | E    |
+| TC-ADM-011 | `npm run e2e --workspace admin`              | F         | E    |
+| TC-ADM-012 | `vercel.json` security headers               | Sec       | S    |
 
 **M13 Shell apps (`APPS`, 5)**
 
-| TC | Case | Type | Plan |
-| -- | ---- | ---- | ---- |
-| TC-APPS-001 | 9 apps ka build | F | E |
-| TC-APPS-002 | Start + 404 smoke | F | E |
-| TC-APPS-003 | `vercel.json` headers + `noindex` | Sec | S |
-| TC-APPS-004 | Dev proxy origin secret bhejta hai | F | S |
-| TC-APPS-005 | Koi stub asli feature jaisa nahi dikhta | F | E |
+| TC          | Case                                    | Type | Plan |
+| ----------- | --------------------------------------- | ---- | ---- |
+| TC-APPS-001 | 9 apps ka build                         | F    | E    |
+| TC-APPS-002 | Start + 404 smoke                       | F    | E    |
+| TC-APPS-003 | `vercel.json` headers + `noindex`       | Sec  | S    |
+| TC-APPS-004 | Dev proxy origin secret bhejta hai      | F    | S    |
+| TC-APPS-005 | Koi stub asli feature jaisa nahi dikhta | F    | E    |
 
 **M14 CI/CD, infra, tooling (`CI` 9, `INF` 2, `TOOL` 4)**
 
-| TC | Case | Type | Plan |
-| -- | ---- | ---- | ---- |
-| TC-CI-001 | Branch-flow check: non-`release` branch se `main` PR pass ho sakta hai? | Sec | S |
-| TC-CI-002 | gitleaks pinned + checksum | Sec | S |
-| TC-CI-003 | Least-privilege `permissions:` | Sec | S |
-| TC-CI-004 | Action pinning (SHA vs tag) | Sec | S |
-| TC-CI-005 | `pull_request_target`, `run:` me untrusted input | Sec | S |
-| TC-CI-006 | Logs me secrets | Sec | S |
-| TC-CI-007 | Mongo kernel workaround (KNOWN-08) | R | S |
-| TC-CI-008 | `release.yml`: OIDC, tag/commit checks, sirf `release` | Sec | S |
-| TC-CI-009 | `wake.yml` (KNOWN-04) | R | S |
-| TC-INF-001 | `scripts/render/*.sh` | Sec/R | S |
-| TC-INF-002 | `docker-compose.yml`: `127.0.0.1` binding, test-only flags | Sec | E |
-| TC-TOOL-001 | Package CLI publish safety, tests me fake registry | Sec | S |
-| TC-TOOL-002 | `update-deps` rollback | R | S |
-| TC-TOOL-003 | Mutation runner asli files nahi likhta | R | S |
-| TC-TOOL-004 | Generator templates RULES maante (ESLint, axios, origin secret header) | F | E |
+| TC          | Case                                                                    | Type  | Plan |
+| ----------- | ----------------------------------------------------------------------- | ----- | ---- |
+| TC-CI-001   | Branch-flow check: non-`release` branch se `main` PR pass ho sakta hai? | Sec   | S    |
+| TC-CI-002   | gitleaks pinned + checksum                                              | Sec   | S    |
+| TC-CI-003   | Least-privilege `permissions:`                                          | Sec   | S    |
+| TC-CI-004   | Action pinning (SHA vs tag)                                             | Sec   | S    |
+| TC-CI-005   | `pull_request_target`, `run:` me untrusted input                        | Sec   | S    |
+| TC-CI-006   | Logs me secrets                                                         | Sec   | S    |
+| TC-CI-007   | Mongo kernel workaround (KNOWN-08)                                      | R     | S    |
+| TC-CI-008   | `release.yml`: OIDC, tag/commit checks, sirf `release`                  | Sec   | S    |
+| TC-CI-009   | `wake.yml` (KNOWN-04)                                                   | R     | S    |
+| TC-INF-001  | `scripts/render/*.sh`                                                   | Sec/R | S    |
+| TC-INF-002  | `docker-compose.yml`: `127.0.0.1` binding, test-only flags              | Sec   | E    |
+| TC-TOOL-001 | Package CLI publish safety, tests me fake registry                      | Sec   | S    |
+| TC-TOOL-002 | `update-deps` rollback                                                  | R     | S    |
+| TC-TOOL-003 | Mutation runner asli files nahi likhta                                  | R     | S    |
+| TC-TOOL-004 | Generator templates RULES maante (ESLint, axios, origin secret header)  | F     | E    |
 
 **M15 Docs vs code (`DOC`, 4)**
 
-| TC | Case | Type | Plan |
-| -- | ---- | ---- | ---- |
-| TC-DOC-001 | HANDOFF, TASKS, READMEs ke claims (commands, ports, keys, test counts, "verified") | Doc | E |
-| TC-DOC-002 | `.env.example` keys vs har deployable ka `configZod` | Doc | E |
-| TC-DOC-003 | `generated/` vs catalogue | Doc | E |
-| TC-DOC-004 | CLAUDE.md/README commands aur ports chalte hain; stack versions (jaise React Router 7 vs installed 8.5.0) | Doc | E |
+| TC         | Case                                                                                                      | Type | Plan |
+| ---------- | --------------------------------------------------------------------------------------------------------- | ---- | ---- |
+| TC-DOC-001 | HANDOFF, TASKS, READMEs ke claims (commands, ports, keys, test counts, "verified")                        | Doc  | E    |
+| TC-DOC-002 | `.env.example` keys vs har deployable ka `configZod`                                                      | Doc  | E    |
+| TC-DOC-003 | `generated/` vs catalogue                                                                                 | Doc  | E    |
+| TC-DOC-004 | CLAUDE.md/README commands aur ports chalte hain; stack versions (jaise React Router 7 vs installed 8.5.0) | Doc  | E    |
 
 ## 4. Bug Report
 
@@ -664,15 +664,15 @@ Plan: **E** = planned-executed (local stack, HTTP, browser, scratch script), **S
 
 ## 5. Security Findings
 
-| ID | OWASP Top 10 (2021) / ASVS 4.0 | Severity | Live pe exposed? | Note |
-| -- | ------------------------------ | -------- | ---------------- | ---- |
-| QA-ID-001 | A07 Identification and Authentication Failures / ASVS V3.5 (token-based session: refresh rotation) | P1 | Haan (refresh token ki copy ho to); repro redacted (Q-003) | Chori pakadne ka control bypass |
-| DR-008 | A01 Broken Access Control (data minimisation, DPDP) | design (DR) | Haan, Auditor/SO ke liye | Reviewers saare customers ke emails page kar sakte hain |
-| DR-009 | A04 Insecure Design (availability, abuse of a paid/limited resource) | design (DR) | Haan | Bina sign-in din ka email budget khatam; ajnabi addresses pe emails |
-| QA-FE-001 | A01 / ASVS V5.1.5 (redirects only to allowed destinations) | P3 (latent) | Nahi (React Router `//` hata deta hai) | Router badalne pe auth flow me open redirect |
-| QA-GW-002 | A07 Identification and Authentication Failures / ASVS V3.3 (session termination) | P4 (latent) | Nahi (aaj har signed-in route identity ka; identity DB se rokti hai) | Pehla non-identity `signed-in` route aate hi P1 |
-| QA-GW-001 | A04 Insecure Design (availability) / ASVS V1.11 | P2 | Haan, agar Render Key Value atke (band nahi) | fail-closed hi rehta hai, data leak nahi |
-| QA-KRN-001 | A04 (availability) | P3 | Haan, sirf gateway start ke turant baad JWKS fail ho | jhootha sign-out |
+| ID         | OWASP Top 10 (2021) / ASVS 4.0                                                                     | Severity    | Live pe exposed?                                                     | Note                                                                |
+| ---------- | -------------------------------------------------------------------------------------------------- | ----------- | -------------------------------------------------------------------- | ------------------------------------------------------------------- |
+| QA-ID-001  | A07 Identification and Authentication Failures / ASVS V3.5 (token-based session: refresh rotation) | P1          | Haan (refresh token ki copy ho to); repro redacted (Q-003)           | Chori pakadne ka control bypass                                     |
+| DR-008     | A01 Broken Access Control (data minimisation, DPDP)                                                | design (DR) | Haan, Auditor/SO ke liye                                             | Reviewers saare customers ke emails page kar sakte hain             |
+| DR-009     | A04 Insecure Design (availability, abuse of a paid/limited resource)                               | design (DR) | Haan                                                                 | Bina sign-in din ka email budget khatam; ajnabi addresses pe emails |
+| QA-FE-001  | A01 / ASVS V5.1.5 (redirects only to allowed destinations)                                         | P3 (latent) | Nahi (React Router `//` hata deta hai)                               | Router badalne pe auth flow me open redirect                        |
+| QA-GW-002  | A07 Identification and Authentication Failures / ASVS V3.3 (session termination)                   | P4 (latent) | Nahi (aaj har signed-in route identity ka; identity DB se rokti hai) | Pehla non-identity `signed-in` route aate hi P1                     |
+| QA-GW-001  | A04 Insecure Design (availability) / ASVS V1.11                                                    | P2          | Haan, agar Render Key Value atke (band nahi)                         | fail-closed hi rehta hai, data leak nahi                            |
+| QA-KRN-001 | A04 (availability)                                                                                 | P3          | Haan, sirf gateway start ke turant baad JWKS fail ho                 | jhootha sign-out                                                    |
 
 **PASS hue controls (M1, executed):** origin secret (8 galat values; timing-safe static), app allow-list + CSRF (Host/x-forwarded-host/Origin, 29 cases), fail-closed 401 (30/30 non-public routes), JWT forgery (`alg:none`, HS256 key confusion, apni ES256 key, embedded `jwk`, tampered claims, galat `kid`/`aud`, junk: 15/15 401), passport (client ka strip; owner seedha bina/forged passport 401), client IP spoofing (XFF, `X-BQ-Client-Ip`, `Forwarded` ignore), rate limits (write/otp/auth budgets, IPv6 /64, IPv4-mapped), `auth`/`otp` fail-closed jab Redis band/atka, request smuggling (9 framing attacks), oversized header/body, path traversal (18 raw paths), security headers (helmet), error envelope, log hygiene, live: `bq-live` `/api` bina secret 403, TLS 1.3. **M2:** OTP (CSPRNG 6-digit, 10 min, 5 tries, resend seema, per-email/ghanta, app binding, replay), enumeration (sign-up/password code/login: same body + same time), argon2id OWASP min, HIBP k-anonymity, lockout, TOTP replay/window, recovery single-use, loginId binding/expiry, grant-based sign-in, email normalization, NoSQL-style input, reset ke baad sessions band, OTP outbox me sealed. **M3:** cookie flags/prefixes, refresh rotation, parallel tab 409 (bina cookies), seedha reuse → session band + email, end-others, IDOR (doosre ka session `{ended:false}`), My Devices sirf apne, expiry, step-up (session-bound, `su`, lock me gine jaate), naye recovery codes pe purane band, security emails. **M4:** OAuth state (43 chars) + browser cookie binding (login CSRF band), PKCE S256, trip single-use + expiry, verified-email-only linking (Google `email_verified`, GitHub primary+verified), consent ticket single-use + browser-bound, callback `next` open redirect (7 cases) band, locked account social sign-in band, aakhri method nahi hatta. **M5:** route × actor matrix, appointer chain, `scopeWithin` (custom state role se), self grant/end/invite band, Master API se nahi aur uska grant koi khatam nahi kar sakta, validity windows, MFA roles, Master seats race-safe, invitation (single use, app-bound, revoke, inviter ka haq dobara), `av` bump, `mfa: true` permissions bina authenticator use nahi ho sakte (step-up), rbac-sync idempotent. **M6:** sealed field context binding (copy kiya secret nahi khulta), identity/notify/core DB aur Redis me plaintext secret nahi (value + pattern scan), `/iam/me` saaf, logs saaf. **M7:** OTP code outbox/delivery me sealed aur bhejne ke baad hat jaata, expire hua code kabhi nahi jaata, emails me HTML escape (UA ka `<script>`/CRLF nahi pahuncha), koi secret/recovery code email me nahi, notify logs me email/code nahi. **M8:** start fail pe 1.6 s me exit (Render ka 15 min atkaav nahi), config errors me secret value nahi, typo `<NAME>__` key pe start rukta, release lease + fingerprint, Master ka live raasta `live` likhne pe hi. **M9:** sealing rotation/tamper/context, JWT expiry/nbf/iss/aud, validators (GSTIN check digit ...), paise integer + safe range, storage key traversal, backend `safeNextPath` (20 cases).
 
@@ -689,34 +689,34 @@ Render free cold start = KNOWN-05.
 
 ## 7. Integration Issues
 
-| Flow | Status | Evidence / note |
-| ---- | ------ | --------------- |
-| identity → outbox (same txn) → relay → BullMQ → notify consumer → `notify_deliveries` → Mailpit | PASS (Executed) | TC-NT-001, ~2 s |
-| core ping → outbox → `core.pingAudit` (apna subscriber) | PASS (Executed) | TC-NT-011 (Redis band rehte bhi) |
-| gateway → identity / core (passport, headers, errors) | PASS (Executed) | M1 |
-| OAuth (fake providers) → identity → session | PASS (Executed) | M4 |
-| Provider (Mailpit) band → retry; expire → `expired` | PASS (Executed) | TC-NT-012, TC-NT-007 |
-| Process kill + restart (delivery waiting) | PASS (Executed) | TC-NT-013 |
-| Redis band (refused) | PASS (Executed) | auth/otp/signed-in fast 503; outbox me events ruke, phir pahunche |
-| Redis atka (connected, chup) | FAIL | QA-GW-001: signed-in requests latakti hain |
-| Redis wipe → epoch recovery (schedules + outbox redrive + dedupe) | PASS, ek gap | TC-NT-014 PASS; revocation markers nahi lautte (QA-GW-002) |
-| Mongo outage | NOT TESTED | shared local Mongo band nahi kiya (Q-004 sirf Valkey/Mailpit ke throwaway); throwaway Mongo replica set chahiye to owner se poochh ke |
-| apps → gateway (browser) | NOT TESTED | M11/M12 me |
+| Flow                                                                                            | Status          | Evidence / note                                                                                                                       |
+| ----------------------------------------------------------------------------------------------- | --------------- | ------------------------------------------------------------------------------------------------------------------------------------- |
+| identity → outbox (same txn) → relay → BullMQ → notify consumer → `notify_deliveries` → Mailpit | PASS (Executed) | TC-NT-001, ~2 s                                                                                                                       |
+| core ping → outbox → `core.pingAudit` (apna subscriber)                                         | PASS (Executed) | TC-NT-011 (Redis band rehte bhi)                                                                                                      |
+| gateway → identity / core (passport, headers, errors)                                           | PASS (Executed) | M1                                                                                                                                    |
+| OAuth (fake providers) → identity → session                                                     | PASS (Executed) | M4                                                                                                                                    |
+| Provider (Mailpit) band → retry; expire → `expired`                                             | PASS (Executed) | TC-NT-012, TC-NT-007                                                                                                                  |
+| Process kill + restart (delivery waiting)                                                       | PASS (Executed) | TC-NT-013                                                                                                                             |
+| Redis band (refused)                                                                            | PASS (Executed) | auth/otp/signed-in fast 503; outbox me events ruke, phir pahunche                                                                     |
+| Redis atka (connected, chup)                                                                    | FAIL            | QA-GW-001: signed-in requests latakti hain                                                                                            |
+| Redis wipe → epoch recovery (schedules + outbox redrive + dedupe)                               | PASS, ek gap    | TC-NT-014 PASS; revocation markers nahi lautte (QA-GW-002)                                                                            |
+| Mongo outage                                                                                    | NOT TESTED      | shared local Mongo band nahi kiya (Q-004 sirf Valkey/Mailpit ke throwaway); throwaway Mongo replica set chahiye to owner se poochh ke |
+| apps → gateway (browser)                                                                        | NOT TESTED      | M11/M12 me                                                                                                                            |
 
 **NOT IMPLEMENTED (roadmap, bug nahi):**
 
-| Integration / feature                        | Task         |
-| -------------------------------------------- | ------------ |
-| Payments deployable, Razorpay (fake driver, webhooks) | T5.3, T7.4 |
-| Cloudinary adapter (StoragePort)             | T4.7         |
-| R2 log archive                               | T11.4        |
-| Ola Maps                                     | T4.3, T8.4   |
-| Web push                                     | T5.1         |
-| In-app inbox                                 | T5.1         |
-| Notify templates, preferences aur consent    | T5.2         |
-| API clients (Seller API, Affiliate Partner)  | T3.4         |
-| `identity.user.*` / `identity.grant.changed` events + inbox | T3.5 |
-| Core kernel (`authorize`, `scopeFilter`, area settings, idempotency store, audit log) | T4.1 |
+| Integration / feature                                                                 | Task       |
+| ------------------------------------------------------------------------------------- | ---------- |
+| Payments deployable, Razorpay (fake driver, webhooks)                                 | T5.3, T7.4 |
+| Cloudinary adapter (StoragePort)                                                      | T4.7       |
+| R2 log archive                                                                        | T11.4      |
+| Ola Maps                                                                              | T4.3, T8.4 |
+| Web push                                                                              | T5.1       |
+| In-app inbox                                                                          | T5.1       |
+| Notify templates, preferences aur consent                                             | T5.2       |
+| API clients (Seller API, Affiliate Partner)                                           | T3.4       |
+| `identity.user.*` / `identity.grant.changed` events + inbox                           | T3.5       |
+| Core kernel (`authorize`, `scopeFilter`, area settings, idempotency store, audit log) | T4.1       |
 
 ## 8. Missing Test Coverage
 
@@ -724,78 +724,78 @@ Har module ke baad (existing tests + `test/mutations.ts` ke survivors).
 
 **M1 Gateway** (existing: `backend/gateway/test/gateway.test.ts` 38 tests; mutations 64, 1 survivor "a missing header matches" equivalent, wajah likhi):
 
-| Scenario | Kyun zaroori | Test type |
-| -------- | ------------ | --------- |
+| Scenario                                                                 | Kyun zaroori                                                                 | Test type                         |
+| ------------------------------------------------------------------------ | ---------------------------------------------------------------------------- | --------------------------------- |
 | Redis connected par jawab na de (stall) → signed-in route timeout pe 503 | QA-GW-001; abhi sirf `disconnect` jaancha jaata hai (`gateway.test.ts:1362`) | integration (na-jawab TCP server) |
-| JWKS ka pehla load fail → `minRefetchMs` ke andar 503, 401 nahi | QA-KRN-001 | unit (server-kit) |
-| Logout → Redis wipe → recovery → purana token gateway pe 401 | QA-GW-002 | integration (identity + gateway) |
-| `/ready` flood pe reuse/memo | DR-001 | unit |
+| JWKS ka pehla load fail → `minRefetchMs` ke andar 503, 401 nahi          | QA-KRN-001                                                                   | unit (server-kit)                 |
+| Logout → Redis wipe → recovery → purana token gateway pe 401             | QA-GW-002                                                                    | integration (identity + gateway)  |
+| `/ready` flood pe reuse/memo                                             | DR-001                                                                       | unit                              |
 
 **M2 Identity auth** (existing: identity 125 tests; mutations 188, survivors wajah ke saath):
 
-| Scenario | Kyun zaroori | Test type |
-| -------- | ------------ | --------- |
+| Scenario                                                                                                    | Kyun zaroori                                                             | Test type                              |
+| ----------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------ | -------------------------------------- |
 | 33 sign-ins ek hash pe → 503 `passwordsBusy` (survivor "no limit on waiting hashes": "not timed by a test") | Ye M2 me chala ke dikha (DR-004); limit hata do to koi test nahi pakdega | unit (hash ko block karke queue bharo) |
-| HIBP 5xx/503 page → "not breached" bina warning (survivor ki wajah me likha) | Fail-open ka log/metric ke bina chhupa raasta | unit |
-| Lock ke dauraan galat tries lock ko phir 1 ghanta badhate hain | DR-003 ka behaviour; faisla jo bhi ho, test me likha ho | integration |
+| HIBP 5xx/503 page → "not breached" bina warning (survivor ki wajah me likha)                                | Fail-open ka log/metric ke bina chhupa raasta                            | unit                                   |
+| Lock ke dauraan galat tries lock ko phir 1 ghanta badhate hain                                              | DR-003 ka behaviour; faisla jo bhi ho, test me likha ho                  | integration                            |
 
 **M3 Identity sessions:**
 
-| Scenario | Kyun zaroori | Test type |
-| -------- | ------------ | --------- |
+| Scenario                                                                   | Kyun zaroori                                                  | Test type   |
+| -------------------------------------------------------------------------- | ------------------------------------------------------------- | ----------- |
 | Ek se zyada generation purana refresh token → reuse (session band + event) | QA-ID-001; abhi tests sirf turant-pichhla token jaanchte hain | integration |
-| Doosre user ka session id DELETE → `{ended:false}` aur uska session zinda | IDOR regression | integration |
+| Doosre user ka session id DELETE → `{ended:false}` aur uska session zinda  | IDOR regression                                               | integration |
 
 **M5 RBAC:**
 
-| Scenario | Kyun zaroori | Test type |
-| -------- | ------------ | --------- |
-| Security Officer → Master par reset/sessions end (DR-007 ka jo bhi faisla) | Faisla test me likha ho, warna chupchaap badal sakta hai | integration |
-| Custom role jo khud ko appoint kare (Q-007 ka jo bhi faisla) | Privilege apne aap failne ka raasta | unit (`roleProblems`) |
+| Scenario                                                                   | Kyun zaroori                                             | Test type             |
+| -------------------------------------------------------------------------- | -------------------------------------------------------- | --------------------- |
+| Security Officer → Master par reset/sessions end (DR-007 ka jo bhi faisla) | Faisla test me likha ho, warna chupchaap badal sakta hai | integration           |
+| Custom role jo khud ko appoint kare (Q-007 ka jo bhi faisla)               | Privilege apne aap failne ka raasta                      | unit (`roleProblems`) |
 
 **M6 Data protection:**
 
-| Scenario | Kyun zaroori | Test type |
-| -------- | ------------ | --------- |
-| Har bade query ka `explain()` IXSCAN (kam se kam social lookup, outbox poll, grants list) | QA-ID-002 jaisi galti test se nahi pakdi gayi | integration |
-| Sealed field doosre record pe copy → open nahi hota | Context binding ka regression | unit (server-crypto me hai; identity level pe nahi) |
+| Scenario                                                                                  | Kyun zaroori                                  | Test type                                           |
+| ----------------------------------------------------------------------------------------- | --------------------------------------------- | --------------------------------------------------- |
+| Har bade query ka `explain()` IXSCAN (kam se kam social lookup, outbox poll, grants list) | QA-ID-002 jaisi galti test se nahi pakdi gayi | integration                                         |
+| Sealed field doosre record pe copy → open nahi hota                                       | Context binding ka regression                 | unit (server-crypto me hai; identity level pe nahi) |
 
 **M7 Notify/async:**
 
-| Scenario | Kyun zaroori | Test type |
-| -------- | ------------ | --------- |
-| Budget khatam hone pe user ko kya dikhe (DR-009 ka jo bhi faisla) | Abhi API 200 aur email nahi: chupchaap toota sign-up | integration |
-| `sending` row wala process lease ke beech mare → 60 s baad dobara (at-least-once) | Provider ne email le liya ho to doosra email; behaviour likha ho | integration |
-| Relay pe envelope size ki dobara jaanch (16 KB) | Seema sirf producer pe; seedha outbox me bada event relay ho gaya | unit |
+| Scenario                                                                          | Kyun zaroori                                                      | Test type   |
+| --------------------------------------------------------------------------------- | ----------------------------------------------------------------- | ----------- |
+| Budget khatam hone pe user ko kya dikhe (DR-009 ka jo bhi faisla)                 | Abhi API 200 aur email nahi: chupchaap toota sign-up              | integration |
+| `sending` row wala process lease ke beech mare → 60 s baad dobara (at-least-once) | Provider ne email le liya ho to doosra email; behaviour likha ho  | integration |
+| Relay pe envelope size ki dobara jaanch (16 KB)                                   | Seema sirf producer pe; seedha outbox me bada event relay ho gaya | unit        |
 
 **M9 Kernel + shared** (mutations: 552 kul, 33 survivors, sab wajah ke saath; contracts 0):
 
-| Scenario | Kyun zaroori | Test type |
-| -------- | ------------ | --------- |
-| `safeNext` dot-segment inputs (`/..//x`, `/.//x`, `/%2e%2e//x`) → `'/'` | QA-FE-001 | unit (auth-ui) |
+| Scenario                                                                                                 | Kyun zaroori                                                                                                   | Test type                        |
+| -------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------- | -------------------------------- |
+| `safeNext` dot-segment inputs (`/..//x`, `/.//x`, `/%2e%2e//x`) → `'/'`                                  | QA-FE-001                                                                                                      | unit (auth-ui)                   |
 | server-queue ke survivors "race guard, not tested", "policy, not tested", "not testable in-process" (12) | Relay/lease ke race paths ka koi test nahi; M7 me behaviour theek dikha, par regression pakadne wala test nahi | integration (do relays ek DB pe) |
-| server-mongo ke 7 survivors (jaise "MongoDB retries a colliding upsert on _id itself") | Fallback paths bina test | unit |
+| server-mongo ke 7 survivors (jaise "MongoDB retries a colliding upsert on _id itself")                   | Fallback paths bina test                                                                                       | unit                             |
 
 ## 9. Questions and Unverified Assumptions
 
-| Q-ID  | Sawal | Kyun zaroori | Evidence | Claude ki recommendation | Owner ka jawab |
-| ----- | ----- | ------------ | -------- | ------------------------ | -------------- |
-| Q-001 | Live pe passive GETs ki ijazat? | Vercel ke security headers, `vercel.json` rewrite aur Render TLS sirf live pe dikhte hain | skill §3.3 | Haan, kul ≤ 15 GETs, bina auth: `bq-live` `/health`, `/status`, ek anjaan path; customer + admin ka home aur ek 404 (headers, TLS). Soya Render jaag jaayega (free hours ka thoda kharch). Koi OTP/auth/write/fuzz nahi | Recommendation maani (2026-11-04) |
-| Q-002 | Mutation runs? | Kernel/auth/permission tests ki taaqat | RULES §6.2 | Naye runs nahi; har package ki `test/mutations.ts` ke likhe survivors §8 me static. Koi auth/permission test gap mile to sirf us package ka `--only` run (`infra:mutation:up`, background), har baar poochh ke | Recommendation maani (2026-11-04) |
-| Q-003 | Public report me security detail kaise? | Report commit hote hi public | skill §3.2 | Live pe exploitable khule findings: report me sirf class, impact, severity, `file:line`; poora payload/repro chat me, fix release ke baad report me. Local-only ya fixed findings poore detail ke saath | Recommendation maani (2026-11-04) |
-| Q-004 | Failure injection kaise? | Valkey/Mailpit band karna saanjhe local containers pe dev ka kaam rokta hai | skill §3.4, §6.3 | Pehle se downloaded images se alag throwaway containers (`127.0.0.1`, doosre ports, `--rm`) pe audit ka bundle; saanjhe containers kabhi band nahi. Koi download nahi | Recommendation maani (2026-11-04) |
-| Q-005 | `npm run build` ka pehla run (taaze `npm ci` ke baad) `customer` pe fail: `Prerender: Request failed for /terms/: The operation was aborted due to timeout`; customer akela aur poora build dobara pass (1/3) | Vercel/CI build bhi har baar thande cache se chalta hai; aisa hua to deploy fail | `@react-router/dev` prerender: 10 s timeout, `retryCount = 0` (`node_modules/@react-router/dev/dist/vite.js:804`), aur user config (`prerender: { paths, concurrency }`) se badla nahi ja sakta; `frontend/customer/react-router.config.ts:7` | Abhi bug nahi (E4, sirf ek baar). Agar CI/Vercel pe dikhe to build CLI me app build ka ek retry, ya upstream issue. Laptop pe lagta hai Windows ka taaza `node_modules` scan wajah thi | — |
-| Q-006 | Live (2026-11-04 ~09:5x UTC): `https://beautinique-customer.vercel.app/api/v1/platform/wake` ka pehla call **403 FORBIDDEN** ("Please use the Beautinique app." = origin secret nahi mila), request id `01a1a5fc-f6a8-77c3-9657-37178a022264`; ~1 min baad wahi URL aur admin ka URL `APP_NOT_ALLOWED` (secret pass). Kya us waqt Render pe deploy/secret rotation chal raha tha, ya Vercel env (aaj team ke shared env me gaya, MEMORY 2026-11-04) kisi deployment me nahi tha? | Agar secret kabhi-kabhi nahi pahunchta to live app ki har API call (sign-in, sign-up) us waqt tootti hai | `scratchpad/m1/live-get.out`, `live-get2.out`; rewrite `frontend/customer/vercel.json:6-19` | Owner Render logs me ye request id aur us waqt ke deploys dekhe, aur Vercel me `ORIGIN_SECRET` Production + Preview dono me har project se linked hai ya nahi. Live pe aur probing nahi ki (Q-001 seema) | — |
-| DR-001 | `/health`, `/ready`, `/status`, `/wake` `/api` ke bahar hain: na origin secret, na rate limit (design, `backend/gateway/src/app.ts:56-104`; `/status` public owner ka faisla 2026-10-25). `/ready` har call pe Redis + har deployable ka `/health` bulata hai, bina reuse | Rakhne ka asar: koi bhi bina limit `/ready` flood kar sakta hai; har request ~4 internal calls (local: 30 parallel = 174 ms). Render free (0.1 CPU) pe ye ek sasta amplification hai; data leak nahi (sirf ok/failing) | `probe6.out` (TC-GW-031), `app.ts:83-86` | Fix karna chahiye (chhota): `/ready` ko bhi `/status` jaisa 5 s reuse do, ya public `/ready` sirf gateway ka Redis check de. Faisla owner ka | — |
-| DR-002 | HIBP fail-open (ARCHITECTURE §7.1; `backend/identity/src/password.ts` `hibpBreachCheck`): HIBP na mile/2 s me na bole to password maan liya jaata hai | Rakhne ka asar: HIBP outage ke dauraan leaked passwords chupchaap account me aa jaate hain, baad me dobara kabhi jaanch nahi; HIBP ka 5xx bhi "clean" (warning ke bina, mutation survivor). Availability ke liye fail-open theek hai | E2: `scratchpad/m2/hibp-check.ts` (2,007 ms pe false + 1 warning); bundle log "breached-password check unavailable" | Fail-open rakho, par (a) 5xx pe bhi warning, (b) aise password pe `hibpPending` nishaan aur agle sign-in/queue task pe dobara jaanch (leaked mile to reset maango). Low priority | — |
-| DR-003 | Lockout account-wide (10 galat / 15 min → 1 ghanta, IP ka hissa nahi) + per-email 5 codes/ghanta (dono owner ke faisle, ARCHITECTURE §7.1) | Rakhne ka asar: koi bhi bina auth kisi ka bhi account 1 ghanta rok sakta hai (10 requests), aur 5 `/auth/password/code` se uska reset raasta bhi ghante bhar band (victim ko 5 emails bhi jaati hain). Lock ke dauraan har 10 try lock ko phir poora ghanta kar dete hain, to har ghante ~15 requests se rok hamesha ke liye. Email code hi ek unlock tha | E1: `scratchpad/m2/m2b.out`: victim reset 429 `OTP_EMAIL_LIMIT`, login 401; lock 20 min → 10 tries ke baad 60 min | Fix karna chahiye: (a) lock IP+account (ya account lock sirf usi IP/device pe), ya progressive delay ki jagah hard lock; (b) lock ke dauraan tries se lock na badhe; (c) per-email code limit me password-reset ka alag, chhota per-IP hissa, taaki attacker victim ka reset na kha sake. Faisla owner ka | — |
-| DR-004 | Argon2 ek waqt me ek hash, 32 se zyada intezaar = 503 (`password.ts:9-38`; 0.1 CPU ki wajah se) + rate limit sirf per IP / IPv6 /64 (owner, 2026-10-25) | Rakhne ka asar: bina auth ~40 parallel galat logins (40 IPs, ya ek IPv6 /56 = 256 /64 buckets) se **saare** sign-in, sign-up verify aur reset 503 ("Too many sign-ins right now") ho jaate hain; asli user ka sahi password bhi. Render 0.1 CPU pe hash dheema, to ye aur sasta. Agar bug maana jaaye to P2 (availability) | E1: `scratchpad/m2/probe-m2d.mjs`: 40 burst → 6×503 aur asli user 503; 60 burst → 27×503 aur asli user 503 | Fix karna chahiye: unauthenticated hash work ka global budget (sab IPs ka), IPv6 ke liye /48 ka doosra coarse bucket `auth`/`otp` pe, aur queue me already-signed-in/known-device ko priority; ya pehle sasta check (lock/grant) phir hash. Faisla owner ka (0.1 CPU trade-off) | — |
-| DR-005 | `/auth/refresh` aur `/auth/logout` bhi `auth` class me: per IP 30 / 5 min (`backend/gateway/src/rate-limits.ts:18`, contracts) | Rakhne ka asar: Indian mobile CGNAT pe ek IPv4 ke peeche sau-sau log hote hain (code comment khud carrier NAT maanta hai). Har khuli app har ~10 min refresh karti hai, to ~60 active users ek IP pe hone se refresh 429 hone lagenge (auth fail-closed), aur users ke sessions toot sakte hain. Login/verify bhi isi bucket me | E1: auth 31st = 429 (TC-GW-022); static budgets | Fix karna chahiye: refresh ko alag class (per session/refresh-token family limit, IP ka bada budget), login/verify ko `auth` me rehne do. Faisla owner ka | — |
-| DR-006 | Social sign-in method (Google/LinkedIn/GitHub) hatana bina step-up (`DELETE /auth/sign-in-methods/:provider`, `write` class). HANDOFF §4 (T3.1 PR 4): "**Claude ka badlav, owner ko batana**"; MEMORY 2026-11-03 decision log me likha, par owner ki manzoori kahin nahi | Rakhne ka asar: 10 min ka chura hua access token wala koi bhi user ka social login hata sakta hai (password bachta hai, aakhri method nahi hatta, security email jaata hai). Naya method jodna is raaste se nahi hota, to takeover nahi; asar sirf pareshani + user ka ek raasta band | E1: `scratchpad/m4/m4.out` (TC-ID-048: remove google 200 bina step-up; aakhri method 409) | Rakh sakte hain (customers ke paas authenticator kam), par behtar: TOTP ke bina accounts ke liye "recent sign-in" (jaise 10 min ke andar password/email code) maango. Owner pehle is badlav ko maane ya badle | — |
-| DR-007 | Security Officer (`master.security_officer`, Master ka appoint kiya, `iam.totp.reset` + `iam.session.revoke`, scope global) kisi ka bhi authenticator reset aur sessions band kar sakta hai, **Master ka bhi**; sirf apne pe nahi (README §"Gateway ka check aur step-up") | Rakhne ka asar: ek chhota role sabse bade account ka 2FA hata sakta hai. Reset ke baad Master ka agla sign-in sirf password se naya authenticator laga leta hai, to jiske paas Master ka password ho (phishing, leak) wo Security Officer ki madad se Master ban sakta hai. Master ko email jaata hai (reset email aaya), par tab tak der ho sakti hai | E1: `scratchpad/m5/m5b.out`: SO → Master reset 200, Master token 401, Master next sign-in `totp-enroll`; Master inbox me "Your Beautinique authenticator was reset" | Fix karna chahiye: Master (aur shayad har `mfaRequired` / iam-manage role) pe reset sirf doosre Master ki second signature se, ya SO ko Master pe reset band. Faisla owner ka | — |
-| Q-007 | Kya Master aisa custom role bana sake jo **khud ko appoint** kare (`appointedBy` me apna hi key) aur jisme `iam.grant.manage` ho? Docs chup hain | Aisa role ek baar diya to holders aapas me aur holders bana sakte hain (aur ek-doosre ke grants khatam kar sakte hain); Master ke control ke bahar failta hai | E1: `scratchpad/m5/m5-scope.mjs`: `admin.c_qa_spreader` (appointedBy khud) 200 | `roleProblems` me self-appointing role refuse karo, jab tak owner jaan-boojh ke na maange | — |
-| DR-008 | Reviewer roles (Internal Auditor, Security Officer: `iam.grant.read`, scope global) ko `GET /iam/grants` me **saare** grants milte hain, har customer ka `customer.customer` bhi, email ke saath (README: "reviewer ... saare roles apne scope me") | Rakhne ka asar: ek insider (Auditor/SO) API se page karke har customer ka email nikaal sakta hai (bulk export). DPDP me data minimisation; auditor ko access review ke liye customers ki list nahi chahiye | E1: `scratchpad/m5/aud-list.mjs`: Auditor ke 3 pages me 47 emails, 35 `customer.customer` | Fix karna chahiye: sign-up/self roles (`customer.customer`, applicants) reviewer list se bahar, ya email masked aur poora sirf ek user dhoondhne (`?email=`) pe. Faisla owner ka | — |
-| DR-009 | Din ka email budget (Brevo free 300/din, `NOTIFY__EMAIL_DAILY_LIMIT`; owner ka faisla) + sign-up code har email ko jaata hai (enumeration se bachne ke liye, design) + otp rate limit sirf per IP 10 / 10 min | Rakhne ka asar: bina sign-in koi bhi manghadant (ya kisi aur ke) emails pe sign-up codes maang ke din ka poora budget kha sakta hai: ek IP ~5 ghante me (300 ÷ 60/ghanta), ek IPv6 /56 ya 30 IPs turant. Uske baad us UTC din saare sign-up, password reset aur invitation codes `failed DAILY_LIMIT`, jabki API 200 deta hai (user ko lagta hai code gaya). Saath me hamare Brevo account se ajnabi logon ko emails (spam shikayat → Brevo account ka khatra) | E1: `scratchpad/m7/probe-m7d.mjs` (budget 8): 8 bina sign-in requests → asli user 200, `failed DAILY_LIMIT`, 0 email | Fix karna chahiye: (a) anjaan emails ke sign-up codes ka apna chhota din ka hissa (password reset / invitation ke liye budget bacha rahe), (b) `otp` ka global (sab IPs) budget + IPv6 ke liye coarse bucket, (c) budget khatam pe app ko saaf sandesh ("email abhi nahi ja sakta"), (d) Brevo budget ke paas alert. Faisla owner ka | — |
+| Q-ID   | Sawal                                                                                                                                                                                                                                                                                                                                                                                                                                                                            | Kyun zaroori                                                                                                                                                                                                                                                                                                                                                                                                                                                   | Evidence                                                                                                                                                                                                                                      | Claude ki recommendation                                                                                                                                                                                                                                                                                                             | Owner ka jawab                    |
+| ------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | --------------------------------- |
+| Q-001  | Live pe passive GETs ki ijazat?                                                                                                                                                                                                                                                                                                                                                                                                                                                  | Vercel ke security headers, `vercel.json` rewrite aur Render TLS sirf live pe dikhte hain                                                                                                                                                                                                                                                                                                                                                                      | skill §3.3                                                                                                                                                                                                                                    | Haan, kul ≤ 15 GETs, bina auth: `bq-live` `/health`, `/status`, ek anjaan path; customer + admin ka home aur ek 404 (headers, TLS). Soya Render jaag jaayega (free hours ka thoda kharch). Koi OTP/auth/write/fuzz nahi                                                                                                              | Recommendation maani (2026-11-04) |
+| Q-002  | Mutation runs?                                                                                                                                                                                                                                                                                                                                                                                                                                                                   | Kernel/auth/permission tests ki taaqat                                                                                                                                                                                                                                                                                                                                                                                                                         | RULES §6.2                                                                                                                                                                                                                                    | Naye runs nahi; har package ki `test/mutations.ts` ke likhe survivors §8 me static. Koi auth/permission test gap mile to sirf us package ka `--only` run (`infra:mutation:up`, background), har baar poochh ke                                                                                                                       | Recommendation maani (2026-11-04) |
+| Q-003  | Public report me security detail kaise?                                                                                                                                                                                                                                                                                                                                                                                                                                          | Report commit hote hi public                                                                                                                                                                                                                                                                                                                                                                                                                                   | skill §3.2                                                                                                                                                                                                                                    | Live pe exploitable khule findings: report me sirf class, impact, severity, `file:line`; poora payload/repro chat me, fix release ke baad report me. Local-only ya fixed findings poore detail ke saath                                                                                                                              | Recommendation maani (2026-11-04) |
+| Q-004  | Failure injection kaise?                                                                                                                                                                                                                                                                                                                                                                                                                                                         | Valkey/Mailpit band karna saanjhe local containers pe dev ka kaam rokta hai                                                                                                                                                                                                                                                                                                                                                                                    | skill §3.4, §6.3                                                                                                                                                                                                                              | Pehle se downloaded images se alag throwaway containers (`127.0.0.1`, doosre ports, `--rm`) pe audit ka bundle; saanjhe containers kabhi band nahi. Koi download nahi                                                                                                                                                                | Recommendation maani (2026-11-04) |
+| Q-005  | `npm run build` ka pehla run (taaze `npm ci` ke baad) `customer` pe fail: `Prerender: Request failed for /terms/: The operation was aborted due to timeout`; customer akela aur poora build dobara pass (1/3)                                                                                                                                                                                                                                                                    | Vercel/CI build bhi har baar thande cache se chalta hai; aisa hua to deploy fail                                                                                                                                                                                                                                                                                                                                                                               | `@react-router/dev` prerender: 10 s timeout, `retryCount = 0` (`node_modules/@react-router/dev/dist/vite.js:804`), aur user config (`prerender: { paths, concurrency }`) se badla nahi ja sakta; `frontend/customer/react-router.config.ts:7` | Abhi bug nahi (E4, sirf ek baar). Agar CI/Vercel pe dikhe to build CLI me app build ka ek retry, ya upstream issue. Laptop pe lagta hai Windows ka taaza `node_modules` scan wajah thi                                                                                                                                               | —                                 |
+| Q-006  | Live (2026-11-04 ~09:5x UTC): `https://beautinique-customer.vercel.app/api/v1/platform/wake` ka pehla call **403 FORBIDDEN** ("Please use the Beautinique app." = origin secret nahi mila), request id `01a1a5fc-f6a8-77c3-9657-37178a022264`; ~1 min baad wahi URL aur admin ka URL `APP_NOT_ALLOWED` (secret pass). Kya us waqt Render pe deploy/secret rotation chal raha tha, ya Vercel env (aaj team ke shared env me gaya, MEMORY 2026-11-04) kisi deployment me nahi tha? | Agar secret kabhi-kabhi nahi pahunchta to live app ki har API call (sign-in, sign-up) us waqt tootti hai                                                                                                                                                                                                                                                                                                                                                       | `scratchpad/m1/live-get.out`, `live-get2.out`; rewrite `frontend/customer/vercel.json:6-19`                                                                                                                                                   | Owner Render logs me ye request id aur us waqt ke deploys dekhe, aur Vercel me `ORIGIN_SECRET` Production + Preview dono me har project se linked hai ya nahi. Live pe aur probing nahi ki (Q-001 seema)                                                                                                                             | —                                 |
+| DR-001 | `/health`, `/ready`, `/status`, `/wake` `/api` ke bahar hain: na origin secret, na rate limit (design, `backend/gateway/src/app.ts:56-104`; `/status` public owner ka faisla 2026-10-25). `/ready` har call pe Redis + har deployable ka `/health` bulata hai, bina reuse                                                                                                                                                                                                        | Rakhne ka asar: koi bhi bina limit `/ready` flood kar sakta hai; har request ~4 internal calls (local: 30 parallel = 174 ms). Render free (0.1 CPU) pe ye ek sasta amplification hai; data leak nahi (sirf ok/failing)                                                                                                                                                                                                                                         | `probe6.out` (TC-GW-031), `app.ts:83-86`                                                                                                                                                                                                      | Fix karna chahiye (chhota): `/ready` ko bhi `/status` jaisa 5 s reuse do, ya public `/ready` sirf gateway ka Redis check de. Faisla owner ka                                                                                                                                                                                         | —                                 |
+| DR-002 | HIBP fail-open (ARCHITECTURE §7.1; `backend/identity/src/password.ts` `hibpBreachCheck`): HIBP na mile/2 s me na bole to password maan liya jaata hai                                                                                                                                                                                                                                                                                                                            | Rakhne ka asar: HIBP outage ke dauraan leaked passwords chupchaap account me aa jaate hain, baad me dobara kabhi jaanch nahi; HIBP ka 5xx bhi "clean" (warning ke bina, mutation survivor). Availability ke liye fail-open theek hai                                                                                                                                                                                                                           | E2: `scratchpad/m2/hibp-check.ts` (2,007 ms pe false + 1 warning); bundle log "breached-password check unavailable"                                                                                                                           | Fail-open rakho, par (a) 5xx pe bhi warning, (b) aise password pe `hibpPending` nishaan aur agle sign-in/queue task pe dobara jaanch (leaked mile to reset maango). Low priority                                                                                                                                                     | —                                 |
+| DR-003 | Lockout account-wide (10 galat / 15 min → 1 ghanta, IP ka hissa nahi) + per-email 5 codes/ghanta (dono owner ke faisle, ARCHITECTURE §7.1)                                                                                                                                                                                                                                                                                                                                       | Rakhne ka asar: koi bhi bina auth kisi ka bhi account 1 ghanta rok sakta hai (10 requests), aur 5 `/auth/password/code` se uska reset raasta bhi ghante bhar band (victim ko 5 emails bhi jaati hain). Lock ke dauraan har 10 try lock ko phir poora ghanta kar dete hain, to har ghante ~15 requests se rok hamesha ke liye. Email code hi ek unlock tha                                                                                                      | E1: `scratchpad/m2/m2b.out`: victim reset 429 `OTP_EMAIL_LIMIT`, login 401; lock 20 min → 10 tries ke baad 60 min                                                                                                                             | Fix karna chahiye: (a) lock IP+account (ya account lock sirf usi IP/device pe), ya progressive delay ki jagah hard lock; (b) lock ke dauraan tries se lock na badhe; (c) per-email code limit me password-reset ka alag, chhota per-IP hissa, taaki attacker victim ka reset na kha sake. Faisla owner ka                            | —                                 |
+| DR-004 | Argon2 ek waqt me ek hash, 32 se zyada intezaar = 503 (`password.ts:9-38`; 0.1 CPU ki wajah se) + rate limit sirf per IP / IPv6 /64 (owner, 2026-10-25)                                                                                                                                                                                                                                                                                                                          | Rakhne ka asar: bina auth ~40 parallel galat logins (40 IPs, ya ek IPv6 /56 = 256 /64 buckets) se **saare** sign-in, sign-up verify aur reset 503 ("Too many sign-ins right now") ho jaate hain; asli user ka sahi password bhi. Render 0.1 CPU pe hash dheema, to ye aur sasta. Agar bug maana jaaye to P2 (availability)                                                                                                                                     | E1: `scratchpad/m2/probe-m2d.mjs`: 40 burst → 6×503 aur asli user 503; 60 burst → 27×503 aur asli user 503                                                                                                                                    | Fix karna chahiye: unauthenticated hash work ka global budget (sab IPs ka), IPv6 ke liye /48 ka doosra coarse bucket `auth`/`otp` pe, aur queue me already-signed-in/known-device ko priority; ya pehle sasta check (lock/grant) phir hash. Faisla owner ka (0.1 CPU trade-off)                                                      | —                                 |
+| DR-005 | `/auth/refresh` aur `/auth/logout` bhi `auth` class me: per IP 30 / 5 min (`backend/gateway/src/rate-limits.ts:18`, contracts)                                                                                                                                                                                                                                                                                                                                                   | Rakhne ka asar: Indian mobile CGNAT pe ek IPv4 ke peeche sau-sau log hote hain (code comment khud carrier NAT maanta hai). Har khuli app har ~10 min refresh karti hai, to ~60 active users ek IP pe hone se refresh 429 hone lagenge (auth fail-closed), aur users ke sessions toot sakte hain. Login/verify bhi isi bucket me                                                                                                                                | E1: auth 31st = 429 (TC-GW-022); static budgets                                                                                                                                                                                               | Fix karna chahiye: refresh ko alag class (per session/refresh-token family limit, IP ka bada budget), login/verify ko `auth` me rehne do. Faisla owner ka                                                                                                                                                                            | —                                 |
+| DR-006 | Social sign-in method (Google/LinkedIn/GitHub) hatana bina step-up (`DELETE /auth/sign-in-methods/:provider`, `write` class). HANDOFF §4 (T3.1 PR 4): "**Claude ka badlav, owner ko batana**"; MEMORY 2026-11-03 decision log me likha, par owner ki manzoori kahin nahi                                                                                                                                                                                                         | Rakhne ka asar: 10 min ka chura hua access token wala koi bhi user ka social login hata sakta hai (password bachta hai, aakhri method nahi hatta, security email jaata hai). Naya method jodna is raaste se nahi hota, to takeover nahi; asar sirf pareshani + user ka ek raasta band                                                                                                                                                                          | E1: `scratchpad/m4/m4.out` (TC-ID-048: remove google 200 bina step-up; aakhri method 409)                                                                                                                                                     | Rakh sakte hain (customers ke paas authenticator kam), par behtar: TOTP ke bina accounts ke liye "recent sign-in" (jaise 10 min ke andar password/email code) maango. Owner pehle is badlav ko maane ya badle                                                                                                                        | —                                 |
+| DR-007 | Security Officer (`master.security_officer`, Master ka appoint kiya, `iam.totp.reset` + `iam.session.revoke`, scope global) kisi ka bhi authenticator reset aur sessions band kar sakta hai, **Master ka bhi**; sirf apne pe nahi (README §"Gateway ka check aur step-up")                                                                                                                                                                                                       | Rakhne ka asar: ek chhota role sabse bade account ka 2FA hata sakta hai. Reset ke baad Master ka agla sign-in sirf password se naya authenticator laga leta hai, to jiske paas Master ka password ho (phishing, leak) wo Security Officer ki madad se Master ban sakta hai. Master ko email jaata hai (reset email aaya), par tab tak der ho sakti hai                                                                                                         | E1: `scratchpad/m5/m5b.out`: SO → Master reset 200, Master token 401, Master next sign-in `totp-enroll`; Master inbox me "Your Beautinique authenticator was reset"                                                                           | Fix karna chahiye: Master (aur shayad har `mfaRequired` / iam-manage role) pe reset sirf doosre Master ki second signature se, ya SO ko Master pe reset band. Faisla owner ka                                                                                                                                                        | —                                 |
+| Q-007  | Kya Master aisa custom role bana sake jo **khud ko appoint** kare (`appointedBy` me apna hi key) aur jisme `iam.grant.manage` ho? Docs chup hain                                                                                                                                                                                                                                                                                                                                 | Aisa role ek baar diya to holders aapas me aur holders bana sakte hain (aur ek-doosre ke grants khatam kar sakte hain); Master ke control ke bahar failta hai                                                                                                                                                                                                                                                                                                  | E1: `scratchpad/m5/m5-scope.mjs`: `admin.c_qa_spreader` (appointedBy khud) 200                                                                                                                                                                | `roleProblems` me self-appointing role refuse karo, jab tak owner jaan-boojh ke na maange                                                                                                                                                                                                                                            | —                                 |
+| DR-008 | Reviewer roles (Internal Auditor, Security Officer: `iam.grant.read`, scope global) ko `GET /iam/grants` me **saare** grants milte hain, har customer ka `customer.customer` bhi, email ke saath (README: "reviewer ... saare roles apne scope me")                                                                                                                                                                                                                              | Rakhne ka asar: ek insider (Auditor/SO) API se page karke har customer ka email nikaal sakta hai (bulk export). DPDP me data minimisation; auditor ko access review ke liye customers ki list nahi chahiye                                                                                                                                                                                                                                                     | E1: `scratchpad/m5/aud-list.mjs`: Auditor ke 3 pages me 47 emails, 35 `customer.customer`                                                                                                                                                     | Fix karna chahiye: sign-up/self roles (`customer.customer`, applicants) reviewer list se bahar, ya email masked aur poora sirf ek user dhoondhne (`?email=`) pe. Faisla owner ka                                                                                                                                                     | —                                 |
+| DR-009 | Din ka email budget (Brevo free 300/din, `NOTIFY__EMAIL_DAILY_LIMIT`; owner ka faisla) + sign-up code har email ko jaata hai (enumeration se bachne ke liye, design) + otp rate limit sirf per IP 10 / 10 min                                                                                                                                                                                                                                                                    | Rakhne ka asar: bina sign-in koi bhi manghadant (ya kisi aur ke) emails pe sign-up codes maang ke din ka poora budget kha sakta hai: ek IP ~5 ghante me (300 ÷ 60/ghanta), ek IPv6 /56 ya 30 IPs turant. Uske baad us UTC din saare sign-up, password reset aur invitation codes `failed DAILY_LIMIT`, jabki API 200 deta hai (user ko lagta hai code gaya). Saath me hamare Brevo account se ajnabi logon ko emails (spam shikayat → Brevo account ka khatra) | E1: `scratchpad/m7/probe-m7d.mjs` (budget 8): 8 bina sign-in requests → asli user 200, `failed DAILY_LIMIT`, 0 email                                                                                                                          | Fix karna chahiye: (a) anjaan emails ke sign-up codes ka apna chhota din ka hissa (password reset / invitation ke liye budget bacha rahe), (b) `otp` ka global (sab IPs) budget + IPv6 ke liye coarse bucket, (c) budget khatam pe app ko saaf sandesh ("email abhi nahi ja sakta"), (d) Brevo budget ke paas alert. Faisla owner ka | —                                 |
 
 ## 10. Recommended Fixing Order
 
@@ -809,19 +809,19 @@ Har module ke baad (existing tests + `test/mutations.ts` ke survivors).
 
 ## Change log
 
-| Version | Date       | Badlav                                                                                               |
-| ------- | ---------- | ---------------------------------------------------------------------------------------------------- |
-| v0.1    | 2026-11-04 | Phase 1: report skeleton, overview, 97 features ki inventory, 248 test cases ka plan, baseline aur 10 KNOWN; Gate 1 pe ruka. |
-| v0.2    | 2026-11-04 | Gate 1 approved: Q-001…Q-004 pe recommendations maani; owner ki hidayat: adversarial testing + owner faislon ka review (`DR-*`, §9). M0 shuru. |
+| Version | Date       | Badlav                                                                                                                                                                                                          |
+| ------- | ---------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| v0.1    | 2026-11-04 | Phase 1: report skeleton, overview, 97 features ki inventory, 248 test cases ka plan, baseline aur 10 KNOWN; Gate 1 pe ruka.                                                                                    |
+| v0.2    | 2026-11-04 | Gate 1 approved: Q-001…Q-004 pe recommendations maani; owner ki hidayat: adversarial testing + owner faislon ka review (`DR-*`, §9). M0 shuru.                                                                  |
 | v0.3    | 2026-11-04 | M0 Baseline: 13 executed + 3 static, 15 PASS / 1 FAIL; npm test 1720/1720, verify 19 packages, gitleaks history saaf, npm audit sirf KNOWN-01..03. Naya bug QA-TOOL-001 (P3); Q-005 (build flake), PERF-OBS-01. |
-| v0.4    | 2026-11-04 | M1 Gateway: 34 executed + 3 static, 35 PASS / 2 FAIL / 1 NOT TESTED (M5 me); bugs QA-GW-001 (P2), QA-KRN-001 (P3), QA-GW-002 (P4); DR-001, Q-006; 12 live GETs; §5, §8, §10 bhare. |
-| v0.5    | 2026-11-04 | M2 Identity auth: 22 executed + 1 static, 23 PASS / 0 FAIL / 2 NOT TESTED (M5/M12 me); naya bug nahi; DR-002…DR-005 (HIBP fail-open, targeted lockout, hash-queue DoS, CGNAT pe refresh limit). |
-| v0.6    | 2026-11-04 | M3 Identity sessions: 14 executed + 1 static, 14 PASS / 1 FAIL; naya bug QA-ID-001 (P1, refresh reuse detection bypass; repro redacted, Q-003). |
-| v0.7    | 2026-11-04 | M4 OAuth (fake providers): 11 executed, 11 PASS; naya bug nahi; DR-006 (provider hatana bina step-up, owner ki manzoori docs me nahi). |
-| v0.8    | 2026-11-04 | Owner: report ki branch `feat/qa-audit` (§0). |
-| v0.9    | 2026-11-04 | M5 RBAC: 14 executed + 1 KNOWN, 14 PASS; TC-ID-011, TC-ID-020, TC-GW-017 bhi PASS; naya bug nahi; DR-007 (Security Officer Master ka 2FA hata sakta), Q-007 (self-appointing custom role). |
-| v0.10   | 2026-11-04 | M6 Data protection: 7 executed, 6 PASS / 1 FAIL; naya bug QA-ID-002 (P3, social lookup COLLSCAN); PERF-OBS-02; DR-008 (Auditor/SO saare customer emails dekh sakte). |
-| v0.11   | 2026-11-04 | M7 Notify/async: 16 executed + 1 static, 17 PASS; §7 flow matrix bhara; naya bug nahi; DR-009 (din ka email budget bina sign-in khatam). |
-| v0.12   | 2026-11-04 | M8 Core + bundle + release: 9 executed + 4 static, 13 PASS; naya bug/DR nahi; M15 ke liye CI/dependency-cruiser note. |
-| v0.13   | 2026-11-04 | M9 Kernel + shared: 15 executed + 1 static, 16 PASS; naya bug QA-FE-001 (P3, `safeNext` protocol-relative); TC-FE-010 FAIL; mutation survivors ka saar §8. |
-| v0.14   | 2026-11-04 | Session 1 band: §0 me agle session ka start (M10), infra saaf; HANDOFF §4 entry. |
+| v0.4    | 2026-11-04 | M1 Gateway: 34 executed + 3 static, 35 PASS / 2 FAIL / 1 NOT TESTED (M5 me); bugs QA-GW-001 (P2), QA-KRN-001 (P3), QA-GW-002 (P4); DR-001, Q-006; 12 live GETs; §5, §8, §10 bhare.                              |
+| v0.5    | 2026-11-04 | M2 Identity auth: 22 executed + 1 static, 23 PASS / 0 FAIL / 2 NOT TESTED (M5/M12 me); naya bug nahi; DR-002…DR-005 (HIBP fail-open, targeted lockout, hash-queue DoS, CGNAT pe refresh limit).                 |
+| v0.6    | 2026-11-04 | M3 Identity sessions: 14 executed + 1 static, 14 PASS / 1 FAIL; naya bug QA-ID-001 (P1, refresh reuse detection bypass; repro redacted, Q-003).                                                                 |
+| v0.7    | 2026-11-04 | M4 OAuth (fake providers): 11 executed, 11 PASS; naya bug nahi; DR-006 (provider hatana bina step-up, owner ki manzoori docs me nahi).                                                                          |
+| v0.8    | 2026-11-04 | Owner: report ki branch `feat/qa-audit` (§0).                                                                                                                                                                   |
+| v0.9    | 2026-11-04 | M5 RBAC: 14 executed + 1 KNOWN, 14 PASS; TC-ID-011, TC-ID-020, TC-GW-017 bhi PASS; naya bug nahi; DR-007 (Security Officer Master ka 2FA hata sakta), Q-007 (self-appointing custom role).                      |
+| v0.10   | 2026-11-04 | M6 Data protection: 7 executed, 6 PASS / 1 FAIL; naya bug QA-ID-002 (P3, social lookup COLLSCAN); PERF-OBS-02; DR-008 (Auditor/SO saare customer emails dekh sakte).                                            |
+| v0.11   | 2026-11-04 | M7 Notify/async: 16 executed + 1 static, 17 PASS; §7 flow matrix bhara; naya bug nahi; DR-009 (din ka email budget bina sign-in khatam).                                                                        |
+| v0.12   | 2026-11-04 | M8 Core + bundle + release: 9 executed + 4 static, 13 PASS; naya bug/DR nahi; M15 ke liye CI/dependency-cruiser note.                                                                                           |
+| v0.13   | 2026-11-04 | M9 Kernel + shared: 15 executed + 1 static, 16 PASS; naya bug QA-FE-001 (P3, `safeNext` protocol-relative); TC-FE-010 FAIL; mutation survivors ka saar §8.                                                      |
+| v0.14   | 2026-11-04 | Session 1 band: §0 me agle session ka start (M10), infra saaf; HANDOFF §4 entry.                                                                                                                                |
