@@ -1,6 +1,6 @@
 # QA AUDIT REPORT — BQ
 
-> **Status:** v0.3 (2026-11-04). Audit base: `origin/prerelease` @ `ee7f46a` (`ee7f46ae7b2605d99f6b4497d26303aa109fb371`). Auditor: Claude Code (Opus 5.5, `claude-opus-5-5`). Ye report audit ki single source of truth hai; fixes alag se, ek-ek karke.
+> **Status:** v0.5 (2026-11-04). Audit base: `origin/prerelease` @ `ee7f46a` (`ee7f46ae7b2605d99f6b4497d26303aa109fb371`). Auditor: Claude Code (Opus 5.5, `claude-opus-5-5`). Ye report audit ki single source of truth hai; fixes alag se, ek-ek karke.
 
 ## 0. Audit state (har session ke aakhir me update)
 
@@ -11,11 +11,12 @@
   - Public report me security detail: **live pe exploitable khule findings redact** (class, impact, severity, `file:line`); poora repro sirf chat me, fix release ke baad report me. Baaki poori detail.
   - Failure injection: **alag throwaway containers** (pehle se downloaded images, `127.0.0.1`, doosre ports, `--rm`); saanjhe Mongo/Valkey/Mailpit kabhi band nahi.
   - **Owner ki do aur hidayatein (2026-11-04):** (1) har feature ko jitna ho sake todne ki koshish (adversarial; phir bhi sirf local, burst ≤ 100, production off-limits). (2) Owner ke "acceptable" faislon pe bhi sawal uthao: rakhne se kya hoga, fix karna chahiye ya nahi. Ye §9 me `DR-<NNN>` (decision review) rows: bug count me nahi, faisla owner ka. CLAUDE.md ke frozen niyam (mobile messaging, app ki bhasha) is se bahar (CLAUDE.md ki precedence).
-- **Ho chuke modules:** M0 (2026-11-04) | **Chalu:** koi nahi | **Agla:** M1 Gateway
+- **Ho chuke modules:** M0, M1, M2 (2026-11-04) | **Chalu:** koi nahi | **Agla:** M3 Identity: sessions and tokens
+- **QA infra (local, is session ka):** throwaway containers `bq-qa-valkey` (127.0.0.1:6390) aur `bq-qa-mailpit` (127.0.0.1:8035, API `/api/v1`), QA bundle `scratchpad/m1/qa-backend.ts` (gateway 8190, fake OAuth 8196, DBs `bq_qa_m1a_{identity,notify,core}`, origin secret scratchpad me). Session khatam pe: bundle band, `docker stop bq-qa-valkey bq-qa-mailpit` (`--rm`), `bq_qa_*` DBs drop. Live GETs: 12/15 use hue (M1).
 - **Base SHA:** skill ka snapshot `f271b31` tha; `origin/prerelease` ab `ee7f46a` hai. Beech me sirf `ca61487` (`/qa-audit` skill) + merge `ee7f46a` (PR #53): koi code nahi badla, kisi module ko dobara nahi dekhna. Worktree `prerelease` @ `ee7f46a`, `git status` saaf (report ke alawa).
 - **Khule blockers:** koi nahi.
 - **Note (local):** `.claude/worktrees/comprehensive-qa-audit-b02e4c` (git ke `info/exclude` me) aur kai `kilo` worktrees laptop pe hain; audit inhe nahi chhoota, aur repo-wide search me `.claude/worktrees` ko bahar rakhta hai (is folder ka asar: QA-TOOL-001).
-- **Note (M0, 2026-11-04 14:57:22):** `npm test` ke aakhri hisse me `docs/QA_AUDIT_REPORT.md` git index me **staged** ho gayi (`??` → `A`). Repo ka koi test asli repo me `git` nahi chalata (saare git calls temp fixture repos me: `scripts/mutation/test/mutation.test.ts:141`, `scripts/packages/test/e2e.test.ts:38`, `scripts/packages/test/helpers.ts:61`), aur us waqt sirf identity ke tests chal rahe the (git nahi chhoote). Isliye ye bahar ka kaam lagta hai (IDE/app/doosra tool). Revert nahi kiya; staging se koi tracked file nahi badli.
+- **Note (M0, 2026-11-04 14:57:22):** `npm test` ke aakhri hisse me `docs/QA_AUDIT_REPORT.md` git index me **staged** ho gayi (`??` → `A`). Repo ka koi test asli repo me `git` nahi chalata (saare git calls temp fixture repos me: `scripts/mutation/test/mutation.test.ts:141`, `scripts/packages/test/e2e.test.ts:38`, `scripts/packages/test/helpers.ts:61`), aur us waqt sirf identity ke tests chal rahe the (git nahi chhoote). Baad me pata chala: 15:19 IST pe commit `0b8353f` ("docs: add QA audit report document", author Nageshwar) `prerelease` pe bana (local, push nahi): staging aur commit insaan/tool ka tha, Claude ka nahi. Skill ke hisaab se audit ki branch `feat/qa-audit` hai; ye faisla owner ka.
 - **Gitleaks `dir` scan (M0):** working folder ke scan ne laptop ki gitignored `.env`/`.env.production` files bhi padhi (gitleaks ne, Claude ne nahi). Report me sirf path + rule dekhe, values kabhi nahi; JSON report turant mitayi. Aage sirf `gitleaks git` (tracked history) chalega.
 
 ## 1. Project Overview
@@ -48,21 +49,21 @@
 
 | Metric                                 | Count                                      |
 | -------------------------------------- | ------------------------------------------ |
-| Modules                                | 16 (M0–M15); ho chuke: 1 (M0)              |
+| Modules                                | 16 (M0–M15); ho chuke: 3 (M0–M2)           |
 | Features (inventory, §3)               | 97                                         |
 | Planned test cases                     | 248 (planned-executed 223, planned-static 25) |
-| Executed                               | 13                                         |
-| Static-only                            | 3                                          |
-| PASS                                   | 15                                         |
-| FAIL                                   | 1                                          |
+| Executed                               | 69                                         |
+| Static-only                            | 7                                          |
+| PASS                                   | 73                                         |
+| FAIL                                   | 3                                          |
 | BLOCKED                                | 0                                          |
-| NOT TESTED                             | 232                                        |
+| NOT TESTED                             | 172                                        |
 | NEEDS CLARIFICATION                    | 0                                          |
 | NOT IMPLEMENTED (roadmap)              | 10 (§7 list)                               |
 | KNOWN                                  | 10 (§2a)                                   |
-| Bugs P0 / P1 / P2 / P3 / P4            | 0 / 0 / 0 / 1 / 0                          |
-| Confirmed (E1–E3) / Suspected (E4)     | 1 / 0                                      |
-| Decision reviews (DR, §9)              | 0                                          |
+| Bugs P0 / P1 / P2 / P3 / P4            | 0 / 0 / 1 / 2 / 1                          |
+| Confirmed (E1–E3) / Suspected (E4)     | 4 / 0                                      |
+| Decision reviews (DR, §9)              | 5                                          |
 
 ## 2a. Baseline: checks aur known issues
 
@@ -106,29 +107,29 @@ Abhi sab `NOT TESTED` (Gate 1). Status ke saath `Executed`/`Static` module ke ba
 | M0 Baseline | `npm audit` vs KNOWN alerts | T0.6 | PASS | Executed | | sirf KNOWN-01..03, koi high/critical nahi |
 | M0 Baseline | Secrets hygiene (`.env.example`, gitleaks rules/ignore, `git grep`) | T0.6, RULES §2.4 | PASS | Executed + Static | | history me koi leak nahi; `.env.example` sirf dummy; live config me laptop ki dummy values ka koi guard hai ya nahi: M1/M6 me |
 | M0 Baseline | Package CLI tests (`test:scripts`) | T0.1 | PASS | Executed | | `npm test` ke andar, 123 tests |
-| M1 Gateway | Origin secret (missing, wrong, rotation, timing-safe) | T2.2 | NOT TESTED | | | |
-| M1 Gateway | App allow-list (`X-BQ-App`, Host, `x-forwarded-host`, Origin, Vercel previews) | T2.1 | NOT TESTED | | | |
-| M1 Gateway | Route table (unknown path/method, traversal, encoding, case, slash) | T2.1 | NOT TESTED | | | |
-| M1 Gateway | Access fail-closed (401 on every non-public route) | T2.2 | NOT TESTED | | | |
-| M1 Gateway | Token verification (alg, kid, exp, aud, JWKS failure/rotation, revocation, `av`) | T2.2, T3.2, T3.3 | NOT TESTED | | | |
-| M1 Gateway | Passport + internal header stripping, `clientIp()` | T2.2 | NOT TESTED | | | |
-| M1 Gateway | Rate limits per class, IPv6 /64, Redis down (fail closed/open) | T2.3 | NOT TESTED | | | |
-| M1 Gateway | Idempotency-Key validation | T2.3 | NOT TESTED | | | |
-| M1 Gateway | Request smuggling, body on GET/DELETE, oversized headers/body | T2.1 | NOT TESTED | | | |
-| M1 Gateway | Proxy: owner down/slow/abort, client abort | T2.1 | NOT TESTED | | | |
-| M1 Gateway | Cache headers | T2.3 | NOT TESTED | | | |
-| M1 Gateway | `/health`, `/ready`, `/status`, `/wake`, passport JWKS | T2.4, T2.7 | NOT TESTED | | | |
-| M1 Gateway | Navigation routes (303) + open redirect | T3.1 PR 4 | NOT TESTED | | | |
-| M1 Gateway | Security headers, error envelope, log hygiene | T2.3 | NOT TESTED | | | |
-| M2 Identity auth | Email-code sign-up / OTP verify / resend | T3.1 | NOT TESTED | | | |
-| M2 Identity auth | Enumeration (time floor, same responses) | T3.1 | NOT TESTED | | | |
-| M2 Identity auth | Password rules, argon2id, HIBP down | T3.1 | NOT TESTED | | | |
-| M2 Identity auth | Forgot password (`/auth/password/code`) | T3.1 | NOT TESTED | | | |
-| M2 Identity auth | Lockout (threshold, 1 h, DoS) | T3.1 | NOT TESTED | | | |
-| M2 Identity auth | Login second factor (`/auth/login/:loginId/*`: TOTP, recovery, enroll) | T3.1 | NOT TESTED | | | |
-| M2 Identity auth | Sign-in sirf grant wale app me | T3.3 | NOT TESTED | | | |
-| M2 Identity auth | Email normalization | T3.1 | NOT TESTED | | | |
-| M2 Identity auth | Input validation + error envelope | T3.1 | NOT TESTED | | | |
+| M1 Gateway | Origin secret (missing, wrong, rotation, timing-safe) | T2.2 | PASS | Executed + Static | | 8 galat values 403; rotation unit test + static (`trust.ts:15-29`) |
+| M1 Gateway | App allow-list (`X-BQ-App`, Host, `x-forwarded-host`, Origin, Vercel previews) | T2.1 | PASS | Executed | | 29 cases; doosre account ka `-<scope>` suffix pattern me aata hai (README me likhi seema), origin secret + Origin=Host se bachav |
+| M1 Gateway | Route table (unknown path/method, traversal, encoding, case, slash) | T2.1 | PASS | Executed | | 18 raw paths, koi 500 nahi, koi doosre route pe nahi gaya |
+| M1 Gateway | Access fail-closed (401 on every non-public route) | T2.2 | PASS | Executed | | 30/30 non-public routes 401 |
+| M1 Gateway | Token verification (alg, kid, exp, aud, JWKS failure/rotation, revocation, `av`) | T2.2, T3.2, T3.3 | FAIL | Executed | QA-KRN-001, QA-GW-002 | 15 forgeries 401; JWKS pehla load fail = 30 s 401; wipe ke baad revoke markers gayab; `av` M5 me |
+| M1 Gateway | Passport + internal header stripping, `clientIp()` | T2.2 | PASS | Executed + Static | | forged passport owner pe 401; session IP sirf `x-real-ip` |
+| M1 Gateway | Rate limits per class, IPv6 /64, Redis down (fail closed/open) | T2.3 | FAIL | Executed | QA-GW-001 | budgets theek; Redis band = fast 503; Redis atka = signed-in requests latakti hain |
+| M1 Gateway | Idempotency-Key validation | T2.3 | PASS | Executed | | dedupe (same key → same answer) NOT IMPLEMENTED, T4.1 |
+| M1 Gateway | Request smuggling, body on GET/DELETE, oversized headers/body | T2.1 | PASS | Executed | | 9 raw framing attacks 400, 20 KB header 431, 2 MB body 413 |
+| M1 Gateway | Proxy: owner down/slow/abort, client abort | T2.1 | PASS | Static | | unit tests `gateway.test.ts:432,766,803`; bundle me ek owner alag band nahi hota |
+| M1 Gateway | Cache headers | T2.3 | PASS | Executed | | koi `cache: public` route abhi nahi (s-maxage sirf unit test) |
+| M1 Gateway | `/health`, `/ready`, `/status`, `/wake`, passport JWKS | T2.4, T2.7 | PASS | Executed | | sirf naam + ok/failing; `/ready` bina memo (DR-001) |
+| M1 Gateway | Navigation routes (303) + open redirect | T3.1 PR 4 | PASS | Executed | | start har `next` leta hai; asli redirect check callback pe (M4) |
+| M1 Gateway | Security headers, error envelope, log hygiene | T2.3 | PASS | Executed | | helmet poora; logs me cookie/token/secret/OTP/email/query nahi |
+| M2 Identity auth | Email-code sign-up / OTP verify / resend | T3.1 | PASS | Executed | | 6-digit CSPRNG, 10 min, 5 tries, 3 resends + 1 min gap, 5/ghanta per email, app binding, replay band |
+| M2 Identity auth | Enumeration (time floor, same responses) | T3.1 | PASS | Executed | | sign-up/password code ~418 ms dono taraf; login unknown vs galat password ~60 ms, same error; invitation M5 me |
+| M2 Identity auth | Password rules, argon2id, HIBP down | T3.1 | PASS | Executed + Static | | 12–128 (trim); argon2id OWASP min; HIBP k-anonymity + fail-open (DR-002) |
+| M2 Identity auth | Forgot password (`/auth/password/code`) | T3.1 | PASS | Executed | | reset pe purane sessions band, rok hatta hai |
+| M2 Identity auth | Lockout (threshold, 1 h, DoS) | T3.1 | PASS | Executed | | 10 galat → 1 ghanta; lock ke dauraan try = lock phir poora ghanta; targeted lockout chain (DR-003) |
+| M2 Identity auth | Login second factor (`/auth/login/:loginId/*`: TOTP, recovery, enroll) | T3.1 | PASS | Executed | | loginId UUIDv7, app-bound, 5 tries, TTL; TOTP replay band; recovery single-use; enroll-at-login M5/M12 me |
+| M2 Identity auth | Sign-in sirf grant wale app me | T3.3 | PASS | Executed | | customer account admin/seller me `INVALID_CREDENTIALS` (galat password jaisa) |
+| M2 Identity auth | Email normalization | T3.1 | PASS | Executed | | trim + lower-case; Unicode/fullwidth/quoted/trailing-dot reject; plus-address alag account |
+| M2 Identity auth | Input validation + error envelope | T3.1 | PASS | Executed | | NoSQL-style objects 400, extra fields hat jaate; hash queue flood (DR-004) |
 | M3 Sessions | ES256 keys, JWKS, rotation | T3.2 | NOT TESTED | | | |
 | M3 Sessions | Refresh rotation + reuse detection + concurrent tabs | T3.2 | NOT TESTED | | | |
 | M3 Sessions | Per-app cookies (flags, prefix, hint cookie) | T3.2, TASKS C.1 | NOT TESTED | | | |
@@ -227,76 +228,76 @@ Plan: **E** = planned-executed (local stack, HTTP, browser, scratch script), **S
 
 **M1 Gateway (`GW`, 38)**
 
-| TC | Case | Type | Plan |
-| -- | ---- | ---- | ---- |
-| TC-GW-001 | Origin secret missing → 403 envelope | Sec/N | E |
-| TC-GW-002 | Galat secret, khaali, bahut lamba, whitespace → 403 | Sec/N | E |
-| TC-GW-003 | Rotation: dono secrets chalte, hataya hua nahi | Sec | E |
-| TC-GW-004 | Secret compare timing-safe (length leak bhi) | Sec | S |
-| TC-GW-005 | `/health`, `/ready`, `/status`, `/wake` bina secret; baaki sab secret maange | Sec | E |
-| TC-GW-006 | `X-BQ-App` anjaan / missing → 403 `APP_NOT_ALLOWED` | Sec/N | E |
-| TC-GW-007 | Host, `x-forwarded-host`, Origin me farak → 403 | Sec | E |
-| TC-GW-008 | Vercel preview pattern: doosra scope/account, lookalike host, `*.vercel.app` | Sec | E |
-| TC-GW-009 | Navigation route pe app sirf host se; app host nahi → 403 | Sec | E |
-| TC-GW-010 | Anjaan path → 404, galat method → contract ke hisaab se | N | E |
-| TC-GW-011 | Traversal raw path: `..`, `%2e%2e`, `%252e%252e`, `\`, `//`, `;` | Sec | E |
-| TC-GW-012 | Trailing slash, letter case, double slash, query edge | Ed | E |
-| TC-GW-013 | Har non-public route (manifest loop) bina cookie → 401 | Sec | E |
-| TC-GW-014 | Token forgery: `alg: none`, HS256 with public key, galat `kid`, expired, galat `aud` (doosre app ki cookie), tampered payload | Sec | E |
-| TC-GW-015 | JWKS fetch fail → 503; anjaan `kid` pe refetch; key rotation | R | E |
-| TC-GW-016 | Session/user revoked (Redis) → 401 | Sec | E |
-| TC-GW-017 | `av` badla → purana token 401 | Sec | E |
-| TC-GW-018 | Permission route: galat permission/scope → 403; step-up wale route bina step-up | Sec | E |
-| TC-GW-019 | Client ka `X-BQ-Passport` strip; owner bina/galat passport pe mana; passport `aud`/expiry | Sec | E |
-| TC-GW-020 | `x-forwarded-for`, `x-real-ip`, `X-BQ-Client-Ip`, `x-origin-secret` owner tak nahi jaate | Sec | E |
-| TC-GW-021 | `clientIp()`: `x-real-ip` sirf sahi secret ke saath; spoofed headers se rate-limit bypass nahi | Sec | E |
-| TC-GW-022 | Har class: limit ke baad 429 + `Retry-After` + `RateLimit-*` (chhota burst ≤ 100) | Sec | E |
-| TC-GW-023 | IPv6 /64 grouping, IPv4-mapped IPv6 | Sec/Ed | E |
-| TC-GW-024 | Redis band: `auth`/`otp` 503, `read`/`write`/`public` docs ke hisaab se | R/Sec | E |
-| TC-GW-025 | Idempotency-Key: missing, khaali, 256 chars, non-visible chars | N | E |
-| TC-GW-026 | GET/DELETE body ke saath (CL aur TE) → 400 | Sec | E |
-| TC-GW-027 | Smuggling: CL + TE dono, `Transfer-Encoding: chunked, identity`, obs-fold | Sec | E |
-| TC-GW-028 | Oversized headers / body → 413/431, process zinda | Sec/R | E |
-| TC-GW-029 | Owner band → 502; slow → 504 (timeout); client abort owner tak | R | E |
-| TC-GW-030 | Cache headers: personal `private, no-store`; `cache: 'public'` contracts pe `s-maxage`, cookies nahi | Sec | E |
-| TC-GW-031 | `/health`, `/ready`, `/status`: koi internal detail leak nahi; `/status` 5 s memo | Sec | E |
-| TC-GW-032 | `/wake`: 204, `no-store`, CORP cross-origin, kuch nahi chhoota | F | E |
-| TC-GW-033 | `/.well-known/passport-jwks.json`: bahar se pahunch, kya leak karta hai | Sec | E |
-| TC-GW-034 | Security headers (helmet) har gateway jawab pe | Sec | E |
-| TC-GW-035 | Error envelope har gateway error pe ek jaisa | F | E |
-| TC-GW-036 | Gateway logs me cookie/token/OTP/secret nahi | Sec | E |
-| TC-GW-037 | Navigation 303 + `next` open redirect (`//evil`, `/\evil`, `https:`, encoded) | Sec | E |
-| TC-GW-038 | Live passive (sirf ijazat pe): `/health`, `/status`, headers, TLS | Sec | E |
+| TC | Case | Type | Plan | Result |
+| -- | ---- | ---- | ---- | ------ |
+| TC-GW-001 | Origin secret missing → 403 envelope | Sec/N | E | PASS (Executed) |
+| TC-GW-002 | Galat secret, khaali, bahut lamba, whitespace → 403 | Sec/N | E | PASS (Executed): 7 galat values 403; aage/peeche ki space HTTP parser hatata hai (RFC 9110 OWS), ye theek hai |
+| TC-GW-003 | Rotation: dono secrets chalte, hataya hua nahi | Sec | E | PASS (Static + unit test `gateway.test.ts:471`) |
+| TC-GW-004 | Secret compare timing-safe (length leak bhi) | Sec | S | PASS (Static): SHA-256 phir `timingSafeEqual`, early exit nahi (`trust.ts:15-29`) |
+| TC-GW-005 | `/health`, `/ready`, `/status`, `/wake` bina secret; baaki sab secret maange | Sec | E | PASS (Executed): `/HEALTH`, `/health/` bhi 200 (Express case-insensitive, nuksan nahi) |
+| TC-GW-006 | `X-BQ-App` anjaan / missing → 403 `APP_NOT_ALLOWED` | Sec/N | E | PASS (Executed) |
+| TC-GW-007 | Host, `x-forwarded-host`, Origin me farak → 403 | Sec | E | PASS (Executed) |
+| TC-GW-008 | Vercel preview pattern: doosra scope/account, lookalike host, `*.vercel.app` | Sec | E | PASS (Executed): `<project>-git-<b>-evil-<scope>.vercel.app` bhi pattern me (README ki likhi seema; secret + Origin se bachav) |
+| TC-GW-009 | Navigation route pe app sirf host se; app host nahi → 403 | Sec | E | PASS (Executed) |
+| TC-GW-010 | Anjaan path → 404, galat method → contract ke hisaab se | N | E | PASS (Executed) |
+| TC-GW-011 | Traversal raw path: `..`, `%2e%2e`, `%252e%252e`, `\`, `//`, `;` | Sec | E | PASS (Executed) |
+| TC-GW-012 | Trailing slash, letter case, double slash, query edge | Ed | E | PASS (Executed) |
+| TC-GW-013 | Har non-public route (manifest loop) bina cookie → 401 | Sec | E | PASS (Executed): 30/30 |
+| TC-GW-014 | Token forgery: `alg: none`, HS256 with public key, galat `kid`, expired, galat `aud` (doosre app ki cookie), tampered payload | Sec | E | PASS (Executed): 15 forgeries 401 |
+| TC-GW-015 | JWKS fetch fail → 503; anjaan `kid` pe refetch; key rotation | R | E | FAIL (Executed, E2): QA-KRN-001; refetch throttle 30 s + single-flight PASS |
+| TC-GW-016 | Session/user revoked (Redis) → 401 | Sec | E | PASS (Executed): logout ke baad 401; Redis wipe ke baad markers gayab (QA-GW-002) |
+| TC-GW-017 | `av` badla → purana token 401 | Sec | E | NOT TESTED (M5 TC-ID-063 me; unit test `gateway.test.ts:1265`) |
+| TC-GW-018 | Permission route: galat permission/scope → 403; step-up wale route bina step-up | Sec | E | PASS (Executed): customer ko 403, step-up routes `STEP_UP_REQUIRED` |
+| TC-GW-019 | Client ka `X-BQ-Passport` strip; owner bina/galat passport pe mana; passport `aud`/expiry | Sec | E | PASS (Executed) |
+| TC-GW-020 | `x-forwarded-for`, `x-real-ip`, `X-BQ-Client-Ip`, `x-origin-secret` owner tak nahi jaate | Sec | E | PASS (Executed) |
+| TC-GW-021 | `clientIp()`: `x-real-ip` sirf sahi secret ke saath; spoofed headers se rate-limit bypass nahi | Sec | E | PASS (Executed + Static); live pe Vercel client ka `x-real-ip` overwrite karta hai ya nahi: unverified |
+| TC-GW-022 | Har class: limit ke baad 429 + `Retry-After` + `RateLimit-*` (chhota burst ≤ 100) | Sec | E | PASS (Executed): write 21st, otp 11th, auth 31st 429 |
+| TC-GW-023 | IPv6 /64 grouping, IPv4-mapped IPv6 | Sec/Ed | E | PASS (Executed) |
+| TC-GW-024 | Redis band: `auth`/`otp` 503, `read`/`write`/`public` docs ke hisaab se | R/Sec | E | FAIL (Executed, 2/2): QA-GW-001 |
+| TC-GW-025 | Idempotency-Key: missing, khaali, 256 chars, non-visible chars | N | E | PASS (Executed); dedupe NOT IMPLEMENTED (T4.1) |
+| TC-GW-026 | GET/DELETE body ke saath (CL aur TE) → 400 | Sec | E | PASS (Executed) |
+| TC-GW-027 | Smuggling: CL + TE dono, `Transfer-Encoding: chunked, identity`, obs-fold | Sec | E | PASS (Executed) |
+| TC-GW-028 | Oversized headers / body → 413/431, process zinda | Sec/R | E | PASS (Executed) |
+| TC-GW-029 | Owner band → 502; slow → 504 (timeout); client abort owner tak | R | E | PASS (Static + unit tests) |
+| TC-GW-030 | Cache headers: personal `private, no-store`; `cache: 'public'` contracts pe `s-maxage`, cookies nahi | Sec | E | PASS (Executed) |
+| TC-GW-031 | `/health`, `/ready`, `/status`: koi internal detail leak nahi; `/status` 5 s memo | Sec | E | PASS (Executed); DR-001 |
+| TC-GW-032 | `/wake`: 204, `no-store`, CORP cross-origin, kuch nahi chhoota | F | E | PASS (Executed) |
+| TC-GW-033 | `/.well-known/passport-jwks.json`: bahar se pahunch, kya leak karta hai | Sec | E | PASS (Executed): sirf public key, `no-store` |
+| TC-GW-034 | Security headers (helmet) har gateway jawab pe | Sec | E | PASS (Executed) |
+| TC-GW-035 | Error envelope har gateway error pe ek jaisa | F | E | PASS (Executed) |
+| TC-GW-036 | Gateway logs me cookie/token/OTP/secret nahi | Sec | E | PASS (Executed) |
+| TC-GW-037 | Navigation 303 + `next` open redirect (`//evil`, `/\evil`, `https:`, encoded) | Sec | E | PASS (Executed, start hissa); callback M4 (TC-ID-050) |
+| TC-GW-038 | Live passive (sirf ijazat pe): `/health`, `/status`, headers, TLS | Sec | E | PASS (Executed, 12 GETs): Q-006 (ek baar FORBIDDEN) |
 
 **M2 Identity: authentication (`ID`, 25)**
 
-| TC | Case | Type | Plan |
-| -- | ---- | ---- | ---- |
-| TC-ID-001 | Sign-up code happy path: Mailpit me email, verify, account bana | F | E |
-| TC-ID-002 | Code length/charset/entropy (CSPRNG) | Sec | E |
-| TC-ID-003 | Code expiry | Sec | E |
-| TC-ID-004 | Ek challenge pe attempts ki seema | Sec | E |
-| TC-ID-005 | Resend limits + per-hour email limit | Sec | E |
-| TC-ID-006 | Challenge binding: doosre email/app se verify | Sec | E |
-| TC-ID-007 | Success ke baad replay | Sec | E |
-| TC-ID-008 | Enumeration: sign-up (naya vs maujood email) jawab + samay | Sec | E |
-| TC-ID-009 | Enumeration: forgot password | Sec | E |
-| TC-ID-010 | Enumeration: login (galat password vs user nahi) jawab + samay | Sec | E |
-| TC-ID-011 | Enumeration: invitation code | Sec | E |
-| TC-ID-012 | `passwordZod` rules (min 12, max, Unicode) | N | E |
-| TC-ID-013 | argon2id parameters | Sec | S |
-| TC-ID-014 | HIBP band/slow: password kabhi bahar nahi (k-anonymity), fail mode docs jaisa | Sec/R | E |
-| TC-ID-015 | Lockout: threshold, 1 ghanta | Sec | E |
-| TC-ID-016 | Lockout per account vs IP; victim pe DoS | Sec | E |
-| TC-ID-017 | `loginId`: guessable?, expiry, pehle factor se binding, attempts | Sec | E |
-| TC-ID-018 | TOTP login: ± window, ek step me wahi code dobara | Sec | E |
-| TC-ID-019 | Recovery code login: single use, ginti | Sec | E |
-| TC-ID-020 | Login pe TOTP enroll/confirm (MFA wale apps) | F/Sec | E |
-| TC-ID-021 | Sign-in sirf grant wale app me | Sec | E |
-| TC-ID-022 | Email normalization: case, whitespace, Unicode (`ı`/`İ`, fullwidth), plus-addressing docs ke hisaab se | Sec/Ed | E |
-| TC-ID-023 | Password reset: code → naya password → purane sessions | F/Sec | E |
-| TC-ID-024 | Input validation: bade/galat type inputs → 400 envelope | N | E |
-| TC-ID-025 | OTP code sealed (outbox/logs me plaintext nahi) | Sec | E |
+| TC | Case | Type | Plan | Result |
+| -- | ---- | ---- | ---- | ------ |
+| TC-ID-001 | Sign-up code happy path: Mailpit me email, verify, account bana | F | E | PASS (Executed) |
+| TC-ID-002 | Code length/charset/entropy (CSPRNG) | Sec | E | PASS (Executed + Static `randomInt`) |
+| TC-ID-003 | Code expiry | Sec | E | PASS (Executed, TTL fast-forward) |
+| TC-ID-004 | Ek challenge pe attempts ki seema | Sec | E | PASS (Executed) |
+| TC-ID-005 | Resend limits + per-hour email limit | Sec | E | PASS (Executed) |
+| TC-ID-006 | Challenge binding: doosre email/app se verify | Sec | E | PASS (Executed) |
+| TC-ID-007 | Success ke baad replay | Sec | E | PASS (Executed) |
+| TC-ID-008 | Enumeration: sign-up (naya vs maujood email) jawab + samay | Sec | E | PASS (Executed): 418 vs 418 ms median |
+| TC-ID-009 | Enumeration: forgot password | Sec | E | PASS (Executed): 416 vs 418 ms |
+| TC-ID-010 | Enumeration: login (galat password vs user nahi) jawab + samay | Sec | E | PASS (Executed): 60 vs 64 ms median |
+| TC-ID-011 | Enumeration: invitation code | Sec | E | NOT TESTED (M5: invitation chahiye) |
+| TC-ID-012 | `passwordZod` rules (min 12, max, Unicode) | N | E | PASS (Executed): 8 cases |
+| TC-ID-013 | argon2id parameters | Sec | S | PASS (Static): m=19456, t=2, p=1, 16-byte salt |
+| TC-ID-014 | HIBP band/slow: password kabhi bahar nahi (k-anonymity), fail mode docs jaisa | Sec/R | E | PASS (Executed, E2 stand-in): sirf `/range/<5 hex>` + `Add-Padding`; 2 s pe fail-open + warning (DR-002) |
+| TC-ID-015 | Lockout: threshold, 1 ghanta | Sec | E | PASS (Executed) |
+| TC-ID-016 | Lockout per account vs IP; victim pe DoS | Sec | E | PASS (Executed): per account, IP nahi; DR-003, DR-004 |
+| TC-ID-017 | `loginId`: guessable?, expiry, pehle factor se binding, attempts | Sec | E | PASS (Executed) |
+| TC-ID-018 | TOTP login: ± window, ek step me wahi code dobara | Sec | E | PASS (Executed): +1 step chalta, purana step `lastStep` se band, replay band |
+| TC-ID-019 | Recovery code login: single use, ginti | Sec | E | PASS (Executed) |
+| TC-ID-020 | Login pe TOTP enroll/confirm (MFA wale apps) | F/Sec | E | NOT TESTED (M5/M12: admin grant wala account chahiye) |
+| TC-ID-021 | Sign-in sirf grant wale app me | Sec | E | PASS (Executed) |
+| TC-ID-022 | Email normalization: case, whitespace, Unicode (`ı`/`İ`, fullwidth), plus-addressing docs ke hisaab se | Sec/Ed | E | PASS (Executed) |
+| TC-ID-023 | Password reset: code → naya password → purane sessions | F/Sec | E | PASS (Executed) |
+| TC-ID-024 | Input validation: bade/galat type inputs → 400 envelope | N | E | PASS (Executed) |
+| TC-ID-025 | OTP code sealed (outbox/logs me plaintext nahi) | Sec | E | PASS (Executed): `sealedCode` (v1.e1), email plain (notify ko chahiye) |
 
 **M3 Identity: sessions (`ID`, 15)**
 
@@ -534,6 +535,42 @@ Plan: **E** = planned-executed (local stack, HTTP, browser, scratch script), **S
 
 ## 4. Bug Report
 
+### [QA-GW-001] Signed-in requests hang for as long as Redis stalls instead of failing fast with 503
+
+**Module:** M1 Gateway | **Feature:** access check (sessions) | **Task/Doc:** T2.2, T3.2; `backend/gateway/README.md` §"Har request" item 5 ("Redis ya JWKS na mile = 503"); `packages/backend/server-queue/src/redis.ts:63-65` ("Commands fail fast while Redis is away ... answer 503 instead of hanging")
+**Severity:** P2 (partial breakage: documented 503 ki jagah request latakti hai; fail-closed hi rehta hai, isliye P1 nahi) | **Priority:** Medium | **Status:** Open
+**Testing Type:** Reliability / failure injection | **Evidence level:** E1 | **Reproducibility:** Always (2/2) | **Environment:** local QA bundle (`ee7f46a`), throwaway Valkey `docker pause`
+**Description:** Jab Redis TCP pe juda hai par jawab nahi deta (atka hua, network stall, overloaded Key Value), to gateway ka session check (`multi().exec()`) bina timeout ke intezaar karta hai. Har signed-in request (`/iam/me`, `/auth/sessions`, aage cart/checkout) utni der latakti hai jitni der Redis atka rahe, phir Redis lautne pe hi jawab aata hai. Isi waqt rate limiter (apna 500 ms timeout) `auth`/`otp` ko sahi 503 deta hai. Redis *band* (connection refused) hone pe sab theek: 764 ms me 503.
+**Steps to Reproduce:** 1. QA bundle throwaway Valkey pe chalao (`scratchpad/m1/qa-backend.ts`). 2. Ek customer sign up karo (access cookie lo). 3. `docker pause bq-qa-valkey`. 4. `GET /api/v1/iam/me` cookie ke saath (client timeout 120 s). 5. 25 s baad `docker unpause`.
+**Expected Result:** Sub-second-ish 503 `SERVICE_UNAVAILABLE` (gateway README item 5; server-queue redis.ts comment), jaise rate limiter deta hai.
+**Actual Result:** Run 1: 40 s client timeout tak koi jawab nahi. Run 2: `/iam/me` aur `/auth/sessions` dono **25,229 ms** baad 200 (bilkul unpause ke waqt). Saath me `auth` 503 (514 ms), `otp` 503 (504 ms), `/ready` 503 (2,011 ms).
+**Evidence:** `scratchpad/m1/probe4.out`, `probe4b.out` (local); bundle log me rate-limit wale 503 dikhte hain, session wale request ka koi log tab tak nahi.
+**Root Cause:** `backend/gateway/src/sessions.ts:95-104` Redis `multi().exec()` (aur `:126-127` `get`) pe koi timeout nahi; shared client `packages/backend/server-queue/src/redis.ts:76-81` me `maxRetriesPerRequest: 1` (sirf disconnected pe fail-fast) hai par `commandTimeout` nahi, isliye connected-par-chup Redis pe command hamesha intezaar karta hai. Rate limiter apna timeout lagata hai (`server-ratelimit`, "Redis did not answer within 500 ms").
+**Affected Files:** `backend/gateway/src/sessions.ts:95`, `backend/gateway/src/sessions.ts:126`, `packages/backend/server-queue/src/redis.ts:76`; isi client ke doosre bina-timeout users bhi (identity ke OTP/session Redis calls; M2/M3 me dekhna)
+**Recommended Fix:** Session gate ke Redis calls pe chhota timeout (rate limiter jaisa, ~500 ms) aur timeout pe 503; ya shared client me `commandTimeout` (dhyan: BullMQ ke blocking connections alag hain, `consumer.ts` apna client banata hai). Phir ek test jo Redis ko "atka" (jaise na-jawab dene wala TCP server) dikhaye.
+**Fix route (RULES §2):** branch + PR (kernel package `server-queue` / gateway logic); kernel line badle to badli lines ke mutations (RULES §6).
+**Regression Risk:** Medium: timeout bahut chhota ho to dheemi par zinda Redis pe jhoothe 503.
+**Regression test to add:** Gateway test: Redis jaisa TCP server jo connection le par jawab na de → signed-in route ~timeout me 503 (abhi `gateway.test.ts:1362` sirf disconnect jaanchta hai).
+**Owner decision needed:** Nahi
+
+### [QA-KRN-001] After a failed first JWKS load, the gateway answers 401 (not 503) to every signed-in request for 30 seconds
+
+**Module:** M1 Gateway (root cause M9 server-kit) | **Feature:** token verification, JWKS cache | **Task/Doc:** T2.2; `backend/gateway/src/sessions.ts:52-57` ("Redis or the JWKS away: 503, never a pass"); gateway README item 5
+**Severity:** P3 (low-impact: sirf jab cache khaali ho, yaani gateway start ke turant baad; galat 401 se app user ko signed-out dikha sakti hai) | **Priority:** Low | **Status:** Open
+**Testing Type:** Reliability | **Evidence level:** E2 | **Reproducibility:** Always (2/2, script) | **Environment:** `packages/backend/server-kit/dist` (`ee7f46a`)
+**Description:** `jwksCache` load shuru karte hi `loadedAt` aage kar deta hai. Pehla load fail ho (identity ka JWKS ek pal ke liye na mile) to wo request 503 paati hai, par agle 30 s (`minRefetchMs`) tak cache dobara load nahi karta aur khaali key set lautata hai; har token ka verify fail hota hai aur gateway 401 `UNAUTHENTICATED` deta hai. App 401 pe refresh karti hai (identity theek hai, naya token milta hai), aur gateway phir bhi 401: jhootha sign-out.
+**Steps to Reproduce:** `node scratchpad/m1/jwks-first-fail.ts`: `load` pehli baar throw kare, doosri baar sahi JWKS de; `now` +1 s, +10 s, +29 s, +30 s pe `keysFor('k1')`.
+**Expected Result:** JWKS na mile to 503 (sessions.ts doc comment, README), 401 nahi.
+**Actual Result:** Pehla call throw (503). +1 s, +10 s, +29 s: `keys known=0` → verify fail → 401. +30 s pe hi doosra load.
+**Evidence:** `scratchpad/m1/jwks-first-fail.ts` output (2 runs same).
+**Root Cause:** `packages/backend/server-kit/src/tokens.ts:84` (`loadedAt = now()` load se pehle) + `:102` (`missing` check `minRefetchMs` tak band) + fail pe purana (khaali) map rehta hai.
+**Affected Files:** `packages/backend/server-kit/src/tokens.ts:83-110`; use: `backend/gateway/src/service.ts:47`
+**Recommended Fix:** Fail hue load ke baad `loadedAt` purana rakho (ya chhota backoff), aur jab koi key hi na ho tab `keysFor` error de (→ 503), khaali map nahi.
+**Fix route (RULES §2):** branch + PR (kernel package); badli lines ke mutations.
+**Regression Risk:** Low.
+**Regression test to add:** server-kit: pehla load fail → `minRefetchMs` ke andar `keysFor` error (503), khaali map nahi.
+**Owner decision needed:** Nahi
+
 ### [QA-TOOL-001] format:check fails on a laptop that has a Claude Code worktree under .claude/worktrees
 
 **Module:** M0 Baseline | **Feature:** `npm run format:check` | **Task/Doc:** T0.6, RULES §2.1 (chhota fix se pehle local `format:check`)
@@ -552,9 +589,33 @@ Plan: **E** = planned-executed (local stack, HTTP, browser, scratch script), **S
 **Regression test to add:** Koi unit test nahi chahiye; `format:check` ek worktree ke saath laptop pe dobara chalao.
 **Owner decision needed:** Nahi
 
+### [QA-GW-002] Session revocations are lost when Redis is wiped; ARCHITECTURE says the gateway falls back to MongoDB, the code does not
+
+**Module:** M1 Gateway / M3 sessions | **Feature:** revocation after Redis wipe | **Task/Doc:** T3.2, T1.3; ARCHITECTURE §6.6 (line 213: "Jab tak recovery poori na ho, gateway revoke aur freeze MongoDB `sessions` se check karta hai ... source of truth hamesha MongoDB"), RULES §4.12 ("Redis kisi cheez ka source of truth nahi")
+**Severity:** P4 (future risk, security: aaj koi exposure nahi, kyunki har signed-in route identity ka hai aur identity apne DB se session dobara jaanchti hai; jis din core/payments ka pehla `signed-in` route aayega, ye P1 ban jaata hai) | **Priority:** Medium (Phase 4 ke signed-in routes se pehle) | **Status:** Open
+**Testing Type:** Security / reliability | **Evidence level:** E1 | **Reproducibility:** Always (1/1 run + key scan) | **Environment:** local QA bundle, throwaway Valkey stop → naya khaali Valkey
+**Description:** Logout, refresh-token chori (reuse) aur email-code password reset gateway ke liye Redis me `bq:id:session-revoked:<sid>` / `bq:id:user-revoked:<userId>` likhte hain (10 min + 60 s TTL). Redis wipe (Render Key Value ka restart, jo docs ke hisaab se kabhi-kabhi hota hai) pe ye markers mit jaate hain; identity ki wipe-recovery inhe dobara nahi likhti, aur gateway ka koi MongoDB fallback nahi. Wipe ke baad gateway band kiye gaye access token ko 10 min tak sahi maanta hai. Aaj identity routes `SESSION_EXPIRED` se bacha lete hain; permission routes "stale" se 401.
+**Steps to Reproduce:** 1. Customer A sign up, logout (purana token → 401 `UNAUTHENTICATED` gateway se). 2. `docker stop bq-qa-valkey`, naya khaali Valkey usi port pe. 3. Recovery log: "redis recovery done". 4. `valkey-cli --scan`: koi `bq:id:*` key nahi. 5. A ka purana token → 401 `SESSION_EXPIRED` (identity ka code, gateway ka nahi: gateway ne token aage bhej diya).
+**Expected Result:** Wipe ke baad bhi gateway band session ko roke (ARCHITECTURE §6.6:213: recovery tak MongoDB se check; ya recovery me markers dobara).
+**Actual Result:** Gateway token aage bhejta hai; sirf owner (identity) ka apna DB check rokta hai.
+**Evidence:** `scratchpad/m1/probe5.out`; key scan me sirf `bq:epoch` aur `bull:*`.
+**Root Cause:** Revocation sirf Redis me (`backend/identity/src/sessions.ts:273`, `:468`, `:539`); recovery (`server-queue` epoch watchdog → schedules + outbox redrive) me revocation rebuild nahi; gateway `backend/gateway/src/sessions.ts:95-111` sirf Redis padhta hai.
+**Affected Files:** `backend/gateway/src/sessions.ts:95`, `backend/identity/src/sessions.ts:167`, `:273`, `:468`, `:539`; ARCHITECTURE §6.6
+**Recommended Fix:** Identity ki wipe-recovery pichhle `REVOKE_TTL_MS` me khatam sessions aur user-revocations ke markers dobara likhe (Mongo se), aur recovery poori hone tak gateway signed-in routes pe fail-closed (503) ya identity se session check. Ya ARCHITECTURE badlo (owner).
+**Fix route (RULES §2):** branch + PR (auth logic); badli lines ke mutations (RULES §6 permissions/authz).
+**Regression Risk:** Medium (recovery path).
+**Regression test to add:** Integration: logout → Redis wipe (apna prefix) → recovery → purana token gateway pe hi 401.
+**Owner decision needed:** Haan: ARCHITECTURE §6.6 ka fallback banana hai, ya doc badalna hai?
+
 ## 5. Security Findings
 
-Abhi koi finding nahi.
+| ID | OWASP Top 10 (2021) / ASVS 4.0 | Severity | Live pe exposed? | Note |
+| -- | ------------------------------ | -------- | ---------------- | ---- |
+| QA-GW-002 | A07 Identification and Authentication Failures / ASVS V3.3 (session termination) | P4 (latent) | Nahi (aaj har signed-in route identity ka; identity DB se rokti hai) | Pehla non-identity `signed-in` route aate hi P1 |
+| QA-GW-001 | A04 Insecure Design (availability) / ASVS V1.11 | P2 | Haan, agar Render Key Value atke (band nahi) | fail-closed hi rehta hai, data leak nahi |
+| QA-KRN-001 | A04 (availability) | P3 | Haan, sirf gateway start ke turant baad JWKS fail ho | jhootha sign-out |
+
+**PASS hue controls (M1, executed):** origin secret (8 galat values; timing-safe static), app allow-list + CSRF (Host/x-forwarded-host/Origin, 29 cases), fail-closed 401 (30/30 non-public routes), JWT forgery (`alg:none`, HS256 key confusion, apni ES256 key, embedded `jwk`, tampered claims, galat `kid`/`aud`, junk: 15/15 401), passport (client ka strip; owner seedha bina/forged passport 401), client IP spoofing (XFF, `X-BQ-Client-Ip`, `Forwarded` ignore), rate limits (write/otp/auth budgets, IPv6 /64, IPv4-mapped), `auth`/`otp` fail-closed jab Redis band/atka, request smuggling (9 framing attacks), oversized header/body, path traversal (18 raw paths), security headers (helmet), error envelope, log hygiene, live: `bq-live` `/api` bina secret 403, TLS 1.3. **M2:** OTP (CSPRNG 6-digit, 10 min, 5 tries, resend seema, per-email/ghanta, app binding, replay), enumeration (sign-up/password code/login: same body + same time), argon2id OWASP min, HIBP k-anonymity, lockout, TOTP replay/window, recovery single-use, loginId binding/expiry, grant-based sign-in, email normalization, NoSQL-style input, reset ke baad sessions band, OTP outbox me sealed.
 
 ## 6. Performance Findings
 
@@ -585,6 +646,23 @@ Flow matrix (identity → outbox → queue → notify → Mailpit; gateway → o
 
 Har module ke baad (existing tests + `test/mutations.ts` ke survivors).
 
+**M1 Gateway** (existing: `backend/gateway/test/gateway.test.ts` 38 tests; mutations 64, 1 survivor "a missing header matches" equivalent, wajah likhi):
+
+| Scenario | Kyun zaroori | Test type |
+| -------- | ------------ | --------- |
+| Redis connected par jawab na de (stall) → signed-in route timeout pe 503 | QA-GW-001; abhi sirf `disconnect` jaancha jaata hai (`gateway.test.ts:1362`) | integration (na-jawab TCP server) |
+| JWKS ka pehla load fail → `minRefetchMs` ke andar 503, 401 nahi | QA-KRN-001 | unit (server-kit) |
+| Logout → Redis wipe → recovery → purana token gateway pe 401 | QA-GW-002 | integration (identity + gateway) |
+| `/ready` flood pe reuse/memo | DR-001 | unit |
+
+**M2 Identity auth** (existing: identity 125 tests; mutations 188, survivors wajah ke saath):
+
+| Scenario | Kyun zaroori | Test type |
+| -------- | ------------ | --------- |
+| 33 sign-ins ek hash pe → 503 `passwordsBusy` (survivor "no limit on waiting hashes": "not timed by a test") | Ye M2 me chala ke dikha (DR-004); limit hata do to koi test nahi pakdega | unit (hash ko block karke queue bharo) |
+| HIBP 5xx/503 page → "not breached" bina warning (survivor ki wajah me likha) | Fail-open ka log/metric ke bina chhupa raasta | unit |
+| Lock ke dauraan galat tries lock ko phir 1 ghanta badhate hain | DR-003 ka behaviour; faisla jo bhi ho, test me likha ho | integration |
+
 ## 9. Questions and Unverified Assumptions
 
 | Q-ID  | Sawal | Kyun zaroori | Evidence | Claude ki recommendation | Owner ka jawab |
@@ -594,10 +672,19 @@ Har module ke baad (existing tests + `test/mutations.ts` ke survivors).
 | Q-003 | Public report me security detail kaise? | Report commit hote hi public | skill §3.2 | Live pe exploitable khule findings: report me sirf class, impact, severity, `file:line`; poora payload/repro chat me, fix release ke baad report me. Local-only ya fixed findings poore detail ke saath | Recommendation maani (2026-11-04) |
 | Q-004 | Failure injection kaise? | Valkey/Mailpit band karna saanjhe local containers pe dev ka kaam rokta hai | skill §3.4, §6.3 | Pehle se downloaded images se alag throwaway containers (`127.0.0.1`, doosre ports, `--rm`) pe audit ka bundle; saanjhe containers kabhi band nahi. Koi download nahi | Recommendation maani (2026-11-04) |
 | Q-005 | `npm run build` ka pehla run (taaze `npm ci` ke baad) `customer` pe fail: `Prerender: Request failed for /terms/: The operation was aborted due to timeout`; customer akela aur poora build dobara pass (1/3) | Vercel/CI build bhi har baar thande cache se chalta hai; aisa hua to deploy fail | `@react-router/dev` prerender: 10 s timeout, `retryCount = 0` (`node_modules/@react-router/dev/dist/vite.js:804`), aur user config (`prerender: { paths, concurrency }`) se badla nahi ja sakta; `frontend/customer/react-router.config.ts:7` | Abhi bug nahi (E4, sirf ek baar). Agar CI/Vercel pe dikhe to build CLI me app build ka ek retry, ya upstream issue. Laptop pe lagta hai Windows ka taaza `node_modules` scan wajah thi | — |
+| Q-006 | Live (2026-11-04 ~09:5x UTC): `https://beautinique-customer.vercel.app/api/v1/platform/wake` ka pehla call **403 FORBIDDEN** ("Please use the Beautinique app." = origin secret nahi mila), request id `01a1a5fc-f6a8-77c3-9657-37178a022264`; ~1 min baad wahi URL aur admin ka URL `APP_NOT_ALLOWED` (secret pass). Kya us waqt Render pe deploy/secret rotation chal raha tha, ya Vercel env (aaj team ke shared env me gaya, MEMORY 2026-11-04) kisi deployment me nahi tha? | Agar secret kabhi-kabhi nahi pahunchta to live app ki har API call (sign-in, sign-up) us waqt tootti hai | `scratchpad/m1/live-get.out`, `live-get2.out`; rewrite `frontend/customer/vercel.json:6-19` | Owner Render logs me ye request id aur us waqt ke deploys dekhe, aur Vercel me `ORIGIN_SECRET` Production + Preview dono me har project se linked hai ya nahi. Live pe aur probing nahi ki (Q-001 seema) | — |
+| DR-001 | `/health`, `/ready`, `/status`, `/wake` `/api` ke bahar hain: na origin secret, na rate limit (design, `backend/gateway/src/app.ts:56-104`; `/status` public owner ka faisla 2026-10-25). `/ready` har call pe Redis + har deployable ka `/health` bulata hai, bina reuse | Rakhne ka asar: koi bhi bina limit `/ready` flood kar sakta hai; har request ~4 internal calls (local: 30 parallel = 174 ms). Render free (0.1 CPU) pe ye ek sasta amplification hai; data leak nahi (sirf ok/failing) | `probe6.out` (TC-GW-031), `app.ts:83-86` | Fix karna chahiye (chhota): `/ready` ko bhi `/status` jaisa 5 s reuse do, ya public `/ready` sirf gateway ka Redis check de. Faisla owner ka | — |
+| DR-002 | HIBP fail-open (ARCHITECTURE §7.1; `backend/identity/src/password.ts` `hibpBreachCheck`): HIBP na mile/2 s me na bole to password maan liya jaata hai | Rakhne ka asar: HIBP outage ke dauraan leaked passwords chupchaap account me aa jaate hain, baad me dobara kabhi jaanch nahi; HIBP ka 5xx bhi "clean" (warning ke bina, mutation survivor). Availability ke liye fail-open theek hai | E2: `scratchpad/m2/hibp-check.ts` (2,007 ms pe false + 1 warning); bundle log "breached-password check unavailable" | Fail-open rakho, par (a) 5xx pe bhi warning, (b) aise password pe `hibpPending` nishaan aur agle sign-in/queue task pe dobara jaanch (leaked mile to reset maango). Low priority | — |
+| DR-003 | Lockout account-wide (10 galat / 15 min → 1 ghanta, IP ka hissa nahi) + per-email 5 codes/ghanta (dono owner ke faisle, ARCHITECTURE §7.1) | Rakhne ka asar: koi bhi bina auth kisi ka bhi account 1 ghanta rok sakta hai (10 requests), aur 5 `/auth/password/code` se uska reset raasta bhi ghante bhar band (victim ko 5 emails bhi jaati hain). Lock ke dauraan har 10 try lock ko phir poora ghanta kar dete hain, to har ghante ~15 requests se rok hamesha ke liye. Email code hi ek unlock tha | E1: `scratchpad/m2/m2b.out`: victim reset 429 `OTP_EMAIL_LIMIT`, login 401; lock 20 min → 10 tries ke baad 60 min | Fix karna chahiye: (a) lock IP+account (ya account lock sirf usi IP/device pe), ya progressive delay ki jagah hard lock; (b) lock ke dauraan tries se lock na badhe; (c) per-email code limit me password-reset ka alag, chhota per-IP hissa, taaki attacker victim ka reset na kha sake. Faisla owner ka | — |
+| DR-004 | Argon2 ek waqt me ek hash, 32 se zyada intezaar = 503 (`password.ts:9-38`; 0.1 CPU ki wajah se) + rate limit sirf per IP / IPv6 /64 (owner, 2026-10-25) | Rakhne ka asar: bina auth ~40 parallel galat logins (40 IPs, ya ek IPv6 /56 = 256 /64 buckets) se **saare** sign-in, sign-up verify aur reset 503 ("Too many sign-ins right now") ho jaate hain; asli user ka sahi password bhi. Render 0.1 CPU pe hash dheema, to ye aur sasta. Agar bug maana jaaye to P2 (availability) | E1: `scratchpad/m2/probe-m2d.mjs`: 40 burst → 6×503 aur asli user 503; 60 burst → 27×503 aur asli user 503 | Fix karna chahiye: unauthenticated hash work ka global budget (sab IPs ka), IPv6 ke liye /48 ka doosra coarse bucket `auth`/`otp` pe, aur queue me already-signed-in/known-device ko priority; ya pehle sasta check (lock/grant) phir hash. Faisla owner ka (0.1 CPU trade-off) | — |
+| DR-005 | `/auth/refresh` aur `/auth/logout` bhi `auth` class me: per IP 30 / 5 min (`backend/gateway/src/rate-limits.ts:18`, contracts) | Rakhne ka asar: Indian mobile CGNAT pe ek IPv4 ke peeche sau-sau log hote hain (code comment khud carrier NAT maanta hai). Har khuli app har ~10 min refresh karti hai, to ~60 active users ek IP pe hone se refresh 429 hone lagenge (auth fail-closed), aur users ke sessions toot sakte hain. Login/verify bhi isi bucket me | E1: auth 31st = 429 (TC-GW-022); static budgets | Fix karna chahiye: refresh ko alag class (per session/refresh-token family limit, IP ka bada budget), login/verify ko `auth` me rehne do. Faisla owner ka | — |
 
 ## 10. Recommended Fixing Order
 
-1. **QA-TOOL-001** (P3): akela, chhota fix; kisi aur pe nirbhar nahi. Baaki bugs aane pe order dobara banega.
+1. **QA-GW-001** (P2): sabse zyada live asar (Redis atke to har signed-in request latakti); kernel + gateway PR.
+2. **QA-KRN-001** (P3): QA-GW-001 jaisa hi "dependency away → 503" ka sawal; dono ek hi PR me ja sakte hain (gateway ka access-check failure handling).
+3. **QA-GW-002** (P4, owner decision): Phase 4 ke pehle `signed-in` route se pehle zaroor; ARCHITECTURE §6.6 ka faisla pehle.
+4. **QA-TOOL-001** (P3): akela chhota fix (`.prettierignore`), kabhi bhi.
 
 ## Change log
 
@@ -606,3 +693,5 @@ Har module ke baad (existing tests + `test/mutations.ts` ke survivors).
 | v0.1    | 2026-11-04 | Phase 1: report skeleton, overview, 97 features ki inventory, 248 test cases ka plan, baseline aur 10 KNOWN; Gate 1 pe ruka. |
 | v0.2    | 2026-11-04 | Gate 1 approved: Q-001…Q-004 pe recommendations maani; owner ki hidayat: adversarial testing + owner faislon ka review (`DR-*`, §9). M0 shuru. |
 | v0.3    | 2026-11-04 | M0 Baseline: 13 executed + 3 static, 15 PASS / 1 FAIL; npm test 1720/1720, verify 19 packages, gitleaks history saaf, npm audit sirf KNOWN-01..03. Naya bug QA-TOOL-001 (P3); Q-005 (build flake), PERF-OBS-01. |
+| v0.4    | 2026-11-04 | M1 Gateway: 34 executed + 3 static, 35 PASS / 2 FAIL / 1 NOT TESTED (M5 me); bugs QA-GW-001 (P2), QA-KRN-001 (P3), QA-GW-002 (P4); DR-001, Q-006; 12 live GETs; §5, §8, §10 bhare. |
+| v0.5    | 2026-11-04 | M2 Identity auth: 22 executed + 1 static, 23 PASS / 0 FAIL / 2 NOT TESTED (M5/M12 me); naya bug nahi; DR-002…DR-005 (HIBP fail-open, targeted lockout, hash-queue DoS, CGNAT pe refresh limit). |
