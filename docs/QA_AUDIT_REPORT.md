@@ -1,6 +1,6 @@
 # QA AUDIT REPORT — BQ
 
-> **Status:** v0.18 (2026-11-05). Audit base: `origin/prerelease` @ `ee7f46a` (`ee7f46ae7b2605d99f6b4497d26303aa109fb371`). Auditor: Claude Code (Opus 5.5, `claude-opus-5-5`). Ye report audit ki single source of truth hai; fixes alag se, ek-ek karke.
+> **Status:** v0.20 (2026-11-05). Audit base: `origin/prerelease` @ `ee7f46a` (`ee7f46ae7b2605d99f6b4497d26303aa109fb371`). Auditor: Claude Code (Opus 5.5, `claude-opus-5-5`). Ye report audit ki single source of truth hai; fixes alag se, ek-ek karke.
 
 ## 0. Audit state (har session ke aakhir me update)
 
@@ -11,13 +11,15 @@
   - Public report me security detail: **live pe exploitable khule findings redact** (class, impact, severity, `file:line`); poora repro sirf chat me, fix release ke baad report me. Baaki poori detail.
   - Failure injection: **alag throwaway containers** (pehle se downloaded images, `127.0.0.1`, doosre ports, `--rm`); saanjhe Mongo/Valkey/Mailpit kabhi band nahi.
   - **Owner ki do aur hidayatein (2026-11-04):** (1) har feature ko jitna ho sake todne ki koshish (adversarial; phir bhi sirf local, burst ≤ 100, production off-limits). (2) Owner ke "acceptable" faislon pe bhi sawal uthao: rakhne se kya hoga, fix karna chahiye ya nahi. Ye §9 me `DR-<NNN>` (decision review) rows: bug count me nahi, faisla owner ka. CLAUDE.md ke frozen niyam (mobile messaging, app ki bhasha) is se bahar (CLAUDE.md ki precedence).
-- **Ho chuke modules:** M0–M13 (2026-11-05) | **Chalu:** koi nahi | **Agla:** M14 CI/CD, infra aur tooling (static + local scripts)
+- **Ho chuke modules:** M0–M15, sab (2026-11-05) | **Chalu:** koi nahi | **Agla:** `final` (Phase 6: §5–§10 poore, counts ki jaanch, final message)
+- **Session 2, M15 (2026-11-05):** sirf static + scratch script `scratchpad/m15/env-vs-config.ts` (config keys ke naam, values nahi) + contracts `check`.
+- **Session 2, M14 (2026-11-05):** sirf static + ek scratch shell script (`scratchpad/m14/branch-flow.sh`) + `docker ps`; GitHub pe kuch nahi bheja, koi server nahi.
 - **Session 2, M13 (2026-11-05):** seller dev + delivery `vite preview` Terminal panel me (M12 jaisa), backend/containers nahi; dono band. Built-in pane service worker register nahi karta (TC-APPS-002 ka SW hissa BLOCKED).
 - **Session 2, M12 (2026-11-04):** owner ke kehne pe admin dev server **Terminal panel** me (`npm run dev --workspace admin`, 3003; launch.json me admin entry nahi, use badla nahi) → QA bundle 8080 (run `m12a`), browser `preview_start {url}` se. Invitation `scratchpad/m11/invite.ts`, server idle `scratchpad/m12/idle-server.mjs` (QA DB me `lastSeenAt` khiska ke). Module ke baad: terminal tab band, bundle band, `bq_qa_m12a_*` drop, containers stop. Admin E2E: 9 pass / 9 skip.
 - **Session 2, M11 (2026-11-04):** QA bundle `scratchpad/m11/qa-backend.ts` ab **port 8080** pe laptop ke public origin secret (`frontend/customer/.env.example` ka `not-a-secret-…`) ke saath, taaki launch.json ka `customer` dev server (3001) bina `.env` padhe usi pe proxy kare (M12 me admin 3003 bhi isi tarah); throwaway Valkey 6390 + Mailpit 8035, fake OAuth 8196, DBs `bq_qa_m11a_*`; helpers `code.mjs` (Mailpit code / TOTP), `device2.mjs` (doosra device), `invite.ts` (Master invitation, QA DBs). Module ke baad sab band: bundle, dev server, `bq_qa_m11a_*` drop, containers stop; scratch secrets mitaye. Customer E2E (`npm run e2e --workspace customer`) chala: 24 pass / 30 skip. Live GETs: abhi bhi 12/15. **M12 me zaroor:** admin invitation accept (`invite.ts`), mandatory authenticator, idle (TC-FE-012 + Q-009), QA-FE-008/009 admin me bhi, admin `vercel.json` (`noindex`, SPA fallback, headers T6.6).
 - **Session 2 (2026-11-04, M10):** sirf playgrounds (components 5184, forms 5185, auth-ui 5186, app-shell 5182; `.claude/launch.json` me styles/icons ke playground nahi, unke checks baaki playgrounds ke axe se) aur ek scratch TCP server (127.0.0.1:8299, jawab nahi deta; band). Koi container ya QA backend nahi chalaya, koi DB nahi bani. Built-in browser pane poore waqt **hidden** raha: screenshots nahi chale aur exit animations rukti hain (dialog band hona/focus wapas aana unit tests pe chhoda); saare checks DOM/JS/axe se. Sab playgrounds band. **M11 me zaroor:** QA-FE-004 ka E1 (QA bundle band karke "Sign out"), QA-FE-001 customer ke root ErrorBoundary me, TC-FE-014 social buttons (fake OAuth), `vercel.json` CSP me `THEME_SCRIPT_HASH`, Q-010 agar slow refresh simulate ho sake. M12 me: TC-FE-012 idle (do tabs, `Date.now` khiska ke) + Q-009.
 - **Session 1 band (2026-11-04, owner ke kehne pe; context 83%):** throwaway containers band, saari `bq_qa_*` DBs drop, koi QA backend nahi chal raha. Agla session `/qa-audit` se M10 (frontend packages, built-in browser + playgrounds) se shuru kare. Session 1 ke probe scripts (`qa-backend.ts`, `lib.mjs`, `probe-*.mjs`) us session ke scratchpad me the: agla session unhe dobara banayega (repo me nahi, skill §3.1). Live GETs: 12/15 use ho chuke (Q-001). P1 QA-ID-001 ka poora repro owner ke paas chat me (Q-003).
-- **M15 ke liye note (M8):** ARCHITECTURE §13 (line ~532) CI me "dependency-cruiser, no-hardcoded-geo lint, no role-name comparisons" kehta hai; `ci.yml` me ye nahi, aur repo me dependency-cruiser config nahi (RULES §4.2 bhi ise naam se kehta hai).
+- **M15 ke liye note (M8, ab QA-DOC-001 bana):** ARCHITECTURE §13 (line ~532) CI me "dependency-cruiser, no-hardcoded-geo lint, no role-name comparisons" kehta hai; `ci.yml` me ye nahi, aur repo me dependency-cruiser config nahi (RULES §4.2 bhi ise naam se kehta hai).
 - **QA infra (local, is session ka):** throwaway containers `bq-qa-valkey` (127.0.0.1:6390) aur `bq-qa-mailpit` (127.0.0.1:8035, API `/api/v1`), QA bundle `scratchpad/m1/qa-backend.ts` (gateway 8190, fake OAuth 8196, saare 11 apps `localhost:3201–3211`; har start pe nayi field keys, isliye har run ki DBs alag `bq_qa_<run>_*`). Har module ke baad bundle band aur us run ki `bq_qa_*` DBs drop (ab tak m1a, m5a, m6a, m7a, m7b, m8a, m8b, m8c; profiler sirf QA DBs pe). M7 se `qa-backend.ts` run ki keys `scratchpad/m1/keys-<run>.json` me rakhta hai (restart test) aur `QA_EXTRA_ENV` se extra settings leta hai. Session khatam pe: `docker stop bq-qa-valkey bq-qa-mailpit` (`--rm`). Live GETs: 12/15 use hue (M1).
 - **Base SHA:** skill ka snapshot `f271b31` tha; `origin/prerelease` ab `ee7f46a` hai. Beech me sirf `ca61487` (`/qa-audit` skill) + merge `ee7f46a` (PR #53): koi code nahi badla, kisi module ko dobara nahi dekhna. Worktree `prerelease` @ `ee7f46a`, `git status` saaf (report ke alawa). **Session 2 start:** `origin/prerelease` abhi bhi `ee7f46a` (kuch naya nahi); `feat/qa-audit` pe owner ka `41de212` ("Format: Lint", sirf report ki prettier formatting).
 - **Khule blockers:** koi nahi.
@@ -55,20 +57,20 @@
 
 | Metric                             | Count                                         |
 | ---------------------------------- | --------------------------------------------- |
-| Modules | 16 (M0–M15); ho chuke: 14 (M0–M13) |
+| Modules | 16 (M0–M15); ho chuke: 16 (sab) |
 | Features (inventory, §3)           | 97                                            |
 | Planned test cases | 249 (planned-executed 224, planned-static 25) |
-| Executed | 211 |
-| Static-only | 16 |
-| PASS | 211 |
-| FAIL | 16 |
+| Executed | 217 |
+| Static-only | 27 |
+| PASS | 226 |
+| FAIL | 18 |
 | BLOCKED                            | 0                                             |
-| NOT TESTED | 19 |
+| NOT TESTED | 0 |
 | NEEDS CLARIFICATION                | 0                                             |
 | NOT IMPLEMENTED (roadmap) | 10 (§7 list); 2 test cases (TC-CUS-022, TC-ADM-012; T6.6) |
-| KNOWN                              | 10 issues (§2a); 1 test case (TC-ID-066)      |
-| Bugs P0 / P1 / P2 / P3 / P4 | 0 / 1 / 4 / 10 / 4 |
-| Confirmed (E1–E3) / Suspected (E4) | 19 / 0 |
+| KNOWN | 10 issues (§2a); 3 test cases (TC-ID-066, TC-CI-007, TC-CI-009) |
+| Bugs P0 / P1 / P2 / P3 / P4 | 0 / 1 / 4 / 11 / 6 |
+| Confirmed (E1–E3) / Suspected (E4) | 22 / 0 |
 | Decision reviews (DR, §9) | 11 (+ Q-007) |
 
 ## 2a. Baseline: checks aur known issues
@@ -200,11 +202,11 @@ Abhi sab `NOT TESTED` (Gate 1). Status ke saath `Executed`/`Static` module ke ba
 | M12 Admin | Sign-in + mandatory authenticator, invitation, forgot password, dashboard, account, idle sign-out | T6.1, RULES §7.1 | FAIL | Executed (E1) | QA-FE-010, QA-FE-009, QA-FE-008 | invitation (Master → email → admin me code + password → "Invitation accepted"), enroll se pehle session nahi, zaroori authenticator → codes → dashboard; "Turn off" pe role ka 409 sandesh (DR-011); idle 28 min sawal / 30 min sign-out + server ka idle (31 min → 401); do tabs me idle tab ka sandesh gayab (QA-FE-010); server down pe "Loading" atka (QA-FE-009, admin me bhi) |
 | M12 Admin | `noindex`, SPA fallback, responsive/theme/axe/keyboard, E2E suite | T6.6 | FAIL | Executed + Static | QA-ADM-001 | `<meta robots noindex, nofollow>` + `X-Robots-Tag` (vercel.json), SPA fallback (`filesystem` → `/index.html`) static; 8 pages axe 0 (4 themes); 360 px pe header 3 px bahar (QA-ADM-001), 375/768/1280 theek; account menu keyboard; security headers NOT IMPLEMENTED (T6.6); PASS (Executed): 9 passed, 9 skipped (bhaari tests sirf chromium-1280-light pe, design), 0 fail, 224 s; teardown ne run 82390d49 ki DBs hatai |
 | M13 Shell apps (9) | Build, start, 404, `vercel.json`, dev proxy secret, no fake features | T0.2 | PASS | Executed + Static | | 9 apps ek hi template (seller se diff: 4 me sirf naam, delivery me PWA); tests 9 × 7 = 63 pass; seller + delivery taaza build; seller dev: home + 404 + axe 0 (light/dark) + 360 px theek; delivery preview: manifest sahi, service worker pane me register nahi hota (BLOCKED); proxy + secret + `X-Robots-Tag` saare 9 me; security headers NOT IMPLEMENTED (T6.6); Q-013, Q-014 |
-| M14 CI/CD          | `ci.yml` (branch flow, gitleaks pin, permissions, pinning, untrusted input)                       | T0.6, T0.7             | NOT TESTED |                   |                       |                                                                                                                                                                          |
-| M14 CI/CD          | `release.yml`, `wake.yml`                                                                         | T0.6, T2.7             | NOT TESTED |                   |                       |                                                                                                                                                                          |
-| M14 Infra          | `scripts/render/*.sh`, `infra/docker-compose.yml`                                                 | T0.8, T11.4            | NOT TESTED |                   |                       |                                                                                                                                                                          |
-| M14 Tooling        | Package CLI, `update-deps`, mutation runner, generator templates                                  | T0.1                   | NOT TESTED |                   |                       |                                                                                                                                                                          |
-| M15 Docs           | HANDOFF/TASKS/README claims, `.env.example` vs `configZod`, generated vs catalogue                | B, RULES §8            | NOT TESTED |                   |                       |                                                                                                                                                                          |
+| M14 CI/CD | `ci.yml` (branch flow, gitleaks pin, permissions, pinning, untrusted input) | T0.6, T0.7 | FAIL | Static + E2 | QA-CI-001 | branch-flow `case` 13 pairs sahi, par sirf naam dekhta (fork ki `release` branch bhi pass, QA-CI-001); gitleaks 8.30.1 + SHA-256 `--check --strict`; `permissions: contents: read`; sirf `pull_request`, branch naam env se; actions tags pe (SHA nahi, Q-015) |
+| M14 CI/CD | `release.yml`, `wake.yml` | T0.6, T2.7 | PASS | Static | | release: dono jobs sirf `refs/heads/release`, `permissions: {}` + per-job, `id-token: write` sirf publish job, publish job package code nahi chalata, `publish-tarballs.mjs` har entry regex se; wake: `permissions: {}`, URL `vars` + env se (KNOWN-04 schedule) |
+| M14 Infra | `scripts/render/*.sh`, `infra/docker-compose.yml` | T0.8, T11.4 | PASS | Executed + Static | | Render: `set -eu`, npm 12.2.0 pinned, `exec node` (SIGTERM seedha app ko); compose: saare ports `127.0.0.1` (chalte containers me bhi), test-only flags (`enableTestCommands`) sirf laptop/CI, `GLIBC_TUNABLES` dono mongo me (KNOWN-08) |
+| M14 Tooling | Package CLI, `update-deps`, mutation runner, generator templates | T0.1 | PASS | Static + Executed (M0 `test:scripts` 123) | | CLI har npm call pe `--registry ctx.registry`, tests me fake registry (`BEAUTINIQUE_REGISTRY`, `registry.example.test`), publish confirm default "no"; `update-deps` fail/Ctrl-C pe saare `package.json` + lockfile wapas (test); mutation temp copy + `node_modules` junction pehle hatata; templates: proxy secret, backend axios, `fetch` sirf tests. Generator `vercel.json` nahi banata (Q-015) |
+| M15 Docs | HANDOFF/TASKS/README claims, `.env.example` vs `configZod`, generated vs catalogue | B, RULES §8 | FAIL | Executed + Static | QA-DOC-001, QA-DOC-002 | `.env.example` (5 deployables + bundle) vs 54 config keys: koi anjaan key set nahi, sirf test-only `IDENTITY__OAUTH_PROVIDERS_URL` bahar (sahi); contracts `generated/ is up to date`; CLAUDE.md ke 25 commands + playground ports sahi; README test counts sahi; progress 14% dono jagah; nahi hue CI guards (QA-DOC-001), purana status/inventory (QA-DOC-002) |
 
 ### 3.1 Test plan (Gate 1)
 
@@ -514,30 +516,30 @@ Plan: **E** = planned-executed (local stack, HTTP, browser, scratch script), **S
 
 | TC          | Case                                                                    | Type  | Plan |
 | ----------- | ----------------------------------------------------------------------- | ----- | ---- |
-| TC-CI-001   | Branch-flow check: non-`release` branch se `main` PR pass ho sakta hai? | Sec   | S    |
-| TC-CI-002   | gitleaks pinned + checksum                                              | Sec   | S    |
-| TC-CI-003   | Least-privilege `permissions:`                                          | Sec   | S    |
-| TC-CI-004   | Action pinning (SHA vs tag)                                             | Sec   | S    |
-| TC-CI-005   | `pull_request_target`, `run:` me untrusted input                        | Sec   | S    |
-| TC-CI-006   | Logs me secrets                                                         | Sec   | S    |
-| TC-CI-007   | Mongo kernel workaround (KNOWN-08)                                      | R     | S    |
-| TC-CI-008   | `release.yml`: OIDC, tag/commit checks, sirf `release`                  | Sec   | S    |
-| TC-CI-009   | `wake.yml` (KNOWN-04)                                                   | R     | S    |
-| TC-INF-001  | `scripts/render/*.sh`                                                   | Sec/R | S    |
-| TC-INF-002  | `docker-compose.yml`: `127.0.0.1` binding, test-only flags              | Sec   | E    |
-| TC-TOOL-001 | Package CLI publish safety, tests me fake registry                      | Sec   | S    |
-| TC-TOOL-002 | `update-deps` rollback                                                  | R     | S    |
-| TC-TOOL-003 | Mutation runner asli files nahi likhta                                  | R     | S    |
-| TC-TOOL-004 | Generator templates RULES maante (ESLint, axios, origin secret header)  | F     | E    |
+| TC-CI-001 | Branch-flow check: non-`release` branch se `main` PR pass ho sakta hai? | Sec | S | FAIL (Static E3 + E2 case logic): QA-CI-001. Apne repo ke naam: `main←prerelease`, `main←feat/x`, `main←Release`, `release←feat/x` FAIL (sahi); `main←release`, `release←prerelease`, `release←hotfix/*` PASS. Fork ki `release` branch bhi PASS |
+| TC-CI-002 | gitleaks pinned + checksum | Sec | S | PASS (Static): `GITLEAKS_VERSION` 8.30.1 + `GITLEAKS_SHA256`, `sha256sum --check --strict`, koi third-party action/token nahi, `--redact`, poori history (M0 me wahi version local) |
+| TC-CI-003 | Least-privilege `permissions:` | Sec | S | PASS (Static): ci `contents: read`; release `{}` top + build `contents: read`, publish `contents: read` + `id-token: write`; wake `{}` |
+| TC-CI-004 | Action pinning (SHA vs tag) | Sec | S | PASS (Static): sirf GitHub ke apne actions (`checkout@v7`, `setup-node@v7`, `cache@v6`, `upload-artifact@v7`, `download-artifact@v8`) major tag pe; SHA pin hardening = Q-015 |
+| TC-CI-005 | `pull_request_target`, `run:` me untrusted input | Sec | S | PASS (Static): sirf `pull_request` (fork PR ko secrets nahi); `head_ref`/`base_ref` env se, `run:` me `${{ github.event.* }}` nahi; `persist-credentials: false` |
+| TC-CI-006 | Logs me secrets | Sec | S | PASS (Static): ci me koi secret nahi; gitleaks `--redact`; release OIDC (token store nahi); wake sirf `vars.BQ_RENDER_URL`. E2E traces artifact me sirf per-run random test values |
+| TC-CI-007 | Mongo kernel workaround (KNOWN-08) | R | S | KNOWN (KNOWN-08): `GLIBC_TUNABLES=glibc.pthread.rseq=1` dono mongo services me, CI kernel `uname -r` print karta; aaj bhi zaroori |
+| TC-CI-008 | `release.yml`: OIDC, tag/commit checks, sirf `release` | Sec | S | PASS (Static): `if: github.ref == refs/heads/release` dono jobs, `workflow_dispatch` hi; build tags is commit pe jaanchta (`npm run publish -- --ci`), publish sirf tarballs + `publish-tarballs.mjs` (name/version/tag/file regex, file maujood), `environment: npm`, cache kabhi nahi |
+| TC-CI-009 | `wake.yml` (KNOWN-04) | R | S | KNOWN (KNOWN-04, schedule chhoot-ta); code safe: `permissions: {}`, URL env se quoted, `--max-time 90` + retry 2 min |
+| TC-INF-001 | `scripts/render/*.sh` | Sec/R | S | PASS (Static): `set -eu`, `cd` script ke hisaab se, npm 12.2.0 `.npm12` me (EROFS), `npm ci`, `--for bundle`; start `exec node … --max-old-space-size=300` (graceful stop) |
+| TC-INF-002 | `docker-compose.yml`: `127.0.0.1` binding, test-only flags | Sec | E | PASS (Executed): `docker ps`: 27017, 6379, 8025, 1025 sirf `127.0.0.1`; mutation profile 27018/6380 bhi `127.0.0.1`; `enableTestCommands=1` sirf laptop/CI (live pe Docker nahi) |
+| TC-TOOL-001 | Package CLI publish safety, tests me fake registry | Sec | S | PASS (Static + M0 `test:scripts`): har `npm whoami/login/logout/trust/publish` pe `--registry ctx.registry`; tests `BEAUTINIQUE_REGISTRY` = local fake ya `registry.example.test`; confirm `default: false` |
+| TC-TOOL-002 | `update-deps` rollback | R | S | PASS (Static + test): snapshot (har `package.json` + `package-lock.json`), install fail ya SIGINT pe `restore()`; test "puts every file back when npm install number 1/2 fails" |
+| TC-TOOL-003 | Mutation runner asli files nahi likhta | R | S | PASS (Static): `mkdtemp(tmpdir, bq-mutation-)` copy, configs + e2e stand-ins copy, `node_modules` junction aur hatate waqt junction pehle (asli `node_modules` tak delete nahi) |
+| TC-TOOL-004 | Generator templates RULES maante (ESLint, axios, origin secret header) | F | E | PASS (Executed M0 `test:scripts` create tests + Static): app template proxy pe `x-origin-secret`, backend template `axios`, `fetch` sirf template ke tests me; `vercel.json` template nahi (Q-015) |
 
 **M15 Docs vs code (`DOC`, 4)**
 
 | TC         | Case                                                                                                      | Type | Plan |
 | ---------- | --------------------------------------------------------------------------------------------------------- | ---- | ---- |
-| TC-DOC-001 | HANDOFF, TASKS, READMEs ke claims (commands, ports, keys, test counts, "verified")                        | Doc  | E    |
-| TC-DOC-002 | `.env.example` keys vs har deployable ka `configZod`                                                      | Doc  | E    |
-| TC-DOC-003 | `generated/` vs catalogue                                                                                 | Doc  | E    |
-| TC-DOC-004 | CLAUDE.md/README commands aur ports chalte hain; stack versions (jaise React Router 7 vs installed 8.5.0) | Doc  | E    |
+| TC-DOC-001 | HANDOFF, TASKS, READMEs ke claims (commands, ports, keys, test counts, "verified") | Doc | E | FAIL (Executed + Static): QA-DOC-001 (dependency-cruiser / no-hardcoded-geo / role-name ESLint ke daave), QA-DOC-002 (TASKS T6.3, CLAUDE.md app list). PASS: README test counts (components 109, forms 16 = M10 run), HANDOFF §1 aur TASKS §P dono 14%, ports/commands |
+| TC-DOC-002 | `.env.example` keys vs har deployable ka `configZod` | Doc | E | PASS (Executed, E2 script): gateway 13, identity 21, notify 14, core 6 keys; har example sirf jaani keys set karta (boot nahi tootega); bundle example me `*_PORT`/`*_URL` nahi (bundle khud jodta); `IDENTITY__OAUTH_PROVIDERS_URL` jaan-boojh ke nahi ("Tests and E2E only … Never set live") |
+| TC-DOC-003 | `generated/` vs catalogue | Doc | E | PASS (Executed): `npm run check --workspace @beautinique/shared-contracts` → "generated/ is up to date" (M9 ke baad dobara) |
+| TC-DOC-004 | CLAUDE.md/README commands aur ports chalte hain; stack versions (jaise React Router 7 vs installed 8.5.0) | Doc | E | PASS (Executed): CLAUDE.md ki 25 root scripts maujood, playgrounds 5180–5186 configs se mel; installed react-router 8.5.0, react 19.3.1, vite 8.3.5, typescript 6.0.3 (pinned), zod 4.6.7, axios 1.21.0; ARCHITECTURE "React Router 8" sahi, TASKS T6.3 "React Router 7" purana = QA-DOC-002 |
 
 ## 4. Bug Report
 
@@ -811,6 +813,24 @@ Plan: **E** = planned-executed (local stack, HTTP, browser, scratch script), **S
 **Regression test to add:** Playwright 360 project: `scrollWidth <= clientWidth` har page pe (admin + customer).
 **Owner decision needed:** Nahi
 
+### [QA-CI-001] The branch-flow check trusts the branch name only, so a fork's branch named "release" passes into main
+
+**Module:** M14 (`.github/workflows/ci.yml`) | **Feature:** "Check the branch flow" | **Task/Doc:** T0.6; CLAUDE.md + RULES §2 (`main` sirf `release` se, `release` sirf `prerelease`/`hotfix/*` se; "CI ye flow check karta hai")
+**Severity:** P3 (process control kamzor: merge ke liye write access phir bhi chahiye, par CI ka green check galat bharosa deta) | **Priority:** Low | **Status:** Open
+**Testing Type:** Security (CI) | **Evidence level:** E3 + E2 (case logic) | **Reproducibility:** Always (fork se) | **Environment:** static @ `ee7f46a`; case statement scratch shell me
+**Description:** Check `"$BASE:$HEAD"` ko `case` me milata hai, jahan `HEAD = github.head_ref`. Fork se PR me `head_ref` fork ki apni branch ka naam hota hai, isliye kisi ke fork ki `release` (ya `hotfix/x`) branch se `main` (ya `release`) me PR "allowed" hai. Repo public hai, aur approval zaroori nahi (CLAUDE.md: sirf CI `check` green), to galti se aisa PR merge ho sakta hai.
+**Steps to Reproduce:** Fork banao, usme `release` branch, us se `Nageshwar1997/Beautinique:main` me PR: "Check the branch flow" pass. (Audit me nahi kiya: GitHub pe kuch nahi bheja.) Local: `scratchpad/m14/branch-flow.sh` ka `main:release` PASS.
+**Expected Result:** Sirf isi repo ki `release` branch se `main` (RULES §2).
+**Actual Result:** Check sirf naam dekhta hai; repo ki pehchaan nahi.
+**Evidence:** `.github/workflows/ci.yml:24-40`; scratch run: 13 pairs, naamon ke liye logic sahi.
+**Root Cause:** `.github/workflows/ci.yml:26-31` me `github.event.pull_request.head.repo.full_name` ka check nahi.
+**Affected Files:** `.github/workflows/ci.yml:24-40`
+**Recommended Fix:** `HEAD_REPO: ${{ github.event.pull_request.head.repo.full_name }}` env se, aur `main`/`release` base pe `HEAD_REPO != github.repository` ho to fail; saath me GitHub ki branch protection (sirf owner merge).
+**Fix route (RULES §2):** chhota fix (1 file) `prerelease` pe.
+**Regression Risk:** Low.
+**Regression test to add:** `test:scripts` me workflow ka case + repo check ek chhoti script me nikaal ke test, ya CI me ek dry-run step.
+**Owner decision needed:** Nahi
+
 ### [QA-GW-002] Session revocations are lost when Redis is wiped; ARCHITECTURE says the gateway falls back to MongoDB, the code does not
 
 **Module:** M1 Gateway / M3 sessions | **Feature:** revocation after Redis wipe | **Task/Doc:** T3.2, T1.3; ARCHITECTURE §6.6 (line 213: "Jab tak recovery poori na ho, gateway revoke aur freeze MongoDB `sessions` se check karta hai ... source of truth hamesha MongoDB"), RULES §4.12 ("Redis kisi cheez ka source of truth nahi")
@@ -846,6 +866,42 @@ Plan: **E** = planned-executed (local stack, HTTP, browser, scratch script), **S
 **Regression Risk:** Low.
 **Regression test to add:** `test:scripts` me: fake bundle jo teardown ke baad likhe → DB na bache.
 **Owner decision needed:** Nahi
+
+### [QA-DOC-001] Docs say CI blocks cross-module imports, hard-coded geo data and role-name comparisons, but no such check exists
+
+**Module:** M15 (docs vs code) | **Feature:** CI/lint guards | **Task/Doc:** ARCHITECTURE §4 ("CI me dependency-cruiser ise rokta hai"), §7 (line ~310: "ESLint role-name comparison pe rok lagata hai"), §13 (line ~532: `ci.yml`: "dependency-cruiser, no-hardcoded-geo lint, no role-name comparisons"); RULES §4 ("(no-hardcoded-geo lint)", "Module boundaries … (dependency-cruiser)")
+**Severity:** P4 (aaj koi bug nahi: core me sirf ek module `platform`, roles DB se; par developer maanega ki guard hai) | **Priority:** Low | **Status:** Open
+**Testing Type:** Docs | **Evidence level:** E3 | **Reproducibility:** Always | **Environment:** static @ `ee7f46a`
+**Description:** Repo me dependency-cruiser ka config ya package nahi (`git ls-files` me koi `cruiser` nahi), `ci.yml` me aisa koi step nahi, aur `configs/eslint-config.js` me na geo literals ka rule, na role-name comparison ka. ESLint sirf `mongodb`/`zod` imports, `.watch(`, `fetch`/`node:http`, `Promise.all` in transaction aur `process.env` rokta hai (yeh sab sahi kaam karte, M0 lint PASS).
+**Steps to Reproduce:** `git ls-files | grep -i cruiser` (khaali); `grep -n "dependency-cruiser\|geo\|role" .github/workflows/ci.yml configs/eslint-config.js` (khaali).
+**Expected Result:** Ya to guards ho (ARCHITECTURE/RULES ke mutabik), ya docs saaf likhein "abhi nahi, Phase 4 (T4.1) me".
+**Actual Result:** Docs present tense me guard batate; code me nahi.
+**Evidence:** M8 note (§0) + M15 grep.
+**Root Cause:** Planned guards docs me "ho gaye" ki tarah likhe gaye.
+**Affected Files:** `docs/ARCHITECTURE.md` (§4 line ~68, §7 line ~310, §13 line ~532), `docs/RULES.md` (§4 lines ~41, ~50)
+**Recommended Fix:** Docs me "abhi nahi, T… me" likho; ya core ke doosre module se pehle dependency-cruiser + do ESLint rules (geo literals, role names) jodo.
+**Fix route (RULES §2):** docs ka chhota fix (`prerelease`), ya guards ka apna `feat/` PR (T4.1 se pehle).
+**Regression Risk:** None (docs).
+**Regression test to add:** Guards bane to ek "bad import" fixture jo lint fail kare.
+**Owner decision needed:** Haan: docs sudhaarein ya guards abhi banayein
+
+### [QA-DOC-002] TASKS still lists the customer SSR app as not done (and on React Router 7), and CLAUDE.md lists only two apps
+
+**Module:** M15 (docs vs code) | **Feature:** status/inventory | **Task/Doc:** TASKS T6.3, CLAUDE.md "Repo ka naksha" (line 86)
+**Severity:** P4 (galat status: progress % thoda kam, aur naya developer/AI kaam dobara kar sakta) | **Priority:** Low | **Status:** Open
+**Testing Type:** Docs | **Evidence level:** E3 | **Reproducibility:** Always | **Environment:** static @ `ee7f46a`
+**Description:** (1) TASKS T6.3 "`[ ]` Customer app → React Router 7 framework mode (SSR)", jabki customer React Router 8.5 framework mode me SSR + prerender ke saath bana aur live hai (ARCHITECTURE §9.2/§13: "React Router 8 framework mode", aur v-log "RR7 likha reh gaya tha"). (2) CLAUDE.md: "`frontend/<app>` … (abhi: customer, admin; …)" jabki `frontend/` me 11 apps hain (9 shells M13 me dekhe).
+**Steps to Reproduce:** `grep -n "T6.3" docs/TASKS.md`; `ls frontend/`; CLAUDE.md line 86.
+**Expected Result:** T6.3 `[x]` (ya `[~]` jo bacha ho) aur "React Router 8"; CLAUDE.md me shells ka zikr.
+**Actual Result:** Upar jaisa.
+**Evidence:** M15 grep; `node_modules/react-router` 8.5.0; `frontend/customer/react-router.config.ts` (`ssr: true`, prerender).
+**Root Cause:** Status update chhoot gaya (TASKS §P ka niyam: checkbox badle to % bhi).
+**Affected Files:** `docs/TASKS.md` (T6.3, §P), `CLAUDE.md:86` (aur `AGENTS.md` agar wahi list ho)
+**Recommended Fix:** Owner tay kare T6.3 me kya bacha hai; phir checkbox + §P table/% + HANDOFF §1 ek hi commit me (CLAUDE.md niyam); CLAUDE.md line me "aur 9 shells".
+**Fix route (RULES §2):** docs ka chhota fix.
+**Regression Risk:** None.
+**Regression test to add:** Nahi.
+**Owner decision needed:** Haan: T6.3 poora maanein? (progress % badlega)
 
 ### [QA-FE-006] API calls from the apps have no timeout: a hung gateway leaves the page waiting with no end
 
@@ -894,6 +950,7 @@ Plan: **E** = planned-executed (local stack, HTTP, browser, scratch script), **S
 | QA-FE-004 | A07 / ASVS V3.3.1 (logout invalidates the session) | P2 | Haan (customer + admin): jab logout call fail ho; tareeka redacted (chat me) | UI "signed out", server session + HttpOnly cookies zinda (customer 30 din) |
 | QA-FE-008 | ASVS V1 / WCAG 2.4.3 + 4.1.3 (a11y, security nahi) | P2 | Haan (customer + admin auth flows) | Screen reader user ko step badalna aur "code bheja" sunai nahi deta |
 | QA-FE-010 | ASVS V3.3 (session termination ka UX; control kaam karta) | P3 | Haan (admin, idle sign-out) | Insaan ko wajah nahi dikhti; session band hota |
+| QA-CI-001 | A08 Software and Data Integrity Failures / CI gate | P3 | Haan (public repo, fork PR) | Branch flow ka check naam se dhoka kha sakta; merge phir bhi write access se |
 | Q-011 | A05 Security Misconfiguration / ASVS V14.4 (HTTP security headers) | NOT IMPLEMENTED (T6.6) | Haan: live sign-in/account pages pe `frame-ancestors`/`X-Frame-Options`, CSP, nosniff, Referrer-Policy nahi | Clickjacking (sign-in, "Turn off" authenticator, sign-out buttons iframe me) |
 | QA-GW-002  | A07 Identification and Authentication Failures / ASVS V3.3 (session termination)                   | P4 (latent) | Nahi (aaj har signed-in route identity ka; identity DB se rokti hai) | Pehla non-identity `signed-in` route aate hi P1                     |
 | QA-GW-001  | A04 Insecure Design (availability) / ASVS V1.11                                                    | P2          | Haan, agar Render Key Value atke (band nahi)                         | fail-closed hi rehta hai, data leak nahi                            |
@@ -1044,6 +1101,13 @@ Har module ke baad (existing tests + `test/mutations.ts` ke survivors).
 | Delivery SW `/api` navigation ko network pe chhode | Q-013 (T8.6 ke saath) | unit (generated sw config) / Playwright |
 | 404 page ka title ("Page not found") | aaj title app ka naam hi rehta | app test |
 
+**M15 Docs vs code:**
+
+| Scenario | Kyun zaroori | Test type |
+| --- | --- | --- |
+| `.env.example` keys = `configZod` keys (unknown/missing) | M15 me scratch script se kiya; CI me nahi | `test:scripts` / har deployable ka unit test |
+| Docs me bataye CI guards sach me chalte | QA-DOC-001 | CI step / lint fixture |
+
 ## 9. Questions and Unverified Assumptions
 
 | Q-ID   | Sawal                                                                                                                                                                                                                                                                                                                                                                                                                                                                            | Kyun zaroori                                                                                                                                                                                                                                                                                                                                                                                                                                                   | Evidence                                                                                                                                                                                                                                      | Claude ki recommendation                                                                                                                                                                                                                                                                                                             | Owner ka jawab                    |
@@ -1073,6 +1137,7 @@ Har module ke baad (existing tests + `test/mutations.ts` ke survivors).
 | DR-011 | Internal apps (admin) me Security page "Turn off" authenticator dikhata hai, jabki role ki wajah se server hamesha 409 deta (auth-ui README: design). Dialog ka text "Signing in will ask for your password only" admin me galat hai | Rakhne ka asar: har internal user ko ek aisa button jo kabhi kaam nahi karta, aur galat vaada; nuksan nahi (server rokta) | E1: admin, `AUTHENTICATOR_REQUIRED_BY_ROLE` "Your Catalog QC & Listing Approver role in the admin app needs an authenticator, so it can't be turned off." | Jahan `SESSION_POLICIES[app]` MFA maange ya `/iam/me` me MFA-role ho, "Turn off" chhupao ya disable + saaf hint; dialog text app ke hisaab se | |
 | Q-013 | Delivery PWA (T8.6 se pehle, aaj shell): `vite-plugin-pwa` default `generateSW` ka `NavigationRoute(createHandlerBoundToURL("index.html"))` **bina denylist** (`frontend/delivery/dist/sw.js`, `vite.config.ts` me `workbox` option nahi). SW install hone ke baad har top-level navigation, `/api/...` bhi, `index.html` se jawab paayegi | Aaj asar nahi (delivery ka koi navigation API route nahi; OAuth sirf customer), par T8.6 me koi download/navigation link `/api` pe gaya to SW SPA dikhayega aur server tak request nahi jaayegi | E3 static (dist/sw.js); browser me SW BLOCKED (pane) | T8.6 me `workbox.navigateFallbackDenylist: [/^\/api\//]` aur ek test; ARCHITECTURE §9.2 ke "run sheet NetworkFirst" ke saath | |
 | Q-014 | 9 shell apps live hain (TASKS M6: "saare 11 apps Vercel pe") aur public ko "The app is ready. Add pages in src/routes.tsx." dikhate hain; delivery ka manifest "Run sheets, deliveries and payments …" kehta hai jo abhi nahi bana | "Production-grade" niyam: koi bhi visitor developer ka sandesh dekhta; install prompt nakli vaada karta (noindex hai, isliye search me nahi) | Executed (seller dev, delivery preview); `frontend/*/src/pages/home.tsx`, `frontend/delivery/vite.config.ts` | Generator template me saada "Coming soon" page (app ka naam + ek line), manifest description bhi waisa; owner ki pasand | |
+| Q-015 | CI/tooling hardening: (1) GitHub actions major tag pe, SHA pe nahi (`checkout@v7`, `setup-node@v7`, `cache@v6`, `upload-artifact@v7`, `download-artifact@v8`); (2) `npm run create:app` `vercel.json` (aur `vercel-config.test.ts`) nahi banata, jabki saare 11 apps me hai (haath se, T6.6) | (1) Tag move hone pe workflow badal sakta (first-party, risk kam; release job `id-token: write` wala bhi tag pe); (2) agla app bina `/api` route, origin secret transform aur `noindex` ke ban sakta | Static: `.github/workflows/*.yml`, `scripts/packages/lib/create/*-templates.ts` (koi `vercel` match nahi) | (1) Kam se kam `release.yml` ke actions SHA pe + Dependabot/renovate se update; (2) T6.6 ke saath template me `vercel.json` + test | |
 
 ## 10. Recommended Fixing Order
 
@@ -1093,8 +1158,10 @@ Har module ke baad (existing tests + `test/mutations.ts` ke survivors).
 15. **QA-FE-005** (P4): playground ka 1-line fix, kabhi bhi.
 16. **QA-FE-010** (P3): QA-FE-004 wale auth-ui PR me (idle ka local forget pehle).
 17. **QA-ADM-001** (P3): admin header chhota fix + Playwright overflow assertion (customer bhi).
-18. **QA-TOOL-002** (P4): `scripts/e2e` chhota fix + purani DBs ka sweep.
-19. **Q-011 / T6.6** (owner): security headers (`frame-ancestors`, nosniff, Referrer-Policy) ka chhota PR, Phase 4 se pehle.
+18. **QA-CI-001** (P3): `ci.yml` 1 step (head repo bhi dekho), `prerelease` pe chhota fix.
+19. **QA-TOOL-002** (P4): `scripts/e2e` chhota fix + purani DBs ka sweep.
+20. **QA-DOC-001 + QA-DOC-002** (P4, owner): docs ka ek chhota PR (T6.3 ka faisla owner ka; TASKS §P bhi).
+21. **Q-011 / T6.6** (owner): security headers (`frame-ancestors`, nosniff, Referrer-Policy) ka chhota PR, Phase 4 se pehle.
 
 ## Change log
 
@@ -1118,3 +1185,5 @@ Har module ke baad (existing tests + `test/mutations.ts` ke survivors).
 | v0.16 | 2026-11-04 | M11 Customer app (browser + QA bundle 8080 + E2E): 22 executed, 1 NOT IMPLEMENTED (T6.6 headers), 19 PASS / 3 FAIL; naye bug QA-FE-009 (P2, server down pe app khule to "Loading" atka), QA-FE-008 (P2, auth steps ka focus/announce), QA-FE-007 (P3, raw 502 sandesh), QA-CUS-001 (P3, `/account` error title); QA-FE-004 aur QA-FE-001 E1; TC-FE-014/017 executed; Q-011 (security headers), TOOL-OBS-01; E2E 24 pass / 30 skip. |
 | v0.17 | 2026-11-04 | M12 Admin app (Terminal panel dev server + QA bundle + E2E): 10 executed + 1 static + 1 NOT IMPLEMENTED, 9 PASS / 2 FAIL (+ TC-FE-012 ab FAIL), naye bug QA-FE-010 (P3, do tabs me idle notice gayab), QA-ADM-001 (P3, 360 px header overflow), QA-TOOL-002 (P4, E2E cleanup race); QA-FE-009 admin me bhi; Q-009 E1; DR-011 ("Turn off" internal apps me); E2E 9 pass / 9 skip. |
 | v0.18 | 2026-11-05 | M13 Shell apps (9): 4 executed + 1 static, 5 PASS; naya bug nahi; Q-013 (delivery SW navigation fallback, T8.6), Q-014 (live shells pe developer sandesh); SW test BLOCKED (pane). |
+| v0.19 | 2026-11-05 | M14 CI/CD, infra, tooling: 15 cases (12 PASS, 1 FAIL, 2 KNOWN; zyada static + case-logic script + `docker ps`); naya bug QA-CI-001 (P3, fork branch naam se branch-flow pass); Q-015 (actions SHA pin, generator me `vercel.json` nahi). |
+| v0.20 | 2026-11-05 | M15 Docs vs code: 4 cases (3 PASS, 1 FAIL); naye bug QA-DOC-001 (P4, docs ke CI guards repo me nahi), QA-DOC-002 (P4, TASKS T6.3 + CLAUDE.md app list purane); `.env.example` vs `configZod` mel; saare 16 modules ho gaye. |
