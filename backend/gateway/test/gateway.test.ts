@@ -262,8 +262,8 @@ const apps = appRegistry({
     ['seller.example', 'seller'],
   ]),
   vercelProjects: [
-    ['customer', 'bq-customer'],
-    ['seller', 'bq-seller'],
+    ['customer', 'beautinique-customer'],
+    ['seller', 'beautinique-seller'],
   ],
   vercelScope: 'team-slug',
 });
@@ -584,19 +584,19 @@ describe('who may call', () => {
           headers: { ...customer, ...headers },
         })
       ).status;
-    const preview = 'bq-customer-git-feat-landing-team-slug.vercel.app';
+    const preview = 'beautinique-customer-git-feat-landing-team-slug.vercel.app';
     // through Vercel: x-forwarded-host is the app's host
     expect(await status({ 'x-forwarded-host': 'customer.example' })).toBe(200);
     expect(await status({ 'x-forwarded-host': 'CUSTOMER.example.' })).toBe(200);
     expect(await status({ 'x-forwarded-host': preview })).toBe(200);
-    expect(await status({ 'x-forwarded-host': 'bq-customer-abc123xyz-team-slug.vercel.app' })).toBe(
-      200,
-    );
+    expect(
+      await status({ 'x-forwarded-host': 'beautinique-customer-abc123xyz-team-slug.vercel.app' }),
+    ).toBe(200);
     for (const host of [
       'seller.example',
-      'bq-seller-git-main-team-slug.vercel.app',
-      'bq-customer-git-main-other-team.vercel.app',
-      'bq-customer.vercel.app',
+      'beautinique-seller-git-main-team-slug.vercel.app',
+      'beautinique-customer-git-main-other-team.vercel.app',
+      'beautinique-customer.vercel.app',
       'evil.example',
       'customer.example, evil.example',
     ]) {
@@ -615,7 +615,7 @@ describe('who may call', () => {
       'ftp://customer.example',
       `https://${preview}`,
       // another Vercel account whose scope ends in "-team-slug" fits the preview pattern
-      'https://bq-customer-git-main-evil-team-slug.vercel.app',
+      'https://beautinique-customer-git-main-evil-team-slug.vercel.app',
     ]) {
       expect(await via('customer.example', origin), origin).toBe(403);
     }
@@ -1087,7 +1087,7 @@ describe('config', () => {
         GATEWAY__ORIGIN_SECRETS: `${SECRET}, ${OLD_SECRET}`,
         GATEWAY__APP_HOSTS:
           'customer=Customer.Example, customer=localhost:3001,admin=admin.example',
-        GATEWAY__VERCEL_PROJECTS: 'customer=bq-customer',
+        GATEWAY__VERCEL_PROJECTS: 'customer=beautinique-customer',
         GATEWAY__VERCEL_SCOPE: 'team-slug',
         GATEWAY__RATE_LIMITS: 'write=5/1m, otp=3/15m,auth=100/1h,search=10/30s',
       },
@@ -1097,7 +1097,7 @@ describe('config', () => {
       coreUrl: 'http://127.0.0.1:8084',
       upstreamTimeoutMs: 30_000,
       originSecrets: [SECRET, OLD_SECRET],
-      vercelProjects: [['customer', 'bq-customer']],
+      vercelProjects: [['customer', 'beautinique-customer']],
       vercelScope: 'team-slug',
       rateLimits: {
         write: { limit: 5, windowMs: 60_000 },
@@ -1135,7 +1135,7 @@ describe('config', () => {
         { GATEWAY__APP_HOSTS: 'customer=a.example,admin=a.example' },
         'belongs to both customer and admin',
       ],
-      [{ GATEWAY__VERCEL_PROJECTS: 'customer=bq-customer' }, 'GATEWAY__VERCEL_SCOPE'],
+      [{ GATEWAY__VERCEL_PROJECTS: 'customer=beautinique-customer' }, 'GATEWAY__VERCEL_SCOPE'],
       [
         { GATEWAY__VERCEL_PROJECTS: 'customer=BQ.*', GATEWAY__VERCEL_SCOPE: 's' },
         'GATEWAY__VERCEL_PROJECTS',

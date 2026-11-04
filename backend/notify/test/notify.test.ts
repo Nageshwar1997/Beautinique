@@ -150,12 +150,12 @@ describe('notify settings', () => {
         env: {
           ...testEnv(),
           NOTIFY__APP_URLS:
-            ' customer=https://bq-customer.vercel.app/ , admin=http://localhost:3003',
+            ' customer=https://beautinique-customer.vercel.app/ , admin=http://localhost:3003',
         },
       }).appUrls,
     ).toEqual(
       new Map([
-        ['customer', 'https://bq-customer.vercel.app'],
+        ['customer', 'https://beautinique-customer.vercel.app'],
         ['admin', 'http://localhost:3003'],
       ]),
     );
@@ -272,10 +272,12 @@ describe('sendDue', () => {
     const linked = await invite('admin');
     const plain = await invite('seller');
     const late = await invite('admin', { to: 'late@beautinique.example', expiresAt: now });
-    const report = await run(sender, { appUrls: new Map([['admin', 'https://bq-admin.example']]) });
+    const report = await run(sender, {
+      appUrls: new Map([['admin', 'https://beautinique-admin.example']]),
+    });
     expect(report).toMatchObject({ sent: 2, expired: 1 });
     const byTo = new Map(sent.map((message) => [message.to, message]));
-    expect(byTo.get(linked.to)?.html).toContain('href="https://bq-admin.example"');
+    expect(byTo.get(linked.to)?.html).toContain('href="https://beautinique-admin.example"');
     expect(byTo.get(linked.to)?.subject).toBe('You are invited to Beautinique Admin');
     expect(byTo.get(plain.to)?.html).not.toContain('href=');
     expect(byTo.get(plain.to)?.text).toContain('open the Beautinique Seller app');
