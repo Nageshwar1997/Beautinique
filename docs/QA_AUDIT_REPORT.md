@@ -1,6 +1,6 @@
 # QA AUDIT REPORT — BQ
 
-> **Status:** v0.17 (2026-11-04). Audit base: `origin/prerelease` @ `ee7f46a` (`ee7f46ae7b2605d99f6b4497d26303aa109fb371`). Auditor: Claude Code (Opus 5.5, `claude-opus-5-5`). Ye report audit ki single source of truth hai; fixes alag se, ek-ek karke.
+> **Status:** v0.18 (2026-11-05). Audit base: `origin/prerelease` @ `ee7f46a` (`ee7f46ae7b2605d99f6b4497d26303aa109fb371`). Auditor: Claude Code (Opus 5.5, `claude-opus-5-5`). Ye report audit ki single source of truth hai; fixes alag se, ek-ek karke.
 
 ## 0. Audit state (har session ke aakhir me update)
 
@@ -11,7 +11,8 @@
   - Public report me security detail: **live pe exploitable khule findings redact** (class, impact, severity, `file:line`); poora repro sirf chat me, fix release ke baad report me. Baaki poori detail.
   - Failure injection: **alag throwaway containers** (pehle se downloaded images, `127.0.0.1`, doosre ports, `--rm`); saanjhe Mongo/Valkey/Mailpit kabhi band nahi.
   - **Owner ki do aur hidayatein (2026-11-04):** (1) har feature ko jitna ho sake todne ki koshish (adversarial; phir bhi sirf local, burst ≤ 100, production off-limits). (2) Owner ke "acceptable" faislon pe bhi sawal uthao: rakhne se kya hoga, fix karna chahiye ya nahi. Ye §9 me `DR-<NNN>` (decision review) rows: bug count me nahi, faisla owner ka. CLAUDE.md ke frozen niyam (mobile messaging, app ki bhasha) is se bahar (CLAUDE.md ki precedence).
-- **Ho chuke modules:** M0–M12 (2026-11-04) | **Chalu:** koi nahi | **Agla:** M13 Shell apps (9)
+- **Ho chuke modules:** M0–M13 (2026-11-05) | **Chalu:** koi nahi | **Agla:** M14 CI/CD, infra aur tooling (static + local scripts)
+- **Session 2, M13 (2026-11-05):** seller dev + delivery `vite preview` Terminal panel me (M12 jaisa), backend/containers nahi; dono band. Built-in pane service worker register nahi karta (TC-APPS-002 ka SW hissa BLOCKED).
 - **Session 2, M12 (2026-11-04):** owner ke kehne pe admin dev server **Terminal panel** me (`npm run dev --workspace admin`, 3003; launch.json me admin entry nahi, use badla nahi) → QA bundle 8080 (run `m12a`), browser `preview_start {url}` se. Invitation `scratchpad/m11/invite.ts`, server idle `scratchpad/m12/idle-server.mjs` (QA DB me `lastSeenAt` khiska ke). Module ke baad: terminal tab band, bundle band, `bq_qa_m12a_*` drop, containers stop. Admin E2E: 9 pass / 9 skip.
 - **Session 2, M11 (2026-11-04):** QA bundle `scratchpad/m11/qa-backend.ts` ab **port 8080** pe laptop ke public origin secret (`frontend/customer/.env.example` ka `not-a-secret-…`) ke saath, taaki launch.json ka `customer` dev server (3001) bina `.env` padhe usi pe proxy kare (M12 me admin 3003 bhi isi tarah); throwaway Valkey 6390 + Mailpit 8035, fake OAuth 8196, DBs `bq_qa_m11a_*`; helpers `code.mjs` (Mailpit code / TOTP), `device2.mjs` (doosra device), `invite.ts` (Master invitation, QA DBs). Module ke baad sab band: bundle, dev server, `bq_qa_m11a_*` drop, containers stop; scratch secrets mitaye. Customer E2E (`npm run e2e --workspace customer`) chala: 24 pass / 30 skip. Live GETs: abhi bhi 12/15. **M12 me zaroor:** admin invitation accept (`invite.ts`), mandatory authenticator, idle (TC-FE-012 + Q-009), QA-FE-008/009 admin me bhi, admin `vercel.json` (`noindex`, SPA fallback, headers T6.6).
 - **Session 2 (2026-11-04, M10):** sirf playgrounds (components 5184, forms 5185, auth-ui 5186, app-shell 5182; `.claude/launch.json` me styles/icons ke playground nahi, unke checks baaki playgrounds ke axe se) aur ek scratch TCP server (127.0.0.1:8299, jawab nahi deta; band). Koi container ya QA backend nahi chalaya, koi DB nahi bani. Built-in browser pane poore waqt **hidden** raha: screenshots nahi chale aur exit animations rukti hain (dialog band hona/focus wapas aana unit tests pe chhoda); saare checks DOM/JS/axe se. Sab playgrounds band. **M11 me zaroor:** QA-FE-004 ka E1 (QA bundle band karke "Sign out"), QA-FE-001 customer ke root ErrorBoundary me, TC-FE-014 social buttons (fake OAuth), `vercel.json` CSP me `THEME_SCRIPT_HASH`, Q-010 agar slow refresh simulate ho sake. M12 me: TC-FE-012 idle (do tabs, `Date.now` khiska ke) + Q-009.
@@ -54,15 +55,15 @@
 
 | Metric                             | Count                                         |
 | ---------------------------------- | --------------------------------------------- |
-| Modules | 16 (M0–M15); ho chuke: 13 (M0–M12) |
+| Modules | 16 (M0–M15); ho chuke: 14 (M0–M13) |
 | Features (inventory, §3)           | 97                                            |
 | Planned test cases | 249 (planned-executed 224, planned-static 25) |
-| Executed | 207 |
-| Static-only | 15 |
-| PASS | 206 |
+| Executed | 211 |
+| Static-only | 16 |
+| PASS | 211 |
 | FAIL | 16 |
 | BLOCKED                            | 0                                             |
-| NOT TESTED | 24 |
+| NOT TESTED | 19 |
 | NEEDS CLARIFICATION                | 0                                             |
 | NOT IMPLEMENTED (roadmap) | 10 (§7 list); 2 test cases (TC-CUS-022, TC-ADM-012; T6.6) |
 | KNOWN                              | 10 issues (§2a); 1 test case (TC-ID-066)      |
@@ -198,7 +199,7 @@ Abhi sab `NOT TESTED` (Gate 1). Status ke saath `Executed`/`Static` module ke ba
 | M11 Customer | `vercel.json` rewrites + security headers; E2E suite | T6.6 | PASS (E2E) / NOT IMPLEMENTED (headers, T6.6) | Static + Executed | | `/api` route + `x-origin-secret` transform sahi; security headers NOT IMPLEMENTED (T6.6 `[ ]`, "Security headers baaki"; risk Q-011); E2E: 24 passed, 30 skipped (design: "one screen size is enough here"), 0 fail, 6.0 min; run ki DBs saaf, purani 36 `bq_e2e_*` DBs (adhoore runs) laptop pe padi |
 | M12 Admin | Sign-in + mandatory authenticator, invitation, forgot password, dashboard, account, idle sign-out | T6.1, RULES §7.1 | FAIL | Executed (E1) | QA-FE-010, QA-FE-009, QA-FE-008 | invitation (Master → email → admin me code + password → "Invitation accepted"), enroll se pehle session nahi, zaroori authenticator → codes → dashboard; "Turn off" pe role ka 409 sandesh (DR-011); idle 28 min sawal / 30 min sign-out + server ka idle (31 min → 401); do tabs me idle tab ka sandesh gayab (QA-FE-010); server down pe "Loading" atka (QA-FE-009, admin me bhi) |
 | M12 Admin | `noindex`, SPA fallback, responsive/theme/axe/keyboard, E2E suite | T6.6 | FAIL | Executed + Static | QA-ADM-001 | `<meta robots noindex, nofollow>` + `X-Robots-Tag` (vercel.json), SPA fallback (`filesystem` → `/index.html`) static; 8 pages axe 0 (4 themes); 360 px pe header 3 px bahar (QA-ADM-001), 375/768/1280 theek; account menu keyboard; security headers NOT IMPLEMENTED (T6.6); PASS (Executed): 9 passed, 9 skipped (bhaari tests sirf chromium-1280-light pe, design), 0 fail, 224 s; teardown ne run 82390d49 ki DBs hatai |
-| M13 Shell apps (9) | Build, start, 404, `vercel.json`, dev proxy secret, no fake features                              | T0.2                   | NOT TESTED |                   |                       |                                                                                                                                                                          |
+| M13 Shell apps (9) | Build, start, 404, `vercel.json`, dev proxy secret, no fake features | T0.2 | PASS | Executed + Static | | 9 apps ek hi template (seller se diff: 4 me sirf naam, delivery me PWA); tests 9 × 7 = 63 pass; seller + delivery taaza build; seller dev: home + 404 + axe 0 (light/dark) + 360 px theek; delivery preview: manifest sahi, service worker pane me register nahi hota (BLOCKED); proxy + secret + `X-Robots-Tag` saare 9 me; security headers NOT IMPLEMENTED (T6.6); Q-013, Q-014 |
 | M14 CI/CD          | `ci.yml` (branch flow, gitleaks pin, permissions, pinning, untrusted input)                       | T0.6, T0.7             | NOT TESTED |                   |                       |                                                                                                                                                                          |
 | M14 CI/CD          | `release.yml`, `wake.yml`                                                                         | T0.6, T2.7             | NOT TESTED |                   |                       |                                                                                                                                                                          |
 | M14 Infra          | `scripts/render/*.sh`, `infra/docker-compose.yml`                                                 | T0.8, T11.4            | NOT TESTED |                   |                       |                                                                                                                                                                          |
@@ -503,11 +504,11 @@ Plan: **E** = planned-executed (local stack, HTTP, browser, scratch script), **S
 
 | TC          | Case                                    | Type | Plan |
 | ----------- | --------------------------------------- | ---- | ---- |
-| TC-APPS-001 | 9 apps ka build                         | F    | E    |
-| TC-APPS-002 | Start + 404 smoke                       | F    | E    |
-| TC-APPS-003 | `vercel.json` headers + `noindex`       | Sec  | S    |
-| TC-APPS-004 | Dev proxy origin secret bhejta hai      | F    | S    |
-| TC-APPS-005 | Koi stub asli feature jaisa nahi dikhta | F    | E    |
+| TC-APPS-001 | 9 apps ka build | F | E | PASS (Executed): M0 ke poore build me saare 9; M13 me `seller` (18 s) aur `delivery` (30 s, precache 6 entries) dobara |
+| TC-APPS-002 | Start + 404 smoke | F | E | PASS (Executed): seller dev (Terminal panel, 3002) `/` "Beautinique Seller", `/orders/123` → "Page not found" + home link, axe 0 light/dark, 360 px 360/360; delivery `vite preview` (3009) home + `manifest.webmanifest`. Service worker BLOCKED: built-in pane register nahi karne deta ("An unknown error occurred when fetching the script", jabki `/sw.js` 200) |
+| TC-APPS-003 | `vercel.json` headers + `noindex` | Sec | S | PASS (Static + 9 × `vercel-config.test.ts`): `/api` route + `x-origin-secret` transform pehle, `X-Robots-Tag: noindex, nofollow` sab routes, `filesystem` → `/index.html`; `index.html` me robots meta nahi (header kaafi). Security headers NOT IMPLEMENTED (T6.6, Q-011) |
+| TC-APPS-004 | Dev proxy origin secret bhejta hai | F | S | PASS (Static + Executed): saare 9 `vite.config.ts` → `http://localhost:8080` + laptop ka public secret; ports 3002, 3004–3011 = gateway ki laptop `APP_HOSTS`; seller dev pe `/api` proxy tak gaya (backend band, 502) |
+| TC-APPS-005 | Koi stub asli feature jaisa nahi dikhta | F | E | PASS (Executed): home "The app is ready. Add pages in src/routes.tsx." (koi nakli feature nahi; par public pe developer sandesh = Q-014); delivery manifest ka description unbuilt features batata (Q-014) |
 
 **M14 CI/CD, infra, tooling (`CI` 9, `INF` 2, `TOOL` 4)**
 
@@ -1036,6 +1037,13 @@ Har module ke baad (existing tests + `test/mutations.ts` ke survivors).
 | Do tabs ke saath idle sign-out ka notice | QA-FE-010 | auth-ui unit (2 instances) / Playwright 2 pages |
 | 360 px pe horizontal overflow | QA-ADM-001; E2E sizes chalate par overflow nahi naapte | Playwright |
 
+**M13 Shell apps** (existing: har app `test/app.test.tsx` + `test/vercel-config.test.ts`, 7 tests × 9):
+
+| Scenario | Kyun zaroori | Test type |
+| --- | --- | --- |
+| Delivery SW `/api` navigation ko network pe chhode | Q-013 (T8.6 ke saath) | unit (generated sw config) / Playwright |
+| 404 page ka title ("Page not found") | aaj title app ka naam hi rehta | app test |
+
 ## 9. Questions and Unverified Assumptions
 
 | Q-ID   | Sawal                                                                                                                                                                                                                                                                                                                                                                                                                                                                            | Kyun zaroori                                                                                                                                                                                                                                                                                                                                                                                                                                                   | Evidence                                                                                                                                                                                                                                      | Claude ki recommendation                                                                                                                                                                                                                                                                                                             | Owner ka jawab                    |
@@ -1063,6 +1071,8 @@ Har module ke baad (existing tests + `test/mutations.ts` ke survivors).
 | Q-011 | `vercel.json` me security headers abhi nahi (T6.6 `[ ]`, "Security headers baaki"), jabki customer + admin live hain aur unpe sign-in, sign-out, "Turn off authenticator", My Devices jaise buttons hain. Kya T6.6 ka kam se kam `frame-ancestors 'none'` / `X-Frame-Options: DENY` + `X-Content-Type-Options: nosniff` + `Referrer-Policy` abhi (Phase 4 se pehle) karein? | Clickjacking: doosri site live page ko iframe me rakh ke click karwa sakti (sign-out, authenticator band, social method hatana) | Static: `frontend/customer/vercel.json` (sirf `/api` route); ARCHITECTURE §9.3 headers ki list | Haan: T6.6 ka header hissa alag chhota PR (CSP baad me `THEME_SCRIPT_HASH` ke saath), naya task nahi | |
 | Q-012 | (M11 me bug bana: QA-FE-009) App khulte waqt server down ho to account page recover karta hai? | | E1, §4 QA-FE-009 | | |
 | DR-011 | Internal apps (admin) me Security page "Turn off" authenticator dikhata hai, jabki role ki wajah se server hamesha 409 deta (auth-ui README: design). Dialog ka text "Signing in will ask for your password only" admin me galat hai | Rakhne ka asar: har internal user ko ek aisa button jo kabhi kaam nahi karta, aur galat vaada; nuksan nahi (server rokta) | E1: admin, `AUTHENTICATOR_REQUIRED_BY_ROLE` "Your Catalog QC & Listing Approver role in the admin app needs an authenticator, so it can't be turned off." | Jahan `SESSION_POLICIES[app]` MFA maange ya `/iam/me` me MFA-role ho, "Turn off" chhupao ya disable + saaf hint; dialog text app ke hisaab se | |
+| Q-013 | Delivery PWA (T8.6 se pehle, aaj shell): `vite-plugin-pwa` default `generateSW` ka `NavigationRoute(createHandlerBoundToURL("index.html"))` **bina denylist** (`frontend/delivery/dist/sw.js`, `vite.config.ts` me `workbox` option nahi). SW install hone ke baad har top-level navigation, `/api/...` bhi, `index.html` se jawab paayegi | Aaj asar nahi (delivery ka koi navigation API route nahi; OAuth sirf customer), par T8.6 me koi download/navigation link `/api` pe gaya to SW SPA dikhayega aur server tak request nahi jaayegi | E3 static (dist/sw.js); browser me SW BLOCKED (pane) | T8.6 me `workbox.navigateFallbackDenylist: [/^\/api\//]` aur ek test; ARCHITECTURE §9.2 ke "run sheet NetworkFirst" ke saath | |
+| Q-014 | 9 shell apps live hain (TASKS M6: "saare 11 apps Vercel pe") aur public ko "The app is ready. Add pages in src/routes.tsx." dikhate hain; delivery ka manifest "Run sheets, deliveries and payments …" kehta hai jo abhi nahi bana | "Production-grade" niyam: koi bhi visitor developer ka sandesh dekhta; install prompt nakli vaada karta (noindex hai, isliye search me nahi) | Executed (seller dev, delivery preview); `frontend/*/src/pages/home.tsx`, `frontend/delivery/vite.config.ts` | Generator template me saada "Coming soon" page (app ka naam + ek line), manifest description bhi waisa; owner ki pasand | |
 
 ## 10. Recommended Fixing Order
 
@@ -1107,3 +1117,4 @@ Har module ke baad (existing tests + `test/mutations.ts` ke survivors).
 | v0.15 | 2026-11-04 | M10 Frontend packages (browser playgrounds): 13 executed + 3 static (+ TC-FE-010 pehle se), 12 PASS / 5 FAIL; naye bug QA-FE-004 (P2, logout fail pe bhi signed-out), QA-FE-002 (P3, HierarchySelect Escape), QA-FE-003 (P3, CodeInput paste), QA-FE-005 (P4, playground wake stub), QA-FE-006 (P4, client timeout nahi); QA-FE-001 browser me E1 (redirect nahi, crash); Q-008–Q-010, DR-010; 850 frontend tests green. |
 | v0.16 | 2026-11-04 | M11 Customer app (browser + QA bundle 8080 + E2E): 22 executed, 1 NOT IMPLEMENTED (T6.6 headers), 19 PASS / 3 FAIL; naye bug QA-FE-009 (P2, server down pe app khule to "Loading" atka), QA-FE-008 (P2, auth steps ka focus/announce), QA-FE-007 (P3, raw 502 sandesh), QA-CUS-001 (P3, `/account` error title); QA-FE-004 aur QA-FE-001 E1; TC-FE-014/017 executed; Q-011 (security headers), TOOL-OBS-01; E2E 24 pass / 30 skip. |
 | v0.17 | 2026-11-04 | M12 Admin app (Terminal panel dev server + QA bundle + E2E): 10 executed + 1 static + 1 NOT IMPLEMENTED, 9 PASS / 2 FAIL (+ TC-FE-012 ab FAIL), naye bug QA-FE-010 (P3, do tabs me idle notice gayab), QA-ADM-001 (P3, 360 px header overflow), QA-TOOL-002 (P4, E2E cleanup race); QA-FE-009 admin me bhi; Q-009 E1; DR-011 ("Turn off" internal apps me); E2E 9 pass / 9 skip. |
+| v0.18 | 2026-11-05 | M13 Shell apps (9): 4 executed + 1 static, 5 PASS; naya bug nahi; Q-013 (delivery SW navigation fallback, T8.6), Q-014 (live shells pe developer sandesh); SW test BLOCKED (pane). |
