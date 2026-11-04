@@ -1,6 +1,6 @@
 # QA AUDIT REPORT — BQ
 
-> **Status:** v0.11 (2026-11-04). Audit base: `origin/prerelease` @ `ee7f46a` (`ee7f46ae7b2605d99f6b4497d26303aa109fb371`). Auditor: Claude Code (Opus 5.5, `claude-opus-5-5`). Ye report audit ki single source of truth hai; fixes alag se, ek-ek karke.
+> **Status:** v0.12 (2026-11-04). Audit base: `origin/prerelease` @ `ee7f46a` (`ee7f46ae7b2605d99f6b4497d26303aa109fb371`). Auditor: Claude Code (Opus 5.5, `claude-opus-5-5`). Ye report audit ki single source of truth hai; fixes alag se, ek-ek karke.
 
 ## 0. Audit state (har session ke aakhir me update)
 
@@ -11,8 +11,9 @@
   - Public report me security detail: **live pe exploitable khule findings redact** (class, impact, severity, `file:line`); poora repro sirf chat me, fix release ke baad report me. Baaki poori detail.
   - Failure injection: **alag throwaway containers** (pehle se downloaded images, `127.0.0.1`, doosre ports, `--rm`); saanjhe Mongo/Valkey/Mailpit kabhi band nahi.
   - **Owner ki do aur hidayatein (2026-11-04):** (1) har feature ko jitna ho sake todne ki koshish (adversarial; phir bhi sirf local, burst ≤ 100, production off-limits). (2) Owner ke "acceptable" faislon pe bhi sawal uthao: rakhne se kya hoga, fix karna chahiye ya nahi. Ye §9 me `DR-<NNN>` (decision review) rows: bug count me nahi, faisla owner ka. CLAUDE.md ke frozen niyam (mobile messaging, app ki bhasha) is se bahar (CLAUDE.md ki precedence).
-- **Ho chuke modules:** M0–M7 (2026-11-04) | **Chalu:** koi nahi | **Agla:** M8 Core, bundle and release
-- **QA infra (local, is session ka):** throwaway containers `bq-qa-valkey` (127.0.0.1:6390) aur `bq-qa-mailpit` (127.0.0.1:8035, API `/api/v1`), QA bundle `scratchpad/m1/qa-backend.ts` (gateway 8190, fake OAuth 8196, saare 11 apps `localhost:3201–3211`; har start pe nayi field keys, isliye har run ki DBs alag `bq_qa_<run>_*`). Har module ke baad bundle band aur us run ki `bq_qa_*` DBs drop (ab tak m1a, m5a, m6a, m7a, m7b; profiler sirf QA DBs pe). M7 se `qa-backend.ts` run ki keys `scratchpad/m1/keys-<run>.json` me rakhta hai (restart test) aur `QA_EXTRA_ENV` se extra settings leta hai. Session khatam pe: `docker stop bq-qa-valkey bq-qa-mailpit` (`--rm`). Live GETs: 12/15 use hue (M1).
+- **Ho chuke modules:** M0–M8 (2026-11-04) | **Chalu:** koi nahi | **Agla:** M9 Kernel and shared packages
+- **M15 ke liye note (M8):** ARCHITECTURE §13 (line ~532) CI me "dependency-cruiser, no-hardcoded-geo lint, no role-name comparisons" kehta hai; `ci.yml` me ye nahi, aur repo me dependency-cruiser config nahi (RULES §4.2 bhi ise naam se kehta hai).
+- **QA infra (local, is session ka):** throwaway containers `bq-qa-valkey` (127.0.0.1:6390) aur `bq-qa-mailpit` (127.0.0.1:8035, API `/api/v1`), QA bundle `scratchpad/m1/qa-backend.ts` (gateway 8190, fake OAuth 8196, saare 11 apps `localhost:3201–3211`; har start pe nayi field keys, isliye har run ki DBs alag `bq_qa_<run>_*`). Har module ke baad bundle band aur us run ki `bq_qa_*` DBs drop (ab tak m1a, m5a, m6a, m7a, m7b, m8a, m8b, m8c; profiler sirf QA DBs pe). M7 se `qa-backend.ts` run ki keys `scratchpad/m1/keys-<run>.json` me rakhta hai (restart test) aur `QA_EXTRA_ENV` se extra settings leta hai. Session khatam pe: `docker stop bq-qa-valkey bq-qa-mailpit` (`--rm`). Live GETs: 12/15 use hue (M1).
 - **Base SHA:** skill ka snapshot `f271b31` tha; `origin/prerelease` ab `ee7f46a` hai. Beech me sirf `ca61487` (`/qa-audit` skill) + merge `ee7f46a` (PR #53): koi code nahi badla, kisi module ko dobara nahi dekhna. Worktree `prerelease` @ `ee7f46a`, `git status` saaf (report ke alawa).
 - **Khule blockers:** koi nahi.
 - **Note (local):** `.claude/worktrees/comprehensive-qa-audit-b02e4c` (git ke `info/exclude` me) aur kai `kilo` worktrees laptop pe hain; audit inhe nahi chhoota, aur repo-wide search me `.claude/worktrees` ko bahar rakhta hai (is folder ka asar: QA-TOOL-001).
@@ -49,15 +50,15 @@
 
 | Metric                                 | Count                                      |
 | -------------------------------------- | ------------------------------------------ |
-| Modules                                | 16 (M0–M15); ho chuke: 8 (M0–M7)           |
+| Modules                                | 16 (M0–M15); ho chuke: 9 (M0–M8)           |
 | Features (inventory, §3)               | 97                                         |
 | Planned test cases                     | 248 (planned-executed 223, planned-static 25) |
-| Executed                               | 134                                        |
-| Static-only                            | 9                                          |
-| PASS                                   | 138                                        |
+| Executed                               | 143                                        |
+| Static-only                            | 13                                         |
+| PASS                                   | 151                                        |
 | FAIL                                   | 5                                          |
 | BLOCKED                                | 0                                          |
-| NOT TESTED                             | 104                                        |
+| NOT TESTED                             | 91                                         |
 | NEEDS CLARIFICATION                    | 0                                          |
 | NOT IMPLEMENTED (roadmap)              | 10 (§7 list)                               |
 | KNOWN                                  | 10 issues (§2a); 1 test case (TC-ID-066)   |
@@ -164,12 +165,12 @@ Abhi sab `NOT TESTED` (Gate 1). Status ke saath `Executed`/`Static` module ke ba
 | M7 Notify/async | Lanes, daily budget, retry 5 + expiry | T5.2 | PASS | Executed + Static | | expire hua OTP der se nahi gaya; budget khatam → `DAILY_LIMIT` (docs jaisa); budget ajnabi kha sakte (DR-009) |
 | M7 Notify/async | Invitation + security emails (content, links, injection) | T3.3 PR B, T3.1 | PASS | Executed | | koi secret/recovery code nahi; UA ka HTML/CRLF email tak nahi |
 | M7 Notify/async | Failure injection (Valkey, Mailpit, restart, Redis wipe, big/unknown event) | T1.3 | PASS | Executed | | Mailpit band → retry; Redis band → outbox me ruka, phir pahuncha; kill + restart → bheja; wipe → koi double email nahi |
-| M8 Core | `platform` ping write (rate, cap, TTL), get by id, audit subscriber | M1 milestone | NOT TESTED | | | |
-| M8 Core | Module boundaries (facade) | RULES §4.2 | NOT TESTED | | | |
-| M8 Bundle | Start/stop, exit on start failure, Sentry off, `loadConfig` unknown keys | T2.5, T2.3 | NOT TESTED | | | |
-| M8 Bundle | `db:release` (lease, fingerprint, 60 s, concurrent boots) | T2.5 | NOT TESTED | | | |
-| M8 Bundle | `db:grant-master` guards (local only) | T3.3 | NOT TESTED | | | |
-| M8 Bundle | `/ready` composition | T2.4 | NOT TESTED | | | |
+| M8 Core | `platform` ping write (rate, cap, TTL), get by id, audit subscriber | M1 milestone | PASS | Executed + Static | | write 20/min (M1), 5,000 pe 503, TTL 7 din dono collections pe, audit copy (M7); `platform.ping.read` kisi shipped role me nahi |
+| M8 Core | Module boundaries (facade) | RULES §4.2 | PASS | Static | | abhi ek hi module; enforcement (dependency-cruiser) repo me nahi: M15 |
+| M8 Bundle | Start/stop, exit on start failure, Sentry off, `loadConfig` unknown keys | T2.5, T2.3 | PASS | Executed + Static | | compiled `dist/start.js` 7 s me; start fail 1.6 s me `exit 1`; typo key refuse, `PAYMENTS__*` ignore; error me secret value nahi |
+| M8 Bundle | `db:release` (lease, fingerprint, 60 s, concurrent boots) | T2.5 | PASS | Executed | | do boot ek saath: B ne intezaar kiya, A ne chalaya; teesra 2 ms me skip |
+| M8 Bundle | `db:grant-master` guards (local only) | T3.3 | PASS | Static | | `--env` sirf `live`, live pe `Type "live"`; live kabhi nahi chalaya; unit tests M0 me pass |
+| M8 Bundle | `/ready` composition | T2.4 | PASS | Executed | | M1: gateway Redis + har deployable; identity mongo/redis/outbox, notify events, core outbox/events |
 | M9 Kernel | server-kit (`mountRoute`, envelope, request id, redaction, navigation) | T1.1 | NOT TESTED | | | |
 | M9 Kernel | server-mongo (`withTransaction` retries, timeout, guards) | T1.2 | NOT TESTED | | | |
 | M9 Kernel | server-queue (relay, lease, redrive, scheduler, epoch) | T1.3 | NOT TESTED | | | |
@@ -390,21 +391,21 @@ Plan: **E** = planned-executed (local stack, HTTP, browser, scratch script), **S
 
 **M8 Core + bundle (`CORE` 6, `BND` 7)**
 
-| TC | Case | Type | Plan |
-| -- | ---- | ---- | ---- |
-| TC-CORE-001 | `POST /platform/pings` public, `write` limit 20/min | Sec | E |
-| TC-CORE-002 | 5,000 cap → 503 `PING_LIMIT_REACHED` | R | E |
-| TC-CORE-003 | Pings/audit copies ka TTL index 7 din | R | E |
-| TC-CORE-004 | `GET /platform/pings/:pingId`: `platform.ping.read` permission | Sec | E |
-| TC-CORE-005 | Audit subscriber copy (event se) | I | E |
-| TC-CORE-006 | Module boundaries (sirf facade) | Arch | S |
-| TC-BND-001 | Start/stop, graceful shutdown | R | E |
-| TC-BND-002 | Start fail → exit (Sentry ke saath bhi) | R | E |
-| TC-BND-003 | Sentry DSN na ho to band | F | E |
-| TC-BND-004 | `loadConfig` anjaan `<NAME>__` key pe ruk jaata | F | E |
-| TC-BND-005 | `db:release`: lease, fingerprint skip, 60 s budget, do boot ek saath | R | E |
-| TC-BND-006 | `db:grant-master` guards (`live` likhna; sirf local chalaya) | Sec | E |
-| TC-BND-007 | `/ready` ki banawat | F | E |
+| TC | Case | Type | Plan | Result |
+| -- | ---- | ---- | ---- | ------ |
+| TC-CORE-001 | `POST /platform/pings` public, `write` limit 20/min | Sec | E | PASS (Executed, M1 TC-GW-022) |
+| TC-CORE-002 | 5,000 cap → 503 `PING_LIMIT_REACHED` | R | E | PASS (Executed): 5,001 pe 503 `PING_LIMIT_REACHED` |
+| TC-CORE-003 | Pings/audit copies ka TTL index 7 din | R | E | PASS (Executed): `recordedAt` TTL 604800 s dono pe |
+| TC-CORE-004 | `GET /platform/pings/:pingId`: `platform.ping.read` permission | Sec | E | PASS (Static): permission route; koi shipped role `platform.ping.read` nahi rakhta, customer app ko route allowed nahi (M1) |
+| TC-CORE-005 | Audit subscriber copy (event se) | I | E | PASS (Executed, M7 TC-NT-011) |
+| TC-CORE-006 | Module boundaries (sirf facade) | Arch | S | PASS (Static): ek module; dependency-cruiser config nahi (M15) |
+| TC-BND-001 | Start/stop, graceful shutdown | R | E | PASS (Executed compiled start; graceful stop Windows pe signal nahi, unit test) |
+| TC-BND-002 | Start fail → exit (Sentry ke saath bhi) | R | E | PASS (Executed): 1.6 s me exit 1, 3 galat configs me value log me nahi |
+| TC-BND-003 | Sentry DSN na ho to band | F | E | PASS (Static + unit test `monitoring.test.ts`) |
+| TC-BND-004 | `loadConfig` anjaan `<NAME>__` key pe ruk jaata | F | E | PASS (Executed) |
+| TC-BND-005 | `db:release`: lease, fingerprint skip, 60 s budget, do boot ek saath | R | E | PASS (Executed) |
+| TC-BND-006 | `db:grant-master` guards (`live` likhna; sirf local chalaya) | Sec | E | PASS (Static + unit test) |
+| TC-BND-007 | `/ready` ki banawat | F | E | PASS (Executed, M1) |
 
 **M9 Kernel + shared (`KRN` 8, `SHR` 8)**
 
@@ -653,7 +654,7 @@ Plan: **E** = planned-executed (local stack, HTTP, browser, scratch script), **S
 | QA-GW-001 | A04 Insecure Design (availability) / ASVS V1.11 | P2 | Haan, agar Render Key Value atke (band nahi) | fail-closed hi rehta hai, data leak nahi |
 | QA-KRN-001 | A04 (availability) | P3 | Haan, sirf gateway start ke turant baad JWKS fail ho | jhootha sign-out |
 
-**PASS hue controls (M1, executed):** origin secret (8 galat values; timing-safe static), app allow-list + CSRF (Host/x-forwarded-host/Origin, 29 cases), fail-closed 401 (30/30 non-public routes), JWT forgery (`alg:none`, HS256 key confusion, apni ES256 key, embedded `jwk`, tampered claims, galat `kid`/`aud`, junk: 15/15 401), passport (client ka strip; owner seedha bina/forged passport 401), client IP spoofing (XFF, `X-BQ-Client-Ip`, `Forwarded` ignore), rate limits (write/otp/auth budgets, IPv6 /64, IPv4-mapped), `auth`/`otp` fail-closed jab Redis band/atka, request smuggling (9 framing attacks), oversized header/body, path traversal (18 raw paths), security headers (helmet), error envelope, log hygiene, live: `bq-live` `/api` bina secret 403, TLS 1.3. **M2:** OTP (CSPRNG 6-digit, 10 min, 5 tries, resend seema, per-email/ghanta, app binding, replay), enumeration (sign-up/password code/login: same body + same time), argon2id OWASP min, HIBP k-anonymity, lockout, TOTP replay/window, recovery single-use, loginId binding/expiry, grant-based sign-in, email normalization, NoSQL-style input, reset ke baad sessions band, OTP outbox me sealed. **M3:** cookie flags/prefixes, refresh rotation, parallel tab 409 (bina cookies), seedha reuse → session band + email, end-others, IDOR (doosre ka session `{ended:false}`), My Devices sirf apne, expiry, step-up (session-bound, `su`, lock me gine jaate), naye recovery codes pe purane band, security emails. **M4:** OAuth state (43 chars) + browser cookie binding (login CSRF band), PKCE S256, trip single-use + expiry, verified-email-only linking (Google `email_verified`, GitHub primary+verified), consent ticket single-use + browser-bound, callback `next` open redirect (7 cases) band, locked account social sign-in band, aakhri method nahi hatta. **M5:** route × actor matrix, appointer chain, `scopeWithin` (custom state role se), self grant/end/invite band, Master API se nahi aur uska grant koi khatam nahi kar sakta, validity windows, MFA roles, Master seats race-safe, invitation (single use, app-bound, revoke, inviter ka haq dobara), `av` bump, `mfa: true` permissions bina authenticator use nahi ho sakte (step-up), rbac-sync idempotent. **M6:** sealed field context binding (copy kiya secret nahi khulta), identity/notify/core DB aur Redis me plaintext secret nahi (value + pattern scan), `/iam/me` saaf, logs saaf. **M7:** OTP code outbox/delivery me sealed aur bhejne ke baad hat jaata, expire hua code kabhi nahi jaata, emails me HTML escape (UA ka `<script>`/CRLF nahi pahuncha), koi secret/recovery code email me nahi, notify logs me email/code nahi.
+**PASS hue controls (M1, executed):** origin secret (8 galat values; timing-safe static), app allow-list + CSRF (Host/x-forwarded-host/Origin, 29 cases), fail-closed 401 (30/30 non-public routes), JWT forgery (`alg:none`, HS256 key confusion, apni ES256 key, embedded `jwk`, tampered claims, galat `kid`/`aud`, junk: 15/15 401), passport (client ka strip; owner seedha bina/forged passport 401), client IP spoofing (XFF, `X-BQ-Client-Ip`, `Forwarded` ignore), rate limits (write/otp/auth budgets, IPv6 /64, IPv4-mapped), `auth`/`otp` fail-closed jab Redis band/atka, request smuggling (9 framing attacks), oversized header/body, path traversal (18 raw paths), security headers (helmet), error envelope, log hygiene, live: `bq-live` `/api` bina secret 403, TLS 1.3. **M2:** OTP (CSPRNG 6-digit, 10 min, 5 tries, resend seema, per-email/ghanta, app binding, replay), enumeration (sign-up/password code/login: same body + same time), argon2id OWASP min, HIBP k-anonymity, lockout, TOTP replay/window, recovery single-use, loginId binding/expiry, grant-based sign-in, email normalization, NoSQL-style input, reset ke baad sessions band, OTP outbox me sealed. **M3:** cookie flags/prefixes, refresh rotation, parallel tab 409 (bina cookies), seedha reuse → session band + email, end-others, IDOR (doosre ka session `{ended:false}`), My Devices sirf apne, expiry, step-up (session-bound, `su`, lock me gine jaate), naye recovery codes pe purane band, security emails. **M4:** OAuth state (43 chars) + browser cookie binding (login CSRF band), PKCE S256, trip single-use + expiry, verified-email-only linking (Google `email_verified`, GitHub primary+verified), consent ticket single-use + browser-bound, callback `next` open redirect (7 cases) band, locked account social sign-in band, aakhri method nahi hatta. **M5:** route × actor matrix, appointer chain, `scopeWithin` (custom state role se), self grant/end/invite band, Master API se nahi aur uska grant koi khatam nahi kar sakta, validity windows, MFA roles, Master seats race-safe, invitation (single use, app-bound, revoke, inviter ka haq dobara), `av` bump, `mfa: true` permissions bina authenticator use nahi ho sakte (step-up), rbac-sync idempotent. **M6:** sealed field context binding (copy kiya secret nahi khulta), identity/notify/core DB aur Redis me plaintext secret nahi (value + pattern scan), `/iam/me` saaf, logs saaf. **M7:** OTP code outbox/delivery me sealed aur bhejne ke baad hat jaata, expire hua code kabhi nahi jaata, emails me HTML escape (UA ka `<script>`/CRLF nahi pahuncha), koi secret/recovery code email me nahi, notify logs me email/code nahi. **M8:** start fail pe 1.6 s me exit (Render ka 15 min atkaav nahi), config errors me secret value nahi, typo `<NAME>__` key pe start rukta, release lease + fingerprint, Master ka live raasta `live` likhne pe hi.
 
 ## 6. Performance Findings
 
@@ -790,3 +791,4 @@ Har module ke baad (existing tests + `test/mutations.ts` ke survivors).
 | v0.9    | 2026-11-04 | M5 RBAC: 14 executed + 1 KNOWN, 14 PASS; TC-ID-011, TC-ID-020, TC-GW-017 bhi PASS; naya bug nahi; DR-007 (Security Officer Master ka 2FA hata sakta), Q-007 (self-appointing custom role). |
 | v0.10   | 2026-11-04 | M6 Data protection: 7 executed, 6 PASS / 1 FAIL; naya bug QA-ID-002 (P3, social lookup COLLSCAN); PERF-OBS-02; DR-008 (Auditor/SO saare customer emails dekh sakte). |
 | v0.11   | 2026-11-04 | M7 Notify/async: 16 executed + 1 static, 17 PASS; §7 flow matrix bhara; naya bug nahi; DR-009 (din ka email budget bina sign-in khatam). |
+| v0.12   | 2026-11-04 | M8 Core + bundle + release: 9 executed + 4 static, 13 PASS; naya bug/DR nahi; M15 ke liye CI/dependency-cruiser note. |
