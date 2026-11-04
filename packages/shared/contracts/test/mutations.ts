@@ -34,12 +34,42 @@ const mutations: Mutation[] = [
   {
     file: 'client',
     name: 'abort is wrapped as NETWORK_ERROR',
-    change: [['if (callOptions?.signal?.aborted) throw error;', '']],
+    change: [['if (callOptions?.signal?.aborted) throw callOptions.signal.reason;', '']],
   },
   {
     file: 'client',
     name: 'error responses are treated as success',
-    change: [['if (!response.ok) throw await failure(response);', '']],
+    change: [['if (response.status < 200 || response.status > 299) throw failure(response);', '']],
+  },
+  {
+    file: 'client',
+    name: 'a redirect is treated as success',
+    change: [['response.status > 299', 'response.status > 399']],
+  },
+  {
+    file: 'client',
+    name: 'axios throws on error statuses (they become NETWORK_ERROR)',
+    change: [['validateStatus: () => true,', '']],
+  },
+  {
+    file: 'client',
+    name: 'a POST without a body is sent as a form',
+    change: [["{ 'Content-Type': false }", '{}']],
+  },
+  {
+    file: 'client',
+    name: 'an answer is not told to onNetwork',
+    change: [["options.onNetwork?.('answered');", '']],
+  },
+  {
+    file: 'client',
+    name: 'no answer is not told to onNetwork',
+    change: [["options.onNetwork?.('unanswered');", '']],
+  },
+  {
+    file: 'client',
+    name: 'a given fetch is ignored',
+    change: [["adapter: 'fetch', env: { fetch: options.fetch }", '']],
   },
   {
     file: 'client',
@@ -102,8 +132,8 @@ const mutations: Mutation[] = [
     name: 'a non-GET route may be cached',
     change: [
       [
-        "if (route.method !== 'GET' || route.access.type !== 'public') {",
-        "if (route.access.type !== 'public') {",
+        "if (route.method !== 'GET' || route.access.type !== 'public') {\n      fail('only public GET routes can be cached');",
+        "if (route.access.type !== 'public') {\n      fail('only public GET routes can be cached');",
       ],
     ],
     tests: 'wrong declarations',
@@ -113,8 +143,8 @@ const mutations: Mutation[] = [
     name: 'a signed-in route may be cached',
     change: [
       [
-        "if (route.method !== 'GET' || route.access.type !== 'public') {",
-        "if (route.method !== 'GET') {",
+        "if (route.method !== 'GET' || route.access.type !== 'public') {\n      fail('only public GET routes can be cached');",
+        "if (route.method !== 'GET') {\n      fail('only public GET routes can be cached');",
       ],
     ],
     tests: 'wrong declarations',
@@ -253,8 +283,24 @@ const mutations: Mutation[] = [
   {
     file: 'catalogue/identity',
     name: 'any number of recovery codes',
-    change: [['recoveryCodes: array(string()).length(10)', 'recoveryCodes: array(string())']],
+    change: [
+      [
+        'output: object({ user: signedInZod, recoveryCodes: array(string()).length(10) }),',
+        'output: object({ user: signedInZod, recoveryCodes: array(string()) }),',
+      ],
+    ],
     tests: 'recovery code',
+  },
+  {
+    file: 'catalogue/identity',
+    name: 'any number of new recovery codes',
+    change: [
+      [
+        "  summary: 'Get 10 new recovery codes',\n  apps: APPS,\n  access: { type: 'signed-in' },\n  rateLimit: 'auth',\n  idempotency: false,\n  stepUp: true,\n  owner: 'identity',\n  input: {},\n  output: object({ recoveryCodes: array(string()).length(10) }),",
+        "  summary: 'Get 10 new recovery codes',\n  apps: APPS,\n  access: { type: 'signed-in' },\n  rateLimit: 'auth',\n  idempotency: false,\n  stepUp: true,\n  owner: 'identity',\n  input: {},\n  output: object({ recoveryCodes: array(string()) }),",
+      ],
+    ],
+    tests: 'account’s password',
   },
   {
     file: 'catalogue/identity',
@@ -300,6 +346,134 @@ const mutations: Mutation[] = [
       ],
     ],
     tests: 'need a session',
+  },
+  // the signed-in authenticator (ARCHITECTURE §9.2)
+  {
+    file: 'routes',
+    name: 'a public route may ask a step-up',
+    change: [["if (route.stepUp && route.access.type === 'public') fail", 'if (false) fail']],
+    tests: 'wrong declarations',
+  },
+  {
+    file: 'catalogue/identity',
+    name: 'new recovery codes without a step-up',
+    change: [
+      [
+        "  path: '/auth/authenticator/recovery-codes',\n  summary: 'Get 10 new recovery codes',\n  apps: APPS,\n  access: { type: 'signed-in' },\n  rateLimit: 'auth',\n  idempotency: false,\n  stepUp: true,",
+        "  path: '/auth/authenticator/recovery-codes',\n  summary: 'Get 10 new recovery codes',\n  apps: APPS,\n  access: { type: 'signed-in' },\n  rateLimit: 'auth',\n  idempotency: false,\n  stepUp: false,",
+      ],
+    ],
+    tests: 'signed-in authenticator',
+  },
+  {
+    file: 'catalogue/identity',
+    name: 'turned off without a step-up',
+    change: [
+      [
+        "  summary: 'Turn the authenticator off',\n  apps: APPS,\n  access: { type: 'signed-in' },\n  rateLimit: 'auth',\n  idempotency: false,\n  stepUp: true,",
+        "  summary: 'Turn the authenticator off',\n  apps: APPS,\n  access: { type: 'signed-in' },\n  rateLimit: 'auth',\n  idempotency: false,\n  stepUp: false,",
+      ],
+    ],
+    tests: 'signed-in authenticator',
+  },
+  {
+    file: 'catalogue/identity',
+    name: 'set up without the password',
+    change: [
+      [
+        'input: { body: object({ code: otpZod, password: currentPasswordZod }) },',
+        'input: { body: object({ code: otpZod, password: currentPasswordZod.optional() }) },',
+      ],
+    ],
+    tests: 'account’s password',
+  },
+  {
+    file: 'catalogue/iam',
+    name: 'a step-up with both proofs, or neither',
+    change: [
+      [
+        'body: xor([object({ code: otpZod }), object({ recoveryCode: recoveryCodeZod })]),',
+        'body: object({ code: otpZod.optional(), recoveryCode: recoveryCodeZod.optional() }),',
+      ],
+    ],
+    tests: 'never both or neither',
+  },
+  // navigation routes and social sign-in (T3.1 PR 4)
+  {
+    file: 'routes',
+    name: 'a navigation route may be a POST or signed in',
+    change: [
+      [
+        "    if (route.method !== 'GET' || route.access.type !== 'public') {\n      fail('a navigation route must be a public GET');",
+        "    if (false) {\n      fail('a navigation route must be a public GET');",
+      ],
+    ],
+    tests: 'a navigation route is a public GET',
+  },
+  {
+    file: 'routes',
+    name: 'a navigation route may be cached',
+    change: [["if (route.cache) fail('a navigation route is never cached');", '']],
+    tests: 'a navigation route is a public GET',
+  },
+  {
+    file: 'routes',
+    name: 'a navigation route may answer anything',
+    change: [['if (route.output !== navigationZod) fail(', 'if (false) fail(']],
+    tests: 'a navigation route is a public GET',
+  },
+  {
+    file: 'routes',
+    name: 'a redirect to //another-host passes',
+    change: [['/^(?:\\/(?![/\\\\])\\S*|https:', '/^(?:\\/\\S*|https:']],
+    tests: 'a navigation route is a public GET',
+  },
+  {
+    file: 'routes',
+    name: 'a redirect to any plain-http host passes',
+    change: [['http:\\/\\/(?:localhost|127\\.0\\.0\\.1)', 'http:\\/\\/(?:[^/\\s]+)']],
+    tests: 'a navigation route is a public GET',
+  },
+  {
+    file: 'routes',
+    name: 'the gateway never hears of navigation routes',
+    change: [['    navigation: route.navigation === true,', '    navigation: false,']],
+    tests: 'the gateway manifest',
+  },
+  {
+    file: 'client',
+    name: 'a navigation route can be called',
+    change: [
+      [
+        '    if (route.navigation) {\n      throw new Error(',
+        '    if (false) {\n      throw new Error(',
+      ],
+    ],
+    tests: 'are links the browser opens',
+  },
+  {
+    file: 'openapi',
+    name: 'a navigation route asks for the app header',
+    change: [['      ...(route.navigation\n        ? []', '      ...(false\n        ? []']],
+    tests: 'describes a navigation route',
+  },
+  {
+    file: 'openapi',
+    name: 'a navigation route documented as { data }',
+    change: [['        ...(route.navigation\n', '        ...(false\n']],
+    tests: 'describes a navigation route',
+  },
+  {
+    file: 'catalogue/social',
+    name: 'next may leave for //another-host',
+    change: [['/^\\/(?![/\\\\])[^\\s\\\\]*$/', '/^\\/[^\\s]*$/']],
+    tests: 'no open redirect',
+  },
+  {
+    file: 'catalogue/social',
+    name: 'next of any length',
+    change: [['next.length <= 512 && ', '']],
+    tests: 'no open redirect',
   },
 ];
 

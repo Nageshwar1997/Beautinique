@@ -21,12 +21,17 @@ import {
   type WipeWatchdog,
 } from '@beautinique/backend-server-queue';
 import {
+  authenticatorChanged,
+  authenticatorReset,
+  invitationCreated,
   otpRequested,
   passportAudience,
   sessionReuseDetected,
+  signInMethodChanged,
 } from '@beautinique/shared-contracts';
 
 import type { Config } from './config.ts';
+import { socialSettings } from './oauth-providers.ts';
 import type { OtpDeps } from './otp.ts';
 import { hibpBreachCheck } from './password.ts';
 import { runReleaseSteps } from './release.ts';
@@ -35,11 +40,17 @@ import { type SigningKeys, signingKeys } from './signing-keys.ts';
 
 /**
  * Who gets identity's events (the relay's list): notify emails the code, and tells a person when
- * a copied refresh token ended their session (backend/notify).
+ * a copied refresh token ended their session, tells an invited person how to accept,
+ * tells a person whose authenticator a Security Officer reset, and tells a person who changed
+ * their own authenticator (backend/notify).
  */
 export const SUBSCRIBERS: Readonly<Record<string, readonly string[]>> = {
   [otpRequested.type]: ['notify.otpEmail'],
   [sessionReuseDetected.type]: ['notify.securityEmail'],
+  [invitationCreated.type]: ['notify.invitationEmail'],
+  [authenticatorReset.type]: ['notify.authenticatorEmail'],
+  [authenticatorChanged.type]: ['notify.authenticatorChangedEmail'],
+  [signInMethodChanged.type]: ['notify.signInMethodEmail'],
 };
 
 export interface RuntimeOptions {
@@ -144,6 +155,7 @@ export async function startRuntime(config: Config, options: RuntimeOptions): Pro
         emailLimitPerHour: config.otpEmailLimitPerHour,
         legalVersion: config.legalVersion,
         breached: hibpBreachCheck({ url: config.hibpUrl, logger }),
+        social: socialSettings(config),
         sessions: sessions({ mongo, redis: redis.client, keys, signing, logger }),
         passport: passportVerifier({
           keys: jwksCache({

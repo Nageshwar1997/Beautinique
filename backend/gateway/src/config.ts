@@ -83,7 +83,7 @@ export const configZod = object({
     }
     return secrets;
   }),
-  /** Exact hosts of each app: `customer=bq-customer.vercel.app,customer=localhost:3001` (§7.2, §11.4). */
+  /** Exact hosts of each app: `customer=beautinique-customer.vercel.app,customer=localhost:3001` (§7.2, §11.4). */
   appHosts: string()
     .default('')
     .transform((value, ctx) => {
@@ -100,7 +100,7 @@ export const configZod = object({
       }
       return hosts;
     }),
-  /** Vercel project of each app, for its preview hosts (§11.4): `customer=bq-customer` */
+  /** Vercel project of each app, for its preview hosts (§11.4): `customer=beautinique-customer` */
   vercelProjects: string()
     .default('')
     .transform((value, ctx) => appPairs(value, ctx, SLUG, 'vercel project')),

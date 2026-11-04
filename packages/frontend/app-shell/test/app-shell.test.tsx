@@ -11,6 +11,7 @@ import { afterEach, describe, expect, it } from 'vitest';
 import {
   AppFrame,
   ErrorPage,
+  IconCreditsPage,
   NavList,
   setThemeChoice,
   THEME_SCRIPT,
@@ -29,9 +30,17 @@ afterEach(() => {
   html.removeAttribute('theme-switching');
 });
 
-/** axe on what is rendered (colour contrast needs a real layout: the browser check covers it). */
+/**
+ * axe on what is rendered. Colour contrast needs a real layout, and label in name a canvas (jsdom
+ * has none: the rule only errors here); the browser check covers both.
+ */
 async function violations(container: HTMLElement) {
-  const results = await axe.run(container, { rules: { 'color-contrast': { enabled: false } } });
+  const results = await axe.run(container, {
+    rules: {
+      'color-contrast': { enabled: false },
+      'label-content-name-mismatch': { enabled: false },
+    },
+  });
   return results.violations.map((violation) => `${violation.id}: ${violation.help}`);
 }
 
@@ -203,6 +212,25 @@ describe('AppFrame', () => {
     expect(main.getAttribute('tabindex')).toBe('-1');
     expect(screen.getByRole('banner').textContent).toBe('Head');
     expect(screen.getByRole('contentinfo').textContent).toBe('Foot');
+    expect(await violations(container)).toEqual([]);
+  });
+});
+
+describe('IconCreditsPage', () => {
+  it('credits every icon set with its author and license, as CC BY asks', async () => {
+    const { container } = render(<IconCreditsPage />);
+    expect(screen.getByRole('heading', { level: 1, name: 'Icon credits' })).toBeTruthy();
+    expect(screen.getByRole('link', { name: '480 Design' }).getAttribute('href')).toBe(
+      'https://www.figma.com/community/file/1166831539721848736',
+    );
+    expect(screen.getByRole('link', { name: 'CC BY 4.0' }).getAttribute('href')).toBe(
+      'https://creativecommons.org/licenses/by/4.0/',
+    );
+    expect(screen.getAllByRole('listitem').map((item) => item.textContent)).toEqual([
+      'Solar by 480 Design, licensed under CC BY 4.0',
+      'SVG Logos by Gil Barbara, licensed under CC0 1.0',
+      'Simple Icons by Simple Icons Collaborators, licensed under CC0 1.0',
+    ]);
     expect(await violations(container)).toEqual([]);
   });
 });

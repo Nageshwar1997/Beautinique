@@ -197,6 +197,45 @@ const mutations: Mutation[] = [
     ],
     tests: '503',
   },
+  {
+    file: 'tokens',
+    name: 'a JWKS error page taken for keys',
+    change: [['if (response.status < 200 || response.status > 299) {', 'if (false) {']],
+    tests: 'jwksFromUrl',
+  },
+  {
+    file: 'tokens',
+    name: 'a JWKS read waits for ever',
+    change: [['signal: AbortSignal.timeout(JWKS_TIMEOUT_MS),', '']],
+    tests: 'jwksFromUrl',
+  },
+  {
+    file: 'tokens',
+    name: 'axios throws its own error on a JWKS error page',
+    change: [
+      [
+        `    validateStatus: () => true,
+  });
+  if (response.status < 200`,
+        `  });
+  if (response.status < 200`,
+      ],
+    ],
+    tests: 'jwksFromUrl',
+  },
+  // navigation routes (T3.1 PR 4)
+  {
+    file: 'route',
+    name: 'a navigation route answers { data }',
+    change: [['      if (route.navigation) {', '      if (false) {']],
+    tests: 'navigation route',
+  },
+  {
+    file: 'route',
+    name: 'a navigation route redirects with a 302',
+    change: [['res.redirect(303,', 'res.redirect(302,']],
+    tests: 'navigation route',
+  },
 ];
 
 export default mutations;

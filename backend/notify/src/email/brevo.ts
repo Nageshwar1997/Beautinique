@@ -1,3 +1,5 @@
+import axios, { type AxiosResponse } from 'axios';
+
 import {
   type EmailFrom,
   type EmailMessage,
@@ -30,16 +32,11 @@ export function brevoSender({
   return {
     name: 'brevo',
     send: async (message: EmailMessage) => {
-      let response: Response;
+      let response: AxiosResponse<unknown>;
       try {
-        response = await fetch(endpoint, {
-          method: 'POST',
-          headers: {
-            'api-key': apiKey,
-            'content-type': 'application/json',
-            accept: 'application/json',
-          },
-          body: JSON.stringify({
+        response = await axios.post<unknown>(
+          endpoint.href,
+          JSON.stringify({
             sender: { email: from.email, name: from.name },
             to: [{ email: message.to }],
             subject: message.subject,
@@ -47,18 +44,27 @@ export function brevoSender({
             textContent: message.text,
             tags: message.tags,
           }),
-          signal: AbortSignal.timeout(timeoutMs),
-        });
+          {
+            headers: {
+              'api-key': apiKey,
+              'content-type': 'application/json',
+              accept: 'application/json',
+            },
+            signal: AbortSignal.timeout(timeoutMs),
+            // a redirect would carry the api-key to another address
+            maxRedirects: 0,
+            validateStatus: () => true,
+          },
+        );
       } catch {
+        // axios's error holds the request (the api-key, the message): never pass it on
         throw networkFailure('BREVO');
       }
-      if (!response.ok) {
-        // the body may echo the message: read it away, never into an error or a log
-        await response.body?.cancel();
+      if (response.status < 200 || response.status > 299) {
+        // the body may echo the message: never into an error or a log
         throw httpFailure('BREVO', response.status);
       }
-      const body: unknown = await response.json().catch(() => null);
-      return { providerId: providerIdOf(body, 'messageId') };
+      return { providerId: providerIdOf(response.data, 'messageId') };
     },
   };
 }

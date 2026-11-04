@@ -10,7 +10,14 @@ import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { brevoSender } from '../src/email/brevo.ts';
 import { mailpitSender } from '../src/email/mailpit.ts';
 import { type EmailMessage, EmailSendError } from '../src/email/port.ts';
-import { otpEmail, sessionReuseEmail } from '../src/email/templates.ts';
+import {
+  authenticatorChangedEmail,
+  authenticatorResetEmail,
+  invitationEmail,
+  otpEmail,
+  sessionReuseEmail,
+  signInMethodEmail,
+} from '../src/email/templates.ts';
 
 const MAILPIT_URL = 'http://localhost:8025';
 const from = { email: 'no-reply@beautinique.example', name: 'Beautinique' };
@@ -224,6 +231,127 @@ describe('mailpitSender', () => {
     const gone = mailpitSender({ url: 'http://127.0.0.1:1', from });
     const missing = await failureOf(gone.send(message('x@beautinique.example')));
     expect([missing.code, missing.retry]).toEqual(['MAILPIT_UNREACHABLE', true]);
+  });
+});
+
+describe('the invitation emails', () => {
+  it('names the app, the role, how to accept and until when, with no secret', () => {
+    const email = invitationEmail({
+      to: 'asha@beautinique.example',
+      app: 'admin',
+      roleName: 'State Admin',
+      expiresAt: '2026-11-05T09:30:00.000Z',
+      url: 'https://bq-admin.example',
+    });
+    expect(email.subject).toBe('You are invited to Beautinique Admin');
+    expect(email.text).toContain('as State Admin');
+    expect(email.text).toContain('"Accept an invitation"');
+    expect(email.text).toContain('5 Nov 2026, 3:00 pm IST');
+    expect(email.text).toContain('https://bq-admin.example');
+    expect(email.html).toContain('href="https://bq-admin.example"');
+    expect(email.tags).toEqual(['invitation']);
+    const escaped = invitationEmail({
+      to: 'x@beautinique.example',
+      app: 'seller',
+      roleName: '<b>Owner</b>',
+      expiresAt: '2026-11-05T09:30:00.000Z',
+    });
+    expect(escaped.html).not.toContain('<b>Owner');
+    expect(escaped.html).not.toContain('href=');
+  });
+
+  it('gives the invitation code its own subject, words and tag', () => {
+    const email = otpEmail({
+      to: 'asha@beautinique.example',
+      code: '123456',
+      app: 'admin',
+      purpose: 'invite',
+      minutes: 10,
+    });
+    expect(email.subject).toBe('Accept your Beautinique Admin invitation');
+    expect(email.text).toContain('accept your invitation to Beautinique Admin');
+    expect(email.subject).not.toContain('123456');
+    expect(email.tags).toEqual(['otp-invite']);
+  });
+});
+
+describe('the authenticator-reset email', () => {
+  it('says what happened, when (IST), and what to do if it was not asked for', () => {
+    const email = authenticatorResetEmail({
+      to: 'asha@beautinique.example',
+      resetAt: '2026-10-29T09:30:00.000Z',
+    });
+    expect(email.subject).toBe('Your Beautinique authenticator was reset');
+    expect(email.text).toContain('29 Oct 2026, 3:00 pm IST');
+    expect(email.text).toContain('signed out everywhere');
+    expect(email.text).toContain('"Forgot password"');
+    expect(email.tags).toEqual(['security-authenticator-reset']);
+  });
+});
+
+describe('the authenticator-changed email', () => {
+  const input = {
+    to: 'riya@beautinique.example',
+    app: 'customer' as const,
+    device: 'Chrome on Windows',
+    changedAt: '2026-10-31T09:30:00.000Z',
+  };
+
+  it('says what changed, where and when (IST), and the way out if it was not the person', () => {
+    const email = authenticatorChangedEmail({ ...input, change: 'enabled' });
+    expect(email.subject).toBe('An authenticator was set up for your Beautinique account');
+    expect(email.text).toContain('in Beautinique (Chrome on Windows) on 31 Oct 2026, 3:00 pm IST');
+    expect(email.text).toContain('every sign-in asks for its code');
+    expect(email.text).toContain('"Forgot password"');
+    expect(email.text).toContain('signs you out everywhere');
+    expect(email.tags).toEqual(['security-authenticator-enabled']);
+  });
+
+  it('has its own words for each change, and escapes what it shows in the HTML', () => {
+    const subjects = (['enabled', 'replaced', 'recovery-codes', 'disabled'] as const).map(
+      (change) => authenticatorChangedEmail({ ...input, change }).subject,
+    );
+    expect(new Set(subjects).size).toBe(4);
+    const off = authenticatorChangedEmail({ ...input, app: 'seller', change: 'disabled' });
+    expect(off.subject).toBe('Your Beautinique authenticator was turned off');
+    expect(off.text).toContain('in Beautinique Seller');
+    expect(off.text).toContain('only for your password');
+    expect(authenticatorChangedEmail({ ...input, change: 'recovery-codes' }).text).toContain(
+      'The old ones no longer work.',
+    );
+    const odd = authenticatorChangedEmail({ ...input, device: '<b>x</b>', change: 'replaced' });
+    expect(odd.html).not.toContain('<b>x</b>');
+    expect(odd.html).toContain('&#60;b&#62;x');
+  });
+});
+
+describe('the sign-in method email', () => {
+  const input = {
+    to: 'riya@beautinique.example',
+    app: 'customer' as const,
+    device: 'Chrome on Windows',
+    changedAt: '2026-11-03T09:30:00.000Z',
+  };
+
+  it('names the provider, what changed, where and when (IST), and the way out', () => {
+    const linked = signInMethodEmail({ ...input, provider: 'google', change: 'linked' });
+    expect(linked.subject).toBe('Google sign-in was added to your Beautinique account');
+    expect(linked.text).toContain('can now be signed in to with Google');
+    expect(linked.text).toContain('in Beautinique (Chrome on Windows) on 3 Nov 2026, 3:00 pm IST');
+    expect(linked.text).toContain('"Forgot password"');
+    expect(linked.tags).toEqual(['security-sign-in-google-linked']);
+    const removed = signInMethodEmail({ ...input, provider: 'linkedin', change: 'removed' });
+    expect(removed.subject).toBe('LinkedIn sign-in was removed from your Beautinique account');
+    expect(removed.text).toContain('Signing in with LinkedIn was removed');
+    const odd = signInMethodEmail({
+      ...input,
+      provider: 'github',
+      change: 'linked',
+      device: '<b>x</b>',
+    });
+    expect(odd.subject).toContain('GitHub');
+    expect(odd.html).not.toContain('<b>x</b>');
+    expect(odd.html).toContain('&#60;b&#62;x');
   });
 });
 

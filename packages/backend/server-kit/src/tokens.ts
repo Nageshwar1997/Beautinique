@@ -15,6 +15,7 @@ import {
   PASSPORT_ISSUER,
   PASSPORT_SECONDS,
 } from '@beautinique/shared-contracts';
+import axios from 'axios';
 import type { Request } from 'express';
 
 import { AppError } from './errors';
@@ -110,11 +111,19 @@ export function jwksCache({
   };
 }
 
+/** How long a JWKS read may take in all (an axios `timeout` would only watch a quiet socket). */
+export const JWKS_TIMEOUT_MS = 2_000;
+
 /** A JWKS read from a URL (with a 2 s timeout). */
 export const jwksFromUrl = (url: string) => async (): Promise<unknown> => {
-  const response = await fetch(url, { signal: AbortSignal.timeout(2_000) });
-  if (!response.ok) throw new Error(`JWKS answered ${String(response.status)}`);
-  return response.json();
+  const response = await axios.get<unknown>(url, {
+    signal: AbortSignal.timeout(JWKS_TIMEOUT_MS),
+    validateStatus: () => true,
+  });
+  if (response.status < 200 || response.status > 299) {
+    throw new Error(`JWKS answered ${String(response.status)}`);
+  }
+  return response.data;
 };
 
 /** Who signed in, as the gateway vouches for one request. */

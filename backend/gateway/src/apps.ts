@@ -5,7 +5,7 @@ const MAX_LABEL = 63;
 
 /** Which host belongs to which of the 11 apps: exact production and dev hosts, plus Vercel previews. */
 export interface AppRegistry {
-  /** the app of a host (`bq-customer.vercel.app`, `localhost:3001`), or null when it is no app's */
+  /** the app of a host (`beautinique-customer.vercel.app`, `localhost:3001`), or null when it is no app's */
   appOf(host: string): AppId | null;
 }
 

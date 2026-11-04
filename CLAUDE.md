@@ -14,7 +14,7 @@ launch jaisi banti hai. Legal cheezein dummy data ke saath implement hoti hain.
 
 1. [docs/HANDOFF.md](docs/HANDOFF.md): abhi kya chal raha hai, agla kaam.
 2. [docs/RULES.md](docs/RULES.md): kaam ke niyam (Definition of Done, git, code, testing, security, AI).
-3. [docs/TASKS.md](docs/TASKS.md): phases aur tasks (`T<phase>.<n>`), owner ke kaam (section A).
+3. [docs/TASKS.md](docs/TASKS.md): phases aur tasks (`T<phase>.<n>`), owner ke kaam (section A), project ka progress % (section P).
 4. [docs/MEMORY.md](docs/MEMORY.md): decision log, purane sabak, traps.
 5. [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md), [docs/PRD.md](docs/PRD.md), [docs/DESIGN.md](docs/DESIGN.md): zaroorat ke hisaab se, poore nahi.
 6. [docs/packages/README.md](docs/packages/README.md): packages ka CLI (create, publish, republish, update-deps).
@@ -40,7 +40,7 @@ launch jaisi banti hai. Legal cheezein dummy data ke saath implement hoti hain.
 - **Git flow (owner, 2026-10-25):** `prerelease` se feature branch → PR → **`prerelease`** (development)
   → PR → **`release`** (production) → release safal hone ke baad PR `release` → **`main`** (sirf final code).
   `main` pe kabhi seedha kaam ya feature PR nahi; `main` aur `release` pe seedha push nahi. `prerelease` pe sirf
-  chhota fix seedha push ho sakta hai (1–10 files, local checks ke baad, force push nahi; RULES §2). Release pe bane commits
+  chhota fix (1–10 files, local checks ke baad, force push nahi) aur `linkedin-posts/` ki files aur `/linkedin-post` skill seedha push ho sakti hain (RULES §2). Release pe bane commits
   (package release, hotfix) ke baad `release` → `prerelease` back-merge bhi. CI ye flow check karta hai (RULES §2).
 - **Commit/push sirf jo insaan kaam kar raha hai uske kehne pe.** Destructive kaam se pehle poochho.
 - **npm pe kuch bhi publish, `npm login/logout` ya `npm trust` sirf insaan ke kehne pe**; tests kabhi
@@ -72,10 +72,12 @@ npm run build
 | `npm run update-deps` (`update-deps:minor`, `update-deps:patch`, `-- --dry-run`)      | Saare package.json ki dependencies naye versions pe (default major), phir `npm install`; `typescript` hold pe ([packages/README.md](docs/packages/README.md) §7) |
 | `npm run dev:backend`                                                                 | `backend/bundle`: saare deployables ek process me                                                                                                                |
 | `npm run db:release` (`-- --force`, `-- --env live`)                                  | Deployables ke release steps (migrations, indexes) bina server chalaye; live pe `live` type karke ([backend/bundle/README.md](backend/bundle/README.md))         |
+| `npm run db:grant-master -- --email <email>` (`--env live`)                           | Pehla Master (account pehle se, max 2); live pe `live` type karke ([backend/bundle/README.md](backend/bundle/README.md))                                         |
 | `npm run infra:up` / `infra:down` / `infra:reset`                                     | Local Mongo, Valkey, Mailpit (Docker; [infra/README.md](infra/README.md))                                                                                        |
 | `npm run infra:mutation:up` / `infra:mutation:down`                                   | Mutation runs ke liye alag Mongo (27018) aur Valkey (6380): normal kaam saath chalta rahe (RULES §6)                                                             |
 | `npm run mutate -- --package backend-server-queue` (`--changed`, `--base prerelease`) | Mutation testing (RULES §6): package ki `test/mutations.ts`, temp copy me                                                                                        |
 | `npm run playground --workspace @beautinique/frontend-styles`                         | Styles ka Vite playground (port 5180)                                                                                                                            |
+| `npm run playground --workspace @beautinique/frontend-hooks`                          | Hooks ka playground (port 5183); components ka 5184, forms ka 5185, app-shell ka 5182, icons ka 5181                                                             |
 
 ## Repo ka naksha
 
@@ -95,9 +97,11 @@ npm run build
   production Redis laptop ya tests se kabhi nahi.
 - **Zod:** `import { object, string, gstinZod } from '@beautinique/shared-zod'` (named, `z.` nahi); seedha `zod` sirf
   `packages/shared/zod` me (ESLint rokta hai). Hamare schemas `...Zod`, `enum as zodEnum`.
+- **HTTP calls sirf axios** (owner, 2026-10-31; RULES §3.8): apps `@beautinique/frontend-api-client` se, backend bhi axios se. `fetch`/`node:http` request sirf gateway `proxy.ts` aur tests me (ESLint rokta hai). axios ka error kabhi log nahi (usme request ke headers/body).
 - **Routes:** contract pehle (`defineRoute`), handler `mountRoute(router, route, handler)` (`@beautinique/backend-server-kit`) se: input/output contract se check hota hai. Namuna: `backend/core/src/modules/platform/` (endpoint + event + subscriber); core ke tests ko `infra:up` chahiye.
 - `configs/`: shared ESLint factory (`eslint-config.js`, naam `eslint.config.js` nahi ho sakta) aur
   tsconfig presets.
+- `linkedin-posts/`: build-in-public LinkedIn posts (date ke folder, `HISTORY.md`); `/linkedin-post` skill (`.claude/skills/linkedin-post/`) draft banata hai, post insaan khud karta hai. Niyam: [linkedin-posts/README.md](linkedin-posts/README.md).
 - `AGENTS.md`: doosre AI tools (Codex, Cursor, Copilot, Gemini ...) ke liye chhota pointer; niyam yahin (`CLAUDE.md`) rehte hain. Niyam badlo to dono dekho.
 - `.github/workflows/`: `ci.yml` (har PR, aur `main`/`prerelease`/`release` pe push), `release.yml`
   (packages publish, sirf `release` branch, haath se).
@@ -106,6 +110,8 @@ npm run build
 
 [docs/HANDOFF.md](docs/HANDOFF.md) ke "Abhi ki halat" aur "Agla kaam" update karo: kya kiya, kya
 adhoora hai, kya uncommitted hai, kaunsa sawal kiske liye khula hai. Change log me ek line jodo.
+**Progress % (owner, 2026-11-03):** kisi task ka checkbox badla (ya task juda/hata) to usi commit me
+[docs/TASKS.md](docs/TASKS.md) §P ka table, poora % aur itihaas line (hisaab wahin likha hai), aur HANDOFF §1 ki "Progress" line.
 
 **Baari-baari (owner, 2026-10-25):** 2 developers, dono Claude Code ke saath. Weekly usage ~85% pe Claude
 naya kaam nahi uthata: kaam commit-ready, branch push, HANDOFF §4 me adhoora aur agla kaam saaf; doosra

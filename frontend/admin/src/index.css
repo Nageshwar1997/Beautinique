@@ -1,2 +1,6 @@
 @import 'tailwindcss';
 @import '@beautinique/frontend-styles';
+@import '@beautinique/frontend-app-shell/tailwind.css';
+@import '@beautinique/frontend-components/tailwind.css';
+@import '@beautinique/frontend-forms/tailwind.css';
+@import '@beautinique/frontend-auth-ui/tailwind.css';

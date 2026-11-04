@@ -11,10 +11,15 @@ export {
   ACCESS_TOKEN_SECONDS,
   accessCookieName,
   AUTH_PROVIDERS,
+  AUTHENTICATOR_CHANGES,
+  authenticatorChanged,
+  confirmAuthenticator,
   confirmTotpEnroll,
   consentProblems,
+  disableAuthenticator,
   endOtherSessions,
   endSession,
+  enrollAuthenticator,
   events,
   getMe,
   getPing,
@@ -24,6 +29,7 @@ export {
   loginRecovery,
   loginTotp,
   logout,
+  newRecoveryCodes,
   OTP_OUTCOMES,
   OTP_PURPOSES,
   otpConsentZod,
@@ -45,6 +51,7 @@ export {
   revokedUserKey,
   routes,
   SESSION_POLICIES,
+  sessionHintCookieName,
   type SessionPolicy,
   sessionReuseDetected,
   SIGN_UP_APPS,
@@ -56,6 +63,8 @@ export {
   verifyOtp,
   wake,
 } from './catalogue';
+export * from './catalogue/iam';
+export * from './catalogue/social';
 export {
   ApiError,
   type CallArgs,
@@ -63,6 +72,8 @@ export {
   type Client,
   type ClientOptions,
   createClient,
+  navigationHref,
+  type NetworkEvent,
   queryKey,
   queryKeyPrefix,
 } from './client';
@@ -117,6 +128,7 @@ export {
   matchPath,
   MAX_S_MAX_AGE,
   MAX_STALE_WHILE_REVALIDATE,
+  navigationZod,
   pathParams,
   RATE_LIMIT_CLASSES,
   type RateLimitClass,
@@ -128,3 +140,4 @@ export {
   type RouteRequest,
   routeTable,
 } from './routes';
+export { INDIAN_STATES, type IndianState, isStateId, type StateId } from './states';

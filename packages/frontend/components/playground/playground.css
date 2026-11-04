@@ -1,0 +1,7 @@
+@import 'tailwindcss';
+@import '@beautinique/frontend-styles';
+@import '@beautinique/frontend-app-shell/tailwind.css';
+
+/* the components from their source (apps read ./dist through tailwind.css), and the playground */
+@source '../src';
+@source '.';

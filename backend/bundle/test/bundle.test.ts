@@ -1,9 +1,12 @@
 import { randomBytes, randomUUID } from 'node:crypto';
 import { type AddressInfo, createServer } from 'node:net';
 
+import { totpCode } from '@beautinique/backend-server-crypto';
 import { ConfigError, createLogger } from '@beautinique/backend-server-kit';
-import { connectMongo } from '@beautinique/backend-server-mongo';
-import { connectRedis } from '@beautinique/backend-server-queue';
+import { connectMongo, withTransaction } from '@beautinique/backend-server-mongo';
+import { connectRedis, writeEvent } from '@beautinique/backend-server-queue';
+import { invitationCreated } from '@beautinique/shared-contracts';
+import { uuidv7 } from '@beautinique/shared-utils';
 import { afterAll, describe, expect, it } from 'vitest';
 
 import { startBundle } from '../src/bundle.ts';
@@ -22,6 +25,10 @@ const notifyDbName = `${dbName}_notify`;
 const ORIGIN_SECRET = randomBytes(32).toString('base64url');
 // identity seals sign-in codes with it, notify opens them: one value for both (ARCHITECTURE §7.1)
 const OTP_EVENT_KEYS = `e1:${randomBytes(32).toString('base64')}`;
+// identity's own keys, the same for every bundle of the run (one database): its token keys are
+// sealed with them, as live, where they never change
+const FIELD_KEYS = `k1:${randomBytes(32).toString('base64')}`;
+const BLIND_INDEX_KEY = `b1:${randomBytes(32).toString('base64')}`;
 
 afterAll(async () => {
   const logger = createLogger({ name: 'bundle-test', level: 'silent' });
@@ -43,8 +50,8 @@ const quiet = () => ({
   IDENTITY__MONGO_URI: MONGO_URI,
   IDENTITY__MONGO_DB_NAME: identityDbName,
   IDENTITY__REDIS_URL: REDIS_DB,
-  IDENTITY__FIELD_KEYS: `k1:${randomBytes(32).toString('base64')}`,
-  IDENTITY__BLIND_INDEX_KEY: `b1:${randomBytes(32).toString('base64')}`,
+  IDENTITY__FIELD_KEYS: FIELD_KEYS,
+  IDENTITY__BLIND_INDEX_KEY: BLIND_INDEX_KEY,
   IDENTITY__OTP_EVENT_KEYS: OTP_EVENT_KEYS,
   // nothing listens there: the breached-password check is away, so it lets passwords through
   // (fail-open), and the tests never reach the internet
@@ -258,6 +265,389 @@ describe('bundle', () => {
       expect((await refresh(token)).status).toBe(401);
       // the same access cookie stops at once (Redis), not when its 10 minutes run out
       expect((await signedInGet('/iam/me')).status).toBe(401);
+    } finally {
+      await bundle.stop();
+      await fetch('http://localhost:8025/api/v1/messages', {
+        method: 'DELETE',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({ IDs: mailIds }),
+      });
+    }
+  });
+
+  it('takes an invitation from identity’s outbox to the inbox, and its acceptance through the gateway (T3.3)', async () => {
+    const bundle = await startBundle({ port: 0, env: quiet() });
+    const email = `invited-${randomUUID().slice(0, 8)}@beautinique.example`;
+    const logger = createLogger({ name: 'bundle-test', level: 'silent' });
+    const identityDb = await connectMongo({
+      uri: MONGO_URI,
+      dbName: identityDbName,
+      appName: 'bundle-test',
+      logger,
+    });
+    const mailIds: string[] = [];
+    interface Found {
+      messages: { ID: string; Subject: string; Snippet: string }[];
+    }
+    /** The newest email to the invited address with this subject, once it reached Mailpit. */
+    const mail = async (subject: string) => {
+      const search = `http://localhost:8025/api/v1/search?query=${encodeURIComponent(`to:${email} subject:"${subject}"`)}`;
+      const end = Date.now() + 10_000;
+      for (;;) {
+        const found = (await (await fetch(search)).json()) as Found;
+        const first = found.messages[0];
+        if (first) {
+          mailIds.push(...found.messages.map((m) => m.ID));
+          return first;
+        }
+        if (Date.now() > end) throw new Error(`no "${subject}" email reached Mailpit`);
+        await new Promise((resolve) => setTimeout(resolve, 100));
+      }
+    };
+    try {
+      // what POST /iam/invitations writes (its route opens at the gateway with T3.3 PR C): a
+      // Master who invites, the invitation, and its event in the same transaction
+      const inviter = uuidv7();
+      const invitationId = uuidv7();
+      const now = new Date();
+      const expiresAt = new Date(now.getTime() + 7 * 86_400_000);
+      await withTransaction(identityDb, async (session) => {
+        await identityDb.db
+          .collection<Record<string, unknown> & { _id: string }>('identity_grants')
+          .insertOne(
+            {
+              _id: uuidv7(),
+              userId: inviter,
+              role: 'master.master',
+              app: 'master',
+              scope: { type: 'global', ids: [] },
+              validFrom: null,
+              validTo: null,
+              grantedBy: null,
+              approvedBy: null,
+              via: 'bootstrap',
+              active: true,
+              createdAt: now,
+              endedAt: null,
+              endedBy: null,
+            },
+            { session },
+          );
+        await identityDb.db
+          .collection<Record<string, unknown> & { _id: string }>('identity_invitations')
+          .insertOne(
+            {
+              _id: invitationId,
+              email,
+              role: 'support.l1_agent',
+              app: 'support',
+              scope: { type: 'global', ids: [] },
+              validFrom: null,
+              validTo: null,
+              invitedBy: inviter,
+              invitedFrom: 'master',
+              status: 'pending',
+              expiresAt,
+              createdAt: now,
+              endedAt: null,
+              endedBy: null,
+            },
+            { session },
+          );
+        await writeEvent(identityDb, session, invitationCreated, {
+          aggregate: { type: 'invitation', id: invitationId },
+          actor: { type: 'user', id: inviter },
+          correlationId: `bundle-${invitationId}`,
+          data: {
+            invitationId,
+            email,
+            app: 'support',
+            roleName: 'Customer Support Agent (L1)',
+            expiresAt: expiresAt.toISOString(),
+          },
+        });
+      });
+      const invited = await mail('You are invited to Beautinique Support');
+      expect(invited.Snippet).toContain('Customer Support Agent (L1)');
+
+      const headers = {
+        'X-BQ-App': 'support',
+        'x-origin-secret': ORIGIN_SECRET,
+        'content-type': 'application/json',
+      };
+      const asked = await fetch(`${bundle.url}/api/v1/auth/invitations/code`, {
+        method: 'POST',
+        headers,
+        body: JSON.stringify({ email }),
+      });
+      expect(asked.status).toBe(200);
+      const { data } = (await asked.json()) as { data: { challengeId: string } };
+      const coded = await mail('Accept your Beautinique Support invitation');
+      const code = /\b(\d{6})\b/.exec(coded.Snippet)?.[1] ?? '';
+      const accepted = await fetch(`${bundle.url}/api/v1/auth/otp/${data.challengeId}/verify`, {
+        method: 'POST',
+        headers,
+        body: JSON.stringify({ code, password: 'a support desk password, long' }),
+      });
+      expect(accepted.status).toBe(200);
+      expect(await accepted.json()).toMatchObject({
+        data: { email, outcome: 'invite-accepted', signedIn: false },
+      });
+      const signIn = await fetch(`${bundle.url}/api/v1/auth/login`, {
+        method: 'POST',
+        headers,
+        body: JSON.stringify({ email, password: 'a support desk password, long' }),
+      });
+      expect(await signIn.json()).toMatchObject({ data: { next: 'totp-enroll' } });
+    } finally {
+      await identityDb.close();
+      await bundle.stop();
+      await fetch('http://localhost:8025/api/v1/messages', {
+        method: 'DELETE',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({ IDs: mailIds }),
+      });
+    }
+  });
+
+  it('opens a permission route through the gateway to someone holding its key, step-up included (T3.3 PR C)', async () => {
+    const bundle = await startBundle({ port: 0, env: quiet() });
+    const email = `master-${randomUUID().slice(0, 8)}@beautinique.example`;
+    const password = 'a master password, long enough';
+    const logger = createLogger({ name: 'bundle-test', level: 'silent' });
+    const identityDb = await connectMongo({
+      uri: MONGO_URI,
+      dbName: identityDbName,
+      appName: 'bundle-test',
+      logger,
+    });
+    const mailIds: string[] = [];
+    const headers = (app: string, cookie?: string) => ({
+      'X-BQ-App': app,
+      'x-origin-secret': ORIGIN_SECRET,
+      'content-type': 'application/json',
+      ...(cookie === undefined ? {} : { cookie }),
+    });
+    const api = (path: string, app: string, body?: unknown, cookie?: string) =>
+      fetch(`${bundle.url}/api/v1${path}`, {
+        method: body === undefined ? 'GET' : 'POST',
+        headers: headers(app, cookie),
+        ...(body === undefined ? {} : { body: JSON.stringify(body) }),
+      });
+    const accessOf = (answer: Response, app: string) =>
+      new RegExp(`__Host-bq_${app}_at=([^;]+)`).exec(
+        answer.headers.getSetCookie().join(', '),
+      )?.[1] ?? '';
+    try {
+      // an account (customer sign-up, the code from Mailpit)
+      const asked = await api('/auth/sign-up/code', 'customer', {
+        email,
+        consent: { terms: true, adult: true },
+      });
+      const { data } = (await asked.json()) as { data: { challengeId: string } };
+      const search = `http://localhost:8025/api/v1/search?query=${encodeURIComponent(`to:${email}`)}`;
+      interface Found {
+        messages: { ID: string; Snippet: string }[];
+      }
+      let found: Found = { messages: [] };
+      const end = Date.now() + 10_000;
+      while (found.messages.length === 0) {
+        if (Date.now() > end) throw new Error('no email reached Mailpit');
+        await new Promise((resolve) => setTimeout(resolve, 100));
+        found = (await (await fetch(search)).json()) as Found;
+      }
+      mailIds.push(...found.messages.map((m) => m.ID));
+      const code = /\b(\d{6})\b/.exec(found.messages[0]?.Snippet ?? '')?.[1] ?? '';
+      const made = await api(`/auth/otp/${data.challengeId}/verify`, 'customer', {
+        code,
+        password,
+      });
+      expect(made.status).toBe(200);
+      const { data: account } = (await made.json()) as { data: { userId: string } };
+
+      // a customer reads no grants: the gateway says no before identity hears of it
+      const customer = accessOf(made, 'customer');
+      const refused = await api(
+        '/iam/grants',
+        'customer',
+        undefined,
+        `__Host-bq_customer_at=${customer}`,
+      );
+      expect(refused.status).toBe(403);
+
+      // the first Master, as `npm run db:grant-master` gives it
+      const now = new Date();
+      await identityDb.db
+        .collection<Record<string, unknown> & { _id: string }>('identity_grants')
+        .insertOne({
+          _id: uuidv7(),
+          userId: account.userId,
+          role: 'master.master',
+          app: 'master',
+          scope: { type: 'global', ids: [] },
+          validFrom: null,
+          validTo: null,
+          grantedBy: null,
+          approvedBy: null,
+          via: 'bootstrap',
+          active: true,
+          createdAt: now,
+          endedAt: null,
+          endedBy: null,
+        });
+
+      // Master signs in to the master app, setting up the authenticator (a step-up too)
+      const started = await api('/auth/login', 'master', { email, password });
+      const { data: step } = (await started.json()) as { data: { next: string; loginId: string } };
+      expect(step.next).toBe('totp-enroll');
+      const enrolled = await api(`/auth/login/${step.loginId}/totp/enroll`, 'master', {});
+      const { data: enroll } = (await enrolled.json()) as { data: { secret: string } };
+      const at = Date.now();
+      const confirmed = await api(`/auth/login/${step.loginId}/totp/confirm`, 'master', {
+        code: totpCode(enroll.secret, at),
+      });
+      expect(confirmed.status).toBe(200);
+      const cookie = `__Host-bq_master_at=${accessOf(confirmed, 'master')}`;
+
+      // a permission route: through the gateway to identity
+      const listed = await api('/iam/grants?role=master.master', 'master', undefined, cookie);
+      expect(listed.status).toBe(200);
+      // a step-up route: the authenticator sign-in a moment ago counts
+      const invited = await api(
+        '/iam/invitations',
+        'master',
+        {
+          email: `invitee-${randomUUID().slice(0, 8)}@beautinique.example`,
+          role: 'support.l1_agent',
+          scope: { type: 'global', ids: [] },
+        },
+        cookie,
+      );
+      expect(invited.status).toBe(200);
+      expect(await invited.json()).toMatchObject({ data: { invitation: { status: 'pending' } } });
+      // a step-up of its own, with the next code
+      const stepped = await api(
+        '/auth/step-up',
+        'master',
+        { code: totpCode(enroll.secret, at + 30_000) },
+        cookie,
+      );
+      expect(stepped.status).toBe(200);
+      expect(accessOf(stepped, 'master')).not.toBe('');
+    } finally {
+      await identityDb.close();
+      await bundle.stop();
+      await fetch('http://localhost:8025/api/v1/messages', {
+        method: 'DELETE',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({ IDs: mailIds }),
+      });
+    }
+  });
+
+  it('sets up, renews and turns off a customer’s authenticator through the gateway, a security email each (ARCHITECTURE §9.2)', async () => {
+    const bundle = await startBundle({ port: 0, env: quiet() });
+    const email = `authenticator-${randomUUID().slice(0, 8)}@beautinique.example`;
+    const password = 'a customer password, long enough';
+    const mailIds: string[] = [];
+    let cookie = '';
+    const api = (method: 'GET' | 'POST' | 'DELETE', path: string, body?: unknown) =>
+      fetch(`${bundle.url}/api/v1${path}`, {
+        method,
+        headers: {
+          'X-BQ-App': 'customer',
+          'x-origin-secret': ORIGIN_SECRET,
+          'content-type': 'application/json',
+          ...(cookie === '' ? {} : { cookie }),
+        },
+        ...(body === undefined ? {} : { body: JSON.stringify(body) }),
+      });
+    const keepAccess = (answer: Response) => {
+      const access = /__Host-bq_customer_at=([^;]+)/.exec(
+        answer.headers.getSetCookie().join(', '),
+      )?.[1];
+      if (access !== undefined) cookie = `__Host-bq_customer_at=${access}`;
+    };
+    interface Found {
+      messages: { ID: string; Subject: string; Snippet: string }[];
+    }
+    /** The emails to the account so far, once there are `count` of them (newest first). */
+    const inbox = async (count: number): Promise<Found['messages']> => {
+      const search = `http://localhost:8025/api/v1/search?query=${encodeURIComponent(`to:${email}`)}`;
+      const end = Date.now() + 10_000;
+      for (;;) {
+        const found = (await (await fetch(search)).json()) as Found;
+        mailIds.push(...found.messages.map((m) => m.ID).filter((id) => !mailIds.includes(id)));
+        if (found.messages.length >= count) return found.messages;
+        if (Date.now() > end) throw new Error(`fewer than ${String(count)} emails reached Mailpit`);
+        await new Promise((resolve) => setTimeout(resolve, 100));
+      }
+    };
+    try {
+      // a customer account, signed in (the sign-up code from Mailpit)
+      const asked = await api('POST', '/auth/sign-up/code', {
+        email,
+        consent: { terms: true, adult: true },
+      });
+      const { data } = (await asked.json()) as { data: { challengeId: string } };
+      const [codeMail] = await inbox(1);
+      const code = /\b(\d{6})\b/.exec(codeMail?.Snippet ?? '')?.[1] ?? '';
+      const made = await api('POST', `/auth/otp/${data.challengeId}/verify`, { code, password });
+      expect(made.status).toBe(200);
+      keepAccess(made);
+
+      // set up from the settings: a secret, then the first code and the password
+      const enrolled = await api('POST', '/auth/authenticator/enroll');
+      expect(enrolled.status).toBe(200);
+      const { data: enroll } = (await enrolled.json()) as { data: { secret: string } };
+      const at = Date.now();
+      const confirmed = await api('POST', '/auth/authenticator/confirm', {
+        code: totpCode(enroll.secret, at),
+        password,
+      });
+      expect(confirmed.status).toBe(200);
+      const { data: saved } = (await confirmed.json()) as { data: { recoveryCodes: string[] } };
+      expect(saved.recoveryCodes).toHaveLength(10);
+      const me = (await (await api('GET', '/iam/me')).json()) as {
+        data: { user: { authenticator: boolean; recoveryCodesLeft: number | null } };
+      };
+      expect(me.data.user).toMatchObject({ authenticator: true, recoveryCodesLeft: 10 });
+
+      // new codes need a step-up: the gateway asks, before identity hears of it
+      const asks = await api('POST', '/auth/authenticator/recovery-codes');
+      expect(asks.status).toBe(401);
+      expect(await asks.json()).toMatchObject({ error: { code: 'STEP_UP_REQUIRED' } });
+      const stepped = await api('POST', '/auth/step-up', {
+        code: totpCode(enroll.secret, at + 30_000),
+      });
+      expect(stepped.status).toBe(200);
+      keepAccess(stepped);
+      const renewed = await api('POST', '/auth/authenticator/recovery-codes');
+      expect(renewed.status).toBe(200);
+      const { data: fresh } = (await renewed.json()) as { data: { recoveryCodes: string[] } };
+      expect(fresh.recoveryCodes).not.toContain(saved.recoveryCodes[0]);
+
+      // turned off, within the same step-up
+      const off = await api('DELETE', '/auth/authenticator');
+      expect(off.status).toBe(200);
+      expect(await off.json()).toEqual({ data: { disabled: true } });
+      const after = (await (await api('GET', '/iam/me')).json()) as {
+        data: { user: { authenticator: boolean; recoveryCodesLeft: number | null } };
+      };
+      expect(after.data.user).toMatchObject({ authenticator: false, recoveryCodesLeft: null });
+
+      // the sign-up code and the three security emails, none with a secret in it
+      const mails = await inbox(4);
+      expect(mails.map((m) => m.Subject).toSorted()).toEqual([
+        'An authenticator was set up for your Beautinique account',
+        'Confirm your email for Beautinique',
+        'New recovery codes for your Beautinique account',
+        'Your Beautinique authenticator was turned off',
+      ]);
+      for (const mail of mails) {
+        expect(mail.Snippet).not.toContain(enroll.secret);
+        expect(mail.Snippet).not.toContain(fresh.recoveryCodes[0]);
+      }
     } finally {
       await bundle.stop();
       await fetch('http://localhost:8025/api/v1/messages', {

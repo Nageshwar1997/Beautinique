@@ -22,13 +22,18 @@ const mutations: Mutation[] = [
   {
     file: 'otp',
     name: 'a password code goes out for an unknown email',
-    change: [['const send = signUp || hasAccount;', 'const send = true;']],
+    change: [
+      [
+        '.countDocuments({ email }, { limit: 1 })) > 0);',
+        '.countDocuments({ email }, { limit: 1 })) >= 0);',
+      ],
+    ],
     tests: 'unknown email',
   },
   {
     file: 'otp',
     name: 'no sign-up code for an unknown email',
-    change: [['const send = signUp || hasAccount;', 'const send = hasAccount;']],
+    change: [['  const send =\n    signUp ||', '  const send =\n    false ||']],
     tests: 'makes the account',
   },
   {
@@ -42,8 +47,8 @@ const mutations: Mutation[] = [
     name: 'adult declared from any app',
     change: [
       [
-        "adult: signUp && app === 'customer' && consent?.adult ? '1' : '0',",
-        "adult: signUp && consent?.adult ? '1' : '0',",
+        "adult: asksConsent && app === 'customer' && consent?.adult ? '1' : '0',",
+        "adult: asksConsent && consent?.adult ? '1' : '0',",
       ],
     ],
     tests: 'made elsewhere',
@@ -113,7 +118,10 @@ const mutations: Mutation[] = [
     file: 'otp',
     name: 'a code of the old sign-in kind still works',
     change: [
-      [" ||\n    (challenge.purpose !== 'sign-up' && challenge.purpose !== 'password')", ''],
+      [
+        " ||\n    (challenge.purpose !== 'sign-up' &&\n      challenge.purpose !== 'password' &&\n      challenge.purpose !== 'invite')",
+        '',
+      ],
     ],
     tests: 'before sign-in by password',
   },
@@ -228,7 +236,10 @@ const mutations: Mutation[] = [
     file: 'users',
     name: 'a sign-up replaces the password',
     change: [
-      ['if (!isNewUser && (await hasPassword(mongo, user._id, session))) {', 'if (false) {'],
+      [
+        "if (!isNewUser && (await hasPassword(mongo, user._id, session))) return 'password-kept';",
+        "if (false) return 'password-kept';",
+      ],
     ],
     tests: 'keeps the password',
   },
@@ -266,6 +277,30 @@ const mutations: Mutation[] = [
       ],
     ],
     tests: 'breached',
+  },
+  {
+    file: 'password',
+    name: 'the breach check waits for ever',
+    change: [
+      [
+        '        signal: AbortSignal.timeout(timeoutMs),\n        responseType',
+        '        responseType',
+      ],
+    ],
+    tests: 'breached',
+  },
+  {
+    file: 'password',
+    name: 'an error page from the breach check read as its list',
+    change: [
+      [
+        'axios.get<string>(`${url}/range/${prefix}`, {',
+        'axios.get<string>(`${url}/range/${prefix}`, { validateStatus: () => true,',
+      ],
+    ],
+    tests: 'breached',
+    survives:
+      'a 503 page has no "SUFFIX:COUNT" line for the password, so it reads as "not breached": the same answer as fail-open, without the warning',
   },
   {
     file: 'password',
@@ -331,7 +366,10 @@ const mutations: Mutation[] = [
     file: 'login',
     name: 'internal apps without the authenticator',
     change: [
-      ['  if ((TOTP_REQUIRED_APPS as readonly string[]).includes(app)) {', '  if (false) {'],
+      [
+        '  if ((TOTP_REQUIRED_APPS as readonly string[]).includes(app) || access.mfaRequired) {',
+        '  if (access.mfaRequired) {',
+      ],
     ],
     tests: 'internal app',
   },
@@ -636,8 +674,8 @@ const mutations: Mutation[] = [
     name: 'access cookie readable by scripts',
     change: [
       [
-        '  res.cookie(accessCookieName(session.app), session.accessToken, {\n    httpOnly: true,\n',
-        '  res.cookie(accessCookieName(session.app), session.accessToken, {\n',
+        '  res.cookie(accessCookieName(app), accessToken, {\n    httpOnly: true,\n',
+        '  res.cookie(accessCookieName(app), accessToken, {\n',
       ],
     ],
     tests: 'two cookies',
@@ -647,8 +685,8 @@ const mutations: Mutation[] = [
     name: 'refresh cookie sent everywhere',
     change: [
       [
-        "    sameSite: 'strict',\n    path: REFRESH_COOKIE_PATH,\n    maxAge:",
-        "    sameSite: 'strict',\n    path: '/',\n    maxAge:",
+        "    sameSite: 'strict',\n    path: REFRESH_COOKIE_PATH,\n    maxAge,",
+        "    sameSite: 'strict',\n    path: '/',\n    maxAge,",
       ],
     ],
     tests: 'two cookies',
@@ -658,11 +696,33 @@ const mutations: Mutation[] = [
     name: 'refresh cookie Lax',
     change: [
       [
-        "    sameSite: 'strict',\n    path: REFRESH_COOKIE_PATH,\n    maxAge:",
-        "    sameSite: 'lax',\n    path: REFRESH_COOKIE_PATH,\n    maxAge:",
+        "    sameSite: 'strict',\n    path: REFRESH_COOKIE_PATH,\n    maxAge,",
+        "    sameSite: 'lax',\n    path: REFRESH_COOKIE_PATH,\n    maxAge,",
       ],
     ],
     tests: 'two cookies',
+  },
+  {
+    file: 'cookies',
+    name: 'the session hint stays after logout',
+    change: [
+      [
+        "  res.clearCookie(sessionHintCookieName(app), { secure: true, sameSite: 'lax', path: '/' });\n",
+        '',
+      ],
+    ],
+    tests: 'clears the hint',
+  },
+  {
+    file: 'cookies',
+    name: 'the session hint outlives the session',
+    change: [
+      [
+        "  res.cookie(sessionHintCookieName(session.app), '1', {\n    secure: true,\n    sameSite: 'lax',\n    path: '/',\n    maxAge,",
+        "  res.cookie(sessionHintCookieName(session.app), '1', {\n    secure: true,\n    sameSite: 'lax',\n    path: '/',\n    maxAge: maxAge * 2,",
+      ],
+    ],
+    tests: 'hint it can read',
   },
   {
     file: 'cookies',
@@ -726,6 +786,774 @@ const mutations: Mutation[] = [
     name: 'any device’s end clears this one’s cookies',
     change: [['if (ended && params.sessionId === passport.sessionId)', 'if (ended)']],
     tests: 'never another account',
+  },
+
+  // T3.3: who may sign in where (grants)
+  {
+    file: 'login',
+    name: 'sign-in without a grant in the app',
+    change: [['  if (!access.allowed) throw invalidCredentials();\n', '']],
+    tests: 'like a wrong password',
+  },
+  {
+    file: 'login',
+    name: 'a role that asks an authenticator does not',
+    change: [[' || access.mfaRequired) {', ') {']],
+    tests: 'Seller Finance or Account Owner',
+  },
+  {
+    file: 'sessions',
+    name: 'a session for an app without a grant',
+    change: [['      if (!access.allowed) throw invalidCredentials();\n', '']],
+    tests: 'whoever asks',
+  },
+  {
+    file: 'sessions',
+    name: 'refresh keeps a session whose grant ended',
+    change: [['        if (!access.allowed) {', '        if (false) {']],
+    tests: 'no grant left',
+  },
+  {
+    file: 'sessions',
+    name: 'tokens always carry av 0',
+    change: [['        av: authzVersion,', '        av: 0,']],
+    tests: 'authz version',
+  },
+  {
+    file: 'rbac/grants',
+    name: 'a grant counts before it starts',
+    change: [['{ $or: [{ validFrom: null }, { validFrom: { $lte: now } }] },', '{},']],
+    tests: 'not before it starts',
+  },
+  {
+    file: 'rbac/grants',
+    name: 'a grant counts after it ran out',
+    change: [['{ $or: [{ validTo: null }, { validTo: { $gt: now } }] },', '{},']],
+    tests: 'not before it starts',
+  },
+  {
+    file: 'rbac/grants',
+    name: 'an ended grant still counts',
+    change: [
+      [
+        'export const activeAt = (now: Date) => ({\n  active: true,\n',
+        'export const activeAt = (now: Date) => ({\n',
+      ],
+    ],
+    tests: 'not before it starts|seat comes back',
+  },
+  {
+    file: 'rbac/grants',
+    name: 'a new grant does not raise the authz version',
+    change: [
+      ['{ $inc: { authzVersion: 1 }, $set: { updatedAt: now } }', '{ $set: { updatedAt: now } }'],
+    ],
+    tests: 'authz version|raises the authz version',
+  },
+  {
+    file: 'rbac/grants',
+    name: 'roles that ask an authenticator never do',
+    change: [['mfaRequired: roles.some((role) => role.mfaRequired),', 'mfaRequired: false,']],
+    tests: 'Seller Finance or Account Owner',
+  },
+  {
+    file: 'users',
+    name: 'no grant at sign-up',
+    change: [
+      [
+        '    await giveSignUpGrant(mongo, session, { userId: user._id, app: input.app, now });\n',
+        '',
+      ],
+    ],
+    tests: 'sign-up grants',
+  },
+  {
+    file: 'rbac/migrations',
+    name: 'migration gives Customer without the 18+ declaration',
+    change: [["(app === 'customer' && user.ageDeclaredAt === null)", 'false']],
+    tests: 'before T3.3',
+  },
+  {
+    file: 'rbac/bootstrap',
+    name: 'a third Master',
+    change: [['if (holders.length >= MASTER_SEATS) {', 'if (holders.length > MASTER_SEATS) {']],
+    tests: 'at most two',
+  },
+  {
+    file: 'rbac/bootstrap',
+    name: 'two at once both take the last Master seat',
+    change: [['{ $inc: { seatClaims: 1 } }', '{ $inc: { seatClaims: 0 } }']],
+    tests: 'never to both',
+  },
+  {
+    file: 'rbac/sync',
+    name: 'the sync retires Master’s own sub-roles',
+    change: [['{ system: true, retired: false, _id: { $nin:', '{ retired: false, _id: { $nin:']],
+    tests: 'never touches Master',
+  },
+
+  // T3.3 PR B: giving, ending and seeing roles, invitations
+  {
+    file: 'rbac/grants',
+    name: 'a retired role still opens its app',
+    change: [
+      [
+        '{ _id: { $in: grants.map((grant) => grant.role) }, retired: false },',
+        '{ _id: { $in: grants.map((grant) => grant.role) } },',
+      ],
+    ],
+    tests: 'renews their holders',
+  },
+  {
+    file: 'rbac/grants',
+    name: 'grant changes never reach the gateway',
+    change: [['if tonumber(ARGV[1]) > current then', 'if false then']],
+    tests: 'State Admin a state|ends a role at once|renews their holders',
+  },
+  {
+    file: 'rbac/grants',
+    name: 'ending a grant does not raise the authz version',
+    change: [
+      [
+        '  await raiseAuthzVersion(mongo, session, ended.userId, now);\n  return ended;',
+        '  return ended;',
+      ],
+    ],
+    tests: 'ends a role at once',
+  },
+  {
+    file: 'rbac/authority',
+    name: 'an appointer role without the right to give still gives',
+    change: [['      own.permissions.includes(grantManage.key) &&\n', '']],
+    tests: 'keeps the right to give',
+  },
+  {
+    file: 'rbac/authority',
+    name: 'any role gives any role',
+    change: [['      role.appointedBy.includes(own._id) &&\n', '']],
+    tests: 'only the roles they appoint',
+  },
+  {
+    file: 'rbac/authority',
+    name: 'a scope wider than the giver’s',
+    change: [['      scopeWithin(grant.scope, inner, chainOf),', '      true,']],
+    tests: 'only the roles they appoint',
+  },
+  {
+    file: 'rbac/authority',
+    name: 'unknown state ids',
+    change: [["if (scope.type === 'state' && !scope.ids.every(isStateId)) {", 'if (false) {']],
+    tests: 'refuses what does not fit',
+  },
+  {
+    file: 'rbac/authority',
+    name: 'hubs and cities before the location master',
+    change: [['  if (NOT_KNOWN_YET.has(scope.type)) {', '  if (false) {']],
+    tests: 'refuses what does not fit',
+  },
+  {
+    file: 'rbac/authority',
+    name: 'a self scope for someone else',
+    change: [['    if (scope.ids.join() !== wanted.join()) {', '    if (false) {']],
+    tests: 'own account',
+  },
+  {
+    file: 'rbac/authority',
+    name: 'an end in the past',
+    change: [['validTo.getTime() <= now.getTime()', 'false']],
+    tests: 'refuses what does not fit',
+  },
+  {
+    file: 'rbac/authority',
+    name: 'a retired role is given',
+    change: [
+      [
+        "  if (role.retired) problems.push({ path: ['role'], message: 'This role is retired' });\n",
+        '',
+      ],
+    ],
+    tests: 'renews their holders',
+  },
+  {
+    file: 'rbac/authority',
+    name: 'a reviewer sees nothing',
+    change: [
+      ['const reviewer = !own.permissions.includes(grantManage.key);', 'const reviewer = false;'],
+    ],
+    tests: 'who sees which grants|a reviewer every role',
+  },
+  {
+    file: 'rbac/authority',
+    name: 'an appointer sees every role',
+    change: [['...(reviewer ? {} : { role: { $in: givable } })', '...{}']],
+    tests: 'a reviewer every role',
+  },
+  {
+    file: 'rbac/authority',
+    name: 'an appointer sees every scope',
+    change: [["        grant.scope.type === 'global'\n", '        true\n']],
+    tests: 'a reviewer every role',
+  },
+  {
+    file: 'rbac/manage',
+    name: 'a role to oneself',
+    change: [
+      [
+        "  if (body.userId === passport.userId) throw forbidden('Nobody gives a role to themselves.');\n",
+        '',
+      ],
+    ],
+    tests: 'refuses what does not fit',
+  },
+  {
+    file: 'rbac/manage',
+    name: 'ending one’s own role',
+    change: [
+      [
+        "  if (grant.userId === passport.userId) throw forbidden('Nobody ends their own role.');\n",
+        '',
+      ],
+    ],
+    tests: 'ends a role at once',
+  },
+  {
+    file: 'rbac/manage',
+    name: 'anyone ends a role',
+    change: [['if (!role || !appointingGrant(caller, role, grant.scope)) {', 'if (!role) {']],
+    tests: 'ends a role at once',
+  },
+  {
+    file: 'rbac/manage',
+    name: 'a shipped role changes through the API',
+    change: [["  if (role.system) throw forbidden('A shipped role changes only in code.');\n", '']],
+    tests: 'renews their holders',
+  },
+  {
+    file: 'rbac/manage',
+    name: 'holders keep their old tokens after a change',
+    change: [['const renew = allows(role) !== allows(next);', 'const renew = false;']],
+    tests: 'renews their holders',
+  },
+  {
+    file: 'rbac/manage',
+    name: 'an appointer role loses the right to give',
+    change: [
+      ['if (!next.permissions.includes(grantManage.key) || next.retired) {', 'if (false) {'],
+    ],
+    tests: 'keeps the right to give',
+  },
+  {
+    file: 'rbac/manage',
+    name: 'a sub-role that makes roles',
+    change: [['if (role.permissions.includes(roleManage.key)) {', 'if (false) {']],
+    tests: 'make a sub-role',
+  },
+  {
+    file: 'rbac/manage',
+    name: 'grants listed without the right to read them',
+    change: [['  requirePermission(caller, grantRead.key);\n  const visible', '  const visible']],
+    tests: 'a reviewer every role',
+  },
+  {
+    file: 'rbac/invitations',
+    name: 'an invitation outlives its inviter’s right',
+    change: [
+      [
+        'if (role && !role.retired && appointingGrant(inviter, role, invitation.scope)) {',
+        'if (role) {',
+      ],
+    ],
+    tests: 'dies with the inviter',
+  },
+  {
+    file: 'rbac/invitations',
+    name: 'inviting oneself',
+    change: [
+      ["  if (me?.email === body.email) throw forbidden('Nobody invites themselves.');\n", ''],
+    ],
+    tests: 'inviting oneself',
+  },
+  {
+    file: 'rbac/invitations',
+    name: 'a code for an invitation that ran out',
+    change: [
+      [
+        "      { email, app, status: 'pending', expiresAt: { $gt: now } },\n      { limit: 1 },",
+        "      { email, app, status: 'pending' },\n      { limit: 1 },",
+      ],
+    ],
+    tests: 'runs out',
+  },
+  {
+    file: 'rbac/invitations',
+    name: 'an accepted invitation stays pending',
+    change: [["{ $set: { status: 'accepted', endedAt: now, endedBy: userId } }", '{ $set: {} }']],
+    tests: 'accepts with an email code',
+  },
+  {
+    file: 'otp',
+    name: 'an invitation code for any email',
+    change: [['? await hasInvitation(deps.mongo, { email, app })', '? true']],
+    tests: 'accepts with an email code',
+  },
+  {
+    file: 'otp',
+    name: 'an invitation into a sign-up app without its consent',
+    change: [
+      ["const asksConsent = signUp || purpose === 'invite';", 'const asksConsent = signUp;'],
+    ],
+    tests: 'consent',
+  },
+
+  // T3.3 PR C: the gateway's permission list, step-up, the Security Officer
+  {
+    file: 'sessions',
+    name: 'no permission list at sign-in',
+    change: [['      await listPermissions(userId, app, access);\n', '']],
+    tests: 'written at every sign-in',
+  },
+  {
+    file: 'sessions',
+    name: 'no permission list at refresh',
+    change: [['        await listPermissions(rotated.userId, app, access);\n', '']],
+    tests: 'written at every sign-in',
+  },
+  {
+    file: 'rbac/grants',
+    name: 'the list holds only sign-in',
+    change: [
+      [
+        'permissions: [...new Set(roles.flatMap((role) => role.permissions))].sort(),',
+        "permissions: ['iam.app.sign_in'],",
+      ],
+    ],
+    tests: 'keys of the roles there',
+  },
+  {
+    file: 'sessions',
+    name: 'a sign-in with the authenticator is no step-up',
+    change: [
+      [
+        'stepUpAt: methods.some((method) => STEP_UP_METHODS.includes(method)) ? new Date(at) : null,',
+        'stepUpAt: null,',
+      ],
+    ],
+    tests: 'is a step-up',
+  },
+  {
+    file: 'sessions',
+    name: 'every sign-in is a step-up',
+    change: [
+      [
+        'stepUpAt: methods.some((method) => STEP_UP_METHODS.includes(method)) ? new Date(at) : null,',
+        'stepUpAt: new Date(at),',
+      ],
+    ],
+    tests: 'is a step-up',
+  },
+  {
+    file: 'sessions',
+    name: 'tokens never carry the step-up',
+    change: [
+      [
+        '        ...(stepUpAt === null ? {} : { su: Math.floor(stepUpAt.getTime() / 1000) }),\n',
+        '',
+      ],
+    ],
+    tests: 'step-up',
+  },
+  {
+    file: 'sessions',
+    name: 'an ended session steps up',
+    change: [
+      [
+        '{ _id: sessionId, userId, revokedAt: null, expiresAt: { $gt: new Date(at) } },',
+        '{ _id: sessionId, userId, expiresAt: { $gt: new Date(at) } },',
+      ],
+    ],
+    tests: 'signed out',
+  },
+  {
+    file: 'login',
+    name: 'a step-up without an authenticator',
+    change: [['  if (!credentials?.totp) throw authenticatorRequired();\n', '']],
+    tests: 'set one up',
+  },
+  {
+    file: 'login',
+    name: 'a locked account steps up',
+    change: [
+      ['  if (await isLocked(deps.redis, deps.keys, user.email)) throw stepUpLocked();\n', ''],
+    ],
+    tests: 'lock',
+  },
+  {
+    file: 'login',
+    name: 'a step-up code works twice',
+    change: [["{ _id: userId, 'totp.lastStep': { $lt: step } },", '{ _id: userId },']],
+    tests: 'confirms with a new authenticator code',
+  },
+  {
+    file: 'login',
+    name: 'wrong step-up codes are not counted',
+    change: [
+      ['    await recordFailure(deps.redis, deps.keys, user.email);\n    throw ', '    throw '],
+    ],
+    tests: 'lock',
+  },
+  // the signed-in authenticator (ARCHITECTURE §9.2, owner 2026-10-31)
+  {
+    file: 'login',
+    name: 'a wrong recovery code steps up',
+    change: [['    right = left !== null;', '    right = true;']],
+    tests: 'spends one code',
+  },
+  {
+    file: 'login',
+    name: 'a step-up does not say how many codes are left',
+    change: [['recoveryCodesLeft: left };', 'recoveryCodesLeft: null };']],
+    tests: 'spends one code',
+  },
+  {
+    file: 'me',
+    name: '/iam/me miscounts the recovery codes left',
+    change: [['? (recoveryCodesLeft(credentials.recoveryCodes) ?? 0)', '? 10']],
+    tests: 'spends one code',
+  },
+  {
+    file: 'authenticator',
+    name: 'replaced without a step-up',
+    change: [['  if (replace && !steppedUp(session, Date.now())) throw stepUpRequired();\n', '']],
+    tests: 'needs a step-up, then swaps',
+  },
+  {
+    file: 'authenticator',
+    name: 'set up without a password on the account',
+    change: [
+      [
+        '  if (!credentials?.password) throw passwordRequired();\n  const replace',
+        '  const replace',
+      ],
+    ],
+    tests: 'without a password',
+  },
+  {
+    file: 'authenticator',
+    name: 'a wrong password sets it up',
+    change: [
+      ['  if (!(await verifyPassword(credentials.password.hash, password))) {', '  if (false) {'],
+    ],
+    tests: 'saves it with the password',
+  },
+  {
+    file: 'authenticator',
+    name: 'a wrong first code sets it up',
+    change: [
+      ['  if (step === null) {\n    return wrongTry', '  if (false) {\n    return wrongTry'],
+    ],
+    tests: 'saves it with the password',
+  },
+  {
+    file: 'authenticator',
+    name: 'a set-up never runs out of tries',
+    change: [
+      ['  if (tries >= LOGIN_MAX_TRIES) {\n    await inRedis', '  if (false) {\n    await inRedis'],
+    ],
+    tests: '5 wrong tries',
+  },
+  {
+    file: 'authenticator',
+    name: 'wrong set-up tries are not counted toward the lock',
+    change: [
+      [
+        '  await recordFailure(deps.redis, deps.keys, email);\n  if (tries >= LOGIN_MAX_TRIES) {',
+        '  if (tries >= LOGIN_MAX_TRIES) {',
+      ],
+    ],
+    tests: '5 wrong tries',
+  },
+  {
+    file: 'authenticator',
+    name: 'a locked account sets one up',
+    change: [
+      [
+        'if (tries > LOGIN_MAX_TRIES || (await isLocked(deps.redis, deps.keys, email))) {',
+        'if (tries > LOGIN_MAX_TRIES) {',
+      ],
+    ],
+    tests: '5 wrong tries',
+  },
+  {
+    file: 'authenticator',
+    name: 'a set-up stays after its confirm',
+    change: [
+      [
+        '  if ((await inRedis(() => deps.redis.del(key))) === 0) throw authenticatorSetupExpired();\n',
+        '',
+      ],
+    ],
+    tests: 'saves it with the password',
+  },
+  {
+    file: 'authenticator',
+    name: 'two confirms of one set-up both go on',
+    change: [
+      [
+        'if ((await inRedis(() => deps.redis.del(key))) === 0) throw authenticatorSetupExpired();',
+        'if ((await inRedis(() => deps.redis.del(key))) < 0) throw authenticatorSetupExpired();',
+      ],
+    ],
+    survives:
+      'two confirms at the same moment: the second finds the set-up gone at its first read; a race no test times',
+  },
+  {
+    file: 'authenticator',
+    name: 'one saved meanwhile is overwritten',
+    change: [
+      [
+        '        : { _id: passport.userId, totp: { $exists: false } },',
+        '        : { _id: passport.userId },',
+      ],
+    ],
+    tests: 'never overwrites',
+  },
+  {
+    file: 'authenticator',
+    name: 'a replace after a reset meanwhile saves anyway',
+    change: [
+      [
+        '        ? { _id: passport.userId, totp: { $exists: true } }\n',
+        '        ? { _id: passport.userId }\n',
+      ],
+    ],
+    survives:
+      'a Security Officer reset between the enroll and the confirm of a replace; a race no test times',
+  },
+  {
+    file: 'authenticator',
+    name: 'a replace is told as a set-up',
+    change: [["change: replace ? 'replaced' : 'enabled',", "change: 'enabled',"]],
+    tests: 'needs a step-up, then swaps',
+  },
+  {
+    file: 'authenticator',
+    name: 'new codes without a step-up',
+    change: [
+      [
+        '  if (!steppedUp(session, Date.now())) throw stepUpRequired();\n  const recovery',
+        '  const recovery',
+      ],
+    ],
+    tests: 'old codes stop working',
+  },
+  {
+    file: 'authenticator',
+    name: 'new codes for an account without an authenticator',
+    change: [['    if (saved.modifiedCount !== 1) throw authenticatorRequired();\n', '']],
+    tests: 'removes it with its codes',
+  },
+  {
+    file: 'authenticator',
+    name: 'turned off without a step-up',
+    change: [
+      [
+        '  if (!steppedUp(session, Date.now())) throw stepUpRequired();\n  const roles',
+        '  const roles',
+      ],
+    ],
+    tests: 'removes it with its codes',
+  },
+  {
+    file: 'authenticator',
+    name: 'a step-up never runs out',
+    change: [['now - session.stepUpAt.getTime() <= STEP_UP_SECONDS * 1000', 'true']],
+    tests: 'older than 5 minutes',
+  },
+  {
+    file: 'authenticator',
+    name: 'turned off while a role needs it',
+    change: [['  if (roles.length > 0) throw authenticatorRequiredByRole(roles);\n', '']],
+    tests: 'while a role needs it',
+  },
+  {
+    file: 'authenticator',
+    name: 'the internal apps’ roles do not need one',
+    change: [
+      [
+        '$or: [{ app: { $in: [...TOTP_REQUIRED_APPS] } }, { mfaRequired: true }],',
+        'mfaRequired: true,',
+      ],
+    ],
+    tests: 'while a role needs it',
+  },
+  {
+    file: 'authenticator',
+    name: 'roles that ask one themselves do not need it',
+    change: [[', { mfaRequired: true }],', '],']],
+    tests: 'while a role needs it',
+  },
+  {
+    file: 'authenticator',
+    name: 'an ended grant still needs one',
+    change: [
+      [
+        '.find({ userId, ...activeAt(now) }, { projection: { role: 1 } })',
+        '.find({ userId }, { projection: { role: 1 } })',
+      ],
+    ],
+    tests: 'while a role needs it',
+  },
+  {
+    file: 'authenticator',
+    name: 'a retired role still needs one',
+    change: [['        retired: false,\n        $or', '        $or']],
+    tests: 'while a role needs it',
+  },
+  {
+    file: 'authenticator',
+    name: 'turning off twice is told twice',
+    change: [
+      [
+        '      { _id: passport.userId, totp: { $exists: true } },\n      { $unset',
+        '      { _id: passport.userId },\n      { $unset',
+      ],
+    ],
+    tests: 'removes it with its codes',
+  },
+  {
+    file: 'rbac/security',
+    name: 'anyone acts as a Security Officer',
+    change: [['  requirePermission(caller, permission);\n', '']],
+    tests: 'nobody else may',
+  },
+  {
+    file: 'rbac/security',
+    name: 'a Security Officer acts on their own account',
+    change: [
+      [
+        "  if (userId === passport.userId) throw forbidden('Use My Devices and your own settings for this.');\n",
+        '',
+      ],
+    ],
+    tests: 'their own account',
+  },
+  {
+    file: 'rbac/security',
+    name: 'recovery codes outlive a reset',
+    change: [["{ $unset: { totp: '', recoveryCodes: '' }", "{ $unset: { totp: '' }"]],
+    tests: 'lost authenticator',
+  },
+  {
+    file: 'rbac/manage',
+    name: 'an email and another account’s id find the email’s grants',
+    change: [['if (!owner || (userId !== undefined && userId !== owner._id)) {', 'if (!owner) {']],
+    tests: 'by email',
+  },
+  // a sign-in in the second every session ended (owner's E2E, 2026-11-02)
+  {
+    file: 'sessions',
+    name: 'a token in the second every session ended',
+    change: [['    if (since === null) return iat;\n', '    return iat;\n']],
+    tests: 'later second',
+  },
+  {
+    file: 'sessions',
+    name: 'a token of the next second issued without waiting for it',
+    change: [['    if (wait > 0) {\n', '    if (false) {\n']],
+    survives:
+      'a token under a second ahead of the clock passes every check (the gateway allows clock skew); the wait keeps its time true',
+  },
+  // social sign-in (T3.1 PR 4)
+  {
+    file: 'oauth',
+    name: 'a callback from another browser goes through (login CSRF)',
+    change: [
+      [
+        'const ours = state !== undefined && cookie !== undefined && state === cookie;',
+        'const ours = state !== undefined;',
+      ],
+    ],
+    tests: 'works once, only in the browser',
+  },
+  {
+    file: 'oauth',
+    name: 'a trip ends at another provider',
+    change: [['trip.provider !== provider || ', '']],
+    tests: 'works once, only in the browser',
+  },
+  {
+    file: 'oauth',
+    name: 'an unverified email finds the account',
+    change: [
+      [
+        'if (profile.email === null || !profile.emailVerified) return',
+        'if (profile.email === null) return',
+      ],
+    ],
+    tests: 'never links an email',
+  },
+  {
+    file: 'oauth',
+    name: 'a locked account signs in with a provider',
+    change: [
+      ["if (await isLocked(deps.redis, deps.keys, user.email)) return backToSignIn('locked');", ''],
+    ],
+    tests: 'locked account',
+  },
+  {
+    file: 'oauth',
+    name: 'an account without this app’s role signs in without its consent',
+    change: [['  if (!access.allowed) {', '  if (false) {']],
+    tests: 'without this app',
+  },
+  {
+    file: 'oauth',
+    name: 'a trip or a waiting sign-up works twice',
+    change: [
+      ['deps.redis.multi().hgetall(key).del(key).exec()', 'deps.redis.multi().hgetall(key).exec()'],
+    ],
+    tests: 'works once, only in the browser|asks the consent',
+  },
+  {
+    file: 'oauth',
+    name: 'a new account without the consent',
+    change: [['  if (problems.length > 0) {', '  if (false) {']],
+    tests: 'asks the consent',
+  },
+  {
+    file: 'oauth',
+    name: 'the last way in can go',
+    change: [['if (names.length === 1) throw lastSignInMethod();', '']],
+    tests: 'never the last way in',
+  },
+  {
+    file: 'oauth-providers',
+    name: 'no PKCE challenge',
+    change: [
+      [
+        "...(challenge === null ? {} : { code_challenge: challenge, code_challenge_method: 'S256' }),",
+        '',
+      ],
+    ],
+    tests: 'sends PKCE',
+  },
+  {
+    file: 'oauth-providers',
+    name: 'no PKCE verifier',
+    change: [['...(verifier === null ? {} : { code_verifier: verifier }),', '']],
+    tests: 'sends PKCE',
+  },
+  {
+    file: 'oauth-providers',
+    name: 'GitHub’s unverified primary email is taken',
+    change: [['emails.find((e) => e.primary && e.verified)', 'emails.find((e) => e.primary)']],
+    tests: 'never links an email',
+  },
+  {
+    file: 'config',
+    name: 'a client secret without its ID',
+    change: [['    if (id === undefined && secret !== undefined) {', '    if (false) {']],
+    tests: 'ID and secret pair',
   },
 ];
 

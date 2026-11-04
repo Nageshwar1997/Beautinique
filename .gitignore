@@ -20,3 +20,11 @@ release-tarballs/
 
 # npm 12 that the Render build installs inside the repo (backend/bundle/README.md "Render")
 .npm12/
+
+# Playwright E2E output (traces, reports)
+test-results/
+playwright-report/
+blob-report/
+
+# LinkedIn carousel images and PDFs (prompts stay in git)
+linkedin-posts/*/slides/
