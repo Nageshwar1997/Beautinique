@@ -1,6 +1,6 @@
 # QA AUDIT REPORT — BQ
 
-> **Status:** v0.13 (2026-11-04). Audit base: `origin/prerelease` @ `ee7f46a` (`ee7f46ae7b2605d99f6b4497d26303aa109fb371`). Auditor: Claude Code (Opus 5.5, `claude-opus-5-5`). Ye report audit ki single source of truth hai; fixes alag se, ek-ek karke.
+> **Status:** v0.14 (2026-11-04). Audit base: `origin/prerelease` @ `ee7f46a` (`ee7f46ae7b2605d99f6b4497d26303aa109fb371`). Auditor: Claude Code (Opus 5.5, `claude-opus-5-5`). Ye report audit ki single source of truth hai; fixes alag se, ek-ek karke.
 
 ## 0. Audit state (har session ke aakhir me update)
 
@@ -12,6 +12,7 @@
   - Failure injection: **alag throwaway containers** (pehle se downloaded images, `127.0.0.1`, doosre ports, `--rm`); saanjhe Mongo/Valkey/Mailpit kabhi band nahi.
   - **Owner ki do aur hidayatein (2026-11-04):** (1) har feature ko jitna ho sake todne ki koshish (adversarial; phir bhi sirf local, burst ≤ 100, production off-limits). (2) Owner ke "acceptable" faislon pe bhi sawal uthao: rakhne se kya hoga, fix karna chahiye ya nahi. Ye §9 me `DR-<NNN>` (decision review) rows: bug count me nahi, faisla owner ka. CLAUDE.md ke frozen niyam (mobile messaging, app ki bhasha) is se bahar (CLAUDE.md ki precedence).
 - **Ho chuke modules:** M0–M9 (2026-11-04) | **Chalu:** koi nahi | **Agla:** M10 Frontend packages (browser)
+- **Session 1 band (2026-11-04, owner ke kehne pe; context 83%):** throwaway containers band, saari `bq_qa_*` DBs drop, koi QA backend nahi chal raha. Agla session `/qa-audit` se M10 (frontend packages, built-in browser + playgrounds) se shuru kare. Session 1 ke probe scripts (`qa-backend.ts`, `lib.mjs`, `probe-*.mjs`) us session ke scratchpad me the: agla session unhe dobara banayega (repo me nahi, skill §3.1). Live GETs: 12/15 use ho chuke (Q-001). P1 QA-ID-001 ka poora repro owner ke paas chat me (Q-003).
 - **M15 ke liye note (M8):** ARCHITECTURE §13 (line ~532) CI me "dependency-cruiser, no-hardcoded-geo lint, no role-name comparisons" kehta hai; `ci.yml` me ye nahi, aur repo me dependency-cruiser config nahi (RULES §4.2 bhi ise naam se kehta hai).
 - **QA infra (local, is session ka):** throwaway containers `bq-qa-valkey` (127.0.0.1:6390) aur `bq-qa-mailpit` (127.0.0.1:8035, API `/api/v1`), QA bundle `scratchpad/m1/qa-backend.ts` (gateway 8190, fake OAuth 8196, saare 11 apps `localhost:3201–3211`; har start pe nayi field keys, isliye har run ki DBs alag `bq_qa_<run>_*`). Har module ke baad bundle band aur us run ki `bq_qa_*` DBs drop (ab tak m1a, m5a, m6a, m7a, m7b, m8a, m8b, m8c; profiler sirf QA DBs pe). M7 se `qa-backend.ts` run ki keys `scratchpad/m1/keys-<run>.json` me rakhta hai (restart test) aur `QA_EXTRA_ENV` se extra settings leta hai. Session khatam pe: `docker stop bq-qa-valkey bq-qa-mailpit` (`--rm`). Live GETs: 12/15 use hue (M1).
 - **Base SHA:** skill ka snapshot `f271b31` tha; `origin/prerelease` ab `ee7f46a` hai. Beech me sirf `ca61487` (`/qa-audit` skill) + merge `ee7f46a` (PR #53): koi code nahi badla, kisi module ko dobara nahi dekhna. Worktree `prerelease` @ `ee7f46a`, `git status` saaf (report ke alawa).
@@ -823,3 +824,4 @@ Har module ke baad (existing tests + `test/mutations.ts` ke survivors).
 | v0.11   | 2026-11-04 | M7 Notify/async: 16 executed + 1 static, 17 PASS; §7 flow matrix bhara; naya bug nahi; DR-009 (din ka email budget bina sign-in khatam). |
 | v0.12   | 2026-11-04 | M8 Core + bundle + release: 9 executed + 4 static, 13 PASS; naya bug/DR nahi; M15 ke liye CI/dependency-cruiser note. |
 | v0.13   | 2026-11-04 | M9 Kernel + shared: 15 executed + 1 static, 16 PASS; naya bug QA-FE-001 (P3, `safeNext` protocol-relative); TC-FE-010 FAIL; mutation survivors ka saar §8. |
+| v0.14   | 2026-11-04 | Session 1 band: §0 me agle session ka start (M10), infra saaf; HANDOFF §4 entry. |
