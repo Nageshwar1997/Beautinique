@@ -1,6 +1,6 @@
 # QA AUDIT REPORT — BQ
 
-> **Status:** v0.8 (2026-11-04). Audit base: `origin/prerelease` @ `ee7f46a` (`ee7f46ae7b2605d99f6b4497d26303aa109fb371`). Auditor: Claude Code (Opus 5.5, `claude-opus-5-5`). Ye report audit ki single source of truth hai; fixes alag se, ek-ek karke.
+> **Status:** v0.9 (2026-11-04). Audit base: `origin/prerelease` @ `ee7f46a` (`ee7f46ae7b2605d99f6b4497d26303aa109fb371`). Auditor: Claude Code (Opus 5.5, `claude-opus-5-5`). Ye report audit ki single source of truth hai; fixes alag se, ek-ek karke.
 
 ## 0. Audit state (har session ke aakhir me update)
 
@@ -11,8 +11,8 @@
   - Public report me security detail: **live pe exploitable khule findings redact** (class, impact, severity, `file:line`); poora repro sirf chat me, fix release ke baad report me. Baaki poori detail.
   - Failure injection: **alag throwaway containers** (pehle se downloaded images, `127.0.0.1`, doosre ports, `--rm`); saanjhe Mongo/Valkey/Mailpit kabhi band nahi.
   - **Owner ki do aur hidayatein (2026-11-04):** (1) har feature ko jitna ho sake todne ki koshish (adversarial; phir bhi sirf local, burst ≤ 100, production off-limits). (2) Owner ke "acceptable" faislon pe bhi sawal uthao: rakhne se kya hoga, fix karna chahiye ya nahi. Ye §9 me `DR-<NNN>` (decision review) rows: bug count me nahi, faisla owner ka. CLAUDE.md ke frozen niyam (mobile messaging, app ki bhasha) is se bahar (CLAUDE.md ki precedence).
-- **Ho chuke modules:** M0, M1, M2, M3, M4 (2026-11-04) | **Chalu:** koi nahi | **Agla:** M5 Identity: RBAC and admin actions
-- **QA infra (local, is session ka):** throwaway containers `bq-qa-valkey` (127.0.0.1:6390) aur `bq-qa-mailpit` (127.0.0.1:8035, API `/api/v1`), QA bundle `scratchpad/m1/qa-backend.ts` (gateway 8190, fake OAuth 8196, DBs `bq_qa_m1a_{identity,notify,core}`, origin secret scratchpad me). Session khatam pe: bundle band, `docker stop bq-qa-valkey bq-qa-mailpit` (`--rm`), `bq_qa_*` DBs drop. Live GETs: 12/15 use hue (M1).
+- **Ho chuke modules:** M0–M5 (2026-11-04) | **Chalu:** koi nahi | **Agla:** M6 Identity: data protection
+- **QA infra (local, is session ka):** throwaway containers `bq-qa-valkey` (127.0.0.1:6390) aur `bq-qa-mailpit` (127.0.0.1:8035, API `/api/v1`), QA bundle `scratchpad/m1/qa-backend.ts` (gateway 8190, fake OAuth 8196, saare 11 apps `localhost:3201–3211`; har start pe nayi field keys, isliye har run ki DBs alag `bq_qa_<run>_*`). M5 ke baad bundle band aur `bq_qa_m1a_*`, `bq_qa_m5a_*` drop kiye. Session khatam pe: `docker stop bq-qa-valkey bq-qa-mailpit` (`--rm`). Live GETs: 12/15 use hue (M1).
 - **Base SHA:** skill ka snapshot `f271b31` tha; `origin/prerelease` ab `ee7f46a` hai. Beech me sirf `ca61487` (`/qa-audit` skill) + merge `ee7f46a` (PR #53): koi code nahi badla, kisi module ko dobara nahi dekhna. Worktree `prerelease` @ `ee7f46a`, `git status` saaf (report ke alawa).
 - **Khule blockers:** koi nahi.
 - **Note (local):** `.claude/worktrees/comprehensive-qa-audit-b02e4c` (git ke `info/exclude` me) aur kai `kilo` worktrees laptop pe hain; audit inhe nahi chhoota, aur repo-wide search me `.claude/worktrees` ko bahar rakhta hai (is folder ka asar: QA-TOOL-001).
@@ -49,21 +49,21 @@
 
 | Metric                                 | Count                                      |
 | -------------------------------------- | ------------------------------------------ |
-| Modules                                | 16 (M0–M15); ho chuke: 5 (M0–M4)           |
+| Modules                                | 16 (M0–M15); ho chuke: 6 (M0–M5)           |
 | Features (inventory, §3)               | 97                                         |
 | Planned test cases                     | 248 (planned-executed 223, planned-static 25) |
-| Executed                               | 94                                         |
+| Executed                               | 111                                        |
 | Static-only                            | 8                                          |
-| PASS                                   | 98                                         |
+| PASS                                   | 115                                        |
 | FAIL                                   | 4                                          |
 | BLOCKED                                | 0                                          |
-| NOT TESTED                             | 146                                        |
+| NOT TESTED                             | 128                                        |
 | NEEDS CLARIFICATION                    | 0                                          |
 | NOT IMPLEMENTED (roadmap)              | 10 (§7 list)                               |
-| KNOWN                                  | 10 (§2a)                                   |
+| KNOWN                                  | 10 issues (§2a); 1 test case (TC-ID-066)   |
 | Bugs P0 / P1 / P2 / P3 / P4            | 0 / 1 / 1 / 2 / 1                          |
 | Confirmed (E1–E3) / Suspected (E4)     | 5 / 0                                      |
-| Decision reviews (DR, §9)              | 6                                          |
+| Decision reviews (DR, §9)              | 7 (+ Q-007)                                |
 
 ## 2a. Baseline: checks aur known issues
 
@@ -146,16 +146,15 @@ Abhi sab `NOT TESTED` (Gate 1). Status ke saath `Executed`/`Static` module ke ba
 | M4 OAuth | `#totp=<loginId>` for authenticator accounts | T3.1 PR 4 | PASS | Executed | | session TOTP ke baad hi |
 | M4 OAuth | Sign-in methods remove (last method, step-up decision) | T3.1 PR 4 | PASS | Executed | | aakhri method 409 `LAST_SIGN_IN_METHOD`; bina step-up hatana = DR-006 |
 | M4 OAuth | Provider errors, unknown provider, non-customer app | T3.1 PR 4 | PASS | Executed | | cancel → `oauth=cancelled`; anjaan provider 400; admin 403 |
-| M5 RBAC | Roles seed + `rbac-sync` idempotent | T3.3 | NOT TESTED | | | |
-| M5 RBAC | Route × actor matrix (13 `iam`/permission routes) | T3.3 | NOT TESTED | | | |
-| M5 RBAC | `scopeWithin`, self-grant, `appointedBy`, Master via API | T3.3 | NOT TESTED | | | |
-| M5 RBAC | Separation of duties, validity windows, `mfaRequired` | T3.3 | NOT TESTED | | | |
-| M5 RBAC | Seat limits (`maxHolders`, race) + `db:grant-master` max 2 | T3.3 | NOT TESTED | | | |
-| M5 RBAC | Invitations (create, list, revoke, accept by code) | T3.3 PR B | NOT TESTED | | | |
-| M5 RBAC | `av` bump on every grant change | T3.3 PR B | NOT TESTED | | | |
-| M5 RBAC | Security Officer: authenticator reset, end user sessions | T3.3 PR C | NOT TESTED | | | |
-| M5 RBAC | Roles create/patch (`iam.role.manage`) | T3.3 | NOT TESTED | | | |
-| M5 RBAC | State Admin limitation | T3.3 | KNOWN | Static | | KNOWN-06 |
+| M5 RBAC | Roles seed + `rbac-sync` idempotent | T3.3 | PASS | Executed | | forced release do baar: 85 roles (81 system + 4 custom), 7 permissions, 11 apps, grants same |
+| M5 RBAC | Route × actor matrix (13 `iam`/permission routes) | T3.3 | PASS | Executed | | bina session 401, customer 403, Auditor sirf padhta, Logistics Head apni hadd me, SO/roles routes doosron ko 403 |
+| M5 RBAC | `scopeWithin`, self-grant, `appointedBy`, Master via API | T3.3 | PASS | Executed | | State Admin (MH) ke custom state role se: KA/MH+KA/global/XX refuse; self grant/end/invite refuse; Master API se nahi; Master ka grant koi khatam nahi kar sakta |
+| M5 RBAC | Separation of duties, validity windows, `mfaRequired` | T3.3 | PASS | Executed | | future grant pe sign-in nahi; past/ulti window refuse; MFA custom role → enroll; second signature T10.4 (NOT IMPLEMENTED) |
+| M5 RBAC | Seat limits (`maxHolders`, race) + `db:grant-master` max 2 | T3.3 | PASS | Executed + Static | | 3 ek saath → 2 given, 1 refuse (seatClaims write conflict); 4th refuse |
+| M5 RBAC | Invitations (create, list, revoke, accept by code) | T3.3 PR B | PASS | Executed | | email me secret nahi; accept sirf usi app me; revoke ke baad code nahi; inviter ka haq gaya to accept fail |
+| M5 RBAC | `av` bump on every grant change | T3.3 PR B | PASS | Executed | | grant/end ke baad purana token 401 |
+| M5 RBAC | Security Officer: authenticator reset, end user sessions | T3.3 PR C | PASS | Executed | | apne pe nahi; reset email aata hai; **Master pe bhi chalta hai** (DR-007) |
+| M5 RBAC | Roles create/patch (`iam.role.manage`) | T3.3 | PASS | Executed | | `iam.role.manage` wala custom role refuse, shipped role PATCH 403; khud ko appoint karne wala role ban jaata hai (Q-007) |
 | M6 Data protection | PII sealing (context binding), blind index, masking | T1.4, T3.1 | NOT TESTED | | | |
 | M6 Data protection | `/iam/me` me secrets nahi | T3.1 | NOT TESTED | | | |
 | M6 Data protection | Log redaction (identity flows) | T1.1, RULES §7.2 | NOT TESTED | | | |
@@ -246,7 +245,7 @@ Plan: **E** = planned-executed (local stack, HTTP, browser, scratch script), **S
 | TC-GW-014 | Token forgery: `alg: none`, HS256 with public key, galat `kid`, expired, galat `aud` (doosre app ki cookie), tampered payload | Sec | E | PASS (Executed): 15 forgeries 401 |
 | TC-GW-015 | JWKS fetch fail → 503; anjaan `kid` pe refetch; key rotation | R | E | FAIL (Executed, E2): QA-KRN-001; refetch throttle 30 s + single-flight PASS |
 | TC-GW-016 | Session/user revoked (Redis) → 401 | Sec | E | PASS (Executed): logout ke baad 401; Redis wipe ke baad markers gayab (QA-GW-002) |
-| TC-GW-017 | `av` badla → purana token 401 | Sec | E | NOT TESTED (M5 TC-ID-063 me; unit test `gateway.test.ts:1265`) |
+| TC-GW-017 | `av` badla → purana token 401 | Sec | E | PASS (Executed, M5 TC-ID-063) |
 | TC-GW-018 | Permission route: galat permission/scope → 403; step-up wale route bina step-up | Sec | E | PASS (Executed): customer ko 403, step-up routes `STEP_UP_REQUIRED` |
 | TC-GW-019 | Client ka `X-BQ-Passport` strip; owner bina/galat passport pe mana; passport `aud`/expiry | Sec | E | PASS (Executed) |
 | TC-GW-020 | `x-forwarded-for`, `x-real-ip`, `X-BQ-Client-Ip`, `x-origin-secret` owner tak nahi jaate | Sec | E | PASS (Executed) |
@@ -283,7 +282,7 @@ Plan: **E** = planned-executed (local stack, HTTP, browser, scratch script), **S
 | TC-ID-008 | Enumeration: sign-up (naya vs maujood email) jawab + samay | Sec | E | PASS (Executed): 418 vs 418 ms median |
 | TC-ID-009 | Enumeration: forgot password | Sec | E | PASS (Executed): 416 vs 418 ms |
 | TC-ID-010 | Enumeration: login (galat password vs user nahi) jawab + samay | Sec | E | PASS (Executed): 60 vs 64 ms median |
-| TC-ID-011 | Enumeration: invitation code | Sec | E | NOT TESTED (M5: invitation chahiye) |
+| TC-ID-011 | Enumeration: invitation code | Sec | E | PASS (Executed, M5): invited vs not, same body, ~410 ms dono |
 | TC-ID-012 | `passwordZod` rules (min 12, max, Unicode) | N | E | PASS (Executed): 8 cases |
 | TC-ID-013 | argon2id parameters | Sec | S | PASS (Static): m=19456, t=2, p=1, 16-byte salt |
 | TC-ID-014 | HIBP band/slow: password kabhi bahar nahi (k-anonymity), fail mode docs jaisa | Sec/R | E | PASS (Executed, E2 stand-in): sirf `/range/<5 hex>` + `Add-Padding`; 2 s pe fail-open + warning (DR-002) |
@@ -292,7 +291,7 @@ Plan: **E** = planned-executed (local stack, HTTP, browser, scratch script), **S
 | TC-ID-017 | `loginId`: guessable?, expiry, pehle factor se binding, attempts | Sec | E | PASS (Executed) |
 | TC-ID-018 | TOTP login: ± window, ek step me wahi code dobara | Sec | E | PASS (Executed): +1 step chalta, purana step `lastStep` se band, replay band |
 | TC-ID-019 | Recovery code login: single use, ginti | Sec | E | PASS (Executed) |
-| TC-ID-020 | Login pe TOTP enroll/confirm (MFA wale apps) | F/Sec | E | NOT TESTED (M5/M12: admin grant wala account chahiye) |
+| TC-ID-020 | Login pe TOTP enroll/confirm (MFA wale apps) | F/Sec | E | PASS (Executed, M5): Master/SO/LH/Auditor pehle sign-in pe authenticator lagate hain |
 | TC-ID-021 | Sign-in sirf grant wale app me | Sec | E | PASS (Executed) |
 | TC-ID-022 | Email normalization: case, whitespace, Unicode (`ı`/`İ`, fullwidth), plus-addressing docs ke hisaab se | Sec/Ed | E | PASS (Executed) |
 | TC-ID-023 | Password reset: code → naya password → purane sessions | F/Sec | E | PASS (Executed) |
@@ -337,23 +336,23 @@ Plan: **E** = planned-executed (local stack, HTTP, browser, scratch script), **S
 
 **M5 Identity: RBAC (`ID`, 15)**
 
-| TC | Case | Type | Plan |
-| -- | ---- | ---- | ---- |
-| TC-ID-052 | Roles seed + `rbac-sync` do baar → same data | R | E |
-| TC-ID-053 | 13 permission/iam routes × (no session, customer, galat scope admin, sahi role) | Sec | E |
-| TC-ID-054 | `scopeWithin`: apne scope ke bahar grant mana | Sec | E |
-| TC-ID-055 | Self-grant / self-elevation mana | Sec | E |
-| TC-ID-056 | `appointedBy`; Master API se kabhi nahi (ARCHITECTURE §7.3) | Sec | E |
-| TC-ID-057 | Separation of duties (maker ≠ checker) jahan laagu | Sec | E |
-| TC-ID-058 | Grant validity window (shuru se pehle, khatam ke baad) | Sec | E |
-| TC-ID-059 | `mfaRequired` roles: bina TOTP ke grant/sign-in | Sec | E |
-| TC-ID-060 | Seat limits: parallel grants/accepts (2–20) se `maxHolders` paar? | Sec/R | E |
-| TC-ID-061 | `db:grant-master` max 2 (sirf local) | Sec | E |
-| TC-ID-062 | Invitation code: entropy, expiry, single use, revoked, doosra email | Sec | E |
-| TC-ID-063 | Har grant badlav pe `av` bump → purana token 401 | Sec | E |
-| TC-ID-064 | Security Officer: authenticator reset + sessions end (permission, step-up, target) | Sec | E |
-| TC-ID-065 | Role create/patch: validation, apne se zyada power wala role? | Sec | E |
-| TC-ID-066 | State Admin limitation (KNOWN-06) | — | S |
+| TC | Case | Type | Plan | Result |
+| -- | ---- | ---- | ---- | ------ |
+| TC-ID-052 | Roles seed + `rbac-sync` do baar → same data | R | E | PASS (Executed): forced release × 2, counts same |
+| TC-ID-053 | 13 permission/iam routes × (no session, customer, galat scope admin, sahi role) | Sec | E | PASS (Executed): 8 routes × 4 actors |
+| TC-ID-054 | `scopeWithin`: apne scope ke bahar grant mana | Sec | E | PASS (Executed, custom state role) |
+| TC-ID-055 | Self-grant / self-elevation mana | Sec | E | PASS (Executed) |
+| TC-ID-056 | `appointedBy`; Master API se kabhi nahi (ARCHITECTURE §7.3) | Sec | E | PASS (Executed) |
+| TC-ID-057 | Separation of duties (maker ≠ checker) jahan laagu | Sec | E | PASS (Executed): self-rules; second signature NOT IMPLEMENTED (T10.4) |
+| TC-ID-058 | Grant validity window (shuru se pehle, khatam ke baad) | Sec | E | PASS (Executed) |
+| TC-ID-059 | `mfaRequired` roles: bina TOTP ke grant/sign-in | Sec | E | PASS (Executed) |
+| TC-ID-060 | Seat limits: parallel grants/accepts (2–20) se `maxHolders` paar? | Sec/R | E | PASS (Executed 1 run + Static) |
+| TC-ID-061 | `db:grant-master` max 2 (sirf local) | Sec | E | PASS (Executed, QA DB) |
+| TC-ID-062 | Invitation code: entropy, expiry, single use, revoked, doosra email | Sec | E | PASS (Executed) |
+| TC-ID-063 | Har grant badlav pe `av` bump → purana token 401 | Sec | E | PASS (Executed) |
+| TC-ID-064 | Security Officer: authenticator reset + sessions end (permission, step-up, target) | Sec | E | PASS (Executed); DR-007 |
+| TC-ID-065 | Role create/patch: validation, apne se zyada power wala role? | Sec | E | PASS (Executed); Q-007 |
+| TC-ID-066 | State Admin limitation (KNOWN-06) | — | S | KNOWN (Static): KNOWN-06 |
 
 **M6 Identity: data protection (`ID`, 7)**
 
@@ -634,7 +633,7 @@ Plan: **E** = planned-executed (local stack, HTTP, browser, scratch script), **S
 | QA-GW-001 | A04 Insecure Design (availability) / ASVS V1.11 | P2 | Haan, agar Render Key Value atke (band nahi) | fail-closed hi rehta hai, data leak nahi |
 | QA-KRN-001 | A04 (availability) | P3 | Haan, sirf gateway start ke turant baad JWKS fail ho | jhootha sign-out |
 
-**PASS hue controls (M1, executed):** origin secret (8 galat values; timing-safe static), app allow-list + CSRF (Host/x-forwarded-host/Origin, 29 cases), fail-closed 401 (30/30 non-public routes), JWT forgery (`alg:none`, HS256 key confusion, apni ES256 key, embedded `jwk`, tampered claims, galat `kid`/`aud`, junk: 15/15 401), passport (client ka strip; owner seedha bina/forged passport 401), client IP spoofing (XFF, `X-BQ-Client-Ip`, `Forwarded` ignore), rate limits (write/otp/auth budgets, IPv6 /64, IPv4-mapped), `auth`/`otp` fail-closed jab Redis band/atka, request smuggling (9 framing attacks), oversized header/body, path traversal (18 raw paths), security headers (helmet), error envelope, log hygiene, live: `bq-live` `/api` bina secret 403, TLS 1.3. **M2:** OTP (CSPRNG 6-digit, 10 min, 5 tries, resend seema, per-email/ghanta, app binding, replay), enumeration (sign-up/password code/login: same body + same time), argon2id OWASP min, HIBP k-anonymity, lockout, TOTP replay/window, recovery single-use, loginId binding/expiry, grant-based sign-in, email normalization, NoSQL-style input, reset ke baad sessions band, OTP outbox me sealed. **M3:** cookie flags/prefixes, refresh rotation, parallel tab 409 (bina cookies), seedha reuse → session band + email, end-others, IDOR (doosre ka session `{ended:false}`), My Devices sirf apne, expiry, step-up (session-bound, `su`, lock me gine jaate), naye recovery codes pe purane band, security emails. **M4:** OAuth state (43 chars) + browser cookie binding (login CSRF band), PKCE S256, trip single-use + expiry, verified-email-only linking (Google `email_verified`, GitHub primary+verified), consent ticket single-use + browser-bound, callback `next` open redirect (7 cases) band, locked account social sign-in band, aakhri method nahi hatta.
+**PASS hue controls (M1, executed):** origin secret (8 galat values; timing-safe static), app allow-list + CSRF (Host/x-forwarded-host/Origin, 29 cases), fail-closed 401 (30/30 non-public routes), JWT forgery (`alg:none`, HS256 key confusion, apni ES256 key, embedded `jwk`, tampered claims, galat `kid`/`aud`, junk: 15/15 401), passport (client ka strip; owner seedha bina/forged passport 401), client IP spoofing (XFF, `X-BQ-Client-Ip`, `Forwarded` ignore), rate limits (write/otp/auth budgets, IPv6 /64, IPv4-mapped), `auth`/`otp` fail-closed jab Redis band/atka, request smuggling (9 framing attacks), oversized header/body, path traversal (18 raw paths), security headers (helmet), error envelope, log hygiene, live: `bq-live` `/api` bina secret 403, TLS 1.3. **M2:** OTP (CSPRNG 6-digit, 10 min, 5 tries, resend seema, per-email/ghanta, app binding, replay), enumeration (sign-up/password code/login: same body + same time), argon2id OWASP min, HIBP k-anonymity, lockout, TOTP replay/window, recovery single-use, loginId binding/expiry, grant-based sign-in, email normalization, NoSQL-style input, reset ke baad sessions band, OTP outbox me sealed. **M3:** cookie flags/prefixes, refresh rotation, parallel tab 409 (bina cookies), seedha reuse → session band + email, end-others, IDOR (doosre ka session `{ended:false}`), My Devices sirf apne, expiry, step-up (session-bound, `su`, lock me gine jaate), naye recovery codes pe purane band, security emails. **M4:** OAuth state (43 chars) + browser cookie binding (login CSRF band), PKCE S256, trip single-use + expiry, verified-email-only linking (Google `email_verified`, GitHub primary+verified), consent ticket single-use + browser-bound, callback `next` open redirect (7 cases) band, locked account social sign-in band, aakhri method nahi hatta. **M5:** route × actor matrix, appointer chain, `scopeWithin` (custom state role se), self grant/end/invite band, Master API se nahi aur uska grant koi khatam nahi kar sakta, validity windows, MFA roles, Master seats race-safe, invitation (single use, app-bound, revoke, inviter ka haq dobara), `av` bump, `mfa: true` permissions bina authenticator use nahi ho sakte (step-up), rbac-sync idempotent.
 
 ## 6. Performance Findings
 
@@ -689,6 +688,13 @@ Har module ke baad (existing tests + `test/mutations.ts` ke survivors).
 | Ek se zyada generation purana refresh token → reuse (session band + event) | QA-ID-001; abhi tests sirf turant-pichhla token jaanchte hain | integration |
 | Doosre user ka session id DELETE → `{ended:false}` aur uska session zinda | IDOR regression | integration |
 
+**M5 RBAC:**
+
+| Scenario | Kyun zaroori | Test type |
+| -------- | ------------ | --------- |
+| Security Officer → Master par reset/sessions end (DR-007 ka jo bhi faisla) | Faisla test me likha ho, warna chupchaap badal sakta hai | integration |
+| Custom role jo khud ko appoint kare (Q-007 ka jo bhi faisla) | Privilege apne aap failne ka raasta | unit (`roleProblems`) |
+
 ## 9. Questions and Unverified Assumptions
 
 | Q-ID  | Sawal | Kyun zaroori | Evidence | Claude ki recommendation | Owner ka jawab |
@@ -705,6 +711,8 @@ Har module ke baad (existing tests + `test/mutations.ts` ke survivors).
 | DR-004 | Argon2 ek waqt me ek hash, 32 se zyada intezaar = 503 (`password.ts:9-38`; 0.1 CPU ki wajah se) + rate limit sirf per IP / IPv6 /64 (owner, 2026-10-25) | Rakhne ka asar: bina auth ~40 parallel galat logins (40 IPs, ya ek IPv6 /56 = 256 /64 buckets) se **saare** sign-in, sign-up verify aur reset 503 ("Too many sign-ins right now") ho jaate hain; asli user ka sahi password bhi. Render 0.1 CPU pe hash dheema, to ye aur sasta. Agar bug maana jaaye to P2 (availability) | E1: `scratchpad/m2/probe-m2d.mjs`: 40 burst → 6×503 aur asli user 503; 60 burst → 27×503 aur asli user 503 | Fix karna chahiye: unauthenticated hash work ka global budget (sab IPs ka), IPv6 ke liye /48 ka doosra coarse bucket `auth`/`otp` pe, aur queue me already-signed-in/known-device ko priority; ya pehle sasta check (lock/grant) phir hash. Faisla owner ka (0.1 CPU trade-off) | — |
 | DR-005 | `/auth/refresh` aur `/auth/logout` bhi `auth` class me: per IP 30 / 5 min (`backend/gateway/src/rate-limits.ts:18`, contracts) | Rakhne ka asar: Indian mobile CGNAT pe ek IPv4 ke peeche sau-sau log hote hain (code comment khud carrier NAT maanta hai). Har khuli app har ~10 min refresh karti hai, to ~60 active users ek IP pe hone se refresh 429 hone lagenge (auth fail-closed), aur users ke sessions toot sakte hain. Login/verify bhi isi bucket me | E1: auth 31st = 429 (TC-GW-022); static budgets | Fix karna chahiye: refresh ko alag class (per session/refresh-token family limit, IP ka bada budget), login/verify ko `auth` me rehne do. Faisla owner ka | — |
 | DR-006 | Social sign-in method (Google/LinkedIn/GitHub) hatana bina step-up (`DELETE /auth/sign-in-methods/:provider`, `write` class). HANDOFF §4 (T3.1 PR 4): "**Claude ka badlav, owner ko batana**"; MEMORY 2026-11-03 decision log me likha, par owner ki manzoori kahin nahi | Rakhne ka asar: 10 min ka chura hua access token wala koi bhi user ka social login hata sakta hai (password bachta hai, aakhri method nahi hatta, security email jaata hai). Naya method jodna is raaste se nahi hota, to takeover nahi; asar sirf pareshani + user ka ek raasta band | E1: `scratchpad/m4/m4.out` (TC-ID-048: remove google 200 bina step-up; aakhri method 409) | Rakh sakte hain (customers ke paas authenticator kam), par behtar: TOTP ke bina accounts ke liye "recent sign-in" (jaise 10 min ke andar password/email code) maango. Owner pehle is badlav ko maane ya badle | — |
+| DR-007 | Security Officer (`master.security_officer`, Master ka appoint kiya, `iam.totp.reset` + `iam.session.revoke`, scope global) kisi ka bhi authenticator reset aur sessions band kar sakta hai, **Master ka bhi**; sirf apne pe nahi (README §"Gateway ka check aur step-up") | Rakhne ka asar: ek chhota role sabse bade account ka 2FA hata sakta hai. Reset ke baad Master ka agla sign-in sirf password se naya authenticator laga leta hai, to jiske paas Master ka password ho (phishing, leak) wo Security Officer ki madad se Master ban sakta hai. Master ko email jaata hai (reset email aaya), par tab tak der ho sakti hai | E1: `scratchpad/m5/m5b.out`: SO → Master reset 200, Master token 401, Master next sign-in `totp-enroll`; Master inbox me "Your Beautinique authenticator was reset" | Fix karna chahiye: Master (aur shayad har `mfaRequired` / iam-manage role) pe reset sirf doosre Master ki second signature se, ya SO ko Master pe reset band. Faisla owner ka | — |
+| Q-007 | Kya Master aisa custom role bana sake jo **khud ko appoint** kare (`appointedBy` me apna hi key) aur jisme `iam.grant.manage` ho? Docs chup hain | Aisa role ek baar diya to holders aapas me aur holders bana sakte hain (aur ek-doosre ke grants khatam kar sakte hain); Master ke control ke bahar failta hai | E1: `scratchpad/m5/m5-scope.mjs`: `admin.c_qa_spreader` (appointedBy khud) 200 | `roleProblems` me self-appointing role refuse karo, jab tak owner jaan-boojh ke na maange | — |
 
 ## 10. Recommended Fixing Order
 
@@ -726,3 +734,4 @@ Har module ke baad (existing tests + `test/mutations.ts` ke survivors).
 | v0.6    | 2026-11-04 | M3 Identity sessions: 14 executed + 1 static, 14 PASS / 1 FAIL; naya bug QA-ID-001 (P1, refresh reuse detection bypass; repro redacted, Q-003). |
 | v0.7    | 2026-11-04 | M4 OAuth (fake providers): 11 executed, 11 PASS; naya bug nahi; DR-006 (provider hatana bina step-up, owner ki manzoori docs me nahi). |
 | v0.8    | 2026-11-04 | Owner: report ki branch `feat/qa-audit` (§0). |
+| v0.9    | 2026-11-04 | M5 RBAC: 14 executed + 1 KNOWN, 14 PASS; TC-ID-011, TC-ID-020, TC-GW-017 bhi PASS; naya bug nahi; DR-007 (Security Officer Master ka 2FA hata sakta), Q-007 (self-appointing custom role). |
