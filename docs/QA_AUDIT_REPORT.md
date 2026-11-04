@@ -1,6 +1,6 @@
 # QA AUDIT REPORT — BQ
 
-> **Status:** v0.9 (2026-11-04). Audit base: `origin/prerelease` @ `ee7f46a` (`ee7f46ae7b2605d99f6b4497d26303aa109fb371`). Auditor: Claude Code (Opus 5.5, `claude-opus-5-5`). Ye report audit ki single source of truth hai; fixes alag se, ek-ek karke.
+> **Status:** v0.10 (2026-11-04). Audit base: `origin/prerelease` @ `ee7f46a` (`ee7f46ae7b2605d99f6b4497d26303aa109fb371`). Auditor: Claude Code (Opus 5.5, `claude-opus-5-5`). Ye report audit ki single source of truth hai; fixes alag se, ek-ek karke.
 
 ## 0. Audit state (har session ke aakhir me update)
 
@@ -11,8 +11,8 @@
   - Public report me security detail: **live pe exploitable khule findings redact** (class, impact, severity, `file:line`); poora repro sirf chat me, fix release ke baad report me. Baaki poori detail.
   - Failure injection: **alag throwaway containers** (pehle se downloaded images, `127.0.0.1`, doosre ports, `--rm`); saanjhe Mongo/Valkey/Mailpit kabhi band nahi.
   - **Owner ki do aur hidayatein (2026-11-04):** (1) har feature ko jitna ho sake todne ki koshish (adversarial; phir bhi sirf local, burst ≤ 100, production off-limits). (2) Owner ke "acceptable" faislon pe bhi sawal uthao: rakhne se kya hoga, fix karna chahiye ya nahi. Ye §9 me `DR-<NNN>` (decision review) rows: bug count me nahi, faisla owner ka. CLAUDE.md ke frozen niyam (mobile messaging, app ki bhasha) is se bahar (CLAUDE.md ki precedence).
-- **Ho chuke modules:** M0–M5 (2026-11-04) | **Chalu:** koi nahi | **Agla:** M6 Identity: data protection
-- **QA infra (local, is session ka):** throwaway containers `bq-qa-valkey` (127.0.0.1:6390) aur `bq-qa-mailpit` (127.0.0.1:8035, API `/api/v1`), QA bundle `scratchpad/m1/qa-backend.ts` (gateway 8190, fake OAuth 8196, saare 11 apps `localhost:3201–3211`; har start pe nayi field keys, isliye har run ki DBs alag `bq_qa_<run>_*`). M5 ke baad bundle band aur `bq_qa_m1a_*`, `bq_qa_m5a_*` drop kiye. Session khatam pe: `docker stop bq-qa-valkey bq-qa-mailpit` (`--rm`). Live GETs: 12/15 use hue (M1).
+- **Ho chuke modules:** M0–M6 (2026-11-04) | **Chalu:** koi nahi | **Agla:** M7 Notify and the async pipeline
+- **QA infra (local, is session ka):** throwaway containers `bq-qa-valkey` (127.0.0.1:6390) aur `bq-qa-mailpit` (127.0.0.1:8035, API `/api/v1`), QA bundle `scratchpad/m1/qa-backend.ts` (gateway 8190, fake OAuth 8196, saare 11 apps `localhost:3201–3211`; har start pe nayi field keys, isliye har run ki DBs alag `bq_qa_<run>_*`). M5/M6 ke baad bundle band aur `bq_qa_m1a_*`, `bq_qa_m5a_*`, `bq_qa_m6a_*` drop kiye (profiler sirf in QA DBs pe chala tha). Session khatam pe: `docker stop bq-qa-valkey bq-qa-mailpit` (`--rm`). Live GETs: 12/15 use hue (M1).
 - **Base SHA:** skill ka snapshot `f271b31` tha; `origin/prerelease` ab `ee7f46a` hai. Beech me sirf `ca61487` (`/qa-audit` skill) + merge `ee7f46a` (PR #53): koi code nahi badla, kisi module ko dobara nahi dekhna. Worktree `prerelease` @ `ee7f46a`, `git status` saaf (report ke alawa).
 - **Khule blockers:** koi nahi.
 - **Note (local):** `.claude/worktrees/comprehensive-qa-audit-b02e4c` (git ke `info/exclude` me) aur kai `kilo` worktrees laptop pe hain; audit inhe nahi chhoota, aur repo-wide search me `.claude/worktrees` ko bahar rakhta hai (is folder ka asar: QA-TOOL-001).
@@ -49,21 +49,21 @@
 
 | Metric                                 | Count                                      |
 | -------------------------------------- | ------------------------------------------ |
-| Modules                                | 16 (M0–M15); ho chuke: 6 (M0–M5)           |
+| Modules                                | 16 (M0–M15); ho chuke: 7 (M0–M6)           |
 | Features (inventory, §3)               | 97                                         |
 | Planned test cases                     | 248 (planned-executed 223, planned-static 25) |
-| Executed                               | 111                                        |
+| Executed                               | 118                                        |
 | Static-only                            | 8                                          |
-| PASS                                   | 115                                        |
-| FAIL                                   | 4                                          |
+| PASS                                   | 121                                        |
+| FAIL                                   | 5                                          |
 | BLOCKED                                | 0                                          |
-| NOT TESTED                             | 128                                        |
+| NOT TESTED                             | 121                                        |
 | NEEDS CLARIFICATION                    | 0                                          |
 | NOT IMPLEMENTED (roadmap)              | 10 (§7 list)                               |
 | KNOWN                                  | 10 issues (§2a); 1 test case (TC-ID-066)   |
-| Bugs P0 / P1 / P2 / P3 / P4            | 0 / 1 / 1 / 2 / 1                          |
-| Confirmed (E1–E3) / Suspected (E4)     | 5 / 0                                      |
-| Decision reviews (DR, §9)              | 7 (+ Q-007)                                |
+| Bugs P0 / P1 / P2 / P3 / P4            | 0 / 1 / 1 / 3 / 1                          |
+| Confirmed (E1–E3) / Suspected (E4)     | 6 / 0                                      |
+| Decision reviews (DR, §9)              | 8 (+ Q-007)                                |
 
 ## 2a. Baseline: checks aur known issues
 
@@ -155,10 +155,10 @@ Abhi sab `NOT TESTED` (Gate 1). Status ke saath `Executed`/`Static` module ke ba
 | M5 RBAC | `av` bump on every grant change | T3.3 PR B | PASS | Executed | | grant/end ke baad purana token 401 |
 | M5 RBAC | Security Officer: authenticator reset, end user sessions | T3.3 PR C | PASS | Executed | | apne pe nahi; reset email aata hai; **Master pe bhi chalta hai** (DR-007) |
 | M5 RBAC | Roles create/patch (`iam.role.manage`) | T3.3 | PASS | Executed | | `iam.role.manage` wala custom role refuse, shipped role PATCH 403; khud ko appoint karne wala role ban jaata hai (Q-007) |
-| M6 Data protection | PII sealing (context binding), blind index, masking | T1.4, T3.1 | NOT TESTED | | | |
-| M6 Data protection | `/iam/me` me secrets nahi | T3.1 | NOT TESTED | | | |
-| M6 Data protection | Log redaction (identity flows) | T1.1, RULES §7.2 | NOT TESTED | | | |
-| M6 Data protection | Indexes for every query/sort; migrations | T2.5, RULES §4.13–4.14 | NOT TESTED | | | |
+| M6 Data protection | PII sealing (context binding), blind index, masking | T1.4, T3.1 | PASS | Executed | | A ka sealed TOTP secret B pe copy → `CryptoError`, koi code nahi chalta; Redis keys me email ka HMAC; DB/Redis me plaintext secret nahi |
+| M6 Data protection | `/iam/me` me secrets nahi | T3.1 | PASS | Executed | | sirf userId, email, age, sign-up app, providers, authenticator bool, codes left, session |
+| M6 Data protection | Log redaction (identity flows) | T1.1, RULES §7.2 | PASS | Executed | | 3 runs ke logs: known secret values 0, emails 0, IPs 0, user-agent 0 |
+| M6 Data protection | Indexes for every query/sort; migrations | T2.5, RULES §4.13–4.14 | FAIL | Executed | QA-ID-002 | profiler: 73 query shapes; social lookup COLLSCAN; 5 in-memory sorts (§6); migration idempotent |
 | M7 Notify/async | OTP email end-to-end (outbox → relay → queue → consumer → Mailpit) | T3.1 PR 1, T1.3 | NOT TESTED | | | |
 | M7 Notify/async | Inbox dedupe, retries, dead letters | T1.3 | NOT TESTED | | | |
 | M7 Notify/async | Lanes, daily budget, retry 5 + expiry | T5.2 | NOT TESTED | | | |
@@ -356,15 +356,15 @@ Plan: **E** = planned-executed (local stack, HTTP, browser, scratch script), **S
 
 **M6 Identity: data protection (`ID`, 7)**
 
-| TC | Case | Type | Plan |
-| -- | ---- | ---- | ---- |
-| TC-ID-067 | Sealed field doosre record me copy → decrypt fail (context binding) | Sec | E |
-| TC-ID-068 | Lookups blind index se | Sec | E |
-| TC-ID-069 | Jawab me masked values | Sec | E |
-| TC-ID-070 | `/iam/me`: hash, TOTP secret, recovery codes, sealed data nahi | Sec | E |
-| TC-ID-071 | Identity logs ki redaction (saare flows ke baad log grep) | Sec | E |
-| TC-ID-072 | Har query/sort ka index (code + `explain` local) | Perf | E |
-| TC-ID-073 | Migrations forward-only + idempotent (do baar chalao) | R | E |
+| TC | Case | Type | Plan | Result |
+| -- | ---- | ---- | ---- | ------ |
+| TC-ID-067 | Sealed field doosre record me copy → decrypt fail (context binding) | Sec | E | PASS (Executed): `CryptoError` (wrong key/context), 500, log me secret nahi |
+| TC-ID-068 | Lookups blind index se | Sec | E | PASS (Executed + Static): Redis keys HMAC; email Mongo me plain (RULES §7.2 ki PII list me nahi) |
+| TC-ID-069 | Jawab me masked values | Sec | E | PASS (Executed): sessions me UA string/refresh hash nahi; IP owner ka faisla; DR-008 |
+| TC-ID-070 | `/iam/me`: hash, TOTP secret, recovery codes, sealed data nahi | Sec | E | PASS (Executed) |
+| TC-ID-071 | Identity logs ki redaction (saare flows ke baad log grep) | Sec | E | PASS (Executed) |
+| TC-ID-072 | Har query/sort ka index (code + `explain` local) | Perf | E | FAIL (Executed, profiler + explain): QA-ID-002; §6 PERF-OBS-02 |
+| TC-ID-073 | Migrations forward-only + idempotent (do baar chalao) | R | E | PASS (Static + Executed, M5 forced release × 2) |
 
 **M7 Notify + async (`NT`, 17)**
 
@@ -606,6 +606,24 @@ Plan: **E** = planned-executed (local stack, HTTP, browser, scratch script), **S
 **Regression test to add:** Koi unit test nahi chahiye; `format:check` ek worktree ke saath laptop pe dobara chalao.
 **Owner decision needed:** Nahi
 
+### [QA-ID-002] Every social sign-in scans the whole sign-in-methods collection (partial index never used)
+
+**Module:** M6 Identity data protection (performance) | **Feature:** `identity_auth_providers` lookup by provider id | **Task/Doc:** T3.1 PR 4; RULES §4.13 (Atlas M0: index ke bina query nahi); identity README ("unique `(provider, subject)`")
+**Severity:** P3 (aaj sahi jawab, par har social sign-in pe poori collection scan; users ke saath seedha badhta hai, M0 pe sign-in dheema) | **Priority:** Medium | **Status:** Open
+**Testing Type:** Performance | **Evidence level:** E1 | **Reproducibility:** Always (profiler 18/18 + explain) | **Environment:** local QA bundle (`m6a`), Mongo 8.0.34
+**Description:** `provider_subject_unique` ek partial index hai (`partialFilterExpression: { subject: { $type: 'string' } }`). Query `findOne({ provider, subject })` me `$type` nahi, isliye planner index ko candidate hi nahi maanta aur COLLSCAN karta hai. Collection me har account ke har sign-in method ki ek row hai (password + social), to har Google/LinkedIn/GitHub callback (aur link karte waqt transaction ke andar wala check) saare users ki rows padhta hai. Uniqueness index se phir bhi bachi rehti hai.
+**Steps to Reproduce:** 1. QA DB pe profiler (level 2) chalu karo. 2. M4 ke social sign-ins chalao. 3. `system.profile`: `identity_auth_providers find {provider,subject} → COLLSCAN` (n=18, maxDocs=26). 4. `db.identity_auth_providers.find({provider:'google',subject:'x'}).explain()` → winning plan `COLLSCAN`, rejected plans 0.
+**Expected Result:** Lookup `provider_subject_unique` index se (IXSCAN), RULES §4.13.
+**Actual Result:** COLLSCAN; docsExamined = poori collection.
+**Evidence:** `scratchpad/m6/profile.out`; explain: `{provider, subject:'x'}` → COLLSCAN, `{provider, subject:{$eq:'x',$type:'string'}}` → `FETCH / IXSCAN provider_subject_unique`.
+**Root Cause:** Partial index ka filter query me nahi: `backend/identity/src/credentials.ts:56-61` (index), `backend/identity/src/oauth.ts:181` aur `:314` (queries).
+**Affected Files:** `backend/identity/src/oauth.ts:181`, `backend/identity/src/oauth.ts:314`, `backend/identity/src/credentials.ts:60`
+**Recommended Fix:** Dono queries me `subject: { $eq: subject, $type: 'string' }` (explain se IXSCAN pakka), ya index ka shape aisa ki plain equality use kare (naya naam, RULES §4.14). Ek test jo `explain()` se IXSCAN maange.
+**Fix route (RULES §2):** branch + PR (auth code), chhota; mutation zaroori nahi (query shape).
+**Regression Risk:** Low.
+**Regression test to add:** identity test: social lookup ka `explain('queryPlanner')` → `IXSCAN provider_subject_unique`.
+**Owner decision needed:** Nahi
+
 ### [QA-GW-002] Session revocations are lost when Redis is wiped; ARCHITECTURE says the gateway falls back to MongoDB, the code does not
 
 **Module:** M1 Gateway / M3 sessions | **Feature:** revocation after Redis wipe | **Task/Doc:** T3.2, T1.3; ARCHITECTURE §6.6 (line 213: "Jab tak recovery poori na ho, gateway revoke aur freeze MongoDB `sessions` se check karta hai ... source of truth hamesha MongoDB"), RULES §4.12 ("Redis kisi cheez ka source of truth nahi")
@@ -629,15 +647,19 @@ Plan: **E** = planned-executed (local stack, HTTP, browser, scratch script), **S
 | ID | OWASP Top 10 (2021) / ASVS 4.0 | Severity | Live pe exposed? | Note |
 | -- | ------------------------------ | -------- | ---------------- | ---- |
 | QA-ID-001 | A07 Identification and Authentication Failures / ASVS V3.5 (token-based session: refresh rotation) | P1 | Haan (refresh token ki copy ho to); repro redacted (Q-003) | Chori pakadne ka control bypass |
+| DR-008 | A01 Broken Access Control (data minimisation, DPDP) | design (DR) | Haan, Auditor/SO ke liye | Reviewers saare customers ke emails page kar sakte hain |
 | QA-GW-002 | A07 Identification and Authentication Failures / ASVS V3.3 (session termination) | P4 (latent) | Nahi (aaj har signed-in route identity ka; identity DB se rokti hai) | Pehla non-identity `signed-in` route aate hi P1 |
 | QA-GW-001 | A04 Insecure Design (availability) / ASVS V1.11 | P2 | Haan, agar Render Key Value atke (band nahi) | fail-closed hi rehta hai, data leak nahi |
 | QA-KRN-001 | A04 (availability) | P3 | Haan, sirf gateway start ke turant baad JWKS fail ho | jhootha sign-out |
 
-**PASS hue controls (M1, executed):** origin secret (8 galat values; timing-safe static), app allow-list + CSRF (Host/x-forwarded-host/Origin, 29 cases), fail-closed 401 (30/30 non-public routes), JWT forgery (`alg:none`, HS256 key confusion, apni ES256 key, embedded `jwk`, tampered claims, galat `kid`/`aud`, junk: 15/15 401), passport (client ka strip; owner seedha bina/forged passport 401), client IP spoofing (XFF, `X-BQ-Client-Ip`, `Forwarded` ignore), rate limits (write/otp/auth budgets, IPv6 /64, IPv4-mapped), `auth`/`otp` fail-closed jab Redis band/atka, request smuggling (9 framing attacks), oversized header/body, path traversal (18 raw paths), security headers (helmet), error envelope, log hygiene, live: `bq-live` `/api` bina secret 403, TLS 1.3. **M2:** OTP (CSPRNG 6-digit, 10 min, 5 tries, resend seema, per-email/ghanta, app binding, replay), enumeration (sign-up/password code/login: same body + same time), argon2id OWASP min, HIBP k-anonymity, lockout, TOTP replay/window, recovery single-use, loginId binding/expiry, grant-based sign-in, email normalization, NoSQL-style input, reset ke baad sessions band, OTP outbox me sealed. **M3:** cookie flags/prefixes, refresh rotation, parallel tab 409 (bina cookies), seedha reuse → session band + email, end-others, IDOR (doosre ka session `{ended:false}`), My Devices sirf apne, expiry, step-up (session-bound, `su`, lock me gine jaate), naye recovery codes pe purane band, security emails. **M4:** OAuth state (43 chars) + browser cookie binding (login CSRF band), PKCE S256, trip single-use + expiry, verified-email-only linking (Google `email_verified`, GitHub primary+verified), consent ticket single-use + browser-bound, callback `next` open redirect (7 cases) band, locked account social sign-in band, aakhri method nahi hatta. **M5:** route × actor matrix, appointer chain, `scopeWithin` (custom state role se), self grant/end/invite band, Master API se nahi aur uska grant koi khatam nahi kar sakta, validity windows, MFA roles, Master seats race-safe, invitation (single use, app-bound, revoke, inviter ka haq dobara), `av` bump, `mfa: true` permissions bina authenticator use nahi ho sakte (step-up), rbac-sync idempotent.
+**PASS hue controls (M1, executed):** origin secret (8 galat values; timing-safe static), app allow-list + CSRF (Host/x-forwarded-host/Origin, 29 cases), fail-closed 401 (30/30 non-public routes), JWT forgery (`alg:none`, HS256 key confusion, apni ES256 key, embedded `jwk`, tampered claims, galat `kid`/`aud`, junk: 15/15 401), passport (client ka strip; owner seedha bina/forged passport 401), client IP spoofing (XFF, `X-BQ-Client-Ip`, `Forwarded` ignore), rate limits (write/otp/auth budgets, IPv6 /64, IPv4-mapped), `auth`/`otp` fail-closed jab Redis band/atka, request smuggling (9 framing attacks), oversized header/body, path traversal (18 raw paths), security headers (helmet), error envelope, log hygiene, live: `bq-live` `/api` bina secret 403, TLS 1.3. **M2:** OTP (CSPRNG 6-digit, 10 min, 5 tries, resend seema, per-email/ghanta, app binding, replay), enumeration (sign-up/password code/login: same body + same time), argon2id OWASP min, HIBP k-anonymity, lockout, TOTP replay/window, recovery single-use, loginId binding/expiry, grant-based sign-in, email normalization, NoSQL-style input, reset ke baad sessions band, OTP outbox me sealed. **M3:** cookie flags/prefixes, refresh rotation, parallel tab 409 (bina cookies), seedha reuse → session band + email, end-others, IDOR (doosre ka session `{ended:false}`), My Devices sirf apne, expiry, step-up (session-bound, `su`, lock me gine jaate), naye recovery codes pe purane band, security emails. **M4:** OAuth state (43 chars) + browser cookie binding (login CSRF band), PKCE S256, trip single-use + expiry, verified-email-only linking (Google `email_verified`, GitHub primary+verified), consent ticket single-use + browser-bound, callback `next` open redirect (7 cases) band, locked account social sign-in band, aakhri method nahi hatta. **M5:** route × actor matrix, appointer chain, `scopeWithin` (custom state role se), self grant/end/invite band, Master API se nahi aur uska grant koi khatam nahi kar sakta, validity windows, MFA roles, Master seats race-safe, invitation (single use, app-bound, revoke, inviter ka haq dobara), `av` bump, `mfa: true` permissions bina authenticator use nahi ho sakte (step-up), rbac-sync idempotent. **M6:** sealed field context binding (copy kiya secret nahi khulta), identity/notify/core DB aur Redis me plaintext secret nahi (value + pattern scan), `/iam/me` saaf, logs saaf.
 
 ## 6. Performance Findings
 
 Render free cold start = KNOWN-05.
+
+- **QA-ID-002 (bug, §4):** social sign-in lookup COLLSCAN.
+- **PERF-OBS-02 (info, M6 profiler, 73 query shapes; bug nahi, aaj ke data pe asar nahi):** in-memory SORT (RULES §4.13 "har sort ke liye index" ke hisaab se adhoore): `platform_outbox find {status} sort createdAt,_id` (index `{status:1, createdAt:1}`, `_id` tie-break index me nahi; identity + core, n=246 har ek; ye relay ka poll hai, `server-queue`), `identity_grants find {active,role} sort _id` aur `{active,role,userId} sort _id`, `identity_sessions find {userId,revokedAt,expiresAt} sort lastSeenAt` (ek user ke kuch sessions). COLLSCAN `identity_roles` (85 docs ki reference table: `find {}`, `find {retired}`). Reviewer ki grants list `find {active} sort _id` poore `_id` index pe chalti hai aur har customer ka grant bhi padhti hai (DR-008). Sujhav: outbox ke liye `{status, createdAt, _id}`, grants ke liye `{role, active, _id}` jab list badi ho.
 
 - **PERF-OBS-01 (info, bug nahi, M0):** npm 12 `allowScripts` ki wajah se `msgpackr-extract@3.0.4` (bullmq → msgpackr ka native accelerator) ka install script nahi chalta ("install scripts blocked", `npm ci` log). msgpackr tab pure JS pe chalta hai: functionally theek, BullMQ job (de)serialization thoda dheema. Aaj ke load pe asar nagnya; agar queue throughput kabhi maapa jaaye to `allowScripts` me ise jodne ka faisla (supply-chain trade-off).
 
@@ -695,6 +717,13 @@ Har module ke baad (existing tests + `test/mutations.ts` ke survivors).
 | Security Officer → Master par reset/sessions end (DR-007 ka jo bhi faisla) | Faisla test me likha ho, warna chupchaap badal sakta hai | integration |
 | Custom role jo khud ko appoint kare (Q-007 ka jo bhi faisla) | Privilege apne aap failne ka raasta | unit (`roleProblems`) |
 
+**M6 Data protection:**
+
+| Scenario | Kyun zaroori | Test type |
+| -------- | ------------ | --------- |
+| Har bade query ka `explain()` IXSCAN (kam se kam social lookup, outbox poll, grants list) | QA-ID-002 jaisi galti test se nahi pakdi gayi | integration |
+| Sealed field doosre record pe copy → open nahi hota | Context binding ka regression | unit (server-crypto me hai; identity level pe nahi) |
+
 ## 9. Questions and Unverified Assumptions
 
 | Q-ID  | Sawal | Kyun zaroori | Evidence | Claude ki recommendation | Owner ka jawab |
@@ -713,6 +742,7 @@ Har module ke baad (existing tests + `test/mutations.ts` ke survivors).
 | DR-006 | Social sign-in method (Google/LinkedIn/GitHub) hatana bina step-up (`DELETE /auth/sign-in-methods/:provider`, `write` class). HANDOFF §4 (T3.1 PR 4): "**Claude ka badlav, owner ko batana**"; MEMORY 2026-11-03 decision log me likha, par owner ki manzoori kahin nahi | Rakhne ka asar: 10 min ka chura hua access token wala koi bhi user ka social login hata sakta hai (password bachta hai, aakhri method nahi hatta, security email jaata hai). Naya method jodna is raaste se nahi hota, to takeover nahi; asar sirf pareshani + user ka ek raasta band | E1: `scratchpad/m4/m4.out` (TC-ID-048: remove google 200 bina step-up; aakhri method 409) | Rakh sakte hain (customers ke paas authenticator kam), par behtar: TOTP ke bina accounts ke liye "recent sign-in" (jaise 10 min ke andar password/email code) maango. Owner pehle is badlav ko maane ya badle | — |
 | DR-007 | Security Officer (`master.security_officer`, Master ka appoint kiya, `iam.totp.reset` + `iam.session.revoke`, scope global) kisi ka bhi authenticator reset aur sessions band kar sakta hai, **Master ka bhi**; sirf apne pe nahi (README §"Gateway ka check aur step-up") | Rakhne ka asar: ek chhota role sabse bade account ka 2FA hata sakta hai. Reset ke baad Master ka agla sign-in sirf password se naya authenticator laga leta hai, to jiske paas Master ka password ho (phishing, leak) wo Security Officer ki madad se Master ban sakta hai. Master ko email jaata hai (reset email aaya), par tab tak der ho sakti hai | E1: `scratchpad/m5/m5b.out`: SO → Master reset 200, Master token 401, Master next sign-in `totp-enroll`; Master inbox me "Your Beautinique authenticator was reset" | Fix karna chahiye: Master (aur shayad har `mfaRequired` / iam-manage role) pe reset sirf doosre Master ki second signature se, ya SO ko Master pe reset band. Faisla owner ka | — |
 | Q-007 | Kya Master aisa custom role bana sake jo **khud ko appoint** kare (`appointedBy` me apna hi key) aur jisme `iam.grant.manage` ho? Docs chup hain | Aisa role ek baar diya to holders aapas me aur holders bana sakte hain (aur ek-doosre ke grants khatam kar sakte hain); Master ke control ke bahar failta hai | E1: `scratchpad/m5/m5-scope.mjs`: `admin.c_qa_spreader` (appointedBy khud) 200 | `roleProblems` me self-appointing role refuse karo, jab tak owner jaan-boojh ke na maange | — |
+| DR-008 | Reviewer roles (Internal Auditor, Security Officer: `iam.grant.read`, scope global) ko `GET /iam/grants` me **saare** grants milte hain, har customer ka `customer.customer` bhi, email ke saath (README: "reviewer ... saare roles apne scope me") | Rakhne ka asar: ek insider (Auditor/SO) API se page karke har customer ka email nikaal sakta hai (bulk export). DPDP me data minimisation; auditor ko access review ke liye customers ki list nahi chahiye | E1: `scratchpad/m5/aud-list.mjs`: Auditor ke 3 pages me 47 emails, 35 `customer.customer` | Fix karna chahiye: sign-up/self roles (`customer.customer`, applicants) reviewer list se bahar, ya email masked aur poora sirf ek user dhoondhne (`?email=`) pe. Faisla owner ka | — |
 
 ## 10. Recommended Fixing Order
 
@@ -721,6 +751,7 @@ Har module ke baad (existing tests + `test/mutations.ts` ke survivors).
 3. **QA-KRN-001** (P3): QA-GW-001 jaisa hi "dependency away → 503" ka sawal; dono ek hi PR me ja sakte hain (gateway ka access-check failure handling).
 4. **QA-GW-002** (P4, owner decision): Phase 4 ke pehle `signed-in` route se pehle zaroor; ARCHITECTURE §6.6 ka faisla pehle.
 5. **QA-TOOL-001** (P3): akela chhota fix (`.prettierignore`), kabhi bhi.
+6. **QA-ID-002** (P3): chhota, akela PR (do queries + explain test); social sign-ins badhne se pehle.
 
 ## Change log
 
@@ -735,3 +766,4 @@ Har module ke baad (existing tests + `test/mutations.ts` ke survivors).
 | v0.7    | 2026-11-04 | M4 OAuth (fake providers): 11 executed, 11 PASS; naya bug nahi; DR-006 (provider hatana bina step-up, owner ki manzoori docs me nahi). |
 | v0.8    | 2026-11-04 | Owner: report ki branch `feat/qa-audit` (§0). |
 | v0.9    | 2026-11-04 | M5 RBAC: 14 executed + 1 KNOWN, 14 PASS; TC-ID-011, TC-ID-020, TC-GW-017 bhi PASS; naya bug nahi; DR-007 (Security Officer Master ka 2FA hata sakta), Q-007 (self-appointing custom role). |
+| v0.10   | 2026-11-04 | M6 Data protection: 7 executed, 6 PASS / 1 FAIL; naya bug QA-ID-002 (P3, social lookup COLLSCAN); PERF-OBS-02; DR-008 (Auditor/SO saare customer emails dekh sakte). |
