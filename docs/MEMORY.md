@@ -1,6 +1,6 @@
 # MEMORY — BQ
 
-> **Status:** v1.49 (2026-11-05). Project ki yaaddasht: **kya tay hua aur kyun**, **pichhle kaam se kya seekha**, aur **kaunse jaal (traps) se bachna hai**. Poori detail baaki docs me hai; yahan short version aur pointers. Naya sabak ya decision aaye to yahan ek line jodo.
+> **Status:** v1.50 (2026-11-05). Project ki yaaddasht: **kya tay hua aur kyun**, **pichhle kaam se kya seekha**, aur **kaunse jaal (traps) se bachna hai**. Poori detail baaki docs me hai; yahan short version aur pointers. Naya sabak ya decision aaye to yahan ek line jodo.
 
 ## 1. Decision log
 
@@ -98,6 +98,7 @@
 | 2026-11-05 | Wake (QA KNOWN-04): cron-job.org mukhya, job har ghante :00 aur :02 IST (10:00–21:02), notification sirf job band hone pe; GitHub `wake.yml` backup, 10:00–21:59 IST ke bahar ka late scheduled run kuch nahi jagata | GitHub ne roz 12 me se 2 run chalaye, kuch aadhi raat ke baad; cron-job.org 30 s pe request kaatta hai aur 25 lagataar fail pe job band karta hai, jabki cold start ~42–57 s ka hai | TASKS A.8, T2.7 |
 | 2026-11-05 | Render free ka cold start (QA KNOWN-05) jaisa hai: paid plan nahi | 2026-11-05 ko 42.4 s (pehle 50–57 s); app ki wake-up screen aur cron-job.org ka wake ise sambhalte hain; free tier ek service pe chalta hai | ARCHITECTURE §11.2 |
 | 2026-11-05 | App khulte hi server ke jawab se pehle koi page nahi: saada parda, 1.5 s pe wake-up screen; customer ke `<head>` me `WakeScript`; crawler aur bina JS ko page seedha | Pehle prerendered Home dikhta, phir wake-up screen use dhak deti (owner ne dekha); aage Home ko bhi server chahiye (categories, sign-in); crawler ko parda ya wake call dena SEO aur free ghante bigadta | DESIGN §6, TASKS T2.7 |
+| 2026-11-05 | State Admin se Seller Account Owner / Pro Buyer (QA KNOWN-06) jaisa hai: org/applicant ka state scope check me T4.5 (sellers) aur T10.2 (Pro & B2B) ke saath, test ke saath; beech me Master ko chhoot nahi | Abhi koi seller org ya Pro applicant hai hi nahi, aur org/account ka state unhi modules me banega; beech ki chhoot bekaar ka raasta kholti | TASKS T4.5, T10.2 |
 
 ## 2. Pichhle kaam se seekhe sabak
 
@@ -211,3 +212,4 @@
 | v1.47   | 2026-11-05 | Decision: wake, cron-job.org :00 aur :02 + GitHub backup ka IST guard (QA KNOWN-04). |
 | v1.48   | 2026-11-05 | Decision: Render free cold start jaisa hai (QA KNOWN-05). |
 | v1.49   | 2026-11-05 | Decision: wake-up, server ke jawab se pehle koi page nahi. |
+| v1.50   | 2026-11-05 | Decision: QA KNOWN-06 jaisa hai, kaam T4.5 aur T10.2 me. |

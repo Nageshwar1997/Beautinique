@@ -1,6 +1,6 @@
 # TASKS — BQ
 
-> **Status:** v1.91 (2026-11-05). Poore project ki task list, [ARCHITECTURE.md](ARCHITECTURE.md) §16 ke phases ke hisaab se. Har task "done" tabhi jab [RULES.md](RULES.md) §1.5 ki Definition of Done poori ho.
+> **Status:** v1.92 (2026-11-05). Poore project ki task list, [ARCHITECTURE.md](ARCHITECTURE.md) §16 ke phases ke hisaab se. Har task "done" tabhi jab [RULES.md](RULES.md) §1.5 ki Definition of Done poori ho.
 
 **Kaise use karein:**
 - `[ ]` baaki, `[~]` chal raha hai, `[x]` done.
@@ -164,7 +164,7 @@ Har milestone ke end me kuch **live** dikhana hai. Ek hi live environment, free 
 - [ ] T4.2 Location: LGD + India Post import (laptop se, batches me).
 - [ ] T4.3 Network + area settings + serviceability API; Pune seed (Chakan + 21 hubs).
 - [ ] T4.4 Expansion: waitlist, suggestions, requests, checklist templates, `goLive`; `open-district-by-config` test.
-- [ ] T4.5 Sellers + review engine (purana `resolveStateAdmin`, reassign aur SLA logic data-driven).
+- [ ] T4.5 Sellers + review engine (purana `resolveStateAdmin`, reassign aur SLA logic data-driven). **Isi ke saath (owner, 2026-11-05; QA KNOWN-06):** State Admin apne state ki seller org me **Seller Account Owner** de sake. Abhi koi nahi de sakta (Master bhi nahi): role `org` scope me milta hai, State Admin ka scope `state` hai, aur `scopeWithin` nahi jaanta ki org kis state ki hai (`backend/identity/src/rbac/authority.ts` `appointingGrant`). Seller org ka state (registered address se) scope check me aaye; test: apne state ki org me de sakta hai, doosre state ki me nahi, state na ho to nahi.
 - [ ] T4.6 Catalog + pricing + discovery (Atlas Search, 3 indexes). **Docker Lesson 5** (atlas-local).
 - [ ] T4.7 Media: Cloudinary adapter, asset registry, lifecycle, unused cleanup, weekly reconcile.
 - [ ] T4.8 Support: contact-us (bina TTL).
@@ -231,7 +231,7 @@ Har milestone ke end me kuch **live** dikhana hai. Ek hi live environment, free 
 ## Phase 10. UGC, growth, creators, governance (5–6 hafte)
 
 - [ ] T10.1 Reviews, Q&A, photo reviews, moderation.
-- [ ] T10.2 Growth: merchandising, CMS, CRM journeys, loyalty, gift cards, retail media, Pro & B2B, city growth.
+- [ ] T10.2 Growth: merchandising, CMS, CRM journeys, loyalty, gift cards, retail media, Pro & B2B, city growth. **Pro & B2B ke saath (owner, 2026-11-05; QA KNOWN-06):** State Admin apne state ke applicant ko **Beauty Pro Buyer** de sake. Abhi koi nahi de sakta: role `self` scope me milta hai aur account ka state scope check me nahi aata. Applicant ka state (application ka address) scope check me aaye; test: apne state ka haan, doosre state ka nahi.
 - [ ] T10.3 Creators aur affiliates: storefronts, looks, links, attribution, commissions, live shopping.
 - [ ] T10.4 Governance: second signatures, emergency switches, policies, takedowns, CERT-In register, access reviews.
 - [ ] T10.5 Privacy: DPDP consents (own-brand bhi), export aur erasure, breach register.
@@ -353,3 +353,4 @@ Har milestone ke end me kuch **live** dikhana hai. Ek hi live environment, free 
 | v1.89   | 2026-11-04 | Itihaas ki lines me bhi Vercel ke naye naam (`beautinique-<app>`), purane hata diye (owner). |
 | v1.90   | 2026-11-05 | A.8, T2.7: QA KNOWN-04 (owner): cron-job.org mukhya (har ghante :00 aur :02, 30 s limit ki wajah se), GitHub backup + IST guard. |
 | v1.91   | 2026-11-05 | T2.7: wake-up glitch, server ke jawab se pehle koi page nahi (saada parda, phir wake-up screen; owner). |
+| v1.92   | 2026-11-05 | T4.5, T10.2: QA KNOWN-06 (owner), State Admin se Seller Account Owner / Pro Buyer ka state check unhi tasks me, test ke saath. |
