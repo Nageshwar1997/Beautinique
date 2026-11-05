@@ -1,6 +1,6 @@
 # MEMORY — BQ
 
-> **Status:** v1.45 (2026-11-05). Project ki yaaddasht: **kya tay hua aur kyun**, **pichhle kaam se kya seekha**, aur **kaunse jaal (traps) se bachna hai**. Poori detail baaki docs me hai; yahan short version aur pointers. Naya sabak ya decision aaye to yahan ek line jodo.
+> **Status:** v1.46 (2026-11-05). Project ki yaaddasht: **kya tay hua aur kyun**, **pichhle kaam se kya seekha**, aur **kaunse jaal (traps) se bachna hai**. Poori detail baaki docs me hai; yahan short version aur pointers. Naya sabak ya decision aaye to yahan ek line jodo.
 
 ## 1. Decision log
 
@@ -94,6 +94,7 @@
 | 2026-11-04 | Vercel: saare 11 apps pehle khaali publish (naam pakke), har project production branch `release`, preview deployments band, affected-only deploys, retention (preview/canceled/errored 1 din, production 2 hafte), env team ke shared env me | Naam jaldi chhin rahe the; Hobby ki 100 deploy/din limit 11 projects ke previews se ek din me khatam hui; ek jagah env | TASKS A.9, ARCHITECTURE (previews) |
 | 2026-11-05 | Dependabot (QA KNOWN-01–03, owner): `deepmerge` alert dismiss ("tolerable risk"); `glob` aur `minimatch` root `overrides` se naye major pe (`^14.0.3`, `^11.0.4`), sirf advisory ki version range pe; parents khud naya major maangne lagein to `overrides` hatao | `deepmerge` ka fix hai hi nahi aur wo sirf build tool me hai; `glob`/`minimatch` ke fix sirf naye major me the aur parents purana maangte the; jaanch me parents sirf naye major wali API chhoote hain (PWA precache aur ESLint ka config map pehle-baad same) | HANDOFF §6 |
 | 2026-11-05 | Fresh lockfile (owner): saare `node_modules` aur `package-lock.json` hata ke naya install. `mongodb` 7.8 pe `server-mongo` ka `ready()` apna 2 s intezaar rakhta hai aur ek waqt me ek ping (`timeoutMS` nahi); `createIndex` teen parameter | 7.8 do CVE fix karta hai aur `timeoutMS` ko no-op bana deta hai, jisse `/ready` atke Mongo pe atak jaata; apna timer driver ka kaam beech me nahi kaatta, aur ek ping se atke Mongo pe pool nahi bharta | HANDOFF §6 |
+| 2026-11-05 | QA ke saare fixes (KNOWN aur QA-*) `feat/qa-audit` me hi, jisme audit report hai; har fix ka apna commit, branch `prerelease` se merge karke update | Report aur uske fixes ek jagah rahein, aur fix ke saath report ki halat bhi badle | HANDOFF §4 item 6 |
 
 ## 2. Pichhle kaam se seekhe sabak
 
@@ -203,3 +204,4 @@
 | v1.43   | 2026-11-05 | Decision: Dependabot (QA KNOWN-01–03): `deepmerge` alert dismiss, `glob`/`minimatch` `overrides` se naye major. |
 | v1.44   | 2026-11-05 | Sabak 22: auth-ui tests me `findBy*` ka 1 s default busy machine pe kam (`asyncUtilTimeout` 10 s). |
 | v1.45   | 2026-11-05 | Decision: fresh lockfile, `mongodb` 7.8 pe `ready()` apna 2 s intezaar + ek ping; sabak 23: fail point do saath aaye commands rokta hai. |
+| v1.46   | 2026-11-05 | Decision: QA ke saare fixes `feat/qa-audit` me. |
