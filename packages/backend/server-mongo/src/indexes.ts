@@ -121,7 +121,10 @@ export async function syncIndexes(
   for (const spec of missing) {
     const { collection, name, key, ...options } = spec;
     try {
-      await mongo.db.collection(collection).createIndex({ ...key }, { ...options, name });
+      // index options, then (none) command options: mongodb 7.8 sends the index options as written
+      await mongo.db
+        .collection(collection)
+        .createIndex({ ...key }, { ...options, name }, undefined);
     } catch (error) {
       if (error instanceof MongoServerError && CONFLICT_CODES.has(Number(error.code))) {
         throw new IndexConflictError(
