@@ -1,6 +1,6 @@
 # QA AUDIT REPORT — BQ
 
-> **Status:** v0.20 (2026-11-05). Audit base: `origin/prerelease` @ `ee7f46a` (`ee7f46ae7b2605d99f6b4497d26303aa109fb371`). Auditor: Claude Code (Opus 5.5, `claude-opus-5-5`). Ye report audit ki single source of truth hai; fixes alag se, ek-ek karke.
+> **Status:** v1.0 (2026-11-05, final). Audit base: `origin/prerelease` @ `ee7f46a` (`ee7f46ae7b2605d99f6b4497d26303aa109fb371`). Auditor: Claude Code (Opus 5.5, `claude-opus-5-5`). Ye report audit ki single source of truth hai; fixes alag se, ek-ek karke.
 
 ## 0. Audit state (har session ke aakhir me update)
 
@@ -11,7 +11,7 @@
   - Public report me security detail: **live pe exploitable khule findings redact** (class, impact, severity, `file:line`); poora repro sirf chat me, fix release ke baad report me. Baaki poori detail.
   - Failure injection: **alag throwaway containers** (pehle se downloaded images, `127.0.0.1`, doosre ports, `--rm`); saanjhe Mongo/Valkey/Mailpit kabhi band nahi.
   - **Owner ki do aur hidayatein (2026-11-04):** (1) har feature ko jitna ho sake todne ki koshish (adversarial; phir bhi sirf local, burst ≤ 100, production off-limits). (2) Owner ke "acceptable" faislon pe bhi sawal uthao: rakhne se kya hoga, fix karna chahiye ya nahi. Ye §9 me `DR-<NNN>` (decision review) rows: bug count me nahi, faisla owner ka. CLAUDE.md ke frozen niyam (mobile messaging, app ki bhasha) is se bahar (CLAUDE.md ki precedence).
-- **Ho chuke modules:** M0–M15, sab (2026-11-05) | **Chalu:** koi nahi | **Agla:** `final` (Phase 6: §5–§10 poore, counts ki jaanch, final message)
+- **Audit poora (final, 2026-11-05):** saare 16 modules (M0–M15) + Phase 6. 249 test cases (PASS 226, FAIL 18, KNOWN 3, NOT IMPLEMENTED 2, NOT TESTED 0), 22 bug (P0 0 / P1 1 / P2 4 / P3 11 / P4 6), sab confirmed; 11 DR + 15 Q owner ke liye (§9). **Fix abhi shuru nahi (owner, 2026-11-05):** fixes alag sessions me, §10 ke kram me. **Jo cover nahi hua:** production pe 12 passive GETs ke alawa kuch nahi (Gate 1); sirf Chromium (Firefox/WebKit nahi); built-in pane me service worker, asli clipboard paste, cross-document `beforeunload` aur screenshots nahi chale (pane hidden); asli Android/Windows IME (Q-008), Mongo outage (shared Mongo, throwaway replica set nahi), asli OAuth providers/Brevo (fake/Mailpit), naye mutation runs (Gate 1), Q-010 ka timing race (E4).
 - **Session 2, M15 (2026-11-05):** sirf static + scratch script `scratchpad/m15/env-vs-config.ts` (config keys ke naam, values nahi) + contracts `check`.
 - **Session 2, M14 (2026-11-05):** sirf static + ek scratch shell script (`scratchpad/m14/branch-flow.sh`) + `docker ps`; GitHub pe kuch nahi bheja, koi server nahi.
 - **Session 2, M13 (2026-11-05):** seller dev + delivery `vite preview` Terminal panel me (M12 jaisa), backend/containers nahi; dono band. Built-in pane service worker register nahi karta (TC-APPS-002 ka SW hissa BLOCKED).
@@ -955,6 +955,8 @@ Plan: **E** = planned-executed (local stack, HTTP, browser, scratch script), **S
 | QA-GW-002  | A07 Identification and Authentication Failures / ASVS V3.3 (session termination)                   | P4 (latent) | Nahi (aaj har signed-in route identity ka; identity DB se rokti hai) | Pehla non-identity `signed-in` route aate hi P1                     |
 | QA-GW-001  | A04 Insecure Design (availability) / ASVS V1.11                                                    | P2          | Haan, agar Render Key Value atke (band nahi)                         | fail-closed hi rehta hai, data leak nahi                            |
 | QA-KRN-001 | A04 (availability)                                                                                 | P3          | Haan, sirf gateway start ke turant baad JWKS fail ho                 | jhootha sign-out                                                    |
+| QA-FE-009 | A04 Insecure Design (availability) | P2 | Haan (customer + admin, Render restart/cold start pe; live trigger verify nahi) | Signed-in pages "Loading" pe atakte; data leak nahi |
+| QA-FE-006 | A04 (availability, hardening) | P4 | Haan | Atka backend pe client ka koi upper bound nahi |
 
 **PASS hue controls (M1, executed):** origin secret (8 galat values; timing-safe static), app allow-list + CSRF (Host/x-forwarded-host/Origin, 29 cases), fail-closed 401 (30/30 non-public routes), JWT forgery (`alg:none`, HS256 key confusion, apni ES256 key, embedded `jwk`, tampered claims, galat `kid`/`aud`, junk: 15/15 401), passport (client ka strip; owner seedha bina/forged passport 401), client IP spoofing (XFF, `X-BQ-Client-Ip`, `Forwarded` ignore), rate limits (write/otp/auth budgets, IPv6 /64, IPv4-mapped), `auth`/`otp` fail-closed jab Redis band/atka, request smuggling (9 framing attacks), oversized header/body, path traversal (18 raw paths), security headers (helmet), error envelope, log hygiene, live: `bq-live` `/api` bina secret 403, TLS 1.3. **M2:** OTP (CSPRNG 6-digit, 10 min, 5 tries, resend seema, per-email/ghanta, app binding, replay), enumeration (sign-up/password code/login: same body + same time), argon2id OWASP min, HIBP k-anonymity, lockout, TOTP replay/window, recovery single-use, loginId binding/expiry, grant-based sign-in, email normalization, NoSQL-style input, reset ke baad sessions band, OTP outbox me sealed. **M3:** cookie flags/prefixes, refresh rotation, parallel tab 409 (bina cookies), seedha reuse → session band + email, end-others, IDOR (doosre ka session `{ended:false}`), My Devices sirf apne, expiry, step-up (session-bound, `su`, lock me gine jaate), naye recovery codes pe purane band, security emails. **M4:** OAuth state (43 chars) + browser cookie binding (login CSRF band), PKCE S256, trip single-use + expiry, verified-email-only linking (Google `email_verified`, GitHub primary+verified), consent ticket single-use + browser-bound, callback `next` open redirect (7 cases) band, locked account social sign-in band, aakhri method nahi hatta. **M5:** route × actor matrix, appointer chain, `scopeWithin` (custom state role se), self grant/end/invite band, Master API se nahi aur uska grant koi khatam nahi kar sakta, validity windows, MFA roles, Master seats race-safe, invitation (single use, app-bound, revoke, inviter ka haq dobara), `av` bump, `mfa: true` permissions bina authenticator use nahi ho sakte (step-up), rbac-sync idempotent. **M6:** sealed field context binding (copy kiya secret nahi khulta), identity/notify/core DB aur Redis me plaintext secret nahi (value + pattern scan), `/iam/me` saaf, logs saaf. **M7:** OTP code outbox/delivery me sealed aur bhejne ke baad hat jaata, expire hua code kabhi nahi jaata, emails me HTML escape (UA ka `<script>`/CRLF nahi pahuncha), koi secret/recovery code email me nahi, notify logs me email/code nahi. **M8:** start fail pe 1.6 s me exit (Render ka 15 min atkaav nahi), config errors me secret value nahi, typo `<NAME>__` key pe start rukta, release lease + fingerprint, Master ka live raasta `live` likhne pe hi. **M9:** sealing rotation/tamper/context, JWT expiry/nbf/iss/aud, validators (GSTIN check digit ...), paise integer + safe range, storage key traversal, backend `safeNextPath` (20 cases). **M10 (browser):** guard deep link (query + hash) → sign-in → wahi page, browser storage me koi user data nahi (sirf theme), recovery codes ek baar + leave blocker + storage me nahi, step-up dialog (galat code field pe, sahi pe asli call dobara), axios errors log nahi, React Router 8.5 external `navigate` rokta (QA-FE-001 open redirect nahi banta), ErrorPage stack sirf DEV, theme script CSP hash sahi. **M11 (customer, asli QA backend):** cookie flags browser tak (`__Host-` access HttpOnly/Lax, `__Secure-` refresh Strict `Path=/api/v1/auth`, hint me sirf `1`), user data storage me nahi, guard + safe `next` (query + hash), doosre device ka session browser se band → turant 401, "end others" ke baad agli call pe sign-in, recovery code single-use format normalise, social consent ticket page reload/back pe dobara use nahi, 429 pe insaani sandesh + `Retry-After`, auth pages `noindex`.
 
@@ -987,7 +989,7 @@ Render free cold start = KNOWN-05.
 | Redis atka (connected, chup)                                                                    | FAIL            | QA-GW-001: signed-in requests latakti hain                                                                                            |
 | Redis wipe → epoch recovery (schedules + outbox redrive + dedupe)                               | PASS, ek gap    | TC-NT-014 PASS; revocation markers nahi lautte (QA-GW-002)                                                                            |
 | Mongo outage                                                                                    | NOT TESTED      | shared local Mongo band nahi kiya (Q-004 sirf Valkey/Mailpit ke throwaway); throwaway Mongo replica set chahiye to owner se poochh ke |
-| apps → gateway (browser) | PASS (customer, Executed) / M12 (admin) | dev proxy + laptop public secret → QA gateway 8080; sign-up/sign-in/social (fake Google)/forgot/devices/authenticator; gateway band pe client ka asar QA-FE-004, QA-FE-007 |
+| apps → gateway (browser) | PASS (Executed: customer M11, admin M12) | dev proxy + laptop public secret → QA gateway 8080; sign-up/sign-in/social (fake Google)/forgot/invitation/authenticator/devices/idle; gateway band pe client ka asar QA-FE-004, QA-FE-007, QA-FE-009 |
 | api-client → atka server (koi jawab nahi) | FAIL | QA-FE-006: koi timeout nahi; `ServerWake` sahi give-up karta (TC-FE-008) |
 
 **NOT IMPLEMENTED (roadmap, bug nahi):**
@@ -1141,27 +1143,28 @@ Har module ke baad (existing tests + `test/mutations.ts` ke survivors).
 
 ## 10. Recommended Fixing Order
 
-1. **QA-ID-001** (P1): live pe khula security control; sabse pehle, akela PR.
-2. **QA-GW-001** (P2): sabse zyada live asar (Redis atke to har signed-in request latakti); kernel + gateway PR.
-3. **QA-FE-009** (P2): Render ke har restart/cold start pe signed-in log "Loading" pe atak sakte; auth-ui (+ app-shell) PR.
-4. **QA-FE-004** (P2): live pe logout fail hone par session zinda; auth-ui ka chhota PR. QA-FE-001 aur QA-FE-007 isi auth-ui/api-client PR me ja sakte hain.
-5. **QA-FE-008** (P2): auth flows ka focus + status announcement; auth-ui PR (QA-FE-004 wale ke saath bhi chal sakta).
-6. **QA-KRN-001** (P3): QA-GW-001 jaisa hi "dependency away → 503" ka sawal; dono ek hi PR me ja sakte hain (gateway ka access-check failure handling).
-7. **QA-GW-002** (P4, owner decision): Phase 4 ke pehle `signed-in` route se pehle zaroor; ARCHITECTURE §6.6 ka faisla pehle.
-8. **QA-TOOL-001** (P3): akela chhota fix (`.prettierignore`), kabhi bhi.
-9. **QA-ID-002** (P3): chhota, akela PR (do queries + explain test); social sign-ins badhne se pehle.
-10. **QA-FE-001** (P3): auth-ui `safeNext` + contracts `safeNextPath` ek jaise; aaj crafted link pe crash (customer me `ErrorPage`).
-11. **QA-FE-007** (P3): `errorMessage` me proxy 5xx ka insaani sandesh; QA-FE-004 ke saath.
-12. **QA-CUS-001** (P3): customer `root.tsx` 1-line (`error == null`) + test.
-13. **QA-FE-003 + QA-FE-002** (P3): ek components PR (dono 1-1 line + test); QA-FE-003 live OTP screens pe, QA-FE-002 Phase 4 ke pehle form se pehle.
-14. **QA-FE-006** (P4, owner: timeout kitna): contracts + api-client PR; QA-GW-001 ke fix ke saath sochna.
-15. **QA-FE-005** (P4): playground ka 1-line fix, kabhi bhi.
-16. **QA-FE-010** (P3): QA-FE-004 wale auth-ui PR me (idle ka local forget pehle).
-17. **QA-ADM-001** (P3): admin header chhota fix + Playwright overflow assertion (customer bhi).
-18. **QA-CI-001** (P3): `ci.yml` 1 step (head repo bhi dekho), `prerelease` pe chhota fix.
-19. **QA-TOOL-002** (P4): `scripts/e2e` chhota fix + purani DBs ka sweep.
-20. **QA-DOC-001 + QA-DOC-002** (P4, owner): docs ka ek chhota PR (T6.3 ka faisla owner ka; TASKS §P bhi).
-21. **Q-011 / T6.6** (owner): security headers (`frame-ancestors`, nosniff, Referrer-Policy) ka chhota PR, Phase 4 se pehle.
+Final (2026-11-05). Har number ek PR (ya ek chhota fix); saath jaane wale bugs ek hi line me. Fixes is audit me nahi: alag sessions me, ek-ek karke.
+
+1. **QA-ID-001** (P1): refresh-token reuse detection bypass; live pe khula security control; sabse pehle, akela PR (repro owner ke paas chat me).
+2. **QA-GW-001 + QA-KRN-001** (P2 + P3): gateway ka "dependency away/atka → jaldi 503" (dono ki Recommended Fix ke mutabik); gateway ke access-check failure handling ka ek PR.
+3. **QA-FE-009** (P2): `/iam/me` 5xx pe retry / wake ke baad dobara + `unavailable` pe sandesh; auth-ui (+ app-shell) PR. Render ke har restart pe asar.
+4. **QA-FE-004 + QA-FE-010** (P2 + P3): sign-out/idle ka local state sahi kram me (server fail pe signed-in rakho; idle me pehle local forget); auth-ui PR.
+5. **QA-FE-008** (P2): auth steps pe focus + "code bheja" status announcement; auth-ui PR (4 ke saath bhi chal sakta).
+6. **QA-FE-001 + QA-FE-007** (P3): `safeNext` normalise ke baad bhi `//` check (+ contracts `safeNextPath`), aur proxy 5xx ka insaani sandesh; auth-ui + api-client chhota PR.
+7. **QA-CI-001** (P3): `ci.yml` branch flow me head repo bhi; `prerelease` pe chhota fix.
+8. **QA-ID-002** (P3): social lookup ka index (do queries + explain test); social sign-ins badhne se pehle.
+9. **QA-CUS-001** (P3): customer `root.tsx` `error == null`; 1 line + test.
+10. **QA-FE-003 + QA-FE-002** (P3): components ka ek PR (`CodeInput` maxLength, HierarchySelect Escape).
+11. **QA-ADM-001** (P3): admin header 360 px + Playwright overflow assertion (customer bhi).
+12. **QA-TOOL-001** (P3): `.prettierignore` me `.claude/worktrees`; kabhi bhi.
+13. **QA-GW-002** (P4, owner decision): Redis wipe pe revocation fallback; ARCHITECTURE §6.6 ka faisla pehle, pehle non-identity `signed-in` route se pehle zaroor.
+14. **QA-FE-006** (P4, owner: timeout kitna): contracts + api-client client timeout; 2 ke saath sochna.
+15. **QA-TOOL-002** (P4): `scripts/e2e` cleanup backend band hone ke baad + purani DBs ka sweep.
+16. **QA-FE-005** (P4): app-shell playground stub 1 line.
+17. **QA-DOC-001 + QA-DOC-002** (P4, owner): docs ka ek chhota PR (T6.3 aur progress % owner tay kare).
+18. **Q-011 / T6.6** (owner, bug nahi): security headers (`frame-ancestors`, nosniff, Referrer-Policy) ka chhota PR Phase 4 se pehle.
+
+**§9 ke owner faisle jinke jawab baaki (sabse zaroori pehle):** DR-009 (email budget), DR-003 (targeted lockout), DR-004 (hash queue DoS), DR-010 (5 min step-up window), Q-010 (do tabs ka 300 ms race), Q-011, Q-014, baaki DR-001…DR-011 aur Q-005…Q-015.
 
 ## Change log
 
@@ -1187,3 +1190,4 @@ Har module ke baad (existing tests + `test/mutations.ts` ke survivors).
 | v0.18 | 2026-11-05 | M13 Shell apps (9): 4 executed + 1 static, 5 PASS; naya bug nahi; Q-013 (delivery SW navigation fallback, T8.6), Q-014 (live shells pe developer sandesh); SW test BLOCKED (pane). |
 | v0.19 | 2026-11-05 | M14 CI/CD, infra, tooling: 15 cases (12 PASS, 1 FAIL, 2 KNOWN; zyada static + case-logic script + `docker ps`); naya bug QA-CI-001 (P3, fork branch naam se branch-flow pass); Q-015 (actions SHA pin, generator me `vercel.json` nahi). |
 | v0.20 | 2026-11-05 | M15 Docs vs code: 4 cases (3 PASS, 1 FAIL); naye bug QA-DOC-001 (P4, docs ke CI guards repo me nahi), QA-DOC-002 (P4, TASKS T6.3 + CLAUDE.md app list purane); `.env.example` vs `configZod` mel; saare 16 modules ho gaye. |
+| v1.0 | 2026-11-05 | Final (Phase 6): §5 me QA-FE-009/QA-FE-006, §7 apps → gateway (customer + admin), §10 final kram PR groups ke saath (18 items, saare 22 bug), §0 me poora saar + jo cover nahi hua; counts dobara jaanche (249 cases, 22 bug). Fixes shuru nahi (owner). |
