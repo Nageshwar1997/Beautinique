@@ -1,10 +1,24 @@
 import { HEADERS, wake } from '@beautinique/shared-contracts';
 import { act, cleanup, render, screen } from '@testing-library/react';
 import axe from 'axe-core';
+import { hydrateRoot } from 'react-dom/client';
 import { renderToString } from 'react-dom/server';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
-import { ServerWake, WAKE_URL, wakeServer } from '../src/index';
+import {
+  isCrawler,
+  ServerWake,
+  WAKE_CHECK_ATTRIBUTE,
+  WAKE_SCRIPT,
+  WAKE_SCRIPT_HASH,
+  WAKE_URL,
+  wakeServer,
+} from '../src/index';
+
+const GOOGLEBOT =
+  'Mozilla/5.0 (compatible; Googlebot/2.1; +http://www.google.com/bot.html) Chrome/130.0 Safari/537.36';
+const CHROME =
+  'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/142.0 Safari/537.36';
 
 /** How one call goes: an answer after `after` ms, a network error, or no answer at all. */
 type Step = { after: number; status: number } | { after: number; error: true } | { hang: true };
@@ -75,6 +89,8 @@ beforeEach(() => {
 afterEach(() => {
   cleanup();
   vi.useRealTimers();
+  vi.restoreAllMocks();
+  document.documentElement.removeAttribute(WAKE_CHECK_ATTRIBUTE);
 });
 
 describe('wakeServer', () => {
@@ -202,9 +218,47 @@ describe('wakeServer', () => {
   });
 });
 
+describe('WAKE_SCRIPT', () => {
+  const runIn = (userAgent: string) => {
+    vi.spyOn(navigator, 'userAgent', 'get').mockReturnValue(userAgent);
+    // the inline script as the browser runs it (a fixed string of this package)
+    // eslint-disable-next-line @typescript-eslint/no-implied-eval
+    const script = new Function(WAKE_SCRIPT) as () => void;
+    script();
+    return document.documentElement.hasAttribute(WAKE_CHECK_ATTRIBUTE);
+  };
+
+  it('marks <html> before the first paint, for people and not for crawlers', () => {
+    expect(runIn(CHROME)).toBe(true);
+    document.documentElement.removeAttribute(WAKE_CHECK_ATTRIBUTE);
+    expect(runIn(GOOGLEBOT)).toBe(false);
+  });
+
+  it('tells crawlers apart as isCrawler does', () => {
+    for (const userAgent of [
+      CHROME,
+      GOOGLEBOT,
+      'Mozilla/5.0 (compatible; bingbot/2.0)',
+      'Baiduspider',
+    ]) {
+      document.documentElement.removeAttribute(WAKE_CHECK_ATTRIBUTE);
+      expect(runIn(userAgent)).toBe(!isCrawler(userAgent));
+    }
+    expect(WAKE_SCRIPT).toContain(`"${WAKE_CHECK_ATTRIBUTE}"`);
+  });
+
+  it('is allowed by WAKE_SCRIPT_HASH, byte for byte', async () => {
+    const bytes = new TextEncoder().encode(WAKE_SCRIPT);
+    const digest = Buffer.from(await crypto.subtle.digest('SHA-256', bytes)).toString('base64');
+    expect(WAKE_SCRIPT_HASH).toBe(`'sha256-${digest}'`);
+  });
+});
+
 describe('ServerWake', () => {
   const app = () => screen.getByTestId('app');
   const wakeScreen = () => screen.queryByRole('dialog');
+  const veil = () => document.querySelector('[data-server-check-veil]');
+  const marked = () => document.documentElement.hasAttribute(WAKE_CHECK_ATTRIBUTE);
 
   const renderApp = (fetch: typeof globalThis.fetch, timings = {}) =>
     render(
@@ -216,13 +270,42 @@ describe('ServerWake', () => {
       </ServerWake>,
     );
 
-  it('shows the app at once and no screen when the server answers quickly', async () => {
+  it('covers the app with a plain loader until a quick server answers, with no wake-up screen', async () => {
     const { fetch } = scriptedFetch({ after: 300, status: 200 });
     renderApp(fetch);
-    expect(app()).toBeTruthy();
+    // before the answer: the loader (no words), the app out of reach and busy
+    expect(marked()).toBe(true);
+    expect(veil()?.getAttribute('aria-hidden')).toBe('true');
+    expect(app().parentElement?.hasAttribute('inert')).toBe(true);
+    expect(app().parentElement?.getAttribute('aria-busy')).toBe('true');
+    expect(wakeScreen()).toBeNull();
+    await advance(300);
+    expect(marked()).toBe(false);
+    expect(veil()).toBeNull();
+    expect(app().parentElement?.hasAttribute('inert')).toBe(false);
+    expect(app().parentElement?.hasAttribute('aria-busy')).toBe(false);
     await advance(5000);
     expect(wakeScreen()).toBeNull();
+  });
+
+  it('leaves a crawler the page as it is, and never calls the server for it', async () => {
+    vi.spyOn(navigator, 'userAgent', 'get').mockReturnValue(GOOGLEBOT);
+    const { fetch } = scriptedFetch({ hang: true });
+    renderApp(fetch);
+    expect(marked()).toBe(false);
+    expect(veil()).toBeNull();
     expect(app().parentElement?.hasAttribute('inert')).toBe(false);
+    await advance(5000);
+    expect(wakeScreen()).toBeNull();
+    expect(fetch).not.toHaveBeenCalled();
+  });
+
+  it('takes the mark off <html> when it goes', () => {
+    const { fetch } = scriptedFetch({ hang: true });
+    const { unmount } = renderApp(fetch);
+    expect(marked()).toBe(true);
+    unmount();
+    expect(marked()).toBe(false);
   });
 
   it('covers the app with the wake-up screen while the server is slow, then gets out of the way', async () => {
@@ -230,7 +313,11 @@ describe('ServerWake', () => {
     renderApp(fetch);
     await advance(1499);
     expect(wakeScreen()).toBeNull();
+    expect(veil()).toBeTruthy();
     await advance(1);
+    // the wake-up screen takes the loader's place
+    expect(veil()).toBeNull();
+    expect(marked()).toBe(false);
     const dialog = wakeScreen();
     expect(dialog?.getAttribute('aria-modal')).toBe('true');
     expect(screen.getByRole('heading', { name: 'Waking up the server' })).toBeTruthy();
@@ -290,14 +377,54 @@ describe('ServerWake', () => {
     expect(await violations()).toEqual([]);
   });
 
-  it('renders only the app on the server (the call starts in the browser)', () => {
+  it('hydrates the page rendered on the server without a mismatch, then blocks it until the answer', async () => {
+    const { fetch } = scriptedFetch({ after: 300, status: 200 });
+    const tree = (
+      <ServerWake app="customer" fetch={fetch}>
+        <main data-testid="app">Store</main>
+      </ServerWake>
+    );
+    const container = document.createElement('div');
+    container.innerHTML = renderToString(tree);
+    document.body.append(container);
+    const errors: unknown[] = [];
+    const root = await act(() =>
+      hydrateRoot(container, tree, {
+        onRecoverableError: (error) => errors.push(error),
+      }),
+    );
+    expect(errors).toEqual([]);
+    expect(marked()).toBe(true);
+    expect(app().parentElement?.hasAttribute('inert')).toBe(true);
+    await advance(300);
+    expect(veil()).toBeNull();
+    expect(app().parentElement?.hasAttribute('inert')).toBe(false);
+    act(() => {
+      root.unmount();
+    });
+    container.remove();
+  });
+
+  it('has no axe violations behind the plain loader', async () => {
+    const { fetch } = scriptedFetch({ hang: true });
+    renderApp(fetch);
+    expect(veil()).toBeTruthy();
+    expect(await violations()).toEqual([]);
+  });
+
+  it('renders the app as it is on the server, with the loader for the CSS to show (the call starts in the browser)', () => {
     const { fetch } = scriptedFetch({ hang: true });
     const html = renderToString(
       <ServerWake app="customer" fetch={fetch}>
         <p>Store</p>
       </ServerWake>,
     );
-    expect(html).toBe('<div><p>Store</p></div>');
+    // not inert nor busy: without JavaScript (or for a crawler) the page works
+    expect(
+      html.startsWith('<div><p>Store</p></div><div aria-hidden="true" data-server-check-veil=""'),
+    ).toBe(true);
+    expect(html).not.toContain('inert');
+    expect(html).not.toContain('role="dialog"');
     expect(fetch).not.toHaveBeenCalled();
   });
 });

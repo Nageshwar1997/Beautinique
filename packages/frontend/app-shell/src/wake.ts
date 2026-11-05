@@ -1,5 +1,5 @@
 import axios from 'axios';
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useLayoutEffect, useState, useSyncExternalStore } from 'react';
 
 /**
  * The wake route behind the gateway (contracts `platform.server.wake`): core answers it, so an answer
@@ -11,9 +11,38 @@ export const WAKE_URL = '/api/v1/platform/wake';
 const APP_HEADER = 'X-BQ-App';
 
 /**
- * `checking`: the call is out, nothing shown yet (a server that is up answers before `slowAfterMs`).
- * `waking`: no answer yet, the wake-up screen shows. `awake`: it answered. `failed`: no answer before
- * `giveUpAfterMs`; the screen offers to try again or to continue without it.
+ * On `<html>` while the first check is out: the app-shell's CSS then shows the plain loader over
+ * the page (owner, 2026-11-05: no page before the server has answered, as pages will need it).
+ */
+export const WAKE_CHECK_ATTRIBUTE = 'data-server-check';
+
+/** Search engines and link previews: they get the page as it is and never wake the server. */
+const CRAWLER = /bot|crawler|spider/i;
+
+/** True for a crawler's user agent (Googlebot, bingbot ...). */
+export const isCrawler = (userAgent: string): boolean => CRAWLER.test(userAgent);
+
+const noSubscription = () => () => undefined;
+const readCrawler = () => isCrawler(navigator.userAgent);
+
+/**
+ * Runs in `<head>` before the first paint and puts WAKE_CHECK_ATTRIBUTE on `<html>` (not for a
+ * crawler), so a page rendered on the server is covered by the loader from its first frame instead of
+ * showing and then being covered. An app rendered only in the browser needs no script: ServerWake
+ * sets the attribute before its first paint. Keep in step with CRAWLER, WAKE_CHECK_ATTRIBUTE and
+ * WAKE_SCRIPT_HASH (a test checks them).
+ */
+export const WAKE_SCRIPT =
+  'try{if(!/bot|crawler|spider/i.test(navigator.userAgent))document.documentElement.setAttribute("data-server-check","")}catch(e){}';
+
+/** CSP `script-src` source that allows exactly WAKE_SCRIPT (no `unsafe-inline`). */
+export const WAKE_SCRIPT_HASH = "'sha256-J6w3CZT06cXz5XQNPA1u+IDEdqZheh+2aFIdjCgocMw='";
+
+/**
+ * `checking`: the call is out and a plain loader covers the app (a server that is up answers before
+ * `slowAfterMs`). `waking`: no answer yet, the wake-up screen shows. `awake`: it answered (or the
+ * reader is a crawler). `failed`: no answer before `giveUpAfterMs`; the screen offers to try again or
+ * to continue without it.
  */
 export type WakeState = 'checking' | 'waking' | 'awake' | 'failed';
 
@@ -158,7 +187,8 @@ export interface ServerWakeStatus {
 
 /**
  * Wakes the server once when the app opens, in the browser only (the server render stays
- * `checking`, which shows nothing). The screen shows only when the answer is slow.
+ * `checking`). Until it answers, `<html>` carries WAKE_CHECK_ATTRIBUTE (the plain loader); the
+ * wake-up screen shows only when the answer is slow. A crawler is `awake` at once, with no call.
  */
 export function useServerWake({
   app,
@@ -172,11 +202,29 @@ export function useServerWake({
   kickEveryMs,
 }: Omit<WakeServerOptions, 'signal'>): ServerWakeStatus {
   const [state, setState] = useState<WakeState>('checking');
+  // false on the server and while hydrating, so the first render in the browser matches the server's
+  const crawler = useSyncExternalStore(noSubscription, readCrawler, () => false);
   const [since, setSince] = useState(0);
   // a new run on every retry (the screen already shows then); the first waits slowAfterMs before it
   const [run, setRun] = useState(0);
 
+  // the loader shows while `checking` (before the first paint here, as the head script may not have
+  // run: an app rendered only in the browser), and goes with the first answer
+  useLayoutEffect(() => {
+    const html = document.documentElement;
+    if (state === 'checking' && !isCrawler(navigator.userAgent)) {
+      html.setAttribute(WAKE_CHECK_ATTRIBUTE, '');
+    } else html.removeAttribute(WAKE_CHECK_ATTRIBUTE);
+  }, [state]);
+  useLayoutEffect(
+    () => () => {
+      document.documentElement.removeAttribute(WAKE_CHECK_ATTRIBUTE);
+    },
+    [],
+  );
+
   useEffect(() => {
+    if (isCrawler(navigator.userAgent)) return;
     const controller = new AbortController();
     const begun = Date.now();
     const slow =
@@ -226,5 +274,5 @@ export function useServerWake({
   const dismiss = useCallback(() => {
     setState('awake');
   }, []);
-  return { state, since, retry, dismiss };
+  return { state: crawler ? 'awake' : state, since, retry, dismiss };
 }

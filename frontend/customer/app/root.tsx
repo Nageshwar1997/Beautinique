@@ -1,4 +1,10 @@
-import { AppFrame, ErrorPage, ServerWake, ThemeScript } from '@beautinique/frontend-app-shell';
+import {
+  AppFrame,
+  ErrorPage,
+  ServerWake,
+  ThemeScript,
+  WakeScript,
+} from '@beautinique/frontend-app-shell';
 import { Toaster } from '@beautinique/frontend-components';
 import displayFont from '@beautinique/frontend-styles/fonts/fraunces-latin.woff2?url';
 import sansFont from '@beautinique/frontend-styles/fonts/plus-jakarta-sans-latin.woff2?url';
@@ -35,14 +41,16 @@ export const links: Route.LinksFunction = () => [
 
 /**
  * Every page, error pages too: the saved theme applied before the first paint (ThemeScript; it sets
- * `<html theme>`, hence suppressHydrationWarning), then the shared frame with this app's header and
- * footer, which the wake-up screen covers while the live server starts.
+ * `<html theme>`, hence suppressHydrationWarning), and the loader marked on `<html>` too (WakeScript:
+ * the prerendered page stays covered until the live server answers), then the shared frame with this
+ * app's header and footer, which the wake-up screen covers while the live server starts.
  */
 export function Layout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en" suppressHydrationWarning>
       <head>
         <ThemeScript />
+        <WakeScript />
         <meta charSet="utf-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <meta name="theme-color" content="#D6336C" />
@@ -56,8 +64,9 @@ export function Layout({ children }: { children: React.ReactNode }) {
         <Links />
       </head>
       <body>
-        {/* the free live server sleeps when idle: wake it, behind a screen only when it is slow;
-            a sleeping one wakes only for a call straight to it, so its /wake is rung too */}
+        {/* the free live server sleeps when idle: no page until it answers (a plain loader, the
+            wake-up screen when it is slow); a sleeping one wakes only for a call straight to it,
+            so its /wake is rung too */}
         <Providers>
           <ServerWake app="customer" kickUrl={WAKE_KICK_URL}>
             <AppFrame header={<SiteHeader />} footer={<SiteFooter />}>

@@ -21,13 +21,20 @@ Tailwind `node_modules` nahi padhta, jahan ye package app me hota hai; `tailwind
 ## Server-rendered app (customer) me
 
 ```tsx
-import { AppFrame, ErrorPage, ServerWake, ThemeScript } from '@beautinique/frontend-app-shell';
+import {
+  AppFrame,
+  ErrorPage,
+  ServerWake,
+  ThemeScript,
+  WakeScript,
+} from '@beautinique/frontend-app-shell';
 
 export function Layout({ children }) {
   return (
     <html lang="en" suppressHydrationWarning>
       <head>
         <ThemeScript />
+        <WakeScript />
         {/* meta, links ... */}
       </head>
       <body>
@@ -56,6 +63,9 @@ export function Layout({ children }) {
 | `IconCreditsPage`                                       | Har app ka "Icon credits" page (DESIGN §11, CC BY): icon set, author aur license. App route aur title deta hai                                                                                          |
 | `ServerWake({ app, children })`                         | Live server jagana aur wake-up screen (neeche)                                                                                                                                                          |
 | `wakeServer`, `useServerWake`, `WAKE_URL`               | Wahi bina screen ke: wake call (retry, timeout, signal) aur uska React hook                                                                                                                             |
+| `WakeScript`                                            | Server-rendered app ke `<head>` me, `ThemeScript` ke baad: pehle paint se parda (upar)                                                                                                                  |
+| `WAKE_SCRIPT`, `WAKE_SCRIPT_HASH`                       | Script ka text, aur CSP `script-src` ke liye uska hash (test milata hai)                                                                                                                                |
+| `WAKE_CHECK_ATTRIBUTE`, `isCrawler`                     | `<html>` ka attribute (`data-server-check`) aur crawler ki pehchaan                                                                                                                                     |
 
 ### ErrorPage
 
@@ -84,8 +94,9 @@ Theme `<html theme="light|dark">` pe lagta hai; attribute na ho to system settin
 
 Free Render service 15 min khaali rehne pe so jaati hai aur jaagne me ~1 min leti hai. Har app apne frame ko `ServerWake` me lapet-ta hai:
 
-- App turant dikhta hai (SSR HTML waisa hi). Browser me hydration ke baad ek baar `GET /api/v1/platform/wake` (contracts `platform.server.wake`, header `X-BQ-App`, `cache: 'no-store'`). Server 1.5 s me jawab de to kuch nahi dikhta.
-- Der ho to poori screen pe modal (`role="dialog"`, `aria-modal`): powder compact, "Waking up the server", `progress-indeterminate` bar aur "Waiting 0:42". Peeche ka app `inert` rehta hai, focus screen pe. Jawab aate hi screen hat jaati hai.
+- **Server ke jawab se pehle koi page nahi (owner, 2026-11-05):** app ke upar ek saada parda (page ka background, 400 ms baad ek patli progress bar, koi shabd nahi, `aria-hidden`; app `inert` aur `aria-busy`). Browser me hydration ke baad ek baar `GET /api/v1/platform/wake` (contracts `platform.server.wake`, header `X-BQ-App`, `cache: 'no-store'`); jawab aate hi parda hat jaata hai. Server-rendered app (customer) `<head>` me `WakeScript` bhi rakhe: wo pehle paint se pehle `<html data-server-check>` lagata hai, aur `tailwind.css` ka niyam parda sirf tab dikhata hai, to prerendered page kabhi "dikha, phir dhaka" nahi hota. Browser-only app (admin) ko script nahi chahiye: `ServerWake` pehle paint se pehle attribute lagata hai.
+- **Crawler (user agent me `bot`/`crawler`/`spider`) aur bina JS:** parda nahi, wake call nahi; server ka HTML `inert` nahi. JS kabhi na chale (files load na hon) to CSS 10 s baad parda hata deti hai.
+- 1.5 s me jawab na aaye to parde ki jagah poori screen pe modal (`role="dialog"`, `aria-modal`): powder compact, "Waking up the server", `progress-indeterminate` bar aur "Waiting 0:42". Peeche ka app `inert` rehta hai, focus screen pe. Jawab aate hi screen hat jaati hai.
 - 5xx, 429, network error ya 30 s tak jawab nahi = "abhi nahi jaaga": 3 s baad dobara. Koi bhi aur jawab (error bhi) = server jaaga hua hai.
 - **`kickUrl`** (server ka apna `/wake`, seedha): "abhi nahi jaaga" pe ek `no-cors` request bhi jaati hai, 15 s me max ek baar (`kickEveryMs`). Soye Render service ko app ke Vercel route ki request nahi jagati, seedhi request jagati hai (live jaanch 2026-10-26). Jawab padha nahi jaata, zaroorat bhi nahi; isme app ka header ya secret nahi jaata. `kickUrl` na ho to ye request nahi.
 - 150 s me na jaage to "The server is taking too long", focus "Try again" pe; "Continue anyway" screen hata deta hai (static pages chalte rahen).
@@ -97,7 +108,7 @@ Free Render service 15 min khaali rehne pe so jaati hai aur jaagne me ~1 min let
 
 ## Tests
 
-`npm test --workspace @beautinique/frontend-app-shell`: theme script (saved theme, junk, storage band, CSP hash), switcher (keyboard, do switchers, doosra tab, server render), frame, nav, error page (dono kind, actions, browser history pe "Go back", reload ke baad bina mismatch hydration, server render, reference, details), wake-up (`wakeServer`: retry, har call ka timeout, deadline, abort; `ServerWake`: jaldi jawab pe koi screen nahi, der pe screen + `inert` + focus, "Try again", "Continue anyway", server render me sirf app, path contracts ke route se), aur har component pe axe (WCAG) check.
+`npm test --workspace @beautinique/frontend-app-shell`: theme script (saved theme, junk, storage band, CSP hash), switcher (keyboard, do switchers, doosra tab, server render), frame, nav, error page (dono kind, actions, browser history pe "Go back", reload ke baad bina mismatch hydration, server render, reference, details), wake-up (`wakeServer`: retry, har call ka timeout, deadline, abort; `ServerWake`: jawab tak saada parda + `inert`/`aria-busy`, jaldi jawab pe wake-up screen nahi, der pe screen + `inert` + focus, "Try again", "Continue anyway", crawler ko na parda na call, unmount pe attribute hatna, server render me app bina `inert` aur CSS wala parda, server HTML pe bina mismatch hydration, path contracts ke route se; `WAKE_SCRIPT`: `<html>` mark, crawler nahi, hash), aur har component pe axe (WCAG) check.
 
 ## Playground
 

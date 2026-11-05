@@ -21,8 +21,9 @@ export function Frame() {
 }
 
 /**
- * Every page: the providers, then the frame, which the wake-up screen covers while the live
- * server starts (it sleeps when idle).
+ * Every page: the providers, then the frame, which a plain loader covers until the live server
+ * answers, and the wake-up screen while it starts (it sleeps when idle). Rendered only in the
+ * browser, so no head script is needed: ServerWake marks `<html>` before its first paint.
  */
 export function AppRoot() {
   return (
