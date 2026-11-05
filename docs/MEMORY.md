@@ -1,6 +1,6 @@
 # MEMORY — BQ
 
-> **Status:** v1.42 (2026-11-04). Project ki yaaddasht: **kya tay hua aur kyun**, **pichhle kaam se kya seekha**, aur **kaunse jaal (traps) se bachna hai**. Poori detail baaki docs me hai; yahan short version aur pointers. Naya sabak ya decision aaye to yahan ek line jodo.
+> **Status:** v1.44 (2026-11-05). Project ki yaaddasht: **kya tay hua aur kyun**, **pichhle kaam se kya seekha**, aur **kaunse jaal (traps) se bachna hai**. Poori detail baaki docs me hai; yahan short version aur pointers. Naya sabak ya decision aaye to yahan ek line jodo.
 
 ## 1. Decision log
 
@@ -116,6 +116,7 @@
 19. **Test ne kuch parakha hi nahi:** gateway ka `..` test `http.request(urlString)` se tha, jo `..` pehle hi hata deta hai, aur method/`..` tests status 404 dekhte the jo upstream bhi deta. Mutation check ne pakda. **Sabak:** har security test ke liye ek mutation chalao; fake upstream me "leak" route rakho taaki galat forward 200 de.
 20. **Ek session, kai attempts:** `withTransaction` ka pehla version har retry me wahi session leta tha. Fail hue attempt ki late `Promise.all` branch transaction ke bahar save ho jaati thi (201 ke saath extra outbox rows). Mere 25 tests aur 37/41 mutations ye nahi pakad paaye; independent review (asli Mongo pe probe ke saath) ne pakda. Fix ke baad doosre review ne fix ki 5 kamiyan aur pakdi (aakhri line ka bhula `await`, network error ke baad bacha transaction). **Sabak:** har attempt ka naya session; naye infra code pe independent review + probe, aur fix ke baad dobara review.
 21. **Env key code se pehle (2026-10-26):** owner ne Render me `IDENTITY__MONGO_URI`/`IDENTITY__REDIS_URL` daale jab identity ka code unhe padhta nahi tha; `loadConfig` ka typo check (anjaan `<NAME>__*` key = error) live deploy rok gaya (purana deploy chalta raha). Fix: identity ne keys padhna shuru kiya. Kisi chalte deployable ki nayi key tabhi daalo jab code use padhe (HANDOFF §6); payments/notify banane wali PR me unke `MONGO_URI`/`REDIS_URL` config me ho.
+22. **`findBy*` ka 1 s kam padta hai (2026-11-05):** auth-ui ke tests (`MyDevices`, `AccountMenu`) busy laptop pe kabhi fail hote the: "Unable to find role=list", page abhi spinner pe. Timing log se dikha ki koi retry ya error nahi tha; naye worker me pehli call ka thanda code (axios, contracts ke schemas, React Aria) request ko fake tak ~0.1–0.4 s me pahunchata hai, aur jab saare workers busy hon to 1 s se zyada me. `testTimeout` 15 s tha, par Testing Library ka `asyncUtilTimeout` 1 s hi tha. Fix: `test/setup.ts` me `configure({ asyncUtilTimeout: 10_000 })` (hooks package me pehle se). **Sabak:** jo frontend package jsdom me network jaisa async flow test kare, uske vitest `setupFiles` me ye pehle din se rakho; flake ho to timeout badhane se pehle timing log se dekho ki koi retry ya error to nahi chhupa.
 
 ## 3. Environment
 
@@ -196,3 +197,4 @@
 | v1.40   | 2026-11-03 | Decision: project ka progress % (TASKS §P).                                                                                                                                          |
 | v1.41   | 2026-11-03 | Decision: social login ke technical faisle (navigation routes, axios, ID token nahi, PKCE, bina step-up hatana). |
 | v1.42   | 2026-11-04 | Decision: Vercel ke 11 projects ki settings (previews band, `release`, retention, shared env). |
+| v1.44   | 2026-11-05 | Sabak 22: auth-ui tests me `findBy*` ka 1 s default busy machine pe kam (`asyncUtilTimeout` 10 s). |
