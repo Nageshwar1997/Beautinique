@@ -1,6 +1,6 @@
 # MEMORY — BQ
 
-> **Status:** v1.42 (2026-11-04). Project ki yaaddasht: **kya tay hua aur kyun**, **pichhle kaam se kya seekha**, aur **kaunse jaal (traps) se bachna hai**. Poori detail baaki docs me hai; yahan short version aur pointers. Naya sabak ya decision aaye to yahan ek line jodo.
+> **Status:** v1.43 (2026-11-05). Project ki yaaddasht: **kya tay hua aur kyun**, **pichhle kaam se kya seekha**, aur **kaunse jaal (traps) se bachna hai**. Poori detail baaki docs me hai; yahan short version aur pointers. Naya sabak ya decision aaye to yahan ek line jodo.
 
 ## 1. Decision log
 
@@ -92,6 +92,7 @@
 | 2026-11-03 | Project ka progress % docs me: TASKS §P (phase % × phase ke hafte ÷ 38; `[~]` = ½), HANDOFF §1 me ek line; checkbox badalte hi usi commit me update                                                                                                                                                                                                                                                                                                                                                                              | Owner ko ek nazar me dikhe kitna bacha; sirf task ginti chhote shuruaati tasks ko zyada wazan deti                                                                                                                                                                                                                                                                          | TASKS §P, HANDOFF §8                                    |
 | 2026-11-03 | Social login (T3.1 PR 4): "navigation routes" (303 redirect, gateway app host se), `openid-client` nahi balki axios + Node `crypto`, ID token nahi (token endpoint + userinfo), PKCE sirf Google/GitHub, provider hatana bina step-up (aakhri tareeka nahi + security email) | Provider ka callback seedha browser navigation hai (na `X-BQ-App`, na JSON); `openid-client` `fetch` use karta hai (RULES §3.8); LinkedIn web flow me PKCE/nonce nahi; step-up ko authenticator chahiye jo zyadatar customers ke paas nahi | ARCHITECTURE §7.2, §10; TASKS T3.1 |
 | 2026-11-04 | Vercel: saare 11 apps pehle khaali publish (naam pakke), har project production branch `release`, preview deployments band, affected-only deploys, retention (preview/canceled/errored 1 din, production 2 hafte), env team ke shared env me | Naam jaldi chhin rahe the; Hobby ki 100 deploy/din limit 11 projects ke previews se ek din me khatam hui; ek jagah env | TASKS A.9, ARCHITECTURE (previews) |
+| 2026-11-05 | Dependabot (QA KNOWN-01–03, owner): `deepmerge` alert dismiss ("tolerable risk"); `glob` aur `minimatch` root `overrides` se naye major pe (`^14.0.3`, `^11.0.4`), sirf advisory ki version range pe; parents khud naya major maangne lagein to `overrides` hatao | `deepmerge` ka fix hai hi nahi aur wo sirf build tool me hai; `glob`/`minimatch` ke fix sirf naye major me the aur parents purana maangte the; jaanch me parents sirf naye major wali API chhoote hain (PWA precache aur ESLint ka config map pehle-baad same) | HANDOFF §6 |
 
 ## 2. Pichhle kaam se seekhe sabak
 
@@ -196,3 +197,4 @@
 | v1.40   | 2026-11-03 | Decision: project ka progress % (TASKS §P).                                                                                                                                          |
 | v1.41   | 2026-11-03 | Decision: social login ke technical faisle (navigation routes, axios, ID token nahi, PKCE, bina step-up hatana). |
 | v1.42   | 2026-11-04 | Decision: Vercel ke 11 projects ki settings (previews band, `release`, retention, shared env). |
+| v1.43   | 2026-11-05 | Decision: Dependabot (QA KNOWN-01–03): `deepmerge` alert dismiss, `glob`/`minimatch` `overrides` se naye major. |
