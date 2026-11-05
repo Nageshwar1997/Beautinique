@@ -49,7 +49,7 @@
     "@beautinique/backend-server-kit": "^1.0.0"
   },
   "dependencies": {
-    "mongodb": "^7.7.0"
+    "mongodb": "^7.8.0"
   },
   "devDependencies": {
     "@beautinique/backend-server-kit": "^1.0.0",
