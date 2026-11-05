@@ -1,6 +1,6 @@
 # MEMORY — BQ
 
-> **Status:** v1.47 (2026-11-05). Project ki yaaddasht: **kya tay hua aur kyun**, **pichhle kaam se kya seekha**, aur **kaunse jaal (traps) se bachna hai**. Poori detail baaki docs me hai; yahan short version aur pointers. Naya sabak ya decision aaye to yahan ek line jodo.
+> **Status:** v1.48 (2026-11-05). Project ki yaaddasht: **kya tay hua aur kyun**, **pichhle kaam se kya seekha**, aur **kaunse jaal (traps) se bachna hai**. Poori detail baaki docs me hai; yahan short version aur pointers. Naya sabak ya decision aaye to yahan ek line jodo.
 
 ## 1. Decision log
 
@@ -96,6 +96,7 @@
 | 2026-11-05 | Fresh lockfile (owner): saare `node_modules` aur `package-lock.json` hata ke naya install. `mongodb` 7.8 pe `server-mongo` ka `ready()` apna 2 s intezaar rakhta hai aur ek waqt me ek ping (`timeoutMS` nahi); `createIndex` teen parameter | 7.8 do CVE fix karta hai aur `timeoutMS` ko no-op bana deta hai, jisse `/ready` atke Mongo pe atak jaata; apna timer driver ka kaam beech me nahi kaatta, aur ek ping se atke Mongo pe pool nahi bharta | HANDOFF §6 |
 | 2026-11-05 | QA ke saare fixes (KNOWN aur QA-*) `feat/qa-audit` me hi, jisme audit report hai; har fix ka apna commit, branch `prerelease` se merge karke update | Report aur uske fixes ek jagah rahein, aur fix ke saath report ki halat bhi badle | HANDOFF §4 item 6 |
 | 2026-11-05 | Wake (QA KNOWN-04): cron-job.org mukhya, job har ghante :00 aur :02 IST (10:00–21:02), notification sirf job band hone pe; GitHub `wake.yml` backup, 10:00–21:59 IST ke bahar ka late scheduled run kuch nahi jagata | GitHub ne roz 12 me se 2 run chalaye, kuch aadhi raat ke baad; cron-job.org 30 s pe request kaatta hai aur 25 lagataar fail pe job band karta hai, jabki cold start ~42–57 s ka hai | TASKS A.8, T2.7 |
+| 2026-11-05 | Render free ka cold start (QA KNOWN-05) jaisa hai: paid plan nahi | 2026-11-05 ko 42.4 s (pehle 50–57 s); app ki wake-up screen aur cron-job.org ka wake ise sambhalte hain; free tier ek service pe chalta hai | ARCHITECTURE §11.2 |
 
 ## 2. Pichhle kaam se seekhe sabak
 
@@ -207,3 +208,4 @@
 | v1.45   | 2026-11-05 | Decision: fresh lockfile, `mongodb` 7.8 pe `ready()` apna 2 s intezaar + ek ping; sabak 23: fail point do saath aaye commands rokta hai. |
 | v1.46   | 2026-11-05 | Decision: QA ke saare fixes `feat/qa-audit` me. |
 | v1.47   | 2026-11-05 | Decision: wake, cron-job.org :00 aur :02 + GitHub backup ka IST guard (QA KNOWN-04). |
+| v1.48   | 2026-11-05 | Decision: Render free cold start jaisa hai (QA KNOWN-05). |
