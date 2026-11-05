@@ -1,6 +1,6 @@
 # QA AUDIT REPORT — BQ
 
-> **Status:** v1.3 (2026-11-05, final; §2a me KNOWN faislon ki halat). Audit base: `origin/prerelease` @ `ee7f46a` (`ee7f46ae7b2605d99f6b4497d26303aa109fb371`). Auditor: Claude Code (Opus 5.5, `claude-opus-5-5`). Ye report audit ki single source of truth hai; fixes alag se, ek-ek karke.
+> **Status:** v1.4 (2026-11-05, final; §2a me KNOWN faislon ki halat). Audit base: `origin/prerelease` @ `ee7f46a` (`ee7f46ae7b2605d99f6b4497d26303aa109fb371`). Auditor: Claude Code (Opus 5.5, `claude-opus-5-5`). Ye report audit ki single source of truth hai; fixes alag se, ek-ek karke.
 
 ## 0. Audit state (har session ke aakhir me update)
 
@@ -100,7 +100,7 @@
 | KNOWN-04 | T2.7 wake: GitHub scheduled `wake.yml` bharosemand nahi (2 din me ~18 me se 2 slots); owner ka faisla khula                                    | HANDOFF §4 item 1, TASKS T2.7  | Faisla (owner, 2026-11-05): cron-job.org mukhya (:00 aur :02), `wake.yml` me IST guard; job ban gaya (owner, 2026-11-05; TASKS A.8) |
 | KNOWN-05 | Render free cold start (~50–57 s), wake-up screen ke saath                                                                                     | ARCHITECTURE §11.2, HANDOFF §4 | Jaisa hai (owner, 2026-11-05): 42.4 s naapa; free tier, wake-up screen + cron-job.org (ARCHITECTURE §11.2) |
 | KNOWN-06 | State Admin abhi Seller Account Owner / Pro Buyer nahi de sakta (alag scope type, seller/pro module ke saath)                                  | HANDOFF §4 (T3.3 PR B "Seema") | Jaisa hai (owner, 2026-11-05): kaam TASKS T4.5 (Seller Account Owner) aur T10.2 (Pro Buyer) me, test ke saath |
-| KNOWN-07 | CI job summary me mutation fixtures ki nakli "Vitest Test Report" ❌ (child env me `GITHUB_STEP_SUMMARY`)                                       | HANDOFF §4 item 8              | M14 me                                                                                  |
+| KNOWN-07 | CI job summary me mutation fixtures ki nakli "Vitest Test Report" ❌ (child env me `GITHUB_STEP_SUMMARY`)                                       | HANDOFF §4 item 8              | Fixed (2026-11-05): child runs ko `GITHUB_ACTIONS`/`GITHUB_STEP_SUMMARY` nahi (`testRunEnv`, CLI e2e `run()`), test ke saath |
 | KNOWN-08 | MongoDB 8.0 + Linux kernel 6.19+/7.0: compose me `GLIBC_TUNABLES=glibc.pthread.rseq=1` workaround                                              | HANDOFF §6                     | M14 me                                                                                  |
 | KNOWN-09 | Frontend Sentry abhi kisi app me nahi (owner ka khula kaam)                                                                                    | HANDOFF §4 item 4              | haan                                                                                    |
 | KNOWN-10 | TypeScript ~6.0.3 hold (typescript-eslint <6.1); `server-queue` "skips an event delivered again" CI flake ka fix GitHub pe dobara dekhna baaki | HANDOFF §6                     | TS hold haan (installed 6.0.3); laptop pe server-queue 55/55 pass, CI wala hissa M14 me |
@@ -1194,3 +1194,4 @@ Final (2026-11-05). Har number ek PR (ya ek chhota fix); saath jaane wale bugs e
 | v1.1    | 2026-11-05 | §2a: KNOWN-01–04 ke owner faisle aur fixes (deepmerge dismiss; glob/minimatch PR #54; wake: cron-job.org + `wake.yml` guard). |
 | v1.2    | 2026-11-05 | §2a: KNOWN-05 (cold start) jaisa hai, owner. |
 | v1.3    | 2026-11-05 | §2a: KNOWN-06 jaisa hai, kaam TASKS T4.5 aur T10.2 me (owner). |
+| v1.4    | 2026-11-05 | §2a: KNOWN-07 theek (CI summary me nakli Vitest reports). |
