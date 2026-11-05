@@ -1,6 +1,6 @@
 # MEMORY — BQ
 
-> **Status:** v1.51 (2026-11-05). Project ki yaaddasht: **kya tay hua aur kyun**, **pichhle kaam se kya seekha**, aur **kaunse jaal (traps) se bachna hai**. Poori detail baaki docs me hai; yahan short version aur pointers. Naya sabak ya decision aaye to yahan ek line jodo.
+> **Status:** v1.52 (2026-11-05). Project ki yaaddasht: **kya tay hua aur kyun**, **pichhle kaam se kya seekha**, aur **kaunse jaal (traps) se bachna hai**. Poori detail baaki docs me hai; yahan short version aur pointers. Naya sabak ya decision aaye to yahan ek line jodo.
 
 ## 1. Decision log
 
@@ -100,6 +100,7 @@
 | 2026-11-05 | App khulte hi server ke jawab se pehle koi page nahi: saada parda, 1.5 s pe wake-up screen; customer ke `<head>` me `WakeScript`; crawler aur bina JS ko page seedha | Pehle prerendered Home dikhta, phir wake-up screen use dhak deti (owner ne dekha); aage Home ko bhi server chahiye (categories, sign-in); crawler ko parda ya wake call dena SEO aur free ghante bigadta | DESIGN §6, TASKS T2.7 |
 | 2026-11-05 | State Admin se Seller Account Owner / Pro Buyer (QA KNOWN-06) jaisa hai: org/applicant ka state scope check me T4.5 (sellers) aur T10.2 (Pro & B2B) ke saath, test ke saath; beech me Master ko chhoot nahi | Abhi koi seller org ya Pro applicant hai hi nahi, aur org/account ka state unhi modules me banega; beech ki chhoot bekaar ka raasta kholti | TASKS T4.5, T10.2 |
 | 2026-11-05 | CI summary me nakli Vitest reports (QA KNOWN-07) theek: mutation runner aur CLI e2e ke child runs ko `GITHUB_ACTIONS` aur `GITHUB_STEP_SUMMARY` nahi | Fixtures ke killed mutant jaan-boojh ke fail hote hain, unki ❌ reports summary me asli failure jaisi dikhti thi; summary me sirf is run ki asli reports rahein | HANDOFF §4 item 8 |
+| 2026-11-05 | MongoDB kernel workaround (`GLIBC_TUNABLES`, QA KNOWN-08) jaisa hai; server `mongo:8.0.34` hi; MongoDB ka fix aane pe checklist se hatao | Asli fix abhi nahi (SERVER-136848 khula), naye server versions bhi affected (8.2 crash), aur version badalna live Atlas 8.0 se mel todta; setting sirf laptop/CI ke Docker Mongo pe hai | infra/README.md trap |
 
 ## 2. Pichhle kaam se seekhe sabak
 
@@ -215,3 +216,4 @@
 | v1.49   | 2026-11-05 | Decision: wake-up, server ke jawab se pehle koi page nahi. |
 | v1.50   | 2026-11-05 | Decision: QA KNOWN-06 jaisa hai, kaam T4.5 aur T10.2 me. |
 | v1.51   | 2026-11-05 | Decision: QA KNOWN-07 theek (child runs ko CI summary keys nahi). |
+| v1.52   | 2026-11-05 | Decision: QA KNOWN-08 jaisa hai (MongoDB kernel workaround). |
