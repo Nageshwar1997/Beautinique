@@ -173,6 +173,29 @@ describe('connectMongo', () => {
     const started = Date.now();
     expect(await mongo.ready()).toBe(false);
     expect(Date.now() - started).toBeLessThan(2900);
+    // only the wait ended: the stalled ping still finishes, and the next check gets its answer
+    expect(await mongo.ready()).toBe(true);
+  });
+
+  it('sends one ping at a time: a check during a slow ping waits for that ping', async () => {
+    await failPoint(
+      { times: 1 },
+      { failCommands: ['ping'], blockConnection: true, blockTimeMS: 3000 },
+    );
+    const first = mongo.ready();
+    // by now MongoDB holds the first ping, and the fail point is used up: a second ping would answer
+    // at once (two pings that arrive together are both held, so the second check comes later)
+    await new Promise((resolve) => setTimeout(resolve, 500));
+    const second = mongo.ready();
+    expect([await first, await second]).toEqual([false, false]);
+    expect(await mongo.ready()).toBe(true);
+  });
+
+  it('pings again for each check after an answer', async () => {
+    expect(await mongo.ready()).toBe(true);
+    await failPoint({ times: 1 }, { failCommands: ['ping'], errorCode: 2 });
+    expect(await mongo.ready()).toBe(false);
+    expect(await mongo.ready()).toBe(true);
   });
 
   it('accepts a replica set or a sharded cluster, and refuses a lone server', () => {
