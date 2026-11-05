@@ -272,19 +272,19 @@
 | v1.98   | 2026-11-03 | `linkedin-posts/` folder aur `/linkedin-post` skill (branch `feat/linkedin-posts`); khula sawal: roz ki files seedha `prerelease` push ya PR (README §5).                                                                    |
 | v1.99   | 2026-11-03 | PR #42 merge (`linkedin-posts/`, `/linkedin-post`); owner: post files seedha `prerelease` pe push (RULES §2).                                                                                                                |
 | v1.100  | 2026-11-03 | Owner: project ka progress % docs me (TASKS §P, pehli ginti 13%); §1 me Progress line; §8: checkbox badle to % bhi.                                                                                                          |
-| v1.101  | 2026-11-03 | §4: PR #40 merge; PR 6 (`feat/t6-auth-ui-admin`) chalu: kya hua, checks, baaki ka order (limit ke paas, doosra account aage).                                                                                                |
-| v1.102  | 2026-11-03 | §4: PR 6 ki saari jaanch poori (checks, dono E2E, browser), jsdom axe ka canvas warning theek; §6: E2E ke dauraan build nahi.                                                                                                |
-| v1.103  | 2026-11-03 | §4: PR #45 ka pehla CI run identity ke TOTP step-boundary flake pe fail; test theek.                                                                                                                                         |
-| v1.104  | 2026-11-03 | §4: PR #45 merge; T3.1 PR 4 shuru (identity me social login ki keys, `.env.example`).                                                                                                                                        |
-| v1.105  | 2026-11-03 | §4: T3.1 PR 4 ka code, tests, E2E, mutations aur docs; baaki logos, browser, asli providers, commit.                                                                                                                         |
-| v1.106  | 2026-11-03 | §6: E2E warm-up Vite ke reload (ERR_ABORTED) pe dobara try (PR #46 ka pehla CI run).                                                                                                                                         |
-| v1.107  | 2026-11-04 | §1, §4: PR #46 merge, T3.1 `[x]`, progress 14%; agla M3 release aur owner ke live kaam.                                                                                                                                      |
-| v1.108  | 2026-11-04 | §4: release PR #47 khula; admin ka Vercel project `beautinique-admin` (host `beautinique-admin.vercel.app`) deploy, owner ke baaki kaam (`ORIGIN_SECRET`, production branch, Render keys).                                   |
-| v1.109  | 2026-11-04 | §1, §4: #47 merge; owner ne Vercel projects `beautinique-customer` aur `beautinique-admin` kiye (naye hosts), live `/api` ke liye Render aur providers ke naye values.                                                       |
-| v1.110  | 2026-11-04 | §1, §4: saare 11 apps bane aur Vercel pe (khaali), T0.2 `[x]`; owner ke kaam (naam, `ORIGIN_SECRET`, production branch, Render keys).                                                                                        |
-| v1.111  | 2026-11-04 | §4: #49 aur #50 merge; seller aur master apne asli hosts pe.                                                                                                                                                                 |
-| v1.112  | 2026-11-04 | §4: Vercel settings (previews band, `release`, retention, shared env); agle deploy pe 10 projects ka `/api` check.                                                                                                           |
-| v1.113  | 2026-11-04 | §4: Render host keys aur live social login ho gaye; agla 9 apps ka redeploy (deploy limit ke baad).                                                                                                                          |
-| v1.114  | 2026-11-04 | §1, §4: Vercel ke purane naam hata ke har jagah `beautinique-<app>` (docs aur tests, owner).                                                                                                                                 |
-| v1.115  | 2026-11-04 | §4 item 5: naya `/qa-audit` skill (QA audit, bina fix, report `docs/QA_AUDIT_REPORT.md`).                                                                                                                                    |
-| v1.118  | 2026-11-05 | §6: QA KNOWN-01–03 (owner): `deepmerge` alert dismiss; `glob` 14 aur `minimatch` 11 root `overrides` se, jaanch aur kab hatana.                                                                                              |
+| v1.101 | 2026-11-03 | §4: PR #40 merge; PR 6 (`feat/t6-auth-ui-admin`) chalu: kya hua, checks, baaki ka order (limit ke paas, doosra account aage). |
+| v1.102 | 2026-11-03 | §4: PR 6 ki saari jaanch poori (checks, dono E2E, browser), jsdom axe ka canvas warning theek; §6: E2E ke dauraan build nahi. |
+| v1.103 | 2026-11-03 | §4: PR #45 ka pehla CI run identity ke TOTP step-boundary flake pe fail; test theek. |
+| v1.104 | 2026-11-03 | §4: PR #45 merge; T3.1 PR 4 shuru (identity me social login ki keys, `.env.example`). |
+| v1.105 | 2026-11-03 | §4: T3.1 PR 4 ka code, tests, E2E, mutations aur docs; baaki logos, browser, asli providers, commit. |
+| v1.106 | 2026-11-03 | §6: E2E warm-up Vite ke reload (ERR_ABORTED) pe dobara try (PR #46 ka pehla CI run). |
+| v1.107 | 2026-11-04 | §1, §4: PR #46 merge, T3.1 `[x]`, progress 14%; agla M3 release aur owner ke live kaam. |
+| v1.108 | 2026-11-04 | §4: release PR #47 khula; admin ka Vercel project `beautinique-admin` (host `beautinique-admin.vercel.app`) deploy, owner ke baaki kaam (`ORIGIN_SECRET`, production branch, Render keys). |
+| v1.109 | 2026-11-04 | §1, §4: #47 merge; owner ne Vercel projects `beautinique-customer` aur `beautinique-admin` kiye (naye hosts), live `/api` ke liye Render aur providers ke naye values. |
+| v1.110 | 2026-11-04 | §1, §4: saare 11 apps bane aur Vercel pe (khaali), T0.2 `[x]`; owner ke kaam (naam, `ORIGIN_SECRET`, production branch, Render keys). |
+| v1.111 | 2026-11-04 | §4: #49 aur #50 merge; seller aur master apne asli hosts pe. |
+| v1.112 | 2026-11-04 | §4: Vercel settings (previews band, `release`, retention, shared env); agle deploy pe 10 projects ka `/api` check. |
+| v1.113 | 2026-11-04 | §4: Render host keys aur live social login ho gaye; agla 9 apps ka redeploy (deploy limit ke baad). |
+| v1.114 | 2026-11-04 | §1, §4: Vercel ke purane naam hata ke har jagah `beautinique-<app>` (docs aur tests, owner). |
+| v1.115 | 2026-11-04 | §4 item 5: naya `/qa-audit` skill (QA audit, bina fix, report `docs/QA_AUDIT_REPORT.md`). |
+| v1.118 | 2026-11-05 | §6: QA KNOWN-01–03 (owner): `deepmerge` alert dismiss; `glob` 14 aur `minimatch` 11 root `overrides` se, jaanch aur kab hatana. |
