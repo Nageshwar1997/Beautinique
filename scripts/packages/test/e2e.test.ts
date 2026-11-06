@@ -64,7 +64,8 @@ function setup(packages: FixturePackage[]) {
 
 /**
  * Runs a script with the fixture's npm config. Async on purpose: the fake registry lives in this
- * process and must keep answering. GITHUB_ACTIONS is cleared (these tests may run in GitHub CI).
+ * process and must keep answering. GITHUB_ACTIONS and GITHUB_STEP_SUMMARY are cleared (these tests
+ * may run in GitHub CI, and the fixture repos' own test runs must not write to its job summary).
  */
 function run(
   script: string,
@@ -73,6 +74,7 @@ function run(
 ): Promise<{ code: number | null; out: string }> {
   const base = { ...process.env };
   delete base.GITHUB_ACTIONS;
+  delete base.GITHUB_STEP_SUMMARY;
   const child = spawn(process.execPath, [script, ...args], {
     cwd: repo.root,
     env: {

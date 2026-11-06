@@ -1,6 +1,6 @@
 # DESIGN — BQ
 
-> **Status:** v1.8 (2026-10-26). UI aur UX ke niyam saare 11 apps ke liye. Design ka **source of truth code hai**: `@beautinique/frontend-styles` (tokens) aur `@beautinique/frontend-components` (components). [RULES.md](RULES.md) §5 frontend ke coding niyam batata hai; ye file batati hai ki cheezein **dikhengi aur chalengi kaise**.
+> **Status:** v1.9 (2026-11-05). UI aur UX ke niyam saare 11 apps ke liye. Design ka **source of truth code hai**: `@beautinique/frontend-styles` (tokens) aur `@beautinique/frontend-components` (components). [RULES.md](RULES.md) §5 frontend ke coding niyam batata hai; ye file batati hai ki cheezein **dikhengi aur chalengi kaise**.
 
 ## 1. Design principles
 
@@ -103,7 +103,7 @@ Har screen ye states dikhati hai:
 - **Empty:** kya hai aur aage kya karein, ek action button ke saath.
 - **Error:** saaf message, retry, aur request-id (support ke liye). Poore page ka error aur 404: app-shell ka `ErrorPage` (bade code ke 0 powder compact: 404 pe khaali, error pe toota; "Go back" sirf jab app ka pichhla page ho; asli status code, apna title, `noindex`; technical details sirf development me).
 - **Offline:** NetworkStatusToaster; Delivery app me offline queue ka count.
-- **Wake-up screen:** Render cold start pe (~1 min) "server jaag raha hai" screen, progress ke saath.
+- **Wake-up screen:** Render cold start pe (~1 min) "server jaag raha hai" screen, progress ke saath. **Server ke jawab se pehle koi page nahi (owner, 2026-11-05):** app khulte hi pehle saada parda (page ka background, 400 ms baad patli bar, koi shabd nahi); jaage server pe ye ek jhalak hai, 1.5 s me jawab na aaye to iski jagah wake-up screen. Kabhi "page dikha, phir dhaka" nahi, kyunki aage har page (Home ki categories, sign-in ki halat) ko server chahiye. Crawler aur bina JS wale ko page seedha (app-shell README).
 - **Permission denied:** kis permission ki zaroorat hai, aur kisse maangein.
 - **Dummy:** dummy legal ya registration data pe DUMMY badge.
 
@@ -179,3 +179,4 @@ Har screen ye states dikhati hai:
 | v1.6    | 2026-10-26 | §11 Logo: master image, `BrandLogo`/`BrandMark` (icons package), rang theme se, favicon alag, install icons.                                                                          |
 | v1.7    | 2026-10-26 | §6 Error: 404 aur error page ka design (`ErrorPage`, compact art).                                                                                                                    |
 | v1.8    | 2026-10-26 | §3: `surface-inverse` ab `brand-text` bhi badalta hai (`brand-text-inverse`); footer me chalu page ka link padhne layak.                                                              |
+| v1.9    | 2026-11-05 | §6: wake-up, server ke jawab se pehle koi page nahi: pehle saada parda, 1.5 s pe wake-up screen (owner). |

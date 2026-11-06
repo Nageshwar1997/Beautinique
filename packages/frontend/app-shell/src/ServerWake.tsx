@@ -1,8 +1,18 @@
-import { type ReactNode, useEffect, useId, useRef, useState } from 'react';
+import { type ReactNode, useEffect, useId, useRef, useState, useSyncExternalStore } from 'react';
 
 import { PRIMARY, SECONDARY } from './buttons';
 import { Compact, PowderBackdrop } from './error-art';
-import { useServerWake, type WakeServerOptions } from './wake';
+import { useServerWake, WAKE_SCRIPT, type WakeServerOptions } from './wake';
+
+const noSubscription = () => () => undefined;
+
+/** False on the server and while hydrating, true after: what the server rendered stays as it was. */
+const useInBrowser = () =>
+  useSyncExternalStore(
+    noSubscription,
+    () => true,
+    () => false,
+  );
 
 export interface ServerWakeProps extends Omit<WakeServerOptions, 'signal'> {
   /** The app (its frame and pages): shown at once, and out of reach while the screen covers it. */
@@ -108,16 +118,52 @@ function WakeScreen({ failed, since, onRetry, onContinue }: WakeScreenProps) {
 }
 
 /**
+ * The plain cover while the first check is out, usually a blink: the page's own background and,
+ * only after 400 ms, a moving bar; no words, so nothing is announced. The app-shell's CSS shows it
+ * only while `<html>` has WAKE_CHECK_ATTRIBUTE (WAKE_SCRIPT, or ServerWake), so a crawler or a
+ * browser without JavaScript gets the page itself.
+ */
+function CheckVeil() {
+  return (
+    <div
+      aria-hidden="true"
+      data-server-check-veil=""
+      className="bg-background fixed inset-0 z-(--z-modal) place-items-center"
+    >
+      <div className="progress-indeterminate text-brand bg-brand/20 animate-fade-in h-1.5 w-40 rounded-full [animation-delay:400ms]" />
+    </div>
+  );
+}
+
+/**
+ * WAKE_SCRIPT in `<head>`, for an app whose pages are rendered on the server (customer): the loader
+ * covers the page from its first paint. Put it right after ThemeScript.
+ */
+export function WakeScript() {
+  // a fixed string from this package, not user input; byte for byte WAKE_SCRIPT, which WAKE_SCRIPT_HASH allows
+  return <script dangerouslySetInnerHTML={{ __html: WAKE_SCRIPT }} />;
+}
+
+/**
  * Wakes the live server when the app opens (ARCHITECTURE §11.1: the free Render service sleeps after
- * 15 idle minutes and takes about a minute to start). The app renders at once; only when the server
- * is slow to answer does the wake-up screen cover it, and the app stays inert until it answers.
+ * 15 idle minutes and takes about a minute to start). No page shows before the server has answered
+ * (owner, 2026-11-05: pages will need it): a plain loader covers the app, and when the answer is slow
+ * the wake-up screen takes its place; the app stays inert until it answers. A page rendered on the
+ * server also needs WakeScript in its `<head>`.
  */
 export function ServerWake({ children, ...options }: ServerWakeProps) {
   const { state, since, retry, dismiss } = useServerWake(options);
+  const inBrowser = useInBrowser();
+  const checking = state === 'checking';
   const covering = state === 'waking' || state === 'failed';
+  // in the browser only: the page rendered on the server stays usable without JavaScript
+  const blocked = covering || (checking && inBrowser);
   return (
     <>
-      <div inert={covering}>{children}</div>
+      <div inert={blocked} aria-busy={checking && inBrowser ? true : undefined}>
+        {children}
+      </div>
+      {checking && <CheckVeil />}
       {covering && (
         <WakeScreen
           failed={state === 'failed'}

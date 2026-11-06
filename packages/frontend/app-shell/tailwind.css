@@ -6,6 +6,25 @@
 @source './dist';
 
 /*
+ * ServerWake's plain loader: shown only while <html data-server-check> (WAKE_SCRIPT before the first
+ * paint, or ServerWake), so a crawler or a browser without JavaScript gets the page underneath. If the
+ * app's JavaScript never runs (its files did not load), the page shows after 10 s anyway; ServerWake
+ * replaces the loader long before that (the wake-up screen comes at 1.5 s).
+ */
+[data-server-check-veil] {
+  display: none;
+}
+:root[data-server-check] [data-server-check-veil] {
+  display: grid;
+  animation: server-check-gives-up 0s linear 10s forwards;
+}
+@keyframes server-check-gives-up {
+  to {
+    visibility: hidden;
+  }
+}
+
+/*
  * The error page's motion (ErrorPage): Tailwind emits each keyframe only when its class is used.
  * Reduced motion stops all of them (styles' base.css): the loops stand still, the crumbs lie where
  * they fell.

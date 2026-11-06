@@ -1,7 +1,6 @@
 // The internal apps' idle sign-out, end to end (ARCHITECTURE §9.2): the page's clock is moved
 // (Playwright's clock), the server's is not; "Stay signed in" renews the real session.
-import { expect, test } from '@playwright/test';
-
+import { expect, test } from '../../../scripts/e2e/app';
 import { deleteMailsTo, e2eEmail } from '../../../scripts/e2e/mail';
 import { expectNoAxeViolations, joinTeam } from './helpers';
 

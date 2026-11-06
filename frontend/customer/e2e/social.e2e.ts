@@ -1,8 +1,9 @@
 // Social sign-in in the customer app (TASKS T3.1 PR 4), end to end: the browser, the dev server's
 // /api proxy, the gateway's navigation routes, identity, notify and Mailpit, and the stand-in
 // Google, LinkedIn and GitHub (scripts/e2e/fake-oauth.ts), never the real ones.
-import { expect, type Page, test } from '@playwright/test';
+import type { Page } from '@playwright/test';
 
+import { appReady, expect, test } from '../../../scripts/e2e/app';
 import type { FakePerson, FakeProvider } from '../../../scripts/e2e/fake-oauth';
 import { deleteMailsTo, e2eEmail, mailsTo } from '../../../scripts/e2e/mail';
 import {
@@ -52,6 +53,8 @@ test('signs up with Google: the consent, then signed in; the next time straight 
 
   // a new account: its consent first
   await expect(page).toHaveURL('/sign-up/finish?next=%2Fcredits');
+  // back from the provider is a new page load: wait for the app before the forced clicks below
+  await appReady(page);
   await expect(page.getByRole('heading', { level: 1, name: 'Finish signing up' })).toBeVisible();
   await expect(page.getByText(email)).toBeVisible();
   await expectNoAxeViolations(page);

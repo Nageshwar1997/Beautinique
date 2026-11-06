@@ -1,7 +1,6 @@
 // The admin app's sign-in, end to end (ARCHITECTURE §9.2): the browser, the dev server's /api
 // proxy, the gateway, identity, notify and Mailpit. Each test invites its own person.
-import { expect, test } from '@playwright/test';
-
+import { expect, test } from '../../../scripts/e2e/app';
 import { deleteMailsTo, e2eEmail } from '../../../scripts/e2e/mail';
 import { totpCode } from '../../../scripts/e2e/totp';
 import {

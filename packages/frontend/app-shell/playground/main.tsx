@@ -48,11 +48,21 @@ function WakeDemo() {
     <section className="container-page py-10">
       <h1 className="font-display text-3xl font-medium">Wake-up screen</h1>
       <p className="text-foreground-muted mt-2 max-w-prose">
-        Apps wrap their frame in ServerWake. A server that answers within 1.5 s shows nothing; a
-        slow one shows the screen until it answers; one that never answers (here after 10 s instead
-        of 150 s) offers to try again or to continue.
+        Apps wrap their frame in ServerWake. Until the server answers, a plain loader covers the
+        app: a server that answers within 1.5 s shows only that blink; a slow one shows the screen
+        until it answers; one that never answers (here after 10 s instead of 150 s) offers to try
+        again or to continue.
       </p>
       <div className="mt-6 flex flex-wrap gap-3">
+        <button
+          type="button"
+          className={button}
+          onClick={() => {
+            setRun({ key: Date.now(), ms: 300 });
+          }}
+        >
+          Quick server (0.3 s)
+        </button>
         <button
           type="button"
           className={button}
