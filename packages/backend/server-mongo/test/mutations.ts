@@ -369,12 +369,22 @@ const mutations: Mutation[] = [
   {
     file: 'connect',
     name: 'ready always true',
-    change: [['return false;', 'return true;']],
+    change: [['() => false,', '() => true,']],
   },
   {
     file: 'connect',
     name: 'ready no timeout',
-    change: [['{ ping: 1 }, { timeoutMS: 2000 }', '{ ping: 1 }']],
+    change: [['return await Promise.race([ping, late]);', 'return await ping;']],
+  },
+  {
+    file: 'connect',
+    name: 'ready pings for every check',
+    change: [['ping ??= client', 'ping = client']],
+  },
+  {
+    file: 'connect',
+    name: 'ready keeps the first answer',
+    change: [['ping = null;', '']],
   },
   {
     file: 'connect',

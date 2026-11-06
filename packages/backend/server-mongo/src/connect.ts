@@ -3,6 +3,9 @@ import { type Db, type Document, MongoClient } from 'mongodb';
 
 import { ParallelGuard } from './guard';
 
+/** How long /ready waits for MongoDB to answer a ping. */
+const READY_WAIT_MS = 2000;
+
 export interface ConnectMongoOptions {
   /** From the deployable's config (IDENTITY__MONGO_URI ...). Never logged: it can hold a password. */
   uri: string;
@@ -22,7 +25,7 @@ export interface Mongo {
   /** The deployable's database. */
   db: Db;
   logger: Logger;
-  /** For /ready: true when MongoDB answers a ping within 2 seconds. */
+  /** For /ready: true when MongoDB answers a ping within 2 seconds (one ping at a time). */
   ready: ReadyCheck;
   /** For startServer's onStop: closes the connection pool. Safe to call twice. */
   close(): Promise<void>;
@@ -87,17 +90,37 @@ export async function connectMongo({
     await client.close();
     throw error;
   }
+  // One ping at a time: a check during a slow ping waits for that one, so a stalled MongoDB does
+  // not pile up a ping per check (each holds one of the pool's few connections until it answers).
+  let ping: Promise<boolean> | null = null;
   return {
     client,
     db: client.db(dbName),
     logger,
     guard,
     ready: async () => {
+      ping ??= client
+        .db('admin')
+        .command({ ping: 1 })
+        .then(
+          () => true,
+          () => false,
+        )
+        .finally(() => {
+          ping = null;
+        });
+      // Only the wait ends after 2 s: the driver no longer stops an operation after a time
+      // (`timeoutMS` does nothing since mongodb 7.8, CVE-2026-119179), so the ping finishes on its own.
+      let timer: ReturnType<typeof setTimeout> | undefined;
+      const late = new Promise<boolean>((resolve) => {
+        timer = setTimeout(() => {
+          resolve(false);
+        }, READY_WAIT_MS);
+      });
       try {
-        await client.db('admin').command({ ping: 1 }, { timeoutMS: 2000 });
-        return true;
-      } catch {
-        return false;
+        return await Promise.race([ping, late]);
+      } finally {
+        clearTimeout(timer);
       }
     },
     close: async () => {

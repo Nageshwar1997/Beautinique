@@ -23,6 +23,18 @@ export const MUTATION_ENV = {
   REDIS_TEST_URL: 'redis://localhost:6380',
 } as const;
 
+/**
+ * A test run's environment: the mutation databases, then this process's, without GitHub's CI keys.
+ * In CI a child Vitest would add its report (and its failures as annotations) to the job's summary,
+ * and a killed mutant fails on purpose: the summary showed fake failed reports (HANDOFF §4, QA KNOWN-07).
+ */
+export function testRunEnv(parent: NodeJS.ProcessEnv): NodeJS.ProcessEnv {
+  const env: NodeJS.ProcessEnv = { ...MUTATION_ENV, ...parent };
+  delete env.GITHUB_ACTIONS;
+  delete env.GITHUB_STEP_SUMMARY;
+  return env;
+}
+
 /** The parts of a package a test run needs. */
 const PACKAGE_PARTS = [
   'src',
@@ -158,7 +170,7 @@ function runTests(
     cwd: dir,
     encoding: 'utf8',
     timeout: timeoutMs,
-    env: { ...MUTATION_ENV, ...process.env },
+    env: testRunEnv(process.env),
     maxBuffer: 64 * 1024 * 1024,
   });
   const ms = Date.now() - started;

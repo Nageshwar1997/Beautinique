@@ -1,7 +1,6 @@
 // The customer app's sign-up and sign-in, end to end (ARCHITECTURE §9.2): the browser, the dev
 // server's /api proxy, the gateway, identity, notify and Mailpit. Each test makes its own account.
-import { expect, test } from '@playwright/test';
-
+import { expect, test } from '../../../scripts/e2e/app';
 import { codeFor, deleteMailsTo, e2eEmail } from '../../../scripts/e2e/mail';
 import { totpCode } from '../../../scripts/e2e/totp';
 import {

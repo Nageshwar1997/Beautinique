@@ -115,9 +115,12 @@ describe('identity', () => {
     });
     // none set: social login off, and no origin needed
     expect(readConfig({ env }).googleClientId).toBeUndefined();
-    const live = { ...google, IDENTITY__OAUTH_REDIRECT_ORIGIN: 'https://bq-customer.vercel.app' };
+    const live = {
+      ...google,
+      IDENTITY__OAUTH_REDIRECT_ORIGIN: 'https://beautinique-customer.vercel.app',
+    };
     expect(readConfig({ env: { ...env, ...live } }).oauthRedirectOrigin).toBe(
-      'https://bq-customer.vercel.app',
+      'https://beautinique-customer.vercel.app',
     );
 
     const problem = (extra: Record<string, string | undefined>) => {
@@ -144,9 +147,9 @@ describe('identity', () => {
     );
     // plain http only on the laptop, and an origin without a path
     for (const origin of [
-      'http://bq-customer.vercel.app',
-      'https://bq-customer.vercel.app/',
-      'https://bq-customer.vercel.app/api/v1',
+      'http://beautinique-customer.vercel.app',
+      'https://beautinique-customer.vercel.app/',
+      'https://beautinique-customer.vercel.app/api/v1',
       'localhost:3001',
     ]) {
       expect(problem({ ...google, IDENTITY__OAUTH_REDIRECT_ORIGIN: origin }), origin).toContain(

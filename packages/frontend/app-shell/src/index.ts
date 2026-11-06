@@ -2,7 +2,8 @@ export { AppFrame, type AppFrameProps } from './AppFrame';
 export { ErrorPage, type ErrorPageAction, type ErrorPageProps } from './ErrorPage';
 export { IconCreditsPage } from './IconCreditsPage';
 export { type NavItem, NavList, type NavListProps } from './NavList';
-export { ServerWake, type ServerWakeProps } from './ServerWake';
+export { type ErrorReporter, reportError, setErrorReporter, useReportError } from './report';
+export { ServerWake, type ServerWakeProps, WakeScript } from './ServerWake';
 export {
   readThemeChoice,
   setThemeChoice,
@@ -19,8 +20,12 @@ export {
   useThemeChoice,
 } from './ThemeSwitcher';
 export {
+  isCrawler,
   type ServerWakeStatus,
   useServerWake,
+  WAKE_CHECK_ATTRIBUTE,
+  WAKE_SCRIPT,
+  WAKE_SCRIPT_HASH,
   WAKE_URL,
   wakeServer,
   type WakeServerOptions,

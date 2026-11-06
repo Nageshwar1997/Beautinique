@@ -1,12 +1,13 @@
+import { setErrorReporter } from '@beautinique/frontend-app-shell';
 import { ACCOUNT_PATHS } from '@beautinique/frontend-auth-ui';
 import { cleanup, render, screen, waitFor, within } from '@testing-library/react';
 import axe from 'axe-core';
-import { createMemoryRouter, type RouteObject, RouterProvider } from 'react-router';
+import { createMemoryRouter, data, type RouteObject, RouterProvider } from 'react-router';
 import { afterEach, describe, expect, it } from 'vitest';
 
 import { ACCOUNT_NAV, FOOTER_NAV, MAIN_NAV } from '../src/nav';
 import { Providers } from '../src/providers';
-import { Frame } from '../src/root';
+import { Frame, PageError, RootError } from '../src/root';
 import { routes } from '../src/routes';
 
 afterEach(cleanup);
@@ -127,6 +128,53 @@ describe('admin, signed out', () => {
           .getAttribute('href'),
       ).toBe('/sign-in?next=%2Fcredits');
     });
+  });
+
+  it('reports a page that broke to monitoring, and not an expected answer like a 404', async () => {
+    const got: unknown[] = [];
+    setErrorReporter((error) => got.push(error));
+    try {
+      const crash = new Error('page exploded');
+      const broken: RouteObject[] = [
+        {
+          element: (
+            <Providers>
+              <Frame />
+            </Providers>
+          ),
+          errorElement: <RootError />,
+          children: [
+            {
+              errorElement: <PageError />,
+              children: [
+                {
+                  path: '/boom',
+                  Component: () => {
+                    throw crash;
+                  },
+                },
+                {
+                  path: '/gone',
+                  loader: () => {
+                    // eslint-disable-next-line @typescript-eslint/only-throw-error -- React Router's way to answer 404
+                    throw data('Not here', { status: 404 });
+                  },
+                  Component: () => null,
+                },
+              ],
+            },
+          ],
+        },
+      ];
+      for (const at of ['/boom', '/gone']) {
+        render(<RouterProvider router={createMemoryRouter(broken, { initialEntries: [at] })} />);
+        await screen.findByRole('heading', { level: 1, name: 'Something went wrong' });
+        cleanup();
+      }
+      expect(got).toEqual([crash]);
+    } finally {
+      setErrorReporter(undefined);
+    }
   });
 
   it('links only pages that exist', () => {

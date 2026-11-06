@@ -75,7 +75,9 @@ describe('SocialSignIn', () => {
 
   it('shows nothing on another origin (a preview), without providers, or with a next off the site', async () => {
     const elsewhere = fakeIdentity('customer');
-    elsewhere.on('GET /auth/oauth/providers', () => offering('https://bq-customer.vercel.app'));
+    elsewhere.on('GET /auth/oauth/providers', () =>
+      offering('https://beautinique-customer.vercel.app'),
+    );
     renderApp({ '/': <SocialSignIn /> }, { identity: elsewhere });
     await waitFor(() => {
       expect(elsewhere.paths()).toContain('GET /auth/oauth/providers');
