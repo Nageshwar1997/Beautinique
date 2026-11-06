@@ -1,6 +1,6 @@
 # MEMORY — BQ
 
-> **Status:** v1.52 (2026-11-05). Project ki yaaddasht: **kya tay hua aur kyun**, **pichhle kaam se kya seekha**, aur **kaunse jaal (traps) se bachna hai**. Poori detail baaki docs me hai; yahan short version aur pointers. Naya sabak ya decision aaye to yahan ek line jodo.
+> **Status:** v1.55 (2026-11-07). Project ki yaaddasht: **kya tay hua aur kyun**, **pichhle kaam se kya seekha**, aur **kaunse jaal (traps) se bachna hai**. Poori detail baaki docs me hai; yahan short version aur pointers. Naya sabak ya decision aaye to yahan ek line jodo.
 
 ## 1. Decision log
 
@@ -101,6 +101,8 @@
 | 2026-11-05 | State Admin se Seller Account Owner / Pro Buyer (QA KNOWN-06) jaisa hai: org/applicant ka state scope check me T4.5 (sellers) aur T10.2 (Pro & B2B) ke saath, test ke saath; beech me Master ko chhoot nahi | Abhi koi seller org ya Pro applicant hai hi nahi, aur org/account ka state unhi modules me banega; beech ki chhoot bekaar ka raasta kholti | TASKS T4.5, T10.2 |
 | 2026-11-05 | CI summary me nakli Vitest reports (QA KNOWN-07) theek: mutation runner aur CLI e2e ke child runs ko `GITHUB_ACTIONS` aur `GITHUB_STEP_SUMMARY` nahi | Fixtures ke killed mutant jaan-boojh ke fail hote hain, unki ❌ reports summary me asli failure jaisi dikhti thi; summary me sirf is run ki asli reports rahein | HANDOFF §4 item 8 |
 | 2026-11-05 | MongoDB kernel workaround (`GLIBC_TUNABLES`, QA KNOWN-08) jaisa hai; server `mongo:8.0.34` hi; MongoDB ka fix aane pe checklist se hatao | Asli fix abhi nahi (SERVER-136848 khula), naye server versions bhi affected (8.2 crash), aur version badalna live Atlas 8.0 se mel todta; setting sirf laptop/CI ke Docker Mongo pe hai | infra/README.md trap |
+| 2026-11-06 | Sentry: ek organization, do project (`bq-backend`, `bq-frontend`); frontend ka shor code me roko (filters, page pe max ~10 errors, Replay ka sample) | Free quota organization ka saanjha hai aur free plan pe project-wise limit nahi; doosra account terms ke khilaaf ho sakta hai aur browser se backend ka trace todta | ARCHITECTURE §14 |
+| 2026-11-06 | Browser Sentry (QA KNOWN-09): pehle customer + admin; app-shell ka alag `/monitoring` entry, page shuru hone ke baad load; sirf apni errors (apni origin, extensions/network/bots nahi, page pe max 10); Replay sirf customer, error ka 20%; public source maps | Page aur wake ka parda Sentry ka intezaar na karein; free quota saanjha hai to shor pehle hi ruke; repo public hai to source maps chhupane ka fayda nahi | ARCHITECTURE §14 |
 
 ## 2. Pichhle kaam se seekhe sabak
 
@@ -127,6 +129,7 @@
 21. **Env key code se pehle (2026-10-26):** owner ne Render me `IDENTITY__MONGO_URI`/`IDENTITY__REDIS_URL` daale jab identity ka code unhe padhta nahi tha; `loadConfig` ka typo check (anjaan `<NAME>__*` key = error) live deploy rok gaya (purana deploy chalta raha). Fix: identity ne keys padhna shuru kiya. Kisi chalte deployable ki nayi key tabhi daalo jab code use padhe (HANDOFF §6); payments/notify banane wali PR me unke `MONGO_URI`/`REDIS_URL` config me ho.
 22. **`findBy*` ka 1 s kam padta hai (2026-11-05):** auth-ui ke tests (`MyDevices`, `AccountMenu`) busy laptop pe kabhi fail hote the: "Unable to find role=list", page abhi spinner pe. Timing log se dikha ki koi retry ya error nahi tha; naye worker me pehli call ka thanda code (axios, contracts ke schemas, React Aria) request ko fake tak ~0.1–0.4 s me pahunchata hai, aur jab saare workers busy hon to 1 s se zyada me. `testTimeout` 15 s tha, par Testing Library ka `asyncUtilTimeout` 1 s hi tha. Fix: `test/setup.ts` me `configure({ asyncUtilTimeout: 10_000 })` (hooks package me pehle se). **Sabak:** jo frontend package jsdom me network jaisa async flow test kare, uske vitest `setupFiles` me ye pehle din se rakho; flake ho to timeout badhane se pehle timing log se dekho ki koi retry ya error to nahi chhupa.
 23. **Fail point `times: 1` ek saath aaye do commands dono ko rok deta hai (2026-11-05):** `server-mongo` ke "ek waqt me ek ping" test me do `ready()` ek hi millisecond me bheje; mutation "har check pe naya ping" bach gaya, kyunki MongoDB ne dono ping 3 s roke (command events ke log se pakda). Fix: doosra check 500 ms baad. **Sabak:** fail point se "sirf pehla rukega" maan ke test likho to doosri command der se bhejo, aur mutation se pakka karo ki test sach me farak pakadta hai.
+24. **Inert field me Playwright ka `fill` chupchaap kuch nahi karta (2026-11-07):** wake ka saada parda app ko inert rakhta hai; laptop pe load me admin E2E ne parde ke dauraan email/password "bhare", koi error nahi aaya, aur parda hatne ke baad `click` ne khaali form submit kiya ("Enter your email address"). Playwright ka page snapshot (`error-context.md`) dekh ke pakda. Fix: `scripts/e2e/app.ts` ka `test` (har `goto`/`reload` ke baad `appReady`). **Sabak:** UI me koi naya parda/inert aaye to E2E me uske hatne ka intezaar ek jagah (fixture) me rakho, har test me nahi.
 
 ## 3. Environment
 
@@ -217,3 +220,6 @@
 | v1.50   | 2026-11-05 | Decision: QA KNOWN-06 jaisa hai, kaam T4.5 aur T10.2 me. |
 | v1.51   | 2026-11-05 | Decision: QA KNOWN-07 theek (child runs ko CI summary keys nahi). |
 | v1.52   | 2026-11-05 | Decision: QA KNOWN-08 jaisa hai (MongoDB kernel workaround). |
+| v1.53   | 2026-11-06 | Decision: Sentry ek organization, do project (QA KNOWN-09). |
+| v1.54   | 2026-11-06 | Decision: browser Sentry ka tareeka (QA KNOWN-09). |
+| v1.55   | 2026-11-07 | Sabak 24: inert field me Playwright `fill` chupchaap kuch nahi karta. |

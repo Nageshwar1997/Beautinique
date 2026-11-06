@@ -3,6 +3,7 @@ import {
   ErrorPage,
   ServerWake,
   ThemeScript,
+  useReportError,
   WakeScript,
 } from '@beautinique/frontend-app-shell';
 import { Toaster } from '@beautinique/frontend-components';
@@ -97,8 +98,15 @@ function technicalDetails(error: unknown): string | undefined {
   return error instanceof Error ? (error.stack ?? error.message) : String(error);
 }
 
-/** Unknown paths (a real 404 status) and unexpected errors, inside the normal header and footer. */
+/** A route's answer below 500 (a 404 above all) is expected; anything else goes to monitoring. */
+const unexpected = (error: unknown) => !isRouteErrorResponse(error) || error.status >= 500;
+
+/**
+ * Unknown paths (a real 404 status) and unexpected errors, inside the normal header and footer. An
+ * unexpected one is reported (ARCHITECTURE §14): a route's error never reaches the browser's handlers.
+ */
 export function ErrorBoundary({ error }: Route.ErrorBoundaryProps) {
+  useReportError(error, unexpected(error));
   if (isNotFound(error)) {
     return (
       <ErrorPage

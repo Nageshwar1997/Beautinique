@@ -30,6 +30,10 @@
       "types": "./dist/index.d.ts",
       "default": "./dist/index.js"
     },
+    "./monitoring": {
+      "types": "./dist/monitoring.d.ts",
+      "default": "./dist/monitoring.js"
+    },
     "./tailwind.css": "./tailwind.css",
     "./package.json": "./package.json"
   },
@@ -50,6 +54,7 @@
   },
   "dependencies": {
     "@beautinique/frontend-icons": "^1.0.0",
+    "@sentry/browser": "^11.11.0",
     "axios": "^1.21.0"
   },
   "devDependencies": {

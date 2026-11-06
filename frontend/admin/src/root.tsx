@@ -1,4 +1,4 @@
-import { AppFrame, ErrorPage, ServerWake } from '@beautinique/frontend-app-shell';
+import { AppFrame, ErrorPage, ServerWake, useReportError } from '@beautinique/frontend-app-shell';
 import { Toaster } from '@beautinique/frontend-components';
 import { isRouteErrorResponse, Outlet, ScrollRestoration, useRouteError } from 'react-router';
 
@@ -46,9 +46,16 @@ function technicalDetails(error: unknown): string | undefined {
   return error instanceof Error ? (error.stack ?? error.message) : String(error);
 }
 
-/** An unexpected error in a page, inside the normal top bar and footer. */
+/** A route's answer below 500 is expected; anything else goes to monitoring (ARCHITECTURE §14). */
+const unexpected = (error: unknown) => !isRouteErrorResponse(error) || error.status >= 500;
+
+/**
+ * An unexpected error in a page, inside the normal top bar and footer; reported, as a route's error
+ * never reaches the browser's handlers.
+ */
 export function PageError() {
   const error = useRouteError();
+  useReportError(error, unexpected(error));
   return (
     <>
       <title>Something went wrong | Beautinique Admin</title>
@@ -63,9 +70,10 @@ export function PageError() {
   );
 }
 
-/** The frame itself failed: the error alone, without it. */
+/** The frame itself failed: the error alone, without it (reported like a page's). */
 export function RootError() {
   const error = useRouteError();
+  useReportError(error, unexpected(error));
   return (
     <main id="main">
       <title>Something went wrong | Beautinique Admin</title>

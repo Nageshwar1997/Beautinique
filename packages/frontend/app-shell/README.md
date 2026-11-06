@@ -66,6 +66,8 @@ export function Layout({ children }) {
 | `WakeScript`                                            | Server-rendered app ke `<head>` me, `ThemeScript` ke baad: pehle paint se parda (upar)                                                                                                                  |
 | `WAKE_SCRIPT`, `WAKE_SCRIPT_HASH`                       | Script ka text, aur CSP `script-src` ke liye uska hash (test milata hai)                                                                                                                                |
 | `WAKE_CHECK_ATTRIBUTE`, `isCrawler`                     | `<html>` ka attribute (`data-server-check`) aur crawler ki pehchaan                                                                                                                                     |
+| `reportError`, `useReportError`, `setErrorReporter`     | Unexpected error bhejna (error screens se); monitoring judne tak max 10 intezaar karti hain                                                                                                             |
+| `/monitoring`: `initMonitoring`, `replay`               | Browser Sentry, alag entry jo app page shuru hone ke baad load kare (neeche)                                                                                                                            |
 
 ### ErrorPage
 
@@ -105,6 +107,26 @@ Free Render service 15 min khaali rehne pe so jaati hai aur jaagne me ~1 min let
 - Laptop pe backend band ho to dev server ka proxy 502 deta hai, isliye wake-up screen dikhti hai: `npm run dev:backend` chalao (wahi asli raasta).
 
 **Abhi nahi, jab app ko chahiye tab:** sidebar layout (internal apps), offline page, idle logout.
+
+### Monitoring (`@beautinique/frontend-app-shell/monitoring`, ARCHITECTURE §14)
+
+Browser ki errors Sentry project `bq-frontend` me. Apna alag entry, jise app page shuru hone ke baad `import()` se laaye, aur sirf jab build me DSN ho:
+
+```ts
+const dsn = import.meta.env.BQ_SENTRY_DSN;
+if (dsn !== undefined && dsn !== '') {
+  void import('@beautinique/frontend-app-shell/monitoring')
+    .then(({ initMonitoring, replay }) => {
+      initMonitoring({ app: 'customer', dsn, integrations: [replay()] });
+    })
+    .catch(() => undefined);
+}
+```
+
+- **Sirf apni errors:** apni origin ki scripts (`allowUrls`); extensions ki nahi; "Failed to fetch", "Network Error", abort jaisi network wali nahi; crawler, headless aur `navigator.webdriver` pe band; ek page se max `MAX_EVENTS_PER_PAGE` (10).
+- **Data:** URL bina query aur `#`, email `[email]` aur 6+ ank `[number]`, koi user, IP, cookie ya body nahi; headers me sirf User-Agent; console breadcrumbs aur page-load session nahi; SDK ka `enhanceFetchErrorMessages` band (app ke error messages waise hi).
+- **Route ki errors** browser ke handlers tak nahi pahunchti: error screen `useReportError(error, unexpected)` bulaye (404 aur 500 se kam ke answers nahi). `reportError` monitoring judne se pehle ki errors (max 10) rakhta hai.
+- **Replay** (`replay()`) sirf customer me: error wale sessions ka `REPLAY_ON_ERROR_SAMPLE_RATE` (20%), saara text, inputs aur media chhupa.
 
 ## Tests
 

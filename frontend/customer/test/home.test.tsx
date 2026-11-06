@@ -1,3 +1,4 @@
+import { setErrorReporter } from '@beautinique/frontend-app-shell';
 import { cleanup, render, screen, within } from '@testing-library/react';
 import axe from 'axe-core';
 import { createRoutesStub } from 'react-router';
@@ -211,6 +212,30 @@ describe('error pages', () => {
     expect(screen.getByText('Technical details').closest('details')?.open).toBe(false);
     expect(container.querySelector('pre')?.textContent).toContain('product card exploded');
     expect(await violations(container)).toEqual([]);
+  });
+
+  it('reports an unexpected error or a 5xx to monitoring, never a 404 or another expected answer', () => {
+    // errors the earlier tests reported wait for a reporter: drop them first
+    setErrorReporter(undefined);
+    const got: unknown[] = [];
+    setErrorReporter((error) => got.push(error));
+    try {
+      const crash = new Error('product card exploded');
+      for (const error of [
+        crash,
+        response(503, 'Service Unavailable'),
+        response(404, 'Not Found'),
+        response(403, 'Forbidden'),
+      ]) {
+        boundary(error);
+        cleanup();
+      }
+      expect(got).toHaveLength(2);
+      expect(got[0]).toBe(crash);
+      expect(got[1]).toMatchObject({ status: 503 });
+    } finally {
+      setErrorReporter(undefined);
+    }
   });
 
   it('another status is named and drawn', () => {
