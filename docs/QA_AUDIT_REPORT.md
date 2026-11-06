@@ -1,6 +1,6 @@
 # QA AUDIT REPORT — BQ
 
-> **Status:** v1.6 (2026-11-06, final; §2a me KNOWN faislon ki halat). Audit base: `origin/prerelease` @ `ee7f46a` (`ee7f46ae7b2605d99f6b4497d26303aa109fb371`). Auditor: Claude Code (Opus 5.5, `claude-opus-5-5`). Ye report audit ki single source of truth hai; fixes alag se, ek-ek karke.
+> **Status:** v1.7 (2026-11-07, final; §2a me KNOWN faislon ki halat). Audit base: `origin/prerelease` @ `ee7f46a` (`ee7f46ae7b2605d99f6b4497d26303aa109fb371`). Auditor: Claude Code (Opus 5.5, `claude-opus-5-5`). Ye report audit ki single source of truth hai; fixes alag se, ek-ek karke.
 
 ## 0. Audit state (har session ke aakhir me update)
 
@@ -103,7 +103,7 @@
 | KNOWN-07 | CI job summary me mutation fixtures ki nakli "Vitest Test Report" ❌ (child env me `GITHUB_STEP_SUMMARY`)                                       | HANDOFF §4 item 8              | Fixed (2026-11-05): child runs ko `GITHUB_ACTIONS`/`GITHUB_STEP_SUMMARY` nahi (`testRunEnv`, CLI e2e `run()`), test ke saath |
 | KNOWN-08 | MongoDB 8.0 + Linux kernel 6.19+/7.0: compose me `GLIBC_TUNABLES=glibc.pthread.rseq=1` workaround                                              | HANDOFF §6                     | Jaisa hai (owner, 2026-11-05): fix abhi nahi (SERVER-136848 khula); hatane ki checklist infra/README.md me |
 | KNOWN-09 | Frontend Sentry abhi kisi app me nahi (owner ka khula kaam)                                                                                    | HANDOFF §4 item 4              | Code ho gaya (2026-11-06): browser Sentry customer + admin me (ARCHITECTURE §14); owner ka kaam TASKS A.10 |
-| KNOWN-10 | TypeScript ~6.0.3 hold (typescript-eslint <6.1); `server-queue` "skips an event delivered again" CI flake ka fix GitHub pe dobara dekhna baaki | HANDOFF §6                     | TS hold haan (installed 6.0.3); laptop pe server-queue 55/55 pass, CI wala hissa M14 me |
+| KNOWN-10 | TypeScript ~6.0.3 hold (typescript-eslint <6.1); `server-queue` "skips an event delivered again" CI flake ka fix GitHub pe dobara dekhna baaki | HANDOFF §6                     | TS hold rahe (owner, 2026-11-07; typescript-eslint abhi `<6.1`); flake band: 2026-10-28 se 100 CI runs me nahi aaya |
 
 ## 3. Module-wise Testing Status
 
@@ -1197,3 +1197,4 @@ Final (2026-11-05). Har number ek PR (ya ek chhota fix); saath jaane wale bugs e
 | v1.4    | 2026-11-05 | §2a: KNOWN-07 theek (CI summary me nakli Vitest reports). |
 | v1.5    | 2026-11-05 | §2a: KNOWN-08 jaisa hai (MongoDB kernel workaround), owner. |
 | v1.6    | 2026-11-06 | §2a: KNOWN-09 ka code (browser Sentry customer + admin), owner ka kaam baaki. |
+| v1.7    | 2026-11-07 | §2a: KNOWN-10 (TS hold rahe, server-queue flake band), owner; saare 10 KNOWN tay. |

@@ -1,6 +1,6 @@
 # MEMORY — BQ
 
-> **Status:** v1.55 (2026-11-07). Project ki yaaddasht: **kya tay hua aur kyun**, **pichhle kaam se kya seekha**, aur **kaunse jaal (traps) se bachna hai**. Poori detail baaki docs me hai; yahan short version aur pointers. Naya sabak ya decision aaye to yahan ek line jodo.
+> **Status:** v1.56 (2026-11-07). Project ki yaaddasht: **kya tay hua aur kyun**, **pichhle kaam se kya seekha**, aur **kaunse jaal (traps) se bachna hai**. Poori detail baaki docs me hai; yahan short version aur pointers. Naya sabak ya decision aaye to yahan ek line jodo.
 
 ## 1. Decision log
 
@@ -103,6 +103,7 @@
 | 2026-11-05 | MongoDB kernel workaround (`GLIBC_TUNABLES`, QA KNOWN-08) jaisa hai; server `mongo:8.0.34` hi; MongoDB ka fix aane pe checklist se hatao | Asli fix abhi nahi (SERVER-136848 khula), naye server versions bhi affected (8.2 crash), aur version badalna live Atlas 8.0 se mel todta; setting sirf laptop/CI ke Docker Mongo pe hai | infra/README.md trap |
 | 2026-11-06 | Sentry: ek organization, do project (`bq-backend`, `bq-frontend`); frontend ka shor code me roko (filters, page pe max ~10 errors, Replay ka sample) | Free quota organization ka saanjha hai aur free plan pe project-wise limit nahi; doosra account terms ke khilaaf ho sakta hai aur browser se backend ka trace todta | ARCHITECTURE §14 |
 | 2026-11-06 | Browser Sentry (QA KNOWN-09): pehle customer + admin; app-shell ka alag `/monitoring` entry, page shuru hone ke baad load; sirf apni errors (apni origin, extensions/network/bots nahi, page pe max 10); Replay sirf customer, error ka 20%; public source maps | Page aur wake ka parda Sentry ka intezaar na karein; free quota saanjha hai to shor pehle hi ruke; repo public hai to source maps chhupane ka fayda nahi | ARCHITECTURE §14 |
+| 2026-11-07 | QA KNOWN-10: TypeScript 6.0.3 ka hold rahe (typescript-eslint abhi `<6.1`); `server-queue` ka "skips an event delivered again" flake band | Lint tool TS 7 nahi maanta, upgrade se har PR ka lint tootta; flake ka fix 2026-10-22 ka tha aur 100 CI runs me dobara nahi aaya, sirf docs me "dekhna baaki" tha | HANDOFF §6 |
 
 ## 2. Pichhle kaam se seekhe sabak
 
@@ -223,3 +224,4 @@
 | v1.53   | 2026-11-06 | Decision: Sentry ek organization, do project (QA KNOWN-09). |
 | v1.54   | 2026-11-06 | Decision: browser Sentry ka tareeka (QA KNOWN-09). |
 | v1.55   | 2026-11-07 | Sabak 24: inert field me Playwright `fill` chupchaap kuch nahi karta. |
+| v1.56   | 2026-11-07 | Decision: QA KNOWN-10 (TS hold rahe, server-queue flake band). |
