@@ -1,8 +1,9 @@
 // The customer app's account pages, end to end (ARCHITECTURE §9.2, owner 2026-11-03): Security
 // (the authenticator set up from the QR page's key, recovery codes shown once, new codes after a
 // step-up, turned off) and My Devices (another browser signed out from here).
-import { expect, type Page, test } from '@playwright/test';
+import type { Page } from '@playwright/test';
 
+import { expect, test, waitForAppAfterLoads } from '../../../scripts/e2e/app';
 import { deleteMailsTo, e2eEmail } from '../../../scripts/e2e/mail';
 import { totpCode } from '../../../scripts/e2e/totp';
 import {
@@ -108,7 +109,7 @@ test('signs another browser out from My Devices', async ({ page, browser }, test
   await expect(page.getByText('This is the only device signed in to your account.')).toBeVisible();
 
   const other = await browser.newContext();
-  const phone = await other.newPage();
+  const phone = waitForAppAfterLoads(await other.newPage());
   await phone.goto('/sign-in?next=%2Faccount%2Fsecurity');
   await passwordStep(phone, email, PASSWORD);
   await expect(phone).toHaveURL('/account/security');
