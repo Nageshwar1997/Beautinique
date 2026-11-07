@@ -62,6 +62,8 @@ Peers: `react` 19, `react-dom`, `react-router` 8, `@tanstack/react-query` 5. App
 
 `ForgotPasswordForm` signed-in insaan ka email `location.state` (`{ email }`) se pehle se bhar leta hai (URL me kabhi nahi). Sign-in ke beech authenticator lagate waqt cookies code confirm hote hi aa jaati hain, par session (`/iam/me`) "Continue" ke baad hi padha jaata hai: isliye `RedirectIfSignedIn` recovery codes save hone se pehle page nahi badalta (aur badle to bhi codes ka "Leave without saving?" rokta hai).
 
+**Step badalne pe focus (WCAG 2.4.3 + 4.1.3, owner 2026-11-07, QA-FE-008):** jo step kisi doosre step se aaye, wo focus leta hai: field wala step apna pehla field (code, authenticator, recovery code; "Use another email", "Start again" aur sign-in khatam hone pe email), aur field `aria-describedby` se step ke sandesh se juda hai ("We sent a 6-digit code to …", "Open your authenticator app …", `LOGIN_EXPIRED` ka note), taaki screen reader focus aate hi sandesh padhe. Bina field wala step (set-up ka scan aur recovery codes) apna heading (`StepFrame focus`, `tabIndex=-1`, ring sirf keyboard ke baad). Abhi khula page kabhi focus nahi leta. Naya step banao to yahi karo.
+
 ## Idle sign-out (internal apps; owner, 2026-10-31)
 
 `<IdleNotice />` app ke root pe, `SessionProvider` ke andar, ek baar. Sirf un apps me kuch karta hai jinki session policy me `idleMs` hai (contracts `SESSION_POLICIES`: saare internal apps, 30 min), aur sirf signed in. app-shell me nahi: use Dialog chahiye, aur components ka playground app-shell leta hai (dependency cycle).

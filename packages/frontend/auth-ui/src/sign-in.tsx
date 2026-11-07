@@ -22,6 +22,7 @@ import {
   type ReactNode,
   useCallback,
   useEffect,
+  useId,
   useRef,
   useState,
   useSyncExternalStore,
@@ -40,7 +41,8 @@ import { oauthNotice, totpStepOf } from './social';
 export const FEW_RECOVERY_CODES = 3;
 
 type Step =
-  | { kind: 'password'; notice?: ReactNode }
+  /** `back`: come back to from a later step, so it takes the focus (QA-FE-008) */
+  | { kind: 'password'; notice?: ReactNode; back?: true }
   | { kind: 'totp' | 'recovery'; loginId: string }
   | { kind: 'enroll'; loginId: string; email: string };
 
@@ -120,7 +122,7 @@ export function SignInForm(props: SignInFormProps) {
   };
   const expired = (error: unknown) => {
     if (!isApiError(error, 'LOGIN_EXPIRED')) return false;
-    setStep({ kind: 'password', notice: error.message });
+    setStep({ kind: 'password', notice: error.message, back: true });
     return true;
   };
 
@@ -130,6 +132,7 @@ export function SignInForm(props: SignInFormProps) {
         key={location.key}
         email={email}
         notice={step.notice}
+        focus={step.back === true}
         forgotHref={authHref(AUTH_PATHS.forgotPassword, next)}
         onStep={async (answer, typed) => {
           if (answer.next === 'signed-in') {
@@ -147,7 +150,7 @@ export function SignInForm(props: SignInFormProps) {
     );
   }
   const back = () => {
-    setStep({ kind: 'password' });
+    setStep({ kind: 'password', back: true });
   };
   if (step.kind === 'enroll') {
     return (
@@ -186,9 +189,10 @@ export function SignInForm(props: SignInFormProps) {
   );
 }
 
-function Notice({ children }: { children: ReactNode }) {
+function Notice({ id, children }: { id?: string; children: ReactNode }) {
   return (
     <p
+      id={id}
       role="status"
       className="bg-info-subtle text-info-subtle-foreground rounded-lg px-4 py-3 text-sm"
     >
@@ -200,17 +204,21 @@ function Notice({ children }: { children: ReactNode }) {
 function PasswordStep({
   email,
   notice,
+  focus,
   forgotHref,
   onStep,
 }: {
   email: string;
   notice: ReactNode;
+  /** Back from a later step: the email takes the focus, and says why when there is a note. */
+  focus: boolean;
   forgotHref: string;
   /** The answer, and the email as typed (the set-up's recovery codes file names it). */
   onStep: (answer: RouteOutput<typeof passwordLogin>, email: string) => Promise<void>;
 }) {
   const client = useApiClient();
   const form = useZodForm(passwordLogin.input.body, { defaultValues: { email, password: '' } });
+  const noticeId = useId();
   return (
     <Form
       form={form}
@@ -219,7 +227,7 @@ function PasswordStep({
         await onStep(await client.call(passwordLogin, { body }), body.email);
       }}
     >
-      {notice !== undefined && <Notice>{notice}</Notice>}
+      {notice !== undefined && <Notice id={noticeId}>{notice}</Notice>}
       <TextField
         control={form.control}
         name="email"
@@ -227,6 +235,8 @@ function PasswordStep({
         type="email"
         autoComplete="email"
         inputMode="email"
+        autoFocus={focus}
+        aria-describedby={notice === undefined ? undefined : noticeId}
       />
       <div className="space-y-2">
         <PasswordField
@@ -261,9 +271,10 @@ function TotpStep({
 }: SecondStepProps & { onRecovery: () => void }) {
   const client = useApiClient();
   const form = useZodForm(loginTotp.input.body, { defaultValues: { code: '' } });
+  const askId = useId();
   return (
     <div className="space-y-4">
-      <p className="text-sm">
+      <p id={askId} className="text-sm">
         Open your authenticator app and enter the 6-digit code for Beautinique.
       </p>
       <Form
@@ -280,7 +291,14 @@ function TotpStep({
           await onSignedIn();
         }}
       >
-        <CodeField control={form.control} name="code" label="Authenticator code" />
+        {/* a new step: focus on its field, which says what it asks (QA-FE-008) */}
+        <CodeField
+          control={form.control}
+          name="code"
+          label="Authenticator code"
+          autoFocus
+          aria-describedby={askId}
+        />
         <SubmitButton fullWidth>Continue</SubmitButton>
       </Form>
       <div className="flex flex-wrap items-center justify-between gap-2">
@@ -304,9 +322,10 @@ function RecoveryStep({
 }: SecondStepProps & { onTotp: () => void }) {
   const client = useApiClient();
   const form = useZodForm(loginRecovery.input.body, { defaultValues: { code: '' } });
+  const askId = useId();
   return (
     <div className="space-y-4">
-      <p className="text-sm">
+      <p id={askId} className="text-sm">
         Enter one of the 10 recovery codes you saved when you set up the authenticator. Each code
         works once.
       </p>
@@ -336,6 +355,8 @@ function RecoveryStep({
           autoComplete="off"
           autoCapitalize="characters"
           spellCheck={false}
+          autoFocus
+          aria-describedby={askId}
         />
         <SubmitButton fullWidth>Continue</SubmitButton>
       </Form>
@@ -424,7 +445,8 @@ function EnrollStep({
             This app asks for a code from an authenticator app each time you sign in. Set one up
             now: it takes a minute.
           </Notice>
-          <StepFrame number={1} title="Add Beautinique to your authenticator app">
+          {/* reached from the password or "Back": its heading takes the focus (QA-FE-008) */}
+          <StepFrame number={1} title="Add Beautinique to your authenticator app" focus>
             <Scan secret={view.secret} uri={view.uri} />
             <div className="flex flex-wrap items-center justify-between gap-3">
               {startAgain}
@@ -456,7 +478,7 @@ function EnrollStep({
       );
     case 'codes':
       return (
-        <StepFrame number={3} title="Save your recovery codes">
+        <StepFrame number={3} title="Save your recovery codes" focus>
           <RecoveryCodes
             codes={view.codes}
             email={email}

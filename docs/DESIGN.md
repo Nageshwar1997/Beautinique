@@ -1,6 +1,6 @@
 # DESIGN — BQ
 
-> **Status:** v1.11 (2026-11-05). UI aur UX ke niyam saare 11 apps ke liye. Design ka **source of truth code hai**: `@beautinique/frontend-styles` (tokens) aur `@beautinique/frontend-components` (components). [RULES.md](RULES.md) §5 frontend ke coding niyam batata hai; ye file batati hai ki cheezein **dikhengi aur chalengi kaise**.
+> **Status:** v1.12 (2026-11-07). UI aur UX ke niyam saare 11 apps ke liye. Design ka **source of truth code hai**: `@beautinique/frontend-styles` (tokens) aur `@beautinique/frontend-components` (components). [RULES.md](RULES.md) §5 frontend ke coding niyam batata hai; ye file batati hai ki cheezein **dikhengi aur chalengi kaise**.
 
 ## 1. Design principles
 
@@ -125,6 +125,7 @@ Har screen ye states dikhati hai:
 - Touch target kam se kam 44 px (Delivery app me 48 px): `size-touch`, ya chhote control pe `touch-target` / `touch-target-lg`.
 - Icon-only button pe `aria-label`; images pe alt text (product images me product ka naam aur shade).
 - Form errors input se jude hon (`aria-describedby`), aur sirf colour se error na batayein.
+- **Kai step wale form (sign-in, sign-up, set-up):** naya step focus le: pehla field, aur bina field wale step me uska heading (`tabIndex=-1`); jo button daba wo gayab ho to focus `body` pe na gire. Step ka sandesh ("We sent a code to …") field se `aria-describedby` se juda ho, taaki focus aate hi padha jaaye. Abhi khula page focus nahi leta (owner, 2026-11-07, QA-FE-008).
 - `prefers-reduced-motion` pe animations band ya halki.
 - Har page pe ek `h1`, sahi heading order, aur skip-to-content link (`skip-link`).
 - High contrast (`contrast="more"` ya system setting) har app me chalna chahiye; Delivery app me hamesha on.
@@ -182,3 +183,4 @@ Har screen ye states dikhati hai:
 | v1.9    | 2026-11-05 | §6: wake-up, server ke jawab se pehle koi page nahi: pehle saada parda, 1.5 s pe wake-up screen (owner). |
 | v1.10   | 2026-11-07 | §6: wake-up ke baad sirf "Try again"; jawab se pehle koi API call nahi; account na mile to sandesh + "Try again" (owner, QA-FE-009). |
 | v1.11   | 2026-11-07 | §6: account na mile to app-shell ka error page ("Oops", Try again + home) (owner). |
+| v1.12   | 2026-11-07 | §8: kai step wale form me naya step focus le (field ya heading), sandesh field se `aria-describedby` se juda (owner, QA-FE-008). |

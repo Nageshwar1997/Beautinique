@@ -106,8 +106,11 @@ test('signs in with the authenticator, or a recovery code when the phone is lost
   await page.goto('/sign-in');
   await passwordStep(page, email, PASSWORD);
   await expect(page.getByLabel('Authenticator code')).toBeVisible();
+  // each new step takes the focus (QA-FE-008)
+  await expect(page.getByLabel('Authenticator code')).toBeFocused();
   await expectNoAxeViolations(page);
   await page.getByRole('button', { name: 'Lost your phone? Use a recovery code' }).click();
+  await expect(page.getByLabel(/Recovery code/)).toBeFocused();
   await expectNoAxeViolations(page);
   await page.getByLabel(/Recovery code/).fill(recoveryCodes[0] ?? '');
   await page.getByRole('button', { name: 'Continue' }).click();
@@ -157,4 +160,35 @@ test('a sign-out the server never got keeps the person signed in, and "Try again
   await expect(page.getByText('You are signed out.').first()).toBeVisible();
   await expect(page.getByText('You are still signed in.')).toHaveCount(0);
   expect((await page.request.get('/api/v1/iam/me', { headers })).status()).toBe(401);
+});
+
+test('a keyboard sign-up: each step takes the focus and says what happened (QA-FE-008)', async ({
+  page,
+}, testInfo) => {
+  test.skip(testInfo.project.name !== 'chromium-1280-light', 'one screen size is enough here');
+  email = e2eEmail('sign-up-keyboard');
+  await page.goto('/sign-up?next=%2Fcredits');
+  await expect(page.getByRole('heading', { level: 1, name: 'Create an account' })).toBeVisible();
+  await page.getByLabel('Email').focus();
+  await page.keyboard.type(email);
+  // the boxes, then the button, from the keyboard (Space ticks, Enter sends)
+  await page.getByRole('checkbox', { name: /I accept the/ }).focus();
+  await page.keyboard.press('Space');
+  await page.getByRole('checkbox', { name: 'I am 18 or older' }).focus();
+  await page.keyboard.press('Space');
+  await page.getByRole('button', { name: 'Send code' }).focus();
+  await page.keyboard.press('Enter');
+
+  // the code field has the focus, and a screen reader hears where the code went
+  const code = page.getByLabel('Code from the email');
+  await expect(code).toBeFocused();
+  await expect(code).toHaveAccessibleDescription(new RegExp(`^We sent a 6-digit code to ${email}`));
+  await expectNoAxeViolations(page);
+  await page.keyboard.type(await codeFor(email));
+  await page.keyboard.press('Tab');
+  await expect(page.getByLabel('Password', { exact: true })).toBeFocused();
+  await page.keyboard.type(PASSWORD);
+  await page.keyboard.press('Enter');
+  await expect(page).toHaveURL('/credits');
+  await expect(accountButton(page, email)).toBeVisible();
 });

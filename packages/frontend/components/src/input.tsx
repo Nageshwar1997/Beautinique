@@ -43,6 +43,7 @@ export function Input({
   required,
   ref,
   type = 'text',
+  'aria-describedby': describedBy,
   ...rest
 }: InputProps) {
   return (
@@ -50,6 +51,7 @@ export function Input({
       label={label}
       hint={hint}
       error={error}
+      describedBy={describedBy}
       required={required}
       id={id}
       className={className}
@@ -152,6 +154,7 @@ export function CodeInput({
   ref,
   onFocus,
   onBlur,
+  'aria-describedby': describedBy,
   ...rest
 }: CodeInputProps) {
   const [focused, setFocused] = useState(false);
@@ -161,6 +164,7 @@ export function CodeInput({
       label={label}
       hint={hint}
       error={error}
+      describedBy={describedBy}
       required={required}
       id={id}
       className={className}

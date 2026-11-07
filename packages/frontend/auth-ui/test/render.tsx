@@ -58,3 +58,11 @@ export function renderApp(
 }
 
 export const where = () => document.querySelector('[data-testid="where"]')?.textContent ?? '';
+
+/** What a screen reader reads after `element`'s name: the text of its aria-describedby, in order. */
+export const describedBy = (element: Element) =>
+  (element.getAttribute('aria-describedby') ?? '')
+    .split(' ')
+    .filter(Boolean)
+    .map((id) => document.getElementById(id)?.textContent ?? `(no #${id})`)
+    .join(' | ');
