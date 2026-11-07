@@ -1,6 +1,6 @@
 # MEMORY — BQ
 
-> **Status:** v1.61 (2026-11-07). Project ki yaaddasht: **kya tay hua aur kyun**, **pichhle kaam se kya seekha**, aur **kaunse jaal (traps) se bachna hai**. Poori detail baaki docs me hai; yahan short version aur pointers. Naya sabak ya decision aaye to yahan ek line jodo.
+> **Status:** v1.62 (2026-11-07). Project ki yaaddasht: **kya tay hua aur kyun**, **pichhle kaam se kya seekha**, aur **kaunse jaal (traps) se bachna hai**. Poori detail baaki docs me hai; yahan short version aur pointers. Naya sabak ya decision aaye to yahan ek line jodo.
 
 ## 1. Decision log
 
@@ -109,6 +109,7 @@
 | 2026-11-07 | Live `MaxListenersExceededWarning` (owner: dono): Sentry ki Express integration band (traces sirf HTTP level), aur gateway ke proxied jawab pe `res.setMaxListeners(20)` | Har `/api` request pe warning (Render logs me 2 lines); leak nahi (har jawab ke apne listeners). Express integration har request ke har middleware pe span + listener banati thi, 0.1 CPU pe | ARCHITECTURE §14 |
 | 2026-11-07 | QA-FE-009 (owner: "server ready na ho to app na chale"): api-client `waitForServer` har call (refresh bhi) `ServerWake` ke `onReady` tak rokta hai; 150 s ke baad sirf "Try again" ("Continue anyway" hata); ready ke baad `/iam/me` 5xx/network pe 2 aur try (`retryServerTrouble`), phir "We could not load your account" + "Try again"; naya app jo server bulaye yahi jode | Pehle `/iam/me` parde ke neeche turant jaata, soye server se 502 paata aur page "Loading" pe atak jaata; ek tareeka jo cold start aur beech ke restart dono sambhale | ARCHITECTURE §11.1, DESIGN §6 |
 | 2026-11-07 | Account na mile (QA-FE-009) to app-shell ka `ErrorPage` ("Oops", "Try again" pehla, phir home), `role="alert"` me; auth-ui ab app-shell pe tika (owner: "uska UI behtar") | Ek hi error ka roop poore app me; app-shell sirf icons pe tika hai, to koi cycle nahi | auth-ui README, DESIGN §6 |
+| 2026-11-07 | Generator ka app template wake-up ke saath (api-client `waitForServer`, `providers.tsx`, `ServerWake` + `onReady`, SSR me `WakeScript`, `BQ_GATEWAY_URL` define) (owner: "template bhi badlo aur docs me bhi") | Naya app shuru se sahi; pehle bane 9 shell apps template se nahi badalte (wo dobara nahi bante), unme kaam shuru hone pe jodna | packages README §3.1, ARCHITECTURE §11.1 |
 
 ## 2. Pichhle kaam se seekhe sabak
 
@@ -238,3 +239,4 @@
 | v1.59   | 2026-11-07 | Decision + sabak 27: live `MaxListenersExceededWarning` (Sentry Express band, gateway 20 listeners). |
 | v1.60   | 2026-11-07 | Decision: QA-FE-009 (server ready tak koi API call nahi, sirf "Try again", account na mile to sandesh). |
 | v1.61   | 2026-11-07 | Decision: account na mile to app-shell ka `ErrorPage` (owner). |
+| v1.62   | 2026-11-07 | Decision: generator ka app template wake-up ke saath (owner). |

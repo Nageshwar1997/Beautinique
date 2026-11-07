@@ -50,6 +50,9 @@ beforeAll(async () => {
   // workspace packages the apps depend on, as npm would report them
   for (const name of [
     '@beautinique/frontend-styles',
+    '@beautinique/frontend-api-client',
+    '@beautinique/frontend-app-shell',
+    '@tanstack/react-query',
     '@beautinique/backend-server-kit',
     '@beautinique/shared-contracts',
     '@beautinique/shared-zod',
@@ -111,6 +114,19 @@ describe('frontend apps pass every check', () => {
       const created = await run(BIN, ['--yes', '--skip-install', '--type', 'app', '--app', app]);
       expect(created.out).toContain(`Created frontend/${app}`);
       expect(created.code).toBe(0);
+
+      // the wake-up from the start: no page and no API call before the server answered (QA-FE-009,
+      // owner 2026-11-07; ARCHITECTURE §11.1)
+      const source = kind === 'ssr' ? 'app' : 'src';
+      const read = (file: string) =>
+        readFileSync(join(repo.root, 'frontend', app, source, file), 'utf8');
+      expect(read('providers.tsx')).toContain(
+        `createApiClient({ app: '${app}', waitForServer: true })`,
+      );
+      const frame = read(kind === 'ssr' ? 'root.tsx' : 'layout.tsx');
+      expect(frame).toContain('<ServerWake');
+      expect(frame).toContain('client.serverReady()');
+      if (kind === 'ssr') expect(frame).toContain('<WakeScript />');
 
       const prettier = await run(
         join(REPO_ROOT, 'node_modules', 'prettier', 'bin', 'prettier.cjs'),
