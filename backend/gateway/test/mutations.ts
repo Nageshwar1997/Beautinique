@@ -346,6 +346,31 @@ const mutations: Mutation[] = [
     tests: 'fails closed',
   },
   {
+    file: 'sessions',
+    name: 'the sign-in check waits for a stalled Redis (QA-GW-001)',
+    change: [
+      [
+        '        const answers = (await within(\n          redisAnswerMs,',
+        '        const answers = (await within(\n          60_000,',
+      ],
+    ],
+    tests: 'stops answering',
+  },
+  {
+    file: 'sessions',
+    name: 'the permission check waits for a stalled Redis',
+    change: [
+      ['raw = await within(redisAnswerMs, redis.get(', 'raw = await within(60_000, redis.get('],
+    ],
+    tests: 'stops answering',
+  },
+  {
+    file: 'sessions',
+    name: 'Redis may take 5 s',
+    change: [['export const REDIS_ANSWER_MS = 500;', 'export const REDIS_ANSWER_MS = 5000;']],
+    tests: 'stops answering',
+  },
+  {
     file: 'proxy',
     name: 'a client’s passport goes on',
     change: [['  HEADERS.passport.toLowerCase(),\n', '']],

@@ -1,10 +1,10 @@
 # QA AUDIT REPORT — BQ
 
-> **Status:** v1.8 (2026-11-07, final; §2a me KNOWN faislon ki halat, §0 me fixes). Audit base: `origin/prerelease` @ `ee7f46a` (`ee7f46ae7b2605d99f6b4497d26303aa109fb371`). Auditor: Claude Code (Opus 5.5, `claude-opus-5-5`). Ye report audit ki single source of truth hai; fixes alag se, ek-ek karke.
+> **Status:** v1.9 (2026-11-07, final; §2a me KNOWN faislon ki halat, §0 me fixes). Audit base: `origin/prerelease` @ `ee7f46a` (`ee7f46ae7b2605d99f6b4497d26303aa109fb371`). Auditor: Claude Code (Opus 5.5, `claude-opus-5-5`). Ye report audit ki single source of truth hai; fixes alag se, ek-ek karke.
 
 ## 0. Audit state (har session ke aakhir me update)
 
-- **Fixes (2026-11-07 se, branch `feat/qa-audit`, §10 ke kram se, har fix ka apna commit, saare fixes ke baad ek PR → `prerelease` (owner, 2026-11-07)):** 1. QA-ID-001 Fixed (2026-11-07). Agla: QA-GW-001 + QA-KRN-001.
+- **Fixes (2026-11-07 se, branch `feat/qa-audit`, §10 ke kram se, har fix ka apna commit, saare fixes ke baad ek PR → `prerelease` (owner, 2026-11-07)):** 1. QA-ID-001 Fixed (2026-11-07). 2. QA-GW-001 + QA-KRN-001 Fixed (2026-11-07). Agla: QA-FE-009.
 - **Gate 1: approved (2026-11-04).** Owner ke jawab (saari recommendations maani):
   - Live pe passive GETs: **haan, kul ≤ 15**, bina auth: `bq-live` `/health`, `/status`, ek anjaan path; customer + admin ka home aur ek 404 (headers, TLS). OTP/auth/write/fuzz/rate-limit/load kabhi nahi.
   - Playwright: Chromium 1248 pehle se installed (Playwright 1.64.1 ki zaroorat yahi); koi download nahi chahiye
@@ -566,7 +566,7 @@ Plan: **E** = planned-executed (local stack, HTTP, browser, scratch script), **S
 ### [QA-GW-001] Signed-in requests hang for as long as Redis stalls instead of failing fast with 503
 
 **Module:** M1 Gateway | **Feature:** access check (sessions) | **Task/Doc:** T2.2, T3.2; `backend/gateway/README.md` §"Har request" item 5 ("Redis ya JWKS na mile = 503"); `packages/backend/server-queue/src/redis.ts:63-65` ("Commands fail fast while Redis is away ... answer 503 instead of hanging")
-**Severity:** P2 (partial breakage: documented 503 ki jagah request latakti hai; fail-closed hi rehta hai, isliye P1 nahi) | **Priority:** Medium | **Status:** Open
+**Severity:** P2 (partial breakage: documented 503 ki jagah request latakti hai; fail-closed hi rehta hai, isliye P1 nahi) | **Priority:** Medium | **Status:** Fixed (2026-11-07, `feat/qa-audit`, commit "fix(gateway): a stalled Redis answers 503 within a second (QA-GW-001)")
 **Testing Type:** Reliability / failure injection | **Evidence level:** E1 | **Reproducibility:** Always (2/2) | **Environment:** local QA bundle (`ee7f46a`), throwaway Valkey `docker pause`
 **Description:** Jab Redis TCP pe juda hai par jawab nahi deta (atka hua, network stall, overloaded Key Value), to gateway ka session check (`multi().exec()`) bina timeout ke intezaar karta hai. Har signed-in request (`/iam/me`, `/auth/sessions`, aage cart/checkout) utni der latakti hai jitni der Redis atka rahe, phir Redis lautne pe hi jawab aata hai. Isi waqt rate limiter (apna 500 ms timeout) `auth`/`otp` ko sahi 503 deta hai. Redis *band* (connection refused) hone pe sab theek: 764 ms me 503.
 **Steps to Reproduce:** 1. QA bundle throwaway Valkey pe chalao (`scratchpad/m1/qa-backend.ts`). 2. Ek customer sign up karo (access cookie lo). 3. `docker pause bq-qa-valkey`. 4. `GET /api/v1/iam/me` cookie ke saath (client timeout 120 s). 5. 25 s baad `docker unpause`.
@@ -580,6 +580,7 @@ Plan: **E** = planned-executed (local stack, HTTP, browser, scratch script), **S
 **Regression Risk:** Medium: timeout bahut chhota ho to dheemi par zinda Redis pe jhoothe 503.
 **Regression test to add:** Gateway test: Redis jaisa TCP server jo connection le par jawab na de → signed-in route ~timeout me 503 (abhi `gateway.test.ts:1362` sirf disconnect jaanchta hai).
 **Owner decision needed:** Nahi
+**Fix (2026-11-07, owner ne "dono saath" chuna):** shared client `connectRedis` me `commandTimeout` (`commandTimeoutMs`, default 1 s): connected par chup Redis pe har deployable ka command 1 s me fail (BullMQ workers apna connection rakhte hain, unpe nahi); aur gateway ke sign-in check (`multi().exec()`) aur permission check (`get`) pe apna 500 ms (`REDIS_ANSWER_MS`, rate limiter jaisa) → 503. Tests: server-queue "fails a command after 1 second" (TCP proxy `freeze`), gateway "stops answering" (jawab na dene wala client: route 503 < 1.5 s, `holds` < 1 s). Mutations: server-queue 2/2, gateway 3/3.
 
 ### [QA-FE-004] Sign-out shows the person as signed out even when the server never ended the session
 
@@ -638,7 +639,7 @@ Plan: **E** = planned-executed (local stack, HTTP, browser, scratch script), **S
 ### [QA-KRN-001] After a failed first JWKS load, the gateway answers 401 (not 503) to every signed-in request for 30 seconds
 
 **Module:** M1 Gateway (root cause M9 server-kit) | **Feature:** token verification, JWKS cache | **Task/Doc:** T2.2; `backend/gateway/src/sessions.ts:52-57` ("Redis or the JWKS away: 503, never a pass"); gateway README item 5
-**Severity:** P3 (low-impact: sirf jab cache khaali ho, yaani gateway start ke turant baad; galat 401 se app user ko signed-out dikha sakti hai) | **Priority:** Low | **Status:** Open
+**Severity:** P3 (low-impact: sirf jab cache khaali ho, yaani gateway start ke turant baad; galat 401 se app user ko signed-out dikha sakti hai) | **Priority:** Low | **Status:** Fixed (2026-11-07, `feat/qa-audit`, commit "fix(server-kit): no empty JWKS before a first read works (QA-KRN-001)")
 **Testing Type:** Reliability | **Evidence level:** E2 | **Reproducibility:** Always (2/2, script) | **Environment:** `packages/backend/server-kit/dist` (`ee7f46a`)
 **Description:** `jwksCache` load shuru karte hi `loadedAt` aage kar deta hai. Pehla load fail ho (identity ka JWKS ek pal ke liye na mile) to wo request 503 paati hai, par agle 30 s (`minRefetchMs`) tak cache dobara load nahi karta aur khaali key set lautata hai; har token ka verify fail hota hai aur gateway 401 `UNAUTHENTICATED` deta hai. App 401 pe refresh karti hai (identity theek hai, naya token milta hai), aur gateway phir bhi 401: jhootha sign-out.
 **Steps to Reproduce:** `node scratchpad/m1/jwks-first-fail.ts`: `load` pehli baar throw kare, doosri baar sahi JWKS de; `now` +1 s, +10 s, +29 s, +30 s pe `keysFor('k1')`.
@@ -652,6 +653,7 @@ Plan: **E** = planned-executed (local stack, HTTP, browser, scratch script), **S
 **Regression Risk:** Low.
 **Regression test to add:** server-kit: pehla load fail → `minRefetchMs` ke andar `keysFor` error (503), khaali map nahi.
 **Owner decision needed:** Nahi
+**Fix (2026-11-07):** `jwksCache` me `loadedAt` sirf kaamyab read pe, retry ki gati alag `triedAt` se (keys na hon to `retryMs` 1 s, hon to `minRefetchMs` 30 s); pehla read kaamyab hone tak `keysFor` error (gateway 503); 10 min wala reload fail ho to purani keys (pehle us request ko 503 milta tha aur agla try 10 min baad); anjaan `kid` ke saath read fail ho to error. Tests: server-kit `jwksCache` (2 naye/badle), gateway "fails closed" me doosri request bhi 503. Mutations: server-kit 8/8 (3 purane entries nayi lines pe).
 
 ### [QA-TOOL-001] format:check fails on a laptop that has a Claude Code worktree under .claude/worktrees
 
@@ -955,8 +957,8 @@ Plan: **E** = planned-executed (local stack, HTTP, browser, scratch script), **S
 | QA-CI-001  | A08 Software and Data Integrity Failures / CI gate                                                 | P3                     | Haan (public repo, fork PR)                                                                                        | Branch flow ka check naam se dhoka kha sakta; merge phir bhi write access se            |
 | Q-011      | A05 Security Misconfiguration / ASVS V14.4 (HTTP security headers)                                 | NOT IMPLEMENTED (T6.6) | Haan: live sign-in/account pages pe `frame-ancestors`/`X-Frame-Options`, CSP, nosniff, Referrer-Policy nahi        | Clickjacking (sign-in, "Turn off" authenticator, sign-out buttons iframe me)            |
 | QA-GW-002  | A07 Identification and Authentication Failures / ASVS V3.3 (session termination)                   | P4 (latent)            | Nahi (aaj har signed-in route identity ka; identity DB se rokti hai)                                               | Pehla non-identity `signed-in` route aate hi P1                                         |
-| QA-GW-001  | A04 Insecure Design (availability) / ASVS V1.11                                                    | P2                     | Haan, agar Render Key Value atke (band nahi)                                                                       | fail-closed hi rehta hai, data leak nahi                                                |
-| QA-KRN-001 | A04 (availability)                                                                                 | P3                     | Haan, sirf gateway start ke turant baad JWKS fail ho                                                               | jhootha sign-out                                                                        |
+| QA-GW-001  | A04 Insecure Design (availability) / ASVS V1.11                                                    | P2                     | Haan, release tak (fix `feat/qa-audit` me, 2026-11-07), agar Render Key Value atke                                 | fail-closed hi rehta hai, data leak nahi                                                |
+| QA-KRN-001 | A04 (availability)                                                                                 | P3                     | Release tak (fix `feat/qa-audit` me, 2026-11-07), sirf gateway start ke turant baad JWKS fail ho                   | jhootha sign-out                                                                        |
 | QA-FE-009  | A04 Insecure Design (availability)                                                                 | P2                     | Haan (customer + admin, Render restart/cold start pe; live trigger verify nahi)                                    | Signed-in pages "Loading" pe atakte; data leak nahi                                     |
 | QA-FE-006  | A04 (availability, hardening)                                                                      | P4                     | Haan                                                                                                               | Atka backend pe client ka koi upper bound nahi                                          |
 
@@ -1148,7 +1150,7 @@ Har module ke baad (existing tests + `test/mutations.ts` ke survivors).
 Final (2026-11-05). Har number ek PR (ya ek chhota fix); saath jaane wale bugs ek hi line me. Fixes is audit me nahi: alag sessions me, ek-ek karke.
 
 1. **QA-ID-001** (P1): refresh-token reuse detection bypass; live pe khula security control; sabse pehle, akela PR (repro owner ke paas chat me). **Fixed (2026-11-07, `feat/qa-audit`)**; live agle release ke saath.
-2. **QA-GW-001 + QA-KRN-001** (P2 + P3): gateway ka "dependency away/atka → jaldi 503" (dono ki Recommended Fix ke mutabik); gateway ke access-check failure handling ka ek PR.
+2. **QA-GW-001 + QA-KRN-001** (P2 + P3): gateway ka "dependency away/atka → jaldi 503" (dono ki Recommended Fix ke mutabik); gateway ke access-check failure handling ka ek PR. **Fixed (2026-11-07, `feat/qa-audit`)**: Redis command timeout 1 s + gateway 500 ms, JWKS pehla read.
 3. **QA-FE-009** (P2): `/iam/me` 5xx pe retry / wake ke baad dobara + `unavailable` pe sandesh; auth-ui (+ app-shell) PR. Render ke har restart pe asar.
 4. **QA-FE-004 + QA-FE-010** (P2 + P3): sign-out/idle ka local state sahi kram me (server fail pe signed-in rakho; idle me pehle local forget); auth-ui PR.
 5. **QA-FE-008** (P2): auth steps pe focus + "code bheja" status announcement; auth-ui PR (4 ke saath bhi chal sakta).
@@ -1201,3 +1203,4 @@ Final (2026-11-05). Har number ek PR (ya ek chhota fix); saath jaane wale bugs e
 | v1.6    | 2026-11-06 | §2a: KNOWN-09 ka code (browser Sentry customer + admin), owner ka kaam baaki. |
 | v1.7    | 2026-11-07 | §2a: KNOWN-10 (TS hold rahe, server-queue flake band), owner; saare 10 KNOWN tay. |
 | v1.8    | 2026-11-07 | QA-ID-001 Fixed (`feat/qa-audit`): refresh token family; repro release ke baad. §0 me fixes ki line, §5, §10. |
+| v1.9    | 2026-11-07 | QA-GW-001 + QA-KRN-001 Fixed (`feat/qa-audit`): Redis command timeout 1 s + gateway 500 ms, JWKS pehla read; §0, §5, §10. |

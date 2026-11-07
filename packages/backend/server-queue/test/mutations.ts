@@ -32,6 +32,18 @@ const mutations: Mutation[] = [
   },
   {
     file: 'redis',
+    name: 'no command timeout (QA-GW-001)',
+    change: [['    commandTimeout: commandTimeoutMs,\n', '']],
+    tests: 'fails a command',
+  },
+  {
+    file: 'redis',
+    name: 'a command waits 5 s on a stalled Redis',
+    change: [['  commandTimeoutMs = 1000,', '  commandTimeoutMs = 5000,']],
+    tests: 'fails a command',
+  },
+  {
+    file: 'redis',
     name: 'ready always true',
     change: [['return false;\n      } finally', 'return true;\n      } finally']],
   },

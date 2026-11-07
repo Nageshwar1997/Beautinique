@@ -328,6 +328,33 @@ describe('connectRedis', () => {
     }
   });
 
+  it('fails a command after 1 second when Redis is connected but stops answering (QA-GW-001)', async () => {
+    const proxy = await redisProxy();
+    const stuck = await connectRedis({ url: proxy.url, name: 'stuck', logger });
+    try {
+      proxy.freeze();
+      const started = Date.now();
+      // a guard of our own, so the old hang fails here instead of at the test timeout
+      const guard = new Promise<never>((_resolve, reject) => {
+        setTimeout(() => {
+          reject(new Error('still waiting after 3 s'));
+        }, 3000).unref();
+      });
+      await expect(Promise.race([stuck.client.get(`${prefix}:stuck`), guard])).rejects.toThrow(
+        'Command timed out',
+      );
+      expect(Date.now() - started).toBeGreaterThanOrEqual(900);
+      expect(Date.now() - started).toBeLessThan(1900);
+      // the client stays usable once Redis answers again
+      proxy.thaw();
+      expect(await stuck.client.get(`${prefix}:stuck`)).toBeNull();
+    } finally {
+      proxy.thaw();
+      await stuck.close();
+      await proxy.down();
+    }
+  });
+
   it('warns near the plan connection limit', async () => {
     const second = await connectRedis({
       url: REDIS_URL,

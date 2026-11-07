@@ -1161,9 +1161,15 @@ describe('config', () => {
 });
 
 describe('sign-in at the gateway (T3.2)', () => {
-  const profile = (gw: RunningServer, cookie?: string, more: Record<string, string> = {}) =>
+  const profile = (
+    gw: RunningServer,
+    cookie?: string,
+    more: Record<string, string> = {},
+    signal?: AbortSignal,
+  ) =>
     fetch(`${gw.url}${API_PREFIX}/customers/profile`, {
       headers: { ...customer, ...(cookie ? { cookie } : {}), ...more },
+      ...(signal ? { signal } : {}),
     });
   const atCookie = (token: string, app: AppId = 'customer') => `__Host-bq_${app}_at=${token}`;
 
@@ -1390,5 +1396,34 @@ describe('sign-in at the gateway (T3.2)', () => {
       503,
       'SERVICE_UNAVAILABLE',
     ]);
+  });
+
+  it('answers 503 within half a second when Redis is connected but stops answering (QA-GW-001)', async () => {
+    const core = await listen(fakeCore());
+    // a client whose commands go out and are never answered: a stalled Redis
+    const never = () => new Promise<never>(() => undefined);
+    const chain: Record<string, unknown> = { exec: never };
+    chain.exists = () => chain;
+    chain.get = () => chain;
+    const stalled = { multi: () => chain, get: never } as unknown as RedisConnection['client'];
+    const gate = sessionGate({ keys: identityKeys, redis: stalled });
+    const gw = await gateway({ core: core.url }, { sessions: gate });
+    const started = Date.now();
+    const res = await profile(gw, atCookie(accessToken()), {}, AbortSignal.timeout(3000));
+    expect(await errorOf(res)).toEqual([503, 'SERVICE_UNAVAILABLE']);
+    expect(Date.now() - started).toBeLessThan(1500);
+    // the permission check as well
+    const asked = Date.now();
+    const signedIn = {
+      userId: randomUUID(),
+      sessionId: randomUUID(),
+      methods: [],
+      authzVersion: 0,
+      stepUpAt: null,
+    };
+    await expect(gate.holds(signedIn, 'customer', 'iam.grant.read')).rejects.toMatchObject({
+      code: 'SERVICE_UNAVAILABLE',
+    });
+    expect(Date.now() - asked).toBeLessThan(1000);
   });
 });
