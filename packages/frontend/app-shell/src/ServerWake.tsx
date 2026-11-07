@@ -1,6 +1,14 @@
-import { type ReactNode, useEffect, useId, useRef, useState, useSyncExternalStore } from 'react';
+import {
+  type ReactNode,
+  useEffect,
+  useEffectEvent,
+  useId,
+  useRef,
+  useState,
+  useSyncExternalStore,
+} from 'react';
 
-import { PRIMARY, SECONDARY } from './buttons';
+import { PRIMARY } from './buttons';
 import { Compact, PowderBackdrop } from './error-art';
 import { useServerWake, WAKE_SCRIPT, type WakeServerOptions } from './wake';
 
@@ -17,6 +25,12 @@ const useInBrowser = () =>
 export interface ServerWakeProps extends Omit<WakeServerOptions, 'signal'> {
   /** The app (its frame and pages): shown at once, and out of reach while the screen covers it. */
   children: ReactNode;
+  /**
+   * Told once, when the server has answered (for a crawler at once): the app's calls may go from
+   * then on (the API client's `serverReady`, QA-FE-009). Never before, so no page asks a sleeping
+   * server and keeps its failure.
+   */
+  onReady?: () => void;
 }
 
 /** `m:ss` since `since`. */
@@ -43,15 +57,15 @@ interface WakeScreenProps {
   failed: boolean;
   since: number;
   onRetry: () => void;
-  onContinue: () => void;
 }
 
 /**
  * The wake-up screen (DESIGN §6): a modal over the whole app while the server starts, with a moving
- * bar and the time waited; after too long, ways on. Focus moves in when it opens and to "Try again"
- * when it fails, so screen readers say what happened.
+ * bar and the time waited; after too long, "Try again" only: no way into the app without the server
+ * (owner, 2026-11-07). Focus moves in when it opens and to "Try again" when it fails, so screen
+ * readers say what happened.
  */
-function WakeScreen({ failed, since, onRetry, onContinue }: WakeScreenProps) {
+function WakeScreen({ failed, since, onRetry }: WakeScreenProps) {
   const id = useId();
   const dialog = useRef<HTMLDivElement>(null);
   const retryButton = useRef<HTMLButtonElement>(null);
@@ -88,16 +102,13 @@ function WakeScreen({ failed, since, onRetry, onContinue }: WakeScreenProps) {
           className="text-foreground-muted animate-rise-in mt-3 max-w-prose text-pretty [animation-delay:60ms] md:text-lg"
         >
           {failed
-            ? 'It may be restarting. Try again in a moment, or continue without it: pages that need the server will not load until it is up.'
+            ? 'It may be restarting. Please try again in a moment.'
             : 'Our server takes a short nap when the store is quiet. It is waking up now and is usually ready in about a minute.'}
         </p>
         {failed ? (
           <div className="animate-rise-in mt-8 flex w-full max-w-xs flex-col gap-3 sm:w-auto sm:max-w-none sm:flex-row sm:justify-center">
             <button ref={retryButton} type="button" className={PRIMARY} onClick={onRetry}>
               Try again
-            </button>
-            <button type="button" className={SECONDARY} onClick={onContinue}>
-              Continue anyway
             </button>
           </div>
         ) : (
@@ -151,11 +162,21 @@ export function WakeScript() {
  * the wake-up screen takes its place; the app stays inert until it answers. A page rendered on the
  * server also needs WakeScript in its `<head>`.
  */
-export function ServerWake({ children, ...options }: ServerWakeProps) {
-  const { state, since, retry, dismiss } = useServerWake(options);
+export function ServerWake({ children, onReady, ...options }: ServerWakeProps) {
+  const { state, since, retry } = useServerWake(options);
   const inBrowser = useInBrowser();
   const checking = state === 'checking';
   const covering = state === 'waking' || state === 'failed';
+  // the latest callback, told once: a new render of the frame does not tell it again
+  const tellReady = useEffectEvent(() => {
+    onReady?.();
+  });
+  const told = useRef(false);
+  useEffect(() => {
+    if (state !== 'awake' || told.current) return;
+    told.current = true;
+    tellReady();
+  }, [state]);
   // in the browser only: the page rendered on the server stays usable without JavaScript
   const blocked = covering || (checking && inBrowser);
   return (
@@ -164,14 +185,7 @@ export function ServerWake({ children, ...options }: ServerWakeProps) {
         {children}
       </div>
       {checking && <CheckVeil />}
-      {covering && (
-        <WakeScreen
-          failed={state === 'failed'}
-          since={since}
-          onRetry={retry}
-          onContinue={dismiss}
-        />
-      )}
+      {covering && <WakeScreen failed={state === 'failed'} since={since} onRetry={retry} />}
     </>
   );
 }

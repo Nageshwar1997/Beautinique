@@ -50,8 +50,8 @@ function WakeDemo() {
       <p className="text-foreground-muted mt-2 max-w-prose">
         Apps wrap their frame in ServerWake. Until the server answers, a plain loader covers the
         app: a server that answers within 1.5 s shows only that blink; a slow one shows the screen
-        until it answers; one that never answers (here after 10 s instead of 150 s) offers to try
-        again or to continue.
+        until it answers; one that never answers (here after 10 s instead of 150 s) offers only to
+        try again: no way into the app without the server.
       </p>
       <div className="mt-6 flex flex-wrap gap-3">
         <button

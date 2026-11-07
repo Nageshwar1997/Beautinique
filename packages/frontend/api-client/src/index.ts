@@ -14,6 +14,7 @@ export {
   type ApiQueryOptions,
   createQueryClient,
   type MutationRequest,
+  retryServerTrouble,
   useApiClient,
   useApiMutation,
   useApiQuery,

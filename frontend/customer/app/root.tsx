@@ -1,3 +1,4 @@
+import { useApiClient } from '@beautinique/frontend-api-client';
 import {
   AppFrame,
   ErrorPage,
@@ -9,6 +10,7 @@ import {
 import { Toaster } from '@beautinique/frontend-components';
 import displayFont from '@beautinique/frontend-styles/fonts/fraunces-latin.woff2?url';
 import sansFont from '@beautinique/frontend-styles/fonts/plus-jakarta-sans-latin.woff2?url';
+import type { ReactNode } from 'react';
 import {
   isRouteErrorResponse,
   Links,
@@ -28,6 +30,25 @@ import { Providers } from './providers';
 const GATEWAY_URL = import.meta.env.BQ_GATEWAY_URL;
 const WAKE_KICK_URL =
   GATEWAY_URL === undefined || GATEWAY_URL === '' ? undefined : `${GATEWAY_URL}/wake`;
+
+/**
+ * The wake-up (ServerWake) tells the API client when the server has answered: until then no call
+ * goes out, so no page asks a sleeping server and keeps its failure (QA-FE-009, owner 2026-11-07).
+ */
+function AppWake({ children }: { children: ReactNode }) {
+  const client = useApiClient();
+  return (
+    <ServerWake
+      app="customer"
+      kickUrl={WAKE_KICK_URL}
+      onReady={() => {
+        client.serverReady();
+      }}
+    >
+      {children}
+    </ServerWake>
+  );
+}
 
 /**
  * The stylesheet as a <link> (in development too, so it is never swapped for a <style> after hydration,
@@ -69,11 +90,11 @@ export function Layout({ children }: { children: React.ReactNode }) {
             wake-up screen when it is slow); a sleeping one wakes only for a call straight to it,
             so its /wake is rung too */}
         <Providers>
-          <ServerWake app="customer" kickUrl={WAKE_KICK_URL}>
+          <AppWake>
             <AppFrame header={<SiteHeader />} footer={<SiteFooter />}>
               {children}
             </AppFrame>
-          </ServerWake>
+          </AppWake>
           <Toaster />
         </Providers>
         <ScrollRestoration />

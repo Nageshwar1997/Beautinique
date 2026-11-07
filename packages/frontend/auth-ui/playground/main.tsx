@@ -3,9 +3,15 @@
 // http://localhost:5186.
 import './playground.css';
 
-import { ApiProvider, createApiClient, createQueryClient } from '@beautinique/frontend-api-client';
+import {
+  ApiProvider,
+  createApiClient,
+  createQueryClient,
+  queryKey,
+} from '@beautinique/frontend-api-client';
 import { AppFrame, NavList, THEME_SCRIPT, ThemeSwitcher } from '@beautinique/frontend-app-shell';
 import { Radio, RadioGroup, Toaster } from '@beautinique/frontend-components';
+import { getMe } from '@beautinique/shared-contracts';
 import { type ReactNode, StrictMode, useState } from 'react';
 import { createRoot } from 'react-dom/client';
 import { createBrowserRouter, Outlet, RouterProvider, useNavigate } from 'react-router';
@@ -59,12 +65,14 @@ const SCENARIOS = {
   totp: 'The account has an authenticator',
   wrong: 'Wrong email or password',
   existing: 'Sign-up: the email has an account',
+  down: 'The server does not answer (/iam/me 503): an account page says so',
 } as const;
 type Scenario = keyof typeof SCENARIOS;
 
 function choose(scenario: Scenario) {
   identity.off('POST /auth/login');
   identity.off('POST /auth/otp/:id/verify');
+  identity.off('GET /iam/me');
   if (scenario === 'wrong') {
     identity.on('POST /auth/login', () =>
       failure(401, 'INVALID_CREDENTIALS', 'The email or password is not right.'),
@@ -72,6 +80,14 @@ function choose(scenario: Scenario) {
   }
   if (scenario === 'totp') identity.on('POST /auth/login', totpNext);
   if (scenario === 'existing') identity.on('POST /auth/otp/:id/verify', passwordKept);
+  if (scenario === 'down') {
+    identity.on('GET /iam/me', () =>
+      failure(503, 'SERVICE_UNAVAILABLE', 'Sign-in is not available right now.'),
+    );
+    // the session forgets what it knew and asks again (two more tries), as an app opening while
+    // the server restarts
+    void queryClient.resetQueries({ queryKey: queryKey(getMe) });
+  }
 }
 
 function Scenarios() {

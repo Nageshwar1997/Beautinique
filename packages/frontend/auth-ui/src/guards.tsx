@@ -1,4 +1,4 @@
-import { Spinner } from '@beautinique/frontend-components';
+import { Button, Spinner } from '@beautinique/frontend-components';
 import type { ReactNode } from 'react';
 import { Navigate, useLocation, useSearchParams } from 'react-router';
 
@@ -17,9 +17,28 @@ function Waiting() {
 }
 
 /**
+ * The account could not be read: the server did not answer, its tries included (a restart). The
+ * person stays signed in and can ask again (owner's words, 2026-11-07; QA-FE-009).
+ */
+function AccountUnavailable({ onRetry }: { onRetry: () => void }) {
+  return (
+    <div className="mx-auto flex max-w-md flex-col items-center gap-4 py-12 text-center">
+      <h1 className="font-display text-2xl font-medium text-balance">
+        We could not load your account
+      </h1>
+      <p role="alert" className="text-foreground-muted text-pretty">
+        The server did not answer. Please try again in a moment.
+      </p>
+      <Button onClick={onRetry}>Try again</Button>
+    </div>
+  );
+}
+
+/**
  * A page for signed-in people only (account, cart, orders): someone signed out goes to sign-in,
  * which brings them back here (`next`), and says why when the app ended the session itself (30
- * idle minutes). `fallback` while the session is not known yet.
+ * idle minutes). `fallback` while the session is not known yet; when the server did not answer, a
+ * note with "Try again".
  */
 export function RequireSignIn({
   children,
@@ -28,8 +47,9 @@ export function RequireSignIn({
   children: ReactNode;
   fallback?: ReactNode;
 }) {
-  const { app, state } = useSession();
+  const { app, state, retry } = useSession();
   const location = useLocation();
+  if (state.status === 'unavailable') return <AccountUnavailable onRetry={retry} />;
   if (state.status === 'signed-out') {
     const here = `${location.pathname}${location.search}${location.hash}`;
     const notice = state.reason === 'idle' ? idleSignOutNotice(app) : undefined;

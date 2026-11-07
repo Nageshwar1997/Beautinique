@@ -1,6 +1,6 @@
 # MEMORY — BQ
 
-> **Status:** v1.59 (2026-11-07). Project ki yaaddasht: **kya tay hua aur kyun**, **pichhle kaam se kya seekha**, aur **kaunse jaal (traps) se bachna hai**. Poori detail baaki docs me hai; yahan short version aur pointers. Naya sabak ya decision aaye to yahan ek line jodo.
+> **Status:** v1.60 (2026-11-07). Project ki yaaddasht: **kya tay hua aur kyun**, **pichhle kaam se kya seekha**, aur **kaunse jaal (traps) se bachna hai**. Poori detail baaki docs me hai; yahan short version aur pointers. Naya sabak ya decision aaye to yahan ek line jodo.
 
 ## 1. Decision log
 
@@ -107,6 +107,7 @@
 | 2026-11-07 | QA-ID-001 (owner ne Claude ki salah maani): refresh token `<sessionId>.<family>.<secret>`; usi family ka koi bhi purana token = chori (session band + event + email), galat family chupchaap 401; purane `<id>.<secret>` sessions agle refresh pe family paate hain | Pehle sirf turant pichhla token chori ginta tha: copy wala do baar refresh kare to asli user ka token chupchaap 401 aur session copy ke paas. "Koi bhi non-current token = chori" (simple) me sirf session id jaanne wala kisi ka session tod deta; saare hashes rakhna Atlas M0 pe badhta | ARCHITECTURE §7.2, identity README |
 | 2026-11-07 | QA-GW-001 (owner: "dono saath"): shared Redis client (`connectRedis`) pe `commandTimeout` 1 s, aur gateway ke sign-in/permission check pe apna 500 ms (rate limiter jaisa). QA-KRN-001: JWKS ka pehla read kaamyab hone tak `keysFor` error (gateway 503, 401 nahi), fail pehla read 1 s baad dobara; 10 min wala reload fail ho to purani keys | Atka (connected par chup) Redis pe har signed-in request latakti thi; 1 s sab deployables ke liye safety net, 500 ms gateway ka vaada. Khaali key set se jhootha sign-out hota tha | gateway, server-queue, server-kit README |
 | 2026-11-07 | Live `MaxListenersExceededWarning` (owner: dono): Sentry ki Express integration band (traces sirf HTTP level), aur gateway ke proxied jawab pe `res.setMaxListeners(20)` | Har `/api` request pe warning (Render logs me 2 lines); leak nahi (har jawab ke apne listeners). Express integration har request ke har middleware pe span + listener banati thi, 0.1 CPU pe | ARCHITECTURE §14 |
+| 2026-11-07 | QA-FE-009 (owner: "server ready na ho to app na chale"): api-client `waitForServer` har call (refresh bhi) `ServerWake` ke `onReady` tak rokta hai; 150 s ke baad sirf "Try again" ("Continue anyway" hata); ready ke baad `/iam/me` 5xx/network pe 2 aur try (`retryServerTrouble`), phir "We could not load your account" + "Try again"; naya app jo server bulaye yahi jode | Pehle `/iam/me` parde ke neeche turant jaata, soye server se 502 paata aur page "Loading" pe atak jaata; ek tareeka jo cold start aur beech ke restart dono sambhale | ARCHITECTURE §11.1, DESIGN §6 |
 
 ## 2. Pichhle kaam se seekhe sabak
 
@@ -234,3 +235,4 @@
 | v1.57   | 2026-11-07 | Decision + sabak 25: QA-ID-001, refresh token family (koi bhi purana token chori). |
 | v1.58   | 2026-11-07 | Decision + sabak 26: QA-GW-001 (Redis command timeout 1 s + gateway 500 ms), QA-KRN-001 (JWKS pehla read). |
 | v1.59   | 2026-11-07 | Decision + sabak 27: live `MaxListenersExceededWarning` (Sentry Express band, gateway 20 listeners). |
+| v1.60   | 2026-11-07 | Decision: QA-FE-009 (server ready tak koi API call nahi, sirf "Try again", account na mile to sandesh). |

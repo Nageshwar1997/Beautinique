@@ -1,4 +1,9 @@
-import { isApiError, useApiClient, useApiQuery } from '@beautinique/frontend-api-client';
+import {
+  isApiError,
+  retryServerTrouble,
+  useApiClient,
+  useApiQuery,
+} from '@beautinique/frontend-api-client';
 import {
   type AppId,
   getMe,
@@ -28,7 +33,8 @@ export type Me = RouteOutput<typeof getMe>;
  * - `signed-out`: no session (no hint cookie, or /iam/me found the session gone); `reason` when
  *   this tab knows why the app ended it (`idle`: 30 minutes without activity, IdleNotice).
  * - `signed-in`: the account and this session.
- * - `unavailable`: /iam/me did not answer (offline, server down); asked again when back online.
+ * - `unavailable`: /iam/me did not answer, two more tries included (offline, a server restarting);
+ *   asked again when back online, or with `retry` (RequireSignIn's "Try again", QA-FE-009).
  */
 export type SessionState =
   | { status: 'loading' }
@@ -54,6 +60,8 @@ export interface Session {
    * signed out for being idle: forget it here the same way, without asking it to.
    */
   forget: (reason?: SignedOutReason) => void;
+  /** Asks /iam/me again now: after `unavailable` (the server did not answer). */
+  retry: () => void;
 }
 
 const SessionContext = createContext<Session | null>(null);
@@ -81,10 +89,15 @@ export function SessionProvider({ children }: { children: ReactNode }) {
   );
   const me = useApiQuery(getMe, undefined, {
     enabled: hint === true,
-    // a missing session is an answer, not a failure to try again
-    retry: false,
+    // a server that did not answer (a restart) is asked twice more; a missing session (4xx) is an
+    // answer, never asked again
+    retry: retryServerTrouble,
     staleTime: Infinity,
   });
+  const { refetch } = me;
+  const retry = useCallback(() => {
+    void refetch();
+  }, [refetch]);
 
   useEffect(
     () =>
@@ -144,8 +157,8 @@ export function SessionProvider({ children }: { children: ReactNode }) {
   );
 
   const session = useMemo(
-    () => ({ app, state, signedIn, signOut, forget }),
-    [app, state, signedIn, signOut, forget],
+    () => ({ app, state, signedIn, signOut, forget, retry }),
+    [app, state, signedIn, signOut, forget, retry],
   );
   return <SessionContext value={session}>{children}</SessionContext>;
 }

@@ -180,6 +180,38 @@ const rejection = async (promise: Promise<unknown>): Promise<unknown> => {
 };
 
 describe('createApiClient', () => {
+  it('holds every call, a refresh too, until the app says the server answered (QA-FE-009)', async () => {
+    const gateway = fakeGateway({ access: true });
+    const client = createApiClient({
+      app: 'customer',
+      baseUrl: BASE_URL,
+      fetch: gateway.fetch,
+      waitForServer: true,
+    });
+    clients.push(client);
+    const me = client.call(getMe);
+    const refreshed = client.refresh();
+    await new Promise((resolve) => setTimeout(resolve, 50));
+    // a sleeping server would only fail them: nothing goes out yet
+    expect(gateway.paths()).toEqual([]);
+    client.serverReady();
+    await expect(me).resolves.toMatchObject({ session: { app: 'customer' } });
+    await expect(refreshed).resolves.toBe(true);
+    // from then on calls go at once; saying it again changes nothing
+    client.serverReady();
+    await client.call(getMe);
+    expect(gateway.paths().filter((path) => path === 'GET /api/v1/iam/me')).toHaveLength(2);
+  });
+
+  it('sends at once without waitForServer, and serverReady changes nothing then', async () => {
+    const gateway = fakeGateway({ access: true });
+    const client = clientFor(gateway);
+    await client.call(getMe);
+    client.serverReady();
+    await client.call(getMe);
+    expect(gateway.paths()).toEqual(['GET /api/v1/iam/me', 'GET /api/v1/iam/me']);
+  });
+
   it('calls the gateway on the app’s own host with the app header', async () => {
     const gateway = fakeGateway({ access: true });
     const me = await clientFor(gateway).call(getMe);

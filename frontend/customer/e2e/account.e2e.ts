@@ -127,3 +127,36 @@ test('signs another browser out from My Devices', async ({ page, browser }, test
   await expect(phone).toHaveURL('/sign-in?next=%2Faccount%2Fsecurity');
   await other.close();
 });
+
+test('a signed-in page asks nothing before the server answered, then opens (QA-FE-009)', async ({
+  page,
+}) => {
+  email = e2eEmail('server-wake');
+  await signUp(page, email, '/account/security');
+  await expect(page.getByRole('heading', { level: 1, name: 'Security' })).toBeVisible();
+
+  // the next load finds the server asleep: its wake call says "not up yet" once, then answers
+  let wakeAnswered = false;
+  let notUpYet = 1;
+  await page.route('**/api/v1/platform/wake', async (route) => {
+    if (notUpYet > 0) {
+      notUpYet -= 1;
+      await route.fulfill({ status: 503, body: '' });
+      return;
+    }
+    wakeAnswered = true;
+    await route.continue();
+  });
+  const askedTooSoon: string[] = [];
+  page.on('request', (request) => {
+    if (!wakeAnswered && new URL(request.url()).pathname.startsWith('/api/v1/iam/')) {
+      askedTooSoon.push(request.url());
+    }
+  });
+  // waits for the app to hear from the server (appReady)
+  await page.reload();
+  await expect(page.getByRole('heading', { level: 1, name: 'Security' })).toBeVisible();
+  expect(askedTooSoon).toEqual([]);
+  expect(notUpYet).toBe(0);
+  await page.unroute('**/api/v1/platform/wake');
+});

@@ -9,7 +9,7 @@ import { type ReactNode, useState } from 'react';
  * asks /iam/me in the browser only, and only with identity's hint cookie.
  */
 export function Providers({ children }: { children: ReactNode }) {
-  const [client] = useState(() => createApiClient({ app: 'customer' }));
+  const [client] = useState(() => createApiClient({ app: 'customer', waitForServer: true }));
   const [queryClient] = useState(createQueryClient);
   return (
     <ApiProvider client={client} queryClient={queryClient}>

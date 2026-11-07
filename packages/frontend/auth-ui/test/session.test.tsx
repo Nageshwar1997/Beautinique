@@ -53,15 +53,37 @@ describe('the session', () => {
     expect(hintSet('customer')).toBe(false);
   });
 
-  it('is unavailable, not signed out, when /iam/me cannot be reached', async () => {
+  it('is unavailable, not signed out, when /iam/me cannot be reached after two more tries', async () => {
     setHint('customer');
     const identity = fakeIdentity('customer', { signedIn: true });
     identity.on('GET /iam/me', () => failure(503, 'SERVICE_UNAVAILABLE'));
     renderApp({ '/': <Status /> }, { identity });
-    await waitFor(() => {
-      expect(status()).toBe('unavailable');
-    });
+    await waitFor(
+      () => {
+        expect(status()).toBe('unavailable');
+      },
+      { timeout: 8000 },
+    );
+    expect(identity.paths()).toEqual(['GET /iam/me', 'GET /iam/me', 'GET /iam/me']);
     expect(hintSet('customer')).toBe(true);
+  });
+
+  it('asks /iam/me again when the server did not answer, and is signed in without a focus or reload (QA-FE-009)', async () => {
+    setHint('customer');
+    const identity = fakeIdentity('customer', { signedIn: true });
+    // a server restarting (Render's deploy): one 502, then it answers
+    identity.on('GET /iam/me', () => {
+      identity.off('GET /iam/me');
+      return failure(502, 'INTERNAL');
+    });
+    renderApp({ '/': <Status /> }, { identity });
+    await waitFor(
+      () => {
+        expect(status()).toBe('signed-in');
+      },
+      { timeout: 5000 },
+    );
+    expect(identity.paths()).toEqual(['GET /iam/me', 'GET /iam/me']);
   });
 });
 
@@ -97,6 +119,38 @@ describe('RequireSignIn and RedirectIfSignedIn', () => {
       { identity, at: '/orders' },
     );
     expect(screen.getByRole('status').textContent).toContain('Loading');
+    await screen.findByText('Your orders');
+  });
+
+  it('says the account could not be loaded when the server never answered, and tries again on request (QA-FE-009)', async () => {
+    setHint('customer');
+    const identity = fakeIdentity('customer', { signedIn: true });
+    identity.on('GET /iam/me', () => failure(503, 'SERVICE_UNAVAILABLE'));
+    renderApp(
+      {
+        '/orders': (
+          <RequireSignIn>
+            <p>Your orders</p>
+          </RequireSignIn>
+        ),
+      },
+      { identity, at: '/orders' },
+    );
+    const heading = await screen.findByRole(
+      'heading',
+      { name: 'We could not load your account' },
+      { timeout: 8000 },
+    );
+    expect(screen.getByRole('alert').textContent).toContain(
+      'The server did not answer. Please try again in a moment.',
+    );
+    // still signed in: no trip to sign-in, the hint stays
+    expect(where()).toBe('/orders');
+    expect(hintSet('customer')).toBe(true);
+    await expectNoAxeViolations(heading.closest('div') ?? document.body);
+    // the server is back: "Try again" asks /iam/me at once, and the page shows
+    identity.off('GET /iam/me');
+    await userEvent.click(screen.getByRole('button', { name: 'Try again' }));
     await screen.findByText('Your orders');
   });
 
