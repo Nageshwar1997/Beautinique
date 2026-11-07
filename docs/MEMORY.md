@@ -1,6 +1,6 @@
 # MEMORY — BQ
 
-> **Status:** v1.56 (2026-11-07). Project ki yaaddasht: **kya tay hua aur kyun**, **pichhle kaam se kya seekha**, aur **kaunse jaal (traps) se bachna hai**. Poori detail baaki docs me hai; yahan short version aur pointers. Naya sabak ya decision aaye to yahan ek line jodo.
+> **Status:** v1.57 (2026-11-07). Project ki yaaddasht: **kya tay hua aur kyun**, **pichhle kaam se kya seekha**, aur **kaunse jaal (traps) se bachna hai**. Poori detail baaki docs me hai; yahan short version aur pointers. Naya sabak ya decision aaye to yahan ek line jodo.
 
 ## 1. Decision log
 
@@ -104,6 +104,7 @@
 | 2026-11-06 | Sentry: ek organization, do project (`bq-backend`, `bq-frontend`); frontend ka shor code me roko (filters, page pe max ~10 errors, Replay ka sample) | Free quota organization ka saanjha hai aur free plan pe project-wise limit nahi; doosra account terms ke khilaaf ho sakta hai aur browser se backend ka trace todta | ARCHITECTURE §14 |
 | 2026-11-06 | Browser Sentry (QA KNOWN-09): pehle customer + admin; app-shell ka alag `/monitoring` entry, page shuru hone ke baad load; sirf apni errors (apni origin, extensions/network/bots nahi, page pe max 10); Replay sirf customer, error ka 20%; public source maps | Page aur wake ka parda Sentry ka intezaar na karein; free quota saanjha hai to shor pehle hi ruke; repo public hai to source maps chhupane ka fayda nahi | ARCHITECTURE §14 |
 | 2026-11-07 | QA KNOWN-10: TypeScript 6.0.3 ka hold rahe (typescript-eslint abhi `<6.1`); `server-queue` ka "skips an event delivered again" flake band | Lint tool TS 7 nahi maanta, upgrade se har PR ka lint tootta; flake ka fix 2026-10-22 ka tha aur 100 CI runs me dobara nahi aaya, sirf docs me "dekhna baaki" tha | HANDOFF §6 |
+| 2026-11-07 | QA-ID-001 (owner ne Claude ki salah maani): refresh token `<sessionId>.<family>.<secret>`; usi family ka koi bhi purana token = chori (session band + event + email), galat family chupchaap 401; purane `<id>.<secret>` sessions agle refresh pe family paate hain | Pehle sirf turant pichhla token chori ginta tha: copy wala do baar refresh kare to asli user ka token chupchaap 401 aur session copy ke paas. "Koi bhi non-current token = chori" (simple) me sirf session id jaanne wala kisi ka session tod deta; saare hashes rakhna Atlas M0 pe badhta | ARCHITECTURE §7.2, identity README |
 
 ## 2. Pichhle kaam se seekhe sabak
 
@@ -131,6 +132,7 @@
 22. **`findBy*` ka 1 s kam padta hai (2026-11-05):** auth-ui ke tests (`MyDevices`, `AccountMenu`) busy laptop pe kabhi fail hote the: "Unable to find role=list", page abhi spinner pe. Timing log se dikha ki koi retry ya error nahi tha; naye worker me pehli call ka thanda code (axios, contracts ke schemas, React Aria) request ko fake tak ~0.1–0.4 s me pahunchata hai, aur jab saare workers busy hon to 1 s se zyada me. `testTimeout` 15 s tha, par Testing Library ka `asyncUtilTimeout` 1 s hi tha. Fix: `test/setup.ts` me `configure({ asyncUtilTimeout: 10_000 })` (hooks package me pehle se). **Sabak:** jo frontend package jsdom me network jaisa async flow test kare, uske vitest `setupFiles` me ye pehle din se rakho; flake ho to timeout badhane se pehle timing log se dekho ki koi retry ya error to nahi chhupa.
 23. **Fail point `times: 1` ek saath aaye do commands dono ko rok deta hai (2026-11-05):** `server-mongo` ke "ek waqt me ek ping" test me do `ready()` ek hi millisecond me bheje; mutation "har check pe naya ping" bach gaya, kyunki MongoDB ne dono ping 3 s roke (command events ke log se pakda). Fix: doosra check 500 ms baad. **Sabak:** fail point se "sirf pehla rukega" maan ke test likho to doosri command der se bhejo, aur mutation se pakka karo ki test sach me farak pakadta hai.
 24. **Inert field me Playwright ka `fill` chupchaap kuch nahi karta (2026-11-07):** wake ka saada parda app ko inert rakhta hai; laptop pe load me admin E2E ne parde ke dauraan email/password "bhare", koi error nahi aaya, aur parda hatne ke baad `click` ne khaali form submit kiya ("Enter your email address"). Playwright ka page snapshot (`error-context.md`) dekh ke pakda. Fix: `scripts/e2e/app.ts` ka `test` (har `goto`/`reload` ke baad `appReady`). **Sabak:** UI me koi naya parda/inert aaye to E2E me uske hatne ka intezaar ek jagah (fixture) me rakho, har test me nahi.
+25. **Rotation ka reuse check "ek peeche" tak seemit mat rakho (2026-11-07, QA-ID-001):** browser kabhi do token peeche nahi hota (cookie saare tabs me ek), isliye parallel-tab ki chhoot sirf turant pichhle token ko do; usse purana koi bhi asli token chori hai. "Asli" pehchaanne ke liye token me session ka chhupa family secret rakho, taaki nakli token (sirf session id se) kuch na tode. Test: copy do baar refresh kare, phir asli ka token, turant (race window ke andar) bhi.
 
 ## 3. Environment
 
@@ -225,3 +227,4 @@
 | v1.54   | 2026-11-06 | Decision: browser Sentry ka tareeka (QA KNOWN-09). |
 | v1.55   | 2026-11-07 | Sabak 24: inert field me Playwright `fill` chupchaap kuch nahi karta. |
 | v1.56   | 2026-11-07 | Decision: QA KNOWN-10 (TS hold rahe, server-queue flake band). |
+| v1.57   | 2026-11-07 | Decision + sabak 25: QA-ID-001, refresh token family (koi bhi purana token chori). |

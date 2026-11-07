@@ -89,6 +89,12 @@ export interface Session {
   refreshHash: string;
   /** The token it replaced, to tell a parallel tab (REFRESH_RACE_MS) from a copied token */
   previousRefreshHash: string | null;
+  /**
+   * Keyed hash of the family secret in every refresh token of this session: an older token of the
+   * family coming back is a copy (QA-ID-001), a made-up one is not. Missing = a session from before
+   * families, until its next refresh.
+   */
+  familyHash?: string;
   rotatedAt: Date | null;
   createdAt: Date;
   lastSeenAt: Date;
@@ -154,14 +160,31 @@ export interface SessionDeps {
   now?: () => number;
 }
 
-/** `<sessionId>.<32 random bytes>`: the session is found by its id, the rest is the secret. */
-const newRefreshToken = (sessionId: string): string =>
-  `${sessionId}.${randomBytes(32).toString('base64url')}`;
+/**
+ * `<sessionId>.<family>.<secret>`: the session is found by its id; the family (16 random bytes) is
+ * the same in every token of the session, so any older token of it is known for what it is; the
+ * secret (32 random bytes) is new at each refresh.
+ */
+const newRefreshToken = (sessionId: string, family: string): string =>
+  `${sessionId}.${family}.${randomBytes(32).toString('base64url')}`;
+const newFamily = (): string => randomBytes(16).toString('base64url');
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-7[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/;
+
+/** A refresh token's session id and family; a token from before families (`<id>.<secret>`) has none. */
+function partsOf(token: string | undefined): { sessionId: string; family: string | null } | null {
+  const parts = token?.split('.') ?? [];
+  const sessionId = parts[0] ?? '';
+  if (!UUID.test(sessionId)) return null;
+  return { sessionId, family: parts.length === 3 ? (parts[1] ?? null) : null };
+}
 
 /** Keyed hash of a refresh token: a database copy alone cannot refresh anything. */
 const refreshHashOf = (keys: CryptoKeys, token: string): string =>
   blindIndex(keys, 'refresh-token', token);
+
+/** Keyed hash of a session's token family, the same way. */
+const familyHashOf = (keys: CryptoKeys, family: string): string =>
+  blindIndex(keys, 'refresh-family', family);
 
 /** Ends sessions at the gateway at once: an access token lives on 10 minutes otherwise. */
 const REVOKE_TTL_MS = (ACCESS_TOKEN_SECONDS + 60) * 1000;
@@ -281,7 +304,8 @@ export function sessions(deps: SessionDeps): Sessions {
       if (!access.allowed) throw invalidCredentials();
       const policy = SESSION_POLICIES[app];
       const sessionId = uuidv7();
-      const refreshToken = newRefreshToken(sessionId);
+      const family = newFamily();
+      const refreshToken = newRefreshToken(sessionId, family);
       const expiresAt = new Date(at + Math.min(policy.slidingMs, policy.maxMs));
       const session: Session = {
         _id: sessionId,
@@ -293,6 +317,7 @@ export function sessions(deps: SessionDeps): Sessions {
         methods,
         refreshHash: refreshHashOf(keys, refreshToken),
         previousRefreshHash: null,
+        familyHash: familyHashOf(keys, family),
         rotatedAt: null,
         createdAt: new Date(at),
         lastSeenAt: new Date(at),
@@ -316,12 +341,15 @@ export function sessions(deps: SessionDeps): Sessions {
     },
 
     async refresh({ app, refreshToken, client }) {
-      const sessionId = refreshToken?.split('.')[0] ?? '';
-      if (!refreshToken || !UUID.test(sessionId)) throw sessionExpired();
+      const parts = partsOf(refreshToken);
+      if (!refreshToken || !parts) throw sessionExpired();
+      const { sessionId } = parts;
       const at = now();
       const policy = SESSION_POLICIES[app];
       const hash = refreshHashOf(keys, refreshToken);
-      const next = newRefreshToken(sessionId);
+      // a session from before families gets one at this refresh
+      const family = parts.family ?? newFamily();
+      const next = newRefreshToken(sessionId, family);
       const until = new Date(at + policy.slidingMs);
       // atomic: of two requests with the same token, one rotates it
       const rotated = await collection.findOneAndUpdate(
@@ -340,6 +368,7 @@ export function sessions(deps: SessionDeps): Sessions {
             $set: {
               refreshHash: refreshHashOf(keys, next),
               previousRefreshHash: hash,
+              familyHash: familyHashOf(keys, family),
               rotatedAt: new Date(at),
               lastSeenAt: new Date(at),
               ip: client.ip,
@@ -383,16 +412,22 @@ export function sessions(deps: SessionDeps): Sessions {
         };
       }
       const found = await collection.findOne({ _id: sessionId, app });
-      if (found?.revokedAt !== null || found.previousRefreshHash !== hash) {
-        throw sessionExpired();
-      }
+      if (found?.revokedAt !== null) throw sessionExpired();
+      const replaced = found.previousRefreshHash === hash;
+      const ofFamily =
+        parts.family !== null &&
+        found.familyHash !== undefined &&
+        found.familyHash === familyHashOf(keys, parts.family);
+      // neither the token just replaced nor one of this session's family: made up, nothing ends
+      if (!replaced && !ofFamily) throw sessionExpired();
       const idle = policy.idleMs !== undefined && at - found.lastSeenAt.getTime() >= policy.idleMs;
       // a session that ran out ends quietly, whatever token comes
       if (found.expiresAt.getTime() <= at || idle) throw sessionExpired();
-      if (found.rotatedAt && at - found.rotatedAt.getTime() < REFRESH_RACE_MS) {
+      // only the token just replaced can be a parallel tab: a browser is never two behind
+      if (replaced && found.rotatedAt && at - found.rotatedAt.getTime() < REFRESH_RACE_MS) {
         throw refreshInProgress();
       }
-      // the token its successor replaced came back: someone has a copy
+      // an older token of the session came back: someone has a copy
       const ended = await withTransaction(mongo, async (session) => {
         const result = await collection.updateOne(
           { _id: sessionId, revokedAt: null },
@@ -433,8 +468,8 @@ export function sessions(deps: SessionDeps): Sessions {
     },
 
     async logout({ app, refreshToken }) {
-      const sessionId = refreshToken?.split('.')[0] ?? '';
-      if (!refreshToken || !UUID.test(sessionId)) return;
+      const sessionId = partsOf(refreshToken)?.sessionId;
+      if (!refreshToken || !sessionId) return;
       const at = now();
       const ended = await collection.updateOne(
         { _id: sessionId, app, refreshHash: refreshHashOf(keys, refreshToken), revokedAt: null },

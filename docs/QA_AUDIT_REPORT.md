@@ -1,9 +1,10 @@
 # QA AUDIT REPORT — BQ
 
-> **Status:** v1.7 (2026-11-07, final; §2a me KNOWN faislon ki halat). Audit base: `origin/prerelease` @ `ee7f46a` (`ee7f46ae7b2605d99f6b4497d26303aa109fb371`). Auditor: Claude Code (Opus 5.5, `claude-opus-5-5`). Ye report audit ki single source of truth hai; fixes alag se, ek-ek karke.
+> **Status:** v1.8 (2026-11-07, final; §2a me KNOWN faislon ki halat, §0 me fixes). Audit base: `origin/prerelease` @ `ee7f46a` (`ee7f46ae7b2605d99f6b4497d26303aa109fb371`). Auditor: Claude Code (Opus 5.5, `claude-opus-5-5`). Ye report audit ki single source of truth hai; fixes alag se, ek-ek karke.
 
 ## 0. Audit state (har session ke aakhir me update)
 
+- **Fixes (2026-11-07 se, branch `feat/qa-audit`, §10 ke kram se, har fix ka apna commit, saare fixes ke baad ek PR → `prerelease` (owner, 2026-11-07)):** 1. QA-ID-001 Fixed (2026-11-07). Agla: QA-GW-001 + QA-KRN-001.
 - **Gate 1: approved (2026-11-04).** Owner ke jawab (saari recommendations maani):
   - Live pe passive GETs: **haan, kul ≤ 15**, bina auth: `bq-live` `/health`, `/status`, ek anjaan path; customer + admin ka home aur ek 404 (headers, TLS). OTP/auth/write/fuzz/rate-limit/load kabhi nahi.
   - Playwright: Chromium 1248 pehle se installed (Playwright 1.64.1 ki zaroorat yahi); koi download nahi chahiye
@@ -546,7 +547,7 @@ Plan: **E** = planned-executed (local stack, HTTP, browser, scratch script), **S
 ### [QA-ID-001] Refresh-token reuse detection can be bypassed, so a copied refresh token keeps the session without any alert
 
 **Module:** M3 Identity sessions | **Feature:** refresh rotation + reuse detection | **Task/Doc:** T3.2; ARCHITECTURE §7.2 (line 277: "Purana token dobara use hua to poori family revoke ho jati hai aur security alert jata hai"); `backend/identity/README.md` §Sessions ("baad me = chori: session band ... email")
-**Severity:** P1 (ek security control kaafi kamzor: chori pakadne wala control ek aasaan refresh sequence se bekaar) | **Priority:** High | **Status:** Open
+**Severity:** P1 (ek security control kaafi kamzor: chori pakadne wala control ek aasaan refresh sequence se bekaar) | **Priority:** High | **Status:** Fixed (2026-11-07, `feat/qa-audit`, commit "fix(identity): any older refresh token of a session is a copy (QA-ID-001)"; live pe agle release ke baad, tab repro yahan)
 **Testing Type:** Security | **Evidence level:** E1 | **Reproducibility:** Always (2/2) | **Environment:** local QA bundle (`ee7f46a`); live pe bhi yahi code (T3.2 live)
 **Description:** **Live pe khula, isliye Q-003 ke hisaab se repro yahan nahi (owner ko chat me diya gaya; fix release ke baad yahan jodna).** Class: refresh-token reuse detection ka scope bahut chhota hai. Jiske paas kisi ka refresh token ki copy ho, wo ek khaas refresh sequence se aisi halat bana sakta hai jisme asli user ka purana token wapas aane pe sirf chupchaap `SESSION_EXPIRED` milta hai: session band **nahi** hota, `identity.session.reuseDetected` event aur "We signed you out" email **nahi** jaate, aur copy wale ke paas session poori umar (customer: 30 din sliding, max 90) chalta rehta hai (refresh 200, `/iam/me` 200). Asli user ko lagta hai bas sign-out ho gaya. Precondition: refresh token ki copy (HttpOnly + Secure + SameSite=Strict + Path `/api/v1/auth` cookie: malware, device access, logs).
 **Steps to Reproduce:** Owner ke paas (chat, 2026-11-04). Script: `scratchpad/m3/probe-m3a.mjs` (local).
@@ -560,6 +561,7 @@ Plan: **E** = planned-executed (local stack, HTTP, browser, scratch script), **S
 **Regression Risk:** Medium: parallel tabs (409) ka behaviour na toote.
 **Regression test to add:** Integration: woh sequence (fix PR me) → session band + event; plus parallel-tab 409 test waisa hi.
 **Owner decision needed:** Nahi
+**Fix (2026-11-07, owner ne option chuna):** refresh token me session ka family secret (`<sessionId>.<family>.<secret>`, DB me sirf keyed hash); usi family ka koi bhi purana token = chori (session band + event + email), sirf turant pichhla token 10 s ke andar 409; galat family chupchaap 401. Purane format ke sessions agle refresh pe family paate hain. Tests `backend/identity/test/sessions.test.ts` ("any older token", "family in every token", "before token families", made-up family); identity ki badli lines ke 11 mutations (`test/mutations.ts`), 11/11 pakde. Docs: ARCHITECTURE §7.2, identity README.
 
 ### [QA-GW-001] Signed-in requests hang for as long as Redis stalls instead of failing fast with 503
 
@@ -943,7 +945,7 @@ Plan: **E** = planned-executed (local stack, HTTP, browser, scratch script), **S
 
 | ID         | OWASP Top 10 (2021) / ASVS 4.0                                                                     | Severity               | Live pe exposed?                                                                                                   | Note                                                                                    |
 | ---------- | -------------------------------------------------------------------------------------------------- | ---------------------- | ------------------------------------------------------------------------------------------------------------------ | --------------------------------------------------------------------------------------- |
-| QA-ID-001  | A07 Identification and Authentication Failures / ASVS V3.5 (token-based session: refresh rotation) | P1                     | Haan (refresh token ki copy ho to); repro redacted (Q-003)                                                         | Chori pakadne ka control bypass                                                         |
+| QA-ID-001  | A07 Identification and Authentication Failures / ASVS V3.5 (token-based session: refresh rotation) | P1                     | Haan, release tak (fix `feat/qa-audit` me, 2026-11-07); repro redacted (Q-003)                                     | Chori pakadne ka control bypass                                                         |
 | DR-008     | A01 Broken Access Control (data minimisation, DPDP)                                                | design (DR)            | Haan, Auditor/SO ke liye                                                                                           | Reviewers saare customers ke emails page kar sakte hain                                 |
 | DR-009     | A04 Insecure Design (availability, abuse of a paid/limited resource)                               | design (DR)            | Haan                                                                                                               | Bina sign-in din ka email budget khatam; ajnabi addresses pe emails                     |
 | QA-FE-001  | A01 / ASVS V5.1.5 (redirects only to allowed destinations)                                         | P3                     | Haan, par redirect nahi: crafted link pe sign-in ke baad error page (React Router 8.5 external target throw karta) | Router ka check hate ya output `href`/`location` me jaaye to auth flow me open redirect |
@@ -1145,7 +1147,7 @@ Har module ke baad (existing tests + `test/mutations.ts` ke survivors).
 
 Final (2026-11-05). Har number ek PR (ya ek chhota fix); saath jaane wale bugs ek hi line me. Fixes is audit me nahi: alag sessions me, ek-ek karke.
 
-1. **QA-ID-001** (P1): refresh-token reuse detection bypass; live pe khula security control; sabse pehle, akela PR (repro owner ke paas chat me).
+1. **QA-ID-001** (P1): refresh-token reuse detection bypass; live pe khula security control; sabse pehle, akela PR (repro owner ke paas chat me). **Fixed (2026-11-07, `feat/qa-audit`)**; live agle release ke saath.
 2. **QA-GW-001 + QA-KRN-001** (P2 + P3): gateway ka "dependency away/atka → jaldi 503" (dono ki Recommended Fix ke mutabik); gateway ke access-check failure handling ka ek PR.
 3. **QA-FE-009** (P2): `/iam/me` 5xx pe retry / wake ke baad dobara + `unavailable` pe sandesh; auth-ui (+ app-shell) PR. Render ke har restart pe asar.
 4. **QA-FE-004 + QA-FE-010** (P2 + P3): sign-out/idle ka local state sahi kram me (server fail pe signed-in rakho; idle me pehle local forget); auth-ui PR.
@@ -1198,3 +1200,4 @@ Final (2026-11-05). Har number ek PR (ya ek chhota fix); saath jaane wale bugs e
 | v1.5    | 2026-11-05 | §2a: KNOWN-08 jaisa hai (MongoDB kernel workaround), owner. |
 | v1.6    | 2026-11-06 | §2a: KNOWN-09 ka code (browser Sentry customer + admin), owner ka kaam baaki. |
 | v1.7    | 2026-11-07 | §2a: KNOWN-10 (TS hold rahe, server-queue flake band), owner; saare 10 KNOWN tay. |
+| v1.8    | 2026-11-07 | QA-ID-001 Fixed (`feat/qa-audit`): refresh token family; repro release ke baad. §0 me fixes ki line, §5, §10. |

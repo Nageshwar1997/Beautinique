@@ -582,7 +582,7 @@ const mutations: Mutation[] = [
     name: 'a parallel tab taken for a copy',
     change: [
       [
-        'if (found.rotatedAt && at - found.rotatedAt.getTime() < REFRESH_RACE_MS) {',
+        'if (replaced && found.rotatedAt && at - found.rotatedAt.getTime() < REFRESH_RACE_MS) {',
         'if (false) {',
       ],
     ],
@@ -590,14 +590,66 @@ const mutations: Mutation[] = [
   },
   {
     file: 'sessions',
-    name: 'any old token taken for a copy',
+    name: 'any made-up token taken for a copy',
     change: [
-      [
-        'found?.revokedAt !== null || found.previousRefreshHash !== hash',
-        'found?.revokedAt !== null',
-      ],
+      ['if (!replaced && !ofFamily) throw sessionExpired();', 'if (false) throw sessionExpired();'],
     ],
     tests: 'made-up token',
+  },
+  // token families (QA-ID-001): any older token of the session is a copy, not only the one replaced
+  {
+    file: 'sessions',
+    name: 'only the token just replaced is a copy (QA-ID-001 back)',
+    change: [['if (!replaced && !ofFamily) throw', 'if (!replaced) throw']],
+    tests: 'older token',
+  },
+  {
+    file: 'sessions',
+    name: 'any family taken for the session’s',
+    change: [
+      ['found.familyHash === familyHashOf(keys, parts.family);', 'found.familyHash !== "";'],
+    ],
+    tests: 'made-up token',
+  },
+  {
+    file: 'sessions',
+    name: 'an older token taken for a parallel tab',
+    change: [['if (replaced && found.rotatedAt && at -', 'if (found.rotatedAt && at -']],
+    tests: 'older token',
+  },
+  {
+    file: 'sessions',
+    name: 'a new family at every refresh',
+    change: [['const family = parts.family ?? newFamily();', 'const family = newFamily();']],
+    tests: 'family in every token|older token',
+  },
+  {
+    file: 'sessions',
+    name: 'every token read as one from before families',
+    change: [['family: parts.length === 3 ? (parts[1] ?? null) : null', 'family: null']],
+    tests: 'family in every token|older token',
+  },
+  {
+    file: 'sessions',
+    name: 'no family hash at sign-in',
+    change: [
+      [
+        '        previousRefreshHash: null,\n        familyHash: familyHashOf(keys, family),\n',
+        '        previousRefreshHash: null,\n',
+      ],
+    ],
+    tests: 'JWKS verifies',
+  },
+  {
+    file: 'sessions',
+    name: 'a session from before families never gets one',
+    change: [
+      [
+        '              previousRefreshHash: hash,\n              familyHash: familyHashOf(keys, family),\n',
+        '              previousRefreshHash: hash,\n',
+      ],
+    ],
+    tests: 'before token families',
   },
   {
     file: 'sessions',

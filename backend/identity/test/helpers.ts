@@ -6,7 +6,13 @@ import { createHash, randomUUID } from 'node:crypto';
 import { createServer, type Server } from 'node:http';
 import type { AddressInfo } from 'node:net';
 
-import { decryptField, generateKey, loadSealingKeys } from '@beautinique/backend-server-crypto';
+import {
+  type CryptoKeys,
+  decryptField,
+  generateKey,
+  loadCryptoKeys,
+  loadSealingKeys,
+} from '@beautinique/backend-server-crypto';
 import {
   createLogger,
   LOOPBACK_HOST,
@@ -75,6 +81,8 @@ export interface Harness {
   prefix: string;
   /** Signs passports the way the gateway does (identity has its public key) */
   passport: PassportSigner;
+  /** Identity's field and blind-index keys, to make a record as an older version wrote it */
+  keys: CryptoKeys;
   start(more?: Record<string, string>): Promise<RunningIdentity>;
   stop(): Promise<void>;
 }
@@ -116,6 +124,7 @@ export async function startHarness(name: string): Promise<Harness> {
     runId,
     passport,
     prefix,
+    keys: loadCryptoKeys({ fieldKeys, blindIndexKey }),
     start: async (more) => {
       const other = await startOne(more);
       otpKeysOf.set(other, loadSealingKeys(otpEventKeys));
