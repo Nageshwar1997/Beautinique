@@ -372,6 +372,20 @@ const mutations: Mutation[] = [
   },
   {
     file: 'proxy',
+    name: 'no room for an instrumentation’s close listeners',
+    change: [['    res.setMaxListeners(PROXIED_ANSWER_MAX_LISTENERS);\n', '']],
+    tests: 'leaves room',
+  },
+  {
+    file: 'proxy',
+    name: 'room only for Node’s default 10',
+    change: [
+      ['const PROXIED_ANSWER_MAX_LISTENERS = 20;', 'const PROXIED_ANSWER_MAX_LISTENERS = 10;'],
+    ],
+    tests: 'leaves room',
+  },
+  {
+    file: 'proxy',
     name: 'a client’s passport goes on',
     change: [['  HEADERS.passport.toLowerCase(),\n', '']],
     tests: 'no passport for a public route',

@@ -54,6 +54,17 @@ const mutations: Mutation[] = [
   // monitoring (Sentry): one init per process, nothing personal sent, server errors only
   {
     file: 'monitoring',
+    name: 'Express layers traced again',
+    change: [
+      [
+        "    integrations: (defaults) => defaults.filter((integration) => integration.name !== 'Express'),\n",
+        '',
+      ],
+    ],
+    tests: 'HTTP level only',
+  },
+  {
+    file: 'monitoring',
     name: 'a second init replaces the first',
     change: [['if (Sentry.isInitialized()) return true;\n  if (dsn', 'if (dsn']],
     tests: 'monitoring',

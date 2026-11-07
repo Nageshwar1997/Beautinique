@@ -1,5 +1,5 @@
 import { randomBytes, randomUUID } from 'node:crypto';
-import { createServer, request, type RequestListener } from 'node:http';
+import { createServer, request, type RequestListener, type ServerResponse } from 'node:http';
 import { type AddressInfo, connect } from 'node:net';
 
 import { generateSigningKey, signJwt } from '@beautinique/backend-server-crypto';
@@ -312,30 +312,35 @@ interface GatewayOptions {
   rateLimits?: Partial<GatewayAppOptions['rateLimits']>;
   sessions?: GatewayAppOptions['sessions'];
   passport?: GatewayAppOptions['passport'];
+  /** What runs before the gateway's app on each request (a stand-in for an instrumentation) */
+  before?: (res: ServerResponse) => void;
 }
 
 async function gateway(
   upstreams: GatewayAppOptions['upstreams'],
-  { timeoutMs = 2000, limiter, rateLimits, sessions, passport }: GatewayOptions = {},
+  { timeoutMs = 2000, limiter, rateLimits, sessions, passport, before }: GatewayOptions = {},
 ) {
-  return listen(
-    buildApp({
-      logger,
-      manifest,
-      upstreams,
-      upstreamTimeoutMs: timeoutMs,
-      apps,
-      isOriginSecret: originSecretCheck([SECRET, OLD_SECRET]),
-      // every gateway of a test gets fresh buckets
-      limiter:
-        limiter ??
-        createRateLimiter({ redis: redis.client, prefix: `${testPrefix}${randomUUID()}:` }),
-      rateLimits: { ...DEFAULT_RATE_LIMITS, ...rateLimits },
-      redisReady: redis.ready,
-      sessions: sessions ?? sessionGate({ keys: identityKeys, redis: redis.client }),
-      passport: passport ?? passportSigner(),
-    }),
-  );
+  const app = buildApp({
+    logger,
+    manifest,
+    upstreams,
+    upstreamTimeoutMs: timeoutMs,
+    apps,
+    isOriginSecret: originSecretCheck([SECRET, OLD_SECRET]),
+    // every gateway of a test gets fresh buckets
+    limiter:
+      limiter ??
+      createRateLimiter({ redis: redis.client, prefix: `${testPrefix}${randomUUID()}:` }),
+    rateLimits: { ...DEFAULT_RATE_LIMITS, ...rateLimits },
+    redisReady: redis.ready,
+    sessions: sessions ?? sessionGate({ keys: identityKeys, redis: redis.client }),
+    passport: passport ?? passportSigner(),
+  });
+  if (!before) return listen(app);
+  return listen((req, res) => {
+    before(res);
+    app(req, res);
+  });
 }
 
 /** A request with exactly this path (a URL would clean up ".." first). */
@@ -360,6 +365,34 @@ const errorOf = async (res: Response) =>
   [res.status, ((await res.json()) as { error: { code: string } }).error.code] as const;
 
 describe('gateway routing', () => {
+  it('leaves room on a proxied answer for the close listeners an instrumentation adds', async () => {
+    const core = await listen(fakeCore());
+    // Sentry's instrumentation adds one per Express layer, and live said so on every /api request
+    const gw = await gateway(
+      { core: core.url },
+      {
+        before: (res) => {
+          for (let i = 0; i < 8; i += 1) res.on('close', () => undefined);
+        },
+      },
+    );
+    const warnings: Error[] = [];
+    const onWarning = (warning: Error) => {
+      if (warning.name === 'MaxListenersExceededWarning') warnings.push(warning);
+    };
+    process.on('warning', onWarning);
+    try {
+      const res = await fetch(`${gw.url}${API_PREFIX}/catalog/products/p1`, { headers: customer });
+      expect(res.status).toBe(200);
+      await res.text();
+      // a warning is emitted on a later tick
+      await new Promise((resolve) => setTimeout(resolve, 50));
+      expect(warnings.map((warning) => warning.message)).toEqual([]);
+    } finally {
+      process.off('warning', onWarning);
+    }
+  });
+
   it('sends a request to its owner at the route path, with the query, request id and client IP', async () => {
     const core = await listen(fakeCore());
     const gw = await gateway({ core: core.url });

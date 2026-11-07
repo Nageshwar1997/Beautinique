@@ -4,6 +4,7 @@ import { createServer, type Server } from 'node:http';
 import type { AddressInfo } from 'node:net';
 import { gunzipSync } from 'node:zlib';
 
+import * as Sentry from '@sentry/node';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 
 import {
@@ -110,6 +111,13 @@ describe('monitoring (Sentry)', () => {
     expect(sent).toContain('"environment":"test"');
     expect(sent).toContain('"release":"abc123"');
     expect(sent).toContain('"request_id":"req-1"');
+  });
+
+  it('traces requests at the HTTP level only, not each Express layer', () => {
+    const client = Sentry.getClient();
+    expect(client?.getIntegrationByName('Http')).toBeDefined();
+    // a span and a close listener per middleware on every request, on a 0.1 CPU (owner, 2026-11-07)
+    expect(client?.getIntegrationByName('Express')).toBeUndefined();
   });
 
   it('reports a server error with its request id, and nothing the request carried', async () => {
