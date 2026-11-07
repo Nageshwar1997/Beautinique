@@ -141,13 +141,17 @@ describe('RequireSignIn and RedirectIfSignedIn', () => {
       { name: 'We could not load your account' },
       { timeout: 8000 },
     );
-    expect(screen.getByRole('alert').textContent).toContain(
-      'The server did not answer. Please try again in a moment.',
-    );
+    // the app-shell's error page (owner, 2026-11-07), said at once to screen readers
+    const alert = screen.getByRole('alert');
+    expect(alert.textContent).toContain('The server did not answer. Please try again in a moment.');
+    expect(alert.querySelector('[data-error-code="Oops"]')).toBeTruthy();
+    // "Try again" first (the main way), then the home page
+    const ways = [...alert.querySelectorAll('a, button')].map((way) => way.textContent);
+    expect(ways.slice(0, 2)).toEqual(['Try again', 'Go to the home page']);
     // still signed in: no trip to sign-in, the hint stays
     expect(where()).toBe('/orders');
     expect(hintSet('customer')).toBe(true);
-    await expectNoAxeViolations(heading.closest('div') ?? document.body);
+    await expectNoAxeViolations(heading.closest('[role="alert"]') ?? document.body);
     // the server is back: "Try again" asks /iam/me at once, and the page shows
     identity.off('GET /iam/me');
     await userEvent.click(screen.getByRole('button', { name: 'Try again' }));

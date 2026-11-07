@@ -1,4 +1,5 @@
-import { Button, Spinner } from '@beautinique/frontend-components';
+import { ErrorPage } from '@beautinique/frontend-app-shell';
+import { Spinner } from '@beautinique/frontend-components';
 import type { ReactNode } from 'react';
 import { Navigate, useLocation, useSearchParams } from 'react-router';
 
@@ -18,18 +19,22 @@ function Waiting() {
 
 /**
  * The account could not be read: the server did not answer, its tries included (a restart). The
- * person stays signed in and can ask again (owner's words, 2026-11-07; QA-FE-009).
+ * person stays signed in and can ask again, on the app-shell's error page ("Oops"; owner's words
+ * and look, 2026-11-07; QA-FE-009). It takes the place of the spinner, so screen readers are told
+ * at once (an alert): no new page loads to announce it.
  */
 function AccountUnavailable({ onRetry }: { onRetry: () => void }) {
   return (
-    <div className="mx-auto flex max-w-md flex-col items-center gap-4 py-12 text-center">
-      <h1 className="font-display text-2xl font-medium text-balance">
-        We could not load your account
-      </h1>
-      <p role="alert" className="text-foreground-muted text-pretty">
-        The server did not answer. Please try again in a moment.
-      </p>
-      <Button onClick={onRetry}>Try again</Button>
+    <div role="alert">
+      <ErrorPage
+        kind="error"
+        title="We could not load your account"
+        message="The server did not answer. Please try again in a moment."
+        actions={[
+          { label: 'Try again', onClick: onRetry },
+          { label: 'Go to the home page', to: '/' },
+        ]}
+      />
     </div>
   );
 }
