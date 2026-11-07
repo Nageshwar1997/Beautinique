@@ -1,5 +1,4 @@
-import { errorMessage } from '@beautinique/frontend-api-client';
-import { cx, toast } from '@beautinique/frontend-components';
+import { cx } from '@beautinique/frontend-components';
 import {
   Button as AriaButton,
   Header,
@@ -14,7 +13,7 @@ import {
 import { Link, useHref, useLocation, useNavigate } from 'react-router';
 
 import { AUTH_PATHS, authHref } from './next';
-import { useSession } from './session';
+import { useSession, useSignOut } from './session';
 
 /** The header's account control is this wide in every state, so nothing moves when it changes. */
 const SLOT = 'inline-flex min-h-touch min-w-22 items-center justify-end';
@@ -38,7 +37,8 @@ export interface AccountMenuProps {
  * pages and "Sign out".
  */
 export function AccountMenu({ links = [] }: AccountMenuProps) {
-  const { state, signOut } = useSession();
+  const { state } = useSession();
+  const signOutNow = useSignOut();
   const location = useLocation();
   const navigate = useNavigate();
   if (state.status === 'signed-out') {
@@ -53,18 +53,6 @@ export function AccountMenu({ links = [] }: AccountMenuProps) {
   }
   if (state.status !== 'signed-in') return <span aria-hidden="true" className={SLOT} />;
   const { email } = state.user;
-  const signOutNow = async () => {
-    try {
-      await signOut();
-      toast({ tone: 'success', title: 'You are signed out.' });
-    } catch (error) {
-      toast({
-        tone: 'error',
-        title: 'Signing out did not finish.',
-        description: errorMessage(error),
-      });
-    }
-  };
   return (
     <span className={SLOT}>
       {/* the menu's links go through the app's router (no full page load) */}

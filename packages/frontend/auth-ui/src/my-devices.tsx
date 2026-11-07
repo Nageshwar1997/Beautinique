@@ -18,7 +18,7 @@ import { useState } from 'react';
 import { AccountCard, APP_NAMES, StatusBadge } from './account-parts';
 import { TextLink } from './layout';
 import { ACCOUNT_PATHS, AUTH_PATHS, authHref } from './next';
-import { useSession } from './session';
+import { useSession, useSignOut } from './session';
 
 type SessionView = RouteOutput<typeof listSessions>['sessions'][number];
 
@@ -30,7 +30,8 @@ const deviceName = (session: SessionView) => session.device.trim() || 'Unknown d
  * out like the account menu does. Inside RequireSignIn.
  */
 export function MyDevices() {
-  const { state, signOut } = useSession();
+  const { state } = useSession();
+  const signOutHere = useSignOut();
   const queryClient = useQueryClient();
   const sessions = useApiQuery(listSessions);
   const end = useApiMutation(endSession);
@@ -69,18 +70,6 @@ export function MyDevices() {
   const list = [...all.filter((s) => s.current), ...all.filter((s) => !s.current)];
   const others = all.filter((s) => !s.current);
 
-  const signOutHere = async () => {
-    try {
-      await signOut();
-      toast({ tone: 'success', title: 'You are signed out.' });
-    } catch (error) {
-      toast({
-        tone: 'error',
-        title: 'Signing out did not finish.',
-        description: errorMessage(error),
-      });
-    }
-  };
   const signOutThere = (session: SessionView) => {
     setEnding(session.sessionId);
     end.mutate(

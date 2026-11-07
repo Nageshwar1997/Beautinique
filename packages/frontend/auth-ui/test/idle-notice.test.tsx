@@ -1,11 +1,14 @@
-import { act, cleanup, fireEvent, screen } from '@testing-library/react';
+import { clearToasts } from '@beautinique/frontend-components';
+import { act, cleanup, fireEvent, screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { IdleNotice, RequireSignIn, SignInForm } from '../src/index';
 import { expectNoAxeViolations } from './axe';
-import { dropHint, fakeIdentity, setHint } from './fake-identity';
+import { dropHint, failure, fakeIdentity, json, setHint } from './fake-identity';
 import { renderApp, where } from './render';
+
+const NOTICE = 'You were signed out after 30 minutes without activity. Please sign in again.';
 
 const MINUTE = 60_000;
 // 10:00 am in India
@@ -19,6 +22,7 @@ beforeEach(() => {
 
 afterEach(() => {
   cleanup();
+  clearToasts();
   vi.useRealTimers();
   dropHint('admin');
   dropHint('customer');
@@ -45,6 +49,12 @@ const pass = async (ms: number) => {
 
 const refreshes = (identity: ReturnType<typeof fakeIdentity>) =>
   identity.paths().filter((path) => path === 'POST /auth/refresh').length;
+
+const logouts = (identity: ReturnType<typeof fakeIdentity>) =>
+  identity.paths().filter((path) => path === 'POST /auth/logout').length;
+
+const serverDown = () =>
+  failure(503, 'SERVICE_UNAVAILABLE', 'Beautinique is not answering right now.');
 
 async function signedInAtDesk(app: 'admin' | 'customer' = 'admin') {
   const identity = fakeIdentity(app, { signedIn: true });
@@ -128,6 +138,119 @@ describe('IdleNotice', () => {
     } finally {
       otherTab.close();
     }
+  });
+
+  it('says why in the tab that went idle too, with another tab open (QA-FE-010)', async () => {
+    const identity = fakeIdentity('admin', { signedIn: true });
+    setHint('admin');
+    const idle = renderApp(pages, { identity, app: 'admin', at: '/desk' });
+    await within(idle.container).findByText('Desk');
+    // the other tab opened a minute later: it has not reached the limit when the first one does
+    await pass(MINUTE);
+    const other = renderApp(pages, { identity, app: 'admin', at: '/desk' });
+    await within(other.container).findByText('Desk');
+    // a slow sign-out: the other tab hears "timed out" long before the server answers
+    let answer: (response: Response) => void = () => undefined;
+    identity.on(
+      'POST /auth/logout',
+      () =>
+        new Promise<Response>((resolve) => {
+          answer = resolve;
+        }),
+    );
+    await pass(29 * MINUTE);
+    for (const tab of [idle, other]) {
+      await within(tab.container).findByText(NOTICE);
+      expect(within(tab.container).getByTestId('where').textContent).toBe('/sign-in?next=%2Fdesk');
+    }
+    // one sign-out for both tabs
+    expect(logouts(identity)).toBe(1);
+    answer(json(200, { data: { signedOut: true } }));
+  });
+
+  it('signs out at 30 though the server cannot be reached, and ends the session there once it can (QA-FE-004)', async () => {
+    const { identity } = await signedInAtDesk();
+    identity.on('POST /auth/logout', serverDown);
+    await pass(30 * MINUTE);
+    await screen.findByText(NOTICE);
+    await vi.waitFor(() => {
+      expect(logouts(identity)).toBe(1);
+    });
+    expect(identity.state.signedIn).toBe(true);
+    // back online: asked again at once
+    act(() => {
+      window.dispatchEvent(new Event('online'));
+    });
+    await vi.waitFor(() => {
+      expect(logouts(identity)).toBe(2);
+    });
+    // and every 30 s while the tab is open, until the server ends the session
+    await pass(30_000);
+    await vi.waitFor(() => {
+      expect(logouts(identity)).toBe(3);
+    });
+    identity.off('POST /auth/logout');
+    await pass(30_000);
+    await vi.waitFor(() => {
+      expect(identity.state.signedIn).toBe(false);
+    });
+    expect(logouts(identity)).toBe(4);
+    await pass(5 * MINUTE);
+    expect(logouts(identity)).toBe(4);
+  });
+
+  it('stops asking the server to end the old session once the app is signed in again (QA-FE-004)', async () => {
+    const { identity } = await signedInAtDesk();
+    identity.on('POST /auth/logout', serverDown);
+    await pass(30 * MINUTE);
+    await screen.findByText(NOTICE);
+    await vi.waitFor(() => {
+      expect(logouts(identity)).toBe(1);
+    });
+    // another tab signs in again (the person, or someone else): the retry must not end that session
+    const otherTab = new BroadcastChannel('bq:admin:session');
+    try {
+      const reads = identity.paths().filter((path) => path === 'GET /iam/me').length;
+      setHint('admin');
+      otherTab.postMessage('signed-in');
+      await vi.waitFor(() => {
+        expect(identity.paths().filter((path) => path === 'GET /iam/me').length).toBe(reads + 1);
+      });
+      await pass(5 * MINUTE);
+      expect(logouts(identity)).toBe(1);
+    } finally {
+      otherTab.close();
+    }
+  });
+
+  it('gives up on the old session when the server’s own idle limit has ended it (QA-FE-004)', async () => {
+    const { identity } = await signedInAtDesk();
+    identity.on('POST /auth/logout', serverDown);
+    await pass(30 * MINUTE);
+    await screen.findByText(NOTICE);
+    await pass(30 * MINUTE);
+    // let the last try's answer land
+    await vi.waitFor(() => {
+      expect(logouts(identity)).toBeGreaterThan(50);
+    });
+    const tried = logouts(identity);
+    await pass(10 * MINUTE);
+    expect(logouts(identity)).toBe(tried);
+  });
+
+  it('keeps the person signed in, and the clock running, when "Sign out" in the question fails (QA-FE-004)', async () => {
+    const { identity } = await signedInAtDesk();
+    identity.on('POST /auth/logout', serverDown);
+    await pass(28 * MINUTE + 10_000);
+    const user = userEvent.setup();
+    await user.click(await screen.findByRole('button', { name: 'Sign out' }));
+    expect(await screen.findByText('You are still signed in.')).toBeTruthy();
+    expect(where()).toBe('/desk');
+    expect(screen.getByRole('alertdialog')).toBeTruthy();
+    // nobody does anything: the idle sign-out still comes at 30
+    await pass(2 * MINUTE);
+    await screen.findByText(NOTICE);
+    expect(where()).toBe('/sign-in?next=%2Fdesk');
   });
 
   it('does nothing in an app without an idle limit', async () => {

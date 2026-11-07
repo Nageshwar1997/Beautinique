@@ -66,6 +66,7 @@ const SCENARIOS = {
   wrong: 'Wrong email or password',
   existing: 'Sign-up: the email has an account',
   down: 'The server does not answer (/iam/me 503): an account page says so',
+  unreached: 'Sign-out does not reach the server: you stay signed in, with "Try again"',
 } as const;
 type Scenario = keyof typeof SCENARIOS;
 
@@ -73,6 +74,10 @@ function choose(scenario: Scenario) {
   identity.off('POST /auth/login');
   identity.off('POST /auth/otp/:id/verify');
   identity.off('GET /iam/me');
+  identity.off('POST /auth/logout');
+  if (scenario === 'unreached') {
+    identity.on('POST /auth/logout', () => Promise.reject(new TypeError('Failed to fetch')));
+  }
   if (scenario === 'wrong') {
     identity.on('POST /auth/login', () =>
       failure(401, 'INVALID_CREDENTIALS', 'The email or password is not right.'),

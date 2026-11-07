@@ -31,6 +31,7 @@ describe('the entry point', () => {
       'RecoveryCodes',
       'RedirectIfSignedIn',
       'RequireSignIn',
+      'SIGN_OUT_RETRY_MS',
       'SecuritySettings',
       'SessionProvider',
       'SignInForm',
@@ -53,6 +54,7 @@ describe('the entry point', () => {
       'totpStepHref',
       'totpStepOf',
       'useSession',
+      'useSignOut',
     ]);
   });
 });

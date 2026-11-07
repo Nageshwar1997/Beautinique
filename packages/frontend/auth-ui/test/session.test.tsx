@@ -1,3 +1,4 @@
+import { clearToasts } from '@beautinique/frontend-components';
 import { cleanup, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { afterEach, describe, expect, it } from 'vitest';
@@ -9,6 +10,7 @@ import { renderApp, where } from './render';
 
 afterEach(() => {
   cleanup();
+  clearToasts();
   dropHint('customer');
 });
 
@@ -225,5 +227,68 @@ describe('AccountMenu', () => {
         .map(() => undefined),
     );
     expect(await screen.findByText('You are signed out.')).toBeTruthy();
+  });
+
+  it('keeps the person signed in when the server did not end the session, and tries again from the toast (QA-FE-004)', async () => {
+    setHint('customer');
+    const identity = fakeIdentity('customer', { signedIn: true });
+    identity.on('POST /auth/logout', () =>
+      failure(503, 'SERVICE_UNAVAILABLE', 'Beautinique is not answering right now.'),
+    );
+    const user = userEvent.setup();
+    renderApp(
+      {
+        '/': (
+          <>
+            <AccountMenu />
+            <Status />
+          </>
+        ),
+      },
+      { identity },
+    );
+    await user.click(await screen.findByRole('button', { name: `Account (${EMAIL})` }));
+    await user.click(screen.getByRole('menuitem', { name: 'Sign out' }));
+    expect(await screen.findByText('You are still signed in.')).toBeTruthy();
+    expect(screen.getByText('Beautinique is not answering right now.')).toBeTruthy();
+    // the session, its cookies and the hint are all still there: nothing says otherwise
+    expect(status()).toBe('signed-in');
+    expect(hintSet('customer')).toBe(true);
+    expect(screen.getByRole('button', { name: `Account (${EMAIL})` })).toBeTruthy();
+    expect(screen.queryByRole('link', { name: 'Sign in' })).toBeNull();
+
+    // the server answers again: "Try again" signs out, and the "still signed in" toast goes
+    identity.off('POST /auth/logout');
+    await user.click(screen.getByRole('button', { name: 'Try again' }));
+    await screen.findByRole('link', { name: 'Sign in' });
+    expect(identity.paths().filter((path) => path === 'POST /auth/logout')).toHaveLength(2);
+    expect(hintSet('customer')).toBe(false);
+    expect((await screen.findAllByText('You are signed out.')).length).toBeGreaterThan(0);
+    await waitFor(() => {
+      expect(screen.queryByText('You are still signed in.')).toBeNull();
+    });
+  });
+
+  it('takes the "still signed in" toast away once another tab signed out (QA-FE-004)', async () => {
+    setHint('customer');
+    const identity = fakeIdentity('customer', { signedIn: true });
+    identity.on('POST /auth/logout', () => Promise.reject(new TypeError('Failed to fetch')));
+    const user = userEvent.setup();
+    renderApp({ '/': <AccountMenu /> }, { identity });
+    await user.click(await screen.findByRole('button', { name: `Account (${EMAIL})` }));
+    await user.click(screen.getByRole('menuitem', { name: 'Sign out' }));
+    await screen.findByText('You are still signed in.');
+    const otherTab = new BroadcastChannel('bq:customer:session');
+    try {
+      // the other tab's sign-out reached the server, which cleared the cookies
+      dropHint('customer');
+      otherTab.postMessage('signed-out');
+      await screen.findByRole('link', { name: 'Sign in' });
+      await waitFor(() => {
+        expect(screen.queryByText('You are still signed in.')).toBeNull();
+      });
+    } finally {
+      otherTab.close();
+    }
   });
 });

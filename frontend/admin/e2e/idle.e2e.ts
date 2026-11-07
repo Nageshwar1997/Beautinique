@@ -44,3 +44,28 @@ test('asks after 28 idle minutes, stays signed in, and signs out at 30 with why'
   const me = await page.request.get('/api/v1/iam/me', { headers: { 'X-BQ-App': 'admin' } });
   expect(me.status()).toBe(401);
 });
+
+test('with a second tab open, both tabs say why after the idle sign-out (QA-FE-010)', async ({
+  page,
+}, testInfo) => {
+  test.skip(testInfo.project.name !== 'chromium-1280-light', 'one screen size is enough here');
+  // one clock for every tab of the browser context
+  await page.clock.install();
+  email = e2eEmail('admin-idle-tabs');
+  await joinTeam(page, email, { check: false });
+  // the second tab opens a minute later, so the first one reaches the limit first
+  await page.clock.fastForward('01:00');
+  const other = await page.context().newPage();
+  await other.goto('/');
+  await expect(other.getByRole('heading', { level: 1, name: 'Dashboard' })).toBeVisible();
+
+  await page.clock.fastForward('29:05');
+  const notice = 'You were signed out after 30 minutes without activity. Please sign in again.';
+  for (const tab of [page, other]) {
+    await expect(tab.getByText(notice)).toBeVisible();
+    await expect(tab).toHaveURL('/sign-in');
+  }
+  // one sign-out on the server for both
+  const me = await page.request.get('/api/v1/iam/me', { headers: { 'X-BQ-App': 'admin' } });
+  expect(me.status()).toBe(401);
+});

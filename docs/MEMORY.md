@@ -1,6 +1,6 @@
 # MEMORY — BQ
 
-> **Status:** v1.62 (2026-11-07). Project ki yaaddasht: **kya tay hua aur kyun**, **pichhle kaam se kya seekha**, aur **kaunse jaal (traps) se bachna hai**. Poori detail baaki docs me hai; yahan short version aur pointers. Naya sabak ya decision aaye to yahan ek line jodo.
+> **Status:** v1.63 (2026-11-07). Project ki yaaddasht: **kya tay hua aur kyun**, **pichhle kaam se kya seekha**, aur **kaunse jaal (traps) se bachna hai**. Poori detail baaki docs me hai; yahan short version aur pointers. Naya sabak ya decision aaye to yahan ek line jodo.
 
 ## 1. Decision log
 
@@ -110,6 +110,7 @@
 | 2026-11-07 | QA-FE-009 (owner: "server ready na ho to app na chale"): api-client `waitForServer` har call (refresh bhi) `ServerWake` ke `onReady` tak rokta hai; 150 s ke baad sirf "Try again" ("Continue anyway" hata); ready ke baad `/iam/me` 5xx/network pe 2 aur try (`retryServerTrouble`), phir "We could not load your account" + "Try again"; naya app jo server bulaye yahi jode | Pehle `/iam/me` parde ke neeche turant jaata, soye server se 502 paata aur page "Loading" pe atak jaata; ek tareeka jo cold start aur beech ke restart dono sambhale | ARCHITECTURE §11.1, DESIGN §6 |
 | 2026-11-07 | Account na mile (QA-FE-009) to app-shell ka `ErrorPage` ("Oops", "Try again" pehla, phir home), `role="alert"` me; auth-ui ab app-shell pe tika (owner: "uska UI behtar") | Ek hi error ka roop poore app me; app-shell sirf icons pe tika hai, to koi cycle nahi | auth-ui README, DESIGN §6 |
 | 2026-11-07 | Generator ka app template wake-up ke saath (api-client `waitForServer`, `providers.tsx`, `ServerWake` + `onReady`, SSR me `WakeScript`, `BQ_GATEWAY_URL` define) (owner: "template bhi badlo aur docs me bhi") | Naya app shuru se sahi; pehle bane 9 shell apps template se nahi badalte (wo dobara nahi bante), unme kaam shuru hone pe jodna | packages README §3.1, ARCHITECTURE §11.1 |
+| 2026-11-07 | QA-FE-004 + QA-FE-010 (owner ne Claude ki salah maani): app me sign-out sirf `POST /auth/logout` ke 200 pe; fail pe signed-in + toast "You are still signed in." + "Try again" (auth-ui `useSignOut`). Idle sign-out turant local (sandesh server ka intezaar nahi karta) aur logout tab khula rehne tak dobara (network lautne pe aur har 30 s, server ki 30 min seema tak, dobara sign-in pe band); idle sirf idle channel se doosre tabs tak | HttpOnly cookies page nahi mita sakta: logout fail hone pe "signed out" dikhana jhooth tha aur usi browser me session zinda (customer 30 din). Idle me insaan ke liye sandesh zaroori hai aur server ki seema backstop hai, par retry wo khidki chhoti karta hai | ARCHITECTURE §7.2, §9.2; auth-ui README |
 
 ## 2. Pichhle kaam se seekhe sabak
 
@@ -140,6 +141,7 @@
 25. **Rotation ka reuse check "ek peeche" tak seemit mat rakho (2026-11-07, QA-ID-001):** browser kabhi do token peeche nahi hota (cookie saare tabs me ek), isliye parallel-tab ki chhoot sirf turant pichhle token ko do; usse purana koi bhi asli token chori hai. "Asli" pehchaanne ke liye token me session ka chhupa family secret rakho, taaki nakli token (sirf session id se) kuch na tode. Test: copy do baar refresh kare, phir asli ka token, turant (race window ke andar) bhi.
 26. **ioredis `maxRetriesPerRequest` sirf disconnect pe bachata hai (2026-11-07, QA-GW-001):** Redis TCP pe juda ho par jawab na de (atka, overloaded) to command hamesha intezaar karta hai; `commandTimeout` hi bachata hai. Blocking commands (BullMQ worker) wale connection pe ye mat lagao: workers apna connection kholte hain (`workerConnection` timeout copy nahi karta). Test: TCP proxy ke sockets `pause()` (`freeze`) karke command ~timeout me reject ho, aur `finally` me pehle `thaw()`, warna `close()` (QUIT) bhi atakta hai.
 27. **Jo sirf Sentry ke saath hota hai, wo laptop/CI pe kabhi nahi dikhta (2026-11-07):** wahan `SENTRY_DSN` nahi, to instrumentation band. Live ki `MaxListenersExceededWarning` laptop pe tabhi aayi jab bundle nakli DSN (`http://public@127.0.0.1:9/1`) ke saath chala. Ginti: gateway ke ek proxied jawab pe Node ka `stream.pipeline` hi 6 `close` listeners lagata hai, Sentry ka HTTP 3, hamare 2 (Express integration ke saath aur). `--trace-warnings` sirf 11va dikhata hai; poori list ke liye `--import` hook jo `ServerResponse.prototype.on/once` gine.
+28. **Do `BroadcastChannel` ke sandeshon ke kram pe bharosa mat karo (2026-11-07, QA-FE-010):** idle tab pehle `timed-out` (idle channel) bhejta tha, phir server ke jawab ke baad `signed-out` (session channel); doosra tab bhi apna `signed-out` bhejta. Jo sandesh pehle pahunche wahi tab ki halat tay karta, aur wajah (idle) sirf ek channel pe thi. **Sabak:** jo baat ek saath pahunchni chahiye (sign-out + wajah) wo ek hi sandesh me bhejo, aur jis tab ne khud faisla kiya wo apni halat turant badle, network ke jawab ke baad nahi. Test: do `SessionProvider` ek jsdom me (saanjhi `document.cookie`) aur logout ka jawab rok ke rakho; fake `Date` me toast ka motion ruk jaata hai, to toast hatna real-time wale test me jaancho.
 
 ## 3. Environment
 
@@ -240,3 +242,4 @@
 | v1.60   | 2026-11-07 | Decision: QA-FE-009 (server ready tak koi API call nahi, sirf "Try again", account na mile to sandesh). |
 | v1.61   | 2026-11-07 | Decision: account na mile to app-shell ka `ErrorPage` (owner). |
 | v1.62   | 2026-11-07 | Decision: generator ka app template wake-up ke saath (owner). |
+| v1.63   | 2026-11-07 | Decision + sabak 28: QA-FE-004 + QA-FE-010 (sign-out sirf server ke 200 pe, idle turant local + retry, idle sirf idle channel se). |

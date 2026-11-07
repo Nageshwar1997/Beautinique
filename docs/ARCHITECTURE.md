@@ -1,6 +1,6 @@
 # ARCHITECTURE — BQ
 
-> **Status:** v1.57 draft (2026-11-07). [PRD.md](PRD.md) v1.0 pe based. Design ek multi-agent review se aaya (3 architecture proposals + review board + owner ke decisions), aur v1.1 me free tier ke official docs ke against verify hua.
+> **Status:** v1.58 draft (2026-11-07). [PRD.md](PRD.md) v1.0 pe based. Design ek multi-agent review se aaya (3 architecture proposals + review board + owner ke decisions), aur v1.1 me free tier ke official docs ke against verify hua.
 
 ## 0. Ek nazar me
 
@@ -291,6 +291,7 @@ Kai platforms alag users ko alag price dikhate hain. BQ ka rule: **ek product ka
   - Isse free server pe load bhi kam padta hai aur Render ka 5 GB bandwidth bachta hai.
 - Refresh pe user ka status aur grants dobara padhe jaate hain, jo aaj ka "7 din purana role" wala bug theek karta hai.
 - Logout, freeze ya grant change Redis me revoke ya freeze key likhta hai. Gateway har request pe ise check karta hai, isliye asar turant hota hai.
+- **App me sign-out sirf server ke "haan" pe (QA-FE-004, owner 2026-11-07):** access/refresh cookies HttpOnly hain, page unhe nahi mita sakta; isliye app tabhi "signed out" dikhata hai jab `POST /auth/logout` 200 de. Fail (offline, 5xx, 429) pe insaan signed-in rehta hai, toast "You are still signed in." + "Try again". Idle sign-out (internal apps) ulta: turant local, aur logout jab tak tab khula hai dobara (network lautne pe aur har 30 s, server ki 30 min seema tak; dobara sign-in hote hi band).
 - Har app me **"My devices"**: sessions dekhna, ek ya saare logout. Security Officer kisi ka bhi session revoke kar sakta hai.
 - Frontend user ko browser storage me save nahi karta. Aaj ka crypto-js localStorage store hatega. Har app `GET /api/v1/iam/me` se shuru hoti hai.
 
@@ -380,7 +381,7 @@ Kai platforms alag users ko alag price dikhate hain. BQ ka rule: **ek product ka
 - **Signed-in password badalna:** naya route nahi; wahi email code wala raasta (`/auth/password/code`). Naya password = saare sessions band (§7.2), phir dobara sign-in.
 - **Customer me dummy `/terms` aur `/privacy`** (prerender, DUMMY badge, version `dummy-1` = `IDENTITY__LEGAL_VERSION`), sign-up consent unhi ke link deta hai.
 - **Admin live:** admin PR me `vercel.json` (SPA rewrite, `noindex`); Vercel project owner banata hai; Render keys (`GATEWAY__APP_HOSTS`, `GATEWAY__VERCEL_PROJECTS`, `NOTIFY__APP_URLS` me admin) code ke baad list.
-- **Internal apps ka idle (30 min):** `IdleNotice`: bina activity 28 min pe "Are you still there?" dialog ("Stay signed in" refresh karta hai), 30 min pe sign-in page saaf sandesh ke saath. **Jagah auth-ui (2026-11-03, PR 6), app-shell nahi:** use components ka Dialog chahiye, aur components ka playground app-shell leta hai (build me dependency cycle). Activity (click, key, scroll, touch; kisi bhi tab me) ho to page server ki 30 min ki seema se 5 min pehle ek refresh karta hai (kaam ke dauraan ~25 min me ek, kyunki `auth` rate limit IP pe hai); tabs `BroadcastChannel` se activity, refresh aur idle sign-out baant'te hain.
+- **Internal apps ka idle (30 min):** `IdleNotice`: bina activity 28 min pe "Are you still there?" dialog ("Stay signed in" refresh karta hai), 30 min pe sign-in page saaf sandesh ke saath. **Jagah auth-ui (2026-11-03, PR 6), app-shell nahi:** use components ka Dialog chahiye, aur components ka playground app-shell leta hai (build me dependency cycle). Activity (click, key, scroll, touch; kisi bhi tab me) ho to page server ki 30 min ki seema se 5 min pehle ek refresh karta hai (kaam ke dauraan ~25 min me ek, kyunki `auth` rate limit IP pe hai); tabs `BroadcastChannel` se activity, refresh aur idle sign-out baant'te hain. Idle sign-out sirf idle channel ke ek sandesh se doosre tabs tak jaata hai, session channel ke `signed-out` se nahi: do channels ke sandesh kisi tab me ulte kram me pahunchte to wo bina wajah ke sign-in pe jaata (QA-FE-010).
 - **Admin PR 6 (2026-11-03):** sign-in me authenticator lagana (identity ka `totp-enroll`: QR + key, pehla code, recovery codes; codes save hone ke baad hi app me), invitation page, khaali dashboard, account pages, icon credits (`IconCreditsPage` app-shell me, dono apps ka). Admin E2E ka invitation `scripts/e2e/invite.ts` se (Master app abhi nahi): identity ke apne functions run ke DB me Master aur invitation banate hain, email notify → Mailpit asli raaste se.
 - **Playwright E2E isi kaam me:** har app ka sign-up/sign-in raasta (bundle + Mailpit), 360/768/1280 px, light/dark, axe; CI me chalta hai.
 - Recovery codes ek baar dikhte hain: copy, `.txt` download, "I've saved them" tick ke bina aage nahi. QR browser me banta hai (koi bahar ki site nahi).
@@ -712,3 +713,4 @@ Sirf config badlegi, code nahi:
 | v1.55   | 2026-11-07 | §14: browser events pe Sentry ka `user.geo` (shehar, IP se, IP nahi) rehne do (owner). |
 | v1.56   | 2026-11-07 | §11.1: server ke jawab se pehle app ki koi API call nahi (api-client `waitForServer` + `ServerWake` `onReady`), sirf "Try again" (owner, QA-FE-009). |
 | v1.57   | 2026-11-07 | §11.1: generator ka app template bhi wake-up + `waitForServer` ke saath (owner). |
+| v1.58   | 2026-11-07 | §7.2: app me sign-out sirf server ke 200 pe, fail pe signed-in + "Try again"; idle sign-out turant local + logout retry; §9.2: idle sign-out sirf idle channel se (owner, QA-FE-004 + QA-FE-010). |

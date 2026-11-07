@@ -123,3 +123,38 @@ test('signs in with the authenticator, or a recovery code when the phone is lost
   await expect(page).toHaveURL('/');
   await expect(accountButton(page, email)).toBeVisible();
 });
+
+test('a sign-out the server never got keeps the person signed in, and "Try again" finishes it (QA-FE-004)', async ({
+  page,
+}, testInfo) => {
+  test.skip(
+    !['chromium-1280-light', 'chromium-360-dark'].includes(testInfo.project.name),
+    'a phone and a desk are enough here',
+  );
+  email = e2eEmail('sign-out-offline');
+  await signUp(page, email);
+  const headers = { 'X-BQ-App': 'customer' };
+  // the sign-out never reaches the server (offline, a proxy that drops it)
+  await page.route('**/api/v1/auth/logout', (route) => route.abort('failed'));
+  await accountButton(page, email).click();
+  await page.getByRole('menuitem', { name: 'Sign out' }).click();
+  const toast = page
+    .getByRole('region', { name: 'Notifications' })
+    .getByRole('listitem')
+    .filter({ hasText: 'You are still signed in.' });
+  await expect(toast).toBeVisible();
+  await expect(toast).toContainText('We could not reach Beautinique.');
+  await expectNoAxeViolations(page);
+  await expectNoSideScroll(page);
+  // what the page says is true: the header still offers the account, the session still works
+  await expect(accountButton(page, email)).toBeVisible();
+  expect((await page.request.get('/api/v1/iam/me', { headers })).status()).toBe(200);
+
+  // the server is reachable again: "Try again" signs out, there and here
+  await page.unroute('**/api/v1/auth/logout');
+  await toast.getByRole('button', { name: 'Try again' }).click();
+  await expect(page.getByRole('link', { name: 'Sign in' })).toBeVisible();
+  await expect(page.getByText('You are signed out.').first()).toBeVisible();
+  await expect(page.getByText('You are still signed in.')).toHaveCount(0);
+  expect((await page.request.get('/api/v1/iam/me', { headers })).status()).toBe(401);
+});
