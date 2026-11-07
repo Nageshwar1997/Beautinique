@@ -25,7 +25,7 @@ const NAV = [
 /** A pretend server for the wake-up screen: it answers after `ms`, or never (null). */
 const pretendServer =
   (ms: number | null): typeof fetch =>
-  (_url, init) =>
+  (input, init) =>
     new Promise((resolve, reject) => {
       const timer =
         ms === null
@@ -33,7 +33,9 @@ const pretendServer =
           : setTimeout(() => {
               resolve(new Response(null, { status: 200 }));
             }, ms);
-      init?.signal?.addEventListener('abort', () => {
+      // axios's fetch adapter puts the signal on the Request, not on init (QA-FE-005)
+      const signal = init?.signal ?? (input instanceof Request ? input.signal : undefined);
+      signal?.addEventListener('abort', () => {
         clearTimeout(timer);
         reject(new DOMException('Aborted', 'AbortError'));
       });

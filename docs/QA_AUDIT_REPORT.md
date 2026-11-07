@@ -1,10 +1,10 @@
 # QA AUDIT REPORT — BQ
 
-> **Status:** v1.10 (2026-11-07, final; §2a me KNOWN faislon ki halat, §0 me fixes). Audit base: `origin/prerelease` @ `ee7f46a` (`ee7f46ae7b2605d99f6b4497d26303aa109fb371`). Auditor: Claude Code (Opus 5.5, `claude-opus-5-5`). Ye report audit ki single source of truth hai; fixes alag se, ek-ek karke.
+> **Status:** v1.11 (2026-11-07, final; §2a me KNOWN faislon ki halat, §0 me fixes). Audit base: `origin/prerelease` @ `ee7f46a` (`ee7f46ae7b2605d99f6b4497d26303aa109fb371`). Auditor: Claude Code (Opus 5.5, `claude-opus-5-5`). Ye report audit ki single source of truth hai; fixes alag se, ek-ek karke.
 
 ## 0. Audit state (har session ke aakhir me update)
 
-- **Fixes (2026-11-07 se, branch `feat/qa-audit`, §10 ke kram se, har fix ka apna commit, saare fixes ke baad ek PR → `prerelease` (owner, 2026-11-07)):** 1. QA-ID-001 Fixed (2026-11-07). 2. QA-GW-001 + QA-KRN-001 Fixed (2026-11-07). 3. QA-FE-009 Fixed (2026-11-07). Agla: QA-FE-004 + QA-FE-010.
+- **Fixes (2026-11-07 se, branch `feat/qa-audit`, §10 ke kram se, har fix ka apna commit, saare fixes ke baad ek PR → `prerelease` (owner, 2026-11-07)):** 1. QA-ID-001 Fixed (2026-11-07). 2. QA-GW-001 + QA-KRN-001 Fixed (2026-11-07). 3. QA-FE-009 Fixed (2026-11-07). 16. QA-FE-005 Fixed (2026-11-07, owner ke kehne pe pehle). Agla: QA-FE-004 + QA-FE-010.
 - **Gate 1: approved (2026-11-04).** Owner ke jawab (saari recommendations maani):
   - Live pe passive GETs: **haan, kul ≤ 15**, bina auth: `bq-live` `/health`, `/status`, ek anjaan path; customer + admin ka home aur ek 404 (headers, TLS). OTP/auth/write/fuzz/rate-limit/load kabhi nahi.
   - Playwright: Chromium 1248 pehle se installed (Playwright 1.64.1 ki zaroorat yahi); koi download nahi chahiye
@@ -635,7 +635,7 @@ Plan: **E** = planned-executed (local stack, HTTP, browser, scratch script), **S
 **Regression Risk:** Low–Medium (401 pe retry na ho, warna sign-out dheema).
 **Regression test to add:** auth-ui unit: fake identity `/iam/me` 502 phir 200 → state `signed-in` bina focus event; customer E2E: route ko kuch der 502 karwa ke.
 **Owner decision needed:** Nahi
-**Fix (2026-11-07, owner ke faisle: "server ready na ho to app na chale"):** api-client `waitForServer` + `serverReady()`: browser me har call (refresh bhi) app-shell `ServerWake` ke naye `onReady` tak rukti hai (customer aur admin ka `AppWake`); 150 s ke baad sirf "Try again" ("Continue anyway" hata); ready ke baad `/iam/me` 5xx/network pe 2 aur try (`retryServerTrouble`), phir `RequireSignIn` pe "We could not load your account" / "The server did not answer. Please try again in a moment." + "Try again" (`useSession().retry`). Tests (pehle fail): api-client 3, app-shell 3, auth-ui 3 (sab packages green: api-client 45, app-shell 23, auth-ui 77, customer 40, admin 20); customer E2E "asks nothing before the server answered" (wake ek baar 503, `/iam/*` wake ke jawab se pehle nahi) 5 projects pass; poora customer E2E 29 pass / 30 skip + 1 laptop Redis 500 ms flake jo dobara pass hua; admin E2E 9 pass / 9 skip. Browser (auth-ui playground, naya "server does not answer" scenario): sandesh light, dark aur 360 px (side scroll nahi, button 44 px), "Try again" asli click se Security page. Wake ki fail screen browser me nahi dekhi (playground ka "No answer" QA-FE-005 ki wajah se kabhi haar nahi maanta); uske unit tests aur axe pass. Frontend packages: mutations nahi (RULES §6c).
+**Fix (2026-11-07, owner ke faisle: "server ready na ho to app na chale"):** api-client `waitForServer` + `serverReady()`: browser me har call (refresh bhi) app-shell `ServerWake` ke naye `onReady` tak rukti hai (customer aur admin ka `AppWake`); 150 s ke baad sirf "Try again" ("Continue anyway" hata); ready ke baad `/iam/me` 5xx/network pe 2 aur try (`retryServerTrouble`), phir `RequireSignIn` pe "We could not load your account" / "The server did not answer. Please try again in a moment." + "Try again" (`useSession().retry`). Tests (pehle fail): api-client 3, app-shell 3, auth-ui 3 (sab packages green: api-client 45, app-shell 23, auth-ui 77, customer 40, admin 20); customer E2E "asks nothing before the server answered" (wake ek baar 503, `/iam/*` wake ke jawab se pehle nahi) 5 projects pass; poora customer E2E 29 pass / 30 skip + 1 laptop Redis 500 ms flake jo dobara pass hua; admin E2E 9 pass / 9 skip. Browser (auth-ui playground, naya "server does not answer" scenario): sandesh light, dark aur 360 px (side scroll nahi, button 44 px), "Try again" asli click se Security page. Wake ki fail screen QA-FE-005 ke fix ke baad browser me dekhi (sirf "Try again", light, dark, 360 px); uske unit tests aur axe bhi pass. Frontend packages: mutations nahi (RULES §6c).
 
 ### [QA-KRN-001] After a failed first JWKS load, the gateway answers 401 (not 503) to every signed-in request for 30 seconds
 
@@ -929,7 +929,7 @@ Plan: **E** = planned-executed (local stack, HTTP, browser, scratch script), **S
 ### [QA-FE-005] The app-shell playground's "No answer" wake demo never gives up, so a manual check of the timeout looks broken
 
 **Module:** M10 (`@beautinique/frontend-app-shell` playground) | **Feature:** `ServerWake` demo | **Task/Doc:** app-shell README §Playground (`/wake`: "kabhi nahi; 10 s me 'taking too long'")
-**Severity:** P4 (sirf dev playground; product sahi, par manual jaanch karne wala galat nateeja nikaalega) | **Priority:** Low | **Status:** Open
+**Severity:** P4 (sirf dev playground; product sahi, par manual jaanch karne wala galat nateeja nikaalega) | **Priority:** Low | **Status:** Fixed (2026-11-07, `feat/qa-audit`, commit "fix(app-shell): the playground’s no-answer wake demo gives up (QA-FE-005)")
 **Testing Type:** Tooling | **Evidence level:** E1 | **Reproducibility:** Always (2/2) | **Environment:** app-shell playground (5182), axios 1.21.0
 **Description:** Playground ka nakli server abort sirf `init?.signal` pe sunta hai (`packages/frontend/app-shell/playground/main.tsx:36`). axios 1.21 ka fetch adapter signal sirf `Request` object me rakhta hai aur `init` se hata deta hai (`node_modules/axios/lib/adapters/fetch.js:491`, `:532`), isliye har attempt ka abort stub tak nahi pahunchta: promise kabhi settle nahi hota aur screen "Waking up the server" pe atki rehti.
 **Steps to Reproduce:** playground → `/wake` → "No answer" → 15 s ruko.
@@ -943,6 +943,7 @@ Plan: **E** = planned-executed (local stack, HTTP, browser, scratch script), **S
 **Regression Risk:** None (playground).
 **Regression test to add:** Nahi (playground); optional: playground ka smoke.
 **Owner decision needed:** Nahi
+**Fix (2026-11-07, owner ke kehne pe QA-FE-009 ke turant baad, kram se pehle):** stub `init?.signal ?? (input instanceof Request ? input.signal : undefined)` sunta hai. Browser me "No answer" 10 s pe "The server is taking too long", sirf "Try again" (focus usi pe), light, dark aur 360 px (button 320×44, side scroll nahi). Test nahi (playground).
 
 ## 5. Security Findings
 
@@ -1165,7 +1166,7 @@ Final (2026-11-05). Har number ek PR (ya ek chhota fix); saath jaane wale bugs e
 13. **QA-GW-002** (P4, owner decision): Redis wipe pe revocation fallback; ARCHITECTURE §6.6 ka faisla pehle, pehle non-identity `signed-in` route se pehle zaroor.
 14. **QA-FE-006** (P4, owner: timeout kitna): contracts + api-client client timeout; 2 ke saath sochna.
 15. **QA-TOOL-002** (P4): `scripts/e2e` cleanup backend band hone ke baad + purani DBs ka sweep.
-16. **QA-FE-005** (P4): app-shell playground stub 1 line.
+16. **QA-FE-005** (P4): app-shell playground stub 1 line. **Fixed (2026-11-07, `feat/qa-audit`, owner ke kehne pe pehle)**.
 17. **QA-DOC-001 + QA-DOC-002** (P4, owner): docs ka ek chhota PR (T6.3 aur progress % owner tay kare).
 18. **Q-011 / T6.6** (owner, bug nahi): security headers (`frame-ancestors`, nosniff, Referrer-Policy) ka chhota PR Phase 4 se pehle.
 
@@ -1206,3 +1207,4 @@ Final (2026-11-05). Har number ek PR (ya ek chhota fix); saath jaane wale bugs e
 | v1.8    | 2026-11-07 | QA-ID-001 Fixed (`feat/qa-audit`): refresh token family; repro release ke baad. §0 me fixes ki line, §5, §10. |
 | v1.9    | 2026-11-07 | QA-GW-001 + QA-KRN-001 Fixed (`feat/qa-audit`): Redis command timeout 1 s + gateway 500 ms, JWKS pehla read; §0, §5, §10. |
 | v1.10   | 2026-11-07 | QA-FE-009 Fixed (`feat/qa-audit`): server gate, sirf "Try again", `/iam/me` retry + sandesh; §0, §5, §10. |
+| v1.11   | 2026-11-07 | QA-FE-005 Fixed (playground stub `Request.signal`); QA-FE-009 ki fail screen browser me dekhi. |
