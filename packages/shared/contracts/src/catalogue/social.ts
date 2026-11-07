@@ -84,7 +84,7 @@ export const listSocialProviders = defineRoute({
   input: {},
   output: object({
     providers: array(zodEnum(SOCIAL_PROVIDERS)),
-    /** `https://bq-customer.vercel.app`; null when social sign-in is off */
+    /** `https://beautinique-customer.vercel.app`; null when social sign-in is off */
     origin: string().nullable(),
   }),
 });

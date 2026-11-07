@@ -92,7 +92,7 @@ describe('syncIndexes', () => {
 
   it('reports indexes nobody asked for, and never drops them', async () => {
     const products = fresh();
-    await mongo.db.collection(products).createIndex({ old: 1 }, { name: 'old_one' });
+    await mongo.db.collection(products).createIndex({ old: 1 }, { name: 'old_one' }, undefined);
     const report = await syncIndexes(mongo, [
       { collection: products, name: 'slug', key: { slug: 1 } },
     ]);
@@ -151,7 +151,9 @@ describe('syncIndexes', () => {
 
   it('refuses an index whose keys already exist under another name', async () => {
     const collection = fresh();
-    await mongo.db.collection(collection).createIndex({ email: 1 }, { name: 'email_old' });
+    await mongo.db
+      .collection(collection)
+      .createIndex({ email: 1 }, { name: 'email_old' }, undefined);
     const error = await syncIndexes(mongo, [
       { collection, name: 'email_new', key: { email: 1 } },
     ]).catch((caught: unknown) => caught);

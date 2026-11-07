@@ -1,6 +1,6 @@
 # infra — laptop ka local infra (Docker)
 
-> **Status:** v1.4 (2026-10-22). Docker Lesson 2 (TASKS T0.8). Docker sirf laptop ke liye hai; live server (Render) Docker nahi chalata, wahan Atlas, Render Key Value aur Brevo hain (ARCHITECTURE §11, §12).
+> **Status:** v1.5 (2026-11-05). Docker Lesson 2 (TASKS T0.8). Docker sirf laptop ke liye hai; live server (Render) Docker nahi chalata, wahan Atlas, Render Key Value aur Brevo hain (ARCHITECTURE §11, §12).
 
 ## Kya chalta hai
 
@@ -76,7 +76,7 @@ docker volume ls
 
 ## Jaal (traps)
 
-- **MongoDB 8.0 aur Linux kernel 6.19+:** naye kernel pe `mongo:8.0.x` shuru hi nahi hota ("MongoDB cannot start: Linux kernel versions 6.19 and newer ...", SERVER-121912), kyunki uska tcmalloc kernel ke ek badlav se toot jaata hai. Ubuntu/Azure ke `7.0.0-xx` kernel bhi block hote hain (SERVER-136848). GitHub ke `ubuntu-latest` aur `ubuntu-24.04` dono runners kernel `7.0.0-azure` pe hain (2026-10-22), isliye runner pin karna kaam nahi aaya. **Hal:** compose ke `mongo` service me `GLIBC_TUNABLES=glibc.pthread.rseq=1` (JIRA pe bataya gaya workaround; tcmalloc safe raaste pe chalta hai). Laptop (WSL2 kernel 6.18) pe bhi yahi chalta hai. MongoDB ka asli fix aane pe ye setting hata do. CI ka start step kernel version print karta hai.
+- **MongoDB 8.0 aur Linux kernel 6.19+:** naye kernel pe `mongo:8.0.x` shuru hi nahi hota ("MongoDB cannot start: Linux kernel versions 6.19 and newer ...", SERVER-121912), kyunki uska tcmalloc kernel ke ek badlav se toot jaata hai. Ubuntu/Azure ke `7.0.0-xx` kernel bhi block hote hain (SERVER-136848). GitHub ke `ubuntu-latest` aur `ubuntu-24.04` dono runners kernel `7.0.0-azure` pe hain (2026-10-22), isliye runner pin karna kaam nahi aaya. **Hal:** compose ke `mongo` service me `GLIBC_TUNABLES=glibc.pthread.rseq=1` (JIRA pe bataya gaya workaround; tcmalloc safe raaste pe chalta hai). Laptop (WSL2 kernel 6.18) pe bhi yahi chalta hai. MongoDB ka asli fix aane pe ye setting hata do. CI ka start step kernel version print karta hai. **Jaanch aur faisla (owner, 2026-11-05; QA KNOWN-08): jaisa hai.** `mongo:8.0.34` hi 8.0 ka sabse naya version hai, aur asli fix abhi nahi: SERVER-125742 ne kernel 7.0.14+ ko chhoot di, par Ubuntu `uname -r` me `7.0.0` batata hai, isliye chhoot nahi lagti (SERVER-136848, khula; 8.0.32, 8.3.11 aur 9.0.2 teeno affected). 8.2 me ye jaanch nahi, par wo naye kernel pe crash hota hai (SERVER-122741). Isliye server ka version badalna hal nahi, aur live (Atlas 8.0) se mel bhi tootta. Ye sirf laptop aur CI ke Docker Mongo ki baat hai: npm ka `mongodb` driver (7.8) aur Atlas pe iska asar nahi. **Kab aur kaise hatao:** jab 8.0 ka koi naya version SERVER-136848 theek kare (har Mongo version badlav pe ye issue dekh lo): (1) `docker-compose.yml` me dono services (`mongo`, `mongo-mutation`) ka `image` us version pe; (2) dono ka `environment` + `GLIBC_TUNABLES` aur `mongo` ke upar ka comment hatao; (3) ye note aur HANDOFF §6 ka trap badlo; (4) PR: CI me Mongo shuru ho aur tests green rahein (start step `uname -r` dikhata hai).
 - **Port pehle se busy** (`port is already allocated`): laptop pe Windows ki MongoDB service ya koi purana container 27017/6379 pe chal raha hai. Use band karo (`services.msc` me MongoDB, ya `docker ps`).
 - **Containers ke andar se Mongo (Lesson 4, split mode):** replica set ka member `localhost:27017` hai, jo laptop se sahi hai par doosre container ke andar nahi. Wahan connection string `mongodb://mongo:27017/<db>?directConnection=true` hogi.
 - **`infra:reset` data mitata hai:** seed data dobara daalna padega (`db:seed`, T4.x).
@@ -91,3 +91,4 @@ docker volume ls
 | v1.2    | 2026-10-21 | CI aur release `valkey` bhi chalate hain (server-queue ke tests).                                            |
 | v1.3    | 2026-10-22 | Trap: MongoDB 8.0 Linux kernel 6.19+ pe shuru nahi hota (CI pin, laptop 6.18).                               |
 | v1.4    | 2026-10-22 | Mutation testing ke liye alag Mongo (27018) aur Valkey (6380), `mutation` profile; `infra:mutation:up/down`. |
+| v1.5    | 2026-11-05 | Trap: MongoDB kernel workaround jaisa hai (QA KNOWN-08), aaj ki jaanch aur hatane ki checklist.              |

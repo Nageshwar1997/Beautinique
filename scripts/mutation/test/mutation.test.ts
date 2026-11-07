@@ -4,6 +4,7 @@ import {
   mkdirSync,
   mkdtempSync,
   readdirSync,
+  readFileSync,
   rmSync,
   symlinkSync,
   unlinkSync,
@@ -208,6 +209,27 @@ describe('runMutations on a real package', () => {
     );
     expect(readdirSync(join(REPO, 'node_modules', 'vitest')).length).toBeGreaterThan(0);
     expect(git('status', '--porcelain', '--', `${pkg}/src`)).toBe('');
+  });
+
+  it("keeps CI's job summary to this run: a killed mutant's failing tests never write to it", async () => {
+    list([{ file: 'math', name: 'minus', change: [['a + b', 'a - b']], tests: 'adds' }]);
+    const stepSummary = join(root, 'step-summary.md');
+    writeFileSync(stepSummary, '');
+    // as GitHub Actions runs this test (restored after, as CI has its own values)
+    const saved = [process.env.GITHUB_ACTIONS, process.env.GITHUB_STEP_SUMMARY];
+    process.env.GITHUB_ACTIONS = 'true';
+    process.env.GITHUB_STEP_SUMMARY = stepSummary;
+    try {
+      const { summary } = await run();
+      expect(summary.results.map((r) => r.outcome)).toEqual(['killed']);
+    } finally {
+      const [actions, stepFile] = saved;
+      if (actions === undefined) delete process.env.GITHUB_ACTIONS;
+      else process.env.GITHUB_ACTIONS = actions;
+      if (stepFile === undefined) delete process.env.GITHUB_STEP_SUMMARY;
+      else process.env.GITHUB_STEP_SUMMARY = stepFile;
+    }
+    expect(readFileSync(stepSummary, 'utf8')).toBe('');
   });
 
   it('says when a known survivor is killed now', async () => {

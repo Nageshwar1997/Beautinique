@@ -50,9 +50,19 @@ export default defineConfig(({ command, mode, isPreview = false }) => {
       themeScript(),
       devKeys(env),
     ],
-    // the one key the browser gets: the server's public address, for the wake-up screen's straight
-    // call to its /wake (ARCHITECTURE §11.1). Nothing else of the env reaches the bundle.
-    define: { 'import.meta.env.BQ_GATEWAY_URL': JSON.stringify(gatewayUrl) },
+    // what the browser gets of the env, nothing else: the server's public address, for the wake-up
+    // screen's straight call to its /wake (ARCHITECTURE §11.1), and for error monitoring (§14) the
+    // Sentry DSN (public by design; none on the laptop and in CI: monitoring off), Vercel's
+    // environment and the deployed commit
+    define: {
+      'import.meta.env.BQ_GATEWAY_URL': JSON.stringify(gatewayUrl),
+      'import.meta.env.BQ_SENTRY_DSN': JSON.stringify((env.BQ_SENTRY_DSN ?? '').trim()),
+      'import.meta.env.BQ_SENTRY_ENVIRONMENT': JSON.stringify(env.VERCEL_ENV ?? ''),
+      'import.meta.env.BQ_SENTRY_RELEASE': JSON.stringify(env.VERCEL_GIT_COMMIT_SHA ?? ''),
+    },
+    // source maps next to the scripts, so Sentry shows errors in the source; the repo is public, so
+    // they give away nothing
+    build: { sourcemap: true },
     server: {
       port,
       strictPort: true,

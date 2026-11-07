@@ -374,7 +374,7 @@ describe('runRelease', () => {
   });
 
   it('stops at an index conflict, and gives the lease back', async () => {
-    await mongo.db.collection('orders').createIndex({ other: 1 }, { name: 'buyer' });
+    await mongo.db.collection('orders').createIndex({ other: 1 }, { name: 'buyer' }, undefined);
     await expect(runRelease(options({ indexes: [ordersIndex] }))).rejects.toMatchObject({
       name: 'IndexConflictError',
     });
@@ -428,7 +428,7 @@ describe('runRelease', () => {
   });
 
   it('warns about indexes nobody asks for, and keeps them', async () => {
-    await mongo.db.collection('orders').createIndex({ old: 1 }, { name: 'old_one' });
+    await mongo.db.collection('orders').createIndex({ old: 1 }, { name: 'old_one' }, undefined);
     const report = await runRelease(options({ indexes: [ordersIndex] }));
     expect(report.indexes.extra).toEqual(['orders.old_one']);
     expect(

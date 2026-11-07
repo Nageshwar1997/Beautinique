@@ -1,6 +1,6 @@
 # Packages — banana, publish aur republish
 
-> **Status:** v1.9 (2026-10-26). **Abhi publish/republish nahi (owner ka faisla, 2026-10-21):** apps isi monorepo se package lete hain (npm workspaces), live deploy pe bhi. Publish sirf zaroorat pe; packages public hi rahenge. `packages/` ke saare npm packages ka kaam, aur naye frontend apps aur backend apps banana, is repo ke apne CLI (`scripts/packages/`) se hota hai. Ye guide batati hai ki kaunsa command kab chalana hai aur andar kya hota hai.
+> **Status:** v1.10 (2026-11-05). **Abhi publish/republish nahi (owner ka faisla, 2026-10-21):** apps isi monorepo se package lete hain (npm workspaces), live deploy pe bhi. Publish sirf zaroorat pe; packages public hi rahenge. `packages/` ke saare npm packages ka kaam, aur naye frontend apps aur backend apps banana, is repo ke apne CLI (`scripts/packages/`) se hota hai. Ye guide batati hai ki kaunsa command kab chalana hai aur andar kya hota hai.
 
 ## 1. Packages kahan aur kis naam se
 
@@ -119,6 +119,7 @@ npm run update-deps -- --dry-run     # sirf plan, kuch nahi badalta
 - **Kabhi nahi:** `latest` tag se upar (next/canary), deprecated version, prerelease, ya jo version chalte Node.js ko support na kare.
 - **Peers:** kisi dependency ka naya version kisi doosri ki peer range me fit na ho, to dono me se ek peeche rehta hai (pehle peer, jaise eslint 10 pe jab tak typescript-eslint 11 na maane; warna dependent). Report me wajah ke saath.
 - **Hold:** `typescript` kabhi nahi chhuta (typescript-eslint sirf <6.1 maanta hai). Report batata hai ki naya TypeScript aaya ya nahi, aur kab hold hata sakte ho (`HELD` in `scripts/packages/lib/dependencies.ts`).
+- **`overrides` nahi chhuta:** root `package.json` ke `overrides` (abhi `glob` 14 aur `minimatch` 11, security fix ke liye; [HANDOFF.md](../HANDOFF.md) §6) waise hi rehte hain. Update ke baad `npm ls glob minimatch --all` dekho: har parent khud naya major maangne lage to override hatao.
 - **Install do baar:** pehle har badli line exact version ke saath `npm install` (warna `^` range pe npm `--level patch` me bhi naya minor le leta), phir range apne style me aur dobara `npm install` (installed version range me fit hai, npm wahi rakhta hai). Aakhir me lockfile me versions plan se milaye jaate hain.
 - **Fail ya Ctrl+C:** saare package.json aur `package-lock.json` wapas jaise the. npm beech me ruka ho to `npm install` chalao.
 - **Baad me (insaan):** `npm run build`, `lint`, `typecheck`, `npm test` (`infra:up` ke saath). Major update code badalwa sakta hai, isliye checks fail hone pe script khud wapas nahi karta; release notes padho, phir commit.
@@ -137,3 +138,4 @@ npm run update-deps -- --dry-run     # sirf plan, kuch nahi badalta
 | v1.7    | 2026-10-21 | CI aur release tests se pehle `valkey` bhi chalate hain.                                                                                                                                                                                                                                                                                                                     |
 | v1.8    | 2026-10-23 | `npm run update-deps` (§2, §7): saare package.json ki dependencies, `--level patch/minor/major` (default major), typescript hold.                                                                                                                                                                                                                                            |
 | v1.9    | 2026-10-26 | `npm run build -- --for <workspace>`: sirf ek app/deployable aur uske packages (deploy).                                                                                                                                                                                                                                                                                     |
+| v1.10   | 2026-11-05 | §7: `update-deps` root `overrides` (`glob` 14, `minimatch` 11) nahi chhuta; kab hatana. |

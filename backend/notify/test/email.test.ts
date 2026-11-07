@@ -241,14 +241,14 @@ describe('the invitation emails', () => {
       app: 'admin',
       roleName: 'State Admin',
       expiresAt: '2026-11-05T09:30:00.000Z',
-      url: 'https://bq-admin.example',
+      url: 'https://beautinique-admin.example',
     });
     expect(email.subject).toBe('You are invited to Beautinique Admin');
     expect(email.text).toContain('as State Admin');
     expect(email.text).toContain('"Accept an invitation"');
     expect(email.text).toContain('5 Nov 2026, 3:00 pm IST');
-    expect(email.text).toContain('https://bq-admin.example');
-    expect(email.html).toContain('href="https://bq-admin.example"');
+    expect(email.text).toContain('https://beautinique-admin.example');
+    expect(email.html).toContain('href="https://beautinique-admin.example"');
     expect(email.tags).toEqual(['invitation']);
     const escaped = invitationEmail({
       to: 'x@beautinique.example',
