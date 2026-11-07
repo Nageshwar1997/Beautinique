@@ -145,7 +145,7 @@ const mutations: Mutation[] = [
     name: 'JWKS never read again',
     change: [
       [
-        'const stale = now() - loadedAt >= maxAgeMs;',
+        'const stale = at - loadedAt >= maxAgeMs;',
         'const stale = loadedAt === Number.NEGATIVE_INFINITY;',
       ],
     ],
@@ -154,18 +154,48 @@ const mutations: Mutation[] = [
   {
     file: 'tokens',
     name: 'JWKS read for every unknown key',
-    change: [['!keys.has(kid) && now() - loadedAt >= minRefetchMs', '!keys.has(kid)']],
+    change: [
+      ['const due = at - triedAt >= (loaded() ? minRefetchMs : retryMs);', 'const due = true;'],
+    ],
     tests: 'jwksCache',
   },
   {
     file: 'tokens',
     name: 'a failed read empties the keys',
+    change: [['    triedAt = startedAt;\n', '    triedAt = startedAt;\n    keys = new Map();\n']],
+    tests: 'jwksCache',
+  },
+  // QA-KRN-001: no empty set before the first read, and a failed first read tried again after 1 s
+  {
+    file: 'tokens',
+    name: 'an empty set before the first read (QA-KRN-001)',
+    change: [["      if (!loaded()) throw new Error('The JWKS is not read yet');\n", '']],
+    tests: 'jwksCache',
+  },
+  {
+    file: 'tokens',
+    name: 'a failed first read counts as a read',
     change: [
-      [
-        '  const reload = async () => {\n    loadedAt = now();',
-        '  const reload = async () => {\n    keys = new Map();\n    loadedAt = now();',
-      ],
+      ['    triedAt = startedAt;\n', '    triedAt = startedAt;\n    loadedAt = startedAt;\n'],
     ],
+    tests: 'jwksCache',
+  },
+  {
+    file: 'tokens',
+    name: 'a failed first read waits 30 s',
+    change: [['(loaded() ? minRefetchMs : retryMs)', 'minRefetchMs']],
+    tests: 'jwksCache',
+  },
+  {
+    file: 'tokens',
+    name: 'a failed read drops the keys it had for that request',
+    change: [['if (!loaded() || missing) throw error;', 'throw error;']],
+    tests: 'jwksCache',
+  },
+  {
+    file: 'tokens',
+    name: 'a token of an unknown key passes a failed read',
+    change: [['if (!loaded() || missing) throw error;', 'if (!loaded()) throw error;']],
     tests: 'jwksCache',
   },
   {

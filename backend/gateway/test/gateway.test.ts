@@ -1385,5 +1385,10 @@ describe('sign-in at the gateway (T3.2)', () => {
       503,
       'SERVICE_UNAVAILABLE',
     ]);
+    // the next request too, before the cache may read again: 503, never a sign-out (QA-KRN-001)
+    expect(await errorOf(await profile(noKeys, atCookie(accessToken())))).toEqual([
+      503,
+      'SERVICE_UNAVAILABLE',
+    ]);
   });
 });
