@@ -201,7 +201,8 @@ export function CodeInput({
             inputMode="numeric"
             autoComplete="one-time-code"
             pattern="[0-9]*"
-            maxLength={length}
+            // no maxLength: the browser cuts a paste, autofill or IME text to it before onChange
+            // drops the non-digits (" 123456" lost its 6; QA-FE-003). onChange cuts to `length`.
             disabled={disabled}
             value={digits}
             onFocus={(event) => {

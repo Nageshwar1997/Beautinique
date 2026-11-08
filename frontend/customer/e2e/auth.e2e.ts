@@ -66,8 +66,13 @@ test('sets a new password with an emailed code, which signs every device out', a
   await expectNoAxeViolations(page);
   await page.getByLabel('Email').fill(email);
   await page.getByRole('button', { name: 'Send code' }).click();
-  // the second email to this address: sign-up's code was the first
-  await page.getByLabel('Code from the email').fill(await codeFor(email, 2));
+  // the second email to this address: sign-up's code was the first. Put in as one insert, with
+  // the space a copy from the email brings, as a paste is: every digit counts (QA-FE-003)
+  const code = await codeFor(email, 2);
+  const codeField = page.getByLabel('Code from the email');
+  await codeField.focus();
+  await page.keyboard.insertText(` ${code}`);
+  await expect(codeField).toHaveValue(code);
   await page.getByLabel('Password', { exact: true }).fill(NEW_PASSWORD);
   await page.getByRole('button', { name: 'Set password' }).click();
   await expect(page).toHaveURL('/sign-in');

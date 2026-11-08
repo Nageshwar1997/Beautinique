@@ -186,7 +186,8 @@ describe('CodeInput', () => {
     const input = screen.getByRole('textbox', { name: 'Code from the email' });
     expect(input.getAttribute('autocomplete')).toBe('one-time-code');
     expect(input.getAttribute('inputmode')).toBe('numeric');
-    expect(input.getAttribute('maxlength')).toBe('6');
+    // no maxlength: the browser would cut a paste before the non-digits go (QA-FE-003)
+    expect(input.hasAttribute('maxlength')).toBe(false);
     const boxes = container.querySelectorAll('span[aria-hidden="true"]');
     expect(boxes).toHaveLength(6);
     await expectNoAxeViolations();
@@ -217,6 +218,19 @@ describe('CodeInput', () => {
     expect(input).toHaveProperty('value', '9876');
     expect(onComplete).toHaveBeenCalledExactlyOnceWith('9876');
   });
+
+  it.each([' 123456', '123 456', '123-456', ' 123456 ', '1234567'])(
+    'a pasted "%s" gives the whole code, cut only after the non-digits go (QA-FE-003)',
+    async (pasted) => {
+      const onComplete = vi.fn();
+      render(<Code onComplete={onComplete} />);
+      const input = screen.getByRole('textbox');
+      await userEvent.click(input);
+      await userEvent.paste(pasted);
+      expect(input).toHaveProperty('value', '123456');
+      expect(onComplete).toHaveBeenCalledExactlyOnceWith('123456');
+    },
+  );
 
   it('marks the box where the next digit goes while focused, and only then', async () => {
     const { container } = render(<Code />);

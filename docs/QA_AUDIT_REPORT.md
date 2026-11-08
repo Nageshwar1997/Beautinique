@@ -1,10 +1,10 @@
 # QA AUDIT REPORT — BQ
 
-> **Status:** v1.19 (2026-11-08, final; §2a me KNOWN faislon ki halat, §0 me fixes). Audit base: `origin/prerelease` @ `ee7f46a` (`ee7f46ae7b2605d99f6b4497d26303aa109fb371`). Auditor: Claude Code (Opus 5.5, `claude-opus-5-5`). Ye report audit ki single source of truth hai; fixes alag se, ek-ek karke.
+> **Status:** v1.20 (2026-11-08, final; §2a me KNOWN faislon ki halat, §0 me fixes). Audit base: `origin/prerelease` @ `ee7f46a` (`ee7f46ae7b2605d99f6b4497d26303aa109fb371`). Auditor: Claude Code (Opus 5.5, `claude-opus-5-5`). Ye report audit ki single source of truth hai; fixes alag se, ek-ek karke.
 
 ## 0. Audit state (har session ke aakhir me update)
 
-- **Fixes (2026-11-07 se, branch `feat/qa-audit`, §10 ke kram se, har fix ka apna commit, saare fixes ke baad ek PR → `prerelease` (owner, 2026-11-07)):** 1. QA-ID-001 Fixed (2026-11-07). 2. QA-GW-001 + QA-KRN-001 Fixed (2026-11-07). 3. QA-FE-009 Fixed (2026-11-07). 16. QA-FE-005 Fixed (2026-11-07, owner ke kehne pe pehle). 4. QA-FE-004 + QA-FE-010 Fixed (2026-11-07). 5. QA-FE-008 Fixed (2026-11-07). 6. QA-FE-001 + QA-FE-007 Fixed (2026-11-08). 7. QA-CI-001 Fixed (2026-11-08). 8. QA-ID-002 Fixed (2026-11-08). 12. QA-TOOL-001 Fixed (2026-11-08, owner ke kehne pe pehle). 9. QA-CUS-001 Fixed (2026-11-08). Agla: QA-FE-003 + QA-FE-002.
+- **Fixes (2026-11-07 se, branch `feat/qa-audit`, §10 ke kram se, har fix ka apna commit, saare fixes ke baad ek PR → `prerelease` (owner, 2026-11-07)):** 1. QA-ID-001 Fixed (2026-11-07). 2. QA-GW-001 + QA-KRN-001 Fixed (2026-11-07). 3. QA-FE-009 Fixed (2026-11-07). 16. QA-FE-005 Fixed (2026-11-07, owner ke kehne pe pehle). 4. QA-FE-004 + QA-FE-010 Fixed (2026-11-07). 5. QA-FE-008 Fixed (2026-11-07). 6. QA-FE-001 + QA-FE-007 Fixed (2026-11-08). 7. QA-CI-001 Fixed (2026-11-08). 8. QA-ID-002 Fixed (2026-11-08). 12. QA-TOOL-001 Fixed (2026-11-08, owner ke kehne pe pehle). 9. QA-CUS-001 Fixed (2026-11-08). 10. QA-FE-003 + QA-FE-002 Fixed (2026-11-08). Agla: QA-ADM-001.
 - **Gate 1: approved (2026-11-04).** Owner ke jawab (saari recommendations maani):
   - Live pe passive GETs: **haan, kul ≤ 15**, bina auth: `bq-live` `/health`, `/status`, ek anjaan path; customer + admin ka home aur ek 404 (headers, TLS). OTP/auth/write/fuzz/rate-limit/load kabhi nahi.
   - Playwright: Chromium 1248 pehle se installed (Playwright 1.64.1 ki zaroorat yahi); koi download nahi chahiye
@@ -718,7 +718,7 @@ Plan: **E** = planned-executed (local stack, HTTP, browser, scratch script), **S
 ### [QA-FE-002] Escape in a HierarchySelect with a selection wipes the selection instead of closing the box
 
 **Module:** M10 (`@beautinique/frontend-components`) | **Feature:** `HierarchySelect` keyboard | **Task/Doc:** T6.1; component ka doc comment (`hierarchy-select.tsx:100`: "Escape closes")
-**Severity:** P3 (keyboard user ka chuna hua input chup-chaap mit jaata hai; aaj koi bana hua app ise use nahi karta, pehla form Phase 4 catalog/seller me) | **Priority:** Low | **Status:** Open
+**Severity:** P3 (keyboard user ka chuna hua input chup-chaap mit jaata hai; aaj koi bana hua app ise use nahi karta, pehla form Phase 4 catalog/seller me) | **Priority:** Low | **Status:** Fixed (2026-11-08, `feat/qa-audit`, commit "fix(components): a pasted code keeps every digit, and Escape in a HierarchySelect keeps the choice (QA-FE-003, QA-FE-002)")
 **Testing Type:** Functional / A11y (keyboard) | **Evidence level:** E1 | **Reproducibility:** Always (2/2 runs) | **Environment:** components playground (5184), Chromium (built-in browser), react-aria-components 1.22.1
 **Description:** Popover ke andar Tree pe focus ho aur kuch chuna ho, to Escape React Aria ke collection ka default `escapeKeyBehavior: 'clearSelection'` chalata hai: multiple mode me poori selection `[]` commit ho jaati hai aur box khula rehta hai (Escape popover tak pahunchta hi nahi). Doosra Escape box band karta hai, tab tak value ja chuki. Single mode me selection mitne pe component box band karta hai (value bachti), isliye wahan asar nahi.
 **Steps to Reproduce:** 1. `npm run playground --workspace @beautinique/frontend-components`, `/` → HierarchySelect "Areas" (value `["mh"]`). 2. Trigger pe Enter → ArrowDown (tree me "Maharashtra"). 3. Escape.
@@ -732,11 +732,12 @@ Plan: **E** = planned-executed (local stack, HTTP, browser, scratch script), **S
 **Regression Risk:** Low.
 **Regression test to add:** unit: multiple mode, ek value chuni → Escape → `onChange` nahi bulaya, dialog band, focus trigger pe.
 **Owner decision needed:** Nahi
+**Fix (2026-11-08, owner ne Claude ki salah "option A" maani):** `<Tree>` pe `escapeKeyBehavior="none"`: Escape ab popover tak jaata hai, box band, value wahi. Baaki collections jaanche: `Select` ka multiple mode pehle se sahi (maujooda test me Escape ke baad trigger pe chuni value), ComboBox single; sirf Tree me galti thi. Test: multiple mode, value chuni, ArrowDown se list pe, Escape → `onChange` nahi, box band, focus trigger pe, trigger pe value (purane code pe fail: `onChange` ek baar). Browser (components playground 5184, "Areas" `["mh"]`): light, dark aur 360 px teeno me Enter → ArrowDown (focus "Maharashtra") → Escape: box band, focus trigger pe, `areas: ["mh"]`; 360 pe side scroll nahi. Mutation nahi (frontend package).
 
 ### [QA-FE-003] Pasting a code with a leading space into a code field drops the last digit
 
 **Module:** M10 (`@beautinique/frontend-components` `CodeInput`, forms `CodeField`) | **Feature:** email code + authenticator code entry (sign-in, sign-up, forgot password, invitation, step-up, authenticator setup) | **Task/Doc:** T3.1, T6.1; `CodeInput` ka kaam: non-digits hata ke 6 digits
-**Severity:** P3 (core flow me chhoti UX dikkat: insaan ko ek digit dobara type karna padta; security asar nahi) | **Priority:** Low | **Status:** Open
+**Severity:** P3 (core flow me chhoti UX dikkat: insaan ko ek digit dobara type karna padta; security asar nahi) | **Priority:** Low | **Status:** Fixed (2026-11-08, `feat/qa-audit`, commit "fix(components): a pasted code keeps every digit, and Escape in a HierarchySelect keeps the choice (QA-FE-003, QA-FE-002)")
 **Testing Type:** Edge / Functional | **Evidence level:** E1 | **Reproducibility:** Always (2/2) | **Environment:** forms playground (5185), Chromium
 **Description:** Chhupa `<input>` `maxLength={6}` rakhta hai, aur digits ke alawa sab `onChange` me hatata hai. Browser `maxlength` ko insert ke waqt (paste, IME, autofill) **filter se pehle** lagata hai: `" 123456"` (email se copy me aage space, ya `"123 456"`) pehle 6 chars `" 12345"` banta hai, phir digits `12345`. 6 se lambe input me baaki bhi kat jaate hain.
 **Steps to Reproduce:** forms playground → "Create an account" → "Code from the email" pe focus → `" 123456"` ek saath insert (paste jaisa; built-in browser me `type` action = ek `insertText`).
@@ -750,6 +751,7 @@ Plan: **E** = planned-executed (local stack, HTTP, browser, scratch script), **S
 **Regression Risk:** Low.
 **Regression test to add:** components unit: `userEvent.paste(' 123456 ')` aur `'123-456'` → `onChange('123456')`.
 **Owner decision needed:** Nahi
+**Fix (2026-11-08, owner ne Claude ki salah "option A" maani):** `CodeInput` se `maxLength` hata (digits chhaantna aur `slice(0, length)` pehle se `onChange` me), to paste, autofill aur IME teeno ek raaste se. Repo me `maxLength` + baad me filter wala aur koi field nahi. Purana paste test `fireEvent.change` se value seedhi deta tha (browser ki `maxlength` bypass), isliye bug bacha. Tests: `userEvent.paste` se `" 123456"`, `"123 456"`, `"123-456"`, `" 123456 "` → `123456` (purane code pe chaaron `12345`), `"1234567"` control, aur input pe `maxlength` nahi. Customer E2E "sets a new password" me code ab asli Chromium `insertText` se aage space ke saath: purane components build pe fail ("386912" ki jagah "38691"), fix ke saath pass. Browser (components playground, 360 px): `" 123456"` daalne pe value `123456`, chhe dabbe bhare. Components pe tike saare workspaces ke tests pass (components 119, forms 18, auth-ui 91, admin 20, customer 40); poora customer E2E 39 pass / 57 skip, admin E2E 10 pass / 14 skip; lint, typecheck, format pass. Mutation nahi (frontend package).
 
 ### [QA-FE-007] A 5xx from the proxy (not the gateway) shows people the raw text "Request failed with status 502"
 
@@ -1169,7 +1171,7 @@ Final (2026-11-05). Har number ek PR (ya ek chhota fix); saath jaane wale bugs e
 7. **QA-CI-001** (P3): `ci.yml` branch flow me head repo bhi; `prerelease` pe chhota fix. **Fixed (2026-11-08, `feat/qa-audit`)**: niyam `scripts/ci/` me test ke saath, `main`/`release` sirf isi repo ki branch se; check galti se bachav hai, taala merge ka haq (RULES §2).
 8. **QA-ID-002** (P3): social lookup ka index (do queries + explain test); social sign-ins badhne se pehle. **Fixed (2026-11-08, `feat/qa-audit`)**: naya index (`$gt: ''`) + `bySubject` + migration, aur identity/notify/core ke tests ka COLLSCAN pehra (RULES §4.13).
 9. **QA-CUS-001** (P3): customer `root.tsx` `error == null`; 1 line + test. **Fixed (2026-11-08, `feat/qa-audit`)**: root `null` bhi "koi error nahi", aur account layout ka apna title + `noindex`.
-10. **QA-FE-003 + QA-FE-002** (P3): components ka ek PR (`CodeInput` maxLength, HierarchySelect Escape).
+10. **QA-FE-003 + QA-FE-002** (P3): components ka ek PR (`CodeInput` maxLength, HierarchySelect Escape). **Fixed (2026-11-08, `feat/qa-audit`)**: `maxLength` hata, Tree pe `escapeKeyBehavior="none"`.
 11. **QA-ADM-001** (P3): admin header 360 px + Playwright overflow assertion (customer bhi).
 12. **QA-TOOL-001** (P3): `.prettierignore` me `.claude/worktrees`; kabhi bhi. **Fixed (2026-11-08, `feat/qa-audit`, owner ke kehne pe pehle)**: Prettier, git, root ESLint aur root Vitest teeno worktree chhodte hain.
 13. **QA-GW-002** (P4, owner decision): Redis wipe pe revocation fallback; ARCHITECTURE §6.6 ka faisla pehle, pehle non-identity `signed-in` route se pehle zaroor.
@@ -1225,3 +1227,4 @@ Final (2026-11-05). Har number ek PR (ya ek chhota fix); saath jaane wale bugs e
 | v1.17   | 2026-11-08 | QA-ID-002 Fixed (`feat/qa-audit`): naya provider-id index + `bySubject` + migration, tests ka COLLSCAN pehra (identity, notify, core); §0, §8, §10. |
 | v1.18   | 2026-11-08 | QA-TOOL-001 Fixed (`feat/qa-audit`, owner ke kehne pe pehle): Prettier, `.gitignore`, root ESLint aur root Vitest `.claude/worktrees` chhodte hain; §0, §10. |
 | v1.19   | 2026-11-08 | QA-CUS-001 Fixed (`feat/qa-audit`): root `meta` `null` bhi "koi error nahi", account layout ka apna title + `noindex`; §0, §10. |
+| v1.20   | 2026-11-08 | QA-FE-003 + QA-FE-002 Fixed (`feat/qa-audit`): `CodeInput` me `maxLength` nahi, HierarchySelect me Escape value rakhta; §0, §10. |
