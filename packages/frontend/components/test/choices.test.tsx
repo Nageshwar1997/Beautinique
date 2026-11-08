@@ -1,4 +1,4 @@
-import { cleanup, render, screen } from '@testing-library/react';
+import { cleanup, fireEvent, render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { createRef, useState } from 'react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
@@ -42,6 +42,43 @@ describe('Checkbox', () => {
     expect(box).toHaveProperty('checked', false);
     expect(onChange.mock.calls).toEqual([[true], [false]]);
     await expectNoAxeViolations();
+  });
+
+  it('opens a link in its label instead of toggling, by click and by Enter; the rest of the label still toggles', async () => {
+    const user = userEvent.setup();
+    const onChange = vi.fn();
+    render(
+      <Checkbox onChange={onChange}>
+        I accept the{' '}
+        <a href="/terms" target="_blank" rel="noreferrer">
+          terms of use
+        </a>
+      </Checkbox>,
+    );
+    const box = screen.getByRole('checkbox');
+    const link = screen.getByRole('link', { name: 'terms of use' });
+    // the link's clicks, read once they are over: nobody stopped their default, so the link opens
+    const clicks: MouseEvent[] = [];
+    link.addEventListener('click', (event) => clicks.push(event));
+    // a mouse click and Enter on the link, sent as the browser sends them. Not user-event: it
+    // hands any click inside a label to the box, through a link too (14.6.8), which the HTML
+    // spec and browsers do not do (a label does nothing for a click on a link inside it).
+    const mouse = { pointerType: 'mouse', pointerId: 1, button: 0, buttons: 1 };
+    fireEvent.pointerDown(link, mouse);
+    fireEvent.mouseDown(link, mouse);
+    fireEvent.pointerUp(link, { ...mouse, buttons: 0 });
+    fireEvent.mouseUp(link, { ...mouse, buttons: 0 });
+    fireEvent.click(link, { ...mouse, buttons: 0, detail: 1 });
+    link.focus();
+    fireEvent.keyDown(link, { key: 'Enter' });
+    fireEvent.click(link);
+    fireEvent.keyUp(link, { key: 'Enter' });
+    expect(clicks.map((event) => event.defaultPrevented)).toEqual([false, false]);
+    expect(box).toHaveProperty('checked', false);
+    expect(onChange).not.toHaveBeenCalled();
+    // the words around it toggle, as any label
+    await user.click(screen.getByText(/I accept the/));
+    expect(box).toHaveProperty('checked', true);
   });
 
   it('draws the check when selected and the dash when indeterminate', () => {

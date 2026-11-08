@@ -192,3 +192,32 @@ test('a keyboard sign-up: each step takes the focus and says what happened (QA-F
   await expect(page).toHaveURL('/credits');
   await expect(accountButton(page, email)).toBeVisible();
 });
+
+test('the consent’s links open the terms and the privacy notice in a new tab, and leave the box alone', async ({
+  page,
+}, testInfo) => {
+  test.skip(
+    !['chromium-1280-light', 'chromium-360-dark'].includes(testInfo.project.name),
+    'a phone and a desk are enough here',
+  );
+  await page.goto('/sign-up');
+  await expect(page.getByRole('heading', { level: 1, name: 'Create an account' })).toBeVisible();
+  const box = page.getByRole('checkbox', { name: /I accept the/ });
+  for (const [name, path] of [
+    ['terms of use', '/terms'],
+    ['privacy notice', '/privacy'],
+  ] as const) {
+    const opened = page.waitForEvent('popup');
+    // the form's link (the footer has its own)
+    await page.getByRole('main').getByRole('link', { name, exact: true }).click();
+    const tab = await opened;
+    await tab.waitForLoadState();
+    expect(new URL(tab.url()).pathname).toBe(path);
+    await tab.close();
+    await expect(box).not.toBeChecked();
+  }
+  // the words around them still tick it
+  // (its first words, top left: the middle of the label is a link)
+  await page.getByText('I accept the').click({ position: { x: 4, y: 6 } });
+  await expect(box).toBeChecked();
+});

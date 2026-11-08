@@ -1,4 +1,4 @@
-import { cleanup, screen, waitFor } from '@testing-library/react';
+import { cleanup, fireEvent, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { afterEach, describe, expect, it } from 'vitest';
 
@@ -67,6 +67,14 @@ describe('SignUpForm', () => {
       '/terms',
       '_blank',
     ]);
+    // and a click on them opens them, not the box (a browser's click: see components' Checkbox test)
+    for (const name of ['terms of use', 'privacy notice']) {
+      const link = screen.getByRole('link', { name });
+      fireEvent.pointerDown(link, { pointerType: 'mouse', pointerId: 1, button: 0 });
+      fireEvent.pointerUp(link, { pointerType: 'mouse', pointerId: 1, button: 0 });
+      expect(fireEvent.click(link)).toBe(true);
+    }
+    expect(screen.getByRole('checkbox', { name: /I accept the/ })).toHaveProperty('checked', false);
     await user.click(screen.getByRole('checkbox', { name: /I accept the/ }));
     await user.click(screen.getByRole('checkbox', { name: 'I am 18 or older' }));
     await user.click(screen.getByRole('button', { name: 'Send code' }));

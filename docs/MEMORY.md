@@ -1,6 +1,6 @@
 # MEMORY — BQ
 
-> **Status:** v1.64 (2026-11-07). Project ki yaaddasht: **kya tay hua aur kyun**, **pichhle kaam se kya seekha**, aur **kaunse jaal (traps) se bachna hai**. Poori detail baaki docs me hai; yahan short version aur pointers. Naya sabak ya decision aaye to yahan ek line jodo.
+> **Status:** v1.65 (2026-11-07). Project ki yaaddasht: **kya tay hua aur kyun**, **pichhle kaam se kya seekha**, aur **kaunse jaal (traps) se bachna hai**. Poori detail baaki docs me hai; yahan short version aur pointers. Naya sabak ya decision aaye to yahan ek line jodo.
 
 ## 1. Decision log
 
@@ -145,6 +145,7 @@
 28. **Do `BroadcastChannel` ke sandeshon ke kram pe bharosa mat karo (2026-11-07, QA-FE-010):** idle tab pehle `timed-out` (idle channel) bhejta tha, phir server ke jawab ke baad `signed-out` (session channel); doosra tab bhi apna `signed-out` bhejta. Jo sandesh pehle pahunche wahi tab ki halat tay karta, aur wajah (idle) sirf ek channel pe thi. **Sabak:** jo baat ek saath pahunchni chahiye (sign-out + wajah) wo ek hi sandesh me bhejo, aur jis tab ne khud faisla kiya wo apni halat turant badle, network ke jawab ke baad nahi. Test: do `SessionProvider` ek jsdom me (saanjhi `document.cookie`) aur logout ka jawab rok ke rakho; fake `Date` me toast ka motion ruk jaata hai, to toast hatna real-time wale test me jaancho.
 29. **Wrapper apne props baad me spread kare to bahar ka attribute chupchaap kho jaata hai (2026-11-07, QA-FE-008):** `Input`/`CodeInput` `{...rest}` ke baad `Field` ke `{...control}` lagate the, to app ka diya `aria-describedby` bina error ke overwrite hota (TypeScript ise pakadta nahi, prop type me wo maujood tha). **Sabak:** jo attribute component khud bhi set karta hai (`aria-describedby`, `id`, `className`, handlers), use rest se alag nikaal ke jodo, aur test me bahar se diya value DOM me jaancho.
 30. **Blur pe galti se button khisakna sirf asli browser pakadta hai (2026-11-07, QA-FE-008):** code field ko `autoFocus` diya; mouse se "Lost your phone?" dabate hi field blur hua, `onTouched` ne khaali field ki galti dikhayi, button neeche khisak gaya aur click chook gaya. jsdom me layout nahi, to unit test pass; customer + admin E2E ne pakda (`error-context.md` me field `[invalid]`). **Sabak:** `autoFocus` (ya koi bhi blur pe UI badlav) lagao to us step ke doosre button pe mouse click ka E2E rakho; forms ab `autoFocus` wale anchhuye field ka blur nahi ginta.
+31. **Label ke andar link: React Aria aur user-event dono dhoka dete hain (2026-11-07, owner ne live sign-up pe pakda):** React Aria ka `Checkbox` label press pe toggle karta aur click ka default rokta, to "terms of use" link box tick karta aur khulta nahi. Fix components `Checkbox` me: label ke andar ke link/button ke events wahin ruk jaate hain. Test me user-event (14.6.8) label ke andar ka har click box ko bhej deta hai, link ke paar bhi (HTML spec aur browsers aisa nahi karte), to link wale test `fireEvent` se likho aur asli Chromium E2E (popup khule, box khaali) se pakka karo. Browser pane ka 360 px mobile emulation React Aria checkbox label ke clicks ko tick nahi karne deta (purane code pe bhi): wahan ka nateeja bug mat maano, Playwright 360 dekho.
 
 ## 3. Environment
 
@@ -247,3 +248,4 @@
 | v1.62   | 2026-11-07 | Decision: generator ka app template wake-up ke saath (owner). |
 | v1.63   | 2026-11-07 | Decision + sabak 28: QA-FE-004 + QA-FE-010 (sign-out sirf server ke 200 pe, idle turant local + retry, idle sirf idle channel se). |
 | v1.64   | 2026-11-07 | Decision + sabak 29, 30: QA-FE-008 (step badalne pe focus, sandesh `aria-describedby` se; `Field` ka bahar wala description; `autoFocus` field ka anchhuya blur). |
+| v1.65   | 2026-11-07 | Sabak 31: checkbox label ke andar link (React Aria, user-event, pane ka mobile emulation). |
