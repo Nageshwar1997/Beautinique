@@ -148,9 +148,12 @@ export function ErrorBoundary({ error }: Route.ErrorBoundaryProps) {
   );
 }
 
-/** Error pages get their own title and stay out of search results. */
+/**
+ * Error pages get their own title and stay out of search results. React Router passes `error: null`
+ * when nothing failed, and undefined when only another route did (QA-CUS-001).
+ */
 export const meta: Route.MetaFunction = ({ error }) =>
-  error === undefined
+  error === null || error === undefined
     ? [{ title: 'Beautinique' }]
     : [
         { title: `${isNotFound(error) ? 'Page not found' : 'Something went wrong'} | Beautinique` },

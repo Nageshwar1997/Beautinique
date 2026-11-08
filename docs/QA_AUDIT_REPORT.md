@@ -1,10 +1,10 @@
 # QA AUDIT REPORT — BQ
 
-> **Status:** v1.18 (2026-11-08, final; §2a me KNOWN faislon ki halat, §0 me fixes). Audit base: `origin/prerelease` @ `ee7f46a` (`ee7f46ae7b2605d99f6b4497d26303aa109fb371`). Auditor: Claude Code (Opus 5.5, `claude-opus-5-5`). Ye report audit ki single source of truth hai; fixes alag se, ek-ek karke.
+> **Status:** v1.19 (2026-11-08, final; §2a me KNOWN faislon ki halat, §0 me fixes). Audit base: `origin/prerelease` @ `ee7f46a` (`ee7f46ae7b2605d99f6b4497d26303aa109fb371`). Auditor: Claude Code (Opus 5.5, `claude-opus-5-5`). Ye report audit ki single source of truth hai; fixes alag se, ek-ek karke.
 
 ## 0. Audit state (har session ke aakhir me update)
 
-- **Fixes (2026-11-07 se, branch `feat/qa-audit`, §10 ke kram se, har fix ka apna commit, saare fixes ke baad ek PR → `prerelease` (owner, 2026-11-07)):** 1. QA-ID-001 Fixed (2026-11-07). 2. QA-GW-001 + QA-KRN-001 Fixed (2026-11-07). 3. QA-FE-009 Fixed (2026-11-07). 16. QA-FE-005 Fixed (2026-11-07, owner ke kehne pe pehle). 4. QA-FE-004 + QA-FE-010 Fixed (2026-11-07). 5. QA-FE-008 Fixed (2026-11-07). 6. QA-FE-001 + QA-FE-007 Fixed (2026-11-08). 7. QA-CI-001 Fixed (2026-11-08). 8. QA-ID-002 Fixed (2026-11-08). 12. QA-TOOL-001 Fixed (2026-11-08, owner ke kehne pe pehle). Agla: QA-CUS-001.
+- **Fixes (2026-11-07 se, branch `feat/qa-audit`, §10 ke kram se, har fix ka apna commit, saare fixes ke baad ek PR → `prerelease` (owner, 2026-11-07)):** 1. QA-ID-001 Fixed (2026-11-07). 2. QA-GW-001 + QA-KRN-001 Fixed (2026-11-07). 3. QA-FE-009 Fixed (2026-11-07). 16. QA-FE-005 Fixed (2026-11-07, owner ke kehne pe pehle). 4. QA-FE-004 + QA-FE-010 Fixed (2026-11-07). 5. QA-FE-008 Fixed (2026-11-07). 6. QA-FE-001 + QA-FE-007 Fixed (2026-11-08). 7. QA-CI-001 Fixed (2026-11-08). 8. QA-ID-002 Fixed (2026-11-08). 12. QA-TOOL-001 Fixed (2026-11-08, owner ke kehne pe pehle). 9. QA-CUS-001 Fixed (2026-11-08). Agla: QA-FE-003 + QA-FE-002.
 - **Gate 1: approved (2026-11-04).** Owner ke jawab (saari recommendations maani):
   - Live pe passive GETs: **haan, kul ≤ 15**, bina auth: `bq-live` `/health`, `/status`, ek anjaan path; customer + admin ka home aur ek 404 (headers, TLS). OTP/auth/write/fuzz/rate-limit/load kabhi nahi.
   - Playwright: Chromium 1248 pehle se installed (Playwright 1.64.1 ki zaroorat yahi); koi download nahi chahiye
@@ -773,7 +773,7 @@ Plan: **E** = planned-executed (local stack, HTTP, browser, scratch script), **S
 ### [QA-CUS-001] /account is titled "Something went wrong" and marked noindex although nothing failed
 
 **Module:** M11 (customer app) | **Feature:** page meta | **Task/Doc:** T6.3; `root.tsx` ka comment ("Error pages get their own title")
-**Severity:** P3 (cosmetic: tab title galat, aur jo bhi naya route apni `meta` na de usko error title + `noindex` milega) | **Priority:** Low | **Status:** Open
+**Severity:** P3 (cosmetic: tab title galat, aur jo bhi naya route apni `meta` na de usko error title + `noindex` milega) | **Priority:** Low | **Status:** Fixed (2026-11-08, `feat/qa-audit`, commit "fix(customer): a page that did not fail never takes the error title, and /account has its own (QA-CUS-001)")
 **Testing Type:** Functional (SSR/meta) | **Evidence level:** E1 | **Reproducibility:** Always | **Environment:** customer dev server (3001), curl + Chromium
 **Description:** Root `meta` `error === undefined` jaanchta hai, par React Router 8.5 bina error ke `error: null` deta hai (`node_modules/react-router/dist/development/lib/dom/ssr/components.js:356-357`: `let error = null`). Jis route ki apni `meta` nahi, uska title root se aata hai: "Something went wrong | Beautinique" + `robots: noindex`. Aaj `/account` (index route, `Navigate` → `/account/security`) pe dikhta: SSR HTML me aur client pe redirect tak tab ka title.
 **Steps to Reproduce:** `curl -s http://localhost:3001/account | grep -o "<title>[^<]*</title>"`; ya browser me `/account` kholo aur turant `document.title` dekho.
@@ -787,6 +787,7 @@ Plan: **E** = planned-executed (local stack, HTTP, browser, scratch script), **S
 **Regression Risk:** Low.
 **Regression test to add:** customer unit/SSR: `/account` ka title "Beautinique" aur `noindex` nahi; error route pe abhi bhi error title.
 **Owner decision needed:** Nahi
+**Fix (2026-11-08, owner ne Claude ki salah "option B" maani):** root `meta` ab `null` aur `undefined` dono ko "koi error nahi" maanta hai (React Router 8.5.1 bina error `null` deta hai, sirf doosre route ki galti pe `undefined`: `components.js:356-357`). Saath me account layout (`app/routes/account.tsx`) ka apna `meta`: "Account | Beautinique" + `noindex`, kyunki jaanch me dikha ki sirf root fix se `/account` ka `noindex` hat jaata, jabki saare account aur auth pages `noindex` hain; ab koi bhi account page jo apna `meta` na de, private hisse ki tarah search se bahar. Purana root test `error: undefined` se jaanchta tha (React Router wo bhejta hi nahi), isliye bug test se bacha. Tests: root `meta` me `null` (purane code pe fail: "Something went wrong"), account layout ka `meta` (purane code pe fail: `meta` hai hi nahi), aur customer E2E me `/account` ka server HTML (`<title>Account | Beautinique</title>`, `noindex`, "Something went wrong" nahi) aur `/no-such-page` 404 + "Page not found". Poora customer E2E (Chromium): 38 pass, 57 skip, 1 fail: `auth.e2e.ts` "sets a new password" (`1280-light`) pe gateway ka "Redis did not answer within 500 ms" (page "not available right now"), wahi test usi project me dobara pass, naya `/account` test bhi. Mutation nahi (frontend app). Admin aur baaki apps me ye `meta` nahi, generator template me bhi nahi.
 
 ### [QA-FE-010] With a second tab open, the tab that went idle is signed out without the "30 minutes without activity" note
 
@@ -1167,7 +1168,7 @@ Final (2026-11-05). Har number ek PR (ya ek chhota fix); saath jaane wale bugs e
 6. **QA-FE-001 + QA-FE-007** (P3): `safeNext` normalise ke baad bhi `//` check (+ contracts `safeNextPath`), aur proxy 5xx ka insaani sandesh; auth-ui + api-client chhota PR. **Fixed (2026-11-08, `feat/qa-audit`)**: `next` ka ek niyam contracts me (resolve karke dobara jaanch), proxy ke jawab ke apne codes aur insaani sandesh.
 7. **QA-CI-001** (P3): `ci.yml` branch flow me head repo bhi; `prerelease` pe chhota fix. **Fixed (2026-11-08, `feat/qa-audit`)**: niyam `scripts/ci/` me test ke saath, `main`/`release` sirf isi repo ki branch se; check galti se bachav hai, taala merge ka haq (RULES §2).
 8. **QA-ID-002** (P3): social lookup ka index (do queries + explain test); social sign-ins badhne se pehle. **Fixed (2026-11-08, `feat/qa-audit`)**: naya index (`$gt: ''`) + `bySubject` + migration, aur identity/notify/core ke tests ka COLLSCAN pehra (RULES §4.13).
-9. **QA-CUS-001** (P3): customer `root.tsx` `error == null`; 1 line + test.
+9. **QA-CUS-001** (P3): customer `root.tsx` `error == null`; 1 line + test. **Fixed (2026-11-08, `feat/qa-audit`)**: root `null` bhi "koi error nahi", aur account layout ka apna title + `noindex`.
 10. **QA-FE-003 + QA-FE-002** (P3): components ka ek PR (`CodeInput` maxLength, HierarchySelect Escape).
 11. **QA-ADM-001** (P3): admin header 360 px + Playwright overflow assertion (customer bhi).
 12. **QA-TOOL-001** (P3): `.prettierignore` me `.claude/worktrees`; kabhi bhi. **Fixed (2026-11-08, `feat/qa-audit`, owner ke kehne pe pehle)**: Prettier, git, root ESLint aur root Vitest teeno worktree chhodte hain.
@@ -1223,3 +1224,4 @@ Final (2026-11-05). Har number ek PR (ya ek chhota fix); saath jaane wale bugs e
 | v1.16   | 2026-11-08 | QA-CI-001 Fixed (`feat/qa-audit`): branch flow `scripts/ci/` me, `main`/`release` sirf isi repo ki branch se; retarget aur PR ki apni `ci.yml` wali seemayein; §0, §5, §10. |
 | v1.17   | 2026-11-08 | QA-ID-002 Fixed (`feat/qa-audit`): naya provider-id index + `bySubject` + migration, tests ka COLLSCAN pehra (identity, notify, core); §0, §8, §10. |
 | v1.18   | 2026-11-08 | QA-TOOL-001 Fixed (`feat/qa-audit`, owner ke kehne pe pehle): Prettier, `.gitignore`, root ESLint aur root Vitest `.claude/worktrees` chhodte hain; §0, §10. |
+| v1.19   | 2026-11-08 | QA-CUS-001 Fixed (`feat/qa-audit`): root `meta` `null` bhi "koi error nahi", account layout ka apna title + `noindex`; §0, §10. |
