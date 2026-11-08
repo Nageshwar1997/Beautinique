@@ -6,6 +6,7 @@ import {
   type ApiClient,
   ApiError,
   createApiClient,
+  errorMessage,
   OTHER_TAB_REFRESH_WAIT_MS,
   type SessionChange,
 } from '../src/index';
@@ -94,7 +95,7 @@ describe('requests over axios', () => {
     });
   });
 
-  it('names an answer that is not our error body by its status', async () => {
+  it('names an answer that is not our error body by its status, in words for people (QA-FE-007)', async () => {
     const gateway = fakeGateway({ access: true });
     gateway.answers.push(
       () =>
@@ -105,16 +106,20 @@ describe('requests over axios', () => {
       () => new Response('nope', { status: 404 }),
     );
     const client = clientFor(gateway);
-    expect(await rejection(client.call(getMe))).toMatchObject({
-      code: 'INTERNAL',
+    const down = await rejection(client.call(getMe));
+    expect(down).toMatchObject({
+      code: 'UPSTREAM_UNAVAILABLE',
       status: 502,
       requestId: 'req-502',
     });
-    expect(await rejection(client.call(getMe))).toMatchObject({
-      code: 'BAD_REQUEST',
+    expect(errorMessage(down)).toBe('The server did not answer. Please try again in a moment.');
+    const other = await rejection(client.call(getMe));
+    expect(other).toMatchObject({
+      code: 'UNEXPECTED_RESPONSE',
       status: 404,
       requestId: null,
     });
+    expect(errorMessage(other)).toBe('Something went wrong. Please try again.');
   });
 
   it('refuses an answer without data, or one that breaks the route’s contract', async () => {

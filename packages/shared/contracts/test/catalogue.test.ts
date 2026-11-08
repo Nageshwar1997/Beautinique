@@ -507,8 +507,19 @@ describe('social sign-in (T3.1 PR 4)', () => {
       'https://evil.example',
       '/a b',
       `/${'x'.repeat(600)}`,
+      '/a b',
+      // dot segments that resolve to //host (QA-FE-001)
+      '/..//evil.example',
+      '/.//evil.example',
+      '/x/..//evil.example?a=1#h',
+      '/%2e%2e//evil.example',
+      '/%2E%2E//evil.example',
     ]) {
       expect(safeNextPath(next), String(next)).toBe('/');
     }
+    // the path as a browser goes: its dot segments resolved
+    expect(safeNextPath('/account/../orders?x=1')).toBe('/orders?x=1');
+    // a longer limit where the caller allows one (an app's sign-in page)
+    expect(safeNextPath(`/${'x'.repeat(600)}`, 2048)).toBe(`/${'x'.repeat(600)}`);
   });
 });

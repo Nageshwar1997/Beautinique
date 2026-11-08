@@ -43,7 +43,7 @@ const queryClient = createQueryClient();
 4. **Session khatam (`SESSION_EXPIRED`):** listeners ko `signed-out` (sirf is tab me), call fail. Offline ya 5xx pe `signed-out` nahi.
 5. **Step-up:** `401 STEP_UP_REQUIRED` pe handler (ek saath kai calls = ek dialog); `true` pe wahi request dobara, `false` ya handler na ho to error.
 6. **Idempotency-Key:** jis route ko chahiye, uski har try (pehli, refresh ke baad, step-up ke baad) pe **ek hi key**; `idempotencyKey` diya ho to wahi.
-7. **Errors:** hamara error body → `ApiError` (code, message, status, requestId, details); doosra jawab status se (`INTERNAL` 5xx, warna `BAD_REQUEST`); jawab hi nahi = `NETWORK_ERROR` (status 0); bina `data` ya contract se alag jawab = `INVALID_RESPONSE`. Caller ka apna abort `signal.reason` (AbortError) hi lautata hai.
+7. **Errors:** hamara error body → `ApiError` (code, message, status, requestId, details); doosra jawab (proxy ya host ka edge bola, hamara server nahi) status se: 502/503/504 = `UPSTREAM_UNAVAILABLE`, baaki = `UNEXPECTED_RESPONSE` (QA-FE-007); jawab hi nahi = `NETWORK_ERROR` (status 0); bina `data` ya contract se alag jawab = `INVALID_RESPONSE`. Caller ka apna abort `signal.reason` (AbortError) hi lautata hai.
 8. **Online status:** koi bhi jawab (error page bhi) = `confirmOnline()`, jawab nahi = `recheck()` (default hooks ka `onlineStatusStore`, jise `useOnlineStatus` padhta hai); caller ka abort kuch nahi kehta.
 9. **Transport:** contracts ka `createClient` (axios) har ek request bhejta hai; ye package uske upar refresh, line, step-up aur key ke niyam rakhta hai (dono jagah ek hi HTTP code). Browser me axios ka XMLHttpRequest, server pe `http`. `fetch` diya ho to axios ka fetch adapter (tests, ya server jo apna fetch laaye); us raaste pe `baseUrl` poora URL ho (`new Request` relative URL nahi leta). Query: list ke har item ka apna naam (`tag=a&tag=b`), Date ISO me, `null`/`undefined` chhoot; bina body wale POST pe `Content-Type` nahi.
 
@@ -60,11 +60,11 @@ const queryClient = createQueryClient();
 
 ## Errors
 
-| Export                     | Kaam                                                                                                                                                                                                               |
-| -------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `ApiError`                 | Contracts ki class (`code`, `message`, `status`, `requestId`, `details`).                                                                                                                                          |
-| `isApiError(error, code?)` | `ApiError` hai (aur ye code).                                                                                                                                                                                      |
-| `errorMessage(error)`      | User ko dikhane wala sentence: server ka message (user ke liye likha hota hai, RULES §4.15); `NETWORK_ERROR` pe connection wala sandesh; `INVALID_RESPONSE` aur baaki pe "Something went wrong. Please try again." |
+| Export                     | Kaam                                                                                                                                                                                                                                                                                                                                                 |
+| -------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `ApiError`                 | Contracts ki class (`code`, `message`, `status`, `requestId`, `details`).                                                                                                                                                                                                                                                                            |
+| `isApiError(error, code?)` | `ApiError` hai (aur ye code).                                                                                                                                                                                                                                                                                                                        |
+| `errorMessage(error)`      | User ko dikhane wala sentence: server ka message (user ke liye likha hota hai, RULES §4.15); `NETWORK_ERROR` pe connection wala sandesh; `UPSTREAM_UNAVAILABLE` pe "The server did not answer. Please try again in a moment." (QA-FE-007); `UNEXPECTED_RESPONSE`, `INVALID_RESPONSE` aur khaali message pe "Something went wrong. Please try again." |
 
 ## Tests
 

@@ -221,3 +221,50 @@ test('the consent’s links open the terms and the privacy notice in a new tab, 
   await page.getByText('I accept the').click({ position: { x: 4, y: 6 } });
   await expect(box).toBeChecked();
 });
+
+test('a next that resolves to another site goes home, signed in or not, with no error page (QA-FE-001)', async ({
+  page,
+}, testInfo) => {
+  test.skip(testInfo.project.name !== 'chromium-1280-light', 'one screen size is enough here');
+  email = e2eEmail('next-dot-segments');
+  await signUp(page, email);
+  // /..//evil.example resolves to //evil.example: another site, so home instead
+  const crafted = `/sign-in?next=${encodeURIComponent('/..//evil.example')}`;
+  // signed in: the sign-in page sends straight on
+  await page.goto(crafted);
+  await expect(page).toHaveURL('/');
+  await expect(accountButton(page, email)).toBeVisible();
+  // signed out: after the password
+  await signOut(page, email);
+  await page.goto(crafted);
+  await passwordStep(page, email, PASSWORD);
+  await expect(page).toHaveURL('/');
+  await expect(accountButton(page, email)).toBeVisible();
+});
+
+test('a proxy’s 502 page reads as words for people, not "Request failed" (QA-FE-007)', async ({
+  page,
+}, testInfo) => {
+  test.skip(
+    !['chromium-1280-light', 'chromium-360-dark'].includes(testInfo.project.name),
+    'a phone and a desk are enough here',
+  );
+  email = e2eEmail('proxy-502');
+  await signUp(page, email);
+  // the host's edge answers for a server it could not reach: its own page, not ours
+  await page.route('**/api/v1/auth/logout', (route) =>
+    route.fulfill({
+      status: 502,
+      contentType: 'text/html',
+      body: '<html><body>Bad gateway</body></html>',
+    }),
+  );
+  await accountButton(page, email).click();
+  await page.getByRole('menuitem', { name: 'Sign out' }).click();
+  const toast = page
+    .getByRole('region', { name: 'Notifications' })
+    .getByRole('listitem')
+    .filter({ hasText: 'You are still signed in.' });
+  await expect(toast).toContainText('The server did not answer. Please try again in a moment.');
+  await expect(page.getByText(/Request failed with status/)).toHaveCount(0);
+});

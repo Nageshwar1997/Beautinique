@@ -196,7 +196,7 @@ describe('client call', () => {
     });
   });
 
-  it('still gives an ApiError for a body that is not ours, using the request id header', async () => {
+  it('still gives an ApiError for a body that is not ours, using the request id header: a proxy that could not reach the server, or anything else (QA-FE-007)', async () => {
     const make = (status: number) =>
       createClient({
         baseUrl: 'https://x.test',
@@ -207,16 +207,21 @@ describe('client call', () => {
     const bad = await make(404)
       .call(getPing, { params: { pingId: id } })
       .catch((e: unknown) => e);
-    expect(bad).toMatchObject({ code: 'BAD_REQUEST', status: 404, requestId: 'req-9' });
-    const down = await make(502)
-      .call(getPing, { params: { pingId: id } })
-      .catch((e: unknown) => e);
-    expect(down).toMatchObject({ code: 'INTERNAL', status: 502 });
-    expect((down as ApiError).details).toEqual([]);
-    const redirect = await make(302)
-      .call(getPing, { params: { pingId: id } })
-      .catch((e: unknown) => e);
-    expect(redirect).toMatchObject({ code: 'BAD_REQUEST', status: 302 });
+    expect(bad).toMatchObject({ code: 'UNEXPECTED_RESPONSE', status: 404, requestId: 'req-9' });
+    // a proxy or the host's edge (Vercel, Render) answered for a server it could not reach
+    for (const status of [502, 503, 504]) {
+      const down = await make(status)
+        .call(getPing, { params: { pingId: id } })
+        .catch((e: unknown) => e);
+      expect(down, String(status)).toMatchObject({ code: 'UPSTREAM_UNAVAILABLE', status });
+      expect((down as ApiError).details).toEqual([]);
+    }
+    for (const status of [302, 500]) {
+      const other = await make(status)
+        .call(getPing, { params: { pingId: id } })
+        .catch((e: unknown) => e);
+      expect(other, String(status)).toMatchObject({ code: 'UNEXPECTED_RESPONSE', status });
+    }
   });
 
   it('reports an unreachable server as NETWORK_ERROR, but rethrows an abort as it is', async () => {

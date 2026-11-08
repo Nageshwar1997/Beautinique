@@ -67,6 +67,7 @@ const SCENARIOS = {
   existing: 'Sign-up: the email has an account',
   down: 'The server does not answer (/iam/me 503): an account page says so',
   unreached: 'Sign-out does not reach the server: you stay signed in, with "Try again"',
+  edge: 'Sign-out gets the host’s 502 page (not ours): the words are for people',
 } as const;
 type Scenario = keyof typeof SCENARIOS;
 
@@ -77,6 +78,17 @@ function choose(scenario: Scenario) {
   identity.off('POST /auth/logout');
   if (scenario === 'unreached') {
     identity.on('POST /auth/logout', () => Promise.reject(new TypeError('Failed to fetch')));
+  }
+  if (scenario === 'edge') {
+    // Vercel's or Render's own page for a server it could not reach (QA-FE-007)
+    identity.on(
+      'POST /auth/logout',
+      () =>
+        new Response('<html><body>Bad gateway</body></html>', {
+          status: 502,
+          headers: { 'Content-Type': 'text/html' },
+        }),
+    );
   }
   if (scenario === 'wrong') {
     identity.on('POST /auth/login', () =>

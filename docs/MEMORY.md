@@ -1,6 +1,6 @@
 # MEMORY — BQ
 
-> **Status:** v1.65 (2026-11-07). Project ki yaaddasht: **kya tay hua aur kyun**, **pichhle kaam se kya seekha**, aur **kaunse jaal (traps) se bachna hai**. Poori detail baaki docs me hai; yahan short version aur pointers. Naya sabak ya decision aaye to yahan ek line jodo.
+> **Status:** v1.66 (2026-11-08). Project ki yaaddasht: **kya tay hua aur kyun**, **pichhle kaam se kya seekha**, aur **kaunse jaal (traps) se bachna hai**. Poori detail baaki docs me hai; yahan short version aur pointers. Naya sabak ya decision aaye to yahan ek line jodo.
 
 ## 1. Decision log
 
@@ -112,6 +112,7 @@
 | 2026-11-07 | Generator ka app template wake-up ke saath (api-client `waitForServer`, `providers.tsx`, `ServerWake` + `onReady`, SSR me `WakeScript`, `BQ_GATEWAY_URL` define) (owner: "template bhi badlo aur docs me bhi") | Naya app shuru se sahi; pehle bane 9 shell apps template se nahi badalte (wo dobara nahi bante), unme kaam shuru hone pe jodna | packages README §3.1, ARCHITECTURE §11.1 |
 | 2026-11-07 | QA-FE-004 + QA-FE-010 (owner ne Claude ki salah maani): app me sign-out sirf `POST /auth/logout` ke 200 pe; fail pe signed-in + toast "You are still signed in." + "Try again" (auth-ui `useSignOut`). Idle sign-out turant local (sandesh server ka intezaar nahi karta) aur logout tab khula rehne tak dobara (network lautne pe aur har 30 s, server ki 30 min seema tak, dobara sign-in pe band); idle sirf idle channel se doosre tabs tak | HttpOnly cookies page nahi mita sakta: logout fail hone pe "signed out" dikhana jhooth tha aur usi browser me session zinda (customer 30 din). Idle me insaan ke liye sandesh zaroori hai aur server ki seema backstop hai, par retry wo khidki chhoti karta hai | ARCHITECTURE §7.2, §9.2; auth-ui README |
 | 2026-11-07 | QA-FE-008 (owner ne Claude ki salah maani: poora scope + `aria-describedby`): auth-ui me har step badlav pe focus naye step pe (pehla field, bina field wale set-up step me heading `tabIndex=-1`), field step ke sandesh se `aria-describedby` se juda; components `Field` ab bahar ka `describedBy` bhi rakhta hai; abhi khula page focus nahi leta; forms me `autoFocus` wala field bina kuch type kiye chhoda to "chhodna" nahi ginta (submit pe jaanch) | `role="status"` usi pal bane-aur-bhare live region ko NVDA/JAWS aksar nahi padhte (khaali bana ke 100 ms baad bharna timing pe tika); description focus aate hi har screen reader padhta hai, aur field pe lautne pe dobara | DESIGN §8, auth-ui README, components README |
+| 2026-11-08 | QA-FE-001 + QA-FE-007 (owner ne Claude ki salah maani): `next` ka ek hi niyam contracts `safeNextPath(next, maxLength)` me (path, `.`/`..` resolve karke dobara jaanch, resolved path lautao), identity aur auth-ui `safeNext` dono wahi; jo jawab hamara nahi uska contracts me apna code (502/503/504 = `UPSTREAM_UNAVAILABLE`, baaki `UNEXPECTED_RESPONSE`), `errorMessage` pe "The server did not answer. Please try again in a moment." / "Something went wrong. Please try again." | Jaanch normalise se pehle aur lautana baad me: `/..//evil.example` `//evil.example` banta tha; do jagah alag niyam phir bhatakte. Proxy ka "Request failed with status 502" developer ke liye tha, logon ke liye nahi; text wahi jo owner pehle maan chuka | contracts + auth-ui + api-client README |
 
 ## 2. Pichhle kaam se seekhe sabak
 
@@ -249,3 +250,4 @@
 | v1.63   | 2026-11-07 | Decision + sabak 28: QA-FE-004 + QA-FE-010 (sign-out sirf server ke 200 pe, idle turant local + retry, idle sirf idle channel se). |
 | v1.64   | 2026-11-07 | Decision + sabak 29, 30: QA-FE-008 (step badalne pe focus, sandesh `aria-describedby` se; `Field` ka bahar wala description; `autoFocus` field ka anchhuya blur). |
 | v1.65   | 2026-11-07 | Sabak 31: checkbox label ke andar link (React Aria, user-event, pane ka mobile emulation). |
+| v1.66   | 2026-11-08 | Decision: QA-FE-001 + QA-FE-007 (`next` ka saanjha niyam, proxy ke jawab ke codes). |

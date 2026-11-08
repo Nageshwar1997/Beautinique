@@ -103,7 +103,15 @@ function requestIdOf(headers: AxiosResponse['headers']): string | null {
   return typeof value === 'string' ? value : null;
 }
 
-/** Parses an error response; a body that is not our error body still becomes an ApiError. */
+/** A proxy's or the host's edge's answer for a server it could not reach (Vercel, Render, Vite). */
+const UPSTREAM_DOWN: readonly number[] = [502, 503, 504];
+
+/**
+ * Parses an error response; a body that is not our error body still becomes an ApiError. Not ours
+ * means our server did not answer (QA-FE-007): `UPSTREAM_UNAVAILABLE` when something in front of
+ * it says so (502, 503, 504), else `UNEXPECTED_RESPONSE`. Their message is for developers (logs,
+ * Sentry); the apps show their own words for these codes (api-client `errorMessage`).
+ */
 function failure(response: AxiosResponse<unknown>): ApiError {
   const parsed = errorBody.safeParse(response.data);
   if (parsed.success) {
@@ -111,7 +119,7 @@ function failure(response: AxiosResponse<unknown>): ApiError {
     return new ApiError({ code, message, status: response.status, requestId, details });
   }
   return new ApiError({
-    code: response.status >= 500 ? 'INTERNAL' : 'BAD_REQUEST',
+    code: UPSTREAM_DOWN.includes(response.status) ? 'UPSTREAM_UNAVAILABLE' : 'UNEXPECTED_RESPONSE',
     message: `Request failed with status ${String(response.status)}`,
     status: response.status,
     requestId: requestIdOf(response.headers),
