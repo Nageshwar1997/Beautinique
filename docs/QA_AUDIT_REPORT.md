@@ -1,10 +1,10 @@
 # QA AUDIT REPORT — BQ
 
-> **Status:** v1.16 (2026-11-08, final; §2a me KNOWN faislon ki halat, §0 me fixes). Audit base: `origin/prerelease` @ `ee7f46a` (`ee7f46ae7b2605d99f6b4497d26303aa109fb371`). Auditor: Claude Code (Opus 5.5, `claude-opus-5-5`). Ye report audit ki single source of truth hai; fixes alag se, ek-ek karke.
+> **Status:** v1.17 (2026-11-08, final; §2a me KNOWN faislon ki halat, §0 me fixes). Audit base: `origin/prerelease` @ `ee7f46a` (`ee7f46ae7b2605d99f6b4497d26303aa109fb371`). Auditor: Claude Code (Opus 5.5, `claude-opus-5-5`). Ye report audit ki single source of truth hai; fixes alag se, ek-ek karke.
 
 ## 0. Audit state (har session ke aakhir me update)
 
-- **Fixes (2026-11-07 se, branch `feat/qa-audit`, §10 ke kram se, har fix ka apna commit, saare fixes ke baad ek PR → `prerelease` (owner, 2026-11-07)):** 1. QA-ID-001 Fixed (2026-11-07). 2. QA-GW-001 + QA-KRN-001 Fixed (2026-11-07). 3. QA-FE-009 Fixed (2026-11-07). 16. QA-FE-005 Fixed (2026-11-07, owner ke kehne pe pehle). 4. QA-FE-004 + QA-FE-010 Fixed (2026-11-07). 5. QA-FE-008 Fixed (2026-11-07). 6. QA-FE-001 + QA-FE-007 Fixed (2026-11-08). 7. QA-CI-001 Fixed (2026-11-08). Agla: QA-ID-002.
+- **Fixes (2026-11-07 se, branch `feat/qa-audit`, §10 ke kram se, har fix ka apna commit, saare fixes ke baad ek PR → `prerelease` (owner, 2026-11-07)):** 1. QA-ID-001 Fixed (2026-11-07). 2. QA-GW-001 + QA-KRN-001 Fixed (2026-11-07). 3. QA-FE-009 Fixed (2026-11-07). 16. QA-FE-005 Fixed (2026-11-07, owner ke kehne pe pehle). 4. QA-FE-004 + QA-FE-010 Fixed (2026-11-07). 5. QA-FE-008 Fixed (2026-11-07). 6. QA-FE-001 + QA-FE-007 Fixed (2026-11-08). 7. QA-CI-001 Fixed (2026-11-08). 8. QA-ID-002 Fixed (2026-11-08). Agla: QA-CUS-001.
 - **Gate 1: approved (2026-11-04).** Owner ke jawab (saari recommendations maani):
   - Live pe passive GETs: **haan, kul ≤ 15**, bina auth: `bq-live` `/health`, `/status`, ek anjaan path; customer + admin ka home aur ek 404 (headers, TLS). OTP/auth/write/fuzz/rate-limit/load kabhi nahi.
   - Playwright: Chromium 1248 pehle se installed (Playwright 1.64.1 ki zaroorat yahi); koi download nahi chahiye
@@ -679,7 +679,7 @@ Plan: **E** = planned-executed (local stack, HTTP, browser, scratch script), **S
 ### [QA-ID-002] Every social sign-in scans the whole sign-in-methods collection (partial index never used)
 
 **Module:** M6 Identity data protection (performance) | **Feature:** `identity_auth_providers` lookup by provider id | **Task/Doc:** T3.1 PR 4; RULES §4.13 (Atlas M0: index ke bina query nahi); identity README ("unique `(provider, subject)`")
-**Severity:** P3 (aaj sahi jawab, par har social sign-in pe poori collection scan; users ke saath seedha badhta hai, M0 pe sign-in dheema) | **Priority:** Medium | **Status:** Open
+**Severity:** P3 (aaj sahi jawab, par har social sign-in pe poori collection scan; users ke saath seedha badhta hai, M0 pe sign-in dheema) | **Priority:** Medium | **Status:** Fixed (2026-11-08, `feat/qa-audit`, commit "fix(identity): social sign-in reads its index, and backend tests fail on a whole-collection read (QA-ID-002)")
 **Testing Type:** Performance | **Evidence level:** E1 | **Reproducibility:** Always (profiler 18/18 + explain) | **Environment:** local QA bundle (`m6a`), Mongo 8.0.34
 **Description:** `provider_subject_unique` ek partial index hai (`partialFilterExpression: { subject: { $type: 'string' } }`). Query `findOne({ provider, subject })` me `$type` nahi, isliye planner index ko candidate hi nahi maanta aur COLLSCAN karta hai. Collection me har account ke har sign-in method ki ek row hai (password + social), to har Google/LinkedIn/GitHub callback (aur link karte waqt transaction ke andar wala check) saare users ki rows padhta hai. Uniqueness index se phir bhi bachi rehti hai.
 **Steps to Reproduce:** 1. QA DB pe profiler (level 2) chalu karo. 2. M4 ke social sign-ins chalao. 3. `system.profile`: `identity_auth_providers find {provider,subject} → COLLSCAN` (n=18, maxDocs=26). 4. `db.identity_auth_providers.find({provider:'google',subject:'x'}).explain()` → winning plan `COLLSCAN`, rejected plans 0.
@@ -693,6 +693,7 @@ Plan: **E** = planned-executed (local stack, HTTP, browser, scratch script), **S
 **Regression Risk:** Low.
 **Regression test to add:** identity test: social lookup ka `explain('queryPlanner')` → `IXSCAN provider_subject_unique`.
 **Owner decision needed:** Nahi
+**Fix (2026-11-08, owner: "A + B + C (sabhi)", jaan-boojh ki poori-padhai pe "query pe nishan"):** (B) index ab `provider_subject_linked_unique`, filter `subject: { $gt: '' }` (har khaali-nahi string): seedhi `{ provider, subject }` query isi ko leti hai, password rows ka `null` bahar (do `null` pe E11000 nahi; `$exists` wale roop me hota, scratch me dekha), uniqueness wahi; provider ka id kabhi khaali nahi (OIDC `sub` zod `min(1)`, GitHub integer). Migration `20261108-001-provider-subject-index` pehle naya index banati hai, phir purana `provider_subject_unique` hatati hai (data nahi badalta, dobara chalna safe; khaali DB pe naya index hi collection banata hai). (A) lookup `bySubject()` (`$eq` + `$type: 'string'`), dono queries (`oauth.ts` link aur sign-in) me: purane roop wale index pe bhi index leti hai. (C) `scripts/e2e/collection-scans.ts`: identity, notify aur core ke tests apni DB pe profiler (`planSummary: 'COLLSCAN'`) chalate hain aur deployable ke apne client (`appName`) ki har poori-collection read pe fail; test apne look-ups alag connection se karte hain (identity `harness.db`, notify ka `notify` client, core ka inspector); core ki safai `system.*` nahi chhooti. Purane code pe pehre ne identity me 5 scans pakdi: yahi bug, aur 4 jaan-boojh ki poori-padhai (role catalog `rbac/manage.ts` + `invitations.ts`, naye/badle custom role ki jaanch, `20261029-001-sign-up-grants` ka har account, `server-release` ka har migration record): inke `comment` me ab `full read: <wajah>` (migration ka `up` sirf comment se badla, kaam wahi). notify aur core saaf. RULES §4.13 me pehle sirf sort ka niyam tha; ab har query ka (owner). Tests: social me 4 naye (seedhi query ka plan, uniqueness + do `null`, `bySubject` purane roop pe, migration + release list, khaali id → `oauth=failed`), pehre ka apna test (`scans.test.ts`). Mutations (identity, `--only`): 8 me 7 maare, 1 jaan-boojh bacha (`oauth` me seedha filter: naya index use bhi leta hai, `bySubject` ka apna test alag). Kernel `server-release` me sirf `comment` (mutation nahi; hata to identity ka pehra pakadta hai). Bundle ke `release-cli` test me identity ki migration gintee 1 → 2. Poora `npm test` pass (1820), aur customer social E2E 8 pass / 10 skip (Google sign-up aur doosri baar seedha sign-in saare 6 Chromium projects pe; GitHub link aur cancel sirf `1280-light` pe, test ka apna niyam).
 
 ### [QA-FE-001] safeNext() can return a protocol-relative path ("//evil.example") from a dot-segment "next"
 
@@ -1058,7 +1059,7 @@ Har module ke baad (existing tests + `test/mutations.ts` ke survivors).
 
 | Scenario                                                                                  | Kyun zaroori                                  | Test type                                           |
 | ----------------------------------------------------------------------------------------- | --------------------------------------------- | --------------------------------------------------- |
-| Har bade query ka `explain()` IXSCAN (kam se kam social lookup, outbox poll, grants list) | QA-ID-002 jaisi galti test se nahi pakdi gayi | integration                                         |
+| Har bade query ka `explain()` IXSCAN (kam se kam social lookup, outbox poll, grants list) | QA-ID-002 jaisi galti test se nahi pakdi gayi. **2026-11-08:** identity, notify, core ke tests ab profiler se har poori-collection read pakadte hain (QA-ID-002 fix); sort ka index abhi test nahi jaanchta (PERF-OBS-02) | integration                                         |
 | Sealed field doosre record pe copy → open nahi hota                                       | Context binding ka regression                 | unit (server-crypto me hai; identity level pe nahi) |
 
 **M7 Notify/async:**
@@ -1164,7 +1165,7 @@ Final (2026-11-05). Har number ek PR (ya ek chhota fix); saath jaane wale bugs e
 5. **QA-FE-008** (P2): auth steps pe focus + "code bheja" status announcement; auth-ui PR (4 ke saath bhi chal sakta). **Fixed (2026-11-07, `feat/qa-audit`)**: naya step focus leta hai (field ya heading), sandesh field se `aria-describedby` se.
 6. **QA-FE-001 + QA-FE-007** (P3): `safeNext` normalise ke baad bhi `//` check (+ contracts `safeNextPath`), aur proxy 5xx ka insaani sandesh; auth-ui + api-client chhota PR. **Fixed (2026-11-08, `feat/qa-audit`)**: `next` ka ek niyam contracts me (resolve karke dobara jaanch), proxy ke jawab ke apne codes aur insaani sandesh.
 7. **QA-CI-001** (P3): `ci.yml` branch flow me head repo bhi; `prerelease` pe chhota fix. **Fixed (2026-11-08, `feat/qa-audit`)**: niyam `scripts/ci/` me test ke saath, `main`/`release` sirf isi repo ki branch se; check galti se bachav hai, taala merge ka haq (RULES §2).
-8. **QA-ID-002** (P3): social lookup ka index (do queries + explain test); social sign-ins badhne se pehle.
+8. **QA-ID-002** (P3): social lookup ka index (do queries + explain test); social sign-ins badhne se pehle. **Fixed (2026-11-08, `feat/qa-audit`)**: naya index (`$gt: ''`) + `bySubject` + migration, aur identity/notify/core ke tests ka COLLSCAN pehra (RULES §4.13).
 9. **QA-CUS-001** (P3): customer `root.tsx` `error == null`; 1 line + test.
 10. **QA-FE-003 + QA-FE-002** (P3): components ka ek PR (`CodeInput` maxLength, HierarchySelect Escape).
 11. **QA-ADM-001** (P3): admin header 360 px + Playwright overflow assertion (customer bhi).
@@ -1219,3 +1220,4 @@ Final (2026-11-05). Har number ek PR (ya ek chhota fix); saath jaane wale bugs e
 | v1.14   | 2026-11-07 | QA-FE-008 Fixed (`feat/qa-audit`): step badalne pe focus, sandesh `aria-describedby` se, `autoFocus` field ka anchhuya blur; §0, §5, §10. |
 | v1.15   | 2026-11-08 | QA-FE-001 + QA-FE-007 Fixed (`feat/qa-audit`): `next` ka saanjha niyam (resolve karke jaanch), proxy ke jawab ke codes aur sandesh; §0, §5, §10. |
 | v1.16   | 2026-11-08 | QA-CI-001 Fixed (`feat/qa-audit`): branch flow `scripts/ci/` me, `main`/`release` sirf isi repo ki branch se; retarget aur PR ki apni `ci.yml` wali seemayein; §0, §5, §10. |
+| v1.17   | 2026-11-08 | QA-ID-002 Fixed (`feat/qa-audit`): naya provider-id index + `bySubject` + migration, tests ka COLLSCAN pehra (identity, notify, core); §0, §8, §10. |

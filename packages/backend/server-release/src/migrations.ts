@@ -73,7 +73,11 @@ export async function runMigrations(
   const { mongo, logger } = context;
   const records = mongo.db.collection<MigrationRecord>(MIGRATIONS);
   const done = new Set(
-    (await records.find({}, { projection: { _id: 1 } }).toArray()).map((record) => record._id),
+    (
+      await records
+        .find({}, { projection: { _id: 1 }, comment: 'full read: every migration that ran' })
+        .toArray()
+    ).map((record) => record._id),
   );
   const known = new Set(migrations.map((migration) => migration.id));
   const unknown = [...done].filter((id) => !known.has(id)).toSorted();

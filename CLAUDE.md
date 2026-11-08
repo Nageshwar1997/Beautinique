@@ -91,7 +91,8 @@ npm run build
   `scripts/packages/test/`.
 - **MongoDB:** `import { ObjectId, withTransaction } from '@beautinique/backend-server-mongo'`; seedha `mongodb` sirf
   `packages/backend/server-mongo` me (ESLint rokta hai). Transaction me queries ek ke baad ek (`Promise.all` ESLint rokta hai),
-  aur query ka error pakad ke aage nahi (dedupe `$setOnInsert` upsert se).
+  aur query ka error pakad ke aage nahi (dedupe `$setOnInsert` upsert se). Har query index se; jaan-boojh poora padhna
+  `comment: 'full read: <wajah>'` se, warna deployable ke tests fail (profiler pehra, RULES §4.13).
 - **Events:** `writeEvent` (`@beautinique/backend-server-queue`) usi `withTransaction` me jisme data badla; relay BullMQ tak le jaata hai.
   Change stream (`.watch(`) sirf us relay me (ESLint rokta hai). Redis: laptop/CI pe Docker Valkey, production me Render Key Value free (internal URL), `REDIS_URL` se;
   production Redis laptop ya tests se kabhi nahi.

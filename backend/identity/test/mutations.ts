@@ -1607,6 +1607,90 @@ const mutations: Mutation[] = [
     change: [['    if (id === undefined && secret !== undefined) {', '    if (false) {']],
     tests: 'ID and secret pair',
   },
+  // the lookup by a provider's id reads an index (QA-ID-002), and full reads say so (RULES §4.13)
+  {
+    file: 'credentials',
+    name: 'the provider-id index filters on $type again',
+    change: [
+      [
+        "  partialFilterExpression: { subject: { $gt: '' } },",
+        "  partialFilterExpression: { subject: { $type: 'string' } },",
+      ],
+    ],
+    tests: 'with a plain query',
+  },
+  {
+    file: 'credentials',
+    name: 'the lookup by a provider’s id without $type',
+    change: [
+      ["  subject: { $eq: subject, $type: 'string' as const },", '  subject: { $eq: subject },'],
+    ],
+    tests: 'whatever its filter',
+  },
+  {
+    file: 'credentials',
+    name: 'the migration keeps the old provider-id index',
+    change: [['    if (old) await providers.dropIndex(OLD_PROVIDER_SUBJECT_INDEX);\n', '']],
+    tests: 'safely again',
+  },
+  {
+    file: 'credentials',
+    name: 'the migration drops the old index before it makes the new one',
+    change: [
+      ['    await syncIndexes(mongo, [PROVIDER_SUBJECT_INDEX]);\n', ''],
+      [
+        '    if (old) await providers.dropIndex(OLD_PROVIDER_SUBJECT_INDEX);\n',
+        '    if (old) await providers.dropIndex(OLD_PROVIDER_SUBJECT_INDEX);\n' +
+          '    await syncIndexes(mongo, [PROVIDER_SUBJECT_INDEX]);\n',
+      ],
+    ],
+    // a fresh database has no collection to list the indexes of until the new index makes it
+    tests: 'safely again',
+  },
+  {
+    file: 'release',
+    name: 'the release does not run the provider-id migration',
+    change: [
+      [
+        'defineMigrations([signUpGrantsMigration, providerSubjectIndexMigration])',
+        'defineMigrations([signUpGrantsMigration])',
+      ],
+    ],
+    tests: 'safely again',
+  },
+  {
+    file: 'oauth',
+    name: 'social sign-in looks up the provider’s id with a plain filter',
+    change: [
+      [
+        'findOne(bySubject(provider, profile.subject))',
+        'findOne({ provider, subject: profile.subject })',
+      ],
+    ],
+    tests: 'links a verified email',
+    survives:
+      'equivalent: the new index takes a plain query too (B); bySubject is the second guard (A), ' +
+      'which its own test keeps (whatever its filter)',
+  },
+  {
+    file: 'rbac/manage',
+    name: 'the role catalog is read without saying it is a full read',
+    change: [
+      [
+        "    .find({}, { comment: 'full read: the role catalog, for what the caller may see' })",
+        '    .find({})',
+      ],
+    ],
+    tests: 'pages with a cursor',
+  },
+  {
+    file: 'rbac/manage',
+    name: 'a new role is checked against every live role without saying so',
+    change: [
+      ["      { comment: 'full read: every live role, to check the new one against' },\n", ''],
+    ],
+    tests: 'make a sub-role',
+  },
 ];
 
 export default mutations;

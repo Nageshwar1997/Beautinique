@@ -1,6 +1,6 @@
 # RULES — BQ
 
-> **Status:** v1.19 (2026-11-08). Ye niyam Beautinique ke har code, doc aur deploy pe lagu hain. [PRD.md](PRD.md) batata hai **kya** banana hai, [ARCHITECTURE.md](ARCHITECTURE.md) batata hai **kaise**, aur ye file batati hai ki **kin niyamon ke saath**. Koi rule todna ho to pehle is file me badlav aur change log entry.
+> **Status:** v1.20 (2026-11-08). Ye niyam Beautinique ke har code, doc aur deploy pe lagu hain. [PRD.md](PRD.md) batata hai **kya** banana hai, [ARCHITECTURE.md](ARCHITECTURE.md) batata hai **kaise**, aur ye file batati hai ki **kin niyamon ke saath**. Koi rule todna ho to pehle is file me badlav aur change log entry.
 
 ## 1. Kaam karne ke niyam
 
@@ -58,7 +58,7 @@
 10. **Files:** sirf `StoragePort` se. Database me sirf `assetId`, provider ka URL kabhi nahi. Upload `UNUSED` se shuru, use pe `USED` (ARCHITECTURE §6.7).
 11. **Timers:** BullMQ job schedulers + due dates MongoDB me. `setInterval` nahi (sirf Redis watchdog exception).
 12. **Redis:** har cache key pe TTL. Free mode me har deployable ki ek queue. Redis kisi cheez ka source of truth nahi.
-13. **Atlas M0:** har sort ke liye index, `$where`/map-reduce nahi, `.watch(` sirf relay module me, bade exports cursor + batches me.
+13. **Atlas M0:** har query aur har sort ke liye index: koi find, update, delete ya count poori collection nahi padhta. Jo query jaan-boojh ke har document padhe (jaise role catalog, migration me har account), wo apne `comment` me `full read: <wajah>` likhe. identity, notify aur core ke tests MongoDB profiler se poori-collection reads pakad ke fail hote hain ([scripts/e2e/collection-scans.ts](../scripts/e2e/collection-scans.ts); test apne look-ups apne connection se kare). Owner, 2026-11-08 (QA-ID-002). `$where`/map-reduce nahi, `.watch(` sirf relay module me, bade exports cursor + batches me.
 14. **Migrations:** forward-only, idempotent, expand/contract; boot pe chalti hain (har deployable ki `src/release.ts`, `@beautinique/backend-server-release`). Id `YYYYMMDD-NNN-words`, list ke aakhir me; chal chuki migration ki id ya `up` kabhi nahi badalti (galti = nayi migration). Lambi backfill migration me nahi, queue task me (boot ke saare steps 60 s). Index uske naam ke neeche kabhi nahi badalta: nayi shakal = naya naam, purana baad me migration se hatao.
 15. **Errors:** `AppError` + common response envelope; error codes contracts me; user ko message error code se (English text ek jagah).
 16. **Cache headers:** login wale aur personal responses `private, no-store`; `s-maxage` sirf `cache: 'public'` contracts pe, aur unpe cookies upstream nahi jaati.
@@ -136,3 +136,4 @@
 | v1.17   | 2026-11-03 | §2: `linkedin-posts/` ki post files seedha `prerelease` pe push (owner). |
 | v1.18 | 2026-11-03 | §2: `linkedin-posts/` ki saari files aur `/linkedin-post` skill bhi seedha `prerelease` pe (owner). |
 | v1.19 | 2026-11-08 | §2: CI flow check `main`/`release` me sirf isi repo ki branch leta (QA-CI-001); check galti se bachav hai, taala merge ka haq; "up to date" niyam aur fork approval band nahi (owner ne salah maani). |
+| v1.20 | 2026-11-08 | §4.13: har query (sirf sort nahi) index se; jaan-boojh poora padhna `comment: 'full read: …'` se; identity, notify, core ke tests ka profiler pehra (owner, QA-ID-002). |

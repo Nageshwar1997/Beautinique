@@ -33,7 +33,7 @@ import {
 let harness: Harness;
 const email = (name: string) => `${name}-${harness.runId}@beautinique.example`;
 const redis = () => harness.server.runtime.redis.client;
-const sessionsDb = () => harness.server.runtime.mongo.db.collection<Session>(SESSIONS);
+const sessionsDb = () => harness.db.collection<Session>(SESSIONS);
 const CHROME =
   'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130.0.0.0 Safari/537.36';
 
@@ -198,7 +198,7 @@ describe('refreshing', () => {
       revokeReason: 'reuse',
     });
     expect(await redis().exists(revokedSessionKey(sessionId))).toBe(1);
-    const [event] = await harness.server.runtime.mongo.db
+    const [event] = await harness.db
       .collection<{ type: string; envelope: { data: Record<string, unknown> } }>(OUTBOX)
       .find({ type: 'identity.session.reuseDetected', 'envelope.data.sessionId': sessionId })
       .toArray();
@@ -236,7 +236,7 @@ describe('refreshing', () => {
       revokeReason: 'reuse',
     });
     expect(await redis().exists(revokedSessionKey(sessionId))).toBe(1);
-    const events = await harness.server.runtime.mongo.db.collection(OUTBOX).countDocuments({
+    const events = await harness.db.collection(OUTBOX).countDocuments({
       type: 'identity.session.reuseDetected',
       'envelope.data.sessionId': sessionId,
     });
@@ -421,7 +421,7 @@ describe('ending sessions', () => {
 
 describe('signing keys', () => {
   it('keep the private key sealed, and make a new key after 30 days while the JWKS keeps the old', async () => {
-    const keys = harness.server.runtime.mongo.db.collection<SigningKeyRecord>(SIGNING_KEYS);
+    const keys = harness.db.collection<SigningKeyRecord>(SIGNING_KEYS);
     const [current] = await keys.find().sort({ createdAt: -1 }).toArray();
     expect(current?.privateKey).toMatch(/^v1\.k1\./);
     expect(JSON.stringify(current)).not.toContain('PRIVATE KEY');

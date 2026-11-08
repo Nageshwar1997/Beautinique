@@ -46,7 +46,7 @@ import {
 
 let harness: Harness;
 const email = (name: string) => `${name}-${harness.runId}@beautinique.example`;
-const db = () => harness.server.runtime.mongo.db;
+const db = () => harness.db;
 const logger = createLogger({ name: 'rbac-test', level: 'silent' });
 
 beforeAll(async () => {

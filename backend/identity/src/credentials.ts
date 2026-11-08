@@ -1,4 +1,10 @@
-import type { ClientSession, IndexSpec, Mongo } from '@beautinique/backend-server-mongo';
+import {
+  type ClientSession,
+  type IndexSpec,
+  type Mongo,
+  syncIndexes,
+} from '@beautinique/backend-server-mongo';
+import type { Migration } from '@beautinique/backend-server-release';
 import type { AUTH_PROVIDERS as PROVIDER_NAMES } from '@beautinique/shared-contracts';
 import { uuidv7 } from '@beautinique/shared-utils';
 
@@ -44,6 +50,23 @@ export interface AuthProvider {
 /** The associated data a sealed authenticator secret is bound to: it opens for this account only. */
 export const totpContext = (userId: string): string => `${CREDENTIALS}.totp:${userId}`;
 
+/**
+ * One Google (LinkedIn, GitHub) account belongs to one of ours. The filter takes every non-empty
+ * string, so a plain `{ provider, subject }` query reads this index (QA-ID-002: with the filter
+ * `$type: 'string'` none did, and every social sign-in read the whole collection). A password row's
+ * null subject stays out of it; a provider's id is never empty (oauth-providers.ts checks it).
+ */
+export const PROVIDER_SUBJECT_INDEX: IndexSpec = {
+  collection: AUTH_PROVIDERS,
+  name: 'provider_subject_linked_unique',
+  key: { provider: 1, subject: 1 },
+  unique: true,
+  partialFilterExpression: { subject: { $gt: '' } },
+};
+
+/** The provider-id index's name before QA-ID-002; providerSubjectIndexMigration drops it. */
+const OLD_PROVIDER_SUBJECT_INDEX = 'provider_subject_unique';
+
 export const indexes: readonly IndexSpec[] = [
   {
     collection: AUTH_PROVIDERS,
@@ -51,15 +74,37 @@ export const indexes: readonly IndexSpec[] = [
     key: { userId: 1, provider: 1 },
     unique: true,
   },
-  {
-    // one Google (LinkedIn, GitHub) account belongs to one of ours
-    collection: AUTH_PROVIDERS,
-    name: 'provider_subject_unique',
-    key: { provider: 1, subject: 1 },
-    unique: true,
-    partialFilterExpression: { subject: { $type: 'string' } },
-  },
+  PROVIDER_SUBJECT_INDEX,
 ];
+
+/**
+ * The lookup by a provider's id: whose account it is. `$type: 'string'` keeps it on an index
+ * whatever that index's filter (the old one took only a query that said so; QA-ID-002).
+ */
+export const bySubject = (provider: Provider, subject: string) => ({
+  provider,
+  subject: { $eq: subject, $type: 'string' as const },
+});
+
+/**
+ * QA-ID-002: the provider-id index has a new shape, so a new name (RULES §1.14). The new index is
+ * made first and the old one dropped after it, so a provider's id is never without a unique index,
+ * and the release still running works with either. Safe to run again.
+ */
+export const providerSubjectIndexMigration: Migration = {
+  id: '20261108-001-provider-subject-index',
+  description:
+    'The provider-id index takes a plain lookup (QA-ID-002): the new shape, then the old goes',
+  async up({ mongo, logger }) {
+    await syncIndexes(mongo, [PROVIDER_SUBJECT_INDEX]);
+    const providers = mongo.db.collection(AUTH_PROVIDERS);
+    const old = (await providers.indexes()).some(
+      (index) => index.name === OLD_PROVIDER_SUBJECT_INDEX,
+    );
+    if (old) await providers.dropIndex(OLD_PROVIDER_SUBJECT_INDEX);
+    logger.info({ droppedOld: old }, 'the provider-id index has its new shape');
+  },
+};
 
 /** Sets (or replaces) an account's password, and records `password` as a way it signs in. */
 export async function storePassword(

@@ -30,9 +30,12 @@ beforeAll(async () => {
 });
 afterEach(async () => {
   await Promise.all(running.splice(0).map((core) => core.stop()));
-  // every test starts from an empty database and no queue state
+  // every test starts from an empty database and no queue state (system.profile keeps the
+  // collection-scan watch's record for the whole file)
   await Promise.all(
-    (await look.mongo.db.collections()).map((collection) => collection.deleteMany({})),
+    (await look.mongo.db.collections())
+      .filter((collection) => !collection.collectionName.startsWith('system.'))
+      .map((collection) => collection.deleteMany({})),
   );
   const keys = await look.redis.client.keys(`${prefix}:*`);
   await look.redis.client.del(epochKey, ...keys);
