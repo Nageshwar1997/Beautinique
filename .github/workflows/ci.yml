@@ -17,28 +17,6 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 30
     steps:
-      # The branch flow (RULES §2): work → prerelease → release → main. main takes only release
-      # (final code after a successful release); release takes only prerelease or a hotfix/* branch.
-      # The branch names come in through env, never straight into the script (a branch name is
-      # chosen by whoever opens the pull request).
-      - name: Check the branch flow
-        if: github.event_name == 'pull_request'
-        env:
-          BASE: ${{ github.base_ref }}
-          HEAD: ${{ github.head_ref }}
-        run: |
-          case "$BASE:$HEAD" in
-            main:release | release:prerelease | release:hotfix/*) ;;
-            main:*)
-              echo "::error::Pull requests into main come only from release (got '$HEAD'). Open it against prerelease."
-              exit 1
-              ;;
-            release:*)
-              echo "::error::Pull requests into release come only from prerelease or hotfix/* (got '$HEAD')."
-              exit 1
-              ;;
-          esac
-
       - uses: actions/checkout@v7
         with:
           persist-credentials: false
@@ -67,6 +45,20 @@ jobs:
         with:
           node-version: 24
           package-manager-cache: false
+
+      # The branch flow (RULES §2): main takes only release, release only prerelease or hotfix/*, and
+      # both only from this repository, not a fork (QA-CI-001). Rules and tests: scripts/ci/. The names
+      # come in through env, never straight into the command (whoever opens the pull request names
+      # the branch). A base change (edited) does not rerun this; the ruleset's "up to date" rule makes
+      # such a pull request update its branch, which does.
+      - name: Check the branch flow
+        if: github.event_name == 'pull_request'
+        env:
+          BASE_REF: ${{ github.base_ref }}
+          HEAD_REF: ${{ github.head_ref }}
+          HEAD_REPO: ${{ github.event.pull_request.head.repo.full_name }}
+          REPO: ${{ github.repository }}
+        run: node scripts/ci/bin/branch-flow.ts
 
       # The repo needs npm 12 (devEngines); Node 24 ships npm 11. A global install is not checked
       # against devEngines, so this runs fine with npm 11.

@@ -1,6 +1,6 @@
 # ARCHITECTURE — BQ
 
-> **Status:** v1.58 draft (2026-11-07). [PRD.md](PRD.md) v1.0 pe based. Design ek multi-agent review se aaya (3 architecture proposals + review board + owner ke decisions), aur v1.1 me free tier ke official docs ke against verify hua.
+> **Status:** v1.59 draft (2026-11-08). [PRD.md](PRD.md) v1.0 pe based. Design ek multi-agent review se aaya (3 architecture proposals + review board + owner ke decisions), aur v1.1 me free tier ke official docs ke against verify hua.
 
 ## 0. Ek nazar me
 
@@ -528,7 +528,7 @@ Sirf config badlegi, code nahi:
   - `release`: **production**, sirf `prerelease` (ya `hotfix/*`) se PR. Yahi branch Render (`bq-live`) aur Vercel production pe deploy hoti hai, aur npm packages sirf yahin se publish hote hain. Merge sirf CI green hone pe.
   - `main`: **master, sirf final code.** Release deploy hokar demo check ho jaaye, tab PR `release` → `main`. Is pe kabhi seedha kaam nahi.
   - **Back-merge:** package release ka commit (versions, changelogs) ya hotfix `release` pe banta hai, isliye uske baad PR `release` → `prerelease`, taaki agla kaam naye versions pe ho.
-  - Branch protection (rulesets): `main` aur `release` pe PR zaroori, required check `check`, force push aur delete band. `prerelease` pe sirf force push aur delete band: chhote fix seedha push ho sakte hain (RULES §2), aur CI har push pe chalta hai. `check` flow bhi jaanchta hai (`main` ← sirf `release`; `release` ← sirf `prerelease` ya `hotfix/*`). Owner ka bypass sirf package CLI ke release commit + tags push karne ke liye. Conventional Commits. Dependency PRs `prerelease` pe.
+  - Branch protection (rulesets): `main` aur `release` pe PR zaroori, required check `check`, force push aur delete band. `prerelease` pe sirf force push aur delete band: chhote fix seedha push ho sakte hain (RULES §2), aur CI har push pe chalta hai. `check` flow bhi jaanchta hai (`main` ← sirf `release`; `release` ← sirf `prerelease` ya `hotfix/*`; dono sirf isi repo ki branch se, fork se nahi; niyam aur tests `scripts/ci/`, QA-CI-001). Ye galti se bachav hai, taala nahi (PR apni `ci.yml` badal sakta hai): taala merge ka haq, fork PR ke CI ka approval aur "up to date" niyam (RULES §2). Owner ka bypass sirf package CLI ke release commit + tags push karne ke liye. Conventional Commits. Dependency PRs `prerelease` pe.
 - **GitHub Actions:**
   - `ci.yml`: lint, typecheck, test, build (sirf affected), dependency-cruiser, no-hardcoded-geo lint, no role-name comparisons, OpenAPI diff, event compatibility, har route pe permission, rate class aur owner, permission catalogue ↔ seed sync, bundle budgets, gitleaks, npm audit. ~2,600 package tests merge rokte hain.
   - `integration.yml`: open-district-by-config (saare refusal paths ke saath), fake Razorpay ke saath checkout saga, outbox/inbox exactly-once, no-oversell (50 parallel orders), ledger zero-sum aur gapless invoices, authz scope aur separation of duties, idempotency, review routing, Redis wipe drill (`FLUSHALL` ke beech koi event miss na ho, revoked session reject ho, schedulers wapas aayein), aur `ATLAS_TIER=M0` mode me relay poll.
@@ -714,3 +714,4 @@ Sirf config badlegi, code nahi:
 | v1.56   | 2026-11-07 | §11.1: server ke jawab se pehle app ki koi API call nahi (api-client `waitForServer` + `ServerWake` `onReady`), sirf "Try again" (owner, QA-FE-009). |
 | v1.57   | 2026-11-07 | §11.1: generator ka app template bhi wake-up + `waitForServer` ke saath (owner). |
 | v1.58   | 2026-11-07 | §7.2: app me sign-out sirf server ke 200 pe, fail pe signed-in + "Try again"; idle sign-out turant local + logout retry; §9.2: idle sign-out sirf idle channel se (owner, QA-FE-004 + QA-FE-010). |
+| v1.59   | 2026-11-08 | §13: CI flow check `main`/`release` me sirf isi repo ki branch leta (`scripts/ci/`, QA-CI-001); check galti se bachav, taala merge ka haq (RULES §2). |
