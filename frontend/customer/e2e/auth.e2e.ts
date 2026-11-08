@@ -273,3 +273,22 @@ test('a proxy’s 502 page reads as words for people, not "Request failed" (QA-F
   await expect(toast).toContainText('The server did not answer. Please try again in a moment.');
   await expect(page.getByText(/Request failed with status/)).toHaveCount(0);
 });
+
+test('every page open to the signed-out fits a phone’s screen', async ({ page }, testInfo) => {
+  test.skip(!testInfo.project.name.startsWith('chromium-360'), 'only a phone is that narrow');
+  for (const path of [
+    '/',
+    '/credits',
+    '/sign-in',
+    '/sign-up',
+    '/forgot-password',
+    '/invitation',
+    '/terms',
+    '/privacy',
+    '/no-such-page',
+  ]) {
+    await page.goto(path);
+    await expect(page.getByRole('banner')).toBeVisible();
+    await expectNoSideScroll(page);
+  }
+});

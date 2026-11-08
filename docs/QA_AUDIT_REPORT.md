@@ -1,10 +1,10 @@
 # QA AUDIT REPORT — BQ
 
-> **Status:** v1.20 (2026-11-08, final; §2a me KNOWN faislon ki halat, §0 me fixes). Audit base: `origin/prerelease` @ `ee7f46a` (`ee7f46ae7b2605d99f6b4497d26303aa109fb371`). Auditor: Claude Code (Opus 5.5, `claude-opus-5-5`). Ye report audit ki single source of truth hai; fixes alag se, ek-ek karke.
+> **Status:** v1.21 (2026-11-08, final; §2a me KNOWN faislon ki halat, §0 me fixes). Audit base: `origin/prerelease` @ `ee7f46a` (`ee7f46ae7b2605d99f6b4497d26303aa109fb371`). Auditor: Claude Code (Opus 5.5, `claude-opus-5-5`). Ye report audit ki single source of truth hai; fixes alag se, ek-ek karke.
 
 ## 0. Audit state (har session ke aakhir me update)
 
-- **Fixes (2026-11-07 se, branch `feat/qa-audit`, §10 ke kram se, har fix ka apna commit, saare fixes ke baad ek PR → `prerelease` (owner, 2026-11-07)):** 1. QA-ID-001 Fixed (2026-11-07). 2. QA-GW-001 + QA-KRN-001 Fixed (2026-11-07). 3. QA-FE-009 Fixed (2026-11-07). 16. QA-FE-005 Fixed (2026-11-07, owner ke kehne pe pehle). 4. QA-FE-004 + QA-FE-010 Fixed (2026-11-07). 5. QA-FE-008 Fixed (2026-11-07). 6. QA-FE-001 + QA-FE-007 Fixed (2026-11-08). 7. QA-CI-001 Fixed (2026-11-08). 8. QA-ID-002 Fixed (2026-11-08). 12. QA-TOOL-001 Fixed (2026-11-08, owner ke kehne pe pehle). 9. QA-CUS-001 Fixed (2026-11-08). 10. QA-FE-003 + QA-FE-002 Fixed (2026-11-08). Agla: QA-ADM-001.
+- **Fixes (2026-11-07 se, branch `feat/qa-audit`, §10 ke kram se, har fix ka apna commit, saare fixes ke baad ek PR → `prerelease` (owner, 2026-11-07)):** 1. QA-ID-001 Fixed (2026-11-07). 2. QA-GW-001 + QA-KRN-001 Fixed (2026-11-07). 3. QA-FE-009 Fixed (2026-11-07). 16. QA-FE-005 Fixed (2026-11-07, owner ke kehne pe pehle). 4. QA-FE-004 + QA-FE-010 Fixed (2026-11-07). 5. QA-FE-008 Fixed (2026-11-07). 6. QA-FE-001 + QA-FE-007 Fixed (2026-11-08). 7. QA-CI-001 Fixed (2026-11-08). 8. QA-ID-002 Fixed (2026-11-08). 12. QA-TOOL-001 Fixed (2026-11-08, owner ke kehne pe pehle). 9. QA-CUS-001 Fixed (2026-11-08). 10. QA-FE-003 + QA-FE-002 Fixed (2026-11-08). 11. QA-ADM-001 Fixed (2026-11-08). Agla: QA-GW-002 (owner ka faisla pehle).
 - **Gate 1: approved (2026-11-04).** Owner ke jawab (saari recommendations maani):
   - Live pe passive GETs: **haan, kul ≤ 15**, bina auth: `bq-live` `/health`, `/status`, ek anjaan path; customer + admin ka home aur ek 404 (headers, TLS). OTP/auth/write/fuzz/rate-limit/load kabhi nahi.
   - Playwright: Chromium 1248 pehle se installed (Playwright 1.64.1 ki zaroorat yahi); koi download nahi chahiye
@@ -813,7 +813,7 @@ Plan: **E** = planned-executed (local stack, HTTP, browser, scratch script), **S
 ### [QA-ADM-001] The admin header is 3 px wider than a 360 px screen, so every admin page scrolls sideways
 
 **Module:** M12 (admin) | **Feature:** header (brand + ThemeSwitcher + AccountMenu) | **Task/Doc:** T6.1; RULES §1.5 (360 / 768 / 1280)
-**Severity:** P3 (360 px pe layout thoda toota: page 3 px side me khiskta, account slot right padding me ghusta; content chhupta nahi) | **Priority:** Low | **Status:** Open
+**Severity:** P3 (360 px pe layout thoda toota: page 3 px side me khiskta, account slot right padding me ghusta; content chhupta nahi) | **Priority:** Low | **Status:** Fixed (2026-11-08, `feat/qa-audit`, commit "fix(admin): the header fits a 360 px phone, and the E2E side-scroll check sees it (QA-ADM-001)")
 **Testing Type:** Responsive | **Evidence level:** E1 | **Reproducibility:** Always (signed-out 5 pages + signed-in 3 pages) | **Environment:** admin dev server, Chromium 360×780 (375 pe theek)
 **Description:** Header ki row `container-page flex gap-3` (padding 16 + 16, gap 12 × 2) me brand link (93.4 px), theme `fieldset` (141.6 px) aur account slot (`min-w-22` = 88 px) = 323 px, jabki jagah 304 px. Brand aur fieldset shrink nahi hote, isliye account slot 275–363 px tak jaata hai: `document.documentElement.scrollWidth` 363 / `clientWidth` 360.
 **Steps to Reproduce:** Admin, viewport 360×780, koi bhi page (`/sign-in`, `/`, `/account/security` …), `document.documentElement.scrollWidth`.
@@ -827,6 +827,7 @@ Plan: **E** = planned-executed (local stack, HTTP, browser, scratch script), **S
 **Regression Risk:** Low.
 **Regression test to add:** Playwright 360 project: `scrollWidth <= clientWidth` har page pe (admin + customer).
 **Owner decision needed:** Nahi
+**Fix (2026-11-08, owner: "Option A + jaanch fix"):** jaanch me naya mila: admin E2E 360 pe pehle se `expectNoSideScroll` chalata tha aur green tha, kyunki jaanch `scrollWidth − innerWidth` thi, aur `mobile: true` project me Chromium chaude content ke liye layout viewport faila deta hai (`innerWidth` bhi 363). Yaani 360 pe ye jaanch dono apps me kabhi fail nahi hoti thi. (1) `scripts/e2e/checks.ts` ka `expectNoSideScroll` ab Playwright ke configured viewport (`page.viewportSize().width`) se milata hai (scrollbar wale browser ke liye `<=`). (2) Admin header phone pe (`sm` se chhota) sirf `BrandMark`, "Admin" `sm` se upar (customer jaisa; DESIGN §11); link ka `aria-label` "Beautinique Admin home" wahi. 360 pe header ke hisse ab 266 px (nishan 36 + switcher 142 + slot 88; pehle 323 px, jagah 304 px padding aur gap ke baad). Naya E2E dono apps me: har signed-out page (admin 5, customer 9) 360 light/dark pe screen me; purane header pe fail ("the page is 363 px wide on a 360 px screen"), fix ke saath pass. Customer ke signed-out pages purani jaanch ke bina bhi naape: sab 360/360 (404 ki sajawat bahar jaati par page scroll nahi). Screenshots (Playwright Chromium): 360 light/dark me nishan, theme switcher, "Sign in" andar (360/360); 768 pe "Admin" dikhta. Admin E2E 12 pass / 18 skip, customer 41 pass / 61 skip (ab signed-in flows bhi 360 pe sach me jaanche); lint, typecheck, format, admin unit pass. Mutation nahi (app).
 
 ### [QA-CI-001] The branch-flow check trusts the branch name only, so a fork's branch named "release" passes into main
 
@@ -1172,7 +1173,7 @@ Final (2026-11-05). Har number ek PR (ya ek chhota fix); saath jaane wale bugs e
 8. **QA-ID-002** (P3): social lookup ka index (do queries + explain test); social sign-ins badhne se pehle. **Fixed (2026-11-08, `feat/qa-audit`)**: naya index (`$gt: ''`) + `bySubject` + migration, aur identity/notify/core ke tests ka COLLSCAN pehra (RULES §4.13).
 9. **QA-CUS-001** (P3): customer `root.tsx` `error == null`; 1 line + test. **Fixed (2026-11-08, `feat/qa-audit`)**: root `null` bhi "koi error nahi", aur account layout ka apna title + `noindex`.
 10. **QA-FE-003 + QA-FE-002** (P3): components ka ek PR (`CodeInput` maxLength, HierarchySelect Escape). **Fixed (2026-11-08, `feat/qa-audit`)**: `maxLength` hata, Tree pe `escapeKeyBehavior="none"`.
-11. **QA-ADM-001** (P3): admin header 360 px + Playwright overflow assertion (customer bhi).
+11. **QA-ADM-001** (P3): admin header 360 px + Playwright overflow assertion (customer bhi). **Fixed (2026-11-08, `feat/qa-audit`)**: phone pe sirf nishan, aur `expectNoSideScroll` ab viewport se (pehle 360 pe andhi thi).
 12. **QA-TOOL-001** (P3): `.prettierignore` me `.claude/worktrees`; kabhi bhi. **Fixed (2026-11-08, `feat/qa-audit`, owner ke kehne pe pehle)**: Prettier, git, root ESLint aur root Vitest teeno worktree chhodte hain.
 13. **QA-GW-002** (P4, owner decision): Redis wipe pe revocation fallback; ARCHITECTURE §6.6 ka faisla pehle, pehle non-identity `signed-in` route se pehle zaroor.
 14. **QA-FE-006** (P4, owner: timeout kitna): contracts + api-client client timeout; 2 ke saath sochna.
@@ -1228,3 +1229,4 @@ Final (2026-11-05). Har number ek PR (ya ek chhota fix); saath jaane wale bugs e
 | v1.18   | 2026-11-08 | QA-TOOL-001 Fixed (`feat/qa-audit`, owner ke kehne pe pehle): Prettier, `.gitignore`, root ESLint aur root Vitest `.claude/worktrees` chhodte hain; §0, §10. |
 | v1.19   | 2026-11-08 | QA-CUS-001 Fixed (`feat/qa-audit`): root `meta` `null` bhi "koi error nahi", account layout ka apna title + `noindex`; §0, §10. |
 | v1.20   | 2026-11-08 | QA-FE-003 + QA-FE-002 Fixed (`feat/qa-audit`): `CodeInput` me `maxLength` nahi, HierarchySelect me Escape value rakhta; §0, §10. |
+| v1.21   | 2026-11-08 | QA-ADM-001 Fixed (`feat/qa-audit`): admin header phone pe sirf nishan; E2E side-scroll jaanch viewport se (mobile emulation me andhi thi); §0, §10. |

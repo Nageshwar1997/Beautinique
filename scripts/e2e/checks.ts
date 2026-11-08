@@ -29,8 +29,19 @@ export async function expectNoAxeViolations(page: Page) {
   ).toEqual([]);
 }
 
-/** Nothing wider than the screen (no sideways scroll on a phone). */
+/**
+ * Nothing wider than the screen (no sideways scroll on a phone), measured against the screen the
+ * project set. Not `innerWidth`: a mobile emulation widens its layout to fit what overflows, so
+ * innerWidth grew with the page and the check could never fail (QA-ADM-001).
+ */
 export async function expectNoSideScroll(page: Page) {
-  const wide = await page.evaluate(() => document.documentElement.scrollWidth - window.innerWidth);
-  expect(wide).toBeLessThanOrEqual(0);
+  const { wide, inner } = await page.evaluate(() => ({
+    wide: document.documentElement.scrollWidth,
+    inner: window.innerWidth,
+  }));
+  const screen = page.viewportSize()?.width ?? inner;
+  expect(
+    wide,
+    `the page is ${String(wide)} px wide on a ${String(screen)} px screen`,
+  ).toBeLessThanOrEqual(screen);
 }

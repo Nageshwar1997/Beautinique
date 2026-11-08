@@ -1,6 +1,6 @@
 # MEMORY — BQ
 
-> **Status:** v1.71 (2026-11-08). Project ki yaaddasht: **kya tay hua aur kyun**, **pichhle kaam se kya seekha**, aur **kaunse jaal (traps) se bachna hai**. Poori detail baaki docs me hai; yahan short version aur pointers. Naya sabak ya decision aaye to yahan ek line jodo.
+> **Status:** v1.72 (2026-11-08). Project ki yaaddasht: **kya tay hua aur kyun**, **pichhle kaam se kya seekha**, aur **kaunse jaal (traps) se bachna hai**. Poori detail baaki docs me hai; yahan short version aur pointers. Naya sabak ya decision aaye to yahan ek line jodo.
 
 ## 1. Decision log
 
@@ -118,6 +118,7 @@
 | 2026-11-08 | QA-TOOL-001 (owner: §10 ke kram se pehle; Claude ki salah "option B" maani): `.claude/worktrees/` `.prettierignore`, `.gitignore` aur root ESLint ignores me, aur root `vitest.config.mjs` (`.claude/**` exclude) | Worktree repo ki doosri copy hai: Prettier uski generated files pe fail hota tha, root ESLint uski 67 files lint karta, root Vitest uske tests dobara chalata; `.gitignore` me hone se dono developers ke clone me ek jaisa | Report QA-TOOL-001 |
 | 2026-11-08 | QA-CUS-001 (owner ne Claude ki salah "option B" maani): customer root `meta` `null` aur `undefined` dono ko "koi error nahi" maanta; account layout ka apna `meta` "Account \| Beautinique" + `noindex` | Sirf root fix se `/account` ka `noindex` hat jaata, jabki ARCHITECTURE §9.2 (2026-11-03) layout ko `noindex` kehta tha aur code me chhoot gaya tha; ab har account page jo apna `meta` na de, search se bahar | Report QA-CUS-001, ARCHITECTURE §9.2 |
 | 2026-11-08 | QA-FE-003 + QA-FE-002 (owner ne Claude ki salah "dono me A" maani): `CodeInput` me `maxLength` nahi (filter + `slice` `onChange` me); HierarchySelect ke `<Tree>` pe `escapeKeyBehavior="none"` | `maxLength` browser filter se pehle lagata (paste, autofill, IME teeno me digit katta), `onPaste` sirf paste theek karta. React Aria ka apna option Escape ko popover tak bhejta, apne key handler se saaf | Report QA-FE-003, QA-FE-002; components README |
+| 2026-11-08 | QA-ADM-001 (owner: "Option A + jaanch fix"): admin header phone pe (`sm` se chhota) sirf `BrandMark`, "Admin" `sm` se upar (DESIGN §11); E2E ka `expectNoSideScroll` ab Playwright ke viewport se milata | Naam ke saath header 323 px ka tha, jagah 304 px; customer pehle se phone pe sirf mark dikhata. Purani jaanch mobile emulation me `innerWidth` se milati thi, jo overflow ke saath badh jaata: 360 pe kabhi fail nahi hoti | Report QA-ADM-001, DESIGN §11 |
 
 ## 2. Pichhle kaam se seekhe sabak
 
@@ -157,6 +158,7 @@
 34. **ESLint v10 aur Vitest ki config kahan se aati hai (2026-11-08, QA-TOOL-001):** ESLint v10 har file ki config uske apne folder se upar dhoondhta hai, isliye `isPathIgnored()` kisi apni `eslint.config.js` wale folder (workspace, worktree) ki file ko us config se jaanchta hai, root ki ignores se nahi: `packages/...` ki file bhi "not ignored" dikhti hai. Root se kya lint hota hai, wo `eslint <folder>` chala ke dekho (worktree ignore hone pe "all files ... are ignored"). Vitest ki root config workspaces pe nahi lagti: config-less workspace bhi apne folder ki defaults leta hai (root pe nakli "kuch mat chuno" config se dekha).
 35. **Library jo value deti hai, test wahi de (2026-11-08, QA-CUS-001):** customer root `meta` ka test `error: undefined` se "koi error nahi" jaanchta tha, par React Router 8.5 bina error `null` bhejta hai (`undefined` sirf tab, jab galti kisi aur route ki ho). Test pass, app galat: har bina-`meta` page ko "Something went wrong" + `noindex`. Kisi library ke callback ka test likho to uska asli argument library ke code ya ek asli run (E2E ka server HTML) se lo, andaze se nahi.
 36. **`fireEvent.change` browser ki seemayein chhod deta hai (2026-11-08, QA-FE-003):** `CodeInput` ka paste test `fireEvent.change` se value seedhi set karta tha, jo `maxlength` ko bypass karta hai; asli browser (aur `userEvent.paste`) insert ko pehle `maxlength` pe kaatta hai, isliye `" 123456"` ka `6` kho jaata tha aur test pass. Input ki seema (maxlength, pattern) wali jaanch `userEvent` aur asli Chromium E2E (`page.keyboard.insertText`) se karo. React Aria ke collections (Tree, ListBox, GridList) me Escape ka default `clearSelection` hai: popover ke andar ho to `escapeKeyBehavior="none"` do, warna Escape selection mitata aur box khula rehta.
+37. **Mobile emulation me `innerWidth` overflow ke saath badhta hai (2026-11-08, QA-ADM-001):** Playwright ke `mobile: true` project (360) me content chauda ho to Chromium layout viewport faila deta hai: `innerWidth` aur `scrollWidth` dono 363. `scrollWidth − innerWidth` wali side-scroll jaanch isliye 360 pe kabhi fail nahi hoti thi, aur admin ka 3 px overflow mahino E2E me green raha. Screen ki chaudaai test ke configured viewport (`page.viewportSize().width`) se lo, page ke andar ke number se nahi. Aur koi jaanch kabhi fail na ho to ek baar jaan-boojh ke galat input pe chala ke dekho ki wo fail hoti hai.
 
 ## 3. Environment
 
@@ -266,3 +268,4 @@
 | v1.69   | 2026-11-08 | Decision + sabak 34: QA-TOOL-001 (worktree ko Prettier, git, root ESLint, root Vitest chhodte; ESLint v10 ki config lookup). |
 | v1.70   | 2026-11-08 | Decision + sabak 35: QA-CUS-001 (root `meta` `null` bhi, account layout ka title + `noindex`; library ka asli argument test me). |
 | v1.71   | 2026-11-08 | Decision + sabak 36: QA-FE-003 + QA-FE-002 (`CodeInput` bina `maxLength`, Tree pe `escapeKeyBehavior="none"`; `fireEvent.change` maxlength chhodta). |
+| v1.72   | 2026-11-08 | Decision + sabak 37: QA-ADM-001 (admin header phone pe sirf mark; side-scroll jaanch viewport se, mobile emulation me `innerWidth` badhta). |

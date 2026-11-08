@@ -1,6 +1,6 @@
 # DESIGN — BQ
 
-> **Status:** v1.12 (2026-11-07). UI aur UX ke niyam saare 11 apps ke liye. Design ka **source of truth code hai**: `@beautinique/frontend-styles` (tokens) aur `@beautinique/frontend-components` (components). [RULES.md](RULES.md) §5 frontend ke coding niyam batata hai; ye file batati hai ki cheezein **dikhengi aur chalengi kaise**.
+> **Status:** v1.13 (2026-11-08). UI aur UX ke niyam saare 11 apps ke liye. Design ka **source of truth code hai**: `@beautinique/frontend-styles` (tokens) aur `@beautinique/frontend-components` (components). [RULES.md](RULES.md) §5 frontend ke coding niyam batata hai; ye file batati hai ki cheezein **dikhengi aur chalengi kaise**.
 
 ## 1. Design principles
 
@@ -160,7 +160,7 @@ Har screen ye states dikhati hai:
   - **License:** copy karne pe bhi license lagu hai. Solar aur Pepicons CC BY 4.0 hain (credit zaroori), Lucide ISC, Line MD MIT, Logos CC0. Package me `LICENSES.md`, aur apps me "Icon credits" page.
   - Decorative icon pe `aria-hidden`, aur akele icon wale button pe `aria-label` (BaseIcon me `label` prop).
 - **Logo** (owner, 2026-10-26): master `packages/frontend/icons/brand/logo-master.webp` ("B" me ek aurat ki profile, rose baal aur pankhudiyan, neeche "Beautinique"), usi se trace hue vectors `@beautinique/frontend-icons` me:
-  - `BrandLogo` (mark + naam; `horizontal` header ke liye, `stacked` master jaisa) aur `BrandMark` (sirf mark, chhoti jagah). `size` = height, width shape se.
+  - `BrandLogo` (mark + naam; `horizontal` header ke liye, `stacked` master jaisa) aur `BrandMark` (sirf mark, chhoti jagah). `size` = height, width shape se. **Header me phone pe (`sm` se chhota) sirf `BrandMark`**, naam (logo ya app ka naam, jaise "Admin") `sm` se upar; link ka `aria-label` poora naam rakhta hai (owner, 2026-11-08, QA-ADM-001: naam ke saath admin header 360 px se 3 px chauda tha).
   - Rang: ink = `currentColor`, rose = theme ka `--brand`, isliye light, dark aur high contrast me apne aap. Inverse surface (footer) aur print pe `monochrome`.
   - Link ke andar logo decorative (naam link pe, jaise "Beautinique home"); akela ho to `label="Beautinique"`.
   - Browser tab ka favicon alag rehta hai: rose tile pe safed "B" (`favicon.svg`/`.ico`), kyunki 16 px pe mark ki details nahi dikhti.
@@ -184,3 +184,4 @@ Har screen ye states dikhati hai:
 | v1.10   | 2026-11-07 | §6: wake-up ke baad sirf "Try again"; jawab se pehle koi API call nahi; account na mile to sandesh + "Try again" (owner, QA-FE-009). |
 | v1.11   | 2026-11-07 | §6: account na mile to app-shell ka error page ("Oops", Try again + home) (owner). |
 | v1.12   | 2026-11-07 | §8: kai step wale form me naya step focus le (field ya heading), sandesh field se `aria-describedby` se juda (owner, QA-FE-008). |
+| v1.13   | 2026-11-08 | §11: header me phone pe sirf `BrandMark`, naam `sm` se upar (owner, QA-ADM-001). |
