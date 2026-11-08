@@ -1,11 +1,13 @@
 // @ts-check
-// Root lint: the release tooling (scripts/) and shared configs. Every workspace lints itself.
+// Root lint: the release tooling (scripts/) and shared configs. Every workspace lints itself, and
+// Claude Code's worktrees (.claude/worktrees: other checkouts of this repo) are not ours to lint
+// here (QA-TOOL-001).
 import { defineConfig } from 'eslint/config';
 
 import { packageConfig } from './configs/eslint-config.js';
 
 export default defineConfig(
-  { ignores: ['packages/**', 'frontend/**', 'backend/**', 'docs/**'] },
+  { ignores: ['packages/**', 'frontend/**', 'backend/**', 'docs/**', '.claude/worktrees/**'] },
   packageConfig({ platform: 'node', tsconfigRootDir: import.meta.dirname }),
   {
     // The CLI and the release scripts print to the terminal on purpose.

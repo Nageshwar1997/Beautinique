@@ -1,10 +1,10 @@
 # QA AUDIT REPORT — BQ
 
-> **Status:** v1.17 (2026-11-08, final; §2a me KNOWN faislon ki halat, §0 me fixes). Audit base: `origin/prerelease` @ `ee7f46a` (`ee7f46ae7b2605d99f6b4497d26303aa109fb371`). Auditor: Claude Code (Opus 5.5, `claude-opus-5-5`). Ye report audit ki single source of truth hai; fixes alag se, ek-ek karke.
+> **Status:** v1.18 (2026-11-08, final; §2a me KNOWN faislon ki halat, §0 me fixes). Audit base: `origin/prerelease` @ `ee7f46a` (`ee7f46ae7b2605d99f6b4497d26303aa109fb371`). Auditor: Claude Code (Opus 5.5, `claude-opus-5-5`). Ye report audit ki single source of truth hai; fixes alag se, ek-ek karke.
 
 ## 0. Audit state (har session ke aakhir me update)
 
-- **Fixes (2026-11-07 se, branch `feat/qa-audit`, §10 ke kram se, har fix ka apna commit, saare fixes ke baad ek PR → `prerelease` (owner, 2026-11-07)):** 1. QA-ID-001 Fixed (2026-11-07). 2. QA-GW-001 + QA-KRN-001 Fixed (2026-11-07). 3. QA-FE-009 Fixed (2026-11-07). 16. QA-FE-005 Fixed (2026-11-07, owner ke kehne pe pehle). 4. QA-FE-004 + QA-FE-010 Fixed (2026-11-07). 5. QA-FE-008 Fixed (2026-11-07). 6. QA-FE-001 + QA-FE-007 Fixed (2026-11-08). 7. QA-CI-001 Fixed (2026-11-08). 8. QA-ID-002 Fixed (2026-11-08). Agla: QA-CUS-001.
+- **Fixes (2026-11-07 se, branch `feat/qa-audit`, §10 ke kram se, har fix ka apna commit, saare fixes ke baad ek PR → `prerelease` (owner, 2026-11-07)):** 1. QA-ID-001 Fixed (2026-11-07). 2. QA-GW-001 + QA-KRN-001 Fixed (2026-11-07). 3. QA-FE-009 Fixed (2026-11-07). 16. QA-FE-005 Fixed (2026-11-07, owner ke kehne pe pehle). 4. QA-FE-004 + QA-FE-010 Fixed (2026-11-07). 5. QA-FE-008 Fixed (2026-11-07). 6. QA-FE-001 + QA-FE-007 Fixed (2026-11-08). 7. QA-CI-001 Fixed (2026-11-08). 8. QA-ID-002 Fixed (2026-11-08). 12. QA-TOOL-001 Fixed (2026-11-08, owner ke kehne pe pehle). Agla: QA-CUS-001.
 - **Gate 1: approved (2026-11-04).** Owner ke jawab (saari recommendations maani):
   - Live pe passive GETs: **haan, kul ≤ 15**, bina auth: `bq-live` `/health`, `/status`, ek anjaan path; customer + admin ka home aur ek 404 (headers, TLS). OTP/auth/write/fuzz/rate-limit/load kabhi nahi.
   - Playwright: Chromium 1248 pehle se installed (Playwright 1.64.1 ki zaroorat yahi); koi download nahi chahiye
@@ -661,7 +661,7 @@ Plan: **E** = planned-executed (local stack, HTTP, browser, scratch script), **S
 ### [QA-TOOL-001] format:check fails on a laptop that has a Claude Code worktree under .claude/worktrees
 
 **Module:** M0 Baseline | **Feature:** `npm run format:check` | **Task/Doc:** T0.6, RULES §2.1 (chhota fix se pehle local `format:check`)
-**Severity:** P3 (tooling ki low-impact galti: repo ka code theek hai, par local check jhootha fail deta hai) | **Priority:** Low | **Status:** Open
+**Severity:** P3 (tooling ki low-impact galti: repo ka code theek hai, par local check jhootha fail deta hai) | **Priority:** Low | **Status:** Fixed (2026-11-08, `feat/qa-audit`, commit "fix(tooling): format, root lint and root Vitest skip Claude Code worktrees (QA-TOOL-001)")
 **Testing Type:** Tooling / baseline | **Evidence level:** E1 | **Reproducibility:** Always (jab tak worktree folder hai), 2/2 | **Environment:** Windows laptop, `ee7f46a`
 **Description:** Claude Code (desktop) apni worktrees repo ke andar `.claude/worktrees/<name>/` me banata hai; ye folder git se `.git/info/exclude` ke zariye chhupa hai, par `.prettierignore` ke patterns root se bandhe hain (`packages/shared/contracts/generated`, `packages/frontend/styles/src/variables.css` ...). Isliye Prettier worktree ke andar ke generated files (`generated/*.json`, `styles/src/*.css`) bhi jaanchta hai aur `npm run format:check` fail hota hai, jabki repo ki apni har file sahi hai.
 **Steps to Reproduce:** 1. Repo ke andar ek Claude Code worktree ho (yahan `.claude/worktrees/comprehensive-qa-audit-b02e4c`, `git worktree list` me dikhta hai). 2. `npm run format:check` → exit 1, "Code style issues found in 6 files" (sab `.claude/worktrees/...` ke). 3. `npx prettier . --check '!.claude/worktrees/**'` → "All matched files use Prettier code style!".
@@ -675,6 +675,7 @@ Plan: **E** = planned-executed (local stack, HTTP, browser, scratch script), **S
 **Regression Risk:** Bahut kam (sirf ignore list).
 **Regression test to add:** Koi unit test nahi chahiye; `format:check` ek worktree ke saath laptop pe dobara chalao.
 **Owner decision needed:** Nahi
+**Fix (2026-11-08, owner ke kehne pe §10 ke kram se pehle; owner ne Claude ki salah "option B" maani):** jaanch me root ke do aur tools worktree tak pahunchte mile: root `eslint .` (purani config ke saath `.claude` ki 67 files, sab worktree ki) aur repo root se chala Vitest (`plan.test.ts` do baar: repo + worktree). Ab `.prettierignore`, `.gitignore` (pehle sirf laptop ke `.git/info/exclude` me tha, doosre developer ke clone me nahi) aur root `eslint.config.js` ki ignores me `.claude/worktrees/`, aur naya root `vitest.config.mjs` (default excludes + `.claude/**`; sirf repo root se chale Vitest ke liye). Worktree ke rehte jaancha: `format:check` pass, `eslint .claude` "all files ... are ignored" (0 files), root Vitest me `plan.test.ts` sirf repo ka, `git check-ignore` `.gitignore:33`. Root ki Vitest config workspaces pe nahi lagti: config-less workspace (`shared-utils`) ne root pe "kuch mat chuno" wali nakli config ke saath bhi apne saare tests dikhaye. Nayi config me ek baat: ESLint v10 har file ki config uske folder se dhoondhta hai, isliye `isPathIgnored` worktree ki file ko uski apni config se "linted" batata hai; asli jaanch root se `eslint <folder>` (MEMORY sabak 34). Typecheck, gitleaks (`git`) aur npm workspaces pe asar nahi tha (unke paths root ke folders se bandhe).
 
 ### [QA-ID-002] Every social sign-in scans the whole sign-in-methods collection (partial index never used)
 
@@ -1169,7 +1170,7 @@ Final (2026-11-05). Har number ek PR (ya ek chhota fix); saath jaane wale bugs e
 9. **QA-CUS-001** (P3): customer `root.tsx` `error == null`; 1 line + test.
 10. **QA-FE-003 + QA-FE-002** (P3): components ka ek PR (`CodeInput` maxLength, HierarchySelect Escape).
 11. **QA-ADM-001** (P3): admin header 360 px + Playwright overflow assertion (customer bhi).
-12. **QA-TOOL-001** (P3): `.prettierignore` me `.claude/worktrees`; kabhi bhi.
+12. **QA-TOOL-001** (P3): `.prettierignore` me `.claude/worktrees`; kabhi bhi. **Fixed (2026-11-08, `feat/qa-audit`, owner ke kehne pe pehle)**: Prettier, git, root ESLint aur root Vitest teeno worktree chhodte hain.
 13. **QA-GW-002** (P4, owner decision): Redis wipe pe revocation fallback; ARCHITECTURE §6.6 ka faisla pehle, pehle non-identity `signed-in` route se pehle zaroor.
 14. **QA-FE-006** (P4, owner: timeout kitna): contracts + api-client client timeout; 2 ke saath sochna.
 15. **QA-TOOL-002** (P4): `scripts/e2e` cleanup backend band hone ke baad + purani DBs ka sweep.
@@ -1221,3 +1222,4 @@ Final (2026-11-05). Har number ek PR (ya ek chhota fix); saath jaane wale bugs e
 | v1.15   | 2026-11-08 | QA-FE-001 + QA-FE-007 Fixed (`feat/qa-audit`): `next` ka saanjha niyam (resolve karke jaanch), proxy ke jawab ke codes aur sandesh; §0, §5, §10. |
 | v1.16   | 2026-11-08 | QA-CI-001 Fixed (`feat/qa-audit`): branch flow `scripts/ci/` me, `main`/`release` sirf isi repo ki branch se; retarget aur PR ki apni `ci.yml` wali seemayein; §0, §5, §10. |
 | v1.17   | 2026-11-08 | QA-ID-002 Fixed (`feat/qa-audit`): naya provider-id index + `bySubject` + migration, tests ka COLLSCAN pehra (identity, notify, core); §0, §8, §10. |
+| v1.18   | 2026-11-08 | QA-TOOL-001 Fixed (`feat/qa-audit`, owner ke kehne pe pehle): Prettier, `.gitignore`, root ESLint aur root Vitest `.claude/worktrees` chhodte hain; §0, §10. |
