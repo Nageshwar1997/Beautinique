@@ -47,6 +47,7 @@ export {
   requestPasswordCode,
   requestSignUpCode,
   resendOtp,
+  REVOCATIONS_READY_KEY,
   revokedSessionKey,
   revokedUserKey,
   routes,

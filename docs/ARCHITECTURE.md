@@ -1,6 +1,6 @@
 # ARCHITECTURE — BQ
 
-> **Status:** v1.60 draft (2026-11-08). [PRD.md](PRD.md) v1.0 pe based. Design ek multi-agent review se aaya (3 architecture proposals + review board + owner ke decisions), aur v1.1 me free tier ke official docs ke against verify hua.
+> **Status:** v1.61 draft (2026-11-09). [PRD.md](PRD.md) v1.0 pe based. Design ek multi-agent review se aaya (3 architecture proposals + review board + owner ke decisions), aur v1.1 me free tier ke official docs ke against verify hua.
 
 ## 0. Ek nazar me
 
@@ -209,8 +209,8 @@ Har module ka apna folder hai (`index.ts` facade, `http`, `application`, `domain
 - `noeviction` ki wajah se memory full = writes pe OOM error. Isliye alert 60% (15 MB) pe. Redis write fail ho to OTP bhejna `503` deta hai ("thodi der baad try karein"), auth routes pe rate limiter fail-closed, baaki routes pe fail-open.
 - **Redis wipe recovery:** Render free Key Value kabhi bhi restart ho sakta hai aur restart pe saara data mit jaata hai, jabki Node process chalta rehta hai (ioredis bas reconnect karta hai). Isliye:
   - Boot pe `bq:epoch` key (random id, bina TTL) likhi jaati hai. Ek process-level watchdog har 30 s check karta hai; key gayab = Redis wipe. Key sab deployables ki ek hai, isliye har deployable apna aakhri recovered epoch apne DB (`platform_state`) me yaad rakhta hai: key gayab ho ya anjaan value ho (koi aur deployable nayi likh chuka), dono me wo recover karta hai. (BullMQ ke schedulers bhi wipe me mit jaate hain, isliye ye watchdog §5.3 ke "setInterval hatao" rule ka akela exception hai.)
-  - Wipe pe recovery (ek Mongo lock ke peeche): (1) saare job schedulers dobara upsert. (2) **Outbox redrive:** pichhle 48 ghante (max retry window) ke outbox events 200-200 ke batches me, same `jobId` ke saath, dobara enqueue; agla batch tabhi jab queue me 100 se kam waiting jobs hon. Consumers `processed_events` se duplicate rok lete hain. (3) Pichhle 15 min me logout, revoke ya freeze hue sessions MongoDB se padh ke Redis keys dobara likhna. (4) Nayi `bq:epoch`.
-  - Jab tak recovery poori na ho, gateway revoke aur freeze MongoDB `sessions` se check karta hai (internal apps ke liye fail closed). **Revoke aur freeze ka source of truth hamesha MongoDB hai**; Redis sirf fast copy hai.
+  - Wipe pe recovery (ek Mongo lock ke peeche): (1) saare job schedulers dobara upsert. (2) **Outbox redrive:** pichhle 48 ghante (max retry window) ke outbox events 200-200 ke batches me, same `jobId` ke saath, dobara enqueue; agla batch tabhi jab queue me 100 se kam waiting jobs hon. Consumers `processed_events` se duplicate rok lete hain. (3) Identity pichhle 11 min (access token ki umar + 60 s) me band hue sessions (`revokedAt`, index `revokedAt`) MongoDB se padh ke gateway ke marks bachi hui TTL ke saath dobara likhti hai, phir `bq:id:revocations-ready` (contracts `REVOCATIONS_READY_KEY`, bina TTL); yahi identity har start pe bhi karti hai (QA-GW-002). (4) Nayi `bq:epoch`.
+  - Jab tak identity ne marks dobara na likhe (`bq:id:revocations-ready` gayab), gateway har signed-in request ko **503** deta hai (fail closed), kyunki band session zinda dikh sakta hai; app "not available right now" + retry dikhati hai. Gateway ka apna DB nahi (§6.1), isliye wo MongoDB nahi padhta (owner, 2026-11-09, QA-GW-002; pehle yahan "gateway MongoDB se check karta" likha tha, jo code me tha hi nahi). Wipe ke baad ye ~30 s (watchdog ka chakkar) tak rehta hai. **Revoke aur freeze ka source of truth hamesha MongoDB hai**; Redis sirf fast copy hai.
   - OTP aur rate-limit counters khona chalega: user OTP dobara maang leta hai.
   - Isi recovery ki wajah se Redis ka data mitne pe bhi koi business event nahi khoyega. CI me "Redis wipe drill" isse check karta hai (§13).
 
@@ -716,3 +716,4 @@ Sirf config badlegi, code nahi:
 | v1.58   | 2026-11-07 | §7.2: app me sign-out sirf server ke 200 pe, fail pe signed-in + "Try again"; idle sign-out turant local + logout retry; §9.2: idle sign-out sirf idle channel se (owner, QA-FE-004 + QA-FE-010). |
 | v1.59   | 2026-11-08 | §13: CI flow check `main`/`release` me sirf isi repo ki branch leta (`scripts/ci/`, QA-CI-001); check galti se bachav, taala merge ka haq (RULES §2). |
 | v1.60   | 2026-11-08 | §9.2: customer account layout ka `meta` (title "Account \| Beautinique" + `noindex`), 2026-11-03 ka `noindex` faisla code me ab (QA-CUS-001). |
+| v1.61   | 2026-11-09 | §6.6: wipe ke baad identity band sessions ke marks MongoDB se dobara likhti (har start pe bhi) aur ready mark; mark na ho to gateway signed-in pe 503 (gateway MongoDB nahi padhta) (owner, QA-GW-002). |

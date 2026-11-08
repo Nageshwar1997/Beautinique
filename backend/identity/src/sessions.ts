@@ -10,6 +10,7 @@ import {
   type AppPermissions,
   appPermissionsKey,
   IDENTITY_ERROR_CODES,
+  REVOCATIONS_READY_KEY,
   revokedSessionKey,
   revokedUserKey,
   SESSION_POLICIES,
@@ -112,6 +113,8 @@ export interface Session {
 
 export const indexes: readonly IndexSpec[] = [
   { collection: SESSIONS, name: 'userId_revokedAt', key: { userId: 1, revokedAt: 1 } },
+  // the sessions that ended lately, for the gateway's marks after a Redis wipe (QA-GW-002)
+  { collection: SESSIONS, name: 'revokedAt', key: { revokedAt: 1 } },
   { collection: SESSIONS, name: 'purgeAt_ttl', key: { purgeAt: 1 }, expireAfterSeconds: 0 },
 ];
 
@@ -188,6 +191,41 @@ const familyHashOf = (keys: CryptoKeys, family: string): string =>
 
 /** Ends sessions at the gateway at once: an access token lives on 10 minutes otherwise. */
 const REVOKE_TTL_MS = (ACCESS_TOKEN_SECONDS + 60) * 1000;
+
+/**
+ * Writes the gateway's ended-session marks again from MongoDB, each for what is left of its access
+ * tokens' life, then the ready mark (ARCHITECTURE §6.6, QA-GW-002): at identity's start, and after
+ * a Redis wipe took them; until the ready mark is there the gateway answers 503. Every way a
+ * session ends (logout, a copied refresh token, a new password, another device) sets its
+ * `revokedAt`, and an account's whole end is the end of each of its sessions, so these marks alone
+ * stop every token that should stop. Answers how many sessions ended lately.
+ */
+export async function restoreGatewayMarks(
+  mongo: Mongo,
+  redis: Redis,
+  {
+    readyKey = REVOCATIONS_READY_KEY,
+    now = Date.now,
+  }: { readyKey?: string; now?: () => number } = {},
+): Promise<number> {
+  const at = now();
+  const ended = await mongo.db
+    .collection<Session>(SESSIONS)
+    .find({ revokedAt: { $gt: new Date(at - REVOKE_TTL_MS) } }, { projection: { revokedAt: 1 } })
+    .toArray();
+  const batch = redis.multi();
+  for (const session of ended) {
+    const left = (session.revokedAt?.getTime() ?? at) + REVOKE_TTL_MS - at;
+    if (left > 0) batch.set(revokedSessionKey(session._id), '1', 'PX', left);
+  }
+  // last: the gateway trusts the marks only once all of them are in
+  batch.set(readyKey, '1');
+  const answers = await batch.exec();
+  if (!answers || answers.some(([error]) => error)) {
+    throw new Error('Redis did not take the ended-session marks');
+  }
+  return ended.length;
+}
 
 /** Redis away: the gateway could not learn of an ended session, so say so (503). */
 async function inRedis<T>(work: () => Promise<T>): Promise<T> {

@@ -1691,6 +1691,60 @@ const mutations: Mutation[] = [
     ],
     tests: 'make a sub-role',
   },
+  // the gateway's ended-session marks come back from MongoDB after a Redis wipe (QA-GW-002)
+  {
+    file: 'sessions',
+    name: 'the ready mark is never written',
+    change: [["  batch.set(readyKey, '1');\n", '']],
+    tests: 'QA-GW-002',
+  },
+  {
+    file: 'sessions',
+    name: 'no ended session gets its mark back',
+    change: [
+      ["    if (left > 0) batch.set(revokedSessionKey(session._id), '1', 'PX', left);\n", ''],
+    ],
+    tests: 'QA-GW-002',
+  },
+  {
+    file: 'sessions',
+    name: 'a mark gets the whole time again, not what is left',
+    change: [["'1', 'PX', left);", "'1', 'PX', REVOKE_TTL_MS);"]],
+    tests: 'QA-GW-002',
+  },
+  {
+    file: 'sessions',
+    name: 'the sessions that ended long ago instead',
+    change: [
+      [
+        'revokedAt: { $gt: new Date(at - REVOKE_TTL_MS) }',
+        'revokedAt: { $lt: new Date(at - REVOKE_TTL_MS) }',
+      ],
+    ],
+    tests: 'QA-GW-002',
+  },
+  {
+    file: 'runtime',
+    name: 'the start writes no marks',
+    change: [
+      [
+        'const ended = await restoreGatewayMarks(mongo, redis.client, readyKey ? { readyKey } : {});',
+        'const ended = 0;',
+      ],
+    ],
+    tests: 'QA-GW-002',
+  },
+  {
+    file: 'runtime',
+    name: 'the recovery writes no marks',
+    change: [
+      [
+        '        await restoreGatewayMarks(mongo, redis.client, readyKey ? { readyKey } : {});\n        await redriveOutbox({',
+        '        await redriveOutbox({',
+      ],
+    ],
+    tests: 'QA-GW-002',
+  },
 ];
 
 export default mutations;

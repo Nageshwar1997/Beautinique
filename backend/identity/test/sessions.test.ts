@@ -396,6 +396,50 @@ describe('ending sessions', () => {
     expect((await refreshWith(refreshOf(two, 'seller'), 'seller')).status).toBe(401);
   });
 
+  it('writes the gateway’s ended sessions again from MongoDB after a Redis wipe, then its ready mark (QA-GW-002)', async () => {
+    const readyKey = `${harness.prefix}:revocations-ready`;
+    // identity's start writes it
+    expect(await redis().get(readyKey)).toBe('1');
+    const address = email('wipe');
+    await makeAccount(address);
+    const token = refreshOf(await signIn(address));
+    const sessionId = token.split('.')[0] ?? '';
+    await call('/auth/logout', { cookie: `__Secure-bq_customer_rt=${token}` });
+    // one that ended 12 minutes ago: its access tokens are past, nothing to write back
+    const old = refreshOf(await signIn(address));
+    const oldId = old.split('.')[0] ?? '';
+    await call('/auth/logout', { cookie: `__Secure-bq_customer_rt=${old}` });
+    await sessionsDb().updateOne(
+      { _id: oldId },
+      { $set: { revokedAt: new Date(Date.now() - 12 * 60_000) } },
+    );
+    // and one that ended 5 minutes ago: its mark gets only what is left (about 6 of 11 minutes)
+    const mid = refreshOf(await signIn(address));
+    const midId = mid.split('.')[0] ?? '';
+    await call('/auth/logout', { cookie: `__Secure-bq_customer_rt=${mid}` });
+    await sessionsDb().updateOne(
+      { _id: midId },
+      { $set: { revokedAt: new Date(Date.now() - 5 * 60_000) } },
+    );
+    // the wipe: the marks, the ready mark and the epoch go
+    await redis().del(
+      revokedSessionKey(sessionId),
+      revokedSessionKey(oldId),
+      revokedSessionKey(midId),
+      readyKey,
+      `${harness.prefix}:epoch`,
+    );
+    expect(await harness.server.runtime.watchdog.check()).toBe(true);
+    const left = await redis().pttl(revokedSessionKey(sessionId));
+    expect(left).toBeGreaterThan(600_000);
+    expect(left).toBeLessThanOrEqual(660_000);
+    const midLeft = await redis().pttl(revokedSessionKey(midId));
+    expect(midLeft).toBeGreaterThan(300_000);
+    expect(midLeft).toBeLessThanOrEqual(360_000);
+    expect(await redis().exists(revokedSessionKey(oldId))).toBe(0);
+    expect(await redis().get(readyKey)).toBe('1');
+  });
+
   it('issues a sign-in right after every session ended in a later second, so the gateway takes it', async () => {
     const address = email('same-second');
     const userId = await makeAccount(address);

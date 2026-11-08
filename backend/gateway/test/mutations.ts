@@ -535,6 +535,21 @@ const mutations: Mutation[] = [
     change: [['  headers[HEADERS.app.toLowerCase()] = caller.app;\n', '']],
     tests: 'a page the browser opened',
   },
+  // after a Redis wipe, nothing passes until identity wrote the ended sessions again (QA-GW-002)
+  {
+    file: 'sessions',
+    name: 'no ready mark needed',
+    change: [['      if (ready !== 1) {', '      if (false) {']],
+    tests: 'QA-GW-002',
+  },
+  {
+    file: 'sessions',
+    name: 'another key read as the ready mark',
+    change: [
+      ['            .exists(readyKey)', '            .exists(revokedSessionKey(sessionId))'],
+    ],
+    tests: 'QA-GW-002',
+  },
 ];
 
 export default mutations;

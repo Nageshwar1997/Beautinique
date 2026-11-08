@@ -29,6 +29,7 @@ import {
   HEADERS,
   navigationZod,
   PASSPORT_JWKS_PATH,
+  REVOCATIONS_READY_KEY,
   revokedSessionKey,
   revokedUserKey,
 } from '@beautinique/shared-contracts';
@@ -59,6 +60,8 @@ let redis: RedisConnection;
 beforeAll(async () => {
   try {
     redis = await connectRedis({ url: REDIS_URL, name: 'gateway-test', logger });
+    // what identity writes at its start (QA-GW-002): the ended sessions are in Redis
+    await redis.client.set(REVOCATIONS_READY_KEY, '1');
   } catch (error) {
     throw new Error('These tests need Valkey: run `npm run infra:up` (or set REDIS_TEST_URL).', {
       cause: error,
@@ -1299,6 +1302,20 @@ describe('sign-in at the gateway (T3.2)', () => {
     expect((await profile(gw, before)).status).toBe(401);
     expect((await profile(gw, after)).status).toBe(200);
     await redis.client.del(revokedSessionKey(sessionId), revokedUserKey(other));
+  });
+
+  it('answers 503 until identity has written the ended sessions again after a Redis wipe (QA-GW-002)', async () => {
+    const readyKey = `${testPrefix}revocations-ready`;
+    const core = await listen(fakeCore());
+    const gw = await gateway(
+      { core: core.url },
+      { sessions: sessionGate({ keys: identityKeys, redis: redis.client, readyKey }) },
+    );
+    const cookie = atCookie(accessToken());
+    // a wipe took the mark with the ended sessions: one could look alive, so nothing passes
+    expect(await errorOf(await profile(gw, cookie))).toEqual([503, 'SERVICE_UNAVAILABLE']);
+    await redis.client.set(readyKey, '1');
+    expect((await profile(gw, cookie)).status).toBe(200);
   });
 
   it('refuses a token from before the account’s grants changed, so the app refreshes (T3.3)', async () => {

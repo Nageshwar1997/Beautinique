@@ -119,7 +119,12 @@ export async function startHarness(name: string): Promise<Harness> {
       port: 0,
       host: LOOPBACK_HOST,
       handleSignals: false,
-      runtime: { queuePrefix: prefix, epochKey: `${prefix}:epoch`, pollMs: 100 },
+      runtime: {
+        queuePrefix: prefix,
+        epochKey: `${prefix}:epoch`,
+        readyKey: `${prefix}:revocations-ready`,
+        pollMs: 100,
+      },
       passportJwks: passport.jwks,
     });
   // the test's own handle: look-ups that are not identity's queries, and the profiler watch (on

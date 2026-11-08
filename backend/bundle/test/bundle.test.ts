@@ -265,6 +265,25 @@ describe('bundle', () => {
       expect((await refresh(token)).status).toBe(401);
       // the same access cookie stops at once (Redis), not when its 10 minutes run out
       expect((await signedInGet('/iam/me')).status).toBe(401);
+
+      // a Redis wipe (QA-GW-002) takes that mark: until identity writes the ended sessions again
+      // from MongoDB the gateway answers 503, never a pass, and then stops the session itself
+      const wiper = await connectRedis({ url: REDIS_DB, name: 'bundle-test', logger });
+      await wiper.client.flushdb();
+      await wiper.close();
+      const codeOf = async (answer: Response) =>
+        [
+          answer.status,
+          ((await answer.json()) as { error?: { code?: string } }).error?.code,
+        ] as const;
+      expect(await codeOf(await signedInGet('/iam/me'))).toEqual([503, 'SERVICE_UNAVAILABLE']);
+      // identity's watchdog looks every 30 s
+      let after = await codeOf(await signedInGet('/iam/me'));
+      for (let tries = 0; after[0] === 503 && tries < 45; tries += 1) {
+        await new Promise((resolve) => setTimeout(resolve, 1000));
+        after = await codeOf(await signedInGet('/iam/me'));
+      }
+      expect(after).toEqual([401, 'UNAUTHENTICATED']);
     } finally {
       await bundle.stop();
       await fetch('http://localhost:8025/api/v1/messages', {
@@ -273,7 +292,8 @@ describe('bundle', () => {
         body: JSON.stringify({ IDs: mailIds }),
       });
     }
-  });
+    // the wipe drill waits for identity's watchdog (every 30 s)
+  }, 120_000);
 
   it('takes an invitation from identity’s outbox to the inbox, and its acceptance through the gateway (T3.3)', async () => {
     const bundle = await startBundle({ port: 0, env: quiet() });
