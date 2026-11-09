@@ -15,7 +15,9 @@ concurrency:
 jobs:
   check:
     runs-on: ubuntu-latest
-    timeout-minutes: 30
+    # A normal run takes 19-29 min; a slow runner (a 4 min Docker image pull, every step ~40% slower)
+    # went past 30 min on 2026-11-09. 45 still stops a hung job.
+    timeout-minutes: 45
     steps:
       - uses: actions/checkout@v7
         with:
