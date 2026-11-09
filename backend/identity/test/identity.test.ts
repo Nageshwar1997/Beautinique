@@ -4,8 +4,12 @@ import { generateKey } from '@beautinique/backend-server-crypto';
 import { createLogger, LOOPBACK_HOST } from '@beautinique/backend-server-kit';
 import { connectMongo } from '@beautinique/backend-server-mongo';
 import { RELEASE_STATE } from '@beautinique/backend-server-release';
-import { afterAll, describe, expect, it } from 'vitest';
+import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 
+import {
+  expectNoCollectionScans,
+  watchCollectionScans,
+} from '../../../scripts/e2e/collection-scans.ts';
 import { readConfig } from '../src/config.ts';
 import { release, start } from '../src/service.ts';
 
@@ -19,10 +23,21 @@ const FIELD_KEYS = `k1:${generateKey()}`;
 const BLIND_INDEX_KEY = `b1:${generateKey()}`;
 const OTP_EVENT_KEYS = `e1:${generateKey()}`;
 
+let watch: Awaited<ReturnType<typeof connectMongo>>;
+
+beforeAll(async () => {
+  // the test's own handle (its look-ups do not count), and the watch before identity starts
+  watch = await connectMongo({ uri: MONGO_URI, dbName, appName: 'identity-test', logger });
+  await watchCollectionScans(watch.db);
+});
+
 afterAll(async () => {
-  const mongo = await connectMongo({ uri: MONGO_URI, dbName, appName: 'identity-test', logger });
-  await mongo.db.dropDatabase();
-  await mongo.close();
+  try {
+    await expectNoCollectionScans(watch.db, ['identity', 'identity-release']);
+  } finally {
+    await watch.db.dropDatabase();
+    await watch.close();
+  }
 });
 
 const testEnv = (): Record<string, string> => ({
@@ -165,7 +180,7 @@ describe('identity', () => {
       handleSignals: false,
     });
     try {
-      const state = await server.runtime.mongo.db.collection(RELEASE_STATE).findOne({});
+      const state = await watch.db.collection(RELEASE_STATE).findOne({ _id: 'current' as never });
       expect(state).toMatchObject({ _id: 'current', fingerprint: expect.any(String) as unknown });
     } finally {
       await server.stop();

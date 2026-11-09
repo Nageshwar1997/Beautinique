@@ -1,4 +1,4 @@
-import { cleanup, screen, waitFor } from '@testing-library/react';
+import { cleanup, fireEvent, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { afterEach, describe, expect, it } from 'vitest';
 
@@ -25,7 +25,7 @@ import {
   setHint,
   USER_ID,
 } from './fake-identity';
-import { renderApp, where } from './render';
+import { describedBy, renderApp, where } from './render';
 
 afterEach(() => {
   cleanup();
@@ -67,6 +67,14 @@ describe('SignUpForm', () => {
       '/terms',
       '_blank',
     ]);
+    // and a click on them opens them, not the box (a browser's click: see components' Checkbox test)
+    for (const name of ['terms of use', 'privacy notice']) {
+      const link = screen.getByRole('link', { name });
+      fireEvent.pointerDown(link, { pointerType: 'mouse', pointerId: 1, button: 0 });
+      fireEvent.pointerUp(link, { pointerType: 'mouse', pointerId: 1, button: 0 });
+      expect(fireEvent.click(link)).toBe(true);
+    }
+    expect(screen.getByRole('checkbox', { name: /I accept the/ })).toHaveProperty('checked', false);
     await user.click(screen.getByRole('checkbox', { name: /I accept the/ }));
     await user.click(screen.getByRole('checkbox', { name: 'I am 18 or older' }));
     await user.click(screen.getByRole('button', { name: 'Send code' }));
@@ -160,6 +168,27 @@ describe('SignUpForm', () => {
     await user.click(await screen.findByRole('button', { name: 'Send a new code' }));
     expect(await screen.findByText(`We sent a new code to ${EMAIL}.`)).toBeTruthy();
     expect(identity.paths().at(-1)).toBe(`POST /auth/otp/${CHALLENGE_ID}/resend`);
+  });
+
+  it('moves to the code, which says where it went, and back to the email (QA-FE-008)', async () => {
+    const identity = fakeIdentity('seller');
+    const user = userEvent.setup();
+    renderApp(pages, { identity, app: 'seller', at: '/sign-up' });
+    // a page that just opened takes no focus
+    expect(document.activeElement).toBe(document.body);
+    await user.type(screen.getByLabelText('Email'), EMAIL);
+    await user.click(screen.getByRole('checkbox', { name: /I accept the/ }));
+    await user.click(screen.getByRole('button', { name: 'Send code' }));
+    const code = await screen.findByLabelText('Code from the email');
+    await waitFor(() => {
+      expect(document.activeElement).toBe(code);
+    });
+    // heard as the field gets focus: the new step and that the code was sent
+    expect(describedBy(code)).toMatch(
+      new RegExp(`^We sent a 6-digit code to ${EMAIL}\\. It works`),
+    );
+    await user.click(screen.getByRole('button', { name: 'Use another email' }));
+    expect(document.activeElement).toBe(screen.getByLabelText('Email'));
   });
 });
 

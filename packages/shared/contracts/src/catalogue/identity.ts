@@ -488,6 +488,13 @@ export const revokedSessionKey = (sessionId: string): string =>
   `bq:id:session-revoked:${sessionId}`;
 export const revokedUserKey = (userId: string): string => `bq:id:user-revoked:${userId}`;
 
+/**
+ * Set (no TTL) once identity has written the ended-session keys above from MongoDB: at its start,
+ * and after a Redis wipe took them (ARCHITECTURE §6.6, QA-GW-002). The gateway answers a signed-in
+ * request 503 while it is missing, never a pass: an ended session could look alive then.
+ */
+export const REVOCATIONS_READY_KEY = 'bq:id:revocations-ready';
+
 /** The ways an account signs in (identity_auth_providers). */
 export const AUTH_PROVIDERS = ['password', 'google', 'linkedin', 'github'] as const;
 

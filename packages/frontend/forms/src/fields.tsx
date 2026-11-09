@@ -38,8 +38,17 @@ function useBoundField<Values extends FieldValues, Output>({
     field: { ref, value, ...field },
     fieldState,
   } = useController({ control, name });
-  return { ref, value: value as unknown, field, error: fieldState.error?.message };
+  return { ref, value: value as unknown, field, error: fieldState.error?.message, fieldState };
 }
+
+/**
+ * The blur that counts as leaving the field (`onTouched` checks it then). A field that took the
+ * focus itself (`autoFocus`, a new step's first field) is not left until something was typed in it:
+ * else a click on the step's other button (Back, "Lost your phone?") would show an error, which
+ * moves that button from under the pointer and the click is lost (QA-FE-008). Submit checks it.
+ */
+const leaving = (onBlur: () => void, autoFocus: boolean | undefined, typed: boolean) =>
+  autoFocus === true && !typed ? undefined : onBlur;
 
 const text = (value: unknown): string => (typeof value === 'string' ? value : '');
 
@@ -68,11 +77,12 @@ export function TextField<Values extends FieldValues, Output>({
   name,
   ...input
 }: FieldBinding<Values, Output> & TextProps) {
-  const { ref, value, field, error } = useBoundField({ control, name });
+  const { ref, value, field, error, fieldState } = useBoundField({ control, name });
   return (
     <Input
       {...input}
       {...field}
+      onBlur={leaving(field.onBlur, input.autoFocus, fieldState.isDirty)}
       ref={ref}
       value={text(value)}
       disabled={field.disabled ?? input.disabled}
@@ -92,11 +102,12 @@ export function PasswordField<Values extends FieldValues, Output>({
   name,
   ...input
 }: FieldBinding<Values, Output> & PasswordProps) {
-  const { ref, value, field, error } = useBoundField({ control, name });
+  const { ref, value, field, error, fieldState } = useBoundField({ control, name });
   return (
     <PasswordInput
       {...input}
       {...field}
+      onBlur={leaving(field.onBlur, input.autoFocus, fieldState.isDirty)}
       ref={ref}
       value={text(value)}
       disabled={field.disabled ?? input.disabled}
@@ -113,11 +124,12 @@ export function CodeField<Values extends FieldValues, Output>({
   name,
   ...input
 }: FieldBinding<Values, Output> & CodeProps) {
-  const { ref, value, field, error } = useBoundField({ control, name });
+  const { ref, value, field, error, fieldState } = useBoundField({ control, name });
   return (
     <CodeInput
       {...input}
       {...field}
+      onBlur={leaving(field.onBlur, input.autoFocus, fieldState.isDirty)}
       ref={ref}
       value={text(value)}
       disabled={field.disabled ?? input.disabled}

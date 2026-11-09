@@ -47,6 +47,7 @@ export {
   requestPasswordCode,
   requestSignUpCode,
   resendOtp,
+  REVOCATIONS_READY_KEY,
   revokedSessionKey,
   revokedUserKey,
   routes,
@@ -66,6 +67,7 @@ export {
 export * from './catalogue/iam';
 export * from './catalogue/social';
 export {
+  API_TIMEOUT_MS,
   ApiError,
   type CallArgs,
   type CallOptions,

@@ -407,6 +407,9 @@ export function HierarchySelect(props: HierarchySelectProps) {
                 dependencies={[covered, chosen]}
                 selectionMode={multiple ? 'multiple' : 'single'}
                 selectionBehavior="toggle"
+                // Escape closes the box and keeps the choice; React Aria's default would clear the
+                // selection first and keep the box open (QA-FE-002)
+                escapeKeyBehavior="none"
                 selectedKeys={chosenSet}
                 onSelectionChange={onSelectionChange}
                 disabledKeys={disabledKeys}

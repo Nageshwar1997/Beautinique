@@ -43,10 +43,21 @@ export interface ApiClientOptions {
   /** Check each answer against the route's output schema (default true). */
   validateResponses?: boolean;
   /**
+   * How long a call waits for its answer, then NETWORK_ERROR (default the contracts'
+   * API_TIMEOUT_MS, 60 s; QA-FE-006). One call can take its own (`timeoutMs` in its options).
+   */
+  timeoutMs?: number;
+  /**
    * Told about every request: an answer proves the internet works, no answer is worth a check
    * (default: the hooks package's shared `onlineStatusStore`, which `useOnlineStatus` reads).
    */
   onlineStatus?: Pick<OnlineStatusStore, 'confirmOnline' | 'recheck'>;
+  /**
+   * Hold every call (a refresh too) until the app says the server answered (`serverReady`, from
+   * the app-shell's ServerWake): a sleeping server would only fail them, and a page would keep the
+   * failure (QA-FE-009, owner 2026-11-07). In the browser only: a server render has no wake.
+   */
+  waitForServer?: boolean;
 }
 
 export interface ApiClient {
@@ -71,6 +82,8 @@ export interface ApiClient {
   onSessionChange(listener: (change: SessionChange) => void): () => void;
   /** The app signed in or out: tell this tab's listeners and the app's other tabs. */
   sessionChanged(change: SessionChange): void;
+  /** The server answered (ServerWake's `onReady`): held calls go, and every call from now on. */
+  serverReady(): void;
   /** Stops listening to the other tabs (tests, or an app that is torn down). */
   dispose(): void;
 }
@@ -91,11 +104,21 @@ export function createApiClient(options: ApiClientOptions): ApiClient {
     app: options.app,
     fetch: options.fetch,
     validateResponses: options.validateResponses,
+    timeoutMs: options.timeoutMs,
     onNetwork: (event) => {
       if (event === 'answered') online.confirmOnline();
       else online.recheck();
     },
   });
+
+  // until the server answered, every call waits here (waitForServer, in the browser)
+  let openGate: () => void = () => undefined;
+  let serverGate: Promise<void> | null =
+    options.waitForServer === true && typeof window !== 'undefined'
+      ? new Promise<void>((resolve) => {
+          openGate = resolve;
+        })
+      : null;
 
   const listeners = new Set<(change: SessionChange) => void>();
   const notify = (change: SessionChange) => {
@@ -114,6 +137,7 @@ export function createApiClient(options: ApiClientOptions): ApiClient {
 
   let refreshing: Promise<boolean> | null = null;
   const runRefresh = async (): Promise<boolean> => {
+    if (serverGate !== null) await serverGate;
     try {
       await inner.call(refreshSession);
       return true;
@@ -159,6 +183,7 @@ export function createApiClient(options: ApiClientOptions): ApiClient {
       : { ...callOptions };
     const sendOnce = () => inner.call(route, ...([request, sendOptions] as CallArgs<Route>));
 
+    if (serverGate !== null) await serverGate;
     // a call asked for during a refresh waits for it, instead of going out with the old cookie
     if (refreshing !== null) await refreshing.catch(() => false);
 
@@ -204,6 +229,10 @@ export function createApiClient(options: ApiClientOptions): ApiClient {
       notify(change);
       openChannel();
       channel?.postMessage(change);
+    },
+    serverReady() {
+      serverGate = null;
+      openGate();
     },
     dispose() {
       listeners.clear();

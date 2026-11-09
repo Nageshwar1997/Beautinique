@@ -25,7 +25,7 @@ const NAV = [
 /** A pretend server for the wake-up screen: it answers after `ms`, or never (null). */
 const pretendServer =
   (ms: number | null): typeof fetch =>
-  (_url, init) =>
+  (input, init) =>
     new Promise((resolve, reject) => {
       const timer =
         ms === null
@@ -33,7 +33,9 @@ const pretendServer =
           : setTimeout(() => {
               resolve(new Response(null, { status: 200 }));
             }, ms);
-      init?.signal?.addEventListener('abort', () => {
+      // axios's fetch adapter puts the signal on the Request, not on init (QA-FE-005)
+      const signal = init?.signal ?? (input instanceof Request ? input.signal : undefined);
+      signal?.addEventListener('abort', () => {
         clearTimeout(timer);
         reject(new DOMException('Aborted', 'AbortError'));
       });
@@ -50,8 +52,8 @@ function WakeDemo() {
       <p className="text-foreground-muted mt-2 max-w-prose">
         Apps wrap their frame in ServerWake. Until the server answers, a plain loader covers the
         app: a server that answers within 1.5 s shows only that blink; a slow one shows the screen
-        until it answers; one that never answers (here after 10 s instead of 150 s) offers to try
-        again or to continue.
+        until it answers; one that never answers (here after 10 s instead of 150 s) offers only to
+        try again: no way into the app without the server.
       </p>
       <div className="mt-6 flex flex-wrap gap-3">
         <button

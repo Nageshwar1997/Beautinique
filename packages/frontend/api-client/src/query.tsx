@@ -50,12 +50,18 @@ export function useApiClient(): ApiClient {
  * A query cache that does not ask again for what will not change: an answer the server refused
  * (4xx) is final, a lost connection or a server error is tried twice more.
  */
+/**
+ * TanStack's `retry` for queries: a server that did not answer (no answer, 5xx: a restart, a
+ * sleeping server) is asked twice more; a refusal (4xx) never, it is an answer.
+ */
+export const retryServerTrouble = (failures: number, error: unknown): boolean =>
+  isApiError(error) && error.status >= 400 && error.status < 500 ? false : failures < 2;
+
 export function createQueryClient(): QueryClient {
   return new QueryClient({
     defaultOptions: {
       queries: {
-        retry: (failures, error) =>
-          isApiError(error) && error.status >= 400 && error.status < 500 ? false : failures < 2,
+        retry: retryServerTrouble,
       },
     },
   });

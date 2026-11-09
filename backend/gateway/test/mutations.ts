@@ -346,6 +346,45 @@ const mutations: Mutation[] = [
     tests: 'fails closed',
   },
   {
+    file: 'sessions',
+    name: 'the sign-in check waits for a stalled Redis (QA-GW-001)',
+    change: [
+      [
+        '        const answers = (await within(\n          redisAnswerMs,',
+        '        const answers = (await within(\n          60_000,',
+      ],
+    ],
+    tests: 'stops answering',
+  },
+  {
+    file: 'sessions',
+    name: 'the permission check waits for a stalled Redis',
+    change: [
+      ['raw = await within(redisAnswerMs, redis.get(', 'raw = await within(60_000, redis.get('],
+    ],
+    tests: 'stops answering',
+  },
+  {
+    file: 'sessions',
+    name: 'Redis may take 5 s',
+    change: [['export const REDIS_ANSWER_MS = 500;', 'export const REDIS_ANSWER_MS = 5000;']],
+    tests: 'stops answering',
+  },
+  {
+    file: 'proxy',
+    name: 'no room for an instrumentation’s close listeners',
+    change: [['    res.setMaxListeners(PROXIED_ANSWER_MAX_LISTENERS);\n', '']],
+    tests: 'leaves room',
+  },
+  {
+    file: 'proxy',
+    name: 'room only for Node’s default 10',
+    change: [
+      ['const PROXIED_ANSWER_MAX_LISTENERS = 20;', 'const PROXIED_ANSWER_MAX_LISTENERS = 10;'],
+    ],
+    tests: 'leaves room',
+  },
+  {
     file: 'proxy',
     name: 'a client’s passport goes on',
     change: [['  HEADERS.passport.toLowerCase(),\n', '']],
@@ -495,6 +534,21 @@ const mutations: Mutation[] = [
     name: 'the owner never hears which app',
     change: [['  headers[HEADERS.app.toLowerCase()] = caller.app;\n', '']],
     tests: 'a page the browser opened',
+  },
+  // after a Redis wipe, nothing passes until identity wrote the ended sessions again (QA-GW-002)
+  {
+    file: 'sessions',
+    name: 'no ready mark needed',
+    change: [['      if (ready !== 1) {', '      if (false) {']],
+    tests: 'QA-GW-002',
+  },
+  {
+    file: 'sessions',
+    name: 'another key read as the ready mark',
+    change: [
+      ['            .exists(readyKey)', '            .exists(revokedSessionKey(sessionId))'],
+    ],
+    tests: 'QA-GW-002',
   },
 ];
 

@@ -17,7 +17,9 @@ export const signUpGrantsMigration: Migration = {
   async up({ mongo, logger }) {
     const acceptances = mongo.db.collection<LegalAcceptance>(LEGAL_ACCEPTANCES);
     let given = 0;
-    for await (const user of mongo.db.collection<User>(USERS).find({})) {
+    for await (const user of mongo.db
+      .collection<User>(USERS)
+      .find({}, { comment: 'full read: every account, once per database' })) {
       const apps = new Set<AppId>([
         user.signUpApp,
         ...(await acceptances.distinct('app', { userId: user._id })),

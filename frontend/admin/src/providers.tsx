@@ -8,7 +8,7 @@ import { type ReactNode, useState } from 'react';
  * identity's hint cookie.
  */
 export function Providers({ children }: { children: ReactNode }) {
-  const [client] = useState(() => createApiClient({ app: 'admin' }));
+  const [client] = useState(() => createApiClient({ app: 'admin', waitForServer: true }));
   const [queryClient] = useState(createQueryClient);
   return (
     <ApiProvider client={client} queryClient={queryClient}>

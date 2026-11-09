@@ -179,10 +179,8 @@ export interface ServerWakeStatus {
   state: WakeState;
   /** When the current wake-up began showing (Date.now()); 0 before. */
   since: number;
-  /** After `failed`: show the screen and call again. */
+  /** After `failed`: show the screen and call again (the only way on: no app without the server). */
   retry: () => void;
-  /** After `failed`: hide the screen and let the user go on without the server. */
-  dismiss: () => void;
 }
 
 /**
@@ -271,8 +269,5 @@ export function useServerWake({
     setState('waking');
     setRun((count) => count + 1);
   }, []);
-  const dismiss = useCallback(() => {
-    setState('awake');
-  }, []);
-  return { state: crawler ? 'awake' : state, since, retry, dismiss };
+  return { state: crawler ? 'awake' : state, since, retry };
 }

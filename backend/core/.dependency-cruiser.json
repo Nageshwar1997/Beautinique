@@ -1,0 +1,27 @@
+{
+  "forbidden": [
+    {
+      "name": "core-module-facade-only",
+      "comment": "A core module uses another only through that module's index.ts; never its models, collections or inside files (ARCHITECTURE §4, RULES §4.2). Side effects go by outbox events.",
+      "severity": "error",
+      "from": { "path": "(^|/)modules/([^/]+)/" },
+      "to": {
+        "path": "(^|/)modules/[^/]+/",
+        "pathNot": ["(^|/)modules/$2/", "(^|/)modules/[^/]+/index\\.ts$"]
+      }
+    },
+    {
+      "name": "core-no-other-deployable",
+      "comment": "Core never imports another deployable's code (identity, payments, notify, gateway, bundle): they talk by HTTP contracts and events, and in bundle mode this keeps their secrets apart (ARCHITECTURE §3).",
+      "severity": "error",
+      "from": {},
+      "to": { "path": "^\\.\\./[^./]" }
+    }
+  ],
+  "options": {
+    "doNotFollow": { "path": ["node_modules", "^\\.\\./[^./]"] },
+    "exclude": { "path": "node_modules" },
+    "tsPreCompilationDeps": true,
+    "tsConfig": { "fileName": "tsconfig.json" }
+  }
+}

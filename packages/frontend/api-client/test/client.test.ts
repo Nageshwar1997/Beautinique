@@ -6,6 +6,7 @@ import {
   type ApiClient,
   ApiError,
   createApiClient,
+  errorMessage,
   OTHER_TAB_REFRESH_WAIT_MS,
   type SessionChange,
 } from '../src/index';
@@ -94,7 +95,7 @@ describe('requests over axios', () => {
     });
   });
 
-  it('names an answer that is not our error body by its status', async () => {
+  it('names an answer that is not our error body by its status, in words for people (QA-FE-007)', async () => {
     const gateway = fakeGateway({ access: true });
     gateway.answers.push(
       () =>
@@ -105,16 +106,20 @@ describe('requests over axios', () => {
       () => new Response('nope', { status: 404 }),
     );
     const client = clientFor(gateway);
-    expect(await rejection(client.call(getMe))).toMatchObject({
-      code: 'INTERNAL',
+    const down = await rejection(client.call(getMe));
+    expect(down).toMatchObject({
+      code: 'UPSTREAM_UNAVAILABLE',
       status: 502,
       requestId: 'req-502',
     });
-    expect(await rejection(client.call(getMe))).toMatchObject({
-      code: 'BAD_REQUEST',
+    expect(errorMessage(down)).toBe('The server did not answer. Please try again in a moment.');
+    const other = await rejection(client.call(getMe));
+    expect(other).toMatchObject({
+      code: 'UNEXPECTED_RESPONSE',
       status: 404,
       requestId: null,
     });
+    expect(errorMessage(other)).toBe('Something went wrong. Please try again.');
   });
 
   it('refuses an answer without data, or one that breaks the route’s contract', async () => {
@@ -180,6 +185,38 @@ const rejection = async (promise: Promise<unknown>): Promise<unknown> => {
 };
 
 describe('createApiClient', () => {
+  it('holds every call, a refresh too, until the app says the server answered (QA-FE-009)', async () => {
+    const gateway = fakeGateway({ access: true });
+    const client = createApiClient({
+      app: 'customer',
+      baseUrl: BASE_URL,
+      fetch: gateway.fetch,
+      waitForServer: true,
+    });
+    clients.push(client);
+    const me = client.call(getMe);
+    const refreshed = client.refresh();
+    await new Promise((resolve) => setTimeout(resolve, 50));
+    // a sleeping server would only fail them: nothing goes out yet
+    expect(gateway.paths()).toEqual([]);
+    client.serverReady();
+    await expect(me).resolves.toMatchObject({ session: { app: 'customer' } });
+    await expect(refreshed).resolves.toBe(true);
+    // from then on calls go at once; saying it again changes nothing
+    client.serverReady();
+    await client.call(getMe);
+    expect(gateway.paths().filter((path) => path === 'GET /api/v1/iam/me')).toHaveLength(2);
+  });
+
+  it('sends at once without waitForServer, and serverReady changes nothing then', async () => {
+    const gateway = fakeGateway({ access: true });
+    const client = clientFor(gateway);
+    await client.call(getMe);
+    client.serverReady();
+    await client.call(getMe);
+    expect(gateway.paths()).toEqual(['GET /api/v1/iam/me', 'GET /api/v1/iam/me']);
+  });
+
   it('calls the gateway on the app’s own host with the app header', async () => {
     const gateway = fakeGateway({ access: true });
     const me = await clientFor(gateway).call(getMe);

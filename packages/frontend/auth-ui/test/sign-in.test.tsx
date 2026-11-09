@@ -17,7 +17,7 @@ import {
   PASSWORD,
   totpNext,
 } from './fake-identity';
-import { renderApp, where } from './render';
+import { describedBy, renderApp, where } from './render';
 
 afterEach(() => {
   cleanup();
@@ -137,6 +137,50 @@ describe('SignInForm', () => {
     expect(screen.getByLabelText('Password')).toBeTruthy();
   });
 
+  it('moves to each step’s field, which says what it asks, and back to the email (QA-FE-008)', async () => {
+    const identity = fakeIdentity('customer');
+    identity.on('POST /auth/login', totpNext);
+    const user = userEvent.setup();
+    renderApp(pages, { identity, at: '/sign-in' });
+    // a page that just opened takes no focus
+    expect(document.activeElement).toBe(document.body);
+    await typePassword(user);
+    const code = await screen.findByLabelText('Authenticator code');
+    await waitFor(() => {
+      expect(document.activeElement).toBe(code);
+    });
+    expect(describedBy(code)).toBe(
+      'Open your authenticator app and enter the 6-digit code for Beautinique.',
+    );
+    await user.click(screen.getByRole('button', { name: 'Lost your phone? Use a recovery code' }));
+    const recovery = screen.getByLabelText(/Recovery code/);
+    expect(document.activeElement).toBe(recovery);
+    expect(describedBy(recovery)).toBe(
+      'Enter one of the 10 recovery codes you saved when you set up the authenticator. Each code works once. | Like ABCDE-FGH23',
+    );
+    await user.click(screen.getByRole('button', { name: 'Use the authenticator code' }));
+    expect(document.activeElement).toBe(screen.getByLabelText('Authenticator code'));
+    await user.click(screen.getByRole('button', { name: 'Start again' }));
+    expect(document.activeElement).toBe(screen.getByLabelText('Email'));
+  });
+
+  it('moves to the email, which says why, when the sign-in step ran out (QA-FE-008)', async () => {
+    const identity = fakeIdentity('customer');
+    identity.on('POST /auth/login', totpNext);
+    identity.on('POST /auth/login/:id/totp', () =>
+      failure(400, 'LOGIN_EXPIRED', 'This sign-in has expired. Please sign in again.'),
+    );
+    const user = userEvent.setup();
+    renderApp(pages, { identity, at: '/sign-in' });
+    await typePassword(user);
+    await user.type(await screen.findByLabelText('Authenticator code'), '482913');
+    await user.click(screen.getByRole('button', { name: 'Continue' }));
+    await screen.findByText('This sign-in has expired. Please sign in again.');
+    const email = screen.getByLabelText('Email');
+    expect(document.activeElement).toBe(email);
+    expect(describedBy(email)).toBe('This sign-in has expired. Please sign in again.');
+  });
+
   it('starts with the email and the note another auth page handed over', async () => {
     const identity = fakeIdentity('customer');
     const { router } = renderApp(pages, { identity, at: '/' });
@@ -224,6 +268,33 @@ describe('SignInForm in an app that needs an authenticator', () => {
     await user.click(screen.getByRole('button', { name: 'Continue' }));
     await screen.findByText('Your orders');
     expect(identity.paths()).toContain('GET /iam/me');
+  });
+
+  it('moves through the set-up: a step’s heading where it has no field, else its field (QA-FE-008)', async () => {
+    const identity = fakeIdentity('admin');
+    identity.on('POST /auth/login', enrollNext);
+    const user = userEvent.setup();
+    renderApp(guarded, { identity, app: 'admin', at: '/sign-in' });
+    await typePassword(user);
+    const scan = await screen.findByRole('heading', {
+      name: 'Add Beautinique to your authenticator app',
+    });
+    await waitFor(() => {
+      expect(document.activeElement).toBe(scan);
+    });
+    await user.click(screen.getByRole('button', { name: 'Next' }));
+    expect(document.activeElement).toBe(screen.getByLabelText('Authenticator code'));
+    await user.click(screen.getByRole('button', { name: 'Back' }));
+    expect(document.activeElement).toBe(
+      screen.getByRole('heading', { name: 'Add Beautinique to your authenticator app' }),
+    );
+    await user.click(screen.getByRole('button', { name: 'Next' }));
+    await user.type(screen.getByLabelText('Authenticator code'), GOOD_CODE);
+    await user.click(screen.getByRole('button', { name: 'Turn on' }));
+    const codes = await screen.findByRole('heading', { name: 'Save your recovery codes' });
+    await waitFor(() => {
+      expect(document.activeElement).toBe(codes);
+    });
   });
 
   it('goes back to the password, with why, when the set-up ran out', async () => {

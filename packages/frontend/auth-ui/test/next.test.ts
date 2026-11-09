@@ -31,6 +31,7 @@ describe('the entry point', () => {
       'RecoveryCodes',
       'RedirectIfSignedIn',
       'RequireSignIn',
+      'SIGN_OUT_RETRY_MS',
       'SecuritySettings',
       'SessionProvider',
       'SignInForm',
@@ -53,6 +54,7 @@ describe('the entry point', () => {
       'totpStepHref',
       'totpStepOf',
       'useSession',
+      'useSignOut',
     ]);
   });
 });
@@ -106,9 +108,22 @@ describe('safeNext', () => {
       '/sign-up',
       '/forgot-password',
       '/invitation',
+      // dot segments that resolve to //host (QA-FE-001)
+      '/..//evil.example',
+      '/.//evil.example',
+      '/x/..//evil.example?a=1#h',
+      '/%2e%2e//evil.example',
+      // and to an auth page
+      '/orders/../sign-in',
     ]) {
       expect(safeNext(next), String(next)).toBe('/');
     }
+  });
+
+  it('goes where a browser would: dot segments resolved (QA-FE-001)', () => {
+    expect(safeNext('/account/../orders?page=2')).toBe('/orders?page=2');
+    // longer than the server keeps (512), still a page of this site
+    expect(safeNext(`/${'a'.repeat(1000)}`)).toBe(`/${'a'.repeat(1000)}`);
   });
 
   it('builds auth links that carry next, and none for the home page', () => {

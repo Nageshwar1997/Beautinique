@@ -131,6 +131,57 @@ describe('Form', () => {
     });
   });
 
+  it('does not count leaving a field that took the focus itself, until something is typed in it (QA-FE-008)', async () => {
+    // a new step of a page: its field takes the focus (autoFocus); a click on the step's other
+    // button (Back, "Lost your phone?") leaves it, and an error then would move that button
+    function Step() {
+      const form = useZodForm(object({ code: otpZod, email: emailZod }), {
+        defaultValues: { code: '', email: '' },
+      });
+      return (
+        <Form form={form} onSubmit={vi.fn()} aria-label="Next step">
+          <CodeField control={form.control} name="code" label="Code" autoFocus />
+          <TextField control={form.control} name="email" label="Email" autoFocus={false} />
+          <SubmitButton>Continue</SubmitButton>
+        </Form>
+      );
+    }
+    const user = userEvent.setup();
+    render(<Step />);
+    const field = screen.getByLabelText('Code');
+    expect(document.activeElement).toBe(field);
+    await user.tab();
+    expect(screen.queryByRole('textbox', { name: 'Code', description: /./ })).toBeNull();
+    expect(field.getAttribute('aria-invalid')).toBeNull();
+    // a field without autoFocus is checked when left, as ever
+    await user.tab();
+    expect(await screen.findByText('Enter your email address')).toBeTruthy();
+    // typed in, the code is checked when left like any field
+    await user.type(field, '12');
+    await user.tab();
+    await waitFor(() => {
+      expect(field.getAttribute('aria-invalid')).toBe('true');
+    });
+  });
+
+  it('checks a field that took the focus itself on submit (QA-FE-008)', async () => {
+    function Step() {
+      const form = useZodForm(object({ code: otpZod }), { defaultValues: { code: '' } });
+      return (
+        <Form form={form} onSubmit={vi.fn()} aria-label="Next step">
+          <CodeField control={form.control} name="code" label="Code" autoFocus />
+          <SubmitButton>Continue</SubmitButton>
+        </Form>
+      );
+    }
+    const user = userEvent.setup();
+    render(<Step />);
+    await user.click(screen.getByRole('button', { name: 'Continue' }));
+    await waitFor(() => {
+      expect(screen.getByLabelText('Code').getAttribute('aria-invalid')).toBe('true');
+    });
+  });
+
   it('submits the schema’s output: trimmed and lower-cased as the schema says', async () => {
     const user = userEvent.setup();
     const onSubmit = vi.fn();

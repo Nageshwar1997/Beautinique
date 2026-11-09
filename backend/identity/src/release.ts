@@ -9,7 +9,7 @@ import {
 } from '@beautinique/backend-server-release';
 
 import type { Config } from './config.ts';
-import { indexes as credentialIndexes } from './credentials.ts';
+import { indexes as credentialIndexes, providerSubjectIndexMigration } from './credentials.ts';
 import { indexes as grantIndexes } from './rbac/grants.ts';
 import { indexes as invitationIndexes } from './rbac/invitations.ts';
 import { signUpGrantsMigration } from './rbac/migrations.ts';
@@ -25,7 +25,7 @@ import { indexes as userIndexes } from './users.ts';
  * roles (TASKS T3.3).
  */
 export const releaseDefinition: ReleaseDefinition = {
-  migrations: defineMigrations([signUpGrantsMigration]),
+  migrations: defineMigrations([signUpGrantsMigration, providerSubjectIndexMigration]),
   indexes: [
     ...OUTBOX_INDEXES,
     ...userIndexes,

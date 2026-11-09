@@ -57,12 +57,31 @@ export const oauthSignUpCookieName = (app: AppId): string => `__Secure-bq_${app}
 export const OAUTH_STATE_SECONDS = 600;
 export const OAUTH_SIGN_UP_SECONDS = 900;
 
+/** A path: one `/` first (`//host` and `/\host` leave the site), no space, backslash or control. */
+// eslint-disable-next-line no-control-regex -- control characters are exactly what is refused
+const PATH_ONLY = /^\/(?![/\\])[^\s\\\u0000-\u001f\u007f]*$/;
+
 /**
- * A path of the app to come back to (`/account?tab=1`), never another site. Anything else means
- * the home page: a page the browser opened cannot show a validation error.
+ * A path of the app to come back to (`/account?tab=1#x`), never another site; anything else means
+ * the home page (a page the browser opened cannot show a validation error). The answer is the path
+ * as a browser goes there, its `.` and `..` segments resolved, and checked again after that:
+ * `/..//evil.example` resolves to `//evil.example`, another site (QA-FE-001). The one rule of the
+ * server (identity's OAuth `next`) and of the apps' sign-in pages (auth-ui `safeNext`, which allows
+ * a longer `next`).
  */
-export const safeNextPath = (next: string | undefined): string =>
-  next !== undefined && next.length <= 512 && /^\/(?![/\\])[^\s\\]*$/.test(next) ? next : '/';
+export function safeNextPath(next: string | null | undefined, maxLength = 512): string {
+  if (typeof next !== 'string' || next.length > maxLength || !PATH_ONLY.test(next)) return '/';
+  const base = 'https://next.invalid';
+  let url: URL;
+  try {
+    url = new URL(next, base);
+  } catch {
+    return '/';
+  }
+  if (url.origin !== base) return '/';
+  const path = `${url.pathname}${url.search}${url.hash}`;
+  return PATH_ONLY.test(path) ? path : '/';
+}
 
 const providerParams = object({ provider: zodEnum(SOCIAL_PROVIDERS) });
 

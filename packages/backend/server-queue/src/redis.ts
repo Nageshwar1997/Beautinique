@@ -10,6 +10,11 @@ export interface ConnectRedisOptions {
   /** How long to wait for Redis at start (default 5 s). */
   connectTimeoutMs?: number;
   /**
+   * How long a command may wait for its answer (default 1 s; ~1 ms is usual): a Redis that is
+   * connected but stalled fails the command instead of holding the request (QA-GW-001).
+   */
+  commandTimeoutMs?: number;
+  /**
    * The plan's connection limit (default 50: Render's free Key Value, which the local Valkey copies).
    * At 80% of it the start log warns, because a deploy runs the old and new instance together.
    */
@@ -61,22 +66,25 @@ export function assertNoEviction(limits: RedisLimits): void {
 }
 
 /**
- * The deployable's shared Redis client. Commands fail fast while Redis is away (OTP and rate limits
- * then answer 503 instead of hanging), and the client keeps reconnecting, because Render's free Key
- * Value restarts empty now and then. Checks the eviction policy at start and logs memory and
- * connection numbers, never the URL.
+ * The deployable's shared Redis client. Commands fail fast while Redis is away or stalled (OTP,
+ * rate limits and the sign-in check then answer 503 instead of hanging), and the client keeps
+ * reconnecting, because Render's free Key Value restarts empty now and then. Never for a blocking
+ * command (BullMQ workers open their own connections, without the command timeout). Checks the
+ * eviction policy at start and logs memory and connection numbers, never the URL.
  */
 export async function connectRedis({
   url,
   name,
   logger,
   connectTimeoutMs = 5000,
+  commandTimeoutMs = 1000,
   connectionLimit = 50,
 }: ConnectRedisOptions): Promise<RedisConnection> {
   const client = new Redis(url, {
     lazyConnect: true,
     connectionName: name,
     connectTimeout: connectTimeoutMs,
+    commandTimeout: commandTimeoutMs,
     maxRetriesPerRequest: 1,
     retryStrategy: (times) => Math.min(times * 200, 2000),
   });

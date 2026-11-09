@@ -6,7 +6,7 @@ import { afterEach, describe, expect, it } from 'vitest';
 import { ACCOUNT_NAV } from '../app/nav';
 import { Providers } from '../app/providers';
 import routes from '../app/routes';
-import Account from '../app/routes/account';
+import Account, { meta as accountMeta } from '../app/routes/account';
 import AccountAuthenticator, {
   meta as authenticatorMeta,
 } from '../app/routes/account-authenticator';
@@ -67,6 +67,11 @@ describe('the account pages', () => {
     for (const meta of [securityMeta, authenticatorMeta, devicesMeta]) {
       expect(meta({} as never)).toContainEqual({ name: 'robots', content: 'noindex' });
     }
+    // /account itself, and any account page without a meta of its own (QA-CUS-001)
+    expect(accountMeta({} as never)).toEqual([
+      { title: 'Account | Beautinique' },
+      { name: 'robots', content: 'noindex' },
+    ]);
   });
 
   it('are the account menu and the account nav', () => {

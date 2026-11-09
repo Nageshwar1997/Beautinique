@@ -1,6 +1,6 @@
 # DESIGN — BQ
 
-> **Status:** v1.9 (2026-11-05). UI aur UX ke niyam saare 11 apps ke liye. Design ka **source of truth code hai**: `@beautinique/frontend-styles` (tokens) aur `@beautinique/frontend-components` (components). [RULES.md](RULES.md) §5 frontend ke coding niyam batata hai; ye file batati hai ki cheezein **dikhengi aur chalengi kaise**.
+> **Status:** v1.13 (2026-11-08). UI aur UX ke niyam saare 11 apps ke liye. Design ka **source of truth code hai**: `@beautinique/frontend-styles` (tokens) aur `@beautinique/frontend-components` (components). [RULES.md](RULES.md) §5 frontend ke coding niyam batata hai; ye file batati hai ki cheezein **dikhengi aur chalengi kaise**.
 
 ## 1. Design principles
 
@@ -103,7 +103,7 @@ Har screen ye states dikhati hai:
 - **Empty:** kya hai aur aage kya karein, ek action button ke saath.
 - **Error:** saaf message, retry, aur request-id (support ke liye). Poore page ka error aur 404: app-shell ka `ErrorPage` (bade code ke 0 powder compact: 404 pe khaali, error pe toota; "Go back" sirf jab app ka pichhla page ho; asli status code, apna title, `noindex`; technical details sirf development me).
 - **Offline:** NetworkStatusToaster; Delivery app me offline queue ka count.
-- **Wake-up screen:** Render cold start pe (~1 min) "server jaag raha hai" screen, progress ke saath. **Server ke jawab se pehle koi page nahi (owner, 2026-11-05):** app khulte hi pehle saada parda (page ka background, 400 ms baad patli bar, koi shabd nahi); jaage server pe ye ek jhalak hai, 1.5 s me jawab na aaye to iski jagah wake-up screen. Kabhi "page dikha, phir dhaka" nahi, kyunki aage har page (Home ki categories, sign-in ki halat) ko server chahiye. Crawler aur bina JS wale ko page seedha (app-shell README).
+- **Wake-up screen:** Render cold start pe (~1 min) "server jaag raha hai" screen, progress ke saath. **Server ke jawab se pehle koi page nahi (owner, 2026-11-05):** app khulte hi pehle saada parda (page ka background, 400 ms baad patli bar, koi shabd nahi); jaage server pe ye ek jhalak hai, 1.5 s me jawab na aaye to iski jagah wake-up screen. Kabhi "page dikha, phir dhaka" nahi, kyunki aage har page (Home ki categories, sign-in ki halat) ko server chahiye. Crawler aur bina JS wale ko page seedha (app-shell README). **150 s ke baad sirf "Try again"** (owner, 2026-11-07: server ke bina app nahi, "Continue anyway" hata), aur jawab se pehle app ki koi API call nahi jaati (QA-FE-009). Server jaagne ke baad bhi signed-in page ka account na mile (restart), to 2 aur try, phir app-shell ka error page ("Oops", toota compact): "We could not load your account" / "The server did not answer. Please try again in a moment.", "Try again" pehla, phir "Go to the home page" (owner, 2026-11-07: error page ka roop behtar).
 - **Permission denied:** kis permission ki zaroorat hai, aur kisse maangein.
 - **Dummy:** dummy legal ya registration data pe DUMMY badge.
 
@@ -125,6 +125,7 @@ Har screen ye states dikhati hai:
 - Touch target kam se kam 44 px (Delivery app me 48 px): `size-touch`, ya chhote control pe `touch-target` / `touch-target-lg`.
 - Icon-only button pe `aria-label`; images pe alt text (product images me product ka naam aur shade).
 - Form errors input se jude hon (`aria-describedby`), aur sirf colour se error na batayein.
+- **Kai step wale form (sign-in, sign-up, set-up):** naya step focus le: pehla field, aur bina field wale step me uska heading (`tabIndex=-1`); jo button daba wo gayab ho to focus `body` pe na gire. Step ka sandesh ("We sent a code to …") field se `aria-describedby` se juda ho, taaki focus aate hi padha jaaye. Abhi khula page focus nahi leta (owner, 2026-11-07, QA-FE-008).
 - `prefers-reduced-motion` pe animations band ya halki.
 - Har page pe ek `h1`, sahi heading order, aur skip-to-content link (`skip-link`).
 - High contrast (`contrast="more"` ya system setting) har app me chalna chahiye; Delivery app me hamesha on.
@@ -159,7 +160,7 @@ Har screen ye states dikhati hai:
   - **License:** copy karne pe bhi license lagu hai. Solar aur Pepicons CC BY 4.0 hain (credit zaroori), Lucide ISC, Line MD MIT, Logos CC0. Package me `LICENSES.md`, aur apps me "Icon credits" page.
   - Decorative icon pe `aria-hidden`, aur akele icon wale button pe `aria-label` (BaseIcon me `label` prop).
 - **Logo** (owner, 2026-10-26): master `packages/frontend/icons/brand/logo-master.webp` ("B" me ek aurat ki profile, rose baal aur pankhudiyan, neeche "Beautinique"), usi se trace hue vectors `@beautinique/frontend-icons` me:
-  - `BrandLogo` (mark + naam; `horizontal` header ke liye, `stacked` master jaisa) aur `BrandMark` (sirf mark, chhoti jagah). `size` = height, width shape se.
+  - `BrandLogo` (mark + naam; `horizontal` header ke liye, `stacked` master jaisa) aur `BrandMark` (sirf mark, chhoti jagah). `size` = height, width shape se. **Header me phone pe (`sm` se chhota) sirf `BrandMark`**, naam (logo ya app ka naam, jaise "Admin") `sm` se upar; link ka `aria-label` poora naam rakhta hai (owner, 2026-11-08, QA-ADM-001: naam ke saath admin header 360 px se 3 px chauda tha).
   - Rang: ink = `currentColor`, rose = theme ka `--brand`, isliye light, dark aur high contrast me apne aap. Inverse surface (footer) aur print pe `monochrome`.
   - Link ke andar logo decorative (naam link pe, jaise "Beautinique home"); akela ho to `label="Beautinique"`.
   - Browser tab ka favicon alag rehta hai: rose tile pe safed "B" (`favicon.svg`/`.ico`), kyunki 16 px pe mark ki details nahi dikhti.
@@ -180,3 +181,7 @@ Har screen ye states dikhati hai:
 | v1.7    | 2026-10-26 | §6 Error: 404 aur error page ka design (`ErrorPage`, compact art).                                                                                                                    |
 | v1.8    | 2026-10-26 | §3: `surface-inverse` ab `brand-text` bhi badalta hai (`brand-text-inverse`); footer me chalu page ka link padhne layak.                                                              |
 | v1.9    | 2026-11-05 | §6: wake-up, server ke jawab se pehle koi page nahi: pehle saada parda, 1.5 s pe wake-up screen (owner). |
+| v1.10   | 2026-11-07 | §6: wake-up ke baad sirf "Try again"; jawab se pehle koi API call nahi; account na mile to sandesh + "Try again" (owner, QA-FE-009). |
+| v1.11   | 2026-11-07 | §6: account na mile to app-shell ka error page ("Oops", Try again + home) (owner). |
+| v1.12   | 2026-11-07 | §8: kai step wale form me naya step focus le (field ya heading), sandesh field se `aria-describedby` se juda (owner, QA-FE-008). |
+| v1.13   | 2026-11-08 | §11: header me phone pe sirf `BrandMark`, naam `sm` se upar (owner, QA-ADM-001). |

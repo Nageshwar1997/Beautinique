@@ -6,19 +6,29 @@ import { createHash, randomUUID } from 'node:crypto';
 import { createServer, type Server } from 'node:http';
 import type { AddressInfo } from 'node:net';
 
-import { decryptField, generateKey, loadSealingKeys } from '@beautinique/backend-server-crypto';
+import {
+  type CryptoKeys,
+  decryptField,
+  generateKey,
+  loadCryptoKeys,
+  loadSealingKeys,
+} from '@beautinique/backend-server-crypto';
 import {
   createLogger,
   LOOPBACK_HOST,
   type PassportSigner,
   passportSigner,
 } from '@beautinique/backend-server-kit';
-import { connectMongo, withTransaction } from '@beautinique/backend-server-mongo';
+import { connectMongo, type Mongo, withTransaction } from '@beautinique/backend-server-mongo';
 import { OUTBOX } from '@beautinique/backend-server-queue';
 import { APPS, otpSealContext } from '@beautinique/shared-contracts';
 import { Queue } from 'bullmq';
 import { expect } from 'vitest';
 
+import {
+  expectNoCollectionScans,
+  watchCollectionScans,
+} from '../../../scripts/e2e/collection-scans.ts';
 import { readConfig } from '../src/config.ts';
 import {
   AUTH_PROVIDERS,
@@ -71,10 +81,14 @@ async function startHibp(): Promise<{ url: string; server: Server }> {
 
 export interface Harness {
   server: RunningIdentity;
+  /** The test's own handle on identity's database: its look-ups never count as identity's queries. */
+  db: Mongo['db'];
   runId: string;
   prefix: string;
   /** Signs passports the way the gateway does (identity has its public key) */
   passport: PassportSigner;
+  /** Identity's field and blind-index keys, to make a record as an older version wrote it */
+  keys: CryptoKeys;
   start(more?: Record<string, string>): Promise<RunningIdentity>;
   stop(): Promise<void>;
 }
@@ -105,17 +119,29 @@ export async function startHarness(name: string): Promise<Harness> {
       port: 0,
       host: LOOPBACK_HOST,
       handleSignals: false,
-      runtime: { queuePrefix: prefix, epochKey: `${prefix}:epoch`, pollMs: 100 },
+      runtime: {
+        queuePrefix: prefix,
+        epochKey: `${prefix}:epoch`,
+        readyKey: `${prefix}:revocations-ready`,
+        pollMs: 100,
+      },
       passportJwks: passport.jwks,
     });
+  // the test's own handle: look-ups that are not identity's queries, and the profiler watch (on
+  // before identity's release steps run)
+  const look = await connectMongo({ uri: MONGO_URI, dbName, appName: 'identity-test', logger });
+  await watchCollectionScans(look.db);
+  lookDb = look.db;
   const server = await startOne();
   otpKeysOf.set(server, loadSealingKeys(otpEventKeys));
   current = server;
   return {
     server,
+    db: look.db,
     runId,
     passport,
     prefix,
+    keys: loadCryptoKeys({ fieldKeys, blindIndexKey }),
     start: async (more) => {
       const other = await startOne(more);
       otpKeysOf.set(other, loadSealingKeys(otpEventKeys));
@@ -125,18 +151,29 @@ export async function startHarness(name: string): Promise<Harness> {
       await server.stop();
       await new Promise((resolve) => fake.server.close(resolve));
       fake.server.closeAllConnections();
-      const mongo = await connectMongo({ uri: MONGO_URI, dbName, appName: 'cleanup', logger });
-      await mongo.db.dropDatabase();
-      await mongo.close();
-      const queue = new Queue('q.notify', { connection: { url: REDIS_URL }, prefix });
-      await queue.obliterate({ force: true });
-      await queue.close();
+      try {
+        // what every identity of this file asked, not the test's own look-ups
+        await expectNoCollectionScans(look.db, ['identity']);
+      } finally {
+        await look.db.dropDatabase();
+        await look.close();
+        const queue = new Queue('q.notify', { connection: { url: REDIS_URL }, prefix });
+        await queue.obliterate({ force: true });
+        await queue.close();
+      }
     },
   };
 }
 
 const otpKeysOf = new WeakMap<RunningIdentity, ReturnType<typeof loadSealingKeys>>();
 let current: RunningIdentity;
+let lookDb: Mongo['db'] | undefined;
+
+/** The running file's own handle on identity's database (see Harness.db). */
+function look(): Mongo['db'] {
+  if (!lookDb) throw new Error('startHarness first');
+  return lookDb;
+}
 
 export interface Answer {
   status: number;
@@ -178,8 +215,8 @@ interface OtpEvent {
   };
 }
 
-export const events = (challengeId: string, to = current) =>
-  to.runtime.mongo.db
+export const events = (challengeId: string) =>
+  look()
     .collection<OtpEvent>(OUTBOX)
     .find({ 'envelope.data.challengeId': challengeId })
     .sort({ _id: 1 })
@@ -187,7 +224,7 @@ export const events = (challengeId: string, to = current) =>
 
 /** The code notify would email: the latest event of the challenge, opened with the shared key. */
 export async function codeOf(challengeId: string, to = current): Promise<string> {
-  const event = (await events(challengeId, to)).at(-1);
+  const event = (await events(challengeId)).at(-1);
   if (!event) throw new Error('no code was sent');
   const keys = otpKeysOf.get(to);
   if (!keys) throw new Error('unknown identity');
@@ -275,11 +312,8 @@ export async function makeAccount(
 export const allowResend = (challengeId: string, to = current) =>
   to.runtime.redis.client.hset(challengeKey(challengeId), 'resendAfter', '0');
 
-export const users = (to = current) => to.runtime.mongo.db.collection<User>(USERS);
-export const grants = (to = current) => to.runtime.mongo.db.collection<GrantRecord>(GRANTS);
-export const acceptances = (to = current) =>
-  to.runtime.mongo.db.collection<LegalAcceptance>(LEGAL_ACCEPTANCES);
-export const credentials = (to = current) =>
-  to.runtime.mongo.db.collection<Credentials>(CREDENTIALS);
-export const providers = (to = current) =>
-  to.runtime.mongo.db.collection<AuthProvider>(AUTH_PROVIDERS);
+export const users = () => look().collection<User>(USERS);
+export const grants = () => look().collection<GrantRecord>(GRANTS);
+export const acceptances = () => look().collection<LegalAcceptance>(LEGAL_ACCEPTANCES);
+export const credentials = () => look().collection<Credentials>(CREDENTIALS);
+export const providers = () => look().collection<AuthProvider>(AUTH_PROVIDERS);

@@ -49,12 +49,23 @@ export interface ClientOptions {
   validateResponses?: boolean;
   /** Told after every request, never for the caller's own abort (the apps' online status). */
   onNetwork?: (event: NetworkEvent) => void;
+  /** How long a request may wait for its answer (default API_TIMEOUT_MS), then NETWORK_ERROR. */
+  timeoutMs?: number;
 }
+
+/**
+ * How long a call waits for an answer before it is a NETWORK_ERROR (owner, 2026-11-09, QA-FE-006):
+ * past the gateway's own 30 s (its 504 comes first, with its own words) and a Render free cold
+ * start (~42 s), below Vercel's 120 s. Without it a server that never answers kept a page waiting.
+ */
+export const API_TIMEOUT_MS = 60_000;
 
 export interface CallOptions {
   signal?: AbortSignal;
   /** Reuse the same key to retry a request; a fresh one is made when omitted. */
   idempotencyKey?: string;
+  /** This call's own wait (an upload, a long report), instead of the client's. */
+  timeoutMs?: number;
 }
 
 type Defined<Request> = {
@@ -103,7 +114,15 @@ function requestIdOf(headers: AxiosResponse['headers']): string | null {
   return typeof value === 'string' ? value : null;
 }
 
-/** Parses an error response; a body that is not our error body still becomes an ApiError. */
+/** A proxy's or the host's edge's answer for a server it could not reach (Vercel, Render, Vite). */
+const UPSTREAM_DOWN: readonly number[] = [502, 503, 504];
+
+/**
+ * Parses an error response; a body that is not our error body still becomes an ApiError. Not ours
+ * means our server did not answer (QA-FE-007): `UPSTREAM_UNAVAILABLE` when something in front of
+ * it says so (502, 503, 504), else `UNEXPECTED_RESPONSE`. Their message is for developers (logs,
+ * Sentry); the apps show their own words for these codes (api-client `errorMessage`).
+ */
 function failure(response: AxiosResponse<unknown>): ApiError {
   const parsed = errorBody.safeParse(response.data);
   if (parsed.success) {
@@ -111,7 +130,7 @@ function failure(response: AxiosResponse<unknown>): ApiError {
     return new ApiError({ code, message, status: response.status, requestId, details });
   }
   return new ApiError({
-    code: response.status >= 500 ? 'INTERNAL' : 'BAD_REQUEST',
+    code: UPSTREAM_DOWN.includes(response.status) ? 'UPSTREAM_UNAVAILABLE' : 'UNEXPECTED_RESPONSE',
     message: `Request failed with status ${String(response.status)}`,
     status: response.status,
     requestId: requestIdOf(response.headers),
@@ -129,6 +148,8 @@ export function createClient(options: ClientOptions) {
     headers: { Accept: 'application/json', [HEADERS.app]: options.app },
     // every answer comes back here; its status decides below
     validateStatus: () => true,
+    // a server that never answers ends as NETWORK_ERROR, not a page waiting for ever
+    timeout: options.timeoutMs ?? API_TIMEOUT_MS,
     ...(options.fetch === undefined ? {} : { adapter: 'fetch', env: { fetch: options.fetch } }),
   });
   const validate = options.validateResponses ?? true;
@@ -166,6 +187,7 @@ export function createClient(options: ClientOptions) {
         headers,
         data: payload,
         signal: callOptions?.signal,
+        ...(callOptions?.timeoutMs === undefined ? {} : { timeout: callOptions.timeoutMs }),
       });
     } catch {
       // the caller's own abort comes back as the signal gives it, like fetch's

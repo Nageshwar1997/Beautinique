@@ -9,6 +9,7 @@ import { randomBytes } from 'node:crypto';
 
 import { startBundle } from '../../backend/bundle/src/bundle.ts';
 import { startFakeOAuth } from './fake-oauth.ts';
+import { markRunning, unmarkRunning } from './runs.ts';
 
 const need = (key: string): string => {
   const value = process.env[key];
@@ -79,10 +80,15 @@ if (fake) {
 }
 
 const bundle = await startBundle({ port, env });
+// the teardown stops this process before it drops the run's databases (scripts/e2e/runs.ts)
+markRunning(runId);
 console.log(`e2e backend on http://localhost:${String(bundle.port)} (run ${runId})`);
 const stop = () => {
   Promise.all([bundle.stop(), fake?.stop()]).then(
-    () => process.exit(0),
+    () => {
+      unmarkRunning(runId);
+      process.exit(0);
+    },
     (error: unknown) => {
       console.error('e2e backend did not stop cleanly', error);
       process.exit(1);

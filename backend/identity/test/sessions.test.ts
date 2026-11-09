@@ -1,9 +1,9 @@
 // Sessions (T3.2): cookies, ES256 access tokens and the JWKS, refresh rotation with reuse
 // detection, idle and maximum lifetimes, logout, and a new password ending every session. Against
 // the local MongoDB replica set and Valkey (`npm run infra:up`). See helpers.ts.
-import { type KeyObject } from 'node:crypto';
+import { type KeyObject, randomBytes } from 'node:crypto';
 
-import { publicKeyFromJwk, verifyJwt } from '@beautinique/backend-server-crypto';
+import { blindIndex, publicKeyFromJwk, verifyJwt } from '@beautinique/backend-server-crypto';
 import { passportSigner } from '@beautinique/backend-server-kit';
 import { OUTBOX } from '@beautinique/backend-server-queue';
 import {
@@ -33,7 +33,7 @@ import {
 let harness: Harness;
 const email = (name: string) => `${name}-${harness.runId}@beautinique.example`;
 const redis = () => harness.server.runtime.redis.client;
-const sessionsDb = () => harness.server.runtime.mongo.db.collection<Session>(SESSIONS);
+const sessionsDb = () => harness.db.collection<Session>(SESSIONS);
 const CHROME =
   'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130.0.0.0 Safari/537.36';
 
@@ -147,8 +147,13 @@ describe('signing in', () => {
       methods: ['password'],
       revokedAt: null,
     });
-    // the refresh token is never stored, only its keyed hash
-    expect(JSON.stringify(session)).not.toContain(refreshOf(answer).split('.')[1]);
+    expect(session?.familyHash).toEqual(expect.any(String));
+    // the refresh token is never stored, only keyed hashes: neither its family nor its secret
+    const [, family = '', secret = ''] = refreshOf(answer).split('.');
+    expect(family).toMatch(/^[\w-]{22}$/);
+    expect(secret).toMatch(/^[\w-]{43}$/);
+    expect(JSON.stringify(session)).not.toContain(family);
+    expect(JSON.stringify(session)).not.toContain(secret);
   });
 
   it('gives a new account a session at sign-up too', async () => {
@@ -193,7 +198,7 @@ describe('refreshing', () => {
       revokeReason: 'reuse',
     });
     expect(await redis().exists(revokedSessionKey(sessionId))).toBe(1);
-    const [event] = await harness.server.runtime.mongo.db
+    const [event] = await harness.db
       .collection<{ type: string; envelope: { data: Record<string, unknown> } }>(OUTBOX)
       .find({ type: 'identity.session.reuseDetected', 'envelope.data.sessionId': sessionId })
       .toArray();
@@ -204,6 +209,70 @@ describe('refreshing', () => {
     });
     // the newest token ends with the session
     expect((await refreshWith(refreshOf(next))).status).toBe(401);
+  });
+
+  it('keeps the session’s family in every token it gives, with a new secret each time', async () => {
+    const address = email('family');
+    await makeAccount(address);
+    const first = refreshOf(await signIn(address));
+    const next = refreshOf(await refreshWith(first));
+    const [sessionId, family, secret] = first.split('.');
+    expect(next.split('.')).toEqual([sessionId, family, expect.not.stringMatching(secret ?? '')]);
+  });
+
+  it('ends the session when any older token of it comes back, not only the one just replaced', async () => {
+    const address = email('older-copy');
+    await makeAccount(address);
+    const owner = refreshOf(await signIn(address));
+    const sessionId = owner.split('.')[0] ?? '';
+    // someone with a copy refreshes twice: the owner's token is now two behind
+    const theirs = refreshOf(await refreshWith(owner));
+    const newest = await refreshWith(theirs);
+    expect(newest.status).toBe(200);
+    // the owner's token back at once, inside the parallel-tab window: a copy all the same
+    const back = await refreshWith(owner);
+    expect([back.status, back.body.error?.code]).toEqual([401, 'SESSION_EXPIRED']);
+    expect(await sessionsDb().findOne({ _id: sessionId })).toMatchObject({
+      revokeReason: 'reuse',
+    });
+    expect(await redis().exists(revokedSessionKey(sessionId))).toBe(1);
+    const events = await harness.db.collection(OUTBOX).countDocuments({
+      type: 'identity.session.reuseDetected',
+      'envelope.data.sessionId': sessionId,
+    });
+    expect(events).toBe(1);
+    // the copy's newest token ends with the session
+    expect((await refreshWith(refreshOf(newest))).status).toBe(401);
+  });
+
+  it('keeps a session from before token families: its next token has one, and a copy is caught', async () => {
+    const address = email('before-families');
+    await makeAccount(address);
+    const sessionId = refreshOf(await signIn(address)).split('.')[0] ?? '';
+    // the session as an older version wrote it: `<sessionId>.<secret>`, no family
+    const before = `${sessionId}.${randomBytes(32).toString('base64url')}`;
+    await sessionsDb().updateOne(
+      { _id: sessionId },
+      {
+        $set: { refreshHash: blindIndex(harness.keys, 'refresh-token', before) },
+        $unset: { familyHash: '' },
+      },
+    );
+    const next = await refreshWith(before);
+    expect(next.status).toBe(200);
+    expect(refreshOf(next).split('.')).toHaveLength(3);
+    expect((await sessionsDb().findOne({ _id: sessionId }))?.familyHash).toEqual(
+      expect.any(String),
+    );
+    // the old token later: a copy, as before families
+    await sessionsDb().updateOne(
+      { _id: sessionId },
+      { $set: { rotatedAt: new Date(Date.now() - 11_000) } },
+    );
+    expect((await refreshWith(before)).status).toBe(401);
+    expect(await sessionsDb().findOne({ _id: sessionId })).toMatchObject({
+      revokeReason: 'reuse',
+    });
   });
 
   it('refuses no cookie, a made-up token and another app’s token, clearing the cookies', async () => {
@@ -226,6 +295,11 @@ describe('refreshing', () => {
     const customer = await signIn(address);
     const realId = refreshOf(customer).split('.')[0] ?? '';
     expect((await refreshWith(`${realId}.forged-secret`)).body.error?.code).toBe('SESSION_EXPIRED');
+    expect((await sessionsDb().findOne({ _id: realId }))?.revokedAt).toBeNull();
+    // so is a made-up family with the session's real secret: only its own family is a copy
+    const [, , realSecret = ''] = refreshOf(customer).split('.');
+    const madeUpFamily = randomBytes(16).toString('base64url');
+    expect((await refreshWith(`${realId}.${madeUpFamily}.${realSecret}`)).status).toBe(401);
     expect((await sessionsDb().findOne({ _id: realId }))?.revokedAt).toBeNull();
     expect((await refreshWith(refreshOf(customer))).status).toBe(200);
     // the seller session is untouched by the wrong-app try
@@ -322,6 +396,50 @@ describe('ending sessions', () => {
     expect((await refreshWith(refreshOf(two, 'seller'), 'seller')).status).toBe(401);
   });
 
+  it('writes the gateway’s ended sessions again from MongoDB after a Redis wipe, then its ready mark (QA-GW-002)', async () => {
+    const readyKey = `${harness.prefix}:revocations-ready`;
+    // identity's start writes it
+    expect(await redis().get(readyKey)).toBe('1');
+    const address = email('wipe');
+    await makeAccount(address);
+    const token = refreshOf(await signIn(address));
+    const sessionId = token.split('.')[0] ?? '';
+    await call('/auth/logout', { cookie: `__Secure-bq_customer_rt=${token}` });
+    // one that ended 12 minutes ago: its access tokens are past, nothing to write back
+    const old = refreshOf(await signIn(address));
+    const oldId = old.split('.')[0] ?? '';
+    await call('/auth/logout', { cookie: `__Secure-bq_customer_rt=${old}` });
+    await sessionsDb().updateOne(
+      { _id: oldId },
+      { $set: { revokedAt: new Date(Date.now() - 12 * 60_000) } },
+    );
+    // and one that ended 5 minutes ago: its mark gets only what is left (about 6 of 11 minutes)
+    const mid = refreshOf(await signIn(address));
+    const midId = mid.split('.')[0] ?? '';
+    await call('/auth/logout', { cookie: `__Secure-bq_customer_rt=${mid}` });
+    await sessionsDb().updateOne(
+      { _id: midId },
+      { $set: { revokedAt: new Date(Date.now() - 5 * 60_000) } },
+    );
+    // the wipe: the marks, the ready mark and the epoch go
+    await redis().del(
+      revokedSessionKey(sessionId),
+      revokedSessionKey(oldId),
+      revokedSessionKey(midId),
+      readyKey,
+      `${harness.prefix}:epoch`,
+    );
+    expect(await harness.server.runtime.watchdog.check()).toBe(true);
+    const left = await redis().pttl(revokedSessionKey(sessionId));
+    expect(left).toBeGreaterThan(600_000);
+    expect(left).toBeLessThanOrEqual(660_000);
+    const midLeft = await redis().pttl(revokedSessionKey(midId));
+    expect(midLeft).toBeGreaterThan(300_000);
+    expect(midLeft).toBeLessThanOrEqual(360_000);
+    expect(await redis().exists(revokedSessionKey(oldId))).toBe(0);
+    expect(await redis().get(readyKey)).toBe('1');
+  });
+
   it('issues a sign-in right after every session ended in a later second, so the gateway takes it', async () => {
     const address = email('same-second');
     const userId = await makeAccount(address);
@@ -347,7 +465,7 @@ describe('ending sessions', () => {
 
 describe('signing keys', () => {
   it('keep the private key sealed, and make a new key after 30 days while the JWKS keeps the old', async () => {
-    const keys = harness.server.runtime.mongo.db.collection<SigningKeyRecord>(SIGNING_KEYS);
+    const keys = harness.db.collection<SigningKeyRecord>(SIGNING_KEYS);
     const [current] = await keys.find().sort({ createdAt: -1 }).toArray();
     expect(current?.privateKey).toMatch(/^v1\.k1\./);
     expect(JSON.stringify(current)).not.toContain('PRIVATE KEY');
