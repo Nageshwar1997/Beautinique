@@ -43,6 +43,11 @@ export interface ApiClientOptions {
   /** Check each answer against the route's output schema (default true). */
   validateResponses?: boolean;
   /**
+   * How long a call waits for its answer, then NETWORK_ERROR (default the contracts'
+   * API_TIMEOUT_MS, 60 s; QA-FE-006). One call can take its own (`timeoutMs` in its options).
+   */
+  timeoutMs?: number;
+  /**
    * Told about every request: an answer proves the internet works, no answer is worth a check
    * (default: the hooks package's shared `onlineStatusStore`, which `useOnlineStatus` reads).
    */
@@ -99,6 +104,7 @@ export function createApiClient(options: ApiClientOptions): ApiClient {
     app: options.app,
     fetch: options.fetch,
     validateResponses: options.validateResponses,
+    timeoutMs: options.timeoutMs,
     onNetwork: (event) => {
       if (event === 'answered') online.confirmOnline();
       else online.recheck();

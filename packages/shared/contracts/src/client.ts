@@ -49,12 +49,23 @@ export interface ClientOptions {
   validateResponses?: boolean;
   /** Told after every request, never for the caller's own abort (the apps' online status). */
   onNetwork?: (event: NetworkEvent) => void;
+  /** How long a request may wait for its answer (default API_TIMEOUT_MS), then NETWORK_ERROR. */
+  timeoutMs?: number;
 }
+
+/**
+ * How long a call waits for an answer before it is a NETWORK_ERROR (owner, 2026-11-09, QA-FE-006):
+ * past the gateway's own 30 s (its 504 comes first, with its own words) and a Render free cold
+ * start (~42 s), below Vercel's 120 s. Without it a server that never answers kept a page waiting.
+ */
+export const API_TIMEOUT_MS = 60_000;
 
 export interface CallOptions {
   signal?: AbortSignal;
   /** Reuse the same key to retry a request; a fresh one is made when omitted. */
   idempotencyKey?: string;
+  /** This call's own wait (an upload, a long report), instead of the client's. */
+  timeoutMs?: number;
 }
 
 type Defined<Request> = {
@@ -137,6 +148,8 @@ export function createClient(options: ClientOptions) {
     headers: { Accept: 'application/json', [HEADERS.app]: options.app },
     // every answer comes back here; its status decides below
     validateStatus: () => true,
+    // a server that never answers ends as NETWORK_ERROR, not a page waiting for ever
+    timeout: options.timeoutMs ?? API_TIMEOUT_MS,
     ...(options.fetch === undefined ? {} : { adapter: 'fetch', env: { fetch: options.fetch } }),
   });
   const validate = options.validateResponses ?? true;
@@ -174,6 +187,7 @@ export function createClient(options: ClientOptions) {
         headers,
         data: payload,
         signal: callOptions?.signal,
+        ...(callOptions?.timeoutMs === undefined ? {} : { timeout: callOptions.timeoutMs }),
       });
     } catch {
       // the caller's own abort comes back as the signal gives it, like fetch's

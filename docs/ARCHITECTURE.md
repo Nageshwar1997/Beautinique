@@ -1,6 +1,6 @@
 # ARCHITECTURE — BQ
 
-> **Status:** v1.61 draft (2026-11-09). [PRD.md](PRD.md) v1.0 pe based. Design ek multi-agent review se aaya (3 architecture proposals + review board + owner ke decisions), aur v1.1 me free tier ke official docs ke against verify hua.
+> **Status:** v1.62 draft (2026-11-09). [PRD.md](PRD.md) v1.0 pe based. Design ek multi-agent review se aaya (3 architecture proposals + review board + owner ke decisions), aur v1.1 me free tier ke official docs ke against verify hua.
 
 ## 0. Ek nazar me
 
@@ -354,7 +354,7 @@ Kai platforms alag users ko alag price dikhate hain. BQ ka rule: **ek product ka
 | Package                                 | Kaam                                                                                                                                                                                                                                      |
 | --------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | contracts                               | Zod DTOs, routes, events, permission keys, error codes, area-setting keys. OpenAPI aur clients generate karta hai.                                                                                                                        |
-| api-client                              | Single-flight refresh, request queue, `X-BQ-App`, Idempotency-Key helper, generated typed calls aur query keys.                                                                                                                           |
+| api-client                              | Single-flight refresh, request queue, `X-BQ-App`, Idempotency-Key helper, generated typed calls, query keys, aur har call pe 60 s timeout (phir `NETWORK_ERROR`; gateway ke 30 s aur Render cold start ~42 s se upar, Vercel ke 120 s se neeche; owner, 2026-11-09, QA-FE-006).                                                                                                                           |
 | auth-ui                                 | Email + password (sign-up, password set aur invitation pe email code), authenticator (TOTP) + recovery codes, invitation accept, Google/LinkedIn/GitHub (sirf customer), 18+ declaration, My Devices, step-up dialog.                     |
 | authz                                   | Permission matcher, `<Can>`, `usePermission`, route guards, nav filtering.                                                                                                                                                                |
 | app-shell                               | Responsive layout, permission-filtered nav, theme switcher, help link, error, 404 aur offline pages, wake-up screen (Render cold start ke liye), Sentry, idle logout.                                                                     |
@@ -717,3 +717,4 @@ Sirf config badlegi, code nahi:
 | v1.59   | 2026-11-08 | §13: CI flow check `main`/`release` me sirf isi repo ki branch leta (`scripts/ci/`, QA-CI-001); check galti se bachav, taala merge ka haq (RULES §2). |
 | v1.60   | 2026-11-08 | §9.2: customer account layout ka `meta` (title "Account \| Beautinique" + `noindex`), 2026-11-03 ka `noindex` faisla code me ab (QA-CUS-001). |
 | v1.61   | 2026-11-09 | §6.6: wipe ke baad identity band sessions ke marks MongoDB se dobara likhti (har start pe bhi) aur ready mark; mark na ho to gateway signed-in pe 503 (gateway MongoDB nahi padhta) (owner, QA-GW-002). |
+| v1.62   | 2026-11-09 | §9.2: apps ke API client me har call pe 60 s timeout (contracts `API_TIMEOUT_MS`), phir `NETWORK_ERROR` (owner, QA-FE-006). |

@@ -2,9 +2,10 @@ import { createServer } from 'node:http';
 import type { AddressInfo } from 'node:net';
 
 import { object, string } from '@beautinique/shared-zod';
-import { describe, expect, expectTypeOf, it } from 'vitest';
+import { describe, expect, expectTypeOf, it, vi } from 'vitest';
 
 import {
+  API_TIMEOUT_MS,
   ApiError,
   createClient,
   defineRoute,
@@ -265,6 +266,70 @@ describe('client call', () => {
     controller.abort();
     await call(controller.signal);
     expect(events).toEqual(['answered', 'answered', 'unanswered']);
+  });
+
+  it('gives up on a server that never answers after 60 seconds, as NETWORK_ERROR (QA-FE-006)', async () => {
+    // owner, 2026-11-09: past the gateway's own 30 s, and a Render cold start (~42 s)
+    expect(API_TIMEOUT_MS).toBe(60_000);
+    // only setTimeout is pretend: axios sets its timer after a few real steps, before it fetches
+    vi.useFakeTimers({ toFake: ['setTimeout', 'clearTimeout'] });
+    try {
+      const seen = { fetched: false };
+      // axios hands fetch a whole Request: the timeout's signal is on it
+      const hanging = ((input: Request, init?: RequestInit) => {
+        seen.fetched = true;
+        const signal = init?.signal ?? input.signal;
+        return new Promise<Response>((_resolve, reject) => {
+          signal.addEventListener('abort', () => {
+            reject(new DOMException('Aborted', 'AbortError'));
+          });
+        });
+      }) as unknown as typeof fetch;
+      const client = createClient({ baseUrl: 'https://x.test', app: 'admin', fetch: hanging });
+      let outcome: unknown = 'pending';
+      const call = client.call(getPing, { params: { pingId: id } }).catch((error: unknown) => {
+        outcome = error;
+      });
+      for (let turns = 0; !seen.fetched && turns < 1000; turns += 1) {
+        await new Promise((resolve) => setImmediate(resolve));
+      }
+      expect(seen.fetched).toBe(true);
+      await vi.advanceTimersByTimeAsync(59_000);
+      expect(outcome).toBe('pending');
+      await vi.advanceTimersByTimeAsync(2_000);
+      await call;
+      expect(outcome).toMatchObject({ code: 'NETWORK_ERROR', status: 0 });
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+
+  it('takes a timeout of its own for the client and for one call, over a real connection that never answers', async () => {
+    const server = createServer(() => {
+      // takes the request and never answers
+    });
+    await new Promise<void>((resolve) => server.listen(0, '127.0.0.1', resolve));
+    const { port } = server.address() as AddressInfo;
+    try {
+      const client = createClient({
+        baseUrl: `http://127.0.0.1:${String(port)}`,
+        app: 'admin',
+        timeoutMs: 100,
+      });
+      let started = Date.now();
+      await expect(client.call(getPing, { params: { pingId: id } })).rejects.toMatchObject({
+        code: 'NETWORK_ERROR',
+      });
+      expect(Date.now() - started).toBeLessThan(2000);
+      started = Date.now();
+      await expect(
+        client.call(getPing, { params: { pingId: id } }, { timeoutMs: 400 }),
+      ).rejects.toMatchObject({ code: 'NETWORK_ERROR' });
+      expect(Date.now() - started).toBeGreaterThanOrEqual(350);
+    } finally {
+      server.closeAllConnections();
+      await new Promise((resolve) => server.close(resolve));
+    }
   });
 
   it('refuses a success response without data or with data that does not match the route', async () => {
