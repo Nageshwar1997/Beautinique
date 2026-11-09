@@ -8,9 +8,6 @@ interface VercelRoute {
   src?: string;
   dest?: string;
   env?: string[];
-  handle?: string;
-  continue?: boolean;
-  headers?: Record<string, string>;
   transforms?: {
     type: string;
     op: string;
@@ -20,9 +17,18 @@ interface VercelRoute {
   }[];
 }
 
+interface VercelHeaders {
+  source: string;
+  headers: { key: string; value: string }[];
+}
+
 const config = JSON.parse(
   readFileSync(join(import.meta.dirname, '..', 'vercel.json'), 'utf8'),
-) as Record<string, unknown> & { routes: VercelRoute[] };
+) as Record<string, unknown> & {
+  routes: VercelRoute[];
+  headers?: VercelHeaders[];
+  rewrites?: { source: string; destination: string }[];
+};
 
 describe('vercel.json (ARCHITECTURE §7.2, §9.2, §9.3)', () => {
   it('sends /api to the gateway with the origin secret, both only from Vercel env, first', () => {
@@ -43,15 +49,14 @@ describe('vercel.json (ARCHITECTURE §7.2, §9.2, §9.3)', () => {
   });
 
   it('keeps every page out of search results, then serves the files, then the SPA for any path', () => {
-    const [pages, ...rest] = config.routes.slice(1);
-    // the same route sends the security headers: scripts/ci/test/vercel-headers.test.ts checks them
-    // for every app
-    expect(pages).toMatchObject({
-      src: '/(.*)',
-      headers: { 'X-Robots-Tag': 'noindex, nofollow' },
-      continue: true,
-    });
-    expect(rest).toEqual([{ handle: 'filesystem' }, { src: '/(.*)', dest: '/index.html' }]);
+    // routes hold only /api (only a route can set its header); noindex rides with the security
+    // headers, which scripts/ci/test/vercel-headers.test.ts checks, with the order Vercel runs
+    expect(config.routes).toHaveLength(1);
+    const [pages] = config.headers ?? [];
+    expect(pages?.source).toBe('/(.*)');
+    expect(pages?.headers).toContainEqual({ key: 'X-Robots-Tag', value: 'noindex, nofollow' });
+    // Vercel serves a file when there is one, before any rewrite
+    expect(config.rewrites).toEqual([{ source: '/(.*)', destination: '/index.html' }]);
   });
 
   it('holds no address or secret of its own', () => {

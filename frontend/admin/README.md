@@ -33,7 +33,7 @@ E2E (Playwright) ko `npm run infra:up` aur `npx playwright install chromium` cha
 - `src/nav.ts`: main nav (abhi khaali: ek hi page), footer, account links, page titles.
 - `src/pages/*.tsx`: pages. Har page apna `<title>` deta hai (React 19).
 - `vite.config.ts`: dev proxy `.env` se, `BQ_GATEWAY_URL` browser ko (wake-up call), theme script `<head>` me sabse pehle (`THEME_SCRIPT`, CSP hash ke liye byte for byte).
-- `vercel.json`: `/api` → gateway (`x-origin-secret` Vercel env se), har page pe `X-Robots-Tag: noindex` aur security headers (iframe me nahi khulta, nosniff, `Referrer-Policy`, camera/mic/location band, HSTS), phir files, phir har path pe `index.html` (SPA). Headers ki list aur jaanch `scripts/ci/test/vercel-headers.test.ts` (saare apps); poora CSP TASKS T6.6 me.
+- `vercel.json`: `routes` me sirf `/api` → gateway (`x-origin-secret` Vercel env se; ye header sirf route laga sakta), `headers` me har page pe `X-Robots-Tag: noindex` aur security headers (iframe me nahi khulta, nosniff, `Referrer-Policy`, camera/mic/location band, HSTS), phir files, phir `rewrites` se har path pe `index.html` (SPA). Headers ki list aur jaanch `scripts/ci/test/vercel-headers.test.ts` (saare apps); poora CSP TASKS T6.6 me.
 - `e2e/`: Playwright; invitation `scripts/e2e/invite.ts` se (Master app abhi nahi), baaki asli raasta.
 - Styles: `@beautinique/frontend-styles` + packages ki `tailwind.css` (`src/index.css`).
 
