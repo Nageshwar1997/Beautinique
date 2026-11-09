@@ -1,10 +1,10 @@
 # QA AUDIT REPORT — BQ
 
-> **Status:** v1.24 (2026-11-09, final; §2a me KNOWN faislon ki halat, §0 me fixes). Audit base: `origin/prerelease` @ `ee7f46a` (`ee7f46ae7b2605d99f6b4497d26303aa109fb371`). Auditor: Claude Code (Opus 5.5, `claude-opus-5-5`). Ye report audit ki single source of truth hai; fixes alag se, ek-ek karke.
+> **Status:** v1.25 (2026-11-09, final; §2a me KNOWN faislon ki halat, §0 me fixes). Audit base: `origin/prerelease` @ `ee7f46a` (`ee7f46ae7b2605d99f6b4497d26303aa109fb371`). Auditor: Claude Code (Opus 5.5, `claude-opus-5-5`). Ye report audit ki single source of truth hai; fixes alag se, ek-ek karke.
 
 ## 0. Audit state (har session ke aakhir me update)
 
-- **Fixes (2026-11-07 se, branch `feat/qa-audit`, §10 ke kram se, har fix ka apna commit, saare fixes ke baad ek PR → `prerelease` (owner, 2026-11-07)):** 1. QA-ID-001 Fixed (2026-11-07). 2. QA-GW-001 + QA-KRN-001 Fixed (2026-11-07). 3. QA-FE-009 Fixed (2026-11-07). 16. QA-FE-005 Fixed (2026-11-07, owner ke kehne pe pehle). 4. QA-FE-004 + QA-FE-010 Fixed (2026-11-07). 5. QA-FE-008 Fixed (2026-11-07). 6. QA-FE-001 + QA-FE-007 Fixed (2026-11-08). 7. QA-CI-001 Fixed (2026-11-08). 8. QA-ID-002 Fixed (2026-11-08). 12. QA-TOOL-001 Fixed (2026-11-08, owner ke kehne pe pehle). 9. QA-CUS-001 Fixed (2026-11-08). 10. QA-FE-003 + QA-FE-002 Fixed (2026-11-08). 11. QA-ADM-001 Fixed (2026-11-08). 13. QA-GW-002 Fixed (2026-11-09). 14. QA-FE-006 Fixed (2026-11-09). 15. QA-TOOL-002 Fixed (2026-11-09). Agla: QA-DOC-001 + QA-DOC-002 (owner ka faisla pehle).
+- **Fixes (2026-11-07 se, branch `feat/qa-audit`, §10 ke kram se, har fix ka apna commit, saare fixes ke baad ek PR → `prerelease` (owner, 2026-11-07)):** 1. QA-ID-001 Fixed (2026-11-07). 2. QA-GW-001 + QA-KRN-001 Fixed (2026-11-07). 3. QA-FE-009 Fixed (2026-11-07). 16. QA-FE-005 Fixed (2026-11-07, owner ke kehne pe pehle). 4. QA-FE-004 + QA-FE-010 Fixed (2026-11-07). 5. QA-FE-008 Fixed (2026-11-07). 6. QA-FE-001 + QA-FE-007 Fixed (2026-11-08). 7. QA-CI-001 Fixed (2026-11-08). 8. QA-ID-002 Fixed (2026-11-08). 12. QA-TOOL-001 Fixed (2026-11-08, owner ke kehne pe pehle). 9. QA-CUS-001 Fixed (2026-11-08). 10. QA-FE-003 + QA-FE-002 Fixed (2026-11-08). 11. QA-ADM-001 Fixed (2026-11-08). 13. QA-GW-002 Fixed (2026-11-09). 14. QA-FE-006 Fixed (2026-11-09). 15. QA-TOOL-002 Fixed (2026-11-09). 17. QA-DOC-001 + QA-DOC-002 Fixed (2026-11-09). Agla: Q-011 / T6.6 (owner ka faisla pehle).
 - **Gate 1: approved (2026-11-04).** Owner ke jawab (saari recommendations maani):
   - Live pe passive GETs: **haan, kul ≤ 15**, bina auth: `bq-live` `/health`, `/status`, ek anjaan path; customer + admin ka home aur ek 404 (headers, TLS). OTP/auth/write/fuzz/rate-limit/load kabhi nahi.
   - Playwright: Chromium 1248 pehle se installed (Playwright 1.64.1 ki zaroorat yahi); koi download nahi chahiye
@@ -889,7 +889,7 @@ Plan: **E** = planned-executed (local stack, HTTP, browser, scratch script), **S
 ### [QA-DOC-001] Docs say CI blocks cross-module imports, hard-coded geo data and role-name comparisons, but no such check exists
 
 **Module:** M15 (docs vs code) | **Feature:** CI/lint guards | **Task/Doc:** ARCHITECTURE §4 ("CI me dependency-cruiser ise rokta hai"), §7 (line ~310: "ESLint role-name comparison pe rok lagata hai"), §13 (line ~532: `ci.yml`: "dependency-cruiser, no-hardcoded-geo lint, no role-name comparisons"); RULES §4 ("(no-hardcoded-geo lint)", "Module boundaries … (dependency-cruiser)")
-**Severity:** P4 (aaj koi bug nahi: core me sirf ek module `platform`, roles DB se; par developer maanega ki guard hai) | **Priority:** Low | **Status:** Open
+**Severity:** P4 (aaj koi bug nahi: core me sirf ek module `platform`, roles DB se; par developer maanega ki guard hai) | **Priority:** Low | **Status:** Fixed (2026-11-09, `feat/qa-audit`, commit "fix(core): dependency-cruiser guards core’s boundaries, and the docs tell which CI guards exist and that T6.3 is done (QA-DOC-001, QA-DOC-002)")
 **Testing Type:** Docs | **Evidence level:** E3 | **Reproducibility:** Always | **Environment:** static @ `ee7f46a`
 **Description:** Repo me dependency-cruiser ka config ya package nahi (`git ls-files` me koi `cruiser` nahi), `ci.yml` me aisa koi step nahi, aur `configs/eslint-config.js` me na geo literals ka rule, na role-name comparison ka. ESLint sirf `mongodb`/`zod` imports, `.watch(`, `fetch`/`node:http`, `Promise.all` in transaction aur `process.env` rokta hai (yeh sab sahi kaam karte, M0 lint PASS).
 **Steps to Reproduce:** `git ls-files | grep -i cruiser` (khaali); `grep -n "dependency-cruiser\|geo\|role" .github/workflows/ci.yml configs/eslint-config.js` (khaali).
@@ -903,11 +903,12 @@ Plan: **E** = planned-executed (local stack, HTTP, browser, scratch script), **S
 **Regression Risk:** None (docs).
 **Regression test to add:** Guards bane to ek "bad import" fixture jo lint fail kare.
 **Owner decision needed:** Haan: docs sudhaarein ya guards abhi banayein
+**Fix (2026-11-09, owner ne Claude ki salah "option C" maani: docs sach bolein + dependency-cruiser abhi):** dependency-cruiser 18.7.0 (root devDependency; 18.7.2 sirf ek hafta purana tha) aur `backend/core/.dependency-cruiser.json`, core ke `npm run lint` me (CI ka `npm run lint` workspaces ke lint bhi chalata hai). Do rules: `core-module-facade-only` (doosre module ka sirf `index.ts`; apna module `from` ke `$2` group se chhootta) aur `core-no-other-deployable` (core se `../<deployable>/` ka koi import nahi, to ARCHITECTURE §3 ka bundle-secrets wala daava bhi ab sach). Test `backend/core/test/boundaries.test.ts`: fixtures (`test/fixtures/boundaries/`: module `beta` jo `alpha/domain` me jhaankta, ek file jo `alpha/index.ts` se leti, aur ek jo identity ka `errors.ts` leti) pe theek do violations aur lint fail; `src` pe koi nahi. Bina rules ke test fail (dikhaya); `src` me ek nakli module (`zz_probe` → `platform/routes.ts`) ko lint ne pakda, phir hataya. Jaanch me: `--output-type json` pe dependency-cruiser violations ke bawajood exit 0 deta, isliye test lint wala exit code alag se dekhta. Docs: ARCHITECTURE §3, §4, §7, §13 (v1.63) aur RULES §3.4, §3.5, §4.2 (v1.21) me har pehre ke saath "hai" ya "abhi nahi, T…"; `ci.yml` ki asli list (build poora, sirf affected T0.6 me; "~2,600 package tests" hataya); `integration.yml`/`e2e.yml`/`nightly.yml` abhi nahi, ye bhi likha. Har route pe permission, rate class aur owner (`defineRoute`) aur catalogue ↔ roles seed (identity `rbac.test.ts`) sach me hain. Naye tasks (owner): T4.10 no-hardcoded-geo lint (T4.2 se pehle), T4.11 role-name lint (T4.1 se pehle), T11.7 OpenAPI diff + event compatibility, T11.8 bundle budgets (TASKS v1.98). AGENTS.md v1.5 ("CI jo pakadta hai" me core boundaries; "jo koi tool nahi rokta" me geo aur role-name), CLAUDE.md naksha. Lint, typecheck, format, poora `npm test` (1835) pass; pehle poore run me naya test 5 s ki default seema paar kar gaya (dependency-cruiser do baar process ke roop me), ab uski apni 30 s, aur dobara poora run pass. Mutation nahi (lint config, test aur docs).
 
 ### [QA-DOC-002] TASKS still lists the customer SSR app as not done (and on React Router 7), and CLAUDE.md lists only two apps
 
 **Module:** M15 (docs vs code) | **Feature:** status/inventory | **Task/Doc:** TASKS T6.3, CLAUDE.md "Repo ka naksha" (line 86)
-**Severity:** P4 (galat status: progress % thoda kam, aur naya developer/AI kaam dobara kar sakta) | **Priority:** Low | **Status:** Open
+**Severity:** P4 (galat status: progress % thoda kam, aur naya developer/AI kaam dobara kar sakta) | **Priority:** Low | **Status:** Fixed (2026-11-09, `feat/qa-audit`, commit "fix(core): dependency-cruiser guards core’s boundaries, and the docs tell which CI guards exist and that T6.3 is done (QA-DOC-001, QA-DOC-002)")
 **Testing Type:** Docs | **Evidence level:** E3 | **Reproducibility:** Always | **Environment:** static @ `ee7f46a`
 **Description:** (1) TASKS T6.3 "`[ ]` Customer app → React Router 7 framework mode (SSR)", jabki customer React Router 8.5 framework mode me SSR + prerender ke saath bana aur live hai (ARCHITECTURE §9.2/§13: "React Router 8 framework mode", aur v-log "RR7 likha reh gaya tha"). (2) CLAUDE.md: "`frontend/<app>` … (abhi: customer, admin; …)" jabki `frontend/` me 11 apps hain (9 shells M13 me dekhe).
 **Steps to Reproduce:** `grep -n "T6.3" docs/TASKS.md`; `ls frontend/`; CLAUDE.md line 86.
@@ -921,6 +922,7 @@ Plan: **E** = planned-executed (local stack, HTTP, browser, scratch script), **S
 **Regression Risk:** None.
 **Regression test to add:** Nahi.
 **Owner decision needed:** Haan: T6.3 poora maanein? (progress % badlega)
+**Fix (2026-11-09, owner: "T6.3 haan"):** TASKS T6.3 `[x]` "Customer app → React Router 8 framework mode (SSR + prerender)" (v1.98). §P usi commit me: Phase 6 13% → 25%; QA-DOC-001 ke 4 naye tasks se Phase 4 9 → 11 tasks (0%), Phase 11 6 → 8 (17% → 13%); poora 14% → 15% (14.8; script se gin ke jaancha), task ginti 27% (23.5 ÷ 86), itihaas line; HANDOFF §1 ki Progress line. CLAUDE.md naksha: 11 apps (customer aur admin chalte, 9 khaali shells) aur backend, plus core ki boundary ka pehra. AGENTS.md me apps ki list nahi thi.
 
 ### [QA-FE-006] API calls from the apps have no timeout: a hung gateway leaves the page waiting with no end
 
@@ -1129,7 +1131,7 @@ Har module ke baad (existing tests + `test/mutations.ts` ke survivors).
 | Scenario                                                 | Kyun zaroori                              | Test type                                    |
 | -------------------------------------------------------- | ----------------------------------------- | -------------------------------------------- |
 | `.env.example` keys = `configZod` keys (unknown/missing) | M15 me scratch script se kiya; CI me nahi | `test:scripts` / har deployable ka unit test |
-| Docs me bataye CI guards sach me chalte                  | QA-DOC-001                                | CI step / lint fixture                       |
+| Docs me bataye CI guards sach me chalte                  | QA-DOC-001 (core boundaries ka test bana: `backend/core/test/boundaries.test.ts`; baaki pehre apne tasks ke saath) | CI step / lint fixture                       |
 
 ## 9. Questions and Unverified Assumptions
 
@@ -1182,7 +1184,7 @@ Final (2026-11-05). Har number ek PR (ya ek chhota fix); saath jaane wale bugs e
 14. **QA-FE-006** (P4, owner: timeout kitna): contracts + api-client client timeout; 2 ke saath sochna. **Fixed (2026-11-09, `feat/qa-audit`)**: har call 60 s (`API_TIMEOUT_MS`), phir `NETWORK_ERROR`; call apna `timeoutMs` de sakti.
 15. **QA-TOOL-002** (P4): `scripts/e2e` cleanup backend band hone ke baad + purani DBs ka sweep. **Fixed (2026-11-09, `feat/qa-audit`)**: teardown pehle backend band karta (pid file), phir drop; jin runs ka backend zinda nahi unki DBs bhi.
 16. **QA-FE-005** (P4): app-shell playground stub 1 line. **Fixed (2026-11-07, `feat/qa-audit`, owner ke kehne pe pehle)**.
-17. **QA-DOC-001 + QA-DOC-002** (P4, owner): docs ka ek chhota PR (T6.3 aur progress % owner tay kare).
+17. **QA-DOC-001 + QA-DOC-002** (P4, owner): docs ka ek chhota PR (T6.3 aur progress % owner tay kare). **Fixed (2026-11-09, `feat/qa-audit`)**: core me dependency-cruiser (module sirf `index.ts` se, doosre deployable ka code nahi) `npm run lint` me; baaki pehre docs me "abhi nahi" + naye T4.10, T4.11, T11.7, T11.8; T6.3 `[x]`, poora 15%.
 18. **Q-011 / T6.6** (owner, bug nahi): security headers (`frame-ancestors`, nosniff, Referrer-Policy) ka chhota PR Phase 4 se pehle.
 
 **§9 ke owner faisle jinke jawab baaki (sabse zaroori pehle):** DR-009 (email budget), DR-003 (targeted lockout), DR-004 (hash queue DoS), DR-010 (5 min step-up window), Q-010 (do tabs ka 300 ms race), Q-011, Q-014, baaki DR-001…DR-011 aur Q-005…Q-015.
@@ -1236,3 +1238,4 @@ Final (2026-11-05). Har number ek PR (ya ek chhota fix); saath jaane wale bugs e
 | v1.22   | 2026-11-09 | QA-GW-002 Fixed (`feat/qa-audit`): wipe ke baad band sessions ke marks MongoDB se + ready mark, gateway tab tak 503; §0, §5, §7, §8, §10. |
 | v1.23   | 2026-11-09 | QA-FE-006 Fixed (`feat/qa-audit`): apps ke API client me har call 60 s timeout, phir `NETWORK_ERROR` (owner); §0, §5, §10. |
 | v1.24   | 2026-11-09 | QA-TOOL-002 Fixed (`feat/qa-audit`): E2E teardown pehle backend band karta (pid file), phir drop, aur jin runs ka backend zinda nahi unki DBs bhi (59 → 0); §0, §6, §10. |
+| v1.25   | 2026-11-09 | QA-DOC-001 + QA-DOC-002 Fixed (`feat/qa-audit`): core boundaries dependency-cruiser se (`npm run lint`), docs me baaki pehre "abhi nahi" + naye tasks, T6.3 `[x]`, poora 15% (owner); §0, §8, §10. |

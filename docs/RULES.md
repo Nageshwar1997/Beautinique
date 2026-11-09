@@ -1,6 +1,6 @@
 # RULES — BQ
 
-> **Status:** v1.20 (2026-11-08). Ye niyam Beautinique ke har code, doc aur deploy pe lagu hain. [PRD.md](PRD.md) batata hai **kya** banana hai, [ARCHITECTURE.md](ARCHITECTURE.md) batata hai **kaise**, aur ye file batati hai ki **kin niyamon ke saath**. Koi rule todna ho to pehle is file me badlav aur change log entry.
+> **Status:** v1.21 (2026-11-09). Ye niyam Beautinique ke har code, doc aur deploy pe lagu hain. [PRD.md](PRD.md) batata hai **kya** banana hai, [ARCHITECTURE.md](ARCHITECTURE.md) batata hai **kaise**, aur ye file batati hai ki **kin niyamon ke saath**. Koi rule todna ho to pehle is file me badlav aur change log entry.
 
 ## 1. Kaam karne ke niyam
 
@@ -38,8 +38,8 @@
 1. **TypeScript strict.** `any` nahi; `unknown` + zod parse.
 2. **Bahar se aane wala har data zod se validate** (API input, env, webhooks, files, events). zod hamesha `@beautinique/shared-zod` se aur naam se import hota hai (`import { object, string, gstinZod } ...`), `z.` nahi; seedha `zod` sirf us package ke andar (ESLint rokta hai). Hamare schemas ke naam `Zod` pe khatam (`emailZod`); `enum` ko `enum as zodEnum`.
 3. **Config sirf config module se.** `process.env` config module ke bahar nahi padhna (ESLint rule).
-4. **Kuch bhi hard-coded nahi jo data hai:** states, districts, pincodes, warehouses, hubs, roles, permissions, rates (GST, TCS, TDS, fees), legal limits. Ye data ya settings me rehte hain (no-hardcoded-geo lint).
-5. **Role ke naam se comparison nahi** (`role === 'MASTER'` jaisa). Hamesha permission + scope se check.
+4. **Kuch bhi hard-coded nahi jo data hai:** states, districts, pincodes, warehouses, hubs, roles, permissions, rates (GST, TCS, TDS, fees), legal limits. Ye data ya settings me rehte hain. Geo literals ka lint (no-hardcoded-geo) **abhi nahi**: T4.10 me, location data (T4.2) se pehle; tab tak code review (QA-DOC-001).
+5. **Role ke naam se comparison nahi** (`role === 'MASTER'` jaisa). Hamesha permission + scope se check. ESLint rule **abhi nahi**: T4.11 me, T4.1 (`authorize()`) se pehle; tab tak code review (QA-DOC-001).
 6. **Naming:** files `kebab-case`, React components `PascalCase`, functions aur variables `camelCase`, constants `UPPER_SNAKE_CASE`, events `<context>.<aggregate>.<pastTense>`, permissions `<module>.<resource>.<action>`.
 7. **Formatting:** Prettier + ESLint, CI me check. Comments sirf "kyun" ke liye, "kya" ke liye nahi.
 8. **HTTP client sirf axios (owner, 2026-10-31), frontend aur backend dono:** apps ki API calls `@beautinique/frontend-api-client` se (andar contracts ka axios wala `createClient`); backend ki bahar ki calls (Brevo, HIBP, JWKS, `/ready`) bhi axios se. `fetch` ya `node:http`/`https` ka request sirf wahan jahan axios kaam nahi kar sakta: **gateway ka reverse proxy** (`backend/gateway/src/proxy.ts`, body dono taraf stream aur khud kaatna) aur **tests** (wo hamare server ko bahar se, browser/curl ki tarah jaanchte hain; kuch ko kachcha HTTP chahiye). Server (`createServer`) is niyam me nahi. ESLint `src/` aur `app/` me `fetch`, `globalThis.fetch` aur `node:http` ka `request`/`get` rokta hai; nayi chhoot = `httpProxyFiles` me file + wajah. axios ki error me request (headers, body) hoti hai: use log ya aage mat bhejo, apna error banao.
@@ -47,7 +47,7 @@
 ## 4. Backend
 
 1. **Contracts-first:** har endpoint aur event pehle `packages/contracts` me, phir handler. Bina contract ke route nahi.
-2. **Module boundaries:** Core ke modules sirf ek doosre ke `index.ts` facade se baat karte hain. Doosre module ke models ya collections chhoona mana hai (dependency-cruiser).
+2. **Module boundaries:** Core ke modules sirf ek doosre ke `index.ts` facade se baat karte hain. Doosre module ke models ya collections chhoona mana hai, aur Core kisi doosre deployable (identity, notify, payments, gateway, bundle) ka code import nahi karta. Dono `npm run lint` (CI bhi) me dependency-cruiser rokta hai (`backend/core/.dependency-cruiser.json`, QA-DOC-001).
 3. **Transactions:** state change `withTransaction()` me; **reply commit ke baad hi**. Outbox aur audit row usi transaction me.
 4. **Side effects sirf outbox events se** (email, doosre module ka kaam, cache invalidation). Transaction ke andar bahar ki API call nahi.
 5. **Idempotency:** paisa, stock, order, delivery wale har write pe `Idempotency-Key`. Consumers `processed_events` se duplicate rokte hain.
@@ -137,3 +137,4 @@
 | v1.18 | 2026-11-03 | §2: `linkedin-posts/` ki saari files aur `/linkedin-post` skill bhi seedha `prerelease` pe (owner). |
 | v1.19 | 2026-11-08 | §2: CI flow check `main`/`release` me sirf isi repo ki branch leta (QA-CI-001); check galti se bachav hai, taala merge ka haq; "up to date" niyam aur fork approval band nahi (owner ne salah maani). |
 | v1.20 | 2026-11-08 | §4.13: har query (sirf sort nahi) index se; jaan-boojh poora padhna `comment: 'full read: …'` se; identity, notify, core ke tests ka profiler pehra (owner, QA-ID-002). |
+| v1.21 | 2026-11-09 | §3.4, §3.5, §4.2: core ki module boundary aur "doosre deployable ka code nahi" ab dependency-cruiser (`npm run lint`) se; geo lint aur role-name lint abhi nahi (T4.10, T4.11), tab tak review (owner, QA-DOC-001). |

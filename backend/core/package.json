@@ -16,7 +16,7 @@
     "build": "tsdown",
     "start": "node --enable-source-maps dist/server.js",
     "typecheck": "tsc --noEmit",
-    "lint": "eslint .",
+    "lint": "eslint . && depcruise src --config .dependency-cruiser.json",
     "test": "vitest run"
   },
   "dependencies": {
