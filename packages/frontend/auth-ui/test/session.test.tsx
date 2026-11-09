@@ -1,3 +1,4 @@
+import { clearToasts } from '@beautinique/frontend-components';
 import { cleanup, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { afterEach, describe, expect, it } from 'vitest';
@@ -9,6 +10,7 @@ import { renderApp, where } from './render';
 
 afterEach(() => {
   cleanup();
+  clearToasts();
   dropHint('customer');
 });
 
@@ -53,15 +55,37 @@ describe('the session', () => {
     expect(hintSet('customer')).toBe(false);
   });
 
-  it('is unavailable, not signed out, when /iam/me cannot be reached', async () => {
+  it('is unavailable, not signed out, when /iam/me cannot be reached after two more tries', async () => {
     setHint('customer');
     const identity = fakeIdentity('customer', { signedIn: true });
     identity.on('GET /iam/me', () => failure(503, 'SERVICE_UNAVAILABLE'));
     renderApp({ '/': <Status /> }, { identity });
-    await waitFor(() => {
-      expect(status()).toBe('unavailable');
-    });
+    await waitFor(
+      () => {
+        expect(status()).toBe('unavailable');
+      },
+      { timeout: 8000 },
+    );
+    expect(identity.paths()).toEqual(['GET /iam/me', 'GET /iam/me', 'GET /iam/me']);
     expect(hintSet('customer')).toBe(true);
+  });
+
+  it('asks /iam/me again when the server did not answer, and is signed in without a focus or reload (QA-FE-009)', async () => {
+    setHint('customer');
+    const identity = fakeIdentity('customer', { signedIn: true });
+    // a server restarting (Render's deploy): one 502, then it answers
+    identity.on('GET /iam/me', () => {
+      identity.off('GET /iam/me');
+      return failure(502, 'INTERNAL');
+    });
+    renderApp({ '/': <Status /> }, { identity });
+    await waitFor(
+      () => {
+        expect(status()).toBe('signed-in');
+      },
+      { timeout: 5000 },
+    );
+    expect(identity.paths()).toEqual(['GET /iam/me', 'GET /iam/me']);
   });
 });
 
@@ -97,6 +121,42 @@ describe('RequireSignIn and RedirectIfSignedIn', () => {
       { identity, at: '/orders' },
     );
     expect(screen.getByRole('status').textContent).toContain('Loading');
+    await screen.findByText('Your orders');
+  });
+
+  it('says the account could not be loaded when the server never answered, and tries again on request (QA-FE-009)', async () => {
+    setHint('customer');
+    const identity = fakeIdentity('customer', { signedIn: true });
+    identity.on('GET /iam/me', () => failure(503, 'SERVICE_UNAVAILABLE'));
+    renderApp(
+      {
+        '/orders': (
+          <RequireSignIn>
+            <p>Your orders</p>
+          </RequireSignIn>
+        ),
+      },
+      { identity, at: '/orders' },
+    );
+    const heading = await screen.findByRole(
+      'heading',
+      { name: 'We could not load your account' },
+      { timeout: 8000 },
+    );
+    // the app-shell's error page (owner, 2026-11-07), said at once to screen readers
+    const alert = screen.getByRole('alert');
+    expect(alert.textContent).toContain('The server did not answer. Please try again in a moment.');
+    expect(alert.querySelector('[data-error-code="Oops"]')).toBeTruthy();
+    // "Try again" first (the main way), then the home page
+    const ways = [...alert.querySelectorAll('a, button')].map((way) => way.textContent);
+    expect(ways.slice(0, 2)).toEqual(['Try again', 'Go to the home page']);
+    // still signed in: no trip to sign-in, the hint stays
+    expect(where()).toBe('/orders');
+    expect(hintSet('customer')).toBe(true);
+    await expectNoAxeViolations(heading.closest('[role="alert"]') ?? document.body);
+    // the server is back: "Try again" asks /iam/me at once, and the page shows
+    identity.off('GET /iam/me');
+    await userEvent.click(screen.getByRole('button', { name: 'Try again' }));
     await screen.findByText('Your orders');
   });
 
@@ -167,5 +227,68 @@ describe('AccountMenu', () => {
         .map(() => undefined),
     );
     expect(await screen.findByText('You are signed out.')).toBeTruthy();
+  });
+
+  it('keeps the person signed in when the server did not end the session, and tries again from the toast (QA-FE-004)', async () => {
+    setHint('customer');
+    const identity = fakeIdentity('customer', { signedIn: true });
+    identity.on('POST /auth/logout', () =>
+      failure(503, 'SERVICE_UNAVAILABLE', 'Beautinique is not answering right now.'),
+    );
+    const user = userEvent.setup();
+    renderApp(
+      {
+        '/': (
+          <>
+            <AccountMenu />
+            <Status />
+          </>
+        ),
+      },
+      { identity },
+    );
+    await user.click(await screen.findByRole('button', { name: `Account (${EMAIL})` }));
+    await user.click(screen.getByRole('menuitem', { name: 'Sign out' }));
+    expect(await screen.findByText('You are still signed in.')).toBeTruthy();
+    expect(screen.getByText('Beautinique is not answering right now.')).toBeTruthy();
+    // the session, its cookies and the hint are all still there: nothing says otherwise
+    expect(status()).toBe('signed-in');
+    expect(hintSet('customer')).toBe(true);
+    expect(screen.getByRole('button', { name: `Account (${EMAIL})` })).toBeTruthy();
+    expect(screen.queryByRole('link', { name: 'Sign in' })).toBeNull();
+
+    // the server answers again: "Try again" signs out, and the "still signed in" toast goes
+    identity.off('POST /auth/logout');
+    await user.click(screen.getByRole('button', { name: 'Try again' }));
+    await screen.findByRole('link', { name: 'Sign in' });
+    expect(identity.paths().filter((path) => path === 'POST /auth/logout')).toHaveLength(2);
+    expect(hintSet('customer')).toBe(false);
+    expect((await screen.findAllByText('You are signed out.')).length).toBeGreaterThan(0);
+    await waitFor(() => {
+      expect(screen.queryByText('You are still signed in.')).toBeNull();
+    });
+  });
+
+  it('takes the "still signed in" toast away once another tab signed out (QA-FE-004)', async () => {
+    setHint('customer');
+    const identity = fakeIdentity('customer', { signedIn: true });
+    identity.on('POST /auth/logout', () => Promise.reject(new TypeError('Failed to fetch')));
+    const user = userEvent.setup();
+    renderApp({ '/': <AccountMenu /> }, { identity });
+    await user.click(await screen.findByRole('button', { name: `Account (${EMAIL})` }));
+    await user.click(screen.getByRole('menuitem', { name: 'Sign out' }));
+    await screen.findByText('You are still signed in.');
+    const otherTab = new BroadcastChannel('bq:customer:session');
+    try {
+      // the other tab's sign-out reached the server, which cleared the cookies
+      dropHint('customer');
+      otherTab.postMessage('signed-out');
+      await screen.findByRole('link', { name: 'Sign in' });
+      await waitFor(() => {
+        expect(screen.queryByText('You are still signed in.')).toBeNull();
+      });
+    } finally {
+      otherTab.close();
+    }
   });
 });

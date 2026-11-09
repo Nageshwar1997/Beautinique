@@ -1,6 +1,6 @@
 # AGENTS.md — Beautinique
 
-> **Status:** v1.4 (2026-11-03). Doosre AI coding tools (Codex, Cursor, Copilot, Gemini ...) ke liye. Asli niyam [CLAUDE.md](CLAUDE.md) me hain; yahan sirf wo hai jo kaam shuru karne se pehle jaanna zaroori hai. Farak ho to `CLAUDE.md` sahi hai.
+> **Status:** v1.5 (2026-11-09). Doosre AI coding tools (Codex, Cursor, Copilot, Gemini ...) ke liye. Asli niyam [CLAUDE.md](CLAUDE.md) me hain; yahan sirf wo hai jo kaam shuru karne se pehle jaanna zaroori hai. Farak ho to `CLAUDE.md` sahi hai.
 
 Beautinique: Indian beauty e-commerce monorepo (npm workspaces, Node 24, npm 12.2+). Education + portfolio project hai, par har cheez asli production jaisi banti hai. Is pe 2 developers baari-baari kaam karte hain, dono Claude Code ke saath (flow: [docs/HANDOFF.md](docs/HANDOFF.md) §8). Ye file tab kaam aati hai jab koi doosra AI tool repo khole.
 
@@ -18,6 +18,7 @@ Beautinique: Indian beauty e-commerce monorepo (npm workspaces, Node 24, npm 12.
 - **Commit, push aur publish sirf insaan ke kehne pe.** `.env` files kabhi nahi kholni; secret, token ya password repo me kabhi nahi.
 - Business decision owner ka hai: docs chup hon to recommendation ke saath poochho, phir jawab doc me likho.
 - Production-grade, kuch bhi "baad me" nahi: naye code ke saath tests aur README. Mutation testing sirf [RULES §6](docs/RULES.md) ke hisaab se (kernel packages, paisa/stock/permissions), copy me, asli files me nahi: `npm run mutate -- --package <category>-<name>`.
+- Role ke naam se comparison nahi (`role === 'MASTER'`), aur states, districts, pincodes, rates jaisa data hard-coded nahi ([RULES §3.4, §3.5](docs/RULES.md)): inke lint abhi nahi (TASKS T4.10, T4.11).
 - "Verified" tabhi likho jab asli action karke dekha ho. Test fail ho to output ke saath batao.
 - Dependencies update sirf `npm run update-deps` se (`:minor`, `:patch`, `-- --dry-run`), haath se `npm install x@latest` nahi: `typescript` hold pe hai (typescript-eslint naya TypeScript nahi maanta), aur script peer ranges aur lockfile sambhalta hai. Nayi dependency jodni ho to `@latest` hi lo.
 
@@ -37,6 +38,7 @@ npm run verify -- --all --yes
 - Imports/exports ka order **ESLint** (`simple-import-sort`) tay karta hai. File badalne ke baad `npx eslint <file> --fix`, phir `npx prettier --write <file>`. Editor ka "Organize Imports" mat chalao: wo alag order deta hai aur lint fail hota hai.
 - `zod` sirf `@beautinique/shared-zod` se, `mongodb` sirf `@beautinique/backend-server-mongo` se; transaction ke andar `Promise.all` nahi. ESLint inhe rokta hai.
 - HTTP calls sirf axios (apps `@beautinique/frontend-api-client` se); `fetch`/`node:http` request sirf gateway `proxy.ts` aur tests me. ESLint rokta hai.
+- Core (`backend/core`) ka module doosre module ko sirf uske `index.ts` se use karta hai, aur doosre deployable (identity, notify, gateway ...) ka code import nahi karta. `npm run lint` me dependency-cruiser rokta hai.
 
 ## Kaam rokte waqt
 
@@ -44,10 +46,11 @@ Chhote commits (Conventional Commits, jaise `feat(scope): ...`), sirf apne task 
 
 ## Change log
 
-| Version | Date       | Badlav                                                                             |
-| ------- | ---------- | ---------------------------------------------------------------------------------- |
-| v1.0    | 2026-10-23 | Pehla version: doosre AI tools ke liye pointer.                                    |
-| v1.1    | 2026-10-23 | Dependencies sirf `npm run update-deps` se.                                        |
-| v1.2    | 2026-10-23 | Claude ke baad Cursor: relay flow, `cursor/<task>` branches, kaam ka bantwara.     |
-| v1.3    | 2026-10-25 | Cursor relay hataya: dono developers Claude Code use karte hain (flow HANDOFF §8). |
-| v1.4    | 2026-11-03 | Kaam rokte waqt: checkbox badle to TASKS §P ka progress % bhi.                     |
+| Version | Date       | Badlav                                                                                        |
+| ------- | ---------- | --------------------------------------------------------------------------------------------- |
+| v1.0    | 2026-10-23 | Pehla version: doosre AI tools ke liye pointer.                                               |
+| v1.1    | 2026-10-23 | Dependencies sirf `npm run update-deps` se.                                                   |
+| v1.2    | 2026-10-23 | Claude ke baad Cursor: relay flow, `cursor/<task>` branches, kaam ka bantwara.                |
+| v1.3    | 2026-10-25 | Cursor relay hataya: dono developers Claude Code use karte hain (flow HANDOFF §8).            |
+| v1.4    | 2026-11-03 | Kaam rokte waqt: checkbox badle to TASKS §P ka progress % bhi.                                |
+| v1.5    | 2026-11-09 | Core boundaries dependency-cruiser se (CI); geo aur role-name ke lint abhi nahi (QA-DOC-001). |

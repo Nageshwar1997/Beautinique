@@ -21,4 +21,16 @@ describe('on the server (customer SSR)', () => {
     await expect(client.call(getMe)).resolves.toMatchObject({ session: { app: 'customer' } });
     client.dispose();
   });
+
+  it('never holds a call for the server wake: there is no wake on the server', async () => {
+    const gateway = fakeGateway({ access: true });
+    const client = createApiClient({
+      app: 'customer',
+      baseUrl: 'https://customer.beautinique.example/api/v1',
+      fetch: gateway.fetch,
+      waitForServer: true,
+    });
+    await expect(client.call(getMe)).resolves.toMatchObject({ session: { app: 'customer' } });
+    client.dispose();
+  });
 });

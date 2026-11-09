@@ -16,9 +16,18 @@ interface VercelRoute {
   }[];
 }
 
+interface VercelHeaders {
+  source: string;
+  headers: { key: string; value: string }[];
+}
+
 const config = JSON.parse(
   readFileSync(join(import.meta.dirname, '..', 'vercel.json'), 'utf8'),
-) as Record<string, unknown> & { routes: VercelRoute[] };
+) as Record<string, unknown> & {
+  routes: VercelRoute[];
+  headers?: VercelHeaders[];
+  rewrites?: { source: string; destination: string }[];
+};
 
 describe('vercel.json (ARCHITECTURE §7.2, §9.3)', () => {
   it('sends /api to the gateway with the origin secret, both only from Vercel env', () => {
@@ -37,6 +46,17 @@ describe('vercel.json (ARCHITECTURE §7.2, §9.3)', () => {
     ]);
     // the first route: nothing else may answer /api before it
     expect(config.routes[0]).toBe(api);
+  });
+
+  it('sends the security headers with every page, and leaves every page to React Router', () => {
+    // routes hold only /api (only a route can set its header); scripts/ci/test/vercel-headers.test.ts
+    // checks the headers, with the order Vercel runs, for every app. No SPA fallback: the server
+    // renders each page itself, and this storefront may be listed (no noindex)
+    expect(config.routes).toHaveLength(1);
+    const [pages] = config.headers ?? [];
+    expect(pages?.source).toBe('/(.*)');
+    expect(pages?.headers.map(({ key }) => key)).not.toContain('X-Robots-Tag');
+    expect(config).not.toHaveProperty('rewrites');
   });
 
   it('holds no address or secret of its own', () => {

@@ -3,8 +3,16 @@
 // takes the whole round trip as a browser does: start, the provider's page, the callback with the
 // trip's cookie. Against the local MongoDB replica set and Valkey (`npm run infra:up`).
 import { totpCode } from '@beautinique/backend-server-crypto';
+import { createLogger } from '@beautinique/backend-server-kit';
+import {
+  type Collection,
+  connectMongo,
+  type Filter,
+  syncIndexes,
+} from '@beautinique/backend-server-mongo';
 import { OUTBOX } from '@beautinique/backend-server-queue';
 import type { AppId } from '@beautinique/shared-contracts';
+import { uuidv7 } from '@beautinique/shared-utils';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 
 import {
@@ -12,6 +20,14 @@ import {
   type FakeProvider,
   startFakeOAuth,
 } from '../../../scripts/e2e/fake-oauth.ts';
+import {
+  AUTH_PROVIDERS,
+  type AuthProvider,
+  bySubject,
+  indexes as credentialIndexes,
+  providerSubjectIndexMigration,
+} from '../src/credentials.ts';
+import { releaseDefinition } from '../src/release.ts';
 import type { RunningIdentity } from '../src/service.ts';
 import { type Session, SESSIONS } from '../src/sessions.ts';
 import {
@@ -21,6 +37,7 @@ import {
   grants,
   type Harness,
   makeAccount,
+  MONGO_URI,
   PASSWORD,
   post,
   providers,
@@ -28,13 +45,20 @@ import {
   users,
 } from './helpers.ts';
 
+/** One stage of an explained plan, down to the index it reads. */
+interface PlanStage {
+  stage: string;
+  indexName?: string;
+  inputStage?: PlanStage;
+}
+
 let harness: Harness;
 let fake: FakeOAuth;
 /** identity with the three providers set, at the stand-in */
 let social: RunningIdentity;
 const ORIGIN = 'http://localhost:3001';
 const email = (name: string) => `${name}-${harness.runId}@beautinique.example`;
-const db = () => harness.server.runtime.mongo.db;
+const db = () => harness.db;
 let subjects = 1000;
 const nextSubject = () => String((subjects += 1));
 
@@ -469,5 +493,136 @@ describe('sign-in methods', () => {
     });
     expect([last.status, last.body.error?.code]).toEqual([409, 'LAST_SIGN_IN_METHOD']);
     expect(await providers().countDocuments({ userId: onlyId })).toBe(1);
+  });
+});
+
+describe('the lookup by a provider’s id (QA-ID-002)', () => {
+  const logger = createLogger({ name: 'identity-test', level: 'silent' });
+
+  /** The index the winning plan reads, or its first stage when it reads none (COLLSCAN). */
+  async function planOf(collection: Collection<AuthProvider>, filter: Filter<AuthProvider>) {
+    const explained = await collection.find(filter).explain('queryPlanner');
+    let stage = (explained as { queryPlanner: { winningPlan: PlanStage } }).queryPlanner
+      .winningPlan;
+    while (stage.inputStage && stage.stage !== 'IXSCAN') stage = stage.inputStage;
+    return stage.stage === 'IXSCAN' ? `IXSCAN ${stage.indexName ?? ''}` : stage.stage;
+  }
+
+  it('reads the provider-id index with a plain query, and keeps a provider’s account to one of ours', async () => {
+    expect(await planOf(providers(), { provider: 'google', subject: '42' })).toBe(
+      'IXSCAN provider_subject_linked_unique',
+    );
+    const row = (userId: string, provider: AuthProvider['provider'], subject: string | null) => ({
+      _id: uuidv7(),
+      userId,
+      provider,
+      subject,
+      linkedAt: new Date(),
+      lastUsedAt: null,
+    });
+    const subject = nextSubject();
+    await providers().insertOne(row(uuidv7(), 'google', subject));
+    await expect(providers().insertOne(row(uuidv7(), 'google', subject))).rejects.toMatchObject({
+      code: 11000,
+    });
+    // every password row has a null subject, and they never meet in the index
+    await providers().insertMany([
+      row(uuidv7(), 'password', null),
+      row(uuidv7(), 'password', null),
+    ]);
+  });
+
+  it('asks in a way an index takes whatever its filter, the old `$type` one too', async () => {
+    const old = harness.db.collection<AuthProvider>('qa_old_provider_index');
+    await old.createIndex(
+      { provider: 1, subject: 1 },
+      { name: 'old', unique: true, partialFilterExpression: { subject: { $type: 'string' } } },
+      undefined,
+    );
+    await old.insertOne({
+      _id: uuidv7(),
+      userId: uuidv7(),
+      provider: 'google',
+      subject: '7',
+      linkedAt: new Date(),
+      lastUsedAt: null,
+    });
+    expect(await planOf(old, bySubject('google', '7'))).toBe('IXSCAN old');
+    // a plain query missed it: every social sign-in read the whole collection
+    expect(await planOf(old, { provider: 'google', subject: '7' })).toBe('COLLSCAN');
+    expect(await planOf(providers(), bySubject('google', '7'))).toBe(
+      'IXSCAN provider_subject_linked_unique',
+    );
+  });
+
+  it('moves a database from the old index to the new one with its rows, safely again', async () => {
+    const mongo = await connectMongo({
+      uri: MONGO_URI,
+      dbName: `bq_test_identity_move_${harness.runId}`,
+      appName: 'identity-test',
+      logger,
+    });
+    try {
+      const rows = mongo.db.collection<AuthProvider>(AUTH_PROVIDERS);
+      await rows.createIndex(
+        { provider: 1, subject: 1 },
+        {
+          name: 'provider_subject_unique',
+          unique: true,
+          partialFilterExpression: { subject: { $type: 'string' } },
+        },
+        undefined,
+      );
+      const at = new Date();
+      await rows.insertMany([
+        {
+          _id: uuidv7(),
+          userId: uuidv7(),
+          provider: 'password',
+          subject: null,
+          linkedAt: at,
+          lastUsedAt: null,
+        },
+        {
+          _id: uuidv7(),
+          userId: uuidv7(),
+          provider: 'password',
+          subject: null,
+          linkedAt: at,
+          lastUsedAt: null,
+        },
+        {
+          _id: uuidv7(),
+          userId: uuidv7(),
+          provider: 'google',
+          subject: '9',
+          linkedAt: at,
+          lastUsedAt: at,
+        },
+      ]);
+      // identity's release runs it (a fresh database never had the old index)
+      expect(releaseDefinition.migrations).toContain(providerSubjectIndexMigration);
+      await providerSubjectIndexMigration.up({ mongo, logger });
+      await providerSubjectIndexMigration.up({ mongo, logger });
+      expect((await rows.indexes()).map((index) => index.name).toSorted()).toEqual([
+        '_id_',
+        'provider_subject_linked_unique',
+      ]);
+      expect(await rows.countDocuments({}, { hint: { _id: 1 } })).toBe(3);
+      // the release's own index step then finds the new one as it wants it
+      expect(await syncIndexes(mongo, credentialIndexes)).toEqual({
+        created: [`${AUTH_PROVIDERS}.userId_provider_unique`],
+        extra: [],
+      });
+    } finally {
+      await mongo.db.dropDatabase();
+      await mongo.close();
+    }
+  });
+
+  it('refuses a provider’s account without an id (the new index leaves an empty one out)', async () => {
+    const page = await roundTrip('google', { subject: '', email: email('no-id') });
+    expect(page.location).toBe('/sign-in?oauth=failed');
+    expect(page.cookies.has(ACCESS)).toBe(false);
   });
 });

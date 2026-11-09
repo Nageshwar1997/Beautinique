@@ -28,3 +28,6 @@ blob-report/
 
 # LinkedIn carousel images and PDFs (prompts stay in git)
 linkedin-posts/*/slides/
+
+# Claude Code worktrees: other checkouts of this repo inside it (QA-TOOL-001)
+.claude/worktrees/

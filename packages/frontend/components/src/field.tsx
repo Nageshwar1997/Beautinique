@@ -18,6 +18,11 @@ export interface FieldProps {
   hint?: ReactNode;
   /** What is wrong; the control is then `aria-invalid` and described by it. */
   error?: ReactNode;
+  /**
+   * Ids of text outside the field that describes the control too, read before the hint and the
+   * error (a step's "We sent a code to …", heard as the field gets focus).
+   */
+  describedBy?: string;
   required?: boolean;
   /** The control's id; one is made when left out. */
   id?: string;
@@ -36,14 +41,25 @@ export interface FieldProps {
  * </Field>
  * ```
  */
-export function Field({ label, hint, error, required, id, className, children }: FieldProps) {
+export function Field({
+  label,
+  hint,
+  error,
+  describedBy: outside,
+  required,
+  id,
+  className,
+  children,
+}: FieldProps) {
   const own = useId();
   const controlId = id ?? own;
   const hintId = `${controlId}-hint`;
   const errorId = `${controlId}-error`;
   const hasError = error !== undefined && error !== null && error !== false && error !== '';
   const describedBy =
-    [hint !== undefined && hintId, hasError && errorId].filter(Boolean).join(' ') || undefined;
+    [outside?.trim(), hint !== undefined && hintId, hasError && errorId]
+      .filter(Boolean)
+      .join(' ') || undefined;
   return (
     <div className={cx('flex flex-col gap-1.5', className)}>
       <label htmlFor={controlId} className="text-foreground text-sm font-medium">

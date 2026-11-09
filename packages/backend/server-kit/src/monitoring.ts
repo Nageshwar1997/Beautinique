@@ -73,6 +73,9 @@ export function initMonitoring({
     environment,
     ...(release === undefined || release === '' ? {} : { release }),
     tracesSampleRate,
+    // traces at the HTTP level only: the Express integration makes a span and a close listener for
+    // each middleware of every request (sampled or not) on a 0.1 CPU (owner, 2026-11-07)
+    integrations: (defaults) => defaults.filter((integration) => integration.name !== 'Express'),
     // Sentry collects all of these by default; none may leave (origin secret, cookies, OTPs, personal
     // data in bodies, queries, queue jobs, database writes and local variables)
     dataCollection: {

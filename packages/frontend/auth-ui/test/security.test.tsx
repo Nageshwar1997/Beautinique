@@ -238,6 +238,30 @@ describe('AuthenticatorSetup', () => {
     expect(await screen.findByText('10 recovery codes of 10 left.')).toBeTruthy();
   });
 
+  it('moves focus between its steps, but not on the page that just opened (QA-FE-008)', async () => {
+    const identity = signedIn();
+    const user = userEvent.setup();
+    renderApp(pages, { identity, at: ACCOUNT_PATHS.authenticator });
+    const scan = await screen.findByRole('heading', {
+      name: 'Add Beautinique to your authenticator app',
+    });
+    expect(document.activeElement).not.toBe(scan);
+    await user.click(screen.getByRole('button', { name: 'Next' }));
+    expect(document.activeElement).toBe(screen.getByLabelText('Authenticator code'));
+    await user.click(screen.getByRole('button', { name: 'Back' }));
+    expect(document.activeElement).toBe(
+      screen.getByRole('heading', { name: 'Add Beautinique to your authenticator app' }),
+    );
+    await user.click(screen.getByRole('button', { name: 'Next' }));
+    await user.type(screen.getByLabelText('Authenticator code'), GOOD_CODE);
+    await user.type(screen.getByLabelText('Your password'), PASSWORD);
+    await user.click(screen.getByRole('button', { name: 'Turn on' }));
+    const codes = await screen.findByRole('heading', { name: 'Save your recovery codes' });
+    await waitFor(() => {
+      expect(document.activeElement).toBe(codes);
+    });
+  });
+
   it('starts again with a new key when the set-up expired', async () => {
     const identity = signedIn();
     identity.on('POST /auth/authenticator/confirm', () =>

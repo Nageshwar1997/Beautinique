@@ -17,6 +17,10 @@ import { otpRequested, otpSealContext } from '@beautinique/shared-contracts';
 import { uuidv7 } from '@beautinique/shared-utils';
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from 'vitest';
 
+import {
+  expectNoCollectionScans,
+  watchCollectionScans,
+} from '../../../scripts/e2e/collection-scans.ts';
 import { readConfig } from '../src/config.ts';
 import {
   DELIVERIES,
@@ -55,17 +59,28 @@ const logger = createLogger({
   }),
 });
 
+/** The test's own handle: look-ups and clean-up, which never count as notify's queries. */
 let mongo: Mongo;
+/** notify's handle for the code the tests call straight (sendDue), named as notify names its own. */
+let app: Mongo;
 
 beforeAll(async () => {
   mongo = await connectMongo({ uri: MONGO_URI, dbName, appName: 'notify-test', logger });
+  // the collection-scan watch, before notify's release steps run
+  await watchCollectionScans(mongo.db);
+  app = await connectMongo({ uri: MONGO_URI, dbName, appName: 'notify', logger });
   await release(readConfig({ env: testEnv() }), { logger });
 });
 
 afterAll(async () => {
-  await mongo.db.dropDatabase();
-  await mongo.client.db(producerDbName).dropDatabase();
-  await mongo.close();
+  try {
+    await expectNoCollectionScans(mongo.db, ['notify', 'notify-release']);
+  } finally {
+    await app.close();
+    await mongo.db.dropDatabase();
+    await mongo.client.db(producerDbName).dropDatabase();
+    await mongo.close();
+  }
 });
 
 function testEnv(): Record<string, string> {
@@ -174,7 +189,7 @@ describe('sendDue', () => {
   };
   const run = (sender: EmailSender, more: Partial<SendDueDeps> = {}) =>
     sendDue({
-      mongo,
+      mongo: app,
       sender,
       otpKeys: keys,
       logger,

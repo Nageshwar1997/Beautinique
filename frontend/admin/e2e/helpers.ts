@@ -81,6 +81,10 @@ export async function joinTeam(page: Page, email: string, { check = true } = {})
 
   // the authenticator this app needs: 1. the key (as an authenticator app would scan it)
   await expect(page.getByText('Step 1 of 3')).toBeVisible();
+  // each step takes the focus: its heading where it has no field (QA-FE-008)
+  await expect(
+    page.getByRole('heading', { name: 'Add Beautinique to your authenticator app' }),
+  ).toBeFocused();
   await expect(
     page.getByRole('img', { name: 'QR code to add Beautinique to your authenticator app' }),
   ).toBeVisible();
@@ -89,12 +93,14 @@ export async function joinTeam(page: Page, email: string, { check = true } = {})
   expect(secret).toMatch(/^[A-Z2-7]{16,}$/);
   await page.getByRole('button', { name: 'Next' }).click();
   // 2. its first code
+  await expect(page.getByLabel('Authenticator code')).toBeFocused();
   const at = Date.now();
   await page.getByLabel('Authenticator code').fill(totpCode(secret, at));
   await page.getByRole('button', { name: 'Turn on' }).click();
   // 3. the recovery codes, before anything else
   const codes = page.getByRole('list', { name: 'Recovery codes' }).getByRole('listitem');
   await expect(codes).toHaveCount(10);
+  await expect(page.getByRole('heading', { name: 'Save your recovery codes' })).toBeFocused();
   await look();
   const recoveryCodes = await codes.allTextContents();
   await expect(page).toHaveURL('/sign-in');

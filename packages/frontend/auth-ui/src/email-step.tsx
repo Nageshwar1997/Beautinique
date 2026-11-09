@@ -75,6 +75,8 @@ export interface EmailStepProps {
   hint?: ReactNode;
   /** Ask the app's consent (sign-up, invitation); a password code asks none. @default true */
   consent?: boolean;
+  /** Back from the code step: the email takes the focus (QA-FE-008); never on a page that just opened. */
+  focus?: boolean;
 }
 
 /**
@@ -89,6 +91,7 @@ export function EmailStep({
   onSubmit,
   hint,
   consent = true,
+  focus = false,
 }: EmailStepProps) {
   const asks = consentOf(app, consent);
   const form = useZodForm(emailStepZod(asks), { defaultValues: { email } });
@@ -108,6 +111,7 @@ export function EmailStep({
         autoComplete="email"
         inputMode="email"
         hint={hint}
+        autoFocus={focus}
       />
       {asks.terms && (
         <CheckboxField control={form.control} name="consent.terms">

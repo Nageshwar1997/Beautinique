@@ -59,3 +59,14 @@ test('signs in with a recovery code when the phone is lost', async ({ page }, te
   await expect(page).toHaveURL('/');
   await expect(accountButton(page, email)).toBeVisible();
 });
+
+test('every page open to the signed-out fits a phone’s screen (QA-ADM-001)', async ({
+  page,
+}, testInfo) => {
+  test.skip(!testInfo.project.name.startsWith('chromium-360'), 'only a phone is that narrow');
+  for (const path of ['/sign-in', '/forgot-password', '/invitation', '/credits', '/no-such-page']) {
+    await page.goto(path);
+    await expect(page.getByRole('link', { name: 'Beautinique Admin home' })).toBeVisible();
+    await expectNoSideScroll(page);
+  }
+});

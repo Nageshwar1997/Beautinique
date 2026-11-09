@@ -62,26 +62,34 @@ export interface JwksCache {
 /**
  * A JWKS kept for `maxAgeMs` (default 10 minutes) and read again sooner when a token names a key
  * it does not have (a new key after a rotation), at most once per `minRefetchMs` (default 30 s),
- * so made-up key ids cannot make it hammer the issuer. A failed read keeps the keys it had.
+ * so made-up key ids cannot make it hammer the issuer. A failed read keeps the keys it had; until a
+ * first read works it answers an error, never an empty set (a 503, not a sign-out: QA-KRN-001), and
+ * tries again after `retryMs` (default 1 s).
  */
 export function jwksCache({
   load,
   maxAgeMs = 10 * 60_000,
   minRefetchMs = 30_000,
+  retryMs = 1000,
   now = Date.now,
 }: {
   /** The JWKS document (`{ keys: [...] }`) */
   load: () => Promise<unknown>;
   maxAgeMs?: number;
   minRefetchMs?: number;
+  retryMs?: number;
   now?: () => number;
 }): JwksCache {
   let keys = new Map<string, KeyObject>();
+  /** The last read that worked, and the last one tried */
   let loadedAt = Number.NEGATIVE_INFINITY;
+  let triedAt = Number.NEGATIVE_INFINITY;
   let loading: Promise<void> | undefined;
+  const loaded = () => loadedAt !== Number.NEGATIVE_INFINITY;
 
   const reload = async () => {
-    loadedAt = now();
+    const startedAt = now();
+    triedAt = startedAt;
     const document = (await load()) as { keys?: unknown } | null;
     if (!Array.isArray(document?.keys)) throw new Error('Not a JWKS document');
     const next = new Map<string, KeyObject>();
@@ -94,18 +102,27 @@ export function jwksCache({
       }
     }
     keys = next;
+    loadedAt = startedAt;
   };
 
   return {
     async keysFor(kid) {
-      const stale = now() - loadedAt >= maxAgeMs;
-      const missing = kid !== undefined && !keys.has(kid) && now() - loadedAt >= minRefetchMs;
-      if (stale || missing) {
+      const at = now();
+      const stale = at - loadedAt >= maxAgeMs;
+      const missing = kid !== undefined && !keys.has(kid);
+      const due = at - triedAt >= (loaded() ? minRefetchMs : retryMs);
+      if ((stale || missing) && due) {
         loading ??= reload().finally(() => {
           loading = undefined;
         });
-        await loading;
+        try {
+          await loading;
+        } catch (error) {
+          // the keys it had still check the tokens they signed; a token of another key: an error
+          if (!loaded() || missing) throw error;
+        }
       }
+      if (!loaded()) throw new Error('The JWKS is not read yet');
       return keys;
     },
   };

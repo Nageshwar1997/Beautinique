@@ -66,6 +66,9 @@ const IDEMPOTENCY_KEY = /^[\x21-\x7e]{1,255}$/;
 /** Methods whose routes have no body (contracts defineRoute refuses one). */
 const BODYLESS: ReadonlySet<string> = new Set(['GET', 'DELETE']);
 
+/** Close listeners a proxied answer may hold before Node warns (its default is 10). */
+const PROXIED_ANSWER_MAX_LISTENERS = 20;
+
 const NOT_FROM_APP = 'This request does not come from a Beautinique app.';
 const UNAVAILABLE = 'This part of Beautinique is not available right now. Please try again soon.';
 const TOO_SLOW = 'This is taking too long. Please try again.';
@@ -290,6 +293,9 @@ export function proxy({
   };
 
   return async (req, res, next) => {
+    // an instrumentation (Sentry) adds close listeners of its own, and this answer adds four (the
+    // caller, the upstream, the pipeline): room for them, so Node does not take them for a leak
+    res.setMaxListeners(PROXIED_ANSWER_MAX_LISTENERS);
     // a caller can leave while the gateway waits (rate limit): then nothing goes to the owner
     const caller = { gone: false };
     res.once('close', () => {

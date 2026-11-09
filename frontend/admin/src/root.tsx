@@ -1,5 +1,7 @@
+import { useApiClient } from '@beautinique/frontend-api-client';
 import { AppFrame, ErrorPage, ServerWake, useReportError } from '@beautinique/frontend-app-shell';
 import { Toaster } from '@beautinique/frontend-components';
+import type { ReactNode } from 'react';
 import { isRouteErrorResponse, Outlet, ScrollRestoration, useRouteError } from 'react-router';
 
 import { AdminFooter } from './components/AdminFooter';
@@ -10,6 +12,25 @@ import { Providers } from './providers';
 const GATEWAY_URL = import.meta.env.BQ_GATEWAY_URL;
 const WAKE_KICK_URL =
   GATEWAY_URL === undefined || GATEWAY_URL === '' ? undefined : `${GATEWAY_URL}/wake`;
+
+/**
+ * The wake-up (ServerWake) tells the API client when the server has answered: until then no call
+ * goes out, so no page asks a sleeping server and keeps its failure (QA-FE-009, owner 2026-11-07).
+ */
+function AppWake({ children }: { children: ReactNode }) {
+  const client = useApiClient();
+  return (
+    <ServerWake
+      app="admin"
+      kickUrl={WAKE_KICK_URL}
+      onReady={() => {
+        client.serverReady();
+      }}
+    >
+      {children}
+    </ServerWake>
+  );
+}
 
 /** The shared frame with this app's top bar and footer, around the page. */
 export function Frame() {
@@ -28,9 +49,9 @@ export function Frame() {
 export function AppRoot() {
   return (
     <Providers>
-      <ServerWake app="admin" kickUrl={WAKE_KICK_URL}>
+      <AppWake>
         <Frame />
-      </ServerWake>
+      </AppWake>
       <Toaster />
       <ScrollRestoration />
     </Providers>

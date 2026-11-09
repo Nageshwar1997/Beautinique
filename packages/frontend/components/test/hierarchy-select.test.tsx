@@ -290,6 +290,22 @@ describe('HierarchySelect, several choices', () => {
     expect(trigger(/Categories/).textContent).toContain('Makeup');
   });
 
+  it('Escape in the list closes the box and keeps what was chosen (QA-FE-002)', async () => {
+    const onChange = vi.fn();
+    render(<Areas onChange={onChange} />);
+    const button = trigger(/Categories/);
+    await userEvent.click(button);
+    await userEvent.keyboard('{ArrowDown}');
+    expect(document.activeElement?.closest('[role="treegrid"]')).not.toBeNull();
+    await userEvent.keyboard('{Escape}');
+    expect(onChange).not.toHaveBeenCalled();
+    expect(screen.queryByRole('dialog')).toBeNull();
+    expect(button.textContent).toContain('Lipstick');
+    await waitFor(() => {
+      expect(document.activeElement).toBe(button);
+    });
+  });
+
   it('Enter ticks and unticks like Space; Clear all; Done closes', async () => {
     const onChange = vi.fn();
     render(<Areas onChange={onChange} />);

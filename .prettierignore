@@ -5,6 +5,8 @@ coverage
 build/
 .react-router/
 package-lock.json
+# Claude Code worktrees: other checkouts of this repo, each checked in its own right (QA-TOOL-001)
+.claude/worktrees/
 
 # Planning docs are hand-formatted (wide tables).
 docs

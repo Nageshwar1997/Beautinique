@@ -4,10 +4,12 @@ import type { ReactNode } from 'react';
 import { afterEach, describe, expect, it } from 'vitest';
 
 import {
+  ApiError,
   ApiProvider,
   createApiClient,
   createQueryClient,
   queryKey,
+  retryServerTrouble,
   useApiClient,
   useApiMutation,
   useApiQuery,
@@ -84,6 +86,21 @@ describe('useApiQuery', () => {
       expect(result.current.isSuccess).toBe(true);
     });
     expect(tries).toBe(3);
+  });
+});
+
+describe('retryServerTrouble', () => {
+  it('tries a server that did not answer (5xx, no answer) twice more, never a refusal (4xx)', () => {
+    const down = new ApiError({ code: 'INTERNAL', message: 'Request failed', status: 502 });
+    const offline = new ApiError({ code: 'NETWORK_ERROR', message: 'Unreachable', status: 0 });
+    const refused = new ApiError({ code: 'SESSION_EXPIRED', message: 'Ended', status: 401 });
+    expect([0, 1, 2].map((failures) => retryServerTrouble(failures, down))).toEqual([
+      true,
+      true,
+      false,
+    ]);
+    expect(retryServerTrouble(0, offline)).toBe(true);
+    expect(retryServerTrouble(0, refused)).toBe(false);
   });
 });
 

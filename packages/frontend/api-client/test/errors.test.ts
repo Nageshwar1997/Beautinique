@@ -18,6 +18,15 @@ describe('errorMessage', () => {
     );
   });
 
+  it('says the server did not answer when a proxy answered for it (QA-FE-007)', () => {
+    expect(
+      errorMessage(apiError('UPSTREAM_UNAVAILABLE', 'Request failed with status 502', 502)),
+    ).toBe('The server did not answer. Please try again in a moment.');
+    expect(
+      errorMessage(apiError('UNEXPECTED_RESPONSE', 'Request failed with status 404', 404)),
+    ).toBe('Something went wrong. Please try again.');
+  });
+
   it('hides the client’s own technical messages and anything that is not an ApiError', () => {
     const fallback = 'Something went wrong. Please try again.';
     expect(errorMessage(apiError('INVALID_RESPONSE', 'The response does not match x', 200))).toBe(
