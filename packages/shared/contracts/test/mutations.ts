@@ -532,6 +532,54 @@ const mutations: Mutation[] = [
     change: [['next.length > maxLength', 'next.length > 512']],
     tests: 'no open redirect',
   },
+  // the refresh token's parts (identity finds the session, the gateway its `session` budget)
+  {
+    file: 'catalogue/identity',
+    name: 'every token read as one from before families',
+    change: [['family: parts.length === 3 && FAMILY.test(family) ? family : null', 'family: null']],
+    tests: 'refresh token',
+  },
+  {
+    file: 'catalogue/identity',
+    name: 'any family text is taken',
+    change: [['parts.length === 3 && FAMILY.test(family)', 'parts.length === 3']],
+    tests: 'refresh token',
+  },
+  {
+    file: 'catalogue/identity',
+    name: 'a token of more parts is read',
+    change: [['parts.length > 3 ||', '']],
+    tests: 'refresh token',
+  },
+  {
+    file: 'catalogue/identity',
+    name: 'a session id alone is read',
+    change: [['parts.length < 2 ||', '']],
+    tests: 'refresh token',
+  },
+  {
+    file: 'catalogue/identity',
+    name: 'any session id is taken',
+    change: [['!SESSION_ID.test(sessionId)', 'sessionId === ""']],
+    tests: 'refresh token',
+  },
+  {
+    file: 'catalogue/identity',
+    name: 'the session id need not be a UUIDv7',
+    change: [['[0-9a-f]{4}-7[0-9a-f]{3}-[89ab]', '[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]']],
+    tests: 'refresh token',
+  },
+  {
+    file: 'catalogue/identity',
+    name: 'refresh and sign-out back in the sign-in class',
+    change: [
+      [
+        "summary: 'Get a new access token with the refresh cookie',\n  apps: APPS,\n  access: { type: 'public' },\n  rateLimit: 'session',",
+        "summary: 'Get a new access token with the refresh cookie',\n  apps: APPS,\n  access: { type: 'public' },\n  rateLimit: 'auth',",
+      ],
+    ],
+    tests: 'refresh cookie only',
+  },
 ];
 
 export default mutations;

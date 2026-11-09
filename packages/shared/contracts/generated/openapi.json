@@ -1631,7 +1631,7 @@
           "access": {
             "type": "public"
           },
-          "rateLimit": "auth",
+          "rateLimit": "session",
           "idempotency": false,
           "stepUp": false,
           "owner": "identity",
@@ -1721,7 +1721,7 @@
           "access": {
             "type": "public"
           },
-          "rateLimit": "auth",
+          "rateLimit": "session",
           "idempotency": false,
           "stepUp": false,
           "owner": "identity",

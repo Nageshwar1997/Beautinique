@@ -27,8 +27,11 @@ import {
   defineRoute,
   gatewayManifest,
   HEADERS,
+  logout,
   navigationZod,
   PASSPORT_JWKS_PATH,
+  refreshCookieName,
+  refreshSession,
   REVOCATIONS_READY_KEY,
   revokedSessionKey,
   revokedUserKey,
@@ -42,7 +45,7 @@ import { appRegistry } from '../src/apps.ts';
 import { readConfig } from '../src/config.ts';
 import { manifest as platformManifest } from '../src/manifest.ts';
 import { API_PREFIX, stepUpFresh } from '../src/proxy.ts';
-import { DEFAULT_RATE_LIMITS } from '../src/rate-limits.ts';
+import { DEFAULT_RATE_LIMITS, SESSION_TOKEN_RULE } from '../src/rate-limits.ts';
 import { start } from '../src/service.ts';
 import { sessionGate } from '../src/sessions.ts';
 import type { StatusBody } from '../src/status.ts';
@@ -188,6 +191,9 @@ const manifest = gatewayManifest([
     input: { params: object({ provider: string() }) },
     output: navigationZod,
   }),
+  // the real ones: their rate-limit class is what is tested
+  refreshSession,
+  logout,
   route({
     id: 'identity.sessions.start',
     method: 'POST',
@@ -897,6 +903,83 @@ describe('rate limits', () => {
     expect((await get('2401:4900:1c2a:7f00::3')).status).toBe(429);
   });
 
+  describe('of refresh and sign-out (QA DR-005)', () => {
+    const sessionId = '0190a1b2-c3d4-7e5f-8a9b-0c1d2e3f4a5b';
+    // a refresh token of identity's shape: <session>.<family (16 bytes)>.<secret>
+    const tokenOf = (family: string) => `${sessionId}.${family.padEnd(22, 'f')}.${'s'.repeat(43)}`;
+    const fakeIdentity = () =>
+      listen(
+        createApp({
+          logger,
+          routes: (app) => {
+            app.post('/auth/refresh', (_req, res) => res.json({ refreshed: true }));
+            app.post('/auth/logout', (_req, res) => res.json({ signedOut: true }));
+          },
+        }),
+      );
+    const call = (url: string, ip: string, token?: string, path = '/auth/refresh') =>
+      fetch(`${url}${API_PREFIX}${path}`, {
+        method: 'POST',
+        headers: {
+          ...customer,
+          'x-real-ip': ip,
+          ...(token === undefined ? {} : { cookie: `${refreshCookieName('customer')}=${token}` }),
+        },
+      });
+
+    it('let the many people behind one mobile IP refresh, each session with its own budget', async () => {
+      const gw = await gateway({ identity: (await fakeIdentity()).url });
+      const ip = '203.0.113.20';
+      // far more people than the sign-in budget of an IP (30) all refresh
+      for (let person = 0; person < 40; person++) {
+        const res = await call(gw.url, ip, tokenOf(`person${String(person)}`));
+        expect(res.status, `person ${String(person)}`).toBe(200);
+      }
+      // one session (a looping tab, a copied cookie) runs out of its own budget only
+      const looping = tokenOf('looping');
+      for (let i = 1; i < SESSION_TOKEN_RULE.limit; i++) {
+        expect((await call(gw.url, ip, looping)).status).toBe(200);
+      }
+      // the last one it may: the tighter of the two budgets is the one told
+      const last = await call(gw.url, ip, looping);
+      expect(last.status).toBe(200);
+      expect(last.headers.get('ratelimit')).toBe('"session-token";r=0;t=300');
+      const refused = await call(gw.url, ip, looping);
+      expect(await errorOf(refused.clone())).toEqual([429, 'RATE_LIMITED']);
+      expect(refused.headers.get('ratelimit-policy')).toBe(
+        `"session-token";q=${String(SESSION_TOKEN_RULE.limit)};w=300`,
+      );
+      expect(refused.headers.get('retry-after')).not.toBeNull();
+      // signing out shares that session's budget; from another IP too
+      expect((await call(gw.url, '203.0.113.21', looping, '/auth/logout')).status).toBe(429);
+      // everyone else behind the IP goes on, and a sign-out without a cookie counts for the IP only
+      expect((await call(gw.url, ip, tokenOf('next'))).status).toBe(200);
+      expect((await call(gw.url, ip, undefined, '/auth/logout')).status).toBe(200);
+    });
+
+    it('keep a roomy budget per IP, which made-up sessions cannot get around', async () => {
+      const gw = await gateway(
+        { identity: (await fakeIdentity()).url },
+        { rateLimits: { session: { limit: 3, windowMs: 60_000 } } },
+      );
+      const ip = '2401:4900:1c2a:7f00::1';
+      for (const family of ['a', 'b', 'c']) {
+        const res = await call(gw.url, ip, tokenOf(family));
+        expect(res.status).toBe(200);
+        // the tighter of the two budgets is the one told
+        if (family === 'c') expect(res.headers.get('ratelimit')).toBe('"session";r=0;t=60');
+      }
+      // a new session, an odd cookie or none: still the IP's budget (/64 for IPv6)
+      expect((await call(gw.url, '2401:4900:1c2a:7f00::2', tokenOf('d'))).status).toBe(429);
+      expect((await call(gw.url, ip, 'not-a-token')).status).toBe(429);
+      expect((await call(gw.url, ip)).status).toBe(429);
+      const refused = await call(gw.url, ip, tokenOf('e'), '/auth/logout');
+      expect(await errorOf(refused.clone())).toEqual([429, 'RATE_LIMITED']);
+      expect(refused.headers.get('ratelimit-policy')).toBe('"session";q=3;w=60');
+      expect((await call(gw.url, '203.0.113.30', tokenOf('a'))).status).toBe(200);
+    });
+  });
+
   it('when Redis is down, let ordinary classes through and refuse auth (fail closed)', async () => {
     const core = await listen(fakeCore());
     const identity = await listen(
@@ -919,6 +1002,12 @@ describe('rate limits', () => {
       body: '{}',
     });
     expect(await errorOf(auth)).toEqual([503, 'SERVICE_UNAVAILABLE']);
+    // refresh and sign-out too
+    const refresh = await fetch(`${gw.url}${API_PREFIX}/auth/refresh`, {
+      method: 'POST',
+      headers: customer,
+    });
+    expect(await errorOf(refresh)).toEqual([503, 'SERVICE_UNAVAILABLE']);
   });
 });
 
@@ -1125,7 +1214,7 @@ describe('config', () => {
           'customer=Customer.Example, customer=localhost:3001,admin=admin.example',
         GATEWAY__VERCEL_PROJECTS: 'customer=beautinique-customer',
         GATEWAY__VERCEL_SCOPE: 'team-slug',
-        GATEWAY__RATE_LIMITS: 'write=5/1m, otp=3/15m,auth=100/1h,search=10/30s',
+        GATEWAY__RATE_LIMITS: 'write=5/1m, otp=3/15m,auth=100/1h,search=10/30s,session=900/5m',
       },
     });
     expect(config).toMatchObject({
@@ -1140,6 +1229,7 @@ describe('config', () => {
         otp: { limit: 3, windowMs: 900_000 },
         auth: { limit: 100, windowMs: 3_600_000 },
         search: { limit: 10, windowMs: 30_000 },
+        session: { limit: 900, windowMs: 300_000 },
       },
     });
     expect([...config.appHosts]).toEqual([

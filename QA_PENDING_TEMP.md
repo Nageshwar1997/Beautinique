@@ -2,20 +2,20 @@
 
 > **Temp file, sirf owner ki tracking ke liye.** Owner ke kehne pe (2026-11-09) abhi git me rehti hai; status update har item ke commit me. Kisi aur doc, file ya memory me iska zikr nahi. Saare items **Done** hote hi ye file repo se delete.
 >
-> **Last update:** 2026-11-09 (0.4 Done; 0.2/0.3 release PR #61 ke merge ka intezaar). **Faisla:** owner ne neeche ki har salah maan li (2026-11-09). Asli docs (report §9 "Owner ka jawab", ARCHITECTURE/RULES/README, MEMORY decision, HANDOFF, TASKS, change logs) har item ke commit me update honge, is file ka naam liye bina.
+> **Last update:** 2026-11-09 (0.4 aur item 1 DR-005 Done; 0.2/0.3 release PR #61 ke merge ka intezaar). **Faisla:** owner ne neeche ki har salah maan li (2026-11-09). Asli docs (report §9 "Owner ka jawab", ARCHITECTURE/RULES/README, MEMORY decision, HANDOFF, TASKS, change logs) har item ke commit me update honge, is file ka naam liye bina.
 
 ## Kitna bacha
 
 | Hissa                     | Items  | Done  | Bacha  | Claude ka andaaza (8 ghante = 1 din) |
 | ------------------------- | ------ | ----- | ------ | ------------------------------------ |
 | 0. Release aur shuruaat   | 4      | 1     | 3      | ~1.75 ghante                         |
-| 1. Abuse aur limits       | 4      | 0     | 4      | ~3.5 din                             |
+| 1. Abuse aur limits       | 4      | 1     | 3      | ~3 din                               |
 | 2. Permissions, step-up   | 5      | 0     | 5      | ~2.25 din                            |
 | 3. Chhote backend         | 2      | 0     | 2      | ~0.6 din                             |
 | 4. Apps                   | 6      | 0     | 6      | ~1.7 din                             |
 | 5. CI                     | 1      | 0     | 1      | ~0.4 din                             |
 | 6. Aakhri kadam           | 4      | 0     | 4      | ~1.5 ghante                          |
-| **Kul (Claude)**          | **26** | **1** | **25** | **~8.5–9.5 din**                     |
+| **Kul (Claude)**          | **26** | **2** | **24** | **~8–9 din**                         |
 | Owner ke haath ke (O1–O3) | 3      | 0     | 3      | owner ka time                        |
 
 **Status:** `Pending` (shuru nahi), `Chal raha`, `Done`, `Ruka` (kisi ka intezaar). Har item Done hone pe upar ki table bhi.
@@ -40,12 +40,12 @@
 
 ### 1. Abuse aur limits (sabse zaroori)
 
-| #   | ID     | Kya karna (salah, owner ne maani)                                                                                                                                                                                                                          | Mehnat | Status  | Commit |
-| --- | ------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------ | ------- | ------ |
-| 1   | DR-005 | `/auth/refresh` (aur logout) ki apni rate class: per session / refresh-token family, IP ka bada budget; login/verify `auth` me hi. Ek IP (CGNAT) ke peeche ke users sign-out na hon                                                                        | ½ din  | Pending |        |
-| 2   | DR-004 | Bina sign-in password hash ka global budget (sab IPs ka), IPv6 ke liye `/48` ka bada bucket (`auth`, `otp`), aur sasta check (lock/grant) pehle, hash baad me                                                                                              | 1 din  | Pending |        |
-| 3   | DR-003 | Lock account + IP pe (10 galat / 15 min → 1 ghanta us IP ke liye); saare IPs milake bahut zyada galti pe hi account-wide chhota lock; lock ke dauraan tries se lock lamba nahi; password-reset code ka per-IP hissa, taaki koi victim ka reset na kha sake | 1 din  | Pending |        |
-| 4   | DR-009 | Sign-up code emails ka din ke budget me alag chhota hissa (reset/invitation ke liye bache); `otp` ka global budget + IPv6 coarse bucket; budget khatam pe app me saaf sandesh; budget ke paas warning log                                                  | 1 din  | Pending |        |
+| #   | ID     | Kya karna (salah, owner ne maani)                                                                                                                                                                                                                          | Mehnat | Status  | Commit                     |
+| --- | ------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------ | ------- | -------------------------- |
+| 1   | DR-005 | `/auth/refresh` (aur logout) ki apni rate class: per session / refresh-token family, IP ka bada budget; login/verify `auth` me hi. Ek IP (CGNAT) ke peeche ke users sign-out na hon                                                                        | ½ din  | Done    | DR-005 commit (2026-11-09) |
+| 2   | DR-004 | Bina sign-in password hash ka global budget (sab IPs ka), IPv6 ke liye `/48` ka bada bucket (`auth`, `otp`), aur sasta check (lock/grant) pehle, hash baad me                                                                                              | 1 din  | Pending |                            |
+| 3   | DR-003 | Lock account + IP pe (10 galat / 15 min → 1 ghanta us IP ke liye); saare IPs milake bahut zyada galti pe hi account-wide chhota lock; lock ke dauraan tries se lock lamba nahi; password-reset code ka per-IP hissa, taaki koi victim ka reset na kha sake | 1 din  | Pending |                            |
+| 4   | DR-009 | Sign-up code emails ka din ke budget me alag chhota hissa (reset/invitation ke liye bache); `otp` ka global budget + IPv6 coarse bucket; budget khatam pe app me saaf sandesh; budget ke paas warning log                                                  | 1 din  | Pending |                            |
 
 ### 2. Permissions aur step-up
 

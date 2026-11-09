@@ -146,14 +146,61 @@ const mutations: Mutation[] = [
   {
     file: 'proxy',
     name: 'a refused request still passes',
-    change: [['      if (!result.allowed) {\n', '      if (false) {\n']],
+    change: [['        if (!result.allowed) {\n', '        if (false) {\n']],
+    tests: 'budget',
+  },
+  {
+    file: 'rate-limits',
+    name: 'every client shares one bucket',
+    change: [['key: `${name}:${client}`', 'key: `${name}:all`']],
     tests: 'budget',
   },
   {
     file: 'proxy',
-    name: 'every client shares one bucket',
-    change: [['`${route.rateLimit}:${ipKey(ip)}`', '`${route.rateLimit}:all`']],
-    tests: 'budget',
+    name: 'the first bucket is always the one told',
+    change: [['result.remaining < told.result.remaining', 'false']],
+    tests: 'refresh and sign-out',
+  },
+  {
+    file: 'rate-limits',
+    name: 'refresh and sign-out take the plain per-IP bucket (no session budget)',
+    change: [["if (name !== 'session') return", 'if (true) return']],
+    tests: 'refresh and sign-out',
+  },
+  {
+    file: 'rate-limits',
+    name: 'no session budget, only the IP one',
+    change: [['  if (parts) {\n', '  if (false) {\n']],
+    tests: 'refresh and sign-out',
+  },
+  {
+    file: 'rate-limits',
+    name: 'all sessions share one session budget',
+    change: [['.update(parts.family ?? parts.sessionId)', ".update('all')"]],
+    tests: 'refresh and sign-out',
+  },
+  {
+    file: 'rate-limits',
+    name: 'a session budget per IP (another IP gets a fresh one)',
+    change: [['key: `session:token:${hash}`', 'key: `session:token:${hash}:${client}`']],
+    tests: 'refresh and sign-out',
+  },
+  {
+    file: 'rate-limits',
+    name: 'refresh gets only the sign-in budget per IP',
+    change: [
+      [
+        'session: { limit: 600, windowMs: 5 * 60_000 },',
+        'session: { limit: 30, windowMs: 5 * 60_000 },',
+      ],
+    ],
+    tests: 'refresh and sign-out',
+  },
+  {
+    file: 'rate-limits',
+    name: 'refresh passes when Redis is down (fail open)',
+    change: [["new Set(['auth', 'session', 'otp'])", "new Set(['auth', 'otp'])"]],
+    tests: 'Redis is down',
   },
   {
     file: 'proxy',

@@ -42,6 +42,7 @@ import {
   REFRESH_COOKIE_PATH,
   refreshCookieName,
   refreshSession,
+  refreshTokenParts,
   requestPasswordCode,
   requestSignUpCode,
   resendOtp,
@@ -340,10 +341,42 @@ describe('sessions', () => {
     expect(tokenAudience('admin')).toBe('bq:admin');
     expect(TOKEN_ISSUER).toBe('bq:identity');
     for (const route of [refreshSession, logout]) {
-      expect(route).toMatchObject({ access: { type: 'public' }, rateLimit: 'auth', apps: APPS });
+      // their own class, so the many people behind one mobile IP keep their sessions (QA DR-005)
+      expect(route).toMatchObject({ access: { type: 'public' }, rateLimit: 'session', apps: APPS });
       expect(`/api/v1${route.path}`.startsWith(REFRESH_COOKIE_PATH)).toBe(true);
     }
+    // signing in stays in the tight class
+    for (const route of [passwordLogin, verifyOtp, loginTotp, loginRecovery]) {
+      expect(route.rateLimit, route.id).toBe('auth');
+    }
     expect(events.latest('identity.session.reuseDetected')).toBe(sessionReuseDetected);
+  });
+
+  it('read the session id and the family of a refresh token, and nothing else', () => {
+    const sessionId = '0190a1b2-c3d4-7e5f-8a9b-0c1d2e3f4a5b';
+    const family = 'AbCdEfGhIjKlMnOpQr-_12';
+    const secret = 'S'.repeat(43);
+    expect(refreshTokenParts(`${sessionId}.${family}.${secret}`)).toEqual({ sessionId, family });
+    // a token from before families
+    expect(refreshTokenParts(`${sessionId}.${secret}`)).toEqual({ sessionId, family: null });
+    for (const token of [
+      undefined,
+      '',
+      sessionId,
+      `${sessionId.toUpperCase()}.${family}.${secret}`,
+      `0190a1b2-c3d4-4e5f-8a9b-0c1d2e3f4a5b.${family}.${secret}`,
+      `x${sessionId}.${family}.${secret}`,
+      `${sessionId}.${family}.${secret}.more`,
+    ]) {
+      expect(refreshTokenParts(token), String(token)).toBeNull();
+    }
+    // a family the bucket cannot be (not 16 bytes of base64url) counts as none
+    for (const odd of ['short', `${family}x`, 'AbCdEfGhIjKlMnOpQr+/12']) {
+      expect(refreshTokenParts(`${sessionId}.${odd}.${secret}`), odd).toEqual({
+        sessionId,
+        family: null,
+      });
+    }
   });
 });
 

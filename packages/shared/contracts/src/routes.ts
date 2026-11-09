@@ -14,8 +14,10 @@ export const HTTP_METHODS = ['GET', 'POST', 'PUT', 'PATCH', 'DELETE'] as const;
 export type HttpMethod = (typeof HTTP_METHODS)[number];
 
 /**
- * Rate-limit classes the gateway knows (budgets live in gateway config). `auth` and `otp` fail closed
- * when Redis is down; the others fail open (ARCHITECTURE §6).
+ * Rate-limit classes the gateway knows (budgets live in gateway config). `session` is refresh and
+ * sign-out: a roomy budget per IP and a budget per refresh-token family, so the many people behind
+ * one mobile IP keep their sessions (QA DR-005). `auth`, `session` and `otp` fail closed when Redis
+ * is down; the others fail open (ARCHITECTURE §6).
  */
 export const RATE_LIMIT_CLASSES = [
   'public',
@@ -23,6 +25,7 @@ export const RATE_LIMIT_CLASSES = [
   'write',
   'search',
   'auth',
+  'session',
   'otp',
   'partner-api',
   'webhook',

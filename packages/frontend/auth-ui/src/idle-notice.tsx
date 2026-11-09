@@ -10,8 +10,8 @@ import { useSession, useSignOut } from './session';
 export const IDLE_WARNING_MS = 2 * 60_000;
 /**
  * A session in use is renewed (a refresh) this long before the server would end it, once there was
- * activity since the last renewal: about once in 25 minutes, so the `auth` rate limit (per IP, and
- * an office shares one) stays far away.
+ * activity since the last renewal: about once in 25 minutes, so the `session` rate limit (a budget
+ * per IP, and an office shares one) stays far away.
  */
 export const IDLE_RENEW_MS = 5 * 60_000;
 /** How often the clock is read, so at most this late after a sleeping laptop wakes. */

@@ -10,6 +10,7 @@ import {
   type AppPermissions,
   appPermissionsKey,
   IDENTITY_ERROR_CODES,
+  refreshTokenParts,
   REVOCATIONS_READY_KEY,
   revokedSessionKey,
   revokedUserKey,
@@ -166,20 +167,12 @@ export interface SessionDeps {
 /**
  * `<sessionId>.<family>.<secret>`: the session is found by its id; the family (16 random bytes) is
  * the same in every token of the session, so any older token of it is known for what it is; the
- * secret (32 random bytes) is new at each refresh.
+ * secret (32 random bytes) is new at each refresh. contracts `refreshTokenParts` reads the first two
+ * back, here and in the gateway (its `session` rate limit).
  */
 const newRefreshToken = (sessionId: string, family: string): string =>
   `${sessionId}.${family}.${randomBytes(32).toString('base64url')}`;
 const newFamily = (): string => randomBytes(16).toString('base64url');
-const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-7[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/;
-
-/** A refresh token's session id and family; a token from before families (`<id>.<secret>`) has none. */
-function partsOf(token: string | undefined): { sessionId: string; family: string | null } | null {
-  const parts = token?.split('.') ?? [];
-  const sessionId = parts[0] ?? '';
-  if (!UUID.test(sessionId)) return null;
-  return { sessionId, family: parts.length === 3 ? (parts[1] ?? null) : null };
-}
 
 /** Keyed hash of a refresh token: a database copy alone cannot refresh anything. */
 const refreshHashOf = (keys: CryptoKeys, token: string): string =>
@@ -379,7 +372,7 @@ export function sessions(deps: SessionDeps): Sessions {
     },
 
     async refresh({ app, refreshToken, client }) {
-      const parts = partsOf(refreshToken);
+      const parts = refreshTokenParts(refreshToken);
       if (!refreshToken || !parts) throw sessionExpired();
       const { sessionId } = parts;
       const at = now();
@@ -506,7 +499,7 @@ export function sessions(deps: SessionDeps): Sessions {
     },
 
     async logout({ app, refreshToken }) {
-      const sessionId = partsOf(refreshToken)?.sessionId;
+      const sessionId = refreshTokenParts(refreshToken)?.sessionId;
       if (!refreshToken || !sessionId) return;
       const at = now();
       const ended = await collection.updateOne(

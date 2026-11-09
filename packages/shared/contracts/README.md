@@ -63,7 +63,7 @@ Types route se hi aate hain:
 | `toOpenApi(routes, info)` | OpenAPI 3.1 document (zod 4 ka JSON Schema), Beautinique details `x-bq` me                          |
 | `buildPath`, `matchPath`  | `/products/:id` bharna (encode ke saath) aur padhna                                                 |
 
-**Rate-limit classes** (ARCHITECTURE me naam tay nahi the; ye shuruaati set hai): `public`, `read`, `write`, `search`, `auth`, `otp`, `partner-api`, `webhook`. Har class ka budget gateway config me rahega. `auth` aur `otp` Redis down hone pe fail-closed hain.
+**Rate-limit classes** (ARCHITECTURE me naam tay nahi the; ye shuruaati set hai): `public`, `read`, `write`, `search`, `auth`, `session`, `otp`, `partner-api`, `webhook`. Har class ka budget gateway config me rahega. `auth`, `session` aur `otp` Redis down hone pe fail-closed hain. `session` (owner 2026-11-09, QA DR-005) sirf `/auth/refresh` aur `/auth/logout`: IP ka bada budget plus har session ka apna, taaki ek mobile IP ke peeche ke log sign-out na hon; sign-in `auth` me hi. Gateway session ko refresh cookie se `refreshTokenParts` (identity ka format `<sessionId>.<family>.<secret>`, sirf pehle do hisse) se pehchanta hai; identity bhi yahi parser use karti hai.
 
 ## Events
 

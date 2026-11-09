@@ -625,12 +625,6 @@ const mutations: Mutation[] = [
   },
   {
     file: 'sessions',
-    name: 'every token read as one from before families',
-    change: [['family: parts.length === 3 ? (parts[1] ?? null) : null', 'family: null']],
-    tests: 'family in every token|older token',
-  },
-  {
-    file: 'sessions',
     name: 'no family hash at sign-in',
     change: [
       [

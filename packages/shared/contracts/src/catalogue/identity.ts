@@ -413,12 +413,32 @@ export const accessCookieName = (app: AppId): string => `__Host-bq_${app}_at`;
 export const refreshCookieName = (app: AppId): string => `__Secure-bq_${app}_rt`;
 export const REFRESH_COOKIE_PATH = '/api/v1/auth';
 
+const SESSION_ID = /^[0-9a-f]{8}-[0-9a-f]{4}-7[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/;
+// 16 random bytes in base64url
+const FAMILY = /^[A-Za-z0-9_-]{22}$/;
+
+/**
+ * The parts of identity's refresh token `<sessionId>.<family>.<secret>` that are not the secret: the
+ * session id (a UUIDv7) and the family (the same in every token of the session). A token from
+ * before families (`<sessionId>.<secret>`), or one whose family is not 16 bytes of base64url, has
+ * none. Identity finds the session with them; the gateway gives each family its own `session`
+ * budget. Anything else: null.
+ */
+export function refreshTokenParts(
+  token: string | undefined,
+): { sessionId: string; family: string | null } | null {
+  const parts = token?.split('.') ?? [];
+  const [sessionId = '', family = ''] = parts;
+  if (parts.length < 2 || parts.length > 3 || !SESSION_ID.test(sessionId)) return null;
+  return { sessionId, family: parts.length === 3 && FAMILY.test(family) ? family : null };
+}
+
 /**
  * A hint, not a credential (owner, 2026-11-02): `1` while the app may have a session, set and
  * cleared with the session cookies, as long as the refresh cookie lives. The page reads it (not
  * HttpOnly) and asks /iam/me only when it is there, so an anonymous visit costs no /iam/me and no
- * refresh (the `auth` rate limit is per IP, and many share one on mobile networks). No secret and
- * nothing of the person in it.
+ * refresh (the `session` rate limit has a budget per IP, and many share one on mobile networks).
+ * No secret and nothing of the person in it.
  */
 export const sessionHintCookieName = (app: AppId): string => `__Host-bq_${app}_hint`;
 
@@ -434,7 +454,7 @@ export const refreshSession = defineRoute({
   summary: 'Get a new access token with the refresh cookie',
   apps: APPS,
   access: { type: 'public' },
-  rateLimit: 'auth',
+  rateLimit: 'session',
   idempotency: false,
   stepUp: false,
   owner: 'identity',
@@ -450,7 +470,7 @@ export const logout = defineRoute({
   summary: 'Sign out of this app on this device',
   apps: APPS,
   access: { type: 'public' },
-  rateLimit: 'auth',
+  rateLimit: 'session',
   idempotency: false,
   stepUp: false,
   owner: 'identity',
