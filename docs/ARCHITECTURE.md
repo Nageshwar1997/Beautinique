@@ -1,6 +1,6 @@
 # ARCHITECTURE — BQ
 
-> **Status:** v1.66 draft (2026-11-09). [PRD.md](PRD.md) v1.0 pe based. Design ek multi-agent review se aaya (3 architecture proposals + review board + owner ke decisions), aur v1.1 me free tier ke official docs ke against verify hua.
+> **Status:** v1.67 draft (2026-11-09). [PRD.md](PRD.md) v1.0 pe based. Design ek multi-agent review se aaya (3 architecture proposals + review board + owner ke decisions), aur v1.1 me free tier ke official docs ke against verify hua.
 
 ## 0. Ek nazar me
 
@@ -346,6 +346,8 @@ Kai platforms alag users ko alag price dikhate hain. BQ ka rule: **ek product ka
 | customer                                                                        | Vercel pe React Router 8 framework mode. Home, product listing, product page, brand, category, creator storefront aur magazine pages SSR + CDN cache ke saath. Legal pages prerender. Account, cart aur checkout client-side. Meta, OG, JSON-LD, sitemap.                                                                                                   |
 | seller, admin, superadmin, master, support, finance, logistics, growth, creator | Vite + React SPAs, React Router data router, lazy routes, route guards. Har app sirf route table, pages aur nav config hai. Baaki packages se aata hai.                                                                                                                                                                                                     |
 | delivery                                                                        | Mobile-first **PWA**: app-shell precache, run sheet NetworkFirst, IndexedDB action queue (har action ka UUID aur Idempotency-Key), POD photos blob me queue aur online hote hi upload, `/api/v1/logistics/sync` batch, pre-generated UPI QR, geolocation, camera, wake lock, install prompt, push. SOS offline bhi queue hota hai, aur `tel:` fallback hai. |
+
+**Install (owner, 2026-11-09):** saare 11 apps phone pe app ki tarah install hote hain (browser bar ke bina): har app ka `public/manifest.webmanifest` (`display: standalone`, `scope` `/`), `index.html` (customer: `app/root.tsx`) me manifest + `apple-touch-icon`, aur parivaar ke icons (DESIGN §11). Service worker aur offline sirf delivery (PWA) me; delivery ka manifest bhi `public/` wali file (`vite-plugin-pwa` me `manifest: false`). `npm run create:app` manifest aur icons ke saath banata hai; `scripts/ci/test/install.test.ts` har app jaanchta hai.
 
 **Code moves:** seller onboarding Customer app se Seller app me. Super Admin Admin app se alag. Admin aur Master se AddProduct aur category CRUD hatenge. Contact-us Support Desk me.
 
@@ -723,3 +725,4 @@ Sirf config badlegi, code nahi:
 | v1.64   | 2026-11-09 | §9.3: saare 11 apps pe security headers (CSP sirf `frame-ancestors 'none'`, X-Frame-Options, nosniff, Referrer-Policy, HSTS, Permissions-Policy me camera/mic/location band; feature apne task me kholega); poora CSP T6.6 me (owner, QA Q-011). |
 | v1.65   | 2026-11-09 | §9.3: `vercel.json` me `routes` sirf `/api` (header sirf route laga sakta), security headers `headers` me, SPA fallback `rewrites` me (deprecated `handle` hataya); test Vercel ki `@vercel/routing-utils` se final routes jaanchta (owner). |
 | v1.66   | 2026-11-09 | §7.2: refresh aur sign-out ki apni rate class `session` (IP ka 600 / 5 min + har session 30 / 5 min), sign-in `auth` me hi (owner, QA DR-005); §9.2 idle refresh ki wajah usi class se. |
+| v1.67   | 2026-11-09 | §9.1: saare apps installable (manifest standalone, parivaar ke icons; offline sirf delivery), owner. |

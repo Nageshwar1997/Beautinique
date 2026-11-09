@@ -17,6 +17,14 @@ import { join } from 'node:path';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 
 import { DEPLOYABLES } from '../../../packages/shared/contracts/src/platform.ts';
+import { APP_TITLES } from '../lib/create/app-templates.ts';
+import {
+  APP_FAMILY,
+  familyIconsDir,
+  INSTALL_HEAD_TAGS,
+  INSTALL_ICONS,
+  webManifest,
+} from '../lib/create/install.ts';
 import { makeRepo } from './helpers.ts';
 import { type FakeRegistry, startRegistry } from './registry-server.ts';
 
@@ -127,6 +135,24 @@ describe('frontend apps pass every check', () => {
       expect(frame).toContain('<ServerWake');
       expect(frame).toContain('client.serverReady()');
       if (kind === 'ssr') expect(frame).toContain('<WakeScript />');
+
+      // installs on a phone as an app (owner, 2026-11-09): its manifest, the head tags and its
+      // family's icons, copied byte for byte
+      const appDir = join(repo.root, 'frontend', app);
+      const webmanifest = JSON.parse(
+        readFileSync(join(appDir, 'public', 'manifest.webmanifest'), 'utf8'),
+      ) as Record<string, unknown>;
+      expect(webmanifest).toEqual(webManifest(app, APP_TITLES[app]));
+      const head = readFileSync(
+        join(appDir, kind === 'ssr' ? 'app/root.tsx' : 'index.html'),
+        'utf8',
+      );
+      for (const tag of INSTALL_HEAD_TAGS) expect(head).toContain(tag);
+      const family = familyIconsDir(join(REPO_ROOT, 'packages/frontend/icons'), APP_FAMILY[app]);
+      for (const icon of INSTALL_ICONS) {
+        const copied = readFileSync(join(appDir, 'public', icon.file));
+        expect(copied.equals(readFileSync(join(family, icon.file))), icon.file).toBe(true);
+      }
 
       const prettier = await run(
         join(REPO_ROOT, 'node_modules', 'prettier', 'bin', 'prettier.cjs'),

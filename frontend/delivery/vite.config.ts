@@ -13,16 +13,8 @@ export default defineConfig({
     beautiniqueFonts({ preload: ['sans'] }),
     VitePWA({
       registerType: 'autoUpdate',
-      manifest: {
-        name: 'Beautinique Delivery',
-        short_name: 'BQ Delivery',
-        description: 'Run sheets, deliveries and payments for Beautinique delivery partners.',
-        theme_color: '#D6336C',
-        background_color: '#FDF8F5',
-        display: 'standalone',
-        start_url: '/',
-        icons: [{ src: '/icon.svg', sizes: 'any', type: 'image/svg+xml', purpose: 'any' }],
-      },
+      // the app's own public/manifest.webmanifest, as every app has (npm run icons:install)
+      manifest: false,
     }),
   ],
   // /api goes to the local gateway, the same path the Vercel rewrite takes in production, with the

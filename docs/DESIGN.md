@@ -1,6 +1,6 @@
 # DESIGN — BQ
 
-> **Status:** v1.13 (2026-11-08). UI aur UX ke niyam saare 11 apps ke liye. Design ka **source of truth code hai**: `@beautinique/frontend-styles` (tokens) aur `@beautinique/frontend-components` (components). [RULES.md](RULES.md) §5 frontend ke coding niyam batata hai; ye file batati hai ki cheezein **dikhengi aur chalengi kaise**.
+> **Status:** v1.14 (2026-11-09). UI aur UX ke niyam saare 11 apps ke liye. Design ka **source of truth code hai**: `@beautinique/frontend-styles` (tokens) aur `@beautinique/frontend-components` (components). [RULES.md](RULES.md) §5 frontend ke coding niyam batata hai; ye file batati hai ki cheezein **dikhengi aur chalengi kaise**.
 
 ## 1. Design principles
 
@@ -164,7 +164,8 @@ Har screen ye states dikhati hai:
   - Rang: ink = `currentColor`, rose = theme ka `--brand`, isliye light, dark aur high contrast me apne aap. Inverse surface (footer) aur print pe `monochrome`.
   - Link ke andar logo decorative (naam link pe, jaise "Beautinique home"); akela ho to `label="Beautinique"`.
   - Browser tab ka favicon alag rehta hai: rose tile pe safed "B" (`favicon.svg`/`.ico`), kyunki 16 px pe mark ki details nahi dikhti.
-  - Install icons (manifest, apple-touch): ivory pe mark; maskable me mark 80% safe circle ke andar. Home screen aur splash pe naam OS khud manifest ke `name` se dikhata hai.
+  - Install icons (manifest, apple-touch): tile pe mark; maskable me mark 80% safe circle ke andar. Home screen aur splash pe naam OS khud manifest ke `name`/`short_name` se dikhata hai.
+  - **Saare 11 apps phone pe app ki tarah install (owner, 2026-11-09):** tile ka rang app ka parivaar batata hai: **customer ivory** (mark ink + rose), **team apps** (Admin, Super Admin, Master, Support Desk, Finance, Growth Studio, Logistics Ops) **ink** `neutral-950` (mark ivory, baal aur pankhudiyan rose; dark theme jaisa), **partner apps** (Seller, Creator, Delivery) **rose** (poora mark ivory, `monochrome` jaisa). Home screen ka naam: customer "Beautinique", baaki "BQ" + app ("BQ Admin", "BQ SuperAdmin" ...; ~13 akshar tak poora dikhta). Splash ka rang tile wala. Icons `npm run icons:install` ek saath banata hai (`scripts/icons/install-icons.ts`, list `scripts/packages/lib/create/install.ts`).
 - **Dark mode:** product images invert nahi hote; brand gradient dono theme me same.
 
 ## Change log
@@ -185,3 +186,4 @@ Har screen ye states dikhati hai:
 | v1.11   | 2026-11-07 | §6: account na mile to app-shell ka error page ("Oops", Try again + home) (owner). |
 | v1.12   | 2026-11-07 | §8: kai step wale form me naya step focus le (field ya heading), sandesh field se `aria-describedby` se juda (owner, QA-FE-008). |
 | v1.13   | 2026-11-08 | §11: header me phone pe sirf `BrandMark`, naam `sm` se upar (owner, QA-ADM-001). |
+| v1.14   | 2026-11-09 | §11: saare apps phone pe install; tile rang parivaar se (customer ivory, team ink, partner rose), naam "BQ" + app (owner). |

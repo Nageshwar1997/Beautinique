@@ -1,4 +1,5 @@
 import type { AppId } from '../../../../packages/shared/contracts/src/platform.ts';
+import { INSTALL_HEAD_TAGS, ROSE, webManifest } from './install.ts';
 import { pickVersions } from './scaffold.ts';
 
 /** spa: Vite + React Router data router. ssr: React Router framework mode. pwa: spa + installable, offline shell. */
@@ -157,9 +158,9 @@ function manifest(spec: AppSpec): Record<string, unknown> {
   };
 }
 
-// Brand colours for files that cannot read CSS variables (icons, manifest): rose-600 and neutral-50.
-const ROSE = '#D6336C';
-const IVORY = '#FDF8F5';
+/** The install tags in a page head (install.ts), indented for index.html or the SSR root. */
+const installTags = (indentBy: string) =>
+  INSTALL_HEAD_TAGS.map((tag) => `${indentBy}${tag}`).join('\n');
 
 const icon = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
   <rect width="64" height="64" rx="14" fill="${ROSE}" />
@@ -264,8 +265,9 @@ function readme(spec: AppSpec): string {
         ]),
     '- **Wake-up (ARCHITECTURE §11.1):** server ke jawab tak saada parda (1.5 s pe wake-up screen), aur tab tak koi API call nahi: `ServerWake` ka `onReady` client ka `serverReady()` kehta hai. `BQ_GATEWAY_URL` (Vercel env) se wake-up server ko seedha bhi bulata hai; laptop pe khaali theek.',
     ...(spec.kind === 'pwa'
-      ? ['- `vite.config.ts`: PWA manifest aur service worker (vite-plugin-pwa).']
+      ? ['- `vite.config.ts`: service worker (vite-plugin-pwa); manifest `public/` wali file hai.']
       : []),
+    '- **Install (phone pe app ki tarah):** `public/manifest.webmanifest` (`display: standalone`), `public/icons/*` aur `public/apple-touch-icon.png` app ke parivaar ke icons; `npm run icons:install` banata hai (`scripts/packages/lib/create/install.ts`, DESIGN §11).',
     '- Styles: `@beautinique/frontend-styles` (tokens, fonts, utilities).',
     '',
   ].join('\n');
@@ -275,7 +277,6 @@ function readme(spec: AppSpec): string {
 
 function viteConfig(spec: AppSpec): string {
   const pwa = spec.kind === 'pwa';
-  const short = spec.title.replace('Beautinique', 'BQ');
   return `import { beautiniqueFonts } from '@beautinique/frontend-styles/vite';
 import tailwindcss from '@tailwindcss/vite';
 import react from '@vitejs/plugin-react';
@@ -294,16 +295,8 @@ ${gatewayEnv}
           ? `
       VitePWA({
         registerType: 'autoUpdate',
-        manifest: {
-          name: '${spec.title}',
-          short_name: '${short}',
-          description: 'Run sheets, deliveries and payments for Beautinique delivery partners.',
-          theme_color: '${ROSE}',
-          background_color: '${IVORY}',
-          display: 'standalone',
-          start_url: '/',
-          icons: [{ src: '/icon.svg', sizes: 'any', type: 'image/svg+xml', purpose: 'any' }],
-        },
+        // the app's own public/manifest.webmanifest, as every app has (npm run icons:install)
+        manifest: false,
       }),`
           : ''
       }
@@ -334,6 +327,8 @@ function indexHtml(spec: AppSpec): string {
     <link rel="icon" type="image/svg+xml" href="/${pwa ? 'icon' : 'favicon'}.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0${pwa ? ', viewport-fit=cover' : ''}" />
     <meta name="theme-color" content="${ROSE}" />
+    <!-- install: the app's manifest (opens standalone, no address bar) and the iOS home-screen icon -->
+${installTags('    ')}
     <title>${spec.title}</title>
   </head>
   <body>
@@ -582,6 +577,8 @@ export function Layout({ children }: { children: ReactNode }) {
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <meta name="theme-color" content="${ROSE}" />
         <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+        {/* install: the app's manifest (opens standalone, no address bar) and the iOS home-screen icon */}
+${installTags('        ')}
         {/* the wake-up's plain cover from the first paint (ServerWake below) */}
         <WakeScript />
         <Meta />
@@ -697,6 +694,11 @@ const ssrGitignore = `/build
 export function renderApp(spec: AppSpec): Map<string, string> {
   const files = new Map<string, string>();
   files.set('package.json', `${JSON.stringify(manifest(spec), null, 2)}\n`);
+  // its icons are binary: the create command copies them (install.ts copyInstallIcons)
+  files.set(
+    'public/manifest.webmanifest',
+    `${JSON.stringify(webManifest(spec.app, spec.title), null, 2)}\n`,
+  );
   files.set('README.md', readme(spec));
   files.set('vitest.config.ts', vitestConfig);
   if (spec.kind === 'ssr') {

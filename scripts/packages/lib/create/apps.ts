@@ -13,6 +13,7 @@ import {
   type AppSpec,
   renderApp,
 } from './app-templates.ts';
+import { APP_FAMILY, copyInstallIcons, iconsPackageDir } from './install.ts';
 import { installAndCheck, resolveVersions, writeTree } from './scaffold.ts';
 
 export interface CreateAppFlags {
@@ -83,6 +84,11 @@ export async function createFrontendApp(ctx: Context, flags: CreateAppFlags): Pr
   }
 
   const target = await writeTree(ctx, relDir, files);
+  // the home-screen icons of its family (binary, so copied, not rendered from text)
+  copyInstallIcons(iconsPackageDir(ctx.root), target, app);
+  ctx.log.info(
+    `Install icons: the ${APP_FAMILY[app]} family's (npm run icons:install makes them).`,
+  );
   if (flags.skipInstall) {
     return target;
   }
