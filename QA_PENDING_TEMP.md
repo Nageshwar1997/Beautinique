@@ -36,7 +36,7 @@
 | 0.1 | PR `prerelease` → `release` (PR #60 ke fixes live; QA-ID-001 P1 release tak live pe khula)                                  | Claude PR, owner merge      | 10 min   | Ruka (owner merge) | [PR #61](https://github.com/Nageshwar1997/Beautinique/pull/61) (2026-11-09) |
 | 0.2 | Release ke baad live jaanch: `bq-live` `/status` ok; customer + admin pe ek-ek GET se security headers; admin header 360 px | Claude (owner ki ijazat se) | 15 min   | Pending            |                                                                             |
 | 0.3 | Gate 1: release ke baad report me fix hue live findings (QA-ID-001 wagairah) ka poora repro, jo ab tak redacted tha         | Claude                      | 1 ghanta | Pending            |                                                                             |
-| 0.4 | `prerelease` se branch `feat/qa-audit`; HANDOFF §4 item 6 update (PR #60 merge, release PR, agla kaam ye decisions)     | Claude                      | 15 min   | Pending            |                                                                             |
+| 0.4 | `prerelease` se branch `feat/qa-audit`; HANDOFF §4 item 6 update (PR #60 merge, release PR, agla kaam ye decisions)         | Claude                      | 15 min   | Pending            |                                                                             |
 
 ### 1. Abuse aur limits (sabse zaroori)
 
@@ -85,7 +85,7 @@
 
 | #   | Kaam                                                                    | Kaun                   | Mehnat | Status  | Commit / PR |
 | --- | ----------------------------------------------------------------------- | ---------------------- | ------ | ------- | ----------- |
-| 19  | PR `feat/qa-audit` → `prerelease` (CI green, owner merge)           | Claude PR, owner merge | 30 min | Pending |             |
+| 19  | PR `feat/qa-audit` → `prerelease` (CI green, owner merge)               | Claude PR, owner merge | 30 min | Pending |             |
 | 20  | PR `prerelease` → `release`, deploy ke baad live jaanch                 | Claude PR, owner merge | 30 min | Pending |             |
 | 21  | Report final: §0 aur §9 me sab ka jawab aur halat, version + change log | Claude                 | 30 min | Pending |             |
 | 22  | Ye temp file delete                                                     | Claude                 | 1 min  | Pending |             |
