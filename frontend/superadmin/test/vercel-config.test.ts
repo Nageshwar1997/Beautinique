@@ -43,11 +43,15 @@ describe('vercel.json (ARCHITECTURE §7.2, §9.2, §9.3)', () => {
   });
 
   it('keeps every page out of search results, then serves the files, then the SPA for any path', () => {
-    expect(config.routes.slice(1)).toEqual([
-      { src: '/(.*)', headers: { 'X-Robots-Tag': 'noindex, nofollow' }, continue: true },
-      { handle: 'filesystem' },
-      { src: '/(.*)', dest: '/index.html' },
-    ]);
+    const [pages, ...rest] = config.routes.slice(1);
+    // the same route sends the security headers: scripts/ci/test/vercel-headers.test.ts checks them
+    // for every app
+    expect(pages).toMatchObject({
+      src: '/(.*)',
+      headers: { 'X-Robots-Tag': 'noindex, nofollow' },
+      continue: true,
+    });
+    expect(rest).toEqual([{ handle: 'filesystem' }, { src: '/(.*)', dest: '/index.html' }]);
   });
 
   it('holds no address or secret of its own', () => {

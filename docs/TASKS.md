@@ -1,6 +1,6 @@
 # TASKS — BQ
 
-> **Status:** v1.98 (2026-11-09). Poore project ki task list, [ARCHITECTURE.md](ARCHITECTURE.md) §16 ke phases ke hisaab se. Har task "done" tabhi jab [RULES.md](RULES.md) §1.5 ki Definition of Done poori ho.
+> **Status:** v1.99 (2026-11-09). Poore project ki task list, [ARCHITECTURE.md](ARCHITECTURE.md) §16 ke phases ke hisaab se. Har task "done" tabhi jab [RULES.md](RULES.md) §1.5 ki Definition of Done poori ho.
 
 **Kaise use karein:**
 - `[ ]` baaki, `[~]` chal raha hai, `[x]` done.
@@ -19,7 +19,7 @@
 - Sirf Phase 0–11 ke tasks gine jaate hain (sections A, B, C, D nahi).
 - Task: `[x]` = 1, `[~]` = ½, `[ ]` = 0. Phase % = in ka jod ÷ phase ke tasks.
 - Poora % = har phase ka % × uske hafte (phase heading ka andaaza, range ka beech: "4–5 hafte" = 4.5), sabka jod ÷ 38 (saare phases ke hafte). Bade phases (Commerce, WMS, Finance) ka wazan zyada, chhote shuruaati tasks ka kam. Poore number tak round.
-- Sirf task ginti se 27% aata hai (23.5 ÷ 86). Wo zyada dikhta hai kyunki shuru ka chhota task bhi utna hi ginta hai jitna Phase 8 ka bada task; isliye upar wala (hafton wala) number hi project ka %.
+- Sirf task ginti se 28% aata hai (24 ÷ 86). Wo zyada dikhta hai kyunki shuru ka chhota task bhi utna hi ginta hai jitna Phase 8 ka bada task; isliye upar wala (hafton wala) number hi project ka %.
 - **Kab update:** jis commit/PR me kisi task ka checkbox badle, ya task jude/hate, usi me ye table, upar ka %, neeche ki itihaas line aur [HANDOFF.md](HANDOFF.md) §1 ki "Progress" line.
 
 | Phase                                 | Hafte  | Tasks  | `[x]`  | `[~]`  | `[ ]`  | Phase % |
@@ -30,13 +30,13 @@
 | 3. bq-identity                        | 2.5    | 6      | 3      | 0      | 3      | 50%     |
 | 4. Core foundations                   | 4.5    | 11     | 0      | 0      | 11     | 0%      |
 | 5. Notify + Payments                  | 2      | 4      | 0      | 2      | 2      | 25%     |
-| 6. Frontend foundation                | 3      | 8      | 1      | 2      | 5      | 25%     |
+| 6. Frontend foundation                | 3      | 8      | 1      | 3      | 4      | 31%     |
 | 7. Commerce + payments                | 4.5    | 6      | 0      | 0      | 6      | 0%      |
 | 8. WMS + logistics + Delivery PWA     | 5.5    | 7      | 0      | 0      | 7      | 0%      |
 | 9. Finance + support                  | 4.5    | 6      | 0      | 0      | 6      | 0%      |
 | 10. UGC, growth, creators, governance | 5.5    | 6      | 0      | 0      | 6      | 0%      |
 | 11. Launch hardening                  | 2      | 8      | 1      | 0      | 7      | 13%     |
-| **Kul**                               | **38** | **86** | **19** | **9**  | **58** | **15%** |
+| **Kul**                               | **38** | **86** | **19** | **10** | **57** | **15%** |
 
 **Itihaas:**
 
@@ -46,6 +46,7 @@
 | 2026-11-04 | 14%     | T3.1 `[x]`: PR 4 social login merge (PR #46). Phase 3: 42% → 50%.                                          |
 | 2026-11-04 | 14%     | T0.2 `[x]`: seller aur master bane (saare 11 apps khaali, Vercel pe; A.9). Phase 0: 44% → 50%. |
 | 2026-11-09 | 15%     | T6.3 `[x]` (customer SSR live tha, checkbox peeche; QA-DOC-002). Naye T4.10, T4.11, T11.7, T11.8: docs ke CI pehre jo bane nahi the (QA-DOC-001). Phase 6: 13% → 25%, Phase 11: 17% → 13%. |
+| 2026-11-09 | 15%     | T6.6 `[~]`: saare 11 apps pe security headers (CSP abhi sirf `frame-ancestors`; poora CSP aur Ola Maps key baaki; QA Q-011). Phase 6: 25% → 31%. |
 
 ## D. Deploy-first plan (owner ka faisla, 2026-10-23)
 
@@ -193,7 +194,7 @@ Har milestone ke end me kuch **live** dikhana hai. Ek hi live environment, free 
 - [x] T6.3 Customer app → React Router 8 framework mode (SSR + prerender). Ho gaya: customer React Router 8.5 pe SSR aur prerender ke saath bana aur live hai; checkbox peeche tha aur "React Router 7" likha reh gaya tha (owner, 2026-11-09, QA-DOC-002).
 - [ ] T6.4 Onboarding Customer → Seller app; Super Admin checkbox hatana; Admin/Master se AddProduct aur category CRUD hatana.
 - [ ] T6.5 7 naye apps template se (superadmin, support, finance, logistics, delivery, growth, creator).
-- [ ] T6.6 Har app ka `vercel.json` (routes transform, security headers), Ola Maps key per app. (2026-10-26: customer ka `vercel.json`: npm 12 install, `npm run build -- --for customer`, `/api` route + `x-origin-secret` transform env se, functions `bom1`. Security headers baaki.)
+- [~] T6.6 Har app ka `vercel.json` (routes transform, security headers), Ola Maps key per app. (2026-10-26: customer ka `vercel.json`: npm 12 install, `npm run build -- --for customer`, `/api` route + `x-origin-secret` transform env se, functions `bom1`. 2026-11-09, owner, QA Q-011: saare 11 apps ki `vercel.json` me security headers: CSP sirf `frame-ancestors 'none'`, `X-Frame-Options: DENY`, nosniff, `Referrer-Policy`, HSTS, `Permissions-Policy` me camera/mic/location band; jaanch `scripts/ci/test/vercel-headers.test.ts`. Bacha: poora CSP (customer SSR me nonce, SPA scripts ke hash, `connect-src`; ARCHITECTURE §9.3) aur Ola Maps key per app.)
 - [ ] T6.7 `apps` profile: split mode containers. **Docker Lesson 4.**
 
 **Milestone 6:** saare 11 apps laptop pe login karke apna empty dashboard dikhate hain, dono themes me.
@@ -366,3 +367,4 @@ Har milestone ke end me kuch **live** dikhana hai. Ek hi live environment, free 
 | v1.96   | 2026-11-07 | A.8: cron-job.org ke 503 (`hibernate-wake-error`) ki jaanch; owner: Vercel wake abhi nahi, UptimeRobot + Better Stack bhi (setup owner ka). |
 | v1.97   | 2026-11-07 | A.8: Better Stack + UptimeRobot laga diye, Render support ka sawaal chhoda (owner); A.10: Sentry `user.geo` rehne do (owner). |
 | v1.98   | 2026-11-09 | T6.3 `[x]` (React Router 8, SSR + prerender, live; QA-DOC-002); naye T4.10 geo lint, T4.11 role-name lint, T11.7 OpenAPI diff + event compatibility, T11.8 bundle budgets (owner, QA-DOC-001); §P: 15% (task ginti 27%). |
+| v1.99   | 2026-11-09 | T6.6 `[~]`: saare 11 apps pe security headers, poora CSP aur Ola Maps key baaki (owner, QA Q-011); §P: Phase 6 31%, poora 15%, task ginti 28%. |
