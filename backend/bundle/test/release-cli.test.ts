@@ -49,6 +49,8 @@ afterAll(async () => {
   const mongo = await connectMongo({ uri: MONGO_URI, dbName: coreDb, appName: 'cli-test', logger });
   await mongo.db.dropDatabase();
   await mongo.client.db(identityDb).dropDatabase();
+  // the "live" run's own, here even when that test failed (it was left behind then)
+  await mongo.client.db(`${identityDb}_live`).dropDatabase();
   await mongo.client.db(notifyDb).dropDatabase();
   await mongo.close();
 });
@@ -165,7 +167,6 @@ describe('npm run db:release', () => {
       logger,
     });
     expect(await mongo.db.collection(RELEASE_STATE).countDocuments()).toBe(1);
-    await mongo.db.dropDatabase();
     await mongo.close();
   });
 

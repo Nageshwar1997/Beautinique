@@ -1,10 +1,10 @@
 # QA AUDIT REPORT — BQ
 
-> **Status:** v1.23 (2026-11-09, final; §2a me KNOWN faislon ki halat, §0 me fixes). Audit base: `origin/prerelease` @ `ee7f46a` (`ee7f46ae7b2605d99f6b4497d26303aa109fb371`). Auditor: Claude Code (Opus 5.5, `claude-opus-5-5`). Ye report audit ki single source of truth hai; fixes alag se, ek-ek karke.
+> **Status:** v1.24 (2026-11-09, final; §2a me KNOWN faislon ki halat, §0 me fixes). Audit base: `origin/prerelease` @ `ee7f46a` (`ee7f46ae7b2605d99f6b4497d26303aa109fb371`). Auditor: Claude Code (Opus 5.5, `claude-opus-5-5`). Ye report audit ki single source of truth hai; fixes alag se, ek-ek karke.
 
 ## 0. Audit state (har session ke aakhir me update)
 
-- **Fixes (2026-11-07 se, branch `feat/qa-audit`, §10 ke kram se, har fix ka apna commit, saare fixes ke baad ek PR → `prerelease` (owner, 2026-11-07)):** 1. QA-ID-001 Fixed (2026-11-07). 2. QA-GW-001 + QA-KRN-001 Fixed (2026-11-07). 3. QA-FE-009 Fixed (2026-11-07). 16. QA-FE-005 Fixed (2026-11-07, owner ke kehne pe pehle). 4. QA-FE-004 + QA-FE-010 Fixed (2026-11-07). 5. QA-FE-008 Fixed (2026-11-07). 6. QA-FE-001 + QA-FE-007 Fixed (2026-11-08). 7. QA-CI-001 Fixed (2026-11-08). 8. QA-ID-002 Fixed (2026-11-08). 12. QA-TOOL-001 Fixed (2026-11-08, owner ke kehne pe pehle). 9. QA-CUS-001 Fixed (2026-11-08). 10. QA-FE-003 + QA-FE-002 Fixed (2026-11-08). 11. QA-ADM-001 Fixed (2026-11-08). 13. QA-GW-002 Fixed (2026-11-09). 14. QA-FE-006 Fixed (2026-11-09). Agla: QA-TOOL-002.
+- **Fixes (2026-11-07 se, branch `feat/qa-audit`, §10 ke kram se, har fix ka apna commit, saare fixes ke baad ek PR → `prerelease` (owner, 2026-11-07)):** 1. QA-ID-001 Fixed (2026-11-07). 2. QA-GW-001 + QA-KRN-001 Fixed (2026-11-07). 3. QA-FE-009 Fixed (2026-11-07). 16. QA-FE-005 Fixed (2026-11-07, owner ke kehne pe pehle). 4. QA-FE-004 + QA-FE-010 Fixed (2026-11-07). 5. QA-FE-008 Fixed (2026-11-07). 6. QA-FE-001 + QA-FE-007 Fixed (2026-11-08). 7. QA-CI-001 Fixed (2026-11-08). 8. QA-ID-002 Fixed (2026-11-08). 12. QA-TOOL-001 Fixed (2026-11-08, owner ke kehne pe pehle). 9. QA-CUS-001 Fixed (2026-11-08). 10. QA-FE-003 + QA-FE-002 Fixed (2026-11-08). 11. QA-ADM-001 Fixed (2026-11-08). 13. QA-GW-002 Fixed (2026-11-09). 14. QA-FE-006 Fixed (2026-11-09). 15. QA-TOOL-002 Fixed (2026-11-09). Agla: QA-DOC-001 + QA-DOC-002 (owner ka faisla pehle).
 - **Gate 1: approved (2026-11-04).** Owner ke jawab (saari recommendations maani):
   - Live pe passive GETs: **haan, kul ≤ 15**, bina auth: `bq-live` `/health`, `/status`, ek anjaan path; customer + admin ka home aur ek 404 (headers, TLS). OTP/auth/write/fuzz/rate-limit/load kabhi nahi.
   - Playwright: Chromium 1248 pehle se installed (Playwright 1.64.1 ki zaroorat yahi); koi download nahi chahiye
@@ -870,7 +870,7 @@ Plan: **E** = planned-executed (local stack, HTTP, browser, scratch script), **S
 ### [QA-TOOL-002] E2E cleanup drops the run's databases while the backend still runs, so the identity database comes back and piles up
 
 **Module:** M12 (tooling: `scripts/e2e/`) | **Feature:** Playwright `globalTeardown` (`scripts/e2e/cleanup.ts`) | **Task/Doc:** `cleanup.ts` ka comment ("the run's databases go … so runs on the laptop do not pile up"), HANDOFF §6 E2E trap
-**Severity:** P4 (sirf laptop/CI ki Mongo me kachra; product pe asar nahi) | **Priority:** Low | **Status:** Open
+**Severity:** P4 (sirf laptop/CI ki Mongo me kachra; product pe asar nahi) | **Priority:** Low | **Status:** Fixed (2026-11-09, `feat/qa-audit`, commit "fix(e2e): a run's backend stops before its databases go, and runs that are over are swept (QA-TOOL-002)")
 **Testing Type:** Tooling | **Evidence level:** E1 | **Reproducibility:** Intermittent (admin run 1/1 bachi; customer run 0/1; laptop pe 21 `_identity`-only DBs) | **Environment:** shared laptop Mongo (27017), `npm run e2e --workspace admin`
 **Description:** `cleanup.ts` teeno DBs drop karta hai, par Playwright ke `webServer` (backend) `globalTeardown` ke baad band hote hain. Us beech chalta bundle (lease/relay) `platform_locks` me likhta hai aur `bq_e2e_<run>_identity` dobara ban jaati hai.
 **Steps to Reproduce:** `npm run e2e --workspace admin`; phir `db.adminCommand('listDatabases')` me us run ki DBs.
@@ -884,6 +884,7 @@ Plan: **E** = planned-executed (local stack, HTTP, browser, scratch script), **S
 **Regression Risk:** Low.
 **Regression test to add:** `test:scripts` me: fake bundle jo teardown ke baad likhe → DB na bache.
 **Owner decision needed:** Nahi
+**Fix (2026-11-09, owner ne Claude ki salah "option A" maani, saath me bachi test DBs hatana):** asli wajah report se badi: Playwright `globalTeardown` ke **baad** apne web servers band karta hai, aur config me `gracefulShutdown` na ho to zabardasti (Windows pe `taskkill /F`, baaki pe SIGKILL): backend ka SIGTERM handler kabhi chalta hi nahi, isliye report wala fix (backend ke `stop()` me drop) bekaar hota. Naya `scripts/e2e/runs.ts`: backend sunne lagte hi apna pid `os.tmpdir()/bq-e2e-<run>.pid` me likhta hai; teardown (`cleanup.ts` → `cleanUpRun`) pehle us process ko band karta aur khatam hone tak rukta hai (15 s, phir SIGKILL), phir har `bq_e2e_<run>_*` DB drop karta hai jiska backend zinda nahi (is run ki, aur roke/toote runs ki); chalte doosre run ki DBs bachti hain. Laptop pe pehle 59 `bq_e2e_*` (identity 26, core 24, notify 9; andar sirf `platform_locks`/`platform_state`), naye teardown ke ek admin E2E ke baad 0, aur do aur runs ke baad bhi 0. Test (`scripts/e2e/test/runs.test.ts`, apna DB prefix aur pid folder, asli E2E kabhi nahi chhoota): nakli backend jo har 50 ms likhta hai → teardown ke baad band, DB gayab aur 500 ms baad bhi wapas nahi; khatam run ki DB gayi, chalte run ki bachi. Dono purane vyavhaar (sirf is run ki DBs turant drop) pe fail. Saath me: 11 bachi `bq_test_*` DBs owner ki ijazat se haath se hatayi; unme se 4 bundle `release-cli` test ki "live" DB thi jo test fail hone pe chhoot jaati thi, ab `afterAll` me hamesha drop. Poora `npm test` (1833) aur customer E2E (41 pass / 61 skip) pass; uske baad Mongo me 0 `bq_e2e_*`, 0 `bq_test_*`, koi pid file nahi. Admin E2E ka ek test ("recovery code", `1280-light`) ek baar sign-out pe "You are still signed in." ke saath fail hua (us run ka log nahi pakda; dobara do baar pass; teardown tests ke baad chalta hai). Lint, typecheck, format pass. Mutation nahi (tooling).
 
 ### [QA-DOC-001] Docs say CI blocks cross-module imports, hard-coded geo data and role-name comparisons, but no such check exists
 
@@ -984,7 +985,7 @@ Plan: **E** = planned-executed (local stack, HTTP, browser, scratch script), **S
 
 Render free cold start = KNOWN-05.
 
-- **TOOL-OBS-01 (info, M11; wajah M12 me mili = QA-TOOL-002):** shared laptop Mongo me 36 purani `bq_e2e_<run>_*` DBs (adhoore/rok diye gaye E2E runs; `scripts/e2e/cleanup.ts` sirf Playwright ke `globalTeardown` pe chalta, process maar diya jaaye to nahi). Audit ne inhe nahi chhooa (developer ka data). Ek "purani e2e DBs hatao" command ya start pe sweep soch sakte ho.
+- **TOOL-OBS-01 (info, M11; wajah M12 me mili = QA-TOOL-002):** shared laptop Mongo me 36 purani `bq_e2e_<run>_*` DBs (adhoore/rok diye gaye E2E runs; `scripts/e2e/cleanup.ts` sirf Playwright ke `globalTeardown` pe chalta, process maar diya jaaye to nahi). **2026-11-09:** QA-TOOL-002 ke fix ke saath har run ke baad wo saari DBs bhi jaati hain jinka backend zinda nahi (59 → 0). Audit ne inhe nahi chhooa (developer ka data). Ek "purani e2e DBs hatao" command ya start pe sweep soch sakte ho.
 - **M11 notes (info, bug nahi):** har page load pe ek `wake` + ek `/iam/me` (koi storm nahi); dev me Chrome "fraunces-latin.woff2 / plus-jakarta-sans-latin.woff2 was preloaded using link preload but not used within a few seconds" (jis page pe display font nahi, wahan bhi preload; production build pe dekhna, M11 me sirf dev server).
 - **M10 notes (info, bug nahi):** api-client me client timeout nahi (QA-FE-006, reliability). Playgrounds me request storm/duplicate calls nahi dikhe (auth-ui: `/iam/me` sirf hint cookie ke saath); network/bundle size apps me (M11/M12).
 
@@ -1179,7 +1180,7 @@ Final (2026-11-05). Har number ek PR (ya ek chhota fix); saath jaane wale bugs e
 12. **QA-TOOL-001** (P3): `.prettierignore` me `.claude/worktrees`; kabhi bhi. **Fixed (2026-11-08, `feat/qa-audit`, owner ke kehne pe pehle)**: Prettier, git, root ESLint aur root Vitest teeno worktree chhodte hain.
 13. **QA-GW-002** (P4, owner decision): Redis wipe pe revocation fallback; ARCHITECTURE §6.6 ka faisla pehle, pehle non-identity `signed-in` route se pehle zaroor. **Fixed (2026-11-09, `feat/qa-audit`)**: identity marks MongoDB se dobara + ready mark, gateway tab tak 503.
 14. **QA-FE-006** (P4, owner: timeout kitna): contracts + api-client client timeout; 2 ke saath sochna. **Fixed (2026-11-09, `feat/qa-audit`)**: har call 60 s (`API_TIMEOUT_MS`), phir `NETWORK_ERROR`; call apna `timeoutMs` de sakti.
-15. **QA-TOOL-002** (P4): `scripts/e2e` cleanup backend band hone ke baad + purani DBs ka sweep.
+15. **QA-TOOL-002** (P4): `scripts/e2e` cleanup backend band hone ke baad + purani DBs ka sweep. **Fixed (2026-11-09, `feat/qa-audit`)**: teardown pehle backend band karta (pid file), phir drop; jin runs ka backend zinda nahi unki DBs bhi.
 16. **QA-FE-005** (P4): app-shell playground stub 1 line. **Fixed (2026-11-07, `feat/qa-audit`, owner ke kehne pe pehle)**.
 17. **QA-DOC-001 + QA-DOC-002** (P4, owner): docs ka ek chhota PR (T6.3 aur progress % owner tay kare).
 18. **Q-011 / T6.6** (owner, bug nahi): security headers (`frame-ancestors`, nosniff, Referrer-Policy) ka chhota PR Phase 4 se pehle.
@@ -1234,3 +1235,4 @@ Final (2026-11-05). Har number ek PR (ya ek chhota fix); saath jaane wale bugs e
 | v1.21   | 2026-11-08 | QA-ADM-001 Fixed (`feat/qa-audit`): admin header phone pe sirf nishan; E2E side-scroll jaanch viewport se (mobile emulation me andhi thi); §0, §10. |
 | v1.22   | 2026-11-09 | QA-GW-002 Fixed (`feat/qa-audit`): wipe ke baad band sessions ke marks MongoDB se + ready mark, gateway tab tak 503; §0, §5, §7, §8, §10. |
 | v1.23   | 2026-11-09 | QA-FE-006 Fixed (`feat/qa-audit`): apps ke API client me har call 60 s timeout, phir `NETWORK_ERROR` (owner); §0, §5, §10. |
+| v1.24   | 2026-11-09 | QA-TOOL-002 Fixed (`feat/qa-audit`): E2E teardown pehle backend band karta (pid file), phir drop, aur jin runs ka backend zinda nahi unki DBs bhi (59 → 0); §0, §6, §10. |
