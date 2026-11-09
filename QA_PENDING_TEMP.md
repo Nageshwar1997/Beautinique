@@ -2,20 +2,20 @@
 
 > **Temp file, sirf owner ki tracking ke liye.** Owner ke kehne pe (2026-11-09) abhi git me rehti hai; status update har item ke commit me. Kisi aur doc, file ya memory me iska zikr nahi. Saare items **Done** hote hi ye file repo se delete.
 >
-> **Last update:** 2026-11-09 (0.4 aur item 1 DR-005 Done; 0.2/0.3 release PR #61 ke merge ka intezaar; owner ka naya item 15a INSTALL aur O4 jode). **Faisla:** owner ne neeche ki har salah maan li (2026-11-09). Asli docs (report §9 "Owner ka jawab", ARCHITECTURE/RULES/README, MEMORY decision, HANDOFF, TASKS, change logs) har item ke commit me update honge, is file ka naam liye bina.
+> **Last update:** 2026-11-09 (hissa 0 poora: PR #61 merge, live jaanch theek, Gate 1 repro report me; item 1 DR-005 Done; owner ka naya item 15a INSTALL aur O4 jode). **Faisla:** owner ne neeche ki har salah maan li (2026-11-09). Asli docs (report §9 "Owner ka jawab", ARCHITECTURE/RULES/README, MEMORY decision, HANDOFF, TASKS, change logs) har item ke commit me update honge, is file ka naam liye bina.
 
 ## Kitna bacha
 
 | Hissa                     | Items  | Done  | Bacha  | Claude ka andaaza (8 ghante = 1 din) |
 | ------------------------- | ------ | ----- | ------ | ------------------------------------ |
-| 0. Release aur shuruaat   | 4      | 1     | 3      | ~1.75 ghante                         |
+| 0. Release aur shuruaat   | 4      | 4     | 0      | Ho gaya                              |
 | 1. Abuse aur limits       | 4      | 1     | 3      | ~3 din                               |
 | 2. Permissions, step-up   | 5      | 0     | 5      | ~2.25 din                            |
 | 3. Chhote backend         | 2      | 0     | 2      | ~0.6 din                             |
 | 4. Apps                   | 7      | 0     | 7      | ~2.1 din                             |
 | 5. CI                     | 1      | 0     | 1      | ~0.4 din                             |
 | 6. Aakhri kadam           | 4      | 0     | 4      | ~1.5 ghante                          |
-| **Kul (Claude)**          | **27** | **2** | **25** | **~8.5–9.5 din**                     |
+| **Kul (Claude)**          | **27** | **5** | **22** | **~8.5–9.5 din**                     |
 | Owner ke haath ke (O1–O4) | 4      | 0     | 4      | owner ka time                        |
 
 **Status:** `Pending` (shuru nahi), `Chal raha`, `Done`, `Ruka` (kisi ka intezaar). Har item Done hone pe upar ki table bhi.
@@ -31,12 +31,12 @@
 
 ### 0. Release aur shuruaat
 
-| #   | Kaam                                                                                                                        | Kaun                        | Mehnat   | Status             | Commit / PR                                                                 |
-| --- | --------------------------------------------------------------------------------------------------------------------------- | --------------------------- | -------- | ------------------ | --------------------------------------------------------------------------- |
-| 0.1 | PR `prerelease` → `release` (PR #60 ke fixes live; QA-ID-001 P1 release tak live pe khula)                                  | Claude PR, owner merge      | 10 min   | Ruka (owner merge) | [PR #61](https://github.com/Nageshwar1997/Beautinique/pull/61) (2026-11-09) |
-| 0.2 | Release ke baad live jaanch: `bq-live` `/status` ok; customer + admin pe ek-ek GET se security headers; admin header 360 px | Claude (owner ki ijazat se) | 15 min   | Ruka (0.1)         |                                                                             |
-| 0.3 | Gate 1: release ke baad report me fix hue live findings (QA-ID-001 wagairah) ka poora repro, jo ab tak redacted tha         | Claude                      | 1 ghanta | Ruka (0.1)         |                                                                             |
-| 0.4 | `prerelease` se branch `feat/qa-audit`; HANDOFF §4 item 6 update (PR #60 merge, release PR, agla kaam ye decisions)         | Claude                      | 15 min   | Done               | HANDOFF v1.157 (2026-11-09)                                                 |
+| #   | Kaam                                                                                                                        | Kaun                        | Mehnat   | Status | Commit / PR                                             |
+| --- | --------------------------------------------------------------------------------------------------------------------------- | --------------------------- | -------- | ------ | ------------------------------------------------------- |
+| 0.1 | PR `prerelease` → `release` (PR #60 ke fixes live; QA-ID-001 P1 release tak live pe khula)                                  | Claude PR, owner merge      | 10 min   | Done   | PR #61 merge (2026-11-09, `38efee4`; live `e1bb7b9`)    |
+| 0.2 | Release ke baad live jaanch: `bq-live` `/status` ok; customer + admin pe ek-ek GET se security headers; admin header 360 px | Claude (owner ki ijazat se) | 15 min   | Done   | Theek: `/status` ok, headers, admin 360 px (2026-11-09) |
+| 0.3 | Gate 1: release ke baad report me fix hue live findings (QA-ID-001 wagairah) ka poora repro, jo ab tak redacted tha         | Claude                      | 1 ghanta | Done   | Report v1.28 (2026-11-09)                               |
+| 0.4 | `prerelease` se branch `feat/qa-audit`; HANDOFF §4 item 6 update (PR #60 merge, release PR, agla kaam ye decisions)         | Claude                      | 15 min   | Done   | HANDOFF v1.157 (2026-11-09)                             |
 
 ### 1. Abuse aur limits (sabse zaroori)
 
