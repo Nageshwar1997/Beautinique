@@ -285,7 +285,9 @@ function readme(spec: AppSpec): string {
         ]),
     '- **Wake-up (ARCHITECTURE §11.1):** server ke jawab tak saada parda (1.5 s pe wake-up screen), aur tab tak koi API call nahi: `ServerWake` ka `onReady` client ka `serverReady()` kehta hai. `BQ_GATEWAY_URL` (Vercel env) se wake-up server ko seedha bhi bulata hai; laptop pe khaali theek.',
     ...(spec.kind === 'pwa'
-      ? ['- `vite.config.ts`: service worker (vite-plugin-pwa); manifest `public/` wali file hai.']
+      ? [
+          '- `vite.config.ts`: service worker (vite-plugin-pwa); manifest `public/` wali file hai; `/api` navigations SW nahi, server leta hai (`navigateFallbackDenylist`).',
+        ]
       : []),
     '- **Install (phone pe app ki tarah):** `public/manifest.webmanifest` (`display: standalone`), `public/icons/*` aur `public/apple-touch-icon.png` app ke parivaar ke icons; `npm run icons:install` banata hai (`scripts/packages/lib/create/install.ts`, DESIGN §11).',
     '- Styles: `@beautinique/frontend-styles` (tokens, fonts, utilities).',
@@ -317,6 +319,9 @@ ${gatewayEnv}
         registerType: 'autoUpdate',
         // the app's own public/manifest.webmanifest, as every app has (npm run icons:install)
         manifest: false,
+        // page navigations get the app shell offline, but never /api: those reach the server (a
+        // download, a sign-in redirect; QA audit Q-013)
+        workbox: { navigateFallbackDenylist: [/^\\/api\\//] },
       }),`
           : ''
       }

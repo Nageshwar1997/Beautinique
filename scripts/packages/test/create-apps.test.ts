@@ -172,6 +172,13 @@ describe('frontend apps pass every check', () => {
         expect(result.code, `${app} ${step}:\n${result.out}`).toBe(0);
       }
       expect(existsSync(join(repo.root, 'frontend', app, built))).toBe(true);
+      if (kind === 'pwa') {
+        // the service worker answers page navigations with the app shell, but never /api (Q-013):
+        // those go to the server (a download, a sign-in redirect)
+        // (minified or not: `denylist:[/^\/api\//]` or `denylist: [/^\/api\//]`)
+        const sw = readFileSync(join(repo.root, 'frontend', app, built), 'utf8');
+        expect(sw).toMatch(/denylist:\s*\[\/\^\\\/api\\\/\/\]/);
+      }
       // the build output must not trip the repo's format check (CI runs it after npm run build)
       const after = await run(join(REPO_ROOT, 'node_modules', 'prettier', 'bin', 'prettier.cjs'), [
         '--check',

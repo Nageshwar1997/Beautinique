@@ -15,6 +15,9 @@ export default defineConfig({
       registerType: 'autoUpdate',
       // the app's own public/manifest.webmanifest, as every app has (npm run icons:install)
       manifest: false,
+      // page navigations get the app shell offline, but never /api: those reach the server (a
+      // download, a sign-in redirect; QA audit Q-013)
+      workbox: { navigateFallbackDenylist: [/^\/api\//] },
     }),
   ],
   // /api goes to the local gateway, the same path the Vercel rewrite takes in production, with the
