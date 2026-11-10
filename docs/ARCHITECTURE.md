@@ -1,6 +1,6 @@
 # ARCHITECTURE — BQ
 
-> **Status:** v1.68 draft (2026-11-10). [PRD.md](PRD.md) v1.0 pe based. Design ek multi-agent review se aaya (3 architecture proposals + review board + owner ke decisions), aur v1.1 me free tier ke official docs ke against verify hua.
+> **Status:** v1.69 draft (2026-11-10). [PRD.md](PRD.md) v1.0 pe based. Design ek multi-agent review se aaya (3 architecture proposals + review board + owner ke decisions), aur v1.1 me free tier ke official docs ke against verify hua.
 
 ## 0. Ek nazar me
 
@@ -383,7 +383,7 @@ Kai platforms alag users ko alag price dikhate hain. BQ ka rule: **ek product ka
 - **Signed-in password badalna:** naya route nahi; wahi email code wala raasta (`/auth/password/code`). Naya password = saare sessions band (§7.2), phir dobara sign-in.
 - **Customer me dummy `/terms` aur `/privacy`** (prerender, DUMMY badge, version `dummy-1` = `IDENTITY__LEGAL_VERSION`), sign-up consent unhi ke link deta hai.
 - **Admin live:** admin PR me `vercel.json` (SPA rewrite, `noindex`); Vercel project owner banata hai; Render keys (`GATEWAY__APP_HOSTS`, `GATEWAY__VERCEL_PROJECTS`, `NOTIFY__APP_URLS` me admin) code ke baad list.
-- **Internal apps ka idle (30 min):** `IdleNotice`: bina activity 28 min pe "Are you still there?" dialog ("Stay signed in" refresh karta hai), 30 min pe sign-in page saaf sandesh ke saath. **Jagah auth-ui (2026-11-03, PR 6), app-shell nahi:** use components ka Dialog chahiye, aur components ka playground app-shell leta hai (build me dependency cycle). Activity (click, key, scroll, touch; kisi bhi tab me) ho to page server ki 30 min ki seema se 5 min pehle ek refresh karta hai (kaam ke dauraan ~25 min me ek, kyunki refresh ki `session` rate limit ka ek budget IP pe hai); tabs `BroadcastChannel` se activity, refresh aur idle sign-out baant'te hain. Idle sign-out sirf idle channel ke ek sandesh se doosre tabs tak jaata hai, session channel ke `signed-out` se nahi: do channels ke sandesh kisi tab me ulte kram me pahunchte to wo bina wajah ke sign-in pe jaata (QA-FE-010).
+- **Internal apps ka idle (30 min):** `IdleNotice`: bina activity 28 min pe "Are you still there?" dialog ("Stay signed in" refresh karta hai), 30 min pe sign-in page saaf sandesh ke saath. **Jagah auth-ui (2026-11-03, PR 6), app-shell nahi:** use components ka Dialog chahiye, aur components ka playground app-shell leta hai (build me dependency cycle). Activity (click, key, scroll, touch, aur app kholna ya naya tab: Q-009, owner 2026-11-09; kisi bhi tab me) ho to page server ki 30 min ki seema se 5 min pehle ek refresh karta hai (kaam ke dauraan ~25 min me ek, kyunki refresh ki `session` rate limit ka ek budget IP pe hai); tabs `BroadcastChannel` se activity, refresh aur idle sign-out baant'te hain. Idle sign-out sirf idle channel ke ek sandesh se doosre tabs tak jaata hai, session channel ke `signed-out` se nahi: do channels ke sandesh kisi tab me ulte kram me pahunchte to wo bina wajah ke sign-in pe jaata (QA-FE-010).
 - **Admin PR 6 (2026-11-03):** sign-in me authenticator lagana (identity ka `totp-enroll`: QR + key, pehla code, recovery codes; codes save hone ke baad hi app me), invitation page, khaali dashboard, account pages, icon credits (`IconCreditsPage` app-shell me, dono apps ka). Admin E2E ka invitation `scripts/e2e/invite.ts` se (Master app abhi nahi): identity ke apne functions run ke DB me Master aur invitation banate hain, email notify → Mailpit asli raaste se.
 - **Playwright E2E isi kaam me:** har app ka sign-up/sign-in raasta (bundle + Mailpit), 360/768/1280 px, light/dark, axe; CI me chalta hai.
 - Recovery codes ek baar dikhte hain: copy, `.txt` download, "I've saved them" tick ke bina aage nahi. QR browser me banta hai (koi bahar ki site nahi).
@@ -727,3 +727,4 @@ Sirf config badlegi, code nahi:
 | v1.66   | 2026-11-09 | §7.2: refresh aur sign-out ki apni rate class `session` (IP ka 600 / 5 min + har session 30 / 5 min), sign-in `auth` me hi (owner, QA DR-005); §9.2 idle refresh ki wajah usi class se. |
 | v1.67   | 2026-11-09 | §9.1: saare apps installable (manifest standalone, parivaar ke icons; offline sirf delivery), owner. |
 | v1.68 | 2026-11-10 | §9.1: delivery ka SW `/api` navigations server ke liye chhodta (Q-013, owner). |
+| v1.69 | 2026-11-10 | §9.2: idle me app kholna (naya tab) bhi activity, sab tabs ko (Q-009, owner). |

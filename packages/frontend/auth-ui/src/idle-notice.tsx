@@ -179,6 +179,10 @@ function IdleWatch({ app, idleMs }: { app: AppId; idleMs: number }) {
         }
       };
       channel.current = tabs;
+      // opening the app is activity: the other tabs hear it too, so a tab left idle does not sign
+      // out the person who just opened a new one (Q-009)
+      watch.shared = at;
+      post({ type: 'active', at });
     }
     const onActivity = () => {
       // while the question is open, only its buttons answer it

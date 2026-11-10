@@ -140,12 +140,34 @@ describe('IdleNotice', () => {
     }
   });
 
+  it('counts opening the app in a new tab as activity in every tab (Q-009)', async () => {
+    const identity = fakeIdentity('admin', { signedIn: true });
+    setHint('admin');
+    const first = renderApp(pages, { identity, app: 'admin', at: '/desk' });
+    await within(first.container).findByText('Desk');
+    // the first tab sits idle; at 29 minutes the person opens the app in a new tab and reads
+    await pass(29 * MINUTE);
+    const second = renderApp(pages, { identity, app: 'admin', at: '/desk' });
+    await within(second.container).findByText('Desk');
+    // the first tab's question closes, and nobody is signed out at 30 minutes
+    await vi.waitFor(() => {
+      expect(within(first.container).queryByRole('alertdialog')).toBeNull();
+    });
+    await pass(MINUTE + 10_000);
+    for (const tab of [first, second]) {
+      expect(within(tab.container).queryByText(NOTICE)).toBeNull();
+      expect(within(tab.container).getByTestId('where').textContent).toBe('/desk');
+    }
+    expect(logouts(identity)).toBe(0);
+  });
+
   it('says why in the tab that went idle too, with another tab open (QA-FE-010)', async () => {
     const identity = fakeIdentity('admin', { signedIn: true });
     setHint('admin');
     const idle = renderApp(pages, { identity, app: 'admin', at: '/desk' });
     await within(idle.container).findByText('Desk');
-    // the other tab opened a minute later: it has not reached the limit when the first one does
+    // the other tab opened a minute later, which counts as activity in both (Q-009): both reach the
+    // limit a minute after that, and the first to see it tells the other
     await pass(MINUTE);
     const other = renderApp(pages, { identity, app: 'admin', at: '/desk' });
     await within(other.container).findByText('Desk');
@@ -158,7 +180,7 @@ describe('IdleNotice', () => {
           answer = resolve;
         }),
     );
-    await pass(29 * MINUTE);
+    await pass(30 * MINUTE + 10_000);
     for (const tab of [idle, other]) {
       await within(tab.container).findByText(NOTICE);
       expect(within(tab.container).getByTestId('where').textContent).toBe('/sign-in?next=%2Fdesk');

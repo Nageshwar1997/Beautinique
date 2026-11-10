@@ -1,6 +1,6 @@
 # MEMORY — BQ
 
-> **Status:** v1.82 (2026-11-10). Project ki yaaddasht: **kya tay hua aur kyun**, **pichhle kaam se kya seekha**, aur **kaunse jaal (traps) se bachna hai**. Poori detail baaki docs me hai; yahan short version aur pointers. Naya sabak ya decision aaye to yahan ek line jodo.
+> **Status:** v1.83 (2026-11-10). Project ki yaaddasht: **kya tay hua aur kyun**, **pichhle kaam se kya seekha**, aur **kaunse jaal (traps) se bachna hai**. Poori detail baaki docs me hai; yahan short version aur pointers. Naya sabak ya decision aaye to yahan ek line jodo.
 
 ## 1. Decision log
 
@@ -129,6 +129,7 @@
 | 2026-11-09 | Saare 11 apps phone pe app ki tarah install (owner ne phone pe pakda: customer app jaisa, baaki browser jaise URL bar ke saath; Claude ki do salah maani): har app ka `public/manifest.webmanifest` (`display: standalone`) + head me manifest aur `apple-touch-icon`; icon tile ka rang parivaar se (customer ivory, team apps ink, partner apps rose), naam "BQ" + app. Icons `npm run icons:install` mark ke paths se Chromium me banata (`brand/install/<family>/`, apps me copy); delivery ka manifest bhi file (`manifest: false`); `create:app` bhi; jaanch `scripts/ci/test/install.test.ts` | Bina manifest Chrome sirf browser shortcut banata hai. 11 ek jaise icon phone pe pehchane nahi jaate, 11 alag rang brand se bahar; parivaar ke rang brand me rehte aur ek nazar me customer/team/partner batate. Headless Chromium ka `getInstallabilityErrors` bina manifest pe bhi khaali deta (control se dekha), isliye asli install ki jaanch phone pe |
 | 2026-11-10 | Q-014 (owner ne Claude ki salah maani, phir pehle karne ko kaha): 9 khaali apps (seller, master, superadmin, support, finance, logistics, delivery, growth, creator) ka home "Coming soon" + app ka naam + ek line (`APP_TAGLINES` generator me; line aage ke kaam ki, "will" ke saath, ARCHITECTURE ke modules se); `create:app` bhi yahi | Live pe har visitor "The app is ready. Add pages in src/routes.tsx." dekhta tha (developer ka sandesh). Ek line batati hai app kis ke liye hai, bina aaj na hone wale feature ka vaada kiye |
 | 2026-11-10 | Q-013 (owner ne Claude ki salah maani, abhi karne ko kaha): delivery ke service worker me `workbox.navigateFallbackDenylist: [/^\/api\//]`, generator bhi | vite-plugin-pwa ka `generateSW` har navigation (`/api` bhi) ko `index.html` deta tha; Chromium me SW ke baad `/api` navigation server tak nahi gayi. T8.6 ke downloads aur redirects se pehle sasta fix |
+| 2026-11-10 | Q-009 (owner ne Claude ki salah maani, abhi karne ko kaha): internal apps me app kholna (naya tab) bhi activity, aur `IdleWatch` mount pe doosre tabs ko `active` bhejta | Tab A 29 min idle, insaan tab C kholta aur bina scroll padhta: 30 min pe A sign-out karta aur C bhi. Ulta khatra nahi: sirf ek tab kholna ghadi aage karta, session lamba nahi khinchta (server ka 30 min refresh ke bina waisa hi) |
 
 ## 2. Pichhle kaam se seekhe sabak
 
@@ -294,3 +295,4 @@
 | v1.80   | 2026-11-09 | Decision: saare apps phone pe install (manifest, parivaar ke icon rang, "BQ" naam). |
 | v1.81 | 2026-11-10 | Decision: Q-014, khaali apps ka "Coming soon" home. |
 | v1.82 | 2026-11-10 | Decision: Q-013, delivery SW `/api` navigation server ke liye. |
+| v1.83 | 2026-11-10 | Decision: Q-009, naya tab bhi idle activity. |
