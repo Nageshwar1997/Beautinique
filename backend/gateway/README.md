@@ -37,7 +37,7 @@ Zaroori (bina inke start nahi hota): `GATEWAY__REDIS_URL` aur `GATEWAY__ORIGIN_S
 
 - `/health`: process zinda (Render health check).
 - `/wake`: soye free Render service ko jagane ke liye (apps ki wake-up screen browser se seedha bulati hai, kyunki Vercel ke raaste ki request soye service ko nahi jagati). Khaali 204, `no-store`, `Cross-Origin-Resource-Policy: cross-origin`; origin secret ke bina, kuch nahi chhoota.
-- `/ready`: Redis + har chalte deployable ka `/health` (monitors).
+- `/ready`: Redis + har chalte deployable ka `/health` (monitors). Ek round ka jawab 5 s tak sab callers ko (`READY_REUSE_MS`, owner 2026-11-09, QA DR-001): public aur bina rate limit, to flood pe bhi har 5 s me kuch hi internal calls; gira hua deployable 5 s tak der se dikh sakta.
 - `/status`: har deployable ka gehra `/ready` ek jawab me (`ok` = 200, warna `degraded` 503). Public, owner ka faisla 2026-10-25: sirf naam aur ok/failing; versions, memory, queue depth baad me sign-in ke peeche. Ek jawab 5 s tak sab requests ko (databases pe bojh nahi).
 
 ## Code kahan hai

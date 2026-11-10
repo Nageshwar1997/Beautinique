@@ -328,7 +328,30 @@ const mutations: Mutation[] = [
     change: [['    if (caller.gone) return;\n', '']],
     tests: 'caller leaves',
   },
-  // 6. /status
+  // 6. /ready (DR-001) and /status
+  {
+    file: 'app',
+    name: 'every /ready call checks again (no reuse)',
+    change: [['if (last === undefined || at - last.at >= ms) {', 'if (true) {']],
+    tests: 'flood of /ready|older than the reuse',
+  },
+  {
+    file: 'app',
+    name: 'the first /ready answer is kept for ever',
+    change: [['if (last === undefined || at - last.at >= ms) {', 'if (last === undefined) {']],
+    tests: 'flood of /ready|older than the reuse',
+  },
+  {
+    file: 'app',
+    name: 'the upstream checks are not reused',
+    change: [
+      [
+        '[name, reusedFor(readyReuseMs, () => isHealthy(origin))]',
+        '[name, () => isHealthy(origin)]',
+      ],
+    ],
+    tests: 'flood of /ready|older than the reuse',
+  },
   {
     file: 'status',
     name: 'any check name is echoed',

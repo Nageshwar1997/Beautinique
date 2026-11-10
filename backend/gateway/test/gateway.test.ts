@@ -323,11 +323,20 @@ interface GatewayOptions {
   passport?: GatewayAppOptions['passport'];
   /** What runs before the gateway's app on each request (a stand-in for an instrumentation) */
   before?: (res: ServerResponse) => void;
+  readyReuseMs?: number;
 }
 
 async function gateway(
   upstreams: GatewayAppOptions['upstreams'],
-  { timeoutMs = 2000, limiter, rateLimits, sessions, passport, before }: GatewayOptions = {},
+  {
+    timeoutMs = 2000,
+    limiter,
+    rateLimits,
+    sessions,
+    passport,
+    before,
+    readyReuseMs,
+  }: GatewayOptions = {},
 ) {
   const app = buildApp({
     logger,
@@ -344,6 +353,7 @@ async function gateway(
     redisReady: redis.ready,
     sessions: sessions ?? sessionGate({ keys: identityKeys, redis: redis.client }),
     passport: passport ?? passportSigner(),
+    ...(readyReuseMs === undefined ? {} : { readyReuseMs }),
   });
   if (!before) return listen(app);
   return listen((req, res) => {
@@ -1085,7 +1095,8 @@ describe('health', () => {
 
   it('is ready only while Redis and every configured upstream answer', async () => {
     const core = await listen(fakeCore());
-    const healthy = await gateway({ core: core.url, identity: undefined });
+    // no reuse here: the same gateway is asked again right after core stops
+    const healthy = await gateway({ core: core.url, identity: undefined }, { readyReuseMs: 0 });
     const ok = await fetch(`${healthy.url}/ready`);
     expect(ok.status).toBe(200);
     expect(await ok.json()).toEqual({ status: 'ready', checks: { redis: 'ok', core: 'ok' } });
@@ -1100,6 +1111,38 @@ describe('health', () => {
     expect(await (await fetch(`${withSick.url}/ready`)).json()).toMatchObject({
       checks: { core: 'failing' },
     });
+  });
+
+  /** An upstream that counts the gateway's /health calls. */
+  const counted = async () => {
+    let calls = 0;
+    const server = await listen((req, res) => {
+      if (req.url === '/health') calls += 1;
+      res.statusCode = 200;
+      res.end('{}');
+    });
+    return { url: server.url, calls: () => calls };
+  };
+
+  it('answers a flood of /ready with one round of checks every 5 seconds (DR-001)', async () => {
+    const core = await counted();
+    const gw = await gateway({ core: core.url });
+    // a burst at once, and more right after: every caller gets the answer of one round
+    const burst = await Promise.all(Array.from({ length: 20 }, () => fetch(`${gw.url}/ready`)));
+    expect(burst.map((res) => res.status)).toEqual(Array<number>(20).fill(200));
+    for (let i = 0; i < 5; i += 1) expect((await fetch(`${gw.url}/ready`)).status).toBe(200);
+    expect(core.calls()).toBe(1);
+  });
+
+  it('checks again once its answer is older than the reuse time', async () => {
+    const core = await counted();
+    const gw = await gateway({ core: core.url }, { readyReuseMs: 100 });
+    await fetch(`${gw.url}/ready`);
+    await fetch(`${gw.url}/ready`);
+    expect(core.calls()).toBe(1);
+    await new Promise((resolve) => setTimeout(resolve, 150));
+    await fetch(`${gw.url}/ready`);
+    expect(core.calls()).toBe(2);
   });
 
   it('/status shows every deployable and its checks: 200 when all that run are ok', async () => {
