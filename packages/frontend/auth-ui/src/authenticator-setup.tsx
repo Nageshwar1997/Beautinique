@@ -56,6 +56,8 @@ export function AuthenticatorSetup({
   const client = useApiClient();
   const { state } = useSession();
   const [step, setStep] = useState<Step>({ kind: 'starting' });
+  // a step reached from another one (not the page that just opened) takes the focus
+  const [moved, setMoved] = useState(false);
 
   const start = useCallback(
     async (notice?: string) => {
@@ -100,7 +102,7 @@ export function AuthenticatorSetup({
       );
     case 'scan':
       return (
-        <StepFrame number={1} title="Add Beautinique to your authenticator app">
+        <StepFrame number={1} title="Add Beautinique to your authenticator app" focus={moved}>
           {step.notice !== undefined && <Notice>{step.notice}</Notice>}
           <Scan secret={step.secret} uri={step.uri} />
           <div className="flex flex-wrap items-center justify-between gap-3">
@@ -121,9 +123,13 @@ export function AuthenticatorSetup({
           <Confirm
             replacing={replacing}
             onBack={() => {
+              setMoved(true);
               setStep({ ...step, kind: 'scan' });
             }}
-            onRestart={(notice) => void start(notice)}
+            onRestart={(notice) => {
+              setMoved(true);
+              void start(notice);
+            }}
             onConfirmed={(codes) => {
               setStep({ kind: 'codes', codes });
             }}
@@ -132,28 +138,45 @@ export function AuthenticatorSetup({
       );
     case 'codes':
       return (
-        <StepFrame number={3} title="Save your recovery codes">
+        <StepFrame number={3} title="Save your recovery codes" focus>
           <RecoveryCodes codes={step.codes} email={email} onDone={onDone} />
         </StepFrame>
       );
   }
 }
 
-/** One numbered step of a set-up (also the sign-in that sets up the authenticator). */
+/**
+ * One numbered step of a set-up (also the sign-in that sets up the authenticator). `focus`: a step
+ * without a field, reached from another step, so its heading takes the focus and is read out
+ * (QA-FE-008); never on a page that just opened.
+ */
 export function StepFrame({
   number,
   title,
+  focus = false,
   children,
 }: {
   number: number;
   title: string;
+  focus?: boolean;
   children: ReactNode;
 }) {
+  const heading = useRef<HTMLHeadingElement>(null);
+  useEffect(() => {
+    if (focus) heading.current?.focus();
+  }, [focus]);
   return (
     <section aria-labelledby={`setup-step-${String(number)}`} className="space-y-5">
       <div>
         <p className="text-foreground-muted text-sm">Step {number} of 3</p>
-        <h2 id={`setup-step-${String(number)}`} className="font-display text-xl font-medium">
+        <h2
+          ref={heading}
+          id={`setup-step-${String(number)}`}
+          // not a control: Tab never stops here, only the code moves the focus; its ring shows
+          // after the keyboard (focus-visible), as everywhere (DESIGN: the focus ring always shows)
+          tabIndex={focus ? -1 : undefined}
+          className="font-display focus-ring rounded-sm text-xl font-medium outline-hidden"
+        >
           {title}
         </h2>
       </div>

@@ -248,6 +248,10 @@ describe('error pages', () => {
   });
 
   it('error pages get their own title and stay out of search results', () => {
+    // React Router passes `error: null` when nothing failed (QA-CUS-001), undefined when another
+    // route failed
+    expect(titleOf(null)).toBe('Beautinique');
+    expect(rootMeta({ error: null } as MetaArgs)).toEqual([{ title: 'Beautinique' }]);
     expect(titleOf(undefined)).toBe('Beautinique');
     expect(titleOf(response(404, 'Not Found'))).toBe('Page not found | Beautinique');
     expect(titleOf(new Error('x'))).toBe('Something went wrong | Beautinique');

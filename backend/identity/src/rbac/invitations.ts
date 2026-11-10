@@ -31,6 +31,7 @@ import {
   isDuplicateKey,
   type ManageDeps,
   notFound,
+  roleCatalog,
   rolesOf,
   validationFailed,
 } from './manage.ts';
@@ -268,7 +269,7 @@ export async function listInvitations(
     now,
   });
   requirePermission(caller, grantRead.key);
-  const visible = visibleFilter(caller, await rolesOf(deps.mongo).find().toArray());
+  const visible = visibleFilter(caller, await roleCatalog(deps.mongo));
   if (!visible) return { items: [], nextCursor: null };
   const byStatus = {
     pending: { status: 'pending' as const, expiresAt: { $gt: now } },

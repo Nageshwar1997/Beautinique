@@ -20,7 +20,13 @@ import {
 } from '@beautinique/shared-contracts';
 import { uuidv7 } from '@beautinique/shared-utils';
 
-import { AUTH_PROVIDERS, type AuthProvider, CREDENTIALS, type Credentials } from './credentials.ts';
+import {
+  AUTH_PROVIDERS,
+  type AuthProvider,
+  bySubject,
+  CREDENTIALS,
+  type Credentials,
+} from './credentials.ts';
 import { lastSignInMethod, oauthSignUpExpired } from './errors.ts';
 import { clearFailures, isLocked } from './lockout.ts';
 import { inRedis, type LoginDeps, startLogin } from './login.ts';
@@ -178,7 +184,7 @@ async function link(
 ): Promise<'linked' | 'there' | null> {
   const mine = await providers(deps).findOne({ userId: user._id, provider }, { session });
   if (mine) return mine.subject === subject ? 'there' : null;
-  const theirs = await providers(deps).findOne({ provider, subject }, { session });
+  const theirs = await providers(deps).findOne(bySubject(provider, subject), { session });
   if (theirs) return null;
   await providers(deps).insertOne(
     { _id: uuidv7(), userId: user._id, provider, subject, linkedAt: now, lastUsedAt: now },
@@ -311,7 +317,7 @@ export async function finishTrip(
     return backToSignIn('failed');
   }
   const users = deps.mongo.db.collection<User>(USERS);
-  const linked = await providers(deps).findOne({ provider, subject: profile.subject });
+  const linked = await providers(deps).findOne(bySubject(provider, profile.subject));
   let user = linked ? await users.findOne({ _id: linked.userId }) : null;
   if (!linked) {
     // a provider we have not seen for this person: only a verified email finds the account

@@ -49,6 +49,11 @@ export const isDuplicateKey = (error: unknown): boolean =>
     (error as { mongoCode?: unknown }).mongoCode === 11000);
 
 export const rolesOf = (mongo: Mongo) => mongo.db.collection<RoleRecord>(ROLES);
+/** Every role, retired too: what a caller may see is worked out from the whole catalog. */
+export const roleCatalog = (mongo: Mongo) =>
+  rolesOf(mongo)
+    .find({}, { comment: 'full read: the role catalog, for what the caller may see' })
+    .toArray();
 const grantsOf = (mongo: Mongo) => mongo.db.collection<GrantRecord>(GRANTS);
 const usersOf = (mongo: Mongo) => mongo.db.collection<User>(USERS);
 
@@ -163,7 +168,13 @@ export async function createRole(deps: ManageDeps, passport: Passport, body: New
     createdAt: now,
     updatedAt: now,
   };
-  const problems = customRoleProblems(role, await roles.find({ retired: false }).toArray());
+  const live = await roles
+    .find(
+      { retired: false },
+      { comment: 'full read: every live role, to check the new one against' },
+    )
+    .toArray();
+  const problems = customRoleProblems(role, live);
   if (problems.length > 0) throw validationFailed(problems);
   try {
     await roles.insertOne(role);
@@ -212,7 +223,12 @@ export async function updateRole(
     retired: change.retired ?? role.retired,
     updatedAt: now,
   };
-  const others = await roles.find({ retired: false, _id: { $ne: key } }).toArray();
+  const others = await roles
+    .find(
+      { retired: false, _id: { $ne: key } },
+      { comment: 'full read: every other live role, to check the change against' },
+    )
+    .toArray();
   const problems = customRoleProblems(next, others);
   if (problems.length > 0) throw validationFailed(problems);
   // a role others name as who gives them keeps the right to give, and stays
@@ -374,7 +390,7 @@ export interface GrantQuery {
 export async function listGrants(deps: ManageDeps, passport: Passport, query: GrantQuery) {
   const caller = await callerOf(deps, passport, new Date());
   requirePermission(caller, grantRead.key);
-  const visible = visibleFilter(caller, await rolesOf(deps.mongo).find().toArray());
+  const visible = visibleFilter(caller, await roleCatalog(deps.mongo));
   if (!visible) return { items: [], nextCursor: null };
   let { userId } = query;
   if (query.email !== undefined) {

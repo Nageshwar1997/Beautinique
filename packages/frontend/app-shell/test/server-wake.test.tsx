@@ -260,9 +260,9 @@ describe('ServerWake', () => {
   const veil = () => document.querySelector('[data-server-check-veil]');
   const marked = () => document.documentElement.hasAttribute(WAKE_CHECK_ATTRIBUTE);
 
-  const renderApp = (fetch: typeof globalThis.fetch, timings = {}) =>
+  const renderApp = (fetch: typeof globalThis.fetch, timings = {}, onReady?: () => void) =>
     render(
-      <ServerWake app="customer" fetch={fetch} {...timings}>
+      <ServerWake app="customer" fetch={fetch} {...timings} onReady={onReady}>
         <main data-testid="app">
           <h1>Store</h1>
           <a href="/x">A link</a>
@@ -291,7 +291,10 @@ describe('ServerWake', () => {
   it('leaves a crawler the page as it is, and never calls the server for it', async () => {
     vi.spyOn(navigator, 'userAgent', 'get').mockReturnValue(GOOGLEBOT);
     const { fetch } = scriptedFetch({ hang: true });
-    renderApp(fetch);
+    const onReady = vi.fn();
+    renderApp(fetch, {}, onReady);
+    // nothing to wait for: the app may call at once
+    expect(onReady).toHaveBeenCalledTimes(1);
     expect(marked()).toBe(false);
     expect(veil()).toBeNull();
     expect(app().parentElement?.hasAttribute('inert')).toBe(false);
@@ -332,18 +335,25 @@ describe('ServerWake', () => {
     expect(app().parentElement?.hasAttribute('inert')).toBe(false);
   });
 
-  it('offers to try again or to continue when the server does not answer in time', async () => {
+  it('offers only to try again when the server does not answer in time (owner, 2026-11-07)', async () => {
     const { fetch, calls } = scriptedFetch(
       { hang: true },
       { hang: true },
       { after: 10_000, status: 200 },
     );
-    renderApp(fetch, { attemptTimeoutMs: 20_000, giveUpAfterMs: 30_000 });
+    const onReady = vi.fn();
+    renderApp(fetch, { attemptTimeoutMs: 20_000, giveUpAfterMs: 30_000 }, onReady);
     await advance(30_000);
     expect(screen.getByRole('heading', { name: 'The server is taking too long' })).toBeTruthy();
     expect(screen.queryByRole('progressbar')).toBeNull();
     const retry = screen.getByRole('button', { name: 'Try again' });
     expect(document.activeElement).toBe(retry);
+    // no way into the app without the server
+    expect(screen.getAllByRole('button').map((button) => button.textContent)).toEqual([
+      'Try again',
+    ]);
+    expect(app().parentElement?.hasAttribute('inert')).toBe(true);
+    expect(onReady).not.toHaveBeenCalled();
 
     // try again: the screen stays and calls again, then goes when the server answers
     act(() => {
@@ -353,17 +363,25 @@ describe('ServerWake', () => {
     expect(calls).toHaveLength(3);
     await advance(10_000);
     expect(wakeScreen()).toBeNull();
+    expect(onReady).toHaveBeenCalledTimes(1);
   });
 
-  it('lets the user continue without the server', async () => {
-    const { fetch } = scriptedFetch({ hang: true });
-    renderApp(fetch, { attemptTimeoutMs: 10_000, giveUpAfterMs: 10_000 });
-    await advance(10_000);
-    act(() => {
-      screen.getByRole('button', { name: 'Continue anyway' }).click();
-    });
-    expect(wakeScreen()).toBeNull();
-    expect(app().parentElement?.hasAttribute('inert')).toBe(false);
+  it('tells the app once that the server answered, and not before', async () => {
+    const { fetch } = scriptedFetch({ after: 25_000, status: 200 });
+    const onReady = vi.fn();
+    const { rerender } = renderApp(fetch, {}, onReady);
+    await advance(24_000);
+    expect(onReady).not.toHaveBeenCalled();
+    await advance(1000);
+    expect(onReady).toHaveBeenCalledTimes(1);
+    // a new render of the frame tells it no more
+    rerender(
+      <ServerWake app="customer" fetch={fetch} onReady={onReady}>
+        <main data-testid="app" />
+      </ServerWake>,
+    );
+    await advance(5000);
+    expect(onReady).toHaveBeenCalledTimes(1);
   });
 
   it.each([

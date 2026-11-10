@@ -582,7 +582,7 @@ const mutations: Mutation[] = [
     name: 'a parallel tab taken for a copy',
     change: [
       [
-        'if (found.rotatedAt && at - found.rotatedAt.getTime() < REFRESH_RACE_MS) {',
+        'if (replaced && found.rotatedAt && at - found.rotatedAt.getTime() < REFRESH_RACE_MS) {',
         'if (false) {',
       ],
     ],
@@ -590,14 +590,66 @@ const mutations: Mutation[] = [
   },
   {
     file: 'sessions',
-    name: 'any old token taken for a copy',
+    name: 'any made-up token taken for a copy',
     change: [
-      [
-        'found?.revokedAt !== null || found.previousRefreshHash !== hash',
-        'found?.revokedAt !== null',
-      ],
+      ['if (!replaced && !ofFamily) throw sessionExpired();', 'if (false) throw sessionExpired();'],
     ],
     tests: 'made-up token',
+  },
+  // token families (QA-ID-001): any older token of the session is a copy, not only the one replaced
+  {
+    file: 'sessions',
+    name: 'only the token just replaced is a copy (QA-ID-001 back)',
+    change: [['if (!replaced && !ofFamily) throw', 'if (!replaced) throw']],
+    tests: 'older token',
+  },
+  {
+    file: 'sessions',
+    name: 'any family taken for the session’s',
+    change: [
+      ['found.familyHash === familyHashOf(keys, parts.family);', 'found.familyHash !== "";'],
+    ],
+    tests: 'made-up token',
+  },
+  {
+    file: 'sessions',
+    name: 'an older token taken for a parallel tab',
+    change: [['if (replaced && found.rotatedAt && at -', 'if (found.rotatedAt && at -']],
+    tests: 'older token',
+  },
+  {
+    file: 'sessions',
+    name: 'a new family at every refresh',
+    change: [['const family = parts.family ?? newFamily();', 'const family = newFamily();']],
+    tests: 'family in every token|older token',
+  },
+  {
+    file: 'sessions',
+    name: 'every token read as one from before families',
+    change: [['family: parts.length === 3 ? (parts[1] ?? null) : null', 'family: null']],
+    tests: 'family in every token|older token',
+  },
+  {
+    file: 'sessions',
+    name: 'no family hash at sign-in',
+    change: [
+      [
+        '        previousRefreshHash: null,\n        familyHash: familyHashOf(keys, family),\n',
+        '        previousRefreshHash: null,\n',
+      ],
+    ],
+    tests: 'JWKS verifies',
+  },
+  {
+    file: 'sessions',
+    name: 'a session from before families never gets one',
+    change: [
+      [
+        '              previousRefreshHash: hash,\n              familyHash: familyHashOf(keys, family),\n',
+        '              previousRefreshHash: hash,\n',
+      ],
+    ],
+    tests: 'before token families',
   },
   {
     file: 'sessions',
@@ -1554,6 +1606,144 @@ const mutations: Mutation[] = [
     name: 'a client secret without its ID',
     change: [['    if (id === undefined && secret !== undefined) {', '    if (false) {']],
     tests: 'ID and secret pair',
+  },
+  // the lookup by a provider's id reads an index (QA-ID-002), and full reads say so (RULES §4.13)
+  {
+    file: 'credentials',
+    name: 'the provider-id index filters on $type again',
+    change: [
+      [
+        "  partialFilterExpression: { subject: { $gt: '' } },",
+        "  partialFilterExpression: { subject: { $type: 'string' } },",
+      ],
+    ],
+    tests: 'with a plain query',
+  },
+  {
+    file: 'credentials',
+    name: 'the lookup by a provider’s id without $type',
+    change: [
+      ["  subject: { $eq: subject, $type: 'string' as const },", '  subject: { $eq: subject },'],
+    ],
+    tests: 'whatever its filter',
+  },
+  {
+    file: 'credentials',
+    name: 'the migration keeps the old provider-id index',
+    change: [['    if (old) await providers.dropIndex(OLD_PROVIDER_SUBJECT_INDEX);\n', '']],
+    tests: 'safely again',
+  },
+  {
+    file: 'credentials',
+    name: 'the migration drops the old index before it makes the new one',
+    change: [
+      ['    await syncIndexes(mongo, [PROVIDER_SUBJECT_INDEX]);\n', ''],
+      [
+        '    if (old) await providers.dropIndex(OLD_PROVIDER_SUBJECT_INDEX);\n',
+        '    if (old) await providers.dropIndex(OLD_PROVIDER_SUBJECT_INDEX);\n' +
+          '    await syncIndexes(mongo, [PROVIDER_SUBJECT_INDEX]);\n',
+      ],
+    ],
+    // a fresh database has no collection to list the indexes of until the new index makes it
+    tests: 'safely again',
+  },
+  {
+    file: 'release',
+    name: 'the release does not run the provider-id migration',
+    change: [
+      [
+        'defineMigrations([signUpGrantsMigration, providerSubjectIndexMigration])',
+        'defineMigrations([signUpGrantsMigration])',
+      ],
+    ],
+    tests: 'safely again',
+  },
+  {
+    file: 'oauth',
+    name: 'social sign-in looks up the provider’s id with a plain filter',
+    change: [
+      [
+        'findOne(bySubject(provider, profile.subject))',
+        'findOne({ provider, subject: profile.subject })',
+      ],
+    ],
+    tests: 'links a verified email',
+    survives:
+      'equivalent: the new index takes a plain query too (B); bySubject is the second guard (A), ' +
+      'which its own test keeps (whatever its filter)',
+  },
+  {
+    file: 'rbac/manage',
+    name: 'the role catalog is read without saying it is a full read',
+    change: [
+      [
+        "    .find({}, { comment: 'full read: the role catalog, for what the caller may see' })",
+        '    .find({})',
+      ],
+    ],
+    tests: 'pages with a cursor',
+  },
+  {
+    file: 'rbac/manage',
+    name: 'a new role is checked against every live role without saying so',
+    change: [
+      ["      { comment: 'full read: every live role, to check the new one against' },\n", ''],
+    ],
+    tests: 'make a sub-role',
+  },
+  // the gateway's ended-session marks come back from MongoDB after a Redis wipe (QA-GW-002)
+  {
+    file: 'sessions',
+    name: 'the ready mark is never written',
+    change: [["  batch.set(readyKey, '1');\n", '']],
+    tests: 'QA-GW-002',
+  },
+  {
+    file: 'sessions',
+    name: 'no ended session gets its mark back',
+    change: [
+      ["    if (left > 0) batch.set(revokedSessionKey(session._id), '1', 'PX', left);\n", ''],
+    ],
+    tests: 'QA-GW-002',
+  },
+  {
+    file: 'sessions',
+    name: 'a mark gets the whole time again, not what is left',
+    change: [["'1', 'PX', left);", "'1', 'PX', REVOKE_TTL_MS);"]],
+    tests: 'QA-GW-002',
+  },
+  {
+    file: 'sessions',
+    name: 'the sessions that ended long ago instead',
+    change: [
+      [
+        'revokedAt: { $gt: new Date(at - REVOKE_TTL_MS) }',
+        'revokedAt: { $lt: new Date(at - REVOKE_TTL_MS) }',
+      ],
+    ],
+    tests: 'QA-GW-002',
+  },
+  {
+    file: 'runtime',
+    name: 'the start writes no marks',
+    change: [
+      [
+        'const ended = await restoreGatewayMarks(mongo, redis.client, readyKey ? { readyKey } : {});',
+        'const ended = 0;',
+      ],
+    ],
+    tests: 'QA-GW-002',
+  },
+  {
+    file: 'runtime',
+    name: 'the recovery writes no marks',
+    change: [
+      [
+        '        await restoreGatewayMarks(mongo, redis.client, readyKey ? { readyKey } : {});\n        await redriveOutbox({',
+        '        await redriveOutbox({',
+      ],
+    ],
+    tests: 'QA-GW-002',
   },
 ];
 

@@ -26,7 +26,7 @@ import {
 
 let harness: Harness;
 const email = (name: string) => `${name}-${harness.runId}@beautinique.example`;
-const db = () => harness.server.runtime.mongo.db;
+const db = () => harness.db;
 const redis = () => harness.server.runtime.redis.client;
 const sessionsDb = () => db().collection<Session>(SESSIONS);
 

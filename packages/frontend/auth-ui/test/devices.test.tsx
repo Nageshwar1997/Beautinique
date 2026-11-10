@@ -1,3 +1,4 @@
+import { clearToasts } from '@beautinique/frontend-components';
 import { cleanup, screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { afterEach, describe, expect, it } from 'vitest';
@@ -18,6 +19,7 @@ import { renderApp, where } from './render';
 
 afterEach(() => {
   cleanup();
+  clearToasts();
   dropHint('customer');
 });
 
@@ -93,6 +95,27 @@ describe('MyDevices', () => {
     expect(identity.paths()).toContain('POST /auth/logout');
     expect(hintSet('customer')).toBe(false);
     expect(where()).toBe('/sign-in?next=%2Faccount%2Fdevices');
+  });
+
+  it('keeps this device signed in when its sign-out did not reach the server (QA-FE-004)', async () => {
+    const identity = signedIn();
+    identity.on('POST /auth/logout', () => Promise.reject(new TypeError('Failed to fetch')));
+    const user = userEvent.setup();
+    renderApp(pages, { identity, at: ACCOUNT_PATHS.devices });
+    await user.click(
+      await screen.findByRole('button', {
+        name: 'Sign out Chrome on Windows, Beautinique (this device)',
+      }),
+    );
+    expect(await screen.findByText('You are still signed in.')).toBeTruthy();
+    expect(
+      screen.getByText('We could not reach Beautinique. Check your connection and try again.'),
+    ).toBeTruthy();
+    expect(screen.getByRole('button', { name: 'Try again' })).toBeTruthy();
+    // still here, still signed in
+    expect(where()).toBe(ACCOUNT_PATHS.devices);
+    expect(hintSet('customer')).toBe(true);
+    expect(screen.queryByText('Sign-in page')).toBeNull();
   });
 
   it('says when this is the only device', async () => {

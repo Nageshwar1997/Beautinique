@@ -1,5 +1,5 @@
 import { IconDanger } from '@beautinique/frontend-icons';
-import type { ReactNode, Ref } from 'react';
+import type { ReactNode, Ref, SyntheticEvent } from 'react';
 import {
   CheckboxButton,
   CheckboxField,
@@ -24,6 +24,17 @@ export interface CheckboxProps extends Omit<
   /** The outer element (label, hint, error); `inputRef` reaches the `<input>`. */
   ref?: Ref<HTMLDivElement>;
 }
+
+/**
+ * A link or button in the label (the terms of use, a privacy notice) is its own control: React
+ * Aria's label toggles the box on a press and stops the click's default, so the link would tick
+ * the box and never open. Its events stop here, before the label hears them; the rest of the label
+ * still toggles.
+ */
+const keepToControl = (event: SyntheticEvent) => {
+  const control = (event.target as Element).closest('a[href], button');
+  if (control !== null && event.currentTarget.contains(control)) event.stopPropagation();
+};
 
 /**
  * A checkbox with its label (React Aria: keyboard, screen reader and touch behaviour; the styles
@@ -89,7 +100,19 @@ export function Checkbox({
                 )
               )}
             </span>
-            <span>{children}</span>
+            <span
+              onClick={keepToControl}
+              onPointerDown={keepToControl}
+              onPointerUp={keepToControl}
+              onMouseDown={keepToControl}
+              onMouseUp={keepToControl}
+              onTouchStart={keepToControl}
+              onTouchEnd={keepToControl}
+              onKeyDown={keepToControl}
+              onKeyUp={keepToControl}
+            >
+              {children}
+            </span>
           </>
         )}
       </CheckboxButton>

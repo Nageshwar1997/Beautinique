@@ -4,7 +4,7 @@ import { ACCESS_TOKEN_SECONDS, type AppId, SESSION_POLICIES } from '@beautinique
 import { formatTime } from '@beautinique/shared-utils';
 import { useCallback, useEffect, useRef, useState } from 'react';
 
-import { useSession } from './session';
+import { useSession, useSignOut } from './session';
 
 /** The question comes this long before the sign-out (owner: at 28 of 30 idle minutes). */
 export const IDLE_WARNING_MS = 2 * 60_000;
@@ -72,6 +72,7 @@ export function IdleNotice() {
 function IdleWatch({ app, idleMs }: { app: AppId; idleMs: number }) {
   const client = useApiClient();
   const { signOut, forget } = useSession();
+  const signOutNow = useSignOut();
   /** The sign-out time while the question is open, else null. */
   const [asking, setAsking] = useState<number | null>(null);
   const [staying, setStaying] = useState(false);
@@ -121,8 +122,9 @@ function IdleWatch({ app, idleMs }: { app: AppId; idleMs: number }) {
     watch.done = true;
     // the other tabs first: they sign out with the same note, without asking the server again
     post({ type: 'timed-out' });
-    // the session may be gone already (the server's idle limit): signed out here either way
-    signOut('idle').catch(() => undefined);
+    // then this tab, at once: its note never waits for the server, which a slow answer let
+    // another tab's sign-out beat (QA-FE-010); the server is asked until it hears it
+    void signOut('idle');
   }, [post, signOut]);
 
   const tick = useCallback(() => {
@@ -156,6 +158,7 @@ function IdleWatch({ app, idleMs }: { app: AppId; idleMs: number }) {
         if (!isMessage(event.data)) return;
         const message = event.data;
         if (message.type === 'timed-out') {
+          // here only: this one message told every tab already, with why (QA-FE-010)
           if (!watch.done) {
             watch.done = true;
             forget('idle');
@@ -226,18 +229,12 @@ function IdleWatch({ app, idleMs }: { app: AppId; idleMs: number }) {
     }
   };
 
-  const signOutNow = async () => {
+  const signOutFromQuestion = async () => {
+    // no idle sign-out meanwhile
     clock.current.done = true;
-    try {
-      await signOut();
-      toast({ tone: 'success', title: 'You are signed out.' });
-    } catch (error) {
-      toast({
-        tone: 'error',
-        title: 'Signing out did not finish.',
-        description: errorMessage(error),
-      });
-    }
+    // still signed in (the server did not end the session): the clock runs on, and the idle
+    // sign-out still comes at the limit (QA-FE-004)
+    if (!(await signOutNow())) clock.current.done = false;
   };
 
   return (
@@ -255,7 +252,7 @@ function IdleWatch({ app, idleMs }: { app: AppId; idleMs: number }) {
       }
       footer={
         <>
-          <Button variant="ghost" tone="neutral" onClick={() => void signOutNow()}>
+          <Button variant="ghost" tone="neutral" onClick={() => void signOutFromQuestion()}>
             Sign out
           </Button>
           <Button loading={staying} onClick={() => void stay()}>

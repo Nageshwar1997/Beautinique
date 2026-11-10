@@ -10,7 +10,9 @@ const ACCOUNT_LINKS = ACCOUNT_NAV.map(({ to, label }) => ({ href: to, label }));
 
 /**
  * The admin app's top bar: the mark and the app's name (home), the main nav, the theme switcher
- * and the account (sign in, or the account menu).
+ * and the account (sign in, or the account menu). On a phone the mark alone, as in the customer
+ * app: with the name the bar was 3 px wider than a 360 px screen (QA-ADM-001); the link keeps its
+ * full name for screen readers.
  */
 export function AdminHeader() {
   return (
@@ -22,7 +24,7 @@ export function AdminHeader() {
           className="text-foreground min-h-touch mr-auto inline-flex items-center gap-2 rounded-md"
         >
           <BrandMark size={36} />
-          <span className="font-display text-lg font-medium">Admin</span>
+          <span className="font-display hidden text-lg font-medium sm:inline">Admin</span>
         </Link>
         <NavList items={MAIN_NAV} label="Main" className="hidden md:block" />
         <ThemeSwitcher />

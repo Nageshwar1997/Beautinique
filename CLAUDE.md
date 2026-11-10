@@ -83,15 +83,18 @@ npm run build
 
 - `packages/<shared|frontend|backend>/<name>` → `@beautinique/<category>-<name>` (npm workspaces).
   Packages naye bante hain; purana `BQ-Packages` repo sirf reference hai.
-- `frontend/<app>`, `backend/<name>`: `npm run create` se bante hain, npm packages nahi (abhi: customer, admin;
-  gateway, identity, notify, core, bundle).
+- `frontend/<app>`, `backend/<name>`: `npm run create` se bante hain, npm packages nahi (abhi 11 apps: customer aur
+  admin chalte, seller, master, superadmin, support, finance, logistics, delivery, growth, creator khaali shells;
+  backend: gateway, identity, notify, core, bundle). Core me module sirf doosre module ke `index.ts` se, aur doosre
+  deployable ka code nahi: `npm run lint` me dependency-cruiser (`backend/core/.dependency-cruiser.json`).
 - `infra/`: laptop ka Docker infra (Mongo replica set, Valkey, Mailpit); live pe Docker nahi.
 - `scripts/mutation/`: mutation runner (`npm run mutate`); lists har package ke `test/mutations.ts` me.
 - `scripts/packages/`: package CLI (Node 24 TypeScript seedha chalata hai, build nahi). Tests:
   `scripts/packages/test/`.
 - **MongoDB:** `import { ObjectId, withTransaction } from '@beautinique/backend-server-mongo'`; seedha `mongodb` sirf
   `packages/backend/server-mongo` me (ESLint rokta hai). Transaction me queries ek ke baad ek (`Promise.all` ESLint rokta hai),
-  aur query ka error pakad ke aage nahi (dedupe `$setOnInsert` upsert se).
+  aur query ka error pakad ke aage nahi (dedupe `$setOnInsert` upsert se). Har query index se; jaan-boojh poora padhna
+  `comment: 'full read: <wajah>'` se, warna deployable ke tests fail (profiler pehra, RULES §4.13).
 - **Events:** `writeEvent` (`@beautinique/backend-server-queue`) usi `withTransaction` me jisme data badla; relay BullMQ tak le jaata hai.
   Change stream (`.watch(`) sirf us relay me (ESLint rokta hai). Redis: laptop/CI pe Docker Valkey, production me Render Key Value free (internal URL), `REDIS_URL` se;
   production Redis laptop ya tests se kabhi nahi.

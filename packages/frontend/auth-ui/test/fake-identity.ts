@@ -62,7 +62,8 @@ export interface Sent {
   body: unknown;
 }
 
-type Handler = (body: unknown) => Response;
+/** An answer, or a promise of one: one held back (a slow server) or rejected (no connection). */
+type Handler = (body: unknown) => Response | Promise<Response>;
 
 export interface FakeIdentity {
   fetch: (input: URL | Request | string, init?: RequestInit) => Promise<Response>;
@@ -157,7 +158,7 @@ export function fakeIdentity(
       fake.sent.push({ method: request.method, path, body });
       const route = `${request.method} ${path.replace(/\/[0-9a-f-]{36}(?=\/|$)/g, '/:id')}`;
       const handler = handlers.get(route);
-      if (handler) return handler(body);
+      if (handler) return await handler(body);
       const signIn = () => {
         fake.state.signedIn = true;
         setHint(app);

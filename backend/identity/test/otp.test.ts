@@ -491,9 +491,7 @@ describe('new codes and limits', () => {
       );
       expect([answer.status, answer.body.error?.code]).toEqual([503, 'SERVICE_UNAVAILABLE']);
       expect(
-        await harness.server.runtime.mongo.db
-          .collection(OUTBOX)
-          .countDocuments({ 'envelope.data.email': email('cut') }),
+        await harness.db.collection(OUTBOX).countDocuments({ 'envelope.data.email': email('cut') }),
       ).toBe(0);
     } finally {
       await cut.stop();

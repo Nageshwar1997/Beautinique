@@ -28,8 +28,10 @@ export function signInStateOf(state: unknown): Partial<SignInState> {
   };
 }
 
+/** `back`: the email again after the code step ("Use another email"), which takes the focus. */
 type Step =
-  { kind: 'email'; email: string } | { kind: 'code'; email: string; challenge: Challenge };
+  | { kind: 'email'; email: string; back?: true }
+  | { kind: 'code'; email: string; challenge: Challenge };
 
 /**
  * After the code: signed in (a new account) → on to `next`; otherwise to sign-in with the email
@@ -71,6 +73,7 @@ export function SignUpForm({ legal }: CodePageProps) {
       <EmailStep
         app={client.app}
         email={step.email}
+        focus={step.back === true}
         legal={legal}
         submitLabel="Send code"
         onSubmit={async (body: EmailStepValues) => {
@@ -86,7 +89,7 @@ export function SignUpForm({ legal }: CodePageProps) {
       challenge={step.challenge}
       submitLabel="Create account"
       onBack={() => {
-        setStep({ kind: 'email', email: step.email });
+        setStep({ kind: 'email', email: step.email, back: true });
       }}
       onVerified={(verified) =>
         after(
@@ -116,6 +119,7 @@ export function ForgotPasswordForm() {
       <EmailStep
         app={client.app}
         email={step.email}
+        focus={step.back === true}
         consent={false}
         submitLabel="Send code"
         hint="We will email you a code to set a new password."
@@ -133,7 +137,7 @@ export function ForgotPasswordForm() {
       submitLabel="Set password"
       passwordHint="Your new password: at least 12 characters. Every device you are signed in on will be signed out."
       onBack={() => {
-        setStep({ kind: 'email', email: step.email });
+        setStep({ kind: 'email', email: step.email, back: true });
       }}
       onVerified={(verified) =>
         after(
@@ -158,6 +162,7 @@ export function InvitationForm({ legal }: CodePageProps) {
       <EmailStep
         app={client.app}
         email={step.email}
+        focus={step.back === true}
         legal={legal}
         submitLabel="Send code"
         hint="The email address the invitation was sent to."
@@ -175,7 +180,7 @@ export function InvitationForm({ legal }: CodePageProps) {
       submitLabel="Accept invitation"
       passwordHint="New to Beautinique? Choose a password of at least 12 characters. Have an account already? Enter its password: it stays as it is."
       onBack={() => {
-        setStep({ kind: 'email', email: step.email });
+        setStep({ kind: 'email', email: step.email, back: true });
       }}
       onVerified={(verified) => after(verified, 'Invitation accepted. Sign in to start.')}
     />

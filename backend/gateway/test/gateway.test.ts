@@ -1,5 +1,5 @@
 import { randomBytes, randomUUID } from 'node:crypto';
-import { createServer, request, type RequestListener } from 'node:http';
+import { createServer, request, type RequestListener, type ServerResponse } from 'node:http';
 import { type AddressInfo, connect } from 'node:net';
 
 import { generateSigningKey, signJwt } from '@beautinique/backend-server-crypto';
@@ -29,6 +29,7 @@ import {
   HEADERS,
   navigationZod,
   PASSPORT_JWKS_PATH,
+  REVOCATIONS_READY_KEY,
   revokedSessionKey,
   revokedUserKey,
 } from '@beautinique/shared-contracts';
@@ -59,6 +60,8 @@ let redis: RedisConnection;
 beforeAll(async () => {
   try {
     redis = await connectRedis({ url: REDIS_URL, name: 'gateway-test', logger });
+    // what identity writes at its start (QA-GW-002): the ended sessions are in Redis
+    await redis.client.set(REVOCATIONS_READY_KEY, '1');
   } catch (error) {
     throw new Error('These tests need Valkey: run `npm run infra:up` (or set REDIS_TEST_URL).', {
       cause: error,
@@ -312,30 +315,35 @@ interface GatewayOptions {
   rateLimits?: Partial<GatewayAppOptions['rateLimits']>;
   sessions?: GatewayAppOptions['sessions'];
   passport?: GatewayAppOptions['passport'];
+  /** What runs before the gateway's app on each request (a stand-in for an instrumentation) */
+  before?: (res: ServerResponse) => void;
 }
 
 async function gateway(
   upstreams: GatewayAppOptions['upstreams'],
-  { timeoutMs = 2000, limiter, rateLimits, sessions, passport }: GatewayOptions = {},
+  { timeoutMs = 2000, limiter, rateLimits, sessions, passport, before }: GatewayOptions = {},
 ) {
-  return listen(
-    buildApp({
-      logger,
-      manifest,
-      upstreams,
-      upstreamTimeoutMs: timeoutMs,
-      apps,
-      isOriginSecret: originSecretCheck([SECRET, OLD_SECRET]),
-      // every gateway of a test gets fresh buckets
-      limiter:
-        limiter ??
-        createRateLimiter({ redis: redis.client, prefix: `${testPrefix}${randomUUID()}:` }),
-      rateLimits: { ...DEFAULT_RATE_LIMITS, ...rateLimits },
-      redisReady: redis.ready,
-      sessions: sessions ?? sessionGate({ keys: identityKeys, redis: redis.client }),
-      passport: passport ?? passportSigner(),
-    }),
-  );
+  const app = buildApp({
+    logger,
+    manifest,
+    upstreams,
+    upstreamTimeoutMs: timeoutMs,
+    apps,
+    isOriginSecret: originSecretCheck([SECRET, OLD_SECRET]),
+    // every gateway of a test gets fresh buckets
+    limiter:
+      limiter ??
+      createRateLimiter({ redis: redis.client, prefix: `${testPrefix}${randomUUID()}:` }),
+    rateLimits: { ...DEFAULT_RATE_LIMITS, ...rateLimits },
+    redisReady: redis.ready,
+    sessions: sessions ?? sessionGate({ keys: identityKeys, redis: redis.client }),
+    passport: passport ?? passportSigner(),
+  });
+  if (!before) return listen(app);
+  return listen((req, res) => {
+    before(res);
+    app(req, res);
+  });
 }
 
 /** A request with exactly this path (a URL would clean up ".." first). */
@@ -360,6 +368,34 @@ const errorOf = async (res: Response) =>
   [res.status, ((await res.json()) as { error: { code: string } }).error.code] as const;
 
 describe('gateway routing', () => {
+  it('leaves room on a proxied answer for the close listeners an instrumentation adds', async () => {
+    const core = await listen(fakeCore());
+    // Sentry's instrumentation adds one per Express layer, and live said so on every /api request
+    const gw = await gateway(
+      { core: core.url },
+      {
+        before: (res) => {
+          for (let i = 0; i < 8; i += 1) res.on('close', () => undefined);
+        },
+      },
+    );
+    const warnings: Error[] = [];
+    const onWarning = (warning: Error) => {
+      if (warning.name === 'MaxListenersExceededWarning') warnings.push(warning);
+    };
+    process.on('warning', onWarning);
+    try {
+      const res = await fetch(`${gw.url}${API_PREFIX}/catalog/products/p1`, { headers: customer });
+      expect(res.status).toBe(200);
+      await res.text();
+      // a warning is emitted on a later tick
+      await new Promise((resolve) => setTimeout(resolve, 50));
+      expect(warnings.map((warning) => warning.message)).toEqual([]);
+    } finally {
+      process.off('warning', onWarning);
+    }
+  });
+
   it('sends a request to its owner at the route path, with the query, request id and client IP', async () => {
     const core = await listen(fakeCore());
     const gw = await gateway({ core: core.url });
@@ -1161,9 +1197,15 @@ describe('config', () => {
 });
 
 describe('sign-in at the gateway (T3.2)', () => {
-  const profile = (gw: RunningServer, cookie?: string, more: Record<string, string> = {}) =>
+  const profile = (
+    gw: RunningServer,
+    cookie?: string,
+    more: Record<string, string> = {},
+    signal?: AbortSignal,
+  ) =>
     fetch(`${gw.url}${API_PREFIX}/customers/profile`, {
       headers: { ...customer, ...(cookie ? { cookie } : {}), ...more },
+      ...(signal ? { signal } : {}),
     });
   const atCookie = (token: string, app: AppId = 'customer') => `__Host-bq_${app}_at=${token}`;
 
@@ -1260,6 +1302,20 @@ describe('sign-in at the gateway (T3.2)', () => {
     expect((await profile(gw, before)).status).toBe(401);
     expect((await profile(gw, after)).status).toBe(200);
     await redis.client.del(revokedSessionKey(sessionId), revokedUserKey(other));
+  });
+
+  it('answers 503 until identity has written the ended sessions again after a Redis wipe (QA-GW-002)', async () => {
+    const readyKey = `${testPrefix}revocations-ready`;
+    const core = await listen(fakeCore());
+    const gw = await gateway(
+      { core: core.url },
+      { sessions: sessionGate({ keys: identityKeys, redis: redis.client, readyKey }) },
+    );
+    const cookie = atCookie(accessToken());
+    // a wipe took the mark with the ended sessions: one could look alive, so nothing passes
+    expect(await errorOf(await profile(gw, cookie))).toEqual([503, 'SERVICE_UNAVAILABLE']);
+    await redis.client.set(readyKey, '1');
+    expect((await profile(gw, cookie)).status).toBe(200);
   });
 
   it('refuses a token from before the account’s grants changed, so the app refreshes (T3.3)', async () => {
@@ -1385,5 +1441,39 @@ describe('sign-in at the gateway (T3.2)', () => {
       503,
       'SERVICE_UNAVAILABLE',
     ]);
+    // the next request too, before the cache may read again: 503, never a sign-out (QA-KRN-001)
+    expect(await errorOf(await profile(noKeys, atCookie(accessToken())))).toEqual([
+      503,
+      'SERVICE_UNAVAILABLE',
+    ]);
+  });
+
+  it('answers 503 within half a second when Redis is connected but stops answering (QA-GW-001)', async () => {
+    const core = await listen(fakeCore());
+    // a client whose commands go out and are never answered: a stalled Redis
+    const never = () => new Promise<never>(() => undefined);
+    const chain: Record<string, unknown> = { exec: never };
+    chain.exists = () => chain;
+    chain.get = () => chain;
+    const stalled = { multi: () => chain, get: never } as unknown as RedisConnection['client'];
+    const gate = sessionGate({ keys: identityKeys, redis: stalled });
+    const gw = await gateway({ core: core.url }, { sessions: gate });
+    const started = Date.now();
+    const res = await profile(gw, atCookie(accessToken()), {}, AbortSignal.timeout(3000));
+    expect(await errorOf(res)).toEqual([503, 'SERVICE_UNAVAILABLE']);
+    expect(Date.now() - started).toBeLessThan(1500);
+    // the permission check as well
+    const asked = Date.now();
+    const signedIn = {
+      userId: randomUUID(),
+      sessionId: randomUUID(),
+      methods: [],
+      authzVersion: 0,
+      stepUpAt: null,
+    };
+    await expect(gate.holds(signedIn, 'customer', 'iam.grant.read')).rejects.toMatchObject({
+      code: 'SERVICE_UNAVAILABLE',
+    });
+    expect(Date.now() - asked).toBeLessThan(1000);
   });
 });

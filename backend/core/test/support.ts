@@ -5,6 +5,10 @@ import { createLogger } from '@beautinique/backend-server-kit';
 import { connectMongo, type Mongo } from '@beautinique/backend-server-mongo';
 import { connectRedis, type RedisConnection } from '@beautinique/backend-server-queue';
 
+import {
+  expectNoCollectionScans,
+  watchCollectionScans,
+} from '../../../scripts/e2e/collection-scans.ts';
 import { readConfig } from '../src/config.ts';
 import { type RunningCore, start } from '../src/service.ts';
 
@@ -46,16 +50,23 @@ export async function inspector(dbName: string): Promise<Inspector> {
     }),
   });
   const mongo = await connectMongo({ uri: MONGO_URI, dbName, appName: 'core-test', logger });
+  // before core starts: its release steps query too
+  await watchCollectionScans(mongo.db);
   const redis = await connectRedis({ url: REDIS_URL, name: 'core-test', logger });
   return {
     mongo,
     redis,
     async cleanUp(prefix, epochKey) {
-      await mongo.db.dropDatabase();
-      const keys = await redis.client.keys(`${prefix}:*`);
-      await redis.client.del(epochKey, ...keys);
-      await redis.close();
-      await mongo.close();
+      try {
+        // what core asked, not the test's own look-ups on this handle
+        await expectNoCollectionScans(mongo.db, ['core', 'core-release']);
+      } finally {
+        await mongo.db.dropDatabase();
+        const keys = await redis.client.keys(`${prefix}:*`);
+        await redis.client.del(epochKey, ...keys);
+        await redis.close();
+        await mongo.close();
+      }
     },
   };
 }

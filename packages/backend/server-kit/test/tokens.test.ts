@@ -96,11 +96,37 @@ describe('jwksCache', () => {
     });
     expect([...(await cache.keysFor(good.kid)).keys()]).toEqual([good.kid]);
     fail = true;
+    // the 10-minute read fails: the keys it had still check the tokens they signed
     clock = 11 * 60_000;
-    await expect(cache.keysFor(good.kid)).rejects.toThrow('down');
-    clock = 11 * 60_000 + 1000;
-    // within the refetch wait it keeps what it had
     expect((await cache.keysFor(good.kid)).has(good.kid)).toBe(true);
+    clock = 11 * 60_000 + 1000;
+    expect((await cache.keysFor(good.kid)).has(good.kid)).toBe(true);
+    // a token of a key it does not have, and the read fails: an error (503), not a sign-out
+    clock = 11 * 60_000 + 30_000;
+    await expect(cache.keysFor('rotated')).rejects.toThrow('down');
+  });
+
+  it('answers an error, never an empty set, until a first read works, tried again after 1 s (QA-KRN-001)', async () => {
+    let clock = 0;
+    let loads = 0;
+    let fail = true;
+    const good = generateSigningKey().publicJwk;
+    const cache = jwksCache({
+      load: () => {
+        loads += 1;
+        return fail ? Promise.reject(new Error('down')) : Promise.resolve({ keys: [good] });
+      },
+      now: () => clock,
+    });
+    await expect(cache.keysFor(good.kid)).rejects.toThrow('down');
+    fail = false;
+    clock = 999;
+    await expect(cache.keysFor(good.kid)).rejects.toThrow('not read yet');
+    await expect(cache.keysFor(undefined)).rejects.toThrow('not read yet');
+    expect(loads).toBe(1);
+    clock = 1000;
+    expect((await cache.keysFor(good.kid)).has(good.kid)).toBe(true);
+    expect(loads).toBe(2);
   });
 });
 

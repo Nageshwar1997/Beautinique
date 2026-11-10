@@ -18,8 +18,31 @@ const mutations: Mutation[] = [
   },
   {
     file: 'client',
-    name: 'server error with a non-JSON body is called INTERNAL',
-    change: [["response.status >= 500 ? 'INTERNAL' : 'BAD_REQUEST'", "'INTERNAL'"]],
+    name: 'every answer that is not ours is called UPSTREAM_UNAVAILABLE',
+    change: [
+      [
+        "UPSTREAM_DOWN.includes(response.status) ? 'UPSTREAM_UNAVAILABLE' : 'UNEXPECTED_RESPONSE'",
+        "'UPSTREAM_UNAVAILABLE'",
+      ],
+    ],
+    tests: 'a body that is not ours',
+  },
+  {
+    file: 'client',
+    name: 'no answer that is not ours is called UPSTREAM_UNAVAILABLE',
+    change: [
+      [
+        "UPSTREAM_DOWN.includes(response.status) ? 'UPSTREAM_UNAVAILABLE' : 'UNEXPECTED_RESPONSE'",
+        "'UNEXPECTED_RESPONSE'",
+      ],
+    ],
+    tests: 'a body that is not ours',
+  },
+  {
+    file: 'client',
+    name: 'a 504 from the edge is not called UPSTREAM_UNAVAILABLE',
+    change: [['[502, 503, 504]', '[502, 503]']],
+    tests: 'a body that is not ours',
   },
   {
     file: 'client',
@@ -466,13 +489,47 @@ const mutations: Mutation[] = [
   {
     file: 'catalogue/social',
     name: 'next may leave for //another-host',
-    change: [['/^\\/(?![/\\\\])[^\\s\\\\]*$/', '/^\\/[^\\s]*$/']],
+    change: [['/^\\/(?![/\\\\])[^', '/^\\/(?![\\\\])[^']],
+    tests: 'no open redirect',
+  },
+  {
+    file: 'catalogue/social',
+    name: 'next may hold a space or a control character',
+    change: [['[^\\s\\\\\\u0000-\\u001f\\u007f]*$/', '[^\\\\]*$/']],
     tests: 'no open redirect',
   },
   {
     file: 'catalogue/social',
     name: 'next of any length',
-    change: [['next.length <= 512 && ', '']],
+    change: [['next.length > maxLength || ', '']],
+    tests: 'no open redirect',
+  },
+  {
+    file: 'catalogue/social',
+    name: 'the resolved path is not checked again (/..//host leaves the site)',
+    change: [["return PATH_ONLY.test(path) ? path : '/';", 'return path;']],
+    tests: 'no open redirect',
+  },
+  {
+    file: 'catalogue/social',
+    name: 'next is given back as typed, its dot segments not resolved',
+    change: [
+      ["return PATH_ONLY.test(path) ? path : '/';", "return PATH_ONLY.test(path) ? next : '/';"],
+    ],
+    tests: 'no open redirect',
+  },
+  {
+    file: 'catalogue/social',
+    name: 'a next that names another origin is kept',
+    change: [["if (url.origin !== base) return '/';", '']],
+    tests: 'no open redirect',
+    survives:
+      'PATH_ONLY lets only a path through (one / first), and a path always resolves on the same origin: the check stays as a second guard',
+  },
+  {
+    file: 'catalogue/social',
+    name: 'the caller’s longer limit is ignored',
+    change: [['next.length > maxLength', 'next.length > 512']],
     tests: 'no open redirect',
   },
 ];

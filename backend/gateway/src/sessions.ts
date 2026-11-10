@@ -7,6 +7,7 @@ import {
   type AppPermissions,
   appPermissionsKey,
   authzVersionKey,
+  REVOCATIONS_READY_KEY,
   revokedSessionKey,
   revokedUserKey,
   TOKEN_ISSUER,
@@ -49,21 +50,44 @@ const unavailable = (cause: unknown) =>
     },
   );
 
+/** A Redis answer slower than this counts as Redis away (503), as in the rate limiter. */
+export const REDIS_ANSWER_MS = 500;
+
+/** The work's answer, or an error once `ms` pass without one (a stalled Redis, QA-GW-001). */
+function within<T>(ms: number, work: Promise<T>): Promise<T> {
+  let timer: NodeJS.Timeout | undefined;
+  const late = new Promise<never>((_resolve, reject) => {
+    timer = setTimeout(() => {
+      reject(new Error(`Redis did not answer within ${String(ms)} ms`));
+    }, ms);
+  });
+  return Promise.race([work, late]).finally(() => {
+    clearTimeout(timer);
+  });
+}
+
 /**
  * The gateway's sign-in check (ARCHITECTURE §7.2): the app's own access cookie, an ES256 token of
  * identity's (its JWKS) for this app (`aud`), not expired; and in Redis, not ended since it was
  * issued (logout, a copied refresh token, a new password), and no grant change since (its `av`).
- * Redis or the JWKS away: 503, never a pass (fail closed).
+ * Redis or the JWKS away, or Redis silent for REDIS_ANSWER_MS: 503, never a pass (fail closed).
+ * So too while identity's ready mark is missing (a Redis wipe took the ended sessions, and identity
+ * has not written them again from MongoDB yet; ARCHITECTURE §6.6, QA-GW-002).
  */
 export function sessionGate({
   keys,
   redis,
   now = Date.now,
+  redisAnswerMs = REDIS_ANSWER_MS,
+  readyKey = REVOCATIONS_READY_KEY,
 }: {
   /** identity's JWKS */
   keys: JwksCache;
   redis: RedisConnection['client'];
   now?: () => number;
+  redisAnswerMs?: number;
+  /** identity's ready mark (default REVOCATIONS_READY_KEY); a test uses its own */
+  readyKey?: string;
 }): SessionGate {
   return {
     async check(req, app) {
@@ -89,22 +113,37 @@ export function sessionGate({
       }
       const sessionId = String(claims.sid);
       const authzVersion = typeof claims.av === 'number' ? claims.av : 0;
+      let ready: number;
       let ended: number;
       let since: string | null;
       let current: string | null;
       try {
-        const answers = (await redis
-          .multi()
-          .exists(revokedSessionKey(sessionId))
-          .get(revokedUserKey(claims.sub))
-          .get(authzVersionKey(claims.sub))
-          .exec()) as
-          | [[Error | null, number], [Error | null, string | null], [Error | null, string | null]]
+        const answers = (await within(
+          redisAnswerMs,
+          redis
+            .multi()
+            .exists(readyKey)
+            .exists(revokedSessionKey(sessionId))
+            .get(revokedUserKey(claims.sub))
+            .get(authzVersionKey(claims.sub))
+            .exec(),
+        )) as
+          | [
+              [Error | null, number],
+              [Error | null, number],
+              [Error | null, string | null],
+              [Error | null, string | null],
+            ]
           | null;
         if (!answers || answers.some(([error]) => error)) throw new Error('Redis did not answer');
-        [[, ended], [, since], [, current]] = answers;
+        [[, ready], [, ended], [, since], [, current]] = answers;
       } catch (error) {
         throw unavailable(error);
+      }
+      // a wipe took the ended sessions and identity has not written them again: one could look
+      // alive, so nothing passes until it has
+      if (ready !== 1) {
+        throw unavailable(new Error('the ended sessions are not back in Redis since it was wiped'));
       }
       // a token issued before every session of the account ended (in whole seconds: one issued in
       // the same second as the end counts as before it)
@@ -124,7 +163,7 @@ export function sessionGate({
     async holds(signedIn, app, permission) {
       let raw: string | null;
       try {
-        raw = await redis.get(appPermissionsKey(signedIn.userId, app));
+        raw = await within(redisAnswerMs, redis.get(appPermissionsKey(signedIn.userId, app)));
       } catch (error) {
         throw unavailable(error);
       }

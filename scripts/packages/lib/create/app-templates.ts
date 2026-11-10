@@ -63,6 +63,19 @@ const apiProxy = `  // /api goes to the local gateway, the same path the Vercel 
     },
   },`;
 
+/** A block of a config file one level deeper (inside the function form's returned object). */
+const indent = (block: string) => block.replace(/^(?=.)/gm, '  ');
+
+/** The env read in a vite config: .env on the laptop, Vercel's env in its build (none in CI). */
+const gatewayEnv = `  // .env on the laptop, Vercel's env in its build (none in CI: the key stays empty)
+  const env = loadEnv(mode, import.meta.dirname, '');
+  const gatewayUrl = (env.BQ_GATEWAY_URL ?? '').trim().replace(/\\/+$/, '');`;
+
+/** The one env key the browser gets: the server's address, for the wake-up's straight call. */
+const gatewayDefine = `    // the one key the browser gets: the server's address, for the wake-up screen's straight call to
+    // its /wake (ARCHITECTURE §11.1)
+    define: { 'import.meta.env.BQ_GATEWAY_URL': JSON.stringify(gatewayUrl) },`;
+
 export interface AppSpec {
   app: AppId;
   kind: AppKind;
@@ -76,7 +89,16 @@ export interface AppSpec {
 /** The libraries each kind needs, for resolveVersions. */
 export function appLibraries(kind: AppKind): { dependencies: string[]; devDependencies: string[] } {
   const common = {
-    dependencies: ['react', 'react-dom', 'react-router', '@beautinique/frontend-styles'],
+    dependencies: [
+      'react',
+      'react-dom',
+      'react-router',
+      '@tanstack/react-query',
+      '@beautinique/frontend-styles',
+      // the wake-up and the API client's gate: no call before the server answered (ARCHITECTURE §11.1)
+      '@beautinique/frontend-api-client',
+      '@beautinique/frontend-app-shell',
+    ],
     devDependencies: [
       '@tailwindcss/vite',
       'tailwindcss',
@@ -147,6 +169,67 @@ const icon = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
 
 const indexCss = `@import 'tailwindcss';
 @import '@beautinique/frontend-styles';
+@import '@beautinique/frontend-app-shell/tailwind.css';
+`;
+
+/** The API client and Query cache, the same for every kind: every call waits for the wake-up. */
+const providersTsx = (
+  spec: AppSpec,
+) => `import { ApiProvider, createApiClient, createQueryClient } from '@beautinique/frontend-api-client';
+import { type ReactNode, useState } from 'react';
+
+/**
+ * The app's API client and Query cache (ARCHITECTURE §9.2), made once per render tree. Every call
+ * waits until the server has answered the wake-up (waitForServer; ServerWake's onReady opens it,
+ * ARCHITECTURE §11.1).
+ */
+export function Providers({ children }: { children: ReactNode }) {
+  const [client] = useState(() => createApiClient({ app: '${spec.app}', waitForServer: true }));
+  const [queryClient] = useState(createQueryClient);
+  return (
+    <ApiProvider client={client} queryClient={queryClient}>
+      {children}
+    </ApiProvider>
+  );
+}
+`;
+
+/** The wake address constant and the AppWake component, the same for every kind. */
+const appWake = (
+  spec: AppSpec,
+) => `/** The server's own wake address (gateway /wake), straight; none where the build had no address. */
+const GATEWAY_URL = import.meta.env.BQ_GATEWAY_URL;
+const WAKE_KICK_URL =
+  GATEWAY_URL === undefined || GATEWAY_URL === '' ? undefined : \`\${GATEWAY_URL}/wake\`;
+
+/**
+ * The wake-up (ServerWake, ARCHITECTURE §11.1): no page before the server has answered, and no API
+ * call either: onReady tells the client its calls may go.
+ */
+function AppWake({ children }: { children: ReactNode }) {
+  const client = useApiClient();
+  return (
+    <ServerWake
+      app="${spec.app}"
+      kickUrl={WAKE_KICK_URL}
+      onReady={() => {
+        client.serverReady();
+      }}
+    >
+      {children}
+    </ServerWake>
+  );
+}
+`;
+
+const envDts = `interface ImportMetaEnv {
+  /**
+   * The server's address (BQ_GATEWAY_URL, the one key vite.config.ts hands to the browser), without a
+   * trailing slash: the wake-up screen calls its /wake straight. Empty where the env has none (CI);
+   * undefined in unit tests, which do not load vite.config.ts.
+   */
+  readonly BQ_GATEWAY_URL: string | undefined;
+}
 `;
 
 function readme(spec: AppSpec): string {
@@ -168,15 +251,18 @@ function readme(spec: AppSpec): string {
     '',
     ...(ssr
       ? [
-          '- `app/root.tsx`: HTML layout, skip link, error page (404 bhi).',
+          '- `app/root.tsx`: HTML layout, skip link, wake-up (`WakeScript`, `ServerWake`), error page (404 bhi).',
+          '- `app/providers.tsx`: API client (`waitForServer`) aur Query cache.',
           '- `app/routes.ts`: route table; pages `app/routes/*.tsx` me.',
           '- `react-router.config.ts`: SSR on.',
         ]
       : [
           '- `src/main.tsx`: app start (React Router data router).',
           '- `src/routes.tsx`: route table; pages `src/pages/*.tsx` me.',
-          '- `src/layout.tsx`: skip link + page outlet.',
+          '- `src/layout.tsx`: providers, wake-up (`ServerWake`), skip link + page outlet.',
+          '- `src/providers.tsx`: API client (`waitForServer`) aur Query cache.',
         ]),
+    '- **Wake-up (ARCHITECTURE §11.1):** server ke jawab tak saada parda (1.5 s pe wake-up screen), aur tab tak koi API call nahi: `ServerWake` ka `onReady` client ka `serverReady()` kehta hai. `BQ_GATEWAY_URL` (Vercel env) se wake-up server ko seedha bhi bulata hai; laptop pe khaali theek.',
     ...(spec.kind === 'pwa'
       ? ['- `vite.config.ts`: PWA manifest aur service worker (vite-plugin-pwa).']
       : []),
@@ -193,35 +279,39 @@ function viteConfig(spec: AppSpec): string {
   return `import { beautiniqueFonts } from '@beautinique/frontend-styles/vite';
 import tailwindcss from '@tailwindcss/vite';
 import react from '@vitejs/plugin-react';
-import { defineConfig } from 'vite';
+import { defineConfig, loadEnv } from 'vite';
 ${pwa ? "import { VitePWA } from 'vite-plugin-pwa';\n" : ''}
 const port = ${String(spec.port)};
 
-export default defineConfig({
-  plugins: [
-    react(),
-    tailwindcss(),
-    beautiniqueFonts({ preload: ['sans'] }),${
-      pwa
-        ? `
-    VitePWA({
-      registerType: 'autoUpdate',
-      manifest: {
-        name: '${spec.title}',
-        short_name: '${short}',
-        description: 'Run sheets, deliveries and payments for Beautinique delivery partners.',
-        theme_color: '${ROSE}',
-        background_color: '${IVORY}',
-        display: 'standalone',
-        start_url: '/',
-        icons: [{ src: '/icon.svg', sizes: 'any', type: 'image/svg+xml', purpose: 'any' }],
-      },
-    }),`
-        : ''
-    }
-  ],
-${apiProxy}
-  preview: { port, strictPort: true },
+export default defineConfig(({ mode }) => {
+${gatewayEnv}
+  return {
+    plugins: [
+      react(),
+      tailwindcss(),
+      beautiniqueFonts({ preload: ['sans'] }),${
+        pwa
+          ? `
+      VitePWA({
+        registerType: 'autoUpdate',
+        manifest: {
+          name: '${spec.title}',
+          short_name: '${short}',
+          description: 'Run sheets, deliveries and payments for Beautinique delivery partners.',
+          theme_color: '${ROSE}',
+          background_color: '${IVORY}',
+          display: 'standalone',
+          start_url: '/',
+          icons: [{ src: '/icon.svg', sizes: 'any', type: 'image/svg+xml', purpose: 'any' }],
+        },
+      }),`
+          : ''
+      }
+    ],
+${gatewayDefine}
+${indent(apiProxy)}
+    preview: { port, strictPort: true },
+  };
 });
 `;
 }
@@ -292,10 +382,18 @@ export const routes: RouteObject[] = [
 ];
 `;
 
-const layoutTsx = `import { Outlet } from 'react-router';
+const layoutTsx = (
+  spec: AppSpec,
+) => `import { useApiClient } from '@beautinique/frontend-api-client';
+import { ServerWake } from '@beautinique/frontend-app-shell';
+import type { ReactNode } from 'react';
+import { Outlet } from 'react-router';
 
+import { Providers } from './providers';
+
+${appWake(spec)}
 /** Every page: a skip link to the main content (DESIGN §8), then the page. */
-export function Layout() {
+export function Frame() {
   return (
     <>
       <a href="#main" className="skip-link">
@@ -303,6 +401,17 @@ export function Layout() {
       </a>
       <Outlet />
     </>
+  );
+}
+
+/** The app's root route: its providers, the wake-up, then the frame. */
+export function Layout() {
+  return (
+    <Providers>
+      <AppWake>
+        <Frame />
+      </AppWake>
+    </Providers>
   );
 }
 `;
@@ -336,15 +445,30 @@ export function NotFoundPage() {
 const spaTest = (
   spec: AppSpec,
 ) => `import { cleanup, render, screen } from '@testing-library/react';
-import { createMemoryRouter, RouterProvider } from 'react-router';
+import { createMemoryRouter, type RouteObject, RouterProvider } from 'react-router';
 import { afterEach, describe, expect, it } from 'vitest';
 
+import { Frame } from '../src/layout';
+import { Providers } from '../src/providers';
 import { routes } from '../src/routes';
 
 afterEach(cleanup);
 
+// the app's routes inside its providers, but without the wake-up (it would call the server)
+const [root] = routes as [RouteObject];
+const testRoutes: RouteObject[] = [
+  {
+    ...root,
+    element: (
+      <Providers>
+        <Frame />
+      </Providers>
+    ),
+  },
+];
+
 const renderAt = (path: string) =>
-  render(<RouterProvider router={createMemoryRouter(routes, { initialEntries: [path] })} />);
+  render(<RouterProvider router={createMemoryRouter(testRoutes, { initialEntries: [path] })} />);
 
 describe('${spec.app}', () => {
   it('shows the home page', async () => {
@@ -405,13 +529,17 @@ export default packageConfig({
 
 const ssrViteConfig = (spec: AppSpec) => `import { reactRouter } from '@react-router/dev/vite';
 import tailwindcss from '@tailwindcss/vite';
-import { defineConfig } from 'vite';
+import { defineConfig, loadEnv } from 'vite';
 
 const port = ${String(spec.port)};
 
-export default defineConfig({
-  plugins: [tailwindcss(), reactRouter()],
-${apiProxy}
+export default defineConfig(({ mode }) => {
+${gatewayEnv}
+  return {
+    plugins: [tailwindcss(), reactRouter()],
+${gatewayDefine}
+${indent(apiProxy)}
+  };
 });
 `;
 
@@ -423,15 +551,18 @@ export default {
 } satisfies Config;
 `;
 
-const ssrRoot = (
-  spec: AppSpec,
-) => `import displayFont from '@beautinique/frontend-styles/fonts/fraunces-latin.woff2?url';
+const ssrRoot = (spec: AppSpec) => `import { useApiClient } from '@beautinique/frontend-api-client';
+import { ServerWake, WakeScript } from '@beautinique/frontend-app-shell';
+import displayFont from '@beautinique/frontend-styles/fonts/fraunces-latin.woff2?url';
 import sansFont from '@beautinique/frontend-styles/fonts/plus-jakarta-sans-latin.woff2?url';
+import type { ReactNode } from 'react';
 import { isRouteErrorResponse, Links, Meta, Outlet, Scripts, ScrollRestoration } from 'react-router';
 
 import type { Route } from './+types/root';
 import stylesheet from './app.css?url';
+import { Providers } from './providers';
 
+${appWake(spec)}
 /**
  * The stylesheet as a <link> (in development too, so it is never swapped for a <style> after hydration,
  * which would load the fonts again and flash the fallback font), and the brand fonts preloaded so the
@@ -443,7 +574,7 @@ export const links: Route.LinksFunction = () => [
   { rel: 'stylesheet', href: stylesheet },
 ];
 
-export function Layout({ children }: { children: React.ReactNode }) {
+export function Layout({ children }: { children: ReactNode }) {
   return (
     <html lang="en">
       <head>
@@ -451,6 +582,8 @@ export function Layout({ children }: { children: React.ReactNode }) {
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <meta name="theme-color" content="${ROSE}" />
         <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+        {/* the wake-up's plain cover from the first paint (ServerWake below) */}
+        <WakeScript />
         <Meta />
         <Links />
       </head>
@@ -466,8 +599,15 @@ export function Layout({ children }: { children: React.ReactNode }) {
   );
 }
 
+/** Every page: the providers (made per render tree), the wake-up, then the page. */
 export default function App() {
-  return <Outlet />;
+  return (
+    <Providers>
+      <AppWake>
+        <Outlet />
+      </AppWake>
+    </Providers>
+  );
 }
 
 /** Unknown paths (a real 404 status) and unexpected errors. */
@@ -567,6 +707,8 @@ export function renderApp(spec: AppSpec): Map<string, string> {
     files.set('eslint.config.js', eslintConfig(['build', '.react-router']));
     files.set('public/favicon.svg', icon);
     files.set('app/app.css', indexCss);
+    files.set('app/env.d.ts', envDts);
+    files.set('app/providers.tsx', providersTsx(spec));
     files.set('app/root.tsx', ssrRoot(spec));
     files.set('app/routes.ts', ssrRoutes);
     files.set('app/routes/home.tsx', ssrHome(spec));
@@ -581,9 +723,11 @@ export function renderApp(spec: AppSpec): Map<string, string> {
   files.set('eslint.config.js', eslintConfig([]));
   files.set(spec.kind === 'pwa' ? 'public/icon.svg' : 'public/favicon.svg', icon);
   files.set('src/index.css', indexCss);
+  files.set('src/env.d.ts', envDts);
   files.set('src/main.tsx', mainTsx);
+  files.set('src/providers.tsx', providersTsx(spec));
   files.set('src/routes.tsx', routesTsx);
-  files.set('src/layout.tsx', layoutTsx);
+  files.set('src/layout.tsx', layoutTsx(spec));
   files.set('src/pages/home.tsx', homeTsx(spec));
   files.set('src/pages/not-found.tsx', notFoundTsx);
   files.set('test/app.test.tsx', spaTest(spec));

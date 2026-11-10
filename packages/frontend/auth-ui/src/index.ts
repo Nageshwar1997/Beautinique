@@ -49,8 +49,10 @@ export {
   type Session,
   SessionProvider,
   type SessionState,
+  SIGN_OUT_RETRY_MS,
   type SignedOutReason,
   useSession,
+  useSignOut,
 } from './session';
 export { clearSessionHint, hasSessionHint } from './session-hint';
 export { FEW_RECOVERY_CODES, SignInForm, type SignInFormProps } from './sign-in';

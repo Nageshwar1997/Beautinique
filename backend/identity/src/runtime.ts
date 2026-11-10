@@ -35,7 +35,7 @@ import { socialSettings } from './oauth-providers.ts';
 import type { OtpDeps } from './otp.ts';
 import { hibpBreachCheck } from './password.ts';
 import { runReleaseSteps } from './release.ts';
-import { sessions } from './sessions.ts';
+import { restoreGatewayMarks, sessions } from './sessions.ts';
 import { type SigningKeys, signingKeys } from './signing-keys.ts';
 
 /**
@@ -59,6 +59,11 @@ export interface RuntimeOptions {
   queuePrefix?: string;
   /** The Redis key that tells a wipe (default `bq:epoch`). */
   epochKey?: string;
+  /**
+   * The Redis key that tells the gateway the ended sessions are in Redis (default
+   * REVOCATIONS_READY_KEY); a test uses its own so a wipe it plays never reaches another test.
+   */
+  readyKey?: string;
   /** How often the relay looks for new events (default: the relay's own). */
   pollMs?: number;
   /** How often the wipe watchdog looks (default 30 s). */
@@ -91,7 +96,15 @@ export interface Runtime {
  * ones before it are closed again and the error goes on.
  */
 export async function startRuntime(config: Config, options: RuntimeOptions): Promise<Runtime> {
-  const { logger, queuePrefix: prefix, epochKey, pollMs, watchdogMs, passportJwks } = options;
+  const {
+    logger,
+    queuePrefix: prefix,
+    epochKey,
+    readyKey,
+    pollMs,
+    watchdogMs,
+    passportJwks,
+  } = options;
   const keys = loadCryptoKeys({ fieldKeys: config.fieldKeys, blindIndexKey: config.blindIndexKey });
   const otpKeys = loadSealingKeys(config.otpEventKeys, 'IDENTITY__OTP_EVENT_KEYS');
   const closers: (() => Promise<void>)[] = [];
@@ -110,6 +123,9 @@ export async function startRuntime(config: Config, options: RuntimeOptions): Pro
     await runReleaseSteps(mongo, logger);
     const redis = await connectRedis({ url: config.redisUrl, name: 'identity', logger });
     closers.push(() => redis.close());
+    // the gateway's ended-session marks, and its ready mark, before anyone signs in (QA-GW-002)
+    const ended = await restoreGatewayMarks(mongo, redis.client, readyKey ? { readyKey } : {});
+    logger.info({ ended }, 'ended sessions written for the gateway');
     const relay = startRelay({
       mongo,
       redis: redis.client,
@@ -126,8 +142,10 @@ export async function startRuntime(config: Config, options: RuntimeOptions): Pro
       logger,
       intervalMs: watchdogMs,
       epochKey,
-      // sign-in codes in Redis are gone with it: people ask again (ARCHITECTURE §6.6)
+      // sign-in codes in Redis are gone with it: people ask again (ARCHITECTURE §6.6). The ended
+      // sessions come first: the gateway answers 503 until they are back (QA-GW-002)
       recover: async () => {
+        await restoreGatewayMarks(mongo, redis.client, readyKey ? { readyKey } : {});
         await redriveOutbox({
           mongo,
           redis: redis.client,

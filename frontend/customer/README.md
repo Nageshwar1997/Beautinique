@@ -34,6 +34,7 @@ Vercel project ka Root Directory `frontend/customer`, production branch `release
 - **Install:** repo root pe npm 12.2.0, phir `npm ci` (root `devEngines` npm 12 maangta hai; Vercel pe npm 11 hota hai).
 - **Build:** repo root pe `npm run build -- --for customer`: ye app aur iske internal packages (`dist` commit nahi hota), dependencies pehle.
 - **`/api/(.*)`** → `${BQ_GATEWAY_URL}/api/$1`, aur `x-origin-secret` header `$ORIGIN_SECRET` se `set` (browser ka bheja hua header badal jaata hai; ARCHITECTURE §7.2). Plain `rewrites` header nahi jod sakta, isliye `routes`.
+- **Security headers** har page pe (`headers` property; `routes` me sirf `/api`): iframe me nahi khulta, nosniff, `Referrer-Policy`, camera/mic/location band, HSTS (ARCHITECTURE §9.3). List aur jaanch `scripts/ci/test/vercel-headers.test.ts` (saare apps). Poora CSP TASKS T6.6 me: SSR ki inline scripts ko har request ka nonce chahiye.
 - **Functions:** `bom1` (Mumbai), Indian users ke paas.
 
 Vercel env (Production **aur** Preview), repo me kabhi nahi:

@@ -10,7 +10,7 @@ import {
 import { useCountdown } from '@beautinique/frontend-hooks';
 import { resendOtp, type RouteOutput, verifyOtp } from '@beautinique/shared-contracts';
 import { formatTime } from '@beautinique/shared-utils';
-import { type ReactNode, useState } from 'react';
+import { type ReactNode, useId, useState } from 'react';
 
 /** An emailed code waiting for its check (contracts otpChallengeZod). */
 export type Challenge = RouteOutput<typeof resendOtp>;
@@ -49,6 +49,7 @@ export function CodeStep({
   const [resending, setResending] = useState(false);
   const wait = useCountdown(challenge.resendAfter);
   const form = useZodForm(verifyOtp.input.body, { defaultValues: { code: '', password: '' } });
+  const sentId = useId();
 
   const resend = async () => {
     setResending(true);
@@ -67,7 +68,7 @@ export function CodeStep({
   const canResend = challenge.resendsLeft > 0 && wait === 0;
   return (
     <div className="space-y-5">
-      <p className="text-sm">
+      <p id={sentId} className="text-sm">
         We sent a 6-digit code to <strong className="font-semibold break-all">{email}</strong>. It
         works until {formatTime(challenge.expiresAt)}. Can&apos;t find it? Check your spam folder
         too.
@@ -84,7 +85,14 @@ export function CodeStep({
           await onVerified(verified);
         }}
       >
-        <CodeField control={form.control} name="code" label="Code from the email" />
+        {/* a new step: focus on its first field, which says where the code went (QA-FE-008) */}
+        <CodeField
+          control={form.control}
+          name="code"
+          label="Code from the email"
+          autoFocus
+          aria-describedby={sentId}
+        />
         <PasswordField
           control={form.control}
           name="password"

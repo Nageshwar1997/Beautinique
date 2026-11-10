@@ -17,6 +17,7 @@ describe('@beautinique/frontend-api-client', () => {
         'isApiError',
         'queryKey',
         'queryKeyPrefix',
+        'retryServerTrouble',
         'useApiClient',
         'useApiMutation',
         'useApiQuery',
