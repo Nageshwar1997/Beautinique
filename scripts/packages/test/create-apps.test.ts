@@ -17,7 +17,7 @@ import { join } from 'node:path';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 
 import { DEPLOYABLES } from '../../../packages/shared/contracts/src/platform.ts';
-import { APP_TITLES } from '../lib/create/app-templates.ts';
+import { APP_TAGLINES, APP_TITLES } from '../lib/create/app-templates.ts';
 import {
   APP_FAMILY,
   familyIconsDir,
@@ -135,6 +135,12 @@ describe('frontend apps pass every check', () => {
       expect(frame).toContain('<ServerWake');
       expect(frame).toContain('client.serverReady()');
       if (kind === 'ssr') expect(frame).toContain('<WakeScript />');
+
+      // a "Coming soon" home with what the app will be for, never a developer's note (Q-014)
+      const home = read(kind === 'ssr' ? 'routes/home.tsx' : 'pages/home.tsx');
+      expect(home).toContain('Coming soon');
+      expect(home).toContain(APP_TAGLINES[app]);
+      expect(home).not.toContain('routes.ts');
 
       // installs on a phone as an app (owner, 2026-11-09): its manifest, the head tags and its
       // family's icons, copied byte for byte

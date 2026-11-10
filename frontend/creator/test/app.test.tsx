@@ -10,11 +10,18 @@ const renderAt = (path: string) =>
   render(<RouterProvider router={createMemoryRouter(routes, { initialEntries: [path] })} />);
 
 describe('creator', () => {
-  it('shows the home page', async () => {
+  it('says the app is coming soon and what it will be for (no note for developers)', async () => {
     renderAt('/');
     expect(
       await screen.findByRole('heading', { level: 1, name: 'Beautinique Creator' }),
     ).toBeTruthy();
+    expect(screen.getByText('Coming soon')).toBeTruthy();
+    expect(
+      screen.getByText(
+        'Creators will build their storefronts, share looks and track their earnings here.',
+      ),
+    ).toBeTruthy();
+    expect(document.body.textContent).not.toContain('routes.tsx');
   });
 
   it('shows "Page not found" for unknown paths', async () => {

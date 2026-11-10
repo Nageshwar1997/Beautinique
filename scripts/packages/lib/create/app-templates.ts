@@ -41,6 +41,26 @@ export const APP_TITLES: Record<AppId, string> = {
   creator: 'Beautinique Creator',
 };
 
+/**
+ * What each app will be for, in one line under its name while it has no pages yet: a new app's
+ * "Coming soon" home (owner, 2026-11-09, QA audit Q-014: never a developer's note to the public).
+ */
+export const APP_TAGLINES: Record<AppId, string> = {
+  customer:
+    'Genuine brands, true-to-life shades and clear prices, every product checked in our own warehouse.',
+  seller:
+    'Brands and authorised distributors will list products, manage stock and follow their orders here.',
+  admin: 'The Beautinique team will review sellers, listings and orders here.',
+  superadmin: 'Super Admins will handle escalated reviews and look after the admin teams here.',
+  master: "Beautinique's owners will manage roles, approvals and emergency controls here.",
+  support: 'The support team will answer tickets, complaints and grievances here.',
+  finance: 'The finance team will run settlements, payouts, invoices and reconciliation here.',
+  logistics: 'The logistics team will run hubs, line-haul and the delivery control tower here.',
+  delivery: 'Delivery partners will see their run sheets and deliver orders here.',
+  growth: 'The growth team will run banners, campaigns, loyalty and gift cards here.',
+  creator: 'Creators will build their storefronts, share looks and track their earnings here.',
+};
+
 /** The gateway's local port: every app's dev server sends /api there (like the Vercel rewrite). */
 export const GATEWAY_PORT = 8080;
 
@@ -411,15 +431,34 @@ export function Layout() {
 }
 `;
 
-const homeTsx = (spec: AppSpec) => `export function HomePage() {
+/** A string literal as Prettier writes it: single quotes, double where the text has an apostrophe. */
+const literal = (text: string) => (text.includes("'") ? JSON.stringify(text) : `'${text}'`);
+
+/** `const TAGLINE = '...';` on one line when it fits in 100 columns, else broken as Prettier does. */
+const taglineConst = (app: AppId) => {
+  const line = `const TAGLINE = ${literal(APP_TAGLINES[app])};`;
+  return line.length <= 100 ? line : `const TAGLINE =\n  ${literal(APP_TAGLINES[app])};`;
+};
+
+/** The home until the app has pages (Q-014): its name, "Coming soon" and what it will be for. */
+const comingSoon = (
+  spec: AppSpec,
+  component: string,
+) => `/** The home until the app has pages: its name, that it is coming soon, and what it will be for. */
+export ${component === 'Home' ? 'default ' : ''}function ${component}() {
   return (
-    <main id="main" className="container-page py-10">
-      <h1 className="font-display text-3xl font-medium">${spec.title}</h1>
-      <p className="text-foreground-muted mt-2">The app is ready. Add pages in src/routes.tsx.</p>
+    <main id="main" className="container-page flex min-h-dvh flex-col justify-center py-16">
+      <p className="text-brand-text text-sm font-medium">Coming soon</p>
+      <h1 className="font-display mt-2 text-4xl font-medium">${spec.title}</h1>
+      <p className="text-foreground-muted mt-3 max-w-prose">{TAGLINE}</p>
     </main>
   );
 }
 `;
+
+const homeTsx = (spec: AppSpec) => `${taglineConst(spec.app)}
+
+${comingSoon(spec, 'HomePage')}`;
 
 const notFoundTsx = `import { Link } from 'react-router';
 
@@ -466,9 +505,12 @@ const renderAt = (path: string) =>
   render(<RouterProvider router={createMemoryRouter(testRoutes, { initialEntries: [path] })} />);
 
 describe('${spec.app}', () => {
-  it('shows the home page', async () => {
+  it('says the app is coming soon and what it will be for (no note for developers)', async () => {
     renderAt('/');
     expect(await screen.findByRole('heading', { level: 1, name: '${spec.title}' })).toBeTruthy();
+    expect(screen.getByText('Coming soon')).toBeTruthy();
+    expect(screen.getByRole('heading', { level: 1 }).nextElementSibling?.textContent).toBeTruthy();
+    expect(document.body.textContent).not.toContain('routes');
   });
 
   it('shows "Page not found" for unknown paths', async () => {
@@ -635,20 +677,14 @@ export default [index('routes/home.tsx')] satisfies RouteConfig;
 
 const ssrHome = (spec: AppSpec) => `import type { Route } from './+types/home';
 
+${taglineConst(spec.app)}
+
 export const meta: Route.MetaFunction = () => [
   { title: '${spec.title}' },
-  { name: 'description', content: 'Beauty you can trust: genuine brands, real shades, clear prices.' },
+  { name: 'description', content: TAGLINE },
 ];
 
-export default function Home() {
-  return (
-    <main id="main" className="container-page py-10">
-      <h1 className="font-display text-3xl font-medium">${spec.title}</h1>
-      <p className="text-foreground-muted mt-2">The app is ready. Add pages in app/routes.ts.</p>
-    </main>
-  );
-}
-`;
+${comingSoon(spec, 'Home')}`;
 
 const ssrTest = (
   spec: AppSpec,
@@ -661,10 +697,13 @@ import Home, { meta } from '../app/routes/home';
 afterEach(cleanup);
 
 describe('${spec.app}', () => {
-  it('shows the home page', async () => {
+  it('says the app is coming soon and what it will be for (no note for developers)', async () => {
     const Stub = createRoutesStub([{ path: '/', Component: Home }]);
     render(<Stub initialEntries={['/']} />);
     expect(await screen.findByRole('heading', { level: 1, name: '${spec.title}' })).toBeTruthy();
+    expect(screen.getByText('Coming soon')).toBeTruthy();
+    expect(screen.getByRole('heading', { level: 1 }).nextElementSibling?.textContent).toBeTruthy();
+    expect(document.body.textContent).not.toContain('routes');
   });
 
   it('gives the home page a title and description', () => {
