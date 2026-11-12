@@ -8,11 +8,11 @@ import {
   type Collection,
   connectMongo,
   type Filter,
+  ObjectId,
   syncIndexes,
 } from '@beautinique/backend-server-mongo';
 import { OUTBOX } from '@beautinique/backend-server-queue';
 import type { AppId } from '@beautinique/shared-contracts';
-import { uuidv7 } from '@beautinique/shared-utils';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 
 import {
@@ -33,14 +33,17 @@ import { type Session, SESSIONS } from '../src/sessions.ts';
 import {
   acceptances,
   type Answer,
+  appIdOf,
   credentials,
   grants,
   type Harness,
   makeAccount,
   MONGO_URI,
+  oid,
   PASSWORD,
   post,
   providers,
+  roleKeysOf,
   startHarness,
   users,
 } from './helpers.ts';
@@ -201,13 +204,19 @@ const linkEvents = async (userId: string) =>
 
 /** The account's active roles in the customer app. */
 const customerRoles = async (userId: string) =>
-  (await grants().find({ userId, app: 'customer', active: true }).toArray()).map((g) => g.role);
+  roleKeysOf(
+    await grants()
+      .find({ userId: oid(userId), appId: await appIdOf('customer'), active: true })
+      .toArray(),
+  );
 
 const sessionOf = async (accessToken: string) => {
   const { sid } = JSON.parse(
     Buffer.from(accessToken.split('.')[1] ?? '', 'base64url').toString(),
   ) as { sid: string };
-  return db().collection<Session>(SESSIONS).findOne({ _id: sid });
+  return db()
+    .collection<Session>(SESSIONS)
+    .findOne({ _id: oid(sid) });
 };
 
 describe('which providers', () => {
@@ -263,16 +272,16 @@ describe('a new account', () => {
 
     const user = await users().findOne({ email: address });
     expect(user?.ageDeclaredAt).toBeInstanceOf(Date);
-    expect(user?.signUpApp).toBe('customer');
+    expect(user?.signUpAppId).toEqual(await appIdOf('customer'));
     expect(await providers().find({ userId: user?._id }).toArray()).toMatchObject([
       { provider: 'google', subject },
     ]);
     // no password: Google alone until one is set
     expect((await credentials().findOne({ _id: user?._id }))?.password).toBeUndefined();
     expect(await acceptances().countDocuments({ userId: user?._id, adult: true })).toBe(1);
-    expect(await customerRoles(user?._id ?? '')).toEqual(['customer.customer']);
+    expect(await customerRoles(user?._id.toHexString() ?? '')).toEqual(['customer.customer']);
     // a new account's first way in: no security email
-    expect(await linkEvents(user?._id ?? '')).toEqual([]);
+    expect(await linkEvents(user?._id.toHexString() ?? '')).toEqual([]);
     // the waiting sign-up worked once
     expect((await consentTo(page)).body.error?.code).toBe('OAUTH_SIGN_UP_EXPIRED');
 
@@ -296,7 +305,13 @@ describe('an account that is there', () => {
     expect([page.status, page.location]).toEqual([303, '/']);
     expect(page.cookies.get(ACCESS)).not.toBe('');
     expect(
-      (await providers().find({ userId }).toArray()).map((p) => [p.provider, p.subject]).toSorted(),
+      (
+        await providers()
+          .find({ userId: oid(userId) })
+          .toArray()
+      )
+        .map((p) => [p.provider, p.subject])
+        .toSorted(),
     ).toEqual([
       ['github', subject],
       ['password', null],
@@ -321,7 +336,7 @@ describe('an account that is there', () => {
     // nor without an email at all
     const none = await roundTrip('linkedin', { subject: nextSubject() });
     expect(none.location).toBe('/sign-in?oauth=email-unverified');
-    expect(await providers().countDocuments({ userId })).toBe(1);
+    expect(await providers().countDocuments({ userId: oid(userId) })).toBe(1);
   });
 
   it('asks an account with an authenticator for its code, and the session says how it signed in', async () => {
@@ -364,7 +379,7 @@ describe('an account that is there', () => {
     const address = email('no-customer-role');
     const userId = await makeAccount(address, PASSWORD, { everyApp: false });
     // like a seller's account: no Customer role
-    await grants().deleteMany({ userId, app: 'customer' });
+    await grants().deleteMany({ userId: oid(userId), appId: await appIdOf('customer') });
     expect(await customerRoles(userId)).toEqual([]);
     const page = await roundTrip('linkedin', { subject: nextSubject(), email: address });
     expect(page.cookies.has(ACCESS)).toBe(false);
@@ -479,12 +494,12 @@ describe('sign-in methods', () => {
   /** The account's newest session that signed in with one of these methods. */
   const sessionWith = async (userId: string, methods: Session['methods']) => {
     const found = await sessionsDb()
-      .find({ userId, methods: { $in: methods } })
+      .find({ userId: oid(userId), methods: { $in: methods } })
       .sort({ createdAt: -1 })
       .limit(1)
       .next();
     if (!found) throw new Error(`no ${methods.join('/')} session`);
-    return { userId, sessionId: found._id };
+    return { userId, sessionId: found._id.toHexString() };
   };
 
   it('takes a provider off with a security email, and never the last way in', async () => {
@@ -505,12 +520,12 @@ describe('sign-in methods', () => {
     const only = email('google-only');
     const page = await roundTrip('google', { subject: nextSubject(), email: only });
     await consentTo(page);
-    const onlyId = (await users().findOne({ email: only }))?._id ?? '';
+    const onlyId = (await users().findOne({ email: only }))?._id.toHexString() ?? '';
     const last = await call('DELETE', '/auth/sign-in-methods/google', {
-      passport: { userId: onlyId, sessionId: '0190a1b2-c3d4-7e5f-8a9b-0c1d2e3f4a5c' },
+      passport: { userId: onlyId, sessionId: new ObjectId().toHexString() },
     });
     expect([last.status, last.body.error?.code]).toEqual([409, 'LAST_SIGN_IN_METHOD']);
-    expect(await providers().countDocuments({ userId: onlyId })).toBe(1);
+    expect(await providers().countDocuments({ userId: oid(onlyId) })).toBe(1);
   });
 
   it('needs a sign-in with the password or an email code in the last 10 minutes, or a step-up with an authenticator (DR-006)', async () => {
@@ -523,7 +538,7 @@ describe('sign-in methods', () => {
     // a sign-in 11 minutes ago: a stolen token of it cannot take a way in off
     const old = await sessionWith(userId, ['email-code']);
     await sessionsDb().updateOne(
-      { _id: old.sessionId },
+      { _id: oid(old.sessionId) },
       { $set: { createdAt: new Date(Date.now() - 11 * 60_000) } },
     );
     const stale = await remove(old);
@@ -534,7 +549,7 @@ describe('sign-in methods', () => {
     // a fresh sign-in with Google itself does not count either
     const viaGoogle = await sessionWith(userId, ['google']);
     expect((await remove(viaGoogle)).body.error?.code).toBe('RECENT_SIGN_IN_REQUIRED');
-    expect(await providers().countDocuments({ userId, provider: 'google' })).toBe(1);
+    expect(await providers().countDocuments({ userId: oid(userId), provider: 'google' })).toBe(1);
     // the password, just now: it goes
     await post('/auth/login', { email: address, password: PASSWORD });
     const fresh = await remove(await sessionWith(userId, ['password']));
@@ -546,14 +561,17 @@ describe('sign-in methods', () => {
     const userId = await makeAccount(address, PASSWORD, { everyApp: false });
     await roundTrip('google', { subject: nextSubject(), email: address });
     await credentials().updateOne(
-      { _id: userId },
+      { _id: oid(userId) },
       { $set: { totp: { secret: 'sealed', enrolledAt: new Date(), lastStep: 0 } } },
     );
     const passport = await sessionWith(userId, ['email-code']);
-    await sessionsDb().updateOne({ _id: passport.sessionId }, { $set: { stepUpAt: null } });
+    await sessionsDb().updateOne({ _id: oid(passport.sessionId) }, { $set: { stepUpAt: null } });
     const asked = await call('DELETE', '/auth/sign-in-methods/google', { passport });
     expect([asked.status, asked.body.error?.code]).toEqual([401, 'STEP_UP_REQUIRED']);
-    await sessionsDb().updateOne({ _id: passport.sessionId }, { $set: { stepUpAt: new Date() } });
+    await sessionsDb().updateOne(
+      { _id: oid(passport.sessionId) },
+      { $set: { stepUpAt: new Date() } },
+    );
     const removed = await call('DELETE', '/auth/sign-in-methods/google', { passport });
     expect(removed.body.data).toEqual({ removed: true, providers: ['password'] });
   });
@@ -575,8 +593,8 @@ describe('the lookup by a provider’s id (QA-ID-002)', () => {
     expect(await planOf(providers(), { provider: 'google', subject: '42' })).toBe(
       'IXSCAN provider_subject_linked_unique',
     );
-    const row = (userId: string, provider: AuthProvider['provider'], subject: string | null) => ({
-      _id: uuidv7(),
+    const row = (userId: ObjectId, provider: AuthProvider['provider'], subject: string | null) => ({
+      _id: new ObjectId(),
       userId,
       provider,
       subject,
@@ -584,14 +602,16 @@ describe('the lookup by a provider’s id (QA-ID-002)', () => {
       lastUsedAt: null,
     });
     const subject = nextSubject();
-    await providers().insertOne(row(uuidv7(), 'google', subject));
-    await expect(providers().insertOne(row(uuidv7(), 'google', subject))).rejects.toMatchObject({
+    await providers().insertOne(row(new ObjectId(), 'google', subject));
+    await expect(
+      providers().insertOne(row(new ObjectId(), 'google', subject)),
+    ).rejects.toMatchObject({
       code: 11000,
     });
     // every password row has a null subject, and they never meet in the index
     await providers().insertMany([
-      row(uuidv7(), 'password', null),
-      row(uuidv7(), 'password', null),
+      row(new ObjectId(), 'password', null),
+      row(new ObjectId(), 'password', null),
     ]);
   });
 
@@ -603,8 +623,8 @@ describe('the lookup by a provider’s id (QA-ID-002)', () => {
       undefined,
     );
     await old.insertOne({
-      _id: uuidv7(),
-      userId: uuidv7(),
+      _id: new ObjectId(),
+      userId: new ObjectId(),
       provider: 'google',
       subject: '7',
       linkedAt: new Date(),
@@ -639,24 +659,24 @@ describe('the lookup by a provider’s id (QA-ID-002)', () => {
       const at = new Date();
       await rows.insertMany([
         {
-          _id: uuidv7(),
-          userId: uuidv7(),
+          _id: new ObjectId(),
+          userId: new ObjectId(),
           provider: 'password',
           subject: null,
           linkedAt: at,
           lastUsedAt: null,
         },
         {
-          _id: uuidv7(),
-          userId: uuidv7(),
+          _id: new ObjectId(),
+          userId: new ObjectId(),
           provider: 'password',
           subject: null,
           linkedAt: at,
           lastUsedAt: null,
         },
         {
-          _id: uuidv7(),
-          userId: uuidv7(),
+          _id: new ObjectId(),
+          userId: new ObjectId(),
           provider: 'google',
           subject: '9',
           linkedAt: at,

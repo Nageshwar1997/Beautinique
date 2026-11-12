@@ -2,11 +2,11 @@ import {
   type ClientSession,
   type IndexSpec,
   type Mongo,
+  type ObjectId,
   syncIndexes,
 } from '@beautinique/backend-server-mongo';
 import type { Migration } from '@beautinique/backend-server-release';
 import type { AUTH_PROVIDERS as PROVIDER_NAMES } from '@beautinique/shared-contracts';
-import { uuidv7 } from '@beautinique/shared-utils';
 
 export const CREDENTIALS = 'identity_credentials';
 export const AUTH_PROVIDERS = 'identity_auth_providers';
@@ -19,7 +19,8 @@ export type Provider = (typeof PROVIDER_NAMES)[number];
  * so that reading an account never reads them. An account made with Google alone has none.
  */
 export interface Credentials {
-  _id: string;
+  /** The account's id (identity_users) */
+  _id: ObjectId;
   password?: {
     /** argon2id PHC string; the password itself is never stored */
     hash: string;
@@ -43,8 +44,8 @@ export interface Credentials {
 
 /** One way an account signs in. `subject` is the provider's user id (null for `password`). */
 export interface AuthProvider {
-  _id: string;
-  userId: string;
+  _id: ObjectId;
+  userId: ObjectId;
   provider: Provider;
   subject: string | null;
   linkedAt: Date;
@@ -52,7 +53,8 @@ export interface AuthProvider {
 }
 
 /** The associated data a sealed authenticator secret is bound to: it opens for this account only. */
-export const totpContext = (userId: string): string => `${CREDENTIALS}.totp:${userId}`;
+export const totpContext = (userId: ObjectId): string =>
+  `${CREDENTIALS}.totp:${userId.toHexString()}`;
 
 /**
  * One Google (LinkedIn, GitHub) account belongs to one of ours. The filter takes every non-empty
@@ -122,7 +124,7 @@ export interface NewPassword {
 export async function storePassword(
   mongo: Mongo,
   session: ClientSession,
-  { userId, password, now }: { userId: string; password: NewPassword; now: Date },
+  { userId, password, now }: { userId: ObjectId; password: NewPassword; now: Date },
 ): Promise<void> {
   // a whole new password: an old mark (pending, leaked) goes with the old one
   const kept = {
@@ -141,7 +143,6 @@ export async function storePassword(
     { userId, provider: 'password' },
     {
       $setOnInsert: {
-        _id: uuidv7(),
         userId,
         provider: 'password',
         subject: null,
@@ -156,7 +157,7 @@ export async function storePassword(
 /** Whether an account signs in with a password. */
 export async function hasPassword(
   mongo: Mongo,
-  userId: string,
+  userId: ObjectId,
   session?: ClientSession,
 ): Promise<boolean> {
   const found = await mongo.db

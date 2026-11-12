@@ -1,4 +1,4 @@
-import { isoDateTimeZod, object, string, uuidv7Zod } from '@beautinique/shared-zod';
+import { isoDateTimeZod, object, objectIdZod, string } from '@beautinique/shared-zod';
 
 import { defineEvent } from '../events';
 import { definePermission } from '../permissions';
@@ -8,7 +8,7 @@ import { defineRoute } from '../routes';
 /** Milestone 1 sample: record a ping, and the `platform.ping.recorded` event goes out with it. */
 const noteZod = string().min(1).max(200);
 const pingData = object({
-  pingId: uuidv7Zod,
+  pingId: objectIdZod,
   note: noteZod,
   recordedAt: isoDateTimeZod,
 });
@@ -81,6 +81,6 @@ export const getPing = defineRoute({
   idempotency: false,
   stepUp: false,
   owner: 'core',
-  input: { params: object({ pingId: uuidv7Zod }) },
+  input: { params: object({ pingId: objectIdZod }) },
   output: pingData,
 });

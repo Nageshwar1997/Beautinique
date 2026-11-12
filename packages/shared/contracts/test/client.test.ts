@@ -19,7 +19,7 @@ import {
   refreshSession,
 } from '../src';
 
-const id = '0190a1b2-c3d4-7e5f-8a9b-0c1d2e3f4a5b';
+const id = '65f1a2b3c4d5e6f708192a3b';
 const ping = { pingId: id, note: 'hello', recordedAt: '2026-10-22T10:00:00.000Z' };
 
 interface Seen {

@@ -11,8 +11,7 @@
         "properties": {
           "eventId": {
             "type": "string",
-            "format": "uuid",
-            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-7[0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12})$"
+            "pattern": "^[0-9a-f]{24}$"
           },
           "type": {
             "type": "string",
@@ -131,8 +130,7 @@
             "properties": {
               "userId": {
                 "type": "string",
-                "format": "uuid",
-                "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-7[0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12})$"
+                "pattern": "^[0-9a-f]{24}$"
               },
               "email": {
                 "type": "string",
@@ -211,8 +209,7 @@
         "properties": {
           "eventId": {
             "type": "string",
-            "format": "uuid",
-            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-7[0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12})$"
+            "pattern": "^[0-9a-f]{24}$"
           },
           "type": {
             "type": "string",
@@ -331,8 +328,7 @@
             "properties": {
               "userId": {
                 "type": "string",
-                "format": "uuid",
-                "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-7[0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12})$"
+                "pattern": "^[0-9a-f]{24}$"
               },
               "email": {
                 "type": "string",
@@ -379,8 +375,7 @@
         "properties": {
           "eventId": {
             "type": "string",
-            "format": "uuid",
-            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-7[0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12})$"
+            "pattern": "^[0-9a-f]{24}$"
           },
           "type": {
             "type": "string",
@@ -499,8 +494,7 @@
             "properties": {
               "invitationId": {
                 "type": "string",
-                "format": "uuid",
-                "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-7[0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12})$"
+                "pattern": "^[0-9a-f]{24}$"
               },
               "email": {
                 "type": "string",
@@ -570,8 +564,7 @@
         "properties": {
           "eventId": {
             "type": "string",
-            "format": "uuid",
-            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-7[0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12})$"
+            "pattern": "^[0-9a-f]{24}$"
           },
           "type": {
             "type": "string",
@@ -771,8 +764,7 @@
         "properties": {
           "eventId": {
             "type": "string",
-            "format": "uuid",
-            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-7[0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12})$"
+            "pattern": "^[0-9a-f]{24}$"
           },
           "type": {
             "type": "string",
@@ -891,13 +883,11 @@
             "properties": {
               "sessionId": {
                 "type": "string",
-                "format": "uuid",
-                "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-7[0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12})$"
+                "pattern": "^[0-9a-f]{24}$"
               },
               "userId": {
                 "type": "string",
-                "format": "uuid",
-                "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-7[0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12})$"
+                "pattern": "^[0-9a-f]{24}$"
               },
               "email": {
                 "type": "string",
@@ -967,8 +957,7 @@
         "properties": {
           "eventId": {
             "type": "string",
-            "format": "uuid",
-            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-7[0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12})$"
+            "pattern": "^[0-9a-f]{24}$"
           },
           "type": {
             "type": "string",
@@ -1087,8 +1076,7 @@
             "properties": {
               "userId": {
                 "type": "string",
-                "format": "uuid",
-                "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-7[0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12})$"
+                "pattern": "^[0-9a-f]{24}$"
               },
               "email": {
                 "type": "string",
@@ -1174,8 +1162,7 @@
         "properties": {
           "eventId": {
             "type": "string",
-            "format": "uuid",
-            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-7[0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12})$"
+            "pattern": "^[0-9a-f]{24}$"
           },
           "type": {
             "type": "string",
@@ -1294,8 +1281,7 @@
             "properties": {
               "pingId": {
                 "type": "string",
-                "format": "uuid",
-                "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-7[0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12})$"
+                "pattern": "^[0-9a-f]{24}$"
               },
               "note": {
                 "type": "string",

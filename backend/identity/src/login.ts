@@ -10,6 +10,7 @@ import {
   verifyTotp,
 } from '@beautinique/backend-server-crypto';
 import { AppError } from '@beautinique/backend-server-kit';
+import { ObjectId, parseObjectId } from '@beautinique/backend-server-mongo';
 import {
   type AppId,
   type SocialProvider,
@@ -55,7 +56,7 @@ export const TOTP_ISSUER = 'Beautinique';
 
 export const loginKey = (loginId: string): string => `bq:id:login:${loginId}`;
 
-/** A sign-in between its password and its second step, in Redis. */
+/** A sign-in between its password and its second step, in Redis (the account's id as hex). */
 interface Login {
   userId: string;
   email: string;
@@ -94,7 +95,14 @@ async function signIn(
   methods: AuthMethod[],
   client: Client,
 ): Promise<{ user: { userId: string; email: string }; session: IssuedSession }> {
-  const session = await deps.sessions.issue({ userId, email, app, methods, client });
+  // the hex of an account this code read (loginAt checks one from Redis)
+  const session = await deps.sessions.issue({
+    userId: new ObjectId(userId),
+    email,
+    app,
+    methods,
+    client,
+  });
   return { user: session.user, session };
 }
 
@@ -155,7 +163,7 @@ export async function passwordLogin(
   await deps.mongo.db
     .collection<AuthProvider>(AUTH_PROVIDERS)
     .updateOne({ userId: user._id, provider: 'password' }, { $set: { lastUsedAt: now } });
-  const who = { userId: user._id, email: user.email, app };
+  const who = { userId: user._id.toHexString(), email: user.email, app };
   if (credentials.totp) {
     return { next: 'totp', loginId: await startLogin(deps, { ...who, stage: 'totp' }) };
   }
@@ -183,7 +191,7 @@ return redis.call('HINCRBY', KEYS[1], 'attempts', 1)
  */
 async function checkedLater(
   deps: LoginDeps,
-  userId: string,
+  userId: ObjectId,
   stored: Credentials['password'],
   password: string,
   now: Date,
@@ -222,11 +230,13 @@ export const oneMoreTry = async (deps: LoginDeps, key: string): Promise<number> 
 async function loginAt(
   deps: LoginDeps,
   { app, loginId, stage, ip }: { app: AppId; loginId: string; stage: Login['stage']; ip: string },
-): Promise<{ login: Login; tries: number }> {
+): Promise<{ login: Login; userId: ObjectId; tries: number }> {
   const key = loginKey(loginId);
   const login = (await inRedis(() => deps.redis.hgetall(key))) as Partial<Login>;
+  // a sign-in from before ObjectIds has another id: it just ends
+  const userId = parseObjectId(login.userId);
   if (
-    login.userId === undefined ||
+    userId === undefined ||
     login.email === undefined ||
     login.app !== app ||
     login.stage !== stage
@@ -239,7 +249,7 @@ async function loginAt(
     await inRedis(() => deps.redis.del(key));
     throw loginExpired();
   }
-  return { login: login as Login, tries };
+  return { login: login as Login, userId, tries };
 }
 
 /** A wrong second step: counts toward the lock; the last try ends the sign-in. */
@@ -272,16 +282,21 @@ export async function loginWithTotp(
   deps: LoginDeps,
   { app, loginId, code, client }: { app: AppId; loginId: string; code: string; client: Client },
 ): Promise<{ user: { userId: string; email: string }; session: IssuedSession }> {
-  const { login, tries } = await loginAt(deps, { app, loginId, stage: 'totp', ip: client.ip });
-  const credentials = await credentialsOf(deps).findOne({ _id: login.userId });
+  const { login, userId, tries } = await loginAt(deps, {
+    app,
+    loginId,
+    stage: 'totp',
+    ip: client.ip,
+  });
+  const credentials = await credentialsOf(deps).findOne({ _id: userId });
   if (!credentials?.totp) throw loginExpired();
-  const secret = decryptField(deps.keys, credentials.totp.secret, totpContext(login.userId));
+  const secret = decryptField(deps.keys, credentials.totp.secret, totpContext(userId));
   const step = verifyTotp(secret, code);
   const fresh =
     step !== null &&
     (
       await credentialsOf(deps).updateOne(
-        { _id: login.userId, 'totp.lastStep': { $lt: step } },
+        { _id: userId, 'totp.lastStep': { $lt: step } },
         { $set: { 'totp.lastStep': step } },
       )
     ).modifiedCount === 1;
@@ -291,8 +306,8 @@ export async function loginWithTotp(
   return signIn(deps, login, [login.first ?? 'password', 'totp'], client);
 }
 
-const recoveryHash = (deps: LoginDeps, userId: string, code: string): string =>
-  blindIndex(deps.keys, `recovery:${userId}`, code.replace('-', ''));
+const recoveryHash = (deps: LoginDeps, userId: ObjectId, code: string): string =>
+  blindIndex(deps.keys, `recovery:${userId.toHexString()}`, code.replace('-', ''));
 
 /** The recovery codes not used yet; null without any (no authenticator). */
 export const recoveryCodesLeft = (codes: Credentials['recoveryCodes']): number | null =>
@@ -301,7 +316,7 @@ export const recoveryCodesLeft = (codes: Credentials['recoveryCodes']): number |
 /** Spends one recovery code of the account: how many are left, or null when it is wrong or used. */
 async function useRecoveryCode(
   deps: LoginDeps,
-  userId: string,
+  userId: ObjectId,
   code: string,
 ): Promise<number | null> {
   const hash = recoveryHash(deps, userId, code);
@@ -322,8 +337,13 @@ export async function loginWithRecoveryCode(
   session: IssuedSession;
   recoveryCodesLeft: number;
 }> {
-  const { login, tries } = await loginAt(deps, { app, loginId, stage: 'totp', ip: client.ip });
-  const left = await useRecoveryCode(deps, login.userId, code);
+  const { login, userId, tries } = await loginAt(deps, {
+    app,
+    loginId,
+    stage: 'totp',
+    ip: client.ip,
+  });
+  const left = await useRecoveryCode(deps, userId, code);
   if (left === null) return wrongTry(deps, loginId, login, tries, client.ip, recoveryCodeInvalid);
   await finish(deps, loginId);
   await clearFailures(deps.redis, deps.keys, login.email, { ip: client.ip });
@@ -358,7 +378,7 @@ export async function startTotpEnroll(
  */
 export function newRecoveryCodes(
   deps: LoginDeps,
-  userId: string,
+  userId: ObjectId,
 ): { codes: string[]; stored: NonNullable<Credentials['recoveryCodes']> } {
   const codes = Array.from({ length: RECOVERY_CODE_COUNT }, () => {
     const code = encodeBase32(randomBytes(7)).slice(0, 10);
@@ -383,21 +403,26 @@ export async function confirmTotpEnroll(
   session: IssuedSession;
   recoveryCodes: string[];
 }> {
-  const { login, tries } = await loginAt(deps, { app, loginId, stage: 'enroll', ip: client.ip });
+  const { login, userId, tries } = await loginAt(deps, {
+    app,
+    loginId,
+    stage: 'enroll',
+    ip: client.ip,
+  });
   if (login.pending === undefined) throw loginExpired();
   const secret = decryptField(deps.keys, login.pending, enrollContext(loginId));
   const step = verifyTotp(secret, code);
   if (step === null) return wrongTry(deps, loginId, login, tries, client.ip, totpInvalid);
   await finish(deps, loginId);
   const now = new Date();
-  const recovery = newRecoveryCodes(deps, login.userId);
+  const recovery = newRecoveryCodes(deps, userId);
   const saved = await credentialsOf(deps).updateOne(
     // never over an authenticator set up meanwhile (another sign-in)
-    { _id: login.userId, totp: { $exists: false } },
+    { _id: userId, totp: { $exists: false } },
     {
       $set: {
         totp: {
-          secret: encryptField(deps.keys, secret, totpContext(login.userId)),
+          secret: encryptField(deps.keys, secret, totpContext(userId)),
           enrolledAt: now,
           lastStep: step,
         },
@@ -432,7 +457,7 @@ export async function stepUpWithTotp(
     sessionId,
     proof,
     ip,
-  }: { userId: string; sessionId: string; proof: StepUpProof; ip: string },
+  }: { userId: ObjectId; sessionId: ObjectId; proof: StepUpProof; ip: string },
 ): Promise<{
   app: AppId;
   accessToken: string;

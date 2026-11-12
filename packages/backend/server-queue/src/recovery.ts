@@ -2,7 +2,7 @@ import { hostname } from 'node:os';
 import { setTimeout as sleep } from 'node:timers/promises';
 
 import type { Logger } from '@beautinique/backend-server-kit';
-import type { Mongo } from '@beautinique/backend-server-mongo';
+import type { IndexSpec, Mongo, ObjectId } from '@beautinique/backend-server-mongo';
 import { uuidv7 } from '@beautinique/shared-utils';
 import type { Queue } from 'bullmq';
 import type { Redis } from 'ioredis';
@@ -24,11 +24,21 @@ export const EPOCH_KEY = 'bq:epoch';
 /** A deployable's small facts about the platform: here, the Redis epoch it last recovered for. */
 export const PLATFORM_STATE = 'platform_state';
 
+/** platform_state's facts are found by key (their _id is an ObjectId, like every document's). */
+export const STATE_INDEXES: readonly IndexSpec[] = [
+  { collection: PLATFORM_STATE, name: 'key_unique', key: { key: 1 }, unique: true },
+];
+
+// the Redis epoch this deployable last recovered for
+const EPOCH_STATE = 'redis-epoch';
+
 /** The lease a deployable's instances share, so one of them recovers. */
 export const RECOVERY_LEASE = 'redis-recovery';
 
 interface StateRecord {
-  _id: string;
+  _id: ObjectId;
+  /** What the fact is about, e.g. `redis-epoch` */
+  key: string;
   value: string;
   recoveredAt: Date;
 }
@@ -92,16 +102,16 @@ export function startWipeWatchdog({
       epoch = await redis.get(epochKey);
       if (epoch === null) throw new Error(`Redis did not keep ${epochKey}`);
     }
-    const known = await state.findOne({ _id: 'redis-epoch' });
+    const known = await state.findOne({ key: EPOCH_STATE });
     if (known?.value === epoch) return false;
     if (!(await tryLease(mongo, RECOVERY_LEASE, owner, lockTtlMs))) return false;
     try {
       // another instance may have finished while this one waited for the lease
-      if ((await state.findOne({ _id: 'redis-epoch' }))?.value === epoch) return false;
+      if ((await state.findOne({ key: EPOCH_STATE }))?.value === epoch) return false;
       logger.warn({ epoch }, 'redis was wiped or is new: recovering');
       await recover();
       await state.updateOne(
-        { _id: 'redis-epoch' },
+        { key: EPOCH_STATE },
         { $set: { value: epoch, recoveredAt: new Date() } },
         { upsert: true },
       );
@@ -208,7 +218,7 @@ export async function redriveOutbox({
     return open;
   };
   let sent = 0;
-  let after: string | undefined;
+  let after: ObjectId | undefined;
   try {
     for (;;) {
       const batch = await outbox
@@ -225,7 +235,7 @@ export async function redriveOutbox({
         for (const subscriber of subscribers[record.type] ?? []) {
           await queue(queueOf(subscriber)).add(subscriber, record.envelope, {
             ...RELAY_JOB_OPTIONS,
-            jobId: jobIdOf(record._id, subscriber),
+            jobId: jobIdOf(record._id.toHexString(), subscriber),
           });
           sent += 1;
         }

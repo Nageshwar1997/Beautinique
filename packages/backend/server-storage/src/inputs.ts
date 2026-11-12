@@ -1,10 +1,10 @@
 import {
   type input,
   int,
+  objectIdZod,
   type output,
   strictObject,
   string,
-  uuidv7Zod,
   type ZodType,
 } from '@beautinique/shared-zod';
 
@@ -28,7 +28,8 @@ const contentTypeZod = string()
   );
 
 export const createUploadInputZod = strictObject({
-  assetId: uuidv7Zod,
+  /** The media_assets record's ObjectId, in hex */
+  assetId: objectIdZod,
   purpose: purposeZod,
   visibility: visibilityZod,
   contentType: contentTypeZod,
@@ -48,8 +49,8 @@ export const getUrlInputZod = strictObject({
 export const copyInputZod = strictObject({
   /** The key of the file to copy. */
   from: keyZod,
-  /** The new asset the copy belongs to. */
-  assetId: uuidv7Zod,
+  /** The new asset the copy belongs to (its record's ObjectId, in hex). */
+  assetId: objectIdZod,
   purpose: purposeZod,
   visibility: visibilityZod,
 });

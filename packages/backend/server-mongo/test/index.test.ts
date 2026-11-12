@@ -137,10 +137,80 @@ describe('public API', () => {
       'TransactionTimeoutError',
       'syncIndexes',
       'IndexConflictError',
+      'parseObjectId',
+      'toObjectId',
     ]) {
       expect(api, name).toHaveProperty(name);
     }
     expect(new ObjectId().toHexString()).toMatch(/^[0-9a-f]{24}$/);
+  });
+});
+
+describe('ids from outside (owner, 2026-11-12)', () => {
+  const hex = '65f1a2b3c4d5e6f708192a3b';
+  // what a path, a token or an old cookie may hold instead (older bson's ObjectId.isValid took the 12-letter one)
+  const bad = [
+    '0190a1b2-c3d4-7e5f-8a9b-0c1d2e3f4a5b',
+    'abcdefghijkl',
+    `${hex}0`,
+    hex.slice(1),
+    ` ${hex}`,
+    'zzf1a2b3c4d5e6f708192a3b',
+    '',
+    12,
+    null,
+    undefined,
+    new ObjectId(),
+  ];
+
+  it('parseObjectId: the ObjectId of 24 hex (either case), else undefined', () => {
+    expect(api.parseObjectId(hex)?.toHexString()).toBe(hex);
+    expect(api.parseObjectId(hex.toUpperCase())?.toHexString()).toBe(hex);
+    for (const value of bad) expect(api.parseObjectId(value), String(value)).toBeUndefined();
+  });
+
+  it('toObjectId: a bad id is the caller’s mistake (400, or 404 for a record), never a 500', () => {
+    expect(api.toObjectId(hex).equals(new ObjectId(hex))).toBe(true);
+    for (const value of bad) {
+      const error = (() => {
+        try {
+          api.toObjectId(value, { field: 'grantId' });
+        } catch (caught) {
+          return caught;
+        }
+        return undefined;
+      })();
+      expect(error, String(value)).toBeInstanceOf(AppError);
+      expect(toErrorResponse(error, 'r1')).toEqual({
+        status: 400,
+        body: {
+          error: {
+            code: 'VALIDATION_FAILED',
+            message: 'Not a valid id',
+            details: [{ path: ['grantId'], message: 'Not a valid id' }],
+            requestId: 'r1',
+          },
+        },
+      });
+    }
+    expect(() => api.toObjectId('nope')).toThrow(
+      expect.objectContaining({ details: [{ path: ['id'], message: 'Not a valid id' }] }),
+    );
+    expect(
+      toErrorResponse(
+        (() => {
+          try {
+            return api.toObjectId('nope', { notFound: 'No such invitation' });
+          } catch (caught) {
+            return caught;
+          }
+        })(),
+        'r2',
+      ),
+    ).toEqual({
+      status: 404,
+      body: { error: { code: 'NOT_FOUND', message: 'No such invitation', requestId: 'r2' } },
+    });
   });
 });
 

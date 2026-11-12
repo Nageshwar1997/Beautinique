@@ -1,4 +1,5 @@
 import { AppError, mountRoute } from '@beautinique/backend-server-kit';
+import { toObjectId } from '@beautinique/backend-server-mongo';
 import {
   type AppId,
   APPS,
@@ -238,7 +239,10 @@ export function routesOf(deps: OtpDeps): Router {
 
   mountRoute(router, endSession, async ({ params }, { req, res }) => {
     const passport = await deps.passport(req);
-    const ended = await deps.sessions.end(passport.userId, params.sessionId);
+    const ended = await deps.sessions.end(
+      toObjectId(passport.userId),
+      toObjectId(params.sessionId, { field: 'sessionId' }),
+    );
     // this device's own session: its cookies go too
     if (ended && params.sessionId === passport.sessionId) clearSessionCookies(res, passport.app);
     return { ended };
@@ -246,7 +250,12 @@ export function routesOf(deps: OtpDeps): Router {
 
   mountRoute(router, endOtherSessions, async (_input, { req }) => {
     const passport = await deps.passport(req);
-    return { ended: await deps.sessions.endOthers(passport.userId, passport.sessionId) };
+    return {
+      ended: await deps.sessions.endOthers(
+        toObjectId(passport.userId),
+        toObjectId(passport.sessionId),
+      ),
+    };
   });
 
   // roles, grants and invitations (TASKS T3.3): identity checks who may, from its own grants
@@ -301,8 +310,8 @@ export function routesOf(deps: OtpDeps): Router {
   mountRoute(router, stepUp, async ({ body }, { req, res }) => {
     const passport = await deps.passport(req);
     const stepped = await login.stepUpWithTotp(deps, {
-      userId: passport.userId,
-      sessionId: passport.sessionId,
+      userId: toObjectId(passport.userId),
+      sessionId: toObjectId(passport.sessionId),
       proof: body,
       ip: clientOf(req).ip,
     });

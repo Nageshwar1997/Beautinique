@@ -16,6 +16,7 @@ import {
   LOGIN_ID,
   PASSWORD,
   totpNext,
+  USER_ID,
 } from './fake-identity';
 import { describedBy, renderApp, where } from './render';
 
@@ -112,7 +113,7 @@ describe('SignInForm', () => {
     expect(document.activeElement).toBe(screen.getByLabelText('Authenticator code'));
     await expectNoAxeViolations();
     identity.on('POST /auth/login/:id/totp', () =>
-      json(200, { data: { user: { userId: LOGIN_ID, email: EMAIL } } }),
+      json(200, { data: { user: { userId: USER_ID, email: EMAIL } } }),
     );
     await user.clear(screen.getByLabelText('Authenticator code'));
     await user.type(screen.getByLabelText('Authenticator code'), '482913');

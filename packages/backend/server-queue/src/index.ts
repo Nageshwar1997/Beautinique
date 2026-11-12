@@ -17,7 +17,8 @@ export {
   type RedriveDeadLettersOptions,
   type RedriveResult,
 } from './dead-letters';
-export { LOCKS, releaseLease, tryLease } from './lock';
+export { PLATFORM_INDEXES } from './indexes';
+export { LOCK_INDEXES, LOCKS, releaseLease, tryLease } from './lock';
 export {
   ensureOutboxIndexes,
   EVENT_MAX_BYTES,
@@ -35,6 +36,7 @@ export {
   redriveOutbox,
   type RedriveOutboxOptions,
   startWipeWatchdog,
+  STATE_INDEXES,
   type WipeWatchdog,
   type WipeWatchdogOptions,
 } from './recovery';
@@ -62,6 +64,7 @@ export {
   type Schedule,
   startTaskTrigger,
   type Task,
+  TASK_RUN_INDEXES,
   TASK_RUNS,
   type TaskRun,
   type TaskTrigger,

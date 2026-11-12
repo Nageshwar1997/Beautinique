@@ -1,7 +1,12 @@
 import { randomBytes } from 'node:crypto';
 
 import { AppError, type Passport } from '@beautinique/backend-server-kit';
-import { type ClientSession, withTransaction } from '@beautinique/backend-server-mongo';
+import {
+  type ClientSession,
+  ObjectId,
+  toObjectId,
+  withTransaction,
+} from '@beautinique/backend-server-mongo';
 import { writeEvent } from '@beautinique/backend-server-queue';
 import type { SIGN_IN_METHOD_CHANGES } from '@beautinique/shared-contracts';
 import {
@@ -19,7 +24,6 @@ import {
   type SocialProvider,
   STEP_UP_SECONDS,
 } from '@beautinique/shared-contracts';
-import { uuidv7 } from '@beautinique/shared-utils';
 
 import {
   AUTH_PROVIDERS,
@@ -156,7 +160,7 @@ function methodChanged(
     requestId,
     at,
   }: {
-    user: { _id: string; email: string };
+    user: { _id: ObjectId; email: string };
     provider: SocialProvider;
     change: (typeof SIGN_IN_METHOD_CHANGES)[number];
     app: AppId;
@@ -166,11 +170,11 @@ function methodChanged(
   },
 ) {
   return writeEvent(deps.mongo, session, signInMethodChanged, {
-    aggregate: { type: 'user', id: user._id },
-    actor: { type: 'user', id: user._id },
+    aggregate: { type: 'user', id: user._id.toHexString() },
+    actor: { type: 'user', id: user._id.toHexString() },
     correlationId: requestId,
     data: {
-      userId: user._id,
+      userId: user._id.toHexString(),
       email: user.email,
       provider,
       change,
@@ -195,7 +199,7 @@ async function link(
   const theirs = await providers(deps).findOne(bySubject(provider, subject), { session });
   if (theirs) return null;
   await providers(deps).insertOne(
-    { _id: uuidv7(), userId: user._id, provider, subject, linkedAt: now, lastUsedAt: now },
+    { _id: new ObjectId(), userId: user._id, provider, subject, linkedAt: now, lastUsedAt: now },
     { session },
   );
   await methodChanged(deps, session, {
@@ -211,7 +215,7 @@ async function link(
 }
 
 interface LinkInput {
-  user: { _id: string; email: string };
+  user: { _id: ObjectId; email: string };
   provider: SocialProvider;
   subject: string;
   app: AppId;
@@ -237,7 +241,7 @@ async function signInAs(
     .findOne({ _id: user._id }, { projection: { totp: 1 } });
   if (credentials?.totp) {
     const loginId = await startLogin(deps, {
-      userId: user._id,
+      userId: user._id.toHexString(),
       email: user.email,
       app,
       stage: 'totp',
@@ -258,7 +262,7 @@ async function signInAs(
 }
 
 interface SignInInput {
-  user: { _id: string; email: string };
+  user: { _id: ObjectId; email: string };
   provider: SocialProvider;
   app: AppId;
   next: string;
@@ -456,7 +460,14 @@ export async function finishSignUp(
     if (isNewUser) {
       // the first way it signs in: no security email for a new account
       await providers(deps).insertOne(
-        { _id: uuidv7(), userId: user._id, provider, subject, linkedAt: now, lastUsedAt: now },
+        {
+          _id: new ObjectId(),
+          userId: user._id,
+          provider,
+          subject,
+          linkedAt: now,
+          lastUsedAt: now,
+        },
         { session },
       );
       return { user, linked: 'linked' as const };
@@ -479,7 +490,7 @@ export async function finishSignUp(
   if (answer.loginId !== undefined) return { next: 'totp', loginId: answer.loginId, nextPath };
   return {
     next: 'signed-in',
-    user: { userId: made.user._id, email: made.user.email },
+    user: { userId: made.user._id.toHexString(), email: made.user.email },
     ...(answer.session ? { session: answer.session } : {}),
     nextPath,
   };
@@ -505,16 +516,14 @@ async function provenJustNow(
   passport: Passport,
   tx: ClientSession,
 ): Promise<void> {
+  const userId = toObjectId(passport.userId);
   const signedIn = await deps.mongo.db
     .collection<Session>(SESSIONS)
-    .findOne(
-      { _id: passport.sessionId, userId: passport.userId, revokedAt: null },
-      { session: tx },
-    );
+    .findOne({ _id: toObjectId(passport.sessionId), userId, revokedAt: null }, { session: tx });
   if (!signedIn) throw sessionExpired();
   const credentials = await deps.mongo.db
     .collection<Credentials>(CREDENTIALS)
-    .findOne({ _id: passport.userId }, { session: tx, projection: { totp: 1 } });
+    .findOne({ _id: userId }, { session: tx, projection: { totp: 1 } });
   const now = Date.now();
   if (credentials?.totp) {
     const stepUpAt = signedIn.stepUpAt?.getTime();
@@ -539,7 +548,7 @@ export async function removeMethod(
 ): Promise<{ removed: boolean; providers: AuthProvider['provider'][] }> {
   const user = await deps.mongo.db
     .collection<User>(USERS)
-    .findOne({ _id: passport.userId }, { projection: { email: 1 } });
+    .findOne({ _id: toObjectId(passport.userId) }, { projection: { email: 1 } });
   if (!user) throw sessionExpired();
   return withTransaction(deps.mongo, async (session) => {
     const methods = await providers(deps)

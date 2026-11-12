@@ -259,10 +259,10 @@ describe('createApiClient', () => {
       json(200, {
         data: {
           user: {
-            userId: '01920000-0000-7000-8000-000000000001',
+            userId: '6730a2b40000000000000001',
             email: 'asha@beautinique.example',
           },
-          sessionId: '01920000-0000-7000-8000-000000000002',
+          sessionId: '6730a2b40000000000000002',
           expiresAt: '2026-12-01T00:00:00.000Z',
         },
       }),
@@ -302,7 +302,7 @@ describe('createApiClient', () => {
     const started = performance.now();
     try {
       const me = await clientFor(gateway).call(getMe);
-      expect(me.user.userId).toBe('01920000-0000-7000-8000-000000000001');
+      expect(me.user.userId).toBe('6730a2b40000000000000001');
     } finally {
       otherTab.close();
     }
@@ -329,7 +329,7 @@ describe('createApiClient', () => {
     const started = performance.now();
     try {
       const me = await clientFor(gateway).call(getMe);
-      expect(me.user.userId).toBe('01920000-0000-7000-8000-000000000001');
+      expect(me.user.userId).toBe('6730a2b40000000000000001');
     } finally {
       otherTab.close();
     }
@@ -387,10 +387,10 @@ describe('createApiClient', () => {
       json(200, {
         data: {
           user: {
-            userId: '01920000-0000-7000-8000-000000000001',
+            userId: '6730a2b40000000000000001',
             email: 'asha@beautinique.example',
           },
-          sessionId: '01920000-0000-7000-8000-000000000002',
+          sessionId: '6730a2b40000000000000002',
           expiresAt: '2026-12-01T00:00:00.000Z',
         },
       }),

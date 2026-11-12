@@ -14,11 +14,11 @@ const mongo = await connectMongo({
   logger: createLogger({ name: 'e2e-test-writer', level: 'silent' }),
 });
 markRunning(runId, { dir });
-const locks = mongo.db.collection<{ _id: string; at: Date }>('platform_locks');
+const locks = mongo.db.collection<{ name: string; at: Date }>('platform_locks');
 setInterval(() => {
   // a write that meets the drop fails, the next one makes the database again: the real backend
   // does not stop over it either
-  locks.updateOne({ _id: 'release' }, { $set: { at: new Date() } }, { upsert: true }).catch(() => {
+  locks.updateOne({ name: 'release' }, { $set: { at: new Date() } }, { upsert: true }).catch(() => {
     // the next write tries again
   });
 }, 50);

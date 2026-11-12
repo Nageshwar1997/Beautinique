@@ -286,6 +286,28 @@ const mutations: Mutation[] = [
       ],
     ],
   },
+  // asset ids are ObjectIds (owner, 2026-11-12)
+  {
+    file: 'keys',
+    name: 'an asset id in a key may be upper case',
+    change: [['const ASSET_ID = /^[0-9a-f]{24}$/;', 'const ASSET_ID = /^[0-9a-fA-F]{24}$/;']],
+  },
+  {
+    file: 'keys',
+    name: 'an asset id in a key may be shorter',
+    change: [['const ASSET_ID = /^[0-9a-f]{24}$/;', 'const ASSET_ID = /^[0-9a-f]{23,24}$/;']],
+  },
+  {
+    file: 'inputs',
+    name: 'an upload may name any asset id',
+    survives: 'assetKey checks the id again before anything is stored',
+    change: [
+      [
+        '  assetId: objectIdZod,\n  purpose: purposeZod,\n  visibility: visibilityZod,\n  contentType',
+        '  assetId: string(),\n  purpose: purposeZod,\n  visibility: visibilityZod,\n  contentType',
+      ],
+    ],
+  },
 ];
 
 export default mutations;

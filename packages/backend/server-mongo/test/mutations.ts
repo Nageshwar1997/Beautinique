@@ -548,6 +548,50 @@ const mutations: Mutation[] = [
     change: [['    created.push(`${collection}.${name}`);\n', '']],
     tests: 'syncIndexes',
   },
+  // ids from outside (owner, 2026-11-12)
+  {
+    file: 'ids',
+    name: 'any 12-letter string is an id (ObjectId.isValid)',
+    change: [
+      [
+        "typeof value === 'string' && HEX_ID.test(value) ? new ObjectId(value) : undefined",
+        "typeof value === 'string' && ObjectId.isValid(value) ? new ObjectId(value) : undefined",
+      ],
+    ],
+    tests: 'ids from outside',
+    survives:
+      'bson 7 ObjectId.isValid takes only 24 hex for a string too; ours stays if bson changes it',
+  },
+  {
+    file: 'ids',
+    name: 'an id may be longer or shorter',
+    change: [['const HEX_ID = /^[0-9a-f]{24}$/i;', 'const HEX_ID = /[0-9a-f]{23}/i;']],
+    tests: 'ids from outside',
+  },
+  {
+    file: 'ids',
+    name: 'upper case is refused',
+    change: [['const HEX_ID = /^[0-9a-f]{24}$/i;', 'const HEX_ID = /^[0-9a-f]{24}$/;']],
+    tests: 'ids from outside',
+  },
+  {
+    file: 'ids',
+    name: 'a value that is not a string is tried',
+    change: [["typeof value === 'string' && HEX_ID", 'HEX_ID']],
+    tests: 'ids from outside',
+  },
+  {
+    file: 'ids',
+    name: 'a bad id is a 404 even without notFound',
+    change: [['if (options.notFound !== undefined) throw', 'throw']],
+    tests: 'ids from outside',
+  },
+  {
+    file: 'ids',
+    name: 'the field is not named',
+    change: [["path: [options.field ?? 'id']", "path: ['id']"]],
+    tests: 'ids from outside',
+  },
 ];
 
 export default mutations;

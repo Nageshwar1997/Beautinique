@@ -4,6 +4,7 @@ export {
   TransactionAbortedError,
   TransactionTimeoutError,
 } from './errors';
+export { parseObjectId, toObjectId } from './ids';
 export { IndexConflictError, type IndexSpec, type IndexSyncReport, syncIndexes } from './indexes';
 export { withTransaction, type WithTransactionOptions } from './transaction';
 // The whole mongodb driver (ObjectId, Collection, MongoServerError ...): services import it from here,

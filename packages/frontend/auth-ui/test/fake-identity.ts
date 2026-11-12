@@ -8,13 +8,13 @@ import {
 } from '@beautinique/shared-contracts';
 
 export const BASE_URL = 'https://bq.example/api/v1';
-export const USER_ID = '01920000-0000-7000-8000-000000000001';
-export const SESSION_ID = '01920000-0000-7000-8000-000000000002';
+export const USER_ID = '6730a2b40000000000000001';
+export const SESSION_ID = '6730a2b40000000000000002';
 export const LOGIN_ID = '01920000-0000-7000-8000-000000000003';
 export const CHALLENGE_ID = '01920000-0000-7000-8000-000000000004';
 export const EMAIL = 'asha@beautinique.example';
 export const PASSWORD = 'pink lipstick on a rainy day';
-export const OTHER_SESSION_ID = '01920000-0000-7000-8000-000000000005';
+export const OTHER_SESSION_ID = '6730a2b40000000000000005';
 export const SECRET = 'JBSWY3DPEHPK3PXPJBSWY3DPEHPK3PXP';
 export const OTP_URI = `otpauth://totp/Beautinique:${encodeURIComponent(EMAIL)}?secret=${SECRET}&issuer=Beautinique`;
 /** The authenticator code the fake takes (any other is wrong). */
@@ -172,7 +172,8 @@ export function fakeIdentity(
       const text = await request.text();
       const body: unknown = text === '' ? undefined : JSON.parse(text);
       fake.sent.push({ method: request.method, path, body });
-      const route = `${request.method} ${path.replace(/\/[0-9a-f-]{36}(?=\/|$)/g, '/:id')}`;
+      // an id in the path: a UUIDv7 (Redis: a sign-in, a challenge) or an ObjectId (a session)
+      const route = `${request.method} ${path.replace(/\/(?:[0-9a-f-]{36}|[0-9a-f]{24})(?=\/|$)/g, '/:id')}`;
       const handler = handlers.get(route);
       if (handler) return await handler(body);
       const signIn = () => {

@@ -7,7 +7,7 @@ import {
   generateSigningKey,
   type PublicJwk,
 } from '@beautinique/backend-server-crypto';
-import type { IndexSpec, Mongo } from '@beautinique/backend-server-mongo';
+import { type IndexSpec, type Mongo, ObjectId } from '@beautinique/backend-server-mongo';
 
 /**
  * identity's ES256 token keys (ARCHITECTURE §7.2), in its own database: the private key sealed
@@ -22,8 +22,9 @@ export const PUBLISH_FOR_MS = ROTATE_AFTER_MS + 24 * 60 * 60_000;
 export const KEY_CACHE_MS = 5 * 60_000;
 
 export interface SigningKeyRecord {
-  /** The key id (`kid`) */
-  _id: string;
+  _id: ObjectId;
+  /** The key id (`kid`) tokens name it by */
+  kid: string;
   /** PKCS #8 PEM, sealed (context privateKeyContext) */
   privateKey: string;
   publicJwk: PublicJwk;
@@ -34,6 +35,7 @@ const privateKeyContext = (kid: string): string => `${SIGNING_KEYS}.privateKey:$
 
 export const indexes: readonly IndexSpec[] = [
   { collection: SIGNING_KEYS, name: 'createdAt', key: { createdAt: -1 } },
+  { collection: SIGNING_KEYS, name: 'kid_unique', key: { kid: 1 }, unique: true },
 ];
 
 export interface SigningKeys {
@@ -73,7 +75,8 @@ export function signingKeys({
         // two processes may both make one: both are published, tokens of either verify
         const made = generateSigningKey();
         newest = {
-          _id: made.kid,
+          _id: new ObjectId(),
+          kid: made.kid,
           privateKey: encryptField(keys, made.privateKeyPem, privateKeyContext(made.kid)),
           publicJwk: made.publicJwk,
           createdAt: new Date(now()),
@@ -81,14 +84,14 @@ export function signingKeys({
         await collection.insertOne(newest);
         cached = undefined;
       }
-      let privateKey = opened.get(newest._id);
+      let privateKey = opened.get(newest.kid);
       if (!privateKey) {
         privateKey = createPrivateKey(
-          decryptField(keys, newest.privateKey, privateKeyContext(newest._id)),
+          decryptField(keys, newest.privateKey, privateKeyContext(newest.kid)),
         );
-        opened.set(newest._id, privateKey);
+        opened.set(newest.kid, privateKey);
       }
-      return { kid: newest._id, privateKey };
+      return { kid: newest.kid, privateKey };
     },
     async jwks() {
       return (await published()).map((record) => record.publicJwk);

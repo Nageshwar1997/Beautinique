@@ -135,7 +135,7 @@ const mutations: Mutation[] = [
   {
     file: 'lock',
     name: 'anyone releases',
-    change: [['deleteOne({ _id: name, owner })', 'deleteOne({ _id: name })']],
+    change: [['deleteOne({ name, owner })', 'deleteOne({ name })']],
   },
   {
     file: 'relay',
@@ -172,7 +172,7 @@ const mutations: Mutation[] = [
   {
     file: 'relay',
     name: 'no job id',
-    change: [['          jobId: jobIdOf(record._id, subscriber),\n', '']],
+    change: [['          jobId: jobIdOf(record._id.toHexString(), subscriber),\n', '']],
   },
   {
     file: 'relay',
@@ -520,7 +520,7 @@ const mutations: Mutation[] = [
     file: 'recovery',
     name: 'no second look after the lease',
     change: [
-      ["if ((await state.findOne({ _id: 'redis-epoch' }))?.value === epoch) return false;", ''],
+      ['if ((await state.findOne({ key: EPOCH_STATE }))?.value === epoch) return false;', ''],
     ],
     survives: 'race guard',
   },
@@ -564,7 +564,7 @@ const mutations: Mutation[] = [
   {
     file: 'recovery',
     name: 'redrive under new job ids',
-    change: [['            jobId: jobIdOf(record._id, subscriber),\n', '']],
+    change: [['            jobId: jobIdOf(record._id.toHexString(), subscriber),\n', '']],
   },
   {
     file: 'recovery',
@@ -584,7 +584,7 @@ const mutations: Mutation[] = [
   {
     file: 'dead-letters',
     name: 'old failed job not removed',
-    change: [['await queue.remove(letter._id);', '']],
+    change: [['await queue.remove(letter.jobId);', '']],
   },
   {
     file: 'dead-letters',
@@ -594,12 +594,99 @@ const mutations: Mutation[] = [
   {
     file: 'dead-letters',
     name: 'running job redriven anyway',
-    change: [['if (await queue.getJob(letter._id)) {', 'if (false) {']],
+    change: [['if (await queue.getJob(letter.jobId)) {', 'if (false) {']],
   },
   {
     file: 'dead-letters',
     name: 'ids ignored',
-    change: [['ids === undefined ? {} : { _id: { $in: [...ids] } }', '{}']],
+    change: [['ids === undefined ? {} : { jobId: { $in: [...ids] } }', '{}']],
+  },
+  // every document's _id an ObjectId, names in unique fields (owner, 2026-11-12)
+  {
+    file: 'outbox',
+    name: 'the outbox keeps the event id as a string',
+    change: [['      _id: eventId,\n', '      _id: eventId.toHexString() as never,\n']],
+    tests: 'writes a checked envelope',
+  },
+  {
+    file: 'consumer',
+    name: 'the mark keeps the event id as a string',
+    change: [
+      [
+        '{ eventId: new ObjectId(event.eventId), subscriber: job.name }',
+        '{ eventId: event.eventId as never, subscriber: job.name }',
+      ],
+    ],
+    tests: 'marks it handled in the same transaction',
+  },
+  {
+    file: 'consumer',
+    name: 'one mark per event for every subscriber',
+    change: [
+      [
+        '{ eventId: new ObjectId(event.eventId), subscriber: job.name }',
+        '{ eventId: new ObjectId(event.eventId) }',
+      ],
+    ],
+    tests: 'startConsumer',
+  },
+  {
+    file: 'consumer',
+    name: 'marks of one event and subscriber may repeat',
+    change: [
+      [
+        '    key: { eventId: 1, subscriber: 1 },\n    unique: true,\n',
+        '    key: { eventId: 1, subscriber: 1 },\n',
+      ],
+    ],
+    tests: 'keeps handled marks',
+  },
+  {
+    file: 'consumer',
+    name: 'a dead letter keeps the event id as a string',
+    change: [['eventId: parseObjectId(data.eventId) ?? null,', 'eventId: data.eventId as never,']],
+    tests: 'dead-letters',
+  },
+  {
+    file: 'consumer',
+    name: 'a dead letter of a job is saved twice',
+    survives:
+      'a job dead-letters twice only after a crash between saving it and failing the job; the unique jobId index keeps one',
+    change: [
+      [
+        'await deadLetters.replaceOne({ jobId: record.jobId }, record, { upsert: true });',
+        'await deadLetters.insertOne({ ...record });',
+      ],
+    ],
+    tests: 'dead letter',
+  },
+  {
+    file: 'lock',
+    name: 'the lease name is not unique',
+    change: [
+      [
+        "{ collection: LOCKS, name: 'name_unique', key: { name: 1 }, unique: true },",
+        "{ collection: LOCKS, name: 'name_unique', key: { name: 1 } },",
+      ],
+    ],
+    tests: 'tryLease',
+  },
+  {
+    file: 'lock',
+    name: 'the lease makes no index of its own',
+    change: [['  await ensureLockIndex(mongo);\n', '']],
+    tests: 'tryLease',
+  },
+  {
+    file: 'schedules',
+    name: 'a task run is found by another task',
+    change: [
+      [
+        '    const run = await runs.findOne({ task: schedule.task });',
+        '    const run = await runs.findOne({});',
+      ],
+    ],
+    tests: 'late',
   },
 ];
 
