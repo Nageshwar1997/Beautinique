@@ -167,6 +167,64 @@ describe('email + password', () => {
   });
 });
 
+describe('the password hashes of every IP together (DR-004)', () => {
+  const at = (to: Harness['server']) => (address: string, password: string) =>
+    post('/auth/login', { email: address, password }, { to });
+
+  it('spend one budget a minute: past it, every sign-in is 503 until it fills again', async () => {
+    const busy = await harness.start({ IDENTITY__LOGIN_HASHES_PER_MINUTE: '3' });
+    try {
+      const login3 = at(busy);
+      for (let i = 0; i < 3; i += 1) {
+        expect((await login3(email(`budget${String(i)}`), 'wrong password!')).status).toBe(401);
+      }
+      // the fourth, from anyone (here the right password of a real account), waits for the budget
+      const address = email('budget-owner');
+      await makeAccount(address);
+      const refused = await login3(address, PASSWORD);
+      expect([refused.status, refused.body.error?.code]).toEqual([503, 'SERVICE_UNAVAILABLE']);
+      expect(refused.body.error?.message).toBe(
+        'Too many sign-ins right now. Please try again in a moment.',
+      );
+      // a minute's budget: a second later it has not filled again (one more every 20 s)
+      await new Promise((resolve) => setTimeout(resolve, 1100));
+      expect((await login3(address, PASSWORD)).status).toBe(503);
+    } finally {
+      await busy.stop();
+    }
+  });
+
+  it('answer a locked account without a hash, so a lock costs the budget nothing', async () => {
+    const address = email('locked-cheap');
+    const neighbour = email('locked-cheap-neighbour');
+    await makeAccount(address);
+    await makeAccount(neighbour);
+    const budgeted = await harness.start({ IDENTITY__LOGIN_HASHES_PER_MINUTE: '12' });
+    try {
+      const login12 = at(budgeted);
+      // 10 wrong tries lock it: 10 hashes of the 12
+      for (let i = 0; i < 10; i += 1) {
+        expect((await login12(address, 'wrong password!')).status).toBe(401);
+      }
+      // locked: five more, the right password among them, answer like a wrong one and spend nothing
+      for (const password of [
+        PASSWORD,
+        'wrong password!',
+        'wrong password!',
+        PASSWORD,
+        'x'.repeat(12),
+      ]) {
+        const answer = await login12(address, password);
+        expect([answer.status, answer.body.error?.code]).toEqual([401, 'INVALID_CREDENTIALS']);
+      }
+      // so the 11th hash is someone else's, who signs in
+      expect((await login12(neighbour, PASSWORD)).status).toBe(200);
+    } finally {
+      await budgeted.stop();
+    }
+  });
+});
+
 describe('the authenticator', () => {
   it('is set up at the first sign-in of an internal app, with 10 recovery codes shown once', async () => {
     const { address, userId, secret, recoveryCodes, enroll, confirmed } =

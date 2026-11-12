@@ -32,7 +32,7 @@ import {
 } from './errors.ts';
 import { clearFailures } from './lockout.ts';
 import type { SocialSettings } from './oauth-providers.ts';
-import { type BreachCheck, hashPassword } from './password.ts';
+import { type BreachCheck, hashPassword, type LoginHashBudget } from './password.ts';
 import { publishAuthzVersions } from './rbac/grants.ts';
 import { acceptableInvitations, acceptInvitations, hasInvitation } from './rbac/invitations.ts';
 import type { Client, IssuedSession, Sessions } from './sessions.ts';
@@ -97,6 +97,8 @@ export interface OtpDeps {
   legalVersion: string;
   /** Have I Been Pwned (fail-open) */
   breached: BreachCheck;
+  /** The sign-in hashes of every IP together (QA DR-004) */
+  loginHashes: LoginHashBudget;
   /** The last step of a sign-in, and the sessions of My Devices */
   sessions: Sessions;
   /** Who signed in, from the gateway's passport (signed-in routes) */

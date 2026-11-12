@@ -45,7 +45,7 @@ import { appRegistry } from '../src/apps.ts';
 import { readConfig } from '../src/config.ts';
 import { manifest as platformManifest } from '../src/manifest.ts';
 import { API_PREFIX, stepUpFresh } from '../src/proxy.ts';
-import { DEFAULT_RATE_LIMITS, SESSION_TOKEN_RULE } from '../src/rate-limits.ts';
+import { DEFAULT_RATE_LIMITS, rateLimitBuckets, SESSION_TOKEN_RULE } from '../src/rate-limits.ts';
 import { start } from '../src/service.ts';
 import { sessionGate } from '../src/sessions.ts';
 import type { StatusBody } from '../src/status.ts';
@@ -911,6 +911,60 @@ describe('rate limits', () => {
     expect((await get('2401:4900:1c2a:7f00::1')).status).toBe(200);
     expect((await get('2401:4900:1c2a:7f00::2')).status).toBe(200);
     expect((await get('2401:4900:1c2a:7f00::3')).status).toBe(429);
+  });
+
+  it('gives an IPv6 network (/48) 4 times one home’s sign-in budget, so many /64s do not help (DR-004)', async () => {
+    const identity = await listen(
+      createApp({
+        logger,
+        routes: (app) => app.post('/identity/sessions', (_req, res) => res.json({ ok: true })),
+      }),
+    );
+    const gw = await gateway(
+      { identity: identity.url },
+      { rateLimits: { auth: { limit: 2, windowMs: 60_000 } } },
+    );
+    const start = (ip: string) =>
+      fetch(`${gw.url}${API_PREFIX}/identity/sessions`, {
+        method: 'POST',
+        headers: { ...customer, 'content-type': 'application/json', 'x-real-ip': ip },
+        body: '{}',
+      });
+    // four homes (/64) of one network (/48): their own 2 each, 8 in all
+    for (let home = 1; home <= 4; home += 1) {
+      for (let i = 0; i < 2; i += 1) {
+        expect((await start(`2401:4900:1c2a:${String(home)}::1`)).status).toBe(200);
+      }
+    }
+    // a fifth home of that network is fresh, but the network has spent its budget
+    const refused = await start('2401:4900:1c2a:5::1');
+    expect(await errorOf(refused.clone())).toEqual([429, 'RATE_LIMITED']);
+    expect(refused.headers.get('ratelimit-policy')).toBe('"auth-network";q=8;w=60');
+    // another network, and an IPv4 address, are not part of it
+    expect((await start('2401:4900:1c2b:1::1')).status).toBe(200);
+    expect((await start('203.0.113.40')).status).toBe(200);
+  });
+
+  it('adds the network bucket to sign-in and codes only, for IPv6 only', () => {
+    const v6 = '2401:4900:1c2a:7f00::9';
+    const network = (name: Parameters<typeof rateLimitBuckets>[0], ip = v6) =>
+      rateLimitBuckets(name, ip, DEFAULT_RATE_LIMITS, undefined).find((bucket) =>
+        bucket.name.endsWith('-network'),
+      );
+    expect(network('auth')).toEqual({
+      name: 'auth-network',
+      key: 'auth:net:2401:4900:1c2a::/48',
+      rule: { limit: 120, windowMs: 5 * 60_000 },
+    });
+    expect(network('otp')).toEqual({
+      name: 'otp-network',
+      key: 'otp:net:2401:4900:1c2a::/48',
+      rule: { limit: 40, windowMs: 10 * 60_000 },
+    });
+    for (const name of ['read', 'write', 'session'] as const) expect(network(name)).toBeUndefined();
+    expect(network('auth', '203.0.113.9')).toBeUndefined();
+    // an IPv4 address written as IPv6 is an IPv4 client
+    expect(network('auth', '::ffff:203.0.113.9')).toBeUndefined();
   });
 
   describe('of refresh and sign-out (QA DR-005)', () => {

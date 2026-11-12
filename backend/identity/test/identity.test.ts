@@ -88,6 +88,7 @@ describe('identity', () => {
       blindIndexKey: BLIND_INDEX_KEY,
       otpEventKeys: OTP_EVENT_KEYS,
       otpEmailLimitPerHour: 5,
+      loginHashesPerMinute: 30,
       legalVersion: 'dummy-1',
       hibpUrl: 'https://api.pwnedpasswords.com',
       passportJwksUrl: 'http://localhost:8080/.well-known/passport-jwks.json',

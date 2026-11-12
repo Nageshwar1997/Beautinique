@@ -1,9 +1,11 @@
 import { argon2, createHash, randomBytes, timingSafeEqual } from 'node:crypto';
 
 import type { Logger } from '@beautinique/backend-server-kit';
+import { createRateLimiter } from '@beautinique/backend-server-ratelimit';
 import axios from 'axios';
+import type { Redis } from 'ioredis';
 
-import { passwordsBusy } from './errors.ts';
+import { passwordsBusy, signInUnavailable } from './errors.ts';
 
 /**
  * argon2id at the OWASP minimum (ARCHITECTURE §11.1): 19 MiB, 2 passes, 1 lane. A new setting here
@@ -73,6 +75,41 @@ export function verifyPassword(hash: string, password: string): Promise<boolean>
     });
     return key.length === want.length && timingSafeEqual(key, want);
   });
+}
+
+/** identity's rate-limit keys in Redis (ARCHITECTURE §6.6, `bq:id:*`). */
+export const RATE_LIMIT_PREFIX = 'bq:id:rl:';
+
+/** Takes one sign-in hash from the budget of every IP together; throws 503 when it is spent. */
+export type LoginHashBudget = () => Promise<void>;
+
+/**
+ * The password hashes sign-ins may cost a minute, every IP together (owner, 2026-11-12, QA
+ * DR-004): the gateway's limits are per IP, so many IPs could keep the one-at-a-time hashing busy
+ * and the free server's 0.1 CPU with it. Past the budget a sign-in is 503 ("Too many sign-ins right
+ * now") until it fills again (GCRA: then one every 60 / perMinute seconds); browsing and signed-in
+ * work go on. Redis away: 503 too, like the lock it cannot read then.
+ */
+export function loginHashBudget({
+  redis,
+  perMinute,
+  prefix = RATE_LIMIT_PREFIX,
+}: {
+  redis: Redis;
+  perMinute: number;
+  prefix?: string;
+}): LoginHashBudget {
+  const limiter = createRateLimiter({ redis, prefix });
+  const rule = { limit: perMinute, windowMs: 60_000 };
+  return async () => {
+    let allowed: boolean;
+    try {
+      ({ allowed } = await limiter.take('login-hash', rule));
+    } catch (error) {
+      throw signInUnavailable(error);
+    }
+    if (!allowed) throw passwordsBusy();
+  };
 }
 
 /** A hash made with other settings than ARGON2 (stored again at the next right sign-in). */

@@ -325,22 +325,65 @@ const mutations: Mutation[] = [
   {
     file: 'login',
     name: 'a locked account signs in',
-    change: [['if (locked || !right || !user', 'if (!right || !user']],
+    change: [['if (await isLocked(deps.redis, deps.keys, email)) {', 'if (false) {']],
     tests: 'locks an account',
   },
   {
     file: 'login',
     name: 'any password fits',
-    change: [['if (locked || !right || !user', 'if (locked || !user']],
+    change: [['if (!right || !user', 'if (!user']],
     tests: 'alike',
+  },
+  // the sign-in hashes of every IP together (DR-004)
+  {
+    file: 'login',
+    name: 'sign-ins hash without the budget',
+    change: [['  await deps.loginHashes();\n', '']],
+    tests: 'DR-004',
+  },
+  {
+    file: 'login',
+    name: 'a locked account is hashed (and spends the budget)',
+    change: [
+      [
+        '    throw invalidCredentials();\n  }\n  await deps.loginHashes();\n',
+        '  }\n  await deps.loginHashes();\n',
+      ],
+    ],
+    tests: 'DR-004',
+  },
+  {
+    file: 'password',
+    name: 'a spent budget lets the sign-in through',
+    change: [['    if (!allowed) throw passwordsBusy();\n', '']],
+    tests: 'DR-004',
+  },
+  {
+    file: 'password',
+    name: 'the budget is per second, not per minute',
+    change: [
+      [
+        'const rule = { limit: perMinute, windowMs: 60_000 };',
+        'const rule = { limit: perMinute, windowMs: 1_000 };',
+      ],
+    ],
+    tests: 'DR-004',
+  },
+  {
+    file: 'password',
+    name: 'Redis away lets sign-ins through the budget',
+    change: [['      throw signInUnavailable(error);\n', '      return;\n']],
+    tests: 'Redis is away',
+    survives:
+      'the lock is read from Redis just before, so Redis away answers 503 there first; the budget never sees it',
   },
   {
     file: 'login',
     name: 'wrong passwords not counted',
     change: [
       [
-        '    await recordFailure(deps.redis, deps.keys, email);\n    throw invalidCredentials();',
-        '    throw invalidCredentials();',
+        '  if (!right || !user || !credentials || hash === undefined) {\n    await recordFailure(deps.redis, deps.keys, email);\n',
+        '  if (!right || !user || !credentials || hash === undefined) {\n',
       ],
     ],
     tests: 'locks an account',

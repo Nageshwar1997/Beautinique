@@ -56,6 +56,8 @@ const quiet = () => ({
   // nothing listens there: the breached-password check is away, so it lets passwords through
   // (fail-open), and the tests never reach the internet
   IDENTITY__HIBP_URL: 'http://127.0.0.1:9',
+  // the tests sign in more than a live minute's 30 hashes (QA DR-004)
+  IDENTITY__LOGIN_HASHES_PER_MINUTE: '1000',
   NOTIFY__MONGO_URI: MONGO_URI,
   NOTIFY__MONGO_DB_NAME: notifyDbName,
   NOTIFY__REDIS_URL: REDIS_DB,

@@ -155,6 +155,31 @@ const mutations: Mutation[] = [
     change: [['key: `${name}:${client}`', 'key: `${name}:all`']],
     tests: 'budget',
   },
+  // the IPv6 network's sign-in and code budget (DR-004)
+  {
+    file: 'rate-limits',
+    name: 'no network bucket',
+    change: [['    if (network !== null) {\n', '    if (false) {\n']],
+    tests: 'network',
+  },
+  {
+    file: 'rate-limits',
+    name: 'every class gets the network bucket',
+    change: [['NETWORK_CLASSES.has(name) ? network48(client) : null', 'network48(client)']],
+    tests: 'network',
+  },
+  {
+    file: 'rate-limits',
+    name: 'the network budget is one home’s',
+    change: [['limit: rules[name].limit * NETWORK_FACTOR', 'limit: rules[name].limit']],
+    tests: 'network',
+  },
+  {
+    file: 'rate-limits',
+    name: 'the network is the /64 itself',
+    change: [[".split(':').slice(0, 3).join(':')", ".split(':').slice(0, 4).join(':')"]],
+    tests: 'network',
+  },
   {
     file: 'proxy',
     name: 'the first bucket is always the one told',

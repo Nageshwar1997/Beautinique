@@ -46,10 +46,25 @@ export interface RateLimitBucket {
 }
 
 /**
- * The buckets of a request, taken in this order: the class's budget for the client IP; for
- * `session`, also its refresh-token family's (the session id of a token from before families). A
- * family is part of the refresh token, so the key holds only its hash. A made-up token still takes
- * from the IP's budget first.
+ * Sign-in and codes (`auth`, `otp`) for a whole IPv6 network (/48, one home or company's 65,536
+ * /64s) get this many times one /64's budget (owner, 2026-11-12, QA DR-004): stepping through the
+ * /64s of one network no longer multiplies the budget.
+ */
+export const NETWORK_FACTOR = 4;
+const NETWORK_CLASSES: ReadonlySet<RateLimitClass> = new Set(['auth', 'otp']);
+
+/** An IPv6 client's /48 from its /64 bucket (`2401:4900:1c2a:7f00::/64`); null for IPv4. */
+function network48(client: string): string | null {
+  if (!client.endsWith('::/64')) return null;
+  return `${client.slice(0, -'::/64'.length).split(':').slice(0, 3).join(':')}::/48`;
+}
+
+/**
+ * The buckets of a request, taken in this order: the class's budget for the client IP; for `auth`
+ * and `otp` from IPv6, also its /48 network's (NETWORK_FACTOR times as much); for `session`, also
+ * its refresh-token family's (the session id of a token from before families). A family is part of
+ * the refresh token, so the key holds only its hash. A made-up token still takes from the IP's
+ * budget first.
  */
 export function rateLimitBuckets(
   name: RateLimitClass,
@@ -58,7 +73,18 @@ export function rateLimitBuckets(
   refreshToken: string | undefined,
 ): RateLimitBucket[] {
   const client = ipKey(ip);
-  if (name !== 'session') return [{ name, key: `${name}:${client}`, rule: rules[name] }];
+  if (name !== 'session') {
+    const buckets: RateLimitBucket[] = [{ name, key: `${name}:${client}`, rule: rules[name] }];
+    const network = NETWORK_CLASSES.has(name) ? network48(client) : null;
+    if (network !== null) {
+      buckets.push({
+        name: `${name}-network`,
+        key: `${name}:net:${network}`,
+        rule: { limit: rules[name].limit * NETWORK_FACTOR, windowMs: rules[name].windowMs },
+      });
+    }
+    return buckets;
+  }
   const buckets: RateLimitBucket[] = [{ name, key: `session:ip:${client}`, rule: rules.session }];
   const parts = refreshTokenParts(refreshToken);
   if (parts) {

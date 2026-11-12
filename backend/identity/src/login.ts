@@ -107,21 +107,29 @@ export async function startLogin(deps: LoginDeps, login: Omit<Login, 'attempts'>
 }
 
 /**
- * POST /auth/login, every app (owner, 2026-10-27). The password is always checked, against a
- * stand-in hash for an email without one and for a locked account too, so a wrong email, a wrong
- * password and a lock answer alike, in the same time. Then the authenticator if the account has
- * one (every app asks), setting one up if the app needs it, or signed in.
+ * POST /auth/login, every app (owner, 2026-10-27). The lock first, without a hash (owner,
+ * 2026-11-12, QA DR-004): a locked email answers like a wrong password at once, so hammering it
+ * costs no hashing; locks are per email, made-up ones too, so the quicker answer says nothing about
+ * an account. Then one hash from the budget of every IP together, the password checked against a
+ * stand-in hash for an email without one, so a wrong email and a wrong password answer alike, in
+ * the same time. The grant comes after the hash, so the time never tells who works where. Then
+ * the authenticator if the account has one (every app asks), setting one up if the app needs it,
+ * or signed in.
  */
 export async function passwordLogin(
   deps: LoginDeps,
   { app, email, password, client }: { app: AppId; email: string; password: string; client: Client },
 ): Promise<LoginStep> {
-  const locked = await isLocked(deps.redis, deps.keys, email);
+  if (await isLocked(deps.redis, deps.keys, email)) {
+    await recordFailure(deps.redis, deps.keys, email);
+    throw invalidCredentials();
+  }
+  await deps.loginHashes();
   const user = await deps.mongo.db.collection<User>(USERS).findOne({ email });
   const credentials = user ? await credentialsOf(deps).findOne({ _id: user._id }) : null;
   const hash = credentials?.password?.hash;
   const right = await verifyPassword(hash ?? (await dummyHash()), password);
-  if (locked || !right || !user || !credentials || hash === undefined) {
+  if (!right || !user || !credentials || hash === undefined) {
     await recordFailure(deps.redis, deps.keys, email);
     throw invalidCredentials();
   }

@@ -111,6 +111,8 @@ export async function startHarness(name: string): Promise<Harness> {
     IDENTITY__BLIND_INDEX_KEY: blindIndexKey,
     IDENTITY__OTP_EVENT_KEYS: otpEventKeys,
     IDENTITY__HIBP_URL: fake.url,
+    // the tests sign in far more than 30 times a minute; a test of the budget sets its own
+    IDENTITY__LOGIN_HASHES_PER_MINUTE: '100000',
     ...more,
   });
   const passport = passportSigner();
@@ -123,6 +125,8 @@ export async function startHarness(name: string): Promise<Harness> {
         queuePrefix: prefix,
         epochKey: `${prefix}:epoch`,
         readyKey: `${prefix}:revocations-ready`,
+        // each identity its own budgets, never another test's
+        rateLimitPrefix: `${prefix}:rl:${randomUUID().slice(0, 8)}:`,
         pollMs: 100,
       },
       passportJwks: passport.jwks,

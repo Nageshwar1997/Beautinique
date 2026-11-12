@@ -33,7 +33,7 @@ import {
 import type { Config } from './config.ts';
 import { socialSettings } from './oauth-providers.ts';
 import type { OtpDeps } from './otp.ts';
-import { hibpBreachCheck } from './password.ts';
+import { hibpBreachCheck, loginHashBudget } from './password.ts';
 import { runReleaseSteps } from './release.ts';
 import { restoreGatewayMarks, sessions } from './sessions.ts';
 import { type SigningKeys, signingKeys } from './signing-keys.ts';
@@ -64,6 +64,8 @@ export interface RuntimeOptions {
    * REVOCATIONS_READY_KEY); a test uses its own so a wipe it plays never reaches another test.
    */
   readyKey?: string;
+  /** The prefix of identity's rate-limit keys (default `bq:id:rl:`); a test uses its own. */
+  rateLimitPrefix?: string;
   /** How often the relay looks for new events (default: the relay's own). */
   pollMs?: number;
   /** How often the wipe watchdog looks (default 30 s). */
@@ -101,6 +103,7 @@ export async function startRuntime(config: Config, options: RuntimeOptions): Pro
     queuePrefix: prefix,
     epochKey,
     readyKey,
+    rateLimitPrefix,
     pollMs,
     watchdogMs,
     passportJwks,
@@ -173,6 +176,11 @@ export async function startRuntime(config: Config, options: RuntimeOptions): Pro
         emailLimitPerHour: config.otpEmailLimitPerHour,
         legalVersion: config.legalVersion,
         breached: hibpBreachCheck({ url: config.hibpUrl, logger }),
+        loginHashes: loginHashBudget({
+          redis: redis.client,
+          perMinute: config.loginHashesPerMinute,
+          ...(rateLimitPrefix === undefined ? {} : { prefix: rateLimitPrefix }),
+        }),
         social: socialSettings(config),
         sessions: sessions({ mongo, redis: redis.client, keys, signing, logger }),
         passport: passportVerifier({
