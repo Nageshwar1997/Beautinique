@@ -30,15 +30,13 @@ try {
     .findOne({ email }, { projection: { _id: 1 } });
   if (!user) throw new Error(`no account for ${email}`);
   const now = new Date();
-  const marked = await mongo.db
-    .collection<Credentials>(CREDENTIALS)
-    .updateOne(
-      { _id: user._id, 'password.hash': { $exists: true } },
-      {
-        $unset: { 'password.hibpPending': '' },
-        $set: { 'password.breachedAt': now, updatedAt: now },
-      },
-    );
+  const marked = await mongo.db.collection<Credentials>(CREDENTIALS).updateOne(
+    { _id: user._id, 'password.hash': { $exists: true } },
+    {
+      $unset: { 'password.hibpPending': '' },
+      $set: { 'password.breachedAt': now, updatedAt: now },
+    },
+  );
   if (marked.matchedCount !== 1) throw new Error(`no password on the account of ${email}`);
 } finally {
   await mongo.close();
