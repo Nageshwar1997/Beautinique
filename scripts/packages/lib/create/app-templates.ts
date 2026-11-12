@@ -544,7 +544,8 @@ const tsconfigApp = `{
     "tsBuildInfoFile": "./node_modules/.tmp/tsconfig.app.tsbuildinfo",
     "types": ["vite/client"]
   },
-  "include": ["src", "test"]
+  "include": ["src", "test"],
+  "exclude": ["test/*-config.test.ts"]
 }
 `;
 
@@ -554,7 +555,7 @@ const tsconfigNode = `{
     "tsBuildInfoFile": "./node_modules/.tmp/tsconfig.node.tsbuildinfo",
     "types": ["node"]
   },
-  "include": ["vite.config.ts", "vitest.config.ts"]
+  "include": ["vite.config.ts", "vitest.config.ts", "test/*-config.test.ts"]
 }
 `;
 
