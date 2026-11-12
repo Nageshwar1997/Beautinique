@@ -73,7 +73,7 @@ const mutations: Mutation[] = [
   {
     file: 'release',
     name: 'runner version bumped',
-    change: [['const RUNNER_VERSION = 1;', 'const RUNNER_VERSION = 2;']],
+    change: [['const RUNNER_VERSION = 2;', 'const RUNNER_VERSION = 3;']],
     survives: 'equivalent: any value works, a new one only makes every database run once more',
   },
 
