@@ -256,11 +256,11 @@ describe('step-up', () => {
     });
     expect(errorOf(right)).toEqual([400, 'TOTP_INVALID']);
     expect(right.body.error?.message).toContain('Too many');
-    // the same lock as a sign-in
+    // the same lock as a sign-in, from the same IP (the lock is per IP, QA DR-003)
     const login = await post(
       '/auth/login',
       { email: address, password: PASSWORD },
-      { app: 'admin' },
+      { app: 'admin', ip: '203.0.113.9' },
     );
     expect(login.body.error?.code).toBe('INVALID_CREDENTIALS');
   });

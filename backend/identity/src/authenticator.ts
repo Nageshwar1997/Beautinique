@@ -155,9 +155,15 @@ export async function enrollAuthenticator(
 /** A wrong password or code at the confirm: counts toward the lock; the last try ends the set-up. */
 async function wrongTry(
   deps: LoginDeps,
-  { key, email, tries, error }: { key: string; email: string; tries: number; error: AppError },
+  {
+    key,
+    email,
+    tries,
+    error,
+    ip,
+  }: { key: string; email: string; tries: number; error: AppError; ip: string },
 ): Promise<never> {
-  await recordFailure(deps.redis, deps.keys, email);
+  await recordFailure(deps.redis, deps.keys, email, ip);
   if (tries >= LOGIN_MAX_TRIES) {
     await inRedis(() => deps.redis.del(key));
     throw authenticatorSetupExpired();
@@ -173,7 +179,12 @@ async function wrongTry(
 export async function confirmAuthenticator(
   deps: LoginDeps,
   passport: Passport,
-  { code, password, requestId }: { code: string; password: string; requestId: string },
+  {
+    code,
+    password,
+    requestId,
+    ip,
+  }: { code: string; password: string; requestId: string; ip: string },
 ): Promise<{ recoveryCodes: string[] }> {
   const { session, email } = await signedInAs(deps, passport);
   const key = setupKey(session._id);
@@ -181,7 +192,7 @@ export async function confirmAuthenticator(
   if (setup.secret === undefined) throw authenticatorSetupExpired();
   const tries = await oneMoreTry(deps, key);
   if (tries === -1) throw authenticatorSetupExpired();
-  if (tries > LOGIN_MAX_TRIES || (await isLocked(deps.redis, deps.keys, email))) {
+  if (tries > LOGIN_MAX_TRIES || (await isLocked(deps.redis, deps.keys, email, ip))) {
     await inRedis(() => deps.redis.del(key));
     throw tries > LOGIN_MAX_TRIES ? authenticatorSetupExpired() : stepUpLocked();
   }
@@ -191,12 +202,12 @@ export async function confirmAuthenticator(
   );
   if (!credentials?.password) throw passwordRequired();
   if (!(await verifyPassword(credentials.password.hash, password))) {
-    return wrongTry(deps, { key, email, tries, error: passwordInvalid() });
+    return wrongTry(deps, { key, email, tries, ip, error: passwordInvalid() });
   }
   const secret = decryptField(deps.keys, setup.secret, setupContext(session._id));
   const step = verifyTotp(secret, code);
   if (step === null) {
-    return wrongTry(deps, { key, email, tries, error: totpInvalid(LOGIN_MAX_TRIES - tries) });
+    return wrongTry(deps, { key, email, tries, ip, error: totpInvalid(LOGIN_MAX_TRIES - tries) });
   }
   // only the request that deletes the set-up goes on (a code works once)
   if ((await inRedis(() => deps.redis.del(key))) === 0) throw authenticatorSetupExpired();
@@ -233,7 +244,7 @@ export async function confirmAuthenticator(
       at,
     });
   });
-  await clearFailures(deps.redis, deps.keys, email);
+  await clearFailures(deps.redis, deps.keys, email, { ip });
   deps.logger.info(
     { userId: passport.userId, app: passport.app, replace },
     replace ? 'authenticator replaced' : 'authenticator set up',

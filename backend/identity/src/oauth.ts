@@ -238,7 +238,7 @@ async function signInAs(
     const query = next === '/' ? '' : `?next=${encodeURIComponent(next)}`;
     return { location: `/sign-in${query}#${OAUTH_TOTP_FRAGMENT}=${loginId}`, state: null, loginId };
   }
-  await clearFailures(deps.redis, deps.keys, user.email);
+  await clearFailures(deps.redis, deps.keys, user.email, { ip: client.ip });
   const session = await deps.sessions.issue({
     userId: user._id,
     email: user.email,
@@ -334,7 +334,7 @@ export async function finishTrip(
     }
   }
   if (!user) return backToSignIn('failed');
-  if (await isLocked(deps.redis, deps.keys, user.email)) return backToSignIn('locked');
+  if (await isLocked(deps.redis, deps.keys, user.email, client.ip)) return backToSignIn('locked');
   const access = await signInAccess(deps.mongo, { userId: user._id, app });
   if (!access.allowed) {
     // an account of another app (a seller ...): this app's consent and role first

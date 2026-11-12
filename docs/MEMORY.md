@@ -1,6 +1,6 @@
 # MEMORY — BQ
 
-> **Status:** v1.85 (2026-11-12). Project ki yaaddasht: **kya tay hua aur kyun**, **pichhle kaam se kya seekha**, aur **kaunse jaal (traps) se bachna hai**. Poori detail baaki docs me hai; yahan short version aur pointers. Naya sabak ya decision aaye to yahan ek line jodo.
+> **Status:** v1.86 (2026-11-12). Project ki yaaddasht: **kya tay hua aur kyun**, **pichhle kaam se kya seekha**, aur **kaunse jaal (traps) se bachna hai**. Poori detail baaki docs me hai; yahan short version aur pointers. Naya sabak ya decision aaye to yahan ek line jodo.
 
 ## 1. Decision log
 
@@ -132,6 +132,7 @@
 | 2026-11-10 | Q-009 (owner ne Claude ki salah maani, abhi karne ko kaha): internal apps me app kholna (naya tab) bhi activity, aur `IdleWatch` mount pe doosre tabs ko `active` bhejta | Tab A 29 min idle, insaan tab C kholta aur bina scroll padhta: 30 min pe A sign-out karta aur C bhi. Ulta khatra nahi: sirf ek tab kholna ghadi aage karta, session lamba nahi khinchta (server ka 30 min refresh ke bina waisa hi) |
 | 2026-11-10 | DR-001 (owner ne Claude ki salah maani, abhi karne ko kaha): gateway ka public `/ready` har check ka jawab 5 s tak sab callers ko deta (`reusedFor`, `READY_REUSE_MS`), `/status` jaisa | `/ready` origin secret aur rate limit ke bahar hai, aur har call pe Redis + har deployable ka `/health` (local 30 parallel = 174 ms); Render free (0.1 CPU) pe sasta amplification tha. Monitors minute me ek baar poochhte, 5 s ki der koi farq nahi |
 | 2026-11-12 | DR-004 (owner ne salah maani; 2026-11-12 ke faisle: sirf lock pehle, 30/min, /48 4 guna): identity me sab IPs ka sign-in hash budget (`IDENTITY__LOGIN_HASHES_PER_MINUTE`, `server-ratelimit` GCRA, khatam = 503), locked email pe hash nahi, gateway me `auth`/`otp` ka IPv6 /48 bucket (`NETWORK_FACTOR` 4) | Per-IP limits ke peeche 40 IPs ya ek IPv6 /56 se hash queue bhar ke saare sign-in 503 ho jaate the aur 0.1 CPU hashing me jaata. Grant pehle check karna tez hota, par internal app ke login ka time batata ki email kisi customer ka hai; lock har email pe lagta hai, isliye wahi sasta check bina khatre ke. Budget ki key har test server ki alag (harness `rateLimitPrefix`), E2E/bundle me 1000/min |
+| 2026-11-12 | DR-003 (owner ne salah maani; numbers 2026-11-12): lock email + IP (10 / 15 min → us IP 1 ghanta), saare IPs 50 / 15 min → account 15 min, lock ke dauraan tries nahi gine jaate; ek email ke 5 codes/ghanta me ek IP max 3 | Account-wide lock se koi bhi 10 requests me kisi ka account ghanta bhar rok sakta tha, aur har ghante 15 tries se hamesha. IP ka hissa pehle 2 tay hua tha, par code + 3 resend ek hi IP se aate hain, to asli user ka doosra resend tootta: owner ne 3 chuna. Tests ke helpers ab har code nayi test IP se maangte (`freshIp`) |
 
 ## 2. Pichhle kaam se seekhe sabak
 
@@ -300,3 +301,4 @@
 | v1.83 | 2026-11-10 | Decision: Q-009, naya tab bhi idle activity. |
 | v1.84 | 2026-11-10 | Decision: DR-001, gateway `/ready` 5 s reuse. |
 | v1.85 | 2026-11-12 | Decision: DR-004, sign-in hash budget, lock pehle, IPv6 /48. |
+| v1.86 | 2026-11-12 | Decision: DR-003, lock email + IP, account-wide 50, code me IP ka hissa 3. |

@@ -520,40 +520,96 @@ const mutations: Mutation[] = [
   },
   {
     file: 'lockout',
-    name: 'never locks',
-    change: [['  if (failures >= MAX_FAILURES) {', '  if (false) {']],
-    tests: 'locks an account',
+    name: 'never locks an IP',
+    change: [['  if (mine >= MAX_FAILURES) locks.push', '  if (false) locks.push']],
+    tests: 'locks an account|locks the IP',
   },
   {
     file: 'lockout',
-    name: 'locks one try later',
-    change: [['  if (failures >= MAX_FAILURES) {', '  if (failures > MAX_FAILURES) {']],
-    tests: 'locks an account',
+    name: 'locks an IP one try later',
+    change: [['  if (mine >= MAX_FAILURES) locks.push', '  if (mine > MAX_FAILURES) locks.push']],
+    tests: 'locks an account|locks the IP',
   },
   {
     file: 'lockout',
-    name: 'lock for 15 minutes',
+    name: 'an IP locked for 15 minutes',
+    change: [['locks.push([bucket, LOCK_MS])', 'locks.push([bucket, FAIL_WINDOW_MS])']],
+    tests: 'locks an account|locks the IP',
+  },
+  {
+    file: 'lockout',
+    name: 'the lock is for every IP (the old account-wide lock)',
     change: [
-      ["set(lockKey(index), '1', 'PX', LOCK_MS)", "set(lockKey(index), '1', 'PX', FAIL_WINDOW_MS)"],
+      [
+        'hmget(lockKey(index), ipBucket(ip), ACCOUNT)',
+        'hmget(lockKey(index), ipBucket("unknown"), ACCOUNT)',
+      ],
     ],
-    tests: 'locks an account',
+    tests: 'DR-003',
+  },
+  {
+    file: 'lockout',
+    name: 'never locks the account',
+    change: [['  if (all >= MAX_ACCOUNT_FAILURES) locks.push', '  if (false) locks.push']],
+    tests: 'DR-003',
+  },
+  {
+    file: 'lockout',
+    name: 'the account lock lasts an hour',
+    change: [['locks.push([ACCOUNT, ACCOUNT_LOCK_MS])', 'locks.push([ACCOUNT, LOCK_MS])']],
+    tests: 'DR-003',
+  },
+  {
+    file: 'lockout',
+    name: 'tries during a lock count (and lengthen it)',
+    change: [['  if (await isLocked(redis, keys, email, ip)) return;\n', '']],
+    tests: 'DR-003',
+  },
+  {
+    file: 'lockout',
+    name: 'every IP shares one bucket',
+    change: [['  const bucket = ipBucket(ip);\n', "  const bucket = 'all';\n"]],
+    tests: 'DR-003',
+  },
+  {
+    file: 'lockout',
+    name: 'an IPv6 address is its own bucket (not its /64)',
+    change: [['    return ipKey(ip);\n', '    return ip;\n']],
+    tests: 'DR-003',
   },
   {
     file: 'lockout',
     name: 'the count never ends',
-    change: [[".pexpire(key, FAIL_WINDOW_MS, 'NX')", ".pexpire(key, LOCK_MS * 1000, 'NX')"]],
+    change: [[".pexpire(fails, FAIL_WINDOW_MS, 'NX')", ".pexpire(fails, LOCK_MS * 1000, 'NX')"]],
     survives: 'the 15-minute window: no test waits it out; the key gets a TTL either way',
   },
   {
     file: 'lockout',
     name: 'unlock keeps the lock',
+    change: [['? redis.del(failKey(index), lockKey(index))', '? redis.del(failKey(index))']],
+    tests: 'locks an account',
+  },
+  {
+    file: 'otp',
+    name: 'one IP may use up an email’s codes',
     change: [
       [
-        'const keysToDelete = unlock ? [failKey(index), lockKey(index)] : [failKey(index)];',
-        'const keysToDelete = [failKey(index)];',
+        '  if ((await count(emailIpCountKey(index, ipBucket(ip)))) > OTP_EMAIL_CODES_PER_IP) {',
+        '  if (false) {',
       ],
     ],
-    tests: 'locks an account',
+    tests: 'DR-003',
+  },
+  {
+    file: 'otp',
+    name: 'a refused IP still counts against the email',
+    change: [
+      [
+        '  if ((await count(emailIpCountKey(index, ipBucket(ip)))) > OTP_EMAIL_CODES_PER_IP) {\n    throw otpEmailLimit();\n  }\n  if ((await count(emailCountKey(index))) > deps.emailLimitPerHour) throw otpEmailLimit();',
+        '  const overEmail = (await count(emailCountKey(index))) > deps.emailLimitPerHour;\n  if ((await count(emailIpCountKey(index, ipBucket(ip)))) > OTP_EMAIL_CODES_PER_IP) {\n    throw otpEmailLimit();\n  }\n  if (overEmail) throw otpEmailLimit();',
+      ],
+    ],
+    tests: 'DR-003',
   },
   // sessions (T3.2)
   {

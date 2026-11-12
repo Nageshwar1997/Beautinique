@@ -30,7 +30,7 @@ import {
   otpUnavailable,
   passwordBreached,
 } from './errors.ts';
-import { clearFailures } from './lockout.ts';
+import { clearFailures, ipBucket } from './lockout.ts';
 import type { SocialSettings } from './oauth-providers.ts';
 import { type BreachCheck, hashPassword, type LoginHashBudget } from './password.ts';
 import { publishAuthzVersions } from './rbac/grants.ts';
@@ -60,6 +60,8 @@ export const OTP_MIN_ANSWER_MS = 400;
 /** Redis keys (`bq:id:*`, ARCHITECTURE §6.6), each with a TTL. The email is never in a key. */
 export const challengeKey = (challengeId: string): string => `bq:id:otp:${challengeId}`;
 const emailCountKey = (index: string): string => `bq:id:otp-email:${index}`;
+const emailIpCountKey = (index: string, bucket: string): string =>
+  `bq:id:otp-email-ip:${index}:${bucket}`;
 
 /**
  * Why the code is sent: to make an account, to set a password (ARCHITECTURE §7.1), or to accept
@@ -140,18 +142,32 @@ async function evenly<T>(work: () => Promise<T>): Promise<T> {
   }
 }
 
-/** Counts a code for this email in the last hour (resends too); over the limit refuses. */
-async function countEmail(deps: OtpDeps, email: string): Promise<void> {
-  const key = emailCountKey(blindIndex(deps.keys, 'otp-email', email));
-  const count = await inRedis(async () => {
-    const [[, value]] = (await deps.redis
-      .multi()
-      .incr(key)
-      .pexpire(key, EMAIL_WINDOW_MS, 'NX')
-      .exec()) as [[Error | null, number], [Error | null, number]];
-    return value;
-  });
-  if (count > deps.emailLimitPerHour) throw otpEmailLimit();
+/**
+ * One IP's share of an email's codes an hour (owner, 2026-11-12, QA DR-003): 3 of the 5, a code and
+ * two resends. From one IP (an IPv6 /64) nobody uses up all of another's codes, so a password reset
+ * still reaches the owner.
+ */
+export const OTP_EMAIL_CODES_PER_IP = 3;
+
+/**
+ * Counts a code for this email in the last hour (resends too), from this IP first: over the IP's
+ * share it refuses without touching the email's count, over the email's limit it refuses too.
+ */
+async function countEmail(deps: OtpDeps, email: string, ip: string): Promise<void> {
+  const index = blindIndex(deps.keys, 'otp-email', email);
+  const count = (key: string) =>
+    inRedis(async () => {
+      const [[, value]] = (await deps.redis
+        .multi()
+        .incr(key)
+        .pexpire(key, EMAIL_WINDOW_MS, 'NX')
+        .exec()) as [[Error | null, number], [Error | null, number]];
+      return value;
+    });
+  if ((await count(emailIpCountKey(index, ipBucket(ip)))) > OTP_EMAIL_CODES_PER_IP) {
+    throw otpEmailLimit();
+  }
+  if ((await count(emailCountKey(index))) > deps.emailLimitPerHour) throw otpEmailLimit();
 }
 
 /** The code goes to notify in an event, sealed, in identity's outbox (ARCHITECTURE §7.1). */
@@ -193,6 +209,8 @@ export interface RequestCodeInput {
   purpose: CodePurpose;
   consent?: { terms?: true; adult?: true } | undefined;
   requestId: string;
+  /** The client's IP (its share of the email's codes, QA DR-003) */
+  ip: string;
 }
 
 /**
@@ -207,7 +225,7 @@ export const requestCode = (deps: OtpDeps, input: RequestCodeInput): Promise<Cha
 
 async function requestCodeNow(
   deps: OtpDeps,
-  { app, email, purpose, consent, requestId }: RequestCodeInput,
+  { app, email, purpose, consent, requestId, ip }: RequestCodeInput,
 ): Promise<ChallengeView> {
   const signUp = purpose === 'sign-up';
   // an invitation into a sign-up app asks that app's consent too, as its sign-up does
@@ -218,7 +236,7 @@ async function requestCodeNow(
       details: problems,
     });
   }
-  await countEmail(deps, email);
+  await countEmail(deps, email, ip);
   const send =
     signUp ||
     (purpose === 'invite'
@@ -272,6 +290,7 @@ interface ResendCodeInput {
   app: AppId;
   challengeId: string;
   requestId: string;
+  ip: string;
 }
 
 /** POST /auth/otp/:challengeId/resend: a new code, the old one stops working (OTP_MIN_ANSWER_MS). */
@@ -280,7 +299,7 @@ export const resendCode = (deps: OtpDeps, input: ResendCodeInput): Promise<Chall
 
 async function resendCodeNow(
   deps: OtpDeps,
-  { app, challengeId, requestId }: ResendCodeInput,
+  { app, challengeId, requestId, ip }: ResendCodeInput,
 ): Promise<ChallengeView> {
   const key = challengeKey(challengeId);
   const challenge = (await inRedis(() => deps.redis.hgetall(key))) as Partial<Challenge>;
@@ -289,7 +308,7 @@ async function resendCodeNow(
   // a refused resend must not use up the email's hourly codes; the script checks again atomically
   if (Number(challenge.resends) >= OTP_MAX_RESENDS) throw otpResendLimit();
   if (Number(challenge.resendAfter) > now) throw otpResendTooSoon();
-  await countEmail(deps, challenge.email);
+  await countEmail(deps, challenge.email, ip);
   const code = newCode();
   const expiresAt = now + OTP_TTL_MS;
   const resendAfter = now + OTP_RESEND_AFTER_MS;

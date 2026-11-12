@@ -120,8 +120,8 @@ export async function passwordLogin(
   deps: LoginDeps,
   { app, email, password, client }: { app: AppId; email: string; password: string; client: Client },
 ): Promise<LoginStep> {
-  if (await isLocked(deps.redis, deps.keys, email)) {
-    await recordFailure(deps.redis, deps.keys, email);
+  if (await isLocked(deps.redis, deps.keys, email, client.ip)) {
+    await recordFailure(deps.redis, deps.keys, email, client.ip);
     throw invalidCredentials();
   }
   await deps.loginHashes();
@@ -130,7 +130,7 @@ export async function passwordLogin(
   const hash = credentials?.password?.hash;
   const right = await verifyPassword(hash ?? (await dummyHash()), password);
   if (!right || !user || !credentials || hash === undefined) {
-    await recordFailure(deps.redis, deps.keys, email);
+    await recordFailure(deps.redis, deps.keys, email, client.ip);
     throw invalidCredentials();
   }
   // sign-in only where the account holds a grant (ARCHITECTURE §7.1); the same answer as a wrong
@@ -157,7 +157,7 @@ export async function passwordLogin(
   }
   // the count starts again only after a whole sign-in: a right password alone must not give a
   // second step new tries
-  await clearFailures(deps.redis, deps.keys, email);
+  await clearFailures(deps.redis, deps.keys, email, { ip: client.ip });
   return { next: 'signed-in', ...(await signIn(deps, who, ['password'], client)) };
 }
 
@@ -177,7 +177,7 @@ export const oneMoreTry = async (deps: LoginDeps, key: string): Promise<number> 
  */
 async function loginAt(
   deps: LoginDeps,
-  { app, loginId, stage }: { app: AppId; loginId: string; stage: Login['stage'] },
+  { app, loginId, stage, ip }: { app: AppId; loginId: string; stage: Login['stage']; ip: string },
 ): Promise<{ login: Login; tries: number }> {
   const key = loginKey(loginId);
   const login = (await inRedis(() => deps.redis.hgetall(key))) as Partial<Login>;
@@ -191,7 +191,7 @@ async function loginAt(
   }
   const tries = await oneMoreTry(deps, key);
   if (tries === -1) throw loginExpired();
-  if (tries > LOGIN_MAX_TRIES || (await isLocked(deps.redis, deps.keys, login.email))) {
+  if (tries > LOGIN_MAX_TRIES || (await isLocked(deps.redis, deps.keys, login.email, ip))) {
     await inRedis(() => deps.redis.del(key));
     throw loginExpired();
   }
@@ -204,9 +204,10 @@ async function wrongTry(
   loginId: string,
   login: Login,
   tries: number,
+  ip: string,
   error: (left: number) => AppError,
 ): Promise<never> {
-  await recordFailure(deps.redis, deps.keys, login.email);
+  await recordFailure(deps.redis, deps.keys, login.email, ip);
   if (tries >= LOGIN_MAX_TRIES) {
     await inRedis(() => deps.redis.del(loginKey(loginId)));
     throw loginExpired();
@@ -227,7 +228,7 @@ export async function loginWithTotp(
   deps: LoginDeps,
   { app, loginId, code, client }: { app: AppId; loginId: string; code: string; client: Client },
 ): Promise<{ user: { userId: string; email: string }; session: IssuedSession }> {
-  const { login, tries } = await loginAt(deps, { app, loginId, stage: 'totp' });
+  const { login, tries } = await loginAt(deps, { app, loginId, stage: 'totp', ip: client.ip });
   const credentials = await credentialsOf(deps).findOne({ _id: login.userId });
   if (!credentials?.totp) throw loginExpired();
   const secret = decryptField(deps.keys, credentials.totp.secret, totpContext(login.userId));
@@ -240,9 +241,9 @@ export async function loginWithTotp(
         { $set: { 'totp.lastStep': step } },
       )
     ).modifiedCount === 1;
-  if (!fresh) return wrongTry(deps, loginId, login, tries, totpInvalid);
+  if (!fresh) return wrongTry(deps, loginId, login, tries, client.ip, totpInvalid);
   await finish(deps, loginId);
-  await clearFailures(deps.redis, deps.keys, login.email);
+  await clearFailures(deps.redis, deps.keys, login.email, { ip: client.ip });
   return signIn(deps, login, [login.first ?? 'password', 'totp'], client);
 }
 
@@ -277,11 +278,11 @@ export async function loginWithRecoveryCode(
   session: IssuedSession;
   recoveryCodesLeft: number;
 }> {
-  const { login, tries } = await loginAt(deps, { app, loginId, stage: 'totp' });
+  const { login, tries } = await loginAt(deps, { app, loginId, stage: 'totp', ip: client.ip });
   const left = await useRecoveryCode(deps, login.userId, code);
-  if (left === null) return wrongTry(deps, loginId, login, tries, recoveryCodeInvalid);
+  if (left === null) return wrongTry(deps, loginId, login, tries, client.ip, recoveryCodeInvalid);
   await finish(deps, loginId);
-  await clearFailures(deps.redis, deps.keys, login.email);
+  await clearFailures(deps.redis, deps.keys, login.email, { ip: client.ip });
   deps.logger.info({ userId: login.userId, app }, 'signed in with a recovery code');
   return {
     ...(await signIn(deps, login, [login.first ?? 'password', 'recovery-code'], client)),
@@ -295,9 +296,9 @@ export async function loginWithRecoveryCode(
  */
 export async function startTotpEnroll(
   deps: LoginDeps,
-  { app, loginId }: { app: AppId; loginId: string },
+  { app, loginId, ip }: { app: AppId; loginId: string; ip: string },
 ): Promise<{ secret: string; uri: string }> {
-  const { login } = await loginAt(deps, { app, loginId, stage: 'enroll' });
+  const { login } = await loginAt(deps, { app, loginId, stage: 'enroll', ip });
   const secret = newTotpSecret();
   await inRedis(() =>
     deps.redis.hset(loginKey(loginId), {
@@ -338,11 +339,11 @@ export async function confirmTotpEnroll(
   session: IssuedSession;
   recoveryCodes: string[];
 }> {
-  const { login, tries } = await loginAt(deps, { app, loginId, stage: 'enroll' });
+  const { login, tries } = await loginAt(deps, { app, loginId, stage: 'enroll', ip: client.ip });
   if (login.pending === undefined) throw loginExpired();
   const secret = decryptField(deps.keys, login.pending, enrollContext(loginId));
   const step = verifyTotp(secret, code);
-  if (step === null) return wrongTry(deps, loginId, login, tries, totpInvalid);
+  if (step === null) return wrongTry(deps, loginId, login, tries, client.ip, totpInvalid);
   await finish(deps, loginId);
   const now = new Date();
   const recovery = newRecoveryCodes(deps, login.userId);
@@ -362,7 +363,7 @@ export async function confirmTotpEnroll(
     },
   );
   if (saved.modifiedCount !== 1) throw loginExpired();
-  await clearFailures(deps.redis, deps.keys, login.email);
+  await clearFailures(deps.redis, deps.keys, login.email, { ip: client.ip });
   deps.logger.info({ userId: login.userId, app }, 'authenticator set up');
   return {
     ...(await signIn(deps, login, ['password', 'totp'], client)),
@@ -381,7 +382,12 @@ export type StepUpProof = { code: string } | { recoveryCode: string };
  */
 export async function stepUpWithTotp(
   deps: LoginDeps,
-  { userId, sessionId, proof }: { userId: string; sessionId: string; proof: StepUpProof },
+  {
+    userId,
+    sessionId,
+    proof,
+    ip,
+  }: { userId: string; sessionId: string; proof: StepUpProof; ip: string },
 ): Promise<{
   app: AppId;
   accessToken: string;
@@ -395,7 +401,7 @@ export async function stepUpWithTotp(
   if (!user) throw sessionExpired();
   const credentials = await credentialsOf(deps).findOne({ _id: userId });
   if (!credentials?.totp) throw authenticatorRequired();
-  if (await isLocked(deps.redis, deps.keys, user.email)) throw stepUpLocked();
+  if (await isLocked(deps.redis, deps.keys, user.email, ip)) throw stepUpLocked();
   let left: number | null = null;
   let right: boolean;
   if ('recoveryCode' in proof) {
@@ -414,10 +420,10 @@ export async function stepUpWithTotp(
       ).modifiedCount === 1;
   }
   if (!right) {
-    await recordFailure(deps.redis, deps.keys, user.email);
+    await recordFailure(deps.redis, deps.keys, user.email, ip);
     throw 'recoveryCode' in proof ? stepUpRecoveryInvalid() : stepUpCodeInvalid();
   }
-  await clearFailures(deps.redis, deps.keys, user.email);
+  await clearFailures(deps.redis, deps.keys, user.email, { ip });
   if (left !== null) deps.logger.info({ userId }, 'stepped up with a recovery code');
   return { ...(await deps.sessions.stepUp({ userId, sessionId })), recoveryCodesLeft: left };
 }

@@ -6,7 +6,7 @@ import { totpCode } from '@beautinique/backend-server-crypto';
 import { uuidv7 } from '@beautinique/shared-utils';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 
-import { emailIndex, LOCK_MS, lockKey } from '../src/lockout.ts';
+import { ACCOUNT_LOCK_MS, emailIndex, LOCK_MS, lockKey } from '../src/lockout.ts';
 import { ENROLL_TTL_MS, LOGIN_TTL_MS, loginKey } from '../src/login.ts';
 import {
   type Answer,
@@ -164,6 +164,61 @@ describe('email + password', () => {
     } finally {
       await cut.stop();
     }
+  });
+});
+
+describe('the lock, per IP and for the account (DR-003)', () => {
+  const tryFrom = (address: string, ip: string, password = 'wrong password!') =>
+    post('/auth/login', { email: address, password }, { ip });
+
+  it('locks the IP that made 10 wrong tries for an hour; the owner signs in from another', async () => {
+    const address = email('lock-ip');
+    await makeAccount(address);
+    for (let i = 0; i < 10; i += 1) {
+      expect((await tryFrom(address, '198.51.100.20')).status).toBe(401);
+    }
+    // that IP: the right password answers like a wrong one
+    const locked = await tryFrom(address, '198.51.100.20', PASSWORD);
+    expect([locked.status, locked.body.error?.code]).toEqual([401, 'INVALID_CREDENTIALS']);
+    // one IPv6 home (/64) counts as one IP
+    for (let i = 0; i < 10; i += 1) await tryFrom(address, `2001:db8:7:1::${String(i + 1)}`);
+    expect((await tryFrom(address, '2001:db8:7:1::99', PASSWORD)).status).toBe(401);
+    // the owner, elsewhere, is not locked out
+    expect((await tryFrom(address, '203.0.113.60', PASSWORD)).status).toBe(200);
+    const lock = await redis().hgetall(
+      lockKey(emailIndex(harness.server.runtime.otp.keys, address)),
+    );
+    expect(Number(lock['198.51.100.20']) - Date.now()).toBeGreaterThan(LOCK_MS - 60_000);
+  });
+
+  it('locks the whole account for 15 minutes after 50 wrong tries from every IP together', async () => {
+    const address = email('lock-all');
+    await makeAccount(address);
+    // 6 IPs with 9 each: no IP reaches its own 10, the account reaches 50
+    for (let ipNo = 0; ipNo < 6; ipNo += 1) {
+      for (let i = 0; i < 9; i += 1) await tryFrom(address, `198.51.100.${String(30 + ipNo)}`);
+    }
+    const anywhere = await tryFrom(address, '203.0.113.61', PASSWORD);
+    expect([anywhere.status, anywhere.body.error?.code]).toEqual([401, 'INVALID_CREDENTIALS']);
+    const lock = await redis().hgetall(
+      lockKey(emailIndex(harness.server.runtime.otp.keys, address)),
+    );
+    const left = Number(lock['*']) - Date.now();
+    expect(left).toBeGreaterThan(ACCOUNT_LOCK_MS - 60_000);
+    expect(left).toBeLessThanOrEqual(ACCOUNT_LOCK_MS);
+  });
+
+  it('does not make a lock longer with the tries during it', async () => {
+    const address = email('lock-steady');
+    await makeAccount(address);
+    for (let i = 0; i < 10; i += 1) await tryFrom(address, '198.51.100.40');
+    const key = lockKey(emailIndex(harness.server.runtime.otp.keys, address));
+    const until = (await redis().hget(key, '198.51.100.40')) ?? '';
+    // 20 more tries from that IP while it is locked: the lock still ends when it would have
+    for (let i = 0; i < 20; i += 1) await tryFrom(address, '198.51.100.40');
+    expect(await redis().hget(key, '198.51.100.40')).toBe(until);
+    // and they did not count toward the account's 50
+    expect(await redis().hget(key, '*')).toBeNull();
   });
 });
 

@@ -377,8 +377,13 @@ describe('an account that is there', () => {
   it('keeps a locked account out until the lock ends', async () => {
     const address = email('locked');
     await makeAccount(address, PASSWORD, { everyApp: false });
+    // from the browser's IP: the lock is per IP (QA DR-003)
     for (let i = 0; i < 10; i += 1) {
-      await post('/auth/login', { email: address, password: 'not the password at all' });
+      await post(
+        '/auth/login',
+        { email: address, password: 'not the password at all' },
+        { ip: '203.0.113.20' },
+      );
     }
     const page = await roundTrip('google', { subject: nextSubject(), email: address });
     expect(page.location).toBe('/sign-in?oauth=locked');

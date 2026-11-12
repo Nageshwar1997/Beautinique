@@ -242,16 +242,30 @@ export interface ChallengeView {
   resendsLeft: number;
 }
 
+let lastIp = 0;
+/**
+ * A test IP of its own (198.18.0.0/15, for tests): a helper's code comes from a new IP each time,
+ * so one IP's share of an email's codes (QA DR-003, tested on its own) never stops another test.
+ */
+export const freshIp = (): string => {
+  lastIp += 1;
+  return `198.18.${String(Math.floor(lastIp / 250))}.${String((lastIp % 250) + 1)}`;
+};
+
 /** A sign-up code for an email (a sign-up app, with the consent). */
 export async function signUpCode(address: string, app = 'customer'): Promise<ChallengeView> {
-  const answer = await post('/auth/sign-up/code', { email: address, consent }, { app });
+  const answer = await post(
+    '/auth/sign-up/code',
+    { email: address, consent },
+    { app, ip: freshIp() },
+  );
   expect(answer.status, JSON.stringify(answer.body)).toBe(200);
   return answer.body.data as unknown as ChallengeView;
 }
 
 /** A password code for an email (any app). */
 export async function passwordCode(address: string, app = 'customer'): Promise<ChallengeView> {
-  const answer = await post('/auth/password/code', { email: address }, { app });
+  const answer = await post('/auth/password/code', { email: address }, { app, ip: freshIp() });
   expect(answer.status, JSON.stringify(answer.body)).toBe(200);
   return answer.body.data as unknown as ChallengeView;
 }

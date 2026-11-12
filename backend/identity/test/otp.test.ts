@@ -480,6 +480,25 @@ describe('new codes and limits', () => {
     }
   });
 
+  it('gives one IP at most 3 of an email’s 5 codes an hour, so nobody uses up another’s reset codes (DR-003)', async () => {
+    const address = email('reset-victim');
+    await makeAccount(address);
+    const from = (ip: string, to = address) => post('/auth/password/code', { email: to }, { ip });
+    for (let i = 0; i < 3; i += 1) expect((await from('198.51.100.9')).status).toBe(200);
+    const fourth = await from('198.51.100.9');
+    expect([fourth.status, fourth.body.error?.code]).toEqual([429, 'OTP_EMAIL_LIMIT']);
+    // the owner, from their own IP, still gets the email's last code of the hour (its sign-up code
+    // was the first of the 5)
+    expect((await from('203.0.113.50')).status).toBe(200);
+    expect((await from('203.0.113.51')).status).toBe(429);
+    // one IPv6 home (/64) is one IP
+    const other = email('reset-v6');
+    for (let i = 1; i <= 3; i += 1) {
+      expect((await from(`2001:db8:5:1::${String(i)}`, other)).status).toBe(200);
+    }
+    expect((await from('2001:db8:5:1::4', other)).status).toBe(429);
+  });
+
   it('refuses with 503 when Redis is away, sending no code it could not check', async () => {
     const cut = await harness.start();
     try {
