@@ -2,7 +2,7 @@
 
 > **Temp file, sirf owner ki tracking ke liye.** Owner ke kehne pe (2026-11-09) abhi git me rehti hai; status update har item ke commit me. Kisi aur doc, file ya memory me iska zikr nahi. Saare items **Done** hote hi ye file repo se delete.
 >
-> **Last update:** 2026-11-12 (hissa 0–3 poore; Done: 1–18 (hissa 0–5 poore); batch (DR-011, Q-010, Q-008, Q-015) ke checks ho gaye, commits local, push aur PR owner ke kehne pe; agla 19 PR). **Faisla:** owner ne neeche ki har salah maan li (2026-11-09). Asli docs (report §9 "Owner ka jawab", ARCHITECTURE/RULES/README, MEMORY decision, HANDOFF, TASKS, change logs) har item ke commit me update honge, is file ka naam liye bina.
+> **Last update:** 2026-11-12 (hissa 0–3 poore; Done: 1–18 (hissa 0–5 poore); batch (DR-011, Q-010, Q-008, Q-015) ke checks ho gaye; PR #63 `feat/qa-audit` → `prerelease` khula, CI green ke baad merge owner; phir 20 release PR). **Faisla:** owner ne neeche ki har salah maan li (2026-11-09). Asli docs (report §9 "Owner ka jawab", ARCHITECTURE/RULES/README, MEMORY decision, HANDOFF, TASKS, change logs) har item ke commit me update honge, is file ka naam liye bina.
 
 ## Kitna bacha
 
@@ -84,12 +84,12 @@
 
 ### 6. Aakhri kadam
 
-| #   | Kaam                                                                    | Kaun                   | Mehnat | Status  | Commit / PR |
-| --- | ----------------------------------------------------------------------- | ---------------------- | ------ | ------- | ----------- |
-| 19  | PR `feat/qa-audit` → `prerelease` (CI green, owner merge)               | Claude PR, owner merge | 30 min | Pending |             |
-| 20  | PR `prerelease` → `release`, deploy ke baad live jaanch                 | Claude PR, owner merge | 30 min | Pending |             |
-| 21  | Report final: §0 aur §9 me sab ka jawab aur halat, version + change log | Claude                 | 30 min | Pending |             |
-| 22  | Ye temp file delete                                                     | Claude                 | 1 min  | Pending |             |
+| #   | Kaam                                                                    | Kaun                   | Mehnat | Status    | Commit / PR         |
+| --- | ----------------------------------------------------------------------- | ---------------------- | ------ | --------- | ------------------- |
+| 19  | PR `feat/qa-audit` → `prerelease` (CI green, owner merge)               | Claude PR, owner merge | 30 min | Chal raha | PR #63 (2026-11-12) |
+| 20  | PR `prerelease` → `release`, deploy ke baad live jaanch                 | Claude PR, owner merge | 30 min | Pending   |                     |
+| 21  | Report final: §0 aur §9 me sab ka jawab aur halat, version + change log | Claude                 | 30 min | Pending   |                     |
+| 22  | Ye temp file delete                                                     | Claude                 | 1 min  | Pending   |                     |
 
 ## Owner ke haath ke (kabhi bhi)
 
