@@ -16,7 +16,12 @@ const mutations: Mutation[] = [
   {
     file: 'otp',
     name: 'no hourly email limit',
-    change: [['if (count > deps.emailLimitPerHour) throw', 'if (false) throw']],
+    change: [
+      [
+        'if ((await count(emailCountKey(index))) > deps.emailLimitPerHour) throw',
+        'if (false) throw',
+      ],
+    ],
     tests: 'hourly limit',
   },
   {
@@ -164,7 +169,7 @@ const mutations: Mutation[] = [
   {
     file: 'otp',
     name: 'breached passwords allowed',
-    change: [['if (await deps.breached(password)) throw passwordBreached();', '']],
+    change: [["  if (breach === 'breached') throw passwordBreached();\n", '']],
     tests: 'breached',
   },
   {
@@ -253,7 +258,7 @@ const mutations: Mutation[] = [
   {
     file: 'password',
     name: 'breach list ignored',
-    change: [['if (hashSuffix === suffix && Number(count) > 0) return true;', '']],
+    change: [["if (hashSuffix === suffix && Number(count) > 0) return 'breached';", '']],
     tests: 'breached',
   },
   {
@@ -261,8 +266,8 @@ const mutations: Mutation[] = [
     name: 'padding lines count as breached',
     change: [
       [
-        'if (hashSuffix === suffix && Number(count) > 0) return true;',
-        'if (Number(count) >= 0) return true;',
+        "if (hashSuffix === suffix && Number(count) > 0) return 'breached';",
+        "if (Number(count) >= 0) return 'breached';",
       ],
     ],
     tests: 'breached|makes the account',
@@ -272,8 +277,8 @@ const mutations: Mutation[] = [
     name: 'fail-closed when the check is away',
     change: [
       [
-        "        'breached-password check unavailable; the password is allowed',\n      );\n      return false;",
-        "        'breached-password check unavailable; the password is allowed',\n      );\n      return true;",
+        "        'breached-password check unavailable; the password is checked again at the next sign-in',\n      );\n      return 'unknown';",
+        "        'breached-password check unavailable; the password is checked again at the next sign-in',\n      );\n      return 'breached';",
       ],
     ],
     tests: 'breached',
@@ -325,7 +330,7 @@ const mutations: Mutation[] = [
   {
     file: 'login',
     name: 'a locked account signs in',
-    change: [['if (await isLocked(deps.redis, deps.keys, email)) {', 'if (false) {']],
+    change: [['if (await isLocked(deps.redis, deps.keys, email, client.ip)) {', 'if (false) {']],
     tests: 'locks an account',
   },
   {
@@ -382,7 +387,7 @@ const mutations: Mutation[] = [
     name: 'wrong passwords not counted',
     change: [
       [
-        '  if (!right || !user || !credentials || hash === undefined) {\n    await recordFailure(deps.redis, deps.keys, email);\n',
+        '  if (!right || !user || !credentials || hash === undefined) {\n    await recordFailure(deps.redis, deps.keys, email, client.ip);\n',
         '  if (!right || !user || !credentials || hash === undefined) {\n',
       ],
     ],
@@ -393,8 +398,8 @@ const mutations: Mutation[] = [
     name: 'a right password alone resets the count',
     change: [
       [
-        '  const now = new Date();\n  if (needsRehash(hash)) {',
-        '  await clearFailures(deps.redis, deps.keys, email);\n  const now = new Date();\n  if (needsRehash(hash)) {',
+        '  const now = new Date();\n  await checkedLater(',
+        '  await clearFailures(deps.redis, deps.keys, email, { ip: client.ip });\n  const now = new Date();\n  await checkedLater(',
       ],
     ],
     tests: 'toward the account lock',
@@ -442,7 +447,7 @@ const mutations: Mutation[] = [
     name: 'second step goes on while locked',
     change: [
       [
-        'if (tries > LOGIN_MAX_TRIES || (await isLocked(deps.redis, deps.keys, login.email))) {',
+        'if (tries > LOGIN_MAX_TRIES || (await isLocked(deps.redis, deps.keys, login.email, ip))) {',
         'if (tries > LOGIN_MAX_TRIES) {',
       ],
     ],
@@ -455,7 +460,7 @@ const mutations: Mutation[] = [
     name: 'wrong codes not counted toward the lock',
     change: [
       [
-        '  await recordFailure(deps.redis, deps.keys, login.email);\n  if (tries >= LOGIN_MAX_TRIES) {',
+        '  await recordFailure(deps.redis, deps.keys, login.email, ip);\n  if (tries >= LOGIN_MAX_TRIES) {',
         '  if (tries >= LOGIN_MAX_TRIES) {',
       ],
     ],
@@ -501,7 +506,7 @@ const mutations: Mutation[] = [
     name: 'a wrong first code saves the authenticator',
     change: [
       [
-        '  if (step === null) return wrongTry(deps, loginId, login, tries, totpInvalid);\n  await finish',
+        '  if (step === null) return wrongTry(deps, loginId, login, tries, client.ip, totpInvalid);\n  await finish',
         '  await finish',
       ],
     ],
@@ -688,6 +693,82 @@ const mutations: Mutation[] = [
       ],
     ],
     tests: 'step-up instead',
+  },
+  // a password the breach check could not see is checked at the next sign-in (DR-002)
+  {
+    file: 'password',
+    name: 'an unanswered check counts as clean',
+    change: [
+      [
+        "        'breached-password check unavailable; the password is checked again at the next sign-in',\n      );\n      return 'unknown';",
+        "        'breached-password check unavailable; the password is checked again at the next sign-in',\n      );\n      return 'clean';",
+      ],
+    ],
+    tests: 'DR-002',
+  },
+  {
+    file: 'otp',
+    name: 'no mark when the check could not answer',
+    change: [["hibpPending: breach === 'unknown' }", 'hibpPending: false }']],
+    tests: 'DR-002',
+  },
+  {
+    file: 'credentials',
+    name: 'the mark is not kept',
+    change: [['    ...(password.hibpPending ? { hibpPending: true as const } : {}),\n', '']],
+    tests: 'DR-002',
+  },
+  {
+    file: 'login',
+    name: 'no check at sign-in',
+    change: [['  await checkedLater(deps, user._id, credentials.password, password, now);\n', '']],
+    tests: 'DR-002',
+  },
+  {
+    file: 'login',
+    name: 'a password known leaked signs in',
+    change: [['  if (stored?.breachedAt) throw passwordResetRequired();\n', '']],
+    tests: 'DR-002',
+  },
+  {
+    file: 'login',
+    name: 'every sign-in asks the check',
+    change: [['  if (stored?.hibpPending !== true) return;\n', '']],
+    tests: 'DR-002',
+  },
+  {
+    file: 'login',
+    name: 'an unanswered check at sign-in refuses it',
+    change: [["  if (answer === 'unknown') return;\n", '']],
+    tests: 'DR-002',
+  },
+  {
+    file: 'login',
+    name: 'a clean check keeps the mark',
+    change: [
+      [
+        "      $unset: { 'password.hibpPending': '' },\n      $set: { updatedAt: now },",
+        '      $set: { updatedAt: now },',
+      ],
+    ],
+    tests: 'DR-002',
+  },
+  {
+    file: 'login',
+    name: 'a leak found is not kept',
+    change: [
+      [
+        "    $set: { 'password.breachedAt': now, updatedAt: now },",
+        '    $set: { updatedAt: now },',
+      ],
+    ],
+    tests: 'DR-002',
+  },
+  {
+    file: 'login',
+    name: 'a leak found signs in',
+    change: [['  );\n  throw passwordResetRequired();\n}', '  );\n}']],
+    tests: 'DR-002',
   },
   // a step-up for one change alone (DR-010)
   {
@@ -1279,7 +1360,7 @@ const mutations: Mutation[] = [
   {
     file: 'rbac/authority',
     name: 'an appointer sees every role',
-    change: [['...(reviewer ? {} : { role: { $in: givable } })', '...{}']],
+    change: [['...(reviewer ? reviewed : { role: { $in: givable } })', '...{}']],
     tests: 'a reviewer every role',
   },
   {
@@ -1345,7 +1426,7 @@ const mutations: Mutation[] = [
   {
     file: 'rbac/manage',
     name: 'grants listed without the right to read them',
-    change: [['  requirePermission(caller, grantRead.key);\n  const visible', '  const visible']],
+    change: [['  requirePermission(caller, grantRead.key);\n  // one person', '  // one person']],
     tests: 'a reviewer every role',
   },
   {
@@ -1477,7 +1558,7 @@ const mutations: Mutation[] = [
     file: 'login',
     name: 'a locked account steps up',
     change: [
-      ['  if (await isLocked(deps.redis, deps.keys, user.email)) throw stepUpLocked();\n', ''],
+      ['  if (await isLocked(deps.redis, deps.keys, user.email, ip)) throw stepUpLocked();\n', ''],
     ],
     tests: 'lock',
   },
@@ -1491,7 +1572,7 @@ const mutations: Mutation[] = [
     file: 'login',
     name: 'wrong step-up codes are not counted',
     change: [
-      ['    await recordFailure(deps.redis, deps.keys, user.email);\n    throw ', '    throw '],
+      ['    await recordFailure(deps.redis, deps.keys, user.email, ip);\n    throw ', '    throw '],
     ],
     tests: 'lock',
   },
@@ -1505,7 +1586,7 @@ const mutations: Mutation[] = [
   {
     file: 'login',
     name: 'a step-up does not say how many codes are left',
-    change: [['recoveryCodesLeft: left };', 'recoveryCodesLeft: null };']],
+    change: [['    })),\n    recoveryCodesLeft: left,', '    })),\n    recoveryCodesLeft: null,']],
     tests: 'spends one code',
   },
   {
@@ -1517,8 +1598,13 @@ const mutations: Mutation[] = [
   {
     file: 'authenticator',
     name: 'replaced without a step-up',
-    change: [['  if (replace && !steppedUp(session, Date.now())) throw stepUpRequired();\n', '']],
-    tests: 'needs a step-up, then swaps',
+    change: [
+      [
+        "  if (replace && !(await deps.sessions.useStepUp(session._id, 'authenticator.replace'))) {\n",
+        '  if (false) {\n',
+      ],
+    ],
+    tests: 'then swaps',
   },
   {
     file: 'authenticator',
@@ -1560,7 +1646,7 @@ const mutations: Mutation[] = [
     name: 'wrong set-up tries are not counted toward the lock',
     change: [
       [
-        '  await recordFailure(deps.redis, deps.keys, email);\n  if (tries >= LOGIN_MAX_TRIES) {',
+        '  await recordFailure(deps.redis, deps.keys, email, ip);\n  if (tries >= LOGIN_MAX_TRIES) {',
         '  if (tries >= LOGIN_MAX_TRIES) {',
       ],
     ],
@@ -1571,7 +1657,7 @@ const mutations: Mutation[] = [
     name: 'a locked account sets one up',
     change: [
       [
-        'if (tries > LOGIN_MAX_TRIES || (await isLocked(deps.redis, deps.keys, email))) {',
+        'if (tries > LOGIN_MAX_TRIES || (await isLocked(deps.redis, deps.keys, email, ip))) {',
         'if (tries > LOGIN_MAX_TRIES) {',
       ],
     ],
@@ -1627,7 +1713,7 @@ const mutations: Mutation[] = [
     file: 'authenticator',
     name: 'a replace is told as a set-up',
     change: [["change: replace ? 'replaced' : 'enabled',", "change: 'enabled',"]],
-    tests: 'needs a step-up, then swaps',
+    tests: 'then swaps',
   },
   {
     file: 'authenticator',
@@ -1651,8 +1737,8 @@ const mutations: Mutation[] = [
     name: 'turned off without a step-up',
     change: [
       [
-        '  if (!steppedUp(session, Date.now())) throw stepUpRequired();\n  const roles',
-        '  const roles',
+        "  if (!(await deps.sessions.useStepUp(session._id, 'authenticator.disable'))) {\n",
+        '  if (false) {\n',
       ],
     ],
     tests: 'removes it with its codes',
@@ -1851,7 +1937,10 @@ const mutations: Mutation[] = [
     file: 'oauth',
     name: 'a locked account signs in with a provider',
     change: [
-      ["if (await isLocked(deps.redis, deps.keys, user.email)) return backToSignIn('locked');", ''],
+      [
+        "if (await isLocked(deps.redis, deps.keys, user.email, client.ip)) return backToSignIn('locked');",
+        '',
+      ],
     ],
     tests: 'locked account',
   },

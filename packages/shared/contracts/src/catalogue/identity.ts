@@ -90,6 +90,8 @@ export const IDENTITY_ERROR_CODES = {
   LAST_SIGN_IN_METHOD: 409,
   /** A sign-in method comes off only after a sign-in with the password or an email code in the last 10 minutes (QA DR-006) */
   RECENT_SIGN_IN_REQUIRED: 403,
+  /** The password turned out to be in a data breach after it was set (QA DR-002): set a new one with an email code */
+  PASSWORD_RESET_REQUIRED: 403,
 } as const satisfies Record<string, number>;
 
 /**

@@ -24,6 +24,10 @@ export interface Credentials {
     /** argon2id PHC string; the password itself is never stored */
     hash: string;
     setAt: Date;
+    /** The breach check could not answer when it was set: checked at the next sign-in (QA DR-002) */
+    hibpPending?: true;
+    /** That later check found it leaked: no sign-in with it until a new one is set */
+    breachedAt?: Date;
   };
   totp?: {
     /** The authenticator secret, sealed with IDENTITY__FIELD_KEYS (context totpContext) */
@@ -107,16 +111,30 @@ export const providerSubjectIndexMigration: Migration = {
 };
 
 /** Sets (or replaces) an account's password, and records `password` as a way it signs in. */
+/** A new password, ready to keep: its hash, and whether the breach check could answer. */
+export interface NewPassword {
+  /** argon2id, made before the code was used up */
+  hash: string;
+  /** The breach check could not answer: checked again at the next sign-in (QA DR-002) */
+  hibpPending: boolean;
+}
+
 export async function storePassword(
   mongo: Mongo,
   session: ClientSession,
-  { userId, hash, now }: { userId: string; hash: string; now: Date },
+  { userId, password, now }: { userId: string; password: NewPassword; now: Date },
 ): Promise<void> {
+  // a whole new password: an old mark (pending, leaked) goes with the old one
+  const kept = {
+    hash: password.hash,
+    setAt: now,
+    ...(password.hibpPending ? { hibpPending: true as const } : {}),
+  };
   await mongo.db
     .collection<Credentials>(CREDENTIALS)
     .updateOne(
       { _id: userId },
-      { $set: { password: { hash, setAt: now }, updatedAt: now } },
+      { $set: { password: kept, updatedAt: now } },
       { upsert: true, session },
     );
   await mongo.db.collection<AuthProvider>(AUTH_PROVIDERS).updateOne(

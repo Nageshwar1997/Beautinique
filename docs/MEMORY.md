@@ -1,6 +1,6 @@
 # MEMORY — BQ
 
-> **Status:** v1.92 (2026-11-12). Project ki yaaddasht: **kya tay hua aur kyun**, **pichhle kaam se kya seekha**, aur **kaunse jaal (traps) se bachna hai**. Poori detail baaki docs me hai; yahan short version aur pointers. Naya sabak ya decision aaye to yahan ek line jodo.
+> **Status:** v1.93 (2026-11-12). Project ki yaaddasht: **kya tay hua aur kyun**, **pichhle kaam se kya seekha**, aur **kaunse jaal (traps) se bachna hai**. Poori detail baaki docs me hai; yahan short version aur pointers. Naya sabak ya decision aaye to yahan ek line jodo.
 
 ## 1. Decision log
 
@@ -139,6 +139,7 @@
 | 2026-11-12 | DR-008 (owner ne salah maani): reviewer (SO, Auditor) ki `GET /iam/grants` sabki list me sign-up roles nahi; `?email=`/`?userId=` se ek insaan ke saare | Ek insider page kar ke har customer ka email nikaal sakta tha (Auditor ke 3 pages me 47 emails); access review ko staff chahiye, customers ki list nahi (DPDP) |
 | 2026-11-12 | DR-010 (owner: code sirf usi kaam ke liye): authenticator band karna aur naya phone apna step-up maangte (`STEP_UP_ACTIONS`, `stepUpFor`, ek baar, 5 min); doosre step-up in pe nahi, ye general nahi; Turn off ki jaanch gateway se identity me | Khule device pe 5 min ke kisi bhi step-up ke baad koi bina code authenticator band kar sakta tha. "Window 0" mumkin nahi (app code ke baad request dobara bhejti hai), to owner ne kaam-bandha code chuna |
 | 2026-11-12 | DR-006 (owner): sign-in method hatane se pehle 10 min ke andar password ya email code se bana session (`RECENT_SIGN_IN_MS`), warna 403 `RECENT_SIGN_IN_REQUIRED` aur app me "Sign in again"; authenticator wale account pe step-up | Khule device pe koi bhi (ya chura cookie) bina kuch jaane provider hata sakta tha; customers ke paas authenticator kam hai, to step-up ki jagah taaza sign-in, jaise bade sites karte hain |
+| 2026-11-12 | DR-002 (owner): HIBP fail-open rahe; jawab `unknown` (5xx/timeout, warning) pe `password.hibpPending`, agle password sign-in pe jaanch; leak pe `breachedAt` + 403 `PASSWORD_RESET_REQUIRED` aur app me "Set a new password"; HIBP phir na mile to sign-in chalta | Outage ke dauraan leaked password chupchaap aa jaata tha aur kabhi dobara jaancha nahi jaata; sign-up/reset rokna availability todta, isliye baad me jaanch |
 
 ## 2. Pichhle kaam se seekhe sabak
 
@@ -314,3 +315,4 @@
 | v1.90 | 2026-11-12 | Decision: DR-008, reviewer ki list me customers nahi. |
 | v1.91 | 2026-11-12 | Decision: DR-010, kaam-bandha step-up. |
 | v1.92 | 2026-11-12 | Decision: DR-006, provider hatane se pehle taaza sign-in. |
+| v1.93 | 2026-11-12 | Decision: DR-002, bina jaanch aaye password ki baad me jaanch. |

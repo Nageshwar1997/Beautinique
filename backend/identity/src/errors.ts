@@ -75,6 +75,17 @@ export const passwordBreached = (): AppError =>
     },
   );
 
+/**
+ * The right password, but a breach check from after it was set found it leaked (QA DR-002): no
+ * sign-in with it until a new one is set with an email code.
+ */
+export const passwordResetRequired = (): AppError =>
+  new AppError(
+    'PASSWORD_RESET_REQUIRED',
+    'This password appeared in a data breach. Please set a new one with an email code.',
+    { status: IDENTITY_ERROR_CODES.PASSWORD_RESET_REQUIRED },
+  );
+
 /** The sign-in step is gone: expired, finished, or out of tries. */
 export const loginExpired = (): AppError =>
   new AppError('LOGIN_EXPIRED', 'This sign-in has expired. Please sign in again.', {

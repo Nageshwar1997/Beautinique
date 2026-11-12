@@ -10,8 +10,10 @@ import { ACCOUNT_LOCK_MS, emailIndex, LOCK_MS, lockKey } from '../src/lockout.ts
 import { ENROLL_TTL_MS, LOGIN_TTL_MS, loginKey } from '../src/login.ts';
 import {
   type Answer,
+  BREACHED,
   credentials,
   type Harness,
+  hibp,
   makeAccount,
   PASSWORD,
   passwordCode,
@@ -441,5 +443,67 @@ describe('the authenticator', () => {
       { app: 'finance' },
     );
     expect(done.status).toBe(200);
+  });
+});
+
+describe('a password the breach check could not see (DR-002)', () => {
+  /** Runs with Have I Been Pwned away (a 503), like an outage. */
+  async function away<T>(run: () => Promise<T>): Promise<T> {
+    hibp.mode = 'down';
+    try {
+      return await run();
+    } finally {
+      hibp.mode = 'answer';
+    }
+  }
+  const stored = async (userId: string) => (await credentials().findOne({ _id: userId }))?.password;
+
+  it('is checked again at the next sign-in, and a leaked one asks for a new password', async () => {
+    const address = email('leak-later');
+    const userId = await away(() => makeAccount(address, BREACHED));
+    expect((await stored(userId))?.hibpPending).toBe(true);
+    // still away: the sign-in goes on, and the next one checks again
+    expect(step(await away(() => login(address, BREACHED))).next).toBe('signed-in');
+    expect((await stored(userId))?.hibpPending).toBe(true);
+
+    const asked = hibp.asked.length;
+    const leaked = await login(address, BREACHED);
+    expect(hibp.asked.length).toBe(asked + 1);
+    expect([leaked.status, leaked.body.error?.code, leaked.body.error?.message]).toEqual([
+      403,
+      'PASSWORD_RESET_REQUIRED',
+      'This password appeared in a data breach. Please set a new one with an email code.',
+    ]);
+    // known now: with the check away again, still no sign-in with it
+    expect((await away(() => login(address, BREACHED))).body.error?.code).toBe(
+      'PASSWORD_RESET_REQUIRED',
+    );
+    expect(hibp.asked.length).toBe(asked + 1);
+
+    // a new password with an email code ends it
+    const reset = await verify((await passwordCode(address)).challengeId, PASSWORD);
+    expect(reset.body.data?.outcome).toBe('password-set');
+    const now = await stored(userId);
+    expect(now).not.toHaveProperty('hibpPending');
+    expect(now).not.toHaveProperty('breachedAt');
+    expect(step(await login(address)).next).toBe('signed-in');
+  });
+
+  it('a clean one loses the mark at the next sign-in; one checked when set is never asked again', async () => {
+    const address = email('clean-later');
+    const userId = await away(() => makeAccount(address));
+    expect((await stored(userId))?.hibpPending).toBe(true);
+    expect(step(await login(address)).next).toBe('signed-in');
+    expect(await stored(userId)).not.toHaveProperty('hibpPending');
+    let asked = hibp.asked.length;
+    expect(step(await login(address)).next).toBe('signed-in');
+    expect(hibp.asked.length).toBe(asked);
+
+    const checked = email('checked-when-set');
+    const other = await makeAccount(checked);
+    expect(await stored(other)).not.toHaveProperty('hibpPending');
+    asked = hibp.asked.length;
+    expect(step(await login(checked)).next).toBe('signed-in');
+    expect(hibp.asked.length).toBe(asked);
   });
 });

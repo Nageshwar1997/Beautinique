@@ -2,7 +2,7 @@
 
 > **Temp file, sirf owner ki tracking ke liye.** Owner ke kehne pe (2026-11-09) abhi git me rehti hai; status update har item ke commit me. Kisi aur doc, file ya memory me iska zikr nahi. Saare items **Done** hote hi ye file repo se delete.
 >
-> **Last update:** 2026-11-12 (hissa 0, 1 aur 2 poore; Done: 1–9, 15a, 15, 16, 14, 10; batch chal raha; agla 11 DR-002). **Faisla:** owner ne neeche ki har salah maan li (2026-11-09). Asli docs (report §9 "Owner ka jawab", ARCHITECTURE/RULES/README, MEMORY decision, HANDOFF, TASKS, change logs) har item ke commit me update honge, is file ka naam liye bina.
+> **Last update:** 2026-11-12 (hissa 0–3 poore; Done: 1–11, 15a, 15, 16, 14; batch ke checks baaki; agla 12 DR-011). **Faisla:** owner ne neeche ki har salah maan li (2026-11-09). Asli docs (report §9 "Owner ka jawab", ARCHITECTURE/RULES/README, MEMORY decision, HANDOFF, TASKS, change logs) har item ke commit me update honge, is file ka naam liye bina.
 
 ## Kitna bacha
 
@@ -11,11 +11,11 @@
 | 0. Release aur shuruaat   | 4      | 4      | 0     | Ho gaya                              |
 | 1. Abuse aur limits       | 4      | 4      | 0     | Ho gaya                              |
 | 2. Permissions, step-up   | 5      | 5      | 0     | Ho gaya                              |
-| 3. Chhote backend         | 2      | 1      | 1     | ~0.5 din                             |
+| 3. Chhote backend         | 2      | 2      | 0     | Ho gaya                              |
 | 4. Apps                   | 7      | 4      | 3     | ~1.1 din                             |
 | 5. CI                     | 1      | 0      | 1     | ~0.4 din                             |
 | 6. Aakhri kadam           | 4      | 0      | 4     | ~1.5 ghante                          |
-| **Kul (Claude)**          | **27** | **18** | **9** | **~3 din**                           |
+| **Kul (Claude)**          | **27** | **19** | **8** | **~2.5 din**                         |
 | Owner ke haath ke (O1–O4) | 4      | 0      | 4     | owner ka time                        |
 
 **Status:** `Pending` (shuru nahi), `Chal raha`, `Done`, `Ruka` (kisi ka intezaar). Har item Done hone pe upar ki table bhi.
@@ -59,10 +59,10 @@
 
 ### 3. Chhote backend
 
-| #   | ID     | Kya karna                                                                                                                                             | Mehnat   | Status  | Commit                     |
-| --- | ------ | ----------------------------------------------------------------------------------------------------------------------------------------------------- | -------- | ------- | -------------------------- |
-| 10  | DR-001 | Public `/ready` ka jawab 5 s reuse (`/status` jaisa), taaki flood se har call pe 4 internal calls na hon                                              | 1 ghanta | Done    | DR-001 commit (2026-11-10) |
-| 11  | DR-002 | HIBP fail-open rahe; 5xx pe bhi warning; bina jaanch aaye password pe `hibpPending` nishaan, agle sign-in pe dobara jaanch, leak mile to reset maango | ½ din    | Pending |                            |
+| #   | ID     | Kya karna                                                                                                                                             | Mehnat   | Status | Commit                     |
+| --- | ------ | ----------------------------------------------------------------------------------------------------------------------------------------------------- | -------- | ------ | -------------------------- |
+| 10  | DR-001 | Public `/ready` ka jawab 5 s reuse (`/status` jaisa), taaki flood se har call pe 4 internal calls na hon                                              | 1 ghanta | Done   | DR-001 commit (2026-11-10) |
+| 11  | DR-002 | HIBP fail-open rahe; 5xx pe bhi warning; bina jaanch aaye password pe `hibpPending` nishaan, agle sign-in pe dobara jaanch, leak mile to reset maango | ½ din    | Done   | DR-002 commit (2026-11-12) |
 
 ### 4. Apps
 

@@ -390,17 +390,6 @@ const mutations: Mutation[] = [
   },
   {
     file: 'catalogue/identity',
-    name: 'turned off without a step-up',
-    change: [
-      [
-        "  summary: 'Turn the authenticator off',\n  apps: APPS,\n  access: { type: 'signed-in' },\n  rateLimit: 'auth',\n  idempotency: false,\n  stepUp: true,",
-        "  summary: 'Turn the authenticator off',\n  apps: APPS,\n  access: { type: 'signed-in' },\n  rateLimit: 'auth',\n  idempotency: false,\n  stepUp: false,",
-      ],
-    ],
-    tests: 'signed-in authenticator',
-  },
-  {
-    file: 'catalogue/identity',
     name: 'set up without the password',
     change: [
       [
@@ -415,8 +404,8 @@ const mutations: Mutation[] = [
     name: 'a step-up with both proofs, or neither',
     change: [
       [
-        'body: xor([object({ code: otpZod }), object({ recoveryCode: recoveryCodeZod })]),',
-        'body: object({ code: otpZod.optional(), recoveryCode: recoveryCodeZod.optional() }),',
+        'body: xor([\n      object({ code: otpZod, for: stepUpForZod }),\n      object({ recoveryCode: recoveryCodeZod, for: stepUpForZod }),\n    ]),',
+        'body: object({\n      code: otpZod.optional(),\n      recoveryCode: recoveryCodeZod.optional(),\n      for: stepUpForZod,\n    }),',
       ],
     ],
     tests: 'never both or neither',

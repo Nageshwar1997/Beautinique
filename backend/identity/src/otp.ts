@@ -22,6 +22,7 @@ import type { Request } from 'express';
 import type { Redis } from 'ioredis';
 
 import type { CodeBudget } from './code-budget.ts';
+import type { NewPassword } from './credentials.ts';
 import {
   otpEmailLimit,
   otpExpired,
@@ -419,13 +420,14 @@ export async function verifyCode(
     }
     throw otpInvalid(OTP_MAX_TRIES - tries);
   }
-  if (await deps.breached(password)) throw passwordBreached();
-  const passwordHash = await hashPassword(password);
+  const breach = await deps.breached(password);
+  if (breach === 'breached') throw passwordBreached();
+  const newPassword = { hash: await hashPassword(password), hibpPending: breach === 'unknown' };
   // a code works once: of two requests with it, only the one that deletes it goes on
   if ((await inRedis(() => deps.redis.del(key))) === 0) throw otpExpired();
 
   if (purpose === 'password') {
-    const user = await setPasswordWithCode(deps.mongo, { email, passwordHash });
+    const user = await setPasswordWithCode(deps.mongo, { email, newPassword });
     if (!user) throw otpExpired();
     await clearFailures(deps.redis, deps.keys, email, { unlock: true });
     await deps.sessions.endAll(user._id, 'password-changed');
@@ -435,7 +437,7 @@ export async function verifyCode(
 
   const consent = { terms: challenge.terms === '1', adult: challenge.adult === '1' };
   if (purpose === 'invite') {
-    return acceptWithCode(deps, { email, app, consent, ip: client.ip, passwordHash });
+    return acceptWithCode(deps, { email, app, consent, ip: client.ip, newPassword });
   }
 
   const { user, outcome } = await signUpWithCode(deps.mongo, {
@@ -444,7 +446,7 @@ export async function verifyCode(
     consent,
     legalVersion: deps.legalVersion,
     ip: client.ip,
-    passwordHash,
+    newPassword,
   });
   deps.logger.info({ userId: user._id, app, outcome }, 'sign-up code used');
   if (outcome === 'password-set') {
@@ -478,13 +480,13 @@ async function acceptWithCode(
     app,
     consent,
     ip,
-    passwordHash,
+    newPassword,
   }: {
     email: string;
     app: AppId;
     consent: { terms: boolean; adult: boolean };
     ip: string;
-    passwordHash: string;
+    newPassword: NewPassword;
   },
 ): Promise<VerifiedCode> {
   const accepted = await withTransaction(deps.mongo, async (session) => {
@@ -502,7 +504,7 @@ async function acceptWithCode(
     const password = await passwordWithCode(deps.mongo, session, {
       user,
       isNewUser,
-      passwordHash,
+      newPassword,
       now,
     });
     await acceptInvitations(deps.mongo, session, { userId: user._id, accepted: invitations, now });

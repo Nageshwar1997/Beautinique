@@ -1,11 +1,13 @@
 // Email codes: sign-up (with the new password) and setting a password, against the local MongoDB
 // replica set and Valkey (`npm run infra:up`). See helpers.ts.
+import type { Logger } from '@beautinique/backend-server-kit';
 import { OUTBOX } from '@beautinique/backend-server-queue';
 import { uuidv7 } from '@beautinique/shared-utils';
 import { Queue } from 'bullmq';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 
 import { challengeKey, OTP_MIN_ANSWER_MS } from '../src/otp.ts';
+import { hibpBreachCheck } from '../src/password.ts';
 import {
   acceptances,
   allowResend,
@@ -572,5 +574,31 @@ describe('new codes and limits', () => {
     await expect(harness.start({ IDENTITY__BLIND_INDEX_KEY: 'b1:short' })).rejects.toThrow(
       'BLIND_INDEX_KEY',
     );
+  });
+});
+
+describe('the breach check (DR-002)', () => {
+  it('answers unknown with a warning when Have I Been Pwned fails (a 5xx) or is slow', async () => {
+    const warned: { fields: unknown; message: string }[] = [];
+    const logger = {
+      warn: (fields: unknown, message: string) => warned.push({ fields, message }),
+    } as unknown as Logger;
+    const check = hibpBreachCheck({ url: harness.hibpUrl, timeoutMs: 300, logger });
+    expect(await check(BREACHED)).toBe('breached');
+    expect(await check(PASSWORD)).toBe('clean');
+    expect(warned).toEqual([]);
+    for (const mode of ['down', 'hang'] as const) {
+      hibp.mode = mode;
+      try {
+        expect(await check(BREACHED), mode).toBe('unknown');
+      } finally {
+        hibp.mode = 'answer';
+      }
+    }
+    expect(warned.map((w) => w.message)).toEqual([
+      'breached-password check unavailable; the password is checked again at the next sign-in',
+      'breached-password check unavailable; the password is checked again at the next sign-in',
+    ]);
+    expect(warned[0]?.fields).toMatchObject({ status: 503 });
   });
 });

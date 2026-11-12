@@ -124,13 +124,17 @@ let dummy: Promise<string> | undefined;
 export const dummyHash = (): Promise<string> =>
   (dummy ??= hashPassword(randomBytes(16).toString('hex')));
 
-/** Whether a password is in a known data breach. */
-export type BreachCheck = (password: string) => Promise<boolean>;
+/**
+ * Whether a password is in a known data breach: `unknown` when the check could not answer (the
+ * password is allowed, and checked again at the next sign-in, QA DR-002).
+ */
+export type BreachAnswer = 'breached' | 'clean' | 'unknown';
+export type BreachCheck = (password: string) => Promise<BreachAnswer>;
 
 /**
  * Have I Been Pwned's Pwned Passwords range API (k-anonymity: only the first 5 hex characters of
- * the SHA-1 leave the server, and the answer is padded). When it does not answer in time, the
- * password is allowed and a warning logged (fail-open, ARCHITECTURE §7.1).
+ * the SHA-1 leave the server, and the answer is padded). When it fails (a 5xx too) or does not
+ * answer in time, `unknown` and a warning (fail-open, ARCHITECTURE §7.1).
  */
 export function hibpBreachCheck({
   url = 'https://api.pwnedpasswords.com',
@@ -154,15 +158,18 @@ export function hibpBreachCheck({
       for (const line of response.data.split('\n')) {
         const [hashSuffix, count] = line.trim().split(':');
         // padding lines have a count of 0
-        if (hashSuffix === suffix && Number(count) > 0) return true;
+        if (hashSuffix === suffix && Number(count) > 0) return 'breached';
       }
-      return false;
+      return 'clean';
     } catch (error) {
       logger.warn(
-        { err: error instanceof Error ? error.message : String(error) },
-        'breached-password check unavailable; the password is allowed',
+        {
+          err: error instanceof Error ? error.message : String(error),
+          status: axios.isAxiosError(error) ? error.response?.status : undefined,
+        },
+        'breached-password check unavailable; the password is checked again at the next sign-in',
       );
-      return false;
+      return 'unknown';
     }
   };
 }

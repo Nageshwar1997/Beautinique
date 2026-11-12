@@ -29,6 +29,7 @@ import {
   authenticatorRequired,
   invalidCredentials,
   loginExpired,
+  passwordResetRequired,
   recoveryCodeInvalid,
   signInUnavailable,
   stepUpCodeInvalid,
@@ -143,6 +144,7 @@ export async function passwordLogin(
   const access = await signInAccess(deps.mongo, { userId: user._id, app });
   if (!access.allowed) throw invalidCredentials();
   const now = new Date();
+  await checkedLater(deps, user._id, credentials.password, password, now);
   if (needsRehash(hash)) {
     // the stored hash is from older settings: keep the same password, with today's
     await credentialsOf(deps).updateOne(
@@ -173,6 +175,43 @@ return redis.call('HINCRBY', KEYS[1], 'attempts', 1)
 `;
 
 /** Counts one more try at the Redis hash `key` (its `attempts`): -1 when it is gone. */
+/**
+ * A password set while the breach check could not answer is checked at sign-in (owner 2026-11-09,
+ * QA DR-002). Leaked: no sign-in with it until a new one is set with an email code, and that is
+ * kept, so a later outage does not let it back in. Clean: the mark goes. Still no answer: the
+ * sign-in goes on, and the next one asks again. After the grant, so it never tells who works where.
+ */
+async function checkedLater(
+  deps: LoginDeps,
+  userId: string,
+  stored: Credentials['password'],
+  password: string,
+  now: Date,
+): Promise<void> {
+  if (stored?.breachedAt) throw passwordResetRequired();
+  if (stored?.hibpPending !== true) return;
+  const answer = await deps.breached(password);
+  if (answer === 'unknown') return;
+  // only this password: a new one set meanwhile has its own mark
+  const thisPassword = { _id: userId, 'password.hash': stored.hash };
+  if (answer === 'clean') {
+    await credentialsOf(deps).updateOne(thisPassword, {
+      $unset: { 'password.hibpPending': '' },
+      $set: { updatedAt: now },
+    });
+    return;
+  }
+  await credentialsOf(deps).updateOne(thisPassword, {
+    $unset: { 'password.hibpPending': '' },
+    $set: { 'password.breachedAt': now, updatedAt: now },
+  });
+  deps.logger.warn(
+    { userId },
+    'a password set while the breach check was away is leaked; sign-in refused',
+  );
+  throw passwordResetRequired();
+}
+
 export const oneMoreTry = async (deps: LoginDeps, key: string): Promise<number> =>
   Number(await inRedis(() => deps.redis.eval(TRY, 1, key)));
 

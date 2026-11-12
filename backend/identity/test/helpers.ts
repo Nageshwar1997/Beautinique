@@ -89,6 +89,8 @@ export interface Harness {
   passport: PassportSigner;
   /** Identity's field and blind-index keys, to make a record as an older version wrote it */
   keys: CryptoKeys;
+  /** The Have I Been Pwned stand-in's URL (it answers as `hibp.mode` says) */
+  hibpUrl: string;
   start(more?: Record<string, string>): Promise<RunningIdentity>;
   stop(): Promise<void>;
 }
@@ -148,6 +150,7 @@ export async function startHarness(name: string): Promise<Harness> {
     passport,
     prefix,
     keys: loadCryptoKeys({ fieldKeys, blindIndexKey }),
+    hibpUrl: fake.url,
     start: async (more) => {
       const other = await startOne(more);
       otpKeysOf.set(other, loadSealingKeys(otpEventKeys));

@@ -189,7 +189,7 @@ const mutations: Mutation[] = [
   {
     file: 'rate-limits',
     name: 'refresh and sign-out take the plain per-IP bucket (no session budget)',
-    change: [["if (name !== 'session') return", 'if (true) return']],
+    change: [["  if (name !== 'session') {\n", '  if (true) {\n']],
     tests: 'refresh and sign-out',
   },
   {
