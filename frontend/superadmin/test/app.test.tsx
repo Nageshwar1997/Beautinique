@@ -10,11 +10,18 @@ const renderAt = (path: string) =>
   render(<RouterProvider router={createMemoryRouter(routes, { initialEntries: [path] })} />);
 
 describe('superadmin', () => {
-  it('shows the home page', async () => {
+  it('says the app is coming soon and what it will be for (no note for developers)', async () => {
     renderAt('/');
     expect(
       await screen.findByRole('heading', { level: 1, name: 'Beautinique Super Admin' }),
     ).toBeTruthy();
+    expect(screen.getByText('Coming soon')).toBeTruthy();
+    expect(
+      screen.getByText(
+        'Super Admins will handle escalated reviews and look after the admin teams here.',
+      ),
+    ).toBeTruthy();
+    expect(document.body.textContent).not.toContain('routes.tsx');
   });
 
   it('shows "Page not found" for unknown paths', async () => {

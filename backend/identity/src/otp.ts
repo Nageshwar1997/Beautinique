@@ -21,6 +21,8 @@ import { uuidv7 } from '@beautinique/shared-utils';
 import type { Request } from 'express';
 import type { Redis } from 'ioredis';
 
+import type { CodeBudget } from './code-budget.ts';
+import type { NewPassword } from './credentials.ts';
 import {
   otpEmailLimit,
   otpExpired,
@@ -30,9 +32,9 @@ import {
   otpUnavailable,
   passwordBreached,
 } from './errors.ts';
-import { clearFailures } from './lockout.ts';
+import { clearFailures, ipBucket } from './lockout.ts';
 import type { SocialSettings } from './oauth-providers.ts';
-import { type BreachCheck, hashPassword } from './password.ts';
+import { type BreachCheck, hashPassword, type LoginHashBudget } from './password.ts';
 import { publishAuthzVersions } from './rbac/grants.ts';
 import { acceptableInvitations, acceptInvitations, hasInvitation } from './rbac/invitations.ts';
 import type { Client, IssuedSession, Sessions } from './sessions.ts';
@@ -60,6 +62,8 @@ export const OTP_MIN_ANSWER_MS = 400;
 /** Redis keys (`bq:id:*`, ARCHITECTURE §6.6), each with a TTL. The email is never in a key. */
 export const challengeKey = (challengeId: string): string => `bq:id:otp:${challengeId}`;
 const emailCountKey = (index: string): string => `bq:id:otp-email:${index}`;
+const emailIpCountKey = (index: string, bucket: string): string =>
+  `bq:id:otp-email-ip:${index}:${bucket}`;
 
 /**
  * Why the code is sent: to make an account, to set a password (ARCHITECTURE §7.1), or to accept
@@ -97,6 +101,10 @@ export interface OtpDeps {
   legalVersion: string;
   /** Have I Been Pwned (fail-open) */
   breached: BreachCheck;
+  /** The sign-in hashes of every IP together (QA DR-004) */
+  loginHashes: LoginHashBudget;
+  /** The code emails of every IP together (QA DR-009) */
+  codes: CodeBudget;
   /** The last step of a sign-in, and the sessions of My Devices */
   sessions: Sessions;
   /** Who signed in, from the gateway's passport (signed-in routes) */
@@ -138,18 +146,32 @@ async function evenly<T>(work: () => Promise<T>): Promise<T> {
   }
 }
 
-/** Counts a code for this email in the last hour (resends too); over the limit refuses. */
-async function countEmail(deps: OtpDeps, email: string): Promise<void> {
-  const key = emailCountKey(blindIndex(deps.keys, 'otp-email', email));
-  const count = await inRedis(async () => {
-    const [[, value]] = (await deps.redis
-      .multi()
-      .incr(key)
-      .pexpire(key, EMAIL_WINDOW_MS, 'NX')
-      .exec()) as [[Error | null, number], [Error | null, number]];
-    return value;
-  });
-  if (count > deps.emailLimitPerHour) throw otpEmailLimit();
+/**
+ * One IP's share of an email's codes an hour (owner, 2026-11-12, QA DR-003): 3 of the 5, a code and
+ * two resends. From one IP (an IPv6 /64) nobody uses up all of another's codes, so a password reset
+ * still reaches the owner.
+ */
+export const OTP_EMAIL_CODES_PER_IP = 3;
+
+/**
+ * Counts a code for this email in the last hour (resends too), from this IP first: over the IP's
+ * share it refuses without touching the email's count, over the email's limit it refuses too.
+ */
+async function countEmail(deps: OtpDeps, email: string, ip: string): Promise<void> {
+  const index = blindIndex(deps.keys, 'otp-email', email);
+  const count = (key: string) =>
+    inRedis(async () => {
+      const [[, value]] = (await deps.redis
+        .multi()
+        .incr(key)
+        .pexpire(key, EMAIL_WINDOW_MS, 'NX')
+        .exec()) as [[Error | null, number], [Error | null, number]];
+      return value;
+    });
+  if ((await count(emailIpCountKey(index, ipBucket(ip)))) > OTP_EMAIL_CODES_PER_IP) {
+    throw otpEmailLimit();
+  }
+  if ((await count(emailCountKey(index))) > deps.emailLimitPerHour) throw otpEmailLimit();
 }
 
 /** The code goes to notify in an event, sealed, in identity's outbox (ARCHITECTURE §7.1). */
@@ -191,6 +213,8 @@ export interface RequestCodeInput {
   purpose: CodePurpose;
   consent?: { terms?: true; adult?: true } | undefined;
   requestId: string;
+  /** The client's IP (its share of the email's codes, QA DR-003) */
+  ip: string;
 }
 
 /**
@@ -205,7 +229,7 @@ export const requestCode = (deps: OtpDeps, input: RequestCodeInput): Promise<Cha
 
 async function requestCodeNow(
   deps: OtpDeps,
-  { app, email, purpose, consent, requestId }: RequestCodeInput,
+  { app, email, purpose, consent, requestId, ip }: RequestCodeInput,
 ): Promise<ChallengeView> {
   const signUp = purpose === 'sign-up';
   // an invitation into a sign-up app asks that app's consent too, as its sign-up does
@@ -216,7 +240,8 @@ async function requestCodeNow(
       details: problems,
     });
   }
-  await countEmail(deps, email);
+  await deps.codes({ signUp });
+  await countEmail(deps, email, ip);
   const send =
     signUp ||
     (purpose === 'invite'
@@ -270,6 +295,7 @@ interface ResendCodeInput {
   app: AppId;
   challengeId: string;
   requestId: string;
+  ip: string;
 }
 
 /** POST /auth/otp/:challengeId/resend: a new code, the old one stops working (OTP_MIN_ANSWER_MS). */
@@ -278,7 +304,7 @@ export const resendCode = (deps: OtpDeps, input: ResendCodeInput): Promise<Chall
 
 async function resendCodeNow(
   deps: OtpDeps,
-  { app, challengeId, requestId }: ResendCodeInput,
+  { app, challengeId, requestId, ip }: ResendCodeInput,
 ): Promise<ChallengeView> {
   const key = challengeKey(challengeId);
   const challenge = (await inRedis(() => deps.redis.hgetall(key))) as Partial<Challenge>;
@@ -287,7 +313,8 @@ async function resendCodeNow(
   // a refused resend must not use up the email's hourly codes; the script checks again atomically
   if (Number(challenge.resends) >= OTP_MAX_RESENDS) throw otpResendLimit();
   if (Number(challenge.resendAfter) > now) throw otpResendTooSoon();
-  await countEmail(deps, challenge.email);
+  await deps.codes({ signUp: challenge.purpose === 'sign-up' });
+  await countEmail(deps, challenge.email, ip);
   const code = newCode();
   const expiresAt = now + OTP_TTL_MS;
   const resendAfter = now + OTP_RESEND_AFTER_MS;
@@ -393,13 +420,14 @@ export async function verifyCode(
     }
     throw otpInvalid(OTP_MAX_TRIES - tries);
   }
-  if (await deps.breached(password)) throw passwordBreached();
-  const passwordHash = await hashPassword(password);
+  const breach = await deps.breached(password);
+  if (breach === 'breached') throw passwordBreached();
+  const newPassword = { hash: await hashPassword(password), hibpPending: breach === 'unknown' };
   // a code works once: of two requests with it, only the one that deletes it goes on
   if ((await inRedis(() => deps.redis.del(key))) === 0) throw otpExpired();
 
   if (purpose === 'password') {
-    const user = await setPasswordWithCode(deps.mongo, { email, passwordHash });
+    const user = await setPasswordWithCode(deps.mongo, { email, newPassword });
     if (!user) throw otpExpired();
     await clearFailures(deps.redis, deps.keys, email, { unlock: true });
     await deps.sessions.endAll(user._id, 'password-changed');
@@ -409,7 +437,7 @@ export async function verifyCode(
 
   const consent = { terms: challenge.terms === '1', adult: challenge.adult === '1' };
   if (purpose === 'invite') {
-    return acceptWithCode(deps, { email, app, consent, ip: client.ip, passwordHash });
+    return acceptWithCode(deps, { email, app, consent, ip: client.ip, newPassword });
   }
 
   const { user, outcome } = await signUpWithCode(deps.mongo, {
@@ -418,7 +446,7 @@ export async function verifyCode(
     consent,
     legalVersion: deps.legalVersion,
     ip: client.ip,
-    passwordHash,
+    newPassword,
   });
   deps.logger.info({ userId: user._id, app, outcome }, 'sign-up code used');
   if (outcome === 'password-set') {
@@ -452,13 +480,13 @@ async function acceptWithCode(
     app,
     consent,
     ip,
-    passwordHash,
+    newPassword,
   }: {
     email: string;
     app: AppId;
     consent: { terms: boolean; adult: boolean };
     ip: string;
-    passwordHash: string;
+    newPassword: NewPassword;
   },
 ): Promise<VerifiedCode> {
   const accepted = await withTransaction(deps.mongo, async (session) => {
@@ -476,7 +504,7 @@ async function acceptWithCode(
     const password = await passwordWithCode(deps.mongo, session, {
       user,
       isNewUser,
-      passwordHash,
+      newPassword,
       now,
     });
     await acceptInvitations(deps.mongo, session, { userId: user._id, accepted: invitations, now });

@@ -390,7 +390,9 @@ export interface GrantQuery {
 export async function listGrants(deps: ManageDeps, passport: Passport, query: GrantQuery) {
   const caller = await callerOf(deps, passport, new Date());
   requirePermission(caller, grantRead.key);
-  const visible = visibleFilter(caller, await roleCatalog(deps.mongo));
+  // one person (by id or email): every role of theirs; else no sign-up roles for a reviewer
+  const onePerson = query.userId !== undefined || query.email !== undefined;
+  const visible = visibleFilter(caller, await roleCatalog(deps.mongo), { onePerson });
   if (!visible) return { items: [], nextCursor: null };
   let { userId } = query;
   if (query.email !== undefined) {

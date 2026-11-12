@@ -1,9 +1,11 @@
 import { argon2, createHash, randomBytes, timingSafeEqual } from 'node:crypto';
 
 import type { Logger } from '@beautinique/backend-server-kit';
+import { createRateLimiter } from '@beautinique/backend-server-ratelimit';
 import axios from 'axios';
+import type { Redis } from 'ioredis';
 
-import { passwordsBusy } from './errors.ts';
+import { passwordsBusy, signInUnavailable } from './errors.ts';
 
 /**
  * argon2id at the OWASP minimum (ARCHITECTURE §11.1): 19 MiB, 2 passes, 1 lane. A new setting here
@@ -75,6 +77,41 @@ export function verifyPassword(hash: string, password: string): Promise<boolean>
   });
 }
 
+/** identity's rate-limit keys in Redis (ARCHITECTURE §6.6, `bq:id:*`). */
+export const RATE_LIMIT_PREFIX = 'bq:id:rl:';
+
+/** Takes one sign-in hash from the budget of every IP together; throws 503 when it is spent. */
+export type LoginHashBudget = () => Promise<void>;
+
+/**
+ * The password hashes sign-ins may cost a minute, every IP together (owner, 2026-11-12, QA
+ * DR-004): the gateway's limits are per IP, so many IPs could keep the one-at-a-time hashing busy
+ * and the free server's 0.1 CPU with it. Past the budget a sign-in is 503 ("Too many sign-ins right
+ * now") until it fills again (GCRA: then one every 60 / perMinute seconds); browsing and signed-in
+ * work go on. Redis away: 503 too, like the lock it cannot read then.
+ */
+export function loginHashBudget({
+  redis,
+  perMinute,
+  prefix = RATE_LIMIT_PREFIX,
+}: {
+  redis: Redis;
+  perMinute: number;
+  prefix?: string;
+}): LoginHashBudget {
+  const limiter = createRateLimiter({ redis, prefix });
+  const rule = { limit: perMinute, windowMs: 60_000 };
+  return async () => {
+    let allowed: boolean;
+    try {
+      ({ allowed } = await limiter.take('login-hash', rule));
+    } catch (error) {
+      throw signInUnavailable(error);
+    }
+    if (!allowed) throw passwordsBusy();
+  };
+}
+
 /** A hash made with other settings than ARGON2 (stored again at the next right sign-in). */
 export const needsRehash = (hash: string): boolean =>
   !hash.startsWith(
@@ -87,13 +124,17 @@ let dummy: Promise<string> | undefined;
 export const dummyHash = (): Promise<string> =>
   (dummy ??= hashPassword(randomBytes(16).toString('hex')));
 
-/** Whether a password is in a known data breach. */
-export type BreachCheck = (password: string) => Promise<boolean>;
+/**
+ * Whether a password is in a known data breach: `unknown` when the check could not answer (the
+ * password is allowed, and checked again at the next sign-in, QA DR-002).
+ */
+export type BreachAnswer = 'breached' | 'clean' | 'unknown';
+export type BreachCheck = (password: string) => Promise<BreachAnswer>;
 
 /**
  * Have I Been Pwned's Pwned Passwords range API (k-anonymity: only the first 5 hex characters of
- * the SHA-1 leave the server, and the answer is padded). When it does not answer in time, the
- * password is allowed and a warning logged (fail-open, ARCHITECTURE §7.1).
+ * the SHA-1 leave the server, and the answer is padded). When it fails (a 5xx too) or does not
+ * answer in time, `unknown` and a warning (fail-open, ARCHITECTURE §7.1).
  */
 export function hibpBreachCheck({
   url = 'https://api.pwnedpasswords.com',
@@ -117,15 +158,18 @@ export function hibpBreachCheck({
       for (const line of response.data.split('\n')) {
         const [hashSuffix, count] = line.trim().split(':');
         // padding lines have a count of 0
-        if (hashSuffix === suffix && Number(count) > 0) return true;
+        if (hashSuffix === suffix && Number(count) > 0) return 'breached';
       }
-      return false;
+      return 'clean';
     } catch (error) {
       logger.warn(
-        { err: error instanceof Error ? error.message : String(error) },
-        'breached-password check unavailable; the password is allowed',
+        {
+          err: error instanceof Error ? error.message : String(error),
+          status: axios.isAxiosError(error) ? error.response?.status : undefined,
+        },
+        'breached-password check unavailable; the password is checked again at the next sign-in',
       );
-      return false;
+      return 'unknown';
     }
   };
 }

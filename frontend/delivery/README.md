@@ -15,7 +15,7 @@ npm test --workspace delivery
 - `src/main.tsx`: app start (React Router data router).
 - `src/routes.tsx`: route table; pages `src/pages/*.tsx` me.
 - `src/layout.tsx`: skip link + page outlet.
-- `vite.config.ts`: PWA manifest aur service worker (vite-plugin-pwa).
+- `vite.config.ts`: service worker (vite-plugin-pwa); manifest `public/manifest.webmanifest` hai (`manifest: false`). SW page navigations ko app shell deta hai, `/api/*` ko kabhi nahi (`navigateFallbackDenylist`, QA Q-013).
 - Styles: `@beautinique/frontend-styles` (tokens, fonts, utilities).
 
 ## Live

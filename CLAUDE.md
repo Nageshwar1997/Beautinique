@@ -76,6 +76,7 @@ npm run build
 | `npm run infra:up` / `infra:down` / `infra:reset`                                     | Local Mongo, Valkey, Mailpit (Docker; [infra/README.md](infra/README.md))                                                                                        |
 | `npm run infra:mutation:up` / `infra:mutation:down`                                   | Mutation runs ke liye alag Mongo (27018) aur Valkey (6380): normal kaam saath chalta rahe (RULES §6)                                                             |
 | `npm run mutate -- --package backend-server-queue` (`--changed`, `--base prerelease`) | Mutation testing (RULES §6): package ki `test/mutations.ts`, temp copy me                                                                                        |
+| `npm run icons:install`                                                               | Saare apps ke install icons (customer/team/partner parivaar) aur manifest dobara (logo badle to; DESIGN §11)                                                     |
 | `npm run playground --workspace @beautinique/frontend-styles`                         | Styles ka Vite playground (port 5180)                                                                                                                            |
 | `npm run playground --workspace @beautinique/frontend-hooks`                          | Hooks ka playground (port 5183); components ka 5184, forms ka 5185, app-shell ka 5182, icons ka 5181                                                             |
 

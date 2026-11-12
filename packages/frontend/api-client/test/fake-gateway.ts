@@ -83,6 +83,7 @@ const me = {
     providers: ['password'],
     authenticator: true,
     recoveryCodesLeft: 10,
+    authenticatorRequiredBy: [],
   },
   session: { sessionId: SESSION_ID, app: 'customer', expiresAt: EXPIRES_AT },
 };

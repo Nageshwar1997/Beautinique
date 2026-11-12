@@ -6,6 +6,7 @@ import {
 } from '@beautinique/frontend-api-client';
 import { Button, Dialog, toast } from '@beautinique/frontend-components';
 import {
+  type AppId,
   disableAuthenticator,
   getMe,
   newRecoveryCodes,
@@ -13,15 +14,17 @@ import {
   type RouteOutput,
   SOCIAL_PROVIDERS,
   type SocialProvider,
+  TOTP_REQUIRED_APPS,
 } from '@beautinique/shared-contracts';
 import { plural } from '@beautinique/shared-utils';
 import { useQueryClient } from '@tanstack/react-query';
 import { type ReactNode, useState } from 'react';
+import { useNavigate } from 'react-router';
 
 import { AccountCard, LinkButton, StatusBadge } from './account-parts';
 import { ACCOUNT_PATHS, AUTH_PATHS, authHref } from './next';
 import { RecoveryCodes } from './recovery-codes';
-import { useSession } from './session';
+import { useSession, useSignOut } from './session';
 import { FEW_RECOVERY_CODES } from './sign-in';
 import { PROVIDER_NAMES } from './social';
 
@@ -107,9 +110,13 @@ function PasswordCard({ user }: { user: User }) {
  */
 function SignInMethodsCard({ user }: { user: User }) {
   const queryClient = useQueryClient();
+  const navigate = useNavigate();
+  const signOutNow = useSignOut();
   const remove = useApiMutation(removeSignInMethod);
   const [asking, setAsking] = useState<SocialProvider | null>(null);
   const ways = user.providers.length;
+  // the last sign-in is too old to take a way in off (QA DR-006): sign in again, then come back
+  const signInAgain = isApiError(remove.error, 'RECENT_SIGN_IN_REQUIRED');
   return (
     <AccountCard
       title="Sign-in methods"
@@ -159,11 +166,17 @@ function SignInMethodsCard({ user }: { user: User }) {
         }}
         title={`Remove ${asking === null ? '' : PROVIDER_NAMES[asking]} sign-in?`}
         description={`You will no longer sign in with ${asking === null ? '' : PROVIDER_NAMES[asking]}. We will email you that it was removed.`}
-        action="Remove"
-        tone="error"
+        action={signInAgain ? 'Sign in again' : 'Remove'}
+        tone={signInAgain ? 'brand' : 'error'}
         busy={remove.isPending}
         error={remove.error ?? undefined}
         onConfirm={() => {
+          if (signInAgain) {
+            void signOutNow().then((signedOut) => {
+              if (signedOut) void navigate(authHref(AUTH_PATHS.signIn, ACCOUNT_PATHS.security));
+            });
+            return;
+          }
           if (asking === null) return;
           const name = PROVIDER_NAMES[asking];
           remove.mutate(
@@ -184,6 +197,23 @@ function SignInMethodsCard({ user }: { user: User }) {
 
 type Asking = 'codes' | 'off' | null;
 
+/**
+ * Why the authenticator can't be turned off, or null when it can (QA DR-011): the roles that need
+ * it (in the words of identity's AUTHENTICATOR_REQUIRED_BY_ROLE), or an app that asks for it at
+ * every sign-in. A role given after the page loaded still gets that refusal in the dialog.
+ */
+function keptOnBecause(app: AppId, user: User): string | null {
+  const roles = user.authenticatorRequiredBy;
+  if (roles.length > 0) {
+    const named = roles.map((role) => `${role.name} role in the ${role.app} app`).join(', ');
+    return `Your ${named} ${roles.length === 1 ? 'needs' : 'need'} an authenticator, so it can’t be turned off.`;
+  }
+  const always: readonly AppId[] = TOTP_REQUIRED_APPS;
+  return always.includes(app)
+    ? 'This app asks for an authenticator at every sign-in, so it can’t be turned off.'
+    : null;
+}
+
 function AuthenticatorCard({
   user,
   focusTitle,
@@ -194,6 +224,7 @@ function AuthenticatorCard({
   onCodes: (codes: string[]) => void;
 }) {
   const queryClient = useQueryClient();
+  const { app } = useSession();
   const [asking, setAsking] = useState<Asking>(null);
   const newCodes = useApiMutation(newRecoveryCodes);
   const turnOff = useApiMutation(disableAuthenticator);
@@ -230,6 +261,7 @@ function AuthenticatorCard({
     error === null || isApiError(error, 'STEP_UP_REQUIRED') ? undefined : error;
   const codesFailed = shown(newCodes.error);
   const offFailed = shown(turnOff.error);
+  const keptOn = keptOnBecause(app, user);
   return (
     <AccountCard
       title="Authenticator app"
@@ -257,16 +289,19 @@ function AuthenticatorCard({
           Get new recovery codes
         </Button>
         <LinkButton to={ACCOUNT_PATHS.authenticator}>Set up on a new phone</LinkButton>
-        <Button
-          variant="outline"
-          tone="error"
-          onClick={() => {
-            ask('off');
-          }}
-        >
-          Turn off
-        </Button>
+        {keptOn === null && (
+          <Button
+            variant="outline"
+            tone="error"
+            onClick={() => {
+              ask('off');
+            }}
+          >
+            Turn off
+          </Button>
+        )}
       </div>
+      {keptOn !== null && <p className="text-foreground-muted text-sm">{keptOn}</p>}
       <Confirm
         open={asking === 'codes'}
         onClose={() => {
@@ -294,7 +329,7 @@ function AuthenticatorCard({
           setAsking(null);
         }}
         title="Turn off the authenticator?"
-        description="Signing in will ask for your password only, and your recovery codes stop working. First you confirm it’s you."
+        description="Signing in will no longer ask for a code from your authenticator app, and your recovery codes stop working. First you confirm it’s you."
         action="Turn off"
         tone="error"
         busy={turnOff.isPending}

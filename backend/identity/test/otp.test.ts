@@ -1,11 +1,13 @@
 // Email codes: sign-up (with the new password) and setting a password, against the local MongoDB
 // replica set and Valkey (`npm run infra:up`). See helpers.ts.
+import type { Logger } from '@beautinique/backend-server-kit';
 import { OUTBOX } from '@beautinique/backend-server-queue';
 import { uuidv7 } from '@beautinique/shared-utils';
 import { Queue } from 'bullmq';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 
 import { challengeKey, OTP_MIN_ANSWER_MS } from '../src/otp.ts';
+import { hibpBreachCheck } from '../src/password.ts';
 import {
   acceptances,
   allowResend,
@@ -14,6 +16,7 @@ import {
   consent,
   credentials,
   events,
+  freshIp,
   type Harness,
   hibp,
   makeAccount,
@@ -480,6 +483,72 @@ describe('new codes and limits', () => {
     }
   });
 
+  it('gives one IP at most 3 of an email’s 5 codes an hour, so nobody uses up another’s reset codes (DR-003)', async () => {
+    const address = email('reset-victim');
+    await makeAccount(address);
+    const from = (ip: string, to = address) => post('/auth/password/code', { email: to }, { ip });
+    for (let i = 0; i < 3; i += 1) expect((await from('198.51.100.9')).status).toBe(200);
+    const fourth = await from('198.51.100.9');
+    expect([fourth.status, fourth.body.error?.code]).toEqual([429, 'OTP_EMAIL_LIMIT']);
+    // the owner, from their own IP, still gets the email's last code of the hour (its sign-up code
+    // was the first of the 5)
+    expect((await from('203.0.113.50')).status).toBe(200);
+    expect((await from('203.0.113.51')).status).toBe(429);
+    // one IPv6 home (/64) is one IP
+    const other = email('reset-v6');
+    for (let i = 1; i <= 3; i += 1) {
+      expect((await from(`2001:db8:5:1::${String(i)}`, other)).status).toBe(200);
+    }
+    expect((await from('2001:db8:5:1::4', other)).status).toBe(429);
+  });
+
+  it('keeps sign-up codes to their share of the day, so password and invitation codes still go (DR-009)', async () => {
+    const owner = email('share-owner');
+    await makeAccount(owner);
+    const shared = await harness.start({ IDENTITY__SIGN_UP_CODES_PER_DAY: '2' });
+    try {
+      const signUp = (address: string) =>
+        post('/auth/sign-up/code', { email: address, consent }, { to: shared, ip: freshIp() });
+      expect((await signUp(email('share1'))).status).toBe(200);
+      expect((await signUp(email('share2'))).status).toBe(200);
+      const third = await signUp(email('share3'));
+      expect([third.status, third.body.error?.code]).toEqual([429, 'OTP_SIGN_UP_LIMIT']);
+      expect(third.body.error?.message).toBe(
+        "We can't send more sign-up codes today. Please try again tomorrow.",
+      );
+      // a password code is not part of that share
+      const reset = await post(
+        '/auth/password/code',
+        { email: owner },
+        { to: shared, ip: freshIp() },
+      );
+      expect(reset.status).toBe(200);
+    } finally {
+      await shared.stop();
+    }
+  });
+
+  it('sends at most the hour’s codes of every IP together, resends too (DR-009)', async () => {
+    const busy = await harness.start({ IDENTITY__CODES_PER_HOUR: '3' });
+    try {
+      const signUp = (address: string) =>
+        post('/auth/sign-up/code', { email: address, consent }, { to: busy, ip: freshIp() });
+      expect((await signUp(email('hour1'))).status).toBe(200);
+      const second = await signUp(email('hour2'));
+      expect(second.status).toBe(200);
+      const { challengeId } = second.body.data as { challengeId: string };
+      await allowResend(challengeId, busy);
+      expect((await post(`/auth/otp/${challengeId}/resend`, {}, { to: busy })).status).toBe(200);
+      const fourth = await signUp(email('hour3'));
+      expect([fourth.status, fourth.body.error?.code]).toEqual([429, 'OTP_BUSY']);
+      expect(fourth.body.error?.message).toBe(
+        "We're sending a lot of codes right now. Please try again in a few minutes.",
+      );
+    } finally {
+      await busy.stop();
+    }
+  });
+
   it('refuses with 503 when Redis is away, sending no code it could not check', async () => {
     const cut = await harness.start();
     try {
@@ -505,5 +574,31 @@ describe('new codes and limits', () => {
     await expect(harness.start({ IDENTITY__BLIND_INDEX_KEY: 'b1:short' })).rejects.toThrow(
       'BLIND_INDEX_KEY',
     );
+  });
+});
+
+describe('the breach check (DR-002)', () => {
+  it('answers unknown with a warning when Have I Been Pwned fails (a 5xx) or is slow', async () => {
+    const warned: { fields: unknown; message: string }[] = [];
+    const logger = {
+      warn: (fields: unknown, message: string) => warned.push({ fields, message }),
+    } as unknown as Logger;
+    const check = hibpBreachCheck({ url: harness.hibpUrl, timeoutMs: 300, logger });
+    expect(await check(BREACHED)).toBe('breached');
+    expect(await check(PASSWORD)).toBe('clean');
+    expect(warned).toEqual([]);
+    for (const mode of ['down', 'hang'] as const) {
+      hibp.mode = mode;
+      try {
+        expect(await check(BREACHED), mode).toBe('unknown');
+      } finally {
+        hibp.mode = 'answer';
+      }
+    }
+    expect(warned.map((w) => w.message)).toEqual([
+      'breached-password check unavailable; the password is checked again at the next sign-in',
+      'breached-password check unavailable; the password is checked again at the next sign-in',
+    ]);
+    expect(warned[0]?.fields).toMatchObject({ status: 503 });
   });
 });

@@ -1,6 +1,6 @@
 # TASKS — BQ
 
-> **Status:** v1.99 (2026-11-09). Poore project ki task list, [ARCHITECTURE.md](ARCHITECTURE.md) §16 ke phases ke hisaab se. Har task "done" tabhi jab [RULES.md](RULES.md) §1.5 ki Definition of Done poori ho.
+> **Status:** v1.100 (2026-11-12). Poore project ki task list, [ARCHITECTURE.md](ARCHITECTURE.md) §16 ke phases ke hisaab se. Har task "done" tabhi jab [RULES.md](RULES.md) §1.5 ki Definition of Done poori ho.
 
 **Kaise use karein:**
 - `[ ]` baaki, `[~]` chal raha hai, `[x]` done.
@@ -194,7 +194,7 @@ Har milestone ke end me kuch **live** dikhana hai. Ek hi live environment, free 
 - [x] T6.3 Customer app → React Router 8 framework mode (SSR + prerender). Ho gaya: customer React Router 8.5 pe SSR aur prerender ke saath bana aur live hai; checkbox peeche tha aur "React Router 7" likha reh gaya tha (owner, 2026-11-09, QA-DOC-002).
 - [ ] T6.4 Onboarding Customer → Seller app; Super Admin checkbox hatana; Admin/Master se AddProduct aur category CRUD hatana.
 - [ ] T6.5 7 naye apps template se (superadmin, support, finance, logistics, delivery, growth, creator).
-- [~] T6.6 Har app ka `vercel.json` (routes transform, security headers), Ola Maps key per app. (2026-10-26: customer ka `vercel.json`: npm 12 install, `npm run build -- --for customer`, `/api` route + `x-origin-secret` transform env se, functions `bom1`. 2026-11-09, owner, QA Q-011: saare 11 apps ki `vercel.json` me security headers: CSP sirf `frame-ancestors 'none'`, `X-Frame-Options: DENY`, nosniff, `Referrer-Policy`, HSTS, `Permissions-Policy` me camera/mic/location band; jaanch `scripts/ci/test/vercel-headers.test.ts`. Bacha: poora CSP (customer SSR me nonce, SPA scripts ke hash, `connect-src`; ARCHITECTURE §9.3) aur Ola Maps key per app.)
+- [~] T6.6 Har app ka `vercel.json` (routes transform, security headers), Ola Maps key per app. (2026-10-26: customer ka `vercel.json`: npm 12 install, `npm run build -- --for customer`, `/api` route + `x-origin-secret` transform env se, functions `bom1`. 2026-11-09, owner, QA Q-011: saare 11 apps ki `vercel.json` me security headers: CSP sirf `frame-ancestors 'none'`, `X-Frame-Options: DENY`, nosniff, `Referrer-Policy`, HSTS, `Permissions-Policy` me camera/mic/location band; jaanch `scripts/ci/test/vercel-headers.test.ts`. 2026-11-12, QA Q-015: `npm run create:app` bhi `vercel.json` aur `test/vercel-config.test.ts` banata, saare 11 apps jaisa hubahu (`scripts/packages/test/app-templates.test.ts`). Bacha: poora CSP (customer SSR me nonce, SPA scripts ke hash, `connect-src`; ARCHITECTURE §9.3) aur Ola Maps key per app.)
 - [ ] T6.7 `apps` profile: split mode containers. **Docker Lesson 4.**
 
 **Milestone 6:** saare 11 apps laptop pe login karke apna empty dashboard dikhate hain, dono themes me.
@@ -368,3 +368,4 @@ Har milestone ke end me kuch **live** dikhana hai. Ek hi live environment, free 
 | v1.97   | 2026-11-07 | A.8: Better Stack + UptimeRobot laga diye, Render support ka sawaal chhoda (owner); A.10: Sentry `user.geo` rehne do (owner). |
 | v1.98   | 2026-11-09 | T6.3 `[x]` (React Router 8, SSR + prerender, live; QA-DOC-002); naye T4.10 geo lint, T4.11 role-name lint, T11.7 OpenAPI diff + event compatibility, T11.8 bundle budgets (owner, QA-DOC-001); §P: 15% (task ginti 27%). |
 | v1.99   | 2026-11-09 | T6.6 `[~]`: saare 11 apps pe security headers, poora CSP aur Ola Maps key baaki (owner, QA Q-011); §P: Phase 6 31%, poora 15%, task ginti 28%. |
+| v1.100 | 2026-11-12 | T6.6 note: `npm run create:app` bhi `vercel.json` aur uska test banata (QA Q-015); checkbox nahi badla. |

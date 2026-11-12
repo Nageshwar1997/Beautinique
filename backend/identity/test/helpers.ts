@@ -89,6 +89,8 @@ export interface Harness {
   passport: PassportSigner;
   /** Identity's field and blind-index keys, to make a record as an older version wrote it */
   keys: CryptoKeys;
+  /** The Have I Been Pwned stand-in's URL (it answers as `hibp.mode` says) */
+  hibpUrl: string;
   start(more?: Record<string, string>): Promise<RunningIdentity>;
   stop(): Promise<void>;
 }
@@ -111,6 +113,10 @@ export async function startHarness(name: string): Promise<Harness> {
     IDENTITY__BLIND_INDEX_KEY: blindIndexKey,
     IDENTITY__OTP_EVENT_KEYS: otpEventKeys,
     IDENTITY__HIBP_URL: fake.url,
+    // the tests sign in and ask for codes far more than live allows; a test of a budget sets its own
+    IDENTITY__LOGIN_HASHES_PER_MINUTE: '100000',
+    IDENTITY__CODES_PER_HOUR: '100000',
+    IDENTITY__SIGN_UP_CODES_PER_DAY: '100000',
     ...more,
   });
   const passport = passportSigner();
@@ -123,6 +129,8 @@ export async function startHarness(name: string): Promise<Harness> {
         queuePrefix: prefix,
         epochKey: `${prefix}:epoch`,
         readyKey: `${prefix}:revocations-ready`,
+        // each identity its own budgets, never another test's
+        rateLimitPrefix: `${prefix}:rl:${randomUUID().slice(0, 8)}:`,
         pollMs: 100,
       },
       passportJwks: passport.jwks,
@@ -142,6 +150,7 @@ export async function startHarness(name: string): Promise<Harness> {
     passport,
     prefix,
     keys: loadCryptoKeys({ fieldKeys, blindIndexKey }),
+    hibpUrl: fake.url,
     start: async (more) => {
       const other = await startOne(more);
       otpKeysOf.set(other, loadSealingKeys(otpEventKeys));
@@ -238,16 +247,30 @@ export interface ChallengeView {
   resendsLeft: number;
 }
 
+let lastIp = 0;
+/**
+ * A test IP of its own (198.18.0.0/15, for tests): a helper's code comes from a new IP each time,
+ * so one IP's share of an email's codes (QA DR-003, tested on its own) never stops another test.
+ */
+export const freshIp = (): string => {
+  lastIp += 1;
+  return `198.18.${String(Math.floor(lastIp / 250))}.${String((lastIp % 250) + 1)}`;
+};
+
 /** A sign-up code for an email (a sign-up app, with the consent). */
 export async function signUpCode(address: string, app = 'customer'): Promise<ChallengeView> {
-  const answer = await post('/auth/sign-up/code', { email: address, consent }, { app });
+  const answer = await post(
+    '/auth/sign-up/code',
+    { email: address, consent },
+    { app, ip: freshIp() },
+  );
   expect(answer.status, JSON.stringify(answer.body)).toBe(200);
   return answer.body.data as unknown as ChallengeView;
 }
 
 /** A password code for an email (any app). */
 export async function passwordCode(address: string, app = 'customer'): Promise<ChallengeView> {
-  const answer = await post('/auth/password/code', { email: address }, { app });
+  const answer = await post('/auth/password/code', { email: address }, { app, ip: freshIp() });
   expect(answer.status, JSON.stringify(answer.body)).toBe(200);
   return answer.body.data as unknown as ChallengeView;
 }

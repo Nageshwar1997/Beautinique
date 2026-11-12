@@ -27,6 +27,12 @@ test('joins the team: the invitation, the authenticator at the first sign-in, th
   await accountButton(page, email).click();
   await page.getByRole('menuitem', { name: 'Security' }).click();
   await expect(page.getByRole('heading', { level: 1, name: 'Security' })).toBeVisible();
+  // the role keeps the authenticator on: why, instead of a "Turn off" that always fails (QA DR-011)
+  await expect(
+    page.getByText(/ role in the admin app needs an authenticator, so it can’t be turned off\.$/),
+  ).toBeVisible();
+  await expect(page.getByRole('button', { name: 'Turn off' })).toHaveCount(0);
+  await expect(page.getByRole('button', { name: 'Get new recovery codes' })).toBeVisible();
   await expectNoAxeViolations(page);
   await expectNoSideScroll(page);
   await page.getByRole('link', { name: 'My Devices' }).click();

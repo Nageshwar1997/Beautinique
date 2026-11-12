@@ -32,6 +32,7 @@ import { renderApp, where } from './render';
 afterEach(() => {
   cleanup();
   dropHint('customer');
+  dropHint('admin');
   vi.restoreAllMocks();
 });
 
@@ -134,7 +135,13 @@ describe('SecuritySettings', () => {
     const user = userEvent.setup();
     renderApp(pages, { identity, at: ACCOUNT_PATHS.security });
     await user.click(await screen.findByRole('button', { name: 'Turn off' }));
+    // true for an account with a social sign-in too, not "your password only" (QA DR-011)
     const ask = screen.getByRole('alertdialog', { name: 'Turn off the authenticator?' });
+    expect(
+      within(ask).getByText(
+        'Signing in will no longer ask for a code from your authenticator app, and your recovery codes stop working. First you confirm it’s you.',
+      ),
+    ).toBeTruthy();
     await user.click(within(ask).getByRole('button', { name: 'Turn off' }));
     const dialog = await screen.findByRole('dialog', { name: 'Confirm it’s you' });
     await user.click(
@@ -143,8 +150,10 @@ describe('SecuritySettings', () => {
     await user.type(within(dialog).getByLabelText('Recovery code'), 'abcde-fgh23');
     await user.click(within(dialog).getByRole('button', { name: 'Continue' }));
     expect(await screen.findByText('The authenticator is off.')).toBeTruthy();
+    // the code is for turning it off alone (QA DR-010)
     expect(identity.sent.find((sent) => sent.path === '/auth/step-up')?.body).toEqual({
       recoveryCode: 'ABCDE-FGH23',
+      for: 'authenticator.disable',
     });
     expect(await screen.findByText('Off')).toBeTruthy();
     expect(screen.queryByRole('alertdialog')).toBeNull();
@@ -186,6 +195,39 @@ describe('SecuritySettings', () => {
     const ask = screen.getByRole('alertdialog');
     await user.click(within(ask).getByRole('button', { name: 'Turn off' }));
     expect((await within(ask).findByRole('alert')).textContent).toBe(message);
+    await expectNoAxeViolations();
+  });
+
+  it('says which roles keep the authenticator on, with no "Turn off" that would fail (QA DR-011)', async () => {
+    const identity = signedIn({ authenticator: true });
+    identity.state.authenticatorRequiredBy = [
+      { name: 'State Admin', app: 'admin' },
+      { name: 'Seller Finance', app: 'seller' },
+    ];
+    renderApp(pages, { identity, at: ACCOUNT_PATHS.security });
+    expect(
+      await screen.findByText(
+        'Your State Admin role in the admin app, Seller Finance role in the seller app need an authenticator, so it can’t be turned off.',
+      ),
+    ).toBeTruthy();
+    expect(screen.queryByRole('button', { name: 'Turn off' })).toBeNull();
+    // the rest stays
+    expect(screen.getByRole('button', { name: 'Get new recovery codes' })).toBeTruthy();
+    expect(screen.getByRole('link', { name: 'Set up on a new phone' })).toBeTruthy();
+    await expectNoAxeViolations();
+  });
+
+  it('keeps it on in an app that asks for it at every sign-in, and says so (QA DR-011)', async () => {
+    setHint('admin');
+    const identity = fakeIdentity('admin', { signedIn: true, authenticator: true });
+    renderApp(pages, { identity, app: 'admin', at: ACCOUNT_PATHS.security });
+    expect(
+      await screen.findByText(
+        'This app asks for an authenticator at every sign-in, so it can’t be turned off.',
+      ),
+    ).toBeTruthy();
+    expect(screen.queryByRole('button', { name: 'Turn off' })).toBeNull();
+    expect(screen.getByText('10 recovery codes of 10 left.')).toBeTruthy();
     await expectNoAxeViolations();
   });
 });
@@ -285,6 +327,11 @@ describe('AuthenticatorSetup', () => {
     await stepUpWith(user, GOOD_CODE);
     await user.click(await screen.findByRole('button', { name: 'Next' }));
     expect(screen.getByRole('button', { name: 'Replace authenticator' })).toBeTruthy();
+    // the code is for the new phone alone (QA DR-010)
+    expect(identity.sent.find((sent) => sent.path === '/auth/step-up')?.body).toEqual({
+      code: GOOD_CODE,
+      for: 'authenticator.replace',
+    });
   });
 
   it('asks to confirm it is you again when the step-up was cancelled', async () => {

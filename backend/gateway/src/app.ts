@@ -38,6 +38,27 @@ export interface GatewayAppOptions {
   sessions: SessionGate;
   /** signs the owners' passports; its public key is at PASSPORT_JWKS_PATH */
   passport: PassportSigner;
+  /** how long one round of /ready checks answers every caller (default READY_REUSE_MS) */
+  readyReuseMs?: number;
+}
+
+/**
+ * /ready is public and outside the rate limits; each round asks Redis and every deployable's
+ * /health. One round answers every caller for this long, as /status does, so a flood costs a few
+ * internal calls every 5 seconds instead of some for each request (QA audit DR-001).
+ */
+export const READY_REUSE_MS = 5000;
+
+/** A check whose answer, or the round still running, every caller shares for `ms`. */
+export function reusedFor(ms: number, check: ReadyCheck): ReadyCheck {
+  let last: { at: number; answer: Promise<boolean> } | undefined;
+  return () => {
+    const at = Date.now();
+    if (last === undefined || at - last.at >= ms) {
+      last = { at, answer: Promise.resolve().then(check) };
+    }
+    return last.answer;
+  };
 }
 
 /** Does the deployable's /health answer within 2 seconds? */
@@ -72,6 +93,7 @@ export function buildApp({
   redisReady,
   sessions,
   passport,
+  readyReuseMs = READY_REUSE_MS,
 }: GatewayAppOptions): Express {
   const running = DEPLOYABLES.flatMap((name) => {
     const origin = upstreams[name];
@@ -81,8 +103,10 @@ export function buildApp({
     logger,
     json: false,
     ready: {
-      redis: redisReady,
-      ...Object.fromEntries(running.map(([name, origin]) => [name, () => isHealthy(origin)])),
+      redis: reusedFor(readyReuseMs, redisReady),
+      ...Object.fromEntries(
+        running.map(([name, origin]) => [name, reusedFor(readyReuseMs, () => isHealthy(origin))]),
+      ),
     },
     routes: (app) => {
       app.get('/status', statusRoute({ own: { redis: redisReady }, upstreams }));

@@ -42,6 +42,7 @@ import {
   REFRESH_COOKIE_PATH,
   refreshCookieName,
   refreshSession,
+  refreshTokenParts,
   requestPasswordCode,
   requestSignUpCode,
   resendOtp,
@@ -50,7 +51,9 @@ import {
   sessionReuseDetected,
   SIGN_UP_APPS,
   startTotpEnroll,
+  STEP_UP_ACTIONS,
   stepUp,
+  stepUpActionOf,
   TOKEN_ISSUER,
   tokenAudience,
   TOTP_REQUIRED_APPS,
@@ -340,17 +343,49 @@ describe('sessions', () => {
     expect(tokenAudience('admin')).toBe('bq:admin');
     expect(TOKEN_ISSUER).toBe('bq:identity');
     for (const route of [refreshSession, logout]) {
-      expect(route).toMatchObject({ access: { type: 'public' }, rateLimit: 'auth', apps: APPS });
+      // their own class, so the many people behind one mobile IP keep their sessions (QA DR-005)
+      expect(route).toMatchObject({ access: { type: 'public' }, rateLimit: 'session', apps: APPS });
       expect(`/api/v1${route.path}`.startsWith(REFRESH_COOKIE_PATH)).toBe(true);
     }
+    // signing in stays in the tight class
+    for (const route of [passwordLogin, verifyOtp, loginTotp, loginRecovery]) {
+      expect(route.rateLimit, route.id).toBe('auth');
+    }
     expect(events.latest('identity.session.reuseDetected')).toBe(sessionReuseDetected);
+  });
+
+  it('read the session id and the family of a refresh token, and nothing else', () => {
+    const sessionId = '0190a1b2-c3d4-7e5f-8a9b-0c1d2e3f4a5b';
+    const family = 'AbCdEfGhIjKlMnOpQr-_12';
+    const secret = 'S'.repeat(43);
+    expect(refreshTokenParts(`${sessionId}.${family}.${secret}`)).toEqual({ sessionId, family });
+    // a token from before families
+    expect(refreshTokenParts(`${sessionId}.${secret}`)).toEqual({ sessionId, family: null });
+    for (const token of [
+      undefined,
+      '',
+      sessionId,
+      `${sessionId.toUpperCase()}.${family}.${secret}`,
+      `0190a1b2-c3d4-4e5f-8a9b-0c1d2e3f4a5b.${family}.${secret}`,
+      `x${sessionId}.${family}.${secret}`,
+      `${sessionId}.${family}.${secret}.more`,
+    ]) {
+      expect(refreshTokenParts(token), String(token)).toBeNull();
+    }
+    // a family the bucket cannot be (not 16 bytes of base64url) counts as none
+    for (const odd of ['short', `${family}x`, 'AbCdEfGhIjKlMnOpQr+/12']) {
+      expect(refreshTokenParts(`${sessionId}.${odd}.${secret}`), odd).toEqual({
+        sessionId,
+        family: null,
+      });
+    }
   });
 });
 
 describe('the signed-in authenticator (ARCHITECTURE §9.2)', () => {
   const all = [enrollAuthenticator, confirmAuthenticator, newRecoveryCodes, disableAuthenticator];
 
-  it('are signed-in identity routes in every app; new codes and turning off need a step-up', () => {
+  it('are signed-in identity routes in every app; new codes need a step-up, turning off and a new phone one of their own', () => {
     for (const route of all) {
       expect(route, route.id).toMatchObject({
         access: { type: 'signed-in' },
@@ -360,7 +395,25 @@ describe('the signed-in authenticator (ARCHITECTURE §9.2)', () => {
         apps: APPS,
       });
     }
-    expect(all.map((route) => route.stepUp)).toEqual([false, false, true, true]);
+    // the gateway's 5 minutes for new codes; turning off asks identity for its own (DR-010)
+    expect(all.map((route) => route.stepUp)).toEqual([false, false, true, false]);
+    expect(STEP_UP_ACTIONS).toEqual(['authenticator.disable', 'authenticator.replace']);
+    expect(stepUpActionOf([{ path: ['for'], message: 'authenticator.disable' }])).toBe(
+      'authenticator.disable',
+    );
+    for (const odd of [
+      undefined,
+      [],
+      [{ path: ['for'], message: 'grants.give' }],
+      [{ path: ['code'], message: 'authenticator.disable' }],
+      [{ path: ['for', 0], message: 'authenticator.disable' }],
+    ]) {
+      expect(stepUpActionOf(odd)).toBeNull();
+    }
+    expect(
+      stepUp.input.body.safeParse({ code: '123456', for: 'authenticator.replace' }).success,
+    ).toBe(true);
+    expect(stepUp.input.body.safeParse({ code: '123456', for: 'grants.give' }).success).toBe(false);
     expect(disableAuthenticator.method).toBe('DELETE');
     expect(IDENTITY_ERROR_CODES).toMatchObject({
       AUTHENTICATOR_EXISTS: 409,
@@ -403,8 +456,22 @@ describe('the signed-in authenticator (ARCHITECTURE §9.2)', () => {
       signUpApp: 'customer',
       providers: ['password'],
       authenticator: true,
+      authenticatorRequiredBy: [],
     };
     expect(user.safeParse({ ...me, recoveryCodesLeft: 3 }).success).toBe(true);
+    // the roles that keep it on, with their apps (QA DR-011)
+    const keptOn = { ...me, recoveryCodesLeft: 3 };
+    expect(
+      user.safeParse({
+        ...keptOn,
+        authenticatorRequiredBy: [{ name: 'Seller Finance', app: 'seller' }],
+      }).success,
+    ).toBe(true);
+    expect(
+      user.safeParse({ ...keptOn, authenticatorRequiredBy: [{ name: 'X', app: 'nowhere' }] })
+        .success,
+    ).toBe(false);
+    expect(user.safeParse({ ...keptOn, authenticatorRequiredBy: undefined }).success).toBe(false);
     expect(user.safeParse({ ...me, authenticator: false, recoveryCodesLeft: null }).success).toBe(
       true,
     );

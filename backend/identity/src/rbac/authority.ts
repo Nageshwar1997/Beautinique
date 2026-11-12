@@ -176,12 +176,17 @@ const idsInside = (ids: readonly string[]) => ({
 /**
  * Which grants (or invitations: the same `role` and `scope` fields) the caller may see, as a
  * MongoDB filter: per grant of theirs that reads grants, the roles it can give (a reviewer, who
- * reads without giving, every role), in its scope. Null when the caller sees none.
+ * reads without giving, every role), in its scope. A reviewer's list of everyone leaves out the
+ * sign-up roles (owner, 2026-11-09, QA DR-008): an access review needs the staff, not a page of
+ * every customer's email; looking up one person (`onePerson`) shows all of theirs. Null when the
+ * caller sees none.
  */
 export function visibleFilter(
   caller: readonly CallerGrant[],
   roles: readonly RoleRecord[],
+  { onePerson = false }: { onePerson?: boolean } = {},
 ): Record<string, unknown> | null {
+  const signUpRoles = roles.filter((role) => role.signUp).map((role) => role._id);
   const clauses = caller
     .filter(({ role }) => role.permissions.includes(grantRead.key))
     .flatMap(({ grant, role: own }) => {
@@ -192,7 +197,8 @@ export function visibleFilter(
         grant.scope.type === 'global'
           ? {}
           : { 'scope.type': grant.scope.type, ...idsInside(grant.scope.ids) };
-      return [{ ...(reviewer ? {} : { role: { $in: givable } }), ...scope }];
+      const reviewed = onePerson ? {} : { role: { $nin: signUpRoles } };
+      return [{ ...(reviewer ? reviewed : { role: { $in: givable } }), ...scope }];
     });
   return clauses.length === 0 ? null : { $or: clauses };
 }

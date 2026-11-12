@@ -24,6 +24,7 @@
     "status": "node scripts/packages/bin/status.ts",
     "create": "node scripts/packages/bin/create.ts",
     "mutate": "node scripts/mutation/bin/mutate.ts",
+    "icons:install": "node scripts/icons/install-icons.ts",
     "create:app": "node scripts/packages/bin/create.ts --type app",
     "create:backend": "node scripts/packages/bin/create.ts --type backend",
     "publish": "node scripts/packages/bin/publish.ts",
