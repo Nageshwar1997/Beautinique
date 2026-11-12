@@ -3,15 +3,29 @@ import { type AddressInfo, createServer } from 'node:net';
 
 import { totpCode } from '@beautinique/backend-server-crypto';
 import { ConfigError, createLogger } from '@beautinique/backend-server-kit';
-import { connectMongo, withTransaction } from '@beautinique/backend-server-mongo';
+import {
+  connectMongo,
+  type Mongo,
+  ObjectId,
+  withTransaction,
+} from '@beautinique/backend-server-mongo';
 import { connectRedis, writeEvent } from '@beautinique/backend-server-queue';
 import { invitationCreated } from '@beautinique/shared-contracts';
-import { uuidv7 } from '@beautinique/shared-utils';
 import { afterAll, describe, expect, it } from 'vitest';
 
+import { expectObjectIds } from '../../../scripts/e2e/object-ids.ts';
 import { startBundle } from '../src/bundle.ts';
 import { readBundleConfig } from '../src/config.ts';
 import { names } from '../src/deployables.ts';
+
+/** A role's or an app's id by its key, in identity's database (grants name them by id). */
+async function idByKey(mongo: Mongo, collection: 'identity_roles' | 'identity_apps', key: string) {
+  const found = await mongo.db
+    .collection<{ _id: ObjectId; key: string }>(collection)
+    .findOne({ key }, { projection: { _id: 1 } });
+  if (!found) throw new Error(`no ${key} in ${collection}`);
+  return found._id;
+}
 
 // core needs MongoDB and Redis: the laptop's and CI's local ones (`npm run infra:up`). The test uses
 // its own database and Redis database 5, so it never touches the data of a running dev server.
@@ -33,10 +47,17 @@ const BLIND_INDEX_KEY = `b1:${randomBytes(32).toString('base64')}`;
 afterAll(async () => {
   const logger = createLogger({ name: 'bundle-test', level: 'silent' });
   const mongo = await connectMongo({ uri: MONGO_URI, dbName, appName: 'bundle-test', logger });
-  await mongo.db.dropDatabase();
-  await mongo.client.db(identityDbName).dropDatabase();
-  await mongo.client.db(notifyDbName).dropDatabase();
-  await mongo.close();
+  try {
+    // every document's _id and every reference an ObjectId, in all three databases (RULES §4.17)
+    for (const name of [dbName, identityDbName, notifyDbName]) {
+      await expectObjectIds(mongo.client.db(name));
+    }
+  } finally {
+    await mongo.db.dropDatabase();
+    await mongo.client.db(identityDbName).dropDatabase();
+    await mongo.client.db(notifyDbName).dropDatabase();
+    await mongo.close();
+  }
   const redis = await connectRedis({ url: REDIS_DB, name: 'bundle-test', logger });
   await redis.client.flushdb();
   await redis.close();
@@ -56,6 +77,10 @@ const quiet = () => ({
   // nothing listens there: the breached-password check is away, so it lets passwords through
   // (fail-open), and the tests never reach the internet
   IDENTITY__HIBP_URL: 'http://127.0.0.1:9',
+  // the tests sign in more than a live minute's 30 hashes (QA DR-004)
+  IDENTITY__LOGIN_HASHES_PER_MINUTE: '1000',
+  IDENTITY__CODES_PER_HOUR: '1000',
+  IDENTITY__SIGN_UP_CODES_PER_DAY: '1000',
   NOTIFY__MONGO_URI: MONGO_URI,
   NOTIFY__MONGO_DB_NAME: notifyDbName,
   NOTIFY__REDIS_URL: REDIS_DB,
@@ -211,9 +236,9 @@ describe('bundle', () => {
       });
       try {
         await mongo.db
-          .collection<{ _id: string; rotatedAt: Date }>('identity_sessions')
+          .collection<{ _id: ObjectId; rotatedAt: Date }>('identity_sessions')
           .updateOne(
-            { _id: first.split('.')[0] ?? '' },
+            { _id: new ObjectId(first.split('.')[0] ?? '') },
             { $set: { rotatedAt: new Date(Date.now() - 11_000) } },
           );
       } finally {
@@ -327,19 +352,26 @@ describe('bundle', () => {
     try {
       // what POST /iam/invitations writes (its route opens at the gateway with T3.3 PR C): a
       // Master who invites, the invitation, and its event in the same transaction
-      const inviter = uuidv7();
-      const invitationId = uuidv7();
+      const inviter = new ObjectId();
+      const invitationId = new ObjectId();
       const now = new Date();
       const expiresAt = new Date(now.getTime() + 7 * 86_400_000);
+      const master = {
+        roleId: await idByKey(identityDb, 'identity_roles', 'master.master'),
+        appId: await idByKey(identityDb, 'identity_apps', 'master'),
+      };
+      const agent = {
+        roleId: await idByKey(identityDb, 'identity_roles', 'support.l1_agent'),
+        appId: await idByKey(identityDb, 'identity_apps', 'support'),
+      };
       await withTransaction(identityDb, async (session) => {
         await identityDb.db
-          .collection<Record<string, unknown> & { _id: string }>('identity_grants')
+          .collection<Record<string, unknown> & { _id: ObjectId }>('identity_grants')
           .insertOne(
             {
-              _id: uuidv7(),
+              _id: new ObjectId(),
               userId: inviter,
-              role: 'master.master',
-              app: 'master',
+              ...master,
               scope: { type: 'global', ids: [] },
               validFrom: null,
               validTo: null,
@@ -354,18 +386,17 @@ describe('bundle', () => {
             { session },
           );
         await identityDb.db
-          .collection<Record<string, unknown> & { _id: string }>('identity_invitations')
+          .collection<Record<string, unknown> & { _id: ObjectId }>('identity_invitations')
           .insertOne(
             {
               _id: invitationId,
               email,
-              role: 'support.l1_agent',
-              app: 'support',
+              ...agent,
               scope: { type: 'global', ids: [] },
               validFrom: null,
               validTo: null,
               invitedBy: inviter,
-              invitedFrom: 'master',
+              invitedFromAppId: master.appId,
               status: 'pending',
               expiresAt,
               createdAt: now,
@@ -375,11 +406,11 @@ describe('bundle', () => {
             { session },
           );
         await writeEvent(identityDb, session, invitationCreated, {
-          aggregate: { type: 'invitation', id: invitationId },
-          actor: { type: 'user', id: inviter },
-          correlationId: `bundle-${invitationId}`,
+          aggregate: { type: 'invitation', id: invitationId.toHexString() },
+          actor: { type: 'user', id: inviter.toHexString() },
+          correlationId: `bundle-${invitationId.toHexString()}`,
           data: {
-            invitationId,
+            invitationId: invitationId.toHexString(),
             email,
             app: 'support',
             roleName: 'Customer Support Agent (L1)',
@@ -498,12 +529,12 @@ describe('bundle', () => {
       // the first Master, as `npm run db:grant-master` gives it
       const now = new Date();
       await identityDb.db
-        .collection<Record<string, unknown> & { _id: string }>('identity_grants')
+        .collection<Record<string, unknown> & { _id: ObjectId }>('identity_grants')
         .insertOne({
-          _id: uuidv7(),
-          userId: account.userId,
-          role: 'master.master',
-          app: 'master',
+          _id: new ObjectId(),
+          userId: new ObjectId(account.userId),
+          roleId: await idByKey(identityDb, 'identity_roles', 'master.master'),
+          appId: await idByKey(identityDb, 'identity_apps', 'master'),
           scope: { type: 'global', ids: [] },
           validFrom: null,
           validTo: null,
@@ -647,7 +678,21 @@ describe('bundle', () => {
       const { data: fresh } = (await renewed.json()) as { data: { recoveryCodes: string[] } };
       expect(fresh.recoveryCodes).not.toContain(saved.recoveryCodes[0]);
 
-      // turned off, within the same step-up
+      // turning it off asks a step-up of its own, not the one the codes had (QA DR-010)
+      const offAsks = await api('DELETE', '/auth/authenticator');
+      expect(offAsks.status).toBe(401);
+      expect(await offAsks.json()).toMatchObject({
+        error: {
+          code: 'STEP_UP_REQUIRED',
+          details: [{ path: ['for'], message: 'authenticator.disable' }],
+        },
+      });
+      const forOff = await api('POST', '/auth/step-up', {
+        recoveryCode: fresh.recoveryCodes[0],
+        for: 'authenticator.disable',
+      });
+      expect(forOff.status).toBe(200);
+      keepAccess(forOff);
       const off = await api('DELETE', '/auth/authenticator');
       expect(off.status).toBe(200);
       expect(await off.json()).toEqual({ data: { disabled: true } });

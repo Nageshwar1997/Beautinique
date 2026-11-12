@@ -6,9 +6,9 @@ import {
   isoDateTimeZod,
   number,
   object,
+  objectIdZod,
   otpZod,
   string,
-  uuidv7Zod,
   xor,
 } from '@beautinique/shared-zod';
 
@@ -143,15 +143,15 @@ export const roleViewZod = object({
 export const GRANT_VIA = ['sign-up', 'migration', 'bootstrap', 'appointed', 'invitation'] as const;
 
 export const grantViewZod = object({
-  grantId: uuidv7Zod,
-  userId: uuidv7Zod,
+  grantId: objectIdZod,
+  userId: objectIdZod,
   email: emailZod,
   role: roleKeyZod,
   app: zodEnum(APPS),
   scope: scopeZod,
   validFrom: isoDateTimeZod.nullable(),
   validTo: isoDateTimeZod.nullable(),
-  grantedBy: uuidv7Zod.nullable(),
+  grantedBy: objectIdZod.nullable(),
   via: zodEnum(GRANT_VIA),
   active: boolean(),
   createdAt: isoDateTimeZod,
@@ -161,14 +161,14 @@ export const grantViewZod = object({
 export const INVITATION_STATUSES = ['pending', 'accepted', 'revoked', 'expired'] as const;
 
 export const invitationViewZod = object({
-  invitationId: uuidv7Zod,
+  invitationId: objectIdZod,
   email: emailZod,
   role: roleKeyZod,
   app: zodEnum(APPS),
   scope: scopeZod,
   validFrom: isoDateTimeZod.nullable(),
   validTo: isoDateTimeZod.nullable(),
-  invitedBy: uuidv7Zod,
+  invitedBy: objectIdZod,
   status: zodEnum(INVITATION_STATUSES),
   expiresAt: isoDateTimeZod,
   createdAt: isoDateTimeZod,
@@ -262,7 +262,7 @@ export const listGrants = defineRoute({
   owner: 'identity',
   input: {
     query: cursorQuery.extend({
-      userId: uuidv7Zod.optional(),
+      userId: objectIdZod.optional(),
       /** The account with this email (a Security Officer finds a person by it) */
       email: emailZod.optional(),
       role: roleKeyZod.optional(),
@@ -289,7 +289,7 @@ export const giveGrant = defineRoute({
   stepUp: grantManage.mfa,
   owner: 'identity',
   input: {
-    body: object({ userId: uuidv7Zod, role: roleKeyZod, scope: scopeZod, ...validityZod }),
+    body: object({ userId: objectIdZod, role: roleKeyZod, scope: scopeZod, ...validityZod }),
   },
   output: object({ grant: grantViewZod }),
 });
@@ -306,7 +306,7 @@ export const endGrant = defineRoute({
   idempotency: false,
   stepUp: grantManage.mfa,
   owner: 'identity',
-  input: { params: object({ grantId: uuidv7Zod }) },
+  input: { params: object({ grantId: objectIdZod }) },
   output: object({ grant: grantViewZod }),
 });
 
@@ -360,7 +360,7 @@ export const revokeInvitation = defineRoute({
   idempotency: false,
   stepUp: grantManage.mfa,
   owner: 'identity',
-  input: { params: object({ invitationId: uuidv7Zod }) },
+  input: { params: object({ invitationId: objectIdZod }) },
   output: object({ invitation: invitationViewZod }),
 });
 
@@ -392,7 +392,7 @@ export const invitationCreated = defineEvent({
   producer: 'identity',
   description: 'Someone was invited to a role; notify tells them how to accept it',
   data: object({
-    invitationId: uuidv7Zod,
+    invitationId: objectIdZod,
     email: emailZod,
     app: zodEnum(APPS),
     roleName: string().min(1).max(80),
@@ -427,6 +427,27 @@ export const STEP_UP_SECONDS = 300;
  * when, `su`). Counts toward the account's lock like a sign-in. An account without an
  * authenticator answers AUTHENTICATOR_REQUIRED.
  */
+/**
+ * Changes that ask a step-up of their own (owner, 2026-11-12, QA DR-010): a code given for one of
+ * them counts once, for it alone, and a step-up for anything else never does. Their
+ * STEP_UP_REQUIRED says which (`details: [{ path: ['for'], message: action }]`), and the app sends
+ * that action with the code.
+ */
+export const STEP_UP_ACTIONS = ['authenticator.disable', 'authenticator.replace'] as const;
+export type StepUpAction = (typeof STEP_UP_ACTIONS)[number];
+
+/** The action a STEP_UP_REQUIRED asks a step-up of its own for, from its details; null for none. */
+export function stepUpActionOf(
+  details: readonly { path: readonly (string | number)[]; message: string }[] | undefined,
+): StepUpAction | null {
+  const asked = details?.find((detail) => detail.path.length === 1 && detail.path[0] === 'for');
+  return (STEP_UP_ACTIONS as readonly string[]).includes(asked?.message ?? '')
+    ? (asked?.message as StepUpAction)
+    : null;
+}
+
+const stepUpForZod = zodEnum(STEP_UP_ACTIONS).optional();
+
 export const stepUp = defineRoute({
   id: 'auth.stepUp.verify',
   method: 'POST',
@@ -439,7 +460,11 @@ export const stepUp = defineRoute({
   stepUp: false,
   owner: 'identity',
   input: {
-    body: xor([object({ code: otpZod }), object({ recoveryCode: recoveryCodeZod })]),
+    // `for`: one of STEP_UP_ACTIONS, when the step-up is for that change alone
+    body: xor([
+      object({ code: otpZod, for: stepUpForZod }),
+      object({ recoveryCode: recoveryCodeZod, for: stepUpForZod }),
+    ]),
   },
   output: object({
     stepUpUntil: isoDateTimeZod,
@@ -448,7 +473,7 @@ export const stepUp = defineRoute({
   }),
 });
 
-const userParams = object({ userId: uuidv7Zod });
+const userParams = object({ userId: objectIdZod });
 
 /**
  * A Security Officer takes away a lost authenticator (ARCHITECTURE §7.1): the authenticator and
@@ -492,5 +517,5 @@ export const authenticatorReset = defineEvent({
   version: 1,
   producer: 'identity',
   description: 'A Security Officer reset an account’s authenticator; the person is told',
-  data: object({ userId: uuidv7Zod, email: emailZod, resetAt: isoDateTimeZod }),
+  data: object({ userId: objectIdZod, email: emailZod, resetAt: isoDateTimeZod }),
 });

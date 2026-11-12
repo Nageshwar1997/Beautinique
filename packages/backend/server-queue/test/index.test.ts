@@ -6,7 +6,13 @@ import { Writable } from 'node:stream';
 import { setTimeout as sleep } from 'node:timers/promises';
 
 import { createLogger } from '@beautinique/backend-server-kit';
-import { connectMongo, type Mongo, withTransaction } from '@beautinique/backend-server-mongo';
+import {
+  connectMongo,
+  type Mongo,
+  ObjectId,
+  syncIndexes,
+  withTransaction,
+} from '@beautinique/backend-server-mongo';
 import { defineEvent } from '@beautinique/shared-contracts';
 import { number, object, string } from '@beautinique/shared-zod';
 import { Queue } from 'bullmq';
@@ -32,6 +38,7 @@ import {
   OUTBOX_KEEP_SECONDS,
   type OutboxRecord,
   parseRedisInfo,
+  PLATFORM_INDEXES,
   PLATFORM_STATE,
   PROCESSED_EVENTS,
   PROCESSED_KEEP_SECONDS,
@@ -129,6 +136,8 @@ beforeAll(async () => {
   }
   await ensureOutboxIndexes(mongo);
   await ensureConsumerIndexes(consumerMongo);
+  // what runRelease syncs in a deployable
+  await syncIndexes(consumerMongo, PLATFORM_INDEXES);
 });
 /** Removes this run's BullMQ keys, so each test counts only its own jobs. */
 async function clearQueues(): Promise<void> {
@@ -427,9 +436,11 @@ describe('writeEvent', () => {
       scope: null,
       data: { orderId: 'o1', total: 129_900 },
     });
-    expect(envelope.eventId).toMatch(/^[0-9a-f]{8}-[0-9a-f]{4}-7/);
+    expect(envelope.eventId).toMatch(/^[0-9a-f]{24}$/);
+    // the outbox keeps it as an ObjectId (owner, 2026-11-12)
+    expect((await outbox().findOne({}))?._id).toEqual(new ObjectId(envelope.eventId));
     expect(new Date(envelope.occurredAt).getTime()).toBeGreaterThan(Date.now() - 5000);
-    expect(await outbox().findOne({ _id: envelope.eventId })).toMatchObject({
+    expect(await outbox().findOne({ _id: new ObjectId(envelope.eventId) })).toMatchObject({
       type: 'commerce.order.placed',
       version: 1,
       status: 'pending',
@@ -499,6 +510,13 @@ describe('tryLease', () => {
 
   it('gives the lease to one owner until it runs out, and lets only that owner release it', async () => {
     expect(await tryLease(mongo, 'job', 'a', 300)).toBe(true);
+    // one document per lease: an ObjectId _id like every document, found by its unique name
+    const leases = await mongo.db.collection(LOCKS).find({ name: 'job' }).toArray();
+    expect(leases).toHaveLength(1);
+    expect(leases[0]?._id).toBeInstanceOf(ObjectId);
+    expect(await mongo.db.collection(LOCKS).indexes()).toContainEqual(
+      expect.objectContaining({ name: 'name_unique', key: { name: 1 }, unique: true }),
+    );
     expect(await tryLease(mongo, 'job', 'b', 300)).toBe(false);
     expect(await tryLease(mongo, 'job', 'a', 300)).toBe(true);
     await sleep(400);
@@ -537,12 +555,12 @@ describe('startRelay', () => {
         removeOnFail: { count: 20 },
       });
     }
-    expect(await outbox().findOne({ _id: placed.eventId })).toMatchObject({
+    expect(await outbox().findOne({ _id: new ObjectId(placed.eventId) })).toMatchObject({
       status: 'relayed',
       subscribers: 2,
     });
     // nobody listens: relayed with no jobs, not left pending
-    expect(await outbox().findOne({ _id: reviewed.eventId })).toMatchObject({
+    expect(await outbox().findOne({ _id: new ObjectId(reviewed.eventId) })).toMatchObject({
       status: 'relayed',
       subscribers: 0,
     });
@@ -572,7 +590,7 @@ describe('startRelay', () => {
     expect(await inspect('q.notify').getJobCounts('waiting')).toMatchObject({ waiting: 1 });
     await first.stop();
     expect(
-      await mongo.db.collection<{ _id: string }>(LOCKS).countDocuments({ _id: RELAY_LEASE }),
+      await mongo.db.collection<{ name: string }>(LOCKS).countDocuments({ name: RELAY_LEASE }),
     ).toBeLessThanOrEqual(1);
     await waitFor(() => second.isLeader(), 2000);
     const next = await placeOrder('o13');
@@ -587,7 +605,10 @@ describe('startRelay', () => {
     const placed = await placeOrder('o14');
     await waitFor(allRelayed);
     // as after a crash between the job and the mark: the event is pending again
-    await outbox().updateOne({ _id: placed.eventId }, { $set: { status: 'pending' } });
+    await outbox().updateOne(
+      { _id: new ObjectId(placed.eventId) },
+      { $set: { status: 'pending' } },
+    );
     await waitFor(allRelayed);
     expect(await inspect('q.identity').getJobCounts('waiting')).toMatchObject({ waiting: 1 });
   });
@@ -601,7 +622,9 @@ describe('startRelay', () => {
       await proxy.down();
       const placed = await placeOrder('o15');
       await sleep(600);
-      expect(await outbox().findOne({ _id: placed.eventId })).toMatchObject({ status: 'pending' });
+      expect(await outbox().findOne({ _id: new ObjectId(placed.eventId) })).toMatchObject({
+        status: 'pending',
+      });
       // the outage is logged (and not an unhandled error event)
       expect(lines.some((l) => l.msg === 'redis error')).toBe(true);
       expect(await running.lag()).toBeGreaterThan(0);
@@ -624,7 +647,7 @@ describe('startRelay', () => {
     await sleep(100);
     const placed = await placeOrder('o16');
     await outbox().updateOne(
-      { _id: placed.eventId },
+      { _id: new ObjectId(placed.eventId) },
       { $set: { createdAt: new Date(Date.now() - 40_000) } },
     );
     expect(await running.lag()).toBeGreaterThanOrEqual(40_000);
@@ -656,8 +679,8 @@ describe('startRelay', () => {
     const leaseEnd = async () =>
       (
         await mongo.db
-          .collection<{ _id: string; expiresAt: Date }>(LOCKS)
-          .findOne({ _id: RELAY_LEASE })
+          .collection<{ name: string; expiresAt: Date }>(LOCKS)
+          .findOne({ name: RELAY_LEASE })
       )?.expiresAt.getTime() ?? 0;
     const first = await leaseEnd();
     await sleep(450);
@@ -668,7 +691,7 @@ describe('startRelay', () => {
     for (let round = 0; round < 5; round += 1) {
       await relay().stop();
       expect(
-        await mongo.db.collection<{ _id: string }>(LOCKS).countDocuments({ _id: RELAY_LEASE }),
+        await mongo.db.collection<{ name: string }>(LOCKS).countDocuments({ name: RELAY_LEASE }),
         String(round),
       ).toBe(0);
     }
@@ -681,7 +704,7 @@ describe('startRelay', () => {
     await running.stop();
     expect(running.isLeader()).toBe(false);
     expect(
-      await mongo.db.collection<{ _id: string }>(LOCKS).countDocuments({ _id: RELAY_LEASE }),
+      await mongo.db.collection<{ name: string }>(LOCKS).countDocuments({ name: RELAY_LEASE }),
     ).toBe(0);
     expect(await redis.ready()).toBe(true);
     expect(lines.filter((l) => l.msg === 'outbox relay stopped')).toHaveLength(1);
@@ -771,12 +794,12 @@ describe('startConsumer', () => {
       _id: placed.eventId,
       orderId: 'c1',
     });
-    expect(
-      await consumerMongo.db
-        .collection<{ _id: string }>(PROCESSED_EVENTS)
-        .findOne({ _id: jobIdOf(placed.eventId, 'notify.emails') }),
-    ).toMatchObject({
-      eventId: placed.eventId,
+    // one mark per event and subscriber, its own ObjectId, the event's id as an ObjectId
+    const marks = await consumerMongo.db.collection(PROCESSED_EVENTS).find({}).toArray();
+    expect(marks).toHaveLength(1);
+    expect(marks[0]?._id).toBeInstanceOf(ObjectId);
+    expect(marks[0]).toMatchObject({
+      eventId: new ObjectId(placed.eventId),
       subscriber: 'notify.emails',
       type: 'commerce.order.placed',
     });
@@ -835,11 +858,12 @@ describe('startConsumer', () => {
     await deliver(placed, placed.eventId, 2);
     await waitFor(async () => (await deadLetters().countDocuments()) === 1);
     const letter = await deadLetters().findOne({});
+    expect(letter?._id).toBeInstanceOf(ObjectId);
     expect(letter).toMatchObject({
-      _id: jobIdOf(placed.eventId, 'notify.emails'),
+      jobId: jobIdOf(placed.eventId, 'notify.emails'),
       queue: 'q.notify',
       subscriber: 'notify.emails',
-      eventId: placed.eventId,
+      eventId: new ObjectId(placed.eventId),
       type: 'commerce.order.placed',
       envelope: { eventId: placed.eventId, data: { orderId: 'c4' } },
       error: { name: 'Error' },
@@ -882,10 +906,11 @@ describe('startConsumer', () => {
       ],
     });
     const placed = await placeOrder('c5');
-    const newer = { ...placed, eventId: '0193a2b4-0000-7000-8000-000000000001', version: 9 };
+    const newer = { ...placed, eventId: '6730a2b40000000000000001', version: 9 };
     const broken = {
       ...placed,
-      eventId: '0193a2b4-0000-7000-8000-000000000002',
+      // not an id at all: its dead letter has no event id
+      eventId: 'not-an-id',
       data: { orderId: 'c5', total: 'many' },
     };
     const review = (eventId: string, reviewId: string) => ({
@@ -898,8 +923,8 @@ describe('startConsumer', () => {
     for (const envelope of [
       newer,
       broken,
-      review('0193a2b4-0000-7000-8000-000000000003', 'parallel'),
-      review('0193a2b4-0000-7000-8000-000000000004', 'swallow'),
+      review('6730a2b40000000000000003', 'parallel'),
+      review('6730a2b40000000000000004', 'swallow'),
     ]) {
       await deliver(envelope, envelope.eventId, 5);
     }
@@ -916,7 +941,20 @@ describe('startConsumer', () => {
         m.startsWith('No handler for commerce.order.placed v9 at notify.emails'),
       ),
     ).toBe(true);
-    expect(messages.some((m) => m.includes('breaks its contract at: data.total'))).toBe(true);
+    expect(messages.some((m) => m.includes('breaks its contract at: eventId, data.total'))).toBe(
+      true,
+    );
+    // the event id as an ObjectId; none for an event whose id is not one
+    const eventIds = letters.map(
+      (letter) => (letter as unknown as { eventId: ObjectId | null }).eventId,
+    );
+    expect(eventIds.filter((id) => id !== null).every((id) => id instanceof ObjectId)).toBe(true);
+    expect(eventIds.map(String).toSorted()).toEqual([
+      '6730a2b40000000000000001',
+      '6730a2b40000000000000003',
+      '6730a2b40000000000000004',
+      'null',
+    ]);
     expect(messages.some((m) => m.includes('ran at the same time'))).toBe(true);
     expect(messages.some((m) => m.includes('(MongoDB error 11000)'))).toBe(true);
     expect(await emails().countDocuments()).toBe(1);
@@ -959,6 +997,40 @@ describe('startConsumer', () => {
       expireAfterSeconds: DEAD_LETTER_KEEP_SECONDS,
     });
     expect([PROCESSED_KEEP_SECONDS, DEAD_LETTER_KEEP_SECONDS]).toEqual([7 * 86_400, 14 * 86_400]);
+    // one mark per event and subscriber, one dead letter per job (their _id is an ObjectId)
+    expect(processedIndexes.find((i) => i.name === 'event_subscriber_unique')).toMatchObject({
+      key: { eventId: 1, subscriber: 1 },
+      unique: true,
+    });
+    expect(deadIndexes.find((i) => i.name === 'job_unique')).toMatchObject({
+      key: { jobId: 1 },
+      unique: true,
+    });
+  });
+
+  it('marks each subscriber of an event on its own, in one database', async () => {
+    const audits = () => consumerMongo.db.collection<{ eventId: string }>('audits');
+    const audit = subscribe('notify.audit', orderPlaced, async (event, session) => {
+      await audits().insertOne({ eventId: event.eventId }, { session });
+    });
+    consume({ subscriptions: [sendEmail, audit] });
+    const placed = await placeOrder('c7');
+    await deliver(placed, placed.eventId);
+    await inspect('q.notify').add('notify.audit', placed, {
+      jobId: jobIdOf(placed.eventId, 'notify.audit'),
+      removeOnComplete: true,
+    });
+    await waitFor(async () => (await audits().countDocuments()) === 1, 5000);
+    await waitFor(async () => (await emails().countDocuments()) === 1, 5000);
+    const marks = await consumerMongo.db
+      .collection<{ eventId: ObjectId; subscriber: string }>(PROCESSED_EVENTS)
+      .find({ eventId: new ObjectId(placed.eventId) })
+      .toArray();
+    expect(marks.map((mark) => mark.subscriber).toSorted()).toEqual([
+      'notify.audit',
+      'notify.emails',
+    ]);
+    await audits().deleteMany({});
   });
 });
 
@@ -1066,7 +1138,7 @@ describe('upsertSchedules and scheduled tasks', () => {
     });
     consumers.push(started);
     await waitFor(() => runs >= 2, 3000);
-    const run = await taskRuns().findOne({ _id: 'commerce.expireCarts' });
+    const run = await taskRuns().findOne({ task: 'commerce.expireCarts' });
     expect(run?.lastFinishedAt).toBeInstanceOf(Date);
     expect(run?.lastError).toBeNull();
     expect(run?.firstSeenAt).toBeInstanceOf(Date);
@@ -1089,13 +1161,14 @@ describe('upsertSchedules and scheduled tasks', () => {
     );
     await waitFor(
       async () =>
-        ((await taskRuns().findOne({ _id: 'commerce.expireCarts' }))?.lastError ?? null) !== null,
+        ((await taskRuns().findOne({ task: 'commerce.expireCarts' }))?.lastError ?? null) !== null,
     );
-    const run = await taskRuns().findOne({ _id: 'commerce.expireCarts' });
+    const run = await taskRuns().findOne({ task: 'commerce.expireCarts' });
     expect(run).toMatchObject({ lastError: { name: 'Error', message: 'index missing' } });
     expect(run?.lastFailedAt).toBeInstanceOf(Date);
     expect(await consumerMongo.db.collection(DEAD_LETTERS).countDocuments()).toBe(0);
-    expect(lines.some((l) => l.msg === 'scheduled task failed')).toBe(true);
+    // the log line follows the saved error
+    await waitFor(() => lines.some((l) => l.msg === 'scheduled task failed'));
   });
 
   it('runs a task at once when triggered, after the transaction of the handler that asked', async () => {
@@ -1130,7 +1203,7 @@ describe('upsertSchedules and scheduled tasks', () => {
       // the run is recorded after the task returns: wait for the record, not only the task
       await waitFor(
         async () =>
-          (await taskRuns().findOne({ _id: 'notify.sendEmails' }))?.lastFinishedAt !== undefined,
+          (await taskRuns().findOne({ task: 'notify.sendEmails' }))?.lastFinishedAt !== undefined,
       );
       expect(seen).toEqual([1]);
       await expect(trigger.runSoon('sendEmails')).rejects.toThrow('must be <module>.<task>');
@@ -1179,7 +1252,7 @@ describe('upsertSchedules and scheduled tasks', () => {
     ]);
     // a finished run restarts the clock
     await taskRuns().updateOne(
-      { _id: 'commerce.expireCarts' },
+      { task: 'commerce.expireCarts' },
       { $set: { lastFinishedAt: later(2500) } },
     );
     expect(await lateTasks(consumerMongo, schedules.slice(0, 1), later(3000))).toEqual([]);
@@ -1192,7 +1265,7 @@ describe('upsertSchedules and scheduled tasks', () => {
     expect(lines.some((l) => l.msg === 'scheduled tasks on time')).toBe(true);
     // the heartbeat's own record is old too: it never reports itself, only the others
     await taskRuns().updateMany(
-      { _id: { $in: ['finance.closeDay', 'platform.heartbeat'] } },
+      { task: { $in: ['finance.closeDay', 'platform.heartbeat'] } },
       { $set: { firstSeenAt: new Date(Date.now() - 10_000) } },
     );
     await beat.run({ firedAt: new Date() });
@@ -1223,8 +1296,8 @@ describe('startWipeWatchdog', () => {
   const known = async () =>
     (
       await consumerMongo.db
-        .collection<{ _id: string; value: string }>(PLATFORM_STATE)
-        .findOne({ _id: 'redis-epoch' })
+        .collection<{ key: string; value: string }>(PLATFORM_STATE)
+        .findOne({ key: 'redis-epoch' })
     )?.value;
 
   it('recovers once on its first start (a new Redis), and remembers the epoch', async () => {
@@ -1335,7 +1408,7 @@ describe('redriveOutbox', () => {
   it('sends the last 48 hours again under the same job ids, and nothing older', async () => {
     const [old, ...recent] = await relayedThenWiped(3);
     await outbox().updateOne(
-      { _id: old },
+      { _id: new ObjectId(old) },
       { $set: { createdAt: new Date(Date.now() - 3 * 24 * 3_600_000) } },
     );
     const sent = await redriveOutbox({ mongo, redis: redis.client, logger, subscribers, prefix });
@@ -1433,11 +1506,11 @@ describe('redriveDeadLetters', () => {
     const id = jobIdOf(placed.eventId, 'notify.emails');
     await deliverOnce(placed);
     await waitFor(async () => (await inspect('q.notify').getJob(id))?.isActive() ?? false);
-    await consumerMongo.db.collection<{ _id: string }>(DEAD_LETTERS).insertOne({
-      _id: id,
+    await consumerMongo.db.collection<{ jobId: string }>(DEAD_LETTERS).insertOne({
+      jobId: id,
       queue: 'q.notify',
       subscriber: 'notify.emails',
-      eventId: placed.eventId,
+      eventId: new ObjectId(placed.eventId),
       type: placed.type,
       envelope: placed,
       error: { name: 'Error', message: 'old' },

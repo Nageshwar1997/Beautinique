@@ -3,7 +3,7 @@
 // security events and /iam/me. Against the local MongoDB replica set and Valkey (`npm run infra:up`).
 import { totpCode } from '@beautinique/backend-server-crypto';
 import { OUTBOX } from '@beautinique/backend-server-queue';
-import type { AppId } from '@beautinique/shared-contracts';
+import type { AppId, StepUpAction } from '@beautinique/shared-contracts';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 
 import { setupKey } from '../src/authenticator.ts';
@@ -16,7 +16,9 @@ import {
   grants,
   type Harness,
   makeAccount,
+  oid,
   PASSWORD,
+  roleIdOf,
   startHarness,
 } from './helpers.ts';
 
@@ -123,15 +125,28 @@ const meOf = async (passport: Passport) =>
   (await send('GET', '/iam/me', { passport })).body.data?.user as {
     authenticator: boolean;
     recoveryCodesLeft: number | null;
+    authenticatorRequiredBy: { name: string; app: string }[];
   };
 
-const stepUp = (passport: Passport, body: { code: string } | { recoveryCode: string }) =>
-  send('POST', '/auth/step-up', { passport, body });
+const stepUp = (
+  passport: Passport,
+  body: ({ code: string } | { recoveryCode: string }) & { for?: StepUpAction },
+) => send('POST', '/auth/step-up', { passport, body });
+
+/** A STEP_UP_REQUIRED that asks a step-up of its own for this action (DR-010). */
+const asksStepUpFor = (answer: Awaited<ReturnType<typeof send>>, action: StepUpAction) => {
+  expect(errorOf(answer)).toEqual([401, 'STEP_UP_REQUIRED']);
+  expect(answer.body.error?.details).toEqual([{ path: ['for'], message: action }]);
+};
 
 describe('setting up the authenticator, signed in', () => {
   it('saves it with the password and the first code, gives 10 codes once, and tells the person', async () => {
     const { address, userId, passport } = await signedInCustomer('setup');
-    expect(await meOf(passport)).toMatchObject({ authenticator: false, recoveryCodesLeft: null });
+    expect(await meOf(passport)).toMatchObject({
+      authenticator: false,
+      recoveryCodesLeft: null,
+      authenticatorRequiredBy: [],
+    });
 
     const enroll = await send('POST', '/auth/authenticator/enroll', { passport });
     expect(enroll.status).toBe(200);
@@ -155,7 +170,7 @@ describe('setting up the authenticator, signed in', () => {
     });
     expect(errorOf(wrongCode)).toEqual([400, 'TOTP_INVALID']);
     expect(wrongCode.body.error?.message).toContain('3 more tries');
-    expect((await credentials().findOne({ _id: userId }))?.totp).toBeUndefined();
+    expect((await credentials().findOne({ _id: oid(userId) }))?.totp).toBeUndefined();
 
     const confirmed = await send('POST', '/auth/authenticator/confirm', {
       passport,
@@ -166,7 +181,7 @@ describe('setting up the authenticator, signed in', () => {
     expect(codes).toHaveLength(10);
     expect(new Set(codes).size).toBe(10);
     // only hashes kept; the set-up is gone, so the same confirm never works twice
-    const stored = await credentials().findOne({ _id: userId });
+    const stored = await credentials().findOne({ _id: oid(userId) });
     expect(stored?.totp?.secret).not.toContain(secret);
     expect(JSON.stringify(stored?.recoveryCodes)).not.toContain(codes[0]?.replace('-', ''));
     expect(await redis().exists(key)).toBe(0);
@@ -182,7 +197,9 @@ describe('setting up the authenticator, signed in', () => {
     expect(change).toMatchObject({ email: address, change: 'enabled', app: 'customer' });
     expect(typeof change?.device).toBe('string');
     // the session goes on; the next sign-in, in any app, asks for the code
-    const session = await db().collection<Session>(SESSIONS).findOne({ _id: passport.sessionId });
+    const session = await db()
+      .collection<Session>(SESSIONS)
+      .findOne({ _id: oid(passport.sessionId) });
     expect(session?.revokedAt).toBeNull();
     const next = await send('POST', '/auth/login', {
       body: { email: address, password: PASSWORD },
@@ -221,7 +238,7 @@ describe('setting up the authenticator, signed in', () => {
 
   it('asks an account without a password to set one first', async () => {
     const { userId, passport } = await signedInCustomer('no-password');
-    await credentials().updateOne({ _id: userId }, { $unset: { password: '' } });
+    await credentials().updateOne({ _id: oid(userId) }, { $unset: { password: '' } });
     expect(errorOf(await send('POST', '/auth/authenticator/enroll', { passport }))).toEqual([
       400,
       'PASSWORD_REQUIRED',
@@ -232,7 +249,7 @@ describe('setting up the authenticator, signed in', () => {
     const { passport } = await signedInCustomer('ended');
     await db()
       .collection<Session>(SESSIONS)
-      .updateOne({ _id: passport.sessionId }, { $set: { revokedAt: new Date() } });
+      .updateOne({ _id: oid(passport.sessionId) }, { $set: { revokedAt: new Date() } });
     for (const [method, path] of [
       ['POST', '/auth/authenticator/enroll'],
       ['POST', '/auth/authenticator/recovery-codes'],
@@ -264,7 +281,9 @@ describe('the step-up with a recovery code', () => {
     ]);
     expect((await stepUp(passport, { recoveryCode: second })).body.data?.recoveryCodesLeft).toBe(8);
     expect((await meOf(passport)).recoveryCodesLeft).toBe(8);
-    const session = await db().collection<Session>(SESSIONS).findOne({ _id: passport.sessionId });
+    const session = await db()
+      .collection<Session>(SESSIONS)
+      .findOne({ _id: oid(passport.sessionId) });
     expect(session?.stepUpAt?.getTime()).toBeGreaterThan(Date.now() - 10_000);
   });
 
@@ -277,18 +296,31 @@ describe('the step-up with a recovery code', () => {
 });
 
 describe('replacing the authenticator (a new phone)', () => {
-  it('needs a step-up, then swaps the secret and the codes, and tells the person', async () => {
+  it('needs a step-up of its own, then swaps the secret and the codes, and tells the person', async () => {
     const { userId, passport, secret, at, recoveryCodes } =
       await customerWithAuthenticator('replace');
-    expect(errorOf(await send('POST', '/auth/authenticator/enroll', { passport }))).toEqual([
-      401,
-      'STEP_UP_REQUIRED',
-    ]);
-    // the phone is lost: a recovery code steps up
-    const [lost = '', spent = ''] = recoveryCodes;
-    expect((await stepUp(passport, { recoveryCode: lost })).status).toBe(200);
+    asksStepUpFor(
+      await send('POST', '/auth/authenticator/enroll', { passport }),
+      'authenticator.replace',
+    );
+    // the phone is lost: a recovery code steps up, but a step-up for something else never counts
+    // here (DR-010)
+    const [lost = '', spent = '', other = ''] = recoveryCodes;
+    expect((await stepUp(passport, { recoveryCode: other })).status).toBe(200);
+    asksStepUpFor(
+      await send('POST', '/auth/authenticator/enroll', { passport }),
+      'authenticator.replace',
+    );
+    expect(
+      (await stepUp(passport, { recoveryCode: lost, for: 'authenticator.replace' })).status,
+    ).toBe(200);
     const enroll = await send('POST', '/auth/authenticator/enroll', { passport });
     expect(enroll.status).toBe(200);
+    // it counted once: asking again needs a new code
+    asksStepUpFor(
+      await send('POST', '/auth/authenticator/enroll', { passport }),
+      'authenticator.replace',
+    );
     const fresh = (enroll.body.data as { secret: string }).secret;
     expect(fresh).not.toBe(secret);
     const confirmed = await send('POST', '/auth/authenticator/confirm', {
@@ -317,7 +349,7 @@ describe('replacing the authenticator (a new phone)', () => {
     const { secret } = enroll.body.data as { secret: string };
     // another tab saved one in between
     await credentials().updateOne(
-      { _id: userId },
+      { _id: oid(userId) },
       { $set: { totp: { secret: 'other', enrolledAt: new Date(), lastStep: 0 } } },
     );
     const confirmed = await send('POST', '/auth/authenticator/confirm', {
@@ -325,7 +357,7 @@ describe('replacing the authenticator (a new phone)', () => {
       body: { code: totpCode(secret, Date.now()), password: PASSWORD },
     });
     expect(errorOf(confirmed)).toEqual([409, 'AUTHENTICATOR_EXISTS']);
-    expect((await credentials().findOne({ _id: userId }))?.totp?.secret).toBe('other');
+    expect((await credentials().findOne({ _id: oid(userId) }))?.totp?.secret).toBe('other');
     expect(await changesOf(userId)).toEqual([]);
   });
 });
@@ -358,7 +390,7 @@ describe('new recovery codes', () => {
     await db()
       .collection<Session>(SESSIONS)
       .updateOne(
-        { _id: passport.sessionId },
+        { _id: oid(passport.sessionId) },
         { $set: { stepUpAt: new Date(Date.now() - 301_000) } },
       );
     expect(errorOf(await send('POST', '/auth/authenticator/recovery-codes', { passport }))).toEqual(
@@ -368,23 +400,75 @@ describe('new recovery codes', () => {
 });
 
 describe('turning the authenticator off', () => {
-  it('needs a step-up, removes it with its codes, keeps the sessions and tells the person', async () => {
+  it('needs a step-up of its own, removes it with its codes, keeps the sessions and tells the person', async () => {
     const { address, userId, passport, recoveryCodes } = await customerWithAuthenticator('off');
-    expect(errorOf(await send('DELETE', '/auth/authenticator', { passport }))).toEqual([
-      401,
-      'STEP_UP_REQUIRED',
-    ]);
-    expect((await stepUp(passport, { recoveryCode: recoveryCodes[0] ?? '' })).status).toBe(200);
+    asksStepUpFor(
+      await send('DELETE', '/auth/authenticator', { passport }),
+      'authenticator.disable',
+    );
+    // a step-up for new recovery codes a minute ago does not turn it off (DR-010)
+    expect((await stepUp(passport, { recoveryCode: recoveryCodes[1] ?? '' })).status).toBe(200);
+    asksStepUpFor(
+      await send('DELETE', '/auth/authenticator', { passport }),
+      'authenticator.disable',
+    );
+    // nor does one for replacing it, which is never a general step-up either
+    const sessions = db().collection<Session>(SESSIONS);
+    await sessions.updateOne({ _id: oid(passport.sessionId) }, { $set: { stepUpAt: null } });
+    expect(
+      (
+        await stepUp(passport, {
+          recoveryCode: recoveryCodes[2] ?? '',
+          for: 'authenticator.replace',
+        })
+      ).status,
+    ).toBe(200);
+    asksStepUpFor(
+      await send('DELETE', '/auth/authenticator', { passport }),
+      'authenticator.disable',
+    );
+    expect(errorOf(await send('POST', '/auth/authenticator/recovery-codes', { passport }))).toEqual(
+      [401, 'STEP_UP_REQUIRED'],
+    );
+    // (the session's own step-up back, as from its sign-in)
+    await sessions.updateOne({ _id: oid(passport.sessionId) }, { $set: { stepUpAt: new Date() } });
+    // one for turning it off counts 5 minutes
+    expect(
+      (
+        await stepUp(passport, {
+          recoveryCode: recoveryCodes[3] ?? '',
+          for: 'authenticator.disable',
+        })
+      ).status,
+    ).toBe(200);
+    await sessions.updateOne(
+      { _id: oid(passport.sessionId) },
+      { $set: { 'stepUpFor.at': new Date(Date.now() - 6 * 60_000) } },
+    );
+    asksStepUpFor(
+      await send('DELETE', '/auth/authenticator', { passport }),
+      'authenticator.disable',
+    );
+    expect(
+      (
+        await stepUp(passport, {
+          recoveryCode: recoveryCodes[0] ?? '',
+          for: 'authenticator.disable',
+        })
+      ).status,
+    ).toBe(200);
     const off = await send('DELETE', '/auth/authenticator', { passport });
     expect(off.status, JSON.stringify(off.body)).toBe(200);
     expect(off.body.data).toEqual({ disabled: true });
-    const stored = await credentials().findOne({ _id: userId });
+    const stored = await credentials().findOne({ _id: oid(userId) });
     expect(stored?.totp).toBeUndefined();
     expect(stored?.recoveryCodes).toBeUndefined();
     expect(stored?.password).toBeDefined();
     expect(await meOf(passport)).toMatchObject({ authenticator: false, recoveryCodesLeft: null });
     expect((await changesOf(userId)).map((c) => c.change)).toEqual(['enabled', 'disabled']);
-    const session = await db().collection<Session>(SESSIONS).findOne({ _id: passport.sessionId });
+    const session = await db()
+      .collection<Session>(SESSIONS)
+      .findOne({ _id: oid(passport.sessionId) });
     expect(session?.revokedAt).toBeNull();
     // nothing left to turn off: no change, no email; no new codes without one either
     const again = await send('DELETE', '/auth/authenticator', { passport });
@@ -402,9 +486,23 @@ describe('turning the authenticator off', () => {
 
   it('stays on while a role needs it, and names those roles; an ended grant no longer counts', async () => {
     const { userId, passport, recoveryCodes } = await customerWithAuthenticator('roles');
+    expect((await meOf(passport)).authenticatorRequiredBy).toEqual([]);
     await giveRole(userId, 'seller.finance');
     await giveRole(userId, 'admin.state_admin');
-    expect((await stepUp(passport, { recoveryCode: recoveryCodes[0] ?? '' })).status).toBe(200);
+    // the apps know it too, so they say why instead of offering a "Turn off" that fails (DR-011)
+    expect((await meOf(passport)).authenticatorRequiredBy).toEqual([
+      { name: 'State Admin', app: 'admin' },
+      { name: 'Seller Finance', app: 'seller' },
+    ]);
+    // the roles are named before the code is asked: no step-up is spent on a refusal
+    expect(
+      (
+        await stepUp(passport, {
+          recoveryCode: recoveryCodes[0] ?? '',
+          for: 'authenticator.disable',
+        })
+      ).status,
+    ).toBe(200);
     const refused = await send('DELETE', '/auth/authenticator', { passport });
     expect(errorOf(refused)).toEqual([409, 'AUTHENTICATOR_REQUIRED_BY_ROLE']);
     expect(refused.body.error?.message).toBe(
@@ -414,22 +512,28 @@ describe('turning the authenticator off', () => {
       { path: ['roles', 'admin'], message: 'State Admin' },
       { path: ['roles', 'seller'], message: 'Seller Finance' },
     ]);
-    expect((await credentials().findOne({ _id: userId }))?.totp).toBeDefined();
+    expect((await credentials().findOne({ _id: oid(userId) }))?.totp).toBeDefined();
 
-    await grants().updateMany({ userId, role: 'admin.state_admin' }, { $set: { active: false } });
+    await grants().updateMany(
+      { userId: oid(userId), roleId: await roleIdOf('admin.state_admin') },
+      { $set: { active: false } },
+    );
     const one = await send('DELETE', '/auth/authenticator', { passport });
     expect(one.body.error?.message).toBe(
       "Your Seller Finance role in the seller app needs an authenticator, so it can't be turned off.",
     );
+    expect((await meOf(passport)).authenticatorRequiredBy).toEqual([
+      { name: 'Seller Finance', app: 'seller' },
+    ]);
     // a retired role no longer counts, as at sign-in
-    const roles = db().collection<{ _id: string; retired: boolean }>(ROLES);
-    await roles.updateOne({ _id: 'seller.finance' }, { $set: { retired: true } });
+    const roles = db().collection<{ key: string; retired: boolean }>(ROLES);
+    await roles.updateOne({ key: 'seller.finance' }, { $set: { retired: true } });
     try {
       expect((await send('DELETE', '/auth/authenticator', { passport })).body.data).toEqual({
         disabled: true,
       });
     } finally {
-      await roles.updateOne({ _id: 'seller.finance' }, { $set: { retired: false } });
+      await roles.updateOne({ key: 'seller.finance' }, { $set: { retired: false } });
     }
   });
 });

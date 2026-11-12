@@ -52,6 +52,8 @@ import { BrandLogo, BrandMark } from '@beautinique/frontend-icons';
 
 Rang: ink = `currentColor` (text ka rang, isliye light/dark/high contrast me apne aap sahi), rose = theme ka `--brand` (bina theme ke `#d6336c`).
 
+**Install icons:** `brand/install/<family>/` (`shop`, `team`, `partner`; publish nahi hote): apps ke home-screen icons, `npm run icons:install` mark ke paths se Chromium me banata hai aur har app ke `public/` me copy karta hai (DESIGN §11).
+
 **Source:** `brand/logo-master.webp` (publish nahi hota). `src/brand/paths.ts` usi se trace hua hai: potrace (`esm-potrace-wasm` 0.5.1, browser me), 4x upscale, har pixel ink ya rose layer me (background se us rang tak ki line pe aadhe se aage), `turdsize 40, alphamax 1, opttolerance 0.2`, phir coordinates master ke pixels me aur har hissa apni seemaon tak crop. Logo badle to naya master yahan rakho aur dobara trace karo; `paths.ts` haath se edit mat karo. Bundle me logo sirf tab aata hai jab app `BrandMark`/`BrandLogo` import kare (`test/bundle.test.ts`).
 
 ## Naya icon jodna

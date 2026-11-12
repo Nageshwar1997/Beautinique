@@ -9,6 +9,7 @@ import {
   expectNoCollectionScans,
   watchCollectionScans,
 } from '../../../scripts/e2e/collection-scans.ts';
+import { expectObjectIds } from '../../../scripts/e2e/object-ids.ts';
 import { readConfig } from '../src/config.ts';
 import { type RunningCore, start } from '../src/service.ts';
 
@@ -60,6 +61,8 @@ export async function inspector(dbName: string): Promise<Inspector> {
       try {
         // what core asked, not the test's own look-ups on this handle
         await expectNoCollectionScans(mongo.db, ['core', 'core-release']);
+        // every document's _id and every reference an ObjectId (RULES §4.17)
+        await expectObjectIds(mongo.db);
       } finally {
         await mongo.db.dropDatabase();
         const keys = await redis.client.keys(`${prefix}:*`);

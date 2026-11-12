@@ -1,6 +1,13 @@
 export { MigrationFailedError, ReleaseLeaseLostError, ReleaseLockTimeoutError } from './errors';
-export { defineMigrations, type Migration, MIGRATIONS, type ReleaseContext } from './migrations';
 export {
+  defineMigrations,
+  type Migration,
+  MIGRATION_INDEXES,
+  MIGRATIONS,
+  type ReleaseContext,
+} from './migrations';
+export {
+  RELEASE_INDEXES,
   RELEASE_LEASE,
   RELEASE_STATE,
   type ReleaseDefinition,

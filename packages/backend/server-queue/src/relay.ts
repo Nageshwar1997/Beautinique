@@ -179,7 +179,7 @@ export function startRelay(options: RelayOptions): Relay {
       for (const subscriber of targets) {
         await queue(queueOf(subscriber)).add(subscriber, record.envelope, {
           ...RELAY_JOB_OPTIONS,
-          jobId: jobIdOf(record._id, subscriber),
+          jobId: jobIdOf(record._id.toHexString(), subscriber),
         });
       }
       await outbox.updateOne(

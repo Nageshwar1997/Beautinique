@@ -44,6 +44,7 @@ export {
   REFRESH_COOKIE_PATH,
   refreshCookieName,
   refreshSession,
+  refreshTokenParts,
   requestPasswordCode,
   requestSignUpCode,
   resendOtp,

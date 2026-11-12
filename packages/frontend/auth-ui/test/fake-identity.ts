@@ -1,16 +1,20 @@
 // The gateway and identity as the auth screens see them: the routes they call, answers a test can
 // change, and the hint cookie identity sets and clears (in jsdom, a Set-Cookie of a fetch never
 // reaches document.cookie, so the fake writes it).
-import { type AppId, sessionHintCookieName } from '@beautinique/shared-contracts';
+import {
+  type AppId,
+  sessionHintCookieName,
+  type StepUpAction,
+} from '@beautinique/shared-contracts';
 
 export const BASE_URL = 'https://bq.example/api/v1';
-export const USER_ID = '01920000-0000-7000-8000-000000000001';
-export const SESSION_ID = '01920000-0000-7000-8000-000000000002';
+export const USER_ID = '6730a2b40000000000000001';
+export const SESSION_ID = '6730a2b40000000000000002';
 export const LOGIN_ID = '01920000-0000-7000-8000-000000000003';
 export const CHALLENGE_ID = '01920000-0000-7000-8000-000000000004';
 export const EMAIL = 'asha@beautinique.example';
 export const PASSWORD = 'pink lipstick on a rainy day';
-export const OTHER_SESSION_ID = '01920000-0000-7000-8000-000000000005';
+export const OTHER_SESSION_ID = '6730a2b40000000000000005';
 export const SECRET = 'JBSWY3DPEHPK3PXPJBSWY3DPEHPK3PXP';
 export const OTP_URI = `otpauth://totp/Beautinique:${encodeURIComponent(EMAIL)}?secret=${SECRET}&issuer=Beautinique`;
 /** The authenticator code the fake takes (any other is wrong). */
@@ -53,7 +57,11 @@ export interface FakeState {
   signedIn: boolean;
   authenticator: boolean;
   recoveryCodesLeft: number | null;
+  /** The roles that keep the authenticator on (QA DR-011); none unless a test gives some */
+  authenticatorRequiredBy: { name: string; app: AppId }[];
   steppedUp: boolean;
+  /** A step-up for one change alone (QA DR-010): counts once, for it */
+  steppedUpFor: StepUpAction | null;
 }
 
 export interface Sent {
@@ -94,6 +102,7 @@ const me = (app: AppId, state: FakeState) => ({
     providers: ['password'],
     authenticator: state.authenticator,
     recoveryCodesLeft: state.recoveryCodesLeft,
+    authenticatorRequiredBy: state.authenticator ? state.authenticatorRequiredBy : [],
   },
   session: { sessionId: SESSION_ID, app, expiresAt: '2026-12-31T00:00:00.000Z' },
 });
@@ -122,8 +131,13 @@ const sessions = (app: AppId) => [
   },
 ];
 
-const stepUpRequired = () =>
-  failure(401, 'STEP_UP_REQUIRED', 'Please confirm with your authenticator code to continue.');
+const stepUpRequired = (action?: StepUpAction) =>
+  failure(
+    401,
+    'STEP_UP_REQUIRED',
+    'Please confirm with your authenticator code to continue.',
+    action === undefined ? undefined : [{ path: ['for'], message: action }],
+  );
 
 /**
  * A fake identity for `app`; signed out unless `signedIn`, with an authenticator when
@@ -140,7 +154,9 @@ export function fakeIdentity(
       signedIn,
       authenticator,
       recoveryCodesLeft: authenticator ? 10 : null,
+      authenticatorRequiredBy: [],
       steppedUp: false,
+      steppedUpFor: null,
     },
     on: (route, handler) => {
       handlers.set(route, handler);
@@ -156,7 +172,8 @@ export function fakeIdentity(
       const text = await request.text();
       const body: unknown = text === '' ? undefined : JSON.parse(text);
       fake.sent.push({ method: request.method, path, body });
-      const route = `${request.method} ${path.replace(/\/[0-9a-f-]{36}(?=\/|$)/g, '/:id')}`;
+      // an id in the path: a UUIDv7 (Redis: a sign-in, a challenge) or an ObjectId (a session)
+      const route = `${request.method} ${path.replace(/\/(?:[0-9a-f-]{36}|[0-9a-f]{24})(?=\/|$)/g, '/:id')}`;
       const handler = handlers.get(route);
       if (handler) return await handler(body);
       const signIn = () => {
@@ -225,7 +242,13 @@ export function fakeIdentity(
         case 'POST /auth/sessions/end-others':
           return json(200, { data: { ended: 1 } });
         case 'POST /auth/authenticator/enroll':
-          if (fake.state.authenticator && !fake.state.steppedUp) return stepUpRequired();
+          // a new phone: a step-up of its own, used once (as identity, QA DR-010)
+          if (fake.state.authenticator) {
+            if (fake.state.steppedUpFor !== 'authenticator.replace') {
+              return stepUpRequired('authenticator.replace');
+            }
+            fake.state.steppedUpFor = null;
+          }
           return json(200, { data: { secret: SECRET, uri: OTP_URI } });
         case 'POST /auth/authenticator/confirm':
           fake.state.authenticator = true;
@@ -236,24 +259,35 @@ export function fakeIdentity(
           fake.state.recoveryCodesLeft = 10;
           return json(200, { data: { recoveryCodes: RECOVERY_CODES } });
         case 'DELETE /auth/authenticator':
-          if (!fake.state.steppedUp) return stepUpRequired();
+          if (fake.state.steppedUpFor !== 'authenticator.disable') {
+            return stepUpRequired('authenticator.disable');
+          }
+          fake.state.steppedUpFor = null;
           fake.state.authenticator = false;
           fake.state.recoveryCodesLeft = null;
           return json(200, { data: { disabled: true } });
         case 'POST /auth/step-up': {
-          const { code, recoveryCode } = body as { code?: string; recoveryCode?: string };
+          const {
+            code,
+            recoveryCode,
+            for: action,
+          } = body as { code?: string; recoveryCode?: string; for?: StepUpAction };
           const stepUpUntil = new Date(Date.now() + 300_000).toISOString();
+          const stepped = () => {
+            if (action === undefined) fake.state.steppedUp = true;
+            else fake.state.steppedUpFor = action;
+          };
           if (code !== undefined) {
             if (code !== GOOD_CODE) {
               return failure(400, 'TOTP_INVALID', 'That authenticator code is not right.');
             }
-            fake.state.steppedUp = true;
+            stepped();
             return json(200, { data: { stepUpUntil, recoveryCodesLeft: null } });
           }
           if (recoveryCode !== RECOVERY_CODES[0]) {
             return failure(400, 'RECOVERY_CODE_INVALID', 'That recovery code is not right.');
           }
-          fake.state.steppedUp = true;
+          stepped();
           fake.state.recoveryCodesLeft = (fake.state.recoveryCodesLeft ?? 1) - 1;
           return json(200, {
             data: { stepUpUntil, recoveryCodesLeft: fake.state.recoveryCodesLeft },

@@ -1,5 +1,6 @@
 import { createHash } from 'node:crypto';
 
+import type { ClientSession, IndexSpec, Mongo, ObjectId } from '@beautinique/backend-server-mongo';
 import type { ReleaseStep } from '@beautinique/backend-server-release';
 import {
   type AppId,
@@ -7,43 +8,36 @@ import {
   type PermissionDefinition,
   permissions,
   SESSION_POLICIES,
-  type SessionPolicy,
   SIGN_UP_APPS,
   TOTP_REQUIRED_APPS,
 } from '@beautinique/shared-contracts';
 
+import {
+  APP_RECORDS,
+  type AppRecord,
+  forgetRbacCatalog,
+  type PermissionRecord,
+  PERMISSIONS,
+  type RbacCatalog,
+  rbacCatalog,
+} from './catalog.ts';
 import { ROLE_SEEDS, type RoleSeed } from './roles.ts';
 
-export const APP_RECORDS = 'identity_apps';
-export const PERMISSIONS = 'identity_permissions';
+export { APP_RECORDS, type AppRecord, type PermissionRecord, PERMISSIONS } from './catalog.ts';
 export const ROLES = 'identity_roles';
-
-/** An app as data (ARCHITECTURE §7.1): who uses it and how they sign in. */
-export interface AppRecord {
-  _id: AppId;
-  audience: 'external' | 'internal';
-  /** An unknown email can make an account here */
-  signUp: boolean;
-  /** `required`: every sign-in asks the authenticator; `optional`: the person's choice */
-  totp: 'required' | 'optional';
-  session: SessionPolicy;
-  updatedAt: Date;
-}
-
-/** A permission key as data, from the code catalogue. `retired`: no longer in the code. */
-export interface PermissionRecord extends Omit<PermissionDefinition, 'key'> {
-  _id: string;
-  retired: boolean;
-  updatedAt: Date;
-}
 
 /**
  * A role in identity_roles. `system`: shipped in code (roles.ts) and kept in step with it at every
  * release; Master's own sub-roles are not, and the sync never touches them. `retired`: a system
- * role the code no longer has, so it can no longer be given.
+ * role the code no longer has, so it can no longer be given. Its app, permissions and appointers
+ * are named by their ids, its own `key` stays what code and contracts use (owner, 2026-11-12).
  */
-export interface RoleRecord extends Omit<RoleSeed, 'key'> {
-  _id: string;
+export interface RoleRecord extends Omit<RoleSeed, 'app' | 'permissions' | 'appointedBy'> {
+  _id: ObjectId;
+  appId: ObjectId;
+  permissionIds: ObjectId[];
+  /** The roles whose holders may give it */
+  appointedBy: ObjectId[];
   system: boolean;
   retired: boolean;
   /** Written by every seat claim of a role with few seats, so two at once clash (bootstrap.ts) */
@@ -52,12 +46,46 @@ export interface RoleRecord extends Omit<RoleSeed, 'key'> {
   updatedAt: Date;
 }
 
+/** A role as identity's code reads it: its app and permission keys next to the stored ids. */
+export interface Role extends RoleRecord {
+  app: AppId;
+  permissions: string[];
+}
+
+/** A stored role with its app and permission keys (a permission the catalogue lost is left out). */
+export function roleOf(record: RoleRecord, catalog: RbacCatalog): Role {
+  return {
+    ...record,
+    app: catalog.appOf(record.appId),
+    permissions: record.permissionIds.flatMap((id) => {
+      const key = catalog.permissionKey(id);
+      return key === undefined ? [] : [key];
+    }),
+  };
+}
+
+/** The roles of a query, with their keys (roleOf). */
+export async function readRoles(
+  mongo: Mongo,
+  filter: Record<string, unknown>,
+  options: { comment?: string; session?: ClientSession } = {},
+): Promise<Role[]> {
+  const catalog = await rbacCatalog(mongo);
+  const records = await mongo.db.collection<RoleRecord>(ROLES).find(filter, options).toArray();
+  return records.map((record) => roleOf(record, catalog));
+}
+
+/** A role is found by its key; grants and invitations find it by its id. */
+export const roleIndexes: readonly IndexSpec[] = [
+  { collection: ROLES, name: 'key_unique', key: { key: 1 }, unique: true },
+];
+
 /** The 11 apps as identity_apps records, from the contracts that sign-in follows. */
-export function appRecords(): Omit<AppRecord, 'updatedAt'>[] {
+export function appRecords(): Omit<AppRecord, '_id' | 'updatedAt'>[] {
   const signUp: readonly string[] = SIGN_UP_APPS;
   const totp: readonly string[] = TOTP_REQUIRED_APPS;
   return APPS.map((app) => ({
-    _id: app,
+    key: app,
     audience: signUp.includes(app) ? 'external' : 'internal',
     signUp: signUp.includes(app),
     totp: totp.includes(app) ? 'required' : 'optional',
@@ -106,8 +134,8 @@ export interface RoleProblem {
 /**
  * What is wrong with one role, shipped or Master's: a key not under its app, no scope type, no
  * sign-in to its app, unknown keys or keys none of its scope types can use, appointers that are
- * not roles (in `byKey`) or cannot give roles, a sign-up role that is not self-scoped or that
- * someone could give.
+ * not roles (in `byKey`) or cannot give roles, a role among its own appointers, a sign-up role
+ * that is not self-scoped or that someone could give.
  */
 export function roleProblems(
   role: RoleShape,
@@ -136,6 +164,8 @@ export function roleProblems(
       add('permissions', `${key} cannot be used in any of its scope types`);
     }
   }
+  // its holders would give it on and on, past Master's control (QA Q-007, owner 2026-11-09)
+  if (role.appointedBy.includes(role.key)) add('appointedBy', 'a role cannot appoint itself');
   for (const appointer of role.appointedBy) {
     const by = byKey.get(appointer);
     if (!by) add('appointedBy', `unknown appointer ${appointer}`);
@@ -173,9 +203,14 @@ export const rbacSyncStep: ReleaseStep = {
     const now = new Date();
     const { db } = mongo;
 
+    // apps and permissions first: the roles name them by id (an upsert by key keeps an id forever)
     await db.collection<AppRecord>(APP_RECORDS).bulkWrite(
-      appRecords().map(({ _id, ...app }) => ({
-        updateOne: { filter: { _id }, update: { $set: { ...app, updatedAt: now } }, upsert: true },
+      appRecords().map(({ key, ...app }) => ({
+        updateOne: {
+          filter: { key },
+          update: { $set: { ...app, updatedAt: now } },
+          upsert: true,
+        },
       })),
     );
 
@@ -183,7 +218,7 @@ export const rbacSyncStep: ReleaseStep = {
     await db.collection<PermissionRecord>(PERMISSIONS).bulkWrite(
       [...permissions.values()].map(({ key, ...permission }) => ({
         updateOne: {
-          filter: { _id: key },
+          filter: { key },
           update: { $set: { ...permission, retired: false, updatedAt: now } },
           upsert: true,
         },
@@ -192,25 +227,61 @@ export const rbacSyncStep: ReleaseStep = {
     await db
       .collection<PermissionRecord>(PERMISSIONS)
       .updateMany(
-        { _id: { $nin: keys }, retired: false },
+        { key: { $nin: keys }, retired: false },
         { $set: { retired: true, updatedAt: now } },
       );
+    forgetRbacCatalog(mongo);
+    const catalog = await rbacCatalog(mongo);
+    const permissionIdsOf = (list: readonly string[]): ObjectId[] =>
+      list.map((key) => {
+        const id = catalog.permissionId(key);
+        if (!id) throw new Error(`Permission ${key} was not written`);
+        return id;
+      });
 
+    // the roles without their appointers, then the appointers by id (a role may name one listed later)
     const roles = db.collection<RoleRecord>(ROLES);
     await roles.bulkWrite(
-      ROLE_SEEDS.map(({ key, ...seed }) => ({
+      ROLE_SEEDS.map(({ key, app, permissions: list, appointedBy: _appointers, ...seed }) => ({
         updateOne: {
-          filter: { _id: key },
+          filter: { key },
           update: {
-            $set: { ...seed, system: true, retired: false, updatedAt: now },
-            $setOnInsert: { createdAt: now },
+            $set: {
+              ...seed,
+              appId: catalog.appId(app),
+              permissionIds: permissionIdsOf(list),
+              system: true,
+              retired: false,
+              updatedAt: now,
+            },
+            $setOnInsert: { appointedBy: [], createdAt: now },
           },
           upsert: true,
         },
       })),
     );
+    const shipped = await roles
+      .find({ key: { $in: ROLE_SEEDS.map((seed) => seed.key) } }, { projection: { key: 1 } })
+      .toArray();
+    const roleIds = new Map(shipped.map((role) => [role.key, role._id]));
+    await roles.bulkWrite(
+      ROLE_SEEDS.map((seed) => ({
+        updateOne: {
+          filter: { key: seed.key },
+          update: {
+            $set: {
+              appointedBy: seed.appointedBy.map((key) => {
+                const id = roleIds.get(key);
+                if (!id) throw new Error(`Appointer ${key} of ${seed.key} is not a shipped role`);
+                return id;
+              }),
+            },
+          },
+        },
+      })),
+    );
     const retired = await roles.updateMany(
-      { system: true, retired: false, _id: { $nin: ROLE_SEEDS.map((seed) => seed.key) } },
+      { system: true, retired: false, key: { $nin: ROLE_SEEDS.map((seed) => seed.key) } },
       { $set: { retired: true, updatedAt: now } },
     );
     logger.info(

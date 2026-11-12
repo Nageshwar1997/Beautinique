@@ -6,12 +6,19 @@ import {
   verifyTotp,
 } from '@beautinique/backend-server-crypto';
 import { AppError, type Passport } from '@beautinique/backend-server-kit';
-import { type ClientSession, withTransaction } from '@beautinique/backend-server-mongo';
+import {
+  type ClientSession,
+  type ObjectId,
+  toObjectId,
+  withTransaction,
+} from '@beautinique/backend-server-mongo';
 import { writeEvent } from '@beautinique/backend-server-queue';
 import {
+  type AppId,
   type AUTHENTICATOR_CHANGES,
   authenticatorChanged,
   STEP_UP_SECONDS,
+  type StepUpAction,
   TOTP_REQUIRED_APPS,
 } from '@beautinique/shared-contracts';
 
@@ -37,8 +44,9 @@ import {
   TOTP_ISSUER,
 } from './login.ts';
 import { verifyPassword } from './password.ts';
+import { rbacCatalog } from './rbac/catalog.ts';
 import { activeAt, type GrantRecord, GRANTS } from './rbac/grants.ts';
-import { type RoleRecord, ROLES } from './rbac/sync.ts';
+import { readRoles } from './rbac/sync.ts';
 import { type Session, sessionExpired, SESSIONS } from './sessions.ts';
 import { type User, USERS } from './users.ts';
 
@@ -66,22 +74,26 @@ const credentialsOf = (deps: LoginDeps) => deps.mongo.db.collection<Credentials>
 
 /** This session (not ended) and its account, or SESSION_EXPIRED. */
 async function signedInAs(deps: LoginDeps, passport: Passport) {
+  const userId = toObjectId(passport.userId);
   const session = await deps.mongo.db
     .collection<Session>(SESSIONS)
-    .findOne({ _id: passport.sessionId, userId: passport.userId, revokedAt: null });
+    .findOne({ _id: toObjectId(passport.sessionId), userId, revokedAt: null });
   const user = await deps.mongo.db
     .collection<User>(USERS)
-    .findOne({ _id: passport.userId }, { projection: { email: 1 } });
+    .findOne({ _id: userId }, { projection: { email: 1 } });
   if (!session || !user) throw sessionExpired();
-  return { session, email: user.email };
+  return { session, email: user.email, userId };
 }
 
 /** The session stepped up in the last STEP_UP_SECONDS (the gateway checks the token's `su` too). */
 const steppedUp = (session: Session, now: number): boolean =>
   session.stepUpAt instanceof Date && now - session.stepUpAt.getTime() <= STEP_UP_SECONDS * 1000;
 
-const stepUpRequired = (): AppError =>
-  new AppError('STEP_UP_REQUIRED', 'Please confirm with your authenticator code to continue.');
+/** STEP_UP_REQUIRED; for one change alone (`action`), the app asks the code for it (QA DR-010). */
+const stepUpRequired = (action?: StepUpAction): AppError =>
+  new AppError('STEP_UP_REQUIRED', 'Please confirm with your authenticator code to continue.', {
+    ...(action === undefined ? {} : { details: [{ path: ['for'], message: action }] }),
+  });
 
 /** The change, for notify to email (in the transaction that made it). */
 function changed(
@@ -127,22 +139,25 @@ export async function enrollAuthenticator(
   deps: LoginDeps,
   passport: Passport,
 ): Promise<{ secret: string; uri: string }> {
-  const { session, email } = await signedInAs(deps, passport);
+  const { session, email, userId } = await signedInAs(deps, passport);
   const credentials = await credentialsOf(deps).findOne(
-    { _id: passport.userId },
+    { _id: userId },
     { projection: { password: 1, totp: 1 } },
   );
   if (!credentials?.password) throw passwordRequired();
   const replace = credentials.totp !== undefined;
-  if (replace && !steppedUp(session, Date.now())) throw stepUpRequired();
+  // a new phone needs a code given for it alone, used once (owner, 2026-11-12, QA DR-010)
+  if (replace && !(await deps.sessions.useStepUp(session._id, 'authenticator.replace'))) {
+    throw stepUpRequired('authenticator.replace');
+  }
   const secret = newTotpSecret();
-  const key = setupKey(session._id);
+  const key = setupKey(session._id.toHexString());
   await inRedis(() =>
     deps.redis
       .multi()
       .del(key)
       .hset(key, {
-        secret: encryptField(deps.keys, secret, setupContext(session._id)),
+        secret: encryptField(deps.keys, secret, setupContext(session._id.toHexString())),
         replace: replace ? '1' : '0',
         attempts: '0',
       } satisfies Setup)
@@ -155,9 +170,15 @@ export async function enrollAuthenticator(
 /** A wrong password or code at the confirm: counts toward the lock; the last try ends the set-up. */
 async function wrongTry(
   deps: LoginDeps,
-  { key, email, tries, error }: { key: string; email: string; tries: number; error: AppError },
+  {
+    key,
+    email,
+    tries,
+    error,
+    ip,
+  }: { key: string; email: string; tries: number; error: AppError; ip: string },
 ): Promise<never> {
-  await recordFailure(deps.redis, deps.keys, email);
+  await recordFailure(deps.redis, deps.keys, email, ip);
   if (tries >= LOGIN_MAX_TRIES) {
     await inRedis(() => deps.redis.del(key));
     throw authenticatorSetupExpired();
@@ -173,45 +194,50 @@ async function wrongTry(
 export async function confirmAuthenticator(
   deps: LoginDeps,
   passport: Passport,
-  { code, password, requestId }: { code: string; password: string; requestId: string },
+  {
+    code,
+    password,
+    requestId,
+    ip,
+  }: { code: string; password: string; requestId: string; ip: string },
 ): Promise<{ recoveryCodes: string[] }> {
-  const { session, email } = await signedInAs(deps, passport);
-  const key = setupKey(session._id);
+  const { session, email, userId } = await signedInAs(deps, passport);
+  const key = setupKey(session._id.toHexString());
   const setup = (await inRedis(() => deps.redis.hgetall(key))) as Partial<Setup>;
   if (setup.secret === undefined) throw authenticatorSetupExpired();
   const tries = await oneMoreTry(deps, key);
   if (tries === -1) throw authenticatorSetupExpired();
-  if (tries > LOGIN_MAX_TRIES || (await isLocked(deps.redis, deps.keys, email))) {
+  if (tries > LOGIN_MAX_TRIES || (await isLocked(deps.redis, deps.keys, email, ip))) {
     await inRedis(() => deps.redis.del(key));
     throw tries > LOGIN_MAX_TRIES ? authenticatorSetupExpired() : stepUpLocked();
   }
   const credentials = await credentialsOf(deps).findOne(
-    { _id: passport.userId },
+    { _id: userId },
     { projection: { password: 1 } },
   );
   if (!credentials?.password) throw passwordRequired();
   if (!(await verifyPassword(credentials.password.hash, password))) {
-    return wrongTry(deps, { key, email, tries, error: passwordInvalid() });
+    return wrongTry(deps, { key, email, tries, ip, error: passwordInvalid() });
   }
-  const secret = decryptField(deps.keys, setup.secret, setupContext(session._id));
+  const secret = decryptField(deps.keys, setup.secret, setupContext(session._id.toHexString()));
   const step = verifyTotp(secret, code);
   if (step === null) {
-    return wrongTry(deps, { key, email, tries, error: totpInvalid(LOGIN_MAX_TRIES - tries) });
+    return wrongTry(deps, { key, email, tries, ip, error: totpInvalid(LOGIN_MAX_TRIES - tries) });
   }
   // only the request that deletes the set-up goes on (a code works once)
   if ((await inRedis(() => deps.redis.del(key))) === 0) throw authenticatorSetupExpired();
   const replace = setup.replace === '1';
-  const recovery = newRecoveryCodes(deps, passport.userId);
+  const recovery = newRecoveryCodes(deps, userId);
   const at = new Date();
   await withTransaction(deps.mongo, async (tx) => {
     const saved = await credentialsOf(deps).updateOne(
       replace
-        ? { _id: passport.userId, totp: { $exists: true } }
-        : { _id: passport.userId, totp: { $exists: false } },
+        ? { _id: userId, totp: { $exists: true } }
+        : { _id: userId, totp: { $exists: false } },
       {
         $set: {
           totp: {
-            secret: encryptField(deps.keys, secret, totpContext(passport.userId)),
+            secret: encryptField(deps.keys, secret, totpContext(userId)),
             enrolledAt: at,
             lastStep: step,
           },
@@ -233,7 +259,7 @@ export async function confirmAuthenticator(
       at,
     });
   });
-  await clearFailures(deps.redis, deps.keys, email);
+  await clearFailures(deps.redis, deps.keys, email, { ip });
   deps.logger.info(
     { userId: passport.userId, app: passport.app, replace },
     replace ? 'authenticator replaced' : 'authenticator set up',
@@ -247,13 +273,13 @@ export async function renewRecoveryCodes(
   passport: Passport,
   requestId: string,
 ): Promise<{ recoveryCodes: string[] }> {
-  const { session, email } = await signedInAs(deps, passport);
+  const { session, email, userId } = await signedInAs(deps, passport);
   if (!steppedUp(session, Date.now())) throw stepUpRequired();
-  const recovery = newRecoveryCodes(deps, passport.userId);
+  const recovery = newRecoveryCodes(deps, userId);
   const at = new Date();
   await withTransaction(deps.mongo, async (tx) => {
     const saved = await credentialsOf(deps).updateOne(
-      { _id: passport.userId, totp: { $exists: true } },
+      { _id: userId, totp: { $exists: true } },
       { $set: { recoveryCodes: recovery.stored, updatedAt: at } },
       { session: tx },
     );
@@ -274,31 +300,30 @@ export async function renewRecoveryCodes(
 /**
  * The roles of the account's active grants that need an authenticator: every role of the 7
  * internal apps (TOTP_REQUIRED_APPS), and roles that ask one themselves (Seller Account Owner,
- * Seller Finance ...). A retired role no longer counts, as at sign-in.
+ * Seller Finance ...). A retired role no longer counts, as at sign-in. /iam/me shows them too.
  */
 export async function rolesNeedingAuthenticator(
-  deps: LoginDeps,
-  userId: string,
+  deps: Pick<LoginDeps, 'mongo'>,
+  userId: ObjectId,
   now = new Date(),
-): Promise<{ name: string; app: string }[]> {
+): Promise<{ name: string; app: AppId }[]> {
   const grants = await deps.mongo.db
     .collection<GrantRecord>(GRANTS)
-    .find({ userId, ...activeAt(now) }, { projection: { role: 1 } })
+    .find({ userId, ...activeAt(now) }, { projection: { roleId: 1 } })
     .toArray();
   if (grants.length === 0) return [];
-  const roles = await deps.mongo.db
-    .collection<RoleRecord>(ROLES)
-    .find(
-      {
-        _id: { $in: [...new Set(grants.map((grant) => grant.role))] },
-        retired: false,
-        $or: [{ app: { $in: [...TOTP_REQUIRED_APPS] } }, { mfaRequired: true }],
-      },
-      { projection: { name: 1, app: 1 } },
-    )
-    .sort({ app: 1, name: 1 })
-    .toArray();
-  return roles.map((role) => ({ name: role.name, app: role.app }));
+  const catalog = await rbacCatalog(deps.mongo);
+  const roles = await readRoles(deps.mongo, {
+    _id: { $in: grants.map((grant) => grant.roleId) },
+    retired: false,
+    $or: [
+      { appId: { $in: TOTP_REQUIRED_APPS.map((app) => catalog.appId(app)) } },
+      { mfaRequired: true },
+    ],
+  });
+  return roles
+    .map((role) => ({ name: role.name, app: role.app }))
+    .toSorted((a, b) => a.app.localeCompare(b.app) || a.name.localeCompare(b.name));
 }
 
 /**
@@ -311,14 +336,23 @@ export async function disableAuthenticator(
   passport: Passport,
   requestId: string,
 ): Promise<{ disabled: boolean }> {
-  const { session, email } = await signedInAs(deps, passport);
-  if (!steppedUp(session, Date.now())) throw stepUpRequired();
-  const roles = await rolesNeedingAuthenticator(deps, passport.userId);
+  const { session, email, userId } = await signedInAs(deps, passport);
+  // none to turn off: nothing to confirm either (there is no code to give)
+  const on = await credentialsOf(deps).findOne(
+    { _id: userId, totp: { $exists: true } },
+    { projection: { _id: 1 } },
+  );
+  if (!on) return { disabled: false };
+  const roles = await rolesNeedingAuthenticator(deps, userId);
   if (roles.length > 0) throw authenticatorRequiredByRole(roles);
+  // turning it off needs a code given for it alone, used once (owner, 2026-11-12, QA DR-010)
+  if (!(await deps.sessions.useStepUp(session._id, 'authenticator.disable'))) {
+    throw stepUpRequired('authenticator.disable');
+  }
   const at = new Date();
   const disabled = await withTransaction(deps.mongo, async (tx) => {
     const removed = await credentialsOf(deps).updateOne(
-      { _id: passport.userId, totp: { $exists: true } },
+      { _id: userId, totp: { $exists: true } },
       { $unset: { totp: '', recoveryCodes: '' }, $set: { updatedAt: at } },
       { session: tx },
     );

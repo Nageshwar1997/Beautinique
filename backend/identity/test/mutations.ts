@@ -16,7 +16,12 @@ const mutations: Mutation[] = [
   {
     file: 'otp',
     name: 'no hourly email limit',
-    change: [['if (count > deps.emailLimitPerHour) throw', 'if (false) throw']],
+    change: [
+      [
+        'if ((await count(emailCountKey(index))) > deps.emailLimitPerHour) throw',
+        'if (false) throw',
+      ],
+    ],
     tests: 'hourly limit',
   },
   {
@@ -164,7 +169,7 @@ const mutations: Mutation[] = [
   {
     file: 'otp',
     name: 'breached passwords allowed',
-    change: [['if (await deps.breached(password)) throw passwordBreached();', '']],
+    change: [["  if (breach === 'breached') throw passwordBreached();\n", '']],
     tests: 'breached',
   },
   {
@@ -220,7 +225,7 @@ const mutations: Mutation[] = [
     name: 'another app’s consent not recorded',
     change: [
       [
-        '{ userId: user._id, app, version: legalVersion },',
+        '{ userId: user._id, appId, version: legalVersion },',
         '{ userId: user._id, version: legalVersion },',
       ],
     ],
@@ -229,7 +234,9 @@ const mutations: Mutation[] = [
   {
     file: 'users',
     name: 'new legal version not recorded',
-    change: [['{ userId: user._id, app, version: legalVersion },', '{ userId: user._id, app },']],
+    change: [
+      ['{ userId: user._id, appId, version: legalVersion },', '{ userId: user._id, appId },'],
+    ],
     tests: 'records the new app',
   },
   {
@@ -253,7 +260,7 @@ const mutations: Mutation[] = [
   {
     file: 'password',
     name: 'breach list ignored',
-    change: [['if (hashSuffix === suffix && Number(count) > 0) return true;', '']],
+    change: [["if (hashSuffix === suffix && Number(count) > 0) return 'breached';", '']],
     tests: 'breached',
   },
   {
@@ -261,8 +268,8 @@ const mutations: Mutation[] = [
     name: 'padding lines count as breached',
     change: [
       [
-        'if (hashSuffix === suffix && Number(count) > 0) return true;',
-        'if (Number(count) >= 0) return true;',
+        "if (hashSuffix === suffix && Number(count) > 0) return 'breached';",
+        "if (Number(count) >= 0) return 'breached';",
       ],
     ],
     tests: 'breached|makes the account',
@@ -272,8 +279,8 @@ const mutations: Mutation[] = [
     name: 'fail-closed when the check is away',
     change: [
       [
-        "        'breached-password check unavailable; the password is allowed',\n      );\n      return false;",
-        "        'breached-password check unavailable; the password is allowed',\n      );\n      return true;",
+        "        'breached-password check unavailable; the password is checked again at the next sign-in',\n      );\n      return 'unknown';",
+        "        'breached-password check unavailable; the password is checked again at the next sign-in',\n      );\n      return 'breached';",
       ],
     ],
     tests: 'breached',
@@ -325,22 +332,65 @@ const mutations: Mutation[] = [
   {
     file: 'login',
     name: 'a locked account signs in',
-    change: [['if (locked || !right || !user', 'if (!right || !user']],
+    change: [['if (await isLocked(deps.redis, deps.keys, email, client.ip)) {', 'if (false) {']],
     tests: 'locks an account',
   },
   {
     file: 'login',
     name: 'any password fits',
-    change: [['if (locked || !right || !user', 'if (locked || !user']],
+    change: [['if (!right || !user', 'if (!user']],
     tests: 'alike',
+  },
+  // the sign-in hashes of every IP together (DR-004)
+  {
+    file: 'login',
+    name: 'sign-ins hash without the budget',
+    change: [['  await deps.loginHashes();\n', '']],
+    tests: 'DR-004',
+  },
+  {
+    file: 'login',
+    name: 'a locked account is hashed (and spends the budget)',
+    change: [
+      [
+        '    throw invalidCredentials();\n  }\n  await deps.loginHashes();\n',
+        '  }\n  await deps.loginHashes();\n',
+      ],
+    ],
+    tests: 'DR-004',
+  },
+  {
+    file: 'password',
+    name: 'a spent budget lets the sign-in through',
+    change: [['    if (!allowed) throw passwordsBusy();\n', '']],
+    tests: 'DR-004',
+  },
+  {
+    file: 'password',
+    name: 'the budget is per second, not per minute',
+    change: [
+      [
+        'const rule = { limit: perMinute, windowMs: 60_000 };',
+        'const rule = { limit: perMinute, windowMs: 1_000 };',
+      ],
+    ],
+    tests: 'DR-004',
+  },
+  {
+    file: 'password',
+    name: 'Redis away lets sign-ins through the budget',
+    change: [['      throw signInUnavailable(error);\n', '      return;\n']],
+    tests: 'Redis is away',
+    survives:
+      'the lock is read from Redis just before, so Redis away answers 503 there first; the budget never sees it',
   },
   {
     file: 'login',
     name: 'wrong passwords not counted',
     change: [
       [
-        '    await recordFailure(deps.redis, deps.keys, email);\n    throw invalidCredentials();',
-        '    throw invalidCredentials();',
+        '  if (!right || !user || !credentials || hash === undefined) {\n    await recordFailure(deps.redis, deps.keys, email, client.ip);\n',
+        '  if (!right || !user || !credentials || hash === undefined) {\n',
       ],
     ],
     tests: 'locks an account',
@@ -350,8 +400,8 @@ const mutations: Mutation[] = [
     name: 'a right password alone resets the count',
     change: [
       [
-        '  const now = new Date();\n  if (needsRehash(hash)) {',
-        '  await clearFailures(deps.redis, deps.keys, email);\n  const now = new Date();\n  if (needsRehash(hash)) {',
+        '  const now = new Date();\n  await checkedLater(',
+        '  await clearFailures(deps.redis, deps.keys, email, { ip: client.ip });\n  const now = new Date();\n  await checkedLater(',
       ],
     ],
     tests: 'toward the account lock',
@@ -399,7 +449,7 @@ const mutations: Mutation[] = [
     name: 'second step goes on while locked',
     change: [
       [
-        'if (tries > LOGIN_MAX_TRIES || (await isLocked(deps.redis, deps.keys, login.email))) {',
+        'if (tries > LOGIN_MAX_TRIES || (await isLocked(deps.redis, deps.keys, login.email, ip))) {',
         'if (tries > LOGIN_MAX_TRIES) {',
       ],
     ],
@@ -412,7 +462,7 @@ const mutations: Mutation[] = [
     name: 'wrong codes not counted toward the lock',
     change: [
       [
-        '  await recordFailure(deps.redis, deps.keys, login.email);\n  if (tries >= LOGIN_MAX_TRIES) {',
+        '  await recordFailure(deps.redis, deps.keys, login.email, ip);\n  if (tries >= LOGIN_MAX_TRIES) {',
         '  if (tries >= LOGIN_MAX_TRIES) {',
       ],
     ],
@@ -432,7 +482,12 @@ const mutations: Mutation[] = [
   {
     file: 'login',
     name: 'an authenticator code works twice',
-    change: [["{ _id: login.userId, 'totp.lastStep': { $lt: step } },", '{ _id: login.userId },']],
+    change: [
+      [
+        "      await credentialsOf(deps).updateOne(\n        { _id: userId, 'totp.lastStep': { $lt: step } },",
+        '      await credentialsOf(deps).updateOne(\n        { _id: userId },',
+      ],
+    ],
     tests: 'each code works once',
   },
   {
@@ -449,7 +504,7 @@ const mutations: Mutation[] = [
   {
     file: 'login',
     name: 'an authenticator set up over another',
-    change: [['{ _id: login.userId, totp: { $exists: false } },', '{ _id: login.userId },']],
+    change: [['{ _id: userId, totp: { $exists: false } },', '{ _id: userId },']],
     survives:
       'two sign-ins setting up at once: the second confirm finds one saved; a race no test times',
   },
@@ -458,7 +513,7 @@ const mutations: Mutation[] = [
     name: 'a wrong first code saves the authenticator',
     change: [
       [
-        '  if (step === null) return wrongTry(deps, loginId, login, tries, totpInvalid);\n  await finish',
+        '  if (step === null) return wrongTry(deps, loginId, login, tries, client.ip, totpInvalid);\n  await finish',
         '  await finish',
       ],
     ],
@@ -477,48 +532,316 @@ const mutations: Mutation[] = [
   },
   {
     file: 'lockout',
-    name: 'never locks',
-    change: [['  if (failures >= MAX_FAILURES) {', '  if (false) {']],
-    tests: 'locks an account',
+    name: 'never locks an IP',
+    change: [['  if (mine >= MAX_FAILURES) locks.push', '  if (false) locks.push']],
+    tests: 'locks an account|locks the IP',
   },
   {
     file: 'lockout',
-    name: 'locks one try later',
-    change: [['  if (failures >= MAX_FAILURES) {', '  if (failures > MAX_FAILURES) {']],
-    tests: 'locks an account',
+    name: 'locks an IP one try later',
+    change: [['  if (mine >= MAX_FAILURES) locks.push', '  if (mine > MAX_FAILURES) locks.push']],
+    tests: 'locks an account|locks the IP',
   },
   {
     file: 'lockout',
-    name: 'lock for 15 minutes',
+    name: 'an IP locked for 15 minutes',
+    change: [['locks.push([bucket, LOCK_MS])', 'locks.push([bucket, FAIL_WINDOW_MS])']],
+    tests: 'locks an account|locks the IP',
+  },
+  {
+    file: 'lockout',
+    name: 'the lock is for every IP (the old account-wide lock)',
     change: [
-      ["set(lockKey(index), '1', 'PX', LOCK_MS)", "set(lockKey(index), '1', 'PX', FAIL_WINDOW_MS)"],
+      [
+        'hmget(lockKey(index), ipBucket(ip), ACCOUNT)',
+        'hmget(lockKey(index), ipBucket("unknown"), ACCOUNT)',
+      ],
     ],
-    tests: 'locks an account',
+    tests: 'DR-003',
+  },
+  {
+    file: 'lockout',
+    name: 'never locks the account',
+    change: [['  if (all >= MAX_ACCOUNT_FAILURES) locks.push', '  if (false) locks.push']],
+    tests: 'DR-003',
+  },
+  {
+    file: 'lockout',
+    name: 'the account lock lasts an hour',
+    change: [['locks.push([ACCOUNT, ACCOUNT_LOCK_MS])', 'locks.push([ACCOUNT, LOCK_MS])']],
+    tests: 'DR-003',
+  },
+  {
+    file: 'lockout',
+    name: 'tries during a lock count (and lengthen it)',
+    change: [['  if (await isLocked(redis, keys, email, ip)) return;\n', '']],
+    tests: 'DR-003',
+  },
+  {
+    file: 'lockout',
+    name: 'every IP shares one bucket',
+    change: [['  const bucket = ipBucket(ip);\n', "  const bucket = 'all';\n"]],
+    tests: 'DR-003',
+  },
+  {
+    file: 'lockout',
+    name: 'an IPv6 address is its own bucket (not its /64)',
+    change: [['    return ipKey(ip);\n', '    return ip;\n']],
+    tests: 'DR-003',
   },
   {
     file: 'lockout',
     name: 'the count never ends',
-    change: [[".pexpire(key, FAIL_WINDOW_MS, 'NX')", ".pexpire(key, LOCK_MS * 1000, 'NX')"]],
+    change: [[".pexpire(fails, FAIL_WINDOW_MS, 'NX')", ".pexpire(fails, LOCK_MS * 1000, 'NX')"]],
     survives: 'the 15-minute window: no test waits it out; the key gets a TTL either way',
   },
   {
     file: 'lockout',
     name: 'unlock keeps the lock',
+    change: [['? redis.del(failKey(index), lockKey(index))', '? redis.del(failKey(index))']],
+    tests: 'locks an account',
+  },
+  {
+    file: 'otp',
+    name: 'one IP may use up an email’s codes',
     change: [
       [
-        'const keysToDelete = unlock ? [failKey(index), lockKey(index)] : [failKey(index)];',
-        'const keysToDelete = [failKey(index)];',
+        '  if ((await count(emailIpCountKey(index, ipBucket(ip)))) > OTP_EMAIL_CODES_PER_IP) {',
+        '  if (false) {',
       ],
     ],
-    tests: 'locks an account',
+    tests: 'DR-003',
+  },
+  {
+    file: 'otp',
+    name: 'a refused IP still counts against the email',
+    change: [
+      [
+        '  if ((await count(emailIpCountKey(index, ipBucket(ip)))) > OTP_EMAIL_CODES_PER_IP) {\n    throw otpEmailLimit();\n  }\n  if ((await count(emailCountKey(index))) > deps.emailLimitPerHour) throw otpEmailLimit();',
+        '  const overEmail = (await count(emailCountKey(index))) > deps.emailLimitPerHour;\n  if ((await count(emailIpCountKey(index, ipBucket(ip)))) > OTP_EMAIL_CODES_PER_IP) {\n    throw otpEmailLimit();\n  }\n  if (overEmail) throw otpEmailLimit();',
+      ],
+    ],
+    tests: 'DR-003',
+  },
+  // the code emails of every IP together (DR-009)
+  {
+    file: 'code-budget',
+    name: 'no hourly budget',
+    change: [['    if (!allowed) throw otpBusy();\n', '']],
+    tests: 'DR-009',
+  },
+  {
+    file: 'code-budget',
+    name: 'no sign-up share',
+    change: [['    if (count > signUpPerDay) throw otpSignUpLimit();\n', '']],
+    tests: 'DR-009',
+  },
+  {
+    file: 'code-budget',
+    name: 'password codes take from the sign-up share',
+    change: [['    if (!signUp) return;\n', '']],
+    tests: 'DR-009',
+  },
+  {
+    file: 'code-budget',
+    name: 'the hour is a minute',
+    change: [
+      [
+        'const hour = { limit: perHour, windowMs: 60 * 60_000 };',
+        'const hour = { limit: perHour, windowMs: 60_000 };',
+      ],
+    ],
+    tests: 'DR-009',
+    survives: 'no test waits out a minute or an hour: both windows refuse the fourth code at once',
+  },
+  {
+    file: 'otp',
+    name: 'a resend takes nothing from the budgets',
+    change: [["  await deps.codes({ signUp: challenge.purpose === 'sign-up' });\n", '']],
+    tests: 'DR-009',
+  },
+  {
+    file: 'otp',
+    name: 'a new code takes nothing from the budgets',
+    change: [['  await deps.codes({ signUp });\n', '']],
+    tests: 'DR-009',
+  },
+  // taking a sign-in method off needs proof from just now (DR-006)
+  {
+    file: 'oauth',
+    name: 'a way in comes off without proof',
+    change: [['    await provenJustNow(deps, passport, session);\n', '']],
+    tests: 'DR-006|step-up instead',
+  },
+  {
+    file: 'oauth',
+    name: 'an old sign-in counts',
+    change: [
+      [
+        'const recent = now - signedIn.createdAt.getTime() <= RECENT_SIGN_IN_MS;',
+        'const recent = true;',
+      ],
+    ],
+    tests: 'DR-006',
+  },
+  {
+    file: 'oauth',
+    name: 'a provider’s own sign-in counts',
+    change: [["!signedIn.methods.some((m) => m === 'password' || m === 'email-code')", 'false']],
+    tests: 'DR-006',
+  },
+  {
+    file: 'oauth',
+    name: 'an account with an authenticator needs no step-up',
+    change: [
+      [
+        '    if (stepUpAt === undefined || now - stepUpAt > STEP_UP_SECONDS * 1000) {',
+        '    if (false) {',
+      ],
+    ],
+    tests: 'step-up instead',
+  },
+  // a password the breach check could not see is checked at the next sign-in (DR-002)
+  {
+    file: 'password',
+    name: 'an unanswered check counts as clean',
+    change: [
+      [
+        "        'breached-password check unavailable; the password is checked again at the next sign-in',\n      );\n      return 'unknown';",
+        "        'breached-password check unavailable; the password is checked again at the next sign-in',\n      );\n      return 'clean';",
+      ],
+    ],
+    tests: 'DR-002',
+  },
+  {
+    file: 'otp',
+    name: 'no mark when the check could not answer',
+    change: [["hibpPending: breach === 'unknown' }", 'hibpPending: false }']],
+    tests: 'DR-002',
+  },
+  {
+    file: 'credentials',
+    name: 'the mark is not kept',
+    change: [['    ...(password.hibpPending ? { hibpPending: true as const } : {}),\n', '']],
+    tests: 'DR-002',
+  },
+  {
+    file: 'login',
+    name: 'no check at sign-in',
+    change: [['  await checkedLater(deps, user._id, credentials.password, password, now);\n', '']],
+    tests: 'DR-002',
+  },
+  {
+    file: 'login',
+    name: 'a password known leaked signs in',
+    change: [['  if (stored?.breachedAt) throw passwordResetRequired();\n', '']],
+    tests: 'DR-002',
+  },
+  {
+    file: 'login',
+    name: 'every sign-in asks the check',
+    change: [['  if (stored?.hibpPending !== true) return;\n', '']],
+    tests: 'DR-002',
+  },
+  {
+    file: 'login',
+    name: 'an unanswered check at sign-in refuses it',
+    change: [["  if (answer === 'unknown') return;\n", '']],
+    tests: 'DR-002',
+  },
+  {
+    file: 'login',
+    name: 'a clean check keeps the mark',
+    change: [
+      [
+        "      $unset: { 'password.hibpPending': '' },\n      $set: { updatedAt: now },",
+        '      $set: { updatedAt: now },',
+      ],
+    ],
+    tests: 'DR-002',
+  },
+  {
+    file: 'login',
+    name: 'a leak found is not kept',
+    change: [
+      [
+        "    $set: { 'password.breachedAt': now, updatedAt: now },",
+        '    $set: { updatedAt: now },',
+      ],
+    ],
+    tests: 'DR-002',
+  },
+  {
+    file: 'login',
+    name: 'a leak found signs in',
+    change: [['  );\n  throw passwordResetRequired();\n}', '  );\n}']],
+    tests: 'DR-002',
+  },
+  // a step-up for one change alone (DR-010)
+  {
+    file: 'sessions',
+    name: 'a step-up for any change counts for this one',
+    change: [["          'stepUpFor.action': action,\n", '']],
+    tests: 'of its own',
+  },
+  {
+    file: 'sessions',
+    name: 'a change’s step-up counts again and again',
+    change: [
+      ['        { $set: { stepUpFor: null } },', '        { $set: { lastSeenAt: new Date(at) } },'],
+    ],
+    tests: 'of its own',
+  },
+  {
+    file: 'sessions',
+    name: 'a change’s step-up never runs out',
+    change: [["          'stepUpFor.at': { $gt: new Date(at - STEP_UP_SECONDS * 1000) },\n", '']],
+    tests: 'of its own',
+  },
+  {
+    file: 'sessions',
+    name: 'a change’s step-up is a general one too',
+    change: [
+      [
+        '          : { stepUpFor: { action, at: new Date(at) } };',
+        '          : { stepUpAt: new Date(at), stepUpFor: { action, at: new Date(at) } };',
+      ],
+    ],
+    tests: 'of its own',
+  },
+  {
+    file: 'authenticator',
+    name: 'a new phone without a step-up of its own',
+    change: [
+      [
+        "  if (replace && !(await deps.sessions.useStepUp(session._id, 'authenticator.replace'))) {",
+        '  if (false) {',
+      ],
+    ],
+    tests: 'of its own',
+  },
+  {
+    file: 'authenticator',
+    name: 'turning off without a step-up of its own',
+    change: [
+      [
+        "  if (!(await deps.sessions.useStepUp(session._id, 'authenticator.disable'))) {",
+        '  if (false) {',
+      ],
+    ],
+    tests: 'of its own',
+  },
+  {
+    file: 'authenticator',
+    name: 'turning off nothing asks a code',
+    change: [['  if (!on) return { disabled: false };\n', '']],
+    tests: 'of its own',
   },
   // sessions (T3.2)
   {
     file: 'sessions',
     name: 'access token for every app',
-    change: [
-      ['        aud: tokenAudience(session.app),', "        aud: tokenAudience('customer'),"],
-    ],
+    change: [['        aud: tokenAudience(app),', "        aud: tokenAudience('customer'),"]],
     tests: 'JWKS verifies',
   },
   {
@@ -625,12 +948,6 @@ const mutations: Mutation[] = [
   },
   {
     file: 'sessions',
-    name: 'every token read as one from before families',
-    change: [['family: parts.length === 3 ? (parts[1] ?? null) : null', 'family: null']],
-    tests: 'family in every token|older token',
-  },
-  {
-    file: 'sessions',
     name: 'no family hash at sign-in',
     change: [
       [
@@ -673,8 +990,8 @@ const mutations: Mutation[] = [
     name: 'logout without the token',
     change: [
       [
-        '{ _id: sessionId, app, refreshHash: refreshHashOf(keys, refreshToken), revokedAt: null },',
-        '{ _id: sessionId, app, revokedAt: null },',
+        '{ _id: sessionId, appId, refreshHash: refreshHashOf(keys, refreshToken), revokedAt: null },',
+        '{ _id: sessionId, appId, revokedAt: null },',
       ],
     ],
     tests: 'logs out',
@@ -692,7 +1009,7 @@ const mutations: Mutation[] = [
     name: 'a new password not told to the gateway',
     change: [
       [
-        "      await inRedis(() => redis.set(revokedUserKey(userId), String(at), 'PX', REVOKE_TTL_MS));\n",
+        "      await inRedis(() =>\n        redis.set(revokedUserKey(userId.toHexString()), String(at), 'PX', REVOKE_TTL_MS),\n      );\n",
         '',
       ],
     ],
@@ -804,8 +1121,8 @@ const mutations: Mutation[] = [
     name: 'an ended session still answers',
     change: [
       [
-        '.findOne({ _id: passport.sessionId, userId: passport.userId, revokedAt: null });',
-        '.findOne({ _id: passport.sessionId, userId: passport.userId });',
+        '.findOne({ _id: toObjectId(passport.sessionId), userId, revokedAt: null });',
+        '.findOne({ _id: toObjectId(passport.sessionId), userId });',
       ],
     ],
     tests: 'ended session',
@@ -813,7 +1130,7 @@ const mutations: Mutation[] = [
   {
     file: 'me',
     name: 'every session marked current',
-    change: [['current: session._id === passport.sessionId,', 'current: true,']],
+    change: [['current: session._id.toHexString() === passport.sessionId,', 'current: true,']],
     tests: 'My Devices',
   },
   {
@@ -939,8 +1256,19 @@ const mutations: Mutation[] = [
   },
   {
     file: 'rbac/sync',
+    name: 'a role may appoint itself (Q-007)',
+    change: [
+      [
+        "  if (role.appointedBy.includes(role.key)) add('appointedBy', 'a role cannot appoint itself');\n",
+        '',
+      ],
+    ],
+    tests: 'sub-role, checked|are checked',
+  },
+  {
+    file: 'rbac/sync',
     name: 'the sync retires Master’s own sub-roles',
-    change: [['{ system: true, retired: false, _id: { $nin:', '{ retired: false, _id: { $nin:']],
+    change: [['{ system: true, retired: false, key: { $nin:', '{ retired: false, key: { $nin:']],
     tests: 'never touches Master',
   },
 
@@ -950,8 +1278,8 @@ const mutations: Mutation[] = [
     name: 'a retired role still opens its app',
     change: [
       [
-        '{ _id: { $in: grants.map((grant) => grant.role) }, retired: false },',
-        '{ _id: { $in: grants.map((grant) => grant.role) } },',
+        '    _id: { $in: grants.map((grant) => grant.roleId) },\n    retired: false,\n  });\n  if (roles.length === 0) return none;',
+        '    _id: { $in: grants.map((grant) => grant.roleId) },\n  });\n  if (roles.length === 0) return none;',
       ],
     ],
     tests: 'renews their holders',
@@ -982,13 +1310,13 @@ const mutations: Mutation[] = [
   {
     file: 'rbac/authority',
     name: 'any role gives any role',
-    change: [['      role.appointedBy.includes(own._id) &&\n', '']],
+    change: [['      namesRole(role.appointedBy, own._id) &&\n', '']],
     tests: 'only the roles they appoint',
   },
   {
     file: 'rbac/authority',
     name: 'a scope wider than the giver’s',
-    change: [['      scopeWithin(grant.scope, inner, chainOf),', '      true,']],
+    change: [['      scopeWithin(scopeOf(grant.scope), inner, chainOf),', '      true,']],
     tests: 'only the roles they appoint',
   },
   {
@@ -1037,7 +1365,7 @@ const mutations: Mutation[] = [
   {
     file: 'rbac/authority',
     name: 'an appointer sees every role',
-    change: [['...(reviewer ? {} : { role: { $in: givable } })', '...{}']],
+    change: [['...(reviewer ? reviewed : { roleId: { $in: givable } })', '...{}']],
     tests: 'a reviewer every role',
   },
   {
@@ -1062,7 +1390,7 @@ const mutations: Mutation[] = [
     name: 'ending one’s own role',
     change: [
       [
-        "  if (grant.userId === passport.userId) throw forbidden('Nobody ends their own role.');\n",
+        "  if (grant.userId.toHexString() === passport.userId) {\n    throw forbidden('Nobody ends their own role.');\n  }\n",
         '',
       ],
     ],
@@ -1071,7 +1399,9 @@ const mutations: Mutation[] = [
   {
     file: 'rbac/manage',
     name: 'anyone ends a role',
-    change: [['if (!role || !appointingGrant(caller, role, grant.scope)) {', 'if (!role) {']],
+    change: [
+      ['if (!role || !appointingGrant(caller, role, scopeOf(grant.scope))) {', 'if (!role) {'],
+    ],
     tests: 'ends a role at once',
   },
   {
@@ -1103,7 +1433,7 @@ const mutations: Mutation[] = [
   {
     file: 'rbac/manage',
     name: 'grants listed without the right to read them',
-    change: [['  requirePermission(caller, grantRead.key);\n  const visible', '  const visible']],
+    change: [['  requirePermission(caller, grantRead.key);\n  const empty', '  const empty']],
     tests: 'a reviewer every role',
   },
   {
@@ -1111,7 +1441,7 @@ const mutations: Mutation[] = [
     name: 'an invitation outlives its inviter’s right',
     change: [
       [
-        'if (role && !role.retired && appointingGrant(inviter, role, invitation.scope)) {',
+        'if (role && !role.retired && appointingGrant(inviter, role, scopeOf(invitation.scope))) {',
         'if (role) {',
       ],
     ],
@@ -1130,8 +1460,8 @@ const mutations: Mutation[] = [
     name: 'a code for an invitation that ran out',
     change: [
       [
-        "      { email, app, status: 'pending', expiresAt: { $gt: now } },\n      { limit: 1 },",
-        "      { email, app, status: 'pending' },\n      { limit: 1 },",
+        "      { email, appId, status: 'pending', expiresAt: { $gt: now } },\n      { limit: 1 },",
+        "      { email, appId, status: 'pending' },\n      { limit: 1 },",
       ],
     ],
     tests: 'runs out',
@@ -1161,7 +1491,12 @@ const mutations: Mutation[] = [
   {
     file: 'sessions',
     name: 'no permission list at sign-in',
-    change: [['      await listPermissions(userId, app, access);\n', '']],
+    change: [
+      [
+        '      await collection.insertOne(session);\n      await listPermissions(userId, app, access);\n',
+        '      await collection.insertOne(session);\n',
+      ],
+    ],
     tests: 'written at every sign-in',
   },
   {
@@ -1235,21 +1570,26 @@ const mutations: Mutation[] = [
     file: 'login',
     name: 'a locked account steps up',
     change: [
-      ['  if (await isLocked(deps.redis, deps.keys, user.email)) throw stepUpLocked();\n', ''],
+      ['  if (await isLocked(deps.redis, deps.keys, user.email, ip)) throw stepUpLocked();\n', ''],
     ],
     tests: 'lock',
   },
   {
     file: 'login',
     name: 'a step-up code works twice',
-    change: [["{ _id: userId, 'totp.lastStep': { $lt: step } },", '{ _id: userId },']],
+    change: [
+      [
+        "\n          { _id: userId, 'totp.lastStep': { $lt: step } },",
+        '\n          { _id: userId },',
+      ],
+    ],
     tests: 'confirms with a new authenticator code',
   },
   {
     file: 'login',
     name: 'wrong step-up codes are not counted',
     change: [
-      ['    await recordFailure(deps.redis, deps.keys, user.email);\n    throw ', '    throw '],
+      ['    await recordFailure(deps.redis, deps.keys, user.email, ip);\n    throw ', '    throw '],
     ],
     tests: 'lock',
   },
@@ -1263,7 +1603,7 @@ const mutations: Mutation[] = [
   {
     file: 'login',
     name: 'a step-up does not say how many codes are left',
-    change: [['recoveryCodesLeft: left };', 'recoveryCodesLeft: null };']],
+    change: [['    })),\n    recoveryCodesLeft: left,', '    })),\n    recoveryCodesLeft: null,']],
     tests: 'spends one code',
   },
   {
@@ -1272,11 +1612,34 @@ const mutations: Mutation[] = [
     change: [['? (recoveryCodesLeft(credentials.recoveryCodes) ?? 0)', '? 10']],
     tests: 'spends one code',
   },
+  // the roles that keep the authenticator on, for the apps (DR-011)
+  {
+    file: 'me',
+    name: '/iam/me never names the roles that keep the authenticator on',
+    change: [['      authenticatorRequiredBy: requiredBy,', '      authenticatorRequiredBy: [],']],
+    tests: 'stays on while a role',
+  },
+  {
+    file: 'me',
+    name: '/iam/me names roles for an account without an authenticator',
+    change: [
+      [
+        'const requiredBy = credentials?.totp ? await rolesNeedingAuthenticator(deps, user._id) : [];',
+        'const requiredBy = [{ name: "Seller Finance", app: "seller" as const }];',
+      ],
+    ],
+    tests: 'saves it with the password',
+  },
   {
     file: 'authenticator',
     name: 'replaced without a step-up',
-    change: [['  if (replace && !steppedUp(session, Date.now())) throw stepUpRequired();\n', '']],
-    tests: 'needs a step-up, then swaps',
+    change: [
+      [
+        "  if (replace && !(await deps.sessions.useStepUp(session._id, 'authenticator.replace'))) {\n",
+        '  if (false) {\n',
+      ],
+    ],
+    tests: 'then swaps',
   },
   {
     file: 'authenticator',
@@ -1318,7 +1681,7 @@ const mutations: Mutation[] = [
     name: 'wrong set-up tries are not counted toward the lock',
     change: [
       [
-        '  await recordFailure(deps.redis, deps.keys, email);\n  if (tries >= LOGIN_MAX_TRIES) {',
+        '  await recordFailure(deps.redis, deps.keys, email, ip);\n  if (tries >= LOGIN_MAX_TRIES) {',
         '  if (tries >= LOGIN_MAX_TRIES) {',
       ],
     ],
@@ -1329,7 +1692,7 @@ const mutations: Mutation[] = [
     name: 'a locked account sets one up',
     change: [
       [
-        'if (tries > LOGIN_MAX_TRIES || (await isLocked(deps.redis, deps.keys, email))) {',
+        'if (tries > LOGIN_MAX_TRIES || (await isLocked(deps.redis, deps.keys, email, ip))) {',
         'if (tries > LOGIN_MAX_TRIES) {',
       ],
     ],
@@ -1362,10 +1725,7 @@ const mutations: Mutation[] = [
     file: 'authenticator',
     name: 'one saved meanwhile is overwritten',
     change: [
-      [
-        '        : { _id: passport.userId, totp: { $exists: false } },',
-        '        : { _id: passport.userId },',
-      ],
+      ['        : { _id: userId, totp: { $exists: false } },', '        : { _id: userId },'],
     ],
     tests: 'never overwrites',
   },
@@ -1373,10 +1733,7 @@ const mutations: Mutation[] = [
     file: 'authenticator',
     name: 'a replace after a reset meanwhile saves anyway',
     change: [
-      [
-        '        ? { _id: passport.userId, totp: { $exists: true } }\n',
-        '        ? { _id: passport.userId }\n',
-      ],
+      ['        ? { _id: userId, totp: { $exists: true } }\n', '        ? { _id: userId }\n'],
     ],
     survives:
       'a Security Officer reset between the enroll and the confirm of a replace; a race no test times',
@@ -1385,7 +1742,7 @@ const mutations: Mutation[] = [
     file: 'authenticator',
     name: 'a replace is told as a set-up',
     change: [["change: replace ? 'replaced' : 'enabled',", "change: 'enabled',"]],
-    tests: 'needs a step-up, then swaps',
+    tests: 'then swaps',
   },
   {
     file: 'authenticator',
@@ -1409,8 +1766,8 @@ const mutations: Mutation[] = [
     name: 'turned off without a step-up',
     change: [
       [
-        '  if (!steppedUp(session, Date.now())) throw stepUpRequired();\n  const roles',
-        '  const roles',
+        "  if (!(await deps.sessions.useStepUp(session._id, 'authenticator.disable'))) {\n",
+        '  if (false) {\n',
       ],
     ],
     tests: 'removes it with its codes',
@@ -1432,8 +1789,8 @@ const mutations: Mutation[] = [
     name: 'the internal apps’ roles do not need one',
     change: [
       [
-        '$or: [{ app: { $in: [...TOTP_REQUIRED_APPS] } }, { mfaRequired: true }],',
-        'mfaRequired: true,',
+        '    $or: [\n      { appId: { $in: TOTP_REQUIRED_APPS.map((app) => catalog.appId(app)) } },\n      { mfaRequired: true },\n    ],',
+        '    mfaRequired: true,',
       ],
     ],
     tests: 'while a role needs it',
@@ -1441,7 +1798,7 @@ const mutations: Mutation[] = [
   {
     file: 'authenticator',
     name: 'roles that ask one themselves do not need it',
-    change: [[', { mfaRequired: true }],', '],']],
+    change: [['      { mfaRequired: true },\n    ],\n', '    ],\n']],
     tests: 'while a role needs it',
   },
   {
@@ -1449,8 +1806,8 @@ const mutations: Mutation[] = [
     name: 'an ended grant still needs one',
     change: [
       [
-        '.find({ userId, ...activeAt(now) }, { projection: { role: 1 } })',
-        '.find({ userId }, { projection: { role: 1 } })',
+        '.find({ userId, ...activeAt(now) }, { projection: { roleId: 1 } })',
+        '.find({ userId }, { projection: { roleId: 1 } })',
       ],
     ],
     tests: 'while a role needs it',
@@ -1458,7 +1815,7 @@ const mutations: Mutation[] = [
   {
     file: 'authenticator',
     name: 'a retired role still needs one',
-    change: [['        retired: false,\n        $or', '        $or']],
+    change: [['    retired: false,\n    $or', '    $or']],
     tests: 'while a role needs it',
   },
   {
@@ -1466,11 +1823,74 @@ const mutations: Mutation[] = [
     name: 'turning off twice is told twice',
     change: [
       [
-        '      { _id: passport.userId, totp: { $exists: true } },\n      { $unset',
-        '      { _id: passport.userId },\n      { $unset',
+        '      { _id: userId, totp: { $exists: true } },\n      { $unset',
+        '      { _id: userId },\n      { $unset',
       ],
     ],
     tests: 'removes it with its codes',
+    survives:
+      'a second turn-off stops at the `on` check, and each needs its own one-time step-up (QA DR-010): only two sessions racing reach it, a race no test times',
+  },
+  {
+    file: 'rbac/authority',
+    name: 'a reviewer’s list shows every customer (DR-008)',
+    change: [
+      [
+        'const reviewed = onePerson ? {} : { roleId: { $nin: signUpRoles } };',
+        'const reviewed = {};',
+      ],
+    ],
+    tests: 'a reviewer every role',
+  },
+  {
+    file: 'rbac/authority',
+    name: 'one person looked up hides their sign-up roles',
+    change: [
+      [
+        'const reviewed = onePerson ? {} : { roleId: { $nin: signUpRoles } };',
+        'const reviewed = { roleId: { $nin: signUpRoles } };',
+      ],
+    ],
+    tests: 'a reviewer every role',
+  },
+  {
+    file: 'rbac/manage',
+    name: 'a look-up by email is a list of everyone',
+    change: [
+      [
+        'const onePerson = query.userId !== undefined || query.email !== undefined;',
+        'const onePerson = query.userId !== undefined;',
+      ],
+    ],
+    tests: 'a reviewer every role',
+  },
+  {
+    file: 'rbac/security',
+    name: 'a Security Officer resets a Master (DR-007)',
+    change: [['  if (!isMaster && (await holdsMaster(deps, user._id))) {', '  if (false) {']],
+    tests: 'DR-007',
+  },
+  {
+    file: 'rbac/security',
+    name: 'not even the other Master resets a Master',
+    change: [
+      [
+        '  if (!isMaster && (await holdsMaster(deps, user._id))) {',
+        '  if (await holdsMaster(deps, user._id)) {',
+      ],
+    ],
+    tests: 'DR-007',
+  },
+  {
+    file: 'rbac/roles',
+    name: 'Master cannot reset an authenticator',
+    change: [
+      [
+        'permissions: [...APPOINTS, roleManage.key, totpReset.key],',
+        'permissions: [...APPOINTS, roleManage.key],',
+      ],
+    ],
+    tests: 'DR-007',
   },
   {
     file: 'rbac/security',
@@ -1498,7 +1918,12 @@ const mutations: Mutation[] = [
   {
     file: 'rbac/manage',
     name: 'an email and another account’s id find the email’s grants',
-    change: [['if (!owner || (userId !== undefined && userId !== owner._id)) {', 'if (!owner) {']],
+    change: [
+      [
+        'if (!owner || (userId !== undefined && !userId.equals(owner._id))) return empty;',
+        'if (!owner) return empty;',
+      ],
+    ],
     tests: 'by email',
   },
   // a sign-in in the second every session ended (owner's E2E, 2026-11-02)
@@ -1548,7 +1973,10 @@ const mutations: Mutation[] = [
     file: 'oauth',
     name: 'a locked account signs in with a provider',
     change: [
-      ["if (await isLocked(deps.redis, deps.keys, user.email)) return backToSignIn('locked');", ''],
+      [
+        "if (await isLocked(deps.redis, deps.keys, user.email, client.ip)) return backToSignIn('locked');",
+        '',
+      ],
     ],
     tests: 'locked account',
   },
@@ -1677,8 +2105,8 @@ const mutations: Mutation[] = [
     name: 'the role catalog is read without saying it is a full read',
     change: [
       [
-        "    .find({}, { comment: 'full read: the role catalog, for what the caller may see' })",
-        '    .find({})',
+        "  readRoles(mongo, {}, { comment: 'full read: the role catalog, for what the caller may see' });",
+        '  readRoles(mongo, {});',
       ],
     ],
     tests: 'pages with a cursor',
@@ -1687,7 +2115,7 @@ const mutations: Mutation[] = [
     file: 'rbac/manage',
     name: 'a new role is checked against every live role without saying so',
     change: [
-      ["      { comment: 'full read: every live role, to check the new one against' },\n", ''],
+      ["    { comment: 'full read: every live role, to check the new one against' },\n", ''],
     ],
     tests: 'make a sub-role',
   },
@@ -1702,7 +2130,10 @@ const mutations: Mutation[] = [
     file: 'sessions',
     name: 'no ended session gets its mark back',
     change: [
-      ["    if (left > 0) batch.set(revokedSessionKey(session._id), '1', 'PX', left);\n", ''],
+      [
+        "    if (left > 0) batch.set(revokedSessionKey(session._id.toHexString()), '1', 'PX', left);\n",
+        '',
+      ],
     ],
     tests: 'QA-GW-002',
   },

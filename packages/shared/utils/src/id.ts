@@ -16,7 +16,10 @@ let counter = 0;
 /**
  * A UUIDv7 (RFC 9562): 48-bit Unix time in ms, then a 12-bit counter and random bits. Ids from one
  * process sort in creation order, even within the same millisecond or if the clock steps back.
- * Used for event ids and the Delivery app's offline actions. `now` is for tests.
+ * For ids that live outside MongoDB and must not be guessed: Redis ids (a sign-in in progress, an
+ * email-code challenge, an OAuth state), lease owners, the Idempotency-Key and the Delivery app's
+ * offline actions. A MongoDB document gets an ObjectId instead (owner, 2026-11-12). `now` is for
+ * tests.
  */
 export function uuidv7(now: number = Date.now()): string {
   const bytes = random(new Uint8Array(16));

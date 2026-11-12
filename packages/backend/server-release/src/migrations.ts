@@ -1,5 +1,5 @@
 import type { Logger } from '@beautinique/backend-server-kit';
-import type { Mongo } from '@beautinique/backend-server-mongo';
+import type { IndexSpec, Mongo, ObjectId } from '@beautinique/backend-server-mongo';
 
 import { MigrationFailedError } from './errors';
 
@@ -25,8 +25,14 @@ export interface Migration {
   up(context: ReleaseContext): Promise<void>;
 }
 
+/** A migration ran once: its record is found by its id (the _id is an ObjectId, like every document's). */
+export const MIGRATION_INDEXES: readonly IndexSpec[] = [
+  { collection: MIGRATIONS, name: 'migrationId_unique', key: { migrationId: 1 }, unique: true },
+];
+
 interface MigrationRecord {
-  _id: string;
+  _id: ObjectId;
+  migrationId: string;
   description: string;
   appliedAt: Date;
   ms: number;
@@ -75,9 +81,12 @@ export async function runMigrations(
   const done = new Set(
     (
       await records
-        .find({}, { projection: { _id: 1 }, comment: 'full read: every migration that ran' })
+        .find(
+          {},
+          { projection: { migrationId: 1 }, comment: 'full read: every migration that ran' },
+        )
         .toArray()
-    ).map((record) => record._id),
+    ).map((record) => record.migrationId),
   );
   const known = new Set(migrations.map((migration) => migration.id));
   const unknown = [...done].filter((id) => !known.has(id)).toSorted();
@@ -96,11 +105,13 @@ export async function runMigrations(
       throw new MigrationFailedError(migration.id, { cause: error });
     }
     const ms = Math.round(performance.now() - started);
-    await records.updateOne(
-      { _id: migration.id },
-      { $setOnInsert: { description: migration.description, appliedAt: new Date(), ms } },
-      { upsert: true },
-    );
+    // the lease keeps a second instance away, and the unique index a second record
+    await records.insertOne({
+      migrationId: migration.id,
+      description: migration.description,
+      appliedAt: new Date(),
+      ms,
+    } as MigrationRecord);
     logger.info({ migration: migration.id, ms }, 'migration applied');
     applied.push(migration.id);
   }

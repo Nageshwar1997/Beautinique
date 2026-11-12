@@ -16,6 +16,7 @@ import {
   LOGIN_ID,
   PASSWORD,
   totpNext,
+  USER_ID,
 } from './fake-identity';
 import { describedBy, renderApp, where } from './render';
 
@@ -69,6 +70,26 @@ describe('SignInForm', () => {
     await expectNoAxeViolations();
   });
 
+  it('a password found leaked after it was set asks for a new one, the email handed over (DR-002)', async () => {
+    const identity = fakeIdentity('customer');
+    const leaked =
+      'This password appeared in a data breach. Please set a new one with an email code.';
+    identity.on('POST /auth/login', () => failure(403, 'PASSWORD_RESET_REQUIRED', leaked));
+    const user = userEvent.setup();
+    const { router } = renderApp(
+      { ...pages, '/forgot-password': <p>The code page</p> },
+      { identity, at: '/sign-in?next=%2Forders' },
+    );
+    await typePassword(user);
+    expect((await screen.findByRole('alert')).textContent).toBe(leaked);
+    expect(hintSet('customer')).toBe(false);
+    await expectNoAxeViolations();
+    await user.click(screen.getByRole('link', { name: 'Set a new password' }));
+    await screen.findByText('The code page');
+    expect(where()).toBe('/forgot-password?next=%2Forders');
+    expect(router.state.location.state).toEqual({ email: EMAIL });
+  });
+
   it('keeps next on the forgot-password link', () => {
     renderApp(pages, { identity: fakeIdentity('customer'), at: '/sign-in?next=%2Forders' });
     expect(screen.getByRole('link', { name: 'Forgot password?' }).getAttribute('href')).toBe(
@@ -92,7 +113,7 @@ describe('SignInForm', () => {
     expect(document.activeElement).toBe(screen.getByLabelText('Authenticator code'));
     await expectNoAxeViolations();
     identity.on('POST /auth/login/:id/totp', () =>
-      json(200, { data: { user: { userId: LOGIN_ID, email: EMAIL } } }),
+      json(200, { data: { user: { userId: USER_ID, email: EMAIL } } }),
     );
     await user.clear(screen.getByLabelText('Authenticator code'));
     await user.type(screen.getByLabelText('Authenticator code'), '482913');

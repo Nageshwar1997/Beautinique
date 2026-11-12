@@ -12,7 +12,7 @@ npm install @beautinique/backend-server-storage zod
 
 - **Database me sirf `assetId`**, provider ka URL kabhi nahi. URL hamesha `getUrl` se banta hai.
 - **Ek file, ek owner.** Wahi image doosre record ko chahiye to `copy` se naya asset banta hai; ek record ka delete doosre ki image nahi todta.
-- **Key ek hi format ka:** `<visibility>/<purpose>/<assetId>` (`public/product.image/<uuidv7>`), `assetKey()` se. Key se hi pata chalta hai ki file public hai ya private, aur provider badalne par key wahi rehti hai.
+- **Key ek hi format ka:** `<visibility>/<purpose>/<assetId>` (`public/product.image/<assetId>`, assetId = `media_assets` record ka ObjectId, lower-case hex; owner 2026-11-12), `assetKey()` se. Key se hi pata chalta hai ki file public hai ya private, aur provider badalne par key wahi rehti hai.
 - Upload browser se seedha provider ko jaata hai (signed ticket); server file ko apne se nahi guzaarta.
 
 ## `StoragePort`
@@ -28,17 +28,18 @@ npm install @beautinique/backend-server-storage zod
 
 `stat` aur `list` ARCHITECTURE §6.7 ke chaar naam wale methods ke upar jude hain: `stat` ke bina `USED` mark karte waqt pata nahi chalta ki file sach me upload hui; `list` ke bina reconcile job provider ki list nahi padh sakta.
 
-Galat input (UUIDv7 nahi, purpose `product.image` jaisa nahi, size 0, typo wala field ...) `StorageError` `INVALID_INPUT` deta hai, aur promise wale methods me wo rejected promise hota hai, call pe throw nahi.
+Galat input (ObjectId ka 24-hex nahi, purpose `product.image` jaisa nahi, size 0, typo wala field ...) `StorageError` `INVALID_INPUT` deta hai, aur promise wale methods me wo rejected promise hota hai, call pe throw nahi.
 
 ## Use
 
 ```ts
+import { ObjectId } from '@beautinique/backend-server-mongo';
 import { assetKey, createMemoryStorage } from '@beautinique/backend-server-storage';
-import { uuidv7 } from '@beautinique/shared-utils';
 
 const storage = createMemoryStorage(); // production me Cloudinary adapter, `storage.provider` config se
 
-const assetId = uuidv7();
+// media_assets record ka _id; key me uska hex
+const assetId = new ObjectId().toHexString();
 const ticket = await storage.createUpload({
   assetId,
   purpose: 'product.image',
@@ -53,7 +54,7 @@ storage.getUrl({ key: ticket.key, width: 640 });
 
 const copy = await storage.copy({
   from: ticket.key,
-  assetId: uuidv7(),
+  assetId: new ObjectId().toHexString(),
   purpose: 'banner.image',
   visibility: 'public',
 });

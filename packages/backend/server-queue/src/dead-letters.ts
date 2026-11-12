@@ -11,7 +11,7 @@ export interface RedriveDeadLettersOptions {
   mongo: Mongo;
   redis: Redis;
   logger: Logger;
-  /** Which dead letters (their ids, `<eventId>@<subscriber>`); all when left out. */
+  /** Which dead letters (their job ids, `<eventId>@<subscriber>`); all when left out. */
   ids?: readonly string[];
   /** BullMQ key prefix (default `bull`). */
   prefix?: string;
@@ -39,7 +39,7 @@ export async function redriveDeadLetters({
 }: RedriveDeadLettersOptions): Promise<RedriveResult> {
   const deadLetters = mongo.db.collection<DeadLetter>(DEAD_LETTERS);
   const letters = await deadLetters
-    .find(ids === undefined ? {} : { _id: { $in: [...ids] } })
+    .find(ids === undefined ? {} : { jobId: { $in: [...ids] } })
     .sort({ failedAt: 1 })
     .toArray();
   const queues = new Map<string, Queue>();
@@ -53,17 +53,17 @@ export async function redriveDeadLetters({
         });
         queues.set(letter.queue, queue);
       }
-      await queue.remove(letter._id);
-      if (await queue.getJob(letter._id)) {
-        result.skipped.push(letter._id);
+      await queue.remove(letter.jobId);
+      if (await queue.getJob(letter.jobId)) {
+        result.skipped.push(letter.jobId);
         continue;
       }
       await queue.add(letter.subscriber, letter.envelope, {
         ...RELAY_JOB_OPTIONS,
-        jobId: letter._id,
+        jobId: letter.jobId,
       });
       await deadLetters.deleteOne({ _id: letter._id });
-      result.sent.push(letter._id);
+      result.sent.push(letter.jobId);
     }
   } finally {
     await Promise.all([...queues.values()].map((open) => open.close()));

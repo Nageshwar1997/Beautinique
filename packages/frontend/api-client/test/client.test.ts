@@ -259,10 +259,10 @@ describe('createApiClient', () => {
       json(200, {
         data: {
           user: {
-            userId: '01920000-0000-7000-8000-000000000001',
+            userId: '6730a2b40000000000000001',
             email: 'asha@beautinique.example',
           },
-          sessionId: '01920000-0000-7000-8000-000000000002',
+          sessionId: '6730a2b40000000000000002',
           expiresAt: '2026-12-01T00:00:00.000Z',
         },
       }),
@@ -292,15 +292,22 @@ describe('createApiClient', () => {
 
   it('does not refresh again when another tab just did (409), and sends the call with its cookie', async () => {
     const gateway = fakeGateway({ access: false });
+    const otherTab = new BroadcastChannel('bq:customer:session');
     gateway.refreshAnswers.push(() => {
-      // the other tab's answer set the new cookies, which this tab shares
+      // the other tab's answer set the new cookies, which this tab shares, and it says so
       gateway.state.access = true;
+      otherTab.postMessage('refreshed');
       return failure(409, 'REFRESH_IN_PROGRESS');
     });
     const started = performance.now();
-    const me = await clientFor(gateway).call(getMe);
-    expect(me.user.userId).toBe('01920000-0000-7000-8000-000000000001');
-    expect(performance.now() - started).toBeGreaterThanOrEqual(OTHER_TAB_REFRESH_WAIT_MS - 5);
+    try {
+      const me = await clientFor(gateway).call(getMe);
+      expect(me.user.userId).toBe('6730a2b40000000000000001');
+    } finally {
+      otherTab.close();
+    }
+    // heard before its own 409 came: no wait for word that already came
+    expect(performance.now() - started).toBeLessThan(OTHER_TAB_REFRESH_WAIT_MS / 2);
     expect(gateway.paths()).toEqual([
       'GET /api/v1/iam/me',
       'POST /api/v1/auth/refresh',
@@ -308,16 +315,82 @@ describe('createApiClient', () => {
     ]);
   });
 
+  it('waits for the other tab’s answer when it comes late after the 409, and never sends the old refresh token again (Q-010)', async () => {
+    const gateway = fakeGateway({ access: false });
+    const otherTab = new BroadcastChannel('bq:customer:session');
+    // the other tab's answer (with the new cookies) comes 800 ms after this tab's 409
+    gateway.refreshAnswers.push(() => {
+      setTimeout(() => {
+        gateway.state.access = true;
+        otherTab.postMessage('refreshed');
+      }, 800);
+      return failure(409, 'REFRESH_IN_PROGRESS');
+    });
+    const started = performance.now();
+    try {
+      const me = await clientFor(gateway).call(getMe);
+      expect(me.user.userId).toBe('6730a2b40000000000000001');
+    } finally {
+      otherTab.close();
+    }
+    expect(performance.now() - started).toBeGreaterThanOrEqual(795);
+    // one refresh: a second one would carry the old token, which identity takes for a copy after 10 s
+    expect(gateway.paths()).toEqual([
+      'GET /api/v1/iam/me',
+      'POST /api/v1/auth/refresh',
+      'GET /api/v1/iam/me',
+    ]);
+  });
+
+  it('tells the app’s other tabs once its own refresh came, and nothing else hears of it', async () => {
+    const gateway = fakeGateway({ access: false });
+    const otherTab = new BroadcastChannel('bq:customer:session');
+    const heard: unknown[] = [];
+    otherTab.onmessage = (event: MessageEvent<unknown>) => heard.push(event.data);
+    const client = clientFor(gateway);
+    const changes: SessionChange[] = [];
+    client.onSessionChange((change) => changes.push(change));
+    try {
+      await expect(client.refresh()).resolves.toBe(true);
+      await vi.waitFor(() => {
+        expect(heard).toEqual(['refreshed']);
+      });
+    } finally {
+      otherTab.close();
+    }
+    expect(changes).toEqual([]);
+  });
+
+  it(
+    'gives up after a while without word from the other tab, as an ended session',
+    { timeout: OTHER_TAB_REFRESH_WAIT_MS + 5_000 },
+    async () => {
+      const gateway = fakeGateway({ access: false });
+      gateway.refreshAnswers.push(() => failure(409, 'REFRESH_IN_PROGRESS'));
+      const started = performance.now();
+      const error = await clientFor(gateway)
+        .call(getMe)
+        .catch((caught: unknown) => caught);
+      expect((error as ApiError).code).toBe('UNAUTHENTICATED');
+      expect(performance.now() - started).toBeGreaterThanOrEqual(OTHER_TAB_REFRESH_WAIT_MS - 5);
+      expect(gateway.paths()).toEqual([
+        'GET /api/v1/iam/me',
+        'POST /api/v1/auth/refresh',
+        'GET /api/v1/iam/me',
+      ]);
+    },
+  );
+
   it('sends a call again only once after a refresh', async () => {
     const gateway = fakeGateway({ access: false });
     gateway.refreshAnswers.push(() =>
       json(200, {
         data: {
           user: {
-            userId: '01920000-0000-7000-8000-000000000001',
+            userId: '6730a2b40000000000000001',
             email: 'asha@beautinique.example',
           },
-          sessionId: '01920000-0000-7000-8000-000000000002',
+          sessionId: '6730a2b40000000000000002',
           expiresAt: '2026-12-01T00:00:00.000Z',
         },
       }),

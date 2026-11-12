@@ -35,6 +35,18 @@ export const configZod = object({
   /** Codes one email may get in an hour, resends included (ARCHITECTURE §7.1: email limits). */
   otpEmailLimitPerHour: coerce.number().int().min(1).default(5),
   /**
+   * Password hashes for sign-ins a minute, every IP together (owner, 2026-11-12, QA DR-004): past
+   * it a sign-in is 503 for a moment, and the rest of the free server's 0.1 CPU stays free.
+   */
+  loginHashesPerMinute: coerce.number().int().min(1).default(30),
+  /**
+   * Code emails an hour, every IP together, resends too, and the sign-up codes of a UTC day (owner,
+   * 2026-11-12, QA DR-009): past either the app says so, and the day's 300 emails keep room for
+   * password, invitation and security emails.
+   */
+  codesPerHour: coerce.number().int().min(1).default(60),
+  signUpCodesPerDay: coerce.number().int().min(1).default(100),
+  /**
    * The version of the terms and privacy notice a sign-up accepts (dummy legal pages until the
    * legal module, RULES §7.4); a new version is accepted again at the next sign-in.
    */

@@ -3,13 +3,14 @@ import { pipeline } from 'node:stream';
 
 import {
   AppError,
+  cookieOf,
   type Logger,
   type PassportSigner,
   requestIdOf,
 } from '@beautinique/backend-server-kit';
 import {
-  ipKey,
   type RateLimiter,
+  type RateLimitResult,
   type RateLimitRule,
   RateLimitUnavailableError,
 } from '@beautinique/backend-server-ratelimit';
@@ -23,12 +24,18 @@ import {
   matchPath,
   passportAudience,
   type RateLimitClass,
+  refreshCookieName,
   STEP_UP_SECONDS,
 } from '@beautinique/shared-contracts';
 import type { Request, RequestHandler, Response } from 'express';
 
 import { type AppRegistry, normalizeHost, originHost } from './apps.ts';
-import { FAIL_CLOSED, rateLimitHeaders } from './rate-limits.ts';
+import {
+  FAIL_CLOSED,
+  type RateLimitBucket,
+  rateLimitBuckets,
+  rateLimitHeaders,
+} from './rate-limits.ts';
 import type { SessionGate } from './sessions.ts';
 import { clientIp, ORIGIN_SECRET_HEADER } from './trust.ts';
 
@@ -266,7 +273,7 @@ export const stepUpFresh = (stepUpAt: number | null, now: number): boolean =>
  * 1. the origin secret of the apps' Vercel routes (direct requests to Render are refused);
  * 2. a known app in X-BQ-App, coming from that app's own host;
  * 3. a route of the manifest that this app may use;
- * 4. the route's rate-limit class, per client IP;
+ * 4. the route's rate-limit class, per client IP (refresh and sign-out also per session);
  * 5. access: a public route passes; any other needs the app's access cookie (sessions), and its
  *    owner gets a passport of who signed in; a permission route needs the key in one of the
  *    person's grants in this app (else 403), and a step-up route a step-up in the last 5 minutes;
@@ -326,13 +333,24 @@ export function proxy({
     }
 
     const ip = clientIp(req, fromVercel);
-    const rule = rateLimits[route.rateLimit];
+    const buckets = rateLimitBuckets(
+      route.rateLimit,
+      ip,
+      rateLimits,
+      cookieOf(req.get('cookie'), refreshCookieName(app)),
+    );
     try {
-      const result = await limiter.take(`${route.rateLimit}:${ipKey(ip)}`, rule);
-      res.set(rateLimitHeaders(route.rateLimit, rule, result));
-      if (!result.allowed) {
-        throw new AppError('RATE_LIMITED', SLOW_DOWN);
+      // the answer tells the bucket that refused, or else the one with the least left
+      let told: { bucket: RateLimitBucket; result: RateLimitResult } | undefined;
+      for (const bucket of buckets) {
+        const result = await limiter.take(bucket.key, bucket.rule);
+        if (!result.allowed) {
+          res.set(rateLimitHeaders(bucket.name, bucket.rule, result));
+          throw new AppError('RATE_LIMITED', SLOW_DOWN);
+        }
+        if (!told || result.remaining < told.result.remaining) told = { bucket, result };
       }
+      if (told) res.set(rateLimitHeaders(told.bucket.name, told.bucket.rule, told.result));
     } catch (error) {
       if (!(error instanceof RateLimitUnavailableError)) throw error;
       limitsDown(error);

@@ -76,6 +76,7 @@ npm run build
 | `npm run infra:up` / `infra:down` / `infra:reset`                                     | Local Mongo, Valkey, Mailpit (Docker; [infra/README.md](infra/README.md))                                                                                        |
 | `npm run infra:mutation:up` / `infra:mutation:down`                                   | Mutation runs ke liye alag Mongo (27018) aur Valkey (6380): normal kaam saath chalta rahe (RULES §6)                                                             |
 | `npm run mutate -- --package backend-server-queue` (`--changed`, `--base prerelease`) | Mutation testing (RULES §6): package ki `test/mutations.ts`, temp copy me                                                                                        |
+| `npm run icons:install`                                                               | Saare apps ke install icons (customer/team/partner parivaar) aur manifest dobara (logo badle to; DESIGN §11)                                                     |
 | `npm run playground --workspace @beautinique/frontend-styles`                         | Styles ka Vite playground (port 5180)                                                                                                                            |
 | `npm run playground --workspace @beautinique/frontend-hooks`                          | Hooks ka playground (port 5183); components ka 5184, forms ka 5185, app-shell ka 5182, icons ka 5181                                                             |
 
@@ -95,6 +96,10 @@ npm run build
   `packages/backend/server-mongo` me (ESLint rokta hai). Transaction me queries ek ke baad ek (`Promise.all` ESLint rokta hai),
   aur query ka error pakad ke aage nahi (dedupe `$setOnInsert` upsert se). Har query index se; jaan-boojh poora padhna
   `comment: 'full read: <wajah>'` se, warna deployable ke tests fail (profiler pehra, RULES §4.13).
+  **Ids (owner, 2026-11-12):** har document ka `_id` ObjectId aur har reference (userId, roleId, appId, eventId ...)
+  ObjectId; naam (role key, lease, task ...) alag unique field me. API/JWT me 24-hex string (`objectIdZod`), query se pehle
+  `toObjectId`/`parseObjectId`. ObjectId kabhi secret nahi (RULES §7.6); UUIDv7 sirf Redis ids, Idempotency-Key, offline actions.
+  Deployable ke tests ke aakhir me ObjectId pehra (`scripts/e2e/object-ids.ts`) bhi chalta hai.
 - **Events:** `writeEvent` (`@beautinique/backend-server-queue`) usi `withTransaction` me jisme data badla; relay BullMQ tak le jaata hai.
   Change stream (`.watch(`) sirf us relay me (ESLint rokta hai). Redis: laptop/CI pe Docker Valkey, production me Render Key Value free (internal URL), `REDIS_URL` se;
   production Redis laptop ya tests se kabhi nahi.

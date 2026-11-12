@@ -2,11 +2,11 @@ import {
   type ClientSession,
   type IndexSpec,
   type Mongo,
+  type ObjectId,
   syncIndexes,
 } from '@beautinique/backend-server-mongo';
 import type { Migration } from '@beautinique/backend-server-release';
 import type { AUTH_PROVIDERS as PROVIDER_NAMES } from '@beautinique/shared-contracts';
-import { uuidv7 } from '@beautinique/shared-utils';
 
 export const CREDENTIALS = 'identity_credentials';
 export const AUTH_PROVIDERS = 'identity_auth_providers';
@@ -19,11 +19,16 @@ export type Provider = (typeof PROVIDER_NAMES)[number];
  * so that reading an account never reads them. An account made with Google alone has none.
  */
 export interface Credentials {
-  _id: string;
+  /** The account's id (identity_users) */
+  _id: ObjectId;
   password?: {
     /** argon2id PHC string; the password itself is never stored */
     hash: string;
     setAt: Date;
+    /** The breach check could not answer when it was set: checked at the next sign-in (QA DR-002) */
+    hibpPending?: true;
+    /** That later check found it leaked: no sign-in with it until a new one is set */
+    breachedAt?: Date;
   };
   totp?: {
     /** The authenticator secret, sealed with IDENTITY__FIELD_KEYS (context totpContext) */
@@ -39,8 +44,8 @@ export interface Credentials {
 
 /** One way an account signs in. `subject` is the provider's user id (null for `password`). */
 export interface AuthProvider {
-  _id: string;
-  userId: string;
+  _id: ObjectId;
+  userId: ObjectId;
   provider: Provider;
   subject: string | null;
   linkedAt: Date;
@@ -48,7 +53,8 @@ export interface AuthProvider {
 }
 
 /** The associated data a sealed authenticator secret is bound to: it opens for this account only. */
-export const totpContext = (userId: string): string => `${CREDENTIALS}.totp:${userId}`;
+export const totpContext = (userId: ObjectId): string =>
+  `${CREDENTIALS}.totp:${userId.toHexString()}`;
 
 /**
  * One Google (LinkedIn, GitHub) account belongs to one of ours. The filter takes every non-empty
@@ -107,23 +113,36 @@ export const providerSubjectIndexMigration: Migration = {
 };
 
 /** Sets (or replaces) an account's password, and records `password` as a way it signs in. */
+/** A new password, ready to keep: its hash, and whether the breach check could answer. */
+export interface NewPassword {
+  /** argon2id, made before the code was used up */
+  hash: string;
+  /** The breach check could not answer: checked again at the next sign-in (QA DR-002) */
+  hibpPending: boolean;
+}
+
 export async function storePassword(
   mongo: Mongo,
   session: ClientSession,
-  { userId, hash, now }: { userId: string; hash: string; now: Date },
+  { userId, password, now }: { userId: ObjectId; password: NewPassword; now: Date },
 ): Promise<void> {
+  // a whole new password: an old mark (pending, leaked) goes with the old one
+  const kept = {
+    hash: password.hash,
+    setAt: now,
+    ...(password.hibpPending ? { hibpPending: true as const } : {}),
+  };
   await mongo.db
     .collection<Credentials>(CREDENTIALS)
     .updateOne(
       { _id: userId },
-      { $set: { password: { hash, setAt: now }, updatedAt: now } },
+      { $set: { password: kept, updatedAt: now } },
       { upsert: true, session },
     );
   await mongo.db.collection<AuthProvider>(AUTH_PROVIDERS).updateOne(
     { userId, provider: 'password' },
     {
       $setOnInsert: {
-        _id: uuidv7(),
         userId,
         provider: 'password',
         subject: null,
@@ -138,7 +157,7 @@ export async function storePassword(
 /** Whether an account signs in with a password. */
 export async function hasPassword(
   mongo: Mongo,
-  userId: string,
+  userId: ObjectId,
   session?: ClientSession,
 ): Promise<boolean> {
   const found = await mongo.db

@@ -3,16 +3,20 @@
 import { argon2, randomBytes } from 'node:crypto';
 
 import { totpCode } from '@beautinique/backend-server-crypto';
-import { uuidv7 } from '@beautinique/shared-utils';
+import { ObjectId } from '@beautinique/backend-server-mongo';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 
-import { emailIndex, LOCK_MS, lockKey } from '../src/lockout.ts';
+import { ACCOUNT_LOCK_MS, emailIndex, LOCK_MS, lockKey } from '../src/lockout.ts';
 import { ENROLL_TTL_MS, LOGIN_TTL_MS, loginKey } from '../src/login.ts';
 import {
   type Answer,
+  appIdOf,
+  BREACHED,
   credentials,
   type Harness,
+  hibp,
   makeAccount,
+  oid,
   PASSWORD,
   passwordCode,
   post,
@@ -73,7 +77,7 @@ describe('email + password', () => {
       expect(step(answer)).toEqual({ next: 'signed-in', user: { userId, email: address } });
     }
     expect(
-      (await providers().findOne({ userId, provider: 'password' }))?.lastUsedAt,
+      (await providers().findOne({ userId: oid(userId), provider: 'password' }))?.lastUsedAt,
     ).toBeInstanceOf(Date);
   });
 
@@ -83,12 +87,12 @@ describe('email + password', () => {
     const googleOnly = email('google');
     const now = new Date();
     await users().insertOne({
-      _id: uuidv7(),
+      _id: new ObjectId(),
       email: googleOnly,
       status: 'active',
       emailVerifiedAt: now,
       ageDeclaredAt: null,
-      signUpApp: 'customer',
+      signUpAppId: await appIdOf('customer'),
       createdAt: now,
       updatedAt: now,
     });
@@ -144,9 +148,9 @@ describe('email + password', () => {
     });
     const b64 = (bytes: Buffer) => bytes.toString('base64').replace(/=+$/, '');
     const old = `$argon2id$v=19$m=8192,t=1,p=1$${b64(salt)}$${b64(key)}`;
-    await credentials().updateOne({ _id: userId }, { $set: { 'password.hash': old } });
+    await credentials().updateOne({ _id: oid(userId) }, { $set: { 'password.hash': old } });
     expect((await login(address)).status).toBe(200);
-    const hash = (await credentials().findOne({ _id: userId }))?.password?.hash;
+    const hash = (await credentials().findOne({ _id: oid(userId) }))?.password?.hash;
     expect(hash).toMatch(/^\$argon2id\$v=19\$m=19456,t=2,p=1\$/);
     expect((await login(address)).status).toBe(200);
   });
@@ -167,6 +171,119 @@ describe('email + password', () => {
   });
 });
 
+describe('the lock, per IP and for the account (DR-003)', () => {
+  const tryFrom = (address: string, ip: string, password = 'wrong password!') =>
+    post('/auth/login', { email: address, password }, { ip });
+
+  it('locks the IP that made 10 wrong tries for an hour; the owner signs in from another', async () => {
+    const address = email('lock-ip');
+    await makeAccount(address);
+    for (let i = 0; i < 10; i += 1) {
+      expect((await tryFrom(address, '198.51.100.20')).status).toBe(401);
+    }
+    // that IP: the right password answers like a wrong one
+    const locked = await tryFrom(address, '198.51.100.20', PASSWORD);
+    expect([locked.status, locked.body.error?.code]).toEqual([401, 'INVALID_CREDENTIALS']);
+    // one IPv6 home (/64) counts as one IP
+    for (let i = 0; i < 10; i += 1) await tryFrom(address, `2001:db8:7:1::${String(i + 1)}`);
+    expect((await tryFrom(address, '2001:db8:7:1::99', PASSWORD)).status).toBe(401);
+    // the owner, elsewhere, is not locked out
+    expect((await tryFrom(address, '203.0.113.60', PASSWORD)).status).toBe(200);
+    const lock = await redis().hgetall(
+      lockKey(emailIndex(harness.server.runtime.otp.keys, address)),
+    );
+    expect(Number(lock['198.51.100.20']) - Date.now()).toBeGreaterThan(LOCK_MS - 60_000);
+  });
+
+  it('locks the whole account for 15 minutes after 50 wrong tries from every IP together', async () => {
+    const address = email('lock-all');
+    await makeAccount(address);
+    // 6 IPs with 9 each: no IP reaches its own 10, the account reaches 50
+    for (let ipNo = 0; ipNo < 6; ipNo += 1) {
+      for (let i = 0; i < 9; i += 1) await tryFrom(address, `198.51.100.${String(30 + ipNo)}`);
+    }
+    const anywhere = await tryFrom(address, '203.0.113.61', PASSWORD);
+    expect([anywhere.status, anywhere.body.error?.code]).toEqual([401, 'INVALID_CREDENTIALS']);
+    const lock = await redis().hgetall(
+      lockKey(emailIndex(harness.server.runtime.otp.keys, address)),
+    );
+    const left = Number(lock['*']) - Date.now();
+    expect(left).toBeGreaterThan(ACCOUNT_LOCK_MS - 60_000);
+    expect(left).toBeLessThanOrEqual(ACCOUNT_LOCK_MS);
+  });
+
+  it('does not make a lock longer with the tries during it', async () => {
+    const address = email('lock-steady');
+    await makeAccount(address);
+    for (let i = 0; i < 10; i += 1) await tryFrom(address, '198.51.100.40');
+    const key = lockKey(emailIndex(harness.server.runtime.otp.keys, address));
+    const until = (await redis().hget(key, '198.51.100.40')) ?? '';
+    // 20 more tries from that IP while it is locked: the lock still ends when it would have
+    for (let i = 0; i < 20; i += 1) await tryFrom(address, '198.51.100.40');
+    expect(await redis().hget(key, '198.51.100.40')).toBe(until);
+    // and they did not count toward the account's 50
+    expect(await redis().hget(key, '*')).toBeNull();
+  });
+});
+
+describe('the password hashes of every IP together (DR-004)', () => {
+  const at = (to: Harness['server']) => (address: string, password: string) =>
+    post('/auth/login', { email: address, password }, { to });
+
+  it('spend one budget a minute: past it, every sign-in is 503 until it fills again', async () => {
+    const busy = await harness.start({ IDENTITY__LOGIN_HASHES_PER_MINUTE: '3' });
+    try {
+      const login3 = at(busy);
+      for (let i = 0; i < 3; i += 1) {
+        expect((await login3(email(`budget${String(i)}`), 'wrong password!')).status).toBe(401);
+      }
+      // the fourth, from anyone (here the right password of a real account), waits for the budget
+      const address = email('budget-owner');
+      await makeAccount(address);
+      const refused = await login3(address, PASSWORD);
+      expect([refused.status, refused.body.error?.code]).toEqual([503, 'SERVICE_UNAVAILABLE']);
+      expect(refused.body.error?.message).toBe(
+        'Too many sign-ins right now. Please try again in a moment.',
+      );
+      // a minute's budget: a second later it has not filled again (one more every 20 s)
+      await new Promise((resolve) => setTimeout(resolve, 1100));
+      expect((await login3(address, PASSWORD)).status).toBe(503);
+    } finally {
+      await busy.stop();
+    }
+  });
+
+  it('answer a locked account without a hash, so a lock costs the budget nothing', async () => {
+    const address = email('locked-cheap');
+    const neighbour = email('locked-cheap-neighbour');
+    await makeAccount(address);
+    await makeAccount(neighbour);
+    const budgeted = await harness.start({ IDENTITY__LOGIN_HASHES_PER_MINUTE: '12' });
+    try {
+      const login12 = at(budgeted);
+      // 10 wrong tries lock it: 10 hashes of the 12
+      for (let i = 0; i < 10; i += 1) {
+        expect((await login12(address, 'wrong password!')).status).toBe(401);
+      }
+      // locked: five more, the right password among them, answer like a wrong one and spend nothing
+      for (const password of [
+        PASSWORD,
+        'wrong password!',
+        'wrong password!',
+        PASSWORD,
+        'x'.repeat(12),
+      ]) {
+        const answer = await login12(address, password);
+        expect([answer.status, answer.body.error?.code]).toEqual([401, 'INVALID_CREDENTIALS']);
+      }
+      // so the 11th hash is someone else's, who signs in
+      expect((await login12(neighbour, PASSWORD)).status).toBe(200);
+    } finally {
+      await budgeted.stop();
+    }
+  });
+});
+
 describe('the authenticator', () => {
   it('is set up at the first sign-in of an internal app, with 10 recovery codes shown once', async () => {
     const { address, userId, secret, recoveryCodes, enroll, confirmed } =
@@ -179,7 +296,7 @@ describe('the authenticator', () => {
     expect(recoveryCodes).toHaveLength(10);
     expect(new Set(recoveryCodes).size).toBe(10);
     for (const code of recoveryCodes) expect(code).toMatch(/^[A-Z2-7]{5}-[A-Z2-7]{5}$/);
-    const saved = await credentials().findOne({ _id: userId });
+    const saved = await credentials().findOne({ _id: oid(userId) });
     expect(saved?.totp?.secret).toMatch(/^v1\.k1\./);
     expect(JSON.stringify(saved)).not.toContain(secret);
     expect(JSON.stringify(saved)).not.toContain(recoveryCodes[0]?.replace('-', ''));
@@ -309,7 +426,7 @@ describe('the authenticator', () => {
       { app: 'finance' },
     );
     expect(wrong.body.error?.code).toBe('TOTP_INVALID');
-    expect((await credentials().findOne({ _id: userId }))?.totp).toBeUndefined();
+    expect((await credentials().findOne({ _id: oid(userId) }))?.totp).toBeUndefined();
     // a second enroll replaces the secret: the first one's code no longer fits
     const replaced = await post(`/auth/login/${String(fresh)}/totp/enroll`, {}, { app: 'finance' });
     const newSecret = (replaced.body.data as { secret: string }).secret;
@@ -328,5 +445,68 @@ describe('the authenticator', () => {
       { app: 'finance' },
     );
     expect(done.status).toBe(200);
+  });
+});
+
+describe('a password the breach check could not see (DR-002)', () => {
+  /** Runs with Have I Been Pwned away (a 503), like an outage. */
+  async function away<T>(run: () => Promise<T>): Promise<T> {
+    hibp.mode = 'down';
+    try {
+      return await run();
+    } finally {
+      hibp.mode = 'answer';
+    }
+  }
+  const stored = async (userId: string) =>
+    (await credentials().findOne({ _id: oid(userId) }))?.password;
+
+  it('is checked again at the next sign-in, and a leaked one asks for a new password', async () => {
+    const address = email('leak-later');
+    const userId = await away(() => makeAccount(address, BREACHED));
+    expect((await stored(userId))?.hibpPending).toBe(true);
+    // still away: the sign-in goes on, and the next one checks again
+    expect(step(await away(() => login(address, BREACHED))).next).toBe('signed-in');
+    expect((await stored(userId))?.hibpPending).toBe(true);
+
+    const asked = hibp.asked.length;
+    const leaked = await login(address, BREACHED);
+    expect(hibp.asked.length).toBe(asked + 1);
+    expect([leaked.status, leaked.body.error?.code, leaked.body.error?.message]).toEqual([
+      403,
+      'PASSWORD_RESET_REQUIRED',
+      'This password appeared in a data breach. Please set a new one with an email code.',
+    ]);
+    // known now: with the check away again, still no sign-in with it
+    expect((await away(() => login(address, BREACHED))).body.error?.code).toBe(
+      'PASSWORD_RESET_REQUIRED',
+    );
+    expect(hibp.asked.length).toBe(asked + 1);
+
+    // a new password with an email code ends it
+    const reset = await verify((await passwordCode(address)).challengeId, PASSWORD);
+    expect(reset.body.data?.outcome).toBe('password-set');
+    const now = await stored(userId);
+    expect(now).not.toHaveProperty('hibpPending');
+    expect(now).not.toHaveProperty('breachedAt');
+    expect(step(await login(address)).next).toBe('signed-in');
+  });
+
+  it('a clean one loses the mark at the next sign-in; one checked when set is never asked again', async () => {
+    const address = email('clean-later');
+    const userId = await away(() => makeAccount(address));
+    expect((await stored(userId))?.hibpPending).toBe(true);
+    expect(step(await login(address)).next).toBe('signed-in');
+    expect(await stored(userId)).not.toHaveProperty('hibpPending');
+    let asked = hibp.asked.length;
+    expect(step(await login(address)).next).toBe('signed-in');
+    expect(hibp.asked.length).toBe(asked);
+
+    const checked = email('checked-when-set');
+    const other = await makeAccount(checked);
+    expect(await stored(other)).not.toHaveProperty('hibpPending');
+    asked = hibp.asked.length;
+    expect(step(await login(checked)).next).toBe('signed-in');
+    expect(hibp.asked.length).toBe(asked);
   });
 });

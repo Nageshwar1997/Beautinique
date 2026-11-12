@@ -1,4 +1,5 @@
 import { AppError, mountRoute } from '@beautinique/backend-server-kit';
+import { toObjectId } from '@beautinique/backend-server-mongo';
 import {
   type AppId,
   APPS,
@@ -84,8 +85,9 @@ function appOf(req: Request, allowed: readonly AppId[] = APPS): AppId {
 }
 
 /**
- * Who is at the other end: the IP as the gateway saw it (clientIp(), ARCHITECTURE §7.2) and the
- * browser's User-Agent. Evidence and My Devices only, never a check.
+ * Who is at the other end: the IP as the gateway saw it (clientIp(), ARCHITECTURE §7.2; only the
+ * gateway reaches identity) and the browser's User-Agent. Evidence and My Devices, and the IP's
+ * own sign-in lock and share of an email's codes (QA DR-003); never a grant or a sign-in by itself.
  */
 const clientOf = (req: Request): Client => ({
   ip: req.get(HEADERS.clientIp) ?? 'unknown',
@@ -106,15 +108,27 @@ export function routesOf(deps: OtpDeps): Router {
       purpose: 'sign-up',
       consent: body.consent,
       requestId,
+      ip: clientOf(req).ip,
     }),
   );
 
   mountRoute(router, requestPasswordCode, ({ body }, { req, requestId }) =>
-    requestCode(deps, { app: appOf(req), email: body.email, purpose: 'password', requestId }),
+    requestCode(deps, {
+      app: appOf(req),
+      email: body.email,
+      purpose: 'password',
+      requestId,
+      ip: clientOf(req).ip,
+    }),
   );
 
   mountRoute(router, resendOtp, ({ params }, { req, requestId }) =>
-    resendCode(deps, { app: appOf(req), challengeId: params.challengeId, requestId }),
+    resendCode(deps, {
+      app: appOf(req),
+      challengeId: params.challengeId,
+      requestId,
+      ip: clientOf(req).ip,
+    }),
   );
 
   mountRoute(router, verifyOtp, async ({ params, body }, { req, res }) =>
@@ -167,7 +181,11 @@ export function routesOf(deps: OtpDeps): Router {
   );
 
   mountRoute(router, startTotpEnroll, ({ params }, { req }) =>
-    login.startTotpEnroll(deps, { app: appOf(req), loginId: params.loginId }),
+    login.startTotpEnroll(deps, {
+      app: appOf(req),
+      loginId: params.loginId,
+      ip: clientOf(req).ip,
+    }),
   );
 
   mountRoute(router, confirmTotpEnroll, async ({ params, body }, { req, res }) =>
@@ -221,7 +239,10 @@ export function routesOf(deps: OtpDeps): Router {
 
   mountRoute(router, endSession, async ({ params }, { req, res }) => {
     const passport = await deps.passport(req);
-    const ended = await deps.sessions.end(passport.userId, params.sessionId);
+    const ended = await deps.sessions.end(
+      toObjectId(passport.userId),
+      toObjectId(params.sessionId, { field: 'sessionId' }),
+    );
     // this device's own session: its cookies go too
     if (ended && params.sessionId === passport.sessionId) clearSessionCookies(res, passport.app);
     return { ended };
@@ -229,7 +250,12 @@ export function routesOf(deps: OtpDeps): Router {
 
   mountRoute(router, endOtherSessions, async (_input, { req }) => {
     const passport = await deps.passport(req);
-    return { ended: await deps.sessions.endOthers(passport.userId, passport.sessionId) };
+    return {
+      ended: await deps.sessions.endOthers(
+        toObjectId(passport.userId),
+        toObjectId(passport.sessionId),
+      ),
+    };
   });
 
   // roles, grants and invitations (TASKS T3.3): identity checks who may, from its own grants
@@ -276,6 +302,7 @@ export function routesOf(deps: OtpDeps): Router {
       purpose: 'invite',
       consent: body.consent,
       requestId,
+      ip: clientOf(req).ip,
     }),
   );
 
@@ -283,9 +310,10 @@ export function routesOf(deps: OtpDeps): Router {
   mountRoute(router, stepUp, async ({ body }, { req, res }) => {
     const passport = await deps.passport(req);
     const stepped = await login.stepUpWithTotp(deps, {
-      userId: passport.userId,
-      sessionId: passport.sessionId,
+      userId: toObjectId(passport.userId),
+      sessionId: toObjectId(passport.sessionId),
       proof: body,
+      ip: clientOf(req).ip,
     });
     setAccessCookie(res, stepped.app, stepped.accessToken);
     return {
@@ -300,7 +328,11 @@ export function routesOf(deps: OtpDeps): Router {
   );
 
   mountRoute(router, confirmAuthenticator, async ({ body }, { req, requestId }) =>
-    authenticator.confirmAuthenticator(deps, await deps.passport(req), { ...body, requestId }),
+    authenticator.confirmAuthenticator(deps, await deps.passport(req), {
+      ...body,
+      requestId,
+      ip: clientOf(req).ip,
+    }),
   );
 
   mountRoute(router, newRecoveryCodes, async (_input, { req, requestId }) =>

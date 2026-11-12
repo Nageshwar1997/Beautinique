@@ -6,19 +6,44 @@ import {
   type IndexSpec,
   type IndexSyncReport,
   type Mongo,
+  type ObjectId,
   syncIndexes,
 } from '@beautinique/backend-server-mongo';
-import { releaseLease, tryLease } from '@beautinique/backend-server-queue';
+import { PLATFORM_INDEXES, releaseLease, tryLease } from '@beautinique/backend-server-queue';
 
 import { ReleaseLeaseLostError, ReleaseLockTimeoutError } from './errors';
-import { defineMigrations, type Migration, type ReleaseContext, runMigrations } from './migrations';
+import {
+  defineMigrations,
+  type Migration,
+  MIGRATION_INDEXES,
+  type ReleaseContext,
+  runMigrations,
+} from './migrations';
 
 /** The lease (in platform_locks) that one booting instance holds while its release steps run. */
 export const RELEASE_LEASE = 'release';
 
 /** One document: the fingerprint of the release the database last finished. */
 export const RELEASE_STATE = 'platform_release';
-const STATE_ID = 'current';
+
+/**
+ * Indexes every deployable's release syncs by itself, after its own: the platform's records that
+ * have a name (leases, task runs, facts, migrations) keep it in a unique field, because every
+ * document's _id is an ObjectId (owner, 2026-11-12).
+ */
+export const RELEASE_INDEXES: readonly IndexSpec[] = [...PLATFORM_INDEXES, ...MIGRATION_INDEXES];
+
+/** The deployable's indexes, then the release's own that it does not list already. */
+function withReleaseIndexes(indexes: readonly IndexSpec[]): IndexSpec[] {
+  const listed = new Set(indexes.map((index) => `${index.collection}.${index.name}`));
+  return [
+    ...indexes,
+    ...RELEASE_INDEXES.filter((index) => !listed.has(`${index.collection}.${index.name}`)),
+  ];
+}
+
+// platform_release has this one document only
+const ONE_STATE = 'full read: the one release document';
 
 // bump it when runRelease starts doing something new, so every database runs its steps once more
 const RUNNER_VERSION = 1;
@@ -70,21 +95,22 @@ export interface ReleaseReport {
 }
 
 interface ReleaseState {
-  _id: string;
+  _id: ObjectId;
   fingerprint: string;
   releasedAt: Date;
   ms: number;
 }
 
 /**
- * One value for everything a release would do: the migration ids, every index's shape and every
- * step's fingerprint. Equal values mean the database already has this release.
+ * One value for everything a release would do: the migration ids, every index's shape (the
+ * release's own RELEASE_INDEXES too) and every step's fingerprint. Equal values mean the database
+ * already has this release.
  */
 export function releaseFingerprint({ migrations, indexes, steps = [] }: ReleaseDefinition): string {
   const shape = {
     runner: RUNNER_VERSION,
     migrations: migrations.map((migration) => migration.id),
-    indexes: indexes.map((index) => [
+    indexes: withReleaseIndexes(indexes).map((index) => [
       index.collection,
       index.name,
       Object.entries(index.key),
@@ -198,7 +224,7 @@ export async function runRelease(options: RunReleaseOptions): Promise<ReleaseRep
   const fingerprint = releaseFingerprint({ migrations, indexes, steps });
   const state = mongo.db.collection<ReleaseState>(RELEASE_STATE);
   const isCurrent = async () =>
-    (await state.findOne({ _id: STATE_ID }))?.fingerprint === fingerprint;
+    (await state.findOne({}, { comment: ONE_STATE }))?.fingerprint === fingerprint;
   const nothing = (): ReleaseReport => ({
     upToDate: true,
     fingerprint,
@@ -226,7 +252,7 @@ export async function runRelease(options: RunReleaseOptions): Promise<ReleaseRep
       lease.check();
     });
     lease.check();
-    const synced = await syncIndexes(mongo, indexes);
+    const synced = await syncIndexes(mongo, withReleaseIndexes(indexes));
     const done: string[] = [];
     for (const step of steps) {
       lease.check();
@@ -236,9 +262,9 @@ export async function runRelease(options: RunReleaseOptions): Promise<ReleaseRep
     lease.check();
     const ms = elapsed();
     await state.updateOne(
-      { _id: STATE_ID },
+      {},
       { $set: { fingerprint, releasedAt: new Date(), ms } },
-      { upsert: true },
+      { upsert: true, comment: ONE_STATE },
     );
 
     const report: ReleaseReport = {

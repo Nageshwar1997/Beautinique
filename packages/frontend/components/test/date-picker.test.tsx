@@ -1,4 +1,4 @@
-import { cleanup, render, screen, waitFor, within } from '@testing-library/react';
+import { act, cleanup, render, screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { useState } from 'react';
 import { afterAll, afterEach, beforeAll, describe, expect, it, vi } from 'vitest';
@@ -27,6 +27,25 @@ afterEach(() => {
 });
 
 const segments = (group: HTMLElement) => within(group).getAllByRole('spinbutton');
+
+/**
+ * Text that comes in one `insertText` into the focused part, as Android keyboards, dictation and
+ * autofill send it (user-event types one key at a time, so it never does this).
+ */
+const insertAtOnce = (text: string) => {
+  const segment = document.activeElement;
+  if (!(segment instanceof HTMLElement)) throw new Error('no part has the focus');
+  act(() => {
+    segment.dispatchEvent(
+      new InputEvent('beforeinput', {
+        inputType: 'insertText',
+        data: text,
+        bubbles: true,
+        cancelable: true,
+      }),
+    );
+  });
+};
 const shown = (group: HTMLElement) =>
   // the time sits between invisible bidi marks (Unicode format characters)
   group.textContent.replace(/\p{Cf}/gu, '');
@@ -53,6 +72,21 @@ describe('DatePicker', () => {
     await expectNoAxeViolations();
     await userEvent.click(at(segments(group)));
     await userEvent.keyboard('05112026');
+    expect(onChange).toHaveBeenLastCalledWith('2026-11-05');
+    expect(shown(group)).toBe('05/11/2026');
+  });
+
+  it('many digits in one go (a keyboard suggestion, dictation, autofill) fill the parts one by one (Q-008)', async () => {
+    const onChange = vi.fn();
+    render(<DatePicker label="Date of birth" onChange={onChange} />);
+    const group = screen.getByRole('group', { name: 'Date of birth' });
+    await userEvent.click(at(segments(group)));
+    insertAtOnce('31122099');
+    expect(onChange).toHaveBeenLastCalledWith('2099-12-31');
+    expect(shown(group)).toBe('31/12/2099');
+    // with the slashes, as an autofill may give it
+    await userEvent.click(at(segments(group)));
+    insertAtOnce('05/11/2026');
     expect(onChange).toHaveBeenLastCalledWith('2026-11-05');
     expect(shown(group)).toBe('05/11/2026');
   });
@@ -190,6 +224,15 @@ describe('DateRangePicker', () => {
     await userEvent.keyboard('0110202631102026');
     expect(onChange).toHaveBeenLastCalledWith({ start: '2026-10-01', end: '2026-10-31' });
     await expectNoAxeViolations();
+  });
+
+  it('both ends given in one go fill the parts one by one (Q-008)', async () => {
+    const onChange = vi.fn();
+    render(<DateRangePicker label="Report period" onChange={onChange} />);
+    const group = screen.getByRole('group', { name: 'Report period' });
+    await userEvent.click(at(segments(group)));
+    insertAtOnce('0110202631102026');
+    expect(onChange).toHaveBeenLastCalledWith({ start: '2026-10-01', end: '2026-10-31' });
   });
 
   it('with a time, both ends are instants', async () => {

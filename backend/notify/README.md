@@ -27,7 +27,8 @@ Sab deployables ek process me: `npm run dev:backend` (`backend/bundle`).
 
 **Niyam:**
 
-- **Din ka budget** (Brevo free 300/din): `notify_email_days` me UTC din ki ginti. `NOTIFY__EMAIL_OTHER_LIMIT` (250) ke baad sirf OTP aur transactional; baaki agle UTC din. `NOTIFY__EMAIL_DAILY_LIMIT` (300) pe OTP bhi `failed` (`DAILY_LIMIT`, error log). Brevo ka din kab reset hota hai, docs me nahi mila, isliye UTC.
+- **Ids (owner, 2026-11-12):** delivery ka `_id` = event ka ObjectId (dobara aaya event wahi row paata hai); `notify_email_days` ka `_id` ObjectId, din `day` (unique) me. Event se aayi app ka naam (key) hi, kyunki apps ke documents identity ke DB me hain; OTP ka `challengeId` Redis ka UUIDv7.
+- **Din ka budget** (Brevo free 300/din): `notify_email_days` me UTC din ki ginti. `NOTIFY__EMAIL_OTHER_LIMIT` (250) ke baad sirf OTP aur transactional; baaki agle UTC din. `NOTIFY__EMAIL_DAILY_LIMIT` (300) pe OTP bhi `failed` (`DAILY_LIMIT`, error log). Din ka 80% (`BUDGET_WARNING`) paar hote hi ek baar warning log "email budget nearly used today" (QA DR-009); sign-up codes ka apna hissa identity rakhti hai (`IDENTITY__SIGN_UP_CODES_PER_DAY`). Brevo ka din kab reset hota hai, docs me nahi mila, isliye UTC.
 - **Retry:** network, 5xx, 429, 402, aur 401/403 (galat key, dashboard me theek ho sakti hai) pe 10 s, 30 s, 90 s, 270 s ke baad, max 5 try. 400/422 (message hi galat) pe turant `failed`. Fail hua try din ki ginti se wapas.
 - **OTP expire:** code ka waqt khatam (`expiresAt`) to email nahi jaata (`expired`), aur retry tabhi jab wo expiry se pehle ho sake.
 - **Logs:** delivery id, lane, attempt, error code aur provider ka message id. Email address, code ya email ka text kabhi nahi (tests isse jaanchte hain).

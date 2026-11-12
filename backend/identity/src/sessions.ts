@@ -2,7 +2,12 @@ import { randomBytes } from 'node:crypto';
 
 import { blindIndex, type CryptoKeys, signJwt } from '@beautinique/backend-server-crypto';
 import { AppError, type Logger } from '@beautinique/backend-server-kit';
-import { type IndexSpec, type Mongo, withTransaction } from '@beautinique/backend-server-mongo';
+import {
+  type IndexSpec,
+  type Mongo,
+  ObjectId,
+  withTransaction,
+} from '@beautinique/backend-server-mongo';
 import { writeEvent } from '@beautinique/backend-server-queue';
 import {
   ACCESS_TOKEN_SECONDS,
@@ -10,18 +15,21 @@ import {
   type AppPermissions,
   appPermissionsKey,
   IDENTITY_ERROR_CODES,
+  refreshTokenParts,
   REVOCATIONS_READY_KEY,
   revokedSessionKey,
   revokedUserKey,
   SESSION_POLICIES,
   sessionReuseDetected,
+  STEP_UP_SECONDS,
+  type StepUpAction,
   TOKEN_ISSUER,
   tokenAudience,
 } from '@beautinique/shared-contracts';
-import { uuidv7 } from '@beautinique/shared-utils';
 import type { Redis } from 'ioredis';
 
 import { invalidCredentials, signInUnavailable } from './errors.ts';
+import { rbacCatalog } from './rbac/catalog.ts';
 import { type SignInAccess, signInAccess } from './rbac/grants.ts';
 import type { SigningKeys } from './signing-keys.ts';
 
@@ -36,14 +44,14 @@ export interface Client {
 }
 
 export interface IssueSessionInput {
-  userId: string;
+  userId: ObjectId;
   email: string;
   app: AppId;
   methods: AuthMethod[];
   client: Client;
 }
 
-/** A session's tokens, for the app's cookies. */
+/** A session's tokens, for the app's cookies (ids as hex, as routes and tokens carry them). */
 export interface IssuedSession {
   user: { userId: string; email: string };
   app: AppId;
@@ -77,11 +85,13 @@ export type EndReason =
 /** A sign-in with these counts as a step-up at that moment (ARCHITECTURE §7.1). */
 const STEP_UP_METHODS: readonly AuthMethod[] = ['totp', 'recovery-code'];
 
+/** One sign-in's session. Every id in it is an ObjectId (owner, 2026-11-12). */
 export interface Session {
-  _id: string;
-  userId: string;
+  _id: ObjectId;
+  userId: ObjectId;
   email: string;
-  app: AppId;
+  /** Its app (identity_apps) */
+  appId: ObjectId;
   /** `Chrome on Windows` (deviceName) */
   device: string;
   ip: string;
@@ -109,7 +119,15 @@ export interface Session {
    * /auth/step-up); access tokens carry it as `su`. Missing = never (sessions from before T3.3).
    */
   stepUpAt?: Date | null;
+  /**
+   * A step-up for one change alone (STEP_UP_ACTIONS, QA DR-010): which, and when. It counts once,
+   * within STEP_UP_SECONDS, and never as `stepUpAt`.
+   */
+  stepUpFor?: { action: StepUpAction; at: Date } | null;
 }
+
+/** A session with its app's key, as My Devices and tokens need it. */
+export type SessionWithApp = Session & { app: AppId };
 
 export const indexes: readonly IndexSpec[] = [
   { collection: SESSIONS, name: 'userId_revokedAt', key: { userId: 1, revokedAt: 1 } },
@@ -166,20 +184,12 @@ export interface SessionDeps {
 /**
  * `<sessionId>.<family>.<secret>`: the session is found by its id; the family (16 random bytes) is
  * the same in every token of the session, so any older token of it is known for what it is; the
- * secret (32 random bytes) is new at each refresh.
+ * secret (32 random bytes) is new at each refresh. contracts `refreshTokenParts` reads the first two
+ * back, here and in the gateway (its `session` rate limit).
  */
-const newRefreshToken = (sessionId: string, family: string): string =>
-  `${sessionId}.${family}.${randomBytes(32).toString('base64url')}`;
+const newRefreshToken = (sessionId: ObjectId, family: string): string =>
+  `${sessionId.toHexString()}.${family}.${randomBytes(32).toString('base64url')}`;
 const newFamily = (): string => randomBytes(16).toString('base64url');
-const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-7[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/;
-
-/** A refresh token's session id and family; a token from before families (`<id>.<secret>`) has none. */
-function partsOf(token: string | undefined): { sessionId: string; family: string | null } | null {
-  const parts = token?.split('.') ?? [];
-  const sessionId = parts[0] ?? '';
-  if (!UUID.test(sessionId)) return null;
-  return { sessionId, family: parts.length === 3 ? (parts[1] ?? null) : null };
-}
 
 /** Keyed hash of a refresh token: a database copy alone cannot refresh anything. */
 const refreshHashOf = (keys: CryptoKeys, token: string): string =>
@@ -216,7 +226,7 @@ export async function restoreGatewayMarks(
   const batch = redis.multi();
   for (const session of ended) {
     const left = (session.revokedAt?.getTime() ?? at) + REVOKE_TTL_MS - at;
-    if (left > 0) batch.set(revokedSessionKey(session._id), '1', 'PX', left);
+    if (left > 0) batch.set(revokedSessionKey(session._id.toHexString()), '1', 'PX', left);
   }
   // last: the gateway trusts the marks only once all of them are in
   batch.set(readyKey, '1');
@@ -246,22 +256,27 @@ export interface Sessions extends SessionPort {
   /** Ends the session of a refresh token (nothing when there is none). */
   logout(input: { app: AppId; refreshToken: string | undefined }): Promise<void>;
   /** Ends every session of an account (a new password, a Security Officer); how many ended. */
-  endAll(userId: string, reason: EndReason): Promise<number>;
+  endAll(userId: ObjectId, reason: EndReason): Promise<number>;
   /**
    * Step-up (ARCHITECTURE §7.1): the session confirmed with the authenticator now; a new access
    * token carries it. SESSION_EXPIRED when the session ended or its app has no grant left.
    */
-  stepUp(input: { userId: string; sessionId: string }): Promise<{
+  stepUp(input: { userId: ObjectId; sessionId: ObjectId; for?: StepUpAction }): Promise<{
     app: AppId;
     accessToken: string;
     stepUpAt: Date;
   }>;
+  /**
+   * Takes the session's step-up for this change, if it has one from the last STEP_UP_SECONDS:
+   * true once, then it is gone (QA DR-010).
+   */
+  useStepUp(sessionId: ObjectId, action: StepUpAction): Promise<boolean>;
   /** My Devices: the account's sessions that have not ended, in every app, the newest first. */
-  list(userId: string): Promise<Session[]>;
+  list(userId: ObjectId): Promise<SessionWithApp[]>;
   /** Ends one session of the account; false when it is not the account's or ended already. */
-  end(userId: string, sessionId: string): Promise<boolean>;
+  end(userId: ObjectId, sessionId: ObjectId): Promise<boolean>;
   /** Ends every session of the account but `keep`; how many ended. */
-  endOthers(userId: string, keep: string): Promise<number>;
+  endOthers(userId: ObjectId, keep: ObjectId): Promise<number>;
 }
 
 export function sessions(deps: SessionDeps): Sessions {
@@ -276,9 +291,9 @@ export function sessions(deps: SessionDeps): Sessions {
    * refresh too, and the person found signed out right after signing in. Waits for the next
    * second instead (under one).
    */
-  async function issueSecond(userId: string, at: number): Promise<number> {
+  async function issueSecond(userId: ObjectId, at: number): Promise<number> {
     const iat = Math.floor(at / 1000);
-    const since = await inRedis(() => redis.get(revokedUserKey(userId)));
+    const since = await inRedis(() => redis.get(revokedUserKey(userId.toHexString())));
     if (since === null) return iat;
     const after = Math.floor(Number(since) / 1000) + 1;
     if (iat >= after) return iat;
@@ -292,7 +307,8 @@ export function sessions(deps: SessionDeps): Sessions {
   }
 
   async function accessToken(
-    session: Pick<Session, '_id' | 'userId' | 'app' | 'methods' | 'stepUpAt'>,
+    session: Pick<Session, '_id' | 'userId' | 'methods' | 'stepUpAt'>,
+    app: AppId,
     at: number,
     authzVersion: number,
   ) {
@@ -302,11 +318,11 @@ export function sessions(deps: SessionDeps): Sessions {
     return signJwt(
       {
         iss: TOKEN_ISSUER,
-        sub: session.userId,
-        aud: tokenAudience(session.app),
+        sub: session.userId.toHexString(),
+        aud: tokenAudience(app),
         iat,
         exp: iat + ACCESS_TOKEN_SECONDS,
-        sid: session._id,
+        sid: session._id.toHexString(),
         amr: session.methods,
         // a grant change raises it, so a token from before is turned back (ARCHITECTURE §7.2)
         av: authzVersion,
@@ -322,16 +338,23 @@ export function sessions(deps: SessionDeps): Sessions {
    * this authz version; written at every sign-in, refresh and step-up, living a little longer
    * than the access token. Redis away: 503, like the revoke keys.
    */
-  async function listPermissions(userId: string, app: AppId, access: SignInAccess) {
+  async function listPermissions(userId: ObjectId, app: AppId, access: SignInAccess) {
     const value: AppPermissions = { v: access.authzVersion, keys: access.permissions };
     await inRedis(() =>
-      redis.set(appPermissionsKey(userId, app), JSON.stringify(value), 'PX', REVOKE_TTL_MS),
+      redis.set(
+        appPermissionsKey(userId.toHexString(), app),
+        JSON.stringify(value),
+        'PX',
+        REVOKE_TTL_MS,
+      ),
     );
   }
 
   /** Marks the session ended, and tells the gateway at once. */
-  async function revokeAtGateway(sessionId: string): Promise<void> {
-    await inRedis(() => redis.set(revokedSessionKey(sessionId), '1', 'PX', REVOKE_TTL_MS));
+  async function revokeAtGateway(sessionId: ObjectId): Promise<void> {
+    await inRedis(() =>
+      redis.set(revokedSessionKey(sessionId.toHexString()), '1', 'PX', REVOKE_TTL_MS),
+    );
   }
 
   return {
@@ -341,7 +364,7 @@ export function sessions(deps: SessionDeps): Sessions {
       const access = await signInAccess(mongo, { userId, app, now: new Date(at) });
       if (!access.allowed) throw invalidCredentials();
       const policy = SESSION_POLICIES[app];
-      const sessionId = uuidv7();
+      const sessionId = new ObjectId();
       const family = newFamily();
       const refreshToken = newRefreshToken(sessionId, family);
       const expiresAt = new Date(at + Math.min(policy.slidingMs, policy.maxMs));
@@ -349,7 +372,7 @@ export function sessions(deps: SessionDeps): Sessions {
         _id: sessionId,
         userId,
         email,
-        app,
+        appId: (await rbacCatalog(mongo)).appId(app),
         device: deviceName(client.userAgent).slice(0, 120),
         ip: client.ip,
         methods,
@@ -369,19 +392,21 @@ export function sessions(deps: SessionDeps): Sessions {
       await listPermissions(userId, app, access);
       logger.info({ userId, app, sessionId, methods }, 'session started');
       return {
-        user: { userId, email },
+        user: { userId: userId.toHexString(), email },
         app,
-        sessionId,
-        accessToken: await accessToken(session, at, access.authzVersion),
+        sessionId: sessionId.toHexString(),
+        accessToken: await accessToken(session, app, at, access.authzVersion),
         refreshToken,
         expiresAt,
       };
     },
 
     async refresh({ app, refreshToken, client }) {
-      const parts = partsOf(refreshToken);
+      const parts = refreshTokenParts(refreshToken);
       if (!refreshToken || !parts) throw sessionExpired();
-      const { sessionId } = parts;
+      // refreshTokenParts takes only 24 lower-case hex
+      const sessionId = new ObjectId(parts.sessionId);
+      const appId = (await rbacCatalog(mongo)).appId(app);
       const at = now();
       const policy = SESSION_POLICIES[app];
       const hash = refreshHashOf(keys, refreshToken);
@@ -393,7 +418,7 @@ export function sessions(deps: SessionDeps): Sessions {
       const rotated = await collection.findOneAndUpdate(
         {
           _id: sessionId,
-          app,
+          appId,
           refreshHash: hash,
           revokedAt: null,
           expiresAt: { $gt: new Date(at) },
@@ -441,15 +466,15 @@ export function sessions(deps: SessionDeps): Sessions {
         }
         await listPermissions(rotated.userId, app, access);
         return {
-          user: { userId: rotated.userId, email: rotated.email },
+          user: { userId: rotated.userId.toHexString(), email: rotated.email },
           app,
-          sessionId,
-          accessToken: await accessToken(rotated, at, access.authzVersion),
+          sessionId: parts.sessionId,
+          accessToken: await accessToken(rotated, app, at, access.authzVersion),
           refreshToken: next,
           expiresAt: rotated.expiresAt,
         };
       }
-      const found = await collection.findOne({ _id: sessionId, app });
+      const found = await collection.findOne({ _id: sessionId, appId });
       if (found?.revokedAt !== null) throw sessionExpired();
       const replaced = found.previousRefreshHash === hash;
       const ofFamily =
@@ -480,12 +505,12 @@ export function sessions(deps: SessionDeps): Sessions {
         );
         if (result.modifiedCount === 1) {
           await writeEvent(mongo, session, sessionReuseDetected, {
-            aggregate: { type: 'session', id: sessionId },
+            aggregate: { type: 'session', id: parts.sessionId },
             actor: { type: 'system', id: 'identity.sessions' },
-            correlationId: sessionId,
+            correlationId: parts.sessionId,
             data: {
-              sessionId,
-              userId: found.userId,
+              sessionId: parts.sessionId,
+              userId: found.userId.toHexString(),
               email: found.email,
               app,
               device: found.device,
@@ -506,11 +531,13 @@ export function sessions(deps: SessionDeps): Sessions {
     },
 
     async logout({ app, refreshToken }) {
-      const sessionId = partsOf(refreshToken)?.sessionId;
-      if (!refreshToken || !sessionId) return;
+      const hex = refreshTokenParts(refreshToken)?.sessionId;
+      if (!refreshToken || !hex) return;
+      const sessionId = new ObjectId(hex);
+      const appId = (await rbacCatalog(mongo)).appId(app);
       const at = now();
       const ended = await collection.updateOne(
-        { _id: sessionId, app, refreshHash: refreshHashOf(keys, refreshToken), revokedAt: null },
+        { _id: sessionId, appId, refreshHash: refreshHashOf(keys, refreshToken), revokedAt: null },
         {
           $set: {
             revokedAt: new Date(at),
@@ -538,7 +565,9 @@ export function sessions(deps: SessionDeps): Sessions {
         },
       );
       // tokens issued before this moment stop at the gateway
-      await inRedis(() => redis.set(revokedUserKey(userId), String(at), 'PX', REVOKE_TTL_MS));
+      await inRedis(() =>
+        redis.set(revokedUserKey(userId.toHexString()), String(at), 'PX', REVOKE_TTL_MS),
+      );
       logger.info(
         { userId, reason, ended: ended.modifiedCount },
         'every session of the account ended',
@@ -546,30 +575,52 @@ export function sessions(deps: SessionDeps): Sessions {
       return ended.modifiedCount;
     },
 
-    async stepUp({ userId, sessionId }) {
+    async stepUp({ userId, sessionId, for: action }) {
       const at = now();
+      // one change's own step-up leaves `stepUpAt` (and the token's `su`) as they were
+      const stepped =
+        action === undefined
+          ? { stepUpAt: new Date(at) }
+          : { stepUpFor: { action, at: new Date(at) } };
       const session = await collection.findOneAndUpdate(
         { _id: sessionId, userId, revokedAt: null, expiresAt: { $gt: new Date(at) } },
-        { $set: { stepUpAt: new Date(at), lastSeenAt: new Date(at) } },
+        { $set: { ...stepped, lastSeenAt: new Date(at) } },
         { returnDocument: 'after' },
       );
       if (!session) throw sessionExpired();
-      const access = await signInAccess(mongo, { userId, app: session.app, now: new Date(at) });
+      const app = (await rbacCatalog(mongo)).appOf(session.appId);
+      const access = await signInAccess(mongo, { userId, app, now: new Date(at) });
       if (!access.allowed) throw sessionExpired();
-      await listPermissions(userId, session.app, access);
-      logger.info({ userId, app: session.app, sessionId }, 'stepped up');
+      await listPermissions(userId, app, access);
+      logger.info({ userId, app, sessionId, for: action }, 'stepped up');
       return {
-        app: session.app,
-        accessToken: await accessToken(session, at, access.authzVersion),
+        app,
+        accessToken: await accessToken(session, app, at, access.authzVersion),
         stepUpAt: new Date(at),
       };
     },
 
-    list(userId) {
-      return collection
+    async useStepUp(sessionId, action) {
+      const at = now();
+      const used = await collection.updateOne(
+        {
+          _id: sessionId,
+          revokedAt: null,
+          'stepUpFor.action': action,
+          'stepUpFor.at': { $gt: new Date(at - STEP_UP_SECONDS * 1000) },
+        },
+        { $set: { stepUpFor: null } },
+      );
+      return used.modifiedCount === 1;
+    },
+
+    async list(userId) {
+      const catalog = await rbacCatalog(mongo);
+      const found = await collection
         .find({ userId, revokedAt: null, expiresAt: { $gt: new Date(now()) } })
         .sort({ lastSeenAt: -1 })
         .toArray();
+      return found.map((session) => ({ ...session, app: catalog.appOf(session.appId) }));
     },
 
     async end(userId, sessionId) {
@@ -609,7 +660,9 @@ export function sessions(deps: SessionDeps): Sessions {
       );
       await inRedis(() => {
         const batch = redis.multi();
-        for (const id of ids) batch.set(revokedSessionKey(id), '1', 'PX', REVOKE_TTL_MS);
+        for (const id of ids) {
+          batch.set(revokedSessionKey(id.toHexString()), '1', 'PX', REVOKE_TTL_MS);
+        }
         return batch.exec();
       });
       logger.info({ userId, ended: ended.modifiedCount }, 'every other device signed out');

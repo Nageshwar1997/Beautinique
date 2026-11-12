@@ -35,25 +35,27 @@ export async function giveMasterGrant(
     // one counts again (two snapshots alone would each see a free seat)
     const claimed = await mongo.db
       .collection<RoleRecord>(ROLES)
-      .updateOne({ _id: MASTER_ROLE }, { $inc: { seatClaims: 1 } }, { session });
-    if (claimed.matchedCount !== 1)
-      throw new Error('The roles are not there: run db:release first.');
+      .findOneAndUpdate(
+        { key: MASTER_ROLE },
+        { $inc: { seatClaims: 1 } },
+        { session, projection: { _id: 1 } },
+      );
+    if (!claimed) throw new Error('The roles are not there: run db:release first.');
     const grants = mongo.db.collection<GrantRecord>(GRANTS);
     const holders = await grants.distinct(
       'userId',
-      { role: MASTER_ROLE, ...activeAt(now) },
+      { roleId: claimed._id, ...activeAt(now) },
       {
         session,
       },
     );
-    if (holders.includes(user._id)) return 'already-master';
+    if (holders.some((holder) => holder.equals(user._id))) return 'already-master';
     if (holders.length >= MASTER_SEATS) {
       throw new Error(`Master has ${String(MASTER_SEATS)} seats and both are taken.`);
     }
     await giveSystemGrant(mongo, session, {
       userId: user._id,
       role: MASTER_ROLE,
-      app: 'master',
       scope: { type: 'global', ids: [] },
       via: 'bootstrap',
       now,

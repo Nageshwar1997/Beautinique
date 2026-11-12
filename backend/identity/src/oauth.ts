@@ -1,7 +1,12 @@
 import { randomBytes } from 'node:crypto';
 
 import { AppError, type Passport } from '@beautinique/backend-server-kit';
-import { type ClientSession, withTransaction } from '@beautinique/backend-server-mongo';
+import {
+  type ClientSession,
+  ObjectId,
+  toObjectId,
+  withTransaction,
+} from '@beautinique/backend-server-mongo';
 import { writeEvent } from '@beautinique/backend-server-queue';
 import type { SIGN_IN_METHOD_CHANGES } from '@beautinique/shared-contracts';
 import {
@@ -17,8 +22,8 @@ import {
   signInMethodChanged,
   SOCIAL_PROVIDERS,
   type SocialProvider,
+  STEP_UP_SECONDS,
 } from '@beautinique/shared-contracts';
-import { uuidv7 } from '@beautinique/shared-utils';
 
 import {
   AUTH_PROVIDERS,
@@ -27,7 +32,7 @@ import {
   CREDENTIALS,
   type Credentials,
 } from './credentials.ts';
-import { lastSignInMethod, oauthSignUpExpired } from './errors.ts';
+import { lastSignInMethod, oauthSignUpExpired, recentSignInRequired } from './errors.ts';
 import { clearFailures, isLocked } from './lockout.ts';
 import { inRedis, type LoginDeps, startLogin } from './login.ts';
 import {
@@ -38,7 +43,14 @@ import {
   usesPkce,
 } from './oauth-providers.ts';
 import { giveSignUpGrant, signInAccess } from './rbac/grants.ts';
-import { type Client, deviceName, type IssuedSession, sessionExpired } from './sessions.ts';
+import {
+  type Client,
+  deviceName,
+  type IssuedSession,
+  type Session,
+  sessionExpired,
+  SESSIONS,
+} from './sessions.ts';
 import { accountWithCode, type User, USERS } from './users.ts';
 
 /**
@@ -148,7 +160,7 @@ function methodChanged(
     requestId,
     at,
   }: {
-    user: { _id: string; email: string };
+    user: { _id: ObjectId; email: string };
     provider: SocialProvider;
     change: (typeof SIGN_IN_METHOD_CHANGES)[number];
     app: AppId;
@@ -158,11 +170,11 @@ function methodChanged(
   },
 ) {
   return writeEvent(deps.mongo, session, signInMethodChanged, {
-    aggregate: { type: 'user', id: user._id },
-    actor: { type: 'user', id: user._id },
+    aggregate: { type: 'user', id: user._id.toHexString() },
+    actor: { type: 'user', id: user._id.toHexString() },
     correlationId: requestId,
     data: {
-      userId: user._id,
+      userId: user._id.toHexString(),
       email: user.email,
       provider,
       change,
@@ -187,7 +199,7 @@ async function link(
   const theirs = await providers(deps).findOne(bySubject(provider, subject), { session });
   if (theirs) return null;
   await providers(deps).insertOne(
-    { _id: uuidv7(), userId: user._id, provider, subject, linkedAt: now, lastUsedAt: now },
+    { _id: new ObjectId(), userId: user._id, provider, subject, linkedAt: now, lastUsedAt: now },
     { session },
   );
   await methodChanged(deps, session, {
@@ -203,7 +215,7 @@ async function link(
 }
 
 interface LinkInput {
-  user: { _id: string; email: string };
+  user: { _id: ObjectId; email: string };
   provider: SocialProvider;
   subject: string;
   app: AppId;
@@ -229,7 +241,7 @@ async function signInAs(
     .findOne({ _id: user._id }, { projection: { totp: 1 } });
   if (credentials?.totp) {
     const loginId = await startLogin(deps, {
-      userId: user._id,
+      userId: user._id.toHexString(),
       email: user.email,
       app,
       stage: 'totp',
@@ -238,7 +250,7 @@ async function signInAs(
     const query = next === '/' ? '' : `?next=${encodeURIComponent(next)}`;
     return { location: `/sign-in${query}#${OAUTH_TOTP_FRAGMENT}=${loginId}`, state: null, loginId };
   }
-  await clearFailures(deps.redis, deps.keys, user.email);
+  await clearFailures(deps.redis, deps.keys, user.email, { ip: client.ip });
   const session = await deps.sessions.issue({
     userId: user._id,
     email: user.email,
@@ -250,7 +262,7 @@ async function signInAs(
 }
 
 interface SignInInput {
-  user: { _id: string; email: string };
+  user: { _id: ObjectId; email: string };
   provider: SocialProvider;
   app: AppId;
   next: string;
@@ -334,7 +346,7 @@ export async function finishTrip(
     }
   }
   if (!user) return backToSignIn('failed');
-  if (await isLocked(deps.redis, deps.keys, user.email)) return backToSignIn('locked');
+  if (await isLocked(deps.redis, deps.keys, user.email, client.ip)) return backToSignIn('locked');
   const access = await signInAccess(deps.mongo, { userId: user._id, app });
   if (!access.allowed) {
     // an account of another app (a seller ...): this app's consent and role first
@@ -448,7 +460,14 @@ export async function finishSignUp(
     if (isNewUser) {
       // the first way it signs in: no security email for a new account
       await providers(deps).insertOne(
-        { _id: uuidv7(), userId: user._id, provider, subject, linkedAt: now, lastUsedAt: now },
+        {
+          _id: new ObjectId(),
+          userId: user._id,
+          provider,
+          subject,
+          linkedAt: now,
+          lastUsedAt: now,
+        },
         { session },
       );
       return { user, linked: 'linked' as const };
@@ -471,7 +490,7 @@ export async function finishSignUp(
   if (answer.loginId !== undefined) return { next: 'totp', loginId: answer.loginId, nextPath };
   return {
     next: 'signed-in',
-    user: { userId: made.user._id, email: made.user.email },
+    user: { userId: made.user._id.toHexString(), email: made.user.email },
     ...(answer.session ? { session: answer.session } : {}),
     nextPath,
   };
@@ -482,6 +501,46 @@ export async function finishSignUp(
  * The last way to sign in stays (LAST_SIGN_IN_METHOD). No step-up: most customers have no
  * authenticator to step up with, and the email tells the owner at once.
  */
+/** A sign-in recent enough to take a way in off (owner, 2026-11-09, QA DR-006). */
+export const RECENT_SIGN_IN_MS = 10 * 60_000;
+
+/**
+ * Taking a way in off needs proof from just now, so a stolen access token (10 minutes) cannot: an
+ * account with an authenticator steps up (5 minutes, STEP_UP_REQUIRED, which the app's dialog
+ * answers); one without signed in with its password or an email code in the last 10 minutes
+ * (RECENT_SIGN_IN_REQUIRED, the app sends it to sign in again). A provider's own sign-in never
+ * counts.
+ */
+async function provenJustNow(
+  deps: SocialDeps,
+  passport: Passport,
+  tx: ClientSession,
+): Promise<void> {
+  const userId = toObjectId(passport.userId);
+  const signedIn = await deps.mongo.db
+    .collection<Session>(SESSIONS)
+    .findOne({ _id: toObjectId(passport.sessionId), userId, revokedAt: null }, { session: tx });
+  if (!signedIn) throw sessionExpired();
+  const credentials = await deps.mongo.db
+    .collection<Credentials>(CREDENTIALS)
+    .findOne({ _id: userId }, { session: tx, projection: { totp: 1 } });
+  const now = Date.now();
+  if (credentials?.totp) {
+    const stepUpAt = signedIn.stepUpAt?.getTime();
+    if (stepUpAt === undefined || now - stepUpAt > STEP_UP_SECONDS * 1000) {
+      throw new AppError(
+        'STEP_UP_REQUIRED',
+        'Please confirm with your authenticator code to continue.',
+      );
+    }
+    return;
+  }
+  const recent = now - signedIn.createdAt.getTime() <= RECENT_SIGN_IN_MS;
+  if (!recent || !signedIn.methods.some((m) => m === 'password' || m === 'email-code')) {
+    throw recentSignInRequired();
+  }
+}
+
 export async function removeMethod(
   deps: SocialDeps,
   passport: Passport,
@@ -489,7 +548,7 @@ export async function removeMethod(
 ): Promise<{ removed: boolean; providers: AuthProvider['provider'][] }> {
   const user = await deps.mongo.db
     .collection<User>(USERS)
-    .findOne({ _id: passport.userId }, { projection: { email: 1 } });
+    .findOne({ _id: toObjectId(passport.userId) }, { projection: { email: 1 } });
   if (!user) throw sessionExpired();
   return withTransaction(deps.mongo, async (session) => {
     const methods = await providers(deps)
@@ -498,6 +557,7 @@ export async function removeMethod(
     const names = methods.map((m) => m.provider).toSorted();
     if (!names.includes(provider)) return { removed: false, providers: names };
     if (names.length === 1) throw lastSignInMethod();
+    await provenJustNow(deps, passport, session);
     await providers(deps).deleteOne({ userId: user._id, provider }, { session });
     await methodChanged(deps, session, {
       user,

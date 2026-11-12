@@ -1,8 +1,10 @@
-import { uuidv7 } from '@beautinique/shared-utils';
+import { ObjectId } from '@beautinique/backend-server-mongo';
 import { describe, expect, it } from 'vitest';
 
 import { assetKey, createMemoryStorage, StorageError } from '../src/index';
 import { TINY_PNG } from '../src/testing';
+
+const newAssetId = (): string => new ObjectId().toHexString();
 
 const start = new Date('2026-10-22T10:00:00.000Z');
 
@@ -18,7 +20,7 @@ function setup() {
 }
 
 const request = (extra: object = {}) => ({
-  assetId: uuidv7(),
+  assetId: newAssetId(),
   purpose: 'product.image',
   visibility: 'public' as const,
   contentType: 'image/png',
@@ -116,8 +118,8 @@ describe('upload tickets', () => {
 });
 
 describe('URLs', () => {
-  const publicKey = assetKey(uuidv7(), 'product.image', 'public');
-  const privateKey = assetKey(uuidv7(), 'seller.kyc_document', 'private');
+  const publicKey = assetKey(newAssetId(), 'product.image', 'public');
+  const privateKey = assetKey(newAssetId(), 'seller.kyc_document', 'private');
 
   it('are base URL + key for public files, with the width when asked', () => {
     const { storage } = setup();
@@ -158,7 +160,7 @@ describe('URLs', () => {
     clock.at = start.getTime();
     const changed = [
       url.replace('w=100', 'w=200'),
-      url.replace(privateKey, assetKey(uuidv7(), 'seller.kyc_document', 'private')),
+      url.replace(privateKey, assetKey(newAssetId(), 'seller.kyc_document', 'private')),
       url.replace(/expires=\d+/, 'expires=9999999999'),
       url.replace(/sig=[0-9a-f]+/, 'sig=00'),
       url.replace(/&sig=[0-9a-f]+/, ''),
@@ -211,7 +213,7 @@ describe('listing', () => {
     clock.at += 5_000;
     const copy = await storage.copy({
       from: ticket.key,
-      assetId: uuidv7(),
+      assetId: newAssetId(),
       purpose: 'product.image',
       visibility: 'public',
     });
@@ -222,12 +224,12 @@ describe('listing', () => {
 describe('listing order and size', () => {
   it('goes by key, whatever order the files came in, and only under the prefix', async () => {
     const { storage } = setup();
-    const early = uuidv7(1_700_000_000_000);
-    const late = uuidv7(1_800_000_000_000);
+    const early = ObjectId.createFromTime(1_700_000_000).toHexString();
+    const late = ObjectId.createFromTime(1_800_000_000).toHexString();
     for (const [assetId, visibility] of [
       [late, 'public'],
       [early, 'public'],
-      [uuidv7(), 'private'],
+      [newAssetId(), 'private'],
     ] as const) {
       const ticket = await storage.createUpload(request({ assetId, visibility }));
       await storage.upload(ticket, TINY_PNG, 'image/png');

@@ -146,14 +146,86 @@ const mutations: Mutation[] = [
   {
     file: 'proxy',
     name: 'a refused request still passes',
-    change: [['      if (!result.allowed) {\n', '      if (false) {\n']],
+    change: [['        if (!result.allowed) {\n', '        if (false) {\n']],
     tests: 'budget',
   },
   {
-    file: 'proxy',
+    file: 'rate-limits',
     name: 'every client shares one bucket',
-    change: [['`${route.rateLimit}:${ipKey(ip)}`', '`${route.rateLimit}:all`']],
+    change: [['key: `${name}:${client}`', 'key: `${name}:all`']],
     tests: 'budget',
+  },
+  // the IPv6 network's sign-in and code budget (DR-004)
+  {
+    file: 'rate-limits',
+    name: 'no network bucket',
+    change: [['    if (network !== null) {\n', '    if (false) {\n']],
+    tests: 'network',
+  },
+  {
+    file: 'rate-limits',
+    name: 'every class gets the network bucket',
+    change: [['NETWORK_CLASSES.has(name) ? network48(client) : null', 'network48(client)']],
+    tests: 'network',
+  },
+  {
+    file: 'rate-limits',
+    name: 'the network budget is one home’s',
+    change: [['limit: rules[name].limit * NETWORK_FACTOR', 'limit: rules[name].limit']],
+    tests: 'network',
+  },
+  {
+    file: 'rate-limits',
+    name: 'the network is the /64 itself',
+    change: [[".split(':').slice(0, 3).join(':')", ".split(':').slice(0, 4).join(':')"]],
+    tests: 'network',
+  },
+  {
+    file: 'proxy',
+    name: 'the first bucket is always the one told',
+    change: [['result.remaining < told.result.remaining', 'false']],
+    tests: 'refresh and sign-out',
+  },
+  {
+    file: 'rate-limits',
+    name: 'refresh and sign-out take the plain per-IP bucket (no session budget)',
+    change: [["  if (name !== 'session') {\n", '  if (true) {\n']],
+    tests: 'refresh and sign-out',
+  },
+  {
+    file: 'rate-limits',
+    name: 'no session budget, only the IP one',
+    change: [['  if (parts) {\n', '  if (false) {\n']],
+    tests: 'refresh and sign-out',
+  },
+  {
+    file: 'rate-limits',
+    name: 'all sessions share one session budget',
+    change: [['.update(parts.family ?? parts.sessionId)', ".update('all')"]],
+    tests: 'refresh and sign-out',
+  },
+  {
+    file: 'rate-limits',
+    name: 'a session budget per IP (another IP gets a fresh one)',
+    change: [['key: `session:token:${hash}`', 'key: `session:token:${hash}:${client}`']],
+    tests: 'refresh and sign-out',
+  },
+  {
+    file: 'rate-limits',
+    name: 'refresh gets only the sign-in budget per IP',
+    change: [
+      [
+        'session: { limit: 600, windowMs: 5 * 60_000 },',
+        'session: { limit: 30, windowMs: 5 * 60_000 },',
+      ],
+    ],
+    tests: 'refresh and sign-out',
+  },
+  {
+    file: 'rate-limits',
+    name: 'refresh passes when Redis is down (fail open)',
+    change: [["new Set(['auth', 'session', 'otp'])", "new Set(['auth', 'otp'])"]],
+    tests: 'Redis is down',
   },
   {
     file: 'proxy',
@@ -281,7 +353,30 @@ const mutations: Mutation[] = [
     change: [['    if (caller.gone) return;\n', '']],
     tests: 'caller leaves',
   },
-  // 6. /status
+  // 6. /ready (DR-001) and /status
+  {
+    file: 'app',
+    name: 'every /ready call checks again (no reuse)',
+    change: [['if (last === undefined || at - last.at >= ms) {', 'if (true) {']],
+    tests: 'flood of /ready|older than the reuse',
+  },
+  {
+    file: 'app',
+    name: 'the first /ready answer is kept for ever',
+    change: [['if (last === undefined || at - last.at >= ms) {', 'if (last === undefined) {']],
+    tests: 'flood of /ready|older than the reuse',
+  },
+  {
+    file: 'app',
+    name: 'the upstream checks are not reused',
+    change: [
+      [
+        '[name, reusedFor(readyReuseMs, () => isHealthy(origin))]',
+        '[name, () => isHealthy(origin)]',
+      ],
+    ],
+    tests: 'flood of /ready|older than the reuse',
+  },
   {
     file: 'status',
     name: 'any check name is echoed',

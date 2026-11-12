@@ -2,6 +2,7 @@
 // grant is, roles that ask an authenticator, the authz version, the migration for earlier accounts
 // and the first Master. Against the local MongoDB replica set and Valkey (`npm run infra:up`).
 import { createLogger } from '@beautinique/backend-server-kit';
+import { ObjectId } from '@beautinique/backend-server-mongo';
 import {
   type AppId,
   APPS,
@@ -10,7 +11,6 @@ import {
   revokedSessionKey,
   SESSION_POLICIES,
 } from '@beautinique/shared-contracts';
-import { uuidv7 } from '@beautinique/shared-utils';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 
 import { giveMasterGrant } from '../src/rbac/bootstrap.ts';
@@ -32,13 +32,18 @@ import { type Session, SESSIONS } from '../src/sessions.ts';
 import { LEGAL_ACCEPTANCES, type LegalAcceptance, type User } from '../src/users.ts';
 import {
   type Answer,
+  appIdOf,
   consent,
   giveRole,
   grants,
   type Harness,
   makeAccount,
+  oid,
   PASSWORD,
+  permissionIdOf,
   post,
+  roleIdOf,
+  roleKeysOf,
   startHarness,
   users,
   verify,
@@ -223,7 +228,10 @@ describe('the shipped roles', () => {
     expect(
       problems({ permissions: ['iam.app.sign_in', 'iam.totp.reset'], scopeTypes: ['state'] }),
     ).toEqual(['admin.x: iam.totp.reset cannot be used in any of its scope types']);
-    expect(problems({ appointedBy: ['admin.x'] })).toEqual(['admin.x: admin.x cannot give roles']);
+    expect(problems({ appointedBy: ['admin.x'] })).toEqual([
+      'admin.x: a role cannot appoint itself',
+      'admin.x: admin.x cannot give roles',
+    ]);
     expect(problems({ appointedBy: ['admin.y'] })).toEqual(['admin.x: unknown appointer admin.y']);
     expect(problems({ signUp: true })).toEqual([
       'admin.x: a sign-up role is self-scoped and given by identity only',
@@ -235,32 +243,40 @@ describe('the shipped roles', () => {
 describe('the release step', () => {
   it('wrote the 11 apps, the catalogue and the shipped roles at start', async () => {
     const apps = await db().collection<AppRecord>(APP_RECORDS).find().toArray();
-    expect(apps.map((app) => app._id).sort()).toEqual([...APPS].sort());
-    expect(apps.find((app) => app._id === 'admin')).toMatchObject({
+    // every document's _id an ObjectId; the app is found by its key (owner, 2026-11-12)
+    expect(apps.every((app) => app._id instanceof ObjectId)).toBe(true);
+    expect(apps.map((app) => app.key).sort()).toEqual([...APPS].sort());
+    expect(apps.find((app) => app.key === 'admin')).toMatchObject({
       audience: 'internal',
       signUp: false,
       totp: 'required',
       session: SESSION_POLICIES.admin,
     });
-    expect(apps.find((app) => app._id === 'customer')).toMatchObject({
+    expect(apps.find((app) => app.key === 'customer')).toMatchObject({
       audience: 'external',
       signUp: true,
       totp: 'optional',
     });
-    const keys = await db().collection<PermissionRecord>(PERMISSIONS).distinct('_id');
+    const keys = await db().collection<PermissionRecord>(PERMISSIONS).distinct('key');
     expect(keys.sort()).toEqual([...permissions.keys()].sort());
-    expect(await db().collection<RoleRecord>(ROLES).countDocuments({ system: true })).toBe(81);
+    const roles = await db().collection<RoleRecord>(ROLES).find({ system: true }).toArray();
+    expect(roles).toHaveLength(81);
+    // a role names its app, permissions and appointers by their ids
+    const admin = roles.find((role) => role.key === 'admin.state_admin');
+    expect(admin?.appId).toEqual(await appIdOf('admin'));
+    expect(admin?.permissionIds.every((id) => id instanceof ObjectId)).toBe(true);
+    expect(admin?.appointedBy).toEqual([await roleIdOf(MASTER_ROLE)]);
   });
 
   it('retires a system role the code dropped, and never touches Master’s own sub-roles', async () => {
     const roles = db().collection<RoleRecord>(ROLES);
     const now = new Date();
     const shape = {
-      app: 'admin' as const,
+      appId: await appIdOf('admin'),
       main: false,
       scopeTypes: ['global' as const],
-      permissions: ['iam.app.sign_in'],
-      appointedBy: [MASTER_ROLE],
+      permissionIds: [await permissionIdOf('iam.app.sign_in')],
+      appointedBy: [await roleIdOf(MASTER_ROLE)],
       mfaRequired: false,
       signUp: false,
       maxHolders: null,
@@ -269,18 +285,20 @@ describe('the release step', () => {
       updatedAt: now,
     };
     await roles.insertMany([
-      { _id: 'admin.dropped', name: 'Dropped', system: true, ...shape },
-      { _id: 'admin.own', name: 'Master made it', system: false, ...shape },
+      { _id: new ObjectId(), key: 'admin.dropped', name: 'Dropped', system: true, ...shape },
+      { _id: new ObjectId(), key: 'admin.own', name: 'Master made it', system: false, ...shape },
     ]);
-    const before = await roles.findOne({ _id: 'admin.state_admin' });
+    const before = await roles.findOne({ key: 'admin.state_admin' });
     await rbacSyncStep.run({ mongo: harness.server.runtime.mongo, logger });
-    expect(await roles.findOne({ _id: 'admin.dropped' })).toMatchObject({ retired: true });
-    expect(await roles.findOne({ _id: 'admin.own' })).toMatchObject({
+    expect(await roles.findOne({ key: 'admin.dropped' })).toMatchObject({ retired: true });
+    expect(await roles.findOne({ key: 'admin.own' })).toMatchObject({
       retired: false,
       name: 'Master made it',
       updatedAt: now,
     });
-    const after = await roles.findOne({ _id: 'admin.state_admin' });
+    const after = await roles.findOne({ key: 'admin.state_admin' });
+    // an upsert by key keeps the role's id, so its grants keep pointing at it
+    expect(after?._id).toEqual(before?._id);
     expect(after?.createdAt).toEqual(before?.createdAt);
     expect(after?.retired).toBe(false);
   });
@@ -294,19 +312,24 @@ describe('the release step', () => {
 describe('sign-up grants', () => {
   it('gives a new customer the Customer role (self), logged, and raises the authz version', async () => {
     const userId = await customerOnly('meera');
-    const own = await grants().find({ userId }).toArray();
+    const own = await grants()
+      .find({ userId: oid(userId) })
+      .toArray();
     expect(own).toHaveLength(1);
+    expect(await roleKeysOf(own)).toEqual(['customer.customer']);
     expect(own[0]).toMatchObject({
-      role: 'customer.customer',
-      app: 'customer',
-      scope: { type: 'self', ids: [userId] },
+      appId: await appIdOf('customer'),
+      scope: { type: 'self', ids: [oid(userId)] },
       via: 'sign-up',
       active: true,
       grantedBy: null,
     });
-    const log = await db().collection<GrantLogEntry>(GRANT_LOG).find({ userId }).toArray();
+    const log = await db()
+      .collection<GrantLogEntry>(GRANT_LOG)
+      .find({ userId: oid(userId) })
+      .toArray();
     expect(log).toMatchObject([{ grantId: own[0]?._id, action: 'granted', via: 'sign-up' }]);
-    expect((await users().findOne({ _id: userId }))?.authzVersion).toBe(1);
+    expect((await users().findOne({ _id: oid(userId) }))?.authzVersion).toBe(1);
   });
 
   it('gives a seller and a creator sign-up their applicant role, also to an account that exists', async () => {
@@ -321,9 +344,13 @@ describe('sign-up grants', () => {
     // the same sign-up again gives nothing new
     await signUpIn(address, 'seller');
 
-    const roles = (await grants().find({ userId, active: true }).toArray()).map((g) => g.role);
+    const roles = await roleKeysOf(
+      await grants()
+        .find({ userId: oid(userId), active: true })
+        .toArray(),
+    );
     expect(roles.sort()).toEqual(['creator.applicant', 'customer.customer', 'seller.applicant']);
-    expect((await users().findOne({ _id: userId }))?.authzVersion).toBe(3);
+    expect((await users().findOne({ _id: oid(userId) }))?.authzVersion).toBe(3);
     expect(next(await login(address, 'seller'))).toBe('signed-in');
   });
 
@@ -332,7 +359,13 @@ describe('sign-up grants', () => {
     const made = await signUpIn(address, 'seller');
     expect(made.body.data).toMatchObject({ outcome: 'account-made', signedIn: true });
     const userId = String(made.body.data?.userId);
-    expect(await grants().find({ userId }).toArray()).toMatchObject([{ role: 'seller.applicant' }]);
+    expect(
+      await roleKeysOf(
+        await grants()
+          .find({ userId: oid(userId) })
+          .toArray(),
+      ),
+    ).toEqual(['seller.applicant']);
     // no customer role without the 18+ declaration of the customer app
     expect(next(await login(address, 'customer'))).toBeUndefined();
   });
@@ -359,19 +392,19 @@ describe('sign-in only where a grant is', () => {
     expect(next(await login(address, 'delivery'))).toBe('signed-in');
     const hour = 60 * 60_000;
     await grants().updateOne(
-      { userId, role: 'delivery.partner' },
+      { userId: oid(userId), roleId: await roleIdOf('delivery.partner') },
       { $set: { validFrom: new Date(Date.now() + hour) } },
     );
     expect(next(await login(address, 'delivery'))).toBeUndefined();
     await grants().updateOne(
-      { userId, role: 'delivery.partner' },
+      { userId: oid(userId), roleId: await roleIdOf('delivery.partner') },
       {
         $set: { validFrom: new Date(Date.now() - 2 * hour), validTo: new Date(Date.now() - hour) },
       },
     );
     expect(next(await login(address, 'delivery'))).toBeUndefined();
     await grants().updateOne(
-      { userId, role: 'delivery.partner' },
+      { userId: oid(userId), roleId: await roleIdOf('delivery.partner') },
       { $set: { validTo: null, active: false } },
     );
     expect(next(await login(address, 'delivery'))).toBeUndefined();
@@ -401,16 +434,18 @@ describe('sign-in only where a grant is', () => {
     const userId = await customerOnly('sana');
     await expect(
       harness.server.runtime.otp.sessions.issue({
-        userId,
+        userId: oid(userId),
         email: email('sana'),
         app: 'admin',
         methods: ['password'],
         client: { ip: '203.0.113.9', userAgent: 'test' },
       }),
     ).rejects.toMatchObject({ code: 'INVALID_CREDENTIALS' });
-    expect(await db().collection<Session>(SESSIONS).countDocuments({ userId, app: 'admin' })).toBe(
-      0,
-    );
+    expect(
+      await db()
+        .collection<Session>(SESSIONS)
+        .countDocuments({ userId: oid(userId), appId: await appIdOf('admin') }),
+    ).toBe(0);
   });
 });
 
@@ -430,24 +465,29 @@ describe('the authz version', () => {
     const address = email('jia');
     const userId = await customerOnly('jia');
     await giveRole(userId, 'growth.content_editor');
-    const access = await signInAccess(harness.server.runtime.mongo, { userId, app: 'growth' });
+    const access = await signInAccess(harness.server.runtime.mongo, {
+      userId: oid(userId),
+      app: 'growth',
+    });
     expect(access).toMatchObject({ allowed: true, mfaRequired: false });
     // growth asks the authenticator: give the session straight, as the last step would
     const session = await harness.server.runtime.otp.sessions.issue({
-      userId,
+      userId: oid(userId),
       email: address,
       app: 'growth',
       methods: ['password', 'totp'],
       client: { ip: '203.0.113.9', userAgent: 'test' },
     });
     await grants().updateOne(
-      { userId, role: 'growth.content_editor' },
+      { userId: oid(userId), roleId: await roleIdOf('growth.content_editor') },
       { $set: { active: false } },
     );
     const answer = await refresh(session.refreshToken, 'growth');
     expect(answer.status).toBe(IDENTITY_ERROR_CODES.SESSION_EXPIRED);
     expect(
-      await db().collection<Session>(SESSIONS).findOne({ _id: session.sessionId }),
+      await db()
+        .collection<Session>(SESSIONS)
+        .findOne({ _id: oid(session.sessionId) }),
     ).toMatchObject({
       revokeReason: 'access-ended',
     });
@@ -461,14 +501,14 @@ describe('accounts from before T3.3', () => {
   it('get the grant of each sign-up, once, and Customer only with the 18+ declaration', async () => {
     const now = new Date();
     const make = async (signUpApp: AppId, adult: boolean, alsoIn: AppId[] = []) => {
-      const _id = uuidv7();
+      const _id = new ObjectId();
       await users().insertOne({
         _id,
-        email: `${_id}@beautinique.example`,
+        email: `${_id.toHexString()}@beautinique.example`,
         status: 'active',
         emailVerifiedAt: now,
         ageDeclaredAt: adult ? now : null,
-        signUpApp,
+        signUpAppId: await appIdOf(signUpApp),
         createdAt: now,
         updatedAt: now,
       } satisfies User);
@@ -476,17 +516,17 @@ describe('accounts from before T3.3', () => {
         await db()
           .collection<LegalAcceptance>(LEGAL_ACCEPTANCES)
           .insertOne({
-            _id: uuidv7(),
+            _id: new ObjectId(),
             userId: _id,
             documents: ['terms', 'privacy'],
             version: 'dummy-1',
             adult: adult && app === 'customer',
-            app,
+            appId: await appIdOf(app),
             ip: '203.0.113.9',
             acceptedAt: now,
           });
       }
-      return _id;
+      return _id.toHexString();
     };
     const customer = await make('customer', true, ['seller']);
     const sellerOnly = await make('seller', false);
@@ -496,8 +536,13 @@ describe('accounts from before T3.3', () => {
     await signUpGrantsMigration.up({ mongo, logger });
     await signUpGrantsMigration.up({ mongo, logger });
 
-    const rolesOf = async (userId: string) =>
-      (await grants().find({ userId }).toArray()).map((g) => `${g.role}:${g.via}`).sort();
+    const rolesOf = async (userId: string) => {
+      const own = await grants()
+        .find({ userId: oid(userId) })
+        .toArray();
+      const keys = await roleKeysOf(own);
+      return own.map((g, i) => `${keys[i] ?? '?'}:${g.via}`).sort();
+    };
     expect(await rolesOf(customer)).toEqual([
       'customer.customer:migration',
       'seller.applicant:migration',
@@ -519,8 +564,17 @@ describe('the first Master', () => {
     const firstId = await customerOnly('owner');
     expect(await giveMasterGrant(mongo, { email: first.toUpperCase() })).toBe('given');
     expect(await giveMasterGrant(mongo, { email: first })).toBe('already-master');
-    expect(await grants().find({ userId: firstId, role: MASTER_ROLE }).toArray()).toMatchObject([
-      { app: 'master', scope: { type: 'global', ids: [] }, via: 'bootstrap', grantedBy: null },
+    expect(
+      await grants()
+        .find({ userId: oid(firstId), roleId: await roleIdOf(MASTER_ROLE) })
+        .toArray(),
+    ).toMatchObject([
+      {
+        appId: await appIdOf('master'),
+        scope: { type: 'global', ids: [] },
+        via: 'bootstrap',
+        grantedBy: null,
+      },
     ]);
     // Master signs in to Master (setting up the authenticator first), and nowhere new
     expect(next(await login(first, 'master'))).toBe('totp-enroll');
@@ -533,13 +587,16 @@ describe('the first Master', () => {
       /2 seats and both are taken/,
     );
     // a seat comes back when a grant ends
-    await grants().updateOne({ userId: firstId, role: MASTER_ROLE }, { $set: { active: false } });
+    await grants().updateOne(
+      { userId: oid(firstId), roleId: await roleIdOf(MASTER_ROLE) },
+      { $set: { active: false } },
+    );
     expect(await giveMasterGrant(mongo, { email: email('owner3') })).toBe('given');
   });
 
   it('gives the last seat to one of two at once, never to both', async () => {
     const mongo = harness.server.runtime.mongo;
-    await grants().updateMany({ role: MASTER_ROLE }, { $set: { active: false } });
+    await grants().updateMany({ roleId: await roleIdOf(MASTER_ROLE) }, { $set: { active: false } });
     await customerOnly('race1');
     await customerOnly('race2');
     await customerOnly('race3');
@@ -549,7 +606,10 @@ describe('the first Master', () => {
       giveMasterGrant(mongo, { email: email('race3') }),
     ]);
     expect(results.map((result) => result.status).sort()).toEqual(['fulfilled', 'rejected']);
-    const held = await grants().distinct('userId', { role: MASTER_ROLE, active: true });
+    const held = await grants().distinct('userId', {
+      roleId: await roleIdOf(MASTER_ROLE),
+      active: true,
+    });
     expect(held).toHaveLength(2);
   });
 
@@ -557,8 +617,8 @@ describe('the first Master', () => {
     const mongo = harness.server.runtime.mongo;
     await customerOnly('early');
     const roles = db().collection<RoleRecord>(ROLES);
-    const master = await roles.findOne({ _id: MASTER_ROLE });
-    await roles.deleteOne({ _id: MASTER_ROLE });
+    const master = await roles.findOne({ key: MASTER_ROLE });
+    await roles.deleteOne({ key: MASTER_ROLE });
     await expect(giveMasterGrant(mongo, { email: email('early') })).rejects.toThrow(/db:release/);
     if (master) await roles.insertOne(master);
   });

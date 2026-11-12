@@ -1,6 +1,6 @@
 import { decryptField, type SealingKeys } from '@beautinique/backend-server-crypto';
 import type { Logger } from '@beautinique/backend-server-kit';
-import type { IndexSpec, Mongo } from '@beautinique/backend-server-mongo';
+import { type IndexSpec, type Mongo, ObjectId } from '@beautinique/backend-server-mongo';
 import { subscribe, type Subscription, type TaskTrigger } from '@beautinique/backend-server-queue';
 import {
   type AppId,
@@ -61,13 +61,16 @@ export const SEND_BATCH = 20;
  * (order, refund, security), then the rest, which waits for the next day (ARCHITECTURE §7.1).
  */
 export const LANES = { otp: 0, transactional: 1, other: 2 } as const;
+
+/** The part of the day's email limit after which notify warns, once (owner, 2026-11-12, QA DR-009). */
+export const BUDGET_WARNING = 0.8;
 export type Lane = keyof typeof LANES;
 
 type Status = 'queued' | 'sending' | 'sent' | 'expired' | 'failed';
 
 export interface Delivery {
-  /** The id of the event that asked for it: a redelivered event finds it already there. */
-  _id: string;
+  /** The id of the event that asked for it (its ObjectId): a redelivered event finds it there. */
+  _id: ObjectId;
   channel: 'email';
   lane: Lane;
   /** LANES[lane]: the order a run sends in */
@@ -125,8 +128,9 @@ export interface Delivery {
 }
 
 interface EmailDay {
-  /** The UTC day, `2026-10-27` */
-  _id: string;
+  _id: ObjectId;
+  /** The UTC day, `2026-10-27` (one record each) */
+  day: string;
   sent: number;
   createdAt: Date;
 }
@@ -145,6 +149,7 @@ export const indexes: readonly IndexSpec[] = [
     key: { createdAt: 1 },
     expireAfterSeconds: DELIVERY_KEEP_SECONDS,
   },
+  { collection: EMAIL_DAYS, name: 'day_unique', key: { day: 1 }, unique: true },
   {
     collection: EMAIL_DAYS,
     name: 'createdAt_ttl',
@@ -185,7 +190,7 @@ export function otpSubscription({
     const now = new Date();
     await deliveries.insertOne(
       {
-        _id: event.eventId,
+        _id: new ObjectId(event.eventId),
         channel: 'email',
         lane: 'otp',
         priority: LANES.otp,
@@ -231,7 +236,7 @@ export function securitySubscription({
     const now = new Date();
     await deliveries.insertOne(
       {
-        _id: event.eventId,
+        _id: new ObjectId(event.eventId),
         channel: 'email',
         lane: 'transactional',
         priority: LANES.transactional,
@@ -277,7 +282,7 @@ export function invitationSubscription({
     const now = new Date();
     await deliveries.insertOne(
       {
-        _id: event.eventId,
+        _id: new ObjectId(event.eventId),
         channel: 'email',
         lane: 'transactional',
         priority: LANES.transactional,
@@ -323,7 +328,7 @@ export function authenticatorSubscription({
     const now = new Date();
     await deliveries.insertOne(
       {
-        _id: event.eventId,
+        _id: new ObjectId(event.eventId),
         channel: 'email',
         lane: 'transactional',
         priority: LANES.transactional,
@@ -369,7 +374,7 @@ export function authenticatorChangedSubscription({
     const now = new Date();
     await deliveries.insertOne(
       {
-        _id: event.eventId,
+        _id: new ObjectId(event.eventId),
         channel: 'email',
         lane: 'transactional',
         priority: LANES.transactional,
@@ -415,7 +420,7 @@ export function signInMethodSubscription({
     const now = new Date();
     await deliveries.insertOne(
       {
-        _id: event.eventId,
+        _id: new ObjectId(event.eventId),
         channel: 'email',
         lane: 'transactional',
         priority: LANES.transactional,
@@ -498,16 +503,24 @@ export async function sendDue({
   /** Counts one email against today's budget; false when this lane's limit is reached. */
   const reserve = async (lane: Lane, at: Date): Promise<boolean> => {
     const day = dayOf(at);
-    await days.updateOne(
-      { _id: day },
-      { $setOnInsert: { sent: 0, createdAt: at } },
-      { upsert: true },
-    );
+    await days.updateOne({ day }, { $setOnInsert: { sent: 0, createdAt: at } }, { upsert: true });
     const limit = lane === 'other' ? limits.other : limits.daily;
-    const counted = await days.updateOne({ _id: day, sent: { $lt: limit } }, { $inc: { sent: 1 } });
-    return counted.modifiedCount === 1;
+    const counted = await days.findOneAndUpdate(
+      { day, sent: { $lt: limit } },
+      { $inc: { sent: 1 } },
+      { returnDocument: 'after' },
+    );
+    if (counted === null) return false;
+    // once a day, as the count crosses it: time to look before codes stop (QA DR-009)
+    if (counted.sent === Math.ceil(limits.daily * BUDGET_WARNING)) {
+      logger.warn(
+        { day, sent: counted.sent, daily: limits.daily },
+        'email budget nearly used today',
+      );
+    }
+    return true;
   };
-  const giveBack = (at: Date) => days.updateOne({ _id: dayOf(at) }, { $inc: { sent: -1 } });
+  const giveBack = (at: Date) => days.updateOne({ day: dayOf(at) }, { $inc: { sent: -1 } });
 
   /** The delivery's end state: the sealed code goes, whatever the end. */
   const finish = (delivery: Delivery, set: Partial<Delivery>) =>

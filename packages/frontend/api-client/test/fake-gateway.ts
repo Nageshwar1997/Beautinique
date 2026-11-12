@@ -3,8 +3,8 @@ import { array, date, number, object, string } from '@beautinique/shared-zod';
 
 /** The app's host in tests: axios makes a Request, which needs a whole URL outside a browser. */
 export const BASE_URL = 'https://customer.beautinique.example/api/v1';
-export const USER_ID = '01920000-0000-7000-8000-000000000001';
-export const SESSION_ID = '01920000-0000-7000-8000-000000000002';
+export const USER_ID = '6730a2b40000000000000001';
+export const SESSION_ID = '6730a2b40000000000000002';
 export const EMAIL = 'asha@beautinique.example';
 const EXPIRES_AT = '2026-12-01T00:00:00.000Z';
 
@@ -83,6 +83,7 @@ const me = {
     providers: ['password'],
     authenticator: true,
     recoveryCodesLeft: 10,
+    authenticatorRequiredBy: [],
   },
   session: { sessionId: SESSION_ID, app: 'customer', expiresAt: EXPIRES_AT },
 };

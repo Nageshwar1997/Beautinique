@@ -29,6 +29,7 @@ import {
 } from 'react';
 import { useLocation, useNavigate, useSearchParams } from 'react-router';
 
+import { LinkButton } from './account-parts';
 import { Scan, StepFrame } from './authenticator-setup';
 import { signInStateOf } from './code-pages';
 import { TextLink } from './layout';
@@ -219,15 +220,28 @@ function PasswordStep({
   const client = useApiClient();
   const form = useZodForm(passwordLogin.input.body, { defaultValues: { email, password: '' } });
   const noticeId = useId();
+  // the right password, found in a data breach after it was set (QA DR-002): a new one with a code
+  const [leakedFor, setLeakedFor] = useState<string | null>(null);
   return (
     <Form
       form={form}
       className="space-y-4"
       onSubmit={async (body) => {
-        await onStep(await client.call(passwordLogin, { body }), body.email);
+        setLeakedFor(null);
+        try {
+          await onStep(await client.call(passwordLogin, { body }), body.email);
+        } catch (error) {
+          if (isApiError(error, 'PASSWORD_RESET_REQUIRED')) setLeakedFor(body.email);
+          throw error;
+        }
       }}
     >
       {notice !== undefined && <Notice id={noticeId}>{notice}</Notice>}
+      {leakedFor !== null && (
+        <LinkButton to={forgotHref} state={{ email: leakedFor }} variant="solid" className="w-full">
+          Set a new password
+        </LinkButton>
+      )}
       <TextField
         control={form.control}
         name="email"

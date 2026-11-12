@@ -5,6 +5,7 @@ import {
   enum as zodEnum,
   isoDateTimeZod,
   object,
+  objectIdZod,
   string,
   uuidv7Zod,
 } from '@beautinique/shared-zod';
@@ -233,7 +234,7 @@ export const signInMethodChanged = defineEvent({
   producer: 'identity',
   description: 'A social sign-in was linked to an account or taken off it',
   data: object({
-    userId: uuidv7Zod,
+    userId: objectIdZod,
     email: emailZod,
     provider: zodEnum(SOCIAL_PROVIDERS),
     change: zodEnum(SIGN_IN_METHOD_CHANGES),

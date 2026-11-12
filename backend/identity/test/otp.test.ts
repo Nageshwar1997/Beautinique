@@ -1,22 +1,27 @@
 // Email codes: sign-up (with the new password) and setting a password, against the local MongoDB
 // replica set and Valkey (`npm run infra:up`). See helpers.ts.
+import type { Logger } from '@beautinique/backend-server-kit';
+import { ObjectId } from '@beautinique/backend-server-mongo';
 import { OUTBOX } from '@beautinique/backend-server-queue';
-import { uuidv7 } from '@beautinique/shared-utils';
 import { Queue } from 'bullmq';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 
 import { challengeKey, OTP_MIN_ANSWER_MS } from '../src/otp.ts';
+import { hibpBreachCheck } from '../src/password.ts';
 import {
   acceptances,
   allowResend,
+  appIdOf,
   BREACHED,
   codeOf,
   consent,
   credentials,
   events,
+  freshIp,
   type Harness,
   hibp,
   makeAccount,
+  oid,
   PASSWORD,
   passwordCode,
   post,
@@ -88,15 +93,15 @@ describe('sign-up with an email code', () => {
       signedIn: true,
     });
     const user = await users().findOne({ email: address });
-    expect(user).toMatchObject({ status: 'active', signUpApp: 'customer' });
+    expect(user).toMatchObject({ status: 'active', signUpAppId: await appIdOf('customer') });
     expect(user?.ageDeclaredAt).toBeInstanceOf(Date);
-    expect(user?._id).toBe(verified.body.data?.userId);
+    expect(user?._id.toHexString()).toBe(verified.body.data?.userId);
     expect(await acceptances().find({ userId: user?._id }).toArray()).toMatchObject([
       {
         documents: ['terms', 'privacy'],
         version: 'dummy-1',
         adult: true,
-        app: 'customer',
+        appId: await appIdOf('customer'),
         ip: '203.0.113.7',
       },
     ]);
@@ -143,7 +148,7 @@ describe('sign-up with an email code', () => {
     const seller = await signUpCode(address, 'seller');
     const kept = await verify(seller.challengeId, 'another password entirely', 'seller');
     expect(kept.body.data).toMatchObject({
-      userId: user?._id,
+      userId: user?._id.toHexString(),
       outcome: 'password-kept',
       signedIn: false,
     });
@@ -153,9 +158,9 @@ describe('sign-up with an email code', () => {
       await acceptances()
         .find({ userId: user?._id })
         .sort({ acceptedAt: 1 })
-        .map((a) => a.app)
+        .map((a) => a.appId)
         .toArray(),
-    ).toEqual(['customer', 'seller']);
+    ).toEqual([await appIdOf('customer'), await appIdOf('seller')]);
     // the same app and version again adds nothing
     await verify((await signUpCode(address, 'seller')).challengeId, PASSWORD, 'seller');
     expect(await acceptances().countDocuments({ userId: user?._id })).toBe(2);
@@ -172,7 +177,7 @@ describe('sign-up with an email code', () => {
       );
       expect(
         await acceptances()
-          .find({ userId: user?._id, app: 'customer' })
+          .find({ userId: user?._id, appId: await appIdOf('customer') })
           .sort({ acceptedAt: 1 })
           .map((a) => a.version)
           .toArray(),
@@ -184,7 +189,7 @@ describe('sign-up with an email code', () => {
 
   it('adds a password to an account without one (made with Google), and does not sign in', async () => {
     const address = email('google');
-    const userId = uuidv7();
+    const userId = new ObjectId();
     const now = new Date();
     await users().insertOne({
       _id: userId,
@@ -192,12 +197,12 @@ describe('sign-up with an email code', () => {
       status: 'active',
       emailVerifiedAt: now,
       ageDeclaredAt: now,
-      signUpApp: 'customer',
+      signUpAppId: await appIdOf('customer'),
       createdAt: now,
       updatedAt: now,
     });
     await providers().insertOne({
-      _id: uuidv7(),
+      _id: new ObjectId(),
       userId,
       provider: 'google',
       subject: '104857392018475620193',
@@ -209,7 +214,11 @@ describe('sign-up with an email code', () => {
       PASSWORD,
       'seller',
     );
-    expect(answer.body.data).toMatchObject({ userId, outcome: 'password-set', signedIn: false });
+    expect(answer.body.data).toMatchObject({
+      userId: userId.toHexString(),
+      outcome: 'password-set',
+      signedIn: false,
+    });
     expect(
       (await providers().find({ userId }).toArray()).map((p) => p.provider).toSorted(),
     ).toEqual(['google', 'password']);
@@ -224,7 +233,7 @@ describe('sign-up with an email code', () => {
     await verify((await signUpCode(address)).challengeId);
     const user = await users().findOne({ email: address });
     expect(user?.ageDeclaredAt).toBeInstanceOf(Date);
-    expect(user?.signUpApp).toBe('seller');
+    expect(user?.signUpAppId).toEqual(await appIdOf('seller'));
     expect(await acceptances().countDocuments({ userId: user?._id, adult: true })).toBe(1);
   });
 });
@@ -233,7 +242,7 @@ describe('password codes', () => {
   it('set a new password for an account, from any app, without signing in', async () => {
     const address = email('rider');
     const userId = await makeAccount(address);
-    const before = (await credentials().findOne({ _id: userId }))?.password?.hash;
+    const before = (await credentials().findOne({ _id: oid(userId) }))?.password?.hash;
     const challenge = await passwordCode(address, 'delivery');
     expect((await events(challenge.challengeId))[0]?.envelope.data).toMatchObject({
       purpose: 'password',
@@ -241,8 +250,8 @@ describe('password codes', () => {
     });
     const answer = await verify(challenge.challengeId, 'a brand new password', 'delivery');
     expect(answer.body.data).toMatchObject({ userId, outcome: 'password-set', signedIn: false });
-    expect((await credentials().findOne({ _id: userId }))?.password?.hash).not.toBe(before);
-    expect(await providers().countDocuments({ userId, provider: 'password' })).toBe(1);
+    expect((await credentials().findOne({ _id: oid(userId) }))?.password?.hash).not.toBe(before);
+    expect(await providers().countDocuments({ userId: oid(userId), provider: 'password' })).toBe(1);
   });
 
   it('answer an unknown email like any other, in the same time, and send nothing', async () => {
@@ -480,6 +489,72 @@ describe('new codes and limits', () => {
     }
   });
 
+  it('gives one IP at most 3 of an email’s 5 codes an hour, so nobody uses up another’s reset codes (DR-003)', async () => {
+    const address = email('reset-victim');
+    await makeAccount(address);
+    const from = (ip: string, to = address) => post('/auth/password/code', { email: to }, { ip });
+    for (let i = 0; i < 3; i += 1) expect((await from('198.51.100.9')).status).toBe(200);
+    const fourth = await from('198.51.100.9');
+    expect([fourth.status, fourth.body.error?.code]).toEqual([429, 'OTP_EMAIL_LIMIT']);
+    // the owner, from their own IP, still gets the email's last code of the hour (its sign-up code
+    // was the first of the 5)
+    expect((await from('203.0.113.50')).status).toBe(200);
+    expect((await from('203.0.113.51')).status).toBe(429);
+    // one IPv6 home (/64) is one IP
+    const other = email('reset-v6');
+    for (let i = 1; i <= 3; i += 1) {
+      expect((await from(`2001:db8:5:1::${String(i)}`, other)).status).toBe(200);
+    }
+    expect((await from('2001:db8:5:1::4', other)).status).toBe(429);
+  });
+
+  it('keeps sign-up codes to their share of the day, so password and invitation codes still go (DR-009)', async () => {
+    const owner = email('share-owner');
+    await makeAccount(owner);
+    const shared = await harness.start({ IDENTITY__SIGN_UP_CODES_PER_DAY: '2' });
+    try {
+      const signUp = (address: string) =>
+        post('/auth/sign-up/code', { email: address, consent }, { to: shared, ip: freshIp() });
+      expect((await signUp(email('share1'))).status).toBe(200);
+      expect((await signUp(email('share2'))).status).toBe(200);
+      const third = await signUp(email('share3'));
+      expect([third.status, third.body.error?.code]).toEqual([429, 'OTP_SIGN_UP_LIMIT']);
+      expect(third.body.error?.message).toBe(
+        "We can't send more sign-up codes today. Please try again tomorrow.",
+      );
+      // a password code is not part of that share
+      const reset = await post(
+        '/auth/password/code',
+        { email: owner },
+        { to: shared, ip: freshIp() },
+      );
+      expect(reset.status).toBe(200);
+    } finally {
+      await shared.stop();
+    }
+  });
+
+  it('sends at most the hour’s codes of every IP together, resends too (DR-009)', async () => {
+    const busy = await harness.start({ IDENTITY__CODES_PER_HOUR: '3' });
+    try {
+      const signUp = (address: string) =>
+        post('/auth/sign-up/code', { email: address, consent }, { to: busy, ip: freshIp() });
+      expect((await signUp(email('hour1'))).status).toBe(200);
+      const second = await signUp(email('hour2'));
+      expect(second.status).toBe(200);
+      const { challengeId } = second.body.data as { challengeId: string };
+      await allowResend(challengeId, busy);
+      expect((await post(`/auth/otp/${challengeId}/resend`, {}, { to: busy })).status).toBe(200);
+      const fourth = await signUp(email('hour3'));
+      expect([fourth.status, fourth.body.error?.code]).toEqual([429, 'OTP_BUSY']);
+      expect(fourth.body.error?.message).toBe(
+        "We're sending a lot of codes right now. Please try again in a few minutes.",
+      );
+    } finally {
+      await busy.stop();
+    }
+  });
+
   it('refuses with 503 when Redis is away, sending no code it could not check', async () => {
     const cut = await harness.start();
     try {
@@ -505,5 +580,31 @@ describe('new codes and limits', () => {
     await expect(harness.start({ IDENTITY__BLIND_INDEX_KEY: 'b1:short' })).rejects.toThrow(
       'BLIND_INDEX_KEY',
     );
+  });
+});
+
+describe('the breach check (DR-002)', () => {
+  it('answers unknown with a warning when Have I Been Pwned fails (a 5xx) or is slow', async () => {
+    const warned: { fields: unknown; message: string }[] = [];
+    const logger = {
+      warn: (fields: unknown, message: string) => warned.push({ fields, message }),
+    } as unknown as Logger;
+    const check = hibpBreachCheck({ url: harness.hibpUrl, timeoutMs: 300, logger });
+    expect(await check(BREACHED)).toBe('breached');
+    expect(await check(PASSWORD)).toBe('clean');
+    expect(warned).toEqual([]);
+    for (const mode of ['down', 'hang'] as const) {
+      hibp.mode = mode;
+      try {
+        expect(await check(BREACHED), mode).toBe('unknown');
+      } finally {
+        hibp.mode = 'answer';
+      }
+    }
+    expect(warned.map((w) => w.message)).toEqual([
+      'breached-password check unavailable; the password is checked again at the next sign-in',
+      'breached-password check unavailable; the password is checked again at the next sign-in',
+    ]);
+    expect(warned[0]?.fields).toMatchObject({ status: 503 });
   });
 });

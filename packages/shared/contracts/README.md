@@ -63,7 +63,7 @@ Types route se hi aate hain:
 | `toOpenApi(routes, info)` | OpenAPI 3.1 document (zod 4 ka JSON Schema), Beautinique details `x-bq` me                          |
 | `buildPath`, `matchPath`  | `/products/:id` bharna (encode ke saath) aur padhna                                                 |
 
-**Rate-limit classes** (ARCHITECTURE me naam tay nahi the; ye shuruaati set hai): `public`, `read`, `write`, `search`, `auth`, `otp`, `partner-api`, `webhook`. Har class ka budget gateway config me rahega. `auth` aur `otp` Redis down hone pe fail-closed hain.
+**Rate-limit classes** (ARCHITECTURE me naam tay nahi the; ye shuruaati set hai): `public`, `read`, `write`, `search`, `auth`, `session`, `otp`, `partner-api`, `webhook`. Har class ka budget gateway config me rahega. `auth`, `session` aur `otp` Redis down hone pe fail-closed hain. `session` (owner 2026-11-09, QA DR-005) sirf `/auth/refresh` aur `/auth/logout`: IP ka bada budget plus har session ka apna, taaki ek mobile IP ke peeche ke log sign-out na hon; sign-in `auth` me hi. Gateway session ko refresh cookie se `refreshTokenParts` (identity ka format `<sessionId>.<family>.<secret>`, sirf pehle do hisse) se pehchanta hai; identity bhi yahi parser use karti hai.
 
 ## Events
 
@@ -76,7 +76,7 @@ export const sellerApproved = defineEvent({
   data: object({ sellerOrgId: objectIdZod }),
 });
 
-sellerApproved.envelope.parse(message); // poora envelope: eventId (UUIDv7), type, version, occurredAt, producer, aggregate, actor, correlationId, causationId, scope, data
+sellerApproved.envelope.parse(message); // poora envelope: eventId (ObjectId ka 24-hex), type, version, occurredAt, producer, aggregate, actor, correlationId, causationId, scope, data
 ```
 
 `data` me breaking change ka matlab naya version hai, jo purane ke saath declare hota hai. `eventCatalogue(events)` type + version se dhoondhta hai, `latest(type)` deta hai, aur duplicate ya versions me gap (1, 3) pe error deta hai.

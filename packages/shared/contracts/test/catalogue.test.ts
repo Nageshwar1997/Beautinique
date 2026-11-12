@@ -42,6 +42,7 @@ import {
   REFRESH_COOKIE_PATH,
   refreshCookieName,
   refreshSession,
+  refreshTokenParts,
   requestPasswordCode,
   requestSignUpCode,
   resendOtp,
@@ -50,7 +51,9 @@ import {
   sessionReuseDetected,
   SIGN_UP_APPS,
   startTotpEnroll,
+  STEP_UP_ACTIONS,
   stepUp,
+  stepUpActionOf,
   TOKEN_ISSUER,
   tokenAudience,
   TOTP_REQUIRED_APPS,
@@ -75,7 +78,7 @@ import {
   startSocialSignIn,
 } from '../src';
 
-const id = '0190a1b2-c3d4-7e5f-8a9b-0c1d2e3f4a5b';
+const id = '65f1a2b3c4d5e6f708192a3b';
 const data = { pingId: id, note: 'hello', recordedAt: '2026-10-22T10:00:00.000Z' };
 
 describe('platform catalogue (Milestone 1 sample)', () => {
@@ -175,6 +178,51 @@ describe('platform catalogue (Milestone 1 sample)', () => {
       pingRecorded.envelope.safeParse({ ...envelope, data: { ...data, note: '' } }).success,
     ).toBe(false);
     expect(recordPing.input.body.safeParse({ note: 'x'.repeat(201) }).success).toBe(false);
+  });
+});
+
+describe('ids (owner, 2026-11-12)', () => {
+  const objectId = '65f1a2b3c4d5e6f708192a3b';
+  const uuid = '0190a1b2-c3d4-7e5f-8a9b-0c1d2e3f4a5b';
+
+  it('MongoDB ids are ObjectIds (24 hex): a UUIDv7 from before is refused', () => {
+    const cases = [
+      [getPing.input.params, 'pingId'],
+      [endSession.input.params, 'sessionId'],
+    ] as const;
+    for (const [params, field] of cases) {
+      expect(params.safeParse({ [field]: objectId }).success, field).toBe(true);
+      expect(params.safeParse({ [field]: objectId.toUpperCase() }).data, field).toEqual({
+        [field]: objectId,
+      });
+      expect(params.safeParse({ [field]: uuid }).success, field).toBe(false);
+    }
+    const envelope = {
+      eventId: objectId,
+      type: 'platform.ping.recorded',
+      version: 1,
+      occurredAt: '2026-10-22T10:00:00.000Z',
+      producer: 'core',
+      aggregate: { type: 'ping', id: objectId },
+      actor: { type: 'user', id: objectId },
+      correlationId: 'c1',
+      causationId: null,
+      scope: null,
+      data: { pingId: objectId, note: 'hello', recordedAt: '2026-10-22T10:00:00.000Z' },
+    };
+    expect(pingRecorded.envelope.safeParse(envelope).success).toBe(true);
+    expect(pingRecorded.envelope.safeParse({ ...envelope, eventId: uuid }).success).toBe(false);
+    expect(
+      pingRecorded.envelope.safeParse({ ...envelope, data: { ...envelope.data, pingId: uuid } })
+        .success,
+    ).toBe(false);
+  });
+
+  it('ids that live in Redis stay UUIDv7, so nobody can guess them', () => {
+    expect(resendOtp.input.params.safeParse({ challengeId: uuid }).success).toBe(true);
+    expect(resendOtp.input.params.safeParse({ challengeId: objectId }).success).toBe(false);
+    expect(loginTotp.input.params.safeParse({ loginId: uuid }).success).toBe(true);
+    expect(loginTotp.input.params.safeParse({ loginId: objectId }).success).toBe(false);
   });
 });
 
@@ -293,7 +341,7 @@ describe('sign-in routes', () => {
     }
     expect(
       confirmTotpEnroll.output.safeParse({
-        user: { userId: '0190a1b2-c3d4-7e5f-8a9b-0c1d2e3f4a5b', email: 'a@b.example' },
+        user: { userId: '65f1a2b3c4d5e6f708192a3b', email: 'a@b.example' },
         recoveryCodes: ['ABCDE-FGH23'],
       }).success,
     ).toBe(false);
@@ -340,17 +388,51 @@ describe('sessions', () => {
     expect(tokenAudience('admin')).toBe('bq:admin');
     expect(TOKEN_ISSUER).toBe('bq:identity');
     for (const route of [refreshSession, logout]) {
-      expect(route).toMatchObject({ access: { type: 'public' }, rateLimit: 'auth', apps: APPS });
+      // their own class, so the many people behind one mobile IP keep their sessions (QA DR-005)
+      expect(route).toMatchObject({ access: { type: 'public' }, rateLimit: 'session', apps: APPS });
       expect(`/api/v1${route.path}`.startsWith(REFRESH_COOKIE_PATH)).toBe(true);
     }
+    // signing in stays in the tight class
+    for (const route of [passwordLogin, verifyOtp, loginTotp, loginRecovery]) {
+      expect(route.rateLimit, route.id).toBe('auth');
+    }
     expect(events.latest('identity.session.reuseDetected')).toBe(sessionReuseDetected);
+  });
+
+  it('read the session id and the family of a refresh token, and nothing else', () => {
+    const sessionId = '65f1a2b3c4d5e6f708192a3b';
+    const family = 'AbCdEfGhIjKlMnOpQr-_12';
+    const secret = 'S'.repeat(43);
+    expect(refreshTokenParts(`${sessionId}.${family}.${secret}`)).toEqual({ sessionId, family });
+    // a token from before families
+    expect(refreshTokenParts(`${sessionId}.${secret}`)).toEqual({ sessionId, family: null });
+    for (const token of [
+      undefined,
+      '',
+      sessionId,
+      `${sessionId.toUpperCase()}.${family}.${secret}`,
+      // a session id from before ObjectIds (owner, 2026-11-12)
+      `0190a1b2-c3d4-7e5f-8a9b-0c1d2e3f4a5b.${family}.${secret}`,
+      `${sessionId.slice(1)}.${family}.${secret}`,
+      `x${sessionId}.${family}.${secret}`,
+      `${sessionId}.${family}.${secret}.more`,
+    ]) {
+      expect(refreshTokenParts(token), String(token)).toBeNull();
+    }
+    // a family the bucket cannot be (not 16 bytes of base64url) counts as none
+    for (const odd of ['short', `${family}x`, 'AbCdEfGhIjKlMnOpQr+/12']) {
+      expect(refreshTokenParts(`${sessionId}.${odd}.${secret}`), odd).toEqual({
+        sessionId,
+        family: null,
+      });
+    }
   });
 });
 
 describe('the signed-in authenticator (ARCHITECTURE §9.2)', () => {
   const all = [enrollAuthenticator, confirmAuthenticator, newRecoveryCodes, disableAuthenticator];
 
-  it('are signed-in identity routes in every app; new codes and turning off need a step-up', () => {
+  it('are signed-in identity routes in every app; new codes need a step-up, turning off and a new phone one of their own', () => {
     for (const route of all) {
       expect(route, route.id).toMatchObject({
         access: { type: 'signed-in' },
@@ -360,7 +442,25 @@ describe('the signed-in authenticator (ARCHITECTURE §9.2)', () => {
         apps: APPS,
       });
     }
-    expect(all.map((route) => route.stepUp)).toEqual([false, false, true, true]);
+    // the gateway's 5 minutes for new codes; turning off asks identity for its own (DR-010)
+    expect(all.map((route) => route.stepUp)).toEqual([false, false, true, false]);
+    expect(STEP_UP_ACTIONS).toEqual(['authenticator.disable', 'authenticator.replace']);
+    expect(stepUpActionOf([{ path: ['for'], message: 'authenticator.disable' }])).toBe(
+      'authenticator.disable',
+    );
+    for (const odd of [
+      undefined,
+      [],
+      [{ path: ['for'], message: 'grants.give' }],
+      [{ path: ['code'], message: 'authenticator.disable' }],
+      [{ path: ['for', 0], message: 'authenticator.disable' }],
+    ]) {
+      expect(stepUpActionOf(odd)).toBeNull();
+    }
+    expect(
+      stepUp.input.body.safeParse({ code: '123456', for: 'authenticator.replace' }).success,
+    ).toBe(true);
+    expect(stepUp.input.body.safeParse({ code: '123456', for: 'grants.give' }).success).toBe(false);
     expect(disableAuthenticator.method).toBe('DELETE');
     expect(IDENTITY_ERROR_CODES).toMatchObject({
       AUTHENTICATOR_EXISTS: 409,
@@ -403,8 +503,22 @@ describe('the signed-in authenticator (ARCHITECTURE §9.2)', () => {
       signUpApp: 'customer',
       providers: ['password'],
       authenticator: true,
+      authenticatorRequiredBy: [],
     };
     expect(user.safeParse({ ...me, recoveryCodesLeft: 3 }).success).toBe(true);
+    // the roles that keep it on, with their apps (QA DR-011)
+    const keptOn = { ...me, recoveryCodesLeft: 3 };
+    expect(
+      user.safeParse({
+        ...keptOn,
+        authenticatorRequiredBy: [{ name: 'Seller Finance', app: 'seller' }],
+      }).success,
+    ).toBe(true);
+    expect(
+      user.safeParse({ ...keptOn, authenticatorRequiredBy: [{ name: 'X', app: 'nowhere' }] })
+        .success,
+    ).toBe(false);
+    expect(user.safeParse({ ...keptOn, authenticatorRequiredBy: undefined }).success).toBe(false);
     expect(user.safeParse({ ...me, authenticator: false, recoveryCodesLeft: null }).success).toBe(
       true,
     );

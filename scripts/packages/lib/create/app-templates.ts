@@ -1,4 +1,5 @@
 import type { AppId } from '../../../../packages/shared/contracts/src/platform.ts';
+import { INSTALL_HEAD_TAGS, ROSE, webManifest } from './install.ts';
 import { pickVersions } from './scaffold.ts';
 
 /** spa: Vite + React Router data router. ssr: React Router framework mode. pwa: spa + installable, offline shell. */
@@ -38,6 +39,26 @@ export const APP_TITLES: Record<AppId, string> = {
   delivery: 'Beautinique Delivery',
   growth: 'Beautinique Growth Studio',
   creator: 'Beautinique Creator',
+};
+
+/**
+ * What each app will be for, in one line under its name while it has no pages yet: a new app's
+ * "Coming soon" home (owner, 2026-11-09, QA audit Q-014: never a developer's note to the public).
+ */
+export const APP_TAGLINES: Record<AppId, string> = {
+  customer:
+    'Genuine brands, true-to-life shades and clear prices, every product checked in our own warehouse.',
+  seller:
+    'Brands and authorised distributors will list products, manage stock and follow their orders here.',
+  admin: 'The Beautinique team will review sellers, listings and orders here.',
+  superadmin: 'Super Admins will handle escalated reviews and look after the admin teams here.',
+  master: "Beautinique's owners will manage roles, approvals and emergency controls here.",
+  support: 'The support team will answer tickets, complaints and grievances here.',
+  finance: 'The finance team will run settlements, payouts, invoices and reconciliation here.',
+  logistics: 'The logistics team will run hubs, line-haul and the delivery control tower here.',
+  delivery: 'Delivery partners will see their run sheets and deliver orders here.',
+  growth: 'The growth team will run banners, campaigns, loyalty and gift cards here.',
+  creator: 'Creators will build their storefronts, share looks and track their earnings here.',
 };
 
 /** The gateway's local port: every app's dev server sends /api there (like the Vercel rewrite). */
@@ -157,9 +178,9 @@ function manifest(spec: AppSpec): Record<string, unknown> {
   };
 }
 
-// Brand colours for files that cannot read CSS variables (icons, manifest): rose-600 and neutral-50.
-const ROSE = '#D6336C';
-const IVORY = '#FDF8F5';
+/** The install tags in a page head (install.ts), indented for index.html or the SSR root. */
+const installTags = (indentBy: string) =>
+  INSTALL_HEAD_TAGS.map((tag) => `${indentBy}${tag}`).join('\n');
 
 const icon = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
   <rect width="64" height="64" rx="14" fill="${ROSE}" />
@@ -264,8 +285,12 @@ function readme(spec: AppSpec): string {
         ]),
     '- **Wake-up (ARCHITECTURE §11.1):** server ke jawab tak saada parda (1.5 s pe wake-up screen), aur tab tak koi API call nahi: `ServerWake` ka `onReady` client ka `serverReady()` kehta hai. `BQ_GATEWAY_URL` (Vercel env) se wake-up server ko seedha bhi bulata hai; laptop pe khaali theek.',
     ...(spec.kind === 'pwa'
-      ? ['- `vite.config.ts`: PWA manifest aur service worker (vite-plugin-pwa).']
+      ? [
+          '- `vite.config.ts`: service worker (vite-plugin-pwa); manifest `public/` wali file hai; `/api` navigations SW nahi, server leta hai (`navigateFallbackDenylist`).',
+        ]
       : []),
+    '- **Install (phone pe app ki tarah):** `public/manifest.webmanifest` (`display: standalone`), `public/icons/*` aur `public/apple-touch-icon.png` app ke parivaar ke icons; `npm run icons:install` banata hai (`scripts/packages/lib/create/install.ts`, DESIGN §11).',
+    `- \`vercel.json\`: \`routes\` me sirf \`/api\` → gateway (\`x-origin-secret\` Vercel env se), \`headers\` me har page pe security headers${ssr ? '' : ' aur `X-Robots-Tag: noindex`'}${ssr ? '' : ', phir SPA fallback'} (ARCHITECTURE §7.2, §9.3); \`test/vercel-config.test.ts\` ise jaanchta. Vercel env: \`BQ_GATEWAY_URL\` aur \`ORIGIN_SECRET\` (Production aur Preview).`,
     '- Styles: `@beautinique/frontend-styles` (tokens, fonts, utilities).',
     '',
   ].join('\n');
@@ -275,7 +300,6 @@ function readme(spec: AppSpec): string {
 
 function viteConfig(spec: AppSpec): string {
   const pwa = spec.kind === 'pwa';
-  const short = spec.title.replace('Beautinique', 'BQ');
   return `import { beautiniqueFonts } from '@beautinique/frontend-styles/vite';
 import tailwindcss from '@tailwindcss/vite';
 import react from '@vitejs/plugin-react';
@@ -294,16 +318,11 @@ ${gatewayEnv}
           ? `
       VitePWA({
         registerType: 'autoUpdate',
-        manifest: {
-          name: '${spec.title}',
-          short_name: '${short}',
-          description: 'Run sheets, deliveries and payments for Beautinique delivery partners.',
-          theme_color: '${ROSE}',
-          background_color: '${IVORY}',
-          display: 'standalone',
-          start_url: '/',
-          icons: [{ src: '/icon.svg', sizes: 'any', type: 'image/svg+xml', purpose: 'any' }],
-        },
+        // the app's own public/manifest.webmanifest, as every app has (npm run icons:install)
+        manifest: false,
+        // page navigations get the app shell offline, but never /api: those reach the server (a
+        // download, a sign-in redirect; QA audit Q-013)
+        workbox: { navigateFallbackDenylist: [/^\\/api\\//] },
       }),`
           : ''
       }
@@ -334,6 +353,8 @@ function indexHtml(spec: AppSpec): string {
     <link rel="icon" type="image/svg+xml" href="/${pwa ? 'icon' : 'favicon'}.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0${pwa ? ', viewport-fit=cover' : ''}" />
     <meta name="theme-color" content="${ROSE}" />
+    <!-- install: the app's manifest (opens standalone, no address bar) and the iOS home-screen icon -->
+${installTags('    ')}
     <title>${spec.title}</title>
   </head>
   <body>
@@ -416,15 +437,34 @@ export function Layout() {
 }
 `;
 
-const homeTsx = (spec: AppSpec) => `export function HomePage() {
+/** A string literal as Prettier writes it: single quotes, double where the text has an apostrophe. */
+const literal = (text: string) => (text.includes("'") ? JSON.stringify(text) : `'${text}'`);
+
+/** `const TAGLINE = '...';` on one line when it fits in 100 columns, else broken as Prettier does. */
+const taglineConst = (app: AppId) => {
+  const line = `const TAGLINE = ${literal(APP_TAGLINES[app])};`;
+  return line.length <= 100 ? line : `const TAGLINE =\n  ${literal(APP_TAGLINES[app])};`;
+};
+
+/** The home until the app has pages (Q-014): its name, "Coming soon" and what it will be for. */
+const comingSoon = (
+  spec: AppSpec,
+  component: string,
+) => `/** The home until the app has pages: its name, that it is coming soon, and what it will be for. */
+export ${component === 'Home' ? 'default ' : ''}function ${component}() {
   return (
-    <main id="main" className="container-page py-10">
-      <h1 className="font-display text-3xl font-medium">${spec.title}</h1>
-      <p className="text-foreground-muted mt-2">The app is ready. Add pages in src/routes.tsx.</p>
+    <main id="main" className="container-page flex min-h-dvh flex-col justify-center py-16">
+      <p className="text-brand-text text-sm font-medium">Coming soon</p>
+      <h1 className="font-display mt-2 text-4xl font-medium">${spec.title}</h1>
+      <p className="text-foreground-muted mt-3 max-w-prose">{TAGLINE}</p>
     </main>
   );
 }
 `;
+
+const homeTsx = (spec: AppSpec) => `${taglineConst(spec.app)}
+
+${comingSoon(spec, 'HomePage')}`;
 
 const notFoundTsx = `import { Link } from 'react-router';
 
@@ -471,9 +511,12 @@ const renderAt = (path: string) =>
   render(<RouterProvider router={createMemoryRouter(testRoutes, { initialEntries: [path] })} />);
 
 describe('${spec.app}', () => {
-  it('shows the home page', async () => {
+  it('says the app is coming soon and what it will be for (no note for developers)', async () => {
     renderAt('/');
     expect(await screen.findByRole('heading', { level: 1, name: '${spec.title}' })).toBeTruthy();
+    expect(screen.getByText('Coming soon')).toBeTruthy();
+    expect(screen.getByRole('heading', { level: 1 }).nextElementSibling?.textContent).toBeTruthy();
+    expect(document.body.textContent).not.toContain('routes');
   });
 
   it('shows "Page not found" for unknown paths', async () => {
@@ -501,7 +544,8 @@ const tsconfigApp = `{
     "tsBuildInfoFile": "./node_modules/.tmp/tsconfig.app.tsbuildinfo",
     "types": ["vite/client"]
   },
-  "include": ["src", "test"]
+  "include": ["src", "test"],
+  "exclude": ["test/*-config.test.ts"]
 }
 `;
 
@@ -511,7 +555,7 @@ const tsconfigNode = `{
     "tsBuildInfoFile": "./node_modules/.tmp/tsconfig.node.tsbuildinfo",
     "types": ["node"]
   },
-  "include": ["vite.config.ts", "vitest.config.ts"]
+  "include": ["vite.config.ts", "vitest.config.ts", "test/*-config.test.ts"]
 }
 `;
 
@@ -582,6 +626,8 @@ export function Layout({ children }: { children: ReactNode }) {
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <meta name="theme-color" content="${ROSE}" />
         <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+        {/* install: the app's manifest (opens standalone, no address bar) and the iOS home-screen icon */}
+${installTags('        ')}
         {/* the wake-up's plain cover from the first paint (ServerWake below) */}
         <WakeScript />
         <Meta />
@@ -638,20 +684,14 @@ export default [index('routes/home.tsx')] satisfies RouteConfig;
 
 const ssrHome = (spec: AppSpec) => `import type { Route } from './+types/home';
 
+${taglineConst(spec.app)}
+
 export const meta: Route.MetaFunction = () => [
   { title: '${spec.title}' },
-  { name: 'description', content: 'Beauty you can trust: genuine brands, real shades, clear prices.' },
+  { name: 'description', content: TAGLINE },
 ];
 
-export default function Home() {
-  return (
-    <main id="main" className="container-page py-10">
-      <h1 className="font-display text-3xl font-medium">${spec.title}</h1>
-      <p className="text-foreground-muted mt-2">The app is ready. Add pages in app/routes.ts.</p>
-    </main>
-  );
-}
-`;
+${comingSoon(spec, 'Home')}`;
 
 const ssrTest = (
   spec: AppSpec,
@@ -664,10 +704,13 @@ import Home, { meta } from '../app/routes/home';
 afterEach(cleanup);
 
 describe('${spec.app}', () => {
-  it('shows the home page', async () => {
+  it('says the app is coming soon and what it will be for (no note for developers)', async () => {
     const Stub = createRoutesStub([{ path: '/', Component: Home }]);
     render(<Stub initialEntries={['/']} />);
     expect(await screen.findByRole('heading', { level: 1, name: '${spec.title}' })).toBeTruthy();
+    expect(screen.getByText('Coming soon')).toBeTruthy();
+    expect(screen.getByRole('heading', { level: 1 }).nextElementSibling?.textContent).toBeTruthy();
+    expect(document.body.textContent).not.toContain('routes');
   });
 
   it('gives the home page a title and description', () => {
@@ -693,11 +736,192 @@ const ssrGitignore = `/build
 /.react-router
 `;
 
+/* ---------------- Vercel (ARCHITECTURE §7.2, §9.3; QA Q-015) ---------------- */
+
+/**
+ * The app's vercel.json, as the 11 apps have it: npm 12 and only this app's build, /api to the
+ * gateway with the origin secret (both from Vercel's env; only a route sets a request header), the
+ * security headers on every page (scripts/ci/test/vercel-headers.test.ts keeps the list). The
+ * server-rendered storefront may be listed and renders every page itself; the others say noindex
+ * and fall back to the SPA.
+ */
+function vercelJson(spec: AppSpec): string {
+  const storefront = spec.kind === 'ssr';
+  return `{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "installCommand": "cd ../.. && npm install --global npm@12.2.0 && npm ci",
+  "buildCommand": "cd ../.. && npm run build -- --for ${spec.app}",
+${storefront ? '' : '  "outputDirectory": "dist",\n'}  "regions": ["bom1"],
+  "routes": [
+    {
+      "src": "/api/(.*)",
+      "dest": "\${BQ_GATEWAY_URL}/api/$1",
+      "env": ["BQ_GATEWAY_URL"],
+      "transforms": [
+        {
+          "type": "request.headers",
+          "op": "set",
+          "target": { "key": "x-origin-secret" },
+          "args": "$ORIGIN_SECRET",
+          "env": ["ORIGIN_SECRET"]
+        }
+      ]
+    }
+  ],
+  "headers": [
+    {
+      "source": "/(.*)",
+      "headers": [
+        { "key": "Content-Security-Policy", "value": "frame-ancestors 'none'" },
+        { "key": "X-Frame-Options", "value": "DENY" },
+        { "key": "X-Content-Type-Options", "value": "nosniff" },
+        { "key": "Referrer-Policy", "value": "strict-origin-when-cross-origin" },
+        { "key": "Permissions-Policy", "value": "camera=(), microphone=(), geolocation=()" },
+        { "key": "Strict-Transport-Security", "value": "max-age=63072000; includeSubDomains" }${
+          storefront
+            ? ''
+            : `,
+        { "key": "X-Robots-Tag", "value": "noindex, nofollow" }`
+        }
+      ]
+    }
+  ]${
+    storefront
+      ? ''
+      : `,
+  "rewrites": [{ "source": "/(.*)", "destination": "/index.html" }]`
+  }
+}
+`;
+}
+
+const vercelTypes = (srcOptional: boolean) => `interface VercelRoute {
+  src${srcOptional ? '?' : ''}: string;
+  dest?: string;
+  env?: string[];
+  transforms?: {
+    type: string;
+    op: string;
+    target: { key: string };
+    args: string;
+    env?: string[];
+  }[];
+}
+
+interface VercelHeaders {
+  source: string;
+  headers: { key: string; value: string }[];
+}
+
+const config = JSON.parse(
+  readFileSync(join(import.meta.dirname, '..', 'vercel.json'), 'utf8'),
+) as Record<string, unknown> & {
+  routes: VercelRoute[];
+  headers?: VercelHeaders[];
+  rewrites?: { source: string; destination: string }[];
+};
+`;
+
+const vercelApiTransforms = `    // \`set\` replaces whatever the browser sent in the same header
+    expect(api?.transforms).toEqual([
+      {
+        type: 'request.headers',
+        op: 'set',
+        target: { key: 'x-origin-secret' },
+        args: '$ORIGIN_SECRET',
+        env: ['ORIGIN_SECRET'],
+      },
+    ]);
+`;
+
+const vercelNoSecrets = `  it('holds no address or secret of its own', () => {
+    const text = JSON.stringify(config);
+    expect(text).not.toMatch(/onrender\\.com|https?:\\/\\/(?!openapi\\.vercel\\.sh)/);
+    expect(text).not.toMatch(/not-a-secret/);
+  });
+`;
+
+/** The app's test of its vercel.json, as the 11 apps have it. */
+function vercelTest(spec: AppSpec): string {
+  const imports = `import { readFileSync } from 'node:fs';
+import { join } from 'node:path';
+
+import { describe, expect, it } from 'vitest';
+
+`;
+  const install = `  it('installs with npm 12 and builds only this app and the packages it needs, from the repo root', () => {
+    expect(config.installCommand).toBe('cd ../.. && npm install --global npm@12.2.0 && npm ci');
+    expect(config.buildCommand).toBe('cd ../.. && npm run build -- --for ${spec.app}');
+`;
+  if (spec.kind === 'ssr') {
+    return `${imports}${vercelTypes(false)}
+describe('vercel.json (ARCHITECTURE §7.2, §9.3)', () => {
+  it('sends /api to the gateway with the origin secret, both only from Vercel env', () => {
+    const api = config.routes.find((route) => route.src === '/api/(.*)');
+    expect(api?.dest).toBe('\${BQ_GATEWAY_URL}/api/$1');
+    expect(api?.env).toEqual(['BQ_GATEWAY_URL']);
+${vercelApiTransforms}    // the first route: nothing else may answer /api before it
+    expect(config.routes[0]).toBe(api);
+  });
+
+  it('sends the security headers with every page, and leaves every page to React Router', () => {
+    // routes hold only /api (only a route can set its header); scripts/ci/test/vercel-headers.test.ts
+    // checks the headers, with the order Vercel runs, for every app. No SPA fallback: the server
+    // renders each page itself, and this storefront may be listed (no noindex)
+    expect(config.routes).toHaveLength(1);
+    const [pages] = config.headers ?? [];
+    expect(pages?.source).toBe('/(.*)');
+    expect(pages?.headers.map(({ key }) => key)).not.toContain('X-Robots-Tag');
+    expect(config).not.toHaveProperty('rewrites');
+  });
+
+${vercelNoSecrets}
+${install}  });
+});
+`;
+  }
+  return `// @vitest-environment node
+${imports}${vercelTypes(true)}
+describe('vercel.json (ARCHITECTURE §7.2, §9.2, §9.3)', () => {
+  it('sends /api to the gateway with the origin secret, both only from Vercel env, first', () => {
+    const api = config.routes[0];
+    expect(api?.src).toBe('/api/(.*)');
+    expect(api?.dest).toBe('\${BQ_GATEWAY_URL}/api/$1');
+    expect(api?.env).toEqual(['BQ_GATEWAY_URL']);
+${vercelApiTransforms}  });
+
+  it('keeps every page out of search results, then serves the files, then the SPA for any path', () => {
+    // routes hold only /api (only a route can set its header); noindex rides with the security
+    // headers, which scripts/ci/test/vercel-headers.test.ts checks, with the order Vercel runs
+    expect(config.routes).toHaveLength(1);
+    const [pages] = config.headers ?? [];
+    expect(pages?.source).toBe('/(.*)');
+    expect(pages?.headers).toContainEqual({ key: 'X-Robots-Tag', value: 'noindex, nofollow' });
+    // Vercel serves a file when there is one, before any rewrite
+    expect(config.rewrites).toEqual([{ source: '/(.*)', destination: '/index.html' }]);
+  });
+
+${vercelNoSecrets}
+${install}    expect(config.outputDirectory).toBe('dist');
+    expect(config.regions).toEqual(['bom1']);
+  });
+});
+`;
+}
+
 /** Every file of a new frontend app: relative path -> content. */
 export function renderApp(spec: AppSpec): Map<string, string> {
   const files = new Map<string, string>();
   files.set('package.json', `${JSON.stringify(manifest(spec), null, 2)}\n`);
+  // its icons are binary: the create command copies them (install.ts copyInstallIcons)
+  files.set(
+    'public/manifest.webmanifest',
+    `${JSON.stringify(webManifest(spec.app, spec.title), null, 2)}\n`,
+  );
   files.set('README.md', readme(spec));
+  // on Vercel from the start: the /api route, the headers and their test (QA Q-015)
+  files.set('vercel.json', vercelJson(spec));
+  files.set('test/vercel-config.test.ts', vercelTest(spec));
   files.set('vitest.config.ts', vitestConfig);
   if (spec.kind === 'ssr') {
     files.set('.gitignore', ssrGitignore);

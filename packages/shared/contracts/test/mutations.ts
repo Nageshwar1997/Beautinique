@@ -390,17 +390,6 @@ const mutations: Mutation[] = [
   },
   {
     file: 'catalogue/identity',
-    name: 'turned off without a step-up',
-    change: [
-      [
-        "  summary: 'Turn the authenticator off',\n  apps: APPS,\n  access: { type: 'signed-in' },\n  rateLimit: 'auth',\n  idempotency: false,\n  stepUp: true,",
-        "  summary: 'Turn the authenticator off',\n  apps: APPS,\n  access: { type: 'signed-in' },\n  rateLimit: 'auth',\n  idempotency: false,\n  stepUp: false,",
-      ],
-    ],
-    tests: 'signed-in authenticator',
-  },
-  {
-    file: 'catalogue/identity',
     name: 'set up without the password',
     change: [
       [
@@ -415,8 +404,8 @@ const mutations: Mutation[] = [
     name: 'a step-up with both proofs, or neither',
     change: [
       [
-        'body: xor([object({ code: otpZod }), object({ recoveryCode: recoveryCodeZod })]),',
-        'body: object({ code: otpZod.optional(), recoveryCode: recoveryCodeZod.optional() }),',
+        'body: xor([\n      object({ code: otpZod, for: stepUpForZod }),\n      object({ recoveryCode: recoveryCodeZod, for: stepUpForZod }),\n    ]),',
+        'body: object({\n      code: otpZod.optional(),\n      recoveryCode: recoveryCodeZod.optional(),\n      for: stepUpForZod,\n    }),',
       ],
     ],
     tests: 'never both or neither',
@@ -531,6 +520,112 @@ const mutations: Mutation[] = [
     name: 'the caller’s longer limit is ignored',
     change: [['next.length > maxLength', 'next.length > 512']],
     tests: 'no open redirect',
+  },
+  // the refresh token's parts (identity finds the session, the gateway its `session` budget)
+  {
+    file: 'catalogue/identity',
+    name: 'every token read as one from before families',
+    change: [['family: parts.length === 3 && FAMILY.test(family) ? family : null', 'family: null']],
+    tests: 'refresh token',
+  },
+  {
+    file: 'catalogue/identity',
+    name: 'any family text is taken',
+    change: [['parts.length === 3 && FAMILY.test(family)', 'parts.length === 3']],
+    tests: 'refresh token',
+  },
+  {
+    file: 'catalogue/identity',
+    name: 'a token of more parts is read',
+    change: [['parts.length > 3 ||', '']],
+    tests: 'refresh token',
+  },
+  {
+    file: 'catalogue/identity',
+    name: 'a session id alone is read',
+    change: [['parts.length < 2 ||', '']],
+    tests: 'refresh token',
+  },
+  {
+    file: 'catalogue/identity',
+    name: 'any session id is taken',
+    change: [['!SESSION_ID.test(sessionId)', 'sessionId === ""']],
+    tests: 'refresh token',
+  },
+  // ids: MongoDB ids are ObjectIds, Redis ids stay UUIDv7 (owner, 2026-11-12)
+  {
+    file: 'catalogue/identity',
+    name: 'the session id need not be 24 hex',
+    change: [['const SESSION_ID = /^[0-9a-f]{24}$/;', 'const SESSION_ID = /^[0-9a-f]{20,}$/;']],
+    tests: 'refresh token',
+  },
+  {
+    file: 'catalogue/identity',
+    name: 'the session id may be upper case',
+    change: [['const SESSION_ID = /^[0-9a-f]{24}$/;', 'const SESSION_ID = /^[0-9a-fA-F]{24}$/;']],
+    tests: 'refresh token',
+  },
+  {
+    file: 'catalogue/identity',
+    name: 'a session id in the path need not be an ObjectId',
+    change: [
+      [
+        'input: { params: object({ sessionId: objectIdZod }) },',
+        'input: { params: object({ sessionId: string().min(1) }) },',
+      ],
+    ],
+    tests: 'MongoDB ids are ObjectIds',
+  },
+  {
+    file: 'catalogue/platform',
+    name: 'a ping id in the path need not be an ObjectId',
+    change: [
+      [
+        'input: { params: object({ pingId: objectIdZod }) },',
+        'input: { params: object({ pingId: string().min(1) }) },',
+      ],
+    ],
+    tests: 'MongoDB ids are ObjectIds',
+  },
+  {
+    file: 'events',
+    name: 'an event id need not be an ObjectId',
+    change: [['    eventId: objectIdZod,\n', '    eventId: string().min(1),\n']],
+    tests: 'envelope',
+  },
+  {
+    file: 'catalogue/identity',
+    name: 'refresh and sign-out back in the sign-in class',
+    change: [
+      [
+        "summary: 'Get a new access token with the refresh cookie',\n  apps: APPS,\n  access: { type: 'public' },\n  rateLimit: 'session',",
+        "summary: 'Get a new access token with the refresh cookie',\n  apps: APPS,\n  access: { type: 'public' },\n  rateLimit: 'auth',",
+      ],
+    ],
+    tests: 'refresh cookie only',
+  },
+  // the roles that keep the authenticator on, in /iam/me (QA DR-011)
+  {
+    file: 'catalogue/identity',
+    name: '/iam/me may leave out the roles that keep the authenticator on',
+    change: [
+      [
+        'authenticatorRequiredBy: array(object({ name: string(), app: zodEnum(APPS) })),',
+        'authenticatorRequiredBy: array(object({ name: string(), app: zodEnum(APPS) })).optional(),',
+      ],
+    ],
+    tests: 'count the recovery codes left',
+  },
+  {
+    file: 'catalogue/identity',
+    name: '/iam/me takes any app for a role that keeps the authenticator on',
+    change: [
+      [
+        'authenticatorRequiredBy: array(object({ name: string(), app: zodEnum(APPS) })),',
+        'authenticatorRequiredBy: array(object({ name: string(), app: string() })),',
+      ],
+    ],
+    tests: 'count the recovery codes left',
   },
 ];
 

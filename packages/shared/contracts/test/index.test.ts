@@ -374,7 +374,7 @@ describe('events', () => {
     data: object({ sellerOrgId: objectIdZod }),
   });
   const event = {
-    eventId: '0192f3a4-5b6c-7d8e-9f01-23456789abcd',
+    eventId: '65f1a2b3c4d5e6f708192a3c',
     type: 'sellers.org.approved',
     version: 1,
     occurredAt: '2026-10-20T07:56:26.899Z',
@@ -390,7 +390,8 @@ describe('events', () => {
   it('validate the whole envelope', () => {
     expect(approved.envelope.parse(event)).toEqual(event);
     for (const [field, value] of [
-      ['eventId', '3f6c2a1e-8b4d-4c2a-9f1e-2b3c4d5e6f70'],
+      ['eventId', '0192f3a4-5b6c-7d8e-9f01-23456789abcd'],
+      ['eventId', '65F1A2B3C4D5E6F708192A3'],
       ['type', 'sellers.org.rejected'],
       ['version', 2],
       ['occurredAt', '20 Oct 2026'],

@@ -19,9 +19,14 @@ import {
   type PassportSigner,
   passportSigner,
 } from '@beautinique/backend-server-kit';
-import { connectMongo, type Mongo, withTransaction } from '@beautinique/backend-server-mongo';
+import {
+  connectMongo,
+  type Mongo,
+  ObjectId,
+  withTransaction,
+} from '@beautinique/backend-server-mongo';
 import { OUTBOX } from '@beautinique/backend-server-queue';
-import { APPS, otpSealContext } from '@beautinique/shared-contracts';
+import { type AppId, APPS, otpSealContext } from '@beautinique/shared-contracts';
 import { Queue } from 'bullmq';
 import { expect } from 'vitest';
 
@@ -29,6 +34,7 @@ import {
   expectNoCollectionScans,
   watchCollectionScans,
 } from '../../../scripts/e2e/collection-scans.ts';
+import { expectObjectIds } from '../../../scripts/e2e/object-ids.ts';
 import { readConfig } from '../src/config.ts';
 import {
   AUTH_PROVIDERS,
@@ -39,6 +45,14 @@ import {
 import { challengeKey } from '../src/otp.ts';
 import { giveSystemGrant, type GrantRecord, GRANTS } from '../src/rbac/grants.ts';
 import { ROLE_SEEDS } from '../src/rbac/roles.ts';
+import {
+  APP_RECORDS,
+  type AppRecord,
+  type PermissionRecord,
+  PERMISSIONS,
+  type RoleRecord,
+  ROLES,
+} from '../src/rbac/sync.ts';
 import { type RunningIdentity, start } from '../src/service.ts';
 import { LEGAL_ACCEPTANCES, type LegalAcceptance, type User, USERS } from '../src/users.ts';
 
@@ -89,6 +103,8 @@ export interface Harness {
   passport: PassportSigner;
   /** Identity's field and blind-index keys, to make a record as an older version wrote it */
   keys: CryptoKeys;
+  /** The Have I Been Pwned stand-in's URL (it answers as `hibp.mode` says) */
+  hibpUrl: string;
   start(more?: Record<string, string>): Promise<RunningIdentity>;
   stop(): Promise<void>;
 }
@@ -111,6 +127,10 @@ export async function startHarness(name: string): Promise<Harness> {
     IDENTITY__BLIND_INDEX_KEY: blindIndexKey,
     IDENTITY__OTP_EVENT_KEYS: otpEventKeys,
     IDENTITY__HIBP_URL: fake.url,
+    // the tests sign in and ask for codes far more than live allows; a test of a budget sets its own
+    IDENTITY__LOGIN_HASHES_PER_MINUTE: '100000',
+    IDENTITY__CODES_PER_HOUR: '100000',
+    IDENTITY__SIGN_UP_CODES_PER_DAY: '100000',
     ...more,
   });
   const passport = passportSigner();
@@ -123,6 +143,8 @@ export async function startHarness(name: string): Promise<Harness> {
         queuePrefix: prefix,
         epochKey: `${prefix}:epoch`,
         readyKey: `${prefix}:revocations-ready`,
+        // each identity its own budgets, never another test's
+        rateLimitPrefix: `${prefix}:rl:${randomUUID().slice(0, 8)}:`,
         pollMs: 100,
       },
       passportJwks: passport.jwks,
@@ -142,6 +164,7 @@ export async function startHarness(name: string): Promise<Harness> {
     passport,
     prefix,
     keys: loadCryptoKeys({ fieldKeys, blindIndexKey }),
+    hibpUrl: fake.url,
     start: async (more) => {
       const other = await startOne(more);
       otpKeysOf.set(other, loadSealingKeys(otpEventKeys));
@@ -154,6 +177,8 @@ export async function startHarness(name: string): Promise<Harness> {
       try {
         // what every identity of this file asked, not the test's own look-ups
         await expectNoCollectionScans(look.db, ['identity']);
+        // every document's _id and every reference an ObjectId (RULES §4.17)
+        await expectObjectIds(look.db);
       } finally {
         await look.db.dropDatabase();
         await look.close();
@@ -238,16 +263,30 @@ export interface ChallengeView {
   resendsLeft: number;
 }
 
+let lastIp = 0;
+/**
+ * A test IP of its own (198.18.0.0/15, for tests): a helper's code comes from a new IP each time,
+ * so one IP's share of an email's codes (QA DR-003, tested on its own) never stops another test.
+ */
+export const freshIp = (): string => {
+  lastIp += 1;
+  return `198.18.${String(Math.floor(lastIp / 250))}.${String((lastIp % 250) + 1)}`;
+};
+
 /** A sign-up code for an email (a sign-up app, with the consent). */
 export async function signUpCode(address: string, app = 'customer'): Promise<ChallengeView> {
-  const answer = await post('/auth/sign-up/code', { email: address, consent }, { app });
+  const answer = await post(
+    '/auth/sign-up/code',
+    { email: address, consent },
+    { app, ip: freshIp() },
+  );
   expect(answer.status, JSON.stringify(answer.body)).toBe(200);
   return answer.body.data as unknown as ChallengeView;
 }
 
 /** A password code for an email (any app). */
 export async function passwordCode(address: string, app = 'customer'): Promise<ChallengeView> {
-  const answer = await post('/auth/password/code', { email: address }, { app });
+  const answer = await post('/auth/password/code', { email: address }, { app, ip: freshIp() });
   expect(answer.status, JSON.stringify(answer.body)).toBe(200);
   return answer.body.data as unknown as ChallengeView;
 }
@@ -266,13 +305,12 @@ export async function giveRole(userId: string, role: string, to = current): Prom
   const type = seed.scopeTypes[0] ?? 'self';
   const scope = seed.scopeTypes.includes('global')
     ? { type: 'global' as const, ids: [] }
-    : { type, ids: [type === 'self' ? userId : `${type}-1`] };
+    : { type, ids: [type === 'self' ? userId : type === 'state' ? 'MH' : SOME_ID] };
   const { mongo } = to.runtime;
   return withTransaction(mongo, (session) =>
     giveSystemGrant(mongo, session, {
-      userId,
+      userId: new ObjectId(userId),
       role,
-      app: seed.app,
       scope,
       via: 'migration',
       now: new Date(),
@@ -311,6 +349,48 @@ export async function makeAccount(
 /** Moves a challenge's resend wait into the past (instead of waiting a minute). */
 export const allowResend = (challengeId: string, to = current) =>
   to.runtime.redis.client.hset(challengeKey(challengeId), 'resendAfter', '0');
+
+/** An ObjectId from the hex an API answer gives (every id in identity's database is one). */
+export const oid = (hex: string): ObjectId => new ObjectId(hex);
+/** A made-up document id for a scope (a seller organisation, a brand ...). */
+export const SOME_ID = '6730a2b4c41b2e9d104f6a99';
+
+/** A role's id by its key (grants and invitations name roles by id). */
+export async function roleIdOf(key: string): Promise<ObjectId> {
+  const role = await look()
+    .collection<RoleRecord>(ROLES)
+    .findOne({ key }, { projection: { _id: 1 } });
+  if (!role) throw new Error(`no role ${key}`);
+  return role._id;
+}
+
+/** An app's id by its key (grants and sessions name apps by id). */
+export async function appIdOf(app: AppId): Promise<ObjectId> {
+  const record = await look()
+    .collection<AppRecord>(APP_RECORDS)
+    .findOne({ key: app }, { projection: { _id: 1 } });
+  if (!record) throw new Error(`no app ${app}`);
+  return record._id;
+}
+
+/** A permission's id by its key (roles name their permissions by id). */
+export async function permissionIdOf(key: string): Promise<ObjectId> {
+  const record = await look()
+    .collection<PermissionRecord>(PERMISSIONS)
+    .findOne({ key }, { projection: { _id: 1 } });
+  if (!record) throw new Error(`no permission ${key}`);
+  return record._id;
+}
+
+/** The role keys of grants (or invitations), in their order. */
+export async function roleKeysOf(records: readonly { roleId: ObjectId }[]): Promise<string[]> {
+  const roles = await look()
+    .collection<RoleRecord>(ROLES)
+    .find({ _id: { $in: records.map((record) => record.roleId) } }, { projection: { key: 1 } })
+    .toArray();
+  const keys = new Map(roles.map((role) => [role._id.toHexString(), role.key]));
+  return records.map((record) => keys.get(record.roleId.toHexString()) ?? '?');
+}
 
 export const users = () => look().collection<User>(USERS);
 export const grants = () => look().collection<GrantRecord>(GRANTS);

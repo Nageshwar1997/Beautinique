@@ -78,8 +78,7 @@
                       "properties": {
                         "pingId": {
                           "type": "string",
-                          "format": "uuid",
-                          "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-7[0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12})$"
+                          "pattern": "^[0-9a-f]{24}$"
                         },
                         "note": {
                           "type": "string",
@@ -152,8 +151,7 @@
             "required": true,
             "schema": {
               "type": "string",
-              "format": "uuid",
-              "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-7[0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12})$"
+              "pattern": "^[0-9a-f]{24}$"
             }
           },
           {
@@ -183,8 +181,7 @@
                       "properties": {
                         "pingId": {
                           "type": "string",
-                          "format": "uuid",
-                          "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-7[0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12})$"
+                          "pattern": "^[0-9a-f]{24}$"
                         },
                         "note": {
                           "type": "string",
@@ -786,8 +783,7 @@
                       "properties": {
                         "userId": {
                           "type": "string",
-                          "format": "uuid",
-                          "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-7[0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12})$"
+                          "pattern": "^[0-9a-f]{24}$"
                         },
                         "email": {
                           "type": "string",
@@ -939,8 +935,7 @@
                           "properties": {
                             "userId": {
                               "type": "string",
-                              "format": "uuid",
-                              "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-7[0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12})$"
+                              "pattern": "^[0-9a-f]{24}$"
                             },
                             "email": {
                               "type": "string",
@@ -1074,8 +1069,7 @@
                           "properties": {
                             "userId": {
                               "type": "string",
-                              "format": "uuid",
-                              "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-7[0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12})$"
+                              "pattern": "^[0-9a-f]{24}$"
                             },
                             "email": {
                               "type": "string",
@@ -1209,8 +1203,7 @@
                           "properties": {
                             "userId": {
                               "type": "string",
-                              "format": "uuid",
-                              "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-7[0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12})$"
+                              "pattern": "^[0-9a-f]{24}$"
                             },
                             "email": {
                               "type": "string",
@@ -1453,8 +1446,7 @@
                           "properties": {
                             "userId": {
                               "type": "string",
-                              "format": "uuid",
-                              "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-7[0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12})$"
+                              "pattern": "^[0-9a-f]{24}$"
                             },
                             "email": {
                               "type": "string",
@@ -1568,8 +1560,7 @@
                           "properties": {
                             "userId": {
                               "type": "string",
-                              "format": "uuid",
-                              "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-7[0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12})$"
+                              "pattern": "^[0-9a-f]{24}$"
                             },
                             "email": {
                               "type": "string",
@@ -1585,8 +1576,7 @@
                         },
                         "sessionId": {
                           "type": "string",
-                          "format": "uuid",
-                          "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-7[0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12})$"
+                          "pattern": "^[0-9a-f]{24}$"
                         },
                         "expiresAt": {
                           "type": "string",
@@ -1631,7 +1621,7 @@
           "access": {
             "type": "public"
           },
-          "rateLimit": "auth",
+          "rateLimit": "session",
           "idempotency": false,
           "stepUp": false,
           "owner": "identity",
@@ -1721,7 +1711,7 @@
           "access": {
             "type": "public"
           },
-          "rateLimit": "auth",
+          "rateLimit": "session",
           "idempotency": false,
           "stepUp": false,
           "owner": "identity",
@@ -1776,8 +1766,7 @@
                           "properties": {
                             "userId": {
                               "type": "string",
-                              "format": "uuid",
-                              "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-7[0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12})$"
+                              "pattern": "^[0-9a-f]{24}$"
                             },
                             "email": {
                               "type": "string",
@@ -1838,6 +1827,38 @@
                                   "type": "null"
                                 }
                               ]
+                            },
+                            "authenticatorRequiredBy": {
+                              "type": "array",
+                              "items": {
+                                "type": "object",
+                                "properties": {
+                                  "name": {
+                                    "type": "string"
+                                  },
+                                  "app": {
+                                    "type": "string",
+                                    "enum": [
+                                      "customer",
+                                      "seller",
+                                      "admin",
+                                      "superadmin",
+                                      "master",
+                                      "support",
+                                      "finance",
+                                      "logistics",
+                                      "delivery",
+                                      "growth",
+                                      "creator"
+                                    ]
+                                  }
+                                },
+                                "required": [
+                                  "name",
+                                  "app"
+                                ],
+                                "additionalProperties": false
+                              }
                             }
                           },
                           "required": [
@@ -1847,7 +1868,8 @@
                             "signUpApp",
                             "providers",
                             "authenticator",
-                            "recoveryCodesLeft"
+                            "recoveryCodesLeft",
+                            "authenticatorRequiredBy"
                           ],
                           "additionalProperties": false
                         },
@@ -1856,8 +1878,7 @@
                           "properties": {
                             "sessionId": {
                               "type": "string",
-                              "format": "uuid",
-                              "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-7[0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12})$"
+                              "pattern": "^[0-9a-f]{24}$"
                             },
                             "app": {
                               "type": "string",
@@ -1986,8 +2007,7 @@
                             "properties": {
                               "sessionId": {
                                 "type": "string",
-                                "format": "uuid",
-                                "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-7[0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12})$"
+                                "pattern": "^[0-9a-f]{24}$"
                               },
                               "app": {
                                 "type": "string",
@@ -2106,8 +2126,7 @@
             "required": true,
             "schema": {
               "type": "string",
-              "format": "uuid",
-              "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-7[0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12})$"
+              "pattern": "^[0-9a-f]{24}$"
             }
           },
           {
@@ -2694,7 +2713,7 @@
           },
           "rateLimit": "auth",
           "idempotency": false,
-          "stepUp": true,
+          "stepUp": false,
           "owner": "identity",
           "cache": null,
           "navigation": false
@@ -3501,8 +3520,7 @@
             "required": false,
             "schema": {
               "type": "string",
-              "format": "uuid",
-              "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-7[0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12})$"
+              "pattern": "^[0-9a-f]{24}$"
             }
           },
           {
@@ -3599,13 +3617,11 @@
                             "properties": {
                               "grantId": {
                                 "type": "string",
-                                "format": "uuid",
-                                "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-7[0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12})$"
+                                "pattern": "^[0-9a-f]{24}$"
                               },
                               "userId": {
                                 "type": "string",
-                                "format": "uuid",
-                                "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-7[0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12})$"
+                                "pattern": "^[0-9a-f]{24}$"
                               },
                               "email": {
                                 "type": "string",
@@ -3696,8 +3712,7 @@
                                 "anyOf": [
                                   {
                                     "type": "string",
-                                    "format": "uuid",
-                                    "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-7[0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12})$"
+                                    "pattern": "^[0-9a-f]{24}$"
                                   },
                                   {
                                     "type": "null"
@@ -3847,8 +3862,7 @@
                 "properties": {
                   "userId": {
                     "type": "string",
-                    "format": "uuid",
-                    "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-7[0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12})$"
+                    "pattern": "^[0-9a-f]{24}$"
                   },
                   "role": {
                     "type": "string",
@@ -3939,13 +3953,11 @@
                           "properties": {
                             "grantId": {
                               "type": "string",
-                              "format": "uuid",
-                              "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-7[0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12})$"
+                              "pattern": "^[0-9a-f]{24}$"
                             },
                             "userId": {
                               "type": "string",
-                              "format": "uuid",
-                              "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-7[0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12})$"
+                              "pattern": "^[0-9a-f]{24}$"
                             },
                             "email": {
                               "type": "string",
@@ -4036,8 +4048,7 @@
                               "anyOf": [
                                 {
                                   "type": "string",
-                                  "format": "uuid",
-                                  "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-7[0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12})$"
+                                  "pattern": "^[0-9a-f]{24}$"
                                 },
                                 {
                                   "type": "null"
@@ -4156,8 +4167,7 @@
             "required": true,
             "schema": {
               "type": "string",
-              "format": "uuid",
-              "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-7[0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12})$"
+              "pattern": "^[0-9a-f]{24}$"
             }
           },
           {
@@ -4198,13 +4208,11 @@
                           "properties": {
                             "grantId": {
                               "type": "string",
-                              "format": "uuid",
-                              "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-7[0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12})$"
+                              "pattern": "^[0-9a-f]{24}$"
                             },
                             "userId": {
                               "type": "string",
-                              "format": "uuid",
-                              "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-7[0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12})$"
+                              "pattern": "^[0-9a-f]{24}$"
                             },
                             "email": {
                               "type": "string",
@@ -4295,8 +4303,7 @@
                               "anyOf": [
                                 {
                                   "type": "string",
-                                  "format": "uuid",
-                                  "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-7[0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12})$"
+                                  "pattern": "^[0-9a-f]{24}$"
                                 },
                                 {
                                   "type": "null"
@@ -4532,8 +4539,7 @@
                           "properties": {
                             "invitationId": {
                               "type": "string",
-                              "format": "uuid",
-                              "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-7[0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12})$"
+                              "pattern": "^[0-9a-f]{24}$"
                             },
                             "email": {
                               "type": "string",
@@ -4622,8 +4628,7 @@
                             },
                             "invitedBy": {
                               "type": "string",
-                              "format": "uuid",
-                              "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-7[0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12})$"
+                              "pattern": "^[0-9a-f]{24}$"
                             },
                             "status": {
                               "type": "string",
@@ -4791,8 +4796,7 @@
                             "properties": {
                               "invitationId": {
                                 "type": "string",
-                                "format": "uuid",
-                                "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-7[0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12})$"
+                                "pattern": "^[0-9a-f]{24}$"
                               },
                               "email": {
                                 "type": "string",
@@ -4881,8 +4885,7 @@
                               },
                               "invitedBy": {
                                 "type": "string",
-                                "format": "uuid",
-                                "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-7[0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12})$"
+                                "pattern": "^[0-9a-f]{24}$"
                               },
                               "status": {
                                 "type": "string",
@@ -4991,8 +4994,7 @@
             "required": true,
             "schema": {
               "type": "string",
-              "format": "uuid",
-              "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-7[0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12})$"
+              "pattern": "^[0-9a-f]{24}$"
             }
           },
           {
@@ -5033,8 +5035,7 @@
                           "properties": {
                             "invitationId": {
                               "type": "string",
-                              "format": "uuid",
-                              "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-7[0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12})$"
+                              "pattern": "^[0-9a-f]{24}$"
                             },
                             "email": {
                               "type": "string",
@@ -5123,8 +5124,7 @@
                             },
                             "invitedBy": {
                               "type": "string",
-                              "format": "uuid",
-                              "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-7[0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12})$"
+                              "pattern": "^[0-9a-f]{24}$"
                             },
                             "status": {
                               "type": "string",
@@ -5398,6 +5398,13 @@
                       "code": {
                         "type": "string",
                         "pattern": "^\\d{6}$"
+                      },
+                      "for": {
+                        "type": "string",
+                        "enum": [
+                          "authenticator.disable",
+                          "authenticator.replace"
+                        ]
                       }
                     },
                     "required": [
@@ -5410,6 +5417,13 @@
                       "recoveryCode": {
                         "type": "string",
                         "pattern": "^[A-Z2-7]{5}-?[A-Z2-7]{5}$"
+                      },
+                      "for": {
+                        "type": "string",
+                        "enum": [
+                          "authenticator.disable",
+                          "authenticator.replace"
+                        ]
                       }
                     },
                     "required": [
@@ -5513,8 +5527,7 @@
             "required": true,
             "schema": {
               "type": "string",
-              "format": "uuid",
-              "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-7[0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12})$"
+              "pattern": "^[0-9a-f]{24}$"
             }
           },
           {
@@ -5623,8 +5636,7 @@
             "required": true,
             "schema": {
               "type": "string",
-              "format": "uuid",
-              "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-7[0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12})$"
+              "pattern": "^[0-9a-f]{24}$"
             }
           },
           {
@@ -6113,8 +6125,7 @@
                           "properties": {
                             "userId": {
                               "type": "string",
-                              "format": "uuid",
-                              "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-7[0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12})$"
+                              "pattern": "^[0-9a-f]{24}$"
                             },
                             "email": {
                               "type": "string",

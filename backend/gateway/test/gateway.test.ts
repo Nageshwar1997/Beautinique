@@ -27,8 +27,11 @@ import {
   defineRoute,
   gatewayManifest,
   HEADERS,
+  logout,
   navigationZod,
   PASSPORT_JWKS_PATH,
+  refreshCookieName,
+  refreshSession,
   REVOCATIONS_READY_KEY,
   revokedSessionKey,
   revokedUserKey,
@@ -42,7 +45,7 @@ import { appRegistry } from '../src/apps.ts';
 import { readConfig } from '../src/config.ts';
 import { manifest as platformManifest } from '../src/manifest.ts';
 import { API_PREFIX, stepUpFresh } from '../src/proxy.ts';
-import { DEFAULT_RATE_LIMITS } from '../src/rate-limits.ts';
+import { DEFAULT_RATE_LIMITS, rateLimitBuckets, SESSION_TOKEN_RULE } from '../src/rate-limits.ts';
 import { start } from '../src/service.ts';
 import { sessionGate } from '../src/sessions.ts';
 import type { StatusBody } from '../src/status.ts';
@@ -188,6 +191,9 @@ const manifest = gatewayManifest([
     input: { params: object({ provider: string() }) },
     output: navigationZod,
   }),
+  // the real ones: their rate-limit class is what is tested
+  refreshSession,
+  logout,
   route({
     id: 'identity.sessions.start',
     method: 'POST',
@@ -317,11 +323,20 @@ interface GatewayOptions {
   passport?: GatewayAppOptions['passport'];
   /** What runs before the gateway's app on each request (a stand-in for an instrumentation) */
   before?: (res: ServerResponse) => void;
+  readyReuseMs?: number;
 }
 
 async function gateway(
   upstreams: GatewayAppOptions['upstreams'],
-  { timeoutMs = 2000, limiter, rateLimits, sessions, passport, before }: GatewayOptions = {},
+  {
+    timeoutMs = 2000,
+    limiter,
+    rateLimits,
+    sessions,
+    passport,
+    before,
+    readyReuseMs,
+  }: GatewayOptions = {},
 ) {
   const app = buildApp({
     logger,
@@ -338,6 +353,7 @@ async function gateway(
     redisReady: redis.ready,
     sessions: sessions ?? sessionGate({ keys: identityKeys, redis: redis.client }),
     passport: passport ?? passportSigner(),
+    ...(readyReuseMs === undefined ? {} : { readyReuseMs }),
   });
   if (!before) return listen(app);
   return listen((req, res) => {
@@ -897,6 +913,137 @@ describe('rate limits', () => {
     expect((await get('2401:4900:1c2a:7f00::3')).status).toBe(429);
   });
 
+  it('gives an IPv6 network (/48) 4 times one home’s sign-in budget, so many /64s do not help (DR-004)', async () => {
+    const identity = await listen(
+      createApp({
+        logger,
+        routes: (app) => app.post('/identity/sessions', (_req, res) => res.json({ ok: true })),
+      }),
+    );
+    const gw = await gateway(
+      { identity: identity.url },
+      { rateLimits: { auth: { limit: 2, windowMs: 60_000 } } },
+    );
+    const start = (ip: string) =>
+      fetch(`${gw.url}${API_PREFIX}/identity/sessions`, {
+        method: 'POST',
+        headers: { ...customer, 'content-type': 'application/json', 'x-real-ip': ip },
+        body: '{}',
+      });
+    // four homes (/64) of one network (/48): their own 2 each, 8 in all
+    for (let home = 1; home <= 4; home += 1) {
+      for (let i = 0; i < 2; i += 1) {
+        expect((await start(`2401:4900:1c2a:${String(home)}::1`)).status).toBe(200);
+      }
+    }
+    // a fifth home of that network is fresh, but the network has spent its budget
+    const refused = await start('2401:4900:1c2a:5::1');
+    expect(await errorOf(refused.clone())).toEqual([429, 'RATE_LIMITED']);
+    expect(refused.headers.get('ratelimit-policy')).toBe('"auth-network";q=8;w=60');
+    // another network, and an IPv4 address, are not part of it
+    expect((await start('2401:4900:1c2b:1::1')).status).toBe(200);
+    expect((await start('203.0.113.40')).status).toBe(200);
+  });
+
+  it('adds the network bucket to sign-in and codes only, for IPv6 only', () => {
+    const v6 = '2401:4900:1c2a:7f00::9';
+    const network = (name: Parameters<typeof rateLimitBuckets>[0], ip = v6) =>
+      rateLimitBuckets(name, ip, DEFAULT_RATE_LIMITS, undefined).find((bucket) =>
+        bucket.name.endsWith('-network'),
+      );
+    expect(network('auth')).toEqual({
+      name: 'auth-network',
+      key: 'auth:net:2401:4900:1c2a::/48',
+      rule: { limit: 120, windowMs: 5 * 60_000 },
+    });
+    expect(network('otp')).toEqual({
+      name: 'otp-network',
+      key: 'otp:net:2401:4900:1c2a::/48',
+      rule: { limit: 40, windowMs: 10 * 60_000 },
+    });
+    for (const name of ['read', 'write', 'session'] as const) expect(network(name)).toBeUndefined();
+    expect(network('auth', '203.0.113.9')).toBeUndefined();
+    // an IPv4 address written as IPv6 is an IPv4 client
+    expect(network('auth', '::ffff:203.0.113.9')).toBeUndefined();
+  });
+
+  describe('of refresh and sign-out (QA DR-005)', () => {
+    const sessionId = '65f1a2b3c4d5e6f708192a3b';
+    // a refresh token of identity's shape: <session>.<family (16 bytes)>.<secret>
+    const tokenOf = (family: string) => `${sessionId}.${family.padEnd(22, 'f')}.${'s'.repeat(43)}`;
+    const fakeIdentity = () =>
+      listen(
+        createApp({
+          logger,
+          routes: (app) => {
+            app.post('/auth/refresh', (_req, res) => res.json({ refreshed: true }));
+            app.post('/auth/logout', (_req, res) => res.json({ signedOut: true }));
+          },
+        }),
+      );
+    const call = (url: string, ip: string, token?: string, path = '/auth/refresh') =>
+      fetch(`${url}${API_PREFIX}${path}`, {
+        method: 'POST',
+        headers: {
+          ...customer,
+          'x-real-ip': ip,
+          ...(token === undefined ? {} : { cookie: `${refreshCookieName('customer')}=${token}` }),
+        },
+      });
+
+    it('let the many people behind one mobile IP refresh, each session with its own budget', async () => {
+      const gw = await gateway({ identity: (await fakeIdentity()).url });
+      const ip = '203.0.113.20';
+      // far more people than the sign-in budget of an IP (30) all refresh
+      for (let person = 0; person < 40; person++) {
+        const res = await call(gw.url, ip, tokenOf(`person${String(person)}`));
+        expect(res.status, `person ${String(person)}`).toBe(200);
+      }
+      // one session (a looping tab, a copied cookie) runs out of its own budget only
+      const looping = tokenOf('looping');
+      for (let i = 1; i < SESSION_TOKEN_RULE.limit; i++) {
+        expect((await call(gw.url, ip, looping)).status).toBe(200);
+      }
+      // the last one it may: the tighter of the two budgets is the one told
+      const last = await call(gw.url, ip, looping);
+      expect(last.status).toBe(200);
+      expect(last.headers.get('ratelimit')).toBe('"session-token";r=0;t=300');
+      const refused = await call(gw.url, ip, looping);
+      expect(await errorOf(refused.clone())).toEqual([429, 'RATE_LIMITED']);
+      expect(refused.headers.get('ratelimit-policy')).toBe(
+        `"session-token";q=${String(SESSION_TOKEN_RULE.limit)};w=300`,
+      );
+      expect(refused.headers.get('retry-after')).not.toBeNull();
+      // signing out shares that session's budget; from another IP too
+      expect((await call(gw.url, '203.0.113.21', looping, '/auth/logout')).status).toBe(429);
+      // everyone else behind the IP goes on, and a sign-out without a cookie counts for the IP only
+      expect((await call(gw.url, ip, tokenOf('next'))).status).toBe(200);
+      expect((await call(gw.url, ip, undefined, '/auth/logout')).status).toBe(200);
+    });
+
+    it('keep a roomy budget per IP, which made-up sessions cannot get around', async () => {
+      const gw = await gateway(
+        { identity: (await fakeIdentity()).url },
+        { rateLimits: { session: { limit: 3, windowMs: 60_000 } } },
+      );
+      const ip = '2401:4900:1c2a:7f00::1';
+      for (const family of ['a', 'b', 'c']) {
+        const res = await call(gw.url, ip, tokenOf(family));
+        expect(res.status).toBe(200);
+        // the tighter of the two budgets is the one told
+        if (family === 'c') expect(res.headers.get('ratelimit')).toBe('"session";r=0;t=60');
+      }
+      // a new session, an odd cookie or none: still the IP's budget (/64 for IPv6)
+      expect((await call(gw.url, '2401:4900:1c2a:7f00::2', tokenOf('d'))).status).toBe(429);
+      expect((await call(gw.url, ip, 'not-a-token')).status).toBe(429);
+      expect((await call(gw.url, ip)).status).toBe(429);
+      const refused = await call(gw.url, ip, tokenOf('e'), '/auth/logout');
+      expect(await errorOf(refused.clone())).toEqual([429, 'RATE_LIMITED']);
+      expect(refused.headers.get('ratelimit-policy')).toBe('"session";q=3;w=60');
+      expect((await call(gw.url, '203.0.113.30', tokenOf('a'))).status).toBe(200);
+    });
+  });
+
   it('when Redis is down, let ordinary classes through and refuse auth (fail closed)', async () => {
     const core = await listen(fakeCore());
     const identity = await listen(
@@ -919,6 +1066,12 @@ describe('rate limits', () => {
       body: '{}',
     });
     expect(await errorOf(auth)).toEqual([503, 'SERVICE_UNAVAILABLE']);
+    // refresh and sign-out too
+    const refresh = await fetch(`${gw.url}${API_PREFIX}/auth/refresh`, {
+      method: 'POST',
+      headers: customer,
+    });
+    expect(await errorOf(refresh)).toEqual([503, 'SERVICE_UNAVAILABLE']);
   });
 });
 
@@ -996,7 +1149,8 @@ describe('health', () => {
 
   it('is ready only while Redis and every configured upstream answer', async () => {
     const core = await listen(fakeCore());
-    const healthy = await gateway({ core: core.url, identity: undefined });
+    // no reuse here: the same gateway is asked again right after core stops
+    const healthy = await gateway({ core: core.url, identity: undefined }, { readyReuseMs: 0 });
     const ok = await fetch(`${healthy.url}/ready`);
     expect(ok.status).toBe(200);
     expect(await ok.json()).toEqual({ status: 'ready', checks: { redis: 'ok', core: 'ok' } });
@@ -1011,6 +1165,38 @@ describe('health', () => {
     expect(await (await fetch(`${withSick.url}/ready`)).json()).toMatchObject({
       checks: { core: 'failing' },
     });
+  });
+
+  /** An upstream that counts the gateway's /health calls. */
+  const counted = async () => {
+    let calls = 0;
+    const server = await listen((req, res) => {
+      if (req.url === '/health') calls += 1;
+      res.statusCode = 200;
+      res.end('{}');
+    });
+    return { url: server.url, calls: () => calls };
+  };
+
+  it('answers a flood of /ready with one round of checks every 5 seconds (DR-001)', async () => {
+    const core = await counted();
+    const gw = await gateway({ core: core.url });
+    // a burst at once, and more right after: every caller gets the answer of one round
+    const burst = await Promise.all(Array.from({ length: 20 }, () => fetch(`${gw.url}/ready`)));
+    expect(burst.map((res) => res.status)).toEqual(Array<number>(20).fill(200));
+    for (let i = 0; i < 5; i += 1) expect((await fetch(`${gw.url}/ready`)).status).toBe(200);
+    expect(core.calls()).toBe(1);
+  });
+
+  it('checks again once its answer is older than the reuse time', async () => {
+    const core = await counted();
+    const gw = await gateway({ core: core.url }, { readyReuseMs: 100 });
+    await fetch(`${gw.url}/ready`);
+    await fetch(`${gw.url}/ready`);
+    expect(core.calls()).toBe(1);
+    await new Promise((resolve) => setTimeout(resolve, 150));
+    await fetch(`${gw.url}/ready`);
+    expect(core.calls()).toBe(2);
   });
 
   it('/status shows every deployable and its checks: 200 when all that run are ok', async () => {
@@ -1087,10 +1273,9 @@ describe('service', () => {
       });
       // the real catalogue (and the real rate-limit keys, so a roomy class): reading a ping needs
       // a permission, refused until sign-in exists
-      const ping = await fetch(
-        `${gw.url}${API_PREFIX}/platform/pings/0190a1b2-c3d4-7e5f-8a9b-0c1d2e3f4a5b`,
-        { headers: { ...customer, 'X-BQ-App': 'admin' } },
-      );
+      const ping = await fetch(`${gw.url}${API_PREFIX}/platform/pings/65f1a2b3c4d5e6f708192a3b`, {
+        headers: { ...customer, 'X-BQ-App': 'admin' },
+      });
       expect(await errorOf(ping)).toEqual([401, 'UNAUTHENTICATED']);
     } finally {
       await gw.stop();
@@ -1125,7 +1310,7 @@ describe('config', () => {
           'customer=Customer.Example, customer=localhost:3001,admin=admin.example',
         GATEWAY__VERCEL_PROJECTS: 'customer=beautinique-customer',
         GATEWAY__VERCEL_SCOPE: 'team-slug',
-        GATEWAY__RATE_LIMITS: 'write=5/1m, otp=3/15m,auth=100/1h,search=10/30s',
+        GATEWAY__RATE_LIMITS: 'write=5/1m, otp=3/15m,auth=100/1h,search=10/30s,session=900/5m',
       },
     });
     expect(config).toMatchObject({
@@ -1140,6 +1325,7 @@ describe('config', () => {
         otp: { limit: 3, windowMs: 900_000 },
         auth: { limit: 100, windowMs: 3_600_000 },
         search: { limit: 10, windowMs: 30_000 },
+        session: { limit: 900, windowMs: 300_000 },
       },
     });
     expect([...config.appHosts]).toEqual([

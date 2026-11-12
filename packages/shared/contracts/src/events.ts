@@ -12,8 +12,8 @@ import {
   isoDateTimeZod,
   literal,
   object,
+  objectIdZod,
   string,
-  uuidv7Zod,
 } from '@beautinique/shared-zod';
 
 import { type Deployable, DEPLOYABLES, SCOPE_TYPES } from './platform';
@@ -45,7 +45,7 @@ export interface EventDefinition<
   data: Data;
   /** The whole envelope (ARCHITECTURE §5.2), validated by producer and consumer alike. */
   envelope: ZodObject<{
-    eventId: typeof uuidv7Zod;
+    eventId: typeof objectIdZod;
     type: ZodLiteral<Type>;
     version: ZodLiteral<Version>;
     occurredAt: typeof isoDateTimeZod;
@@ -88,7 +88,7 @@ export function defineEvent<
     throw new Error(`Event "${type}" needs a description`);
   }
   const envelope = object({
-    eventId: uuidv7Zod,
+    eventId: objectIdZod,
     type: literal(type),
     version: literal(version),
     occurredAt: isoDateTimeZod,
