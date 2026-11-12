@@ -75,10 +75,9 @@ export async function readRoles(
   return records.map((record) => roleOf(record, catalog));
 }
 
-/** A role is found by its key; grants and invitations find it by id. */
+/** A role is found by its key; grants and invitations find it by its id. */
 export const roleIndexes: readonly IndexSpec[] = [
   { collection: ROLES, name: 'key_unique', key: { key: 1 }, unique: true },
-  { collection: ROLES, name: 'appId_key', key: { appId: 1, key: 1 } },
 ];
 
 /** The 11 apps as identity_apps records, from the contracts that sign-in follows. */
