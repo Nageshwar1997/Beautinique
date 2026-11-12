@@ -135,7 +135,8 @@ export const ROLE_SEEDS: readonly RoleSeed[] = [
   // 5. Master
   role('master', 'master', 'Master', GLOBAL, {
     main: true,
-    permissions: [...APPOINTS, roleManage.key],
+    // resets the other Master's authenticator: a Security Officer may not (QA DR-007)
+    permissions: [...APPOINTS, roleManage.key, totpReset.key],
     appointedBy: [],
     mfaRequired: true,
     maxHolders: 2,

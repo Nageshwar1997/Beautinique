@@ -1621,6 +1621,34 @@ const mutations: Mutation[] = [
   },
   {
     file: 'rbac/security',
+    name: 'a Security Officer resets a Master (DR-007)',
+    change: [['  if (!isMaster && (await holdsMaster(deps, userId))) {', '  if (false) {']],
+    tests: 'DR-007',
+  },
+  {
+    file: 'rbac/security',
+    name: 'not even the other Master resets a Master',
+    change: [
+      [
+        '  if (!isMaster && (await holdsMaster(deps, userId))) {',
+        '  if (await holdsMaster(deps, userId)) {',
+      ],
+    ],
+    tests: 'DR-007',
+  },
+  {
+    file: 'rbac/roles',
+    name: 'Master cannot reset an authenticator',
+    change: [
+      [
+        'permissions: [...APPOINTS, roleManage.key, totpReset.key],',
+        'permissions: [...APPOINTS, roleManage.key],',
+      ],
+    ],
+    tests: 'DR-007',
+  },
+  {
+    file: 'rbac/security',
     name: 'anyone acts as a Security Officer',
     change: [['  requirePermission(caller, permission);\n', '']],
     tests: 'nobody else may',
