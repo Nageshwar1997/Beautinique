@@ -13,9 +13,9 @@ import { connectRedis, writeEvent } from '@beautinique/backend-server-queue';
 import { invitationCreated } from '@beautinique/shared-contracts';
 import { afterAll, describe, expect, it } from 'vitest';
 
+import { expectObjectIds } from '../../../scripts/e2e/object-ids.ts';
 import { startBundle } from '../src/bundle.ts';
 import { readBundleConfig } from '../src/config.ts';
-import { expectObjectIds } from '../../../scripts/e2e/object-ids.ts';
 import { names } from '../src/deployables.ts';
 
 /** A role's or an app's id by its key, in identity's database (grants name them by id). */
