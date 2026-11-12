@@ -1828,6 +1828,8 @@ const mutations: Mutation[] = [
       ],
     ],
     tests: 'removes it with its codes',
+    survives:
+      'a second turn-off stops at the `on` check, and each needs its own one-time step-up (QA DR-010): only two sessions racing reach it, a race no test times',
   },
   {
     file: 'rbac/authority',
