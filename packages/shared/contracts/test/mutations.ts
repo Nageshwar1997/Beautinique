@@ -569,6 +569,29 @@ const mutations: Mutation[] = [
     ],
     tests: 'refresh cookie only',
   },
+  // the roles that keep the authenticator on, in /iam/me (QA DR-011)
+  {
+    file: 'catalogue/identity',
+    name: '/iam/me may leave out the roles that keep the authenticator on',
+    change: [
+      [
+        'authenticatorRequiredBy: array(object({ name: string(), app: zodEnum(APPS) })),',
+        'authenticatorRequiredBy: array(object({ name: string(), app: zodEnum(APPS) })).optional(),',
+      ],
+    ],
+    tests: 'count the recovery codes left',
+  },
+  {
+    file: 'catalogue/identity',
+    name: '/iam/me takes any app for a role that keeps the authenticator on',
+    change: [
+      [
+        'authenticatorRequiredBy: array(object({ name: string(), app: zodEnum(APPS) })),',
+        'authenticatorRequiredBy: array(object({ name: string(), app: string() })),',
+      ],
+    ],
+    tests: 'count the recovery codes left',
+  },
 ];
 
 export default mutations;
