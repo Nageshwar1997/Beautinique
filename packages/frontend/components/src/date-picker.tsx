@@ -7,7 +7,14 @@ import {
   today,
   toZoned,
 } from '@internationalized/date';
-import { type ReactNode, type Ref, useContext, useSyncExternalStore } from 'react';
+import {
+  type ReactNode,
+  type Ref,
+  useContext,
+  useEffect,
+  useRef,
+  useSyncExternalStore,
+} from 'react';
 import {
   Button as AriaButton,
   Calendar,
@@ -31,6 +38,7 @@ import {
   RangeCalendar,
   RangeCalendarStateContext,
 } from 'react-aria-components';
+import { flushSync } from 'react-dom';
 
 import { cx } from './cx';
 import { CONTROL_BOX } from './input';
@@ -302,6 +310,58 @@ function sharedProps(props: DateFieldBaseProps) {
   };
 }
 
+/**
+ * The box of a field's parts (day, month, year ...). Text that comes into a part in one go (a
+ * keyboard's suggestion, dictation, autofill: one `beforeinput` with all of it) reached React
+ * Aria's part as one key, so the day showed `31122099` and the value stayed empty (QA Q-008). Here
+ * such text goes in one character at a time, as if typed, each into the part that has the focus
+ * by then; one character, a deletion and a composition go on to React Aria as they are.
+ */
+function PartsBox({ className, children }: { className: string; children: ReactNode }) {
+  const box = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    const element = box.current;
+    if (element === null) return;
+    const split = (event: InputEvent) => {
+      const { data, inputType } = event;
+      if (data === null || !inputType.startsWith('insert')) return;
+      if (inputType === 'insertCompositionText') return;
+      const characters = Array.from(new Intl.Segmenter().segment(data), (part) => part.segment);
+      if (characters.length < 2) return;
+      // the part never gets it whole: caught on the way down, before the part's own listener
+      event.stopPropagation();
+      event.preventDefault();
+      for (const character of characters) {
+        const part = document.activeElement;
+        if (!(part instanceof HTMLElement) || !element.contains(part)) return;
+        // each one rendered before the next, so the next one reads the field as it is now
+        flushSync(() => {
+          part.dispatchEvent(
+            new InputEvent('beforeinput', {
+              inputType: 'insertText',
+              data: character,
+              bubbles: true,
+              cancelable: true,
+            }),
+          );
+        });
+      }
+    };
+    element.addEventListener('beforeinput', split, { capture: true });
+    return () => {
+      element.removeEventListener('beforeinput', split, { capture: true });
+    };
+  }, []);
+  return (
+    <div
+      ref={box}
+      className={cx('flex min-w-0 flex-1 flex-wrap items-center px-3 py-2 tabular-nums', className)}
+    >
+      {children}
+    </div>
+  );
+}
+
 export interface DatePickerProps extends DateFieldBaseProps {
   /** `YYYY-MM-DD`, or with `withTime` an ISO instant (`2026-10-30T04:30:00.000Z`); null = empty. */
   value?: string | null;
@@ -343,12 +403,12 @@ export function DatePicker(props: DatePickerProps) {
       >
         <FieldLabel required={props.isRequired}>{props.label}</FieldLabel>
         <Group className={cx(CONTROL_BOX, 'data-invalid:border-error')}>
-          <div className="flex min-w-0 flex-1 flex-wrap items-center gap-x-1.5 px-3 py-2 tabular-nums">
+          <PartsBox className="gap-x-1.5">
             <DateInput className="flex flex-wrap items-center">
               {(segment) => <DateSegment segment={segment} className={SEGMENT} />}
             </DateInput>
             {withTime && <IstMark />}
-          </div>
+          </PartsBox>
           <AriaButton className={ICON_BUTTON}>
             <IconCalendar aria-hidden="true" size={20} />
           </AriaButton>
@@ -427,7 +487,7 @@ export function DateRangePicker(props: DateRangePickerProps) {
       >
         <FieldLabel required={props.isRequired}>{props.label}</FieldLabel>
         <Group className={cx(CONTROL_BOX, 'data-invalid:border-error')}>
-          <div className="flex min-w-0 flex-1 flex-wrap items-center gap-x-2 px-3 py-2 tabular-nums">
+          <PartsBox className="gap-x-2">
             <DateInput slot="start" className="flex flex-wrap items-center">
               {(segment) => <DateSegment segment={segment} className={SEGMENT} />}
             </DateInput>
@@ -439,7 +499,7 @@ export function DateRangePicker(props: DateRangePickerProps) {
               {(segment) => <DateSegment segment={segment} className={SEGMENT} />}
             </DateInput>
             {withTime && <IstMark />}
-          </div>
+          </PartsBox>
           <AriaButton className={ICON_BUTTON}>
             <IconCalendar aria-hidden="true" size={20} />
           </AriaButton>

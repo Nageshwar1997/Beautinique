@@ -1,6 +1,6 @@
 # MEMORY — BQ
 
-> **Status:** v1.95 (2026-11-12). Project ki yaaddasht: **kya tay hua aur kyun**, **pichhle kaam se kya seekha**, aur **kaunse jaal (traps) se bachna hai**. Poori detail baaki docs me hai; yahan short version aur pointers. Naya sabak ya decision aaye to yahan ek line jodo.
+> **Status:** v1.96 (2026-11-12). Project ki yaaddasht: **kya tay hua aur kyun**, **pichhle kaam se kya seekha**, aur **kaunse jaal (traps) se bachna hai**. Poori detail baaki docs me hai; yahan short version aur pointers. Naya sabak ya decision aaye to yahan ek line jodo.
 
 ## 1. Decision log
 
@@ -142,6 +142,7 @@
 | 2026-11-12 | DR-002 (owner): HIBP fail-open rahe; jawab `unknown` (5xx/timeout, warning) pe `password.hibpPending`, agle password sign-in pe jaanch; leak pe `breachedAt` + 403 `PASSWORD_RESET_REQUIRED` aur app me "Set a new password"; HIBP phir na mile to sign-in chalta | Outage ke dauraan leaked password chupchaap aa jaata tha aur kabhi dobara jaancha nahi jaata; sign-up/reset rokna availability todta, isliye baad me jaanch |
 | 2026-11-12 | DR-011 (owner, Claude ki salah): `/iam/me` ke user me `authenticatorRequiredBy` (roles + app, `DELETE` wali hi jaanch; authenticator band ho to khaali); jahan authenticator band nahi ho sakta (aise roles, ya TOTP_REQUIRED_APPS ka app) wahan Security page "Turn off" nahi dikhata, uski jagah wajah ki line; dialog ka text har app me sach | Internal apps me har insaan ko ek button dikhta tha jo hamesha 409 deta, aur dialog "password only" ka galat vaada karta (social sign-in wale account pe bhi) |
 | 2026-11-12 | Q-010 (owner ne 2026-11-12 BroadcastChannel chuna, "ek baar aur refresh()" ki jagah): jo tab refresh kar leta wo `bq:<app>:session` pe `refreshed` bhejta; 409 wala tab uska intezaar karta (pehle aa chuka ho to turant, max 5 s `OTHER_TAB_REFRESH_WAIT_MS`), phir call dobara; refresh dobara nahi | Fixed 300 ms ke baad pehle tab ka jawab na aaya ho to doosra tab signed-out dikhta. "Ek baar aur refresh" purana token dobara bhejta, jo 10 s ke baad identity ke liye chori hai (session band + galat security email) |
+| 2026-11-12 | Q-008 (owner, Claude ki salah): DatePicker/DateRangePicker ke hisson ka box ek `beforeinput` me aaye kai akshar capture phase me rok ke ek-ek karke focused hisse pe bhejta (har ek `flushSync` me); ek akshar, delete aur composition React Aria ko waise hi. Asli Android jaanch owner ki (O2) | React Aria ka hissa poore string ko ek key maanta: `15081990/mm/yyyy` dikhta aur value `null`. Chromium ka typing bhi poora string ek `insertText` me bhejta, to ye sirf Android ki baat nahi |
 
 ## 2. Pichhle kaam se seekhe sabak
 
@@ -320,3 +321,4 @@
 | v1.93 | 2026-11-12 | Decision: DR-002, bina jaanch aaye password ki baad me jaanch. |
 | v1.94 | 2026-11-12 | Decision: DR-011, Turn off ki jagah wajah. |
 | v1.95 | 2026-11-12 | Decision: Q-010, 409 ke baad doosre tab ka sandesh. |
+| v1.96 | 2026-11-12 | Decision: Q-008, DatePicker me ek saath aaye akshar ek-ek karke. |
