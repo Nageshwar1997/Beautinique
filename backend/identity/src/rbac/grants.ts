@@ -1,4 +1,9 @@
-import type { ClientSession, IndexSpec, Mongo } from '@beautinique/backend-server-mongo';
+import {
+  type ClientSession,
+  type IndexSpec,
+  type Mongo,
+  ObjectId,
+} from '@beautinique/backend-server-mongo';
 import {
   ACCESS_TOKEN_SECONDS,
   type AppId,
@@ -6,70 +11,105 @@ import {
   type GRANT_VIA,
   type ScopeType,
 } from '@beautinique/shared-contracts';
-import { uuidv7 } from '@beautinique/shared-utils';
 import type { Redis } from 'ioredis';
 
 import { type User, USERS } from '../users.ts';
+import { rbacCatalog } from './catalog.ts';
 import { SIGN_UP_ROLES } from './roles.ts';
-import { type RoleRecord, ROLES } from './sync.ts';
+import { readRoles, type RoleRecord, ROLES } from './sync.ts';
 
 export const GRANTS = 'identity_grants';
 export const GRANT_LOG = 'identity_grant_log';
 
 export type GrantVia = (typeof GRANT_VIA)[number];
+
+/** A scope as routes and shared-authz see it: its ids as strings. */
 export interface Scope {
   type: ScopeType;
   ids: string[];
 }
 
 /**
+ * A scope as identity keeps it: ids that name a document (an account for `self`, a seller
+ * organisation, a brand ...) are ObjectIds (owner, 2026-11-12); a state is a contracts code (MH),
+ * and `global` names none.
+ */
+export interface StoredScope {
+  type: ScopeType;
+  ids: (ObjectId | string)[];
+}
+
+/** Scope types whose ids are codes, not documents. */
+export const CODE_SCOPE_TYPES: ReadonlySet<ScopeType> = new Set(['global', 'state']);
+
+/** The scope to store; its document ids must be 24 hex already (scopeIdProblems checks them). */
+export function storedScope(scope: Scope): StoredScope {
+  return CODE_SCOPE_TYPES.has(scope.type)
+    ? { type: scope.type, ids: [...scope.ids] }
+    : { type: scope.type, ids: scope.ids.map((id) => new ObjectId(id)) };
+}
+
+/** A stored scope as routes and shared-authz see it. */
+export function scopeOf(scope: StoredScope): Scope {
+  return {
+    type: scope.type,
+    ids: scope.ids.map((id) => (typeof id === 'string' ? id : id.toHexString())),
+  };
+}
+
+/**
  * A role given to an account for a scope, for a time (ARCHITECTURE §7.3). Ending one keeps the
  * record (`active: false`) for audit; at most one active grant per account, role and scope id.
+ * Every id in it is an ObjectId (owner, 2026-11-12).
  */
 export interface GrantRecord {
-  _id: string;
-  userId: string;
-  role: string;
-  /** The role's app, so sign-in asks one index */
-  app: AppId;
-  scope: Scope;
+  _id: ObjectId;
+  userId: ObjectId;
+  roleId: ObjectId;
+  /** The role's app (identity_apps), so sign-in asks one index */
+  appId: ObjectId;
+  scope: StoredScope;
   validFrom: Date | null;
   validTo: Date | null;
   /** Who gave it; null = identity itself (sign-up, a migration, the Master command) */
-  grantedBy: string | null;
+  grantedBy: ObjectId | null;
   /** The second person, where the role needs one */
-  approvedBy: string | null;
+  approvedBy: ObjectId | null;
   /** How it came (contracts GRANT_VIA) */
   via: GrantVia;
   active: boolean;
   createdAt: Date;
   endedAt: Date | null;
-  endedBy: string | null;
+  endedBy: ObjectId | null;
 }
 
 /** One line of the grant history: what changed, by whom, when. Never changed or deleted. */
 export interface GrantLogEntry {
-  _id: string;
-  grantId: string;
-  userId: string;
-  role: string;
-  scope: Scope;
+  _id: ObjectId;
+  grantId: ObjectId;
+  userId: ObjectId;
+  roleId: ObjectId;
+  scope: StoredScope;
   action: 'granted' | 'ended';
-  by: string | null;
+  by: ObjectId | null;
   via: GrantVia;
   at: Date;
 }
 
 export const indexes: readonly IndexSpec[] = [
-  { collection: GRANTS, name: 'userId_app_active', key: { userId: 1, app: 1, active: 1 } },
   {
     collection: GRANTS,
-    name: 'active_role_scope_unique',
-    key: { userId: 1, role: 1, 'scope.type': 1, 'scope.ids': 1 },
+    name: 'userId_appId_active',
+    key: { userId: 1, appId: 1, active: 1 },
+  },
+  {
+    collection: GRANTS,
+    name: 'active_roleId_scope_unique',
+    key: { userId: 1, roleId: 1, 'scope.type': 1, 'scope.ids': 1 },
     unique: true,
     partialFilterExpression: { active: true },
   },
-  { collection: GRANTS, name: 'role_active', key: { role: 1, active: 1 } },
+  { collection: GRANTS, name: 'roleId_active', key: { roleId: 1, active: 1 } },
   { collection: GRANT_LOG, name: 'userId_at', key: { userId: 1, at: -1 } },
 ];
 
@@ -80,7 +120,7 @@ const logOf = (mongo: Mongo) => mongo.db.collection<GrantLogEntry>(GRANT_LOG);
 export async function raiseAuthzVersion(
   mongo: Mongo,
   session: ClientSession,
-  userId: string,
+  userId: ObjectId,
   now: Date,
 ): Promise<void> {
   await mongo.db
@@ -93,27 +133,26 @@ export async function raiseAuthzVersion(
 }
 
 /** An active grant of the account and role that shares a scope id with `scope` (or is it). */
-export function overlapping(userId: string, role: string, scope: Scope) {
+export function overlapping(userId: ObjectId, roleId: ObjectId, scope: Scope) {
+  const { ids } = storedScope(scope);
   return {
     userId,
-    role,
+    roleId,
     active: true,
     'scope.type': scope.type,
-    ...(scope.ids.length === 0
-      ? { 'scope.ids': { $size: 0 } }
-      : { 'scope.ids': { $in: scope.ids } }),
+    ...(ids.length === 0 ? { 'scope.ids': { $size: 0 } } : { 'scope.ids': { $in: ids } }),
   };
 }
 
 export interface NewGrant {
-  userId: string;
-  role: string;
-  app: AppId;
+  userId: ObjectId;
+  roleId: ObjectId;
+  appId: ObjectId;
   scope: Scope;
   via: GrantVia;
   now: Date;
-  grantedBy?: string | null;
-  approvedBy?: string | null;
+  grantedBy?: ObjectId | null;
+  approvedBy?: ObjectId | null;
   validFrom?: Date | null;
   validTo?: Date | null;
 }
@@ -128,17 +167,18 @@ export async function writeGrant(
   mongo: Mongo,
   session: ClientSession,
   grant: NewGrant,
-): Promise<string | null> {
-  const { userId, role, app, scope, via, now } = grant;
-  if (await grantsOf(mongo).findOne(overlapping(userId, role, scope), { session })) return null;
-  const _id = uuidv7();
+): Promise<ObjectId | null> {
+  const { userId, roleId, appId, scope, via, now } = grant;
+  if (await grantsOf(mongo).findOne(overlapping(userId, roleId, scope), { session })) return null;
+  const _id = new ObjectId();
+  const stored = storedScope(scope);
   // equality on the whole scope: an insert takes it from the filter, and a second call finds it
   const written = await grantsOf(mongo).updateOne(
-    { userId, role, 'scope.type': scope.type, 'scope.ids': scope.ids, active: true },
+    { userId, roleId, 'scope.type': stored.type, 'scope.ids': stored.ids, active: true },
     {
       $setOnInsert: {
         _id,
-        app,
+        appId,
         validFrom: grant.validFrom ?? null,
         validTo: grant.validTo ?? null,
         grantedBy: grant.grantedBy ?? null,
@@ -154,11 +194,11 @@ export async function writeGrant(
   if (written.upsertedCount !== 1) return null;
   await logOf(mongo).insertOne(
     {
-      _id: uuidv7(),
+      _id: new ObjectId(),
       grantId: _id,
       userId,
-      role,
-      scope,
+      roleId,
+      scope: stored,
       action: 'granted',
       by: grant.grantedBy ?? null,
       via,
@@ -171,9 +211,9 @@ export async function writeGrant(
 }
 
 export interface NewSystemGrant {
-  userId: string;
+  userId: ObjectId;
+  /** The role's key (its id and app are looked up) */
   role: string;
-  app: AppId;
   scope: Scope;
   via: 'sign-up' | 'migration' | 'bootstrap';
   now: Date;
@@ -183,9 +223,15 @@ export interface NewSystemGrant {
 export async function giveSystemGrant(
   mongo: Mongo,
   session: ClientSession,
-  grant: NewSystemGrant,
+  { role: key, ...grant }: NewSystemGrant,
 ): Promise<boolean> {
-  return (await writeGrant(mongo, session, grant)) !== null;
+  const role = await mongo.db
+    .collection<RoleRecord>(ROLES)
+    .findOne({ key }, { session, projection: { _id: 1, appId: 1 } });
+  if (!role) throw new Error(`Role ${key} is not there: run db:release first.`);
+  return (
+    (await writeGrant(mongo, session, { ...grant, roleId: role._id, appId: role.appId })) !== null
+  );
 }
 
 /**
@@ -196,15 +242,14 @@ export async function giveSystemGrant(
 export async function giveSignUpGrant(
   mongo: Mongo,
   session: ClientSession,
-  { userId, app, now }: { userId: string; app: AppId; now: Date },
+  { userId, app, now }: { userId: ObjectId; app: AppId; now: Date },
 ): Promise<boolean> {
   const role = SIGN_UP_ROLES[app];
   if (role === undefined) return false;
   return giveSystemGrant(mongo, session, {
     userId,
     role,
-    app,
-    scope: { type: 'self', ids: [userId] },
+    scope: { type: 'self', ids: [userId.toHexString()] },
     via: 'sign-up',
     now,
   });
@@ -217,7 +262,7 @@ export async function giveSignUpGrant(
 export async function endGrantRecord(
   mongo: Mongo,
   session: ClientSession,
-  { grantId, by, now }: { grantId: string; by: string | null; now: Date },
+  { grantId, by, now }: { grantId: ObjectId; by: ObjectId | null; now: Date },
 ): Promise<GrantRecord | null> {
   const ended = await grantsOf(mongo).findOneAndUpdate(
     { _id: grantId, active: true },
@@ -227,10 +272,10 @@ export async function endGrantRecord(
   if (!ended) return null;
   await logOf(mongo).insertOne(
     {
-      _id: uuidv7(),
+      _id: new ObjectId(),
       grantId,
       userId: ended.userId,
-      role: ended.role,
+      roleId: ended.roleId,
       scope: ended.scope,
       action: 'ended',
       by,
@@ -261,18 +306,19 @@ const PUBLISH_TTL_MS = (ACCESS_TOKEN_SECONDS + 60) * 1000;
 export async function publishAuthzVersions(
   mongo: Mongo,
   redis: Redis,
-  userIds: readonly string[],
+  userIds: readonly ObjectId[],
 ): Promise<void> {
   if (userIds.length === 0) return;
+  const unique = [...new Map(userIds.map((id) => [id.toHexString(), id])).values()];
   const users = await mongo.db
     .collection<User>(USERS)
-    .find({ _id: { $in: [...new Set(userIds)] } }, { projection: { authzVersion: 1 } })
+    .find({ _id: { $in: unique } }, { projection: { authzVersion: 1 } })
     .toArray();
   for (const user of users) {
     await redis.eval(
       PUBLISH,
       1,
-      authzVersionKey(user._id),
+      authzVersionKey(user._id.toHexString()),
       String(user.authzVersion ?? 0),
       String(PUBLISH_TTL_MS),
     );
@@ -306,7 +352,7 @@ export const activeAt = (now: Date) => ({
  */
 export async function signInAccess(
   mongo: Mongo,
-  { userId, app, now = new Date() }: { userId: string; app: AppId; now?: Date },
+  { userId, app, now = new Date() }: { userId: ObjectId; app: AppId; now?: Date },
 ): Promise<SignInAccess> {
   const user = await mongo.db
     .collection<User>(USERS)
@@ -314,17 +360,15 @@ export async function signInAccess(
   const authzVersion = user?.authzVersion ?? 0;
   const none = { allowed: false, mfaRequired: false, authzVersion, permissions: [] };
   if (user?.status !== 'active') return none;
+  const appId = (await rbacCatalog(mongo)).appId(app);
   const grants = await grantsOf(mongo)
-    .find({ userId, app, ...activeAt(now) }, { projection: { role: 1 } })
+    .find({ userId, appId, ...activeAt(now) }, { projection: { roleId: 1 } })
     .toArray();
   if (grants.length === 0) return none;
-  const roles = await mongo.db
-    .collection<RoleRecord>(ROLES)
-    .find(
-      { _id: { $in: grants.map((grant) => grant.role) }, retired: false },
-      { projection: { mfaRequired: 1, permissions: 1 } },
-    )
-    .toArray();
+  const roles = await readRoles(mongo, {
+    _id: { $in: grants.map((grant) => grant.roleId) },
+    retired: false,
+  });
   if (roles.length === 0) return none;
   return {
     allowed: true,

@@ -2,22 +2,22 @@
 
 > **Temp file, sirf owner ki tracking ke liye.** Owner ke kehne pe (2026-11-09) abhi git me rehti hai; status update har item ke commit me. Kisi aur doc, file ya memory me iska zikr nahi. Saare items **Done** hote hi ye file repo se delete.
 >
-> **Last update:** 2026-11-12 (hissa 0–5 poore; 19 Done (PR #63 merge, `fcc619b`); 20 chal raha (PR #64 merge, `d075dcd`, live jaanch baaki); 21–22 hissa 7 ke baad; hissa 7 (OBJECTID, owner 2026-11-12) branch `feat/objectid` pe: 23 Done (kernel commit), 24 chal raha). **Faisla:** owner ne neeche ki har salah maan li (2026-11-09). Asli docs (report §9 "Owner ka jawab", ARCHITECTURE/RULES/README, MEMORY decision, HANDOFF, TASKS, change logs) har item ke commit me update honge, is file ka naam liye bina.
+> **Last update:** 2026-11-12 (hissa 0–5 poore; 19 Done (PR #63 merge, `fcc619b`); 20 chal raha (PR #64 merge, `d075dcd`, live jaanch baaki); 21–22 hissa 7 ke baad; hissa 7 (OBJECTID, owner 2026-11-12) branch `feat/objectid` pe: 23, 24 Done (local commits), 25 chal raha). **Faisla:** owner ne neeche ki har salah maan li (2026-11-09). Asli docs (report §9 "Owner ka jawab", ARCHITECTURE/RULES/README, MEMORY decision, HANDOFF, TASKS, change logs) har item ke commit me update honge, is file ka naam liye bina.
 
 ## Kitna bacha
 
-| Hissa                     | Items  | Done   | Bacha | Claude ka andaaza (8 ghante = 1 din)    |
-| ------------------------- | ------ | ------ | ----- | --------------------------------------- |
-| 0. Release aur shuruaat   | 4      | 4      | 0     | Ho gaya                                 |
-| 1. Abuse aur limits       | 4      | 4      | 0     | Ho gaya                                 |
-| 2. Permissions, step-up   | 5      | 5      | 0     | Ho gaya                                 |
-| 3. Chhote backend         | 2      | 2      | 0     | Ho gaya                                 |
-| 4. Apps                   | 7      | 7      | 0     | Ho gaya                                 |
-| 5. CI                     | 1      | 1      | 0     | Ho gaya                                 |
-| 6. Aakhri kadam           | 4      | 1      | 3     | ~1 ghanta (21–22 hissa 7 ke baad)       |
-| 7. ObjectId, live naya    | 5      | 1      | 4     | ~3.5 din (owner ke naye faisle se bada) |
-| **Kul (Claude)**          | **32** | **25** | **7** | **~3.5 din**                            |
-| Owner ke haath ke (O1–O5) | 5      | 0      | 5     | owner ka time                           |
+| Hissa                     | Items  | Done   | Bacha | Claude ka andaaza (8 ghante = 1 din) |
+| ------------------------- | ------ | ------ | ----- | ------------------------------------ |
+| 0. Release aur shuruaat   | 4      | 4      | 0     | Ho gaya                              |
+| 1. Abuse aur limits       | 4      | 4      | 0     | Ho gaya                              |
+| 2. Permissions, step-up   | 5      | 5      | 0     | Ho gaya                              |
+| 3. Chhote backend         | 2      | 2      | 0     | Ho gaya                              |
+| 4. Apps                   | 7      | 7      | 0     | Ho gaya                              |
+| 5. CI                     | 1      | 1      | 0     | Ho gaya                              |
+| 6. Aakhri kadam           | 4      | 1      | 3     | ~1 ghanta (21–22 hissa 7 ke baad)    |
+| 7. ObjectId, live naya    | 5      | 2      | 3     | ~1 din                               |
+| **Kul (Claude)**          | **32** | **26** | **6** | **~1 din**                           |
+| Owner ke haath ke (O1–O5) | 5      | 0      | 5     | owner ka time                        |
 
 **Status:** `Pending` (shuru nahi), `Chal raha`, `Done`, `Ruka` (kisi ka intezaar). Har item Done hone pe upar ki table bhi.
 
@@ -104,13 +104,13 @@
 
 **Wajah (Claude ne naapa, 2026-11-12):** Mongo 8.0, 2 lakh users + 10 lakh orders, har order me 3 ids. Kul disk: ObjectId 72 MB, UUIDv7 binary 110 MB, UUIDv7 string (abhi) 162 MB. Orders ka `_id` index: 10 / 20 / 35 MB. 2 lakh orders ka users se join: 1.28 s vs 1.52 s; ek-ek lookup me farq nahi. Atlas M0 (512 MB) pe storage hi asli farq hai. mongodb driver 7.8.0 ka TypeScript, typed collection (`_id: ObjectId`) pe, URL ki string seedhi `findOne({ _id: str })` me aur bina `_id` ka `insertOne`, dono ko compile error deta hai; dot wale raaste (`'scope.ids'`) aur aggregation pipeline check nahi hote, wahan tests chahiye. Abhi badalna sabse sasta: ids sirf identity, notify, core ke platform module aur server-queue me.
 
-| #   | Kaam                                                                                                                                                                                                                                                                                                                                                          | Kaun                   | Mehnat   | Status    | Commit / PR                |
-| --- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------- | -------- | --------- | -------------------------- |
-| 23  | Kernel: contracts me Mongo ids ke liye `objectIdZod` (24 hex, `uuidv7Zod` ki jagah); `server-kit` me string → ObjectId helper (galat id pe 400/404, kabhi 500 nahi); `server-queue` ka `eventId` ObjectId (envelope, outbox, processed events, dead letters); kernel ki badli lines pe mutation                                                               | Claude                 | 1 din    | Done      | kernel commit (2026-11-12) |
-| 24  | identity, notify, core: har entity ka `_id` aur reference ObjectId (users, sessions, credentials, sign-in providers, grants + log, invitations, legal acceptances, deliveries, audit, pings); record types me `_id: ObjectId`; JWT/passport me hex string, query se pehle helper; api-client fixtures aur E2E; permission/identity ki badli lines pe mutation | Claude                 | 2.5 din  | Chal raha |                            |
-| 25  | Pehra test: deployables ke tests ke baad har entity collection me `_id` aur references ObjectId hi hon; naam wali keys ki collections ki list alag                                                                                                                                                                                                            | Claude                 | 2 ghante | Pending   |                            |
-| 26  | PR `feat/objectid` → `prerelease` (CI `check` green, merge owner)                                                                                                                                                                                                                                                                                             | Claude PR, owner merge | 30 min   | Pending   |                            |
-| 27  | PR `prerelease` → `release`; deploy ke turant baad owner O5, phir live jaanch: `/status` ok, sign-up, Atlas me `identity_users._id` = `ObjectId(...)` (har live GET se pehle owner se poochho)                                                                                                                                                                | Claude PR, owner merge | 1 ghanta | Pending   |                            |
+| #   | Kaam                                                                                                                                                                                                                                                                                                                                                          | Kaun                   | Mehnat   | Status  | Commit / PR                              |
+| --- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------- | -------- | ------- | ---------------------------------------- |
+| 23  | Kernel: contracts me Mongo ids ke liye `objectIdZod` (24 hex, `uuidv7Zod` ki jagah); `server-kit` me string → ObjectId helper (galat id pe 400/404, kabhi 500 nahi); `server-queue` ka `eventId` ObjectId (envelope, outbox, processed events, dead letters); kernel ki badli lines pe mutation                                                               | Claude                 | 1 din    | Done    | kernel commit (2026-11-12)               |
+| 24  | identity, notify, core: har entity ka `_id` aur reference ObjectId (users, sessions, credentials, sign-in providers, grants + log, invitations, legal acceptances, deliveries, audit, pings); record types me `_id: ObjectId`; JWT/passport me hex string, query se pehle helper; api-client fixtures aur E2E; permission/identity ki badli lines pe mutation | Claude                 | 2.5 din  | Done    | identity/notify/core commit (2026-11-12) |
+| 25  | Pehra test: deployables ke tests ke baad har entity collection me `_id` aur references ObjectId hi hon; naam wali keys ki collections ki list alag                                                                                                                                                                                                            | Claude                 | 2 ghante | Pending |                                          |
+| 26  | PR `feat/objectid` → `prerelease` (CI `check` green, merge owner)                                                                                                                                                                                                                                                                                             | Claude PR, owner merge | 30 min   | Pending |                                          |
+| 27  | PR `prerelease` → `release`; deploy ke turant baad owner O5, phir live jaanch: `/status` ok, sign-up, Atlas me `identity_users._id` = `ObjectId(...)` (har live GET se pehle owner se poochho)                                                                                                                                                                | Claude PR, owner merge | 1 ghanta | Pending |                                          |
 
 ## Owner ke haath ke (kabhi bhi)
 

@@ -125,7 +125,7 @@ describe('MyDevices', () => {
         data: {
           sessions: [
             {
-              sessionId: '01920000-0000-7000-8000-000000000002',
+              sessionId: '6730a2b40000000000000002',
               app: 'customer',
               device: '',
               ip: '203.0.113.7',

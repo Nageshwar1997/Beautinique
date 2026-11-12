@@ -1,4 +1,5 @@
 import { type Logger, LOOPBACK_HOST } from '@beautinique/backend-server-kit';
+import { ObjectId } from '@beautinique/backend-server-mongo';
 import { OUTBOX, PROCESSED_EVENTS } from '@beautinique/backend-server-queue';
 import { createClient, getPing, recordPing, wake } from '@beautinique/shared-contracts';
 import { afterAll, afterEach, beforeAll, describe, expect, it } from 'vitest';
@@ -56,9 +57,11 @@ async function startCore(options: { consume?: boolean } = {}, logger?: Logger) {
   return core;
 }
 
-const pings = () => look.mongo.db.collection<{ _id: string; note: string }>(PINGS);
+const pings = () => look.mongo.db.collection<{ _id: ObjectId; note: string }>(PINGS);
 const audit = () =>
-  look.mongo.db.collection<{ _id: string; pingId: string; note: string }>(PING_AUDIT_COLLECTION);
+  look.mongo.db.collection<{ _id: ObjectId; pingId: ObjectId; note: string }>(
+    PING_AUDIT_COLLECTION,
+  );
 const outbox = () =>
   look.mongo.db.collection<{
     type: string;
@@ -75,10 +78,14 @@ describe('the sample endpoint, from the contract to the inbox', () => {
 
     const recorded = await client.call(recordPing, { body: { note: 'first ping' } });
     expect(recorded).toMatchObject({ note: 'first ping' });
-    expect(await pings().findOne({ _id: recorded.pingId })).toMatchObject({ note: 'first ping' });
+    expect(await pings().findOne({ _id: new ObjectId(recorded.pingId) })).toMatchObject({
+      note: 'first ping',
+    });
 
     // the same transaction wrote the event, and the relay and the worker carried it to the inbox
-    await waitFor(async () => (await audit().countDocuments({ pingId: recorded.pingId })) === 1);
+    await waitFor(
+      async () => (await audit().countDocuments({ pingId: new ObjectId(recorded.pingId) })) === 1,
+    );
     const events = await outbox().find({ 'envelope.aggregate.id': recorded.pingId }).toArray();
     expect(events).toHaveLength(1);
     expect(events[0]).toMatchObject({
@@ -88,7 +95,9 @@ describe('the sample endpoint, from the contract to the inbox', () => {
     });
     expect(await handled().countDocuments({ eventId: events[0]?._id })).toBe(1);
     expect(await audit().countDocuments()).toBe(1);
-    expect(await audit().findOne({ pingId: recorded.pingId })).toMatchObject({
+    // the audit copy names the ping by its ObjectId, and has the event's as its own
+    expect(await audit().findOne({ pingId: new ObjectId(recorded.pingId) })).toMatchObject({
+      _id: events[0]?._id,
       recordedAt: new Date(recorded.recordedAt),
     });
 
@@ -117,8 +126,12 @@ describe('the sample endpoint, from the contract to the inbox', () => {
       code: 'VALIDATION_FAILED',
     });
     await expect(
-      client.call(getPing, { params: { pingId: '019dc0de-0000-7000-8000-000000000000' } }),
+      client.call(getPing, { params: { pingId: new ObjectId().toHexString() } }),
     ).rejects.toMatchObject({ status: 404, code: 'NOT_FOUND' });
+    // a UUIDv7 from before ObjectIds is not an id at all
+    await expect(
+      client.call(getPing, { params: { pingId: '019dc0de-0000-7000-8000-000000000000' } }),
+    ).rejects.toMatchObject({ status: 400, code: 'VALIDATION_FAILED' });
     const bad = await fetch(`${core.url}/platform/pings/not-an-id`);
     expect(bad.status).toBe(400);
     expect(await pings().countDocuments()).toBe(0);
@@ -140,8 +153,8 @@ describe('the sample endpoint, from the contract to the inbox', () => {
   it('keeps at most PING_CAP pings, so the public demo cannot fill the free cluster', async () => {
     const core = await startCore();
     await pings().insertMany(
-      Array.from({ length: PING_CAP }, (_, index) => ({
-        _id: `filler-${String(index)}`,
+      Array.from({ length: PING_CAP }, () => ({
+        _id: new ObjectId(),
         note: 'x',
       })),
     );
@@ -212,9 +225,9 @@ describe('Redis wipe drill', () => {
     core.runtime.startConsuming();
     await waitFor(async () => (await audit().countDocuments()) === 2);
     await sleep(300);
-    expect((await audit().find().toArray()).map((row) => row.pingId).toSorted()).toEqual(
-      [first.pingId, second.pingId].toSorted(),
-    );
+    expect(
+      (await audit().find().toArray()).map((row) => row.pingId.toHexString()).toSorted(),
+    ).toEqual([first.pingId, second.pingId].toSorted());
     expect(await handled().countDocuments()).toBe(2);
   }, 30_000);
 
@@ -230,7 +243,7 @@ describe('Redis wipe drill', () => {
     await waitFor(async () => (await redis().exists(epochKey)) === 1);
     // the redrive sends the handled event again, and the inbox mark skips it: no second effect
     await waitFor(() => lines.some((line) => line.msg === 'event seen again, skipped'));
-    expect(await audit().countDocuments({ pingId: recorded.pingId })).toBe(1);
+    expect(await audit().countDocuments({ pingId: new ObjectId(recorded.pingId) })).toBe(1);
     expect(await handled().countDocuments()).toBe(1);
   }, 30_000);
 });

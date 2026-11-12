@@ -19,9 +19,14 @@ import {
   type PassportSigner,
   passportSigner,
 } from '@beautinique/backend-server-kit';
-import { connectMongo, type Mongo, withTransaction } from '@beautinique/backend-server-mongo';
+import {
+  connectMongo,
+  type Mongo,
+  ObjectId,
+  withTransaction,
+} from '@beautinique/backend-server-mongo';
 import { OUTBOX } from '@beautinique/backend-server-queue';
-import { APPS, otpSealContext } from '@beautinique/shared-contracts';
+import { type AppId, APPS, otpSealContext } from '@beautinique/shared-contracts';
 import { Queue } from 'bullmq';
 import { expect } from 'vitest';
 
@@ -39,6 +44,14 @@ import {
 import { challengeKey } from '../src/otp.ts';
 import { giveSystemGrant, type GrantRecord, GRANTS } from '../src/rbac/grants.ts';
 import { ROLE_SEEDS } from '../src/rbac/roles.ts';
+import {
+  APP_RECORDS,
+  type AppRecord,
+  type PermissionRecord,
+  PERMISSIONS,
+  type RoleRecord,
+  ROLES,
+} from '../src/rbac/sync.ts';
 import { type RunningIdentity, start } from '../src/service.ts';
 import { LEGAL_ACCEPTANCES, type LegalAcceptance, type User, USERS } from '../src/users.ts';
 
@@ -289,13 +302,12 @@ export async function giveRole(userId: string, role: string, to = current): Prom
   const type = seed.scopeTypes[0] ?? 'self';
   const scope = seed.scopeTypes.includes('global')
     ? { type: 'global' as const, ids: [] }
-    : { type, ids: [type === 'self' ? userId : `${type}-1`] };
+    : { type, ids: [type === 'self' ? userId : type === 'state' ? 'MH' : SOME_ID] };
   const { mongo } = to.runtime;
   return withTransaction(mongo, (session) =>
     giveSystemGrant(mongo, session, {
-      userId,
+      userId: new ObjectId(userId),
       role,
-      app: seed.app,
       scope,
       via: 'migration',
       now: new Date(),
@@ -334,6 +346,48 @@ export async function makeAccount(
 /** Moves a challenge's resend wait into the past (instead of waiting a minute). */
 export const allowResend = (challengeId: string, to = current) =>
   to.runtime.redis.client.hset(challengeKey(challengeId), 'resendAfter', '0');
+
+/** An ObjectId from the hex an API answer gives (every id in identity's database is one). */
+export const oid = (hex: string): ObjectId => new ObjectId(hex);
+/** A made-up document id for a scope (a seller organisation, a brand ...). */
+export const SOME_ID = '6730a2b4c41b2e9d104f6a99';
+
+/** A role's id by its key (grants and invitations name roles by id). */
+export async function roleIdOf(key: string): Promise<ObjectId> {
+  const role = await look()
+    .collection<RoleRecord>(ROLES)
+    .findOne({ key }, { projection: { _id: 1 } });
+  if (!role) throw new Error(`no role ${key}`);
+  return role._id;
+}
+
+/** An app's id by its key (grants and sessions name apps by id). */
+export async function appIdOf(app: AppId): Promise<ObjectId> {
+  const record = await look()
+    .collection<AppRecord>(APP_RECORDS)
+    .findOne({ key: app }, { projection: { _id: 1 } });
+  if (!record) throw new Error(`no app ${app}`);
+  return record._id;
+}
+
+/** A permission's id by its key (roles name their permissions by id). */
+export async function permissionIdOf(key: string): Promise<ObjectId> {
+  const record = await look()
+    .collection<PermissionRecord>(PERMISSIONS)
+    .findOne({ key }, { projection: { _id: 1 } });
+  if (!record) throw new Error(`no permission ${key}`);
+  return record._id;
+}
+
+/** The role keys of grants (or invitations), in their order. */
+export async function roleKeysOf(records: readonly { roleId: ObjectId }[]): Promise<string[]> {
+  const roles = await look()
+    .collection<RoleRecord>(ROLES)
+    .find({ _id: { $in: records.map((record) => record.roleId) } }, { projection: { key: 1 } })
+    .toArray();
+  const keys = new Map(roles.map((role) => [role._id.toHexString(), role.key]));
+  return records.map((record) => keys.get(record.roleId.toHexString()) ?? '?');
+}
 
 export const users = () => look().collection<User>(USERS);
 export const grants = () => look().collection<GrantRecord>(GRANTS);

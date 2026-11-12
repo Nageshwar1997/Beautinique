@@ -3,15 +3,28 @@ import { type AddressInfo, createServer } from 'node:net';
 
 import { totpCode } from '@beautinique/backend-server-crypto';
 import { ConfigError, createLogger } from '@beautinique/backend-server-kit';
-import { connectMongo, withTransaction } from '@beautinique/backend-server-mongo';
+import {
+  connectMongo,
+  type Mongo,
+  ObjectId,
+  withTransaction,
+} from '@beautinique/backend-server-mongo';
 import { connectRedis, writeEvent } from '@beautinique/backend-server-queue';
 import { invitationCreated } from '@beautinique/shared-contracts';
-import { uuidv7 } from '@beautinique/shared-utils';
 import { afterAll, describe, expect, it } from 'vitest';
 
 import { startBundle } from '../src/bundle.ts';
 import { readBundleConfig } from '../src/config.ts';
 import { names } from '../src/deployables.ts';
+
+/** A role's or an app's id by its key, in identity's database (grants name them by id). */
+async function idByKey(mongo: Mongo, collection: 'identity_roles' | 'identity_apps', key: string) {
+  const found = await mongo.db
+    .collection<{ _id: ObjectId; key: string }>(collection)
+    .findOne({ key }, { projection: { _id: 1 } });
+  if (!found) throw new Error(`no ${key} in ${collection}`);
+  return found._id;
+}
 
 // core needs MongoDB and Redis: the laptop's and CI's local ones (`npm run infra:up`). The test uses
 // its own database and Redis database 5, so it never touches the data of a running dev server.
@@ -215,9 +228,9 @@ describe('bundle', () => {
       });
       try {
         await mongo.db
-          .collection<{ _id: string; rotatedAt: Date }>('identity_sessions')
+          .collection<{ _id: ObjectId; rotatedAt: Date }>('identity_sessions')
           .updateOne(
-            { _id: first.split('.')[0] ?? '' },
+            { _id: new ObjectId(first.split('.')[0] ?? '') },
             { $set: { rotatedAt: new Date(Date.now() - 11_000) } },
           );
       } finally {
@@ -331,19 +344,26 @@ describe('bundle', () => {
     try {
       // what POST /iam/invitations writes (its route opens at the gateway with T3.3 PR C): a
       // Master who invites, the invitation, and its event in the same transaction
-      const inviter = uuidv7();
-      const invitationId = uuidv7();
+      const inviter = new ObjectId();
+      const invitationId = new ObjectId();
       const now = new Date();
       const expiresAt = new Date(now.getTime() + 7 * 86_400_000);
+      const master = {
+        roleId: await idByKey(identityDb, 'identity_roles', 'master.master'),
+        appId: await idByKey(identityDb, 'identity_apps', 'master'),
+      };
+      const agent = {
+        roleId: await idByKey(identityDb, 'identity_roles', 'support.l1_agent'),
+        appId: await idByKey(identityDb, 'identity_apps', 'support'),
+      };
       await withTransaction(identityDb, async (session) => {
         await identityDb.db
-          .collection<Record<string, unknown> & { _id: string }>('identity_grants')
+          .collection<Record<string, unknown> & { _id: ObjectId }>('identity_grants')
           .insertOne(
             {
-              _id: uuidv7(),
+              _id: new ObjectId(),
               userId: inviter,
-              role: 'master.master',
-              app: 'master',
+              ...master,
               scope: { type: 'global', ids: [] },
               validFrom: null,
               validTo: null,
@@ -358,18 +378,17 @@ describe('bundle', () => {
             { session },
           );
         await identityDb.db
-          .collection<Record<string, unknown> & { _id: string }>('identity_invitations')
+          .collection<Record<string, unknown> & { _id: ObjectId }>('identity_invitations')
           .insertOne(
             {
               _id: invitationId,
               email,
-              role: 'support.l1_agent',
-              app: 'support',
+              ...agent,
               scope: { type: 'global', ids: [] },
               validFrom: null,
               validTo: null,
               invitedBy: inviter,
-              invitedFrom: 'master',
+              invitedFromAppId: master.appId,
               status: 'pending',
               expiresAt,
               createdAt: now,
@@ -379,11 +398,11 @@ describe('bundle', () => {
             { session },
           );
         await writeEvent(identityDb, session, invitationCreated, {
-          aggregate: { type: 'invitation', id: invitationId },
-          actor: { type: 'user', id: inviter },
-          correlationId: `bundle-${invitationId}`,
+          aggregate: { type: 'invitation', id: invitationId.toHexString() },
+          actor: { type: 'user', id: inviter.toHexString() },
+          correlationId: `bundle-${invitationId.toHexString()}`,
           data: {
-            invitationId,
+            invitationId: invitationId.toHexString(),
             email,
             app: 'support',
             roleName: 'Customer Support Agent (L1)',
@@ -502,12 +521,12 @@ describe('bundle', () => {
       // the first Master, as `npm run db:grant-master` gives it
       const now = new Date();
       await identityDb.db
-        .collection<Record<string, unknown> & { _id: string }>('identity_grants')
+        .collection<Record<string, unknown> & { _id: ObjectId }>('identity_grants')
         .insertOne({
-          _id: uuidv7(),
-          userId: account.userId,
-          role: 'master.master',
-          app: 'master',
+          _id: new ObjectId(),
+          userId: new ObjectId(account.userId),
+          roleId: await idByKey(identityDb, 'identity_roles', 'master.master'),
+          appId: await idByKey(identityDb, 'identity_apps', 'master'),
           scope: { type: 'global', ids: [] },
           validFrom: null,
           validTo: null,

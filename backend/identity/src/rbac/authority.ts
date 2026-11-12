@@ -1,5 +1,5 @@
 import { AppError } from '@beautinique/backend-server-kit';
-import type { Mongo } from '@beautinique/backend-server-mongo';
+import type { Mongo, ObjectId } from '@beautinique/backend-server-mongo';
 import { type ChainOf, grantProblems, scopeWithin } from '@beautinique/shared-authz';
 import {
   type AppId,
@@ -9,35 +9,48 @@ import {
   permissions,
 } from '@beautinique/shared-contracts';
 
-import { activeAt, type GrantRecord, GRANTS, type Scope } from './grants.ts';
-import { type RoleRecord, ROLES } from './sync.ts';
+import { rbacCatalog } from './catalog.ts';
+import {
+  activeAt,
+  CODE_SCOPE_TYPES,
+  type GrantRecord,
+  GRANTS,
+  type Scope,
+  scopeOf,
+} from './grants.ts';
+import { readRoles, type Role, type RoleRecord } from './sync.ts';
 
 /** One grant of the caller in the app they act from, with its role. */
 export interface CallerGrant {
   grant: GrantRecord;
-  role: RoleRecord;
+  role: Role;
 }
 
 /** The caller's grants that count now, in the app they act from (the passport's app). */
 export async function callerGrants(
   mongo: Mongo,
-  { userId, app, now = new Date() }: { userId: string; app: AppId; now?: Date },
+  { userId, app, now = new Date() }: { userId: ObjectId; app: AppId; now?: Date },
 ): Promise<CallerGrant[]> {
+  const appId = (await rbacCatalog(mongo)).appId(app);
   const grants = await mongo.db
     .collection<GrantRecord>(GRANTS)
-    .find({ userId, app, ...activeAt(now) })
+    .find({ userId, appId, ...activeAt(now) })
     .toArray();
   if (grants.length === 0) return [];
-  const roles = await mongo.db
-    .collection<RoleRecord>(ROLES)
-    .find({ _id: { $in: grants.map((grant) => grant.role) }, retired: false })
-    .toArray();
-  const byKey = new Map(roles.map((role) => [role._id, role]));
+  const roles = await readRoles(mongo, {
+    _id: { $in: grants.map((grant) => grant.roleId) },
+    retired: false,
+  });
+  const byId = new Map(roles.map((role) => [role._id.toHexString(), role]));
   return grants.flatMap((grant) => {
-    const role = byKey.get(grant.role);
+    const role = byId.get(grant.roleId.toHexString());
     return role ? [{ grant, role }] : [];
   });
 }
+
+/** `list` names the role with this id. */
+export const namesRole = (list: readonly ObjectId[], id: ObjectId): boolean =>
+  list.some((each) => each.equals(id));
 
 export const forbidden = (message = 'You do not have access to this.'): AppError =>
   new AppError('FORBIDDEN', message);
@@ -54,6 +67,9 @@ export function requirePermission(caller: readonly CallerGrant[], key: string): 
  */
 export const chainOf: ChainOf = (type, id) => (type === 'state' && isStateId(id) ? {} : undefined);
 
+// a document's id in a scope, as the API gives it (lower-case hex, objectIdZod)
+const OBJECT_ID = /^[0-9a-f]{24}$/;
+
 /** Scope types whose ids identity cannot know yet (owner, 2026-10-29: the location master). */
 const NOT_KNOWN_YET = new Set(['district', 'city', 'hub', 'warehouse']);
 
@@ -65,8 +81,9 @@ export interface ScopeProblem {
 /**
  * What is wrong with a scope's ids: a `state` id that is not a state or union territory, a
  * district, city, hub or warehouse id (not known before the location master), a `self` scope
- * that is not the person's own account. `selfId` null = the account is not known yet (an
- * invitation): a self scope then names no ids.
+ * that is not the person's own account, an id that is not an ObjectId where the scope names
+ * documents (a seller organisation, a brand ...: owner, 2026-11-12). `selfId` null = the account
+ * is not known yet (an invitation): a self scope then names no ids.
  */
 export function scopeIdProblems(scope: Scope, selfId: string | null): ScopeProblem[] {
   const at = ['scope', 'ids'];
@@ -92,6 +109,9 @@ export function scopeIdProblems(scope: Scope, selfId: string | null): ScopeProbl
       ];
     }
   }
+  if (!CODE_SCOPE_TYPES.has(scope.type) && !scope.ids.every((id) => OBJECT_ID.test(id))) {
+    return [{ path: at, message: `Use the id of a ${scope.type}` }];
+  }
   return [];
 }
 
@@ -101,7 +121,7 @@ export function scopeIdProblems(scope: Scope, selfId: string | null): ScopeProbl
  * (grantProblems: ids, dates in order), a validity that ended already, unknown ids.
  */
 export function grantShapeProblems(
-  role: RoleRecord,
+  role: Role,
   scope: Scope,
   {
     validFrom,
@@ -127,7 +147,7 @@ export function grantShapeProblems(
   const shaped = scope.type === 'self' && selfId === null ? { ...scope, ids: ['pending'] } : scope;
   for (const problem of grantProblems(
     {
-      role: role._id,
+      role: role.key,
       permissions: role.permissions,
       scope: shaped,
       validFrom: validFrom?.toISOString() ?? null,
@@ -163,13 +183,13 @@ export function appointingGrant(
   return caller.find(
     ({ grant, role: own }) =>
       own.permissions.includes(grantManage.key) &&
-      role.appointedBy.includes(own._id) &&
-      scopeWithin(grant.scope, inner, chainOf),
+      namesRole(role.appointedBy, own._id) &&
+      scopeWithin(scopeOf(grant.scope), inner, chainOf),
   );
 }
 
-/** Ids of `scope.ids` all inside `ids` (a non-global scope of the same type). */
-const idsInside = (ids: readonly string[]) => ({
+/** Ids of `scope.ids` all inside `ids` (a non-global scope of the same type, as stored). */
+const idsInside = (ids: readonly (ObjectId | string)[]) => ({
   'scope.ids': { $not: { $elemMatch: { $nin: [...ids] } } },
 });
 
@@ -183,7 +203,7 @@ const idsInside = (ids: readonly string[]) => ({
  */
 export function visibleFilter(
   caller: readonly CallerGrant[],
-  roles: readonly RoleRecord[],
+  roles: readonly Pick<RoleRecord, '_id' | 'appointedBy' | 'signUp'>[],
   { onePerson = false }: { onePerson?: boolean } = {},
 ): Record<string, unknown> | null {
   const signUpRoles = roles.filter((role) => role.signUp).map((role) => role._id);
@@ -191,14 +211,16 @@ export function visibleFilter(
     .filter(({ role }) => role.permissions.includes(grantRead.key))
     .flatMap(({ grant, role: own }) => {
       const reviewer = !own.permissions.includes(grantManage.key);
-      const givable = roles.filter((role) => role.appointedBy.includes(own._id)).map((r) => r._id);
+      const givable = roles
+        .filter((role) => namesRole(role.appointedBy, own._id))
+        .map((role) => role._id);
       if (!reviewer && givable.length === 0) return [];
       const scope =
         grant.scope.type === 'global'
           ? {}
           : { 'scope.type': grant.scope.type, ...idsInside(grant.scope.ids) };
-      const reviewed = onePerson ? {} : { role: { $nin: signUpRoles } };
-      return [{ ...(reviewer ? reviewed : { role: { $in: givable } }), ...scope }];
+      const reviewed = onePerson ? {} : { roleId: { $nin: signUpRoles } };
+      return [{ ...(reviewer ? reviewed : { roleId: { $in: givable } }), ...scope }];
     });
   return clauses.length === 0 ? null : { $or: clauses };
 }

@@ -432,7 +432,12 @@ export async function verifyCode(
     await clearFailures(deps.redis, deps.keys, email, { unlock: true });
     await deps.sessions.endAll(user._id, 'password-changed');
     deps.logger.info({ userId: user._id, app }, 'password set with an email code');
-    return { userId: user._id, email: user.email, outcome: 'password-set', signedIn: false };
+    return {
+      userId: user._id.toHexString(),
+      email: user.email,
+      outcome: 'password-set',
+      signedIn: false,
+    };
   }
 
   const consent = { terms: challenge.terms === '1', adult: challenge.adult === '1' };
@@ -454,7 +459,7 @@ export async function verifyCode(
     await deps.sessions.endAll(user._id, 'password-changed');
   }
   if (outcome !== 'account-made') {
-    return { userId: user._id, email: user.email, outcome, signedIn: false };
+    return { userId: user._id.toHexString(), email: user.email, outcome, signedIn: false };
   }
   const session = await deps.sessions.issue({
     userId: user._id,
@@ -508,7 +513,7 @@ async function acceptWithCode(
       now,
     });
     await acceptInvitations(deps.mongo, session, { userId: user._id, accepted: invitations, now });
-    return { user, password, roles: invitations.map((invitation) => invitation.role) };
+    return { user, password, roles: invitations.map((invitation) => invitation.roleId) };
   });
   if (!accepted) throw otpExpired();
   const { user, password, roles } = accepted;
@@ -518,5 +523,10 @@ async function acceptWithCode(
   }
   await publishAuthzVersions(deps.mongo, deps.redis, [user._id]);
   deps.logger.info({ userId: user._id, app, roles, password }, 'invitation accepted');
-  return { userId: user._id, email: user.email, outcome: 'invite-accepted', signedIn: false };
+  return {
+    userId: user._id.toHexString(),
+    email: user.email,
+    outcome: 'invite-accepted',
+    signedIn: false,
+  };
 }

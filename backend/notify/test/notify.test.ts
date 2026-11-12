@@ -6,7 +6,12 @@ import { setTimeout as sleep } from 'node:timers/promises';
 
 import { encryptField, generateKey, loadSealingKeys } from '@beautinique/backend-server-crypto';
 import { createLogger, LOOPBACK_HOST } from '@beautinique/backend-server-kit';
-import { connectMongo, type Mongo, withTransaction } from '@beautinique/backend-server-mongo';
+import {
+  connectMongo,
+  type Mongo,
+  ObjectId,
+  withTransaction,
+} from '@beautinique/backend-server-mongo';
 import {
   type Relay,
   startRelay,
@@ -203,7 +208,7 @@ describe('sendDue', () => {
   const queue = async (code = '482913', more: Partial<Delivery> = {}): Promise<Delivery> => {
     const challengeId = uuidv7();
     const delivery: Delivery = {
-      _id: uuidv7(),
+      _id: new ObjectId(),
       channel: 'email',
       lane: 'otp',
       priority: LANES.otp,
@@ -226,7 +231,7 @@ describe('sendDue', () => {
     await deliveries().insertOne(delivery);
     return delivery;
   };
-  const read = (id: string) => deliveries().findOne({ _id: id });
+  const read = (id: ObjectId) => deliveries().findOne({ _id: id });
 
   beforeEach(async () => {
     now = new Date('2026-10-27T05:00:00.000Z');
@@ -252,9 +257,7 @@ describe('sendDue', () => {
     expect(after?.sentAt).toEqual(now);
     expect(after?.otp).not.toHaveProperty('sealedCode');
     expect(after).not.toHaveProperty('leaseUntil');
-    expect(
-      await mongo.db.collection(EMAIL_DAYS).findOne({ _id: '2026-10-27' as never }),
-    ).toMatchObject({
+    expect(await mongo.db.collection(EMAIL_DAYS).findOne({ day: '2026-10-27' })).toMatchObject({
       sent: 1,
     });
     // a second run finds nothing
@@ -266,7 +269,7 @@ describe('sendDue', () => {
     const { sender, sent } = fakeSender();
     const invite = (app: 'admin' | 'seller', more: Partial<Delivery> = {}) => {
       const delivery: Delivery = {
-        _id: uuidv7(),
+        _id: new ObjectId(),
         channel: 'email',
         lane: 'transactional',
         priority: LANES.transactional,
@@ -303,7 +306,7 @@ describe('sendDue', () => {
     const { sender, sent } = fakeSender();
     const change = (more: Partial<Delivery> = {}): Promise<Delivery> => {
       const delivery: Delivery = {
-        _id: uuidv7(),
+        _id: new ObjectId(),
         channel: 'email',
         lane: 'transactional',
         priority: LANES.transactional,
@@ -343,7 +346,7 @@ describe('sendDue', () => {
     const { sender, sent } = fakeSender();
     const change = (more: Partial<Delivery> = {}): Promise<Delivery> => {
       const delivery: Delivery = {
-        _id: uuidv7(),
+        _id: new ObjectId(),
         channel: 'email',
         lane: 'transactional',
         priority: LANES.transactional,
@@ -413,9 +416,7 @@ describe('sendDue', () => {
     expect(after).toMatchObject({ status: 'queued', attempts: 1, error: 'BREVO_UNAVAILABLE' });
     expect(after?.dueAt).toEqual(new Date(now.getTime() + 10_000));
     // the failed try did not use up the day's budget
-    expect(
-      await mongo.db.collection(EMAIL_DAYS).findOne({ _id: '2026-10-27' as never }),
-    ).toMatchObject({
+    expect(await mongo.db.collection(EMAIL_DAYS).findOne({ day: '2026-10-27' })).toMatchObject({
       sent: 0,
     });
     failures.push(new Error('socket hang up'));
@@ -472,8 +473,8 @@ describe('sendDue', () => {
   it('keeps to the day’s limits: codes stop at the hard limit, other emails wait for the next UTC day', async () => {
     const { sender, sent } = fakeSender();
     await mongo.db
-      .collection<{ _id: string; sent: number; createdAt: Date }>(EMAIL_DAYS)
-      .insertOne({ _id: '2026-10-27', sent: 2, createdAt: now });
+      .collection<{ _id: ObjectId; day: string; sent: number; createdAt: Date }>(EMAIL_DAYS)
+      .insertOne({ _id: new ObjectId(), day: '2026-10-27', sent: 2, createdAt: now });
     const other = await queue('1', { lane: 'other', priority: LANES.other });
     const code = await queue('2');
     const late = await queue('3');
@@ -494,8 +495,8 @@ describe('sendDue', () => {
   it('warns once when 80% of the day’s emails are sent (DR-009)', async () => {
     const { sender } = fakeSender();
     await mongo.db
-      .collection<{ _id: string; sent: number; createdAt: Date }>(EMAIL_DAYS)
-      .insertOne({ _id: '2026-10-27', sent: 7, createdAt: now });
+      .collection<{ _id: ObjectId; day: string; sent: number; createdAt: Date }>(EMAIL_DAYS)
+      .insertOne({ _id: new ObjectId(), day: '2026-10-27', sent: 7, createdAt: now });
     await queue('1');
     await queue('2');
     const warned = () => lines.filter((l) => l.msg === 'email budget nearly used today');
@@ -604,9 +605,10 @@ describe('notify end to end', () => {
       expect(sent[0]?.text).toContain('739104');
       // the delivery is marked sent just after the provider answers
       await waitFor(
-        async () => (await deliveries().findOne({ _id: event.eventId }))?.status === 'sent',
+        async () =>
+          (await deliveries().findOne({ _id: new ObjectId(event.eventId) }))?.status === 'sent',
       );
-      expect(await deliveries().findOne({ _id: event.eventId })).toMatchObject({
+      expect(await deliveries().findOne({ _id: new ObjectId(event.eventId) })).toMatchObject({
         status: 'sent',
         lane: 'otp',
         to: email,
