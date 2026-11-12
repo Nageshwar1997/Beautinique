@@ -1,6 +1,6 @@
 # ARCHITECTURE — BQ
 
-> **Status:** v1.81 draft (2026-11-12). [PRD.md](PRD.md) v1.0 pe based. Design ek multi-agent review se aaya (3 architecture proposals + review board + owner ke decisions), aur v1.1 me free tier ke official docs ke against verify hua.
+> **Status:** v1.82 draft (2026-11-12). [PRD.md](PRD.md) v1.0 pe based. Design ek multi-agent review se aaya (3 architecture proposals + review board + owner ke decisions), aur v1.1 me free tier ke official docs ke against verify hua.
 
 ## 0. Ek nazar me
 
@@ -545,6 +545,7 @@ Sirf config badlegi, code nahi:
     5. Return → QC → refund
     6. Second signature ke saath payout batch
   - `nightly.yml`: finance, inventory reservations, authz, go-live aur checkout pe Stryker mutation tests, aur poora LGD import test.
+  - **Actions SHA pe (owner, 2026-11-09; QA Q-015):** `ci.yml` aur `release.yml` ka har `uses:` poore commit SHA pe, version comment ke saath (`actions/checkout@<sha> # v7.0.1`), taaki tag hilne se chalne wala code na badle; Dependabot (`.github/dependabot.yml`, `github-actions`, mahine me ek, `prerelease` pe PR) SHA aur comment saath badalta. Jaanch `scripts/ci/test/actions-pinned.test.ts`.
   - `release.yml`: repo ke package CLI se public packages publish, sirf `release` branch se (build job `npm run publish -- --ci` se check + pack karta hai, publish job tarballs ko trusted publishing + provenance se bhejta hai; haath se chalaya jata hai, [packages/README.md](packages/README.md)), Sentry release aur source maps.
 - **CI minutes aur repo visibility:** repo **public** hai (owner ka decision, 2026-10-19). Public repo pe standard GitHub-hosted runners free aur unlimited hain (larger runners nahi, wo hamesha paid hain). Private kiya to GitHub Free me sirf 2,000 minutes/mahina aur 500 MB artifact storage milega; tab `e2e.yml` sirf `main` pe aur `nightly.yml` hafte me ek baar. Public repo ka matlab: koi secret, test password ya DB dump repo, logs ya artifacts me nahi (gitleaks + gitignored seed file).
 
@@ -742,3 +743,4 @@ Sirf config badlegi, code nahi:
 | v1.79 | 2026-11-12 | §7.1: bina HIBP jaanch aaye password ki agle sign-in pe jaanch, leak pe naya password (DR-002, owner). |
 | v1.80 | 2026-11-12 | §7.1: `/iam/me` me authenticator chalu rakhne wale roles; jahan band nahi ho sakta wahan "Turn off" ki jagah wajah (DR-011, owner). |
 | v1.81 | 2026-11-12 | §7.2: 409 ke baad app doosre tab ka `refreshed` sandesh sunti (max 5 s), fixed 300 ms nahi (Q-010, owner). |
+| v1.82 | 2026-11-12 | §11: workflows ke actions commit SHA pe, Dependabot badalta (Q-015, owner). |

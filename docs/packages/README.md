@@ -1,6 +1,6 @@
 # Packages — banana, publish aur republish
 
-> **Status:** v1.13 (2026-11-10). **Abhi publish/republish nahi (owner ka faisla, 2026-10-21):** apps isi monorepo se package lete hain (npm workspaces), live deploy pe bhi. Publish sirf zaroorat pe; packages public hi rahenge. `packages/` ke saare npm packages ka kaam, aur naye frontend apps aur backend apps banana, is repo ke apne CLI (`scripts/packages/`) se hota hai. Ye guide batati hai ki kaunsa command kab chalana hai aur andar kya hota hai.
+> **Status:** v1.14 (2026-11-12). **Abhi publish/republish nahi (owner ka faisla, 2026-10-21):** apps isi monorepo se package lete hain (npm workspaces), live deploy pe bhi. Publish sirf zaroorat pe; packages public hi rahenge. `packages/` ke saare npm packages ka kaam, aur naye frontend apps aur backend apps banana, is repo ke apne CLI (`scripts/packages/`) se hota hai. Ye guide batati hai ki kaunsa command kab chalana hai aur andar kya hota hai.
 
 ## 1. Packages kahan aur kis naam se
 
@@ -47,6 +47,7 @@ Sawal: category → kind (TypeScript library / React library / CSS package; Reac
 - Teen tarah (ARCHITECTURE §9.1): customer = React Router framework mode (SSR), delivery = PWA, baaki = Vite + React SPA (Vite ke react-ts jaisa layout: `tsconfig.app.json` + `tsconfig.node.json`).
 - Har app phone pe install hota hai (owner, 2026-11-09): `public/manifest.webmanifest`, head me manifest + `apple-touch-icon`, aur app ke parivaar ke icons icons package ke `brand/install/<family>/` se copy (`--skip-install` me bhi). Logo badle to `npm run icons:install` (DESIGN §11).
 - Naye app ka home "Coming soon" + app ka naam + ek line (`APP_TAGLINES`, Q-014): pehla asli page aate hi use badlo.
+- Vercel pe pehle din se (QA Q-015): `vercel.json` (`/api` route + `x-origin-secret` env se, security headers, SSR ke siva `noindex` aur SPA fallback) aur `test/vercel-config.test.ts`, saare 11 apps jaise hubahu (`scripts/packages/test/app-templates.test.ts` milaata hai). Vercel project aur env (`BQ_GATEWAY_URL`, `ORIGIN_SECRET`) insaan banata hai.
 - Dev ports 3001 (customer) se 3011 (creator), `APPS` ke order me. `/api` local gateway (8080) pe jata hai, jaise Vercel rewrite.
 - **Wake-up shuru se (owner, 2026-11-07; ARCHITECTURE §11.1, QA-FE-009):** naya app api-client (`waitForServer: true`, `providers.tsx`) aur app-shell `ServerWake` (`onReady` → `serverReady()`) ke saath banta hai; customer kind me `<head>` me `WakeScript` bhi. vite config `BQ_GATEWAY_URL` browser ko deta hai (wake-up ki seedhi call; laptop pe khaali theek). App ke unit tests root route ko `Providers > Frame` se chalate hain, bina wake ke. Pehle bane 9 shell apps me ye nahi: jab unka kaam shuru ho, tab jodna.
 - Bina sawal: `npm run create -- --yes --type app --app seller`.
@@ -145,3 +146,4 @@ npm run update-deps -- --dry-run     # sirf plan, kuch nahi badalta
 | v1.11   | 2026-11-07 | §3.1: naya frontend app wake-up (api-client `waitForServer` + `ServerWake`) ke saath banta hai (owner, QA-FE-009). |
 | v1.12   | 2026-11-09 | §3.1: naya frontend app manifest aur parivaar ke install icons ke saath banta hai (owner). |
 | v1.13 | 2026-11-10 | §3.1: naya app "Coming soon" home ke saath banta hai (Q-014). |
+| v1.14 | 2026-11-12 | §3.1: naya app `vercel.json` aur uske test ke saath banta hai (Q-015). |

@@ -2,7 +2,7 @@
 
 > **Temp file, sirf owner ki tracking ke liye.** Owner ke kehne pe (2026-11-09) abhi git me rehti hai; status update har item ke commit me. Kisi aur doc, file ya memory me iska zikr nahi. Saare items **Done** hote hi ye file repo se delete.
 >
-> **Last update:** 2026-11-12 (hissa 0–3 poore; Done: 1–17 (hissa 4 poora); naya batch chal raha (owner: jitne ek saath ho sakein), checks batch ke aakhir me; agla 18 Q-015). **Faisla:** owner ne neeche ki har salah maan li (2026-11-09). Asli docs (report §9 "Owner ka jawab", ARCHITECTURE/RULES/README, MEMORY decision, HANDOFF, TASKS, change logs) har item ke commit me update honge, is file ka naam liye bina.
+> **Last update:** 2026-11-12 (hissa 0–3 poore; Done: 1–18 (hissa 0–5 poore); batch (DR-011, Q-010, Q-008, Q-015) ke checks chal rahe; phir 19 PR, owner ke kehne pe). **Faisla:** owner ne neeche ki har salah maan li (2026-11-09). Asli docs (report §9 "Owner ka jawab", ARCHITECTURE/RULES/README, MEMORY decision, HANDOFF, TASKS, change logs) har item ke commit me update honge, is file ka naam liye bina.
 
 ## Kitna bacha
 
@@ -13,9 +13,9 @@
 | 2. Permissions, step-up   | 5      | 5      | 0     | Ho gaya                              |
 | 3. Chhote backend         | 2      | 2      | 0     | Ho gaya                              |
 | 4. Apps                   | 7      | 7      | 0     | Ho gaya                              |
-| 5. CI                     | 1      | 0      | 1     | ~0.4 din                             |
+| 5. CI                     | 1      | 1      | 0     | Ho gaya                              |
 | 6. Aakhri kadam           | 4      | 0      | 4     | ~1.5 ghante                          |
-| **Kul (Claude)**          | **27** | **22** | **5** | **~0.6 din**                         |
+| **Kul (Claude)**          | **27** | **23** | **4** | **~1.5 ghante**                      |
 | Owner ke haath ke (O1–O4) | 4      | 0      | 4     | owner ka time                        |
 
 **Status:** `Pending` (shuru nahi), `Chal raha`, `Done`, `Ruka` (kisi ka intezaar). Har item Done hone pe upar ki table bhi.
@@ -78,9 +78,9 @@
 
 ### 5. CI
 
-| #   | ID    | Kya karna                                                                                                                                                    | Mehnat   | Status  | Commit |
-| --- | ----- | ------------------------------------------------------------------------------------------------------------------------------------------------------------ | -------- | ------- | ------ |
-| 18  | Q-015 | `release.yml` aur `ci.yml` ke GitHub actions SHA pe + Dependabot (`github-actions`); `npm run create:app` naye app ka `vercel.json` aur uska test bhi banaye | 3 ghante | Pending |        |
+| #   | ID    | Kya karna                                                                                                                                                    | Mehnat   | Status | Commit                    |
+| --- | ----- | ------------------------------------------------------------------------------------------------------------------------------------------------------------ | -------- | ------ | ------------------------- |
+| 18  | Q-015 | `release.yml` aur `ci.yml` ke GitHub actions SHA pe + Dependabot (`github-actions`); `npm run create:app` naye app ka `vercel.json` aur uska test bhi banaye | 3 ghante | Done   | Q-015 commit (2026-11-12) |     |
 
 ### 6. Aakhri kadam
 

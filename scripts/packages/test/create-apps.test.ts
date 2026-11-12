@@ -160,6 +160,13 @@ describe('frontend apps pass every check', () => {
         expect(copied.equals(readFileSync(join(family, icon.file))), icon.file).toBe(true);
       }
 
+      // on Vercel from the start, as the 11 apps are (Q-015); its own test runs in `test` below
+      for (const file of ['vercel.json', 'test/vercel-config.test.ts']) {
+        expect(readFileSync(join(appDir, file), 'utf8'), file).toBe(
+          readFileSync(join(REPO_ROOT, 'frontend', app, file), 'utf8'),
+        );
+      }
+
       const prettier = await run(
         join(REPO_ROOT, 'node_modules', 'prettier', 'bin', 'prettier.cjs'),
         ['--check', `frontend/${app}`],
