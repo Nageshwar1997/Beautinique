@@ -518,6 +518,25 @@ const mutations: Mutation[] = [
     change: [['for more than ${String(waitMs)} ms.', 'for too long.']],
     tests: 'gives up',
   },
+  // a database from before ObjectIds goes whole (owner, 2026-11-12)
+  {
+    file: 'before-objectids',
+    name: 'one from before is never noticed',
+    change: [['    if (found) {', '    if (false) {']],
+    tests: 'before ObjectIds',
+  },
+  {
+    file: 'before-objectids',
+    name: 'a running release of before is not noticed by its task runs',
+    change: [["  'platform_task_runs',\n", '']],
+    tests: 'before ObjectIds',
+  },
+  {
+    file: 'release',
+    name: 'the release never looks for one',
+    change: [['  await dropIfBeforeObjectIds(mongo, logger);\n', '']],
+    tests: 'before ObjectIds',
+  },
 ];
 
 export default mutations;

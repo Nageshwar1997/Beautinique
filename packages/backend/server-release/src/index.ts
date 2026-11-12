@@ -1,3 +1,4 @@
+export { BEFORE_OBJECTIDS, dropIfBeforeObjectIds } from './before-objectids';
 export { MigrationFailedError, ReleaseLeaseLostError, ReleaseLockTimeoutError } from './errors';
 export {
   defineMigrations,
