@@ -427,6 +427,27 @@ export const STEP_UP_SECONDS = 300;
  * when, `su`). Counts toward the account's lock like a sign-in. An account without an
  * authenticator answers AUTHENTICATOR_REQUIRED.
  */
+/**
+ * Changes that ask a step-up of their own (owner, 2026-11-12, QA DR-010): a code given for one of
+ * them counts once, for it alone, and a step-up for anything else never does. Their
+ * STEP_UP_REQUIRED says which (`details: [{ path: ['for'], message: action }]`), and the app sends
+ * that action with the code.
+ */
+export const STEP_UP_ACTIONS = ['authenticator.disable', 'authenticator.replace'] as const;
+export type StepUpAction = (typeof STEP_UP_ACTIONS)[number];
+
+/** The action a STEP_UP_REQUIRED asks a step-up of its own for, from its details; null for none. */
+export function stepUpActionOf(
+  details: readonly { path: readonly (string | number)[]; message: string }[] | undefined,
+): StepUpAction | null {
+  const asked = details?.find((detail) => detail.path.length === 1 && detail.path[0] === 'for');
+  return (STEP_UP_ACTIONS as readonly string[]).includes(asked?.message ?? '')
+    ? (asked?.message as StepUpAction)
+    : null;
+}
+
+const stepUpForZod = zodEnum(STEP_UP_ACTIONS).optional();
+
 export const stepUp = defineRoute({
   id: 'auth.stepUp.verify',
   method: 'POST',
@@ -439,7 +460,11 @@ export const stepUp = defineRoute({
   stepUp: false,
   owner: 'identity',
   input: {
-    body: xor([object({ code: otpZod }), object({ recoveryCode: recoveryCodeZod })]),
+    // `for`: one of STEP_UP_ACTIONS, when the step-up is for that change alone
+    body: xor([
+      object({ code: otpZod, for: stepUpForZod }),
+      object({ recoveryCode: recoveryCodeZod, for: stepUpForZod }),
+    ]),
   },
   output: object({
     stepUpUntil: isoDateTimeZod,

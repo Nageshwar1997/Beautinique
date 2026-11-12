@@ -256,11 +256,11 @@ describe('step-up', () => {
     });
     expect(errorOf(right)).toEqual([400, 'TOTP_INVALID']);
     expect(right.body.error?.message).toContain('Too many');
-    // the same lock as a sign-in
+    // the same lock as a sign-in, from the same IP (the lock is per IP, QA DR-003)
     const login = await post(
       '/auth/login',
       { email: address, password: PASSWORD },
-      { app: 'admin' },
+      { app: 'admin', ip: '203.0.113.9' },
     );
     expect(login.body.error?.code).toBe('INVALID_CREDENTIALS');
   });
@@ -308,6 +308,31 @@ describe('a Security Officer', () => {
       passport: so,
     });
     expect(twice.body.data).toEqual({ reset: false, sessionsEnded: 0 });
+  });
+
+  it('never resets a Master’s authenticator: only the other Master may (DR-007)', async () => {
+    const so = await officer('officer-for-master');
+    const { userId: master } = await adminWithAuthenticator('master-one');
+    expect(await giveRole(master, 'master.master')).toBe(true);
+    const other = await makeAccount(email('master-two'), PASSWORD, { everyApp: false });
+    expect(await giveRole(other, 'master.master')).toBe(true);
+
+    const refused = await call(`/iam/users/${master}/authenticator/reset`, {
+      app: 'master',
+      passport: so,
+    });
+    expect(errorOf(refused)).toEqual([403, 'FORBIDDEN']);
+    expect(refused.body.error?.message).toBe(
+      "Only another Master can reset a Master's authenticator.",
+    );
+    expect((await credentials().findOne({ _id: master }))?.totp).toBeDefined();
+
+    const byMaster = await call(`/iam/users/${master}/authenticator/reset`, {
+      app: 'master',
+      passport: { userId: other, sessionId: uuidv7() },
+    });
+    expect(byMaster.status, JSON.stringify(byMaster.body)).toBe(200);
+    expect(byMaster.body.data).toMatchObject({ reset: true });
   });
 
   it('ends every session of someone', async () => {

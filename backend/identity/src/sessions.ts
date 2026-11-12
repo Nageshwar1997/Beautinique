@@ -10,11 +10,14 @@ import {
   type AppPermissions,
   appPermissionsKey,
   IDENTITY_ERROR_CODES,
+  refreshTokenParts,
   REVOCATIONS_READY_KEY,
   revokedSessionKey,
   revokedUserKey,
   SESSION_POLICIES,
   sessionReuseDetected,
+  STEP_UP_SECONDS,
+  type StepUpAction,
   TOKEN_ISSUER,
   tokenAudience,
 } from '@beautinique/shared-contracts';
@@ -109,6 +112,11 @@ export interface Session {
    * /auth/step-up); access tokens carry it as `su`. Missing = never (sessions from before T3.3).
    */
   stepUpAt?: Date | null;
+  /**
+   * A step-up for one change alone (STEP_UP_ACTIONS, QA DR-010): which, and when. It counts once,
+   * within STEP_UP_SECONDS, and never as `stepUpAt`.
+   */
+  stepUpFor?: { action: StepUpAction; at: Date } | null;
 }
 
 export const indexes: readonly IndexSpec[] = [
@@ -166,20 +174,12 @@ export interface SessionDeps {
 /**
  * `<sessionId>.<family>.<secret>`: the session is found by its id; the family (16 random bytes) is
  * the same in every token of the session, so any older token of it is known for what it is; the
- * secret (32 random bytes) is new at each refresh.
+ * secret (32 random bytes) is new at each refresh. contracts `refreshTokenParts` reads the first two
+ * back, here and in the gateway (its `session` rate limit).
  */
 const newRefreshToken = (sessionId: string, family: string): string =>
   `${sessionId}.${family}.${randomBytes(32).toString('base64url')}`;
 const newFamily = (): string => randomBytes(16).toString('base64url');
-const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-7[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/;
-
-/** A refresh token's session id and family; a token from before families (`<id>.<secret>`) has none. */
-function partsOf(token: string | undefined): { sessionId: string; family: string | null } | null {
-  const parts = token?.split('.') ?? [];
-  const sessionId = parts[0] ?? '';
-  if (!UUID.test(sessionId)) return null;
-  return { sessionId, family: parts.length === 3 ? (parts[1] ?? null) : null };
-}
 
 /** Keyed hash of a refresh token: a database copy alone cannot refresh anything. */
 const refreshHashOf = (keys: CryptoKeys, token: string): string =>
@@ -251,11 +251,16 @@ export interface Sessions extends SessionPort {
    * Step-up (ARCHITECTURE §7.1): the session confirmed with the authenticator now; a new access
    * token carries it. SESSION_EXPIRED when the session ended or its app has no grant left.
    */
-  stepUp(input: { userId: string; sessionId: string }): Promise<{
+  stepUp(input: { userId: string; sessionId: string; for?: StepUpAction }): Promise<{
     app: AppId;
     accessToken: string;
     stepUpAt: Date;
   }>;
+  /**
+   * Takes the session's step-up for this change, if it has one from the last STEP_UP_SECONDS:
+   * true once, then it is gone (QA DR-010).
+   */
+  useStepUp(sessionId: string, action: StepUpAction): Promise<boolean>;
   /** My Devices: the account's sessions that have not ended, in every app, the newest first. */
   list(userId: string): Promise<Session[]>;
   /** Ends one session of the account; false when it is not the account's or ended already. */
@@ -379,7 +384,7 @@ export function sessions(deps: SessionDeps): Sessions {
     },
 
     async refresh({ app, refreshToken, client }) {
-      const parts = partsOf(refreshToken);
+      const parts = refreshTokenParts(refreshToken);
       if (!refreshToken || !parts) throw sessionExpired();
       const { sessionId } = parts;
       const at = now();
@@ -506,7 +511,7 @@ export function sessions(deps: SessionDeps): Sessions {
     },
 
     async logout({ app, refreshToken }) {
-      const sessionId = partsOf(refreshToken)?.sessionId;
+      const sessionId = refreshTokenParts(refreshToken)?.sessionId;
       if (!refreshToken || !sessionId) return;
       const at = now();
       const ended = await collection.updateOne(
@@ -546,23 +551,42 @@ export function sessions(deps: SessionDeps): Sessions {
       return ended.modifiedCount;
     },
 
-    async stepUp({ userId, sessionId }) {
+    async stepUp({ userId, sessionId, for: action }) {
       const at = now();
+      // one change's own step-up leaves `stepUpAt` (and the token's `su`) as they were
+      const stepped =
+        action === undefined
+          ? { stepUpAt: new Date(at) }
+          : { stepUpFor: { action, at: new Date(at) } };
       const session = await collection.findOneAndUpdate(
         { _id: sessionId, userId, revokedAt: null, expiresAt: { $gt: new Date(at) } },
-        { $set: { stepUpAt: new Date(at), lastSeenAt: new Date(at) } },
+        { $set: { ...stepped, lastSeenAt: new Date(at) } },
         { returnDocument: 'after' },
       );
       if (!session) throw sessionExpired();
       const access = await signInAccess(mongo, { userId, app: session.app, now: new Date(at) });
       if (!access.allowed) throw sessionExpired();
       await listPermissions(userId, session.app, access);
-      logger.info({ userId, app: session.app, sessionId }, 'stepped up');
+      logger.info({ userId, app: session.app, sessionId, for: action }, 'stepped up');
       return {
         app: session.app,
         accessToken: await accessToken(session, at, access.authzVersion),
         stepUpAt: new Date(at),
       };
+    },
+
+    async useStepUp(sessionId, action) {
+      const at = now();
+      const used = await collection.updateOne(
+        {
+          _id: sessionId,
+          revokedAt: null,
+          'stepUpFor.action': action,
+          'stepUpFor.at': { $gt: new Date(at - STEP_UP_SECONDS * 1000) },
+        },
+        { $set: { stepUpFor: null } },
+      );
+      return used.modifiedCount === 1;
     },
 
     list(userId) {

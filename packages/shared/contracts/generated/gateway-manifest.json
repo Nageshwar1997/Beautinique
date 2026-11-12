@@ -331,7 +331,7 @@
       "access": {
         "type": "public"
       },
-      "rateLimit": "auth",
+      "rateLimit": "session",
       "idempotency": false,
       "stepUp": false,
       "cache": null,
@@ -358,7 +358,7 @@
       "access": {
         "type": "public"
       },
-      "rateLimit": "auth",
+      "rateLimit": "session",
       "idempotency": false,
       "stepUp": false,
       "cache": null,
@@ -576,7 +576,7 @@
       },
       "rateLimit": "auth",
       "idempotency": false,
-      "stepUp": true,
+      "stepUp": false,
       "cache": null,
       "navigation": false
     },

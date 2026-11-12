@@ -3,7 +3,7 @@ import { withTransaction } from '@beautinique/backend-server-mongo';
 import type { AppId, OTP_OUTCOMES } from '@beautinique/shared-contracts';
 import { uuidv7 } from '@beautinique/shared-utils';
 
-import { hasPassword, storePassword } from './credentials.ts';
+import { hasPassword, type NewPassword, storePassword } from './credentials.ts';
 import { giveSignUpGrant } from './rbac/grants.ts';
 
 export const USERS = 'identity_users';
@@ -59,8 +59,8 @@ export interface SignUpWithCode {
   consent: { terms: boolean; adult: boolean };
   legalVersion: string;
   ip: string;
-  /** The new password's hash (argon2id), made before the code was used up */
-  passwordHash: string;
+  /** The new password, hashed before the code was used up */
+  newPassword: NewPassword;
 }
 
 /**
@@ -84,7 +84,7 @@ export async function signUpWithCode(
     const password = await passwordWithCode(mongo, session, {
       user,
       isNewUser,
-      passwordHash: input.passwordHash,
+      newPassword: input.newPassword,
       now,
     });
     return { user, outcome: password };
@@ -102,12 +102,12 @@ export async function passwordWithCode(
   {
     user,
     isNewUser,
-    passwordHash,
+    newPassword,
     now,
-  }: { user: User; isNewUser: boolean; passwordHash: string; now: Date },
+  }: { user: User; isNewUser: boolean; newPassword: NewPassword; now: Date },
 ): Promise<'account-made' | 'password-set' | 'password-kept'> {
   if (!isNewUser && (await hasPassword(mongo, user._id, session))) return 'password-kept';
-  await storePassword(mongo, session, { userId: user._id, hash: passwordHash, now });
+  await storePassword(mongo, session, { userId: user._id, password: newPassword, now });
   return isNewUser ? 'account-made' : 'password-set';
 }
 
@@ -126,7 +126,7 @@ export async function accountWithCode(
     legalVersion,
     ip,
     now,
-  }: Omit<SignUpWithCode, 'passwordHash'> & { now: Date },
+  }: Omit<SignUpWithCode, 'newPassword'> & { now: Date },
 ): Promise<{ user: User; isNewUser: boolean }> {
   const users = mongo.db.collection<User>(USERS);
   const acceptances = mongo.db.collection<LegalAcceptance>(LEGAL_ACCEPTANCES);
@@ -190,12 +190,16 @@ export async function accountWithCode(
  */
 export async function setPasswordWithCode(
   mongo: Mongo,
-  { email, passwordHash }: { email: string; passwordHash: string },
+  { email, newPassword }: { email: string; newPassword: NewPassword },
 ): Promise<User | null> {
   return withTransaction(mongo, async (session) => {
     const user = await mongo.db.collection<User>(USERS).findOne({ email }, { session });
     if (!user) return null;
-    await storePassword(mongo, session, { userId: user._id, hash: passwordHash, now: new Date() });
+    await storePassword(mongo, session, {
+      userId: user._id,
+      password: newPassword,
+      now: new Date(),
+    });
     return user;
   });
 }

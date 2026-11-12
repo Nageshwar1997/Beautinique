@@ -35,6 +35,18 @@ export const otpEmailLimit = (): AppError =>
     'Too many codes were asked for this email. Please try again in an hour.',
     { status: IDENTITY_ERROR_CODES.OTP_EMAIL_LIMIT },
   );
+export const otpSignUpLimit = (): AppError =>
+  new AppError(
+    'OTP_SIGN_UP_LIMIT',
+    "We can't send more sign-up codes today. Please try again tomorrow.",
+    { status: IDENTITY_ERROR_CODES.OTP_SIGN_UP_LIMIT },
+  );
+export const otpBusy = (): AppError =>
+  new AppError(
+    'OTP_BUSY',
+    "We're sending a lot of codes right now. Please try again in a few minutes.",
+    { status: IDENTITY_ERROR_CODES.OTP_BUSY },
+  );
 
 /** Redis is away: no code can be kept, so none is sent (ARCHITECTURE §6.6). */
 export const otpUnavailable = (cause: unknown): AppError =>
@@ -61,6 +73,17 @@ export const passwordBreached = (): AppError =>
       status: IDENTITY_ERROR_CODES.PASSWORD_BREACHED,
       details: [{ path: ['password'], message: 'Choose a password that has not been leaked' }],
     },
+  );
+
+/**
+ * The right password, but a breach check from after it was set found it leaked (QA DR-002): no
+ * sign-in with it until a new one is set with an email code.
+ */
+export const passwordResetRequired = (): AppError =>
+  new AppError(
+    'PASSWORD_RESET_REQUIRED',
+    'This password appeared in a data breach. Please set a new one with an email code.',
+    { status: IDENTITY_ERROR_CODES.PASSWORD_RESET_REQUIRED },
   );
 
 /** The sign-in step is gone: expired, finished, or out of tries. */
@@ -182,4 +205,12 @@ export const lastSignInMethod = (): AppError =>
     'LAST_SIGN_IN_METHOD',
     'This is the only way you sign in. Set a password first, then you can remove it.',
     { status: IDENTITY_ERROR_CODES.LAST_SIGN_IN_METHOD },
+  );
+
+/** A sign-in method comes off only after a recent sign-in with the password or an email code. */
+export const recentSignInRequired = (): AppError =>
+  new AppError(
+    'RECENT_SIGN_IN_REQUIRED',
+    'For your security, please sign in again with your password, then remove it.',
+    { status: IDENTITY_ERROR_CODES.RECENT_SIGN_IN_REQUIRED },
   );

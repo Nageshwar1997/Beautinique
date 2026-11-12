@@ -1,5 +1,6 @@
 import type { Passport } from '@beautinique/backend-server-kit';
 
+import { rolesNeedingAuthenticator } from './authenticator.ts';
 import { AUTH_PROVIDERS, type AuthProvider, CREDENTIALS, type Credentials } from './credentials.ts';
 import { recoveryCodesLeft } from './login.ts';
 import type { OtpDeps } from './otp.ts';
@@ -8,7 +9,7 @@ import { type User, USERS } from './users.ts';
 
 /**
  * GET /iam/me: who signed in (ARCHITECTURE §7.2), how the account signs in (with the recovery
- * codes left, ARCHITECTURE §9.2), and this session. A
+ * codes left and the roles that keep the authenticator on, ARCHITECTURE §9.2), and this session. A
  * session the gateway let through but that ended a moment ago (or an account that went away)
  * answers like an ended session.
  */
@@ -26,6 +27,8 @@ export async function me(deps: OtpDeps, passport: Passport) {
   const credentials = await db
     .collection<Credentials>(CREDENTIALS)
     .findOne({ _id: user._id }, { projection: { totp: 1, recoveryCodes: 1 } });
+  // only an authenticator that is on can be kept on: no queries for the rest (QA DR-011)
+  const requiredBy = credentials?.totp ? await rolesNeedingAuthenticator(deps, user._id) : [];
   return {
     user: {
       userId: user._id,
@@ -37,6 +40,7 @@ export async function me(deps: OtpDeps, passport: Passport) {
       recoveryCodesLeft: credentials?.totp
         ? (recoveryCodesLeft(credentials.recoveryCodes) ?? 0)
         : null,
+      authenticatorRequiredBy: requiredBy,
     },
     session: {
       sessionId: session._id,

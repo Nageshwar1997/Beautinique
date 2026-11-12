@@ -9,9 +9,11 @@ import { AppError, type Passport } from '@beautinique/backend-server-kit';
 import { type ClientSession, withTransaction } from '@beautinique/backend-server-mongo';
 import { writeEvent } from '@beautinique/backend-server-queue';
 import {
+  type AppId,
   type AUTHENTICATOR_CHANGES,
   authenticatorChanged,
   STEP_UP_SECONDS,
+  type StepUpAction,
   TOTP_REQUIRED_APPS,
 } from '@beautinique/shared-contracts';
 
@@ -80,8 +82,11 @@ async function signedInAs(deps: LoginDeps, passport: Passport) {
 const steppedUp = (session: Session, now: number): boolean =>
   session.stepUpAt instanceof Date && now - session.stepUpAt.getTime() <= STEP_UP_SECONDS * 1000;
 
-const stepUpRequired = (): AppError =>
-  new AppError('STEP_UP_REQUIRED', 'Please confirm with your authenticator code to continue.');
+/** STEP_UP_REQUIRED; for one change alone (`action`), the app asks the code for it (QA DR-010). */
+const stepUpRequired = (action?: StepUpAction): AppError =>
+  new AppError('STEP_UP_REQUIRED', 'Please confirm with your authenticator code to continue.', {
+    ...(action === undefined ? {} : { details: [{ path: ['for'], message: action }] }),
+  });
 
 /** The change, for notify to email (in the transaction that made it). */
 function changed(
@@ -134,7 +139,10 @@ export async function enrollAuthenticator(
   );
   if (!credentials?.password) throw passwordRequired();
   const replace = credentials.totp !== undefined;
-  if (replace && !steppedUp(session, Date.now())) throw stepUpRequired();
+  // a new phone needs a code given for it alone, used once (owner, 2026-11-12, QA DR-010)
+  if (replace && !(await deps.sessions.useStepUp(session._id, 'authenticator.replace'))) {
+    throw stepUpRequired('authenticator.replace');
+  }
   const secret = newTotpSecret();
   const key = setupKey(session._id);
   await inRedis(() =>
@@ -155,9 +163,15 @@ export async function enrollAuthenticator(
 /** A wrong password or code at the confirm: counts toward the lock; the last try ends the set-up. */
 async function wrongTry(
   deps: LoginDeps,
-  { key, email, tries, error }: { key: string; email: string; tries: number; error: AppError },
+  {
+    key,
+    email,
+    tries,
+    error,
+    ip,
+  }: { key: string; email: string; tries: number; error: AppError; ip: string },
 ): Promise<never> {
-  await recordFailure(deps.redis, deps.keys, email);
+  await recordFailure(deps.redis, deps.keys, email, ip);
   if (tries >= LOGIN_MAX_TRIES) {
     await inRedis(() => deps.redis.del(key));
     throw authenticatorSetupExpired();
@@ -173,7 +187,12 @@ async function wrongTry(
 export async function confirmAuthenticator(
   deps: LoginDeps,
   passport: Passport,
-  { code, password, requestId }: { code: string; password: string; requestId: string },
+  {
+    code,
+    password,
+    requestId,
+    ip,
+  }: { code: string; password: string; requestId: string; ip: string },
 ): Promise<{ recoveryCodes: string[] }> {
   const { session, email } = await signedInAs(deps, passport);
   const key = setupKey(session._id);
@@ -181,7 +200,7 @@ export async function confirmAuthenticator(
   if (setup.secret === undefined) throw authenticatorSetupExpired();
   const tries = await oneMoreTry(deps, key);
   if (tries === -1) throw authenticatorSetupExpired();
-  if (tries > LOGIN_MAX_TRIES || (await isLocked(deps.redis, deps.keys, email))) {
+  if (tries > LOGIN_MAX_TRIES || (await isLocked(deps.redis, deps.keys, email, ip))) {
     await inRedis(() => deps.redis.del(key));
     throw tries > LOGIN_MAX_TRIES ? authenticatorSetupExpired() : stepUpLocked();
   }
@@ -191,12 +210,12 @@ export async function confirmAuthenticator(
   );
   if (!credentials?.password) throw passwordRequired();
   if (!(await verifyPassword(credentials.password.hash, password))) {
-    return wrongTry(deps, { key, email, tries, error: passwordInvalid() });
+    return wrongTry(deps, { key, email, tries, ip, error: passwordInvalid() });
   }
   const secret = decryptField(deps.keys, setup.secret, setupContext(session._id));
   const step = verifyTotp(secret, code);
   if (step === null) {
-    return wrongTry(deps, { key, email, tries, error: totpInvalid(LOGIN_MAX_TRIES - tries) });
+    return wrongTry(deps, { key, email, tries, ip, error: totpInvalid(LOGIN_MAX_TRIES - tries) });
   }
   // only the request that deletes the set-up goes on (a code works once)
   if ((await inRedis(() => deps.redis.del(key))) === 0) throw authenticatorSetupExpired();
@@ -233,7 +252,7 @@ export async function confirmAuthenticator(
       at,
     });
   });
-  await clearFailures(deps.redis, deps.keys, email);
+  await clearFailures(deps.redis, deps.keys, email, { ip });
   deps.logger.info(
     { userId: passport.userId, app: passport.app, replace },
     replace ? 'authenticator replaced' : 'authenticator set up',
@@ -274,13 +293,13 @@ export async function renewRecoveryCodes(
 /**
  * The roles of the account's active grants that need an authenticator: every role of the 7
  * internal apps (TOTP_REQUIRED_APPS), and roles that ask one themselves (Seller Account Owner,
- * Seller Finance ...). A retired role no longer counts, as at sign-in.
+ * Seller Finance ...). A retired role no longer counts, as at sign-in. /iam/me shows them too.
  */
 export async function rolesNeedingAuthenticator(
-  deps: LoginDeps,
+  deps: Pick<LoginDeps, 'mongo'>,
   userId: string,
   now = new Date(),
-): Promise<{ name: string; app: string }[]> {
+): Promise<{ name: string; app: AppId }[]> {
   const grants = await deps.mongo.db
     .collection<GrantRecord>(GRANTS)
     .find({ userId, ...activeAt(now) }, { projection: { role: 1 } })
@@ -312,9 +331,18 @@ export async function disableAuthenticator(
   requestId: string,
 ): Promise<{ disabled: boolean }> {
   const { session, email } = await signedInAs(deps, passport);
-  if (!steppedUp(session, Date.now())) throw stepUpRequired();
+  // none to turn off: nothing to confirm either (there is no code to give)
+  const on = await credentialsOf(deps).findOne(
+    { _id: passport.userId, totp: { $exists: true } },
+    { projection: { _id: 1 } },
+  );
+  if (!on) return { disabled: false };
   const roles = await rolesNeedingAuthenticator(deps, passport.userId);
   if (roles.length > 0) throw authenticatorRequiredByRole(roles);
+  // turning it off needs a code given for it alone, used once (owner, 2026-11-12, QA DR-010)
+  if (!(await deps.sessions.useStepUp(session._id, 'authenticator.disable'))) {
+    throw stepUpRequired('authenticator.disable');
+  }
   const at = new Date();
   const disabled = await withTransaction(deps.mongo, async (tx) => {
     const removed = await credentialsOf(deps).updateOne(

@@ -43,6 +43,10 @@ const env: Record<string, string> = {
   IDENTITY__HIBP_URL: 'http://127.0.0.1:9',
   // every test asks codes from one IP, and some for one email more than once
   IDENTITY__OTP_EMAIL_LIMIT_PER_HOUR: '100',
+  // every project and worker signs in: far more than a live minute's 30 hashes (QA DR-004)
+  IDENTITY__LOGIN_HASHES_PER_MINUTE: '1000',
+  IDENTITY__CODES_PER_HOUR: '1000',
+  IDENTITY__SIGN_UP_CODES_PER_DAY: '1000',
   NOTIFY__MONGO_URI: mongo,
   NOTIFY__MONGO_DB_NAME: `bq_e2e_${runId}_notify`,
   NOTIFY__REDIS_URL: redis,

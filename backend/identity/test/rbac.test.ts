@@ -223,7 +223,10 @@ describe('the shipped roles', () => {
     expect(
       problems({ permissions: ['iam.app.sign_in', 'iam.totp.reset'], scopeTypes: ['state'] }),
     ).toEqual(['admin.x: iam.totp.reset cannot be used in any of its scope types']);
-    expect(problems({ appointedBy: ['admin.x'] })).toEqual(['admin.x: admin.x cannot give roles']);
+    expect(problems({ appointedBy: ['admin.x'] })).toEqual([
+      'admin.x: a role cannot appoint itself',
+      'admin.x: admin.x cannot give roles',
+    ]);
     expect(problems({ appointedBy: ['admin.y'] })).toEqual(['admin.x: unknown appointer admin.y']);
     expect(problems({ signUp: true })).toEqual([
       'admin.x: a sign-up role is self-scoped and given by identity only',

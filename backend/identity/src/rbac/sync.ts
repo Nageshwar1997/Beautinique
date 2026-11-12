@@ -106,8 +106,8 @@ export interface RoleProblem {
 /**
  * What is wrong with one role, shipped or Master's: a key not under its app, no scope type, no
  * sign-in to its app, unknown keys or keys none of its scope types can use, appointers that are
- * not roles (in `byKey`) or cannot give roles, a sign-up role that is not self-scoped or that
- * someone could give.
+ * not roles (in `byKey`) or cannot give roles, a role among its own appointers, a sign-up role
+ * that is not self-scoped or that someone could give.
  */
 export function roleProblems(
   role: RoleShape,
@@ -136,6 +136,8 @@ export function roleProblems(
       add('permissions', `${key} cannot be used in any of its scope types`);
     }
   }
+  // its holders would give it on and on, past Master's control (QA Q-007, owner 2026-11-09)
+  if (role.appointedBy.includes(role.key)) add('appointedBy', 'a role cannot appoint itself');
   for (const appointer of role.appointedBy) {
     const by = byKey.get(appointer);
     if (!by) add('appointedBy', `unknown appointer ${appointer}`);

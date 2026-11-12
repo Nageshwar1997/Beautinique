@@ -17,6 +17,14 @@ import { join } from 'node:path';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 
 import { DEPLOYABLES } from '../../../packages/shared/contracts/src/platform.ts';
+import { APP_TAGLINES, APP_TITLES } from '../lib/create/app-templates.ts';
+import {
+  APP_FAMILY,
+  familyIconsDir,
+  INSTALL_HEAD_TAGS,
+  INSTALL_ICONS,
+  webManifest,
+} from '../lib/create/install.ts';
 import { makeRepo } from './helpers.ts';
 import { type FakeRegistry, startRegistry } from './registry-server.ts';
 
@@ -128,6 +136,37 @@ describe('frontend apps pass every check', () => {
       expect(frame).toContain('client.serverReady()');
       if (kind === 'ssr') expect(frame).toContain('<WakeScript />');
 
+      // a "Coming soon" home with what the app will be for, never a developer's note (Q-014)
+      const home = read(kind === 'ssr' ? 'routes/home.tsx' : 'pages/home.tsx');
+      expect(home).toContain('Coming soon');
+      expect(home).toContain(APP_TAGLINES[app]);
+      expect(home).not.toContain('routes.ts');
+
+      // installs on a phone as an app (owner, 2026-11-09): its manifest, the head tags and its
+      // family's icons, copied byte for byte
+      const appDir = join(repo.root, 'frontend', app);
+      const webmanifest = JSON.parse(
+        readFileSync(join(appDir, 'public', 'manifest.webmanifest'), 'utf8'),
+      ) as Record<string, unknown>;
+      expect(webmanifest).toEqual(webManifest(app, APP_TITLES[app]));
+      const head = readFileSync(
+        join(appDir, kind === 'ssr' ? 'app/root.tsx' : 'index.html'),
+        'utf8',
+      );
+      for (const tag of INSTALL_HEAD_TAGS) expect(head).toContain(tag);
+      const family = familyIconsDir(join(REPO_ROOT, 'packages/frontend/icons'), APP_FAMILY[app]);
+      for (const icon of INSTALL_ICONS) {
+        const copied = readFileSync(join(appDir, 'public', icon.file));
+        expect(copied.equals(readFileSync(join(family, icon.file))), icon.file).toBe(true);
+      }
+
+      // on Vercel from the start, as the 11 apps are (Q-015); its own test runs in `test` below
+      for (const file of ['vercel.json', 'test/vercel-config.test.ts']) {
+        expect(readFileSync(join(appDir, file), 'utf8'), file).toBe(
+          readFileSync(join(REPO_ROOT, 'frontend', app, file), 'utf8'),
+        );
+      }
+
       const prettier = await run(
         join(REPO_ROOT, 'node_modules', 'prettier', 'bin', 'prettier.cjs'),
         ['--check', `frontend/${app}`],
@@ -140,6 +179,13 @@ describe('frontend apps pass every check', () => {
         expect(result.code, `${app} ${step}:\n${result.out}`).toBe(0);
       }
       expect(existsSync(join(repo.root, 'frontend', app, built))).toBe(true);
+      if (kind === 'pwa') {
+        // the service worker answers page navigations with the app shell, but never /api (Q-013):
+        // those go to the server (a download, a sign-in redirect)
+        // (minified or not: `denylist:[/^\/api\//]` or `denylist: [/^\/api\//]`)
+        const sw = readFileSync(join(repo.root, 'frontend', app, built), 'utf8');
+        expect(sw).toMatch(/denylist:\s*\[\/\^\\\/api\\\/\/\]/);
+      }
       // the build output must not trip the repo's format check (CI runs it after npm run build)
       const after = await run(join(REPO_ROOT, 'node_modules', 'prettier', 'bin', 'prettier.cjs'), [
         '--check',

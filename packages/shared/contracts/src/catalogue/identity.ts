@@ -54,6 +54,10 @@ export const IDENTITY_ERROR_CODES = {
   OTP_RESEND_LIMIT: 429,
   /** Too many codes for this email in the last hour */
   OTP_EMAIL_LIMIT: 429,
+  /** Sign-up codes have used up their share of today's emails (QA DR-009) */
+  OTP_SIGN_UP_LIMIT: 429,
+  /** Every IP together asked for too many codes this hour (QA DR-009) */
+  OTP_BUSY: 429,
   /** Wrong email or password, or too many wrong tries: the same answer for all three */
   INVALID_CREDENTIALS: 401,
   /** The password is in a known data breach (Have I Been Pwned): choose another */
@@ -84,6 +88,10 @@ export const IDENTITY_ERROR_CODES = {
   OAUTH_SIGN_UP_EXPIRED: 400,
   /** The last way the account signs in cannot go: set a password or keep another one first */
   LAST_SIGN_IN_METHOD: 409,
+  /** A sign-in method comes off only after a sign-in with the password or an email code in the last 10 minutes (QA DR-006) */
+  RECENT_SIGN_IN_REQUIRED: 403,
+  /** The password turned out to be in a data breach after it was set (QA DR-002): set a new one with an email code */
+  PASSWORD_RESET_REQUIRED: 403,
 } as const satisfies Record<string, number>;
 
 /**
@@ -413,12 +421,32 @@ export const accessCookieName = (app: AppId): string => `__Host-bq_${app}_at`;
 export const refreshCookieName = (app: AppId): string => `__Secure-bq_${app}_rt`;
 export const REFRESH_COOKIE_PATH = '/api/v1/auth';
 
+const SESSION_ID = /^[0-9a-f]{8}-[0-9a-f]{4}-7[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/;
+// 16 random bytes in base64url
+const FAMILY = /^[A-Za-z0-9_-]{22}$/;
+
+/**
+ * The parts of identity's refresh token `<sessionId>.<family>.<secret>` that are not the secret: the
+ * session id (a UUIDv7) and the family (the same in every token of the session). A token from
+ * before families (`<sessionId>.<secret>`), or one whose family is not 16 bytes of base64url, has
+ * none. Identity finds the session with them; the gateway gives each family its own `session`
+ * budget. Anything else: null.
+ */
+export function refreshTokenParts(
+  token: string | undefined,
+): { sessionId: string; family: string | null } | null {
+  const parts = token?.split('.') ?? [];
+  const [sessionId = '', family = ''] = parts;
+  if (parts.length < 2 || parts.length > 3 || !SESSION_ID.test(sessionId)) return null;
+  return { sessionId, family: parts.length === 3 && FAMILY.test(family) ? family : null };
+}
+
 /**
  * A hint, not a credential (owner, 2026-11-02): `1` while the app may have a session, set and
  * cleared with the session cookies, as long as the refresh cookie lives. The page reads it (not
  * HttpOnly) and asks /iam/me only when it is there, so an anonymous visit costs no /iam/me and no
- * refresh (the `auth` rate limit is per IP, and many share one on mobile networks). No secret and
- * nothing of the person in it.
+ * refresh (the `session` rate limit has a budget per IP, and many share one on mobile networks).
+ * No secret and nothing of the person in it.
  */
 export const sessionHintCookieName = (app: AppId): string => `__Host-bq_${app}_hint`;
 
@@ -434,7 +462,7 @@ export const refreshSession = defineRoute({
   summary: 'Get a new access token with the refresh cookie',
   apps: APPS,
   access: { type: 'public' },
-  rateLimit: 'auth',
+  rateLimit: 'session',
   idempotency: false,
   stepUp: false,
   owner: 'identity',
@@ -450,7 +478,7 @@ export const logout = defineRoute({
   summary: 'Sign out of this app on this device',
   apps: APPS,
   access: { type: 'public' },
-  rateLimit: 'auth',
+  rateLimit: 'session',
   idempotency: false,
   stepUp: false,
   owner: 'identity',
@@ -526,6 +554,12 @@ export const getMe = defineRoute({
       authenticator: boolean(),
       /** Recovery codes not used yet; null without an authenticator */
       recoveryCodesLeft: number().int().min(0).nullable(),
+      /**
+       * The roles of active grants that keep the authenticator on (TOTP_REQUIRED_APPS, Seller
+       * Finance ...), so the app says so instead of a "Turn off" that fails (QA DR-011); empty
+       * without an authenticator
+       */
+      authenticatorRequiredBy: array(object({ name: string(), app: zodEnum(APPS) })),
     }),
     session: object({
       sessionId: uuidv7Zod,
@@ -662,7 +696,8 @@ export const newRecoveryCodes = defineRoute({
 /**
  * Turns the authenticator off, with its recovery codes. Never while a role the account holds needs
  * one (TOTP_REQUIRED_APPS, Seller Account Owner, Seller Finance ...): AUTHENTICATOR_REQUIRED_BY_ROLE
- * names them. The person is emailed; their sessions stay.
+ * names them. The person is emailed; their sessions stay. It asks a step-up of its own (identity
+ * checks it, not the gateway's 5 minutes; STEP_UP_ACTIONS, QA DR-010).
  */
 export const disableAuthenticator = defineRoute({
   id: 'auth.authenticator.disable',
@@ -673,7 +708,7 @@ export const disableAuthenticator = defineRoute({
   access: { type: 'signed-in' },
   rateLimit: 'auth',
   idempotency: false,
-  stepUp: true,
+  stepUp: false,
   owner: 'identity',
   input: {},
   output: object({ disabled: boolean() }),

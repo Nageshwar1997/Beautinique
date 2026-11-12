@@ -1631,7 +1631,7 @@
           "access": {
             "type": "public"
           },
-          "rateLimit": "auth",
+          "rateLimit": "session",
           "idempotency": false,
           "stepUp": false,
           "owner": "identity",
@@ -1721,7 +1721,7 @@
           "access": {
             "type": "public"
           },
-          "rateLimit": "auth",
+          "rateLimit": "session",
           "idempotency": false,
           "stepUp": false,
           "owner": "identity",
@@ -1838,6 +1838,38 @@
                                   "type": "null"
                                 }
                               ]
+                            },
+                            "authenticatorRequiredBy": {
+                              "type": "array",
+                              "items": {
+                                "type": "object",
+                                "properties": {
+                                  "name": {
+                                    "type": "string"
+                                  },
+                                  "app": {
+                                    "type": "string",
+                                    "enum": [
+                                      "customer",
+                                      "seller",
+                                      "admin",
+                                      "superadmin",
+                                      "master",
+                                      "support",
+                                      "finance",
+                                      "logistics",
+                                      "delivery",
+                                      "growth",
+                                      "creator"
+                                    ]
+                                  }
+                                },
+                                "required": [
+                                  "name",
+                                  "app"
+                                ],
+                                "additionalProperties": false
+                              }
                             }
                           },
                           "required": [
@@ -1847,7 +1879,8 @@
                             "signUpApp",
                             "providers",
                             "authenticator",
-                            "recoveryCodesLeft"
+                            "recoveryCodesLeft",
+                            "authenticatorRequiredBy"
                           ],
                           "additionalProperties": false
                         },
@@ -2694,7 +2727,7 @@
           },
           "rateLimit": "auth",
           "idempotency": false,
-          "stepUp": true,
+          "stepUp": false,
           "owner": "identity",
           "cache": null,
           "navigation": false
@@ -5398,6 +5431,13 @@
                       "code": {
                         "type": "string",
                         "pattern": "^\\d{6}$"
+                      },
+                      "for": {
+                        "type": "string",
+                        "enum": [
+                          "authenticator.disable",
+                          "authenticator.replace"
+                        ]
                       }
                     },
                     "required": [
@@ -5410,6 +5450,13 @@
                       "recoveryCode": {
                         "type": "string",
                         "pattern": "^[A-Z2-7]{5}-?[A-Z2-7]{5}$"
+                      },
+                      "for": {
+                        "type": "string",
+                        "enum": [
+                          "authenticator.disable",
+                          "authenticator.replace"
+                        ]
                       }
                     },
                     "required": [

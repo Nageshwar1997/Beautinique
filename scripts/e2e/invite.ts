@@ -40,7 +40,7 @@ try {
     consent: { terms: true, adult: true },
     legalVersion: 'dummy-1',
     ip: '127.0.0.1',
-    passwordHash: await hashPassword(randomUUID()),
+    newPassword: { hash: await hashPassword(randomUUID()), hibpPending: false },
   });
   await giveMasterGrant(mongo, { email: master });
   await createInvitation(

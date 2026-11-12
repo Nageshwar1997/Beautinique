@@ -162,6 +162,18 @@ describe('roles', () => {
     expect(await bad({ permissions: ['iam.totp.reset'], scopeTypes: ['state'] })).toEqual([
       ['permissions', 'iam.totp.reset cannot be used in any of its scope types'],
     ]);
+    // a role that gives itself would spread past Master: its holders make more holders (Q-007)
+    const spreader = await as(boss, 'master', 'POST', '/iam/roles', {
+      ...desk,
+      slug: 'spreader',
+      permissions: ['iam.grant.manage'],
+      appointedBy: ['admin.c_spreader'],
+    });
+    expect(spreader.status).toBe(400);
+    expect(spreader.body.error?.details).toContainEqual({
+      path: ['appointedBy'],
+      message: 'a role cannot appoint itself',
+    });
     // not Master: no
     const logistics = await account('lh-roles');
     await hold(logistics, 'logistics.logistics_head');
@@ -523,7 +535,7 @@ describe('who sees which grants', () => {
     const seen = await listed(owner, 'seller');
     expect(seen.items.map((g) => g.userId).sort()).toEqual([mine, mine]);
 
-    // a Security Officer reads every role, sign-up roles too
+    // a Security Officer reads every role of one person, sign-up roles too (by id or email)
     const officer = await account('officer');
     await hold(officer, 'master.security_officer');
     const all = await listed(officer, 'master', `?userId=${theirs}`);
@@ -531,6 +543,24 @@ describe('who sees which grants', () => {
       'customer.customer',
       'seller.catalog_manager',
     ]);
+    const byEmail = await listed(
+      officer,
+      'master',
+      `?email=${encodeURIComponent(email('theirs'))}`,
+    );
+    expect(byEmail.items.map((g) => g.role).sort()).toEqual([
+      'customer.customer',
+      'seller.catalog_manager',
+    ]);
+    // but a reviewer's list of everyone has no sign-up roles: no page of every customer's email
+    // (DR-008, data minimisation)
+    const auditor = await account('auditor');
+    await hold(auditor, 'master.internal_auditor');
+    for (const reviewer of [officer, auditor]) {
+      const everyone = await listed(reviewer, 'master', '?limit=100');
+      expect(everyone.items.some((g) => g.role === 'customer.customer')).toBe(false);
+      expect(everyone.items.some((g) => g.role === 'seller.catalog_manager')).toBe(true);
+    }
 
     // pages
     const first = await listed(owner, 'seller', '?limit=1');
