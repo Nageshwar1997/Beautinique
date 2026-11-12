@@ -12,6 +12,7 @@ import {
   type AUTHENTICATOR_CHANGES,
   authenticatorChanged,
   STEP_UP_SECONDS,
+  type StepUpAction,
   TOTP_REQUIRED_APPS,
 } from '@beautinique/shared-contracts';
 
@@ -80,8 +81,11 @@ async function signedInAs(deps: LoginDeps, passport: Passport) {
 const steppedUp = (session: Session, now: number): boolean =>
   session.stepUpAt instanceof Date && now - session.stepUpAt.getTime() <= STEP_UP_SECONDS * 1000;
 
-const stepUpRequired = (): AppError =>
-  new AppError('STEP_UP_REQUIRED', 'Please confirm with your authenticator code to continue.');
+/** STEP_UP_REQUIRED; for one change alone (`action`), the app asks the code for it (QA DR-010). */
+const stepUpRequired = (action?: StepUpAction): AppError =>
+  new AppError('STEP_UP_REQUIRED', 'Please confirm with your authenticator code to continue.', {
+    ...(action === undefined ? {} : { details: [{ path: ['for'], message: action }] }),
+  });
 
 /** The change, for notify to email (in the transaction that made it). */
 function changed(
@@ -134,7 +138,10 @@ export async function enrollAuthenticator(
   );
   if (!credentials?.password) throw passwordRequired();
   const replace = credentials.totp !== undefined;
-  if (replace && !steppedUp(session, Date.now())) throw stepUpRequired();
+  // a new phone needs a code given for it alone, used once (owner, 2026-11-12, QA DR-010)
+  if (replace && !(await deps.sessions.useStepUp(session._id, 'authenticator.replace'))) {
+    throw stepUpRequired('authenticator.replace');
+  }
   const secret = newTotpSecret();
   const key = setupKey(session._id);
   await inRedis(() =>
@@ -323,9 +330,18 @@ export async function disableAuthenticator(
   requestId: string,
 ): Promise<{ disabled: boolean }> {
   const { session, email } = await signedInAs(deps, passport);
-  if (!steppedUp(session, Date.now())) throw stepUpRequired();
+  // none to turn off: nothing to confirm either (there is no code to give)
+  const on = await credentialsOf(deps).findOne(
+    { _id: passport.userId, totp: { $exists: true } },
+    { projection: { _id: 1 } },
+  );
+  if (!on) return { disabled: false };
   const roles = await rolesNeedingAuthenticator(deps, passport.userId);
   if (roles.length > 0) throw authenticatorRequiredByRole(roles);
+  // turning it off needs a code given for it alone, used once (owner, 2026-11-12, QA DR-010)
+  if (!(await deps.sessions.useStepUp(session._id, 'authenticator.disable'))) {
+    throw stepUpRequired('authenticator.disable');
+  }
   const at = new Date();
   const disabled = await withTransaction(deps.mongo, async (tx) => {
     const removed = await credentialsOf(deps).updateOne(

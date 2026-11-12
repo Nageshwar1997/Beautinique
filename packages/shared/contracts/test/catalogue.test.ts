@@ -51,7 +51,9 @@ import {
   sessionReuseDetected,
   SIGN_UP_APPS,
   startTotpEnroll,
+  STEP_UP_ACTIONS,
   stepUp,
+  stepUpActionOf,
   TOKEN_ISSUER,
   tokenAudience,
   TOTP_REQUIRED_APPS,
@@ -383,7 +385,7 @@ describe('sessions', () => {
 describe('the signed-in authenticator (ARCHITECTURE §9.2)', () => {
   const all = [enrollAuthenticator, confirmAuthenticator, newRecoveryCodes, disableAuthenticator];
 
-  it('are signed-in identity routes in every app; new codes and turning off need a step-up', () => {
+  it('are signed-in identity routes in every app; new codes need a step-up, turning off and a new phone one of their own', () => {
     for (const route of all) {
       expect(route, route.id).toMatchObject({
         access: { type: 'signed-in' },
@@ -393,7 +395,25 @@ describe('the signed-in authenticator (ARCHITECTURE §9.2)', () => {
         apps: APPS,
       });
     }
-    expect(all.map((route) => route.stepUp)).toEqual([false, false, true, true]);
+    // the gateway's 5 minutes for new codes; turning off asks identity for its own (DR-010)
+    expect(all.map((route) => route.stepUp)).toEqual([false, false, true, false]);
+    expect(STEP_UP_ACTIONS).toEqual(['authenticator.disable', 'authenticator.replace']);
+    expect(stepUpActionOf([{ path: ['for'], message: 'authenticator.disable' }])).toBe(
+      'authenticator.disable',
+    );
+    for (const odd of [
+      undefined,
+      [],
+      [{ path: ['for'], message: 'grants.give' }],
+      [{ path: ['code'], message: 'authenticator.disable' }],
+      [{ path: ['for', 0], message: 'authenticator.disable' }],
+    ]) {
+      expect(stepUpActionOf(odd)).toBeNull();
+    }
+    expect(
+      stepUp.input.body.safeParse({ code: '123456', for: 'authenticator.replace' }).success,
+    ).toBe(true);
+    expect(stepUp.input.body.safeParse({ code: '123456', for: 'grants.give' }).success).toBe(false);
     expect(disableAuthenticator.method).toBe('DELETE');
     expect(IDENTITY_ERROR_CODES).toMatchObject({
       AUTHENTICATOR_EXISTS: 409,

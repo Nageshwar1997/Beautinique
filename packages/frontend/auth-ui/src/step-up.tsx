@@ -1,7 +1,14 @@
 import { queryKey, useApiClient } from '@beautinique/frontend-api-client';
 import { Button, Dialog, toast } from '@beautinique/frontend-components';
 import { CodeField, Form, SubmitButton, TextField, useZodForm } from '@beautinique/frontend-forms';
-import { getMe, loginRecovery, loginTotp, stepUp } from '@beautinique/shared-contracts';
+import {
+  getMe,
+  loginRecovery,
+  loginTotp,
+  stepUp,
+  type StepUpAction,
+  stepUpActionOf,
+} from '@beautinique/shared-contracts';
 import { plural } from '@beautinique/shared-utils';
 import { useQueryClient } from '@tanstack/react-query';
 import { type ReactNode, useEffect, useState } from 'react';
@@ -14,12 +21,16 @@ import { FEW_RECOVERY_CODES } from './sign-in';
 /** The step-up the dialog is answering: settles the API client's wait once. */
 interface Asking {
   settle: (proved: boolean) => void;
+  /** The change that asked a step-up of its own (QA DR-010): the code is sent for it alone */
+  action: StepUpAction | null;
 }
 
 /**
  * Answers the API client's step-ups (STEP_UP_REQUIRED, ARCHITECTURE §7.1) with one dialog: the
  * authenticator code, or one of the recovery codes (a lost phone). Proved, the client sends the
- * call again, and the step-up counts 5 minutes; cancelled, the call fails with STEP_UP_REQUIRED,
+ * call again, and the step-up counts 5 minutes (or, for a change that asks one of its own, such as
+ * turning the authenticator off, once and for that change alone: QA DR-010); cancelled, the call
+ * fails with STEP_UP_REQUIRED,
  * which a page treats as "nothing happened" (`isApiError(error, 'STEP_UP_REQUIRED')`). Put it
  * inside the router and the SessionProvider, once per app.
  */
@@ -30,7 +41,7 @@ export function StepUpProvider({ children }: { children: ReactNode }) {
   useEffect(
     () =>
       client.setStepUpHandler(
-        () =>
+        (error) =>
           new Promise<boolean>((resolve) => {
             let settled = false;
             setAsking({
@@ -40,6 +51,7 @@ export function StepUpProvider({ children }: { children: ReactNode }) {
                 setAsking(null);
                 resolve(proved);
               },
+              action: stepUpActionOf(error.details),
             });
           }),
       ),
@@ -120,6 +132,10 @@ interface FormProps {
   cancel: ReactNode;
 }
 
+/** The step-up body's `for`, when a change asked one of its own. */
+const forOf = (asking: Asking): { for?: StepUpAction } =>
+  asking.action === null ? {} : { for: asking.action };
+
 function Actions({ cancel, other }: { cancel: ReactNode; other: ReactNode }) {
   return (
     <div className="space-y-3">
@@ -141,7 +157,7 @@ function CodeForm({ asking, cancel, onRecovery }: FormProps & { onRecovery: () =
       className="space-y-4"
       errorFields={{ TOTP_INVALID: 'code' }}
       onSubmit={async ({ code }) => {
-        await client.call(stepUp, { body: { code } });
+        await client.call(stepUp, { body: { code, ...forOf(asking) } });
         asking.settle(true);
       }}
     >
@@ -169,7 +185,9 @@ function RecoveryForm({ asking, cancel, onCode }: FormProps & { onCode: () => vo
       className="space-y-4"
       errorFields={{ RECOVERY_CODE_INVALID: 'code' }}
       onSubmit={async ({ code }) => {
-        const { recoveryCodesLeft } = await client.call(stepUp, { body: { recoveryCode: code } });
+        const { recoveryCodesLeft } = await client.call(stepUp, {
+          body: { recoveryCode: code, ...forOf(asking) },
+        });
         // the count on the security page is one less now
         void queryClient.invalidateQueries({ queryKey: queryKey(getMe) });
         if (recoveryCodesLeft !== null && recoveryCodesLeft <= FEW_RECOVERY_CODES) {

@@ -2694,7 +2694,7 @@
           },
           "rateLimit": "auth",
           "idempotency": false,
-          "stepUp": true,
+          "stepUp": false,
           "owner": "identity",
           "cache": null,
           "navigation": false
@@ -5398,6 +5398,13 @@
                       "code": {
                         "type": "string",
                         "pattern": "^\\d{6}$"
+                      },
+                      "for": {
+                        "type": "string",
+                        "enum": [
+                          "authenticator.disable",
+                          "authenticator.replace"
+                        ]
                       }
                     },
                     "required": [
@@ -5410,6 +5417,13 @@
                       "recoveryCode": {
                         "type": "string",
                         "pattern": "^[A-Z2-7]{5}-?[A-Z2-7]{5}$"
+                      },
+                      "for": {
+                        "type": "string",
+                        "enum": [
+                          "authenticator.disable",
+                          "authenticator.replace"
+                        ]
                       }
                     },
                     "required": [

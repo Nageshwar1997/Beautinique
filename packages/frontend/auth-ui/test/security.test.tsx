@@ -143,8 +143,10 @@ describe('SecuritySettings', () => {
     await user.type(within(dialog).getByLabelText('Recovery code'), 'abcde-fgh23');
     await user.click(within(dialog).getByRole('button', { name: 'Continue' }));
     expect(await screen.findByText('The authenticator is off.')).toBeTruthy();
+    // the code is for turning it off alone (QA DR-010)
     expect(identity.sent.find((sent) => sent.path === '/auth/step-up')?.body).toEqual({
       recoveryCode: 'ABCDE-FGH23',
+      for: 'authenticator.disable',
     });
     expect(await screen.findByText('Off')).toBeTruthy();
     expect(screen.queryByRole('alertdialog')).toBeNull();
@@ -285,6 +287,11 @@ describe('AuthenticatorSetup', () => {
     await stepUpWith(user, GOOD_CODE);
     await user.click(await screen.findByRole('button', { name: 'Next' }));
     expect(screen.getByRole('button', { name: 'Replace authenticator' })).toBeTruthy();
+    // the code is for the new phone alone (QA DR-010)
+    expect(identity.sent.find((sent) => sent.path === '/auth/step-up')?.body).toEqual({
+      code: GOOD_CODE,
+      for: 'authenticator.replace',
+    });
   });
 
   it('asks to confirm it is you again when the step-up was cancelled', async () => {

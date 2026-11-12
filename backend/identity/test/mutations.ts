@@ -654,6 +654,66 @@ const mutations: Mutation[] = [
     change: [['  await deps.codes({ signUp });\n', '']],
     tests: 'DR-009',
   },
+  // a step-up for one change alone (DR-010)
+  {
+    file: 'sessions',
+    name: 'a step-up for any change counts for this one',
+    change: [["          'stepUpFor.action': action,\n", '']],
+    tests: 'of its own',
+  },
+  {
+    file: 'sessions',
+    name: 'a change’s step-up counts again and again',
+    change: [
+      ['        { $set: { stepUpFor: null } },', '        { $set: { lastSeenAt: new Date(at) } },'],
+    ],
+    tests: 'of its own',
+  },
+  {
+    file: 'sessions',
+    name: 'a change’s step-up never runs out',
+    change: [["          'stepUpFor.at': { $gt: new Date(at - STEP_UP_SECONDS * 1000) },\n", '']],
+    tests: 'of its own',
+  },
+  {
+    file: 'sessions',
+    name: 'a change’s step-up is a general one too',
+    change: [
+      [
+        '          : { stepUpFor: { action, at: new Date(at) } };',
+        '          : { stepUpAt: new Date(at), stepUpFor: { action, at: new Date(at) } };',
+      ],
+    ],
+    tests: 'of its own',
+  },
+  {
+    file: 'authenticator',
+    name: 'a new phone without a step-up of its own',
+    change: [
+      [
+        "  if (replace && !(await deps.sessions.useStepUp(session._id, 'authenticator.replace'))) {",
+        '  if (false) {',
+      ],
+    ],
+    tests: 'of its own',
+  },
+  {
+    file: 'authenticator',
+    name: 'turning off without a step-up of its own',
+    change: [
+      [
+        "  if (!(await deps.sessions.useStepUp(session._id, 'authenticator.disable'))) {",
+        '  if (false) {',
+      ],
+    ],
+    tests: 'of its own',
+  },
+  {
+    file: 'authenticator',
+    name: 'turning off nothing asks a code',
+    change: [['  if (!on) return { disabled: false };\n', '']],
+    tests: 'of its own',
+  },
   // sessions (T3.2)
   {
     file: 'sessions',

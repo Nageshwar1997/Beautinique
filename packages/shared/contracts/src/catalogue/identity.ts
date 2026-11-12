@@ -686,7 +686,8 @@ export const newRecoveryCodes = defineRoute({
 /**
  * Turns the authenticator off, with its recovery codes. Never while a role the account holds needs
  * one (TOTP_REQUIRED_APPS, Seller Account Owner, Seller Finance ...): AUTHENTICATOR_REQUIRED_BY_ROLE
- * names them. The person is emailed; their sessions stay.
+ * names them. The person is emailed; their sessions stay. It asks a step-up of its own (identity
+ * checks it, not the gateway's 5 minutes; STEP_UP_ACTIONS, QA DR-010).
  */
 export const disableAuthenticator = defineRoute({
   id: 'auth.authenticator.disable',
@@ -697,7 +698,7 @@ export const disableAuthenticator = defineRoute({
   access: { type: 'signed-in' },
   rateLimit: 'auth',
   idempotency: false,
-  stepUp: true,
+  stepUp: false,
   owner: 'identity',
   input: {},
   output: object({ disabled: boolean() }),

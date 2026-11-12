@@ -1,6 +1,6 @@
 # MEMORY — BQ
 
-> **Status:** v1.90 (2026-11-12). Project ki yaaddasht: **kya tay hua aur kyun**, **pichhle kaam se kya seekha**, aur **kaunse jaal (traps) se bachna hai**. Poori detail baaki docs me hai; yahan short version aur pointers. Naya sabak ya decision aaye to yahan ek line jodo.
+> **Status:** v1.91 (2026-11-12). Project ki yaaddasht: **kya tay hua aur kyun**, **pichhle kaam se kya seekha**, aur **kaunse jaal (traps) se bachna hai**. Poori detail baaki docs me hai; yahan short version aur pointers. Naya sabak ya decision aaye to yahan ek line jodo.
 
 ## 1. Decision log
 
@@ -137,6 +137,7 @@
 | 2026-11-12 | Q-007 (owner ne salah maani): koi role apne `appointedBy` me khud nahi ho sakta (`roleProblems`, shipped aur custom dono) | Aisa role ek baar diya to holders aapas me aur holders bana sakte (aur ek-doosre ke grants khatam kar sakte), Master ke control ke bahar |
 | 2026-11-12 | DR-007 (owner ne salah maani): Master ka authenticator reset sirf doosra Master; Master role ko `iam.totp.reset` (step-up) | Security Officer (chhota role) Master ka 2FA hata deta to Master ka password jaanne wala (phishing/leak) agle sign-in pe naya authenticator laga ke Master ban jaata. Do Master seats hain, to doosra Master hi sahi hath |
 | 2026-11-12 | DR-008 (owner ne salah maani): reviewer (SO, Auditor) ki `GET /iam/grants` sabki list me sign-up roles nahi; `?email=`/`?userId=` se ek insaan ke saare | Ek insider page kar ke har customer ka email nikaal sakta tha (Auditor ke 3 pages me 47 emails); access review ko staff chahiye, customers ki list nahi (DPDP) |
+| 2026-11-12 | DR-010 (owner: code sirf usi kaam ke liye): authenticator band karna aur naya phone apna step-up maangte (`STEP_UP_ACTIONS`, `stepUpFor`, ek baar, 5 min); doosre step-up in pe nahi, ye general nahi; Turn off ki jaanch gateway se identity me | Khule device pe 5 min ke kisi bhi step-up ke baad koi bina code authenticator band kar sakta tha. "Window 0" mumkin nahi (app code ke baad request dobara bhejti hai), to owner ne kaam-bandha code chuna |
 
 ## 2. Pichhle kaam se seekhe sabak
 
@@ -310,3 +311,4 @@
 | v1.88 | 2026-11-12 | Decision: Q-007, role khud ko appoint nahi. |
 | v1.89 | 2026-11-12 | Decision: DR-007, Master ka reset sirf doosra Master. |
 | v1.90 | 2026-11-12 | Decision: DR-008, reviewer ki list me customers nahi. |
+| v1.91 | 2026-11-12 | Decision: DR-010, kaam-bandha step-up. |

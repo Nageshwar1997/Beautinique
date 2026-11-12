@@ -10,7 +10,12 @@ import {
   verifyTotp,
 } from '@beautinique/backend-server-crypto';
 import { AppError } from '@beautinique/backend-server-kit';
-import { type AppId, type SocialProvider, TOTP_REQUIRED_APPS } from '@beautinique/shared-contracts';
+import {
+  type AppId,
+  type SocialProvider,
+  type StepUpAction,
+  TOTP_REQUIRED_APPS,
+} from '@beautinique/shared-contracts';
 import { uuidv7 } from '@beautinique/shared-utils';
 
 import {
@@ -372,7 +377,8 @@ export async function confirmTotpEnroll(
 }
 
 /** A step-up's proof: the authenticator code, or (a lost phone) one recovery code. */
-export type StepUpProof = { code: string } | { recoveryCode: string };
+/** The code, or a recovery code; `for` when the step-up is for one change alone (QA DR-010). */
+export type StepUpProof = ({ code: string } | { recoveryCode: string }) & { for?: StepUpAction };
 
 /**
  * POST /auth/step-up (ARCHITECTURE §7.1, §9.2): the authenticator code again, or one recovery
@@ -425,5 +431,12 @@ export async function stepUpWithTotp(
   }
   await clearFailures(deps.redis, deps.keys, user.email, { ip });
   if (left !== null) deps.logger.info({ userId }, 'stepped up with a recovery code');
-  return { ...(await deps.sessions.stepUp({ userId, sessionId })), recoveryCodesLeft: left };
+  return {
+    ...(await deps.sessions.stepUp({
+      userId,
+      sessionId,
+      ...(proof.for === undefined ? {} : { for: proof.for }),
+    })),
+    recoveryCodesLeft: left,
+  };
 }
