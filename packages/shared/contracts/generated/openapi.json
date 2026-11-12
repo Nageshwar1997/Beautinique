@@ -1838,6 +1838,38 @@
                                   "type": "null"
                                 }
                               ]
+                            },
+                            "authenticatorRequiredBy": {
+                              "type": "array",
+                              "items": {
+                                "type": "object",
+                                "properties": {
+                                  "name": {
+                                    "type": "string"
+                                  },
+                                  "app": {
+                                    "type": "string",
+                                    "enum": [
+                                      "customer",
+                                      "seller",
+                                      "admin",
+                                      "superadmin",
+                                      "master",
+                                      "support",
+                                      "finance",
+                                      "logistics",
+                                      "delivery",
+                                      "growth",
+                                      "creator"
+                                    ]
+                                  }
+                                },
+                                "required": [
+                                  "name",
+                                  "app"
+                                ],
+                                "additionalProperties": false
+                              }
                             }
                           },
                           "required": [
@@ -1847,7 +1879,8 @@
                             "signUpApp",
                             "providers",
                             "authenticator",
-                            "recoveryCodesLeft"
+                            "recoveryCodesLeft",
+                            "authenticatorRequiredBy"
                           ],
                           "additionalProperties": false
                         },

@@ -9,6 +9,7 @@ import { AppError, type Passport } from '@beautinique/backend-server-kit';
 import { type ClientSession, withTransaction } from '@beautinique/backend-server-mongo';
 import { writeEvent } from '@beautinique/backend-server-queue';
 import {
+  type AppId,
   type AUTHENTICATOR_CHANGES,
   authenticatorChanged,
   STEP_UP_SECONDS,
@@ -292,13 +293,13 @@ export async function renewRecoveryCodes(
 /**
  * The roles of the account's active grants that need an authenticator: every role of the 7
  * internal apps (TOTP_REQUIRED_APPS), and roles that ask one themselves (Seller Account Owner,
- * Seller Finance ...). A retired role no longer counts, as at sign-in.
+ * Seller Finance ...). A retired role no longer counts, as at sign-in. /iam/me shows them too.
  */
 export async function rolesNeedingAuthenticator(
-  deps: LoginDeps,
+  deps: Pick<LoginDeps, 'mongo'>,
   userId: string,
   now = new Date(),
-): Promise<{ name: string; app: string }[]> {
+): Promise<{ name: string; app: AppId }[]> {
   const grants = await deps.mongo.db
     .collection<GrantRecord>(GRANTS)
     .find({ userId, ...activeAt(now) }, { projection: { role: 1 } })

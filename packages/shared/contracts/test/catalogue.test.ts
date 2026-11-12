@@ -456,8 +456,22 @@ describe('the signed-in authenticator (ARCHITECTURE §9.2)', () => {
       signUpApp: 'customer',
       providers: ['password'],
       authenticator: true,
+      authenticatorRequiredBy: [],
     };
     expect(user.safeParse({ ...me, recoveryCodesLeft: 3 }).success).toBe(true);
+    // the roles that keep it on, with their apps (QA DR-011)
+    const keptOn = { ...me, recoveryCodesLeft: 3 };
+    expect(
+      user.safeParse({
+        ...keptOn,
+        authenticatorRequiredBy: [{ name: 'Seller Finance', app: 'seller' }],
+      }).success,
+    ).toBe(true);
+    expect(
+      user.safeParse({ ...keptOn, authenticatorRequiredBy: [{ name: 'X', app: 'nowhere' }] })
+        .success,
+    ).toBe(false);
+    expect(user.safeParse({ ...keptOn, authenticatorRequiredBy: undefined }).success).toBe(false);
     expect(user.safeParse({ ...me, authenticator: false, recoveryCodesLeft: null }).success).toBe(
       true,
     );

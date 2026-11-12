@@ -39,6 +39,7 @@ const meWith = (providers: string[]) =>
         providers,
         authenticator: false,
         recoveryCodesLeft: null,
+        authenticatorRequiredBy: [],
       },
       session: { sessionId: SESSION_ID, app: 'customer', expiresAt: '2026-12-31T00:00:00.000Z' },
     },

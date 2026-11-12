@@ -57,6 +57,8 @@ export interface FakeState {
   signedIn: boolean;
   authenticator: boolean;
   recoveryCodesLeft: number | null;
+  /** The roles that keep the authenticator on (QA DR-011); none unless a test gives some */
+  authenticatorRequiredBy: { name: string; app: AppId }[];
   steppedUp: boolean;
   /** A step-up for one change alone (QA DR-010): counts once, for it */
   steppedUpFor: StepUpAction | null;
@@ -100,6 +102,7 @@ const me = (app: AppId, state: FakeState) => ({
     providers: ['password'],
     authenticator: state.authenticator,
     recoveryCodesLeft: state.recoveryCodesLeft,
+    authenticatorRequiredBy: state.authenticator ? state.authenticatorRequiredBy : [],
   },
   session: { sessionId: SESSION_ID, app, expiresAt: '2026-12-31T00:00:00.000Z' },
 });
@@ -151,6 +154,7 @@ export function fakeIdentity(
       signedIn,
       authenticator,
       recoveryCodesLeft: authenticator ? 10 : null,
+      authenticatorRequiredBy: [],
       steppedUp: false,
       steppedUpFor: null,
     },

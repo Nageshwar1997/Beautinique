@@ -123,6 +123,7 @@ const meOf = async (passport: Passport) =>
   (await send('GET', '/iam/me', { passport })).body.data?.user as {
     authenticator: boolean;
     recoveryCodesLeft: number | null;
+    authenticatorRequiredBy: { name: string; app: string }[];
   };
 
 const stepUp = (
@@ -139,7 +140,11 @@ const asksStepUpFor = (answer: Awaited<ReturnType<typeof send>>, action: StepUpA
 describe('setting up the authenticator, signed in', () => {
   it('saves it with the password and the first code, gives 10 codes once, and tells the person', async () => {
     const { address, userId, passport } = await signedInCustomer('setup');
-    expect(await meOf(passport)).toMatchObject({ authenticator: false, recoveryCodesLeft: null });
+    expect(await meOf(passport)).toMatchObject({
+      authenticator: false,
+      recoveryCodesLeft: null,
+      authenticatorRequiredBy: [],
+    });
 
     const enroll = await send('POST', '/auth/authenticator/enroll', { passport });
     expect(enroll.status).toBe(200);
@@ -473,8 +478,14 @@ describe('turning the authenticator off', () => {
 
   it('stays on while a role needs it, and names those roles; an ended grant no longer counts', async () => {
     const { userId, passport, recoveryCodes } = await customerWithAuthenticator('roles');
+    expect((await meOf(passport)).authenticatorRequiredBy).toEqual([]);
     await giveRole(userId, 'seller.finance');
     await giveRole(userId, 'admin.state_admin');
+    // the apps know it too, so they say why instead of offering a "Turn off" that fails (DR-011)
+    expect((await meOf(passport)).authenticatorRequiredBy).toEqual([
+      { name: 'State Admin', app: 'admin' },
+      { name: 'Seller Finance', app: 'seller' },
+    ]);
     // the roles are named before the code is asked: no step-up is spent on a refusal
     expect(
       (
@@ -500,6 +511,9 @@ describe('turning the authenticator off', () => {
     expect(one.body.error?.message).toBe(
       "Your Seller Finance role in the seller app needs an authenticator, so it can't be turned off.",
     );
+    expect((await meOf(passport)).authenticatorRequiredBy).toEqual([
+      { name: 'Seller Finance', app: 'seller' },
+    ]);
     // a retired role no longer counts, as at sign-in
     const roles = db().collection<{ _id: string; retired: boolean }>(ROLES);
     await roles.updateOne({ _id: 'seller.finance' }, { $set: { retired: true } });

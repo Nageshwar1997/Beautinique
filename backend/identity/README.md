@@ -95,7 +95,7 @@ Routes (contracts `catalogue/iam.ts`), sab gateway ke passport se; identity khud
 | `DELETE /auth/authenticator`              | haan    | Authenticator + codes hat'te hain. Koi active grant zaroori maange (TOTP_REQUIRED_APPS ke roles, ya `mfaRequired` role jaise Seller Finance; retired role nahi) to 409 `AUTHENTICATOR_REQUIRED_BY_ROLE`, roles ke naam ke saath.     |
 
 - Har badlav pe event `identity.authenticator.changed` (`enabled`, `replaced`, `recovery-codes`, `disabled`; app + device) usi transaction me → notify ka security email. Sessions chalte rehte hain. Gateway step-up route pe token ka `su` dekhta hai; identity bhi session ka `stepUpAt` dobara jaanchta hai.
-- `GET /iam/me` me `recoveryCodesLeft` (authenticator na ho to `null`).
+- `GET /iam/me` me `recoveryCodesLeft` (authenticator na ho to `null`) aur `authenticatorRequiredBy`: wo roles (naam + app) jinki wajah se authenticator band nahi ho sakta, `DELETE` wali hi jaanch; authenticator na ho to khaali aur koi query nahi (QA DR-011).
 
 ## Settings
 

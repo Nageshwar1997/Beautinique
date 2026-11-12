@@ -1,6 +1,6 @@
 # ARCHITECTURE — BQ
 
-> **Status:** v1.79 draft (2026-11-12). [PRD.md](PRD.md) v1.0 pe based. Design ek multi-agent review se aaya (3 architecture proposals + review board + owner ke decisions), aur v1.1 me free tier ke official docs ke against verify hua.
+> **Status:** v1.80 draft (2026-11-12). [PRD.md](PRD.md) v1.0 pe based. Design ek multi-agent review se aaya (3 architecture proposals + review board + owner ke decisions), aur v1.1 me free tier ke official docs ke against verify hua.
 
 ## 0. Ek nazar me
 
@@ -380,7 +380,7 @@ Kai platforms alag users ko alag price dikhate hain. BQ ka rule: **ek product ka
 - **Cart/wishlist bina sign-in nahi:** "Add to cart" ya wishlist → `/sign-in?next=<page>?add=<id>`; sign-in (ya sign-up) ke baad wahi page, item ek baar judta hai (Idempotency-Key), phir `add` URL se hat'ta hai. Guest cart nahi (user data browser storage me nahi, RULES §5.9).
 - **Sign-in aur sign-up alag pages** (`/sign-in`, `/sign-up`; plus `/forgot-password`, `/invitation`); `next` har auth link me aage jaata hai. `next` sirf apni site ka path (`/` se shuru, `//` ya bahar ka domain nahi, auth pages nahi), warna `/`. Email daalte hi account hai ya nahi, nahi batate (backend har email ko ek jaisa jawab deta hai), isliye user khud "Sign in" ya "Create an account" chunta hai.
 - **Seller/creator me koi public page nahi:** customer ke footer me "Sell on Beautinique" aur "Become a creator" unke sign-up page pe.
-- **Signed-in authenticator (customer jaise apps):** naye routes: authenticator lagana (signed-in), naye 10 recovery codes (step-up, purane band), band karna sirf jab account ka koi grant use zaroori na maange (internal apps, Seller Account Owner/Finance) aur step-up + security email ke saath; `/iam/me` me bache recovery codes ki ginti.
+- **Signed-in authenticator (customer jaise apps):** naye routes: authenticator lagana (signed-in), naye 10 recovery codes (step-up, purane band), band karna sirf jab account ka koi grant use zaroori na maange (internal apps, Seller Account Owner/Finance) aur step-up + security email ke saath; `/iam/me` me bache recovery codes ki ginti aur wo roles jo authenticator chalu rakhte (`authenticatorRequiredBy`). Jahan band nahi ho sakta (aise roles, ya app hi har sign-in pe maange: TOTP_REQUIRED_APPS) wahan app "Turn off" nahi dikhata, uski jagah saaf wajah (owner, 2026-11-09, QA DR-011).
   - **Detail (owner, 2026-10-31):** routes `POST /auth/authenticator/enroll`, `POST /auth/authenticator/confirm` (code + abhi ka password; bina password wale account ko pehle password set karna), `POST /auth/authenticator/recovery-codes` aur `DELETE /auth/authenticator` (dono step-up). Authenticator pehle se ho to taaze step-up ke saath `enroll` use **badalta** hai (naya phone: naya secret, naye codes). Step-up recovery code se bhi hota hai (ek code khatam), taaki phone kho jaye to bhi naye codes, badlav ya band karna ho sake; Security Officer ka reset sirf jab codes bhi kho gaye. Band na ho to sandesh me roles aur apps ke naam. Lagana, naye codes aur band karna: teeno pe security email; baaki sessions chalte rehte hain (email me "aapne nahi kiya?" → password reset, jo saare sessions band karta hai). Password badalna authenticator ko nahi chhoota. Step-up ab `signed-in` routes pe bhi (apne account ke kaam), sirf permission routes pe nahi.
 - **Signed-in password badalna:** naya route nahi; wahi email code wala raasta (`/auth/password/code`). Naya password = saare sessions band (§7.2), phir dobara sign-in.
 - **Customer me dummy `/terms` aur `/privacy`** (prerender, DUMMY badge, version `dummy-1` = `IDENTITY__LEGAL_VERSION`), sign-up consent unhi ke link deta hai.
@@ -740,3 +740,4 @@ Sirf config badlegi, code nahi:
 | v1.77 | 2026-11-12 | §7.1: authenticator band karna aur naya phone apne step-up se (DR-010, owner). |
 | v1.78 | 2026-11-12 | §10: sign-in method hatane se pehle 10 min ka password/email-code sign-in ya step-up (DR-006, owner). |
 | v1.79 | 2026-11-12 | §7.1: bina HIBP jaanch aaye password ki agle sign-in pe jaanch, leak pe naya password (DR-002, owner). |
+| v1.80 | 2026-11-12 | §7.1: `/iam/me` me authenticator chalu rakhne wale roles; jahan band nahi ho sakta wahan "Turn off" ki jagah wajah (DR-011, owner). |

@@ -1595,6 +1595,24 @@ const mutations: Mutation[] = [
     change: [['? (recoveryCodesLeft(credentials.recoveryCodes) ?? 0)', '? 10']],
     tests: 'spends one code',
   },
+  // the roles that keep the authenticator on, for the apps (DR-011)
+  {
+    file: 'me',
+    name: '/iam/me never names the roles that keep the authenticator on',
+    change: [['      authenticatorRequiredBy: requiredBy,', '      authenticatorRequiredBy: [],']],
+    tests: 'stays on while a role',
+  },
+  {
+    file: 'me',
+    name: '/iam/me names roles for an account without an authenticator',
+    change: [
+      [
+        'const requiredBy = credentials?.totp ? await rolesNeedingAuthenticator(deps, user._id) : [];',
+        'const requiredBy = [{ name: "Seller Finance", app: "seller" as const }];',
+      ],
+    ],
+    tests: 'saves it with the password',
+  },
   {
     file: 'authenticator',
     name: 'replaced without a step-up',

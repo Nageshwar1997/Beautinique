@@ -1,6 +1,6 @@
 # MEMORY — BQ
 
-> **Status:** v1.93 (2026-11-12). Project ki yaaddasht: **kya tay hua aur kyun**, **pichhle kaam se kya seekha**, aur **kaunse jaal (traps) se bachna hai**. Poori detail baaki docs me hai; yahan short version aur pointers. Naya sabak ya decision aaye to yahan ek line jodo.
+> **Status:** v1.94 (2026-11-12). Project ki yaaddasht: **kya tay hua aur kyun**, **pichhle kaam se kya seekha**, aur **kaunse jaal (traps) se bachna hai**. Poori detail baaki docs me hai; yahan short version aur pointers. Naya sabak ya decision aaye to yahan ek line jodo.
 
 ## 1. Decision log
 
@@ -140,6 +140,7 @@
 | 2026-11-12 | DR-010 (owner: code sirf usi kaam ke liye): authenticator band karna aur naya phone apna step-up maangte (`STEP_UP_ACTIONS`, `stepUpFor`, ek baar, 5 min); doosre step-up in pe nahi, ye general nahi; Turn off ki jaanch gateway se identity me | Khule device pe 5 min ke kisi bhi step-up ke baad koi bina code authenticator band kar sakta tha. "Window 0" mumkin nahi (app code ke baad request dobara bhejti hai), to owner ne kaam-bandha code chuna |
 | 2026-11-12 | DR-006 (owner): sign-in method hatane se pehle 10 min ke andar password ya email code se bana session (`RECENT_SIGN_IN_MS`), warna 403 `RECENT_SIGN_IN_REQUIRED` aur app me "Sign in again"; authenticator wale account pe step-up | Khule device pe koi bhi (ya chura cookie) bina kuch jaane provider hata sakta tha; customers ke paas authenticator kam hai, to step-up ki jagah taaza sign-in, jaise bade sites karte hain |
 | 2026-11-12 | DR-002 (owner): HIBP fail-open rahe; jawab `unknown` (5xx/timeout, warning) pe `password.hibpPending`, agle password sign-in pe jaanch; leak pe `breachedAt` + 403 `PASSWORD_RESET_REQUIRED` aur app me "Set a new password"; HIBP phir na mile to sign-in chalta | Outage ke dauraan leaked password chupchaap aa jaata tha aur kabhi dobara jaancha nahi jaata; sign-up/reset rokna availability todta, isliye baad me jaanch |
+| 2026-11-12 | DR-011 (owner, Claude ki salah): `/iam/me` ke user me `authenticatorRequiredBy` (roles + app, `DELETE` wali hi jaanch; authenticator band ho to khaali); jahan authenticator band nahi ho sakta (aise roles, ya TOTP_REQUIRED_APPS ka app) wahan Security page "Turn off" nahi dikhata, uski jagah wajah ki line; dialog ka text har app me sach | Internal apps me har insaan ko ek button dikhta tha jo hamesha 409 deta, aur dialog "password only" ka galat vaada karta (social sign-in wale account pe bhi) |
 
 ## 2. Pichhle kaam se seekhe sabak
 
@@ -316,3 +317,4 @@
 | v1.91 | 2026-11-12 | Decision: DR-010, kaam-bandha step-up. |
 | v1.92 | 2026-11-12 | Decision: DR-006, provider hatane se pehle taaza sign-in. |
 | v1.93 | 2026-11-12 | Decision: DR-002, bina jaanch aaye password ki baad me jaanch. |
+| v1.94 | 2026-11-12 | Decision: DR-011, Turn off ki jagah wajah. |

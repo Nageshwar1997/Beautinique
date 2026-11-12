@@ -554,6 +554,12 @@ export const getMe = defineRoute({
       authenticator: boolean(),
       /** Recovery codes not used yet; null without an authenticator */
       recoveryCodesLeft: number().int().min(0).nullable(),
+      /**
+       * The roles of active grants that keep the authenticator on (TOTP_REQUIRED_APPS, Seller
+       * Finance ...), so the app says so instead of a "Turn off" that fails (QA DR-011); empty
+       * without an authenticator
+       */
+      authenticatorRequiredBy: array(object({ name: string(), app: zodEnum(APPS) })),
     }),
     session: object({
       sessionId: uuidv7Zod,
