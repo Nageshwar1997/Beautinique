@@ -651,7 +651,21 @@ describe('bundle', () => {
       const { data: fresh } = (await renewed.json()) as { data: { recoveryCodes: string[] } };
       expect(fresh.recoveryCodes).not.toContain(saved.recoveryCodes[0]);
 
-      // turned off, within the same step-up
+      // turning it off asks a step-up of its own, not the one the codes had (QA DR-010)
+      const offAsks = await api('DELETE', '/auth/authenticator');
+      expect(offAsks.status).toBe(401);
+      expect(await offAsks.json()).toMatchObject({
+        error: {
+          code: 'STEP_UP_REQUIRED',
+          details: [{ path: ['for'], message: 'authenticator.disable' }],
+        },
+      });
+      const forOff = await api('POST', '/auth/step-up', {
+        recoveryCode: fresh.recoveryCodes[0],
+        for: 'authenticator.disable',
+      });
+      expect(forOff.status).toBe(200);
+      keepAccess(forOff);
       const off = await api('DELETE', '/auth/authenticator');
       expect(off.status).toBe(200);
       expect(await off.json()).toEqual({ data: { disabled: true } });
