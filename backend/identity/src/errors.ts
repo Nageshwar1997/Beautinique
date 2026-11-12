@@ -195,3 +195,11 @@ export const lastSignInMethod = (): AppError =>
     'This is the only way you sign in. Set a password first, then you can remove it.',
     { status: IDENTITY_ERROR_CODES.LAST_SIGN_IN_METHOD },
   );
+
+/** A sign-in method comes off only after a recent sign-in with the password or an email code. */
+export const recentSignInRequired = (): AppError =>
+  new AppError(
+    'RECENT_SIGN_IN_REQUIRED',
+    'For your security, please sign in again with your password, then remove it.',
+    { status: IDENTITY_ERROR_CODES.RECENT_SIGN_IN_REQUIRED },
+  );

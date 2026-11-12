@@ -654,6 +654,41 @@ const mutations: Mutation[] = [
     change: [['  await deps.codes({ signUp });\n', '']],
     tests: 'DR-009',
   },
+  // taking a sign-in method off needs proof from just now (DR-006)
+  {
+    file: 'oauth',
+    name: 'a way in comes off without proof',
+    change: [['    await provenJustNow(deps, passport, session);\n', '']],
+    tests: 'DR-006|step-up instead',
+  },
+  {
+    file: 'oauth',
+    name: 'an old sign-in counts',
+    change: [
+      [
+        'const recent = now - signedIn.createdAt.getTime() <= RECENT_SIGN_IN_MS;',
+        'const recent = true;',
+      ],
+    ],
+    tests: 'DR-006',
+  },
+  {
+    file: 'oauth',
+    name: 'a provider’s own sign-in counts',
+    change: [["!signedIn.methods.some((m) => m === 'password' || m === 'email-code')", 'false']],
+    tests: 'DR-006',
+  },
+  {
+    file: 'oauth',
+    name: 'an account with an authenticator needs no step-up',
+    change: [
+      [
+        '    if (stepUpAt === undefined || now - stepUpAt > STEP_UP_SECONDS * 1000) {',
+        '    if (false) {',
+      ],
+    ],
+    tests: 'step-up instead',
+  },
   // a step-up for one change alone (DR-010)
   {
     file: 'sessions',

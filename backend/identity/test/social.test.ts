@@ -475,11 +475,24 @@ describe('the trip', () => {
 });
 
 describe('sign-in methods', () => {
+  const sessionsDb = () => harness.db.collection<Session>(SESSIONS);
+  /** The account's newest session that signed in with one of these methods. */
+  const sessionWith = async (userId: string, methods: Session['methods']) => {
+    const found = await sessionsDb()
+      .find({ userId, methods: { $in: methods } })
+      .sort({ createdAt: -1 })
+      .limit(1)
+      .next();
+    if (!found) throw new Error(`no ${methods.join('/')} session`);
+    return { userId, sessionId: found._id };
+  };
+
   it('takes a provider off with a security email, and never the last way in', async () => {
     const address = email('remove');
     const userId = await makeAccount(address, PASSWORD, { everyApp: false });
     await roundTrip('google', { subject: nextSubject(), email: address });
-    const passport = { userId, sessionId: '0190a1b2-c3d4-7e5f-8a9b-0c1d2e3f4a5b' };
+    // the sign-up a moment ago (an email code) is a recent sign-in (DR-006)
+    const passport = await sessionWith(userId, ['email-code']);
     const removed = await call('DELETE', '/auth/sign-in-methods/google', { passport });
     expect(removed.body.data).toEqual({ removed: true, providers: ['password'] });
     expect((await linkEvents(userId)).map((e) => e.change)).toEqual(['linked', 'removed']);
@@ -498,6 +511,51 @@ describe('sign-in methods', () => {
     });
     expect([last.status, last.body.error?.code]).toEqual([409, 'LAST_SIGN_IN_METHOD']);
     expect(await providers().countDocuments({ userId: onlyId })).toBe(1);
+  });
+
+  it('needs a sign-in with the password or an email code in the last 10 minutes, or a step-up with an authenticator (DR-006)', async () => {
+    const address = email('remove-recent');
+    const userId = await makeAccount(address, PASSWORD, { everyApp: false });
+    await roundTrip('google', { subject: nextSubject(), email: address });
+    const remove = (passport: { userId: string; sessionId: string }) =>
+      call('DELETE', '/auth/sign-in-methods/google', { passport });
+
+    // a sign-in 11 minutes ago: a stolen token of it cannot take a way in off
+    const old = await sessionWith(userId, ['email-code']);
+    await sessionsDb().updateOne(
+      { _id: old.sessionId },
+      { $set: { createdAt: new Date(Date.now() - 11 * 60_000) } },
+    );
+    const stale = await remove(old);
+    expect([stale.status, stale.body.error?.code]).toEqual([403, 'RECENT_SIGN_IN_REQUIRED']);
+    expect(stale.body.error?.message).toBe(
+      'For your security, please sign in again with your password, then remove it.',
+    );
+    // a fresh sign-in with Google itself does not count either
+    const viaGoogle = await sessionWith(userId, ['google']);
+    expect((await remove(viaGoogle)).body.error?.code).toBe('RECENT_SIGN_IN_REQUIRED');
+    expect(await providers().countDocuments({ userId, provider: 'google' })).toBe(1);
+    // the password, just now: it goes
+    await post('/auth/login', { email: address, password: PASSWORD });
+    const fresh = await remove(await sessionWith(userId, ['password']));
+    expect(fresh.body.data).toEqual({ removed: true, providers: ['password'] });
+  });
+
+  it('asks an account with an authenticator for a step-up instead', async () => {
+    const address = email('remove-totp');
+    const userId = await makeAccount(address, PASSWORD, { everyApp: false });
+    await roundTrip('google', { subject: nextSubject(), email: address });
+    await credentials().updateOne(
+      { _id: userId },
+      { $set: { totp: { secret: 'sealed', enrolledAt: new Date(), lastStep: 0 } } },
+    );
+    const passport = await sessionWith(userId, ['email-code']);
+    await sessionsDb().updateOne({ _id: passport.sessionId }, { $set: { stepUpAt: null } });
+    const asked = await call('DELETE', '/auth/sign-in-methods/google', { passport });
+    expect([asked.status, asked.body.error?.code]).toEqual([401, 'STEP_UP_REQUIRED']);
+    await sessionsDb().updateOne({ _id: passport.sessionId }, { $set: { stepUpAt: new Date() } });
+    const removed = await call('DELETE', '/auth/sign-in-methods/google', { passport });
+    expect(removed.body.data).toEqual({ removed: true, providers: ['password'] });
   });
 });
 

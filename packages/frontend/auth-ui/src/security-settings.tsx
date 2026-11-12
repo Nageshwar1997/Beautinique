@@ -17,11 +17,12 @@ import {
 import { plural } from '@beautinique/shared-utils';
 import { useQueryClient } from '@tanstack/react-query';
 import { type ReactNode, useState } from 'react';
+import { useNavigate } from 'react-router';
 
 import { AccountCard, LinkButton, StatusBadge } from './account-parts';
 import { ACCOUNT_PATHS, AUTH_PATHS, authHref } from './next';
 import { RecoveryCodes } from './recovery-codes';
-import { useSession } from './session';
+import { useSession, useSignOut } from './session';
 import { FEW_RECOVERY_CODES } from './sign-in';
 import { PROVIDER_NAMES } from './social';
 
@@ -107,9 +108,13 @@ function PasswordCard({ user }: { user: User }) {
  */
 function SignInMethodsCard({ user }: { user: User }) {
   const queryClient = useQueryClient();
+  const navigate = useNavigate();
+  const signOutNow = useSignOut();
   const remove = useApiMutation(removeSignInMethod);
   const [asking, setAsking] = useState<SocialProvider | null>(null);
   const ways = user.providers.length;
+  // the last sign-in is too old to take a way in off (QA DR-006): sign in again, then come back
+  const signInAgain = isApiError(remove.error, 'RECENT_SIGN_IN_REQUIRED');
   return (
     <AccountCard
       title="Sign-in methods"
@@ -159,11 +164,17 @@ function SignInMethodsCard({ user }: { user: User }) {
         }}
         title={`Remove ${asking === null ? '' : PROVIDER_NAMES[asking]} sign-in?`}
         description={`You will no longer sign in with ${asking === null ? '' : PROVIDER_NAMES[asking]}. We will email you that it was removed.`}
-        action="Remove"
-        tone="error"
+        action={signInAgain ? 'Sign in again' : 'Remove'}
+        tone={signInAgain ? 'brand' : 'error'}
         busy={remove.isPending}
         error={remove.error ?? undefined}
         onConfirm={() => {
+          if (signInAgain) {
+            void signOutNow().then((signedOut) => {
+              if (signedOut) void navigate(authHref(AUTH_PATHS.signIn, ACCOUNT_PATHS.security));
+            });
+            return;
+          }
           if (asking === null) return;
           const name = PROVIDER_NAMES[asking];
           remove.mutate(

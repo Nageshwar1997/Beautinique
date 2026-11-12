@@ -17,6 +17,7 @@ import {
   signInMethodChanged,
   SOCIAL_PROVIDERS,
   type SocialProvider,
+  STEP_UP_SECONDS,
 } from '@beautinique/shared-contracts';
 import { uuidv7 } from '@beautinique/shared-utils';
 
@@ -27,7 +28,7 @@ import {
   CREDENTIALS,
   type Credentials,
 } from './credentials.ts';
-import { lastSignInMethod, oauthSignUpExpired } from './errors.ts';
+import { lastSignInMethod, oauthSignUpExpired, recentSignInRequired } from './errors.ts';
 import { clearFailures, isLocked } from './lockout.ts';
 import { inRedis, type LoginDeps, startLogin } from './login.ts';
 import {
@@ -38,7 +39,14 @@ import {
   usesPkce,
 } from './oauth-providers.ts';
 import { giveSignUpGrant, signInAccess } from './rbac/grants.ts';
-import { type Client, deviceName, type IssuedSession, sessionExpired } from './sessions.ts';
+import {
+  type Client,
+  deviceName,
+  type IssuedSession,
+  type Session,
+  sessionExpired,
+  SESSIONS,
+} from './sessions.ts';
 import { accountWithCode, type User, USERS } from './users.ts';
 
 /**
@@ -482,6 +490,48 @@ export async function finishSignUp(
  * The last way to sign in stays (LAST_SIGN_IN_METHOD). No step-up: most customers have no
  * authenticator to step up with, and the email tells the owner at once.
  */
+/** A sign-in recent enough to take a way in off (owner, 2026-11-09, QA DR-006). */
+export const RECENT_SIGN_IN_MS = 10 * 60_000;
+
+/**
+ * Taking a way in off needs proof from just now, so a stolen access token (10 minutes) cannot: an
+ * account with an authenticator steps up (5 minutes, STEP_UP_REQUIRED, which the app's dialog
+ * answers); one without signed in with its password or an email code in the last 10 minutes
+ * (RECENT_SIGN_IN_REQUIRED, the app sends it to sign in again). A provider's own sign-in never
+ * counts.
+ */
+async function provenJustNow(
+  deps: SocialDeps,
+  passport: Passport,
+  tx: ClientSession,
+): Promise<void> {
+  const signedIn = await deps.mongo.db
+    .collection<Session>(SESSIONS)
+    .findOne(
+      { _id: passport.sessionId, userId: passport.userId, revokedAt: null },
+      { session: tx },
+    );
+  if (!signedIn) throw sessionExpired();
+  const credentials = await deps.mongo.db
+    .collection<Credentials>(CREDENTIALS)
+    .findOne({ _id: passport.userId }, { session: tx, projection: { totp: 1 } });
+  const now = Date.now();
+  if (credentials?.totp) {
+    const stepUpAt = signedIn.stepUpAt?.getTime();
+    if (stepUpAt === undefined || now - stepUpAt > STEP_UP_SECONDS * 1000) {
+      throw new AppError(
+        'STEP_UP_REQUIRED',
+        'Please confirm with your authenticator code to continue.',
+      );
+    }
+    return;
+  }
+  const recent = now - signedIn.createdAt.getTime() <= RECENT_SIGN_IN_MS;
+  if (!recent || !signedIn.methods.some((m) => m === 'password' || m === 'email-code')) {
+    throw recentSignInRequired();
+  }
+}
+
 export async function removeMethod(
   deps: SocialDeps,
   passport: Passport,
@@ -498,6 +548,7 @@ export async function removeMethod(
     const names = methods.map((m) => m.provider).toSorted();
     if (!names.includes(provider)) return { removed: false, providers: names };
     if (names.length === 1) throw lastSignInMethod();
+    await provenJustNow(deps, passport, session);
     await providers(deps).deleteOne({ userId: user._id, provider }, { session });
     await methodChanged(deps, session, {
       user,

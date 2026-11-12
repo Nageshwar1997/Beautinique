@@ -84,7 +84,7 @@ Peers: `react` 19, `react-dom`, `react-router` 8, `@tanstack/react-query` 5. App
 | `oauthNotice`, `totpStepOf`, `totpStepHref` | `SignInForm` khud padhta hai: `?oauth=<cancelled\|expired\|failed\|email-unverified\|locked>` ka sandesh, aur `#totp=<loginId>` pe seedha authenticator step (hydration ke baad; id URL se hat jaati hai).                                                                              |
 | `PROVIDER_NAMES`                            | Google, LinkedIn, GitHub.                                                                                                                                                                                                                                                               |
 
-`SecuritySettings signInMethods` (customer): "Sign-in methods" card, har provider Connected / Not connected, "Remove" (confirm, phir account ke email pe security email); akela tareeka ho to Remove nahi, "set a password" ki salah.
+`SecuritySettings signInMethods` (customer): "Sign-in methods" card, har provider Connected / Not connected, "Remove" (confirm, phir account ke email pe security email); akela tareeka ho to Remove nahi, "set a password" ki salah. Pichhla sign-in purana ho (403 `RECENT_SIGN_IN_REQUIRED`, QA DR-006) to dialog sandesh dikhata aur button "Sign in again": sign out, phir sign-in, wapas Security; authenticator wale account pe wahi step-up dialog.
 
 ## Account pages (owner, 2026-11-03)
 

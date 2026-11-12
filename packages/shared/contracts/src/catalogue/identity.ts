@@ -88,6 +88,8 @@ export const IDENTITY_ERROR_CODES = {
   OAUTH_SIGN_UP_EXPIRED: 400,
   /** The last way the account signs in cannot go: set a password or keep another one first */
   LAST_SIGN_IN_METHOD: 409,
+  /** A sign-in method comes off only after a sign-in with the password or an email code in the last 10 minutes (QA DR-006) */
+  RECENT_SIGN_IN_REQUIRED: 403,
 } as const satisfies Record<string, number>;
 
 /**

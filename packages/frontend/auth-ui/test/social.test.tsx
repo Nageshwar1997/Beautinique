@@ -282,6 +282,38 @@ describe('sign-in methods', () => {
     );
   });
 
+  it('asks for a sign-in again when the last one is too old to take a way in off (DR-006)', async () => {
+    const identity = fakeIdentity('customer', { signedIn: true });
+    setHint('customer');
+    identity.on('GET /iam/me', () => meWith(['google', 'password']));
+    identity.on('DELETE /auth/sign-in-methods/google', () =>
+      failure(
+        403,
+        'RECENT_SIGN_IN_REQUIRED',
+        'For your security, please sign in again with your password, then remove it.',
+      ),
+    );
+    const user = userEvent.setup();
+    renderApp(
+      {
+        '/account/security': <SecuritySettings signInMethods />,
+        '/sign-in': <p>The sign-in page</p>,
+      },
+      { identity, at: '/account/security' },
+    );
+    await user.click(await screen.findByRole('button', { name: 'Remove Google sign-in' }));
+    const dialog = await screen.findByRole('alertdialog');
+    await user.click(within(dialog).getByRole('button', { name: 'Remove' }));
+    expect((await within(dialog).findByRole('alert')).textContent).toContain(
+      'please sign in again with your password',
+    );
+    // the dialog's own way on: signed out, then the sign-in page, back here afterwards
+    await user.click(within(dialog).getByRole('button', { name: 'Sign in again' }));
+    expect(await screen.findByText('The sign-in page')).toBeTruthy();
+    expect(where()).toBe('/sign-in?next=%2Faccount%2Fsecurity');
+    expect(identity.paths()).toContain('POST /auth/logout');
+  });
+
   it('is only where the app asks for it', async () => {
     const identity = fakeIdentity('customer', { signedIn: true });
     setHint('customer');
