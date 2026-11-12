@@ -1,5 +1,9 @@
 // What the E2E specs share: the password, axe and side-scroll checks (scripts/e2e/checks.ts, every
-// app's), and signing up, out and in through the customer app's pages.
+// app's), signing up, out and in through the customer app's pages, and a password found leaked.
+import { execFile } from 'node:child_process';
+import { join } from 'node:path';
+import { promisify } from 'node:util';
+
 import { expect, type Page } from '@playwright/test';
 
 import { expectNoAxeViolations, expectNoSideScroll } from '../../../scripts/e2e/checks';
@@ -9,6 +13,17 @@ export { expectNoAxeViolations, expectNoSideScroll };
 
 export const PASSWORD = 'pink lipstick on a rainy day';
 export const NEW_PASSWORD = 'rose gold eyeliner at midnight';
+
+const REPO = join(import.meta.dirname, '..', '..', '..');
+
+/** The account's password found in a data breach after it was set (scripts/e2e/leaked.ts, QA DR-002). */
+export async function markLeaked(email: string): Promise<void> {
+  await promisify(execFile)(
+    process.execPath,
+    ['--conditions=beautinique-source', 'scripts/e2e/leaked.ts', email],
+    { cwd: REPO, env: process.env },
+  );
+}
 
 /** The header's account control, once the session is known. */
 export const accountButton = (page: Page, email: string) =>

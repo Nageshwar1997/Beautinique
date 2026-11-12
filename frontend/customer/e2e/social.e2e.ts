@@ -10,6 +10,8 @@ import {
   accountButton,
   expectNoAxeViolations,
   expectNoSideScroll,
+  PASSWORD,
+  passwordStep,
   signOut,
   signUp,
 } from './helpers';
@@ -96,6 +98,17 @@ test('links GitHub to an account made with email, emails it, and takes it off in
   await methods.getByRole('button', { name: 'Remove GitHub sign-in' }).click();
   const dialog = page.getByRole('alertdialog', { name: 'Remove GitHub sign-in?' });
   await expectNoAxeViolations(page);
+  await dialog.getByRole('button', { name: 'Remove' }).click();
+  // a GitHub sign-in is not proof enough to take a way in off (QA DR-006): sign in again first
+  await expect(
+    dialog.getByText('For your security, please sign in again with your password, then remove it.'),
+  ).toBeVisible();
+  await expectNoAxeViolations(page);
+  await dialog.getByRole('button', { name: 'Sign in again' }).click();
+  await expect(page).toHaveURL('/sign-in?next=%2Faccount%2Fsecurity');
+  await passwordStep(page, email, PASSWORD);
+  await expect(page).toHaveURL('/account/security');
+  await methods.getByRole('button', { name: 'Remove GitHub sign-in' }).click();
   await dialog.getByRole('button', { name: 'Remove' }).click();
   await expect(page.getByText('GitHub sign-in was removed.').first()).toBeVisible();
   await expect(methods.getByText('Not connected')).toHaveCount(3);

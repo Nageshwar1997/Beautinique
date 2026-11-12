@@ -92,12 +92,17 @@ test('sets up the authenticator, gets new codes after a step-up, and turns it of
   await stepUp.getByLabel('Authenticator code').fill(totpCode(secret, at + 30_000));
   await stepUp.getByRole('button', { name: 'Continue' }).click();
   await expect(page.getByRole('heading', { name: 'Your new recovery codes' })).toBeVisible();
-  await saveCodes(page);
+  const fresh = await saveCodes(page);
   await expect(page.getByText('Your new recovery codes are ready to use.').first()).toBeVisible();
 
-  // off: the step-up still counts (5 minutes), so no second dialog
+  // off: a step-up of its own, not the one the new codes had (QA DR-010), here with a recovery code
   await page.getByRole('button', { name: 'Turn off' }).click();
   await page.getByRole('alertdialog').getByRole('button', { name: 'Turn off' }).click();
+  const forOff = page.getByRole('dialog', { name: 'Confirm it’s you' });
+  await expect(forOff).toBeVisible();
+  await forOff.getByRole('button', { name: 'Lost your phone? Use a recovery code' }).click();
+  await forOff.getByLabel('Recovery code').fill(fresh[0] ?? '');
+  await forOff.getByRole('button', { name: 'Continue' }).click();
   await expect(page.getByText('The authenticator is off.').first()).toBeVisible();
   await expect(page.getByRole('link', { name: 'Set up' })).toBeVisible();
 });

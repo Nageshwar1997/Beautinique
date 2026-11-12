@@ -7,6 +7,7 @@ import {
   accountButton,
   expectNoAxeViolations,
   expectNoSideScroll,
+  markLeaked,
   NEW_PASSWORD,
   PASSWORD,
   passwordStep,
@@ -82,6 +83,38 @@ test('sets a new password with an emailed code, which signs every device out', a
   await expect(page.getByRole('link', { name: 'Sign in' })).toBeVisible();
   await page.getByLabel('Password', { exact: true }).fill(NEW_PASSWORD);
   await page.getByRole('button', { name: 'Sign in' }).click();
+  await expect(page).toHaveURL('/');
+  await expect(accountButton(page, email)).toBeVisible();
+});
+
+test('a password found leaked after it was set asks for a new one with an email code (QA DR-002)', async ({
+  page,
+}, testInfo) => {
+  email = e2eEmail('leaked');
+  await signUp(page, email);
+  await signOut(page, email);
+  await markLeaked(email);
+  await page.goto('/sign-in');
+  await passwordStep(page, email, PASSWORD);
+  await expect(
+    page.getByText(
+      'This password appeared in a data breach. Please set a new one with an email code.',
+    ),
+  ).toBeVisible();
+  await expectNoAxeViolations(page);
+  await expectNoSideScroll(page);
+  await page.getByRole('link', { name: 'Set a new password' }).click();
+  await expect(page).toHaveURL('/forgot-password');
+  await expect(page.getByLabel('Email')).toHaveValue(email);
+  if (testInfo.project.name !== 'chromium-1280-light') return;
+
+  // a new password with the emailed code (the second email: sign-up's code was the first) ends it
+  await page.getByRole('button', { name: 'Send code' }).click();
+  await page.getByLabel('Code from the email').fill(await codeFor(email, 2));
+  await page.getByLabel('Password', { exact: true }).fill(NEW_PASSWORD);
+  await page.getByRole('button', { name: 'Set password' }).click();
+  await expect(page).toHaveURL('/sign-in');
+  await passwordStep(page, email, NEW_PASSWORD);
   await expect(page).toHaveURL('/');
   await expect(accountButton(page, email)).toBeVisible();
 });
