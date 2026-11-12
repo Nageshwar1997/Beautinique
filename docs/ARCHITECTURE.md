@@ -1,6 +1,6 @@
 # ARCHITECTURE — BQ
 
-> **Status:** v1.73 draft (2026-11-12). [PRD.md](PRD.md) v1.0 pe based. Design ek multi-agent review se aaya (3 architecture proposals + review board + owner ke decisions), aur v1.1 me free tier ke official docs ke against verify hua.
+> **Status:** v1.74 draft (2026-11-12). [PRD.md](PRD.md) v1.0 pe based. Design ek multi-agent review se aaya (3 architecture proposals + review board + owner ke decisions), aur v1.1 me free tier ke official docs ke against verify hua.
 
 ## 0. Ek nazar me
 
@@ -301,6 +301,7 @@ Kai platforms alag users ko alag price dikhate hain. BQ ka rule: **ek product ka
 - **Roles data hain:** 79 roles (11 main + 68 sub-roles). Master ya app head deploy kiye bina naye sub-roles bana sakte hain.
 - **Grants:** `{user, role, scope {type, ids}, validFrom, validTo, grantedBy, approvedBy}`. Scope types: self, brand, state, district, category, city, warehouse, hub, global, sellerOrg, creatorAgency. Containment: global ⊇ state ⊇ district ⊇ city ⊇ hub.
 - **Kaun kise appoint kar sakta hai:** Master: Super Admins, State Admins, Head of Operations aur app heads. Logistics Head: Warehouse, Hub, City Managers aur Network Planner. Hub Manager: Hub Ops aur Rider Onboarding. Seller Account Owner: apna staff. Super Admin states assign nahi kar sakta.
+- **Koi role khud ko appoint nahi kar sakta** (owner, 2026-11-09, QA Q-007): `appointedBy` me apna key ho to role (shipped ya Master ka sub-role) refuse, warna uske holders aur holders banate jaate, Master ke control ke bahar.
 - **Separation of duties** (tests ke saath):
   - Appeal decide karne wala reject karne wala nahi ho sakta.
   - Fees, payouts, over-cap coupons aur policy publishing me maker aur checker alag hone chahiye.
@@ -732,3 +733,4 @@ Sirf config badlegi, code nahi:
 | v1.71 | 2026-11-12 | §7.2 + §11: sab IPs ka sign-in hash budget (30/min), locked pe hash nahi, IPv6 /48 bucket 4 guna (DR-004, owner). |
 | v1.72 | 2026-11-12 | §7.1: rok email + IP, account-wide 50/15 min → 15 min, rok ke dauraan tries nahi, code me IP ka hissa 3 (DR-003, owner). |
 | v1.73 | 2026-11-12 | §7.1: code emails 60/ghanta sab IPs, sign-up 100/din, saaf sandesh, notify 80% warning (DR-009, owner). |
+| v1.74 | 2026-11-12 | §7.3: koi role khud ko appoint nahi kar sakta (Q-007, owner). |

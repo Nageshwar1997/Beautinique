@@ -1075,6 +1075,17 @@ const mutations: Mutation[] = [
   },
   {
     file: 'rbac/sync',
+    name: 'a role may appoint itself (Q-007)',
+    change: [
+      [
+        "  if (role.appointedBy.includes(role.key)) add('appointedBy', 'a role cannot appoint itself');\n",
+        '',
+      ],
+    ],
+    tests: 'sub-role, checked|are checked',
+  },
+  {
+    file: 'rbac/sync',
     name: 'the sync retires Master’s own sub-roles',
     change: [['{ system: true, retired: false, _id: { $nin:', '{ retired: false, _id: { $nin:']],
     tests: 'never touches Master',

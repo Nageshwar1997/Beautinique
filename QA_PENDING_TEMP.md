@@ -2,7 +2,7 @@
 
 > **Temp file, sirf owner ki tracking ke liye.** Owner ke kehne pe (2026-11-09) abhi git me rehti hai; status update har item ke commit me. Kisi aur doc, file ya memory me iska zikr nahi. Saare items **Done** hote hi ye file repo se delete.
 >
-> **Last update:** 2026-11-12 (hissa 0 aur 1 poore; Done: 1–4, 15a, 15, 16, 14, 10; batch chal raha; agla 5 Q-007). **Faisla:** owner ne neeche ki har salah maan li (2026-11-09). Asli docs (report §9 "Owner ka jawab", ARCHITECTURE/RULES/README, MEMORY decision, HANDOFF, TASKS, change logs) har item ke commit me update honge, is file ka naam liye bina.
+> **Last update:** 2026-11-12 (hissa 0 aur 1 poore; Done: 1–5, 15a, 15, 16, 14, 10; batch chal raha; agla 6 DR-007). **Faisla:** owner ne neeche ki har salah maan li (2026-11-09). Asli docs (report §9 "Owner ka jawab", ARCHITECTURE/RULES/README, MEMORY decision, HANDOFF, TASKS, change logs) har item ke commit me update honge, is file ka naam liye bina.
 
 ## Kitna bacha
 
@@ -10,12 +10,12 @@
 | ------------------------- | ------ | ------ | ------ | ------------------------------------ |
 | 0. Release aur shuruaat   | 4      | 4      | 0      | Ho gaya                              |
 | 1. Abuse aur limits       | 4      | 4      | 0      | Ho gaya                              |
-| 2. Permissions, step-up   | 5      | 0      | 5      | ~2.25 din                            |
+| 2. Permissions, step-up   | 5      | 1      | 4      | ~2 din                               |
 | 3. Chhote backend         | 2      | 1      | 1      | ~0.5 din                             |
 | 4. Apps                   | 7      | 4      | 3      | ~1.1 din                             |
 | 5. CI                     | 1      | 0      | 1      | ~0.4 din                             |
 | 6. Aakhri kadam           | 4      | 0      | 4      | ~1.5 ghante                          |
-| **Kul (Claude)**          | **27** | **13** | **14** | **~5–5.5 din**                       |
+| **Kul (Claude)**          | **27** | **14** | **13** | **~5 din**                           |
 | Owner ke haath ke (O1–O4) | 4      | 0      | 4      | owner ka time                        |
 
 **Status:** `Pending` (shuru nahi), `Chal raha`, `Done`, `Ruka` (kisi ka intezaar). Har item Done hone pe upar ki table bhi.
@@ -49,13 +49,13 @@
 
 ### 2. Permissions aur step-up
 
-| #   | ID     | Kya karna                                                                                                                                              | Mehnat   | Status  | Commit |
-| --- | ------ | ------------------------------------------------------------------------------------------------------------------------------------------------------ | -------- | ------- | ------ |
-| 5   | Q-007  | Jo custom role khud ko appoint kare (`appointedBy` me apna key), use `roleProblems` refuse kare                                                        | 2 ghante | Pending |        |
-| 6   | DR-007 | Security Officer Master ka authenticator reset nahi kar sakta; Master ka reset sirf doosra Master kare                                                 | ½ din    | Pending |        |
-| 7   | DR-008 | Reviewer roles ki `GET /iam/grants` list me sign-up/self roles (`customer.customer`, applicants) nahi; ek user email se dhoondh sakte (`?email=`)      | ½ din    | Pending |        |
-| 8   | DR-010 | "Turn off authenticator" aur "Set up on a new phone" pe hamesha naya code (window 0); baaki step-up ka 5 min window wahi, Master ke grants bhi         | ½ din    | Pending |        |
-| 9   | DR-006 | Social sign-in method hatane se pehle "recent sign-in" (10 min ke andar password ya email code; authenticator wale account pe step-up), auth-ui me bhi | ½ din    | Pending |        |
+| #   | ID     | Kya karna                                                                                                                                              | Mehnat   | Status  | Commit                    |
+| --- | ------ | ------------------------------------------------------------------------------------------------------------------------------------------------------ | -------- | ------- | ------------------------- |
+| 5   | Q-007  | Jo custom role khud ko appoint kare (`appointedBy` me apna key), use `roleProblems` refuse kare                                                        | 2 ghante | Done    | Q-007 commit (2026-11-12) |
+| 6   | DR-007 | Security Officer Master ka authenticator reset nahi kar sakta; Master ka reset sirf doosra Master kare                                                 | ½ din    | Pending |                           |
+| 7   | DR-008 | Reviewer roles ki `GET /iam/grants` list me sign-up/self roles (`customer.customer`, applicants) nahi; ek user email se dhoondh sakte (`?email=`)      | ½ din    | Pending |                           |
+| 8   | DR-010 | "Turn off authenticator" aur "Set up on a new phone" pe hamesha naya code (window 0); baaki step-up ka 5 min window wahi, Master ke grants bhi         | ½ din    | Pending |                           |
+| 9   | DR-006 | Social sign-in method hatane se pehle "recent sign-in" (10 min ke andar password ya email code; authenticator wale account pe step-up), auth-ui me bhi | ½ din    | Pending |                           |
 
 ### 3. Chhote backend
 

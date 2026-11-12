@@ -162,6 +162,18 @@ describe('roles', () => {
     expect(await bad({ permissions: ['iam.totp.reset'], scopeTypes: ['state'] })).toEqual([
       ['permissions', 'iam.totp.reset cannot be used in any of its scope types'],
     ]);
+    // a role that gives itself would spread past Master: its holders make more holders (Q-007)
+    const spreader = await as(boss, 'master', 'POST', '/iam/roles', {
+      ...desk,
+      slug: 'spreader',
+      permissions: ['iam.grant.manage'],
+      appointedBy: ['admin.c_spreader'],
+    });
+    expect(spreader.status).toBe(400);
+    expect(spreader.body.error?.details).toContainEqual({
+      path: ['appointedBy'],
+      message: 'a role cannot appoint itself',
+    });
     // not Master: no
     const logistics = await account('lh-roles');
     await hold(logistics, 'logistics.logistics_head');
