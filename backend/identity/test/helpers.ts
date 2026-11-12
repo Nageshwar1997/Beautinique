@@ -34,6 +34,7 @@ import {
   expectNoCollectionScans,
   watchCollectionScans,
 } from '../../../scripts/e2e/collection-scans.ts';
+import { expectObjectIds } from '../../../scripts/e2e/object-ids.ts';
 import { readConfig } from '../src/config.ts';
 import {
   AUTH_PROVIDERS,
@@ -176,6 +177,8 @@ export async function startHarness(name: string): Promise<Harness> {
       try {
         // what every identity of this file asked, not the test's own look-ups
         await expectNoCollectionScans(look.db, ['identity']);
+        // every document's _id and every reference an ObjectId (RULES §4.17)
+        await expectObjectIds(look.db);
       } finally {
         await look.db.dropDatabase();
         await look.close();

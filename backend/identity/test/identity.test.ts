@@ -10,6 +10,7 @@ import {
   expectNoCollectionScans,
   watchCollectionScans,
 } from '../../../scripts/e2e/collection-scans.ts';
+import { expectObjectIds } from '../../../scripts/e2e/object-ids.ts';
 import { readConfig } from '../src/config.ts';
 import { release, start } from '../src/service.ts';
 
@@ -34,6 +35,8 @@ beforeAll(async () => {
 afterAll(async () => {
   try {
     await expectNoCollectionScans(watch.db, ['identity', 'identity-release']);
+    // every document's _id and every reference an ObjectId (RULES §4.17)
+    await expectObjectIds(watch.db);
   } finally {
     await watch.db.dropDatabase();
     await watch.close();

@@ -26,6 +26,7 @@ import {
   expectNoCollectionScans,
   watchCollectionScans,
 } from '../../../scripts/e2e/collection-scans.ts';
+import { expectObjectIds } from '../../../scripts/e2e/object-ids.ts';
 import { readConfig } from '../src/config.ts';
 import {
   DELIVERIES,
@@ -80,6 +81,9 @@ beforeAll(async () => {
 afterAll(async () => {
   try {
     await expectNoCollectionScans(mongo.db, ['notify', 'notify-release']);
+    // every document's _id and every reference an ObjectId (RULES §4.17)
+    await expectObjectIds(mongo.db);
+    await expectObjectIds(mongo.client.db(producerDbName));
   } finally {
     await app.close();
     await mongo.db.dropDatabase();

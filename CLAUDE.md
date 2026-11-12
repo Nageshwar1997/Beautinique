@@ -99,6 +99,7 @@ npm run build
   **Ids (owner, 2026-11-12):** har document ka `_id` ObjectId aur har reference (userId, roleId, appId, eventId ...)
   ObjectId; naam (role key, lease, task ...) alag unique field me. API/JWT me 24-hex string (`objectIdZod`), query se pehle
   `toObjectId`/`parseObjectId`. ObjectId kabhi secret nahi (RULES §7.6); UUIDv7 sirf Redis ids, Idempotency-Key, offline actions.
+  Deployable ke tests ke aakhir me ObjectId pehra (`scripts/e2e/object-ids.ts`) bhi chalta hai.
 - **Events:** `writeEvent` (`@beautinique/backend-server-queue`) usi `withTransaction` me jisme data badla; relay BullMQ tak le jaata hai.
   Change stream (`.watch(`) sirf us relay me (ESLint rokta hai). Redis: laptop/CI pe Docker Valkey, production me Render Key Value free (internal URL), `REDIS_URL` se;
   production Redis laptop ya tests se kabhi nahi.

@@ -2,7 +2,7 @@
 
 > **Temp file, sirf owner ki tracking ke liye.** Owner ke kehne pe (2026-11-09) abhi git me rehti hai; status update har item ke commit me. Kisi aur doc, file ya memory me iska zikr nahi. Saare items **Done** hote hi ye file repo se delete.
 >
-> **Last update:** 2026-11-12 (hissa 0–5 poore; 19 Done (PR #63 merge, `fcc619b`); 20 chal raha (PR #64 merge, `d075dcd`, live jaanch baaki); 21–22 hissa 7 ke baad; hissa 7 (OBJECTID, owner 2026-11-12) branch `feat/objectid` pe: 23, 24 Done (local commits), 25 chal raha). **Faisla:** owner ne neeche ki har salah maan li (2026-11-09). Asli docs (report §9 "Owner ka jawab", ARCHITECTURE/RULES/README, MEMORY decision, HANDOFF, TASKS, change logs) har item ke commit me update honge, is file ka naam liye bina.
+> **Last update:** 2026-11-12 (hissa 0–5 poore; 19 Done (PR #63 merge, `fcc619b`); 20 chal raha (PR #64 merge, `d075dcd`, live jaanch baaki); 21–22 hissa 7 ke baad; hissa 7 (OBJECTID, owner 2026-11-12) branch `feat/objectid` pe: 23–25 Done (local commits), 26 PR baaki). **Faisla:** owner ne neeche ki har salah maan li (2026-11-09). Asli docs (report §9 "Owner ka jawab", ARCHITECTURE/RULES/README, MEMORY decision, HANDOFF, TASKS, change logs) har item ke commit me update honge, is file ka naam liye bina.
 
 ## Kitna bacha
 
@@ -15,8 +15,8 @@
 | 4. Apps                   | 7      | 7      | 0     | Ho gaya                              |
 | 5. CI                     | 1      | 1      | 0     | Ho gaya                              |
 | 6. Aakhri kadam           | 4      | 1      | 3     | ~1 ghanta (21–22 hissa 7 ke baad)    |
-| 7. ObjectId, live naya    | 5      | 2      | 3     | ~1 din                               |
-| **Kul (Claude)**          | **32** | **26** | **6** | **~1 din**                           |
+| 7. ObjectId, live naya    | 5      | 3      | 2     | ~2 ghante (owner ke merge ke saath)  |
+| **Kul (Claude)**          | **32** | **27** | **5** | **~3 ghante**                        |
 | Owner ke haath ke (O1–O5) | 5      | 0      | 5     | owner ka time                        |
 
 **Status:** `Pending` (shuru nahi), `Chal raha`, `Done`, `Ruka` (kisi ka intezaar). Har item Done hone pe upar ki table bhi.
@@ -108,7 +108,7 @@
 | --- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------- | -------- | ------- | ---------------------------------------- |
 | 23  | Kernel: contracts me Mongo ids ke liye `objectIdZod` (24 hex, `uuidv7Zod` ki jagah); `server-kit` me string → ObjectId helper (galat id pe 400/404, kabhi 500 nahi); `server-queue` ka `eventId` ObjectId (envelope, outbox, processed events, dead letters); kernel ki badli lines pe mutation                                                               | Claude                 | 1 din    | Done    | kernel commit (2026-11-12)               |
 | 24  | identity, notify, core: har entity ka `_id` aur reference ObjectId (users, sessions, credentials, sign-in providers, grants + log, invitations, legal acceptances, deliveries, audit, pings); record types me `_id: ObjectId`; JWT/passport me hex string, query se pehle helper; api-client fixtures aur E2E; permission/identity ki badli lines pe mutation | Claude                 | 2.5 din  | Done    | identity/notify/core commit (2026-11-12) |
-| 25  | Pehra test: deployables ke tests ke baad har entity collection me `_id` aur references ObjectId hi hon; naam wali keys ki collections ki list alag                                                                                                                                                                                                            | Claude                 | 2 ghante | Pending |                                          |
+| 25  | Pehra test: deployables ke tests ke baad har entity collection me `_id` aur references ObjectId hi hon; naam wali keys ki collections ki list alag                                                                                                                                                                                                            | Claude                 | 2 ghante | Done    | pehra commit (2026-11-12)                |
 | 26  | PR `feat/objectid` → `prerelease` (CI `check` green, merge owner)                                                                                                                                                                                                                                                                                             | Claude PR, owner merge | 30 min   | Pending |                                          |
 | 27  | PR `prerelease` → `release`; deploy ke turant baad owner O5, phir live jaanch: `/status` ok, sign-up, Atlas me `identity_users._id` = `ObjectId(...)` (har live GET se pehle owner se poochho)                                                                                                                                                                | Claude PR, owner merge | 1 ghanta | Pending |                                          |
 

@@ -1,6 +1,6 @@
 # RULES — BQ
 
-> **Status:** v1.22 (2026-11-12). Ye niyam Beautinique ke har code, doc aur deploy pe lagu hain. [PRD.md](PRD.md) batata hai **kya** banana hai, [ARCHITECTURE.md](ARCHITECTURE.md) batata hai **kaise**, aur ye file batati hai ki **kin niyamon ke saath**. Koi rule todna ho to pehle is file me badlav aur change log entry.
+> **Status:** v1.23 (2026-11-12). Ye niyam Beautinique ke har code, doc aur deploy pe lagu hain. [PRD.md](PRD.md) batata hai **kya** banana hai, [ARCHITECTURE.md](ARCHITECTURE.md) batata hai **kaise**, aur ye file batati hai ki **kin niyamon ke saath**. Koi rule todna ho to pehle is file me badlav aur change log entry.
 
 ## 1. Kaam karne ke niyam
 
@@ -62,7 +62,7 @@
 14. **Migrations:** forward-only, idempotent, expand/contract; boot pe chalti hain (har deployable ki `src/release.ts`, `@beautinique/backend-server-release`). Id `YYYYMMDD-NNN-words`, list ke aakhir me; chal chuki migration ki id ya `up` kabhi nahi badalti (galti = nayi migration). Lambi backfill migration me nahi, queue task me (boot ke saare steps 60 s). Index uske naam ke neeche kabhi nahi badalta: nayi shakal = naya naam, purana baad me migration se hatao.
 15. **Errors:** `AppError` + common response envelope; error codes contracts me; user ko message error code se (English text ek jagah).
 16. **Cache headers:** login wale aur personal responses `private, no-store`; `s-maxage` sirf `cache: 'public'` contracts pe, aur unpe cookies upstream nahi jaati.
-17. **Ids (owner, 2026-11-12):** MongoDB me har document ka `_id` ObjectId, aur har reference jo kisi document ki taraf jaaye (userId, sessionId, grantId, roleId, appId, permissionIds, eventId, assetId ...) bhi ObjectId, string nahi. Jis record ki pehchaan naam hai (role key, permission key, app, signing key ka `kid`, lease, task, migration, din), uska naam ek alag unique field me, `_id` me nahi. Contracts, JWT, cookies aur URL me id ObjectId ka 24-hex string (`objectIdZod`); query se pehle `toObjectId` (galat id pe 400/404, kabhi 500 nahi) ya `parseObjectId` (`@beautinique/backend-server-mongo`). UUIDv7 sirf MongoDB ke bahar ke ids ke liye: Redis (sign-in, email-code challenge, OAuth state), Idempotency-Key, Delivery ke offline actions. Wajah ARCHITECTURE §6.1, MEMORY decision.
+17. **Ids (owner, 2026-11-12):** MongoDB me har document ka `_id` ObjectId, aur har reference jo kisi document ki taraf jaaye (userId, sessionId, grantId, roleId, appId, permissionIds, eventId, assetId ...) bhi ObjectId, string nahi. Jis record ki pehchaan naam hai (role key, permission key, app, signing key ka `kid`, lease, task, migration, din), uska naam ek alag unique field me, `_id` me nahi. Contracts, JWT, cookies aur URL me id ObjectId ka 24-hex string (`objectIdZod`); query se pehle `toObjectId` (galat id pe 400/404, kabhi 500 nahi) ya `parseObjectId` (`@beautinique/backend-server-mongo`). UUIDv7 sirf MongoDB ke bahar ke ids ke liye: Redis (sign-in, email-code challenge, OAuth state), Idempotency-Key, Delivery ke offline actions. Wajah ARCHITECTURE §6.1, MEMORY decision. **Pehra:** identity, notify, core aur bundle ke tests ke aakhir me `scripts/e2e/object-ids.ts` unke DB ka har document dekhta hai: `_id` ObjectId na ho, reference (`…Id`, `…Ids`, `…By`) string ho, ya kahin id text me likhi ho (event envelope aur Redis epoch chhod ke) to test fail.
 
 ## 5. Frontend
 
@@ -141,3 +141,4 @@
 | v1.20 | 2026-11-08 | §4.13: har query (sirf sort nahi) index se; jaan-boojh poora padhna `comment: 'full read: …'` se; identity, notify, core ke tests ka profiler pehra (owner, QA-ID-002). |
 | v1.21 | 2026-11-09 | §3.4, §3.5, §4.2: core ki module boundary aur "doosre deployable ka code nahi" ab dependency-cruiser (`npm run lint`) se; geo lint aur role-name lint abhi nahi (T4.10, T4.11), tab tak review (owner, QA-DOC-001). |
 | v1.22 | 2026-11-12 | §4.17: har `_id` aur reference ObjectId, naam alag unique field me, UUIDv7 sirf DB ke bahar; §7.6: ObjectId kabhi secret nahi (owner). |
+| v1.23 | 2026-11-12 | §4.17: ObjectId ka pehra deployables ke tests ke aakhir me (`scripts/e2e/object-ids.ts`). |

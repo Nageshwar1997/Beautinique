@@ -15,6 +15,7 @@ import { afterAll, describe, expect, it } from 'vitest';
 
 import { startBundle } from '../src/bundle.ts';
 import { readBundleConfig } from '../src/config.ts';
+import { expectObjectIds } from '../../../scripts/e2e/object-ids.ts';
 import { names } from '../src/deployables.ts';
 
 /** A role's or an app's id by its key, in identity's database (grants name them by id). */
@@ -46,10 +47,17 @@ const BLIND_INDEX_KEY = `b1:${randomBytes(32).toString('base64')}`;
 afterAll(async () => {
   const logger = createLogger({ name: 'bundle-test', level: 'silent' });
   const mongo = await connectMongo({ uri: MONGO_URI, dbName, appName: 'bundle-test', logger });
-  await mongo.db.dropDatabase();
-  await mongo.client.db(identityDbName).dropDatabase();
-  await mongo.client.db(notifyDbName).dropDatabase();
-  await mongo.close();
+  try {
+    // every document's _id and every reference an ObjectId, in all three databases (RULES §4.17)
+    for (const name of [dbName, identityDbName, notifyDbName]) {
+      await expectObjectIds(mongo.client.db(name));
+    }
+  } finally {
+    await mongo.db.dropDatabase();
+    await mongo.client.db(identityDbName).dropDatabase();
+    await mongo.client.db(notifyDbName).dropDatabase();
+    await mongo.close();
+  }
   const redis = await connectRedis({ url: REDIS_DB, name: 'bundle-test', logger });
   await redis.client.flushdb();
   await redis.close();
