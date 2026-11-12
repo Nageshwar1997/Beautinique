@@ -11,6 +11,7 @@ import {
 } from '@beautinique/backend-server-mongo';
 import { PLATFORM_INDEXES, releaseLease, tryLease } from '@beautinique/backend-server-queue';
 
+import { dropIfBeforeObjectIds } from './before-objectids';
 import { ReleaseLeaseLostError, ReleaseLockTimeoutError } from './errors';
 import {
   defineMigrations,
@@ -240,6 +241,9 @@ export async function runRelease(options: RunReleaseOptions): Promise<ReleaseRep
     return nothing();
   }
 
+  // a database from before ObjectIds goes whole first: its leases alone would stop the lease
+  // below (owner, 2026-11-12)
+  await dropIfBeforeObjectIds(mongo, logger);
   const lease = await takeLease(mongo, logger, { lockTtlMs, waitMs, pollMs });
   try {
     // another instance may have finished this release while we waited for the lease

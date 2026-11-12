@@ -141,8 +141,10 @@ async function evenly<T>(work: () => Promise<T>): Promise<T> {
   try {
     return await work();
   } finally {
-    const left = until - performance.now();
-    if (left > 0) await sleep(left);
+    // a timer counts whole milliseconds and may wake a fraction early: look again until it is due
+    for (let left = until - performance.now(); left > 0; left = until - performance.now()) {
+      await sleep(Math.ceil(left));
+    }
   }
 }
 
