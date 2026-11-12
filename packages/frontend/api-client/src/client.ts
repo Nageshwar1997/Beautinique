@@ -16,10 +16,14 @@ import { isApiError } from './errors';
 export const API_BASE_URL = '/api/v1';
 
 /**
- * How long a refresh waits after another tab refreshed the same session a moment earlier (409):
- * that tab's answer sets the new cookies, which this tab shares.
+ * After another tab refreshed the same session a moment earlier (409), how long a refresh waits at
+ * most for that tab to say its answer came (`refreshed` on the app's channel): the answer sets the
+ * new cookies, which this tab shares. The old refresh token never goes again: after 10 s identity
+ * takes it for a stolen copy and ends the session (ARCHITECTURE §7.2; QA Q-010, owner 2026-11-12).
  */
-export const OTHER_TAB_REFRESH_WAIT_MS = 300;
+export const OTHER_TAB_REFRESH_WAIT_MS = 5_000;
+/** Without a BroadcastChannel to hear the other tab on (an old browser): a short wait instead. */
+const NO_CHANNEL_WAIT_MS = 300;
 
 /** What a session did: told to the app's listeners, and to its other tabs when the app says so. */
 export type SessionChange = 'signed-in' | 'signed-out';
@@ -125,27 +129,57 @@ export function createApiClient(options: ApiClientOptions): ApiClient {
     for (const listener of listeners) listener(change);
   };
 
+  // the other tabs' refreshes: how many were heard, and the refreshes waiting for the next one
+  let refreshesHeard = 0;
+  const refreshWaiters = new Set<() => void>();
+
   let channel: BroadcastChannel | undefined;
   const openChannel = () => {
     if (channel !== undefined) return;
     if (typeof window === 'undefined' || typeof BroadcastChannel === 'undefined') return;
     channel = new BroadcastChannel(`bq:${options.app}:session`);
     channel.onmessage = (event: MessageEvent<unknown>) => {
-      if (event.data === 'signed-in' || event.data === 'signed-out') notify(event.data);
+      if (event.data === 'refreshed') {
+        refreshesHeard += 1;
+        for (const wake of refreshWaiters) wake();
+      } else if (event.data === 'signed-in' || event.data === 'signed-out') {
+        notify(event.data);
+      }
     };
+  };
+
+  /** Another tab said its refresh came after `heard` of them, or the longest wait went by. */
+  const otherTabRefreshed = (heard: number): Promise<void> => {
+    if (refreshesHeard > heard) return Promise.resolve();
+    if (channel === undefined) return delay(NO_CHANNEL_WAIT_MS);
+    return new Promise<void>((resolve) => {
+      const wake = () => {
+        clearTimeout(timer);
+        refreshWaiters.delete(wake);
+        resolve();
+      };
+      const timer = setTimeout(wake, OTHER_TAB_REFRESH_WAIT_MS);
+      refreshWaiters.add(wake);
+    });
   };
 
   let refreshing: Promise<boolean> | null = null;
   const runRefresh = async (): Promise<boolean> => {
     if (serverGate !== null) await serverGate;
+    // listening before asking: the other tab's word can come before this tab's own 409
+    openChannel();
+    const heard = refreshesHeard;
     try {
       await inner.call(refreshSession);
+      // tabs of the app that got a 409 meanwhile can send their calls now, with these cookies
+      channel?.postMessage('refreshed');
       return true;
     } catch (error) {
       if (isApiError(error, 'REFRESH_IN_PROGRESS')) {
-        // Another tab refreshed this session a moment ago, and its new cookies are this tab's too.
-        // Asking again with the old refresh token would look like a stolen one (ARCHITECTURE §7.2).
-        await delay(OTHER_TAB_REFRESH_WAIT_MS);
+        // Another tab refreshed this session a moment ago, and its new cookies are this tab's too
+        // once its answer comes. Asking again with the old refresh token would look like a stolen
+        // one after 10 s (ARCHITECTURE §7.2), so this tab waits to hear the other one (QA Q-010).
+        await otherTabRefreshed(heard);
         return true;
       }
       if (isApiError(error, 'SESSION_EXPIRED')) {
@@ -238,6 +272,8 @@ export function createApiClient(options: ApiClientOptions): ApiClient {
       listeners.clear();
       channel?.close();
       channel = undefined;
+      // nothing to hear any more: a refresh waiting on another tab goes on
+      for (const wake of refreshWaiters) wake();
     },
   };
 }

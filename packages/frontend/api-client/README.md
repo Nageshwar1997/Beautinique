@@ -39,7 +39,7 @@ const queryClient = createQueryClient();
 
 1. **Refresh:** `401 UNAUTHENTICATED` (access token khatam) pe ek refresh, phir wahi call **ek baar** dobara. Dobara bhi 401 to error (loop nahi).
 2. **Line:** refresh chal raha ho to nayi call uske khatam hone ka intezaar karti hai, purane cookie ke saath nahi jaati.
-3. **Doosra tab (409 `REFRESH_IN_PROGRESS`):** doosre tab ne abhi refresh kiya; uske naye cookies is tab ke bhi hain. Client 300 ms (`OTHER_TAB_REFRESH_WAIT_MS`) ruk ke call dobara bhejta hai, **refresh dobara nahi**: purane refresh token se dobara poochhna chori jaisa dikhta (session band, ARCHITECTURE §7.2).
+3. **Doosra tab (409 `REFRESH_IN_PROGRESS`):** doosre tab ne abhi refresh kiya; uske naye cookies is tab ke bhi hain. Jo tab refresh kar leta hai wo app ke BroadcastChannel (`bq:<app>:session`) pe `refreshed` bhejta hai; 409 wala tab us sandesh ka intezaar karta hai (pehle aa chuka ho to turant; max 5 s, `OTHER_TAB_REFRESH_WAIT_MS`), phir call dobara bhejta hai, **refresh dobara nahi**: purane refresh token se dobara poochhna 10 s ke baad chori jaisa dikhta (session band + security email, ARCHITECTURE §7.2). Pehle fixed 300 ms tha: pehle tab ka jawab der se aata to doosra tab signed-out dikhta (QA Q-010, owner 2026-11-12). BroadcastChannel na ho (purana browser) to 300 ms.
 4. **Session khatam (`SESSION_EXPIRED`):** listeners ko `signed-out` (sirf is tab me), call fail. Offline ya 5xx pe `signed-out` nahi.
 5. **Step-up:** `401 STEP_UP_REQUIRED` pe handler (ek saath kai calls = ek dialog); `true` pe wahi request dobara, `false` ya handler na ho to error.
 6. **Idempotency-Key:** jis route ko chahiye, uski har try (pehli, refresh ke baad, step-up ke baad) pe **ek hi key**; `idempotencyKey` diya ho to wahi.

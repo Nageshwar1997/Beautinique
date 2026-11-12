@@ -1,6 +1,6 @@
 # ARCHITECTURE — BQ
 
-> **Status:** v1.80 draft (2026-11-12). [PRD.md](PRD.md) v1.0 pe based. Design ek multi-agent review se aaya (3 architecture proposals + review board + owner ke decisions), aur v1.1 me free tier ke official docs ke against verify hua.
+> **Status:** v1.81 draft (2026-11-12). [PRD.md](PRD.md) v1.0 pe based. Design ek multi-agent review se aaya (3 architecture proposals + review board + owner ke decisions), aur v1.1 me free tier ke official docs ke against verify hua.
 
 ## 0. Ek nazar me
 
@@ -274,7 +274,7 @@ Kai platforms alag users ko alag price dikhate hain. BQ ka rule: **ek product ka
 ### 7.2 Tokens, sessions aur cookies (bina domain ke)
 
 - **Access JWT:** ES256, 10 min, `aud = bq:<app>`. Token me roles nahi hote, sirf session aur authz version.
-- **Refresh token:** random, hashed store, har use pe rotate hota hai. Purana token dobara use hua to poori family revoke ho jati hai aur security alert jata hai. Ek session pe ek waqt me ek refresh: turant pichhla token 10 s ke andar aaye to parallel tab (409, naye cookie ke saath dobara), uske baad chori (owner, 2026-10-28). Token `<sessionId>.<family>.<secret>`: family (16 random bytes) session bhar ek, secret (32 random bytes) har refresh pe naya; DB me dono ke sirf HMAC. Usi family ka **koi bhi** purana token (sirf turant pichhla nahi) = chori; galat family wala token chupchaap 401, kuch band nahi (QA-ID-001, 2026-11-07). Family se pehle bane sessions (`<sessionId>.<secret>`) agle refresh pe family paate hain.
+- **Refresh token:** random, hashed store, har use pe rotate hota hai. Purana token dobara use hua to poori family revoke ho jati hai aur security alert jata hai. Ek session pe ek waqt me ek refresh: turant pichhla token 10 s ke andar aaye to parallel tab (409; server cookie nahi deta: app us tab ka `refreshed` sandesh BroadcastChannel pe sunti, max 5 s, phir uske naye cookie ke saath call dobara, purana token dobara kabhi nahi; QA Q-010, owner 2026-11-12), uske baad chori (owner, 2026-10-28). Token `<sessionId>.<family>.<secret>`: family (16 random bytes) session bhar ek, secret (32 random bytes) har refresh pe naya; DB me dono ke sirf HMAC. Usi family ka **koi bhi** purana token (sirf turant pichhla nahi) = chori; galat family wala token chupchaap 401, kuch band nahi (QA-ID-001, 2026-11-07). Family se pehle bane sessions (`<sessionId>.<secret>`) agle refresh pe family paate hain.
 - **Token keys:** ES256 keys identity ke DB me (`identity_signing_keys`), private key `IDENTITY__FIELD_KEYS` se sealed, har 30 din nayi, JWKS me 1 din zyada; gateway JWKS identity se padhta hai (anjaan `kid` pe dobara). Env me koi naya secret nahi.
 - **Passport (owner, 2026-10-28):** gateway har start pe apni nayi ES256 key banata hai aur public key apne endpoint pe deta hai; passport 60 s ka, isliye env me shared secret nahi.
 - **My Devices (owner, 2026-10-28):** account ke saare apps ke sessions ek list me, current alag nishaan ke saath. Delivery ka device binding delivery app (PWA) ke saath.
@@ -741,3 +741,4 @@ Sirf config badlegi, code nahi:
 | v1.78 | 2026-11-12 | §10: sign-in method hatane se pehle 10 min ka password/email-code sign-in ya step-up (DR-006, owner). |
 | v1.79 | 2026-11-12 | §7.1: bina HIBP jaanch aaye password ki agle sign-in pe jaanch, leak pe naya password (DR-002, owner). |
 | v1.80 | 2026-11-12 | §7.1: `/iam/me` me authenticator chalu rakhne wale roles; jahan band nahi ho sakta wahan "Turn off" ki jagah wajah (DR-011, owner). |
+| v1.81 | 2026-11-12 | §7.2: 409 ke baad app doosre tab ka `refreshed` sandesh sunti (max 5 s), fixed 300 ms nahi (Q-010, owner). |
