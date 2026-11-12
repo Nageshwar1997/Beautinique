@@ -1,9 +1,9 @@
 ---
 date: 2026-11-04
 day: 2
-status: ready # draft | ready | scheduled | posted (README §2)
-posted_at:
-link:
+status: posted # draft | ready | scheduled | posted (README §2)
+posted_at: 2026-11-05
+link: https://lnkd.in/p/e2WGHtvV
 covers: 'PR #3 (Phase 1 part), #4, #7' # Phase 1 commits e533ace..ad98303 (mongo, queue, crypto, contracts, authz, core sample)
 ---
 
