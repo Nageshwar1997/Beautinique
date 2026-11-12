@@ -54,6 +54,10 @@ export const IDENTITY_ERROR_CODES = {
   OTP_RESEND_LIMIT: 429,
   /** Too many codes for this email in the last hour */
   OTP_EMAIL_LIMIT: 429,
+  /** Sign-up codes have used up their share of today's emails (QA DR-009) */
+  OTP_SIGN_UP_LIMIT: 429,
+  /** Every IP together asked for too many codes this hour (QA DR-009) */
+  OTP_BUSY: 429,
   /** Wrong email or password, or too many wrong tries: the same answer for all three */
   INVALID_CREDENTIALS: 401,
   /** The password is in a known data breach (Have I Been Pwned): choose another */

@@ -89,6 +89,8 @@ describe('identity', () => {
       otpEventKeys: OTP_EVENT_KEYS,
       otpEmailLimitPerHour: 5,
       loginHashesPerMinute: 30,
+      codesPerHour: 60,
+      signUpCodesPerDay: 100,
       legalVersion: 'dummy-1',
       hibpUrl: 'https://api.pwnedpasswords.com',
       passportJwksUrl: 'http://localhost:8080/.well-known/passport-jwks.json',

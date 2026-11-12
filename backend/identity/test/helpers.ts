@@ -111,8 +111,10 @@ export async function startHarness(name: string): Promise<Harness> {
     IDENTITY__BLIND_INDEX_KEY: blindIndexKey,
     IDENTITY__OTP_EVENT_KEYS: otpEventKeys,
     IDENTITY__HIBP_URL: fake.url,
-    // the tests sign in far more than 30 times a minute; a test of the budget sets its own
+    // the tests sign in and ask for codes far more than live allows; a test of a budget sets its own
     IDENTITY__LOGIN_HASHES_PER_MINUTE: '100000',
+    IDENTITY__CODES_PER_HOUR: '100000',
+    IDENTITY__SIGN_UP_CODES_PER_DAY: '100000',
     ...more,
   });
   const passport = passportSigner();

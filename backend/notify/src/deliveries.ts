@@ -61,6 +61,9 @@ export const SEND_BATCH = 20;
  * (order, refund, security), then the rest, which waits for the next day (ARCHITECTURE §7.1).
  */
 export const LANES = { otp: 0, transactional: 1, other: 2 } as const;
+
+/** The part of the day's email limit after which notify warns, once (owner, 2026-11-12, QA DR-009). */
+export const BUDGET_WARNING = 0.8;
 export type Lane = keyof typeof LANES;
 
 type Status = 'queued' | 'sending' | 'sent' | 'expired' | 'failed';
@@ -504,8 +507,20 @@ export async function sendDue({
       { upsert: true },
     );
     const limit = lane === 'other' ? limits.other : limits.daily;
-    const counted = await days.updateOne({ _id: day, sent: { $lt: limit } }, { $inc: { sent: 1 } });
-    return counted.modifiedCount === 1;
+    const counted = await days.findOneAndUpdate(
+      { _id: day, sent: { $lt: limit } },
+      { $inc: { sent: 1 } },
+      { returnDocument: 'after' },
+    );
+    if (counted === null) return false;
+    // once a day, as the count crosses it: time to look before codes stop (QA DR-009)
+    if (counted.sent === Math.ceil(limits.daily * BUDGET_WARNING)) {
+      logger.warn(
+        { day, sent: counted.sent, daily: limits.daily },
+        'email budget nearly used today',
+      );
+    }
+    return true;
   };
   const giveBack = (at: Date) => days.updateOne({ _id: dayOf(at) }, { $inc: { sent: -1 } });
 

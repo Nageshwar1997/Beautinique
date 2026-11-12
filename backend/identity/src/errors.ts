@@ -35,6 +35,18 @@ export const otpEmailLimit = (): AppError =>
     'Too many codes were asked for this email. Please try again in an hour.',
     { status: IDENTITY_ERROR_CODES.OTP_EMAIL_LIMIT },
   );
+export const otpSignUpLimit = (): AppError =>
+  new AppError(
+    'OTP_SIGN_UP_LIMIT',
+    "We can't send more sign-up codes today. Please try again tomorrow.",
+    { status: IDENTITY_ERROR_CODES.OTP_SIGN_UP_LIMIT },
+  );
+export const otpBusy = (): AppError =>
+  new AppError(
+    'OTP_BUSY',
+    "We're sending a lot of codes right now. Please try again in a few minutes.",
+    { status: IDENTITY_ERROR_CODES.OTP_BUSY },
+  );
 
 /** Redis is away: no code can be kept, so none is sent (ARCHITECTURE §6.6). */
 export const otpUnavailable = (cause: unknown): AppError =>

@@ -58,6 +58,8 @@ const quiet = () => ({
   IDENTITY__HIBP_URL: 'http://127.0.0.1:9',
   // the tests sign in more than a live minute's 30 hashes (QA DR-004)
   IDENTITY__LOGIN_HASHES_PER_MINUTE: '1000',
+  IDENTITY__CODES_PER_HOUR: '1000',
+  IDENTITY__SIGN_UP_CODES_PER_DAY: '1000',
   NOTIFY__MONGO_URI: MONGO_URI,
   NOTIFY__MONGO_DB_NAME: notifyDbName,
   NOTIFY__REDIS_URL: REDIS_DB,

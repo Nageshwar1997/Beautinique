@@ -611,6 +611,49 @@ const mutations: Mutation[] = [
     ],
     tests: 'DR-003',
   },
+  // the code emails of every IP together (DR-009)
+  {
+    file: 'code-budget',
+    name: 'no hourly budget',
+    change: [['    if (!allowed) throw otpBusy();\n', '']],
+    tests: 'DR-009',
+  },
+  {
+    file: 'code-budget',
+    name: 'no sign-up share',
+    change: [['    if (count > signUpPerDay) throw otpSignUpLimit();\n', '']],
+    tests: 'DR-009',
+  },
+  {
+    file: 'code-budget',
+    name: 'password codes take from the sign-up share',
+    change: [['    if (!signUp) return;\n', '']],
+    tests: 'DR-009',
+  },
+  {
+    file: 'code-budget',
+    name: 'the hour is a minute',
+    change: [
+      [
+        'const hour = { limit: perHour, windowMs: 60 * 60_000 };',
+        'const hour = { limit: perHour, windowMs: 60_000 };',
+      ],
+    ],
+    tests: 'DR-009',
+    survives: 'no test waits out a minute or an hour: both windows refuse the fourth code at once',
+  },
+  {
+    file: 'otp',
+    name: 'a resend takes nothing from the budgets',
+    change: [["  await deps.codes({ signUp: challenge.purpose === 'sign-up' });\n", '']],
+    tests: 'DR-009',
+  },
+  {
+    file: 'otp',
+    name: 'a new code takes nothing from the budgets',
+    change: [['  await deps.codes({ signUp });\n', '']],
+    tests: 'DR-009',
+  },
   // sessions (T3.2)
   {
     file: 'sessions',

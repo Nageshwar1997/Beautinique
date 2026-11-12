@@ -30,6 +30,7 @@ import {
   signInMethodChanged,
 } from '@beautinique/shared-contracts';
 
+import { codeBudget } from './code-budget.ts';
 import type { Config } from './config.ts';
 import { socialSettings } from './oauth-providers.ts';
 import type { OtpDeps } from './otp.ts';
@@ -179,6 +180,12 @@ export async function startRuntime(config: Config, options: RuntimeOptions): Pro
         loginHashes: loginHashBudget({
           redis: redis.client,
           perMinute: config.loginHashesPerMinute,
+          ...(rateLimitPrefix === undefined ? {} : { prefix: rateLimitPrefix }),
+        }),
+        codes: codeBudget({
+          redis: redis.client,
+          perHour: config.codesPerHour,
+          signUpPerDay: config.signUpCodesPerDay,
           ...(rateLimitPrefix === undefined ? {} : { prefix: rateLimitPrefix }),
         }),
         social: socialSettings(config),

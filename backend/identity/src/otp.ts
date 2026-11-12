@@ -21,6 +21,7 @@ import { uuidv7 } from '@beautinique/shared-utils';
 import type { Request } from 'express';
 import type { Redis } from 'ioredis';
 
+import type { CodeBudget } from './code-budget.ts';
 import {
   otpEmailLimit,
   otpExpired,
@@ -101,6 +102,8 @@ export interface OtpDeps {
   breached: BreachCheck;
   /** The sign-in hashes of every IP together (QA DR-004) */
   loginHashes: LoginHashBudget;
+  /** The code emails of every IP together (QA DR-009) */
+  codes: CodeBudget;
   /** The last step of a sign-in, and the sessions of My Devices */
   sessions: Sessions;
   /** Who signed in, from the gateway's passport (signed-in routes) */
@@ -236,6 +239,7 @@ async function requestCodeNow(
       details: problems,
     });
   }
+  await deps.codes({ signUp });
   await countEmail(deps, email, ip);
   const send =
     signUp ||
@@ -308,6 +312,7 @@ async function resendCodeNow(
   // a refused resend must not use up the email's hourly codes; the script checks again atomically
   if (Number(challenge.resends) >= OTP_MAX_RESENDS) throw otpResendLimit();
   if (Number(challenge.resendAfter) > now) throw otpResendTooSoon();
+  await deps.codes({ signUp: challenge.purpose === 'sign-up' });
   await countEmail(deps, challenge.email, ip);
   const code = newCode();
   const expiresAt = now + OTP_TTL_MS;

@@ -1,6 +1,6 @@
 # ARCHITECTURE — BQ
 
-> **Status:** v1.72 draft (2026-11-12). [PRD.md](PRD.md) v1.0 pe based. Design ek multi-agent review se aaya (3 architecture proposals + review board + owner ke decisions), aur v1.1 me free tier ke official docs ke against verify hua.
+> **Status:** v1.73 draft (2026-11-12). [PRD.md](PRD.md) v1.0 pe based. Design ek multi-agent review se aaya (3 architecture proposals + review board + owner ke decisions), aur v1.1 me free tier ke official docs ke against verify hua.
 
 ## 0. Ek nazar me
 
@@ -269,7 +269,7 @@ Kai platforms alag users ko alag price dikhate hain. BQ ka rule: **ek product ka
 - **Password (owner, 2026-10-27):** min 12, max 128 characters, koi composition rule nahi (NIST SP 800-63B). Leaked passwords HIBP Pwned Passwords range API (k-anonymity, free) se roke jaate hain; API na mile to signup/badlav nahi rukta (fail-open, log ke saath).
 - **TOTP kho jaye (owner, 2026-10-27):** enroll pe 10 recovery codes (ek-ek baar, hashed); Security Officer ka reset T3.3 ke saath.
 - **Mobile pe koi message nahi** (na SMS, na WhatsApp; owner ka frozen faisla, 2026-10-20): na login OTP, na doorstep delivery OTP, na order updates. Delivery OTP customer ko order page aur email me dikhta hai, aur notifications in-app, email aur browser push se jaate hain. Wajah (2026-10-20 ki research): India me sasta SMS TRAI DLT registration ke bina nahi jata, jiske liye registered business ka proof chahiye (dummy brand ke paas nahi), aur bina DLT ke raaste (Firebase, Twilio, WhatsApp) paid hain ya card maangte hain.
-- **Email ka daily budget:** Brevo free plan 300 emails/din deta hai, saare emails milake. Notify ginti rakhta hai; OTP fast lane me sabse pehle jata hai, aur din ke 250 emails ke baad sirf OTP aur transactional emails (order, refund, security) jaate hain, baaki agle din. Sessions lambe hain (customer 30 din, delivery 7–14 din device-bound), isliye OTP kam baar lagta hai.
+- **Email ka daily budget:** Brevo free plan 300 emails/din deta hai, saare emails milake. Notify ginti rakhta hai; OTP fast lane me sabse pehle jata hai, aur din ke 250 emails ke baad sirf OTP aur transactional emails (order, refund, security) jaate hain, baaki agle din. Sessions lambe hain (customer 30 din, delivery 7–14 din device-bound), isliye OTP kam baar lagta hai. **Bina sign-in codes ka budget (owner, 2026-11-12, QA DR-009):** identity sab IPs milake ghante me 60 code emails (resend bhi) aur UTC din me 100 sign-up codes bhejti hai, taaki banawati sign-ups din ka budget na kha sakein aur password reset, invitation aur security emails ke liye jagah bache; khatam pe app ko turant saaf sandesh (`OTP_BUSY`, `OTP_SIGN_UP_LIMIT`). Notify din ke 80% pe ek warning log deta hai.
 
 ### 7.2 Tokens, sessions aur cookies (bina domain ke)
 
@@ -731,3 +731,4 @@ Sirf config badlegi, code nahi:
 | v1.70 | 2026-11-10 | §14: gateway `/ready` ka jawab 5 s reuse (DR-001, owner). |
 | v1.71 | 2026-11-12 | §7.2 + §11: sab IPs ka sign-in hash budget (30/min), locked pe hash nahi, IPv6 /48 bucket 4 guna (DR-004, owner). |
 | v1.72 | 2026-11-12 | §7.1: rok email + IP, account-wide 50/15 min → 15 min, rok ke dauraan tries nahi, code me IP ka hissa 3 (DR-003, owner). |
+| v1.73 | 2026-11-12 | §7.1: code emails 60/ghanta sab IPs, sign-up 100/din, saaf sandesh, notify 80% warning (DR-009, owner). |

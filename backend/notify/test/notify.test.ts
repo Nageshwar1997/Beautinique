@@ -491,6 +491,21 @@ describe('sendDue', () => {
     );
   });
 
+  it('warns once when 80% of the day’s emails are sent (DR-009)', async () => {
+    const { sender } = fakeSender();
+    await mongo.db
+      .collection<{ _id: string; sent: number; createdAt: Date }>(EMAIL_DAYS)
+      .insertOne({ _id: '2026-10-27', sent: 7, createdAt: now });
+    await queue('1');
+    await queue('2');
+    const warned = () => lines.filter((l) => l.msg === 'email budget nearly used today');
+    const before = warned().length;
+    await run(sender, { limits: { daily: 10, other: 8 } });
+    // the 8th of 10 crossed it, the 9th did not warn again
+    expect(warned().length - before).toBe(1);
+    expect(warned().at(-1)).toMatchObject({ day: '2026-10-27', sent: 8, daily: 10 });
+  });
+
   it('takes back a send that stopped half way once its lease ran out', async () => {
     const { sender, sent } = fakeSender();
     const stuck = await queue('1', { status: 'sending', attempts: 1, leaseUntil: now });

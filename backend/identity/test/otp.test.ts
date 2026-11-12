@@ -14,6 +14,7 @@ import {
   consent,
   credentials,
   events,
+  freshIp,
   type Harness,
   hibp,
   makeAccount,
@@ -497,6 +498,53 @@ describe('new codes and limits', () => {
       expect((await from(`2001:db8:5:1::${String(i)}`, other)).status).toBe(200);
     }
     expect((await from('2001:db8:5:1::4', other)).status).toBe(429);
+  });
+
+  it('keeps sign-up codes to their share of the day, so password and invitation codes still go (DR-009)', async () => {
+    const owner = email('share-owner');
+    await makeAccount(owner);
+    const shared = await harness.start({ IDENTITY__SIGN_UP_CODES_PER_DAY: '2' });
+    try {
+      const signUp = (address: string) =>
+        post('/auth/sign-up/code', { email: address, consent }, { to: shared, ip: freshIp() });
+      expect((await signUp(email('share1'))).status).toBe(200);
+      expect((await signUp(email('share2'))).status).toBe(200);
+      const third = await signUp(email('share3'));
+      expect([third.status, third.body.error?.code]).toEqual([429, 'OTP_SIGN_UP_LIMIT']);
+      expect(third.body.error?.message).toBe(
+        "We can't send more sign-up codes today. Please try again tomorrow.",
+      );
+      // a password code is not part of that share
+      const reset = await post(
+        '/auth/password/code',
+        { email: owner },
+        { to: shared, ip: freshIp() },
+      );
+      expect(reset.status).toBe(200);
+    } finally {
+      await shared.stop();
+    }
+  });
+
+  it('sends at most the hour’s codes of every IP together, resends too (DR-009)', async () => {
+    const busy = await harness.start({ IDENTITY__CODES_PER_HOUR: '3' });
+    try {
+      const signUp = (address: string) =>
+        post('/auth/sign-up/code', { email: address, consent }, { to: busy, ip: freshIp() });
+      expect((await signUp(email('hour1'))).status).toBe(200);
+      const second = await signUp(email('hour2'));
+      expect(second.status).toBe(200);
+      const { challengeId } = second.body.data as { challengeId: string };
+      await allowResend(challengeId, busy);
+      expect((await post(`/auth/otp/${challengeId}/resend`, {}, { to: busy })).status).toBe(200);
+      const fourth = await signUp(email('hour3'));
+      expect([fourth.status, fourth.body.error?.code]).toEqual([429, 'OTP_BUSY']);
+      expect(fourth.body.error?.message).toBe(
+        "We're sending a lot of codes right now. Please try again in a few minutes.",
+      );
+    } finally {
+      await busy.stop();
+    }
   });
 
   it('refuses with 503 when Redis is away, sending no code it could not check', async () => {
