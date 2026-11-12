@@ -537,6 +537,41 @@ const mutations: Mutation[] = [
     change: [['  await dropIfBeforeObjectIds(mongo, logger);\n', '']],
     tests: 'before ObjectIds',
   },
+  {
+    file: 'before-objectids',
+    name: 'a database of today goes whole for what a release of before wrote into it',
+    change: [['  if (ofToday) {', '  if (false) {']],
+    tests: 'before ObjectIds',
+  },
+  {
+    file: 'before-objectids',
+    name: 'a release of today is taken for one of before',
+    change: [["{ _id: { $type: 'objectId' } }", "{ _id: { $type: 'string' } }"]],
+    tests: 'before ObjectIds',
+  },
+  {
+    file: 'before-objectids',
+    name: 'what a release of before wrote stays',
+    change: [
+      [
+        ".deleteMany({ _id: { $type: 'string' } } as never)",
+        ".deleteMany({ _id: { $type: 'bool' } } as never)",
+      ],
+    ],
+    tests: 'before ObjectIds',
+  },
+  {
+    file: 'before-objectids',
+    name: 'the removed records are not counted',
+    change: [['    if (deletedCount > 0) removed[name] = deletedCount;\n', '']],
+    tests: 'before ObjectIds',
+  },
+  {
+    file: 'before-objectids',
+    name: 'it warns when nothing was removed',
+    change: [['  if (Object.keys(removed).length === 0) return;\n', '']],
+    tests: 'before ObjectIds',
+  },
 ];
 
 export default mutations;
