@@ -1620,6 +1620,39 @@ const mutations: Mutation[] = [
     tests: 'removes it with its codes',
   },
   {
+    file: 'rbac/authority',
+    name: 'a reviewer’s list shows every customer (DR-008)',
+    change: [
+      [
+        'const reviewed = onePerson ? {} : { role: { $nin: signUpRoles } };',
+        'const reviewed = {};',
+      ],
+    ],
+    tests: 'a reviewer every role',
+  },
+  {
+    file: 'rbac/authority',
+    name: 'one person looked up hides their sign-up roles',
+    change: [
+      [
+        'const reviewed = onePerson ? {} : { role: { $nin: signUpRoles } };',
+        'const reviewed = { role: { $nin: signUpRoles } };',
+      ],
+    ],
+    tests: 'a reviewer every role',
+  },
+  {
+    file: 'rbac/manage',
+    name: 'a look-up by email is a list of everyone',
+    change: [
+      [
+        'const onePerson = query.userId !== undefined || query.email !== undefined;',
+        'const onePerson = query.userId !== undefined;',
+      ],
+    ],
+    tests: 'a reviewer every role',
+  },
+  {
     file: 'rbac/security',
     name: 'a Security Officer resets a Master (DR-007)',
     change: [['  if (!isMaster && (await holdsMaster(deps, userId))) {', '  if (false) {']],

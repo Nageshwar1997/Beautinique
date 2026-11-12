@@ -1,6 +1,6 @@
 # ARCHITECTURE — BQ
 
-> **Status:** v1.75 draft (2026-11-12). [PRD.md](PRD.md) v1.0 pe based. Design ek multi-agent review se aaya (3 architecture proposals + review board + owner ke decisions), aur v1.1 me free tier ke official docs ke against verify hua.
+> **Status:** v1.76 draft (2026-11-12). [PRD.md](PRD.md) v1.0 pe based. Design ek multi-agent review se aaya (3 architecture proposals + review board + owner ke decisions), aur v1.1 me free tier ke official docs ke against verify hua.
 
 ## 0. Ek nazar me
 
@@ -302,6 +302,7 @@ Kai platforms alag users ko alag price dikhate hain. BQ ka rule: **ek product ka
 - **Grants:** `{user, role, scope {type, ids}, validFrom, validTo, grantedBy, approvedBy}`. Scope types: self, brand, state, district, category, city, warehouse, hub, global, sellerOrg, creatorAgency. Containment: global ⊇ state ⊇ district ⊇ city ⊇ hub.
 - **Kaun kise appoint kar sakta hai:** Master: Super Admins, State Admins, Head of Operations aur app heads. Logistics Head: Warehouse, Hub, City Managers aur Network Planner. Hub Manager: Hub Ops aur Rider Onboarding. Seller Account Owner: apna staff. Super Admin states assign nahi kar sakta.
 - **Koi role khud ko appoint nahi kar sakta** (owner, 2026-11-09, QA Q-007): `appointedBy` me apna key ho to role (shipped ya Master ka sub-role) refuse, warna uske holders aur holders banate jaate, Master ke control ke bahar.
+- **Reviewer ki list (owner, 2026-11-09, QA DR-008):** Security Officer aur Internal Auditor `GET /iam/grants` me sabki list me sign-up roles (har customer, applicants) nahi dekhte, sirf staff (access review); ek insaan email ya id se dhoondhne pe uske saare roles. DPDP data minimisation.
 - **Separation of duties** (tests ke saath):
   - Appeal decide karne wala reject karne wala nahi ho sakta.
   - Fees, payouts, over-cap coupons aur policy publishing me maker aur checker alag hone chahiye.
@@ -735,3 +736,4 @@ Sirf config badlegi, code nahi:
 | v1.73 | 2026-11-12 | §7.1: code emails 60/ghanta sab IPs, sign-up 100/din, saaf sandesh, notify 80% warning (DR-009, owner). |
 | v1.74 | 2026-11-12 | §7.3: koi role khud ko appoint nahi kar sakta (Q-007, owner). |
 | v1.75 | 2026-11-12 | §7.1: Master ka authenticator reset sirf doosra Master (DR-007, owner). |
+| v1.76 | 2026-11-12 | §7.3: reviewer ki sabki list me sign-up roles nahi (DR-008, owner). |
