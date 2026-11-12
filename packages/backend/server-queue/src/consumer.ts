@@ -3,7 +3,9 @@ import {
   type ClientSession,
   type IndexSpec,
   type Mongo,
+  ObjectId,
   ParallelTransactionError,
+  parseObjectId,
   syncIndexes,
   TransactionAbortedError,
   withTransaction,
@@ -74,10 +76,13 @@ export interface Consumer {
 }
 
 export interface DeadLetter {
-  _id: string;
+  _id: ObjectId;
+  /** The BullMQ job, `<eventId>@<subscriber>` (a redrive queues it again under the same id) */
+  jobId: string;
   queue: string;
   subscriber: string;
-  eventId: string;
+  /** null when the job's event id is not an ObjectId (an event that breaks its contract) */
+  eventId: ObjectId | null;
   type: string;
   envelope: unknown;
   error: { name: string; message: string };
@@ -85,8 +90,27 @@ export interface DeadLetter {
   failedAt: Date;
 }
 
-/** The consumer's indexes: handled events and dead letters expire on their own. */
+/** One subscriber's mark on one event it handled. */
+interface ProcessedEvent {
+  _id: ObjectId;
+  eventId: ObjectId;
+  subscriber: string;
+  type: string;
+  processedAt: Date;
+}
+
+/**
+ * The consumer's indexes: one mark per event and subscriber, one dead letter per job, and both
+ * expire on their own.
+ */
 export const CONSUMER_INDEXES: readonly IndexSpec[] = [
+  {
+    collection: PROCESSED_EVENTS,
+    name: 'event_subscriber_unique',
+    key: { eventId: 1, subscriber: 1 },
+    unique: true,
+  },
+  { collection: DEAD_LETTERS, name: 'job_unique', key: { jobId: 1 }, unique: true },
   {
     collection: PROCESSED_EVENTS,
     name: 'processed_expiry',
@@ -158,7 +182,7 @@ export function startConsumer({
     if (routes.has(key)) throw new Error(`Subscription ${key} is declared twice`);
     routes.set(key, subscription);
   }
-  const processed = mongo.db.collection<{ _id: string }>(PROCESSED_EVENTS);
+  const processed = mongo.db.collection<ProcessedEvent>(PROCESSED_EVENTS);
   const deadLetters = mongo.db.collection<DeadLetter>(DEAD_LETTERS);
   const taskRuns = mongo.db.collection<TaskRun>(TASK_RUNS);
   const taskByName = new Map<string, Task>();
@@ -178,7 +202,7 @@ export function startConsumer({
       throw new UnrecoverableError(`No task ${name} on ${queue}`);
     }
     await taskRuns.updateOne(
-      { _id: name },
+      { task: name },
       { $set: { lastStartedAt: new Date() }, $setOnInsert: { firstSeenAt: new Date() } },
       { upsert: true },
     );
@@ -186,14 +210,14 @@ export function startConsumer({
       await task.run({ firedAt: new Date(job.timestamp) });
     } catch (error) {
       await taskRuns.updateOne(
-        { _id: name },
+        { task: name },
         { $set: { lastFailedAt: new Date(), lastError: describe(error) } },
       );
       logger.error({ task: name, err: describe(error) }, 'scheduled task failed');
       throw error;
     }
     await taskRuns.updateOne(
-      { _id: name },
+      { task: name },
       { $set: { lastFinishedAt: new Date(), lastError: null } },
     );
   }
@@ -216,11 +240,9 @@ export function startConsumer({
     const event = parsed.data;
     const handled = await withTransaction(mongo, async (session) => {
       const mark = await processed.updateOne(
-        { _id: jobIdOf(event.eventId, job.name) },
+        { eventId: new ObjectId(event.eventId), subscriber: job.name },
         {
           $setOnInsert: {
-            eventId: event.eventId,
-            subscriber: job.name,
             type: event.type,
             processedAt: new Date(),
           },
@@ -238,11 +260,11 @@ export function startConsumer({
 
   async function deadLetter(job: Job, error: unknown, attempts: number): Promise<void> {
     const data = job.data as { eventId?: unknown; type?: unknown };
-    const record: DeadLetter = {
-      _id: job.id ?? `${String(data.eventId)}@${job.name}`,
+    const record: Omit<DeadLetter, '_id'> = {
+      jobId: job.id ?? jobIdOf(String(data.eventId), job.name),
       queue,
       subscriber: job.name,
-      eventId: String(data.eventId),
+      eventId: parseObjectId(data.eventId) ?? null,
       type: String(data.type),
       envelope: job.data,
       error: describe(error),
@@ -250,14 +272,14 @@ export function startConsumer({
       failedAt: new Date(),
     };
     try {
-      await deadLetters.replaceOne({ _id: record._id }, record, { upsert: true });
+      await deadLetters.replaceOne({ jobId: record.jobId }, record, { upsert: true });
     } catch (writeError) {
       // MongoDB away as well: the job still waits in Redis's failed list (the last 20)
-      logger.error({ err: describe(writeError), eventId: record.eventId }, 'dead letter not saved');
+      logger.error({ err: describe(writeError), jobId: record.jobId }, 'dead letter not saved');
     }
     logger.error(
       {
-        eventId: record.eventId,
+        eventId: String(data.eventId),
         type: record.type,
         subscriber: record.subscriber,
         attempts,

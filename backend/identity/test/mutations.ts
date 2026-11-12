@@ -225,7 +225,7 @@ const mutations: Mutation[] = [
     name: 'another app’s consent not recorded',
     change: [
       [
-        '{ userId: user._id, app, version: legalVersion },',
+        '{ userId: user._id, appId, version: legalVersion },',
         '{ userId: user._id, version: legalVersion },',
       ],
     ],
@@ -234,7 +234,9 @@ const mutations: Mutation[] = [
   {
     file: 'users',
     name: 'new legal version not recorded',
-    change: [['{ userId: user._id, app, version: legalVersion },', '{ userId: user._id, app },']],
+    change: [
+      ['{ userId: user._id, appId, version: legalVersion },', '{ userId: user._id, appId },'],
+    ],
     tests: 'records the new app',
   },
   {
@@ -480,7 +482,12 @@ const mutations: Mutation[] = [
   {
     file: 'login',
     name: 'an authenticator code works twice',
-    change: [["{ _id: login.userId, 'totp.lastStep': { $lt: step } },", '{ _id: login.userId },']],
+    change: [
+      [
+        "      await credentialsOf(deps).updateOne(\n        { _id: userId, 'totp.lastStep': { $lt: step } },",
+        '      await credentialsOf(deps).updateOne(\n        { _id: userId },',
+      ],
+    ],
     tests: 'each code works once',
   },
   {
@@ -497,7 +504,7 @@ const mutations: Mutation[] = [
   {
     file: 'login',
     name: 'an authenticator set up over another',
-    change: [['{ _id: login.userId, totp: { $exists: false } },', '{ _id: login.userId },']],
+    change: [['{ _id: userId, totp: { $exists: false } },', '{ _id: userId },']],
     survives:
       'two sign-ins setting up at once: the second confirm finds one saved; a race no test times',
   },
@@ -834,9 +841,7 @@ const mutations: Mutation[] = [
   {
     file: 'sessions',
     name: 'access token for every app',
-    change: [
-      ['        aud: tokenAudience(session.app),', "        aud: tokenAudience('customer'),"],
-    ],
+    change: [['        aud: tokenAudience(app),', "        aud: tokenAudience('customer'),"]],
     tests: 'JWKS verifies',
   },
   {
@@ -985,8 +990,8 @@ const mutations: Mutation[] = [
     name: 'logout without the token',
     change: [
       [
-        '{ _id: sessionId, app, refreshHash: refreshHashOf(keys, refreshToken), revokedAt: null },',
-        '{ _id: sessionId, app, revokedAt: null },',
+        '{ _id: sessionId, appId, refreshHash: refreshHashOf(keys, refreshToken), revokedAt: null },',
+        '{ _id: sessionId, appId, revokedAt: null },',
       ],
     ],
     tests: 'logs out',
@@ -1004,7 +1009,7 @@ const mutations: Mutation[] = [
     name: 'a new password not told to the gateway',
     change: [
       [
-        "      await inRedis(() => redis.set(revokedUserKey(userId), String(at), 'PX', REVOKE_TTL_MS));\n",
+        "      await inRedis(() =>\n        redis.set(revokedUserKey(userId.toHexString()), String(at), 'PX', REVOKE_TTL_MS),\n      );\n",
         '',
       ],
     ],
@@ -1116,8 +1121,8 @@ const mutations: Mutation[] = [
     name: 'an ended session still answers',
     change: [
       [
-        '.findOne({ _id: passport.sessionId, userId: passport.userId, revokedAt: null });',
-        '.findOne({ _id: passport.sessionId, userId: passport.userId });',
+        '.findOne({ _id: toObjectId(passport.sessionId), userId, revokedAt: null });',
+        '.findOne({ _id: toObjectId(passport.sessionId), userId });',
       ],
     ],
     tests: 'ended session',
@@ -1125,7 +1130,7 @@ const mutations: Mutation[] = [
   {
     file: 'me',
     name: 'every session marked current',
-    change: [['current: session._id === passport.sessionId,', 'current: true,']],
+    change: [['current: session._id.toHexString() === passport.sessionId,', 'current: true,']],
     tests: 'My Devices',
   },
   {
@@ -1263,7 +1268,7 @@ const mutations: Mutation[] = [
   {
     file: 'rbac/sync',
     name: 'the sync retires Master’s own sub-roles',
-    change: [['{ system: true, retired: false, _id: { $nin:', '{ retired: false, _id: { $nin:']],
+    change: [['{ system: true, retired: false, key: { $nin:', '{ retired: false, key: { $nin:']],
     tests: 'never touches Master',
   },
 
@@ -1273,8 +1278,8 @@ const mutations: Mutation[] = [
     name: 'a retired role still opens its app',
     change: [
       [
-        '{ _id: { $in: grants.map((grant) => grant.role) }, retired: false },',
-        '{ _id: { $in: grants.map((grant) => grant.role) } },',
+        '    _id: { $in: grants.map((grant) => grant.roleId) },\n    retired: false,\n  });\n  if (roles.length === 0) return none;',
+        '    _id: { $in: grants.map((grant) => grant.roleId) },\n  });\n  if (roles.length === 0) return none;',
       ],
     ],
     tests: 'renews their holders',
@@ -1305,13 +1310,13 @@ const mutations: Mutation[] = [
   {
     file: 'rbac/authority',
     name: 'any role gives any role',
-    change: [['      role.appointedBy.includes(own._id) &&\n', '']],
+    change: [['      namesRole(role.appointedBy, own._id) &&\n', '']],
     tests: 'only the roles they appoint',
   },
   {
     file: 'rbac/authority',
     name: 'a scope wider than the giver’s',
-    change: [['      scopeWithin(grant.scope, inner, chainOf),', '      true,']],
+    change: [['      scopeWithin(scopeOf(grant.scope), inner, chainOf),', '      true,']],
     tests: 'only the roles they appoint',
   },
   {
@@ -1360,7 +1365,7 @@ const mutations: Mutation[] = [
   {
     file: 'rbac/authority',
     name: 'an appointer sees every role',
-    change: [['...(reviewer ? reviewed : { role: { $in: givable } })', '...{}']],
+    change: [['...(reviewer ? reviewed : { roleId: { $in: givable } })', '...{}']],
     tests: 'a reviewer every role',
   },
   {
@@ -1385,7 +1390,7 @@ const mutations: Mutation[] = [
     name: 'ending one’s own role',
     change: [
       [
-        "  if (grant.userId === passport.userId) throw forbidden('Nobody ends their own role.');\n",
+        "  if (grant.userId.toHexString() === passport.userId) {\n    throw forbidden('Nobody ends their own role.');\n  }\n",
         '',
       ],
     ],
@@ -1394,7 +1399,9 @@ const mutations: Mutation[] = [
   {
     file: 'rbac/manage',
     name: 'anyone ends a role',
-    change: [['if (!role || !appointingGrant(caller, role, grant.scope)) {', 'if (!role) {']],
+    change: [
+      ['if (!role || !appointingGrant(caller, role, scopeOf(grant.scope))) {', 'if (!role) {'],
+    ],
     tests: 'ends a role at once',
   },
   {
@@ -1426,7 +1433,7 @@ const mutations: Mutation[] = [
   {
     file: 'rbac/manage',
     name: 'grants listed without the right to read them',
-    change: [['  requirePermission(caller, grantRead.key);\n  // one person', '  // one person']],
+    change: [['  requirePermission(caller, grantRead.key);\n  const empty', '  const empty']],
     tests: 'a reviewer every role',
   },
   {
@@ -1434,7 +1441,7 @@ const mutations: Mutation[] = [
     name: 'an invitation outlives its inviter’s right',
     change: [
       [
-        'if (role && !role.retired && appointingGrant(inviter, role, invitation.scope)) {',
+        'if (role && !role.retired && appointingGrant(inviter, role, scopeOf(invitation.scope))) {',
         'if (role) {',
       ],
     ],
@@ -1453,8 +1460,8 @@ const mutations: Mutation[] = [
     name: 'a code for an invitation that ran out',
     change: [
       [
-        "      { email, app, status: 'pending', expiresAt: { $gt: now } },\n      { limit: 1 },",
-        "      { email, app, status: 'pending' },\n      { limit: 1 },",
+        "      { email, appId, status: 'pending', expiresAt: { $gt: now } },\n      { limit: 1 },",
+        "      { email, appId, status: 'pending' },\n      { limit: 1 },",
       ],
     ],
     tests: 'runs out',
@@ -1484,7 +1491,12 @@ const mutations: Mutation[] = [
   {
     file: 'sessions',
     name: 'no permission list at sign-in',
-    change: [['      await listPermissions(userId, app, access);\n', '']],
+    change: [
+      [
+        '      await collection.insertOne(session);\n      await listPermissions(userId, app, access);\n',
+        '      await collection.insertOne(session);\n',
+      ],
+    ],
     tests: 'written at every sign-in',
   },
   {
@@ -1565,7 +1577,12 @@ const mutations: Mutation[] = [
   {
     file: 'login',
     name: 'a step-up code works twice',
-    change: [["{ _id: userId, 'totp.lastStep': { $lt: step } },", '{ _id: userId },']],
+    change: [
+      [
+        "\n          { _id: userId, 'totp.lastStep': { $lt: step } },",
+        '\n          { _id: userId },',
+      ],
+    ],
     tests: 'confirms with a new authenticator code',
   },
   {
@@ -1708,10 +1725,7 @@ const mutations: Mutation[] = [
     file: 'authenticator',
     name: 'one saved meanwhile is overwritten',
     change: [
-      [
-        '        : { _id: passport.userId, totp: { $exists: false } },',
-        '        : { _id: passport.userId },',
-      ],
+      ['        : { _id: userId, totp: { $exists: false } },', '        : { _id: userId },'],
     ],
     tests: 'never overwrites',
   },
@@ -1719,10 +1733,7 @@ const mutations: Mutation[] = [
     file: 'authenticator',
     name: 'a replace after a reset meanwhile saves anyway',
     change: [
-      [
-        '        ? { _id: passport.userId, totp: { $exists: true } }\n',
-        '        ? { _id: passport.userId }\n',
-      ],
+      ['        ? { _id: userId, totp: { $exists: true } }\n', '        ? { _id: userId }\n'],
     ],
     survives:
       'a Security Officer reset between the enroll and the confirm of a replace; a race no test times',
@@ -1778,8 +1789,8 @@ const mutations: Mutation[] = [
     name: 'the internal apps’ roles do not need one',
     change: [
       [
-        '$or: [{ app: { $in: [...TOTP_REQUIRED_APPS] } }, { mfaRequired: true }],',
-        'mfaRequired: true,',
+        '    $or: [\n      { appId: { $in: TOTP_REQUIRED_APPS.map((app) => catalog.appId(app)) } },\n      { mfaRequired: true },\n    ],',
+        '    mfaRequired: true,',
       ],
     ],
     tests: 'while a role needs it',
@@ -1787,7 +1798,7 @@ const mutations: Mutation[] = [
   {
     file: 'authenticator',
     name: 'roles that ask one themselves do not need it',
-    change: [[', { mfaRequired: true }],', '],']],
+    change: [['      { mfaRequired: true },\n    ],\n', '    ],\n']],
     tests: 'while a role needs it',
   },
   {
@@ -1795,8 +1806,8 @@ const mutations: Mutation[] = [
     name: 'an ended grant still needs one',
     change: [
       [
-        '.find({ userId, ...activeAt(now) }, { projection: { role: 1 } })',
-        '.find({ userId }, { projection: { role: 1 } })',
+        '.find({ userId, ...activeAt(now) }, { projection: { roleId: 1 } })',
+        '.find({ userId }, { projection: { roleId: 1 } })',
       ],
     ],
     tests: 'while a role needs it',
@@ -1804,7 +1815,7 @@ const mutations: Mutation[] = [
   {
     file: 'authenticator',
     name: 'a retired role still needs one',
-    change: [['        retired: false,\n        $or', '        $or']],
+    change: [['    retired: false,\n    $or', '    $or']],
     tests: 'while a role needs it',
   },
   {
@@ -1812,18 +1823,20 @@ const mutations: Mutation[] = [
     name: 'turning off twice is told twice',
     change: [
       [
-        '      { _id: passport.userId, totp: { $exists: true } },\n      { $unset',
-        '      { _id: passport.userId },\n      { $unset',
+        '      { _id: userId, totp: { $exists: true } },\n      { $unset',
+        '      { _id: userId },\n      { $unset',
       ],
     ],
     tests: 'removes it with its codes',
+    survives:
+      'a second turn-off stops at the `on` check, and each needs its own one-time step-up (QA DR-010): only two sessions racing reach it, a race no test times',
   },
   {
     file: 'rbac/authority',
     name: 'a reviewer’s list shows every customer (DR-008)',
     change: [
       [
-        'const reviewed = onePerson ? {} : { role: { $nin: signUpRoles } };',
+        'const reviewed = onePerson ? {} : { roleId: { $nin: signUpRoles } };',
         'const reviewed = {};',
       ],
     ],
@@ -1834,8 +1847,8 @@ const mutations: Mutation[] = [
     name: 'one person looked up hides their sign-up roles',
     change: [
       [
-        'const reviewed = onePerson ? {} : { role: { $nin: signUpRoles } };',
-        'const reviewed = { role: { $nin: signUpRoles } };',
+        'const reviewed = onePerson ? {} : { roleId: { $nin: signUpRoles } };',
+        'const reviewed = { roleId: { $nin: signUpRoles } };',
       ],
     ],
     tests: 'a reviewer every role',
@@ -1854,7 +1867,7 @@ const mutations: Mutation[] = [
   {
     file: 'rbac/security',
     name: 'a Security Officer resets a Master (DR-007)',
-    change: [['  if (!isMaster && (await holdsMaster(deps, userId))) {', '  if (false) {']],
+    change: [['  if (!isMaster && (await holdsMaster(deps, user._id))) {', '  if (false) {']],
     tests: 'DR-007',
   },
   {
@@ -1862,8 +1875,8 @@ const mutations: Mutation[] = [
     name: 'not even the other Master resets a Master',
     change: [
       [
-        '  if (!isMaster && (await holdsMaster(deps, userId))) {',
-        '  if (await holdsMaster(deps, userId)) {',
+        '  if (!isMaster && (await holdsMaster(deps, user._id))) {',
+        '  if (await holdsMaster(deps, user._id)) {',
       ],
     ],
     tests: 'DR-007',
@@ -1905,7 +1918,12 @@ const mutations: Mutation[] = [
   {
     file: 'rbac/manage',
     name: 'an email and another account’s id find the email’s grants',
-    change: [['if (!owner || (userId !== undefined && userId !== owner._id)) {', 'if (!owner) {']],
+    change: [
+      [
+        'if (!owner || (userId !== undefined && !userId.equals(owner._id))) return empty;',
+        'if (!owner) return empty;',
+      ],
+    ],
     tests: 'by email',
   },
   // a sign-in in the second every session ended (owner's E2E, 2026-11-02)
@@ -2087,8 +2105,8 @@ const mutations: Mutation[] = [
     name: 'the role catalog is read without saying it is a full read',
     change: [
       [
-        "    .find({}, { comment: 'full read: the role catalog, for what the caller may see' })",
-        '    .find({})',
+        "  readRoles(mongo, {}, { comment: 'full read: the role catalog, for what the caller may see' });",
+        '  readRoles(mongo, {});',
       ],
     ],
     tests: 'pages with a cursor',
@@ -2097,7 +2115,7 @@ const mutations: Mutation[] = [
     file: 'rbac/manage',
     name: 'a new role is checked against every live role without saying so',
     change: [
-      ["      { comment: 'full read: every live role, to check the new one against' },\n", ''],
+      ["    { comment: 'full read: every live role, to check the new one against' },\n", ''],
     ],
     tests: 'make a sub-role',
   },
@@ -2112,7 +2130,10 @@ const mutations: Mutation[] = [
     file: 'sessions',
     name: 'no ended session gets its mark back',
     change: [
-      ["    if (left > 0) batch.set(revokedSessionKey(session._id), '1', 'PX', left);\n", ''],
+      [
+        "    if (left > 0) batch.set(revokedSessionKey(session._id.toHexString()), '1', 'PX', left);\n",
+        '',
+      ],
     ],
     tests: 'QA-GW-002',
   },

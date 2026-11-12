@@ -3,10 +3,10 @@ import {
   type Document,
   type IndexSpec,
   type Mongo,
+  ObjectId,
   syncIndexes,
 } from '@beautinique/backend-server-mongo';
 import type { EventDefinition, EventEnvelope } from '@beautinique/shared-contracts';
-import { uuidv7 } from '@beautinique/shared-utils';
 
 /** The deployable's outbox: events written with the change that caused them, sent on by the relay. */
 export const OUTBOX = 'platform_outbox';
@@ -21,8 +21,8 @@ export const OUTBOX_KEEP_SECONDS = 72 * 60 * 60;
 export const EVENT_MAX_BYTES = 16 * 1024;
 
 export interface OutboxRecord {
-  /** The event id (UUIDv7, so ids sort by time). */
-  _id: string;
+  /** The event id: an ObjectId here, its hex in the envelope (owner, 2026-11-12). */
+  _id: ObjectId;
   type: string;
   version: number;
   envelope: Document;
@@ -81,8 +81,9 @@ export async function writeEvent<Definition extends EventDefinition>(
         'together with the change that caused it.',
     );
   }
+  const eventId = new ObjectId();
   const envelope = definition.envelope.parse({
-    eventId: uuidv7(),
+    eventId: eventId.toHexString(),
     type: definition.type,
     version: definition.version,
     occurredAt: new Date().toISOString(),
@@ -103,7 +104,7 @@ export async function writeEvent<Definition extends EventDefinition>(
   }
   await mongo.db.collection<OutboxRecord>(OUTBOX).insertOne(
     {
-      _id: envelope.eventId,
+      _id: eventId,
       type: envelope.type,
       version: envelope.version,
       envelope,

@@ -1,11 +1,16 @@
 import type { Logger } from '@beautinique/backend-server-kit';
-import type { Mongo } from '@beautinique/backend-server-mongo';
+import type { IndexSpec, Mongo, ObjectId } from '@beautinique/backend-server-mongo';
 import type { Redis } from 'ioredis';
 
 import { openQueue } from './relay';
 
 /** When each scheduled task last ran: the heartbeat reads it (ARCHITECTURE §5.3). */
 export const TASK_RUNS = 'platform_task_runs';
+
+/** A task's runs are found by its name (the _id is an ObjectId, like every document's). */
+export const TASK_RUN_INDEXES: readonly IndexSpec[] = [
+  { collection: TASK_RUNS, name: 'task_unique', key: { task: 1 }, unique: true },
+];
 
 /** `<module>.<task>`, e.g. `commerce.expireCarts`. */
 const TASK_NAME = /^[a-z][a-zA-Z0-9]*\.[a-z][a-zA-Z0-9]*$/;
@@ -27,7 +32,9 @@ export interface Schedule {
 }
 
 export interface TaskRun {
-  _id: string;
+  _id: ObjectId;
+  /** The task, `<module>.<task>` */
+  task: string;
   /** When the schedule was first set: a task that never ran is late only after its gap from here. */
   firstSeenAt: Date;
   lastStartedAt?: Date;
@@ -158,7 +165,7 @@ export async function upsertSchedules({
         opts: { removeOnComplete: true, removeOnFail: { count: 20 } },
       });
       await runs.updateOne(
-        { _id: schedule.task },
+        { task: schedule.task },
         { $setOnInsert: { firstSeenAt: new Date() } },
         { upsert: true },
       );
@@ -182,7 +189,7 @@ export async function lateTasks(
   const runs = mongo.db.collection<TaskRun>(TASK_RUNS);
   const late: string[] = [];
   for (const schedule of schedules) {
-    const run = await runs.findOne({ _id: schedule.task });
+    const run = await runs.findOne({ task: schedule.task });
     const since = run?.lastFinishedAt ?? run?.firstSeenAt;
     if (!since || now.getTime() - since.getTime() > gapOf(schedule)) late.push(schedule.task);
   }

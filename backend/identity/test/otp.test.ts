@@ -1,8 +1,8 @@
 // Email codes: sign-up (with the new password) and setting a password, against the local MongoDB
 // replica set and Valkey (`npm run infra:up`). See helpers.ts.
 import type { Logger } from '@beautinique/backend-server-kit';
+import { ObjectId } from '@beautinique/backend-server-mongo';
 import { OUTBOX } from '@beautinique/backend-server-queue';
-import { uuidv7 } from '@beautinique/shared-utils';
 import { Queue } from 'bullmq';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 
@@ -11,6 +11,7 @@ import { hibpBreachCheck } from '../src/password.ts';
 import {
   acceptances,
   allowResend,
+  appIdOf,
   BREACHED,
   codeOf,
   consent,
@@ -20,6 +21,7 @@ import {
   type Harness,
   hibp,
   makeAccount,
+  oid,
   PASSWORD,
   passwordCode,
   post,
@@ -91,15 +93,15 @@ describe('sign-up with an email code', () => {
       signedIn: true,
     });
     const user = await users().findOne({ email: address });
-    expect(user).toMatchObject({ status: 'active', signUpApp: 'customer' });
+    expect(user).toMatchObject({ status: 'active', signUpAppId: await appIdOf('customer') });
     expect(user?.ageDeclaredAt).toBeInstanceOf(Date);
-    expect(user?._id).toBe(verified.body.data?.userId);
+    expect(user?._id.toHexString()).toBe(verified.body.data?.userId);
     expect(await acceptances().find({ userId: user?._id }).toArray()).toMatchObject([
       {
         documents: ['terms', 'privacy'],
         version: 'dummy-1',
         adult: true,
-        app: 'customer',
+        appId: await appIdOf('customer'),
         ip: '203.0.113.7',
       },
     ]);
@@ -146,7 +148,7 @@ describe('sign-up with an email code', () => {
     const seller = await signUpCode(address, 'seller');
     const kept = await verify(seller.challengeId, 'another password entirely', 'seller');
     expect(kept.body.data).toMatchObject({
-      userId: user?._id,
+      userId: user?._id.toHexString(),
       outcome: 'password-kept',
       signedIn: false,
     });
@@ -156,9 +158,9 @@ describe('sign-up with an email code', () => {
       await acceptances()
         .find({ userId: user?._id })
         .sort({ acceptedAt: 1 })
-        .map((a) => a.app)
+        .map((a) => a.appId)
         .toArray(),
-    ).toEqual(['customer', 'seller']);
+    ).toEqual([await appIdOf('customer'), await appIdOf('seller')]);
     // the same app and version again adds nothing
     await verify((await signUpCode(address, 'seller')).challengeId, PASSWORD, 'seller');
     expect(await acceptances().countDocuments({ userId: user?._id })).toBe(2);
@@ -175,7 +177,7 @@ describe('sign-up with an email code', () => {
       );
       expect(
         await acceptances()
-          .find({ userId: user?._id, app: 'customer' })
+          .find({ userId: user?._id, appId: await appIdOf('customer') })
           .sort({ acceptedAt: 1 })
           .map((a) => a.version)
           .toArray(),
@@ -187,7 +189,7 @@ describe('sign-up with an email code', () => {
 
   it('adds a password to an account without one (made with Google), and does not sign in', async () => {
     const address = email('google');
-    const userId = uuidv7();
+    const userId = new ObjectId();
     const now = new Date();
     await users().insertOne({
       _id: userId,
@@ -195,12 +197,12 @@ describe('sign-up with an email code', () => {
       status: 'active',
       emailVerifiedAt: now,
       ageDeclaredAt: now,
-      signUpApp: 'customer',
+      signUpAppId: await appIdOf('customer'),
       createdAt: now,
       updatedAt: now,
     });
     await providers().insertOne({
-      _id: uuidv7(),
+      _id: new ObjectId(),
       userId,
       provider: 'google',
       subject: '104857392018475620193',
@@ -212,7 +214,11 @@ describe('sign-up with an email code', () => {
       PASSWORD,
       'seller',
     );
-    expect(answer.body.data).toMatchObject({ userId, outcome: 'password-set', signedIn: false });
+    expect(answer.body.data).toMatchObject({
+      userId: userId.toHexString(),
+      outcome: 'password-set',
+      signedIn: false,
+    });
     expect(
       (await providers().find({ userId }).toArray()).map((p) => p.provider).toSorted(),
     ).toEqual(['google', 'password']);
@@ -227,7 +233,7 @@ describe('sign-up with an email code', () => {
     await verify((await signUpCode(address)).challengeId);
     const user = await users().findOne({ email: address });
     expect(user?.ageDeclaredAt).toBeInstanceOf(Date);
-    expect(user?.signUpApp).toBe('seller');
+    expect(user?.signUpAppId).toEqual(await appIdOf('seller'));
     expect(await acceptances().countDocuments({ userId: user?._id, adult: true })).toBe(1);
   });
 });
@@ -236,7 +242,7 @@ describe('password codes', () => {
   it('set a new password for an account, from any app, without signing in', async () => {
     const address = email('rider');
     const userId = await makeAccount(address);
-    const before = (await credentials().findOne({ _id: userId }))?.password?.hash;
+    const before = (await credentials().findOne({ _id: oid(userId) }))?.password?.hash;
     const challenge = await passwordCode(address, 'delivery');
     expect((await events(challenge.challengeId))[0]?.envelope.data).toMatchObject({
       purpose: 'password',
@@ -244,8 +250,8 @@ describe('password codes', () => {
     });
     const answer = await verify(challenge.challengeId, 'a brand new password', 'delivery');
     expect(answer.body.data).toMatchObject({ userId, outcome: 'password-set', signedIn: false });
-    expect((await credentials().findOne({ _id: userId }))?.password?.hash).not.toBe(before);
-    expect(await providers().countDocuments({ userId, provider: 'password' })).toBe(1);
+    expect((await credentials().findOne({ _id: oid(userId) }))?.password?.hash).not.toBe(before);
+    expect(await providers().countDocuments({ userId: oid(userId), provider: 'password' })).toBe(1);
   });
 
   it('answer an unknown email like any other, in the same time, and send nothing', async () => {

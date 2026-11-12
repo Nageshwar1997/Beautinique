@@ -17,8 +17,8 @@ import {
 } from '../src/index';
 
 const passport = {
-  userId: '0199f3a2-7c41-7b2e-9d10-4f6a2b8c1e01',
-  sessionId: '0199f3a2-7c41-7b2e-9d10-4f6a2b8c1e02',
+  userId: '6730a2b4c41b2e9d104f6a01',
+  sessionId: '6730a2b4c41b2e9d104f6a02',
   app: 'seller' as const,
   methods: ['password', 'totp'],
   authzVersion: 3,

@@ -10,10 +10,11 @@ import {
 
 import type { Config } from './config.ts';
 import { indexes as credentialIndexes, providerSubjectIndexMigration } from './credentials.ts';
+import { catalogIndexes } from './rbac/catalog.ts';
 import { indexes as grantIndexes } from './rbac/grants.ts';
 import { indexes as invitationIndexes } from './rbac/invitations.ts';
 import { signUpGrantsMigration } from './rbac/migrations.ts';
-import { rbacSyncStep } from './rbac/sync.ts';
+import { rbacSyncStep, roleIndexes } from './rbac/sync.ts';
 import { indexes as sessionIndexes } from './sessions.ts';
 import { indexes as signingKeyIndexes } from './signing-keys.ts';
 import { indexes as userIndexes } from './users.ts';
@@ -34,6 +35,8 @@ export const releaseDefinition: ReleaseDefinition = {
     ...signingKeyIndexes,
     ...grantIndexes,
     ...invitationIndexes,
+    ...catalogIndexes,
+    ...roleIndexes,
   ],
   steps: [rbacSyncStep],
 };

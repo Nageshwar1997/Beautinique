@@ -1,8 +1,12 @@
 import { AppError, mountRoute } from '@beautinique/backend-server-kit';
-import { type Mongo, withTransaction } from '@beautinique/backend-server-mongo';
+import {
+  type Mongo,
+  ObjectId,
+  toObjectId,
+  withTransaction,
+} from '@beautinique/backend-server-mongo';
 import { writeEvent } from '@beautinique/backend-server-queue';
 import { getPing, pingRecorded, recordPing, wake } from '@beautinique/shared-contracts';
-import { uuidv7 } from '@beautinique/shared-utils';
 import { Router } from 'express';
 
 export const PINGS = 'platform_pings';
@@ -15,13 +19,13 @@ export const PINGS = 'platform_pings';
 export const PING_CAP = 5000;
 
 interface PingRecord {
-  _id: string;
+  _id: ObjectId;
   note: string;
   recordedAt: Date;
 }
 
 const dataOf = (ping: PingRecord) => ({
-  pingId: ping._id,
+  pingId: ping._id.toHexString(),
   note: ping.note,
   recordedAt: ping.recordedAt.toISOString(),
 });
@@ -43,12 +47,12 @@ export function platformRouter({ mongo }: { mongo: Mongo }): Router {
           { status: 503 },
         );
       }
-      const ping: PingRecord = { _id: uuidv7(), note: body.note, recordedAt: new Date() };
+      const ping: PingRecord = { _id: new ObjectId(), note: body.note, recordedAt: new Date() };
       // the ping and its event are written in one transaction, and the reply goes out after commit
       await withTransaction(mongo, async (session) => {
         await pings.insertOne(ping, { session });
         await writeEvent(mongo, session, pingRecorded, {
-          aggregate: { type: 'ping', id: ping._id },
+          aggregate: { type: 'ping', id: ping._id.toHexString() },
           // a public route: no signed-in user reaches core (sign-in comes with identity, M3)
           actor: { type: 'system', id: 'core.platform' },
           correlationId: requestId,
@@ -64,7 +68,9 @@ export function platformRouter({ mongo }: { mongo: Mongo }): Router {
   mountRoute(router, wake, () => ({ awakeAt: new Date().toISOString() }));
 
   mountRoute(router, getPing, async ({ params }) => {
-    const ping = await pings.findOne({ _id: params.pingId });
+    const ping = await pings.findOne({
+      _id: toObjectId(params.pingId, { notFound: 'No such ping' }),
+    });
     if (!ping) throw new AppError('NOT_FOUND', 'No such ping');
     return dataOf(ping);
   });

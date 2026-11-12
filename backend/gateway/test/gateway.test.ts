@@ -968,7 +968,7 @@ describe('rate limits', () => {
   });
 
   describe('of refresh and sign-out (QA DR-005)', () => {
-    const sessionId = '0190a1b2-c3d4-7e5f-8a9b-0c1d2e3f4a5b';
+    const sessionId = '65f1a2b3c4d5e6f708192a3b';
     // a refresh token of identity's shape: <session>.<family (16 bytes)>.<secret>
     const tokenOf = (family: string) => `${sessionId}.${family.padEnd(22, 'f')}.${'s'.repeat(43)}`;
     const fakeIdentity = () =>
@@ -1273,10 +1273,9 @@ describe('service', () => {
       });
       // the real catalogue (and the real rate-limit keys, so a roomy class): reading a ping needs
       // a permission, refused until sign-in exists
-      const ping = await fetch(
-        `${gw.url}${API_PREFIX}/platform/pings/0190a1b2-c3d4-7e5f-8a9b-0c1d2e3f4a5b`,
-        { headers: { ...customer, 'X-BQ-App': 'admin' } },
-      );
+      const ping = await fetch(`${gw.url}${API_PREFIX}/platform/pings/65f1a2b3c4d5e6f708192a3b`, {
+        headers: { ...customer, 'X-BQ-App': 'admin' },
+      });
       expect(await errorOf(ping)).toEqual([401, 'UNAUTHENTICATED']);
     } finally {
       await gw.stop();

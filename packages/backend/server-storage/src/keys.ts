@@ -1,4 +1,4 @@
-import { enum as zodEnum, string, uuidv7Zod } from '@beautinique/shared-zod';
+import { enum as zodEnum, string } from '@beautinique/shared-zod';
 
 import { StorageError } from './errors';
 
@@ -13,6 +13,9 @@ export const purposeZod = string()
   .max(64)
   .regex(/^[a-z][a-z0-9_]*(?:\.[a-z][a-z0-9_]*)*$/, 'Purpose looks like product.image');
 
+// the asset's id: its media_assets record's ObjectId, in lower-case hex (owner, 2026-11-12)
+const ASSET_ID = /^[0-9a-f]{24}$/;
+
 export interface ParsedKey {
   visibility: Visibility;
   purpose: string;
@@ -25,13 +28,11 @@ export function parseKey(key: string): ParsedKey | undefined {
   if (rest.length > 0) return undefined;
   const parsedVisibility = visibilityZod.safeParse(visibility);
   const parsedPurpose = purposeZod.safeParse(purpose);
-  const parsedAssetId = uuidv7Zod.safeParse(assetId);
-  return parsedVisibility.success && parsedPurpose.success && parsedAssetId.success
-    ? {
-        visibility: parsedVisibility.data,
-        purpose: parsedPurpose.data,
-        assetId: parsedAssetId.data,
-      }
+  return parsedVisibility.success &&
+    parsedPurpose.success &&
+    assetId !== undefined &&
+    ASSET_ID.test(assetId)
+    ? { visibility: parsedVisibility.data, purpose: parsedPurpose.data, assetId }
     : undefined;
 }
 
@@ -51,7 +52,7 @@ export function assetKey(assetId: string, purpose: string, visibility: Visibilit
   if (parseKey(key) === undefined) {
     throw new StorageError(
       'INVALID_INPUT',
-      'An asset key needs a UUIDv7 asset id, a purpose like product.image and a visibility',
+      'An asset key needs an ObjectId asset id, a purpose like product.image and a visibility',
     );
   }
   return key;

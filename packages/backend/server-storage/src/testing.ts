@@ -1,12 +1,15 @@
 import { randomBytes } from 'node:crypto';
 
-import { uuidv7 } from '@beautinique/shared-utils';
+import { ObjectId } from '@beautinique/backend-server-mongo';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 
 import { StorageError } from './errors';
 import { MAX_EXPIRY_SECONDS, MAX_LIST_LIMIT, MAX_UPLOAD_BYTES } from './inputs';
 import { assetKey, type Visibility } from './keys';
 import type { StoragePort, UploadTicket } from './types';
+
+/** A new asset id: an ObjectId's hex, like the media_assets record it names (owner, 2026-11-12). */
+const newAssetId = (): string => new ObjectId().toHexString();
 
 /** A real 1x1 PNG: providers that look inside what they store (Cloudinary does) accept it. */
 export const TINY_PNG = new Uint8Array(
@@ -72,7 +75,7 @@ export function storageContract(
       options: { visibility?: Visibility; maxBytes?: number; purpose?: string } = {},
     ): Promise<UploadTicket> => {
       const ticket = await harness.storage.createUpload({
-        assetId: uuidv7(),
+        assetId: newAssetId(),
         purpose: options.purpose ?? purpose,
         visibility: options.visibility ?? 'public',
         contentType: 'image/png',
@@ -89,7 +92,7 @@ export function storageContract(
     };
 
     it('issues a signed ticket for the asset, valid for the time asked', async () => {
-      const assetId = uuidv7();
+      const assetId = newAssetId();
       const ticket = await harness.storage.createUpload({
         assetId,
         purpose,
@@ -110,7 +113,7 @@ export function storageContract(
 
     it('gives the same key for the same asset, and another for public and private', async () => {
       const input = {
-        assetId: uuidv7(),
+        assetId: newAssetId(),
         purpose,
         visibility: 'public',
         contentType: 'image/png',
@@ -151,7 +154,7 @@ export function storageContract(
     });
 
     it('gives a stable public URL, and another for each size', () => {
-      const key = assetKey(uuidv7(), purpose, 'public');
+      const key = assetKey(newAssetId(), purpose, 'public');
       const { storage } = harness;
       const url = storage.getUrl({ key });
       expect(() => new URL(url)).not.toThrow();
@@ -161,7 +164,7 @@ export function storageContract(
     });
 
     it('signs private URLs for a limited time', () => {
-      const key = assetKey(uuidv7(), purpose, 'private');
+      const key = assetKey(newAssetId(), purpose, 'private');
       const { storage } = harness;
       expect(storage.getUrl({ key, expiresInSeconds: 60 })).not.toBe(
         storage.getUrl({ key, expiresInSeconds: 3600 }),
@@ -174,13 +177,15 @@ export function storageContract(
       await storage.delete(ticket.key);
       expect(await storage.stat(ticket.key)).toBeUndefined();
       await expect(storage.delete(ticket.key)).resolves.toBeUndefined();
-      await expect(storage.delete(assetKey(uuidv7(), purpose, 'public'))).resolves.toBeUndefined();
+      await expect(
+        storage.delete(assetKey(newAssetId(), purpose, 'public')),
+      ).resolves.toBeUndefined();
     });
 
     it('copies a file to another asset, and each file lives on without the other', async () => {
       const { storage } = harness;
       const source = await put({ visibility: 'private' });
-      const assetId = uuidv7();
+      const assetId = newAssetId();
       const copy = await storage.copy({
         from: source.key,
         assetId,
@@ -199,7 +204,7 @@ export function storageContract(
 
       const again = await storage.copy({
         from: copy.key,
-        assetId: uuidv7(),
+        assetId: newAssetId(),
         purpose,
         visibility: 'private',
       });
@@ -211,7 +216,7 @@ export function storageContract(
     it('can give the copy another purpose and visibility', async () => {
       const { storage } = harness;
       const source = await put({ visibility: 'private' });
-      const assetId = uuidv7();
+      const assetId = newAssetId();
       const copy = await storage.copy({
         from: source.key,
         assetId,
@@ -224,10 +229,15 @@ export function storageContract(
     });
 
     it('refuses to copy a file that is not there', async () => {
-      const missing = assetKey(uuidv7(), purpose, 'public');
+      const missing = assetKey(newAssetId(), purpose, 'public');
       expect(
         await codeOf(() =>
-          harness.storage.copy({ from: missing, assetId: uuidv7(), purpose, visibility: 'public' }),
+          harness.storage.copy({
+            from: missing,
+            assetId: newAssetId(),
+            purpose,
+            visibility: 'public',
+          }),
         ),
       ).toBe('NOT_FOUND');
     });
@@ -287,15 +297,22 @@ export function storageContract(
     it('refuses wrong input with INVALID_INPUT, before it asks the provider', async () => {
       const { storage } = harness;
       const good = {
-        assetId: uuidv7(),
+        assetId: newAssetId(),
         purpose,
         visibility: 'public',
         contentType: 'image/png',
         maxBytes: 1000,
       } as const;
-      const key = assetKey(uuidv7(), purpose, 'public');
+      const key = assetKey(newAssetId(), purpose, 'public');
       const wrong: [string, () => unknown][] = [
-        ['asset id that is not a UUIDv7', () => storage.createUpload({ ...good, assetId: 'abc' })],
+        [
+          'asset id that is not an ObjectId',
+          () => storage.createUpload({ ...good, assetId: 'abc' }),
+        ],
+        [
+          'asset id that is a UUIDv7 (from before ObjectIds)',
+          () => storage.createUpload({ ...good, assetId: '0190a1b2-c3d4-7e5f-8a9b-0c1d2e3f4a5b' }),
+        ],
         [
           'purpose over 64 characters',
           () => storage.createUpload({ ...good, purpose: 'a'.repeat(65) }),
@@ -329,10 +346,10 @@ export function storageContract(
         ['delete: odd key', () => storage.delete('public/x')],
         [
           'copy: odd source',
-          () => storage.copy({ from: 'x', assetId: uuidv7(), purpose, visibility: 'public' }),
+          () => storage.copy({ from: 'x', assetId: newAssetId(), purpose, visibility: 'public' }),
         ],
         [
-          'copy: asset id that is not a UUIDv7',
+          'copy: asset id that is not an ObjectId',
           () => storage.copy({ from: key, assetId: 'abc', purpose, visibility: 'public' }),
         ],
         ['list: limit 0', () => storage.list({ limit: 0 })],

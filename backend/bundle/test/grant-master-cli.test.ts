@@ -5,7 +5,7 @@ import { join } from 'node:path';
 import { Readable, Writable } from 'node:stream';
 
 import { createLogger } from '@beautinique/backend-server-kit';
-import { connectMongo, type Mongo } from '@beautinique/backend-server-mongo';
+import { connectMongo, type Mongo, ObjectId } from '@beautinique/backend-server-mongo';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 
 import { grantMasterCli } from '../src/grant-master-cli.ts';
@@ -34,16 +34,19 @@ beforeAll(async () => {
   await writeFile(join(dir, 'live.env'), envText);
   mongo = await connectMongo({ uri: MONGO_URI, dbName: identityDb, appName: 'cli-test', logger });
   const now = new Date();
-  await mongo.db.collection<Record<string, unknown> & { _id: string }>('identity_users').insertOne({
-    _id: randomUUID(),
-    email: OWNER,
-    status: 'active',
-    emailVerifiedAt: now,
-    ageDeclaredAt: now,
-    signUpApp: 'customer',
-    createdAt: now,
-    updatedAt: now,
-  });
+  await mongo.db
+    .collection<Record<string, unknown> & { _id: ObjectId }>('identity_users')
+    .insertOne({
+      _id: new ObjectId(),
+      email: OWNER,
+      status: 'active',
+      emailVerifiedAt: now,
+      ageDeclaredAt: now,
+      // the apps are written by the release the command runs first; the grant never reads this
+      signUpAppId: new ObjectId(),
+      createdAt: now,
+      updatedAt: now,
+    });
 });
 afterAll(async () => {
   await rm(dir, { recursive: true, force: true });
@@ -69,8 +72,14 @@ async function run(args: string[], answer = '') {
   return { code, printed };
 }
 
-const masters = () =>
-  mongo.db.collection('identity_grants').countDocuments({ role: 'master.master', active: true });
+const masters = async () => {
+  const role = await mongo.db
+    .collection<{ _id: ObjectId; key: string }>('identity_roles')
+    .findOne({ key: 'master.master' });
+  return role
+    ? mongo.db.collection('identity_grants').countDocuments({ roleId: role._id, active: true })
+    : 0;
+};
 
 describe('npm run db:grant-master', () => {
   it('explains itself, and refuses a missing email or another --env', async () => {

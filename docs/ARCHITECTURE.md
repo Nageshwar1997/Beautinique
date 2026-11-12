@@ -1,6 +1,6 @@
 # ARCHITECTURE — BQ
 
-> **Status:** v1.82 draft (2026-11-12). [PRD.md](PRD.md) v1.0 pe based. Design ek multi-agent review se aaya (3 architecture proposals + review board + owner ke decisions), aur v1.1 me free tier ke official docs ke against verify hua.
+> **Status:** v1.83 draft (2026-11-12). [PRD.md](PRD.md) v1.0 pe based. Design ek multi-agent review se aaya (3 architecture proposals + review board + owner ke decisions), aur v1.1 me free tier ke official docs ke against verify hua.
 
 ## 0. Ek nazar me
 
@@ -109,13 +109,13 @@ Har module ka apna folder hai (`index.ts` facade, `http`, `application`, `domain
 ### 5.2 Async (events)
 
 - **Outbox → BullMQ → inbox:** har deployable apne events state change ke saath **usi transaction me** apne outbox me likhta hai. HTTP reply commit ke baad hi jata hai.
-- **Relay:** har deployable ka relay apne outbox ko padhta hai aur har subscriber ke liye ek job banata hai (`jobId = <eventId>@<subscriber>`; BullMQ custom job id me `:` mana hai). Relay mode config se chunta hai (`outbox.relay = poll | changestream`):
+- **Relay:** har deployable ka relay apne outbox ko padhta hai aur har subscriber ke liye ek job banata hai (`jobId = <eventId>@<subscriber>`, eventId ObjectId ka hex; BullMQ custom job id me `:` mana hai). Relay mode config se chunta hai (`outbox.relay = poll | changestream`):
   - **Live (Atlas free) me `poll`:** har 1 second polling (`{status, createdAt}` index ke saath). Atlas free cluster pe poore cluster me **max 5 change streams** khul sakti hain, aur deploy ke waqt purana aur naya instance dono khulein to 4 relays × 2 = 8 ho jaati. 4 deployables × 1 query/second = ~4 ops/s, jo M0 ke 100 ops/s me theek hai.
   - Laptop aur paid mode me `changestream` + 5 second sweeper.
   - Relay ek Mongo lease lock (`platform_locks`, 15 s TTL) ke peeche chalta hai, taaki deploy overlap me ek hi instance relay kare.
   - Atlas free pe koi aur change stream nahi khulegi. CI me lint rule `.watch(` ko sirf relay module me allow karta hai.
-- Consumer apna effect aur `processed_events` entry ek hi transaction me likhta hai. Delivery at-least-once hai, effect effectively-once.
-- **Event envelope:** `{eventId (UUIDv7), type '<context>.<aggregate>.<pastTense>', version, occurredAt, producer, aggregate, actor, correlationId, causationId, scope, data}`. Zod se validate hota hai. Breaking change = naya version, aur CI compatibility check karta hai.
+- Consumer apna effect aur `processed_events` entry (`eventId` ObjectId + subscriber, unique index) ek hi transaction me likhta hai. Delivery at-least-once hai, effect effectively-once.
+- **Event envelope:** `{eventId (ObjectId ka 24-hex; outbox me wahi ObjectId _id), type '<context>.<aggregate>.<pastTense>', version, occurredAt, producer, aggregate, actor, correlationId, causationId, scope, data}`. Zod se validate hota hai. Breaking change = naya version, aur CI compatibility check karta hai.
 - **Retries:** 5–8 baar, exponential backoff. Final fail pe job MongoDB `platform_dead_letters` collection me jaata hai (14 din TTL) aur Sentry alert jaata hai. Redis me sirf aakhri 20 failed jobs rehte hain.
 - **Read models:** Identity users aur grants ke snapshot events bhejta hai. Core aur Notify unki local copies rakhte hain, isliye unhe Identity ko call nahi karna padta.
 - **Grants events se:** Core ke domain events Identity ke inbox me jaate hain: `sellers.org.approved` → Seller Account Owner grant (scope sellerOrg) aur applicant grant khatam; `creators.creator.approved` → Creator grant; `logistics.rider.activated` / `deactivated` → Delivery Partner grant dena ya hatana.
@@ -138,6 +138,7 @@ Har module ka apna folder hai (`index.ts` facade, `http`, `application`, `domain
 | `bq_audit`    | bq-core (sirf insert aur find) | Audit events, hash chain. Update aur delete ka right kisi ke paas nahi.                                                                                                                                             |
 
 - Har database ka apna Atlas DB user hai, jiske paas sirf apne database pe readWrite ka right hai.
+- **Ids (owner, 2026-11-12, Claude ki salah):** har document ka `_id` ObjectId, aur har reference (userId, sessionId, grantId, roleId, appId, permissionIds, eventId, assetId ...) ObjectId. Naam se pehchane jaane wale records (roles, permissions, apps, signing keys, leases, task runs, migrations, email ke din, platform facts) ka naam ek unique field me (`key`, `kid`, `name`, `task`, `migrationId`, `day`), `_id` me nahi; code, contracts, JWT, cookies aur URL me naam hi chalta hai, DB me reference ObjectId. API me id 24-hex string (`objectIdZod`), DB query se pehle `toObjectId`/`parseObjectId` (`server-mongo`). ObjectId ka andaaza lagaya ja sakta hai, isliye kabhi secret nahi (RULES §7.6). UUIDv7 sirf DB ke bahar: Redis ids (loginId, OTP challengeId, OAuth state), Idempotency-Key, Delivery ke offline actions. **Wajah (Claude ne naapa, Mongo 8.0, 2 lakh users + 10 lakh orders, har order me 3 ids):** kul disk ObjectId 72 MB, UUIDv7 binary 110 MB, UUIDv7 string 162 MB; orders ka `_id` index 10 / 20 / 35 MB; 2 lakh orders ka users se join 1.28 s vs 1.52 s. M0 ke 512 MB pe storage hi asli farq. Live ka data sirf test ka tha, isliye migration nahi: release ke din live DB aur Redis naye sire se (HANDOFF).
 - **Atlas free (M0) ki limits** (mongodb.com free cluster limits se verified, 2026-10-19):
   - 512 MB storage (documents + indexes).
   - **100 operations/second**, aur 7 din me 10 GB in + 10 GB out. Bulk imports (LGD, India Post) laptop se, batches me, throttle ke saath.
@@ -217,7 +218,7 @@ Har module ka apna folder hai (`index.ts` facade, `http`, `application`, `domain
 ### 6.7 Files aur media
 
 - **Storage port:** saari files ek `StoragePort` interface ke peeche hain: `createUpload` (signed direct upload), `getUrl` (public ya signed), `stat` (file sach me upload hui ya nahi: `USED` karne se pehle), `delete` (jo nahi hai uspe bhi theek), `copy` (naya, alag asset; overwrite kabhi nahi) aur `list` (pages me, reconcile job ke liye). Key ek hi format: `<visibility>/<purpose>/<assetId>`. Har adapter ko package ke shared contract tests (`storageContract`) pass karne hain. Aaj ka adapter **Cloudinary** hai; kal **AWS S3 (+ CloudFront)** ya koi aur adapter sirf config (`storage.provider`) se aa jayega.
-- **Asset registry (`media_assets`):** har file ka record: `assetId`, provider, provider key, owner entity (product, seller document, POD...), purpose, visibility (public/private), size, status. Baaki collections sirf `assetId` rakhti hain, **provider ka URL kabhi nahi**. URL hamesha `getUrl()` se banta hai, isliye provider badalne pe data nahi badalta.
+- **Asset registry (`media_assets`):** har file ka record: `assetId` (record ka ObjectId; provider key me uska hex, owner 2026-11-12), provider, provider key, owner entity (product, seller document, POD...), purpose, visibility (public/private), size, status. Baaki collections sirf `assetId` rakhti hain, **provider ka URL kabhi nahi**. URL hamesha `getUrl()` se banta hai, isliye provider badalne pe data nahi badalta.
 - **Lifecycle:** upload → `UNUSED` → koi record use kare → `USED` → record hata ya file badli → `DELETING` → provider se delete → `DELETED`. Delete outbox event se hota hai (transaction ke baad), retry ke saath.
 - **Unused cleanup:** daily job 24 ghante se purane `UNUSED` uploads (adhoore forms, chhode hue drafts) aur `DELETING` me atke assets provider se hataata hai. Weekly reconcile job provider ki list ko registry se milata hai; registry me nahi to orphan, delete. Reconcile pichhle 24 ghante me upload hui files ko chhodta hai (upload chal raha ho sakta hai), aur provider ki list pages me padhta hai (Cloudinary Admin API ki hourly limit). Legal files (invoices, KYC) apne purpose ke retention tak rehti hain.
 - **Ek file, ek owner (owner ka faisla, 2026-10-20):** har asset ka ek hi owner record hota hai. Wahi image doosri jagah chahiye (jaise product image banner me) to `StoragePort.copy` se naya asset banta hai, apne owner ke saath. Isliye ek record ka delete kabhi doosre record ki image nahi todta.
@@ -744,3 +745,4 @@ Sirf config badlegi, code nahi:
 | v1.80 | 2026-11-12 | §7.1: `/iam/me` me authenticator chalu rakhne wale roles; jahan band nahi ho sakta wahan "Turn off" ki jagah wajah (DR-011, owner). |
 | v1.81 | 2026-11-12 | §7.2: 409 ke baad app doosre tab ka `refreshed` sandesh sunti (max 5 s), fixed 300 ms nahi (Q-010, owner). |
 | v1.82 | 2026-11-12 | §11: workflows ke actions commit SHA pe, Dependabot badalta (Q-015, owner). |
+| v1.83 | 2026-11-12 | §5.2, §6.1, §6.7: har `_id` aur reference ObjectId (eventId, assetId bhi), naam alag unique field me, UUIDv7 sirf DB ke bahar; benchmark ke number (owner). |

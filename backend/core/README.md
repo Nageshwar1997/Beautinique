@@ -34,6 +34,7 @@ Core ko MongoDB aur Redis chahiye (start pe connect hota hai, tests bhi asli pe 
 
 - `POST /platform/pings` (contract `platform.ping.record`): `mountRoute` input check karta hai, ping aur `platform.ping.recorded` event ek hi transaction me likhta hai, jawab commit ke baad (201, `{ data }`).
 - `GET /platform/pings/:pingId`: ek ping padhta hai (nahi mila to `NOT_FOUND`).
+- Ping ka `_id` ObjectId (route aur event me 24-hex), audit row ka `_id` = event ka ObjectId aur `pingId` ObjectId (owner, 2026-11-12; RULES §4.17).
 - Event outbox se relay ke raaste Redis queue me jaata hai, worker `core.pingAudit` subscriber chalata hai jo `platform_ping_audit` me ek row likhta hai; wahi event dobara aaye to inbox ka nishaan use skip kar deta hai.
 - Kaun call kar sakta hai (`access`, `apps`) gateway dekhta hai (Phase 2); idempotency aur `authorize()` platform kernel me (T4.1). Abhi event ka actor `system` hai, kyunki core tak signed-in user nahi pahunchta.
 

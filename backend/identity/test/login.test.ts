@@ -3,18 +3,20 @@
 import { argon2, randomBytes } from 'node:crypto';
 
 import { totpCode } from '@beautinique/backend-server-crypto';
-import { uuidv7 } from '@beautinique/shared-utils';
+import { ObjectId } from '@beautinique/backend-server-mongo';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 
 import { ACCOUNT_LOCK_MS, emailIndex, LOCK_MS, lockKey } from '../src/lockout.ts';
 import { ENROLL_TTL_MS, LOGIN_TTL_MS, loginKey } from '../src/login.ts';
 import {
   type Answer,
+  appIdOf,
   BREACHED,
   credentials,
   type Harness,
   hibp,
   makeAccount,
+  oid,
   PASSWORD,
   passwordCode,
   post,
@@ -75,7 +77,7 @@ describe('email + password', () => {
       expect(step(answer)).toEqual({ next: 'signed-in', user: { userId, email: address } });
     }
     expect(
-      (await providers().findOne({ userId, provider: 'password' }))?.lastUsedAt,
+      (await providers().findOne({ userId: oid(userId), provider: 'password' }))?.lastUsedAt,
     ).toBeInstanceOf(Date);
   });
 
@@ -85,12 +87,12 @@ describe('email + password', () => {
     const googleOnly = email('google');
     const now = new Date();
     await users().insertOne({
-      _id: uuidv7(),
+      _id: new ObjectId(),
       email: googleOnly,
       status: 'active',
       emailVerifiedAt: now,
       ageDeclaredAt: null,
-      signUpApp: 'customer',
+      signUpAppId: await appIdOf('customer'),
       createdAt: now,
       updatedAt: now,
     });
@@ -146,9 +148,9 @@ describe('email + password', () => {
     });
     const b64 = (bytes: Buffer) => bytes.toString('base64').replace(/=+$/, '');
     const old = `$argon2id$v=19$m=8192,t=1,p=1$${b64(salt)}$${b64(key)}`;
-    await credentials().updateOne({ _id: userId }, { $set: { 'password.hash': old } });
+    await credentials().updateOne({ _id: oid(userId) }, { $set: { 'password.hash': old } });
     expect((await login(address)).status).toBe(200);
-    const hash = (await credentials().findOne({ _id: userId }))?.password?.hash;
+    const hash = (await credentials().findOne({ _id: oid(userId) }))?.password?.hash;
     expect(hash).toMatch(/^\$argon2id\$v=19\$m=19456,t=2,p=1\$/);
     expect((await login(address)).status).toBe(200);
   });
@@ -294,7 +296,7 @@ describe('the authenticator', () => {
     expect(recoveryCodes).toHaveLength(10);
     expect(new Set(recoveryCodes).size).toBe(10);
     for (const code of recoveryCodes) expect(code).toMatch(/^[A-Z2-7]{5}-[A-Z2-7]{5}$/);
-    const saved = await credentials().findOne({ _id: userId });
+    const saved = await credentials().findOne({ _id: oid(userId) });
     expect(saved?.totp?.secret).toMatch(/^v1\.k1\./);
     expect(JSON.stringify(saved)).not.toContain(secret);
     expect(JSON.stringify(saved)).not.toContain(recoveryCodes[0]?.replace('-', ''));
@@ -424,7 +426,7 @@ describe('the authenticator', () => {
       { app: 'finance' },
     );
     expect(wrong.body.error?.code).toBe('TOTP_INVALID');
-    expect((await credentials().findOne({ _id: userId }))?.totp).toBeUndefined();
+    expect((await credentials().findOne({ _id: oid(userId) }))?.totp).toBeUndefined();
     // a second enroll replaces the secret: the first one's code no longer fits
     const replaced = await post(`/auth/login/${String(fresh)}/totp/enroll`, {}, { app: 'finance' });
     const newSecret = (replaced.body.data as { secret: string }).secret;
@@ -456,7 +458,8 @@ describe('a password the breach check could not see (DR-002)', () => {
       hibp.mode = 'answer';
     }
   }
-  const stored = async (userId: string) => (await credentials().findOne({ _id: userId }))?.password;
+  const stored = async (userId: string) =>
+    (await credentials().findOne({ _id: oid(userId) }))?.password;
 
   it('is checked again at the next sign-in, and a leaked one asks for a new password', async () => {
     const address = email('leak-later');

@@ -19,9 +19,11 @@ import { JWKS_PATH } from '../src/app.ts';
 import { deviceName, type Session, SESSIONS } from '../src/sessions.ts';
 import { ROTATE_AFTER_MS, SIGNING_KEYS, type SigningKeyRecord } from '../src/signing-keys.ts';
 import {
+  appIdOf,
   codeOf,
   type Harness,
   makeAccount,
+  oid,
   PASSWORD,
   passwordCode,
   signUpCode,
@@ -123,7 +125,7 @@ describe('signing in', () => {
       audience: tokenAudience('customer'),
       issuer: TOKEN_ISSUER,
     });
-    const { authzVersion } = (await users().findOne({ _id: userId })) ?? {};
+    const { authzVersion } = (await users().findOne({ _id: oid(userId) })) ?? {};
     expect(authzVersion).toBeGreaterThan(0);
     expect(claims).toMatchObject({ sub: userId, amr: ['password'], av: authzVersion });
     expect(claims.exp - claims.iat).toBe(600);
@@ -137,11 +139,11 @@ describe('signing in', () => {
     expect(() =>
       verifyJwt(sellerToken, { keys, audience: tokenAudience('customer'), issuer: TOKEN_ISSUER }),
     ).toThrow('audience');
-    const session = await sessionsDb().findOne({ _id: String(claims.sid) });
+    const session = await sessionsDb().findOne({ _id: oid(String(claims.sid)) });
     expect(session).toMatchObject({
-      userId,
+      userId: oid(userId),
       email: address,
-      app: 'customer',
+      appId: await appIdOf('customer'),
       device: 'Chrome on Windows',
       ip: '203.0.113.9',
       methods: ['password'],
@@ -186,7 +188,7 @@ describe('refreshing', () => {
     expect(race.cookies).toEqual({});
     // the same old token later: someone has a copy
     await sessionsDb().updateOne(
-      { _id: sessionId },
+      { _id: oid(sessionId) },
       { $set: { rotatedAt: new Date(Date.now() - 11_000) } },
     );
     const copied = await refreshWith(old);
@@ -194,7 +196,7 @@ describe('refreshing', () => {
     expect(copied.cookies['__Host-bq_customer_at']?.attributes).toContain(
       'Expires=Thu, 01 Jan 1970 00:00:00 GMT',
     );
-    expect(await sessionsDb().findOne({ _id: sessionId })).toMatchObject({
+    expect(await sessionsDb().findOne({ _id: oid(sessionId) })).toMatchObject({
       revokeReason: 'reuse',
     });
     expect(await redis().exists(revokedSessionKey(sessionId))).toBe(1);
@@ -232,7 +234,7 @@ describe('refreshing', () => {
     // the owner's token back at once, inside the parallel-tab window: a copy all the same
     const back = await refreshWith(owner);
     expect([back.status, back.body.error?.code]).toEqual([401, 'SESSION_EXPIRED']);
-    expect(await sessionsDb().findOne({ _id: sessionId })).toMatchObject({
+    expect(await sessionsDb().findOne({ _id: oid(sessionId) })).toMatchObject({
       revokeReason: 'reuse',
     });
     expect(await redis().exists(revokedSessionKey(sessionId))).toBe(1);
@@ -252,7 +254,7 @@ describe('refreshing', () => {
     // the session as an older version wrote it: `<sessionId>.<secret>`, no family
     const before = `${sessionId}.${randomBytes(32).toString('base64url')}`;
     await sessionsDb().updateOne(
-      { _id: sessionId },
+      { _id: oid(sessionId) },
       {
         $set: { refreshHash: blindIndex(harness.keys, 'refresh-token', before) },
         $unset: { familyHash: '' },
@@ -261,16 +263,16 @@ describe('refreshing', () => {
     const next = await refreshWith(before);
     expect(next.status).toBe(200);
     expect(refreshOf(next).split('.')).toHaveLength(3);
-    expect((await sessionsDb().findOne({ _id: sessionId }))?.familyHash).toEqual(
+    expect((await sessionsDb().findOne({ _id: oid(sessionId) }))?.familyHash).toEqual(
       expect.any(String),
     );
     // the old token later: a copy, as before families
     await sessionsDb().updateOne(
-      { _id: sessionId },
+      { _id: oid(sessionId) },
       { $set: { rotatedAt: new Date(Date.now() - 11_000) } },
     );
     expect((await refreshWith(before)).status).toBe(401);
-    expect(await sessionsDb().findOne({ _id: sessionId })).toMatchObject({
+    expect(await sessionsDb().findOne({ _id: oid(sessionId) })).toMatchObject({
       revokeReason: 'reuse',
     });
   });
@@ -295,12 +297,12 @@ describe('refreshing', () => {
     const customer = await signIn(address);
     const realId = refreshOf(customer).split('.')[0] ?? '';
     expect((await refreshWith(`${realId}.forged-secret`)).body.error?.code).toBe('SESSION_EXPIRED');
-    expect((await sessionsDb().findOne({ _id: realId }))?.revokedAt).toBeNull();
+    expect((await sessionsDb().findOne({ _id: oid(realId) }))?.revokedAt).toBeNull();
     // so is a made-up family with the session's real secret: only its own family is a copy
     const [, , realSecret = ''] = refreshOf(customer).split('.');
     const madeUpFamily = randomBytes(16).toString('base64url');
     expect((await refreshWith(`${realId}.${madeUpFamily}.${realSecret}`)).status).toBe(401);
-    expect((await sessionsDb().findOne({ _id: realId }))?.revokedAt).toBeNull();
+    expect((await sessionsDb().findOne({ _id: oid(realId) }))?.revokedAt).toBeNull();
     expect((await refreshWith(refreshOf(customer))).status).toBe(200);
     // the seller session is untouched by the wrong-app try
     expect((await refreshWith(refreshOf(seller, 'seller'), 'seller')).status).toBe(200);
@@ -313,15 +315,15 @@ describe('refreshing', () => {
     const sessionId = refreshOf(answer).split('.')[0] ?? '';
     const day = 24 * 60 * 60_000;
     const createdAt = new Date(Date.now() - 80 * day);
-    await sessionsDb().updateOne({ _id: sessionId }, { $set: { createdAt } });
+    await sessionsDb().updateOne({ _id: oid(sessionId) }, { $set: { createdAt } });
     const refreshed = await refreshWith(refreshOf(answer));
-    const session = await sessionsDb().findOne({ _id: sessionId });
+    const session = await sessionsDb().findOne({ _id: oid(sessionId) });
     expect(session?.expiresAt.getTime()).toBe(createdAt.getTime() + 90 * day);
     expect(session?.purgeAt.getTime()).toBe(createdAt.getTime() + 120 * day);
     expect(refreshed.body.data?.expiresAt).toBe(session?.expiresAt.toISOString());
     // past its end, the session refreshes no more (a refresh must not bring it back)
     await sessionsDb().updateOne(
-      { _id: sessionId },
+      { _id: oid(sessionId) },
       { $set: { expiresAt: new Date(Date.now() - 1000) } },
     );
     const ended = await refreshWith(refreshOf(refreshed));
@@ -332,7 +334,7 @@ describe('refreshing', () => {
     const address = email('idle');
     const userId = await makeAccount(address);
     const issued = await harness.server.runtime.otp.sessions.issue({
-      userId,
+      userId: oid(userId),
       email: address,
       app: 'admin',
       methods: ['password', 'totp'],
@@ -342,7 +344,7 @@ describe('refreshing', () => {
     const next = await refreshWith(issued.refreshToken, 'admin');
     expect(next.status).toBe(200);
     await sessionsDb().updateOne(
-      { _id: issued.sessionId },
+      { _id: oid(issued.sessionId) },
       { $set: { lastSeenAt: new Date(Date.now() - 31 * 60_000) } },
     );
     expect((await refreshWith(refreshOf(next, 'admin'), 'admin')).body.error?.code).toBe(
@@ -350,11 +352,11 @@ describe('refreshing', () => {
     );
     // the token before it, after its session ran out: no alarm, no email
     await sessionsDb().updateOne(
-      { _id: issued.sessionId },
+      { _id: oid(issued.sessionId) },
       { $set: { rotatedAt: new Date(Date.now() - 60_000) } },
     );
     expect((await refreshWith(issued.refreshToken, 'admin')).status).toBe(401);
-    expect((await sessionsDb().findOne({ _id: issued.sessionId }))?.revokedAt).toBeNull();
+    expect((await sessionsDb().findOne({ _id: oid(issued.sessionId) }))?.revokedAt).toBeNull();
   });
 });
 
@@ -367,13 +369,13 @@ describe('ending sessions', () => {
     const sessionId = token.split('.')[0] ?? '';
     // the session id alone (with a made-up secret) logs nobody out
     await call('/auth/logout', { cookie: `__Secure-bq_customer_rt=${sessionId}.forged-secret` });
-    expect((await sessionsDb().findOne({ _id: sessionId }))?.revokedAt).toBeNull();
+    expect((await sessionsDb().findOne({ _id: oid(sessionId) }))?.revokedAt).toBeNull();
     const out = await call('/auth/logout', { cookie: `__Secure-bq_customer_rt=${token}` });
     expect(out.body.data).toEqual({ signedOut: true });
     expect(out.cookies['__Host-bq_customer_at']?.attributes).toContain(
       'Expires=Thu, 01 Jan 1970 00:00:00 GMT',
     );
-    expect(await sessionsDb().findOne({ _id: sessionId })).toMatchObject({
+    expect(await sessionsDb().findOne({ _id: oid(sessionId) })).toMatchObject({
       revokeReason: 'logout',
     });
     expect(await redis().pttl(revokedSessionKey(sessionId))).toBeGreaterThan(600_000);
@@ -390,7 +392,9 @@ describe('ending sessions', () => {
     const two = await signIn(address, 'seller');
     const before = Date.now();
     await verify((await passwordCode(address)).challengeId, 'a brand new password');
-    expect(await sessionsDb().countDocuments({ userId, revokeReason: 'password-changed' })).toBe(3);
+    expect(
+      await sessionsDb().countDocuments({ userId: oid(userId), revokeReason: 'password-changed' }),
+    ).toBe(3);
     expect(Number(await redis().get(revokedUserKey(userId)))).toBeGreaterThanOrEqual(before);
     expect((await refreshWith(refreshOf(one))).status).toBe(401);
     expect((await refreshWith(refreshOf(two, 'seller'), 'seller')).status).toBe(401);
@@ -410,7 +414,7 @@ describe('ending sessions', () => {
     const oldId = old.split('.')[0] ?? '';
     await call('/auth/logout', { cookie: `__Secure-bq_customer_rt=${old}` });
     await sessionsDb().updateOne(
-      { _id: oldId },
+      { _id: oid(oldId) },
       { $set: { revokedAt: new Date(Date.now() - 12 * 60_000) } },
     );
     // and one that ended 5 minutes ago: its mark gets only what is left (about 6 of 11 minutes)
@@ -418,7 +422,7 @@ describe('ending sessions', () => {
     const midId = mid.split('.')[0] ?? '';
     await call('/auth/logout', { cookie: `__Secure-bq_customer_rt=${mid}` });
     await sessionsDb().updateOne(
-      { _id: midId },
+      { _id: oid(midId) },
       { $set: { revokedAt: new Date(Date.now() - 5 * 60_000) } },
     );
     // the wipe: the marks, the ready mark and the epoch go
@@ -473,7 +477,7 @@ describe('signing keys', () => {
     const later = await harness.start();
     try {
       await keys.updateOne(
-        { _id: String(current?._id) },
+        { _id: current?._id },
         { $set: { createdAt: new Date(Date.now() - ROTATE_AFTER_MS - 60_000) } },
       );
       const address = email('rotate-key');
@@ -490,11 +494,11 @@ describe('signing keys', () => {
       const header = JSON.parse(Buffer.from(token.split('.')[0] ?? '', 'base64url').toString()) as {
         kid: string;
       };
-      expect(header.kid).not.toBe(current?._id);
+      expect(header.kid).not.toBe(current?.kid);
       const listed = await (await fetch(`${later.url}${JWKS_PATH}`)).json();
       expect((listed as { keys: { kid: string }[] }).keys.map((k) => k.kid)).toEqual([
         header.kid,
-        current?._id,
+        current?.kid,
       ]);
     } finally {
       await later.stop();
@@ -561,7 +565,7 @@ describe('signed in (the gateway’s passport)', () => {
   const signedInAs = async (address: string, app: AppId = 'customer') => {
     const answer = await signIn(address, app);
     const sessionId = refreshOf(answer, app).split('.')[0] ?? '';
-    const session = await sessionsDb().findOne({ _id: sessionId });
+    const session = await sessionsDb().findOne({ _id: oid(sessionId) });
     return { sessionId, userId: String(session?.userId), answer };
   };
 
@@ -629,7 +633,7 @@ describe('signed in (the gateway’s passport)', () => {
       method: 'DELETE',
     });
     expect(foreign.body.data).toEqual({ ended: false });
-    expect((await sessionsDb().findOne({ _id: stranger.sessionId }))?.revokedAt).toBeNull();
+    expect((await sessionsDb().findOne({ _id: oid(stranger.sessionId) }))?.revokedAt).toBeNull();
     // the seller device
     const ended = await asSignedIn(`/auth/sessions/${there.sessionId}`, {
       ...here,
@@ -638,13 +642,13 @@ describe('signed in (the gateway’s passport)', () => {
     expect(ended.body.data).toEqual({ ended: true });
     expect(ended.cookies).toEqual([]);
     expect(await redis().exists(revokedSessionKey(there.sessionId))).toBe(1);
-    expect(await sessionsDb().findOne({ _id: there.sessionId })).toMatchObject({
+    expect(await sessionsDb().findOne({ _id: oid(there.sessionId) })).toMatchObject({
       revokeReason: 'signed-out-elsewhere',
     });
     // every other one: the sign-up session; this one stays
     const others = await asSignedIn('/auth/sessions/end-others', { ...here, method: 'POST' });
     expect(others.body.data).toEqual({ ended: 1 });
-    expect((await sessionsDb().findOne({ _id: here.sessionId }))?.revokedAt).toBeNull();
+    expect((await sessionsDb().findOne({ _id: oid(here.sessionId) }))?.revokedAt).toBeNull();
     // this device itself: its cookies go too
     const self = await asSignedIn(`/auth/sessions/${here.sessionId}`, {
       ...here,

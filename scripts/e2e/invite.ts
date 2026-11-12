@@ -7,7 +7,7 @@
 import { randomUUID } from 'node:crypto';
 
 import { createLogger } from '@beautinique/backend-server-kit';
-import { connectMongo } from '@beautinique/backend-server-mongo';
+import { connectMongo, ObjectId } from '@beautinique/backend-server-mongo';
 import { connectRedis } from '@beautinique/backend-server-queue';
 
 import { hashPassword } from '../../backend/identity/src/password.ts';
@@ -46,8 +46,9 @@ try {
   await createInvitation(
     { mongo, redis: redis.client, logger },
     {
-      userId: user._id,
-      sessionId: randomUUID(),
+      userId: user._id.toHexString(),
+      // a passport's session is not read here; any ObjectId does
+      sessionId: new ObjectId().toHexString(),
       app: 'master',
       methods: ['password', 'totp'],
       authzVersion: 0,

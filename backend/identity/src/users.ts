@@ -1,9 +1,9 @@
 import type { ClientSession, IndexSpec, Mongo } from '@beautinique/backend-server-mongo';
-import { withTransaction } from '@beautinique/backend-server-mongo';
+import { ObjectId, withTransaction } from '@beautinique/backend-server-mongo';
 import type { AppId, OTP_OUTCOMES } from '@beautinique/shared-contracts';
-import { uuidv7 } from '@beautinique/shared-utils';
 
 import { hasPassword, type NewPassword, storePassword } from './credentials.ts';
+import { rbacCatalog } from './rbac/catalog.ts';
 import { giveSignUpGrant } from './rbac/grants.ts';
 
 export const USERS = 'identity_users';
@@ -12,18 +12,19 @@ export const LEGAL_ACCEPTANCES = 'identity_legal_acceptances';
 /**
  * One sign-in account per email (ARCHITECTURE §7.1); the phone is contact data, never a login.
  * Credentials and sign-in ways live in identity_credentials and identity_auth_providers; grants and
- * sessions in their own (T3.2, T3.3).
+ * sessions in their own (T3.2, T3.3). Its _id is an ObjectId, like every id that points at it
+ * (owner, 2026-11-12); outside the database (tokens, routes) it is the 24-hex string.
  */
 export interface User {
-  _id: string;
+  _id: ObjectId;
   /** Lower case, as emailZod gives it; unique */
   email: string;
   status: 'active';
   emailVerifiedAt: Date;
   /** When the person declared being 18 or older (customer app, PRD §2); null until then */
   ageDeclaredAt: Date | null;
-  /** The app the account was made in */
-  signUpApp: AppId;
+  /** The app the account was made in (identity_apps) */
+  signUpAppId: ObjectId;
   /** Goes up at every grant change; access tokens carry it as `av` (ARCHITECTURE §7.2). Missing = 0 */
   authzVersion?: number;
   createdAt: Date;
@@ -32,13 +33,14 @@ export interface User {
 
 /** Legal evidence of a consent: who, which documents and version, from which app and IP, when. */
 export interface LegalAcceptance {
-  _id: string;
-  userId: string;
+  _id: ObjectId;
+  userId: ObjectId;
   documents: ('terms' | 'privacy')[];
   version: string;
   /** The 18-or-older declaration came with it */
   adult: boolean;
-  app: AppId;
+  /** The app it was given in (identity_apps) */
+  appId: ObjectId;
   ip: string;
   acceptedAt: Date;
 }
@@ -130,16 +132,17 @@ export async function accountWithCode(
 ): Promise<{ user: User; isNewUser: boolean }> {
   const users = mongo.db.collection<User>(USERS);
   const acceptances = mongo.db.collection<LegalAcceptance>(LEGAL_ACCEPTANCES);
+  const appId = (await rbacCatalog(mongo)).appId(app);
+  // the server gives a new account its ObjectId
   const made = await users.updateOne(
     { email },
     {
       $setOnInsert: {
-        _id: uuidv7(),
         email,
         status: 'active',
         emailVerifiedAt: now,
         ageDeclaredAt: consent.adult ? now : null,
-        signUpApp: app,
+        signUpAppId: appId,
         createdAt: now,
         updatedAt: now,
       },
@@ -162,18 +165,18 @@ export async function accountWithCode(
   if (consent.terms) {
     // one row per new consent: per app and legal version, not per code
     const known = await acceptances.findOne(
-      { userId: user._id, app, version: legalVersion },
+      { userId: user._id, appId, version: legalVersion },
       { session, projection: { _id: 1 } },
     );
     if (isNewUser || declaredNow || !known) {
       await acceptances.insertOne(
         {
-          _id: uuidv7(),
+          _id: new ObjectId(),
           userId: user._id,
           documents: ['terms', 'privacy'],
           version: legalVersion,
           adult: consent.adult,
-          app,
+          appId,
           ip,
           acceptedAt: now,
         },

@@ -4,7 +4,12 @@ import { Writable } from 'node:stream';
 import { setTimeout as sleep } from 'node:timers/promises';
 
 import { createLogger } from '@beautinique/backend-server-kit';
-import { connectMongo, type IndexSpec, type Mongo } from '@beautinique/backend-server-mongo';
+import {
+  connectMongo,
+  type IndexSpec,
+  type Mongo,
+  ObjectId,
+} from '@beautinique/backend-server-mongo';
 import { LOCKS } from '@beautinique/backend-server-queue';
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from 'vitest';
 
@@ -14,6 +19,7 @@ import {
   type Migration,
   MigrationFailedError,
   MIGRATIONS,
+  RELEASE_INDEXES,
   RELEASE_LEASE,
   RELEASE_STATE,
   releaseFingerprint,
@@ -95,11 +101,11 @@ const options = (more: Partial<RunReleaseOptions> = {}): RunReleaseOptions => ({
   indexes: [],
   ...more,
 });
-const lease = () => mongo.db.collection<{ _id: string; owner: string; expiresAt: Date }>(LOCKS);
+const lease = () => mongo.db.collection<{ name: string; owner: string; expiresAt: Date }>(LOCKS);
 /** Another instance's lease, for `ms` from now on MongoDB's clock. */
 async function heldByOther(ms: number): Promise<void> {
   await lease().updateOne(
-    { _id: RELEASE_LEASE },
+    { name: RELEASE_LEASE },
     [{ $set: { owner: 'other', expiresAt: { $add: ['$$NOW', ms] } } }],
     { upsert: true },
   );
@@ -115,6 +121,7 @@ describe('public API', () => {
       'MIGRATIONS',
       'RELEASE_LEASE',
       'RELEASE_STATE',
+      'RELEASE_INDEXES',
       'MigrationFailedError',
       'ReleaseLeaseLostError',
       'ReleaseLockTimeoutError',
@@ -227,6 +234,35 @@ describe('releaseFingerprint', () => {
   });
 });
 
+describe('release indexes (owner, 2026-11-12)', () => {
+  it('keep the name of every platform record that has one in a unique field', () => {
+    expect(
+      RELEASE_INDEXES.map((index) => [index.collection, index.name, index.key, index.unique]),
+    ).toEqual([
+      ['platform_locks', 'name_unique', { name: 1 }, true],
+      ['platform_task_runs', 'task_unique', { task: 1 }, true],
+      ['platform_state', 'key_unique', { key: 1 }, true],
+      [MIGRATIONS, 'migrationId_unique', { migrationId: 1 }, true],
+    ]);
+  });
+
+  it('count once in the fingerprint, whether a deployable lists them or not', () => {
+    const none = releaseFingerprint({ migrations: [], indexes: [] });
+    expect(releaseFingerprint({ migrations: [], indexes: [...RELEASE_INDEXES] })).toBe(none);
+    expect(releaseFingerprint({ migrations: [], indexes: RELEASE_INDEXES.slice(0, 1) })).toBe(none);
+  });
+
+  it('are made by every release, so a migration is never recorded twice', async () => {
+    await runRelease(options({ migrations: [counted('20261027-001-a', [])] }));
+    expect(await mongo.db.collection(MIGRATIONS).indexes()).toContainEqual(
+      expect.objectContaining({ name: 'migrationId_unique', unique: true }),
+    );
+    await expect(
+      mongo.db.collection(MIGRATIONS).insertOne({ migrationId: '20261027-001-a' }),
+    ).rejects.toMatchObject({ code: 11000 });
+  });
+});
+
 describe('runRelease', () => {
   it('runs migrations, then the index sync, then the steps, records them and gives the lease back', async () => {
     const order: string[] = [];
@@ -259,6 +295,12 @@ describe('runRelease', () => {
     ];
 
     const report = await runRelease(options({ migrations, indexes: [ordersIndex], steps }));
+    const created = [
+      'orders.buyer',
+      'platform_task_runs.task_unique',
+      'platform_state.key_unique',
+      'platform_migrations.migrationId_unique',
+    ];
 
     expect(order).toEqual(['migration a', 'migration b', 'step']);
     expect(report).toMatchObject({
@@ -266,25 +308,28 @@ describe('runRelease', () => {
       fingerprint: releaseFingerprint({ migrations, indexes: [ordersIndex], steps }),
       migrations: ['20261027-001-a', '20261027-002-b'],
       unknownMigrations: [],
-      indexes: { created: ['orders.buyer'], extra: [] },
+      // and the platform's own (names in unique fields; the lease made its index already)
+      indexes: { created: [...created], extra: [] },
       steps: ['sync'],
     });
     expect(report.ms).toBeGreaterThanOrEqual(0);
-    const records = await mongo.db.collection(MIGRATIONS).find().sort({ _id: 1 }).toArray();
+    // every document's _id is an ObjectId; a migration is found by its id field
+    const records = await mongo.db.collection(MIGRATIONS).find().sort({ migrationId: 1 }).toArray();
     expect(records).toMatchObject([
-      { _id: '20261027-001-a', description: 'test 20261027-001-a' },
-      { _id: '20261027-002-b', description: 'test 20261027-002-b' },
+      { migrationId: '20261027-001-a', description: 'test 20261027-001-a' },
+      { migrationId: '20261027-002-b', description: 'test 20261027-002-b' },
     ]);
+    expect(records.every((record) => record._id instanceof ObjectId)).toBe(true);
     expect(records[0]?.appliedAt).toBeInstanceOf(Date);
     expect(typeof records[0]?.ms).toBe('number');
-    expect(await mongo.db.collection(RELEASE_STATE).findOne({})).toMatchObject({
-      _id: 'current',
-      fingerprint: report.fingerprint,
-    });
+    const states = await mongo.db.collection(RELEASE_STATE).find().toArray();
+    expect(states).toHaveLength(1);
+    expect(states[0]?._id).toBeInstanceOf(ObjectId);
+    expect(states[0]).toMatchObject({ fingerprint: report.fingerprint });
     expect(await lease().countDocuments()).toBe(0);
     expect(lines.find((line) => line.msg === 'release steps done')).toMatchObject({
       migrations: ['20261027-001-a', '20261027-002-b'],
-      indexesCreated: ['orders.buyer'],
+      indexesCreated: [...created],
       steps: ['sync'],
     });
     expect(messages().filter((msg) => msg === 'migration applied')).toHaveLength(2);
@@ -357,7 +402,9 @@ describe('runRelease', () => {
     expect(error).toBeInstanceOf(MigrationFailedError);
     expect(error).toMatchObject({ migration: '20261027-002-b', cause: { message: 'bad data' } });
     expect(runs).toEqual(['20261027-001-a', '20261027-002-b']);
-    expect(await mongo.db.collection(MIGRATIONS).distinct('_id')).toEqual(['20261027-001-a']);
+    expect(await mongo.db.collection(MIGRATIONS).distinct('migrationId')).toEqual([
+      '20261027-001-a',
+    ]);
     expect(await mongo.db.collection(RELEASE_STATE).countDocuments()).toBe(0);
     expect(await lease().countDocuments()).toBe(0);
     // the index sync never ran
@@ -497,7 +544,7 @@ describe('runRelease', () => {
     expect((error as Error).message).toContain('more than 300 ms');
     expect(Date.now() - started).toBeGreaterThanOrEqual(300);
     // the other instance's lease is untouched
-    expect(await lease().findOne({ _id: RELEASE_LEASE })).toMatchObject({ owner: 'other' });
+    expect(await lease().findOne({ name: RELEASE_LEASE })).toMatchObject({ owner: 'other' });
   });
 
   it('stops before the next step once another instance took its lease', async () => {
@@ -519,7 +566,7 @@ describe('runRelease', () => {
     expect(runs).toEqual(['20261027-001-a']);
     expect(await mongo.db.collection(RELEASE_STATE).countDocuments()).toBe(0);
     // the other instance's lease stays
-    expect(await lease().findOne({ _id: RELEASE_LEASE })).toMatchObject({ owner: 'other' });
+    expect(await lease().findOne({ name: RELEASE_LEASE })).toMatchObject({ owner: 'other' });
   });
 
   it('stops when it could not renew its lease in time, and never takes a lease back that ran out', async () => {
@@ -606,7 +653,7 @@ describe('runRelease', () => {
       counted('20261027-001-a', [], async () => {
         const [held] = await lease()
           .aggregate<{ left: number }>([
-            { $match: { _id: RELEASE_LEASE } },
+            { $match: { name: RELEASE_LEASE } },
             { $project: { left: { $subtract: ['$expiresAt', '$$NOW'] } } },
           ])
           .toArray();

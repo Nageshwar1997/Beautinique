@@ -1,9 +1,11 @@
 import type { Passport } from '@beautinique/backend-server-kit';
+import { toObjectId } from '@beautinique/backend-server-mongo';
 
 import { rolesNeedingAuthenticator } from './authenticator.ts';
 import { AUTH_PROVIDERS, type AuthProvider, CREDENTIALS, type Credentials } from './credentials.ts';
 import { recoveryCodesLeft } from './login.ts';
 import type { OtpDeps } from './otp.ts';
+import { rbacCatalog } from './rbac/catalog.ts';
 import { type Session, sessionExpired, SESSIONS } from './sessions.ts';
 import { type User, USERS } from './users.ts';
 
@@ -15,10 +17,11 @@ import { type User, USERS } from './users.ts';
  */
 export async function me(deps: OtpDeps, passport: Passport) {
   const db = deps.mongo.db;
-  const user = await db.collection<User>(USERS).findOne({ _id: passport.userId });
+  const userId = toObjectId(passport.userId);
+  const user = await db.collection<User>(USERS).findOne({ _id: userId });
   const session = await db
     .collection<Session>(SESSIONS)
-    .findOne({ _id: passport.sessionId, userId: passport.userId, revokedAt: null });
+    .findOne({ _id: toObjectId(passport.sessionId), userId, revokedAt: null });
   if (!user || !session) throw sessionExpired();
   const providers = await db
     .collection<AuthProvider>(AUTH_PROVIDERS)
@@ -29,12 +32,13 @@ export async function me(deps: OtpDeps, passport: Passport) {
     .findOne({ _id: user._id }, { projection: { totp: 1, recoveryCodes: 1 } });
   // only an authenticator that is on can be kept on: no queries for the rest (QA DR-011)
   const requiredBy = credentials?.totp ? await rolesNeedingAuthenticator(deps, user._id) : [];
+  const catalog = await rbacCatalog(deps.mongo);
   return {
     user: {
-      userId: user._id,
+      userId: user._id.toHexString(),
       email: user.email,
       ageDeclaredAt: user.ageDeclaredAt?.toISOString() ?? null,
-      signUpApp: user.signUpApp,
+      signUpApp: catalog.appOf(user.signUpAppId),
       providers: providers.map((p) => p.provider).toSorted(),
       authenticator: credentials?.totp !== undefined,
       recoveryCodesLeft: credentials?.totp
@@ -43,8 +47,8 @@ export async function me(deps: OtpDeps, passport: Passport) {
       authenticatorRequiredBy: requiredBy,
     },
     session: {
-      sessionId: session._id,
-      app: session.app,
+      sessionId: session._id.toHexString(),
+      app: catalog.appOf(session.appId),
       expiresAt: session.expiresAt.toISOString(),
     },
   };
@@ -52,17 +56,17 @@ export async function me(deps: OtpDeps, passport: Passport) {
 
 /** GET /auth/sessions: My Devices, this session marked. */
 export async function myDevices(deps: OtpDeps, passport: Passport) {
-  const sessions = await deps.sessions.list(passport.userId);
+  const sessions = await deps.sessions.list(toObjectId(passport.userId));
   return {
     sessions: sessions.map((session) => ({
-      sessionId: session._id,
+      sessionId: session._id.toHexString(),
       app: session.app,
       device: session.device,
       ip: session.ip,
       createdAt: session.createdAt.toISOString(),
       lastSeenAt: session.lastSeenAt.toISOString(),
       expiresAt: session.expiresAt.toISOString(),
-      current: session._id === passport.sessionId,
+      current: session._id.toHexString() === passport.sessionId,
     })),
   };
 }

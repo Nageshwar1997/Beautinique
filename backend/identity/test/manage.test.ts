@@ -1,6 +1,6 @@
 // T3.3 part B: roles, grants and invitations through identity's routes, as the gateway's passport
 // would bring them, against the local MongoDB replica set and Valkey (`npm run infra:up`).
-import { withTransaction } from '@beautinique/backend-server-mongo';
+import { ObjectId, withTransaction } from '@beautinique/backend-server-mongo';
 import { OUTBOX } from '@beautinique/backend-server-queue';
 import { type AppId, authzVersionKey } from '@beautinique/shared-contracts';
 import { uuidv7 } from '@beautinique/shared-utils';
@@ -11,13 +11,19 @@ import { type InvitationRecord, INVITATIONS } from '../src/rbac/invitations.ts';
 import { type RoleRecord, ROLES } from '../src/rbac/sync.ts';
 import {
   type Answer,
+  appIdOf,
   codeOf,
   events,
   grants,
   type Harness,
   makeAccount,
+  oid,
   PASSWORD,
+  permissionIdOf,
   post,
+  roleIdOf,
+  roleKeysOf,
+  SOME_ID,
   startHarness,
   users,
   verify,
@@ -53,7 +59,13 @@ async function as(
       'X-BQ-App': app,
       'X-BQ-Client-Ip': '203.0.113.9',
       'X-BQ-Passport': harness.passport.sign(
-        { userId, sessionId: uuidv7(), app, methods: ['password', 'totp'], authzVersion: 0 },
+        {
+          userId,
+          sessionId: new ObjectId().toHexString(),
+          app,
+          methods: ['password', 'totp'],
+          authzVersion: 0,
+        },
         'bq:identity',
       ),
     },
@@ -62,19 +74,23 @@ async function as(
   return { status: response.status, body: (await response.json()) as Answer['body'] };
 }
 
+// two seller organisations (made-up ids)
+const ORG_A = '6730a2b4c41b2e9d104f6aa1';
+const ORG_B = '6730a2b4c41b2e9d104f6ab2';
+
 /** An account that holds only its customer sign-up role. */
 const account = (name: string) => makeAccount(email(name), PASSWORD, { everyApp: false });
 
 /** Gives a role straight in the database (as a migration would), in this scope. */
 async function hold(userId: string, role: string, scope: Scope = { type: 'global', ids: [] }) {
-  const record = await roles().findOne({ _id: role });
+  const record = await roles().findOne({ key: role });
   if (!record) throw new Error(`no role ${role}`);
   const { mongo } = harness.server.runtime;
   await withTransaction(mongo, (session) =>
     writeGrant(mongo, session, {
-      userId,
-      role,
-      app: record.app,
+      userId: oid(userId),
+      roleId: record._id,
+      appId: record.appId,
       scope,
       via: 'migration',
       now: new Date(),
@@ -93,7 +109,8 @@ const login = (address: string, app: AppId) =>
 const next = (answer: Answer) => (answer.body.data as { next?: string } | undefined)?.next;
 const errorOf = (answer: Answer) => [answer.status, answer.body.error?.code];
 const versionAt = async (userId: string) => redis().get(authzVersionKey(userId));
-const versionOf = async (userId: string) => (await users().findOne({ _id: userId }))?.authzVersion;
+const versionOf = async (userId: string) =>
+  (await users().findOne({ _id: oid(userId) }))?.authzVersion;
 
 describe('roles', () => {
   it('lists every role to whoever reads grants, and to nobody else', async () => {
@@ -283,13 +300,14 @@ describe('roles', () => {
     // also for someone whose other role there may give roles (but not this one)
     await hold(agentId, 'support.c_desk_lead');
     await roles().insertOne({
-      _id: 'support.c_odd',
-      app: 'support',
+      _id: new ObjectId(),
+      key: 'support.c_odd',
+      appId: await appIdOf('support'),
       name: 'Odd',
       main: false,
       scopeTypes: ['global'],
-      permissions: ['iam.app.sign_in'],
-      appointedBy: ['support.c_desk_agent'],
+      permissionIds: [await permissionIdOf('iam.app.sign_in')],
+      appointedBy: [await roleIdOf('support.c_desk_agent')],
       mfaRequired: false,
       signUp: false,
       maxHolders: null,
@@ -337,8 +355,8 @@ describe('giving and ending roles', () => {
     expect(await versionAt(asha)).toBe(String((before ?? 0) + 1));
     const log = await db()
       .collection<GrantLogEntry>(GRANT_LOG)
-      .findOne({ userId: asha, role: 'admin.state_admin' });
-    expect(log).toMatchObject({ action: 'granted', by: boss, via: 'appointed' });
+      .findOne({ userId: oid(asha), roleId: await roleIdOf('admin.state_admin') });
+    expect(log).toMatchObject({ action: 'granted', by: oid(boss), via: 'appointed' });
     // the admin app asks for the authenticator first
     expect(next(await login(email('asha'), 'admin'))).toBe('totp-enroll');
     // the same again: already held
@@ -369,7 +387,7 @@ describe('giving and ending roles', () => {
       return (answer.body.error?.details as { path: string[] }[]).map((d) => d.path.join('.'));
     };
     expect(await fieldOf({ role: 'admin.nobody' })).toEqual(['role']);
-    expect(await fieldOf({ userId: uuidv7() })).toEqual(['userId']);
+    expect(await fieldOf({ userId: new ObjectId().toHexString() })).toEqual(['userId']);
     expect(await fieldOf({ scope: { type: 'state', ids: ['XX'] } })).toEqual(['scope.ids']);
     expect(await fieldOf({ scope: { type: 'global', ids: [] } })).toContain('scope.type');
     expect(
@@ -435,7 +453,7 @@ describe('giving and ending roles', () => {
 
     // a seller's owner gives staff roles in their own seller only
     const owner = await account('owner');
-    await hold(owner, 'seller.account_owner', { type: 'sellerOrg', ids: ['org-1'] });
+    await hold(owner, 'seller.account_owner', { type: 'sellerOrg', ids: [SOME_ID] });
     const staff = await account('staff');
     const fromOwner = (ids: string[]) =>
       as(owner, 'seller', 'POST', '/iam/grants', {
@@ -443,8 +461,8 @@ describe('giving and ending roles', () => {
         role: 'seller.catalog_manager',
         scope: { type: 'sellerOrg', ids },
       });
-    expect(errorOf(await fromOwner(['org-2']))).toEqual([403, 'FORBIDDEN']);
-    expect((await fromOwner(['org-1'])).status).toBe(200);
+    expect(errorOf(await fromOwner([new ObjectId().toHexString()]))).toEqual([403, 'FORBIDDEN']);
+    expect((await fromOwner([SOME_ID])).status).toBe(200);
     expect(next(await login(email('staff'), 'seller'))).toBe('signed-in');
     // someone without the right to give at all
     expect(
@@ -452,7 +470,7 @@ describe('giving and ending roles', () => {
         await as(staff, 'seller', 'POST', '/iam/grants', {
           userId: owner,
           role: 'seller.catalog_manager',
-          scope: { type: 'sellerOrg', ids: ['org-1'] },
+          scope: { type: 'sellerOrg', ids: [SOME_ID] },
         }),
       ),
     ).toEqual([403, 'FORBIDDEN']);
@@ -483,19 +501,18 @@ describe('giving and ending roles', () => {
     expect(ended.body.data?.grant).toMatchObject({ active: false, grantId });
     expect(await versionOf(ravi)).toBe((version ?? 0) + 1);
     expect(await versionAt(ravi)).toBe(String((version ?? 0) + 1));
-    expect(await grants().findOne({ _id: grantId })).toMatchObject({
+    expect(await grants().findOne({ _id: oid(grantId) })).toMatchObject({
       active: false,
-      endedBy: boss,
+      endedBy: oid(boss),
     });
     expect(next(await login(email('ravi'), 'logistics'))).toBeUndefined();
     // again: nothing changes
     const again = await as(boss, 'master', 'POST', `/iam/grants/${grantId}/end`);
     expect(again.body.data?.grant).toMatchObject({ active: false });
     expect(await versionOf(ravi)).toBe((version ?? 0) + 1);
-    expect(errorOf(await as(boss, 'master', 'POST', `/iam/grants/${uuidv7()}/end`))).toEqual([
-      404,
-      'NOT_FOUND',
-    ]);
+    expect(
+      errorOf(await as(boss, 'master', 'POST', `/iam/grants/${new ObjectId().toHexString()}/end`)),
+    ).toEqual([404, 'NOT_FOUND']);
 
     // a role its holder could give: still not their own
     await as(boss, 'master', 'POST', '/iam/roles', {
@@ -508,7 +525,10 @@ describe('giving and ending roles', () => {
       mfaRequired: false,
     });
     await hold(boss, 'master.c_desk');
-    const own = await grants().findOne({ userId: boss, role: 'master.c_desk' });
+    const own = await grants().findOne({
+      userId: oid(boss),
+      roleId: await roleIdOf('master.c_desk'),
+    });
     expect(
       errorOf(await as(boss, 'master', 'POST', `/iam/grants/${String(own?._id)}/end`)),
     ).toEqual([403, 'FORBIDDEN']);
@@ -518,12 +538,12 @@ describe('giving and ending roles', () => {
 describe('who sees which grants', () => {
   it('shows an appointer the roles they give in their scope, a reviewer every role, pages with a cursor', async () => {
     const owner = await account('owner-list');
-    await hold(owner, 'seller.account_owner', { type: 'sellerOrg', ids: ['org-a'] });
+    await hold(owner, 'seller.account_owner', { type: 'sellerOrg', ids: [ORG_A] });
     const mine = await account('mine');
-    await hold(mine, 'seller.catalog_manager', { type: 'sellerOrg', ids: ['org-a'] });
-    await hold(mine, 'seller.finance', { type: 'sellerOrg', ids: ['org-a'] });
+    await hold(mine, 'seller.catalog_manager', { type: 'sellerOrg', ids: [ORG_A] });
+    await hold(mine, 'seller.finance', { type: 'sellerOrg', ids: [ORG_A] });
     const theirs = await account('theirs');
-    await hold(theirs, 'seller.catalog_manager', { type: 'sellerOrg', ids: ['org-b'] });
+    await hold(theirs, 'seller.catalog_manager', { type: 'sellerOrg', ids: [ORG_B] });
 
     interface Page {
       items: { userId: string; role: string }[];
@@ -627,20 +647,26 @@ describe('invitations', () => {
     expect(accepted.status, JSON.stringify(accepted.body)).toBe(200);
     expect(accepted.body.data).toMatchObject({ outcome: 'invite-accepted', signedIn: false });
     const userId = String(accepted.body.data?.userId);
-    expect(await grants().findOne({ userId, role: 'admin.state_admin' })).toMatchObject({
+    expect(
+      await grants().findOne({ userId: oid(userId), roleId: await roleIdOf('admin.state_admin') }),
+    ).toMatchObject({
       via: 'invitation',
-      grantedBy: boss,
+      grantedBy: oid(boss),
       scope: { type: 'state', ids: ['DL'] },
       active: true,
     });
-    expect(await invitationsDb().findOne({ _id: invitation.invitationId })).toMatchObject({
+    expect(await invitationsDb().findOne({ _id: oid(invitation.invitationId) })).toMatchObject({
       status: 'accepted',
-      endedBy: userId,
+      endedBy: oid(userId),
     });
     // a staff account gets no customer role
-    expect((await grants().find({ userId }).toArray()).map((g) => g.role)).toEqual([
-      'admin.state_admin',
-    ]);
+    expect(
+      await roleKeysOf(
+        await grants()
+          .find({ userId: oid(userId) })
+          .toArray(),
+      ),
+    ).toEqual(['admin.state_admin']);
     expect(next(await login(address, 'admin'))).toBe('totp-enroll');
     expect(next(await login(address, 'customer'))).toBeUndefined();
   });
@@ -687,8 +713,10 @@ describe('invitations', () => {
     const challengeId = await inviteCode(address, 'creator', { consent: { terms: true } });
     const accepted = await verify(challengeId, PASSWORD, 'creator');
     const userId = String(accepted.body.data?.userId);
-    expect(await grants().findOne({ userId, role: 'creator.creator' })).toMatchObject({
-      scope: { type: 'self', ids: [userId] },
+    expect(
+      await grants().findOne({ userId: oid(userId), roleId: await roleIdOf('creator.creator') }),
+    ).toMatchObject({
+      scope: { type: 'self', ids: [oid(userId)] },
     });
     expect(next(await login(address, 'creator'))).toBe('signed-in');
   });
@@ -717,7 +745,7 @@ describe('invitations', () => {
     // run out: no code, shown as expired, and the same invitation can go again
     const old = await invite('old');
     await invitationsDb().updateOne(
-      { _id: old },
+      { _id: oid(old) },
       { $set: { expiresAt: new Date(Date.now() - 1000) } },
     );
     expect(await events(await inviteCode(email('old'), 'finance'))).toHaveLength(0);
@@ -730,9 +758,12 @@ describe('invitations', () => {
     // the inviter lost the right: the invitation is taken back at acceptance
     const gone = await invite('gone');
     const goneCode = await inviteCode(email('gone'), 'finance');
-    await grants().updateMany({ userId: boss, role: 'master.master' }, { $set: { active: false } });
+    await grants().updateMany(
+      { userId: oid(boss), roleId: await roleIdOf('master.master') },
+      { $set: { active: false } },
+    );
     expect(errorOf(await verify(goneCode, PASSWORD, 'finance'))).toEqual([400, 'OTP_EXPIRED']);
-    expect(await invitationsDb().findOne({ _id: gone })).toMatchObject({ status: 'revoked' });
+    expect(await invitationsDb().findOne({ _id: oid(gone) })).toMatchObject({ status: 'revoked' });
   });
 
   it('refuses inviting oneself, and taking back what one could not give', async () => {

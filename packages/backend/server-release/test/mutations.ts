@@ -245,7 +245,12 @@ const mutations: Mutation[] = [
   {
     file: 'release',
     name: 'release not recorded',
-    change: [['      { upsert: true },', '      { upsert: false },']],
+    change: [
+      [
+        '      { upsert: true, comment: ONE_STATE },',
+        '      { upsert: false, comment: ONE_STATE },',
+      ],
+    ],
     tests: run,
   },
   {
@@ -434,14 +439,64 @@ const mutations: Mutation[] = [
   {
     file: 'migrations',
     name: 'migration not recorded',
-    change: [['      { upsert: true },', '      { upsert: false },']],
+    change: [['    await records.insertOne({', '    void ({']],
     tests: run,
   },
   {
     file: 'migrations',
     name: 'description not recorded',
-    change: [['{ description: migration.description,', "{ description: '',"]],
+    change: [
+      [
+        '      description: migration.description,\n      appliedAt',
+        "      description: '',\n      appliedAt",
+      ],
+    ],
     tests: run,
+  },
+  // every document's _id an ObjectId, names in unique fields (owner, 2026-11-12)
+  {
+    file: 'migrations',
+    name: 'a migration may be recorded twice',
+    change: [
+      [
+        "{ collection: MIGRATIONS, name: 'migrationId_unique', key: { migrationId: 1 }, unique: true },",
+        "{ collection: MIGRATIONS, name: 'migrationId_unique', key: { migrationId: 1 } },",
+      ],
+    ],
+    tests: 'release indexes',
+  },
+  {
+    file: 'release',
+    name: 'the platform indexes are not synced',
+    change: [
+      [
+        '    const synced = await syncIndexes(mongo, withReleaseIndexes(indexes));',
+        '    const synced = await syncIndexes(mongo, indexes);',
+      ],
+    ],
+    tests: run,
+  },
+  {
+    file: 'release',
+    name: 'the fingerprint leaves the platform indexes out',
+    change: [
+      [
+        '    indexes: withReleaseIndexes(indexes).map((index) => [',
+        '    indexes: indexes.map((index) => [',
+      ],
+    ],
+    tests: 'release indexes',
+  },
+  {
+    file: 'release',
+    name: 'an index the deployable lists is synced twice',
+    change: [
+      [
+        '    ...RELEASE_INDEXES.filter((index) => !listed.has(',
+        "    ...RELEASE_INDEXES.filter((index) => !listed.has('x' + ",
+      ],
+    ],
+    tests: 'release indexes',
   },
   {
     file: 'migrations',

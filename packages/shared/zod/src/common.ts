@@ -18,7 +18,11 @@ export const basisPointsZod = number()
   .min(0, 'Rate cannot be negative')
   .max(10_000, 'Rate cannot be more than 100%');
 
-/** MongoDB ObjectId (24 hex characters), stored in lower case. */
+/**
+ * MongoDB ObjectId (24 hex characters), in lower case: every document's _id and every id that
+ * points at a document (owner, 2026-11-12). Not a secret: it can be guessed (time, a per-process
+ * random part, a counter), so a route checks permission and scope, never "nobody knows the id".
+ */
 export const objectIdZod = string()
   .trim()
   .toLowerCase()
@@ -27,7 +31,11 @@ export const objectIdZod = string()
 /** Any RFC 9562 UUID. */
 export const uuidZod = uuid('Not a valid UUID');
 
-/** UUIDv7 (time-ordered): event ids, offline action ids. */
+/**
+ * UUIDv7 (time-ordered, mostly random): ids that live outside MongoDB and must not be guessed:
+ * Redis ids (a sign-in in progress, an email-code challenge, an OAuth state), the Idempotency-Key
+ * and the Delivery app's offline actions. MongoDB ids are objectIdZod (owner, 2026-11-12).
+ */
 export const uuidv7Zod = uuid({ version: 'v7', error: 'Not a valid UUIDv7' });
 
 /** URL slug: lower-case letters and digits in groups joined by single hyphens. */

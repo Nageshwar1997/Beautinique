@@ -2,6 +2,7 @@
 // with the authenticator, and a Security Officer's authenticator reset and session end. Against
 // the local MongoDB replica set and Valkey (`npm run infra:up`).
 import { totpCode } from '@beautinique/backend-server-crypto';
+import { ObjectId } from '@beautinique/backend-server-mongo';
 import { OUTBOX } from '@beautinique/backend-server-queue';
 import {
   type AppId,
@@ -9,7 +10,6 @@ import {
   revokedUserKey,
   STEP_UP_SECONDS,
 } from '@beautinique/shared-contracts';
-import { uuidv7 } from '@beautinique/shared-utils';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 
 import { type Session, SESSIONS } from '../src/sessions.ts';
@@ -19,6 +19,7 @@ import {
   giveRole,
   type Harness,
   makeAccount,
+  oid,
   PASSWORD,
   post,
   startHarness,
@@ -189,7 +190,7 @@ describe('step-up', () => {
     expect(claims.su).toBeGreaterThanOrEqual(Math.floor(before / 1000));
     // only the access cookie: the refresh token stays as it is
     expect(stepped.cookies.has('__Secure-bq_admin_rt')).toBe(false);
-    const session = await sessionsDb().findOne({ _id: sessionId });
+    const session = await sessionsDb().findOne({ _id: oid(sessionId) });
     expect(Math.floor((session?.stepUpAt?.getTime() ?? 0) / 1000)).toBe(claims.su);
 
     // the same code never works twice, nor an older one still in the time window
@@ -213,7 +214,7 @@ describe('step-up', () => {
   it('asks an account without an authenticator to set one up, and an ended session to sign in', async () => {
     const userId = await makeAccount(email('no-totp'), PASSWORD, { everyApp: false });
     const answer = await call('/auth/step-up', {
-      passport: { userId, sessionId: uuidv7() },
+      passport: { userId, sessionId: new ObjectId().toHexString() },
       body: { code: '123456' },
     });
     expect(errorOf(answer)).toEqual([400, 'AUTHENTICATOR_REQUIRED']);
@@ -221,7 +222,7 @@ describe('step-up', () => {
     const { userId: other, secret, at } = await adminWithAuthenticator('ended');
     const gone = await call('/auth/step-up', {
       app: 'admin',
-      passport: { userId: other, sessionId: uuidv7() },
+      passport: { userId: other, sessionId: new ObjectId().toHexString() },
       body: { code: totpCode(secret, at + 30_000) },
     });
     expect(errorOf(gone)).toEqual([401, 'SESSION_EXPIRED']);
@@ -270,7 +271,7 @@ describe('a Security Officer', () => {
   const officer = async (name: string) => {
     const userId = await makeAccount(email(name), PASSWORD, { everyApp: false });
     await giveRole(userId, 'master.security_officer');
-    return { userId, sessionId: uuidv7() };
+    return { userId, sessionId: new ObjectId().toHexString() };
   };
 
   it('resets a lost authenticator: it goes with its recovery codes, every session ends, and the person is told', async () => {
@@ -283,13 +284,13 @@ describe('a Security Officer', () => {
     expect(reset.status, JSON.stringify(reset.body)).toBe(200);
     // the sign-up session (customer) and the admin one
     expect(reset.body.data).toEqual({ reset: true, sessionsEnded: 2 });
-    const left = await credentials().findOne({ _id: userId });
+    const left = await credentials().findOne({ _id: oid(userId) });
     expect(left?.totp).toBeUndefined();
     expect(left?.recoveryCodes).toBeUndefined();
     expect(left?.password).toBeDefined();
     expect(await redis().get(revokedUserKey(userId))).not.toBeNull();
     expect(
-      await sessionsDb().findOne({ userId, revokeReason: 'authenticator-reset' }),
+      await sessionsDb().findOne({ userId: oid(userId), revokeReason: 'authenticator-reset' }),
     ).not.toBeNull();
     const event = await db()
       .collection<{ type: string; envelope: { data: Record<string, unknown> } }>(OUTBOX)
@@ -325,11 +326,11 @@ describe('a Security Officer', () => {
     expect(refused.body.error?.message).toBe(
       "Only another Master can reset a Master's authenticator.",
     );
-    expect((await credentials().findOne({ _id: master }))?.totp).toBeDefined();
+    expect((await credentials().findOne({ _id: oid(master) }))?.totp).toBeDefined();
 
     const byMaster = await call(`/iam/users/${master}/authenticator/reset`, {
       app: 'master',
-      passport: { userId: other, sessionId: uuidv7() },
+      passport: { userId: other, sessionId: new ObjectId().toHexString() },
     });
     expect(byMaster.status, JSON.stringify(byMaster.body)).toBe(200);
     expect(byMaster.body.data).toMatchObject({ reset: true });
@@ -344,8 +345,10 @@ describe('a Security Officer', () => {
     const ended = await call(`/iam/users/${userId}/sessions/end`, { app: 'master', passport: so });
     // the sign-up session and the two sign-ins
     expect(ended.body.data).toEqual({ ended: 3 });
-    expect(await sessionsDb().countDocuments({ userId, revokedAt: null })).toBe(0);
-    expect(await sessionsDb().countDocuments({ userId, revokeReason: 'security-officer' })).toBe(3);
+    expect(await sessionsDb().countDocuments({ userId: oid(userId), revokedAt: null })).toBe(0);
+    expect(
+      await sessionsDb().countDocuments({ userId: oid(userId), revokeReason: 'security-officer' }),
+    ).toBe(3);
   });
 
   it('never acts on their own account, nor on one that is not there; nobody else may', async () => {
@@ -355,7 +358,12 @@ describe('a Security Officer', () => {
         errorOf(await call(`/iam/users/${so.userId}/${path}`, { app: 'master', passport: so })),
       ).toEqual([403, 'FORBIDDEN']);
       expect(
-        errorOf(await call(`/iam/users/${uuidv7()}/${path}`, { app: 'master', passport: so })),
+        errorOf(
+          await call(`/iam/users/${new ObjectId().toHexString()}/${path}`, {
+            app: 'master',
+            passport: so,
+          }),
+        ),
       ).toEqual([404, 'NOT_FOUND']);
     }
     const plain = await makeAccount(email('not-officer'), PASSWORD, { everyApp: false });
@@ -366,7 +374,7 @@ describe('a Security Officer', () => {
         errorOf(
           await call(`/iam/users/${target}/${path}`, {
             app: 'master',
-            passport: { userId: plain, sessionId: uuidv7() },
+            passport: { userId: plain, sessionId: new ObjectId().toHexString() },
           }),
         ),
       ).toEqual([403, 'FORBIDDEN']);

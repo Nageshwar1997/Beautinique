@@ -76,7 +76,7 @@ export const sellerApproved = defineEvent({
   data: object({ sellerOrgId: objectIdZod }),
 });
 
-sellerApproved.envelope.parse(message); // poora envelope: eventId (UUIDv7), type, version, occurredAt, producer, aggregate, actor, correlationId, causationId, scope, data
+sellerApproved.envelope.parse(message); // poora envelope: eventId (ObjectId ka 24-hex), type, version, occurredAt, producer, aggregate, actor, correlationId, causationId, scope, data
 ```
 
 `data` me breaking change ka matlab naya version hai, jo purane ke saath declare hota hai. `eventCatalogue(events)` type + version se dhoondhta hai, `latest(type)` deta hai, aur duplicate ya versions me gap (1, 3) pe error deta hai.

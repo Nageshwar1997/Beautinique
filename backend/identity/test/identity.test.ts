@@ -2,7 +2,7 @@ import { randomBytes, randomUUID } from 'node:crypto';
 
 import { generateKey } from '@beautinique/backend-server-crypto';
 import { createLogger, LOOPBACK_HOST } from '@beautinique/backend-server-kit';
-import { connectMongo } from '@beautinique/backend-server-mongo';
+import { connectMongo, ObjectId } from '@beautinique/backend-server-mongo';
 import { RELEASE_STATE } from '@beautinique/backend-server-release';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 
@@ -10,6 +10,7 @@ import {
   expectNoCollectionScans,
   watchCollectionScans,
 } from '../../../scripts/e2e/collection-scans.ts';
+import { expectObjectIds } from '../../../scripts/e2e/object-ids.ts';
 import { readConfig } from '../src/config.ts';
 import { release, start } from '../src/service.ts';
 
@@ -34,6 +35,8 @@ beforeAll(async () => {
 afterAll(async () => {
   try {
     await expectNoCollectionScans(watch.db, ['identity', 'identity-release']);
+    // every document's _id and every reference an ObjectId (RULES §4.17)
+    await expectObjectIds(watch.db);
   } finally {
     await watch.db.dropDatabase();
     await watch.close();
@@ -183,8 +186,11 @@ describe('identity', () => {
       handleSignals: false,
     });
     try {
-      const state = await watch.db.collection(RELEASE_STATE).findOne({ _id: 'current' as never });
-      expect(state).toMatchObject({ _id: 'current', fingerprint: expect.any(String) as unknown });
+      // one release document, its _id an ObjectId like every document's
+      const states = await watch.db.collection(RELEASE_STATE).find().toArray();
+      expect(states).toHaveLength(1);
+      expect(states[0]?._id).toBeInstanceOf(ObjectId);
+      expect(states[0]).toMatchObject({ fingerprint: expect.any(String) as unknown });
     } finally {
       await server.stop();
     }

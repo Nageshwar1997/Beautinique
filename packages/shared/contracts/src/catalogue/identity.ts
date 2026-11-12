@@ -7,6 +7,7 @@ import {
   literal,
   number,
   object,
+  objectIdZod,
   otpZod,
   passwordZod,
   string,
@@ -224,7 +225,7 @@ export const resendOtp = defineRoute({
 });
 
 /** Who signed in. The session (cookies) comes with T3.2. */
-export const signedInZod = object({ userId: uuidv7Zod, email: emailZod });
+export const signedInZod = object({ userId: objectIdZod, email: emailZod });
 
 /**
  * What a right code did. `account-made`: a new account, signed in. `password-set`: the password
@@ -259,7 +260,7 @@ export const verifyOtp = defineRoute({
   owner: 'identity',
   input: { params: challengeParams, body: object({ code: otpZod, password: passwordZod }) },
   output: object({
-    userId: uuidv7Zod,
+    userId: objectIdZod,
     email: emailZod,
     outcome: zodEnum(OTP_OUTCOMES),
     /** true only for a new account; after setting a password, sign in with it */
@@ -421,13 +422,14 @@ export const accessCookieName = (app: AppId): string => `__Host-bq_${app}_at`;
 export const refreshCookieName = (app: AppId): string => `__Secure-bq_${app}_rt`;
 export const REFRESH_COOKIE_PATH = '/api/v1/auth';
 
-const SESSION_ID = /^[0-9a-f]{8}-[0-9a-f]{4}-7[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/;
+// the session id: an ObjectId, in lower-case hex (identity never writes another)
+const SESSION_ID = /^[0-9a-f]{24}$/;
 // 16 random bytes in base64url
 const FAMILY = /^[A-Za-z0-9_-]{22}$/;
 
 /**
  * The parts of identity's refresh token `<sessionId>.<family>.<secret>` that are not the secret: the
- * session id (a UUIDv7) and the family (the same in every token of the session). A token from
+ * session id (an ObjectId, 24 hex) and the family (the same in every token of the session). A token from
  * before families (`<sessionId>.<secret>`), or one whose family is not 16 bytes of base64url, has
  * none. Identity finds the session with them; the gateway gives each family its own `session`
  * budget. Anything else: null.
@@ -467,7 +469,7 @@ export const refreshSession = defineRoute({
   stepUp: false,
   owner: 'identity',
   input: {},
-  output: object({ user: signedInZod, sessionId: uuidv7Zod, expiresAt: isoDateTimeZod }),
+  output: object({ user: signedInZod, sessionId: objectIdZod, expiresAt: isoDateTimeZod }),
 });
 
 /** Ends the session in the refresh cookie (if any) and clears the app's cookies. */
@@ -496,8 +498,8 @@ export const sessionReuseDetected = defineEvent({
   producer: 'identity',
   description: 'An old refresh token came back; the session was ended and the person is told',
   data: object({
-    sessionId: uuidv7Zod,
-    userId: uuidv7Zod,
+    sessionId: objectIdZod,
+    userId: objectIdZod,
     email: emailZod,
     app: zodEnum(APPS),
     /** What the session's browser called itself at sign-in, e.g. `Chrome on Windows` */
@@ -544,7 +546,7 @@ export const getMe = defineRoute({
   input: {},
   output: object({
     user: object({
-      userId: uuidv7Zod,
+      userId: objectIdZod,
       email: emailZod,
       /** When the person declared being 18 or older (customer app); null until then */
       ageDeclaredAt: isoDateTimeZod.nullable(),
@@ -562,7 +564,7 @@ export const getMe = defineRoute({
       authenticatorRequiredBy: array(object({ name: string(), app: zodEnum(APPS) })),
     }),
     session: object({
-      sessionId: uuidv7Zod,
+      sessionId: objectIdZod,
       app: zodEnum(APPS),
       expiresAt: isoDateTimeZod,
     }),
@@ -570,7 +572,7 @@ export const getMe = defineRoute({
 });
 
 const sessionViewZod = object({
-  sessionId: uuidv7Zod,
+  sessionId: objectIdZod,
   app: zodEnum(APPS),
   /** `Chrome on Windows` */
   device: string(),
@@ -613,7 +615,7 @@ export const endSession = defineRoute({
   idempotency: false,
   stepUp: false,
   owner: 'identity',
-  input: { params: object({ sessionId: uuidv7Zod }) },
+  input: { params: object({ sessionId: objectIdZod }) },
   output: object({ ended: boolean() }),
 });
 
@@ -725,7 +727,7 @@ export const authenticatorChanged = defineEvent({
   description:
     'Someone set up, replaced or turned off their authenticator, or got new recovery codes',
   data: object({
-    userId: uuidv7Zod,
+    userId: objectIdZod,
     email: emailZod,
     change: zodEnum(AUTHENTICATOR_CHANGES),
     /** The app it was done in */

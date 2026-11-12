@@ -1,4 +1,4 @@
-import type { IndexSpec, Mongo } from '@beautinique/backend-server-mongo';
+import { type IndexSpec, type Mongo, ObjectId } from '@beautinique/backend-server-mongo';
 import { subscribe, type Subscription } from '@beautinique/backend-server-queue';
 import { pingRecorded } from '@beautinique/shared-contracts';
 import type { Router } from 'express';
@@ -24,9 +24,10 @@ export const platformSubscribers = { [pingRecorded.type]: [PING_AUDIT] };
  */
 export const PING_TTL_SECONDS = 7 * 24 * 60 * 60;
 
+/** The audit copy of a ping: the event's id, and the ping it names (both ObjectIds). */
 interface PingAudit {
-  _id: string;
-  pingId: string;
+  _id: ObjectId;
+  pingId: ObjectId;
   note: string;
   recordedAt: Date;
 }
@@ -48,8 +49,8 @@ export function subscriptionsOf({ mongo }: { mongo: Mongo }): Subscription[] {
     subscribe(PING_AUDIT, pingRecorded, async (event, session) => {
       await audit.insertOne(
         {
-          _id: event.eventId,
-          pingId: event.data.pingId,
+          _id: new ObjectId(event.eventId),
+          pingId: new ObjectId(event.data.pingId),
           note: event.data.note,
           recordedAt: new Date(event.data.recordedAt),
         },

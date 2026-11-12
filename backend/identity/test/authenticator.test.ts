@@ -16,7 +16,9 @@ import {
   grants,
   type Harness,
   makeAccount,
+  oid,
   PASSWORD,
+  roleIdOf,
   startHarness,
 } from './helpers.ts';
 
@@ -168,7 +170,7 @@ describe('setting up the authenticator, signed in', () => {
     });
     expect(errorOf(wrongCode)).toEqual([400, 'TOTP_INVALID']);
     expect(wrongCode.body.error?.message).toContain('3 more tries');
-    expect((await credentials().findOne({ _id: userId }))?.totp).toBeUndefined();
+    expect((await credentials().findOne({ _id: oid(userId) }))?.totp).toBeUndefined();
 
     const confirmed = await send('POST', '/auth/authenticator/confirm', {
       passport,
@@ -179,7 +181,7 @@ describe('setting up the authenticator, signed in', () => {
     expect(codes).toHaveLength(10);
     expect(new Set(codes).size).toBe(10);
     // only hashes kept; the set-up is gone, so the same confirm never works twice
-    const stored = await credentials().findOne({ _id: userId });
+    const stored = await credentials().findOne({ _id: oid(userId) });
     expect(stored?.totp?.secret).not.toContain(secret);
     expect(JSON.stringify(stored?.recoveryCodes)).not.toContain(codes[0]?.replace('-', ''));
     expect(await redis().exists(key)).toBe(0);
@@ -195,7 +197,9 @@ describe('setting up the authenticator, signed in', () => {
     expect(change).toMatchObject({ email: address, change: 'enabled', app: 'customer' });
     expect(typeof change?.device).toBe('string');
     // the session goes on; the next sign-in, in any app, asks for the code
-    const session = await db().collection<Session>(SESSIONS).findOne({ _id: passport.sessionId });
+    const session = await db()
+      .collection<Session>(SESSIONS)
+      .findOne({ _id: oid(passport.sessionId) });
     expect(session?.revokedAt).toBeNull();
     const next = await send('POST', '/auth/login', {
       body: { email: address, password: PASSWORD },
@@ -234,7 +238,7 @@ describe('setting up the authenticator, signed in', () => {
 
   it('asks an account without a password to set one first', async () => {
     const { userId, passport } = await signedInCustomer('no-password');
-    await credentials().updateOne({ _id: userId }, { $unset: { password: '' } });
+    await credentials().updateOne({ _id: oid(userId) }, { $unset: { password: '' } });
     expect(errorOf(await send('POST', '/auth/authenticator/enroll', { passport }))).toEqual([
       400,
       'PASSWORD_REQUIRED',
@@ -245,7 +249,7 @@ describe('setting up the authenticator, signed in', () => {
     const { passport } = await signedInCustomer('ended');
     await db()
       .collection<Session>(SESSIONS)
-      .updateOne({ _id: passport.sessionId }, { $set: { revokedAt: new Date() } });
+      .updateOne({ _id: oid(passport.sessionId) }, { $set: { revokedAt: new Date() } });
     for (const [method, path] of [
       ['POST', '/auth/authenticator/enroll'],
       ['POST', '/auth/authenticator/recovery-codes'],
@@ -277,7 +281,9 @@ describe('the step-up with a recovery code', () => {
     ]);
     expect((await stepUp(passport, { recoveryCode: second })).body.data?.recoveryCodesLeft).toBe(8);
     expect((await meOf(passport)).recoveryCodesLeft).toBe(8);
-    const session = await db().collection<Session>(SESSIONS).findOne({ _id: passport.sessionId });
+    const session = await db()
+      .collection<Session>(SESSIONS)
+      .findOne({ _id: oid(passport.sessionId) });
     expect(session?.stepUpAt?.getTime()).toBeGreaterThan(Date.now() - 10_000);
   });
 
@@ -343,7 +349,7 @@ describe('replacing the authenticator (a new phone)', () => {
     const { secret } = enroll.body.data as { secret: string };
     // another tab saved one in between
     await credentials().updateOne(
-      { _id: userId },
+      { _id: oid(userId) },
       { $set: { totp: { secret: 'other', enrolledAt: new Date(), lastStep: 0 } } },
     );
     const confirmed = await send('POST', '/auth/authenticator/confirm', {
@@ -351,7 +357,7 @@ describe('replacing the authenticator (a new phone)', () => {
       body: { code: totpCode(secret, Date.now()), password: PASSWORD },
     });
     expect(errorOf(confirmed)).toEqual([409, 'AUTHENTICATOR_EXISTS']);
-    expect((await credentials().findOne({ _id: userId }))?.totp?.secret).toBe('other');
+    expect((await credentials().findOne({ _id: oid(userId) }))?.totp?.secret).toBe('other');
     expect(await changesOf(userId)).toEqual([]);
   });
 });
@@ -384,7 +390,7 @@ describe('new recovery codes', () => {
     await db()
       .collection<Session>(SESSIONS)
       .updateOne(
-        { _id: passport.sessionId },
+        { _id: oid(passport.sessionId) },
         { $set: { stepUpAt: new Date(Date.now() - 301_000) } },
       );
     expect(errorOf(await send('POST', '/auth/authenticator/recovery-codes', { passport }))).toEqual(
@@ -408,7 +414,7 @@ describe('turning the authenticator off', () => {
     );
     // nor does one for replacing it, which is never a general step-up either
     const sessions = db().collection<Session>(SESSIONS);
-    await sessions.updateOne({ _id: passport.sessionId }, { $set: { stepUpAt: null } });
+    await sessions.updateOne({ _id: oid(passport.sessionId) }, { $set: { stepUpAt: null } });
     expect(
       (
         await stepUp(passport, {
@@ -425,7 +431,7 @@ describe('turning the authenticator off', () => {
       [401, 'STEP_UP_REQUIRED'],
     );
     // (the session's own step-up back, as from its sign-in)
-    await sessions.updateOne({ _id: passport.sessionId }, { $set: { stepUpAt: new Date() } });
+    await sessions.updateOne({ _id: oid(passport.sessionId) }, { $set: { stepUpAt: new Date() } });
     // one for turning it off counts 5 minutes
     expect(
       (
@@ -436,7 +442,7 @@ describe('turning the authenticator off', () => {
       ).status,
     ).toBe(200);
     await sessions.updateOne(
-      { _id: passport.sessionId },
+      { _id: oid(passport.sessionId) },
       { $set: { 'stepUpFor.at': new Date(Date.now() - 6 * 60_000) } },
     );
     asksStepUpFor(
@@ -454,13 +460,15 @@ describe('turning the authenticator off', () => {
     const off = await send('DELETE', '/auth/authenticator', { passport });
     expect(off.status, JSON.stringify(off.body)).toBe(200);
     expect(off.body.data).toEqual({ disabled: true });
-    const stored = await credentials().findOne({ _id: userId });
+    const stored = await credentials().findOne({ _id: oid(userId) });
     expect(stored?.totp).toBeUndefined();
     expect(stored?.recoveryCodes).toBeUndefined();
     expect(stored?.password).toBeDefined();
     expect(await meOf(passport)).toMatchObject({ authenticator: false, recoveryCodesLeft: null });
     expect((await changesOf(userId)).map((c) => c.change)).toEqual(['enabled', 'disabled']);
-    const session = await db().collection<Session>(SESSIONS).findOne({ _id: passport.sessionId });
+    const session = await db()
+      .collection<Session>(SESSIONS)
+      .findOne({ _id: oid(passport.sessionId) });
     expect(session?.revokedAt).toBeNull();
     // nothing left to turn off: no change, no email; no new codes without one either
     const again = await send('DELETE', '/auth/authenticator', { passport });
@@ -504,9 +512,12 @@ describe('turning the authenticator off', () => {
       { path: ['roles', 'admin'], message: 'State Admin' },
       { path: ['roles', 'seller'], message: 'Seller Finance' },
     ]);
-    expect((await credentials().findOne({ _id: userId }))?.totp).toBeDefined();
+    expect((await credentials().findOne({ _id: oid(userId) }))?.totp).toBeDefined();
 
-    await grants().updateMany({ userId, role: 'admin.state_admin' }, { $set: { active: false } });
+    await grants().updateMany(
+      { userId: oid(userId), roleId: await roleIdOf('admin.state_admin') },
+      { $set: { active: false } },
+    );
     const one = await send('DELETE', '/auth/authenticator', { passport });
     expect(one.body.error?.message).toBe(
       "Your Seller Finance role in the seller app needs an authenticator, so it can't be turned off.",
@@ -515,14 +526,14 @@ describe('turning the authenticator off', () => {
       { name: 'Seller Finance', app: 'seller' },
     ]);
     // a retired role no longer counts, as at sign-in
-    const roles = db().collection<{ _id: string; retired: boolean }>(ROLES);
-    await roles.updateOne({ _id: 'seller.finance' }, { $set: { retired: true } });
+    const roles = db().collection<{ key: string; retired: boolean }>(ROLES);
+    await roles.updateOne({ key: 'seller.finance' }, { $set: { retired: true } });
     try {
       expect((await send('DELETE', '/auth/authenticator', { passport })).body.data).toEqual({
         disabled: true,
       });
     } finally {
-      await roles.updateOne({ _id: 'seller.finance' }, { $set: { retired: false } });
+      await roles.updateOne({ key: 'seller.finance' }, { $set: { retired: false } });
     }
   });
 });

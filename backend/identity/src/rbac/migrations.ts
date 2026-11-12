@@ -3,6 +3,7 @@ import type { Migration } from '@beautinique/backend-server-release';
 import type { AppId } from '@beautinique/shared-contracts';
 
 import { LEGAL_ACCEPTANCES, type LegalAcceptance, type User, USERS } from '../users.ts';
+import { type RbacCatalog, rbacCatalog } from './catalog.ts';
 import { giveSystemGrant } from './grants.ts';
 import { SIGN_UP_ROLES } from './roles.ts';
 
@@ -17,25 +18,38 @@ export const signUpGrantsMigration: Migration = {
   async up({ mongo, logger }) {
     const acceptances = mongo.db.collection<LegalAcceptance>(LEGAL_ACCEPTANCES);
     let given = 0;
+    let catalog: RbacCatalog | undefined;
     for await (const user of mongo.db
       .collection<User>(USERS)
       .find({}, { comment: 'full read: every account, once per database' })) {
-      const apps = new Set<AppId>([
-        user.signUpApp,
-        ...(await acceptances.distinct('app', { userId: user._id })),
-      ]);
+      catalog ??= await rbacCatalog(mongo);
+      const appIds = [
+        user.signUpAppId,
+        ...(await acceptances.distinct('appId', { userId: user._id })),
+      ];
+      const known = catalog;
+      // an app the release has not written yet (this runs before the rbac step) names no role:
+      // an account made since ObjectIds got its grant at sign-up anyway (owner, 2026-11-12)
+      const apps = new Set<AppId>(
+        appIds.flatMap((id) => {
+          try {
+            return [known.appOf(id)];
+          } catch {
+            return [];
+          }
+        }),
+      );
       const roles = [...apps].flatMap((app) => {
         const role = SIGN_UP_ROLES[app];
         if (role === undefined || (app === 'customer' && user.ageDeclaredAt === null)) return [];
         return [{ app, role }];
       });
-      for (const { app, role } of roles) {
+      for (const { role } of roles) {
         const made = await withTransaction(mongo, (session) =>
           giveSystemGrant(mongo, session, {
             userId: user._id,
             role,
-            app,
-            scope: { type: 'self', ids: [user._id] },
+            scope: { type: 'self', ids: [user._id.toHexString()] },
             via: 'migration',
             now: new Date(),
           }),
