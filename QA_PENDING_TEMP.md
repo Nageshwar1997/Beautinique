@@ -2,7 +2,7 @@
 
 > **Temp file, sirf owner ki tracking ke liye.** Owner ke kehne pe (2026-11-09) abhi git me rehti hai; status update har item ke commit me. Kisi aur doc, file ya memory me iska zikr nahi. Saare items **Done** hote hi ye file repo se delete.
 >
-> **Last update:** 2026-11-12 (hissa 0–3 poore; Done: 1–11, 15a, 15, 16, 14; batch ke checks baaki; agla 12 DR-011). **Faisla:** owner ne neeche ki har salah maan li (2026-11-09). Asli docs (report §9 "Owner ka jawab", ARCHITECTURE/RULES/README, MEMORY decision, HANDOFF, TASKS, change logs) har item ke commit me update honge, is file ka naam liye bina.
+> **Last update:** 2026-11-12 (hissa 0–3 poore; Done: 1–11, 15a, 15, 16, 14; batch ke checks ho gaye, push owner ke kehne pe; agla 12 DR-011). **Faisla:** owner ne neeche ki har salah maan li (2026-11-09). Asli docs (report §9 "Owner ka jawab", ARCHITECTURE/RULES/README, MEMORY decision, HANDOFF, TASKS, change logs) har item ke commit me update honge, is file ka naam liye bina.
 
 ## Kitna bacha
 
