@@ -552,11 +552,46 @@ const mutations: Mutation[] = [
     change: [['!SESSION_ID.test(sessionId)', 'sessionId === ""']],
     tests: 'refresh token',
   },
+  // ids: MongoDB ids are ObjectIds, Redis ids stay UUIDv7 (owner, 2026-11-12)
   {
     file: 'catalogue/identity',
-    name: 'the session id need not be a UUIDv7',
-    change: [['[0-9a-f]{4}-7[0-9a-f]{3}-[89ab]', '[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]']],
+    name: 'the session id need not be 24 hex',
+    change: [['const SESSION_ID = /^[0-9a-f]{24}$/;', 'const SESSION_ID = /^[0-9a-f]{20,}$/;']],
     tests: 'refresh token',
+  },
+  {
+    file: 'catalogue/identity',
+    name: 'the session id may be upper case',
+    change: [['const SESSION_ID = /^[0-9a-f]{24}$/;', 'const SESSION_ID = /^[0-9a-fA-F]{24}$/;']],
+    tests: 'refresh token',
+  },
+  {
+    file: 'catalogue/identity',
+    name: 'a session id in the path need not be an ObjectId',
+    change: [
+      [
+        'input: { params: object({ sessionId: objectIdZod }) },',
+        'input: { params: object({ sessionId: string().min(1) }) },',
+      ],
+    ],
+    tests: 'MongoDB ids are ObjectIds',
+  },
+  {
+    file: 'catalogue/platform',
+    name: 'a ping id in the path need not be an ObjectId',
+    change: [
+      [
+        'input: { params: object({ pingId: objectIdZod }) },',
+        'input: { params: object({ pingId: string().min(1) }) },',
+      ],
+    ],
+    tests: 'MongoDB ids are ObjectIds',
+  },
+  {
+    file: 'events',
+    name: 'an event id need not be an ObjectId',
+    change: [['    eventId: objectIdZod,\n', '    eventId: string().min(1),\n']],
+    tests: 'envelope',
   },
   {
     file: 'catalogue/identity',

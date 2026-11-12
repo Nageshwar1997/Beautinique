@@ -1,4 +1,4 @@
-import { uuidv7 } from '@beautinique/shared-utils';
+import { ObjectId } from '@beautinique/backend-server-mongo';
 import { describe, expect, it } from 'vitest';
 
 import * as api from '../src/index';
@@ -44,7 +44,8 @@ describe('public API', () => {
 });
 
 describe('asset keys', () => {
-  const assetId = uuidv7();
+  // an ObjectId's hex, like the media_assets record it names (owner, 2026-11-12)
+  const assetId = new ObjectId().toHexString();
 
   it('are <visibility>/<purpose>/<asset id>, and parse back', () => {
     const key = assetKey(assetId, 'product.image', 'public');
@@ -52,8 +53,15 @@ describe('asset keys', () => {
     expect(parseKey(key)).toEqual({ visibility: 'public', purpose: 'product.image', assetId });
   });
 
-  it('refuse anything that is not a UUIDv7, a dotted lower-case purpose and a visibility', () => {
+  it('refuse anything that is not an ObjectId, a dotted lower-case purpose and a visibility', () => {
     expect(() => assetKey('abc', 'product.image', 'public')).toThrow(StorageError);
+    for (const id of [
+      '0190a1b2-c3d4-7e5f-8a9b-0c1d2e3f4a5b',
+      assetId.toUpperCase(),
+      assetId.slice(1),
+    ]) {
+      expect(() => assetKey(id, 'product.image', 'public'), id).toThrow(StorageError);
+    }
     expect(() => assetKey(assetId, 'Product', 'public')).toThrow(StorageError);
     expect(() => assetKey(assetId, 'product/image', 'public')).toThrow(StorageError);
     expect(() => assetKey(`${assetId}/x`, 'product', 'public')).toThrow(StorageError);

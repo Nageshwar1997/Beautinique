@@ -1,6 +1,6 @@
 # AGENTS.md — Beautinique
 
-> **Status:** v1.5 (2026-11-09). Doosre AI coding tools (Codex, Cursor, Copilot, Gemini ...) ke liye. Asli niyam [CLAUDE.md](CLAUDE.md) me hain; yahan sirf wo hai jo kaam shuru karne se pehle jaanna zaroori hai. Farak ho to `CLAUDE.md` sahi hai.
+> **Status:** v1.6 (2026-11-12). Doosre AI coding tools (Codex, Cursor, Copilot, Gemini ...) ke liye. Asli niyam [CLAUDE.md](CLAUDE.md) me hain; yahan sirf wo hai jo kaam shuru karne se pehle jaanna zaroori hai. Farak ho to `CLAUDE.md` sahi hai.
 
 Beautinique: Indian beauty e-commerce monorepo (npm workspaces, Node 24, npm 12.2+). Education + portfolio project hai, par har cheez asli production jaisi banti hai. Is pe 2 developers baari-baari kaam karte hain, dono Claude Code ke saath (flow: [docs/HANDOFF.md](docs/HANDOFF.md) §8). Ye file tab kaam aati hai jab koi doosra AI tool repo khole.
 
@@ -37,6 +37,7 @@ npm run verify -- --all --yes
 
 - Imports/exports ka order **ESLint** (`simple-import-sort`) tay karta hai. File badalne ke baad `npx eslint <file> --fix`, phir `npx prettier --write <file>`. Editor ka "Organize Imports" mat chalao: wo alag order deta hai aur lint fail hota hai.
 - `zod` sirf `@beautinique/shared-zod` se, `mongodb` sirf `@beautinique/backend-server-mongo` se; transaction ke andar `Promise.all` nahi. ESLint inhe rokta hai.
+- MongoDB me har document ka `_id` aur har reference (userId, roleId, appId, eventId ...) ObjectId; naam alag unique field me; API me 24-hex string (`objectIdZod`), query se pehle `toObjectId`. ObjectId kabhi secret nahi ([RULES §4.17, §7.6](docs/RULES.md)).
 - HTTP calls sirf axios (apps `@beautinique/frontend-api-client` se); `fetch`/`node:http` request sirf gateway `proxy.ts` aur tests me. ESLint rokta hai.
 - Core (`backend/core`) ka module doosre module ko sirf uske `index.ts` se use karta hai, aur doosre deployable (identity, notify, gateway ...) ka code import nahi karta. `npm run lint` me dependency-cruiser rokta hai.
 
@@ -46,11 +47,12 @@ Chhote commits (Conventional Commits, jaise `feat(scope): ...`), sirf apne task 
 
 ## Change log
 
-| Version | Date       | Badlav                                                                                        |
-| ------- | ---------- | --------------------------------------------------------------------------------------------- |
-| v1.0    | 2026-10-23 | Pehla version: doosre AI tools ke liye pointer.                                               |
-| v1.1    | 2026-10-23 | Dependencies sirf `npm run update-deps` se.                                                   |
-| v1.2    | 2026-10-23 | Claude ke baad Cursor: relay flow, `cursor/<task>` branches, kaam ka bantwara.                |
-| v1.3    | 2026-10-25 | Cursor relay hataya: dono developers Claude Code use karte hain (flow HANDOFF §8).            |
-| v1.4    | 2026-11-03 | Kaam rokte waqt: checkbox badle to TASKS §P ka progress % bhi.                                |
-| v1.5    | 2026-11-09 | Core boundaries dependency-cruiser se (CI); geo aur role-name ke lint abhi nahi (QA-DOC-001). |
+| Version | Date       | Badlav                                                                                           |
+| ------- | ---------- | ------------------------------------------------------------------------------------------------ |
+| v1.0    | 2026-10-23 | Pehla version: doosre AI tools ke liye pointer.                                                  |
+| v1.1    | 2026-10-23 | Dependencies sirf `npm run update-deps` se.                                                      |
+| v1.2    | 2026-10-23 | Claude ke baad Cursor: relay flow, `cursor/<task>` branches, kaam ka bantwara.                   |
+| v1.3    | 2026-10-25 | Cursor relay hataya: dono developers Claude Code use karte hain (flow HANDOFF §8).               |
+| v1.4    | 2026-11-03 | Kaam rokte waqt: checkbox badle to TASKS §P ka progress % bhi.                                   |
+| v1.5    | 2026-11-09 | Core boundaries dependency-cruiser se (CI); geo aur role-name ke lint abhi nahi (QA-DOC-001).    |
+| v1.6    | 2026-11-12 | MongoDB ids: har `_id` aur reference ObjectId, naam alag field me, ObjectId secret nahi (owner). |

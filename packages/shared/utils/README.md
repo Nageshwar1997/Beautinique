@@ -65,7 +65,7 @@ istDateKey('2026-10-19T20:00:00Z'); // '2026-10-20'  (India me agla din: cut-off
 
 ## Ids aur assertions
 
-- `uuidv7()`: time-ordered UUID (RFC 9562), events aur Delivery app ke offline actions ke liye. Ek process ke ids banne ke order me sort hote hain, ek hi millisecond me ya clock peeche jaye tab bhi. `uuidv7Time(id)` banne ka time deta hai.
+- `uuidv7()`: time-ordered UUID (RFC 9562), sirf MongoDB ke bahar ke ids ke liye jinka andaaza nahi lagna chahiye: Redis ids, lease owners, Idempotency-Key, Delivery app ke offline actions (MongoDB document ko ObjectId milta hai, owner 2026-11-12). Ek process ke ids banne ke order me sort hote hain, ek hi millisecond me ya clock peeche jaye tab bhi. `uuidv7Time(id)` banne ka time deta hai.
 - `invariant(condition, message)`: false pe error, aur TypeScript type narrow karta hai.
 - `assertNever(value)`: exhaustive `switch` ke liye; case chhoota to compile error.
 

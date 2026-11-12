@@ -1,12 +1,34 @@
-import { type Mongo, MongoServerError } from '@beautinique/backend-server-mongo';
+import {
+  type IndexSpec,
+  type Mongo,
+  MongoServerError,
+  type ObjectId,
+  syncIndexes,
+} from '@beautinique/backend-server-mongo';
 
 /** Leases: one holder at a time per name, across instances (a deploy runs old and new together). */
 export const LOCKS = 'platform_locks';
 
 interface LockRecord {
-  _id: string;
+  _id: ObjectId;
+  /** The lease, e.g. `release` */
+  name: string;
   owner: string;
   expiresAt: Date;
+}
+
+/** A lease is found by its name (its _id is an ObjectId, like every document's). */
+export const LOCK_INDEXES: readonly IndexSpec[] = [
+  { collection: LOCKS, name: 'name_unique', key: { name: 1 }, unique: true },
+];
+
+// tryLease runs before any release step (the release itself takes a lease), so it makes its own
+// index, once per database: without it two instances could each make the same lease
+const indexed = new WeakSet<object>();
+async function ensureLockIndex(mongo: Mongo): Promise<void> {
+  if (indexed.has(mongo.db)) return;
+  await syncIndexes(mongo, LOCK_INDEXES);
+  indexed.add(mongo.db);
 }
 
 /**
@@ -22,9 +44,10 @@ export async function tryLease(
 ): Promise<boolean> {
   // a missing lease has no expiresAt, and missing sorts before any date: free
   const ours = { $or: [{ $eq: ['$owner', owner] }, { $lt: ['$expiresAt', '$$NOW'] }] };
+  await ensureLockIndex(mongo);
   try {
     const lease = await mongo.db.collection<LockRecord>(LOCKS).findOneAndUpdate(
-      { _id: name },
+      { name },
       [
         {
           $set: {
@@ -45,5 +68,5 @@ export async function tryLease(
 
 /** Gives the lease up at once (a clean stop), if `owner` still holds it. */
 export async function releaseLease(mongo: Mongo, name: string, owner: string): Promise<void> {
-  await mongo.db.collection<LockRecord>(LOCKS).deleteOne({ _id: name, owner });
+  await mongo.db.collection<LockRecord>(LOCKS).deleteOne({ name, owner });
 }

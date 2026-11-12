@@ -78,7 +78,7 @@ import {
   startSocialSignIn,
 } from '../src';
 
-const id = '0190a1b2-c3d4-7e5f-8a9b-0c1d2e3f4a5b';
+const id = '65f1a2b3c4d5e6f708192a3b';
 const data = { pingId: id, note: 'hello', recordedAt: '2026-10-22T10:00:00.000Z' };
 
 describe('platform catalogue (Milestone 1 sample)', () => {
@@ -178,6 +178,51 @@ describe('platform catalogue (Milestone 1 sample)', () => {
       pingRecorded.envelope.safeParse({ ...envelope, data: { ...data, note: '' } }).success,
     ).toBe(false);
     expect(recordPing.input.body.safeParse({ note: 'x'.repeat(201) }).success).toBe(false);
+  });
+});
+
+describe('ids (owner, 2026-11-12)', () => {
+  const objectId = '65f1a2b3c4d5e6f708192a3b';
+  const uuid = '0190a1b2-c3d4-7e5f-8a9b-0c1d2e3f4a5b';
+
+  it('MongoDB ids are ObjectIds (24 hex): a UUIDv7 from before is refused', () => {
+    const cases = [
+      [getPing.input.params, 'pingId'],
+      [endSession.input.params, 'sessionId'],
+    ] as const;
+    for (const [params, field] of cases) {
+      expect(params.safeParse({ [field]: objectId }).success, field).toBe(true);
+      expect(params.safeParse({ [field]: objectId.toUpperCase() }).data, field).toEqual({
+        [field]: objectId,
+      });
+      expect(params.safeParse({ [field]: uuid }).success, field).toBe(false);
+    }
+    const envelope = {
+      eventId: objectId,
+      type: 'platform.ping.recorded',
+      version: 1,
+      occurredAt: '2026-10-22T10:00:00.000Z',
+      producer: 'core',
+      aggregate: { type: 'ping', id: objectId },
+      actor: { type: 'user', id: objectId },
+      correlationId: 'c1',
+      causationId: null,
+      scope: null,
+      data: { pingId: objectId, note: 'hello', recordedAt: '2026-10-22T10:00:00.000Z' },
+    };
+    expect(pingRecorded.envelope.safeParse(envelope).success).toBe(true);
+    expect(pingRecorded.envelope.safeParse({ ...envelope, eventId: uuid }).success).toBe(false);
+    expect(
+      pingRecorded.envelope.safeParse({ ...envelope, data: { ...envelope.data, pingId: uuid } })
+        .success,
+    ).toBe(false);
+  });
+
+  it('ids that live in Redis stay UUIDv7, so nobody can guess them', () => {
+    expect(resendOtp.input.params.safeParse({ challengeId: uuid }).success).toBe(true);
+    expect(resendOtp.input.params.safeParse({ challengeId: objectId }).success).toBe(false);
+    expect(loginTotp.input.params.safeParse({ loginId: uuid }).success).toBe(true);
+    expect(loginTotp.input.params.safeParse({ loginId: objectId }).success).toBe(false);
   });
 });
 
@@ -296,7 +341,7 @@ describe('sign-in routes', () => {
     }
     expect(
       confirmTotpEnroll.output.safeParse({
-        user: { userId: '0190a1b2-c3d4-7e5f-8a9b-0c1d2e3f4a5b', email: 'a@b.example' },
+        user: { userId: '65f1a2b3c4d5e6f708192a3b', email: 'a@b.example' },
         recoveryCodes: ['ABCDE-FGH23'],
       }).success,
     ).toBe(false);
@@ -355,7 +400,7 @@ describe('sessions', () => {
   });
 
   it('read the session id and the family of a refresh token, and nothing else', () => {
-    const sessionId = '0190a1b2-c3d4-7e5f-8a9b-0c1d2e3f4a5b';
+    const sessionId = '65f1a2b3c4d5e6f708192a3b';
     const family = 'AbCdEfGhIjKlMnOpQr-_12';
     const secret = 'S'.repeat(43);
     expect(refreshTokenParts(`${sessionId}.${family}.${secret}`)).toEqual({ sessionId, family });
@@ -366,7 +411,9 @@ describe('sessions', () => {
       '',
       sessionId,
       `${sessionId.toUpperCase()}.${family}.${secret}`,
-      `0190a1b2-c3d4-4e5f-8a9b-0c1d2e3f4a5b.${family}.${secret}`,
+      // a session id from before ObjectIds (owner, 2026-11-12)
+      `0190a1b2-c3d4-7e5f-8a9b-0c1d2e3f4a5b.${family}.${secret}`,
+      `${sessionId.slice(1)}.${family}.${secret}`,
       `x${sessionId}.${family}.${secret}`,
       `${sessionId}.${family}.${secret}.more`,
     ]) {

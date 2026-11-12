@@ -82,17 +82,17 @@ Leaked passwords ki list se check server karta hai, ye package nahi.
 
 ### Common
 
-| Export                         | Niyam                                                   |
-| ------------------------------ | ------------------------------------------------------- |
-| `paiseZod`                     | Integer paise, 0 ya zyada (₹1 = 100). Har amount isi me |
-| `signedPaiseZod`               | Integer paise, minus bhi (ledger, refund, adjustment)   |
-| `basisPointsZod`               | 0–10000 (1% = 100): GST rate, commission, discount      |
-| `objectIdZod`                  | MongoDB id, 24 hex, lower case                          |
-| `uuidZod`, `uuidv7Zod`         | UUID; v7 events aur offline actions ke liye             |
-| `slugZod`                      | `rose-glow-serum` jaisa                                 |
-| `hexColorZod`                  | `#RRGGBB` (shade swatch), upper case                    |
-| `httpsUrlZod`                  | Sirf `https://` (http, `javascript:` waghaira mana)     |
-| `isoDateTimeZod`, `isoDateZod` | `2026-10-20T07:56:26.899Z` (UTC), `2026-10-20`          |
+| Export                         | Niyam                                                                                                     |
+| ------------------------------ | --------------------------------------------------------------------------------------------------------- |
+| `paiseZod`                     | Integer paise, 0 ya zyada (₹1 = 100). Har amount isi me                                                   |
+| `signedPaiseZod`               | Integer paise, minus bhi (ledger, refund, adjustment)                                                     |
+| `basisPointsZod`               | 0–10000 (1% = 100): GST rate, commission, discount                                                        |
+| `objectIdZod`                  | MongoDB id, 24 hex, lower case: har `_id` aur reference (owner, 2026-11-12); secret nahi                  |
+| `uuidZod`, `uuidv7Zod`         | UUID; v7 sirf DB ke bahar ke ids: Redis (sign-in, email-code challenge), Idempotency-Key, offline actions |
+| `slugZod`                      | `rose-glow-serum` jaisa                                                                                   |
+| `hexColorZod`                  | `#RRGGBB` (shade swatch), upper case                                                                      |
+| `httpsUrlZod`                  | Sirf `https://` (http, `javascript:` waghaira mana)                                                       |
+| `isoDateTimeZod`, `isoDateZod` | `2026-10-20T07:56:26.899Z` (UTC), `2026-10-20`                                                            |
 
 Sab zod schemas hain, to `.optional()`, `.nullable()`, `.array()` waghaira lagaye ja sakte hain.
 
