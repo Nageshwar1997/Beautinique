@@ -47,7 +47,8 @@ function withReleaseIndexes(indexes: readonly IndexSpec[]): IndexSpec[] {
 const ONE_STATE = 'full read: the one release document';
 
 // bump it when runRelease starts doing something new, so every database runs its steps once more
-const RUNNER_VERSION = 1;
+// (2: a database of today loses what a release of before wrote into it, 2026-11-13)
+const RUNNER_VERSION = 2;
 
 /** A step after migrations and indexes, e.g. the permission sync of identity (TASKS T3.3). */
 export interface ReleaseStep {
