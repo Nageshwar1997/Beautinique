@@ -65,6 +65,8 @@ Index sync khud `@beautinique/backend-server-mongo` ka `syncIndexes` hai (README
 
 **ObjectId se pehle ka DB (owner, 2026-11-12):** release na ho chuka ho to steps se pehle `dropIfBeforeObjectIds` dekhta hai ki `BEFORE_OBJECTIDS` ke kisi collection (release state, migrations, leases, task runs, `platform_state`, identity ke apps/permissions/roles/signing keys, notify ke din) me string `_id` to nahi. Mile to us DB ke saare collections (indexes ke saath) drop, phir release naye sire se: purana data sirf test ka tha aur naya code use padh nahi sakta. Aaj ke DB pe kuch nahi; up-to-date boot pe ek bhi extra read nahi. Wajah: 2026-11-12 ka pehla live deploy purane data pe `MigrationFailedError` (`app._id.toHexString is not a function`) se ruka, aur purana chalta release har minute naam wale records (task runs, leases) phir likhta, to haath se data hatana akela kaafi nahi tha.
 
+**Aaj ka DB kabhi drop nahi (2026-11-13):** jis DB ko aaj ka release ek baar poora kar chuka (release state ka `_id` ObjectId), wo hamesha aaj ka hai. Deploy ke dauraan purana instance naye ke saath kuch second chalta hai aur drop ke baad bhi naam wale records likh sakta hai (2026-11-13 live: purane core ka heartbeat task run drop ke 7 s baad). Aise DB me sirf `BEFORE_OBJECTIDS` ke string-`_id` records hatte hain (warn log `records a release from before ObjectIds wrote: removed`), data kabhi nahi; warna agla release asli users samet poora DB gira deta.
+
 ## Niyam
 
 - **Migration (RULES §1.14):** sirf aage, dobara chalana safe, expand/contract: naya release start hote waqt purana usi data pe chal raha hota hai. Pehle naya field/index jodo (expand), purana sirf baad ke release me hatao (contract). Chal chuki migration ki id aur `up` kabhi mat badlo; galti ho to nayi migration.

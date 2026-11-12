@@ -302,6 +302,43 @@ describe('a database from before ObjectIds (owner, 2026-11-12)', () => {
     expect(again.upToDate).toBe(true);
     expect(await mongo.db.collection('orders').countDocuments()).toBe(1);
   });
+
+  it('keeps a database a release of today finished: only what a release of before wrote into it goes', async () => {
+    await runRelease(options({ indexes: [ordersIndex] }));
+    await mongo.db.collection('orders').insertOne({ _id: new ObjectId(), buyerId: 1 });
+    // the old instance runs on during the deploy (2026-11-12): a task run and a lease, names in _id
+    await mongo.db
+      .collection<Record<string, unknown>>('platform_task_runs')
+      .insertOne({ _id: 'platform.heartbeat' as never, lastStartedAt: new Date() });
+    await mongo.db
+      .collection<Record<string, unknown>>(LOCKS)
+      .insertOne({ _id: 'outbox-relay' as never, owner: 'old', expiresAt: new Date() });
+    lines.length = 0;
+    const next = await runRelease(
+      options({
+        indexes: [ordersIndex, { collection: 'orders', name: 'placed', key: { placedAt: 1 } }],
+      }),
+    );
+    expect(next.upToDate).toBe(false);
+    expect(await mongo.db.collection('orders').countDocuments()).toBe(1);
+    expect(
+      await mongo.db.collection('platform_task_runs').countDocuments({ _id: { $type: 'string' } }),
+    ).toBe(0);
+    expect(await mongo.db.collection(LOCKS).countDocuments({ _id: { $type: 'string' } })).toBe(0);
+    expect(messages()).not.toContain('a database from before ObjectIds: dropped');
+    expect(
+      lines.find((line) => line.msg === 'records a release from before ObjectIds wrote: removed'),
+    ).toMatchObject({ level: 40, removed: { platform_task_runs: 1, [LOCKS]: 1 } });
+    const states = await mongo.db.collection(RELEASE_STATE).find().toArray();
+    expect(states).toHaveLength(1);
+  });
+
+  it('says nothing when a database of today has nothing of before', async () => {
+    await runRelease(options({ indexes: [ordersIndex] }));
+    lines.length = 0;
+    await runRelease(options({ indexes: [] }));
+    expect(messages()).not.toContain('records a release from before ObjectIds wrote: removed');
+  });
 });
 
 describe('release indexes (owner, 2026-11-12)', () => {
