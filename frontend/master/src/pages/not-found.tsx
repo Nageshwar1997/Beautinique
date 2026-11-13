@@ -1,14 +1,17 @@
-import { Link } from 'react-router';
+import { ErrorPage } from '@beautinique/frontend-app-shell';
 
+import { pageTitle } from '../nav';
+
+/** Any path the app does not have. */
 export function NotFoundPage() {
   return (
-    <main id="main" className="container-page py-10">
-      <h1 className="font-display text-3xl font-medium">Page not found</h1>
-      <p className="text-foreground-muted mt-2">
-        <Link to="/" className="text-brand-text underline">
-          Go to the home page
-        </Link>
-      </p>
-    </main>
+    <>
+      <title>{pageTitle('Page not found')}</title>
+      <ErrorPage
+        status={404}
+        title="Page not found"
+        message="We looked everywhere, even under the vanity. The page may have moved, or the link may have a typo."
+      />
+    </>
   );
 }

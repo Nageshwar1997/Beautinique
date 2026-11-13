@@ -1,6 +1,7 @@
 import { randomBytes, randomUUID } from 'node:crypto';
 import { createServer, request, type RequestListener, type ServerResponse } from 'node:http';
 import { type AddressInfo, connect } from 'node:net';
+import { Writable } from 'node:stream';
 
 import { generateSigningKey, signJwt } from '@beautinique/backend-server-crypto';
 import {
@@ -324,6 +325,8 @@ interface GatewayOptions {
   /** What runs before the gateway's app on each request (a stand-in for an instrumentation) */
   before?: (res: ServerResponse) => void;
   readyReuseMs?: number;
+  /** Where the gateway logs (the tests' logger is silent) */
+  log?: ReturnType<typeof createLogger>;
 }
 
 async function gateway(
@@ -336,10 +339,11 @@ async function gateway(
     passport,
     before,
     readyReuseMs,
+    log,
   }: GatewayOptions = {},
 ) {
   const app = buildApp({
-    logger,
+    logger: log ?? logger,
     manifest,
     upstreams,
     upstreamTimeoutMs: timeoutMs,
@@ -571,6 +575,50 @@ describe('who may call', () => {
       'APP_NOT_ALLOWED',
       'This app cannot use this feature.',
     ]);
+  });
+
+  it('logs the hosts of a refused app, never its cookies, at most once a second (LIVE-001)', async () => {
+    const lines: Record<string, unknown>[] = [];
+    const log = createLogger({
+      name: 'test',
+      level: 'info',
+      destination: new Writable({
+        write(chunk: Buffer, _encoding, done) {
+          for (const line of chunk.toString().split('\n').filter(Boolean)) {
+            lines.push(JSON.parse(line) as Record<string, unknown>);
+          }
+          done();
+        },
+      }),
+    });
+    const core = await listen(fakeCore());
+    const gw = await gateway({ core: core.url }, { log });
+    const refused = (headers: Record<string, string>) =>
+      fetch(`${gw.url}${API_PREFIX}/catalog/products/a`, {
+        headers: { 'x-origin-secret': SECRET, Cookie: 'bq_customer_at=secret-token', ...headers },
+      });
+    const first = await refused({
+      'X-BQ-App': 'admin',
+      'x-forwarded-host': 'beautinique-admin-team-slug.vercel.app',
+      Origin: 'https://beautinique-admin.vercel.app',
+    });
+    expect(first.status).toBe(403);
+    await refused({ 'X-BQ-App': 'seller', 'x-forwarded-host': 'x'.repeat(500) });
+    const logged = lines.filter((line) => line.msg === 'refused: not from an app');
+    expect(logged).toHaveLength(1);
+    expect(logged[0]).toMatchObject({
+      level: 30,
+      app: 'admin',
+      forwardedHost: 'beautinique-admin-team-slug.vercel.app',
+      origin: 'https://beautinique-admin.vercel.app',
+    });
+    expect(JSON.stringify(lines)).not.toContain('secret-token');
+    // a second later the next one is logged again, cut to 200 characters
+    await new Promise((resolve) => setTimeout(resolve, 1050));
+    await refused({ 'X-BQ-App': 'seller', 'x-forwarded-host': 'x'.repeat(500) });
+    const again = lines.filter((line) => line.msg === 'refused: not from an app');
+    expect(again).toHaveLength(2);
+    expect(again[1]?.forwardedHost).toBe('x'.repeat(200));
   });
 
   it('takes the app of a page the browser opened (no app header) from its host, and only there', async () => {
