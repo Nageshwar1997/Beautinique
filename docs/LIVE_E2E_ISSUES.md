@@ -1,6 +1,6 @@
 # Live E2E jaanch: issues
 
-> **Status:** v1.2 (2026-11-13). Live (Vercel ke 11 apps + Render `bq-live`) pe [QA_AUDIT_REPORT.md](QA_AUDIT_REPORT.md) ke flows ki jaanch, bina sign-in. Issues yahan; fix ke faisle owner ke.
+> **Status:** v1.3 (2026-11-13). Live (Vercel ke 11 apps + Render `bq-live`) pe [QA_AUDIT_REPORT.md](QA_AUDIT_REPORT.md) ke flows ki jaanch, bina sign-in. Issues yahan; fix ke faisle owner ke.
 
 ## 1. Kya jaancha, kya nahi
 
@@ -41,7 +41,7 @@
 
 ## 4. Owner ke liye (live, sign-in wale)
 
-Naye deploy ke baad, LIVE-001 theek hone pe: (1) customer pe apne email se sign-up (OTP email aaye); (2) `npm run db:grant-master -- --email <email> --env live`; (3) admin me sign-in, naya authenticator, recovery codes; (4) My Devices me session dikhe aur "end others" chale; (5) ek invitation bhejo aur accept karo; (6) sign-out ke baad refresh pe wapas sign-in maange.
+Is order me: (1) LIVE-001 theek (Render env); (2) customer pe apne email se sign-up (OTP email aaye); (3) `npm run db:grant-master -- --email <email> --env live`; (4) Master app me sign-in, naya authenticator, recovery codes: **abhi ruka hai**, kyunki live Master app sirf "Coming soon" hai (routes me sirf home aur 404, sign-in screen nahi), aur sign-in sirf usi app me hota hai jahan grant ho (`login.ts` `signInAccess`), to Master grant se admin me bhi sign-in nahi hoga; (5) Master se baaki roles, phir har app me sign-in, My Devices me session aur "end others", ek invitation bhejna aur accept karna, sign-out ke baad refresh pe sign-in maange.
 
 ## Change log
 
@@ -50,3 +50,4 @@ Naye deploy ke baad, LIVE-001 theek hone pe: (1) customer pe apne email se sign-
 | v1.0    | 2026-11-13 | Pehli live jaanch (bina sign-in): LIVE-001 (10 apps ka API 403), LIVE-002, LIVE-003. |
 | v1.1    | 2026-11-13 | `380eef8` ke deploy ke baad ki jaanch (§3a); LIVE-004 (deploy overlap, fix `2389cb6`). |
 | v1.2    | 2026-11-13 | LIVE-004 live pe verified (`942348d`: core ka 1 purana task run hata, drop nahi). |
+| v1.3    | 2026-11-13 | §4: Master app me sign-in screen nahi (live), isliye owner ka step (4) ruka; admin wali galat line hati. |
