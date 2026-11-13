@@ -8,6 +8,8 @@
     <!-- install: the app's manifest (opens standalone, no address bar) and the iOS home-screen icon -->
     <link rel="manifest" href="/manifest.webmanifest" />
     <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+    <!-- an internal app: never in search results (vercel.json sends X-Robots-Tag too) -->
+    <meta name="robots" content="noindex, nofollow" />
     <title>Beautinique Master</title>
   </head>
   <body>
