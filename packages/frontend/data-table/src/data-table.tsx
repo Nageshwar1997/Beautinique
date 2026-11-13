@@ -84,11 +84,14 @@ export function DataTable<Row>({
 
   if (status === 'loading') {
     return (
-      <div className="border-border flex min-h-40 items-center justify-center gap-3 rounded-xl border">
-        <Spinner size="sm" label={`Loading ${label.toLowerCase()}`} />
-        <span aria-hidden="true" className="text-foreground-muted text-sm">
-          Loading…
-        </span>
+      <div className="space-y-4">
+        <div className="border-border flex min-h-40 items-center justify-center gap-3 rounded-xl border">
+          <Spinner size="sm" label={`Loading ${label.toLowerCase()}`} />
+          <span aria-hidden="true" className="text-foreground-muted text-sm">
+            Loading…
+          </span>
+        </div>
+        {footer}
       </div>
     );
   }
@@ -104,10 +107,14 @@ export function DataTable<Row>({
       </div>
     );
   }
+  // the pager stays under every state but a failed load: a page that turned empty can go back
   if (rows.length === 0) {
     return (
-      <div className="border-border text-foreground-muted rounded-xl border border-dashed px-6 py-10 text-center">
-        {empty}
+      <div className="space-y-4">
+        <div className="border-border text-foreground-muted rounded-xl border border-dashed px-6 py-10 text-center">
+          {empty}
+        </div>
+        {footer}
       </div>
     );
   }

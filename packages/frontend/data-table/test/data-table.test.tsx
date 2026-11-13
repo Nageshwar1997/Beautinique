@@ -153,6 +153,14 @@ describe('DataTable states', () => {
     expect(screen.queryByRole('table')).toBeNull();
   });
 
+  it('keeps its footer (the pager) while loading and when a page is empty', () => {
+    widthIs(1280);
+    const { rerender } = render(table({ status: 'loading', footer: <p>Pager</p> }));
+    expect(screen.getByText('Pager')).toBeDefined();
+    rerender(table({ rows: [], footer: <p>Pager</p> }));
+    expect(screen.getByText('Pager')).toBeDefined();
+  });
+
   it('shows its footer under the rows', () => {
     widthIs(1280);
     render(table({ footer: <p>Footer here</p> }));
