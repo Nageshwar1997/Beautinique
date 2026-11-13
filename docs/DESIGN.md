@@ -183,11 +183,11 @@ Har screen ye states dikhati hai:
 | v1.6    | 2026-10-26 | §11 Logo: master image, `BrandLogo`/`BrandMark` (icons package), rang theme se, favicon alag, install icons.                                                                          |
 | v1.7    | 2026-10-26 | §6 Error: 404 aur error page ka design (`ErrorPage`, compact art).                                                                                                                    |
 | v1.8    | 2026-10-26 | §3: `surface-inverse` ab `brand-text` bhi badalta hai (`brand-text-inverse`); footer me chalu page ka link padhne layak.                                                              |
-| v1.9    | 2026-11-05 | §6: wake-up, server ke jawab se pehle koi page nahi: pehle saada parda, 1.5 s pe wake-up screen (owner). |
-| v1.10   | 2026-11-07 | §6: wake-up ke baad sirf "Try again"; jawab se pehle koi API call nahi; account na mile to sandesh + "Try again" (owner, QA-FE-009). |
-| v1.11   | 2026-11-07 | §6: account na mile to app-shell ka error page ("Oops", Try again + home) (owner). |
-| v1.12   | 2026-11-07 | §8: kai step wale form me naya step focus le (field ya heading), sandesh field se `aria-describedby` se juda (owner, QA-FE-008). |
-| v1.13   | 2026-11-08 | §11: header me phone pe sirf `BrandMark`, naam `sm` se upar (owner, QA-ADM-001). |
-| v1.14   | 2026-11-09 | §11: saare apps phone pe install; tile rang parivaar se (customer ivory, team ink, partner rose), naam "BQ" + app (owner). |
-| v1.15 | 2026-11-10 | §10: pages se pehle "Coming soon" home (naam + ek line), owner, Q-014. |
-| v1.16 | 2026-11-13 | §10: Master app ka "Coming soon" home ab sign-in ke peeche (owner). |
+| v1.9    | 2026-11-05 | §6: wake-up, server ke jawab se pehle koi page nahi: pehle saada parda, 1.5 s pe wake-up screen (owner).                                                                              |
+| v1.10   | 2026-11-07 | §6: wake-up ke baad sirf "Try again"; jawab se pehle koi API call nahi; account na mile to sandesh + "Try again" (owner, QA-FE-009).                                                  |
+| v1.11   | 2026-11-07 | §6: account na mile to app-shell ka error page ("Oops", Try again + home) (owner).                                                                                                    |
+| v1.12   | 2026-11-07 | §8: kai step wale form me naya step focus le (field ya heading), sandesh field se `aria-describedby` se juda (owner, QA-FE-008).                                                      |
+| v1.13   | 2026-11-08 | §11: header me phone pe sirf `BrandMark`, naam `sm` se upar (owner, QA-ADM-001).                                                                                                      |
+| v1.14   | 2026-11-09 | §11: saare apps phone pe install; tile rang parivaar se (customer ivory, team ink, partner rose), naam "BQ" + app (owner).                                                            |
+| v1.15   | 2026-11-10 | §10: pages se pehle "Coming soon" home (naam + ek line), owner, Q-014.                                                                                                                |
+| v1.16   | 2026-11-13 | §10: Master app ka "Coming soon" home ab sign-in ke peeche (owner).                                                                                                                   |
