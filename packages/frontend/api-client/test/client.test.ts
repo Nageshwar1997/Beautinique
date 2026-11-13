@@ -236,6 +236,27 @@ describe('createApiClient', () => {
     ]);
   });
 
+  it('tells its listeners after a refresh that worked, once, and never after one that failed (T3.7)', async () => {
+    const gateway = fakeGateway({ access: false });
+    const client = clientFor(gateway);
+    const heard: string[] = [];
+    const stop = client.onRefreshed(() => heard.push('refreshed'));
+    await Promise.all([client.call(getMe), client.call(getMe)]);
+    // the new token may carry other grants: the session reads /iam/me again
+    expect(heard).toEqual(['refreshed']);
+    stop();
+    gateway.state.access = false;
+    await client.call(getMe);
+    expect(heard).toEqual(['refreshed']);
+
+    const ended = fakeGateway({ access: false, session: false });
+    const endedClient = clientFor(ended);
+    const none: string[] = [];
+    endedClient.onRefreshed(() => none.push('refreshed'));
+    await expect(endedClient.call(getMe)).rejects.toThrow();
+    expect(none).toEqual([]);
+  });
+
   it('refreshes once for calls that find the token ended together', async () => {
     const gateway = fakeGateway({ access: false });
     const client = clientFor(gateway);
