@@ -1,7 +1,7 @@
 ---
 date: 2026-11-06
 day: 4
-status: draft # draft | ready | scheduled | posted (README §2)
+status: ready # draft | ready | scheduled | posted (README §2)
 posted_at:
 link:
 covers: 'PR #21, #22, #25, #26, #27' # T3.1 (email codes, password, authenticator), T3.2 (sessions, gateway passport, My Devices)

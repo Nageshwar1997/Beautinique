@@ -1,7 +1,7 @@
 ---
 date: 2026-11-08
 day: 6
-status: draft # draft | ready | scheduled | posted (README §2)
+status: ready # draft | ready | scheduled | posted (README §2)
 posted_at:
 link:
 covers: 'PR #33, #34, #35, #36, #37' # T6.1: frontend-hooks, components (base, pickers), api-client (axios only), forms

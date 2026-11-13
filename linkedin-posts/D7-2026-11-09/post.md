@@ -1,7 +1,7 @@
 ---
 date: 2026-11-09
 day: 7
-status: draft # draft | ready | scheduled | posted (README §2)
+status: ready # draft | ready | scheduled | posted (README §2)
 posted_at:
 link:
 covers: 'PR #39, #40' # T6.1: auth-ui package, customer sign-in/sign-up/password pages, account screens (step-up, Security, My Devices); last 2bf071f
