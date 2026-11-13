@@ -1,6 +1,6 @@
 # TASKS — BQ
 
-> **Status:** v1.113 (2026-11-13). Poore project ki task list, [ARCHITECTURE.md](ARCHITECTURE.md) §16 ke phases ke hisaab se. Har task "done" tabhi jab [RULES.md](RULES.md) §1.5 ki Definition of Done poori ho.
+> **Status:** v1.114 (2026-11-13). Poore project ki task list, [ARCHITECTURE.md](ARCHITECTURE.md) §16 ke phases ke hisaab se. Har task "done" tabhi jab [RULES.md](RULES.md) §1.5 ki Definition of Done poori ho.
 
 **Kaise use karein:**
 - `[ ]` baaki, `[~]` chal raha hai, `[x]` done.
@@ -9,7 +9,7 @@
 - Naya task aaye to sahi phase me jodo, aur bada badlav change log me likho.
 - **2 developers, baari-baari (owner ka faisla, 2026-10-25):** dono Claude Code use karte hain. Ek ki weekly limit khatam → wo kaam commit-ready chhod ke HANDOFF update karta hai, doosra wahin se aage badhta hai. Flow: [HANDOFF.md](HANDOFF.md) §8.
 
-**Abhi ka focus:** Milestone 3: Identity (section D): customer + admin ka login, authenticator, roles/grants, My Devices. T3.1, T3.2, T3.3 poore (2026-11-04). M3 ka code `release` pe aur live (2026-11-04: Render keys, social login customer pe chal raha). Bacha: live demo aur section D ki M3 row.
+**Abhi ka focus:** Milestone 3 ka demo live pe ho gaya (2026-11-13, section D ke demo notes). Agla: Master app me Staff ke pages (roles dena/hatana, invitations; identity ka API pehle se live), taaki owner admin team ko live pe la sake (QA_AUDIT_REPORT §7a ki bachi jaanch; M4 ke approve aur QC unhi ke haath me). Uske baad Milestone 4 (Phase 4): pehle T4.10 aur T4.11, phir T4.1.
 
 ## P. Progress (kitna ho gaya)
 
@@ -80,6 +80,7 @@ Har milestone ke end me kuch **live** dikhana hai. Ek hi live environment, free 
 
 **Demo notes (checklist ka 3):**
 - **M2 (2026-10-27, 00:25 IST, asli browser):** https://beautinique-customer.vercel.app khula (landing "Beauty you can trust"; wake-up screen nahi aayi, server jaaga tha); `https://bq-live.onrender.com/status` 200, gateway/identity/core `ok` (payments, notify `not-running`: abhi bane nahi); page se `POST /api/v1/platform/pings` 201 (`pingId` `01a17991-603f-…`), `GET /api/v1/platform/wake` 200. Soye server ka cold start demo 2026-10-26 17:02 UTC pe pass hua tha (T2.7). Baaki: checklist ka 4 (PR #18 `release` → `main`, owner).
+- **M3 (2026-11-13, owner, asli browser, live):** customer pe sign-up (email code), Master app me sign-in + authenticator + recovery codes, My Devices me "end others", sign-out ke baad refresh pe sign-in; Master ke account se admin app me sign-in mana ("The email or password is not right": grant na ho to wahi jawab jo galat password pe, `backend/identity/src/login.ts`). Bacha: roles dena aur invitation ki live jaanch, Master app ke Staff pages ke baad (QA_AUDIT_REPORT §7a). Checklist ka 4: PR `release` → `main` (2026-11-13).
 
 **Niyam:**
 - Phase 6 (frontend foundation) M2 se hi saath-saath: har live milestone ko UI chahiye, isliye har milestone me backend ke saath uski screens bhi.
@@ -384,3 +385,4 @@ Har milestone ke end me kuch **live** dikhana hai. Ek hi live environment, free 
 | v1.111  | 2026-11-13 | Phase 2 se ek task hataya (owner); §P: 88 tasks, Phase 2 71%.                                                                                                                                                            |
 | v1.112  | 2026-11-13 | T2.7 `[x]` (jagana live pe chal raha); §P: Phase 2 79%, poora 16%, task ginti 29%.                                                                                                                                       |
 | v1.113  | 2026-11-13 | T2.6 hataya (owner: purana kuch use nahi hota); §P: 87 tasks, Phase 2 92%, poora 16%.                                                                                                                                    |
+| v1.114  | 2026-11-13 | Section D: M3 ka demo note (live, owner); "Abhi ka focus": Master app ke Staff pages, phir M4 (T4.10, T4.11, T4.1). |
