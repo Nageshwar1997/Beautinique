@@ -1,6 +1,6 @@
 # Live E2E jaanch: issues
 
-> **Status:** v1.4 (2026-11-13). Live (Vercel ke 11 apps + Render `bq-live`) pe [QA_AUDIT_REPORT.md](QA_AUDIT_REPORT.md) ke flows ki jaanch, bina sign-in. Issues yahan; fix ke faisle owner ke.
+> **Status:** v1.5 (2026-11-13). Live (Vercel ke 11 apps + Render `bq-live`) pe [QA_AUDIT_REPORT.md](QA_AUDIT_REPORT.md) ke flows ki jaanch, bina sign-in. Issues yahan; fix ke faisle owner ke.
 
 ## 1. Kya jaancha, kya nahi
 
@@ -41,7 +41,7 @@
 
 ## 4. Owner ke liye (live, sign-in wale)
 
-Is order me: (1) ~~LIVE-001~~ theek (2026-11-13); (2) customer pe apne email se sign-up (OTP email aaye); (3) `npm run db:grant-master -- --email <email> --env live`; (4) Master app me sign-in, naya authenticator, recovery codes: **abhi ruka hai**, kyunki live Master app sirf "Coming soon" hai (routes me sirf home aur 404, sign-in screen nahi), aur sign-in sirf usi app me hota hai jahan grant ho (`login.ts` `signInAccess`), to Master grant se admin me bhi sign-in nahi hoga; (5) Master se baaki roles, phir har app me sign-in, My Devices me session aur "end others", ek invitation bhejna aur accept karna, sign-out ke baad refresh pe sign-in maange.
+Is order me: (1) ~~LIVE-001~~ theek (2026-11-13); (2) customer pe apne email se sign-up (OTP email aaye); (3) `npm run db:grant-master -- --email <email> --env live`; (4) Master app me sign-in, naya authenticator, recovery codes: Master app ka team sign-in 2026-11-13 se live (#73/#74; live jaanch: `/` → `/sign-in`, wake 200, console saaf, 360 px pe scroll nahi). Pehle ye ruka tha, kyunki sign-in sirf usi app me hota hai jahan grant ho (`login.ts` `signInAccess`); (5) Master se baaki roles, phir har app me sign-in, My Devices me session aur "end others", ek invitation bhejna aur accept karna, sign-out ke baad refresh pe sign-in maange.
 
 ## Change log
 
@@ -52,3 +52,4 @@ Is order me: (1) ~~LIVE-001~~ theek (2026-11-13); (2) customer pe apne email se 
 | v1.2    | 2026-11-13 | LIVE-004 live pe verified (`942348d`: core ka 1 purana task run hata, drop nahi). |
 | v1.3    | 2026-11-13 | §4: Master app me sign-in screen nahi (live), isliye owner ka step (4) ruka; admin wali galat line hati. |
 | v1.4    | 2026-11-13 | LIVE-001 theek: owner ka Render env update; 11 apps 200, gateway ab refused hosts log karta hai (#72). |
+| v1.5    | 2026-11-13 | §4: Master app ka sign-in live (#73, #74), owner ka step (4) khula. |
