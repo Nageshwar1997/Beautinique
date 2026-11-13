@@ -1,6 +1,6 @@
 # TASKS — BQ
 
-> **Status:** v1.107 (2026-11-13). Poore project ki task list, [ARCHITECTURE.md](ARCHITECTURE.md) §16 ke phases ke hisaab se. Har task "done" tabhi jab [RULES.md](RULES.md) §1.5 ki Definition of Done poori ho.
+> **Status:** v1.108 (2026-11-13). Poore project ki task list, [ARCHITECTURE.md](ARCHITECTURE.md) §16 ke phases ke hisaab se. Har task "done" tabhi jab [RULES.md](RULES.md) §1.5 ki Definition of Done poori ho.
 
 **Kaise use karein:**
 - `[ ]` baaki, `[~]` chal raha hai, `[x]` done.
@@ -19,7 +19,7 @@
 - Sirf Phase 0–11 ke tasks gine jaate hain (sections A, B, C, D nahi).
 - Task: `[x]` = 1, `[~]` = ½, `[ ]` = 0. Phase % = in ka jod ÷ phase ke tasks.
 - Poora % = har phase ka % × uske hafte (phase heading ka andaaza, range ka beech: "4–5 hafte" = 4.5), sabka jod ÷ 38 (saare phases ke hafte). Bade phases (Commerce, WMS, Finance) ka wazan zyada, chhote shuruaati tasks ka kam. Poore number tak round.
-- Sirf task ginti se 29% aata hai (25 ÷ 87). Wo zyada dikhta hai kyunki shuru ka chhota task bhi utna hi ginta hai jitna Phase 8 ka bada task; isliye upar wala (hafton wala) number hi project ka %.
+- Sirf task ginti se 28% aata hai (25 ÷ 88). Wo zyada dikhta hai kyunki shuru ka chhota task bhi utna hi ginta hai jitna Phase 8 ka bada task; isliye upar wala (hafton wala) number hi project ka %.
 - **Kab update:** jis commit/PR me kisi task ka checkbox badle, ya task jude/hate, usi me ye table, upar ka %, neeche ki itihaas line aur [HANDOFF.md](HANDOFF.md) §1 ki "Progress" line.
 
 | Phase                                 | Hafte  | Tasks  | `[x]`  | `[~]`  | `[ ]`  | Phase % |
@@ -28,7 +28,7 @@
 | 1. Server kit + contracts | 1.5 | 8 | 8 | 0 | 0 | 100% |
 | 2. Gateway                            | 1      | 8      | 4      | 2      | 2      | 63%     |
 | 3. bq-identity                        | 2.5    | 6      | 3      | 0      | 3      | 50%     |
-| 4. Core foundations                   | 4.5    | 11     | 0      | 0      | 11     | 0%      |
+| 4. Core foundations | 4.5 | 12 | 0 | 0 | 12 | 0% |
 | 5. Notify + Payments                  | 2      | 4      | 0      | 2      | 2      | 25%     |
 | 6. Frontend foundation                | 3      | 8      | 1      | 3      | 4      | 31%     |
 | 7. Commerce + payments                | 4.5    | 6      | 0      | 0      | 6      | 0%      |
@@ -36,7 +36,7 @@
 | 9. Finance + support                  | 4.5    | 6      | 0      | 0      | 6      | 0%      |
 | 10. UGC, growth, creators, governance | 5.5    | 6      | 0      | 0      | 6      | 0%      |
 | 11. Launch hardening                  | 2      | 8      | 1      | 0      | 7      | 13%     |
-| **Kul** | **38** | **87** | **20** | **10** | **57** | **15%** |
+| **Kul** | **38** | **88** | **20** | **10** | **58** | **15%** |
 
 **Itihaas:**
 
@@ -49,6 +49,7 @@
 | 2026-11-09 | 15%     | T6.6 `[~]`: saare 11 apps pe security headers (CSP abhi sirf `frame-ancestors`; poora CSP aur Ola Maps key baaki; QA Q-011). Phase 6: 25% → 31%. |
 | 2026-11-12 | 15%     | Naya T1.8 `[~]` (MongoDB ids ObjectId; kernel ho gaya, deployables baaki). Phase 1: 100% → 94%. |
 | 2026-11-13 | 15% | T1.8 `[x]`: ObjectId live (#68–#70; owner ka sign-up, Atlas me `ObjectId`). Phase 1: 94% → 100%; task ginti 28% → 29%. |
+| 2026-11-13 | 15% | Naya T4.12 `[ ]` (customer SEO: canonical, `og:image`, JSON-LD, catalog pages sitemap me; LIVE-003). Phase 4: 0% (12 tasks); task ginti 29% → 28%. |
 
 ## D. Deploy-first plan (owner ka faisla, 2026-10-23)
 
@@ -177,6 +178,7 @@ Har milestone ke end me kuch **live** dikhana hai. Ek hi live environment, free 
 - [ ] T4.9 Imports: categories, products (`NEEDS_REQC`), sellers (`LEGACY_NEEDS_REKYC`), media.
 - [ ] T4.10 no-hardcoded-geo lint (RULES §3.4): states, districts, pincodes, hubs, warehouses jaise literals code me aayein to ESLint fail; "bad" fixture test ke saath. T4.2 (location data) se pehle (owner, 2026-11-09, QA-DOC-001).
 - [ ] T4.11 Role-name comparison lint (RULES §3.5): `role === 'MASTER'` jaisi tulna pe ESLint fail; "bad" fixture test ke saath. T4.1 (`authorize()`) se pehle (owner, 2026-11-09, QA-DOC-001).
+- [ ] T4.12 Customer SEO (owner, 2026-11-13; LIVE-003): canonical aur `og:url` (site ka pakka address, ek setting se), product/brand/category pages ka `og:image` aur JSON-LD (Product, Organization, BreadcrumbList), aur ye pages `sitemap.xml` me (`app/routes/sitemap-xml.ts` `SITEMAP_PATHS` ki jagah catalog se). T4.6 (catalog) ke saath. `robots.txt` aur home + legal + credits ka sitemap 2026-11-13 se hain.
 
 **Milestone 4:** naya district sirf config se khulta hai (CI), seller apply → approve → listing QC → storefront laptop pe chalta hai.
 
@@ -379,3 +381,4 @@ Har milestone ke end me kuch **live** dikhana hai. Ek hi live environment, free 
 | v1.105 | 2026-11-13 | T6.1: Master app me team sign-in (owner); §P nahi badla (checkbox wahi). |
 | v1.106 | 2026-11-13 | A.9: Vercel Deployment Checks (`check`) saare 11 projects me (LIVE-002); §P nahi badla (section A nahi ginta). |
 | v1.107 | 2026-11-13 | T1.8 `[x]` (ObjectId live, owner ki jaanch); §P: Phase 1 100%, poora 15%, task ginti 29%. |
+| v1.108 | 2026-11-13 | Naya T4.12 customer SEO (LIVE-003; `robots.txt` + sitemap ho gaye); §P: 88 tasks, task ginti 28%, poora 15%. |
