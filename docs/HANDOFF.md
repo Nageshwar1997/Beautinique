@@ -376,5 +376,5 @@
 | v1.196  | 2026-11-13 | §1 Progress: Phase 2 se ek task hataya (owner); §4 se uska bullet.                                                                                                                                                           |
 | v1.197  | 2026-11-13 | §1 Progress 16% (T2.7 `[x]`).                                                                                                                                                                                                |
 | v1.198  | 2026-11-13 | §1 Progress: T2.6 hataya (owner), Phase 2 92%.                                                                                                                                                                               |
-| v1.199 | 2026-11-13 | §6: har release pe Render ke ~12 canceled deploys normal hain (owner: jaisa hai waisa). |
-| v1.200 | 2026-11-13 | Live jaanch ab QA_AUDIT_REPORT §7a me (alag file hati); §5: Master ke roles/invitation page ke baad owner ki jaanch. |
+| v1.199  | 2026-11-13 | §6: har release pe Render ke ~12 canceled deploys normal hain (owner: jaisa hai waisa).                                                                                                                                      |
+| v1.200  | 2026-11-13 | Live jaanch ab QA_AUDIT_REPORT §7a me (alag file hati); §5: Master ke roles/invitation page ke baad owner ki jaanch.                                                                                                         |
