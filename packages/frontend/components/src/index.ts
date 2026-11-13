@@ -1,3 +1,4 @@
+export { Badge, type BadgeProps } from './badge';
 export {
   Button,
   BUTTON_SIZES,
@@ -19,7 +20,7 @@ export {
   INDIA_TIME_ZONE,
   todayInIndia,
 } from './date-picker';
-export { Dialog, type DialogProps, type DialogSize } from './dialog';
+export { Dialog, type DialogPlacement, type DialogProps, type DialogSize } from './dialog';
 export { Field, type FieldControlProps, type FieldProps } from './field';
 export {
   type HierarchyOption,

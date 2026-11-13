@@ -1,6 +1,6 @@
 # DESIGN — BQ
 
-> **Status:** v1.16 (2026-11-13). UI aur UX ke niyam saare 11 apps ke liye. Design ka **source of truth code hai**: `@beautinique/frontend-styles` (tokens) aur `@beautinique/frontend-components` (components). [RULES.md](RULES.md) §5 frontend ke coding niyam batata hai; ye file batati hai ki cheezein **dikhengi aur chalengi kaise**.
+> **Status:** v1.17 (2026-11-14). UI aur UX ke niyam saare 11 apps ke liye. Design ka **source of truth code hai**: `@beautinique/frontend-styles` (tokens) aur `@beautinique/frontend-components` (components). [RULES.md](RULES.md) §5 frontend ke coding niyam batata hai; ye file batati hai ki cheezein **dikhengi aur chalengi kaise**.
 
 ## 1. Design principles
 
@@ -79,7 +79,7 @@ Brand: **rose** rgb(214, 51, 108), deep **plum** rgb(92, 26, 70), **champagne go
 
 ### 5.2 Naye shared components (ARCHITECTURE §9.2)
 
-app-shell (layout, nav, theme switcher, wake-up screen), data-table, review-screens, auth-ui (OTP input, TOTP, My Devices, step-up dialog), maps, forms, pwa-kit.
+app-shell (layout, nav, theme switcher, wake-up screen, `SectionLayout`: data-dense app ka sidebar), data-table (bana 2026-11-14, T3.7: table, phone pe cards, cursor pages, URL me filters), review-screens, auth-ui (OTP input, TOTP, My Devices, step-up dialog), maps, forms, pwa-kit.
 
 ### 5.3 Product-specific (packages me banenge)
 
@@ -148,6 +148,8 @@ Har screen ye states dikhati hai:
 | Logistics Ops                                                    | Data-dense + maps: network map, control tower live map, scan-friendly bade inputs.                                                                     |
 | Delivery (PWA)                                                   | Phone ke liye: high contrast (dhoop me bhi padh sakein), bade buttons, ek haath se chalne layak, neeche fixed action bar, offline state hamesha dikhe. |
 
+**Data-dense ka namuna (2026-11-14, T3.7):** app-shell `SectionLayout` (md se sidebar, phone pe page ke upar links), data-table (table, 375 px pe cards; filters aur pages URL me), row ka detail components `Dialog placement="side"` me, halat `Badge` se (shabd + rang, sirf rang kabhi nahi). Buttons, links aur pages sirf haq walon ko (`@beautinique/frontend-authz`); faisla server ka.
+
 ## 11. Media, motion, icons
 
 - **Images:** Cloudinary `f_auto,q_auto`, sahi `sizes`/`srcset`, lazy loading. Product images 1:1, banners ka ratio component me fix.
@@ -191,3 +193,4 @@ Har screen ye states dikhati hai:
 | v1.14   | 2026-11-09 | §11: saare apps phone pe install; tile rang parivaar se (customer ivory, team ink, partner rose), naam "BQ" + app (owner).                                                            |
 | v1.15   | 2026-11-10 | §10: pages se pehle "Coming soon" home (naam + ek line), owner, Q-014.                                                                                                                |
 | v1.16   | 2026-11-13 | §10: Master app ka "Coming soon" home ab sign-in ke peeche (owner).                                                                                                                   |
+| v1.17   | 2026-11-14 | §5.2: app-shell `SectionLayout`, data-table bana (T3.7); §10 ke neeche data-dense ka namuna; components me `Badge` aur Dialog side panel. |

@@ -8,6 +8,7 @@ describe('@beautinique/frontend-components', () => {
       [
         'BUTTON_SIZES',
         'BUTTON_VARIANTS',
+        'Badge',
         'Button',
         'CONTROL_BOX',
         'Checkbox',
