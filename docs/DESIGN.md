@@ -1,6 +1,6 @@
 # DESIGN — BQ
 
-> **Status:** v1.15 (2026-11-10). UI aur UX ke niyam saare 11 apps ke liye. Design ka **source of truth code hai**: `@beautinique/frontend-styles` (tokens) aur `@beautinique/frontend-components` (components). [RULES.md](RULES.md) §5 frontend ke coding niyam batata hai; ye file batati hai ki cheezein **dikhengi aur chalengi kaise**.
+> **Status:** v1.16 (2026-11-13). UI aur UX ke niyam saare 11 apps ke liye. Design ka **source of truth code hai**: `@beautinique/frontend-styles` (tokens) aur `@beautinique/frontend-components` (components). [RULES.md](RULES.md) §5 frontend ke coding niyam batata hai; ye file batati hai ki cheezein **dikhengi aur chalengi kaise**.
 
 ## 1. Design principles
 
@@ -138,7 +138,7 @@ Har screen ye states dikhati hai:
 
 ## 10. Har app ka look
 
-**Jab tak app ke pages nahi (owner, 2026-11-09, QA Q-014):** home pe "Coming soon", app ka naam aur ek line ki app kis kaam ka hoga (`scripts/packages/lib/create/app-templates.ts` `APP_TAGLINES`); public ko kabhi developer ka sandesh nahi.
+**Jab tak app ke pages nahi (owner, 2026-11-09, QA Q-014):** home pe "Coming soon", app ka naam aur ek line ki app kis kaam ka hoga (`scripts/packages/lib/create/app-templates.ts` `APP_TAGLINES`); public ko kabhi developer ka sandesh nahi. Team ke app me sign-in pehle aa sakta hai (Master, owner 2026-11-13): tab ye home sign-in ke peeche, "Signed in as" ke saath.
 
 | App                                                              | Look                                                                                                                                                   |
 | ---------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------ |
@@ -190,3 +190,4 @@ Har screen ye states dikhati hai:
 | v1.13   | 2026-11-08 | §11: header me phone pe sirf `BrandMark`, naam `sm` se upar (owner, QA-ADM-001). |
 | v1.14   | 2026-11-09 | §11: saare apps phone pe install; tile rang parivaar se (customer ivory, team ink, partner rose), naam "BQ" + app (owner). |
 | v1.15 | 2026-11-10 | §10: pages se pehle "Coming soon" home (naam + ek line), owner, Q-014. |
+| v1.16 | 2026-11-13 | §10: Master app ka "Coming soon" home ab sign-in ke peeche (owner). |
