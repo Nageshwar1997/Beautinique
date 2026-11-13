@@ -12,10 +12,7 @@ import {
 import { expectObjectIds } from '../../../scripts/e2e/object-ids.ts';
 import { readConfig } from '../src/config.ts';
 import { type RunningCore, start } from '../src/service.ts';
-
-/** The laptop's and CI's local services (`npm run infra:up`). */
-const MONGO_URI = 'mongodb://localhost:27017/?replicaSet=rs0';
-const REDIS_URL = 'redis://localhost:6379';
+import { MONGO_URI, REDIS_URL } from './env.ts';
 
 /** A test's own database name, queue prefix and epoch key, so tests never meet each other's data. */
 export function isolation() {
