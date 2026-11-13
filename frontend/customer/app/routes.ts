@@ -23,6 +23,9 @@ export default [
   // the dummy legal pages the sign-up consent links to (version dummy-1)
   route('terms', 'routes/terms.tsx'),
   route('privacy', 'routes/privacy.tsx'),
+  // for search engines (LIVE-003): what to crawl, and the pages to list
+  route('robots.txt', 'routes/robots-txt.ts'),
+  route('sitemap.xml', 'routes/sitemap-xml.ts'),
   // Chrome DevTools' own request: a quiet 404 instead of an error in the server log
   route('.well-known/appspecific/com.chrome.devtools.json', 'routes/devtools-json.ts'),
 ] satisfies RouteConfig;
