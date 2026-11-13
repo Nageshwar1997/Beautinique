@@ -6,7 +6,13 @@ import { type AppId, authzVersionKey } from '@beautinique/shared-contracts';
 import { uuidv7 } from '@beautinique/shared-utils';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 
-import { GRANT_LOG, type GrantLogEntry, type Scope, writeGrant } from '../src/rbac/grants.ts';
+import {
+  appAccess,
+  GRANT_LOG,
+  type GrantLogEntry,
+  type Scope,
+  writeGrant,
+} from '../src/rbac/grants.ts';
 import { type InvitationRecord, INVITATIONS } from '../src/rbac/invitations.ts';
 import { type RoleRecord, ROLES } from '../src/rbac/sync.ts';
 import {
@@ -595,6 +601,171 @@ describe('who sees which grants', () => {
     expect((await listed(owner, 'seller', '?status=ended')).items).toEqual([]);
     // no right to read grants
     expect(errorOf(await as(mine, 'seller', 'GET', '/iam/grants'))).toEqual([403, 'FORBIDDEN']);
+  });
+
+  it('shows Master the other Master, whose authenticator only it may reset, but not to end (DR-007)', async () => {
+    const first = await master('master-one');
+    const second = await master('master-two');
+    const page = async (userId: string, app: AppId, query: string) =>
+      (await as(userId, app, 'GET', `/iam/grants${query}`)).body.data as unknown as {
+        items: { userId: string; grantId: string; role: string }[];
+      };
+    const masters = await page(first, 'master', '?role=master.master&limit=100');
+    expect(masters.items.map((g) => g.userId)).toEqual(expect.arrayContaining([first, second]));
+    const theirs = masters.items.find((g) => g.userId === second);
+    expect(
+      errorOf(await as(first, 'master', 'POST', `/iam/grants/${String(theirs?.grantId)}/end`)),
+    ).toEqual([403, 'FORBIDDEN']);
+    // by email too, as the Staff page finds a person
+    const byEmail = await page(
+      first,
+      'master',
+      `?email=${encodeURIComponent(email('master-two'))}`,
+    );
+    expect(byEmail.items.map((g) => g.role)).toEqual(['master.master']);
+    // an appointer without the reset does not see their peers: a Logistics Head is no Master
+    const head = await account('peer-head');
+    await hold(head, 'logistics.logistics_head');
+    const otherHead = await account('peer-head-two');
+    await hold(otherHead, 'logistics.logistics_head');
+    const heads = await page(head, 'logistics', '?role=logistics.logistics_head&limit=100');
+    expect(heads.items).toEqual([]);
+  });
+
+  it('shows peers in the grants list only, never their invitations: a sub-role that resets authenticators', async () => {
+    const boss = await master('peer-boss');
+    // Master makes a desk lead that gives roles and resets authenticators, given by Master
+    const made = await as(boss, 'master', 'POST', '/iam/roles', {
+      app: 'master',
+      slug: 'desk_lead',
+      name: 'Desk Lead',
+      scopeTypes: ['global'],
+      permissions: ['iam.grant.read', 'iam.grant.manage', 'iam.totp.reset'],
+      appointedBy: ['master.master'],
+      mfaRequired: true,
+    });
+    expect(made.status, JSON.stringify(made.body)).toBe(200);
+    const lead = await account('desk-lead-one');
+    await hold(lead, 'master.c_desk_lead');
+    const other = await account('desk-lead-two');
+    await hold(other, 'master.c_desk_lead');
+    // Master invites a third person to the same role
+    const invited = await as(boss, 'master', 'POST', '/iam/invitations', {
+      email: email('desk-lead-three'),
+      role: 'master.c_desk_lead',
+      scope: { type: 'global', ids: [] },
+    });
+    expect(invited.status, JSON.stringify(invited.body)).toBe(200);
+
+    // the lead sees the other lead's grant (a peer) ...
+    const grantsSeen = (await as(lead, 'master', 'GET', '/iam/grants?limit=100')).body.data as {
+      items: { userId: string; role: string }[];
+    };
+    expect(
+      grantsSeen.items.filter((g) => g.role === 'master.c_desk_lead').map((g) => g.userId),
+    ).toEqual(expect.arrayContaining([lead, other]));
+    // ... but not the invitation to that role, which only Master gives
+    const invitationsSeen = (await as(lead, 'master', 'GET', '/iam/invitations?limit=100')).body
+      .data as { items: { role: string }[] };
+    expect(invitationsSeen.items.some((i) => i.role === 'master.c_desk_lead')).toBe(false);
+    // Master, who gives it, sees it
+    const bossSees = (await as(boss, 'master', 'GET', '/iam/invitations?limit=100')).body.data as {
+      items: { role: string }[];
+    };
+    expect(bossSees.items.some((i) => i.role === 'master.c_desk_lead')).toBe(true);
+  });
+});
+
+describe('what an account may do in its app (GET /iam/me access)', () => {
+  it('names the roles active there now, with their scopes and permission keys, and nothing else', async () => {
+    const admin = await account('access-admin');
+    await hold(admin, 'admin.state_admin', { type: 'state', ids: ['MH', 'GJ'] });
+    await hold(admin, 'admin.fraud_risk');
+    // another app's role, a role that ended, one that has not started, one that ran out
+    await hold(admin, 'logistics.logistics_head');
+    const { mongo } = harness.server.runtime;
+    const record = async (role: string) => {
+      const found = await roles().findOne({ key: role });
+      if (!found) throw new Error(`no role ${role}`);
+      return found;
+    };
+    const later = (days: number) => new Date(Date.now() + days * 86_400_000);
+    for (const [role, from, to] of [
+      ['admin.catalog_qc', later(2), null],
+      ['admin.cosmetics_regulatory', later(-9), later(-2)],
+    ] as const) {
+      const found = await record(role);
+      await withTransaction(mongo, (session) =>
+        writeGrant(mongo, session, {
+          userId: oid(admin),
+          roleId: found._id,
+          appId: found.appId,
+          scope: { type: 'global', ids: [] },
+          validFrom: from,
+          validTo: to,
+          via: 'migration',
+          now: new Date(),
+        }),
+      );
+    }
+    await hold(admin, 'admin.seller_ops_lead');
+    await grants().updateOne(
+      { userId: oid(admin), roleId: await roleIdOf('admin.seller_ops_lead') },
+      { $set: { active: false } },
+    );
+
+    const access = await appAccess(mongo, { userId: oid(admin), app: 'admin' });
+    expect(access.roles).toEqual([
+      {
+        role: 'admin.fraud_risk',
+        name: 'Fraud & Risk Analyst',
+        scope: { type: 'global', ids: [] },
+      },
+      {
+        role: 'admin.state_admin',
+        name: 'State Admin',
+        scope: { type: 'state', ids: ['MH', 'GJ'] },
+      },
+    ]);
+    expect(access.permissions).toEqual(['iam.app.sign_in', 'iam.grant.manage', 'iam.grant.read']);
+    // a self scope names the account itself
+    expect(await appAccess(mongo, { userId: oid(admin), app: 'customer' })).toEqual({
+      roles: [
+        { role: 'customer.customer', name: 'Customer', scope: { type: 'self', ids: [admin] } },
+      ],
+      permissions: ['iam.app.sign_in'],
+    });
+    // none in an app without a grant
+    expect(await appAccess(mongo, { userId: oid(admin), app: 'finance' })).toEqual({
+      roles: [],
+      permissions: [],
+    });
+  });
+
+  it('leaves out a retired role, as sign-in does', async () => {
+    const boss = await master('access-boss');
+    const made = await as(boss, 'master', 'POST', '/iam/roles', {
+      app: 'support',
+      slug: 'night_desk',
+      name: 'Night Desk',
+      scopeTypes: ['global'],
+      permissions: [],
+      appointedBy: ['master.master'],
+      mfaRequired: false,
+    });
+    expect(made.status, JSON.stringify(made.body)).toBe(200);
+    const agent = await account('access-agent');
+    await hold(agent, 'support.c_night_desk');
+    await hold(agent, 'support.l1_agent');
+    const { mongo } = harness.server.runtime;
+    const before = await appAccess(mongo, { userId: oid(agent), app: 'support' });
+    expect(before.roles.map((r) => r.role)).toEqual(['support.c_night_desk', 'support.l1_agent']);
+    const retired = await as(boss, 'master', 'PATCH', '/iam/roles/support.c_night_desk', {
+      retired: true,
+    });
+    expect(retired.status, JSON.stringify(retired.body)).toBe(200);
+    const after = await appAccess(mongo, { userId: oid(agent), app: 'support' });
+    expect(after.roles.map((r) => r.role)).toEqual(['support.l1_agent']);
   });
 });
 

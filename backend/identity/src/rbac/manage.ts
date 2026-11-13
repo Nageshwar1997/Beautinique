@@ -479,7 +479,7 @@ export async function listGrants(deps: ManageDeps, passport: Passport, query: Gr
   // one person (by id or email): every role of theirs; else no sign-up roles for a reviewer
   const onePerson = query.userId !== undefined || query.email !== undefined;
   const roles = await roleCatalog(deps.mongo);
-  const visible = visibleFilter(caller, roles, { onePerson });
+  const visible = visibleFilter(caller, roles, { onePerson, peers: true });
   if (!visible) return empty;
   let userId =
     query.userId === undefined ? undefined : toObjectId(query.userId, { field: 'userId' });
