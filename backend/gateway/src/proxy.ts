@@ -291,6 +291,24 @@ export function proxy({
   sessions,
   passport,
 }: ProxyOptions): RequestHandler {
+  // A refused app is known only by the hosts that reached the gateway (which host Vercel names in
+  // x-forwarded-host is Vercel's, LIVE-001), so they go in the log: hosts and origins, never a
+  // cookie; at most once a second, so a stranger's flood stays one line.
+  let lastRefusedApp = 0;
+  const refusedApp = (req: Request, app: string | undefined) => {
+    if (Date.now() - lastRefusedApp < 1000) return;
+    lastRefusedApp = Date.now();
+    const clip = (value: string | undefined) => value?.slice(0, 200);
+    logger.info(
+      {
+        app: clip(app),
+        forwardedHost: clip(req.get('x-forwarded-host')),
+        host: clip(req.get('host')),
+        origin: clip(req.get('origin')),
+      },
+      'refused: not from an app',
+    );
+  };
   // a down Redis would log on every request; once a minute is enough
   let lastLimitsWarning = 0;
   const limitsDown = (error: RateLimitUnavailableError) => {
@@ -316,6 +334,7 @@ export function proxy({
     }
     const app = req.get(HEADERS.app) ?? pageApp(req, manifest, apps);
     if (!isApp(app) || !fromAppHost(req, app, apps)) {
+      refusedApp(req, app);
       throw new AppError('APP_NOT_ALLOWED', NOT_FROM_APP);
     }
     const match = findRoute(manifest, req.method, req.path);
