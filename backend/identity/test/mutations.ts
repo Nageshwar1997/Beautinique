@@ -44,7 +44,7 @@ const mutations: Mutation[] = [
   {
     file: 'otp',
     name: 'no even answer time',
-    change: [['    if (left > 0) await sleep(left);\n', '']],
+    change: [['      await sleep(Math.ceil(left));\n', '      break;\n']],
     tests: 'same time',
   },
   {
@@ -1510,8 +1510,8 @@ const mutations: Mutation[] = [
     name: 'the list holds only sign-in',
     change: [
       [
-        'permissions: [...new Set(roles.flatMap((role) => role.permissions))].sort(),',
-        "permissions: ['iam.app.sign_in'],",
+        '    authzVersion,\n    permissions: [...new Set(roles.flatMap((role) => role.permissions))].sort(),',
+        "    authzVersion,\n    permissions: ['iam.app.sign_in'],",
       ],
     ],
     tests: 'keys of the roles there',
@@ -2175,6 +2175,119 @@ const mutations: Mutation[] = [
       ],
     ],
     tests: 'QA-GW-002',
+  },
+  // what an account may do in its app, for the app to show (GET /iam/me access, TASKS T3.7)
+  {
+    file: 'rbac/grants',
+    name: 'access counts a grant that ended, has not started or ran out',
+    change: [
+      [
+        '.find({ userId, appId, ...activeAt(now) }, { projection: { roleId: 1, scope: 1 } })',
+        '.find({ userId, appId }, { projection: { roleId: 1, scope: 1 } })',
+      ],
+    ],
+    tests: 'names the roles active there now',
+  },
+  {
+    file: 'rbac/grants',
+    name: 'access counts the roles of every app',
+    change: [
+      [
+        '.find({ userId, appId, ...activeAt(now) }, { projection: { roleId: 1, scope: 1 } })',
+        '.find({ userId, ...activeAt(now) }, { projection: { roleId: 1, scope: 1 } })',
+      ],
+    ],
+    tests: 'names the roles active there now',
+  },
+  {
+    file: 'rbac/grants',
+    name: 'access keeps a retired role',
+    change: [['    retired: false,\n  });\n  const byId', '  });\n  const byId']],
+    tests: 'leaves out a retired role',
+  },
+  {
+    file: 'rbac/grants',
+    name: 'access names no scope',
+    change: [['scope: scopeOf(grant.scope) }]', "scope: { type: 'global' as const, ids: [] } }]"]],
+    tests: 'names the roles active there now',
+  },
+  {
+    file: 'rbac/grants',
+    name: 'access has no permission keys',
+    change: [
+      [
+        '    ),\n    permissions: [...new Set(roles.flatMap((role) => role.permissions))].sort(),',
+        '    ),\n    permissions: [],',
+      ],
+    ],
+    tests: 'names the roles active there now',
+  },
+  {
+    file: 'me',
+    name: '/iam/me gives no access',
+    change: [['    access,\n  };', '    access: { roles: [], permissions: [] },\n  };']],
+    tests: 'tells the app who signed in',
+  },
+  {
+    file: 'me',
+    name: '/iam/me gives the access of another app',
+    change: [
+      [
+        'await appAccess(deps.mongo, { userId: user._id, app });',
+        "await appAccess(deps.mongo, { userId: user._id, app: 'master' });",
+      ],
+    ],
+    tests: 'tells the app who signed in',
+  },
+  // Master sees the other Master, whose authenticator only it may reset (DR-007, TASKS T3.7)
+  {
+    file: 'rbac/authority',
+    name: 'Master does not see the other Master',
+    change: [
+      ['      if (peers && own.permissions.includes(totpReset.key)) givable.push(own._id);\n', ''],
+    ],
+    tests: 'shows Master the other Master',
+  },
+  {
+    file: 'rbac/authority',
+    name: 'every appointer sees the holders of their own role',
+    change: [
+      ['if (peers && own.permissions.includes(totpReset.key)) givable', 'if (peers) givable'],
+    ],
+    tests: 'shows Master the other Master',
+  },
+  {
+    file: 'rbac/manage',
+    name: 'the grants list leaves out the peers',
+    change: [
+      [
+        'visibleFilter(caller, roles, { onePerson, peers: true })',
+        'visibleFilter(caller, roles, { onePerson })',
+      ],
+    ],
+    tests: 'shows Master the other Master',
+  },
+  {
+    file: 'rbac/invitations',
+    name: 'the invitations list shows the peers’ invitations too',
+    change: [
+      [
+        'const visible = visibleFilter(caller, roles);',
+        'const visible = visibleFilter(caller, roles, { peers: true });',
+      ],
+    ],
+    tests: 'never their invitations',
+  },
+  {
+    file: 'rbac/manage',
+    name: 'a grant whose account is gone breaks the list',
+    change: [
+      [
+        '      return email === undefined\n        ? []\n        : [grantView(grant, { email, role: keyOf(grant.roleId), catalog })];',
+        "      return [grantView(grant, { email: email ?? '', role: keyOf(grant.roleId), catalog })];",
+      ],
+    ],
+    tests: 'account is gone',
   },
 ];
 

@@ -84,6 +84,12 @@ export interface ApiClient {
   setStepUpHandler(handler: StepUpHandler): () => void;
   /** Hear sign-ins and sign-outs: this tab's, its failed refreshes, and the other tabs' of this app. */
   onSessionChange(listener: (change: SessionChange) => void): () => void;
+  /**
+   * Hear this tab's refreshes that worked (its own, or another tab's it waited for): the new
+   * access token carries the grants of now, so who the session is for may have changed (a role
+   * given or ended raises the authz version, ARCHITECTURE §7.2). The session reads /iam/me again.
+   */
+  onRefreshed(listener: () => void): () => void;
   /** The app signed in or out: tell this tab's listeners and the app's other tabs. */
   sessionChanged(change: SessionChange): void;
   /** The server answered (ServerWake's `onReady`): held calls go, and every call from now on. */
@@ -127,6 +133,10 @@ export function createApiClient(options: ApiClientOptions): ApiClient {
   const listeners = new Set<(change: SessionChange) => void>();
   const notify = (change: SessionChange) => {
     for (const listener of listeners) listener(change);
+  };
+  const refreshListeners = new Set<() => void>();
+  const refreshed = () => {
+    for (const listener of refreshListeners) listener();
   };
 
   // the other tabs' refreshes: how many were heard, and the refreshes waiting for the next one
@@ -173,6 +183,7 @@ export function createApiClient(options: ApiClientOptions): ApiClient {
       await inner.call(refreshSession);
       // tabs of the app that got a 409 meanwhile can send their calls now, with these cookies
       channel?.postMessage('refreshed');
+      refreshed();
       return true;
     } catch (error) {
       if (isApiError(error, 'REFRESH_IN_PROGRESS')) {
@@ -180,6 +191,7 @@ export function createApiClient(options: ApiClientOptions): ApiClient {
         // once its answer comes. Asking again with the old refresh token would look like a stolen
         // one after 10 s (ARCHITECTURE §7.2), so this tab waits to hear the other one (QA Q-010).
         await otherTabRefreshed(heard);
+        refreshed();
         return true;
       }
       if (isApiError(error, 'SESSION_EXPIRED')) {
@@ -257,6 +269,12 @@ export function createApiClient(options: ApiClientOptions): ApiClient {
       listeners.add(listener);
       return () => {
         listeners.delete(listener);
+      };
+    },
+    onRefreshed(listener) {
+      refreshListeners.add(listener);
+      return () => {
+        refreshListeners.delete(listener);
       };
     },
     sessionChanged(change) {

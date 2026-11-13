@@ -17,6 +17,7 @@ import {
 import { defineEvent } from '../events';
 import { type AppId, APPS } from '../platform';
 import { defineRoute } from '../routes';
+import { roleKeyZod, scopeZod } from './rbac';
 
 /**
  * Apps where an unknown email makes a new account (email code + password). A delivery partner is
@@ -530,7 +531,8 @@ export const AUTH_PROVIDERS = ['password', 'google', 'linkedin', 'github'] as co
 
 /**
  * Who is signed in, the first call of every app (ARCHITECTURE §7.2): the account, how it signs
- * in, and this session. The app keeps nothing of it in browser storage. Grants come with T3.3.
+ * in, this session, and what it may do in this app. The app keeps nothing of it in browser
+ * storage.
  */
 export const getMe = defineRoute({
   id: 'iam.me.get',
@@ -568,6 +570,17 @@ export const getMe = defineRoute({
       app: zodEnum(APPS),
       expiresAt: isoDateTimeZod,
     }),
+    /**
+     * What the account may do in this session's app (TASKS T3.7): the roles of its grants active
+     * there now, each with its scope, and their permission keys (what the gateway checks). The app
+     * shows only what these allow; the server still decides every call (ARCHITECTURE §7.3).
+     * Defaults to none: an app that goes live before identity does (Vercel deploys faster than
+     * Render) keeps working, and shows nothing it has no word for.
+     */
+    access: object({
+      roles: array(object({ role: roleKeyZod, name: string(), scope: scopeZod })),
+      permissions: array(string()),
+    }).default({ roles: [], permissions: [] }),
   }),
 });
 

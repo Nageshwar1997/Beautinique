@@ -1,3 +1,4 @@
+import { useApiClient } from '@beautinique/frontend-api-client';
 import { clearToasts } from '@beautinique/frontend-components';
 import { cleanup, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -86,6 +87,49 @@ describe('the session', () => {
       { timeout: 5000 },
     );
     expect(identity.paths()).toEqual(['GET /iam/me', 'GET /iam/me']);
+  });
+});
+
+describe('the session’s access (T3.7)', () => {
+  function Access() {
+    const { state } = useSession();
+    const client = useApiClient();
+    return (
+      <>
+        <p data-testid="access">
+          {state.status === 'signed-in' ? state.access.permissions.join(',') || 'none' : '-'}
+        </p>
+        <button type="button" onClick={() => void client.refresh()}>
+          Refresh
+        </button>
+      </>
+    );
+  }
+  const access = () => screen.getByTestId('access').textContent;
+
+  it('reads /iam/me again after a refresh, so a role given or ended shows without a reload', async () => {
+    setHint('customer');
+    const identity = fakeIdentity('customer', { signedIn: true });
+    renderApp({ '/': <Access /> }, { identity });
+    await waitFor(() => {
+      expect(access()).toBe('none');
+    });
+    // Master gave a role: the gateway's 401 (a newer authz version) makes the app refresh
+    identity.state.access = {
+      roles: [
+        {
+          role: 'customer.pro_buyer',
+          name: 'Beauty Pro Buyer',
+          scope: { type: 'state', ids: ['MH'] },
+        },
+      ],
+      permissions: ['iam.app.sign_in'],
+    };
+    await userEvent.click(screen.getByRole('button', { name: 'Refresh' }));
+    await waitFor(() => {
+      expect(access()).toBe('iam.app.sign_in');
+    });
+    expect(identity.paths()).toEqual(['GET /iam/me', 'POST /auth/refresh', 'GET /iam/me']);
   });
 });
 

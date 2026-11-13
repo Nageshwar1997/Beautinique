@@ -7,6 +7,7 @@ import {
   grantRead,
   isStateId,
   permissions,
+  totpReset,
 } from '@beautinique/shared-contracts';
 
 import { rbacCatalog } from './catalog.ts';
@@ -198,13 +199,15 @@ const idsInside = (ids: readonly (ObjectId | string)[]) => ({
  * MongoDB filter: per grant of theirs that reads grants, the roles it can give (a reviewer, who
  * reads without giving, every role), in its scope. A reviewer's list of everyone leaves out the
  * sign-up roles (owner, 2026-11-09, QA DR-008): an access review needs the staff, not a page of
- * every customer's email; looking up one person (`onePerson`) shows all of theirs. Null when the
- * caller sees none.
+ * every customer's email; looking up one person (`onePerson`) shows all of theirs. With `peers`
+ * (the grants list), an appointer whose role resets authenticators also sees the holders of that
+ * role: Master sees the other Master, whose lost authenticator only it may reset (QA DR-007;
+ * owner, 2026-11-13, TASKS T3.7), though it cannot end that grant. Null when the caller sees none.
  */
 export function visibleFilter(
   caller: readonly CallerGrant[],
   roles: readonly Pick<RoleRecord, '_id' | 'appointedBy' | 'signUp'>[],
-  { onePerson = false }: { onePerson?: boolean } = {},
+  { onePerson = false, peers = false }: { onePerson?: boolean; peers?: boolean } = {},
 ): Record<string, unknown> | null {
   const signUpRoles = roles.filter((role) => role.signUp).map((role) => role._id);
   const clauses = caller
@@ -214,6 +217,7 @@ export function visibleFilter(
       const givable = roles
         .filter((role) => namesRole(role.appointedBy, own._id))
         .map((role) => role._id);
+      if (peers && own.permissions.includes(totpReset.key)) givable.push(own._id);
       if (!reviewer && givable.length === 0) return [];
       const scope =
         grant.scope.type === 'global'

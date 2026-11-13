@@ -6,12 +6,14 @@ import { AUTH_PROVIDERS, type AuthProvider, CREDENTIALS, type Credentials } from
 import { recoveryCodesLeft } from './login.ts';
 import type { OtpDeps } from './otp.ts';
 import { rbacCatalog } from './rbac/catalog.ts';
+import { appAccess } from './rbac/grants.ts';
 import { type Session, sessionExpired, SESSIONS } from './sessions.ts';
 import { type User, USERS } from './users.ts';
 
 /**
  * GET /iam/me: who signed in (ARCHITECTURE §7.2), how the account signs in (with the recovery
- * codes left and the roles that keep the authenticator on, ARCHITECTURE §9.2), and this session. A
+ * codes left and the roles that keep the authenticator on, ARCHITECTURE §9.2), this session, and
+ * what the account may do in its app (the roles held there and their permission keys). A
  * session the gateway let through but that ended a moment ago (or an account that went away)
  * answers like an ended session.
  */
@@ -33,6 +35,8 @@ export async function me(deps: OtpDeps, passport: Passport) {
   // only an authenticator that is on can be kept on: no queries for the rest (QA DR-011)
   const requiredBy = credentials?.totp ? await rolesNeedingAuthenticator(deps, user._id) : [];
   const catalog = await rbacCatalog(deps.mongo);
+  const app = catalog.appOf(session.appId);
+  const access = await appAccess(deps.mongo, { userId: user._id, app });
   return {
     user: {
       userId: user._id.toHexString(),
@@ -48,9 +52,10 @@ export async function me(deps: OtpDeps, passport: Passport) {
     },
     session: {
       sessionId: session._id.toHexString(),
-      app: catalog.appOf(session.appId),
+      app,
       expiresAt: session.expiresAt.toISOString(),
     },
+    access,
   };
 }
 

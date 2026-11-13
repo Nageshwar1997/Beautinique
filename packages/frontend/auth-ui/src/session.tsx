@@ -128,6 +128,15 @@ export function SessionProvider({ children }: { children: ReactNode }) {
       }),
     [client, queryClient, stopEndingNow],
   );
+  // a new access token carries the grants of now (a role given or ended raised the authz
+  // version): what the session may do (`access`) is read again, so the app's buttons follow it
+  useEffect(
+    () =>
+      client.onRefreshed(() => {
+        void queryClient.invalidateQueries({ queryKey: ME_KEY });
+      }),
+    [client, queryClient],
+  );
 
   const expired =
     isApiError(me.error, 'SESSION_EXPIRED') || isApiError(me.error, 'UNAUTHENTICATED');
