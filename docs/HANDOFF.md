@@ -1,6 +1,6 @@
 # HANDOFF — BQ
 
-> **Status:** v1.201 (2026-11-13). Is project pe 2 log kaam karte hain. Ye file batati hai ki **abhi kya halat hai, kisne kya chhoda, agla kaam kya hai** aur kaunse sawal khule hain, taaki doosra insaan (aur uska Claude) bina poora itihaas padhe kaam utha sake. Jo bhi kaam roke, wo ye file update kare (neeche §8).
+> **Status:** v1.202 (2026-11-13). Is project pe 2 log kaam karte hain. Ye file batati hai ki **abhi kya halat hai, kisne kya chhoda, agla kaam kya hai** aur kaunse sawal khule hain, taaki doosra insaan (aur uska Claude) bina poora itihaas padhe kaam utha sake. Jo bhi kaam roke, wo ye file update kare (neeche §8).
 
 ## 0. Pehle ye (handoff ke din)
 
@@ -12,7 +12,7 @@
 
 - **Kya:** Beautinique, Indian beauty-only e-commerce marketplace. Har main role ka alag app (11 apps, 79 roles, sab launch pe), backend = Gateway + Identity, Payments, Notify microservices + Core modular monolith. Hosting ₹0: Vercel (apps), Render free (backend, "bundle mode"), Atlas M0, Redis.
 - **Kyun:** education + portfolio. Brand dummy hai, par sab kuch asli production jaisa banta hai; legal cheezein dummy data ke saath.
-- **Progress (2026-11-13): poora project 16%** (phase ke kaam ke hafton ke wazan se; sirf task ginti se 29%). 2026-11-13: T2.7 `[x]` (jagana live pe chal raha), Phase 2 → 79%; T2.6 hataya (owner: purana kuch use nahi hota), Phase 2 → 92%; T1.8 `[x]` (ObjectId live, owner ki jaanch), Phase 1 94% → 100%; naya T4.12 (customer SEO, LIVE-003), task ginti 29% → 28%. Naya T11.9 (QA §8 ke 8 khule test gaps), Phase 11 13% → 11%. Phase 2 se ek task hataya (owner), Phase 2 63% → 71%. 2026-11-12: naya T1.8 `[~]`, Phase 1 100% → 94%. 2026-11-09: T6.3 `[x]` (customer SSR live tha; QA-DOC-002), naye T4.10, T4.11, T11.7, T11.8 (docs ke CI pehre jo bane nahi the; QA-DOC-001); Phase 6 13% → 25%, Phase 11 17% → 13%; phir T6.6 `[~]` (saare apps pe security headers, QA Q-011), Phase 6 → 31%. Phase-wise table, hisaab aur itihaas [TASKS.md](TASKS.md) §P; kisi task ka checkbox badle to dono update (§8).
+- **Progress (2026-11-13): poora project 17%** (phase ke kaam ke hafton ke wazan se; sirf task ginti se 30%). 2026-11-13: T3.6 hataya (owner: purane users ka import nahi), Phase 3 50% → 60%; T2.7 `[x]` (jagana live pe chal raha), Phase 2 → 79%; T2.6 hataya (owner: purana kuch use nahi hota), Phase 2 → 92%; T1.8 `[x]` (ObjectId live, owner ki jaanch), Phase 1 94% → 100%; naya T4.12 (customer SEO, LIVE-003), task ginti 29% → 28%. Naya T11.9 (QA §8 ke 8 khule test gaps), Phase 11 13% → 11%. Phase 2 se ek task hataya (owner), Phase 2 63% → 71%. 2026-11-12: naya T1.8 `[~]`, Phase 1 100% → 94%. 2026-11-09: T6.3 `[x]` (customer SSR live tha; QA-DOC-002), naye T4.10, T4.11, T11.7, T11.8 (docs ke CI pehre jo bane nahi the; QA-DOC-001); Phase 6 13% → 25%, Phase 11 17% → 13%; phir T6.6 `[~]` (saare apps pe security headers, QA Q-011), Phase 6 → 31%. Phase-wise table, hisaab aur itihaas [TASKS.md](TASKS.md) §P; kisi task ka checkbox badle to dono update (§8).
 - **Docs ka order:** [RULES.md](RULES.md) → [TASKS.md](TASKS.md) → [MEMORY.md](MEMORY.md) → zaroorat pe [ARCHITECTURE.md](ARCHITECTURE.md), [PRD.md](PRD.md), [DESIGN.md](DESIGN.md), [packages/README.md](packages/README.md). Root ka `CLAUDE.md` Claude ke liye short niyam rakhta hai.
 
 ## 2. Setup (naya laptop)
@@ -380,3 +380,4 @@
 | v1.199  | 2026-11-13 | §6: har release pe Render ke ~12 canceled deploys normal hain (owner: jaisa hai waisa).                                                                                                                                      |
 | v1.200  | 2026-11-13 | Live jaanch ab QA_AUDIT_REPORT §7a me (alag file hati); §5: Master ke roles/invitation page ke baad owner ki jaanch.                                                                                                         |
 | v1.201  | 2026-11-13 | §4 item 10: M3 ka demo live pe ho gaya; agla Master app ke Staff pages, phir M4 (T4.10, T4.11, T4.1). |
+| v1.202  | 2026-11-13 | §1 Progress 17%: T3.6 hataya (owner), Phase 3 60%. |
