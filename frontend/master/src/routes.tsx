@@ -15,6 +15,10 @@ import { InvitationPage } from './pages/invitation';
 import { NotFoundPage } from './pages/not-found';
 import { SignInPage } from './pages/sign-in';
 import { AppRoot, PageError, RootError } from './root';
+import { InvitationsPage } from './staff/invitations';
+import { StaffLayout } from './staff/layout';
+import { PeoplePage } from './staff/people';
+import { RolesPage } from './staff/roles';
 
 /**
  * The app's route table (ARCHITECTURE §9.2): sign-in first for everything; only the auth pages,
@@ -41,6 +45,15 @@ export const routes: RouteObject[] = [
             ),
             children: [
               { index: true, element: <HomePage /> },
+              {
+                path: '/staff',
+                element: <StaffLayout />,
+                children: [
+                  { index: true, element: <PeoplePage /> },
+                  { path: 'invitations', element: <InvitationsPage /> },
+                  { path: 'roles', element: <RolesPage /> },
+                ],
+              },
               {
                 path: '/account',
                 element: <AccountLayout />,
