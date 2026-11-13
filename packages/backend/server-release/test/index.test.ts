@@ -122,6 +122,8 @@ describe('public API', () => {
       'RELEASE_LEASE',
       'RELEASE_STATE',
       'RELEASE_INDEXES',
+      'dropIfBeforeObjectIds',
+      'BEFORE_OBJECTIDS',
       'MigrationFailedError',
       'ReleaseLeaseLostError',
       'ReleaseLockTimeoutError',
@@ -231,6 +233,111 @@ describe('releaseFingerprint', () => {
       indexes: [{ ...ordersIndex, key: { b: 1, a: 1 } }],
     });
     expect(ab).not.toBe(ba);
+  });
+});
+
+describe('a database from before ObjectIds (owner, 2026-11-12)', () => {
+  /** What a release of before ObjectIds left: names in _id, and a record of the data. */
+  async function writtenBeforeObjectIds(): Promise<void> {
+    const at = new Date();
+    await mongo.db
+      .collection<Record<string, unknown>>(RELEASE_STATE)
+      .insertOne({ _id: 'current' as never, fingerprint: 'old', releasedAt: at, ms: 1 });
+    await mongo.db.collection<Record<string, unknown>>(MIGRATIONS).insertMany([
+      { _id: '20261029-001-sign-up-grants' as never, description: 'old', appliedAt: at, ms: 1 },
+      {
+        _id: '20261108-001-provider-subject-index' as never,
+        description: 'old',
+        appliedAt: at,
+        ms: 1,
+      },
+    ]);
+    await mongo.db
+      .collection<Record<string, unknown>>('identity_apps')
+      .insertMany([{ _id: 'customer' as never }, { _id: 'admin' as never }]);
+    await mongo.db
+      .collection<Record<string, unknown>>('identity_users')
+      .insertOne({ _id: '0190a1b2-c3d4-7e5f-8a9b-0c1d2e3f4a5b' as never, email: 'a@b.example' });
+  }
+
+  it('drops every collection, then runs the release anew: the new code cannot read that data', async () => {
+    await writtenBeforeObjectIds();
+    const runs: string[] = [];
+    const report = await runRelease(
+      options({
+        migrations: [counted('20261029-001-sign-up-grants', runs)],
+        indexes: [ordersIndex],
+      }),
+    );
+    expect(report).toMatchObject({ upToDate: false, migrations: ['20261029-001-sign-up-grants'] });
+    expect(runs).toEqual(['20261029-001-sign-up-grants']);
+    expect(await mongo.db.collection('identity_users').countDocuments()).toBe(0);
+    expect(await mongo.db.collection('identity_apps').countDocuments()).toBe(0);
+    const states = await mongo.db.collection(RELEASE_STATE).find().toArray();
+    expect(states).toHaveLength(1);
+    expect(states[0]?._id).toBeInstanceOf(ObjectId);
+    expect(
+      lines.find((line) => line.msg === 'a database from before ObjectIds: dropped'),
+    ).toMatchObject({ level: 40 });
+  });
+
+  it('knows one by what a running release of before writes too (a task run, a lease)', async () => {
+    await mongo.db
+      .collection<Record<string, unknown>>('platform_task_runs')
+      .insertOne({ _id: 'email.sendDue' as never, firstSeenAt: new Date() });
+    await mongo.db.collection('orders').insertOne({ _id: new ObjectId(), buyerId: 1 });
+    await runRelease(options({ indexes: [ordersIndex] }));
+    expect(await mongo.db.collection('platform_task_runs').countDocuments()).toBe(0);
+    expect(await mongo.db.collection('orders').countDocuments()).toBe(0);
+  });
+
+  it('leaves a database of today alone, and an up-to-date one reads nothing more', async () => {
+    await mongo.db.collection('orders').insertOne({ _id: new ObjectId(), buyerId: 1 });
+    await runRelease(options({ indexes: [ordersIndex] }));
+    expect(await mongo.db.collection('orders').countDocuments()).toBe(1);
+    expect(lines.some((line) => line.msg === 'a database from before ObjectIds: dropped')).toBe(
+      false,
+    );
+    const again = await runRelease(options({ indexes: [ordersIndex] }));
+    expect(again.upToDate).toBe(true);
+    expect(await mongo.db.collection('orders').countDocuments()).toBe(1);
+  });
+
+  it('keeps a database a release of today finished: only what a release of before wrote into it goes', async () => {
+    await runRelease(options({ indexes: [ordersIndex] }));
+    await mongo.db.collection('orders').insertOne({ _id: new ObjectId(), buyerId: 1 });
+    // the old instance runs on during the deploy (2026-11-12): a task run and a lease, names in _id
+    await mongo.db
+      .collection<Record<string, unknown>>('platform_task_runs')
+      .insertOne({ _id: 'platform.heartbeat' as never, lastStartedAt: new Date() });
+    await mongo.db
+      .collection<Record<string, unknown>>(LOCKS)
+      .insertOne({ _id: 'outbox-relay' as never, owner: 'old', expiresAt: new Date() });
+    lines.length = 0;
+    const next = await runRelease(
+      options({
+        indexes: [ordersIndex, { collection: 'orders', name: 'placed', key: { placedAt: 1 } }],
+      }),
+    );
+    expect(next.upToDate).toBe(false);
+    expect(await mongo.db.collection('orders').countDocuments()).toBe(1);
+    expect(
+      await mongo.db.collection('platform_task_runs').countDocuments({ _id: { $type: 'string' } }),
+    ).toBe(0);
+    expect(await mongo.db.collection(LOCKS).countDocuments({ _id: { $type: 'string' } })).toBe(0);
+    expect(messages()).not.toContain('a database from before ObjectIds: dropped');
+    expect(
+      lines.find((line) => line.msg === 'records a release from before ObjectIds wrote: removed'),
+    ).toMatchObject({ level: 40, removed: { platform_task_runs: 1, [LOCKS]: 1 } });
+    const states = await mongo.db.collection(RELEASE_STATE).find().toArray();
+    expect(states).toHaveLength(1);
+  });
+
+  it('says nothing when a database of today has nothing of before', async () => {
+    await runRelease(options({ indexes: [ordersIndex] }));
+    lines.length = 0;
+    await runRelease(options({ indexes: [] }));
+    expect(messages()).not.toContain('records a release from before ObjectIds wrote: removed');
   });
 });
 

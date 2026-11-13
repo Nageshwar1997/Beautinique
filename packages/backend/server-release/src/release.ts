@@ -11,6 +11,7 @@ import {
 } from '@beautinique/backend-server-mongo';
 import { PLATFORM_INDEXES, releaseLease, tryLease } from '@beautinique/backend-server-queue';
 
+import { dropIfBeforeObjectIds } from './before-objectids';
 import { ReleaseLeaseLostError, ReleaseLockTimeoutError } from './errors';
 import {
   defineMigrations,
@@ -46,7 +47,8 @@ function withReleaseIndexes(indexes: readonly IndexSpec[]): IndexSpec[] {
 const ONE_STATE = 'full read: the one release document';
 
 // bump it when runRelease starts doing something new, so every database runs its steps once more
-const RUNNER_VERSION = 1;
+// (2: a database of today loses what a release of before wrote into it, 2026-11-13)
+const RUNNER_VERSION = 2;
 
 /** A step after migrations and indexes, e.g. the permission sync of identity (TASKS T3.3). */
 export interface ReleaseStep {
@@ -240,6 +242,9 @@ export async function runRelease(options: RunReleaseOptions): Promise<ReleaseRep
     return nothing();
   }
 
+  // a database from before ObjectIds goes whole first: its leases alone would stop the lease
+  // below (owner, 2026-11-12)
+  await dropIfBeforeObjectIds(mongo, logger);
   const lease = await takeLease(mongo, logger, { lockTtlMs, waitMs, pollMs });
   try {
     // another instance may have finished this release while we waited for the lease

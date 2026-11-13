@@ -73,7 +73,7 @@ const mutations: Mutation[] = [
   {
     file: 'release',
     name: 'runner version bumped',
-    change: [['const RUNNER_VERSION = 1;', 'const RUNNER_VERSION = 2;']],
+    change: [['const RUNNER_VERSION = 2;', 'const RUNNER_VERSION = 3;']],
     survives: 'equivalent: any value works, a new one only makes every database run once more',
   },
 
@@ -517,6 +517,60 @@ const mutations: Mutation[] = [
     name: 'lock timeout without the wait',
     change: [['for more than ${String(waitMs)} ms.', 'for too long.']],
     tests: 'gives up',
+  },
+  // a database from before ObjectIds goes whole (owner, 2026-11-12)
+  {
+    file: 'before-objectids',
+    name: 'one from before is never noticed',
+    change: [['    if (found) {', '    if (false) {']],
+    tests: 'before ObjectIds',
+  },
+  {
+    file: 'before-objectids',
+    name: 'a running release of before is not noticed by its task runs',
+    change: [["  'platform_task_runs',\n", '']],
+    tests: 'before ObjectIds',
+  },
+  {
+    file: 'release',
+    name: 'the release never looks for one',
+    change: [['  await dropIfBeforeObjectIds(mongo, logger);\n', '']],
+    tests: 'before ObjectIds',
+  },
+  {
+    file: 'before-objectids',
+    name: 'a database of today goes whole for what a release of before wrote into it',
+    change: [['  if (ofToday) {', '  if (false) {']],
+    tests: 'before ObjectIds',
+  },
+  {
+    file: 'before-objectids',
+    name: 'a release of today is taken for one of before',
+    change: [["{ _id: { $type: 'objectId' } }", "{ _id: { $type: 'string' } }"]],
+    tests: 'before ObjectIds',
+  },
+  {
+    file: 'before-objectids',
+    name: 'what a release of before wrote stays',
+    change: [
+      [
+        ".deleteMany({ _id: { $type: 'string' } } as never)",
+        ".deleteMany({ _id: { $type: 'bool' } } as never)",
+      ],
+    ],
+    tests: 'before ObjectIds',
+  },
+  {
+    file: 'before-objectids',
+    name: 'the removed records are not counted',
+    change: [['    if (deletedCount > 0) removed[name] = deletedCount;\n', '']],
+    tests: 'before ObjectIds',
+  },
+  {
+    file: 'before-objectids',
+    name: 'it warns when nothing was removed',
+    change: [['  if (Object.keys(removed).length === 0) return;\n', '']],
+    tests: 'before ObjectIds',
   },
 ];
 
