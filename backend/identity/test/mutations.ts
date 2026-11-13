@@ -2278,6 +2278,17 @@ const mutations: Mutation[] = [
     ],
     tests: 'never their invitations',
   },
+  {
+    file: 'rbac/manage',
+    name: 'a grant whose account is gone breaks the list',
+    change: [
+      [
+        '      return email === undefined\n        ? []\n        : [grantView(grant, { email, role: keyOf(grant.roleId), catalog })];',
+        "      return [grantView(grant, { email: email ?? '', role: keyOf(grant.roleId), catalog })];",
+      ],
+    ],
+    tests: 'account is gone',
+  },
 ];
 
 export default mutations;

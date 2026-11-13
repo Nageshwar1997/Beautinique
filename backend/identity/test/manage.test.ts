@@ -603,6 +603,20 @@ describe('who sees which grants', () => {
     expect(errorOf(await as(mine, 'seller', 'GET', '/iam/grants'))).toEqual([403, 'FORBIDDEN']);
   });
 
+  it('leaves out a grant whose account is gone, so the list keeps its contract', async () => {
+    const boss = await master('gone-boss');
+    const kept = await account('gone-kept');
+    await hold(kept, 'support.l1_agent');
+    // a grant of an account that is no longer there (e.g. written straight by a migration)
+    const ghost = new ObjectId().toHexString();
+    await hold(ghost, 'support.l1_agent');
+    const listed = await as(boss, 'master', 'GET', '/iam/grants?role=support.l1_agent&limit=100');
+    expect(listed.status, JSON.stringify(listed.body)).toBe(200);
+    const users = (listed.body.data as { items: { userId: string }[] }).items.map((g) => g.userId);
+    expect(users).toContain(kept);
+    expect(users).not.toContain(ghost);
+  });
+
   it('shows Master the other Master, whose authenticator only it may reset, but not to end (DR-007)', async () => {
     const first = await master('master-one');
     const second = await master('master-two');
