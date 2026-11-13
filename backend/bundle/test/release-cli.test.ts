@@ -10,9 +10,10 @@ import { RELEASE_STATE } from '@beautinique/backend-server-release';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 
 import { releaseCli } from '../src/release-cli.ts';
+import { MONGO_HOST, MONGO_URI, REDIS_DB } from './env.ts';
 
-// the laptop's and CI's local services (`npm run infra:up`), in test databases of their own
-const MONGO_URI = 'mongodb://localhost:27017/?replicaSet=rs0';
+// the laptop's and CI's local services (`npm run infra:up`) or a mutation run's (test/env.ts), in
+// test databases of their own
 const id = randomUUID().slice(0, 8);
 const coreDb = `bq_test_cli_core_${id}`;
 const identityDb = `bq_test_cli_identity_${id}`;
@@ -24,16 +25,16 @@ const envText = (mongoUri: string) =>
   [
     `CORE__MONGO_URI=${mongoUri}`,
     `CORE__MONGO_DB_NAME=${coreDb}`,
-    'CORE__REDIS_URL=redis://localhost:6379/5',
+    `CORE__REDIS_URL=${REDIS_DB}`,
     `IDENTITY__MONGO_URI=${mongoUri}`,
     `IDENTITY__MONGO_DB_NAME=${identityDb}`,
-    'IDENTITY__REDIS_URL=redis://localhost:6379/5',
+    `IDENTITY__REDIS_URL=${REDIS_DB}`,
     `IDENTITY__FIELD_KEYS=k1:${randomBytes(32).toString('base64')}`,
     `IDENTITY__BLIND_INDEX_KEY=b1:${randomBytes(32).toString('base64')}`,
     `IDENTITY__OTP_EVENT_KEYS=e1:${randomBytes(32).toString('base64')}`,
     `NOTIFY__MONGO_URI=${mongoUri}`,
     `NOTIFY__MONGO_DB_NAME=${notifyDb}`,
-    'NOTIFY__REDIS_URL=redis://localhost:6379/5',
+    `NOTIFY__REDIS_URL=${REDIS_DB}`,
     'NOTIFY__EMAIL_TRANSPORT=mailpit',
     'NOTIFY__EMAIL_FROM=no-reply@beautinique.example',
     `NOTIFY__OTP_EVENT_KEYS=e1:${randomBytes(32).toString('base64')}`,
@@ -109,35 +110,35 @@ describe('npm run db:release', () => {
     expect(first.code).toBe(0);
     expect(first.printed).toMatch(
       new RegExp(
-        `identity \\(${identityDb} on localhost:27017\\): 2 migration\\(s\\), \\d+ index\\(es\\) made`,
+        `identity \\(${identityDb} on ${MONGO_HOST}\\): 2 migration\\(s\\), \\d+ index\\(es\\) made`,
       ),
     );
     expect(first.printed).toMatch(
       new RegExp(
-        `core \\(${coreDb} on localhost:27017\\): 0 migration\\(s\\), \\d+ index\\(es\\) made`,
+        `core \\(${coreDb} on ${MONGO_HOST}\\): 0 migration\\(s\\), \\d+ index\\(es\\) made`,
       ),
     );
     expect(first.printed).toMatch(
       new RegExp(
-        `notify \\(${notifyDb} on localhost:27017\\): 0 migration\\(s\\), \\d+ index\\(es\\) made`,
+        `notify \\(${notifyDb} on ${MONGO_HOST}\\): 0 migration\\(s\\), \\d+ index\\(es\\) made`,
       ),
     );
     expect(first.printed).not.toContain('gateway');
 
     const again = await run([]);
-    expect(again.printed).toContain(`identity (${identityDb} on localhost:27017): up to date`);
-    expect(again.printed).toContain(`core (${coreDb} on localhost:27017): up to date`);
+    expect(again.printed).toContain(`identity (${identityDb} on ${MONGO_HOST}): up to date`);
+    expect(again.printed).toContain(`core (${coreDb} on ${MONGO_HOST}): up to date`);
 
     const one = await run(['--deployable', 'core', '--force']);
     expect(one.code).toBe(0);
     expect(one.printed).toContain(
-      `core (${coreDb} on localhost:27017): 0 migration(s), 0 index(es) made`,
+      `core (${coreDb} on ${MONGO_HOST}): 0 migration(s), 0 index(es) made`,
     );
     expect(one.printed).not.toContain('identity');
   });
 
   it('asks before the live databases, and runs nothing without "live"', async () => {
-    const secretUri = new URL('mongodb://localhost:27017/?replicaSet=rs0');
+    const secretUri = new URL(MONGO_URI);
     secretUri.username = 'bq-core';
     secretUri.password = randomBytes(12).toString('hex');
     await writeFile(join(dir, 'secret.env'), envText(secretUri.toString()));
@@ -147,7 +148,7 @@ describe('npm run db:release', () => {
 
     expect(code).toBe(1);
     expect(printed).toContain('The release steps will run on the LIVE databases:');
-    expect(printed).toContain(`core: ${coreDb} on localhost:27017`);
+    expect(printed).toContain(`core: ${coreDb} on ${MONGO_HOST}`);
     expect(printed).toContain('Type "live" to go on:');
     expect(printed).toContain('Stopped: nothing ran.');
     expect(printed).not.toContain(secretUri.password);
@@ -159,7 +160,7 @@ describe('npm run db:release', () => {
     await writeFile(join(dir, 'live.env'), envText(MONGO_URI).replace(identityDb, liveIdentity));
     const { code, printed } = await run(['--env', 'live', '--deployable', 'identity'], 'live\n');
     expect(code).toBe(0);
-    expect(printed).toContain(`identity (${liveIdentity} on localhost:27017): 2 migration(s)`);
+    expect(printed).toContain(`identity (${liveIdentity} on ${MONGO_HOST}): 2 migration(s)`);
     const mongo = await connectMongo({
       uri: MONGO_URI,
       dbName: liveIdentity,
