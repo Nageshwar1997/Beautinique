@@ -1,9 +1,9 @@
 ---
 date: 2026-11-06
 day: 4
-status: ready # draft | ready | scheduled | posted (README §2)
-posted_at:
-link:
+status: posted # draft | ready | scheduled | posted (README §2)
+posted_at: '2026-11-14 13:21 IST'
+link: 'https://lnkd.in/p/dDseKzcQ'
 covers: 'PR #21, #22, #25, #26, #27' # T3.1 (email codes, password, authenticator), T3.2 (sessions, gateway passport, My Devices)
 ---
 
