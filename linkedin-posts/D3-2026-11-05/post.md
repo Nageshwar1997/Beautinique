@@ -26,6 +26,6 @@ Live, the wake-up screen waited 150 seconds for a server that would never wake.
 Carousel: gateway, deploy, wake-up screen, Sentry and the lesson.
 
 Code: https://github.com/Nageshwar1997/Beautinique
-```
 
-Post ke end me `hashtags.md` wali line paste karo.
+#buildinpublic #devops #nodejs #vercel #render
+```

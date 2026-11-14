@@ -26,6 +26,6 @@ Day 5 of building Beautinique in public: who can do what.
 Carousel: roles, sign-in by grant, invitations, step-up and the lesson.
 
 Code: https://github.com/Nageshwar1997/Beautinique
-```
 
-Post ke end me `hashtags.md` wali line paste karo.
+#buildinpublic #security #rbac #backend #nodejs
+```

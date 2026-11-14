@@ -23,6 +23,6 @@ covers: # PR numbers, last commit sha
 𝗟𝗲𝘀𝘀𝗼𝗻 𝗼𝗳 𝘁𝗵𝗲 𝗱𝗮𝘆: ...
 
 Code: https://github.com/Nageshwar1997/Beautinique
-```
 
-Post ke end me `hashtags.md` wali line paste karo.
+#buildinpublic #webdev #softwareengineering #fullstack #typescript #nodejs #react #ecommerce #<topic-1> #<topic-2>
+```

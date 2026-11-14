@@ -26,6 +26,6 @@ Two tabs refreshing a session at once can look just like a stolen token.
 Carousel: hooks, components, pickers, the API client and the lesson.
 
 Code: https://github.com/Nageshwar1997/Beautinique
-```
 
-Post ke end me `hashtags.md` wali line paste karo.
+#buildinpublic #react #frontend #accessibility #typescript
+```

@@ -18,8 +18,8 @@ Read both first, nothing else unless needed (keep tokens low). Ask the user whic
    `gh pr list --base prerelease --state merged --limit 200 --json number,title,mergedAt` (titles only; group
    by phase, ~1 post per phase), then draft the first item. Later runs take the next "Baaki" item before new work.
 4. If nothing worth showing, tell the user and stop.
-5. Copy `_template/` to `linkedin-posts/D<N>-<post date YYYY-MM-DD>/` (N = the day number, e.g. `D3-2026-11-05`). Fill `post.md`,
-   `hashtags.md`, `carousel.md` per README §3–4. Facts only from PR bodies/commits. Next day number from HISTORY.
+5. Copy `_template/` to `linkedin-posts/D<N>-<post date YYYY-MM-DD>/` (N = the day number, e.g. `D3-2026-11-05`). Fill `post.md`
+   (8–10 hashtags as the last line of its text block, no separate file) and `carousel.md` per README §3–4. Facts only from PR bodies/commits. Next day number from HISTORY.
    Brand colors: `packages/frontend/styles/src/variables.css` if more than the README's rose is needed.
 6. Add a `draft` row to HISTORY.md (Kya cover hua = PR numbers), bump its status and change log.
 7. `npx prettier --write linkedin-posts`, then show the user the post text and the slide list.
