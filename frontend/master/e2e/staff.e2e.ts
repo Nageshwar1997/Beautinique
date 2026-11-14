@@ -101,4 +101,38 @@ test('a Master invites and takes back, gives a role and ends it', async ({ page 
   await page.getByRole('alertdialog').getByRole('button', { name: 'End role' }).click();
   await expect(page.getByText(`Support Lead ended for ${agent}.`).first()).toBeVisible();
   await expect(panel.getByText('Support Lead')).toHaveCount(0);
+  await page.keyboard.press('Escape');
+
+  // Roles: a shipped role reads only; Master makes a sub-role, retires it and brings it back
+  await page
+    .getByRole('navigation', { name: 'Staff' })
+    .getByRole('link', { name: 'Roles' })
+    .click();
+  await expect(page.getByRole('heading', { level: 1, name: 'Roles' })).toBeVisible();
+  await expectNoAxeViolations(page);
+  await expectNoSideScroll(page);
+  await page.getByRole('button', { name: 'State Admin', exact: true }).click();
+  const shipped = page.getByRole('dialog', { name: 'State Admin' });
+  await expect(shipped.getByText('Give roles, invite people to them and end them')).toBeVisible();
+  await expect(shipped.getByRole('button', { name: 'Change' })).toHaveCount(0);
+  await page.keyboard.press('Escape');
+  const slug = `e2e_${Date.now().toString(36)}`;
+  await page.getByRole('button', { name: 'New sub-role' }).click();
+  const editor = page.getByRole('dialog', { name: 'New sub-role' });
+  await editor.getByRole('button', { name: /App/ }).click();
+  await page.getByRole('option', { name: 'Support Desk' }).click();
+  await editor.getByLabel('Key name').fill(slug);
+  await editor.getByLabel('Name', { exact: true }).fill(`Night Desk ${slug}`);
+  await expectNoAxeViolations(page);
+  await editor.getByRole('button', { name: 'Make sub-role' }).click();
+  await expect(
+    page.getByText(`Night Desk ${slug} is made (support.c_${slug}).`).first(),
+  ).toBeVisible();
+  await page.getByRole('button', { name: `Night Desk ${slug}`, exact: true }).click();
+  const made = page.getByRole('dialog', { name: `Night Desk ${slug}` });
+  await made.getByRole('button', { name: 'Retire' }).click();
+  await page.getByRole('alertdialog').getByRole('button', { name: 'Retire' }).click();
+  await expect(page.getByText(`Night Desk ${slug} is retired.`).first()).toBeVisible();
+  await made.getByRole('button', { name: 'Bring back' }).click();
+  await expect(page.getByText(`Night Desk ${slug} is in use again.`).first()).toBeVisible();
 });
