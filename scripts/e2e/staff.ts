@@ -40,11 +40,12 @@ const mongo = await connectMongo({
 });
 try {
   if (what === 'master') {
-    // Master has 2 seats, and every project of the run makes its own Master: the earlier ones of
-    // this run (their test is over) give theirs up first, in the run's own database only
+    // Master has 2 seats, and every test of staff.e2e.ts in every project makes its own Master
+    // (master-staff, master-cross): the earlier ones of this run (their test is over) give theirs
+    // up first, in the run's own database only; the run's own Master (invite.ts) keeps its seat
     const earlier = await mongo.db
       .collection<{ _id: ObjectId; email: string }>(USERS)
-      .find({ email: { $regex: '^e2e-master-staff-' } }, { projection: { _id: 1 } })
+      .find({ email: { $regex: '^e2e-master-(staff|cross)-' } }, { projection: { _id: 1 } })
       .toArray();
     const masterRole = await mongo.db
       .collection<RoleRecord>(ROLES)
