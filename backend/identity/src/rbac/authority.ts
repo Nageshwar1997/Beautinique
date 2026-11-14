@@ -3,6 +3,7 @@ import type { Mongo, ObjectId } from '@beautinique/backend-server-mongo';
 import { type ChainOf, grantProblems, scopeWithin } from '@beautinique/shared-authz';
 import {
   type AppId,
+  CODE_SCOPE_TYPES,
   grantManage,
   grantRead,
   isStateId,
@@ -12,14 +13,7 @@ import {
 } from '@beautinique/shared-contracts';
 
 import { rbacCatalog } from './catalog.ts';
-import {
-  activeAt,
-  CODE_SCOPE_TYPES,
-  type GrantRecord,
-  GRANTS,
-  type Scope,
-  scopeOf,
-} from './grants.ts';
+import { activeAt, type GrantRecord, GRANTS, type Scope, scopeOf } from './grants.ts';
 import { readRoles, type Role, type RoleRecord } from './sync.ts';
 
 /** One grant of the caller in the app they act from, with its role. */

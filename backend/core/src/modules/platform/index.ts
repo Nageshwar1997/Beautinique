@@ -3,6 +3,7 @@ import { subscribe, type Subscription } from '@beautinique/backend-server-queue'
 import { pingRecorded } from '@beautinique/shared-contracts';
 import type { Router } from 'express';
 
+import { accessSubscriptions } from './access.ts';
 import { PINGS, platformRouter } from './routes.ts';
 
 export const PING_AUDIT = 'core.pingAudit';
@@ -13,6 +14,15 @@ export const PING_AUDIT_COLLECTION = 'platform_ping_audit';
  * `platform.ping.recorded` event goes out through the outbox, the queue and the inbox. It is also
  * the pattern every module follows: routes on contracts, events in the same transaction.
  */
+export {
+  ACCESS_COPIES,
+  type AccessCopy,
+  type GrantCopy,
+  ROLE_COPIES,
+  type RoleCopy,
+  USER_COPIES,
+  type UserCopy,
+} from './access.ts';
 export { PINGS } from './routes.ts';
 
 /** Which subscribers get which event (the relay's list). */
@@ -46,6 +56,8 @@ export const indexes: readonly IndexSpec[] = [PINGS, PING_AUDIT_COLLECTION].map(
 export function subscriptionsOf({ mongo }: { mongo: Mongo }): Subscription[] {
   const audit = mongo.db.collection<PingAudit>(PING_AUDIT_COLLECTION);
   return [
+    // core's copy of identity's roles, grants and accounts (TASKS T3.5)
+    ...accessSubscriptions({ mongo }),
     subscribe(PING_AUDIT, pingRecorded, async (event, session) => {
       await audit.insertOne(
         {

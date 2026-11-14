@@ -137,6 +137,8 @@ const ping = await client.call(getPing, { params: { pingId } }); // return type 
 
 Platform ka poora catalogue `src/catalogue/` me hai (`routes`, `events`, `permissions`); har module apni list wahan jodta hai. Social login (T3.1 PR 4) `catalogue/social.ts` me: `SOCIAL_PROVIDERS`, 6 routes (providers ki list, start aur callback navigation routes, naye account ka consent, provider hatana), event `identity.signInMethod.changed`, cookies (`oauthStateCookieName`, `oauthSignUpCookieName`, path `OAUTH_COOKIE_PATH`), `?oauth=` ke nateeje (`OAUTH_RESULTS`) aur `safeNextPath(next, maxLength = 512)`: sirf apni site ka path, `.`/`..` resolve karke dobara jaancha hua (`/..//evil.example` = `//evil.example` = `/`; QA-FE-001); identity aur auth-ui `safeNext` dono yahi ek niyam lete hain. Abhi Milestone 1 ka sample hai: route `platform.ping.record` (POST, **public** (owner ka faisla 2026-10-25: login se pehle live demo; gateway ka `write` rate limit, core 7 din TTL aur max 5,000 pings), idempotent, har app) jo `platform.ping.recorded` event usi transaction me likhta hai, route `platform.ping.get` (permission `platform.ping.read`).
 
+Identity ke snapshot events (T3.5, ARCHITECTURE §5.2) `catalogue/access.ts` me (`ACCESS_EVENTS`): `identity.role.changed` (ek role, permission keys ke saath), `identity.grant.changed` (ek account ke saare grants, sirf role id, aur `authzVersion`; ek grant ~250 bytes, ~60 grants ek event ke 16 KB me) aur `identity.user.changed`. `CODE_SCOPE_TYPES` (`platform.ts`): jin scope types ki ids codes hain (`global`, `state`); baaki ki ids documents ki ObjectId.
+
 ```bash
 npm run build --workspace @beautinique/shared-contracts
 npm run generate --workspace @beautinique/shared-contracts   # generated/ likhta hai

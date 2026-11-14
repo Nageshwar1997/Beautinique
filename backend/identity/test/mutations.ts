@@ -2153,11 +2153,22 @@ const mutations: Mutation[] = [
     name: 'the release does not run the provider-id migration',
     change: [
       [
-        'defineMigrations([signUpGrantsMigration, providerSubjectIndexMigration])',
-        'defineMigrations([signUpGrantsMigration])',
+        '    providerSubjectIndexMigration,\n    accessSnapshotsMigration,',
+        '    accessSnapshotsMigration,',
       ],
     ],
     tests: 'safely again',
+  },
+  {
+    file: 'release',
+    name: 'the release does not run the first copy for core (T3.5)',
+    change: [
+      [
+        '    providerSubjectIndexMigration,\n    accessSnapshotsMigration,\n',
+        '    providerSubjectIndexMigration,\n',
+      ],
+    ],
+    tests: 'runs the first copy at a release',
   },
   {
     file: 'oauth',
@@ -2361,6 +2372,101 @@ const mutations: Mutation[] = [
       ],
     ],
     tests: 'account is gone',
+  },
+  // core's copy: identity's snapshot events (TASKS T3.5)
+  {
+    file: 'rbac/grants',
+    name: 'a grant change sends no snapshot',
+    change: [
+      ['  await writeAccessSnapshot(mongo, session, userId, user.authzVersion ?? 0, now);\n', ''],
+    ],
+    tests: 'sends all of an account grants',
+  },
+  {
+    file: 'rbac/grants',
+    name: 'a snapshot keeps a grant that ran out',
+    change: [
+      [
+        '  active: true,\n  $or: [{ validTo: null }, { validTo: { $gt: now } }],\n});',
+        '  active: true,\n});',
+      ],
+    ],
+    tests: 'leaves out a grant that ran out',
+  },
+  {
+    file: 'rbac/grants',
+    name: 'a snapshot keeps an ended grant',
+    change: [['  userId,\n  active: true,\n  $or:', '  userId,\n  $or:']],
+    tests: 'sends all of an account grants',
+  },
+  {
+    file: 'rbac/sync',
+    name: 'the rbac step sends no roles',
+    change: [['const snapshots = await writeAllRoleSnapshots(mongo);', 'const snapshots = 0;']],
+    tests: 'sends every role from the rbac step',
+  },
+  {
+    file: 'rbac/manage',
+    name: 'a new sub-role sends no snapshot',
+    change: [
+      [
+        '      await writeRoleSnapshots(deps.mongo, session, [\n        { ...written, app: body.app, permissions: [...keyed.permissions] },\n      ]);\n',
+        '',
+      ],
+    ],
+    tests: 'sends a role when Master',
+  },
+  {
+    file: 'rbac/manage',
+    name: 'a changed sub-role sends no snapshot',
+    change: [
+      [
+        '    await writeRoleSnapshots(deps.mongo, session, [\n      { ...role, ...fields, permissions: next.permissions },\n    ]);\n',
+        '',
+      ],
+    ],
+    tests: 'sends a role when Master',
+  },
+  {
+    file: 'rbac/manage',
+    name: "a changed sub-role leaves its holders' versions",
+    change: [['      await raiseAuthzVersion(deps.mongo, session, userId, now);\n', '']],
+    tests: 'sends a role when Master|renews their holders',
+  },
+  {
+    file: 'users',
+    name: 'a new account sends no snapshot',
+    change: [['  if (isNewUser) await writeUserSnapshot(mongo, session, user);\n', '']],
+    tests: 'sends a new account',
+  },
+  {
+    file: 'rbac/migrations',
+    name: 'the first copy leaves out the accounts',
+    change: [['          await writeUserSnapshot(mongo, session, user);\n', '']],
+    tests: 'sends the first copy',
+  },
+  {
+    file: 'rbac/migrations',
+    name: 'the first copy leaves out the grants',
+    change: [
+      [
+        '          await writeAccessSnapshot(mongo, session, user._id, user.authzVersion ?? 0, now);\n',
+        '',
+      ],
+    ],
+    tests: 'sends the first copy',
+  },
+  {
+    file: 'rbac/grants',
+    name: 'an account holds any number of grants',
+    change: [['  if (held >= MAX_GRANTS_PER_ACCOUNT) {', '  if (false) {']],
+    tests: 'holds at most 50 grants',
+  },
+  {
+    file: 'rbac/grants',
+    name: 'an account holds one grant more than the cap',
+    change: [['  if (held >= MAX_GRANTS_PER_ACCOUNT) {', '  if (held > MAX_GRANTS_PER_ACCOUNT) {']],
+    tests: 'holds at most 50 grants',
   },
 ];
 

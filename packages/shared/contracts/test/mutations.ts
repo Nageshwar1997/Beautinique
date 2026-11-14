@@ -662,6 +662,39 @@ const mutations: Mutation[] = [
     change: [['canResetAuthenticator: boolean().optional(),', 'canResetAuthenticator: boolean(),']],
     tests: 'may reset their authenticator',
   },
+  // identity's snapshot events for core's copy (TASKS T3.5)
+  {
+    file: 'catalogue/index',
+    name: 'the snapshot events are not in the catalogue',
+    change: [['  ...ACCESS_EVENTS,\n', '']],
+    tests: 'in the platform catalogue, from identity|every event version',
+  },
+  {
+    file: 'catalogue/access',
+    name: 'a snapshot takes a negative authz version',
+    change: [['    authzVersion: number().int().min(0),', '    authzVersion: number().int(),']],
+    tests: 'by role id only',
+  },
+  {
+    file: 'catalogue/access',
+    name: "a role snapshot leaves out the role's permissions",
+    change: [['    permissions: array(string()),\n', '']],
+    tests: 'by role id only',
+  },
+  {
+    file: 'platform',
+    name: 'a state id is taken for a document id',
+    change: [["new Set<ScopeType>(['global', 'state'])", "new Set<ScopeType>(['global'])"]],
+    tests: 'whose ids are codes',
+  },
+  {
+    file: 'catalogue/access',
+    name: 'an account may hold more grants than an event carries',
+    change: [
+      ['export const MAX_GRANTS_PER_ACCOUNT = 50;', 'export const MAX_GRANTS_PER_ACCOUNT = 100;'],
+    ],
+    tests: 'the most grants it may hold',
+  },
 ];
 
 export default mutations;

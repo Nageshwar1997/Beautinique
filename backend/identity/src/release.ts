@@ -13,7 +13,7 @@ import { indexes as credentialIndexes, providerSubjectIndexMigration } from './c
 import { catalogIndexes } from './rbac/catalog.ts';
 import { indexes as grantIndexes } from './rbac/grants.ts';
 import { indexes as invitationIndexes } from './rbac/invitations.ts';
-import { signUpGrantsMigration } from './rbac/migrations.ts';
+import { accessSnapshotsMigration, signUpGrantsMigration } from './rbac/migrations.ts';
 import { rbacSyncStep, roleIndexes } from './rbac/sync.ts';
 import { indexes as sessionIndexes } from './sessions.ts';
 import { indexes as signingKeyIndexes } from './signing-keys.ts';
@@ -26,7 +26,11 @@ import { indexes as userIndexes } from './users.ts';
  * roles (TASKS T3.3).
  */
 export const releaseDefinition: ReleaseDefinition = {
-  migrations: defineMigrations([signUpGrantsMigration, providerSubjectIndexMigration]),
+  migrations: defineMigrations([
+    signUpGrantsMigration,
+    providerSubjectIndexMigration,
+    accessSnapshotsMigration,
+  ]),
   indexes: [
     ...OUTBOX_INDEXES,
     ...userIndexes,
