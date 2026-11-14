@@ -98,10 +98,13 @@ describe('generateFiles', () => {
     expect(list.map((e) => [e.type, e.version])).toEqual([
       ['identity.authenticator.changed', 1],
       ['identity.authenticator.reset', 1],
+      ['identity.grant.changed', 1],
       ['identity.invitation.created', 1],
       ['identity.otp.requested', 1],
+      ['identity.role.changed', 1],
       ['identity.session.reuseDetected', 1],
       ['identity.signInMethod.changed', 1],
+      ['identity.user.changed', 1],
       ['platform.ping.recorded', 1],
     ]);
     expect(list.at(-1)?.schema.required).toEqual(
@@ -120,6 +123,7 @@ describe('generateFiles', () => {
       'iam.role.manage',
       'iam.session.revoke',
       'iam.totp.reset',
+      'iam.totp.reset_master',
       'platform.ping.read',
     ]);
     expect(list.at(-1)?.scopeTypes).toEqual(['global']);

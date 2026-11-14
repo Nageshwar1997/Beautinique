@@ -65,6 +65,7 @@ export {
   verifyOtp,
   wake,
 } from './catalogue';
+export * from './catalogue/access';
 export * from './catalogue/iam';
 export * from './catalogue/social';
 export {
@@ -109,6 +110,7 @@ export {
 export {
   type AppId,
   APPS,
+  CODE_SCOPE_TYPES,
   type Deployable,
   DEPLOYABLES,
   HEADERS,

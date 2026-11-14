@@ -19,6 +19,7 @@ const ACCESS: Record<Who, { role: string; name: string; permissions: string[] }>
       'iam.grant.read',
       'iam.role.manage',
       'iam.totp.reset',
+      'iam.totp.reset_master',
     ],
   },
   officer: {
@@ -67,7 +68,13 @@ export const ROLES = [
   role('master.master', 'Master', ['global'], {
     appointedBy: [],
     main: true,
-    permissions: ['iam.grant.read', 'iam.grant.manage', 'iam.role.manage', 'iam.totp.reset'],
+    permissions: [
+      'iam.grant.read',
+      'iam.grant.manage',
+      'iam.role.manage',
+      'iam.totp.reset',
+      'iam.totp.reset_master',
+    ],
   }),
   role('admin.state_admin', 'State Admin', ['state'], {
     main: true,
@@ -156,6 +163,19 @@ export function fakeApi(who: Who = 'master') {
       }),
     );
 
+  // as identity decides it (QA DR-007): with the reset, never one's own, and an account whose
+  // role carries the Master reset only by someone who holds it too
+  const canResetAuthenticator = (userId: string): boolean => {
+    if (!access.permissions.includes('iam.totp.reset') || userId === ME) return false;
+    if (access.permissions.includes('iam.totp.reset_master')) return true;
+    return !state.grants.some(
+      (g) =>
+        g.userId === userId &&
+        g.active &&
+        ROLES.find((r) => r.key === g.role)?.permissions.includes('iam.totp.reset_master') === true,
+    );
+  };
+
   const fetch = async (input: RequestInfo | URL, init?: RequestInit): Promise<Response> => {
     const request = new Request(input, init);
     const url = new URL(request.url);
@@ -197,7 +217,14 @@ export function fakeApi(who: Who = 'master') {
           (q.get('app') === null || g.app === q.get('app')) &&
           (q.get('role') === null || g.role === q.get('role')),
       );
-      return json(200, { data: { items, nextCursor: null } });
+      const userId = q.get('userId');
+      return json(200, {
+        data: {
+          items,
+          nextCursor: null,
+          ...(userId === null ? {} : { canResetAuthenticator: canResetAuthenticator(userId) }),
+        },
+      });
     }
     if (path === '/iam/invitations' && request.method === 'GET') {
       const items = state.invitations.filter(

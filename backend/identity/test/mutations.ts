@@ -1250,6 +1250,17 @@ const mutations: Mutation[] = [
   },
   {
     file: 'rbac/bootstrap',
+    name: 'Master gets a third seat',
+    change: [
+      [
+        'const MASTER_SEATS = MASTER_SEED.maxHolders ?? 2;',
+        'const MASTER_SEATS = (MASTER_SEED.maxHolders ?? 2) + 1;',
+      ],
+    ],
+    tests: 'at most two',
+  },
+  {
+    file: 'rbac/bootstrap',
     name: 'two at once both take the last Master seat',
     change: [['{ $inc: { seatClaims: 1 } }', '{ $inc: { seatClaims: 0 } }']],
     tests: 'never to both',
@@ -1867,16 +1878,55 @@ const mutations: Mutation[] = [
   {
     file: 'rbac/security',
     name: 'a Security Officer resets a Master (DR-007)',
-    change: [['  if (!isMaster && (await holdsMaster(deps, user._id))) {', '  if (false) {']],
+    change: [
+      [
+        '  if (!(await mayResetAuthenticator(deps.mongo, caller, toObjectId(passport.userId), user._id))) {',
+        '  if (false) {',
+      ],
+    ],
     tests: 'DR-007',
   },
   {
-    file: 'rbac/security',
+    file: 'rbac/authority',
+    name: 'a Master is no different from anyone (no protection by permission)',
+    change: [['    !(await holdsPermission(mongo, target, totpResetMaster.key))', '    true']],
+    tests: 'DR-007',
+  },
+  {
+    file: 'rbac/authority',
     name: 'not even the other Master resets a Master',
+    change: [['    holds(caller, totpResetMaster.key) ||', '    false ||']],
+    tests: 'DR-007',
+  },
+  {
+    file: 'rbac/authority',
+    name: 'the grants list says one may reset their own authenticator',
     change: [
       [
-        '  if (!isMaster && (await holdsMaster(deps, user._id))) {',
-        '  if (await holdsMaster(deps, user._id)) {',
+        'if (!holds(caller, totpReset.key) || target.equals(callerId)) return false;',
+        'if (!holds(caller, totpReset.key)) return false;',
+      ],
+    ],
+    tests: 'whether the caller may reset',
+  },
+  {
+    file: 'rbac/authority',
+    name: 'the grants list says anyone may reset',
+    change: [
+      [
+        'if (!holds(caller, totpReset.key) || target.equals(callerId)) return false;',
+        'if (target.equals(callerId)) return false;',
+      ],
+    ],
+    tests: 'whether the caller may reset',
+  },
+  {
+    file: 'rbac/authority',
+    name: 'an ended grant still protects (or a retired role)',
+    change: [
+      [
+        '    .find({ userId, ...activeAt(now) }, { projection: { roleId: 1 } })',
+        '    .find({ userId }, { projection: { roleId: 1 } })',
       ],
     ],
     tests: 'DR-007',
@@ -1886,11 +1936,34 @@ const mutations: Mutation[] = [
     name: 'Master cannot reset an authenticator',
     change: [
       [
-        'permissions: [...APPOINTS, roleManage.key, totpReset.key],',
-        'permissions: [...APPOINTS, roleManage.key],',
+        'permissions: [...APPOINTS, roleManage.key, totpReset.key, totpResetMaster.key],',
+        'permissions: [...APPOINTS, roleManage.key, totpResetMaster.key],',
       ],
     ],
     tests: 'DR-007',
+  },
+  {
+    file: 'rbac/roles',
+    name: 'Master cannot reset the other Master',
+    change: [
+      [
+        'permissions: [...APPOINTS, roleManage.key, totpReset.key, totpResetMaster.key],',
+        'permissions: [...APPOINTS, roleManage.key, totpReset.key],',
+      ],
+    ],
+    tests: 'DR-007',
+  },
+  {
+    file: 'rbac/manage',
+    name: 'a sub-role may reset a Master',
+    change: [['  if (role.permissions.includes(totpResetMaster.key)) {', '  if (false) {']],
+    tests: 'lets Master make a sub-role',
+  },
+  {
+    file: 'rbac/manage',
+    name: 'the grants list never says whether one may reset',
+    change: [['    ...(userId === undefined\n      ? {}', '    ...(true\n      ? {}']],
+    tests: 'whether the caller may reset',
   },
   {
     file: 'rbac/security',
@@ -2080,11 +2153,22 @@ const mutations: Mutation[] = [
     name: 'the release does not run the provider-id migration',
     change: [
       [
-        'defineMigrations([signUpGrantsMigration, providerSubjectIndexMigration])',
-        'defineMigrations([signUpGrantsMigration])',
+        '    providerSubjectIndexMigration,\n    accessSnapshotsMigration,',
+        '    accessSnapshotsMigration,',
       ],
     ],
     tests: 'safely again',
+  },
+  {
+    file: 'release',
+    name: 'the release does not run the first copy for core (T3.5)',
+    change: [
+      [
+        '    providerSubjectIndexMigration,\n    accessSnapshotsMigration,\n',
+        '    providerSubjectIndexMigration,\n',
+      ],
+    ],
+    tests: 'runs the first copy at a release',
   },
   {
     file: 'oauth',
@@ -2288,6 +2372,101 @@ const mutations: Mutation[] = [
       ],
     ],
     tests: 'account is gone',
+  },
+  // core's copy: identity's snapshot events (TASKS T3.5)
+  {
+    file: 'rbac/grants',
+    name: 'a grant change sends no snapshot',
+    change: [
+      ['  await writeAccessSnapshot(mongo, session, userId, user.authzVersion ?? 0, now);\n', ''],
+    ],
+    tests: 'sends all of an account grants',
+  },
+  {
+    file: 'rbac/grants',
+    name: 'a snapshot keeps a grant that ran out',
+    change: [
+      [
+        '  active: true,\n  $or: [{ validTo: null }, { validTo: { $gt: now } }],\n});',
+        '  active: true,\n});',
+      ],
+    ],
+    tests: 'leaves out a grant that ran out',
+  },
+  {
+    file: 'rbac/grants',
+    name: 'a snapshot keeps an ended grant',
+    change: [['  userId,\n  active: true,\n  $or:', '  userId,\n  $or:']],
+    tests: 'sends all of an account grants',
+  },
+  {
+    file: 'rbac/sync',
+    name: 'the rbac step sends no roles',
+    change: [['const snapshots = await writeAllRoleSnapshots(mongo);', 'const snapshots = 0;']],
+    tests: 'sends every role from the rbac step',
+  },
+  {
+    file: 'rbac/manage',
+    name: 'a new sub-role sends no snapshot',
+    change: [
+      [
+        '      await writeRoleSnapshots(deps.mongo, session, [\n        { ...written, app: body.app, permissions: [...keyed.permissions] },\n      ]);\n',
+        '',
+      ],
+    ],
+    tests: 'sends a role when Master',
+  },
+  {
+    file: 'rbac/manage',
+    name: 'a changed sub-role sends no snapshot',
+    change: [
+      [
+        '    await writeRoleSnapshots(deps.mongo, session, [\n      { ...role, ...fields, permissions: next.permissions },\n    ]);\n',
+        '',
+      ],
+    ],
+    tests: 'sends a role when Master',
+  },
+  {
+    file: 'rbac/manage',
+    name: "a changed sub-role leaves its holders' versions",
+    change: [['      await raiseAuthzVersion(deps.mongo, session, userId, now);\n', '']],
+    tests: 'sends a role when Master|renews their holders',
+  },
+  {
+    file: 'users',
+    name: 'a new account sends no snapshot',
+    change: [['  if (isNewUser) await writeUserSnapshot(mongo, session, user);\n', '']],
+    tests: 'sends a new account',
+  },
+  {
+    file: 'rbac/migrations',
+    name: 'the first copy leaves out the accounts',
+    change: [['          await writeUserSnapshot(mongo, session, user);\n', '']],
+    tests: 'sends the first copy',
+  },
+  {
+    file: 'rbac/migrations',
+    name: 'the first copy leaves out the grants',
+    change: [
+      [
+        '          await writeAccessSnapshot(mongo, session, user._id, user.authzVersion ?? 0, now);\n',
+        '',
+      ],
+    ],
+    tests: 'sends the first copy',
+  },
+  {
+    file: 'rbac/grants',
+    name: 'an account holds any number of grants',
+    change: [['  if (held >= MAX_GRANTS_PER_ACCOUNT) {', '  if (false) {']],
+    tests: 'holds at most 50 grants',
+  },
+  {
+    file: 'rbac/grants',
+    name: 'an account holds one grant more than the cap',
+    change: [['  if (held >= MAX_GRANTS_PER_ACCOUNT) {', '  if (held > MAX_GRANTS_PER_ACCOUNT) {']],
+    tests: 'holds at most 50 grants',
   },
 ];
 

@@ -444,6 +444,38 @@ describe('bundle', () => {
       expect(await accepted.json()).toMatchObject({
         data: { email, outcome: 'invite-accepted', signedIn: false },
       });
+      // core's copy (T3.5): the new account, its grant and the role, from identity's outbox
+      // through the relay and core's queue
+      const coreDb = identityDb.client.db(dbName);
+      const account = await identityDb.db
+        .collection<{ _id: ObjectId; email: string; authzVersion?: number }>('identity_users')
+        .findOne({ email });
+      const userId = account?._id ?? new ObjectId();
+      interface Copied {
+        authzVersion: number;
+        grants: { roleId: ObjectId; app: string }[];
+      }
+      const copied = coreDb.collection<Copied & { _id: ObjectId }>('platform_access');
+      let copy: Copied | null = null;
+      const until = Date.now() + 15_000;
+      while (!copy?.grants.some((grant) => grant.roleId.equals(agent.roleId))) {
+        if (Date.now() > until) throw new Error('core never got the account’s grants');
+        await new Promise((resolve) => setTimeout(resolve, 100));
+        copy = await copied.findOne({ _id: userId });
+      }
+      expect(copy.authzVersion).toBe(account?.authzVersion);
+      expect(copy.grants.find((grant) => grant.roleId.equals(agent.roleId))?.app).toBe('support');
+      expect(
+        await coreDb.collection<{ _id: ObjectId; email: string }>('platform_users').findOne({
+          _id: userId,
+        }),
+      ).toMatchObject({ email });
+      // every role came at the start (identity's release step): the invited one too
+      expect(
+        await coreDb
+          .collection<{ _id: ObjectId; key: string; permissions: string[] }>('platform_roles')
+          .findOne({ _id: agent.roleId }),
+      ).toMatchObject({ key: 'support.l1_agent' });
       const signIn = await fetch(`${bundle.url}/api/v1/auth/login`, {
         method: 'POST',
         headers,

@@ -2,10 +2,17 @@ import { withTransaction } from '@beautinique/backend-server-mongo';
 import type { Migration } from '@beautinique/backend-server-release';
 import type { AppId } from '@beautinique/shared-contracts';
 
-import { LEGAL_ACCEPTANCES, type LegalAcceptance, type User, USERS } from '../users.ts';
+import {
+  LEGAL_ACCEPTANCES,
+  type LegalAcceptance,
+  type User,
+  USERS,
+  writeUserSnapshot,
+} from '../users.ts';
 import { type RbacCatalog, rbacCatalog } from './catalog.ts';
-import { giveSystemGrant } from './grants.ts';
+import { giveSystemGrant, writeAccessSnapshot } from './grants.ts';
 import { SIGN_UP_ROLES } from './roles.ts';
+import { writeAllRoleSnapshots } from './sync.ts';
 
 /**
  * Accounts made before grants (T3.1, T3.2) get the role their sign-up gives today, so they can
@@ -58,5 +65,45 @@ export const signUpGrantsMigration: Migration = {
       }
     }
     logger.info({ given }, 'sign-up grants for earlier accounts');
+  },
+};
+
+/** Accounts per transaction in the first copy: small, so one batch never nears a time limit. */
+const SNAPSHOT_BATCH = 50;
+
+/**
+ * The first copy for core (TASKS T3.5): every role, every account and every account's grants go
+ * out once as snapshot events, so core's copy starts complete; from here on each change sends its
+ * own. Safe to run again (core keeps the newest). On a new database it finds nothing, and the
+ * rbac step after it sends the roles.
+ */
+export const accessSnapshotsMigration: Migration = {
+  id: '20261114-001-access-snapshots',
+  description: 'The first copy for core: every role, account and its grants as a snapshot event',
+  async up({ mongo, logger }) {
+    const roles = await writeAllRoleSnapshots(mongo);
+    let accounts = 0;
+    let batch: User[] = [];
+    const flush = async () => {
+      const part = batch;
+      batch = [];
+      if (part.length === 0) return;
+      const now = new Date();
+      await withTransaction(mongo, async (session) => {
+        for (const user of part) {
+          await writeUserSnapshot(mongo, session, user);
+          await writeAccessSnapshot(mongo, session, user._id, user.authzVersion ?? 0, now);
+        }
+      });
+      accounts += part.length;
+    };
+    for await (const user of mongo.db
+      .collection<User>(USERS)
+      .find({}, { comment: 'full read: every account, once per database' })) {
+      batch.push(user);
+      if (batch.length === SNAPSHOT_BATCH) await flush();
+    }
+    await flush();
+    logger.info({ roles, accounts }, 'snapshots for the first copy');
   },
 };

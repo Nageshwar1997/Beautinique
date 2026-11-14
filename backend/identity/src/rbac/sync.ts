@@ -1,12 +1,20 @@
 import { createHash } from 'node:crypto';
 
-import type { ClientSession, IndexSpec, Mongo, ObjectId } from '@beautinique/backend-server-mongo';
+import {
+  type ClientSession,
+  type IndexSpec,
+  type Mongo,
+  ObjectId,
+  withTransaction,
+} from '@beautinique/backend-server-mongo';
+import { writeEvent } from '@beautinique/backend-server-queue';
 import type { ReleaseStep } from '@beautinique/backend-server-release';
 import {
   type AppId,
   APPS,
   type PermissionDefinition,
   permissions,
+  roleChanged,
   SESSION_POLICIES,
   SIGN_UP_APPS,
   TOTP_REQUIRED_APPS,
@@ -73,6 +81,48 @@ export async function readRoles(
   const catalog = await rbacCatalog(mongo);
   const records = await mongo.db.collection<RoleRecord>(ROLES).find(filter, options).toArray();
   return records.map((record) => roleOf(record, catalog));
+}
+
+/** identity's own events: no request started them (a release step, a grant's knock-on). */
+export const SYSTEM_ACTOR = { type: 'system', id: 'identity' } as const;
+
+/**
+ * Writes each role's snapshot (identity.role.changed, TASKS T3.5) in the change's transaction:
+ * core keeps a copy of every role, with its permission keys, for authorize().
+ */
+export async function writeRoleSnapshots(
+  mongo: Mongo,
+  session: ClientSession,
+  roles: readonly Role[],
+): Promise<void> {
+  for (const role of roles) {
+    await writeEvent(mongo, session, roleChanged, {
+      aggregate: { type: 'role', id: role._id.toHexString() },
+      actor: SYSTEM_ACTOR,
+      correlationId: new ObjectId().toHexString(),
+      data: {
+        roleId: role._id.toHexString(),
+        key: role.key,
+        app: role.app,
+        permissions: role.permissions,
+        scopeTypes: [...role.scopeTypes],
+        mfaRequired: role.mfaRequired,
+        retired: role.retired,
+        changedAt: role.updatedAt.toISOString(),
+      },
+    });
+  }
+}
+
+/** Every role's snapshot, a batch per transaction (the rbac sync, the first copy). */
+export async function writeAllRoleSnapshots(mongo: Mongo): Promise<number> {
+  const all = await readRoles(mongo, {}, { comment: 'full read: every role, for its snapshot' });
+  const batch = 50;
+  for (let start = 0; start < all.length; start += batch) {
+    const part = all.slice(start, start + batch);
+    await withTransaction(mongo, (session) => writeRoleSnapshots(mongo, session, part));
+  }
+  return all.length;
 }
 
 /** A role is found by its key; grants and invitations find it by its id. */
@@ -284,12 +334,15 @@ export const rbacSyncStep: ReleaseStep = {
       { system: true, retired: false, key: { $nin: ROLE_SEEDS.map((seed) => seed.key) } },
       { $set: { retired: true, updatedAt: now } },
     );
+    // core's copy of the roles follows (TASKS T3.5): every role, Master's sub-roles too
+    const snapshots = await writeAllRoleSnapshots(mongo);
     logger.info(
       {
         apps: APPS.length,
         permissions: keys.length,
         roles: ROLE_SEEDS.length,
         retiredRoles: retired.modifiedCount,
+        roleSnapshots: snapshots,
       },
       'roles and permissions in step with the code',
     );

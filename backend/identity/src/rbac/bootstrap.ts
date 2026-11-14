@@ -6,12 +6,12 @@ import type { Config } from '../config.ts';
 import { runReleaseSteps } from '../release.ts';
 import { type User, USERS } from '../users.ts';
 import { activeAt, giveSystemGrant, type GrantRecord, GRANTS } from './grants.ts';
-import { MASTER_ROLE, ROLE_SEEDS } from './roles.ts';
+import { MASTER_ROLE, MASTER_SEED } from './roles.ts';
 import { type RoleRecord, ROLES } from './sync.ts';
 
 export type MasterGrantOutcome = 'given' | 'already-master';
 
-const MASTER_SEATS = ROLE_SEEDS.find((seed) => seed.key === MASTER_ROLE)?.maxHolders ?? 2;
+const MASTER_SEATS = MASTER_SEED.maxHolders ?? 2;
 
 /**
  * The first Master (ARCHITECTURE §7.3): nobody can appoint one, so the owner gives it with

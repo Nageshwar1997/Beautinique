@@ -1,6 +1,7 @@
 import type { ClientSession, IndexSpec, Mongo } from '@beautinique/backend-server-mongo';
 import { ObjectId, withTransaction } from '@beautinique/backend-server-mongo';
-import type { AppId, OTP_OUTCOMES } from '@beautinique/shared-contracts';
+import { writeEvent } from '@beautinique/backend-server-queue';
+import { type AppId, type OTP_OUTCOMES, userChanged } from '@beautinique/shared-contracts';
 
 import { hasPassword, type NewPassword, storePassword } from './credentials.ts';
 import { rbacCatalog } from './rbac/catalog.ts';
@@ -114,6 +115,29 @@ export async function passwordWithCode(
 }
 
 /**
+ * Writes the account's snapshot (identity.user.changed, TASKS T3.5) in the change's transaction:
+ * other deployables (core) keep a copy, so they never need to ask identity who an id is.
+ */
+export async function writeUserSnapshot(
+  mongo: Mongo,
+  session: ClientSession,
+  user: Pick<User, '_id' | 'email' | 'status' | 'createdAt' | 'updatedAt'>,
+): Promise<void> {
+  await writeEvent(mongo, session, userChanged, {
+    aggregate: { type: 'user', id: user._id.toHexString() },
+    actor: { type: 'user', id: user._id.toHexString() },
+    correlationId: new ObjectId().toHexString(),
+    data: {
+      userId: user._id.toHexString(),
+      email: user.email,
+      status: user.status,
+      createdAt: user.createdAt.toISOString(),
+      changedAt: user.updatedAt.toISOString(),
+    },
+  });
+}
+
+/**
  * The account of a right code (email proven): made if there is none (an upsert, so two codes at
  * once make one), with the app's consent as legal evidence: a first one in this app, a new legal
  * version, or a first 18-or-older declaration is recorded.
@@ -152,6 +176,7 @@ export async function accountWithCode(
   const isNewUser = made.upsertedCount === 1;
   const user = await users.findOne({ email }, { session });
   if (!user) throw new Error('the account just written is not there');
+  if (isNewUser) await writeUserSnapshot(mongo, session, user);
   let declaredNow = false;
   if (!isNewUser && consent.adult && user.ageDeclaredAt === null) {
     await users.updateOne(

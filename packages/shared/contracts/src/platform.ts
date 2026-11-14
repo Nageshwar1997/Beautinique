@@ -37,6 +37,13 @@ export const SCOPE_TYPES = [
 ] as const;
 export type ScopeType = (typeof SCOPE_TYPES)[number];
 
+/**
+ * Scope types whose ids are codes (a state's `MH`), not documents; every other type names its
+ * documents (an account, a seller organisation, a hub ...) by their ObjectId, as stored and as
+ * copied (owner, 2026-11-12, RULES §4.17).
+ */
+export const CODE_SCOPE_TYPES: ReadonlySet<ScopeType> = new Set<ScopeType>(['global', 'state']);
+
 /** The location chain, widest first. */
 export const LOCATION_SCOPES = ['global', 'state', 'district', 'city', 'hub'] as const;
 export type LocationScope = (typeof LOCATION_SCOPES)[number];

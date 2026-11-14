@@ -44,6 +44,8 @@ const PACKAGE_PARTS = [
   'tsconfig.json',
   'eslint.config.js',
   'vitest.config.ts',
+  // core's boundaries test runs dependency-cruiser with it
+  '.dependency-cruiser.json',
 ];
 
 export type Outcome = 'killed' | 'survived' | 'hung';
