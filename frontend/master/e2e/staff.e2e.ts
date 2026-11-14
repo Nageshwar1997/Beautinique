@@ -14,6 +14,7 @@ import {
   passwordStep,
   signOut,
 } from './helpers';
+import { ADMIN_PORT } from './ports';
 
 const REPO = join(import.meta.dirname, '..', '..', '..');
 const staff = (...args: string[]) =>
@@ -101,7 +102,9 @@ test('a Master invites and takes back, gives a role and ends it', async ({ page 
   await page.getByRole('alertdialog').getByRole('button', { name: 'End role' }).click();
   await expect(page.getByText(`Support Lead ended for ${agent}.`).first()).toBeVisible();
   await expect(panel.getByText('Support Lead')).toHaveCount(0);
-  await page.keyboard.press('Escape');
+  // closed by its own button (Escape goes where the focus is, a toast too)
+  await panel.getByRole('button', { name: 'Close' }).click();
+  await expect(panel).toBeHidden();
 
   // Roles: a shipped role reads only; Master makes a sub-role, retires it and brings it back
   await page
@@ -115,7 +118,8 @@ test('a Master invites and takes back, gives a role and ends it', async ({ page 
   const shipped = page.getByRole('dialog', { name: 'State Admin' });
   await expect(shipped.getByText('Give roles, invite people to them and end them')).toBeVisible();
   await expect(shipped.getByRole('button', { name: 'Change' })).toHaveCount(0);
-  await page.keyboard.press('Escape');
+  await shipped.getByRole('button', { name: 'Close' }).click();
+  await expect(shipped).toBeHidden();
   const slug = `e2e_${Date.now().toString(36)}`;
   await page.getByRole('button', { name: 'New sub-role' }).click();
   const editor = page.getByRole('dialog', { name: 'New sub-role' });
@@ -135,4 +139,67 @@ test('a Master invites and takes back, gives a role and ends it', async ({ page 
   await expect(page.getByText(`Night Desk ${slug} is retired.`).first()).toBeVisible();
   await made.getByRole('button', { name: 'Bring back' }).click();
   await expect(page.getByText(`Night Desk ${slug} is in use again.`).first()).toBeVisible();
+});
+
+test('an invitation from the Staff pages is accepted in the admin app; ending the role signs them out there', async ({
+  page,
+  browser,
+}, testInfo) => {
+  // two apps and two people: one size is enough for the path between them
+  test.skip(
+    testInfo.project.name !== 'chromium-1280-light',
+    'the cross-app path runs at 1280 light',
+  );
+  const email = e2eEmail('master-cross');
+  const invitee = e2eEmail('admin-invitee');
+  emails.push(email, invitee);
+  const { secret, at } = await joinTeam(page, email, { check: false });
+  await staff('master', email);
+  await signOut(page, email);
+  await passwordStep(page, email);
+  await page.getByLabel('Authenticator code').fill(totpCode(secret, at + 30_000));
+  await page.getByRole('button', { name: 'Continue' }).click();
+  await page.getByRole('link', { name: /^Invitations/ }).click();
+
+  // Master invites them to an admin role, from the Staff pages
+  await page.getByRole('button', { name: 'Invite someone' }).click();
+  const form = page.getByRole('dialog', { name: 'Invite someone' });
+  await form.getByLabel('Email').fill(invitee);
+  await form.getByRole('button', { name: /App/ }).click();
+  await page.getByRole('option', { name: 'Admin', exact: true }).click();
+  await form.getByRole('button', { name: /Role/ }).click();
+  await page.getByRole('option', { name: /Fraud & Risk Analyst/ }).click();
+  await form.getByRole('button', { name: 'Send invitation' }).click();
+  await expect(page.getByText(`Invitation sent to ${invitee}.`).first()).toBeVisible();
+
+  // they accept it in the admin app, set up the authenticator and land on its dashboard
+  const adminContext = await browser.newContext({
+    baseURL: `http://localhost:${String(ADMIN_PORT)}`,
+  });
+  const admin = await adminContext.newPage();
+  try {
+    await joinTeam(admin, invitee, { check: false, invited: true, home: 'Dashboard' });
+    await page.reload();
+    const row = page.locator('main').locator('tr, li').filter({ hasText: invitee });
+    await expect(row.getByText('Accepted', { exact: true })).toBeVisible();
+
+    // Master ends the role: their next call in the admin app finds them signed out
+    await page
+      .getByRole('navigation', { name: 'Staff' })
+      .getByRole('link', { name: 'People' })
+      .click();
+    await page.getByLabel('Email').fill(invitee);
+    await page.getByLabel('Email').press('Enter');
+    await page.getByRole('button', { name: new RegExp(`^${invitee}, Fraud`) }).click();
+    const panel = page.getByRole('dialog', { name: invitee });
+    await panel.getByRole('button', { name: `End Fraud & Risk Analyst for ${invitee}` }).click();
+    await page.getByRole('alertdialog').getByRole('button', { name: 'End role' }).click();
+    await expect(
+      page.getByText(`Fraud & Risk Analyst ended for ${invitee}.`).first(),
+    ).toBeVisible();
+    await admin.reload();
+    await expect(admin.getByRole('heading', { level: 1, name: 'Sign in' })).toBeVisible();
+  } finally {
+    await adminContext.close();
+  }
 });
