@@ -19,7 +19,7 @@ Beautinique: Indian beauty e-commerce monorepo (npm workspaces, Node 24, npm 12.
 - **Koi AI attribution nahi (owner, 2026-11-14):** commits, PR title/description, tags aur release notes me AI tool ka co-author trailer, "Generated with ..." footer ya signature nahi; sirf developer ki apni git identity, git config nahi badalna. Saajhe git niyam: `.claude/skills/_shared/git-rules.md`.
 - Business decision owner ka hai: docs chup hon to recommendation ke saath poochho, phir jawab doc me likho.
 - Production-grade, kuch bhi "baad me" nahi: naye code ke saath tests aur README. Mutation testing sirf [RULES §6](docs/RULES.md) ke hisaab se (kernel packages, paisa/stock/permissions), copy me, asli files me nahi: `npm run mutate -- --package <category>-<name>`.
-- Role ke naam se comparison nahi (`role === 'MASTER'`), aur states, districts, pincodes, rates jaisa data hard-coded nahi ([RULES §3.4, §3.5](docs/RULES.md)): inke lint abhi nahi (TASKS T4.10, T4.11).
+- Role ke naam se comparison nahi (`role === 'MASTER'`), aur states, districts, pincodes, rates jaisa data hard-coded nahi ([RULES §3.4, §3.5](docs/RULES.md)): geo literals ESLint (`bq/no-hardcoded-geo`) rokta hai; role-name ka lint abhi nahi (TASKS T4.11).
 - "Verified" tabhi likho jab asli action karke dekha ho. Test fail ho to output ke saath batao.
 - Dependencies update sirf `npm run update-deps` se (`:minor`, `:patch`, `-- --dry-run`), haath se `npm install x@latest` nahi: `typescript` hold pe hai (typescript-eslint naya TypeScript nahi maanta), aur script peer ranges aur lockfile sambhalta hai. Nayi dependency jodni ho to `@latest` hi lo.
 

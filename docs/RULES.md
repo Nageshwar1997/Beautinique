@@ -1,6 +1,6 @@
 # RULES — BQ
 
-> **Status:** v1.25 (2026-11-14). Ye niyam Beautinique ke har code, doc aur deploy pe lagu hain. [PRD.md](PRD.md) batata hai **kya** banana hai, [ARCHITECTURE.md](ARCHITECTURE.md) batata hai **kaise**, aur ye file batati hai ki **kin niyamon ke saath**. Koi rule todna ho to pehle is file me badlav aur change log entry.
+> **Status:** v1.26 (2026-11-14). Ye niyam Beautinique ke har code, doc aur deploy pe lagu hain. [PRD.md](PRD.md) batata hai **kya** banana hai, [ARCHITECTURE.md](ARCHITECTURE.md) batata hai **kaise**, aur ye file batati hai ki **kin niyamon ke saath**. Koi rule todna ho to pehle is file me badlav aur change log entry.
 
 ## 1. Kaam karne ke niyam
 
@@ -39,7 +39,7 @@
 1. **TypeScript strict.** `any` nahi; `unknown` + zod parse.
 2. **Bahar se aane wala har data zod se validate** (API input, env, webhooks, files, events). zod hamesha `@beautinique/shared-zod` se aur naam se import hota hai (`import { object, string, gstinZod } ...`), `z.` nahi; seedha `zod` sirf us package ke andar (ESLint rokta hai). Hamare schemas ke naam `Zod` pe khatam (`emailZod`); `enum` ko `enum as zodEnum`.
 3. **Config sirf config module se.** `process.env` config module ke bahar nahi padhna (ESLint rule).
-4. **Kuch bhi hard-coded nahi jo data hai:** states, districts, pincodes, warehouses, hubs, roles, permissions, rates (GST, TCS, TDS, fees), legal limits. Ye data ya settings me rehte hain. Geo literals ka lint (no-hardcoded-geo) **abhi nahi**: T4.10 me, location data (T4.2) se pehle; tab tak code review (QA-DOC-001).
+4. **Kuch bhi hard-coded nahi jo data hai:** states, districts, pincodes, warehouses, hubs, roles, permissions, rates (GST, TCS, TDS, fees), legal limits. Ye data ya settings me rehte hain. **Geo literals ESLint rokta hai (`bq/no-hardcoded-geo`, T4.10, 2026-11-14)**, `src/` aur `app/` me (tests aur fixtures me nahi): state ya union territory ka poora naam (`'Maharashtra'`, purane naam jaise `'Orissa'` bhi), pincode jaisi 6 digit string (`'411001'`), jagah wale naam (`district`, `pincode`, `hubId`, `warehouseCodes`, `stateCode`, `city`, `taluka`, `village`, `lgd` ...) ki literal se tulna (`===`, `switch`, `includes`/`has`) ya aise variable/key me literal (`const hubId = 'H1'`, `{ hubId: 'H1' }`), aur bare `state` ke saath state id (`state === 'MH'`). Poori value hi dekhta hai (`'Asia/Kolkata'` theek), aur `{ district: 'District' }` jaisa scope ke naam ka label bhi theek. Jo file khud jagah ka data hai (states ki ek hi list `packages/shared/contracts/src/states.ts`, aage seed files) wo us package ke `eslint.config.js` me `geoDataFiles` me, wajah ke saath. Rule `configs/eslint-rules/no-hardcoded-geo.js`, test `scripts/ci/test/no-hardcoded-geo.test.ts` ("bad" fixture ke saath).
 5. **Role ke naam se comparison nahi** (`role === 'MASTER'` jaisa). Hamesha permission + scope se check. ESLint rule **abhi nahi**: T4.11 me, T4.1 (`authorize()`) se pehle; tab tak code review (QA-DOC-001).
 6. **Naming:** files `kebab-case`, React components `PascalCase`, functions aur variables `camelCase`, constants `UPPER_SNAKE_CASE`, events `<context>.<aggregate>.<pastTense>`, permissions `<module>.<resource>.<action>`.
 7. **Formatting:** Prettier + ESLint, CI me check. Comments sirf "kyun" ke liye, "kya" ke liye nahi.
@@ -145,3 +145,4 @@
 | v1.23   | 2026-11-12 | §4.17: ObjectId ka pehra deployables ke tests ke aakhir me (`scripts/e2e/object-ids.ts`).                                                                                                                                                        |
 | v1.24   | 2026-11-14 | §2: `linkedin-posts/` ki files ki list se `hashtags` hata (hashtags ab `post.md` me hi; linkedin-posts README v1.12).                                                                                                                            |
 | v1.25   | 2026-11-14 | §2.2: koi AI attribution nahi (commits, PRs, tags, release notes), sirf apni git identity, git config nahi badalna; git skills aur unke saajhe niyam `.claude/skills/_shared/git-rules.md`; `.claude/settings.json` me attribution band (owner). |
+| v1.26   | 2026-11-14 | §3.4: geo literals ka lint `bq/no-hardcoded-geo` ab hai (T4.10): kya rokta hai, `geoDataFiles` chhoot, test.
