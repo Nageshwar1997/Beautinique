@@ -42,6 +42,8 @@ Ye line zaroori hai: Tailwind `node_modules` nahi padhta, to iske bina component
 
 ## Pickers (owner ke faisle 2026-10-30, ARCHITECTURE §9.2)
 
+**Items value se keyed (2026-11-14, T3.7):** `Select` aur `ComboBox` har option ko uske `value` se React Aria ka `id` dete hain. Pehle index se key banti thi, isliye page pe rehte hue options badalne pe (ek field doosre ke peeche) "Cannot change the id of an item" se page toot-ta tha; regression test `select.test.tsx` me.
+
 Sabke options data hain (`{ value, label, description?, disabled? }`, `PickerOption`), value text (`string`), aur sab controlled (`value` + `onChange`) ya uncontrolled (`defaultValue`) chalte hain; `label` zaroori, `hint`, `error`, `isRequired`, `isDisabled`, `name` (native form).
 
 | Export            | Kaam                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 |

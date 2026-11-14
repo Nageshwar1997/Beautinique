@@ -84,7 +84,7 @@ function ClearButton() {
       onClick={() => {
         state.setValue(null);
       }}
-      className="absolute end-10 top-1/2 -translate-y-1/2"
+      className="absolute inset-e-10 top-1/2 -translate-y-1/2"
     />
   );
 }
@@ -169,8 +169,10 @@ export function Select(props: SelectProps) {
       <FieldHint>{hint}</FieldHint>
       <FieldErrorText error={error} />
       <Popover offset={6} className={cx(POPOVER, 'max-h-72 min-w-(--trigger-width) p-1')}>
-        <ListBox<PickerOption>
-          items={options}
+        {/* each item keyed by its value (React Aria's `id`): by index, a list that changes while
+            open (a field that follows another) gave an item a new id and broke the page */}
+        <ListBox<PickerOption & { id: string }>
+          items={options.map((option) => ({ ...option, id: option.value }))}
           className="outline-hidden"
           renderEmptyState={() => <EmptyList>No options</EmptyList>}
         >

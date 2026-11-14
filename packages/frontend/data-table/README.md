@@ -62,9 +62,9 @@ const grants = useApiQuery(listGrants, { query: { ...url.filters, cursor: url.cu
 
 ## Change log
 
-| Version | Date       | Badlav                                                                        |
-| ------- | ---------- | ----------------------------------------------------------------------------- |
-| 1.0.0   | 2026-11-14 | Pehla: `DataTable`, `useTableUrl`, `CursorPager`, `tailwind.css`, playground. |
+| Version | Date       | Badlav                                                                                                                                             |
+| ------- | ---------- | -------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 1.0.0   | 2026-11-14 | Pehla: `DataTable`, `useTableUrl`, `CursorPager`, `tailwind.css`, playground. Review (T3.7 PR C): `footer` (pager) loading aur khaali page pe bhi. |
 
 ## License
 

@@ -1,12 +1,14 @@
 import type { NavItem } from '@beautinique/frontend-app-shell';
 import { ACCOUNT_PATHS } from '@beautinique/frontend-auth-ui';
+import type { Guarded } from '@beautinique/frontend-authz';
 
 /**
- * The Master app's main nav. Only pages that exist go here, so the nav never has a dead link: roles,
- * approvals and the emergency controls join as they are built. With one page there is nothing to
- * navigate, so the header shows no nav yet.
+ * The Master app's main nav: only pages that exist, each for those whose roles open it (authz
+ * `useVisible`); approvals and the emergency controls join as they are built.
  */
-export const MAIN_NAV: readonly NavItem[] = [];
+export const MAIN_NAV: readonly (NavItem & Guarded)[] = [
+  { label: 'Staff', to: '/staff', permission: 'iam.grant.read' },
+];
 
 /** Footer links: pages everyone may need, signed in or not. */
 export const FOOTER_NAV: readonly NavItem[] = [{ label: 'Icon credits', to: '/credits' }];

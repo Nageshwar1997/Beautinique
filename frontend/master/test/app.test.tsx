@@ -178,7 +178,8 @@ describe('master, signed out', () => {
   });
 
   it('links only pages that exist', () => {
-    expect(MAIN_NAV).toEqual([]);
+    // each for those whose roles open it (authz useVisible)
+    expect(MAIN_NAV).toEqual([{ label: 'Staff', to: '/staff', permission: 'iam.grant.read' }]);
     expect(FOOTER_NAV.map((item) => item.to)).toEqual(['/credits']);
     expect(ACCOUNT_NAV.map((item) => item.to)).toEqual([
       ACCOUNT_PATHS.security,

@@ -138,7 +138,7 @@ Har screen ye states dikhati hai:
 
 ## 10. Har app ka look
 
-**Jab tak app ke pages nahi (owner, 2026-11-09, QA Q-014):** home pe "Coming soon", app ka naam aur ek line ki app kis kaam ka hoga (`scripts/packages/lib/create/app-templates.ts` `APP_TAGLINES`); public ko kabhi developer ka sandesh nahi. Team ke app me sign-in pehle aa sakta hai (Master, owner 2026-11-13): tab ye home sign-in ke peeche, "Signed in as" ke saath.
+**Jab tak app ke pages nahi (owner, 2026-11-09, QA Q-014):** home pe "Coming soon", app ka naam aur ek line ki app kis kaam ka hoga (`scripts/packages/lib/create/app-templates.ts` `APP_TAGLINES`); public ko kabhi developer ka sandesh nahi. Team ke app me sign-in pehle aa sakta hai (Master, owner 2026-11-13): tab ye home sign-in ke peeche, "Signed in as" ke saath. **Pages aane ke baad (Master, 2026-11-14, T3.7):** home pe "Coming soon" nahi; "Signed in as" aur un sections ke cards jo person ke roles kholte hain, aur jiske roles koi section nahi kholte use "There is nothing to manage here for your role yet."
 
 | App                                                              | Look                                                                                                                                                   |
 | ---------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------ |
