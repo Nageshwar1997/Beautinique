@@ -1,6 +1,6 @@
 # AGENTS.md — Beautinique
 
-> **Status:** v1.6 (2026-11-12). Doosre AI coding tools (Codex, Cursor, Copilot, Gemini ...) ke liye. Asli niyam [CLAUDE.md](CLAUDE.md) me hain; yahan sirf wo hai jo kaam shuru karne se pehle jaanna zaroori hai. Farak ho to `CLAUDE.md` sahi hai.
+> **Status:** v1.7 (2026-11-14). Doosre AI coding tools (Codex, Cursor, Copilot, Gemini ...) ke liye. Asli niyam [CLAUDE.md](CLAUDE.md) me hain; yahan sirf wo hai jo kaam shuru karne se pehle jaanna zaroori hai. Farak ho to `CLAUDE.md` sahi hai.
 
 Beautinique: Indian beauty e-commerce monorepo (npm workspaces, Node 24, npm 12.2+). Education + portfolio project hai, par har cheez asli production jaisi banti hai. Is pe 2 developers baari-baari kaam karte hain, dono Claude Code ke saath (flow: [docs/HANDOFF.md](docs/HANDOFF.md) §8). Ye file tab kaam aati hai jab koi doosra AI tool repo khole.
 
@@ -16,6 +16,7 @@ Beautinique: Indian beauty e-commerce monorepo (npm workspaces, Node 24, npm 12.
 - Planning docs Hinglish me. Har doc ke top pe status (version + date), neeche change log: har badlav ki ek line. Code, identifiers aur comments English me.
 - Mobile pe koi message nahi (na SMS, na WhatsApp, na OTP); OTP sirf email se.
 - **Commit, push aur publish sirf insaan ke kehne pe.** `.env` files kabhi nahi kholni; secret, token ya password repo me kabhi nahi.
+- **Koi AI attribution nahi (owner, 2026-11-14):** commits, PR title/description, tags aur release notes me AI tool ka co-author trailer, "Generated with ..." footer ya signature nahi; sirf developer ki apni git identity, git config nahi badalna. Saajhe git niyam: `.claude/skills/_shared/git-rules.md`.
 - Business decision owner ka hai: docs chup hon to recommendation ke saath poochho, phir jawab doc me likho.
 - Production-grade, kuch bhi "baad me" nahi: naye code ke saath tests aur README. Mutation testing sirf [RULES §6](docs/RULES.md) ke hisaab se (kernel packages, paisa/stock/permissions), copy me, asli files me nahi: `npm run mutate -- --package <category>-<name>`.
 - Role ke naam se comparison nahi (`role === 'MASTER'`), aur states, districts, pincodes, rates jaisa data hard-coded nahi ([RULES §3.4, §3.5](docs/RULES.md)): inke lint abhi nahi (TASKS T4.10, T4.11).
@@ -47,12 +48,13 @@ Chhote commits (Conventional Commits, jaise `feat(scope): ...`), sirf apne task 
 
 ## Change log
 
-| Version | Date       | Badlav                                                                                           |
-| ------- | ---------- | ------------------------------------------------------------------------------------------------ |
-| v1.0    | 2026-10-23 | Pehla version: doosre AI tools ke liye pointer.                                                  |
-| v1.1    | 2026-10-23 | Dependencies sirf `npm run update-deps` se.                                                      |
-| v1.2    | 2026-10-23 | Claude ke baad Cursor: relay flow, `cursor/<task>` branches, kaam ka bantwara.                   |
-| v1.3    | 2026-10-25 | Cursor relay hataya: dono developers Claude Code use karte hain (flow HANDOFF §8).               |
-| v1.4    | 2026-11-03 | Kaam rokte waqt: checkbox badle to TASKS §P ka progress % bhi.                                   |
-| v1.5    | 2026-11-09 | Core boundaries dependency-cruiser se (CI); geo aur role-name ke lint abhi nahi (QA-DOC-001).    |
-| v1.6    | 2026-11-12 | MongoDB ids: har `_id` aur reference ObjectId, naam alag field me, ObjectId secret nahi (owner). |
+| Version | Date       | Badlav                                                                                                        |
+| ------- | ---------- | ------------------------------------------------------------------------------------------------------------- |
+| v1.0    | 2026-10-23 | Pehla version: doosre AI tools ke liye pointer.                                                               |
+| v1.1    | 2026-10-23 | Dependencies sirf `npm run update-deps` se.                                                                   |
+| v1.2    | 2026-10-23 | Claude ke baad Cursor: relay flow, `cursor/<task>` branches, kaam ka bantwara.                                |
+| v1.3    | 2026-10-25 | Cursor relay hataya: dono developers Claude Code use karte hain (flow HANDOFF §8).                            |
+| v1.4    | 2026-11-03 | Kaam rokte waqt: checkbox badle to TASKS §P ka progress % bhi.                                                |
+| v1.5    | 2026-11-09 | Core boundaries dependency-cruiser se (CI); geo aur role-name ke lint abhi nahi (QA-DOC-001).                 |
+| v1.6    | 2026-11-12 | MongoDB ids: har `_id` aur reference ObjectId, naam alag field me, ObjectId secret nahi (owner).              |
+| v1.7    | 2026-11-14 | Koi AI attribution nahi (commits, PRs, tags); saajhe git niyam `.claude/skills/_shared/git-rules.md` (owner). |
