@@ -1,6 +1,6 @@
 # RULES — BQ
 
-> **Status:** v1.29 (2026-11-14). Ye niyam Beautinique ke har code, doc aur deploy pe lagu hain. [PRD.md](PRD.md) batata hai **kya** banana hai, [ARCHITECTURE.md](ARCHITECTURE.md) batata hai **kaise**, aur ye file batati hai ki **kin niyamon ke saath**. Koi rule todna ho to pehle is file me badlav aur change log entry.
+> **Status:** v1.30 (2026-11-14). Ye niyam Beautinique ke har code, doc aur deploy pe lagu hain. [PRD.md](PRD.md) batata hai **kya** banana hai, [ARCHITECTURE.md](ARCHITECTURE.md) batata hai **kaise**, aur ye file batati hai ki **kin niyamon ke saath**. Koi rule todna ho to pehle is file me badlav aur change log entry.
 
 ## 1. Kaam karne ke niyam
 
@@ -38,6 +38,7 @@
 3. **PR:** chhota rakho, description me kya aur kyun, aur kaise test kiya. CI green hue bina merge nahi.
 4. **Public repo:** koi secret, `.env`, token, test password, DB dump ya asli personal data kabhi commit nahi. Sirf `.env.example`. Gitleaks har PR pe chalega.
    - **Env files (owner, 2026-10-26), har us folder me jahan envs hain** (`backend/<name>`, `frontend/<app>`): `.env.example` git me, teen hisson me (owner, 2026-10-27): **LOCAL** (sirf wo keys jo laptop pe chahiye, laptop ki public values), **OPTIONAL** (default wali settings, commented), **PRODUCTION** (Render/Vercel ki keys, dummy values `<...>` ke saath; secret kabhi nahi); bundle me har hissa deployable-wise sections (`# ── <name> ──`) me; `.env` laptop = sirf LOCAL hissa (jo key hatane se config na badle, wo `.env` me nahi; dev scripts padhti hain); `.env.production` owner ki private copy un live values ki jo Render/Vercel me daali (live server dashboard se env leta hai; sirf `npm run db:release -- --env live` `backend/bundle/.env.production` padhta hai, `live` type karne ke baad: owner, 2026-10-27). `.gitignore` `.env` aur `.env.*` rokta hai, sirf `.env.example` chhod ke. Claude `.env`/`.env.*` kabhi nahi kholta.
+     - **Schema aur `.env.example` milte rahein (T0.9, 2026-11-14):** backend deployable ke `src/config.ts` (zod) ki har key uski `.env.example` me (`mongoUri` → `NOTIFY__MONGO_URI`, test-only key bhi, commented aur "never set" ke saath), aur `.env.example` me koi aisi `<NAME>__*` key nahi jo schema na jaane (boot pe "not a setting ... (typo?)"); bundle ki file me bhi nahi. Teeno hisse har file me. `scripts/ci/test/env-examples.test.ts` ye rokta hai.
 5. **Dependencies:** `npm run update-deps` (ya Renovate/Dependabot) ke PRs `prerelease` pe; major version upgrade alag PR me.
 
 ## 3. Code: sabke liye
@@ -155,3 +156,4 @@
 | v1.27   | 2026-11-14 | §3.5: role-name comparison ka lint `bq/no-role-comparison` ab hai (T4.11), kisi file ko chhoot nahi; DR-007 ab permission `iam.totp.reset_master` se aur app ko server batata hai (owner). |
 | v1.28   | 2026-11-14 | §2: CI ka dhaancha (owner): parallel jobs, aakhri `check`, same-code marker, affected-only PR `prerelease` pe, poora har push pe; CI badalne ke niyam. |
 | v1.29   | 2026-11-14 | §2 CI: har test/E2E job sirf zaroori build (T0.6), alag build job nahi. |
+| v1.30   | 2026-11-14 | §2.4: deployable ka schema aur `.env.example` milte rahein, test se (T0.9). |
