@@ -627,6 +627,41 @@ const mutations: Mutation[] = [
     ],
     tests: 'count the recovery codes left',
   },
+  // a Master's authenticator only the other Master resets, by permission (QA DR-007, TASKS T4.11)
+  {
+    file: 'catalogue/iam',
+    name: "a Master's authenticator reset works in a scope",
+    change: [
+      [
+        "key: 'iam.totp.reset_master',\n  description: \"Reset a Master's authenticator\",\n  scopeTypes: ['global'],",
+        "key: 'iam.totp.reset_master',\n  description: \"Reset a Master's authenticator\",\n  scopeTypes: SCOPE_TYPES,",
+      ],
+    ],
+    tests: 'reset global and behind a step-up',
+  },
+  {
+    file: 'catalogue/iam',
+    name: "a Master's authenticator reset needs no step-up",
+    change: [
+      [
+        "risk: 'high',\n  mfa: true,\n  secondSignature: false,\n});\n\nexport const IAM_PERMISSIONS",
+        "risk: 'high',\n  mfa: false,\n  secondSignature: false,\n});\n\nexport const IAM_PERMISSIONS",
+      ],
+    ],
+    tests: 'step-up',
+  },
+  {
+    file: 'catalogue/iam',
+    name: "a Master's authenticator reset is not in the catalogue",
+    change: [['  totpReset,\n  totpResetMaster,\n] as const;', '  totpReset,\n] as const;']],
+    tests: 'lists permissions sorted by key',
+  },
+  {
+    file: 'catalogue/iam',
+    name: 'every grants list must say whether one may reset',
+    change: [['canResetAuthenticator: boolean().optional(),', 'canResetAuthenticator: boolean(),']],
+    tests: 'may reset their authenticator',
+  },
 ];
 
 export default mutations;

@@ -1,6 +1,6 @@
 # TASKS — BQ
 
-> **Status:** v1.122 (2026-11-14). Poore project ki task list, [ARCHITECTURE.md](ARCHITECTURE.md) §16 ke phases ke hisaab se. Har task "done" tabhi jab [RULES.md](RULES.md) §1.5 ki Definition of Done poori ho.
+> **Status:** v1.123 (2026-11-14). Poore project ki task list, [ARCHITECTURE.md](ARCHITECTURE.md) §16 ke phases ke hisaab se. Har task "done" tabhi jab [RULES.md](RULES.md) §1.5 ki Definition of Done poori ho.
 
 **Kaise use karein:**
 - `[ ]` baaki, `[~]` chal raha hai, `[x]` done.
@@ -13,13 +13,13 @@
 
 ## P. Progress (kitna ho gaya)
 
-**Poora project: 20% (2026-11-14).** Phase 1 poora; Phase 2 lagbhag poora (92%); Phase 3 67%; Phase 0 aur 6 aadhe; Phase 4, 5 aur 11 me thoda; Phase 7–10 abhi shuru nahi hue.
+**Poora project: 21% (2026-11-14).** Phase 1 poora; Phase 2 lagbhag poora (92%); Phase 3 67%; Phase 0 aur 6 aadhe; Phase 4, 5 aur 11 me thoda; Phase 7–10 abhi shuru nahi hue.
 
 **Hisaab (har baar isi tarah):**
 - Sirf Phase 0–11 ke tasks gine jaate hain (sections A, B, C, D nahi).
 - Task: `[x]` = 1, `[~]` = ½, `[ ]` = 0. Phase % = in ka jod ÷ phase ke tasks.
 - Poora % = har phase ka % × uske hafte (phase heading ka andaaza, range ka beech: "4–5 hafte" = 4.5), sabka jod ÷ 38 (saare phases ke hafte). Bade phases (Commerce, WMS, Finance) ka wazan zyada, chhote shuruaati tasks ka kam. Poore number tak round.
-- Sirf task ginti se 33% aata hai (29 ÷ 87). Wo zyada dikhta hai kyunki shuru ka chhota task bhi utna hi ginta hai jitna Phase 8 ka bada task; isliye upar wala (hafton wala) number hi project ka %.
+- Sirf task ginti se 34% aata hai (30 ÷ 87). Wo zyada dikhta hai kyunki shuru ka chhota task bhi utna hi ginta hai jitna Phase 8 ka bada task; isliye upar wala (hafton wala) number hi project ka %.
 - **Kab update:** jis commit/PR me kisi task ka checkbox badle, ya task jude/hate, usi me ye table, upar ka %, neeche ki itihaas line aur [HANDOFF.md](HANDOFF.md) §1 ki "Progress" line.
 
 | Phase                                 | Hafte  | Tasks  | `[x]`  | `[~]`  | `[ ]`  | Phase % |
@@ -28,7 +28,7 @@
 | 1. Server kit + contracts             | 1.5    | 8      | 8      | 0      | 0      | 100%    |
 | 2. Gateway                            | 1      | 6      | 5      | 1      | 0      | 92%     |
 | 3. bq-identity                        | 2.5    | 6      | 4      | 0     | 2      | 67%     |
-| 4. Core foundations                   | 4.5    | 12     | 1      | 0      | 11     | 8%      |
+| 4. Core foundations                   | 4.5    | 12     | 2      | 0      | 10     | 17%     |
 | 5. Notify + Payments                  | 2      | 4      | 0      | 2      | 2      | 25%     |
 | 6. Frontend foundation                | 3      | 8      | 2      | 4      | 2      | 50%     |
 | 7. Commerce + payments                | 4.5    | 6      | 0      | 0      | 6      | 0%      |
@@ -36,7 +36,7 @@
 | 9. Finance + support                  | 4.5    | 6      | 0      | 0      | 6      | 0%      |
 | 10. UGC, growth, creators, governance | 5.5    | 6      | 0      | 0      | 6      | 0%      |
 | 11. Launch hardening                  | 2      | 9      | 1      | 0      | 8      | 11%     |
-| **Kul**                               | **38** | **87** | **24** | **10** | **53** | **20%** |
+| **Kul**                               | **38** | **87** | **25** | **10** | **52** | **21%** |
 
 **Itihaas:**
 
@@ -59,6 +59,7 @@
 | 2026-11-14 | 17%     | T3.7 `[x]`: Master ke Staff pages live, owner ki live jaanch theek (#77–#82). Phase 3: 58% → 67%; task ginti 30% (26.5 ÷ 87). |
 | 2026-11-14 | 19%     | Checkbox peeche the: T6.2 `[x]` (styles v2: fonts, `/vite` preload plugin, `base.css` 2026-10-20 se bane), T6.5 `[~]` (7 khaali apps generator se, 2026-11-04 `be216ae`; login + khaali dashboard baaki). Phase 6: 31% → 50%; task ginti 30% → 32% (28 ÷ 87). |
 | 2026-11-14 | 20%     | T4.10 `[x]`: geo literals ka ESLint rule `bq/no-hardcoded-geo` (RULES §3.4). Phase 4: 0% → 8%; task ginti 32% → 33% (29 ÷ 87). |
+| 2026-11-14 | 21%     | T4.11 `[x]`: role-name comparison ka ESLint rule `bq/no-role-comparison` (RULES §3.5); DR-007 permission se (owner). Phase 4: 8% → 17%; task ginti 33% → 34% (30 ÷ 87). |
 
 ## D. Deploy-first plan (owner ka faisla, 2026-10-23)
 
@@ -180,7 +181,7 @@ Har milestone ke end me kuch **live** dikhana hai. Ek hi live environment, free 
 - [ ] T4.8 Support: contact-us (bina TTL).
 - [ ] T4.9 Imports: categories, products (`NEEDS_REQC`), sellers (`LEGACY_NEEDS_REKYC`), media.
 - [x] T4.10 no-hardcoded-geo lint (RULES §3.4): states, districts, pincodes, hubs, warehouses jaise literals code me aayein to ESLint fail; "bad" fixture test ke saath. T4.2 (location data) se pehle (owner, 2026-11-09, QA-DOC-001). **Ho gaya (2026-11-14, branch `feat/t4.10-no-hardcoded-geo`):** repo ka apna ESLint rule `bq/no-hardcoded-geo` (`configs/eslint-rules/no-hardcoded-geo.js`), `packageConfig` ke `src/`/`app/` block me har workspace pe (generator ke naye apps/packages bhi). Rokta hai: state/UT ka poora naam (36 + purane naam), 6 digit pincode string, jagah wale naam ki literal se tulna (`===`, `switch`, `includes`/`has`) ya aise variable/qualified key me literal, bare `state` ke saath state id; poori value hi (`'Asia/Kolkata'` theek), scope ke label (`{ district: 'District' }`) theek. Chhoot: package ke `eslint.config.js` me `geoDataFiles` (abhi sirf contracts ka `src/states.ts`). Test `scripts/ci/test/no-hardcoded-geo.test.ts`: rule ke 42 cases (valid + invalid), `placeKind`, asli `packageConfig` se "bad" fixture (`scripts/ci/test/fixtures/no-hardcoded-geo/`: `bad.ts` me 5 reports, `places.ts` `geoDataFiles` me 0, `good.ts` aur `test/` 0), aur rule ki states list = contracts ki list. Poore repo ka `npm run lint` saaf (aaj code me koi geo literal nahi).
-- [ ] T4.11 Role-name comparison lint (RULES §3.5): `role === 'MASTER'` jaisi tulna pe ESLint fail; "bad" fixture test ke saath. T4.1 (`authorize()`) se pehle (owner, 2026-11-09, QA-DOC-001).
+- [x] T4.11 Role-name comparison lint (RULES §3.5): `role === 'MASTER'` jaisi tulna pe ESLint fail; "bad" fixture test ke saath. T4.1 (`authorize()`) se pehle (owner, 2026-11-09, QA-DOC-001). **Ho gaya (2026-11-14, T4.10 wali branch `feat/t4.10-no-hardcoded-geo` me, owner ke kehne pe):** ESLint rule `bq/no-role-comparison` (`configs/eslint-rules/no-role-comparison.js`; dono rules ke saajhe helpers `ast.js`), har workspace ke `src/`/`app/` pe: role key (`<app>.<name>`) ya role constant (`MASTER_ROLE`) ki tulna (`===`, `switch`, `includes`/`has`/`indexOf`) ya `holdsRole()` me fixed role, aur role wale naam (`role`, `grant.role`, `role.key`, `roleKey`) ki string se tulna; key-jaisi doosri cheez (`purpose`, `type`, `event` ...) theek. Kisi file ko chhoot nahi. **Code me 3 jagah thi, owner ke faisle (2026-11-14):** (1) identity DR-007 (`security.ts` ka `role.key === MASTER_ROLE`) ab nayi permission `iam.totp.reset_master` se (contracts; sirf Master role me, sub-role me mana; `mayResetAuthenticator` `authority.ts` me); (2) Master app `staff/people.tsx` ka `'master.master'` hata, server `GET /iam/grants?userId=` me `canResetAuthenticator` deta hai (wahi check), app usi se button dikhata hai; role form me nayi permission nahi dikhti; (3) identity `rbac/bootstrap.ts` (`db:grant-master`) ki `seed.key === MASTER_ROLE` (owner ne pakdi): ab `roles.ts` ka `MASTER_SEED` export, seats usi ke `maxHolders` se. Render me koi nayi key nahi; deploy pe `rbac-sync` nayi permission aur Master role likhta hai. Checks: rule ke 33 cases + "bad" fixture (`bad.ts` me 5 reports, `good.ts` aur `test/` 0) + apps list = contracts; purane `bootstrap.ts` aur `people.tsx` ki tulna rule ne pakdi; contracts 86 tests, identity 154 tests (11 files, Mongo + Valkey), master Staff 13 tests; poore repo ka `npm run lint` saaf; mutations (badli lines, RULES §6): contracts 4/4, identity 12/12 pakde (alag mutation Mongo + Valkey pe; "khatam hua Master grant bhi bachata hai" ek run me sanyog se pakda, doosre me bacha, isliye naya test: Master grant khatam hone pe Security Officer ka reset phir se haan).
 - [ ] T4.12 Customer SEO (owner, 2026-11-13; LIVE-003): canonical aur `og:url` (site ka pakka address, ek setting se), product/brand/category pages ka `og:image` aur JSON-LD (Product, Organization, BreadcrumbList), aur ye pages `sitemap.xml` me (`app/routes/sitemap-xml.ts` `SITEMAP_PATHS` ki jagah catalog se). T4.6 (catalog) ke saath. `robots.txt` aur home + legal + credits ka sitemap 2026-11-13 se hain.
 
 **Milestone 4:** naya district sirf config se khulta hai (CI), seller apply → approve → listing QC → storefront laptop pe chalta hai.
@@ -399,3 +400,4 @@ Har milestone ke end me kuch **live** dikhana hai. Ek hi live environment, free 
 | v1.120  | 2026-11-14 | T3.7 `[x]` (owner ki live jaanch theek; LIVE-005 fix prerelease me); §P: Phase 3 67%, poora 17%, task ginti 30%; "Abhi ka focus": M4. |
 | v1.121  | 2026-11-14 | Peeche chhoote checkbox code se mila ke theek: T6.2 `[x]`, T6.5 `[~]`, C.1 `[x]`, A.1 `[x]`, B.7 `[x]`; §P: Phase 6 50%, poora 19%, task ginti 32%; T3.7 me #81 aur owner ki jaanch ho gayi; M3 demo note me Staff ki live jaanch; `release` → `main` (#82 ke baad) baaki. |
 | v1.122  | 2026-11-14 | T4.10 `[x]`: `bq/no-hardcoded-geo` ESLint rule, `geoDataFiles`, fixture test; §P: Phase 4 8%, poora 20%, task ginti 33%. |
+| v1.123  | 2026-11-14 | T4.11 `[x]`: `bq/no-role-comparison` (kisi file ko chhoot nahi); DR-007 permission `iam.totp.reset_master` se, Master UI `canResetAuthenticator` se (owner); §P: Phase 4 17%, poora 21%, task ginti 34%. |

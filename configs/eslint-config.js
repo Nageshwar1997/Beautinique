@@ -13,9 +13,12 @@ import globals from 'globals';
 import tseslint from 'typescript-eslint';
 
 import { noHardcodedGeo } from './eslint-rules/no-hardcoded-geo.js';
+import { noRoleComparison } from './eslint-rules/no-role-comparison.js';
 
 /** The repo's own rules (configs/eslint-rules/). */
-const BQ_PLUGIN = { rules: { 'no-hardcoded-geo': noHardcodedGeo } };
+const BQ_PLUGIN = {
+  rules: { 'no-hardcoded-geo': noHardcodedGeo, 'no-role-comparison': noRoleComparison },
+};
 
 const GLOBALS = {
   neutral: {},
@@ -155,6 +158,8 @@ export function packageConfig({
       rules: {
         // places are data (RULES §3.4); tests and fixtures may name a place on purpose
         'bq/no-hardcoded-geo': 'error',
+        // decide by permission and scope, never by a role's name (RULES §3.5)
+        'bq/no-role-comparison': 'error',
         'no-restricted-globals': ['error', { name: 'fetch', message: HTTP_MESSAGE }],
         'no-restricted-properties': [
           'error',

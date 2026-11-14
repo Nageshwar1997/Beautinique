@@ -12,6 +12,7 @@ import {
   grantRead,
   roleManage,
   type ScopeType,
+  totpResetMaster,
 } from '@beautinique/shared-contracts';
 import type { Redis } from 'ioredis';
 
@@ -21,6 +22,7 @@ import {
   callerGrants,
   forbidden,
   grantShapeProblems,
+  mayResetAuthenticator,
   namesRole,
   requirePermission,
   type ScopeProblem,
@@ -167,6 +169,13 @@ function customRoleProblems(role: KeyedRole, others: readonly Role[]): ScopeProb
   }));
   if (role.permissions.includes(roleManage.key)) {
     problems.push({ path: ['permissions'], message: 'Only Master makes roles' });
+  }
+  // the other Master's authenticator stays the shipped Master role's alone (QA DR-007)
+  if (role.permissions.includes(totpResetMaster.key)) {
+    problems.push({
+      path: ['permissions'],
+      message: "Only Master resets a Master's authenticator",
+    });
   }
   return problems;
 }
@@ -528,5 +537,16 @@ export async function listGrants(deps: ManageDeps, passport: Passport, query: Gr
         : [grantView(grant, { email, role: keyOf(grant.roleId), catalog })];
     }),
     nextCursor: page.length > query.limit ? (items.at(-1)?._id.toHexString() ?? null) : null,
+    // one person: may the caller reset their authenticator (the same check as the reset)
+    ...(userId === undefined
+      ? {}
+      : {
+          canResetAuthenticator: await mayResetAuthenticator(
+            deps.mongo,
+            caller,
+            toObjectId(passport.userId),
+            userId,
+          ),
+        }),
   };
 }

@@ -179,6 +179,10 @@ describe('roles', () => {
       'permissions',
       'Only Master makes roles',
     ]);
+    expect(await bad({ permissions: ['iam.totp.reset', 'iam.totp.reset_master'] })).toContainEqual([
+      'permissions',
+      "Only Master resets a Master's authenticator",
+    ]);
     expect(await bad({ appointedBy: ['admin.catalog_qc'] })).toEqual([
       ['appointedBy', 'admin.catalog_qc cannot give roles'],
     ]);
@@ -644,6 +648,44 @@ describe('who sees which grants', () => {
     await hold(otherHead, 'logistics.logistics_head');
     const heads = await page(head, 'logistics', '?role=logistics.logistics_head&limit=100');
     expect(heads.items).toEqual([]);
+  });
+
+  it('tells, for one person, whether the caller may reset their authenticator (DR-007)', async () => {
+    const first = await master('reset-master-one');
+    const second = await master('reset-master-two');
+    const officer = await account('reset-officer');
+    await hold(officer, 'master.security_officer');
+    const staff = await account('reset-staff');
+    await hold(staff, 'master.head_of_operations');
+    const canReset = async (caller: string, userId: string) => {
+      const answer = await as(caller, 'master', 'GET', `/iam/grants?userId=${userId}`);
+      expect(answer.status, JSON.stringify(answer.body)).toBe(200);
+      return (answer.body.data as { canResetAuthenticator?: boolean }).canResetAuthenticator;
+    };
+    // a Master's only by the other Master; anyone else's by a Security Officer too
+    expect(await canReset(first, second)).toBe(true);
+    expect(await canReset(officer, second)).toBe(false);
+    expect(await canReset(officer, staff)).toBe(true);
+    expect(await canReset(first, staff)).toBe(true);
+    // never one's own, and nothing without the reset itself
+    expect(await canReset(first, first)).toBe(false);
+    expect(await canReset(officer, officer)).toBe(false);
+    const head = await account('reset-head');
+    await hold(head, 'logistics.logistics_head');
+    const fromHead = await as(head, 'logistics', 'GET', `/iam/grants?userId=${staff}`);
+    expect(fromHead.status, JSON.stringify(fromHead.body)).toBe(200);
+    expect(fromHead.body.data).toHaveProperty('canResetAuthenticator', false);
+    // a Master no longer: the ended grant protects nothing, so a Security Officer may again
+    const former = await master('reset-master-former');
+    expect(await canReset(officer, former)).toBe(false);
+    await grants().updateOne(
+      { userId: oid(former), roleId: await roleIdOf('master.master') },
+      { $set: { active: false } },
+    );
+    expect(await canReset(officer, former)).toBe(true);
+    // a list of many people says nothing
+    const many = await as(first, 'master', 'GET', '/iam/grants?role=master.master&limit=100');
+    expect(many.body.data).not.toHaveProperty('canResetAuthenticator');
   });
 
   it('shows peers in the grants list only, never their invitations: a sub-role that resets authenticators', async () => {

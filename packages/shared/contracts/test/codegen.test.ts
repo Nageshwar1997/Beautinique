@@ -120,6 +120,7 @@ describe('generateFiles', () => {
       'iam.role.manage',
       'iam.session.revoke',
       'iam.totp.reset',
+      'iam.totp.reset_master',
       'platform.ping.read',
     ]);
     expect(list.at(-1)?.scopeTypes).toEqual(['global']);

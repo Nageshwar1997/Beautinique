@@ -268,9 +268,9 @@ function PersonPanel({ person, onClose }: PersonPanelProps) {
   const signOut = useApiMutation(endUserSessions, {
     onError: failed('Their sessions were not ended.'),
   });
-  // a Master's authenticator only another Master resets (QA DR-007): no button that always fails
-  const holdsMaster = theirs.data?.items.some((grant) => grant.role === 'master.master') ?? false;
-  const canReset = !holdsMaster || mine.includes('master.master');
+  // identity decides whose authenticator the caller may reset (a Master's only by the other
+  // Master, QA DR-007), with the same check as the reset: no button that always fails
+  const canReset = theirs.data?.canResetAuthenticator === true;
   const canEnd = (grant: Grant) => {
     const role: RoleView | undefined = byKey.get(grant.role);
     return !self && role !== undefined && givesRole(role, mine);

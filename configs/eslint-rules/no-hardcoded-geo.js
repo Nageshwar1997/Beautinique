@@ -17,6 +17,10 @@
  * seed files are named in `geoDataFiles` (configs/eslint-config.js), where this rule is off.
  */
 
+import { EQUALITY, literalValue, membershipOf, nameOf, wordsOf } from './ast.js';
+
+/** @typedef {import('./ast.js').Value} Value */
+
 /** India's states and union territories, as in packages/shared/contracts/src/states.ts (a test keeps them equal). */
 export const STATES = [
   ['AP', 'Andhra Pradesh'],
@@ -115,11 +119,7 @@ const QUALIFIERS = new Set(['id', 'ids', 'code', 'codes', 'name', 'names', 'key'
  * @returns {{ kind: 'place' | 'state' | null, qualified: boolean }}
  */
 function describeName(name) {
-  const words = name
-    .replace(/([a-z0-9])([A-Z])/g, '$1 $2')
-    .split(/[^A-Za-z0-9]+/)
-    .filter(Boolean)
-    .map((word) => word.toLowerCase());
+  const words = wordsOf(name);
   let qualified = false;
   while (words.length > 1 && QUALIFIERS.has(words.at(-1) ?? '')) {
     const pair = `${words.at(-2) ?? ''}${(words.at(-1) ?? '').replace(/s$/, '')}`;
@@ -152,73 +152,6 @@ function describeName(name) {
  * @returns {'place' | 'state' | null}
  */
 export const placeKind = (name) => describeName(name).kind;
-
-/** @typedef {{ value: string | number }} Value */
-
-/**
- * The value of a plain literal (string, number, or a template with no `${}`), seen through
- * `as const` and `!`; null for anything else.
- * @param {any} node
- * @returns {Value | null}
- */
-function literalValue(node) {
-  let current = node;
-  while (
-    current &&
-    (current.type === 'TSAsExpression' ||
-      current.type === 'TSSatisfiesExpression' ||
-      current.type === 'TSNonNullExpression')
-  ) {
-    current = current.expression;
-  }
-  if (!current) {
-    return null;
-  }
-  if (current.type === 'Literal') {
-    if (typeof current.value === 'string' && current.value !== '') {
-      return { value: current.value };
-    }
-    if (typeof current.value === 'number') {
-      return { value: current.value };
-    }
-    return null;
-  }
-  if (current.type === 'TemplateLiteral' && current.expressions.length === 0) {
-    const text = current.quasis[0]?.value.cooked ?? '';
-    return text === '' ? null : { value: text };
-  }
-  return null;
-}
-
-/**
- * The name an expression is known by: `district`, `order.hubId`, `this.#warehouse`, `row['pincode']`.
- * @param {any} node
- * @returns {string | null}
- */
-function nameOf(node) {
-  let current = node;
-  while (
-    current &&
-    (current.type === 'ChainExpression' ||
-      current.type === 'TSAsExpression' ||
-      current.type === 'TSNonNullExpression')
-  ) {
-    current = current.expression;
-  }
-  if (!current) {
-    return null;
-  }
-  if (current.type === 'Identifier' || current.type === 'PrivateIdentifier') {
-    return current.name;
-  }
-  if (current.type === 'MemberExpression') {
-    if (!current.computed) {
-      return nameOf(current.property);
-    }
-    return typeof current.property.value === 'string' ? current.property.value : null;
-  }
-  return null;
-}
 
 /** Why a value alone is a place, whatever it stands next to. */
 const ownReason = (/** @type {Value} */ { value }) => {
@@ -307,7 +240,7 @@ export const noHardcodedGeo = {
       },
       /** @param {any} node */
       BinaryExpression(node) {
-        if (!['===', '!==', '==', '!='].includes(node.operator)) {
+        if (!EQUALITY.has(node.operator)) {
           return;
         }
         checkPair(nameOf(node.left), node.right, 'decision');
@@ -324,18 +257,9 @@ export const noHardcodedGeo = {
       },
       /** @param {any} node */
       CallExpression(node) {
-        const callee =
-          node.callee.type === 'ChainExpression' ? node.callee.expression : node.callee;
-        if (
-          callee.type !== 'MemberExpression' ||
-          callee.computed ||
-          !['includes', 'has', 'indexOf'].includes(callee.property.name)
-        ) {
-          return;
-        }
-        const argument = node.arguments[0];
-        if (argument) {
-          checkPair(nameOf(callee.object), argument, 'decision');
+        const asked = membershipOf(node);
+        if (asked) {
+          checkPair(nameOf(asked.list), asked.value, 'decision');
         }
       },
       /** @param {any} node */
