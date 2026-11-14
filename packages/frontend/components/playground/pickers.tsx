@@ -20,6 +20,13 @@ const SKIN_TYPES: PickerOption[] = [
   { value: 'combination', label: 'Combination', description: 'Oily T-zone, dry cheeks' },
   { value: 'normal', label: 'Normal' },
   { value: 'sensitive', label: 'Sensitive', disabled: true, description: 'Coming with the quiz' },
+  {
+    value: 'mature',
+    label: 'Mature skin with fine lines and some dryness',
+    disabled: true,
+    description:
+      'Can be given once categories or brands exist, with the skin quiz and its routines',
+  },
 ];
 
 const CONCERNS: PickerOption[] = [

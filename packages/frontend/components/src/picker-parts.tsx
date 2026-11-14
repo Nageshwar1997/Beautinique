@@ -76,6 +76,13 @@ export function FieldErrorText({ error }: { error?: ReactNode }) {
 }
 
 /** The box a picker opens: a surface over the page, its own scroll, the styles fade. */
+/**
+ * A picker's list width: at least its field's, wider for longer rows up to 24rem, never past the
+ * screen (a phone at 375 px); longer rows wrap (a role's "Can be given once ..." line overflowed).
+ */
+export const POPOVER_WIDTH =
+  'min-w-(--trigger-width) max-w-[max(var(--trigger-width),min(24rem,calc(100vw-1.5rem)))]';
+
 export const POPOVER =
   'bg-surface text-foreground border-border overflow-auto rounded-xl border shadow-lg outline-hidden data-entering:animate-fade-in data-exiting:animate-fade-out';
 
@@ -155,7 +162,7 @@ export function OptionItem({ option }: { option: PickerOption }) {
               {option.label}
             </Text>
             {option.description !== undefined && (
-              <Text slot="description" className="text-foreground-muted text-sm">
+              <Text slot="description" className="text-foreground-muted text-sm wrap-break-word">
                 {option.description}
               </Text>
             )}
