@@ -377,3 +377,42 @@ export async function signInAccess(
     permissions: [...new Set(roles.flatMap((role) => role.permissions))].sort(),
   };
 }
+
+/** A role an account holds in an app now, with where (GET /iam/me). */
+export interface HeldRole {
+  role: string;
+  name: string;
+  scope: Scope;
+}
+
+/**
+ * What the account may do in the app now (GET /iam/me, TASKS T3.7): the roles of its active grants
+ * there, each with its scope, and their permission keys, as at sign-in (a retired role no longer
+ * counts). The app shows only what these allow; every route still checks for itself.
+ */
+export async function appAccess(
+  mongo: Mongo,
+  { userId, app, now = new Date() }: { userId: ObjectId; app: AppId; now?: Date },
+): Promise<{ roles: HeldRole[]; permissions: string[] }> {
+  const appId = (await rbacCatalog(mongo)).appId(app);
+  const grants = await grantsOf(mongo)
+    .find({ userId, appId, ...activeAt(now) }, { projection: { roleId: 1, scope: 1 } })
+    .toArray();
+  if (grants.length === 0) return { roles: [], permissions: [] };
+  const roles = await readRoles(mongo, {
+    _id: { $in: grants.map((grant) => grant.roleId) },
+    retired: false,
+  });
+  const byId = new Map(roles.map((role) => [role._id.toHexString(), role]));
+  const held = grants.flatMap((grant) => {
+    const role = byId.get(grant.roleId.toHexString());
+    return role ? [{ role: role.key, name: role.name, scope: scopeOf(grant.scope) }] : [];
+  });
+  return {
+    roles: held.toSorted(
+      (a, b) =>
+        a.role.localeCompare(b.role) || a.scope.ids.join().localeCompare(b.scope.ids.join()),
+    ),
+    permissions: [...new Set(roles.flatMap((role) => role.permissions))].sort(),
+  };
+}

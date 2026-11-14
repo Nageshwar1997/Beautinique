@@ -5,5 +5,5 @@ export default packageConfig({
   platform: 'node',
   tsconfigRootDir: import.meta.dirname,
   // instrument.ts reads the process-wide Sentry settings before anything else loads
-  envFiles: ['src/config.ts', 'src/instrument.ts'],
+  envFiles: ['src/config.ts', 'src/instrument.ts', 'test/env.ts'],
 });

@@ -55,9 +55,9 @@ import {
 } from '../src/rbac/sync.ts';
 import { type RunningIdentity, start } from '../src/service.ts';
 import { LEGAL_ACCEPTANCES, type LegalAcceptance, type User, USERS } from '../src/users.ts';
+import { MONGO_URI, REDIS_URL } from './env.ts';
 
-export const MONGO_URI = 'mongodb://localhost:27017/?replicaSet=rs0';
-export const REDIS_URL = 'redis://localhost:6379';
+export { MONGO_URI, REDIS_URL };
 const logger = createLogger({ name: 'identity-test', level: 'silent' });
 
 /** A password Have I Been Pwned knows (the stand-in answers it as breached). */

@@ -1,6 +1,6 @@
 # LinkedIn posts — history
 
-> **Status:** v1.10 (2026-11-10). Har post ki ek line, aur kahan tak ka kaam cover ho chuka hai.
+> **Status:** v1.11 (2026-11-13). Har post ki ek line, aur kahan tak ka kaam cover ho chuka hai.
 
 **Kahan tak cover hua:** commit `afb3502` (PR #15 aur uska live fix), Day 3. Catch-up abhi chal raha hai: agla post "Baaki" ki list se. Format: `commit <sha> (PR #N)`, `prerelease` ka
 aakhri commit jo post me aa chuka.
@@ -10,10 +10,10 @@ aakhri commit jo post me aa chuka.
 | 1   | 2026-11-03 | Phase 0: monorepo, CI, local infra, git | PR #1, #2, #3 (Phase 0 part), #8 | posted | [post](https://lnkd.in/p/dZdHFY7N) |
 | 2   | 2026-11-04 | Phase 1: server kit, outbox, encryption | PR #3 (Phase 1 part), #4, #7     | posted | [post](https://lnkd.in/p/e2WGHtvV) |
 | 3   | 2026-11-05 | Phase 2: gateway, first live deploy     | PR #11, #12, #15                 | posted | [post](https://lnkd.in/p/eyKV-FmS) |
-| 4   | 2026-11-06 | Phase 3: sign-in, sessions, My Devices  | PR #21, #22, #25, #26, #27       | draft  |                                    |
-| 5   | 2026-11-07 | Phase 3: roles, grants, step-up         | PR #30, #31, #32, #38            | draft  |                                    |
-| 6   | 2026-11-08 | Phase 6: frontend toolkit               | PR #33–#37                       | draft  |                                    |
-| 7   | 2026-11-09 | Phase 6 + M3: customer auth screens     | PR #39, #40                      | draft  |                                    |
+| 4   | 2026-11-06 | Phase 3: sign-in, sessions, My Devices  | PR #21, #22, #25, #26, #27       | ready  |                                    |
+| 5   | 2026-11-07 | Phase 3: roles, grants, step-up         | PR #30, #31, #32, #38            | ready  |                                    |
+| 6   | 2026-11-08 | Phase 6: frontend toolkit               | PR #33–#37                       | ready  |                                    |
+| 7   | 2026-11-09 | Phase 6 + M3: customer auth screens     | PR #39, #40                      | ready  |                                    |
 
 ## Baaki
 
@@ -52,3 +52,4 @@ PR #41 (Dependabot alerts ka note) aur #42 (ye posts folder) sirf docs: alag pos
 | v1.8    | 2026-11-10 | Day 3 ready: 8 slides (16:9) aur carousel.pdf.                   |
 | v1.9    | 2026-11-10 | Day 3 posted (link), marker `afb3502` (PR #15) tak.              |
 | v1.10   | 2026-11-10 | Day 2 posted (link); marker Day 3 pe hi.                         |
+| v1.11   | 2026-11-13 | Day 4–7 ready: har ek ki 8 slides (16:9) aur carousel.pdf.       |

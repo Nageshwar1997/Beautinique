@@ -13,10 +13,9 @@ import {
 import { expectObjectIds } from '../../../scripts/e2e/object-ids.ts';
 import { readConfig } from '../src/config.ts';
 import { release, start } from '../src/service.ts';
+import { MONGO_URI, REDIS_URL } from './env.ts';
 
 // The laptop's and CI's local services (`npm run infra:up`), in a test database of its own.
-const MONGO_URI = 'mongodb://localhost:27017/?replicaSet=rs0';
-const REDIS_URL = 'redis://localhost:6379';
 const dbName = `bq_test_identity_${randomUUID().slice(0, 8)}`;
 const logger = createLogger({ name: 'identity-test', level: 'silent' });
 // made per run, so no key-looking literal sits in the repo (gitleaks)

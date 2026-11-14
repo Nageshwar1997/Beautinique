@@ -1,7 +1,7 @@
 ---
 date: 2026-11-06
 day: 4
-status: draft # draft | ready | scheduled | posted (README §2)
+status: ready # draft | ready | scheduled | posted (README §2)
 posted_at:
 link:
 covers: 'PR #21, #22, #25, #26, #27' # T3.1 (email codes, password, authenticator), T3.2 (sessions, gateway passport, My Devices)
@@ -11,7 +11,7 @@ covers: 'PR #21, #22, #25, #26, #27' # T3.1 (email codes, password, authenticato
 
 ```text
 Day 4 of building Beautinique in public: sign-in.
-A wrong email, a wrong password and a locked account all get the same answer, in the same time. On purpose.
+A wrong email, a wrong password and a locked account all get the same answer, at the same time. On purpose.
 
 𝗔𝗯𝗼𝘂𝘁 𝘁𝗵𝗲 𝗽𝗿𝗼𝗷𝗲𝗰𝘁: Beautinique is a beauty-only e-commerce platform for India: brands sell on one storefront, all stock sits in one warehouse, in-house partners deliver, and every role has its own app. A portfolio project, built to production standards.
 

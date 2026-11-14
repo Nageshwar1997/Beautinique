@@ -571,7 +571,8 @@ describe('signed in (the gateway’s passport)', () => {
 
   it('tells the app who signed in, how the account signs in, and this session', async () => {
     const address = email('me');
-    await makeAccount(address);
+    // its customer role alone, so its access in the app is that one
+    await makeAccount(address, PASSWORD, { everyApp: false });
     const { userId, sessionId } = await signedInAs(address);
     const answer = await asSignedIn('/iam/me', { userId, sessionId });
     expect(answer.status).toBe(200);
@@ -584,6 +585,13 @@ describe('signed in (the gateway’s passport)', () => {
         authenticator: false,
       },
       session: { sessionId, app: 'customer' },
+      // what it may do in this app: its customer role, on its own account (TASKS T3.7)
+      access: {
+        roles: [
+          { role: 'customer.customer', name: 'Customer', scope: { type: 'self', ids: [userId] } },
+        ],
+        permissions: ['iam.app.sign_in'],
+      },
     });
     expect((answer.body.data?.user as { ageDeclaredAt: string }).ageDeclaredAt).toMatch(/^2\d{3}-/);
   });

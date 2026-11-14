@@ -134,11 +134,11 @@
 | v1.13   | 2026-10-27 | §1.14: migrations ke niyam (id, kabhi nahi badalti, 60 s, index ka naam); §2.4: `.env.production` sirf `npm run db:release -- --env live` padhta hai (owner).                                                         |
 | v1.14   | 2026-10-27 | §2.1: `prerelease` pe branch delete bhi nahi; §9: ultracode/workflow mode me bhi ek agent, UI har badlav light/dark/mobile, secrets, nayi env key sirf code ke baad, kaam rokte waqt HANDOFF (owner).                 |
 | v1.15   | 2026-10-27 | §2.4: `.env.example` teen hisson me (LOCAL, OPTIONAL, PRODUCTION dummy values ke saath), bundle me deployable-wise; `.env` = sirf LOCAL (owner).                                                                      |
-| v1.16   | 2026-10-31 | §3.8: HTTP client sirf axios (frontend + backend); chhoot sirf gateway proxy aur tests, ESLint se (owner). §5.8 usi ke saath. |
-| v1.17   | 2026-11-03 | §2: `linkedin-posts/` ki post files seedha `prerelease` pe push (owner). |
-| v1.18 | 2026-11-03 | §2: `linkedin-posts/` ki saari files aur `/linkedin-post` skill bhi seedha `prerelease` pe (owner). |
-| v1.19 | 2026-11-08 | §2: CI flow check `main`/`release` me sirf isi repo ki branch leta (QA-CI-001); check galti se bachav hai, taala merge ka haq; "up to date" niyam aur fork approval band nahi (owner ne salah maani). |
-| v1.20 | 2026-11-08 | §4.13: har query (sirf sort nahi) index se; jaan-boojh poora padhna `comment: 'full read: …'` se; identity, notify, core ke tests ka profiler pehra (owner, QA-ID-002). |
-| v1.21 | 2026-11-09 | §3.4, §3.5, §4.2: core ki module boundary aur "doosre deployable ka code nahi" ab dependency-cruiser (`npm run lint`) se; geo lint aur role-name lint abhi nahi (T4.10, T4.11), tab tak review (owner, QA-DOC-001). |
-| v1.22 | 2026-11-12 | §4.17: har `_id` aur reference ObjectId, naam alag unique field me, UUIDv7 sirf DB ke bahar; §7.6: ObjectId kabhi secret nahi (owner). |
-| v1.23 | 2026-11-12 | §4.17: ObjectId ka pehra deployables ke tests ke aakhir me (`scripts/e2e/object-ids.ts`). |
+| v1.16   | 2026-10-31 | §3.8: HTTP client sirf axios (frontend + backend); chhoot sirf gateway proxy aur tests, ESLint se (owner). §5.8 usi ke saath.                                                                                         |
+| v1.17   | 2026-11-03 | §2: `linkedin-posts/` ki post files seedha `prerelease` pe push (owner).                                                                                                                                              |
+| v1.18   | 2026-11-03 | §2: `linkedin-posts/` ki saari files aur `/linkedin-post` skill bhi seedha `prerelease` pe (owner).                                                                                                                   |
+| v1.19   | 2026-11-08 | §2: CI flow check `main`/`release` me sirf isi repo ki branch leta (QA-CI-001); check galti se bachav hai, taala merge ka haq; "up to date" niyam aur fork approval band nahi (owner ne salah maani).                 |
+| v1.20   | 2026-11-08 | §4.13: har query (sirf sort nahi) index se; jaan-boojh poora padhna `comment: 'full read: …'` se; identity, notify, core ke tests ka profiler pehra (owner, QA-ID-002).                                               |
+| v1.21   | 2026-11-09 | §3.4, §3.5, §4.2: core ki module boundary aur "doosre deployable ka code nahi" ab dependency-cruiser (`npm run lint`) se; geo lint aur role-name lint abhi nahi (T4.10, T4.11), tab tak review (owner, QA-DOC-001).   |
+| v1.22   | 2026-11-12 | §4.17: har `_id` aur reference ObjectId, naam alag unique field me, UUIDv7 sirf DB ke bahar; §7.6: ObjectId kabhi secret nahi (owner).                                                                                |
+| v1.23   | 2026-11-12 | §4.17: ObjectId ka pehra deployables ke tests ke aakhir me (`scripts/e2e/object-ids.ts`).                                                                                                                             |

@@ -9,9 +9,10 @@ import { connectMongo, type Mongo, ObjectId } from '@beautinique/backend-server-
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 
 import { grantMasterCli } from '../src/grant-master-cli.ts';
+import { MONGO_HOST, MONGO_URI, REDIS_DB } from './env.ts';
 
-// the laptop's and CI's local MongoDB (`npm run infra:up`), in a test database of its own
-const MONGO_URI = 'mongodb://localhost:27017/?replicaSet=rs0';
+// the laptop's and CI's local MongoDB (`npm run infra:up`) or a mutation run's (test/env.ts), in a
+// test database of its own
 const id = randomUUID().slice(0, 8);
 const identityDb = `bq_test_cli_master_${id}`;
 const logger = createLogger({ name: 'grant-master-cli-test', level: 'silent' });
@@ -22,7 +23,7 @@ let mongo: Mongo;
 const envText = [
   `IDENTITY__MONGO_URI=${MONGO_URI}`,
   `IDENTITY__MONGO_DB_NAME=${identityDb}`,
-  'IDENTITY__REDIS_URL=redis://localhost:6379/5',
+  `IDENTITY__REDIS_URL=${REDIS_DB}`,
   `IDENTITY__FIELD_KEYS=k1:${randomBytes(32).toString('base64')}`,
   `IDENTITY__BLIND_INDEX_KEY=b1:${randomBytes(32).toString('base64')}`,
   `IDENTITY__OTP_EVENT_KEYS=e1:${randomBytes(32).toString('base64')}`,
@@ -96,7 +97,7 @@ describe('npm run db:grant-master', () => {
   it('does nothing on the live database unless "live" is typed', async () => {
     const stopped = await run(['--email', OWNER, '--env', 'live'], 'yes');
     expect(stopped.code).toBe(1);
-    expect(stopped.printed).toMatch(/LIVE database: .* on localhost:27017/);
+    expect(stopped.printed).toMatch(new RegExp(`LIVE database: .* on ${MONGO_HOST}`));
     expect(stopped.printed).toMatch(/Stopped: nothing changed/);
     expect(await masters()).toBe(0);
   });

@@ -97,9 +97,13 @@ export function ComboBox({
         onChange?.(key === null ? null : String(key));
       }}
       // React Aria filters `defaultItems` itself; `items` are shown as given (the server filtered them)
+      // each keyed by its value (React Aria's `id`), so a list that changes keeps its items' ids
       {...(onSearch === undefined
-        ? { defaultItems: options }
-        : { items: options, onInputChange: onSearch })}
+        ? { defaultItems: options.map((option) => ({ ...option, id: option.value })) }
+        : {
+            items: options.map((option) => ({ ...option, id: option.value })),
+            onInputChange: onSearch,
+          })}
       allowsEmptyCollection
       isRequired={isRequired ?? false}
       {...invalidProps(isInvalid, error)}

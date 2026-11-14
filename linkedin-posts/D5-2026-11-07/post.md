@@ -1,7 +1,7 @@
 ---
 date: 2026-11-07
 day: 5
-status: draft # draft | ready | scheduled | posted (README §2)
+status: ready # draft | ready | scheduled | posted (README §2)
 posted_at:
 link:
 covers: 'PR #30, #31, #32, #38' # T3.3 (roles, grants, invitations, gateway permissions, step-up), signed-in authenticator

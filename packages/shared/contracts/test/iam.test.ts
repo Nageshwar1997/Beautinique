@@ -5,6 +5,7 @@ import {
   appSignIn,
   authzVersionKey,
   events,
+  getMe,
   giveGrant,
   IAM_PERMISSIONS,
   INDIAN_STATES,
@@ -123,5 +124,48 @@ describe('role, grant and invitation routes', () => {
       'invitationId',
       'roleName',
     ]);
+  });
+});
+
+describe('GET /iam/me access (TASKS T3.7)', () => {
+  const me = {
+    user: {
+      userId: '6730a2b40000000000000001',
+      email: 'asha@beautinique.example',
+      ageDeclaredAt: null,
+      signUpApp: 'customer',
+      providers: ['password'],
+      authenticator: true,
+      recoveryCodesLeft: 10,
+      authenticatorRequiredBy: [],
+    },
+    session: {
+      sessionId: '6730a2b40000000000000002',
+      app: 'master',
+      expiresAt: '2026-12-31T00:00:00.000Z',
+    },
+  };
+
+  it('names the roles held in the app with their scopes, and their permission keys', () => {
+    const access = {
+      roles: [
+        { role: 'admin.state_admin', name: 'State Admin', scope: { type: 'state', ids: ['MH'] } },
+      ],
+      permissions: ['iam.app.sign_in', 'iam.grant.manage', 'iam.grant.read'],
+    };
+    expect(getMe.output.parse({ ...me, access }).access).toEqual(access);
+    expect(() =>
+      getMe.output.parse({
+        ...me,
+        access: {
+          roles: [{ role: 'Not a key', name: 'x', scope: { type: 'global', ids: [] } }],
+          permissions: [],
+        },
+      }),
+    ).toThrow();
+  });
+
+  it('is none when identity has not sent it yet (an app live before identity)', () => {
+    expect(getMe.output.parse(me).access).toEqual({ roles: [], permissions: [] });
   });
 });

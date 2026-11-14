@@ -13,6 +13,7 @@ import {
   ErrorPage,
   IconCreditsPage,
   NavList,
+  SectionLayout,
   setThemeChoice,
   THEME_SCRIPT,
   THEME_SCRIPT_HASH,
@@ -48,6 +49,7 @@ const inRouter = (element: React.ReactElement, path = '/') => {
   const Stub = createRoutesStub([
     { path: '/', Component: () => element },
     { path: '/about', Component: () => element },
+    { path: '/staff/invitations', Component: () => element },
   ]);
   return render(<Stub initialEntries={[path]} />);
 };
@@ -253,6 +255,49 @@ describe('NavList', () => {
   it('renders nothing without pages', () => {
     const { container } = inRouter(<NavList items={[]} label="Main" />);
     expect(container.querySelector('nav')).toBeNull();
+  });
+});
+
+describe('SectionLayout', () => {
+  const pages = [
+    { label: 'People', to: '/staff', end: true },
+    { label: 'Invitations', to: '/staff/invitations' },
+    { label: 'Roles', to: '/staff/roles' },
+  ];
+
+  it('names its one nav by the section, marks the page you are on, and shows the page', async () => {
+    const { container } = inRouter(
+      <SectionLayout title="Staff" items={pages}>
+        <h1>Invitations</h1>
+      </SectionLayout>,
+      '/staff/invitations',
+    );
+    const nav = screen.getByRole('navigation', { name: 'Staff' });
+    expect(
+      within(nav)
+        .getAllByRole('link')
+        .map((link) => link.textContent),
+    ).toEqual(['People', 'Invitations', 'Roles']);
+    expect(
+      within(nav).getByRole('link', { name: 'Invitations' }).getAttribute('aria-current'),
+    ).toBe('page');
+    // People ends at its own path: not marked on a page below it
+    expect(
+      within(nav).getByRole('link', { name: 'People' }).getAttribute('aria-current'),
+    ).toBeNull();
+    expect(screen.getAllByRole('navigation')).toHaveLength(1);
+    expect(screen.getByRole('heading', { name: 'Invitations' })).toBeTruthy();
+    expect(await violations(container)).toEqual([]);
+  });
+
+  it('is the page alone without pages to list', () => {
+    inRouter(
+      <SectionLayout title="Staff" items={[]}>
+        <p>Only this</p>
+      </SectionLayout>,
+    );
+    expect(screen.queryByRole('navigation')).toBeNull();
+    expect(screen.getByText('Only this')).toBeTruthy();
   });
 });
 
