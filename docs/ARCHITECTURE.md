@@ -1,6 +1,6 @@
 # ARCHITECTURE — BQ
 
-> **Status:** v1.90 draft (2026-11-14). [PRD.md](PRD.md) v1.0 pe based. Design ek multi-agent review se aaya (3 architecture proposals + review board + owner ke decisions), aur v1.1 me free tier ke official docs ke against verify hua.
+> **Status:** v1.91 draft (2026-11-14). [PRD.md](PRD.md) v1.0 pe based. Design ek multi-agent review se aaya (3 architecture proposals + review board + owner ke decisions), aur v1.1 me free tier ke official docs ke against verify hua.
 
 ## 0. Ek nazar me
 
@@ -488,7 +488,7 @@ Kaunsa adapter chalega, ye config tay karta hai. Har call pe timeout, retries, c
 
 ### 11.5 Deploy aur rollback
 
-- Render: sirf **`release`** branch se auto-deploy, CI pass hone ke baad (`checksPass`). Build filter sirf `backend/**`, `packages/contracts/**`, `packages/server-*/**`, `packages/authz/**` aur `package-lock.json`; frontend packages (components, hooks, quill...) badalne pe backend build nahi hoga. Build me sirf backend workspaces install aur build hote hain.
+- Render: sirf **`release`** branch se auto-deploy, CI pass hone ke baad (`checksPass`). Build filter sirf `backend/**`, `packages/shared/**`, `packages/backend/**`, `package.json` aur `package-lock.json` (HANDOFF §3); frontend packages (components, hooks, quill...) badalne pe backend build nahi hoga. Build me sirf backend workspaces install aur build hote hain.
 - Vercel: har app ka apna project, production branch `release`, `turbo-ignore` ke saath.
 - Rollback: Render pe pichhla deploy wapas, Vercel pe instant rollback. Migrations expand/contract hain, isliye pichhla release compatible rehta hai.
 
@@ -536,8 +536,8 @@ Sirf config badlegi, code nahi:
   - **Back-merge:** package release ka commit (versions, changelogs) ya hotfix `release` pe banta hai, isliye uske baad PR `release` → `prerelease`, taaki agla kaam naye versions pe ho.
   - Branch protection (rulesets): `main` aur `release` pe PR zaroori, required check `check`, force push aur delete band. `prerelease` pe sirf force push aur delete band: chhote fix seedha push ho sakte hain (RULES §2), aur CI har push pe chalta hai. `check` flow bhi jaanchta hai (`main` ← sirf `release`; `release` ← sirf `prerelease` ya `hotfix/*`; dono sirf isi repo ki branch se, fork se nahi; niyam aur tests `scripts/ci/`, QA-CI-001). Ye galti se bachav hai, taala nahi (PR apni `ci.yml` badal sakta hai): taala merge ka haq, fork PR ke CI ka approval aur "up to date" niyam (RULES §2). Owner ka bypass sirf package CLI ke release commit + tags push karne ke liye. Conventional Commits. Dependency PRs `prerelease` pe.
 - **GitHub Actions:**
-  - `ci.yml` (aaj, required check `check`): gitleaks, branch flow (`scripts/ci/`), build (poora; sirf affected build abhi nahi, T0.6), format, lint (ESLint ke rules, jinme no-hardcoded-geo (T4.10, RULES §3.4) aur no-role-comparison (T4.11, RULES §3.5) bhi, + core me dependency-cruiser), typecheck, saare tests (`npm test`), customer aur admin E2E, packages ke publish wale checks (`verify`), `npm audit`. Har route pe permission, rate class aur owner `defineRoute` (types + start pe check) se, aur permission catalogue ↔ roles seed identity ke test se. **Abhi nahi, apne task ke saath (QA-DOC-001):** OpenAPI diff aur event compatibility (T11.7), bundle budgets (T11.8).
-  - **Neeche ke `integration.yml`, `e2e.yml` aur `nightly.yml` abhi nahi:** ye checks apne tasks ke saath banenge (jaise T4.4, T11.1); aaj customer aur admin ke E2E `ci.yml` me chalte hain.
+  - `ci.yml` (aaj, required check `check`; owner 2026-11-14): jobs ek saath (`guard`, `static`, `test-scripts`, `test-backend`, `test-frontend`, har app ki `e2e`, `verify`), aakhri `check` sab ke green hone pe green. Har job pehle `scripts/ci/bin/plan.ts` se poochhti hai: jo git tree pehle poore run me pass hua (marker `ci-pass-<tree>`) us pe sirf `guard`; `prerelease` pe PR sirf affected workspaces; har push aur `release`/`main` pe PR poora (niyam RULES §2). Kaam: gitleaks, branch flow (`scripts/ci/`), build (poora), format, lint (ESLint ke rules, jinme no-hardcoded-geo (T4.10, RULES §3.4) aur no-role-comparison (T4.11, RULES §3.5) bhi, + core me dependency-cruiser), typecheck, tests (`test:scripts` + workspaces), customer, admin aur master E2E, packages ke publish wale checks (`verify`), `npm audit`. Har route pe permission, rate class aur owner `defineRoute` (types + start pe check) se, aur permission catalogue ↔ roles seed identity ke test se. **Abhi nahi, apne task ke saath (QA-DOC-001):** OpenAPI diff aur event compatibility (T11.7), bundle budgets (T11.8).
+  - **Neeche ke `integration.yml`, `e2e.yml` aur `nightly.yml` abhi nahi:** ye checks apne tasks ke saath banenge (jaise T4.4, T11.1); aaj customer, admin aur master ke E2E `ci.yml` me chalte hain.
   - `integration.yml`: open-district-by-config (saare refusal paths ke saath), fake Razorpay ke saath checkout saga, outbox/inbox exactly-once, no-oversell (50 parallel orders), ledger zero-sum aur gapless invoices, authz scope aur separation of duties, idempotency, review routing, Redis wipe drill (`FLUSHALL` ke beech koi event miss na ho, revoked session reject ho, schedulers wapas aayein), aur `ATLAS_TIER=M0` mode me relay poll.
   - `e2e.yml` (Playwright + axe):
     1. Customer email OTP login → prepaid checkout
@@ -754,3 +754,4 @@ Sirf config badlegi, code nahi:
 | v1.88   | 2026-11-14 | §7.3: DR-007 permission `iam.totp.reset_master` se, `GET /iam/grants?userId=` ka `canResetAuthenticator` (owner); §7.3, §13: role-name comparison lint ab hai (T4.11). |
 | v1.89   | 2026-11-14 | §5.2: read models kaise (role, grant, user snapshot events, core ki copies, `authorize()` ka `authzVersion` check; T3.5, owner); §6.5: audit viewer T4.1 me, CSV export seedha download (owner). |
 | v1.90   | 2026-11-14 | §5.2: ek account pe max 50 grants (snapshot ek event me) aur deploy overlap ka catch-up sweep (owner). |
+| v1.91   | 2026-11-14 | §13: `ci.yml` ab parallel jobs, same-code marker aur affected-only (owner; RULES §2), master E2E bhi; §11.5: Render build filter ki list aaj ke folders se. |

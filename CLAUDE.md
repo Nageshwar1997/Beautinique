@@ -122,7 +122,8 @@ npm run build
   safety, is repo ka branch flow aur PR titles, checks) `.claude/skills/_shared/git-rules.md` me. `/sync` aur
   `/undo-commit` sirf insaan ke type karne pe chalte hain. Insaan ke liye manual: [docs/GIT_SKILLS.md](docs/GIT_SKILLS.md). Branch flow badle (RULES §2) to ye dono bhi.
 - `AGENTS.md`: doosre AI tools (Codex, Cursor, Copilot, Gemini ...) ke liye chhota pointer; niyam yahin (`CLAUDE.md`) rehte hain. Niyam badlo to dono dekho.
-- `.github/workflows/`: `ci.yml` (har PR, aur `main`/`prerelease`/`release` pe push), `release.yml`
+- `.github/workflows/`: `ci.yml` (har PR, aur `main`/`prerelease`/`release` pe push; jobs ek saath, aakhri `check`;
+  har job `scripts/ci/bin/plan.ts` se poochhti hai: same code pehle pass to skip, `prerelease` pe PR sirf affected; RULES §2), `release.yml`
   (packages publish, sirf `release` branch, haath se).
 
 ## Kaam rokte waqt

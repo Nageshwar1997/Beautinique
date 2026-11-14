@@ -1,6 +1,6 @@
 # Packages — banana, publish aur republish
 
-> **Status:** v1.15 (2026-11-14). **Abhi publish/republish nahi (owner ka faisla, 2026-10-21):** apps isi monorepo se package lete hain (npm workspaces), live deploy pe bhi. Publish sirf zaroorat pe; packages public hi rahenge. `packages/` ke saare npm packages ka kaam, aur naye frontend apps aur backend apps banana, is repo ke apne CLI (`scripts/packages/`) se hota hai. Ye guide batati hai ki kaunsa command kab chalana hai aur andar kya hota hai.
+> **Status:** v1.16 (2026-11-14). **Abhi publish/republish nahi (owner ka faisla, 2026-10-21):** apps isi monorepo se package lete hain (npm workspaces), live deploy pe bhi. Publish sirf zaroorat pe; packages public hi rahenge. `packages/` ke saare npm packages ka kaam, aur naye frontend apps aur backend apps banana, is repo ke apne CLI (`scripts/packages/`) se hota hai. Ye guide batati hai ki kaunsa command kab chalana hai aur andar kya hota hai.
 
 ## 1. Packages kahan aur kis naam se
 
@@ -101,7 +101,7 @@ Kisi package ka naya version agar kisi published dependent ki range tod de, to C
 
 ## 5. CI
 
-`.github/workflows/ci.yml` `main`, `prerelease` aur `release` pe push aur har PR pe: `npm ci`, `npm run build`, format check, lint, typecheck, tests (CLI ke 70+ tests, fake npm registry ke saath asli publish aur GitHub release flows bhi), `npm run verify -- --all`, `npm audit`. Tests se pehle `infra/docker-compose.yml` ke `mongo` aur `valkey` chalte hain (`release.yml` me bhi, publish ke checks se pehle). npm 12.2.0 pin hai (Node 24 ke saath npm 11 aata hai).
+`.github/workflows/ci.yml` `main`, `prerelease` aur `release` pe push aur har PR pe, kai jobs ek saath (RULES §2): format check, build, lint, typecheck (`static`), CLI ke tests (`test-scripts`: 70+ tests, fake npm registry ke saath asli publish aur GitHub release flows bhi), packages aur apps ke tests (`test-backend`, `test-frontend`), apps ke E2E, `npm run verify` (affected packages, ya poore run pe `--all`), `npm audit`. Har job pehle `scripts/ci/bin/plan.ts` se poochhti hai kya chalana hai (same code pehle pass ho chuka to kuch nahi; `prerelease` pe PR sirf affected). Jin jobs ko services chahiye unme tests se pehle `infra/docker-compose.yml` ke `mongo`, `valkey` aur `mailpit` chalte hain (`release.yml` me bhi, publish ke checks se pehle). npm 12.2.0 pin hai (Node 24 ke saath npm 11 aata hai).
 
 ## 6. CLI ka code
 
@@ -149,3 +149,4 @@ npm run update-deps -- --dry-run     # sirf plan, kuch nahi badalta
 | v1.13   | 2026-11-10 | §3.1: naya app "Coming soon" home ke saath banta hai (Q-014).                                                                                                                                                                                                                                                                                                                |
 | v1.14   | 2026-11-12 | §3.1: naya app `vercel.json` aur uske test ke saath banta hai (Q-015).                                                                                                                                                                                                                                                                                                       |
 | v1.15   | 2026-11-14 | §3: Tailwind wale React package ka niyam (`tailwind.css`, playground ka `@source`, har app/playground me import) aur uska pehra (owner). |
+| v1.16   | 2026-11-14 | §5: CI ab parallel jobs, `plan.ts` se same-code skip aur affected-only `verify` (RULES §2). |
