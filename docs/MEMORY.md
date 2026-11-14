@@ -1,6 +1,6 @@
 # MEMORY — BQ
 
-> **Status:** v1.109 (2026-11-14). Project ki yaaddasht: **kya tay hua aur kyun**, **pichhle kaam se kya seekha**, aur **kaunse jaal (traps) se bachna hai**. Poori detail baaki docs me hai; yahan short version aur pointers. Naya sabak ya decision aaye to yahan ek line jodo.
+> **Status:** v1.110 (2026-11-14). Project ki yaaddasht: **kya tay hua aur kyun**, **pichhle kaam se kya seekha**, aur **kaunse jaal (traps) se bachna hai**. Poori detail baaki docs me hai; yahan short version aur pointers. Naya sabak ya decision aaye to yahan ek line jodo.
 
 ## 1. Decision log
 
@@ -153,6 +153,7 @@
 | 2026-11-14 | Role ke naam ki tulna ka lint (T4.11, owner ne Claude ke 2 sawalon pe chuna): DR-007 (Master ka authenticator sirf doosra Master reset kare) ab role key se nahi, nayi permission `iam.totp.reset_master` se (sirf Master role me, sub-role me mana; jiske role me ye ho uska reset sirf ye rakhne wala); Master app ka "Reset authenticator" button role key nahi dekhta, server `GET /iam/grants?userId=` me `canResetAuthenticator` batata hai (reset wala hi check). Kisi file ko chhoot nahi (owner ne `bootstrap.ts` ki `seed.key === MASTER_ROLE` pakdi: ab seed ka `MASTER_SEED`). Wajah: roles data hain, faisla permission + scope se (RULES §3.5). |
 | 2026-11-14 | T4.1 (platform kernel) ka order aur hisse (owner ne Claude ke chaaron salah maane): pehle T3.5, kyunki passport me grants nahi aate aur core ko apni copy chahiye (identity ke role, grant, user snapshot events; har request pe identity ko call nahi, ARCHITECTURE §5.1 ke "sirf do sync calls"); audit ka viewer Master app me T4.1 me hi; CSV export seedha download (50,000 rows, formula injection se bachaav), background job aur file nahi; area-settings resolver T4.2 (location data) ke baad, taaki district/pincode ka level adhoora na rahe. |
 | 2026-11-14 | T3.5 ke 2 faisle (owner, Claude ki salah se): ek account pe max 50 grants (chalte ya aane wale), kyunki core ki copy ka snapshot ek event (16 KB, ~60 grants) me aana chahiye; 51wa saaf 409, 500 nahi. Deploy overlap me purane instance ka grant badlav copy se chhoot sakta hai (fail closed): catch-up sweep (identity har start ke ~5 min baad ek baar, lease ke peeche, pichhle 30 min me badle accounts (`updatedAt` se) ke grant snapshots dobara bhejta hai), T4.1 PR B me. |
+| 2026-11-14 | CI parallel jobs + same-code skip + affected-only (owner ne Claude ki teeno salah maani): ek job me ~34 min (2026-11-14 ka run: lint 2.9, tests 8.3, E2E 12.2, verify 5.9) aur ek feature pe same code ke 6 runs (PR → prerelease, push, PR → release, push, PR → main, push) the. Ab jobs ek saath, aakhri `check` sab ka intezaar karta hai; poore run ka pass git tree ke marker artifact (`ci-pass-<tree>`) se yaad, us tree ke baad ke runs ~1–2 min; feature PR pe sirf affected workspaces, aur merge ke baad `prerelease` ka push background me poora (chhoot wahin pakdi jaati hai, release tak nahi pahunchti). Render/Vercel ki settings nahi badli: Render sab checks dekhta hai (success, neutral, skipped pass; zero checks pe deploy nahi), Vercel sirf `check`. Isliye koi job `check` ke alawa `needs` nahi (intezaar wali job ka check shayad tab tak bana na ho, Render pehle deploy kar de), aur `release`/`main` ka push trigger rehta hai (deploy us merge commit ke checks pe). Niyam RULES §2. |
 
 ## 2. Pichhle kaam se seekhe sabak
 
@@ -348,3 +349,4 @@
 | v1.107  | 2026-11-14 | Decision: DR-007 permission `iam.totp.reset_master` se, Master UI ko server batata hai; role-name lint (T4.11, owner). |
 | v1.108  | 2026-11-14 | Decision: T4.1 ka order (T3.5 pehle) aur hisse: audit viewer isi task me, CSV seedha download, area settings T4.2 ke baad (owner). |
 | v1.109  | 2026-11-14 | Decision: 50 grants ki seema, deploy overlap ka catch-up sweep (T3.5, owner). |
+| v1.110  | 2026-11-14 | Decision: CI parallel jobs, same-code marker, affected-only feature PR (owner). |
