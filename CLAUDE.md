@@ -91,7 +91,7 @@ npm run build
 - `packages/<shared|frontend|backend>/<name>` → `@beautinique/<category>-<name>` (npm workspaces).
   Packages naye bante hain; purana `BQ-Packages` repo sirf reference hai.
 - `frontend/<app>`, `backend/<name>`: `npm run create` se bante hain, npm packages nahi (abhi 11 apps: customer aur
-  admin chalte, master me sirf sign-in aur account pages, seller, superadmin, support, finance, logistics, delivery,
+  admin chalte, master me sign-in, account aur Staff pages, seller, superadmin, support, finance, logistics, delivery,
   growth, creator khaali shells;
   backend: gateway, identity, notify, core, bundle). Core me module sirf doosre module ke `index.ts` se, aur doosre
   deployable ka code nahi: `npm run lint` me dependency-cruiser (`backend/core/.dependency-cruiser.json`).
