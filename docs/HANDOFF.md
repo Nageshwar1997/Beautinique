@@ -1,6 +1,6 @@
 # HANDOFF — BQ
 
-> **Status:** v1.207 (2026-11-14). Is project pe 2 log kaam karte hain. Ye file batati hai ki **abhi kya halat hai, kisne kya chhoda, agla kaam kya hai** aur kaunse sawal khule hain, taaki doosra insaan (aur uska Claude) bina poora itihaas padhe kaam utha sake. Jo bhi kaam roke, wo ye file update kare (neeche §8).
+> **Status:** v1.208 (2026-11-14). Is project pe 2 log kaam karte hain. Ye file batati hai ki **abhi kya halat hai, kisne kya chhoda, agla kaam kya hai** aur kaunse sawal khule hain, taaki doosra insaan (aur uska Claude) bina poora itihaas padhe kaam utha sake. Jo bhi kaam roke, wo ye file update kare (neeche §8).
 
 ## 0. Pehle ye (handoff ke din)
 
@@ -386,3 +386,4 @@
 | v1.205  | 2026-11-14 | §4 item 10: PR B merge (#79); PR C (Master Staff pages) ka kaam aur bacha kaam (weekly ~90% pe haath badla).                                                                                                                                                          |
 | v1.206  | 2026-11-14 | §1 Progress: T3.7 `[x]`, Phase 3 67%; §4 item 10: release #82 live, live jaanch theek, LIVE-005 fix prerelease me; agla M4.                                                                                                                                           |
 | v1.207  | 2026-11-14 | Owner: git skills `/commit`, `/push`, `/pr`, `/sync`, `/git-status`, `/undo-commit` (`.claude/skills/`, saajhe niyam `_shared/git-rules.md`); koi AI attribution nahi (RULES §2.2, CLAUDE.md, AGENTS.md), `.claude/settings.json` me Claude Code ki attribution band. |
+| v1.208  | 2026-11-14 | Git skills ka manual [GIT_SKILLS.md](GIT_SKILLS.md) (roz ka aur release flow, har command, rukne pe kya karein); CLAUDE.md docs list me (owner). |

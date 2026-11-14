@@ -18,6 +18,7 @@ launch jaisi banti hai. Legal cheezein dummy data ke saath implement hoti hain.
 4. [docs/MEMORY.md](docs/MEMORY.md): decision log, purane sabak, traps.
 5. [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md), [docs/PRD.md](docs/PRD.md), [docs/DESIGN.md](docs/DESIGN.md): zaroorat ke hisaab se, poore nahi.
 6. [docs/packages/README.md](docs/packages/README.md): packages ka CLI (create, publish, republish, update-deps).
+7. [docs/GIT_SKILLS.md](docs/GIT_SKILLS.md): git skills (`/commit`, `/push`, `/pr`, `/sync`, `/git-status`, `/undo-commit`) ka manual.
 
 ## Hamesha laagu niyam (detail RULES.md me)
 
@@ -119,7 +120,7 @@ npm run build
 - `/qa-audit` skill (`.claude/skills/qa-audit/`): poore bane hue project ka QA audit (functional, security, integration), bina kuch fix kiye, report `docs/QA_AUDIT_REPORT.md` me; modes `resume`, `M<n>`, `status`, `final`. Sirf insaan ke chalane pe, kai sessions me.
 - Git skills (`.claude/skills/{commit,push,pr,sync,git-status,undo-commit}/`): sabke saajhe niyam (attribution nahi,
   safety, is repo ka branch flow aur PR titles, checks) `.claude/skills/_shared/git-rules.md` me. `/sync` aur
-  `/undo-commit` sirf insaan ke type karne pe chalte hain. Branch flow badle (RULES §2) to ye file bhi.
+  `/undo-commit` sirf insaan ke type karne pe chalte hain. Insaan ke liye manual: [docs/GIT_SKILLS.md](docs/GIT_SKILLS.md). Branch flow badle (RULES §2) to ye dono bhi.
 - `AGENTS.md`: doosre AI tools (Codex, Cursor, Copilot, Gemini ...) ke liye chhota pointer; niyam yahin (`CLAUDE.md`) rehte hain. Niyam badlo to dono dekho.
 - `.github/workflows/`: `ci.yml` (har PR, aur `main`/`prerelease`/`release` pe push), `release.yml`
   (packages publish, sirf `release` branch, haath se).

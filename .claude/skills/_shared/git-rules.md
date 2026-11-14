@@ -1,7 +1,7 @@
 # Git workflow rules
 
 Shared by `/commit`, `/push`, `/pr`, `/sync`, `/git-status` and `/undo-commit`. This folder has no `SKILL.md`, so it
-is not a skill itself. Repository rules win over this file: `CLAUDE.md` and `docs/RULES.md` §2 (git flow). If they
+is not a skill itself; the human manual is `docs/GIT_SKILLS.md` (keep it in step). Repository rules win over this file: `CLAUDE.md` and `docs/RULES.md` §2 (git flow). If they
 differ, follow the repository and tell the user.
 
 ## 1. Identity and attribution (most important)
