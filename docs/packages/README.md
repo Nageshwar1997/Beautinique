@@ -1,6 +1,6 @@
 # Packages — banana, publish aur republish
 
-> **Status:** v1.14 (2026-11-12). **Abhi publish/republish nahi (owner ka faisla, 2026-10-21):** apps isi monorepo se package lete hain (npm workspaces), live deploy pe bhi. Publish sirf zaroorat pe; packages public hi rahenge. `packages/` ke saare npm packages ka kaam, aur naye frontend apps aur backend apps banana, is repo ke apne CLI (`scripts/packages/`) se hota hai. Ye guide batati hai ki kaunsa command kab chalana hai aur andar kya hota hai.
+> **Status:** v1.15 (2026-11-14). **Abhi publish/republish nahi (owner ka faisla, 2026-10-21):** apps isi monorepo se package lete hain (npm workspaces), live deploy pe bhi. Publish sirf zaroorat pe; packages public hi rahenge. `packages/` ke saare npm packages ka kaam, aur naye frontend apps aur backend apps banana, is repo ke apne CLI (`scripts/packages/`) se hota hai. Ye guide batati hai ki kaunsa command kab chalana hai aur andar kya hota hai.
 
 ## 1. Packages kahan aur kis naam se
 
@@ -39,6 +39,7 @@ Sawal: category → kind (TypeScript library / React library / CSS package; Reac
 - Har TypeScript package ke saath ek pehla test (`test/index.test.ts`) aata hai; `npm test` bina test ke pass nahi hota.
 - Bana package turant build, typecheck, lint, test aur publish checks pass karta hai (CLI ke tests ye har kind ke liye sach me chala ke dekhte hain).
 - Bina sawal: `npm run create -- --yes --category shared --kind ts --name date-format --description "..." --keywords dates --visibility public --extends none`.
+- **Tailwind wala React package (owner, 2026-11-14):** jiske components me Tailwind classes hon, wo package me `tailwind.css` (`@source './dist'`) rakhe, use `files` aur `exports` (`"./tailwind.css"`) me de, aur uske playground ki CSS `@import 'tailwindcss'` ke saath `@source '../src'` kare (editor ka Tailwind IntelliSense isi entry se us package ki classes pehchanta hai). Jo app ya playground us package ko (seedha ya kisi package ke through) render kare, uski CSS me `@import '@beautinique/frontend-<name>/tailwind.css'` zaroori: Tailwind `node_modules` scan nahi karta, iske bina classes bante hi nahi. Pehra: `scripts/ci/test/tailwind-sources.test.ts` (CI me `npm test`). Naya package bana aur editor me suggestions na aayein to VS Code me "Tailwind CSS: Restart IntelliSense Server" (ya Reload Window): extension chalu rehte hue bani nayi CSS entry turant nahi pakadta.
 
 ### 3.1 Frontend app (`--type app`)
 
@@ -147,3 +148,4 @@ npm run update-deps -- --dry-run     # sirf plan, kuch nahi badalta
 | v1.12   | 2026-11-09 | §3.1: naya frontend app manifest aur parivaar ke install icons ke saath banta hai (owner).                                                                                                                                                                                                                                                                                   |
 | v1.13   | 2026-11-10 | §3.1: naya app "Coming soon" home ke saath banta hai (Q-014).                                                                                                                                                                                                                                                                                                                |
 | v1.14   | 2026-11-12 | §3.1: naya app `vercel.json` aur uske test ke saath banta hai (Q-015).                                                                                                                                                                                                                                                                                                       |
+| v1.15   | 2026-11-14 | §3: Tailwind wale React package ka niyam (`tailwind.css`, playground ka `@source`, har app/playground me import) aur uska pehra (owner). |
