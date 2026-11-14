@@ -89,6 +89,17 @@ describe('ci.yml', () => {
     expect(check).toMatch(/name: ci-pass-\$\{\{ needs\.static\.outputs\.tree \}\}/);
   });
 
+  // the rulesets and Vercel's Deployment Checks wait for the check named `check`: no display name
+  it('check keeps its name; every other job shows its group first', () => {
+    const nameOf = (id: string) => /^ {4}name: (.+)$/m.exec((jobs.get(id) ?? []).join('\n'))?.[1];
+    expect(nameOf('check')).toBeUndefined();
+    for (const id of jobs.keys()) {
+      if (id !== 'check') {
+        expect(nameOf(id), id).toMatch(/^(?:guard|static|tests|verify|cache) \/ /);
+      }
+    }
+  });
+
   // T0.5, T0.6: a test or E2E job builds what plan.ts names with Turborepo, after restoring its
   // cache; static builds everything with the package CLI, never from the cache
   const builds = (id: string) =>

@@ -31,9 +31,12 @@ env:
 # turbo-cache and check starts the same way (checkout, Node, plan); scripts/ci/test/ci-workflow.test.ts
 # keeps them in step. Builds: static with the package CLI (`npm run build`, never cached, the way
 # Vercel and Render build); the test and E2E jobs with Turborepo and its cache (turbo.json, T0.5).
+# Display names start with their group (guard, static, tests, verify, cache) so the checks read as
+# flows; they change nothing else. `check` has no display name: the rulesets and Vercel name it.
 jobs:
   # Runs on every run, same code or not: the history, the branch flow and the advisories change.
   guard:
+    name: guard / secrets, branch flow
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
@@ -88,6 +91,7 @@ jobs:
   # Prettier on every run; build, lint and typecheck of everything whenever code changed. Its outputs
   # tell `check` whether a pass may leave the marker.
   static:
+    name: static / format, lint, types
     runs-on: ubuntu-latest
     timeout-minutes: 20
     outputs:
@@ -134,6 +138,7 @@ jobs:
   # The repo's own tests (CLI, CI guards that read every app and package, E2E helpers): whenever code
   # changed anywhere, since they read across the workspaces.
   test-scripts:
+    name: tests / scripts
     runs-on: ubuntu-latest
     timeout-minutes: 25
     steps:
@@ -196,6 +201,7 @@ jobs:
   # Backend packages, shared packages and the deployables, against a real MongoDB replica set, Valkey
   # and Mailpit.
   test-backend:
+    name: tests / backend
     runs-on: ubuntu-latest
     timeout-minutes: 25
     steps:
@@ -258,6 +264,7 @@ jobs:
 
   # Frontend packages and the apps' unit tests: no service needed.
   test-frontend:
+    name: tests / frontend
     runs-on: ubuntu-latest
     timeout-minutes: 25
     steps:
@@ -311,6 +318,7 @@ jobs:
   # every screen (owner, 2026-11-02: Chromium only in CI). One job per app; every app with an e2e
   # script is in the list (scripts/ci/test/ci-workflow.test.ts).
   e2e:
+    name: tests / e2e (${{ matrix.app }})
     runs-on: ubuntu-latest
     timeout-minutes: 30
     strategy:
@@ -387,6 +395,7 @@ jobs:
   # Every check a publish runs (build, lint, typecheck, tests, package contents, publint, types),
   # nothing published: the affected packages, or all of them. It builds what it checks itself.
   verify:
+    name: verify / packages
     runs-on: ubuntu-latest
     timeout-minutes: 25
     steps:
@@ -436,6 +445,7 @@ jobs:
   # merged code usually skips every build (same code), so nothing else would. Nobody waits for it and
   # check does not need it; elsewhere it is skipped.
   turbo-cache:
+    name: cache / turbo
     if: github.event_name == 'push' && github.ref == 'refs/heads/prerelease'
     runs-on: ubuntu-latest
     timeout-minutes: 20
