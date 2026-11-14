@@ -47,13 +47,21 @@ export interface Joined {
  * a password), then the first sign-in, which sets up the authenticator (the QR page's key, the first
  * code, the recovery codes) and lands on the home page. `check` runs axe on each screen.
  */
-export async function joinTeam(page: Page, email: string, { check = true } = {}): Promise<Joined> {
+export async function joinTeam(
+  page: Page,
+  email: string,
+  {
+    check = true,
+    invited = false,
+    home = 'Beautinique Master',
+  }: { check?: boolean; invited?: boolean; home?: string } = {},
+): Promise<Joined> {
   const look = async () => {
     if (!check) return;
     await expectNoAxeViolations(page);
     await expectNoSideScroll(page);
   };
-  await invite(email);
+  if (!invited) await invite(email);
   const [invitation] = await mailsTo(email);
   expect(invitation?.Subject).toMatch(/invit/i);
 
@@ -109,8 +117,9 @@ export async function joinTeam(page: Page, email: string, { check = true } = {})
   await page.getByRole('button', { name: 'Continue' }).click();
 
   await expect(page).toHaveURL('/');
-  await expect(page.getByRole('heading', { level: 1, name: 'Beautinique Master' })).toBeVisible();
-  await expect(page.getByText(`Signed in as ${email}`)).toBeVisible();
+  await expect(page.getByRole('heading', { level: 1, name: home })).toBeVisible();
+  if (home === 'Beautinique Master')
+    await expect(page.getByText(`Signed in as ${email}`)).toBeVisible();
   await expect(accountButton(page, email)).toBeVisible();
   await look();
   return { secret, at, recoveryCodes };

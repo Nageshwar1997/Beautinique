@@ -7,6 +7,8 @@ import { randomBytes, randomUUID } from 'node:crypto';
 
 import { defineConfig, devices } from '@playwright/test';
 
+import { ADMIN_PORT } from './e2e/ports';
+
 const APP_PORT = 3105;
 const GATEWAY_PORT = 8093;
 
@@ -63,7 +65,7 @@ export default defineConfig({
       stdout: 'pipe',
       env: {
         BQ_E2E_GATEWAY_PORT: String(GATEWAY_PORT),
-        BQ_E2E_APP_HOSTS: `master=localhost:${String(APP_PORT)}`,
+        BQ_E2E_APP_HOSTS: `master=localhost:${String(APP_PORT)},admin=localhost:${String(ADMIN_PORT)}`,
       },
     },
     {
@@ -72,6 +74,18 @@ export default defineConfig({
       reuseExistingServer: false,
       timeout: 120_000,
       // the dev server's /api proxy goes to the e2e backend (these win over frontend/master/.env)
+      env: {
+        BQ_GATEWAY_URL: `http://localhost:${String(GATEWAY_PORT)}`,
+        ORIGIN_SECRET: process.env.BQ_E2E_ORIGIN_SECRET,
+      },
+    },
+    {
+      // the admin app, its own dev server on its own port, through the same e2e backend
+      command: `npm run dev -- --port ${String(ADMIN_PORT)}`,
+      cwd: '../admin',
+      url: `http://localhost:${String(ADMIN_PORT)}/sign-in`,
+      reuseExistingServer: false,
+      timeout: 120_000,
       env: {
         BQ_GATEWAY_URL: `http://localhost:${String(GATEWAY_PORT)}`,
         ORIGIN_SECRET: process.env.BQ_E2E_ORIGIN_SECRET,
