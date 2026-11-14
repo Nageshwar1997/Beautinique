@@ -1,6 +1,6 @@
 # MEMORY — BQ
 
-> **Status:** v1.111 (2026-11-14). Project ki yaaddasht: **kya tay hua aur kyun**, **pichhle kaam se kya seekha**, aur **kaunse jaal (traps) se bachna hai**. Poori detail baaki docs me hai; yahan short version aur pointers. Naya sabak ya decision aaye to yahan ek line jodo.
+> **Status:** v1.112 (2026-11-14). Project ki yaaddasht: **kya tay hua aur kyun**, **pichhle kaam se kya seekha**, aur **kaunse jaal (traps) se bachna hai**. Poori detail baaki docs me hai; yahan short version aur pointers. Naya sabak ya decision aaye to yahan ek line jodo.
 
 ## 1. Decision log
 
@@ -155,6 +155,7 @@
 | 2026-11-14 | T3.5 ke 2 faisle (owner, Claude ki salah se): ek account pe max 50 grants (chalte ya aane wale), kyunki core ki copy ka snapshot ek event (16 KB, ~60 grants) me aana chahiye; 51wa saaf 409, 500 nahi. Deploy overlap me purane instance ka grant badlav copy se chhoot sakta hai (fail closed): catch-up sweep (identity har start ke ~5 min baad ek baar, lease ke peeche, pichhle 30 min me badle accounts (`updatedAt` se) ke grant snapshots dobara bhejta hai), T4.1 PR B me. |
 | 2026-11-14 | CI parallel jobs + same-code skip + affected-only (owner ne Claude ki teeno salah maani): ek job me ~34 min (2026-11-14 ka run: lint 2.9, tests 8.3, E2E 12.2, verify 5.9) aur ek feature pe same code ke 6 runs (PR → prerelease, push, PR → release, push, PR → main, push) the. Ab jobs ek saath, aakhri `check` sab ka intezaar karta hai; poore run ka pass git tree ke marker artifact (`ci-pass-<tree>`) se yaad, us tree ke baad ke runs ~1–2 min; feature PR pe sirf affected workspaces, aur merge ke baad `prerelease` ka push background me poora (chhoot wahin pakdi jaati hai, release tak nahi pahunchti). Render/Vercel ki settings nahi badli: Render sab checks dekhta hai (success, neutral, skipped pass; zero checks pe deploy nahi), Vercel sirf `check`. Isliye koi job `check` ke alawa `needs` nahi (intezaar wali job ka check shayad tab tak bana na ho, Render pehle deploy kar de), aur `release`/`main` ka push trigger rehta hai (deploy us merge commit ke checks pe). Niyam RULES §2. |
 | 2026-11-14 | CI me build ek alag job me ek baar nahi (owner ne Claude ki salah maani): har job ka build ~55 s (37 workspaces, apps lagbhag aadha) aur jobs ek saath chalti hain. Build job + artifact + `needs` se CI ~1.5 min dheema hota, aur Render pehle deploy kar sakta tha (jo job `needs` me rukti hai uska check der se banta hai; PR #85 pe pehle sirf 9 checks dikhe, `check` baad me). Iske badle: har test/E2E job sirf zaroori build (`--for`, T0.6), aur aage Turborepo build cache sirf CI me (T0.5; `static` bina cache, Vercel/Render ke build nahi chhedne: build-time env aur Vercel ka apna Remote Cache). |
+| 2026-11-14 | Turborepo sirf CI ka build cache (T0.5, owner ne Claude ki salah maani): test aur E2E jobs `turbo run build` cache ke saath; `static`, deploys (Vercel, Render) aur laptops `npm run build` (package CLI) hi. Wajah: Vercel pe turbo apna Remote Cache khud lagata hai aur build-time env (gateway URL, Sentry) declare na ho to galat build production me jaa sakta hai; `static` ka taaza build cache ki galti pakadta hai. Ek waqt me ek build, kyunki customer ka prerender load me timeout hua (laptop, 10 parallel builds). `prerelease` push same code ki wajah se kuch build nahi karta, isliye cache bharne ki alag `turbo-cache` job. Root `package.json` me `packageManager: npm@12.2.0`: turbo `devEngines` ki khuli range (`>=12.2.0`) nahi maanta aur iske bina workspaces nahi pehchaanta; npm ka niyam `devEngines` me hi. Version 2.11.10 (2.11.11 sirf 3 din purana tha). |
 
 ## 2. Pichhle kaam se seekhe sabak
 
@@ -352,3 +353,4 @@
 | v1.109  | 2026-11-14 | Decision: 50 grants ki seema, deploy overlap ka catch-up sweep (T3.5, owner). |
 | v1.110  | 2026-11-14 | Decision: CI parallel jobs, same-code marker, affected-only feature PR (owner). |
 | v1.111  | 2026-11-14 | Decision: CI me alag build job nahi; har job sirf zaroori build, Turborepo cache sirf CI me (owner). |
+| v1.112  | 2026-11-14 | Decision: Turborepo sirf CI ka build cache, ek-ek build, `turbo-cache` job, `packageManager` field (owner). |
