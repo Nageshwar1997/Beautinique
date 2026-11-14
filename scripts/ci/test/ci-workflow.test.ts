@@ -40,11 +40,13 @@ const stepsOf = (id: string) => {
   return steps;
 };
 
-const planned = [...jobs.keys()].filter((id) => id !== 'guard' && id !== 'check');
+/** Jobs that do not ask plan.ts: guard runs every time, turbo-cache only on a push to prerelease. */
+const UNPLANNED = new Set(['guard', 'turbo-cache', 'check']);
+const planned = [...jobs.keys()].filter((id) => !UNPLANNED.has(id));
 
 describe('ci.yml', () => {
-  it('has guard, check and one job for each plan.ts job', () => {
-    expect([...jobs.keys()].sort()).toEqual(['check', 'guard', ...JOBS].sort());
+  it('has guard, turbo-cache, check and one job for each plan.ts job', () => {
+    expect([...jobs.keys()].sort()).toEqual([...UNPLANNED, ...JOBS].sort());
   });
 
   it.each(planned)('%s: checks out, sets up Node, then asks plan.ts for itself', (id) => {
@@ -76,7 +78,7 @@ describe('ci.yml', () => {
         ?.split(',')
         .map((need) => need.trim())
         .sort(),
-    ).toEqual([...jobs.keys()].filter((id) => id !== 'check').sort());
+    ).toEqual([...jobs.keys()].filter((id) => id !== 'check' && id !== 'turbo-cache').sort());
   });
 
   it('check runs unless the run is cancelled, and keeps the marker only after a full pass', () => {
@@ -87,22 +89,70 @@ describe('ci.yml', () => {
     expect(check).toMatch(/name: ci-pass-\$\{\{ needs\.static\.outputs\.tree \}\}/);
   });
 
-  // T0.6: a test or E2E job builds only what plan.ts names; static builds everything for lint and
-  // typecheck, test-scripts because those tests read every workspace
+  // T0.5, T0.6: a test or E2E job builds what plan.ts names with Turborepo, after restoring its
+  // cache; static builds everything with the package CLI, never from the cache
   const builds = (id: string) =>
     stepsOf(id)
       .map((step) => step.join('\n'))
-      .filter((step) => step.includes('run: npm run build'));
+      .filter((step) => /run: (?:npm run build|npx turbo run build)/.test(step));
 
-  it.each(['test-backend', 'test-frontend', 'e2e'])('%s: builds what plan.ts names', (id) => {
-    expect(builds(id)).toHaveLength(1);
-    expect(builds(id)[0]).toMatch(/BUILD: \$\{\{ steps\.plan\.outputs\.build \}\}/);
-    expect(builds(id)[0]).toMatch(/run: npm run build -- \$BUILD$/m);
+  it.each(['test-scripts', 'test-backend', 'test-frontend', 'e2e'])(
+    '%s: restores the build cache, then builds what plan.ts names, one build at a time',
+    (id) => {
+      const steps = stepsOf(id).map((step) => step.join('\n'));
+      expect(builds(id)).toHaveLength(1);
+      const build = builds(id)[0] ?? '';
+      expect(build).toContain('BUILD: ${{ steps.plan.outputs.build }}');
+      expect(build).toContain('run: npx turbo run build $BUILD --concurrency=1 ');
+      const restore = steps[steps.indexOf(build) - 1] ?? '';
+      expect(restore).toContain('uses: actions/cache/restore@');
+      expect(restore).toContain('path: .turbo/cache');
+    },
+  );
+
+  it('static: builds every workspace with the package CLI, no cache', () => {
+    expect(builds('static')).toHaveLength(1);
+    expect(builds('static')[0]).toMatch(/run: npm run build$/m);
+    expect((jobs.get('static') ?? []).join('\n')).not.toMatch(/turbo/);
   });
 
-  it.each(['static', 'test-scripts'])('%s: builds every workspace', (id) => {
-    expect(builds(id)).toHaveLength(1);
-    expect(builds(id)[0]).toMatch(/run: npm run build$/m);
+  it('turbo-cache: only on a push to prerelease, builds everything and saves the cache', () => {
+    const job = (jobs.get('turbo-cache') ?? []).join('\n');
+    expect(job).toMatch(
+      /^ {4}if: github\.event_name == 'push' && github\.ref == 'refs\/heads\/prerelease'$/m,
+    );
+    expect(job).toContain('run: npx turbo run build --concurrency=1 ');
+    expect(job).toMatch(/uses: actions\/cache\/save@[\s\S]+path: \.turbo\/cache/);
+  });
+
+  it('turbo.json: builds dependencies first, keeps every build folder, rebuilds on root changes', () => {
+    const turbo = JSON.parse(readFileSync(join(root, 'turbo.json'), 'utf8')) as {
+      envMode?: string;
+      globalDependencies?: string[];
+      tasks?: { build?: { dependsOn?: string[]; outputs?: string[] } };
+    };
+    // every env value reaches the build as with npm run build; CI sets the same ones on every run
+    expect(turbo.envMode).toBe('loose');
+    // build tools (tsdown, vite, typescript) come from the root package.json and the lock file
+    expect(turbo.globalDependencies).toEqual(
+      expect.arrayContaining(['package.json', 'package-lock.json', 'configs/**']),
+    );
+    expect(turbo.tasks?.build?.dependsOn).toEqual(['^build']);
+    expect(turbo.tasks?.build?.outputs).toEqual(expect.arrayContaining(['dist/**', 'build/**']));
+  });
+
+  it('package.json: turbo pinned, packageManager on the npm major devEngines asks for', () => {
+    const manifest = JSON.parse(readFileSync(join(root, 'package.json'), 'utf8')) as {
+      packageManager?: string;
+      devEngines?: { packageManager?: { version?: string } };
+      devDependencies?: Record<string, string>;
+    };
+    expect(manifest.devDependencies?.turbo).toMatch(/^\d+\.\d+\.\d+$/);
+    // turbo finds the workspaces through packageManager (it rejects an open devEngines range)
+    const major = /^npm@(\d+)\.\d+\.\d+$/.exec(manifest.packageManager ?? '')?.[1];
+    const wanted = /(\d+)\./.exec(manifest.devEngines?.packageManager?.version ?? '')?.[1];
+    expect(major).toBeDefined();
+    expect(major).toBe(wanted);
   });
 
   it('has an E2E job for every app with an e2e script, and no other', () => {

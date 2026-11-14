@@ -15,6 +15,11 @@ concurrency:
   group: ci-${{ github.ref }}
   cancel-in-progress: true
 
+# Turborepo, the CI build cache (T0.5): no telemetry, no update notice.
+env:
+  TURBO_TELEMETRY_DISABLED: '1'
+  TURBO_NO_UPDATE_NOTIFIER: '1'
+
 # Parallel jobs (owner, 2026-11-14; RULES §2 "CI"). Each job checks out, asks scripts/ci/bin/plan.ts
 # what it has to do and skips its steps when that is nothing, so it still ends green:
 # - same code already passed (a marker artifact ci-pass-<git tree>): nothing heavy runs;
@@ -22,9 +27,10 @@ concurrency:
 # - every push, a pull request into release or main, or a change outside the workspaces: everything.
 # No job waits for a "plan" job: Render's "After CI checks pass" deploys once every check it sees has
 # passed, and a job that waits (needs) may have no check yet. Only `check` waits for the others; the
-# rulesets and Vercel's Deployment Checks name it, so it keeps its name. Every job but guard and
-# check starts the same way (checkout, Node, plan); scripts/ci/test/ci-workflow.test.ts keeps them
-# in step.
+# rulesets and Vercel's Deployment Checks name it, so it keeps its name. Every job but guard,
+# turbo-cache and check starts the same way (checkout, Node, plan); scripts/ci/test/ci-workflow.test.ts
+# keeps them in step. Builds: static with the package CLI (`npm run build`, never cached, the way
+# Vercel and Render build); the test and E2E jobs with Turborepo and its cache (turbo.json, T0.5).
 jobs:
   # Runs on every run, same code or not: the history, the branch flow and the advisories change.
   guard:
@@ -157,8 +163,20 @@ jobs:
           restore-keys: npm-${{ runner.os }}-
       - if: steps.plan.outputs.run == 'true'
         run: npm ci
+      - name: Restore the build cache
+        if: steps.plan.outputs.run == 'true'
+        uses: actions/cache/restore@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: .turbo/cache
+          key: turbo-${{ runner.os }}-${{ github.sha }}
+          restore-keys: turbo-${{ runner.os }}-
+      # What this job runs and what that needs (T0.6; plan.ts, plain names, through env); unchanged
+      # workspaces come from the cache (T0.5). One build at a time: the customer app's prerender times
+      # out under load.
       - if: steps.plan.outputs.run == 'true'
-        run: npm run build
+        env:
+          BUILD: ${{ steps.plan.outputs.build }}
+        run: npx turbo run build $BUILD --concurrency=1 --output-logs=new-only
       # The E2E helpers' tests use MongoDB. Every job that needs a service starts it like this, from
       # the same compose file as the laptops (`npm run infra:up`), and so does release.yml.
       - name: Start MongoDB, Valkey and Mailpit for the tests
@@ -207,11 +225,20 @@ jobs:
           restore-keys: npm-${{ runner.os }}-
       - if: steps.plan.outputs.run == 'true'
         run: npm ci
-      # Only what this job runs and what that needs (T0.6), from plan.ts (plain names, through env).
+      - name: Restore the build cache
+        if: steps.plan.outputs.run == 'true'
+        uses: actions/cache/restore@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: .turbo/cache
+          key: turbo-${{ runner.os }}-${{ github.sha }}
+          restore-keys: turbo-${{ runner.os }}-
+      # What this job runs and what that needs (T0.6; plan.ts, plain names, through env); unchanged
+      # workspaces come from the cache (T0.5). One build at a time: the customer app's prerender times
+      # out under load.
       - if: steps.plan.outputs.run == 'true'
         env:
           BUILD: ${{ steps.plan.outputs.build }}
-        run: npm run build -- $BUILD
+        run: npx turbo run build $BUILD --concurrency=1 --output-logs=new-only
       - name: Start MongoDB, Valkey and Mailpit for the tests
         if: steps.plan.outputs.run == 'true'
         run: |
@@ -260,11 +287,20 @@ jobs:
           restore-keys: npm-${{ runner.os }}-
       - if: steps.plan.outputs.run == 'true'
         run: npm ci
-      # Only what this job runs and what that needs (T0.6), from plan.ts (plain names, through env).
+      - name: Restore the build cache
+        if: steps.plan.outputs.run == 'true'
+        uses: actions/cache/restore@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: .turbo/cache
+          key: turbo-${{ runner.os }}-${{ github.sha }}
+          restore-keys: turbo-${{ runner.os }}-
+      # What this job runs and what that needs (T0.6; plan.ts, plain names, through env); unchanged
+      # workspaces come from the cache (T0.5). One build at a time: the customer app's prerender times
+      # out under load.
       - if: steps.plan.outputs.run == 'true'
         env:
           BUILD: ${{ steps.plan.outputs.build }}
-        run: npm run build -- $BUILD
+        run: npx turbo run build $BUILD --concurrency=1 --output-logs=new-only
       - if: steps.plan.outputs.run == 'true'
         env:
           WORKSPACES: ${{ steps.plan.outputs.args }}
@@ -309,11 +345,20 @@ jobs:
           restore-keys: npm-${{ runner.os }}-
       - if: steps.plan.outputs.run == 'true'
         run: npm ci
-      # Only what this job runs and what that needs (T0.6), from plan.ts (plain names, through env).
+      - name: Restore the build cache
+        if: steps.plan.outputs.run == 'true'
+        uses: actions/cache/restore@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: .turbo/cache
+          key: turbo-${{ runner.os }}-${{ github.sha }}
+          restore-keys: turbo-${{ runner.os }}-
+      # What this job runs and what that needs (T0.6; plan.ts, plain names, through env); unchanged
+      # workspaces come from the cache (T0.5). One build at a time: the customer app's prerender times
+      # out under load.
       - if: steps.plan.outputs.run == 'true'
         env:
           BUILD: ${{ steps.plan.outputs.build }}
-        run: npm run build -- $BUILD
+        run: npx turbo run build $BUILD --concurrency=1 --output-logs=new-only
       - name: Start MongoDB, Valkey and Mailpit for the tests
         if: steps.plan.outputs.run == 'true'
         run: |
@@ -386,6 +431,41 @@ jobs:
         env:
           PACKAGES: ${{ steps.plan.outputs.args }}
         run: npm run verify -- $PACKAGES --yes
+
+  # Fills the build cache that pull requests restore (T0.5): only on a push to prerelease, where the
+  # merged code usually skips every build (same code), so nothing else would. Nobody waits for it and
+  # check does not need it; elsewhere it is skipped.
+  turbo-cache:
+    if: github.event_name == 'push' && github.ref == 'refs/heads/prerelease'
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: 24
+          package-manager-cache: false
+      - run: npm install --global npm@12.2.0
+      - uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: ~/.npm
+          key: npm-${{ runner.os }}-${{ hashFiles('package-lock.json') }}
+          restore-keys: npm-${{ runner.os }}-
+      - run: npm ci
+      - uses: actions/cache/restore@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: .turbo/cache
+          key: turbo-${{ runner.os }}-${{ github.sha }}
+          restore-keys: turbo-${{ runner.os }}-
+      - run: npx turbo run build --concurrency=1 --output-logs=new-only
+      # An entry not rebuilt for a week goes (one rebuild then), so the cache stays small.
+      - run: find .turbo/cache -type f -mtime +7 -delete
+      - uses: actions/cache/save@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: .turbo/cache
+          key: turbo-${{ runner.os }}-${{ github.sha }}
 
   # The one check the rulesets require and Vercel's Deployment Checks wait for: green only when every
   # job above is. A run that tested everything and passed leaves the marker for this tree.

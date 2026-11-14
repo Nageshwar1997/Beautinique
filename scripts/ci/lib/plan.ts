@@ -238,9 +238,10 @@ export interface Plan {
   /** test-backend, test-frontend, verify: the arguments for npm */
   args: string;
   /**
-   * The arguments for `npm run build --` (T0.6): empty builds every workspace; `--for a,b` builds
-   * those and every workspace they need (the package CLI's closure, devDependencies too). A test job
-   * builds what it tests, an E2E job its app and the bundle; static and test-scripts build everything.
+   * The filters for `turbo run build` (T0.5, T0.6): empty builds every workspace; `--filter=a...`
+   * builds a and every workspace it needs (turbo.json: `^build`). A test job builds what it tests, an
+   * E2E job its app and the bundle; test-scripts everything. (static builds everything with the
+   * package CLI, `npm run build`, never from the cache.)
    */
   build: string;
 }
@@ -266,7 +267,9 @@ export function planJob(input: PlanInput): Plan {
     throw new Error(`No app frontend/${app ?? ''} with an e2e script.`);
   }
   const buildFor = (names: readonly string[]) =>
-    names.length === 0 ? '' : `--for ${safe(names).join(',')}`;
+    safe(names)
+      .map((name) => `--filter=${name}...`)
+      .join(' ');
   if (passedRun !== undefined) {
     return {
       ...none,

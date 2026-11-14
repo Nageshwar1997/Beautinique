@@ -292,16 +292,20 @@ describe('a job', () => {
     expect(plan('test-scripts', null, all).build).toBe('');
     expect(plan('verify', null, all).build).toBe('');
     expect(plan('test-backend', null, all).build).toBe(
-      '--for bundle,core,@x/backend-kit,@x/shared-zod',
+      '--filter=bundle... --filter=core... --filter=@x/backend-kit... --filter=@x/shared-zod...',
     );
     expect(plan('test-frontend', null, all).build).toBe(
-      '--for blank,shop,@x/frontend-components,@x/frontend-styles',
+      '--filter=blank... --filter=shop... --filter=@x/frontend-components... --filter=@x/frontend-styles...',
     );
-    expect(plan('e2e', null, { ...all, app: 'blank' }).build).toBe('--for blank,bundle');
+    expect(plan('e2e', null, { ...all, app: 'blank' }).build).toBe(
+      '--filter=blank... --filter=bundle...',
+    );
 
     const appChange = ['frontend/shop/app/root.tsx'];
-    expect(plan('test-frontend', appChange).build).toBe('--for shop');
-    expect(plan('e2e', appChange, { app: 'shop' }).build).toBe('--for shop,bundle');
+    expect(plan('test-frontend', appChange).build).toBe('--filter=shop...');
+    expect(plan('e2e', appChange, { app: 'shop' }).build).toBe(
+      '--filter=shop... --filter=bundle...',
+    );
     expect(plan('static', appChange).build).toBe('');
   });
 
