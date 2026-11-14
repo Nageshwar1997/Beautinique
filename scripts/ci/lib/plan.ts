@@ -237,6 +237,12 @@ export interface Plan {
   code: boolean;
   /** test-backend, test-frontend, verify: the arguments for npm */
   args: string;
+  /**
+   * The arguments for `npm run build --` (T0.6): empty builds every workspace; `--for a,b` builds
+   * those and every workspace they need (the package CLI's closure, devDependencies too). A test job
+   * builds what it tests, an E2E job its app and the bundle; static and test-scripts build everything.
+   */
+  build: string;
 }
 
 const SAFE_ARG = /^[@\w./-]+$/;
@@ -254,13 +260,13 @@ const list = (values: readonly string[]) =>
 
 export function planJob(input: PlanInput): Plan {
   const { job, app, full, passedRun, changed, workspaces } = input;
-  const none = { everything: false, code: false, args: '' };
-  if (job === 'e2e') {
-    const target = workspaces.find((w) => w.dir === `frontend/${app ?? ''}`);
-    if (!target?.scripts.includes('e2e')) {
-      throw new Error(`No app frontend/${app ?? ''} with an e2e script.`);
-    }
+  const none = { everything: false, code: false, args: '', build: '' };
+  const e2eApp = workspaces.find((w) => w.dir === `frontend/${app ?? ''}`);
+  if (job === 'e2e' && !e2eApp?.scripts.includes('e2e')) {
+    throw new Error(`No app frontend/${app ?? ''} with an e2e script.`);
   }
+  const buildFor = (names: readonly string[]) =>
+    names.length === 0 ? '' : `--for ${safe(names).join(',')}`;
   if (passedRun !== undefined) {
     return {
       ...none,
@@ -284,7 +290,8 @@ export function planJob(input: PlanInput): Plan {
         : code
           ? `affected: ${list(reach)}`
           : 'only docs changed';
-  const base = { everything, code };
+  // static (lint, typecheck) and test-scripts (they read every workspace) build everything
+  const base = { everything, code, build: '' };
 
   switch (job) {
     case 'static':
@@ -301,16 +308,16 @@ export function planJob(input: PlanInput): Plan {
       const groups = TEST_GROUPS[job];
       const targets = workspaces
         .filter((w) => reach.includes(w.dir) && w.scripts.includes('test'))
-        .filter((w) => groups.some((group) => w.dir.startsWith(group)))
-        .map((w) => w.dir);
+        .filter((w) => groups.some((group) => w.dir.startsWith(group)));
+      const dirs = targets.map((w) => w.dir);
       return {
         ...base,
         run: targets.length > 0,
-        args: safe(targets)
+        args: safe(dirs)
           .map((dir) => `--workspace=${dir}`)
           .join(' '),
-        reason:
-          targets.length > 0 ? `${why}; tests ${list(targets)}` : `${why}: none of these here`,
+        build: buildFor(targets.map((w) => w.name)),
+        reason: targets.length > 0 ? `${why}; tests ${list(dirs)}` : `${why}: none of these here`,
       };
     }
     case 'e2e': {
@@ -318,7 +325,16 @@ export function planJob(input: PlanInput): Plan {
       // runs every app's E2E
       const backend = reach.some((dir) => dir.startsWith('backend/'));
       const run = everything || backend || reach.includes(`frontend/${app ?? ''}`);
-      return { ...base, run, args: '', reason: run ? why : `${why}: not frontend/${app ?? ''}` };
+      // the app and the bundle (every deployable) with what they need; no bundle known: everything
+      const bundle = workspaces.find((w) => w.dir === 'backend/bundle');
+      return {
+        ...base,
+        run,
+        args: '',
+        build:
+          bundle === undefined || e2eApp === undefined ? '' : buildFor([e2eApp.name, bundle.name]),
+        reason: run ? why : `${why}: not frontend/${app ?? ''}`,
+      };
     }
     case 'verify': {
       const names = workspaces

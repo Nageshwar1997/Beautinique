@@ -1,6 +1,6 @@
 // Every job of .github/workflows/ci.yml (but guard and check) runs this first:
 //   node scripts/ci/bin/plan.ts --job <static|test-scripts|test-backend|test-frontend|e2e|verify> [--app <app>]
-// and its steps read the outputs: run (true/false), code, args, tree, upload. The rules are in
+// and its steps read the outputs: run (true/false), code, args, build, tree, upload. The rules are in
 // ../lib/plan.ts. It looks for the marker with the gh CLI (on every GitHub runner, GH_TOKEN from the
 // job), not an HTTP call of its own.
 import { execFileSync } from 'node:child_process';
@@ -70,11 +70,13 @@ console.log(
   `Tree ${tree}${changed === null ? '' : `, ${String(changed.length)} changed file(s)`}.`,
 );
 if (plan.args !== '') console.log(`npm arguments: ${plan.args}`);
+if (plan.run) console.log(`Build: ${plan.build === '' ? 'every workspace' : plan.build}`);
 
 const outputs = {
   run: String(plan.run),
   code: String(plan.code),
   args: plan.args,
+  build: plan.build,
   tree,
   upload: String(upload),
 };

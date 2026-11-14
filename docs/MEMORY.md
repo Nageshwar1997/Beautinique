@@ -1,6 +1,6 @@
 # MEMORY — BQ
 
-> **Status:** v1.110 (2026-11-14). Project ki yaaddasht: **kya tay hua aur kyun**, **pichhle kaam se kya seekha**, aur **kaunse jaal (traps) se bachna hai**. Poori detail baaki docs me hai; yahan short version aur pointers. Naya sabak ya decision aaye to yahan ek line jodo.
+> **Status:** v1.111 (2026-11-14). Project ki yaaddasht: **kya tay hua aur kyun**, **pichhle kaam se kya seekha**, aur **kaunse jaal (traps) se bachna hai**. Poori detail baaki docs me hai; yahan short version aur pointers. Naya sabak ya decision aaye to yahan ek line jodo.
 
 ## 1. Decision log
 
@@ -154,6 +154,7 @@
 | 2026-11-14 | T4.1 (platform kernel) ka order aur hisse (owner ne Claude ke chaaron salah maane): pehle T3.5, kyunki passport me grants nahi aate aur core ko apni copy chahiye (identity ke role, grant, user snapshot events; har request pe identity ko call nahi, ARCHITECTURE §5.1 ke "sirf do sync calls"); audit ka viewer Master app me T4.1 me hi; CSV export seedha download (50,000 rows, formula injection se bachaav), background job aur file nahi; area-settings resolver T4.2 (location data) ke baad, taaki district/pincode ka level adhoora na rahe. |
 | 2026-11-14 | T3.5 ke 2 faisle (owner, Claude ki salah se): ek account pe max 50 grants (chalte ya aane wale), kyunki core ki copy ka snapshot ek event (16 KB, ~60 grants) me aana chahiye; 51wa saaf 409, 500 nahi. Deploy overlap me purane instance ka grant badlav copy se chhoot sakta hai (fail closed): catch-up sweep (identity har start ke ~5 min baad ek baar, lease ke peeche, pichhle 30 min me badle accounts (`updatedAt` se) ke grant snapshots dobara bhejta hai), T4.1 PR B me. |
 | 2026-11-14 | CI parallel jobs + same-code skip + affected-only (owner ne Claude ki teeno salah maani): ek job me ~34 min (2026-11-14 ka run: lint 2.9, tests 8.3, E2E 12.2, verify 5.9) aur ek feature pe same code ke 6 runs (PR → prerelease, push, PR → release, push, PR → main, push) the. Ab jobs ek saath, aakhri `check` sab ka intezaar karta hai; poore run ka pass git tree ke marker artifact (`ci-pass-<tree>`) se yaad, us tree ke baad ke runs ~1–2 min; feature PR pe sirf affected workspaces, aur merge ke baad `prerelease` ka push background me poora (chhoot wahin pakdi jaati hai, release tak nahi pahunchti). Render/Vercel ki settings nahi badli: Render sab checks dekhta hai (success, neutral, skipped pass; zero checks pe deploy nahi), Vercel sirf `check`. Isliye koi job `check` ke alawa `needs` nahi (intezaar wali job ka check shayad tab tak bana na ho, Render pehle deploy kar de), aur `release`/`main` ka push trigger rehta hai (deploy us merge commit ke checks pe). Niyam RULES §2. |
+| 2026-11-14 | CI me build ek alag job me ek baar nahi (owner ne Claude ki salah maani): har job ka build ~55 s (37 workspaces, apps lagbhag aadha) aur jobs ek saath chalti hain. Build job + artifact + `needs` se CI ~1.5 min dheema hota, aur Render pehle deploy kar sakta tha (jo job `needs` me rukti hai uska check der se banta hai; PR #85 pe pehle sirf 9 checks dikhe, `check` baad me). Iske badle: har test/E2E job sirf zaroori build (`--for`, T0.6), aur aage Turborepo build cache sirf CI me (T0.5; `static` bina cache, Vercel/Render ke build nahi chhedne: build-time env aur Vercel ka apna Remote Cache). |
 
 ## 2. Pichhle kaam se seekhe sabak
 
@@ -350,3 +351,4 @@
 | v1.108  | 2026-11-14 | Decision: T4.1 ka order (T3.5 pehle) aur hisse: audit viewer isi task me, CSV seedha download, area settings T4.2 ke baad (owner). |
 | v1.109  | 2026-11-14 | Decision: 50 grants ki seema, deploy overlap ka catch-up sweep (T3.5, owner). |
 | v1.110  | 2026-11-14 | Decision: CI parallel jobs, same-code marker, affected-only feature PR (owner). |
+| v1.111  | 2026-11-14 | Decision: CI me alag build job nahi; har job sirf zaroori build, Turborepo cache sirf CI me (owner). |

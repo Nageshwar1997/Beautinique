@@ -1,6 +1,6 @@
 # TASKS — BQ
 
-> **Status:** v1.128 (2026-11-14). Poore project ki task list, [ARCHITECTURE.md](ARCHITECTURE.md) §16 ke phases ke hisaab se. Har task "done" tabhi jab [RULES.md](RULES.md) §1.5 ki Definition of Done poori ho.
+> **Status:** v1.129 (2026-11-14). Poore project ki task list, [ARCHITECTURE.md](ARCHITECTURE.md) §16 ke phases ke hisaab se. Har task "done" tabhi jab [RULES.md](RULES.md) §1.5 ki Definition of Done poori ho.
 
 **Kaise use karein:**
 - `[ ]` baaki, `[~]` chal raha hai, `[x]` done.
@@ -13,18 +13,18 @@
 
 ## P. Progress (kitna ho gaya)
 
-**Poora project: 22% (2026-11-14).** Phase 1 poora; Phase 2 lagbhag poora (92%); Phase 3 83%; Phase 0 aur 6 aadhe; Phase 4, 5 aur 11 me thoda; Phase 7–10 abhi shuru nahi hue.
+**Poora project: 23% (2026-11-14).** Phase 1 poora; Phase 2 lagbhag poora (92%); Phase 3 83%; Phase 0 72%; Phase 6 aadha; Phase 4, 5 aur 11 me thoda; Phase 7–10 abhi shuru nahi hue.
 
 **Hisaab (har baar isi tarah):**
 - Sirf Phase 0–11 ke tasks gine jaate hain (sections A, B, C, D nahi).
 - Task: `[x]` = 1, `[~]` = ½, `[ ]` = 0. Phase % = in ka jod ÷ phase ke tasks.
 - Poora % = har phase ka % × uske hafte (phase heading ka andaaza, range ka beech: "4–5 hafte" = 4.5), sabka jod ÷ 38 (saare phases ke hafte). Bade phases (Commerce, WMS, Finance) ka wazan zyada, chhote shuruaati tasks ka kam. Poore number tak round.
-- Sirf task ginti se 37% aata hai (32 ÷ 87). Wo zyada dikhta hai kyunki shuru ka chhota task bhi utna hi ginta hai jitna Phase 8 ka bada task; isliye upar wala (hafton wala) number hi project ka %.
+- Sirf task ginti se 38% aata hai (33 ÷ 87). Wo zyada dikhta hai kyunki shuru ka chhota task bhi utna hi ginta hai jitna Phase 8 ka bada task; isliye upar wala (hafton wala) number hi project ka %.
 - **Kab update:** jis commit/PR me kisi task ka checkbox badle, ya task jude/hate, usi me ye table, upar ka %, neeche ki itihaas line aur [HANDOFF.md](HANDOFF.md) §1 ki "Progress" line.
 
 | Phase                                 | Hafte  | Tasks  | `[x]`  | `[~]`  | `[ ]`  | Phase % |
 | ------------------------------------- | ------ | ------ | ------ | ------ | ------ | ------- |
-| 0. Monorepo + CI                      | 1.5    | 9      | 4      | 3      | 2      | 61%     |
+| 0. Monorepo + CI                      | 1.5    | 9      | 5      | 3      | 1      | 72%     |
 | 1. Server kit + contracts             | 1.5    | 8      | 8      | 0      | 0      | 100%    |
 | 2. Gateway                            | 1      | 6      | 5      | 1      | 0      | 92%     |
 | 3. bq-identity                        | 2.5    | 6      | 5      | 0      | 1      | 83%     |
@@ -36,7 +36,7 @@
 | 9. Finance + support                  | 4.5    | 6      | 0      | 0      | 6      | 0%      |
 | 10. UGC, growth, creators, governance | 5.5    | 6      | 0      | 0      | 6      | 0%      |
 | 11. Launch hardening                  | 2      | 9      | 1      | 0      | 8      | 11%     |
-| **Kul**                               | **38** | **87** | **27** | **10** | **50** | **22%** |
+| **Kul**                               | **38** | **87** | **28** | **10** | **49** | **23%** |
 
 **Itihaas:**
 
@@ -63,6 +63,7 @@
 | 2026-11-14 | 21%     | T3.5 `[~]`: identity ke snapshot events aur core me grants ki copy shuru (T4.1 ki neev, owner). Phase 3: 67% → 75%; task ginti 34% → 35% (30.5 ÷ 87). |
 | 2026-11-14 | 22%     | T3.5 `[x]`: identity ke snapshot events aur core me copy (role, grants, users). Phase 3: 75% → 83%; task ginti 35% → 36% (31 ÷ 87). |
 | 2026-11-14 | 22%     | T0.4 `[x]` (owner: Media-service ka nested `.git` aur `.kilo` worktree, ab zaroorat nahi). Phase 0: 50% → 61%; task ginti 36% → 37% (32 ÷ 87). |
+| 2026-11-14 | 23%     | T0.6 `[x]`: CI me har test aur E2E job sirf zaroori build (`npm run build -- --for`, `plan.ts`); `static` aur `test-scripts` poora. Phase 0: 61% → 72%; task ginti 37% → 38% (33 ÷ 87). |
 
 ## D. Deploy-first plan (owner ka faisla, 2026-10-23)
 
@@ -130,7 +131,7 @@ Har milestone ke end me kuch **live** dikhana hai. Ek hi live environment, free 
 - [~] T0.3 Gateway aur services → `backend/` (port sources ki tarah). (Har deployable aur bundle `npm run create -- --type backend` se banta hai, §3.2. gateway, identity, core, bundle (2026-10-21) aur notify (2026-10-27) bane; payments baaki.)
 - [x] T0.4 Media-service ka nested `.git` aur `.kilo` worktree hatana. (2026-11-14, owner: ab iski zaroorat nahi rahi, isliye done mana; karne ko kuch nahi bacha.)
 - [ ] T0.5 Turborepo. (npm workspaces, root scripts, shared configs aur package CLI ho gaye: [packages/README.md](packages/README.md).)
-- [ ] T0.6 `ci.yml`: build (affected) baaki. (Format, lint, typecheck, test, packages verify aur npm audit wala pehla `ci.yml`, plus `release.yml`, ho gaye. 2026-10-21 gitleaks ho gaya: required `check` job ka pehla step, gitleaks 8.30.1 binary (version + SHA-256 pinned, koi action/licence nahi) har PR aur `main`/`prerelease`/`release` push pe tested commit ki poori history `--redact` ke saath scan karta hai, finding = job fail; `.gitleaks.toml` = default rules + password wale connection URL (Mongo, Valkey, Cloudinary) ka rule, path allow-list koi nahi kyunki repo ke fake values kisi rule pe nahi aate; poori history ka local scan: 0 findings; Ubuntu container me ci.yml ka step chala ke dekha: planted fake secret (tip, PR merge commit, add ke baad delete) fail, asli tree pass. GitHub ka pehla run (2026-10-21) `server-mongo` test ke nakli password wale Mongo URL (host `127.0.0.1:1`, jahan kuch nahi chalta) pe fail hua (commit `e533ace`, push ho chuka, history badal nahi sakte). Wo test sirf ye dekhta hai ki password error me na chhape, isliye ye ek finding fingerprint se `.gitleaksignore` me hai, wajah ke saath (poora path allow-list nahi). Local gitleaks 8.30.1 se poori history: no leaks; asli jaisa password URL ab bhi pakda jaata hai. 2026-11-14 (`feat/ci-split`, owner): jobs parallel, aakhri `check`; same code pehle pass hua to sirf `guard` (marker `ci-pass-<tree>`); feature PR pe tests, E2E aur `verify` sirf affected workspaces (`scripts/ci/bin/plan.ts`, RULES §2). Build abhi bhi poora (har job me ~1 min), isliye checkbox `[ ]`.)
+- [x] T0.6 `ci.yml`: build (affected). (Format, lint, typecheck, test, packages verify aur npm audit wala pehla `ci.yml`, plus `release.yml`, ho gaye. 2026-10-21 gitleaks ho gaya: required `check` job ka pehla step, gitleaks 8.30.1 binary (version + SHA-256 pinned, koi action/licence nahi) har PR aur `main`/`prerelease`/`release` push pe tested commit ki poori history `--redact` ke saath scan karta hai, finding = job fail; `.gitleaks.toml` = default rules + password wale connection URL (Mongo, Valkey, Cloudinary) ka rule, path allow-list koi nahi kyunki repo ke fake values kisi rule pe nahi aate; poori history ka local scan: 0 findings; Ubuntu container me ci.yml ka step chala ke dekha: planted fake secret (tip, PR merge commit, add ke baad delete) fail, asli tree pass. GitHub ka pehla run (2026-10-21) `server-mongo` test ke nakli password wale Mongo URL (host `127.0.0.1:1`, jahan kuch nahi chalta) pe fail hua (commit `e533ace`, push ho chuka, history badal nahi sakte). Wo test sirf ye dekhta hai ki password error me na chhape, isliye ye ek finding fingerprint se `.gitleaksignore` me hai, wajah ke saath (poora path allow-list nahi). Local gitleaks 8.30.1 se poori history: no leaks; asli jaisa password URL ab bhi pakda jaata hai. 2026-11-14 (`feat/ci-split`, owner): jobs parallel, aakhri `check`; same code pehle pass hua to sirf `guard` (marker `ci-pass-<tree>`); feature PR pe tests, E2E aur `verify` sirf affected workspaces (`scripts/ci/bin/plan.ts`, RULES §2). 2026-11-14 (`feat/t0.6-targeted-build`, owner): test aur E2E jobs sirf wahi build karti hain jo chalati hain (`npm run build -- --for`, dependencies ke saath; E2E: app + `bundle`); `static` (lint, typecheck) aur `test-scripts` (saare workspaces padhte hain) poora build. Ek alag build job nahi (MEMORY 2026-11-14).)
 - [x] T0.7 Branches `prerelease` aur `release`, branch protection, required checks. (2026-10-20: branches ban gayi, CI teeno pe green; ruleset `protected-branches` (`main`, `prerelease`, `release`: delete aur force push band, PR + 1 approval (2026-10-25 se approvals 0, owner), `check` required aur up to date, bypass sirf Repository admin); tag ruleset `release-tags` (`@beautinique/*` tags sirf owner bana, badal ya mita sakta hai); environment `npm` sirf `release` branch se, owner ki approval ke saath.) Packages bhi sirf `release` branch se publish hote hain (package CLI aur `release.yml` yahi maante hain).
 - [x] T0.8 `infra/docker-compose.yml` ka `infra` profile: Mongo replica set, Valkey (Render jaisi limits), Mailpit. **Docker Lesson 2.** (2026-10-21: `mongo:8.0.34` replica set `rs0`, `valkey/valkey:8.1.10` (25 MB, noeviction, 50 clients, disk pe kuch nahi), `axllent/mailpit:v1.31.6`; ports sirf `127.0.0.1`; `npm run infra:up/down/reset/logs`. Laptop pe chala ke dekha: transaction commit/abort, Valkey ka OOM error, Mailpit inbox me email, restart ke baad Mongo data bacha aur Valkey khaali. Notes: [infra/README.md](../infra/README.md).)
 - [~] T0.9 Har deployable ka `.env.example` aur zod env schema. (Generator har deployable ko `src/config.ts` (zod, `<NAME>__*`) aur `.env.example` deta hai: port, log level, gateway ke upstream URLs. Provider keys apne feature ke saath judti hain.)
@@ -409,3 +410,4 @@ Har milestone ke end me kuch **live** dikhana hai. Ek hi live environment, free 
 | v1.126  | 2026-11-14 | T3.5: owner ke 2 faisle (catch-up sweep T4.1 PR B me; 50 grants ki seema isi task me); T4.1 PR B me sweep. |
 | v1.127  | 2026-11-14 | T0.4 `[x]` (owner: zaroorat nahi rahi, done mana); §P: Phase 0 50% → 61%, poora 22% (nahi badla), task ginti 36% → 37%. |
 | v1.128  | 2026-11-14 | T0.6 note: CI parallel jobs, same-code skip, affected-only tests/E2E/verify; build poora, checkbox nahi badla (§P nahi badla). |
+| v1.129  | 2026-11-14 | T0.6 `[x]` (CI me sirf zaroori build); §P: Phase 0 61% → 72%, poora 22% → 23%, task ginti 37% → 38%. |
