@@ -1,15 +1,13 @@
 import type { Passport } from '@beautinique/backend-server-kit';
-import { type ObjectId, toObjectId, withTransaction } from '@beautinique/backend-server-mongo';
+import { toObjectId, withTransaction } from '@beautinique/backend-server-mongo';
 import { writeEvent } from '@beautinique/backend-server-queue';
 import { authenticatorReset, sessionRevoke, totpReset } from '@beautinique/shared-contracts';
 
 import { CREDENTIALS, type Credentials } from '../credentials.ts';
 import type { OtpDeps } from '../otp.ts';
 import { type User, USERS } from '../users.ts';
-import { callerGrants, forbidden, requirePermission } from './authority.ts';
-import { activeAt, type GrantRecord, GRANTS } from './grants.ts';
-import { notFound, roleByKey } from './manage.ts';
-import { MASTER_ROLE } from './roles.ts';
+import { callerGrants, forbidden, mayResetAuthenticator, requirePermission } from './authority.ts';
+import { notFound } from './manage.ts';
 
 /** The account a Security Officer acts on: it exists, and it is never their own. */
 async function targetOf(deps: OtpDeps, passport: Passport, userId: string, permission: string) {
@@ -17,7 +15,6 @@ async function targetOf(deps: OtpDeps, passport: Passport, userId: string, permi
     userId: toObjectId(passport.userId),
     app: passport.app,
   });
-  const isMaster = caller.some(({ role }) => role.key === MASTER_ROLE);
   requirePermission(caller, permission);
   if (userId === passport.userId) throw forbidden('Use My Devices and your own settings for this.');
   const user = await deps.mongo.db
@@ -27,17 +24,7 @@ async function targetOf(deps: OtpDeps, passport: Passport, userId: string, permi
       { projection: { email: 1 } },
     );
   if (!user) throw notFound('Account');
-  return { user, isMaster };
-}
-
-/** Does the account hold Master now? */
-async function holdsMaster(deps: OtpDeps, userId: ObjectId): Promise<boolean> {
-  const master = await roleByKey(deps.mongo, MASTER_ROLE);
-  if (!master) return false;
-  const grant = await deps.mongo.db
-    .collection<GrantRecord>(GRANTS)
-    .findOne({ userId, roleId: master._id, ...activeAt(new Date()) }, { projection: { _id: 1 } });
-  return grant !== null;
+  return { user, caller };
 }
 
 /**
@@ -52,10 +39,10 @@ export async function resetAuthenticator(
   userId: string,
   requestId: string,
 ) {
-  const { user, isMaster } = await targetOf(deps, passport, userId, totpReset.key);
+  const { user, caller } = await targetOf(deps, passport, userId, totpReset.key);
   // a Master's second factor is the last door to everything: only the other Master opens it, so
   // a Security Officer and a leaked Master password together are not enough (QA DR-007)
-  if (!isMaster && (await holdsMaster(deps, user._id))) {
+  if (!(await mayResetAuthenticator(deps.mongo, caller, toObjectId(passport.userId), user._id))) {
     throw forbidden("Only another Master can reset a Master's authenticator.");
   }
   const now = new Date();

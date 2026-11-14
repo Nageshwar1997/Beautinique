@@ -23,11 +23,14 @@ import {
 import {
   authenticatorChanged,
   authenticatorReset,
+  grantsChanged,
   invitationCreated,
   otpRequested,
   passportAudience,
+  roleChanged,
   sessionReuseDetected,
   signInMethodChanged,
+  userChanged,
 } from '@beautinique/shared-contracts';
 
 import { codeBudget } from './code-budget.ts';
@@ -43,7 +46,8 @@ import { type SigningKeys, signingKeys } from './signing-keys.ts';
  * Who gets identity's events (the relay's list): notify emails the code, and tells a person when
  * a copied refresh token ended their session, tells an invited person how to accept,
  * tells a person whose authenticator a Security Officer reset, and tells a person who changed
- * their own authenticator (backend/notify).
+ * their own authenticator (backend/notify). Core keeps copies of the roles, each account's grants
+ * and the accounts (TASKS T3.5), for authorize().
  */
 export const SUBSCRIBERS: Readonly<Record<string, readonly string[]>> = {
   [otpRequested.type]: ['notify.otpEmail'],
@@ -52,6 +56,9 @@ export const SUBSCRIBERS: Readonly<Record<string, readonly string[]>> = {
   [authenticatorReset.type]: ['notify.authenticatorEmail'],
   [authenticatorChanged.type]: ['notify.authenticatorChangedEmail'],
   [signInMethodChanged.type]: ['notify.signInMethodEmail'],
+  [roleChanged.type]: ['core.roleCopy'],
+  [grantsChanged.type]: ['core.accessCopy'],
+  [userChanged.type]: ['core.userCopy'],
 };
 
 export interface RuntimeOptions {
@@ -73,6 +80,11 @@ export interface RuntimeOptions {
   watchdogMs?: number;
   /** The gateway's passport keys, in memory (backend/bundle); otherwise read from the config URL */
   passportJwks?: readonly PublicJwk[];
+  /**
+   * Who gets identity's events (default SUBSCRIBERS). A test with no core and no notify working
+   * their queues leaves those out, or a wipe's redrive waits for queues nobody empties.
+   */
+  subscribers?: Readonly<Record<string, readonly string[]>>;
 }
 
 /** identity's connections and background work: MongoDB, Redis, the outbox relay, the wipe watchdog. */
@@ -108,6 +120,7 @@ export async function startRuntime(config: Config, options: RuntimeOptions): Pro
     pollMs,
     watchdogMs,
     passportJwks,
+    subscribers = SUBSCRIBERS,
   } = options;
   const keys = loadCryptoKeys({ fieldKeys: config.fieldKeys, blindIndexKey: config.blindIndexKey });
   const otpKeys = loadSealingKeys(config.otpEventKeys, 'IDENTITY__OTP_EVENT_KEYS');
@@ -135,7 +148,7 @@ export async function startRuntime(config: Config, options: RuntimeOptions): Pro
       redis: redis.client,
       logger,
       mode: config.outboxRelay,
-      subscribers: SUBSCRIBERS,
+      subscribers,
       prefix,
       pollMs,
     });
@@ -154,7 +167,7 @@ export async function startRuntime(config: Config, options: RuntimeOptions): Pro
           mongo,
           redis: redis.client,
           logger,
-          subscribers: SUBSCRIBERS,
+          subscribers,
           prefix,
         });
       },

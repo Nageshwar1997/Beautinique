@@ -627,6 +627,74 @@ const mutations: Mutation[] = [
     ],
     tests: 'count the recovery codes left',
   },
+  // a Master's authenticator only the other Master resets, by permission (QA DR-007, TASKS T4.11)
+  {
+    file: 'catalogue/iam',
+    name: "a Master's authenticator reset works in a scope",
+    change: [
+      [
+        "key: 'iam.totp.reset_master',\n  description: \"Reset a Master's authenticator\",\n  scopeTypes: ['global'],",
+        "key: 'iam.totp.reset_master',\n  description: \"Reset a Master's authenticator\",\n  scopeTypes: SCOPE_TYPES,",
+      ],
+    ],
+    tests: 'reset global and behind a step-up',
+  },
+  {
+    file: 'catalogue/iam',
+    name: "a Master's authenticator reset needs no step-up",
+    change: [
+      [
+        "risk: 'high',\n  mfa: true,\n  secondSignature: false,\n});\n\nexport const IAM_PERMISSIONS",
+        "risk: 'high',\n  mfa: false,\n  secondSignature: false,\n});\n\nexport const IAM_PERMISSIONS",
+      ],
+    ],
+    tests: 'step-up',
+  },
+  {
+    file: 'catalogue/iam',
+    name: "a Master's authenticator reset is not in the catalogue",
+    change: [['  totpReset,\n  totpResetMaster,\n] as const;', '  totpReset,\n] as const;']],
+    tests: 'lists permissions sorted by key',
+  },
+  {
+    file: 'catalogue/iam',
+    name: 'every grants list must say whether one may reset',
+    change: [['canResetAuthenticator: boolean().optional(),', 'canResetAuthenticator: boolean(),']],
+    tests: 'may reset their authenticator',
+  },
+  // identity's snapshot events for core's copy (TASKS T3.5)
+  {
+    file: 'catalogue/index',
+    name: 'the snapshot events are not in the catalogue',
+    change: [['  ...ACCESS_EVENTS,\n', '']],
+    tests: 'in the platform catalogue, from identity|every event version',
+  },
+  {
+    file: 'catalogue/access',
+    name: 'a snapshot takes a negative authz version',
+    change: [['    authzVersion: number().int().min(0),', '    authzVersion: number().int(),']],
+    tests: 'by role id only',
+  },
+  {
+    file: 'catalogue/access',
+    name: "a role snapshot leaves out the role's permissions",
+    change: [['    permissions: array(string()),\n', '']],
+    tests: 'by role id only',
+  },
+  {
+    file: 'platform',
+    name: 'a state id is taken for a document id',
+    change: [["new Set<ScopeType>(['global', 'state'])", "new Set<ScopeType>(['global'])"]],
+    tests: 'whose ids are codes',
+  },
+  {
+    file: 'catalogue/access',
+    name: 'an account may hold more grants than an event carries',
+    change: [
+      ['export const MAX_GRANTS_PER_ACCOUNT = 50;', 'export const MAX_GRANTS_PER_ACCOUNT = 100;'],
+    ],
+    tests: 'the most grants it may hold',
+  },
 ];
 
 export default mutations;

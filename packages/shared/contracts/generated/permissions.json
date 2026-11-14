@@ -90,6 +90,16 @@
       "secondSignature": false
     },
     {
+      "key": "iam.totp.reset_master",
+      "description": "Reset a Master's authenticator",
+      "scopeTypes": [
+        "global"
+      ],
+      "risk": "high",
+      "mfa": true,
+      "secondSignature": false
+    },
+    {
       "key": "platform.ping.read",
       "description": "Read recorded pings",
       "scopeTypes": [

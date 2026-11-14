@@ -3,22 +3,17 @@ import type { Mongo, ObjectId } from '@beautinique/backend-server-mongo';
 import { type ChainOf, grantProblems, scopeWithin } from '@beautinique/shared-authz';
 import {
   type AppId,
+  CODE_SCOPE_TYPES,
   grantManage,
   grantRead,
   isStateId,
   permissions,
   totpReset,
+  totpResetMaster,
 } from '@beautinique/shared-contracts';
 
 import { rbacCatalog } from './catalog.ts';
-import {
-  activeAt,
-  CODE_SCOPE_TYPES,
-  type GrantRecord,
-  GRANTS,
-  type Scope,
-  scopeOf,
-} from './grants.ts';
+import { activeAt, type GrantRecord, GRANTS, type Scope, scopeOf } from './grants.ts';
 import { readRoles, type Role, type RoleRecord } from './sync.ts';
 
 /** One grant of the caller in the app they act from, with its role. */
@@ -56,9 +51,51 @@ export const namesRole = (list: readonly ObjectId[], id: ObjectId): boolean =>
 export const forbidden = (message = 'You do not have access to this.'): AppError =>
   new AppError('FORBIDDEN', message);
 
+/** The caller holds the permission in some grant here. */
+const holds = (caller: readonly CallerGrant[], key: string): boolean =>
+  caller.some(({ role }) => role.permissions.includes(key));
+
 /** The caller holds the permission in some grant here, or 403. */
 export function requirePermission(caller: readonly CallerGrant[], key: string): void {
-  if (!caller.some(({ role }) => role.permissions.includes(key))) throw forbidden();
+  if (!holds(caller, key)) throw forbidden();
+}
+
+/** Does the account hold, in any app, a grant that counts now whose role has this permission? */
+export async function holdsPermission(
+  mongo: Mongo,
+  userId: ObjectId,
+  key: string,
+  now = new Date(),
+): Promise<boolean> {
+  const grants = await mongo.db
+    .collection<GrantRecord>(GRANTS)
+    .find({ userId, ...activeAt(now) }, { projection: { roleId: 1 } })
+    .toArray();
+  if (grants.length === 0) return false;
+  const roles = await readRoles(mongo, {
+    _id: { $in: grants.map((grant) => grant.roleId) },
+    retired: false,
+  });
+  return roles.some((role) => role.permissions.includes(key));
+}
+
+/**
+ * May the caller reset this account's authenticator (ARCHITECTURE §7.1)? With `iam.totp.reset`,
+ * never their own, and an account that holds `iam.totp.reset_master` (Master) only by someone
+ * who holds it too (QA DR-007). By permission, never by a role's name (RULES §3.5). The reset
+ * asks it, and so does the grants list, for the app to show the button.
+ */
+export async function mayResetAuthenticator(
+  mongo: Mongo,
+  caller: readonly CallerGrant[],
+  callerId: ObjectId,
+  target: ObjectId,
+): Promise<boolean> {
+  if (!holds(caller, totpReset.key) || target.equals(callerId)) return false;
+  return (
+    holds(caller, totpResetMaster.key) ||
+    !(await holdsPermission(mongo, target, totpResetMaster.key))
+  );
 }
 
 /**

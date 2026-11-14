@@ -12,6 +12,7 @@ import {
   grantRead,
   roleManage,
   type ScopeType,
+  totpResetMaster,
 } from '@beautinique/shared-contracts';
 import type { Redis } from 'ioredis';
 
@@ -21,6 +22,7 @@ import {
   callerGrants,
   forbidden,
   grantShapeProblems,
+  mayResetAuthenticator,
   namesRole,
   requirePermission,
   type ScopeProblem,
@@ -32,6 +34,7 @@ import {
   type GrantRecord,
   GRANTS,
   publishAuthzVersions,
+  raiseAuthzVersion,
   type Scope,
   scopeOf,
   writeGrant,
@@ -43,6 +46,7 @@ import {
   roleProblems,
   type RoleRecord,
   ROLES,
+  writeRoleSnapshots,
 } from './sync.ts';
 
 export interface ManageDeps {
@@ -168,6 +172,13 @@ function customRoleProblems(role: KeyedRole, others: readonly Role[]): ScopeProb
   if (role.permissions.includes(roleManage.key)) {
     problems.push({ path: ['permissions'], message: 'Only Master makes roles' });
   }
+  // the other Master's authenticator stays the shipped Master role's alone (QA DR-007)
+  if (role.permissions.includes(totpResetMaster.key)) {
+    problems.push({
+      path: ['permissions'],
+      message: "Only Master resets a Master's authenticator",
+    });
+  }
   return problems;
 }
 
@@ -239,8 +250,15 @@ export async function createRole(deps: ManageDeps, passport: Passport, body: New
   };
   let made: RoleRecord;
   try {
-    const { insertedId } = await roles.insertOne(record as RoleRecord);
-    made = { ...record, _id: insertedId };
+    made = await withTransaction(deps.mongo, async (session) => {
+      const { insertedId } = await roles.insertOne(record as RoleRecord, { session });
+      const written = { ...record, _id: insertedId };
+      // core's copy of the roles follows (TASKS T3.5)
+      await writeRoleSnapshots(deps.mongo, session, [
+        { ...written, app: body.app, permissions: [...keyed.permissions] },
+      ]);
+      return written;
+    });
   } catch (error) {
     if (isDuplicateKey(error)) throw conflict('A role with this name exists in this app already.');
     throw error;
@@ -330,17 +348,20 @@ export async function updateRole(
   };
   const holders = await withTransaction(deps.mongo, async (session) => {
     await roles.updateOne({ _id: role._id }, { $set: fields }, { session });
+    // core's copy of the role follows (TASKS T3.5)
+    await writeRoleSnapshots(deps.mongo, session, [
+      { ...role, ...fields, permissions: next.permissions },
+    ]);
     if (!renew) return [];
     const userIds = await grantsOf(deps.mongo).distinct(
       'userId',
       { roleId: role._id, active: true },
       { session },
     );
-    await usersOf(deps.mongo).updateMany(
-      { _id: { $in: userIds } },
-      { $inc: { authzVersion: 1 }, $set: { updatedAt: now } },
-      { session },
-    );
+    // one by one: each holder's version goes up and their grants snapshot goes out with it
+    for (const userId of userIds) {
+      await raiseAuthzVersion(deps.mongo, session, userId, now);
+    }
     return userIds;
   });
   await publishAuthzVersions(deps.mongo, deps.redis, holders);
@@ -528,5 +549,16 @@ export async function listGrants(deps: ManageDeps, passport: Passport, query: Gr
         : [grantView(grant, { email, role: keyOf(grant.roleId), catalog })];
     }),
     nextCursor: page.length > query.limit ? (items.at(-1)?._id.toHexString() ?? null) : null,
+    // one person: may the caller reset their authenticator (the same check as the reset)
+    ...(userId === undefined
+      ? {}
+      : {
+          canResetAuthenticator: await mayResetAuthenticator(
+            deps.mongo,
+            caller,
+            toObjectId(passport.userId),
+            userId,
+          ),
+        }),
   };
 }

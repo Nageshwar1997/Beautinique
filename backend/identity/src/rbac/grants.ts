@@ -1,14 +1,19 @@
+import { AppError } from '@beautinique/backend-server-kit';
 import {
   type ClientSession,
   type IndexSpec,
   type Mongo,
   ObjectId,
 } from '@beautinique/backend-server-mongo';
+import { writeEvent } from '@beautinique/backend-server-queue';
 import {
   ACCESS_TOKEN_SECONDS,
   type AppId,
   authzVersionKey,
+  CODE_SCOPE_TYPES,
   type GRANT_VIA,
+  grantsChanged,
+  MAX_GRANTS_PER_ACCOUNT,
   type ScopeType,
 } from '@beautinique/shared-contracts';
 import type { Redis } from 'ioredis';
@@ -16,7 +21,7 @@ import type { Redis } from 'ioredis';
 import { type User, USERS } from '../users.ts';
 import { rbacCatalog } from './catalog.ts';
 import { SIGN_UP_ROLES } from './roles.ts';
-import { readRoles, type RoleRecord, ROLES } from './sync.ts';
+import { readRoles, type RoleRecord, ROLES, SYSTEM_ACTOR } from './sync.ts';
 
 export const GRANTS = 'identity_grants';
 export const GRANT_LOG = 'identity_grant_log';
@@ -38,9 +43,6 @@ export interface StoredScope {
   type: ScopeType;
   ids: (ObjectId | string)[];
 }
-
-/** Scope types whose ids are codes, not documents. */
-export const CODE_SCOPE_TYPES: ReadonlySet<ScopeType> = new Set(['global', 'state']);
 
 /** The scope to store; its document ids must be 24 hex already (scopeIdProblems checks them). */
 export function storedScope(scope: Scope): StoredScope {
@@ -114,22 +116,68 @@ export const indexes: readonly IndexSpec[] = [
 ];
 
 const grantsOf = (mongo: Mongo) => mongo.db.collection<GrantRecord>(GRANTS);
+
+/** An account's grants that count now or later: active, and not run out (an account's snapshot, the cap). */
+const heldFrom = (userId: ObjectId, now: Date) => ({
+  userId,
+  active: true,
+  $or: [{ validTo: null }, { validTo: { $gt: now } }],
+});
 const logOf = (mongo: Mongo) => mongo.db.collection<GrantLogEntry>(GRANT_LOG);
 
-/** Goes up at every grant change of the account: the next access token carries it as `av`. */
+/**
+ * Goes up at every grant change of the account: the next access token carries it as `av`, and
+ * the account's grants snapshot goes out with it in the same transaction (TASKS T3.5).
+ */
 export async function raiseAuthzVersion(
   mongo: Mongo,
   session: ClientSession,
   userId: ObjectId,
   now: Date,
 ): Promise<void> {
-  await mongo.db
+  const user = await mongo.db
     .collection<User>(USERS)
-    .updateOne(
+    .findOneAndUpdate(
       { _id: userId },
       { $inc: { authzVersion: 1 }, $set: { updatedAt: now } },
-      { session },
+      { session, returnDocument: 'after', projection: { authzVersion: 1 } },
     );
+  if (!user) return;
+  await writeAccessSnapshot(mongo, session, userId, user.authzVersion ?? 0, now);
+}
+
+/**
+ * Writes the account's grants snapshot (identity.grant.changed, ARCHITECTURE §5.2): every grant
+ * active now or starting later, each with its role's id, and the account's authz version. Core
+ * keeps the one with the highest version for authorize(); a role's permissions come in its own
+ * snapshot (sync.ts).
+ */
+export async function writeAccessSnapshot(
+  mongo: Mongo,
+  session: ClientSession,
+  userId: ObjectId,
+  authzVersion: number,
+  now: Date,
+): Promise<void> {
+  const grants = await grantsOf(mongo).find(heldFrom(userId, now), { session }).toArray();
+  const catalog = await rbacCatalog(mongo);
+  await writeEvent(mongo, session, grantsChanged, {
+    aggregate: { type: 'user', id: userId.toHexString() },
+    actor: SYSTEM_ACTOR,
+    correlationId: new ObjectId().toHexString(),
+    data: {
+      userId: userId.toHexString(),
+      authzVersion,
+      grants: grants.map((grant) => ({
+        grantId: grant._id.toHexString(),
+        roleId: grant.roleId.toHexString(),
+        app: catalog.appOf(grant.appId),
+        scope: scopeOf(grant.scope),
+        validFrom: grant.validFrom?.toISOString() ?? null,
+        validTo: grant.validTo?.toISOString() ?? null,
+      })),
+    },
+  });
 }
 
 /** An active grant of the account and role that shares a scope id with `scope` (or is it). */
@@ -170,6 +218,17 @@ export async function writeGrant(
 ): Promise<ObjectId | null> {
   const { userId, roleId, appId, scope, via, now } = grant;
   if (await grantsOf(mongo).findOne(overlapping(userId, roleId, scope), { session })) return null;
+  // the account's snapshot carries all its grants (TASKS T3.5): a cap keeps it inside one event
+  const held = await grantsOf(mongo).countDocuments(heldFrom(userId, now), {
+    session,
+    limit: MAX_GRANTS_PER_ACCOUNT,
+  });
+  if (held >= MAX_GRANTS_PER_ACCOUNT) {
+    throw new AppError(
+      'CONFLICT',
+      `This account holds the most roles it can (${String(MAX_GRANTS_PER_ACCOUNT)}): end one first.`,
+    );
+  }
   const _id = new ObjectId();
   const stored = storedScope(scope);
   // equality on the whole scope: an insert takes it from the filter, and a second call finds it

@@ -1,6 +1,7 @@
 import { eventCatalogue } from '../events';
 import { permissionCatalogue } from '../permissions';
 import { routeTable } from '../routes';
+import { ACCESS_EVENTS } from './access';
 import {
   authenticatorReset,
   createInvitation,
@@ -193,5 +194,6 @@ export const events = eventCatalogue([
   authenticatorReset,
   authenticatorChanged,
   signInMethodChanged,
+  ...ACCESS_EVENTS,
 ]);
 export const permissions = permissionCatalogue([pingRead, ...IAM_PERMISSIONS]);
