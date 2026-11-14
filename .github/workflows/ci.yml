@@ -207,8 +207,11 @@ jobs:
           restore-keys: npm-${{ runner.os }}-
       - if: steps.plan.outputs.run == 'true'
         run: npm ci
+      # Only what this job runs and what that needs (T0.6), from plan.ts (plain names, through env).
       - if: steps.plan.outputs.run == 'true'
-        run: npm run build
+        env:
+          BUILD: ${{ steps.plan.outputs.build }}
+        run: npm run build -- $BUILD
       - name: Start MongoDB, Valkey and Mailpit for the tests
         if: steps.plan.outputs.run == 'true'
         run: |
@@ -257,8 +260,11 @@ jobs:
           restore-keys: npm-${{ runner.os }}-
       - if: steps.plan.outputs.run == 'true'
         run: npm ci
+      # Only what this job runs and what that needs (T0.6), from plan.ts (plain names, through env).
       - if: steps.plan.outputs.run == 'true'
-        run: npm run build
+        env:
+          BUILD: ${{ steps.plan.outputs.build }}
+        run: npm run build -- $BUILD
       - if: steps.plan.outputs.run == 'true'
         env:
           WORKSPACES: ${{ steps.plan.outputs.args }}
@@ -303,8 +309,11 @@ jobs:
           restore-keys: npm-${{ runner.os }}-
       - if: steps.plan.outputs.run == 'true'
         run: npm ci
+      # Only what this job runs and what that needs (T0.6), from plan.ts (plain names, through env).
       - if: steps.plan.outputs.run == 'true'
-        run: npm run build
+        env:
+          BUILD: ${{ steps.plan.outputs.build }}
+        run: npm run build -- $BUILD
       - name: Start MongoDB, Valkey and Mailpit for the tests
         if: steps.plan.outputs.run == 'true'
         run: |

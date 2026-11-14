@@ -193,7 +193,7 @@ describe('a job', () => {
   it('runs nothing when this code already passed, however it changed', () => {
     for (const job of ['static', 'test-scripts', 'test-backend', 'verify'] as const) {
       const result = planJob({ job, full: true, passedRun: 42, changed: null, workspaces });
-      expect(result).toMatchObject({ run: false, everything: false });
+      expect(result).toMatchObject({ run: false, everything: false, build: '' });
       expect(result.reason).toMatch(/run 42/);
     }
     expect(
@@ -284,6 +284,37 @@ describe('a job', () => {
     expect(plan('verify', changed).args).toBe(
       '--packages @x/backend-kit,@x/frontend-components,@x/shared-zod',
     );
+  });
+
+  it('builds only what the job runs and what that needs; static and test-scripts everything', () => {
+    const all = { full: true };
+    expect(plan('static', null, all).build).toBe('');
+    expect(plan('test-scripts', null, all).build).toBe('');
+    expect(plan('verify', null, all).build).toBe('');
+    expect(plan('test-backend', null, all).build).toBe(
+      '--for bundle,core,@x/backend-kit,@x/shared-zod',
+    );
+    expect(plan('test-frontend', null, all).build).toBe(
+      '--for blank,shop,@x/frontend-components,@x/frontend-styles',
+    );
+    expect(plan('e2e', null, { ...all, app: 'blank' }).build).toBe('--for blank,bundle');
+
+    const appChange = ['frontend/shop/app/root.tsx'];
+    expect(plan('test-frontend', appChange).build).toBe('--for shop');
+    expect(plan('e2e', appChange, { app: 'shop' }).build).toBe('--for shop,bundle');
+    expect(plan('static', appChange).build).toBe('');
+  });
+
+  it('an E2E job without a bundle workspace builds everything', () => {
+    const noBundle = workspaces.filter((w) => w.dir !== 'backend/bundle');
+    const result = planJob({
+      job: 'e2e',
+      app: 'shop',
+      full: true,
+      changed: null,
+      workspaces: noBundle,
+    });
+    expect(result).toMatchObject({ run: true, build: '' });
   });
 
   it('an E2E job names an app with an e2e script', () => {

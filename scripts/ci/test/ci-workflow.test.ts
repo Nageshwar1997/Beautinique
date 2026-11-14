@@ -87,6 +87,24 @@ describe('ci.yml', () => {
     expect(check).toMatch(/name: ci-pass-\$\{\{ needs\.static\.outputs\.tree \}\}/);
   });
 
+  // T0.6: a test or E2E job builds only what plan.ts names; static builds everything for lint and
+  // typecheck, test-scripts because those tests read every workspace
+  const builds = (id: string) =>
+    stepsOf(id)
+      .map((step) => step.join('\n'))
+      .filter((step) => step.includes('run: npm run build'));
+
+  it.each(['test-backend', 'test-frontend', 'e2e'])('%s: builds what plan.ts names', (id) => {
+    expect(builds(id)).toHaveLength(1);
+    expect(builds(id)[0]).toMatch(/BUILD: \$\{\{ steps\.plan\.outputs\.build \}\}/);
+    expect(builds(id)[0]).toMatch(/run: npm run build -- \$BUILD$/m);
+  });
+
+  it.each(['static', 'test-scripts'])('%s: builds every workspace', (id) => {
+    expect(builds(id)).toHaveLength(1);
+    expect(builds(id)[0]).toMatch(/run: npm run build$/m);
+  });
+
   it('has an E2E job for every app with an e2e script, and no other', () => {
     const frontend = join(root, 'frontend');
     const apps = readdirSync(frontend, { withFileTypes: true })
