@@ -221,7 +221,7 @@ export function DataTable<Row>({
                 .map((column) => (
                   <div key={column.key} className="contents">
                     <dt className="text-foreground-muted">{column.header}</dt>
-                    <dd className="min-w-0 break-words">{column.cell(row)}</dd>
+                    <dd className="min-w-0 wrap-break-word">{column.cell(row)}</dd>
                   </div>
                 ))}
             </dl>

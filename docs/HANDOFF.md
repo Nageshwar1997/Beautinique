@@ -379,8 +379,8 @@
 | v1.198  | 2026-11-13 | §1 Progress: T2.6 hataya (owner), Phase 2 92%.                                                                                                                                                                               |
 | v1.199  | 2026-11-13 | §6: har release pe Render ke ~12 canceled deploys normal hain (owner: jaisa hai waisa).                                                                                                                                      |
 | v1.200  | 2026-11-13 | Live jaanch ab QA_AUDIT_REPORT §7a me (alag file hati); §5: Master ke roles/invitation page ke baad owner ki jaanch.                                                                                                         |
-| v1.201  | 2026-11-13 | §4 item 10: M3 ka demo live pe ho gaya; agla Master app ke Staff pages, phir M4 (T4.10, T4.11, T4.1). |
-| v1.202  | 2026-11-13 | §1 Progress 17%: T3.6 hataya (owner), Phase 3 60%. |
-| v1.203  | 2026-11-13 | §4 item 10: T3.7 (Master ke Staff pages) shuru, PR A ka kaam uncommitted; §1 Progress: naya T3.7, Phase 3 58%. |
-| v1.204  | 2026-11-14 | §4 item 10: T3.7 PR A merge (#77), PR B (data-table) ka kaam; Docker sirf zaroorat ke containers (owner). |
-| v1.205  | 2026-11-14 | §4 item 10: PR B merge (#79); PR C (Master Staff pages) ka kaam aur bacha kaam (weekly ~90% pe haath badla). |
+| v1.201  | 2026-11-13 | §4 item 10: M3 ka demo live pe ho gaya; agla Master app ke Staff pages, phir M4 (T4.10, T4.11, T4.1).                                                                                                                        |
+| v1.202  | 2026-11-13 | §1 Progress 17%: T3.6 hataya (owner), Phase 3 60%.                                                                                                                                                                           |
+| v1.203  | 2026-11-13 | §4 item 10: T3.7 (Master ke Staff pages) shuru, PR A ka kaam uncommitted; §1 Progress: naya T3.7, Phase 3 58%.                                                                                                               |
+| v1.204  | 2026-11-14 | §4 item 10: T3.7 PR A merge (#77), PR B (data-table) ka kaam; Docker sirf zaroorat ke containers (owner).                                                                                                                    |
+| v1.205  | 2026-11-14 | §4 item 10: PR B merge (#79); PR C (Master Staff pages) ka kaam aur bacha kaam (weekly ~90% pe haath badla).                                                                                                                 |

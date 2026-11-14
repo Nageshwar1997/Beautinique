@@ -22,20 +22,20 @@
 - Sirf task ginti se 30% aata hai (25.5 ÷ 86). Wo zyada dikhta hai kyunki shuru ka chhota task bhi utna hi ginta hai jitna Phase 8 ka bada task; isliye upar wala (hafton wala) number hi project ka %.
 - **Kab update:** jis commit/PR me kisi task ka checkbox badle, ya task jude/hate, usi me ye table, upar ka %, neeche ki itihaas line aur [HANDOFF.md](HANDOFF.md) §1 ki "Progress" line.
 
-| Phase                                 | Hafte  | Tasks  | `[x]`  | `[~]` | `[ ]`  | Phase % |
-| ------------------------------------- | ------ | ------ | ------ | ----- | ------ | ------- |
-| 0. Monorepo + CI                      | 1.5    | 9      | 3      | 3     | 3      | 50%     |
-| 1. Server kit + contracts             | 1.5    | 8      | 8      | 0     | 0      | 100%    |
-| 2. Gateway                            | 1      | 6      | 5      | 1     | 0      | 92%     |
-| 3. bq-identity                        | 2.5    | 6      | 3      | 1     | 2      | 58%     |
-| 4. Core foundations                   | 4.5    | 12     | 0      | 0     | 12     | 0%      |
-| 5. Notify + Payments                  | 2      | 4      | 0      | 2     | 2      | 25%     |
-| 6. Frontend foundation                | 3      | 8      | 1      | 3     | 4      | 31%     |
-| 7. Commerce + payments                | 4.5    | 6      | 0      | 0     | 6      | 0%      |
-| 8. WMS + logistics + Delivery PWA     | 5.5    | 7      | 0      | 0     | 7      | 0%      |
-| 9. Finance + support                  | 4.5    | 6      | 0      | 0     | 6      | 0%      |
-| 10. UGC, growth, creators, governance | 5.5    | 6      | 0      | 0     | 6      | 0%      |
-| 11. Launch hardening                  | 2      | 9      | 1      | 0     | 8      | 11%     |
+| Phase                                 | Hafte  | Tasks  | `[x]`  | `[~]`  | `[ ]`  | Phase % |
+| ------------------------------------- | ------ | ------ | ------ | ------ | ------ | ------- |
+| 0. Monorepo + CI                      | 1.5    | 9      | 3      | 3      | 3      | 50%     |
+| 1. Server kit + contracts             | 1.5    | 8      | 8      | 0      | 0      | 100%    |
+| 2. Gateway                            | 1      | 6      | 5      | 1      | 0      | 92%     |
+| 3. bq-identity                        | 2.5    | 6      | 3      | 1      | 2      | 58%     |
+| 4. Core foundations                   | 4.5    | 12     | 0      | 0      | 12     | 0%      |
+| 5. Notify + Payments                  | 2      | 4      | 0      | 2      | 2      | 25%     |
+| 6. Frontend foundation                | 3      | 8      | 1      | 3      | 4      | 31%     |
+| 7. Commerce + payments                | 4.5    | 6      | 0      | 0      | 6      | 0%      |
+| 8. WMS + logistics + Delivery PWA     | 5.5    | 7      | 0      | 0      | 7      | 0%      |
+| 9. Finance + support                  | 4.5    | 6      | 0      | 0      | 6      | 0%      |
+| 10. UGC, growth, creators, governance | 5.5    | 6      | 0      | 0      | 6      | 0%      |
+| 11. Launch hardening                  | 2      | 9      | 1      | 0      | 8      | 11%     |
 | **Kul**                               | **38** | **87** | **21** | **10** | **56** | **17%** |
 
 **Itihaas:**
@@ -54,8 +54,8 @@
 | 2026-11-13 | 15%     | Phase 2 se ek task hataya (owner). Phase 2: 63% → 71%; task ginti 28% (25 ÷ 88).                                                                                                           |
 | 2026-11-13 | 16%     | T2.7 `[x]`: jagana live pe chal raha (har ghante `/wake` 204). Phase 2: 71% → 79%; task ginti 28% → 29%.                                                                                   |
 | 2026-11-13 | 16%     | T2.6 hataya (owner: purana kuch use nahi hota, hatane ko kuch nahi). Phase 2: 79% → 92%; task ginti 29% (25.5 ÷ 87).                                                                       |
-| 2026-11-13 | 17%     | T3.6 hataya (owner: naya stack khaali data se, purane users ka import nahi; Master ka authenticator pehle se zaroori). Phase 3: 50% → 60%; task ginti 29% → 30% (25.5 ÷ 86). |
-| 2026-11-13 | 17%     | Naya T3.7 `[~]` (Master app ke Staff pages; PR A: `/iam/me` access + authz package). Phase 3: 60% → 58%; task ginti 30% (26 ÷ 87). |
+| 2026-11-13 | 17%     | T3.6 hataya (owner: naya stack khaali data se, purane users ka import nahi; Master ka authenticator pehle se zaroori). Phase 3: 50% → 60%; task ginti 29% → 30% (25.5 ÷ 86).               |
+| 2026-11-13 | 17%     | Naya T3.7 `[~]` (Master app ke Staff pages; PR A: `/iam/me` access + authz package). Phase 3: 60% → 58%; task ginti 30% (26 ÷ 87).                                                         |
 
 ## D. Deploy-first plan (owner ka faisla, 2026-10-23)
 
@@ -387,9 +387,9 @@ Har milestone ke end me kuch **live** dikhana hai. Ek hi live environment, free 
 | v1.111  | 2026-11-13 | Phase 2 se ek task hataya (owner); §P: 88 tasks, Phase 2 71%.                                                                                                                                                            |
 | v1.112  | 2026-11-13 | T2.7 `[x]` (jagana live pe chal raha); §P: Phase 2 79%, poora 16%, task ginti 29%.                                                                                                                                       |
 | v1.113  | 2026-11-13 | T2.6 hataya (owner: purana kuch use nahi hota); §P: 87 tasks, Phase 2 92%, poora 16%.                                                                                                                                    |
-| v1.114  | 2026-11-13 | Section D: M3 ka demo note (live, owner); "Abhi ka focus": Master app ke Staff pages, phir M4 (T4.10, T4.11, T4.1). |
-| v1.115  | 2026-11-13 | T3.6 hataya (owner: purane users ka import nahi); §P: 86 tasks, Phase 3 60%, poora 17%, task ginti 30%. |
-| v1.116  | 2026-11-13 | Naya T3.7 `[~]` (Master ke Staff pages, owner ke 4 faisle, 3 PR; PR A ka kaam); §P: 87 tasks, Phase 3 58%, poora 17%, task ginti 30%. |
-| v1.117  | 2026-11-14 | T3.7 ka follow-up poora: core, notify, bundle ke tests bhi `MONGO_TEST_URI`/`REDIS_TEST_URL` (`test/env.ts`). |
-| v1.118  | 2026-11-14 | T3.7: PR A merge (#77); PR B ka kaam (data-table v1, `Badge`, side panel, `SectionLayout`); T6.1 me data-table. |
-| v1.119  | 2026-11-14 | T3.7: PR B merge (#79); PR C ka kaam (Master Staff pages, Select fix, E2E, review ke 12 fixes) aur bacha kaam. |
+| v1.114  | 2026-11-13 | Section D: M3 ka demo note (live, owner); "Abhi ka focus": Master app ke Staff pages, phir M4 (T4.10, T4.11, T4.1).                                                                                                      |
+| v1.115  | 2026-11-13 | T3.6 hataya (owner: purane users ka import nahi); §P: 86 tasks, Phase 3 60%, poora 17%, task ginti 30%.                                                                                                                  |
+| v1.116  | 2026-11-13 | Naya T3.7 `[~]` (Master ke Staff pages, owner ke 4 faisle, 3 PR; PR A ka kaam); §P: 87 tasks, Phase 3 58%, poora 17%, task ginti 30%.                                                                                    |
+| v1.117  | 2026-11-14 | T3.7 ka follow-up poora: core, notify, bundle ke tests bhi `MONGO_TEST_URI`/`REDIS_TEST_URL` (`test/env.ts`).                                                                                                            |
+| v1.118  | 2026-11-14 | T3.7: PR A merge (#77); PR B ka kaam (data-table v1, `Badge`, side panel, `SectionLayout`); T6.1 me data-table.                                                                                                          |
+| v1.119  | 2026-11-14 | T3.7: PR B merge (#79); PR C ka kaam (Master Staff pages, Select fix, E2E, review ke 12 fixes) aur bacha kaam.                                                                                                           |
