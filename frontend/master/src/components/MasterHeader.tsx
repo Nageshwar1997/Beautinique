@@ -1,5 +1,6 @@
 import { NavList, ThemeSwitcher } from '@beautinique/frontend-app-shell';
 import { AccountMenu } from '@beautinique/frontend-auth-ui';
+import { useVisible } from '@beautinique/frontend-authz';
 import { BrandMark } from '@beautinique/frontend-icons';
 import { Link } from 'react-router';
 
@@ -9,12 +10,14 @@ import { ACCOUNT_NAV, MAIN_NAV } from '../nav';
 const ACCOUNT_LINKS = ACCOUNT_NAV.map(({ to, label }) => ({ href: to, label }));
 
 /**
- * The Master app's top bar: the mark and the app's name (home), the main nav, the theme switcher
+ * The Master app's top bar: the mark and the app's name (home), the main nav (the pages the
+ * person's roles open), the theme switcher
  * and the account (sign in, or the account menu). On a phone the mark alone, as in the customer
  * and admin apps (QA-ADM-001: with the name the bar was wider than a 360 px screen); the link keeps
  * its full name for screen readers.
  */
 export function MasterHeader() {
+  const nav = useVisible(MAIN_NAV);
   return (
     <header className="border-border bg-surface/90 sticky top-0 z-10 border-b backdrop-blur">
       <div className="container-page flex min-h-16 items-center gap-3">
@@ -26,7 +29,7 @@ export function MasterHeader() {
           <BrandMark size={36} />
           <span className="font-display hidden text-lg font-medium sm:inline">Master</span>
         </Link>
-        <NavList items={MAIN_NAV} label="Main" className="hidden md:block" />
+        <NavList items={nav} label="Main" className="hidden md:block" />
         <ThemeSwitcher />
         <AccountMenu links={ACCOUNT_LINKS} />
       </div>

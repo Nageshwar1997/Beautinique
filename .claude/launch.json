@@ -38,6 +38,18 @@
       "port": 5186
     },
     {
+      "name": "authz-playground",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": ["run", "playground", "--workspace", "@beautinique/frontend-authz"],
+      "port": 5187
+    },
+    {
+      "name": "data-table-playground",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": ["run", "playground", "--workspace", "@beautinique/frontend-data-table"],
+      "port": 5188
+    },
+    {
       "name": "backend",
       "runtimeExecutable": "npm",
       "runtimeArgs": ["run", "dev:backend"],

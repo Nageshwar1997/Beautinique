@@ -3,6 +3,7 @@ export { ErrorPage, type ErrorPageAction, type ErrorPageProps } from './ErrorPag
 export { IconCreditsPage } from './IconCreditsPage';
 export { type NavItem, NavList, type NavListProps } from './NavList';
 export { type ErrorReporter, reportError, setErrorReporter, useReportError } from './report';
+export { SectionLayout, type SectionLayoutProps } from './SectionLayout';
 export { ServerWake, type ServerWakeProps, WakeScript } from './ServerWake';
 export {
   readThemeChoice,

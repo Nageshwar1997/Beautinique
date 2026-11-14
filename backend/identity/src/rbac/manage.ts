@@ -479,7 +479,7 @@ export async function listGrants(deps: ManageDeps, passport: Passport, query: Gr
   // one person (by id or email): every role of theirs; else no sign-up roles for a reviewer
   const onePerson = query.userId !== undefined || query.email !== undefined;
   const roles = await roleCatalog(deps.mongo);
-  const visible = visibleFilter(caller, roles, { onePerson });
+  const visible = visibleFilter(caller, roles, { onePerson, peers: true });
   if (!visible) return empty;
   let userId =
     query.userId === undefined ? undefined : toObjectId(query.userId, { field: 'userId' });
@@ -519,13 +519,14 @@ export async function listGrants(deps: ManageDeps, passport: Passport, query: Gr
   );
   const keyOf = roleKeys(roles);
   return {
-    items: items.map((grant) =>
-      grantView(grant, {
-        email: emails.get(grant.userId.toHexString()) ?? '',
-        role: keyOf(grant.roleId),
-        catalog,
-      }),
-    ),
+    // a grant whose account is gone (it signs in nowhere) is left out: one such grant made the
+    // whole list break its contract (an empty email); the cursor still counts it
+    items: items.flatMap((grant) => {
+      const email = emails.get(grant.userId.toHexString());
+      return email === undefined
+        ? []
+        : [grantView(grant, { email, role: keyOf(grant.roleId), catalog })];
+    }),
     nextCursor: page.length > query.limit ? (items.at(-1)?._id.toHexString() ?? null) : null,
   };
 }

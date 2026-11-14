@@ -17,6 +17,7 @@ import { expectObjectIds } from '../../../scripts/e2e/object-ids.ts';
 import { startBundle } from '../src/bundle.ts';
 import { readBundleConfig } from '../src/config.ts';
 import { names } from '../src/deployables.ts';
+import { MONGO_URI, REDIS_DB } from './env.ts';
 
 /** A role's or an app's id by its key, in identity's database (grants name them by id). */
 async function idByKey(mongo: Mongo, collection: 'identity_roles' | 'identity_apps', key: string) {
@@ -27,10 +28,9 @@ async function idByKey(mongo: Mongo, collection: 'identity_roles' | 'identity_ap
   return found._id;
 }
 
-// core needs MongoDB and Redis: the laptop's and CI's local ones (`npm run infra:up`). The test uses
-// its own database and Redis database 5, so it never touches the data of a running dev server.
-const MONGO_URI = 'mongodb://localhost:27017/?replicaSet=rs0';
-const REDIS_DB = 'redis://localhost:6379/5';
+// core needs MongoDB and Redis: the laptop's and CI's local ones (`npm run infra:up`), or a mutation
+// run's (test/env.ts). The test uses its own database and Redis database 5, so it never touches the
+// data of a running dev server.
 const dbName = `bq_test_bundle_${randomUUID().slice(0, 8)}`;
 // every deployable has a database of its own, live and here
 const identityDbName = `${dbName}_identity`;

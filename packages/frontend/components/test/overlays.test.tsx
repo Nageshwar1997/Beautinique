@@ -3,7 +3,7 @@ import userEvent from '@testing-library/user-event';
 import { useState } from 'react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
-import { Button, Dialog, type DialogProps, Tooltip } from '../src/index';
+import { Badge, Button, Dialog, type DialogProps, Tooltip } from '../src/index';
 import { expectNoAxeViolations } from './axe';
 
 afterEach(() => {
@@ -139,6 +139,36 @@ describe('Dialog', () => {
     rerender(<Dialog open onOpenChange={vi.fn()} title="Sized" size="lg" />);
     expect(box()?.classList).toContain('max-w-2xl');
     await expectNoAxeViolations();
+  });
+
+  it('is a side panel along the end edge with placement side: full height, closes like a dialog', async () => {
+    const onOpenChange = vi.fn();
+    render(
+      <Dialog open onOpenChange={onOpenChange} title="asha@beautinique.example" placement="side">
+        <p>Her roles</p>
+      </Dialog>,
+    );
+    const panel = screen.getByRole('dialog', { name: 'asha@beautinique.example' });
+    expect(panel.classList).toContain('h-full');
+    expect(panel.classList).not.toContain('rounded-2xl');
+    const box = panel.parentElement;
+    expect(box?.classList).toContain('h-dvh');
+    expect(box?.className).toContain('animate-slide-in-from-right');
+    expect(box?.parentElement?.classList).toContain('justify-end');
+    await userEvent.keyboard('{Escape}');
+    expect(onOpenChange).toHaveBeenCalledWith(false);
+    await expectNoAxeViolations();
+  });
+});
+
+describe('Badge', () => {
+  it('says a state in its words, in a tone’s light colours, neutral by default', () => {
+    const { rerender } = render(<Badge>Ended</Badge>);
+    const badge = screen.getByText('Ended');
+    expect(badge.classList).toContain('tone-neutral');
+    expect(badge.classList).toContain('bg-tone-subtle');
+    rerender(<Badge tone="success">Active</Badge>);
+    expect(screen.getByText('Active').classList).toContain('tone-success');
   });
 });
 

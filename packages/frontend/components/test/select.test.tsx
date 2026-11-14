@@ -28,6 +28,20 @@ const described = (element: HTMLElement) =>
 const OPTION_DESCRIPTIONS = ['label-content-name-mismatch'];
 
 describe('Select', () => {
+  it('keeps working when its options change while it stays on the page (T3.7)', async () => {
+    const first = [
+      { value: 'admin.fraud_risk', label: 'Fraud & Risk Analyst' },
+      { value: 'admin.state_admin', label: 'State Admin' },
+    ];
+    const second = [{ value: 'support.l1_agent', label: 'Customer Support Agent (L1)' }];
+    const { rerender } = render(<Select label="Role" options={first} />);
+    rerender(<Select label="Role" options={second} />);
+    await userEvent.click(screen.getByRole('button', { name: /Role/ }));
+    expect(screen.getAllByRole('option').map((o) => o.textContent)).toEqual([
+      'Customer Support Agent (L1)',
+    ]);
+  });
+
   it('opens on press, chooses an option and shows it', async () => {
     const onChange = vi.fn();
     function Skin() {

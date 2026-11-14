@@ -1,6 +1,6 @@
 # DESIGN — BQ
 
-> **Status:** v1.16 (2026-11-13). UI aur UX ke niyam saare 11 apps ke liye. Design ka **source of truth code hai**: `@beautinique/frontend-styles` (tokens) aur `@beautinique/frontend-components` (components). [RULES.md](RULES.md) §5 frontend ke coding niyam batata hai; ye file batati hai ki cheezein **dikhengi aur chalengi kaise**.
+> **Status:** v1.17 (2026-11-14). UI aur UX ke niyam saare 11 apps ke liye. Design ka **source of truth code hai**: `@beautinique/frontend-styles` (tokens) aur `@beautinique/frontend-components` (components). [RULES.md](RULES.md) §5 frontend ke coding niyam batata hai; ye file batati hai ki cheezein **dikhengi aur chalengi kaise**.
 
 ## 1. Design principles
 
@@ -79,7 +79,7 @@ Brand: **rose** rgb(214, 51, 108), deep **plum** rgb(92, 26, 70), **champagne go
 
 ### 5.2 Naye shared components (ARCHITECTURE §9.2)
 
-app-shell (layout, nav, theme switcher, wake-up screen), data-table, review-screens, auth-ui (OTP input, TOTP, My Devices, step-up dialog), maps, forms, pwa-kit.
+app-shell (layout, nav, theme switcher, wake-up screen, `SectionLayout`: data-dense app ka sidebar), data-table (bana 2026-11-14, T3.7: table, phone pe cards, cursor pages, URL me filters), review-screens, auth-ui (OTP input, TOTP, My Devices, step-up dialog), maps, forms, pwa-kit.
 
 ### 5.3 Product-specific (packages me banenge)
 
@@ -138,7 +138,7 @@ Har screen ye states dikhati hai:
 
 ## 10. Har app ka look
 
-**Jab tak app ke pages nahi (owner, 2026-11-09, QA Q-014):** home pe "Coming soon", app ka naam aur ek line ki app kis kaam ka hoga (`scripts/packages/lib/create/app-templates.ts` `APP_TAGLINES`); public ko kabhi developer ka sandesh nahi. Team ke app me sign-in pehle aa sakta hai (Master, owner 2026-11-13): tab ye home sign-in ke peeche, "Signed in as" ke saath.
+**Jab tak app ke pages nahi (owner, 2026-11-09, QA Q-014):** home pe "Coming soon", app ka naam aur ek line ki app kis kaam ka hoga (`scripts/packages/lib/create/app-templates.ts` `APP_TAGLINES`); public ko kabhi developer ka sandesh nahi. Team ke app me sign-in pehle aa sakta hai (Master, owner 2026-11-13): tab ye home sign-in ke peeche, "Signed in as" ke saath. **Pages aane ke baad (Master, 2026-11-14, T3.7):** home pe "Coming soon" nahi; "Signed in as" aur un sections ke cards jo person ke roles kholte hain, aur jiske roles koi section nahi kholte use "There is nothing to manage here for your role yet."
 
 | App                                                              | Look                                                                                                                                                   |
 | ---------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------ |
@@ -147,6 +147,8 @@ Har screen ye states dikhati hai:
 | Admin, Super Admin, Master, Support Desk, Finance, Growth Studio | Data-dense: sidebar nav, filters + data-table, review queues, side panel me detail, keyboard shortcuts.                                                |
 | Logistics Ops                                                    | Data-dense + maps: network map, control tower live map, scan-friendly bade inputs.                                                                     |
 | Delivery (PWA)                                                   | Phone ke liye: high contrast (dhoop me bhi padh sakein), bade buttons, ek haath se chalne layak, neeche fixed action bar, offline state hamesha dikhe. |
+
+**Data-dense ka namuna (2026-11-14, T3.7):** app-shell `SectionLayout` (md se sidebar, phone pe page ke upar links), data-table (table, 375 px pe cards; filters aur pages URL me), row ka detail components `Dialog placement="side"` me, halat `Badge` se (shabd + rang, sirf rang kabhi nahi). Buttons, links aur pages sirf haq walon ko (`@beautinique/frontend-authz`); faisla server ka.
 
 ## 11. Media, motion, icons
 
@@ -183,11 +185,12 @@ Har screen ye states dikhati hai:
 | v1.6    | 2026-10-26 | §11 Logo: master image, `BrandLogo`/`BrandMark` (icons package), rang theme se, favicon alag, install icons.                                                                          |
 | v1.7    | 2026-10-26 | §6 Error: 404 aur error page ka design (`ErrorPage`, compact art).                                                                                                                    |
 | v1.8    | 2026-10-26 | §3: `surface-inverse` ab `brand-text` bhi badalta hai (`brand-text-inverse`); footer me chalu page ka link padhne layak.                                                              |
-| v1.9    | 2026-11-05 | §6: wake-up, server ke jawab se pehle koi page nahi: pehle saada parda, 1.5 s pe wake-up screen (owner). |
-| v1.10   | 2026-11-07 | §6: wake-up ke baad sirf "Try again"; jawab se pehle koi API call nahi; account na mile to sandesh + "Try again" (owner, QA-FE-009). |
-| v1.11   | 2026-11-07 | §6: account na mile to app-shell ka error page ("Oops", Try again + home) (owner). |
-| v1.12   | 2026-11-07 | §8: kai step wale form me naya step focus le (field ya heading), sandesh field se `aria-describedby` se juda (owner, QA-FE-008). |
-| v1.13   | 2026-11-08 | §11: header me phone pe sirf `BrandMark`, naam `sm` se upar (owner, QA-ADM-001). |
-| v1.14   | 2026-11-09 | §11: saare apps phone pe install; tile rang parivaar se (customer ivory, team ink, partner rose), naam "BQ" + app (owner). |
-| v1.15 | 2026-11-10 | §10: pages se pehle "Coming soon" home (naam + ek line), owner, Q-014. |
-| v1.16 | 2026-11-13 | §10: Master app ka "Coming soon" home ab sign-in ke peeche (owner). |
+| v1.9    | 2026-11-05 | §6: wake-up, server ke jawab se pehle koi page nahi: pehle saada parda, 1.5 s pe wake-up screen (owner).                                                                              |
+| v1.10   | 2026-11-07 | §6: wake-up ke baad sirf "Try again"; jawab se pehle koi API call nahi; account na mile to sandesh + "Try again" (owner, QA-FE-009).                                                  |
+| v1.11   | 2026-11-07 | §6: account na mile to app-shell ka error page ("Oops", Try again + home) (owner).                                                                                                    |
+| v1.12   | 2026-11-07 | §8: kai step wale form me naya step focus le (field ya heading), sandesh field se `aria-describedby` se juda (owner, QA-FE-008).                                                      |
+| v1.13   | 2026-11-08 | §11: header me phone pe sirf `BrandMark`, naam `sm` se upar (owner, QA-ADM-001).                                                                                                      |
+| v1.14   | 2026-11-09 | §11: saare apps phone pe install; tile rang parivaar se (customer ivory, team ink, partner rose), naam "BQ" + app (owner).                                                            |
+| v1.15   | 2026-11-10 | §10: pages se pehle "Coming soon" home (naam + ek line), owner, Q-014.                                                                                                                |
+| v1.16   | 2026-11-13 | §10: Master app ka "Coming soon" home ab sign-in ke peeche (owner).                                                                                                                   |
+| v1.17   | 2026-11-14 | §5.2: app-shell `SectionLayout`, data-table bana (T3.7); §10 ke neeche data-dense ka namuna; components me `Badge` aur Dialog side panel. |

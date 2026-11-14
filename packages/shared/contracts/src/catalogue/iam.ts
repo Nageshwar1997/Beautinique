@@ -18,6 +18,7 @@ import { definePermission } from '../permissions';
 import { type AppId, APPS, SCOPE_TYPES } from '../platform';
 import { defineRoute } from '../routes';
 import { otpChallengeZod, otpConsentZod, recoveryCodeZod } from './identity';
+import { roleKeyZod, scopeZod } from './rbac';
 
 /**
  * Identity's permission keys (ARCHITECTURE §7.3). Every role holds `iam.app.sign_in`: a grant
@@ -100,21 +101,12 @@ export const authzVersionKey = (userId: string): string => `bq:id:authz-version:
 
 // ---- Roles, grants and invitations (TASKS T3.3 PR B, ARCHITECTURE §7.3) ----
 
-/** `<app>.<name>`: a shipped role, or `<app>.c_<name>` for one Master made. */
-export const roleKeyZod = string()
-  .max(80)
-  .regex(/^[a-z]+\.[a-z][a-z0-9_]*$/, 'Not a role key');
+export { roleKeyZod, scopeZod };
 
 /** The name part of a role Master makes: its key becomes `<app>.c_<slug>`. */
 export const roleSlugZod = string()
   .trim()
   .regex(/^[a-z][a-z0-9_]{1,38}$/, 'Use 2 to 39 lower-case letters, digits or _');
-
-/** Where a grant holds: a scope type and its ids (`global` has none). */
-export const scopeZod = object({
-  type: zodEnum(SCOPE_TYPES),
-  ids: array(string().trim().min(1).max(64)).max(50),
-});
 
 const validityZod = {
   /** When it starts (ISO); left out = now */

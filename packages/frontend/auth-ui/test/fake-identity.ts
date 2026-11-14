@@ -3,6 +3,7 @@
 // reaches document.cookie, so the fake writes it).
 import {
   type AppId,
+  type ScopeType,
   sessionHintCookieName,
   type StepUpAction,
 } from '@beautinique/shared-contracts';
@@ -62,6 +63,11 @@ export interface FakeState {
   steppedUp: boolean;
   /** A step-up for one change alone (QA DR-010): counts once, for it */
   steppedUpFor: StepUpAction | null;
+  /** What the account may do in the app (GET /iam/me): nothing unless a test gives it */
+  access: {
+    roles: { role: string; name: string; scope: { type: ScopeType; ids: string[] } }[];
+    permissions: string[];
+  };
 }
 
 export interface Sent {
@@ -105,6 +111,7 @@ const me = (app: AppId, state: FakeState) => ({
     authenticatorRequiredBy: state.authenticator ? state.authenticatorRequiredBy : [],
   },
   session: { sessionId: SESSION_ID, app, expiresAt: '2026-12-31T00:00:00.000Z' },
+  access: state.access,
 });
 
 /** This device and a phone, in two apps. */
@@ -157,6 +164,7 @@ export function fakeIdentity(
       authenticatorRequiredBy: [],
       steppedUp: false,
       steppedUpFor: null,
+      access: { roles: [], permissions: [] },
     },
     on: (route, handler) => {
       handlers.set(route, handler);

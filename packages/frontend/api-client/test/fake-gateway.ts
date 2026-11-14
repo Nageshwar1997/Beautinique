@@ -86,6 +86,12 @@ const me = {
     authenticatorRequiredBy: [],
   },
   session: { sessionId: SESSION_ID, app: 'customer', expiresAt: EXPIRES_AT },
+  access: {
+    roles: [
+      { role: 'customer.customer', name: 'Customer', scope: { type: 'self', ids: [USER_ID] } },
+    ],
+    permissions: ['iam.app.sign_in'],
+  },
 };
 
 /** The gateway and identity as the browser sees them, cookies included. */

@@ -40,9 +40,8 @@ import {
 } from '../src/deliveries.ts';
 import { type EmailMessage, type EmailSender, EmailSendError } from '../src/email/port.ts';
 import { release, start } from '../src/service.ts';
+import { MONGO_URI, REDIS_URL } from './env.ts';
 
-const MONGO_URI = 'mongodb://localhost:27017/?replicaSet=rs0';
-const REDIS_URL = 'redis://localhost:6379';
 const runId = randomUUID().slice(0, 8);
 const dbName = `bq_test_notify_${runId}`;
 const producerDbName = `bq_test_notify_producer_${runId}`;
