@@ -197,6 +197,7 @@ export function mountCoreRoute<const Route extends RouteDefinition>(
   deps: IdempotencyDeps,
   options?: MountRouteOptions,
 ): void {
+  if (route.download) throw new Error(`${route.id} is a download: mount it with mountCoreDownload`);
   if (route.idempotency) {
     router[route.method.toLowerCase() as Lowercase<Route['method']>](
       route.path,

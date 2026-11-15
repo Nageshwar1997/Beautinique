@@ -3,11 +3,17 @@
 import { describe, expect, it } from 'vitest';
 
 import {
+  AUDIT_ACTION_NAMES,
   AUDIT_DAYS_MAX,
+  AUDIT_EXPORT_MAX_ROWS,
   AUDIT_RETENTION_DAYS,
+  auditExport,
   auditRead,
   auditRecorded,
+  csvFileZod,
+  ERROR_CODES,
   events,
+  exportAuditEntries,
   listAuditDays,
   listAuditEntries,
   maskEmail,
@@ -59,6 +65,24 @@ describe('the audit contracts', () => {
         idempotency: false,
       });
     }
+    // the CSV: the same filters, by its own permission, each time with a step-up (owner)
+    expect(permissions.get('audit.entry.export')).toBe(auditExport);
+    expect(auditExport).toMatchObject({ scopeTypes: ['global'], risk: 'high', mfa: true });
+    expect(exportAuditEntries).toMatchObject({
+      method: 'GET',
+      path: '/audit/entries/export',
+      owner: 'core',
+      apps: ['master'],
+      access: { type: 'permission', permission: 'audit.entry.export' },
+      stepUp: true,
+      download: 'csv',
+      idempotency: false,
+    });
+    expect(exportAuditEntries.output).toBe(csvFileZod);
+    expect(exportAuditEntries.input.query.safeParse({ cursor: 'x', limit: 5 }).data).toEqual({});
+    expect(AUDIT_EXPORT_MAX_ROWS).toBe(50_000);
+    expect(ERROR_CODES.EXPORT_TOO_LARGE).toBe(422);
+    expect(AUDIT_ACTION_NAMES['audit.entries.export']).toBe('Audit log downloaded');
     expect(AUDIT_RETENTION_DAYS).toBe(400);
     expect(AUDIT_DAYS_MAX).toBeGreaterThanOrEqual(31);
   });

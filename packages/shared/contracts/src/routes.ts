@@ -57,6 +57,12 @@ export const navigationZod = object({
   ),
 });
 
+/**
+ * The output of a download route (`download: 'csv'`, T4.1 PR D): the answer is the file itself, not
+ * `{ data }`, so this schema only marks the route; the client takes the file with `download()`.
+ */
+export const csvFileZod = string();
+
 /** Longest CDN freshness (1 day) and stale window (7 days) a route may ask for. */
 export const MAX_S_MAX_AGE = 86_400;
 export const MAX_STALE_WHILE_REVALIDATE = 604_800;
@@ -87,6 +93,13 @@ export interface RouteDefinition {
    * is `navigationZod`.
    */
   navigation?: true;
+  /**
+   * A file the person saves (CSV export, ARCHITECTURE §6.5, T4.1 PR D): a signed-in GET whose
+   * answer is the file itself, streamed from the database (`text/csv`, `Content-Disposition:
+   * attachment` with its name), never `{ data }` and never cached. The client takes it with
+   * `download()`, not `call()`. Its output schema is `csvFileZod`.
+   */
+  download?: 'csv';
   input: { params?: ObjectSchema; query?: ObjectSchema; body?: ZodType };
   output: ZodType;
 }
@@ -165,6 +178,14 @@ export function defineRoute<const Route extends RouteDefinition>(route: Route): 
     }
     if (route.cache) fail('a navigation route is never cached');
     if (route.output !== navigationZod) fail('a navigation route answers with navigationZod');
+  }
+  if (route.download === undefined) {
+    if (route.output === csvFileZod) fail('only a download route answers with csvFileZod');
+  } else {
+    if (route.method !== 'GET' || route.access.type === 'public') {
+      fail('a download route must be a signed-in GET');
+    }
+    if (route.output !== csvFileZod) fail('a download route answers with csvFileZod');
   }
   const declared = pathParams(route.path);
   if (new Set(declared).size !== declared.length) fail('path repeats a parameter');

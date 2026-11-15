@@ -34,6 +34,16 @@ export {
   scopeFilter,
 } from './authz.ts';
 export {
+  csvCell,
+  type CsvColumn,
+  type CsvFile,
+  csvLine,
+  csvText,
+  type DownloadDeps,
+  type DownloadHandler,
+  mountCoreDownload,
+} from './download.ts';
+export {
   IDEMPOTENCY,
   idempotency,
   type IdempotencyDeps,

@@ -5,7 +5,7 @@ import { cleanup, configure, screen, waitFor, within } from '@testing-library/re
 import userEvent from '@testing-library/user-event';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
-import { actionText, checkOf } from '../src/audit/audit-log';
+import { actionText, checkOf, rangeOf } from '../src/audit/audit-log';
 import { renderAs, violations } from './render';
 
 beforeEach(() => {
@@ -81,6 +81,47 @@ describe('the filters', () => {
       expect(api.paths()).toContain('GET /audit/entries?limit=25');
     });
     expect(api.paths().some((path) => path.includes('action=constructor'))).toBe(false);
+  });
+});
+
+describe('the CSV (T4.1 PR D)', () => {
+  it('downloads the entries the filters show, India days as times, and says it is done', async () => {
+    const made = vi.spyOn(URL, 'createObjectURL').mockReturnValue('blob:audit');
+    vi.spyOn(URL, 'revokeObjectURL').mockImplementation(() => undefined);
+    const clicked = vi
+      .spyOn(HTMLAnchorElement.prototype, 'click')
+      .mockImplementation(() => undefined);
+    const { api } = renderAs('master', '/audit?result=denied&from=2026-11-01&to=2026-11-15');
+    await screen.findByRole('table', { name: 'Audit entries' });
+    const range = 'from=2026-10-31T18%3A30%3A00.000Z&to=2026-11-15T18%3A29%3A59.999Z';
+    await waitFor(() => {
+      expect(api.paths()).toContain(`GET /audit/entries?limit=25&${range}&result=denied`);
+    });
+    await userEvent.click(screen.getByRole('button', { name: 'Download CSV' }));
+    // the toast (and its words for screen readers)
+    expect((await screen.findAllByText('Audit log downloaded')).length).toBeGreaterThan(0);
+    expect(api.paths()).toContain(`GET /audit/entries/export?${range}&result=denied`);
+    expect(made).toHaveBeenCalledTimes(1);
+    const link = clicked.mock.contexts[0] as HTMLAnchorElement;
+    expect(link.download).toBe('beautinique-audit-log-2026-11-15.csv');
+  });
+
+  it('says so when more than 50,000 entries match, and the Internal Auditor has the button too', async () => {
+    const { api } = renderAs('auditor', '/audit');
+    api.state.exportAnswer = 'too-large';
+    await screen.findByRole('table', { name: 'Audit entries' });
+    await userEvent.click(screen.getByRole('button', { name: 'Download CSV' }));
+    expect((await screen.findByRole('alert')).textContent).toBe(
+      'More than 50,000 entries match. Narrow the dates or filters.',
+    );
+  });
+
+  it('turns picked India days into the time range, and leaves out what is no day', () => {
+    expect(rangeOf('2026-11-01', '2026-11-15')).toEqual({
+      from: '2026-10-31T18:30:00.000Z',
+      to: '2026-11-15T18:29:59.999Z',
+    });
+    expect(rangeOf('', 'x')).toEqual({});
   });
 });
 

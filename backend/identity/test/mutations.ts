@@ -1948,24 +1948,31 @@ const mutations: Mutation[] = [
   {
     file: 'rbac/roles',
     name: 'Master cannot reset an authenticator',
-    change: [
-      [
-        'permissions: [...APPOINTS, roleManage.key, totpReset.key, totpResetMaster.key, auditRead.key],',
-        'permissions: [...APPOINTS, roleManage.key, totpResetMaster.key, auditRead.key],',
-      ],
-    ],
+    change: [['    totpReset.key,\n    totpResetMaster.key,', '    totpResetMaster.key,']],
     tests: 'DR-007',
   },
   {
     file: 'rbac/roles',
     name: 'Master cannot reset the other Master',
+    change: [['    totpResetMaster.key,\n    auditRead.key,', '    auditRead.key,']],
+    tests: 'DR-007',
+  },
+  {
+    file: 'rbac/roles',
+    name: 'Master cannot download the audit log',
+    change: [['    auditRead.key,\n    auditExport.key,\n  ],', '    auditRead.key,\n  ],']],
+    tests: 'read the audit log and download it',
+  },
+  {
+    file: 'rbac/roles',
+    name: 'the Internal Auditor cannot download the audit log',
     change: [
       [
-        'permissions: [...APPOINTS, roleManage.key, totpReset.key, totpResetMaster.key, auditRead.key],',
-        'permissions: [...APPOINTS, roleManage.key, totpReset.key, auditRead.key],',
+        'permissions: [grantRead.key, auditRead.key, auditExport.key],',
+        'permissions: [grantRead.key, auditRead.key],',
       ],
     ],
-    tests: 'DR-007',
+    tests: 'read the audit log and download it',
   },
   {
     file: 'rbac/manage',

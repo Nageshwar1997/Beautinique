@@ -16,7 +16,7 @@ import { defineEvent } from '../events';
 import { cursorPage, cursorQuery } from '../http';
 import { definePermission } from '../permissions';
 import { APPS, DEPLOYABLES } from '../platform';
-import { defineRoute } from '../routes';
+import { csvFileZod, defineRoute } from '../routes';
 import { roleKeyZod, scopeZod } from './rbac';
 
 /**
@@ -35,7 +35,20 @@ export const auditRead = definePermission({
   secondSignature: false,
 });
 
-export const AUDIT_PERMISSIONS = [auditRead] as const;
+/**
+ * Download the audit log as a CSV file (T4.1 PR D): Master and the Internal Auditor, each time
+ * with a step-up (owner, 2026-11-15); every export is an audit entry of its own.
+ */
+export const auditExport = definePermission({
+  key: 'audit.entry.export',
+  description: 'Download the audit log as a CSV file',
+  scopeTypes: ['global'],
+  risk: 'high',
+  mfa: true,
+  secondSignature: false,
+});
+
+export const AUDIT_PERMISSIONS = [auditRead, auditExport] as const;
 
 /** How the action ended: done, refused by a rule, or broken on the way. */
 export const AUDIT_RESULTS = ['success', 'denied', 'failed'] as const;
@@ -43,6 +56,28 @@ export type AuditResult = (typeof AUDIT_RESULTS)[number];
 
 /** The days an audit entry is kept (a TTL index; ARCHITECTURE §6.5). */
 export const AUDIT_RETENTION_DAYS = 400;
+
+/**
+ * The most entries one CSV export holds (ARCHITECTURE §6.5): more matching the filters is a 422
+ * (`EXPORT_TOO_LARGE`), never a file cut short (owner, 2026-11-15).
+ */
+export const AUDIT_EXPORT_MAX_ROWS = 50_000;
+
+/** What each action is called in the viewer and the CSV; one not named yet shows as its key. */
+export const AUDIT_ACTION_NAMES: Readonly<Record<string, string>> = {
+  'iam.grants.give': 'Role given',
+  'iam.grants.end': 'Role ended',
+  'iam.roles.create': 'Sub-role made',
+  'iam.roles.update': 'Sub-role changed',
+  'iam.invitations.create': 'Invitation sent',
+  'iam.invitations.revoke': 'Invitation taken back',
+  'iam.invitations.accept': 'Invitation accepted',
+  'iam.users.resetAuthenticator': 'Authenticator reset',
+  'iam.users.endSessions': 'Sessions ended',
+  'identity.session.signedIn': 'Signed in',
+  'identity.session.reuseDetected': 'Copied session stopped',
+  'audit.entries.export': 'Audit log downloaded',
+};
 
 /** The most days one look at the chain checks covers (`GET /audit/days`). */
 export const AUDIT_DAYS_MAX = 92;
@@ -106,6 +141,17 @@ export const auditEntryViewZod = auditRecordZod.extend({
   }),
 });
 
+/** Which entries a list or an export holds: by time, who, what, which thing and how it ended. */
+export const auditFiltersZod = object({
+  from: isoDateTimeZod.optional(),
+  to: isoDateTimeZod.optional(),
+  actorId: objectIdZod.optional(),
+  action: string().min(1).max(100).optional(),
+  resourceType: string().min(1).max(40).optional(),
+  resourceId: string().min(1).max(100).optional(),
+  result: zodEnum(AUDIT_RESULTS).optional(),
+});
+
 export const listAuditEntries = defineRoute({
   id: 'audit.entries.list',
   method: 'GET',
@@ -117,18 +163,29 @@ export const listAuditEntries = defineRoute({
   idempotency: false,
   stepUp: auditRead.mfa,
   owner: 'core',
-  input: {
-    query: cursorQuery.extend({
-      from: isoDateTimeZod.optional(),
-      to: isoDateTimeZod.optional(),
-      actorId: objectIdZod.optional(),
-      action: string().min(1).max(100).optional(),
-      resourceType: string().min(1).max(40).optional(),
-      resourceId: string().min(1).max(100).optional(),
-      result: zodEnum(AUDIT_RESULTS).optional(),
-    }),
-  },
+  input: { query: cursorQuery.extend(auditFiltersZod.shape) },
   output: cursorPage(auditEntryViewZod),
+});
+
+/**
+ * The log as a CSV file (T4.1 PR D): the list's filters, newest first, at most
+ * AUDIT_EXPORT_MAX_ROWS entries, each with what changed (personal data half hidden, as stored),
+ * named `beautinique-audit-log-<today in India>.csv`.
+ */
+export const exportAuditEntries = defineRoute({
+  id: 'audit.entries.export',
+  method: 'GET',
+  path: '/audit/entries/export',
+  summary: 'The audit log as a CSV file, by the same filters as the list',
+  apps: ['master'],
+  access: { type: 'permission', permission: auditExport.key },
+  rateLimit: 'search',
+  idempotency: false,
+  stepUp: auditExport.mfa,
+  owner: 'core',
+  download: 'csv',
+  input: { query: auditFiltersZod },
+  output: csvFileZod,
 });
 
 /** A day's chain check: the daily task counts the day's entries again and follows its hashes. */
@@ -165,7 +222,7 @@ export const listAuditDays = defineRoute({
   }),
 });
 
-export const AUDIT_ROUTES = [listAuditEntries, listAuditDays] as const;
+export const AUDIT_ROUTES = [listAuditEntries, exportAuditEntries, listAuditDays] as const;
 export const AUDIT_EVENTS = [auditRecorded] as const;
 
 const EMAIL = /^([^\s@])[^\s@]*(@[^\s@]+\.[^\s@]+)$/;

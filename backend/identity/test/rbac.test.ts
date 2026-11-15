@@ -180,6 +180,15 @@ describe('the shipped roles', () => {
     });
   });
 
+  it('let only Master and the Internal Auditor read the audit log and download it', () => {
+    const holders = (permission: string) =>
+      ROLE_SEEDS.filter((seed) => seed.permissions.includes(permission))
+        .map((seed) => seed.key)
+        .sort();
+    expect(holders('audit.entry.read')).toEqual(['master.internal_auditor', 'master.master']);
+    expect(holders('audit.entry.export')).toEqual(['master.internal_auditor', 'master.master']);
+  });
+
   it('ask an authenticator of Seller Account Owner and Seller Finance, not of other seller staff', () => {
     const strict = ROLE_SEEDS.filter((seed) => seed.app === 'seller' && seed.mfaRequired);
     expect(strict.map((seed) => seed.key).sort()).toEqual([

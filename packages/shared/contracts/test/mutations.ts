@@ -67,7 +67,12 @@ const mutations: Mutation[] = [
   {
     file: 'client',
     name: 'a redirect is treated as success',
-    change: [['response.status > 299', 'response.status > 399']],
+    change: [
+      [
+        'response.status > 299) throw failure(response);',
+        'response.status > 399) throw failure(response);',
+      ],
+    ],
   },
   {
     file: 'client',
@@ -751,5 +756,41 @@ const mutations: Mutation[] = [
     tests: 'under any key',
   },
 ];
+
+// download routes (T4.1 PR D): a signed-in GET, and a file name that stays a plain one
+mutations.push(
+  {
+    file: 'routes',
+    name: 'a public download route is taken',
+    change: [
+      ["    if (route.method !== 'GET' || route.access.type === 'public') {", '    if (false) {'],
+    ],
+    tests: 'a download route is a signed-in GET',
+  },
+  {
+    file: 'routes',
+    name: 'a download route may answer with anything',
+    change: [
+      [
+        "    if (route.output !== csvFileZod) fail('a download route answers with csvFileZod');",
+        '',
+      ],
+    ],
+    tests: 'a download route is a signed-in GET',
+  },
+  {
+    file: 'client',
+    name: 'a file name with a path is taken',
+    // String.raw: the source's own backslashes
+    change: [[String.raw`/filename="([^"\\/]+)"/i`, '/filename="([^"]+)"/i']],
+    tests: 'reads only a plain file name',
+  },
+  {
+    file: 'client',
+    name: "a download's error answer is not read",
+    change: [['        body = JSON.parse(await blob.text());', '        body = null;']],
+    tests: 'reads an error answer as the error it is',
+  },
+);
 
 export default mutations;

@@ -5,6 +5,7 @@ import {
   type CallArgs,
   type CallOptions,
   createClient,
+  type DownloadedFile,
   refreshSession,
   type RouteDefinition,
   type RouteOutput,
@@ -75,6 +76,14 @@ export interface ApiClient {
     route: Route,
     ...args: CallArgs<Route>
   ): Promise<RouteOutput<Route>>;
+  /**
+   * `download(route, { params, query })`: a download route's file (`download: 'csv'`, T4.1 PR D),
+   * with the same refresh and step-up as `call`. Save it with `saveFile`.
+   */
+  download<const Route extends RouteDefinition & { download: 'csv' }>(
+    route: Route,
+    ...args: CallArgs<Route>
+  ): Promise<DownloadedFile>;
   /**
    * A new access token with the refresh cookie, one at a time: callers during a refresh share it.
    * false when there is no session any more; other failures (offline, server down) throw.
@@ -219,16 +228,8 @@ export function createApiClient(options: ApiClientOptions): ApiClient {
     return steppingUp;
   };
 
-  async function call<const Route extends RouteDefinition>(
-    route: Route,
-    ...[request, callOptions]: CallArgs<Route>
-  ): Promise<RouteOutput<Route>> {
-    // one key for every try, so a call sent again after a refresh or a step-up is the same request
-    const sendOptions: CallOptions = route.idempotency
-      ? { ...callOptions, idempotencyKey: callOptions?.idempotencyKey ?? crypto.randomUUID() }
-      : { ...callOptions };
-    const sendOnce = () => inner.call(route, ...([request, sendOptions] as CallArgs<Route>));
-
+  /** Sends until it is answered: once more after a refresh, once more after a step-up. */
+  async function withSession<T>(sendOnce: () => Promise<T>): Promise<T> {
     if (serverGate !== null) await serverGate;
     // a call asked for during a refresh waits for it, instead of going out with the old cookie
     if (refreshing !== null) await refreshing.catch(() => false);
@@ -254,9 +255,28 @@ export function createApiClient(options: ApiClientOptions): ApiClient {
     }
   }
 
+  function call<const Route extends RouteDefinition>(
+    route: Route,
+    ...[request, callOptions]: CallArgs<Route>
+  ): Promise<RouteOutput<Route>> {
+    // one key for every try, so a call sent again after a refresh or a step-up is the same request
+    const sendOptions: CallOptions = route.idempotency
+      ? { ...callOptions, idempotencyKey: callOptions?.idempotencyKey ?? crypto.randomUUID() }
+      : { ...callOptions };
+    return withSession(() => inner.call(route, ...([request, sendOptions] as CallArgs<Route>)));
+  }
+
+  function download<const Route extends RouteDefinition & { download: 'csv' }>(
+    route: Route,
+    ...args: CallArgs<Route>
+  ): Promise<DownloadedFile> {
+    return withSession(() => inner.download(route, ...args));
+  }
+
   return {
     app: options.app,
     call,
+    download,
     refresh,
     setStepUpHandler(handler) {
       stepUpHandler = handler;

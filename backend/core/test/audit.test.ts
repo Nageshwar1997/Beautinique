@@ -7,13 +7,16 @@ import { join } from 'node:path';
 import { LOOPBACK_HOST, type Passport, passportSigner } from '@beautinique/backend-server-kit';
 import { ObjectId, withTransaction } from '@beautinique/backend-server-mongo';
 import {
+  AUDIT_EXPORT_MAX_ROWS,
   auditRecorded,
   createClient,
+  exportAuditEntries,
   HEADERS,
   listAuditDays,
   listAuditEntries,
   passportAudience,
 } from '@beautinique/shared-contracts';
+import { istDateKey } from '@beautinique/shared-utils';
 import { afterAll, afterEach, beforeAll, describe, expect, it } from 'vitest';
 
 import {
@@ -31,6 +34,7 @@ import {
   verifyChains,
   verifyDay,
 } from '../src/modules/audit/index.ts';
+import { AUDIT_CSV_COLUMNS, indiaTime } from '../src/modules/audit/routes.ts';
 import {
   ACCESS_COPIES,
   type AccessCopy,
@@ -490,6 +494,201 @@ describe('the viewer routes (Master app)', () => {
     await expect(
       as(other).call(listAuditDays, { query: { from: today(), to: today() } }),
     ).rejects.toMatchObject({ status: 403 });
+  });
+});
+
+describe('the CSV export (T4.1 PR D)', () => {
+  const passportOf = (userId: ObjectId): Passport => ({
+    userId: userId.toHexString(),
+    sessionId: new ObjectId().toHexString(),
+    app: 'master',
+    methods: ['password', 'totp'],
+    authzVersion: 1,
+  });
+  async function caller(permissions: string[]): Promise<Passport> {
+    const userId = new ObjectId();
+    const roleId = new ObjectId();
+    await look.mongo.db.collection<RoleCopy>(ROLE_COPIES).insertOne({
+      _id: roleId,
+      key: 'master.internal_auditor',
+      app: 'master',
+      permissions,
+      scopeTypes: ['global'],
+      mfaRequired: false,
+      retired: false,
+      changedAt: new Date(),
+    });
+    await look.mongo.db.collection<AccessCopy>(ACCESS_COPIES).insertOne({
+      _id: userId,
+      authzVersion: 1,
+      grants: [
+        {
+          grantId: new ObjectId(),
+          roleId,
+          app: 'master',
+          scope: { type: 'global', ids: [] },
+          validFrom: null,
+          validTo: null,
+        },
+      ],
+      copiedAt: new Date(),
+    });
+    return passportOf(userId);
+  }
+  const as = (passport: Passport | null) =>
+    createClient({
+      baseUrl: core.url,
+      app: 'master',
+      fetch: (input, init) => {
+        const headers = new Headers(init?.headers);
+        if (passport) {
+          headers.set(HEADERS.passport, signer.sign(passport, passportAudience('core')));
+          headers.set(HEADERS.clientIp, '203.0.113.7');
+        }
+        return fetch(input, { ...init, headers });
+      },
+    });
+  /** The file's lines, its BOM checked and taken off. */
+  async function linesOf(blob: Blob): Promise<string[]> {
+    const bytes = new Uint8Array(await blob.arrayBuffer());
+    expect([...bytes.slice(0, 3)]).toEqual([0xef, 0xbb, 0xbf]);
+    const text = new TextDecoder().decode(bytes);
+    expect(text.endsWith('\r\n')).toBe(true);
+    return text.slice(0, -2).split('\r\n');
+  }
+
+  it('gives the filtered entries newest first, actors half hidden, formulas kept as text, and logs the export', async () => {
+    const auditor = await caller(['iam.app.sign_in', 'audit.entry.export']);
+    const asha = new ObjectId();
+    await look.mongo.db.collection<UserCopy>(USER_COPIES).insertOne({
+      _id: asha,
+      email: 'asha@beautinique.example',
+      status: 'active',
+      createdAt: new Date(),
+      changedAt: new Date(),
+    });
+    const grantId = new ObjectId();
+    await write({
+      action: 'iam.grants.give',
+      actor: { ...system, userId: asha, app: 'master', roles: ['master.master'], system: null },
+      resource: { type: 'grant', id: grantId },
+      scope: { type: 'state', ids: ['MH'] },
+      after: { email: 'ravi@beautinique.example', role: 'admin.state_admin' },
+      reason: '=HYPERLINK("https://x.example")',
+      at: new Date('2026-11-14T20:00:05.000Z'),
+    });
+    await write({ action: 'iam.roles.update', resource: { type: 'role', id: 'admin.c_desk' } });
+    await write({ action: 'identity.session.reuseDetected', result: 'denied' });
+
+    const file = await as(auditor).download(exportAuditEntries, { query: {} });
+    expect(file.fileName).toBe(`beautinique-audit-log-${istDateKey(new Date())}.csv`);
+    const [header, ...rows] = await linesOf(file.blob);
+    expect(header).toBe(AUDIT_CSV_COLUMNS.map((column) => `"${column.header}"`).join(','));
+    expect(rows).toHaveLength(3);
+    expect(rows[0]).toContain(
+      '"identity.session.reuseDetected","Copied session stopped","denied","System (core.test)"',
+    );
+    const grant = rows[2] ?? '';
+    expect(
+      grant.startsWith(
+        '"2026-11-15 01:30:05","iam.grants.give","Role given","success","a•••@beautinique.example",',
+      ),
+    ).toBe(true);
+    expect(grant).toContain(
+      `"${asha.toHexString()}","master","master.master","grant","${grantId.toHexString()}","state: MH"`,
+    );
+    // a cell a spreadsheet would run is text, its quotes doubled; what changed is masked
+    expect(grant).toContain(`"'=HYPERLINK(""https://x.example"")"`);
+    expect(grant).toContain('""email"":""r•••@beautinique.example""');
+    expect(grant).toContain(`"core","${today()}",1,"`);
+
+    // by a filter, like the list
+    const denied = await as(auditor).download(exportAuditEntries, { query: { result: 'denied' } });
+    expect(await linesOf(denied.blob)).toHaveLength(2);
+
+    // each export is an entry of its own: who, from where, which filters and how many rows
+    const exports = await entries()
+      .find({ action: 'audit.entries.export' })
+      .sort({ _id: 1 })
+      .toArray();
+    expect(exports).toHaveLength(2);
+    expect(exports[0]).toMatchObject({
+      actor: {
+        userId: new ObjectId(auditor.userId),
+        app: 'master',
+        roles: ['master.internal_auditor'],
+      },
+      resource: { type: 'audit_log', id: null },
+      result: 'success',
+      ip: '203.0.113.7',
+    });
+    expect(JSON.parse(exports[0]?.after ?? '{}')).toEqual({ filters: {}, rows: 3 });
+    expect(JSON.parse(exports[1]?.after ?? '{}')).toEqual({
+      filters: { result: 'denied' },
+      rows: 1,
+    });
+  });
+
+  it('answers 401 without a passport, 403 with only the read permission, 400 for an id without its type', async () => {
+    await expect(as(null).download(exportAuditEntries, { query: {} })).rejects.toMatchObject({
+      status: 401,
+    });
+    const reader = await caller(['iam.app.sign_in', 'audit.entry.read']);
+    await expect(as(reader).download(exportAuditEntries, { query: {} })).rejects.toMatchObject({
+      status: 403,
+      code: 'FORBIDDEN',
+    });
+    const auditor = await caller(['iam.app.sign_in', 'audit.entry.export']);
+    await expect(
+      as(auditor).download(exportAuditEntries, {
+        query: { resourceId: new ObjectId().toHexString() },
+      }),
+    ).rejects.toMatchObject({ status: 400, code: 'VALIDATION_FAILED' });
+    // nothing was exported, so nothing is in the log
+    expect(await entries().countDocuments({ action: 'audit.entries.export' })).toBe(0);
+  });
+
+  it('refuses more than 50,000 matching entries with a 422, never a cut file, and takes narrower filters', async () => {
+    const auditor = await caller(['iam.app.sign_in', 'audit.entry.export']);
+    const at = new Date();
+    const many = Array.from({ length: AUDIT_EXPORT_MAX_ROWS + 1 }, (_, seq) => ({
+      _id: new ObjectId(),
+      day: '2000-01-01',
+      seq: seq + 1,
+      prevHash: '',
+      hash: '',
+      at,
+      source: 'core' as const,
+      action: 'test.bulk.write',
+      actor: system,
+      resource: { type: 'test', id: null },
+      scope: null,
+      before: null,
+      after: null,
+      reason: null,
+      result: 'success' as const,
+      ip: null,
+      userAgent: null,
+      requestId: null,
+      eventId: null,
+    }));
+    await look.auditDb.collection<AuditEntry>(AUDIT_ENTRIES).insertMany(many, { ordered: false });
+    await write({ action: 'iam.roles.update', resource: { type: 'role', id: 'admin.c_desk' } });
+    await expect(as(auditor).download(exportAuditEntries, { query: {} })).rejects.toMatchObject({
+      status: 422,
+      code: 'EXPORT_TOO_LARGE',
+      message: 'More than 50,000 entries match. Narrow the dates or filters.',
+    });
+    expect(await entries().countDocuments({ action: 'audit.entries.export' })).toBe(0);
+    const narrow = await as(auditor).download(exportAuditEntries, {
+      query: { action: 'iam.roles.update' },
+    });
+    expect(await linesOf(narrow.blob)).toHaveLength(2);
+  }, 60_000);
+
+  it('writes India time to the second, sortable', () => {
+    expect(indiaTime(new Date('2026-11-14T20:00:05.000Z'))).toBe('2026-11-15 01:30:05');
+    expect(indiaTime(new Date('2026-11-15T18:29:59.000Z'))).toBe('2026-11-15 23:59:59');
   });
 });
 

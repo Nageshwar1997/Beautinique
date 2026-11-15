@@ -81,6 +81,7 @@ describe('generateFiles', () => {
       '/auth/oauth/sign-up',
       '/auth/sign-in-methods/{provider}',
       '/audit/entries',
+      '/audit/entries/export',
       '/audit/days',
     ]);
     const manifest = parsed('gateway-manifest.json') as {
@@ -120,6 +121,7 @@ describe('generateFiles', () => {
       parsed('permissions.json') as { permissions: { key: string; scopeTypes: string[] }[] }
     ).permissions;
     expect(list.map((p) => p.key)).toEqual([
+      'audit.entry.export',
       'audit.entry.read',
       'iam.app.sign_in',
       'iam.grant.manage',
