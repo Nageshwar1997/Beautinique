@@ -191,6 +191,14 @@ const mutations: Mutation[] = [
   },
   {
     file: 'relay',
+    name: 'an unknown type is relayed to nobody (LIVE-006)',
+    change: [
+      [".find({ status: 'pending', type: { $in: known } })", ".find({ status: 'pending' })"],
+    ],
+    tests: 'has no entry for',
+  },
+  {
+    file: 'relay',
     name: 'one batch per round',
     change: [['(await relayBatch()) === batchSize', '(await relayBatch()) === -1']],
   },

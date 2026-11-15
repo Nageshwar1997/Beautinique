@@ -103,7 +103,11 @@ const order = (orderId: string) => ({
   correlationId: 'req-1',
   data: { orderId, total: 129_900 },
 });
-const SUBSCRIBERS = { 'commerce.order.placed': ['notify.emails', 'identity.grants'] };
+/** Every type the test writes has an entry: nobody listens to reviews (an empty list). */
+const SUBSCRIBERS = {
+  'commerce.order.placed': ['notify.emails', 'identity.grants'],
+  'catalog.review.added': [],
+};
 
 let mongo: Mongo;
 let redis: RedisConnection;
@@ -564,6 +568,37 @@ describe('startRelay', () => {
       status: 'relayed',
       subscribers: 0,
     });
+  });
+
+  it('leaves an event of a type it has no entry for pending, for a newer instance that knows it (LIVE-006)', async () => {
+    // the old instance of a deploy: its code knows orders, not reviews
+    const old = relay({ subscribers: { 'commerce.order.placed': ['notify.emails'] } });
+    const review = await withTransaction(mongo, (session) =>
+      writeEvent(mongo, session, reviewAdded, {
+        ...order('r2'),
+        aggregate: { type: 'review', id: 'r2' },
+        data: { reviewId: 'r2' },
+      }),
+    );
+    const placed = await placeOrder('o15');
+    await waitFor(
+      async () =>
+        (await outbox().findOne({ _id: new ObjectId(placed.eventId) }))?.status === 'relayed',
+    );
+    // a few more rounds: the review stays, never relayed to nobody
+    await sleep(400);
+    expect(await outbox().findOne({ _id: new ObjectId(review.eventId) })).toMatchObject({
+      status: 'pending',
+    });
+    // the new instance leads once the old one stops, and sends it on
+    await old.stop();
+    relay({ subscribers: { ...SUBSCRIBERS, 'catalog.review.added': ['notify.emails'] } });
+    await waitFor(allRelayed);
+    expect(await outbox().findOne({ _id: new ObjectId(review.eventId) })).toMatchObject({
+      status: 'relayed',
+      subscribers: 1,
+    });
+    expect(await inspect('q.notify').getJob(jobIdOf(review.eventId, 'notify.emails'))).toBeTruthy();
   });
 
   it('relays at once through the change stream, before any sweep', async () => {
