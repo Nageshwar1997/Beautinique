@@ -37,7 +37,7 @@ import {
   rateLimitHeaders,
 } from './rate-limits.ts';
 import type { SessionGate } from './sessions.ts';
-import { clientIp, ORIGIN_SECRET_HEADER } from './trust.ts';
+import { clientIpOf, ORIGIN_SECRET_HEADER, VERCEL_IP_HEADERS } from './trust.ts';
 
 /** One route as the gateway sees it (contracts gatewayManifest). */
 export type GatewayRoute = ReturnType<typeof gatewayManifest>[number];
@@ -64,6 +64,7 @@ const NOT_FORWARDED = new Set([
   HEADERS.passport.toLowerCase(),
   'x-real-ip',
   'x-forwarded-for',
+  'x-vercel-forwarded-for',
   'forwarded',
 ]);
 /** A cached route never sends these on, so its answer cannot depend on who asked (§7.2). */
@@ -309,6 +310,18 @@ export function proxy({
       'refused: not from an app',
     );
   };
+  // a request from Vercel without the client in any of its headers: every client would share the
+  // socket address (Render's proxy) in rate limits and audit (LIVE-007). Once every 10 minutes,
+  // with the names of the headers that were there, never an address.
+  let lastNoClientIp = 0;
+  const noClientIp = (req: Request) => {
+    if (Date.now() - lastNoClientIp < 600_000) return;
+    lastNoClientIp = Date.now();
+    logger.warn(
+      { present: VERCEL_IP_HEADERS.filter((name) => req.get(name) !== undefined) },
+      "client IP not in Vercel's headers: rate limits and audit see the socket address",
+    );
+  };
   // a down Redis would log on every request; once a minute is enough
   let lastLimitsWarning = 0;
   const limitsDown = (error: RateLimitUnavailableError) => {
@@ -351,7 +364,8 @@ export function proxy({
       throw new AppError('BAD_REQUEST', 'This request cannot have a body.');
     }
 
-    const ip = clientIp(req, fromVercel);
+    const { ip, source } = clientIpOf(req, fromVercel);
+    if (source === 'socket') noClientIp(req);
     const buckets = rateLimitBuckets(
       route.rateLimit,
       ip,
