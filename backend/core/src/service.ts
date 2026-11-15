@@ -10,7 +10,7 @@ import type { Config } from './config.ts';
 import { type Runtime, type RuntimeOptions, startRuntime } from './runtime.ts';
 
 export { type Config, readConfig } from './config.ts';
-export { release, releaseDefinition } from './release.ts';
+export { release, releaseDefinitionOf } from './release.ts';
 
 export interface StartOptions {
   /** default: config.port (0 picks a free one) */
@@ -23,6 +23,8 @@ export interface StartOptions {
   logger?: Logger;
   /** for tests: another queue prefix, epoch key or poll time, or a worker that starts later */
   runtime?: Omit<RuntimeOptions, 'logger'>;
+  /** The gateway's passport keys (backend/bundle hands them over in memory) */
+  passportJwks?: RuntimeOptions['passportJwks'];
 }
 
 /** A running core. Its `runtime` is there for tests that look inside (MongoDB, Redis, the workers). */
@@ -31,7 +33,11 @@ export type RunningCore = RunningServer & { runtime: Runtime };
 /** Starts core: src/server.ts in split mode, backend/bundle in bundle mode. */
 export async function start(config: Config, options: StartOptions = {}): Promise<RunningCore> {
   const logger = options.logger ?? createLogger({ name: 'core', level: config.logLevel });
-  const runtime = await startRuntime(config, { ...options.runtime, logger });
+  const runtime = await startRuntime(config, {
+    passportJwks: options.passportJwks,
+    ...options.runtime,
+    logger,
+  });
   try {
     const server = await startServer(buildApp({ logger, runtime }), {
       port: options.port ?? config.port,

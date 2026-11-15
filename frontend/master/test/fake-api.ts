@@ -19,6 +19,9 @@ const ACCESS: Record<Who, { role: string; name: string; permissions: string[] }>
       'iam.grant.read',
       'iam.role.manage',
       'iam.totp.reset',
+      'iam.totp.reset_master',
+      'audit.entry.read',
+      'audit.entry.export',
     ],
   },
   officer: {
@@ -29,7 +32,7 @@ const ACCESS: Record<Who, { role: string; name: string; permissions: string[] }>
   auditor: {
     role: 'master.internal_auditor',
     name: 'Internal Auditor',
-    permissions: ['iam.app.sign_in', 'iam.grant.read'],
+    permissions: ['iam.app.sign_in', 'iam.grant.read', 'audit.entry.read', 'audit.entry.export'],
   },
   head: {
     role: 'master.head_of_operations',
@@ -67,7 +70,13 @@ export const ROLES = [
   role('master.master', 'Master', ['global'], {
     appointedBy: [],
     main: true,
-    permissions: ['iam.grant.read', 'iam.grant.manage', 'iam.role.manage', 'iam.totp.reset'],
+    permissions: [
+      'iam.grant.read',
+      'iam.grant.manage',
+      'iam.role.manage',
+      'iam.totp.reset',
+      'iam.totp.reset_master',
+    ],
   }),
   role('admin.state_admin', 'State Admin', ['state'], {
     main: true,
@@ -77,6 +86,38 @@ export const ROLES = [
   role('admin.fraud_risk', 'Fraud & Risk Analyst', ['global']),
   role('admin.c_night_desk', 'Night Desk', ['global'], { system: false }),
 ];
+
+/** An audit entry as core gives it (T4.1 PR C). */
+export const auditEntry = (
+  n: number,
+  action: string,
+  extra: Partial<{ result: string; email: string | null; at: string; userId: string | null }> = {},
+) => ({
+  entryId: id(300 + n),
+  day: '2026-11-15',
+  seq: n,
+  hash: 'a'.repeat(64),
+  source: 'identity',
+  action,
+  actor: {
+    userId: extra.userId === undefined ? id(3) : extra.userId,
+    app: extra.userId === null ? null : 'master',
+    sessionId: extra.userId === null ? null : id(9),
+    roles: extra.userId === null ? [] : ['master.master'],
+    system: extra.userId === null ? 'identity' : null,
+    email: extra.email === undefined ? 'm•••@beautinique.example' : extra.email,
+  },
+  resource: { type: 'grant', id: id(100) },
+  scope: { type: 'state', ids: ['MH'] },
+  before: null,
+  after: { role: 'admin.state_admin', email: 'a•••@beautinique.example' },
+  reason: null,
+  result: extra.result ?? 'success',
+  ip: '203.0.113.9',
+  userAgent: 'Chrome on Windows',
+  requestId: 'req-1',
+  at: extra.at ?? '2026-11-15T05:00:00.000Z',
+});
 
 export interface Sent {
   method: string;
@@ -117,6 +158,30 @@ export function fakeApi(who: Who = 'master') {
       grant(2, 'ravi@beautinique.example', 'admin.fraud_risk'),
       grant(3, 'mona@beautinique.example', 'master.master'),
     ].map((g, i) => ({ ...g, grantId: id(100 + i) })),
+    audit: [
+      auditEntry(3, 'identity.session.reuseDetected', {
+        result: 'denied',
+        userId: null,
+        email: null,
+      }),
+      auditEntry(2, 'iam.grants.end'),
+      auditEntry(1, 'iam.grants.give'),
+    ],
+    /** What the CSV export answers: the file, or a 422 for too many entries */
+    exportAnswer: 'file' as 'file' | 'too-large',
+    days: [
+      { day: '2026-11-15', entries: 3, check: null },
+      {
+        day: '2026-11-14',
+        entries: 5,
+        check: { ok: false, entries: 5, brokenAtSeq: 2, checkedAt: '2026-11-15T00:15:00.000Z' },
+      },
+      {
+        day: '2026-11-13',
+        entries: 4,
+        check: { ok: true, entries: 4, brokenAtSeq: null, checkedAt: '2026-11-14T00:15:00.000Z' },
+      },
+    ],
     invitations: [
       {
         invitationId: id(200),
@@ -155,6 +220,19 @@ export function fakeApi(who: Who = 'master') {
         headers: { 'content-type': 'application/json' },
       }),
     );
+
+  // as identity decides it (QA DR-007): with the reset, never one's own, and an account whose
+  // role carries the Master reset only by someone who holds it too
+  const canResetAuthenticator = (userId: string): boolean => {
+    if (!access.permissions.includes('iam.totp.reset') || userId === ME) return false;
+    if (access.permissions.includes('iam.totp.reset_master')) return true;
+    return !state.grants.some(
+      (g) =>
+        g.userId === userId &&
+        g.active &&
+        ROLES.find((r) => r.key === g.role)?.permissions.includes('iam.totp.reset_master') === true,
+    );
+  };
 
   const fetch = async (input: RequestInfo | URL, init?: RequestInit): Promise<Response> => {
     const request = new Request(input, init);
@@ -197,8 +275,42 @@ export function fakeApi(who: Who = 'master') {
           (q.get('app') === null || g.app === q.get('app')) &&
           (q.get('role') === null || g.role === q.get('role')),
       );
+      const userId = q.get('userId');
+      return json(200, {
+        data: {
+          items,
+          nextCursor: null,
+          ...(userId === null ? {} : { canResetAuthenticator: canResetAuthenticator(userId) }),
+        },
+      });
+    }
+    if (path === '/audit/entries/export') {
+      if (state.exportAnswer === 'too-large') {
+        return json(422, {
+          error: {
+            code: 'EXPORT_TOO_LARGE',
+            message: 'More than 50,000 entries match. Narrow the dates or filters.',
+            requestId: 'req-export',
+          },
+        });
+      }
+      return new Response('"Action"\r\n"iam.grants.give"\r\n', {
+        status: 200,
+        headers: {
+          'content-type': 'text/csv; charset=utf-8',
+          'content-disposition': 'attachment; filename="beautinique-audit-log-2026-11-15.csv"',
+        },
+      });
+    }
+    if (path === '/audit/entries') {
+      const items = state.audit.filter(
+        (e) =>
+          (q.get('action') === null || e.action === q.get('action')) &&
+          (q.get('result') === null || e.result === q.get('result')),
+      );
       return json(200, { data: { items, nextCursor: null } });
     }
+    if (path === '/audit/days') return json(200, { data: { items: state.days } });
     if (path === '/iam/invitations' && request.method === 'GET') {
       const items = state.invitations.filter(
         (i) => q.get('status') === null || i.status === q.get('status'),

@@ -19,4 +19,10 @@ export {
   useApiMutation,
   useApiQuery,
 } from './query';
-export { ApiError, queryKey, queryKeyPrefix } from '@beautinique/shared-contracts';
+export { saveFile } from './save-file';
+export {
+  ApiError,
+  type DownloadedFile,
+  queryKey,
+  queryKeyPrefix,
+} from '@beautinique/shared-contracts';

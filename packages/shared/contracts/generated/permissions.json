@@ -2,6 +2,26 @@
   "version": "1.0.0",
   "permissions": [
     {
+      "key": "audit.entry.export",
+      "description": "Download the audit log as a CSV file",
+      "scopeTypes": [
+        "global"
+      ],
+      "risk": "high",
+      "mfa": true,
+      "secondSignature": false
+    },
+    {
+      "key": "audit.entry.read",
+      "description": "Read the audit log",
+      "scopeTypes": [
+        "global"
+      ],
+      "risk": "high",
+      "mfa": false,
+      "secondSignature": false
+    },
+    {
       "key": "iam.app.sign_in",
       "description": "Sign in to the role's app",
       "scopeTypes": [
@@ -82,6 +102,16 @@
     {
       "key": "iam.totp.reset",
       "description": "Reset someone's authenticator",
+      "scopeTypes": [
+        "global"
+      ],
+      "risk": "high",
+      "mfa": true,
+      "secondSignature": false
+    },
+    {
+      "key": "iam.totp.reset_master",
+      "description": "Reset a Master's authenticator",
       "scopeTypes": [
         "global"
       ],

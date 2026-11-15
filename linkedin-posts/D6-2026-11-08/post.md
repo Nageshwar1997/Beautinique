@@ -1,8 +1,8 @@
 ---
 date: 2026-11-08
 day: 6
-status: ready # draft | ready | scheduled | posted (README §2)
-posted_at:
+status: scheduled # draft | ready | scheduled | posted (README §2)
+posted_at: '2026-11-16 09:00 IST'
 link:
 covers: 'PR #33, #34, #35, #36, #37' # T6.1: frontend-hooks, components (base, pickers), api-client (axios only), forms
 ---
@@ -26,6 +26,6 @@ Two tabs refreshing a session at once can look just like a stolen token.
 Carousel: hooks, components, pickers, the API client and the lesson.
 
 Code: https://github.com/Nageshwar1997/Beautinique
-```
 
-Post ke end me `hashtags.md` wali line paste karo.
+#buildinpublic #react #frontend #accessibility #typescript
+```

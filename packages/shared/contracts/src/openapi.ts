@@ -87,20 +87,33 @@ export function toOpenApi(
                 headers: { Location: { required: true, schema: { type: 'string' } } },
               },
             }
-          : {
-              '200': {
-                description: 'OK',
-                content: {
-                  'application/json': {
-                    schema: {
-                      type: 'object',
-                      properties: { data: jsonSchema(route.output, 'output') },
-                      required: ['data'],
+          : route.download
+            ? {
+                '200': {
+                  description: 'The file, streamed (UTF-8 with a BOM)',
+                  headers: {
+                    'Content-Disposition': {
+                      required: true,
+                      schema: { type: 'string', example: 'attachment; filename="file.csv"' },
+                    },
+                  },
+                  content: { 'text/csv': { schema: { type: 'string' } } },
+                },
+              }
+            : {
+                '200': {
+                  description: 'OK',
+                  content: {
+                    'application/json': {
+                      schema: {
+                        type: 'object',
+                        properties: { data: jsonSchema(route.output, 'output') },
+                        required: ['data'],
+                      },
                     },
                   },
                 },
-              },
-            }),
+              }),
         default: { $ref: '#/components/responses/Error' },
       },
       security: route.access.type === 'public' ? [] : [{ bearerAuth: [] }],
@@ -113,6 +126,7 @@ export function toOpenApi(
         owner: route.owner,
         cache: route.cache ? { ...route.cache } : null,
         navigation: route.navigation === true,
+        ...(route.download ? { download: route.download } : {}),
       },
     };
   }

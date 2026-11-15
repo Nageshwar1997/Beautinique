@@ -9,25 +9,29 @@ import {
 } from '@beautinique/backend-server-release';
 
 import type { Config } from './config.ts';
-import { indexes as moduleIndexes } from './modules/index.ts';
+import { auditIndexesStep, indexes as moduleIndexes } from './modules/index.ts';
 
 /**
  * core's release steps (ARCHITECTURE §11.1), run on every start before core listens: migrations,
- * then every index. A new migration goes at the end of the list (RULES §1.14), a module's indexes
- * into src/modules/index.ts.
+ * then every index, then the audit log's indexes in its own database. A new migration goes at the
+ * end of the list (RULES §1.14), a module's indexes into src/modules/index.ts.
  */
-export const releaseDefinition: ReleaseDefinition = {
-  migrations: defineMigrations([]),
-  indexes: [...OUTBOX_INDEXES, ...CONSUMER_INDEXES, ...moduleIndexes],
-};
+export function releaseDefinitionOf(auditDbName: string): ReleaseDefinition {
+  return {
+    migrations: defineMigrations([]),
+    indexes: [...OUTBOX_INDEXES, ...CONSUMER_INDEXES, ...moduleIndexes],
+    steps: [auditIndexesStep(auditDbName)],
+  };
+}
 
 /** The release steps on core's database (a start, or `npm run db:release`). */
 export function runReleaseSteps(
   mongo: Mongo,
   logger: Logger,
-  options: { force?: boolean } = {},
+  options: { auditDbName: string; force?: boolean },
 ): Promise<ReleaseReport> {
-  return runRelease({ mongo, logger, ...releaseDefinition, ...options });
+  const { auditDbName, force } = options;
+  return runRelease({ mongo, logger, ...releaseDefinitionOf(auditDbName), force });
 }
 
 /**
@@ -46,7 +50,7 @@ export async function release(
     logger,
   });
   try {
-    return await runReleaseSteps(mongo, logger, { force });
+    return await runReleaseSteps(mongo, logger, { auditDbName: config.auditDbName, force });
   } finally {
     await mongo.close();
   }

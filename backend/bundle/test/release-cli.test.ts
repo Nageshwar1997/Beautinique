@@ -18,6 +18,7 @@ const id = randomUUID().slice(0, 8);
 const coreDb = `bq_test_cli_core_${id}`;
 const identityDb = `bq_test_cli_identity_${id}`;
 const notifyDb = `bq_test_cli_notify_${id}`;
+const auditDb = `bq_test_cli_audit_${id}`;
 const logger = createLogger({ name: 'release-cli-test', level: 'silent' });
 let dir: string;
 
@@ -25,6 +26,7 @@ const envText = (mongoUri: string) =>
   [
     `CORE__MONGO_URI=${mongoUri}`,
     `CORE__MONGO_DB_NAME=${coreDb}`,
+    `CORE__AUDIT_DB_NAME=${auditDb}`,
     `CORE__REDIS_URL=${REDIS_DB}`,
     `IDENTITY__MONGO_URI=${mongoUri}`,
     `IDENTITY__MONGO_DB_NAME=${identityDb}`,
@@ -53,6 +55,7 @@ afterAll(async () => {
   // the "live" run's own, here even when that test failed (it was left behind then)
   await mongo.client.db(`${identityDb}_live`).dropDatabase();
   await mongo.client.db(notifyDb).dropDatabase();
+  await mongo.client.db(auditDb).dropDatabase();
   await mongo.close();
 });
 
@@ -110,7 +113,7 @@ describe('npm run db:release', () => {
     expect(first.code).toBe(0);
     expect(first.printed).toMatch(
       new RegExp(
-        `identity \\(${identityDb} on ${MONGO_HOST}\\): 2 migration\\(s\\), \\d+ index\\(es\\) made`,
+        `identity \\(${identityDb} on ${MONGO_HOST}\\): 3 migration\\(s\\), \\d+ index\\(es\\) made`,
       ),
     );
     expect(first.printed).toMatch(
@@ -160,7 +163,7 @@ describe('npm run db:release', () => {
     await writeFile(join(dir, 'live.env'), envText(MONGO_URI).replace(identityDb, liveIdentity));
     const { code, printed } = await run(['--env', 'live', '--deployable', 'identity'], 'live\n');
     expect(code).toBe(0);
-    expect(printed).toContain(`identity (${liveIdentity} on ${MONGO_HOST}): 2 migration(s)`);
+    expect(printed).toContain(`identity (${liveIdentity} on ${MONGO_HOST}): 3 migration(s)`);
     const mongo = await connectMongo({
       uri: MONGO_URI,
       dbName: liveIdentity,

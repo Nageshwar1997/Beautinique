@@ -83,6 +83,21 @@ export const totpReset = definePermission({
   secondSignature: false,
 });
 
+/**
+ * Reset the authenticator of an account that holds this permission too (QA DR-007): only Master
+ * has it, so a Master's second factor, the last door to everything, only the other Master takes
+ * away, and a Security Officer with a leaked Master password is not enough. Identity checks the
+ * permission, never the role's name (RULES §3.5).
+ */
+export const totpResetMaster = definePermission({
+  key: 'iam.totp.reset_master',
+  description: "Reset a Master's authenticator",
+  scopeTypes: ['global'],
+  risk: 'high',
+  mfa: true,
+  secondSignature: false,
+});
+
 export const IAM_PERMISSIONS = [
   appSignIn,
   grantRead,
@@ -90,6 +105,7 @@ export const IAM_PERMISSIONS = [
   roleManage,
   sessionRevoke,
   totpReset,
+  totpResetMaster,
 ] as const;
 
 /**
@@ -262,7 +278,13 @@ export const listGrants = defineRoute({
       status: zodEnum(['active', 'ended']).default('active'),
     }),
   },
-  output: cursorPage(grantViewZod),
+  output: cursorPage(grantViewZod).extend({
+    /**
+     * Only with `userId`: whether the caller may reset that person's authenticator now (identity
+     * decides, with the same check as the reset; QA DR-007). The app shows the button by it.
+     */
+    canResetAuthenticator: boolean().optional(),
+  }),
 });
 
 /**

@@ -1,6 +1,7 @@
 import { ACCOUNT_PATHS, AUTH_PATHS, RequireSignIn } from '@beautinique/frontend-auth-ui';
 import { Outlet, type RouteObject } from 'react-router';
 
+import { AuditLogPage } from './audit/audit-log';
 import {
   AccountIndex,
   AccountLayout,
@@ -54,6 +55,7 @@ export const routes: RouteObject[] = [
                   { path: 'roles', element: <RolesPage /> },
                 ],
               },
+              { path: '/audit', element: <AuditLogPage /> },
               {
                 path: '/account',
                 element: <AccountLayout />,

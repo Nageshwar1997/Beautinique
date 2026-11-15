@@ -1,6 +1,8 @@
 import { eventCatalogue } from '../events';
 import { permissionCatalogue } from '../permissions';
 import { routeTable } from '../routes';
+import { ACCESS_EVENTS } from './access';
+import { AUDIT_EVENTS, AUDIT_PERMISSIONS, AUDIT_ROUTES } from './audit';
 import {
   authenticatorReset,
   createInvitation,
@@ -184,6 +186,7 @@ export const routes = routeTable([
   getSocialSignUp,
   finishSocialSignUp,
   removeSignInMethod,
+  ...AUDIT_ROUTES,
 ]);
 export const events = eventCatalogue([
   pingRecorded,
@@ -193,5 +196,11 @@ export const events = eventCatalogue([
   authenticatorReset,
   authenticatorChanged,
   signInMethodChanged,
+  ...ACCESS_EVENTS,
+  ...AUDIT_EVENTS,
 ]);
-export const permissions = permissionCatalogue([pingRead, ...IAM_PERMISSIONS]);
+export const permissions = permissionCatalogue([
+  pingRead,
+  ...IAM_PERMISSIONS,
+  ...AUDIT_PERMISSIONS,
+]);

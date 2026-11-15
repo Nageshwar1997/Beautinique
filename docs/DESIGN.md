@@ -193,4 +193,4 @@ Har screen ye states dikhati hai:
 | v1.14   | 2026-11-09 | §11: saare apps phone pe install; tile rang parivaar se (customer ivory, team ink, partner rose), naam "BQ" + app (owner).                                                            |
 | v1.15   | 2026-11-10 | §10: pages se pehle "Coming soon" home (naam + ek line), owner, Q-014.                                                                                                                |
 | v1.16   | 2026-11-13 | §10: Master app ka "Coming soon" home ab sign-in ke peeche (owner).                                                                                                                   |
-| v1.17   | 2026-11-14 | §5.2: app-shell `SectionLayout`, data-table bana (T3.7); §10 ke neeche data-dense ka namuna; components me `Badge` aur Dialog side panel. |
+| v1.17   | 2026-11-14 | §5.2: app-shell `SectionLayout`, data-table bana (T3.7); §10 ke neeche data-dense ka namuna; components me `Badge` aur Dialog side panel.                                             |

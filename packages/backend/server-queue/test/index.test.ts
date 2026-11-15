@@ -1215,6 +1215,95 @@ describe('upsertSchedules and scheduled tasks', () => {
     expect(redis.client.status).toBe('ready');
   });
 
+  it('runs a task once after a delay, never before it (runAfter)', async () => {
+    const trigger = startTaskTrigger({ redis: redis.client, logger, queue: 'q.identity', prefix });
+    const ranAt: number[] = [];
+    try {
+      consumers.push(
+        startConsumer({
+          mongo: consumerMongo,
+          redis: redis.client,
+          logger,
+          queue: 'q.identity',
+          subscriptions: [],
+          tasks: [
+            defineTask('identity.catchUpSweep', () => {
+              ranAt.push(Date.now());
+              return Promise.resolve();
+            }),
+          ],
+          prefix,
+        }),
+      );
+      const asked = Date.now();
+      await trigger.runAfter('identity.catchUpSweep', 1500);
+      // not yet: it waits as a delayed job in Redis
+      await new Promise((resolve) => setTimeout(resolve, 500));
+      expect(ranAt).toEqual([]);
+      await waitFor(
+        async () =>
+          (await taskRuns().findOne({ task: 'identity.catchUpSweep' }))?.lastFinishedAt !==
+          undefined,
+      );
+      expect(ranAt).toHaveLength(1);
+      expect((ranAt[0] ?? 0) - asked).toBeGreaterThanOrEqual(1400);
+      await expect(trigger.runAfter('catchUpSweep', 10)).rejects.toThrow('must be <module>.<task>');
+      await expect(trigger.runAfter('identity.catchUpSweep', -1)).rejects.toThrow(
+        'whole milliseconds',
+      );
+      await expect(trigger.runAfter('identity.catchUpSweep', 1.5)).rejects.toThrow(
+        'whole milliseconds',
+      );
+    } finally {
+      await trigger.close();
+    }
+    await expect(trigger.runAfter('identity.catchUpSweep', 10)).rejects.toThrow('is closed');
+  });
+
+  it('tries a delayed run that throws again after its backoff, with the same firedAt', async () => {
+    const trigger = startTaskTrigger({ redis: redis.client, logger, queue: 'q.identity', prefix });
+    const tries: { at: number; firedAt: number }[] = [];
+    try {
+      consumers.push(
+        startConsumer({
+          mongo: consumerMongo,
+          redis: redis.client,
+          logger,
+          queue: 'q.identity',
+          subscriptions: [],
+          tasks: [
+            defineTask('identity.catchUpSweep', ({ firedAt }) => {
+              tries.push({ at: Date.now(), firedAt: firedAt.getTime() });
+              return tries.length === 1
+                ? Promise.reject(new Error('the database is away'))
+                : Promise.resolve();
+            }),
+          ],
+          prefix,
+        }),
+      );
+      await trigger.runAfter('identity.catchUpSweep', 0, { attempts: 3, backoffMs: 1000 });
+      await waitFor(
+        async () =>
+          (await taskRuns().findOne({ task: 'identity.catchUpSweep' }))?.lastFinishedAt !==
+          undefined,
+      );
+      expect(tries).toHaveLength(2);
+      const [first, second] = tries;
+      // the second try waits out the backoff, and still says when the run was asked for
+      expect((second?.at ?? 0) - (first?.at ?? 0)).toBeGreaterThanOrEqual(900);
+      expect(second?.firedAt).toBe(first?.firedAt);
+      await expect(
+        trigger.runAfter('identity.catchUpSweep', 10, { attempts: 0, backoffMs: 10 }),
+      ).rejects.toThrow('whole number of attempts');
+      await expect(
+        trigger.runAfter('identity.catchUpSweep', 10, { attempts: 2, backoffMs: -1 }),
+      ).rejects.toThrow('backoff of whole milliseconds');
+    } finally {
+      await trigger.close();
+    }
+  });
+
   it('refuses the same task twice in one consumer', () => {
     const task = defineTask('commerce.expireCarts', () => Promise.resolve());
     expect(() =>

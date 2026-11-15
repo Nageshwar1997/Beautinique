@@ -1,12 +1,15 @@
 import {
   type AppId,
   appSignIn,
+  auditExport,
+  auditRead,
   grantManage,
   grantRead,
   roleManage,
   type ScopeType,
   sessionRevoke,
   totpReset,
+  totpResetMaster,
 } from '@beautinique/shared-contracts';
 
 /**
@@ -87,6 +90,27 @@ const BY_LOGISTICS_HEAD = { appointedBy: [MASTER, LOGISTICS_HEAD] };
 const BY_HUB_MANAGER = { appointedBy: [MASTER, LOGISTICS_HEAD, HUB_MANAGER] };
 const BY_CREATOR_MANAGER = { appointedBy: [CREATOR_MANAGER] };
 
+/**
+ * Master: nobody appoints it (the first comes from `npm run db:grant-master`, bootstrap.ts), at
+ * most two seats. Its own constant, so the bootstrap reads its seats without looking it up by
+ * its key (RULES §3.5).
+ */
+export const MASTER_SEED: RoleSeed = role('master', 'master', 'Master', GLOBAL, {
+  main: true,
+  // resets the other Master's authenticator: a Security Officer may not (QA DR-007)
+  permissions: [
+    ...APPOINTS,
+    roleManage.key,
+    totpReset.key,
+    totpResetMaster.key,
+    auditRead.key,
+    auditExport.key,
+  ],
+  appointedBy: [],
+  mfaRequired: true,
+  maxHolders: 2,
+});
+
 export const ROLE_SEEDS: readonly RoleSeed[] = [
   // 1. Customer
   role('customer', 'customer', 'Customer', SELF, { main: true, signUp: true, appointedBy: [] }),
@@ -133,14 +157,7 @@ export const ROLE_SEEDS: readonly RoleSeed[] = [
   role('superadmin', 'ugc_moderator', 'Review & UGC Moderator', GLOBAL),
 
   // 5. Master
-  role('master', 'master', 'Master', GLOBAL, {
-    main: true,
-    // resets the other Master's authenticator: a Security Officer may not (QA DR-007)
-    permissions: [...APPOINTS, roleManage.key, totpReset.key],
-    appointedBy: [],
-    mfaRequired: true,
-    maxHolders: 2,
-  }),
+  MASTER_SEED,
   role('master', 'head_of_operations', 'Head of Operations', GLOBAL),
   role('master', 'legal_compliance', 'Legal & Compliance Officer (Nodal Person)', GLOBAL),
   role('master', 'fairness_analyst', 'Marketplace Fairness & Price-Integrity Analyst', GLOBAL),
@@ -148,7 +165,10 @@ export const ROLE_SEEDS: readonly RoleSeed[] = [
   role('master', 'security_officer', 'Security Officer (CERT-In contact)', GLOBAL, {
     permissions: [grantRead.key, sessionRevoke.key, totpReset.key],
   }),
-  role('master', 'internal_auditor', 'Internal Auditor', GLOBAL, { permissions: [grantRead.key] }),
+  // reads the audit log and downloads it (with a step-up), changes nothing (ARCHITECTURE §6.5)
+  role('master', 'internal_auditor', 'Internal Auditor', GLOBAL, {
+    permissions: [grantRead.key, auditRead.key, auditExport.key],
+  }),
 
   // 6. Support Desk
   role('support', 'l1_agent', 'Customer Support Agent (L1)', GLOBAL, { main: true }),

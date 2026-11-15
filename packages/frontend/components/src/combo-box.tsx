@@ -20,6 +20,7 @@ import {
   OptionItem,
   type PickerOption,
   POPOVER,
+  POPOVER_WIDTH,
 } from './picker-parts';
 import { Spinner } from './spinner';
 
@@ -115,7 +116,7 @@ export function ComboBox({
         <IconSearch
           aria-hidden="true"
           size={18}
-          className="text-foreground-muted pointer-events-none absolute start-3 top-1/2 -translate-y-1/2"
+          className="text-foreground-muted pointer-events-none absolute inset-s-3 top-1/2 -translate-y-1/2"
         />
         <AriaInput
           {...(placeholder === undefined ? {} : { placeholder })}
@@ -132,7 +133,7 @@ export function ComboBox({
       </div>
       <FieldHint>{hint}</FieldHint>
       <FieldErrorText error={error} />
-      <Popover offset={6} className={cx(POPOVER, 'max-h-72 min-w-(--trigger-width) p-1')}>
+      <Popover offset={6} className={cx(POPOVER, POPOVER_WIDTH, 'max-h-72 p-1')}>
         <ListBox<PickerOption>
           className="outline-hidden"
           renderEmptyState={() => <EmptyList>{loading ? 'Searching…' : emptyText}</EmptyList>}

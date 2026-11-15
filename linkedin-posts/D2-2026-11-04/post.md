@@ -26,6 +26,6 @@ All my tests were green. Mutation testing still found a bug in the money code.
 Carousel: contracts, outbox, encryption, the Redis drill and the lesson.
 
 Code: https://github.com/Nageshwar1997/Beautinique
-```
 
-Post ke end me `hashtags.md` wali line paste karo.
+#buildinpublic #backend #nodejs #mongodb #testing
+```

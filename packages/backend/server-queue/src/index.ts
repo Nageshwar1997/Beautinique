@@ -61,6 +61,7 @@ export {
   defineTask,
   heartbeatTask,
   lateTasks,
+  type RunRetry,
   type Schedule,
   startTaskTrigger,
   type Task,

@@ -13,21 +13,29 @@ import {
 import { connectMongo, type Mongo } from '@beautinique/backend-server-mongo';
 import {
   connectRedis,
+  type Consumer,
+  defineTask,
   type RedisConnection,
   redriveOutbox,
   type Relay,
+  startConsumer,
   startRelay,
+  startTaskTrigger,
   startWipeWatchdog,
   type WipeWatchdog,
 } from '@beautinique/backend-server-queue';
 import {
+  auditRecorded,
   authenticatorChanged,
   authenticatorReset,
+  grantsChanged,
   invitationCreated,
   otpRequested,
   passportAudience,
+  roleChanged,
   sessionReuseDetected,
   signInMethodChanged,
+  userChanged,
 } from '@beautinique/shared-contracts';
 
 import { codeBudget } from './code-budget.ts';
@@ -35,6 +43,13 @@ import type { Config } from './config.ts';
 import { socialSettings } from './oauth-providers.ts';
 import type { OtpDeps } from './otp.ts';
 import { hibpBreachCheck, loginHashBudget } from './password.ts';
+import {
+  CATCH_UP_ATTEMPTS,
+  CATCH_UP_DELAY_MS,
+  CATCH_UP_LEASE_MS,
+  CATCH_UP_TASK,
+  catchUpSweep,
+} from './rbac/catch-up.ts';
 import { runReleaseSteps } from './release.ts';
 import { restoreGatewayMarks, sessions } from './sessions.ts';
 import { type SigningKeys, signingKeys } from './signing-keys.ts';
@@ -43,7 +58,8 @@ import { type SigningKeys, signingKeys } from './signing-keys.ts';
  * Who gets identity's events (the relay's list): notify emails the code, and tells a person when
  * a copied refresh token ended their session, tells an invited person how to accept,
  * tells a person whose authenticator a Security Officer reset, and tells a person who changed
- * their own authenticator (backend/notify).
+ * their own authenticator (backend/notify). Core keeps copies of the roles, each account's grants
+ * and the accounts (TASKS T3.5), for authorize(), and writes identity's audit records (T4.1).
  */
 export const SUBSCRIBERS: Readonly<Record<string, readonly string[]>> = {
   [otpRequested.type]: ['notify.otpEmail'],
@@ -52,7 +68,15 @@ export const SUBSCRIBERS: Readonly<Record<string, readonly string[]>> = {
   [authenticatorReset.type]: ['notify.authenticatorEmail'],
   [authenticatorChanged.type]: ['notify.authenticatorChangedEmail'],
   [signInMethodChanged.type]: ['notify.signInMethodEmail'],
+  [roleChanged.type]: ['core.roleCopy'],
+  [grantsChanged.type]: ['core.accessCopy'],
+  [userChanged.type]: ['core.userCopy'],
+  // staff and security actions into core's audit log (TASKS T4.1 PR C)
+  [auditRecorded.type]: ['core.identityAudit'],
 };
+
+/** identity's own queue: its worker runs identity's tasks (no events come to identity). */
+export const QUEUE = 'q.identity';
 
 export interface RuntimeOptions {
   logger: Logger;
@@ -73,6 +97,13 @@ export interface RuntimeOptions {
   watchdogMs?: number;
   /** The gateway's passport keys, in memory (backend/bundle); otherwise read from the config URL */
   passportJwks?: readonly PublicJwk[];
+  /**
+   * Who gets identity's events (default SUBSCRIBERS). A test with no core and no notify working
+   * their queues leaves those out, or a wipe's redrive waits for queues nobody empties.
+   */
+  subscribers?: Readonly<Record<string, readonly string[]>>;
+  /** How long after the start the catch-up sweep runs (default CATCH_UP_DELAY_MS, 5 min). */
+  catchUpDelayMs?: number;
 }
 
 /** identity's connections and background work: MongoDB, Redis, the outbox relay, the wipe watchdog. */
@@ -108,6 +139,8 @@ export async function startRuntime(config: Config, options: RuntimeOptions): Pro
     pollMs,
     watchdogMs,
     passportJwks,
+    subscribers = SUBSCRIBERS,
+    catchUpDelayMs = CATCH_UP_DELAY_MS,
   } = options;
   const keys = loadCryptoKeys({ fieldKeys: config.fieldKeys, blindIndexKey: config.blindIndexKey });
   const otpKeys = loadSealingKeys(config.otpEventKeys, 'IDENTITY__OTP_EVENT_KEYS');
@@ -135,7 +168,7 @@ export async function startRuntime(config: Config, options: RuntimeOptions): Pro
       redis: redis.client,
       logger,
       mode: config.outboxRelay,
-      subscribers: SUBSCRIBERS,
+      subscribers,
       prefix,
       pollMs,
     });
@@ -154,12 +187,38 @@ export async function startRuntime(config: Config, options: RuntimeOptions): Pro
           mongo,
           redis: redis.client,
           logger,
-          subscribers: SUBSCRIBERS,
+          subscribers,
           prefix,
         });
       },
     });
     closers.push(() => watchdog.stop());
+
+    // identity's tasks on its own queue (owner, 2026-11-14): the catch-up sweep a while after each
+    // start, as a delayed job, so core's copy gets what an old instance changed during the deploy
+    const trigger = startTaskTrigger({ redis: redis.client, logger, queue: QUEUE, prefix });
+    closers.push(() => trigger.close());
+    const consumer: Consumer = startConsumer({
+      mongo,
+      redis: redis.client,
+      logger,
+      queue: QUEUE,
+      subscriptions: [],
+      tasks: [
+        // firedAt is when this start asked for it: a retry later still covers the same window
+        defineTask(CATCH_UP_TASK, async ({ firedAt }) => {
+          await catchUpSweep(mongo, logger, { startedAt: firedAt });
+        }),
+      ],
+      prefix,
+    });
+    closers.push(() => consumer.stop());
+    // a failed sweep (a long database outage) runs again: 5, 10, then 20 min later, never before
+    // the lease of a run that could not let go of it has run out
+    await trigger.runAfter(CATCH_UP_TASK, catchUpDelayMs, {
+      attempts: CATCH_UP_ATTEMPTS,
+      backoffMs: CATCH_UP_LEASE_MS,
+    });
 
     const signing = signingKeys({ mongo, keys });
     return {
@@ -199,7 +258,12 @@ export async function startRuntime(config: Config, options: RuntimeOptions): Pro
           audience: passportAudience('identity'),
         }),
       },
-      ready: { mongo: mongo.ready, redis: redis.ready, outbox: relay.ready },
+      ready: {
+        mongo: mongo.ready,
+        redis: redis.ready,
+        outbox: relay.ready,
+        tasks: () => consumer.ready(),
+      },
       stop,
     };
   } catch (error) {

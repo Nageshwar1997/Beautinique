@@ -8,7 +8,10 @@ import {
   API_TIMEOUT_MS,
   ApiError,
   createClient,
+  csvFileZod,
   defineRoute,
+  DOWNLOAD_TIMEOUT_MS,
+  fileNameOf,
   getPing,
   navigationHref,
   navigationZod,
@@ -99,6 +102,107 @@ describe('navigation routes', () => {
       client.call(oauthPage, { params: { provider: 'google' }, query: {} }),
     ).rejects.toThrow('auth.oauth.start is a page the browser opens');
     expect(seen).toHaveLength(0);
+  });
+});
+
+const auditFile = defineRoute({
+  id: 'audit.entries.export',
+  method: 'GET',
+  path: '/audit/entries/export',
+  summary: 'The log as a file',
+  apps: ['master'],
+  access: { type: 'signed-in' },
+  rateLimit: 'search',
+  idempotency: false,
+  stepUp: true,
+  owner: 'core',
+  download: 'csv',
+  input: { query: object({ action: string().optional() }) },
+  output: csvFileZod,
+});
+
+describe('download (T4.1 PR D)', () => {
+  it('takes the file and its name, asking for a CSV with the app header and the token', async () => {
+    const { seen, fetchStub } = stub(
+      () =>
+        new Response('\uFEFF"Action"\r\n"iam.grants.give"\r\n', {
+          status: 200,
+          headers: {
+            'Content-Type': 'text/csv; charset=utf-8',
+            'Content-Disposition': 'attachment; filename="beautinique-audit-log-2026-11-15.csv"',
+          },
+        }),
+    );
+    const client = createClient({
+      baseUrl: 'https://x.test',
+      app: 'master',
+      fetch: fetchStub,
+      getToken: () => 'tok',
+    });
+    const file = await client.download(auditFile, { query: { action: 'iam.grants.give' } });
+    expect(file.fileName).toBe('beautinique-audit-log-2026-11-15.csv');
+    // the bytes as sent, the BOM first (text() would drop it)
+    const bytes = [...new Uint8Array(await file.blob.arrayBuffer()).slice(0, 3)];
+    expect(bytes).toEqual([0xef, 0xbb, 0xbf]);
+    expect(await file.blob.text()).toBe('"Action"\r\n"iam.grants.give"\r\n');
+    expect(seen[0]?.url).toBe('https://x.test/audit/entries/export?action=iam.grants.give');
+    expect(seen[0]?.headers.get('Accept')).toBe('text/csv, application/json');
+    expect(seen[0]?.headers.get('X-BQ-App')).toBe('master');
+    expect(seen[0]?.headers.get('Authorization')).toBe('Bearer tok');
+    expect(DOWNLOAD_TIMEOUT_MS).toBe(120_000);
+  });
+
+  it('reads an error answer as the error it is, and refuses a file without its name', async () => {
+    const tooMany = {
+      error: {
+        code: 'EXPORT_TOO_LARGE',
+        message: 'More than 50,000 entries match.',
+        requestId: 'r1',
+      },
+    };
+    const client = createClient({
+      baseUrl: 'https://x.test',
+      app: 'master',
+      fetch: stub(() => json(tooMany, 422)).fetchStub,
+    });
+    await expect(client.download(auditFile, { query: {} })).rejects.toMatchObject({
+      code: 'EXPORT_TOO_LARGE',
+      status: 422,
+      message: 'More than 50,000 entries match.',
+      requestId: 'r1',
+    });
+    const proxy = createClient({
+      baseUrl: 'https://x.test',
+      app: 'master',
+      fetch: stub(() => new Response('<html>Bad gateway</html>', { status: 502 })).fetchStub,
+    });
+    await expect(proxy.download(auditFile, { query: {} })).rejects.toMatchObject({
+      code: 'UPSTREAM_UNAVAILABLE',
+      status: 502,
+    });
+    const nameless = createClient({
+      baseUrl: 'https://x.test',
+      app: 'master',
+      fetch: stub(() => new Response('a,b\r\n', { status: 200 })).fetchStub,
+    });
+    await expect(nameless.download(auditFile, { query: {} })).rejects.toMatchObject({
+      code: 'INVALID_RESPONSE',
+    });
+  });
+
+  it('keeps call() and download() apart, and reads only a plain file name', async () => {
+    const client = createClient({
+      baseUrl: 'https://x.test',
+      app: 'master',
+      fetch: stub(() => json({ data: {} })).fetchStub,
+    });
+    await expect(client.call(auditFile as never, { query: {} } as never)).rejects.toThrow(
+      'audit.entries.export is a file: take it with download()',
+    );
+    expect(fileNameOf('attachment; filename="a.csv"')).toBe('a.csv');
+    expect(fileNameOf('attachment; filename="../a.csv"')).toBeNull();
+    expect(fileNameOf('attachment')).toBeNull();
+    expect(fileNameOf(undefined)).toBeNull();
   });
 });
 

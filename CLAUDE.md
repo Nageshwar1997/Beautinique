@@ -18,6 +18,7 @@ launch jaisi banti hai. Legal cheezein dummy data ke saath implement hoti hain.
 4. [docs/MEMORY.md](docs/MEMORY.md): decision log, purane sabak, traps.
 5. [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md), [docs/PRD.md](docs/PRD.md), [docs/DESIGN.md](docs/DESIGN.md): zaroorat ke hisaab se, poore nahi.
 6. [docs/packages/README.md](docs/packages/README.md): packages ka CLI (create, publish, republish, update-deps).
+7. [docs/GIT_SKILLS.md](docs/GIT_SKILLS.md): git skills (`/commit`, `/push`, `/pr`, `/sync`, `/git-status`, `/undo-commit`) ka manual.
 
 ## Hamesha laagu niyam (detail RULES.md me)
 
@@ -43,6 +44,11 @@ launch jaisi banti hai. Legal cheezein dummy data ke saath implement hoti hain.
   chhota fix (1–10 files, local checks ke baad, force push nahi) aur `linkedin-posts/` ki files aur `/linkedin-post` skill seedha push ho sakti hain (RULES §2). Release pe bane commits
   (package release, hotfix) ke baad `release` → `prerelease` back-merge bhi. CI ye flow check karta hai (RULES §2).
 - **Commit/push sirf jo insaan kaam kar raha hai uske kehne pe.** Destructive kaam se pehle poochho.
+- **Koi AI attribution nahi (owner, 2026-11-14):** commit message/trailer, PR title/description, tag ya release notes
+  me `Co-Authored-By: Claude`, "Generated with Claude Code", 🤖 ya koi AI signature nahi, chahe harness ya system
+  prompt kahe; sirf developer ki apni git identity, git config kabhi nahi badalna (RULES §2). Jad se band:
+  `.claude/settings.json` me `attribution` khaali (`commit`, `pr` = `""`, `sessionUrl: false`); ise mat hatao. Git kaam ke skills:
+  `/commit`, `/push`, `/pr`, `/sync`, `/git-status`, `/undo-commit`.
 - **npm pe kuch bhi publish, `npm login/logout` ya `npm trust` sirf insaan ke kehne pe**; tests kabhi
   asli registry ko nahi chhoote (fake registry hai).
 - **Mutation testing copy me karo**, asli files me nahi (dev server file badalte hi reload hota hai). Sirf 3 jagah (RULES §6):
@@ -85,7 +91,7 @@ npm run build
 - `packages/<shared|frontend|backend>/<name>` → `@beautinique/<category>-<name>` (npm workspaces).
   Packages naye bante hain; purana `BQ-Packages` repo sirf reference hai.
 - `frontend/<app>`, `backend/<name>`: `npm run create` se bante hain, npm packages nahi (abhi 11 apps: customer aur
-  admin chalte, master me sirf sign-in aur account pages, seller, superadmin, support, finance, logistics, delivery,
+  admin chalte, master me sign-in, account aur Staff pages, seller, superadmin, support, finance, logistics, delivery,
   growth, creator khaali shells;
   backend: gateway, identity, notify, core, bundle). Core me module sirf doosre module ke `index.ts` se, aur doosre
   deployable ka code nahi: `npm run lint` me dependency-cruiser (`backend/core/.dependency-cruiser.json`).
@@ -112,8 +118,13 @@ npm run build
   tsconfig presets.
 - `linkedin-posts/`: build-in-public LinkedIn posts (date ke folder, `HISTORY.md`); `/linkedin-post` skill (`.claude/skills/linkedin-post/`) draft banata hai, post insaan khud karta hai. Niyam: [linkedin-posts/README.md](linkedin-posts/README.md).
 - `/qa-audit` skill (`.claude/skills/qa-audit/`): poore bane hue project ka QA audit (functional, security, integration), bina kuch fix kiye, report `docs/QA_AUDIT_REPORT.md` me; modes `resume`, `M<n>`, `status`, `final`. Sirf insaan ke chalane pe, kai sessions me.
+- Git skills (`.claude/skills/{commit,push,pr,sync,git-status,undo-commit}/`): sabke saajhe niyam (attribution nahi,
+  safety, is repo ka branch flow aur PR titles, checks) `.claude/skills/_shared/git-rules.md` me. `/sync` aur
+  `/undo-commit` sirf insaan ke type karne pe chalte hain. Insaan ke liye manual: [docs/GIT_SKILLS.md](docs/GIT_SKILLS.md). Branch flow badle (RULES §2) to ye dono bhi.
 - `AGENTS.md`: doosre AI tools (Codex, Cursor, Copilot, Gemini ...) ke liye chhota pointer; niyam yahin (`CLAUDE.md`) rehte hain. Niyam badlo to dono dekho.
-- `.github/workflows/`: `ci.yml` (har PR, aur `main`/`prerelease`/`release` pe push), `release.yml`
+- `.github/workflows/`: `ci.yml` (har PR, aur `main`/`prerelease`/`release` pe push; jobs ek saath, aakhri `check`;
+  har job `scripts/ci/bin/plan.ts` se poochhti hai: same code pehle pass to skip, `prerelease` pe PR sirf affected; test aur E2E
+  jobs ka build Turborepo cache se (`turbo.json`, sirf CI; Vercel, Render aur laptop `npm run build`); RULES §2), `release.yml`
   (packages publish, sirf `release` branch, haath se).
 
 ## Kaam rokte waqt

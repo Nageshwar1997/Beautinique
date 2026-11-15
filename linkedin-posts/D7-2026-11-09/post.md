@@ -1,8 +1,8 @@
 ---
 date: 2026-11-09
 day: 7
-status: ready # draft | ready | scheduled | posted (README §2)
-posted_at:
+status: scheduled # draft | ready | scheduled | posted (README §2)
+posted_at: '2026-11-17 09:00 IST'
 link:
 covers: 'PR #39, #40' # T6.1: auth-ui package, customer sign-in/sign-up/password pages, account screens (step-up, Security, My Devices); last 2bf071f
 ---
@@ -26,6 +26,6 @@ A sign-in right after a password change was turned away. The cause was a single 
 Carousel: shared forms, Security, My Devices, tests and the lesson.
 
 Code: https://github.com/Nageshwar1997/Beautinique
-```
 
-Post ke end me `hashtags.md` wali line paste karo.
+#buildinpublic #react #playwright #accessibility #webdev
+```

@@ -22,6 +22,7 @@ import {
   OptionItem,
   type PickerOption,
   POPOVER,
+  POPOVER_WIDTH,
   TRIGGER,
 } from './picker-parts';
 
@@ -168,7 +169,7 @@ export function Select(props: SelectProps) {
       </div>
       <FieldHint>{hint}</FieldHint>
       <FieldErrorText error={error} />
-      <Popover offset={6} className={cx(POPOVER, 'max-h-72 min-w-(--trigger-width) p-1')}>
+      <Popover offset={6} className={cx(POPOVER, POPOVER_WIDTH, 'max-h-72 p-1')}>
         {/* each item keyed by its value (React Aria's `id`): by index, a list that changes while
             open (a field that follows another) gave an item a new id and broke the page */}
         <ListBox<PickerOption & { id: string }>

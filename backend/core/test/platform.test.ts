@@ -1,13 +1,30 @@
-import { type Logger, LOOPBACK_HOST } from '@beautinique/backend-server-kit';
+import {
+  type Logger,
+  LOOPBACK_HOST,
+  type Passport,
+  passportSigner,
+} from '@beautinique/backend-server-kit';
 import { ObjectId } from '@beautinique/backend-server-mongo';
 import { OUTBOX, PROCESSED_EVENTS } from '@beautinique/backend-server-queue';
-import { createClient, getPing, recordPing, wake } from '@beautinique/shared-contracts';
+import {
+  createClient,
+  getPing,
+  HEADERS,
+  passportAudience,
+  pingRead,
+  recordPing,
+  wake,
+} from '@beautinique/shared-contracts';
 import { afterAll, afterEach, beforeAll, describe, expect, it } from 'vitest';
 
 import {
+  ACCESS_COPIES,
+  type AccessCopy,
   PING_AUDIT,
   PING_AUDIT_COLLECTION,
   PING_TTL_SECONDS,
+  ROLE_COPIES,
+  type RoleCopy,
 } from '../src/modules/platform/index.ts';
 import { PING_CAP, PINGS } from '../src/modules/platform/routes.ts';
 import { QUEUE } from '../src/runtime.ts';
@@ -45,6 +62,62 @@ afterAll(async () => {
   await look.cleanUp(prefix, epochKey);
 });
 
+/** The gateway's passport signer: core reads a signed-in caller from it (T4.1). */
+const signer = passportSigner();
+
+/**
+ * Someone who may read pings: a grant of platform.ping.read in core's copy of identity's grants
+ * (no seeded role holds it; a Master would make one), at this authz version.
+ */
+async function pingReader(copyVersion = 1): Promise<Passport> {
+  const userId = new ObjectId();
+  const roleId = new ObjectId();
+  await look.mongo.db.collection<RoleCopy>(ROLE_COPIES).insertOne({
+    _id: roleId,
+    key: 'admin.ping_reader',
+    app: 'admin',
+    permissions: [pingRead.key],
+    scopeTypes: ['global'],
+    mfaRequired: false,
+    retired: false,
+    changedAt: new Date(),
+  });
+  await look.mongo.db.collection<AccessCopy>(ACCESS_COPIES).insertOne({
+    _id: userId,
+    authzVersion: copyVersion,
+    grants: [
+      {
+        grantId: new ObjectId(),
+        roleId,
+        app: 'admin',
+        scope: { type: 'global', ids: [] },
+        validFrom: null,
+        validTo: null,
+      },
+    ],
+    copiedAt: new Date(),
+  });
+  return {
+    userId: userId.toHexString(),
+    sessionId: new ObjectId().toHexString(),
+    app: 'admin',
+    methods: ['password', 'totp'],
+    authzVersion: 1,
+  };
+}
+
+/** A client as the gateway forwards it for this caller: with a passport for core. */
+const signedIn = (baseUrl: string, passport: Passport) =>
+  createClient({
+    baseUrl,
+    app: 'admin',
+    fetch: (input, init) => {
+      const headers = new Headers(init?.headers);
+      headers.set(HEADERS.passport, signer.sign(passport, passportAudience('core')));
+      return fetch(input, { ...init, headers });
+    },
+  });
+
 async function startCore(options: { consume?: boolean } = {}, logger?: Logger) {
   const core = await start(testConfig(dbName), {
     port: 0,
@@ -52,6 +125,7 @@ async function startCore(options: { consume?: boolean } = {}, logger?: Logger) {
     handleSignals: false,
     logger,
     runtime: { queuePrefix: prefix, epochKey, pollMs: 50, watchdogMs: 200, ...options },
+    passportJwks: signer.jwks,
   });
   running.push(core);
   return core;
@@ -101,14 +175,20 @@ describe('the sample endpoint, from the contract to the inbox', () => {
       recordedAt: new Date(recorded.recordedAt),
     });
 
-    expect(await client.call(getPing, { params: { pingId: recorded.pingId } })).toEqual(recorded);
+    const reader = signedIn(core.url, await pingReader());
+    expect(await reader.call(getPing, { params: { pingId: recorded.pingId } })).toEqual(recorded);
   });
 
   it('answers 201 with { data } and carries the request id into the event', async () => {
     const core = await startCore();
     const response = await fetch(`${core.url}/platform/pings`, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json', 'X-Request-Id': 'req-from-gateway' },
+      headers: {
+        'Content-Type': 'application/json',
+        'X-Request-Id': 'req-from-gateway',
+        // the route is idempotent: the gateway lets it through only with a key (T4.1)
+        'Idempotency-Key': crypto.randomUUID(),
+      },
       body: JSON.stringify({ note: 'with id' }),
     });
     expect(response.status).toBe(201);
@@ -125,8 +205,9 @@ describe('the sample endpoint, from the contract to the inbox', () => {
       status: 400,
       code: 'VALIDATION_FAILED',
     });
+    const reader = signedIn(core.url, await pingReader());
     await expect(
-      client.call(getPing, { params: { pingId: new ObjectId().toHexString() } }),
+      reader.call(getPing, { params: { pingId: new ObjectId().toHexString() } }),
     ).rejects.toMatchObject({ status: 404, code: 'NOT_FOUND' });
     // a UUIDv7 from before ObjectIds is not an id at all
     await expect(
@@ -136,6 +217,34 @@ describe('the sample endpoint, from the contract to the inbox', () => {
     expect(bad.status).toBe(400);
     expect(await pings().countDocuments()).toBe(0);
     expect(await outbox().countDocuments()).toBe(0);
+  });
+
+  it("reads a ping only with platform.ping.read in core's copy of the grants (T4.1)", async () => {
+    const core = await startCore();
+    const pingId = new ObjectId().toHexString();
+    // no passport (a request that did not come through the gateway): 401
+    await expect(
+      createClient({ baseUrl: core.url, app: 'admin' }).call(getPing, { params: { pingId } }),
+    ).rejects.toMatchObject({ status: 401, code: 'UNAUTHENTICATED' });
+    // signed in, but no grant of the permission in the copy: 403
+    const userId = new ObjectId();
+    await look.mongo.db
+      .collection<AccessCopy>(ACCESS_COPIES)
+      .insertOne({ _id: userId, authzVersion: 1, grants: [], copiedAt: new Date() });
+    const nobody: Passport = {
+      userId: userId.toHexString(),
+      sessionId: new ObjectId().toHexString(),
+      app: 'admin',
+      methods: ['password', 'totp'],
+      authzVersion: 1,
+    };
+    await expect(
+      signedIn(core.url, nobody).call(getPing, { params: { pingId } }),
+    ).rejects.toMatchObject({ status: 403, code: 'FORBIDDEN' });
+    // the copy is older than the passport and stays so: 503 after the re-reads, never a guess
+    await expect(
+      signedIn(core.url, await pingReader(0)).call(getPing, { params: { pingId } }),
+    ).rejects.toMatchObject({ status: 503, code: 'SERVICE_UNAVAILABLE' });
   });
 
   it('deletes pings and their audit copies 7 days after they were recorded (public demo route)', async () => {
@@ -160,7 +269,7 @@ describe('the sample endpoint, from the contract to the inbox', () => {
     );
     const response = await fetch(`${core.url}/platform/pings`, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: { 'Content-Type': 'application/json', 'Idempotency-Key': crypto.randomUUID() },
       body: JSON.stringify({ note: 'one too many' }),
     });
     expect(response.status).toBe(503);

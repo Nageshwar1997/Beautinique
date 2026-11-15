@@ -10,7 +10,14 @@ export function buildApp({ logger, runtime }: { logger: Logger; runtime: Runtime
     logger,
     ready: runtime.ready,
     routes: (app) => {
-      app.use(routerOf({ mongo: runtime.mongo }));
+      app.use(
+        routerOf({
+          mongo: runtime.mongo,
+          passport: runtime.passport,
+          logger,
+          audit: runtime.audit,
+        }),
+      );
     },
   });
 }

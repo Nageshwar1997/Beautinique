@@ -31,6 +31,7 @@ const env: Record<string, string> = {
   ),
   CORE__MONGO_URI: mongo,
   CORE__MONGO_DB_NAME: `bq_e2e_${runId}_core`,
+  CORE__AUDIT_DB_NAME: `bq_e2e_${runId}_audit`,
   CORE__REDIS_URL: redis,
   IDENTITY__MONGO_URI: mongo,
   IDENTITY__MONGO_DB_NAME: `bq_e2e_${runId}_identity`,

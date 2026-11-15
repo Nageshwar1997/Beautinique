@@ -19,6 +19,7 @@ import {
   roleSlugZod,
   routes,
   SCOPE_TYPES,
+  totpResetMaster,
 } from '../src';
 
 describe('INDIAN_STATES', () => {
@@ -78,6 +79,13 @@ describe('identity permissions', () => {
     }
   });
 
+  it("keeps a Master's authenticator reset global and behind a step-up (QA DR-007)", () => {
+    expect(totpResetMaster.key).toBe('iam.totp.reset_master');
+    expect(totpResetMaster.scopeTypes).toEqual(['global']);
+    expect(totpResetMaster.risk).toBe('high');
+    expect(totpResetMaster.mfa).toBe(true);
+  });
+
   it('keeps the authz version key apart from the revoke keys', () => {
     expect(authzVersionKey('u1')).toBe('bq:id:authz-version:u1');
     expect(authzVersionKey('u1')).not.toBe(revokedUserKey('u1'));
@@ -94,6 +102,15 @@ describe('role, grant and invitation routes', () => {
     }
     expect(giveGrant.stepUp).toBe(true);
     expect(listGrants.stepUp).toBe(false);
+  });
+
+  it('say, for one person, whether the caller may reset their authenticator', () => {
+    const page = { items: [], nextCursor: null };
+    expect(listGrants.output.parse({ ...page, canResetAuthenticator: false })).toEqual({
+      ...page,
+      canResetAuthenticator: false,
+    });
+    expect(listGrants.output.parse(page)).toEqual(page);
   });
 
   it('let anyone ask an invitation code, in any app, as public', () => {

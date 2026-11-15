@@ -22,6 +22,7 @@ import {
   permissions,
   roleManage,
   type ScopeType,
+  totpResetMaster,
   updateRole,
 } from '@beautinique/shared-contracts';
 import { useQueryClient } from '@tanstack/react-query';
@@ -304,10 +305,12 @@ function RoleEditor({
     onClose();
   };
   const usable = CATALOGUE.filter(
-    // signing in always; making roles only the shipped Master role (identity refuses it here)
+    // signing in always; making roles and resetting a Master's authenticator only the shipped
+    // Master role (identity refuses them here)
     (p) =>
       p.key !== appSignIn.key &&
       p.key !== roleManage.key &&
+      p.key !== totpResetMaster.key &&
       p.scopeTypes.some((t) => scopeTypes.includes(t)),
   );
   const appointers = roles.filter(

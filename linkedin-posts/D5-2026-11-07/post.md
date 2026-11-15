@@ -1,8 +1,8 @@
 ---
 date: 2026-11-07
 day: 5
-status: ready # draft | ready | scheduled | posted (README §2)
-posted_at:
+status: scheduled # draft | ready | scheduled | posted (README §2)
+posted_at: '2026-11-15 09:00 IST'
 link:
 covers: 'PR #30, #31, #32, #38' # T3.3 (roles, grants, invitations, gateway permissions, step-up), signed-in authenticator
 ---
@@ -26,6 +26,6 @@ Day 5 of building Beautinique in public: who can do what.
 Carousel: roles, sign-in by grant, invitations, step-up and the lesson.
 
 Code: https://github.com/Nageshwar1997/Beautinique
-```
 
-Post ke end me `hashtags.md` wali line paste karo.
+#buildinpublic #security #rbac #backend #nodejs
+```

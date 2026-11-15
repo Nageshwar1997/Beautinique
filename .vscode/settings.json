@@ -11,6 +11,19 @@
   // The root eslint.config.js ignores packages/, frontend/ and backend/ (each lints itself), so the
   // extension must look for the nearest config of the file being saved.
   "eslint.workingDirectories": [{ "mode": "auto" }],
+  // Tailwind IntelliSense: class names in the packages' cx(...) calls too (inside className and
+  // outside, e.g. a ROW constant), and no projects from build output or Claude's worktrees (a
+  // worktree is a whole copy of the repo: its CSS files made 20 extra projects)
+  "tailwindCSS.classFunctions": ["cx"],
+  "tailwindCSS.files.exclude": [
+    "**/.git/**",
+    "**/node_modules/**",
+    "**/.hg/**",
+    "**/.svn/**",
+    "**/.claude/worktrees/**",
+    "**/dist/**",
+    "**/build/**"
+  ],
   "editor.formatOnSave": true,
   "editor.defaultFormatter": "esbenp.prettier-vscode",
   // VS Code downloads a JSON schema only from trusted domains; the apps' vercel.json use Vercel's
