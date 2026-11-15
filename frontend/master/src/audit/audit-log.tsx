@@ -1,10 +1,27 @@
-import { errorMessage, useApiQuery } from '@beautinique/frontend-api-client';
-import { RequirePermission } from '@beautinique/frontend-authz';
-import { Badge, Button, Dialog, Select, type Tone } from '@beautinique/frontend-components';
+import {
+  errorMessage,
+  saveFile,
+  useApiClient,
+  useApiQuery,
+} from '@beautinique/frontend-api-client';
+import { Can, RequirePermission } from '@beautinique/frontend-authz';
+import {
+  Badge,
+  Button,
+  DateRangePicker,
+  Dialog,
+  Select,
+  toast,
+  todayInIndia,
+  type Tone,
+} from '@beautinique/frontend-components';
 import { type Column, CursorPager, DataTable, useTableUrl } from '@beautinique/frontend-data-table';
 import {
+  AUDIT_ACTION_NAMES,
+  AUDIT_EXPORT_MAX_ROWS,
   AUDIT_RESULTS,
   type AuditResult,
+  exportAuditEntries,
   listAuditDays,
   listAuditEntries,
   type RouteOutput,
@@ -20,24 +37,24 @@ type Entry = RouteOutput<typeof listAuditEntries>['items'][number];
 type Day = RouteOutput<typeof listAuditDays>['items'][number];
 
 const PAGE_SIZE = 25;
-const FILTERS = { action: '', result: '' } as const;
+const FILTERS = { action: '', result: '', from: '', to: '' } as const;
+const DAY = /^\d{4}-\d{2}-\d{2}$/;
 /** The days whose chain check the page shows, today included. */
 export const DAYS_SHOWN = 14;
 
-/** What each action is called here; one not named yet shows as its key. */
-export const ACTION_NAMES: Readonly<Record<string, string>> = {
-  'iam.grants.give': 'Role given',
-  'iam.grants.end': 'Role ended',
-  'iam.roles.create': 'Sub-role made',
-  'iam.roles.update': 'Sub-role changed',
-  'iam.invitations.create': 'Invitation sent',
-  'iam.invitations.revoke': 'Invitation taken back',
-  'iam.invitations.accept': 'Invitation accepted',
-  'iam.users.resetAuthenticator': 'Authenticator reset',
-  'iam.users.endSessions': 'Sessions ended',
-  'identity.session.signedIn': 'Signed in',
-  'identity.session.reuseDetected': 'Copied session stopped',
-};
+/** What each action is called here and in the CSV (contracts); one not named yet shows as its key. */
+export const ACTION_NAMES = AUDIT_ACTION_NAMES;
+
+/**
+ * The time range of picked India days (YYYY-MM-DD): from the first day's start to the last one's
+ * end, in India time. A day that is not one is left out.
+ */
+export function rangeOf(from: string, to: string): { from?: string; to?: string } {
+  return {
+    ...(DAY.test(from) ? { from: new Date(`${from}T00:00:00.000+05:30`).toISOString() } : {}),
+    ...(DAY.test(to) ? { to: new Date(`${to}T23:59:59.999+05:30`).toISOString() } : {}),
+  };
+}
 
 const RESULT: Readonly<Record<AuditResult, { label: string; tone: Tone }>> = {
   success: { label: 'Done', tone: 'success' },
@@ -103,18 +120,39 @@ function AuditLog() {
   const result = (AUDIT_RESULTS as readonly string[]).includes(url.filters.result)
     ? (url.filters.result as AuditResult)
     : undefined;
+  // the list and the CSV hold the same entries
+  const filters = {
+    ...rangeOf(url.filters.from, url.filters.to),
+    ...(action === undefined ? {} : { action }),
+    ...(result === undefined ? {} : { result }),
+  };
   const entries = useApiQuery(
     listAuditEntries,
     {
       query: {
         limit: PAGE_SIZE,
-        ...(action === undefined ? {} : { action }),
-        ...(result === undefined ? {} : { result }),
+        ...filters,
         ...(url.cursor === undefined ? {} : { cursor: url.cursor }),
       },
     },
     { placeholderData: keepPreviousData },
   );
+  const api = useApiClient();
+  const [downloading, setDownloading] = useState(false);
+  const [downloadError, setDownloadError] = useState<string | null>(null);
+  const download = async () => {
+    setDownloading(true);
+    setDownloadError(null);
+    try {
+      // a step-up first when the last one is older than 5 minutes: the app's step-up dialog
+      saveFile(await api.download(exportAuditEntries, { query: filters }));
+      toast({ tone: 'success', title: 'Audit log downloaded' });
+    } catch (error) {
+      setDownloadError(errorMessage(error));
+    } finally {
+      setDownloading(false);
+    }
+  };
   const days = useApiQuery(listAuditDays, {
     query: { from: utcDay(DAYS_SHOWN - 1), to: utcDay(0) },
   });
@@ -228,7 +266,44 @@ function AuditLog() {
             }}
           />
         </div>
+        <div className="w-full max-w-sm">
+          <DateRangePicker
+            label="Dates (India time)"
+            maxValue={todayInIndia()}
+            value={
+              DAY.test(url.filters.from) && DAY.test(url.filters.to)
+                ? { start: url.filters.from, end: url.filters.to }
+                : null
+            }
+            onChange={(range) => {
+              url.setFilters({ from: range?.start ?? '', to: range?.end ?? '' });
+            }}
+          />
+        </div>
       </div>
+
+      <Can permission="audit.entry.export">
+        <div className="space-y-2">
+          <Button
+            variant="outline"
+            loading={downloading}
+            onClick={() => {
+              void download();
+            }}
+          >
+            Download CSV
+          </Button>
+          <p className="text-sm text-foreground-muted">
+            The entries these filters show, up to {AUDIT_EXPORT_MAX_ROWS.toLocaleString('en-IN')},
+            with what changed. You may be asked for your authenticator first.
+          </p>
+          {downloadError !== null && (
+            <p role="alert" className="text-sm text-error">
+              {downloadError}
+            </p>
+          )}
+        </div>
+      </Can>
 
       <DataTable
         label="Audit entries"

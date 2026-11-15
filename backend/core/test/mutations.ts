@@ -292,8 +292,8 @@ const mutations: Mutation[] = [
     name: 'the entries without the read permission',
     change: [
       [
-        '      authorize(await accessOf(mongo, await deps.passport(req)), auditRead.key);\n      // an id names',
-        '      await deps.passport(req);\n      // an id names',
+        '      authorize(await accessOf(mongo, await deps.passport(req)), auditRead.key);\n      const filter',
+        '      await deps.passport(req);\n      const filter',
       ],
     ],
     tests: 'without the read permission',
@@ -367,11 +367,59 @@ const mutations: Mutation[] = [
     name: 'a resource id without its type is taken',
     change: [
       [
-        '      if (query.resourceId !== undefined && query.resourceType === undefined) {',
-        '      if (false) {',
+        '  if (query.resourceId !== undefined && query.resourceType === undefined) {',
+        '  if (false) {',
       ],
     ],
     tests: 'actor half hidden',
+  },
+
+  // the CSV export (T4.1 PR D): who may, how many, and what a spreadsheet may run
+  {
+    file: 'modules/audit/routes',
+    name: 'the export takes the read permission',
+    change: [
+      ['      authorize(access, auditExport.key);', '      authorize(access, auditRead.key);'],
+    ],
+    tests: 'only the read permission',
+  },
+  {
+    file: 'modules/audit/routes',
+    name: 'the export holds more than its limit',
+    change: [['      if (rows > AUDIT_EXPORT_MAX_ROWS) {', '      if (false) {']],
+    tests: 'more than 50,000',
+  },
+  {
+    file: 'modules/audit/routes',
+    name: 'the export holds its own entry and what comes in meanwhile',
+    change: [
+      [
+        '      const filter = { ...filterOf(query), _id: { $lt: new ObjectId() } };',
+        '      const filter = filterOf(query);',
+      ],
+    ],
+    tests: 'logs the export',
+  },
+  {
+    file: 'modules/platform/download',
+    name: 'a cell that starts like a formula goes as it is',
+    // String.raw: the source's own backslashes
+    change: [[String.raw`const FORMULA_START = /^[=+\-@\t\r]/;`, 'const FORMULA_START = /(?!)/;']],
+    tests: 'starts like a formula',
+  },
+  {
+    file: 'modules/platform/download',
+    name: 'a minus or a tab start goes as it is',
+    change: [
+      [String.raw`const FORMULA_START = /^[=+\-@\t\r]/;`, 'const FORMULA_START = /^[=+@]/;'],
+    ],
+    tests: 'starts like a formula',
+  },
+  {
+    file: 'modules/platform/download',
+    name: 'any file name goes into the header',
+    change: [['    if (!FILE_NAME.test(file.fileName)) {', '    if (false) {']],
+    tests: 'no plain one',
   },
 ];
 

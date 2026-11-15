@@ -2,6 +2,16 @@
   "version": "1.0.0",
   "permissions": [
     {
+      "key": "audit.entry.export",
+      "description": "Download the audit log as a CSV file",
+      "scopeTypes": [
+        "global"
+      ],
+      "risk": "high",
+      "mfa": true,
+      "secondSignature": false
+    },
+    {
       "key": "audit.entry.read",
       "description": "Read the audit log",
       "scopeTypes": [

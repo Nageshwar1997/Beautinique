@@ -13,10 +13,10 @@ import {
   startServer,
 } from '@beautinique/backend-server-kit';
 import { ObjectId } from '@beautinique/backend-server-mongo';
-import { defineRoute, HEADERS } from '@beautinique/shared-contracts';
-import { boolean, number, object } from '@beautinique/shared-zod';
+import { csvFileZod, defineRoute, HEADERS } from '@beautinique/shared-contracts';
+import { boolean, number, object, string } from '@beautinique/shared-zod';
 import { Router } from 'express';
-import { afterAll, afterEach, beforeAll, describe, expect, it } from 'vitest';
+import { afterAll, afterEach, beforeAll, describe, expect, it, vi } from 'vitest';
 
 import {
   ACCESS_COPIES,
@@ -24,7 +24,10 @@ import {
   accessOf,
   authorize,
   type CallerAccess,
+  csvCell,
+  csvText,
   IDEMPOTENCY,
+  mountCoreDownload,
   mountCoreRoute,
   PINGS,
   REPLAYED_HEADER,
@@ -33,6 +36,7 @@ import {
   scopeFilter,
 } from '../src/modules/platform/index.ts';
 import {
+  captureLogger,
   type Inspector,
   inspector,
   isolation,
@@ -430,6 +434,156 @@ describe('idempotency keys', () => {
       const taken = await call('meera', key, { fail: false, waitMs: 0 });
       expect(taken.status).toBe(200);
       expect(runs).toBe(before + 1);
+    });
+  });
+});
+
+describe('CSV downloads (T4.1 PR D)', () => {
+  it('keeps a cell that starts like a formula as text, quotes text and doubles its quotes', () => {
+    for (const start of ['=', '+', '-', '@', '\t', '\r']) {
+      expect(csvCell(`${start}1+1`)).toBe(`"'${start}1+1"`);
+    }
+    expect(csvCell('say "hi", then go\nhome')).toBe('"say ""hi"", then go\nhome"');
+    expect(csvCell('a=b')).toBe('"a=b"');
+    expect(csvCell(-5)).toBe('-5');
+    expect(csvCell(Number.NaN)).toBe('');
+    expect(csvCell(null)).toBe('');
+    expect(csvCell('')).toBe('""');
+  });
+
+  it('writes a BOM and the header first, then the rows in big pieces', async () => {
+    async function* rows() {
+      for (let i = 0; i < 3000; i += 1) {
+        // rows come as a cursor gives them: one at a time, later
+        await Promise.resolve();
+        yield i;
+      }
+    }
+    const pieces: string[] = [];
+    for await (const piece of csvText({
+      fileName: 'n.csv',
+      columns: [
+        { header: 'N', value: (n: number) => n },
+        { header: 'Text', value: (n: number) => `row ${String(n)}` },
+      ],
+      rows: rows(),
+    })) {
+      pieces.push(piece);
+    }
+    expect(pieces[0]).toBe('\uFEFF"N","Text"\r\n');
+    expect(pieces.length).toBeLessThan(10);
+    const lines = pieces.join('').split('\r\n');
+    expect(lines).toHaveLength(3002);
+    expect(lines[3000]).toBe('2999,"row 2999"');
+  });
+
+  describe('a download route', () => {
+    const file = defineRoute({
+      id: 'platform.kernel.export',
+      method: 'GET',
+      path: '/test/export',
+      summary: 'A test of the download step',
+      apps: ['master'],
+      access: { type: 'signed-in' },
+      rateLimit: 'search',
+      idempotency: false,
+      stepUp: false,
+      owner: 'core',
+      download: 'csv',
+      input: {
+        query: object({
+          name: string(),
+          breakAt: string().optional(),
+          waitAt: string().optional(),
+        }),
+      },
+      output: csvFileZod,
+    });
+    const { logger, lines } = captureLogger();
+    let server: Awaited<ReturnType<typeof startServer>> | undefined;
+
+    beforeAll(async () => {
+      const router = Router();
+      mountCoreDownload(
+        router,
+        file,
+        ({ query }) => {
+          async function* rows() {
+            for (let i = 1; i <= 20_000; i += 1) {
+              // a slow database: the rows stop coming for a while
+              await (String(i) === query.waitAt
+                ? new Promise((resolve) => setTimeout(resolve, 3000))
+                : Promise.resolve());
+              if (String(i) === query.breakAt) throw new Error('the cursor broke');
+              yield i;
+            }
+          }
+          return Promise.resolve({
+            fileName: query.name,
+            columns: [{ header: 'N', value: (n: number) => n }],
+            rows: rows(),
+          });
+        },
+        { logger },
+      );
+      const app = createApp({ logger, routes: (mounted) => mounted.use(router) });
+      server = await startServer(app, {
+        port: 0,
+        host: LOOPBACK_HOST,
+        handleSignals: false,
+        logger,
+      });
+    });
+    afterAll(async () => {
+      await server?.stop();
+    });
+    const get = (query: string) => fetch(`${server?.url ?? ''}/test/export?${query}`);
+
+    it('sends the file with its name, never to be kept by a cache', async () => {
+      const answer = await get('name=numbers.csv');
+      expect(answer.status).toBe(200);
+      expect(answer.headers.get('content-type')).toBe('text/csv; charset=utf-8');
+      expect(answer.headers.get('content-disposition')).toBe('attachment; filename="numbers.csv"');
+      expect(answer.headers.get('cache-control')).toBe('private, no-store');
+      const text = await answer.text();
+      expect(text.split('\r\n')).toHaveLength(20_002);
+    });
+
+    it('answers a wrong query as usual, and refuses a file name that is no plain one', async () => {
+      expect((await get('')).status).toBe(400);
+      expect((await get('name=..%2Fetc.csv')).status).toBe(500);
+      expect((await get('name=a.csv%22%0D%0AX-Bad:1')).status).toBe(500);
+    });
+
+    it('cuts the file off when its rows break halfway, and says so in the logs', async () => {
+      const answer = await get('name=broken.csv&breakAt=15000');
+      expect(answer.status).toBe(200);
+      await expect(answer.text()).rejects.toThrow();
+      expect(lines.some((line) => line.msg === 'export cut off halfway')).toBe(true);
+    });
+
+    it('stops quietly when the caller leaves halfway', async () => {
+      const controller = new AbortController();
+      const answer = await fetch(`${server?.url ?? ''}/test/export?name=slow.csv&waitAt=10`, {
+        signal: controller.signal,
+      });
+      await answer.body?.getReader().read();
+      controller.abort();
+      await vi.waitFor(() => {
+        expect(lines.some((line) => line.msg === 'export stopped: the caller left')).toBe(true);
+        // the rows' source closes once its slow read is back
+      }, 5000);
+      expect(lines.filter((line) => line.msg === 'export cut off halfway')).toHaveLength(1);
+    });
+
+    it('is mounted only as a download', () => {
+      expect(() => {
+        mountCoreRoute(Router(), file as never, () => '' as never, {
+          mongo: core.runtime.mongo,
+          passport: () => Promise.reject(new Error('no')),
+          logger,
+        });
+      }).toThrow('platform.kernel.export is a download: mount it with mountCoreDownload');
     });
   });
 });

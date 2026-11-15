@@ -1063,6 +1063,24 @@
       "navigation": false
     },
     {
+      "id": "audit.entries.export",
+      "method": "GET",
+      "path": "/audit/entries/export",
+      "owner": "core",
+      "apps": [
+        "master"
+      ],
+      "access": {
+        "type": "permission",
+        "permission": "audit.entry.export"
+      },
+      "rateLimit": "search",
+      "idempotency": false,
+      "stepUp": true,
+      "cache": null,
+      "navigation": false
+    },
+    {
       "id": "audit.days.list",
       "method": "GET",
       "path": "/audit/days",

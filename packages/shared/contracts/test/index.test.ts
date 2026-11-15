@@ -13,6 +13,7 @@ import { describe, expect, expectTypeOf, it } from 'vitest';
 import {
   APPS,
   buildPath,
+  csvFileZod,
   cursorPage,
   cursorQuery,
   defineAreaSetting,
@@ -318,6 +319,36 @@ describe('routes', () => {
     ]) {
       expect(navigationZod.safeParse({ location }).success, location).toBe(false);
     }
+  });
+});
+
+describe('download routes (T4.1 PR D)', () => {
+  const file = (): RouteDefinition => ({
+    ...base(),
+    access: { type: 'signed-in' },
+    download: 'csv',
+    output: csvFileZod,
+  });
+
+  it('a download route is a signed-in GET, never cached, that answers with csvFileZod', () => {
+    const bad: [Partial<RouteDefinition>, string][] = [
+      [{ access: { type: 'public' } }, 'a download route must be a signed-in GET'],
+      [{ method: 'POST' }, 'a download route must be a signed-in GET'],
+      [{ cache: { sMaxAge: 60, staleWhileRevalidate: 0 } }, 'only public GET routes can be cached'],
+      [{ navigation: true }, 'a navigation route must be a public GET'],
+      [{ output: string() }, 'a download route answers with csvFileZod'],
+    ];
+    for (const [change, message] of bad) {
+      expect(() => defineRoute({ ...file(), ...change }), message).toThrow(message);
+    }
+    expect(() => defineRoute(file())).not.toThrow();
+    expect(() =>
+      defineRoute({ ...file(), access: { type: 'permission', permission: 'a.b.export' } }),
+    ).not.toThrow();
+    // the file's mark is for download routes only
+    expect(() => defineRoute({ ...base(), output: csvFileZod })).toThrow(
+      'only a download route answers with csvFileZod',
+    );
   });
 });
 

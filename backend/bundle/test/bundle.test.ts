@@ -633,6 +633,20 @@ describe('bundle', () => {
       const days = await api(`/audit/days?from=${today}&to=${today}`, 'master', undefined, cookie);
       expect(days.status).toBe(200);
       expect(await days.json()).toMatchObject({ data: { items: [{ day: today }] } });
+      // its CSV (T4.1 PR D): streamed through the gateway with its name, never cached, the
+      // authenticator sign-in a moment ago counting as the step-up
+      const csv = await api('/audit/entries/export', 'master', undefined, cookie);
+      expect(csv.status).toBe(200);
+      expect(csv.headers.get('content-type')).toBe('text/csv; charset=utf-8');
+      expect(csv.headers.get('content-disposition')).toMatch(
+        /^attachment; filename="beautinique-audit-log-\d{4}-\d{2}-\d{2}\.csv"$/,
+      );
+      expect(csv.headers.get('cache-control')).toBe('private, no-store');
+      const bytes = new Uint8Array(await csv.arrayBuffer());
+      expect([...bytes.slice(0, 3)]).toEqual([0xef, 0xbb, 0xbf]);
+      const file = new TextDecoder().decode(bytes);
+      expect(file.split('\r\n')[0]).toContain('"Time (IST)","Action","Action name","Result"');
+      expect(file).toContain('"iam.invitations.create","Invitation sent","success"');
       // a customer never reads it: the gateway says no first
       const blocked = await api(
         '/audit/entries',

@@ -126,6 +126,7 @@ describe('platform catalogue (Milestone 1 sample)', () => {
       'auth.socialSignUp.finish',
       'auth.signInMethods.remove',
       'audit.entries.list',
+      'audit.entries.export',
       'audit.days.list',
     ]);
     expect(events.latest('platform.ping.recorded')).toBe(pingRecorded);

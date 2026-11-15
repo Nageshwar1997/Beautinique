@@ -77,6 +77,9 @@ export {
   type Client,
   type ClientOptions,
   createClient,
+  DOWNLOAD_TIMEOUT_MS,
+  type DownloadedFile,
+  fileNameOf,
   navigationHref,
   type NetworkEvent,
   queryKey,
@@ -127,6 +130,7 @@ export {
 } from './platform';
 export {
   buildPath,
+  csvFileZod,
   defineRoute,
   gatewayManifest,
   HTTP_METHODS,

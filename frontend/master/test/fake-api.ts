@@ -21,6 +21,7 @@ const ACCESS: Record<Who, { role: string; name: string; permissions: string[] }>
       'iam.totp.reset',
       'iam.totp.reset_master',
       'audit.entry.read',
+      'audit.entry.export',
     ],
   },
   officer: {
@@ -31,7 +32,7 @@ const ACCESS: Record<Who, { role: string; name: string; permissions: string[] }>
   auditor: {
     role: 'master.internal_auditor',
     name: 'Internal Auditor',
-    permissions: ['iam.app.sign_in', 'iam.grant.read', 'audit.entry.read'],
+    permissions: ['iam.app.sign_in', 'iam.grant.read', 'audit.entry.read', 'audit.entry.export'],
   },
   head: {
     role: 'master.head_of_operations',
@@ -166,6 +167,8 @@ export function fakeApi(who: Who = 'master') {
       auditEntry(2, 'iam.grants.end'),
       auditEntry(1, 'iam.grants.give'),
     ],
+    /** What the CSV export answers: the file, or a 422 for too many entries */
+    exportAnswer: 'file' as 'file' | 'too-large',
     days: [
       { day: '2026-11-15', entries: 3, check: null },
       {
@@ -278,6 +281,24 @@ export function fakeApi(who: Who = 'master') {
           items,
           nextCursor: null,
           ...(userId === null ? {} : { canResetAuthenticator: canResetAuthenticator(userId) }),
+        },
+      });
+    }
+    if (path === '/audit/entries/export') {
+      if (state.exportAnswer === 'too-large') {
+        return json(422, {
+          error: {
+            code: 'EXPORT_TOO_LARGE',
+            message: 'More than 50,000 entries match. Narrow the dates or filters.',
+            requestId: 'req-export',
+          },
+        });
+      }
+      return new Response('"Action"\r\n"iam.grants.give"\r\n', {
+        status: 200,
+        headers: {
+          'content-type': 'text/csv; charset=utf-8',
+          'content-disposition': 'attachment; filename="beautinique-audit-log-2026-11-15.csv"',
         },
       });
     }
