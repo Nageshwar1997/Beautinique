@@ -79,6 +79,8 @@ export type EndReason =
   | 'password-changed'
   | 'signed-out-elsewhere'
   | 'access-ended'
+  /** a role that needs the authenticator came after a sign-in without it (refresh) */
+  | 'mfa-needed'
   | 'authenticator-reset'
   | 'security-officer';
 
@@ -443,25 +445,40 @@ export function sessions(deps: SessionDeps): Sessions {
         { returnDocument: 'after' },
       );
       if (rotated) {
-        // grants are read again at every refresh: the last grant in the app gone = signed out
+        // grants are read again at every refresh: the last grant in the app gone = signed out; a
+        // role that needs the authenticator, given after a sign-in without it, ends the session
+        // too, and the next sign-in asks for the authenticator or sets one up (owner, 2026-11-15)
         const access = await signInAccess(mongo, {
           userId: rotated.userId,
           app,
           now: new Date(at),
         });
-        if (!access.allowed) {
+        const withAuthenticator = rotated.methods.some((method) =>
+          STEP_UP_METHODS.includes(method),
+        );
+        const ended: EndReason | null = !access.allowed
+          ? 'access-ended'
+          : access.mfaRequired && !withAuthenticator
+            ? 'mfa-needed'
+            : null;
+        if (ended) {
           await collection.updateOne(
             { _id: sessionId, revokedAt: null },
             {
               $set: {
                 revokedAt: new Date(at),
-                revokeReason: 'access-ended',
+                revokeReason: ended,
                 purgeAt: new Date(at + KEEP_ENDED_MS),
               },
             },
           );
           await revokeAtGateway(sessionId);
-          logger.info({ userId: rotated.userId, app, sessionId }, 'session ended: no grant left');
+          logger.info(
+            { userId: rotated.userId, app, sessionId },
+            ended === 'access-ended'
+              ? 'session ended: no grant left'
+              : 'session ended: its access now needs the authenticator',
+          );
           throw sessionExpired();
         }
         await listPermissions(rotated.userId, app, access);

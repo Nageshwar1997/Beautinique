@@ -1179,8 +1179,22 @@ const mutations: Mutation[] = [
   {
     file: 'sessions',
     name: 'refresh keeps a session whose grant ended',
-    change: [['        if (!access.allowed) {', '        if (false) {']],
+    change: [
+      ['const ended: EndReason | null = !access.allowed', 'const ended: EndReason | null = false'],
+    ],
     tests: 'no grant left',
+  },
+  {
+    file: 'sessions',
+    name: 'refresh keeps a session without the authenticator its new role needs',
+    change: [[': access.mfaRequired && !withAuthenticator', ': false && !withAuthenticator']],
+    tests: 'needs the authenticator it did not use',
+  },
+  {
+    file: 'sessions',
+    name: 'refresh ends a session that used the authenticator',
+    change: [[': access.mfaRequired && !withAuthenticator', ': access.mfaRequired']],
+    tests: 'used the authenticator when such a role comes',
   },
   {
     file: 'sessions',
