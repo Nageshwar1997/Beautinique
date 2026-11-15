@@ -1,6 +1,7 @@
 import {
   type AppId,
   appSignIn,
+  auditRead,
   grantManage,
   grantRead,
   roleManage,
@@ -96,7 +97,7 @@ const BY_CREATOR_MANAGER = { appointedBy: [CREATOR_MANAGER] };
 export const MASTER_SEED: RoleSeed = role('master', 'master', 'Master', GLOBAL, {
   main: true,
   // resets the other Master's authenticator: a Security Officer may not (QA DR-007)
-  permissions: [...APPOINTS, roleManage.key, totpReset.key, totpResetMaster.key],
+  permissions: [...APPOINTS, roleManage.key, totpReset.key, totpResetMaster.key, auditRead.key],
   appointedBy: [],
   mfaRequired: true,
   maxHolders: 2,
@@ -156,7 +157,10 @@ export const ROLE_SEEDS: readonly RoleSeed[] = [
   role('master', 'security_officer', 'Security Officer (CERT-In contact)', GLOBAL, {
     permissions: [grantRead.key, sessionRevoke.key, totpReset.key],
   }),
-  role('master', 'internal_auditor', 'Internal Auditor', GLOBAL, { permissions: [grantRead.key] }),
+  // reads the audit log, changes nothing (ARCHITECTURE §6.5)
+  role('master', 'internal_auditor', 'Internal Auditor', GLOBAL, {
+    permissions: [grantRead.key, auditRead.key],
+  }),
 
   // 6. Support Desk
   role('support', 'l1_agent', 'Customer Support Agent (L1)', GLOBAL, { main: true }),

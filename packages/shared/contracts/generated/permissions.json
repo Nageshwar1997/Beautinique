@@ -2,6 +2,16 @@
   "version": "1.0.0",
   "permissions": [
     {
+      "key": "audit.entry.read",
+      "description": "Read the audit log",
+      "scopeTypes": [
+        "global"
+      ],
+      "risk": "high",
+      "mfa": false,
+      "secondSignature": false
+    },
+    {
       "key": "iam.app.sign_in",
       "description": "Sign in to the role's app",
       "scopeTypes": [

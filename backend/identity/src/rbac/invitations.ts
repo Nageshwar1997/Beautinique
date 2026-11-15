@@ -17,6 +17,7 @@ import {
   invitationCreated,
 } from '@beautinique/shared-contracts';
 
+import { type AuditCaller, writeAudit } from '../audit.ts';
 import { type User, USERS } from '../users.ts';
 import {
   appointingGrant,
@@ -139,7 +140,7 @@ export interface NewInvitationRequest {
  */
 export async function createInvitation(
   deps: ManageDeps,
-  passport: Passport,
+  passport: AuditCaller,
   body: NewInvitationRequest,
   requestId: string,
 ) {
@@ -232,6 +233,19 @@ export async function createInvitation(
           expiresAt: invitation.expiresAt.toISOString(),
         },
       });
+      await writeAudit(deps.mongo, session, {
+        action: 'iam.invitations.create',
+        caller: { ...passport, requestId: passport.requestId ?? requestId },
+        resource: { type: 'invitation', id: invitation._id.toHexString() },
+        scope: body.scope,
+        after: {
+          email: invitation.email,
+          role: role.key,
+          validFrom: body.validFrom ?? null,
+          validTo: body.validTo ?? null,
+          expiresAt: invitation.expiresAt.toISOString(),
+        },
+      });
       return true;
     });
   } catch (error) {
@@ -247,7 +261,11 @@ export async function createInvitation(
 }
 
 /** POST /iam/invitations/:invitationId/revoke: one not accepted yet, by whoever could make it. */
-export async function revokeInvitation(deps: ManageDeps, passport: Passport, invitationId: string) {
+export async function revokeInvitation(
+  deps: ManageDeps,
+  passport: AuditCaller,
+  invitationId: string,
+) {
   const now = new Date();
   const userId = toObjectId(passport.userId);
   const caller = await callerGrants(deps.mongo, { userId, app: passport.app, now });
@@ -260,11 +278,24 @@ export async function revokeInvitation(deps: ManageDeps, passport: Passport, inv
   if (!role || !appointingGrant(caller, role, scopeOf(invitation.scope))) {
     throw forbidden('You cannot take back this invitation.');
   }
-  const revoked = await invitations.findOneAndUpdate(
-    { _id: id, status: 'pending' },
-    { $set: { status: 'revoked', endedAt: now, endedBy: userId } },
-    { returnDocument: 'after' },
-  );
+  const revoked = await withTransaction(deps.mongo, async (session) => {
+    const done = await invitations.findOneAndUpdate(
+      { _id: id, status: 'pending' },
+      { $set: { status: 'revoked', endedAt: now, endedBy: userId } },
+      { returnDocument: 'after', session },
+    );
+    if (done) {
+      await writeAudit(deps.mongo, session, {
+        action: 'iam.invitations.revoke',
+        caller: passport,
+        resource: { type: 'invitation', id: invitationId },
+        scope: scopeOf(invitation.scope),
+        before: { email: invitation.email, role: role.key, status: 'pending' },
+        after: { status: 'revoked' },
+      });
+    }
+    return done;
+  });
   if (revoked) {
     deps.logger.info({ invitationId, by: passport.userId }, 'invitation taken back');
   }
@@ -404,10 +435,22 @@ export async function acceptInvitations(
       validTo: invitation.validTo,
       now,
     });
-    await invitationsOf(mongo).updateOne(
+    const taken = await invitationsOf(mongo).updateOne(
       { _id: invitation._id, status: 'pending' },
       { $set: { status: 'accepted', endedAt: now, endedBy: userId } },
       { session },
     );
+    if (taken.modifiedCount === 1) {
+      const app = (await rbacCatalog(mongo)).appOf(invitation.appId);
+      await writeAudit(mongo, session, {
+        action: 'iam.invitations.accept',
+        // the invited person, who just proved the email (no session of theirs yet)
+        caller: { userId: userId.toHexString(), app },
+        resource: { type: 'invitation', id: invitation._id.toHexString() },
+        scope,
+        before: { email: invitation.email, status: 'pending' },
+        after: { status: 'accepted', invitedBy: invitation.invitedBy.toHexString() },
+      });
+    }
   }
 }

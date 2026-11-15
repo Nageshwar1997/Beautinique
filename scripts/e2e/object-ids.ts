@@ -10,8 +10,18 @@ type Db = Mongo['db'];
 /** A field that names a document: `userId`, `roleId`, `permissionIds`, `grantedBy`, `by` ... */
 const REFERENCE = /(?:Id|Ids|By)$|^by$/;
 
-/** Fields whose ids do not name a document: Redis and BullMQ ids, migration names, a provider's own. */
-const NOT_REFERENCES = new Set(['challengeId', 'loginId', 'jobId', 'migrationId', 'providerId']);
+/**
+ * Fields whose ids do not name a document: Redis and BullMQ ids, migration names, a provider's own,
+ * and a request's (the audit log keeps it, TASKS T4.1 PR C).
+ */
+const NOT_REFERENCES = new Set([
+  'challengeId',
+  'loginId',
+  'jobId',
+  'migrationId',
+  'providerId',
+  'requestId',
+]);
 
 /** Where an id may be a string: event envelopes are JSON messages, and the Redis epoch is Redis's. */
 const STRING_IDS_AT = [

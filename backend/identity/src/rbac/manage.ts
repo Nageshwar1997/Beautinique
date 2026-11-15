@@ -16,6 +16,7 @@ import {
 } from '@beautinique/shared-contracts';
 import type { Redis } from 'ioredis';
 
+import { type AuditCaller, writeAudit } from '../audit.ts';
 import { type User, USERS } from '../users.ts';
 import {
   appointingGrant,
@@ -207,7 +208,7 @@ export interface NewRole {
 }
 
 /** POST /iam/roles: a sub-role without a deploy, `<app>.c_<slug>` (ARCHITECTURE §7.3). */
-export async function createRole(deps: ManageDeps, passport: Passport, body: NewRole) {
+export async function createRole(deps: ManageDeps, passport: AuditCaller, body: NewRole) {
   const now = new Date();
   requirePermission(await callerOf(deps, passport, now), roleManage.key);
   const roles = rolesOf(deps.mongo);
@@ -257,6 +258,19 @@ export async function createRole(deps: ManageDeps, passport: Passport, body: New
       await writeRoleSnapshots(deps.mongo, session, [
         { ...written, app: body.app, permissions: [...keyed.permissions] },
       ]);
+      await writeAudit(deps.mongo, session, {
+        action: 'iam.roles.create',
+        caller: passport,
+        resource: { type: 'role', id: insertedId.toHexString() },
+        after: {
+          key,
+          name: body.name,
+          scopeTypes: keyed.scopeTypes,
+          permissions: [...keyed.permissions],
+          appointedBy: keyed.appointedBy,
+          mfaRequired: body.mfaRequired,
+        },
+      });
       return written;
     });
   } catch (error) {
@@ -287,7 +301,7 @@ export interface RoleChange {
  */
 export async function updateRole(
   deps: ManageDeps,
-  passport: Passport,
+  passport: AuditCaller,
   key: string,
   change: RoleChange,
 ) {
@@ -352,6 +366,21 @@ export async function updateRole(
     await writeRoleSnapshots(deps.mongo, session, [
       { ...role, ...fields, permissions: next.permissions },
     ]);
+    await writeAudit(deps.mongo, session, {
+      action: 'iam.roles.update',
+      caller: passport,
+      resource: { type: 'role', id: role._id.toHexString() },
+      before: {
+        key,
+        name: role.name,
+        scopeTypes: role.scopeTypes,
+        permissions: role.permissions,
+        appointedBy: role.appointedBy.map(keyOf),
+        mfaRequired: role.mfaRequired,
+        retired: role.retired,
+      },
+      after: { key, ...next },
+    });
     if (!renew) return [];
     const userIds = await grantsOf(deps.mongo).distinct(
       'userId',
@@ -387,7 +416,7 @@ export interface NewGrantRequest {
  * role gives it, in a scope inside the caller's own. Nobody gives a role to themselves. The
  * person's tokens renew at once.
  */
-export async function giveGrant(deps: ManageDeps, passport: Passport, body: NewGrantRequest) {
+export async function giveGrant(deps: ManageDeps, passport: AuditCaller, body: NewGrantRequest) {
   const now = new Date();
   const caller = await callerOf(deps, passport, now);
   requirePermission(caller, grantManage.key);
@@ -413,8 +442,8 @@ export async function giveGrant(deps: ManageDeps, passport: Passport, body: NewG
   }
   let grantId: ObjectId | null;
   try {
-    grantId = await withTransaction(deps.mongo, (session) =>
-      writeGrant(deps.mongo, session, {
+    grantId = await withTransaction(deps.mongo, async (session) => {
+      const given = await writeGrant(deps.mongo, session, {
         userId,
         roleId: role._id,
         appId: role.appId,
@@ -424,8 +453,24 @@ export async function giveGrant(deps: ManageDeps, passport: Passport, body: NewG
         validFrom,
         validTo,
         now,
-      }),
-    );
+      });
+      if (given) {
+        await writeAudit(deps.mongo, session, {
+          action: 'iam.grants.give',
+          caller: passport,
+          resource: { type: 'grant', id: given.toHexString() },
+          scope: body.scope,
+          after: {
+            userId: body.userId,
+            email: user.email,
+            role: role.key,
+            validFrom: body.validFrom ?? null,
+            validTo: body.validTo ?? null,
+          },
+        });
+      }
+      return given;
+    });
   } catch (error) {
     if (isDuplicateKey(error)) grantId = null;
     else throw error;
@@ -444,7 +489,7 @@ export async function giveGrant(deps: ManageDeps, passport: Passport, body: NewG
  * person's tokens stop at once, and a session left with no grant in its app ends at its next
  * refresh. Ending an ended grant changes nothing. Nobody ends their own.
  */
-export async function endGrant(deps: ManageDeps, passport: Passport, grantId: string) {
+export async function endGrant(deps: ManageDeps, passport: AuditCaller, grantId: string) {
   const now = new Date();
   const caller = await callerOf(deps, passport, now);
   requirePermission(caller, grantManage.key);
@@ -458,9 +503,24 @@ export async function endGrant(deps: ManageDeps, passport: Passport, grantId: st
   if (grant.userId.toHexString() === passport.userId) {
     throw forbidden('Nobody ends their own role.');
   }
-  const ended = await withTransaction(deps.mongo, (session) =>
-    endGrantRecord(deps.mongo, session, { grantId: id, by: toObjectId(passport.userId), now }),
-  );
+  const ended = await withTransaction(deps.mongo, async (session) => {
+    const done = await endGrantRecord(deps.mongo, session, {
+      grantId: id,
+      by: toObjectId(passport.userId),
+      now,
+    });
+    if (done) {
+      await writeAudit(deps.mongo, session, {
+        action: 'iam.grants.end',
+        caller: passport,
+        resource: { type: 'grant', id: grantId },
+        scope: scopeOf(grant.scope),
+        before: { userId: grant.userId.toHexString(), role: role.key, active: true },
+        after: { active: false },
+      });
+    }
+    return done;
+  });
   if (ended) {
     await publishAuthzVersions(deps.mongo, deps.redis, [grant.userId]);
     deps.logger.info({ grantId, role: role.key, by: passport.userId }, 'role ended');

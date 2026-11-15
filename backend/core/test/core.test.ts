@@ -3,7 +3,7 @@ import { RELEASE_STATE, releaseFingerprint } from '@beautinique/backend-server-r
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 
 import { readConfig } from '../src/config.ts';
-import { releaseDefinition } from '../src/release.ts';
+import { releaseDefinitionOf } from '../src/release.ts';
 import {
   type Inspector,
   inspector,
@@ -56,6 +56,7 @@ describe('core', () => {
       handleSignals: false,
       runtime: { queuePrefix: prefix, epochKey, consume: false },
     });
+    const releaseDefinition = releaseDefinitionOf(testConfig(dbName).auditDbName);
     try {
       for (const { collection, name } of releaseDefinition.indexes) {
         const names = (await look.mongo.db.collection(collection).indexes()).map((i) => i.name);
@@ -99,10 +100,15 @@ describe('core', () => {
       logLevel: 'silent',
       mongoUri: env.CORE__MONGO_URI,
       mongoDbName: 'bq_core_x',
+      auditDbName: 'bq_core_x_audit',
       redisUrl: env.CORE__REDIS_URL,
       outboxRelay: 'poll',
       passportJwksUrl: 'http://localhost:8080/.well-known/passport-jwks.json',
     });
+    // live, the audit log has its own database by default
+    expect(readConfig({ env: { ...env, CORE__AUDIT_DB_NAME: undefined } }).auditDbName).toBe(
+      'bq_audit',
+    );
     expect(readConfig({ env: { ...env, CORE__PORT: '9001' } }).port).toBe(9001);
     expect(readConfig({ env: { ...env, CORE__OUTBOX_RELAY: 'changestream' } }).outboxRelay).toBe(
       'changestream',

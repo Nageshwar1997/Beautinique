@@ -209,6 +209,18 @@ describe('refreshing', () => {
       app: 'customer',
       device: 'Chrome on Windows',
     });
+    // and in the audit log, as a copy refused (T4.1 PR C); a customer's sign-in itself is not
+    const audits = await harness.db
+      .collection<{ envelope: { data: Record<string, unknown> } }>(OUTBOX)
+      .find({ type: 'identity.audit.recorded', 'envelope.data.resource.id': sessionId })
+      .toArray();
+    expect(audits.map((one) => one.envelope.data)).toEqual([
+      expect.objectContaining({
+        action: 'identity.session.reuseDetected',
+        result: 'denied',
+        actor: expect.objectContaining({ userId: null, system: 'identity' }) as unknown,
+      }),
+    ]);
     // the newest token ends with the session
     expect((await refreshWith(refreshOf(next))).status).toBe(401);
   });

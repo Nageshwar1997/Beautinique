@@ -80,6 +80,8 @@ describe('generateFiles', () => {
       '/auth/oauth/{provider}/callback',
       '/auth/oauth/sign-up',
       '/auth/sign-in-methods/{provider}',
+      '/audit/entries',
+      '/audit/days',
     ]);
     const manifest = parsed('gateway-manifest.json') as {
       version: string;
@@ -96,6 +98,7 @@ describe('generateFiles', () => {
       }
     ).events;
     expect(list.map((e) => [e.type, e.version])).toEqual([
+      ['identity.audit.recorded', 1],
       ['identity.authenticator.changed', 1],
       ['identity.authenticator.reset', 1],
       ['identity.grant.changed', 1],
@@ -117,6 +120,7 @@ describe('generateFiles', () => {
       parsed('permissions.json') as { permissions: { key: string; scopeTypes: string[] }[] }
     ).permissions;
     expect(list.map((p) => p.key)).toEqual([
+      'audit.entry.read',
       'iam.app.sign_in',
       'iam.grant.manage',
       'iam.grant.read',

@@ -11,6 +11,7 @@ import {
 } from '@beautinique/backend-server-mongo';
 import { connectRedis, writeEvent } from '@beautinique/backend-server-queue';
 import { invitationCreated } from '@beautinique/shared-contracts';
+import { grantMaster, readConfig as readIdentityConfig } from 'identity';
 import { afterAll, describe, expect, it } from 'vitest';
 
 import { expectObjectIds } from '../../../scripts/e2e/object-ids.ts';
@@ -35,6 +36,8 @@ const dbName = `bq_test_bundle_${randomUUID().slice(0, 8)}`;
 // every deployable has a database of its own, live and here
 const identityDbName = `${dbName}_identity`;
 const notifyDbName = `${dbName}_notify`;
+// core's audit log has one of its own too (TASKS T4.1 PR C)
+const auditDbName = `${dbName}_audit`;
 // made per run, so no secret-looking literal sits in the repo (gitleaks)
 const ORIGIN_SECRET = randomBytes(32).toString('base64url');
 // identity seals sign-in codes with it, notify opens them: one value for both (ARCHITECTURE §7.1)
@@ -49,13 +52,14 @@ afterAll(async () => {
   const mongo = await connectMongo({ uri: MONGO_URI, dbName, appName: 'bundle-test', logger });
   try {
     // every document's _id and every reference an ObjectId, in all three databases (RULES §4.17)
-    for (const name of [dbName, identityDbName, notifyDbName]) {
+    for (const name of [dbName, identityDbName, notifyDbName, auditDbName]) {
       await expectObjectIds(mongo.client.db(name));
     }
   } finally {
     await mongo.db.dropDatabase();
     await mongo.client.db(identityDbName).dropDatabase();
     await mongo.client.db(notifyDbName).dropDatabase();
+    await mongo.client.db(auditDbName).dropDatabase();
     await mongo.close();
   }
   const redis = await connectRedis({ url: REDIS_DB, name: 'bundle-test', logger });
@@ -67,6 +71,7 @@ const quiet = () => ({
   ...Object.fromEntries(names.map((name) => [`${name.toUpperCase()}__LOG_LEVEL`, 'silent'])),
   CORE__MONGO_URI: MONGO_URI,
   CORE__MONGO_DB_NAME: dbName,
+  CORE__AUDIT_DB_NAME: auditDbName,
   CORE__REDIS_URL: REDIS_DB,
   IDENTITY__MONGO_URI: MONGO_URI,
   IDENTITY__MONGO_DB_NAME: identityDbName,
@@ -493,7 +498,7 @@ describe('bundle', () => {
     }
   });
 
-  it('opens a permission route through the gateway to someone holding its key, step-up included (T3.3 PR C)', async () => {
+  it('opens a permission route through the gateway to someone holding its key, step-up included, and keeps it in the audit log (T3.3 PR C, T4.1 PR C)', async () => {
     const bundle = await startBundle({ port: 0, env: quiet() });
     const email = `master-${randomUUID().slice(0, 8)}@beautinique.example`;
     const password = 'a master password, long enough';
@@ -558,26 +563,12 @@ describe('bundle', () => {
       );
       expect(refused.status).toBe(403);
 
-      // the first Master, as `npm run db:grant-master` gives it
-      const now = new Date();
-      await identityDb.db
-        .collection<Record<string, unknown> & { _id: ObjectId }>('identity_grants')
-        .insertOne({
-          _id: new ObjectId(),
-          userId: new ObjectId(account.userId),
-          roleId: await idByKey(identityDb, 'identity_roles', 'master.master'),
-          appId: await idByKey(identityDb, 'identity_apps', 'master'),
-          scope: { type: 'global', ids: [] },
-          validFrom: null,
-          validTo: null,
-          grantedBy: null,
-          approvedBy: null,
-          via: 'bootstrap',
-          active: true,
-          createdAt: now,
-          endedAt: null,
-          endedBy: null,
-        });
+      // the first Master, as `npm run db:grant-master` gives it: its grants snapshot goes to
+      // core's copy too, which core's own permission routes read (TASKS T4.1)
+      expect(await grantMaster(readIdentityConfig({ env: quiet() }), { email, logger })).toBe(
+        'given',
+      );
+      expect(account.userId).toMatch(/^[0-9a-f]{24}$/);
 
       // Master signs in to the master app, setting up the authenticator (a step-up too)
       const started = await api('/auth/login', 'master', { email, password });
@@ -617,6 +608,39 @@ describe('bundle', () => {
       );
       expect(stepped.status).toBe(200);
       expect(accessOf(stepped, 'master')).not.toBe('');
+
+      // the audit log (T4.1 PR C): the sign-in to an internal app and the invitation, from
+      // identity's events through core's queue, read by Master through the gateway from core
+      let actions: string[] = [];
+      const until = Date.now() + 20_000;
+      while (
+        !actions.includes('iam.invitations.create') ||
+        !actions.includes('identity.session.signedIn')
+      ) {
+        if (Date.now() > until) throw new Error(`the audit log has only: ${actions.join(', ')}`);
+        await new Promise((resolve) => setTimeout(resolve, 200));
+        const read = await api('/audit/entries?limit=50', 'master', undefined, cookie);
+        if (read.status === 200) {
+          const { data: page } = (await read.json()) as {
+            data: { items: { action: string; actor: { userId: string | null } }[] };
+          };
+          actions = page.items
+            .filter((item) => item.actor.userId === account.userId)
+            .map((item) => item.action);
+        }
+      }
+      const today = new Date().toISOString().slice(0, 10);
+      const days = await api(`/audit/days?from=${today}&to=${today}`, 'master', undefined, cookie);
+      expect(days.status).toBe(200);
+      expect(await days.json()).toMatchObject({ data: { items: [{ day: today }] } });
+      // a customer never reads it: the gateway says no first
+      const blocked = await api(
+        '/audit/entries',
+        'customer',
+        undefined,
+        `__Host-bq_customer_at=${customer}`,
+      );
+      expect([403, 404]).toContain(blocked.status);
     } finally {
       await identityDb.close();
       await bundle.stop();

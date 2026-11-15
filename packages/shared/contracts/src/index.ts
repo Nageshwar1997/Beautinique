@@ -66,6 +66,7 @@ export {
   wake,
 } from './catalogue';
 export * from './catalogue/access';
+export * from './catalogue/audit';
 export * from './catalogue/iam';
 export * from './catalogue/social';
 export {

@@ -2,7 +2,7 @@ import { randomUUID } from 'node:crypto';
 import { Writable } from 'node:stream';
 
 import { createLogger } from '@beautinique/backend-server-kit';
-import { connectMongo, type Mongo } from '@beautinique/backend-server-mongo';
+import { connectMongo, type Db, type Mongo } from '@beautinique/backend-server-mongo';
 import { connectRedis, type RedisConnection } from '@beautinique/backend-server-queue';
 
 import {
@@ -20,11 +20,16 @@ export function isolation() {
   return { dbName: `bq_test_core_${id}`, prefix: `bqtest${id}`, epochKey: `bq:test:epoch:${id}` };
 }
 
+/** The audit database that goes with a test's core database. */
+export const auditDbOf = (dbName: string): string => `${dbName}_audit`;
+
 export const testEnv = (dbName: string): Record<string, string> => ({
   CORE__LOG_LEVEL: 'silent',
   CORE__MONGO_URI: MONGO_URI,
   CORE__MONGO_DB_NAME: dbName,
   CORE__REDIS_URL: REDIS_URL,
+  // the audit log's own database, one per test too (TASKS T4.1 PR C)
+  CORE__AUDIT_DB_NAME: auditDbOf(dbName),
 });
 
 export const testConfig = (dbName: string) => readConfig({ env: testEnv(dbName) });
@@ -32,6 +37,8 @@ export const testConfig = (dbName: string) => readConfig({ env: testEnv(dbName) 
 /** Our own handles on the same MongoDB and Redis, to look inside and to clean up. */
 export interface Inspector {
   mongo: Mongo;
+  /** The test's audit database */
+  auditDb: Db;
   redis: RedisConnection;
   /** Removes the test database and every Redis key the test made. */
   cleanUp(prefix: string, epochKey: string): Promise<void>;
@@ -48,20 +55,26 @@ export async function inspector(dbName: string): Promise<Inspector> {
     }),
   });
   const mongo = await connectMongo({ uri: MONGO_URI, dbName, appName: 'core-test', logger });
+  const auditDb = mongo.client.db(auditDbOf(dbName));
   // before core starts: its release steps query too
   await watchCollectionScans(mongo.db);
+  await watchCollectionScans(auditDb);
   const redis = await connectRedis({ url: REDIS_URL, name: 'core-test', logger });
   return {
     mongo,
+    auditDb,
     redis,
     async cleanUp(prefix, epochKey) {
       try {
         // what core asked, not the test's own look-ups on this handle
         await expectNoCollectionScans(mongo.db, ['core', 'core-release']);
+        await expectNoCollectionScans(auditDb, ['core', 'core-release']);
         // every document's _id and every reference an ObjectId (RULES §4.17)
         await expectObjectIds(mongo.db);
+        await expectObjectIds(auditDb);
       } finally {
         await mongo.db.dropDatabase();
+        await auditDb.dropDatabase();
         const keys = await redis.client.keys(`${prefix}:*`);
         await redis.client.del(epochKey, ...keys);
         await redis.close();

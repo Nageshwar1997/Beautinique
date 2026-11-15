@@ -1518,8 +1518,8 @@ const mutations: Mutation[] = [
     name: 'no permission list at sign-in',
     change: [
       [
-        '      await collection.insertOne(session);\n      await listPermissions(userId, app, access);\n',
-        '      await collection.insertOne(session);\n',
+        "      await listPermissions(userId, app, access);\n      logger.info({ userId, app, sessionId, methods }, 'session started');",
+        "      logger.info({ userId, app, sessionId, methods }, 'session started');",
       ],
     ],
     tests: 'written at every sign-in',
@@ -1950,8 +1950,8 @@ const mutations: Mutation[] = [
     name: 'Master cannot reset an authenticator',
     change: [
       [
-        'permissions: [...APPOINTS, roleManage.key, totpReset.key, totpResetMaster.key],',
-        'permissions: [...APPOINTS, roleManage.key, totpResetMaster.key],',
+        'permissions: [...APPOINTS, roleManage.key, totpReset.key, totpResetMaster.key, auditRead.key],',
+        'permissions: [...APPOINTS, roleManage.key, totpResetMaster.key, auditRead.key],',
       ],
     ],
     tests: 'DR-007',
@@ -1961,8 +1961,8 @@ const mutations: Mutation[] = [
     name: 'Master cannot reset the other Master',
     change: [
       [
-        'permissions: [...APPOINTS, roleManage.key, totpReset.key, totpResetMaster.key],',
-        'permissions: [...APPOINTS, roleManage.key, totpReset.key],',
+        'permissions: [...APPOINTS, roleManage.key, totpReset.key, totpResetMaster.key, auditRead.key],',
+        'permissions: [...APPOINTS, roleManage.key, totpReset.key, auditRead.key],',
       ],
     ],
     tests: 'DR-007',
@@ -2551,6 +2551,74 @@ const mutations: Mutation[] = [
     name: 'the worker never sweeps',
     change: [['          await catchUpSweep(mongo, logger, { startedAt: firedAt });\n', '']],
     tests: 'worker of identity',
+  },
+  // identity's audit records for core's audit log (TASKS T4.1 PR C)
+  {
+    file: 'rbac/manage',
+    name: 'a grant given goes unrecorded',
+    change: [["          action: 'iam.grants.give',", "          action: 'iam.grants.list',"]],
+    tests: 'grant given and ended',
+  },
+  {
+    file: 'rbac/manage',
+    name: 'a grant ended goes unrecorded',
+    change: [["        action: 'iam.grants.end',", "        action: 'iam.grants.list',"]],
+    tests: 'grant given and ended',
+  },
+  {
+    file: 'rbac/manage',
+    name: 'a sub-role change goes unrecorded',
+    change: [["      action: 'iam.roles.update',", "        action: 'iam.roles.list',"]],
+    tests: 'sub-role made and changed',
+  },
+  {
+    file: 'sessions',
+    name: "a customer's sign-in is recorded and an internal one not",
+    change: [
+      [
+        '      if ((SIGN_UP_APPS as readonly string[]).includes(app)) {',
+        '      if (!(SIGN_UP_APPS as readonly string[]).includes(app)) {',
+      ],
+    ],
+    tests: 'internal app, never a customer',
+  },
+  {
+    file: 'sessions',
+    name: 'a copied session goes unrecorded',
+    change: [
+      [
+        "            action: 'identity.session.reuseDetected',",
+        "            action: 'identity.session.refreshed',",
+      ],
+    ],
+    tests: 'old one a moment later',
+  },
+  {
+    file: 'audit',
+    name: 'identity sends personal data unmasked',
+    change: [
+      ['      before: mask(input.before),', '      before: input.before ?? null,'],
+      ['      after: mask(input.after),', '      after: input.after ?? null,'],
+    ],
+    tests: 'grant given and ended',
+  },
+  {
+    file: 'audit',
+    name: 'the IP is lost',
+    change: [['      ip: client?.ip ?? null,', '      ip: null,']],
+    tests: 'grant given and ended',
+  },
+  {
+    file: 'rbac/invitations',
+    name: 'an accepted invitation goes unrecorded',
+    change: [['    if (taken.modifiedCount === 1) {', '    if (false) {']],
+    tests: 'taken back and accepted',
+  },
+  {
+    file: 'audit',
+    name: 'a refused staff action goes unrecorded',
+    change: [['    if (error instanceof AppError && error.status === 403) {', '    if (false) {']],
+    tests: 'refused staff action',
   },
 ];
 

@@ -12,6 +12,11 @@ export const configZod = object({
   mongoUri: string().regex(/^mongodb(?:\+srv)?:\/\//, 'Use a MongoDB connection string'),
   /** core's own database: no other deployable reads or writes it. */
   mongoDbName: string().min(1).max(63).default('bq_core'),
+  /**
+   * The audit log's own database (ARCHITECTURE §3): core's user may only insert and read there (an
+   * Atlas custom role; owner, 2026-11-15).
+   */
+  auditDbName: string().min(1).max(63).default('bq_audit'),
   /** Redis for the queues: Render Key Value (internal URL) live, Docker Valkey on the laptop. */
   redisUrl: string().regex(/^rediss?:\/\//, 'Use a Redis URL'),
   /** How the outbox relay finds new events: `poll` on Atlas free, `changestream` on a replica set you run. */

@@ -25,6 +25,7 @@ import {
   type WipeWatchdog,
 } from '@beautinique/backend-server-queue';
 import {
+  auditRecorded,
   authenticatorChanged,
   authenticatorReset,
   grantsChanged,
@@ -58,7 +59,7 @@ import { type SigningKeys, signingKeys } from './signing-keys.ts';
  * a copied refresh token ended their session, tells an invited person how to accept,
  * tells a person whose authenticator a Security Officer reset, and tells a person who changed
  * their own authenticator (backend/notify). Core keeps copies of the roles, each account's grants
- * and the accounts (TASKS T3.5), for authorize().
+ * and the accounts (TASKS T3.5), for authorize(), and writes identity's audit records (T4.1).
  */
 export const SUBSCRIBERS: Readonly<Record<string, readonly string[]>> = {
   [otpRequested.type]: ['notify.otpEmail'],
@@ -70,6 +71,8 @@ export const SUBSCRIBERS: Readonly<Record<string, readonly string[]>> = {
   [roleChanged.type]: ['core.roleCopy'],
   [grantsChanged.type]: ['core.accessCopy'],
   [userChanged.type]: ['core.userCopy'],
+  // staff and security actions into core's audit log (TASKS T4.1 PR C)
+  [auditRecorded.type]: ['core.identityAudit'],
 };
 
 /** identity's own queue: its worker runs identity's tasks (no events come to identity). */

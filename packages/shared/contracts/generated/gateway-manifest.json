@@ -1043,6 +1043,42 @@
       "stepUp": false,
       "cache": null,
       "navigation": false
+    },
+    {
+      "id": "audit.entries.list",
+      "method": "GET",
+      "path": "/audit/entries",
+      "owner": "core",
+      "apps": [
+        "master"
+      ],
+      "access": {
+        "type": "permission",
+        "permission": "audit.entry.read"
+      },
+      "rateLimit": "read",
+      "idempotency": false,
+      "stepUp": false,
+      "cache": null,
+      "navigation": false
+    },
+    {
+      "id": "audit.days.list",
+      "method": "GET",
+      "path": "/audit/days",
+      "owner": "core",
+      "apps": [
+        "master"
+      ],
+      "access": {
+        "type": "permission",
+        "permission": "audit.entry.read"
+      },
+      "rateLimit": "read",
+      "idempotency": false,
+      "stepUp": false,
+      "cache": null,
+      "navigation": false
     }
   ]
 }

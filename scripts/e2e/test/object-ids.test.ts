@@ -38,8 +38,9 @@ describe('the ObjectId guard', () => {
       scope: { type: 'self', ids: [new ObjectId()] },
       key: 'admin.state_admin',
       state: { type: 'state', ids: ['MH'] },
-      // a Redis id, a BullMQ job, a migration's name and a provider's own message id
+      // a Redis id, a BullMQ job, a migration's name, a provider's own message id and a request's
       otp: { challengeId: uuid },
+      requestId: uuid,
       jobId: `${hex}@notify.emails`,
       migrationId: '20261029-001-sign-up-grants',
       providerId: '<202611120001.abc@smtp-relay.mailin.fr>',
