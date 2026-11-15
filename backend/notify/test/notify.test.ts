@@ -193,6 +193,8 @@ describe('sendDue', () => {
       triggered += 1;
       return Promise.resolve();
     },
+    // notify never delays a run
+    runAfter: () => Promise.reject(new Error('notify never asks for a delayed run')),
     close: () => Promise.resolve(),
   };
   const run = (sender: EmailSender, more: Partial<SendDueDeps> = {}) =>

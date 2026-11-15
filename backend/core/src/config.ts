@@ -16,6 +16,16 @@ export const configZod = object({
   redisUrl: string().regex(/^rediss?:\/\//, 'Use a Redis URL'),
   /** How the outbox relay finds new events: `poll` on Atlas free, `changestream` on a replica set you run. */
   outboxRelay: zodEnum(['poll', 'changestream']).default('poll'),
+  /**
+   * The gateway's passport keys (ARCHITECTURE §7.2), for split mode only: backend/bundle hands the
+   * key over in memory, so nothing to set live.
+   */
+  passportJwksUrl: string()
+    .regex(
+      /^https?:\/\/\S+$/,
+      'Use a URL like http://localhost:8080/.well-known/passport-jwks.json',
+    )
+    .default('http://localhost:8080/.well-known/passport-jwks.json'),
 });
 export type Config = output<typeof configZod>;
 

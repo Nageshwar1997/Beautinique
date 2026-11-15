@@ -1,4 +1,12 @@
-import type { Logger, ReadyCheck } from '@beautinique/backend-server-kit';
+import type { PublicJwk } from '@beautinique/backend-server-crypto';
+import {
+  jwksCache,
+  jwksFromUrl,
+  type Logger,
+  type Passport,
+  passportVerifier,
+  type ReadyCheck,
+} from '@beautinique/backend-server-kit';
 import { connectMongo, type Mongo } from '@beautinique/backend-server-mongo';
 import {
   connectRedis,
@@ -14,6 +22,8 @@ import {
   upsertSchedules,
   type WipeWatchdog,
 } from '@beautinique/backend-server-queue';
+import { passportAudience } from '@beautinique/shared-contracts';
+import type { Request } from 'express';
 
 import type { Config } from './config.ts';
 import { subscribers, subscriptionsOf } from './modules/index.ts';
@@ -37,6 +47,8 @@ export interface RuntimeOptions {
   pollMs?: number;
   /** How often the wipe watchdog looks (default 30 s). */
   watchdogMs?: number;
+  /** The gateway's passport keys, in memory (backend/bundle); otherwise read from the config URL */
+  passportJwks?: readonly PublicJwk[];
 }
 
 /** core's connections and background workers: MongoDB, Redis, the outbox relay, the queue worker. */
@@ -45,6 +57,8 @@ export interface Runtime {
   redis: RedisConnection;
   relay: Relay;
   watchdog: WipeWatchdog;
+  /** Who signed in, from the gateway's passport (401 without one): routes that need a caller */
+  passport: (req: Request) => Promise<Passport>;
   /** Starts the queue worker if it is not running yet. */
   startConsuming(): void;
   /** The checks for GET /ready. */
@@ -61,7 +75,15 @@ export interface Runtime {
  * closed again and the error goes on.
  */
 export async function startRuntime(config: Config, options: RuntimeOptions): Promise<Runtime> {
-  const { logger, consume = true, queuePrefix: prefix, epochKey, pollMs, watchdogMs } = options;
+  const {
+    logger,
+    consume = true,
+    queuePrefix: prefix,
+    epochKey,
+    pollMs,
+    watchdogMs,
+    passportJwks,
+  } = options;
   const closers: (() => Promise<void>)[] = [];
   const stop = async () => {
     for (const close of closers.splice(0).toReversed()) await close();
@@ -131,6 +153,14 @@ export async function startRuntime(config: Config, options: RuntimeOptions): Pro
       redis,
       relay,
       watchdog,
+      passport: passportVerifier({
+        keys: jwksCache({
+          load: passportJwks
+            ? () => Promise.resolve({ keys: passportJwks })
+            : jwksFromUrl(config.passportJwksUrl),
+        }),
+        audience: passportAudience('core'),
+      }),
       startConsuming,
       ready: {
         mongo: mongo.ready,

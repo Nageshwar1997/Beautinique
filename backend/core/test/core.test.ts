@@ -101,6 +101,7 @@ describe('core', () => {
       mongoDbName: 'bq_core_x',
       redisUrl: env.CORE__REDIS_URL,
       outboxRelay: 'poll',
+      passportJwksUrl: 'http://localhost:8080/.well-known/passport-jwks.json',
     });
     expect(readConfig({ env: { ...env, CORE__PORT: '9001' } }).port).toBe(9001);
     expect(readConfig({ env: { ...env, CORE__OUTBOX_RELAY: 'changestream' } }).outboxRelay).toBe(
