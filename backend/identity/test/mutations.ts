@@ -2192,6 +2192,28 @@ const mutations: Mutation[] = [
     tests: 'runs the first copy at a release',
   },
   {
+    file: 'release',
+    name: 'the release does not send the first copy once more (LIVE-006)',
+    change: [
+      [
+        '    accessSnapshotsMigration,\n    accessSnapshotsAgainMigration,\n',
+        '    accessSnapshotsMigration,\n',
+      ],
+    ],
+    tests: 'runs the first copy at a release',
+  },
+  {
+    file: 'rbac/migrations',
+    name: 'the second copy sends nothing (LIVE-006)',
+    change: [
+      [
+        '  up: (context) => accessSnapshotsMigration.up(context),',
+        '  up: () => Promise.resolve(),',
+      ],
+    ],
+    tests: 'sends the first copy once more',
+  },
+  {
     file: 'oauth',
     name: 'social sign-in looks up the provider’s id with a plain filter',
     change: [

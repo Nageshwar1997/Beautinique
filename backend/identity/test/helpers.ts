@@ -58,12 +58,16 @@ import { type RunningIdentity, start } from '../src/service.ts';
 import { LEGAL_ACCEPTANCES, type LegalAcceptance, type User, USERS } from '../src/users.ts';
 import { MONGO_URI, REDIS_URL } from './env.ts';
 
-/** identity's event routes without core's copies: no core runs in these tests (TASKS T3.5). */
+/**
+ * identity's event routes without core's copies: no core runs in these tests (TASKS T3.5). Every
+ * type keeps its entry, an empty list too: the relay leaves a type it has no entry for pending
+ * (LIVE-006).
+ */
 const NOTIFY_ONLY = Object.fromEntries(
-  Object.entries(SUBSCRIBERS).flatMap(([type, list]) => {
-    const kept = list.filter((subscriber) => !subscriber.startsWith('core.'));
-    return kept.length === 0 ? [] : [[type, kept]];
-  }),
+  Object.entries(SUBSCRIBERS).map(([type, list]) => [
+    type,
+    list.filter((subscriber) => !subscriber.startsWith('core.')),
+  ]),
 );
 
 export { MONGO_URI, REDIS_URL };

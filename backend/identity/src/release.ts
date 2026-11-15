@@ -13,7 +13,11 @@ import { indexes as credentialIndexes, providerSubjectIndexMigration } from './c
 import { catalogIndexes } from './rbac/catalog.ts';
 import { indexes as grantIndexes } from './rbac/grants.ts';
 import { indexes as invitationIndexes } from './rbac/invitations.ts';
-import { accessSnapshotsMigration, signUpGrantsMigration } from './rbac/migrations.ts';
+import {
+  accessSnapshotsAgainMigration,
+  accessSnapshotsMigration,
+  signUpGrantsMigration,
+} from './rbac/migrations.ts';
 import { rbacSyncStep, roleIndexes } from './rbac/sync.ts';
 import { indexes as sessionIndexes } from './sessions.ts';
 import { indexes as signingKeyIndexes } from './signing-keys.ts';
@@ -30,6 +34,7 @@ export const releaseDefinition: ReleaseDefinition = {
     signUpGrantsMigration,
     providerSubjectIndexMigration,
     accessSnapshotsMigration,
+    accessSnapshotsAgainMigration,
   ]),
   indexes: [
     ...OUTBOX_INDEXES,

@@ -21,7 +21,10 @@ export interface RelayOptions {
   mode: RelayMode;
   /**
    * Who gets each event type, as `<deployable>.<module>`:
-   * `{ 'sellers.org.approved': ['identity.grants', 'notify.emails'] }`.
+   * `{ 'sellers.org.approved': ['identity.grants', 'notify.emails'] }`. Every type the deployable
+   * writes has an entry, an empty list too: the relay leaves an event of a type it has no entry for
+   * pending, for an instance that knows it (a deploy runs the old instance next to the new one,
+   * LIVE-006).
    */
   subscribers: Readonly<Record<string, readonly string[]>>;
   /** A subscriber's queue (default `q.<deployable>`: one queue per deployable on the free plan). */
@@ -116,6 +119,11 @@ export function checkSubscribers(subscribers: RelayOptions['subscribers']): void
  * and tries again on the
  * next round. Only the instance holding the MongoDB lease relays. Delivery is at least once (a crash
  * between the job and the mark sends the event again under the same job id); consumers dedupe.
+ *
+ * It reads only the types it has an entry for. During a deploy the old instance can still hold the
+ * lease while the new one writes events of a type the old code does not know (its release's first
+ * snapshots, LIVE-006): those wait, pending, until the new instance leads, instead of being marked
+ * relayed to nobody and lost.
  */
 export function startRelay(options: RelayOptions): Relay {
   const {
@@ -132,6 +140,8 @@ export function startRelay(options: RelayOptions): Relay {
     batchSize = 100,
   } = options;
   checkSubscribers(subscribers);
+  // the types this version routes; any other waits for a version that knows it
+  const known = Object.keys(subscribers);
   const outbox = mongo.db.collection<OutboxRecord>(OUTBOX);
   const owner = `${hostname()}:${String(process.pid)}:${uuidv7()}`;
   const queues = new Map<string, Queue>();
@@ -169,7 +179,7 @@ export function startRelay(options: RelayOptions): Relay {
   /** Relays one batch; returns how many events it read. */
   async function relayBatch(): Promise<number> {
     const batch = await outbox
-      .find({ status: 'pending' })
+      .find({ status: 'pending', type: { $in: known } })
       .sort({ createdAt: 1, _id: 1 })
       .limit(batchSize)
       .toArray();
