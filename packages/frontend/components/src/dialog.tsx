@@ -82,15 +82,15 @@ export function Dialog({
           'w-full',
           side
             ? 'data-entering:animate-slide-in-from-right data-exiting:animate-slide-out-to-right rtl:data-entering:animate-slide-in-from-left rtl:data-exiting:animate-slide-out-to-left h-dvh'
-            : 'data-entering:animate-rise-in data-exiting:animate-sink-out sm:data-entering:animate-scale-in sm:data-exiting:animate-scale-out',
+            : 'data-entering:animate-rise-in data-exiting:animate-sink-out sm:data-entering:animate-scale-in sm:data-exiting:animate-scale-out overflow-hidden rounded-2xl shadow-xl',
           SIZE[size],
         )}
       >
         <AriaDialog
           role={role}
           className={cx(
-            'bg-surface text-foreground relative flex flex-col overflow-y-auto p-6 shadow-xl outline-hidden',
-            side ? 'h-full sm:border-border sm:border-s' : 'max-h-[85dvh] rounded-2xl',
+            'bg-surface text-foreground relative flex flex-col overflow-y-auto p-6 outline-hidden scrollbar-thin scrollbar-thumb-border-strong scrollbar-track-transparent',
+            side ? 'h-full shadow-xl sm:border-border sm:border-s' : 'max-h-[85dvh] rounded-2xl',
           )}
         >
           {({ close }) => (

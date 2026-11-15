@@ -50,7 +50,7 @@ import { DEFAULT_RATE_LIMITS, rateLimitBuckets, SESSION_TOKEN_RULE } from '../sr
 import { start } from '../src/service.ts';
 import { sessionGate } from '../src/sessions.ts';
 import type { StatusBody } from '../src/status.ts';
-import { clientIp, originSecretCheck } from '../src/trust.ts';
+import { clientIp, clientIpOf, originSecretCheck } from '../src/trust.ts';
 import { REDIS_URL } from './env.ts';
 
 // Rate limits need Valkey (test/env.ts); every key of this run has its own prefix.
@@ -931,6 +931,38 @@ describe('client IP', () => {
     expect(clientIp(fake({ 'x-real-ip': 'nope' }, '::ffff:10.0.0.6'), true)).toBe('10.0.0.6');
     expect(clientIp(fake({ 'x-real-ip': '2401:4900::1' }), true)).toBe('2401:4900::1');
     expect(clientIp(fake({}), true)).toBe('0.0.0.0');
+  });
+
+  it("takes Vercel's x-vercel-forwarded-for first, then the client end of x-forwarded-for (LIVE-007)", () => {
+    // live: the socket is Render's proxy, and x-real-ip does not arrive
+    const live = fake(
+      { 'x-forwarded-for': '49.36.10.20, 76.76.21.9', 'x-vercel-forwarded-for': '49.36.10.20' },
+      '127.0.0.1',
+    );
+    expect(clientIpOf(live, true)).toEqual({ ip: '49.36.10.20', source: 'x-vercel-forwarded-for' });
+    expect(
+      clientIpOf(fake({ 'x-forwarded-for': ' 49.36.10.21 , 76.76.21.9' }, '127.0.0.1'), true),
+    ).toEqual({ ip: '49.36.10.21', source: 'x-forwarded-for' });
+    // Vercel's own header wins over one the client may have put in front
+    expect(
+      clientIp(
+        fake({ 'x-vercel-forwarded-for': '49.36.10.22', 'x-forwarded-for': '1.2.3.4' }),
+        true,
+      ),
+    ).toBe('49.36.10.22');
+    // a value that is no address: the next header
+    expect(
+      clientIp(
+        fake({ 'x-vercel-forwarded-for': 'unknown', 'x-forwarded-for': '::ffff:49.36.10.23' }),
+        true,
+      ),
+    ).toBe('49.36.10.23');
+    // straight to the server, without the origin secret: no header counts
+    expect(clientIpOf(live, false)).toEqual({ ip: '127.0.0.1', source: 'socket' });
+    expect(clientIpOf(fake({ 'x-forwarded-for': '' }, '10.0.0.7'), true)).toEqual({
+      ip: '10.0.0.7',
+      source: 'socket',
+    });
   });
 });
 

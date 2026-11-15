@@ -84,7 +84,15 @@ export const POPOVER_WIDTH =
   'min-w-(--trigger-width) max-w-[max(var(--trigger-width),min(24rem,calc(100vw-1.5rem)))]';
 
 export const POPOVER =
-  'bg-surface text-foreground border-border overflow-auto rounded-xl border shadow-lg outline-hidden data-entering:animate-fade-in data-exiting:animate-fade-out';
+  'bg-surface text-foreground border-border rounded-xl border shadow-lg outline-hidden data-entering:animate-fade-in data-exiting:animate-fade-out';
+
+/**
+ * A scrolling area inside a rounded box: a thin scrollbar in the theme's colours on a clear track.
+ * The box itself clips (`overflow-hidden`), so the scrollbar never pokes out of its round corners
+ * (Windows draws square ends and arrows; LIVE-008).
+ */
+export const SCROLL =
+  'overflow-auto scrollbar-thin scrollbar-thumb-border-strong scrollbar-track-transparent';
 
 /** The button that opens a picker: the text-field box (44 px, strong border), the focus ring on it. */
 export const TRIGGER =
@@ -141,9 +149,13 @@ export function CheckBoxMark({
   );
 }
 
-/** Classes of one row of a list: 44 px, the focused row tinted, a ring for keyboard focus. */
+/**
+ * Classes of one row of a list: 44 px, the focused row tinted, a ring for keyboard focus. No tint
+ * while the list fades out: closing it from its button focuses the first row for a moment, which
+ * then lit up as the list went (LIVE-008).
+ */
 export const ROW =
-  'text-foreground min-h-touch flex cursor-pointer items-center gap-3 rounded-lg px-3 py-2 outline-hidden data-disabled:cursor-not-allowed data-disabled:opacity-50 data-focused:bg-surface-muted data-hovered:bg-surface-muted data-focus-visible:ring-focus-ring data-focus-visible:ring-2 data-focus-visible:ring-inset';
+  'text-foreground min-h-touch flex cursor-pointer items-center gap-3 rounded-lg px-3 py-2 outline-hidden data-disabled:cursor-not-allowed data-disabled:opacity-50 data-focused:bg-surface-muted data-hovered:bg-surface-muted data-focus-visible:ring-focus-ring data-focus-visible:ring-2 data-focus-visible:ring-inset in-data-exiting:bg-transparent! in-data-exiting:ring-0';
 
 /** One option of a ListBox (Select, ComboBox): a box for multiple choice, a tick for one. */
 export function OptionItem({ option }: { option: PickerOption }) {

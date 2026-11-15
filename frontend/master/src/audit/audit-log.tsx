@@ -378,15 +378,19 @@ function EntryDetails({ entry }: { entry: Entry }) {
       <div className="grid gap-3 md:grid-cols-2">
         <div>
           <h3 className="mb-1 text-sm font-medium">Before</h3>
-          <pre className="overflow-x-auto rounded-md bg-surface-muted p-3 text-xs">
-            {json(entry.before)}
-          </pre>
+          <div className="overflow-hidden rounded-md bg-surface-muted">
+            <pre className="scrollbar-thin scrollbar-thumb-border-strong scrollbar-track-transparent overflow-x-auto p-3 text-xs">
+              {json(entry.before)}
+            </pre>
+          </div>
         </div>
         <div>
           <h3 className="mb-1 text-sm font-medium">After</h3>
-          <pre className="overflow-x-auto rounded-md bg-surface-muted p-3 text-xs">
-            {json(entry.after)}
-          </pre>
+          <div className="overflow-hidden rounded-md bg-surface-muted">
+            <pre className="scrollbar-thin scrollbar-thumb-border-strong scrollbar-track-transparent overflow-x-auto p-3 text-xs">
+              {json(entry.after)}
+            </pre>
+          </div>
         </div>
       </div>
     </div>

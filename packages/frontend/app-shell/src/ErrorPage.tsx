@@ -135,11 +135,11 @@ export function ErrorPage({
           </p>
         )}
         {details !== undefined && details.trim() !== '' && (
-          <details className="border-border bg-surface mt-10 w-full max-w-2xl rounded-lg border text-left">
+          <details className="border-border bg-surface mt-10 w-full max-w-2xl overflow-hidden rounded-lg border text-left">
             <summary className="min-h-touch flex cursor-pointer items-center px-4 text-sm font-medium">
               Technical details
             </summary>
-            <pre className="text-foreground-muted max-h-72 overflow-auto px-4 pb-4 text-xs whitespace-pre-wrap">
+            <pre className="text-foreground-muted scrollbar-thin scrollbar-thumb-border-strong scrollbar-track-transparent max-h-72 overflow-auto px-4 pb-4 text-xs whitespace-pre-wrap">
               {details}
             </pre>
           </details>
