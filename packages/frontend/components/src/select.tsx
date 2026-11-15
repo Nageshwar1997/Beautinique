@@ -23,6 +23,7 @@ import {
   type PickerOption,
   POPOVER,
   POPOVER_WIDTH,
+  SCROLL,
   TRIGGER,
 } from './picker-parts';
 
@@ -169,12 +170,15 @@ export function Select(props: SelectProps) {
       </div>
       <FieldHint>{hint}</FieldHint>
       <FieldErrorText error={error} />
-      <Popover offset={6} className={cx(POPOVER, POPOVER_WIDTH, 'max-h-72 p-1')}>
+      <Popover
+        offset={6}
+        className={cx(POPOVER, POPOVER_WIDTH, 'flex max-h-72 flex-col overflow-hidden p-1')}
+      >
         {/* each item keyed by its value (React Aria's `id`): by index, a list that changes while
             open (a field that follows another) gave an item a new id and broke the page */}
         <ListBox<PickerOption & { id: string }>
           items={options.map((option) => ({ ...option, id: option.value }))}
-          className="outline-hidden"
+          className={cx(SCROLL, 'min-h-0 flex-1 outline-hidden')}
           renderEmptyState={() => <EmptyList>No options</EmptyList>}
         >
           {(option) => <OptionItem option={option} />}

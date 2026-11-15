@@ -137,68 +137,71 @@ export function DataTable<Row>({
     );
 
   const body = wide ? (
-    <div className="border-border overflow-x-auto rounded-xl border">
-      <table aria-labelledby={captionId} className="w-full border-collapse text-sm">
-        <caption id={captionId} className="sr-only">
-          {label}
-        </caption>
-        <thead className="bg-surface-muted text-foreground-muted text-start">
-          <tr>
-            {columns.map((column) => (
-              <th
-                key={column.key}
-                scope="col"
-                className={cx(
-                  'px-4 py-3 font-medium',
-                  column.align === 'end' ? 'text-end' : 'text-start',
-                  column.className,
-                )}
-              >
-                {column.header}
-              </th>
-            ))}
-          </tr>
-        </thead>
-        <tbody>
-          {rows.map((row) => {
-            const key = rowKey(row);
-            return (
-              <tr
-                key={key}
-                aria-current={openKey === key ? 'true' : undefined}
-                className={cx(
-                  'border-border relative border-t align-top',
-                  onOpen !== undefined && 'hover:bg-surface-muted cursor-pointer',
-                  openKey === key && 'bg-brand-subtle',
-                )}
-              >
-                {columns.map((column) =>
-                  column === primary ? (
-                    <th
-                      key={column.key}
-                      scope="row"
-                      className={cx('px-4 py-3 text-start font-normal', column.className)}
-                    >
-                      {openButton(row)}
-                    </th>
-                  ) : (
-                    <td
-                      key={column.key}
-                      className={cx(
-                        'px-4 py-3',
-                        column.align === 'end' && 'text-end tabular-nums',
-                        column.className,
-                      )}
-                    >
-                      {column.cell(row)}
-                    </td>
-                  ),
-                )}
-              </tr>
-            );
-          })}
-        </tbody>
-      </table>
+    // the frame clips the round corners, so the scrollbar inside never pokes out (LIVE-008)
+    <div className="border-border overflow-hidden rounded-xl border">
+      <div className="scrollbar-thin scrollbar-thumb-border-strong scrollbar-track-transparent overflow-x-auto">
+        <table aria-labelledby={captionId} className="w-full border-collapse text-sm">
+          <caption id={captionId} className="sr-only">
+            {label}
+          </caption>
+          <thead className="bg-surface-muted text-foreground-muted text-start">
+            <tr>
+              {columns.map((column) => (
+                <th
+                  key={column.key}
+                  scope="col"
+                  className={cx(
+                    'px-4 py-3 font-medium',
+                    column.align === 'end' ? 'text-end' : 'text-start',
+                    column.className,
+                  )}
+                >
+                  {column.header}
+                </th>
+              ))}
+            </tr>
+          </thead>
+          <tbody>
+            {rows.map((row) => {
+              const key = rowKey(row);
+              return (
+                <tr
+                  key={key}
+                  aria-current={openKey === key ? 'true' : undefined}
+                  className={cx(
+                    'border-border relative border-t align-top',
+                    onOpen !== undefined && 'hover:bg-surface-muted cursor-pointer',
+                    openKey === key && 'bg-brand-subtle',
+                  )}
+                >
+                  {columns.map((column) =>
+                    column === primary ? (
+                      <th
+                        key={column.key}
+                        scope="row"
+                        className={cx('px-4 py-3 text-start font-normal', column.className)}
+                      >
+                        {openButton(row)}
+                      </th>
+                    ) : (
+                      <td
+                        key={column.key}
+                        className={cx(
+                          'px-4 py-3',
+                          column.align === 'end' && 'text-end tabular-nums',
+                          column.className,
+                        )}
+                      >
+                        {column.cell(row)}
+                      </td>
+                    ),
+                  )}
+                </tr>
+              );
+            })}
+          </tbody>
+        </table>
+      </div>
     </div>
   ) : (
     <ul aria-label={label} className="space-y-3">

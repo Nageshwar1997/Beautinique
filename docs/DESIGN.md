@@ -1,6 +1,6 @@
 # DESIGN — BQ
 
-> **Status:** v1.17 (2026-11-14). UI aur UX ke niyam saare 11 apps ke liye. Design ka **source of truth code hai**: `@beautinique/frontend-styles` (tokens) aur `@beautinique/frontend-components` (components). [RULES.md](RULES.md) §5 frontend ke coding niyam batata hai; ye file batati hai ki cheezein **dikhengi aur chalengi kaise**.
+> **Status:** v1.18 (2026-11-15). UI aur UX ke niyam saare 11 apps ke liye. Design ka **source of truth code hai**: `@beautinique/frontend-styles` (tokens) aur `@beautinique/frontend-components` (components). [RULES.md](RULES.md) §5 frontend ke coding niyam batata hai; ye file batati hai ki cheezein **dikhengi aur chalengi kaise**.
 
 ## 1. Design principles
 
@@ -71,6 +71,8 @@ Brand: **rose** rgb(214, 51, 108), deep **plum** rgb(92, 26, 70), **champagne go
 ## 5. Components
 
 ### 5.1 Pehle se bane (reuse karo)
+
+- **Rounded dibbe me scroll (LIVE-008, 2026-11-15):** gol kone wala dibba khud scroll nahi karta; dibba `overflow-hidden` se kone kaat-ta hai aur andar ka hissa scroll karta hai, patle theme wale scrollbar ke saath (`SCROLL` in `@beautinique/frontend-components`: `scrollbar-thin scrollbar-thumb-border-strong scrollbar-track-transparent`). Warna Windows ka scrollbar (chaukor sire, teer) kone se bahar dikhta hai. Data-table, picker lists, Dialog, audit ke `pre` aur ErrorPage isi tarah. List band hote waqt (`data-exiting`) uski koi row highlight nahi hoti.
 
 - **ui:** Badge, Button, Divider, GradientText, Tooltip.
 - **inputs:** Input, Select, Checkbox, Radio, Textarea, InputLabel, InputError, InputIcon.
@@ -194,3 +196,4 @@ Har screen ye states dikhati hai:
 | v1.15   | 2026-11-10 | §10: pages se pehle "Coming soon" home (naam + ek line), owner, Q-014.                                                                                                                |
 | v1.16   | 2026-11-13 | §10: Master app ka "Coming soon" home ab sign-in ke peeche (owner).                                                                                                                   |
 | v1.17   | 2026-11-14 | §5.2: app-shell `SectionLayout`, data-table bana (T3.7); §10 ke neeche data-dense ka namuna; components me `Badge` aur Dialog side panel.                                             |
+| v1.18 | 2026-11-15 | §5.1: rounded dibbe me scroll aur band hoti list ka niyam (LIVE-008). |
