@@ -21,6 +21,7 @@ import {
   type PickerOption,
   POPOVER,
   POPOVER_WIDTH,
+  SCROLL,
 } from './picker-parts';
 import { Spinner } from './spinner';
 
@@ -133,9 +134,12 @@ export function ComboBox({
       </div>
       <FieldHint>{hint}</FieldHint>
       <FieldErrorText error={error} />
-      <Popover offset={6} className={cx(POPOVER, POPOVER_WIDTH, 'max-h-72 p-1')}>
+      <Popover
+        offset={6}
+        className={cx(POPOVER, POPOVER_WIDTH, 'flex max-h-72 flex-col overflow-hidden p-1')}
+      >
         <ListBox<PickerOption>
-          className="outline-hidden"
+          className={cx(SCROLL, 'min-h-0 flex-1 outline-hidden')}
           renderEmptyState={() => <EmptyList>{loading ? 'Searching…' : emptyText}</EmptyList>}
         >
           {(option) => <OptionItem option={option} />}

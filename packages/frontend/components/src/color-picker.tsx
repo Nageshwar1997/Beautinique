@@ -20,7 +20,14 @@ import {
 
 import { cx } from './cx';
 import { CONTROL_BOX } from './input';
-import { FieldErrorText, FieldHint, FieldLabel, invalidProps, POPOVER } from './picker-parts';
+import {
+  FieldErrorText,
+  FieldHint,
+  FieldLabel,
+  invalidProps,
+  POPOVER,
+  SCROLL,
+} from './picker-parts';
 
 /** Where the picker starts while the field is empty: the brand rose. */
 const START = '#D6336C';
@@ -127,7 +134,7 @@ export function ColorPicker({
               )}
             />
           </AriaButton>
-          <Popover offset={6} placement="bottom start" className={cx(POPOVER, 'p-3')}>
+          <Popover offset={6} placement="bottom start" className={cx(POPOVER, SCROLL, 'p-3')}>
             <AriaDialog
               aria-label="Colour picker"
               className="flex w-56 flex-col gap-3 outline-hidden"

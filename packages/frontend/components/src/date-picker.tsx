@@ -42,7 +42,14 @@ import { flushSync } from 'react-dom';
 
 import { cx } from './cx';
 import { CONTROL_BOX } from './input';
-import { FieldErrorText, FieldHint, FieldLabel, invalidProps, POPOVER } from './picker-parts';
+import {
+  FieldErrorText,
+  FieldHint,
+  FieldLabel,
+  invalidProps,
+  POPOVER,
+  SCROLL,
+} from './picker-parts';
 
 /** India's time zone: dates with a time are shown and typed in it, whatever the device says. */
 export const INDIA_TIME_ZONE = 'Asia/Kolkata';
@@ -195,7 +202,7 @@ function CalendarOverlay({ children }: { children: ReactNode }) {
     );
   }
   return (
-    <Popover offset={6} placement="bottom end" className={cx(POPOVER, 'p-3')}>
+    <Popover offset={6} placement="bottom end" className={cx(POPOVER, SCROLL, 'p-3')}>
       <AriaDialog className="outline-hidden">{children}</AriaDialog>
     </Popover>
   );

@@ -41,7 +41,15 @@ import {
   withoutCovered,
 } from './hierarchy-tree';
 import { CONTROL_BOX } from './input';
-import { CheckBoxMark, CheckMark, EmptyList, hasError, POPOVER, TRIGGER } from './picker-parts';
+import {
+  CheckBoxMark,
+  CheckMark,
+  EmptyList,
+  hasError,
+  POPOVER,
+  SCROLL,
+  TRIGGER,
+} from './picker-parts';
 
 export type { HierarchyOption } from './hierarchy-tree';
 
@@ -93,7 +101,7 @@ export interface MultipleHierarchySelectProps extends HierarchySelectBaseProps {
 export type HierarchySelectProps = SingleHierarchySelectProps | MultipleHierarchySelectProps;
 
 const TREE_ROW =
-  'text-foreground min-h-touch flex cursor-pointer items-center rounded-lg pe-2 outline-hidden data-focused:bg-surface-muted data-hovered:bg-surface-muted data-focus-visible:ring-focus-ring data-focus-visible:ring-2 data-focus-visible:ring-inset';
+  'text-foreground min-h-touch flex cursor-pointer items-center rounded-lg pe-2 outline-hidden data-focused:bg-surface-muted data-hovered:bg-surface-muted data-focus-visible:ring-focus-ring data-focus-visible:ring-2 data-focus-visible:ring-inset in-data-exiting:bg-transparent! in-data-exiting:ring-0';
 
 /**
  * A field that opens a tree of options (categories, State → District) with a search above it
@@ -359,7 +367,10 @@ export function HierarchySelect(props: HierarchySelectProps) {
         </AriaButton>
         <Popover
           offset={6}
-          className={cx(POPOVER, 'flex max-h-104 w-(--trigger-width) min-w-72 flex-col p-2')}
+          className={cx(
+            POPOVER,
+            'flex max-h-104 w-(--trigger-width) min-w-72 flex-col overflow-hidden p-2',
+          )}
         >
           <AriaDialog
             aria-labelledby={labelId}
@@ -421,7 +432,7 @@ export function HierarchySelect(props: HierarchySelectProps) {
                 renderEmptyState={() => (
                   <EmptyList>{searching ? 'No matching options' : 'No options'}</EmptyList>
                 )}
-                className="min-h-0 flex-1 overflow-auto outline-hidden"
+                className={cx(SCROLL, 'min-h-0 flex-1 outline-hidden')}
               >
                 {(option) => renderOption(option)}
               </Tree>
