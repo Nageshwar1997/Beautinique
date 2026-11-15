@@ -695,6 +695,61 @@ const mutations: Mutation[] = [
     ],
     tests: 'the most grants it may hold',
   },
+  // the audit log's personal data, half hidden (TASKS T4.1 PR C, owner 2026-11-15)
+  {
+    file: 'catalogue/audit',
+    name: 'an email kept whole',
+    change: [["return match ? `${match[1] ?? ''}•••${match[2] ?? ''}` : email;", 'return email;']],
+    tests: 'first letter and the domain',
+  },
+  {
+    file: 'catalogue/audit',
+    name: 'a masked phone masked again',
+    change: [['if (/^•+\\d{0,4}$/.test(phone)) return phone;', '']],
+    tests: 'second time',
+  },
+  {
+    file: 'catalogue/audit',
+    name: 'a phone kept whole',
+    change: [
+      ["return digits.length <= 4 ? '••••' : `••••••${digits.slice(-4)}`;", 'return phone;'],
+    ],
+    tests: 'last 4 digits',
+  },
+  {
+    file: 'catalogue/audit',
+    name: 'a name or a PAN kept',
+    change: [
+      [
+        'if (HIDDEN_KEYS.test(key)) return value === null || value === undefined ? value : HIDDEN;',
+        '',
+      ],
+    ],
+    tests: 'hides a name',
+  },
+  {
+    file: 'catalogue/audit',
+    name: 'a phone key not looked at',
+    change: [['if (PHONE_KEYS.test(key)) return maskPhone(value);', '']],
+    tests: 'last 4 digits',
+  },
+  {
+    file: 'catalogue/audit',
+    name: 'arrays not looked into',
+    change: [
+      [
+        'if (Array.isArray(value)) return value.map((item) => maskForAudit(item, key));',
+        'if (Array.isArray(value)) return value;',
+      ],
+    ],
+    tests: 'arrays and nested objects',
+  },
+  {
+    file: 'catalogue/audit',
+    name: 'nested objects not looked into',
+    change: [['        maskForAudit(item, inner),', '        item,']],
+    tests: 'under any key',
+  },
 ];
 
 export default mutations;

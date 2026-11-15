@@ -53,6 +53,7 @@ import {
 } from '@beautinique/shared-contracts';
 import { type Request, type Response, Router } from 'express';
 
+import { type AuditCaller, auditRefusal } from '../audit.ts';
 import * as authenticator from '../authenticator.ts';
 import {
   clearSessionCookies,
@@ -92,6 +93,17 @@ function appOf(req: Request, allowed: readonly AppId[] = APPS): AppId {
 const clientOf = (req: Request): Client => ({
   ip: req.get(HEADERS.clientIp) ?? 'unknown',
   userAgent: (req.get('user-agent') ?? '').slice(0, 512),
+});
+
+/** The caller of an audited route: their passport, the client and the request id (T4.1 PR C). */
+const auditCallerOf = async (
+  deps: OtpDeps,
+  req: Request,
+  requestId: string,
+): Promise<AuditCaller> => ({
+  ...(await deps.passport(req)),
+  client: clientOf(req),
+  requestId,
 });
 
 /**
@@ -263,37 +275,101 @@ export function routesOf(deps: OtpDeps): Router {
     manage.listRoles(deps, await deps.passport(req), query),
   );
 
-  mountRoute(router, createRole, async ({ body }, { req }) =>
-    manage.createRole(deps, await deps.passport(req), body),
-  );
+  // a staff action identity refuses (403) is kept in the audit log as denied (owner, 2026-11-15)
+  mountRoute(router, createRole, async ({ body }, { req, requestId }) => {
+    const caller = await auditCallerOf(deps, req, requestId);
+    return auditRefusal(
+      deps.mongo,
+      deps.logger,
+      {
+        action: 'iam.roles.create',
+        caller,
+        resource: { type: 'role', id: `${body.app}.c_${body.slug}` },
+        // what was asked, in short: a refused body is never checked, and an event stays small
+        after: { name: body.name, permissionCount: body.permissions.length },
+      },
+      () => manage.createRole(deps, caller, body),
+    );
+  });
 
-  mountRoute(router, updateRole, async ({ params, body }, { req }) =>
-    manage.updateRole(deps, await deps.passport(req), params.roleKey, body),
-  );
+  mountRoute(router, updateRole, async ({ params, body }, { req, requestId }) => {
+    const caller = await auditCallerOf(deps, req, requestId);
+    return auditRefusal(
+      deps.mongo,
+      deps.logger,
+      {
+        action: 'iam.roles.update',
+        caller,
+        resource: { type: 'role', id: params.roleKey },
+        after: { fields: Object.keys(body) },
+      },
+      () => manage.updateRole(deps, caller, params.roleKey, body),
+    );
+  });
 
   mountRoute(router, listGrants, async ({ query }, { req }) =>
     manage.listGrants(deps, await deps.passport(req), query),
   );
 
-  mountRoute(router, giveGrant, async ({ body }, { req }) =>
-    manage.giveGrant(deps, await deps.passport(req), body),
-  );
+  mountRoute(router, giveGrant, async ({ body }, { req, requestId }) => {
+    const caller = await auditCallerOf(deps, req, requestId);
+    return auditRefusal(
+      deps.mongo,
+      deps.logger,
+      {
+        action: 'iam.grants.give',
+        caller,
+        resource: { type: 'user', id: body.userId },
+        scope: body.scope,
+        after: { role: body.role },
+      },
+      () => manage.giveGrant(deps, caller, body),
+    );
+  });
 
-  mountRoute(router, endGrant, async ({ params }, { req }) =>
-    manage.endGrant(deps, await deps.passport(req), params.grantId),
-  );
+  mountRoute(router, endGrant, async ({ params }, { req, requestId }) => {
+    const caller = await auditCallerOf(deps, req, requestId);
+    return auditRefusal(
+      deps.mongo,
+      deps.logger,
+      { action: 'iam.grants.end', caller, resource: { type: 'grant', id: params.grantId } },
+      () => manage.endGrant(deps, caller, params.grantId),
+    );
+  });
 
-  mountRoute(router, createInvitation, async ({ body }, { req, requestId }) =>
-    invitations.createInvitation(deps, await deps.passport(req), body, requestId),
-  );
+  mountRoute(router, createInvitation, async ({ body }, { req, requestId }) => {
+    const caller = await auditCallerOf(deps, req, requestId);
+    return auditRefusal(
+      deps.mongo,
+      deps.logger,
+      {
+        action: 'iam.invitations.create',
+        caller,
+        resource: { type: 'invitation', id: null },
+        scope: body.scope,
+        after: { email: body.email, role: body.role },
+      },
+      () => invitations.createInvitation(deps, caller, body, requestId),
+    );
+  });
 
   mountRoute(router, listInvitations, async ({ query }, { req }) =>
     invitations.listInvitations(deps, await deps.passport(req), query),
   );
 
-  mountRoute(router, revokeInvitation, async ({ params }, { req }) =>
-    invitations.revokeInvitation(deps, await deps.passport(req), params.invitationId),
-  );
+  mountRoute(router, revokeInvitation, async ({ params }, { req, requestId }) => {
+    const caller = await auditCallerOf(deps, req, requestId);
+    return auditRefusal(
+      deps.mongo,
+      deps.logger,
+      {
+        action: 'iam.invitations.revoke',
+        caller,
+        resource: { type: 'invitation', id: params.invitationId },
+      },
+      () => invitations.revokeInvitation(deps, caller, params.invitationId),
+    );
+  });
 
   mountRoute(router, requestInvitationCode, ({ body }, { req, requestId }) =>
     requestCode(deps, {
@@ -343,13 +419,29 @@ export function routesOf(deps: OtpDeps): Router {
     authenticator.disableAuthenticator(deps, await deps.passport(req), requestId),
   );
 
-  mountRoute(router, resetAuthenticator, async ({ params }, { req, requestId }) =>
-    security.resetAuthenticator(deps, await deps.passport(req), params.userId, requestId),
-  );
+  mountRoute(router, resetAuthenticator, async ({ params }, { req, requestId }) => {
+    const caller = await auditCallerOf(deps, req, requestId);
+    return auditRefusal(
+      deps.mongo,
+      deps.logger,
+      {
+        action: 'iam.users.resetAuthenticator',
+        caller,
+        resource: { type: 'user', id: params.userId },
+      },
+      () => security.resetAuthenticator(deps, caller, params.userId, requestId),
+    );
+  });
 
-  mountRoute(router, endUserSessions, async ({ params }, { req }) =>
-    security.endUserSessions(deps, await deps.passport(req), params.userId),
-  );
+  mountRoute(router, endUserSessions, async ({ params }, { req, requestId }) => {
+    const caller = await auditCallerOf(deps, req, requestId);
+    return auditRefusal(
+      deps.mongo,
+      deps.logger,
+      { action: 'iam.users.endSessions', caller, resource: { type: 'user', id: params.userId } },
+      () => security.endUserSessions(deps, caller, params.userId),
+    );
+  });
 
   // social sign-in, the customer app's (TASKS T3.1 PR 4)
   /** A page the browser opened: its cookies, then where it goes; never an error page. */

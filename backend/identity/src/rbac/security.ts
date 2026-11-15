@@ -3,6 +3,7 @@ import { toObjectId, withTransaction } from '@beautinique/backend-server-mongo';
 import { writeEvent } from '@beautinique/backend-server-queue';
 import { authenticatorReset, sessionRevoke, totpReset } from '@beautinique/shared-contracts';
 
+import { type AuditCaller, writeAudit } from '../audit.ts';
 import { CREDENTIALS, type Credentials } from '../credentials.ts';
 import type { OtpDeps } from '../otp.ts';
 import { type User, USERS } from '../users.ts';
@@ -35,7 +36,7 @@ async function targetOf(deps: OtpDeps, passport: Passport, userId: string, permi
  */
 export async function resetAuthenticator(
   deps: OtpDeps,
-  passport: Passport,
+  passport: AuditCaller,
   userId: string,
   requestId: string,
 ) {
@@ -61,6 +62,13 @@ export async function resetAuthenticator(
       correlationId: requestId,
       data: { userId, email: user.email, resetAt: now.toISOString() },
     });
+    await writeAudit(deps.mongo, session, {
+      action: 'iam.users.resetAuthenticator',
+      caller: { ...passport, requestId: passport.requestId ?? requestId },
+      resource: { type: 'user', id: userId },
+      before: { email: user.email, authenticator: true },
+      after: { authenticator: false, sessions: 'ended' },
+    });
     return true;
   });
   const sessionsEnded = reset ? await deps.sessions.endAll(user._id, 'authenticator-reset') : 0;
@@ -72,9 +80,24 @@ export async function resetAuthenticator(
 }
 
 /** POST /iam/users/:userId/sessions/end (ARCHITECTURE §7.2): every session of the account ends. */
-export async function endUserSessions(deps: OtpDeps, passport: Passport, userId: string) {
+export async function endUserSessions(deps: OtpDeps, passport: AuditCaller, userId: string) {
   const { user } = await targetOf(deps, passport, userId, sessionRevoke.key);
   const ended = await deps.sessions.endAll(user._id, 'security-officer');
+  // the sessions end on their own (at the gateway too); the record follows at once, and if it
+  // cannot be written that is an error in the logs, not a 500 that invites a second, empty try
+  try {
+    await withTransaction(deps.mongo, (session) =>
+      writeAudit(deps.mongo, session, {
+        action: 'iam.users.endSessions',
+        caller: passport,
+        resource: { type: 'user', id: userId },
+        before: { email: user.email },
+        after: { sessionsEnded: ended },
+      }),
+    );
+  } catch (failed) {
+    deps.logger.error({ err: failed, userId }, 'audit record of ended sessions not written');
+  }
   deps.logger.info({ userId, by: passport.userId, ended }, 'sessions ended by a Security Officer');
   return { ended };
 }

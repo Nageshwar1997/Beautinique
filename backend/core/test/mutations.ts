@@ -206,6 +206,173 @@ const mutations: Mutation[] = [
     ],
     tests: 'process died',
   },
+  // the audit log: one hash chain a day, its check, the viewer's routes (TASKS T4.1 PR C)
+  {
+    file: 'modules/audit/store',
+    name: 'an entry does not point at the one before',
+    change: [['        prevHash: head.lastHash,', '        prevHash: chainStartOf(day),']],
+    tests: 'every hash following',
+  },
+  {
+    file: 'modules/audit/store',
+    name: "the day's head keeps no last hash",
+    change: [
+      [
+        '      await heads.updateOne({ _id: head._id }, { $set: { lastHash: hash } }, { session });',
+        '',
+      ],
+    ],
+    tests: 'every hash following',
+  },
+  {
+    file: 'modules/audit/store',
+    name: 'what changed is kept unmasked',
+    change: [
+      [
+        '  const text = JSON.stringify(maskForAudit(value));',
+        '  const text = JSON.stringify(value);',
+      ],
+    ],
+    tests: 'half hides personal data',
+  },
+  {
+    file: 'modules/audit/store',
+    name: 'a big change kept whole',
+    change: [['  return text.length > AUDIT_CHANGE_MAX_CHARS', '  return text.length > Infinity']],
+    tests: 'too big change',
+  },
+  {
+    file: 'modules/audit/store',
+    name: 'the chain does not grow',
+    change: [['          $inc: { seq: 1 },', '          $inc: { seq: 0 },']],
+    tests: 'every hash following',
+  },
+  {
+    file: 'modules/audit/verify',
+    name: 'a changed entry passes the check',
+    change: [
+      [
+        'entry.seq !== expectedSeq || entry.prevHash !== prevHash || hashOf(entry) !== entry.hash',
+        'entry.seq !== expectedSeq || entry.prevHash !== prevHash',
+      ],
+    ],
+    tests: 'a changed, a lost and an added',
+  },
+  {
+    file: 'modules/audit/verify',
+    name: 'a lost last entry passes the check',
+    change: [
+      [
+        '  if (brokenAtSeq === null && entries !== length) brokenAtSeq = Math.min(entries, length) + 1;\n',
+        '',
+      ],
+    ],
+    // a lost last entry is caught by the last hash too; the count alone catches a lost head
+    tests: 'a changed, a lost and an added|head was lost',
+  },
+  {
+    file: 'modules/audit/verify',
+    name: "today's growing chain is checked",
+    change: [
+      [
+        '  const range = { day: { $gte: since, $lt: today } };',
+        '  const range = { day: { $gte: since, $lte: today } };',
+      ],
+    ],
+    tests: 'checks only finished days',
+  },
+  {
+    file: 'modules/audit/verify',
+    name: 'a broken chain is no error',
+    change: [["        'audit chain broken',", "        'audit chains fine',"]],
+    tests: 'checks only finished days',
+  },
+  {
+    file: 'modules/audit/routes',
+    name: 'the entries without the read permission',
+    change: [
+      [
+        '      authorize(await accessOf(mongo, await deps.passport(req)), auditRead.key);\n      // an id names',
+        '      await deps.passport(req);\n      // an id names',
+      ],
+    ],
+    tests: 'without the read permission',
+  },
+  {
+    file: 'modules/audit/routes',
+    name: 'the days without the read permission',
+    change: [
+      [
+        '      authorize(await accessOf(mongo, await deps.passport(req)), auditRead.key);\n      const span',
+        '      await deps.passport(req);\n      const span',
+      ],
+    ],
+    tests: 'without the read permission',
+  },
+  {
+    file: 'modules/audit/routes',
+    name: 'any range of days',
+    change: [['      if (span < 0 || span >= AUDIT_DAYS_MAX) {', '      if (false) {']],
+    tests: 'at most the allowed days',
+  },
+  {
+    file: 'modules/audit/routes',
+    name: "the actor's email shown whole",
+    change: [
+      [
+        '          emails.set(user._id.toHexString(), maskEmail(user.email));',
+        '          emails.set(user._id.toHexString(), user.email);',
+      ],
+    ],
+    tests: 'actor half hidden',
+  },
+  {
+    file: 'modules/audit/index',
+    name: "identity's records named as core's",
+    change: [["        source: 'identity',", "        source: 'core',"]],
+    tests: 'identity.audit.recorded',
+  },
+  // the review's fixes (T4.1 PR C)
+  {
+    file: 'modules/audit/verify',
+    name: 'a lost head hides its day',
+    change: [["    ...(await store.entries.distinct('day', range)),\n", '']],
+    tests: 'head was lost',
+  },
+  {
+    file: 'modules/audit/verify',
+    name: 'another last hash passes the check',
+    change: [
+      [
+        '  if (brokenAtSeq === null && length > 0 && head?.lastHash !== prevHash) brokenAtSeq = length;\n',
+        '',
+      ],
+    ],
+    tests: 'head was lost',
+  },
+  {
+    file: 'modules/audit/index',
+    name: "a refused request's scope stops the record",
+    change: [['  /^[0-9a-f]{24}$/.test(id) ? new ObjectId(id) : id;', '  new ObjectId(id);']],
+    tests: 'identity.audit.recorded',
+  },
+  {
+    file: 'modules/audit/store',
+    name: 'an entry kept beyond the limits',
+    change: [['      const input = withinLimits(given);', '      const input = given;']],
+    tests: 'inside the limits',
+  },
+  {
+    file: 'modules/audit/routes',
+    name: 'a resource id without its type is taken',
+    change: [
+      [
+        '      if (query.resourceId !== undefined && query.resourceType === undefined) {',
+        '      if (false) {',
+      ],
+    ],
+    tests: 'actor half hidden',
+  },
 ];
 
 export default mutations;

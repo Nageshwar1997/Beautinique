@@ -27,11 +27,12 @@ E2E (Playwright) ko `npm run infra:up` aur `npx playwright install chromium` cha
 ## Structure
 
 - `src/main.tsx`: app start (`createBrowserRouter`), Sentry sirf jahan build me DSN ho.
-- `src/routes.tsx`: route table. `RequireSignIn` ke andar home (`/`), Staff (`/staff`, `/staff/invitations`, `/staff/roles`) aur account pages (`/account/security`, `/account/security/authenticator`, `/account/devices`).
+- `src/routes.tsx`: route table. `RequireSignIn` ke andar home (`/`), Staff (`/staff`, `/staff/invitations`, `/staff/roles`), Audit log (`/audit`, T4.1 PR C) aur account pages (`/account/security`, `/account/security/authenticator`, `/account/devices`).
 - `src/staff/` (TASKS T3.7): `StaffLayout` (sirf `iam.grant.read` walon ko, warna "Not for your role"; app-shell `SectionLayout`), `people.tsx` (grants ki list: email, app, role, status filters URL me, cursor pages; person ka side panel: roles, "Give another role", "End" confirm ke saath, Security Officer ke "Reset authenticator" / "End all sessions"), `invitations.tsx` (list, invite, pending ko "Take back"), `roles.tsx` (roles, permissions, Master ke sub-roles banana/badalna/retire), `role-form.tsx` (app → role jo caller deta hai → kahan: Everywhere ya states; baaki scope types dikhte par band, wajah ke saath → kab), `labels.ts`. Har button `@beautinique/frontend-authz` se sirf haq walon ko; faisla server ka; step-up api-client khud maangta hai.
 - `src/root.tsx`: providers, wake-up screen (`ServerWake`), frame (top bar + footer), toasts; page aur root ke error screens.
 - `src/providers.tsx`: API client (`app: 'master'`), Query cache, session, step-up dialog, `IdleNotice`.
-- `src/nav.ts`: main nav (Staff, sirf `iam.grant.read` walon ko: authz `useVisible`), footer, account links, page titles.
+- `src/nav.ts`: main nav (Staff sirf `iam.grant.read` walon ko, Audit log sirf `audit.entry.read` walon ko: Master aur Internal Auditor; authz `useVisible`), footer, account links, page titles.
+- `src/audit/audit-log.tsx`: audit log (ARCHITECTURE §6.5): pichhle 14 din ki chain jaanch (theek / tooti / abhi nahi), entries naye pehle (action aur result ke filters URL me), ek entry ki detail (kaun, kahan se, kya badla: PII aadha chhupa). CSV export PR D me.
 - `src/pages/*.tsx`: pages. Har page apna `<title>` deta hai (React 19). Home: "Signed in as" aur un sections ke cards jo person ke roles kholte hain; koi nahi to "There is nothing to manage here for your role yet."
 - `vite.config.ts`: dev proxy `.env` se, `BQ_GATEWAY_URL` browser ko (wake-up call), theme script `<head>` me sabse pehle (`THEME_SCRIPT`, CSP hash ke liye byte for byte).
 - `vercel.json`: `routes` me sirf `/api` → gateway (`x-origin-secret` Vercel env se), `headers` me har page pe `X-Robots-Tag: noindex` aur security headers, phir files, phir `rewrites` se har path pe `index.html` (SPA). Headers ki list aur jaanch `scripts/ci/test/vercel-headers.test.ts` (saare apps); poora CSP TASKS T6.6 me.

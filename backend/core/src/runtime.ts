@@ -26,14 +26,24 @@ import { passportAudience } from '@beautinique/shared-contracts';
 import type { Request } from 'express';
 
 import type { Config } from './config.ts';
-import { subscribers, subscriptionsOf } from './modules/index.ts';
+import {
+  type AuditStore,
+  auditStore,
+  schedules as moduleSchedules,
+  subscribers,
+  subscriptionsOf,
+  tasksOf,
+} from './modules/index.ts';
 import { runReleaseSteps } from './release.ts';
 
 /** core's queue: its worker runs core's subscribers and scheduled tasks (one queue per deployable). */
 export const QUEUE = 'q.core';
 
 /** Timers live in BullMQ job schedulers, never `setInterval` (RULES §4.11). */
-export const SCHEDULES: readonly Schedule[] = [{ task: 'platform.heartbeat', every: 5 * 60_000 }];
+export const SCHEDULES: readonly Schedule[] = [
+  { task: 'platform.heartbeat', every: 5 * 60_000 },
+  ...moduleSchedules,
+];
 
 export interface RuntimeOptions {
   logger: Logger;
@@ -54,6 +64,8 @@ export interface RuntimeOptions {
 /** core's connections and background workers: MongoDB, Redis, the outbox relay, the queue worker. */
 export interface Runtime {
   mongo: Mongo;
+  /** The audit log: entries in their own database, chain heads in core's (TASKS T4.1 PR C) */
+  audit: AuditStore;
   redis: RedisConnection;
   relay: Relay;
   watchdog: WipeWatchdog;
@@ -97,7 +109,8 @@ export async function startRuntime(config: Config, options: RuntimeOptions): Pro
     });
     closers.push(() => mongo.close());
     // migrations and indexes before anything uses the database (ARCHITECTURE §11.1)
-    await runReleaseSteps(mongo, logger);
+    await runReleaseSteps(mongo, logger, { auditDbName: config.auditDbName });
+    const audit = auditStore(mongo, config.auditDbName);
     const redis = await connectRedis({ url: config.redisUrl, name: 'core', logger });
     closers.push(() => redis.close());
     const relay = startRelay({
@@ -118,8 +131,8 @@ export async function startRuntime(config: Config, options: RuntimeOptions): Pro
         redis: redis.client,
         logger,
         queue: QUEUE,
-        subscriptions: subscriptionsOf({ mongo }),
-        tasks: [heartbeatTask(mongo, SCHEDULES, logger)],
+        subscriptions: subscriptionsOf({ mongo, audit }),
+        tasks: [heartbeatTask(mongo, SCHEDULES, logger), ...tasksOf({ audit, logger })],
         prefix,
       });
     };
@@ -150,6 +163,7 @@ export async function startRuntime(config: Config, options: RuntimeOptions): Pro
 
     return {
       mongo,
+      audit,
       redis,
       relay,
       watchdog,

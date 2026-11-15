@@ -8,6 +8,7 @@ import type { Guarded } from '@beautinique/frontend-authz';
  */
 export const MAIN_NAV: readonly (NavItem & Guarded)[] = [
   { label: 'Staff', to: '/staff', permission: 'iam.grant.read' },
+  { label: 'Audit log', to: '/audit', permission: 'audit.entry.read' },
 ];
 
 /** Footer links: pages everyone may need, signed in or not. */

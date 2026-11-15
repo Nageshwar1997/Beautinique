@@ -21,6 +21,7 @@ import {
   revokedUserKey,
   SESSION_POLICIES,
   sessionReuseDetected,
+  SIGN_UP_APPS,
   STEP_UP_SECONDS,
   type StepUpAction,
   TOKEN_ISSUER,
@@ -28,6 +29,7 @@ import {
 } from '@beautinique/shared-contracts';
 import type { Redis } from 'ioredis';
 
+import { writeAudit } from './audit.ts';
 import { invalidCredentials, signInUnavailable } from './errors.ts';
 import { rbacCatalog } from './rbac/catalog.ts';
 import { type SignInAccess, signInAccess } from './rbac/grants.ts';
@@ -390,7 +392,26 @@ export function sessions(deps: SessionDeps): Sessions {
         purgeAt: new Date(expiresAt.getTime() + KEEP_ENDED_MS),
         stepUpAt: methods.some((method) => STEP_UP_METHODS.includes(method)) ? new Date(at) : null,
       };
-      await collection.insertOne(session);
+      // a sign-in to an internal app goes into the audit log with its session; a customer's,
+      // seller's or creator's does not (owner, 2026-11-15: the free database would fill up)
+      if ((SIGN_UP_APPS as readonly string[]).includes(app)) {
+        await collection.insertOne(session);
+      } else {
+        await withTransaction(mongo, async (txn) => {
+          await collection.insertOne(session, { session: txn });
+          await writeAudit(mongo, txn, {
+            action: 'identity.session.signedIn',
+            caller: {
+              userId: userId.toHexString(),
+              app,
+              sessionId: sessionId.toHexString(),
+              client,
+            },
+            resource: { type: 'session', id: sessionId.toHexString() },
+            after: { email, methods, device: session.device },
+          });
+        });
+      }
       await listPermissions(userId, app, access);
       logger.info({ userId, app, sessionId, methods }, 'session started');
       return {
@@ -533,6 +554,21 @@ export function sessions(deps: SessionDeps): Sessions {
               device: found.device,
               detectedAt: new Date(at).toISOString(),
             },
+          });
+          await writeAudit(mongo, session, {
+            action: 'identity.session.reuseDetected',
+            caller: null,
+            resource: { type: 'session', id: parts.sessionId },
+            reason: 'An older refresh token of the session came back: someone has a copy.',
+            result: 'denied',
+            client,
+            before: {
+              userId: found.userId.toHexString(),
+              email: found.email,
+              app,
+              device: found.device,
+            },
+            after: { ended: true },
           });
         }
         return result.modifiedCount === 1;

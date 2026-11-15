@@ -1,15 +1,8 @@
-import { ApiProvider, createApiClient, createQueryClient } from '@beautinique/frontend-api-client';
-import { SessionProvider, StepUpProvider } from '@beautinique/frontend-auth-ui';
-import { Toaster } from '@beautinique/frontend-components';
-import { cleanup, configure, render, screen, waitFor, within } from '@testing-library/react';
+import { cleanup, configure, screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import axe from 'axe-core';
-import { createMemoryRouter, type RouteObject, RouterProvider } from 'react-router';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
-import { Frame } from '../src/root';
-import { routes } from '../src/routes';
-import { BASE_URL, fakeApi, type Who } from './fake-api';
+import { renderAs, violations } from './render';
 
 // a laptop's screen: the lists are tables (jsdom has no matchMedia; the data-table package tests
 // the phone's cards)
@@ -30,51 +23,6 @@ afterEach(() => {
 // the first call of a fresh worker runs cold code (axios, schemas, React Aria): over 1 s when every
 // worker is busy, as in auth-ui (nothing here depends on the time)
 configure({ asyncUtilTimeout: 10_000 });
-
-const [root] = routes as [RouteObject];
-
-/** The app's pages, signed in as `who`, against the pretend API; starting at `at`. */
-function renderAs(who: Who, at: string) {
-  const api = fakeApi(who);
-  const client = createApiClient({ app: 'master', baseUrl: BASE_URL, fetch: api.fetch });
-  const queryClient = createQueryClient();
-  const router = createMemoryRouter(
-    [
-      {
-        ...root,
-        element: (
-          <ApiProvider client={client} queryClient={queryClient}>
-            <SessionProvider>
-              <StepUpProvider>
-                <Frame />
-              </StepUpProvider>
-            </SessionProvider>
-            <Toaster />
-          </ApiProvider>
-        ),
-      },
-    ],
-    { initialEntries: [at] },
-  );
-  const view = render(<RouterProvider router={router} />);
-  return {
-    ...view,
-    api,
-    router,
-    where: () => `${router.state.location.pathname}${router.state.location.search}`,
-  };
-}
-
-async function violations(container: HTMLElement) {
-  const results = await axe.run(container, {
-    rules: {
-      'color-contrast': { enabled: false },
-      'label-content-name-mismatch': { enabled: false },
-      region: { enabled: false },
-    },
-  });
-  return results.violations.map((violation) => `${violation.id}: ${violation.help}`);
-}
 
 describe('People, as Master', () => {
   it('lists the staff with role names, where and how, and the Staff link in the nav', async () => {
