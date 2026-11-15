@@ -513,7 +513,10 @@ describe('tryLease', () => {
   });
 
   it('gives the lease to one owner until it runs out, and lets only that owner release it', async () => {
-    expect(await tryLease(mongo, 'job', 'a', 300)).toBe(true);
+    // long enough that the steps between two tries never outlive it on a slow CI runner (a 300 ms
+    // lease ran out there between them, 2026-11-15)
+    const ttl = 1500;
+    expect(await tryLease(mongo, 'job', 'a', ttl)).toBe(true);
     // one document per lease: an ObjectId _id like every document, found by its unique name
     const leases = await mongo.db.collection(LOCKS).find({ name: 'job' }).toArray();
     expect(leases).toHaveLength(1);
@@ -521,14 +524,14 @@ describe('tryLease', () => {
     expect(await mongo.db.collection(LOCKS).indexes()).toContainEqual(
       expect.objectContaining({ name: 'name_unique', key: { name: 1 }, unique: true }),
     );
-    expect(await tryLease(mongo, 'job', 'b', 300)).toBe(false);
-    expect(await tryLease(mongo, 'job', 'a', 300)).toBe(true);
-    await sleep(400);
-    expect(await tryLease(mongo, 'job', 'b', 300)).toBe(true);
+    expect(await tryLease(mongo, 'job', 'b', ttl)).toBe(false);
+    expect(await tryLease(mongo, 'job', 'a', ttl)).toBe(true);
+    await sleep(ttl + 100);
+    expect(await tryLease(mongo, 'job', 'b', ttl)).toBe(true);
     await releaseLease(mongo, 'job', 'a');
-    expect(await tryLease(mongo, 'job', 'a', 300)).toBe(false);
+    expect(await tryLease(mongo, 'job', 'a', ttl)).toBe(false);
     await releaseLease(mongo, 'job', 'b');
-    expect(await tryLease(mongo, 'job', 'a', 300)).toBe(true);
+    expect(await tryLease(mongo, 'job', 'a', ttl)).toBe(true);
   });
 });
 
