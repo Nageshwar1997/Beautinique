@@ -113,6 +113,16 @@ export async function startRuntime(config: Config, options: RuntimeOptions): Pro
     const audit = auditStore(mongo, config.auditDbName);
     const redis = await connectRedis({ url: config.redisUrl, name: 'core', logger });
     closers.push(() => redis.close());
+    // every start sets the schedules (safe to repeat): one a release adds is there at once, not
+    // only after Redis is next wiped (LIVE-006: audit.verifyChains never ran live)
+    await upsertSchedules({
+      mongo,
+      redis: redis.client,
+      logger,
+      queue: QUEUE,
+      schedules: SCHEDULES,
+      prefix,
+    });
     const relay = startRelay({
       mongo,
       redis: redis.client,

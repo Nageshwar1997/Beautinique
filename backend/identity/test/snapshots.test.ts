@@ -22,7 +22,7 @@ import {
   catchUpSweep,
 } from '../src/rbac/catch-up.ts';
 import { endGrantRecord, writeGrant } from '../src/rbac/grants.ts';
-import { accessSnapshotsMigration } from '../src/rbac/migrations.ts';
+import { accessSnapshotsAgainMigration, accessSnapshotsMigration } from '../src/rbac/migrations.ts';
 import { rbacSyncStep, type RoleRecord, ROLES } from '../src/rbac/sync.ts';
 import { releaseDefinition } from '../src/release.ts';
 import { QUEUE, SUBSCRIBERS } from '../src/runtime.ts';
@@ -267,8 +267,21 @@ describe('identity snapshot events (T3.5)', () => {
     );
   });
 
-  it('runs the first copy at a release, after the earlier migrations', () => {
-    expect(releaseDefinition.migrations.at(-1)?.id).toBe(accessSnapshotsMigration.id);
+  it('runs the first copy at a release, after the earlier migrations, and then once more (LIVE-006)', () => {
+    expect(releaseDefinition.migrations.slice(-2).map((migration) => migration.id)).toEqual([
+      accessSnapshotsMigration.id,
+      accessSnapshotsAgainMigration.id,
+    ]);
+  });
+
+  it('sends the first copy once more, every account with its grants (LIVE-006)', async () => {
+    const userId = await makeAccount(email('again'), undefined, { everyApp: false });
+    const { mongo } = harness.server.runtime;
+    const before = (await snapshots('identity.user.changed', userId)).length;
+    const grantsBefore = (await snapshots('identity.grant.changed', userId)).length;
+    await accessSnapshotsAgainMigration.up({ mongo, logger: silent });
+    expect(await snapshots('identity.user.changed', userId)).toHaveLength(before + 1);
+    expect(await snapshots('identity.grant.changed', userId)).toHaveLength(grantsBefore + 1);
   });
 
   it('sends the first copy: every account with its grants, safe to run again', async () => {

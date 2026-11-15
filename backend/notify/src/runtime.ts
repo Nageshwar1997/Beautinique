@@ -108,6 +108,16 @@ export async function startRuntime(config: Config, options: RuntimeOptions): Pro
     await runReleaseSteps(mongo, logger);
     const redis = await connectRedis({ url: config.redisUrl, name: 'notify', logger });
     closers.push(() => redis.close());
+    // every start sets the schedules (safe to repeat): one a release adds is there at once, not
+    // only after Redis is next wiped (LIVE-006)
+    await upsertSchedules({
+      mongo,
+      redis: redis.client,
+      logger,
+      queue: QUEUE,
+      schedules: SCHEDULES,
+      prefix,
+    });
     const trigger = startTaskTrigger({ redis: redis.client, logger, queue: QUEUE, prefix });
     closers.push(() => trigger.close());
 

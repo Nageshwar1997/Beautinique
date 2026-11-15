@@ -107,3 +107,14 @@ export const accessSnapshotsMigration: Migration = {
     logger.info({ roles, accounts }, 'snapshots for the first copy');
   },
 };
+
+/**
+ * The first copy for core once more (LIVE-006): on release #91 the old instance, still holding the
+ * outbox lease, did not know these event types and marked the first copy relayed to nobody, so
+ * core never had the accounts and their grants. Safe to run again: core keeps the highest version.
+ */
+export const accessSnapshotsAgainMigration: Migration = {
+  id: '20261115-001-access-snapshots-again',
+  description: 'The first copy for core once more: the first went to nobody (LIVE-006)',
+  up: (context) => accessSnapshotsMigration.up(context),
+};
