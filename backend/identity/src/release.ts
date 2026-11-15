@@ -1,6 +1,6 @@
 import type { Logger } from '@beautinique/backend-server-kit';
 import { connectMongo, type Mongo } from '@beautinique/backend-server-mongo';
-import { OUTBOX_INDEXES } from '@beautinique/backend-server-queue';
+import { CONSUMER_INDEXES, OUTBOX_INDEXES } from '@beautinique/backend-server-queue';
 import {
   defineMigrations,
   type ReleaseDefinition,
@@ -33,6 +33,8 @@ export const releaseDefinition: ReleaseDefinition = {
   ]),
   indexes: [
     ...OUTBOX_INDEXES,
+    // identity's own worker (the catch-up sweep, T4.1)
+    ...CONSUMER_INDEXES,
     ...userIndexes,
     ...credentialIndexes,
     ...sessionIndexes,

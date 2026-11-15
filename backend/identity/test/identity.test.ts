@@ -66,7 +66,8 @@ describe('identity', () => {
       expect(ready.status).toBe(200);
       expect(await ready.json()).toEqual({
         status: 'ready',
-        checks: { mongo: 'ok', redis: 'ok', outbox: 'ok' },
+        // tasks: identity's own worker (the catch-up sweep, T4.1)
+        checks: { mongo: 'ok', redis: 'ok', outbox: 'ok', tasks: 'ok' },
       });
       expect(server.runtime.mongo.db.databaseName).toBe(dbName);
       const missing = await fetch(`${server.url}/nope`);

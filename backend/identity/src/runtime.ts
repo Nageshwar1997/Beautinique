@@ -13,10 +13,14 @@ import {
 import { connectMongo, type Mongo } from '@beautinique/backend-server-mongo';
 import {
   connectRedis,
+  type Consumer,
+  defineTask,
   type RedisConnection,
   redriveOutbox,
   type Relay,
+  startConsumer,
   startRelay,
+  startTaskTrigger,
   startWipeWatchdog,
   type WipeWatchdog,
 } from '@beautinique/backend-server-queue';
@@ -38,6 +42,13 @@ import type { Config } from './config.ts';
 import { socialSettings } from './oauth-providers.ts';
 import type { OtpDeps } from './otp.ts';
 import { hibpBreachCheck, loginHashBudget } from './password.ts';
+import {
+  CATCH_UP_ATTEMPTS,
+  CATCH_UP_DELAY_MS,
+  CATCH_UP_LEASE_MS,
+  CATCH_UP_TASK,
+  catchUpSweep,
+} from './rbac/catch-up.ts';
 import { runReleaseSteps } from './release.ts';
 import { restoreGatewayMarks, sessions } from './sessions.ts';
 import { type SigningKeys, signingKeys } from './signing-keys.ts';
@@ -60,6 +71,9 @@ export const SUBSCRIBERS: Readonly<Record<string, readonly string[]>> = {
   [grantsChanged.type]: ['core.accessCopy'],
   [userChanged.type]: ['core.userCopy'],
 };
+
+/** identity's own queue: its worker runs identity's tasks (no events come to identity). */
+export const QUEUE = 'q.identity';
 
 export interface RuntimeOptions {
   logger: Logger;
@@ -85,6 +99,8 @@ export interface RuntimeOptions {
    * their queues leaves those out, or a wipe's redrive waits for queues nobody empties.
    */
   subscribers?: Readonly<Record<string, readonly string[]>>;
+  /** How long after the start the catch-up sweep runs (default CATCH_UP_DELAY_MS, 5 min). */
+  catchUpDelayMs?: number;
 }
 
 /** identity's connections and background work: MongoDB, Redis, the outbox relay, the wipe watchdog. */
@@ -121,6 +137,7 @@ export async function startRuntime(config: Config, options: RuntimeOptions): Pro
     watchdogMs,
     passportJwks,
     subscribers = SUBSCRIBERS,
+    catchUpDelayMs = CATCH_UP_DELAY_MS,
   } = options;
   const keys = loadCryptoKeys({ fieldKeys: config.fieldKeys, blindIndexKey: config.blindIndexKey });
   const otpKeys = loadSealingKeys(config.otpEventKeys, 'IDENTITY__OTP_EVENT_KEYS');
@@ -174,6 +191,32 @@ export async function startRuntime(config: Config, options: RuntimeOptions): Pro
     });
     closers.push(() => watchdog.stop());
 
+    // identity's tasks on its own queue (owner, 2026-11-14): the catch-up sweep a while after each
+    // start, as a delayed job, so core's copy gets what an old instance changed during the deploy
+    const trigger = startTaskTrigger({ redis: redis.client, logger, queue: QUEUE, prefix });
+    closers.push(() => trigger.close());
+    const consumer: Consumer = startConsumer({
+      mongo,
+      redis: redis.client,
+      logger,
+      queue: QUEUE,
+      subscriptions: [],
+      tasks: [
+        // firedAt is when this start asked for it: a retry later still covers the same window
+        defineTask(CATCH_UP_TASK, async ({ firedAt }) => {
+          await catchUpSweep(mongo, logger, { startedAt: firedAt });
+        }),
+      ],
+      prefix,
+    });
+    closers.push(() => consumer.stop());
+    // a failed sweep (a long database outage) runs again: 5, 10, then 20 min later, never before
+    // the lease of a run that could not let go of it has run out
+    await trigger.runAfter(CATCH_UP_TASK, catchUpDelayMs, {
+      attempts: CATCH_UP_ATTEMPTS,
+      backoffMs: CATCH_UP_LEASE_MS,
+    });
+
     const signing = signingKeys({ mongo, keys });
     return {
       mongo,
@@ -212,7 +255,12 @@ export async function startRuntime(config: Config, options: RuntimeOptions): Pro
           audience: passportAudience('identity'),
         }),
       },
-      ready: { mongo: mongo.ready, redis: redis.ready, outbox: relay.ready },
+      ready: {
+        mongo: mongo.ready,
+        redis: redis.ready,
+        outbox: relay.ready,
+        tasks: () => consumer.ready(),
+      },
       stop,
     };
   } catch (error) {

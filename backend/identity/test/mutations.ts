@@ -1179,8 +1179,22 @@ const mutations: Mutation[] = [
   {
     file: 'sessions',
     name: 'refresh keeps a session whose grant ended',
-    change: [['        if (!access.allowed) {', '        if (false) {']],
+    change: [
+      ['const ended: EndReason | null = !access.allowed', 'const ended: EndReason | null = false'],
+    ],
     tests: 'no grant left',
+  },
+  {
+    file: 'sessions',
+    name: 'refresh keeps a session without the authenticator its new role needs',
+    change: [[': access.mfaRequired && !withAuthenticator', ': false && !withAuthenticator']],
+    tests: 'needs the authenticator it did not use',
+  },
+  {
+    file: 'sessions',
+    name: 'refresh ends a session that used the authenticator',
+    change: [[': access.mfaRequired && !withAuthenticator', ': access.mfaRequired']],
+    tests: 'used the authenticator when such a role comes',
   },
   {
     file: 'sessions',
@@ -2467,6 +2481,76 @@ const mutations: Mutation[] = [
     name: 'an account holds one grant more than the cap',
     change: [['  if (held >= MAX_GRANTS_PER_ACCOUNT) {', '  if (held > MAX_GRANTS_PER_ACCOUNT) {']],
     tests: 'holds at most 50 grants',
+  },
+  // the catch-up sweep on identity's own queue (TASKS T4.1 PR B)
+  {
+    file: 'rbac/catch-up',
+    name: 'the sweep sends every account, however old its change',
+    change: [['.find(\n      { updatedAt: { $gte: since } },', '.find(\n      {},']],
+    tests: 'not of older ones',
+  },
+  {
+    file: 'rbac/catch-up',
+    name: 'two instances sweep at once',
+    change: [['if (!(await tryLease(mongo, LEASE, owner, CATCH_UP_LEASE_MS))) {', 'if (false) {']],
+    tests: 'another instance sweeps',
+  },
+  {
+    file: 'rbac/catch-up',
+    name: 'the sweep sends no grants',
+    change: [
+      [
+        '          await writeAccessSnapshot(mongo, session, user._id, user.authzVersion ?? 0, new Date());\n',
+        '',
+      ],
+    ],
+    tests: 'changed lately',
+  },
+  {
+    file: 'rbac/catch-up',
+    name: 'the sweep sends no accounts',
+    change: [['          await writeUserSnapshot(mongo, session, user);\n', '']],
+    tests: 'changed lately',
+  },
+  {
+    file: 'rbac/catch-up',
+    name: 'the sweep sends no roles',
+    change: [
+      [
+        '      await withTransaction(mongo, (session) => writeRoleSnapshots(mongo, session, part));\n',
+        '',
+      ],
+    ],
+    tests: 'roles changed lately',
+  },
+  {
+    file: 'rbac/catch-up',
+    name: 'the sweep sends every role, however old its change',
+    change: [['      mongo,\n      { updatedAt: { $gte: since } },', '      mongo,\n      {},']],
+    tests: 'roles changed lately',
+  },
+  {
+    file: 'runtime',
+    name: 'a start asks for no sweep',
+    change: [
+      [
+        'await trigger.runAfter(CATCH_UP_TASK, catchUpDelayMs, {',
+        'await Promise.resolve({ CATCH_UP_TASK, catchUpDelayMs,',
+      ],
+    ],
+    tests: 'at each start',
+  },
+  {
+    file: 'runtime',
+    name: 'a failed sweep is not tried again',
+    change: [['      attempts: CATCH_UP_ATTEMPTS,\n', '      attempts: 1,\n']],
+    tests: 'at each start',
+  },
+  {
+    file: 'runtime',
+    name: 'the worker never sweeps',
+    change: [['          await catchUpSweep(mongo, logger, { startedAt: firedAt });\n', '']],
+    tests: 'worker of identity',
   },
 ];
 

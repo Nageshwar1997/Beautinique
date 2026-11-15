@@ -193,9 +193,12 @@ export async function startHarness(name: string): Promise<Harness> {
       } finally {
         await look.db.dropDatabase();
         await look.close();
-        const queue = new Queue('q.notify', { connection: { url: REDIS_URL }, prefix });
-        await queue.obliterate({ force: true });
-        await queue.close();
+        // notify's queue, and identity's own (each start's delayed catch-up sweep, T4.1)
+        for (const name of ['q.notify', 'q.identity']) {
+          const queue = new Queue(name, { connection: { url: REDIS_URL }, prefix });
+          await queue.obliterate({ force: true });
+          await queue.close();
+        }
       }
     },
   };

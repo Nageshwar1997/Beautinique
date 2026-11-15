@@ -48,6 +48,8 @@ export interface LegalAcceptance {
 
 export const indexes: readonly IndexSpec[] = [
   { collection: USERS, name: 'email_unique', key: { email: 1 }, unique: true },
+  // identity's catch-up sweep finds the accounts changed lately (TASKS T4.1)
+  { collection: USERS, name: 'updatedAt', key: { updatedAt: 1 } },
   {
     collection: LEGAL_ACCEPTANCES,
     name: 'userId_acceptedAt',

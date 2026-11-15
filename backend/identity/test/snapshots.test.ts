@@ -3,15 +3,29 @@
 // and Valkey (`npm run infra:up`).
 import { createLogger } from '@beautinique/backend-server-kit';
 import { ObjectId, withTransaction } from '@beautinique/backend-server-mongo';
-import { OUTBOX, type OutboxRecord } from '@beautinique/backend-server-queue';
+import {
+  OUTBOX,
+  type OutboxRecord,
+  releaseLease,
+  TASK_RUNS,
+  type TaskRun,
+  tryLease,
+} from '@beautinique/backend-server-queue';
 import type { AppId } from '@beautinique/shared-contracts';
+import { Queue } from 'bullmq';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 
+import {
+  CATCH_UP_ATTEMPTS,
+  CATCH_UP_LEASE_MS,
+  CATCH_UP_TASK,
+  catchUpSweep,
+} from '../src/rbac/catch-up.ts';
 import { endGrantRecord, writeGrant } from '../src/rbac/grants.ts';
 import { accessSnapshotsMigration } from '../src/rbac/migrations.ts';
-import { rbacSyncStep } from '../src/rbac/sync.ts';
+import { rbacSyncStep, type RoleRecord, ROLES } from '../src/rbac/sync.ts';
 import { releaseDefinition } from '../src/release.ts';
-import { SUBSCRIBERS } from '../src/runtime.ts';
+import { QUEUE, SUBSCRIBERS } from '../src/runtime.ts';
 import {
   type Answer,
   giveRole,
@@ -19,6 +33,7 @@ import {
   type Harness,
   makeAccount,
   oid,
+  REDIS_URL,
   roleIdOf,
   startHarness,
   users,
@@ -270,5 +285,128 @@ describe('identity snapshot events (T3.5)', () => {
     expect((await latest<GrantSnapshot>('identity.grant.changed', userId))?.authzVersion).toBe(
       version,
     );
+  });
+
+  describe('the catch-up sweep (T4.1)', () => {
+    it('sends again the snapshot of each account changed lately, not of older ones', async () => {
+      const recent = await makeAccount(email('sweep-recent'), undefined, { everyApp: false });
+      const old = await makeAccount(email('sweep-old'), undefined, { everyApp: false });
+      await users().updateOne(
+        { _id: oid(old) },
+        { $set: { updatedAt: new Date(Date.now() - 2 * 60 * 60_000) } },
+      );
+      const recentBefore = (await snapshots('identity.grant.changed', recent)).length;
+      const oldBefore = (await snapshots('identity.grant.changed', old)).length;
+      const accountBefore = (await snapshots('identity.user.changed', recent)).length;
+      const { mongo } = harness.server.runtime;
+      expect(await catchUpSweep(mongo, silent)).toBeGreaterThanOrEqual(1);
+      const sent = await snapshots<GrantSnapshot>('identity.grant.changed', recent);
+      expect(sent).toHaveLength(recentBefore + 1);
+      // it changes nothing: the same version as the account's
+      expect(sent.at(-1)?.authzVersion).toBe(
+        (await users().findOne({ _id: oid(recent) }))?.authzVersion,
+      );
+      expect(await snapshots('identity.grant.changed', old)).toHaveLength(oldBefore);
+      // and the account itself: one an old instance made has no copy in core yet
+      expect(await snapshots('identity.user.changed', recent)).toHaveLength(accountBefore + 1);
+    });
+
+    it('skips while another instance sweeps', async () => {
+      // an account changed just now: without the lease it would be sent
+      const changed = await makeAccount(email('sweep-held'), undefined, { everyApp: false });
+      const before = (await snapshots('identity.grant.changed', changed)).length;
+      const { mongo } = harness.server.runtime;
+      expect(await tryLease(mongo, 'identity.catchUpSweep', 'the other instance', 60_000)).toBe(
+        true,
+      );
+      try {
+        expect(await catchUpSweep(mongo, silent)).toBe(0);
+        expect(await snapshots('identity.grant.changed', changed)).toHaveLength(before);
+      } finally {
+        await releaseLease(mongo, 'identity.catchUpSweep', 'the other instance');
+      }
+    });
+
+    it('sends again the roles changed lately, before the accounts, not older ones', async () => {
+      // what an old instance's role change leaves behind: a newer updatedAt and no snapshot
+      const recent = await roleIdOf('admin.state_admin');
+      const old = await roleIdOf('logistics.hub_manager');
+      const roles = harness.db.collection<RoleRecord>(ROLES);
+      const kept = await roles.findOne({ _id: old }, { projection: { updatedAt: 1 } });
+      await roles.updateOne({ _id: recent }, { $set: { updatedAt: new Date() } });
+      await roles.updateOne(
+        { _id: old },
+        { $set: { updatedAt: new Date(Date.now() - 2 * 60 * 60_000) } },
+      );
+      try {
+        const account = await makeAccount(email('sweep-roles'), undefined, { everyApp: false });
+        const recentBefore = (await snapshots('identity.role.changed', recent.toHexString()))
+          .length;
+        const oldBefore = (await snapshots('identity.role.changed', old.toHexString())).length;
+        const { mongo } = harness.server.runtime;
+        await catchUpSweep(mongo, silent);
+        expect(await snapshots('identity.role.changed', recent.toHexString())).toHaveLength(
+          recentBefore + 1,
+        );
+        expect(await snapshots('identity.role.changed', old.toHexString())).toHaveLength(oldBefore);
+        // the role's snapshot goes out before the account's grants: core never meets a fresh
+        // grants copy with an older copy of its role
+        const lastOf = async (type: string, id: string) =>
+          (
+            await outbox()
+              .find(
+                { type, 'envelope.aggregate.id': id },
+                { comment: 'full read: the test looks into the outbox' },
+              )
+              .sort({ _id: -1 })
+              .limit(1)
+              .toArray()
+          )
+            .at(0)
+            ?._id.toHexString() ?? '';
+        expect(await lastOf('identity.role.changed', recent.toHexString())).not.toBe('');
+        expect(
+          (await lastOf('identity.role.changed', recent.toHexString())) <
+            (await lastOf('identity.grant.changed', account)),
+        ).toBe(true);
+      } finally {
+        if (kept) await roles.updateOne({ _id: old }, { $set: { updatedAt: kept.updatedAt } });
+      }
+    });
+
+    it("runs on the worker of identity's own queue", async () => {
+      const changed = await makeAccount(email('sweep-worker'), undefined, { everyApp: false });
+      const before = (await snapshots('identity.grant.changed', changed)).length;
+      const runs = harness.db.collection<TaskRun>(TASK_RUNS);
+      const finished = async () =>
+        (await runs.findOne({ task: CATCH_UP_TASK }))?.lastFinishedAt?.getTime() ?? 0;
+      const finishedBefore = await finished();
+      const queue = new Queue(QUEUE, { connection: { url: REDIS_URL }, prefix: harness.prefix });
+      try {
+        // the run a start asks for, without waiting its 5 minutes
+        await queue.add(CATCH_UP_TASK, { task: CATCH_UP_TASK }, { removeOnComplete: true });
+        const deadline = Date.now() + 10_000;
+        while ((await finished()) <= finishedBefore && Date.now() < deadline) {
+          await new Promise((resolve) => setTimeout(resolve, 100));
+        }
+        expect(await finished()).toBeGreaterThan(finishedBefore);
+        expect(await snapshots('identity.grant.changed', changed)).toHaveLength(before + 1);
+      } finally {
+        await queue.close();
+      }
+    });
+
+    it("asks for it at each start, as a delayed job on identity's own queue", async () => {
+      const queue = new Queue(QUEUE, { connection: { url: REDIS_URL }, prefix: harness.prefix });
+      try {
+        const delayed = (await queue.getDelayed()).find((job) => job.name === CATCH_UP_TASK);
+        expect(delayed).toBeDefined();
+        // a failed sweep runs again, never before a stuck run's lease has run out
+        expect(delayed?.opts.attempts).toBe(CATCH_UP_ATTEMPTS);
+        expect(delayed?.opts.backoff).toEqual({ type: 'exponential', delay: CATCH_UP_LEASE_MS });
+      } finally {
+        await queue.close();
+      }
+    });
   });
 });

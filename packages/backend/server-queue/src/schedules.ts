@@ -82,6 +82,14 @@ export interface TaskTriggerOptions {
   prefix?: string;
 }
 
+/** How a delayed run that throws is tried again (runAfter). */
+export interface RunRetry {
+  /** Tries in all, the first one included (at least 1). */
+  attempts: number;
+  /** The wait before the second try; each next wait is twice the one before. */
+  backoffMs: number;
+}
+
 /** Runs a queue's task now instead of at its next scheduled time. */
 export interface TaskTrigger {
   /**
@@ -91,6 +99,14 @@ export interface TaskTrigger {
    * one job at a time (the default); otherwise the next scheduled run picks the work up.
    */
   runSoon(task: string): Promise<void>;
+  /**
+   * Adds one run of `task` that starts `delayMs` from now: a delayed job in Redis, so a restart of
+   * this process does not lose it (a Redis wipe does; keep such a run a safety net). Identity's
+   * catch-up sweep after a start uses it (TASKS T4.1). With `retry`, a run that throws runs again
+   * up to `attempts` tries in all, after `backoffMs`, then twice that, and so on; `firedAt` stays the
+   * time the run was asked for.
+   */
+  runAfter(task: string, delayMs: number, retry?: RunRetry): Promise<void>;
   /** Closes the trigger's queue handle, not the shared Redis client. */
   close(): Promise<void>;
 }
@@ -109,11 +125,40 @@ export function startTaskTrigger({
     logger.warn({ err: { name: error.name, message: error.message } }, 'task trigger queue error');
   });
   let closed = false;
+  /** Both ways to add a run check the task's name and that the trigger is still open. */
+  const checkOpen = (task: string) => {
+    if (!TASK_NAME.test(task)) throw new Error(`Task "${task}" must be <module>.<task>`);
+    if (closed) throw new Error(`The task trigger of ${queue} is closed`);
+  };
   return {
     runSoon: async (task) => {
-      if (!TASK_NAME.test(task)) throw new Error(`Task "${task}" must be <module>.<task>`);
-      if (closed) throw new Error(`The task trigger of ${queue} is closed`);
+      checkOpen(task);
       await open.add(task, { task }, { removeOnComplete: true, removeOnFail: { count: 20 } });
+    },
+    runAfter: async (task, delayMs, retry) => {
+      checkOpen(task);
+      if (!Number.isInteger(delayMs) || delayMs < 0) {
+        throw new Error(`Task "${task}" needs a delay of whole milliseconds, from 0`);
+      }
+      if (retry && (!Number.isInteger(retry.attempts) || retry.attempts < 1)) {
+        throw new Error(`Task "${task}" needs a whole number of attempts, from 1`);
+      }
+      if (retry && (!Number.isInteger(retry.backoffMs) || retry.backoffMs < 0)) {
+        throw new Error(`Task "${task}" needs a backoff of whole milliseconds, from 0`);
+      }
+      await open.add(
+        task,
+        { task },
+        {
+          delay: delayMs,
+          ...(retry && {
+            attempts: retry.attempts,
+            backoff: { type: 'exponential', delay: retry.backoffMs },
+          }),
+          removeOnComplete: true,
+          removeOnFail: { count: 20 },
+        },
+      );
     },
     close: async () => {
       if (closed) return;
