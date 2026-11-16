@@ -19,8 +19,9 @@ export const API_BASE_URL = '/api/v1';
 /**
  * After another tab refreshed the same session a moment earlier (409), how long a refresh waits at
  * most for that tab to say its answer came (`refreshed` on the app's channel): the answer sets the
- * new cookies, which this tab shares. The old refresh token never goes again: after 10 s identity
- * takes it for a stolen copy and ends the session (ARCHITECTURE §7.2; QA Q-010, owner 2026-11-12).
+ * new cookies, which this tab shares. The old refresh token never goes again: it would undo the other
+ * tab's new token, and the cookie left last could be the undone one, a stolen copy at the next
+ * refresh (ARCHITECTURE §7.2; QA Q-010, owner 2026-11-12).
  */
 export const OTHER_TAB_REFRESH_WAIT_MS = 5_000;
 /** Without a BroadcastChannel to hear the other tab on (an old browser): a short wait instead. */
@@ -197,8 +198,8 @@ export function createApiClient(options: ApiClientOptions): ApiClient {
     } catch (error) {
       if (isApiError(error, 'REFRESH_IN_PROGRESS')) {
         // Another tab refreshed this session a moment ago, and its new cookies are this tab's too
-        // once its answer comes. Asking again with the old refresh token would look like a stolen
-        // one after 10 s (ARCHITECTURE §7.2), so this tab waits to hear the other one (QA Q-010).
+        // once its answer comes. Asking again with the old refresh token would undo that tab's new
+        // token (ARCHITECTURE §7.2), so this tab waits to hear the other one (QA Q-010).
         await otherTabRefreshed(heard);
         refreshed();
         return true;

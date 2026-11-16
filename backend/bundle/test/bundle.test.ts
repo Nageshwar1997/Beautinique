@@ -221,17 +221,18 @@ describe('bundle', () => {
       expect(
         signedIn.headers.getSetCookie().some((c) => c.startsWith('__Host-bq_customer_at=')),
       ).toBe(true);
-      const refresh = (token: string) =>
+      const refresh = (token: string, device: Record<string, string> = {}) =>
         fetch(`${bundle.url}/api/v1/auth/refresh`, {
           method: 'POST',
-          headers: { ...headers, cookie: `__Secure-bq_customer_rt=${token}` },
+          headers: { ...headers, ...device, cookie: `__Secure-bq_customer_rt=${token}` },
         });
       const refreshed = await refresh(first);
       expect(refreshed.status).toBe(200);
       expect(refreshed.headers.get('cache-control')).toBe('private, no-store');
       const second = refreshCookie(refreshed);
       expect(second).not.toBe(first);
-      // the first token again, past the 10 s a parallel tab gets: someone had a copy
+      // the first token again, past the 10 s a parallel tab gets, from another kind of device:
+      // someone had a copy (the same device would get a new one: its answer was lost, LIVE-009)
       const logger = createLogger({ name: 'bundle-test', level: 'silent' });
       const mongo = await connectMongo({
         uri: MONGO_URI,
@@ -249,7 +250,10 @@ describe('bundle', () => {
       } finally {
         await mongo.close();
       }
-      expect((await refresh(first)).status).toBe(401);
+      const firefox = {
+        'user-agent': 'Mozilla/5.0 (X11; Linux x86_64; rv:132.0) Gecko/20100101 Firefox/132.0',
+      };
+      expect((await refresh(first, firefox)).status).toBe(401);
       expect((await refresh(second)).status).toBe(401);
       const alert = `http://localhost:8025/api/v1/search?query=${encodeURIComponent(`to:${email} subject:"signed you out"`)}`;
       let warned: Found = { messages: [] };
