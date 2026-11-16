@@ -39,6 +39,7 @@ const sessionsDb = () => harness.db.collection<Session>(SESSIONS);
 const CHROME =
   'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130.0.0.0 Safari/537.36';
 const FIREFOX = 'Mozilla/5.0 (X11; Linux x86_64; rv:132.0) Gecko/20100101 Firefox/132.0';
+const HOME_IP = '203.0.113.9';
 
 beforeAll(async () => {
   harness = await startHarness('sessions');
@@ -62,12 +63,13 @@ async function call(
     cookie,
     body = {},
     userAgent = CHROME,
-  }: { app?: AppId; cookie?: string; body?: unknown; userAgent?: string } = {},
+    ip = HOME_IP,
+  }: { app?: AppId; cookie?: string; body?: unknown; userAgent?: string; ip?: string } = {},
 ): Promise<Raw> {
   const headers: Record<string, string> = {
     'content-type': 'application/json',
     'X-BQ-App': app,
-    'X-BQ-Client-Ip': '203.0.113.9',
+    'X-BQ-Client-Ip': ip,
     'user-agent': userAgent,
   };
   if (cookie) headers.cookie = cookie;
@@ -87,8 +89,10 @@ async function call(
 
 const signIn = (address: string, app: AppId = 'customer') =>
   call('/auth/login', { app, body: { email: address, password: PASSWORD } });
-const refreshWith = (token: string, app: AppId = 'customer', userAgent = CHROME) =>
-  call('/auth/refresh', { app, cookie: `__Secure-bq_${app}_rt=${token}`, userAgent });
+const refreshWith = (token: string, app: AppId = 'customer', userAgent = CHROME, ip = HOME_IP) =>
+  call('/auth/refresh', { app, cookie: `__Secure-bq_${app}_rt=${token}`, userAgent, ip });
+/** The MAC part of a blind index: what a token secret made from it looks like. */
+const macOf = (index: string) => index.slice(index.lastIndexOf('.') + 1);
 const accessOf = (answer: Raw, app: AppId = 'customer') =>
   answer.cookies[`__Host-bq_${app}_at`]?.value ?? '';
 const refreshOf = (answer: Raw, app: AppId = 'customer') =>
@@ -177,7 +181,7 @@ describe('signing in', () => {
 });
 
 describe('refreshing', () => {
-  it('rotates the refresh token; the old one a moment later is a parallel tab, later from another device a copy', async () => {
+  it('rotates the refresh token; the old one a moment later from another device waits, later a copy', async () => {
     const address = email('rotate');
     await makeAccount(address);
     const first = await signIn(address);
@@ -188,8 +192,8 @@ describe('refreshing', () => {
     expect(refreshOf(next)).not.toBe(old);
     expect(accessOf(next)).not.toBe(accessOf(first));
     const sessionId = old.split('.')[0] ?? '';
-    // the same old token at once: another tab refreshed first; nothing is cleared
-    const race = await refreshWith(old);
+    // the same old token at once, from another kind of device: it waits; nothing is cleared
+    const race = await refreshWith(old, 'customer', FIREFOX);
     expect([race.status, race.body.error?.code]).toEqual([409, 'REFRESH_IN_PROGRESS']);
     expect(race.cookies).toEqual({});
     // the same old token later, from another kind of device: someone has a copy
@@ -229,6 +233,99 @@ describe('refreshing', () => {
     ]);
     // the newest token ends with the session
     expect((await refreshWith(refreshOf(next))).status).toBe(401);
+  });
+
+  it('gives the same device the same token again a moment later: a parallel tab or a late answer (LIVE-009)', async () => {
+    const address = email('same-token');
+    await makeAccount(address);
+    const old = refreshOf(await signIn(address));
+    const sessionId = old.split('.')[0] ?? '';
+    // the first answer never came, or comes late; another tab asks with the same token at once
+    const first = await refreshWith(old);
+    const second = await refreshWith(old);
+    expect([first.status, second.status]).toEqual([200, 200]);
+    expect(refreshOf(second)).toBe(refreshOf(first));
+    expect(second.body.data).toMatchObject({ user: { email: address } });
+    expect(accessOf(second)).not.toBe('');
+    const stored = await sessionsDb().findOne({ _id: oid(sessionId) });
+    expect(stored).toMatchObject({
+      revokedAt: null,
+      refreshHash: blindIndex(harness.keys, 'refresh-token', refreshOf(first)),
+      previousRefreshHash: blindIndex(harness.keys, 'refresh-token', old),
+    });
+    // the next token follows from the old one, but not as anything the database keeps, and not
+    // from the old one and the key alone: a random salt is in it
+    const [, , secret = ''] = refreshOf(first).split('.');
+    expect(JSON.stringify(stored)).not.toContain(secret);
+    expect(secret).not.toBe(macOf(blindIndex(harness.keys, 'refresh-next', old)));
+    // two tabs together get one token too
+    const together = await Promise.all([refreshWith(old), refreshWith(old)]);
+    expect(together.map((answer) => [answer.status, refreshOf(answer)])).toEqual([
+      [200, refreshOf(first)],
+      [200, refreshOf(first)],
+    ]);
+    expect(
+      await harness.db.collection(OUTBOX).countDocuments({
+        type: 'identity.session.reuseDetected',
+        'envelope.data.sessionId': sessionId,
+      }),
+    ).toBe(0);
+    // once that token moved on, the old one is two behind: a copy, at once all the same
+    expect((await refreshWith(refreshOf(first))).status).toBe(200);
+    expect((await refreshWith(old)).status).toBe(401);
+    expect(await sessionsDb().findOne({ _id: oid(sessionId) })).toMatchObject({
+      revokeReason: 'reuse',
+    });
+  });
+
+  it('gives no same token to another network, even from the same kind of device: it waits', async () => {
+    const address = email('same-token-network');
+    await makeAccount(address);
+    const old = refreshOf(await signIn(address));
+    const mine = await refreshWith(old);
+    // a copy elsewhere, with the User-Agent My Devices shows, right after the session rotated
+    const theirs = await refreshWith(old, 'customer', CHROME, '198.51.100.7');
+    expect([theirs.status, theirs.body.error?.code]).toEqual([409, 'REFRESH_IN_PROGRESS']);
+    expect(theirs.cookies).toEqual({});
+    expect((await refreshWith(refreshOf(mine))).status).toBe(200);
+  });
+
+  it('counts the moment from the last time the same token went out, so a later ask gets it too', async () => {
+    const address = email('same-token-window');
+    await makeAccount(address);
+    const old = refreshOf(await signIn(address));
+    const sessionId = old.split('.')[0] ?? '';
+    const lost = refreshOf(await refreshWith(old));
+    // 9 s after the rotation, another tab gets the same token, and its answer is on its way
+    await sessionsDb().updateOne(
+      { _id: oid(sessionId) },
+      { $set: { rotatedAt: new Date(Date.now() - 9_000) } },
+    );
+    const before = Date.now();
+    expect(refreshOf(await refreshWith(old))).toBe(lost);
+    // the moment moved with that answer: a third ask just after the first 10 s gets it as well,
+    // instead of a new token that the late answer would undo
+    const stamped = (await sessionsDb().findOne({ _id: oid(sessionId) }))?.rotatedAt;
+    expect(stamped?.getTime()).toBeGreaterThanOrEqual(before - 1_000);
+    expect(refreshOf(await refreshWith(old))).toBe(lost);
+    expect((await refreshWith(lost)).status).toBe(200);
+  });
+
+  it('gives the same token again only when the session moved on to it, not after another token', async () => {
+    const address = email('same-token-only');
+    await makeAccount(address);
+    const old = refreshOf(await signIn(address));
+    const sessionId = old.split('.')[0] ?? '';
+    await refreshWith(old);
+    // the session moved on to some other token (an older version made random ones)
+    const other = `${old.split('.').slice(0, 2).join('.')}.${randomBytes(32).toString('base64url')}`;
+    await sessionsDb().updateOne(
+      { _id: oid(sessionId) },
+      { $set: { refreshHash: blindIndex(harness.keys, 'refresh-token', other) } },
+    );
+    const race = await refreshWith(old);
+    expect([race.status, race.body.error?.code]).toEqual([409, 'REFRESH_IN_PROGRESS']);
+    expect((await refreshWith(other)).status).toBe(200);
   });
 
   it('replaces the old token again when it comes back later from the same device: its answer was lost (LIVE-009)', async () => {
@@ -294,9 +391,21 @@ describe('refreshing', () => {
     const address = email('family');
     await makeAccount(address);
     const first = refreshOf(await signIn(address));
+    const [sessionId, family] = first.split('.');
+    const saltNow = async () =>
+      (await sessionsDb().findOne({ _id: oid(sessionId ?? '') }))?.nextSalt;
     const next = refreshOf(await refreshWith(first));
-    const [sessionId, family, secret] = first.split('.');
-    expect(next.split('.')).toEqual([sessionId, family, expect.not.stringMatching(secret ?? '')]);
+    const saltOfNext = await saltNow();
+    const after = refreshOf(await refreshWith(next));
+    // the salt that made `next` is gone: with the key and the database, `first` leads nowhere now
+    expect([saltOfNext, await saltNow()]).toEqual([expect.any(String), expect.any(String)]);
+    expect(await saltNow()).not.toBe(saltOfNext);
+    const secrets = [first, next, after].map((token) => {
+      const [id, ofFamily, secret = ''] = token.split('.');
+      expect([id, ofFamily]).toEqual([sessionId, family]);
+      return secret;
+    });
+    expect(new Set(secrets).size).toBe(3);
   });
 
   it('ends the session when any older token of it comes back, not only the one just replaced', async () => {
