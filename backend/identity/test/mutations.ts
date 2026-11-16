@@ -898,7 +898,7 @@ const mutations: Mutation[] = [
   {
     file: 'sessions',
     name: 'a copy taken for a parallel tab',
-    change: [['at - found.rotatedAt.getTime() < REFRESH_RACE_MS', 'true']],
+    change: [['const soon = sinceRotated < REFRESH_RACE_MS;', 'const soon = true;']],
     tests: 'another device waits|answer was lost',
   },
   {
@@ -969,8 +969,8 @@ const mutations: Mutation[] = [
     name: 'a parallel tab waits instead of the same token',
     change: [
       [
-        '        sameDevice &&\n        soon &&\n        found.ip',
-        '        false &&\n        soon &&\n        found.ip',
+        '        sameDevice &&\n        sinceRotated < SAME_TOKEN_MS &&\n',
+        '        false &&\n        sinceRotated < SAME_TOKEN_MS &&\n',
       ],
     ],
     tests: 'same token again a moment later',
@@ -978,8 +978,14 @@ const mutations: Mutation[] = [
   {
     file: 'sessions',
     name: 'the same token again for a lost answer later',
-    change: [['        sameDevice &&\n        soon &&\n', '        sameDevice &&\n']],
+    change: [['        sinceRotated < SAME_TOKEN_MS &&\n', '']],
     tests: 'answer was lost',
+  },
+  {
+    file: 'sessions',
+    name: 'the same token only within the race: a late answer undone',
+    change: [['        sinceRotated < SAME_TOKEN_MS &&\n', '        soon &&\n']],
+    tests: 'late answer up to the app',
   },
   {
     file: 'sessions',
@@ -1031,6 +1037,12 @@ const mutations: Mutation[] = [
       ],
     ],
     tests: 'same token again a moment later',
+  },
+  {
+    file: 'sessions',
+    name: 'an access token for a session that ended while its refresh ran',
+    change: [['      accountEnded &&\n', '      false &&\n']],
+    tests: 'ends while the refresh runs',
   },
   {
     file: 'sessions',
@@ -2116,7 +2128,12 @@ const mutations: Mutation[] = [
   {
     file: 'sessions',
     name: 'a token in the second every session ended',
-    change: [['    if (since === null) return iat;\n', '    return iat;\n']],
+    change: [
+      [
+        '    if (since === null) return { iat, accountEnded: false };\n',
+        '    return { iat, accountEnded: false };\n',
+      ],
+    ],
     tests: 'later second',
   },
   {

@@ -12,6 +12,7 @@ import {
 import { writeEvent } from '@beautinique/backend-server-queue';
 import {
   ACCESS_TOKEN_SECONDS,
+  API_TIMEOUT_MS,
   type AppId,
   type AppPermissions,
   appPermissionsKey,
@@ -75,6 +76,13 @@ export const SESSIONS = 'identity_sessions';
 export const KEEP_ENDED_MS = 30 * 24 * 60 * 60_000;
 /** A second refresh with the token just replaced, this soon, is a parallel tab, not a copy. */
 export const REFRESH_RACE_MS = 10_000;
+/**
+ * How long the token just replaced, from the same kind of device on the same network, gets the
+ * same next token again: longer than an app waits for any answer (API_TIMEOUT_MS), so when the
+ * session is given a new random token instead, no answer that carries the old next one can still
+ * land in the browser and undo it (LIVE-009; owner, 2026-11-16).
+ */
+export const SAME_TOKEN_MS = API_TIMEOUT_MS + 5_000;
 
 export type EndReason =
   | 'logout'
@@ -104,9 +112,9 @@ export interface Session {
   /** Keyed hash of the current refresh token; the token itself is never stored */
   refreshHash: string;
   /**
-   * The token it replaced, to tell a parallel tab or a late answer (REFRESH_RACE_MS: the same token
-   * again from the same device) or a lost answer (the same device, later: replaced again) from a
-   * copied token
+   * The token it replaced, to tell a parallel tab or a late answer (SAME_TOKEN_MS: the same token
+   * again from the same device and network; REFRESH_RACE_MS: a wait from another) or a lost answer
+   * (the same device, later: replaced again) from a copied token
    */
   previousRefreshHash: string | null;
   /**
@@ -122,7 +130,7 @@ export interface Session {
    * older version).
    */
   nextSalt?: string | null;
-  /** The last rotation, or the last time its token went out again: REFRESH_RACE_MS counts from here */
+  /** The last rotation, or the last time its token went out again: the windows count from here */
   rotatedAt: Date | null;
   createdAt: Date;
   lastSeenAt: Date;
@@ -332,19 +340,22 @@ export function sessions(deps: SessionDeps): Sessions {
    * refresh too, and the person found signed out right after signing in. Waits for the next
    * second instead (under one).
    */
-  async function issueSecond(userId: ObjectId, at: number): Promise<number> {
+  async function issueSecond(
+    userId: ObjectId,
+    at: number,
+  ): Promise<{ iat: number; accountEnded: boolean }> {
     const iat = Math.floor(at / 1000);
     const since = await inRedis(() => redis.get(revokedUserKey(userId.toHexString())));
-    if (since === null) return iat;
+    if (since === null) return { iat, accountEnded: false };
     const after = Math.floor(Number(since) / 1000) + 1;
-    if (iat >= after) return iat;
+    if (iat >= after) return { iat, accountEnded: true };
     const wait = after * 1000 - now();
     if (wait > 0) {
       await new Promise((resolve) => {
         setTimeout(resolve, wait);
       });
     }
-    return after;
+    return { iat: after, accountEnded: true };
   }
 
   async function accessToken(
@@ -354,7 +365,16 @@ export function sessions(deps: SessionDeps): Sessions {
     authzVersion: number,
   ) {
     const stepUpAt = session.stepUpAt ?? null;
-    const iat = await issueSecond(session.userId, at);
+    const { iat, accountEnded } = await issueSecond(session.userId, at);
+    // Every session of the account ended lately (a new password, a Security Officer). The mark
+    // goes up only once they all ended, so the session itself says whether that end took it too,
+    // while this request ran: then no token, which the next second would let through the gateway.
+    if (
+      accountEnded &&
+      (await collection.findOne({ _id: session._id, revokedAt: null })) === null
+    ) {
+      throw sessionExpired();
+    }
     const { kid, privateKey } = await signing.current();
     return signJwt(
       {
@@ -571,26 +591,28 @@ export function sessions(deps: SessionDeps): Sessions {
       if (found.expiresAt.getTime() <= at || idle) throw sessionExpired();
       // Not for a token from before families: its new family would make the lost one look made up.
       const sameDevice = replaced && parts.family !== null && found.device === deviceOf(client);
-      const soon = found.rotatedAt !== null && at - found.rotatedAt.getTime() < REFRESH_RACE_MS;
+      const sinceRotated =
+        found.rotatedAt === null ? Number.POSITIVE_INFINITY : at - found.rotatedAt.getTime();
+      const soon = sinceRotated < REFRESH_RACE_MS;
       // the token that follows this one, when the session moved on to it
       const following =
         parts.family !== null && typeof found.nextSalt === 'string'
           ? followingToken(keys, sessionId, parts.family, refreshToken, found.nextSalt)
           : null;
-      // The token just replaced, a moment later, from the same kind of device on the same network
-      // (the IP that rotated it): a parallel tab, or a tab whose answer never came or comes late.
-      // The session moved on to the token that follows this one, so that one goes out again, and
-      // every tab and every late answer end up with one token (LIVE-009; owner, 2026-11-16). Not for
-      // anyone, any time: a copy elsewhere can send any User-Agent and see in My Devices when the
+      // The token just replaced, within SAME_TOKEN_MS, from the same kind of device on the same
+      // network (the IP that rotated it): a parallel tab, or a tab whose answer never came or comes
+      // late. The session moved on to the token that follows this one, so that one goes out again,
+      // and every tab and every late answer end up with one token (LIVE-009; owner, 2026-11-16). Not
+      // for anyone, any time: a copy elsewhere can send any User-Agent and see in My Devices when the
       // session rotates, and the same token for it would let it keep step with the session for good.
       if (
         sameDevice &&
-        soon &&
+        sinceRotated < SAME_TOKEN_MS &&
         found.ip === client.ip &&
         following !== null &&
         found.refreshHash === refreshHashOf(keys, following)
       ) {
-        // the window counts from this answer too: a re-rotation a moment later would undo it
+        // the window counts from this answer too: a new token before it lands would be undone
         const kept = await collection.findOneAndUpdate(
           {
             _id: sessionId,
@@ -611,9 +633,9 @@ export function sessions(deps: SessionDeps): Sessions {
       }
       // only the token just replaced can be a parallel tab: a browser is never two behind
       if (replaced && soon) throw refreshInProgress();
-      // The token just replaced, later, from the same kind of device: the answer that carried its
-      // replacement never arrived or never stayed (a phone froze or closed the browser), so the
-      // replacement was never used. It is replaced again, by a new random token: a copy and the
+      // The token just replaced, later (or from another network after REFRESH_RACE_MS), from the
+      // same kind of device: the answer that carried its replacement never arrived or never stayed
+      // (a phone froze or closed the browser), so the replacement was never used. It is replaced again, by a new random token: a copy and the
       // session part ways here, and the lost one is an older token of the family from now on, a
       // copy if it ever comes back (LIVE-009; owner, 2026-11-16).
       if (sameDevice) {

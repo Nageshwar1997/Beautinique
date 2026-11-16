@@ -16,7 +16,7 @@ import {
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 
 import { JWKS_PATH } from '../src/app.ts';
-import { deviceName, type Session, SESSIONS } from '../src/sessions.ts';
+import { deviceName, SAME_TOKEN_MS, type Session, SESSIONS } from '../src/sessions.ts';
 import { ROTATE_AFTER_MS, SIGNING_KEYS, type SigningKeyRecord } from '../src/signing-keys.ts';
 import {
   appIdOf,
@@ -296,19 +296,78 @@ describe('refreshing', () => {
     const old = refreshOf(await signIn(address));
     const sessionId = old.split('.')[0] ?? '';
     const lost = refreshOf(await refreshWith(old));
-    // 9 s after the rotation, another tab gets the same token, and its answer is on its way
+    // just inside the window after the rotation, another tab gets the same token, and its answer
+    // is on its way
     await sessionsDb().updateOne(
       { _id: oid(sessionId) },
-      { $set: { rotatedAt: new Date(Date.now() - 9_000) } },
+      { $set: { rotatedAt: new Date(Date.now() - SAME_TOKEN_MS + 2_000) } },
     );
     const before = Date.now();
     expect(refreshOf(await refreshWith(old))).toBe(lost);
-    // the moment moved with that answer: a third ask just after the first 10 s gets it as well,
-    // instead of a new token that the late answer would undo
+    // the moment moved with that answer: a third ask just after the first window gets it as
+    // well, instead of a new token that the late answer would undo
     const stamped = (await sessionsDb().findOne({ _id: oid(sessionId) }))?.rotatedAt;
     expect(stamped?.getTime()).toBeGreaterThanOrEqual(before - 1_000);
     expect(refreshOf(await refreshWith(old))).toBe(lost);
     expect((await refreshWith(lost)).status).toBe(200);
+  });
+
+  it('gives the same token for a late answer up to the app’s timeout; another network gets a new one', async () => {
+    const address = email('same-token-late');
+    await makeAccount(address);
+    const old = refreshOf(await signIn(address));
+    const sessionId = old.split('.')[0] ?? '';
+    const late = refreshOf(await refreshWith(old));
+    const ago = (ms: number) =>
+      sessionsDb().updateOne(
+        { _id: oid(sessionId) },
+        { $set: { rotatedAt: new Date(Date.now() - ms) } },
+      );
+    // half a minute later from the same network: an answer that may still land, so the same token
+    await ago(30_000);
+    expect(refreshOf(await refreshWith(old))).toBe(late);
+    // from another network after the 10 s: a lost answer, a new token (the late one, if it ever
+    // comes back, is a copy)
+    await ago(30_000);
+    const elsewhere = await refreshWith(old, 'customer', CHROME, '198.51.100.7');
+    expect(elsewhere.status).toBe(200);
+    expect([old, late]).not.toContain(refreshOf(elsewhere));
+    expect((await refreshWith(refreshOf(elsewhere))).status).toBe(200);
+  });
+
+  it('gives no access token when every session of the account ends while the refresh runs', async () => {
+    const address = email('ended-meanwhile');
+    await makeAccount(address);
+    const token = refreshOf(await signIn(address));
+    const sessionId = token.split('.')[0] ?? '';
+    const userId =
+      (await sessionsDb().findOne({ _id: oid(sessionId) }))?.userId.toHexString() ?? '';
+    const mark = revokedUserKey(userId);
+    // a new password lands between the rotation and the access token: every session ends, then
+    // the mark goes up, as endAll does
+    const client = redis();
+    const get = client.get.bind(client);
+    let landed = false;
+    client.get = async (key: string) => {
+      if (key === mark && !landed) {
+        landed = true;
+        await sessionsDb().updateMany(
+          { userId: oid(userId), revokedAt: null },
+          { $set: { revokedAt: new Date(), revokeReason: 'password-changed' } },
+        );
+        await client.set(mark, String(Date.now()), 'PX', 60_000);
+      }
+      return get(key);
+    };
+    try {
+      const answer = await refreshWith(token);
+      expect(landed).toBe(true);
+      expect([answer.status, answer.body.error?.code]).toEqual([401, 'SESSION_EXPIRED']);
+      expect(accessOf(answer)).toBe('');
+    } finally {
+      client.get = get;
+      await client.del(mark);
+    }
   });
 
   it('gives the same token again only when the session moved on to it, not after another token', async () => {
@@ -375,7 +434,7 @@ describe('refreshing', () => {
     await refreshWith(old);
     await sessionsDb().updateOne(
       { _id: oid(sessionId) },
-      { $set: { rotatedAt: new Date(Date.now() - 11_000) } },
+      { $set: { rotatedAt: new Date(Date.now() - SAME_TOKEN_MS - 1_000) } },
     );
     const answers = await Promise.all([refreshWith(old), refreshWith(old)]);
     expect(answers.map((answer) => answer.status).sort((a, b) => a - b)).toEqual([200, 409]);
