@@ -853,8 +853,8 @@ const mutations: Mutation[] = [
   {
     file: 'sessions',
     name: 'refresh without the token',
-    change: [['        refreshHash: hash,\n        expiresAt:', '        expiresAt:']],
-    tests: 'made-up token|parallel tab',
+    change: [['          refreshHash: hash,\n          expiresAt:', '          expiresAt:']],
+    tests: 'made-up token|another device waits',
   },
   {
     file: 'sessions',
@@ -870,14 +870,17 @@ const mutations: Mutation[] = [
   {
     file: 'sessions',
     name: 'an expired session refreshes',
-    change: [['        expiresAt: { $gt: new Date(at) },\n', '']],
+    change: [['          expiresAt: { $gt: new Date(at) },\n', '']],
     tests: '90 days',
   },
   {
     file: 'sessions',
     name: 'no idle end',
     change: [
-      ['          : { lastSeenAt: { $gt: new Date(at - policy.idleMs) } }),', '          : {}),'],
+      [
+        '            : { lastSeenAt: { $gt: new Date(at - policy.idleMs) } }),',
+        '            : {}),',
+      ],
     ],
     tests: 'idle minutes',
   },
@@ -895,19 +898,16 @@ const mutations: Mutation[] = [
   {
     file: 'sessions',
     name: 'a copy taken for a parallel tab',
-    change: [['at - found.rotatedAt.getTime() < REFRESH_RACE_MS', 'true']],
-    tests: 'parallel tab',
+    change: [['const soon = sinceRotated < REFRESH_RACE_MS;', 'const soon = true;']],
+    tests: 'another device waits|answer was lost',
   },
   {
     file: 'sessions',
     name: 'a parallel tab taken for a copy',
     change: [
-      [
-        'if (replaced && found.rotatedAt && at - found.rotatedAt.getTime() < REFRESH_RACE_MS) {',
-        'if (false) {',
-      ],
+      ['if (replaced && soon) throw refreshInProgress();', 'if (false) throw refreshInProgress();'],
     ],
-    tests: 'parallel tab',
+    tests: 'another device waits',
   },
   {
     file: 'sessions',
@@ -935,40 +935,114 @@ const mutations: Mutation[] = [
   {
     file: 'sessions',
     name: 'an older token taken for a parallel tab',
-    change: [['if (replaced && found.rotatedAt && at -', 'if (found.rotatedAt && at -']],
+    change: [['if (replaced && soon) throw', 'if (soon) throw']],
     tests: 'older token',
   },
-  // a lost answer (LIVE-009): the token just replaced, later, from the same device, gets a new one
+  // LIVE-009: the token just replaced from the same device gets the same next token a moment
+  // later, a new random one later (its answer was lost)
   {
     file: 'sessions',
     name: 'a lost answer taken for a copy',
-    change: [
-      [
-        'if (replaced && parts.family !== null && found.device === deviceOf(client)) {',
-        'if (false) {',
-      ],
-    ],
+    change: [['      if (sameDevice) {', '      if (false) {']],
     tests: 'answer was lost',
   },
   {
     file: 'sessions',
     name: 'a copy from another device taken for a lost answer',
-    change: [[' && found.device === deviceOf(client)) {', ') {']],
-    tests: 'another device',
+    change: [[' && found.device === deviceOf(client);', ';']],
+    tests: 'another device waits',
   },
   {
     file: 'sessions',
     name: 'a lost answer for a token from before families',
-    change: [
-      ['if (replaced && parts.family !== null && found.device', 'if (replaced && found.device'],
-    ],
+    change: [['replaced && parts.family !== null && found.device', 'replaced && found.device']],
     tests: 'before token families',
   },
   {
     file: 'sessions',
     name: 'a lost answer replaced from any older token',
-    change: [['if (replaced && parts.family !== null &&', 'if (parts.family !== null &&']],
+    change: [['const sameDevice = replaced && parts.family', 'const sameDevice = parts.family']],
     tests: 'older token',
+  },
+  {
+    file: 'sessions',
+    name: 'a parallel tab waits instead of the same token',
+    change: [
+      [
+        '        sameDevice &&\n        sinceRotated < SAME_TOKEN_MS &&\n',
+        '        false &&\n        sinceRotated < SAME_TOKEN_MS &&\n',
+      ],
+    ],
+    tests: 'same token again a moment later',
+  },
+  {
+    file: 'sessions',
+    name: 'the same token again for a lost answer later',
+    change: [['        sinceRotated < SAME_TOKEN_MS &&\n', '']],
+    tests: 'answer was lost',
+  },
+  {
+    file: 'sessions',
+    name: 'the same token only within the race: a late answer undone',
+    change: [['        sinceRotated < SAME_TOKEN_MS &&\n', '        soon &&\n']],
+    tests: 'late answer up to the app',
+  },
+  {
+    file: 'sessions',
+    name: 'the same token again after another token',
+    change: [['        found.refreshHash === refreshHashOf(keys, following)\n', '        true\n']],
+    tests: 'not after another token',
+  },
+  {
+    file: 'sessions',
+    name: 'the same token again for another network: a copy keeps step',
+    change: [['        found.ip === client.ip &&\n', '']],
+    tests: 'no same token to another network',
+  },
+  {
+    file: 'sessions',
+    name: 'the moment counts from the rotation only: a late answer undone',
+    change: [
+      [
+        '{ $max: { rotatedAt: new Date(at), lastSeenAt: new Date(at) } }',
+        '{ $max: { lastSeenAt: new Date(at) } }',
+      ],
+    ],
+    tests: 'last time the same token went out',
+  },
+  {
+    file: 'sessions',
+    name: 'a random next token: tabs and late answers get different ones',
+    change: [
+      [
+        'const next = followingToken(keys, sessionId, family, refreshToken, salt);',
+        'const next = newRefreshToken(sessionId, family);',
+      ],
+    ],
+    tests: 'same token again a moment later',
+  },
+  {
+    file: 'sessions',
+    name: 'no salt kept: the same token never again',
+    change: [['                nextSalt,\n', '']],
+    tests: 'same token again a moment later',
+  },
+  {
+    file: 'sessions',
+    name: 'no salt in the next token: the key walks old tokens forward',
+    change: [
+      [
+        "blindIndex(keys, 'refresh-next', `${salt}.${token}`);",
+        "blindIndex(keys, 'refresh-next', token);",
+      ],
+    ],
+    tests: 'same token again a moment later',
+  },
+  {
+    file: 'sessions',
+    name: 'an access token for a session that ended while its refresh ran',
+    change: [['      accountEnded &&\n', '      false &&\n']],
+    tests: 'ends while the refresh runs',
   },
   {
     file: 'sessions',
@@ -2054,7 +2128,12 @@ const mutations: Mutation[] = [
   {
     file: 'sessions',
     name: 'a token in the second every session ended',
-    change: [['    if (since === null) return iat;\n', '    return iat;\n']],
+    change: [
+      [
+        '    if (since === null) return { iat, accountEnded: false };\n',
+        '    return { iat, accountEnded: false };\n',
+      ],
+    ],
     tests: 'later second',
   },
   {
