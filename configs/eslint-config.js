@@ -12,6 +12,14 @@ import simpleImportSort from 'eslint-plugin-simple-import-sort';
 import globals from 'globals';
 import tseslint from 'typescript-eslint';
 
+import { noHardcodedGeo } from './eslint-rules/no-hardcoded-geo.js';
+import { noRoleComparison } from './eslint-rules/no-role-comparison.js';
+
+/** The repo's own rules (configs/eslint-rules/). */
+const BQ_PLUGIN = {
+  rules: { 'no-hardcoded-geo': noHardcodedGeo, 'no-role-comparison': noRoleComparison },
+};
+
 const GLOBALS = {
   neutral: {},
   browser: globals.browser,
@@ -29,6 +37,7 @@ const GLOBALS = {
  * @param {boolean} [options.changeStreamPackage] only for @beautinique/backend-server-queue: the outbox relay, the one place that opens MongoDB change streams
  * @param {string[]} [options.envFiles] backend apps: the only files that may read process.env (ARCHITECTURE §3)
  * @param {string[]} [options.httpProxyFiles] only the gateway's reverse proxy: the one place that streams with node:http instead of calling with axios (RULES §3)
+ * @param {string[]} [options.geoDataFiles] the files that are place data (the states list, seed data): no-hardcoded-geo is off there (RULES §3.4)
  */
 export function packageConfig({
   platform,
@@ -40,6 +49,7 @@ export function packageConfig({
   changeStreamPackage = false,
   envFiles,
   httpProxyFiles = [],
+  geoDataFiles = [],
 }) {
   const ZOD_MESSAGE =
     "Import z from '@beautinique/shared-zod' (the repo has one zod and one import path).";
@@ -84,7 +94,7 @@ export function packageConfig({
         globals: GLOBALS[platform],
         parserOptions: { projectService: true, tsconfigRootDir },
       },
-      plugins: { 'simple-import-sort': simpleImportSort },
+      plugins: { 'simple-import-sort': simpleImportSort, bq: BQ_PLUGIN },
       rules: {
         'simple-import-sort/imports': 'error',
         'simple-import-sort/exports': 'error',
@@ -146,6 +156,10 @@ export function packageConfig({
     {
       files: SOURCE,
       rules: {
+        // places are data (RULES §3.4); tests and fixtures may name a place on purpose
+        'bq/no-hardcoded-geo': 'error',
+        // decide by permission and scope, never by a role's name (RULES §3.5)
+        'bq/no-role-comparison': 'error',
         'no-restricted-globals': ['error', { name: 'fetch', message: HTTP_MESSAGE }],
         'no-restricted-properties': [
           'error',
@@ -176,6 +190,7 @@ export function packageConfig({
           },
         }
       : {},
+    geoDataFiles.length > 0 ? { files: geoDataFiles, rules: { 'bq/no-hardcoded-geo': 'off' } } : {},
     prettier,
   );
 }

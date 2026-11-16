@@ -80,6 +80,9 @@ describe('generateFiles', () => {
       '/auth/oauth/{provider}/callback',
       '/auth/oauth/sign-up',
       '/auth/sign-in-methods/{provider}',
+      '/audit/entries',
+      '/audit/entries/export',
+      '/audit/days',
     ]);
     const manifest = parsed('gateway-manifest.json') as {
       version: string;
@@ -96,12 +99,16 @@ describe('generateFiles', () => {
       }
     ).events;
     expect(list.map((e) => [e.type, e.version])).toEqual([
+      ['identity.audit.recorded', 1],
       ['identity.authenticator.changed', 1],
       ['identity.authenticator.reset', 1],
+      ['identity.grant.changed', 1],
       ['identity.invitation.created', 1],
       ['identity.otp.requested', 1],
+      ['identity.role.changed', 1],
       ['identity.session.reuseDetected', 1],
       ['identity.signInMethod.changed', 1],
+      ['identity.user.changed', 1],
       ['platform.ping.recorded', 1],
     ]);
     expect(list.at(-1)?.schema.required).toEqual(
@@ -114,12 +121,15 @@ describe('generateFiles', () => {
       parsed('permissions.json') as { permissions: { key: string; scopeTypes: string[] }[] }
     ).permissions;
     expect(list.map((p) => p.key)).toEqual([
+      'audit.entry.export',
+      'audit.entry.read',
       'iam.app.sign_in',
       'iam.grant.manage',
       'iam.grant.read',
       'iam.role.manage',
       'iam.session.revoke',
       'iam.totp.reset',
+      'iam.totp.reset_master',
       'platform.ping.read',
     ]);
     expect(list.at(-1)?.scopeTypes).toEqual(['global']);

@@ -53,9 +53,22 @@ import {
   type RoleRecord,
   ROLES,
 } from '../src/rbac/sync.ts';
+import { SUBSCRIBERS } from '../src/runtime.ts';
 import { type RunningIdentity, start } from '../src/service.ts';
 import { LEGAL_ACCEPTANCES, type LegalAcceptance, type User, USERS } from '../src/users.ts';
 import { MONGO_URI, REDIS_URL } from './env.ts';
+
+/**
+ * identity's event routes without core's copies: no core runs in these tests (TASKS T3.5). Every
+ * type keeps its entry, an empty list too: the relay leaves a type it has no entry for pending
+ * (LIVE-006).
+ */
+const NOTIFY_ONLY = Object.fromEntries(
+  Object.entries(SUBSCRIBERS).map(([type, list]) => [
+    type,
+    list.filter((subscriber) => !subscriber.startsWith('core.')),
+  ]),
+);
 
 export { MONGO_URI, REDIS_URL };
 const logger = createLogger({ name: 'identity-test', level: 'silent' });
@@ -146,6 +159,8 @@ export async function startHarness(name: string): Promise<Harness> {
         // each identity its own budgets, never another test's
         rateLimitPrefix: `${prefix}:rl:${randomUUID().slice(0, 8)}:`,
         pollMs: 100,
+        // no core works q.core here: its copies' jobs would only pile up (TASKS T3.5)
+        subscribers: NOTIFY_ONLY,
       },
       passportJwks: passport.jwks,
     });
@@ -182,9 +197,12 @@ export async function startHarness(name: string): Promise<Harness> {
       } finally {
         await look.db.dropDatabase();
         await look.close();
-        const queue = new Queue('q.notify', { connection: { url: REDIS_URL }, prefix });
-        await queue.obliterate({ force: true });
-        await queue.close();
+        // notify's queue, and identity's own (each start's delayed catch-up sweep, T4.1)
+        for (const name of ['q.notify', 'q.identity']) {
+          const queue = new Queue(name, { connection: { url: REDIS_URL }, prefix });
+          await queue.obliterate({ force: true });
+          await queue.close();
+        }
       }
     },
   };

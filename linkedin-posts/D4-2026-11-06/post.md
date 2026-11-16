@@ -1,9 +1,9 @@
 ---
 date: 2026-11-06
 day: 4
-status: ready # draft | ready | scheduled | posted (README §2)
-posted_at:
-link:
+status: posted # draft | ready | scheduled | posted (README §2)
+posted_at: '2026-11-14 13:21 IST'
+link: 'https://lnkd.in/p/dDseKzcQ'
 covers: 'PR #21, #22, #25, #26, #27' # T3.1 (email codes, password, authenticator), T3.2 (sessions, gateway passport, My Devices)
 ---
 
@@ -26,6 +26,6 @@ A wrong email, a wrong password and a locked account all get the same answer, at
 Carousel: codes, passwords, the authenticator, sessions and My Devices.
 
 Code: https://github.com/Nageshwar1997/Beautinique
-```
 
-Post ke end me `hashtags.md` wali line paste karo.
+#buildinpublic #security #authentication #nodejs #webdev
+```

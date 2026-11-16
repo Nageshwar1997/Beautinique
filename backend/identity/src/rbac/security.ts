@@ -1,15 +1,14 @@
 import type { Passport } from '@beautinique/backend-server-kit';
-import { type ObjectId, toObjectId, withTransaction } from '@beautinique/backend-server-mongo';
+import { toObjectId, withTransaction } from '@beautinique/backend-server-mongo';
 import { writeEvent } from '@beautinique/backend-server-queue';
 import { authenticatorReset, sessionRevoke, totpReset } from '@beautinique/shared-contracts';
 
+import { type AuditCaller, writeAudit } from '../audit.ts';
 import { CREDENTIALS, type Credentials } from '../credentials.ts';
 import type { OtpDeps } from '../otp.ts';
 import { type User, USERS } from '../users.ts';
-import { callerGrants, forbidden, requirePermission } from './authority.ts';
-import { activeAt, type GrantRecord, GRANTS } from './grants.ts';
-import { notFound, roleByKey } from './manage.ts';
-import { MASTER_ROLE } from './roles.ts';
+import { callerGrants, forbidden, mayResetAuthenticator, requirePermission } from './authority.ts';
+import { notFound } from './manage.ts';
 
 /** The account a Security Officer acts on: it exists, and it is never their own. */
 async function targetOf(deps: OtpDeps, passport: Passport, userId: string, permission: string) {
@@ -17,7 +16,6 @@ async function targetOf(deps: OtpDeps, passport: Passport, userId: string, permi
     userId: toObjectId(passport.userId),
     app: passport.app,
   });
-  const isMaster = caller.some(({ role }) => role.key === MASTER_ROLE);
   requirePermission(caller, permission);
   if (userId === passport.userId) throw forbidden('Use My Devices and your own settings for this.');
   const user = await deps.mongo.db
@@ -27,17 +25,7 @@ async function targetOf(deps: OtpDeps, passport: Passport, userId: string, permi
       { projection: { email: 1 } },
     );
   if (!user) throw notFound('Account');
-  return { user, isMaster };
-}
-
-/** Does the account hold Master now? */
-async function holdsMaster(deps: OtpDeps, userId: ObjectId): Promise<boolean> {
-  const master = await roleByKey(deps.mongo, MASTER_ROLE);
-  if (!master) return false;
-  const grant = await deps.mongo.db
-    .collection<GrantRecord>(GRANTS)
-    .findOne({ userId, roleId: master._id, ...activeAt(new Date()) }, { projection: { _id: 1 } });
-  return grant !== null;
+  return { user, caller };
 }
 
 /**
@@ -48,14 +36,14 @@ async function holdsMaster(deps: OtpDeps, userId: ObjectId): Promise<boolean> {
  */
 export async function resetAuthenticator(
   deps: OtpDeps,
-  passport: Passport,
+  passport: AuditCaller,
   userId: string,
   requestId: string,
 ) {
-  const { user, isMaster } = await targetOf(deps, passport, userId, totpReset.key);
+  const { user, caller } = await targetOf(deps, passport, userId, totpReset.key);
   // a Master's second factor is the last door to everything: only the other Master opens it, so
   // a Security Officer and a leaked Master password together are not enough (QA DR-007)
-  if (!isMaster && (await holdsMaster(deps, user._id))) {
+  if (!(await mayResetAuthenticator(deps.mongo, caller, toObjectId(passport.userId), user._id))) {
     throw forbidden("Only another Master can reset a Master's authenticator.");
   }
   const now = new Date();
@@ -74,6 +62,13 @@ export async function resetAuthenticator(
       correlationId: requestId,
       data: { userId, email: user.email, resetAt: now.toISOString() },
     });
+    await writeAudit(deps.mongo, session, {
+      action: 'iam.users.resetAuthenticator',
+      caller: { ...passport, requestId: passport.requestId ?? requestId },
+      resource: { type: 'user', id: userId },
+      before: { email: user.email, authenticator: true },
+      after: { authenticator: false, sessions: 'ended' },
+    });
     return true;
   });
   const sessionsEnded = reset ? await deps.sessions.endAll(user._id, 'authenticator-reset') : 0;
@@ -85,9 +80,24 @@ export async function resetAuthenticator(
 }
 
 /** POST /iam/users/:userId/sessions/end (ARCHITECTURE §7.2): every session of the account ends. */
-export async function endUserSessions(deps: OtpDeps, passport: Passport, userId: string) {
+export async function endUserSessions(deps: OtpDeps, passport: AuditCaller, userId: string) {
   const { user } = await targetOf(deps, passport, userId, sessionRevoke.key);
   const ended = await deps.sessions.endAll(user._id, 'security-officer');
+  // the sessions end on their own (at the gateway too); the record follows at once, and if it
+  // cannot be written that is an error in the logs, not a 500 that invites a second, empty try
+  try {
+    await withTransaction(deps.mongo, (session) =>
+      writeAudit(deps.mongo, session, {
+        action: 'iam.users.endSessions',
+        caller: passport,
+        resource: { type: 'user', id: userId },
+        before: { email: user.email },
+        after: { sessionsEnded: ended },
+      }),
+    );
+  } catch (failed) {
+    deps.logger.error({ err: failed, userId }, 'audit record of ended sessions not written');
+  }
   deps.logger.info({ userId, by: passport.userId, ended }, 'sessions ended by a Security Officer');
   return { ended };
 }

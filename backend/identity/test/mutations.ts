@@ -853,16 +853,17 @@ const mutations: Mutation[] = [
   {
     file: 'sessions',
     name: 'refresh without the token',
-    change: [
-      ['          refreshHash: hash,\n          revokedAt: null,', '          revokedAt: null,'],
-    ],
-    tests: 'made-up token|parallel tab',
+    change: [['          refreshHash: hash,\n          expiresAt:', '          expiresAt:']],
+    tests: 'made-up token|another device waits',
   },
   {
     file: 'sessions',
     name: 'an ended session refreshes',
     change: [
-      ['          refreshHash: hash,\n          revokedAt: null,', '          refreshHash: hash,'],
+      [
+        '{ _id: sessionId, appId, revokedAt: null, ...current }',
+        '{ _id: sessionId, appId, ...current }',
+      ],
     ],
     tests: 'logs out',
   },
@@ -897,19 +898,16 @@ const mutations: Mutation[] = [
   {
     file: 'sessions',
     name: 'a copy taken for a parallel tab',
-    change: [['at - found.rotatedAt.getTime() < REFRESH_RACE_MS', 'true']],
-    tests: 'parallel tab',
+    change: [['const soon = sinceRotated < REFRESH_RACE_MS;', 'const soon = true;']],
+    tests: 'another device waits|answer was lost',
   },
   {
     file: 'sessions',
     name: 'a parallel tab taken for a copy',
     change: [
-      [
-        'if (replaced && found.rotatedAt && at - found.rotatedAt.getTime() < REFRESH_RACE_MS) {',
-        'if (false) {',
-      ],
+      ['if (replaced && soon) throw refreshInProgress();', 'if (false) throw refreshInProgress();'],
     ],
-    tests: 'parallel tab',
+    tests: 'another device waits',
   },
   {
     file: 'sessions',
@@ -937,8 +935,114 @@ const mutations: Mutation[] = [
   {
     file: 'sessions',
     name: 'an older token taken for a parallel tab',
-    change: [['if (replaced && found.rotatedAt && at -', 'if (found.rotatedAt && at -']],
+    change: [['if (replaced && soon) throw', 'if (soon) throw']],
     tests: 'older token',
+  },
+  // LIVE-009: the token just replaced from the same device gets the same next token a moment
+  // later, a new random one later (its answer was lost)
+  {
+    file: 'sessions',
+    name: 'a lost answer taken for a copy',
+    change: [['      if (sameDevice) {', '      if (false) {']],
+    tests: 'answer was lost',
+  },
+  {
+    file: 'sessions',
+    name: 'a copy from another device taken for a lost answer',
+    change: [[' && found.device === deviceOf(client);', ';']],
+    tests: 'another device waits',
+  },
+  {
+    file: 'sessions',
+    name: 'a lost answer for a token from before families',
+    change: [['replaced && parts.family !== null && found.device', 'replaced && found.device']],
+    tests: 'before token families',
+  },
+  {
+    file: 'sessions',
+    name: 'a lost answer replaced from any older token',
+    change: [['const sameDevice = replaced && parts.family', 'const sameDevice = parts.family']],
+    tests: 'older token',
+  },
+  {
+    file: 'sessions',
+    name: 'a parallel tab waits instead of the same token',
+    change: [
+      [
+        '        sameDevice &&\n        sinceRotated < SAME_TOKEN_MS &&\n',
+        '        false &&\n        sinceRotated < SAME_TOKEN_MS &&\n',
+      ],
+    ],
+    tests: 'same token again a moment later',
+  },
+  {
+    file: 'sessions',
+    name: 'the same token again for a lost answer later',
+    change: [['        sinceRotated < SAME_TOKEN_MS &&\n', '']],
+    tests: 'answer was lost',
+  },
+  {
+    file: 'sessions',
+    name: 'the same token only within the race: a late answer undone',
+    change: [['        sinceRotated < SAME_TOKEN_MS &&\n', '        soon &&\n']],
+    tests: 'late answer up to the app',
+  },
+  {
+    file: 'sessions',
+    name: 'the same token again after another token',
+    change: [['        found.refreshHash === refreshHashOf(keys, following)\n', '        true\n']],
+    tests: 'not after another token',
+  },
+  {
+    file: 'sessions',
+    name: 'the same token again for another network: a copy keeps step',
+    change: [['        found.ip === client.ip &&\n', '']],
+    tests: 'no same token to another network',
+  },
+  {
+    file: 'sessions',
+    name: 'the moment counts from the rotation only: a late answer undone',
+    change: [
+      [
+        '{ $max: { rotatedAt: new Date(at), lastSeenAt: new Date(at) } }',
+        '{ $max: { lastSeenAt: new Date(at) } }',
+      ],
+    ],
+    tests: 'last time the same token went out',
+  },
+  {
+    file: 'sessions',
+    name: 'a random next token: tabs and late answers get different ones',
+    change: [
+      [
+        'const next = followingToken(keys, sessionId, family, refreshToken, salt);',
+        'const next = newRefreshToken(sessionId, family);',
+      ],
+    ],
+    tests: 'same token again a moment later',
+  },
+  {
+    file: 'sessions',
+    name: 'no salt kept: the same token never again',
+    change: [['                nextSalt,\n', '']],
+    tests: 'same token again a moment later',
+  },
+  {
+    file: 'sessions',
+    name: 'no salt in the next token: the key walks old tokens forward',
+    change: [
+      [
+        "blindIndex(keys, 'refresh-next', `${salt}.${token}`);",
+        "blindIndex(keys, 'refresh-next', token);",
+      ],
+    ],
+    tests: 'same token again a moment later',
+  },
+  {
+    file: 'sessions',
+    name: 'an access token for a session that ended while its refresh ran',
+    change: [['      accountEnded &&\n', '      false &&\n']],
+    tests: 'ends while the refresh runs',
   },
   {
     file: 'sessions',
@@ -962,8 +1066,8 @@ const mutations: Mutation[] = [
     name: 'a session from before families never gets one',
     change: [
       [
-        '              previousRefreshHash: hash,\n              familyHash: familyHashOf(keys, family),\n',
-        '              previousRefreshHash: hash,\n',
+        '                previousRefreshHash: hash,\n                familyHash: familyHashOf(keys, family),\n',
+        '                previousRefreshHash: hash,\n',
       ],
     ],
     tests: 'before token families',
@@ -1179,8 +1283,22 @@ const mutations: Mutation[] = [
   {
     file: 'sessions',
     name: 'refresh keeps a session whose grant ended',
-    change: [['        if (!access.allowed) {', '        if (false) {']],
+    change: [
+      ['const ended: EndReason | null = !access.allowed', 'const ended: EndReason | null = false'],
+    ],
     tests: 'no grant left',
+  },
+  {
+    file: 'sessions',
+    name: 'refresh keeps a session without the authenticator its new role needs',
+    change: [[': access.mfaRequired && !withAuthenticator', ': false && !withAuthenticator']],
+    tests: 'needs the authenticator it did not use',
+  },
+  {
+    file: 'sessions',
+    name: 'refresh ends a session that used the authenticator',
+    change: [[': access.mfaRequired && !withAuthenticator', ': access.mfaRequired']],
+    tests: 'used the authenticator when such a role comes',
   },
   {
     file: 'sessions',
@@ -1246,6 +1364,17 @@ const mutations: Mutation[] = [
     file: 'rbac/bootstrap',
     name: 'a third Master',
     change: [['if (holders.length >= MASTER_SEATS) {', 'if (holders.length > MASTER_SEATS) {']],
+    tests: 'at most two',
+  },
+  {
+    file: 'rbac/bootstrap',
+    name: 'Master gets a third seat',
+    change: [
+      [
+        'const MASTER_SEATS = MASTER_SEED.maxHolders ?? 2;',
+        'const MASTER_SEATS = (MASTER_SEED.maxHolders ?? 2) + 1;',
+      ],
+    ],
     tests: 'at most two',
   },
   {
@@ -1493,8 +1622,8 @@ const mutations: Mutation[] = [
     name: 'no permission list at sign-in',
     change: [
       [
-        '      await collection.insertOne(session);\n      await listPermissions(userId, app, access);\n',
-        '      await collection.insertOne(session);\n',
+        "      await listPermissions(userId, app, access);\n      logger.info({ userId, app, sessionId, methods }, 'session started');",
+        "      logger.info({ userId, app, sessionId, methods }, 'session started');",
       ],
     ],
     tests: 'written at every sign-in',
@@ -1867,16 +1996,55 @@ const mutations: Mutation[] = [
   {
     file: 'rbac/security',
     name: 'a Security Officer resets a Master (DR-007)',
-    change: [['  if (!isMaster && (await holdsMaster(deps, user._id))) {', '  if (false) {']],
+    change: [
+      [
+        '  if (!(await mayResetAuthenticator(deps.mongo, caller, toObjectId(passport.userId), user._id))) {',
+        '  if (false) {',
+      ],
+    ],
     tests: 'DR-007',
   },
   {
-    file: 'rbac/security',
+    file: 'rbac/authority',
+    name: 'a Master is no different from anyone (no protection by permission)',
+    change: [['    !(await holdsPermission(mongo, target, totpResetMaster.key))', '    true']],
+    tests: 'DR-007',
+  },
+  {
+    file: 'rbac/authority',
     name: 'not even the other Master resets a Master',
+    change: [['    holds(caller, totpResetMaster.key) ||', '    false ||']],
+    tests: 'DR-007',
+  },
+  {
+    file: 'rbac/authority',
+    name: 'the grants list says one may reset their own authenticator',
     change: [
       [
-        '  if (!isMaster && (await holdsMaster(deps, user._id))) {',
-        '  if (await holdsMaster(deps, user._id)) {',
+        'if (!holds(caller, totpReset.key) || target.equals(callerId)) return false;',
+        'if (!holds(caller, totpReset.key)) return false;',
+      ],
+    ],
+    tests: 'whether the caller may reset',
+  },
+  {
+    file: 'rbac/authority',
+    name: 'the grants list says anyone may reset',
+    change: [
+      [
+        'if (!holds(caller, totpReset.key) || target.equals(callerId)) return false;',
+        'if (target.equals(callerId)) return false;',
+      ],
+    ],
+    tests: 'whether the caller may reset',
+  },
+  {
+    file: 'rbac/authority',
+    name: 'an ended grant still protects (or a retired role)',
+    change: [
+      [
+        '    .find({ userId, ...activeAt(now) }, { projection: { roleId: 1 } })',
+        '    .find({ userId }, { projection: { roleId: 1 } })',
       ],
     ],
     tests: 'DR-007',
@@ -1884,13 +2052,43 @@ const mutations: Mutation[] = [
   {
     file: 'rbac/roles',
     name: 'Master cannot reset an authenticator',
+    change: [['    totpReset.key,\n    totpResetMaster.key,', '    totpResetMaster.key,']],
+    tests: 'DR-007',
+  },
+  {
+    file: 'rbac/roles',
+    name: 'Master cannot reset the other Master',
+    change: [['    totpResetMaster.key,\n    auditRead.key,', '    auditRead.key,']],
+    tests: 'DR-007',
+  },
+  {
+    file: 'rbac/roles',
+    name: 'Master cannot download the audit log',
+    change: [['    auditRead.key,\n    auditExport.key,\n  ],', '    auditRead.key,\n  ],']],
+    tests: 'read the audit log and download it',
+  },
+  {
+    file: 'rbac/roles',
+    name: 'the Internal Auditor cannot download the audit log',
     change: [
       [
-        'permissions: [...APPOINTS, roleManage.key, totpReset.key],',
-        'permissions: [...APPOINTS, roleManage.key],',
+        'permissions: [grantRead.key, auditRead.key, auditExport.key],',
+        'permissions: [grantRead.key, auditRead.key],',
       ],
     ],
-    tests: 'DR-007',
+    tests: 'read the audit log and download it',
+  },
+  {
+    file: 'rbac/manage',
+    name: 'a sub-role may reset a Master',
+    change: [['  if (role.permissions.includes(totpResetMaster.key)) {', '  if (false) {']],
+    tests: 'lets Master make a sub-role',
+  },
+  {
+    file: 'rbac/manage',
+    name: 'the grants list never says whether one may reset',
+    change: [['    ...(userId === undefined\n      ? {}', '    ...(true\n      ? {}']],
+    tests: 'whether the caller may reset',
   },
   {
     file: 'rbac/security',
@@ -1930,7 +2128,12 @@ const mutations: Mutation[] = [
   {
     file: 'sessions',
     name: 'a token in the second every session ended',
-    change: [['    if (since === null) return iat;\n', '    return iat;\n']],
+    change: [
+      [
+        '    if (since === null) return { iat, accountEnded: false };\n',
+        '    return { iat, accountEnded: false };\n',
+      ],
+    ],
     tests: 'later second',
   },
   {
@@ -2080,11 +2283,44 @@ const mutations: Mutation[] = [
     name: 'the release does not run the provider-id migration',
     change: [
       [
-        'defineMigrations([signUpGrantsMigration, providerSubjectIndexMigration])',
-        'defineMigrations([signUpGrantsMigration])',
+        '    providerSubjectIndexMigration,\n    accessSnapshotsMigration,',
+        '    accessSnapshotsMigration,',
       ],
     ],
     tests: 'safely again',
+  },
+  {
+    file: 'release',
+    name: 'the release does not run the first copy for core (T3.5)',
+    change: [
+      [
+        '    providerSubjectIndexMigration,\n    accessSnapshotsMigration,\n',
+        '    providerSubjectIndexMigration,\n',
+      ],
+    ],
+    tests: 'runs the first copy at a release',
+  },
+  {
+    file: 'release',
+    name: 'the release does not send the first copy once more (LIVE-006)',
+    change: [
+      [
+        '    accessSnapshotsMigration,\n    accessSnapshotsAgainMigration,\n',
+        '    accessSnapshotsMigration,\n',
+      ],
+    ],
+    tests: 'runs the first copy at a release',
+  },
+  {
+    file: 'rbac/migrations',
+    name: 'the second copy sends nothing (LIVE-006)',
+    change: [
+      [
+        '  up: (context) => accessSnapshotsMigration.up(context),',
+        '  up: () => Promise.resolve(),',
+      ],
+    ],
+    tests: 'sends the first copy once more',
   },
   {
     file: 'oauth',
@@ -2288,6 +2524,239 @@ const mutations: Mutation[] = [
       ],
     ],
     tests: 'account is gone',
+  },
+  // core's copy: identity's snapshot events (TASKS T3.5)
+  {
+    file: 'rbac/grants',
+    name: 'a grant change sends no snapshot',
+    change: [
+      ['  await writeAccessSnapshot(mongo, session, userId, user.authzVersion ?? 0, now);\n', ''],
+    ],
+    tests: 'sends all of an account grants',
+  },
+  {
+    file: 'rbac/grants',
+    name: 'a snapshot keeps a grant that ran out',
+    change: [
+      [
+        '  active: true,\n  $or: [{ validTo: null }, { validTo: { $gt: now } }],\n});',
+        '  active: true,\n});',
+      ],
+    ],
+    tests: 'leaves out a grant that ran out',
+  },
+  {
+    file: 'rbac/grants',
+    name: 'a snapshot keeps an ended grant',
+    change: [['  userId,\n  active: true,\n  $or:', '  userId,\n  $or:']],
+    tests: 'sends all of an account grants',
+  },
+  {
+    file: 'rbac/sync',
+    name: 'the rbac step sends no roles',
+    change: [['const snapshots = await writeAllRoleSnapshots(mongo);', 'const snapshots = 0;']],
+    tests: 'sends every role from the rbac step',
+  },
+  {
+    file: 'rbac/manage',
+    name: 'a new sub-role sends no snapshot',
+    change: [
+      [
+        '      await writeRoleSnapshots(deps.mongo, session, [\n        { ...written, app: body.app, permissions: [...keyed.permissions] },\n      ]);\n',
+        '',
+      ],
+    ],
+    tests: 'sends a role when Master',
+  },
+  {
+    file: 'rbac/manage',
+    name: 'a changed sub-role sends no snapshot',
+    change: [
+      [
+        '    await writeRoleSnapshots(deps.mongo, session, [\n      { ...role, ...fields, permissions: next.permissions },\n    ]);\n',
+        '',
+      ],
+    ],
+    tests: 'sends a role when Master',
+  },
+  {
+    file: 'rbac/manage',
+    name: "a changed sub-role leaves its holders' versions",
+    change: [['      await raiseAuthzVersion(deps.mongo, session, userId, now);\n', '']],
+    tests: 'sends a role when Master|renews their holders',
+  },
+  {
+    file: 'users',
+    name: 'a new account sends no snapshot',
+    change: [['  if (isNewUser) await writeUserSnapshot(mongo, session, user);\n', '']],
+    tests: 'sends a new account',
+  },
+  {
+    file: 'rbac/migrations',
+    name: 'the first copy leaves out the accounts',
+    change: [['          await writeUserSnapshot(mongo, session, user);\n', '']],
+    tests: 'sends the first copy',
+  },
+  {
+    file: 'rbac/migrations',
+    name: 'the first copy leaves out the grants',
+    change: [
+      [
+        '          await writeAccessSnapshot(mongo, session, user._id, user.authzVersion ?? 0, now);\n',
+        '',
+      ],
+    ],
+    tests: 'sends the first copy',
+  },
+  {
+    file: 'rbac/grants',
+    name: 'an account holds any number of grants',
+    change: [['  if (held >= MAX_GRANTS_PER_ACCOUNT) {', '  if (false) {']],
+    tests: 'holds at most 50 grants',
+  },
+  {
+    file: 'rbac/grants',
+    name: 'an account holds one grant more than the cap',
+    change: [['  if (held >= MAX_GRANTS_PER_ACCOUNT) {', '  if (held > MAX_GRANTS_PER_ACCOUNT) {']],
+    tests: 'holds at most 50 grants',
+  },
+  // the catch-up sweep on identity's own queue (TASKS T4.1 PR B)
+  {
+    file: 'rbac/catch-up',
+    name: 'the sweep sends every account, however old its change',
+    change: [['.find(\n      { updatedAt: { $gte: since } },', '.find(\n      {},']],
+    tests: 'not of older ones',
+  },
+  {
+    file: 'rbac/catch-up',
+    name: 'two instances sweep at once',
+    change: [['if (!(await tryLease(mongo, LEASE, owner, CATCH_UP_LEASE_MS))) {', 'if (false) {']],
+    tests: 'another instance sweeps',
+  },
+  {
+    file: 'rbac/catch-up',
+    name: 'the sweep sends no grants',
+    change: [
+      [
+        '          await writeAccessSnapshot(mongo, session, user._id, user.authzVersion ?? 0, new Date());\n',
+        '',
+      ],
+    ],
+    tests: 'changed lately',
+  },
+  {
+    file: 'rbac/catch-up',
+    name: 'the sweep sends no accounts',
+    change: [['          await writeUserSnapshot(mongo, session, user);\n', '']],
+    tests: 'changed lately',
+  },
+  {
+    file: 'rbac/catch-up',
+    name: 'the sweep sends no roles',
+    change: [
+      [
+        '      await withTransaction(mongo, (session) => writeRoleSnapshots(mongo, session, part));\n',
+        '',
+      ],
+    ],
+    tests: 'roles changed lately',
+  },
+  {
+    file: 'rbac/catch-up',
+    name: 'the sweep sends every role, however old its change',
+    change: [['      mongo,\n      { updatedAt: { $gte: since } },', '      mongo,\n      {},']],
+    tests: 'roles changed lately',
+  },
+  {
+    file: 'runtime',
+    name: 'a start asks for no sweep',
+    change: [
+      [
+        'await trigger.runAfter(CATCH_UP_TASK, catchUpDelayMs, {',
+        'await Promise.resolve({ CATCH_UP_TASK, catchUpDelayMs,',
+      ],
+    ],
+    tests: 'at each start',
+  },
+  {
+    file: 'runtime',
+    name: 'a failed sweep is not tried again',
+    change: [['      attempts: CATCH_UP_ATTEMPTS,\n', '      attempts: 1,\n']],
+    tests: 'at each start',
+  },
+  {
+    file: 'runtime',
+    name: 'the worker never sweeps',
+    change: [['          await catchUpSweep(mongo, logger, { startedAt: firedAt });\n', '']],
+    tests: 'worker of identity',
+  },
+  // identity's audit records for core's audit log (TASKS T4.1 PR C)
+  {
+    file: 'rbac/manage',
+    name: 'a grant given goes unrecorded',
+    change: [["          action: 'iam.grants.give',", "          action: 'iam.grants.list',"]],
+    tests: 'grant given and ended',
+  },
+  {
+    file: 'rbac/manage',
+    name: 'a grant ended goes unrecorded',
+    change: [["        action: 'iam.grants.end',", "        action: 'iam.grants.list',"]],
+    tests: 'grant given and ended',
+  },
+  {
+    file: 'rbac/manage',
+    name: 'a sub-role change goes unrecorded',
+    change: [["      action: 'iam.roles.update',", "        action: 'iam.roles.list',"]],
+    tests: 'sub-role made and changed',
+  },
+  {
+    file: 'sessions',
+    name: "a customer's sign-in is recorded and an internal one not",
+    change: [
+      [
+        '      if ((SIGN_UP_APPS as readonly string[]).includes(app)) {',
+        '      if (!(SIGN_UP_APPS as readonly string[]).includes(app)) {',
+      ],
+    ],
+    tests: 'internal app, never a customer',
+  },
+  {
+    file: 'sessions',
+    name: 'a copied session goes unrecorded',
+    change: [
+      [
+        "            action: 'identity.session.reuseDetected',",
+        "            action: 'identity.session.refreshed',",
+      ],
+    ],
+    tests: 'old one a moment later',
+  },
+  {
+    file: 'audit',
+    name: 'identity sends personal data unmasked',
+    change: [
+      ['      before: mask(input.before),', '      before: input.before ?? null,'],
+      ['      after: mask(input.after),', '      after: input.after ?? null,'],
+    ],
+    tests: 'grant given and ended',
+  },
+  {
+    file: 'audit',
+    name: 'the IP is lost',
+    change: [['      ip: client?.ip ?? null,', '      ip: null,']],
+    tests: 'grant given and ended',
+  },
+  {
+    file: 'rbac/invitations',
+    name: 'an accepted invitation goes unrecorded',
+    change: [['    if (taken.modifiedCount === 1) {', '    if (false) {']],
+    tests: 'taken back and accepted',
+  },
+  {
+    file: 'audit',
+    name: 'a refused staff action goes unrecorded',
+    change: [['    if (error instanceof AppError && error.status === 403) {', '    if (false) {']],
+    tests: 'refused staff action',
   },
 ];
 

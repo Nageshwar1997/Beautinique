@@ -103,7 +103,11 @@ const order = (orderId: string) => ({
   correlationId: 'req-1',
   data: { orderId, total: 129_900 },
 });
-const SUBSCRIBERS = { 'commerce.order.placed': ['notify.emails', 'identity.grants'] };
+/** Every type the test writes has an entry: nobody listens to reviews (an empty list). */
+const SUBSCRIBERS = {
+  'commerce.order.placed': ['notify.emails', 'identity.grants'],
+  'catalog.review.added': [],
+};
 
 let mongo: Mongo;
 let redis: RedisConnection;
@@ -509,7 +513,10 @@ describe('tryLease', () => {
   });
 
   it('gives the lease to one owner until it runs out, and lets only that owner release it', async () => {
-    expect(await tryLease(mongo, 'job', 'a', 300)).toBe(true);
+    // long enough that the steps between two tries never outlive it on a slow CI runner (a 300 ms
+    // lease ran out there between them, 2026-11-15)
+    const ttl = 1500;
+    expect(await tryLease(mongo, 'job', 'a', ttl)).toBe(true);
     // one document per lease: an ObjectId _id like every document, found by its unique name
     const leases = await mongo.db.collection(LOCKS).find({ name: 'job' }).toArray();
     expect(leases).toHaveLength(1);
@@ -517,14 +524,14 @@ describe('tryLease', () => {
     expect(await mongo.db.collection(LOCKS).indexes()).toContainEqual(
       expect.objectContaining({ name: 'name_unique', key: { name: 1 }, unique: true }),
     );
-    expect(await tryLease(mongo, 'job', 'b', 300)).toBe(false);
-    expect(await tryLease(mongo, 'job', 'a', 300)).toBe(true);
-    await sleep(400);
-    expect(await tryLease(mongo, 'job', 'b', 300)).toBe(true);
+    expect(await tryLease(mongo, 'job', 'b', ttl)).toBe(false);
+    expect(await tryLease(mongo, 'job', 'a', ttl)).toBe(true);
+    await sleep(ttl + 100);
+    expect(await tryLease(mongo, 'job', 'b', ttl)).toBe(true);
     await releaseLease(mongo, 'job', 'a');
-    expect(await tryLease(mongo, 'job', 'a', 300)).toBe(false);
+    expect(await tryLease(mongo, 'job', 'a', ttl)).toBe(false);
     await releaseLease(mongo, 'job', 'b');
-    expect(await tryLease(mongo, 'job', 'a', 300)).toBe(true);
+    expect(await tryLease(mongo, 'job', 'a', ttl)).toBe(true);
   });
 });
 
@@ -564,6 +571,37 @@ describe('startRelay', () => {
       status: 'relayed',
       subscribers: 0,
     });
+  });
+
+  it('leaves an event of a type it has no entry for pending, for a newer instance that knows it (LIVE-006)', async () => {
+    // the old instance of a deploy: its code knows orders, not reviews
+    const old = relay({ subscribers: { 'commerce.order.placed': ['notify.emails'] } });
+    const review = await withTransaction(mongo, (session) =>
+      writeEvent(mongo, session, reviewAdded, {
+        ...order('r2'),
+        aggregate: { type: 'review', id: 'r2' },
+        data: { reviewId: 'r2' },
+      }),
+    );
+    const placed = await placeOrder('o15');
+    await waitFor(
+      async () =>
+        (await outbox().findOne({ _id: new ObjectId(placed.eventId) }))?.status === 'relayed',
+    );
+    // a few more rounds: the review stays, never relayed to nobody
+    await sleep(400);
+    expect(await outbox().findOne({ _id: new ObjectId(review.eventId) })).toMatchObject({
+      status: 'pending',
+    });
+    // the new instance leads once the old one stops, and sends it on
+    await old.stop();
+    relay({ subscribers: { ...SUBSCRIBERS, 'catalog.review.added': ['notify.emails'] } });
+    await waitFor(allRelayed);
+    expect(await outbox().findOne({ _id: new ObjectId(review.eventId) })).toMatchObject({
+      status: 'relayed',
+      subscribers: 1,
+    });
+    expect(await inspect('q.notify').getJob(jobIdOf(review.eventId, 'notify.emails'))).toBeTruthy();
   });
 
   it('relays at once through the change stream, before any sweep', async () => {
@@ -1213,6 +1251,95 @@ describe('upsertSchedules and scheduled tasks', () => {
     }
     await expect(trigger.runSoon('notify.sendEmails')).rejects.toThrow('is closed');
     expect(redis.client.status).toBe('ready');
+  });
+
+  it('runs a task once after a delay, never before it (runAfter)', async () => {
+    const trigger = startTaskTrigger({ redis: redis.client, logger, queue: 'q.identity', prefix });
+    const ranAt: number[] = [];
+    try {
+      consumers.push(
+        startConsumer({
+          mongo: consumerMongo,
+          redis: redis.client,
+          logger,
+          queue: 'q.identity',
+          subscriptions: [],
+          tasks: [
+            defineTask('identity.catchUpSweep', () => {
+              ranAt.push(Date.now());
+              return Promise.resolve();
+            }),
+          ],
+          prefix,
+        }),
+      );
+      const asked = Date.now();
+      await trigger.runAfter('identity.catchUpSweep', 1500);
+      // not yet: it waits as a delayed job in Redis
+      await new Promise((resolve) => setTimeout(resolve, 500));
+      expect(ranAt).toEqual([]);
+      await waitFor(
+        async () =>
+          (await taskRuns().findOne({ task: 'identity.catchUpSweep' }))?.lastFinishedAt !==
+          undefined,
+      );
+      expect(ranAt).toHaveLength(1);
+      expect((ranAt[0] ?? 0) - asked).toBeGreaterThanOrEqual(1400);
+      await expect(trigger.runAfter('catchUpSweep', 10)).rejects.toThrow('must be <module>.<task>');
+      await expect(trigger.runAfter('identity.catchUpSweep', -1)).rejects.toThrow(
+        'whole milliseconds',
+      );
+      await expect(trigger.runAfter('identity.catchUpSweep', 1.5)).rejects.toThrow(
+        'whole milliseconds',
+      );
+    } finally {
+      await trigger.close();
+    }
+    await expect(trigger.runAfter('identity.catchUpSweep', 10)).rejects.toThrow('is closed');
+  });
+
+  it('tries a delayed run that throws again after its backoff, with the same firedAt', async () => {
+    const trigger = startTaskTrigger({ redis: redis.client, logger, queue: 'q.identity', prefix });
+    const tries: { at: number; firedAt: number }[] = [];
+    try {
+      consumers.push(
+        startConsumer({
+          mongo: consumerMongo,
+          redis: redis.client,
+          logger,
+          queue: 'q.identity',
+          subscriptions: [],
+          tasks: [
+            defineTask('identity.catchUpSweep', ({ firedAt }) => {
+              tries.push({ at: Date.now(), firedAt: firedAt.getTime() });
+              return tries.length === 1
+                ? Promise.reject(new Error('the database is away'))
+                : Promise.resolve();
+            }),
+          ],
+          prefix,
+        }),
+      );
+      await trigger.runAfter('identity.catchUpSweep', 0, { attempts: 3, backoffMs: 1000 });
+      await waitFor(
+        async () =>
+          (await taskRuns().findOne({ task: 'identity.catchUpSweep' }))?.lastFinishedAt !==
+          undefined,
+      );
+      expect(tries).toHaveLength(2);
+      const [first, second] = tries;
+      // the second try waits out the backoff, and still says when the run was asked for
+      expect((second?.at ?? 0) - (first?.at ?? 0)).toBeGreaterThanOrEqual(900);
+      expect(second?.firedAt).toBe(first?.firedAt);
+      await expect(
+        trigger.runAfter('identity.catchUpSweep', 10, { attempts: 0, backoffMs: 10 }),
+      ).rejects.toThrow('whole number of attempts');
+      await expect(
+        trigger.runAfter('identity.catchUpSweep', 10, { attempts: 2, backoffMs: -1 }),
+      ).rejects.toThrow('backoff of whole milliseconds');
+    } finally {
+      await trigger.close();
+    }
   });
 
   it('refuses the same task twice in one consumer', () => {

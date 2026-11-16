@@ -3,6 +3,8 @@ import { subscribe, type Subscription } from '@beautinique/backend-server-queue'
 import { pingRecorded } from '@beautinique/shared-contracts';
 import type { Router } from 'express';
 
+import { accessSubscriptions } from './access.ts';
+import { type IdempotencyDeps, idempotencyIndexes } from './idempotency.ts';
 import { PINGS, platformRouter } from './routes.ts';
 
 export const PING_AUDIT = 'core.pingAudit';
@@ -13,6 +15,41 @@ export const PING_AUDIT_COLLECTION = 'platform_ping_audit';
  * `platform.ping.recorded` event goes out through the outbox, the queue and the inbox. It is also
  * the pattern every module follows: routes on contracts, events in the same transaction.
  */
+export {
+  ACCESS_COPIES,
+  type AccessCopy,
+  type GrantCopy,
+  ROLE_COPIES,
+  type RoleCopy,
+  USER_COPIES,
+  type UserCopy,
+} from './access.ts';
+export {
+  accessOf,
+  authorize,
+  type CallerAccess,
+  COPY_RETRIES,
+  COPY_RETRY_MS,
+  type ScopeFields,
+  scopeFilter,
+} from './authz.ts';
+export {
+  csvCell,
+  type CsvColumn,
+  type CsvFile,
+  csvLine,
+  csvText,
+  type DownloadDeps,
+  type DownloadHandler,
+  mountCoreDownload,
+} from './download.ts';
+export {
+  IDEMPOTENCY,
+  idempotency,
+  type IdempotencyDeps,
+  mountCoreRoute,
+  REPLAYED_HEADER,
+} from './idempotency.ts';
 export { PINGS } from './routes.ts';
 
 /** Which subscribers get which event (the relay's list). */
@@ -32,20 +69,25 @@ interface PingAudit {
   recordedAt: Date;
 }
 
-export const routerOf = (deps: { mongo: Mongo }): Router => platformRouter(deps);
+export const routerOf = (deps: IdempotencyDeps): Router => platformRouter(deps);
 
 /** The module's indexes: the release steps make them before core listens (ARCHITECTURE §11.1). */
-export const indexes: readonly IndexSpec[] = [PINGS, PING_AUDIT_COLLECTION].map((collection) => ({
-  collection,
-  name: 'recordedAt_ttl',
-  key: { recordedAt: 1 },
-  expireAfterSeconds: PING_TTL_SECONDS,
-}));
+export const indexes: readonly IndexSpec[] = [
+  ...[PINGS, PING_AUDIT_COLLECTION].map((collection): IndexSpec => ({
+    collection,
+    name: 'recordedAt_ttl',
+    key: { recordedAt: 1 },
+    expireAfterSeconds: PING_TTL_SECONDS,
+  })),
+  ...idempotencyIndexes,
+];
 
 /** What the queue worker runs for this module's subscribers: DB work only, safe to run again. */
 export function subscriptionsOf({ mongo }: { mongo: Mongo }): Subscription[] {
   const audit = mongo.db.collection<PingAudit>(PING_AUDIT_COLLECTION);
   return [
+    // core's copy of identity's roles, grants and accounts (TASKS T3.5)
+    ...accessSubscriptions({ mongo }),
     subscribe(PING_AUDIT, pingRecorded, async (event, session) => {
       await audit.insertOne(
         {

@@ -5,6 +5,7 @@ import {
   type CallArgs,
   type CallOptions,
   createClient,
+  type DownloadedFile,
   refreshSession,
   type RouteDefinition,
   type RouteOutput,
@@ -18,8 +19,9 @@ export const API_BASE_URL = '/api/v1';
 /**
  * After another tab refreshed the same session a moment earlier (409), how long a refresh waits at
  * most for that tab to say its answer came (`refreshed` on the app's channel): the answer sets the
- * new cookies, which this tab shares. The old refresh token never goes again: after 10 s identity
- * takes it for a stolen copy and ends the session (ARCHITECTURE §7.2; QA Q-010, owner 2026-11-12).
+ * new cookies, which this tab shares. The old refresh token never goes again: it would undo the other
+ * tab's new token, and the cookie left last could be the undone one, a stolen copy at the next
+ * refresh (ARCHITECTURE §7.2; QA Q-010, owner 2026-11-12).
  */
 export const OTHER_TAB_REFRESH_WAIT_MS = 5_000;
 /** Without a BroadcastChannel to hear the other tab on (an old browser): a short wait instead. */
@@ -75,6 +77,14 @@ export interface ApiClient {
     route: Route,
     ...args: CallArgs<Route>
   ): Promise<RouteOutput<Route>>;
+  /**
+   * `download(route, { params, query })`: a download route's file (`download: 'csv'`, T4.1 PR D),
+   * with the same refresh and step-up as `call`. Save it with `saveFile`.
+   */
+  download<const Route extends RouteDefinition & { download: 'csv' }>(
+    route: Route,
+    ...args: CallArgs<Route>
+  ): Promise<DownloadedFile>;
   /**
    * A new access token with the refresh cookie, one at a time: callers during a refresh share it.
    * false when there is no session any more; other failures (offline, server down) throw.
@@ -188,8 +198,8 @@ export function createApiClient(options: ApiClientOptions): ApiClient {
     } catch (error) {
       if (isApiError(error, 'REFRESH_IN_PROGRESS')) {
         // Another tab refreshed this session a moment ago, and its new cookies are this tab's too
-        // once its answer comes. Asking again with the old refresh token would look like a stolen
-        // one after 10 s (ARCHITECTURE §7.2), so this tab waits to hear the other one (QA Q-010).
+        // once its answer comes. Asking again with the old refresh token would undo that tab's new
+        // token (ARCHITECTURE §7.2), so this tab waits to hear the other one (QA Q-010).
         await otherTabRefreshed(heard);
         refreshed();
         return true;
@@ -219,16 +229,8 @@ export function createApiClient(options: ApiClientOptions): ApiClient {
     return steppingUp;
   };
 
-  async function call<const Route extends RouteDefinition>(
-    route: Route,
-    ...[request, callOptions]: CallArgs<Route>
-  ): Promise<RouteOutput<Route>> {
-    // one key for every try, so a call sent again after a refresh or a step-up is the same request
-    const sendOptions: CallOptions = route.idempotency
-      ? { ...callOptions, idempotencyKey: callOptions?.idempotencyKey ?? crypto.randomUUID() }
-      : { ...callOptions };
-    const sendOnce = () => inner.call(route, ...([request, sendOptions] as CallArgs<Route>));
-
+  /** Sends until it is answered: once more after a refresh, once more after a step-up. */
+  async function withSession<T>(sendOnce: () => Promise<T>): Promise<T> {
     if (serverGate !== null) await serverGate;
     // a call asked for during a refresh waits for it, instead of going out with the old cookie
     if (refreshing !== null) await refreshing.catch(() => false);
@@ -254,9 +256,28 @@ export function createApiClient(options: ApiClientOptions): ApiClient {
     }
   }
 
+  function call<const Route extends RouteDefinition>(
+    route: Route,
+    ...[request, callOptions]: CallArgs<Route>
+  ): Promise<RouteOutput<Route>> {
+    // one key for every try, so a call sent again after a refresh or a step-up is the same request
+    const sendOptions: CallOptions = route.idempotency
+      ? { ...callOptions, idempotencyKey: callOptions?.idempotencyKey ?? crypto.randomUUID() }
+      : { ...callOptions };
+    return withSession(() => inner.call(route, ...([request, sendOptions] as CallArgs<Route>)));
+  }
+
+  function download<const Route extends RouteDefinition & { download: 'csv' }>(
+    route: Route,
+    ...args: CallArgs<Route>
+  ): Promise<DownloadedFile> {
+    return withSession(() => inner.download(route, ...args));
+  }
+
   return {
     app: options.app,
     call,
+    download,
     refresh,
     setStepUpHandler(handler) {
       stepUpHandler = handler;

@@ -1,4 +1,12 @@
-import type { Logger, ReadyCheck } from '@beautinique/backend-server-kit';
+import type { PublicJwk } from '@beautinique/backend-server-crypto';
+import {
+  jwksCache,
+  jwksFromUrl,
+  type Logger,
+  type Passport,
+  passportVerifier,
+  type ReadyCheck,
+} from '@beautinique/backend-server-kit';
 import { connectMongo, type Mongo } from '@beautinique/backend-server-mongo';
 import {
   connectRedis,
@@ -14,16 +22,28 @@ import {
   upsertSchedules,
   type WipeWatchdog,
 } from '@beautinique/backend-server-queue';
+import { passportAudience } from '@beautinique/shared-contracts';
+import type { Request } from 'express';
 
 import type { Config } from './config.ts';
-import { subscribers, subscriptionsOf } from './modules/index.ts';
+import {
+  type AuditStore,
+  auditStore,
+  schedules as moduleSchedules,
+  subscribers,
+  subscriptionsOf,
+  tasksOf,
+} from './modules/index.ts';
 import { runReleaseSteps } from './release.ts';
 
 /** core's queue: its worker runs core's subscribers and scheduled tasks (one queue per deployable). */
 export const QUEUE = 'q.core';
 
 /** Timers live in BullMQ job schedulers, never `setInterval` (RULES §4.11). */
-export const SCHEDULES: readonly Schedule[] = [{ task: 'platform.heartbeat', every: 5 * 60_000 }];
+export const SCHEDULES: readonly Schedule[] = [
+  { task: 'platform.heartbeat', every: 5 * 60_000 },
+  ...moduleSchedules,
+];
 
 export interface RuntimeOptions {
   logger: Logger;
@@ -37,14 +57,20 @@ export interface RuntimeOptions {
   pollMs?: number;
   /** How often the wipe watchdog looks (default 30 s). */
   watchdogMs?: number;
+  /** The gateway's passport keys, in memory (backend/bundle); otherwise read from the config URL */
+  passportJwks?: readonly PublicJwk[];
 }
 
 /** core's connections and background workers: MongoDB, Redis, the outbox relay, the queue worker. */
 export interface Runtime {
   mongo: Mongo;
+  /** The audit log: entries in their own database, chain heads in core's (TASKS T4.1 PR C) */
+  audit: AuditStore;
   redis: RedisConnection;
   relay: Relay;
   watchdog: WipeWatchdog;
+  /** Who signed in, from the gateway's passport (401 without one): routes that need a caller */
+  passport: (req: Request) => Promise<Passport>;
   /** Starts the queue worker if it is not running yet. */
   startConsuming(): void;
   /** The checks for GET /ready. */
@@ -61,7 +87,15 @@ export interface Runtime {
  * closed again and the error goes on.
  */
 export async function startRuntime(config: Config, options: RuntimeOptions): Promise<Runtime> {
-  const { logger, consume = true, queuePrefix: prefix, epochKey, pollMs, watchdogMs } = options;
+  const {
+    logger,
+    consume = true,
+    queuePrefix: prefix,
+    epochKey,
+    pollMs,
+    watchdogMs,
+    passportJwks,
+  } = options;
   const closers: (() => Promise<void>)[] = [];
   const stop = async () => {
     for (const close of closers.splice(0).toReversed()) await close();
@@ -75,9 +109,20 @@ export async function startRuntime(config: Config, options: RuntimeOptions): Pro
     });
     closers.push(() => mongo.close());
     // migrations and indexes before anything uses the database (ARCHITECTURE §11.1)
-    await runReleaseSteps(mongo, logger);
+    await runReleaseSteps(mongo, logger, { auditDbName: config.auditDbName });
+    const audit = auditStore(mongo, config.auditDbName);
     const redis = await connectRedis({ url: config.redisUrl, name: 'core', logger });
     closers.push(() => redis.close());
+    // every start sets the schedules (safe to repeat): one a release adds is there at once, not
+    // only after Redis is next wiped (LIVE-006: audit.verifyChains never ran live)
+    await upsertSchedules({
+      mongo,
+      redis: redis.client,
+      logger,
+      queue: QUEUE,
+      schedules: SCHEDULES,
+      prefix,
+    });
     const relay = startRelay({
       mongo,
       redis: redis.client,
@@ -96,8 +141,8 @@ export async function startRuntime(config: Config, options: RuntimeOptions): Pro
         redis: redis.client,
         logger,
         queue: QUEUE,
-        subscriptions: subscriptionsOf({ mongo }),
-        tasks: [heartbeatTask(mongo, SCHEDULES, logger)],
+        subscriptions: subscriptionsOf({ mongo, audit }),
+        tasks: [heartbeatTask(mongo, SCHEDULES, logger), ...tasksOf({ audit, logger })],
         prefix,
       });
     };
@@ -128,9 +173,18 @@ export async function startRuntime(config: Config, options: RuntimeOptions): Pro
 
     return {
       mongo,
+      audit,
       redis,
       relay,
       watchdog,
+      passport: passportVerifier({
+        keys: jwksCache({
+          load: passportJwks
+            ? () => Promise.resolve({ keys: passportJwks })
+            : jwksFromUrl(config.passportJwksUrl),
+        }),
+        audience: passportAudience('core'),
+      }),
       startConsuming,
       ready: {
         mongo: mongo.ready,

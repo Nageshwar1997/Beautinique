@@ -1,6 +1,6 @@
 # LinkedIn posts — Beautinique
 
-> **Status:** v1.11 (2026-11-03). Project ke build-in-public LinkedIn posts: har post ka text, hashtags aur
+> **Status:** v1.12 (2026-11-14). Project ke build-in-public LinkedIn posts: har post ka text, hashtags aur
 > PDF carousel ki slides ka image prompt yahan date ke folder me rehte hain. Post insaan khud
 > LinkedIn pe karta hai; koi API ya browser automation nahi.
 
@@ -13,8 +13,7 @@ linkedin-posts/
   IMAGES.md       images banane ke common steps (har post ke liye same)
   _template/      naye post ki khaali files
   D<N>-YYYY-MM-DD/  Day number + post ki date, jaise D1-2026-11-03 (owner, 2026-11-03)
-    post.md       status + post ka text
-    hashtags.md   3–5 hashtags
+    post.md       status + post ka text (hashtags bhi isi me, aakhri line)
     carousel.md   PDF ka title aur saari slides ka ek image prompt
     slides/       images (1.jpg, 2.jpg ...) aur carousel.pdf — git me nahi (.gitignore)
 ```
@@ -37,8 +36,10 @@ linkedin-posts/
   end me repo link: https://github.com/Nageshwar1997/Beautinique. Limit 3000 characters.
 - Koi secret, email, internal URL, personal data ya hype words nahi. Facts sirf PRs/commits se; jo bana
   nahi, wo mat likho.
-- Post ka text `post.md` me ` ```text ` block me (prettier nahi chhedta, copy aasaan). `hashtags.md` wali
-  line post ke end me paste hoti hai.
+- Post ka text `post.md` me ` ```text ` block me (prettier nahi chhedta, copy aasaan).
+- **Hashtags usi block ki aakhri line me** (owner, 2026-11-14): alag file nahi, poora post ek copy-paste me.
+  8–10 hashtags: pehle common (`#buildinpublic`, stack wale), phir us din ke topic ke. Ye bhi 3000 characters
+  me gine jaate hain.
 - Carousel ke saath text me slides ka chhota saar bhi ho (PDF me alt text nahi jaata).
 - **Alt text sirf akeli image wale post me** (owner, 2026-11-03): carousel (PDF) ke saath LinkedIn alt text nahi
   leta, isliye `carousel.md` me alt text nahi. Post me ek hi image ho to `post.md` me uska ek line alt text, jo
@@ -88,7 +89,7 @@ Naye Claude Code session me (worktree me, taaki chal rahi feature branch pe asar
 
 ## 6. Commit ka faisla (owner, 2026-11-03)
 
-- `linkedin-posts/` ki **saari** files (post, hashtags, carousel, HISTORY, README, `IMAGES.md`, `_template/`) aur
+- `linkedin-posts/` ki **saari** files (post, carousel, HISTORY, README, `IMAGES.md`, `_template/`) aur
   `/linkedin-post` skill **seedha `prerelease` pe push**, bina branch/PR (owner, 2026-11-03: chhote badlav ke liye
   PR aur CI ka intezaar nahi). Pehle `git pull --rebase` aur `npm run format:check`; force push nahi, `slides/`
   kabhi nahi ([RULES §2](../docs/RULES.md)).
@@ -109,3 +110,4 @@ Naye Claude Code session me (worktree me, taaki chal rahi feature branch pe asar
 | v1.9    | 2026-11-03 | §6: README, IMAGES.md, template aur skill bhi seedha `prerelease` pe, PR nahi (owner ka faisla).                    |
 | v1.10   | 2026-11-03 | §3: alt text sirf akeli image wale post me; carousel me nahi (owner ka faisla).                                     |
 | v1.11   | 2026-11-03 | §1: post folder ka naam `D<N>-YYYY-MM-DD` (Day number + date; owner ka faisla).                                     |
+| v1.12   | 2026-11-14 | §1, §3: `hashtags.md` hata, hashtags `post.md` ke text block ki aakhri line me; 8–10 hashtags (owner ka faisla).    |

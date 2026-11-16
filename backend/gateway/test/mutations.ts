@@ -247,15 +247,39 @@ const mutations: Mutation[] = [
   },
   {
     file: 'trust',
-    name: 'x-real-ip counts without the origin secret',
-    change: [['if (fromVercel && real !== undefined', 'if (real !== undefined']],
+    name: "Vercel's IP headers count without the origin secret",
+    change: [
+      ['  if (fromVercel) {\n    for (const header', '  if (true) {\n    for (const header'],
+    ],
     tests: 'client IP',
   },
   {
     file: 'trust',
-    name: 'any x-real-ip text is taken',
-    change: [['real !== undefined && isIP(real) !== 0', 'real !== undefined']],
-    tests: 'request id and a re-encoded path',
+    name: 'any header text is taken as an IP',
+    change: [
+      [
+        "first !== '' && isIP(unmapped(first)) !== 0 ? first : undefined",
+        "first !== '' ? first : undefined",
+      ],
+    ],
+    tests: 'client IP',
+  },
+  {
+    file: 'trust',
+    name: "x-forwarded-for wins over Vercel's own header (LIVE-007)",
+    change: [
+      [
+        "  'x-vercel-forwarded-for',\n  'x-real-ip',\n  'x-forwarded-for',\n] as const;",
+        "  'x-forwarded-for',\n  'x-real-ip',\n  'x-vercel-forwarded-for',\n] as const;",
+      ],
+    ],
+    tests: 'client IP',
+  },
+  {
+    file: 'trust',
+    name: 'the last address of x-forwarded-for is taken, the proxy (LIVE-007)',
+    change: [["value?.split(',')[0]?.trim()", "value?.split(',').at(-1)?.trim()"]],
+    tests: 'client IP',
   },
   // 5. what reaches the owner, and what comes back
   {

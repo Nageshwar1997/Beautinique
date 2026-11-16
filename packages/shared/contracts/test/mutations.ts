@@ -67,7 +67,12 @@ const mutations: Mutation[] = [
   {
     file: 'client',
     name: 'a redirect is treated as success',
-    change: [['response.status > 299', 'response.status > 399']],
+    change: [
+      [
+        'response.status > 299) throw failure(response);',
+        'response.status > 399) throw failure(response);',
+      ],
+    ],
   },
   {
     file: 'client',
@@ -627,6 +632,165 @@ const mutations: Mutation[] = [
     ],
     tests: 'count the recovery codes left',
   },
+  // a Master's authenticator only the other Master resets, by permission (QA DR-007, TASKS T4.11)
+  {
+    file: 'catalogue/iam',
+    name: "a Master's authenticator reset works in a scope",
+    change: [
+      [
+        "key: 'iam.totp.reset_master',\n  description: \"Reset a Master's authenticator\",\n  scopeTypes: ['global'],",
+        "key: 'iam.totp.reset_master',\n  description: \"Reset a Master's authenticator\",\n  scopeTypes: SCOPE_TYPES,",
+      ],
+    ],
+    tests: 'reset global and behind a step-up',
+  },
+  {
+    file: 'catalogue/iam',
+    name: "a Master's authenticator reset needs no step-up",
+    change: [
+      [
+        "risk: 'high',\n  mfa: true,\n  secondSignature: false,\n});\n\nexport const IAM_PERMISSIONS",
+        "risk: 'high',\n  mfa: false,\n  secondSignature: false,\n});\n\nexport const IAM_PERMISSIONS",
+      ],
+    ],
+    tests: 'step-up',
+  },
+  {
+    file: 'catalogue/iam',
+    name: "a Master's authenticator reset is not in the catalogue",
+    change: [['  totpReset,\n  totpResetMaster,\n] as const;', '  totpReset,\n] as const;']],
+    tests: 'lists permissions sorted by key',
+  },
+  {
+    file: 'catalogue/iam',
+    name: 'every grants list must say whether one may reset',
+    change: [['canResetAuthenticator: boolean().optional(),', 'canResetAuthenticator: boolean(),']],
+    tests: 'may reset their authenticator',
+  },
+  // identity's snapshot events for core's copy (TASKS T3.5)
+  {
+    file: 'catalogue/index',
+    name: 'the snapshot events are not in the catalogue',
+    change: [['  ...ACCESS_EVENTS,\n', '']],
+    tests: 'in the platform catalogue, from identity|every event version',
+  },
+  {
+    file: 'catalogue/access',
+    name: 'a snapshot takes a negative authz version',
+    change: [['    authzVersion: number().int().min(0),', '    authzVersion: number().int(),']],
+    tests: 'by role id only',
+  },
+  {
+    file: 'catalogue/access',
+    name: "a role snapshot leaves out the role's permissions",
+    change: [['    permissions: array(string()),\n', '']],
+    tests: 'by role id only',
+  },
+  {
+    file: 'platform',
+    name: 'a state id is taken for a document id',
+    change: [["new Set<ScopeType>(['global', 'state'])", "new Set<ScopeType>(['global'])"]],
+    tests: 'whose ids are codes',
+  },
+  {
+    file: 'catalogue/access',
+    name: 'an account may hold more grants than an event carries',
+    change: [
+      ['export const MAX_GRANTS_PER_ACCOUNT = 50;', 'export const MAX_GRANTS_PER_ACCOUNT = 100;'],
+    ],
+    tests: 'the most grants it may hold',
+  },
+  // the audit log's personal data, half hidden (TASKS T4.1 PR C, owner 2026-11-15)
+  {
+    file: 'catalogue/audit',
+    name: 'an email kept whole',
+    change: [["return match ? `${match[1] ?? ''}•••${match[2] ?? ''}` : email;", 'return email;']],
+    tests: 'first letter and the domain',
+  },
+  {
+    file: 'catalogue/audit',
+    name: 'a masked phone masked again',
+    change: [['if (/^•+\\d{0,4}$/.test(phone)) return phone;', '']],
+    tests: 'second time',
+  },
+  {
+    file: 'catalogue/audit',
+    name: 'a phone kept whole',
+    change: [
+      ["return digits.length <= 4 ? '••••' : `••••••${digits.slice(-4)}`;", 'return phone;'],
+    ],
+    tests: 'last 4 digits',
+  },
+  {
+    file: 'catalogue/audit',
+    name: 'a name or a PAN kept',
+    change: [
+      [
+        'if (HIDDEN_KEYS.test(key)) return value === null || value === undefined ? value : HIDDEN;',
+        '',
+      ],
+    ],
+    tests: 'hides a name',
+  },
+  {
+    file: 'catalogue/audit',
+    name: 'a phone key not looked at',
+    change: [['if (PHONE_KEYS.test(key)) return maskPhone(value);', '']],
+    tests: 'last 4 digits',
+  },
+  {
+    file: 'catalogue/audit',
+    name: 'arrays not looked into',
+    change: [
+      [
+        'if (Array.isArray(value)) return value.map((item) => maskForAudit(item, key));',
+        'if (Array.isArray(value)) return value;',
+      ],
+    ],
+    tests: 'arrays and nested objects',
+  },
+  {
+    file: 'catalogue/audit',
+    name: 'nested objects not looked into',
+    change: [['        maskForAudit(item, inner),', '        item,']],
+    tests: 'under any key',
+  },
 ];
+
+// download routes (T4.1 PR D): a signed-in GET, and a file name that stays a plain one
+mutations.push(
+  {
+    file: 'routes',
+    name: 'a public download route is taken',
+    change: [
+      ["    if (route.method !== 'GET' || route.access.type === 'public') {", '    if (false) {'],
+    ],
+    tests: 'a download route is a signed-in GET',
+  },
+  {
+    file: 'routes',
+    name: 'a download route may answer with anything',
+    change: [
+      [
+        "    if (route.output !== csvFileZod) fail('a download route answers with csvFileZod');",
+        '',
+      ],
+    ],
+    tests: 'a download route is a signed-in GET',
+  },
+  {
+    file: 'client',
+    name: 'a file name with a path is taken',
+    // String.raw: the source's own backslashes
+    change: [[String.raw`/filename="([^"\\/]+)"/i`, '/filename="([^"]+)"/i']],
+    tests: 'reads only a plain file name',
+  },
+  {
+    file: 'client',
+    name: "a download's error answer is not read",
+    change: [['        body = JSON.parse(await blob.text());', '        body = null;']],
+    tests: 'reads an error answer as the error it is',
+  },
+);
 
 export default mutations;

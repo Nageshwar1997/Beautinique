@@ -1,9 +1,13 @@
 import { LOOPBACK_HOST } from '@beautinique/backend-server-kit';
+import { PLATFORM_STATE, TASK_RUNS } from '@beautinique/backend-server-queue';
 import { RELEASE_STATE, releaseFingerprint } from '@beautinique/backend-server-release';
+import { events } from '@beautinique/shared-contracts';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 
 import { readConfig } from '../src/config.ts';
-import { releaseDefinition } from '../src/release.ts';
+import { subscribers } from '../src/modules/index.ts';
+import { releaseDefinitionOf } from '../src/release.ts';
+import { SCHEDULES } from '../src/runtime.ts';
 import {
   type Inspector,
   inspector,
@@ -56,6 +60,7 @@ describe('core', () => {
       handleSignals: false,
       runtime: { queuePrefix: prefix, epochKey, consume: false },
     });
+    const releaseDefinition = releaseDefinitionOf(testConfig(dbName).auditDbName);
     try {
       for (const { collection, name } of releaseDefinition.indexes) {
         const names = (await look.mongo.db.collection(collection).indexes()).map((i) => i.name);
@@ -74,6 +79,53 @@ describe('core', () => {
     } finally {
       await server.stop();
     }
+  });
+
+  it('sets its schedules at every start, also on a Redis it already recovered for (LIVE-006)', async () => {
+    // a Redis that lives on from the last release: the watchdog has nothing to recover
+    const ownPrefix = `${prefix}s`;
+    const epoch = `epoch-${ownPrefix}`;
+    await look.redis.client.set(epochKey, epoch);
+    await look.mongo.db
+      .collection(PLATFORM_STATE)
+      .updateOne(
+        { key: 'redis-epoch' },
+        { $set: { value: epoch, recoveredAt: new Date() } },
+        { upsert: true },
+      );
+    const server = await start(testConfig(dbName), {
+      port: 0,
+      host: LOOPBACK_HOST,
+      handleSignals: false,
+      runtime: { queuePrefix: ownPrefix, epochKey, consume: false },
+    });
+    try {
+      const runs = await look.mongo.db
+        .collection<{ task: string; firstSeenAt: Date }>(TASK_RUNS)
+        .find({ task: { $in: SCHEDULES.map((schedule) => schedule.task) } })
+        .toArray();
+      expect(runs.map((run) => run.task).sort()).toEqual(
+        SCHEDULES.map((schedule) => schedule.task).sort(),
+      );
+      // and the schedulers are in this Redis, under this start's prefix
+      expect(await look.redis.client.keys(`${ownPrefix}:q.core:*`)).not.toEqual([]);
+    } finally {
+      await server.stop();
+      const keys = await look.redis.client.keys(`${ownPrefix}:*`);
+      if (keys.length > 0) await look.redis.client.del(...keys);
+    }
+  });
+
+  it('routes every event type it writes, and only those (LIVE-006: an unrouted type waits)', () => {
+    const written = [
+      ...new Set(
+        events
+          .all()
+          .filter((event) => event.producer === 'core')
+          .map((event) => event.type),
+      ),
+    ].sort();
+    expect(Object.keys(subscribers).sort()).toEqual(written);
   });
 
   it('is not ready while its queue worker is not running', async () => {
@@ -99,9 +151,15 @@ describe('core', () => {
       logLevel: 'silent',
       mongoUri: env.CORE__MONGO_URI,
       mongoDbName: 'bq_core_x',
+      auditDbName: 'bq_core_x_audit',
       redisUrl: env.CORE__REDIS_URL,
       outboxRelay: 'poll',
+      passportJwksUrl: 'http://localhost:8080/.well-known/passport-jwks.json',
     });
+    // live, the audit log has its own database by default
+    expect(readConfig({ env: { ...env, CORE__AUDIT_DB_NAME: undefined } }).auditDbName).toBe(
+      'bq_audit',
+    );
     expect(readConfig({ env: { ...env, CORE__PORT: '9001' } }).port).toBe(9001);
     expect(readConfig({ env: { ...env, CORE__OUTBOX_RELAY: 'changestream' } }).outboxRelay).toBe(
       'changestream',

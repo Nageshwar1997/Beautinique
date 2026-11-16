@@ -191,6 +191,14 @@ const mutations: Mutation[] = [
   },
   {
     file: 'relay',
+    name: 'an unknown type is relayed to nobody (LIVE-006)',
+    change: [
+      [".find({ status: 'pending', type: { $in: known } })", ".find({ status: 'pending' })"],
+    ],
+    tests: 'has no entry for',
+  },
+  {
+    file: 'relay',
     name: 'one batch per round',
     change: [['(await relayBatch()) === batchSize', '(await relayBatch()) === -1']],
   },
@@ -687,6 +695,44 @@ const mutations: Mutation[] = [
       ],
     ],
     tests: 'late',
+  },
+  // runAfter: a task run after a delay (identity catch-up sweep, TASKS T4.1)
+  {
+    file: 'schedules',
+    name: 'a delayed run starts at once',
+    change: [['          delay: delayMs,\n', '']],
+    tests: 'never before it',
+  },
+  {
+    file: 'schedules',
+    name: 'a delay in fractions or below 0 is taken',
+    change: [['if (!Number.isInteger(delayMs) || delayMs < 0) {', 'if (delayMs < 0) {']],
+    tests: 'never before it',
+  },
+  {
+    file: 'schedules',
+    name: 'a delayed run that throws is not tried again',
+    change: [['            attempts: retry.attempts,\n', '']],
+    tests: 'after its backoff',
+  },
+  {
+    file: 'schedules',
+    name: 'the backoff is not kept',
+    change: [
+      [
+        "backoff: { type: 'exponential', delay: retry.backoffMs },",
+        "backoff: { type: 'exponential', delay: 0 },",
+      ],
+    ],
+    tests: 'after its backoff',
+  },
+  {
+    file: 'schedules',
+    name: 'zero attempts taken',
+    change: [
+      ['if (retry && (!Number.isInteger(retry.attempts) || retry.attempts < 1)) {', 'if (false) {'],
+    ],
+    tests: 'after its backoff',
   },
 ];
 

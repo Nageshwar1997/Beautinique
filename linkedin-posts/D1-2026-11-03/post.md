@@ -26,6 +26,6 @@ Lesson of the day: "latest" moves under you. One day CI failed with no code chan
 Carousel: monorepo, CI checks, local infra, branch flow and the kernel bug.
 
 Code: https://github.com/Nageshwar1997/Beautinique
-```
 
-Post ke end me `hashtags.md` wali line paste karo.
+#buildinpublic #webdev #typescript #monorepo #mongodb
+```

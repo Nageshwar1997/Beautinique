@@ -180,6 +180,15 @@ describe('the shipped roles', () => {
     });
   });
 
+  it('let only Master and the Internal Auditor read the audit log and download it', () => {
+    const holders = (permission: string) =>
+      ROLE_SEEDS.filter((seed) => seed.permissions.includes(permission))
+        .map((seed) => seed.key)
+        .sort();
+    expect(holders('audit.entry.read')).toEqual(['master.internal_auditor', 'master.master']);
+    expect(holders('audit.entry.export')).toEqual(['master.internal_auditor', 'master.master']);
+  });
+
   it('ask an authenticator of Seller Account Owner and Seller Finance, not of other seller staff', () => {
     const strict = ROLE_SEEDS.filter((seed) => seed.app === 'seller' && seed.mfaRequired);
     expect(strict.map((seed) => seed.key).sort()).toEqual([
@@ -494,6 +503,49 @@ describe('the authz version', () => {
     expect(
       await harness.server.runtime.redis.client.exists(revokedSessionKey(session.sessionId)),
     ).toBe(1);
+  });
+
+  it('ends a session at refresh when its access now needs the authenticator it did not use', async () => {
+    // a seller signs in with a password (seller asks no authenticator by itself) ...
+    const address = email('tara');
+    const userId = await customerOnly('tara');
+    await giveRole(userId, 'seller.catalog_manager');
+    const session = await harness.server.runtime.otp.sessions.issue({
+      userId: oid(userId),
+      email: address,
+      app: 'seller',
+      methods: ['password'],
+      client: { ip: '203.0.113.9', userAgent: 'test' },
+    });
+    // ... and is then made Seller Finance, a role that needs it (owner, 2026-11-15)
+    await giveRole(userId, 'seller.finance');
+    const answer = await refresh(session.refreshToken, 'seller');
+    expect(answer.status).toBe(IDENTITY_ERROR_CODES.SESSION_EXPIRED);
+    expect(
+      await db()
+        .collection<Session>(SESSIONS)
+        .findOne({ _id: oid(session.sessionId) }),
+    ).toMatchObject({ revokeReason: 'mfa-needed' });
+    expect(
+      await harness.server.runtime.redis.client.exists(revokedSessionKey(session.sessionId)),
+    ).toBe(1);
+    // the next sign-in sets the authenticator up first
+    expect(next(await login(address, 'seller'))).toBe('totp-enroll');
+  });
+
+  it('keeps a session that used the authenticator when such a role comes', async () => {
+    const address = email('veda');
+    const userId = await customerOnly('veda');
+    await giveRole(userId, 'seller.catalog_manager');
+    const session = await harness.server.runtime.otp.sessions.issue({
+      userId: oid(userId),
+      email: address,
+      app: 'seller',
+      methods: ['password', 'totp'],
+      client: { ip: '203.0.113.9', userAgent: 'test' },
+    });
+    await giveRole(userId, 'seller.finance');
+    expect((await refresh(session.refreshToken, 'seller')).status).toBe(200);
   });
 });
 

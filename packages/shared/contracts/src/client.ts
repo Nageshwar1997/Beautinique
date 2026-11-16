@@ -137,10 +137,30 @@ function failure(response: AxiosResponse<unknown>): ApiError {
   });
 }
 
+/** A file a download route sent (T4.1 PR D): its bytes, and the name the server gave it. */
+export interface DownloadedFile {
+  blob: Blob;
+  fileName: string;
+}
+
+/**
+ * How long a download may take, start to end: Vercel's own limit for a rewrite (120 s), since the
+ * whole file comes in one answer (50,000 rows at most).
+ */
+export const DOWNLOAD_TIMEOUT_MS = 120_000;
+
+/** The name in `attachment; filename="audit.csv"`, or null when there is none. */
+export function fileNameOf(disposition: unknown): string | null {
+  if (typeof disposition !== 'string') return null;
+  const match = /filename="([^"\\/]+)"/i.exec(disposition);
+  return match?.[1] ?? null;
+}
+
 /**
  * The typed client (ARCHITECTURE §5.1), over axios: `client.call(route, { params, query, body })`
- * returns the route's `data` type, or throws an ApiError. Apps use only this (through
- * `@beautinique/frontend-api-client`), never axios directly.
+ * returns the route's `data` type, or throws an ApiError; `client.download(route, ...)` returns a
+ * download route's file. Apps use only this (through `@beautinique/frontend-api-client`), never
+ * axios directly.
  */
 export function createClient(options: ClientOptions) {
   const http = axios.create({
@@ -154,13 +174,13 @@ export function createClient(options: ClientOptions) {
   });
   const validate = options.validateResponses ?? true;
 
-  async function call<const Route extends RouteDefinition>(
-    route: Route,
-    ...[request, callOptions]: CallArgs<Route>
-  ): Promise<RouteOutput<Route>> {
-    if (route.navigation) {
-      throw new Error(`${route.id} is a page the browser opens: link to it with navigationHref()`);
-    }
+  /** Sends one request of `route`: its answer whatever the status, or NETWORK_ERROR. */
+  async function send(
+    route: RouteDefinition,
+    request: unknown,
+    callOptions: CallOptions | undefined,
+    file: boolean,
+  ): Promise<AxiosResponse<unknown>> {
     const input = (request ?? {}) as {
       params?: Record<string, string | number>;
       query?: unknown;
@@ -168,6 +188,7 @@ export function createClient(options: ClientOptions) {
     };
     // false keeps axios from calling a POST without a body a form
     const headers: Record<string, string | false> = { 'Content-Type': false };
+    if (file) headers.Accept = 'text/csv, application/json';
     const token = await options.getToken?.();
     if (token) headers.Authorization = `Bearer ${token}`;
     if (route.idempotency) {
@@ -179,16 +200,19 @@ export function createClient(options: ClientOptions) {
       payload = JSON.stringify(input.body);
     }
     const url = `${buildPath(route.path, input.params)}${queryString(input.query)}`;
-    let response: AxiosResponse<unknown>;
+    const timeout = callOptions?.timeoutMs ?? (file ? DOWNLOAD_TIMEOUT_MS : undefined);
     try {
-      response = await http.request<unknown>({
+      const response = await http.request<unknown>({
         method: route.method,
         url,
         headers,
         data: payload,
         signal: callOptions?.signal,
-        ...(callOptions?.timeoutMs === undefined ? {} : { timeout: callOptions.timeoutMs }),
+        ...(file ? { responseType: 'blob' as const } : {}),
+        ...(timeout === undefined ? {} : { timeout }),
       });
+      options.onNetwork?.('answered');
+      return response;
     } catch {
       // the caller's own abort comes back as the signal gives it, like fetch's
       if (callOptions?.signal?.aborted) throw callOptions.signal.reason;
@@ -199,7 +223,17 @@ export function createClient(options: ClientOptions) {
         status: 0,
       });
     }
-    options.onNetwork?.('answered');
+  }
+
+  async function call<const Route extends RouteDefinition>(
+    route: Route,
+    ...[request, callOptions]: CallArgs<Route>
+  ): Promise<RouteOutput<Route>> {
+    if (route.navigation) {
+      throw new Error(`${route.id} is a page the browser opens: link to it with navigationHref()`);
+    }
+    if (route.download) throw new Error(`${route.id} is a file: take it with download()`);
+    const response = await send(route, request, callOptions, false);
     if (response.status < 200 || response.status > 299) throw failure(response);
     const answer = response.data;
     const data =
@@ -227,7 +261,43 @@ export function createClient(options: ClientOptions) {
     return parsed.data as RouteOutput<Route>;
   }
 
-  return { call };
+  /**
+   * A download route's file (`download: 'csv'`): its bytes and name, or an ApiError like call()'s
+   * (the error body comes as a file too, and is read as JSON here). Waits up to
+   * DOWNLOAD_TIMEOUT_MS unless the call gives its own.
+   */
+  async function download<const Route extends RouteDefinition & { download: 'csv' }>(
+    route: Route,
+    ...[request, callOptions]: CallArgs<Route>
+  ): Promise<DownloadedFile> {
+    const response = await send(route, request, callOptions, true);
+    const blob = response.data instanceof Blob ? response.data : new Blob([]);
+    if (response.status < 200 || response.status > 299) {
+      let body: unknown = null;
+      try {
+        body = JSON.parse(await blob.text());
+      } catch {
+        // not our error body: failure() names it by its status
+      }
+      throw failure({ ...response, data: body });
+    }
+    const disposition: unknown =
+      response.headers instanceof AxiosHeaders
+        ? response.headers.get('Content-Disposition')
+        : response.headers['content-disposition'];
+    const fileName = fileNameOf(disposition);
+    if (fileName === null) {
+      throw new ApiError({
+        code: 'INVALID_RESPONSE',
+        message: `The file of ${route.id} came without its name`,
+        status: response.status,
+        requestId: requestIdOf(response.headers),
+      });
+    }
+    return { blob, fileName };
+  }
+
+  return { call, download };
 }
 
 export type Client = ReturnType<typeof createClient>;

@@ -1,13 +1,11 @@
-import { AppError, mountRoute } from '@beautinique/backend-server-kit';
-import {
-  type Mongo,
-  ObjectId,
-  toObjectId,
-  withTransaction,
-} from '@beautinique/backend-server-mongo';
+import { AppError } from '@beautinique/backend-server-kit';
+import { ObjectId, toObjectId, withTransaction } from '@beautinique/backend-server-mongo';
 import { writeEvent } from '@beautinique/backend-server-queue';
-import { getPing, pingRecorded, recordPing, wake } from '@beautinique/shared-contracts';
+import { getPing, pingRead, pingRecorded, recordPing, wake } from '@beautinique/shared-contracts';
 import { Router } from 'express';
+
+import { accessOf, authorize } from './authz.ts';
+import { type IdempotencyDeps, mountCoreRoute } from './idempotency.ts';
 
 export const PINGS = 'platform_pings';
 
@@ -30,12 +28,17 @@ const dataOf = (ping: PingRecord) => ({
   recordedAt: ping.recordedAt.toISOString(),
 });
 
-/** The platform module's routes. Who may call them is the gateway's job (access in the contract). */
-export function platformRouter({ mongo }: { mongo: Mongo }): Router {
+/**
+ * The platform module's routes. The gateway checks the contract's access first (a key some grant
+ * holds); a permission route checks it again here with authorize(), on core's copy of the grants
+ * at the request's time and scope (RULES §4.6).
+ */
+export function platformRouter(deps: IdempotencyDeps): Router {
+  const { mongo } = deps;
   const router = Router();
   const pings = mongo.db.collection<PingRecord>(PINGS);
 
-  mountRoute(
+  mountCoreRoute(
     router,
     recordPing,
     async ({ body }, { requestId }) => {
@@ -61,19 +64,27 @@ export function platformRouter({ mongo }: { mongo: Mongo }): Router {
       });
       return dataOf(ping);
     },
+    deps,
     { status: 201 },
   );
 
   // answering is the whole job: the request itself woke the server (ARCHITECTURE §11.1)
-  mountRoute(router, wake, () => ({ awakeAt: new Date().toISOString() }));
+  mountCoreRoute(router, wake, () => ({ awakeAt: new Date().toISOString() }), deps);
 
-  mountRoute(router, getPing, async ({ params }) => {
-    const ping = await pings.findOne({
-      _id: toObjectId(params.pingId, { notFound: 'No such ping' }),
-    });
-    if (!ping) throw new AppError('NOT_FOUND', 'No such ping');
-    return dataOf(ping);
-  });
+  mountCoreRoute(
+    router,
+    getPing,
+    async ({ params }, { req }) => {
+      // a global permission: no resource scope to check
+      authorize(await accessOf(mongo, await deps.passport(req)), pingRead.key);
+      const ping = await pings.findOne({
+        _id: toObjectId(params.pingId, { notFound: 'No such ping' }),
+      });
+      if (!ping) throw new AppError('NOT_FOUND', 'No such ping');
+      return dataOf(ping);
+    },
+    deps,
+  );
 
   return router;
 }

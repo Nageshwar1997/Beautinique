@@ -65,6 +65,8 @@ export {
   verifyOtp,
   wake,
 } from './catalogue';
+export * from './catalogue/access';
+export * from './catalogue/audit';
 export * from './catalogue/iam';
 export * from './catalogue/social';
 export {
@@ -75,6 +77,9 @@ export {
   type Client,
   type ClientOptions,
   createClient,
+  DOWNLOAD_TIMEOUT_MS,
+  type DownloadedFile,
+  fileNameOf,
   navigationHref,
   type NetworkEvent,
   queryKey,
@@ -109,6 +114,7 @@ export {
 export {
   type AppId,
   APPS,
+  CODE_SCOPE_TYPES,
   type Deployable,
   DEPLOYABLES,
   HEADERS,
@@ -124,6 +130,7 @@ export {
 } from './platform';
 export {
   buildPath,
+  csvFileZod,
   defineRoute,
   gatewayManifest,
   HTTP_METHODS,
