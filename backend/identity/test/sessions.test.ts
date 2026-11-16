@@ -38,6 +38,7 @@ const redis = () => harness.server.runtime.redis.client;
 const sessionsDb = () => harness.db.collection<Session>(SESSIONS);
 const CHROME =
   'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130.0.0.0 Safari/537.36';
+const FIREFOX = 'Mozilla/5.0 (X11; Linux x86_64; rv:132.0) Gecko/20100101 Firefox/132.0';
 
 beforeAll(async () => {
   harness = await startHarness('sessions');
@@ -56,13 +57,18 @@ interface Raw {
 /** A request like the gateway's, with the cookies a browser would send, and the Set-Cookie back. */
 async function call(
   path: string,
-  { app = 'customer', cookie, body = {} }: { app?: AppId; cookie?: string; body?: unknown } = {},
+  {
+    app = 'customer',
+    cookie,
+    body = {},
+    userAgent = CHROME,
+  }: { app?: AppId; cookie?: string; body?: unknown; userAgent?: string } = {},
 ): Promise<Raw> {
   const headers: Record<string, string> = {
     'content-type': 'application/json',
     'X-BQ-App': app,
     'X-BQ-Client-Ip': '203.0.113.9',
-    'user-agent': CHROME,
+    'user-agent': userAgent,
   };
   if (cookie) headers.cookie = cookie;
   const response = await fetch(`${harness.server.url}${path}`, {
@@ -81,8 +87,8 @@ async function call(
 
 const signIn = (address: string, app: AppId = 'customer') =>
   call('/auth/login', { app, body: { email: address, password: PASSWORD } });
-const refreshWith = (token: string, app: AppId = 'customer') =>
-  call('/auth/refresh', { app, cookie: `__Secure-bq_${app}_rt=${token}` });
+const refreshWith = (token: string, app: AppId = 'customer', userAgent = CHROME) =>
+  call('/auth/refresh', { app, cookie: `__Secure-bq_${app}_rt=${token}`, userAgent });
 const accessOf = (answer: Raw, app: AppId = 'customer') =>
   answer.cookies[`__Host-bq_${app}_at`]?.value ?? '';
 const refreshOf = (answer: Raw, app: AppId = 'customer') =>
@@ -171,7 +177,7 @@ describe('signing in', () => {
 });
 
 describe('refreshing', () => {
-  it('rotates the refresh token; the old one a moment later is a parallel tab, later a copy', async () => {
+  it('rotates the refresh token; the old one a moment later is a parallel tab, later from another device a copy', async () => {
     const address = email('rotate');
     await makeAccount(address);
     const first = await signIn(address);
@@ -186,12 +192,12 @@ describe('refreshing', () => {
     const race = await refreshWith(old);
     expect([race.status, race.body.error?.code]).toEqual([409, 'REFRESH_IN_PROGRESS']);
     expect(race.cookies).toEqual({});
-    // the same old token later: someone has a copy
+    // the same old token later, from another kind of device: someone has a copy
     await sessionsDb().updateOne(
       { _id: oid(sessionId) },
       { $set: { rotatedAt: new Date(Date.now() - 11_000) } },
     );
-    const copied = await refreshWith(old);
+    const copied = await refreshWith(old, 'customer', FIREFOX);
     expect([copied.status, copied.body.error?.code]).toEqual([401, 'SESSION_EXPIRED']);
     expect(copied.cookies['__Host-bq_customer_at']?.attributes).toContain(
       'Expires=Thu, 01 Jan 1970 00:00:00 GMT',
@@ -223,6 +229,65 @@ describe('refreshing', () => {
     ]);
     // the newest token ends with the session
     expect((await refreshWith(refreshOf(next))).status).toBe(401);
+  });
+
+  it('replaces the old token again when it comes back later from the same device: its answer was lost (LIVE-009)', async () => {
+    const address = email('lost-answer');
+    await makeAccount(address);
+    const old = refreshOf(await signIn(address));
+    const sessionId = old.split('.')[0] ?? '';
+    // the browser never kept this answer (a phone froze or closed it)
+    const lost = refreshOf(await refreshWith(old));
+    await sessionsDb().updateOne(
+      { _id: oid(sessionId) },
+      { $set: { rotatedAt: new Date(Date.now() - 10 * 60_000) } },
+    );
+    const again = await refreshWith(old);
+    expect(again.status).toBe(200);
+    expect(again.body.data).toMatchObject({ user: { email: address } });
+    expect(accessOf(again)).not.toBe('');
+    const [, family] = old.split('.');
+    expect(refreshOf(again).split('.').slice(0, 2)).toEqual([sessionId, family]);
+    expect([old, lost]).not.toContain(refreshOf(again));
+    expect(await sessionsDb().findOne({ _id: oid(sessionId) })).toMatchObject({
+      revokedAt: null,
+      refreshHash: blindIndex(harness.keys, 'refresh-token', refreshOf(again)),
+      previousRefreshHash: blindIndex(harness.keys, 'refresh-token', old),
+    });
+    const alarms = () =>
+      harness.db.collection(OUTBOX).countDocuments({
+        type: 'identity.session.reuseDetected',
+        'envelope.data.sessionId': sessionId,
+      });
+    expect(await alarms()).toBe(0);
+    // the lost token is an older one of the family now: if it ever comes back, someone has a copy
+    const back = await refreshWith(lost);
+    expect([back.status, back.body.error?.code]).toEqual([401, 'SESSION_EXPIRED']);
+    expect(await sessionsDb().findOne({ _id: oid(sessionId) })).toMatchObject({
+      revokeReason: 'reuse',
+    });
+    expect(await alarms()).toBe(1);
+    expect((await refreshWith(refreshOf(again))).status).toBe(401);
+  });
+
+  it('replaces a lost answer once when two tabs ask with the old token together', async () => {
+    const address = email('lost-twice');
+    await makeAccount(address);
+    const old = refreshOf(await signIn(address));
+    const sessionId = old.split('.')[0] ?? '';
+    await refreshWith(old);
+    await sessionsDb().updateOne(
+      { _id: oid(sessionId) },
+      { $set: { rotatedAt: new Date(Date.now() - 11_000) } },
+    );
+    const answers = await Promise.all([refreshWith(old), refreshWith(old)]);
+    expect(answers.map((answer) => answer.status).sort((a, b) => a - b)).toEqual([200, 409]);
+    const won = answers.find((answer) => answer.status === 200);
+    const token = won ? refreshOf(won) : '';
+    expect((await sessionsDb().findOne({ _id: oid(sessionId) }))?.refreshHash).toBe(
+      blindIndex(harness.keys, 'refresh-token', token),
+    );
+    expect((await refreshWith(token)).status).toBe(200);
   });
 
   it('keeps the session’s family in every token it gives, with a new secret each time', async () => {
@@ -278,7 +343,8 @@ describe('refreshing', () => {
     expect((await sessionsDb().findOne({ _id: oid(sessionId) }))?.familyHash).toEqual(
       expect.any(String),
     );
-    // the old token later: a copy, as before families
+    // the old token later, even from the same device: a copy, as before families (a new family
+    // for it would make the lost token look made up)
     await sessionsDb().updateOne(
       { _id: oid(sessionId) },
       { $set: { rotatedAt: new Date(Date.now() - 11_000) } },

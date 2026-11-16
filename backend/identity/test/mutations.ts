@@ -853,33 +853,31 @@ const mutations: Mutation[] = [
   {
     file: 'sessions',
     name: 'refresh without the token',
-    change: [
-      ['          refreshHash: hash,\n          revokedAt: null,', '          revokedAt: null,'],
-    ],
+    change: [['        refreshHash: hash,\n        expiresAt:', '        expiresAt:']],
     tests: 'made-up token|parallel tab',
   },
   {
     file: 'sessions',
     name: 'an ended session refreshes',
     change: [
-      ['          refreshHash: hash,\n          revokedAt: null,', '          refreshHash: hash,'],
+      [
+        '{ _id: sessionId, appId, revokedAt: null, ...current }',
+        '{ _id: sessionId, appId, ...current }',
+      ],
     ],
     tests: 'logs out',
   },
   {
     file: 'sessions',
     name: 'an expired session refreshes',
-    change: [['          expiresAt: { $gt: new Date(at) },\n', '']],
+    change: [['        expiresAt: { $gt: new Date(at) },\n', '']],
     tests: '90 days',
   },
   {
     file: 'sessions',
     name: 'no idle end',
     change: [
-      [
-        '            : { lastSeenAt: { $gt: new Date(at - policy.idleMs) } }),',
-        '            : {}),',
-      ],
+      ['          : { lastSeenAt: { $gt: new Date(at - policy.idleMs) } }),', '          : {}),'],
     ],
     tests: 'idle minutes',
   },
@@ -940,6 +938,38 @@ const mutations: Mutation[] = [
     change: [['if (replaced && found.rotatedAt && at -', 'if (found.rotatedAt && at -']],
     tests: 'older token',
   },
+  // a lost answer (LIVE-009): the token just replaced, later, from the same device, gets a new one
+  {
+    file: 'sessions',
+    name: 'a lost answer taken for a copy',
+    change: [
+      [
+        'if (replaced && parts.family !== null && found.device === deviceOf(client)) {',
+        'if (false) {',
+      ],
+    ],
+    tests: 'answer was lost',
+  },
+  {
+    file: 'sessions',
+    name: 'a copy from another device taken for a lost answer',
+    change: [[' && found.device === deviceOf(client)) {', ') {']],
+    tests: 'another device',
+  },
+  {
+    file: 'sessions',
+    name: 'a lost answer for a token from before families',
+    change: [
+      ['if (replaced && parts.family !== null && found.device', 'if (replaced && found.device'],
+    ],
+    tests: 'before token families',
+  },
+  {
+    file: 'sessions',
+    name: 'a lost answer replaced from any older token',
+    change: [['if (replaced && parts.family !== null &&', 'if (parts.family !== null &&']],
+    tests: 'older token',
+  },
   {
     file: 'sessions',
     name: 'a new family at every refresh',
@@ -962,8 +992,8 @@ const mutations: Mutation[] = [
     name: 'a session from before families never gets one',
     change: [
       [
-        '              previousRefreshHash: hash,\n              familyHash: familyHashOf(keys, family),\n',
-        '              previousRefreshHash: hash,\n',
+        '                previousRefreshHash: hash,\n                familyHash: familyHashOf(keys, family),\n',
+        '                previousRefreshHash: hash,\n',
       ],
     ],
     tests: 'before token families',
