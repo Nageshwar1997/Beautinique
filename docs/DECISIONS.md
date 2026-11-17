@@ -1,6 +1,6 @@
 # DECISIONS: Beautinique
 
-> **Status:** v1.3.2 (2026-11-17). Har faisla ek jagah. Sirf wahi "Tay" jo owner ne khud kaha; Claude ki salah faisla nahi. Cheezein ek-ek karke judti hain.
+> **Status:** v1.4.2 (2026-11-17). Har faisla ek jagah. Sirf wahi "Tay" jo owner ne khud kaha; Claude ki salah faisla nahi. Cheezein ek-ek karke judti hain.
 
 ## 0. Kaise likhein
 
@@ -12,36 +12,62 @@
 
 ## 1. Ek nazar me
 
-| Id | Faisla | Tag | Kab |
-| --- | --- | --- | --- |
-| D-001 | Tech stack tay; finance service ka database PostgreSQL, baaki saari services MongoDB pe. | Architecture | 2026-11-17 |
-| D-002 | Ek monorepo, tay folder dhaancha; tools aur conventions RULES me. | Architecture | 2026-11-17 |
-| D-003 | Docs aur code naye sire se; pehle ka kaam sirf seekhne ka reference, naye me uska zikr ya link nahi. | Process | 2026-11-17 |
-| D-004 | Abhi sirf discovery; plan, task files aur code owner ke agla stage kholne pe. | Process | 2026-11-17 |
-| D-005 | Agents ek ke baad ek; 5-hour limit ~80% pe naya agent nahi. | Process | 2026-11-17 |
-| D-006 | Docs kai files me: PROJECT_PLAN, har module ka folder `tasks/NN-<module>/`, FLOWS; dhaancha docs index me. | Process | 2026-11-17 |
-| D-007 | Security Architect zaroori, alag role; security ki do files, faisle aur risks tag ke saath. | Security | 2026-11-17 |
-| D-008 | Design aur task files poore ecosystem ki pehle din; banana releases me (R1 = patla par poora order flow); koi feature kata nahi. | Process | 2026-11-17 |
-| D-009 | Capacity: ek insaan, 2 Claude accounts, 30 ghante/hafta, koi deadline nahi. | Process | 2026-11-17 |
-| D-010 | 11 alag apps, har role parivaar ka ek; screens module ke saath judti hain. | Architecture | 2026-11-17 |
-| D-011 | Sabki alag services, har service ka apna database aur apna cluster; seema transaction se. | Architecture | 2026-11-17 |
-| D-012 | Design aur code asli users maan ke (production-grade), halaanki live system sirf owner chalata hai. | Architecture | 2026-11-17 |
-| D-013 | Backup: ek command se saare databases ka data download aur restore command; files repo ke folder me par git se bahar (4 pehre). | Architecture | 2026-11-17 |
-| D-014 | Fulfilment: maal sirf apne warehouse me, delivery sirf apne partners; carrier port; seller khud nahi bhejta; pehle din 1 warehouse + 1 hub. | Business | 2026-11-17 |
-| D-015 | Location: India > State > District > Sub-District; har level ka switch; switch aur live alag; sharten sirf live karte waqt. | Business | 2026-11-17 |
-| D-016 | Pincode → theek ek hub (primary sub-district se), 10 cases ke niyam ke saath. | Business | 2026-11-17 |
-| D-017 | Roles ki poori list design me, har role apne module ke saath chalu; ginti fix nahi; owner ke har role ka alag account. | Business | 2026-11-17 |
-| D-018 | Faislon ka record is file ke format me; badalne pe "badla" line; sawal-jawab files me sirf aakhri faisla. | Process | 2026-11-17 |
-| D-019 | Docs chhote, har baat ek jagah, "bana hai" sirf code ya test ki link se; CI me docs ke paths ka check. | Process | 2026-11-17 |
-| D-020 | Guest cart aur guest wishlist nahi; bina sign-in sirf dekhna, search, reviews padhna, pincode check. | Business | 2026-11-17 |
-| D-021 | Customer ke sign-in ke teen raaste: password, social (Google, LinkedIn, GitHub), email code. | Security | 2026-11-17 |
-| D-022 | Location ka kaam sirf utna jitna D-015 ko chahiye; pehle location, phir products; staff ki list data me (sirf Master badle). | Business | 2026-11-17 |
-| D-023 | Package CLI ka kaam wahi (create, publish, republish, verify, update-deps); naya kaam publish ke plan pe; teen chhote niyam. | Process | 2026-11-17 |
-| D-024 | `main` branch hategi; flow `prerelease` → `release`; GitHub default branch `release`. | Process | 2026-11-17 |
-| D-025 | Skin & Hair Expert aur Beauty Advisor asli staff roles; video ke liye Google Meet ka dummy link; Beauty Advisor ka message thread (live chat nahi). | Business | 2026-11-17 |
-| D-026 | Lakshya: portfolio project, par aisa bane ki kal asli business ban sake; design asli jaisa, registrations aur kanooni details dummy. | Business | 2026-11-17 |
-| D-027 | Warehouse aur hub ke beech maal kiraye ke transporter se; har trip ka record aur transporter ka bill finance me. | Business | 2026-11-17 |
-| D-028 | Kharcha ₹0, domain nahi; server baar-baar jagaya jayega; production-grade = code + chalne ki quality, ₹0 me jitni ho sake. | Business | 2026-11-17 |
+| Id    | Faisla                                                                                                                                              | Tag          | Kab        |
+| ----- | --------------------------------------------------------------------------------------------------------------------------------------------------- | ------------ | ---------- |
+| D-001 | Tech stack tay; finance service ka database PostgreSQL, baaki saari services MongoDB pe.                                                            | Architecture | 2026-11-17 |
+| D-002 | Ek monorepo, tay folder dhaancha; tools aur conventions RULES me.                                                                                   | Architecture | 2026-11-17 |
+| D-003 | Docs aur code naye sire se; pehle ka kaam sirf seekhne ka reference, naye me uska zikr ya link nahi.                                                | Process      | 2026-11-17 |
+| D-004 | Abhi sirf discovery; plan, task files aur code owner ke agla stage kholne pe.                                                                       | Process      | 2026-11-17 |
+| D-005 | Agents ek ke baad ek; 5-hour limit ~80% pe naya agent nahi.                                                                                         | Process      | 2026-11-17 |
+| D-006 | Docs kai files me: PROJECT_PLAN, har module ka folder `tasks/NN-<module>/`, FLOWS; dhaancha docs index me.                                          | Process      | 2026-11-17 |
+| D-007 | Security Architect zaroori, alag role; security ki do files, faisle aur risks tag ke saath.                                                         | Security     | 2026-11-17 |
+| D-008 | Design aur task files poore ecosystem ki pehle din; banana releases me (R1 = patla par poora order flow); koi feature kata nahi.                    | Process      | 2026-11-17 |
+| D-009 | Capacity: ek insaan, 2 Claude accounts, 30 ghante/hafta, koi deadline nahi.                                                                         | Process      | 2026-11-17 |
+| D-010 | 11 alag apps, har role parivaar ka ek; screens module ke saath judti hain.                                                                          | Architecture | 2026-11-17 |
+| D-011 | Sabki alag services, har service ka apna database aur apna cluster; seema transaction se.                                                           | Architecture | 2026-11-17 |
+| D-012 | Design aur code asli users maan ke (production-grade), halaanki live system sirf owner chalata hai.                                                 | Architecture | 2026-11-17 |
+| D-013 | Backup: ek command se saare databases ka data download aur restore command; files repo ke folder me par git se bahar (4 pehre).                     | Architecture | 2026-11-17 |
+| D-014 | Fulfilment: maal sirf apne warehouse me, delivery sirf apne partners; carrier port; seller khud nahi bhejta; pehle din 1 warehouse + 1 hub.         | Business     | 2026-11-17 |
+| D-015 | Location: India > State > District > Sub-District; har level ka switch; switch aur live alag; sharten sirf live karte waqt.                         | Business     | 2026-11-17 |
+| D-016 | Pincode → theek ek hub (primary sub-district se), 10 cases ke niyam ke saath.                                                                       | Business     | 2026-11-17 |
+| D-017 | Roles ki poori list design me, har role apne module ke saath chalu; ginti fix nahi; owner ke har role ka alag account.                              | Business     | 2026-11-17 |
+| D-018 | Faislon ka record is file ke format me; badalne pe "badla" line; sawal-jawab files me sirf aakhri faisla.                                           | Process      | 2026-11-17 |
+| D-019 | Docs chhote, har baat ek jagah, "bana hai" sirf code ya test ki link se; CI me docs ke paths ka check.                                              | Process      | 2026-11-17 |
+| D-020 | Guest cart aur guest wishlist nahi; bina sign-in sirf dekhna, search, reviews padhna, pincode check.                                                | Business     | 2026-11-17 |
+| D-021 | Customer ke sign-in ke teen raaste: password, social (Google, LinkedIn, GitHub), email code.                                                        | Security     | 2026-11-17 |
+| D-022 | Location ka kaam sirf utna jitna D-015 ko chahiye; pehle location, phir products; staff ki list data me (sirf Master badle).                        | Business     | 2026-11-17 |
+| D-023 | Package CLI ka kaam wahi (create, publish, republish, verify, update-deps); naya kaam publish ke plan pe; teen chhote niyam.                        | Process      | 2026-11-17 |
+| D-024 | `main` branch hategi; flow `prerelease` → `release`; GitHub default branch `release`.                                                               | Process      | 2026-11-17 |
+| D-025 | Skin & Hair Expert aur Beauty Advisor asli staff roles; video ke liye Google Meet ka dummy link; Beauty Advisor ka message thread (live chat nahi). | Business     | 2026-11-17 |
+| D-026 | Lakshya: portfolio project, par aisa bane ki kal asli business ban sake; design asli jaisa, registrations aur kanooni details dummy.                | Business     | 2026-11-17 |
+| D-027 | Warehouse aur hub ke beech maal kiraye ke transporter se; har trip ka record aur transporter ka bill finance me.                                    | Business     | 2026-11-17 |
+| D-028 | Kharcha ₹0, domain nahi; server baar-baar jagaya jayega; production-grade = code + chalne ki quality, ₹0 me jitni ho sake.                          | Business     | 2026-11-17 |
+| D-029 | Sirf beauty aur personal care; koi aur category nahi.                                                                                               | Business     | 2026-11-17 |
+| D-030 | Business model: apna brand + doosre beauty brands seller ban ke, sab ek hi storefront pe.                                                           | Business     | 2026-11-17 |
+| D-031 | Apna brand ek alag (dummy) company ke naam se, seller app ke "house brand" seller account se; koi shortcut nahi.                                    | Business     | 2026-11-17 |
+| D-032 | Sirf brand owners aur authorised distributors bech sakte hain; baaki Beauty Pro Buyer ban ke kharidte hain.                                         | Business     | 2026-11-17 |
+| D-033 | Delivery partners gig partners, apni gaadi ke saath.                                                                                                | Business     | 2026-11-17 |
+| D-034 | Payments: prepaid online (Razorpay) ya delivery pe UPI QR; cash bilkul nahi.                                                                        | Business     | 2026-11-17 |
+| D-035 | Launch phases me: Pune district → Maharashtra ke baaki districts → baaki states; poora India dekh sake, order sirf served pincodes se.              | Business     | 2026-11-17 |
+| D-036 | Sellers poore India se; jis state ke warehouse me maal, us state ka GSTIN zaroori; onboarding me guide aur checklist.                               | Business     | 2026-11-17 |
+| D-037 | Naya district ya state kholna sirf setting aur operations ka kaam: na code change, na deploy.                                                       | Architecture | 2026-11-17 |
+| D-038 | Customers sirf 18+; sign-up pe age declaration.                                                                                                     | Business     | 2026-11-17 |
+| D-039 | Ratings aur reviews R1 me.                                                                                                                          | Business     | 2026-11-17 |
+| D-040 | Foreign investment ka koi plan nahi.                                                                                                                | Business     | 2026-11-17 |
+| D-041 | Sirf India, prices INR me; har order ka GST-compliant invoice.                                                                                      | Business     | 2026-11-17 |
+| D-042 | Saare apps fully responsive web; Delivery mobile-first PWA (offline); baaki apps phone pe install ho sakein; native apps nahi.                      | Architecture | 2026-11-17 |
+| D-043 | Drug-classified items kabhi nahi; isliye drug licence ya pharmacist ki zaroorat nahi.                                                               | Business     | 2026-11-17 |
+| D-044 | Head of Operations: Support, Logistics aur Seller Ops ke upar.                                                                                      | Business     | 2026-11-17 |
+| D-045 | Plastic EPR laagu (Beautinique micro ya small enterprise nahi maana; registration dummy).                                                           | Business     | 2026-11-17 |
+| D-046 | Notify-me waitlist rahega; usse agla area kholne ka suggestion, par kholne ka koi fixed order nahi.                                                 | Business     | 2026-11-17 |
+| D-047 | Master ke doosre roles (Trust & Safety Lead, Marketing Head) usi insaan ke alag staff account pe.                                                   | Security     | 2026-11-17 |
+| D-048 | Hosting ₹0: backend Render free, apps Vercel Hobby, MongoDB Atlas M0 (har service ka apna), Redis Render Key Value free.                            | Architecture | 2026-11-17 |
+| D-049 | Render pe bundle mode (saari backend services ek web service me); laptop pe Docker split mode.                                                      | Architecture | 2026-11-17 |
+| D-050 | Har service ka apna database aur DB user; service ke andar modules ki collections module ke prefix ke saath.                                        | Architecture | 2026-11-17 |
+| D-051 | Redis: laptop pe local Valkey, production me Render Key Value sirf internal URL se; laptop, tests aur CI kabhi production Redis se nahi.            | Architecture | 2026-11-17 |
+| D-052 | Har Vercel app `/api/*` ko gateway pe rewrite karti hai (same-origin).                                                                              | Architecture | 2026-11-17 |
+| D-053 | Performance targets sirf tab laagu jab server jaaga ho.                                                                                             | Architecture | 2026-11-17 |
+| D-054 | Roles ka timing: design me saare roles, poore launch tak sab system me; banate waqt har role apne module ke saath chalu.                            | Business     | 2026-11-17 |
 
 ## 2. Record
 
@@ -179,10 +205,11 @@
   - Raasta: brand → warehouse → hub → delivery partner → customer.
   - Ilaake ke bahar delivery unavailable.
   - Delivery ka code ek carrier port ke peeche; aaj uske peeche sirf apni fleet.
-  - Seller khud nahi bhejta.
-  - Pehle din 1 warehouse + 1 hub, us sub-district ke saare pincodes; baaki hubs baad me ek click se.
+  - Seller khud nahi bhejta. Brand maal warehouse bhejta hai; batch aur expiry ki jaanch ek hi jagah: warehouse me receiving pe.
+  - Return pickup bhi apne delivery partners karte hain.
+  - Pehle din 1 warehouse + **sirf 1 hub** (warehouse wale sub-district me, warehouse ke paas); delivery usi sub-district ke saare pincodes tak; baaki hubs baad me ek click se.
 - **Wajah:** owner: pehle din poora district nahi, ek-ek hub se shuru.
-- **Chhode vikalp:** pehle din poora district (21 hubs); seller khud bheje.
+- **Chhode vikalp:** pehle din poora district (21 hubs); pehle din 2 hub (warehouse wala aur ek alag sub-district ka); seller khud bheje.
 - **Kab dobara khulega:** owner khud khole.
 - **Kisne, kab:** owner, 2026-11-17. **Nishaan:** Owner; Salah maani (carrier port).
 
@@ -342,14 +369,234 @@
 - **Kisne, kab:** owner, 2026-11-17. **Nishaan:** Salah nahi maani.
 - **Jokhim (owner ne maana):** domain ke bina emails spam me ja sakte hain, aur har OTP email se hi jaata hai.
 
+### D-029. Product category
+
+- **Faisla:** sirf beauty aur personal care. Koi aur category nahi aayegi.
+- **Wajah:** owner ka faisla, 2026-11-17 ko dobara dekh ke waise hi rakha.
+- **Chhode vikalp:** doosri categories.
+- **Kab dobara khulega:** owner khud khole.
+- **Kisne, kab:** owner, 2026-11-17. **Nishaan:** Owner.
+
+### D-030. Business model
+
+- **Faisla:** Beautinique apne brand ke products bechega, aur doosre beauty brands seller ban ke bechenge. Sab kuch ek hi storefront pe. Har product ka ek seller, aur customer invoice us seller ke GSTIN se.
+- **Wajah:** owner ka faisla, 2026-11-17 ko dobara dekh ke waise hi rakha.
+- **Chhode vikalp:** sirf apna maal (1P inventory); sirf doosre brands (pure marketplace).
+- **Kab dobara khulega:** owner khud khole.
+- **Kisne, kab:** owner, 2026-11-17. **Nishaan:** Owner.
+
+### D-031. Apna brand
+
+- **Faisla:** apna brand ek **alag (dummy) company ke naam se** seller banega. Wo seller app me ek "house brand" seller account se chalega, jise Own-Brand Manager sambhalega. Iske products bhi baaki brands ki tarah hi check honge. Koi shortcut nahi, Master ke liye bhi nahi.
+- **Wajah:** owner ne alag company chuni (2026-11-17). Claude ki daleel: platform company khud seller ho to har jagah special case banta (khud pe TCS nahi, settlement ki jagah andar ka transfer, apne brand ko aage dikhane ke sawal); alag company ke saath apna brand bhi baaki sellers jaisa ek hi raasta.
+- **Chhode vikalp:** platform company khud apne brand ki seller.
+- **Kab dobara khulega:** owner khud khole.
+- **Kisne, kab:** owner, 2026-11-17. **Nishaan:** Owner (house brand account, koi shortcut nahi); Salah maani (alag company).
+
+### D-032. Kaun bech sakta hai
+
+- **Faisla:** sirf brand owners aur authorised distributors. Clinic, salon, spa, freelancer, home-based aur individual bech nahi sakte; wo Beauty Pro Buyer ban ke kharid sakte hain.
+- **Wajah:** owner ka faisla, 2026-11-17 ko dobara dekh ke waise hi rakha.
+- **Chhode vikalp:** koi bhi seller ban sake.
+- **Kab dobara khulega:** owner khud khole.
+- **Kisne, kab:** owner, 2026-11-17. **Nishaan:** Owner.
+
+### D-033. Delivery partners
+
+- **Faisla:** delivery partners gig partners honge (payroll employee nahi), aur apni gaadi chalayenge.
+- **Wajah:** owner ka faisla, 2026-11-17 ko dobara dekh ke waise hi rakha.
+- **Chhode vikalp:** payroll employees; company ki gaadiyan.
+- **Kab dobara khulega:** owner khud khole.
+- **Kisne, kab:** owner, 2026-11-17. **Nishaan:** Owner.
+
+### D-034. Payments
+
+- **Faisla:** prepaid online (Razorpay), ya delivery ke waqt UPI QR. Cash bilkul nahi.
+- **Wajah:** owner ka faisla, 2026-11-17 ko dobara dekh ke waise hi rakha.
+- **Chhode vikalp:** cash on delivery.
+- **Kab dobara khulega:** owner khud khole.
+- **Kisne, kab:** owner, 2026-11-17. **Nishaan:** Owner.
+
+### D-035. Launch coverage
+
+- **Faisla:** launch phases me:
+  1. Pune district, Maharashtra.
+  2. Maharashtra ke baaki districts, ek-ek karke.
+  3. Phir baaki states isi tarah: pehle sabse bada district, phir baaki.
+  - Poore India ke customers products dekh sakte hain, par order sirf served pincodes se hoga.
+- **Wajah:** owner ka faisla, 2026-11-17 ko dobara dekh ke waise hi rakha.
+- **Chhode vikalp:** pehle din poora India.
+- **Kab dobara khulega:** owner khud khole.
+- **Kisne, kab:** owner, 2026-11-17. **Nishaan:** Owner.
+
+### D-036. Sellers ki location
+
+- **Faisla:** poore India ke brands jud sakte hain, kyunki unka stock hamare warehouse me aata hai. Shart: jis state ke warehouse me unka stock rahega, us state ka GST registration unke paas hona chahiye; Pune launch ke liye Maharashtra GSTIN. Jinke paas nahi, wo registration lenge, aur seller onboarding me iski step-by-step guide aur checklist milegi.
+- **Wajah:** owner ka faisla, 2026-11-17 ko dobara dekh ke waise hi rakha.
+- **Chhode vikalp:** sirf usi state ke sellers jahan warehouse hai.
+- **Kab dobara khulega:** owner khud khole.
+- **Kisne, kab:** owner, 2026-11-17. **Nishaan:** Owner.
+- **Asar (Claude):** naya state khulne pe (D-015) us state ke warehouse me sirf unhi brands ka maal jaa sakta hai jinke paas us state ka GSTIN ho; yaani ek product kisi state me mile aur kisi me nahi. Ye data aur jaanch ka niyam hai; registrations dummy.
+
+### D-037. Expansion sirf configuration se
+
+- **Faisla:** naya district ya state jodna ekdum simple: sirf admin setting aur operations ka kaam (warehouse ya hub, delivery partners, GST registration). Na code change, na deploy.
+- **Wajah:** owner ka faisla, 2026-11-17 ko dobara dekh ke waise hi rakha.
+- **Chhode vikalp:** har naye area ke liye code ya deploy.
+- **Kab dobara khulega:** owner khud khole.
+- **Kisne, kab:** owner, 2026-11-17. **Nishaan:** Owner.
+
+### D-038. Customers ki umar
+
+- **Faisla:** launch pe sirf 18+ customers. Sign-up pe age declaration lenge.
+- **Wajah:** owner ka faisla, 2026-11-17 ko dobara dekh ke waise hi rakha.
+- **Chhode vikalp:** umar ki koi shart nahi.
+- **Kab dobara khulega:** owner khud khole.
+- **Kisne, kab:** owner, 2026-11-17. **Nishaan:** Owner.
+
+### D-039. Reviews
+
+- **Faisla:** ratings aur reviews pehli release (R1, D-008) me honge.
+- **Wajah:** owner ka faisla, 2026-11-17 ko dobara dekh ke waise hi rakha.
+- **Chhode vikalp:** reviews baad ki release me.
+- **Kab dobara khulega:** owner khud khole.
+- **Kisne, kab:** owner, 2026-11-17. **Nishaan:** Owner.
+
+### D-040. Foreign investment
+
+- **Faisla:** foreign investment ka koi plan nahi.
+- **Wajah:** owner ka faisla, 2026-11-17 ko dobara dekh ke waise hi rakha.
+- **Chhode vikalp:** foreign investment lena.
+- **Kab dobara khulega:** owner khud khole.
+- **Kisne, kab:** owner, 2026-11-17. **Nishaan:** Owner.
+
+### D-041. Market aur tax
+
+- **Faisla:** sirf India, prices INR me. Har order ka GST-compliant invoice.
+- **Wajah:** owner ka faisla, 2026-11-17 ko dobara dekh ke waise hi rakha.
+- **Chhode vikalp:** India ke bahar bechna.
+- **Kab dobara khulega:** owner khud khole.
+- **Kisne, kab:** owner, 2026-11-17. **Nishaan:** Owner.
+
+### D-042. Platform type
+
+- **Faisla:** fully responsive web apps (mobile, tablet, desktop). Delivery app mobile-first PWA: phone pe install ho sake aur kamzor network me bhi chale. Baaki saare apps bhi phone pe app ki tarah install ho sakein (home screen icon, browser bar ke bina); offline sirf Delivery. Native mobile apps scope me nahi.
+- **Wajah:** owner ka faisla, 2026-11-17 ko dobara dekh ke waise hi rakha.
+- **Chhode vikalp:** native mobile apps.
+- **Kab dobara khulega:** owner khud khole.
+- **Kisne, kab:** owner, 2026-11-17. **Nishaan:** Owner.
+
+### D-043. Drug items
+
+- **Faisla:** drug-classified items kabhi nahi bechenge (jaise minoxidil, medicated creams). Isliye drug licence ya pharmacist ki zaroorat nahi.
+- **Wajah:** owner ka faisla, 2026-11-17 ko dobara dekh ke waise hi rakha.
+- **Chhode vikalp:** drug licence ke saath aise items bechna.
+- **Kab dobara khulega:** owner khud khole.
+- **Kisne, kab:** owner, 2026-11-17. **Nishaan:** Owner.
+
+### D-044. Head of Operations
+
+- **Faisla:** Support, Logistics aur Seller Ops ke upar ek Head of Operations hoga (Master app me).
+- **Wajah:** owner ka faisla, 2026-11-17 ko dobara dekh ke waise hi rakha.
+- **Chhode vikalp:** teeno seedhe Master ko report karein.
+- **Kab dobara khulega:** owner khud khole.
+- **Kisne, kab:** owner, 2026-11-17. **Nishaan:** Owner.
+
+### D-045. Plastic EPR
+
+- **Faisla:** maan ke chalenge ki Beautinique micro ya small enterprise nahi hai, isliye plastic EPR laagu (dummy registration).
+- **Wajah:** owner ka faisla, 2026-11-17 ko dobara dekh ke waise hi rakha.
+- **Chhode vikalp:** micro ya small enterprise maan ke EPR chhodna.
+- **Kab dobara khulega:** owner khud khole.
+- **Kisne, kab:** owner, 2026-11-17. **Nishaan:** Owner.
+
+### D-046. Notify-me waitlist
+
+- **Faisla:** jis pincode pe delivery nahi, wahan ka customer notify-me waitlist me jud sakta hai. Waitlist se agla district ya state kholne ka suggestion milta hai, par kholne ka koi fixed order nahi: D-015 ke haq wala level use kabhi bhi khol sakta hai (Master kisi bhi district ya state ko seedha bhi). Kholne ki sharten D-015 wali hi.
+- **Wajah:** owner ne rakha (2026-11-17).
+- **Chhode vikalp:** waitlist nahi.
+- **Kab dobara khulega:** owner khud khole.
+- **Kisne, kab:** owner, 2026-11-17. **Nishaan:** Owner.
+
+### D-047. Master ke doosre roles
+
+- **Faisla:** Master ke doosre launch roles (Trust & Safety Lead, Marketing Head) ek alag staff account pe, usi insaan ke liye.
+- **Wajah:** Master ke paas kisi kaam ka faisla lene ka haq nahi (seller, listing, appeal, ban appeal, risk rules), wo sirf doosra signature deta hai. Trust & Safety Lead ban appeals tay karta aur risk rules approve karta hai, isliye ye kaam alag account pe. Audit me owner aur operator alag dikhte hain.
+- **Chhode vikalp:** Master ke account pe hi ye roles.
+- **Kab dobara khulega:** owner khud khole.
+- **Kisne, kab:** owner, 2026-11-17. **Nishaan:** Owner.
+
+### D-048. Hosting (₹0)
+
+- **Faisla:** kharcha ₹0 (D-028):
+  - Backend: Render ki free web service.
+  - Apps: Vercel Hobby.
+  - MongoDB: Atlas M0, har MongoDB service ka apna cluster (D-011).
+  - Redis: Render Key Value free (D-051).
+  - Finance ka PostgreSQL (D-001): free provider abhi chunna baaki.
+- **Wajah:** owner ka faisla, 2026-11-17 ko dobara dekh ke waise hi rakha.
+- **Chhode vikalp:** paid plans.
+- **Kab dobara khulega:** owner khud khole.
+- **Kisne, kab:** owner, 2026-11-17. **Nishaan:** Owner.
+
+### D-049. Render pe bundle mode
+
+- **Faisla:** Render pe bundle mode: saari backend services ek free web service me chalti hain. Laptop pe Docker split mode (har service alag).
+- **Wajah:** owner ka faisla, 2026-11-17 ko dobara dekh ke waise hi rakha.
+- **Chhode vikalp:** har service ki alag web service (₹0 me nahi hota).
+- **Kab dobara khulega:** owner khud khole, ya ek 512 MB process saari services na sambhal sake (D-011).
+- **Kisne, kab:** owner, 2026-11-17. **Nishaan:** Owner.
+
+### D-050. Database aur collections
+
+- **Faisla:** har service ka apna database aur apna DB user (D-011). Ek service ke andar kai modules hon to unki collections module ke prefix ke saath.
+- **Wajah:** owner ka faisla, 2026-11-17 ko dobara dekh ke waise hi rakha.
+- **Chhode vikalp:** saari services ka ek database.
+- **Kab dobara khulega:** owner khud khole.
+- **Kisne, kab:** owner, 2026-11-17. **Nishaan:** Owner.
+
+### D-051. Redis
+
+- **Faisla:** development me local Redis (Docker Valkey, Render jaisi limits ke saath). Production me Render Key Value (Redis-compatible; free: 25 MB, 50 connections, disk pe save nahi). Sab `REDIS_URL` setting se. Production Redis sirf internal URL se (bahar se band); laptop, tests aur CI kabhi production Redis se nahi judte.
+- **Wajah:** owner ka faisla, 2026-11-17 ko dobara dekh ke waise hi rakha.
+- **Chhode vikalp:** paid Redis.
+- **Kab dobara khulega:** owner khud khole.
+- **Kisne, kab:** owner, 2026-11-17. **Nishaan:** Owner.
+
+### D-052. Apps se backend tak
+
+- **Faisla:** har Vercel app `/api/*` ko Render pe chal rahe gateway pe rewrite karti hai, taaki app aur API ek hi origin pe dikhein (domain nahi, D-028).
+- **Wajah:** owner ka faisla, 2026-11-17 ko dobara dekh ke waise hi rakha.
+- **Chhode vikalp:** browser seedha backend ko bulaye (alag origin).
+- **Kab dobara khulega:** owner khud khole.
+- **Kisne, kab:** owner, 2026-11-17. **Nishaan:** Owner.
+
+### D-053. Performance targets
+
+- **Faisla:** performance targets sirf tab laagu jab server jaaga ho.
+- **Wajah:** free tier me CPU aur RAM kam hai, aur soya server pehli request pe der se uthta hai (D-028).
+- **Chhode vikalp:** har haal me targets.
+- **Kab dobara khulega:** jab paid hosting aaye, ya owner khole.
+- **Kisne, kab:** owner, 2026-11-17. **Nishaan:** Owner.
+
+### D-054. Roles ka timing
+
+- **Faisla:** design me saare roles. Poore launch tak saare roles system me honge; koi role "baad me" ke liye nahi chhoda. Banate waqt har role apne module ke saath chalu hota hai, usi badlav me uski permissions (D-017). Shuru me ek insaan kai roles sambhal sakta hai (har role ka alag account, D-017).
+- **Wajah:** owner ne 2026-11-17 ko pakka kiya ki "saare roles launch tak" aur "har role apne module ke saath" dono ek saath sahi hain.
+- **Chhode vikalp:** saare roles abhi, module ke bina, system me; kuch roles launch ke baad.
+- **Kab dobara khulega:** owner khud khole.
+- **Kisne, kab:** owner, 2026-11-17. **Nishaan:** Owner (saare roles launch tak); Salah maani (dono ka mel).
+
 ## Change log
 
-| Version | Date | Badlav |
-| --- | --- | --- |
-| v1.0.0 | 2026-11-17 | Khaali file bani. |
-| v1.1.1 | 2026-11-17 | §0 likhne ka tareeka, §1 aur §2 bane; pehla faisla D-001 (tech stack, finance ke liye PostgreSQL). |
-| v1.1.2 | 2026-11-17 | Sudhaar (owner ne pakda): D-001 me PostgreSQL ka nishaan "Salah maani"; ye Claude ki hi daleel thi. Faisla nahi badla. |
-| v1.2.1 | 2026-11-17 | D-002 se D-011 aaye (repo, sab naye sire se, discovery, agents, docs ka dhaancha, Security Architect, releases, capacity, 11 apps, services). |
-| v1.2.2 | 2026-11-17 | D-011: owner ne pakka kiya ki har service ka apna cluster; "ek environment ka ek cluster" chhoda. |
-| v1.3.1 | 2026-11-17 | D-012 se D-027 aaye (asli users, backup, fulfilment, location, pincode, roles, faislon aur docs ka tareeka, guest cart, customer sign-in, location ka kaam, package CLI, branches, consultation, lakshya, stock transport). |
-| v1.3.2 | 2026-11-17 | D-028 aaya (₹0 aur domain nahi). |
+| Version | Date       | Badlav                                                                                                                                                                                                                                                                                  |
+| ------- | ---------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| v1.0.0  | 2026-11-17 | Khaali file bani.                                                                                                                                                                                                                                                                       |
+| v1.1.1  | 2026-11-17 | §0 likhne ka tareeka, §1 aur §2 bane; pehla faisla D-001 (tech stack, finance ke liye PostgreSQL).                                                                                                                                                                                      |
+| v1.1.2  | 2026-11-17 | Sudhaar (owner ne pakda): D-001 me PostgreSQL ka nishaan "Salah maani"; ye Claude ki hi daleel thi. Faisla nahi badla.                                                                                                                                                                  |
+| v1.2.1  | 2026-11-17 | D-002 se D-011 aaye (repo, sab naye sire se, discovery, agents, docs ka dhaancha, Security Architect, releases, capacity, 11 apps, services).                                                                                                                                           |
+| v1.2.2  | 2026-11-17 | D-011: owner ne pakka kiya ki har service ka apna cluster; "ek environment ka ek cluster" chhoda.                                                                                                                                                                                       |
+| v1.3.1  | 2026-11-17 | D-012 se D-027 aaye (asli users, backup, fulfilment, location, pincode, roles, faislon aur docs ka tareeka, guest cart, customer sign-in, location ka kaam, package CLI, branches, consultation, lakshya, stock transport).                                                             |
+| v1.3.2  | 2026-11-17 | D-028 aaya (₹0 aur domain nahi).                                                                                                                                                                                                                                                        |
+| v1.4.1  | 2026-11-17 | D-029 se D-053 aaye: product, business model, apna brand (alag company), sellers, payments, launch, customers, reviews, platform, compliance, waitlist, Master ke roles, hosting, Redis, performance. D-014 me jod: receiving pe batch aur expiry, return pickup, pehle din sirf 1 hub. |
+| v1.4.2  | 2026-11-17 | D-054 aaya (roles ka timing: dono baatein ek saath).                                                                                                                                                                                                                                    |

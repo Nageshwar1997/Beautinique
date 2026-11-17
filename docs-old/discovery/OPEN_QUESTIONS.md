@@ -21,19 +21,19 @@ Ye 6 jawab baaki har cheez ki disha tay karte hain. Agle agents (domain expert, 
 | Q-002 Purane decisions      | Tay     | Jo 9 dobara khulne the, unme se 8 tay: 11 apps (D-010), ₹0 aur domain (D-014), stock, delivery aur 21 hubs (D-016), roles (D-019), guest cart (D-022). Business model (Q-005) baaki. Tay: D-029 (har purane faisle pe alag jawab). |
 | Q-003 Bana hua code         | Khula   | Owner ne 11 apps rakhe (D-010) aur CLI rakha (D-025), par code ke baare me seedha jawab nahi.                                                                                                                                      |
 | Q-004 Releases aur capacity | Tay     | D-008, D-009                                                                                                                                                                                                                       |
-| Q-005 Business model        | Charcha | Stock aur delivery tay (D-016). (c) hybrid (D-029). Bacha: apna brand ki company.                                                                                                               |
+| Q-005 Business model        | Charcha | Stock aur delivery tay (D-016). (c) hybrid (D-029). Bacha: apna brand ki company.                                                                                                                                                  |
 | Q-006 Budget                | Tay     | D-014 (₹0, domain nahi)                                                                                                                                                                                                            |
 
 ### Saaf karna baaki (D-029 se nikle)
 
-| Sawal | Kya saaf karna hai | Status |
-| --- | --- | --- |
-| Q-005 (bacha hissa) | Apna brand alag (dummy) company ke naam se seller ho, ya platform company khud | Khula |
-| Q-007 | **[Naye docs me: DECISIONS D-011]** ARCHITECTURE #5 (ek cluster) aur D-011 (har service ka cluster) me kaunsa | Tay: har service ka apna cluster |
-| Q-008 | PRD "Roles ka timing" (saare roles launch se system me) aur D-019 (role apne module ke saath chalu) ka mel | Khula |
-| Q-009 | Pune pehle din: live sub-district wahi jahan warehouse hai (kul 1 hub), ya alag (kul 2 hubs) | Khula |
-| Q-010 | Purani "Agla district" row ka notify-me waitlist (unserved pincode ke customer ko khabar) rahega ya nahi; D-017 me iska zikr nahi | Khula |
-| ARCHITECTURE #9, #10 | Master ke doosre roles alag staff account pe; performance targets sirf jaage server pe | Khula |
+| Sawal                | Kya saaf karna hai                                                                                                                                                    | Status                           |
+| -------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------- |
+| Q-005 (bacha hissa)  | **[Naye docs me: DECISIONS D-031]** Apna brand alag (dummy) company ke naam se seller ho, ya platform company khud                                                    | Tay: alag (dummy) company        |
+| Q-007                | **[Naye docs me: DECISIONS D-011]** ARCHITECTURE #5 (ek cluster) aur D-011 (har service ka cluster) me kaunsa                                                         | Tay: har service ka apna cluster |
+| Q-008                | **[Naye docs me: DECISIONS D-054]** PRD "Roles ka timing" (saare roles launch se system me) aur D-019 (role apne module ke saath chalu) ka mel                        | Tay: dono                        |
+| Q-009                | **[Naye docs me: DECISIONS D-014]** Pune pehle din: live sub-district wahi jahan warehouse hai (kul 1 hub), ya alag (kul 2 hubs)                                      | Tay: sirf 1 hub                  |
+| Q-010                | **[Naye docs me: DECISIONS D-046]** Purani "Agla district" row ka notify-me waitlist (unserved pincode ke customer ko khabar) rahega ya nahi; D-017 me iska zikr nahi | Tay: waitlist rahega             |
+| ARCHITECTURE #9, #10 | **[Naye docs me: DECISIONS D-047, D-053]** Master ke doosre roles alag staff account pe; performance targets sirf jaage server pe                                     | Tay: dono haan                   |
 
 ### Q-001. Project ka asli lakshya kya hai?
 
@@ -156,5 +156,5 @@ Ye 6 jawab baaki har cheez ki disha tay karte hain. Agle agents (domain expert, 
 | v0.1    | 2026-11-17 | Pehla draft: Batch 1 (Q-001 se Q-006) aur aage ki queue.                                                                  |
 | v0.2    | 2026-11-17 | REPOSITORY_ANALYSIS Q1 se Q13 ke jawab gine: Batch 1 ki halat (Q-004, Q-006 tay), queue me "ab tak", §3 jaanchna baaki.   |
 | v0.3    | 2026-11-17 | §0: ek waqt me ek sawal, jawab sawal ke neeche. Agent 2 Batch 1 ke baad. Q-005 D-016 ke hisaab se dobara likha (Charcha). |
-| v0.4    | 2026-11-17 | Q-001 tay: (b) (D-028). |
-| v0.5    | 2026-11-17 | Q-002 tay (D-029, D-030); Q-005 me (c); saaf karna baaki Q-007 se Q-010; Q-007 likha (Charcha). |
+| v0.4    | 2026-11-17 | Q-001 tay: (b) (D-028).                                                                                                   |
+| v0.5    | 2026-11-17 | Q-002 tay (D-029, D-030); Q-005 me (c); saaf karna baaki Q-007 se Q-010; Q-007 likha (Charcha).                           |

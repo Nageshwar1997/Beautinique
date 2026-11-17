@@ -11,38 +11,38 @@
 
 ## 1. Tay (owner ne kaha)
 
-| Id | Faisla | Kab | Kahan se |
-| --- | --- | --- | --- |
-| D-001 | **[Naye docs me: DECISIONS D-001]** Tech stack wahi rahega jo abhi hai. **Jod (2026-11-17):** finance service ke liye PostgreSQL (D-012). | 2026-11-17 | Shuru |
-| D-002 | **[Naye docs me: DECISIONS D-002]** Repo aur folders ka structure, tools aur conventions wahi rahenge. | 2026-11-17 | Shuru |
-| D-003 | **[Naye docs me: DECISIONS D-003]** Existing project (code aur docs) sirf reference hai; usme jo sawal uthane layak ho, uthaya jaye. | 2026-11-17 | Shuru |
-| D-004 | **[Naye docs me: DECISIONS D-004]** Abhi sirf discovery: sawal-jawab. Plan, task files aur code tab tak nahi jab tak owner agla stage na khole. | 2026-11-17 | Shuru |
-| D-005 | **[Naye docs me: DECISIONS D-005]** Agents ek ke baad ek, kabhi saath nahi. 5-hour limit ~80% pe ho to naya agent nahi; chalta hua agent poora hone do. | 2026-11-17 | Shuru |
-| D-006 | **[Naye docs me: DECISIONS D-006]** Tasks ek file me nahi: ek main plan file, har poore flow ki alag task file, uske andar subtasks. Exact dhaancha baad me tay hoga (B17). | 2026-11-17 | Shuru |
-| D-007 | **[Naye docs me: DECISIONS D-007]** Security Architect ek zaroori, alag role hai; security docs zaroorat ke saath bante jayenge. | 2026-11-17 | Shuru |
-| D-008 | **[Naye docs me: DECISIONS D-008]** Design aur task files poore ecosystem ki pehle din; banana releases me, R1 = patla par poora order flow; koi feature kata nahi. | 2026-11-17 | Q1 |
-| D-009 | **[Naye docs me: DECISIONS D-009]** Capacity: ek hi insaan (2 Claude accounts), 5 ghante/din, 6 din/hafta, koi deadline nahi. | 2026-11-17 | Q1 |
-| D-010 | **[Naye docs me: DECISIONS D-010]** 11 alag apps rahenge; screens module ke saath judti jayengi. | 2026-11-17 | Q2 |
-| D-011 | **[Naye docs me: DECISIONS D-011]** Sabki alag services, har service ka apna database aur apna cluster (MongoDB services ke Atlas clusters; finance PostgreSQL pe, D-012); seema transaction se (draft 9 services). | 2026-11-17 | Q3 |
-| D-012 | **[Naye docs me: DECISIONS D-001, D-001 ke saath]** Finance PostgreSQL pe, baaki services MongoDB pe; har niyam ki list aur test. | 2026-11-17 | Q5 |
-| D-013 | **[Naye docs me: DECISIONS D-012]** Design aur code asli users maan ke (production-grade), halaanki live system sirf owner chalayega. | 2026-11-17 | Q5 |
-| D-014 | **[Naye docs me: DECISIONS D-028]** Kharcha ₹0, domain nahi; server baar-baar jagaya jayega; production-grade = code + chalne ki quality (₹0 me jitni ho sake). | 2026-11-17 | Q4 |
-| D-015 | **[Naye docs me: DECISIONS D-013]** Backup: ek command se saare databases ka data download (MongoDB: Extended JSON; finance ka PostgreSQL bhi), restore command ke saath, files repo ke folder me par git se bahar (4 pehre). | 2026-11-17 | Q4 |
-| D-016 | **[Naye docs me: DECISIONS D-014]** Fulfilment: stock sirf apne warehouse (Chakan), delivery sirf apne partners; carrier port; seller khud nahi bhejta; pehle din 1 warehouse + 1 hub. | 2026-11-17 | Q6 |
-| D-017 | **[Naye docs me: DECISIONS D-015]** Location: India > State > District > Sub-District; har level ka switch (Master / Super Admin / Admin); switch aur live alag; sharten sirf live karte waqt. | 2026-11-17 | Q6, Q12 |
-| D-018 | **[Naye docs me: DECISIONS D-016]** Pincode → theek ek hub (primary sub-district se), 10 cases ke niyam ke saath. | 2026-11-17 | Q6 |
-| D-019 | **[Naye docs me: DECISIONS D-017]** Roles ki poori list design me, har role apne module ke saath chalu (permissions samet); ginti fix nahi; owner ke har role ka alag account. | 2026-11-17 | Q7 |
-| D-020 | **[Naye docs me: DECISIONS D-018]** Faislon ka record is file ke §2 wale format me; badalne pe "badla" line. Sawal-jawab files me sirf aakhri faisla. | 2026-11-17 | Q8 |
-| D-021 | **[Naye docs me: DECISIONS D-019]** Naye docs chhote, har baat ek jagah, "bana hai" sirf code link se; CI me docs ke paths ka check; purane product docs B17 ke baad archive. | 2026-11-17 | Q9 |
-| D-022 | **[Naye docs me: DECISIONS D-020]** Guest cart aur guest wishlist nahi; bina sign-in sirf dekhna, search, reviews padhna, pincode check. | 2026-11-17 | Q10 |
-| D-023 | **[Naye docs me: DECISIONS D-021]** Customer ke sign-in ke teen raaste: password, social (Google, LinkedIn, GitHub), email code. | 2026-11-17 | Q11 |
-| D-024 | **[Naye docs me: DECISIONS D-022]** Location ka kaam sirf utna jitna D-017 ko chahiye; pehle location, phir products; staff ki list data me (sirf Master badle). | 2026-11-17 | Q12 |
-| D-025 | **[Naye docs me: DECISIONS D-023]** Package CLI jaisa hai rahe (naya kaam publish ke plan pe), teen chhote sudhaar ke saath. | 2026-11-17 | Q13a |
-| D-026 | **[Naye docs me: DECISIONS D-024]** `main` branch hategi; flow `prerelease` → `release`; GitHub default branch `release`. | 2026-11-17 | Q13b |
-| D-027 | **[Naye docs me: DECISIONS D-025]** Skin & Hair Expert aur Beauty Advisor asli staff roles rahenge; video ke liye Google Meet ka dummy link; Beauty Advisor ka message thread (live chat nahi). | 2026-11-17 | Q13c |
-| D-028 | **[Naye docs me: DECISIONS D-026]** Lakshya: portfolio project, par aisa bane ki kal asli business ban sake; design asli jaisa, registrations aur kanooni details dummy. | 2026-11-17 | Q-001 |
-| D-029 | Purane PRD §2 aur ARCHITECTURE §2 (#3 se #8) waise hi naye docs me; 4 PRD rows naye roop me; #5 ka cluster wala hissa Q-007 me. | 2026-11-17 | Q-002 |
-| D-030 | **[Naye docs me: DECISIONS D-027]** Warehouse aur hub ke beech maal kiraye ke transporter se; har trip ka record aur transporter ka bill finance me. | 2026-11-17 | Q-002 |
+| Id    | Faisla                                                                                                                                                                                                                        | Kab        | Kahan se |
+| ----- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------- | -------- |
+| D-001 | **[Naye docs me: DECISIONS D-001]** Tech stack wahi rahega jo abhi hai. **Jod (2026-11-17):** finance service ke liye PostgreSQL (D-012).                                                                                     | 2026-11-17 | Shuru    |
+| D-002 | **[Naye docs me: DECISIONS D-002]** Repo aur folders ka structure, tools aur conventions wahi rahenge.                                                                                                                        | 2026-11-17 | Shuru    |
+| D-003 | **[Naye docs me: DECISIONS D-003]** Existing project (code aur docs) sirf reference hai; usme jo sawal uthane layak ho, uthaya jaye.                                                                                          | 2026-11-17 | Shuru    |
+| D-004 | **[Naye docs me: DECISIONS D-004]** Abhi sirf discovery: sawal-jawab. Plan, task files aur code tab tak nahi jab tak owner agla stage na khole.                                                                               | 2026-11-17 | Shuru    |
+| D-005 | **[Naye docs me: DECISIONS D-005]** Agents ek ke baad ek, kabhi saath nahi. 5-hour limit ~80% pe ho to naya agent nahi; chalta hua agent poora hone do.                                                                       | 2026-11-17 | Shuru    |
+| D-006 | **[Naye docs me: DECISIONS D-006]** Tasks ek file me nahi: ek main plan file, har poore flow ki alag task file, uske andar subtasks. Exact dhaancha baad me tay hoga (B17).                                                   | 2026-11-17 | Shuru    |
+| D-007 | **[Naye docs me: DECISIONS D-007]** Security Architect ek zaroori, alag role hai; security docs zaroorat ke saath bante jayenge.                                                                                              | 2026-11-17 | Shuru    |
+| D-008 | **[Naye docs me: DECISIONS D-008]** Design aur task files poore ecosystem ki pehle din; banana releases me, R1 = patla par poora order flow; koi feature kata nahi.                                                           | 2026-11-17 | Q1       |
+| D-009 | **[Naye docs me: DECISIONS D-009]** Capacity: ek hi insaan (2 Claude accounts), 5 ghante/din, 6 din/hafta, koi deadline nahi.                                                                                                 | 2026-11-17 | Q1       |
+| D-010 | **[Naye docs me: DECISIONS D-010]** 11 alag apps rahenge; screens module ke saath judti jayengi.                                                                                                                              | 2026-11-17 | Q2       |
+| D-011 | **[Naye docs me: DECISIONS D-011]** Sabki alag services, har service ka apna database aur apna cluster (MongoDB services ke Atlas clusters; finance PostgreSQL pe, D-012); seema transaction se (draft 9 services).           | 2026-11-17 | Q3       |
+| D-012 | **[Naye docs me: DECISIONS D-001, D-001 ke saath]** Finance PostgreSQL pe, baaki services MongoDB pe; har niyam ki list aur test.                                                                                             | 2026-11-17 | Q5       |
+| D-013 | **[Naye docs me: DECISIONS D-012]** Design aur code asli users maan ke (production-grade), halaanki live system sirf owner chalayega.                                                                                         | 2026-11-17 | Q5       |
+| D-014 | **[Naye docs me: DECISIONS D-028]** Kharcha ₹0, domain nahi; server baar-baar jagaya jayega; production-grade = code + chalne ki quality (₹0 me jitni ho sake).                                                               | 2026-11-17 | Q4       |
+| D-015 | **[Naye docs me: DECISIONS D-013]** Backup: ek command se saare databases ka data download (MongoDB: Extended JSON; finance ka PostgreSQL bhi), restore command ke saath, files repo ke folder me par git se bahar (4 pehre). | 2026-11-17 | Q4       |
+| D-016 | **[Naye docs me: DECISIONS D-014]** Fulfilment: stock sirf apne warehouse (Chakan), delivery sirf apne partners; carrier port; seller khud nahi bhejta; pehle din 1 warehouse + 1 hub.                                        | 2026-11-17 | Q6       |
+| D-017 | **[Naye docs me: DECISIONS D-015]** Location: India > State > District > Sub-District; har level ka switch (Master / Super Admin / Admin); switch aur live alag; sharten sirf live karte waqt.                                | 2026-11-17 | Q6, Q12  |
+| D-018 | **[Naye docs me: DECISIONS D-016]** Pincode → theek ek hub (primary sub-district se), 10 cases ke niyam ke saath.                                                                                                             | 2026-11-17 | Q6       |
+| D-019 | **[Naye docs me: DECISIONS D-017]** Roles ki poori list design me, har role apne module ke saath chalu (permissions samet); ginti fix nahi; owner ke har role ka alag account.                                                | 2026-11-17 | Q7       |
+| D-020 | **[Naye docs me: DECISIONS D-018]** Faislon ka record is file ke §2 wale format me; badalne pe "badla" line. Sawal-jawab files me sirf aakhri faisla.                                                                         | 2026-11-17 | Q8       |
+| D-021 | **[Naye docs me: DECISIONS D-019]** Naye docs chhote, har baat ek jagah, "bana hai" sirf code link se; CI me docs ke paths ka check; purane product docs B17 ke baad archive.                                                 | 2026-11-17 | Q9       |
+| D-022 | **[Naye docs me: DECISIONS D-020]** Guest cart aur guest wishlist nahi; bina sign-in sirf dekhna, search, reviews padhna, pincode check.                                                                                      | 2026-11-17 | Q10      |
+| D-023 | **[Naye docs me: DECISIONS D-021]** Customer ke sign-in ke teen raaste: password, social (Google, LinkedIn, GitHub), email code.                                                                                              | 2026-11-17 | Q11      |
+| D-024 | **[Naye docs me: DECISIONS D-022]** Location ka kaam sirf utna jitna D-017 ko chahiye; pehle location, phir products; staff ki list data me (sirf Master badle).                                                              | 2026-11-17 | Q12      |
+| D-025 | **[Naye docs me: DECISIONS D-023]** Package CLI jaisa hai rahe (naya kaam publish ke plan pe), teen chhote sudhaar ke saath.                                                                                                  | 2026-11-17 | Q13a     |
+| D-026 | **[Naye docs me: DECISIONS D-024]** `main` branch hategi; flow `prerelease` → `release`; GitHub default branch `release`.                                                                                                     | 2026-11-17 | Q13b     |
+| D-027 | **[Naye docs me: DECISIONS D-025]** Skin & Hair Expert aur Beauty Advisor asli staff roles rahenge; video ke liye Google Meet ka dummy link; Beauty Advisor ka message thread (live chat nahi).                               | 2026-11-17 | Q13c     |
+| D-028 | **[Naye docs me: DECISIONS D-026]** Lakshya: portfolio project, par aisa bane ki kal asli business ban sake; design asli jaisa, registrations aur kanooni details dummy.                                                      | 2026-11-17 | Q-001    |
+| D-029 | **[Naye docs me: DECISIONS D-029 se D-054, aur D-014 me jod]** Purane PRD §2 aur ARCHITECTURE §2 (#3 se #8) waise hi naye docs me; 4 PRD rows naye roop me; #5 ka cluster wala hissa Q-007 me.                                | 2026-11-17 | Q-002    |
+| D-030 | **[Naye docs me: DECISIONS D-027]** Warehouse aur hub ke beech maal kiraye ke transporter se; har trip ka record aur transporter ka bill finance me.                                                                          | 2026-11-17 | Q-002    |
 
 ## 2. Faislon ka record (D-008 se)
 
@@ -257,6 +257,8 @@
 
 ### D-029. Purane PRD §2 aur ARCHITECTURE §2 ki samiksha
 
+- **[Naye docs me: DECISIONS D-029 se D-054, aur D-014 me jod]** (2026-11-17).
+
 - **Faisla:** owner ne purane PRD §2 ki har row aur ARCHITECTURE §2 ke #3 se #8 pe alag-alag jawab diya. Jo rows waise hi rahin, wo naye docs (B17) me niyam ki tarah jayengi.
   - **PRD §2, waise hi (25 rows):** Product category, Business model, Apna brand, Kaun bech sakta hai, Stock, Delivery, Delivery partners, Payments, Launch coverage, Sellers ki location, Expansion design, Customers, Reviews, Foreign investment, Apps, Roles ka timing, Docs ki language, Project ka type, Market aur tax, Platform type, Drug items, Head of Operations, Plastic EPR, aur root `CLAUDE.md` ke dono frozen niyam.
   - **PRD §2, naye roop me (4 rows):**
@@ -293,52 +295,52 @@
 
 ## 4. Rejected approaches
 
-| Approach | Kisne chhoda | Faisla |
-| --- | --- | --- |
-| Internal apps ko 4 se 5 apps me milana | Owner | D-010 |
-| Modular monolith / payments core me | Owner | D-011 |
-| Sab MongoDB pe, finance bhi | Owner | D-012 |
-| Domain ya mahine ka budget | Owner | D-014 |
-| Pehle din poora Pune district (21 hubs) | Owner | D-016 |
-| Guest cart / guest wishlist | Owner | D-022 |
-| Sharat tootte hi area apne aap band | Owner | D-024 |
-| Apna video system, live chat | Owner | D-027 |
+| Approach                                | Kisne chhoda | Faisla |
+| --------------------------------------- | ------------ | ------ |
+| Internal apps ko 4 se 5 apps me milana  | Owner        | D-010  |
+| Modular monolith / payments core me     | Owner        | D-011  |
+| Sab MongoDB pe, finance bhi             | Owner        | D-012  |
+| Domain ya mahine ka budget              | Owner        | D-014  |
+| Pehle din poora Pune district (21 hubs) | Owner        | D-016  |
+| Guest cart / guest wishlist             | Owner        | D-022  |
+| Sharat tootte hi area apne aap band     | Owner        | D-024  |
+| Apna video system, live chat            | Owner        | D-027  |
 
 ## 5. Assumptions (jab tak owner kuch aur na kahe)
 
-| Id | Assumption |
-| --- | --- |
+| Id    | Assumption                                                                                                                     |
+| ----- | ------------------------------------------------------------------------------------------------------------------------------ |
 | A-001 | Root `CLAUDE.md` ke "Hamesha laagu niyam" waise hi laagu hain, siwaye §7 ki list ke jo is discovery ke faislon se badalti hai. |
-| A-002 | Purane PRD aur ARCHITECTURE ke decisions sirf reference hain jab tak Q-002 ka jawab na aaye. |
-| A-003 | Discovery ki files `docs/discovery/` me rehti hain; final dhaancha B17 me tay hoga. |
+| A-002 | Purane PRD aur ARCHITECTURE ke decisions sirf reference hain jab tak Q-002 ka jawab na aaye.                                   |
+| A-003 | Discovery ki files `docs/discovery/` me rehti hain; final dhaancha B17 me tay hoga.                                            |
 
 ## 6. Risks
 
-| Id | Risk |
-| --- | --- |
+| Id    | Risk                                                                                                                                                                                                     |
+| ----- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | R-001 | Scope aur capacity ka mel nahi: neev gehri hai par commerce ka ek bhi feature nahi bana. D-008 (releases) aur D-009 (30 ghante/hafta, deadline nahi) isse kam karte hain, par R1 ka scope abhi tay nahi. |
-| R-002 | ₹0 hosting aur "production-grade" ek saath: owner ne D-014 me maana; chalne ki quality ₹0 tak hi. |
-| R-003 | Ek hi agent ne 5-hour limit ka ~59% liya: discovery kai sessions me chalegi. |
-| R-004 | Kanooni baatein lawyer se verify nahi hain. |
-| R-005 | Domain nahi, isliye OTP aur baaki emails spam me ja sakte hain (D-014). |
-| R-006 | Atlas free tier: ek project me ek free cluster ka niyam (8 MongoDB clusters) aur hafte ki data-transfer seema D-011 aur D-015 ko seemit kar sakti hai (jaanch baaki). |
-| R-007 | Ek 512 MB Render process me 9 services ki memory (jaanch baaki). |
-| R-008 | Render free ke mahine ke ghante aur baar-baar jagana (D-014) uske niyamon me theek hai ya nahi (jaanch baaki). |
-| R-009 | Finance ke liye kernel packages ka SQL roop naya kaam hai; free PostgreSQL provider abhi chuna nahi (D-012). |
+| R-002 | ₹0 hosting aur "production-grade" ek saath: owner ne D-014 me maana; chalne ki quality ₹0 tak hi.                                                                                                        |
+| R-003 | Ek hi agent ne 5-hour limit ka ~59% liya: discovery kai sessions me chalegi.                                                                                                                             |
+| R-004 | Kanooni baatein lawyer se verify nahi hain.                                                                                                                                                              |
+| R-005 | Domain nahi, isliye OTP aur baaki emails spam me ja sakte hain (D-014).                                                                                                                                  |
+| R-006 | Atlas free tier: ek project me ek free cluster ka niyam (8 MongoDB clusters) aur hafte ki data-transfer seema D-011 aur D-015 ko seemit kar sakti hai (jaanch baaki).                                    |
+| R-007 | Ek 512 MB Render process me 9 services ki memory (jaanch baaki).                                                                                                                                         |
+| R-008 | Render free ke mahine ke ghante aur baar-baar jagana (D-014) uske niyamon me theek hai ya nahi (jaanch baaki).                                                                                           |
+| R-009 | Finance ke liye kernel packages ka SQL roop naya kaam hai; free PostgreSQL provider abhi chuna nahi (D-012).                                                                                             |
 
 ## 7. Purane docs me kya badlega (sirf list; badlav owner ki haan ke baad)
 
-| Doc | Kya badlega | Faisla |
-| --- | --- | --- |
-| Root `CLAUDE.md` | "Production-grade, kuch bhi baad me nahi" → releases me banana; git flow (`main` hatna, default `release`); "2 developers" ki wording; stack me finance ka PostgreSQL | D-008, D-026, D-009, D-012 |
-| `AGENTS.md` | CLAUDE.md ke niyam badlein to ye pointer bhi dekhna | D-026 |
-| `docs/RULES.md` §2 | Git flow aur back-merge | D-026 |
-| `.claude/skills/_shared/git-rules.md`, `docs/GIT_SKILLS.md` | Branch flow, `main` ka zikr | D-026 |
-| `docs/HANDOFF.md` | "2 developers" → ek insaan, 2 accounts; chhota karna | D-009, D-021 |
-| `docs/PRD.md` | §2 "Apps" / "Roles ka timing"; customer login; teleconsultation flow; delivery ka model (1 hub se) | D-008, D-023, D-027, D-016 |
-| `docs/ARCHITECTURE.md` | §2 #1 / #5 services aur clusters; §2 #3 aur #7 (₹0, domain: pehle jaise); §7.1 customer login; jagane ka niyam; PostgreSQL | D-011, D-023, D-014, D-012 |
-| `docs/packages/README.md` | Back-merge, `test:scripts` ke liye `infra:up`, naye services ke liye `create:backend` | D-025, D-011 |
-| `docs/backend/T4-LOCATION-PLAN.md` | Reference rahe; naya location design D-017, D-018, D-024 se | D-024 |
+| Doc                                                         | Kya badlega                                                                                                                                                           | Faisla                     |
+| ----------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------- |
+| Root `CLAUDE.md`                                            | "Production-grade, kuch bhi baad me nahi" → releases me banana; git flow (`main` hatna, default `release`); "2 developers" ki wording; stack me finance ka PostgreSQL | D-008, D-026, D-009, D-012 |
+| `AGENTS.md`                                                 | CLAUDE.md ke niyam badlein to ye pointer bhi dekhna                                                                                                                   | D-026                      |
+| `docs/RULES.md` §2                                          | Git flow aur back-merge                                                                                                                                               | D-026                      |
+| `.claude/skills/_shared/git-rules.md`, `docs/GIT_SKILLS.md` | Branch flow, `main` ka zikr                                                                                                                                           | D-026                      |
+| `docs/HANDOFF.md`                                           | "2 developers" → ek insaan, 2 accounts; chhota karna                                                                                                                  | D-009, D-021               |
+| `docs/PRD.md`                                               | §2 "Apps" / "Roles ka timing"; customer login; teleconsultation flow; delivery ka model (1 hub se)                                                                    | D-008, D-023, D-027, D-016 |
+| `docs/ARCHITECTURE.md`                                      | §2 #1 / #5 services aur clusters; §2 #3 aur #7 (₹0, domain: pehle jaise); §7.1 customer login; jagane ka niyam; PostgreSQL                                            | D-011, D-023, D-014, D-012 |
+| `docs/packages/README.md`                                   | Back-merge, `test:scripts` ke liye `infra:up`, naye services ke liye `create:backend`                                                                                 | D-025, D-011               |
+| `docs/backend/T4-LOCATION-PLAN.md`                          | Reference rahe; naya location design D-017, D-018, D-024 se                                                                                                           | D-024                      |
 
 ## 8. Implementation ke kaam (discovery ke baad; abhi code nahi chhua)
 
@@ -352,10 +354,10 @@
 
 ## Change log
 
-| Version | Date | Badlav |
-| --- | --- | --- |
-| v0.1 | 2026-11-17 | Pehla draft: D-001 se D-007, assumptions, risks. |
-| v0.2 | 2026-11-17 | REPOSITORY_ANALYSIS ke Q1 se Q13 ke faisle: D-008 se D-027, D-001 me PostgreSQL ka jod, rejected approaches, risks R-005 se R-009, purane docs ki list aur implementation ke kaam. |
-| v0.3 | 2026-11-17 | Sudhaar (owner ne pakda): D-011, D-015, R-006 me "saare Atlas clusters" ki jagah saaf kiya ki finance PostgreSQL pe hai (D-012); Claude ki likhne ki galti, faisla nahi badla. |
-| v0.5 | 2026-11-17 | D-028: lakshya (b) (Q-001). |
-| v0.6 | 2026-11-17 | D-029 (purane PRD §2 aur ARCHITECTURE §2 ki samiksha, Q-002), D-030 (stock transport). |
+| Version | Date       | Badlav                                                                                                                                                                             |
+| ------- | ---------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| v0.1    | 2026-11-17 | Pehla draft: D-001 se D-007, assumptions, risks.                                                                                                                                   |
+| v0.2    | 2026-11-17 | REPOSITORY_ANALYSIS ke Q1 se Q13 ke faisle: D-008 se D-027, D-001 me PostgreSQL ka jod, rejected approaches, risks R-005 se R-009, purane docs ki list aur implementation ke kaam. |
+| v0.3    | 2026-11-17 | Sudhaar (owner ne pakda): D-011, D-015, R-006 me "saare Atlas clusters" ki jagah saaf kiya ki finance PostgreSQL pe hai (D-012); Claude ki likhne ki galti, faisla nahi badla.     |
+| v0.5    | 2026-11-17 | D-028: lakshya (b) (Q-001).                                                                                                                                                        |
+| v0.6    | 2026-11-17 | D-029 (purane PRD §2 aur ARCHITECTURE §2 ki samiksha, Q-002), D-030 (stock transport).                                                                                             |
