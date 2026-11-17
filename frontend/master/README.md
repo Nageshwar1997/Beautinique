@@ -41,4 +41,4 @@ E2E (Playwright) ko `npm run infra:up` aur `npx playwright install chromium` cha
 
 ## Live (owner)
 
-Vercel project `beautinique-master` (root `frontend/master`, production branch `release`): https://beautinique-master.vercel.app. Env `BQ_GATEWAY_URL` aur `ORIGIN_SECRET` (team ka shared env). Render (`bq-live`) me `GATEWAY__APP_HOSTS`, `GATEWAY__VERCEL_PROJECTS` aur `NOTIFY__APP_URLS` me ye app ([TASKS.md](../../docs/TASKS.md) A.9).
+Vercel project `beautinique-master` (root `frontend/master`, production branch `release`): https://beautinique-master.vercel.app. Env `BQ_GATEWAY_URL` aur `ORIGIN_SECRET` (team ka shared env). Render (`bq-live`) me `GATEWAY__APP_HOSTS`, `GATEWAY__VERCEL_PROJECTS` aur `NOTIFY__APP_URLS` me ye app ([TASKS.md](../../docs-old/TASKS.md) A.9).

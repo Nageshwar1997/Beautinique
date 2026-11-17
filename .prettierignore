@@ -10,6 +10,7 @@ package-lock.json
 
 # Planning docs are hand-formatted (wide tables).
 docs
+docs-old
 
 # Generated files, checked byte for byte by their own `npm run check`.
 packages/frontend/styles/src/variables.css

@@ -53,14 +53,14 @@ Master ko koi appoint nahi kar sakta (ARCHITECTURE §7.3), isliye pehla Master o
 
 ## Render (`bq-live`)
 
-| Setting           | Value                                                                                                                                                     |
-| ----------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Root Directory    | khaali (repo root)                                                                                                                                        |
-| Build Command     | `sh scripts/render/build.sh`                                                                                                                              |
-| Start Command     | `sh scripts/render/start.sh`                                                                                                                              |
-| Health Check Path | `/health`                                                                                                                                                 |
-| Branch            | `release`, Auto-Deploy "After CI checks pass"                                                                                                             |
-| Env               | `.env.example` ki keys, live values ke saath ([HANDOFF](../../docs/HANDOFF.md) §4); `NODE_VERSION=24`, `UV_THREADPOOL_SIZE=2`; `PORT` aur `NODE_ENV` nahi |
+| Setting           | Value                                                                                                                                                         |
+| ----------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Root Directory    | khaali (repo root)                                                                                                                                            |
+| Build Command     | `sh scripts/render/build.sh`                                                                                                                                  |
+| Start Command     | `sh scripts/render/start.sh`                                                                                                                                  |
+| Health Check Path | `/health`                                                                                                                                                     |
+| Branch            | `release`, Auto-Deploy "After CI checks pass"                                                                                                                 |
+| Env               | `.env.example` ki keys, live values ke saath ([HANDOFF](../../docs-old/HANDOFF.md) §4); `NODE_VERSION=24`, `UV_THREADPOOL_SIZE=2`; `PORT` aur `NODE_ENV` nahi |
 
 - **Commands repo me:** asli commands [scripts/render/build.sh](../../scripts/render/build.sh) aur [start.sh](../../scripts/render/start.sh) me hain, dashboard me sirf unka naam. Commands badalna = code ka badlav (`release` pe deploy ke saath); dashboard dobara nahi chhoona. Pehle dashboard me poore commands the: repo me badle, par Render purane hi chalata raha (2026-10-26).
 - **npm 12 `.npm12` me:** root `devEngines` npm 12 maangta hai, aur Render ka npm 11 is repo me `npm ci` ya `npm run` pe `EBADDEVENGINES` deta hai. Global install nahi ho sakta (Render pe `/usr/lib/node_modules` read-only, `EROFS`), isliye npm 12 repo ke andar ek folder me.

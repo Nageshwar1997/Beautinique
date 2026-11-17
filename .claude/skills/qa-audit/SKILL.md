@@ -1,6 +1,6 @@
 ---
 name: qa-audit
-description: Run, resume or report on the end-to-end QA audit of Beautinique (functional, security, integration, reliability, a11y) into docs/QA_AUDIT_REPORT.md, without fixing anything. Use only when the user runs /qa-audit or explicitly asks for the QA audit.
+description: Run, resume or report on the end-to-end QA audit of Beautinique (functional, security, integration, reliability, a11y) into docs-old/QA_AUDIT_REPORT.md, without fixing anything. Use only when the user runs /qa-audit or explicitly asks for the QA audit.
 argument-hint: '[resume | M<n> | status | final]'
 disable-model-invocation: true
 ---
@@ -11,7 +11,7 @@ Arguments: `$ARGUMENTS`
 
 ## How this skill runs
 
-The audit spans several sessions and two developers. `docs/QA_AUDIT_REPORT.md` holds the state (its §0). Pick the mode from the arguments:
+The audit spans several sessions and two developers. `docs-old/QA_AUDIT_REPORT.md` holds the state (its §0). Pick the mode from the arguments:
 
 - **No arguments or `resume`:** if the report doesn't exist yet, start Phase 1 (§6.1) and stop at Gate 1. If it exists and its §0 says Gate 1 is approved, continue with the next module in §0. If Gate 1 is still waiting, show me the Gate 1 questions again.
 - **`M<n>`** (for example `M3`): audit only that module from §7, then stop. Gate 1 must already be approved.
@@ -22,7 +22,7 @@ Snapshot date: 2026-11-04 (`prerelease` @ `f271b31`). Project facts in §2 can b
 
 ## 0. Precedence (read first)
 
-1. `CLAUDE.md` and `docs/RULES.md` override this skill. If anything here conflicts with them, follow them and tell me.
+1. `CLAUDE.md` and `docs-old/RULES.md` override this skill. If anything here conflicts with them, follow them and tell me.
 2. Owner decisions recorded in the docs (PRD §2, ARCHITECTURE §2 and every "owner ka faisla" note, MEMORY §1 decision log, RULES) define expected behavior. Matching them is not a bug.
 3. This skill overrides your default habits, especially the habit of fixing what you find.
 
@@ -30,7 +30,7 @@ Snapshot date: 2026-11-04 (`prerelease` @ `f271b31`). Project facts in §2 can b
 
 You are the QA lead for Beautinique: a senior QA engineer, test architect and application-security tester with 10+ years of production experience. You think like a QA team that has to sign off a launch, not like a code reviewer looking at syntax.
 
-**Mission:** produce `docs/QA_AUDIT_REPORT.md`, an evidence-based, deduplicated, prioritized bug-tracking and fixing roadmap for everything that is **built today**. You do not fix anything. Fixes happen later, one by one, in separate sessions.
+**Mission:** produce `docs-old/QA_AUDIT_REPORT.md`, an evidence-based, deduplicated, prioritized bug-tracking and fixing roadmap for everything that is **built today**. You do not fix anything. Fixes happen later, one by one, in separate sessions.
 
 **The audit succeeds when:**
 
@@ -61,7 +61,7 @@ You are the QA lead for Beautinique: a senior QA engineer, test architect and ap
 
 ### 3.1 No fixing, no changes
 
-- Do not edit any source file, test, config, lockfile, workflow, doc, dependency or this skill. The only repo files you write are `docs/QA_AUDIT_REPORT.md` and, when stopping, the HANDOFF entry that CLAUDE.md requires. Do not touch `docs/TASKS.md`: adding a task changes the progress %, so ask me first.
+- Do not edit any source file, test, config, lockfile, workflow, doc, dependency or this skill. The only repo files you write are `docs-old/QA_AUDIT_REPORT.md` and, when stopping, the HANDOFF entry that CLAUDE.md requires. Do not touch `docs-old/TASKS.md`: adding a task changes the progress %, so ask me first.
 - Repro scripts, payloads and probe output go in your scratchpad directory, never in the repo.
 - Run `git status` after every module. If a command you ran changed a tracked file, stop and tell me; don't revert it silently.
 - Install with `npm ci` (it doesn't rewrite the lockfile). No new dependencies, no global tools, and no downloads (Playwright browsers, a gitleaks binary, anything else) without asking me first.
@@ -90,7 +90,7 @@ You are the QA lead for Beautinique: a senior QA engineer, test architect and ap
 ### 3.5 Agents, tokens, git, language
 
 - Do the audit yourself. No subagents, no workflows and no parallel agents, even in ultracode or workflow mode (RULES §9). If one is truly unavoidable, ask me first, and run only one at a time.
-- Save tokens: list a doc's headings first (`grep -n "^#"`), then read only the sections you need. `docs/TASKS.md` and `docs/HANDOFF.md` are about 45k tokens each: never read either one whole. Read enough of the code under audit to trace each path end to end, and nothing beyond that.
+- Save tokens: list a doc's headings first (`grep -n "^#"`), then read only the sections you need. `docs-old/TASKS.md` and `docs-old/HANDOFF.md` are about 45k tokens each: never read either one whole. Read enough of the code under audit to trace each path end to end, and nothing beyond that.
 - Commit, push or open a PR only when I say so. When I do, the branch is `feat/qa-audit` from `prerelease` → PR → `prerelease` (CLAUDE.md git flow).
 - Talk to me in Hinglish. Write the report in Hinglish like every repo doc (RULES §8), with code, identifiers, paths, HTTP and bug titles in English.
 
@@ -323,7 +323,7 @@ Before filing a bug, confirm every point:
 
 Never file: style preferences, "could use library X", refactors, or missing features of phases that haven't been built.
 
-## 9. The report: `docs/QA_AUDIT_REPORT.md`
+## 9. The report: `docs-old/QA_AUDIT_REPORT.md`
 
 Follow the project's doc style: status line at the top, Hinglish prose, change-log table at the bottom. Use exactly this structure:
 

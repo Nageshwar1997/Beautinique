@@ -2,8 +2,8 @@
 
 Indian beauty-only e-commerce marketplace: apps for every role, backend services and shared npm packages, in one monorepo. Education and portfolio project, built like a production product.
 
-- Planning docs: [docs/](docs) (PRD, ARCHITECTURE, RULES, DESIGN, TASKS, MEMORY).
-- Packages and releases: [docs/packages/README.md](docs/packages/README.md).
+- Docs: [docs/](docs) (being rewritten from scratch); the previous docs are in [docs-old/](docs-old), kept for reference.
+- Packages and releases: [docs-old/packages/README.md](docs-old/packages/README.md).
 
 ## Setup
 
