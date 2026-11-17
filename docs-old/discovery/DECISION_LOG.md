@@ -25,24 +25,24 @@
 | D-010 | **[Naye docs me: DECISIONS D-010]** 11 alag apps rahenge; screens module ke saath judti jayengi. | 2026-11-17 | Q2 |
 | D-011 | **[Naye docs me: DECISIONS D-011]** Sabki alag services, har service ka apna database aur apna cluster (MongoDB services ke Atlas clusters; finance PostgreSQL pe, D-012); seema transaction se (draft 9 services). | 2026-11-17 | Q3 |
 | D-012 | **[Naye docs me: DECISIONS D-001, D-001 ke saath]** Finance PostgreSQL pe, baaki services MongoDB pe; har niyam ki list aur test. | 2026-11-17 | Q5 |
-| D-013 | Design aur code asli users maan ke (production-grade), halaanki live system sirf owner chalayega. | 2026-11-17 | Q5 |
-| D-014 | Kharcha ₹0, domain nahi; server baar-baar jagaya jayega; production-grade = code + chalne ki quality (₹0 me jitni ho sake). | 2026-11-17 | Q4 |
-| D-015 | Backup: ek command se saare databases ka data download (MongoDB: Extended JSON; finance ka PostgreSQL bhi), restore command ke saath, files repo ke folder me par git se bahar (4 pehre). | 2026-11-17 | Q4 |
-| D-016 | Fulfilment: stock sirf apne warehouse (Chakan), delivery sirf apne partners; carrier port; seller khud nahi bhejta; pehle din 1 warehouse + 1 hub. | 2026-11-17 | Q6 |
-| D-017 | Location: India > State > District > Sub-District; har level ka switch (Master / Super Admin / Admin); switch aur live alag; sharten sirf live karte waqt. | 2026-11-17 | Q6, Q12 |
-| D-018 | Pincode → theek ek hub (primary sub-district se), 10 cases ke niyam ke saath. | 2026-11-17 | Q6 |
-| D-019 | Roles ki poori list design me, har role apne module ke saath chalu (permissions samet); ginti fix nahi; owner ke har role ka alag account. | 2026-11-17 | Q7 |
-| D-020 | Faislon ka record is file ke §2 wale format me; badalne pe "badla" line. Sawal-jawab files me sirf aakhri faisla. | 2026-11-17 | Q8 |
-| D-021 | Naye docs chhote, har baat ek jagah, "bana hai" sirf code link se; CI me docs ke paths ka check; purane product docs B17 ke baad archive. | 2026-11-17 | Q9 |
-| D-022 | Guest cart aur guest wishlist nahi; bina sign-in sirf dekhna, search, reviews padhna, pincode check. | 2026-11-17 | Q10 |
-| D-023 | Customer ke sign-in ke teen raaste: password, social (Google, LinkedIn, GitHub), email code. | 2026-11-17 | Q11 |
-| D-024 | Location ka kaam sirf utna jitna D-017 ko chahiye; pehle location, phir products; staff ki list data me (sirf Master badle). | 2026-11-17 | Q12 |
-| D-025 | Package CLI jaisa hai rahe (naya kaam publish ke plan pe), teen chhote sudhaar ke saath. | 2026-11-17 | Q13a |
-| D-026 | `main` branch hategi; flow `prerelease` → `release`; GitHub default branch `release`. | 2026-11-17 | Q13b |
-| D-027 | Skin & Hair Expert aur Beauty Advisor asli staff roles rahenge; video ke liye Google Meet ka dummy link; Beauty Advisor ka message thread (live chat nahi). | 2026-11-17 | Q13c |
-| D-028 | Lakshya: portfolio project, par aisa bane ki kal asli business ban sake; design asli jaisa, registrations aur kanooni details dummy. | 2026-11-17 | Q-001 |
+| D-013 | **[Naye docs me: DECISIONS D-012]** Design aur code asli users maan ke (production-grade), halaanki live system sirf owner chalayega. | 2026-11-17 | Q5 |
+| D-014 | **[Naye docs me: DECISIONS D-028]** Kharcha ₹0, domain nahi; server baar-baar jagaya jayega; production-grade = code + chalne ki quality (₹0 me jitni ho sake). | 2026-11-17 | Q4 |
+| D-015 | **[Naye docs me: DECISIONS D-013]** Backup: ek command se saare databases ka data download (MongoDB: Extended JSON; finance ka PostgreSQL bhi), restore command ke saath, files repo ke folder me par git se bahar (4 pehre). | 2026-11-17 | Q4 |
+| D-016 | **[Naye docs me: DECISIONS D-014]** Fulfilment: stock sirf apne warehouse (Chakan), delivery sirf apne partners; carrier port; seller khud nahi bhejta; pehle din 1 warehouse + 1 hub. | 2026-11-17 | Q6 |
+| D-017 | **[Naye docs me: DECISIONS D-015]** Location: India > State > District > Sub-District; har level ka switch (Master / Super Admin / Admin); switch aur live alag; sharten sirf live karte waqt. | 2026-11-17 | Q6, Q12 |
+| D-018 | **[Naye docs me: DECISIONS D-016]** Pincode → theek ek hub (primary sub-district se), 10 cases ke niyam ke saath. | 2026-11-17 | Q6 |
+| D-019 | **[Naye docs me: DECISIONS D-017]** Roles ki poori list design me, har role apne module ke saath chalu (permissions samet); ginti fix nahi; owner ke har role ka alag account. | 2026-11-17 | Q7 |
+| D-020 | **[Naye docs me: DECISIONS D-018]** Faislon ka record is file ke §2 wale format me; badalne pe "badla" line. Sawal-jawab files me sirf aakhri faisla. | 2026-11-17 | Q8 |
+| D-021 | **[Naye docs me: DECISIONS D-019]** Naye docs chhote, har baat ek jagah, "bana hai" sirf code link se; CI me docs ke paths ka check; purane product docs B17 ke baad archive. | 2026-11-17 | Q9 |
+| D-022 | **[Naye docs me: DECISIONS D-020]** Guest cart aur guest wishlist nahi; bina sign-in sirf dekhna, search, reviews padhna, pincode check. | 2026-11-17 | Q10 |
+| D-023 | **[Naye docs me: DECISIONS D-021]** Customer ke sign-in ke teen raaste: password, social (Google, LinkedIn, GitHub), email code. | 2026-11-17 | Q11 |
+| D-024 | **[Naye docs me: DECISIONS D-022]** Location ka kaam sirf utna jitna D-017 ko chahiye; pehle location, phir products; staff ki list data me (sirf Master badle). | 2026-11-17 | Q12 |
+| D-025 | **[Naye docs me: DECISIONS D-023]** Package CLI jaisa hai rahe (naya kaam publish ke plan pe), teen chhote sudhaar ke saath. | 2026-11-17 | Q13a |
+| D-026 | **[Naye docs me: DECISIONS D-024]** `main` branch hategi; flow `prerelease` → `release`; GitHub default branch `release`. | 2026-11-17 | Q13b |
+| D-027 | **[Naye docs me: DECISIONS D-025]** Skin & Hair Expert aur Beauty Advisor asli staff roles rahenge; video ke liye Google Meet ka dummy link; Beauty Advisor ka message thread (live chat nahi). | 2026-11-17 | Q13c |
+| D-028 | **[Naye docs me: DECISIONS D-026]** Lakshya: portfolio project, par aisa bane ki kal asli business ban sake; design asli jaisa, registrations aur kanooni details dummy. | 2026-11-17 | Q-001 |
 | D-029 | Purane PRD §2 aur ARCHITECTURE §2 (#3 se #8) waise hi naye docs me; 4 PRD rows naye roop me; #5 ka cluster wala hissa Q-007 me. | 2026-11-17 | Q-002 |
-| D-030 | Warehouse aur hub ke beech maal kiraye ke transporter se; har trip ka record aur transporter ka bill finance me. | 2026-11-17 | Q-002 |
+| D-030 | **[Naye docs me: DECISIONS D-027]** Warehouse aur hub ke beech maal kiraye ke transporter se; har trip ka record aur transporter ka bill finance me. | 2026-11-17 | Q-002 |
 
 ## 2. Faislon ka record (D-008 se)
 
@@ -100,12 +100,16 @@
 
 ### D-013. Asli users maan ke design
 
+- **[Naye docs me: DECISIONS D-012]** (2026-11-17).
+
 - **Faisla:** live system sirf owner chalayega, par design aur code ye maan ke ki asli users use kar rahe hain: concurrency, abuse aur scale ki soch, aur unke tests.
 - **Wajah (owner):** "hume code sirf mere liye nhi likhna he ekdum production grade banana he".
 - **Kisne, kab:** owner, 2026-11-17. **Nishaan:** Owner.
 - **Kahan laagu nahi:** sirf chhote operations ke faisle (jaise backup ke waqt system khaali, emails ki ginti).
 
 ### D-014. ₹0 aur domain nahi
+
+- **[Naye docs me: DECISIONS D-028]** (2026-11-17).
 
 - **Faisla:** kharcha ₹0, domain nahi. Soye server pe pehle customer ka ~1 minute intezaar chalega. Server GitHub Actions, cron-job aur UptimeRobot se din me baar-baar jagaya jayega, aur apps khule hon tab har kuch minute me. 300 emails/din kaafi. Free tier ki seemaon ki handling banti rahegi. Production-grade = code ki quality + chalne ki quality, ₹0 me jitni ho sake.
 - **Wajah (owner):** "Mera Hobby Project he to din ke 300 mails kafi honge"; "Domain nhi chahiye".
@@ -117,12 +121,16 @@
 
 ### D-015. Backup command
 
+- **[Naye docs me: DECISIONS D-013]** (2026-11-17).
+
 - **Faisla:** ek command, jo production me jaane se pehle owner chalayega, aur saare databases ka data download kare. MongoDB clusters: Extended JSON (har collection ki ek file, ek line me ek document). Finance ka PostgreSQL bhi isi command me (D-012 ka asar); uska format technical batch (B16) me tay. Restore command ek baar local pe jaanchi hui. Files isi repo ke folder me, git se bahar. 4 pehre: `.gitignore`; CI pehra jo us folder ki file git me dikhe to fail kare; prettier, ESLint aur tests se bahar; Claude us folder ko `.env` ki tarah kabhi na khole.
 - **Wajah (owner):** "Main ek command chalaunga production me jane se pehle aur wo sabhi clusters ka data json me download kar degi"; "downloaded files isi repo me rahenge bus github pe nhi jayegi".
 - **Chhode vikalp:** repo ke bahar ka folder (Claude ki salah).
 - **Kisne, kab:** owner, 2026-11-17. **Nishaan:** Owner (command, jagah); Salah maani (format, restore, pehre).
 
 ### D-016. Fulfilment model
+
+- **[Naye docs me: DECISIONS D-014]** (2026-11-17).
 
 - **Faisla:** har brand ka saara maal sirf apne warehouse (Chakan) me; customer tak sirf apne delivery partners, koi courier nahi. Raasta: brand → warehouse → hub → delivery partner → customer. Ilaake ke bahar delivery unavailable. Delivery ka code ek carrier port ke peeche (aaj sirf apni fleet). Seller khud nahi bhejta. Pehle din 1 warehouse + 1 hub, us sub-district ke saare pincodes; baaki hubs baad me ek click se.
 - **Wajah (owner):** "Pehle din pura district nhi ek ek hub se suru karenge".
@@ -131,6 +139,8 @@
 - **Kisne, kab:** owner, 2026-11-17. **Nishaan:** Owner; carrier port Salah maani.
 
 ### D-017. Location, switches aur live
+
+- **[Naye docs me: DECISIONS D-015]** (2026-11-17).
 
 - **Faisla:**
   - Seedhi: India > State > District > Sub-District. District me ek main warehouse; har sub-district me theek ek hub (alag record, sub-district se juda). Hub sirf parcel aage badhata hai, stock nahi. Warehouse se seedha customer ko kuch nahi; main city me bhi warehouse ke paas hub.
@@ -145,11 +155,15 @@
 
 ### D-018. Pincode ke niyam
 
+- **[Naye docs me: DECISIONS D-016]** (2026-11-17).
+
 - **Faisla:** delivery ka faisla pincode → theek ek hub se, har pincode ka ek primary sub-district (data se, Admin badal sake). Do sub-districts / districts me phaila pincode primary se serve; do states me phaila pincode pe customer state chune (state live ho, GST usi state ka); naam se kabhi nahi, id aur sarkari code se; import pe ek pincode ek record; naam badle to itihaas rahe; bina mapping wala pincode unavailable + Admin ki list; jaanch order banate waqt usi transaction me; returns bhi "pending" me ginte hain. Poori list: [REPOSITORY_ANALYSIS.md](REPOSITORY_ANALYSIS.md) §6 Q6.
 - **Wajah (owner):** "in cases ko tum tumhari salah se update karo. tumhe jo thik lage".
 - **Kisne, kab:** owner, 2026-11-17. **Nishaan:** Salah maani.
 
 ### D-019. Roles
+
+- **[Naye docs me: DECISIONS D-017]** (2026-11-17).
 
 - **Faisla:** roles ki poori list design me; system me har role tab chalu jab uska module bane, usi badlav me uski permissions. Ginti (~80) fix nahi, zaroorat pe badh sakti hai (Master bina deploy ke sub-role jod sakta hai). RBAC engine waisa hi.
 - **Owner ke accounts:** har role ka alag account, 2 base emails ke `+` alias se: ek authenticator wale 7 apps ke roles ke liye, ek baaki (customer, seller, delivery, creator) ke liye. Bantwara sirf suvidha, niyam nahi: jahan zaroori ho authenticator lagega (jaise Seller Account Owner, Seller Finance).
@@ -160,16 +174,22 @@
 
 ### D-020. Faislon ki process
 
+- **[Naye docs me: DECISIONS D-018]** (2026-11-17).
+
 - **Faisla:** har bada faisla §2 ke format me (faisla, owner ke shabdon me wajah, chhode vikalp, kab dobara khulega, kisne-kab, Claude ki salah aur owner ka faisla alag nishaan). Is file me purana faisla mitta nahi, "badla" line judti hai. Sawal-jawab ki kaam-chalau files me sirf aakhri faisla.
 - **Kisne, kab:** owner, 2026-11-17. **Nishaan:** Salah maani.
 
 ### D-021. Docs ka tareeka
+
+- **[Naye docs me: DECISIONS D-019]** (2026-11-17).
 
 - **Faisla:** naye docs chhote aur decision records ke saath; har baat sirf ek jagah, baaki jagah link; "bana hai" sirf code ya test ke link se; ek index file. CI me ek check jo docs me likhe file paths repo me hon ye dekhe. Purane PRD, ARCHITECTURE, TASKS, DESIGN naye docs banne (B17) ke baad `docs/archive/` me, "sirf reference" note ke saath; RULES, HANDOFF, GIT_SKILLS, MEMORY rahen aur update hon (HANDOFF chhota).
 - **Chhode vikalp:** purane bade docs hi update karte rehna.
 - **Kisne, kab:** owner, 2026-11-17. **Nishaan:** Salah maani.
 
 ### D-022. Guest cart nahi
+
+- **[Naye docs me: DECISIONS D-020]** (2026-11-17).
 
 - **Faisla:** cart aur wishlist ke liye sign-in zaroori. Bina sign-in: products aur product page, search aur filter, reviews padhna, pincode pe delivery check. Sign-in zaroori: cart, wishlist, checkout aur payment, review likhna, orders aur account.
 - **Wajah (owner):** "Storage aur kaam kam karne ke liye"; "Bina login ke nhi matlab nhi".
@@ -179,12 +199,16 @@
 
 ### D-023. Customer sign-in
 
+- **[Naye docs me: DECISIONS D-021]** (2026-11-17).
+
 - **Faisla:** customer app me teen raaste, customer khud chune: password, social (Google, LinkedIn, GitHub), aur email code. Email code se sign-in sirf customer app me; authenticator laga ho to email code ke baad bhi maanga jaye (B15 me pakka). Ye baat naye docs me ek hi jagah.
 - **Chhode vikalp:** sirf password + social (aaj ka code); sirf email code + social.
 - **Kisne, kab:** owner, 2026-11-17. **Nishaan:** Salah maani.
 - **Badla (purana faisla):** purane ARCHITECTURE §7.1 (2026-10-27) ka "email code se login hata" isse badalta hai.
 
 ### D-024. Location ka kaam kitna aur kis order me
+
+- **[Naye docs me: DECISIONS D-022]** (2026-11-17).
 
 - **Faisla:** vikalp (c): poore India ka data import, shak wale pincodes ki jaanch sirf live hone wale district ki; D-017 ke switches aur live; teen sharten code ke niyam (generic checklist engine baad me); area settings sirf checkout aur delivery promise ki keys (sub-district level samet); network me 1 warehouse, hub, pincode → hub, delivery promise. **Order:** pehle location, phir products. Expand karna (naya hub, warehouse, district, switch, staff, live, sarkari data) app ya import se, code se nahi.
 - **Staff ki list:** kaunse roles kitne, data me, app ke ek page pe, sab hubs ke liye ek; sirf Master badle, audit ke saath.
@@ -194,11 +218,15 @@
 
 ### D-025. Package CLI
 
+- **[Naye docs me: DECISIONS D-023]** (2026-11-17).
+
 - **Faisla:** CLI jaisa hai waisa; naya kaam tabhi jab publish ka plan bane. Teen sudhaar: release ke baad ka sandesh "(main)" ki jagah `release` branch; `docs/packages/README.md` ka back-merge `release` → `prerelease`; docs me `test:scripts` ke liye `infra:up` ki baat.
 - **Chhode vikalp:** CLI hatana; aage badhana.
 - **Kisne, kab:** owner, 2026-11-17. **Nishaan:** Salah maani.
 
 ### D-026. Branches
+
+- **[Naye docs me: DECISIONS D-024]** (2026-11-17).
 
 - **Faisla:** `main` branch hategi. Flow: feature branch → `prerelease` (development) → `release` (production); back-merge `release` → `prerelease` waise hi. GitHub default branch `release`.
 - **Wajah (owner):** "main branch delete karni he".
@@ -209,12 +237,16 @@
 
 ### D-027. Consultation aur Beauty Advisor
 
+- **[Naye docs me: DECISIONS D-025]** (2026-11-17).
+
 - **Faisla:** Skin & Hair Expert aur Beauty Advisor asli staff roles (Support Desk, Support Lead ke neeche). Apna video system nahi: customer ko Google Meet ka dummy link. Flow: request → time tay aur link bheja → consult hua → resolve (cancel aur no-show bhi), har badlav audit me, customer ko haalat dikhe. Link staff daale (sirf `https://meet.google.com/...`), system nakli link nahi banata; demo me DUMMY nishaan. Link email aur in-app se. Dono roles ka ek hi flow. Skin & Hair Expert ke notes health data: sirf expert aur zaroori support roles, pehle customer ki consent (B15 me pakka). Telemedicine ki ek dummy row legal matrix me. Beauty Advisor ka chat live nahi, message thread: customer sawal bheje, advisor shade aur product links ke saath jawab de.
 - **Wajah (owner):** "ye ek complete plan hoga"; "Telecommunication ki jhanjhat nhi chahiye".
 - **Chhode vikalp:** apna video system; live chat; roles hatana.
 - **Kisne, kab:** owner, 2026-11-17. **Nishaan:** Owner (roles, Meet link); Salah maani (flow ke niyam, message thread).
 
 ### D-028. Project ka lakshya
+
+- **[Naye docs me: DECISIONS D-026]** (2026-11-17).
 
 - **Faisla:** vikalp (b): portfolio / practice project, par aisa bane ki kal asli business ban sake. Design asli jaisa (data model, compliance ke fields, security); registrations aur kanooni details dummy; scope ka paimana "poora order flow chalta dikhe".
 - **Wajah:** owner ne vikalp (b) chuna. Owner pehle hi project ko "practice hobby project" keh chuke the; (b) usme ye jodta hai ki design asli business jaisa rahe, taaki aage jaana pade to code dobara na likhna pade.
@@ -245,6 +277,8 @@
   - "Roles ka timing" (saare roles launch se system me) aur D-019 (role apne module ke saath chalu) ka mel: Q-008.
 
 ### D-030. Stock transport (warehouse aur hub ke beech)
+
+- **[Naye docs me: DECISIONS D-027]** (2026-11-17).
 
 - **Faisla:** warehouse aur hub ke beech maal (dono taraf, returns samet) **kiraye ke transporter** se. Driver ka system me account ya role nahi. Har trip ka record: transporter, gaadi number, driver ka naam aur phone (sirf contact ke liye), seal number, manifest (kaunse bags aur parcels), warehouse pe dispatch scan aur hub pe receive scan (kis staff ne kiya). Transporter ka bill finance me kharche ki entry, trip records se mila ke. Brands apna maal bhejne aur wapas le jaane ke liye apna transport ya courier le sakte hain (purani row ka ye hissa waise hi).
 - **Wajah:** owner ne do vikalp diye (apna local staff jiska system me record nahi, ya kiraye ka), saath me kaha ki kharche ka bill banega, aur chunna Claude pe chhoda. Claude ne kiraye ka chuna: (1) bina record ke maal gum ya toot jaaye to zimmedari kisi pe nahi banti, jo D-013 ke khilaaf hai; (2) bill kiraye wale ke saath seedha baithta hai, apne staff ka kharcha salary hota hai; (3) naya role ya app nahi chahiye.
