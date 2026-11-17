@@ -1,10 +1,11 @@
 # OPEN QUESTIONS: Cosmetics E-Commerce Ecosystem (discovery)
 
-> **Status:** v0.2 (2026-11-17), discovery phase. REPOSITORY_ANALYSIS ke Q1 se Q13 ke jawab ([REPOSITORY_ANALYSIS.md](REPOSITORY_ANALYSIS.md) §6) yahan gine gaye: Batch 1 ki halat §1 me, aage ki queue §2 me, jaanchna baaki §3 me. Owner ke saath sawal-jawab ki file. Yahan likhi "Salah" sirf recommendation hai: jab tak owner haan na kahe, kuch tay nahi. Tay hui baatein [DECISION_LOG.md](DECISION_LOG.md) me jaati hain.
+> **Status:** v0.3 (2026-11-17), discovery phase. REPOSITORY_ANALYSIS ke Q1 se Q13 ke jawab ([REPOSITORY_ANALYSIS.md](REPOSITORY_ANALYSIS.md) §6) yahan gine gaye: Batch 1 ki halat §1 me, aage ki queue §2 me, jaanchna baaki §3 me. Owner ke saath sawal-jawab ki file. Yahan likhi "Salah" sirf recommendation hai: jab tak owner haan na kahe, kuch tay nahi. Tay hui baatein [DECISION_LOG.md](DECISION_LOG.md) me jaati hain.
 
 ## 0. Ye file kaise chalti hai
 
-- Sawal chhote batch me (3 se 7), ek topic ek batch. Agla batch pichhle ke jawab ke baad.
+- Ek waqt me ek sawal; agla tabhi jab owner "next" kahe (owner, 2026-11-17). Batch sirf topic ki grouping hai.
+- Owner ka jawab usi sawal ke neeche likha jaata hai; jawab badle to purani line hata ke nayi (itihaas sirf DECISION_LOG me).
 - Har sawal me: **Sawal**, **Kyun zaroori**, **Vikalp**, **Salah**, **Trade-off**.
 - Status: `Khula` (jawab baaki), `Charcha` (baat chal rahi), `Tay` (DECISION_LOG me gaya), `Roka` (baad me).
 - Saboot aur purane project ki critique: [REPOSITORY_ANALYSIS.md](REPOSITORY_ANALYSIS.md) (§6 critique, §9 purane decisions, §10 unknowns).
@@ -12,16 +13,16 @@
 
 ## 1. Batch 1: neev ke sawal
 
-Ye 6 jawab baaki har cheez ki disha tay karte hain. Agle agents (domain expert, Security Architect) ka brief bhi inhi se banega.
+Ye 6 jawab baaki har cheez ki disha tay karte hain. Agle agents (domain expert, Security Architect) ka brief bhi inhi se banega. Agent 2 (Business Analyst + cosmetics domain expert) Batch 1 ke bache jawabon ke baad chalega (owner, 2026-11-17: "Jawab ke baad").
 
-| Sawal | Status | Ab tak |
-| --- | --- | --- |
-| Q-001 Lakshya | Charcha | Owner ke shabd: "practice hobby project"; design aur code asli users maan ke (D-013); legal dummy (CLAUDE.md). Seedha (a) / (b) / (c) baaki. |
-| Q-002 Purane decisions | Charcha | Jo 9 dobara khulne the, unme se 8 tay: 11 apps (D-010), ₹0 aur domain (D-014), stock, delivery aur 21 hubs (D-016), roles (D-019), guest cart (D-022). Business model (Q-005) baaki. Tareeka (b) chal raha hai, seedhi haan baaki. |
-| Q-003 Bana hua code | Khula | Owner ne 11 apps rakhe (D-010) aur CLI rakha (D-025), par code ke baare me seedha jawab nahi. |
-| Q-004 Releases aur capacity | Tay | D-008, D-009 |
-| Q-005 Business model | Khula | Stock aur delivery tay (D-016: brands ka maal apne warehouse me). 1P, marketplace ya hybrid, aur invoice pe kaun: baaki. |
-| Q-006 Budget | Tay | D-014 (₹0, domain nahi) |
+| Sawal                       | Status  | Ab tak                                                                                                                                                                                                                             |
+| --------------------------- | ------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Q-001 Lakshya               | Charcha | Owner ke shabd: "practice hobby project"; design aur code asli users maan ke (D-013); legal dummy (CLAUDE.md). Seedha (a) / (b) / (c) baaki.                                                                                       |
+| Q-002 Purane decisions      | Charcha | Jo 9 dobara khulne the, unme se 8 tay: 11 apps (D-010), ₹0 aur domain (D-014), stock, delivery aur 21 hubs (D-016), roles (D-019), guest cart (D-022). Business model (Q-005) baaki. Tareeka (b) chal raha hai, seedhi haan baaki. |
+| Q-003 Bana hua code         | Khula   | Owner ne 11 apps rakhe (D-010) aur CLI rakha (D-025), par code ke baare me seedha jawab nahi.                                                                                                                                      |
+| Q-004 Releases aur capacity | Tay     | D-008, D-009                                                                                                                                                                                                                       |
+| Q-005 Business model        | Charcha | Stock aur delivery tay (D-016). Sawal D-016 ke hisaab se dobara likha aur owner se poocha (2026-11-17); jawab baaki.                                                                                                               |
+| Q-006 Budget                | Tay     | D-014 (₹0, domain nahi)                                                                                                                                                                                                            |
 
 ### Q-001. Project ka asli lakshya kya hai?
 
@@ -55,13 +56,32 @@ Ye 6 jawab baaki har cheez ki disha tay karte hain. Agle agents (domain expert, 
 - **Salah:** **(b)**. "Baad me bhool jayenge" ka dar task files se sambhalta hai: har module ki file pehle din banegi, sirf banne ka order alag hoga. Ye CLAUDE.md ke "kuch bhi baad me nahi" niyam ko chhuta hai, isliye owner ka saaf faisla chahiye.
 - **Trade-off:** releases me thoda rework (R1 ka model R2 me badal sakta hai). (a) me rework nahi, par bahut der tak kuch chalta nahi dikhta aur koi business assumption parkha nahi jaata.
 
-### Q-005. Business model kya hai?
+### Q-005. Business model: maal ka maalik kaun, aur customer ke invoice pe seller kaun?
 
-- **Sawal:** platform (a) 1P retailer hai (Beautinique maal khareed ke khud bechta hai, invoice pe Beautinique), (b) pure marketplace (sellers apna maal bechte hain, invoice pe seller, hamara commission), ya (c) hybrid: apna brand + doosre brand sellers, ek hi storefront (purana faisla)?
-- **Kyun zaroori:** sabse bada scope driver. (b) aur (c) me seller onboarding / KYC, seller app, commission, settlement, TCS / TDS aur seller-wise invoice aate hain. (a) me purchase orders aur vendor payable aate hain, par seller app aur settlement nahi.
-- **Vikalp:** (a), (b), (c) jaise upar.
-- **Salah:** **(c) end-state rahe**, kyunki "ecosystem" wahi hai aur identity / RBAC pehle se kai organisations ke liye bana hai. Par R1 me sirf house brand usi seller pipeline se beche (seller entity, seller ka stock, invoice pe seller), doosre sellers R2 me. Isse model pehle din se marketplace ki shakal ka rehta hai aur pehla order settlement ke bina chal jaata hai.
-- **Trade-off:** R1 me marketplace ka finance hissa parkha nahi jaata. (a) chunne se finance lagbhag aadha ho jaata hai, par seller side ka poora ecosystem chala jaata hai.
+- **Sawal:** D-016 se itna tay hai ki har brand ka maal hamare warehouse me rahega aur delivery hum karenge. Baaki ye hai:
+  - **(a) 1P (inventory):** Beautinique brands se maal khareedta hai; maalik Beautinique, customer ka invoice Beautinique ka.
+  - **(b) Marketplace + hamari fulfilment:** maal brand ka hi rehta hai, sirf hamare warehouse me rakha; invoice brand (seller) ka; hum commission aur fees lete hain, paisa collect karke brand ko settle karte hain.
+  - **(c) Hybrid:** (b) + apna brand bhi ek seller (purana faisla).
+- **Kyun zaroori:** isi se tay hota hai seller app ka kaam, finance service (D-012) me kya hai, invoice aur GST, brand onboarding, price kaun tay kare, aur expire ya na bika maal kiska nuksaan.
+
+|                       | (a) 1P                                        | (b) Marketplace                                               | (c) Hybrid                        |
+| --------------------- | --------------------------------------------- | ------------------------------------------------------------- | --------------------------------- |
+| Maal ka maalik        | Beautinique                                   | Brand                                                         | Brand; apna brand: apni company   |
+| Customer ka invoice   | Beautinique                                   | Brand ke GSTIN se                                             | Har product ke seller ke GSTIN se |
+| Price kaun tay kare   | Beautinique                                   | Brand                                                         | Brand (apna brand: apni team)     |
+| Seller app            | Vendor portal: PO, maal bhejna, payment       | Poora: listing, price, stock, settlement, reports             | (b) jaisa                         |
+| Finance               | Khareed, vendor payment, margin               | Commission, fees, GST TCS, income-tax TDS, settlement, payout | (b) + apne brand ka hisaab        |
+| Brand ki GST shart    | Naya registration nahi (wo hamein bechta hai) | Jis state ke warehouse me maal, us state ka GSTIN             | (b) jaisa                         |
+| Expire / na bika maal | Hamara nuksaan                                | Brand ka (wapas le jaaye ya disposal fee)                     | (b) jaisa                         |
+
+- **Salah:** **(c)**, ek sharat ke saath: apna brand ek **alag (dummy) company** ke naam se seller ho, platform wali company khud nahi, aur baaki sellers ki tarah hi onboard ho (purana "koi shortcut nahi" niyam).
+  - D-010 ke seller aur finance apps aur D-012 ka ledger marketplace me hi poora kaam aate hain; 1P me seller app sirf vendor portal reh jaata hai.
+  - Ek hi raasta: har product ka ek seller, har customer invoice ek seller ke GSTIN se; platform sirf apne commission / fee ke invoice sellers ko deta hai. Apna brand koi special case nahi.
+  - Cosmetics me expiry asli jokhim hai. (b) / (c) me wo brand ka hai, aur uska flow (removal, disposal) design me aata hai.
+  - Alag company kyun: platform company khud seller ho to har jagah special case banta hai (khud pe TCS nahi, settlement ki jagah andar ka transfer, apne brand ko aage dikhane ke sawal).
+  - Kanooni detail (TCS / TDS ke niyam aur dar, related-party seller) jaanchi nahi.
+- **Trade-off:** (c) me finance sabse bada (settlement, TCS / TDS, commission invoices, seller ledger, payouts). Naya state kholne pe (D-017) har brand ko us state ka GSTIN chahiye; tab tak uska maal us state ke warehouse me nahi jaa sakta, yaani ek product kisi state me mile aur kisi me nahi (design me data + jaanch; registrations dummy). (a) me finance aur onboarding lagbhag aadha, par seller side ka ecosystem chala jaata hai aur expiry ka nuksaan hamara.
+- **Iske baad (alag sawal):** R1 me kaunse sellers: sirf apna brand, ya ek dummy brand bhi, taaki ek order ke do seller invoice parkhe jaayein.
 
 ### Q-006. Infra ka budget kitna hai?
 
@@ -73,39 +93,40 @@ Ye 6 jawab baaki har cheez ki disha tay karte hain. Agle agents (domain expert, 
 
 ## 2. Aage ki queue (abhi sirf topics; sawal agents ke baad likhe jayenge)
 
-| Batch | Topic | Kaun gehrai me jayega | Ab tak (2026-11-17) |
-| ----- | ----- | --------------------- | ------------------- |
-| B2 | Fulfilment aur logistics: apna warehouse / fleet, courier, launch ka area | Domain expert | Zyadatar tay: D-016, D-017, D-018, D-024. Baaki: hub staff ki list me kya missing; asli data se ginti ki kitne pincodes do sub-districts / districts / states me phaile; main city ke pincode kis hub pe. |
-| B3 | Apps aur roles: 11 apps ya kam, launch pe kaunse roles asli | Architect | Tay: D-010, D-019. Baaki: live system me jo roles diye ja chuke, unhe dekhna. |
-| B4 | Catalog: variant / shade / size, ingredients, batch aur expiry, content ka maalik | Domain expert | — |
-| B5 | Pricing, promotions, bundles aur kits | Domain expert | — |
-| B6 | Cart, checkout, order model (split, partial cancel / return, exchange) | Domain expert + Architect | Guest cart nahi (D-022). |
-| B7 | Payments, refunds, settlement, ledger (database ka sawal bhi) | Domain expert + Architect + Security | Finance PostgreSQL pe (D-012). Baaki: finance me kya-kya PostgreSQL me; kernel packages ka SQL roop. |
-| B8 | Returns aur replacement: cosmetics ke hygiene niyam | Domain expert | — |
-| B9 | Reviews, ratings, UGC, moderation | Domain expert | Reviews padhna bina sign-in, likhna sign-in se (D-022). |
-| B10 | Search, recommendations, virtual try-on | Domain expert + Architect | Try-on ke saath camera permission (DECISION_LOG §8). |
-| B11 | Loyalty, gift cards, store credit, subscriptions | Domain expert | Gift cards aur store credit ka faisla yahin (owner, 2026-11-17): RBI ke prepaid (PPI) niyam lag sakte hain, jaancha nahi. |
-| B12 | Support, disputes, notifications | Domain expert | Consultation flow aur Beauty Advisor ka message thread tay (D-027). |
-| B13 | Analytics aur reporting | Architect | — |
-| B14 | Compliance ki gehrai: kya dummy, kya asli | Domain expert | Telemedicine ki dummy row (D-027). |
-| B15 | Security: auth, authorization, payments, uploads, abuse, privacy | Security Architect | Aage bheje: kai apps me sign-in ka bojh (D-010); owner ke ~80 accounts pe authenticator ka bojh (D-019); customer ke email code sign-in ke niyam (D-023); consultation notes ki pahunch aur consent (D-027); alag services ki process security (D-011). |
-| B16 | Technical: service boundaries, hosting, observability, backup, scale targets | Architect | Services aur clusters (D-011), backup (D-015) tay. Baaki: §3 ki jaanch. |
-| B17 | Docs aur task files ka dhaancha (PROJECT_PLAN, `tasks/<flow>/TASK.md`, subtasks), purane docs ka kya | Owner ke saath | Tareeka tay (D-021): purane product docs B17 ke baad archive; CI me paths check. |
+| Batch | Topic                                                                                                | Kaun gehrai me jayega                | Ab tak (2026-11-17)                                                                                                                                                                                                                                     |
+| ----- | ---------------------------------------------------------------------------------------------------- | ------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| B2    | Fulfilment aur logistics: apna warehouse / fleet, courier, launch ka area                            | Domain expert                        | Zyadatar tay: D-016, D-017, D-018, D-024. Baaki: hub staff ki list me kya missing; asli data se ginti ki kitne pincodes do sub-districts / districts / states me phaile; main city ke pincode kis hub pe.                                               |
+| B3    | Apps aur roles: 11 apps ya kam, launch pe kaunse roles asli                                          | Architect                            | Tay: D-010, D-019. Baaki: live system me jo roles diye ja chuke, unhe dekhna.                                                                                                                                                                           |
+| B4    | Catalog: variant / shade / size, ingredients, batch aur expiry, content ka maalik                    | Domain expert                        | —                                                                                                                                                                                                                                                       |
+| B5    | Pricing, promotions, bundles aur kits                                                                | Domain expert                        | —                                                                                                                                                                                                                                                       |
+| B6    | Cart, checkout, order model (split, partial cancel / return, exchange)                               | Domain expert + Architect            | Guest cart nahi (D-022).                                                                                                                                                                                                                                |
+| B7    | Payments, refunds, settlement, ledger (database ka sawal bhi)                                        | Domain expert + Architect + Security | Finance PostgreSQL pe (D-012). Baaki: finance me kya-kya PostgreSQL me; kernel packages ka SQL roop.                                                                                                                                                    |
+| B8    | Returns aur replacement: cosmetics ke hygiene niyam                                                  | Domain expert                        | —                                                                                                                                                                                                                                                       |
+| B9    | Reviews, ratings, UGC, moderation                                                                    | Domain expert                        | Reviews padhna bina sign-in, likhna sign-in se (D-022).                                                                                                                                                                                                 |
+| B10   | Search, recommendations, virtual try-on                                                              | Domain expert + Architect            | Try-on ke saath camera permission (DECISION_LOG §8).                                                                                                                                                                                                    |
+| B11   | Loyalty, gift cards, store credit, subscriptions                                                     | Domain expert                        | Gift cards aur store credit ka faisla yahin (owner, 2026-11-17): RBI ke prepaid (PPI) niyam lag sakte hain, jaancha nahi.                                                                                                                               |
+| B12   | Support, disputes, notifications                                                                     | Domain expert                        | Consultation flow aur Beauty Advisor ka message thread tay (D-027).                                                                                                                                                                                     |
+| B13   | Analytics aur reporting                                                                              | Architect                            | —                                                                                                                                                                                                                                                       |
+| B14   | Compliance ki gehrai: kya dummy, kya asli                                                            | Domain expert                        | Telemedicine ki dummy row (D-027).                                                                                                                                                                                                                      |
+| B15   | Security: auth, authorization, payments, uploads, abuse, privacy                                     | Security Architect                   | Aage bheje: kai apps me sign-in ka bojh (D-010); owner ke ~80 accounts pe authenticator ka bojh (D-019); customer ke email code sign-in ke niyam (D-023); consultation notes ki pahunch aur consent (D-027); alag services ki process security (D-011). |
+| B16   | Technical: service boundaries, hosting, observability, backup, scale targets                         | Architect                            | Services aur clusters (D-011), backup (D-015) tay. Baaki: §3 ki jaanch.                                                                                                                                                                                 |
+| B17   | Docs aur task files ka dhaancha (PROJECT_PLAN, `tasks/<flow>/TASK.md`, subtasks), purane docs ka kya | Owner ke saath                       | Tareeka tay (D-021): purane product docs B17 ke baad archive; CI me paths check.                                                                                                                                                                        |
 
 ## 3. Jaanchna baaki (Claude; owner ka faisla nahi chahiye, sirf saboot)
 
-| Kya | Kis faisle se | Kyun |
-| --- | --- | --- |
-| Atlas free tier: ek project me ek free cluster, hafte ki data-transfer seema | D-011, D-015 | 8 alag MongoDB clusters (finance PostgreSQL pe, D-012) aur poore backup ki ginti isi pe |
-| Ek 512 MB Render process me 9 services ki memory | D-011 | Bundle mode me sab ek process me chalte hain |
-| Render free ke mahine ke ghante, aur baar-baar jagana niyamon me theek hai ya nahi | D-014 | Server ko jagaye rakhne ka plan |
-| Free PostgreSQL provider (storage, sona / pause, connections) | D-012 | Finance service ka database |
-| Asli location data me main city aur phaile hue pincodes | D-017, D-018 | Pincode → hub mapping |
-| Live system me pehle se diye gaye roles | D-019 | Role "chalu nahi" karne se pehle |
+| Kya                                                                                | Kis faisle se | Kyun                                                                                    |
+| ---------------------------------------------------------------------------------- | ------------- | --------------------------------------------------------------------------------------- |
+| Atlas free tier: ek project me ek free cluster, hafte ki data-transfer seema       | D-011, D-015  | 8 alag MongoDB clusters (finance PostgreSQL pe, D-012) aur poore backup ki ginti isi pe |
+| Ek 512 MB Render process me 9 services ki memory                                   | D-011         | Bundle mode me sab ek process me chalte hain                                            |
+| Render free ke mahine ke ghante, aur baar-baar jagana niyamon me theek hai ya nahi | D-014         | Server ko jagaye rakhne ka plan                                                         |
+| Free PostgreSQL provider (storage, sona / pause, connections)                      | D-012         | Finance service ka database                                                             |
+| Asli location data me main city aur phaile hue pincodes                            | D-017, D-018  | Pincode → hub mapping                                                                   |
+| Live system me pehle se diye gaye roles                                            | D-019         | Role "chalu nahi" karne se pehle                                                        |
 
 ## Change log
 
-| Version | Date | Badlav |
-| ------- | ---------- | ------ |
-| v0.1 | 2026-11-17 | Pehla draft: Batch 1 (Q-001 se Q-006) aur aage ki queue. |
-| v0.2 | 2026-11-17 | REPOSITORY_ANALYSIS Q1 se Q13 ke jawab gine: Batch 1 ki halat (Q-004, Q-006 tay), queue me "ab tak", §3 jaanchna baaki. |
+| Version | Date       | Badlav                                                                                                                    |
+| ------- | ---------- | ------------------------------------------------------------------------------------------------------------------------- |
+| v0.1    | 2026-11-17 | Pehla draft: Batch 1 (Q-001 se Q-006) aur aage ki queue.                                                                  |
+| v0.2    | 2026-11-17 | REPOSITORY_ANALYSIS Q1 se Q13 ke jawab gine: Batch 1 ki halat (Q-004, Q-006 tay), queue me "ab tak", §3 jaanchna baaki.   |
+| v0.3    | 2026-11-17 | §0: ek waqt me ek sawal, jawab sawal ke neeche. Agent 2 Batch 1 ke baad. Q-005 D-016 ke hisaab se dobara likha (Charcha). |
