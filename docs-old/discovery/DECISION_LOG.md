@@ -316,6 +316,8 @@
 
 ## 6. Risks
 
+**[Naye docs me: RISKS R-001 se R-009]** (2026-11-17).
+
 | Id    | Risk                                                                                                                                                                                                     |
 | ----- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | R-001 | Scope aur capacity ka mel nahi: neev gehri hai par commerce ka ek bhi feature nahi bana. D-008 (releases) aur D-009 (30 ghante/hafta, deadline nahi) isse kam karte hain, par R1 ka scope abhi tay nahi. |
@@ -344,13 +346,13 @@
 
 ## 8. Implementation ke kaam (discovery ke baad; abhi code nahi chhua)
 
-- Email validation pe `+` alias ka code comment (D-019).
-- Backup aur restore command, 4 pehron ke saath (D-015).
-- Package CLI ke teen sudhaar (D-025).
-- `main` hatane ka kram (D-026).
-- CI me docs ke paths ka check (D-021).
-- Customer app ka `Permissions-Policy` (camera, location) try-on aur address pin ke saath sirf apni site ke liye kholna (Q13d).
-- `create:backend`: naye services, Mongo URI template me, PostgreSQL option (D-011, D-012).
+- **[Naye docs me: DECISIONS D-017]** Email validation pe `+` alias ka code comment (D-019).
+- **[Naye docs me: DECISIONS D-013]** Backup aur restore command, 4 pehron ke saath (D-015).
+- **[Naye docs me: DECISIONS D-023]** Package CLI ke teen sudhaar (D-025).
+- **[Naye docs me: DECISIONS D-024]** `main` hatane ka kram (D-026).
+- **[Naye docs me: DECISIONS D-019]** CI me docs ke paths ka check (D-021).
+- **[Naye docs me: SECURITY_REQUIREMENTS SR-001]** Customer app ka `Permissions-Policy` (camera, location) try-on aur address pin ke saath sirf apni site ke liye kholna (Q13d).
+- **[Naye docs me: DECISIONS D-011]** `create:backend`: naye services, Mongo URI template me, PostgreSQL option (D-011, D-012).
 
 ## Change log
 
