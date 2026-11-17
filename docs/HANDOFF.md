@@ -1,6 +1,6 @@
 # HANDOFF — BQ
 
-> **Status:** v1.241 (2026-11-16). Is project pe 2 log kaam karte hain. Ye file batati hai ki **abhi kya halat hai, kisne kya chhoda, agla kaam kya hai** aur kaunse sawal khule hain, taaki doosra insaan (aur uska Claude) bina poora itihaas padhe kaam utha sake. Jo bhi kaam roke, wo ye file update kare (neeche §8).
+> **Status:** v1.242 (2026-11-17). Is project pe 2 log kaam karte hain. Ye file batati hai ki **abhi kya halat hai, kisne kya chhoda, agla kaam kya hai** aur kaunse sawal khule hain, taaki doosra insaan (aur uska Claude) bina poora itihaas padhe kaam utha sake. Jo bhi kaam roke, wo ye file update kare (neeche §8).
 
 ## 0. Pehle ye (handoff ke din)
 
@@ -73,9 +73,9 @@
 **Agla kaam, is order me:**
 
 1. ~~**PR `release` → `main`**~~ ho gaya (2026-11-16): PR [#100](https://github.com/Nageshwar1997/Beautinique/pull/100) merge `cdcd570`, release #91 se #99 tak (work PRs #84 se #98) ab `main` me.
-2. **Milestone 4, T4.2 Location** (TASKS T4.2): LGD + India Post ka import, laptop se batches me. Shuru karne se pehle plan owner ke saath (data ka source, kaunse levels, M0 ki jagah).
-3. **T4.1 PR E** (area-settings resolver; TASKS T4.1): T4.2 ke baad, taaki district/pincode ki ids asli location data se jaanchi jaayein.
-4. **T4.3** (network + area settings + serviceability API; Pune seed: Chakan + 21 hubs).
+2. **Milestone 4, T4.2 Location** (TASKS T4.2): LGD + India Post ka import, laptop se batches me. **Plan owner ne maana (2026-11-17, saari 49 salah):** [backend/T4-LOCATION-PLAN.md](backend/T4-LOCATION-PLAN.md) v1.2 (teeno kaam ka poora plan, faisle §1, M0 ka hisaab §7, 14 PR §8). **Agla:** owner ke downloads (plan §2: LGD ki 3 files CSV me, India Post CSV, 36 village files; private shared folder, repo ke bahar), phir PR 1 `feat/t4.2-location-prepare`. Plan doc aur TASKS/HANDOFF/MEMORY ki plan lines `prerelease` pe commit (2026-11-17); push owner ke kehne pe.
+3. **T4.1 PR E** (area-settings resolver; TASKS T4.1): T4.2 ke baad, taaki district/pincode ki ids asli location data se jaanchi jaayein. Plan wahi doc: §5, PR 7.
+4. **T4.3** (network + area settings + serviceability API; Pune seed: Chakan + 21 hubs). Plan wahi doc: §6, PR 8–13.
 
 **Abhi (2026-10-26): M2 live hai** (customer https://beautinique-customer.vercel.app, backend https://bq-live.onrender.com, Sentry `bq-backend`; §3). PR #18 `release` → `main` merge ho chuka (2026-10-26 17:40 UTC). **Abhi (2026-10-27):** PR #21 aur #22 `prerelease` me; release PR [#23](https://github.com/Nageshwar1997/Beautinique/pull/23) `prerelease` → `release` khula (pehle `release` → `prerelease` back-merge chahiye: `release` me `cfd7a04` hai). **#23 merge aur live (2026-10-27):** pehla deploy keys ke bina 15 min atak ke fail (neeche §6), keys ke baad dobara deploy kaamyab; `/status` me identity, notify, core `ok`; owner ke email pe asli OTP: email aaya, verify 200 (TASKS T3.1). Render me 7 keys ho gayi. Start fail pe turant exit ka fix (+ test) seedha `prerelease` pe (owner, 2026-10-27), agle release ke saath live. **Khula:** PR [#24](https://github.com/Nageshwar1997/Beautinique/pull/24) `release` → `main` khula (2026-10-27), merge owner karega. OTP jawab ka samay barabar (TASKS T3.1, 400 ms floor) aur `.env.example` ke Atlas jaise Mongo URI `prerelease` pe (timing fix uncommitted, owner ke kehne pe commit). **Agla: Milestone 3 (Identity)**, TASKS section D ki M3 row aur Phase 3. Is order me:
 
@@ -436,3 +436,4 @@
 | v1.239 | 2026-11-16 | §4 item 10: LIVE-009 ka agla hissa branch pe (agla token pichhle + salt se HMAC, 65 s ke andar usi device aur IP ko wahi token); review ke 3 fix, khidki 65 s, account band hote waqt refresh ka fix; IP ki shart owner ne maani. |
 | v1.240 | 2026-11-16 | §4 item 10: LIVE-009 ka agla hissa live pe theek (release #99): wahi token 1.6 s aur 30 s baad, 70 s baad naya token; koi reuse nahi. |
 | v1.241 | 2026-11-16 | §4: "Abhi (2026-11-16)" aur agla kaam (release → main #100 ho gaya; T4.2, T4.1 PR E, T4.3); LIVE-006 ka chain check live pe ho gaya. |
+| v1.242 | 2026-11-17 | §4 items 2–4: T4 plan (`docs/backend/T4-LOCATION-PLAN.md` v1.2) owner ne maana; agla owner ke downloads, phir PR 1. |
