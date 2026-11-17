@@ -1,6 +1,6 @@
 # DECISIONS: Beautinique
 
-> **Status:** v1.1.1 (2026-11-17). Har faisla ek jagah. Sirf wahi "Tay" jo owner ne khud kaha; Claude ki salah faisla nahi. Cheezein ek-ek karke judti hain.
+> **Status:** v1.1.2 (2026-11-17). Har faisla ek jagah. Sirf wahi "Tay" jo owner ne khud kaha; Claude ki salah faisla nahi. Cheezein ek-ek karke judti hain.
 
 ## 0. Kaise likhein
 
@@ -26,10 +26,10 @@
   - **Frontend:** React, React Router, TanStack Query, react-hook-form, react-aria-components; build Vite se, styling Tailwind CSS se.
   - **Tooling:** npm workspaces ka monorepo, Turborepo, tsdown (packages ka build), Vitest aur Testing Library, Playwright (E2E), ESLint, Prettier, GitHub Actions (CI).
   - **Finance ke niyam:** har niyam ki saaf list (unique index, conditional update, ya code + raat ki jaanch se pakka), aur har niyam ka test, ek saath chalne wale requests ke tests samet.
-- **Wajah:** stack owner ne shuru me hi tay kiya. Finance ke liye owner ne PostgreSQL chuna, jab charcha hui ki ledger, settlement aur finance reports ke niyam relational database me zyada mazboot rehte hain.
-- **Chhode vikalp:** naya stack; finance bhi MongoDB pe (Claude ki salah); finance ka scope chhota karna.
+- **Wajah:** stack owner ne shuru me hi tay kiya. Finance ke liye PostgreSQL Claude ki daleel se aaya: finance ka poora scope (ledger, settlement, TCS / TDS, GST registers) rahe to uske niyam aur reports relational database me zyada mazboot rehte hain. Owner ne yahi chuna.
+- **Chhode vikalp:** naya stack; finance bhi MongoDB pe; finance ka scope chhota karna.
 - **Kab dobara khulega:** owner khud khole.
-- **Kisne, kab:** owner, 2026-11-17. **Nishaan:** Owner (stack); Salah nahi maani (finance ke liye PostgreSQL).
+- **Kisne, kab:** owner, 2026-11-17. **Nishaan:** Owner (stack); Salah maani (finance ke liye PostgreSQL).
 - **Asar (Claude):** finance service ke liye transaction, events, release steps aur idempotency ka PostgreSQL wala roop banana hoga; laptop ka Docker infra, CI aur backup me PostgreSQL judega; free PostgreSQL provider chunna abhi baaki hai.
 
 ## Change log
@@ -38,3 +38,4 @@
 | --- | --- | --- |
 | v1.0.0 | 2026-11-17 | Khaali file bani. |
 | v1.1.1 | 2026-11-17 | §0 likhne ka tareeka, §1 aur §2 bane; pehla faisla D-001 (tech stack, finance ke liye PostgreSQL). |
+| v1.1.2 | 2026-11-17 | Sudhaar (owner ne pakda): D-001 me PostgreSQL ka nishaan "Salah maani"; ye Claude ki hi daleel thi. Faisla nahi badla. |
