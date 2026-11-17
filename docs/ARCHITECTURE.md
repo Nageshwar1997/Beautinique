@@ -1,6 +1,6 @@
 # ARCHITECTURE: Beautinique
 
-> **Status:** v0.1 (2026-11-17), **khaali**. System kaise bana hai, ek nazar me. Cheezein ek-ek karke, owner ki haan ke baad judengi.
+> **Status:** v1.0.0 (2026-11-17), **khaali**. System kaise bana hai, ek nazar me. Cheezein ek-ek karke, owner ki haan ke baad judengi.
 
 ## Is file me kya aayega
 
@@ -12,10 +12,10 @@
 - Deployment aur environments.
 - Logs, monitoring aur alerts.
 
-Module ki detail apni `tasks/<nn-module>/TASK.md` me; yahan sirf poore system ki tasveer. Aaj ke code ki jaanch [../docs-old/discovery/REPOSITORY_ANALYSIS.md](../docs-old/discovery/REPOSITORY_ANALYSIS.md) me hai (reference).
+Module ki detail apni `tasks/<nn-module>/TASK.md` me; yahan sirf poore system ki tasveer.
 
 ## Change log
 
 | Version | Date | Badlav |
 | --- | --- | --- |
-| v0.1 | 2026-11-17 | Khaali file bani. |
+| v1.0.0 | 2026-11-17 | Khaali file bani. |

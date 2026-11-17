@@ -10,7 +10,6 @@ package-lock.json
 
 # Planning docs are hand-formatted (wide tables).
 docs
-docs-old
 
 # Generated files, checked byte for byte by their own `npm run check`.
 packages/frontend/styles/src/variables.css
@@ -18,7 +17,9 @@ packages/frontend/styles/src/fonts.css
 packages/frontend/styles/src/fonts
 packages/shared/contracts/generated
 
-# Old code, kept only for reference (the project is rebuilt from scratch).
+# Old code and docs, kept only for reference while the project is rebuilt from scratch.
+# TEMPORARY: delete these lines together with the folders once the old code is removed.
+docs-old
 backend-old
 configs-old
 frontend-old

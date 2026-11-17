@@ -1,6 +1,6 @@
 # RISKS: Beautinique
 
-> **Status:** v0.1 (2026-11-17), **khaali**. Saare risks ek jagah, security wale bhi. Cheezein ek-ek karke judengi.
+> **Status:** v1.0.0 (2026-11-17), **khaali**. Saare risks ek jagah, security wale bhi. Cheezein ek-ek karke judengi.
 
 ## Is file me kya aayega
 
@@ -8,10 +8,10 @@ Har risk: **Id**, **Risk**, **Tag** (`Business`, `Architecture`, `Security`, `Op
 
 ## Numbering
 
-Purane risks ([../docs-old/discovery/DECISION_LOG.md](../docs-old/discovery/DECISION_LOG.md) §6 me R-001 se R-009) yahan aayenge to unka wahi number rahega; naye R-010 se.
+R-001, R-002 ... kram se. Ek baar diya number kabhi badalta nahi aur dobara use nahi hota.
 
 ## Change log
 
 | Version | Date | Badlav |
 | --- | --- | --- |
-| v0.1 | 2026-11-17 | Khaali file bani. |
+| v1.0.0 | 2026-11-17 | Khaali file bani. |

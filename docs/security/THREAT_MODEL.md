@@ -1,6 +1,6 @@
 # THREAT MODEL: Beautinique
 
-> **Status:** v0.1 (2026-11-17), **khaali**. Security Architect ka kaam. Cheezein ek-ek karke judengi.
+> **Status:** v1.0.0 (2026-11-17), **khaali**. Security Architect ka kaam. Cheezein ek-ek karke judengi.
 
 ## Is file me kya aayega
 
@@ -18,4 +18,4 @@ Security ke faisle [../DECISIONS.md](../DECISIONS.md) me (tag `Security`), secur
 
 | Version | Date | Badlav |
 | --- | --- | --- |
-| v0.1 | 2026-11-17 | Khaali file bani. |
+| v1.0.0 | 2026-11-17 | Khaali file bani. |

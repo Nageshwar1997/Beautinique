@@ -1,7 +1,7 @@
 # Git workflow rules
 
 Shared by `/commit`, `/push`, `/pr`, `/sync`, `/git-status` and `/undo-commit`. This folder has no `SKILL.md`, so it
-is not a skill itself; the human manual is `docs-old/GIT_SKILLS.md` (keep it in step). Repository rules win over this file: `CLAUDE.md` and `docs-old/RULES.md` §2 (git flow). If they
+is not a skill itself; the human manual is `docs/GIT_SKILLS.md` (keep it in step). Repository rules win over this file: `CLAUDE.md` (git flow). If they
 differ, follow the repository and tell the user.
 
 ## 1. Identity and attribution (most important)
@@ -38,7 +38,7 @@ differ, follow the repository and tell the user.
 - Run Git through the Bash tool. Multi-line text goes through stdin, never `-m` with escaped newlines:
   `git commit -F - <<'EOF'` and `gh pr create ... --body-file - <<'EOF'`.
 
-## 3. Branches in this repository (`docs-old/RULES.md` §2)
+## 3. Branches in this repository (`CLAUDE.md` git flow)
 
 - Long-lived: `prerelease` (development), `release` (production), `main` (final code only). Never rebase them onto
   another branch, never force-push them. `main` and `release`: no direct push (ruleset), PR only. The package release
@@ -74,12 +74,12 @@ Any other pair → stop and explain. CI (`scripts/ci/lib/branch-flow.ts`) reject
   deployable (`identity`, `gateway`), `ci`, or a docs area (`linkedin-posts`). Scope may be dropped for repo-wide work.
 - Body only when it helps: why, not how, wrapped near 72 characters. Add the task id (`T3.7`, `QA-CI-001`) when known.
 - Never generic: "update", "changes", "fix bugs", "wip", "misc".
-- One concern per commit (`docs-old/RULES.md` §2.2). The progress-% rule is being redefined with the new
+- One concern per commit. The progress-% rule is being redefined with the new
   `docs/PROJECT_PLAN.md` (`CLAUDE.md`); until it is, no progress table has to change with a commit.
 
 ## 5. Checks
 
-- **For now (2026-11-17):** the old code is in the `*-old/` folders and the root tooling does not run, so the
+- **For now (2026-11-17):** the code is being rebuilt from scratch and the root tooling does not run, so the
   only check is `npx prettier --check <changed files>`. Say that instead of running build, lint, typecheck or
   tests, and say that CI on a pull request will fail until the new root setup exists. The rest of this section
   applies again once the new code has its own setup.

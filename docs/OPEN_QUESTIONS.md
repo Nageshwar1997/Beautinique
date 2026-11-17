@@ -1,6 +1,6 @@
 # OPEN QUESTIONS: Beautinique
 
-> **Status:** v0.1 (2026-11-17), **khaali**. Khule sawal. Cheezein ek-ek karke judengi.
+> **Status:** v1.0.0 (2026-11-17), **khaali**. Khule sawal. Cheezein ek-ek karke judengi.
 
 ## Is file me kya aayega
 
@@ -11,10 +11,10 @@
 
 ## Numbering
 
-Purane sawal ([../docs-old/discovery/OPEN_QUESTIONS.md](../docs-old/discovery/OPEN_QUESTIONS.md) me Q-001 se Q-010) yahan aayenge to unka wahi number rahega; naye sawal Q-011 se.
+Q-001, Q-002 ... kram se. Ek baar diya number kabhi badalta nahi aur dobara use nahi hota.
 
 ## Change log
 
 | Version | Date | Badlav |
 | --- | --- | --- |
-| v0.1 | 2026-11-17 | Khaali file bani. |
+| v1.0.0 | 2026-11-17 | Khaali file bani. |

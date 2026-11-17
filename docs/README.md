@@ -1,11 +1,12 @@
 # Docs: Beautinique
 
-> **Status:** v0.1 (2026-11-17). Naye docs ka index. Files khaali shuru hui hain; cheezein ek-ek karke, owner ki haan ke baad judti hain. Purane docs [../docs-old/](../docs-old) me hain: sirf reference.
+> **Status:** v1.0.0 (2026-11-17). Docs ka index. Files khaali shuru hui hain; cheezein ek-ek karke, owner ki haan ke baad judti hain.
 
 ## Niyam
 
 - Har file ka ek hi kaam. Har baat sirf ek jagah; baaki jagah uski link.
 - "Bana hai" sirf code ya test ki link ke saath.
+- Sirf naye docs aur naye code ki baat: kisi purane doc ya purane code ka zikr ya link nahi.
 - Har file ke top pe status (version + date), neeche change log: har badlav ki ek line.
 
 ## Files
@@ -25,7 +26,7 @@
 | [OPERATIONS.md](OPERATIONS.md) | Chalane ka manual |
 | [RULES.md](RULES.md) | Kaam ke niyam |
 | [HANDOFF.md](HANDOFF.md) | Abhi ki halat aur agla kaam |
-| [LESSONS.md](LESSONS.md) | Purane sabak aur traps |
+| [LESSONS.md](LESSONS.md) | Sabak aur traps |
 | [GIT_SKILLS.md](GIT_SKILLS.md) | Git skills ka manual |
 | [security/THREAT_MODEL.md](security/THREAT_MODEL.md) | Har module ka threat model |
 | [security/SECURITY_REQUIREMENTS.md](security/SECURITY_REQUIREMENTS.md) | Security ke niyam, module-wise |
@@ -42,4 +43,4 @@
 
 | Version | Date | Badlav |
 | --- | --- | --- |
-| v0.1 | 2026-11-17 | Pehla version: naye docs ka index. |
+| v1.0.0 | 2026-11-17 | Pehla version: docs ka index aur niyam. |

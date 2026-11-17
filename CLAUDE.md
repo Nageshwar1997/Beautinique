@@ -1,7 +1,6 @@
 # CLAUDE.md: Beautinique
 
-> **Status:** v2.0 (2026-11-17). Naya CLAUDE.md: docs naye sire se ban rahe hain. Purana CLAUDE.md
-> ab [CLAUDE-old.md](CLAUDE-old.md) hai aur purane docs [docs-old/](docs-old) me: dono sirf reference.
+> **Status:** v1.0.0 (2026-11-17). Docs aur code naye sire se ban rahe hain.
 
 Ye file Claude Code har session ki shuruaat me padhta hai. Project pe ek hi insaan (owner) kaam karta hai,
 2 Claude accounts se baari-baari. **Kaam shuru karne se pehle [docs/HANDOFF.md](docs/HANDOFF.md) padho.**
@@ -12,13 +11,10 @@ Ye file Claude Code har session ki shuruaat me padhta hai. Project pe ek hi insa
   Plan, task files aur code tab tak nahi jab tak owner agla stage na khole.
 - **Naye docs khaali shuru hue hain.** Unme cheezein ek-ek karke judti hain, owner ki haan ke baad. Index:
   [docs/README.md](docs/README.md).
-- **Purana sab reference hai:** [docs-old/](docs-old) (PRD, ARCHITECTURE, TASKS, RULES, MEMORY, DESIGN aur
-  discovery ki files), [CLAUDE-old.md](CLAUDE-old.md) (commands, repo ka naksha) aur purana code root ke
-  `*-old/` folders me. Wahan naya kuch nahi likha jaata; jo naye docs me aa jaye, wahi sach.
-- **Code naye sire se banega (owner, 2026-11-17):** purana code `backend-old/`, `frontend-old/`,
-  `packages-old/`, `scripts-old/`, `configs-old/`, `infra-old/` me hai. Use padh ke seekh sakte ho, par wo ab
-  chalta nahi: root ka `package.json`, lint, build, tests aur CI unhi purane paths pe tike the. Naya root setup
-  aur naya code implementation stage me, wahi folder structure (`packages/`, `frontend/`, `backend/` ...).
+- **Sach sirf naye docs (`docs/`) aur ye file.** Code bhi naye sire se banega (owner, 2026-11-17): naya root
+  setup aur naya code implementation stage me, folder structure `packages/`, `frontend/`, `backend/` ...
+- **Naye docs aur naye code me purane code ya purane docs ka koi zikr ya link nahi** (owner, 2026-11-17): wo
+  aage hat jayenge.
 
 ## Discovery ke niyam
 
@@ -35,6 +31,9 @@ Ye file Claude Code har session ki shuruaat me padhta hai. Project pe ek hi insa
   koi language feature propose mat karo. Owner ka sakht niyam hai.
 - **Docs Hinglish me** (jaise ye file). Code, identifiers, comments aur app UI English me. Har doc ke top
   pe status (version + date), neeche change log; har badlav ki ek line.
+- **Version `vX.Y.Z` (owner, 2026-11-17):** nayi file `v1.0.0`. Chhota badlav: Z badhta hai (`v1.0.1`,
+  `v1.0.2`). Bada badlav: Y badhta hai aur Z 1 se (`v1.1.1`, `v1.1.2`). Ek poora flow pura hua: X badhta hai,
+  Y aur Z 1 se (`v2.1.1`, `v2.1.2`).
 - **Mobile pe koi message nahi (owner ka frozen faisla, 2026-10-20).** Na SMS, na WhatsApp: na OTP, na
   notification. Har OTP sirf email se; notifications in-app, email aur browser push. Inka flow mat banao aur
   propose mat karo. Phone number sirf contact ke liye hai.
@@ -72,19 +71,17 @@ Ye file Claude Code har session ki shuruaat me padhta hai. Project pe ek hi insa
 
 ## Commands aur repo ka naksha
 
-Abhi koi command nahi chalta (purana code `*-old/` me). [CLAUDE-old.md](CLAUDE-old.md) ke "Setup aur
-commands" aur "Repo ka naksha" purane code ke hain (paths me ab `-old` juda hai). Naye code ke saath yahan
-ek-ek karke aayenge. Docs ke liye sirf `npx prettier --check <files>` chalta hai.
+Abhi koi npm command nahi chalta: naya root setup implementation stage me banega. Docs ke liye sirf
+`npx prettier --check <files>`. Commands aur repo ka naksha naye code ke saath yahan ek-ek karke aayenge.
 
 ## Kaam rokte waqt
 
 [docs/HANDOFF.md](docs/HANDOFF.md) update karo: kya kiya, kya adhoora hai, kya uncommitted hai, kaunsa sawal
 khula hai. Jis doc me badlav kiya, uske change log me ek line. Progress % ka niyam naye
-[docs/PROJECT_PLAN.md](docs/PROJECT_PLAN.md) ke saath tay hoga; purana TASKS §P ab nahi chalta.
+[docs/PROJECT_PLAN.md](docs/PROJECT_PLAN.md) ke saath tay hoga.
 
 ## Change log
 
-| Version | Date       | Badlav                                                                                                       |
-| ------- | ---------- | ------------------------------------------------------------------------------------------------------------ |
-| v2.0    | 2026-11-17 | Naya CLAUDE.md: purana `CLAUDE-old.md`, purane docs `docs-old/`; hamesha laagu niyam aur discovery ke niyam. |
-| v2.1    | 2026-11-17 | Purana code `*-old/` folders me; naya code naye sire se; abhi koi command nahi chalta.                       |
+| Version | Date       | Badlav                                                                    |
+| ------- | ---------- | ------------------------------------------------------------------------- |
+| v1.0.0  | 2026-11-17 | Pehla version: abhi ki halat, discovery ke niyam aur hamesha laagu niyam. |

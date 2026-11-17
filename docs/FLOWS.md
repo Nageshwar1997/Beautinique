@@ -1,6 +1,6 @@
 # FLOWS: Beautinique
 
-> **Status:** v0.1 (2026-11-17), **khaali**. Poore flows jo kai modules me chalte hain (jaise order se delivery, return se refund). Cheezein ek-ek karke, owner ki haan ke baad judengi.
+> **Status:** v1.0.0 (2026-11-17), **khaali**. Poore flows jo kai modules me chalte hain (jaise order se delivery, return se refund). Cheezein ek-ek karke, owner ki haan ke baad judengi.
 
 ## Is file me kya aayega
 
@@ -16,4 +16,4 @@ Module apna kaam apni `TASK.md` me likhta hai; yahan sirf ye ki flow modules ke 
 
 | Version | Date | Badlav |
 | --- | --- | --- |
-| v0.1 | 2026-11-17 | Khaali file bani. |
+| v1.0.0 | 2026-11-17 | Khaali file bani. |

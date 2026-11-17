@@ -1,6 +1,6 @@
 # GLOSSARY: Beautinique
 
-> **Status:** v0.1 (2026-11-17), **khaali**. Har shabd ka ek hi matlab, taaki saare docs aur code ek bhasha bolein. Cheezein ek-ek karke judengi.
+> **Status:** v1.0.0 (2026-11-17), **khaali**. Har shabd ka ek hi matlab, taaki saare docs aur code ek bhasha bolein. Cheezein ek-ek karke judengi.
 
 ## Is file me kya aayega
 
@@ -10,4 +10,4 @@ Har shabd: **Shabd**, **Matlab**, **Kahan tay hua** (DECISIONS ya kisi doc ki li
 
 | Version | Date | Badlav |
 | --- | --- | --- |
-| v0.1 | 2026-11-17 | Khaali file bani. |
+| v1.0.0 | 2026-11-17 | Khaali file bani. |

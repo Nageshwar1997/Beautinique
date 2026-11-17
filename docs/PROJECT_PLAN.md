@@ -1,6 +1,6 @@
 # PROJECT PLAN: Beautinique
 
-> **Status:** v0.1 (2026-11-17), **khaali**. Project ki kendriya file. Cheezein ek-ek karke, owner ki haan ke baad judengi.
+> **Status:** v1.0.0 (2026-11-17), **khaali**. Project ki kendriya file. Cheezein ek-ek karke, owner ki haan ke baad judengi.
 
 ## Is file me kya aayega
 
@@ -15,4 +15,4 @@
 
 | Version | Date | Badlav |
 | --- | --- | --- |
-| v0.1 | 2026-11-17 | Khaali file bani. |
+| v1.0.0 | 2026-11-17 | Khaali file bani. |

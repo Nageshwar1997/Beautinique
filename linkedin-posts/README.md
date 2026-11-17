@@ -92,7 +92,7 @@ Naye Claude Code session me (worktree me, taaki chal rahi feature branch pe asar
 - `linkedin-posts/` ki **saari** files (post, carousel, HISTORY, README, `IMAGES.md`, `_template/`) aur
   `/linkedin-post` skill **seedha `prerelease` pe push**, bina branch/PR (owner, 2026-11-03: chhote badlav ke liye
   PR aur CI ka intezaar nahi). Pehle `git pull --rebase` aur `npm run format:check`; force push nahi, `slides/`
-  kabhi nahi ([RULES §2](../docs-old/RULES.md)).
+  kabhi nahi ([CLAUDE.md](../CLAUDE.md) git flow).
 
 ## Change log
 

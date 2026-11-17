@@ -1,6 +1,6 @@
 # TASKS: Beautinique
 
-> **Status:** v0.1 (2026-11-17), **khaali**. Har module ka apna folder. Modules ki list discovery ke baad aayegi; cheezein ek-ek karke judengi.
+> **Status:** v1.0.0 (2026-11-17), **khaali**. Har module ka apna folder. Modules ki list discovery ke baad aayegi; cheezein ek-ek karke judengi.
 
 ## Dhaancha
 
@@ -20,4 +20,4 @@ tasks/
 
 | Version | Date | Badlav |
 | --- | --- | --- |
-| v0.1 | 2026-11-17 | Khaali dhaancha bana. |
+| v1.0.0 | 2026-11-17 | Khaali dhaancha bana. |
