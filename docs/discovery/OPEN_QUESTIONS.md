@@ -1,6 +1,6 @@
 # OPEN QUESTIONS: Cosmetics E-Commerce Ecosystem (discovery)
 
-> **Status:** v0.3 (2026-11-17), discovery phase. REPOSITORY_ANALYSIS ke Q1 se Q13 ke jawab ([REPOSITORY_ANALYSIS.md](REPOSITORY_ANALYSIS.md) §6) yahan gine gaye: Batch 1 ki halat §1 me, aage ki queue §2 me, jaanchna baaki §3 me. Owner ke saath sawal-jawab ki file. Yahan likhi "Salah" sirf recommendation hai: jab tak owner haan na kahe, kuch tay nahi. Tay hui baatein [DECISION_LOG.md](DECISION_LOG.md) me jaati hain.
+> **Status:** v0.5 (2026-11-17), discovery phase. REPOSITORY_ANALYSIS ke Q1 se Q13 ke jawab ([REPOSITORY_ANALYSIS.md](REPOSITORY_ANALYSIS.md) §6) yahan gine gaye: Batch 1 ki halat §1 me, aage ki queue §2 me, jaanchna baaki §3 me. Owner ke saath sawal-jawab ki file. Yahan likhi "Salah" sirf recommendation hai: jab tak owner haan na kahe, kuch tay nahi. Tay hui baatein [DECISION_LOG.md](DECISION_LOG.md) me jaati hain.
 
 ## 0. Ye file kaise chalti hai
 
@@ -17,12 +17,23 @@ Ye 6 jawab baaki har cheez ki disha tay karte hain. Agle agents (domain expert, 
 
 | Sawal                       | Status  | Ab tak                                                                                                                                                                                                                             |
 | --------------------------- | ------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Q-001 Lakshya               | Charcha | Owner ke shabd: "practice hobby project"; design aur code asli users maan ke (D-013); legal dummy (CLAUDE.md). Seedha (a) / (b) / (c) baaki.                                                                                       |
-| Q-002 Purane decisions      | Charcha | Jo 9 dobara khulne the, unme se 8 tay: 11 apps (D-010), ₹0 aur domain (D-014), stock, delivery aur 21 hubs (D-016), roles (D-019), guest cart (D-022). Business model (Q-005) baaki. Tareeka (b) chal raha hai, seedhi haan baaki. |
+| Q-001 Lakshya               | Tay     | D-028: (b)                                                                                                                                                                                                                         |
+| Q-002 Purane decisions      | Tay     | Jo 9 dobara khulne the, unme se 8 tay: 11 apps (D-010), ₹0 aur domain (D-014), stock, delivery aur 21 hubs (D-016), roles (D-019), guest cart (D-022). Business model (Q-005) baaki. Tay: D-029 (har purane faisle pe alag jawab). |
 | Q-003 Bana hua code         | Khula   | Owner ne 11 apps rakhe (D-010) aur CLI rakha (D-025), par code ke baare me seedha jawab nahi.                                                                                                                                      |
 | Q-004 Releases aur capacity | Tay     | D-008, D-009                                                                                                                                                                                                                       |
-| Q-005 Business model        | Charcha | Stock aur delivery tay (D-016). Sawal D-016 ke hisaab se dobara likha aur owner se poocha (2026-11-17); jawab baaki.                                                                                                               |
+| Q-005 Business model        | Charcha | Stock aur delivery tay (D-016). (c) hybrid (D-029). Bacha: apna brand ki company.                                                                                                               |
 | Q-006 Budget                | Tay     | D-014 (₹0, domain nahi)                                                                                                                                                                                                            |
+
+### Saaf karna baaki (D-029 se nikle)
+
+| Sawal | Kya saaf karna hai | Status |
+| --- | --- | --- |
+| Q-005 (bacha hissa) | Apna brand alag (dummy) company ke naam se seller ho, ya platform company khud | Khula |
+| Q-007 | ARCHITECTURE #5 (ek cluster) aur D-011 (har service ka cluster) me kaunsa | Charcha |
+| Q-008 | PRD "Roles ka timing" (saare roles launch se system me) aur D-019 (role apne module ke saath chalu) ka mel | Khula |
+| Q-009 | Pune pehle din: live sub-district wahi jahan warehouse hai (kul 1 hub), ya alag (kul 2 hubs) | Khula |
+| Q-010 | Purani "Agla district" row ka notify-me waitlist (unserved pincode ke customer ko khabar) rahega ya nahi; D-017 me iska zikr nahi | Khula |
+| ARCHITECTURE #9, #10 | Master ke doosre roles alag staff account pe; performance targets sirf jaage server pe | Khula |
 
 ### Q-001. Project ka asli lakshya kya hai?
 
@@ -31,6 +42,7 @@ Ye 6 jawab baaki har cheez ki disha tay karte hain. Agle agents (domain expert, 
 - **Vikalp:** (a), (b), (c) jaise upar.
 - **Salah:** **(b)**. Design asli jaisa (data model, compliance ke fields, security), registrations aur kanooni details dummy, aur scope ka faisla "poora order flow chalta dikhe" se.
 - **Trade-off:** (b) me compliance ke design ka kharcha aata hai jo demo me kabhi "use" nahi hota. Badle me (c) pe jaana rewrite nahi maangta. (a) me shortcuts portfolio ki keemat ghata dete hain; (c) ke liye lawyer, paisa aur asli operations chahiye, jo architecture tay nahi kar sakta.
+- **Owner ka jawab (2026-11-17):** **(b)**. Record: [DECISION_LOG.md](DECISION_LOG.md) D-028.
 
 ### Q-002. Purane decisions ka darja kya hai?
 
@@ -39,6 +51,7 @@ Ye 6 jawab baaki har cheez ki disha tay karte hain. Agle agents (domain expert, 
 - **Vikalp:** (a) sab mita ke khaali panne se; (b) purane decisions "default" rahen, par jin pe critique hai wo khul ke dobara discuss hon; (c) sab pakke.
 - **Salah:** **(b)**. Dobara khulne wale 9: business model; saara stock sirf apne warehouse me; delivery sirf apni; 11 alag apps; saare roles launch pe; pehle din poora Pune district (21 hubs); kharcha ₹0; domain nahi; guest cart nahi. "Dobara confirm" wali list analysis §9 me hai. Baaki default.
 - **Trade-off:** (a) saaf hai par pehle se ki hui soch barbaad hoti hai; (c) me jaani hui kamzoriyan reh jaati hain; (b) me har purane faisle pe ek nazar ka kaam hai.
+- **Owner ka jawab (2026-11-17):** **(b)**, har purane faisle pe alag jawab ke saath. Record: [DECISION_LOG.md](DECISION_LOG.md) D-029, D-030.
 
 ### Q-003. Jo code ban chuka hai uska kya?
 
@@ -81,6 +94,7 @@ Ye 6 jawab baaki har cheez ki disha tay karte hain. Agle agents (domain expert, 
   - Alag company kyun: platform company khud seller ho to har jagah special case banta hai (khud pe TCS nahi, settlement ki jagah andar ka transfer, apne brand ko aage dikhane ke sawal).
   - Kanooni detail (TCS / TDS ke niyam aur dar, related-party seller) jaanchi nahi.
 - **Trade-off:** (c) me finance sabse bada (settlement, TCS / TDS, commission invoices, seller ledger, payouts). Naya state kholne pe (D-017) har brand ko us state ka GSTIN chahiye; tab tak uska maal us state ke warehouse me nahi jaa sakta, yaani ek product kisi state me mile aur kisi me nahi (design me data + jaanch; registrations dummy). (a) me finance aur onboarding lagbhag aadha, par seller side ka ecosystem chala jaata hai aur expiry ka nuksaan hamara.
+- **Owner ka jawab (2026-11-17):** **(c)**, PRD §2 ke "Business model" aur "Apna brand" rows waise hi rakh ke. Record: [DECISION_LOG.md](DECISION_LOG.md) D-029. Bacha: apna brand alag company ke naam se ya platform company khud.
 - **Iske baad (alag sawal):** R1 me kaunse sellers: sirf apna brand, ya ek dummy brand bhi, taaki ek order ke do seller invoice parkhe jaayein.
 
 ### Q-006. Infra ka budget kitna hai?
@@ -90,6 +104,16 @@ Ye 6 jawab baaki har cheez ki disha tay karte hain. Agle agents (domain expert, 
 - **Vikalp:** (a), (b), (c) jaise upar.
 - **Salah:** **abhi kam se kam (b)** (email deliverability, canonical URL, saaf cookies). (c) ka faisla tab jab pehla order flow chalne lage. "Production-grade" do hisson me likha jaye: code quality (abhi se) aur operations (budget ke saath).
 - **Trade-off:** ₹0 me accidental complexity aur demo me cold start. Budget me ek non-commercial project pe har mahine ka kharcha.
+
+### Q-007. Database: ek cluster, ya har service ka apna cluster?
+
+- **Sawal:** ARCHITECTURE §2 #5 ("har environment ka 1 Atlas cluster") aapne waise hi rakha, par D-011 me tay hua tha ki har service ka apna cluster hoga. Dono ek saath nahi chal sakte. Kaunsa rahe?
+- **Kyun zaroori:** isi se storage (har cluster 512 MB), connection settings, backup command (D-015) aur Atlas free tier ka hisaab tay hota hai.
+- **Vikalp:**
+  - **(a) D-011 rahe:** har MongoDB service ka apna Atlas cluster (alag Atlas project, alag DB user). #5 ka baaki hissa (apna database, apna DB user, module-prefixed collections) har cluster ke andar waise hi.
+  - **(b) #5 rahe:** ek environment ka ek cluster, har service ka alag database aur DB user. D-011 ka "apna cluster" hissa badlega.
+- **Salah:** **(a)**. D-011 ki wajah (512 MB kaafi nahi) isi se poori hoti hai, aur ek service ka bojh doosri ko nahi rokta. Laptop pe ek hi Docker Mongo rahe, har service ka alag database: sirf `<NAME>__MONGO_URI` badalta hai, code nahi.
+- **Trade-off:** (a) me 8 clusters sambhalne (8 Atlas projects, 8 connection strings), backup 8 jagah se, aur Atlas ka "ek project me ek free cluster" niyam abhi jaancha nahi (R-006). (b) me sab ek jagah aur saral, par 512 MB aur 100 ops/s saari services me saajha.
 
 ## 2. Aage ki queue (abhi sirf topics; sawal agents ke baad likhe jayenge)
 
@@ -130,3 +154,5 @@ Ye 6 jawab baaki har cheez ki disha tay karte hain. Agle agents (domain expert, 
 | v0.1    | 2026-11-17 | Pehla draft: Batch 1 (Q-001 se Q-006) aur aage ki queue.                                                                  |
 | v0.2    | 2026-11-17 | REPOSITORY_ANALYSIS Q1 se Q13 ke jawab gine: Batch 1 ki halat (Q-004, Q-006 tay), queue me "ab tak", §3 jaanchna baaki.   |
 | v0.3    | 2026-11-17 | §0: ek waqt me ek sawal, jawab sawal ke neeche. Agent 2 Batch 1 ke baad. Q-005 D-016 ke hisaab se dobara likha (Charcha). |
+| v0.4    | 2026-11-17 | Q-001 tay: (b) (D-028). |
+| v0.5    | 2026-11-17 | Q-002 tay (D-029, D-030); Q-005 me (c); saaf karna baaki Q-007 se Q-010; Q-007 likha (Charcha). |

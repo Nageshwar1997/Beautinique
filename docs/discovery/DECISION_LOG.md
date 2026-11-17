@@ -1,6 +1,6 @@
 # DECISION LOG: discovery
 
-> **Status:** v0.4 (2026-11-17), discovery phase. Sirf wahi "Tay" hai jo owner ne khud kaha ho. Recommendation tab tak faisla nahi jab tak owner haan na kahe. Koi faisla badle to purani line mitti nahi: nayi line "badla" ke saath judti hai (D-020). Sawal-jawab ki poori baatcheet [REPOSITORY_ANALYSIS.md](REPOSITORY_ANALYSIS.md) §6 me (har sawal ke neeche "Owner ka jawab aur charcha"); yahan sirf faisla aur uska record.
+> **Status:** v0.6 (2026-11-17), discovery phase. Sirf wahi "Tay" hai jo owner ne khud kaha ho. Recommendation tab tak faisla nahi jab tak owner haan na kahe. Koi faisla badle to purani line mitti nahi: nayi line "badla" ke saath judti hai (D-020). Sawal-jawab ki poori baatcheet [REPOSITORY_ANALYSIS.md](REPOSITORY_ANALYSIS.md) §6 me (har sawal ke neeche "Owner ka jawab aur charcha"); yahan sirf faisla aur uska record.
 
 ## 0. Kaise padhein
 
@@ -40,6 +40,9 @@
 | D-025 | Package CLI jaisa hai rahe (naya kaam publish ke plan pe), teen chhote sudhaar ke saath. | 2026-11-17 | Q13a |
 | D-026 | `main` branch hategi; flow `prerelease` → `release`; GitHub default branch `release`. | 2026-11-17 | Q13b |
 | D-027 | Skin & Hair Expert aur Beauty Advisor asli staff roles rahenge; video ke liye Google Meet ka dummy link; Beauty Advisor ka message thread (live chat nahi). | 2026-11-17 | Q13c |
+| D-028 | Lakshya: portfolio project, par aisa bane ki kal asli business ban sake; design asli jaisa, registrations aur kanooni details dummy. | 2026-11-17 | Q-001 |
+| D-029 | Purane PRD §2 aur ARCHITECTURE §2 (#3 se #8) waise hi naye docs me; 4 PRD rows naye roop me; #5 ka cluster wala hissa Q-007 me. | 2026-11-17 | Q-002 |
+| D-030 | Warehouse aur hub ke beech maal kiraye ke transporter se; har trip ka record aur transporter ka bill finance me. | 2026-11-17 | Q-002 |
 
 ## 2. Faislon ka record (D-008 se)
 
@@ -201,9 +204,48 @@
 - **Chhode vikalp:** apna video system; live chat; roles hatana.
 - **Kisne, kab:** owner, 2026-11-17. **Nishaan:** Owner (roles, Meet link); Salah maani (flow ke niyam, message thread).
 
+### D-028. Project ka lakshya
+
+- **Faisla:** vikalp (b): portfolio / practice project, par aisa bane ki kal asli business ban sake. Design asli jaisa (data model, compliance ke fields, security); registrations aur kanooni details dummy; scope ka paimana "poora order flow chalta dikhe".
+- **Wajah:** owner ne vikalp (b) chuna. Owner pehle hi project ko "practice hobby project" keh chuke the; (b) usme ye jodta hai ki design asli business jaisa rahe, taaki aage jaana pade to code dobara na likhna pade.
+- **Chhode vikalp:** (a) sirf seekhna aur portfolio; (c) asli business launch.
+- **Kab dobara khulega:** owner khud khole.
+- **Kisne, kab:** owner, 2026-11-17. **Nishaan:** Salah maani.
+- **Asar (Claude):** D-013 (asli users maan ke code) aur D-014 (₹0) isi ke saath chalte hain. Asli business pe jaana = operations, kanooni registration aur paid plans ka kaam (jaise Vercel Hobby sirf non-commercial), code rewrite nahi. Iske liye dummy kanooni details (GSTIN, licence numbers, contacts) data ya config me rahen, code me nahi.
+
+### D-029. Purane PRD §2 aur ARCHITECTURE §2 ki samiksha
+
+- **Faisla:** owner ne purane PRD §2 ki har row aur ARCHITECTURE §2 ke #3 se #8 pe alag-alag jawab diya. Jo rows waise hi rahin, wo naye docs (B17) me niyam ki tarah jayengi.
+  - **PRD §2, waise hi (25 rows):** Product category, Business model, Apna brand, Kaun bech sakta hai, Stock, Delivery, Delivery partners, Payments, Launch coverage, Sellers ki location, Expansion design, Customers, Reviews, Foreign investment, Apps, Roles ka timing, Docs ki language, Project ka type, Market aur tax, Platform type, Drug items, Head of Operations, Plastic EPR, aur root `CLAUDE.md` ke dono frozen niyam.
+  - **PRD §2, naye roop me (4 rows):**
+    - Pune pehle din: 1 state, 1 district (1 warehouse), 1 sub-district (1 hub); jis sub-district me warehouse ho, wahan ka hub warehouse ke saath (D-016). Hub ki ginti saaf karna baaki (Q-009).
+    - Agla district ya state: D-017 ke haq se; jis level ka switch jiske paas, wahi us level ko kholega.
+    - Pune network: D-016 (Chakan warehouse; pehle din ek hub, baaki hubs baad me).
+    - Stock transport: D-030.
+  - **ARCHITECTURE §2, waise hi:** #3 kharcha ₹0 (Render free, Vercel Hobby, Atlas M0, free Redis); #4 Render pe bundle mode, laptop pe Docker split mode; #6 Redis (laptop pe local Valkey; production me Render Key Value sirf internal URL se; laptop, tests aur CI kabhi production Redis se nahi); #7 domain nahi, har Vercel app ka `/api/*` gateway pe rewrite; #8 monorepo (npm workspaces + Turborepo).
+  - **ARCHITECTURE §2 #5:** owner ne waise hi rakha aur "Core ke andar" ko "Core ya aage bani har service ke andar" kiya (module-prefixed collections). Iska "har environment ka 1 Atlas cluster" hissa D-011 (har service ka apna cluster) se takrata hai: Q-007.
+  - **ARCHITECTURE §2 #1, #2:** pehle hi D-011 se badle (sabki alag services; seema transaction se). #9 aur #10 pe charcha baaki.
+- **Wajah:** owner ne har purane faisle ko khud dekha; jahan purani soch theek thi, wahan rakhi.
+- **Kisne, kab:** owner, 2026-11-17. **Nishaan:** Owner.
+- **Asar (Claude):**
+  - Q-005: "Business model" aur "Apna brand" waise hi, yaani vikalp (c) hybrid. Apna brand alag company ke naam se ho ya platform company khud, ye baaki.
+  - "Reviews pehli release me" ab D-008 ke saath padha: reviews R1 me.
+  - REPOSITORY_ANALYSIS §9 ke "ek baar confirm" wale (customers 18+, gig partners apni gaadi, sellers ka warehouse-state GSTIN, Head of Operations) ab tay.
+  - #4 ke "5 deployables" D-011 ke baad zyada services honge; bundle mode wahi.
+  - "Roles ka timing" (saare roles launch se system me) aur D-019 (role apne module ke saath chalu) ka mel: Q-008.
+
+### D-030. Stock transport (warehouse aur hub ke beech)
+
+- **Faisla:** warehouse aur hub ke beech maal (dono taraf, returns samet) **kiraye ke transporter** se. Driver ka system me account ya role nahi. Har trip ka record: transporter, gaadi number, driver ka naam aur phone (sirf contact ke liye), seal number, manifest (kaunse bags aur parcels), warehouse pe dispatch scan aur hub pe receive scan (kis staff ne kiya). Transporter ka bill finance me kharche ki entry, trip records se mila ke. Brands apna maal bhejne aur wapas le jaane ke liye apna transport ya courier le sakte hain (purani row ka ye hissa waise hi).
+- **Wajah:** owner ne do vikalp diye (apna local staff jiska system me record nahi, ya kiraye ka), saath me kaha ki kharche ka bill banega, aur chunna Claude pe chhoda. Claude ne kiraye ka chuna: (1) bina record ke maal gum ya toot jaaye to zimmedari kisi pe nahi banti, jo D-013 ke khilaaf hai; (2) bill kiraye wale ke saath seedha baithta hai, apne staff ka kharcha salary hota hai; (3) naya role ya app nahi chahiye.
+- **Chhode vikalp:** apna local staff, bina record ke.
+- **Kab dobara khulega:** owner khud khole.
+- **Kisne, kab:** owner, 2026-11-17 (chunna Claude pe chhoda). **Nishaan:** Salah maani.
+- **Aage (Claude):** e-way bill ki zaroorat aur seema jaanchi nahi (B14).
+
 ## 3. Pending (jawab baaki)
 
-[OPEN_QUESTIONS.md](OPEN_QUESTIONS.md) §1 (Batch 1 ki halat) aur §2 (jaanchna baaki).
+[OPEN_QUESTIONS.md](OPEN_QUESTIONS.md) §1 (Batch 1 ki halat aur saaf karna baaki: Q-007 se Q-010) aur §3 (jaanchna baaki).
 
 ## 4. Rejected approaches
 
@@ -271,3 +313,5 @@
 | v0.1 | 2026-11-17 | Pehla draft: D-001 se D-007, assumptions, risks. |
 | v0.2 | 2026-11-17 | REPOSITORY_ANALYSIS ke Q1 se Q13 ke faisle: D-008 se D-027, D-001 me PostgreSQL ka jod, rejected approaches, risks R-005 se R-009, purane docs ki list aur implementation ke kaam. |
 | v0.3 | 2026-11-17 | Sudhaar (owner ne pakda): D-011, D-015, R-006 me "saare Atlas clusters" ki jagah saaf kiya ki finance PostgreSQL pe hai (D-012); Claude ki likhne ki galti, faisla nahi badla. |
+| v0.5 | 2026-11-17 | D-028: lakshya (b) (Q-001). |
+| v0.6 | 2026-11-17 | D-029 (purane PRD §2 aur ARCHITECTURE §2 ki samiksha, Q-002), D-030 (stock transport). |

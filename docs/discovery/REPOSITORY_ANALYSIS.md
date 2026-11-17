@@ -544,31 +544,31 @@ Coverage: **nahi** = docs me bhi nahi; **ek line** = sirf module list me naam; *
 | Decision | Raay | Ek line wajah |
 | --- | --- | --- |
 | Sirf beauty aur personal care | K | Focus; catalog model gehra ban sakta hai |
-| Business model: house brand + doosre brand sellers | **O** (Q-005 baaki) | Sabse bada scope driver: marketplace compliance, settlement, fairness; 1P ya pure marketplace se aadha finance hat'ta hai |
+| Business model: house brand + doosre brand sellers | **O** → D-029 ((c) rakha; apna brand ki company baaki) | Sabse bada scope driver: marketplace compliance, settlement, fairness; 1P ya pure marketplace se aadha finance hat'ta hai |
 | House brand ek seller account se, koi shortcut nahi | K | Saaf separation of duties (agar hybrid rahe) |
 | Sirf brand owners aur authorised distributors | K | Nakli maal ka jokhim kam; trust model saral |
 | Saara stock Beautinique warehouse me | **O** → D-016 (rakha) | WMS aur warehouse-state GST ki shart yahin se aati hai (Q6) |
 | Delivery sirf Beautinique | **O** → D-016 (rakha, carrier port ke saath) | Fallback nahi, pan-India nahi (Q6) |
-| Gig partners, apni gaadi | R | Upar wale pe nirbhar; state-wise gig compliance |
+| Gig partners, apni gaadi | R → D-029 (rakha) | Upar wale pe nirbhar; state-wise gig compliance |
 | Prepaid (Razorpay) ya delivery pe UPI QR; cash nahi | K | Cash handling hat'ta hai; UPI-on-delivery MVP me ho ya nahi, R |
 | Launch phases me, Pune se | K | Chhote se shuru karna sahi |
-| Sellers poore India se, warehouse-state GSTIN ke saath | R | Stock wale faisle ka nateeja; onboarding ki rukawat |
+| Sellers poore India se, warehouse-state GSTIN ke saath | R → D-029 (rakha) | Stock wale faisle ka nateeja; onboarding ki rukawat |
 | Expansion sirf config se | K (principle), R (gehrai) → D-024 | Lint sasta hai; go-live engine mehenga (Q12) |
-| Customers sirf 18+ | R | Wajah likhi nahi; sign-up me ek step badhta hai |
-| Reviews pehli release me | R | MVP tiering ka sawal |
+| Customers sirf 18+ | R → D-029 (rakha) | Wajah likhi nahi; sign-up me ek step badhta hai |
+| Reviews pehli release me | R → D-029 (rakha; R1 me) | MVP tiering ka sawal |
 | Foreign investment nahi | K | Isi se hybrid (inventory + marketplace) model mumkin rehta hai [NV: kanooni detail] |
 | 11 apps | **O** → D-010 (rakha) | Q2 |
 | Saare roles launch se | **O** → D-019 (module ke saath chalu) | Q1, Q7 |
 | Docs Hinglish me | K | Owner ke liye |
-| Education + portfolio, par production-grade; legal dummy | R → D-013, D-014 (Q-001 baaki) | "Production-grade" ki paribhasha ₹0 infra se takrati hai (Q4) |
+| Education + portfolio, par production-grade; legal dummy | R → D-013, D-014, D-028 | "Production-grade" ki paribhasha ₹0 infra se takrati hai (Q4) |
 | Sirf India, INR, GST invoice | K | Saaf |
 | Fully responsive web; delivery PWA; native nahi | K | Rider PWA ki seemaayein (background location, scan) R |
 | Pune pehle din poora district | **O** → D-016 (1 hub se) | 21 hubs pehle din (Q6) |
-| Agla district kisi bhi order me, team-ready checklist | K | Expansion principle ka hissa |
+| Agla district kisi bhi order me, team-ready checklist | K → D-017, D-029 | Expansion principle ka hissa |
 | Pune network: Chakan + 21 hubs | R → D-016 (pehle din 1 hub) | Dummy data; upar wale pe nirbhar |
-| Stock transport: kiraye ke trucks | K | Chhota faisla |
+| Stock transport: kiraye ke trucks | K → D-030 (kiraye ka transporter, trip record + bill) | Chhota faisla |
 | Drug items kabhi nahi | K | Compliance saral; borderline products ke niyam chahiye |
-| Head of Operations role | R | Role catalogue ke saath |
+| Head of Operations role | R → D-029 (rakha) | Role catalogue ke saath |
 | Plastic EPR lagu (dummy) | K | Kam priority |
 
 **ARCHITECTURE §2:**
@@ -576,10 +576,10 @@ Coverage: **nahi** = docs me bhi nahi; **ek line** = sirf module list me naam; *
 | # | Decision | Raay | Ek line wajah |
 | --- | --- | --- | --- |
 | 1 | Identity, Payments, Notify microservices + Core monolith | R → D-011 (sab alag services) | Identity / notify bane hain, rakho; payments alag process **O** (Q3) |
-| 2 | Microservice banne ka rule | K | Rule sahi hai; bundle mode me uska security wala hissa lagu nahi |
+| 2 | Microservice banne ka rule | K → D-011 (badla) | Rule sahi hai; bundle mode me uska security wala hissa lagu nahi |
 | 3 | Kharcha ₹0 | **O** → D-014 (rakha) | Q4; owner ka budget faisla |
 | 4 | Render pe bundle mode | K (jab tak ₹0) | #3 ka nateeja |
-| 5 | Ek cluster, har deployable ka DB + user, module-prefixed collections | K → D-011 (badla: har service ka alag cluster) | Sasta isolation, cross-module transaction mumkin |
+| 5 | Ek cluster, har deployable ka DB + user, module-prefixed collections | K → D-011 (badla: har service ka alag cluster); owner ka Ok aur D-011 ka takrav Q-007 me | Sasta isolation, cross-module transaction mumkin |
 | 6 | Redis source of truth nahi; local Valkey, live Key Value | K | Sabse mazboot principle |
 | 7 | Domain nahi; Vercel rewrite se same-origin | **O** → D-014 (domain nahi, rakha) | Domain sasta hai; same-origin rewrite pattern rakho |
 | 8 | Monorepo: npm workspaces + Turborepo | K | Owner ke framing me frozen |
