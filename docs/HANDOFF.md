@@ -7,7 +7,7 @@
 - **Discovery phase** chal raha hai: plan, task files aur naya code abhi nahi. Branch: `feat/mig-plan`.
 - **Docs aur code naye sire se (owner):** naye docs ([README.md](README.md)) khaali files se shuru hue hain; cheezein ek-ek karke, owner ki haan ke baad judengi. Code bhi naye sire se banega (Q-003 ka jawab: sab dobara), implementation stage me.
 - **Abhi koi npm command nahi chalta**; docs ke liye sirf `npx prettier --check <files>`. Pull request pe CI fail hoga jab tak naya root setup na bane; is branch pe push se CI nahi chalta.
-- **Ab tak ke faisle** naye [DECISIONS.md](DECISIONS.md) me ek-ek karke, D-001 se, aayenge; Q-003 ka jawab bhi wahin likhna hai.
+- **Ab tak ke faisle** [DECISIONS.md](DECISIONS.md) me ek-ek karke aa rahe hain: D-001 (tech stack, finance ke liye PostgreSQL) aa gaya. Code naye sire se banne ka faisla bhi wahin likhna hai.
 - **Khule sawal:**
   - Apna brand kis company ke naam se seller ho: alag (dummy) company ya platform company khud.
   - Database: ek cluster, ya har service ka apna cluster (owner se poocha hua).
@@ -24,7 +24,7 @@
 
 ## 3. Agla kaam
 
-1. [DECISIONS.md](DECISIONS.md) me faisle, D-001 se, ek-ek karke (owner ki haan se).
+1. [DECISIONS.md](DECISIONS.md) me agla faisla (repo aur folders ka structure), ek-ek karke (owner ki haan se).
 2. Database cluster wale sawal ka jawab.
 
 ## Change log
@@ -32,3 +32,4 @@
 | Version | Date | Badlav |
 | --- | --- | --- |
 | v1.0.0 | 2026-11-17 | Pehla version: abhi ki halat aur agla kaam. |
+| v1.0.1 | 2026-11-17 | D-001 DECISIONS me aaya; agla kaam agla faisla. |

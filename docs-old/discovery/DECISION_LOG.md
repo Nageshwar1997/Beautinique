@@ -1,6 +1,6 @@
 # DECISION LOG: discovery
 
-> **Status:** v0.6 (2026-11-17), discovery phase. Sirf wahi "Tay" hai jo owner ne khud kaha ho. Recommendation tab tak faisla nahi jab tak owner haan na kahe. Koi faisla badle to purani line mitti nahi: nayi line "badla" ke saath judti hai (D-020). Sawal-jawab ki poori baatcheet [REPOSITORY_ANALYSIS.md](REPOSITORY_ANALYSIS.md) §6 me (har sawal ke neeche "Owner ka jawab aur charcha"); yahan sirf faisla aur uska record.
+> **Status:** v0.6 (2026-11-17), discovery phase. **Naye docs me jo aa gaya, uspe "[Naye docs me: ...]" ka nishaan hai.** Sirf wahi "Tay" hai jo owner ne khud kaha ho. Recommendation tab tak faisla nahi jab tak owner haan na kahe. Koi faisla badle to purani line mitti nahi: nayi line "badla" ke saath judti hai (D-020). Sawal-jawab ki poori baatcheet [REPOSITORY_ANALYSIS.md](REPOSITORY_ANALYSIS.md) §6 me (har sawal ke neeche "Owner ka jawab aur charcha"); yahan sirf faisla aur uska record.
 
 ## 0. Kaise padhein
 
@@ -13,7 +13,7 @@
 
 | Id | Faisla | Kab | Kahan se |
 | --- | --- | --- | --- |
-| D-001 | Tech stack wahi rahega jo abhi hai. **Jod (2026-11-17):** finance service ke liye PostgreSQL (D-012). | 2026-11-17 | Shuru |
+| D-001 | **[Naye docs me: DECISIONS D-001]** Tech stack wahi rahega jo abhi hai. **Jod (2026-11-17):** finance service ke liye PostgreSQL (D-012). | 2026-11-17 | Shuru |
 | D-002 | Repo aur folders ka structure, tools aur conventions wahi rahenge. | 2026-11-17 | Shuru |
 | D-003 | Existing project (code aur docs) sirf reference hai; usme jo sawal uthane layak ho, uthaya jaye. | 2026-11-17 | Shuru |
 | D-004 | Abhi sirf discovery: sawal-jawab. Plan, task files aur code tab tak nahi jab tak owner agla stage na khole. | 2026-11-17 | Shuru |
@@ -24,7 +24,7 @@
 | D-009 | Capacity: ek hi insaan (2 Claude accounts), 5 ghante/din, 6 din/hafta, koi deadline nahi. | 2026-11-17 | Q1 |
 | D-010 | 11 alag apps rahenge; screens module ke saath judti jayengi. | 2026-11-17 | Q2 |
 | D-011 | Sabki alag services, har service ka apna database aur apna cluster (MongoDB services ke Atlas clusters; finance PostgreSQL pe, D-012); seema transaction se (draft 9 services). | 2026-11-17 | Q3 |
-| D-012 | Finance PostgreSQL pe, baaki services MongoDB pe; har niyam ki list aur test. | 2026-11-17 | Q5 |
+| D-012 | **[Naye docs me: DECISIONS D-001, D-001 ke saath]** Finance PostgreSQL pe, baaki services MongoDB pe; har niyam ki list aur test. | 2026-11-17 | Q5 |
 | D-013 | Design aur code asli users maan ke (production-grade), halaanki live system sirf owner chalayega. | 2026-11-17 | Q5 |
 | D-014 | Kharcha ₹0, domain nahi; server baar-baar jagaya jayega; production-grade = code + chalne ki quality (₹0 me jitni ho sake). | 2026-11-17 | Q4 |
 | D-015 | Backup: ek command se saare databases ka data download (MongoDB: Extended JSON; finance ka PostgreSQL bhi), restore command ke saath, files repo ke folder me par git se bahar (4 pehre). | 2026-11-17 | Q4 |
@@ -80,6 +80,8 @@
 - **Note (Claude):** alag cluster + alag DB user se data ki security abhi milti hai; process ki security tab jab services alag servers pe chalein. Har deployable apna `<NAME>__MONGO_URI` pehle se padhta hai.
 
 ### D-012. Finance ke liye PostgreSQL
+
+- **[Naye docs me: DECISIONS D-001]** (2026-11-17): D-001 ke saath ek faisla bana.
 
 - **Faisla:** finance service PostgreSQL pe; baaki services MongoDB pe. Har niyam ki saaf list (unique index, conditional update, ya code + raat ki jaanch) aur har ek ka test, ek saath chalne wale requests ke tests samet.
 - **Wajah (owner):** "Thik he Finance ke liye Hum SQL use karenge"; "PostgreSQL thik he".
