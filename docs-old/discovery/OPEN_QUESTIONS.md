@@ -29,7 +29,7 @@ Ye 6 jawab baaki har cheez ki disha tay karte hain. Agle agents (domain expert, 
 | Sawal | Kya saaf karna hai | Status |
 | --- | --- | --- |
 | Q-005 (bacha hissa) | Apna brand alag (dummy) company ke naam se seller ho, ya platform company khud | Khula |
-| Q-007 | ARCHITECTURE #5 (ek cluster) aur D-011 (har service ka cluster) me kaunsa | Charcha |
+| Q-007 | **[Naye docs me: DECISIONS D-011]** ARCHITECTURE #5 (ek cluster) aur D-011 (har service ka cluster) me kaunsa | Tay: har service ka apna cluster |
 | Q-008 | PRD "Roles ka timing" (saare roles launch se system me) aur D-019 (role apne module ke saath chalu) ka mel | Khula |
 | Q-009 | Pune pehle din: live sub-district wahi jahan warehouse hai (kul 1 hub), ya alag (kul 2 hubs) | Khula |
 | Q-010 | Purani "Agla district" row ka notify-me waitlist (unserved pincode ke customer ko khabar) rahega ya nahi; D-017 me iska zikr nahi | Khula |
@@ -106,6 +106,8 @@ Ye 6 jawab baaki har cheez ki disha tay karte hain. Agle agents (domain expert, 
 - **Trade-off:** ₹0 me accidental complexity aur demo me cold start. Budget me ek non-commercial project pe har mahine ka kharcha.
 
 ### Q-007. Database: ek cluster, ya har service ka apna cluster?
+
+- **[Naye docs me: DECISIONS D-011]** Owner ka jawab (2026-11-17): **(a)**, har service ka apna cluster.
 
 - **Sawal:** ARCHITECTURE §2 #5 ("har environment ka 1 Atlas cluster") aapne waise hi rakha, par D-011 me tay hua tha ki har service ka apna cluster hoga. Dono ek saath nahi chal sakte. Kaunsa rahe?
 - **Kyun zaroori:** isi se storage (har cluster 512 MB), connection settings, backup command (D-015) aur Atlas free tier ka hisaab tay hota hai.

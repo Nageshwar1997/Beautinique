@@ -14,16 +14,16 @@
 | Id | Faisla | Kab | Kahan se |
 | --- | --- | --- | --- |
 | D-001 | **[Naye docs me: DECISIONS D-001]** Tech stack wahi rahega jo abhi hai. **Jod (2026-11-17):** finance service ke liye PostgreSQL (D-012). | 2026-11-17 | Shuru |
-| D-002 | Repo aur folders ka structure, tools aur conventions wahi rahenge. | 2026-11-17 | Shuru |
-| D-003 | Existing project (code aur docs) sirf reference hai; usme jo sawal uthane layak ho, uthaya jaye. | 2026-11-17 | Shuru |
-| D-004 | Abhi sirf discovery: sawal-jawab. Plan, task files aur code tab tak nahi jab tak owner agla stage na khole. | 2026-11-17 | Shuru |
-| D-005 | Agents ek ke baad ek, kabhi saath nahi. 5-hour limit ~80% pe ho to naya agent nahi; chalta hua agent poora hone do. | 2026-11-17 | Shuru |
-| D-006 | Tasks ek file me nahi: ek main plan file, har poore flow ki alag task file, uske andar subtasks. Exact dhaancha baad me tay hoga (B17). | 2026-11-17 | Shuru |
-| D-007 | Security Architect ek zaroori, alag role hai; security docs zaroorat ke saath bante jayenge. | 2026-11-17 | Shuru |
-| D-008 | Design aur task files poore ecosystem ki pehle din; banana releases me, R1 = patla par poora order flow; koi feature kata nahi. | 2026-11-17 | Q1 |
-| D-009 | Capacity: ek hi insaan (2 Claude accounts), 5 ghante/din, 6 din/hafta, koi deadline nahi. | 2026-11-17 | Q1 |
-| D-010 | 11 alag apps rahenge; screens module ke saath judti jayengi. | 2026-11-17 | Q2 |
-| D-011 | Sabki alag services, har service ka apna database aur apna cluster (MongoDB services ke Atlas clusters; finance PostgreSQL pe, D-012); seema transaction se (draft 9 services). | 2026-11-17 | Q3 |
+| D-002 | **[Naye docs me: DECISIONS D-002]** Repo aur folders ka structure, tools aur conventions wahi rahenge. | 2026-11-17 | Shuru |
+| D-003 | **[Naye docs me: DECISIONS D-003]** Existing project (code aur docs) sirf reference hai; usme jo sawal uthane layak ho, uthaya jaye. | 2026-11-17 | Shuru |
+| D-004 | **[Naye docs me: DECISIONS D-004]** Abhi sirf discovery: sawal-jawab. Plan, task files aur code tab tak nahi jab tak owner agla stage na khole. | 2026-11-17 | Shuru |
+| D-005 | **[Naye docs me: DECISIONS D-005]** Agents ek ke baad ek, kabhi saath nahi. 5-hour limit ~80% pe ho to naya agent nahi; chalta hua agent poora hone do. | 2026-11-17 | Shuru |
+| D-006 | **[Naye docs me: DECISIONS D-006]** Tasks ek file me nahi: ek main plan file, har poore flow ki alag task file, uske andar subtasks. Exact dhaancha baad me tay hoga (B17). | 2026-11-17 | Shuru |
+| D-007 | **[Naye docs me: DECISIONS D-007]** Security Architect ek zaroori, alag role hai; security docs zaroorat ke saath bante jayenge. | 2026-11-17 | Shuru |
+| D-008 | **[Naye docs me: DECISIONS D-008]** Design aur task files poore ecosystem ki pehle din; banana releases me, R1 = patla par poora order flow; koi feature kata nahi. | 2026-11-17 | Q1 |
+| D-009 | **[Naye docs me: DECISIONS D-009]** Capacity: ek hi insaan (2 Claude accounts), 5 ghante/din, 6 din/hafta, koi deadline nahi. | 2026-11-17 | Q1 |
+| D-010 | **[Naye docs me: DECISIONS D-010]** 11 alag apps rahenge; screens module ke saath judti jayengi. | 2026-11-17 | Q2 |
+| D-011 | **[Naye docs me: DECISIONS D-011]** Sabki alag services, har service ka apna database aur apna cluster (MongoDB services ke Atlas clusters; finance PostgreSQL pe, D-012); seema transaction se (draft 9 services). | 2026-11-17 | Q3 |
 | D-012 | **[Naye docs me: DECISIONS D-001, D-001 ke saath]** Finance PostgreSQL pe, baaki services MongoDB pe; har niyam ki list aur test. | 2026-11-17 | Q5 |
 | D-013 | Design aur code asli users maan ke (production-grade), halaanki live system sirf owner chalayega. | 2026-11-17 | Q5 |
 | D-014 | Kharcha ₹0, domain nahi; server baar-baar jagaya jayega; production-grade = code + chalne ki quality (₹0 me jitni ho sake). | 2026-11-17 | Q4 |
@@ -48,6 +48,8 @@
 
 ### D-008. Releases me banana
 
+- **[Naye docs me: DECISIONS D-008]** (2026-11-17).
+
 - **Faisla:** design aur task files poore ecosystem ki pehle din. Banana releases me: R1 = ek patla par poora order flow. Koi feature kata nahi. R1 me exactly kya aayega, ye alag se tay hoga.
 - **Wajah:** owner ne salah maani ("Tumhari salah").
 - **Chhode vikalp:** sirf patla flow aur baaki kaatna (scope chhota hota); sab launch pe (bahut der tak kuch chalta nahi dikhta).
@@ -57,11 +59,15 @@
 
 ### D-009. Capacity
 
+- **[Naye docs me: DECISIONS D-009]** (2026-11-17).
+
 - **Faisla:** kaam karne wala ek hi insaan (owner). Docs ka "2 developers" = owner ke 2 Claude accounts, usage limit ki wajah se. Din me 5 ghante, hafte me 6 din (30 ghante), 2026-11-17 se. Koi deadline nahi.
 - **Wajah:** owner ki batayi haalat.
 - **Kisne, kab:** owner, 2026-11-17. **Nishaan:** Owner.
 
 ### D-010. 11 alag apps
+
+- **[Naye docs me: DECISIONS D-010]** (2026-11-17).
 
 - **Faisla:** har role parivaar ka alag app; 11 apps rahenge. Jaise-jaise module bane, uski screens apps me judengi; shells tab tak jaise hain.
 - **Wajah (owner):** "apps already bane huye he"; "alag rakhne ka ek ye bhi reason he ki multiple projects ban jayenge".
@@ -71,6 +77,8 @@
 - **Aage:** ek insaan ke kai roles pe kai jagah sign-in ka bojh B15 me.
 
 ### D-011. Alag services, alag clusters
+
+- **[Naye docs me: DECISIONS D-011]** (2026-11-17).
 
 - **Faisla:** sabki alag services, har service ka apna database aur apna cluster. MongoDB wali 8 services ka har ek alag Atlas cluster (alag Atlas project, alag DB user); finance PostgreSQL pe (D-012), alag DB user ke saath. Kam storage wale modules ek service me reh sakte hain; seema Claude tay kare: jo ek saath pakka hona chahiye wo ek service me, services ke beech data sirf events se. Draft (module design me pakka): identity, notify, payments, catalog, commerce, logistics, finance, support, audit.
 - **Wajah (owner):** M0 cluster 512 MB deta hai, "wo apne project ke liye kafi nhi hogi"; "Security bhi important he".
