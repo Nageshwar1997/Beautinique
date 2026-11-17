@@ -17,3 +17,11 @@ packages/frontend/styles/src/variables.css
 packages/frontend/styles/src/fonts.css
 packages/frontend/styles/src/fonts
 packages/shared/contracts/generated
+
+# Old code, kept only for reference (the project is rebuilt from scratch).
+backend-old
+configs-old
+frontend-old
+infra-old
+packages-old
+scripts-old

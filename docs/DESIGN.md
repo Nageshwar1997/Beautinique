@@ -10,7 +10,7 @@
 - Har app parivaar ka layout.
 - Accessibility.
 
-Aaj ka code `packages/frontend/styles`, `components` aur `icons` me hai; purana doc [../docs-old/DESIGN.md](../docs-old/DESIGN.md) (reference).
+Purana code `packages-old/frontend/styles`, `components` aur `icons` me hai, aur purana doc [../docs-old/DESIGN.md](../docs-old/DESIGN.md): dono sirf reference.
 
 ## Change log
 

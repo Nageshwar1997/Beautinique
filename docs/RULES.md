@@ -14,7 +14,7 @@
 
 ## Tab tak
 
-Hamesha laagu niyam root [CLAUDE.md](../CLAUDE.md) me hain. Code ke conventions wahi rehte hain (stack aur conventions nahi badle), aur unme se kai ESLint aur CI khud laagu karte hain; unki detail purane [../docs-old/RULES.md](../docs-old/RULES.md) me (reference).
+Hamesha laagu niyam root [CLAUDE.md](../CLAUDE.md) me hain. Code ke conventions wahi rehte hain (stack aur conventions nahi badle); unki detail purane [../docs-old/RULES.md](../docs-old/RULES.md) me, aur unhe laagu karne wale purane ESLint rules aur CI checks `configs-old/` aur `scripts-old/` me (reference). Naye code ke saath ye dobara banenge.
 
 ## Change log
 

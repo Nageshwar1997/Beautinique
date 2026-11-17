@@ -13,8 +13,12 @@ Ye file Claude Code har session ki shuruaat me padhta hai. Project pe ek hi insa
 - **Naye docs khaali shuru hue hain.** Unme cheezein ek-ek karke judti hain, owner ki haan ke baad. Index:
   [docs/README.md](docs/README.md).
 - **Purana sab reference hai:** [docs-old/](docs-old) (PRD, ARCHITECTURE, TASKS, RULES, MEMORY, DESIGN aur
-  discovery ki files) aur [CLAUDE-old.md](CLAUDE-old.md) (commands, repo ka naksha). Wahan naya kuch nahi
-  likha jaata; jo naye docs me aa jaye, wahi sach.
+  discovery ki files), [CLAUDE-old.md](CLAUDE-old.md) (commands, repo ka naksha) aur purana code root ke
+  `*-old/` folders me. Wahan naya kuch nahi likha jaata; jo naye docs me aa jaye, wahi sach.
+- **Code naye sire se banega (owner, 2026-11-17):** purana code `backend-old/`, `frontend-old/`,
+  `packages-old/`, `scripts-old/`, `configs-old/`, `infra-old/` me hai. Use padh ke seekh sakte ho, par wo ab
+  chalta nahi: root ka `package.json`, lint, build, tests aur CI unhi purane paths pe tike the. Naya root setup
+  aur naya code implementation stage me, wahi folder structure (`packages/`, `frontend/`, `backend/` ...).
 
 ## Discovery ke niyam
 
@@ -68,8 +72,9 @@ Ye file Claude Code har session ki shuruaat me padhta hai. Project pe ek hi insa
 
 ## Commands aur repo ka naksha
 
-Abhi [CLAUDE-old.md](CLAUDE-old.md) ke "Setup aur commands" aur "Repo ka naksha" me hain (code ke tathya,
-waise hi sahi). Yahan ek-ek karke aayenge.
+Abhi koi command nahi chalta (purana code `*-old/` me). [CLAUDE-old.md](CLAUDE-old.md) ke "Setup aur
+commands" aur "Repo ka naksha" purane code ke hain (paths me ab `-old` juda hai). Naye code ke saath yahan
+ek-ek karke aayenge. Docs ke liye sirf `npx prettier --check <files>` chalta hai.
 
 ## Kaam rokte waqt
 
@@ -82,3 +87,4 @@ khula hai. Jis doc me badlav kiya, uske change log me ek line. Progress % ka niy
 | Version | Date       | Badlav                                                                                                       |
 | ------- | ---------- | ------------------------------------------------------------------------------------------------------------ |
 | v2.0    | 2026-11-17 | Naya CLAUDE.md: purana `CLAUDE-old.md`, purane docs `docs-old/`; hamesha laagu niyam aur discovery ke niyam. |
+| v2.1    | 2026-11-17 | Purana code `*-old/` folders me; naya code naye sire se; abhi koi command nahi chalta.                       |

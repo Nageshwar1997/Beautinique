@@ -79,6 +79,10 @@ Any other pair → stop and explain. CI (`scripts/ci/lib/branch-flow.ts`) reject
 
 ## 5. Checks
 
+- **For now (2026-11-17):** the old code is in the `*-old/` folders and the root tooling does not run, so the
+  only check is `npx prettier --check <changed files>`. Say that instead of running build, lint, typecheck or
+  tests, and say that CI on a pull request will fail until the new root setup exists. The rest of this section
+  applies again once the new code has its own setup.
 - CI order: `npm run build`, then `npm run format:check`, `npm run lint`, `npm run typecheck`, `npm test`.
 - Locally: `format:check`, `lint` and `typecheck` always (run `npm run build` first if anything under `packages/`
   changed); tests only for changed workspaces (`npm test --workspace <path>`); `npm run test:scripts` (about 10 min)
