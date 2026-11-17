@@ -1,6 +1,6 @@
 # REPOSITORY ANALYSIS: Beautinique (BQ)
 
-> **Status:** v0.1 (2026-11-17), **draft**, discovery phase. Principal Architect ka pehla, evidence-based repository analysis. Ye implementation plan nahi hai: sirf samajh, critique aur sawal.
+> **Status:** v0.3 (2026-11-17), discovery phase; §6 ke 13 sawalon pe owner ke jawab aur charcha har sawal ke neeche ([DECISION_LOG.md](DECISION_LOG.md) D-008 se D-027). Principal Architect ka pehla, evidence-based repository analysis. Ye implementation plan nahi hai: sirf samajh, critique aur sawal.
 >
 > **Existing project sirf reference hai.** Is repo ka code aur docs (approved [PRD.md](../PRD.md) aur [ARCHITECTURE.md](../ARCHITECTURE.md) bhi) yahan apne aap sahi ya final nahi maane gaye. Tech stack, repo structure, tooling aur conventions waise hi rehte hain; stack badalne ki salah sirf wahan hai jahan saaf technical wajah ho.
 
@@ -129,6 +129,8 @@
 
 Har item: **Problem**, **kyun kaafi nahi**, **vikalp**, **salah**, **trade-off**.
 
+**Owner ke jawab (2026-11-17):** har sawal ke neeche "Owner ka jawab aur charcha" me owner ka jawab, Claude ki jaanch aur saath ki baatcheet (sirf aakhri faisla). Faislon ka record [DECISION_LOG.md](DECISION_LOG.md) D-008 se D-027 me.
+
 ### Q1. "Sab kuch launch pe": scope aur capacity ka mel nahi
 
 - **Problem:** 11 apps, 79 roles, ~23 Core modules, sab pehle din (PRD §2, RULES §1.2). 30 din aur 527 commits ke baad koi product list, cart ya order nahi ho sakta; saare 44 routes auth aur platform ke hain [V].
@@ -136,6 +138,13 @@ Har item: **Problem**, **kyun kaafi nahi**, **vikalp**, **salah**, **trade-off**
 - **Vikalp:** (a) vertical slice pehle (catalog → cart → order → payment → dispatch, 3 se 4 apps); (b) release tiers (MVP, R2, R3) jahan roles data hone se baad me judte hain; (c) jaisa hai.
 - **Salah:** "saare roles aur apps launch pe" **reopen** ho. MVP ki paribhasha discovery ka pehla output ho.
 - **Trade-off:** owner ka dar ("baad me bhool sakte hain") backlog se sambhalta hai, scope se nahi. Tiering me kuch rework ka jokhim rehta hai.
+
+**Owner ka jawab aur charcha (2026-11-17), faisle [DECISION_LOG.md](DECISION_LOG.md) D-008, D-009:**
+
+- **Owner ka jawab (2026-11-17):** salah maani: **(b)**. Design aur task files poore ecosystem ki pehle din; banana releases me, R1 = ek patla par poora order flow. Koi feature kata nahi. R1 me exactly kya aayega, ye alag se tay hoga.
+- **Asar:** purane PRD §2 ke "Apps" aur "Roles ka timing" aur root `CLAUDE.md` ka "kuch bhi baad me nahi" niyam isse badalte hain; badlav ki list DECISION_LOG §7 me (owner ki haan ke baad).
+- **Capacity (owner, 2026-11-17):** kaam karne wala **ek hi insaan** hai (owner). Docs ka "2 developers" asal me usi insaan ke 2 Claude accounts hain, jo usage limit ki wajah se baari-baari use hote hain. Yaani handoff ek account se doosre account ko hota hai, insaan se insaan ko nahi.
+- **Samay (owner, 2026-11-17):** din me **5 ghante**, hafte me **6 din** (30 ghante/hafta), shuruaat aaj (2026-11-17) se. **Koi deadline nahi** (owner ne saaf kaha).
 
 ### Q2. 11 alag frontend apps
 
@@ -145,6 +154,13 @@ Har item: **Problem**, **kyun kaafi nahi**, **vikalp**, **salah**, **trade-off**
 - **Salah:** **reopen**. Identity me "app" data hi rahe; internal apps consolidate karna default mana jaye.
 - **Trade-off:** alag app = chhota bundle, alag session policy, kam blast radius, role ke hisaab se saaf URL. Consolidation = kam ops, ek deploy, par console bada aur route guards pe zyada bharosa.
 
+**Owner ka jawab aur charcha (2026-11-17), faisle [DECISION_LOG.md](DECISION_LOG.md) D-010:**
+
+- **Owner ka jawab (2026-11-17):** salah nahi maani: **har role ka alag app chahiye** (11 apps rahenge).
+- **Wajah (owner):** (1) saare 11 apps pehle se bane hue hain; (2) alag rakhne se multiple projects ban jayenge.
+- **Banne ka order (owner, 2026-11-17):** jaise jaise modules pe kaam chalega, us module ki screens apps me judti jayengi. Shells tab tak jaise hain rahenge.
+- **Aage bheja:** ek insaan ke kai roles ho to kai jagah sign-in ka bojh (single sign-on ya alag sign-in) security wale batch (B15) me tay hoga.
+
 ### Q3. "Microservices" jo production me ek hi process hain
 
 - **Problem:** Identity, Payments, Notify ko alag karne ki wajah "security keys, paisa, secrets" di gayi (ARCHITECTURE §2.1). Par production = bundle mode: ek process, ek heap, ek cluster, ek Redis (`backend/bundle/src/bundle.ts:24`) [V]. Asli isolation sirf alag DB user aur env keys hatana hai.
@@ -152,6 +168,27 @@ Har item: **Problem**, **kyun kaafi nahi**, **vikalp**, **salah**, **trade-off**
 - **Vikalp:** (a) modular monolith: identity, notify, payments module ki tarah, wahi facade + outbox + alag DB discipline, physical split tab jab paid infra ho; (b) jo bana hai rakho, par naya process (payments) tab tak nahi jab tak asli isolation na mile; (c) asli split paid tier pe.
 - **Salah:** bani hui identity aur notify **rakho** (kaam karta code hai). Payments ko alag process banane ka faisla **reopen**. Agar wajah "microservices seekhna" hai (MEMORY 2026-10-19) to wahi likho, security nahi.
 - **Trade-off:** monolith me secrets ka blast radius ek rehta hai (jo aaj bhi hai); split ka raasta contracts ki wajah se khula rehta hai.
+
+**Owner ka jawab aur charcha (2026-11-17), faisle [DECISION_LOG.md](DECISION_LOG.md) D-011, D-012:**
+
+- **Owner ka jawab (2026-11-17):** salah nahi maani: **sabki alag services**. Har service ka **apna database aur apna alag cluster**.
+- **Wajah (owner):** (1) MongoDB Atlas ka M0 cluster 512 MB deta hai, jo poore project ke liye kaafi nahi hoga; har service ka alag cluster hone se storage milta hai. (2) **Security bhi zaroori wajah hai** (owner ne salah ki "security nahi" wali baat nahi maani).
+- **Security ka sach (Claude ka note):** alag cluster + alag DB user se data ki security abhi se milti hai (ek service ka DB password leak ho to doosri ka data nahi khulta). Process ki security (ek service me chhed ho to doosri ke secrets bachein) tab milegi jab services alag servers pe chalengi; design aisa rahe ki wo kadam baad me bina rewrite ke ho. Security Architect (B15) ise jaanchega.
+- **Seema (owner, 2026-11-17):** kuch modules ek service me rah sakte hain (jahan storage kam lagta ho). Seema Claude tay kare; di gayi salah (transaction se seema, 7 se 9 services) maani.
+- **Owner ke andaze:** audit log aur pincodes / locations ka data ~100 MB; launch pe ~500 products.
+- **Seema ka pehla draft (Claude ka, module design ke waqt pakka hoga):**
+  1. identity (bana hua): login, accounts, roles
+  2. notify (bana hua): email, in-app, push
+  3. payments: paisa lena, refunds
+  4. catalog: products, search, reviews
+  5. commerce: cart, orders, stock, warehouse, promotions (order + stock reservation ek transaction me)
+  6. logistics: location master, pincodes, hubs, delivery
+  7. finance: ledger, settlement
+  8. support: tickets, disputes
+  9. audit: audit log (sabse tez badhne wala data)
+- **Niyam:** jo cheezein ek saath pakki honi chahiye wo ek hi service aur cluster me; services ke beech data sirf events se; MongoDB wali har service ka cluster alag Atlas project aur alag DB user ke saath; finance PostgreSQL pe (Q5).
+- **Jaanchna baaki:** Atlas ke free-tier niyam (ek project me ek free cluster), ek process me 9 services ki memory (512 MB), aur repo me har deployable ka alag cluster URI lena kitna chhota badlav hai.
+  - **Jaancha (Claude, 2026-11-17):** alag cluster URI ka intezaam pehle se hai: har deployable apna `<NAME>__MONGO_URI` padhta hai (`backend/identity/src/config.ts:16`, `backend/bundle/.env.example`). Par `create:backend` ka template naye service me Mongo URI nahi jodta; abhi identity, notify, core me haath se juda hai.
 
 ### Q4. ₹0 hosting vs "production-grade"
 
@@ -161,6 +198,26 @@ Har item: **Problem**, **kyun kaafi nahi**, **vikalp**, **salah**, **trade-off**
 - **Salah:** **reopen**, owner ka budget faisla. Kam se kam domain (sasta, email deliverability, canonical URL, cookies saaf).
 - **Trade-off:** paisa vs complexity aur asli demo ki quality.
 
+**Owner ka jawab aur charcha (2026-11-17), faisle [DECISION_LOG.md](DECISION_LOG.md) D-014, D-015:**
+
+- **Owner ka jawab (2026-11-17):** salah nahi maani: **(a) ₹0 hi, domain nahi chahiye**.
+  - Soye server pe pehle customer ka ~1 minute intezaar: chalega.
+  - Server ko din me baar-baar jagaya jayega: GitHub Actions, cron-job aur UptimeRobot se; aur jab frontend apps khule hon tab har kuch minute me wake.
+  - Din ke 300 emails kaafi hain (owner: ye hobby project hai).
+  - Free tier ki seemaon ke liye limit handling waise hi banti rahegi jaise ab tak bani hai.
+  - "Production-grade" ka matlab: **code ki quality bhi, aur chalne ki quality bhi (₹0 me jitni ho sake)**.
+- **Jaanchna baaki (Claude):** Render free plan ke mahine ke ghante ek hamesha-jaage server ke liye kaafi hain ya nahi, aur baar-baar jagana uske niyamon me theek hai ya nahi. Ye purane faisle "jagana, jaagta rakhna nahi" ko badalta hai.
+- **Jokhim (owner ne maana):** domain ke bina emails spam me ja sakte hain, aur har OTP email se hi jaata hai.
+- **Backup (owner, 2026-11-17):** **ek command, jo production me jaane se pehle owner chalayega, aur jo saare clusters ka data JSON me download kar de.**
+  - **Format (Claude ki salah, owner ne maani):** MongoDB clusters ke liye Extended JSON, har collection ki ek file, ek line me ek document, taaki ObjectId aur dates wapas wahi banein.
+  - **Finance ka PostgreSQL (Q5 ka asar):** isi command me; uska format technical batch (B16) me tay.
+  - **Restore (Claude ki salah, owner ne maani):** saath me restore ki command, ek baar local database pe chala ke jaanchi jaye; restore ke bina backup adhoora.
+  - **Files ki jagah (owner):** downloaded files **isi repo ke folder me**, bas GitHub pe nahi (git se bahar).
+  - **Suraksha ke 4 pehre (owner ne haan kahi):** folder `.gitignore` me; CI ka pehra jo us folder ki koi file git me dikhe to fail kare; folder prettier, ESLint aur tests ki nazar se bahar; Claude us folder ko `.env` ki tarah kabhi na khole.
+  - **Achhi aadat, zaroori nahi (Claude):** jo data dobara ban jaata hai (sessions, idempotency ke jawab, nipte hue events) chhodna, audit log zaroor lena; backup ke liye sirf padhne wala DB user.
+- **Kaun chalayega (owner, 2026-11-17):** live system sirf owner chalayega, koi doosra asli user nahi; isliye backup ke waqt "ek pal ka snapshot" ki chinta nahi. Par design aur code asli users maan ke hi honge (Q5).
+- **Jaanchna baaki (Claude):** Atlas free cluster ki hafte ki data-transfer seema, taaki pata ho hafte me kitni baar poora backup liya ja sakta hai.
+
 ### Q5. MongoDB pe orders, inventory, payments aur ledger
 
 - **Problem:** double-entry journal, gapless GST invoice counter, stock reservation aur coupon budget sab multi-document transactions pe (ARCHITECTURE §6.2 se §6.4) [D]. Kuch bana nahi, isliye ye design abhi tak parkha nahi gaya.
@@ -168,6 +225,20 @@ Har item: **Problem**, **kyun kaafi nahi**, **vikalp**, **salah**, **trade-off**
 - **Vikalp:** (a) MongoDB hi (stack frozen), par invariants ki list saaf: kaunsa unique index se, kaunsa conditional update se, kaunsa sirf code se; hot counters ke contention tests; reports pre-aggregated read models se. (b) Sirf finance / ledger ke liye relational store. (c) Finance ka scope chhota karna.
 - **Salah:** stack badalne ki salah **nahi**. Par ye discovery ka khula design sawal rahe: agar finance ka poora scope (settlement, TCS / TDS, GST registers) rehta hai, to ledger ke liye relational store ka case mazboot hai aur ise Data / Finance expert jaanche. Existing `withTransaction` aur audit ka "DB role se immutability" pattern ledger pe reuse ho.
 - **Trade-off:** ek DB = kam ops aur ek transaction; relational = mazboot integrity aur reporting, par do stores aur cross-store consistency.
+
+**Owner ka jawab aur charcha (2026-11-17), faisle [DECISION_LOG.md](DECISION_LOG.md) D-012, D-001, D-013:**
+
+- **Owner ka jawab (2026-11-17):** **finance ke liye PostgreSQL** (vikalp (b)); baaki services MongoDB pe. Har niyam ki saaf list (kaunsa unique index se, kaunsa conditional update se, kaunsa code + raat ki jaanch se) aur har ek ka test.
+- **Owner ka niyam (isi jawab ke saath, poore project pe laagu):** system sirf owner chalayega, par **code sirf owner ke liye nahi likhna**. Ekdum production-grade: ye maan ke design aur code karna hai ki asli users use kar rahe hain, halaaki karenge nahi.
+- **Is niyam ka asar yahan (Claude):** load wali chintaayein (ek saath kai checkout, hot counters, 100 ops/s) khatam nahi hoti. Isliye tests me ek saath chalne wale requests ke tests bhi honge (invoice counter, stock, coupon budget).
+- **Asar (Claude):**
+  1. "Tech stack wahi rahega" (DECISION_LOG D-001) me ye ek jod hai; D-001 me likh diya.
+  2. Stock, coupon budget jaise niyam commerce service (MongoDB) me hain: unki list aur tests waise hi rahenge.
+  3. Finance pehle se alag service hai aur data events se leti hai (Q3), isliye SQL saaf alag baithta hai; do databases ke beech koi transaction nahi chahiye.
+  4. Kernel packages (transaction, outbox, release steps, idempotency) aaj sirf MongoDB ke liye hain; finance ke liye inka SQL roop chahiye hoga. Ye is faisle ka asli kharcha hai.
+  5. Local Docker infra, CI aur backup script me SQL database bhi judega.
+- **Jaanchna baaki (Claude):** kaunsa free PostgreSQL provider (storage, sone / pause hone ke niyam, connections ki seema).
+- **Aage bheja:** finance ke andar kya-kya PostgreSQL me jayega, aur kernel packages ka SQL roop kaisa hoga: finance aur technical batches me.
 
 ### Q6. Sirf apna warehouse + sirf apni delivery fleet + pehle din poora Pune district (21 hubs)
 
@@ -177,6 +248,55 @@ Har item: **Problem**, **kyun kaafi nahi**, **vikalp**, **salah**, **trade-off**
 - **Salah:** **reopen**. Logistics ko port ke peeche design karo taaki model baad me bina rewrite badle.
 - **Trade-off:** apna stock aur fleet = batch, expiry aur asli maal pe control (bataayi gayi wajah); badle me scope aur asli duniya me capex.
 
+**Owner ka jawab aur charcha (2026-11-17), faisle [DECISION_LOG.md](DECISION_LOG.md) D-016, D-017, D-018:**
+
+- **Owner ka jawab (2026-11-17):**
+  - **Stock:** har brand ka saara maal sirf Beautinique ke apne warehouse me (Chakan). Brand maal bhejta hai; hum rakhte aur pack karte hain.
+  - **Delivery:** customer tak sirf Beautinique ke apne delivery partners. Bahar ki koi courier company nahi.
+  - **Maal ka raasta:** brand → warehouse → hub → delivery partner → customer.
+  - **Ilaake ke bahar:** delivery unavailable.
+  - **Carrier port:** salah maani (is file ka vikalp (a); chat me ise (b) kaha gaya tha). Delivery ka code ek port ke peeche; aaj uske peeche sirf apni fleet.
+  - **Seller khud bheje** (is file ka vikalp (b)): nahi; stock aur delivery sirf apni.
+  - **Pehle din:** 1 warehouse + **1 hub** (21 nahi). Baaki hubs baad me ek click se judte jayein.
+  - **Hub ki shart:** hub tabhi live hoga jab uska poora staff ready ho; staff ke bina hub start nahi hoga.
+  - **Location ki seedhi:** India > State > District > Sub-District.
+  - **Service on / off ka haq:** Master = State; Super Admin = District; Admin = Sub-District.
+- **Pehle din ka ilaaka (owner ne saaf kiya, 2026-11-17):** district me **ek main warehouse**; sub-district me **ek hub**. Pehle din delivery **us sub-district ke saare pincodes** tak hogi, poore district me nahi.
+- **Aur saaf kiya (owner, 2026-11-17):**
+  - Sub-district ki jagah **sirf hub** hai: parcel aage badhana, stock nahi.
+  - **Ek sub-district me sirf ek hub.**
+  - **Warehouse se seedha customer ko kuch nahi jayega.** Main city ka alag sub-district nahi hota; wahan bhi warehouse ke paas ek hub banega, aur har parcel hub se hi jayega. Warehouse hub ka kaam nahi karta.
+  - **Poora staff:** jo-jo zaroori ho. Staff ki list kaafi had tak pehle se hai (purane docs ke roles); jo missing ho wo jodna hai.
+  - **Hub ko live Admin karta hai.**
+  - **Upar ka level OFF to neeche sab OFF** (State OFF = uske saare districts, sub-districts aur hubs OFF).
+  - **Live hone ki sharten:** State tab tak live nahi jab tak uska kam se kam ek district live na ho. District tab tak live nahi jab tak uske paas warehouse aur hub na ho.
+- **Claude ke notes:** (1) [owner ne ye salah maani, 2026-11-17] "ek sub-district me ek hub" niyam ki tarah laagu ho, par data me hub alag record rahe jo sub-district se juda ho, taaki niyam kabhi badle to data na todna pade. (2) Sarkari data me main city bhi ek sub-district ki tarah darj ho to bhi ye model theek baithta hai, kyunki ab har sub-district me hub hi hai; phir bhi data dekh ke pakka karna hai.
+- **OFF aur warehouse ke niyam (owner, 2026-11-17):**
+  - **OFF karna:** OFF karte hi naya order banna band. Par jagah poori OFF tab tak nahi hogi jab tak uske orders raaste me hain.
+  - **Aakhri live district OFF hua:** state bhi OFF hoga, agar uska koi order pending nahi hai.
+  - **Order ka warehouse:** user jis district me hai, usi district ke warehouse se.
+  - **Upar wala role neeche ka switch chala sakta hai:** haan (salah maani); kisne kya kiya, audit log me.
+- **Pincode ke cases (owner ne poochha; Claude ki salah, owner ne maani, 2026-11-17: "jo theek lage"):**
+  1. **Buniyadi niyam:** delivery ka faisla naam ya seedhi se nahi, **pincode → theek ek hub** ki mapping se. Har pincode ka ek "primary sub-district" (data se aaye, Admin badal sake).
+  2. **Pincode number poore India me ek hi ilaake ka hota hai;** do states alag-alag jagah ke liye wahi number use nahi karte. Asli case: ek hi pincode ka ilaaka do sub-districts, do districts ya (kabhi-kabhi) do states me phaila ho.
+  3. **Do sub-districts ya do districts me phaila pincode:** primary sub-district ka hub aur us district ka warehouse serve kare; address me likha district alag ho to bhi order na ruke.
+  4. **Do states me phaila pincode:** data me nishaan; customer state chune; chuna hua state live ho tabhi order; GST usi state ke hisaab se.
+  5. **Ek jaise naam** (district ya sub-district ke naam alag states me dohraate hain): hamesha id aur sarkari code se, naam se kabhi nahi; screen pe "Sub-District, District, State" saath dikhe.
+  6. **Source data me ek pincode ki kai lines** (kai post offices, spelling ke farak): import pe ek pincode = ek record, unique.
+  7. **Naam ya seema badle** (district ka naya naam, naya district): code wahi, naam ka itihaas rahe; purane orders me address waisa hi jaisa order ke waqt tha.
+  8. **Jis pincode ki mapping nahi:** unavailable, aur Admin ko "bina mapping wale pincodes" ki list.
+  9. **Jaanch kab:** serviceability ki jaanch order banate waqt usi transaction me, sirf cart dikhate waqt nahi.
+  10. **"Pending order" me returns bhi:** return pickup aur refund poore hone tak jagah poori OFF na ho.
+- **Live hone ki sharton ki gaanth:** state OFF ho to district live nahi ho sakta (upar OFF to neeche OFF), aur state tab tak live nahi jab tak ek district live na ho; is tarah pehli baar koi nahi khul sakta.
+- **Gaanth ka hal (Claude ki salah, owner ne maani, 2026-11-17):** har level (State, District, Sub-District, Hub) pe do cheezein alag:
+  - **Switch:** kisi ne ON dabaya ya nahi (haq upar wali table jaisa).
+  - **Asli haal (live):** apna switch ON + upar wala level live. Ye hamesha isi niyam se nikalta hai, kahin alag se save nahi hota.
+  - **Sharten sirf live karte waqt rokti hain (owner, 2026-11-17, Q12 me):** live hone ke baad sharat me kami (jaise staff kam) se jagah apne aap band nahi hoti, sirf chetavni aati hai (detail Q12 "Staff kam ho jaye to"). Switch OFF (insaan ka faisla) ka asar turant.
+  - **Sharten:** Hub = poora staff ready. District = warehouse + hub tayyar. State = kam se kam ek district ka switch ON aur wo tayyar.
+  - **Kholne ka kram:** Admin hub tayyar kare aur sub-district ka switch ON; Super Admin district ka switch ON; Master state ka switch ON; tab sab live.
+  - **Band hona:** koi switch apne aap nahi palatta. Aakhri district band hua to state customers ke liye apne aap band dikhega; district wapas khula to state bina dobara dabaye chal padega. Owner ka "pending order" wala niyam laagu: jab tak raaste me orders ya returns hain, us jagah ke purane orders poore hote rahenge, sirf naye band.
+- **Aage bheja (Q12 aur logistics batch):** staff ki list me kya missing hai; asli location data dekh ke ginti ki kitne pincodes do sub-districts, districts ya states me phaile hain.
+
 ### Q7. 79 roles ka seed, permissions ke bina
 
 - **Problem:** roles ship ho chuke par lagbhag khaali hain (10 permission keys) [V]. Modules aane pe har role dobara banega.
@@ -185,11 +305,36 @@ Har item: **Problem**, **kyun kaafi nahi**, **vikalp**, **salah**, **trade-off**
 - **Salah:** RBAC engine **rakho** (mazboot); catalogue ka size aur timing **reopen**. 50-grant cap ko business niyam nahi, technical seema ki tarah dobara dekho.
 - **Trade-off:** kam roles se shuru me scope mote honge.
 
+**Owner ka jawab aur charcha (2026-11-17), faisle [DECISION_LOG.md](DECISION_LOG.md) D-019:**
+
+- **Chat me vikalp aise rakhe gaye the (2026-11-17):** (a) roles ki poori list design me rahe, par system me role tab chalu ho jab uska module bane; (b) jaisa hai, saare 79 abhi system me; (c) roles hi kam karo (12 se 15).
+- **Owner ka jawab (2026-11-17):** salah maani: **chat wala (a)**. Roles ki poori list design me (Q6: staff ki list kaafi had tak hai, missing jodna hai); system me har role tab chalu jab uska module bane, aur usi badlav me uski permissions. RBAC engine waisa hi.
+- **Roles ki ginti (owner, 2026-11-17):** ~80 fix nahi hai; zaroorat ke hisaab se roles badh bhi sakte hain. (Code me pehle se: Master naye sub-roles bina deploy ke jod sakta hai, `backend/identity/src/rbac/roles.ts:17-19`.)
+- **Owner (2026-11-17):** **har role ke liye owner ka alag email** (alag staff account) rahega.
+- **Asar (Claude):** ek account pe 50 roles ki seema owner ke liye ab rukawat nahi; "kaunse roles ek insaan ke paas saath nahi ho sakte" wale niyam bhi apne aap poore. Code me email sirf trim aur lowercase hota hai (`packages/shared/zod/src/identity.ts:4`), `+` wala hissa nahi hatta, to `naam+role@...` jaise alias alag accounts ban sakte hain.
+- **Emails ka bantwara (owner, 2026-11-17):** jin roles pe authenticator lagta hai unke liye alag email, baaki roles ke liye alag.
+  - **Authenticator kahan lagta hai (code, Claude ne dekha):** 7 apps me har sign-in pe: admin, superadmin, master, support, finance, logistics, growth (`packages/shared/contracts/src/catalogue/identity.ts:34`). Baaki apps me sirf in roles pe: Seller Account Owner, Seller Finance (`backend/identity/src/rbac/roles.ts:119-133`). Customer, delivery, creator aur baaki seller roles pe nahi (khud chaahe to laga sakta hai; ek baar lagaya to har app me maangega).
+  - **Saaf kiya (owner, 2026-11-17):** **2 email ids, dono `+` alias ke saath.** Ek email authenticator wale 7 apps ke saare roles ke liye, doosra bina authenticator wale apps (customer, seller, delivery, creator) ke roles ke liye. Har role ka apna alias, yaani har role ka alag account; inbox sirf do.
+  - **Dhyan (Claude):** seller app doosre email me aata hai, par uske 2 roles (Seller Account Owner, Seller Finance) pe bhi authenticator lagega.
+  - **Bantware ki wajah (owner, 2026-11-17):** jin accounts ko authenticator ki zaroorat nahi, unhe har login pe authenticator na chalana pade; bojh kam karne ke liye.
+  - **Code ka sach (Claude ne dekha, `backend/identity/src/login.ts:167-172`):** authenticator **account pe** lagta hai, email ke base pe nahi. Jis account pe authenticator laga hai, wo har app me har sign-in pe maangta hai; jis pe nahi laga, wo sirf authenticator wale apps ya roles me laga ne ko kehta hai. Owner ka maqsad isliye poora ho raha hai ki har role ka **alag account** (alag `+` alias) hai. Do base emails ka bantwara iske liye zaroori nahi, par inbox alag rakhne ke liye kaam ka hai; kuch badalna nahi.
+  - **Owner ne saaf kiya (2026-11-17):** ye bantwara sirf suvidha hai, niyam nahi. Doosre email wale kisi account ko authenticator na dene ki koi majboori nahi: jahan zaroori ho wahan de denge (jaise in 2 seller roles pe).
+- **`+` alias (owner, 2026-11-17):** abhi ignore (hobby project). Jahan email ka validation hai wahan code comment me likha jayega ki ye `+` alias ko alag nahi pehchanta, aur jaan-boojh ke kyun aisa rakha. Comment me ye bhi ho ki owner ke role accounts isi `+` alias pe tike hain, to alias ko ek maan lene wala badlav (normalisation) unhe tod dega. Ye code ka kaam hai: discovery ke baad, implementation me (abhi code nahi chhua).
+- **Aage bheja (security batch B15):** ~80 staff accounts aur internal apps pe har sign-in pe authenticator code: owner ke liye roz ka bojh.
+- **Jaanchna baaki (Claude):** live system me jo roles kisi ko diye ja chuke hain, unhe "chalu nahi" karne se pehle dekhna.
+
 ### Q8. Faislon ki process: bahut tez "approved", koi khula sawal nahi
 
 - **Problem:** PRD v0.1 se v1.0 "approved" ek hi din me (2026-10-18). PRD §10: "Abhi koi open question nahi hai". ARCHITECTURE 30 din me v1.104 pe hai aur ab bhi "draft". Decision log me baar-baar "owner ne Claude ki salah maani"; location plan ki saari 49 salah maani gayi [D].
 - **Kyun kaafi nahi:** PRD me personas, competitor / market, unit economics, success metrics aur MVP nahi hain. Is size ke product me zero open question asambhav hai; matlab sawal poochhe hi nahi gaye. Ek hi awaaz (AI) ke sujhav bina doosri raay ke maane gaye.
 - **Salah:** discovery me har bada faisla assumption ki tarah likha jaye, uske vikalp aur "kis saboot se badlega" ke saath.
+
+**Owner ka jawab aur charcha (2026-11-17), faisle [DECISION_LOG.md](DECISION_LOG.md) D-020:**
+
+- **Owner ka jawab (2026-11-17):** salah maani: **(a)**.
+- **Har bade faisle ke saath kya likha jayega:** (1) faisla; (2) wajah (owner ke shabdon me); (3) kaunse vikalp chhode aur kyun; (4) kis saboot ya haalat me faisla dobara khulega; (5) kisne aur kab; (6) Claude ki salah aur owner ka faisla alag-alag nishaan ke saath.
+- **Badalne ka niyam:** purana faisla mitaya nahi jaata; nayi line "badla" ke saath judti hai.
+  - **Kahan laagu (owner, 2026-11-17):** faislon ke record (DECISION_LOG) me. Baaki discovery files (jaise is file ka "Owner ka jawab aur charcha") me sirf aakhri faisla; purani lines hata di jaati hain.
 
 ### Q9. Docs ka bojh aur docs vs code ka farak
 
@@ -203,16 +348,58 @@ Har item: **Problem**, **kyun kaafi nahi**, **vikalp**, **salah**, **trade-off**
   - Decision log aur CLAUDE.md "2 developers" kehte hain; git authorship me ek hi insaan ke do naam dikhte hain, doosre developer ka alag authorship nahi mila.
 - **Salah:** redesign me chhote docs + ADRs; ek fact ek jagah; "built" ka daawa sirf code link ke saath.
 
+**Owner ka jawab aur charcha (2026-11-17), faisle [DECISION_LOG.md](DECISION_LOG.md) D-021, D-009:**
+
+- **Saath ka sawal:** docs "2 developers" kehte hain, git me ek hi insaan ke do naam dikhte hain. Asal me kitne log hain? (Q1 se juda.)
+  - **Jawab (Q1 me mila, owner, 2026-11-17):** ek hi insaan; "2 developers" = owner ke 2 Claude accounts. Docs ki ye wording baad me badalni hai.
+- **Farak kyun hota hai (Claude):** ek hi baat kai docs me likhi (badlav ek me, baaki bhool jaate hain); "bana hai" ka daawa bina saboot; bade docs (ARCHITECTURE 772 lines, PRD 584, HANDOFF 439, TASKS 433; `docs/` ~2 MB) har session poore nahi padhta.
+- **Owner ka jawab (2026-11-17):** salah maani: **(a)**.
+  - **Naye docs:** chhote docs aur decision records (format Q8 wala). Har baat sirf ek jagah, baaki jagah sirf link. "Bana hai" sirf code ya test ke link ke saath. Files zyada hongi, isliye ek index file.
+  - **Mel (Claude):** owner ka apna docs plan (main PROJECT_PLAN, `decisions/`, `tasks/<flow>/TASK.md`) isi tarah ka hai.
+- **Purane docs (Claude ki salah, owner ne maani, 2026-11-17):**
+  - **Product aur design docs (PRD, ARCHITECTURE, TASKS, DESIGN):** naye docs ban jaane ke baad `docs/archive/` me, top pe note ke saath ki ye sirf reference hain, sach nahi. Git me history rahegi.
+  - **Kaam ke tareeke ke docs (RULES, HANDOFF, GIT_SKILLS, MEMORY):** yahi rahen aur update hon. HANDOFF chhota ho (owner ke 2 accounts ke beech pul).
+  - **Kab:** abhi kuch nahi hilega. Ye tab hoga jab B17 (docs ka dhaancha) tay ho aur naya PROJECT_PLAN ban jaye; tab tak CLAUDE.md, skills aur HANDOFF purane paths se jude hain.
+- **CI me path check (Claude ki salah, marzi owner ki):** CI check jo dekhe ki docs me likhe file paths repo me sach me hain.
+  - **Owner ka jawab (2026-11-17):** **haan, chahiye.** Ye code ka kaam hai: discovery ke baad, implementation me (abhi code nahi chhua).
+
 ### Q10. Guest cart nahi (cart / wishlist ke liye sign-in zaroori)
 
 - **Problem:** ARCHITECTURE §9.2: "Add to cart" seedha `/sign-in` pe bhejta hai, kyunki user data browser storage me nahi (RULES §5.9).
 - **Kyun kaafi nahi:** e-commerce me ye conversion ka seedha nuksaan hai. Niyam ka maqsad (browser storage me data nahi) server-side anonymous cart (HttpOnly cookie) se bhi poora hota hai.
 - **Salah:** **reopen**.
 
+**Owner ka jawab aur charcha (2026-11-17), faisle [DECISION_LOG.md](DECISION_LOG.md) D-022:**
+
+- **Owner ka jawab (2026-11-17):** salah nahi maani: **(b) guest cart nahi**. Cart me daalne ke liye sign-in zaroori (jaisa purane design me hai).
+- **Wajah (owner, 2026-11-17):** storage aur kaam kam karne ke liye.
+- **Wishlist (owner, 2026-11-17):** **wishlist ke liye bhi sign-in zaroori.** Wajah wahi: storage aur kaam kam.
+- **Bina sign-in kya chalega (Claude ki salah, owner ne maani, 2026-11-17):**
+  - **Bina sign-in (koi bhi):** products dekhna aur product page; search aur filter (shade, skin type ...); reviews padhna; pincode daal ke delivery hai ya nahi dekhna.
+  - **Sign-in zaroori:** cart; wishlist; checkout aur payment; review likhna; orders aur account.
+  - **Wajah:** dekhne wale hisse me kuch save nahi hota, to storage wali wajah laagu nahi; visitor ko khareedne se pehle delivery ka pata chal jaata hai.
+
 ### Q11. Customer login: sirf password (min 12) + social
 
 - **Problem:** email code se sign-in hata diya gaya (2026-10-27) jabki PRD ab bhi wahi kehta hai. Consumer storefront ke liye lamba password friction hai.
 - **Salah:** **re-confirm**: customer ke liye email code se sign-in wapas chahiye ya nahi; PRD aur ARCHITECTURE ek hon.
+
+**Owner ka jawab aur charcha (2026-11-17), faisle [DECISION_LOG.md](DECISION_LOG.md) D-023:**
+
+- **Aaj ka haal (code, Claude ne dekha):**
+  - Customer: email + password (min 12, max 128, koi composition rule nahi, leaked password roka jaata hai), aur Google, LinkedIn, GitHub (sirf customer app).
+  - Email code sirf sign-up, "password set karo / bhool gaya" aur invite me (`backend/identity/src/otp.ts:72`), login me nahi.
+  - Customer session 30 din (har use pe aage badhta hai), zyada se zyada 90 din (`packages/shared/contracts/src/catalogue/identity.ts:405`).
+  - PRD (§3.2, §5.0) ab bhi "email OTP se login" kehta hai; ARCHITECTURE §7.1 (2026-10-27) ne email code se login hataya. Hatane ki wajah docs me nahi mili.
+- **Kyun zaroori (Claude):** guest cart nahi (Q10), to har naya visitor "Add to cart" pe login pe atakta hai; lamba session matlab login kabhi-kabhi, aur tabhi password bhool jaata hai; bina domain email spam me ja sakta hai aur din ke 300 hi (Q4).
+- **Owner ka jawab (2026-11-17):** salah maani: **(b)**. Customer app me teen raaste: password, social (Google, LinkedIn, GitHub), aur email code se sign-in; customer khud chune.
+- **Wajah (Claude ki, owner ne maani):** email code ka poora system pehle se bana hai, login me sirf naya purpose judega; session lamba hai to email budget nahi khata; email spam me jaaye to password ka raasta khula rehta hai.
+- **Security niyam (Claude ki salah; Security Architect batch B15 me pakke honge):**
+  - Jis account pe authenticator laga hai, uspe email code ke baad bhi authenticator maanga jayega; email code authenticator ko bypass nahi karega.
+  - Email code se sign-in sirf customer app me; staff apps me nahi.
+  - Account utna hi surakshit jitna email inbox; ye seema user ko batani hai.
+- **Docs (Q9 ka niyam):** customer login ki baat sirf ek jagah likhi jayegi; PRD aur ARCHITECTURE ka farak naye docs me khatam.
+- **Saath ka farak (jaankari, faisla nahi hua):** delivery partner ke liye bhi PRD "email OTP" aur ARCHITECTURE "password + device binding" kehta hai. Owner chahe to alag sawal banega.
 
 ### Q12. Expansion engine aur poore India ka location master, pehle product se pehle
 
@@ -220,12 +407,77 @@ Har item: **Problem**, **kyun kaafi nahi**, **vikalp**, **salah**, **trade-off**
 - **Kyun kaafi nahi:** ek dummy network (1 warehouse, 21 hubs) ke liye ye sab pehle banana opportunity cost hai; serviceability ka MVP ek pincode → hub table hai.
 - **Salah:** principle **rakho**, gehrai aur order **re-confirm**.
 
+**Owner ka jawab aur charcha (2026-11-17), faisle [DECISION_LOG.md](DECISION_LOG.md) D-017, D-024:**
+
+- **Charcha me vikalp:** (a) R1 me sirf pincode → hub, engine baad ki release me; (b) jaisa purana plan hai (14 PR ka location + network plan pehle); (c) sirf utna jitna Q6 ko chahiye (detail neeche).
+- **Charcha me salah:** (c). Q6 me owner ne hierarchy, har level ke switches, live ki sharten aur pincode → hub maange hain, to location master, switches aur sharten R1 me chahiye hi; (a) inke liye kaafi nahi. Sawal "kitna gehra aur kis order me" hai.
+- **Purana plan (reference, `docs/backend/T4-LOCATION-PLAN.md` v1.2, 14 PR):** location master (poora India, LGD + India Post, 6 PR); area settings (global → state → district → pincode, 1 PR); network (warehouse, hubs, lanes, delivery promise, 7 PR); go-live checklist engine (templates data me, alag task).
+- **Vikalp (c) ki detail (Claude):**
+  - **Data:** poore India ka data import (script wahi, data sasta); shak wale pincodes ki jaanch sirf us district ki jo live hona hai. Baaki districts ki jaanch unke live hone se pehle.
+  - **Switches aur live:** Q6 wale saare (har level ka switch, live ki haalat hisaab se, store nahi; pending orders tak area poora OFF nahi).
+  - **Live ki sharten:** Q6 ki teen sharten code ke niyam ki tarah (hub = staff poora; district = warehouse + hub; state = ek district). Generic template engine baad me, jab sharten badhne lagein.
+  - **Area settings:** sirf checkout aur delivery promise ki keys (cut-off, holidays, UPI ki seema). Baaki keys baad me.
+  - **Network:** 1 warehouse, hub, pincode → hub, delivery promise. Lanes ki poori detail doosra district aane pe.
+- **(c) ka nuksan (Claude):** nayi sharat ya setting jodne pe har baar code + test + deploy (engine me ye Master app se, bina deploy hota). Buniyaad (dhaancha, switches, live ki haalat, pincode → hub) poori banti hai, to baad me engine aaye to sirf "sharten" wala hissa badlega.
+- **Owner ka jawab (2026-11-17):** salah maani: **(c)**.
+- **Saaf kiya (Claude, 2026-11-17):** (c) me expand karna code ka kaam nahi: naya hub, warehouse ya district jodna, switch ON/OFF, staff ko hub pe role dena, hub live karna aur naye area ka sarkari data laana, sab app ya import command se. Code sirf checklist me bilkul nayi kism ki sharat ke liye.
+- **Sudhaar (Claude ki salah, owner ne maani, 2026-11-17):** hub ke staff ki list (kaunse roles, kitne) data me, app ke ek page pe; code me sirf niyam "hub tabhi live jab list ka har role poora bhara ho". List sab hubs ke liye ek common, use sirf **Master** badle, har badlav audit me.
+- **Staff kam ho jaye to (owner ka sawal; Claude ki salah (3), owner ne maani, 2026-11-17):** live hub me list se kam staff ho jaye (Master ne list badhayi, ya koi chala gaya).
+  - **Chhode vikalp:** (1) turant band: ek resignation se poora area achanak band, aur "kuch apne aap nahi palatta" niyam tootta. (2) purane hubs pe naya niyam nahi: niyam bekaar.
+  - **Badlav se pehle:** Master list badle to save se pehle dikhe "is badlav se N live hubs me staff kam ho jayega"; confirm ke baad hi save; audit me.
+  - **Kami hone pe:** hub chalta rahe, us pe nishaan (jaise "Delivery Partner 1/2"); us hub ke Admin aur upar Super Admin ko in-app aur email khabar; Admin dashboard me "staff kam wale hubs" ki list.
+  - **Faisla insaan ka:** Admin staff bhare, ya switch se hub OFF kare (naye order band, raste wale orders poore).
+  - **Dobara live:** OFF hua hub tabhi live jab nayi list poori ho.
+  - **Baaki levels:** district aur state ki sharten bhi sirf live karte waqt rokti hain; baad me kami pe chetavni, apne aap band nahi.
+  - **Asar:** Q6 ka "asli haal (live)" niyam isi ke hisaab se likha hai.
+- **Order (Claude ki salah, owner ne maana, 2026-11-17):** **pehle location, phir products.** Wajah: staff ke grants ka scope (hub, district) aur "hub tabhi live jab staff poora" location aur hub ke records pe tike hain; products dekhne ko location nahi chahiye, par checkout ko chahiye.
+- **Naye design me dhyan (Claude):**
+  - Purane plan ki area settings me sub-district level nahi tha; Q6 me hai, to naye design me judega.
+  - Purane plan me shehar ke beech wale pincodes ka sub-district aksar khaali (LGD me wahan gaon nahi). Yahi Q6 ka "main city ka alag sub-district nahi hota" hai; aise pincode kis hub pe jayein, ye data dekh ke pakka karna baaki (Q6 ke Claude ke note (2)).
+
 ### Q13. Chhote par thos points
 
 - Customer ke `Permissions-Policy` me `camera=()` aur `geolocation=()` (`frontend/customer/vercel.json`); try-on ko camera chahiye, address pin ko location. Aaj theek, par feature ke saath badalna hoga [V].
 - Teleconsultation (Skin & Hair Expert), gift cards aur store credit PRD me hain, par §7.1 ke legal matrix me inki koi row nahi [D]; kaunsa kanoon lagta hai [NV].
 - Package publish CLI (fake registry, 75 tests [D]) un packages ke liye hai jo publish hi nahi hote: nivesh vs upyog **re-confirm**.
 - Teen long-lived branches + back-merge, 1 se 2 logon ki team ke liye bhaari; har release pe ~12 cancelled Render deploys (HANDOFF §6) [D].
+
+**Owner ka jawab aur charcha (2026-11-17), faisle [DECISION_LOG.md](DECISION_LOG.md) D-027, D-025, D-026:**
+
+- **Q13a. Package publish CLI:** packages npm pe publish hone hain? Nahi to is CLI pe aur kaam nahi. **Salah:** aur nivesh nahi jab tak publish ka plan na ho.
+  - **Owner ka sawal (2026-11-17):** abhi ke package flow (publish, create ...) me koi issue hai kya?
+  - **Jaanch (Claude, 2026-11-17):** `npm run test:scripts`: 391 me 386 pass. 2 test files Mongo maangti hain (`scripts/e2e`, Docker band tha), 1 test (seller app create) poore run me 120 s se upar gaya, akele 16 s me pass (laptop pe load). QA audit (2026-11-05) me bhi CLI PASS.
+  - **Chhoti kamiyan (Claude ne dekhi):**
+    1. `scripts/packages/lib/release.ts:469` kehta hai Release workflow "(main)" pe chalao, par workflow sirf `release` pe chalta hai (`.github/workflows/release.yml:24,78`). `main` chuna to kuch publish nahi, aur 48 ghante ka trust nikal sakta hai.
+    2. `docs/packages/README.md` §4 step 10 back-merge `release` → `main` kehta hai; RULES §2 (2026-10-25) `release` → `prerelease`. CLI back-merge yaad nahi dilata.
+    3. Docs `test:scripts` ko "sirf CLI ke tests" kehte hain, par isme `scripts/e2e` ke tests bhi hain jinhe `infra:up` chahiye.
+    4. Laptop pe poore run me ek test 120 s ki seema paar kar sakta hai.
+  - **Owner ka jawab (2026-11-17):** **(a) + sudhaar.** CLI jaisa hai waisa rahe, naya kaam tabhi jab publish ka plan bane; upar ki kamiyan 1, 2, 3 theek hongi (chhote sudhaar, naya nivesh nahi). Ye code aur docs ka kaam hai: discovery ke baad, implementation me (abhi code nahi chhua).
+  - **Naye design ke saath badlega (galti nahi):** `create:backend` sirf 5 deployables jaanta hai (`packages/shared/contracts/src/platform.ts:18`) aur baaki sab "core ka module" maanta hai (`scripts/packages/lib/create/backend-templates.ts:26`); Q3 ki 9 services ke liye ye badlega. Template me Mongo URI nahi, aur PostgreSQL (Q5) ka option nahi. 20 package files ke links `tree/main/...` pe (`scripts/packages/lib/create/templates.ts:62`); 13b me `main` band hua to ye badlenge.
+- **Q13b. Teen long-lived branches + back-merge:** `prerelease` → `release` → `main` rahe, ya do branches? **Salah:** dobara dekho; 1 se 2 logon ke liye bhaari hai.
+  - **Vikalp (Claude):** (a) teeno rahen; (b) do branches `prerelease` + `release`, `main` band, GitHub default branch `release`; (c) sirf `main` + feature branches (har merge pe 11 Vercel deploys, Hobby ki 100/din seema). Salah (b).
+  - **Owner ka jawab (2026-11-17):** **`main` branch delete karni hai.** Flow: feature branch → `prerelease` (development) → `release` (production); back-merge `release` → `prerelease` waise hi.
+  - **Jaancha (Claude, 2026-11-17, local refs, aakhri fetch tak):** `origin/main` aur `origin/release` ki files bilkul same; `main` me sirf `release` → `main` ke merge commits hain. `main` hatane se koi code nahi khoyega.
+  - **Kram (Claude ki salah):** pehle saari jagah `main` ka zikr badle (CI flow check, git skills `.claude/skills/_shared/git-rules.md`, RULES §2, CLAUDE.md, AGENTS.md, GitHub ruleset, 20 package files ke `tree/main` links, CLI ka release sandesh aur `docs/packages/README.md` §4), phir GitHub default branch badle, aakhir me `main` delete. GitHub default branch delete nahi karne deta, isliye ye kram zaroori. Delete sirf implementation me, owner ke kehne pe (abhi kuch nahi chhua).
+  - **Default branch:** salah `release` (repo dekhne wale ko wahi code dikhe jo live hai).
+    - **Owner ka jawab (2026-11-17):** **`release`** default branch.
+- **Q13c. Teleconsultation, gift cards, store credit:** scope me rahen? Inka kanooni hissa legal matrix me nahi hai. **Salah:** domain expert ke batch tak roko.
+  - **Owner ka jawab, teleconsultation (2026-11-17):** **Skin & Hair Expert aur Beauty Advisor dono roles rahenge** (dono Support Desk ka staff, Support Lead ke neeche; code me `backend/identity/src/rbac/roles.ts:181-182`).
+    - **Video call:** apna video system nahi. Customer ko **Google Meet ka dummy link** bheja jayega. Koi asli connect nahi karega, par flow poora banega.
+    - **Data me nishaan:** consultation hua aur resolve hua, ye data me mark hoga, jo bhi flow bane.
+    - **Wajah (owner):** "ye ek complete plan hoga", par asli video ka jhanjhat nahi.
+    - **Roles asli hain (owner, 2026-11-17):** dono dummy nahi, hamare apne staff roles: asli accounts, permissions aur flow. Dummy sirf Meet link aur legal wala data (jaise doctor ka registration number, CLAUDE.md ka "legal cheezein dummy data ke saath" niyam).
+  - **Flow ke niyam (Claude ki salah, owner ne maani, 2026-11-17):**
+    - **Link:** system khud nakli link nahi banata; staff link daale (sirf `https://meet.google.com/...` maana jaye). Demo me dummy link, DUMMY nishaan ke saath. Asli link daalo to wahi flow asli me chal jaye.
+    - **Link kaise pahunche:** email aur in-app (SMS/WhatsApp nahi).
+    - **Haalat:** request → time tay aur link bheja → consult hua → resolve; saath me cancel aur customer nahi aaya (no-show). Har badlav audit me, customer ko apni request ki haalat dikhe.
+    - **Ek hi flow dono ke liye:** Beauty Advisor aur Skin & Hair Expert ka booking flow ek, farak sirf kaun lega aur notes kaun dekhe.
+    - **Skin & Hair Expert ke notes:** health data, to sirf expert aur zaroori support roles dekhein, consultation se pehle customer ki consent. Pakka Security Architect batch B15 me.
+    - **Legal:** telemedicine ke niyam ki ek dummy row legal matrix me (doctor ka registration number dummy).
+  - **Beauty Advisor ka chat (Claude ki salah, owner ne maani, 2026-11-17):** **live chat nahi, message thread.** Customer "Ask a Beauty Advisor" se sawal bheje, advisor jawab me shade aur product ke links bheje. Support desk ke tickets ke upar chhota jod; server so bhi jaye to message nahi khota. Nuksan: jawab turant nahi, thodi der me.
+  - **Gift cards aur store credit (Claude ki salah, owner ne maani, 2026-11-17):** **(c) abhi faisla nahi.** Business Analyst + cosmetics domain expert agent pehle inka kanoon (RBI ke prepaid niyam lag sakte hain, jaancha nahi) aur kaam dekhe, phir owner tay kare.
+- **Q13d. Camera aur location permission:** try-on aur address pin ke saath badlegi. Ye sirf note hai, faisla nahi chahiye.
+  - **Owner (2026-11-17):** note sahi hai. Aaj customer app me camera, microphone aur location band (`frontend/customer/vercel.json:30`); virtual try-on aur address pin bante waqt sirf apni site ke liye kholna (jaise `camera=(self)`).
 
 ## 7. Gaps: cosmetics e-commerce ecosystem ke liye jo kam hai
 
@@ -285,35 +537,35 @@ Coverage: **nahi** = docs me bhi nahi; **ek line** = sirf module list me naam; *
 
 ## 9. Recorded decisions aur meri raay
 
-**K** = default ki tarah rakho. **R** = dobara confirm karo. **O** = reopen karo.
+**K** = default ki tarah rakho. **R** = dobara confirm karo. **O** = reopen karo. **→ D-xxx** = owner ka faisla aa gaya (2026-11-17), detail [DECISION_LOG.md](DECISION_LOG.md) me.
 
 **PRD §2** (27 rows; 2 frozen rows evaluation ke bahar):
 
 | Decision | Raay | Ek line wajah |
 | --- | --- | --- |
 | Sirf beauty aur personal care | K | Focus; catalog model gehra ban sakta hai |
-| Business model: house brand + doosre brand sellers | **O** | Sabse bada scope driver: marketplace compliance, settlement, fairness; 1P ya pure marketplace se aadha finance hat'ta hai |
+| Business model: house brand + doosre brand sellers | **O** (Q-005 baaki) | Sabse bada scope driver: marketplace compliance, settlement, fairness; 1P ya pure marketplace se aadha finance hat'ta hai |
 | House brand ek seller account se, koi shortcut nahi | K | Saaf separation of duties (agar hybrid rahe) |
 | Sirf brand owners aur authorised distributors | K | Nakli maal ka jokhim kam; trust model saral |
-| Saara stock Beautinique warehouse me | **O** | WMS aur warehouse-state GST ki shart yahin se aati hai (Q6) |
-| Delivery sirf Beautinique | **O** | Fallback nahi, pan-India nahi (Q6) |
+| Saara stock Beautinique warehouse me | **O** → D-016 (rakha) | WMS aur warehouse-state GST ki shart yahin se aati hai (Q6) |
+| Delivery sirf Beautinique | **O** → D-016 (rakha, carrier port ke saath) | Fallback nahi, pan-India nahi (Q6) |
 | Gig partners, apni gaadi | R | Upar wale pe nirbhar; state-wise gig compliance |
 | Prepaid (Razorpay) ya delivery pe UPI QR; cash nahi | K | Cash handling hat'ta hai; UPI-on-delivery MVP me ho ya nahi, R |
 | Launch phases me, Pune se | K | Chhote se shuru karna sahi |
 | Sellers poore India se, warehouse-state GSTIN ke saath | R | Stock wale faisle ka nateeja; onboarding ki rukawat |
-| Expansion sirf config se | K (principle), R (gehrai) | Lint sasta hai; go-live engine mehenga (Q12) |
+| Expansion sirf config se | K (principle), R (gehrai) → D-024 | Lint sasta hai; go-live engine mehenga (Q12) |
 | Customers sirf 18+ | R | Wajah likhi nahi; sign-up me ek step badhta hai |
 | Reviews pehli release me | R | MVP tiering ka sawal |
 | Foreign investment nahi | K | Isi se hybrid (inventory + marketplace) model mumkin rehta hai [NV: kanooni detail] |
-| 11 apps | **O** | Q2 |
-| Saare roles launch se | **O** | Q1, Q7 |
+| 11 apps | **O** → D-010 (rakha) | Q2 |
+| Saare roles launch se | **O** → D-019 (module ke saath chalu) | Q1, Q7 |
 | Docs Hinglish me | K | Owner ke liye |
-| Education + portfolio, par production-grade; legal dummy | R | "Production-grade" ki paribhasha ₹0 infra se takrati hai (Q4) |
+| Education + portfolio, par production-grade; legal dummy | R → D-013, D-014 (Q-001 baaki) | "Production-grade" ki paribhasha ₹0 infra se takrati hai (Q4) |
 | Sirf India, INR, GST invoice | K | Saaf |
 | Fully responsive web; delivery PWA; native nahi | K | Rider PWA ki seemaayein (background location, scan) R |
-| Pune pehle din poora district | **O** | 21 hubs pehle din (Q6) |
+| Pune pehle din poora district | **O** → D-016 (1 hub se) | 21 hubs pehle din (Q6) |
 | Agla district kisi bhi order me, team-ready checklist | K | Expansion principle ka hissa |
-| Pune network: Chakan + 21 hubs | R | Dummy data; upar wale pe nirbhar |
+| Pune network: Chakan + 21 hubs | R → D-016 (pehle din 1 hub) | Dummy data; upar wale pe nirbhar |
 | Stock transport: kiraye ke trucks | K | Chhota faisla |
 | Drug items kabhi nahi | K | Compliance saral; borderline products ke niyam chahiye |
 | Head of Operations role | R | Role catalogue ke saath |
@@ -323,13 +575,13 @@ Coverage: **nahi** = docs me bhi nahi; **ek line** = sirf module list me naam; *
 
 | # | Decision | Raay | Ek line wajah |
 | --- | --- | --- | --- |
-| 1 | Identity, Payments, Notify microservices + Core monolith | R | Identity / notify bane hain, rakho; payments alag process **O** (Q3) |
+| 1 | Identity, Payments, Notify microservices + Core monolith | R → D-011 (sab alag services) | Identity / notify bane hain, rakho; payments alag process **O** (Q3) |
 | 2 | Microservice banne ka rule | K | Rule sahi hai; bundle mode me uska security wala hissa lagu nahi |
-| 3 | Kharcha ₹0 | **O** | Q4; owner ka budget faisla |
+| 3 | Kharcha ₹0 | **O** → D-014 (rakha) | Q4; owner ka budget faisla |
 | 4 | Render pe bundle mode | K (jab tak ₹0) | #3 ka nateeja |
-| 5 | Ek cluster, har deployable ka DB + user, module-prefixed collections | K | Sasta isolation, cross-module transaction mumkin |
+| 5 | Ek cluster, har deployable ka DB + user, module-prefixed collections | K → D-011 (badla: har service ka alag cluster) | Sasta isolation, cross-module transaction mumkin |
 | 6 | Redis source of truth nahi; local Valkey, live Key Value | K | Sabse mazboot principle |
-| 7 | Domain nahi; Vercel rewrite se same-origin | **O** | Domain sasta hai; same-origin rewrite pattern rakho |
+| 7 | Domain nahi; Vercel rewrite se same-origin | **O** → D-014 (domain nahi, rakha) | Domain sasta hai; same-origin rewrite pattern rakho |
 | 8 | Monorepo: npm workspaces + Turborepo | K | Owner ke framing me frozen |
 | 9 | Master ke doosre roles alag staff account pe | K | Audit me owner aur operator alag |
 | 10 | Performance targets sirf jaage hue pe | R | #3 ka nateeja |
@@ -342,15 +594,15 @@ Coverage: **nahi** = docs me bhi nahi; **ek line** = sirf module list me naam; *
 | Har id ObjectId | K | Ek niyam, pehra test ke saath |
 | Contracts-first; zod sirf `shared-zod` se; HTTP sirf axios | K | Convention, lint se laagu |
 | Mutation testing 3 hisson me | K | Keemat aur faayde ka sahi santulan |
-| Git flow `prerelease` → `release` → `main` + back-merge | R | 1 se 2 logon ke liye bhaari (Q13) |
-| Apna package CLI; packages public par publish nahi | R | Nivesh vs upyog |
-| Saare apps email + password; email code se sign-in nahi | R | PRD se takrav (Q11) |
+| Git flow `prerelease` → `release` → `main` + back-merge | R → D-026 (`main` hategi) | 1 se 2 logon ke liye bhaari (Q13) |
+| Apna package CLI; packages public par publish nahi | R → D-025 (rakha) | Nivesh vs upyog |
+| Saare apps email + password; email code se sign-in nahi | R → D-023 (customer me email code bhi) | PRD se takrav (Q11) |
 | Social login sirf customer me (3 providers) | K | Customer ki suvidha |
-| Cart / wishlist ke liye sign-in; guest cart nahi | **O** | Q10 |
-| Ek account pe max 50 grants | R | Technical seema business niyam ban gayi (Q3) |
-| Service jagana, jaagta rakhna nahi; previews band | K (jab tak ₹0) | ₹0 ka nateeja |
+| Cart / wishlist ke liye sign-in; guest cart nahi | **O** → D-022 (rakha) | Q10 |
+| Ek account pe max 50 grants | R → D-019 (owner ke alag accounts) | Technical seema business niyam ban gayi (Q3) |
+| Service jagana, jaagta rakhna nahi; previews band | K (jab tak ₹0) → D-014 (badla: baar-baar jagana) | ₹0 ka nateeja |
 | Purane data ka import nahi; khaali data se shuru | K | Saaf shuruaat |
-| Poore India ka location master pehle din | R | Q12 |
+| Poore India ka location master pehle din | R → D-024 (data poora, jaanch sirf live district ki) | Q12 |
 | `StoragePort`; ordered product archive; ek file ek owner | K | Provider badalna aasaan; order history surakshit |
 | Base price sabke liye ek; farak sirf label se | K | Bharosa; dark-pattern ka jokhim kam |
 | Internal apps pe har login TOTP; 12 ghante session, 30 min idle | K | Sahi default |
@@ -361,18 +613,18 @@ Coverage: **nahi** = docs me bhi nahi; **ek line** = sirf module list me naam; *
 | --- | --- | --- | --- |
 | 1 | **Project ka asli lakshya:** portfolio demo, ya kabhi asli business launch? | Budget, legal (dummy vs asli), scope aur "done" ki paribhasha isi se tay hoti hai | Lagbhag har doosra faisla |
 | 2 | **Business model:** hybrid marketplace, 1P inventory-led, ya pure marketplace? Invoice pe supplier kaun? | Finance (TCS / TDS, settlement), seller app, catalog ki ownership, compliance | Finance, sellers, catalog, order model |
-| 3 | **Fulfilment model:** sirf apna warehouse + fleet, ya 3PL / courier / seller-fulfilled bhi? | 2 apps aur roadmap ke sabse bade phases isi se | WMS, logistics, delivery app, serviceability |
-| 4 | **MVP ki paribhasha aur phasing:** release 1 me kya? "Sab launch pe" rehta hai? | Bina iske koi roadmap ya estimate sach nahi | App ginti, role catalogue, module order |
-| 5 | **Budget, hosting tier, uptime ki ummeed, domain** | ₹0 ke liye bani complexity rehni hai ya hatni hai | Deployment topology, SLOs, email, backup, staging |
-| 6 | **Team capacity aur timeline:** kitne log, hafte me kitne ghante, koi target date? | Scope ko capacity se milana | MVP ka size |
-| 7 | **App topology:** 11 apps ya consolidated; launch pe kaunse roles sach me insaan ke paas honge? | Frontend ka kaam aur ops ka bojh | Frontend architecture, RBAC catalogue |
+| 3 | **Fulfilment model (tay: D-016):** sirf apna warehouse + fleet, ya 3PL / courier / seller-fulfilled bhi? | 2 apps aur roadmap ke sabse bade phases isi se | WMS, logistics, delivery app, serviceability |
+| 4 | **MVP ki paribhasha aur phasing (releases tay: D-008; R1 ka scope baaki):** release 1 me kya? "Sab launch pe" rehta hai? | Bina iske koi roadmap ya estimate sach nahi | App ginti, role catalogue, module order |
+| 5 | **Budget, hosting tier, uptime ki ummeed, domain (tay: D-014)** | ₹0 ke liye bani complexity rehni hai ya hatni hai | Deployment topology, SLOs, email, backup, staging |
+| 6 | **Team capacity aur timeline (tay: D-009):** kitne log, hafte me kitne ghante, koi target date? | Scope ko capacity se milana | MVP ka size |
+| 7 | **App topology (tay: D-010, D-019):** 11 apps ya consolidated; launch pe kaunse roles sach me insaan ke paas honge? | Frontend ka kaam aur ops ka bojh | Frontend architecture, RBAC catalogue |
 | 8 | **Cosmetics catalog model:** variant axes, batch-wise MRP / expiry, ingredient data, content ka maalik | Search, pricing, inventory, try-on aur product page ke kanooni declarations sab isi pe | Catalog, discovery, inventory, pricing |
 | 9 | **Order model:** multi-seller cart ka split (supplier / shipment / invoice), partial cancel / return, exchange | Invoice, reservation aur refund ki neev | Commerce, finance, logistics |
 | 10 | **Paise ka flow:** kaun collect karta hai, seller ko kab aur kaise, refunds, store credit / gift card / loyalty ki liability; asli PSP onboarding hoga? | Ledger design aur database ka sawal (Q5) | Payments, finance, compliance |
 | 11 | **Virtual try-on:** MVP me hai? Kaunsi technology, kaunsi categories? | PRD ka mukhya differentiator par design zero | Catalog shade data, media, privacy consent |
 | 12 | **Returns policy:** cosmetics me opened / hygiene items, window, kharcha kiska | Reverse logistics, refund aur fraud | Logistics, finance, support |
 | 13 | **Scale targets:** SKUs, sellers, orders/din, concurrent users (launch aur 12 mahine) | Capacity design; aaj koi number nahi | DB sizing, search, queue design |
-| 14 | **Compliance ki gehrai:** kaunsi cheezein dummy rahengi, kaunsi asli; teleconsult aur gift cards ka kanooni darja | Scope aur jokhim | Governance, finance, support modules |
+| 14 | **Compliance ki gehrai (teleconsult: D-027; gift cards B11 me):** kaunsi cheezein dummy rahengi, kaunsi asli; teleconsult aur gift cards ka kanooni darja | Scope aur jokhim | Governance, finance, support modules |
 | 15 | **Purane repos ke assets** (try-on packages, purane apps): reuse ya chhodna? | PRD unhe "Hai" ginta hai; is repo me nahi hain | Try-on, seller app, estimates |
 
 ## Change log
@@ -380,3 +632,4 @@ Coverage: **nahi** = docs me bhi nahi; **ek line** = sirf module list me naam; *
 | Version | Date | Badlav |
 | ------- | ---------- | ------ |
 | v0.1 | 2026-11-17 | Pehla draft: stack, structure, built vs planned, architecture, reference patterns, critical review (Q1 se Q13), gaps, scalability, decisions pe raay, 15 unknowns. |
+| v0.2 | 2026-11-17 | Owner ke jawab: §6 me har sawal ki "Jawab" line, §9 ki raay pe faisle ke pointer (D-008 se D-027), §10 me tay hue unknowns. |
