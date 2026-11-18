@@ -1,6 +1,6 @@
 # OPEN QUESTIONS: Beautinique
 
-> **Status:** v1.2.10 (2026-11-18). Khule sawal, aage ke topics aur jaanchna baaki. Cheezein ek-ek karke judengi.
+> **Status:** v1.2.17 (2026-11-18). Khule sawal, aage ke topics aur jaanchna baaki. Cheezein ek-ek karke judengi.
 
 ## Is file me kya aayega
 
@@ -168,19 +168,169 @@ Claude ka kaam: owner ka faisla nahi chahiye, sirf saboot. Nateeja saboot ke saa
 - **Kanooni detail jaanchi nahi** (R-004): online pe pack ki jaankari dikhane ke niyam.
 - **Owner ka jawab (2026-11-18):** **(b)**, batch ke hisaab se, 5 niyam ke saath. Record: [DECISIONS.md](DECISIONS.md) D-064.
 
+### Q-006. Beauty Pro buyers ke liye alag daam ho ya nahi?
+
+- **Status:** `Tay`. Topic: B4 (pricing).
+- **Sawal:** Beauty Pro buyers (salon, clinic, spa, freelancer jaise professional, D-032) ko normal customer wala hi daam mile, ya unke liye alag (kam) daam ho sake?
+- **Kyun zaroori:**
+  - Professional kharidaar zyada maal aur baar-baar lete hain, aur aksar brand ka "trade price" hota hai. Agar platform pe wahi daam mile jo har customer ko, to unke liye Beauty Pro banne ki wajah sirf GST wala invoice reh jaati hai.
+  - Isi se tay hota hai: ek product pe ek daam ya do (D-061 ke niyam dono pe), cart me daam kharidaar ke hisaab se badle ya nahi, aur kam daam pe khareed ke aage bechne ka khatra kaise roka jaye.
+  - Beauty Pro ke kaam R2 se hain (D-055), par daam ka dhaancha abhi tay ho to catalog aur cart ka design ek baar me sahi banta hai.
+- **Vikalp:**
+  - **(a) Sabke liye ek daam:** Beauty Pro ko alag daam nahi; farak sirf unke GSTIN wala invoice (taaki wo tax credit le sakein).
+  - **(b) Seller chahe to Pro daam rakhe:** seller kisi product pe ek alag Pro daam rakh sakta hai, jo sirf jaanche hue (verified) Beauty Pro buyers ko dikhe. Niyam:
+    1. Pro daam normal daam se zyada nahi, aur D-061 ke saare niyam (MRP ki seema, itihaas, bade badlav pe confirm) is pe bhi.
+    2. D-064 ka batch wala MRP niyam is pe bhi.
+    3. Seller Pro daam na rakhe to Pro buyer ko normal daam.
+    4. Pro buyer ko GSTIN wala invoice.
+  - **(c) Platform ka Pro discount:** sab products pe Beauty Pro ko ek tay % chhoot, jiska paisa platform deta hai.
+- **Salah:** **(b)**. Daam bechne wale ka hi rehta hai (D-061), platform pe koi kharcha nahi, aur seller apne trade price ke hisaab se khud tay karta hai.
+- **Trade-off:**
+  - (a) sabse saral, par Pro buyers ke liye platform pe aane ki wajah kam.
+  - (b) me ek product ke do daam: cart aur product page pe daam kharidaar ke hisaab se, aur kam daam pe khareed ke aage bechne ka khatra (iske liye Pro ki jaanch aur quantity ki seema chahiye).
+  - (c) me platform ka seedha kharcha, aur saare sellers ke liye ek jaisi chhoot jo har brand ke hisaab se sahi nahi.
+- **Kanooni detail jaanchi nahi** (R-004): kharidaar ke hisaab se alag daam ke niyam.
+- **Iske baad (alag sawal):** Beauty Pro buyer ki jaanch (verification) kaise ho; aur Pro buyer pe quantity ki seema ho ya nahi.
+- **Owner ka jawab (2026-11-18):** **(b)**, seller chahe to Pro daam rakhe, 4 niyam ke saath. Record: [DECISIONS.md](DECISIONS.md) D-065.
+
+### Q-007. Lambe samay se pade na bike maal pe storage fee ho ya nahi?
+
+- **Status:** `Tay`. Topic: B6 (settlement), B1 (warehouse).
+- **Sawal:** brand ka jo maal (expire nahi hua) warehouse me bahut der se pada hai aur nahi bik raha, us pe hum storage fee lein ya nahi, aur kab se?
+- **Kyun zaroori:**
+  - Warehouse ki jagah ka kharcha hai. D-062 kehta hai na bika maal brand kabhi bhi wapas maang sakta hai, par koi wajah na ho to brand zaroorat se zyada maal bhej ke chhod deta hai, aur warehouse bharta jaata hai.
+  - Isi se tay hota hai: har batch kitne din se pada hai uska hisaab, brand ko alert, aur fee seller ke hisaab (B6) me kaise kate.
+- **Vikalp:**
+  - **(a) Koi storage fee nahi:** fees sirf bikne pe (commission aur fulfilment fee).
+  - **(b) Har maal pe har mahine fee:** jitna maal pada hai, utni fee, pehle din se.
+  - **(c) Kuch din muft, phir fee:** har batch receiving ke baad tay din tak muft (jaise 90 din). Uske baad har mahine fee, jo jitna purana utni zyada ho sakti hai. Niyam:
+    1. Fee shuru hone se pehle brand ko alert, taaki wo chahe to maal wapas le jaaye (D-062 niyam 5).
+    2. D-062 me bikri band hua batch (expiry ki wajah se) pe ye fee nahi; us pe D-062 ke niyam.
+    3. Fee seller ke hisaab me kat-ti hai (B6), har batch ke hisaab ke saath.
+    4. Din aur fee ki rakam settlement ki charcha (B6) me.
+- **Salah:** **(c)**. Theek se bikne wale maal pe koi kharcha nahi, aur dead stock pe wajah banti hai ki brand utna hi bheje jitna bikta hai.
+- **Trade-off:**
+  - (a) sabse saral, par warehouse dead stock se bhar sakta hai, aur iska kharcha hamara.
+  - (b) har brand pe kharcha, theek se bikne wale maal pe bhi: chhote brands ke liye bhaari.
+  - (c) me har batch ki umar ka hisaab, mahine ki fee ka calculation aur alerts.
+- **Iske baad (alag sawal):** seller ka payout fee se kam pade (bikri na ho) to bachi fee ka kya ho.
+- **Owner ka jawab (2026-11-18):** **(c)**, kuch din muft, phir fee, 4 niyam ke saath. Record: [DECISIONS.md](DECISIONS.md) D-066.
+
+### Q-008. Customer ko product page pe expiry dikhe ya nahi?
+
+- **Status:** `Tay`. Topic: B3 (batch aur expiry).
+- **Sawal:** customer ko kharidne se pehle pata chale ya nahi ki use jo pack milega uski expiry kab hai, aur kaise?
+- **Kyun zaroori:**
+  - Cosmetics kharidne wale expiry ke baare me poochhte hain; na dikhe to bharosa kam aur support ke sawal zyada.
+  - D-064 ke baad order usi batch se reserve hota hai jiska MRP site pe dikha. Isliye us batch ki expiry bhi pakki pata hai, aur dikhana mumkin hai.
+  - D-062 me bikri band ki seema hai (misaal 3 mahine), yaani customer ko kam se kam itni expiry milti hi hai.
+- **Vikalp:**
+  - **(a) Exact expiry nahi:** sirf ek pakka vaada dikhe: "kam se kam X mahine ki expiry" (D-062 ki seema).
+  - **(b) Agle bhejne wale batch ki expiry:** product page, cart aur checkout pe us batch ki expiry (mahina aur saal, jaise pack pe hota hai). Niyam:
+    1. D-064 ki tarah: batch badle to dikhi expiry bhi badle.
+    2. Ek line do batches me bate to har hissa apni expiry ke saath (D-064 niyam 4 jaisa).
+    3. Order ki detail aur invoice me har line ka batch aur expiry.
+  - **(c) Dono:** product page pe "kam se kam X mahine" ka vaada, aur cart, checkout aur order me exact expiry.
+- **Salah:** **(b)**. Customer ko wahi dikhe jo use milega, aur ye D-064 (MRP batch ke hisaab se) ke saath seedha milta hai: data wahi, sirf ek aur field.
+- **Trade-off:**
+  - (a) saral, par customer ko asli expiry tab pata chalti hai jab pack haath me aata hai.
+  - (b) me jis batch ki expiry kareeb hai (seema ke upar par kam), use customer chhod sakte hain, to wo dheere bikta hai aur brand ke liye D-062 ka wapsi ya disposal badh sakta hai. Brand chahe to aise batch pe daam ghata sakta hai (D-061).
+  - (c) me screen pe do tarah ki jaankari: thoda zyada UI aur text.
+- **Kanooni detail jaanchi nahi** (R-004): online pe expiry dikhane ke niyam.
+- **Owner ka jawab (2026-11-18):** **(b)**, agle bhejne wale batch ki exact expiry. Record: [DECISIONS.md](DECISIONS.md) D-067.
+
+### Q-009. Transporter ya delivery partner ke haath se hua nuksaan: vasooli ho ya nahi?
+
+- **Status:** `Tay`. Topic: B1 (logistics), B6 (settlement).
+- **Sawal:** maal warehouse aur hub ke beech transporter (D-027) ke paas, ya customer tak jaate waqt delivery partner (D-033) ke paas toota, kho gaya ya chori hua. Brand ko bharpai hum dete hain (D-063). Kya hum ye paisa transporter ya delivery partner se vasool karein, aur kaise?
+- **Kyun zaroori:**
+  - Vasooli na ho to har nuksaan seedha hamara kharcha, aur laaparwahi ya dhokhe (parcel "gum" bata dena) ko rokne ki koi wajah nahi.
+  - Par delivery partner gig partner hain (D-033), apni gaadi ke saath. Unki kamaai se kaat-na bharose aur unke bane rehne pe asar daalta hai, aur galat kaat galat insaan pe padti hai.
+  - D-027 me har trip ka record (seal number, manifest, dispatch aur receive scan) pehle se hai, yaani transporter ke maamle me saboot hota hai.
+- **Vikalp:**
+  - **(a) Koi vasooli nahi:** saara nuksaan platform ka kharcha.
+  - **(b) Saboot ke saath, alag-alag niyam:**
+    1. **Transporter:** seal toota ho, ya hub pe manifest se kam maal mile, to nuksaan transporter ke bill se kat-ta hai (contract ka niyam).
+    2. **Delivery partner:** kaat sirf jaanch ke baad, jab saboot ho ki galti unki hai (jaise parcel unhe scan karke diya gaya, aur na delivery ka saboot, na wapsi). Ek baar me aur mahine me kaat ki seema. Partner ko apna paksh rakhne ka mauka, aur faisla staff ka, apne aap nahi.
+    3. Baar-baar aisa ho to kaat badhane ki jagah partner ka account rokna (staff ke faisle se).
+    4. Har maamle ka record: kya hua, saboot, faisla, kisne kiya.
+  - **(c) Hamesha poori vasooli:** jiske paas maal tha, usse poora paisa.
+- **Salah:** **(b)**. Transporter ek business hai aur saboot pehle se hai; delivery partner ke saath sakhti sirf saboot pe, seema ke andar, aur unki baat sun ke.
+- **Trade-off:**
+  - (a) sabse saral aur partners ke liye achha, par nuksaan aur dhokha dono hamare sir.
+  - (b) me jaanch ka kaam: staff ka samay, saboot dekhna, partner ki baat sunna, aur seema ka hisaab.
+  - (c) seedha, par galat kaat ka khatra, aur partners chhod ke ja sakte hain.
+- **Kanooni detail jaanchi nahi** (R-004): gig partners ki kamaai se kaat ke niyam.
+- **Iske baad (alag sawal):** customer kahe parcel nahi mila jabki delivery partner ne "delivered" kiya: kaun sahi, kaise tay ho (B11).
+- **Owner ka jawab (2026-11-18):** **(b)**, vasooli sirf saboot ke saath, 4 niyam. Record: [DECISIONS.md](DECISIONS.md) D-068.
+
+### Q-010. Beauty Pro buyer ki jaanch kaise ho?
+
+- **Status:** `Tay`. Topic: B2 (roles), B4 (pricing).
+- **Sawal:** koi customer kahe ki wo professional hai (salon, clinic, spa, freelancer, home-based, D-032), to use Beauty Pro (jise Pro daam dikhta hai, D-065) kaise aur kis saboot pe banaya jaye?
+- **Kyun zaroori:**
+  - Pro daam sirf jaanche hue Pro buyers ko dikhta hai (D-065). Jaanch kamzor ho to koi bhi Pro ban ke kam daam pe khareede aur aage beche: sellers ka nuksaan.
+  - D-032 me freelancer aur home-based bhi Beauty Pro ban sakte hain, aur aksar unke paas GSTIN nahi hota. Isliye "sirf GSTIN" wala raasta unhe bahar kar deta hai.
+  - Dastavez (documents) personal data hain: unhe kahan aur kaise rakhein, kaun dekhe, ye security ka sawal bhi hai (B14).
+- **Vikalp:**
+  - **(a) Sirf GSTIN:** sahi GSTIN do, Pro ban jao (GSTIN ki jaanch dummy, D-026).
+  - **(b) Saboot + staff ki jaanch:** customer ek saboot de, staff jaanch ke Pro banaye. Niyam:
+    1. **Saboot (koi ek):** GSTIN, ya business ka registration (jaise Udyam, dukaan ka licence), ya freelancer ke liye beauty course ka certificate. Sab dummy (D-026).
+    2. **GSTIN alag:** GSTIN ho to GSTIN wala invoice (D-065 niyam 4); na ho to Pro daam milta hai par normal invoice.
+    3. **Muddat:** Pro darja ek tay muddat (jaise 1 saal) ke liye; phir dobara saboot.
+    4. **Staff hata sake:** galat istemaal (jaise bahut zyada maal le ke aage bechna) pe staff Pro darja hata sake, wajah ke record ke saath.
+    5. **Dastavez private:** saboot sirf jaanch karne wale staff ko dikhe, public link se nahi.
+  - **(c) Koi jaanch nahi:** customer khud bata de ki wo Pro hai.
+- **Salah:** **(b)**. D-032 ke saare professional (GSTIN ke bina wale bhi) aa sakte hain, aur jaanch staff ke haath me rehti hai, to Pro daam ka galat istemaal kam hota hai.
+- **Trade-off:**
+  - (a) apne aap aur saral, par freelancer aur home-based bahar, aur kisi bhi business ka GSTIN chal jaata hai (beauty business ho ya na ho).
+  - (b) me staff ka samay, dastavez rakhne ka surakshit intezaam, aur har saal dobara jaanch ka flow.
+  - (c) me koi kaam nahi, par Pro daam sabke liye khul jaata hai, aur D-065 ka matlab hi khatam.
+- **Kanooni detail jaanchi nahi** (R-004): dastavez rakhne aur personal data ke niyam.
+- **Owner ka jawab (2026-11-18):** **(b)**, ek saboot + staff ki jaanch, 5 niyam. Record: [DECISIONS.md](DECISIONS.md) D-069.
+
+### Q-011. Beauty Pro buyer pe Pro daam ki quantity ki seema ho ya nahi?
+
+- **Status:** `Tay`. Topic: B4 (pricing), B5 (cart).
+- **Sawal:** ek jaancha hua Beauty Pro buyer Pro daam (D-065) pe ek product kitna bhi khareed sake, ya ek seema ho?
+- **Kyun zaroori:**
+  - Pro daam kam hota hai. Seema na ho to koi Pro buyer bahut saara maal le ke aage normal customers ko beche, aur seller ki normal bikri ko nuksaan ho.
+  - D-069 me staff galat istemaal pe Pro darja hata sakta hai, par ye tab hota hai jab nuksaan ho chuka. Seema pehle se roke.
+  - Har product ki zaroorat alag: salon ek shampoo ke kai bade pack leta hai, par ek lipstick shade ke itne nahi.
+- **Vikalp:**
+  - **(a) Koi seema nahi:** sirf staff ki nazar aur D-069 niyam 4.
+  - **(b) Seller tay kare:** seller kisi product pe Pro daam ki seema rakh sakta hai (ek order me, aur mahine me, har Pro buyer ke liye). Niyam:
+    1. Seema seller ki marzi: na rakhe to koi seema nahi.
+    2. Seema se upar ki quantity normal daam pe milti hai (rokte nahi). Cart me line do hisson me dikhti hai: Pro daam wala hissa aur normal daam wala (D-064 ke batch wale hisson jaisa).
+    3. Staff ko report: har Pro buyer ka mahine ka total, product ke hisaab se, taaki D-069 niyam 4 ke liye saboot rahe.
+  - **(c) Platform ki ek seema:** saare products pe ek hi seema (jaise ek order me 10).
+- **Salah:** **(b)**. Seller apne product aur trade ki zaroorat jaanta hai, aur seema se upar rok ki jagah normal daam se kharidaar ka kaam bhi nahi rukta.
+- **Trade-off:**
+  - (a) sabse saral, par aage bechna tab pakda jaata hai jab nuksaan ho chuka.
+  - (b) me cart me daam ka hisaab do tarah (Pro aur normal), batch wale hisson (D-064) ke saath milke thoda pecheeda; aur seller ko seema ka form.
+  - (c) saare products pe ek number: kahin bahut kam, kahin bahut zyada.
+- **Owner ka jawab (2026-11-18):** **(b)**, seller tay kare, 3 niyam. Record: [DECISIONS.md](DECISIONS.md) D-070.
+
 ## Change log
 
-| Version | Date       | Badlav                                                       |
-| ------- | ---------- | ------------------------------------------------------------ |
-| v1.0.0  | 2026-11-17 | Khaali file bani.                                            |
-| v1.1.1  | 2026-11-18 | §1 aage ke topics (B1 se B16) aur §2 jaanchna baaki bane.    |
-| v1.2.1  | 2026-11-18 | §3 Sawal bana; Q-001 (warehouse me rakhe maal ka maalik).    |
-| v1.2.2  | 2026-11-18 | Q-001 tay: (a) brand maalik (D-060).                         |
-| v1.2.3  | 2026-11-18 | Q-002 (customer ko dikhne wala price kaun tay kare).         |
-| v1.2.4  | 2026-11-18 | Q-002 tay: (c) brand + platform ke niyam (D-061).            |
-| v1.2.5  | 2026-11-18 | Q-003 (expire hone wala ya na bika maal).                    |
-| v1.2.6  | 2026-11-18 | Q-003 tay: (b) brand ka nuksaan + platform ke niyam (D-062). |
-| v1.2.7  | 2026-11-18 | Q-004 (hamare haath se hue nuksaan ki bharpai ka daam).      |
-| v1.2.8  | 2026-11-18 | Q-004 tay: (b) bikne wala daam (D-063).                      |
-| v1.2.9  | 2026-11-18 | Q-005 (alag batches ka alag MRP).                            |
-| v1.2.10 | 2026-11-18 | Q-005 tay: (b) batch ke hisaab se (D-064).                   |
+| Version | Date       | Badlav                                                                     |
+| ------- | ---------- | -------------------------------------------------------------------------- |
+| v1.0.0  | 2026-11-17 | Khaali file bani.                                                          |
+| v1.1.1  | 2026-11-18 | §1 aage ke topics (B1 se B16) aur §2 jaanchna baaki bane.                  |
+| v1.2.1  | 2026-11-18 | §3 Sawal bana; Q-001 (warehouse me rakhe maal ka maalik).                  |
+| v1.2.2  | 2026-11-18 | Q-001 tay: (a) brand maalik (D-060).                                       |
+| v1.2.3  | 2026-11-18 | Q-002 (customer ko dikhne wala price kaun tay kare).                       |
+| v1.2.4  | 2026-11-18 | Q-002 tay: (c) brand + platform ke niyam (D-061).                          |
+| v1.2.5  | 2026-11-18 | Q-003 (expire hone wala ya na bika maal).                                  |
+| v1.2.6  | 2026-11-18 | Q-003 tay: (b) brand ka nuksaan + platform ke niyam (D-062).               |
+| v1.2.7  | 2026-11-18 | Q-004 (hamare haath se hue nuksaan ki bharpai ka daam).                    |
+| v1.2.8  | 2026-11-18 | Q-004 tay: (b) bikne wala daam (D-063).                                    |
+| v1.2.9  | 2026-11-18 | Q-005 (alag batches ka alag MRP).                                          |
+| v1.2.10 | 2026-11-18 | Q-005 tay: (b) batch ke hisaab se (D-064).                                 |
+| v1.2.11 | 2026-11-18 | Q-006 (Beauty Pro buyers ka daam).                                         |
+| v1.2.12 | 2026-11-18 | Q-006 tay: (b) Pro daam (D-065); Q-007 (storage fee).                      |
+| v1.2.13 | 2026-11-18 | Q-007 tay: (c) muft, phir fee (D-066); Q-008 (product page pe expiry).     |
+| v1.2.14 | 2026-11-18 | Q-008 tay: (b) exact expiry (D-067); Q-009 (nuksaan ki vasooli).           |
+| v1.2.15 | 2026-11-18 | Q-009 tay: (b) saboot se vasooli (D-068); Q-010 (Beauty Pro ki jaanch).    |
+| v1.2.16 | 2026-11-18 | Q-010 tay: (b) saboot + staff (D-069); Q-011 (Pro daam ki quantity seema). |
+| v1.2.17 | 2026-11-18 | Q-011 tay: (b) seller tay kare (D-070).                                    |
