@@ -1,6 +1,6 @@
 # HANDOFF: Beautinique
 
-> **Status:** v1.0.22 (2026-11-18). Ek session ya account se agle tak ki halat. Chhota rakho: sirf abhi ki halat aur agla kaam.
+> **Status:** v1.0.23 (2026-11-18). Ek session ya account se agle tak ki halat. Chhota rakho: sirf abhi ki halat aur agla kaam.
 
 ## 1. Abhi ki halat (2026-11-17)
 
@@ -13,7 +13,7 @@
 
 ## 2. Uncommitted
 
-- [DECISIONS.md](DECISIONS.md) v1.4.9 (D-055 se D-058), [RISKS.md](RISKS.md) v1.2.14 (R-014 tak), [PROJECT_PLAN.md](PROJECT_PLAN.md) v1.1.1 (R1) aur ye HANDOFF.
+- [DECISIONS.md](DECISIONS.md) v1.4.9 (D-055 se D-058), [RISKS.md](RISKS.md) v1.2.15 (R-014 tak), [PROJECT_PLAN.md](PROJECT_PLAN.md) v1.1.1 (R1) aur ye HANDOFF.
 
 ## 3. Agla kaam
 
@@ -47,3 +47,4 @@
 | v1.0.20 | 2026-11-18 | Atlas ka region jaancha.                                                                            |
 | v1.0.21 | 2026-11-18 | Atlas Singapore pakka.                                                                              |
 | v1.0.22 | 2026-11-18 | D-058 (hosting Singapore me); R-012 Maana.                                                          |
+| v1.0.23 | 2026-11-18 | R-009 Maana.                                                                                        |
