@@ -1,6 +1,6 @@
 # HANDOFF: Beautinique
 
-> **Status:** v1.1.2 (2026-11-18). Ek session ya account se agle tak ki halat. Chhota rakho: sirf abhi ki halat aur agla kaam.
+> **Status:** v1.1.3 (2026-11-18). Ek session ya account se agle tak ki halat. Chhota rakho: sirf abhi ki halat aur agla kaam.
 
 ## 1. Abhi ki halat (2026-11-17)
 
@@ -9,16 +9,16 @@
 - **Abhi koi npm command nahi chalta**; docs ke liye sirf `npx prettier --check <files>`. Pull request pe CI fail hoga jab tak naya root setup na bane; is branch pe push se CI nahi chalta.
 - **Faisle:** [DECISIONS.md](DECISIONS.md) me D-001 se D-095 (R1 ka scope: D-055, detail [PROJECT_PLAN.md](PROJECT_PLAN.md) §1); ab tak ke saare faisle aa gaye. Risks [RISKS.md](RISKS.md) me (R-001 se R-014, jaanch ke tathya samet); pehla security niyam [security/SECURITY_REQUIREMENTS.md](security/SECURITY_REQUIREMENTS.md) me (SR-001).
 - **Agents:** repo analysis ho gaya. Business Analyst + cosmetics domain expert ka **pehla run (B1 se B7) poora (2026-11-18)**: 52 prastaavit sawal (ek kram me), 16 sirf jaanch wali cheezein, aur tay faislon pe 10 dhyaan ke points (jaise D-063 me return ka safar, D-064 me exact batch pick, D-072 aur 300 emails). Main session ne report ke daawe DECISIONS se milaa ke jaanche. Ye sab abhi sirf prastaav hai, tay nahi. Doosra run (B8 se B13) baaki. Phir Security Architect, aur baad me ek agent kanooni jaanch ke liye (R-004). Ek waqt me ek. Agent 2 se 10 ki har report me "pehle ke kaam se lene layak" ka hissa (D-074).
-- **Sawal aur topics:** [OPEN_QUESTIONS.md](OPEN_QUESTIONS.md) me aage ke topics (B1 se B16), jaanchna baaki (§2) aur sawal (§3). **Tay:** Q-001 se Q-036 (faisle D-060 se D-095; har sawal ke neeche owner ka jawab aur faisle ki link). Koi sawal khula nahi. Niyam (owner, 2026-11-18): jo sawal kisi khule sawal pe tike nahi, wo ek saath. **Baaki:** Agent 2 ke pehle run ke 31 sawal; ye sab aapas me jude hain (6 group, jaise ek group me delivery fee, cancel, refund aur RTO), to koi bhi akela bina dependency ka nahi. Agli batch ka tareeka owner se poochha.
-- **Usage (2026-11-18):** abhi wale account pe weekly 9% (reset 2026-11-25), 5-hour 64% (D-095 tak). Agent 2 ke pehle run ne lagbhag 32% aur ~40 minute liye. Pichhla account weekly 99% (reset 2026-11-21): us pe naya kaam nahi.
+- **Sawal aur topics:** [OPEN_QUESTIONS.md](OPEN_QUESTIONS.md) me aage ke topics (B1 se B16), jaanchna baaki (§2) aur sawal (§3). **Tay:** Q-001 se Q-036 (faisle D-060 se D-095; har sawal ke neeche owner ka jawab aur faisle ki link). Niyam (owner, 2026-11-18): jo sawal kisi khule sawal pe tike nahi, wo ek saath; aapas me jude sawal ek group me saath. **Khule (21):** Q-037 se Q-057, 6 group me (G1 maal aana aur barcode, G2 listing content, G3 offers, G4 udhaar aur partner ki kamaai, G5 R1 ke customer maamle, G6 delivery, cancel, refund aur return). **Baaki:** Agent 2 ke pehle run ke 10 sawal, jo in groups pe tike hain.
+- **Usage (2026-11-18):** abhi wale account pe weekly 9% (reset 2026-11-25), 5-hour 68% (Q-057 tak; reset 2026-11-18 ko 18:00 UTC). Agent 2 ke pehle run ne lagbhag 32% aur ~40 minute liye. Pichhla account weekly 99% (reset 2026-11-21): us pe naya kaam nahi.
 
 ## 2. Uncommitted
 
-- [OPEN_QUESTIONS.md](OPEN_QUESTIONS.md) v1.3.3 ("Iske baad" hataya, Q-025 se Q-036, sab tay), [DECISIONS.md](DECISIONS.md) v1.5.1 ("Asar" se agle sawalon ke zikr hataye, D-083 se D-095), [CLAUDE.md](../CLAUDE.md) v1.0.1 (sawal ek saath ka niyam) aur ye HANDOFF; baaki sab commit ho chuka.
+- [OPEN_QUESTIONS.md](OPEN_QUESTIONS.md) v1.3.4 ("Iske baad" hataya, Q-025 se Q-036 tay, Q-037 se Q-057 khule), [DECISIONS.md](DECISIONS.md) v1.5.1 ("Asar" se agle sawalon ke zikr hataye, D-083 se D-095), [CLAUDE.md](../CLAUDE.md) v1.0.1 (sawal ek saath ka niyam) aur ye HANDOFF; baaki sab commit ho chuka.
 
 ## 3. Agla kaam
 
-1. Baaki 31 sawalon ki agli batch, owner ke chune tareeke se ([OPEN_QUESTIONS.md](OPEN_QUESTIONS.md) §3); agla number Q-037 aur D-096. Report ke "tay faislon pe dhyaan" wale 10 points bhi owner ke saamne.
+1. Q-037 se Q-057 ke owner ke jawab, har ek ka D-xxx (D-096 se). Phir baaki 10 sawal ek saath ([OPEN_QUESTIONS.md](OPEN_QUESTIONS.md) §3); agla number Q-058. Report ke "tay faislon pe dhyaan" wale 10 points bhi owner ke saamne.
 2. Agent 2 ka doosra run (B8 se B13), usage dekh ke aur owner ki haan se; report me "pehle ke kaam se lene layak" ka hissa (D-074).
 3. [OPEN_QUESTIONS.md](OPEN_QUESTIONS.md) §2 ki location data wali jaanch (Claude, kabhi bhi).
 
@@ -89,3 +89,4 @@
 | v1.0.60 | 2026-11-18 | Q-023 tay (D-082); Q-024 khula (pack pe expiry date na ho to).                                                                      |
 | v1.1.1  | 2026-11-18 | Niyam badla (owner): bina dependency wale sawal ek saath, agle sawal ka zikr nahi; Q-025 se Q-036 khule; sawalon ki line chhoti ki. |
 | v1.1.2  | 2026-11-18 | Q-024 se Q-036 tay (D-083 se D-095); baaki 31 sawal aapas me jude, agli batch ka tareeka owner se.                                  |
+| v1.1.3  | 2026-11-18 | Owner ne group ka tareeka chuna; Q-037 se Q-057 khule (6 group).                                                                    |

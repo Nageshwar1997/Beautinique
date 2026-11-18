@@ -1,6 +1,6 @@
 # OPEN QUESTIONS: Beautinique
 
-> **Status:** v1.3.3 (2026-11-18). Khule sawal, aage ke topics aur jaanchna baaki. Cheezein ek-ek karke judengi.
+> **Status:** v1.3.4 (2026-11-18). Khule sawal, aage ke topics aur jaanchna baaki. Cheezein ek-ek karke judengi.
 
 ## Is file me kya aayega
 
@@ -9,6 +9,7 @@
 - Owner ka jawab sawal ke neeche: sirf chuna hua vikalp aur DECISIONS ki link. Jawab badle to purani line hata ke nayi.
 - Jo sawal kisi khule sawal pe tike nahi, wo ek saath aate hain; jo kisi khule sawal pe tika ho, wo us sawal ke jawab ke baad (owner, 2026-11-18).
 - Sawal me agle sawal ka zikr nahi hota.
+- Jo sawal aapas me ek doosre pe tike hain, wo ek group (G1, G2 ...) me saath aate hain; group Status ki line me likha hota hai, aur group ke sawalon ka jawab saath diya jaata hai.
 
 ## Numbering
 
@@ -876,45 +877,482 @@ Claude ka kaam: owner ka faisla nahi chahiye, sirf saboot. Nateeja saboot ke saa
   - (c) me har maamle ki jaanch.
 - **Owner ka jawab (2026-11-18):** **(c)**, wajah ke hisaab se (3 niyam). Record: [DECISIONS.md](DECISIONS.md) D-095.
 
+### Q-037. Brand maal bheje to pehle se suchna zaroori ho, aur receiving pe farak nikle to kya?
+
+- **Status:** `Khula`. Topic: B1 (warehouse), B3 (batch). **Group G1** (Q-037, Q-038): saath jawab dein.
+- **Sawal:** brand maal bheje to kya pehle seller app me shipment ki suchna zaroori ho (variant, batch, expiry ya mfg date + shelf life, har batch ka MRP, ginti)? Aur receiving pe ginti ya batch me farak nikle to kya ho?
+- **Kyun zaroori:**
+  - Receiving pe kai faisle tike hain: batch aur expiry ki jaanch (D-014, D-083), receiving ki expiry seema (D-062, D-082), batch ka MRP (D-064), hamari zimmedari "accept" se (D-063), aur storage fee ki ghadi (D-066, D-094). In sabke liye "accept" ka matlab saaf chahiye.
+  - R1 me maal warehouse me aata hai ([PROJECT_PLAN.md](PROJECT_PLAN.md) §1).
+- **Vikalp:**
+  - **(a) Bina suchna:** maal aaye, staff jo gine wahi record, seller ko report.
+  - **(b) Suchna zaroori:**
+    1. Receiving pe suchna se milan. Farak (kam, zyada, galat batch, toota aaya) seller ko photo ke saath report; seller tay din (misaal 7) me aitraaz kar sake.
+    2. Jo maal accept nahi hua (toota aaya, expiry seema se kam) wo brand ke kharche pe wapas, ya brand kahe to nasht aur fee (D-062 jaisa).
+    3. Bina suchna aaya maal alag rakha jaata hai (hold), seller ko alert; tay din me suchna na bane to wapas.
+    4. "Accept" = ginti aur jaanch poori hokar staff ka accept scan; zimmedari (D-063) aur storage fee ki ghadi (D-066) isi pal se.
+    5. Suchna me har batch ka MRP pehle se ho, to D-064 ka alert maal pahunchne se pehle hi seller ko mil jaata hai.
+  - **(c) (b) + aane ka slot:** warehouse ki capacity ke hisaab se brand slot book kare.
+- **Salah:** **(b)**; slot tab jab sellers badhein. Farak pe jhagda nahi hota, aur har zimmedari ka shuruaati pal ek hi hai.
+- **Trade-off:**
+  - (a) me farak pe jhagda (kiski ginti sahi).
+  - (b) me seller ka ek extra form.
+  - (c) me scheduling ka kaam.
+
+### Q-038. Har variant pe brand ka barcode zaroori ho, ya platform apna label lagaye?
+
+- **Status:** `Khula`. Topic: B3 (catalog), B1 (warehouse). **Group G1** (Q-037, Q-038): saath jawab dein.
+- **Sawal:** har variant pe brand ka barcode (EAN) zaroori ho, ya na ho to platform apna label lagaye?
+- **Kyun zaroori:**
+  - Warehouse me scan karke pick karne se galat shade ya size nahi jaata. Duplicate listing ki jaanch barcode se hoti hai (D-075 niyam 4).
+  - Chhote brands ke paas aksar barcode nahi hota.
+  - Barcode batch nahi batata, jabki customer ko wahi batch jaana chahiye jiska MRP aur expiry usne dekhi (D-064, D-067).
+- **Vikalp:**
+  - **(a) Barcode zaroori:** bina barcode product list nahi.
+  - **(b) Barcode ho to wahi, na ho to platform ka label:**
+    1. Barcode na ho to receiving pe har unit pe platform ka barcode label (labelling fee, D-078 niyam 4: shuru me ₹0).
+    2. Warehouse me ek bin me ek variant ka ek hi batch, taaki pick pe sahi batch jaaye.
+  - **(c) Har unit pe platform ka label** (barcode ho ya na ho), jisme variant aur batch dono; batch scan se pakka.
+- **Salah:** **(b)**. Ek warehouse aur kam sellers ke saath "ek bin, ek batch" sasta hai, aur chhote brands bhi aa paate hain.
+- **Trade-off:**
+  - (a) chhote brands ke liye rukawat.
+  - (b) me labelling ka kaam aur bin ka anushaasan.
+  - (c) sabse pakka, par har unit pe mehnat.
+
+### Q-039. Listing ka content kaun likhe, aur badlav pe dobara jaanch kab ho?
+
+- **Status:** `Khula`. Topic: B3 (catalog). **Group G2** (Q-039, Q-040, Q-041): saath jawab dein.
+- **Sawal:** listing ka content (naam, description, images, ingredients, claims, declarations, net quantity) kaun likhe, staff kya kar sake, aur seller ke har badlav pe dobara jaanch ho ya nahi?
+- **Kyun zaroori:**
+  - R1 me listing staff ki jaanch ke baad live hoti hai (D-084). Daam ki tarah (D-061 niyam 4) content pe bhi saaf niyam chahiye.
+  - Galat ingredients ya claim allergy wale customer ke liye jokhim hai.
+- **Vikalp:**
+  - **(a) Har badlav pe jaanch:** seller likhe, staff sirf manzoor ya reject kare (tay wajah ke saath). Har badlav naya version; jaanch tak purana version live.
+  - **(b) Sirf jokhim wale fields pe jaanch:**
+    1. Ingredients, claims, declarations, net quantity, category, images aur shade swatch pe dobara jaanch; tab tak purana version live.
+    2. Baaki (description ke shabd, istemaal ka tareeka) turant live, baad me staff ka spot check.
+    3. Staff khud koi field nahi badalta, sirf "ye badlo" wajah ke saath bhejta hai.
+    4. Har version ka record: kisne, kab, kya badla.
+  - **(c) Platform ki content team:** seller sirf data de, platform content likhe aur sudhaare.
+- **Salah:** **(b)**. Jokhim wale fields hamesha jaanch se guzarte hain, aur chhote badlav pe staff ka bojh nahi banta.
+- **Trade-off:**
+  - (a) sabse surakshit, par staff pe bojh aur seller ka intezaar.
+  - (b) me fields ki do list sambhalni padti hain.
+  - (c) me content hamara ho jaata hai, aur galti ki zimmedari bhi.
+- **Kanooni detail jaanchi nahi** (R-004): listing ke galat claim ya jaankari ki zimmedari (seller ya platform).
+
+### Q-040. Ingredients aur allergens kis roop me lein aur dikhayein?
+
+- **Status:** `Khula`. Topic: B3 (catalog). **Group G2** (Q-039, Q-040, Q-041): saath jawab dein.
+- **Sawal:** product ke ingredients (INCI list) aur allergens seller se kis roop me lein, aur customer ko kaise dikhayein?
+- **Kyun zaroori:**
+  - Allergy wale customer ke liye ye sabse zaroori jaankari hai.
+  - "Free-from" filters (jaise paraben-free, fragrance-free) aur allergen ki chetavni isi data se banti hai.
+- **Vikalp:**
+  - **(a) Text + label photo:** seller pack jaisi poori ingredients list text me de, aur pack ke label ki photo zaroori; staff photo se milaye.
+  - **(b) Structured list:** platform ki ingredient master list (INCI naam) se seller har ingredient chune.
+  - **(c) Dono, kram se:**
+    1. R1 me (a): text + label photo; product page pe poori list, chhupi hui nahi.
+    2. R2 me text se structured list semi-auto bane, staff jaanche.
+    3. Uske baad free-from filters aur allergen ki chetavni.
+- **Salah:** **(c)**. Label ki photo se ek saath ingredients, declarations aur batch ka format jaanch hota hai, aur R1 pe bhaari master data ka kaam nahi aata.
+- **Trade-off:**
+  - (a) akela filters nahi deta.
+  - (b) R1 me bhaari: master data ek insaan ke liye bada kaam.
+  - (c) me R2 me ek baar data badalna padta hai.
+- **Kanooni detail jaanchi nahi** (R-004): label aur online page pe ingredients aur allergens dikhane ke niyam.
+
+### Q-041. Product claims (vegan, SPF jaise) seller kaise kare, aur platform kya jaanche?
+
+- **Status:** `Khula`. Topic: B3 (catalog). **Group G2** (Q-039, Q-040, Q-041): saath jawab dein.
+- **Sawal:** "vegan", "cruelty-free", "paraben-free", "dermatologically tested", "organic", "non-comedogenic", "SPF 50 PA++++" jaise claims seller kaise kare, aur platform kya jaanche?
+- **Kyun zaroori:**
+  - Customer claims dekh ke kharidta aur filter karta hai.
+  - Galat claim se customer ko nuksaan ho sakta hai (sunscreen ka SPF galat ho to sehat), aur platform pe bharosa kam hota hai.
+- **Vikalp:**
+  - **(a) Free text,** koi jaanch nahi.
+  - **(b) Platform ki tay claim list:** seller tick kare (khud ki ghoshna), koi saboot nahi.
+  - **(c) Tay list + kuch pe saboot:**
+    1. Claims sirf platform ki tay list se; filters bhi sirf isi list se.
+    2. SPF aur PA pe test report, organic pe certificate, cruelty-free pe certification, dermatologically tested pe test report (sab dummy, D-026); baaki claims khud ki ghoshna.
+    3. Staff saboot jaanche; saboot ki expiry ho to reminder.
+    4. Description ke free text me claim jaise shabd staff ki jaanch me.
+    5. R1 me tay list + ghoshna, aur saboot sirf SPF ke liye; baaki saboot R2 se.
+- **Salah:** **(c)**. Filters sach pe chalte hain, aur sehat se jude claim (SPF) pe R1 se hi saboot.
+- **Trade-off:**
+  - (a) me galat claims.
+  - (b) me list hai, par sach ki jaanch nahi.
+  - (c) me seller aur staff ka kaam, aur dastavez rakhne ki zimmedari (Security Architect ke saath, B14).
+- **Kanooni detail jaanchi nahi** (R-004): cosmetics claims aur galat vigyapan ke niyam.
+
+### Q-042. Offers aur coupons ka paisa kaun de: brand, platform ya dono?
+
+- **Status:** `Khula`. Topic: B4 (promotions). **Group G3** (Q-042, Q-043): saath jawab dein.
+- **Sawal:** R2 ke offers aur coupons (D-055) ka paisa kaun deta hai: brand, platform, ya dono?
+- **Kyun zaroori:**
+  - Invoice ka daam, commission ki rakam (D-078), D-063 ki bharpai ka daam, aur D-061 niyam 4 (platform ka discount alag dikhe) isi pe tike hain.
+  - Offers R2 se hain, par R1 ki order line me iske khane pehle se chahiye, chahe khaali rahein.
+- **Vikalp:**
+  - **(a) Sirf brand:** seller ka coupon ya ghataya daam; invoice discount ke baad ke daam pe; commission usi pe.
+  - **(b) Brand ya platform:** platform ke coupon me seller ko poora daam milta hai, farak platform deta hai.
+  - **(c) (b) + baanta hua:**
+    1. Har offer pe brand aur platform ka hissa (%) tay.
+    2. Offer ka budget; budget khatam hote hi offer apne aap band.
+    3. R2 ki shuruaat (a) aur (b) se; baanta hua offer uske baad.
+    4. R1 ki order line me "discount, kisne diya" ke khane.
+- **Salah:** **(c)** ka design. Brand aur platform dono apne offer chala sakte hain, aur hisaab har line pe saaf rehta hai.
+- **Trade-off:**
+  - (a) saral, par platform apni marzi ka offer nahi chala sakta.
+  - (b) me platform ka kharcha aur hisaab.
+  - (c) me har offer ka hissa aur budget sambhalna.
+- **Kanooni detail jaanchi nahi** (R-004): discount pe GST (bikri se pehle ya baad ka), aur platform ke diye discount ka invoice pe asar.
+
+### Q-043. Ek item pe kai offers ek saath lag sakein?
+
+- **Status:** `Khula`. Topic: B4 (promotions). **Group G3** (Q-042, Q-043): saath jawab dein.
+- **Sawal:** ek item pe kai fayde ek saath lag sakte hain? Jaise sale daam + coupon, do coupons, ya Pro daam + coupon. (R2 se, D-055.)
+- **Kyun zaroori:**
+  - Bina niyam ke offers ka kharcha behisaab badh sakta hai.
+  - Pro daam (D-065) ke saath coupon aage bechne ka lalach badhata hai.
+- **Vikalp:**
+  - **(a) Saaf default:** ek order pe ek coupon; sale daam + coupon chale; Pro daam pe coupon nahi.
+  - **(b) Koi mel nahi:** sirf sabse achha ek fayda.
+  - **(c) Har offer pe setting:** "kis ke saath chale".
+- **Salah:** **(a)** default, aur (c) ka raasta baad me.
+- **Trade-off:**
+  - (a) me kuch customers ko kam fayda.
+  - (b) me sale ke dino me coupon bekaar.
+  - (c) me staff ko har offer pe sochna padta hai.
+
+### Q-044. Seller ke udhaar aur delivery partner se kaat ki seemaon ke number kya hon?
+
+- **Status:** `Khula`. Topic: B6 (settlement). **Group G4** (Q-044, Q-045): saath jawab dein.
+- **Sawal:** D-071 ke udhaar ki seema (rakam, din, aur "lambe samay") aur D-068 me delivery partner se kaat ki seema kya ho?
+- **Kyun zaroori:**
+  - Dono faislon ne numbers settlement ki charcha pe chhode the. Seller ka udhaar R1 ke seller hisaab me hai; partner ki kaat partner ki kamaai pe tiki hai.
+- **Vikalp:**
+  - **(a) Beech ka:**
+    1. Udhaar ₹5,000 ya 60 din paar: alert + payment link.
+    2. Uske 30 din baad (notice ke saath): naya maal aur listings band.
+    3. Uske 90 din baad: account band.
+    4. Delivery partner: ek maamle me zyada se zyada ₹500, mahine me ₹1,500, ya mahine ki kamaai ka 10%, jo kam ho.
+    5. Saare number misaal; setting se badal sakein.
+  - **(b) Kadi:** ₹2,000 ya 30 din; phir 15 din; phir 45 din.
+  - **(c) Narm:** ₹10,000 ya 90 din; phir 60 din; phir 180 din.
+- **Salah:** **(a)**. Chhote brand pe shuru me bojh nahi, aur udhaar ek seema se aage nahi badhta.
+- **Trade-off:**
+  - (a) beech ka raasta.
+  - (b) chhote brand ke liye bhaari.
+  - (c) me udhaar bada hota jaata hai.
+- **Kanooni detail jaanchi nahi** (R-004): gig partner ki kamaai se kaat ke niyam.
+
+### Q-045. Delivery partner ki kamaai kaise bane?
+
+- **Status:** `Khula`. Topic: B6 (settlement), B1 (delivery). **Group G4** (Q-044, Q-045): saath jawab dein.
+- **Sawal:** gig delivery partner (D-033) ki kamaai kaise bane?
+- **Kyun zaroori:**
+  - D-068 ki kaat isi kamaai se hoti hai, aur partners ka payout finance me hai.
+- **Vikalp:**
+  - **(a) Har kaam pe:**
+    1. Har delivered parcel pe tay rakam (misaal ₹30), har return pickup pe (misaal ₹25), fail koshish pe kam (misaal ₹10).
+    2. Hafte me ek payout.
+    3. R2 se; R1 me sirf record: kaunsa parcel kis partner ne, taaki baad me hisaab ban sake.
+  - **(b) (a) + doori:** km ke hisaab se extra.
+  - **(c) Ghante (shift) ke hisaab se.**
+- **Salah:** **(a)**; doori wala hissa baad me, jab hubs ka ilaaka bada ho.
+- **Trade-off:**
+  - (a) saral, par door ke pincode pe partner ka nuksaan.
+  - (b) me doori ka hisaab.
+  - (c) payroll jaisa, jo D-033 (gig partners) ke khilaaf jaata hai.
+- **Kanooni detail jaanchi nahi** (R-004): gig partners ke niyam, unke payout pe TDS, aur aggregator ka contribution.
+
+### Q-046. R1 me return, daawe aur refund ki manzoori kaun sa staff kare?
+
+- **Status:** `Khula`. Topic: B2 (roles), B11 (support). **Group G5** (Q-046, Q-047): saath jawab dein.
+- **Sawal:** R1 me return ki manzoori, "parcel nahi mila" ka daawa (D-072) aur refund ki manzoori kaunsa staff role kare, aur kis app me, jabki support desk R2 se hai (D-055)?
+- **Kyun zaroori:**
+  - R1 me return aur refund hai ([PROJECT_PLAN.md](PROJECT_PLAN.md) §1), aur D-072 me staff ki jaanch hai. Bina role ke R1 ka order flow adhoora hai.
+- **Vikalp:**
+  - **(a) Support Desk app ka patla hissa R1 me:**
+    1. Ek role (misaal "Support Agent") sirf order dekhe, return manzoor ya reject kare, daawe ka faisla kare, aur refund shuru kare.
+    2. Return request apne aap manzoor, jab wajah aur saboot poore hon; aakhri faisla warehouse ki jaanch pe.
+    3. Tickets, SLA aur baaki support desk R2 me.
+    4. R1 ke scope me ye chhota jod owner ki haan se (D-055).
+  - **(b) Logistics Ops app me:** returns ki jaanch aur hub manager hi ye kaam karein.
+  - **(c) Kam se kam staff:** return apne aap manzoor (jaise (a) niyam 2); daawe me sirf "bina code" wale maamle hub manager dekhe.
+- **Salah:** **(a)**. Kaam shuru se sahi app me hota hai (D-010), aur R2 me usi app me tickets judte hain; apne aap manzoori se staff ka kaam kam.
+- **Trade-off:**
+  - (a) me R1 me ek app ka chhota hissa badhta hai.
+  - (b) me kaam galat app me, jo baad me hatana padta hai.
+  - (c) akela ho to galat daawe pe rok kam.
+
+### Q-047. Toote, galat ya kam item ke daawe me customer se kya saboot lein?
+
+- **Status:** `Khula`. Topic: B7 (returns). **Group G5** (Q-046, Q-047): saath jawab dein.
+- **Sawal:** toota, galat ya kam item ke daawe (D-079) me customer se kya saboot lein?
+- **Kyun zaroori:**
+  - Cosmetics me "galat shade aaya" ya "khaali box aaya" jaise daawe aam hain. D-072 ki tarah faisla saboot se hona chahiye, andaaze se nahi.
+- **Vikalp:**
+  - **(a) Koi saboot nahi.**
+  - **(b) Photo zaroori:**
+    1. Item ki, label pe batch number ki, aur damage ki photo.
+    2. "Item kam" pe parcel aur packing ki photo.
+    3. Unboxing video optional; staff maang sake.
+    4. Hamari taraf ka saboot: warehouse pe pack ki photo.
+  - **(c) (b) + unboxing video zaroori:** ek rakam (misaal ₹1,500) se upar.
+- **Salah:** **(b)**. Saboot ka ek aasaan kadam, aur hamari pack ki photo se dono taraf ka saboot rehta hai.
+- **Trade-off:**
+  - (a) me jhooth aasaan.
+  - (b) me customer ka ek kadam.
+  - (c) me video banana sabko nahi aata, aur video me privacy ka sawal.
+- **Kanooni detail jaanchi nahi** (R-004): customer ki photo aur video (ghar ya chehra aa sakta hai) rakhne ke niyam.
+
+### Q-048. Customer se delivery fee lein ya nahi?
+
+- **Status:** `Khula`. Topic: B4 (pricing), B5 (checkout). **Group G6** (Q-048 se Q-057): delivery, cancel, refund aur return ke sawal ek doosre pe tike hain; saath jawab dein.
+- **Sawal:** customer se delivery fee lein ya nahi; lein to kitni, aur kaise dikhe?
+- **Kyun zaroori:**
+  - Checkout ka total, invoice (delivery platform ki seva hai, to shayad platform ka alag invoice), aur cancel, RTO aur return ke niyam isi pe tike hain.
+- **Vikalp:**
+  - **(a) Hamesha muft.**
+  - **(b) Seema ke neeche fee:**
+    1. Order ki rakam ek seema se kam ho to tay fee (misaal ₹499 se kam pe ₹49), area setting se; 0 bhi rakhi ja sake.
+    2. Kai sellers ya kai parcel wale order (D-077) pe bhi ek hi fee, order pe.
+    3. Product page aur cart pe pehle se "₹X se upar muft delivery" dikhe.
+    4. Koi "platform fee" ya "packing fee" nahi.
+  - **(c) Doori ya wazan ke hisaab se.**
+- **Salah:** **(b)**. Asli jaisa (D-026), aur cancel, RTO aur return ke niyam isi pe saaf bante hain; seema 0 rakh ke muft bhi chala sakte hain.
+- **Trade-off:**
+  - (a) saral, par kharcha poora hamara, aur niyam baad me jodne padte hain.
+  - (b) me platform ka invoice aur fee ke niyam.
+  - (c) customer ke liye samajhna mushkil.
+- **Kanooni detail jaanchi nahi** (R-004): delivery fee pe GST aur kiska invoice.
+
+### Q-049. Delivery na ho paaye to kitni koshish, aur phir kya (RTO)?
+
+- **Status:** `Khula`. Topic: B1 (delivery). **Group G6** (Q-048 se Q-057): saath jawab dein.
+- **Sawal:** customer na mile, address na mile, ya customer parcel lene se mana kare, to kitni baar koshish ho, aur phir kya? (Parcel wapas warehouse jaana = RTO.)
+- **Kyun zaroori:**
+  - Prepaid order pe refund ka samay, delivery pe UPI wale order (D-034) pe stock wapas, aur har koshish ka kharcha isi se tay hota hai.
+  - D-072 ka niyam "delivered" ke liye hai, "delivery nahi hui" ke liye nahi.
+- **Vikalp:**
+  - **(a) Ek koshish:** fail hote hi RTO; prepaid ka refund.
+  - **(b) Do koshish (misaal):**
+    1. Har fail pe wajah (ghar band, address galat, customer ne mana kiya), aur customer ko in-app, email aur browser push se khabar, agla din chunne ka option.
+    2. Parcel hub pe zyada se zyada 3 din (misaal), phir RTO.
+    3. Customer ne saaf mana kiya to doosri koshish nahi, seedha RTO.
+    4. Prepaid ka poora refund RTO ka hub pe scan hote hi shuru (parcel tab bhi hamari zimmedari me, D-063).
+    5. RTO maal warehouse me receiving jaisi jaanch ke baad stock me.
+    6. Delivery fee (agar Q-048 me lage) customer ki galti wale RTO pe wapas nahi.
+  - **(c) Teen koshish,** aur customer kabhi bhi agla din badal sake.
+- **Salah:** **(b)**. Customer ko doosra mauka milta hai, aur refund warehouse pahunchne tak nahi rukta, kyunki parcel hamari zimmedari me hai.
+- **Trade-off:**
+  - (a) me chhoti galti pe order khatam.
+  - (b) me hub pe parcel rakhne ki jagah aur din ki ginti.
+  - (c) me kharcha aur hub ka bojh zyada.
+
+### Q-050. Delivery pe UPI kise mile, kitni rakam tak, aur mana karne pe kya?
+
+- **Status:** `Khula`. Topic: B5 (checkout), B6 (payments). **Group G6** (Q-048 se Q-057): saath jawab dein.
+- **Sawal:** delivery pe UPI QR (D-034) kise mile, kitni rakam tak ke order pe, aur customer payment se mana kare to kya ho?
+- **Kyun zaroori:**
+  - Bina advance paise ke order me customer mana kare to delivery aur wapsi ka kharcha hamara, aur stock itne din ruka rehta hai. R1 me ye raasta hai.
+- **Vikalp:**
+  - **(a) Sab customers,** koi seema nahi.
+  - **(b) Seema ke saath:**
+    1. Order ki zyada se zyada rakam (misaal ₹3,000); naye customer ke pehle order pe kam (misaal ₹1,500); area setting se on ya off.
+    2. Jo customer aise order pe 2 baar (misaal) mana kare ya payment na kare, uske liye delivery pe UPI band; staff wajah ke saath khol sake.
+    3. Door pe payment fail ho (network) to partner 10 minute (misaal) tak QR dobara dikhaye, phir "koshish fail" (Q-049).
+    4. Delivery code (D-072) payment ke baad hi.
+  - **(c) Sirf purane customers:** kam se kam ek prepaid order delivered ho chuka ho.
+- **Salah:** **(b)**. Naye customer ko bhi raasta milta hai, aur mana karne ka nuksaan ek seema me rehta hai.
+- **Trade-off:**
+  - (a) me mana karne ka nuksaan.
+  - (b) me kuch customers ko prepaid karna padta hai.
+  - (c) naye customer ke liye rukawat.
+
+### Q-051. Customer order kab tak cancel kar sake, aur poora ya ek-ek item?
+
+- **Status:** `Khula`. Topic: B5 (order). **Group G6** (Q-048 se Q-057): saath jawab dein.
+- **Sawal:** customer order kab tak cancel kar sake, aur poora hi ya ek-ek item bhi?
+- **Kyun zaroori:**
+  - Refund, stock wapas, aur delivery fee ke niyam isi pe tike hain. Ek item cancel hone ke baad order muft delivery ki seema se neeche aaye, to bhi niyam chahiye.
+- **Vikalp:**
+  - **(a) Sirf poora order,** pack hone se pehle.
+  - **(b) Ek-ek item ya quantity, pack hone se pehle:**
+    1. Pack ke baad cancel nahi, sirf door pe mana (RTO, Q-049).
+    2. Koi cancel fee nahi.
+    3. Cancel ke baad order seema se neeche aaye to bhi baad me delivery fee nahi lagti.
+    4. Prepaid ka refund turant; delivery pe UPI wale order me paisa liya hi nahi.
+  - **(c) Ek-ek item, warehouse se nikalne tak.**
+- **Salah:** **(b)**. Customer ko poora order nahi todna padta, aur niyam saral aur saaf rehte hain.
+- **Trade-off:**
+  - (a) me customer ko poora order todna padta hai.
+  - (b) me line ke hisaab se refund aur stock.
+  - (c) me pack hua parcel kholna (galti ka mauka).
+
+### Q-052. Refund kis raaste jaaye, aur kab shuru ho?
+
+- **Status:** `Khula`. Topic: B6 (payments). **Group G6** (Q-048 se Q-057): saath jawab dein.
+- **Sawal:** refund kis raaste jaaye, aur kab shuru ho?
+- **Kyun zaroori:**
+  - R1 me Razorpay test mode me refund hai ([PROJECT_PLAN.md](PROJECT_PLAN.md) §1), aur saara paisa platform ke ek gateway account me aata hai (D-093). Delivery pe UPI wale order ka refund bhi chahiye (return pe).
+- **Vikalp:**
+  - **(a) Hamesha original raaste:**
+    1. Razorpay refund; delivery pe UPI QR wala payment bhi usi raaste.
+    2. Shuru hone ka samay: cancel pe turant (Q-051), RTO pe hub scan pe (Q-049), return pe warehouse jaanch ke baad (Q-056).
+    3. Refund fail ho (jaise account band) to staff ka haath ka raasta, aur customer ko khabar.
+    4. Customer ko refund ki halat in-app aur email me dikhe.
+  - **(b) Original ya bank account:** customer chahe to bank account me (bank details lena padta, jo sensitive data hai).
+  - **(c) Default store credit:** gift card aur store credit ke sawal (B10, D-055 me R2) ka hissa; prepaid instruments ke niyam ka jokhim.
+- **Salah:** **(a)**. Customer ka paisa usi raaste wapas jaata hai jisse aaya, aur bank details rakhne ka jokhim nahi.
+- **Trade-off:**
+  - (a) me kuch maamle haath se.
+  - (b) me bank details ki suraksha.
+  - (c) me customer ka paisa platform pe atka rehta hai.
+- **Kanooni detail jaanchi nahi** (R-004): refund ka samay (RBI ke niyam) aur store credit ke niyam.
+
+### Q-053. Lauta maal kahan jaaye, aur nuksaan kiska?
+
+- **Status:** `Khula`. Topic: B7 (returns). **Group G6** (Q-048 se Q-057): saath jawab dein.
+- **Sawal:** warehouse ki jaanch ke baad lauta maal kahan jaaye (dobara stock, brand ko, ya nasht), aur kharcha ya nuksaan kiska?
+- **Kyun zaroori:**
+  - Maal brand ka hai (D-060); hamari galti ka nuksaan hamara (D-063); band maal dobara bike to brand ka fayda. R1 ki warehouse jaanch ka nateeja isi se banta hai.
+  - D-063 me zimmedari "receiving se customer tak" hai; return pickup ke baad, warehouse pahunchne se pehle maal kho jaaye ya toote, to kiska, ye saaf nahi.
+- **Vikalp:**
+  - **(a) Kabhi dobara stock nahi:** har lauta maal brand ko wapas ya nasht.
+  - **(b) Wajah ke hisaab se:**
+    1. Band, seal salamat (D-079), batch wahi jo bheja tha, aur expiry bikri band ki seema (D-082) se upar: wapas bikne layak stock, usi batch me.
+    2. Transit me toota ya leak (hamari zimmedari): nasht (D-062 ka record), brand ko D-063 se bharpai, customer ko refund.
+    3. Galat item bheja (hamari pick ki galti): hamari zimmedari; lauta item jaanch ke baad stock me.
+    4. Brand ki galti (defect, galat batch label, nakli ka shak sahi nikla): refund ka paisa seller ke hisaab se, saath me wapsi ka kharcha; maal brand ko wapas, ya brand ke kharche pe nasht (D-062 jaisa).
+    5. Customer ki baat jaanch me galat (khula maal "band" bata ke, ya batch alag): refund nahi; maal customer ko wapas (misaal ek baar hamare kharche pe).
+    6. Return pickup ke scan se warehouse receiving tak maal hamari zimmedari (D-063 me jod).
+    7. Seller ke panel me har return ka nateeja aur wajah; seller ko aitraaz ka raasta.
+  - **(c) (b) jaisa, par dobara stock sirf brand ki haan se.**
+- **Salah:** **(b)**. Har maamle me nuksaan usi ka jiski galti, band maal bekaar nasht nahi hota, aur return ke raaste me bhi zimmedari saaf rehti hai.
+- **Trade-off:**
+  - (a) me brand ka nuksaan bada, aur galti hamari ho to jhagda.
+  - (b) me jaanch ka anushaasan.
+  - (c) me brand ke jawab tak maal ruka rehta hai.
+- **Kanooni detail jaanchi nahi** (R-004): lautaye band cosmetics ko dobara bechne ke niyam.
+
+### Q-054. Return pickup ke waqt delivery partner kya jaanche?
+
+- **Status:** `Khula`. Topic: B7 (returns), B1 (delivery). **Group G6** (Q-048 se Q-057): saath jawab dein.
+- **Sawal:** return pickup ke waqt delivery partner kya jaanche?
+- **Kyun zaroori:**
+  - Fraud ki sabse sasti rok yahi hai: hamare paas har line ka batch hai (D-064), to galat ya purana maal lautane wala door pe hi pakda jaata hai.
+- **Vikalp:**
+  - **(a) Kuch nahi,** sab warehouse me.
+  - **(b) Photo + batch + seal:**
+    1. Partner item ki photo le, aur label pe batch number ko order wale batch se milaye.
+    2. "Man badla" wale return me seal dekhe (D-079).
+    3. Mel na khaye to pickup na le (wajah + photo), aur customer ko in-app, email aur browser push se khabar.
+  - **(c) (b) + partner hi refund manzoor kare.**
+- **Salah:** **(b)**. Galat maal warehouse tak nahi aata, aur Delivery app me photo ka kadam pehle se hai (D-072).
+- **Trade-off:**
+  - (a) me galat maal warehouse tak aata hai, aur ek aur trip ka kharcha.
+  - (b) me partner ka ek-do minute aur.
+  - (c) me partner pe paise ka faisla (jokhim).
+
+### Q-055. Return pickup ka kharcha customer se kate ya nahi?
+
+- **Status:** `Khula`. Topic: B7 (returns). **Group G6** (Q-048 se Q-057): saath jawab dein.
+- **Sawal:** return pickup ka kharcha customer se kate ya nahi?
+- **Kyun zaroori:**
+  - "Man badla" wale return (D-079) me galti kisi ki nahi; muft ho to galat istemaal, mehenga ho to customer naraz.
+- **Vikalp:**
+  - **(a) Hamesha muft.**
+  - **(b) Galti ke hisaab se:**
+    1. Hamari ya brand ki galti: return muft, aur delivery fee (agar Q-048 me lage) bhi wapas.
+    2. Man badla: refund me se return fee kat-ti hai (misaal ₹49), aur delivery fee wapas nahi.
+  - **(c) Man badla ka kharcha seller pe.**
+- **Salah:** **(b)**. Galti wale customer ka koi kharcha nahi, aur man badla wale return ka galat istemaal kam hota hai.
+- **Trade-off:**
+  - (a) me kharcha hamara, aur galat istemaal.
+  - (b) me ek fee ka niyam.
+  - (c) seller ke saath anyay, kyunki galti uski nahi.
+
+### Q-056. Return ka refund kab ho: warehouse jaanch ke baad, ya kuch maamlon me pickup pe hi?
+
+- **Status:** `Khula`. Topic: B7 (returns), B6 (payments). **Group G6** (Q-048 se Q-057): saath jawab dein.
+- **Sawal:** R1 me return ka refund warehouse jaanch ke baad hai ([PROJECT_PLAN.md](PROJECT_PLAN.md) §1). Aage (R2 se) bhi aisa hi rahe, ya kuch maamlon me pickup pe hi?
+- **Kyun zaroori:**
+  - Warehouse jaanch me 3 se 5 din (misaal) lagte hain; customer ka paisa itne din atka rehta hai.
+- **Vikalp:**
+  - **(a) Hamesha warehouse jaanch ke baad.**
+  - **(b) Chhoti rakam pe pickup pe:**
+    1. Misaal ₹1,000 tak, aur pickup ki jaanch (Q-054) paas ho, to pickup scan pe refund; baaki warehouse ke baad.
+    2. Baar-baar galat return karne wale customer (Q-057) ko ye suvidha nahi.
+    3. R2 se; R1 me (a).
+  - **(c) Request pe turant.**
+- **Salah:** **(b)**. Zyadatar customers ka paisa jaldi wapas aata hai, aur jokhim chhoti rakam tak simit rehta hai.
+- **Trade-off:**
+  - (a) me customer ka intezaar.
+  - (b) me thoda jokhim (pickup ke baad maal galat nikle).
+  - (c) me fraud aasaan.
+
+### Q-057. Baar-baar return ya daawa karne wale customer pe kya ho?
+
+- **Status:** `Khula`. Topic: B7 (returns), B11 (disputes). **Group G6** (Q-048 se Q-057): saath jawab dein.
+- **Sawal:** jo customer bahut return ya daawe kare, us pe kya ho?
+- **Kyun zaroori:**
+  - D-072 niyam 4 me sirf record aur report hai; return ke liye bhi niyam chahiye, warna pickup ka kharcha aur nuksaan badhta hai.
+- **Vikalp:**
+  - **(a) Sirf record** aur staff ko report.
+  - **(b) Seema ke baad suvidhayein band:**
+    1. Seema misaal: 90 din me 5 returns, ya delivered orders ka 40% se zyada.
+    2. Seema paar: man badla wala return band, delivery pe UPI band (Q-050), aur pickup pe refund (Q-056) band.
+    3. Staff wajah ke saath khol sake; customer ko wajah dikhe.
+    4. R2 se; record R1 se.
+  - **(c) Account band.**
+- **Salah:** **(b)**. Nuksaan rukta hai, aur galti se pakde gaye sahi customer ke liye staff ka raasta khula rehta hai.
+- **Trade-off:**
+  - (a) me nuksaan chalta rehta hai.
+  - (b) me ek seema, aur kuch sahi customer bhi pakde ja sakte hain (isliye staff khol sake).
+  - (c) bahut kada, galat faisle ka jokhim.
+
 ## Change log
 
-| Version | Date       | Badlav                                                                                                            |
-| ------- | ---------- | ----------------------------------------------------------------------------------------------------------------- |
-| v1.0.0  | 2026-11-17 | Khaali file bani.                                                                                                 |
-| v1.1.1  | 2026-11-18 | §1 aage ke topics (B1 se B16) aur §2 jaanchna baaki bane.                                                         |
-| v1.2.1  | 2026-11-18 | §3 Sawal bana; Q-001 (warehouse me rakhe maal ka maalik).                                                         |
-| v1.2.2  | 2026-11-18 | Q-001 tay: (a) brand maalik (D-060).                                                                              |
-| v1.2.3  | 2026-11-18 | Q-002 (customer ko dikhne wala price kaun tay kare).                                                              |
-| v1.2.4  | 2026-11-18 | Q-002 tay: (c) brand + platform ke niyam (D-061).                                                                 |
-| v1.2.5  | 2026-11-18 | Q-003 (expire hone wala ya na bika maal).                                                                         |
-| v1.2.6  | 2026-11-18 | Q-003 tay: (b) brand ka nuksaan + platform ke niyam (D-062).                                                      |
-| v1.2.7  | 2026-11-18 | Q-004 (hamare haath se hue nuksaan ki bharpai ka daam).                                                           |
-| v1.2.8  | 2026-11-18 | Q-004 tay: (b) bikne wala daam (D-063).                                                                           |
-| v1.2.9  | 2026-11-18 | Q-005 (alag batches ka alag MRP).                                                                                 |
-| v1.2.10 | 2026-11-18 | Q-005 tay: (b) batch ke hisaab se (D-064).                                                                        |
-| v1.2.11 | 2026-11-18 | Q-006 (Beauty Pro buyers ka daam).                                                                                |
-| v1.2.12 | 2026-11-18 | Q-006 tay: (b) Pro daam (D-065); Q-007 (storage fee).                                                             |
-| v1.2.13 | 2026-11-18 | Q-007 tay: (c) muft, phir fee (D-066); Q-008 (product page pe expiry).                                            |
-| v1.2.14 | 2026-11-18 | Q-008 tay: (b) exact expiry (D-067); Q-009 (nuksaan ki vasooli).                                                  |
-| v1.2.15 | 2026-11-18 | Q-009 tay: (b) saboot se vasooli (D-068); Q-010 (Beauty Pro ki jaanch).                                           |
-| v1.2.16 | 2026-11-18 | Q-010 tay: (b) saboot + staff (D-069); Q-011 (Pro daam ki quantity seema).                                        |
-| v1.2.17 | 2026-11-18 | Q-011 tay: (b) seller tay kare (D-070).                                                                           |
-| v1.2.18 | 2026-11-18 | Q-012 (bachi fee) aur Q-013 (parcel nahi mila par "delivered").                                                   |
-| v1.2.19 | 2026-11-18 | Q-012 tay: (b) seema ke baad kadam (D-071).                                                                       |
-| v1.2.20 | 2026-11-18 | Q-013 tay: (b) saboot se faisla (D-072).                                                                          |
-| v1.2.21 | 2026-11-18 | Q-014 (pehle ka kaam kab aur kaise hatega).                                                                       |
-| v1.2.22 | 2026-11-18 | Q-014 tay: (b) do kadam me (D-073).                                                                               |
-| v1.2.23 | 2026-11-18 | Q-015 (pehle ke kaam se kya naye me aaye, list kab aur kaise).                                                    |
-| v1.2.24 | 2026-11-18 | Q-015 tay: (b) chalti list discovery ke saath (D-074).                                                            |
-| v1.2.25 | 2026-11-18 | Q-016 (ek brand ka maal kai sellers bechna chahein).                                                              |
-| v1.2.26 | 2026-11-18 | Q-016 tay: (a) ek brand, ek seller (D-075); Q-017 (variants kin cheezon se).                                      |
-| v1.2.27 | 2026-11-18 | Q-017 tay: (b) category ke hisaab se (D-076); Q-018 (kai sellers wala order aur parcel).                          |
-| v1.2.28 | 2026-11-18 | Q-018 tay: (c) normal ek parcel (D-077); Q-019 (seller ki fees aur commission ka aadhaar).                        |
-| v1.2.29 | 2026-11-18 | Q-019 tay: (b) + (ii) (D-078); Q-020 (return ki wajahein aur "band" ka matlab).                                   |
-| v1.2.30 | 2026-11-18 | Q-020 tay: (b) man badla sirf band maal pe (D-079); Q-021 (return ki samay-seema).                                |
-| v1.2.31 | 2026-11-18 | Q-021 tay: (b) wajah ke hisaab se (D-080); Q-022 (seller ka paisa kab payable, payout).                           |
-| v1.2.32 | 2026-11-18 | Q-022 tay: (b) samay-seema ke baad, hafte me payout (D-081); Q-023 (expiry ki seemaon ke number).                 |
-| v1.2.33 | 2026-11-18 | Q-023 tay: (b) default + category override (D-082); Q-024 (pack pe expiry date na ho to).                         |
-| v1.3.1  | 2026-11-18 | Niyam badla (owner): bina dependency wale sawal ek saath; har sawal se "Iske baad" aur agle sawal ke zikr hataye. |
-| v1.3.2  | 2026-11-18 | Q-025 se Q-036 ek saath (kisi khule sawal pe tike nahi).                                                          |
-| v1.3.3  | 2026-11-18 | Q-024 se Q-036 tay: owner ne saari salah maani (D-083 se D-095).                                                  |
+| Version | Date       | Badlav                                                                                                                     |
+| ------- | ---------- | -------------------------------------------------------------------------------------------------------------------------- |
+| v1.0.0  | 2026-11-17 | Khaali file bani.                                                                                                          |
+| v1.1.1  | 2026-11-18 | §1 aage ke topics (B1 se B16) aur §2 jaanchna baaki bane.                                                                  |
+| v1.2.1  | 2026-11-18 | §3 Sawal bana; Q-001 (warehouse me rakhe maal ka maalik).                                                                  |
+| v1.2.2  | 2026-11-18 | Q-001 tay: (a) brand maalik (D-060).                                                                                       |
+| v1.2.3  | 2026-11-18 | Q-002 (customer ko dikhne wala price kaun tay kare).                                                                       |
+| v1.2.4  | 2026-11-18 | Q-002 tay: (c) brand + platform ke niyam (D-061).                                                                          |
+| v1.2.5  | 2026-11-18 | Q-003 (expire hone wala ya na bika maal).                                                                                  |
+| v1.2.6  | 2026-11-18 | Q-003 tay: (b) brand ka nuksaan + platform ke niyam (D-062).                                                               |
+| v1.2.7  | 2026-11-18 | Q-004 (hamare haath se hue nuksaan ki bharpai ka daam).                                                                    |
+| v1.2.8  | 2026-11-18 | Q-004 tay: (b) bikne wala daam (D-063).                                                                                    |
+| v1.2.9  | 2026-11-18 | Q-005 (alag batches ka alag MRP).                                                                                          |
+| v1.2.10 | 2026-11-18 | Q-005 tay: (b) batch ke hisaab se (D-064).                                                                                 |
+| v1.2.11 | 2026-11-18 | Q-006 (Beauty Pro buyers ka daam).                                                                                         |
+| v1.2.12 | 2026-11-18 | Q-006 tay: (b) Pro daam (D-065); Q-007 (storage fee).                                                                      |
+| v1.2.13 | 2026-11-18 | Q-007 tay: (c) muft, phir fee (D-066); Q-008 (product page pe expiry).                                                     |
+| v1.2.14 | 2026-11-18 | Q-008 tay: (b) exact expiry (D-067); Q-009 (nuksaan ki vasooli).                                                           |
+| v1.2.15 | 2026-11-18 | Q-009 tay: (b) saboot se vasooli (D-068); Q-010 (Beauty Pro ki jaanch).                                                    |
+| v1.2.16 | 2026-11-18 | Q-010 tay: (b) saboot + staff (D-069); Q-011 (Pro daam ki quantity seema).                                                 |
+| v1.2.17 | 2026-11-18 | Q-011 tay: (b) seller tay kare (D-070).                                                                                    |
+| v1.2.18 | 2026-11-18 | Q-012 (bachi fee) aur Q-013 (parcel nahi mila par "delivered").                                                            |
+| v1.2.19 | 2026-11-18 | Q-012 tay: (b) seema ke baad kadam (D-071).                                                                                |
+| v1.2.20 | 2026-11-18 | Q-013 tay: (b) saboot se faisla (D-072).                                                                                   |
+| v1.2.21 | 2026-11-18 | Q-014 (pehle ka kaam kab aur kaise hatega).                                                                                |
+| v1.2.22 | 2026-11-18 | Q-014 tay: (b) do kadam me (D-073).                                                                                        |
+| v1.2.23 | 2026-11-18 | Q-015 (pehle ke kaam se kya naye me aaye, list kab aur kaise).                                                             |
+| v1.2.24 | 2026-11-18 | Q-015 tay: (b) chalti list discovery ke saath (D-074).                                                                     |
+| v1.2.25 | 2026-11-18 | Q-016 (ek brand ka maal kai sellers bechna chahein).                                                                       |
+| v1.2.26 | 2026-11-18 | Q-016 tay: (a) ek brand, ek seller (D-075); Q-017 (variants kin cheezon se).                                               |
+| v1.2.27 | 2026-11-18 | Q-017 tay: (b) category ke hisaab se (D-076); Q-018 (kai sellers wala order aur parcel).                                   |
+| v1.2.28 | 2026-11-18 | Q-018 tay: (c) normal ek parcel (D-077); Q-019 (seller ki fees aur commission ka aadhaar).                                 |
+| v1.2.29 | 2026-11-18 | Q-019 tay: (b) + (ii) (D-078); Q-020 (return ki wajahein aur "band" ka matlab).                                            |
+| v1.2.30 | 2026-11-18 | Q-020 tay: (b) man badla sirf band maal pe (D-079); Q-021 (return ki samay-seema).                                         |
+| v1.2.31 | 2026-11-18 | Q-021 tay: (b) wajah ke hisaab se (D-080); Q-022 (seller ka paisa kab payable, payout).                                    |
+| v1.2.32 | 2026-11-18 | Q-022 tay: (b) samay-seema ke baad, hafte me payout (D-081); Q-023 (expiry ki seemaon ke number).                          |
+| v1.2.33 | 2026-11-18 | Q-023 tay: (b) default + category override (D-082); Q-024 (pack pe expiry date na ho to).                                  |
+| v1.3.1  | 2026-11-18 | Niyam badla (owner): bina dependency wale sawal ek saath; har sawal se "Iske baad" aur agle sawal ke zikr hataye.          |
+| v1.3.2  | 2026-11-18 | Q-025 se Q-036 ek saath (kisi khule sawal pe tike nahi).                                                                   |
+| v1.3.3  | 2026-11-18 | Q-024 se Q-036 tay: owner ne saari salah maani (D-083 se D-095).                                                           |
+| v1.3.4  | 2026-11-18 | Q-037 se Q-057: aapas me jude sawal 6 group (G1 se G6) me ek saath (owner ne group ka tareeka chuna); group ka niyam upar. |
