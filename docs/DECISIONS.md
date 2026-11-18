@@ -1,6 +1,6 @@
 # DECISIONS: Beautinique
 
-> **Status:** v1.4.21 (2026-11-18). Har faisla ek jagah. Sirf wahi "Tay" jo owner ne khud kaha; Claude ki salah faisla nahi. Cheezein ek-ek karke judti hain.
+> **Status:** v1.4.23 (2026-11-18). Har faisla ek jagah. Sirf wahi "Tay" jo owner ne khud kaha; Claude ki salah faisla nahi. Cheezein ek-ek karke judti hain.
 
 ## 0. Kaise likhein
 
@@ -84,6 +84,8 @@
 | D-068 | Transporter ya delivery partner se nuksaan ki vasooli sirf saboot ke saath: transporter ke bill se; delivery partner se jaanch ke baad, seema ke andar, unki baat sun ke. | Business     | 2026-11-18 |
 | D-069 | Beauty Pro banne ke liye ek saboot (GSTIN, business registration ya freelancer certificate) aur staff ki jaanch; darja tay muddat ke liye, staff hata sake.               | Business     | 2026-11-18 |
 | D-070 | Pro daam ki quantity seema seller chahe to rakhe (har order, har mahine, har Pro buyer); seema se upar normal daam; staff ko mahine ka report.                            | Business     | 2026-11-18 |
+| D-071 | Seller pe bachi fee (udhaar) agle payouts se kat-ti hai; seema paar ho to alert aur payment link, phir listings rokna, aakhir me account band (5 niyam).                  | Business     | 2026-11-18 |
+| D-072 | "Parcel nahi mila" ka jhagda saboot se: delivery pe code (customer ke app aur email me), code na mile to photo aur location; daawe ka faisla saboot se (4 niyam).         | Business     | 2026-11-18 |
 
 ## 2. Record
 
@@ -788,6 +790,33 @@
 - **Kisne, kab:** owner, 2026-11-18. **Nishaan:** Salah maani.
 - **Asar (Claude):** cart me ek line ke hisse do wajah se ban sakte hain (batch, D-064, aur Pro ya normal daam); dono saath sambhalne ka design cart ki charcha (B5) me. Beauty Pro ke kaam R2 se (D-055).
 
+### D-071. Seller pe bachi fee (udhaar)
+
+- **Faisla:** kisi seller ki fees (commission, storage fee D-066, disposal fee D-062, wapsi ka kharcha) uski bikri se zyada hon, to bachi fee seller pe udhaar ki tarah aage chalti hai. Niyam:
+  1. Udhaar agle payout se pehle kat-ta hai.
+  2. Udhaar tay rakam ya tay din (misaal ₹5,000 ya 60 din) se zyada ho to seller ko alert, aur payment link se chukane ka mauka (test mode, D-026).
+  3. Phir bhi na chukaye to notice ke baad naya maal bhejna band aur seller ki listings ruk jaati hain.
+  4. Lambe samay tak na chukaye to account band, aur maal brand ke kharche pe wapas (D-062 jaisa); wapsi ka kharcha bhi udhaar me.
+  5. Har kadam ka record aur seller ko notice.
+- **Wajah:** Claude ki salah, owner ne maani: chhote brand pe pehle din se bojh nahi (deposit nahi), aur udhaar ek seema se aage nahi badhta.
+- **Chhode vikalp:** udhaar bas aage chale, aur kuch nahi (udhaar badhta reh sakta); security deposit (judne me rukawat, deposit ka paisa sambhalna).
+- **Kab dobara khulega:** owner khud khole.
+- **Kisne, kab:** owner, 2026-11-18. **Nishaan:** Salah maani.
+- **Asar (Claude):** rakam, din aur "lambe samay" ke number settlement ki charcha (B6) me. Seller ke hisaab me minus balance ka design finance me. Kanooni detail jaanchi nahi (R-004): seller pe udhaar ki vasooli ke niyam.
+
+### D-072. "Parcel nahi mila" par "delivered"
+
+- **Faisla:** delivery ke waqt saboot banta hai, aur customer ke "parcel nahi mila" ke daawe ka faisla usi saboot se hota hai. Niyam:
+  1. **Delivery code:** har order ka ek code customer ke app aur email me. Delivery pe partner wo code Delivery app me daalta hai; sahi code = delivery pakki.
+  2. **Code na mile** (customer ghar pe nahi, koi aur le raha): parcel ki photo aur delivery ke waqt partner ki location ka record.
+  3. **Daawa:** customer tay samay me (misaal 48 ghante) daawa kare. Code se delivered: daawa nahi maana jaata. Sirf photo aur location: staff jaanch karta hai. Koi saboot nahi: customer ko refund ya dobara maal, aur D-068 ke hisaab se partner ki jaanch.
+  4. **Record:** baar-baar daawa karne wale customer aur baar-baar aise maamle wale partner, dono ka record aur staff ko report.
+- **Wajah:** Claude ki salah, owner ne maani: saboot delivery ke waqt hi ban jaata hai, to jhagde me faisla andaaze se nahi, saboot se hota hai, aur D-068 ki vasooli bhi saboot pe tik paati hai.
+- **Chhode vikalp:** partner ka "delivered" hi sach (faisla andaaze pe); customer hamesha sahi (daawa aate hi refund; jhooth bol ke refund aasaan).
+- **Kab dobara khulega:** owner khud khole.
+- **Kisne, kab:** owner, 2026-11-18. **Nishaan:** Salah maani.
+- **Asar (Claude):** Delivery app me code daalne, photo aur location ka kadam (R1 ka delivery saboot, [PROJECT_PLAN.md](PROJECT_PLAN.md) §1). Photo aur location personal data hain: kitne din rakhein aur kaun dekhe, Security Architect ke saath (B14). Daawe ka samay support ki charcha (B11) me. Kanooni detail jaanchi nahi (R-004): photo aur location jaise personal data rakhne ke niyam.
+
 ## Change log
 
 | Version | Date       | Badlav                                                                                                                                                                                                                                                                                  |
@@ -820,3 +849,5 @@
 | v1.4.19 | 2026-11-18 | D-068 aaya (nuksaan ki vasooli sirf saboot ke saath; Q-009).                                                                                                                                                                                                                            |
 | v1.4.20 | 2026-11-18 | D-069 aaya (Beauty Pro buyer: saboot + staff ki jaanch; Q-010).                                                                                                                                                                                                                         |
 | v1.4.21 | 2026-11-18 | D-070 aaya (Pro daam ki quantity seema seller tay kare; Q-011).                                                                                                                                                                                                                         |
+| v1.4.22 | 2026-11-18 | D-071 aaya (seller pe bachi fee: seema ke baad kadam; Q-012).                                                                                                                                                                                                                           |
+| v1.4.23 | 2026-11-18 | D-072 aaya ("parcel nahi mila" ka jhagda saboot se; Q-013).                                                                                                                                                                                                                             |
