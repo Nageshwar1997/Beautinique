@@ -1,6 +1,6 @@
 # DECISIONS: Beautinique
 
-> **Status:** v1.4.24 (2026-11-18). Har faisla ek jagah. Sirf wahi "Tay" jo owner ne khud kaha; Claude ki salah faisla nahi. Cheezein ek-ek karke judti hain.
+> **Status:** v1.4.25 (2026-11-18). Har faisla ek jagah. Sirf wahi "Tay" jo owner ne khud kaha; Claude ki salah faisla nahi. Cheezein ek-ek karke judti hain.
 
 ## 0. Kaise likhein
 
@@ -87,6 +87,7 @@
 | D-071 | Seller pe bachi fee (udhaar) agle payouts se kat-ti hai; seema paar ho to alert aur payment link, phir listings rokna, aakhir me account band (5 niyam).                  | Business     | 2026-11-18 |
 | D-072 | "Parcel nahi mila" ka jhagda saboot se: delivery pe code (customer ke app aur email me), code na mile to photo aur location; daawe ka faisla saboot se (4 niyam).         | Business     | 2026-11-18 |
 | D-073 | Pehle ka kaam do kadam me hatega: git tag ke baad, purane docs discovery khatam hone pe, purana code naya root setup banne ke saath; dono baar owner ki haan se.          | Process      | 2026-11-18 |
+| D-074 | Pehle ke kaam se lene layak cheezon ki chalti list discovery ke saath: har agent ki report me hissa, kasauti, owner ki haan, discovery ke aakhir me jaanch (5 niyam).     | Process      | 2026-11-18 |
 
 ## 2. Record
 
@@ -831,6 +832,20 @@
 - **Kisne, kab:** owner, 2026-11-18. **Nishaan:** Salah maani.
 - **Asar (Claude):** alag sawal baaki: pehle ke kaam ki kaunsi cheezein (jaise achhe patterns, design ke tokens) naye me laani hain, aur uski list kab aur kaise bane.
 
+### D-074. Pehle ke kaam se kya naye me aaye
+
+- **Faisla:** pehle ke kaam se lene layak cheezon ki ek chalti list discovery ke saath banti hai. Niyam:
+  1. **Shuruaat:** repo analysis (pehla agent) ki shuruaati list.
+  2. **Har agent (2 se 10):** apni report me ek hissa: apne area me pehle ke kaam se kya lene layak, kyun, aur naye docs me kahan jayega.
+  3. **Kasauti:** cheez kisi pakki zaroorat ko hal kare, kisi tay faisle se na takraye, aur naye doc me naye vakya me likhi ja sake.
+  4. **Owner ki haan:** har cheez apne area ke sawalon ke saath, ek-ek karke. Haan ho to sahi naye doc me naye vakya me (zaroorat ho to naya D-xxx), bina pehle ke kaam ke zikr ke (D-003); design tokens jaise values bhi poori naye doc me. Naya code naye doc se banta hai, pehle ke code se copy nahi.
+  5. **Aakhri jaanch:** discovery ke aakhir me, purane docs hatne se pehle (D-073 niyam 2), Claude dekhe ki list ki har cheez ya to naye doc me hai ya chhodi gayi; kuch bacha ho to owner se.
+- **Wajah:** Claude ki salah, owner ne maani: har cheez tab parkhi jaati hai jab uska area tay ho raha ho (jaise transactions database ke saath, tokens design ke saath), alag agent ka kharcha nahi, aur aakhri jaanch se kuch chhootta nahi.
+- **Chhode vikalp:** koi list nahi (kya dekha aur kya chhoda, iska record nahi); alag agent abhi, poori list ek baar me (ek aur agent run, aur architecture aur database ke faislon se pehle parakh); planning stage me ek baar (tab tak purane docs hat chuke hote, cheezein der se aur git tag se aatin).
+- **Kab dobara khulega:** owner khud khole.
+- **Kisne, kab:** owner, 2026-11-18. **Nishaan:** Salah maani.
+- **Asar (Claude):** Agent 2 se 10 ke prompt me "pehle ke kaam se lene layak" ka hissa zaroori. Lene layak cheezon ki list naye docs me nahi rehti (D-003): wo agents ki reports ke saath rehti hai, aur naye docs me sirf maani hui cheez naye roop me aati hai. Kanooni detail jaanchi nahi (R-004): pehle ke kaam ka koi bahar ka asset (font, icon, image) naye me aaye to uska license.
+
 ## Change log
 
 | Version | Date       | Badlav                                                                                                                                                                                                                                                                                  |
@@ -866,3 +881,4 @@
 | v1.4.22 | 2026-11-18 | D-071 aaya (seller pe bachi fee: seema ke baad kadam; Q-012).                                                                                                                                                                                                                           |
 | v1.4.23 | 2026-11-18 | D-072 aaya ("parcel nahi mila" ka jhagda saboot se; Q-013).                                                                                                                                                                                                                             |
 | v1.4.24 | 2026-11-18 | D-073 aaya (pehle ka kaam do kadam me hatega; Q-014).                                                                                                                                                                                                                                   |
+| v1.4.25 | 2026-11-18 | D-074 aaya (pehle ke kaam se lene layak cheezon ki chalti list; Q-015).                                                                                                                                                                                                                 |
