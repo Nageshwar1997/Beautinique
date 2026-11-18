@@ -1,6 +1,6 @@
 # DECISIONS: Beautinique
 
-> **Status:** v1.4.34 (2026-11-18). Har faisla ek jagah. Sirf wahi "Tay" jo owner ne khud kaha; Claude ki salah faisla nahi. Cheezein ek-ek karke judti hain.
+> **Status:** v1.5.1 (2026-11-18). Har faisla ek jagah. Sirf wahi "Tay" jo owner ne khud kaha; Claude ki salah faisla nahi. Cheezein ek-ek karke judti hain.
 
 ## 0. Kaise likhein
 
@@ -88,14 +88,27 @@
 | D-072 | "Parcel nahi mila" ka jhagda saboot se: delivery pe code (customer ke app aur email me), code na mile to photo aur location; daawe ka faisla saboot se (4 niyam).         | Business     | 2026-11-18 |
 | D-073 | Pehle ka kaam do kadam me hatega: git tag ke baad, purane docs discovery khatam hone pe, purana code naya root setup banne ke saath; dono baar owner ki haan se.          | Process      | 2026-11-18 |
 | D-074 | Pehle ke kaam se lene layak cheezon ki chalti list discovery ke saath: har agent ki report me hissa, kasauti, owner ki haan, discovery ke aakhir me jaanch (5 niyam).     | Process      | 2026-11-18 |
-| D-075 | Ek brand ka poore platform pe ek hi seller (brand khud ya uska ek authorised distributor); brand ko pehla haq; barcode se duplicate check (5 niyam). | Business | 2026-11-18 |
-| D-076 | Variants category ke hisaab se platform tay kare (zyada se zyada 2 per product); formula badalne wala farak alag product; reviews product pe, variant ke saath (6 niyam). | Business | 2026-11-18 |
-| D-077 | Kai sellers wala order: normal ek parcel (andar har seller ka invoice), majboori me alag; seller ke hisse aur parcel alag; code har parcel ka (5 niyam). | Business | 2026-11-18 |
-| D-078 | Seller ki fees: category ka % commission (GST ke bina wali rakam pe) + har unit pe tay fulfilment fee + pehle tay fees; aage ki fees shuru me ₹0 (5 niyam). | Business | 2026-11-18 |
-| D-079 | Return: hamari ya brand ki galti ki saari wajahein; "man badla" sirf band maal pe (factory seal salamat); seal na aane wale product pe man badla return nahi (5 niyam). | Business | 2026-11-18 |
-| D-080 | Return ki samay-seema wajah ke hisaab se: dikhne wali galti 48 ghante, baaki wajahein 7 din (dono misaal); uske baad batch ki dikkat recall ke raaste (5 niyam). | Business | 2026-11-18 |
-| D-081 | Seller ka paisa return ki samay-seema ke baad payable; hafte me ek payout; pehle udhaar aur fees katein, bharpai jude; kam se kam payout rakam (5 niyam). | Business | 2026-11-18 |
-| D-082 | Expiry ki seemaayein: ek default (misaal 6 mahine receiving pe, 3 mahine pe bikri band) + category ka override setting se; brand ka jawab sab pe ek (4 niyam). | Business | 2026-11-18 |
+| D-075 | Ek brand ka poore platform pe ek hi seller (brand khud ya uska ek authorised distributor); brand ko pehla haq; barcode se duplicate check (5 niyam).                      | Business     | 2026-11-18 |
+| D-076 | Variants category ke hisaab se platform tay kare (zyada se zyada 2 per product); formula badalne wala farak alag product; reviews product pe, variant ke saath (6 niyam). | Business     | 2026-11-18 |
+| D-077 | Kai sellers wala order: normal ek parcel (andar har seller ka invoice), majboori me alag; seller ke hisse aur parcel alag; code har parcel ka (5 niyam).                  | Business     | 2026-11-18 |
+| D-078 | Seller ki fees: category ka % commission (GST ke bina wali rakam pe) + har unit pe tay fulfilment fee + pehle tay fees; aage ki fees shuru me ₹0 (5 niyam).               | Business     | 2026-11-18 |
+| D-079 | Return: hamari ya brand ki galti ki saari wajahein; "man badla" sirf band maal pe (factory seal salamat); seal na aane wale product pe man badla return nahi (5 niyam).   | Business     | 2026-11-18 |
+| D-080 | Return ki samay-seema wajah ke hisaab se: dikhne wali galti 48 ghante, baaki wajahein 7 din (dono misaal); uske baad batch ki dikkat recall ke raaste (5 niyam).          | Business     | 2026-11-18 |
+| D-081 | Seller ka paisa return ki samay-seema ke baad payable; hafte me ek payout; pehle udhaar aur fees katein, bharpai jude; kam se kam payout rakam (5 niyam).                 | Business     | 2026-11-18 |
+| D-082 | Expiry ki seemaayein: ek default (misaal 6 mahine receiving pe, 3 mahine pe bikri band) + category ka override setting se; brand ka jawab sab pe ek (4 niyam).            | Business     | 2026-11-18 |
+| D-083 | Expiry pack ki chhapi date se, ya mfg date + chhapi shelf life se; sirf PAO wala maal receiving pe wapas; PAO alag field (4 niyam).                                       | Business     | 2026-11-18 |
+| D-084 | Seller aur listing ki jaanch poore desh ki ek-ek team kare; jisne reject kiya wo appeal tay nahi karta (3 niyam).                                                         | Business     | 2026-11-18 |
+| D-085 | Shade pe naam, swatch photo aur hex zaroori; complexion products pe undertone aur depth, lip aur eye pe shade family (5 niyam).                                           | Business     | 2026-11-18 |
+| D-086 | HSN aur GST rate platform ki tareekh wali table se; seller allowed HSN chune, staff jaanche; rate badle to alert (5 niyam).                                               | Business     | 2026-11-18 |
+| D-087 | Daam ke bade badlav pe dobara confirm: neeche 30% ya upar 50% se zyada, ya MRP ke 20% se kam (misaal); Pro daam pe bhi (3 niyam).                                         | Business     | 2026-11-18 |
+| D-088 | Brand ka pack kiya kit normal product (R1); usi seller ka combo R2 se; alag sellers ka combo nahi (5 niyam).                                                              | Business     | 2026-11-18 |
+| D-089 | Kam expiry wale batch pe apne aap "short expiry" label; brand chahe to clearance section; R2 se (4 niyam).                                                                | Business     | 2026-11-18 |
+| D-090 | Pick pe maal toota ya kam: barabar batch ho to badal do, warna customer se poochho, jawab na aaye to line cancel aur refund (4 niyam).                                    | Business     | 2026-11-18 |
+| D-091 | Normal customer ki quantity seema: platform ki default (misaal 10 per variant per order), seller usse kam rakh sake.                                                      | Business     | 2026-11-18 |
+| D-092 | Normal customer bhi GSTIN daal ke business invoice le sake (format check, Pro daam nahi); R2 se.                                                                          | Business     | 2026-11-18 |
+| D-093 | Customer ka saara paisa platform ke ek payment gateway account me; har seller ka hisaab finance me; baad me raasta badle to hisaab wahi.                                  | Business     | 2026-11-18 |
+| D-094 | Fees ki shuruaati rakam (dummy): sab categories pe ek commission (misaal 10%), fulfilment ₹25, storage 90 din muft phir fee, disposal ₹10 (misaal).                       | Business     | 2026-11-18 |
+| D-095 | Chargeback ka nuksaan wajah ke hisaab se: product ki galti seller ki, delivery ya fraud platform ka; saboot mazboot ho to platform lade; R2 se (3 niyam).                 | Business     | 2026-11-18 |
 
 ## 2. Record
 
@@ -967,6 +980,164 @@
 - **Kisne, kab:** owner, 2026-11-18. **Nishaan:** Salah maani.
 - **Asar (Claude):** receiving ki jaanch (D-014) aur bikri band (D-062) inhi settings se. Customer ko kam se kam bikri band ki seema jitni expiry milti hai, aur product page pe exact expiry (D-067). Setting kaunsa staff role badle, wo roles ki list (D-017) me. Number abhi misaal hain. Kanooni detail jaanchi nahi (R-004): expiry ke kareeb ya expired cosmetics bechne ke niyam.
 
+### D-083. Pack pe expiry date na ho to
+
+- **Faisla:** batch ki expiry hamesha pack ki chhapi jaankari se aati hai. Niyam:
+  1. Pack pe expiry ho to wahi.
+  2. Expiry na ho par mfg date aur shelf life (mahine) chhapi ho, to system expiry nikale (mfg date + shelf life); staff receiving pe pack se jaanche.
+  3. Sirf PAO wala (na expiry, na shelf life): receiving pe wapas.
+  4. PAO ek alag field: product page pe customer ki jaankari ke liye, par expiry ka badal nahi.
+- **Wajah:** Claude ki salah, owner ne maani: expiry andaaze se nahi, pack ki chhapi jaankari se aati hai, aur sahi products (mfg date + shelf life wale) bahar nahi hote.
+- **Chhode vikalp:** sirf chhapi expiry (kuch sahi products bhi bahar); sirf PAO bhi chale, expiry andaaze se (andaaze ki expiry customer ko "exact" dikhti, D-067 ke khilaaf).
+- **Kab dobara khulega:** owner khud khole.
+- **Kisne, kab:** owner, 2026-11-18. **Nishaan:** Salah maani.
+- **Asar (Claude):** receiving (D-014) pe batch ke fields: expiry, ya mfg date + shelf life, aur PAO. Nikali hui expiry pe bhi D-062, D-064, D-067 aur D-082 waise hi laagu. Kanooni detail jaanchi nahi (R-004): label pe expiry ya "use before" date ke niyam.
+
+### D-084. Seller aur listing ki jaanch ka daayra
+
+- **Faisla:** seller ki manzoori aur listing ki jaanch poore desh ki team karti hai, state ke hisaab se nahi. Niyam:
+  1. Seller Ops (D-044) ki ek team saare sellers manzoor kare; har naye warehouse state ke GSTIN ki jaanch usi queue me alag kaam.
+  2. Listing ki jaanch bhi ek team, kaam category ke hisaab se bata hua.
+  3. Appeal: jisne reject kiya, wo us appeal ka faisla nahi karta.
+- **Wajah:** Claude ki salah, owner ne maani: abhi ek hi warehouse state hai, aur ek product ek hi baar jaanchna chahiye, chahe wo kitne bhi states me bike.
+- **Chhode vikalp:** seller state ke hisaab se aur listing poore desh ki (ek seller ko alag-alag log jaanchte); dono state ke hisaab se (ek product kai baar jaanchna).
+- **Kab dobara khulega:** owner khud khole.
+- **Kisne, kab:** owner, 2026-11-18. **Nishaan:** Salah maani.
+- **Asar (Claude):** staff permissions ka daayra poora desh, category ke hisaab se queue; roles ki list (D-017) me. States badhne pe team pe bojh badhega; tab ye faisla dobara dekh sakte hain.
+
+### D-085. Shade ki jaankari
+
+- **Faisla:** shade wale variant (D-076) pe seller ko ye jaankari deni hoti hai. Niyam:
+  1. Har shade pe naam + swatch photo + hex colour.
+  2. Complexion products (foundation, concealer, compact, tinted moisturiser) pe undertone (warm, cool, neutral, olive) aur depth (misaal 6 star: fair, light, medium, tan, deep, very deep) bhi zaroori.
+  3. Lip aur eye products pe shade family (jaise nude, pink, red, berry, brown).
+  4. Finish, coverage aur alag skin tones pe photo optional.
+  5. Staff jaanch me swatch aur hex ka mel moota-moota dekhe.
+- **Wajah:** Claude ki salah, owner ne maani: filter aur aage ka shade finder sahi data pe chalte hain, aur chhote brand pe bojh bahut zyada nahi.
+- **Chhode vikalp:** sirf naam aur swatch photo (filter aur shade finder kamzor); finish, coverage aur skin tones ki photo bhi zaroori (chhote brands ke liye rukawat).
+- **Kab dobara khulega:** owner khud khole.
+- **Kisne, kab:** owner, 2026-11-18. **Nishaan:** Salah maani.
+- **Asar (Claude):** fields R1 me; shade finder aur try-on R2 se (D-055). Shade family ka filter R1 ke basic filter me.
+
+### D-086. HSN aur GST rate
+
+- **Faisla:** HSN aur GST rate platform ki ek tareekh wali table se aate hain. Niyam:
+  1. Table me har HSN ka rate tareekh ke saath (kis din se kaunsa rate).
+  2. Seller category ke allowed HSN me se chune; rate table se aaye; staff jaanche.
+  3. Rate badle to table me nayi line nayi tareekh se; us din se naye invoices naye rate pe.
+  4. Rate badalne pe sellers ko alert ki apna daam dekh lein (daam platform nahi badalta, D-061).
+  5. Sahi HSN ki zimmedari seller ki, kyunki supplier wahi hai (D-030).
+- **Wajah:** Claude ki salah, owner ne maani: typo se galat tax nahi lagta, rate badalne ka hisaab ek hi jagah rehta hai, aur zimmedari seller pe rehti hai.
+- **Chhode vikalp:** seller dono bhare (typo se galat tax aur invoice); platform category se HSN khud lagaye (alag HSN wala product atak jaata).
+- **Kab dobara khulega:** owner khud khole.
+- **Kisne, kab:** owner, 2026-11-18. **Nishaan:** Salah maani.
+- **Asar (Claude):** rate se GST ke bina wali rakam nikalti hai, jis pe commission (D-078). Table kaunsa staff role sambhale, wo roles ki list (D-017) me. Kanooni detail jaanchi nahi (R-004): cosmetics ke HSN aur rates, aur rate badalne pe MRP aur purane stock ke niyam.
+
+### D-087. Daam ke bade badlav ki seema
+
+- **Faisla:** D-061 niyam 3 ka "bada badlav" ye hai. Niyam:
+  1. Daam neeche 30% se zyada, ya upar 50% se zyada badle (misaal), to seller se dobara confirm.
+  2. Naya daam MRP ke 20% (misaal) se kam ho to hamesha confirm, chahe pichhla daam kuch bhi ho.
+  3. Pro daam (D-065) pe bhi yahi niyam.
+- **Wajah:** Claude ki salah, owner ne maani: neeche ki galti zyada nuksaan wali hai, aur MRP wala check tab bhi pakadta hai jab pichhla daam bhi galat tha.
+- **Chhode vikalp:** 50% dono taraf (neeche ki galti der se pakdi jaati); sirf alag-alag seema, MRP check ke bina.
+- **Kab dobara khulega:** owner khud khole.
+- **Kisne, kab:** owner, 2026-11-18. **Nishaan:** Salah maani.
+- **Asar (Claude):** number abhi misaal hain; settings se badal sakein. Sach me bahut saste product pe seller ko har baar confirm karna padega.
+
+### D-088. Kits aur combos
+
+- **Faisla:** kits aur combos is roop me bikte hain. Niyam:
+  1. Brand ka pack kiya kit R1 se hi, normal product ki tarah: ek barcode, ek MRP. Kit ki expiry = sabse pehle expire hone wali cheez ki; kit ki cheezon ki list product page pe.
+  2. Combo: "A + B saath me ₹X", sirf ek hi seller ke products ka.
+  3. Combo me stock har cheez se ghatta hai; combo ka daam cheezon me baanta jaata hai, aur invoice me har cheez ki line apne batch aur expiry ke saath.
+  4. Combo poora lautta hai; ek cheez kharab nikle to sirf usi ka badla ya refund.
+  5. Combo R2 se (promotions ke saath, D-055).
+- **Wajah:** Claude ki salah, owner ne maani: brand ka kit R1 me bina naye kaam ke chal jaata hai, aur combo ek seller tak rehne se ek daam do invoices me nahi baantna padta.
+- **Chhode vikalp:** sirf brand ka kit (combo ke liye seller ko naya barcode banana padta); alag sellers ke products ka combo (ek daam do invoices pe, aur return pe jhagda).
+- **Kab dobara khulega:** owner khud khole.
+- **Kisne, kab:** owner, 2026-11-18. **Nishaan:** Salah maani.
+- **Asar (Claude):** D-076 niyam 6 ka "bundle" yahi combo hai. Combo ke return ke niyam returns ke baaki sawalon ke saath. Kanooni detail jaanchi nahi (R-004): kai cheezon ke set pe GST (mixed ya composite supply).
+
+### D-089. Kam expiry wale batch ka label
+
+- **Faisla:** jis batch ki expiry kareeb hai, us pe customer ko saaf label dikhta hai. Niyam:
+  1. Bachi expiry ek seema (misaal 6 mahine) se kam ho to apne aap "short expiry" label.
+  2. Brand chahe to apne ghataye daam ke saath use "clearance" section me daale.
+  3. Ek waqt me ek hi batch dikhta hai (D-064), to label tabhi aata hai jab wahi batch agla bhejne wala ho.
+  4. R2 se (promotions ke saath, D-055).
+- **Wajah:** Claude ki salah, owner ne maani: customer ko saaf pata rehta hai, brand ko maal nikaalne ka raasta milta hai, aur daam phir bhi brand ka hi rehta hai (D-061 niyam 4).
+- **Chhode vikalp:** kuch nahi, brand khud daam ghataye (nuksaan aur disposal zyada); platform apne aap discount de (D-061 niyam 4 se takrav).
+- **Kab dobara khulega:** owner khud khole.
+- **Kisne, kab:** owner, 2026-11-18. **Nishaan:** Salah maani.
+- **Asar (Claude):** label ki seema D-082 ki bikri band wali seema se upar honi chahiye; dono settings me.
+
+### D-090. Pick pe reserved maal toota ya kam
+
+- **Faisla:** order ke baad reserved unit toota ya kam nikle to ye hota hai. Niyam:
+  1. Usi variant ka doosra batch ho jiska MRP wahi ho aur expiry dikhayi gayi se barabar ya baad ki, to bina pooche badal do.
+  2. Warna customer se poochho (in-app, email aur browser push), jawab ke liye tay samay (misaal 12 ghante).
+  3. Jawab na aaye to wo line cancel aur refund.
+  4. Toote maal ki bharpai seller ko D-063 se apne aap.
+- **Wajah:** Claude ki salah, owner ne maani: customer ka order bina zaroorat nahi toot-ta, aur jo use dikha tha (MRP D-064, expiry D-067) usse kam kabhi nahi milta.
+- **Chhode vikalp:** seedha line cancel (order bina zaroorat toot-ta); hamesha poochho (har baar der).
+- **Kab dobara khulega:** owner khud khole.
+- **Kisne, kab:** owner, 2026-11-18. **Nishaan:** Salah maani.
+- **Asar (Claude):** pick ke waqt "badlo ya poochho" ka kadam warehouse app me. Refund ka raasta aur samay refunds ke sawal me.
+
+### D-091. Normal customer ki quantity seema
+
+- **Faisla:** normal customer (Beauty Pro nahi) ek order me ek variant ki platform ki default seema tak le sakta hai (misaal 10); seller chahe to apne product pe usse kam rakhe.
+- **Wajah:** Claude ki salah, owner ne maani: har product pe ek seema rehti hai, aur seller apne product ke hisaab se use kam kar sakta hai.
+- **Chhode vikalp:** koi seema nahi (ek order se stock khatam ho sakta); seller tay kare, default koi nahi (zyada products pe seema nahi).
+- **Kab dobara khulega:** owner khud khole.
+- **Kisne, kab:** owner, 2026-11-18. **Nishaan:** Salah maani.
+- **Asar (Claude):** R1 me ek saral check cart aur checkout pe. Bade kharidaar ke liye Beauty Pro (D-069, D-070) ka raasta.
+
+### D-092. Bina Pro bane GSTIN wala invoice
+
+- **Faisla:** normal customer bhi checkout pe apna GSTIN daal ke business invoice le sakta hai: GSTIN ka format check aur naam; Pro daam nahi; har seller ka invoice customer ke GSTIN ke saath. R2 se (Beauty Pro ke kaam bhi R2, D-055).
+- **Wajah:** Claude ki salah, owner ne maani: business customer bina Pro bane sahi invoice le paata hai, aur format check se galat GSTIN ka jokhim kam rehta hai.
+- **Chhode vikalp:** sirf Pro buyer ko (business customers bahar); staff ki jaanch ke baad (staff ka kaam aur der).
+- **Kab dobara khulega:** owner khud khole.
+- **Kisne, kab:** owner, 2026-11-18. **Nishaan:** Salah maani.
+- **Asar (Claude):** invoice me customer ka GSTIN ek optional field; R1 ke invoice ka dhaancha ise pehle din se sambhale. Kanooni detail jaanchi nahi (R-004): B2B invoice aur us pe tax credit ke niyam.
+
+### D-093. Customer ka paisa kis khaate me
+
+- **Faisla:** customer ka saara payment (prepaid aur delivery pe UPI, D-034) platform ke ek payment gateway (Razorpay) account me aata hai. Finance me har seller ka hisaab, aur payout platform karta hai (R1 me haath se "paid", D-055). Design aisa ki baad me payment pe hi baantne (seller ke linked account) pe jaana pade to sirf payout ka tareeka badle, hisaab nahi.
+- **Wajah:** Claude ki salah, owner ne maani: R1 ke liye saral, aur baad me raasta badalna pade to hisaab wahi rehta hai.
+- **Chhode vikalp:** payment pe hi har seller ke linked account me baantna (linked accounts ka setup aur har seller ke bank ki jaanch); har seller ka apna gateway (ek checkout me sambhav nahi).
+- **Kab dobara khulega:** owner khud khole.
+- **Kisne, kab:** owner, 2026-11-18. **Nishaan:** Salah maani.
+- **Asar (Claude):** platform ke paas sellers ka paisa rehta hai (zimmedari); finance ke ledger aur milaan ka design Database Architect ke saath. Kanooni detail jaanchi nahi (R-004): marketplace ke liye payment aggregator aur sellers ka paisa rakhne ke niyam.
+
+### D-094. Fees ki shuruaati rakam (dummy)
+
+- **Faisla:** fees ki shuruaati rakam (dummy, baad me setting se badle):
+  1. Commission ka dhaancha category ka (D-078), par shuru me sab categories pe ek rakam (misaal 10%).
+  2. Fulfilment fee ₹25 per unit (misaal).
+  3. Storage: receiving ke 90 din muft, phir ₹2 per unit per mahina, 180 din ke baad ₹4 (misaal).
+  4. Disposal fee ₹10 per unit (misaal); wapsi ka kharcha asli.
+  5. Storage fee per unit; volume ke hisaab se baad me.
+- **Wajah:** Claude ki salah, owner ne maani: R1 me setup saral, aur category ki alag rakam baad me bina code change ke.
+- **Chhode vikalp:** shuru se category ke hisaab se alag commission (R1 me zyada setup); owner apni rakam de (owner ka samay).
+- **Kab dobara khulega:** owner khud khole.
+- **Kisne, kab:** owner, 2026-11-18. **Nishaan:** Salah maani.
+- **Asar (Claude):** D-066 ke muft din aur fee, aur D-062 ki disposal fee ab yahi. Saari rakam settings me.
+
+### D-095. Chargeback ka nuksaan
+
+- **Faisla:** customer chargeback jeete to nuksaan wajah ke hisaab se. Niyam:
+  1. Product ki shikayat (galat ya kharab maal, brand ki galti): seller.
+  2. Delivery ya fraud ka maamla: platform.
+  3. Delivery ka saboot mazboot ho (D-072 ka code), to platform dispute lade.
+- **Wajah:** Claude ki salah, owner ne maani: nuksaan usi pe jiski galti, aur delivery ke saboot se jhoothe dispute ka mukabla ho sakta hai.
+- **Chhode vikalp:** hamesha platform (galti brand ki ho tab bhi nuksaan platform ka); hamesha seller (galti delivery ki ho tab seller ke saath anyay).
+- **Kab dobara khulega:** owner khud khole.
+- **Kisne, kab:** owner, 2026-11-18. **Nishaan:** Salah maani.
+- **Asar (Claude):** R2 se, kyunki test mode me chargebacks nahi aate (D-055). Seller ka hissa D-071 ke udhaar ke raaste.
+
 ## Change log
 
 | Version | Date       | Badlav                                                                                                                                                                                                                                                                                  |
@@ -1003,12 +1174,13 @@
 | v1.4.23 | 2026-11-18 | D-072 aaya ("parcel nahi mila" ka jhagda saboot se; Q-013).                                                                                                                                                                                                                             |
 | v1.4.24 | 2026-11-18 | D-073 aaya (pehle ka kaam do kadam me hatega; Q-014).                                                                                                                                                                                                                                   |
 | v1.4.25 | 2026-11-18 | D-074 aaya (pehle ke kaam se lene layak cheezon ki chalti list; Q-015).                                                                                                                                                                                                                 |
-| v1.4.26 | 2026-11-18 | D-075 aaya (ek brand ka ek seller, brand ko pehla haq; Q-016). |
-| v1.4.27 | 2026-11-18 | D-076 aaya (variants category ke hisaab se, platform tay kare; Q-017). |
-| v1.4.28 | 2026-11-18 | D-077 aaya (kai sellers wala order: normal ek parcel, majboori me alag; Q-018); D-072 me jod (code har parcel ka). |
-| v1.4.29 | 2026-11-18 | D-078 aaya (seller ki fees: commission GST ke bina + fulfilment fee; Q-019). |
-| v1.4.30 | 2026-11-18 | D-079 aaya (return ki wajahein; man badla sirf band maal pe; Q-020). |
-| v1.4.31 | 2026-11-18 | D-080 aaya (return ki samay-seema wajah ke hisaab se; Q-021). |
-| v1.4.32 | 2026-11-18 | D-081 aaya (seller ka paisa return ki samay-seema ke baad payable, hafte me payout; Q-022). |
-| v1.4.33 | 2026-11-18 | D-082 aaya (expiry ki seemaayein: default + category ka override; Q-023). |
-| v1.4.34 | 2026-11-18 | "Asar" se agle sawalon ke zikr hataye (owner); jo sawal tay ho chuka, wahan us faisle ka number. Koi faisla nahi badla. |
+| v1.4.26 | 2026-11-18 | D-075 aaya (ek brand ka ek seller, brand ko pehla haq; Q-016).                                                                                                                                                                                                                          |
+| v1.4.27 | 2026-11-18 | D-076 aaya (variants category ke hisaab se, platform tay kare; Q-017).                                                                                                                                                                                                                  |
+| v1.4.28 | 2026-11-18 | D-077 aaya (kai sellers wala order: normal ek parcel, majboori me alag; Q-018); D-072 me jod (code har parcel ka).                                                                                                                                                                      |
+| v1.4.29 | 2026-11-18 | D-078 aaya (seller ki fees: commission GST ke bina + fulfilment fee; Q-019).                                                                                                                                                                                                            |
+| v1.4.30 | 2026-11-18 | D-079 aaya (return ki wajahein; man badla sirf band maal pe; Q-020).                                                                                                                                                                                                                    |
+| v1.4.31 | 2026-11-18 | D-080 aaya (return ki samay-seema wajah ke hisaab se; Q-021).                                                                                                                                                                                                                           |
+| v1.4.32 | 2026-11-18 | D-081 aaya (seller ka paisa return ki samay-seema ke baad payable, hafte me payout; Q-022).                                                                                                                                                                                             |
+| v1.4.33 | 2026-11-18 | D-082 aaya (expiry ki seemaayein: default + category ka override; Q-023).                                                                                                                                                                                                               |
+| v1.4.34 | 2026-11-18 | "Asar" se agle sawalon ke zikr hataye (owner); jo sawal tay ho chuka, wahan us faisle ka number. Koi faisla nahi badla.                                                                                                                                                                 |
+| v1.5.1  | 2026-11-18 | D-083 se D-095 aaye (Q-024 se Q-036 ek saath; owner ne saare sawalon pe salah maani).                                                                                                                                                                                                   |

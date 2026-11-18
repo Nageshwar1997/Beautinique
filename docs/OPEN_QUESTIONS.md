@@ -1,6 +1,6 @@
 # OPEN QUESTIONS: Beautinique
 
-> **Status:** v1.3.2 (2026-11-18). Khule sawal, aage ke topics aur jaanchna baaki. Cheezein ek-ek karke judengi.
+> **Status:** v1.3.3 (2026-11-18). Khule sawal, aage ke topics aur jaanchna baaki. Cheezein ek-ek karke judengi.
 
 ## Is file me kya aayega
 
@@ -607,7 +607,7 @@ Claude ka kaam: owner ka faisla nahi chahiye, sirf saboot. Nateeja saboot ke saa
 
 ### Q-024. Pack pe expiry date na ho to us maal ka kya ho?
 
-- **Status:** `Khula`. Topic: B3 (catalog: batch aur expiry).
+- **Status:** `Tay`. Topic: B3 (catalog: batch aur expiry).
 - **Sawal:** kuch packs pe expiry date nahi hoti: sirf bani hone ki tareekh (mfg date) aur "itne mahine me istemaal karein" likha hota hai, ya sirf PAO nishaan (khulne ke baad kitne mahine chale, jaise "12M"). Aise maal ka kya ho?
 - **Kyun zaroori:**
   - Expiry pe kai faisle tike hain: bikri band ki seema (D-062, D-082), sabse pehle expire hone wala pehle (D-062 niyam 2), batch ka MRP (D-064), aur product page pe expiry (D-067). Expiry na ho to ye sab toot-te hain.
@@ -626,10 +626,11 @@ Claude ka kaam: owner ka faisla nahi chahiye, sirf saboot. Nateeja saboot ke saa
   - (b) me staff ko pack dhyaan se padhna padta hai, aur nikali hui expiry ki jaanch karni padti hai.
   - (c) me andaaze ki expiry customer ko "exact" dikhegi, jo D-067 ke khilaaf hai.
 - **Kanooni detail jaanchi nahi** (R-004): label pe expiry ya "use before" date ke niyam.
+- **Owner ka jawab (2026-11-18):** **(b)**, expiry ya mfg date + shelf life; sirf PAO wala maal wapas (4 niyam). Record: [DECISIONS.md](DECISIONS.md) D-083.
 
 ### Q-025. Seller aur listing ki jaanch kis daayre ka staff kare?
 
-- **Status:** `Khula`. Topic: B2 (roles), B3 (catalog).
+- **Status:** `Tay`. Topic: B2 (roles), B3 (catalog).
 - **Sawal:** seller ki manzoori (dummy KYC aur warehouse wale state ka GSTIN, D-036) aur product listing ki jaanch kaun kare: poore desh ki ek team, ya state ke hisaab se alag staff?
 - **Kyun zaroori:**
   - Products poore India me dikhte hain (D-035), aur seller ka state uske warehouse wale GSTIN se tay hota hai (D-036). Isi se staff ki permissions ka daayra, kaam ki queue aur appeal ka niyam banta hai.
@@ -646,10 +647,11 @@ Claude ka kaam: owner ka faisla nahi chahiye, sirf saboot. Nateeja saboot ke saa
   - (a) me states badhne pe ek team pe bojh badhta hai.
   - (b) me seller ko ek state ka staff aur doosre state ka GSTIN alag log jaanchte hain.
   - (c) me ek product kai baar jaanchna padta hai.
+- **Owner ka jawab (2026-11-18):** **(a)**, dono jaanch poore desh ki team kare (3 niyam). Record: [DECISIONS.md](DECISIONS.md) D-084.
 
 ### Q-026. Shade wale variant pe seller kitni jaankari de?
 
-- **Status:** `Khula`. Topic: B3 (catalog: shade).
+- **Status:** `Tay`. Topic: B3 (catalog: shade).
 - **Sawal:** shade wale variant (D-076) ke saath seller ko kya dena zaroori ho: sirf naam aur swatch photo, ya hex colour, undertone aur depth bhi?
 - **Kyun zaroori:**
   - Online cosmetics me galat shade return ki sabse badi wajahon me se hai (D-079 me galat shade ek wajah hai).
@@ -668,10 +670,11 @@ Claude ka kaam: owner ka faisla nahi chahiye, sirf saboot. Nateeja saboot ke saa
   - (a) me filter aur shade finder kamzor rehte hain.
   - (b) me seller ka thoda zyada kaam.
   - (c) chhote brands ke liye rukawat.
+- **Owner ka jawab (2026-11-18):** **(b)**, beech ka: naam, swatch aur hex; complexion pe undertone aur depth (5 niyam). Record: [DECISIONS.md](DECISIONS.md) D-085.
 
 ### Q-027. Product ka HSN code aur GST rate kaun tay kare?
 
-- **Status:** `Khula`. Topic: B3 (catalog), B6 (tax).
+- **Status:** `Tay`. Topic: B3 (catalog), B6 (tax).
 - **Sawal:** har product ka HSN code aur GST rate seller bhare, ya platform tay kare?
 - **Kyun zaroori:**
   - R1 catalog me HSN aur GST rate hain ([PROJECT_PLAN.md](PROJECT_PLAN.md) §1). Invoice seller ke GSTIN se banta hai (D-030), yaani supplier seller hai.
@@ -692,10 +695,11 @@ Claude ka kaam: owner ka faisla nahi chahiye, sirf saboot. Nateeja saboot ke saa
   - (b) me ek table sambhalni padti hai.
   - (c) me jis product ka HSN category se alag ho, wo atak jaata hai.
 - **Kanooni detail jaanchi nahi** (R-004): cosmetics ke HSN aur rates, aur rate badalne pe MRP aur purane stock ke niyam.
+- **Owner ka jawab (2026-11-18):** **(b)**, platform ki HSN → rate table tareekh ke saath (5 niyam). Record: [DECISIONS.md](DECISIONS.md) D-086.
 
 ### Q-028. Daam ka kitna bada badlav ho to seller se dobara confirm maanga jaaye?
 
-- **Status:** `Khula`. Topic: B4 (pricing).
+- **Status:** `Tay`. Topic: B4 (pricing).
 - **Sawal:** D-061 niyam 3 me bade badlav pe seller se dobara confirm hai (misaal 50%). Asli seema kya ho?
 - **Kyun zaroori:**
   - Daam neeche ki galti (₹1,999 ki jagah ₹199) me stock minton me bik jaata hai, aur nuksaan seller ka hota hai.
@@ -712,10 +716,11 @@ Claude ka kaam: owner ka faisla nahi chahiye, sirf saboot. Nateeja saboot ke saa
   - (a) sabse saral.
   - (b) me neeche ki galti jaldi pakdi jaati hai.
   - (c) me ek aur check; sach me bahut saste product pe seller ko har baar confirm karna padta hai.
+- **Owner ka jawab (2026-11-18):** **(c)**, alag-alag seema + MRP ka check (3 niyam). Record: [DECISIONS.md](DECISIONS.md) D-087.
 
 ### Q-029. Kits aur combos kis roop me bikein?
 
-- **Status:** `Khula`. Topic: B4 (bundles aur kits).
+- **Status:** `Tay`. Topic: B4 (bundles aur kits).
 - **Sawal:** gift sets aur routine kits (jaise cleanser + toner + moisturiser) kis roop me bikein?
 - **Kyun zaroori:**
   - Cosmetics me kits aur combos aam hain. Har cheez ka apna batch aur expiry hota hai (D-064, D-067), aur GST rate alag ho sakta hai.
@@ -735,10 +740,11 @@ Claude ka kaam: owner ka faisla nahi chahiye, sirf saboot. Nateeja saboot ke saa
   - (b) me daam baantne aur stock ka hisaab.
   - (c) bahut bhaari: ek daam do invoices pe, aur return pe jhagda.
 - **Kanooni detail jaanchi nahi** (R-004): kai cheezon ke set pe GST (mixed ya composite supply).
+- **Owner ka jawab (2026-11-18):** **(b)**, brand ka kit + usi seller ka combo (5 niyam). Record: [DECISIONS.md](DECISIONS.md) D-088.
 
 ### Q-030. Kam expiry wale batch ke liye "short expiry" label ya alag section ho?
 
-- **Status:** `Khula`. Topic: B4 (pricing), B3 (expiry).
+- **Status:** `Tay`. Topic: B4 (pricing), B3 (expiry).
 - **Sawal:** jis batch ki expiry kareeb hai (bikri band se pehle, misaal 3 se 6 mahine bachi), uske liye "short expiry" label ya alag section ho?
 - **Kyun zaroori:**
   - Product page pe exact expiry dikhti hai (D-067), to customer kareeb expiry wala batch chhod deta hai, aur brand ka nuksaan (D-062 ki wapsi ya nasht) badhta hai.
@@ -756,10 +762,11 @@ Claude ka kaam: owner ka faisla nahi chahiye, sirf saboot. Nateeja saboot ke saa
   - (a) me nuksaan brand ka, aur disposal zyada.
   - (b) me label ka niyam aur ek naya section.
   - (c) tay faisle (D-061) se takrav.
+- **Owner ka jawab (2026-11-18):** **(b)**, "short expiry" label + clearance section (4 niyam). Record: [DECISIONS.md](DECISIONS.md) D-089.
 
 ### Q-031. Pick pe reserved maal toota ya kam nikle to customer ka kya ho?
 
-- **Status:** `Khula`. Topic: B5 (order), B1 (warehouse).
+- **Status:** `Tay`. Topic: B5 (order), B1 (warehouse).
 - **Sawal:** order ke baad warehouse me reserved batch ka unit toota nikle ya ginti kam ho, to customer ke order ka kya ho?
 - **Kyun zaroori:**
   - Customer ko jo MRP (D-064 niyam 3) aur expiry (D-067) dikhi, wahi milni chahiye.
@@ -777,10 +784,11 @@ Claude ka kaam: owner ka faisla nahi chahiye, sirf saboot. Nateeja saboot ke saa
   - (a) me customer ka order bina zaroorat toot-ta hai.
   - (b) me ek "poochho" ka kadam aur uska samay.
   - (c) me har baar der.
+- **Owner ka jawab (2026-11-18):** **(b)**, barabar ho to badal do, warna poochho (4 niyam). Record: [DECISIONS.md](DECISIONS.md) D-090.
 
 ### Q-032. Normal customer ek order me ek variant ki kitni quantity le sake?
 
-- **Status:** `Khula`. Topic: B5 (cart aur checkout).
+- **Status:** `Tay`. Topic: B5 (cart aur checkout).
 - **Sawal:** normal customer (Beauty Pro nahi) ek order me ek variant ki kitni quantity le sake?
 - **Kyun zaroori:**
   - Sasta khareed ke aage bechna, aur ek customer ka poora stock le jaana, dono rokne hain. Pro buyer ke liye seema D-070 me hai, normal customer ke liye nahi.
@@ -793,10 +801,11 @@ Claude ka kaam: owner ka faisla nahi chahiye, sirf saboot. Nateeja saboot ke saa
   - (a) me ek order se stock khatam ho sakta hai.
   - (b) me bada kharidaar Beauty Pro (D-069) ki taraf jaata hai.
   - (c) me zyada products pe koi seema nahi rehti.
+- **Owner ka jawab (2026-11-18):** **(b)**, platform ki default seema, seller usse kam rakh sake. Record: [DECISIONS.md](DECISIONS.md) D-091.
 
 ### Q-033. Normal customer bina Beauty Pro bane GSTIN wala invoice le sake?
 
-- **Status:** `Khula`. Topic: B5 (checkout), B6 (invoice).
+- **Status:** `Tay`. Topic: B5 (checkout), B6 (invoice).
 - **Sawal:** koi normal customer (Pro nahi) checkout pe apna GSTIN daal ke business invoice le sake?
 - **Kyun zaroori:**
   - Pro buyer ko GSTIN wala invoice milta hai (D-065, D-069). Companies gifting ke liye bhi kharidti hain, aur unhe Pro daam nahi, sirf sahi invoice chahiye.
@@ -810,10 +819,11 @@ Claude ka kaam: owner ka faisla nahi chahiye, sirf saboot. Nateeja saboot ke saa
   - (b) me galat GSTIN ka thoda jokhim.
   - (c) me staff ka kaam aur der.
 - **Kanooni detail jaanchi nahi** (R-004): B2B invoice aur us pe tax credit ke niyam.
+- **Owner ka jawab (2026-11-18):** **(b)**, haan, format check ke saath, R2 se. Record: [DECISIONS.md](DECISIONS.md) D-092.
 
 ### Q-034. Customer ka paisa kis khaate me aaye, aur sellers tak kaise pahunche?
 
-- **Status:** `Khula`. Topic: B6 (payments aur settlement).
+- **Status:** `Tay`. Topic: B6 (payments aur settlement).
 - **Sawal:** customer ka payment (prepaid aur delivery pe UPI, D-034) kis khaate me aaye, aur sellers tak kaise pahunche?
 - **Kyun zaroori:**
   - Isse ledger ka dhaancha, hisaab ka milaan aur payout ka tareeka tay hota hai. Payout ka samay D-081 me tay hai; ye sawal raasta tay karta hai.
@@ -827,10 +837,11 @@ Claude ka kaam: owner ka faisla nahi chahiye, sirf saboot. Nateeja saboot ke saa
   - (b) me gateway ke linked accounts ka setup aur har seller ke bank ki jaanch.
   - (c) me customer ko ek order ke liye kai payment.
 - **Kanooni detail jaanchi nahi** (R-004): marketplace ke liye payment aggregator aur sellers ka paisa rakhne ke niyam.
+- **Owner ka jawab (2026-11-18):** **(a)**, platform ka ek payment gateway account. Record: [DECISIONS.md](DECISIONS.md) D-093.
 
 ### Q-035. Seller ki fees ki shuruaati rakam (dummy) kya ho?
 
-- **Status:** `Khula`. Topic: B6 (settlement).
+- **Status:** `Tay`. Topic: B6 (settlement).
 - **Sawal:** D-078 ki fees (commission, fulfilment fee) aur D-066, D-062 ki fees ki shuruaati rakam kya ho? Business dummy hai, aur rakam baad me setting se badal sakti hai.
 - **Kyun zaroori:**
   - R1 ke seller hisaab me asli jaise numbers chahiye. Storage fee ki rakam aur muft din (D-066) aur disposal fee (D-062) ab tak tay nahi.
@@ -843,10 +854,11 @@ Claude ka kaam: owner ka faisla nahi chahiye, sirf saboot. Nateeja saboot ke saa
   - (a) asli jaisa, par R1 me zyada setup.
   - (b) saral, par shuru me har category ka asli farak nahi dikhta.
   - (c) me owner ka samay lagta hai.
+- **Owner ka jawab (2026-11-18):** **(b)**, shuru me sab categories pe ek commission (misaal rakam). Record: [DECISIONS.md](DECISIONS.md) D-094.
 
 ### Q-036. Customer ka chargeback jeete to nuksaan kiska?
 
-- **Status:** `Khula`. Topic: B6 (payments).
+- **Status:** `Tay`. Topic: B6 (payments).
 - **Sawal:** customer bank se payment ka dispute (chargeback) jeete, to nuksaan kiska: platform ka ya seller ka?
 - **Kyun zaroori:**
   - Asli payments me chargebacks aate hain; bina niyam ke har maamla jhagda banta hai. Test mode me chargebacks nahi aate, to ye R2 se (D-055).
@@ -862,45 +874,47 @@ Claude ka kaam: owner ka faisla nahi chahiye, sirf saboot. Nateeja saboot ke saa
   - (a) me platform ka nuksaan, chahe galti brand ki ho.
   - (b) me seller ke saath anyay, jab galti delivery ki ho.
   - (c) me har maamle ki jaanch.
+- **Owner ka jawab (2026-11-18):** **(c)**, wajah ke hisaab se (3 niyam). Record: [DECISIONS.md](DECISIONS.md) D-095.
 
 ## Change log
 
-| Version | Date       | Badlav                                                                     |
-| ------- | ---------- | -------------------------------------------------------------------------- |
-| v1.0.0  | 2026-11-17 | Khaali file bani.                                                          |
-| v1.1.1  | 2026-11-18 | §1 aage ke topics (B1 se B16) aur §2 jaanchna baaki bane.                  |
-| v1.2.1  | 2026-11-18 | §3 Sawal bana; Q-001 (warehouse me rakhe maal ka maalik).                  |
-| v1.2.2  | 2026-11-18 | Q-001 tay: (a) brand maalik (D-060).                                       |
-| v1.2.3  | 2026-11-18 | Q-002 (customer ko dikhne wala price kaun tay kare).                       |
-| v1.2.4  | 2026-11-18 | Q-002 tay: (c) brand + platform ke niyam (D-061).                          |
-| v1.2.5  | 2026-11-18 | Q-003 (expire hone wala ya na bika maal).                                  |
-| v1.2.6  | 2026-11-18 | Q-003 tay: (b) brand ka nuksaan + platform ke niyam (D-062).               |
-| v1.2.7  | 2026-11-18 | Q-004 (hamare haath se hue nuksaan ki bharpai ka daam).                    |
-| v1.2.8  | 2026-11-18 | Q-004 tay: (b) bikne wala daam (D-063).                                    |
-| v1.2.9  | 2026-11-18 | Q-005 (alag batches ka alag MRP).                                          |
-| v1.2.10 | 2026-11-18 | Q-005 tay: (b) batch ke hisaab se (D-064).                                 |
-| v1.2.11 | 2026-11-18 | Q-006 (Beauty Pro buyers ka daam).                                         |
-| v1.2.12 | 2026-11-18 | Q-006 tay: (b) Pro daam (D-065); Q-007 (storage fee).                      |
-| v1.2.13 | 2026-11-18 | Q-007 tay: (c) muft, phir fee (D-066); Q-008 (product page pe expiry).     |
-| v1.2.14 | 2026-11-18 | Q-008 tay: (b) exact expiry (D-067); Q-009 (nuksaan ki vasooli).           |
-| v1.2.15 | 2026-11-18 | Q-009 tay: (b) saboot se vasooli (D-068); Q-010 (Beauty Pro ki jaanch).    |
-| v1.2.16 | 2026-11-18 | Q-010 tay: (b) saboot + staff (D-069); Q-011 (Pro daam ki quantity seema). |
-| v1.2.17 | 2026-11-18 | Q-011 tay: (b) seller tay kare (D-070).                                    |
-| v1.2.18 | 2026-11-18 | Q-012 (bachi fee) aur Q-013 (parcel nahi mila par "delivered").            |
-| v1.2.19 | 2026-11-18 | Q-012 tay: (b) seema ke baad kadam (D-071).                                |
-| v1.2.20 | 2026-11-18 | Q-013 tay: (b) saboot se faisla (D-072).                                   |
-| v1.2.21 | 2026-11-18 | Q-014 (pehle ka kaam kab aur kaise hatega).                                |
-| v1.2.22 | 2026-11-18 | Q-014 tay: (b) do kadam me (D-073).                                        |
-| v1.2.23 | 2026-11-18 | Q-015 (pehle ke kaam se kya naye me aaye, list kab aur kaise).             |
-| v1.2.24 | 2026-11-18 | Q-015 tay: (b) chalti list discovery ke saath (D-074).                     |
-| v1.2.25 | 2026-11-18 | Q-016 (ek brand ka maal kai sellers bechna chahein). |
-| v1.2.26 | 2026-11-18 | Q-016 tay: (a) ek brand, ek seller (D-075); Q-017 (variants kin cheezon se). |
-| v1.2.27 | 2026-11-18 | Q-017 tay: (b) category ke hisaab se (D-076); Q-018 (kai sellers wala order aur parcel). |
-| v1.2.28 | 2026-11-18 | Q-018 tay: (c) normal ek parcel (D-077); Q-019 (seller ki fees aur commission ka aadhaar). |
-| v1.2.29 | 2026-11-18 | Q-019 tay: (b) + (ii) (D-078); Q-020 (return ki wajahein aur "band" ka matlab). |
-| v1.2.30 | 2026-11-18 | Q-020 tay: (b) man badla sirf band maal pe (D-079); Q-021 (return ki samay-seema). |
-| v1.2.31 | 2026-11-18 | Q-021 tay: (b) wajah ke hisaab se (D-080); Q-022 (seller ka paisa kab payable, payout). |
-| v1.2.32 | 2026-11-18 | Q-022 tay: (b) samay-seema ke baad, hafte me payout (D-081); Q-023 (expiry ki seemaon ke number). |
-| v1.2.33 | 2026-11-18 | Q-023 tay: (b) default + category override (D-082); Q-024 (pack pe expiry date na ho to). |
-| v1.3.1 | 2026-11-18 | Niyam badla (owner): bina dependency wale sawal ek saath; har sawal se "Iske baad" aur agle sawal ke zikr hataye. |
-| v1.3.2 | 2026-11-18 | Q-025 se Q-036 ek saath (kisi khule sawal pe tike nahi). |
+| Version | Date       | Badlav                                                                                                            |
+| ------- | ---------- | ----------------------------------------------------------------------------------------------------------------- |
+| v1.0.0  | 2026-11-17 | Khaali file bani.                                                                                                 |
+| v1.1.1  | 2026-11-18 | §1 aage ke topics (B1 se B16) aur §2 jaanchna baaki bane.                                                         |
+| v1.2.1  | 2026-11-18 | §3 Sawal bana; Q-001 (warehouse me rakhe maal ka maalik).                                                         |
+| v1.2.2  | 2026-11-18 | Q-001 tay: (a) brand maalik (D-060).                                                                              |
+| v1.2.3  | 2026-11-18 | Q-002 (customer ko dikhne wala price kaun tay kare).                                                              |
+| v1.2.4  | 2026-11-18 | Q-002 tay: (c) brand + platform ke niyam (D-061).                                                                 |
+| v1.2.5  | 2026-11-18 | Q-003 (expire hone wala ya na bika maal).                                                                         |
+| v1.2.6  | 2026-11-18 | Q-003 tay: (b) brand ka nuksaan + platform ke niyam (D-062).                                                      |
+| v1.2.7  | 2026-11-18 | Q-004 (hamare haath se hue nuksaan ki bharpai ka daam).                                                           |
+| v1.2.8  | 2026-11-18 | Q-004 tay: (b) bikne wala daam (D-063).                                                                           |
+| v1.2.9  | 2026-11-18 | Q-005 (alag batches ka alag MRP).                                                                                 |
+| v1.2.10 | 2026-11-18 | Q-005 tay: (b) batch ke hisaab se (D-064).                                                                        |
+| v1.2.11 | 2026-11-18 | Q-006 (Beauty Pro buyers ka daam).                                                                                |
+| v1.2.12 | 2026-11-18 | Q-006 tay: (b) Pro daam (D-065); Q-007 (storage fee).                                                             |
+| v1.2.13 | 2026-11-18 | Q-007 tay: (c) muft, phir fee (D-066); Q-008 (product page pe expiry).                                            |
+| v1.2.14 | 2026-11-18 | Q-008 tay: (b) exact expiry (D-067); Q-009 (nuksaan ki vasooli).                                                  |
+| v1.2.15 | 2026-11-18 | Q-009 tay: (b) saboot se vasooli (D-068); Q-010 (Beauty Pro ki jaanch).                                           |
+| v1.2.16 | 2026-11-18 | Q-010 tay: (b) saboot + staff (D-069); Q-011 (Pro daam ki quantity seema).                                        |
+| v1.2.17 | 2026-11-18 | Q-011 tay: (b) seller tay kare (D-070).                                                                           |
+| v1.2.18 | 2026-11-18 | Q-012 (bachi fee) aur Q-013 (parcel nahi mila par "delivered").                                                   |
+| v1.2.19 | 2026-11-18 | Q-012 tay: (b) seema ke baad kadam (D-071).                                                                       |
+| v1.2.20 | 2026-11-18 | Q-013 tay: (b) saboot se faisla (D-072).                                                                          |
+| v1.2.21 | 2026-11-18 | Q-014 (pehle ka kaam kab aur kaise hatega).                                                                       |
+| v1.2.22 | 2026-11-18 | Q-014 tay: (b) do kadam me (D-073).                                                                               |
+| v1.2.23 | 2026-11-18 | Q-015 (pehle ke kaam se kya naye me aaye, list kab aur kaise).                                                    |
+| v1.2.24 | 2026-11-18 | Q-015 tay: (b) chalti list discovery ke saath (D-074).                                                            |
+| v1.2.25 | 2026-11-18 | Q-016 (ek brand ka maal kai sellers bechna chahein).                                                              |
+| v1.2.26 | 2026-11-18 | Q-016 tay: (a) ek brand, ek seller (D-075); Q-017 (variants kin cheezon se).                                      |
+| v1.2.27 | 2026-11-18 | Q-017 tay: (b) category ke hisaab se (D-076); Q-018 (kai sellers wala order aur parcel).                          |
+| v1.2.28 | 2026-11-18 | Q-018 tay: (c) normal ek parcel (D-077); Q-019 (seller ki fees aur commission ka aadhaar).                        |
+| v1.2.29 | 2026-11-18 | Q-019 tay: (b) + (ii) (D-078); Q-020 (return ki wajahein aur "band" ka matlab).                                   |
+| v1.2.30 | 2026-11-18 | Q-020 tay: (b) man badla sirf band maal pe (D-079); Q-021 (return ki samay-seema).                                |
+| v1.2.31 | 2026-11-18 | Q-021 tay: (b) wajah ke hisaab se (D-080); Q-022 (seller ka paisa kab payable, payout).                           |
+| v1.2.32 | 2026-11-18 | Q-022 tay: (b) samay-seema ke baad, hafte me payout (D-081); Q-023 (expiry ki seemaon ke number).                 |
+| v1.2.33 | 2026-11-18 | Q-023 tay: (b) default + category override (D-082); Q-024 (pack pe expiry date na ho to).                         |
+| v1.3.1  | 2026-11-18 | Niyam badla (owner): bina dependency wale sawal ek saath; har sawal se "Iske baad" aur agle sawal ke zikr hataye. |
+| v1.3.2  | 2026-11-18 | Q-025 se Q-036 ek saath (kisi khule sawal pe tike nahi).                                                          |
+| v1.3.3  | 2026-11-18 | Q-024 se Q-036 tay: owner ne saari salah maani (D-083 se D-095).                                                  |
