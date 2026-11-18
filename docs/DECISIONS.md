@@ -1,6 +1,6 @@
 # DECISIONS: Beautinique
 
-> **Status:** v1.4.5 (2026-11-17). Har faisla ek jagah. Sirf wahi "Tay" jo owner ne khud kaha; Claude ki salah faisla nahi. Cheezein ek-ek karke judti hain.
+> **Status:** v1.4.6 (2026-11-18). Har faisla ek jagah. Sirf wahi "Tay" jo owner ne khud kaha; Claude ki salah faisla nahi. Cheezein ek-ek karke judti hain.
 
 ## 0. Kaise likhein
 
@@ -69,6 +69,7 @@
 | D-053 | Performance targets sirf tab laagu jab server jaaga ho.                                                                                                              | Architecture | 2026-11-17 |
 | D-054 | Roles ka timing: design me saare roles, poore launch tak sab system me; banate waqt har role apne module ke saath chalu.                                             | Business     | 2026-11-17 |
 | D-055 | R1 ka scope: ek patla par poora order flow (2 sellers, 1 warehouse + 1 hub, test mode payments, simple return, review, seller ka hisaab); detail PROJECT_PLAN §1 me. | Business     | 2026-11-17 |
+| D-056 | Render pe sirf ek free web service (saara backend) aur ek free Key Value; koi doosri web service nahi, preview bhi nahi.                                             | Architecture | 2026-11-18 |
 
 ## 2. Record
 
@@ -597,6 +598,14 @@
 - **Kab dobara khulega:** domain charcha (agent 2) ke baad (Claude), ya owner khud khole.
 - **Kisne, kab:** owner, 2026-11-17 (chunna Claude pe chhoda; owner ne list dekh ke pakki ki). **Nishaan:** Salah maani.
 
+### D-056. Render pe sirf ek web service
+
+- **Faisla:** Render pe sirf do cheezein: ek free web service, jisme saara backend bundle mode me chalta hai (D-049), aur ek free Key Value (D-051). Koi doosri web service nahi, preview ya test ke liye bhi nahi.
+- **Wajah:** owner (2026-11-18): koi doosri service nahi aayegi. Isse 750 free ghante sirf ek service me jaate hain, aur wo 24 ghante jaagi rahe to bhi mahine me fit (R-008).
+- **Chhode vikalp:** har service ya preview ki alag free web service.
+- **Kab dobara khulega:** owner khud khole, ya paid hosting aaye.
+- **Kisne, kab:** owner, 2026-11-18. **Nishaan:** Owner.
+
 ## Change log
 
 | Version | Date       | Badlav                                                                                                                                                                                                                                                                                  |
@@ -613,3 +622,4 @@
 | v1.4.3  | 2026-11-17 | D-011 me asar: generator har service ka apna MongoDB URI aur finance ke liye PostgreSQL option de.                                                                                                                                                                                      |
 | v1.4.4  | 2026-11-17 | D-055 aaya (R1 ka scope; detail PROJECT_PLAN §1).                                                                                                                                                                                                                                       |
 | v1.4.5  | 2026-11-17 | D-055: owner ne R1 ki list dekh ke pakki ki.                                                                                                                                                                                                                                            |
+| v1.4.6  | 2026-11-18 | D-056 aaya (Render pe sirf ek web service aur ek Key Value).                                                                                                                                                                                                                            |
