@@ -1,6 +1,6 @@
 # DECISIONS: Beautinique
 
-> **Status:** v1.4.13 (2026-11-18). Har faisla ek jagah. Sirf wahi "Tay" jo owner ne khud kaha; Claude ki salah faisla nahi. Cheezein ek-ek karke judti hain.
+> **Status:** v1.4.15 (2026-11-18). Har faisla ek jagah. Sirf wahi "Tay" jo owner ne khud kaha; Claude ki salah faisla nahi. Cheezein ek-ek karke judti hain.
 
 ## 0. Kaise likhein
 
@@ -76,6 +76,8 @@
 | D-060 | Warehouse me rakhe maal ka maalik bikne tak brand (seller); hum rakhte, pack karte aur pahunchate hain, aur fees lete hain.                                          | Business     | 2026-11-18 |
 | D-061 | Selling price brand (seller) tay karta hai, platform ke 4 niyam ke saath (MRP ki seema, itihaas, bade badlav pe confirm, platform daam nahi badalta).                | Business     | 2026-11-18 |
 | D-062 | Expire hone wala, expire hua ya na bika maal: nuksaan brand ka; platform ke 6 niyam (receiving ki seema, bikri band, alert, brand ka chunaav, wapsi, record).        | Business     | 2026-11-18 |
+| D-063 | Hamare haath se hue nuksaan ki bharpai: jitna brand ko bikne pe milta (selling price, 30 din ka sabse kam, commission aur fees ghata ke), 5 niyam ke saath.          | Business     | 2026-11-18 |
+| D-064 | Alag batches ka alag MRP: site pe agle bhejne wale batch ka MRP, order usi batch se reserve; seller ka ek daam har bikne layak batch ke MRP ke andar (5 niyam).      | Business     | 2026-11-18 |
 
 ## 2. Record
 
@@ -675,6 +677,34 @@
 - **Kisne, kab:** owner, 2026-11-18. **Nishaan:** Salah maani.
 - **Asar (Claude):** teeno numbers (receiving ki seema, bikri band ki seema, brand ke jawab ke din; misaal 6 mahine, 3 mahine, 15 din) B3 ki charcha me tay honge, category ke hisaab se alag ho sakte hain. Disposal fee aur wapsi ka kharcha seller ke hisaab (B6) me. Do alag sawal baaki: lambe samay se pade na bike maal pe storage fee ho ya nahi; customer ko product page pe expiry dikhe ya nahi. Kanooni detail jaanchi nahi (R-004): label pe expiry ke niyam aur cosmetics nasht karne ke niyam.
 
+### D-063. Hamare haath se hue nuksaan ki bharpai
+
+- **Faisla:** brand ka maal hamari zimmedari me toot jaaye, kho jaaye ya chori ho, to brand ko utni bharpai milti hai jitna use bikne pe milta. Zimmedari receiving pe maal accept hone se customer ko delivery (ya brand ko wapsi) tak: warehouse, warehouse aur hub ke beech ka safar, hub aur delivery partner. Receiving se pehle ka nuksaan aur expiry ka nuksaan (D-062) brand ka. Niyam:
+  1. **Daam:** nuksaan ke din ka selling price aur pichhle 30 din ka sabse kam selling price (D-061 ke itihaas se), dono me jo kam ho; usme se hamara commission aur fees ghata ke.
+  2. **Record:** har nuksaan ka record: kab, kahan (warehouse, safar, hub, delivery), kisne pakda, batch, ginti; seller ko apne panel me dikhe.
+  3. **Bharpai:** seller ke hisaab me credit, record banne ke baad agle payout me. Toota maal nasht, D-062 ke record ke saath.
+  4. **Baad me mil gaya:** gum hua maal baad me mile aur bikne layak ho, to bharpai wapas kat-ti hai aur maal phir stock me.
+  5. **Seller ka daawa:** seller ki ginti hamari ginti se na mile to wo support se daawa kar sakta hai (B11).
+- **Wajah:** Claude ki salah, owner ne maani: brand ki haalat waisi hi jaisi bikne pe hoti; zaroori data pehle se hai (D-061); 30 din ke sabse kam daam se nuksaan se theek pehle daam badha ke zyada bharpai lena kaam nahi karta.
+- **Chhode vikalp:** MRP pe (brand ko bikne se bhi zyada, hamara nuksaan bada); brand ka bataya cost (jaanchna mushkil, har batch pe ek aur field).
+- **Kab dobara khulega:** owner khud khole.
+- **Kisne, kab:** owner, 2026-11-18. **Nishaan:** Salah maani.
+- **Asar (Claude):** 30 din ki khidki aur payout ka cycle settlement ki charcha (B6) me pakke honge. Alag sawal baaki: nuksaan transporter (D-027) ya delivery partner ke haath se hua ho to hum unse vasooli karein ya nahi, aur kaise. Kanooni detail jaanchi nahi (R-004): bharpai pe GST, aur kho gaye maal ka brand ke tax me hisaab.
+
+### D-064. Alag batches ka alag MRP
+
+- **Faisla:** ek product ke alag batches ke pack pe alag MRP ho, to site pe usi batch ka MRP dikhta hai jo agla bhejna hai (D-062 ka kram: sabse pehle expire hone wala pehle), aur order usi batch se reserve hota hai. Niyam:
+  1. Seller ka ek hi daam (D-061), jo kisi bhi bikne layak batch ke MRP se zyada nahi ho sakta.
+  2. Naya batch aaye aur uska MRP seller ke daam se kam ho, to wo batch tab tak nahi bikta jab tak seller daam na ghataye; seller ko alert. Platform daam khud nahi badalta (D-061 niyam 4).
+  3. Customer ne jo MRP dekha, wahi batch jaata hai.
+  4. Ek line ki quantity do batches me bate aur MRP alag ho, to checkout pe line do hisson me dikhti hai, har hissa apne MRP ke saath (daam wahi).
+  5. Invoice me har line ka batch aur MRP.
+- **Wajah:** Claude ki salah, owner ne maani: site pe dikha MRP aur customer ke haath me aaya pack hamesha same, jo online pe pack ki jaankari dikhane ke kanoon ki maang hai; batch ka record (D-062) pehle se ban raha hai, to reservation ko batch tak le jaana chhota kaam hai.
+- **Chhode vikalp:** ek MRP, saare batches me sabse kam wala (site aur pack ka MRP kabhi alag); har MRP ki alag listing (customer ke liye confusing, search aur reviews do jagah).
+- **Kab dobara khulega:** owner khud khole.
+- **Kisne, kab:** owner, 2026-11-18. **Nishaan:** Salah maani.
+- **Asar (Claude):** stock aur reservation batch ke level pe; batch badalte hi site ka MRP badalta hai; cart aur checkout me line ka batch-wise hissa (B5). Kanooni detail jaanchi nahi (R-004): online pe pack ki jaankari dikhane ke niyam.
+
 ## Change log
 
 | Version | Date       | Badlav                                                                                                                                                                                                                                                                                  |
@@ -699,3 +729,5 @@
 | v1.4.11 | 2026-11-18 | D-060 aaya (warehouse me rakhe maal ka maalik brand; Q-001).                                                                                                                                                                                                                            |
 | v1.4.12 | 2026-11-18 | D-061 aaya (selling price brand tay kare, platform ke 4 niyam; Q-002).                                                                                                                                                                                                                  |
 | v1.4.13 | 2026-11-18 | D-062 aaya (expire hone wala ya na bika maal: nuksaan brand ka, platform ke 6 niyam; Q-003).                                                                                                                                                                                            |
+| v1.4.14 | 2026-11-18 | D-063 aaya (hamare haath se hue nuksaan ki bharpai: bikne wala daam; Q-004).                                                                                                                                                                                                            |
+| v1.4.15 | 2026-11-18 | D-064 aaya (alag batches ka alag MRP: batch ke hisaab se; Q-005).                                                                                                                                                                                                                       |
