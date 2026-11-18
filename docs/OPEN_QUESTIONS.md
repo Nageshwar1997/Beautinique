@@ -1,6 +1,6 @@
 # OPEN QUESTIONS: Beautinique
 
-> **Status:** v1.2.20 (2026-11-18). Khule sawal, aage ke topics aur jaanchna baaki. Cheezein ek-ek karke judengi.
+> **Status:** v1.2.22 (2026-11-18). Khule sawal, aage ke topics aur jaanchna baaki. Cheezein ek-ek karke judengi.
 
 ## Is file me kya aayega
 
@@ -359,6 +359,31 @@ Claude ka kaam: owner ka faisla nahi chahiye, sirf saboot. Nateeja saboot ke saa
 - **Kanooni detail jaanchi nahi** (R-004): photo aur location jaise personal data rakhne ke niyam.
 - **Owner ka jawab (2026-11-18):** **(b)**, delivery pe saboot, phir saboot se faisla (4 niyam). Record: [DECISIONS.md](DECISIONS.md) D-072.
 
+### Q-014. Pehle ka kaam (purana code aur purane docs) kab aur kaise hatega?
+
+- **Status:** `Tay`. Topic: B16 (docs aur dhaancha), B15 (technical).
+- **Sawal:** D-003 kehta hai pehle ka kaam sirf reference hai aur aage hat jayega. Wo repo se kab hate, aur kaise?
+- **Kyun zaroori:**
+  - Jab tak pada hai, repo bhaari hai aur galti se purane ko sach maan lene ka khatra rehta hai (D-003 ki wajah yahi thi).
+  - Abhi koi npm command nahi chalta aur pull request pe CI fail hota hai (D-003 ka asar), kyunki root setup purane hisse pe tika hai. Ye naye root setup se hi theek hoga.
+  - Par abhi iski zaroorat bhi hai: Agent 2 (domain expert) aur Security Architect purane analysis aur audit se gaps dekh sakte hain.
+  - Hatana working tree se hota hai; git history me sab rehta hai, to zaroorat pe wapas dekha ja sakta hai.
+- **Vikalp:**
+  - **(a) Abhi hatao:** ek commit me sab purana hatao; reference chahiye to git history se.
+  - **(b) Do kadam me, zaroorat khatam hone pe:**
+    1. Hatane se pehle ek git tag, taaki pura purana kaam ek command se mil sake.
+    2. Purane docs: discovery khatam hone pe (Agent 2 aur Security Architect ke baad, planning stage shuru hone se pehle).
+    3. Purana code: naya root setup (`package.json`, lint, CI) banne ke saath, implementation stage ka pehla kaam.
+    4. Dono baar hatana owner ki haan se (destructive kaam), aur naye docs me iska koi zikr nahi (D-003).
+  - **(c) Kabhi na hatao:** reference ke liye hamesha repo me rahe.
+- **Salah:** **(b)**. Har hissa tab hatta hai jab uski zaroorat khatam hoti hai: purane docs discovery tak kaam aate hain, aur purana code naye root setup tak hi rukawat hai. Tag se kuch khota nahi.
+- **Trade-off:**
+  - (a) repo turant saaf, par agents ko purana analysis git history se nikaalna padega; aur npm aur CI tab bhi naye root setup tak nahi chalenge.
+  - (b) me do baar ka kaam, aur tab tak repo me purana aur naya dono.
+  - (c) me hamesha confusion ka khatra aur bhaari repo: D-003 ke khilaaf.
+- **Iske baad (alag sawal):** pehle ke kaam ki kaunsi cheezein (jaise achhe patterns, design ke tokens) naye me laani hain, aur uski list kab aur kaise bane.
+- **Owner ka jawab (2026-11-18):** **(b)**, do kadam me (4 niyam). Record: [DECISIONS.md](DECISIONS.md) D-073.
+
 ## Change log
 
 | Version | Date       | Badlav                                                                     |
@@ -385,3 +410,5 @@ Claude ka kaam: owner ka faisla nahi chahiye, sirf saboot. Nateeja saboot ke saa
 | v1.2.18 | 2026-11-18 | Q-012 (bachi fee) aur Q-013 (parcel nahi mila par "delivered").            |
 | v1.2.19 | 2026-11-18 | Q-012 tay: (b) seema ke baad kadam (D-071).                                |
 | v1.2.20 | 2026-11-18 | Q-013 tay: (b) saboot se faisla (D-072).                                   |
+| v1.2.21 | 2026-11-18 | Q-014 (pehle ka kaam kab aur kaise hatega).                                |
+| v1.2.22 | 2026-11-18 | Q-014 tay: (b) do kadam me (D-073).                                        |

@@ -1,25 +1,26 @@
 # HANDOFF: Beautinique
 
-> **Status:** v1.0.45 (2026-11-18). Ek session ya account se agle tak ki halat. Chhota rakho: sirf abhi ki halat aur agla kaam.
+> **Status:** v1.0.47 (2026-11-18). Ek session ya account se agle tak ki halat. Chhota rakho: sirf abhi ki halat aur agla kaam.
 
 ## 1. Abhi ki halat (2026-11-17)
 
 - **Discovery phase** chal raha hai: plan, task files aur naya code abhi nahi. Branch: `feat/mig-plan`.
 - **Docs aur code naye sire se (owner, D-003):** naye docs ([README.md](README.md)) me cheezein ek-ek karke, owner ki haan ke baad judti hain. Code naye sire se implementation stage me.
 - **Abhi koi npm command nahi chalta**; docs ke liye sirf `npx prettier --check <files>`. Pull request pe CI fail hoga jab tak naya root setup na bane; is branch pe push se CI nahi chalta.
-- **Faisle:** [DECISIONS.md](DECISIONS.md) me D-001 se D-072 (R1 ka scope: D-055, detail [PROJECT_PLAN.md](PROJECT_PLAN.md) §1); ab tak ke saare faisle aa gaye. Risks [RISKS.md](RISKS.md) me (R-001 se R-014, jaanch ke tathya samet); pehla security niyam [security/SECURITY_REQUIREMENTS.md](security/SECURITY_REQUIREMENTS.md) me (SR-001).
+- **Faisle:** [DECISIONS.md](DECISIONS.md) me D-001 se D-073 (R1 ka scope: D-055, detail [PROJECT_PLAN.md](PROJECT_PLAN.md) §1); ab tak ke saare faisle aa gaye. Risks [RISKS.md](RISKS.md) me (R-001 se R-014, jaanch ke tathya samet); pehla security niyam [security/SECURITY_REQUIREMENTS.md](security/SECURITY_REQUIREMENTS.md) me (SR-001).
 - **Agents:** repo analysis ho gaya. Agla: Business Analyst + cosmetics domain expert, phir Security Architect, aur baad me ek agent kanooni jaanch ke liye (R-004). Ek waqt me ek.
-- **Sawal aur topics:** [OPEN_QUESTIONS.md](OPEN_QUESTIONS.md) me aage ke topics (B1 se B16), jaanchna baaki (§2) aur sawal (§3). Tay: Q-001 (maal ka maalik brand, D-060), Q-002 (price brand + platform ke niyam, D-061), Q-003 (expire ya na bika maal: brand ka nuksaan + platform ke niyam, D-062), Q-004 (hamare haath se hue nuksaan ki bharpai: bikne wala daam, D-063), Q-005 (alag batches ka MRP: batch ke hisaab se, D-064), Q-006 (Beauty Pro ka alag daam, seller chahe to, D-065), Q-007 (storage fee: kuch din muft, phir fee, D-066), Q-008 (product page pe agle batch ki exact expiry, D-067), Q-009 (nuksaan ki vasooli sirf saboot se, D-068), Q-010 (Beauty Pro: saboot + staff ki jaanch, D-069), Q-011 (Pro daam ki quantity seema seller tay kare, D-070), Q-012 (bachi fee: udhaar aage, seema ke baad kadam, D-071), Q-013 (parcel nahi mila: saboot se faisla, D-072). Koi sawal khula nahi, aur kram me koi naya sawal nahi bacha. Owner ka jawab wala button hi "next" bhi hai.
-- **Usage (2026-11-18):** is account pe weekly **97%** (reset 2026-11-21): is account pe naya kaam nahi (owner ne Q-012, Q-013 likhwaye). Agent 2 doosre account pe ya reset ke baad.
+- **Sawal aur topics:** [OPEN_QUESTIONS.md](OPEN_QUESTIONS.md) me aage ke topics (B1 se B16), jaanchna baaki (§2) aur sawal (§3). Tay: Q-001 (maal ka maalik brand, D-060), Q-002 (price brand + platform ke niyam, D-061), Q-003 (expire ya na bika maal: brand ka nuksaan + platform ke niyam, D-062), Q-004 (hamare haath se hue nuksaan ki bharpai: bikne wala daam, D-063), Q-005 (alag batches ka MRP: batch ke hisaab se, D-064), Q-006 (Beauty Pro ka alag daam, seller chahe to, D-065), Q-007 (storage fee: kuch din muft, phir fee, D-066), Q-008 (product page pe agle batch ki exact expiry, D-067), Q-009 (nuksaan ki vasooli sirf saboot se, D-068), Q-010 (Beauty Pro: saboot + staff ki jaanch, D-069), Q-011 (Pro daam ki quantity seema seller tay kare, D-070), Q-012 (bachi fee: udhaar aage, seema ke baad kadam, D-071), Q-013 (parcel nahi mila: saboot se faisla, D-072). Q-014 (pehle ka kaam do kadam me hatega, D-073). Koi sawal khula nahi. Kram ka agla sawal (Q-015, abhi file me nahi): pehle ke kaam ki kaunsi cheezein naye me aayengi, aur list kab aur kaise bane. Owner ka jawab wala button hi "next" bhi hai.
+- **Usage (2026-11-18):** is account pe weekly **99%** (reset 2026-11-21): is account pe naya kaam nahi (owner ne Q-012, Q-013 likhwaye). Agent 2 doosre account pe ya reset ke baad.
 
 ## 2. Uncommitted
 
-- [OPEN_QUESTIONS.md](OPEN_QUESTIONS.md) v1.2.20 (Q-012, Q-013), [DECISIONS.md](DECISIONS.md) v1.4.23 (D-071, D-072) aur ye HANDOFF; baaki sab commit ho chuka.
+- [OPEN_QUESTIONS.md](OPEN_QUESTIONS.md) v1.2.22 (Q-014), [DECISIONS.md](DECISIONS.md) v1.4.24 (D-073) aur ye HANDOFF; baaki sab commit ho chuka.
 
 ## 3. Agla kaam
 
-1. Agent 2 (Business Analyst + cosmetics domain expert), usage dekh ke aur owner ki haan se. Uske topics B1 se B16 ([OPEN_QUESTIONS.md](OPEN_QUESTIONS.md) §1) se naye sawal banenge.
-2. [OPEN_QUESTIONS.md](OPEN_QUESTIONS.md) §2 ki location data wali jaanch (Claude, kabhi bhi).
+1. Q-015 file me likhna (pehle ke kaam se kya naye me aaye), phir uska jawab ([OPEN_QUESTIONS.md](OPEN_QUESTIONS.md) §3).
+2. Agent 2 (Business Analyst + cosmetics domain expert), usage dekh ke aur owner ki haan se. Uske topics B1 se B16 ([OPEN_QUESTIONS.md](OPEN_QUESTIONS.md) §1) se naye sawal banenge.
+3. [OPEN_QUESTIONS.md](OPEN_QUESTIONS.md) §2 ki location data wali jaanch (Claude, kabhi bhi).
 
 ## Change log
 
@@ -71,3 +72,5 @@
 | v1.0.43 | 2026-11-18 | Q-012 aur Q-013 khule (owner ke kehne pe).                                                           |
 | v1.0.44 | 2026-11-18 | Q-012 tay (D-071); Q-013 khula.                                                                      |
 | v1.0.45 | 2026-11-18 | Q-013 tay (D-072); kram ke saare sawal tay; agla kaam agent 2.                                       |
+| v1.0.46 | 2026-11-18 | Q-014 khula (pehle ka kaam kab aur kaise hatega); kram me naya sawal (kya naye me aaye).             |
+| v1.0.47 | 2026-11-18 | Q-014 tay (D-073); weekly 99%, is account pe ruka; agla Q-015.                                       |
