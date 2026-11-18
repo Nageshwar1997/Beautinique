@@ -1,6 +1,6 @@
 # DECISIONS: Beautinique
 
-> **Status:** v1.4.6 (2026-11-18). Har faisla ek jagah. Sirf wahi "Tay" jo owner ne khud kaha; Claude ki salah faisla nahi. Cheezein ek-ek karke judti hain.
+> **Status:** v1.4.9 (2026-11-18). Har faisla ek jagah. Sirf wahi "Tay" jo owner ne khud kaha; Claude ki salah faisla nahi. Cheezein ek-ek karke judti hain.
 
 ## 0. Kaise likhein
 
@@ -70,6 +70,8 @@
 | D-054 | Roles ka timing: design me saare roles, poore launch tak sab system me; banate waqt har role apne module ke saath chalu.                                             | Business     | 2026-11-17 |
 | D-055 | R1 ka scope: ek patla par poora order flow (2 sellers, 1 warehouse + 1 hub, test mode payments, simple return, review, seller ka hisaab); detail PROJECT_PLAN §1 me. | Business     | 2026-11-17 |
 | D-056 | Render pe sirf ek free web service (saara backend) aur ek free Key Value; koi doosri web service nahi, preview bhi nahi.                                             | Architecture | 2026-11-18 |
+| D-057 | Finance ka PostgreSQL Neon ke free plan pe (expire nahi hota, pause nahi hota).                                                                                      | Architecture | 2026-11-18 |
+| D-058 | Saari hosting Singapore region me: Render ki web service, finance ka Neon project aur saare Atlas clusters (AWS Singapore).                                          | Architecture | 2026-11-18 |
 
 ## 2. Record
 
@@ -85,7 +87,7 @@
 - **Chhode vikalp:** naya stack; finance bhi MongoDB pe; finance ka scope chhota karna.
 - **Kab dobara khulega:** owner khud khole.
 - **Kisne, kab:** owner, 2026-11-17. **Nishaan:** Owner (stack); Salah maani (finance ke liye PostgreSQL).
-- **Asar (Claude):** finance service ke liye transaction, events, release steps aur idempotency ka PostgreSQL wala roop banana hoga; laptop ka Docker infra, CI aur backup me PostgreSQL judega; free PostgreSQL provider chunna abhi baaki hai.
+- **Asar (Claude):** finance service ke liye transaction, events, release steps aur idempotency ka PostgreSQL wala roop banana hoga; laptop ka Docker infra, CI aur backup me PostgreSQL judega; provider Neon ka free plan (D-057).
 
 ### D-002. Repo aur folders ka dhaancha
 
@@ -536,7 +538,7 @@
   - Apps: Vercel Hobby.
   - MongoDB: Atlas M0, har MongoDB service ka apna cluster (D-011).
   - Redis: Render Key Value free (D-051).
-  - Finance ka PostgreSQL (D-001): free provider abhi chunna baaki.
+  - Finance ka PostgreSQL (D-001): Neon ka free plan (D-057, 2026-11-18).
 - **Wajah:** owner ka faisla, 2026-11-17 ko dobara dekh ke waise hi rakha.
 - **Chhode vikalp:** paid plans.
 - **Kab dobara khulega:** owner khud khole.
@@ -606,6 +608,24 @@
 - **Kab dobara khulega:** owner khud khole, ya paid hosting aaye.
 - **Kisne, kab:** owner, 2026-11-18. **Nishaan:** Owner.
 
+### D-057. Finance ka PostgreSQL: Neon
+
+- **Faisla:** finance service ka PostgreSQL (D-001) Neon ke free plan pe, ek Neon project me.
+- **Wajah:** Neon ka free plan expire nahi hota, aur kaam na ho to bhi project na pause hota na delete; soya compute agli query pe khud jaagta hai. Owner (2026-11-18): use kam hoga (project banate waqt, aur baad me kabhi-kabhi interviews me dikhane ke liye), isliye mahine ke 100 CU-ghante kaafi.
+- **Chhode vikalp:** Render ka free PostgreSQL (30 din me expire); Supabase (7 din bina kaam ke pause, haath se kholna); Aiven (idle pe band); finance bhi MongoDB pe.
+- **Kab dobara khulega:** Neon ke free niyam badlein, use badhe, ya owner khole.
+- **Kisne, kab:** owner, 2026-11-18. **Nishaan:** Salah maani.
+- **Asar (Claude):** code asli users maan ke banega (D-012), isliye design me finance database se sirf kaam aane pe baat ho; server jagane ke ping aur health check finance database tak na pahunchein; compute ka size 0.25 CU pe roka jaye. Ye niyam finance ki technical charcha me pakke honge. Neon ka Singapore region (`aws-ap-southeast-1`) hai (jaancha 2026-11-18); project usi me banana, kyunki region baad me nahi badalta, aur backend bhi Render ke Singapore region me (R-012).
+
+### D-058. Hosting ka region: Singapore
+
+- **Faisla:** Render ki web service (D-056), finance ka Neon project (D-057) aur MongoDB ke saare Atlas clusters (D-011) AWS Singapore region me banenge.
+- **Wajah:** Render me India ka region nahi; Singapore sabse paas hai. Database server ke paas hona chahiye, user ke paas nahi, kyunki database se sirf server baat karta hai; teeno ek region me to har query tez. Render, Neon aur Atlas teeno me Singapore jaancha (RISKS §2.4). Owner ne Singapore chuna (2026-11-18).
+- **Chhode vikalp:** Atlas Mumbai me (server se door, har query Singapore se Mumbai aur wapas); Render ka koi aur region.
+- **Kab dobara khulega:** Render ya kisi provider me India ka region aaye, ya owner khole. Teeno ka region banne ke baad nahi badalta, isliye badalna = naya banana aur data le jaana.
+- **Kisne, kab:** owner, 2026-11-18. **Nishaan:** Salah maani.
+- **Asar (Claude):** apps Vercel pe hain (D-048); customer app ke server-side hisse ka Vercel region (backend ke paas Singapore, ya users ke paas) technical charcha me tay hoga.
+
 ## Change log
 
 | Version | Date       | Badlav                                                                                                                                                                                                                                                                                  |
@@ -623,3 +643,6 @@
 | v1.4.4  | 2026-11-17 | D-055 aaya (R1 ka scope; detail PROJECT_PLAN §1).                                                                                                                                                                                                                                       |
 | v1.4.5  | 2026-11-17 | D-055: owner ne R1 ki list dekh ke pakki ki.                                                                                                                                                                                                                                            |
 | v1.4.6  | 2026-11-18 | D-056 aaya (Render pe sirf ek web service aur ek Key Value).                                                                                                                                                                                                                            |
+| v1.4.7  | 2026-11-18 | D-057 aaya (finance ka PostgreSQL Neon pe); D-001 aur D-048 me provider likha.                                                                                                                                                                                                          |
+| v1.4.8  | 2026-11-18 | D-057: Neon ka Singapore region jaancha; project usi me.                                                                                                                                                                                                                                |
+| v1.4.9  | 2026-11-18 | D-058 aaya (saari hosting Singapore region me).                                                                                                                                                                                                                                         |

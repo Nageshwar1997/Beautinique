@@ -1,19 +1,19 @@
 # HANDOFF: Beautinique
 
-> **Status:** v1.0.17 (2026-11-18). Ek session ya account se agle tak ki halat. Chhota rakho: sirf abhi ki halat aur agla kaam.
+> **Status:** v1.0.22 (2026-11-18). Ek session ya account se agle tak ki halat. Chhota rakho: sirf abhi ki halat aur agla kaam.
 
 ## 1. Abhi ki halat (2026-11-17)
 
 - **Discovery phase** chal raha hai: plan, task files aur naya code abhi nahi. Branch: `feat/mig-plan`.
 - **Docs aur code naye sire se (owner, D-003):** naye docs ([README.md](README.md)) me cheezein ek-ek karke, owner ki haan ke baad judti hain. Code naye sire se implementation stage me.
 - **Abhi koi npm command nahi chalta**; docs ke liye sirf `npx prettier --check <files>`. Pull request pe CI fail hoga jab tak naya root setup na bane; is branch pe push se CI nahi chalta.
-- **Faisle:** [DECISIONS.md](DECISIONS.md) me D-001 se D-056 (R1 ka scope: D-055, detail [PROJECT_PLAN.md](PROJECT_PLAN.md) §1); ab tak ke saare faisle aa gaye, koi khula sawal nahi. Risks [RISKS.md](RISKS.md) me (R-001 se R-013, jaanch ke tathya samet); pehla security niyam [security/SECURITY_REQUIREMENTS.md](security/SECURITY_REQUIREMENTS.md) me (SR-001).
+- **Faisle:** [DECISIONS.md](DECISIONS.md) me D-001 se D-058 (R1 ka scope: D-055, detail [PROJECT_PLAN.md](PROJECT_PLAN.md) §1); ab tak ke saare faisle aa gaye, koi khula sawal nahi. Risks [RISKS.md](RISKS.md) me (R-001 se R-014, jaanch ke tathya samet); pehla security niyam [security/SECURITY_REQUIREMENTS.md](security/SECURITY_REQUIREMENTS.md) me (SR-001).
 - **Agents:** repo analysis ho gaya. Agla: Business Analyst + cosmetics domain expert, phir Security Architect, aur baad me ek agent kanooni jaanch ke liye (R-004). Ek waqt me ek.
 - **Usage (2026-11-17):** is account pe weekly **85%** (reset 2026-11-21) aur 5-hour 77%: is account pe naya kaam nahi. Agent 2 doosre account pe ya reset ke baad.
 
 ## 2. Uncommitted
 
-- [RISKS.md](RISKS.md) v1.2.9, [DECISIONS.md](DECISIONS.md) v1.4.6 (D-055, D-056), [PROJECT_PLAN.md](PROJECT_PLAN.md) v1.1.1 (R1) aur ye HANDOFF.
+- [DECISIONS.md](DECISIONS.md) v1.4.9 (D-055 se D-058), [RISKS.md](RISKS.md) v1.2.14 (R-014 tak), [PROJECT_PLAN.md](PROJECT_PLAN.md) v1.1.1 (R1) aur ye HANDOFF.
 
 ## 3. Agla kaam
 
@@ -42,3 +42,8 @@
 | v1.0.15 | 2026-11-18 | RISKS: Atlas projects ki seema jaanchi.                                                             |
 | v1.0.16 | 2026-11-18 | RISKS: Render Key Value ke ghante jaanche.                                                          |
 | v1.0.17 | 2026-11-18 | D-056 (Render pe sirf ek web service).                                                              |
+| v1.0.18 | 2026-11-18 | D-057 (finance ka PostgreSQL Neon pe) aur R-014.                                                    |
+| v1.0.19 | 2026-11-18 | Regions jaanche (Neon aur Render me Singapore).                                                     |
+| v1.0.20 | 2026-11-18 | Atlas ka region jaancha.                                                                            |
+| v1.0.21 | 2026-11-18 | Atlas Singapore pakka.                                                                              |
+| v1.0.22 | 2026-11-18 | D-058 (hosting Singapore me); R-012 Maana.                                                          |
