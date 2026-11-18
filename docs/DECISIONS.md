@@ -1,6 +1,6 @@
 # DECISIONS: Beautinique
 
-> **Status:** v1.4.25 (2026-11-18). Har faisla ek jagah. Sirf wahi "Tay" jo owner ne khud kaha; Claude ki salah faisla nahi. Cheezein ek-ek karke judti hain.
+> **Status:** v1.4.30 (2026-11-18). Har faisla ek jagah. Sirf wahi "Tay" jo owner ne khud kaha; Claude ki salah faisla nahi. Cheezein ek-ek karke judti hain.
 
 ## 0. Kaise likhein
 
@@ -88,6 +88,11 @@
 | D-072 | "Parcel nahi mila" ka jhagda saboot se: delivery pe code (customer ke app aur email me), code na mile to photo aur location; daawe ka faisla saboot se (4 niyam).         | Business     | 2026-11-18 |
 | D-073 | Pehle ka kaam do kadam me hatega: git tag ke baad, purane docs discovery khatam hone pe, purana code naya root setup banne ke saath; dono baar owner ki haan se.          | Process      | 2026-11-18 |
 | D-074 | Pehle ke kaam se lene layak cheezon ki chalti list discovery ke saath: har agent ki report me hissa, kasauti, owner ki haan, discovery ke aakhir me jaanch (5 niyam).     | Process      | 2026-11-18 |
+| D-075 | Ek brand ka poore platform pe ek hi seller (brand khud ya uska ek authorised distributor); brand ko pehla haq; barcode se duplicate check (5 niyam). | Business | 2026-11-18 |
+| D-076 | Variants category ke hisaab se platform tay kare (zyada se zyada 2 per product); formula badalne wala farak alag product; reviews product pe, variant ke saath (6 niyam). | Business | 2026-11-18 |
+| D-077 | Kai sellers wala order: normal ek parcel (andar har seller ka invoice), majboori me alag; seller ke hisse aur parcel alag; code har parcel ka (5 niyam). | Business | 2026-11-18 |
+| D-078 | Seller ki fees: category ka % commission (GST ke bina wali rakam pe) + har unit pe tay fulfilment fee + pehle tay fees; aage ki fees shuru me ₹0 (5 niyam). | Business | 2026-11-18 |
+| D-079 | Return: hamari ya brand ki galti ki saari wajahein; "man badla" sirf band maal pe (factory seal salamat); seal na aane wale product pe man badla return nahi (5 niyam). | Business | 2026-11-18 |
 
 ## 2. Record
 
@@ -818,6 +823,7 @@
 - **Kab dobara khulega:** owner khud khole.
 - **Kisne, kab:** owner, 2026-11-18. **Nishaan:** Salah maani.
 - **Asar (Claude):** Delivery app me code daalne, photo aur location ka kadam (R1 ka delivery saboot, [PROJECT_PLAN.md](PROJECT_PLAN.md) §1). Photo aur location personal data hain: kitne din rakhein aur kaun dekhe, Security Architect ke saath (B14). Daawe ka samay support ki charcha (B11) me. Kanooni detail jaanchi nahi (R-004): photo aur location jaise personal data rakhne ke niyam.
+- **Jod (owner, 2026-11-18, D-077):** order alag parcels me jaaye to delivery code har parcel ka apna hota hai; tab niyam 1 ka "order ka code" parcel ka code hai.
 
 ### D-073. Pehle ka kaam kab aur kaise hatega
 
@@ -845,6 +851,77 @@
 - **Kab dobara khulega:** owner khud khole.
 - **Kisne, kab:** owner, 2026-11-18. **Nishaan:** Salah maani.
 - **Asar (Claude):** Agent 2 se 10 ke prompt me "pehle ke kaam se lene layak" ka hissa zaroori. Lene layak cheezon ki list naye docs me nahi rehti (D-003): wo agents ki reports ke saath rehti hai, aur naye docs me sirf maani hui cheez naye roop me aati hai. Kanooni detail jaanchi nahi (R-004): pehle ke kaam ka koi bahar ka asset (font, icon, image) naye me aaye to uska license.
+
+### D-075. Ek brand, ek seller
+
+- **Faisla:** poore platform pe ek brand ka ek hi seller hota hai, aur brand ko pehla haq hai. Niyam:
+  1. Ek brand ka ek hi seller: brand khud, ya brand ka ek authorised distributor (D-032).
+  2. Distributor ke liye brand ka authorisation letter (dummy, D-026) aur staff ki jaanch.
+  3. Brand khud aana chahe aur distributor pehle se ho: distributor ko notice, aur tay din (misaal 30 din) baad brand seller ban jaata hai. Product page aur reviews wahi rehte hain, sirf seller badalta hai. Distributor ka bacha maal uske kharche pe wapas (D-062 niyam 5 jaisa).
+  4. Jaanch pe barcode se duplicate check: wahi barcode kisi aur seller ke paas ho to nayi listing rukti hai.
+  5. Apna brand (D-031) bhi isi niyam me.
+- **Wajah:** Claude ki salah, owner ne maani: brand ki authorisation ek hi baar jaanchni padti hai, brand ka saara maal aur reviews ek seller ke paas rehte hain, aur "kis seller ka kaunsa maal" ka jhagda nahi hota. Pehla haq brand ko, kyunki maal aur naam brand ka hai.
+- **Chhode vikalp:** ek product ka ek seller, jo pehle aaye (ek brand ke products alag sellers me bat jaate, brand ka control kam); har product ka seller brand tay kare (staff ka kaam zyada, aur brand platform pe na ho to kaun tay kare, ye saaf nahi).
+- **Kab dobara khulega:** owner khud khole.
+- **Kisne, kab:** owner, 2026-11-18. **Nishaan:** Salah maani.
+- **Asar (Claude):** seller onboarding me brand authorisation ki jaanch ka kadam (staff role ki list, D-017, me). Product ka seller badalne ka flow chahiye, jisme product page aur reviews na toote. Notice ke din ka asli number seller ki charcha me. Naya state khulne pe (D-037) kisi brand ka wahan ka distributor alag ho to wo nahi aa sakta; tab ye niyam D-030 ke saath dobara dekhna padega. Kanooni detail jaanchi nahi (R-004): brand authorisation aur trademark ke niyam.
+
+### D-076. Variants kin cheezon se
+
+- **Faisla:** ek product ke variants kin cheezon se banenge, ye category ke hisaab se platform tay karta hai. Niyam:
+  1. Har category ki variant wali cheezein platform tay kare (misaal: makeup me shade aur size; skincare me size; fragrance me size; hair colour me shade; bath & body me scent aur size).
+  2. Seller sirf us category ki di hui cheezein chune; ek product pe zyada se zyada 2.
+  3. Nayi cheez staff setting se jode, bina code change ya deploy.
+  4. Jo farak formula badalta hai (jaise matte ya dewy finish, SPF 30 ya SPF 50, EDT ya EDP) wo alag product hai, variant nahi.
+  5. Rating aur reviews product pe (saare variants ke saath), par har review pe uska variant (jaise shade) dikhe.
+  6. "Pack of 2" jaisa variant nahi: wo bundle (promotions ki charcha, B4) ya brand ka alag product.
+- **Wajah:** Claude ki salah, owner ne maani: har category ke products sahi dhang se fit hote hain, filters aur search ek jaise naam se chalte hain, aur formula ka farak alag product banne se ingredients aur claims sahi product pe rehte hain.
+- **Chhode vikalp:** do tay cheezein (shade aur size) sab products pe (bath & body aur tools jaise products fit nahi hote); seller apni marzi ki cheezein banaye (filters aur search bigadte, staff ki jaanch mushkil).
+- **Kab dobara khulega:** owner khud khole.
+- **Kisne, kab:** owner, 2026-11-18. **Nishaan:** Salah maani.
+- **Asar (Claude):** har variant ka apna MRP, batch, stock aur expiry (D-064, D-067). Category ki variant list kaunsa staff role sambhale, wo roles ki list (D-017) me; categories ki shuruaati list catalog ki charcha me. Reviews pe variant dikhana reviews ki charcha (B8) me; bundles promotions ke saath R2 se (D-055).
+
+### D-077. Kai sellers wala order aur parcel
+
+- **Faisla:** ek order me kai sellers ka maal ho to normal ek parcel jaata hai, aur alag parcel sirf majboori me. Niyam:
+  1. Customer ko ek order number. Order ke andar do alag cheezein: seller ke hisse (invoice ke liye) aur parcel (delivery ke liye); dono ek doosre se bandhe nahi.
+  2. Normal: poora order ek parcel me, andar har seller ka invoice.
+  3. Alag parcel sirf majboori me: size ya wazan ki seema (misaal 5 kg) paar ho, ya koi item baaki ke saath tayyar na ho, taaki baaki maal na ruke.
+  4. Har parcel ka apna delivery code (D-072 me jod).
+  5. Customer ko order page pe dikhe: kitne parcel, aur kaunsa item kis parcel me.
+- **Wajah:** Claude ki salah, owner ne maani: customer ko aam taur pe ek hi delivery milti hai, delivery ka kharcha kam rehta hai, aur bhaari ya adhoora order bhi sambhal jaata hai. Invoice aur parcel alag rakhne se ek ki wajah se doosra nahi badalna padta.
+- **Chhode vikalp:** hamesha ek parcel (bhaari order nahi samata, ek item ruke to poora order rukta); har seller ka alag parcel (delivery ka kharcha aur partners ka kaam badhta, customer ko kai baar ghar pe rehna).
+- **Kab dobara khulega:** owner khud khole.
+- **Kisne, kab:** owner, 2026-11-18. **Nishaan:** Salah maani.
+- **Asar (Claude):** saara maal ek warehouse me (D-014), isliye kai sellers ka maal ek saath pack hota hai. Wazan aur size ki asli seema delivery ki charcha (B1) me, delivery partner ki gaadi ke hisaab se. Wapsi aur return parcel ke hisaab se (B1, B7). Order, seller ke hisse aur parcel ka data model Database Architect ke saath. Kanooni detail jaanchi nahi (R-004): ek parcel me kai sellers ke invoices bhejne ke niyam.
+
+### D-078. Seller ki fees aur commission ka aadhaar
+
+- **Faisla:** seller se commission aur fulfilment fee li jaati hai, aur commission GST ke bina wali rakam (taxable value) pe lagta hai. Niyam:
+  1. Category ke hisaab se % commission, item ki taxable value (GST ke bina) pe.
+  2. Har unit pe tay fulfilment fee (misaal ₹25): rakhne, pack aur delivery ka kharcha.
+  3. Saath me storage fee (D-066), disposal fee (D-062) aur wapsi ka kharcha, jaise pehle tay.
+  4. Aage ki fees (jaise labelling ya return handling) ka dhaancha bane, par shuru me ₹0.
+  5. Platform ki fees pe platform ka GST alag line me.
+- **Wajah:** Claude ki salah, owner ne maani: fulfilment fee asli kaam ka kharcha dikhati hai (sasta product bhi utna hi pack hota hai), aur GST ke bina aadhaar seller ke liye seedha hai: GST rate badle to commission nahi badalta.
+- **Chhode vikalp:** sirf commission (sasta product platform ke liye nuksaan ka); shuru se aur fees, jaise labelling, return handling aur suchna se farak pe penalty (chhote brand pe shuru me bojh); commission GST samet daam pe (GST pe bhi commission, aur rate badle to commission bhi badle).
+- **Kab dobara khulega:** owner khud khole.
+- **Kisne, kab:** owner, 2026-11-18. **Nishaan:** Salah maani.
+- **Asar (Claude):** fees ki rakam (dummy) kram ke aage ke sawal me. Seller ke hisaab (finance, D-001) me har fee ki alag line, aur D-063 ki bharpai aur D-071 ke udhaar me yahi fees. Kanooni detail jaanchi nahi (R-004): commission aur fees pe GST, platform ka seller ko fees ka invoice.
+
+### D-079. Return ki wajahein aur "band" maal
+
+- **Faisla:** hamari ya brand ki galti pe return hota hai, aur "man badla" sirf band maal pe. Niyam:
+  1. Galti wali wajahein: transit me toota ya leak, pighla, galat item ya galat shade ya size, item kam, dikhayi gayi se pehle ki expiry (D-067), kharab (jaise pump nahi chalta), ya nakli hone ka shak (staff jaanch).
+  2. "Band" = factory seal ya shrink wrap salamat, aur maal istemaal nahi hua.
+  3. Listing pe seller batata hai ki product pe aisa seal aata hai ya nahi; staff listing ki jaanch me ise dekhta hai.
+  4. Jis product pe seal aata hi nahi, us pe "man badla" return nahi (hygiene); galti wali wajahein phir bhi chalti hain.
+  5. Khula maal jisme koi galti nahi: return nahi. Skin reaction ki shikayat ka raasta alag sawal hai.
+- **Wajah:** Claude ki salah, owner ne maani: R1 ka "band ya kharab" isi ka saaf roop hai, aur listing ka seal wala field ek hi baar me hygiene ka sawal hal karta hai.
+- **Chhode vikalp:** sirf galti pe return, man badla bilkul nahi (customer ke liye kadi); kuch khula maal bhi wapas, jaise "shade guarantee" (khula maal nasht, nuksaan bada, galat istemaal aasaan).
+- **Kab dobara khulega:** owner khud khole.
+- **Kisne, kab:** owner, 2026-11-18. **Nishaan:** Salah maani.
+- **Asar (Claude):** R1 ka return niyam ([PROJECT_PLAN.md](PROJECT_PLAN.md) §1) ab isi se. Listing me "seal aata hai ya nahi" ka field (catalog). Pickup aur warehouse pe seal ki jaanch, aur lauta maal kahan jaaye: kram ke aage ke sawal. "Nakli ka shak" ki jaanch kaunsa staff role kare, wo roles ki list (D-017) me. Kanooni detail jaanchi nahi (R-004): return policy dikhane ke niyam, aur khule cosmetics pe "no return" ki shartein.
 
 ## Change log
 
@@ -882,3 +959,8 @@
 | v1.4.23 | 2026-11-18 | D-072 aaya ("parcel nahi mila" ka jhagda saboot se; Q-013).                                                                                                                                                                                                                             |
 | v1.4.24 | 2026-11-18 | D-073 aaya (pehle ka kaam do kadam me hatega; Q-014).                                                                                                                                                                                                                                   |
 | v1.4.25 | 2026-11-18 | D-074 aaya (pehle ke kaam se lene layak cheezon ki chalti list; Q-015).                                                                                                                                                                                                                 |
+| v1.4.26 | 2026-11-18 | D-075 aaya (ek brand ka ek seller, brand ko pehla haq; Q-016). |
+| v1.4.27 | 2026-11-18 | D-076 aaya (variants category ke hisaab se, platform tay kare; Q-017). |
+| v1.4.28 | 2026-11-18 | D-077 aaya (kai sellers wala order: normal ek parcel, majboori me alag; Q-018); D-072 me jod (code har parcel ka). |
+| v1.4.29 | 2026-11-18 | D-078 aaya (seller ki fees: commission GST ke bina + fulfilment fee; Q-019). |
+| v1.4.30 | 2026-11-18 | D-079 aaya (return ki wajahein; man badla sirf band maal pe; Q-020). |
