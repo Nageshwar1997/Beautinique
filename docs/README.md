@@ -11,26 +11,26 @@
 
 ## Files
 
-| File | Kya hai |
-| --- | --- |
-| [PROJECT_PLAN.md](PROJECT_PLAN.md) | Kendra: modules ki list, unki dependencies, releases, progress % |
-| [PRODUCT.md](PRODUCT.md) | Kya bana rahe aur kyun: business model, users aur roles, apps, scope |
-| [ARCHITECTURE.md](ARCHITECTURE.md) | Kaise: services, data ka maalik, events, auth, deployment |
-| [FLOWS.md](FLOWS.md) | Poore flows jo kai modules me chalte hain |
-| [DECISIONS.md](DECISIONS.md) | Har faisla (D-xxx), tag ke saath |
-| [OPEN_QUESTIONS.md](OPEN_QUESTIONS.md) | Khule sawal (Q-xxx), aage ke topics (B1 ...) aur jaanchna baaki |
-| [RISKS.md](RISKS.md) | Risks (R-xxx), security wale bhi |
-| [GLOSSARY.md](GLOSSARY.md) | Shabdon ka ek matlab |
-| [COMPLIANCE.md](COMPLIANCE.md) | Kanooni matrix (sab dummy) |
-| [DESIGN.md](DESIGN.md) | UI design system |
-| [OPERATIONS.md](OPERATIONS.md) | Chalane ka manual |
-| [RULES.md](RULES.md) | Kaam ke niyam |
-| [HANDOFF.md](HANDOFF.md) | Abhi ki halat aur agla kaam |
-| [LESSONS.md](LESSONS.md) | Sabak aur traps |
-| [GIT_SKILLS.md](GIT_SKILLS.md) | Git skills ka manual |
-| [security/THREAT_MODEL.md](security/THREAT_MODEL.md) | Har module ka threat model |
-| [security/SECURITY_REQUIREMENTS.md](security/SECURITY_REQUIREMENTS.md) | Security ke niyam, module-wise |
-| [tasks/](tasks/README.md) | Har module ka folder: `TASK.md` aur subtasks |
+| File                                                                   | Kya hai                                                              |
+| ---------------------------------------------------------------------- | -------------------------------------------------------------------- |
+| [PROJECT_PLAN.md](PROJECT_PLAN.md)                                     | Kendra: modules ki list, unki dependencies, releases, progress %     |
+| [PRODUCT.md](PRODUCT.md)                                               | Kya bana rahe aur kyun: business model, users aur roles, apps, scope |
+| [ARCHITECTURE.md](ARCHITECTURE.md)                                     | Kaise: services, data ka maalik, events, auth, deployment            |
+| [FLOWS.md](FLOWS.md)                                                   | Poore flows jo kai modules me chalte hain                            |
+| [DECISIONS.md](DECISIONS.md)                                           | Har faisla (D-xxx), tag ke saath                                     |
+| [OPEN_QUESTIONS.md](OPEN_QUESTIONS.md)                                 | Khule sawal (Q-xxx), aage ke topics (B1 ...) aur jaanchna baaki      |
+| [RISKS.md](RISKS.md)                                                   | Risks (R-xxx), security wale bhi                                     |
+| [GLOSSARY.md](GLOSSARY.md)                                             | Shabdon ka ek matlab                                                 |
+| [COMPLIANCE.md](COMPLIANCE.md)                                         | Kanooni matrix (sab dummy)                                           |
+| [DESIGN.md](DESIGN.md)                                                 | UI design system                                                     |
+| [OPERATIONS.md](OPERATIONS.md)                                         | Chalane ka manual                                                    |
+| [RULES.md](RULES.md)                                                   | Kaam ke niyam                                                        |
+| [HANDOFF.md](HANDOFF.md)                                               | Abhi ki halat aur agla kaam                                          |
+| [LESSONS.md](LESSONS.md)                                               | Sabak aur traps                                                      |
+| [GIT_SKILLS.md](GIT_SKILLS.md)                                         | Git skills ka manual                                                 |
+| [security/THREAT_MODEL.md](security/THREAT_MODEL.md)                   | Har module ka threat model                                           |
+| [security/SECURITY_REQUIREMENTS.md](security/SECURITY_REQUIREMENTS.md) | Security ke niyam, module-wise                                       |
+| [tasks/](tasks/README.md)                                              | Har module ka folder: `TASK.md` aur subtasks                         |
 
 ## Padhne ka order
 
@@ -41,7 +41,7 @@
 
 ## Change log
 
-| Version | Date | Badlav |
-| --- | --- | --- |
-| v1.0.0 | 2026-11-17 | Pehla version: docs ka index aur niyam. |
-| v1.0.1 | 2026-11-18 | OPEN_QUESTIONS ki line: topics aur jaanchna baaki bhi. |
+| Version | Date       | Badlav                                                 |
+| ------- | ---------- | ------------------------------------------------------ |
+| v1.0.0  | 2026-11-17 | Pehla version: docs ka index aur niyam.                |
+| v1.0.1  | 2026-11-18 | OPEN_QUESTIONS ki line: topics aur jaanchna baaki bhi. |

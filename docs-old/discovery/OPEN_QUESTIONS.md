@@ -159,7 +159,7 @@ Ye 6 jawab baaki har cheez ki disha tay karte hain. Agle agents (domain expert, 
 | **[Naye docs me: RISKS R-008, §2.2]** Render free ke mahine ke ghante, aur baar-baar jagana niyamon me theek hai ya nahi | D-014         | Server ko jagaye rakhne ka plan                                                         |
 | **[Naye docs me: DECISIONS D-057; RISKS §2.3]** Free PostgreSQL provider (storage, sona / pause, connections)            | D-012         | Finance service ka database                                                             |
 | **[Naye docs me: OPEN_QUESTIONS §2]** Asli location data me main city aur phaile hue pincodes                            | D-017, D-018  | Pincode → hub mapping                                                                   |
-| **[Naye docs me: DECISIONS D-059]** Live system me pehle se diye gaye roles                                                                                  | D-019         | Role "chalu nahi" karne se pehle                                                        |
+| **[Naye docs me: DECISIONS D-059]** Live system me pehle se diye gaye roles                                              | D-019         | Role "chalu nahi" karne se pehle                                                        |
 
 ## Change log
 

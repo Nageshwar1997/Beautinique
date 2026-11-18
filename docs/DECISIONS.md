@@ -1,6 +1,6 @@
 # DECISIONS: Beautinique
 
-> **Status:** v1.4.10 (2026-11-18). Har faisla ek jagah. Sirf wahi "Tay" jo owner ne khud kaha; Claude ki salah faisla nahi. Cheezein ek-ek karke judti hain.
+> **Status:** v1.4.13 (2026-11-18). Har faisla ek jagah. Sirf wahi "Tay" jo owner ne khud kaha; Claude ki salah faisla nahi. Cheezein ek-ek karke judti hain.
 
 ## 0. Kaise likhein
 
@@ -73,6 +73,9 @@
 | D-057 | Finance ka PostgreSQL Neon ke free plan pe (expire nahi hota, pause nahi hota).                                                                                      | Architecture | 2026-11-18 |
 | D-058 | Saari hosting Singapore region me: Render ki web service, finance ka Neon project aur saare Atlas clusters (AWS Singapore).                                          | Architecture | 2026-11-18 |
 | D-059 | Pehle ke system me diye gaye roles ki jaanch nahi; naya system naye sire se (D-003).                                                                                 | Process      | 2026-11-18 |
+| D-060 | Warehouse me rakhe maal ka maalik bikne tak brand (seller); hum rakhte, pack karte aur pahunchate hain, aur fees lete hain.                                          | Business     | 2026-11-18 |
+| D-061 | Selling price brand (seller) tay karta hai, platform ke 4 niyam ke saath (MRP ki seema, itihaas, bade badlav pe confirm, platform daam nahi badalta).                | Business     | 2026-11-18 |
+| D-062 | Expire hone wala, expire hua ya na bika maal: nuksaan brand ka; platform ke 6 niyam (receiving ki seema, bikri band, alert, brand ka chunaav, wapsi, record).        | Business     | 2026-11-18 |
 
 ## 2. Record
 
@@ -635,6 +638,43 @@
 - **Kab dobara khulega:** pehle ke system se koi data naye system me laana tay ho, ya owner khole.
 - **Kisne, kab:** owner, 2026-11-18. **Nishaan:** Salah maani.
 
+### D-060. Warehouse me rakhe maal ka maalik
+
+- **Faisla:** brands ka jo maal hamare warehouse me rakha hai (D-014), bikne tak uska maalik wahi brand (seller) hai. Beautinique maal nahi khareedta: hum sirf rakhte, pack karte aur customer tak pahunchate hain, aur iske liye fees lete hain. Apna brand bhi isi tarah, kyunki wo alag company ka seller hai (D-031).
+- **Wajah:** Claude ki salah, owner ne maani: customer ka invoice seller ke GSTIN se banta hai (D-030), aur jo maal ka maalik nahi wo uska invoice nahi kaat sakta; warehouse wale state ka GSTIN brand ke paas hone ki shart (D-036) bhi isi pe tiki hai. Har cheez ka ek hi raasta: har batch pe uske seller ka record, har bikri ka invoice usi seller ka.
+- **Chhode vikalp:** Beautinique maal khareed le (customer invoice Beautinique ka, D-030 se takrav); dono tarah (kuch brands ka maal hamara, kuch ka unka).
+- **Kab dobara khulega:** Beautinique khud maal khareed ke bechna chahe, ya owner khole.
+- **Kisne, kab:** owner, 2026-11-18. **Nishaan:** Salah maani.
+- **Asar (Claude):** stock ke har batch pe uske seller ka record; seller ko apne maal ki ginti dikhe; warehouse me hamare haath se hua nuksaan (toot-foot, chori, galat dispatch) hamari zimmedari, jiski bharpai ka daam alag sawal hai. Kanooni detail jaanchi nahi (R-004).
+
+### D-061. Selling price kaun tay kare
+
+- **Faisla:** customer ko dikhne wala selling price brand (seller) tay karta hai. Platform ye 4 niyam laagu karta hai:
+  1. Daam 0 se zyada, aur pack pe chhape MRP (saare tax samet) se zyada nahi.
+  2. Har badlav ka itihaas: kisne, kab, purana daam, naya daam.
+  3. Ek baar me bada badlav (jaise 50% se zyada upar ya neeche) pe seller se dobara confirm, taaki ₹1,999 ki jagah ₹199 jaisi galti pakdi jaye.
+  4. Platform seller ka daam kabhi nahi badalta; platform ka diya discount (R2, D-055) alag dikhta hai.
+- **Wajah:** Claude ki salah, owner ne maani: maal aur invoice dono brand ke (D-060, D-030), isliye daam bhi bechne wale ka; niyam 1 se 3 customer aur seller dono ko galti se bachate hain.
+- **Chhode vikalp:** brand poori tarah azaad (sirf MRP ki seema, koi itihaas ya confirm nahi); Beautinique daam tay kare (invoice brand ka par daam hamara).
+- **Kab dobara khulega:** owner khud khole.
+- **Kisne, kab:** owner, 2026-11-18. **Nishaan:** Salah maani.
+- **Asar (Claude):** bade badlav ka asli number pricing ki charcha (B4) me tay hoga. Do alag sawal baaki: ek product ke alag batches ka MRP alag ho to customer ko kaunsa MRP aur daam dikhe; aur Beauty Pro buyers (D-032) ke liye alag daam ho ya nahi. Kanooni detail jaanchi nahi (R-004).
+
+### D-062. Expire hone wala ya na bika maal
+
+- **Faisla:** warehouse me brand ka jo maal expire hone wala hai, expire ho gaya, ya nahi bik raha, uska nuksaan brand ka hai. Platform ye 6 niyam laagu karta hai:
+  1. **Receiving pe:** batch ki bachi expiry ek kam se kam seema se kam ho to maal wapas.
+  2. **Bikri band:** bachi expiry ek seema se kam hote hi wo batch bikna band, taaki customer ko kam se kam itni expiry mile. Pick me sabse pehle expire hone wala batch pehle jaata hai.
+  3. **Khabar:** brand ko bikri band hone se pehle alert, aur band hone pe dobara.
+  4. **Brand ka chunaav:** bikri band hone ke baad brand tay din me chune: maal apne kharche pe wapas le jaaye, ya hum nasht karein aur disposal fee lein. Tay din me jawab na aaye to hum nasht karte hain aur fee lagti hai.
+  5. **Na bika maal (expire nahi):** brand kabhi bhi apne kharche pe wapas maang sakta hai.
+  6. **Record:** har wapsi aur har disposal ka record (batch, ginti, tareekh, kisne kiya); disposal kanoon ke hisaab se (dummy, D-026).
+- **Wajah:** Claude ki salah, owner ne maani: maal brand ka (D-060), isliye nuksaan bhi; niyam warehouse ko saaf aur customer ko surakshit rakhte hain. Brand chahe to bikri band hone se pehle khud daam ghata sakta hai (D-061 ke niyam ke andar).
+- **Chhode vikalp:** brand khud sambhale, platform ke koi niyam nahi (sirf report); nuksaan baant lena (platform kuch hissa uthaye ya khareed le).
+- **Kab dobara khulega:** owner khud khole.
+- **Kisne, kab:** owner, 2026-11-18. **Nishaan:** Salah maani.
+- **Asar (Claude):** teeno numbers (receiving ki seema, bikri band ki seema, brand ke jawab ke din; misaal 6 mahine, 3 mahine, 15 din) B3 ki charcha me tay honge, category ke hisaab se alag ho sakte hain. Disposal fee aur wapsi ka kharcha seller ke hisaab (B6) me. Do alag sawal baaki: lambe samay se pade na bike maal pe storage fee ho ya nahi; customer ko product page pe expiry dikhe ya nahi. Kanooni detail jaanchi nahi (R-004): label pe expiry ke niyam aur cosmetics nasht karne ke niyam.
+
 ## Change log
 
 | Version | Date       | Badlav                                                                                                                                                                                                                                                                                  |
@@ -656,3 +696,6 @@
 | v1.4.8  | 2026-11-18 | D-057: Neon ka Singapore region jaancha; project usi me.                                                                                                                                                                                                                                |
 | v1.4.9  | 2026-11-18 | D-058 aaya (saari hosting Singapore region me).                                                                                                                                                                                                                                         |
 | v1.4.10 | 2026-11-18 | D-059 aaya (pehle diye gaye roles ki jaanch nahi).                                                                                                                                                                                                                                      |
+| v1.4.11 | 2026-11-18 | D-060 aaya (warehouse me rakhe maal ka maalik brand; Q-001).                                                                                                                                                                                                                            |
+| v1.4.12 | 2026-11-18 | D-061 aaya (selling price brand tay kare, platform ke 4 niyam; Q-002).                                                                                                                                                                                                                  |
+| v1.4.13 | 2026-11-18 | D-062 aaya (expire hone wala ya na bika maal: nuksaan brand ka, platform ke 6 niyam; Q-003).                                                                                                                                                                                            |
