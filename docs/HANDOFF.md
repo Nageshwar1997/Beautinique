@@ -1,6 +1,6 @@
 # HANDOFF: Beautinique
 
-> **Status:** v1.0.49 (2026-11-18). Ek session ya account se agle tak ki halat. Chhota rakho: sirf abhi ki halat aur agla kaam.
+> **Status:** v1.0.51 (2026-11-18). Ek session ya account se agle tak ki halat. Chhota rakho: sirf abhi ki halat aur agla kaam.
 
 ## 1. Abhi ki halat (2026-11-17)
 
@@ -8,17 +8,17 @@
 - **Docs aur code naye sire se (owner, D-003):** naye docs ([README.md](README.md)) me cheezein ek-ek karke, owner ki haan ke baad judti hain. Code naye sire se implementation stage me.
 - **Abhi koi npm command nahi chalta**; docs ke liye sirf `npx prettier --check <files>`. Pull request pe CI fail hoga jab tak naya root setup na bane; is branch pe push se CI nahi chalta.
 - **Faisle:** [DECISIONS.md](DECISIONS.md) me D-001 se D-074 (R1 ka scope: D-055, detail [PROJECT_PLAN.md](PROJECT_PLAN.md) §1); ab tak ke saare faisle aa gaye. Risks [RISKS.md](RISKS.md) me (R-001 se R-014, jaanch ke tathya samet); pehla security niyam [security/SECURITY_REQUIREMENTS.md](security/SECURITY_REQUIREMENTS.md) me (SR-001).
-- **Agents:** repo analysis ho gaya. Agla: Business Analyst + cosmetics domain expert, phir Security Architect, aur baad me ek agent kanooni jaanch ke liye (R-004). Ek waqt me ek. Agent 2 se 10 ki har report me "pehle ke kaam se lene layak" ka hissa (D-074).
+- **Agents:** repo analysis ho gaya. Business Analyst + cosmetics domain expert ka **pehla run (B1 se B7) poora (2026-11-18)**: 52 prastaavit sawal (ek kram me), 16 sirf jaanch wali cheezein, aur tay faislon pe 10 dhyaan ke points (jaise D-063 me return ka safar, D-064 me exact batch pick, D-072 aur 300 emails). Main session ne report ke daawe DECISIONS se milaa ke jaanche. Ye sab abhi sirf prastaav hai, tay nahi. Doosra run (B8 se B13) baaki. Phir Security Architect, aur baad me ek agent kanooni jaanch ke liye (R-004). Ek waqt me ek. Agent 2 se 10 ki har report me "pehle ke kaam se lene layak" ka hissa (D-074).
 - **Sawal aur topics:** [OPEN_QUESTIONS.md](OPEN_QUESTIONS.md) me aage ke topics (B1 se B16), jaanchna baaki (§2) aur sawal (§3). Tay: Q-001 (maal ka maalik brand, D-060), Q-002 (price brand + platform ke niyam, D-061), Q-003 (expire ya na bika maal: brand ka nuksaan + platform ke niyam, D-062), Q-004 (hamare haath se hue nuksaan ki bharpai: bikne wala daam, D-063), Q-005 (alag batches ka MRP: batch ke hisaab se, D-064), Q-006 (Beauty Pro ka alag daam, seller chahe to, D-065), Q-007 (storage fee: kuch din muft, phir fee, D-066), Q-008 (product page pe agle batch ki exact expiry, D-067), Q-009 (nuksaan ki vasooli sirf saboot se, D-068), Q-010 (Beauty Pro: saboot + staff ki jaanch, D-069), Q-011 (Pro daam ki quantity seema seller tay kare, D-070), Q-012 (bachi fee: udhaar aage, seema ke baad kadam, D-071), Q-013 (parcel nahi mila: saboot se faisla, D-072). Q-014 (pehle ka kaam do kadam me hatega, D-073), Q-015 (pehle ke kaam se lene layak cheezon ki chalti list, D-074). Koi sawal khula nahi; kram ke saare sawal tay. Owner ka jawab wala button hi "next" bhi hai.
-- **Usage (2026-11-18):** abhi wale account pe weekly 0% (reset 2026-11-25), 5-hour 2%. Pichhla account weekly 99% (reset 2026-11-21): us pe naya kaam nahi.
+- **Usage (2026-11-18):** abhi wale account pe weekly 5% (reset 2026-11-25), 5-hour 37% (Agent 2 ke pehle run ke baad; run ne lagbhag 32% aur ~40 minute liye). Pichhla account weekly 99% (reset 2026-11-21): us pe naya kaam nahi.
 
 ## 2. Uncommitted
 
-- [OPEN_QUESTIONS.md](OPEN_QUESTIONS.md) v1.2.24 (Q-015), [DECISIONS.md](DECISIONS.md) v1.4.25 (D-074) aur ye HANDOFF; baaki sab commit ho chuka.
+- [OPEN_QUESTIONS.md](OPEN_QUESTIONS.md) v1.2.24 (Q-015), [DECISIONS.md](DECISIONS.md) v1.4.25 (D-074), ye HANDOFF, aur Agent 2 ki report (pehla run, nayi file); baaki sab commit ho chuka.
 
 ## 3. Agla kaam
 
-1. Agent 2 (Business Analyst + cosmetics domain expert), usage dekh ke aur owner ki haan se. Topics B1 se B13 ([OPEN_QUESTIONS.md](OPEN_QUESTIONS.md) §1); kaam bada hai to do run (B1 se B7, phir B8 se B13). Report me "pehle ke kaam se lene layak" ka hissa (D-074). Report se naye sawal banenge, owner ke saath ek-ek karke.
+1. Agent 2 ki report (pehla run) ke sawal owner ke saath ek-ek karke, Q-016 se, report ke kram me; ya pehle doosra run: owner tay kare. Doosra run usage dekh ke aur owner ki haan se. Topics B1 se B13 ([OPEN_QUESTIONS.md](OPEN_QUESTIONS.md) §1); kaam bada hai to do run (B1 se B7, phir B8 se B13). Report me "pehle ke kaam se lene layak" ka hissa (D-074). Report se naye sawal banenge, owner ke saath ek-ek karke.
 2. [OPEN_QUESTIONS.md](OPEN_QUESTIONS.md) §2 ki location data wali jaanch (Claude, kabhi bhi).
 
 ## Change log
@@ -75,3 +75,5 @@
 | v1.0.47 | 2026-11-18 | Q-014 tay (D-073); weekly 99%, is account pe ruka; agla Q-015.                                       |
 | v1.0.48 | 2026-11-18 | Q-015 khula (pehle ke kaam se kya naye me aaye); doosre account ka usage; uncommitted list sahi ki.  |
 | v1.0.49 | 2026-11-18 | Q-015 tay (D-074); kram ke saare sawal tay; agla kaam Agent 2.                                       |
+| v1.0.50 | 2026-11-18 | Agent 2 ka pehla run (B1 se B7) shuru, owner ki haan se.                                             |
+| v1.0.51 | 2026-11-18 | Agent 2 ka pehla run poora (52 prastaavit sawal), report jaanchi; agla: sawal ya doosra run.         |
