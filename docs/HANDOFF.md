@@ -1,6 +1,6 @@
 # HANDOFF: Beautinique
 
-> **Status:** v1.0.14 (2026-11-18). Ek session ya account se agle tak ki halat. Chhota rakho: sirf abhi ki halat aur agla kaam.
+> **Status:** v1.0.15 (2026-11-18). Ek session ya account se agle tak ki halat. Chhota rakho: sirf abhi ki halat aur agla kaam.
 
 ## 1. Abhi ki halat (2026-11-17)
 
@@ -13,7 +13,7 @@
 
 ## 2. Uncommitted
 
-- [RISKS.md](RISKS.md) v1.2.6, [DECISIONS.md](DECISIONS.md) v1.4.5 (D-055), [PROJECT_PLAN.md](PROJECT_PLAN.md) v1.1.1 (R1) aur ye HANDOFF.
+- [RISKS.md](RISKS.md) v1.2.7, [DECISIONS.md](DECISIONS.md) v1.4.5 (D-055), [PROJECT_PLAN.md](PROJECT_PLAN.md) v1.1.1 (R1) aur ye HANDOFF.
 
 ## 3. Agla kaam
 
@@ -39,3 +39,4 @@
 | v1.0.12 | 2026-11-17 | R-001 Maana.                                                                                        |
 | v1.0.13 | 2026-11-17 | R-003 Maana.                                                                                        |
 | v1.0.14 | 2026-11-18 | R-006, R-008 Maana; kanooni jaanch ka agent agents ki list me.                                      |
+| v1.0.15 | 2026-11-18 | RISKS: Atlas projects ki seema jaanchi.                                                             |

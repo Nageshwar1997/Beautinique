@@ -1,6 +1,6 @@
 # RISKS: Beautinique
 
-> **Status:** v1.2.6 (2026-11-18). Saare risks ek jagah, security wale bhi. Cheezein ek-ek karke judti hain.
+> **Status:** v1.2.7 (2026-11-18). Saare risks ek jagah, security wale bhi. Cheezein ek-ek karke judti hain.
 
 ## 0. Kaise likhein
 
@@ -31,7 +31,7 @@
 ### 2.1 MongoDB Atlas free cluster
 
 - Ek project me ek free cluster; har free cluster 0.5 GB storage, 100 operations/second, aur rolling 7 din me 10 GB andar + 10 GB bahar data transfer. Seema paar hone pe Atlas network dheema karta hai. Source: [Atlas free cluster limitations](https://www.mongodb.com/docs/atlas/reference/free-shared-limitations/).
-- Ek organization me kitne projects ban sakte hain, ye nahi jaancha.
+- Ek organization me 250 projects tak (badhai ja sakti hai), aur ek project me 25 clusters tak. D-011 ki MongoDB wali 8 services = 8 projects, is seema ke andar. Poore organization pe free clusters ki koi alag ginti ki seema nahi mili. Source: [Atlas Service Limits](https://www.mongodb.com/docs/atlas/reference/atlas-limits/) (jaancha 2026-11-18).
 
 ### 2.2 Render free web service aur Key Value
 
@@ -57,3 +57,4 @@
 | v1.2.4  | 2026-11-17 | R-001 Maana (owner); Band tab jab R1 ka pehla poora order chale.                                         |
 | v1.2.5  | 2026-11-17 | R-003 Maana (owner): sirf discovery nahi, poore kaam pe; kaam sessions aur accounts me batna acceptable. |
 | v1.2.6  | 2026-11-18 | R-006 aur R-008 Maana (owner); R-004: baad me ek agent se kanooni jaanch.                                |
+| v1.2.7  | 2026-11-18 | §2.1: Atlas me ek organization me 250 projects (8 services ke liye kaafi).                               |
