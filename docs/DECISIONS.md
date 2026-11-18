@@ -1,6 +1,6 @@
 # DECISIONS: Beautinique
 
-> **Status:** v1.4.30 (2026-11-18). Har faisla ek jagah. Sirf wahi "Tay" jo owner ne khud kaha; Claude ki salah faisla nahi. Cheezein ek-ek karke judti hain.
+> **Status:** v1.4.33 (2026-11-18). Har faisla ek jagah. Sirf wahi "Tay" jo owner ne khud kaha; Claude ki salah faisla nahi. Cheezein ek-ek karke judti hain.
 
 ## 0. Kaise likhein
 
@@ -93,6 +93,9 @@
 | D-077 | Kai sellers wala order: normal ek parcel (andar har seller ka invoice), majboori me alag; seller ke hisse aur parcel alag; code har parcel ka (5 niyam). | Business | 2026-11-18 |
 | D-078 | Seller ki fees: category ka % commission (GST ke bina wali rakam pe) + har unit pe tay fulfilment fee + pehle tay fees; aage ki fees shuru me ₹0 (5 niyam). | Business | 2026-11-18 |
 | D-079 | Return: hamari ya brand ki galti ki saari wajahein; "man badla" sirf band maal pe (factory seal salamat); seal na aane wale product pe man badla return nahi (5 niyam). | Business | 2026-11-18 |
+| D-080 | Return ki samay-seema wajah ke hisaab se: dikhne wali galti 48 ghante, baaki wajahein 7 din (dono misaal); uske baad batch ki dikkat recall ke raaste (5 niyam). | Business | 2026-11-18 |
+| D-081 | Seller ka paisa return ki samay-seema ke baad payable; hafte me ek payout; pehle udhaar aur fees katein, bharpai jude; kam se kam payout rakam (5 niyam). | Business | 2026-11-18 |
+| D-082 | Expiry ki seemaayein: ek default (misaal 6 mahine receiving pe, 3 mahine pe bikri band) + category ka override setting se; brand ka jawab sab pe ek (4 niyam). | Business | 2026-11-18 |
 
 ## 2. Record
 
@@ -923,6 +926,47 @@
 - **Kisne, kab:** owner, 2026-11-18. **Nishaan:** Salah maani.
 - **Asar (Claude):** R1 ka return niyam ([PROJECT_PLAN.md](PROJECT_PLAN.md) §1) ab isi se. Listing me "seal aata hai ya nahi" ka field (catalog). Pickup aur warehouse pe seal ki jaanch, aur lauta maal kahan jaaye: kram ke aage ke sawal. "Nakli ka shak" ki jaanch kaunsa staff role kare, wo roles ki list (D-017) me. Kanooni detail jaanchi nahi (R-004): return policy dikhane ke niyam, aur khule cosmetics pe "no return" ki shartein.
 
+### D-080. Return ki samay-seema
+
+- **Faisla:** return ki samay-seema wajah (D-079) ke hisaab se alag hai. Niyam:
+  1. Dikhne wali galti (toota, leak, pighla, item kam, galat item ya shade ya size): delivery ke 48 ghante tak (misaal), D-072 ke daawe jaisa.
+  2. Kharab maal (jaise pump nahi chalta) aur dikhayi gayi se pehle ki expiry: 7 din tak (misaal).
+  3. Man badla (sirf band maal, D-079): 7 din tak (misaal).
+  4. Nakli hone ka shak: 7 din tak (misaal), staff ki jaanch ke saath.
+  5. Samay-seema ke baad kisi batch me dikkat nikle to recall ka raasta (alag sawal).
+- **Wajah:** Claude ki salah, owner ne maani: dikhne wali galti jaldi pakdi jaati hai, to saboot sach rehta hai; baaki wajahon me customer ko poora mauka milta hai, aur seller ka paisa bahut der nahi rukta.
+- **Chhode vikalp:** sab wajahon pe ek hi samay, 7 din (transit ki galti ka daawa der se, saboot kamzor); sab pe 15 din (seller ka paisa der tak ruka, saboot kamzor).
+- **Kab dobara khulega:** owner khud khole.
+- **Kisne, kab:** owner, 2026-11-18. **Nishaan:** Salah maani.
+- **Asar (Claude):** samay product page aur order page pe saaf dikhe (UX). Asli number abhi misaal hain; settings se badal sakein. Seller ka paisa kab payable ho, wo isi pe tika (kram ka agla sawal). Kanooni detail jaanchi nahi (R-004): return ki kam se kam samay-seema ke niyam (agar koi ho), aur kharab maal pe customer ke haq.
+
+### D-081. Seller ka paisa kab payable, aur payout
+
+- **Faisla:** bikri ka paisa seller ke liye return ki samay-seema ke baad payable hota hai, aur payout hafte me ek baar. Niyam:
+  1. Ek line tab payable hoti hai jab uski sabse lambi return samay-seema (D-080, misaal 7 din) khatam ho aur us pe koi return khula na ho.
+  2. Payout hafte me ek baar (misaal har Monday), pichhle hafte tak jo payable hua.
+  3. Payout me se pehle udhaar (D-071) aur fees (D-078) kat-ti hain, aur bharpai (D-063) judti hai.
+  4. Kam se kam payout rakam (misaal ₹100); usse kam ho to agle hafte me judti hai.
+  5. Seller ko har line ki halat dikhe: kab payable hogi, aur kis payout me gayi.
+- **Wajah:** Claude ki salah, owner ne maani: return ka khatra khatam hone ke baad hi paisa jaata hai, to returns se udhaar kam banta hai, aur hafte ka payout chhote brand ke liye bahut lamba intezaar nahi.
+- **Chhode vikalp:** delivery ke din se payable (har return pe udhaar ka khatra); mahine me do baar payout (chhote brand ke liye lamba intezaar).
+- **Kab dobara khulega:** owner khud khole.
+- **Kisne, kab:** owner, 2026-11-18. **Nishaan:** Salah maani.
+- **Asar (Claude):** finance (D-001) me har line ki halat: payable hone ka intezaar, payable, paid. R1 me payout haath se "paid" mark hota hai (D-055). Din aur rakam abhi misaal hain; settings se badal sakein. Payable ke baad koi daawa ya bharpai ulti pade to wo D-071 ke udhaar ke raaste. D-063 ka payout cycle ab yahi. Kanooni detail jaanchi nahi (R-004): marketplace pe seller ko payment ki samay-seema ke niyam (agar koi ho), aur payout pe GST TCS aur income-tax TDS kaatne ka samay.
+
+### D-082. Expiry ki seemaon ke number
+
+- **Faisla:** D-062 ki expiry wali seemaayein ek default se chalti hain, aur category ke hisaab se badal sakti hain. Niyam:
+  1. Default: receiving pe kam se kam 6 mahine bachi, aur bikri band jab 3 mahine se kam (misaal).
+  2. Category ka override setting se, bina code change ya deploy (misaal: sunscreen aur actives jaise vitamin C serum 9 / 4 mahine; chhoti shelf life wale natural products 4 / 2 mahine).
+  3. Brand ke jawab ke din sab pe ek (misaal 15 din).
+  4. R1 me sirf default bhi chal sakta hai, par override ki setting pehle din se.
+- **Wajah:** Claude ki salah, owner ne maani: samajhna aasaan hai, aur categories ka farak sambhal jaata hai.
+- **Chhode vikalp:** sab pe ek seema (chhoti shelf life wale products ke liye kadi); shelf life ke % se (har batch pe kul shelf life chahiye, jo pack pe hamesha saaf nahi).
+- **Kab dobara khulega:** owner khud khole.
+- **Kisne, kab:** owner, 2026-11-18. **Nishaan:** Salah maani.
+- **Asar (Claude):** receiving ki jaanch (D-014) aur bikri band (D-062) inhi settings se. Customer ko kam se kam bikri band ki seema jitni expiry milti hai, aur product page pe exact expiry (D-067). Setting kaunsa staff role badle, wo roles ki list (D-017) me. Number abhi misaal hain. Kanooni detail jaanchi nahi (R-004): expiry ke kareeb ya expired cosmetics bechne ke niyam.
+
 ## Change log
 
 | Version | Date       | Badlav                                                                                                                                                                                                                                                                                  |
@@ -964,3 +1008,6 @@
 | v1.4.28 | 2026-11-18 | D-077 aaya (kai sellers wala order: normal ek parcel, majboori me alag; Q-018); D-072 me jod (code har parcel ka). |
 | v1.4.29 | 2026-11-18 | D-078 aaya (seller ki fees: commission GST ke bina + fulfilment fee; Q-019). |
 | v1.4.30 | 2026-11-18 | D-079 aaya (return ki wajahein; man badla sirf band maal pe; Q-020). |
+| v1.4.31 | 2026-11-18 | D-080 aaya (return ki samay-seema wajah ke hisaab se; Q-021). |
+| v1.4.32 | 2026-11-18 | D-081 aaya (seller ka paisa return ki samay-seema ke baad payable, hafte me payout; Q-022). |
+| v1.4.33 | 2026-11-18 | D-082 aaya (expiry ki seemaayein: default + category ka override; Q-023). |

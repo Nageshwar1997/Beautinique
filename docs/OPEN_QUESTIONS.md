@@ -1,6 +1,6 @@
 # OPEN QUESTIONS: Beautinique
 
-> **Status:** v1.2.30 (2026-11-18). Khule sawal, aage ke topics aur jaanchna baaki. Cheezein ek-ek karke judengi.
+> **Status:** v1.2.33 (2026-11-18). Khule sawal, aage ke topics aur jaanchna baaki. Cheezein ek-ek karke judengi.
 
 ## Is file me kya aayega
 
@@ -546,7 +546,7 @@ Claude ka kaam: owner ka faisla nahi chahiye, sirf saboot. Nateeja saboot ke saa
 
 ### Q-021. Return kitne din tak maanga ja sake?
 
-- **Status:** `Khula`. Topic: B7 (returns), B6 (settlement).
+- **Status:** `Tay`. Topic: B7 (returns), B6 (settlement).
 - **Sawal:** delivery ke kitne din tak customer return maang sake? Sab wajahon pe ek hi samay, ya wajah ke hisaab se alag (D-079 ki wajahein)?
 - **Kyun zaroori:**
   - Transit me toota ya item kam ka daawa jitna jaldi aaye, saboot utna sach hota hai; der se aaye daawe me ye pata karna mushkil hai ki nuksaan kahan hua.
@@ -568,6 +568,81 @@ Claude ka kaam: owner ka faisla nahi chahiye, sirf saboot. Nateeja saboot ke saa
   - (c) customer ke liye achha, par seller ka paisa der tak rukta hai aur daawe ka saboot kamzor hota hai.
 - **Kanooni detail jaanchi nahi** (R-004): return ki kam se kam samay-seema ke niyam (agar koi ho), aur kharab maal pe customer ke haq.
 - **Iske baad (kram ka agla sawal):** seller ka paisa kab payable ho, aur payout kitni baar ho.
+- **Owner ka jawab (2026-11-18):** **(b)**, wajah ke hisaab se alag samay (5 niyam). Record: [DECISIONS.md](DECISIONS.md) D-080.
+
+### Q-022. Seller ka paisa kab payable ho, aur payout kitni baar ho?
+
+- **Status:** `Tay`. Topic: B6 (settlement).
+- **Sawal:** bikri ka paisa seller ke liye kab "payable" (dene layak) ho, aur payout kitni baar ho? R1 me payout haath se "paid" mark hota hai, asli bank transfer nahi ([PROJECT_PLAN.md](PROJECT_PLAN.md) §1).
+- **Kyun zaroori:**
+  - Delivery ke baad return aa sakte hain (D-080). Paisa pehle de diya aur return aaya, to wo rakam seller pe udhaar banti hai (D-071).
+  - Bharpai (D-063 niyam 3) aur bachi fee ka kaatna (D-071 niyam 1) "agle payout" pe tike hain, aur D-063 ne payout ka cycle settlement ki charcha pe chhoda tha.
+  - Chhote brand ke liye paisa kitni jaldi aata hai, ye judne ki ek badi wajah hai.
+- **Vikalp:**
+  - **(a) Delivery ke din se payable, har hafte payout:** baad ke returns agle payouts se kat-te hain.
+  - **(b) Return ki samay-seema ke baad payable, har hafte payout:**
+    1. Ek line tab payable hoti hai jab uski sabse lambi return samay-seema (D-080, misaal 7 din) khatam ho aur us pe koi return khula na ho.
+    2. Payout hafte me ek baar (misaal har Monday), pichhle hafte tak jo payable hua.
+    3. Payout me se pehle udhaar (D-071) aur fees (D-078) kat-ti hain, aur bharpai (D-063) judti hai.
+    4. Kam se kam payout rakam (misaal ₹100); usse kam ho to agle hafte me judti hai.
+    5. Seller ko har line ki halat dikhe: kab payable hogi, aur kis payout me gayi.
+  - **(c) (b) jaisa, par mahine me do baar payout.**
+- **Salah:** **(b)**. Return ka khatra khatam hone ke baad hi paisa jaata hai, to returns se udhaar kam banta hai, aur hafte ka payout chhote brand ke liye bahut lamba intezaar nahi.
+- **Trade-off:**
+  - (a) seller ko paisa sabse jaldi, par har return pe udhaar ka khatra, aur D-071 ke kadam zyada baar.
+  - (b) me paisa delivery ke lagbhag 1 se 2 hafte baad aata hai.
+  - (c) me payout ka kaam kam, par chhote brand ke liye lamba intezaar.
+- **Kanooni detail jaanchi nahi** (R-004): marketplace pe seller ko payment ki samay-seema ke niyam (agar koi ho), aur payout pe GST TCS aur income-tax TDS kaatne ka samay.
+- **Iske baad (kram ka agla sawal):** expiry ki seemaon ke number (D-062): receiving pe kam se kam bachi expiry, bikri band hone ki seema, aur brand ke jawab ke din; sab products pe ek jaise ya category ke hisaab se.
+- **Owner ka jawab (2026-11-18):** **(b)**, return ki samay-seema ke baad payable, hafte me ek payout (5 niyam). Record: [DECISIONS.md](DECISIONS.md) D-081.
+
+### Q-023. Expiry ki seemaon ke number kya hon, aur sab products pe ek jaise ya category ke hisaab se?
+
+- **Status:** `Tay`. Topic: B3 (catalog: batch aur expiry).
+- **Sawal:** D-062 ki seemaon ke number kya hon: (1) receiving pe batch ki kam se kam bachi expiry, (2) bikri band hone ki seema, aur (3) bikri band ke baad brand ke jawab ke din? Aur ye sab products pe ek jaise hon ya category ke hisaab se?
+- **Kyun zaroori:**
+  - D-062 ne niyam tay kiye, par number nahi. R1 me receiving pe batch aur expiry ki jaanch (D-014) aur product page ki expiry (D-067) inhi numbers pe chalti hai.
+  - Customer ke paas product khatam karne ka samay hona chahiye: serum aksar 2 se 3 mahine me, aur foundation 6 se 12 mahine me khatam hota hai.
+  - Kuch products ki kul shelf life hi chhoti hoti hai (jaise kuch natural products, misaal 12 mahine); sab pe ek kadi seema unhe platform se bahar kar sakti hai.
+- **Vikalp:**
+  - **(a) Sab pe ek:** receiving pe kam se kam 6 mahine bachi (misaal), bikri band jab 3 mahine se kam (misaal), aur brand ka jawab 15 din (misaal).
+  - **(b) Ek default + category ka override:**
+    1. Default: receiving pe kam se kam 6 mahine bachi, aur bikri band jab 3 mahine se kam (misaal).
+    2. Category ka override setting se, bina code change ya deploy (misaal: sunscreen aur actives jaise vitamin C serum 9 / 4 mahine; chhoti shelf life wale natural products 4 / 2 mahine).
+    3. Brand ke jawab ke din sab pe ek (misaal 15 din).
+    4. R1 me sirf default bhi chal sakta hai, par override ki setting pehle din se.
+  - **(c) Shelf life ke % se:** receiving pe kul shelf life ka kam se kam 50% bacha (misaal), bikri band jab 15% se kam (misaal), saath me kam se kam 3 mahine.
+- **Salah:** **(b)**. Samajhna aasaan hai, aur categories ka farak sambhal jaata hai.
+- **Trade-off:**
+  - (a) saral, par chhoti shelf life wale products ke liye kadi seema.
+  - (b) me category ki values staff ko sambhalni padti hain.
+  - (c) har product pe sahi baithta hai, par har batch pe kul shelf life (bani hone ki tareekh se expiry tak) chahiye, jo pack pe hamesha saaf nahi hoti.
+- **Kanooni detail jaanchi nahi** (R-004): expiry ke kareeb ya expired cosmetics bechne ke niyam.
+- **Iske baad (kram ka agla sawal):** pack pe expiry date na ho to kya ho.
+- **Owner ka jawab (2026-11-18):** **(b)**, ek default + category ka override (4 niyam). Record: [DECISIONS.md](DECISIONS.md) D-082.
+
+### Q-024. Pack pe expiry date na ho to us maal ka kya ho?
+
+- **Status:** `Khula`. Topic: B3 (catalog: batch aur expiry).
+- **Sawal:** kuch packs pe expiry date nahi hoti: sirf bani hone ki tareekh (mfg date) aur "itne mahine me istemaal karein" likha hota hai, ya sirf PAO nishaan (khulne ke baad kitne mahine chale, jaise "12M"). Aise maal ka kya ho?
+- **Kyun zaroori:**
+  - Expiry pe kai faisle tike hain: bikri band ki seema (D-062, D-082), sabse pehle expire hone wala pehle (D-062 niyam 2), batch ka MRP (D-064), aur product page pe expiry (D-067). Expiry na ho to ye sab toot-te hain.
+  - Receiving pe staff ko pata hona chahiye ki aisa maal le ya lautaye (D-014).
+- **Vikalp:**
+  - **(a) Sirf chhapi expiry:** jis pack pe expiry (ya "use before") date nahi, wo receiving pe wapas.
+  - **(b) Expiry, ya mfg date + shelf life:**
+    1. Pack pe expiry ho to wahi.
+    2. Expiry na ho par mfg date aur shelf life (mahine) chhapi ho, to system expiry nikale (mfg date + shelf life); staff receiving pe pack se jaanche.
+    3. Sirf PAO wala (na expiry, na shelf life): receiving pe wapas.
+    4. PAO ek alag field: product page pe customer ki jaankari ke liye, par expiry ka badal nahi.
+  - **(c) Sirf PAO bhi chale:** expiry = mfg date + tay mahine (misaal 30 mahine) maan ke.
+- **Salah:** **(b)**. Expiry hamesha pack ki chhapi jaankari se aati hai, andaaze se nahi; aur sahi products (mfg date + shelf life wale) bahar nahi hote.
+- **Trade-off:**
+  - (a) saral, par kuch sahi products bhi bahar ho jaate hain.
+  - (b) me staff ko pack dhyaan se padhna padta hai, aur nikali hui expiry ki jaanch karni padti hai.
+  - (c) me andaaze ki expiry customer ko "exact" dikhegi, jo D-067 ke khilaaf hai.
+- **Kanooni detail jaanchi nahi** (R-004): label pe expiry ya "use before" date ke niyam.
+- **Iske baad (kram ka agla sawal):** brand maal warehouse bheje to pehle se suchna (kya aur kitna aa raha hai), aur aaye maal me farak ho to kya.
 
 ## Change log
 
@@ -605,3 +680,6 @@ Claude ka kaam: owner ka faisla nahi chahiye, sirf saboot. Nateeja saboot ke saa
 | v1.2.28 | 2026-11-18 | Q-018 tay: (c) normal ek parcel (D-077); Q-019 (seller ki fees aur commission ka aadhaar). |
 | v1.2.29 | 2026-11-18 | Q-019 tay: (b) + (ii) (D-078); Q-020 (return ki wajahein aur "band" ka matlab). |
 | v1.2.30 | 2026-11-18 | Q-020 tay: (b) man badla sirf band maal pe (D-079); Q-021 (return ki samay-seema). |
+| v1.2.31 | 2026-11-18 | Q-021 tay: (b) wajah ke hisaab se (D-080); Q-022 (seller ka paisa kab payable, payout). |
+| v1.2.32 | 2026-11-18 | Q-022 tay: (b) samay-seema ke baad, hafte me payout (D-081); Q-023 (expiry ki seemaon ke number). |
+| v1.2.33 | 2026-11-18 | Q-023 tay: (b) default + category override (D-082); Q-024 (pack pe expiry date na ho to). |
