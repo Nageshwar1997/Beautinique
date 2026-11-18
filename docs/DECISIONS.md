@@ -1,6 +1,6 @@
 # DECISIONS: Beautinique
 
-> **Status:** v1.4.33 (2026-11-18). Har faisla ek jagah. Sirf wahi "Tay" jo owner ne khud kaha; Claude ki salah faisla nahi. Cheezein ek-ek karke judti hain.
+> **Status:** v1.4.34 (2026-11-18). Har faisla ek jagah. Sirf wahi "Tay" jo owner ne khud kaha; Claude ki salah faisla nahi. Cheezein ek-ek karke judti hain.
 
 ## 0. Kaise likhein
 
@@ -665,7 +665,7 @@
 - **Chhode vikalp:** Beautinique maal khareed le (customer invoice Beautinique ka, D-030 se takrav); dono tarah (kuch brands ka maal hamara, kuch ka unka).
 - **Kab dobara khulega:** Beautinique khud maal khareed ke bechna chahe, ya owner khole.
 - **Kisne, kab:** owner, 2026-11-18. **Nishaan:** Salah maani.
-- **Asar (Claude):** stock ke har batch pe uske seller ka record; seller ko apne maal ki ginti dikhe; warehouse me hamare haath se hua nuksaan (toot-foot, chori, galat dispatch) hamari zimmedari, jiski bharpai ka daam alag sawal hai. Kanooni detail jaanchi nahi (R-004).
+- **Asar (Claude):** stock ke har batch pe uske seller ka record; seller ko apne maal ki ginti dikhe; warehouse me hamare haath se hua nuksaan (toot-foot, chori, galat dispatch) hamari zimmedari; bharpai ka daam D-063 me. Kanooni detail jaanchi nahi (R-004).
 
 ### D-061. Selling price kaun tay kare
 
@@ -678,7 +678,7 @@
 - **Chhode vikalp:** brand poori tarah azaad (sirf MRP ki seema, koi itihaas ya confirm nahi); Beautinique daam tay kare (invoice brand ka par daam hamara).
 - **Kab dobara khulega:** owner khud khole.
 - **Kisne, kab:** owner, 2026-11-18. **Nishaan:** Salah maani.
-- **Asar (Claude):** bade badlav ka asli number pricing ki charcha (B4) me tay hoga. Do alag sawal baaki: ek product ke alag batches ka MRP alag ho to customer ko kaunsa MRP aur daam dikhe; aur Beauty Pro buyers (D-032) ke liye alag daam ho ya nahi. Kanooni detail jaanchi nahi (R-004).
+- **Asar (Claude):** bade badlav ka asli number pricing ki charcha (B4) me tay hoga. Alag batches ka MRP D-064 me, aur Beauty Pro buyers ka daam D-065 me. Kanooni detail jaanchi nahi (R-004).
 
 ### D-062. Expire hone wala ya na bika maal
 
@@ -693,7 +693,7 @@
 - **Chhode vikalp:** brand khud sambhale, platform ke koi niyam nahi (sirf report); nuksaan baant lena (platform kuch hissa uthaye ya khareed le).
 - **Kab dobara khulega:** owner khud khole.
 - **Kisne, kab:** owner, 2026-11-18. **Nishaan:** Salah maani.
-- **Asar (Claude):** teeno numbers (receiving ki seema, bikri band ki seema, brand ke jawab ke din; misaal 6 mahine, 3 mahine, 15 din) B3 ki charcha me tay honge, category ke hisaab se alag ho sakte hain. Disposal fee aur wapsi ka kharcha seller ke hisaab (B6) me. Do alag sawal baaki: lambe samay se pade na bike maal pe storage fee ho ya nahi; customer ko product page pe expiry dikhe ya nahi. Kanooni detail jaanchi nahi (R-004): label pe expiry ke niyam aur cosmetics nasht karne ke niyam.
+- **Asar (Claude):** teeno numbers (receiving ki seema, bikri band ki seema, brand ke jawab ke din; misaal 6 mahine, 3 mahine, 15 din) B3 ki charcha me tay honge, category ke hisaab se alag ho sakte hain. Disposal fee aur wapsi ka kharcha seller ke hisaab (B6) me. Storage fee D-066 me, product page pe expiry D-067 me, aur teeno numbers D-082 me. Kanooni detail jaanchi nahi (R-004): label pe expiry ke niyam aur cosmetics nasht karne ke niyam.
 
 ### D-063. Hamare haath se hue nuksaan ki bharpai
 
@@ -707,7 +707,7 @@
 - **Chhode vikalp:** MRP pe (brand ko bikne se bhi zyada, hamara nuksaan bada); brand ka bataya cost (jaanchna mushkil, har batch pe ek aur field).
 - **Kab dobara khulega:** owner khud khole.
 - **Kisne, kab:** owner, 2026-11-18. **Nishaan:** Salah maani.
-- **Asar (Claude):** 30 din ki khidki aur payout ka cycle settlement ki charcha (B6) me pakke honge. Alag sawal baaki: nuksaan transporter (D-027) ya delivery partner ke haath se hua ho to hum unse vasooli karein ya nahi, aur kaise. Kanooni detail jaanchi nahi (R-004): bharpai pe GST, aur kho gaye maal ka brand ke tax me hisaab.
+- **Asar (Claude):** 30 din ki khidki aur payout ka cycle settlement ki charcha (B6) me pakke honge. Transporter ya delivery partner se vasooli D-068 me, aur payout ka cycle D-081 me. Kanooni detail jaanchi nahi (R-004): bharpai pe GST, aur kho gaye maal ka brand ke tax me hisaab.
 
 ### D-064. Alag batches ka alag MRP
 
@@ -734,7 +734,7 @@
 - **Chhode vikalp:** sabke liye ek daam (farak sirf GSTIN wala invoice); platform ka tay % Pro discount (platform ka kharcha, har brand pe ek jaisa).
 - **Kab dobara khulega:** owner khud khole.
 - **Kisne, kab:** owner, 2026-11-18. **Nishaan:** Salah maani.
-- **Asar (Claude):** Beauty Pro ke kaam R2 se (D-055), par catalog aur cart ka design pehle din se do daam sambhale: product page aur cart me daam kharidaar ke hisaab se. Kam daam pe khareed ke aage bechne ka khatra: do alag sawal baaki (Pro buyer ki jaanch kaise, aur quantity ki seema). Kanooni detail jaanchi nahi (R-004): kharidaar ke hisaab se alag daam ke niyam.
+- **Asar (Claude):** Beauty Pro ke kaam R2 se (D-055), par catalog aur cart ka design pehle din se do daam sambhale: product page aur cart me daam kharidaar ke hisaab se. Kam daam pe khareed ke aage bechne ka khatra: Pro buyer ki jaanch D-069 me, aur quantity ki seema D-070 me. Kanooni detail jaanchi nahi (R-004): kharidaar ke hisaab se alag daam ke niyam.
 
 ### D-066. Na bike maal pe storage fee
 
@@ -747,7 +747,7 @@
 - **Chhode vikalp:** koi storage fee nahi (warehouse dead stock se bhar sakta hai, kharcha hamara); pehle din se har maal pe har mahine fee (chhote brands ke liye bhaari).
 - **Kab dobara khulega:** owner khud khole.
 - **Kisne, kab:** owner, 2026-11-18. **Nishaan:** Salah maani.
-- **Asar (Claude):** har batch ki umar (receiving ki tareekh se) ka hisaab aur mahine ki fee ka calculation. Alag sawal baaki: seller ka payout fee se kam pade (bikri na ho) to bachi fee ka kya ho.
+- **Asar (Claude):** har batch ki umar (receiving ki tareekh se) ka hisaab aur mahine ki fee ka calculation. Bachi fee (udhaar) D-071 me.
 
 ### D-067. Product page pe expiry
 
@@ -772,7 +772,7 @@
 - **Chhode vikalp:** koi vasooli nahi (nuksaan aur dhokha dono hamare sir); hamesha poori vasooli (galat kaat ka khatra, partners chhod sakte hain).
 - **Kab dobara khulega:** owner khud khole.
 - **Kisne, kab:** owner, 2026-11-18. **Nishaan:** Salah maani.
-- **Asar (Claude):** kaat ki seema (ek baar aur mahine me) aur jaanch ka tareeka logistics (B1) aur settlement (B6) ki charcha me. Transporter ke contract me ye niyam. Alag sawal baaki: customer kahe parcel nahi mila jabki delivery partner ne "delivered" kiya, to kaun sahi aur kaise tay ho (B11). Kanooni detail jaanchi nahi (R-004): gig partners ki kamaai se kaat ke niyam.
+- **Asar (Claude):** kaat ki seema (ek baar aur mahine me) aur jaanch ka tareeka logistics (B1) aur settlement (B6) ki charcha me. Transporter ke contract me ye niyam. "Parcel nahi mila" ka jhagda D-072 me. Kanooni detail jaanchi nahi (R-004): gig partners ki kamaai se kaat ke niyam.
 
 ### D-069. Beauty Pro buyer ki jaanch
 
@@ -839,7 +839,7 @@
 - **Chhode vikalp:** abhi sab hatao (agents ko purana analysis git history se nikaalna padta); kabhi na hatao (confusion aur bhaari repo, D-003 ke khilaaf).
 - **Kab dobara khulega:** owner khud khole.
 - **Kisne, kab:** owner, 2026-11-18. **Nishaan:** Salah maani.
-- **Asar (Claude):** alag sawal baaki: pehle ke kaam ki kaunsi cheezein (jaise achhe patterns, design ke tokens) naye me laani hain, aur uski list kab aur kaise bane.
+- **Asar (Claude):** pehle ke kaam se kya naye me aaye, wo D-074 me.
 
 ### D-074. Pehle ke kaam se kya naye me aaye
 
@@ -910,7 +910,7 @@
 - **Chhode vikalp:** sirf commission (sasta product platform ke liye nuksaan ka); shuru se aur fees, jaise labelling, return handling aur suchna se farak pe penalty (chhote brand pe shuru me bojh); commission GST samet daam pe (GST pe bhi commission, aur rate badle to commission bhi badle).
 - **Kab dobara khulega:** owner khud khole.
 - **Kisne, kab:** owner, 2026-11-18. **Nishaan:** Salah maani.
-- **Asar (Claude):** fees ki rakam (dummy) kram ke aage ke sawal me. Seller ke hisaab (finance, D-001) me har fee ki alag line, aur D-063 ki bharpai aur D-071 ke udhaar me yahi fees. Kanooni detail jaanchi nahi (R-004): commission aur fees pe GST, platform ka seller ko fees ka invoice.
+- **Asar (Claude):** fees ki rakam (dummy) abhi tay nahi. Seller ke hisaab (finance, D-001) me har fee ki alag line, aur D-063 ki bharpai aur D-071 ke udhaar me yahi fees. Kanooni detail jaanchi nahi (R-004): commission aur fees pe GST, platform ka seller ko fees ka invoice.
 
 ### D-079. Return ki wajahein aur "band" maal
 
@@ -924,7 +924,7 @@
 - **Chhode vikalp:** sirf galti pe return, man badla bilkul nahi (customer ke liye kadi); kuch khula maal bhi wapas, jaise "shade guarantee" (khula maal nasht, nuksaan bada, galat istemaal aasaan).
 - **Kab dobara khulega:** owner khud khole.
 - **Kisne, kab:** owner, 2026-11-18. **Nishaan:** Salah maani.
-- **Asar (Claude):** R1 ka return niyam ([PROJECT_PLAN.md](PROJECT_PLAN.md) §1) ab isi se. Listing me "seal aata hai ya nahi" ka field (catalog). Pickup aur warehouse pe seal ki jaanch, aur lauta maal kahan jaaye: kram ke aage ke sawal. "Nakli ka shak" ki jaanch kaunsa staff role kare, wo roles ki list (D-017) me. Kanooni detail jaanchi nahi (R-004): return policy dikhane ke niyam, aur khule cosmetics pe "no return" ki shartein.
+- **Asar (Claude):** R1 ka return niyam ([PROJECT_PLAN.md](PROJECT_PLAN.md) §1) ab isi se. Listing me "seal aata hai ya nahi" ka field (catalog). Pickup aur warehouse pe seal ki jaanch, aur lauta maal kahan jaaye, abhi tay nahi. "Nakli ka shak" ki jaanch kaunsa staff role kare, wo roles ki list (D-017) me. Kanooni detail jaanchi nahi (R-004): return policy dikhane ke niyam, aur khule cosmetics pe "no return" ki shartein.
 
 ### D-080. Return ki samay-seema
 
@@ -938,7 +938,7 @@
 - **Chhode vikalp:** sab wajahon pe ek hi samay, 7 din (transit ki galti ka daawa der se, saboot kamzor); sab pe 15 din (seller ka paisa der tak ruka, saboot kamzor).
 - **Kab dobara khulega:** owner khud khole.
 - **Kisne, kab:** owner, 2026-11-18. **Nishaan:** Salah maani.
-- **Asar (Claude):** samay product page aur order page pe saaf dikhe (UX). Asli number abhi misaal hain; settings se badal sakein. Seller ka paisa kab payable ho, wo isi pe tika (kram ka agla sawal). Kanooni detail jaanchi nahi (R-004): return ki kam se kam samay-seema ke niyam (agar koi ho), aur kharab maal pe customer ke haq.
+- **Asar (Claude):** samay product page aur order page pe saaf dikhe (UX). Asli number abhi misaal hain; settings se badal sakein. Seller ka payable isi pe tika (D-081). Kanooni detail jaanchi nahi (R-004): return ki kam se kam samay-seema ke niyam (agar koi ho), aur kharab maal pe customer ke haq.
 
 ### D-081. Seller ka paisa kab payable, aur payout
 
@@ -1011,3 +1011,4 @@
 | v1.4.31 | 2026-11-18 | D-080 aaya (return ki samay-seema wajah ke hisaab se; Q-021). |
 | v1.4.32 | 2026-11-18 | D-081 aaya (seller ka paisa return ki samay-seema ke baad payable, hafte me payout; Q-022). |
 | v1.4.33 | 2026-11-18 | D-082 aaya (expiry ki seemaayein: default + category ka override; Q-023). |
+| v1.4.34 | 2026-11-18 | "Asar" se agle sawalon ke zikr hataye (owner); jo sawal tay ho chuka, wahan us faisle ka number. Koi faisla nahi badla. |

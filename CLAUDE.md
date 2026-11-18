@@ -1,6 +1,6 @@
 # CLAUDE.md: Beautinique
 
-> **Status:** v1.0.0 (2026-11-17). Docs aur code naye sire se ban rahe hain.
+> **Status:** v1.0.1 (2026-11-18). Docs aur code naye sire se ban rahe hain.
 
 Ye file Claude Code har session ki shuruaat me padhta hai. Project pe ek hi insaan (owner) kaam karta hai,
 2 Claude accounts se baari-baari. **Kaam shuru karne se pehle [docs/HANDOFF.md](docs/HANDOFF.md) padho.**
@@ -18,8 +18,9 @@ Ye file Claude Code har session ki shuruaat me padhta hai. Project pe ek hi insa
 
 ## Discovery ke niyam
 
-- Ek waqt me ek sawal; agla tabhi jab owner "next" kahe. Har sawal ke saath: kyun zaroori, vikalp, salah,
-  trade-off. Owner ke kamzor faisle pe khul ke salah do, par tay hue faisle dobara mat chhedo.
+- Jo sawal kisi khule sawal pe tike nahi, wo ek saath do; jo tika ho, wo us sawal ke jawab ke baad (owner,
+  2026-11-18). Sawal me agle sawal ka zikr nahi. Har sawal ke saath: kyun zaroori, vikalp, salah, trade-off.
+  Owner ke kamzor faisle pe khul ke salah do, par tay hue faisle dobara mat chhedo.
 - "Tay" sirf wahi jo owner ne khud kaha. Claude ki salah ko faisla mat likho.
 - Owner ka jawab docs me saaf vakya me likho, chat ka chhota roop (jaise "Q1 => b") nahi.
 - Sawal-jawab ki files me sirf aakhri faisla; faisle ka itihaas sirf [docs/DECISIONS.md](docs/DECISIONS.md) me.
@@ -82,6 +83,7 @@ khula hai. Jis doc me badlav kiya, uske change log me ek line. Progress % ka niy
 
 ## Change log
 
-| Version | Date       | Badlav                                                                    |
-| ------- | ---------- | ------------------------------------------------------------------------- |
-| v1.0.0  | 2026-11-17 | Pehla version: abhi ki halat, discovery ke niyam aur hamesha laagu niyam. |
+| Version | Date       | Badlav                                                                           |
+| ------- | ---------- | -------------------------------------------------------------------------------- |
+| v1.0.0  | 2026-11-17 | Pehla version: abhi ki halat, discovery ke niyam aur hamesha laagu niyam.        |
+| v1.0.1  | 2026-11-18 | Discovery: bina dependency wale sawal ek saath; agle sawal ka zikr nahi (owner). |
