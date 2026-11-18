@@ -1,6 +1,6 @@
 # Docs: Beautinique
 
-> **Status:** v1.0.0 (2026-11-17). Docs ka index. Files khaali shuru hui hain; cheezein ek-ek karke, owner ki haan ke baad judti hain.
+> **Status:** v1.0.1 (2026-11-18). Docs ka index. Files khaali shuru hui hain; cheezein ek-ek karke, owner ki haan ke baad judti hain.
 
 ## Niyam
 
@@ -18,7 +18,7 @@
 | [ARCHITECTURE.md](ARCHITECTURE.md) | Kaise: services, data ka maalik, events, auth, deployment |
 | [FLOWS.md](FLOWS.md) | Poore flows jo kai modules me chalte hain |
 | [DECISIONS.md](DECISIONS.md) | Har faisla (D-xxx), tag ke saath |
-| [OPEN_QUESTIONS.md](OPEN_QUESTIONS.md) | Khule sawal (Q-xxx) |
+| [OPEN_QUESTIONS.md](OPEN_QUESTIONS.md) | Khule sawal (Q-xxx), aage ke topics (B1 ...) aur jaanchna baaki |
 | [RISKS.md](RISKS.md) | Risks (R-xxx), security wale bhi |
 | [GLOSSARY.md](GLOSSARY.md) | Shabdon ka ek matlab |
 | [COMPLIANCE.md](COMPLIANCE.md) | Kanooni matrix (sab dummy) |
@@ -44,3 +44,4 @@
 | Version | Date | Badlav |
 | --- | --- | --- |
 | v1.0.0 | 2026-11-17 | Pehla version: docs ka index aur niyam. |
+| v1.0.1 | 2026-11-18 | OPEN_QUESTIONS ki line: topics aur jaanchna baaki bhi. |

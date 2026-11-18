@@ -1,6 +1,6 @@
 # DECISIONS: Beautinique
 
-> **Status:** v1.4.9 (2026-11-18). Har faisla ek jagah. Sirf wahi "Tay" jo owner ne khud kaha; Claude ki salah faisla nahi. Cheezein ek-ek karke judti hain.
+> **Status:** v1.4.10 (2026-11-18). Har faisla ek jagah. Sirf wahi "Tay" jo owner ne khud kaha; Claude ki salah faisla nahi. Cheezein ek-ek karke judti hain.
 
 ## 0. Kaise likhein
 
@@ -72,6 +72,7 @@
 | D-056 | Render pe sirf ek free web service (saara backend) aur ek free Key Value; koi doosri web service nahi, preview bhi nahi.                                             | Architecture | 2026-11-18 |
 | D-057 | Finance ka PostgreSQL Neon ke free plan pe (expire nahi hota, pause nahi hota).                                                                                      | Architecture | 2026-11-18 |
 | D-058 | Saari hosting Singapore region me: Render ki web service, finance ka Neon project aur saare Atlas clusters (AWS Singapore).                                          | Architecture | 2026-11-18 |
+| D-059 | Pehle ke system me diye gaye roles ki jaanch nahi; naya system naye sire se (D-003).                                                                                 | Process      | 2026-11-18 |
 
 ## 2. Record
 
@@ -626,6 +627,14 @@
 - **Kisne, kab:** owner, 2026-11-18. **Nishaan:** Salah maani.
 - **Asar (Claude):** apps Vercel pe hain (D-048); customer app ke server-side hisse ka Vercel region (backend ke paas Singapore, ya users ke paas) technical charcha me tay hoga.
 
+### D-059. Pehle diye gaye roles ki jaanch nahi
+
+- **Faisla:** pehle ke system me jo roles diye ja chuke the, unki jaanch nahi hogi.
+- **Wajah:** Claude ki salah: naya system naye sire se banega (D-003), isliye pehle diye gaye roles ka uspe koi asar nahi; naye system me har role apne module ke saath chalu hoga (D-017, D-054). Owner ne maani.
+- **Chhode vikalp:** roles chalu karne se pehle, pehle ke system me diye gaye roles dekhna.
+- **Kab dobara khulega:** pehle ke system se koi data naye system me laana tay ho, ya owner khole.
+- **Kisne, kab:** owner, 2026-11-18. **Nishaan:** Salah maani.
+
 ## Change log
 
 | Version | Date       | Badlav                                                                                                                                                                                                                                                                                  |
@@ -646,3 +655,4 @@
 | v1.4.7  | 2026-11-18 | D-057 aaya (finance ka PostgreSQL Neon pe); D-001 aur D-048 me provider likha.                                                                                                                                                                                                          |
 | v1.4.8  | 2026-11-18 | D-057: Neon ka Singapore region jaancha; project usi me.                                                                                                                                                                                                                                |
 | v1.4.9  | 2026-11-18 | D-058 aaya (saari hosting Singapore region me).                                                                                                                                                                                                                                         |
+| v1.4.10 | 2026-11-18 | D-059 aaya (pehle diye gaye roles ki jaanch nahi).                                                                                                                                                                                                                                      |
