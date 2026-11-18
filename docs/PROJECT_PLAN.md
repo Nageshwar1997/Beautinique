@@ -1,6 +1,6 @@
 # PROJECT PLAN: Beautinique
 
-> **Status:** v1.1.1 (2026-11-17). Project ki kendriya file. Cheezein ek-ek karke, owner ki haan ke baad judti hain.
+> **Status:** v1.1.2 (2026-11-18). Project ki kendriya file. Cheezein ek-ek karke, owner ki haan ke baad judti hain.
 
 ## 0. Is file me kya aayega
 
@@ -22,9 +22,9 @@ Design poore ecosystem ka, banana releases me; koi feature kata nahi (D-008). Jo
 **Andar:**
 
 1. **Area:** poore India ka location data import; Maharashtra → Pune → warehouse wala sub-district live, 1 warehouse + 1 hub (D-014, D-015, D-016, D-022). Unserved pincode pe "unavailable" aur notify-me waitlist me judna (D-046).
-2. **Staff aur roles:** sirf in flows ke roles chalu (D-017, D-054), owner ke alag accounts ke saath; staff ke kaam audit log me.
+2. **Staff aur roles:** sirf in flows ke roles chalu (D-017, D-054), owner ke alag accounts ke saath; staff ke kaam audit log me. Return, daawe aur refund ki manzoori ke liye Support Desk app ka patla hissa, Support Agent role ke saath (D-105).
 3. **Sellers:** 2 sellers: apna brand (alag dummy company, D-031) aur ek dummy brand. Onboarding dummy KYC aur Maharashtra GSTIN ke saath (D-036); staff ki approval.
-4. **Catalog:** seller products daale (shade aur size jaise variants, MRP, price, HSN aur GST rate, images); staff ki jaanch ke baad live. Customer ke liye list, product page, basic search aur filter.
+4. **Catalog:** seller products daale (shade aur size jaise variants, MRP, price, HSN aur GST rate, images); staff ki jaanch ke baad live. Customer ke liye list, product page, basic search aur filter. Ingredients text + label photo se, INCI structured list, free-from filters aur allergen ki chetavni (D-099).
 5. **Maal warehouse me:** seller maal bheje; receiving pe batch aur expiry ki jaanch (D-014); stock dikhe.
 6. **Customer:** sign-up sirf 18+ (D-038), sign-in ke teen raaste (D-021); pincode check; cart aur wishlist sign-in ke saath (D-020); address.
 7. **Checkout aur payment:** Razorpay test mode (prepaid) aur delivery pe UPI QR (D-034); stock reservation; ek order me dono sellers ke items ho sakein, invoice har seller ke GSTIN se (D-030, D-041).
@@ -38,7 +38,7 @@ Design poore ecosystem ka, banana releases me; koi feature kata nahi (D-008). Jo
 
 - Promotions, coupons aur bundles; loyalty, gift cards aur store credit; subscriptions.
 - Virtual try-on, recommendations; Beauty Advisor aur consultation (D-025).
-- Support desk, tickets aur disputes.
+- Support desk ke tickets, SLA aur disputes (R1 me sirf patla hissa, D-105).
 - Growth Studio aur Creator ke kaam; Beauty Pro buyers ke kaam.
 - Zyada sellers, zyada hubs, naye districts aur states (setting se, D-037).
 - Transporter ke bill ki finance entry aur finance ki poori reports.
@@ -47,7 +47,8 @@ Design poore ecosystem ka, banana releases me; koi feature kata nahi (D-008). Jo
 
 ## Change log
 
-| Version | Date       | Badlav                                 |
-| ------- | ---------- | -------------------------------------- |
-| v1.0.0  | 2026-11-17 | Khaali file bani.                      |
-| v1.1.1  | 2026-11-17 | §1 Releases bana; R1 ka scope (D-055). |
+| Version | Date       | Badlav                                                                                                      |
+| ------- | ---------- | ----------------------------------------------------------------------------------------------------------- |
+| v1.0.0  | 2026-11-17 | Khaali file bani.                                                                                           |
+| v1.1.1  | 2026-11-17 | §1 Releases bana; R1 ka scope (D-055).                                                                      |
+| v1.1.2  | 2026-11-18 | R1 me jod (owner): ingredients ki structured list aur filters (D-099), Support Desk ka patla hissa (D-105). |
