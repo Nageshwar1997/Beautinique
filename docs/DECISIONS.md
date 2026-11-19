@@ -1,6 +1,6 @@
 # DECISIONS: Beautinique
 
-> **Status:** v1.10.16 (2026-11-19). Har faisla ek jagah. Sirf wahi "Tay" jo owner ne khud kaha; Claude ki salah faisla nahi. Cheezein ek-ek karke judti hain.
+> **Status:** v1.10.17 (2026-11-19). Har faisla ek jagah. Sirf wahi "Tay" jo owner ne khud kaha; Claude ki salah faisla nahi. Cheezein ek-ek karke judti hain.
 
 ## 0. Kaise likhein
 
@@ -242,6 +242,20 @@
 | D-225 | Account delete pe jaari invoice aur credit note ki asli copy alag tax archive me 72 mahine (misaal), sirf finance dekhe; baaki jagah pehchaan hatti hai; D-151 badla.                                         | Security     | 2026-11-19 |
 | D-226 | Invoice pe customer ka naam aur pata rakam se: ₹50,000 se kam pe state (aur shehar ya pincode), ₹50,000 ya zyada pe naam aur pata, seller ki copy me bhi; D-143 me jod.                                       | Business     | 2026-11-19 |
 | D-227 | Seller ke tax wale dastavez (GSTIN certificate, TCS statements, invoices) 72 mahine (misaal), baaki KYC 3 saal; D-193 badla.                                                                                  | Security     | 2026-11-19 |
+| D-228 | Brand ke kit pe kit ki cheezon ka sabse zyada GST rate default; combo (R2) ka tax CA ki salah ke baad; D-088 badla.                                                                                           | Business     | 2026-11-19 |
+| D-229 | Bina shart ka sample tax invoice ke bahar ("free sample, not for sale"); kharid ki shart wala gift R2 me bhi CA ki salah tak nahi; D-121 badla.                                                               | Business     | 2026-11-19 |
+| D-230 | Platform ka barcode label sirf pack ki khaali jagah ya bahar ke polybag pe, kabhi likhawat pe nahi; receiving pe photo.                                                                                       | Business     | 2026-11-19 |
+| D-231 | Tax ghatne pe batch pe "revised MRP" saboot ke saath; site ka MRP, daam ki seema, "% off" aur invoice usi se.                                                                                                 | Business     | 2026-11-19 |
+| D-232 | Batch pe expiry ka roop ("Use before" ya "Expiry"); system ka aakhri din usi se, seemaayein usi se.                                                                                                           | Business     | 2026-11-19 |
+| D-233 | Apne brand aur uski dummy company ka naam platform ke naam se alag.                                                                                                                                           | Business     | 2026-11-19 |
+| D-234 | Chhote pack ya soap pe batch na ho to platform ka batch id; daawe aur pickup me pack ki photo.                                                                                                                | Business     | 2026-11-19 |
+| D-235 | Chhote pack ke label pe ingredients na hon to carton ki photo ya brand ki specification se milaan.                                                                                                            | Business     | 2026-11-19 |
+| D-236 | 10 g ya 10 ml tak ke packs tabhi list hon jab pack pe MRP chhapa ho.                                                                                                                                          | Business     | 2026-11-19 |
+| D-237 | Grievance Officer aur nodal person apne staff ke roles; unki jaankari dummy nahi; D-145 niyam 4 badla.                                                                                                        | Business     | 2026-11-19 |
+| D-238 | Product page pe seller ka block (naam, pata, customer care, seller ka grievance officer), iske bina seller live nahi; seller pe shikayat bhi platform ki seedhi me; receipt me shikayat ka text.              | Business     | 2026-11-19 |
+| D-239 | Tax ke chhote sudhaar: HSN + description ki row, invoice pack ya dispatch pe, delivery fee aur TDS ka pal CA se, doosre state ke GSTIN pe chetavni, e-invoice aur TCS registration ke fields.                 | Business     | 2026-11-19 |
+| D-240 | Listing aur pages ke chhote sudhaar: country of origin ka sort, blocklist me "cosmetic me mana", seller ka undertaking, Payments aur "Kram kaise" pages, recall emails pehle, dark patterns ka saal ka audit. | Business     | 2026-11-19 |
+| D-241 | Jahan kaam apna role karta hai, wahan dummy naam nahi: staff role banta hai aur jaankari usi account se; dummy sirf registrations aur bahar ki companies ke liye.                                             | Business     | 2026-11-19 |
 
 ## 2. Record
 
@@ -424,6 +438,7 @@
 - **Faisla:** roles ki poori list design me; system me har role tab chalu jab uska module bane, usi badlav me uski permissions. Ginti fix nahi (abhi ki soch ~80), zaroorat pe badh sakti hai; Master bina deploy ke sub-role jod sakta hai.
   - **Owner ke accounts:** har role ka alag account, 2 base emails ke `+` alias se: ek authenticator wale 7 apps ke roles ke liye, ek baaki (Customer, Seller, Delivery, Creator) ke liye. Bantwara sirf suvidha, niyam nahi: jahan zaroori ho authenticator lagega (jaise Seller Account Owner, Seller Finance).
   - **`+` alias:** normalise nahi hoga; email validation pe code comment ki kyun, aur ki owner ke accounts isi pe tike hain.
+- **Jod (owner, 2026-11-19, D-237, D-241):** Nodal Officer ka role judta hai (Grievance Officer pehle se, D-163). Jahan kisi kaam ke liye insaan ki jaankari chahiye aur wo kaam apna hai, uska role banta hai, dummy naam nahi (D-241).
 - **Wajah:** owner: jinko authenticator ki zaroorat nahi, unhe har login pe authenticator na chalana pade; roles 80 hi honge, ye fix nahi.
 - **Chhode vikalp:** saare roles abhi system me; roles kam karna (12 se 15).
 - **Kab dobara khulega:** owner khud khole.
@@ -520,6 +535,7 @@
 - **Kab dobara khulega:** owner khud khole.
 - **Kisne, kab:** owner, 2026-11-17. **Nishaan:** Salah maani.
 - **Asar (Claude):** D-012 (asli users maan ke code) isi ke saath chalta hai. Asli business pe jaana = operations, kanooni registration aur paid plans ka kaam, code rewrite nahi. Iske liye dummy kanooni details (GSTIN, licence numbers, contacts) data ya config me rahen, code me nahi.
+- **Jod (owner, 2026-11-19, D-241):** dummy sirf registrations, licence numbers aur bahar ki (dummy) companies ki jaankari; jis kaam ka role apna hai (jaise Grievance Officer, nodal person, customer care), uski jaankari dummy nahi, role wale staff account se.
 
 ### D-027. Stock transport (warehouse aur hub ke beech)
 
@@ -563,6 +579,7 @@
 ### D-031. Apna brand
 
 - **Faisla:** apna brand ek **alag (dummy) company ke naam se** seller banega. Wo seller app me ek "house brand" seller account se chalega, jise Own-Brand Manager sambhalega. Iske products bhi baaki brands ki tarah hi check honge. Koi shortcut nahi, Master ke liye bhi nahi.
+- **Jod (owner, 2026-11-19, D-233, D-241):** brand aur dummy company ka naam platform ke naam se alag (D-233). Company dummy hai, par use chalane wale apne roles (jaise Own-Brand Manager) asli staff roles hain (D-241).
 - **Wajah:** owner ne alag company chuni (2026-11-17). Claude ki daleel: platform company khud seller ho to har jagah special case banta (khud pe TCS nahi, settlement ki jagah andar ka transfer, apne brand ko aage dikhane ke sawal); alag company ke saath apna brand bhi baaki sellers jaisa ek hi raasta.
 - **Chhode vikalp:** platform company khud apne brand ki seller.
 - **Kab dobara khulega:** owner khud khole.
@@ -648,6 +665,7 @@
 ### D-041. Market aur tax
 
 - **Faisla:** sirf India, prices INR me. Har order ka GST-compliant invoice.
+- **Jod (owner, 2026-11-19, D-239):** invoice pack ya dispatch ke scan pe; pack se pehle cancel pe invoice nahi; baad me credit note.
 - **Wajah:** owner ka faisla, 2026-11-17 ko dobara dekh ke waise hi rakha.
 - **Chhode vikalp:** India ke bahar bechna.
 - **Kab dobara khulega:** owner khud khole.
@@ -824,6 +842,7 @@
   2. Har badlav ka itihaas: kisne, kab, purana daam, naya daam.
   3. Ek baar me bada badlav (jaise 50% se zyada upar ya neeche) pe seller se dobara confirm, taaki ₹1,999 ki jagah ₹199 jaisi galti pakdi jaye.
   4. Platform seller ka daam kabhi nahi badalta; platform ka diya discount (R2, D-055) alag dikhta hai.
+- **Jod (owner, 2026-11-19, D-231, D-236):** batch pe revised MRP ho to niyam 1 ki seema usi se (D-231); 10 g ya 10 ml tak ke packs tabhi list jab pack pe MRP chhapa ho (D-236).
 - **Wajah:** Claude ki salah, owner ne maani: maal aur invoice dono brand ke (D-060, D-030), isliye daam bhi bechne wale ka; niyam 1 se 3 customer aur seller dono ko galti se bachate hain.
 - **Chhode vikalp:** brand poori tarah azaad (sirf MRP ki seema, koi itihaas ya confirm nahi); Beautinique daam tay kare (invoice brand ka par daam hamara).
 - **Kab dobara khulega:** owner khud khole.
@@ -839,6 +858,7 @@
   4. **Brand ka chunaav:** bikri band hone ke baad brand tay din me chune: maal apne kharche pe wapas le jaaye, ya hum nasht karein aur disposal fee lein. Tay din me jawab na aaye to hum nasht karte hain aur fee lagti hai.
   5. **Na bika maal (expire nahi):** brand kabhi bhi apne kharche pe wapas maang sakta hai.
   6. **Record:** har wapsi aur har disposal ka record (batch, ginti, tareekh, kisne kiya); disposal kanoon ke hisaab se (dummy, D-026).
+- **Jod (owner, 2026-11-19, D-232):** seemaayein batch ke expiry ke roop ("Use before" ya "Expiry") se bane aakhri din se.
 - **Wajah:** Claude ki salah, owner ne maani: maal brand ka (D-060), isliye nuksaan bhi; niyam warehouse ko saaf aur customer ko surakshit rakhte hain. Brand chahe to bikri band hone se pehle khud daam ghata sakta hai (D-061 ke niyam ke andar).
 - **Chhode vikalp:** brand khud sambhale, platform ke koi niyam nahi (sirf report); nuksaan baant lena (platform kuch hissa uthaye ya khareed le).
 - **Kab dobara khulega:** owner khud khole.
@@ -869,6 +889,7 @@
   3. Customer ne jo MRP dekha, wahi batch jaata hai.
   4. Ek line ki quantity do batches me bate aur MRP alag ho, to checkout pe line do hisson me dikhti hai, har hissa apne MRP ke saath (daam wahi).
   5. Invoice me har line ka batch aur MRP.
+- **Jod (owner, 2026-11-19, D-231, D-234):** batch ka revised MRP (D-231); chhote pack ya soap pe batch na ho to platform ka batch id (D-234).
 - **Wajah:** Claude ki salah, owner ne maani: site pe dikha MRP aur customer ke haath me aaya pack hamesha same, jo online pe pack ki jaankari dikhane ke kanoon ki maang hai; batch ka record (D-062) pehle se ban raha hai, to reservation ko batch tak le jaana chhota kaam hai.
 - **Chhode vikalp:** ek MRP, saare batches me sabse kam wala (site aur pack ka MRP kabhi alag); har MRP ki alag listing (customer ke liye confusing, search aur reviews do jagah).
 - **Kab dobara khulega:** owner khud khole.
@@ -1105,6 +1126,7 @@
   3. Payout me se pehle udhaar (D-071) aur fees (D-078) kat-ti hain, aur bharpai (D-063) judti hai.
   4. Kam se kam payout rakam (misaal ₹100); usse kam ho to agle hafte me judti hai.
   5. Seller ko har line ki halat dikhe: kab payable hogi, aur kis payout me gayi.
+- **Jod (owner, 2026-11-19, D-239):** income-tax TDS seller ke ledger me pehle credit pe (ya payment pe, jo pehle), payable ke din nahi; return pe ulat CA se.
 - **Wajah:** Claude ki salah, owner ne maani: return ka khatra khatam hone ke baad hi paisa jaata hai, to returns se udhaar kam banta hai, aur hafte ka payout chhote brand ke liye bahut lamba intezaar nahi.
 - **Chhode vikalp:** delivery ke din se payable (har return pe udhaar ka khatra); mahine me do baar payout (chhote brand ke liye lamba intezaar).
 - **Kab dobara khulega:** owner khud khole.
@@ -1118,6 +1140,7 @@
   2. Category ka override setting se, bina code change ya deploy (misaal: sunscreen aur actives jaise vitamin C serum 9 / 4 mahine; chhoti shelf life wale natural products 4 / 2 mahine).
   3. Brand ke jawab ke din sab pe ek (misaal 15 din).
   4. R1 me sirf default bhi chal sakta hai, par override ki setting pehle din se.
+- **Jod (owner, 2026-11-19, D-232):** mahine expiry ke roop se bane aakhri din se gine jaate hain.
 - **Wajah:** Claude ki salah, owner ne maani: samajhna aasaan hai, aur categories ka farak sambhal jaata hai.
 - **Chhode vikalp:** sab pe ek seema (chhoti shelf life wale products ke liye kadi); shelf life ke % se (har batch pe kul shelf life chahiye, jo pack pe hamesha saaf nahi).
 - **Kab dobara khulega:** owner khud khole.
@@ -1171,6 +1194,7 @@
   3. Rate badle to table me nayi line nayi tareekh se; us din se naye invoices naye rate pe.
   4. Rate badalne pe sellers ko alert ki apna daam dekh lein (daam platform nahi badalta, D-061).
   5. Sahi HSN ki zimmedari seller ki, kyunki supplier wahi hai (D-030).
+- **Jod (owner, 2026-11-19, D-239):** table ki row = HSN + description ki shart + rate + tareekh; seller row chune.
 - **Wajah:** Claude ki salah, owner ne maani: typo se galat tax nahi lagta, rate badalne ka hisaab ek hi jagah rehta hai, aur zimmedari seller pe rehti hai.
 - **Chhode vikalp:** seller dono bhare (typo se galat tax aur invoice); platform category se HSN khud lagaye (alag HSN wala product atak jaata).
 - **Kab dobara khulega:** owner khud khole.
@@ -1197,6 +1221,7 @@
   3. Combo me stock har cheez se ghatta hai; combo ka daam cheezon me baanta jaata hai, aur invoice me har cheez ki line apne batch aur expiry ke saath.
   4. Combo poora lautta hai; ek cheez kharab nikle to sirf usi ka badla ya refund.
   5. Combo R2 se (promotions ke saath, D-055).
+- **Badla (owner, 2026-11-19, D-228):** niyam 3 ka "daam baantna" combo pe abhi laagu nahi; combo ka tax CA ki salah ke baad. Brand ke kit pe kit ki cheezon ka sabse zyada rate default.
 - **Wajah:** Claude ki salah, owner ne maani: brand ka kit R1 me bina naye kaam ke chal jaata hai, aur combo ek seller tak rehne se ek daam do invoices me nahi baantna padta.
 - **Chhode vikalp:** sirf brand ka kit (combo ke liye seller ko naya barcode banana padta); alag sellers ke products ka combo (ek daam do invoices pe, aur return pe jhagda).
 - **Kab dobara khulega:** owner khud khole.
@@ -1242,6 +1267,7 @@
 ### D-092. Bina Pro bane GSTIN wala invoice
 
 - **Faisla:** normal customer bhi checkout pe apna GSTIN daal ke business invoice le sakta hai: GSTIN ka format check aur naam; Pro daam nahi; har seller ka invoice customer ke GSTIN ke saath. R2 se (Beauty Pro ke kaam bhi R2, D-055).
+- **Jod (owner, 2026-11-19, D-239):** checkout pe GSTIN ke state code ka milaan aur chetavni ki doosre state ke GSTIN pe tax credit shayad na mile.
 - **Wajah:** Claude ki salah, owner ne maani: business customer bina Pro bane sahi invoice le paata hai, aur format check se galat GSTIN ka jokhim kam rehta hai.
 - **Chhode vikalp:** sirf Pro buyer ko (business customers bahar); staff ki jaanch ke baad (staff ka kaam aur der).
 - **Kab dobara khulega:** owner khud khole.
@@ -1302,6 +1328,7 @@
 - **Faisla:** variant pe brand ka barcode (EAN) ho to wahi chalta hai; barcode na ho to bhi product list ho sakta hai. Niyam:
   1. Barcode na ho to receiving pe har unit pe platform ka barcode label lagta hai (labelling fee, D-078 niyam 4; shuru me ₹0).
   2. Warehouse me ek bin me ek variant ka ek hi batch, taaki scan karke pick pe wahi batch jaaye jiska MRP aur expiry customer ne dekhi (D-064, D-067).
+- **Jod (owner, 2026-11-19, D-230):** label sirf pack ki khaali jagah ya bahar ke polybag pe, kabhi likhawat pe nahi; receiving pe photo.
 - **Wajah:** Claude ki salah, owner ne maani: ek warehouse aur kam sellers ke saath "ek bin, ek batch" sasta hai, aur bina barcode wale chhote brands bhi aa paate hain.
 - **Chhode vikalp:** barcode zaroori (chhote brands ke liye rukawat); har unit pe platform ka label, variant aur batch ke saath (sabse pakka, par har unit pe mehnat).
 - **Kab dobara khulega:** owner khud khole.
@@ -1315,6 +1342,7 @@
   2. Baaki (description ke shabd, istemaal ka tareeka) turant live, baad me staff ka spot check.
   3. Staff khud koi field nahi badalta; sirf "ye badlo" wajah ke saath bhejta hai.
   4. Har version ka record: kisne, kab, kya badla.
+- **Jod (owner, 2026-11-19, D-240):** seller agreement me content sahi hone ka undertaking, aur har listing submit pe checkbox, pehle se tick nahi.
 - **Wajah:** Claude ki salah, owner ne maani: jokhim wale fields hamesha jaanch se guzarte hain, aur chhote badlav pe staff ka bojh nahi banta.
 - **Chhode vikalp:** har badlav pe jaanch (staff pe bojh, seller ka intezaar); platform ki content team (content aur galti ki zimmedari hamari).
 - **Kab dobara khulega:** owner khud khole.
@@ -1327,6 +1355,7 @@
   1. Seller pack jaisi poori ingredients list text me de, aur pack ke label ki photo zaroori; staff photo se milaye. Product page pe poori list, chhupi hui nahi.
   2. Text se platform ki ingredient master list (INCI naam) ke hisaab se structured list semi-auto bane; staff jaanche.
   3. Structured list se free-from filters (jaise paraben-free, fragrance-free) aur allergen ki chetavni.
+- **Jod (owner, 2026-11-19, D-235):** chhote pack ke label pe ingredients na hon to carton ki photo ya brand ki specification se milaan.
 - **Wajah:** Claude ki salah (pehle text aur photo, structured list aur filters baad me) owner ne maani, aur kaha ki teeno kadam R1 me hon. Label ki photo se ingredients, declarations aur batch ka format ek saath jaanch hota hai, aur structured list se filters aur chetavni pehle din se data pe chalte hain.
 - **Chhode vikalp:** sirf text + label photo (filters nahi); sirf structured list, seller har ingredient chune; structured list aur filters R2 me.
 - **Kab dobara khulega:** owner khud khole.
@@ -1417,6 +1446,7 @@
   2. "Item kam" pe parcel aur packing ki photo.
   3. Unboxing video optional; staff maang sake.
   4. Hamari taraf ka saboot: warehouse pe pack ki photo.
+- **Jod (owner, 2026-11-19, D-234):** jis pack pe batch nahi hota, us pe batch ki jagah pack aur label ki photo.
 - **Wajah:** Claude ki salah, owner ne maani: saboot ka ek aasaan kadam, aur hamari pack ki photo se dono taraf ka saboot rehta hai.
 - **Chhode vikalp:** koi saboot nahi (jhooth aasaan); ek rakam (misaal ₹1,500) se upar unboxing video zaroori (video sabko nahi aata, aur privacy ka sawal).
 - **Kab dobara khulega:** owner khud khole.
@@ -1430,6 +1460,7 @@
   2. Kai sellers ya kai parcel wale order (D-077) pe bhi ek hi fee, order pe.
   3. Product page aur cart pe pehle se "₹X se upar muft delivery" dikhe.
   4. Koi "platform fee" ya "packing fee" nahi.
+- **Jod (owner, 2026-11-19, D-239):** fee ka SAC aur GST rate CA se tay; rate table me tareekh ke saath.
 - **Wajah:** Claude ki salah, owner ne maani: asli jaisa (D-026), aur cancel, RTO aur return ke niyam isi pe saaf bante hain; seema 0 rakh ke muft bhi chala sakte hain.
 - **Chhode vikalp:** hamesha muft (kharcha poora hamara, niyam baad me jodne padte); doori ya wazan ke hisaab se (customer ke liye samajhna mushkil).
 - **Kab dobara khulega:** owner khud khole.
@@ -1512,6 +1543,7 @@
   1. Item ki photo le, aur label pe batch number ko order wale batch (D-064) se milaye.
   2. "Man badla" wale return me seal dekhe (D-079).
   3. Mel na khaye to pickup na le (wajah + photo), aur customer ko in-app, email aur browser push se khabar.
+- **Jod (owner, 2026-11-19, D-234):** jis pack pe batch nahi hota, us pe platform ke batch id aur pack ki photo se milaan.
 - **Wajah:** Claude ki salah, owner ne maani: galat maal warehouse tak nahi aata, aur Delivery app me photo ka kadam pehle se hai (D-072).
 - **Chhode vikalp:** door pe kuch nahi, sab warehouse me (galat maal warehouse tak, aur ek aur trip); partner hi refund manzoor kare (partner pe paise ka faisla).
 - **Kab dobara khulega:** owner khud khole.
@@ -1607,6 +1639,7 @@
   2. Invoice pe ₹0 ki line, "not for sale" nishaan.
   3. Samples pe bhi batch aur expiry (D-062).
   4. Return pe gift lautana zaroori nahi; jis offer se gift mila uski shart return ke baad toote, to bhi gift ka paisa nahi kat-ta.
+- **Badla (owner, 2026-11-19, D-229):** niyam 2 badla: bina shart ka sample tax invoice ke bahar ("free sample, not for sale"); kharid ki shart wala gift CA ki salah tak nahi.
 - **Wajah:** Claude ki salah, owner ne maani: beauty ka aam tareeka milta hai, kharcha brand ka rehta hai, aur return ke niyam saral rehte hain.
 - **Chhode vikalp:** samples nahi (beauty ka aam tareeka chhoot-ta); platform ke gifts aur customer ke chune samples (platform ka kharcha aur gifts ka stock).
 - **Kab dobara khulega:** owner khud khole.
@@ -1747,6 +1780,7 @@
   2. Public database (jaise EU ka CosIng) ka import tab, jab Claude uska license aur format jaanch le aur products badhein.
   3. Master list me naya naam catalog ki jaanch wali team (D-084) jodti hai.
   4. Blocklist sirf ek senior catalog role badle, wajah ke saath; har badlav audit log me.
+- **Jod (owner, 2026-11-19, D-240):** blocklist ke do hisse: drug ingredients aur "cosmetic me mana" ingredients (IS 4707 Part 2 ki list); har entry pe source.
 - **Wajah:** Claude ki salah, owner ne maani: R1 ke 2 sellers ke kam products ke liye badhti list kaafi hai, aur blocklist pe jokhim zyada hai (galat naam hata to drug bik sakta, galat juda to sahi products ruk jaate), isliye uska badlav senior role ke haath me.
 - **Chhode vikalp:** badhti list, aur blocklist bhi aam jaanch team badle (zyada jokhim wala badlav aam haath me); shuru se public database ka import aur alag data role (R1 me import, safai aur license ka kaam).
 - **Kab dobara khulega:** products badhein aur import ka license jaancha jaaye, ya owner khud khole.
@@ -1791,6 +1825,7 @@
   | Site ke registrations (Shops & Establishments, jalne wale maal ke liye fire NOC)                                      | L1 (field aur expiry ki yaad)                   | R2                                |
   | Telemedicine (D-025)                                                                                                  | L1                                              | R2                                |
 
+- **Jod (owner, 2026-11-19, D-237 se D-240):** naye rows: Grievance Officer aur nodal person ki asli staff jaankari page pe (D-237); seller ka block L2, iske bina seller live nahi (D-238); e-invoice ka field L1 aur har warehouse state me TCS registration L1 (D-239); dark patterns ka saal ka self-audit aur certificate ka record L3 jaisa, 2027 se pehle (D-240).
 - **Wajah:** Claude ki salah, owner ne maani: jo paise, tax aur customer ki suraksha se juda hai wo gehra, baaki sirf field, taaki asli business pe jaane pe jagah ho, aur ek insaan (D-009) ka kaam seemit rahe.
 - **Chhode vikalp:** sab L1 (design asli nahi rehta, D-026 ke khilaaf); sab L3 (ek insaan ke liye bahut bada kaam).
 - **Kab dobara khulega:** kanooni jaanch (R-004) kisi area me zyada maange, ya owner khud khole.
@@ -1845,6 +1880,7 @@
 ### D-138. R1 ke filters aur sort
 
 - **Faisla:** R1 ke basic search aur filter me ye filters: category, brand, daam ki range, shade family (D-085), free-from (D-099), skin type aur concern (D-137), claims (D-100), rating, discount %, country of origin (D-127), size. Sort: relevance, daam (kam se zyada, zyada se kam), naya, rating, discount.
+- **Jod (owner, 2026-11-19, D-240):** sort me bhi country of origin, aur search me country ka naam.
 - **Wajah:** Claude ki salah, owner ne maani: data R1 me ban hi raha hai, aur filter usi ka seedha fayda hai.
 - **Chhode vikalp:** kam filters (data hote hue bhi filter nahi); Pro daam se sort bhi (har dekhne wale ke liye alag daam ka sort; baad me).
 - **Kab dobara khulega:** owner khud khole.
@@ -1902,6 +1938,7 @@
   4. Chhat paar ho to wo email agle din ki line me; in-app aur push usi din.
   5. Bade burst (area khulna, recall) apne aap kai dinon me bant-te hain, chhat ke andar.
   6. Din ka 80% (misaal 240) hone pe Master aur Head of Operations ko in-app chetavni.
+- **Jod (owner, 2026-11-19, D-240):** recall ki email line OTP ke baad sabse pehle, paise ke emails se bhi pehle.
 - **Wajah:** Claude ki salah, owner ne maani: OTP kabhi nahi rukta, aur paise ke emails "baaki" ke burst me nahi dabte. Sirf line ka kram kaafi nahi, kyunki subah ka burst shaam ke OTP ki jagah kha sakta hai.
 - **Chhode vikalp:** koi chhat nahi, sirf D-126 ka kram (bade din pe OTP aur sign-in ruk sakta); sirf OTP ki pakki jagah ("baaki" ka burst paise ke emails ko agle din dhakel sakta).
 - **Kab dobara khulega:** emails ki seema badle, ya owner khud khole.
@@ -1945,6 +1982,7 @@
   5. Dummy numbers aise ki kisi asli company ke number se na milein.
   6. Demo ke reviews pe "Demo review" ka nishaan.
   7. Saare dummy values ek jagah (data ya config) ki list me (D-026).
+- **Badla (owner, 2026-11-19, D-237, D-241):** niyam 4 badla: Grievance Officer aur nodal person apne staff ke roles hain; unki jaankari dummy nahi, role wale staff account se. Aam niyam: jahan kaam apna role karta hai, wahan dummy naam nahi (D-241).
 - **Wajah:** Claude ki salah, owner ne maani: koi bhi page ya file bahar jaaye to bhi asli na lage.
 - **Chhode vikalp:** kahin nahi (nakli invoice aur dhokhe ka jokhim); sirf site ki patti (download hui file asli lagti).
 - **Kab dobara khulega:** asli business pe jaate waqt (D-026), ya owner khud khole.
@@ -2005,6 +2043,7 @@
   2. Har page pe "DUMMY: lawyer se jaancha nahi" badge aur version.
   3. Terms ya Privacy ka bada badlav ho to agle sign-in pe naya consent.
   4. Return aur Shipping pages ke number policy ki settings se aayein (ek baat ek jagah).
+- **Jod (owner, 2026-11-19, D-240):** "Payments" aur "Kram kaise" pages bhi.
 - **Wajah:** Claude ki salah, owner ne maani: customer ko site ke asli niyam dikhte hain, aur design asli rehta hai (D-026).
 - **Chhode vikalp:** placeholder (consent ka koi matlab nahi, niyam kahin likhe nahi); kisi template site se copy (copyright aur galat niyam ka jokhim).
 - **Kab dobara khulega:** kanooni jaanch (R-004) ke baad, ya owner khud khole.
@@ -2164,6 +2203,7 @@
   3. Receipt aur hal ke timers (misaal 48 ghante aur 30 din); review ya content ki shikayat ka chhota timer (misaal 24 ghante me receipt).
   4. Grievance register: har shikayat, faisla aur samay; mahine ki report Head of Operations ko (D-044).
   5. Grievance Officer ka role alag account pe (D-017).
+- **Badla (owner, 2026-11-19, D-237, D-238):** Grievance Officer ki jaankari dummy nahi, role wale staff account se (D-237). Seller ke products ki shikayat bhi isi seedhi me, seller ticket pe jawab de; receipt me shikayat ka poora text (D-238).
 - **Wajah:** Claude ki salah, owner ne maani: gambhir shikayat aam queue me nahi dabti, aur har shikayat ka record rehta hai.
 - **Chhode vikalp:** alag raasta nahi, sab ek queue me (gambhir shikayat dab jaati); seedhi bina register (shikayaton ka record nahi).
 - **Kab dobara khulega:** kanooni jaanch (R-004) ke baad, ya owner khud khole.
@@ -2828,6 +2868,163 @@
 - **Kisne, kab:** owner, 2026-11-19. **Nishaan:** Salah maani.
 - **Asar (Claude):** D-193 niyam 2 badla. Kanooni detail jaanchi nahi (R-004): CGST Act s.36 public source se mila, lawyer se nahi.
 
+### D-228. Kit aur combo pe GST
+
+- **Faisla:** kit aur combo pe GST is tarah. Niyam:
+  1. Brand ka kit (R1): listing pe kit ki cheezon ke rates me se sabse zyada wala default; seller badle to wajah ke saath, staff jaanche.
+  2. Combo (R2): shuru hone se pehle CA se tay ho ki ek daam = mixed supply (sabse zyada rate), ya har cheez ka daam alag dikha ke alag supplies. Tab tak D-088 niyam 3 ka "daam baantna" sirf design me, laagu nahi.
+- **Wajah:** Claude ki salah, owner ne maani: R1 ka kit kanoon ke saath seedha chalta hai, aur combo R2 me hai, to CA ki salah ke liye samay hai.
+- **Chhode vikalp:** combo me har cheez ka daam alag (ek daam wala combo nahi); jaisa hai (galat tax ka jokhim).
+- **Kab dobara khulega:** CA ki salah aane pe, ya owner khud khole.
+- **Kisne, kab:** owner, 2026-11-19. **Nishaan:** Salah maani.
+- **Asar (Claude):** D-088 niyam 3 badla. Kanooni detail jaanchi nahi (R-004): CGST Act s.8(b) public source se mila; CA aur lawyer se nahi.
+
+### D-229. Free sample aur shart wala gift
+
+- **Faisla:** do tarah. Niyam:
+  1. Bina shart ka sample (brand ki marzi se, kisi kharid ki shart ke bina): tax invoice ke bahar, packing slip pe "free sample, not for sale".
+  2. Shart wala gift ("X kharido to Y free"): R2 me bhi tab tak nahi jab tak CA se invoice ka tareeka tay na ho.
+- **Wajah:** Claude ki salah, owner ne maani: sample ka aam tareeka chalta rehta hai, aur shart wala gift tabhi jab tax ka tareeka pakka ho.
+- **Chhode vikalp:** shart wala gift bhi, daam ka hissa baant ke, bina CA ke (galat ho sakta); jaisa hai, ₹0 ki line (galat invoice ka jokhim).
+- **Kab dobara khulega:** CA ki salah aane pe, ya owner khud khole.
+- **Kisne, kab:** owner, 2026-11-19. **Nishaan:** Salah maani.
+- **Asar (Claude):** D-121 niyam 2 badla. Kanooni detail jaanchi nahi (R-004): CBIC circular 92/11/2019 sirf secondary source se.
+
+### D-230. Platform ka barcode label kahan
+
+- **Faisla:** platform ka barcode label (D-097) pack ki khaali jagah pe, ya pack ke bahar ke polybag ya sleeve pe; khaali jagah na ho to polybag. Niyam:
+  1. Kabhi batch, expiry, MRP, ingredients ya kisi bhi likhawat ke upar nahi.
+  2. Receiving pe label lagne ke baad photo; Warehouse app me jaanch ka kadam.
+- **Wajah:** Claude ki salah, owner ne maani: pack ki koi likhawat nahi dhakti, aur photo se saboot rehta hai.
+- **Chhode vikalp:** hamesha polybag (kharcha aur plastic); sirf bin pe label (unit ka scan nahi).
+- **Kab dobara khulega:** owner khud khole.
+- **Kisne, kab:** owner, 2026-11-19. **Nishaan:** Salah maani.
+- **Asar (Claude):** D-097 me jod. Kanooni detail jaanchi nahi (R-004): Cosmetics Rules rule 35 public source se mila, lawyer se nahi.
+
+### D-231. Tax ghatne pe revised MRP
+
+- **Faisla:** batch pe "revised MRP" ka field. Niyam:
+  1. Batch pe optional "revised MRP (tax badlav)", saboot ke saath (manufacturer ki suchna ya naya sticker); staff jaanche.
+  2. Revised MRP ho to site ka MRP, daam ki seema (D-061 niyam 1), "% off" (D-120), pichhle 30 din ka daam (D-223) aur invoice usi se.
+  3. Seller ka daam revised MRP se upar ho to us batch ki bikri ruke aur seller ko alert (D-064 niyam 2 jaisa).
+- **Wajah:** Claude ki salah, owner ne maani: ek field se kanoon ka niyam sambhal jaata hai, aur daam ke baaki niyam usi pe chalte hain.
+- **Chhode vikalp:** naya batch maan ke dobara receiving (stock ki ginti me ulajh); jaisa hai (naye MRP se zyada daam ka jokhim).
+- **Kab dobara khulega:** owner khud khole.
+- **Kisne, kab:** owner, 2026-11-19. **Nishaan:** Salah maani.
+- **Asar (Claude):** D-061 aur D-064 me jod. Kanooni detail jaanchi nahi (R-004): Legal Metrology (Packaged Commodities) Rules rule 18(3) public source se mila; 2025 ki MRP sticker wali chhoot sirf secondary source se.
+
+### D-232. "Use before" aur "expiry" ka din
+
+- **Faisla:** batch pe expiry ka roop. Niyam:
+  1. Receiving pe batch pe roop: "Use before" ya "Expiry", pack jaisa.
+  2. System ka "aakhri din" usi se: use before = mahine ka pehla din; expiry = mahine ka aakhri din.
+  3. Seemaayein (D-062, D-082) isi aakhri din se gini jaati hain.
+  4. Customer ko pack jaisa text dikhta hai (D-067).
+- **Wajah:** Claude ki salah, owner ne maani: har pack ka sahi din, aur customer ko wahi jo pack pe hai.
+- **Chhode vikalp:** hamesha mahine ka pehla din ("expiry" wale packs ki bikri ek mahina pehle band); jaisa hai (ek mahine ka galat hisaab).
+- **Kab dobara khulega:** kanooni jaanch primary source se kuch aur bataye, ya owner khud khole.
+- **Kisne, kab:** owner, 2026-11-19. **Nishaan:** Salah maani.
+- **Asar (Claude):** D-062 aur D-082 me jod. Kanooni detail jaanchi nahi (R-004): Cosmetics Rules ka 2025 ka badlav sirf secondary source se.
+
+### D-233. Apne brand ka naam
+
+- **Faisla:** apne brand aur uski dummy company (D-031) ka naam "Beautinique" se nahi milta.
+- **Wajah:** Claude ki salah, owner ne maani: apna brand pehle se alag company hai, aur alag naam se 2027 ke "platform ke naam jaisa seller" wale niyam ka alag consent ka kaam nahi bachta; D-166 jaisa hai waisa.
+- **Chhode vikalp:** naam platform jaisa, aur sujhaav me alag opt-in (ek aur consent); jaisa hai (2027 se takrav ka jokhim).
+- **Kab dobara khulega:** owner khud khole.
+- **Kisne, kab:** owner, 2026-11-19. **Nishaan:** Salah maani.
+- **Asar (Claude):** D-031 me jod. Dummy company aur brand ka naam D-145 niyam 7 ki dummy list me. Kanooni detail jaanchi nahi (R-004): E-commerce rules ka 2026 ka badlav (rule 5(6)) sirf secondary source se.
+
+### D-234. Chhote packs pe batch na ho to
+
+- **Faisla:** platform ka batch id. Niyam:
+  1. Listing pe "pack pe batch nahi" sirf do maamlon me (10 g ya 25 ml tak ka pack, ya soap); staff jaanche.
+  2. Receiving pe platform ka batch id: receiving lot + banne ka mahina ya expiry.
+  3. Daawe (D-106) aur pickup (D-113) me batch ki photo ki jagah pack aur label ki photo.
+- **Wajah:** Claude ki salah, owner ne maani: minis aur soap jaise products bhi aa paate hain, aur batch ka record platform ke id se bana rehta hai.
+- **Chhode vikalp:** batch zaroori (minis, samples aur soap bahar); jaisa hai (daawe aur pickup atak jaate).
+- **Kab dobara khulega:** owner khud khole.
+- **Kisne, kab:** owner, 2026-11-19. **Nishaan:** Salah maani.
+- **Asar (Claude):** D-064, D-106 aur D-113 me jod. Kanooni detail jaanchi nahi (R-004): Cosmetics Rules rule 34(2)(a) public source se mila, lawyer se nahi.
+
+### D-235. Chhote packs ke label pe ingredients na hon to
+
+- **Faisla:** label pe ingredients na hon (60 ml ya 30 g tak ke packs) to bahar ke carton ki photo, ya brand ki product specification (dummy, D-026); staff usi se milata hai. Product page pe poori list waise hi.
+- **Wajah:** Claude ki salah, owner ne maani: ingredients ka saboot bana rehta hai, aur chhote packs bhi aa paate hain.
+- **Chhode vikalp:** sirf seller ki ghoshna (galat allergen chetavni ka jokhim); label photo zaroori (chhote packs bahar).
+- **Kab dobara khulega:** owner khud khole.
+- **Kisne, kab:** owner, 2026-11-19. **Nishaan:** Salah maani.
+- **Asar (Claude):** D-099 me jod. Kanooni detail jaanchi nahi (R-004): Cosmetics Rules rule 34(7) public source se mila, lawyer se nahi.
+
+### D-236. Bahut chhote packs aur MRP
+
+- **Faisla:** 10 g ya 10 ml tak ke packs tabhi list hote hain jab pack pe MRP chhapa ho; baaki daam ke niyam jaise hain.
+- **Wajah:** Claude ki salah, owner ne maani: ek saral niyam, aur MRP wale minis aa paate hain.
+- **Chhode vikalp:** "reference price" ka field (MRP ke bina daam ki seema kamzor); R1 me aise sab packs bahar.
+- **Kab dobara khulega:** owner khud khole.
+- **Kisne, kab:** owner, 2026-11-19. **Nishaan:** Salah maani.
+- **Asar (Claude):** D-061 me jod. Kanooni detail jaanchi nahi (R-004): Legal Metrology ki chhote packs wali chhoot public source se mili, lawyer se nahi.
+
+### D-237. Grievance Officer aur nodal person
+
+- **Faisla:** Grievance Officer aur nodal person apne staff ke roles hain, sarkari log nahi. Unki jaankari (naam, designation, contact) dummy nahi hoti; wo us staff ki asli jaankari hai jiske paas role hai.
+- **Wajah:** owner: ye dono apne staff ke roles hain; pehle inhe sarkari log samjha tha, isliye dummy kaha tha.
+- **Chhode vikalp:** Claude ki salah: demo me "Dummy Grievance Officer" jaisa naam, "DUMMY" badge ke saath; sirf role ka naam; insaan jaisa banawati naam.
+- **Kab dobara khulega:** owner khud khole.
+- **Kisne, kab:** owner, 2026-11-19. **Nishaan:** Salah nahi maani.
+- **Asar (Claude):** D-145 niyam 4 badla; D-163 ki "officer ki jaankari dummy" wali baat bhi badli. Roles ki list (D-017) me Grievance Officer (D-163 niyam 5) ke saath Nodal Officer judta hai, alag account pe. Page pe naam, designation aur contact role wale staff account se aate hain, to role kisi aur ko diya jaaye to page apne aap badle. Abhi saare staff accounts owner ke hain (D-017), to live site pe owner ki di hui jaankari public dikhegi. Repo me koi asli naam nahi (public repo niyam): ye sirf database me. Kanooni detail jaanchi nahi (R-004): E-commerce rules rule 4(1) aur 4(4) public source se mile, lawyer se nahi.
+
+### D-238. Seller ki jaankari aur seller pe shikayat
+
+- **Faisla:** seller ka block aur ek hi shikayat ki seedhi. Niyam:
+  1. Product page pe "Sold by" ke saath seller ka business naam, pata, customer care contact aur seller ka grievance officer. Dummy seller pe dummy jaankari ("DUMMY" badge); jahan kaam apna role karta hai, wahan dummy nahi (D-241). Ye L2: iske bina seller live nahi.
+  2. Seller ke products ki shikayat bhi platform ki usi seedhi (D-163) me; seller ko ticket dikhe aur wo jawab de, timers wahi.
+  3. Receipt (email aur in-app) me shikayat ka poora text.
+- **Wajah:** Claude ki salah, owner ne maani: customer ko pata rehta hai ki maal kisne becha, aur har shikayat ek hi jagah, ek hi timers se.
+- **Chhode vikalp:** sirf seller ka naam aur pata, seller ka grievance officer nahi (kanoon ka seller wala hissa adhoora); jaisa hai.
+- **Kab dobara khulega:** owner khud khole.
+- **Kisne, kab:** owner, 2026-11-19. **Nishaan:** Salah maani.
+- **Asar (Claude):** D-134 me naya row aur D-163 me jod. Seller ka grievance officer seller ki apni jaankari hai. R1 ka doosra brand dummy hai, to uska dummy. Apna brand dummy company hai par use apne roles chalate hain (Own-Brand Manager, D-031), to Claude ki samajh me D-241 se uske grievance officer ka bhi apna staff role banta hai; owner chahe to badle. Kanooni detail jaanchi nahi (R-004): rules 5(3)(a), 6(4), 6(5) public source se mile; receipt me copy wala niyam sirf secondary source se.
+
+### D-239. Tax ke chhote sudhaar
+
+- **Faisla:** ye sudhaar maane gaye:
+  1. **HSN aur rate (D-086):** table ki row = HSN + description ki shart + rate + tareekh; seller row chune, staff jaanche.
+  2. **Invoice kab (D-041):** invoice pack ya dispatch ke scan pe; pack se pehle cancel ho to invoice nahi; baad me cancel ya return pe credit note.
+  3. **Delivery fee ka GST (D-107):** fee ka SAC aur rate CA se tay; rate table me tareekh ke saath.
+  4. **TDS ka pal (D-081):** income-tax TDS seller ke ledger me pehle credit pe (ya payment pe, jo pehle ho); return pe ulat ka niyam CA se.
+  5. **Doosre state ka GSTIN (D-092, R2):** checkout pe state code ka milaan aur saaf chetavni ki tax credit shayad na mile.
+  6. **D-134 me do rows:** e-invoice ka field (L1) aur har warehouse state me TCS registration ka field (L1).
+- **Wajah:** Claude ki salah, owner ne maani: kanooni jaanch ke chhote nateeje tay faislon me seedhe jud jaate hain.
+- **Chhode vikalp:** badlav ke saath maanna; abhi rokna (galat tax ke jokhim bache rehte).
+- **Kab dobara khulega:** CA ki salah aane pe, ya owner khud khole.
+- **Kisne, kab:** owner, 2026-11-19. **Nishaan:** Salah maani.
+- **Asar (Claude):** D-041, D-081, D-086, D-092, D-107 aur D-134 me jod. Kanooni detail jaanchi nahi (R-004): HSN aur s.31 public source se mile; credit note, delivery fee ka naya niyam, TDS, B2B tax credit aur e-invoice ki seema sirf secondary source se.
+
+### D-240. Listing, pages aur compliance ke chhote sudhaar
+
+- **Faisla:** ye sudhaar maane gaye:
+  1. **Country of origin (D-138):** filter ke saath sort me bhi, aur search me country ka naam.
+  2. **Blocklist (D-132):** do hisse: drug ingredients (D-128) aur "cosmetic me mana" ingredients (IS 4707 Part 2 ki list); har entry pe source.
+  3. **Seller ka undertaking (D-098):** seller agreement me content sahi hone ka undertaking, aur har listing submit pe checkbox, pehle se tick nahi.
+  4. **Legal pages (D-150):** "Payments" (payment ke tareeke, fees, charge-back) aur "Kram kaise" (search aur sujhaav ke mukhya gun, saral shabdon me) pages bhi.
+  5. **Recall ke emails (D-142):** recall ki email line OTP ke baad sabse pehle, paise ke emails se bhi pehle; chhat paar ho to in-app aur push usi din.
+  6. **Dark patterns (D-134):** saal ka self-audit aur certificate ka record (audit ki checklist aur dummy certificate) L3 jaisa, 2027 se pehle.
+- **Wajah:** Claude ki salah, owner ne maani: kanooni jaanch ke chhote nateeje tay faislon me seedhe jud jaate hain.
+- **Chhode vikalp:** badlav ke saath maanna; abhi rokna (kanoon ke chhote hisse adhoore).
+- **Kab dobara khulega:** owner khud khole.
+- **Kisne, kab:** owner, 2026-11-19. **Nishaan:** Salah maani.
+- **Asar (Claude):** D-098, D-132, D-134, D-138, D-142 aur D-150 me jod. Kanooni detail jaanchi nahi (R-004): Legal Metrology rule 6(10A), Cosmetics Rules rule 39, E-commerce rules 5(2) aur 5(3) public source se mile (IS ki list khud nahi khuli); dark patterns ka saal ka audit sirf secondary source se; recall emails ka kram Claude ki salah hai, kanoon ki seema nahi.
+
+### D-241. Apne roles ki jaankari dummy nahi
+
+- **Faisla:** jahan bhi docs me dummy naam ki baat hai, aur wahan wo kaam apna role karta hai, wahan jaankari dummy nahi hoti: us kaam ka staff role banta hai, aur jaankari us role wale staff account se aati hai. Dummy sirf registrations, licence numbers aur bahar ki (dummy) companies ki jaankari ke liye (D-026).
+- **Wajah:** owner: apne roles ke log apne staff hain; unke liye dummy naam nahi, unke roles banenge.
+- **Chhode vikalp:** apne roles ke liye bhi dummy naam (D-145 niyam 4 ka pehla roop).
+- **Kab dobara khulega:** owner khud khole.
+- **Kisne, kab:** owner, 2026-11-19. **Nishaan:** Owner.
+- **Asar (Claude):** ab tak ki jagahein: Grievance Officer aur nodal person (D-237, D-145 niyam 4), D-163, platform ka customer care contact (D-026 me jod), aur apne brand ke seller wale officers (D-238, Claude ki samajh). Jab bhi kisi naye kaam ke liye kisi insaan ki jaankari chahiye, pehle dekha jaata hai ki wo kaam apna role karta hai ya bahar ki company. Live site pe ye jaankari public dikhti hai; abhi saare staff accounts owner ke hain (D-017). Repo me koi asli naam nahi (public repo niyam): ye sirf database me.
+
 ## Change log
 
 | Version  | Date       | Badlav                                                                                                                                                                                                                                                                                  |
@@ -2896,3 +3093,4 @@
 | v1.10.14 | 2026-11-19 | D-220 aaya (kanooni jaanch ke nateeje: pehle asar ke sawal, phir COMPLIANCE ki 4 batches; Q-161); §0 me "jaanchi nahi" ki line.                                                                                                                                                         |
 | v1.10.15 | 2026-11-19 | D-221 se D-227 aaye (kanooni asar: return ki muddat, der se delivery, 30 din ka daam, test claims, tax archive, invoice pe naam, seller ke tax dastavez; Q-162 se Q-168); D-079, D-080, D-100, D-117, D-120, D-143, D-151, D-193 me badla ya jod; D-055 me R1 jod.                      |
 | v1.10.16 | 2026-11-19 | D-134 me jod: test wale claims ka saboot R1 se (D-224).                                                                                                                                                                                                                                 |
+| v1.10.17 | 2026-11-19 | D-228 se D-241 aaye (kanooni asar ke baaki 22 points, Q-169 se Q-181; D-237 aur D-241 owner ke apne jawab: Grievance Officer, nodal person aur apne roles ki jaankari dummy nahi); 26 purane faislon me badla ya jod.                                                                   |
