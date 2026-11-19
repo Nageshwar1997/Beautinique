@@ -1,6 +1,6 @@
 # OPEN QUESTIONS: Beautinique
 
-> **Status:** v1.3.28 (2026-11-19). Khule sawal, aage ke topics aur jaanchna baaki. Cheezein ek-ek karke judengi.
+> **Status:** v1.3.30 (2026-11-19). Khule sawal, aage ke topics aur jaanchna baaki. Cheezein ek-ek karke judengi.
 
 ## Is file me kya aayega
 
@@ -3723,6 +3723,180 @@ Claude ka kaam: owner ka faisla nahi chahiye, sirf saboot. Nateeja saboot ke saa
 - **Kanooni detail jaanchi nahi** (R-004): invoice ki copy pe customer ka naam aur address zaroori hai ya nahi; points aur gift cards ke prepaid niyam (D-179).
 - **Owner ka jawab (2026-11-19):** **(a)**, list jaisi hai waisi maani. Record: [DECISIONS.md](DECISIONS.md) D-219.
 
+### Q-161. Kanooni jaanch (pehla run) ke nateeje naye docs me kis tareeke se aayein?
+
+- **Status:** `Tay`. Topic: B13 (compliance), B16 (docs).
+- **Sawal:** kanooni jaanch ke pehle run (tax, Legal Metrology, cosmetics kanoon, e-commerce aur consumer kanoon) me 87 points hain (52 jaancha, 34 aadha jaancha, 1 jaancha nahi), aur tay faislon pe 29 asar ke points (jaise D-080, D-088, D-117, D-120, D-151). Ye [COMPLIANCE.md](COMPLIANCE.md), [DECISIONS.md](DECISIONS.md) aur [RISKS.md](RISKS.md) me, owner ki haan se, kis tareeke se aayein?
+- **Kyun zaroori:**
+  - Naye docs me cheez sirf owner ki haan se aati hai; par 87 points ek-ek karke poochhna bahut lamba hai.
+  - 29 asar ke points business ke faisle hain (jaise return ki muddat, kit ka GST, account delete pe invoice ka data): inhe owner ka saaf jawab chahiye, sirf "haan" nahi.
+  - [COMPLIANCE.md](COMPLIANCE.md) abhi khaali hai; architecture, database, UX aur QA ke kaam ko kanooni zarooraton ka ek tay aadhaar chahiye.
+  - DECISIONS me lagbhag 86 jagah "Kanooni detail jaanchi nahi" likha hai. Lawyer se ab bhi kuch nahi jaancha, par kai points public source se mila liye gaye hain; padhne wale ko pata hona chahiye ki ye milaan kahan hai.
+- **Vikalp:**
+  - **(a) Pehle asar ke sawal, phir area ke hisaab se batches:**
+    1. **Asar ke sawal:** 29 asar ke points owner ke sawal ban ke aate hain, vikalp aur salah ke saath, discovery ke niyam se: jo kisi khule sawal pe tike nahi wo ek saath, jude hue ek group me. Jawab se naya D-xxx, aur jahan faisla badle wahan "badla" line (D-018).
+    2. **Area batches:** baaki nateeje [COMPLIANCE.md](COMPLIANCE.md) me 4 batches me (tax; Legal Metrology; cosmetics kanoon; e-commerce aur consumer kanoon). Har batch ek sawal (maano, badlav ke saath maano, ya roko), D-209 jaisa. Har row naya number (CL-001 se) aur naye vakya me, COMPLIANCE ke format me (kanoon ya niyam, kis pe laagu, kis module me, system me kya chahiye, dummy kya hai, jaancha ya nahi), saath me source aur uski tareekh.
+    3. **Aadha jaancha:** ye points isi status ke saath COMPLIANCE me aate hain. Jab primary source khule, Claude khud jaanch ke status badle (§2 jaisa).
+    4. **DECISIONS ki "jaanchi nahi" lines:** jaisi hain waisi rahein, kyunki lawyer se ab bhi nahi jaancha (R-004). DECISIONS §0 me ek line: public source se milaan [COMPLIANCE.md](COMPLIANCE.md) me hai.
+    5. Report ke IDs naye docs me nahi jaate; har cheez naye number aur naye vakya me (D-209 jaisa).
+  - **(b) Ek badi batch:** saare nateeje aur 29 asar ke points ek saath; owner ek baar me haan ya badlav.
+  - **(c) Pehle se haan:** Claude nateeje seedha COMPLIANCE me likhe aur owner baad me padhe; sirf 29 asar ke points sawal bane.
+- **Salah:** **(a)**. Pehle faisle saaf hote hain, phir COMPLIANCE unhi faislon ke hisaab se likha jaata hai, to dobara badalna nahi padta. Har batch itni chhoti ki padhi ja sake.
+- **Trade-off:**
+  - (a) me 29 asar ke points (kai chhote, ek sawal me jud sakte) aur 4 batches: kuch baar ka kaam.
+  - (b) me bahut lambi list: padhna mushkil, galti chhoot sakti hai, aur faisle aur COMPLIANCE ek saath ulajh sakte hain.
+  - (c) tez, par owner ki haan pehle na hone se galat ya adhoori kanooni baat docs me aa sakti hai.
+- **Kanooni detail:** is report ka koi nateeja lawyer se jaancha nahi (R-004). "Jaancha" ka matlab sirf public source se milaan hai, aur kai sarkari sites nahi khuli, isliye kuch points "aadha jaancha" hain.
+- **Owner ka jawab (2026-11-19):** **(a)**, pehle asar ke sawal, phir area ke hisaab se batches (5 niyam). Record: [DECISIONS.md](DECISIONS.md) D-220.
+
+### Q-162. Return ki muddatein (D-080) kanoon ke saath kaise tikein?
+
+- **Status:** `Khula`. Topic: B7 (returns), B13 (compliance).
+- **Sawal:** D-080 me dikhne wali galti pe 48 ghante aur kharab ya nakli maal pe 7 din (misaal) hain. Kanooni jaanch ke hisaab se ye muddatein waise hi nahi tik-tin. Kya badle?
+- **Kyun zaroori:**
+  - E-commerce rules ka rule 6(3): kharab, nakli ya "jaisa dikhaya waisa nahi" maal pe seller return ya refund se mana nahi kar sakta, aur wahan koi muddat nahi likhi.
+  - Consumer Protection Act ki s.2(47)(viii): aise maal ko wapas lene se mana karna unfair trade practice hai, agar bill pe likhi muddat ke andar ho; bill pe muddat na ho to 30 din.
+  - Matlab 48 ghante aur 7 din invoice pe likhe na hon to 30 din maane ja sakte hain; aur 7 din kharab maal ke liye kam pad sakte hain. Man badla (band maal) pe kanoon koi din nahi deta, to D-080 niyam 3 theek hai.
+- **Vikalp:**
+  - **(a) Muddat likhi ho, aur kharab maal pe lambi:**
+    1. Har muddat invoice, order page aur return policy page pe likhi ho.
+    2. Kharab maal, nakli ka shak, aur galat item, shade ya size: 30 din (misaal) tak return.
+    3. Dikhne wali galti (toota, leak, pighla, item kam): 48 ghante saboot ka niyam rahe. 48 ghante ke andar daawa photo se seedha; baad ka daawa bhi liya jaata hai, par staff ki zyada jaanch ke saath, seedha mana nahi.
+    4. Man badla: 7 din (misaal), jaisa hai.
+    5. Muddat ke baad bhi support ka raasta: jaanch, seedha mana nahi; batch ki dikkat pe recall (D-129) jaisa hai.
+  - **(b) Sirf likh do:** numbers waise hi (48 ghante, 7 din), bas invoice, order page aur policy page pe likhe.
+  - **(c) Sab wajahon pe 30 din.**
+- **Salah:** **(a)**. Kanoon ka 30 din ka default aur rule 6(3) dono sambhal jaate hain, aur 48 ghante ka niyam saboot ke liye bana rehta hai.
+- **Trade-off:**
+  - (a) me kharab maal ke der wale daawe aate hain: staff ki jaanch badhti hai, aur seller ke payout (D-081) pe asar dekhna hoga.
+  - (b) saral, par rule 6(3) ka "koi muddat nahi" aur kam din ka jokhim bacha rehta hai.
+  - (c) man badle pe bhi 30 din: hygiene aur seller ka paisa dono pe bojh.
+- **Kanooni detail:** rule 6(3) aur s.2(47)(viii) public source se mila ke dekhe gaye (kanooni jaanch, pehla run); lawyer se nahi jaancha (R-004).
+
+### Q-163. Der se delivery pe return ya refund ka haq?
+
+- **Status:** `Khula`. Topic: B1 (delivery), B7 (returns), B13 (compliance).
+- **Sawal:** D-117 niyam 4 me vaada toote to sirf "der" ki haalat aur khabar hai, R1 me koi muavza nahi. Kanoon der se aaye maal pe customer ko kya haq deta hai, aur hum kya karein?
+- **Kyun zaroori:**
+  - E-commerce rules ka rule 6(3): tay delivery schedule se der ho to seller return ya refund se mana nahi kar sakta (force majeure chhod ke).
+  - Return ki wajahon (D-079) me "der se aaya" nahi hai, to customer ke paas ye raasta hi nahi.
+  - Delivery hamari apni hai (D-014), to der ki zimmedari seller ki nahi, hamari hai.
+- **Vikalp:**
+  - **(a) "Der se pahuncha" ek wajah:**
+    1. "Der" = dikhaye vaade ki tareekh (D-117) ke baad.
+    2. Door pe lene se mana: poora refund, delivery fee samet.
+    3. Lene ke baad: 7 din (misaal) me return, customer pe return ka koi kharcha nahi; band maal ki shart (D-079) wahi.
+    4. Force majeure (baadh, band, hadtaal): staff flag lagaye, wajah ke saath; customer ko wajah dikhe, tab ye haq nahi.
+    5. Der ka kharcha (wapsi, fee) platform ka, seller ka nahi.
+  - **(b) Sirf door pe mana:** der se aaya parcel lene se mana kare to poora refund; lene ke baad normal niyam.
+  - **(c) Jaisa hai:** R1 me sirf "der" ki khabar.
+- **Salah:** **(a)**. Kanoon ka haq poora milta hai, aur kharcha usi pe jiski der hai.
+- **Trade-off:**
+  - (a) me der ka kharcha platform pe, aur force majeure ke flag ki jaanch.
+  - (b) aadha haq: lene ke baad customer ke paas raasta nahi.
+  - (c) me rule 6(3) se takrav ka jokhim.
+- **Kanooni detail:** rule 6(3) public source se mila ke dekha gaya (kanooni jaanch, pehla run); lawyer se nahi jaancha (R-004).
+
+### Q-164. "Pichhle 30 din ka sabse kam daam" R1 se dikhe ya nahi?
+
+- **Status:** `Khula`. Topic: B4 (pricing), B13 (compliance).
+- **Sawal:** D-120 me "pichhle 30 din ka sabse kam daam" sirf "sale" ya "deal" label ke saath, R2 se. R1 me har jagah kata MRP aur "% off" dikhta hai. Kya ye daam R1 se hi har discount ke saath dikhe?
+- **Kyun zaroori:**
+  - Kanooni jaanch ke hisaab se E-commerce rules ke 2026 ke badlav (1 Jan 2027 se) me har "price reduction" ke daawe ke saath pehle ka daam (pichhle 30 din ka sabse kam) zaroori hai.
+  - Ye sirf secondary source se mila ("aadha jaancha"); primary gazette nahi khula.
+  - Daam ka itihaas D-061 me pehle se hai, to data ki kami nahi.
+- **Vikalp:**
+  - **(a) R1 se, har discount ke saath:** jahan bhi kata MRP ya "% off" dikhe, saath me "pichhle 30 din ka sabse kam daam". Itihaas 30 din se kam ho (naya product) to jitne din ka hai, utne din ka likh ke.
+  - **(b) Jaisa hai, 2027 se pehle badlav:** R1 me sirf kata MRP aur "% off"; 1 Jan 2027 se pehle (R2 ke saath) naya niyam.
+  - **(c) "% off" hatao:** sirf MRP aur daam, koi discount ka daawa nahi.
+- **Salah:** **(a)**. Data hai, ek hi display ka niyam banta hai, aur 2027 ke niyam se pehle badlav ka kaam nahi bachta.
+- **Trade-off:**
+  - (a) me product page aur cart pe ek line aur, aur itihaas ki query har jagah.
+  - (b) me baad me design aur tests dobara.
+  - (c) saaf, par customer ko bachat nahi dikhti.
+- **Kanooni detail:** sirf secondary source se ("aadha jaancha"); kata MRP bhi "price reduction" ka daawa hai ya nahi, ye pakka nahi; lawyer se nahi jaancha (R-004).
+
+### Q-165. Test ya asar wale claims ka saboot R1 me?
+
+- **Status:** `Khula`. Topic: B3 (catalog), B13 (compliance).
+- **Sawal:** D-100 niyam 5 me R1 me saboot sirf SPF ke liye; baaki claims seller ki ghoshna. "Dermatologically tested", "clinically proven", "non-comedogenic" jaise claims ka kya ho?
+- **Kyun zaroori:**
+  - Consumer Protection Act ki s.2(47)(i)(g): kisi product ke asar ya performance ka daawa theek test pe tika na ho to unfair trade practice; saboot ka bojh daawa karne wale pe.
+  - Ye claims filters me bhi aate hain (D-138), to platform pe galat daawa customer ke faisle pe seedha asar karta hai.
+- **Vikalp:**
+  - **(a) Claims do hisson me:**
+    1. Ghoshna wale (jaise vegan, fragrance-free): seller ki ghoshna, jaisa hai.
+    2. Test wale (dermatologically tested, clinically proven, non-comedogenic, hypoallergenic, SPF aur PA): R1 se hi saboot (test report, dummy, D-026) ke saath; bina saboot wo claim chuna nahi ja sakta.
+    3. Saboot ki jaanch SPF wale raaste se hi (D-100 niyam 3).
+  - **(b) Test wale R1 me bahar:** R1 me ye claims list me hi nahi; R2 me saboot ke saath.
+  - **(c) Jaisa hai.**
+- **Salah:** **(a)**. SPF ka saboot wala raasta R1 me ban hi raha hai, to baaki test wale claims bhi usi se; galat daawa filters tak nahi pahunchta.
+- **Trade-off:**
+  - (a) me staff ki jaanch thodi zyada.
+  - (b) me R1 me kam claims aur kam filters.
+  - (c) me unfair trade practice ka jokhim.
+- **Kanooni detail:** s.2(47)(i)(g) public source se mila ke dekha gaya (kanooni jaanch, pehla run); lawyer se nahi jaancha (R-004).
+
+### Q-166. Account delete pe jaari invoice ka kya?
+
+- **Status:** `Khula`. Topic: B14 (privacy), B6 (finance), B13 (compliance). Group G19.
+- **Sawal:** D-151 niyam 1 me account delete pe invoice aur ledger me naam, pata aur email hata ke ek code. Tax ke kanoon ke saath ye kaise ho?
+- **Kyun zaroori:**
+  - CGST Act ki s.36: tax records 72 mahine (kanooni jaanch me 2021 ki sarkari copy, baad ke badlav secondary se). Jaari invoice badalna tax record badalna hai.
+  - CGST rules ka rule 46: ₹50,000 ya zyada ke B2C invoice, aur B2B invoice, pe naam aur pata zaroori.
+- **Vikalp:**
+  - **(a) Alag tax archive:**
+    1. Jaari invoice aur credit note ki asli copy (naam aur pata samet) ek alag, kam pahunch wale tax archive me, 72 mahine (misaal) tak, aur koi jhagda chale to uske khatam hone tak, bina badlav.
+    2. Archive sirf finance ka role dekhe, har dekhna audit me.
+    3. App ki baaki jagah (profile, orders ki list, reports, ledger ke views) se pehchaan hat jaaye, jaisa D-151 me.
+    4. Samay poora hone pe archive se bhi delete.
+  - **(b) Invoice me naam hi kam:** ₹50,000 se kam ke B2C invoice pe naam aur pata na chhaapo (state chhaapo), to delete pe un invoices me kuch badalna nahi; baaki ke liye archive.
+  - **(c) Jaisa hai:** invoice me bhi naam aur pata hata do.
+- **Salah:** **(a)**. Tax record nahi badalta, aur personal data sirf ek band jagah pe, tay samay tak.
+- **Trade-off:**
+  - (a) me ek alag archive aur uski pahunch ka niyam.
+  - (b) me do tarah ke invoice ka niyam; archive phir bhi chahiye.
+  - (c) me tax record badalne ka jokhim.
+- **Kanooni detail:** s.36 aur rule 46 public source se mila ke dekhe gaye (kuch hissa secondary se, kanooni jaanch, pehla run); personal data (DPDP) wala hissa doosre run me; lawyer se nahi jaancha (R-004).
+
+### Q-167. ₹50,000 ya zyada ke invoice pe customer ka naam aur pata
+
+- **Status:** `Khula`. Topic: B6 (finance), B14 (privacy), B13 (compliance). Group G19.
+- **Sawal:** D-143 me seller ko customer ka naam aur pata nahi milta; invoice ki copy me sirf wo jo invoice pe zaroori ho. Kis invoice pe customer ka naam aur pata chhape?
+- **Kyun zaroori:**
+  - CGST rules ka rule 46: ₹50,000 ya zyada ke B2C invoice pe naam, pata aur state zaroori; kam ke invoice pe state.
+  - Invoice seller ke GSTIN se hai (D-030), to us invoice ki copy (SR-088) me naam aur pata seller tak bhi jaayega.
+- **Vikalp:**
+  - **(a) Rakam ke hisaab se:**
+    1. ₹50,000 se kam: invoice pe customer ka state (aur shehar ya pincode); naam aur pata sirf customer chahe to.
+    2. ₹50,000 ya zyada: naam aur pata invoice pe, aur seller ki copy me bhi.
+    3. Seller ki copy ka niyam (SR-088: ek-ek karke download, audit) waisa hi.
+  - **(b) Har invoice pe naam aur pata:** saral, par har customer ka pata seller tak.
+  - **(c) R1 me ₹50,000 se kam ki seema:** ek seller ke invoice ki rakam ₹50,000 se upar na jaaye (cart ki seema).
+- **Salah:** **(a)**. Kanoon jitna maangta hai utna hi, aur D-143 ka "kam personal data" bana rehta hai.
+- **Trade-off:**
+  - (a) me invoice ka do roop.
+  - (b) me personal data zyada haathon me.
+  - (c) me bade orders (jaise Beauty Pro ke) ruk sakte hain.
+- **Kanooni detail:** rule 46 public source se mila ke dekha gaya (kanooni jaanch, pehla run); lawyer se nahi jaancha (R-004).
+
+### Q-168. Seller ke tax wale dastavez kitne din rahein?
+
+- **Status:** `Khula`. Topic: B14 (privacy), B6 (finance), B13 (compliance). Group G19.
+- **Sawal:** D-193 niyam 2 me manzoor seller ke KYC dastavez account band hone ke 3 saal baad delete. Jo dastavez tax records ka hissa hain, unka kya?
+- **Kyun zaroori:**
+  - CGST Act ki s.36: tax records 72 mahine. GSTIN ka certificate aur TCS ke statements tax records ka hissa ho sakte hain.
+- **Vikalp:**
+  - **(a) Dastavez ke kism se:** tax records ka hissa (GSTIN certificate, TCS ke statements, invoices) 72 mahine (misaal); baaki KYC (PAN ki copy, brand authorisation) 3 saal, jaisa hai. Pakka number personal data ki kanooni jaanch (doosra run) ke baad.
+  - **(b) Sab 72 mahine.**
+  - **(c) Jaisa hai:** sab 3 saal.
+- **Salah:** **(a)**. Tax ke dastavez kanoon jitna rehte hain, baaki jaldi hatte hain.
+- **Trade-off:**
+  - (a) me dastavez ke kism ki ek setting.
+  - (b) me zyada personal data zyada der tak.
+  - (c) me tax records jaldi hatne ka jokhim.
+- **Kanooni detail:** s.36 public source se mila ke dekha gaya (kanooni jaanch, pehla run); lawyer se nahi jaancha (R-004).
+
 ## Change log
 
 | Version | Date       | Badlav                                                                                                                                                               |
@@ -3790,3 +3964,5 @@ Claude ka kaam: owner ka faisla nahi chahiye, sirf saboot. Nateeja saboot ke saa
 | v1.3.26 | 2026-11-19 | Q-158 tay: (a) batch 8 maana (D-217); Q-159 khula (security batch 9: export, audit, logs aur DevOps); §2 me Render ke logs aur GitHub ki jaanch.                     |
 | v1.3.27 | 2026-11-19 | Q-159 tay: (a) batch 9 maana (D-218); Q-160 khula (security batch 10: R2 ke hisse aur seller ko invoice ki copy); §2 me security report ki baaki tathya wali jaanch. |
 | v1.3.28 | 2026-11-19 | Q-160 tay: (a) batch 10 maana (D-219); security report ki saari batches poori; koi sawal khula nahi.                                                                 |
+| v1.3.29 | 2026-11-19 | Q-161 khula (kanooni jaanch ke pehle run ke nateeje docs me kaise aayein).                                                                                           |
+| v1.3.30 | 2026-11-19 | Q-161 tay: (a) pehle asar ke sawal, phir batches (D-220); asar ke 29 points (15 nahi); Q-162 se Q-168 khule (sabse zyada jokhim wale; G19).                          |

@@ -1,6 +1,6 @@
 # DECISIONS: Beautinique
 
-> **Status:** v1.10.13 (2026-11-19). Har faisla ek jagah. Sirf wahi "Tay" jo owner ne khud kaha; Claude ki salah faisla nahi. Cheezein ek-ek karke judti hain.
+> **Status:** v1.10.14 (2026-11-19). Har faisla ek jagah. Sirf wahi "Tay" jo owner ne khud kaha; Claude ki salah faisla nahi. Cheezein ek-ek karke judti hain.
 
 ## 0. Kaise likhein
 
@@ -8,6 +8,7 @@
 - **§2 Record:** har faisle ke liye: **Faisla**, **Wajah**, **Chhode vikalp**, **Kab dobara khulega**, **Kisne, kab**, **Nishaan** (`Owner` / `Salah maani` / `Salah nahi maani`), aur zaroorat ho to **Asar (Claude)**.
 - **Tag:** `Business`, `Architecture`, `Security` ya `Process`.
 - Faisla badle to purani line mitti nahi: nayi line "badla" ke saath judti hai.
+- **"Kanooni detail jaanchi nahi":** lawyer se jaancha nahi (R-004). Public source se milaan, jaise-jaise aaye, [COMPLIANCE.md](COMPLIANCE.md) me (D-220).
 - **Number:** D-001, D-002 ... kram se. Ek baar diya number kabhi badalta nahi aur dobara use nahi hota.
 
 ## 1. Ek nazar me
@@ -233,6 +234,7 @@
 | D-217 | Security batch 8 (data stores, services aur khabrein) maana: niyam SR-068 se SR-074, 9 threats, risks R-021 aur R-022 `Maana`.                                                                                | Security     | 2026-11-19 |
 | D-218 | Security batch 9 (export, audit, logs aur DevOps) maana: niyam SR-075 se SR-084, 10 threats; R-023 se R-025 `Maana`, R-026 aur R-027 `Khula`; numbers misaal, settings me.                                    | Security     | 2026-11-19 |
 | D-219 | Security batch 10 maana: R2 ke niyam SR-085 se SR-087 aur R1 ka SR-088 (seller ko invoice ki copy ek-ek karke, bulk export me nahi); 5 threats. Security report ki saari batches poori.                       | Security     | 2026-11-19 |
+| D-220 | Kanooni jaanch ke nateeje: pehle tay faislon pe asar ke sawal, phir baaki nateeje COMPLIANCE me 4 area batches (CL-001 se); "jaanchi nahi" lines waisi hi, §0 me ek line.                                     | Process      | 2026-11-19 |
 
 ## 2. Record
 
@@ -2712,6 +2714,20 @@
 - **Kisne, kab:** owner, 2026-11-19. **Nishaan:** Salah maani.
 - **Asar (Claude):** SR-088 R1 se, baaki R2 se. Doosra security run architecture ke baad ke faislon ka review karega, aur OWASP ke naye versions se milaan bhi. Kanooni detail jaanchi nahi (R-004): invoice ki copy pe customer ka naam aur address zaroori hai ya nahi; points aur gift cards ke prepaid niyam.
 
+### D-220. Kanooni jaanch ke nateeje docs me kaise aayein
+
+- **Faisla:** kanooni jaanch (R-004) ke pehle run ke nateeje is tareeke se aate hain. Niyam:
+  1. **Asar ke sawal:** tay faislon pe asar ke points owner ke sawal ban ke aate hain, vikalp aur salah ke saath, discovery ke niyam se: jo kisi khule sawal pe tike nahi wo ek saath, jude hue ek group me. Jawab se naya D-xxx, aur jahan faisla badle wahan "badla" line (D-018).
+  2. **Area batches:** baaki nateeje [COMPLIANCE.md](COMPLIANCE.md) me 4 batches me (tax; Legal Metrology; cosmetics kanoon; e-commerce aur consumer kanoon). Har batch ek sawal (maano, badlav ke saath maano, ya roko), D-209 jaisa. Har row naya number (CL-001 se) aur naye vakya me, COMPLIANCE ke format me, saath me source aur uski tareekh.
+  3. **Aadha jaancha:** ye points isi status ke saath COMPLIANCE me aate hain. Jab primary source khule, Claude khud jaanch ke status badle.
+  4. **DECISIONS ki "jaanchi nahi" lines** jaisi hain waisi rehti hain, kyunki lawyer se ab bhi nahi jaancha (R-004); §0 me ek line ki public source se milaan COMPLIANCE me hai.
+  5. Report ke IDs naye docs me nahi jaate; har cheez naye number aur naye vakya me.
+- **Wajah:** Claude ki salah, owner ne maani: pehle faisle saaf hote hain, phir COMPLIANCE unhi faislon ke hisaab se likha jaata hai, to dobara badalna nahi padta; har batch itni chhoti ki padhi ja sake.
+- **Chhode vikalp:** ek badi batch (padhna mushkil, faisle aur COMPLIANCE ulajh sakte); pehle se haan aur seedha COMPLIANCE me (galat ya adhoori kanooni baat docs me aa sakti).
+- **Kab dobara khulega:** owner khud khole.
+- **Kisne, kab:** owner, 2026-11-19. **Nishaan:** Salah maani.
+- **Asar (Claude):** sawal me "15 asar ke points" likha tha; report me asal me 29 hain (Claude ki ginti ki galti; tareeka wahi). Sabse zyada jokhim wale pehle aate hain. Kanooni detail jaanchi nahi (R-004): koi nateeja lawyer se nahi jaancha.
+
 ## Change log
 
 | Version  | Date       | Badlav                                                                                                                                                                                                                                                                                  |
@@ -2777,3 +2793,4 @@
 | v1.10.11 | 2026-11-19 | D-217 aaya (security batch 8: data stores, services aur khabrein maana; Q-158).                                                                                                                                                                                                         |
 | v1.10.12 | 2026-11-19 | D-218 aaya (security batch 9: export, audit, logs aur DevOps maana; Q-159).                                                                                                                                                                                                             |
 | v1.10.13 | 2026-11-19 | D-219 aaya (security batch 10: R2 ke hisse aur seller ko invoice ki copy maana; Q-160); security report ki saari batches poori.                                                                                                                                                         |
+| v1.10.14 | 2026-11-19 | D-220 aaya (kanooni jaanch ke nateeje: pehle asar ke sawal, phir COMPLIANCE ki 4 batches; Q-161); §0 me "jaanchi nahi" ki line.                                                                                                                                                         |
