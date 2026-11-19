@@ -1,6 +1,6 @@
 # OPEN QUESTIONS: Beautinique
 
-> **Status:** v1.3.13 (2026-11-19). Khule sawal, aage ke topics aur jaanchna baaki. Cheezein ek-ek karke judengi.
+> **Status:** v1.3.14 (2026-11-19). Khule sawal, aage ke topics aur jaanchna baaki. Cheezein ek-ek karke judengi.
 
 ## Is file me kya aayega
 
@@ -2752,6 +2752,429 @@ Claude ka kaam: owner ka faisla nahi chahiye, sirf saboot. Nateeja saboot ke saa
 - **Kanooni detail jaanchi nahi** (R-004): prepaid instrument (closed ya semi-closed) ke niyam, gift card ki kam se kam muddat aur KYC, gift voucher pe GST, aur bina kharch ke balance ka hisaab. Is sawal ka jawab kanooni jaanch ke baad badal sakta hai.
 - **Owner ka jawab (2026-11-19):** **(b)**, design abhi, banana kanooni jaanch ke baad. Record: [DECISIONS.md](DECISIONS.md) D-179.
 
+### Q-121. Customer app me ek sign-in kitne din chale?
+
+- **Status:** `Khula`. Topic: B14 (security).
+- **Sawal:** customer app me ek baar sign-in kitne din tak chale, phir dobara sign-in?
+- **Kyun zaroori:**
+  - Guest cart nahi (D-020), to cart aur wishlist ke liye sign-in chahiye. Har naya sign-in email code (D-021) se hai, jo emails ki din ki chhat (D-142) khaata hai.
+  - Lamba session chori ho jaaye to lamba chalta hai, aur shared phone ya laptop pe agla insaan account me hota hai.
+- **Vikalp:**
+  - **(a)** Har istemaal pe 30 din aage badhe, zyada se zyada 90 din; phir dobara sign-in.
+  - **(b)** Har istemaal pe 7 din aage, zyada se zyada 30 din.
+  - **(c)** Har istemaal pe 90 din aage, zyada se zyada 1 saal.
+- **Salah:** **(a)**, saath me account ki security badalne pe dobara pehchaan, aur "My devices" se kisi bhi session ko band karne ka raasta. Isse lambe session ka jokhim kam rehta hai.
+- **Trade-off:**
+  - (a) me chori hua session 90 din tak chal sakta hai, jab tak customer use band na kare.
+  - (b) me har hafte sign-in: zyada codes, zyada rukawat.
+  - (c) sabse aasaan, par chori ka asar sabse lamba.
+
+### Q-122. Staff aur seller apps me sign-in kitni der chale?
+
+- **Status:** `Khula`. Topic: B14 (security), B2 (apps).
+- **Sawal:** staff ke 7 apps (Admin, Super Admin, Master, Support Desk, Finance, Logistics Ops, Growth Studio), Seller app aur Creator app me session kitni der chale, aur bina kaam ke kitni der me band ho?
+- **Kyun zaroori:**
+  - Staff ke accounts sabse taaqatwar hain; khula chhoda laptop ya chori hua session bada nuksaan kar sakta hai.
+  - Owner ke ~80 accounts (D-017) pe roz sign-in ka bojh isi number se tay hota hai.
+- **Vikalp:**
+  - **(a) Ek kaam ka din:** staff apps 12 ghante, 30 minute bina kaam pe band; Seller har istemaal pe 7 din aage, zyada se zyada 30 din; Creator (R2) 30 din aage, zyada se zyada 90 din.
+  - **(b) Kada:** staff apps 8 ghante, 15 minute bina kaam pe band; Seller 1 din aage, zyada se zyada 7 din; Creator 7 din aage, zyada se zyada 30 din.
+  - **(c) Dheela:** staff apps 24 ghante, 2 ghante bina kaam pe band; Seller aur Creator 30 din aage, zyada se zyada 90 din.
+- **Salah:** **(a)**: staff ke liye ek kaam ka din, seller ke liye hafte me ek sign-in, Creator customer jaisa. (b) owner ke accounts ke saath bahut bhaari hai.
+- **Trade-off:**
+  - (a) me staff ka chori hua session ek din tak chal sakta hai.
+  - (b) zyada surakshit, par bahut sign-in.
+  - (c) aasaan, par chori ka asar lamba.
+
+### Q-123. Baar-baar galat password ya code pe rok kaisi ho?
+
+- **Status:** `Khula`. Topic: B14 (security).
+- **Sawal:** baar-baar galat password ya code daalne pe account kaise roka jaaye?
+- **Kyun zaroori:**
+  - Rok na ho to password ka andaaza lagta rehta hai.
+  - Par poore account ki rok ho to koi bhi jaan-boojh ke galat password daal ke owner ke staff accounts band kar sakta hai.
+- **Vikalp:**
+  - **(a) IP aur account mila ke:**
+    1. Ek IP se 15 minute me 10 galat koshish: us IP se us account pe 1 ghante ki rok.
+    2. Saare IPs mila ke 15 minute me 50 galat: poore account pe 15 minute ki rok.
+    3. Rok ke dauraan "password bhool gaye" chalta rahe, aur rok ke dauraan ki koshishein gini na jaayein.
+  - **(b) Sirf account:** 15 minute me 10 galat koshish pe poora account 1 ghante band, har IP se.
+  - **(c) Account pe rok nahi:** sirf IP ki rate limit aur leak hue passwords ki jaanch.
+- **Salah:** **(a)**. Hamlavar ka andaaza rukta hai, aur asli user doosri jagah se sign-in kar sakta hai. Numbers misaal hain.
+- **Trade-off:**
+  - (a) me do ginti ka kaam; bahut IPs wala hamlavar 15 minute ki poori rok tak pahunch sakta hai.
+  - (b) seedha, par rok khud hamle ka hathiyar ban jaati hai.
+  - (c) me andaaze pe kam rok.
+
+### Q-124. Delivery app me sign-in kaise ho, aur kya session ek phone se bandha ho?
+
+- **Status:** `Khula`. Topic: B14 (security), B1 (delivery).
+- **Sawal:** delivery partner Delivery app me kaise sign-in kare, aur kya session ek manzoor phone se bandha ho?
+- **Kyun zaroori:**
+  - Partner ka phone hi kaam ka auzaar hai, app offline bhi chalta hai (D-042), aur phone pe customers ke naam, address aur phone hote hain.
+  - Partners gig partners hain (D-033): har shift pe authenticator ka bojh kaam rokta hai.
+- **Vikalp:**
+  - **(a) Manzoor phone:** email aur password; partner ka ek manzoor phone (Hub Manager manzoor kare; naya phone = nayi manzoori); session usi phone pe misaal 14 din; authenticator optional; Hub Manager kabhi bhi session band kar sake.
+  - **(b) Har shift authenticator:** email, password aur authenticator, misaal har 12 ghante.
+  - **(c) Bina bandish:** email aur password, session 30 din, phone ki koi bandish nahi.
+- **Salah:** **(a)**. Offline ke saath chalta hai, phone khone pe Hub Manager turant band kar sakta hai, aur partner pe roz ka bojh nahi.
+- **Trade-off:**
+  - (a) me Hub Manager ka kaam (naya phone manzoor karna); phone ki pehchaan browser me rakhi key se hoti hai, to browser ka data saaf hone pe dobara manzoori.
+  - (b) zyada surakshit, par authenticator usi phone pe ho to phone chori = dono gaye.
+  - (c) aasaan, par chori ka asar lamba.
+
+### Q-125. Seller app me authenticator kin users pe zaroori ho?
+
+- **Status:** `Khula`. Topic: B14 (security), B2 (roles).
+- **Sawal:** seller ke kaunse users ke liye authenticator zaroori ho?
+- **Kyun zaroori:** D-017 me misaal Account Owner aur Seller Finance hai. Par daam badalna (₹1,999 ki jagah ₹199), maal bhejna aur seller ke staff jodna bhi bade asar wale kaam hain; inka account chori ho to seller ka seedha nuksaan.
+- **Vikalp:**
+  - **(a) Jokhim ke hisaab se:** Account Owner, Finance, aur jis bhi user ko daam, payout ya bank, seller ke staff, ya maal bhejne ka haq ho; sirf listing content ya reports wale users bina authenticator.
+  - **(b)** Sirf Account Owner aur Finance.
+  - **(c)** Saare seller users.
+- **Salah:** **(a)**: jahan nuksaan ho sakta hai wahan doosra factor, aur content likhne walon pe bojh nahi.
+- **Trade-off:**
+  - (a) me seller ke kai users pe authenticator.
+  - (b) me daam aur maal bhejna bina doosre factor ke.
+  - (c) sabse surakshit, par chhote brand ke content wale bhi authenticator chalayein.
+
+### Q-126. Kin kaamon se pehle dobara authenticator maanga jaaye?
+
+- **Status:** `Khula`. Topic: B14 (security).
+- **Sawal:** sign-in ke baad bhi kin kaamon se theek pehle dobara authenticator code maanga jaaye?
+- **Kyun zaroori:** khula chhoda session ya chori hui cookie se sabse bade kaam na ho sakein. Par har kaam pe code maangna kaam rok deta hai.
+- **Vikalp:**
+  - **(a) Tay list, misaal 5 minute ki khidki:** role ya grant dena aur hatana; authenticator reset; allowlist badalna (D-133); area ke switches aur live karna; fees, policy ke numbers, HSN table, blocklist aur emails ki chhat badalna; payout "paid"; seema se upar refund ya daawe ki manzoori; data export; seller ka bank badalna; kill switches. Authenticator band karna aur naye recovery codes banana har baar apna alag code maangein.
+  - **(b)** Staff ke har likhne wale kaam pe.
+  - **(c)** Sirf Master ke kaamon pe.
+- **Salah:** **(a)**.
+- **Trade-off:**
+  - (a) me naye kaam aane pe list badhani padegi.
+  - (b) me staff ka kaam bahut dheema.
+  - (c) me Finance aur Admin ke bade kaam bina dobara code ke.
+
+### Q-127. Kai apps me sign-in: har app alag, ya ek jagah sign-in se sab apps?
+
+- **Status:** `Khula`. Topic: B14 (security), B2 (apps).
+- **Sawal:** jis insaan ke roles kai apps me hon, wo har app me alag sign-in kare, ya ek jagah sign-in karke sab apps khulein?
+- **Kyun zaroori:** 11 apps alag hosts pe hain (D-010, D-048, domain nahi D-028), aur cookies har host ki alag hoti hain.
+- **Vikalp:**
+  - **(a) Har app alag:** har app ka apna sign-in aur apni cookies; password manager se aasaan.
+  - **(b) Ek central sign-in app:** baaki apps redirect se ek baar ka code le ke apna session banayein.
+  - **(c)** Abhi (a), aur asli business pe (b), jab asli staff ke roles kai apps me hon.
+- **Salah:** **(a)**. Owner ke har role ka alag account hai (D-017), to zyadatar ek account ek hi app me jaata hai. Central sign-in se owner ka bojh kam nahi hota, aur redirect aur code se hamle ke naye raaste khulte hain.
+- **Trade-off:**
+  - (a) me asli business pe kai roles wale staff ko kai sign-in.
+  - (b) me ek jagah chori = saare apps, aur banane ka kaam bada.
+  - (c) me baad me badlav ka kaam.
+
+### Q-128. Sign-in, sign-up aur password reset ke code wale emails ki seema kya ho?
+
+- **Status:** `Khula`. Topic: B14 (security), B11 (notifications).
+- **Sawal:** bina sign-in maange jaane wale code ke emails (sign-in, sign-up, password reset) kitne bheje ja sakein?
+- **Kyun zaroori:**
+  - Code maangna bina sign-in ke hota hai, aur din ke 300 emails me OTP ki 60 pakki jagah hai (D-142).
+  - Seema na ho to koi bhi codes maang-maang ke din ki jagah kha sakta hai, ya kisi ke inbox pe emails ki baadh la sakta hai. Allowlist (D-133) abhi isse bachati hai, par asli business pe allowlist band hogi.
+- **Vikalp:**
+  - **(a)** Ek email ko ghante me 5 code (ek IP se unme 3 tak); saare emails mila ke ghante me 30; sign-up ke codes din me 20. Allowlist band karte waqt numbers dobara dekhna.
+  - **(b) Kada:** ek email ko ghante me 3, sab mila ke 15, sign-up din me 10.
+  - **(c) Dheela:** ek email ko ghante me 10, sab mila ke 60, sign-up din me 60.
+- **Salah:** **(a)**: sign-up ki baadh me bhi password reset, invite aur security codes ke liye jagah bachti hai.
+- **Trade-off:**
+  - (a) me bhaari ghante me asli user ko "thodi der baad koshish karein" ka sandesh.
+  - (b) aur kada.
+  - (c) me ek ghante me OTP ki poori din ki jagah khatam ho sakti hai.
+
+### Q-129. Support Agent kitni rakam tak refund ya daawa khud manzoor kare?
+
+- **Status:** `Khula`. Topic: B14 (security), B11 (support), B6 (refunds).
+- **Sawal:** Support Agent ek maamle me aur din me kitni rakam tak refund ya daawa khud manzoor kare, aur kab doosre account ki haan chahiye?
+- **Kyun zaroori:**
+  - Zyadatar refund niyam se apne aap shuru hote hain (D-111), par daawe ka faisla aur fail hue refund ka staff wala raasta insaan karta hai (D-105, D-111).
+  - Chori hua account ya mili-bhagat yahin nuksaan karti hai.
+- **Vikalp:**
+  - **(a) Seema:** Support Agent ek maamle me misaal ₹2,000 tak aur din me kul misaal ₹10,000 tak; usse upar Support Lead (doosra account). Fail hue refund ka staff wala raasta hamesha Support Lead aur Finance ki manzoori se.
+  - **(b) Koi seema nahi:** sirf audit.
+  - **(c)** Har insaani faisle pe doosre account ki haan.
+- **Salah:** **(a)**.
+- **Trade-off:**
+  - (a) me bade maamle thodi der se.
+  - (b) me ek account se bada nuksaan.
+  - (c) me har chhote maamle pe do accounts (owner ke do accounts) ka bojh.
+
+### Q-130. Seller ka payout "paid" mark karne ke liye ek account kaafi ho ya do?
+
+- **Status:** `Khula`. Topic: B14 (security), B6 (settlement).
+- **Sawal:** seller ke payout ko "paid" mark karne ke liye ek account kaafi ho, ya do?
+- **Kyun zaroori:**
+  - R1 me payout haath se "paid" mark hota hai ([PROJECT_PLAN.md](PROJECT_PLAN.md) §1); asli business pe yahi asli bank transfer banega.
+  - Ek hi account payout bana bhi sake aur mark bhi kare, to chori hua account seller ka paisa "paid" dikha sakta hai.
+- **Vikalp:**
+  - **(a) Do haath:** Finance role payout batch banaye; Master ka doosra account (D-047) manzoor kare; ek account dono kaam nahi kar sakta.
+  - **(b)** Finance role akela bana ke mark kare.
+  - **(c)** Sirf Master mark kare.
+- **Salah:** **(a)**.
+- **Trade-off:**
+  - (a) me har hafte do accounts se kaam (owner ke liye do sign-in).
+  - (b) me ek account ka jokhim.
+  - (c) me Master ke paas roz ke kaam ka haq aa jaata hai, jo D-047 ki soch ke khilaaf hai.
+
+### Q-131. Seller apna bank khaata badle to naye khaate pe payout kab?
+
+- **Status:** `Khula`. Topic: B14 (security), B6 (settlement).
+- **Sawal:** seller apna bank ya payout ka khaata badle to naye khaate pe payout turant ho, ya kuch rok ke baad?
+- **Kyun zaroori:** sellers ka paisa platform ke paas rehta hai (D-093). Seller ka account chori karke bank badalna aur agla payout apne khaate me lena sabse seedha nuksaan hai.
+- **Vikalp:**
+  - **(a) Rok ke saath:** bank badalne pe dobara authenticator code, purane email aur in-app pe khabar, aur naye khaate pe misaal 72 ghante tak payout nahi; us dauraan Account Owner "ye maine nahi kiya" daba ke badlav rok sake.
+  - **(b) Staff ki jaanch:** naye khaate pe pehla payout Seller Ops ki jaanch ke baad.
+  - **(c) Koi rok nahi:** sirf khabar.
+- **Salah:** **(a)**; asli business pe (b) bhi saath me.
+- **Trade-off:**
+  - (a) me bank badalne ke baad payout 3 din der se.
+  - (b) me staff ka kaam.
+  - (c) me chori ka seedha raasta.
+
+### Q-132. Delivery ke saboot (photo aur location) kitne din rakhein, aur kaun dekhe?
+
+- **Status:** `Khula`. Topic: B14 (security, privacy), B1 (delivery).
+- **Sawal:** delivery ke waqt li gayi photo aur partner ki location (D-072) kitne din rakhein, aur kaun dekh sake?
+- **Kyun zaroori:**
+  - Photo me ghar ka darwaza ya koi insaan aa sakta hai, aur location se customer ka ghar pata chalta hai.
+  - Saboot daawe (D-148), partner ke dispute (D-164, R2) aur chargeback (D-095, R2) ke liye bhi chahiye.
+- **Vikalp:**
+  - **(a)** Delivered se misaal 180 din, ya khula daawa, dispute ya chargeback band hone tak (jo baad me ho). Dekhe: daawe pe Support Agent aur Support Lead, aur apne hub ka Hub Manager; partner submit ke baad nahi; customer apni delivery ki photo dekh sake.
+  - **(b)** 30 din (daawe ki seema ke baad delete).
+  - **(c)** 1 saal.
+- **Salah:** **(a)**. Chargeback ki asli samay-seema payment gateway ke niyam se pakki karni hai.
+- **Trade-off:**
+  - (a) me storage aur delete ka kaam.
+  - (b) me baad ka chargeback ya dispute bina saboot.
+  - (c) me zyada data zyada der.
+- **Kanooni detail jaanchi nahi** (R-004): photo aur location jaise personal data rakhne ka samay.
+
+### Q-133. Daawe, return pickup aur pack ki photos aur video kitne din rakhein?
+
+- **Status:** `Khula`. Topic: B14 (security, privacy), B7 (returns).
+- **Sawal:** customer ke daawe ki photos aur video (D-106), return pickup ki photo (D-113) aur warehouse pe pack ki photo (D-106) kitne din rakhein, aur kaun dekhe?
+- **Kyun zaroori:** inme ghar, chehra ya personal cheezein aa sakti hain; par baad ke jhagde aur seller ke dispute ke liye saboot chahiye.
+- **Vikalp:**
+  - **(a) Alag samay:** daawe ki photos maamla band hone ke misaal 180 din baad delete, video misaal 90 din; pack ki photo delivered ke misaal 90 din, ya daawa ho to daawe ke saath. Dekhe: us maamle ka Support staff aur warehouse ka jaanch wala staff.
+  - **(b)** Sab 90 din.
+  - **(c)** Sab 1 saal.
+- **Salah:** **(a)**.
+- **Trade-off:**
+  - (a) me alag-alag samay ka kaam.
+  - (b) me lamba jhagda bina saboot.
+  - (c) me zyada storage aur zyada personal data.
+- **Kanooni detail jaanchi nahi** (R-004): customer ki photo aur video rakhne ke niyam.
+
+### Q-134. Seller aur Beauty Pro ke dastavez kitne din rakhein, aur kaun dekhe?
+
+- **Status:** `Khula`. Topic: B14 (security, privacy), B3 (seller).
+- **Sawal:** seller ke KYC dastavez (PAN, GSTIN ka certificate, brand authorisation), claims ke saboot (D-100) aur Beauty Pro ke dastavez (D-069) kitne din rakhein, aur kaun dekhe?
+- **Kyun zaroori:** ye pehchaan ke dastavez hain; leak ho to pehchaan ki chori. Par jaanch, dobara jaanch aur jhagde ke liye chahiye.
+- **Vikalp:**
+  - **(a) Kaam tak, phir tay samay:**
+    1. Reject hui application ke dastavez 30 din baad delete; sirf faisla aur wajah rahe.
+    2. Manzoor seller ke dastavez account chalne tak, aur band hone ke misaal 3 saal baad (kanooni jaanch ke baad number badal sakta hai).
+    3. Claims ke saboot unki expiry ke misaal 1 saal baad; Pro ke dastavez darje ki muddat ke misaal 1 saal baad.
+    4. Dekhe: sirf jaanch wali team (Seller Ops, catalog ki jaanch, Pro ki jaanch) aur Trust & Safety; seller apne dastavez.
+  - **(b)** Sab hamesha.
+  - **(c)** Jaanch ke baad turant delete; sirf nateeja, chhupa number aur file ka hash rahe.
+- **Salah:** **(a)**. Seller ke liye R1 se, Beauty Pro ke liye R2 se (D-055).
+- **Trade-off:**
+  - (a) me samay ki settings aur delete ka kaam.
+  - (b) me leak ka bada bhandaar.
+  - (c) me jhagde ya dobara jaanch pe dastavez nahi.
+- **Kanooni detail jaanchi nahi** (R-004): KYC aur tax ke records kitne din rakhne zaroori hain.
+
+### Q-135. Audit log, sign-in events aur delete hue account ke records kitne din rakhein?
+
+- **Status:** `Khula`. Topic: B14 (security), B12 (reporting).
+- **Sawal:** audit log, sign-in aur security events, aur delete hue account ke bina pehchaan records kitne din rakhein?
+- **Kyun zaroori:**
+  - Audit hi batata hai kisne kya kiya; jaldi mita to jaanch nahi ho sakti.
+  - Par audit ke cluster me bhi jagah 0.5 GB hi hai (R-006), aur IP aur browser ki jaankari bhi personal data hai. D-151 ne records ka samay yahin chhoda hai.
+- **Vikalp:**
+  - **(a) Alag samay:** audit log misaal 2 saal (paise ke kaamon ka audit kanooni jaanch ke baad lamba ho sakta hai); sign-in aur security events misaal 1 saal; delete hue account ke bina pehchaan records (invoice, ledger) kanooni samay tak; backups me purana data backup ki umar tak.
+  - **(b)** Audit aur sign-in events sab 400 din.
+  - **(c)** Audit hamesha.
+- **Salah:** **(a)**.
+- **Trade-off:**
+  - (a) me do alag samay.
+  - (b) me saal bhar baad ki jaanch me kami.
+  - (c) me jagah aur personal data badhte rehte hain.
+- **Kanooni detail jaanchi nahi** (R-004): logs rakhne ka samay (CERT-In ke niyam), aur tax records ka samay.
+
+### Q-136. Browser push aur emails me order ki kitni jaankari ho?
+
+- **Status:** `Khula`. Topic: B14 (security, privacy), B11 (notifications).
+- **Sawal:** browser push aur emails me order ki kitni jaankari likhi jaaye?
+- **Kyun zaroori:**
+  - Push lock screen pe koi bhi dekh sakta hai, aur beauty aur personal care ke kuch products niji hote hain.
+  - Delivery code (D-072) saboot hai; wo kahin aur leak na ho.
+- **Vikalp:**
+  - **(a)** Push me sirf order number aur haalat (misaal "Order 1234: out for delivery"); product ka naam, rakam, address aur delivery code push me kabhi nahi. Email me order ki detail (D-126), par poora address sirf invoice me.
+  - **(b)** Push me product ka naam bhi.
+  - **(c)** Push aur email me poori detail.
+- **Salah:** **(a)**.
+- **Trade-off:**
+  - (a) me detail ke liye customer ko app kholna padta hai.
+  - (b) me niji product lock screen pe.
+  - (c) me sabse zyada leak.
+
+### Q-137. Backup ki files laptop pe encrypted rahein?
+
+- **Status:** `Khula`. Topic: B14 (security), B15 (backup).
+- **Sawal:** backup command (D-013) ki files laptop pe encrypted rahein?
+- **Kyun zaroori:** backup me saara data hai (customers, sellers, paisa). D-013 ke 4 pehre git se bachate hain, par laptop chori, malware ya Desktop ke cloud sync se nahi.
+- **Vikalp:**
+  - **(a) Encrypted:** backup command apni files ek key se encrypt kare (key password manager me, repo me kabhi nahi); restore command key maange; laptop pe misaal sirf aakhri 3 backups, purane apne aap delete.
+  - **(b) Bina encryption:** sirf laptop ka disk encryption aur D-013 ke 4 pehre.
+  - **(c)** (a), aur ek encrypted copy alag device pe (jaise pen drive).
+- **Salah:** **(a)**; (c) agar owner chahe, kyunki laptop kharab ho to backup bhi jaata hai.
+- **Trade-off:**
+  - (a) aur (c) me key kho jaaye to backup bekaar.
+  - (b) me laptop pe khula data.
+
+### Q-138. Secrets (passwords aur keys) kab badle jaayein?
+
+- **Status:** `Khula`. Topic: B14 (security), B15 (operations).
+- **Sawal:** secrets (databases ke passwords, payment gateway ki keys, apps se backend ka secret, email ki key, sign-in providers ke secrets, encryption keys) kab badle jaayein?
+- **Kyun zaroori:** leak hua secret badalna hi ilaaj hai; par ek insaan ke liye ~20 secrets (11 Vercel projects samet) baar-baar badalna galti ka mauka bhi hai.
+- **Vikalp:**
+  - **(a)** Shak ya incident pe turant, tay kram se; baaki saal me ek baar sab; token sign karne wali keys apne aap (misaal har 30 din); asli business pe kisi staff ke jaane pe turant.
+  - **(b)** Har 90 din sab.
+  - **(c)** Sirf incident pe.
+- **Salah:** **(a)**.
+- **Trade-off:**
+  - (a) me secret saal bhar purana reh sakta hai.
+  - (b) me bahut kaam aur galti ka mauka.
+  - (c) me chupchaap leak kabhi theek nahi hota.
+
+### Q-139. Personal data ka leak ho to users ko kab aur kaise bataya jaaye?
+
+- **Status:** `Khula`. Topic: B14 (security, incident response).
+- **Sawal:** personal data ka leak pakka ho to users ko kab aur kaise bataya jaaye?
+- **Kyun zaroori:** registrations dummy hain, par system me asli personal data (owner aur testers ka) hai, aur design asli business jaisa (D-026).
+- **Vikalp:**
+  - **(a)** Leak pakka hone pe asar wale users ko email aur in-app, misaal 72 ghante ke andar: kya hua, kaunsa data, unhe kya karna hai; site pe ek patti; aur jo sarkari report kanooni jaanch bataye.
+  - **(b)** Sirf gambhir leak (password, paisa, dastavez) pe khabar.
+  - **(c)** Koi khabar nahi (demo hai).
+- **Salah:** **(a)**; R1 me iska likha hua kram (runbook).
+- **Trade-off:**
+  - (a) me emails ki chhat (D-142) me jagah chahiye.
+  - (b) me chhota leak chhup jaata hai.
+  - (c) asli business ke liye galat aadat.
+- **Kanooni detail jaanchi nahi** (R-004): data leak pe users aur sarkari sanstha ko suchna ka samay aur tareeka.
+
+### Q-140. Staff accounts pe password ke saath doosra factor kaunsa ho?
+
+- **Status:** `Khula`. Topic: B14 (security). Group G15.
+- **Sawal:** staff accounts (staff ke 7 apps) pe password ke saath doosra factor kaunsa ho?
+- **Kyun zaroori:**
+  - Owner ke ~80 accounts (D-017) me se zyadatar pe doosra factor lagega.
+  - Domain nahi (D-028), to milte-julte naam ka nakli sign-in page banana aasaan hai. Authenticator ka code nakli page pe bhi daala ja sakta hai; passkey sirf asli site pe chalti hai.
+- **Vikalp:**
+  - **(a)** R1 me authenticator app (6 digit code) har staff account pe; passkey R2 me ek aur raasta.
+  - **(b)** R1 se passkey (phone ya laptop ka fingerprint ya PIN, ya password manager) pehla raasta, authenticator backup.
+  - **(c)** Hamesha sirf authenticator.
+- **Salah:** **(a)**: R1 me kaam kam, R2 me passkey. Asli business pe Master aur Finance pe passkey zaroori karna owner tab tay kare.
+- **Trade-off:**
+  - (a) me authenticator app me 50 se zyada entries, aur phishing ka jokhim. Authenticator ke secrets usi password manager me hon jisme passwords, to dono factor ek jaise ho jaate hain.
+  - (b) phishing se bachav, par har app ka alag host hai (D-048), to har account ki passkey uske app ke host pe banti hai: banane ka kaam zyada.
+  - (c) me phishing ka jokhim hamesha.
+
+### Q-141. Staff ka authenticator kho jaaye to account kaise wapas mile?
+
+- **Status:** `Khula`. Topic: B14 (security). Group G15.
+- **Sawal:** staff ka (aur Master ka) authenticator kho jaaye to reset ka raasta kya ho?
+- **Kyun zaroori:**
+  - Owner akela hai; phone kho jaaye to bahut se accounts ek saath band ho jaate hain.
+  - Reset ka raasta hi account par kabze ka sabse aasaan raasta hota hai.
+- **Vikalp:**
+  - **(a) Recovery codes, phir Master, phir laptop:**
+    1. Pehle recovery codes (10, har code ek baar).
+    2. Staff account ka reset Master account kare: dobara authenticator code, audit, us account ke saare sessions band, aur user ko email.
+    3. Master ka apna reset sirf recovery codes se; wo bhi na hon to owner ke laptop se ek "break-glass" command jo seedha database pe reset kare aur audit me likhe.
+  - **(b)** Ek alag security role kisi ka bhi reset kare, Master ka bhi.
+  - **(c)** Email code se reset.
+- **Salah:** **(a)**.
+- **Trade-off:**
+  - (a) me recovery codes sambhalne padte hain, aur break-glass command ke liye production database ki pahunch laptop pe chahiye (backup command ke liye pehle se, D-013).
+  - (b) me ek role ke paas sabki chaabi.
+  - (c) me inbox hi authenticator ban jaata hai: doosre factor ka matlab khatam.
+
+### Q-142. Staff ko customer ka naam, email, phone aur address kitna dikhe?
+
+- **Status:** `Khula`. Topic: B14 (privacy), B2 (roles). Group G16.
+- **Sawal:** Support, warehouse, hub aur delivery partner ko customer ka naam, email, phone aur address kitna dikhe?
+- **Kyun zaroori:** sellers ke liye D-143 tay hai, par staff ke liye nahi. Staff ki lists se customers ka data bahar jaana sabse aasaan raasta hai.
+- **Vikalp:**
+  - **(a) Lists me chhupa:**
+    1. Lists me naam ka pehla hissa aur shehar, aadha email, phone ke aakhri 4 ank.
+    2. Poori jaankari sirf maamla kholne pe, wajah chun ke; har baar dekhna audit me.
+    3. Delivery partner ko sirf apne active parcel ka naam, address aur phone; delivered ke misaal 24 ghante baad chhupa.
+    4. Warehouse aur hub ko sirf order number aur label.
+  - **(b)** Support ko hamesha poori; baaki ko chhupi.
+  - **(c)** Jise kaam ho use poori.
+- **Salah:** **(a)**.
+- **Trade-off:**
+  - (a) me support ko ek click zyada, aur audit ka kaam.
+  - (b) me support ki list se poora data bahar ja sakta hai.
+  - (c) sabse aasaan, par sabse zyada leak.
+- **Kanooni detail jaanchi nahi** (R-004): staff ke paas personal data ki pahunch ke niyam.
+
+### Q-143. Support customer ka account usi ki nazar se dekh sake?
+
+- **Status:** `Khula`. Topic: B14 (privacy), B11 (support). Group G16.
+- **Sawal:** support staff customer ka account usi ki nazar se dekh sake, ya uske naam se kaam kar sake?
+- **Kyun zaroori:** shikayat samajhne ke liye ye aasaan lagta hai, par isse staff ke haq aur chhupi jaankari (Q-142) dono ka bypass ho jaata hai.
+- **Vikalp:**
+  - **(a) Kabhi nahi:** support ki apni screens (order, return aur refund ki haalat) jo customer jaisa dikhayein.
+  - **(b) Sirf dekhna:** "customer ki nazar" mode, wajah ke saath, audit me, aur customer ko khabar.
+  - **(c)** Customer ban ke poora kaam.
+- **Salah:** **(a)**, Support Desk ke R1 wale patle hisse (D-105) me.
+- **Trade-off:**
+  - (a) me support ki screens banane ka kaam.
+  - (b) me sirf dekhne me bhi poora data.
+  - (c) sabse bada jokhim.
+
+### Q-144. Ek insaan ke kai accounts per-customer seemaayein reset na karein, iske liye kya gina jaaye?
+
+- **Status:** `Khula`. Topic: B14 (abuse), B5 (checkout). Group G17.
+- **Sawal:** per-customer seemaayein (naye customer ke pehle order ki delivery pe UPI ki seema D-109, baar-baar return D-116, reviews D-156, referral D-176) ek insaan ke kai accounts se reset na hon, iske liye kya gina jaaye?
+- **Kyun zaroori:** email ka `+` alias alag account maana jaata hai (D-017; owner ke accounts isi pe hain). Isse ek insaan naye alias se naya account bana ke har per-customer seema dobara shuru kar sakta hai.
+- **Vikalp:**
+  - **(a) Account alag, seemaon ke liye jod:**
+    1. Account alag hi rahein (D-017).
+    2. Seemaon ki ginti me ek "jod" bhi: wahi address (ek roop me karke), wahi payment ki pehchaan (gateway de to), aur wahi browser ki device cookie.
+    3. Email ka bina `+` wala roop sirf ek ishara, faisla nahi.
+    4. Jod pe apne aap rok sirf tay seemaon (jaise D-109) pe; baaki staff ki review queue me.
+  - **(b) Email ka ek roop:** seemaon ki ginti ke liye email ka bina `+` (aur Gmail me bina dots) wala roop ek insaan; account phir bhi alag.
+  - **(c) Koi jod nahi:** har account alag.
+- **Salah:** **(a)**: R1 me D-109 wala jod, baaki seemaon ke saath R2 se.
+- **Trade-off:**
+  - (a) me jod ka kaam, aur jod ka data bhi personal data hai. Owner ke apne customer aliases ek hi address pe hon to unki "pehle order" wali seema saath lagegi: testing me dhyaan.
+  - (b) me owner ke saare customer aliases ek insaan gine jaayenge.
+  - (c) me har per-customer seema bekaar.
+- **Kanooni detail jaanchi nahi** (R-004): device ki pehchaan aur accounts ka jod rakhne ke niyam.
+
+### Q-145. Ek customer ke ek waqt me kitne delivery-pe-UPI orders khule ho sakein?
+
+- **Status:** `Khula`. Topic: B14 (abuse), B5 (checkout). Group G17.
+- **Sawal:** ek customer ke ek waqt me kitne aise orders khule ho sakte hain jinka payment delivery pe hai?
+- **Kyun zaroori:** delivery pe UPI wale order me stock delivery tak ruka rehta hai (D-118). Bina payment kai orders se stock roka ja sakta hai; D-109 sirf rakam aur mana karne ki ginti dekhta hai.
+- **Vikalp:**
+  - **(a)** Ek customer ke (Q-144 ke "ek customer" ke hisaab se) ek waqt me misaal 2 khule orders, aur unki kul rakam D-109 ki seema tak.
+  - **(b)** Ek waqt me 1 khula order.
+  - **(c)** Koi alag seema nahi.
+- **Salah:** **(a)**.
+- **Trade-off:**
+  - (a) me kabhi asli customer ka teesra order prepaid hi.
+  - (b) aur kada.
+  - (c) me stock rokne ka raasta khula.
+
 ## Change log
 
 | Version | Date       | Badlav                                                                                                                                                            |
@@ -2804,3 +3227,4 @@ Claude ka kaam: owner ka faisla nahi chahiye, sirf saboot. Nateeja saboot ke saa
 | v1.3.11 | 2026-11-19 | Q-074 se Q-100 tay (D-133 se D-159; owner ne saari salah maani); §1 ke "Ab tak" me naye faisle.                                                                   |
 | v1.3.12 | 2026-11-19 | Q-101 se Q-120 khule: Agent 2 ke doosre run ke R2 wale sawal; jude sawal G12, G13, G14 me.                                                                        |
 | v1.3.13 | 2026-11-19 | Q-101 se Q-120 tay (D-160 se D-179; owner ne saari salah maani); §1 ke "Ab tak" me naye faisle; koi sawal khula nahi.                                             |
+| v1.3.14 | 2026-11-19 | Q-121 se Q-145 khule: Security Architect ke pehle run ke R1 wale sawal; jude sawal G15, G16, G17 me.                                                              |
