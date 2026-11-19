@@ -1,6 +1,6 @@
 # OPEN QUESTIONS: Beautinique
 
-> **Status:** v1.3.30 (2026-11-19). Khule sawal, aage ke topics aur jaanchna baaki. Cheezein ek-ek karke judengi.
+> **Status:** v1.3.31 (2026-11-19). Khule sawal, aage ke topics aur jaanchna baaki. Cheezein ek-ek karke judengi.
 
 ## Is file me kya aayega
 
@@ -3751,7 +3751,7 @@ Claude ka kaam: owner ka faisla nahi chahiye, sirf saboot. Nateeja saboot ke saa
 
 ### Q-162. Return ki muddatein (D-080) kanoon ke saath kaise tikein?
 
-- **Status:** `Khula`. Topic: B7 (returns), B13 (compliance).
+- **Status:** `Tay`. Topic: B7 (returns), B13 (compliance).
 - **Sawal:** D-080 me dikhne wali galti pe 48 ghante aur kharab ya nakli maal pe 7 din (misaal) hain. Kanooni jaanch ke hisaab se ye muddatein waise hi nahi tik-tin. Kya badle?
 - **Kyun zaroori:**
   - E-commerce rules ka rule 6(3): kharab, nakli ya "jaisa dikhaya waisa nahi" maal pe seller return ya refund se mana nahi kar sakta, aur wahan koi muddat nahi likhi.
@@ -3772,10 +3772,11 @@ Claude ka kaam: owner ka faisla nahi chahiye, sirf saboot. Nateeja saboot ke saa
   - (b) saral, par rule 6(3) ka "koi muddat nahi" aur kam din ka jokhim bacha rehta hai.
   - (c) man badle pe bhi 30 din: hygiene aur seller ka paisa dono pe bojh.
 - **Kanooni detail:** rule 6(3) aur s.2(47)(viii) public source se mila ke dekhe gaye (kanooni jaanch, pehla run); lawyer se nahi jaancha (R-004).
+- **Owner ka jawab (2026-11-19):** **(a)**, muddatein likhi hon aur kharab maal pe 30 din (5 niyam). Record: [DECISIONS.md](DECISIONS.md) D-221.
 
 ### Q-163. Der se delivery pe return ya refund ka haq?
 
-- **Status:** `Khula`. Topic: B1 (delivery), B7 (returns), B13 (compliance).
+- **Status:** `Tay`. Topic: B1 (delivery), B7 (returns), B13 (compliance).
 - **Sawal:** D-117 niyam 4 me vaada toote to sirf "der" ki haalat aur khabar hai, R1 me koi muavza nahi. Kanoon der se aaye maal pe customer ko kya haq deta hai, aur hum kya karein?
 - **Kyun zaroori:**
   - E-commerce rules ka rule 6(3): tay delivery schedule se der ho to seller return ya refund se mana nahi kar sakta (force majeure chhod ke).
@@ -3796,10 +3797,11 @@ Claude ka kaam: owner ka faisla nahi chahiye, sirf saboot. Nateeja saboot ke saa
   - (b) aadha haq: lene ke baad customer ke paas raasta nahi.
   - (c) me rule 6(3) se takrav ka jokhim.
 - **Kanooni detail:** rule 6(3) public source se mila ke dekha gaya (kanooni jaanch, pehla run); lawyer se nahi jaancha (R-004).
+- **Owner ka jawab (2026-11-19):** **(a)**, "der se pahuncha" return ki ek wajah (5 niyam). Record: [DECISIONS.md](DECISIONS.md) D-222.
 
 ### Q-164. "Pichhle 30 din ka sabse kam daam" R1 se dikhe ya nahi?
 
-- **Status:** `Khula`. Topic: B4 (pricing), B13 (compliance).
+- **Status:** `Tay`. Topic: B4 (pricing), B13 (compliance).
 - **Sawal:** D-120 me "pichhle 30 din ka sabse kam daam" sirf "sale" ya "deal" label ke saath, R2 se. R1 me har jagah kata MRP aur "% off" dikhta hai. Kya ye daam R1 se hi har discount ke saath dikhe?
 - **Kyun zaroori:**
   - Kanooni jaanch ke hisaab se E-commerce rules ke 2026 ke badlav (1 Jan 2027 se) me har "price reduction" ke daawe ke saath pehle ka daam (pichhle 30 din ka sabse kam) zaroori hai.
@@ -3815,10 +3817,11 @@ Claude ka kaam: owner ka faisla nahi chahiye, sirf saboot. Nateeja saboot ke saa
   - (b) me baad me design aur tests dobara.
   - (c) saaf, par customer ko bachat nahi dikhti.
 - **Kanooni detail:** sirf secondary source se ("aadha jaancha"); kata MRP bhi "price reduction" ka daawa hai ya nahi, ye pakka nahi; lawyer se nahi jaancha (R-004).
+- **Owner ka jawab (2026-11-19):** **(a)**, R1 se har discount ke saath pichhle 30 din ka sabse kam daam. Record: [DECISIONS.md](DECISIONS.md) D-223.
 
 ### Q-165. Test ya asar wale claims ka saboot R1 me?
 
-- **Status:** `Khula`. Topic: B3 (catalog), B13 (compliance).
+- **Status:** `Tay`. Topic: B3 (catalog), B13 (compliance).
 - **Sawal:** D-100 niyam 5 me R1 me saboot sirf SPF ke liye; baaki claims seller ki ghoshna. "Dermatologically tested", "clinically proven", "non-comedogenic" jaise claims ka kya ho?
 - **Kyun zaroori:**
   - Consumer Protection Act ki s.2(47)(i)(g): kisi product ke asar ya performance ka daawa theek test pe tika na ho to unfair trade practice; saboot ka bojh daawa karne wale pe.
@@ -3836,10 +3839,11 @@ Claude ka kaam: owner ka faisla nahi chahiye, sirf saboot. Nateeja saboot ke saa
   - (b) me R1 me kam claims aur kam filters.
   - (c) me unfair trade practice ka jokhim.
 - **Kanooni detail:** s.2(47)(i)(g) public source se mila ke dekha gaya (kanooni jaanch, pehla run); lawyer se nahi jaancha (R-004).
+- **Owner ka jawab (2026-11-19):** **(a)**, claims do hisson me, test wale R1 se saboot ke saath (3 niyam). Record: [DECISIONS.md](DECISIONS.md) D-224.
 
 ### Q-166. Account delete pe jaari invoice ka kya?
 
-- **Status:** `Khula`. Topic: B14 (privacy), B6 (finance), B13 (compliance). Group G19.
+- **Status:** `Tay`. Topic: B14 (privacy), B6 (finance), B13 (compliance). Group G19.
 - **Sawal:** D-151 niyam 1 me account delete pe invoice aur ledger me naam, pata aur email hata ke ek code. Tax ke kanoon ke saath ye kaise ho?
 - **Kyun zaroori:**
   - CGST Act ki s.36: tax records 72 mahine (kanooni jaanch me 2021 ki sarkari copy, baad ke badlav secondary se). Jaari invoice badalna tax record badalna hai.
@@ -3858,10 +3862,11 @@ Claude ka kaam: owner ka faisla nahi chahiye, sirf saboot. Nateeja saboot ke saa
   - (b) me do tarah ke invoice ka niyam; archive phir bhi chahiye.
   - (c) me tax record badalne ka jokhim.
 - **Kanooni detail:** s.36 aur rule 46 public source se mila ke dekhe gaye (kuch hissa secondary se, kanooni jaanch, pehla run); personal data (DPDP) wala hissa doosre run me; lawyer se nahi jaancha (R-004).
+- **Owner ka jawab (2026-11-19):** **(a)**, alag tax archive (4 niyam). Record: [DECISIONS.md](DECISIONS.md) D-225.
 
 ### Q-167. ₹50,000 ya zyada ke invoice pe customer ka naam aur pata
 
-- **Status:** `Khula`. Topic: B6 (finance), B14 (privacy), B13 (compliance). Group G19.
+- **Status:** `Tay`. Topic: B6 (finance), B14 (privacy), B13 (compliance). Group G19.
 - **Sawal:** D-143 me seller ko customer ka naam aur pata nahi milta; invoice ki copy me sirf wo jo invoice pe zaroori ho. Kis invoice pe customer ka naam aur pata chhape?
 - **Kyun zaroori:**
   - CGST rules ka rule 46: ₹50,000 ya zyada ke B2C invoice pe naam, pata aur state zaroori; kam ke invoice pe state.
@@ -3879,10 +3884,11 @@ Claude ka kaam: owner ka faisla nahi chahiye, sirf saboot. Nateeja saboot ke saa
   - (b) me personal data zyada haathon me.
   - (c) me bade orders (jaise Beauty Pro ke) ruk sakte hain.
 - **Kanooni detail:** rule 46 public source se mila ke dekha gaya (kanooni jaanch, pehla run); lawyer se nahi jaancha (R-004).
+- **Owner ka jawab (2026-11-19):** **(a)**, rakam ke hisaab se (3 niyam). Record: [DECISIONS.md](DECISIONS.md) D-226.
 
 ### Q-168. Seller ke tax wale dastavez kitne din rahein?
 
-- **Status:** `Khula`. Topic: B14 (privacy), B6 (finance), B13 (compliance). Group G19.
+- **Status:** `Tay`. Topic: B14 (privacy), B6 (finance), B13 (compliance). Group G19.
 - **Sawal:** D-193 niyam 2 me manzoor seller ke KYC dastavez account band hone ke 3 saal baad delete. Jo dastavez tax records ka hissa hain, unka kya?
 - **Kyun zaroori:**
   - CGST Act ki s.36: tax records 72 mahine. GSTIN ka certificate aur TCS ke statements tax records ka hissa ho sakte hain.
@@ -3896,6 +3902,7 @@ Claude ka kaam: owner ka faisla nahi chahiye, sirf saboot. Nateeja saboot ke saa
   - (b) me zyada personal data zyada der tak.
   - (c) me tax records jaldi hatne ka jokhim.
 - **Kanooni detail:** s.36 public source se mila ke dekha gaya (kanooni jaanch, pehla run); lawyer se nahi jaancha (R-004).
+- **Owner ka jawab (2026-11-19):** **(a)**, dastavez ke kism se: tax wale 72 mahine, baaki KYC 3 saal. Record: [DECISIONS.md](DECISIONS.md) D-227.
 
 ## Change log
 
@@ -3966,3 +3973,4 @@ Claude ka kaam: owner ka faisla nahi chahiye, sirf saboot. Nateeja saboot ke saa
 | v1.3.28 | 2026-11-19 | Q-160 tay: (a) batch 10 maana (D-219); security report ki saari batches poori; koi sawal khula nahi.                                                                 |
 | v1.3.29 | 2026-11-19 | Q-161 khula (kanooni jaanch ke pehle run ke nateeje docs me kaise aayein).                                                                                           |
 | v1.3.30 | 2026-11-19 | Q-161 tay: (a) pehle asar ke sawal, phir batches (D-220); asar ke 29 points (15 nahi); Q-162 se Q-168 khule (sabse zyada jokhim wale; G19).                          |
+| v1.3.31 | 2026-11-19 | Q-162 se Q-168 tay: saari salah (a) (D-221 se D-227).                                                                                                                |

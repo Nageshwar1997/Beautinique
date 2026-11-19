@@ -1,6 +1,6 @@
 # DECISIONS: Beautinique
 
-> **Status:** v1.10.14 (2026-11-19). Har faisla ek jagah. Sirf wahi "Tay" jo owner ne khud kaha; Claude ki salah faisla nahi. Cheezein ek-ek karke judti hain.
+> **Status:** v1.10.15 (2026-11-19). Har faisla ek jagah. Sirf wahi "Tay" jo owner ne khud kaha; Claude ki salah faisla nahi. Cheezein ek-ek karke judti hain.
 
 ## 0. Kaise likhein
 
@@ -235,6 +235,13 @@
 | D-218 | Security batch 9 (export, audit, logs aur DevOps) maana: niyam SR-075 se SR-084, 10 threats; R-023 se R-025 `Maana`, R-026 aur R-027 `Khula`; numbers misaal, settings me.                                    | Security     | 2026-11-19 |
 | D-219 | Security batch 10 maana: R2 ke niyam SR-085 se SR-087 aur R1 ka SR-088 (seller ko invoice ki copy ek-ek karke, bulk export me nahi); 5 threats. Security report ki saari batches poori.                       | Security     | 2026-11-19 |
 | D-220 | Kanooni jaanch ke nateeje: pehle tay faislon pe asar ke sawal, phir baaki nateeje COMPLIANCE me 4 area batches (CL-001 se); "jaanchi nahi" lines waisi hi, §0 me ek line.                                     | Process      | 2026-11-19 |
+| D-221 | Return ki muddatein invoice, order page aur policy page pe likhi; kharab, nakli aur galat item ya shade pe 30 din (misaal); 48 ghante sirf saboot ka niyam; D-080 badla.                                      | Business     | 2026-11-19 |
+| D-222 | "Der se pahuncha" return ki wajah: door pe mana to poora refund, baad me 7 din (misaal) bina kharche; force majeure ka staff flag; kharcha platform ka; D-117 badla.                                          | Business     | 2026-11-19 |
+| D-223 | "Pichhle 30 din ka sabse kam daam" R1 se har discount (kata MRP ya "% off") ke saath; D-120 badla.                                                                                                            | Business     | 2026-11-19 |
+| D-224 | Test ya asar wale claims (dermatologically tested, clinically proven, non-comedogenic, hypoallergenic, SPF, PA) R1 se saboot ke saath hi; D-100 badla.                                                        | Business     | 2026-11-19 |
+| D-225 | Account delete pe jaari invoice aur credit note ki asli copy alag tax archive me 72 mahine (misaal), sirf finance dekhe; baaki jagah pehchaan hatti hai; D-151 badla.                                         | Security     | 2026-11-19 |
+| D-226 | Invoice pe customer ka naam aur pata rakam se: ₹50,000 se kam pe state (aur shehar ya pincode), ₹50,000 ya zyada pe naam aur pata, seller ki copy me bhi; D-143 me jod.                                       | Business     | 2026-11-19 |
+| D-227 | Seller ke tax wale dastavez (GSTIN certificate, TCS statements, invoices) 72 mahine (misaal), baaki KYC 3 saal; D-193 badla.                                                                                  | Security     | 2026-11-19 |
 
 ## 2. Record
 
@@ -765,6 +772,7 @@
 - **Kisne, kab:** owner, 2026-11-17 (chunna Claude pe chhoda; owner ne list dekh ke pakki ki). **Nishaan:** Salah maani.
 - **Jod (owner, 2026-11-18, D-099, D-105):** R1 me do cheezein judin: ingredients ki structured list, free-from filters aur allergen ki chetavni (D-099); aur Support Desk app ka patla hissa, Support Agent role ke saath (D-105). [PROJECT_PLAN.md](PROJECT_PLAN.md) §1 me bhi.
 - **Jod (owner, 2026-11-19, D-137, D-147, D-155):** R1 me teen chhote jod: skin type, concern aur active % ke catalog fields (D-137); customer ki appeal ke liye Support Lead role (D-147); review me photo (D-155). D-133 se D-159 ke baaki R1 wale niyam R1 ke apne hisson me. [PROJECT_PLAN.md](PROJECT_PLAN.md) §1 me bhi.
+- **Jod (owner, 2026-11-19, D-222 se D-225):** kanooni jaanch se R1 me chaar jod: "der se pahuncha" return (D-222), har discount ke saath pichhle 30 din ka sabse kam daam (D-223), test wale claims ka saboot (D-224), aur invoices ka tax archive (D-225).
 
 ### D-056. Render pe sirf ek web service
 
@@ -1067,6 +1075,7 @@
   3. Listing pe seller batata hai ki product pe aisa seal aata hai ya nahi; staff listing ki jaanch me ise dekhta hai.
   4. Jis product pe seal aata hi nahi, us pe "man badla" return nahi (hygiene); galti wali wajahein phir bhi chalti hain.
   5. Khula maal jisme koi galti nahi: return nahi. Skin reaction ki shikayat ka raasta alag sawal hai.
+- **Jod (owner, 2026-11-19, D-222):** "der se pahuncha" bhi return ki wajah hai.
 - **Wajah:** Claude ki salah, owner ne maani: R1 ka "band ya kharab" isi ka saaf roop hai, aur listing ka seal wala field ek hi baar me hygiene ka sawal hal karta hai.
 - **Chhode vikalp:** sirf galti pe return, man badla bilkul nahi (customer ke liye kadi); kuch khula maal bhi wapas, jaise "shade guarantee" (khula maal nasht, nuksaan bada, galat istemaal aasaan).
 - **Kab dobara khulega:** owner khud khole.
@@ -1085,6 +1094,7 @@
 - **Chhode vikalp:** sab wajahon pe ek hi samay, 7 din (transit ki galti ka daawa der se, saboot kamzor); sab pe 15 din (seller ka paisa der tak ruka, saboot kamzor).
 - **Kab dobara khulega:** owner khud khole.
 - **Kisne, kab:** owner, 2026-11-18. **Nishaan:** Salah maani.
+- **Badla (owner, 2026-11-19, D-221):** muddatein invoice, order page aur policy page pe likhi; kharab maal, nakli ka shak aur galat item, shade ya size pe 30 din (misaal); niyam 1 ke 48 ghante sirf saboot ka niyam, baad ka daawa zyada jaanch ke saath.
 - **Asar (Claude):** samay product page aur order page pe saaf dikhe (UX). Asli number abhi misaal hain; settings se badal sakein. Seller ka payable isi pe tika (D-081). Kanooni detail jaanchi nahi (R-004): return ki kam se kam samay-seema ke niyam (agar koi ho), aur kharab maal pe customer ke haq.
 
 ### D-081. Seller ka paisa kab payable, aur payout
@@ -1337,6 +1347,7 @@
 - **Kab dobara khulega:** owner khud khole.
 - **Kisne, kab:** owner, 2026-11-18. **Nishaan:** Salah maani.
 - **Asar (Claude):** "paraben-free" jaisa claim D-099 ke ingredients se bane free-from filter se takraye (claim hai, par list me paraben), to staff ki jaanch me pakda jaaye. Saboot ke dastavez rakhne ki zimmedari Security Architect ke saath (B14). Kanooni detail jaanchi nahi (R-004): cosmetics claims aur galat vigyapan ke niyam.
+- **Badla (owner, 2026-11-19, D-224):** niyam 5 badla: test ya asar wale claims (dermatologically tested, clinically proven, non-comedogenic, hypoallergenic, SPF aur PA) R1 se hi saboot ke saath; ghoshna wale claims jaise the.
 
 ### D-101. Offers ka paisa kaun de
 
@@ -1553,6 +1564,7 @@
 - **Kab dobara khulega:** owner khud khole.
 - **Kisne, kab:** owner, 2026-11-18. **Nishaan:** Salah maani.
 - **Asar (Claude):** cut-off, trip aur chhuttiyon ki settings area ke saath (D-022). Delivery fail ke niyam D-108 me.
+- **Badla (owner, 2026-11-19, D-222):** niyam 4 me jod: vaada toote to customer ko return ya refund ka haq (door pe mana to poora refund; baad me 7 din, misaal, bina kharche); force majeure ka staff flag.
 
 ### D-118. Stock kab ruke aur payment ka samay
 
@@ -1586,6 +1598,7 @@
 - **Kab dobara khulega:** owner khud khole.
 - **Kisne, kab:** owner, 2026-11-18. **Nishaan:** Salah maani.
 - **Asar (Claude):** platform ka discount alag dikhta hai (D-061 niyam 4, D-101). Kanooni detail jaanchi nahi (R-004): discount aur "pehle ka daam" dikhane ke niyam.
+- **Badla (owner, 2026-11-19, D-223):** niyam 3 badla: "pichhle 30 din ka sabse kam daam" R1 se, har kate MRP ya "% off" ke saath, sirf "sale" label pe nahi.
 
 ### D-121. Free samples aur gifts
 
@@ -1906,6 +1919,7 @@
 - **Kab dobara khulega:** owner khud khole.
 - **Kisne, kab:** owner, 2026-11-19. **Nishaan:** Salah maani.
 - **Asar (Claude):** R1 me seller app ki reports (reviews ka saar R2 se). Invoice ki copy ke niyam ki jaanch. Kanooni detail jaanchi nahi (R-004): seller ko customer ka data dena, aur invoice pe customer ki zaroori jaankari.
+- **Jod (owner, 2026-11-19, D-226):** niyam 3 ka saaf roop: ₹50,000 ya zyada ke invoice pe customer ka naam aur pata, aur seller ki copy me bhi; kam ke invoice pe state (aur shehar ya pincode).
 
 ### D-144. Data export
 
@@ -2006,6 +2020,7 @@
 - **Kab dobara khulega:** kanooni jaanch (R-004) ke baad, ya owner khud khole.
 - **Kisne, kab:** owner, 2026-11-19. **Nishaan:** Salah maani.
 - **Asar (Claude):** delete ke saath pehchaan hatane ka kaam R1 me; records kitne din rakhein, Security Architect ke saath (B14). Kanooni detail jaanchi nahi (R-004): data ke haq, jawab ka samay, aur records rakhne ka samay.
+- **Badla (owner, 2026-11-19, D-225):** niyam 1 badla: jaari invoice aur credit note nahi badalte; unki asli copy alag tax archive me 72 mahine (misaal), sirf finance dekhe; app ki baaki jagah se pehchaan hatti hai.
 
 ### D-152. Zero result aur synonyms
 
@@ -2462,6 +2477,7 @@
 - **Kab dobara khulega:** kanooni jaanch (R-004) ke baad, ya owner khud khole.
 - **Kisne, kab:** owner, 2026-11-19. **Nishaan:** Salah maani.
 - **Asar (Claude):** seller ke liye R1 se, Beauty Pro ke liye R2 se (D-055). Kanooni detail jaanchi nahi (R-004): KYC aur tax ke records kitne din rakhne zaroori hain.
+- **Badla (owner, 2026-11-19, D-227):** niyam 2 badla: tax records wale dastavez (GSTIN certificate, TCS ke statements, invoices) 72 mahine (misaal); baaki KYC 3 saal.
 
 ### D-194. Audit log aur records ka samay
 
@@ -2728,6 +2744,89 @@
 - **Kisne, kab:** owner, 2026-11-19. **Nishaan:** Salah maani.
 - **Asar (Claude):** sawal me "15 asar ke points" likha tha; report me asal me 29 hain (Claude ki ginti ki galti; tareeka wahi). Sabse zyada jokhim wale pehle aate hain. Kanooni detail jaanchi nahi (R-004): koi nateeja lawyer se nahi jaancha.
 
+### D-221. Return ki muddatein aur kanoon
+
+- **Faisla:** return ki muddatein likhi hoti hain, aur kharab maal pe lambi. Niyam:
+  1. Har muddat invoice, order page aur return policy page pe likhi ho.
+  2. Kharab maal, nakli ka shak, aur galat item, shade ya size: 30 din (misaal) tak return.
+  3. Dikhne wali galti (toota, leak, pighla, item kam): 48 ghante saboot ka niyam. 48 ghante ke andar daawa photo se seedha; baad ka daawa bhi liya jaata hai, par staff ki zyada jaanch ke saath, seedha mana nahi.
+  4. Man badla: 7 din (misaal), jaisa D-080 me.
+  5. Muddat ke baad bhi support ka raasta: jaanch, seedha mana nahi; batch ki dikkat pe recall (D-129).
+- **Wajah:** Claude ki salah, owner ne maani: kanoon ka 30 din ka default aur E-commerce rules ka rule 6(3) dono sambhal jaate hain, aur 48 ghante ka niyam saboot ke liye bana rehta hai.
+- **Chhode vikalp:** sirf muddatein likh do, numbers waise hi (rule 6(3) aur kam din ka jokhim); sab wajahon pe 30 din (man badle pe bhi; hygiene aur seller ke paise pe bojh).
+- **Kab dobara khulega:** owner khud khole.
+- **Kisne, kab:** owner, 2026-11-19. **Nishaan:** Salah maani.
+- **Asar (Claude):** D-080 niyam 1, 2 aur 4 badle. Seller ke payout (D-081) pe 30 din ka asar finance ki charcha me. Kanooni detail jaanchi nahi (R-004): rule 6(3) aur Consumer Protection Act s.2(47)(viii) public source se mile, lawyer se nahi.
+
+### D-222. Der se delivery pe return
+
+- **Faisla:** "der se pahuncha" return ki ek wajah hai. Niyam:
+  1. "Der" = dikhaye vaade ki tareekh (D-117) ke baad.
+  2. Door pe lene se mana: poora refund, delivery fee samet.
+  3. Lene ke baad: 7 din (misaal) me return, customer pe return ka koi kharcha nahi; band maal ki shart (D-079) wahi.
+  4. Force majeure (baadh, band, hadtaal): staff flag lagaye, wajah ke saath; customer ko wajah dikhe, tab ye haq nahi.
+  5. Der ka kharcha (wapsi, fee) platform ka, seller ka nahi.
+- **Wajah:** Claude ki salah, owner ne maani: kanoon ka haq poora milta hai, aur kharcha usi pe jiski der hai (delivery hamari, D-014).
+- **Chhode vikalp:** sirf door pe mana (lene ke baad raasta nahi); jaisa hai, sirf khabar (rule 6(3) se takrav ka jokhim).
+- **Kab dobara khulega:** owner khud khole.
+- **Kisne, kab:** owner, 2026-11-19. **Nishaan:** Salah maani.
+- **Asar (Claude):** D-117 niyam 4 badla, D-079 ki wajahon me jod. R1 me (D-055 me jod). Kanooni detail jaanchi nahi (R-004): rule 6(3) public source se mila, lawyer se nahi.
+
+### D-223. Pichhle 30 din ka sabse kam daam
+
+- **Faisla:** jahan bhi kata MRP ya "% off" dikhe, saath me "pichhle 30 din ka sabse kam daam", R1 se. Itihaas 30 din se kam ho (naya product) to jitne din ka hai, utne din ka likh ke.
+- **Wajah:** Claude ki salah, owner ne maani: data D-061 me hai, ek hi display ka niyam banta hai, aur 2027 ke niyam se pehle badlav ka kaam nahi bachta.
+- **Chhode vikalp:** jaisa hai, 2027 se pehle badlav (design aur tests dobara); "% off" hatao (customer ko bachat nahi dikhti).
+- **Kab dobara khulega:** owner khud khole.
+- **Kisne, kab:** owner, 2026-11-19. **Nishaan:** Salah maani.
+- **Asar (Claude):** D-120 niyam 3 badla: ab R1 se aur har discount pe, sirf "sale" label pe nahi. R1 me (D-055 me jod). Kanooni detail jaanchi nahi (R-004): E-commerce rules ka 2026 ka badlav sirf secondary source se mila; kata MRP "price reduction" ka daawa hai ya nahi, pakka nahi.
+
+### D-224. Test wale claims ka saboot
+
+- **Faisla:** claims do hisson me. Niyam:
+  1. Ghoshna wale (jaise vegan, fragrance-free): seller ki ghoshna, jaisa D-100 me.
+  2. Test wale (dermatologically tested, clinically proven, non-comedogenic, hypoallergenic, SPF aur PA): R1 se hi saboot (test report, dummy, D-026) ke saath; bina saboot wo claim chuna nahi ja sakta.
+  3. Saboot ki jaanch SPF wale raaste se (D-100 niyam 3).
+- **Wajah:** Claude ki salah, owner ne maani: SPF ka saboot wala raasta R1 me ban hi raha hai, aur galat daawa filters tak nahi pahunchta.
+- **Chhode vikalp:** test wale claims R1 me list se bahar (kam claims aur filters); jaisa hai (unfair trade practice ka jokhim).
+- **Kab dobara khulega:** owner khud khole.
+- **Kisne, kab:** owner, 2026-11-19. **Nishaan:** Salah maani.
+- **Asar (Claude):** D-100 niyam 5 badla. R1 me (D-055 me jod). Kanooni detail jaanchi nahi (R-004): Consumer Protection Act s.2(47)(i)(g) public source se mila, lawyer se nahi.
+
+### D-225. Account delete aur tax archive
+
+- **Faisla:** account delete pe jaari invoice nahi badalta. Niyam:
+  1. Jaari invoice aur credit note ki asli copy (naam aur pata samet) ek alag, kam pahunch wale tax archive me, 72 mahine (misaal) tak, aur koi jhagda chale to uske khatam hone tak, bina badlav.
+  2. Archive sirf finance ka role dekhe, har dekhna audit me.
+  3. App ki baaki jagah (profile, orders ki list, reports, ledger ke views) se pehchaan hat jaati hai.
+  4. Samay poora hone pe archive se bhi delete.
+- **Wajah:** Claude ki salah, owner ne maani: tax record nahi badalta, aur personal data sirf ek band jagah pe, tay samay tak.
+- **Chhode vikalp:** chhote invoice pe naam hi na chhaapo (do tarah ka niyam, archive phir bhi chahiye); invoice me bhi naam aur pata hata do (tax record badalne ka jokhim).
+- **Kab dobara khulega:** personal data ki kanooni jaanch (doosra run) ke baad, ya owner khud khole.
+- **Kisne, kab:** owner, 2026-11-19. **Nishaan:** Salah maani.
+- **Asar (Claude):** D-151 niyam 1 badla. R1 me (D-055 me jod). Archive ki pahunch aur audit security docs me. Kanooni detail jaanchi nahi (R-004): CGST Act s.36 aur rule 46 public source se mile (kuch hissa secondary); personal data wala hissa doosre run me.
+
+### D-226. Invoice pe customer ka naam aur pata
+
+- **Faisla:** invoice pe customer ki jaankari rakam ke hisaab se. Niyam:
+  1. ₹50,000 se kam: invoice pe customer ka state (aur shehar ya pincode); naam aur pata sirf customer chahe to.
+  2. ₹50,000 ya zyada: naam aur pata invoice pe, aur seller ki copy me bhi.
+  3. Seller ki copy ka niyam (SR-088: ek-ek karke download, audit) waisa hi.
+- **Wajah:** Claude ki salah, owner ne maani: kanoon jitna maangta hai utna hi, aur D-143 ka "kam personal data" bana rehta hai.
+- **Chhode vikalp:** har invoice pe naam aur pata (personal data zyada haathon me); R1 me ₹50,000 se kam ki cart seema (bade orders ruk sakte).
+- **Kab dobara khulega:** owner khud khole.
+- **Kisne, kab:** owner, 2026-11-19. **Nishaan:** Salah maani.
+- **Asar (Claude):** D-143 niyam 3 ka saaf roop. Kanooni detail jaanchi nahi (R-004): CGST rules ka rule 46 public source se mila, lawyer se nahi.
+
+### D-227. Seller ke tax wale dastavez
+
+- **Faisla:** seller ke dastavez ka samay unke kism se: tax records ka hissa (GSTIN certificate, TCS ke statements, invoices) 72 mahine (misaal); baaki KYC (PAN ki copy, brand authorisation) 3 saal, jaisa D-193 me. Pakka number personal data ki kanooni jaanch (doosra run) ke baad.
+- **Wajah:** Claude ki salah, owner ne maani: tax ke dastavez kanoon jitna rehte hain, baaki jaldi hatte hain.
+- **Chhode vikalp:** sab 72 mahine (zyada personal data zyada der tak); sab 3 saal (tax records jaldi hatne ka jokhim).
+- **Kab dobara khulega:** personal data ki kanooni jaanch (doosra run) ke baad, ya owner khud khole.
+- **Kisne, kab:** owner, 2026-11-19. **Nishaan:** Salah maani.
+- **Asar (Claude):** D-193 niyam 2 badla. Kanooni detail jaanchi nahi (R-004): CGST Act s.36 public source se mila, lawyer se nahi.
+
 ## Change log
 
 | Version  | Date       | Badlav                                                                                                                                                                                                                                                                                  |
@@ -2794,3 +2893,4 @@
 | v1.10.12 | 2026-11-19 | D-218 aaya (security batch 9: export, audit, logs aur DevOps maana; Q-159).                                                                                                                                                                                                             |
 | v1.10.13 | 2026-11-19 | D-219 aaya (security batch 10: R2 ke hisse aur seller ko invoice ki copy maana; Q-160); security report ki saari batches poori.                                                                                                                                                         |
 | v1.10.14 | 2026-11-19 | D-220 aaya (kanooni jaanch ke nateeje: pehle asar ke sawal, phir COMPLIANCE ki 4 batches; Q-161); §0 me "jaanchi nahi" ki line.                                                                                                                                                         |
+| v1.10.15 | 2026-11-19 | D-221 se D-227 aaye (kanooni asar: return ki muddat, der se delivery, 30 din ka daam, test claims, tax archive, invoice pe naam, seller ke tax dastavez; Q-162 se Q-168); D-079, D-080, D-100, D-117, D-120, D-143, D-151, D-193 me badla ya jod; D-055 me R1 jod.                      |
