@@ -1,6 +1,6 @@
 # OPEN QUESTIONS: Beautinique
 
-> **Status:** v1.3.31 (2026-11-19). Khule sawal, aage ke topics aur jaanchna baaki. Cheezein ek-ek karke judengi.
+> **Status:** v1.3.32 (2026-11-19). Khule sawal, aage ke topics aur jaanchna baaki. Cheezein ek-ek karke judengi.
 
 ## Is file me kya aayega
 
@@ -3904,6 +3904,272 @@ Claude ka kaam: owner ka faisla nahi chahiye, sirf saboot. Nateeja saboot ke saa
 - **Kanooni detail:** s.36 public source se mila ke dekha gaya (kanooni jaanch, pehla run); lawyer se nahi jaancha (R-004).
 - **Owner ka jawab (2026-11-19):** **(a)**, dastavez ke kism se: tax wale 72 mahine, baaki KYC 3 saal. Record: [DECISIONS.md](DECISIONS.md) D-227.
 
+### Q-169. Kit aur combo pe GST kis rate se?
+
+- **Status:** `Khula`. Topic: B4 (bundles), B6 (finance), B13 (compliance).
+- **Sawal:** D-088 niyam 3 me combo ka daam cheezon me baant ke har cheez apne rate pe. Kanooni jaanch ke hisaab se ek daam wala combo "mixed supply" ho sakta hai. Kit aur combo pe GST kaise lage?
+- **Kyun zaroori:**
+  - CGST Act ki s.8(b): alag cheezein ek daam pe (mixed supply) bikein to poore pe sabse zyada rate wali cheez ka rate.
+  - Misaal: 5% wala soap aur 18% wala face wash ek daam pe = poora 18%. Brand ka kit (R1, ek barcode, ek MRP) bhi isi me aa sakta hai.
+  - Galat rate se invoice aur TCS ka hisaab dono galat.
+- **Vikalp:**
+  - **(a) Kit pe sabse zyada rate, combo CA ki salah ke baad:**
+    1. Brand ka kit (R1): listing pe kit ki cheezon ke rates me se sabse zyada wala default; seller badle to wajah ke saath, staff jaanche.
+    2. Combo (R2): shuru hone se pehle CA se tay ho ki ek daam = mixed supply (sabse zyada rate), ya har cheez ka daam alag dikha ke alag supplies. Tab tak D-088 niyam 3 ka "daam baantna" sirf design me, laagu nahi.
+  - **(b) Combo me har cheez ka daam alag:** combo = alag supplies, har line apne rate pe, customer ko har cheez ka daam dikhe; ek daam wala combo nahi.
+  - **(c) Jaisa hai.**
+- **Salah:** **(a)**. R1 ka kit kanoon ke saath seedha chalta hai, aur combo R2 me hai, to CA ki salah ke liye samay hai.
+- **Trade-off:**
+  - (a) me kit ka poora tax sabse zyada rate pe.
+  - (b) me "ek daam" wale combo ka aakarshan nahi.
+  - (c) me galat tax ka jokhim.
+- **Kanooni detail:** s.8(b) public source se mila ke dekha gaya (kanooni jaanch, pehla run); CA aur lawyer se nahi jaancha (R-004).
+
+### Q-170. Kharid ki shart wala free gift
+
+- **Status:** `Khula`. Topic: B4 (promotions), B6 (finance), B13 (compliance).
+- **Sawal:** D-121 (R2) me brand ke samples aur gifts invoice pe ₹0 ki line ke saath. Kanooni jaanch ke hisaab se kharid ki shart wala gift asal me "free" nahi maana ja sakta. Kya badle?
+- **Kyun zaroori:**
+  - CBIC ke ek circular (92/11/2019) ke hisaab se bina shart ka free sample supply nahi, par "X kharido to Y free" me Y ki keemat X ke daam me hi shaamil maani ja sakti hai. Tab invoice pe ₹0 ki taxable line sahi nahi.
+  - Ye sirf secondary source se mila ("aadha jaancha").
+- **Vikalp:**
+  - **(a) Do tarah:**
+    1. Bina shart ka sample (brand ki marzi se, kisi kharid ki shart ke bina): tax invoice ke bahar, packing slip pe "free sample, not for sale".
+    2. Shart wala gift ("X kharido to Y free"): R2 me tab tak nahi jab tak CA se invoice ka tareeka tay na ho.
+  - **(b) Shart wala gift bhi:** invoice me gift ki line, kharid ke daam ka hissa gift ko baant ke (bundle jaisa), bina CA ki salah ke.
+  - **(c) Jaisa hai:** ₹0 ki line.
+- **Salah:** **(a)**. Sample ka aam tareeka chalta rehta hai, aur shart wala gift tabhi jab tax ka tareeka pakka ho.
+- **Trade-off:**
+  - (a) me "gift with purchase" offer R2 me bhi der se.
+  - (b) bina CA ke galat ho sakta hai.
+  - (c) me galat invoice ka jokhim.
+- **Kanooni detail:** circular sirf secondary source se ("aadha jaancha"); CA aur lawyer se nahi jaancha (R-004).
+
+### Q-171. Platform ka barcode label pack pe kahan lage?
+
+- **Status:** `Khula`. Topic: B1 (warehouse), B3 (catalog), B13 (compliance).
+- **Sawal:** D-097 niyam 1 me barcode na ho to receiving pe har unit pe platform ka barcode label. Label pack pe kahan lage, ye tay nahi.
+- **Kyun zaroori:**
+  - Cosmetics Rules ka rule 35: manufacturer ke label ki likhawat ko badalna, mitana ya dhakna mana.
+  - Label batch, expiry, MRP ya ingredients pe lage to kanoon toot-ta hai, aur customer wahi jaankari padh nahi pata.
+- **Vikalp:**
+  - **(a) Sirf khaali jagah ya bahar ka polybag:**
+    1. Label pack ki khaali jagah pe, ya pack ke bahar ke polybag ya sleeve pe; khaali jagah na ho to polybag.
+    2. Kabhi batch, expiry, MRP, ingredients ya kisi bhi likhawat ke upar nahi.
+    3. Receiving pe label lagne ke baad photo; Warehouse app me jaanch ka kadam.
+  - **(b) Hamesha polybag:** har bina barcode unit ek polybag me, label polybag pe.
+  - **(c) Sirf bin pe label:** unit pe kuch nahi; scan bin se (D-097 niyam 2: ek bin, ek batch).
+- **Salah:** **(a)**. Pack ki koi likhawat nahi dhakti, aur photo se saboot rehta hai.
+- **Trade-off:**
+  - (a) me receiving pe ek photo ka kadam.
+  - (b) me har unit pe polybag ka kharcha aur plastic (EPR, D-045).
+  - (c) me pack aur dispatch pe unit ka scan nahi, galat item jaane ka jokhim.
+- **Kanooni detail:** rule 35 public source se mila ke dekha gaya (kanooni jaanch, pehla run); lawyer se nahi jaancha (R-004).
+
+### Q-172. Tax ghatne pe naya (kam) MRP
+
+- **Status:** `Khula`. Topic: B4 (pricing), B3 (batch), B13 (compliance).
+- **Sawal:** D-061 niyam 1 aur D-064 sirf pack pe chhapa MRP maante hain. Tax ghatne pe manufacturer purane packs ka naya, kam MRP bata de, to site kaunsa MRP maane?
+- **Kyun zaroori:**
+  - Legal Metrology (Packaged Commodities) Rules ka rule 18(3): tax ghatne pe manufacturer ka bataya naya kam MRP purane packs pe bhi laagu.
+  - Tab daam ki seema (D-061 niyam 1), "% off" (D-120) aur pichhle 30 din ka daam (D-223) sab purane MRP ke galat aadhaar pe chalenge.
+- **Vikalp:**
+  - **(a) Batch pe "revised MRP":**
+    1. Batch pe optional "revised MRP (tax badlav)", saboot ke saath (manufacturer ki suchna ya naya sticker); staff jaanche.
+    2. Revised MRP ho to site ka MRP, daam ki seema, "% off" aur invoice usi se.
+    3. Seller ka daam revised MRP se upar ho to us batch ki bikri ruke aur seller ko alert (D-064 niyam 2 jaisa).
+  - **(b) Naya batch:** revised MRP wale packs naya batch maan ke dobara receiving (sticker ke saath).
+  - **(c) Jaisa hai.**
+- **Salah:** **(a)**. Ek field se kanoon ka niyam sambhal jaata hai, aur daam ke baaki niyam usi pe chalte hain.
+- **Trade-off:**
+  - (a) me ek field aur staff ki jaanch.
+  - (b) me dobara receiving, aur stock ki ginti me ulajh.
+  - (c) me naye MRP se zyada daam ka jokhim.
+- **Kanooni detail:** rule 18(3) public source se mila ke dekha gaya (kanooni jaanch, pehla run); 2025 ki MRP sticker wali chhoot sirf secondary source se; lawyer se nahi jaancha (R-004).
+
+### Q-173. "Use before" aur "expiry" ka din
+
+- **Status:** `Khula`. Topic: B3 (batch aur expiry), B13 (compliance).
+- **Sawal:** D-062, D-067 aur D-082 expiry ko ek hi tarah ki tareekh (mahina aur saal) maante hain. Kanooni jaanch ke hisaab se "use before" aur "expiry" ka din alag ho sakta hai. Kya karein?
+- **Kyun zaroori:**
+  - Cosmetics Rules ke 2025 ke badlav ke hisaab se "use before" = us mahine ka pehla din, aur "expiry" = us mahine ka aakhri din. Ye sirf secondary source se mila ("aadha jaancha").
+  - Bikri band (D-062 niyam 2) aur receiving ki seema (D-082) ek mahine tak galat gin sakte hain.
+- **Vikalp:**
+  - **(a) Batch pe expiry ka roop:**
+    1. Receiving pe batch pe roop: "Use before" ya "Expiry", pack jaisa.
+    2. System ka "aakhri din" usi se: use before = mahine ka pehla din; expiry = mahine ka aakhri din.
+    3. Seemaayein (D-062, D-082) isi aakhri din se ginein.
+    4. Customer ko pack jaisa text dikhe (D-067).
+  - **(b) Hamesha mahine ka pehla din:** roop ka field nahi; sab pe sabse surakshit din.
+  - **(c) Jaisa hai.**
+- **Salah:** **(a)**. Har pack ka sahi din, aur customer ko wahi jo pack pe hai.
+- **Trade-off:**
+  - (a) me receiving pe ek field.
+  - (b) me "expiry" wale packs ki bikri ek mahina pehle band: brand ka thoda nuksaan.
+  - (c) me ek mahine ka galat hisaab ho sakta hai.
+- **Kanooni detail:** 2025 ka badlav sirf secondary source se ("aadha jaancha"); lawyer se nahi jaancha (R-004).
+
+### Q-174. Platform ke naam jaisa apna brand aur customer ka data
+
+- **Status:** `Khula`. Topic: B9 (sujhaav), B14 (privacy), B13 (compliance).
+- **Sawal:** D-166 me sujhaav consent ke saath, aur kisi seller ko boost nahi. Apna brand (D-031) platform ke naam jaisa ho, to customer ke data se uske sujhaav aur promotion ka kya?
+- **Kyun zaroori:**
+  - E-commerce rules ke 2026 ke badlav (1 Jan 2027 se) ka rule 5(6): platform ke naam se milte naam wale seller ko bechne ya promote karne me customer ka data sirf saaf (express) consent se.
+  - Ye sirf secondary source se mila ("aadha jaancha").
+- **Vikalp:**
+  - **(a) Brand ka naam platform se alag:** apne brand aur uski dummy company ka naam "Beautinique" se na mile; tab ye niyam laagu hi nahi, aur D-166 jaisa hai waisa.
+  - **(b) Alag opt-in:** naam platform jaisa rahe, par sujhaav aur promotion me apna brand sirf un customers ko jo iske liye alag consent dein.
+  - **(c) Jaisa hai.**
+- **Salah:** **(a)**. Apna brand pehle se alag company hai (D-031); alag naam se ek alag consent ka kaam nahi bachta.
+- **Trade-off:**
+  - (a) me platform ke naam ka branding fayda apne brand ko nahi.
+  - (b) me ek aur consent aur uska hisaab har sujhaav me.
+  - (c) me 2027 se takrav ka jokhim.
+- **Kanooni detail:** sirf secondary source se ("aadha jaancha"); lawyer se nahi jaancha (R-004).
+
+### Q-175. Chhote packs pe batch number na ho to?
+
+- **Status:** `Khula`. Topic: B3 (batch), B7 (returns), B13 (compliance). Group G20.
+- **Sawal:** D-064, D-106 aur D-113 maante hain ki har pack pe batch number hai (batch ka MRP, daawe ki photo, pickup pe milaan). Jin packs pe kanoon batch nahi maangta, unka kya?
+- **Kyun zaroori:**
+  - Cosmetics Rules ka rule 34(2)(a): 10 g ya 25 ml tak ke packs pe batch number zaroori nahi; soap pe batch ki jagah banne ka mahina.
+  - Aise packs pe photo se batch ka milaan ho hi nahi sakta, to daawe aur pickup atak jaate.
+- **Vikalp:**
+  - **(a) Platform ka batch id:**
+    1. Listing pe "pack pe batch nahi" sirf in do maamlon me (chhota pack, ya soap); staff jaanche.
+    2. Receiving pe platform ka batch id: receiving lot + banne ka mahina ya expiry.
+    3. Daawe (D-106) aur pickup (D-113) me batch ki photo ki jagah pack aur label ki photo.
+  - **(b) Batch zaroori:** jin packs pe batch na ho, wo list hi na hon.
+  - **(c) Jaisa hai.**
+- **Salah:** **(a)**. Minis aur soap jaise products bhi aa paate hain, aur batch ka record platform ke id se bana rehta hai.
+- **Trade-off:**
+  - (a) me receiving pe ek id ka kadam, aur pickup pe milaan thoda kamzor.
+  - (b) me minis, samples aur soap bahar.
+  - (c) me aise packs pe daawe aur pickup atak jaate.
+- **Kanooni detail:** rule 34(2)(a) public source se mila ke dekha gaya (kanooni jaanch, pehla run); lawyer se nahi jaancha (R-004).
+
+### Q-176. Chhote packs ke label pe ingredients na hon to?
+
+- **Status:** `Khula`. Topic: B3 (catalog), B13 (compliance). Group G20.
+- **Sawal:** D-099 niyam 1 me seller ingredients ka text aur pack ke label ki photo deta hai, aur staff photo se milata hai. Jin chhote packs ke label pe ingredients nahi hote, unka kya?
+- **Kyun zaroori:**
+  - Cosmetics Rules ka rule 34(7): 60 ml ya 30 g tak ke packs ke label pe ingredients zaroori nahi (bahar ke carton ya leaflet pe ho sakte).
+  - Tab label ki photo se milaan nahi hota, aur allergen ki chetavni (D-099, D-159) galat list pe chal sakti hai.
+- **Vikalp:**
+  - **(a) Carton ya brand ki specification:** label pe na ho to bahar ke carton ki photo, ya brand ki product specification (dummy, D-026); staff usi se milaye. Product page pe poori list waise hi.
+  - **(b) Sirf seller ki ghoshna:** chhote packs pe photo ka milaan nahi.
+  - **(c) Jaisa hai:** label ki photo zaroori; aise packs list nahi ho paate.
+- **Salah:** **(a)**. Ingredients ka saboot bana rehta hai, aur chhote packs bhi aa paate hain.
+- **Trade-off:**
+  - (a) me seller se ek aur dastavez.
+  - (b) me galat ingredients aur galat allergen chetavni ka jokhim.
+  - (c) me chhote packs bahar.
+- **Kanooni detail:** rule 34(7) public source se mila ke dekha gaya (kanooni jaanch, pehla run); lawyer se nahi jaancha (R-004).
+
+### Q-177. Bahut chhote packs pe MRP na ho to?
+
+- **Status:** `Khula`. Topic: B4 (pricing), B3 (catalog), B13 (compliance). Group G20.
+- **Sawal:** D-061 niyam 1 maanta hai ki har pack pe MRP chhapa hai (daam MRP se zyada nahi). 10 g ya 10 ml tak ke packs pe Legal Metrology ka MRP zaroori nahi. Inka kya?
+- **Kyun zaroori:**
+  - Legal Metrology (Packaged Commodities) Rules me 10 g ya 10 ml tak ke packs ko zyada-tar declarations (MRP samet) ki chhoot hai.
+  - Bina MRP ke daam ki seema (D-061), "% off" (D-120) aur pichhle 30 din ka daam (D-223) ka aadhaar nahi rehta.
+- **Vikalp:**
+  - **(a) MRP chhapa ho tabhi list:** aise chhote packs tabhi list hon jab pack pe MRP chhapa ho; baaki niyam jaise hain.
+  - **(b) "Reference price" ka field:** seller ek reference daam de, staff jaanche; aise packs pe kata daam aur "% off" nahi.
+  - **(c) R1 me aise sab packs bahar:** 10 g ya 10 ml tak ke packs R1 me list nahi; R2 me dobara dekhein.
+- **Salah:** **(a)**. Ek saral niyam, aur MRP wale minis aa paate hain.
+- **Trade-off:**
+  - (a) me bina MRP wale minis bahar.
+  - (b) me naya field aur jaanch, aur MRP ke bina daam ki seema kamzor.
+  - (c) me koi chhota pack nahi, MRP wala bhi nahi.
+- **Kanooni detail:** chhoot public source se mila ke dekhi gayi (kanooni jaanch, pehla run); lawyer se nahi jaancha (R-004).
+
+### Q-178. Grievance Officer aur nodal person ka naam
+
+- **Status:** `Khula`. Topic: B11 (support), B13 (compliance). Group G21.
+- **Sawal:** D-145 niyam 4 me Grievance Officer jaise officers ke liye sirf role ka naam aur `example` domain ka email; kisi insaan ka banawati naam nahi. Kanoon naam maangta hai. Kya karein?
+- **Kyun zaroori:**
+  - E-commerce rules ka rule 4(4): Grievance Officer ka naam, contact aur designation dikhana zaroori.
+  - Rule 4(1): ek nodal person bhi chahiye; D-134 ki table me iska row nahi.
+- **Vikalp:**
+  - **(a) Naam ka field, demo me saaf dummy:**
+    1. Grievance Officer aur nodal person ke naam, designation aur contact ke fields data me (D-145 niyam 7 ki dummy list me).
+    2. Demo me naam "Dummy Grievance Officer" aur "Dummy Nodal Officer", "DUMMY" badge ke saath; insaan jaisa naam nahi.
+    3. Asli business pe asli naam, sirf data badal ke, code nahi.
+  - **(b) Jaisa hai:** sirf role ka naam, aur note ki asli business pe naam aayega.
+  - **(c) Insaan jaisa banawati naam,** "DUMMY" badge ke saath.
+- **Salah:** **(a)**. Kanoon ka field pehle din se, aur kisi asli insaan se naam milne ka dhokha nahi.
+- **Trade-off:**
+  - (a) me do officers ke fields.
+  - (b) me page pe kanoon ka field hi nahi.
+  - (c) me naam kisi asli insaan se mil sakta hai.
+- **Kanooni detail:** rule 4(1) aur 4(4) public source se mila ke dekhe gaye (kanooni jaanch, pehla run); lawyer se nahi jaancha (R-004).
+
+### Q-179. Seller ki jaankari, seller pe shikayat, aur shikayat ki copy
+
+- **Status:** `Khula`. Topic: B11 (support), B2 (sellers), B13 (compliance). Group G21.
+- **Sawal:** product page pe seller ki kitni jaankari dikhe, seller ke products ki shikayat kaise chale, aur shikayat ki receipt me kya ho?
+- **Kyun zaroori:**
+  - E-commerce rules ke rule 5(3)(a), 6(4) aur 6(5): marketplace pe seller ka naam, pata, customer care aur seller ke grievance officer ki jaankari, aur seller ka shikayat pe jawab. D-134 ki table me iska row nahi.
+  - 2026 ke badlav (1 Jan 2027 se, sirf secondary source se): grievance ki receipt ke saath shikayat ki copy. D-163 niyam 3 me receipt hai, copy nahi.
+- **Vikalp:**
+  - **(a) Seller ka block aur ek hi seedhi:**
+    1. Product page pe "Sold by" ke saath seller ka business naam, pata, customer care contact aur seller ka grievance officer (dummy, "DUMMY" badge). Ye L2: iske bina seller live nahi (D-134 me naya row).
+    2. Seller ke products ki shikayat bhi platform ki usi seedhi (D-163) me; seller ko ticket dikhe aur wo jawab de, timers wahi.
+    3. Receipt (email aur in-app) me shikayat ka poora text.
+  - **(b) Kam:** sirf seller ka naam aur pata; shikayat sirf platform sambhale, seller ka grievance officer nahi.
+  - **(c) Jaisa hai.**
+- **Salah:** **(a)**. Customer ko pata rehta hai ki maal kisne becha, aur har shikayat ek hi jagah, ek hi timers se.
+- **Trade-off:**
+  - (a) me seller onboarding me kuch fields aur, aur seller app me ticket ka raasta.
+  - (b) me kanoon ka seller wala hissa adhoora.
+  - (c) me takrav ka jokhim.
+- **Kanooni detail:** rules 5(3)(a), 6(4), 6(5) public source se mila ke dekhe gaye; receipt me copy wala niyam sirf secondary source se ("aadha jaancha"); lawyer se nahi jaancha (R-004).
+
+### Q-180. Tax ke chhote sudhaar maanein?
+
+- **Status:** `Khula`. Topic: B6 (finance), B13 (compliance).
+- **Sawal:** kanooni jaanch me tax ke kuch chhote sudhaar nikle. Inhe maanein?
+- **Prastaavit sudhaar:**
+  1. **HSN aur rate (D-086):** table ki row = HSN + description ki shart + rate + tareekh, kyunki ek HSN me alag products ke alag rate ho sakte hain (misaal: 3304 me talcum 5% par make-up 18%; 3401 me soap bar 5% par face wash 18%). Seller row chune, staff jaanche. (Jaancha.)
+  2. **Invoice kab bane (D-041):** invoice pack ya dispatch ke scan pe; pack se pehle cancel ho to invoice nahi; baad me cancel ya return pe credit note. CGST Act ki s.31: invoice maal nikalne se pehle ya us waqt. (Jaancha; credit note wala hissa aadha jaancha.)
+  3. **Delivery fee ka GST (D-107):** fee ka SAC aur rate CA se tay; rate table me tareekh ke saath. 1 Nov 2026 se delivery seva pe naya niyam (5% bina ITC, e-commerce operator pe zimmedari) sirf secondary source se mila. (Aadha jaancha.)
+  4. **TDS ka pal (D-081):** income-tax TDS seller ke ledger me pehle credit pe (ya payment pe, jo pehle ho), "payable" ke din nahi. Return pe ulat ka niyam CA se. (Aadha jaancha.)
+  5. **Doosre state ka GSTIN (D-092, R2):** invoice delivery wale state ke hisaab se tax lagata hai; customer ka GSTIN doosre state ka ho to us invoice ka tax credit wo shayad na le paaye. Checkout pe state code ka milaan aur saaf chetavni. (Aadha jaancha.)
+  6. **D-134 ki table me do rows:** e-invoice ka field (L1; seema seller ke turnover pe, sirf secondary source se) aur har warehouse state me TCS registration ka field (L1). (Aadha jaancha aur jaancha.)
+- **Vikalp:**
+  - **(a)** List jaisi hai waisi maanein.
+  - **(b)** Maanein, par owner jo sudhaar badle, wo badal ke.
+  - **(c)** Abhi roko.
+- **Salah:** **(a)**.
+- **Trade-off:**
+  - (a) me finance aur catalog me chhote kaam.
+  - (b) me har badlav ki ek line.
+  - (c) me galat tax ke jokhim bache rehte hain.
+- **Kanooni detail:** har sudhaar ke saath uska status likha hai; CA aur lawyer se nahi jaancha (R-004).
+
+### Q-181. Listing, pages aur compliance ke chhote sudhaar maanein?
+
+- **Status:** `Khula`. Topic: B3 (catalog), B9 (search), B11 (khabrein), B13 (compliance).
+- **Sawal:** kanooni jaanch me listing, legal pages aur compliance ki table ke kuch chhote sudhaar nikle. Inhe maanein?
+- **Prastaavit sudhaar:**
+  1. **Country of origin (D-138):** filter ke saath sort me bhi country of origin, aur search me country ka naam. Legal Metrology rules ka rule 6(10A) (1 Jul 2026 se): country of origin ka filter searchable aur sortable ho. (Jaancha.)
+  2. **Blocklist (D-132):** do hisse: drug ingredients (D-128) aur "cosmetic me mana" ingredients (Cosmetics Rules ka rule 39; IS 4707 Part 2 ki list); har entry pe source. (Niyam jaancha; IS ki list khud nahi khuli.)
+  3. **Seller ka undertaking (D-098):** seller agreement me content sahi hone ka undertaking (E-commerce rules ka rule 5(2)), aur har listing submit pe checkbox, pehle se tick nahi. (Jaancha.)
+  4. **Legal pages (D-150):** "Payments" (payment ke tareeke, fees, charge-back) aur "Kram kaise" (search aur sujhaav ke mukhya gun, saral shabdon me) pages list me (rule 5(3)). (Jaancha.)
+  5. **Recall ke emails (D-142):** recall ki email line OTP ke baad sabse pehle, paise ke emails se bhi pehle; chhat paar ho to in-app aur push usi din. Kanoon ki koi seema nahi mili; sehat ka maamla hai. (Claude ki salah.)
+  6. **Dark patterns (D-134):** 2027 se saal ka self-audit aur certificate (sirf secondary source se): D-134 me iska record (audit ki checklist aur dummy certificate) L3 jaisa, 2027 se pehle. (Aadha jaancha.)
+- **Vikalp:**
+  - **(a)** List jaisi hai waisi maanein.
+  - **(b)** Maanein, par owner jo sudhaar badle, wo badal ke.
+  - **(c)** Abhi roko.
+- **Salah:** **(a)**.
+- **Trade-off:**
+  - (a) me catalog, search aur pages me chhote kaam.
+  - (b) me har badlav ki ek line.
+  - (c) me kanoon ke chhote hisse adhoore.
+- **Kanooni detail:** har sudhaar ke saath uska status likha hai; lawyer se nahi jaancha (R-004).
+
 ## Change log
 
 | Version | Date       | Badlav                                                                                                                                                               |
@@ -3974,3 +4240,4 @@ Claude ka kaam: owner ka faisla nahi chahiye, sirf saboot. Nateeja saboot ke saa
 | v1.3.29 | 2026-11-19 | Q-161 khula (kanooni jaanch ke pehle run ke nateeje docs me kaise aayein).                                                                                           |
 | v1.3.30 | 2026-11-19 | Q-161 tay: (a) pehle asar ke sawal, phir batches (D-220); asar ke 29 points (15 nahi); Q-162 se Q-168 khule (sabse zyada jokhim wale; G19).                          |
 | v1.3.31 | 2026-11-19 | Q-162 se Q-168 tay: saari salah (a) (D-221 se D-227).                                                                                                                |
+| v1.3.32 | 2026-11-19 | Q-169 se Q-181 khule: kanooni asar ke baaki 22 points (G20 chhote packs, G21 grievance; tax aur listing ke chhote sudhaar ek-ek sawal me).                           |

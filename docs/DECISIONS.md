@@ -1,6 +1,6 @@
 # DECISIONS: Beautinique
 
-> **Status:** v1.10.15 (2026-11-19). Har faisla ek jagah. Sirf wahi "Tay" jo owner ne khud kaha; Claude ki salah faisla nahi. Cheezein ek-ek karke judti hain.
+> **Status:** v1.10.16 (2026-11-19). Har faisla ek jagah. Sirf wahi "Tay" jo owner ne khud kaha; Claude ki salah faisla nahi. Cheezein ek-ek karke judti hain.
 
 ## 0. Kaise likhein
 
@@ -1794,6 +1794,7 @@
 - **Wajah:** Claude ki salah, owner ne maani: jo paise, tax aur customer ki suraksha se juda hai wo gehra, baaki sirf field, taaki asli business pe jaane pe jagah ho, aur ek insaan (D-009) ka kaam seemit rahe.
 - **Chhode vikalp:** sab L1 (design asli nahi rehta, D-026 ke khilaaf); sab L3 (ek insaan ke liye bahut bada kaam).
 - **Kab dobara khulega:** kanooni jaanch (R-004) kisi area me zyada maange, ya owner khud khole.
+- **Jod (owner, 2026-11-19, D-224):** claims ke saboot me test wale claims (sirf SPF nahi) R1 se.
 - **Kisne, kab:** owner, 2026-11-19. **Nishaan:** Salah maani.
 - **Asar (Claude):** [COMPLIANCE.md](COMPLIANCE.md) ki har row ka "System me kya chahiye" khana is level se bharega. Kanooni detail jaanchi nahi (R-004): table ki har row; ye sirf "system kya banaye" ki baat hai, kanoon kya maangta hai ye kanooni jaanch batayegi.
 
@@ -2894,3 +2895,4 @@
 | v1.10.13 | 2026-11-19 | D-219 aaya (security batch 10: R2 ke hisse aur seller ko invoice ki copy maana; Q-160); security report ki saari batches poori.                                                                                                                                                         |
 | v1.10.14 | 2026-11-19 | D-220 aaya (kanooni jaanch ke nateeje: pehle asar ke sawal, phir COMPLIANCE ki 4 batches; Q-161); §0 me "jaanchi nahi" ki line.                                                                                                                                                         |
 | v1.10.15 | 2026-11-19 | D-221 se D-227 aaye (kanooni asar: return ki muddat, der se delivery, 30 din ka daam, test claims, tax archive, invoice pe naam, seller ke tax dastavez; Q-162 se Q-168); D-079, D-080, D-100, D-117, D-120, D-143, D-151, D-193 me badla ya jod; D-055 me R1 jod.                      |
+| v1.10.16 | 2026-11-19 | D-134 me jod: test wale claims ka saboot R1 se (D-224).                                                                                                                                                                                                                                 |
