@@ -1,6 +1,6 @@
 # HANDOFF: Beautinique
 
-> **Status:** v1.1.7 (2026-11-18). Ek session ya account se agle tak ki halat. Chhota rakho: sirf abhi ki halat aur agla kaam.
+> **Status:** v1.1.10 (2026-11-19). Ek session ya account se agle tak ki halat. Chhota rakho: sirf abhi ki halat aur agla kaam.
 
 ## 1. Abhi ki halat (2026-11-17)
 
@@ -8,18 +8,20 @@
 - **Docs aur code naye sire se (owner, D-003):** naye docs ([README.md](README.md)) me cheezein ek-ek karke, owner ki haan ke baad judti hain. Code naye sire se implementation stage me.
 - **Abhi koi npm command nahi chalta**; docs ke liye sirf `npx prettier --check <files>`. Pull request pe CI fail hoga jab tak naya root setup na bane; is branch pe push se CI nahi chalta.
 - **Faisle:** [DECISIONS.md](DECISIONS.md) me D-001 se D-132 (R1 ka scope: D-055, detail [PROJECT_PLAN.md](PROJECT_PLAN.md) §1; 2026-11-18 ko D-099 aur D-105 ka jod); ab tak ke saare faisle aa gaye. Risks [RISKS.md](RISKS.md) me (R-001 se R-014, jaanch ke tathya samet); pehla security niyam [security/SECURITY_REQUIREMENTS.md](security/SECURITY_REQUIREMENTS.md) me (SR-001).
-- **Agents:** repo analysis ho gaya. Business Analyst + cosmetics domain expert ka **pehla run (B1 se B7) poora (2026-11-18)**: 52 prastaavit sawal (ek kram me), 16 sirf jaanch wali cheezein, aur tay faislon pe 10 dhyaan ke points (jaise D-063 me return ka safar, D-064 me exact batch pick, D-072 aur 300 emails). Main session ne report ke daawe DECISIONS se milaa ke jaanche. Dhyaan ke 10 points me se: 2 aur 3 tay (D-112, D-105), 1 ka bin wala hissa D-097 me, 7 pehle se D-086 niyam 4 me, 10 naye docs me pehle se sahi (har seller pe TCS aur TDS, [PROJECT_PLAN.md](PROJECT_PLAN.md) §1), 5 Architect ke liye, 9 sirf yaad; 1, 4, 6, 8 bhi tay (D-124, D-128, D-126, D-125). Pehle run ka saara kaam poora. Doosra run (B8 se B13) baaki. Phir Security Architect, aur baad me ek agent kanooni jaanch ke liye (R-004). Ek waqt me ek. Agent 2 se 10 ki har report me "pehle ke kaam se lene layak" ka hissa (D-074).
-- **Sawal aur topics:** [OPEN_QUESTIONS.md](OPEN_QUESTIONS.md) me aage ke topics (B1 se B16), jaanchna baaki (§2) aur sawal (§3). **Tay:** Q-001 se Q-073 (faisle D-060 se D-132; har sawal ke neeche owner ka jawab aur faisle ki link). Niyam (owner, 2026-11-18): jo sawal kisi khule sawal pe tike nahi, wo ek saath; aapas me jude sawal ek group me saath. **Khule:** koi nahi.
-- **Usage (2026-11-18):** abhi wale account pe weekly 11% (reset 2026-11-25), 5-hour 4% (naya window; reset 2026-11-18 ko 23:00 UTC). Agent 2 ke pehle run ne lagbhag 32% aur ~40 minute liye. Pichhla account weekly 99% (reset 2026-11-21): us pe naya kaam nahi.
+- **Agents:** repo analysis ho gaya. Business Analyst + cosmetics domain expert ka **pehla run (B1 se B7) poora (2026-11-18)**: 52 prastaavit sawal (ek kram me), 16 sirf jaanch wali cheezein, aur tay faislon pe 10 dhyaan ke points (jaise D-063 me return ka safar, D-064 me exact batch pick, D-072 aur 300 emails). Main session ne report ke daawe DECISIONS se milaa ke jaanche. Dhyaan ke 10 points me se: 2 aur 3 tay (D-112, D-105), 1 ka bin wala hissa D-097 me, 7 pehle se D-086 niyam 4 me, 10 naye docs me pehle se sahi (har seller pe TCS aur TDS, [PROJECT_PLAN.md](PROJECT_PLAN.md) §1), 5 Architect ke liye, 9 sirf yaad; 1, 4, 6, 8 bhi tay (D-124, D-128, D-126, D-125). Pehle run ka saara kaam poora. **Doosra run (B8 se B13) poora (2026-11-19); Agent 2 poora.** Doosre run me 45 prastaavit sawal hain (B8: 10, B9: 9, B10: 7, B11: 9, B12: 5, B13: 5). Unme 38 kisi khule sawal pe tike nahi (23 R1 ke, 15 R2 aur baad ke), aur 5 jude groups hain. Saath me 24 sirf jaanch wali cheezein (19 kanooni, 5 tathya), aur tay faislon pe 6 dhyaan ke points: D-126 aur D-131 ki email lines ki din ki seema, D-017 ke `+` alias se ek insaan ke kai accounts, D-099 ki allergen chetavni sabke liye ya personal, D-039 me demo reviews, D-058 ka region, aur iPhone pe push. Main session ne daawe DECISIONS se milaa ke jaanche. Ye sab abhi sirf prastaav hai, tay nahi. Phir Security Architect, aur baad me ek agent kanooni jaanch ke liye (R-004). Ek waqt me ek. Agent 2 se 10 ki har report me "pehle ke kaam se lene layak" ka hissa (D-074).
+- **Sawal aur topics:** [OPEN_QUESTIONS.md](OPEN_QUESTIONS.md) me aage ke topics (B1 se B16), jaanchna baaki (§2) aur sawal (§3). **Tay:** Q-001 se Q-073 (faisle D-060 se D-132; har sawal ke neeche owner ka jawab aur faisle ki link). Niyam (owner, 2026-11-18): jo sawal kisi khule sawal pe tike nahi, wo ek saath; aapas me jude sawal ek group me saath. **Khule (2026-11-19):** Q-074 se Q-100, Agent 2 ke doosre run ke R1 wale sawal (owner ne pehle R1 wale chune), aur report ke 2 dhyaan points (Q-083 email lines ki chhat, Q-100 allergen chetavni). Jude sawal groups G9 (Q-078, Q-079), G10 (Q-081 se Q-083), G11 (Q-084, Q-085) me. Report ki R1 wali "lene layak" cheezein sawalon ke vikalpon me naye vakya me aayi (D-074).
+- **Usage (2026-11-19):** abhi wale account pe weekly 16% (reset 2026-11-25), 5-hour 40% (doosre run ke baad). Doosre run ne lagbhag 30% aur ~26 minute liye. Agent 2 ke pehle run ne lagbhag 32% aur ~40 minute liye. Pichhla account weekly 99% (reset 2026-11-21): us pe naya kaam nahi.
 
 ## 2. Uncommitted
 
-- [OPEN_QUESTIONS.md](OPEN_QUESTIONS.md) v1.3.9 (Q-058 se Q-073 tay), [DECISIONS.md](DECISIONS.md) v1.7.2 (D-117 se D-132, aath faislon me jod), [RISKS.md](RISKS.md) v1.2.16 (R-013) aur ye HANDOFF. Pichhla kaam (OPEN_QUESTIONS v1.3.6, DECISIONS v1.6.2, PROJECT_PLAN v1.1.2, HANDOFF v1.1.4) staged hai, commit nahi; baaki sab commit ho chuka.
+- [OPEN_QUESTIONS.md](OPEN_QUESTIONS.md) v1.3.10 (Q-074 se Q-100), ye HANDOFF aur Agent 2 ke doosre run ki report (nayi file); baaki sab commit ho chuka.
 
 ## 3. Agla kaam
 
-1. Agent 2 ka doosra run (B8 se B13), usage dekh ke aur owner ki haan se; report me "pehle ke kaam se lene layak" ka hissa (D-074).
-2. [OPEN_QUESTIONS.md](OPEN_QUESTIONS.md) §2 ki dono jaanch (location data, public ingredient database) (Claude, kabhi bhi).
+1. Q-074 se Q-100 ke owner ke jawab, phir har jawab ka D-xxx (D-133 se) aur sawal `Tay`.
+2. Phir doosre run ke baaki R2 wale sawal (Q-101 se): 15 jo kisi khule sawal pe tike nahi, aur 5 jo unpe tike hain (B9-9, B11-4, B10-2, B10-3, B10-7), groups ke saath. Saath me report ki R2 wali "lene layak" cheezein (D-074).
+3. Phir agla agent: Security Architect (pehla run), owner ki haan se.
+4. [OPEN_QUESTIONS.md](OPEN_QUESTIONS.md) §2 ki dono jaanch (location data, public ingredient database) (Claude, kabhi bhi).
 
 ## Change log
 
@@ -93,3 +95,6 @@
 | v1.1.5  | 2026-11-18 | Q-058 se Q-071 tay (D-117 se D-130); koi sawal khula nahi; agla kaam Agent 2 ka doosra run.                                         |
 | v1.1.6  | 2026-11-18 | Q-072 aur Q-073 khule (D-126 aur D-128 ke bache hisse, owner ke kehne pe salah ke saath).                                           |
 | v1.1.7  | 2026-11-18 | Q-072 aur Q-073 tay (D-131, D-132); koi sawal khula nahi; agla kaam Agent 2 ka doosra run.                                          |
+| v1.1.8  | 2026-11-18 | Agent 2 ka doosra run (B8 se B13) shuru, owner ki haan se; uncommitted list sahi ki.                                                |
+| v1.1.9  | 2026-11-19 | Agent 2 ka doosra run poora (45 prastaavit sawal), report jaanchi; Agent 2 poora; agla: uske sawal.                                 |
+| v1.1.10 | 2026-11-19 | Q-074 se Q-100 khule (doosre run ke R1 wale sawal + 2 dhyaan points); R2 wale baad me.                                              |

@@ -1,6 +1,6 @@
 # OPEN QUESTIONS: Beautinique
 
-> **Status:** v1.3.9 (2026-11-18). Khule sawal, aage ke topics aur jaanchna baaki. Cheezein ek-ek karke judengi.
+> **Status:** v1.3.10 (2026-11-19). Khule sawal, aage ke topics aur jaanchna baaki. Cheezein ek-ek karke judengi.
 
 ## Is file me kya aayega
 
@@ -1685,51 +1685,662 @@ Claude ka kaam: owner ka faisla nahi chahiye, sirf saboot. Nateeja saboot ke saa
 - **Kanooni detail jaanchi nahi** (R-004): kaunse ingredients cosmetic me mana hain, aur public database ke data ka license.
 - **Owner ka jawab (2026-11-18):** **(c)**, badhti list se shuru, public database baad me, do level ki pahunch (4 niyam). Record: [DECISIONS.md](DECISIONS.md) D-132.
 
+### Q-074. Live site pe anjaan log sign-up aur order kar sakein ya nahi?
+
+- **Status:** `Khula`. Topic: B13 (compliance), B5 (checkout).
+- **Sawal:** live site pe koi bhi anjaan insaan sign-up karke order de sake, ya sign-up aur order sirf chune hue emails (allowlist) tak hon?
+- **Kyun zaroori:**
+  - Payments test mode me hain (D-026) aur delivery asli nahi hoti. Anjaan insaan order de to use lagega ye asli dukaan hai.
+  - Uska personal data (naam, address, phone) hamare paas aata hai, aur uske sign-up ke codes din ke 300 emails (D-028) khaate hain.
+  - Owner ke apne accounts `+` alias se bante hain (D-017), to allowlist se owner ka kaam nahi rukta.
+- **Vikalp:**
+  - **(a) Sab ke liye khula,** site pe demo ki patti ke saath.
+  - **(b) Dekhna sab ke liye, account sirf allowlist se:**
+    1. Dekhna, search, reviews padhna aur pincode check (D-020) sab ke liye.
+    2. Sign-up aur sign-in (teeno raaste, D-021) sirf allowlist ke emails se: owner ke base emails aur unke `+` alias, aur jinhe owner jode (testers).
+    3. Allowlist ek setting me, bina deploy.
+    4. Baaki ko saaf sandesh: "Ye demo store hai."
+    5. Seller, delivery partner aur Creator ke sign-up bhi isi niyam se; waitlist (D-046) me judna bhi account se, to wo bhi allowlist tak.
+    6. Asli business pe jaane pe (D-026) allowlist ek setting se band.
+  - **(c) Sign-up khula, checkout sirf allowlist ke liye.**
+- **Salah:** **(b)**, R1 se. Code waisa hi production-grade rehta hai (D-012), par anjaan logon ka data aur emails ka bojh nahi aata, aur koi dhokha nahi khaata.
+- **Trade-off:**
+  - (a) me anjaan ka data, emails ka bojh aur dhokhe ka jokhim.
+  - (b) me portfolio dekhne wala sign-up nahi kar sakta (owner chahe to use allowlist me jode).
+  - (c) me anjaan ka data aur sign-up ke codes phir bhi.
+- **Kanooni detail jaanchi nahi** (R-004): test mode me bikri dikhane wali site, aur anjaan logon ka personal data.
+
+### Q-075. Har kanooni area me system kitna banaye?
+
+- **Status:** `Khula`. Topic: B13 (compliance).
+- **Sawal:** D-026 me design asli aur registrations dummy hain. Har kanooni area me system kitna banaye: sirf field, workflow me rok, ya poora register aur report?
+- **Kyun zaroori:**
+  - Ek insaan (D-009) har area me poora register nahi bana sakta, aur har area ki zaroorat alag hai.
+  - [COMPLIANCE.md](COMPLIANCE.md) ka "System me kya chahiye" khana isi se bharega.
+- **Teen level:** **L1** = field, dummy value aur dikhana. **L2** = L1 + workflow me rok ya jaanch (iske bina aage nahi). **L3** = L2 + register, report, export aur yaad (filing jaisa nateeja; asli filing nahi).
+- **Vikalp:**
+  - **(a) Sab L1.**
+  - **(b) Area ke hisaab se:**
+
+    | Area                                                                                                                  | Level                                           | Kab                               |
+    | --------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------- | --------------------------------- |
+    | GST invoice, credit note, bina gap ka invoice number (D-041)                                                          | L3                                              | R1 invoice; registers R2          |
+    | Seller pe GST TCS aur income-tax TDS                                                                                  | L3                                              | R1 hisaab; register aur export R2 |
+    | HSN aur GST rate ki table (D-086)                                                                                     | L2                                              | R1                                |
+    | Seller KYC aur warehouse state ka GSTIN (D-036)                                                                       | L2                                              | R1                                |
+    | Licence ka type, import registration (D-127, D-128)                                                                   | L2                                              | R1                                |
+    | Product page ki declarations (net quantity, MRP, mfg aur expiry, maker ya importer, country of origin, customer care) | L2 (inke bina listing live nahi)                | R1                                |
+    | Claims ke saboot (D-100)                                                                                              | L2; saboot ki expiry ki yaad L3                 | SPF R1; baaki R2                  |
+    | Reviews jaise user content: report aur chhupana                                                                       | L2; register L3                                 | R1; register R2                   |
+    | Grievance Officer aur shikayatein                                                                                     | L3                                              | R2 (page R1)                      |
+    | Privacy aur data ke haq                                                                                               | L2                                              | R1 kuch, R2 baaki                 |
+    | Dark patterns se bachav                                                                                               | L2 (UX aur code ke niyam)                       | R1                                |
+    | E-way bill (warehouse aur hub ka trip, D-027)                                                                         | L1 (trip pe dummy number)                       | R2                                |
+    | Plastic EPR (D-045)                                                                                                   | L1 (registration); packaging ka data L3 baad me | R1 field                          |
+    | Gig delivery partners ka registration                                                                                 | L1                                              | R2                                |
+    | Site ke registrations (Shops & Establishments, jalne wale maal ke liye fire NOC)                                      | L1 (field aur expiry ki yaad)                   | R2                                |
+    | Telemedicine (D-025)                                                                                                  | L1                                              | R2                                |
+
+  - **(c) Sab L3.**
+- **Salah:** **(b)**. Jo paise, tax aur customer ki suraksha se juda hai wo gehra; baaki sirf field, taaki asli business pe jaane pe jagah ho.
+- **Trade-off:**
+  - (a) me design asli nahi rehta (D-026 ke khilaaf).
+  - (b) me har area ka level yaad rakhna (COMPLIANCE.md me).
+  - (c) ek insaan ke liye bahut bada kaam.
+- **Kanooni detail jaanchi nahi** (R-004): table ki har row. Ye sirf "system kya banaye" ki baat hai; kanoon kya maangta hai, ye kanooni jaanch batayegi.
+
+### Q-076. Review ka haq: kin order lines pe, kab tak, aur kitni baar?
+
+- **Status:** `Khula`. Topic: B8 (reviews).
+- **Sawal:** delivery ke baad verified purchase review (D-055) ka haq kin order lines pe ho, kitne din tak, aur ek customer ek product pe kitne review likh sake?
+- **Kyun zaroori:**
+  - Lauta hua item, RTO (D-108) ya cancel (D-110) line, Pro daam wali line (D-065) aur ek product ke kai orders: inse review ka data model aur rating ki ginti banti hai.
+  - Review pe variant dikhana (D-076 niyam 5) bhi order line se hi aata hai.
+- **Vikalp:**
+  - **(a) Har line, har baar:** har delivered order line pe ek review; ek product ke kai orders = kai reviews; window delivery se misaal 180 din.
+  - **(b) Ek customer, ek product, ek review:**
+    1. Haq kisi bhi delivered line se, lauta hua item bhi (return ke baad bhi raay de sake). Cancel aur RTO line pe nahi.
+    2. Pro daam wali line (D-065) pe bhi review.
+    3. Review pe us line ka variant aur "Verified purchase" ka nishaan. Dobara kharid pe naya review nahi: purana review edit ho (variant nayi line ka chun sake), aur "kai baar kharida" ka nishaan.
+    4. Window delivery se misaal 365 din.
+    5. Customer kabhi bhi edit ya delete kare; edit dobara moderation se; har version ka record.
+  - **(c) Har line pe review, rating me aakhri:** har order pe naya review dikhe, par rating me har customer ka sirf aakhri review gina jaaye.
+- **Salah:** **(b)**, R1 se. Ek insaan ki ek awaaz: baar-baar kharidne wala rating ko jhuka nahi sakta, aur dobara kharid pe customer apni raay taaza kar sakta hai. Lautaye item pe review rokna negative raay dabane jaisa lagta.
+- **Trade-off:**
+  - (a) me zyada kharidne wale ka asar zyada.
+  - (b) me edit ka itihaas rakhna, aur lautaye item ke negative reviews aayenge (jo sach hain).
+  - (c) me do tarah ki ginti samjhana mushkil.
+- **Kanooni detail jaanchi nahi** (R-004): verified review aur negative review na dabane ke niyam.
+
+### Q-077. Review ki moderation: kab jaanch aur kaun?
+
+- **Status:** `Khula`. Topic: B8 (moderation), B2 (roles).
+- **Sawal:** review live hone se pehle staff jaanche, ya pehle live ho aur baad me jaanch ho; aur ye kaam kis staff role ke paas ho?
+- **Kyun zaroori:**
+  - Reviews R1 me hain (D-039) aur staff ka saara kaam ek insaan karta hai (D-009). Har review haath se jaanchna bhaari hai.
+  - Par gaali, kisi ka phone ya address, ya nakli review live rehna jokhim hai.
+  - Roles ki list (D-017) me role aur uska app (D-010) chahiye.
+- **Vikalp:**
+  - **(a) Sab pehle jaanch:** har review staff ke "approve" ke baad live; faisla misaal 2 kaam ke din me.
+  - **(b) Mila-jula:**
+    1. Sirf star rating (bina text) turant live.
+    2. Text wala review apne aap ki jaanch se guzre (gaali ke shabdon ki list; phone, email ya link jaisa pattern; lambai): paas to turant live, atka to staff ki queue.
+    3. Photo wala review hamesha queue me.
+    4. Report hua review live rahe jab tak faisla na ho; sirf personal data ya intimate content ki report pe faisle tak chhupe, aur aisi report queue me sabse pehle.
+    5. Queue ka faisla misaal 2 kaam ke din me.
+    6. Har chhupana aur wapas dikhana wajah ke saath, audit me, aur wapas ho sake.
+    7. Role "Review Moderator": poore desh ki ek team (D-084 jaisa), Admin app me.
+  - **(c) Sab turant live:** jaanch sirf report hone pe.
+- **Salah:** **(b)**, R1 se. Zyadatar reviews bina staff ke live, aur jokhim wale (photo, atke, report hue) hi staff tak. Ek insaan ka bojh kam rehta hai.
+- **Trade-off:**
+  - (a) me ek insaan pe bojh aur customer ka intezaar.
+  - (b) me shabdon ki list aur jaanch ka kaam, aur kuch galat review thodi der live.
+  - (c) me galat content der tak live.
+- **Kanooni detail jaanchi nahi** (R-004): reviews jaise user content pe platform ki zimmedari aur hatane ke samay.
+
+### Q-078. Skin type, concern aur active ingredient ka data kis roop me?
+
+- **Status:** `Khula`. Topic: B9 (search), B3 (catalog). Group G9.
+- **Sawal:** product pe "kis skin type ke liye", "kis concern ke liye" aur active ingredient ka % jaisi jaankari kis roop me aaye, taaki filter aur search usse chal sakein?
+- **Kyun zaroori:**
+  - Skincare aur haircare me customer "oily skin", "acne-prone skin", "pigmentation", "dandruff", "10% niacinamide" se dhoondhta hai.
+  - Variants (D-076), shade (D-085), ingredients (D-099) aur claims (D-100) me ye fields nahi. Baad me saari listings dobara bharna mehnga.
+  - Concern ke shabd drug ke daawe tak ja sakte hain ("acne-prone skin ke liye" se "acne ka ilaaj"; D-128).
+- **Vikalp:**
+  - **(a) Claims ki list me hi:** "oily skin ke liye", "acne-prone skin ke liye" jaise claims D-100 ki tay list me jud jaayein; filter claims se.
+  - **(b) Alag fields, platform ki list se:**
+    1. Category ke hisaab se fields (D-076 jaisa): skin type (kai chune ja sakein), concern, hair type.
+    2. Seller platform ki list se chune; ye jokhim wale fields me (D-098 niyam 1), badlav pe jaanch.
+    3. Concern ki list me sirf cosmetic shabd ("acne-prone skin", "dull skin"); "treat", "cure" jaise shabd list me nahi.
+    4. Active ingredient ka % alag field, sirf tab jab pack pe chhapa ho; staff label ki photo (D-099 niyam 1) se milaye.
+    5. Filters inhi fields se.
+  - **(c) R1 me kuch nahi.**
+- **Salah:** **(b)**, R1 me chhota jod. Skin type aur concern lagbhag har skincare product pe hote hain; claims ki list saboot wale daawon ke liye hai, unme milane se list bhaari aur filters ulajhte hain.
+- **Trade-off:**
+  - (a) me claims ki list lambi, aur saboot ke niyam (D-100) inpe bhi lagne ka sawal.
+  - (b) me seller aur staff ka thoda aur kaam.
+  - (c) me R1 ka filter kamzor, aur baad me sab listings dobara.
+- **Kanooni detail jaanchi nahi** (R-004): cosmetic aur drug ke daawe ke shabd.
+
+### Q-079. R1 me kaunse filters aur sort?
+
+- **Status:** `Khula`. Topic: B9 (search). Group G9.
+- **Sawal:** R1 ke basic search aur filter ([PROJECT_PLAN.md](PROJECT_PLAN.md) §1) me kaunse filters aur kaunse sort hon?
+- **Kyun zaroori:**
+  - R1 me basic search aur filter tay hai, par list nahi.
+  - Har filter ka data catalog me pehle din se chahiye (D-085, D-099, D-100, D-127, aur Q-078 ka data).
+- **Vikalp:**
+  - **(a) Kam:** category, brand, daam ki range, shade family, free-from. Sort: relevance, daam (kam se zyada, zyada se kam), naya.
+  - **(b) Poore:** (a) + skin type aur concern (Q-078), claims (D-100), rating, discount %, country of origin (D-127), size. Sort me rating aur discount bhi.
+  - **(c) (b) + Pro daam se sort,** Pro buyer ke liye (D-065).
+- **Salah:** **(b)**, R1 se. Data R1 me ban hi raha hai; filter usi ka seedha fayda hai. Pro daam ka sort baad me.
+- **Trade-off:**
+  - (a) me data hote hue bhi filter nahi.
+  - (b) me filter ki screen aur search index ka kaam.
+  - (c) me har dekhne wale ke liye alag daam ka sort.
+- **Kanooni detail jaanchi nahi** (R-004): imported products ke liye country of origin ka filter zaroori hai ya nahi.
+
+### Q-080. Search aur listing me products kis kram me aayein?
+
+- **Status:** `Khula`. Topic: B9 (search).
+- **Sawal:** search aur category page pe products kis kram me aayein, aur kya apne brand ya paid "sponsored" ko upar jagah mil sake?
+- **Kyun zaroori:**
+  - Kram se bikri tay hoti hai.
+  - Apna brand platform ka hi hai (D-031: koi shortcut nahi); use upar rakhna doosre sellers ke saath anyay hai.
+  - Ranking ki technique Architect ka kaam hai; yahan sirf niti.
+- **Vikalp:**
+  - **(a) Sirf relevance:** shabd ka mel, phir naya.
+  - **(b) Relevance + gun, bina seller ke boost:**
+    1. Relevance ke baad: rating (kam se kam misaal 5 reviews pe), pichhle 30 din ki bikri, stock me hona.
+    2. Out-of-stock (agar dikhein) sabse neeche.
+    3. Apne brand ko koi boost nahi; code me kisi seller ke hisaab se boost ka raasta hi nahi.
+    4. Sponsored sirf R2 ke baad, hamesha "Sponsored" label ke saath, aur ginti ki seema (misaal har 10 me 2 tak).
+    5. Kram ke mukhya gun customer ke liye ek page pe likhe.
+  - **(c) (b) + apne brand ko boost.**
+- **Salah:** **(b)**: R1 me sponsored ke bina; sponsored R2 ke baad. Customer ko kaam ka kram, aur sab sellers ke saath ek niyam.
+- **Trade-off:**
+  - (a) me achhe aur bikne wale products neeche reh sakte.
+  - (b) me rating aur bikri ki ginti ka kaam.
+  - (c) me sellers ka bharosa aur kanooni jokhim.
+- **Kanooni detail jaanchi nahi** (R-004): kram ke gun batana, apne brand ko aage rakhna, sponsored ka label.
+
+### Q-081. Sellers aur staff ko kin baaton ka email jaaye?
+
+- **Status:** `Khula`. Topic: B11 (notifications). Group G10.
+- **Sawal:** din ke 300 emails ki seema me sellers aur staff ko kin baaton ka email jaaye, aur baaki khabar kaise?
+- **Kyun zaroori:**
+  - D-126 sirf customer ke order emails ka hai.
+  - Sellers ko bhi bahut khabrein jaati hain: listing ka "ye badlo" (D-098), receiving ka farak (D-096), expiry ke alert (D-062, D-124), udhaar ka alert aur payment link (D-071, D-103), payout (D-081), recall (D-129), staff invite aur password reset. Sab usi 300 me (D-028).
+- **Vikalp:**
+  - **(a) Har khabar ka email.**
+  - **(b) Sirf zaroori, aur din ka ek saar:**
+    1. Account aur security (invite, password reset, sign-in code): OTP wali line me.
+    2. Paisa (payout statement, udhaar ka alert aur payment link, fee ka invoice): paise wali line me.
+    3. Jinpe seller ka kaam ruke ya tay samay me jawab chahiye (receiving ka farak, listing "ye badlo", recall, batch rokna): din ka ek saar wala email (misaal subah 9 baje), har khabar alag nahi.
+    4. Baaki (listing manzoor, stock ki ginti, reviews) sirf in-app aur push.
+    5. Staff ko sirf account aur security ke emails; kaam ki khabar app ki queue me.
+  - **(c) Seller khud chune** kaunse emails chahiye.
+- **Salah:** **(b)**, R1 se. Ek seller ko din me 1 se 2 emails, aur zaroori baat chhootti nahi.
+- **Trade-off:**
+  - (a) me sellers badhte hi seema khatam.
+  - (b) me saar wale email ka kaam, aur khabar thodi der se.
+  - (c) me settings ka kaam aur zyada emails ka jokhim.
+
+### Q-082. Order ke alawa customer ki khabrein kis raaste se?
+
+- **Status:** `Khula`. Topic: B11 (notifications). Group G10.
+- **Sawal:** order ke alawa customer ki khabrein (area khulne ki khabar, review likhne ki yaad, offers aur sale, points ki expiry, cart me chhoda item) kis raaste se aur kis consent se jaayein?
+- **Kyun zaroori:**
+  - Waitlist R1 me hai (D-046). Area khulte hi waitlist ke sab logon ko email jaaye aur log 300 se zyada hon, to us din ki seema khatam aur OTP bhi ruk sakta.
+  - Marketing ke liye consent chahiye.
+  - Cart ki yaad zyada ho to pareshan karne wali (dark pattern jaisi) ban sakti.
+- **Vikalp:**
+  - **(a) Sab email se.**
+  - **(b) Muft raaste pehle, email seemit:**
+    1. Offers aur marketing sirf in-app aur push, sirf alag opt-in se (sign-up pe pehle se tick nahi), kabhi bhi band.
+    2. Review ki yaad, points ki expiry aur cart ki yaad: in-app aur push; cart ki yaad ek baar (misaal 24 ghante baad), opt-in se.
+    3. Area khulne ki khabar: in-app aur push; email sirf unhe jinke paas push nahi, "baaki" line ki din ki chhat (Q-083) ke andar, baaki agle dinon me.
+    4. Har khabar me "ye kyun mila" aur band karne ka raasta.
+    5. Ek customer ko hafte me misaal 3 marketing push tak.
+  - **(c) Koi marketing khabar nahi.**
+- **Salah:** **(b)**: area khulne ki khabar R1 me, baaki R2 se. OTP kabhi nahi rukta, aur khabrein consent ke andar.
+- **Trade-off:**
+  - (a) me bade din pe OTP ruk sakta, aur consent ka jokhim.
+  - (b) me push band wale customer tak kam pahunch, aur area khulne ki khabar kuch logon ko der se.
+  - (c) me growth ka raasta band.
+- **Kanooni detail jaanchi nahi** (R-004): marketing khabron ki consent aur band karne ke niyam.
+
+### Q-083. Emails ki har line ki din ki chhat ho ya nahi?
+
+- **Status:** `Khula`. Topic: B11 (notifications). Group G10.
+- **Sawal:** din ke 300 emails me har line (OTP, paisa, baaki; D-126 niyam 4) ki apni din ki chhat ho, taaki OTP ke liye hamesha jagah bache?
+- **Kyun zaroori:**
+  - D-126 niyam 4 ka kram sirf tab kaam karta hai jab emails ek saath khade hon. Subah waitlist ki khabar (D-046) ya bade recall (D-131: har customer ko email) me 300 nikal gaye, to shaam ke OTP ke liye jagah nahi bachti, chahe OTP line me sabse pehle ho.
+  - Har OTP sirf email se jaata hai, to OTP ruka matlab sign-in ruka.
+- **Vikalp:**
+  - **(a) Koi chhat nahi:** sirf D-126 ka kram.
+  - **(b) Har line ki chhat, OTP ke liye pakki jagah:**
+    1. Din ke 300 me se misaal 60 sirf OTP ke liye; baaki lines milake 240 tak.
+    2. "Baaki" line misaal 120 tak; paise ke emails aur D-131 wali khabar bachi jagah me.
+    3. OTP apni 60 ke baad bhi koi bhi bachi jagah le sake.
+    4. Chhat paar ho to wo email agle din ki line me; in-app aur push usi din.
+    5. Bade burst (area khulna, recall) apne aap kai dinon me bant-te hain, chhat ke andar.
+    6. Din ka 80% (misaal 240) hone pe Master aur Head of Operations ko in-app chetavni.
+  - **(c) Sirf OTP ki pakki jagah:** misaal 60 OTP ke liye; baaki lines me alag chhat nahi.
+- **Salah:** **(b)**, R1 se. OTP kabhi nahi rukta, aur paise ke emails "baaki" ke burst me nahi dabte.
+- **Trade-off:**
+  - (a) me bade din pe OTP aur sign-in ruk sakta.
+  - (b) me bade recall ke emails kuch dinon me bant-te (in-app aur push usi din), aur chhat ki ginti ka kaam.
+  - (c) me "baaki" ka burst paise ke emails ko agle din dhakel sakta.
+- **Kanooni detail jaanchi nahi** (R-004): recall pe customer ko suchna dene ke samay ke niyam.
+
+### Q-084. Seller ko kaunsi reports milein, aur customer ki kitni jaankari dikhe?
+
+- **Status:** `Khula`. Topic: B12 (reporting), B6 (settlement). Group G11.
+- **Sawal:** seller app me seller ko apni bikri ki kaunsi reports milein, aur customer ki kitni jaankari dikhe?
+- **Kyun zaroori:**
+  - Fulfilment platform karta hai (D-014), to seller ko customer ke address ya phone ki zaroorat nahi.
+  - Par invoice seller ke naam se banta hai (D-030), aur brands demand ka data maangte hain (kis shehar me bikta).
+  - Seller ka hisaab R1 me hai (D-055).
+- **Vikalp:**
+  - **(a) Sab:** naam, phone, address samet.
+  - **(b) Kaam ki reports, customer ki pehchaan ke bina:**
+    1. Orders aur lines (variant, batch, daam, "discount kisne diya", D-101), returns wajah ke saath (D-079) aur jaanch ka nateeja (D-112), stock batch ke hisaab se umar aur expiry (D-062, D-066), settlement statement (D-081), reviews ka saar.
+    2. Customer ki pehchaan: sirf order number, shehar ya district, aur pincode; naam, phone, email, address nahi.
+    3. Invoice ki copy me sirf wo jo invoice pe zaroori hai.
+    4. Customer ki koi list nahi; seller customer se seedha sampark nahi kar sakta.
+  - **(c) Sirf jod:** order ke level ki jaankari bhi nahi.
+- **Salah:** **(b)**, R1 se (reviews ka saar R2 se). Brand ko kaam ka data, aur customer ka personal data kam haathon me.
+- **Trade-off:**
+  - (a) me personal data bahut haathon me, aur customer se bahar sampark ka jokhim.
+  - (b) me invoice ki copy ke niyam ki jaanch.
+  - (c) me brand apne returns aur stock samajh nahi pata.
+- **Kanooni detail jaanchi nahi** (R-004): seller ko customer ka data dena, aur invoice pe customer ki zaroori jaankari.
+
+### Q-085. Kaun apna data file (CSV) me nikaal sake?
+
+- **Status:** `Khula`. Topic: B12 (reporting). Group G11.
+- **Sawal:** kaun apna data file (CSV) me nikaal sake, aur kis roop me?
+- **Kyun zaroori:**
+  - Seller apne orders aur settlement apne accounting me daalte hain, aur finance ko books chahiye.
+  - Par har export personal data bahar jaane ka raasta hai.
+- **Vikalp:**
+  - **(a) Koi export nahi:** sirf screen pe.
+  - **(b) Seemit export:**
+    1. Seller: apne orders, settlement aur stock ka CSV, utni hi jaankari jitni seller ki reports me (Q-084); customer ki pehchaan nahi.
+    2. Finance staff: ledger aur tax registers (R2; accounting software ka format baad me).
+    3. Baaki staff: sirf apne kaam ki list, personal data chhupa ke.
+    4. Har export audit me; ek export me misaal 50,000 rows tak, zyada pe saaf mana (aadhi kati file nahi).
+  - **(c) Sab ko sab.**
+- **Salah:** **(b)**: seller ka settlement CSV R1 me, baaki R2 se.
+- **Trade-off:**
+  - (a) me seller aur finance ka haath ka kaam.
+  - (b) me export ke niyam aur audit.
+  - (c) me data ke leak ka bada raasta.
+
+### Q-086. Demo aur dummy ka nishaan kahan dikhe?
+
+- **Status:** `Khula`. Topic: B13 (compliance).
+- **Sawal:** kin jagahon pe "demo" ya "dummy" ka nishaan dikhe?
+- **Kyun zaroori:**
+  - D-026: registrations aur kanooni details dummy, data ya config me.
+  - Asli jaise dikhne wale invoice (GSTIN ke saath), licence number aur officers ke naam bahar galat istemaal ho sakte (nakli invoice). Dummy number kisi asli company ke number se mil sakta hai.
+  - Owner ke accounts ke reviews asli customer ke reviews jaise dikhte hain, khaas kar apne brand (D-031) pe.
+- **Vikalp:**
+  - **(a) Kahin nahi.**
+  - **(b) Har jagah jahan dhokha ho sake:**
+    1. Har app ke upar patli patti: "Demo store: koi asli bikri, payment ya delivery nahi."
+    2. Invoice, credit note aur payout statement ke PDF pe "SPECIMEN / DEMO: not a tax document" watermark.
+    3. Har dummy registration number (GSTIN, licence, import registration, EPR) ke saath "DUMMY" badge, jahan bhi dikhe.
+    4. Grievance Officer jaise officers ke liye sirf role ka naam aur `example` domain ka email; kisi insaan ka banawati naam nahi.
+    5. Dummy numbers aise ki kisi asli company ke number se na milein.
+    6. Demo ke reviews pe "Demo review" ka nishaan.
+    7. Saare dummy values ek jagah (data ya config) ki list me (D-026).
+  - **(c) Sirf site ki patti.**
+- **Salah:** **(b)**, R1 se. Koi bhi page ya file bahar jaaye to bhi asli na lage.
+- **Trade-off:**
+  - (a) me nakli invoice aur dhokhe ka jokhim.
+  - (b) me har PDF aur number ke saath kaam.
+  - (c) me download hui file asli lagti.
+- **Kanooni detail jaanchi nahi** (R-004): demo site pe dummy registration numbers aur invoice jaise documents.
+
+### Q-087. Review me kya chhupaya ja sake, aur kya kabhi nahi?
+
+- **Status:** `Khula`. Topic: B8 (moderation).
+- **Sawal:** moderation ke niyam kya hon: kis wajah se review chhupaya ja sake, aur kis wajah se kabhi nahi?
+- **Kyun zaroori:**
+  - Negative review chhupana customer ke saath dhokha hai; galat content rakhna bhi jokhim hai.
+  - Cosmetics ke teen khaas maamle: review me skin reaction ki baat (D-130); ilaaj jaisa daawa ("is cream se meri acne theek ho gayi", jo product ko dawa jaisa dikhata hai, D-043, D-128); aur delivery ya packaging ki shikayat (delivery hamari hai, D-014, par rating brand ki girti hai).
+- **Vikalp:**
+  - **(a) Tay list, negative raay kabhi wajah nahi:**
+    1. Chhupane ki wajahein sirf: gaali, nafrat ya dhamki; kisi ka personal data (phone, email, address, order number); spam, link ya doosre product ya site ka prachaar; product se bilkul alag baat; nakli ya khel wala review; intimate ya kisi aur ki photo; kanooni order.
+    2. Kabhi wajah nahi: kam rating, kadwi raay, brand ki aalochna, "mujhe reaction hua".
+    3. Skin reaction wala review rahe, aur customer ko support ka raasta dikhe (D-130).
+    4. Ilaaj jaise daawe wale review rahein; saare reviews ke upar ek tay note: "Reviews customers ki apni raay hain, ilaaj ka daawa nahi."
+    5. Delivery ya packaging ki shikayat review me rahe (customer ka asli anubhav).
+    6. Customer ko chhupane ki wajah dikhe; wo badal ke dobara bhej sake; ek appeal, jiska faisla doosra moderator kare (D-084 niyam 3 jaisa).
+  - **(b) (a), par delivery ki shikayat bahar:** delivery ya packaging ki shikayat wale review product ki rating se bahar, aur customer ko delivery feedback me bheja jaaye.
+  - **(c) Staff ki samajh:** koi tay list nahi.
+- **Salah:** **(a)**, R1 se. Ek jaisa faisla, aur negative raay ki suraksha saaf. Delivery ki shikayat se brand ki rating thodi girti dikhegi, par review ko hatana ya doosri jagah bhejna customer ki raay se chhed jaisa hai.
+- **Trade-off:**
+  - (a) me brand ki rating pe hamari delivery ka asar.
+  - (b) me customer ka review uski marzi ke bina doosri jagah.
+  - (c) me har moderator ka alag faisla.
+- **Kanooni detail jaanchi nahi** (R-004): negative review chhupane ke niyam, review me ilaaj ke daawe, aur user content hatane ke niyam.
+
+### Q-088. Return ya daawa reject ho to customer appeal kar sake ya nahi?
+
+- **Status:** `Khula`. Topic: B11 (disputes), B7 (returns).
+- **Sawal:** R1 me Support Agent ne return ya daawa reject kiya (D-105), to customer dobara jaanch (appeal) maang sake ya nahi?
+- **Kyun zaroori:**
+  - R1 me reject ke faisle hain (D-105 niyam 1), par uske baad ka raasta nahi.
+  - D-084 ka niyam (jisne reject kiya wo appeal tay nahi karta) sirf seller aur listing ke liye hai.
+  - Owner kai accounts se kaam karta hai (D-017), to "doosra insaan" ka matlab doosra role aur account.
+- **Vikalp:**
+  - **(a) R1 me appeal nahi:** reject aakhri, wajah ke saath.
+  - **(b) Ek appeal:** reject ke misaal 7 din me, naye saboot ke saath; faisla Support Lead role kare (wo account jisne reject nahi kiya); faisla misaal 3 kaam ke din me; uske baad aakhri.
+  - **(c) Kitni bhi appeals.**
+- **Salah:** **(b)**, R1 me chhota jod. Galat reject ka sudhaar, aur bojh seemit. R1 me Support Lead role chalu karna chhota kaam hai (D-054).
+- **Trade-off:**
+  - (a) me galat reject ka koi raasta nahi.
+  - (b) me R1 me ek aur role.
+  - (c) me ek hi maamla baar-baar.
+
+### Q-089. "Parcel nahi mila" ke daawe ki samay-seema kitni?
+
+- **Status:** `Khula`. Topic: B11 (disputes), B1 (delivery).
+- **Sawal:** "parcel nahi mila" ke daawe (D-072) ki samay-seema kitni ho, aur kab se gini jaaye?
+- **Kyun zaroori:**
+  - D-072 niyam 3 me samay sirf misaal (48 ghante) hai, aur number support ki charcha ko diya gaya tha. R1 me daawa hai (D-105).
+  - Code se pakki delivery pe daawa maana nahi jaata (D-072). To samay asal me un deliveries ke liye hai jahan code nahi mila (photo aur location, D-072 niyam 2): wahan kisi aur ne parcel liya ho sakta hai, aur customer ko der se pata chalta hai.
+- **Vikalp:**
+  - **(a) Sab pe 48 ghante,** "delivered" scan se.
+  - **(b) Saboot ke hisaab se:** code se delivered pe 48 ghante (daawa darj hota hai, par D-072 ke niyam se maana nahi jaata); sirf photo aur location wali delivery pe misaal 7 din; dono "delivered" scan se.
+  - **(c) Sab pe 7 din.**
+- **Salah:** **(b)**, R1 se. Jahan saboot kamzor hai wahan customer ko poora samay, aur code wali delivery pe lambe samay ka koi fayda nahi.
+- **Trade-off:**
+  - (a) me ghar se bahar gaya customer chhoot sakta.
+  - (b) me do samay-seemaayein.
+  - (c) me code wali delivery pe bhi lamba khula maamla.
+
+### Q-090. R1 me owner ko kaunse aankde dikhein?
+
+- **Status:** `Khula`. Topic: B12 (analytics).
+- **Sawal:** R1 me owner ko (Master aur Head of Operations ke accounts pe) kaunse aankde dikhein?
+- **Kyun zaroori:**
+  - R1 ka lakshya poora flow parkhna hai (D-055); bina aankdon ke pata nahi chalta flow kahan tootta hai.
+  - Har aankde ka data R1 ke events me pehle din se chahiye; baad me jodna mushkil.
+- **Vikalp:**
+  - **(a) Kuch nahi:** sirf orders ki list.
+  - **(b) Chhota set** (din, hafta, mahina):
+    1. Orders, GMV (MRP aur diya hua daam dono), average order value.
+    2. Cancel % (wajah se), RTO % (D-108), pehli koshish me delivery %, vaade pe delivery % (D-117).
+    3. Return % (wajah aur category se, D-079), refund ka samay (D-111), daawon ki ginti (D-072).
+    4. Stock: bikne layak, ruka hua aur near-expiry ki rakam (D-062, D-089); storage fee wala maal (D-066).
+    5. Waitlist ki ginti district se (D-046); zero result wali searches.
+  - **(c) (b) + target aur alert:** har aankde ka target, tootne pe in-app alert.
+- **Salah:** **(b)** R1 me; (c) ka target aur alert R2 se.
+- **Trade-off:**
+  - (a) me flow ki kamzori chhupi rehti hai.
+  - (b) me events aur roz ke jod ka kaam.
+  - (c) me targets ki setting aur alerts ka kaam.
+
+### Q-091. Legal pages me kya likha ho?
+
+- **Status:** `Khula`. Topic: B13 (compliance).
+- **Sawal:** Terms, Privacy, Return, Shipping, Grievance aur Seller agreement jaise pages me kya likha ho?
+- **Kyun zaroori:**
+  - Sign-up pe customer inhe maanta hai (consent ka record, version ke saath), aur seller agreement seller ke judne pe.
+  - Return, refund, cancel aur delivery fee ke niyam ab tay hain (D-079, D-080, D-107, D-108, D-110, D-111, D-114), to pages unse mel khane chahiye.
+- **Vikalp:**
+  - **(a) Placeholder:** "ye demo text hai", koi niyam nahi.
+  - **(b) Tay faislon se asli jaisa draft:**
+    1. Claude tay faislon se pages likhe.
+    2. Har page pe "DUMMY: lawyer se jaancha nahi" badge aur version.
+    3. Terms ya Privacy ka bada badlav ho to agle sign-in pe naya consent.
+    4. Return aur Shipping pages ke number policy ki settings se aayein (ek baat ek jagah).
+  - **(c) Kisi template site se copy.**
+- **Salah:** **(b)**, R1 se (sign-up ka consent R1 me). Customer ko site ke asli niyam dikhte hain, aur design asli rehta hai (D-026).
+- **Trade-off:**
+  - (a) me consent ka koi matlab nahi, aur niyam kahin likhe nahi.
+  - (b) me pages likhne aur version rakhne ka kaam.
+  - (c) me copyright aur galat niyam ka jokhim.
+- **Kanooni detail jaanchi nahi** (R-004): in pages ke zaroori hisse.
+
+### Q-092. Customer apne data ke kaunse haq app me khud chala sake?
+
+- **Status:** `Khula`. Topic: B13 (compliance).
+- **Sawal:** customer apne data ke kaunse haq app me khud chala sake, aur kab se?
+- **Kyun zaroori:**
+  - Live site pe asli personal data hai (owner aur testers ka): profile sudhaarna, marketing ki consent band karna, account delete karna, apna data download karna.
+  - Kuch records kanoon se rakhne padte hain (invoice, ledger, tax), to delete pe unme se pehchaan hatani padti hai.
+- **Vikalp:**
+  - **(a) Koi self-service nahi:** sab support se (R2).
+  - **(b) Zaroori R1 me, baaki R2:**
+    1. R1: profile sudhaar; marketing consent band; account delete (chalte orders, returns aur refunds ke baad; misaal 7 din ka wapas lene ka samay; invoice aur ledger me naam, pata aur email hata ke ek code).
+    2. R2: poore data ka download (file, app se; email attachment nahi), consent ka itihaas, data request ka ticket aur tay samay.
+  - **(c) Sab R1 me.**
+- **Salah:** **(b)**. Asli data pe zaroori haq pehle din se, aur bada kaam support desk ke saath.
+- **Trade-off:**
+  - (a) me R1 me asli data pe koi haq nahi.
+  - (b) me delete ke saath pehchaan hatane ka kaam R1 me.
+  - (c) me R1 bhaari.
+- **Kanooni detail jaanchi nahi** (R-004): data ke haq, jawab ka samay, aur records rakhne ka samay.
+
+### Q-093. Search me kuch na mile to kya ho, aur synonyms kaun sambhale?
+
+- **Status:** `Khula`. Topic: B9 (search).
+- **Sawal:** search me kuch na mile to customer ko kya dikhe, aur ek cheez ke kai naam (synonyms) ki list aur na mile shabdon ki report kaun sambhale?
+- **Kyun zaroori:**
+  - Beauty me ek cheez ke kai naam aur spelling aam hain (sunscreen aur sunblock, moisturiser aur moisturizer, eyeliner aur kohl).
+  - Zero result pe customer chala jaata hai, aur na mile shabd batate hain ki kaunsa brand ya product laana chahiye.
+- **Vikalp:**
+  - **(a) Saada:** "kuch nahi mila" aur categories ki list.
+  - **(b) Madad aur report:**
+    1. Spelling ki galti pe "kya aapka matlab ..." ka sujhaav, milte-julte products, popular categories.
+    2. Synonyms ki list staff setting se, bina deploy (D-037 ki soch).
+    3. Zero result wale shabd har hafte ki report me.
+    4. R1 me ye kaam catalog ki jaanch wali team (D-084, Admin app) kare; Growth Studio (D-010) bane to wahan.
+    5. Customer "ye brand ya product chahiye" ki request de sake (sign-in se): R2.
+  - **(c) (b) + apne aap seekhne wale synonyms.**
+- **Salah:** **(b)**: niyam 1 se 4 R1 me, niyam 5 R2 se. Kam kaam me customer rukta hai, aur demand ka data milta hai.
+- **Trade-off:**
+  - (a) me customer khota.
+  - (b) me synonyms ki list ka haath ka kaam.
+  - (c) me technique ka bojh aur galat synonyms ka jokhim.
+
+### Q-094. Stock khatam product dikhe ya chhupe?
+
+- **Status:** `Khula`. Topic: B9 (search), B11 (notifications).
+- **Sawal:** stock khatam variant ya product search aur listing me dikhe ya chhupe, aur customer "stock aane pe batao" chun sake ya nahi?
+- **Kyun zaroori:**
+  - Maal ek warehouse (D-014) me hai, to stock khatam matlab har jagah khatam.
+  - Chhupane se customer wapas nahi aata; dikhane se kram aur khabar ka sawal uthta hai.
+  - D-046 sirf area ka waitlist hai, stock ka nahi. Khabar ka raasta 300 emails (D-028) me.
+- **Vikalp:**
+  - **(a) Chhupe:** stock khatam product search aur listing me nahi.
+  - **(b) Dikhe, khabar ke saath:**
+    1. "Out of stock" ke saath dikhe, kram me neeche.
+    2. Product page pe "stock aane pe batao" (sign-in se).
+    3. Khabar sirf in-app aur browser push se, email nahi.
+    4. Request misaal 90 din me khatam.
+    5. Seller ko "kitne log ruke hain" ki ginti.
+  - **(c) Dikhe, bina khabar.**
+- **Salah:** **(b)**: dikhana R1 me, khabar R2 se. Customer ka intent nahi khota, seller ko maal bhejne ka signal milta hai, aur email ka bojh nahi.
+- **Trade-off:**
+  - (a) me customer aur demand ka signal dono khote.
+  - (b) me khabar ka kaam.
+  - (c) me customer ko baar-baar dekhna padta.
+
+### Q-095. Customer ko "Bestseller" ya "kam stock" jaise aankde dikhein ya nahi?
+
+- **Status:** `Khula`. Topic: B12 (analytics), B9 (listing).
+- **Sawal:** product page aur listing pe "Bestseller", "is hafte 100+ ne kharida", "sirf 3 bache" jaise aankde dikhein ya nahi?
+- **Kyun zaroori:**
+  - Ye bikri badhate hain, par galat ya bana hua aankda jhoothi jaldi (dark pattern) hai.
+  - Apne brand (D-031) pe bhi wahi niyam.
+- **Vikalp:**
+  - **(a) Koi aisa aankda nahi.**
+  - **(b) Sirf sach, tay niyam se:**
+    1. "Bestseller": category me pichhle 30 din ki bikri ke top 10 me (misaal).
+    2. "Kam stock": sirf jab bikne layak stock misaal 5 se kam ho, asli ginti ke saath.
+    3. "X ne kharida" nahi (chhoti ginti pe gumraah karta hai).
+    4. Countdown timer sirf jab offer ka asli khatam hone ka samay ho (offers R2 se).
+    5. Har niyam ek policy page pe.
+  - **(c) Marketing ki marzi se.**
+- **Salah:** **(b)**: "Bestseller" aur "kam stock" R1 me, countdown R2 se. Sach aankde customer ke kaam ke hain, aur niyam se bana aankda jhooth nahi ban sakta.
+- **Trade-off:**
+  - (a) me sach aankdon ka fayda bhi nahi.
+  - (b) me niyam ki ginti aur policy page ka kaam.
+  - (c) me dark pattern ka seedha jokhim.
+- **Kanooni detail jaanchi nahi** (R-004): jhoothi jaldi aur kam stock dikhane ke niyam.
+
+### Q-096. Review me customer photo jod sake ya nahi?
+
+- **Status:** `Khula`. Topic: B8 (reviews).
+- **Sawal:** review me customer photo jod sake ya nahi, aur kab se?
+- **Kyun zaroori:**
+  - Skin pe lagaye shade ki asli photo cosmetics me sabse kaam ki jaankari hai, aur khareedne se pehle shade ka darr kam karti hai.
+  - Par photo me chehra, ghar, address label ya twacha ki bimari aa sakti hai; har photo jaanchni padegi.
+  - Photo upload ka raasta R1 me daawe ke liye pehle se ban raha hai (D-106).
+- **Vikalp:**
+  - **(a) R2 se:** R1 me sirf text aur star; photo R2 me, har photo staff ki jaanch ke baad.
+  - **(b) R1 se, har photo jaanch ke baad:** ek review me zyada se zyada misaal 3 photos; har photo staff ki jaanch ke baad live; chehra dikhe to customer ka "ye meri photo hai aur dikhane ki ijazat hai" tick zaroori; address label, doosre insaan ya intimate photo pe reject; video nahi.
+  - **(c) Photo aur video R1 se.**
+- **Salah:** **(b)**, R1 me chhota jod. Upload ka kaam R1 me pehle se hai, har photo jaanch se guzarti hai to jokhim kam, aur R1 me do sellers ke saath photos kam hongi. Video nahi: jagah, data aur jaanch ka bojh.
+- **Trade-off:**
+  - (a) me R1 ke reviews kam kaam ke.
+  - (b) me har photo ek insaan ki queue me.
+  - (c) me video ki jagah aur jaanch ₹0 (D-028) pe bhaari.
+- **Kanooni detail jaanchi nahi** (R-004): customer ki photo (chehra) rakhne aur dikhane ki consent.
+
+### Q-097. Nakli review pakda jaaye to kya karwai ho?
+
+- **Status:** `Khula`. Topic: B8 (moderation), B14 (abuse).
+- **Sawal:** nakli review ya rating ke saath khel (brand ke log khud order karke review, paid reviews, ek insaan ke kai accounts) pakda jaaye to kis pe kya karwai ho?
+- **Kyun zaroori:**
+  - Verified purchase se bhi khel ho sakta hai: brand khud kam daam ke orders karke review likhe. Apna brand (D-031) bhi isi niyam me.
+  - Ek insaan ke kai email (`+` alias, D-017) se kai accounts banana aasaan hai.
+- **Vikalp:**
+  - **(a) Sirf review hatao.**
+  - **(b) Seedhi karwai:**
+    1. Review hatao, wajah ke record ke saath.
+    2. Customer: pehli baar chetavni; dobara to review likhna band (misaal 6 mahine); staff wajah ke saath khol sake.
+    3. Seller: brand ke staff ya brand ke kahe pe review sabit ho to chetavni; dobara to us brand ki listings rokna, aur aage account band, Trust & Safety ke faisle se (D-047).
+    4. Kisi product ke bahut reviews hatein to uski rating dobara gini jaaye, aur seller ko wajah dikhe.
+    5. Seller app ke users (brand ka staff) apne brand ke product pe review nahi likh sakte (system ki rok).
+  - **(c) Account turant band.**
+- **Salah:** **(b)**: niyam 1 aur 5 R1 me, baaki R2 se (Trust & Safety ke saath). Saza galti ke hisaab se, galat pakde gaye ke liye raasta khula, aur brand ke apne staff pe system ki rok.
+- **Trade-off:**
+  - (a) me khel karne wale pe koi rok nahi.
+  - (b) me record, seedhi aur appeal ka kaam.
+  - (c) me galat faisle ka bada jokhim.
+- **Kanooni detail jaanchi nahi** (R-004): nakli reviews pe platform ki zimmedari.
+
+### Q-098. Customer ke behaviour ka data lein ya nahi?
+
+- **Status:** `Khula`. Topic: B12 (analytics).
+- **Sawal:** customer site pe kya dekhta, khojta aur cart me daalta hai, iska data lein ya nahi, aur kya ye bahar ki kisi analytics service ko jaaye?
+- **Kyun zaroori:**
+  - Funnel (dekha, cart, order) ke bina pata nahi chalta customer kahan rukta hai.
+  - Par bahar ki service ko data jaana matlab cookie aur consent ka kaam aur privacy ka jokhim; apne database me rakhna Atlas ki 0.5 GB (R-006) ki jagah khaata hai.
+- **Vikalp:**
+  - **(a) Sirf business events:** server ke events (order, cancel, return, search ke shabdon ki ginti); koi page-level tracking nahi.
+  - **(b) (a) + apna halka page data:** bina personal pehchaan ke din ki ginti (kis product ka page kitni baar khula, kitne cart me gaye); kachcha data misaal 30 din, phir sirf din ka jod; bahar koi service nahi.
+  - **(c) Bahar ki free analytics service,** cookie consent ke saath.
+- **Salah:** **(b)**: R1 me sirf (a) ke business events, page ka halka data R2 se. Funnel ka moota roop milta hai, data bahar nahi jaata, aur jagah seemit rehti hai.
+- **Trade-off:**
+  - (a) me funnel nahi.
+  - (b) me apna halka tracking aur jod ka kaam.
+  - (c) me consent ka banner, data bahar, aur page pe bahar ki script.
+- **Kanooni detail jaanchi nahi** (R-004): tracking aur cookies ki consent.
+
+### Q-099. Muft mile product ya inaam wale review ka niyam kya ho?
+
+- **Status:** `Khula`. Topic: B8 (reviews).
+- **Sawal:** jis customer ko product muft mila (brand ka sample ya gift, creator ko brand ka bheja product), ya jise review ke badle kuch mile, uske review ka niyam kya ho?
+- **Kyun zaroori:**
+  - Muft ya inaam wale reviews rating ko upar jhukate hain, aur chhupa inaam customer ke saath dhokha hai.
+  - Samples aur gifts (D-121) R2 me aate hain, creators ka kaam Creator app (D-010) me hai, aur loyalty me "review pe points" aam tareeka hai.
+- **Vikalp:**
+  - **(a) Koi inaam nahi:** ₹0 wali line (sample ya gift, D-121) pe review ka haq nahi; review ke badle koi points, coupon ya inaam nahi (na platform, na brand); brand customer se review ke liye seedha sampark nahi kar sakta.
+  - **(b) Label ke saath:**
+    1. ₹0 wali line ya brand ke bheje product pe review ho sake, "Muft mila product" label ke saath.
+    2. Inaam sirf review likhne pe, rating dekh ke kabhi nahi; label "Inaam mila".
+    3. Label wale reviews rating me nahi gine jaate, alag dikhte hain.
+    4. Brand khud inaam nahi de sakta, sirf platform ke program se.
+  - **(c) Inaam, bina label.**
+- **Salah:** **(a)**: niyam R1 se (R1 me ₹0 line nahi aati, par rok code me). Sabse saaf aur sabse zyada bharosa. Baad me review ke badle inaam chahiye ho to (b) ka label wala raasta khula hai.
+- **Trade-off:**
+  - (a) me reviews kam aate hain.
+  - (b) me label, alag ginti aur inaam ke niyam.
+  - (c) me bharosa aur kanoon dono ka jokhim.
+- **Kanooni detail jaanchi nahi** (R-004): inaam ya muft product wale review aur endorsement ke label ke niyam.
+
+### Q-100. Allergen ki chetavni sabke liye ek jaisi ho ya customer ke hisaab se?
+
+- **Status:** `Khula`. Topic: B3 (catalog), B9 (search).
+- **Sawal:** D-099 ki allergen ki chetavni sab customers ko ek jaisi ho (product me jaane-maane allergens), ya customer ki apni allergy ke hisaab se?
+- **Kyun zaroori:**
+  - D-099 ki chetavni R1 me hai, par ye saaf nahi ki kis tarah ki.
+  - Customer ke hisaab se chetavni ke liye uski allergy ka data chahiye, jo sehat ke paas ka data hai (consent aur suraksha, Security Architect ke saath, B14). R1 me ye data kahin tay nahi.
+- **Vikalp:**
+  - **(a) Hamesha sabke liye ek jaisi:** product page pe jaane-maane allergens (jaise fragrance ke allergens) ki chetavni, structured list (D-099 niyam 2) se; customer ka koi data nahi.
+  - **(b) Customer ke hisaab se, R1 se:** customer profile me apni allergy ke ingredients chune (consent ke saath); un ingredients wale product pe use chetavni.
+  - **(c) R1 me sabke liye ek jaisi; customer ke hisaab se baad me,** jab customer ki allergy ka data aur uski consent tay ho.
+- **Salah:** **(c)**. R1 me koi sehat ka data nahi chahiye, chetavni har customer ko dikhti hai, aur personal chetavni ka raasta khula rehta hai.
+- **Trade-off:**
+  - (a) me customer ko apni allergy ke hisaab se madad kabhi nahi.
+  - (b) me R1 me sehat ke data ka kaam aur consent.
+  - (c) me personal chetavni ka intezaar.
+- **Kanooni detail jaanchi nahi** (R-004): allergens dikhane ke niyam, aur sehat ke data ki consent.
+
 ## Change log
 
-| Version | Date       | Badlav                                                                                                                                   |
-| ------- | ---------- | ---------------------------------------------------------------------------------------------------------------------------------------- |
-| v1.0.0  | 2026-11-17 | Khaali file bani.                                                                                                                        |
-| v1.1.1  | 2026-11-18 | §1 aage ke topics (B1 se B16) aur §2 jaanchna baaki bane.                                                                                |
-| v1.2.1  | 2026-11-18 | §3 Sawal bana; Q-001 (warehouse me rakhe maal ka maalik).                                                                                |
-| v1.2.2  | 2026-11-18 | Q-001 tay: (a) brand maalik (D-060).                                                                                                     |
-| v1.2.3  | 2026-11-18 | Q-002 (customer ko dikhne wala price kaun tay kare).                                                                                     |
-| v1.2.4  | 2026-11-18 | Q-002 tay: (c) brand + platform ke niyam (D-061).                                                                                        |
-| v1.2.5  | 2026-11-18 | Q-003 (expire hone wala ya na bika maal).                                                                                                |
-| v1.2.6  | 2026-11-18 | Q-003 tay: (b) brand ka nuksaan + platform ke niyam (D-062).                                                                             |
-| v1.2.7  | 2026-11-18 | Q-004 (hamare haath se hue nuksaan ki bharpai ka daam).                                                                                  |
-| v1.2.8  | 2026-11-18 | Q-004 tay: (b) bikne wala daam (D-063).                                                                                                  |
-| v1.2.9  | 2026-11-18 | Q-005 (alag batches ka alag MRP).                                                                                                        |
-| v1.2.10 | 2026-11-18 | Q-005 tay: (b) batch ke hisaab se (D-064).                                                                                               |
-| v1.2.11 | 2026-11-18 | Q-006 (Beauty Pro buyers ka daam).                                                                                                       |
-| v1.2.12 | 2026-11-18 | Q-006 tay: (b) Pro daam (D-065); Q-007 (storage fee).                                                                                    |
-| v1.2.13 | 2026-11-18 | Q-007 tay: (c) muft, phir fee (D-066); Q-008 (product page pe expiry).                                                                   |
-| v1.2.14 | 2026-11-18 | Q-008 tay: (b) exact expiry (D-067); Q-009 (nuksaan ki vasooli).                                                                         |
-| v1.2.15 | 2026-11-18 | Q-009 tay: (b) saboot se vasooli (D-068); Q-010 (Beauty Pro ki jaanch).                                                                  |
-| v1.2.16 | 2026-11-18 | Q-010 tay: (b) saboot + staff (D-069); Q-011 (Pro daam ki quantity seema).                                                               |
-| v1.2.17 | 2026-11-18 | Q-011 tay: (b) seller tay kare (D-070).                                                                                                  |
-| v1.2.18 | 2026-11-18 | Q-012 (bachi fee) aur Q-013 (parcel nahi mila par "delivered").                                                                          |
-| v1.2.19 | 2026-11-18 | Q-012 tay: (b) seema ke baad kadam (D-071).                                                                                              |
-| v1.2.20 | 2026-11-18 | Q-013 tay: (b) saboot se faisla (D-072).                                                                                                 |
-| v1.2.21 | 2026-11-18 | Q-014 (pehle ka kaam kab aur kaise hatega).                                                                                              |
-| v1.2.22 | 2026-11-18 | Q-014 tay: (b) do kadam me (D-073).                                                                                                      |
-| v1.2.23 | 2026-11-18 | Q-015 (pehle ke kaam se kya naye me aaye, list kab aur kaise).                                                                           |
-| v1.2.24 | 2026-11-18 | Q-015 tay: (b) chalti list discovery ke saath (D-074).                                                                                   |
-| v1.2.25 | 2026-11-18 | Q-016 (ek brand ka maal kai sellers bechna chahein).                                                                                     |
-| v1.2.26 | 2026-11-18 | Q-016 tay: (a) ek brand, ek seller (D-075); Q-017 (variants kin cheezon se).                                                             |
-| v1.2.27 | 2026-11-18 | Q-017 tay: (b) category ke hisaab se (D-076); Q-018 (kai sellers wala order aur parcel).                                                 |
-| v1.2.28 | 2026-11-18 | Q-018 tay: (c) normal ek parcel (D-077); Q-019 (seller ki fees aur commission ka aadhaar).                                               |
-| v1.2.29 | 2026-11-18 | Q-019 tay: (b) + (ii) (D-078); Q-020 (return ki wajahein aur "band" ka matlab).                                                          |
-| v1.2.30 | 2026-11-18 | Q-020 tay: (b) man badla sirf band maal pe (D-079); Q-021 (return ki samay-seema).                                                       |
-| v1.2.31 | 2026-11-18 | Q-021 tay: (b) wajah ke hisaab se (D-080); Q-022 (seller ka paisa kab payable, payout).                                                  |
-| v1.2.32 | 2026-11-18 | Q-022 tay: (b) samay-seema ke baad, hafte me payout (D-081); Q-023 (expiry ki seemaon ke number).                                        |
-| v1.2.33 | 2026-11-18 | Q-023 tay: (b) default + category override (D-082); Q-024 (pack pe expiry date na ho to).                                                |
-| v1.3.1  | 2026-11-18 | Niyam badla (owner): bina dependency wale sawal ek saath; har sawal se "Iske baad" aur agle sawal ke zikr hataye.                        |
-| v1.3.2  | 2026-11-18 | Q-025 se Q-036 ek saath (kisi khule sawal pe tike nahi).                                                                                 |
-| v1.3.3  | 2026-11-18 | Q-024 se Q-036 tay: owner ne saari salah maani (D-083 se D-095).                                                                         |
-| v1.3.4  | 2026-11-18 | Q-037 se Q-057: aapas me jude sawal 6 group (G1 se G6) me ek saath (owner ne group ka tareeka chuna); group ka niyam upar.               |
-| v1.3.5  | 2026-11-18 | Q-037 se Q-057 tay (D-096 se D-116; Q-040 me teeno kadam R1 me); §1 ke "Ab tak" me naye faisle; topic wali line se "ek-ek karke" hataya. |
-| v1.3.6  | 2026-11-18 | Q-058 se Q-071 khule: Agent 2 ke pehle run ke baaki 10 sawal aur report ke 4 dhyaan points (G7, G8 group).                               |
-| v1.3.7  | 2026-11-18 | Q-058 se Q-071 tay (D-117 se D-130); §1 ke "Ab tak" me naye faisle; koi sawal khula nahi.                                                |
-| v1.3.8  | 2026-11-18 | Q-072 (push band customer ko kin khabaron ka email) aur Q-073 (ingredient master list aur blocklist) khule.                              |
-| v1.3.9  | 2026-11-18 | Q-072 aur Q-073 tay (D-131, D-132); §2 me public ingredient database ki jaanch.                                                          |
+| Version | Date       | Badlav                                                                                                                                                            |
+| ------- | ---------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| v1.0.0  | 2026-11-17 | Khaali file bani.                                                                                                                                                 |
+| v1.1.1  | 2026-11-18 | §1 aage ke topics (B1 se B16) aur §2 jaanchna baaki bane.                                                                                                         |
+| v1.2.1  | 2026-11-18 | §3 Sawal bana; Q-001 (warehouse me rakhe maal ka maalik).                                                                                                         |
+| v1.2.2  | 2026-11-18 | Q-001 tay: (a) brand maalik (D-060).                                                                                                                              |
+| v1.2.3  | 2026-11-18 | Q-002 (customer ko dikhne wala price kaun tay kare).                                                                                                              |
+| v1.2.4  | 2026-11-18 | Q-002 tay: (c) brand + platform ke niyam (D-061).                                                                                                                 |
+| v1.2.5  | 2026-11-18 | Q-003 (expire hone wala ya na bika maal).                                                                                                                         |
+| v1.2.6  | 2026-11-18 | Q-003 tay: (b) brand ka nuksaan + platform ke niyam (D-062).                                                                                                      |
+| v1.2.7  | 2026-11-18 | Q-004 (hamare haath se hue nuksaan ki bharpai ka daam).                                                                                                           |
+| v1.2.8  | 2026-11-18 | Q-004 tay: (b) bikne wala daam (D-063).                                                                                                                           |
+| v1.2.9  | 2026-11-18 | Q-005 (alag batches ka alag MRP).                                                                                                                                 |
+| v1.2.10 | 2026-11-18 | Q-005 tay: (b) batch ke hisaab se (D-064).                                                                                                                        |
+| v1.2.11 | 2026-11-18 | Q-006 (Beauty Pro buyers ka daam).                                                                                                                                |
+| v1.2.12 | 2026-11-18 | Q-006 tay: (b) Pro daam (D-065); Q-007 (storage fee).                                                                                                             |
+| v1.2.13 | 2026-11-18 | Q-007 tay: (c) muft, phir fee (D-066); Q-008 (product page pe expiry).                                                                                            |
+| v1.2.14 | 2026-11-18 | Q-008 tay: (b) exact expiry (D-067); Q-009 (nuksaan ki vasooli).                                                                                                  |
+| v1.2.15 | 2026-11-18 | Q-009 tay: (b) saboot se vasooli (D-068); Q-010 (Beauty Pro ki jaanch).                                                                                           |
+| v1.2.16 | 2026-11-18 | Q-010 tay: (b) saboot + staff (D-069); Q-011 (Pro daam ki quantity seema).                                                                                        |
+| v1.2.17 | 2026-11-18 | Q-011 tay: (b) seller tay kare (D-070).                                                                                                                           |
+| v1.2.18 | 2026-11-18 | Q-012 (bachi fee) aur Q-013 (parcel nahi mila par "delivered").                                                                                                   |
+| v1.2.19 | 2026-11-18 | Q-012 tay: (b) seema ke baad kadam (D-071).                                                                                                                       |
+| v1.2.20 | 2026-11-18 | Q-013 tay: (b) saboot se faisla (D-072).                                                                                                                          |
+| v1.2.21 | 2026-11-18 | Q-014 (pehle ka kaam kab aur kaise hatega).                                                                                                                       |
+| v1.2.22 | 2026-11-18 | Q-014 tay: (b) do kadam me (D-073).                                                                                                                               |
+| v1.2.23 | 2026-11-18 | Q-015 (pehle ke kaam se kya naye me aaye, list kab aur kaise).                                                                                                    |
+| v1.2.24 | 2026-11-18 | Q-015 tay: (b) chalti list discovery ke saath (D-074).                                                                                                            |
+| v1.2.25 | 2026-11-18 | Q-016 (ek brand ka maal kai sellers bechna chahein).                                                                                                              |
+| v1.2.26 | 2026-11-18 | Q-016 tay: (a) ek brand, ek seller (D-075); Q-017 (variants kin cheezon se).                                                                                      |
+| v1.2.27 | 2026-11-18 | Q-017 tay: (b) category ke hisaab se (D-076); Q-018 (kai sellers wala order aur parcel).                                                                          |
+| v1.2.28 | 2026-11-18 | Q-018 tay: (c) normal ek parcel (D-077); Q-019 (seller ki fees aur commission ka aadhaar).                                                                        |
+| v1.2.29 | 2026-11-18 | Q-019 tay: (b) + (ii) (D-078); Q-020 (return ki wajahein aur "band" ka matlab).                                                                                   |
+| v1.2.30 | 2026-11-18 | Q-020 tay: (b) man badla sirf band maal pe (D-079); Q-021 (return ki samay-seema).                                                                                |
+| v1.2.31 | 2026-11-18 | Q-021 tay: (b) wajah ke hisaab se (D-080); Q-022 (seller ka paisa kab payable, payout).                                                                           |
+| v1.2.32 | 2026-11-18 | Q-022 tay: (b) samay-seema ke baad, hafte me payout (D-081); Q-023 (expiry ki seemaon ke number).                                                                 |
+| v1.2.33 | 2026-11-18 | Q-023 tay: (b) default + category override (D-082); Q-024 (pack pe expiry date na ho to).                                                                         |
+| v1.3.1  | 2026-11-18 | Niyam badla (owner): bina dependency wale sawal ek saath; har sawal se "Iske baad" aur agle sawal ke zikr hataye.                                                 |
+| v1.3.2  | 2026-11-18 | Q-025 se Q-036 ek saath (kisi khule sawal pe tike nahi).                                                                                                          |
+| v1.3.3  | 2026-11-18 | Q-024 se Q-036 tay: owner ne saari salah maani (D-083 se D-095).                                                                                                  |
+| v1.3.4  | 2026-11-18 | Q-037 se Q-057: aapas me jude sawal 6 group (G1 se G6) me ek saath (owner ne group ka tareeka chuna); group ka niyam upar.                                        |
+| v1.3.5  | 2026-11-18 | Q-037 se Q-057 tay (D-096 se D-116; Q-040 me teeno kadam R1 me); §1 ke "Ab tak" me naye faisle; topic wali line se "ek-ek karke" hataya.                          |
+| v1.3.6  | 2026-11-18 | Q-058 se Q-071 khule: Agent 2 ke pehle run ke baaki 10 sawal aur report ke 4 dhyaan points (G7, G8 group).                                                        |
+| v1.3.7  | 2026-11-18 | Q-058 se Q-071 tay (D-117 se D-130); §1 ke "Ab tak" me naye faisle; koi sawal khula nahi.                                                                         |
+| v1.3.8  | 2026-11-18 | Q-072 (push band customer ko kin khabaron ka email) aur Q-073 (ingredient master list aur blocklist) khule.                                                       |
+| v1.3.9  | 2026-11-18 | Q-072 aur Q-073 tay (D-131, D-132); §2 me public ingredient database ki jaanch.                                                                                   |
+| v1.3.10 | 2026-11-19 | Q-074 se Q-100 khule: Agent 2 ke doosre run ke R1 wale sawal aur report ke 2 dhyaan points (email lines ki chhat, allergen chetavni); jude sawal G9, G10, G11 me. |
