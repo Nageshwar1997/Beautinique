@@ -1,6 +1,6 @@
 # DECISIONS: Beautinique
 
-> **Status:** v1.7.2 (2026-11-18). Har faisla ek jagah. Sirf wahi "Tay" jo owner ne khud kaha; Claude ki salah faisla nahi. Cheezein ek-ek karke judti hain.
+> **Status:** v1.9.1 (2026-11-19). Har faisla ek jagah. Sirf wahi "Tay" jo owner ne khud kaha; Claude ki salah faisla nahi. Cheezein ek-ek karke judti hain.
 
 ## 0. Kaise likhein
 
@@ -146,6 +146,53 @@
 | D-130 | Skin reaction: case record (consent ke saath photo), brand ko khabar, goodwill refund seema tak, Skin & Hair Expert ki salah; ek batch pe 3 (misaal) shikayatein to bikri ruke; R2 se (7 niyam).              | Business     | 2026-11-18 |
 | D-131 | Push band customer ko bhi email: jis khabar pe jawab chahiye aur jawab na aane pe order badalta hai (D-090); recall ki khabar har customer ko email se bhi; D-126 me jod (3 niyam).                           | Business     | 2026-11-18 |
 | D-132 | Ingredient master list R1 me badhti list (anjaana naam staff jode), public database ka import license jaanch ke baad; blocklist sirf senior catalog role badle, wajah ke saath (4 niyam).                     | Business     | 2026-11-18 |
+| D-133 | Live site pe dekhna sab ke liye; sign-up, sign-in aur order sirf allowlist ke emails se (setting se, bina deploy); asli business pe allowlist band (6 niyam).                                                 | Business     | 2026-11-19 |
+| D-134 | Kanooni area ke hisaab se system ki gehrai: L1 field, L2 workflow ki rok, L3 register aur report; har area ka level aur release ek table me.                                                                  | Business     | 2026-11-19 |
+| D-135 | Review: ek customer, ek product, ek review; lauta item bhi, cancel aur RTO nahi; dobara kharid pe edit; window misaal 365 din (5 niyam).                                                                      | Business     | 2026-11-19 |
+| D-136 | Review moderation mila-jula: star turant, text apne aap ki jaanch se, photo aur atke review staff ki queue me; Review Moderator role (7 niyam).                                                               | Business     | 2026-11-19 |
+| D-137 | Skin type, concern, hair type aur active % alag catalog fields, platform ki list se; concern me sirf cosmetic shabd; R1 me jod (5 niyam).                                                                     | Business     | 2026-11-19 |
+| D-138 | R1 ke filters: category, brand, daam, shade family, free-from, skin type, concern, claims, rating, discount, country of origin, size; sort me rating aur discount bhi.                                        | Business     | 2026-11-19 |
+| D-139 | Search ka kram: relevance, phir rating, bikri aur stock; kisi seller (apna brand bhi) ka boost nahi; sponsored R2 ke baad, label aur seema ke saath (5 niyam).                                                | Business     | 2026-11-19 |
+| D-140 | Sellers aur staff ko sirf zaroori emails: account aur paisa apni line me, kaam rokne wali khabrein din ke ek saar me, baaki in-app aur push (5 niyam).                                                        | Business     | 2026-11-19 |
+| D-141 | Order ke alawa khabrein in-app aur push se, marketing sirf opt-in se; area khulne ka email sirf push band walon ko, "baaki" ki chhat ke andar (5 niyam).                                                      | Business     | 2026-11-19 |
+| D-142 | Emails ki har line ki din ki chhat: misaal 60 OTP ke liye pakke, baaki lines 240 tak, "baaki" 120 tak; chhat paar to agle din; 80% pe chetavni (6 niyam).                                                     | Business     | 2026-11-19 |
+| D-143 | Seller ki reports kaam ki, par customer ki pehchaan ke bina (sirf order number, shehar, pincode); seller customer se seedha sampark nahi (4 niyam).                                                           | Business     | 2026-11-19 |
+| D-144 | Data export seemit: seller ka CSV uski reports jitna, finance ke registers R2 se, staff ki list me personal data chhupa; har export audit me (4 niyam).                                                       | Security     | 2026-11-19 |
+| D-145 | Demo aur dummy ka nishaan har jagah jahan dhokha ho sake: site ki patti, PDF pe SPECIMEN, dummy numbers pe badge, demo reviews (7 niyam).                                                                     | Business     | 2026-11-19 |
+| D-146 | Review chhupane ki tay list; negative raay, reaction, ilaaj ka daawa aur delivery ki shikayat kabhi wajah nahi; appeal doosra moderator tay kare (6 niyam).                                                   | Business     | 2026-11-19 |
+| D-147 | Return ya daawa reject pe customer ki ek appeal (misaal 7 din me); faisla Support Lead role kare, jisne reject nahi kiya; R1 me jod.                                                                          | Business     | 2026-11-19 |
+| D-148 | "Parcel nahi mila" ka daawa: code se delivered pe 48 ghante, sirf photo aur location wali delivery pe 7 din (misaal), "delivered" scan se (D-072 me jod).                                                     | Business     | 2026-11-19 |
+| D-149 | R1 me owner ko aankdon ka chhota set (orders, cancel, RTO, delivery, returns, refund, stock, waitlist, zero result); target aur alert R2 se.                                                                  | Business     | 2026-11-19 |
+| D-150 | Legal pages tay faislon se asli jaisa draft, DUMMY badge aur version ke saath; bade badlav pe naya consent; number policy ki settings se (4 niyam).                                                           | Business     | 2026-11-19 |
+| D-151 | Data ke haq: R1 me profile sudhaar, marketing consent band aur account delete (records me pehchaan hata ke); data download aur request R2 se.                                                                 | Security     | 2026-11-19 |
+| D-152 | Zero result pe sujhaav aur milte-julte products; synonyms staff setting se; zero result ki hafte ki report; product ki request R2 se (5 niyam).                                                               | Business     | 2026-11-19 |
+| D-153 | Stock khatam product "Out of stock" ke saath kram me neeche dikhe; "stock aane pe batao" in-app aur push se, R2 se (5 niyam).                                                                                 | Business     | 2026-11-19 |
+| D-154 | Customer ko sirf sach aankde: "Bestseller" aur "kam stock" tay niyam se R1 me; "X ne kharida" nahi; countdown sirf asli offer pe (5 niyam).                                                                   | Business     | 2026-11-19 |
+| D-155 | Review me photo R1 se: misaal 3 tak, har photo staff ki jaanch ke baad, chehre pe ijazat ka tick, video nahi; R1 me jod.                                                                                      | Business     | 2026-11-19 |
+| D-156 | Nakli review pe seedhi karwai (customer aur seller); brand ka staff apne product pe review nahi likh sakta; niyam 1 aur 5 R1 me (5 niyam).                                                                    | Business     | 2026-11-19 |
+| D-157 | Customer ke behaviour ka data: R1 me sirf server ke business events; bina pehchaan ka halka page data R2 se; bahar koi analytics service nahi.                                                                | Business     | 2026-11-19 |
+| D-158 | Muft mile product ya inaam wala review nahi: ₹0 line pe review ka haq nahi, review ke badle koi inaam nahi; niyam R1 se code me.                                                                              | Business     | 2026-11-19 |
+| D-159 | Allergen ki chetavni R1 me sabke liye ek jaisi (jaane-maane allergens); customer ki apni allergy ke hisaab se baad me (D-099 me jod).                                                                         | Business     | 2026-11-19 |
+| D-160 | Brand har review pe ek public jawab de sake, moderation ke saath; reviewer ka contact kabhi nahi; review hata nahi sakta; reviews dekhna R1, jawab R2 se (4 niyam).                                           | Business     | 2026-11-19 |
+| D-161 | Support tickets: customer, seller, delivery partner aur bina sign-in form; platform ki tay categories; baat-cheet in-app; R2 se (4 niyam).                                                                    | Business     | 2026-11-19 |
+| D-162 | Ticket ka SLA category ke hisaab se (paisa aur skin reaction pehle), kaam ke ghanton me; jawab ke intezaar me timer ruke; R2 se (5 niyam).                                                                    | Business     | 2026-11-19 |
+| D-163 | Shikayat ki seedhi: Support Agent, Support Lead, Grievance Officer; alag grievance form, timers aur register; page R1, raasta R2 (5 niyam).                                                                   | Business     | 2026-11-19 |
+| D-164 | Seller ya delivery partner ka dispute alag kaam: tay din me saboot, naya senior faisla kare, rakam pe rok, record; R2 se (5 niyam).                                                                           | Business     | 2026-11-19 |
+| D-165 | Optional beauty profile, allergy wale ingredients samet, alag consent se; personal allergen chetavni; seller ko kabhi nahi; R2 se (5 niyam; D-159 me jod).                                                    | Business     | 2026-11-19 |
+| D-166 | Sujhaav product data, sab ki kharid ke jod, staff ki routines aur (consent se) customer ki profile se; kisi seller ka boost nahi; R2 se (4 niyam).                                                            | Business     | 2026-11-19 |
+| D-167 | Review ke saath optional skin type, depth, undertone aur umar ka group, inse filter; skin ki bimari ka field nahi; R2 se.                                                                                     | Business     | 2026-11-19 |
+| D-168 | Shade finder: depth, undertone aur pasand ke sawal + customer ka abhi ka shade; camera se skin tone nahi; R2 se.                                                                                              | Business     | 2026-11-19 |
+| D-169 | Virtual try-on browser me, device pe hi, sirf lip, blush aur eye products; koi photo server pe nahi; pehle consent; R2 se (6 niyam).                                                                          | Business     | 2026-11-19 |
+| D-170 | Product pe public Q&A: brand aur verified buyers jawab dein, moderation ke saath; ilaaj ke sawal pe Expert ki salah; R2 se.                                                                                   | Business     | 2026-11-19 |
+| D-171 | Formula badle to purane reviews pe label aur rating do roop me (R2 se); R1 me har review pe us waqt ka listing version.                                                                                       | Business     | 2026-11-19 |
+| D-172 | Consultation muft, seema ke saath (misaal mahine me 2 booking, no-show pe rok, Advisor ke din me 5 sawal); R2 se.                                                                                             | Business     | 2026-11-19 |
+| D-173 | Loyalty points (misaal ₹100 pe 1 point, 1 point = ₹1), sirf platform pe kharch, cash ya transfer nahi; tiers baad me; R2 se.                                                                                  | Business     | 2026-11-19 |
+| D-174 | Points ke niyam: diye paise pe, return window ke baad pakke, misaal 12 mahine me expire, order ka misaal 20% tak; review pe points nahi (6 niyam).                                                            | Business     | 2026-11-19 |
+| D-175 | Points ki chhoot ka paisa shuru me sirf platform ka; brand ke bonus points baad me.                                                                                                                           | Business     | 2026-11-19 |
+| D-176 | Referral rok ke saath: dono ko inaam pehle order ke return window ke baad, saal me seema, ek address, device ya payment pe nahi; R2 ke baad (3 niyam).                                                        | Business     | 2026-11-19 |
+| D-177 | Store credit nahi; goodwill sirf ek customer ke ek baar ke coupon se.                                                                                                                                         | Business     | 2026-11-19 |
+| D-178 | Dobara kharid: "dobara order" aur in-app ya push yaad R2 se, bina pehle ke payment; subscription baad me, kanooni aur payment jaanch ke baad.                                                                 | Business     | 2026-11-19 |
+| D-179 | Gift cards ka design abhi, banana kanooni jaanch (R-004) ke baad; tay rakam, paane wale ke email pe, cash nahi.                                                                                               | Business     | 2026-11-19 |
 
 ## 2. Record
 
@@ -675,6 +722,7 @@
 - **Kab dobara khulega:** domain charcha (agent 2) ke baad (Claude), ya owner khud khole.
 - **Kisne, kab:** owner, 2026-11-17 (chunna Claude pe chhoda; owner ne list dekh ke pakki ki). **Nishaan:** Salah maani.
 - **Jod (owner, 2026-11-18, D-099, D-105):** R1 me do cheezein judin: ingredients ki structured list, free-from filters aur allergen ki chetavni (D-099); aur Support Desk app ka patla hissa, Support Agent role ke saath (D-105). [PROJECT_PLAN.md](PROJECT_PLAN.md) §1 me bhi.
+- **Jod (owner, 2026-11-19, D-137, D-147, D-155):** R1 me teen chhote jod: skin type, concern aur active % ke catalog fields (D-137); customer ki appeal ke liye Support Lead role (D-147); review me photo (D-155). D-133 se D-159 ke baaki R1 wale niyam R1 ke apne hisson me. [PROJECT_PLAN.md](PROJECT_PLAN.md) §1 me bhi.
 
 ### D-056. Render pe sirf ek web service
 
@@ -880,9 +928,10 @@
 - **Chhode vikalp:** partner ka "delivered" hi sach (faisla andaaze pe); customer hamesha sahi (daawa aate hi refund; jhooth bol ke refund aasaan).
 - **Kab dobara khulega:** owner khud khole.
 - **Kisne, kab:** owner, 2026-11-18. **Nishaan:** Salah maani.
-- **Asar (Claude):** Delivery app me code daalne, photo aur location ka kadam (R1 ka delivery saboot, [PROJECT_PLAN.md](PROJECT_PLAN.md) §1). Photo aur location personal data hain: kitne din rakhein aur kaun dekhe, Security Architect ke saath (B14). Daawe ka samay support ki charcha (B11) me. Kanooni detail jaanchi nahi (R-004): photo aur location jaise personal data rakhne ke niyam.
+- **Asar (Claude):** Delivery app me code daalne, photo aur location ka kadam (R1 ka delivery saboot, [PROJECT_PLAN.md](PROJECT_PLAN.md) §1). Photo aur location personal data hain: kitne din rakhein aur kaun dekhe, Security Architect ke saath (B14). Daawe ka samay D-148 me. Kanooni detail jaanchi nahi (R-004): photo aur location jaise personal data rakhne ke niyam.
 - **Jod (owner, 2026-11-18, D-077):** order alag parcels me jaaye to delivery code har parcel ka apna hota hai; tab niyam 1 ka "order ka code" parcel ka code hai.
 - **Jod (owner, 2026-11-18, D-126):** niyam 1 ka email order confirmation ka email hi hai; delivery code usi me jaata hai.
+- **Jod (owner, 2026-11-19, D-148):** niyam 3 ka samay: code se delivered pe 48 ghante, sirf photo aur location wali delivery pe misaal 7 din, dono "delivered" scan se.
 
 ### D-073. Pehle ka kaam kab aur kaise hatega
 
@@ -1231,6 +1280,7 @@
 - **Kab dobara khulega:** owner khud khole.
 - **Kisne, kab:** owner, 2026-11-18. **Nishaan:** Salah maani; R1 me teeno kadam owner ka faisla.
 - **Asar (Claude):** R1 ke catalog me INCI master list, text se milan aur filters ka kaam judta hai (D-055 me jod, [PROJECT_PLAN.md](PROJECT_PLAN.md) §1). Master list ka shuruaati data aur staff role D-132 me. Kanooni detail jaanchi nahi (R-004): label aur online page pe ingredients aur allergens dikhane ke niyam.
+- **Jod (owner, 2026-11-19, D-159):** niyam 3 ki allergen chetavni R1 me sab customers ko ek jaisi (product ke jaane-maane allergens); customer ki apni allergy ke hisaab se chetavni baad me.
 
 ### D-100. Product claims
 
@@ -1305,6 +1355,7 @@
 - **Kab dobara khulega:** owner khud khole.
 - **Kisne, kab:** owner, 2026-11-18. **Nishaan:** Salah maani.
 - **Asar (Claude):** Support Agent role R1 me chalu (D-017, D-054); [PROJECT_PLAN.md](PROJECT_PLAN.md) §1 me jod.
+- **Jod (owner, 2026-11-19, D-147):** niyam 1 ke reject ke baad customer ek appeal kar sakta hai; faisla Support Lead role karta hai (jisne reject nahi kiya), jo R1 me chalu hai.
 
 ### D-106. Daawe ka saboot
 
@@ -1564,6 +1615,7 @@
 - **Kisne, kab:** owner, 2026-11-18. **Nishaan:** Salah maani.
 - **Asar (Claude):** D-072 aur D-108 me jod. Browser push band rakhne wale customer ko kam khabar milti hai. Push band wale customer ko D-090 ke sawal aur recall (D-129) ka email D-131 me. Kai parcels wale order (D-077, D-072 ka jod) me har parcel ka code confirmation email me tabhi jaa sakta hai jab parcels order ke waqt tay hon; ye order ke design me.
 - **Jod (owner, 2026-11-18, D-131):** niyam 3 me: push band ho to jawab maangne wali khabar (jaise D-090) ka email, aur recall ki khabar (D-129) har customer ko email se bhi; dono emails ki line me OTP ke baad, paise ke emails ke saath.
+- **Jod (owner, 2026-11-19, D-142):** niyam 4 ki har line ki apni din ki chhat; OTP ke liye misaal 60 emails hamesha pakke.
 
 ### D-127. Imported cosmetics
 
@@ -1646,6 +1698,596 @@
 - **Kisne, kab:** owner, 2026-11-18. **Nishaan:** Salah maani.
 - **Asar (Claude):** shuru me staff ko naye naam haath se jodne padte hain. Senior catalog role ka naam roles ki list (D-017) me. License ki jaanch [OPEN_QUESTIONS.md](OPEN_QUESTIONS.md) §2 me. Kanooni detail jaanchi nahi (R-004): kaunse ingredients cosmetic me mana hain, aur public database ke data ka license.
 
+### D-133. Live site pe anjaan log
+
+- **Faisla:** live site pe dekhna sab ke liye, par account sirf allowlist ke emails se. Niyam:
+  1. Dekhna, search, reviews padhna aur pincode check (D-020) sab ke liye.
+  2. Sign-up aur sign-in (teeno raaste, D-021) sirf allowlist ke emails se: owner ke base emails aur unke `+` alias, aur jinhe owner jode (testers).
+  3. Allowlist ek setting me, bina deploy.
+  4. Baaki ko saaf sandesh: "Ye demo store hai."
+  5. Seller, delivery partner aur Creator ke sign-up bhi isi niyam se; waitlist (D-046) me judna bhi account se, to wo bhi allowlist tak.
+  6. Asli business pe jaane pe (D-026) allowlist ek setting se band.
+- **Wajah:** Claude ki salah, owner ne maani: code waisa hi production-grade rehta hai (D-012), par anjaan logon ka data aur emails ka bojh nahi aata, aur koi dhokha nahi khaata.
+- **Chhode vikalp:** sab ke liye khula, demo ki patti ke saath (anjaan ka data, emails ka bojh, dhokhe ka jokhim); sign-up khula aur checkout sirf allowlist (anjaan ka data aur sign-up codes phir bhi).
+- **Kab dobara khulega:** asli business pe jaate waqt (D-026), ya owner khud khole.
+- **Kisne, kab:** owner, 2026-11-19. **Nishaan:** Salah maani.
+- **Asar (Claude):** allowlist aur "demo store" ka sandesh R1 ke sign-up me ([PROJECT_PLAN.md](PROJECT_PLAN.md) §1). Portfolio dekhne wala sign-up nahi kar sakta, jab tak owner use allowlist me na jode. Bina sign-in codes ki ginti ki seema Security Architect ke saath (B14). Kanooni detail jaanchi nahi (R-004): test mode me bikri dikhane wali site, aur anjaan logon ka personal data.
+
+### D-134. Har kanooni area me system ki gehrai
+
+- **Faisla:** har kanooni area me system utna banta hai jitna is table me. **L1** = field, dummy value aur dikhana. **L2** = L1 + workflow me rok ya jaanch (iske bina aage nahi). **L3** = L2 + register, report, export aur yaad (filing jaisa nateeja; asli filing nahi).
+
+  | Area                                                                                                                  | Level                                           | Kab                               |
+  | --------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------- | --------------------------------- |
+  | GST invoice, credit note, bina gap ka invoice number (D-041)                                                          | L3                                              | R1 invoice; registers R2          |
+  | Seller pe GST TCS aur income-tax TDS                                                                                  | L3                                              | R1 hisaab; register aur export R2 |
+  | HSN aur GST rate ki table (D-086)                                                                                     | L2                                              | R1                                |
+  | Seller KYC aur warehouse state ka GSTIN (D-036)                                                                       | L2                                              | R1                                |
+  | Licence ka type, import registration (D-127, D-128)                                                                   | L2                                              | R1                                |
+  | Product page ki declarations (net quantity, MRP, mfg aur expiry, maker ya importer, country of origin, customer care) | L2 (inke bina listing live nahi)                | R1                                |
+  | Claims ke saboot (D-100)                                                                                              | L2; saboot ki expiry ki yaad L3                 | SPF R1; baaki R2                  |
+  | Reviews jaise user content: report aur chhupana                                                                       | L2; register L3                                 | R1; register R2                   |
+  | Grievance Officer aur shikayatein                                                                                     | L3                                              | R2 (page R1)                      |
+  | Privacy aur data ke haq                                                                                               | L2                                              | R1 kuch, R2 baaki                 |
+  | Dark patterns se bachav                                                                                               | L2 (UX aur code ke niyam)                       | R1                                |
+  | E-way bill (warehouse aur hub ka trip, D-027)                                                                         | L1 (trip pe dummy number)                       | R2                                |
+  | Plastic EPR (D-045)                                                                                                   | L1 (registration); packaging ka data L3 baad me | R1 field                          |
+  | Gig delivery partners ka registration                                                                                 | L1                                              | R2                                |
+  | Site ke registrations (Shops & Establishments, jalne wale maal ke liye fire NOC)                                      | L1 (field aur expiry ki yaad)                   | R2                                |
+  | Telemedicine (D-025)                                                                                                  | L1                                              | R2                                |
+
+- **Wajah:** Claude ki salah, owner ne maani: jo paise, tax aur customer ki suraksha se juda hai wo gehra, baaki sirf field, taaki asli business pe jaane pe jagah ho, aur ek insaan (D-009) ka kaam seemit rahe.
+- **Chhode vikalp:** sab L1 (design asli nahi rehta, D-026 ke khilaaf); sab L3 (ek insaan ke liye bahut bada kaam).
+- **Kab dobara khulega:** kanooni jaanch (R-004) kisi area me zyada maange, ya owner khud khole.
+- **Kisne, kab:** owner, 2026-11-19. **Nishaan:** Salah maani.
+- **Asar (Claude):** [COMPLIANCE.md](COMPLIANCE.md) ki har row ka "System me kya chahiye" khana is level se bharega. Kanooni detail jaanchi nahi (R-004): table ki har row; ye sirf "system kya banaye" ki baat hai, kanoon kya maangta hai ye kanooni jaanch batayegi.
+
+### D-135. Review ka haq
+
+- **Faisla:** ek customer, ek product, ek review. Niyam:
+  1. Haq kisi bhi delivered line se, lauta hua item bhi (return ke baad bhi raay de sake). Cancel (D-110) aur RTO (D-108) line pe nahi.
+  2. Pro daam wali line (D-065) pe bhi review.
+  3. Review pe us line ka variant (D-076 niyam 5) aur "Verified purchase" ka nishaan. Dobara kharid pe naya review nahi: purana review edit ho (variant nayi line ka chun sake), aur "kai baar kharida" ka nishaan.
+  4. Window delivery se misaal 365 din.
+  5. Customer kabhi bhi edit ya delete kare; edit dobara moderation se (D-136); har version ka record.
+- **Wajah:** Claude ki salah, owner ne maani: ek insaan ki ek awaaz, to baar-baar kharidne wala rating ko jhuka nahi sakta, aur dobara kharid pe customer apni raay taaza kar sakta hai. Lautaye item pe review rokna negative raay dabane jaisa lagta.
+- **Chhode vikalp:** har line, har baar (zyada kharidne wale ka asar zyada); har line pe review par rating me sirf aakhri (do tarah ki ginti samjhana mushkil).
+- **Kab dobara khulega:** owner khud khole.
+- **Kisne, kab:** owner, 2026-11-19. **Nishaan:** Salah maani.
+- **Asar (Claude):** R1 ke review ka data model customer + product se bandha, har version ke saath. Lautaye item ke negative reviews aayenge (jo sach hain). Kanooni detail jaanchi nahi (R-004): verified review aur negative review na dabane ke niyam.
+
+### D-136. Review ki moderation
+
+- **Faisla:** review ki moderation mila-jula. Niyam:
+  1. Sirf star rating (bina text) turant live.
+  2. Text wala review apne aap ki jaanch se guzre (gaali ke shabdon ki list; phone, email ya link jaisa pattern; lambai): paas to turant live, atka to staff ki queue.
+  3. Photo wala review hamesha queue me (D-155).
+  4. Report hua review live rahe jab tak faisla na ho; sirf personal data ya intimate content ki report pe faisle tak chhupe, aur aisi report queue me sabse pehle.
+  5. Queue ka faisla misaal 2 kaam ke din me.
+  6. Har chhupana aur wapas dikhana wajah ke saath, audit me, aur wapas ho sake.
+  7. Role "Review Moderator": poore desh ki ek team (D-084 jaisa), Admin app me.
+- **Wajah:** Claude ki salah, owner ne maani: zyadatar reviews bina staff ke live, aur jokhim wale (photo, atke, report hue) hi staff tak, to ek insaan (D-009) ka bojh kam rehta hai.
+- **Chhode vikalp:** sab pehle jaanch (ek insaan pe bojh aur customer ka intezaar); sab turant live, jaanch sirf report pe (galat content der tak live).
+- **Kab dobara khulega:** owner khud khole.
+- **Kisne, kab:** owner, 2026-11-19. **Nishaan:** Salah maani.
+- **Asar (Claude):** Review Moderator role roles ki list (D-017) me, R1 me chalu (D-054). Shabdon ki list aur apne aap ki jaanch ka kaam; kuch galat review thodi der live reh sakte hain. Chhupane ke niyam D-146 me. Kanooni detail jaanchi nahi (R-004): reviews jaise user content pe platform ki zimmedari aur hatane ke samay.
+
+### D-137. Skin type, concern aur active ingredient ka data
+
+- **Faisla:** skin type, concern aur active ingredient ka % alag catalog fields me, platform ki list se. Niyam:
+  1. Category ke hisaab se fields (D-076 jaisa): skin type (kai chune ja sakein), concern, hair type.
+  2. Seller platform ki list se chune; ye jokhim wale fields me (D-098 niyam 1), badlav pe jaanch.
+  3. Concern ki list me sirf cosmetic shabd ("acne-prone skin", "dull skin"); "treat", "cure" jaise shabd list me nahi.
+  4. Active ingredient ka % alag field, sirf tab jab pack pe chhapa ho; staff label ki photo (D-099 niyam 1) se milaye.
+  5. Filters inhi fields se (D-138).
+- **Wajah:** Claude ki salah, owner ne maani: skin type aur concern lagbhag har skincare product pe hote hain; claims ki list (D-100) saboot wale daawon ke liye hai, unme milane se list bhaari aur filters ulajhte.
+- **Chhode vikalp:** claims ki list me hi jodna (list lambi, saboot ke niyam ka sawal); R1 me kuch nahi (filter kamzor, baad me sab listings dobara).
+- **Kab dobara khulega:** owner khud khole.
+- **Kisne, kab:** owner, 2026-11-19. **Nishaan:** Salah maani.
+- **Asar (Claude):** R1 ke catalog me chhota jod (D-055 me jod, [PROJECT_PLAN.md](PROJECT_PLAN.md) §1). Seller aur staff ka thoda aur kaam; skin type, concern aur hair type ki shuruaati list catalog team (D-084) sambhale. Kanooni detail jaanchi nahi (R-004): cosmetic aur drug ke daawe ke shabd.
+
+### D-138. R1 ke filters aur sort
+
+- **Faisla:** R1 ke basic search aur filter me ye filters: category, brand, daam ki range, shade family (D-085), free-from (D-099), skin type aur concern (D-137), claims (D-100), rating, discount %, country of origin (D-127), size. Sort: relevance, daam (kam se zyada, zyada se kam), naya, rating, discount.
+- **Wajah:** Claude ki salah, owner ne maani: data R1 me ban hi raha hai, aur filter usi ka seedha fayda hai.
+- **Chhode vikalp:** kam filters (data hote hue bhi filter nahi); Pro daam se sort bhi (har dekhne wale ke liye alag daam ka sort; baad me).
+- **Kab dobara khulega:** owner khud khole.
+- **Kisne, kab:** owner, 2026-11-19. **Nishaan:** Salah maani.
+- **Asar (Claude):** filter ki screen aur search index ka kaam (Architect). Pro daam ka sort baad me. Kanooni detail jaanchi nahi (R-004): imported products ke liye country of origin ka filter zaroori hai ya nahi.
+
+### D-139. Search aur listing ka kram
+
+- **Faisla:** relevance aur gun se kram, kisi seller ka boost nahi. Niyam:
+  1. Relevance ke baad: rating (kam se kam misaal 5 reviews pe), pichhle 30 din ki bikri, stock me hona.
+  2. Out-of-stock sabse neeche (D-153).
+  3. Apne brand (D-031) ko koi boost nahi; code me kisi seller ke hisaab se boost ka raasta hi nahi.
+  4. Sponsored sirf R2 ke baad, hamesha "Sponsored" label ke saath, aur ginti ki seema (misaal har 10 me 2 tak).
+  5. Kram ke mukhya gun customer ke liye ek page pe likhe.
+- **Wajah:** Claude ki salah, owner ne maani: customer ko kaam ka kram, aur sab sellers ke saath ek niyam.
+- **Chhode vikalp:** sirf relevance (achhe aur bikne wale products neeche reh sakte); apne brand ko boost (sellers ka bharosa aur kanooni jokhim).
+- **Kab dobara khulega:** owner khud khole.
+- **Kisne, kab:** owner, 2026-11-19. **Nishaan:** Salah maani.
+- **Asar (Claude):** rating aur bikri ki ginti ka kaam; ranking ki technique Architect ke saath. Kanooni detail jaanchi nahi (R-004): kram ke gun batana, apne brand ko aage rakhna, sponsored ka label.
+
+### D-140. Sellers aur staff ke emails
+
+- **Faisla:** din ke 300 emails (D-028) me sellers aur staff ko sirf zaroori emails. Niyam:
+  1. Account aur security (invite, password reset, sign-in code): OTP wali line me.
+  2. Paisa (payout statement, udhaar ka alert aur payment link, fee ka invoice): paise wali line me.
+  3. Jinpe seller ka kaam ruke ya tay samay me jawab chahiye (receiving ka farak, listing "ye badlo", recall, batch rokna): din ka ek saar wala email (misaal subah 9 baje), har khabar alag nahi.
+  4. Baaki (listing manzoor, stock ki ginti, reviews) sirf in-app aur push.
+  5. Staff ko sirf account aur security ke emails; kaam ki khabar app ki queue me.
+- **Wajah:** Claude ki salah, owner ne maani: ek seller ko din me 1 se 2 emails, aur zaroori baat chhootti nahi.
+- **Chhode vikalp:** har khabar ka email (sellers badhte hi seema khatam); seller khud chune (settings ka kaam aur zyada emails ka jokhim).
+- **Kab dobara khulega:** emails ki seema badle, ya owner khud khole.
+- **Kisne, kab:** owner, 2026-11-19. **Nishaan:** Salah maani.
+- **Asar (Claude):** saar wale email ka kaam, aur khabar thodi der se. Line ki chhat D-142 me.
+
+### D-141. Order ke alawa customer ki khabrein
+
+- **Faisla:** order ke alawa khabrein muft raaston se, email seemit. Niyam:
+  1. Offers aur marketing sirf in-app aur push, sirf alag opt-in se (sign-up pe pehle se tick nahi), kabhi bhi band.
+  2. Review ki yaad, points ki expiry aur cart ki yaad: in-app aur push; cart ki yaad ek baar (misaal 24 ghante baad), opt-in se.
+  3. Area khulne ki khabar (D-046): in-app aur push; email sirf unhe jinke paas push nahi, "baaki" line ki din ki chhat (D-142) ke andar, baaki agle dinon me.
+  4. Har khabar me "ye kyun mila" aur band karne ka raasta.
+  5. Ek customer ko hafte me misaal 3 marketing push tak.
+- **Wajah:** Claude ki salah, owner ne maani: OTP kabhi nahi rukta, aur khabrein consent ke andar.
+- **Chhode vikalp:** sab email se (bade din pe OTP ruk sakta, consent ka jokhim); koi marketing khabar nahi (growth ka raasta band).
+- **Kab dobara khulega:** emails ki seema badle, ya owner khud khole.
+- **Kisne, kab:** owner, 2026-11-19. **Nishaan:** Salah maani.
+- **Asar (Claude):** area khulne ki khabar R1 me; baaki R2 se. Push band wale customer tak kam pahunch, aur area khulne ki khabar kuch logon ko der se. Kanooni detail jaanchi nahi (R-004): marketing khabron ki consent aur band karne ke niyam.
+
+### D-142. Emails ki har line ki din ki chhat
+
+- **Faisla:** din ke 300 emails me har line (D-126 niyam 4) ki apni din ki chhat. Niyam:
+  1. Din ke 300 me se misaal 60 sirf OTP ke liye; baaki lines milake 240 tak.
+  2. "Baaki" line misaal 120 tak; paise ke emails aur D-131 wali khabar bachi jagah me.
+  3. OTP apni 60 ke baad bhi koi bhi bachi jagah le sake.
+  4. Chhat paar ho to wo email agle din ki line me; in-app aur push usi din.
+  5. Bade burst (area khulna, recall) apne aap kai dinon me bant-te hain, chhat ke andar.
+  6. Din ka 80% (misaal 240) hone pe Master aur Head of Operations ko in-app chetavni.
+- **Wajah:** Claude ki salah, owner ne maani: OTP kabhi nahi rukta, aur paise ke emails "baaki" ke burst me nahi dabte. Sirf line ka kram kaafi nahi, kyunki subah ka burst shaam ke OTP ki jagah kha sakta hai.
+- **Chhode vikalp:** koi chhat nahi, sirf D-126 ka kram (bade din pe OTP aur sign-in ruk sakta); sirf OTP ki pakki jagah ("baaki" ka burst paise ke emails ko agle din dhakel sakta).
+- **Kab dobara khulega:** emails ki seema badle, ya owner khud khole.
+- **Kisne, kab:** owner, 2026-11-19. **Nishaan:** Salah maani.
+- **Asar (Claude):** D-126 me jod. Number misaal hain; asli number Architect aur DevOps ke saath. Bade recall ke emails kuch dinon me bant sakte hain (in-app aur push usi din). Kanooni detail jaanchi nahi (R-004): recall pe customer ko suchna dene ke samay ke niyam.
+
+### D-143. Seller ki reports aur customer ki jaankari
+
+- **Faisla:** seller ko kaam ki reports milti hain, par customer ki pehchaan ke bina. Niyam:
+  1. Orders aur lines (variant, batch, daam, "discount kisne diya", D-101), returns wajah ke saath (D-079) aur jaanch ka nateeja (D-112), stock batch ke hisaab se umar aur expiry (D-062, D-066), settlement statement (D-081), reviews ka saar.
+  2. Customer ki pehchaan: sirf order number, shehar ya district, aur pincode; naam, phone, email, address nahi.
+  3. Invoice ki copy me sirf wo jo invoice pe zaroori hai.
+  4. Customer ki koi list nahi; seller customer se seedha sampark nahi kar sakta.
+- **Wajah:** Claude ki salah, owner ne maani: fulfilment platform karta hai (D-014), to brand ko kaam ka data milta hai aur customer ka personal data kam haathon me rehta hai.
+- **Chhode vikalp:** sab, naam, phone aur address samet (personal data bahut haathon me); sirf jod (brand apne returns aur stock samajh nahi pata).
+- **Kab dobara khulega:** owner khud khole.
+- **Kisne, kab:** owner, 2026-11-19. **Nishaan:** Salah maani.
+- **Asar (Claude):** R1 me seller app ki reports (reviews ka saar R2 se). Invoice ki copy ke niyam ki jaanch. Kanooni detail jaanchi nahi (R-004): seller ko customer ka data dena, aur invoice pe customer ki zaroori jaankari.
+
+### D-144. Data export
+
+- **Faisla:** data export seemit. Niyam:
+  1. Seller: apne orders, settlement aur stock ka CSV, utni hi jaankari jitni seller ki reports me (D-143); customer ki pehchaan nahi.
+  2. Finance staff: ledger aur tax registers (R2 se; accounting software ka format baad me).
+  3. Baaki staff: sirf apne kaam ki list, personal data chhupa ke.
+  4. Har export audit me; ek export me misaal 50,000 rows tak, zyada pe saaf mana (aadhi kati file nahi).
+- **Wajah:** Claude ki salah, owner ne maani: seller aur finance ka kaam chalta hai, aur data ke leak ka raasta seemit rehta hai.
+- **Chhode vikalp:** koi export nahi (seller aur finance ka haath ka kaam); sab ko sab (data ke leak ka bada raasta).
+- **Kab dobara khulega:** owner khud khole.
+- **Kisne, kab:** owner, 2026-11-19. **Nishaan:** Salah maani.
+- **Asar (Claude):** seller ka settlement CSV R1 me; baaki R2 se. Export ki suraksha (file me formula jaise cell, scope) Security Architect ke saath (B14).
+
+### D-145. Demo aur dummy ka nishaan
+
+- **Faisla:** har jagah jahan dhokha ho sake, demo ya dummy ka nishaan. Niyam:
+  1. Har app ke upar patli patti: "Demo store: koi asli bikri, payment ya delivery nahi."
+  2. Invoice, credit note aur payout statement ke PDF pe "SPECIMEN / DEMO: not a tax document" watermark.
+  3. Har dummy registration number (GSTIN, licence, import registration, EPR) ke saath "DUMMY" badge, jahan bhi dikhe.
+  4. Grievance Officer jaise officers ke liye sirf role ka naam aur `example` domain ka email; kisi insaan ka banawati naam nahi.
+  5. Dummy numbers aise ki kisi asli company ke number se na milein.
+  6. Demo ke reviews pe "Demo review" ka nishaan.
+  7. Saare dummy values ek jagah (data ya config) ki list me (D-026).
+- **Wajah:** Claude ki salah, owner ne maani: koi bhi page ya file bahar jaaye to bhi asli na lage.
+- **Chhode vikalp:** kahin nahi (nakli invoice aur dhokhe ka jokhim); sirf site ki patti (download hui file asli lagti).
+- **Kab dobara khulega:** asli business pe jaate waqt (D-026), ya owner khud khole.
+- **Kisne, kab:** owner, 2026-11-19. **Nishaan:** Salah maani.
+- **Asar (Claude):** R1 se; har PDF aur number ke saath kaam. Owner ke accounts ke reviews (D-017, D-039) niyam 6 se demo dikhte hain. Kanooni detail jaanchi nahi (R-004): demo site pe dummy registration numbers aur invoice jaise documents.
+
+### D-146. Review chhupane ke niyam
+
+- **Faisla:** review chhupane ki tay list, aur negative raay kabhi wajah nahi. Niyam:
+  1. Chhupane ki wajahein sirf: gaali, nafrat ya dhamki; kisi ka personal data (phone, email, address, order number); spam, link ya doosre product ya site ka prachaar; product se bilkul alag baat; nakli ya khel wala review; intimate ya kisi aur ki photo; kanooni order.
+  2. Kabhi wajah nahi: kam rating, kadwi raay, brand ki aalochna, "mujhe reaction hua".
+  3. Skin reaction wala review rahe, aur customer ko support ka raasta dikhe (D-130).
+  4. Ilaaj jaise daawe wale review rahein; saare reviews ke upar ek tay note: "Reviews customers ki apni raay hain, ilaaj ka daawa nahi."
+  5. Delivery ya packaging ki shikayat review me rahe (customer ka asli anubhav).
+  6. Customer ko chhupane ki wajah dikhe; wo badal ke dobara bhej sake; ek appeal, jiska faisla doosra moderator kare (D-084 niyam 3 jaisa).
+- **Wajah:** Claude ki salah, owner ne maani: ek jaisa faisla, aur negative raay ki suraksha saaf. Review ko hatana ya doosri jagah bhejna customer ki raay se chhed jaisa hai.
+- **Chhode vikalp:** delivery ki shikayat wale review rating se bahar (customer ka review uski marzi ke bina doosri jagah); staff ki samajh, koi tay list nahi (har moderator ka alag faisla).
+- **Kab dobara khulega:** owner khud khole.
+- **Kisne, kab:** owner, 2026-11-19. **Nishaan:** Salah maani.
+- **Asar (Claude):** R1 se. Brand ki rating pe hamari delivery ka asar dikhega. Appeal ke liye doosra moderator account (D-017). Kanooni detail jaanchi nahi (R-004): negative review chhupane ke niyam, review me ilaaj ke daawe, aur user content hatane ke niyam.
+
+### D-147. Return ya daawa reject pe customer ki appeal
+
+- **Faisla:** R1 me Support Agent ke reject (D-105) ke baad customer ek appeal kar sakta hai: reject ke misaal 7 din me, naye saboot ke saath. Faisla Support Lead role kare (wo account jisne reject nahi kiya), misaal 3 kaam ke din me; uske baad faisla aakhri.
+- **Wajah:** Claude ki salah, owner ne maani: galat reject ka sudhaar hota hai, aur bojh seemit rehta hai.
+- **Chhode vikalp:** R1 me appeal nahi (galat reject ka koi raasta nahi); kitni bhi appeals (ek hi maamla baar-baar).
+- **Kab dobara khulega:** owner khud khole.
+- **Kisne, kab:** owner, 2026-11-19. **Nishaan:** Salah maani.
+- **Asar (Claude):** R1 me chhota jod: Support Lead role R1 me chalu (D-017, D-054); D-105 me jod, [PROJECT_PLAN.md](PROJECT_PLAN.md) §1.
+
+### D-148. "Parcel nahi mila" ke daawe ki samay-seema
+
+- **Faisla:** "parcel nahi mila" ke daawe (D-072) ki samay-seema saboot ke hisaab se: code se delivered pe 48 ghante (daawa darj hota hai, par D-072 ke niyam se maana nahi jaata); sirf photo aur location wali delivery pe misaal 7 din. Dono "delivered" scan se gine jaate hain.
+- **Wajah:** Claude ki salah, owner ne maani: jahan saboot kamzor hai wahan customer ko poora samay, aur code wali delivery pe lambe samay ka koi fayda nahi.
+- **Chhode vikalp:** sab pe 48 ghante (ghar se bahar gaya customer chhoot sakta); sab pe 7 din (code wali delivery pe bhi lamba khula maamla).
+- **Kab dobara khulega:** owner khud khole.
+- **Kisne, kab:** owner, 2026-11-19. **Nishaan:** Salah maani.
+- **Asar (Claude):** D-072 niyam 3 ka number yahan; D-072 me jod. R1 me (D-105).
+
+### D-149. R1 ke aankde
+
+- **Faisla:** R1 me owner ko (Master aur Head of Operations ke accounts pe) din, hafte aur mahine ke ye aankde:
+  1. Orders, GMV (MRP aur diya hua daam dono), average order value.
+  2. Cancel % (wajah se), RTO % (D-108), pehli koshish me delivery %, vaade pe delivery % (D-117).
+  3. Return % (wajah aur category se, D-079), refund ka samay (D-111), daawon ki ginti (D-072).
+  4. Stock: bikne layak, ruka hua aur near-expiry ki rakam (D-062, D-089); storage fee wala maal (D-066).
+  5. Waitlist ki ginti district se (D-046); zero result wali searches (D-152).
+- **Wajah:** Claude ki salah, owner ne maani: R1 ka lakshya poora flow parkhna hai (D-055), aur bina aankdon ke pata nahi chalta flow kahan tootta.
+- **Chhode vikalp:** kuch nahi, sirf orders ki list (flow ki kamzori chhupi); target aur alert bhi R1 me (targets aur alerts ka kaam; R2 me).
+- **Kab dobara khulega:** owner khud khole.
+- **Kisne, kab:** owner, 2026-11-19. **Nishaan:** Salah maani.
+- **Asar (Claude):** har aankde ka data R1 ke events me pehle din se (D-157); roz ke jod ka kaam, sote server (R-002) ke saath Architect. Target aur alert R2 se.
+
+### D-150. Legal pages ka content
+
+- **Faisla:** Terms, Privacy, Return, Shipping, Grievance aur Seller agreement jaise pages tay faislon se asli jaisa draft. Niyam:
+  1. Claude tay faislon se pages likhe.
+  2. Har page pe "DUMMY: lawyer se jaancha nahi" badge aur version.
+  3. Terms ya Privacy ka bada badlav ho to agle sign-in pe naya consent.
+  4. Return aur Shipping pages ke number policy ki settings se aayein (ek baat ek jagah).
+- **Wajah:** Claude ki salah, owner ne maani: customer ko site ke asli niyam dikhte hain, aur design asli rehta hai (D-026).
+- **Chhode vikalp:** placeholder (consent ka koi matlab nahi, niyam kahin likhe nahi); kisi template site se copy (copyright aur galat niyam ka jokhim).
+- **Kab dobara khulega:** kanooni jaanch (R-004) ke baad, ya owner khud khole.
+- **Kisne, kab:** owner, 2026-11-19. **Nishaan:** Salah maani.
+- **Asar (Claude):** R1 me (sign-up ka consent version ke saath). Pages likhne aur version rakhne ka kaam. Kanooni detail jaanchi nahi (R-004): in pages ke zaroori hisse.
+
+### D-151. Customer ke data ke haq
+
+- **Faisla:** zaroori haq R1 me, baaki R2 se. Niyam:
+  1. R1: profile sudhaar; marketing consent band; account delete (chalte orders, returns aur refunds ke baad; misaal 7 din ka wapas lene ka samay; invoice aur ledger me naam, pata aur email hata ke ek code).
+  2. R2: poore data ka download (file, app se; email attachment nahi), consent ka itihaas, data request ka ticket aur tay samay.
+- **Wajah:** Claude ki salah, owner ne maani: asli personal data (owner aur testers ka) pe zaroori haq pehle din se, aur bada kaam support desk ke saath.
+- **Chhode vikalp:** koi self-service nahi, sab support se (R1 me koi haq nahi); sab R1 me (R1 bhaari).
+- **Kab dobara khulega:** kanooni jaanch (R-004) ke baad, ya owner khud khole.
+- **Kisne, kab:** owner, 2026-11-19. **Nishaan:** Salah maani.
+- **Asar (Claude):** delete ke saath pehchaan hatane ka kaam R1 me; records kitne din rakhein, Security Architect ke saath (B14). Kanooni detail jaanchi nahi (R-004): data ke haq, jawab ka samay, aur records rakhne ka samay.
+
+### D-152. Zero result aur synonyms
+
+- **Faisla:** search me kuch na mile to madad, aur shabdon ki report. Niyam:
+  1. Spelling ki galti pe "kya aapka matlab ..." ka sujhaav, milte-julte products, popular categories.
+  2. Synonyms ki list staff setting se, bina deploy (D-037 ki soch).
+  3. Zero result wale shabd har hafte ki report me.
+  4. R1 me ye kaam catalog ki jaanch wali team (D-084, Admin app) kare; Growth Studio (D-010) bane to wahan.
+  5. Customer "ye brand ya product chahiye" ki request de sake (sign-in se): R2 se.
+- **Wajah:** Claude ki salah, owner ne maani: kam kaam me customer rukta hai, aur demand ka data milta hai.
+- **Chhode vikalp:** saada "kuch nahi mila" (customer khota); apne aap seekhne wale synonyms (technique ka bojh aur galat synonyms ka jokhim).
+- **Kab dobara khulega:** owner khud khole.
+- **Kisne, kab:** owner, 2026-11-19. **Nishaan:** Salah maani.
+- **Asar (Claude):** niyam 1 se 4 R1 me. Synonyms ki list ka haath ka kaam.
+
+### D-153. Stock khatam product
+
+- **Faisla:** stock khatam product dikhe, khabar ke saath. Niyam:
+  1. "Out of stock" ke saath dikhe, kram me neeche (D-139).
+  2. Product page pe "stock aane pe batao" (sign-in se).
+  3. Khabar sirf in-app aur browser push se, email nahi.
+  4. Request misaal 90 din me khatam.
+  5. Seller ko "kitne log ruke hain" ki ginti.
+- **Wajah:** Claude ki salah, owner ne maani: customer ka intent nahi khota, seller ko maal bhejne ka signal milta hai, aur email ka bojh nahi.
+- **Chhode vikalp:** chhupe (customer aur demand ka signal dono khote); dikhe par bina khabar (customer ko baar-baar dekhna padta).
+- **Kab dobara khulega:** owner khud khole.
+- **Kisne, kab:** owner, 2026-11-19. **Nishaan:** Salah maani.
+- **Asar (Claude):** dikhana R1 me; "stock aane pe batao" ki khabar R2 se.
+
+### D-154. Customer ko dikhne wale aankde
+
+- **Faisla:** customer ko sirf sach aankde, tay niyam se. Niyam:
+  1. "Bestseller": category me pichhle 30 din ki bikri ke top 10 me (misaal).
+  2. "Kam stock": sirf jab bikne layak stock misaal 5 se kam ho, asli ginti ke saath.
+  3. "X ne kharida" nahi (chhoti ginti pe gumraah karta hai).
+  4. Countdown timer sirf jab offer ka asli khatam hone ka samay ho (offers R2 se).
+  5. Har niyam ek policy page pe.
+- **Wajah:** Claude ki salah, owner ne maani: sach aankde customer ke kaam ke hain, aur niyam se bana aankda jhooth nahi ban sakta. Apne brand (D-031) pe bhi wahi niyam.
+- **Chhode vikalp:** koi aisa aankda nahi (sach aankdon ka fayda bhi nahi); marketing ki marzi se (dark pattern ka seedha jokhim).
+- **Kab dobara khulega:** owner khud khole.
+- **Kisne, kab:** owner, 2026-11-19. **Nishaan:** Salah maani.
+- **Asar (Claude):** "Bestseller" aur "kam stock" R1 me; countdown R2 se. Kanooni detail jaanchi nahi (R-004): jhoothi jaldi aur kam stock dikhane ke niyam.
+
+### D-155. Review me customer ki photo
+
+- **Faisla:** review me photo R1 se, har photo jaanch ke baad: ek review me zyada se zyada misaal 3 photos; har photo staff ki jaanch (D-136) ke baad live; chehra dikhe to customer ka "ye meri photo hai aur dikhane ki ijazat hai" tick zaroori; address label, doosre insaan ya intimate photo pe reject; video nahi.
+- **Wajah:** Claude ki salah, owner ne maani: photo upload ka kaam R1 me daawe ke liye pehle se hai (D-106), har photo jaanch se guzarti hai to jokhim kam, aur R1 me do sellers ke saath photos kam hongi. Video nahi: jagah, data aur jaanch ka bojh.
+- **Chhode vikalp:** photo R2 se (R1 ke reviews kam kaam ke); photo aur video R1 se (video ki jagah aur jaanch ₹0, D-028, pe bhaari).
+- **Kab dobara khulega:** owner khud khole.
+- **Kisne, kab:** owner, 2026-11-19. **Nishaan:** Salah maani.
+- **Asar (Claude):** R1 me chhota jod (D-055 me jod, [PROJECT_PLAN.md](PROJECT_PLAN.md) §1). Har photo ek insaan ki queue me. Photos database me nahi (R-006); media ki jagah Architect ke saath. Kanooni detail jaanchi nahi (R-004): customer ki photo (chehra) rakhne aur dikhane ki consent.
+
+### D-156. Nakli review pe karwai
+
+- **Faisla:** nakli review ya rating ke saath khel pakda jaaye to seedhi karwai. Niyam:
+  1. Review hatao, wajah ke record ke saath.
+  2. Customer: pehli baar chetavni; dobara to review likhna band (misaal 6 mahine); staff wajah ke saath khol sake.
+  3. Seller: brand ke staff ya brand ke kahe pe review sabit ho to chetavni; dobara to us brand ki listings rokna, aur aage account band, Trust & Safety ke faisle se (D-047).
+  4. Kisi product ke bahut reviews hatein to uski rating dobara gini jaaye, aur seller ko wajah dikhe.
+  5. Seller app ke users (brand ka staff) apne brand ke product pe review nahi likh sakte (system ki rok).
+- **Wajah:** Claude ki salah, owner ne maani: saza galti ke hisaab se, galat pakde gaye ke liye raasta khula, aur brand ke apne staff pe system ki rok. Apna brand (D-031) bhi isi niyam me.
+- **Chhode vikalp:** sirf review hatao (khel karne wale pe koi rok nahi); account turant band (galat faisle ka bada jokhim).
+- **Kab dobara khulega:** owner khud khole.
+- **Kisne, kab:** owner, 2026-11-19. **Nishaan:** Salah maani.
+- **Asar (Claude):** niyam 1 aur 5 R1 me; baaki R2 se, Trust & Safety ke saath. `+` alias (D-017) se kai accounts ki pehchaan address, device aur payment ke jod se, Security Architect ke saath (B14). Kanooni detail jaanchi nahi (R-004): nakli reviews pe platform ki zimmedari.
+
+### D-157. Customer ke behaviour ka data
+
+- **Faisla:** R1 me sirf server ke business events (order, cancel, return, search ke shabdon ki ginti); koi page-level tracking nahi. R2 se bina personal pehchaan ka halka page data: din ki ginti (kis product ka page kitni baar khula, kitne cart me gaye); kachcha data misaal 30 din, phir sirf din ka jod. Bahar koi analytics service nahi.
+- **Wajah:** Claude ki salah, owner ne maani: funnel ka moota roop milta hai, data bahar nahi jaata, aur Atlas ki 0.5 GB (R-006) me jagah seemit rehti hai.
+- **Chhode vikalp:** sirf business events, hamesha (funnel nahi); bahar ki free analytics service, cookie consent ke saath (consent ka banner, data bahar, page pe bahar ki script).
+- **Kab dobara khulega:** owner khud khole.
+- **Kisne, kab:** owner, 2026-11-19. **Nishaan:** Salah maani.
+- **Asar (Claude):** R1 ke aankde (D-149) inhi events se. Apna halka tracking aur jod ka kaam R2 me. Kanooni detail jaanchi nahi (R-004): tracking aur cookies ki consent.
+
+### D-158. Muft mile product ya inaam wale review
+
+- **Faisla:** koi inaam nahi: ₹0 wali line (sample ya gift, D-121) pe review ka haq nahi; review ke badle koi points, coupon ya inaam nahi (na platform, na brand); brand customer se review ke liye seedha sampark nahi kar sakta.
+- **Wajah:** Claude ki salah, owner ne maani: sabse saaf aur sabse zyada bharosa. Baad me review ke badle inaam chahiye ho to label wala raasta khula hai.
+- **Chhode vikalp:** label ke saath ("Muft mila product", "Inaam mila"; label, alag ginti aur inaam ke niyam ka kaam); inaam bina label (bharosa aur kanoon dono ka jokhim).
+- **Kab dobara khulega:** loyalty ki charcha (B10) me review ke points chahiye hon, ya owner khud khole.
+- **Kisne, kab:** owner, 2026-11-19. **Nishaan:** Salah maani.
+- **Asar (Claude):** niyam R1 se code me (R1 me ₹0 line nahi aati, par rok code me). Reviews kam aa sakte hain. Kanooni detail jaanchi nahi (R-004): inaam ya muft product wale review aur endorsement ke label ke niyam.
+
+### D-159. Allergen ki chetavni ka roop
+
+- **Faisla:** D-099 ki allergen ki chetavni R1 me sab customers ko ek jaisi: product page pe jaane-maane allergens (jaise fragrance ke allergens) ki chetavni, structured list (D-099 niyam 2) se; customer ka koi data nahi. Customer ki apni allergy ke hisaab se chetavni baad me, jab customer ki allergy ka data aur uski consent tay ho.
+- **Wajah:** Claude ki salah, owner ne maani: R1 me koi sehat ka data nahi chahiye, chetavni har customer ko dikhti hai, aur personal chetavni ka raasta khula rehta hai.
+- **Chhode vikalp:** hamesha sabke liye ek jaisi (customer ko apni allergy ke hisaab se madad kabhi nahi); customer ke hisaab se R1 se (R1 me sehat ke data ka kaam aur consent).
+- **Kab dobara khulega:** customer ki allergy ka data tay hone pe, ya owner khud khole.
+- **Kisne, kab:** owner, 2026-11-19. **Nishaan:** Salah maani.
+- **Asar (Claude):** D-099 me jod. Allergy ka data sehat ke paas ka data hai: consent aur suraksha Security Architect ke saath (B14). Kanooni detail jaanchi nahi (R-004): allergens dikhane ke niyam, aur sehat ke data ki consent.
+- **Jod (owner, 2026-11-19, D-165):** customer ki apni allergy ke hisaab se chetavni beauty profile (D-165) se, R2 se.
+
+### D-160. Brand ka review pe jawab
+
+- **Faisla:** brand (seller) har review pe ek public jawab de sakta hai, niyam ke saath. Niyam:
+  1. Har review pe ek jawab (edit ho sake), reviews wale moderation niyam (D-136, D-146) se.
+  2. Seller ko reviewer ka sirf chhota naam dikhe, koi contact detail kabhi nahi (D-143).
+  3. Seller report kare (wajah ke saath), faisla moderator ka; seller review hata ya badal nahi sakta.
+  4. Jawab me coupon, offer ya bahar sampark ka raasta nahi.
+- **Wajah:** Claude ki salah, owner ne maani: brand ki baat customer tak pahunchti hai aur customer ki suraksha bhi rehti hai. Apna brand (D-031) bhi isi niyam me.
+- **Chhode vikalp:** jawab nahi, sirf dekhna aur report (brand ki baat nahi pahunchti); jawab bina moderation (bina jaanch live).
+- **Kab dobara khulega:** owner khud khole.
+- **Kisne, kab:** owner, 2026-11-19. **Nishaan:** Salah maani.
+- **Asar (Claude):** apne products ke reviews dekhna R1 me (seller app); jawab aur report R2 se. Jawab bhi moderation ki queue me.
+
+### D-161. Support tickets ke raaste aur categories
+
+- **Faisla:** support tickets kai log bana sakte hain, platform ki tay categories me. Niyam:
+  1. Signed-in customer aur seller apne app se (order, parcel ya line chun ke); bina sign-in "Contact us" form (email zaroori; jab tak D-133 ki allowlist hai, sirf allowlist ke emails se); delivery partner Delivery app se apne maamle (kamaai, kaat).
+  2. Categories platform ki list se, har ek ka tay raasta: order ki haalat; cancel, return, refund; parcel nahi mila (D-072); toota ya galat item (D-106); payment kata par order nahi; account aur sign-in; product ya shade ka sawal (Beauty Advisor, D-025); skin reaction (D-130); review ya content ki shikayat; privacy ya data ki request (D-151); delivery partner ka vyavhaar; seller ke maamle.
+  3. Ticket ki baat-cheet in-app; jawab aane pe push; push band ho to email sirf tab jab customer ka jawab chahiye (D-131 jaisa), emails ki chhat (D-142) ke andar.
+  4. Band hone pe ek sawal ka chhota survey (in-app).
+- **Wajah:** Claude ki salah, owner ne maani: sab paksh ek hi desk pe, aur email ki seema pe bojh nahi.
+- **Chhode vikalp:** sirf signed-in customer (seller, partner aur bina sign-in wale ke liye raasta nahi); live chat bhi (ek insaan ko screen pe baithe rehna, aur server so jaata, D-028).
+- **Kab dobara khulega:** owner khud khole.
+- **Kisne, kab:** owner, 2026-11-19. **Nishaan:** Salah maani.
+- **Asar (Claude):** R2 se (D-105 niyam 3). Categories aur raaston ki setting ka kaam. SLA D-162 me.
+
+### D-162. Ticket ka SLA aur kaam ke ghante
+
+- **Faisla:** ticket ka SLA category (D-161) ke hisaab se, kaam ke ghanton me. Niyam:
+  1. Paisa (kata par order nahi, refund nahi aaya) aur skin reaction: pehla jawab 4 kaam ke ghante, hal 1 kaam ka din (misaal).
+  2. Baaki: 24 kaam ke ghante aur 3 kaam ke din; Beauty Advisor ka sawal 1 kaam ka din (misaal).
+  3. Kaam ke ghante misaal Monday se Saturday 10:00 se 18:00 IST; chhuttiyan setting me (D-117 jaisa).
+  4. Customer ke jawab ke intezaar me timer ruke; misaal 7 din jawab na aaye to ticket band (dobara khul sake).
+  5. SLA tootne pe Support Lead ko in-app alert.
+- **Wajah:** Claude ki salah, owner ne maani: zaroori maamle pehle, aur ek insaan (D-009) ke liye sach vaada.
+- **Chhode vikalp:** ek SLA sab pe (paise wala maamla bhi dheema); koi SLA nahi (customer ko koi umeed nahi).
+- **Kab dobara khulega:** owner khud khole.
+- **Kisne, kab:** owner, 2026-11-19. **Nishaan:** Salah maani.
+- **Asar (Claude):** R2 se. Timers aur kaam ke ghanton ke calendar ka kaam; sote server (R-002) pe timers late ho sakte hain (Architect).
+
+### D-163. Shikayat ki seedhi aur Grievance Officer
+
+- **Faisla:** support ke faisle ke baad shikayat ki seedhi aur grievance register. Niyam:
+  1. Support Agent, phir Support Lead (appeal, D-147), phir Grievance Officer.
+  2. "Grievance" ka alag form (bina sign-in bhi), ticket number turant.
+  3. Receipt aur hal ke timers (misaal 48 ghante aur 30 din); review ya content ki shikayat ka chhota timer (misaal 24 ghante me receipt).
+  4. Grievance register: har shikayat, faisla aur samay; mahine ki report Head of Operations ko (D-044).
+  5. Grievance Officer ka role alag account pe (D-017).
+- **Wajah:** Claude ki salah, owner ne maani: gambhir shikayat aam queue me nahi dabti, aur har shikayat ka record rehta hai.
+- **Chhode vikalp:** alag raasta nahi, sab ek queue me (gambhir shikayat dab jaati); seedhi bina register (shikayaton ka record nahi).
+- **Kab dobara khulega:** kanooni jaanch (R-004) ke baad, ya owner khud khole.
+- **Kisne, kab:** owner, 2026-11-19. **Nishaan:** Salah maani.
+- **Asar (Claude):** site pe Grievance Officer ka saada page R1 se (D-134, officer ki jaankari dummy D-145 niyam 4 se); poora raasta R2 se. Register aur timers ka kaam. Kanooni detail jaanchi nahi (R-004): grievance officer, receipt aur hal ke samay, aur user content ki shikayat ke samay.
+
+### D-164. Seller aur delivery partner ke dispute
+
+- **Faisla:** seller ya delivery partner platform ke faisle (receiving ka farak D-096, "brand ki galti" D-112, bharpai D-063, kaat D-068 aur D-103, payout D-081) se asehmat ho to "dispute" ek alag kaam. Niyam:
+  1. Faisle ke misaal 7 din (seller) ya 3 din (partner) me, saboot ke saath.
+  2. Faisla us team ka senior kare jo pehle faisle me nahi tha (D-084 niyam 3 jaisa).
+  3. Faisla misaal 5 kaam ke din me.
+  4. Dispute chalte us rakam pe rok (payout ki hold, ya kaat ruki).
+  5. Har dispute ka record; seller ke payout statement me dispute ki line.
+- **Wajah:** Claude ki salah, owner ne maani: saaf samay, nishpaksh faisla, aur jhagde ki rakam ka hisaab saaf.
+- **Chhode vikalp:** sirf ticket, koi tay samay nahi (maamle latakte); sirf Finance tay kare (operations ke maamle Finance ke paas).
+- **Kab dobara khulega:** owner khud khole.
+- **Kisne, kab:** owner, 2026-11-19. **Nishaan:** Salah maani.
+- **Asar (Claude):** R2 se. Dispute ka naya kaam, aur finance me rakam ki hold.
+
+### D-165. Customer ki beauty profile
+
+- **Faisla:** customer optional beauty profile save kar sakta hai, allergens samet. Niyam:
+  1. Fields: skin type, depth aur undertone (D-085 ki list), concerns (D-137 ki list), allergy wale ingredients (ingredient master list, D-132, se chune).
+  2. Istemaal: product page aur cart pe personal allergen chetavni, search me "meri skin ke liye" ka switch, shade finder (D-168).
+  3. Chetavni ke saath hamesha "pack ki list se mila ke dekhein" (master list se milan galat ho sakta hai).
+  4. Alag consent ("is jaankari se mujhe salah do"); customer kabhi bhi badle ya mitaye.
+  5. Seller ko kabhi nahi; staff sirf tab jab customer khud support me bataye.
+- **Wajah:** Claude ki salah, owner ne maani: cosmetics me personal allergen chetavni sabse bada suraksha fayda hai.
+- **Chhode vikalp:** profile nahi, chetavni sabke liye ek jaisi hi (personal suraksha nahi); profile bina allergens (suraksha wala hissa chhoot-ta).
+- **Kab dobara khulega:** owner khud khole.
+- **Kisne, kab:** owner, 2026-11-19. **Nishaan:** Salah maani.
+- **Asar (Claude):** R2 se; D-159 me jod. Allergy aur skin concerns sehat ke paas ka data: consent, kaun dekhe aur kitne din, Security Architect ke saath (B14). Kanooni detail jaanchi nahi (R-004): sehat ke paas ke data ki consent aur rakhna.
+
+### D-166. Product sujhaav
+
+- **Faisla:** sujhaav product data aur (consent se) customer ki kharid aur profile se. Niyam:
+  1. Sab customers ki kharid ke jod se "saath me kharide gaye" (kisi ek customer ki baat nahi).
+  2. Staff ki banayi routine templates se "routine poora karo".
+  3. Sign-in customer ko uski profile (D-165) aur pichhli kharid se, sirf consent ho to.
+  4. Kram ki wahi niti jo search me: kisi seller ko boost nahi (D-139 niyam 3).
+- **Wajah:** Claude ki salah, owner ne maani: kaam ke sujhaav, consent ke andar, aur sab sellers ke saath ek niyam.
+- **Chhode vikalp:** sirf product data se (personal madad nahi); bahar ki recommendation service (₹0 me nahi, data bahar).
+- **Kab dobara khulega:** owner khud khole.
+- **Kisne, kab:** owner, 2026-11-19. **Nishaan:** Salah maani.
+- **Asar (Claude):** R2 se. Routine templates ka staff kaam aur consent ka hisaab. Kanooni detail jaanchi nahi (R-004): personal data se sujhaav ki consent, aur apne brand ke prachaar me customer data.
+
+### D-167. Reviewer ki skin jaankari
+
+- **Faisla:** review ke saath customer optional fields bata sakta hai, platform ki list se: skin type (oily, dry, combination, normal, sensitive), depth aur undertone (D-085 ki list), umar ka group (misaal 18 se 24, 25 se 34, 35 se 44, 45+). Ye review pe dikhte hain aur inse reviews filter hote hain. Skin ki bimari ka koi field nahi.
+- **Wajah:** Claude ki salah, owner ne maani: "meri jaisi skin wale ko kaisa laga" ka sabse kaam ka filter, aur sehat wala data bahar.
+- **Chhode vikalp:** sirf variant (shade ke alawa koi madad nahi); concerns bhi (sehat ke paas ka data public review pe).
+- **Kab dobara khulega:** owner khud khole.
+- **Kisne, kab:** owner, 2026-11-19. **Nishaan:** Salah maani.
+- **Asar (Claude):** R2 se (R1 me sirf variant, D-076 niyam 5). Thoda aur personal data aur uski consent. Kanooni detail jaanchi nahi (R-004): review ke saath dikhne wala personal data.
+
+### D-168. Shade finder
+
+- **Faisla:** shade finder (D-085) do tareekon se shade sujhata hai: depth, undertone (aasaan pehchaan: nas ka rang, sone ya chandi ka gehna kis pe achha lagta), finish aur coverage ki pasand ke sawal; aur "jo shade abhi lagate ho": customer platform pe listed kisi brand ka apna abhi ka product aur shade chune, usi ki depth aur undertone se doosre brands ke milte shades. Data sirf listed products ka.
+- **Wajah:** Claude ki salah, owner ne maani: customer ka asli anubhav (jo shade use pehle se jachta hai) sabse achha aadhaar hai.
+- **Chhode vikalp:** sirf sawal-jawab (customer ki apni pehchaan galat ho sakti); camera se skin tone padhna (roshni aur camera se galat nateeje, aur chehre ki photo ka jokhim).
+- **Kab dobara khulega:** owner khud khole.
+- **Kisne, kab:** owner, 2026-11-19. **Nishaan:** Salah maani.
+- **Asar (Claude):** R2 se. Brands ke beech mel sirf D-085 ke moote data se.
+
+### D-169. Virtual try-on
+
+- **Faisla:** virtual try-on browser me, device pe hi. Niyam:
+  1. Camera live (ya ek photo jo device se bahar na jaaye).
+  2. Sirf lipstick, lip gloss, blush, eyeshadow aur eyeliner; baaki baad me.
+  3. Rang D-085 ke hex se; screen pe note "rang asli se alag dikh sakta hai".
+  4. Koi photo ya video server pe nahi jaata, save nahi hota.
+  5. Pehli baar camera se pehle saaf consent.
+  6. Shade ke rang (hex) ki jaanch ek staff role kare (misaal "Shade Specialist", D-085 niyam 5 ke saath).
+- **Wajah:** Claude ki salah, owner ne maani: ₹0 (D-028) me ho sakta hai, chehre ka data device se bahar nahi jaata, aur sabse zyada fayde wali categories me hai.
+- **Chhode vikalp:** try-on nahi, alag skin tones pe photos (try-on ka fayda nahi); foundation bhi aur photo server pe (galat nateeje aur chehre ka data server pe).
+- **Kab dobara khulega:** owner khud khole.
+- **Kisne, kab:** owner, 2026-11-19. **Nishaan:** Salah maani.
+- **Asar (Claude):** R2 se (D-055). Camera ka niyam SR-001. Purane phones pe dheema ho sakta; browser me chehre ki pehchaan ki free library ka license aur speed Architect ke saath. Shade Specialist role roles ki list (D-017) me. Kanooni detail jaanchi nahi (R-004): chehre ki photo ya video ki consent.
+
+### D-170. Product pe public Q&A
+
+- **Faisla:** product page pe public sawal-jawab: sawal sign-in se; jawab brand (seller) aur us product ke verified buyers de sakein; brand ke jawab pe "Brand" label; har sawal aur jawab reviews wale moderation niyam (D-136, D-146) se; ilaaj ya dawa jaise sawal pe tay jawab "Skin & Hair Expert se salah lein" (D-025).
+- **Wajah:** Claude ki salah, owner ne maani: ek jawab bahut logon ke kaam aata hai, aur Beauty Advisor pe bojh kam hota hai.
+- **Chhode vikalp:** public Q&A nahi, sirf Advisor ka thread (har customer ko alag poochhna); sirf brand jawab de (der aur ek-tarfa jaankari).
+- **Kab dobara khulega:** owner khud khole.
+- **Kisne, kab:** owner, 2026-11-19. **Nishaan:** Salah maani.
+- **Asar (Claude):** R2 se. Moderation ka aur kaam.
+
+### D-171. Formula badle to purane reviews
+
+- **Faisla:** listing ki jaanch (D-098) me staff ingredients ke bade badlav ko "formula badla" mark kare; us tareekh se pehle ke reviews pe "pehle ke formula pe" label; rating do roop me dikhe (misaal "naya formula: 4.2 (12)", "kul: 4.0 (340)"). Ye R2 se; R1 me har review pe us waqt ka listing version save hota hai (data).
+- **Wajah:** Claude ki salah, owner ne maani: purani jaankari khoti nahi, aur naya customer naye formula ki asli tasveer dekhta hai.
+- **Chhode vikalp:** kuch nahi (galat tasveer); naya product, reviews zero se (brand ke saalon ke reviews khatam).
+- **Kab dobara khulega:** owner khud khole.
+- **Kisne, kab:** owner, 2026-11-19. **Nishaan:** Salah maani.
+- **Asar (Claude):** R1 ke review data me listing version ([PROJECT_PLAN.md](PROJECT_PLAN.md) §1). "Bada badlav" kya hai, ye staff ki samajh (misaal: naya ya hata hua ingredient upar ke 10 me).
+
+### D-172. Consultation ka daam aur seema
+
+- **Faisla:** Beauty Advisor aur Skin & Hair Expert ki consultation (D-025) muft, seema ke saath: ek customer mahine me misaal 2 booking; 2 baar no-show to 30 din booking band; Advisor ka message thread muft (din me misaal 5 sawal).
+- **Wajah:** Claude ki salah, owner ne maani: payment aur seva ke invoice ka naya kaam nahi, aur seema se ek insaan ka bojh seemit.
+- **Chhode vikalp:** Advisor muft aur Expert paid (payment, refund aur invoice ka kaam); dono muft bina seema (samay pe koi rok nahi).
+- **Kab dobara khulega:** asli business pe jaate waqt, ya owner khud khole.
+- **Kisne, kab:** owner, 2026-11-19. **Nishaan:** Salah maani.
+- **Asar (Claude):** R2 se. Expert ke samay ki keemat nahi. Kanooni detail jaanchi nahi (R-004): dermatologist jaise expert ki online consultation ke niyam (D-025 ki dummy row), aur seva pe GST.
+
+### D-173. Loyalty program
+
+- **Faisla:** loyalty points: har delivered order pe points (misaal har ₹100 pe 1 point, 1 point = ₹1 ki chhoot); points sirf platform pe kharch, cash ya bank me nahi badalte, transfer nahi; program ek staff role sambhale (misaal "Loyalty Manager", Growth Studio me). Tiers baad me, data me jagah rahe.
+- **Wajah:** Claude ki salah, owner ne maani: beauty me dobara kharid ka karan banta hai, aur tiers ke niyam aur delivery fee ka hisaab baad tak tal jaata hai.
+- **Chhode vikalp:** loyalty nahi, sirf offers (dobara kharid ka khaas karan nahi); tiers + points abhi (tiers ke niyam aur delivery fee, D-107, ka hisaab).
+- **Kab dobara khulega:** kanooni jaanch (R-004) ke baad, ya owner khud khole.
+- **Kisne, kab:** owner, 2026-11-19. **Nishaan:** Salah maani.
+- **Asar (Claude):** R2 se (D-055). Points ka khaata aur liability finance me. Loyalty Manager role roles ki list (D-017) me. Kanooni detail jaanchi nahi (R-004): points prepaid instrument bante hain ya nahi, aur points pe GST.
+
+### D-174. Points ke niyam
+
+- **Faisla:** points (D-173) ke niyam:
+  1. Aadhaar: customer ne jo paisa diya, delivery fee aur Pro daam wali lines ke bina.
+  2. Points "pending" jab tak return window (D-080) na nikle; phir pakke. Return ya cancel pe us line ke pending points hatein.
+  3. Expiry misaal 12 mahine (har point apni tareekh se); expiry se 30 din pehle in-app aur push se yaad.
+  4. Kharch: ek order pe zyada se zyada misaal 20% rakam tak; ek coupon (D-102) ke saath chal sake.
+  5. Points se kharida item return ho to points wapas (agar expire nahi hue); paise wala hissa original raaste (D-111).
+  6. Review ke badle points nahi (D-158).
+- **Wajah:** Claude ki salah, owner ne maani: liability seemit, khel ke raaste band, aur hisaab return ke niyam se mel khata hai.
+- **Chhode vikalp:** saada, delivery pe pakke aur expiry nahi (liability behisaab, return pe khel); points se poora order (platform ka kharcha bada).
+- **Kab dobara khulega:** owner khud khole.
+- **Kisne, kab:** owner, 2026-11-19. **Nishaan:** Salah maani.
+- **Asar (Claude):** R2 se. Pending aur expiry ka hisaab finance me. Kanooni detail jaanchi nahi (R-004): points ki expiry aur suchna ke niyam.
+
+### D-175. Points ki chhoot ka paisa
+
+- **Faisla:** points se mili chhoot shuru me sirf platform ka discount: seller ko poora daam (D-101 niyam 1 jaisa), aur finance me points ki liability ka khaata. Baad me brand apne products pe bonus points de sake (brand ka kharcha, budget ke saath, D-101 niyam 2 jaisa).
+- **Wajah:** Claude ki salah, owner ne maani: seller ka hisaab saaf rehta hai.
+- **Chhode vikalp:** brand ka % har order pe (sellers pe bina poochhe kharcha).
+- **Kab dobara khulega:** brand ke bonus points shuru karte waqt, ya owner khud khole.
+- **Kisne, kab:** owner, 2026-11-19. **Nishaan:** Salah maani.
+- **Asar (Claude):** R2 se. Shuru me saara kharcha platform ka. Kanooni detail jaanchi nahi (R-004): points ki chhoot ka invoice aur GST pe asar.
+
+### D-176. Referral
+
+- **Faisla:** "dost ko bulao" (referral) rok ke saath. Niyam:
+  1. Dono ko points (D-173) ka inaam, sirf jab naye customer ka pehla order deliver ho aur return window (D-080) paar ho.
+  2. Ek customer ke saal me misaal 10 referrals tak.
+  3. Ek hi address, device ya payment wale referral pe inaam nahi.
+- **Wajah:** Claude ki salah, owner ne maani: naye customer laane ka sasta raasta, aur fraud ke raaste band.
+- **Chhode vikalp:** referral nahi (growth ka ek raasta kam); sirf bulaane wale ko inaam (naye customer ko khaas karan nahi).
+- **Kab dobara khulega:** owner khud khole.
+- **Kisne, kab:** owner, 2026-11-19. **Nishaan:** Salah maani.
+- **Asar (Claude):** R2 ke baad. `+` alias (D-017) se kai accounts ki pehchaan address, device aur payment ke jod se, Security Architect ke saath (B14).
+
+### D-177. Store credit
+
+- **Faisla:** store credit nahi. Goodwill sirf ek customer ke liye ek baar ke coupon (platform ka offer, D-101) se.
+- **Wajah:** Claude ki salah, owner ne maani: naya balance aur khaata nahi chahiye, aur coupon ka raasta R2 me ban hi raha hai. Refund pehle se original raaste hai (D-111).
+- **Chhode vikalp:** promo credit (naya balance, khaata aur expiry); wallet (prepaid ke niyam ka seedha jokhim).
+- **Kab dobara khulega:** owner khud khole.
+- **Kisne, kab:** owner, 2026-11-19. **Nishaan:** Salah maani.
+- **Asar (Claude):** R2 se. Goodwill coupon ke saath customer ka us order pe doosra coupon nahi chalta (D-102). Support role ki goodwill ki rakam seema Security Architect ke saath (B14).
+
+### D-178. Dobara kharid
+
+- **Faisla:** rozana khatam hone wale products ke liye "dobara order" button aur yaad. Niyam:
+  1. Size aur category se andaaza (misaal 100 ml face wash lagbhag 60 din; staff setting).
+  2. Customer chahe to yaad chalu kare; yaad in-app aur push se, email nahi (D-141).
+  3. Ek tap pe cart me, us din ke daam aur expiry ke saath; koi pehle se payment nahi.
+- **Wajah:** Claude ki salah, owner ne maani: dobara kharid ka aasaan raasta, bina mandate aur subscription ke bade kaam ke.
+- **Chhode vikalp:** sirf "dobara order" button (customer ko khud yaad rakhna); subscription abhi (mandate, daam ki haan aur stock ke niyam ka bada kaam).
+- **Kab dobara khulega:** subscription baad me, kanooni aur payment ki jaanch ke baad.
+- **Kisne, kab:** owner, 2026-11-19. **Nishaan:** Salah maani.
+- **Asar (Claude):** R2 se; subscription baad me. Kanooni detail jaanchi nahi (R-004): recurring payment mandate ke RBI niyam.
+
+### D-179. Gift cards
+
+- **Faisla:** gift cards ka design abhi, banana kanooni jaanch (R-004) ke baad. Design ke niyam (misaal): tay rakam (₹500, ₹1,000, ₹2,000); code paane wale ke email pe; thoda-thoda kharch; balance dikhe; cash me nahi; gift card se kharida item return ho to rakam gift card me wapas (D-111 ka "original raasta"); khareeda gift card sirf bina istemaal ke cancel.
+- **Wajah:** Claude ki salah, owner ne maani: design asli rahe, par paise jaisi cheez kanoon dekhe bina na bane.
+- **Chhode vikalp:** gift cards nahi (gifting ka raasta nahi); R2 me test mode me dummy kanooni details ke saath (galat design ka jokhim).
+- **Kab dobara khulega:** kanooni jaanch ke baad.
+- **Kisne, kab:** owner, 2026-11-19. **Nishaan:** Salah maani.
+- **Asar (Claude):** data aur finance ke khaate design me; banana R2 ke baad. Gift card ka email D-142 ki chhat me. Kanooni detail jaanchi nahi (R-004): prepaid instrument (closed ya semi-closed) ke niyam, gift card ki kam se kam muddat aur KYC, gift voucher pe GST, aur bina kharch ke balance ka hisaab; jawab kanooni jaanch ke baad badal sakta hai.
+
 ## Change log
 
 | Version | Date       | Badlav                                                                                                                                                                                                                                                                                  |
@@ -1696,3 +2338,5 @@
 | v1.6.2  | 2026-11-18 | D-068, D-071 aur D-090 ke "Asar" me naye faislon ke number; koi faisla nahi badla.                                                                                                                                                                                                      |
 | v1.7.1  | 2026-11-18 | D-117 se D-130 aaye (Q-058 se Q-071; owner ne saare sawalon pe salah maani); D-043, D-063, D-064, D-072 aur D-108 me jod; D-080 niyam 5 me D-129 ka number.                                                                                                                             |
 | v1.7.2  | 2026-11-18 | D-131 aur D-132 aaye (Q-072, Q-073; owner ne salah maani); D-090, D-126 aur D-129 me jod; D-099, D-126 aur D-128 ke "Asar" me naye number.                                                                                                                                              |
+| v1.8.1  | 2026-11-19 | D-133 se D-159 aaye (Q-074 se Q-100; owner ne saare sawalon pe salah maani); D-055, D-072, D-099, D-105 aur D-126 me jod; D-072 ke "Asar" me naya number.                                                                                                                               |
+| v1.9.1  | 2026-11-19 | D-160 se D-179 aaye (Q-101 se Q-120; owner ne saare sawalon pe salah maani); D-159 me jod.                                                                                                                                                                                              |
