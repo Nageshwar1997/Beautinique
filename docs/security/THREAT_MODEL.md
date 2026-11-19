@@ -1,6 +1,6 @@
 # THREAT MODEL: Beautinique
 
-> **Status:** v1.1.2 (2026-11-19). Security Architect ka kaam. Cheezein ek-ek karke judti hain.
+> **Status:** v1.1.3 (2026-11-19). Security Architect ka kaam. Cheezein ek-ek karke judti hain.
 
 ## Is file me kya aayega
 
@@ -62,6 +62,24 @@ Security ke faisle [../DECISIONS.md](../DECISIONS.md) me (tag `Security`), secur
 - **Bachav aur test:** har niyam ka test [SECURITY_REQUIREMENTS.md](SECURITY_REQUIREMENTS.md) me.
 - **Bacha jokhim:** domain ke bina nakli sign-in pages (R-017); customer ka account inbox jitna surakshit (R-018).
 
+### 1.3 Sessions aur tokens
+
+- **Attack surface:** har app ki apni cookies (D-186) saajhe hosts pe (D-048, domain nahi); access aur refresh tokens; sessions ka cache Redis me (R-010); "My devices".
+- **Threats (STRIDE):**
+
+  | Threat                                                                                                   | STRIDE                           | Bachav                 |
+  | -------------------------------------------------------------------------------------------------------- | -------------------------------- | ---------------------- |
+  | XSS ya malware se session token ki chori; lamba session chori ke baad bhi chale                          | Spoofing, Information disclosure | SR-027, SR-028, SR-005 |
+  | Refresh token ki copy chupchaap chale; ya ulta, khoya jawab "chori" maan ke sahi user baar-baar bahar ho | Spoofing, DoS                    | SR-028                 |
+  | Redis restart pe band sessions ke nishaan ud jaayein aur purana session phir chale                       | Elevation                        | SR-029                 |
+  | Cookie wale sessions pe CSRF (doosri site se badalne wali request)                                       | Tampering                        | SR-030                 |
+  | Token jaali banana (algorithm ka khel), signing key ka leak, ya ek app ka token doosre app pe chalna     | Spoofing, Elevation              | SR-031                 |
+  | Allowlist se hata tester, ya role khatam hua staff, chalte session se kaam karta rahe                    | Elevation                        | SR-018, SR-029         |
+
+- **Abuse:** chori hui cookie se "My devices" chhupana ya naye sessions banana (SR-016, SR-028).
+- **Bachav aur test:** har niyam ka test [SECURITY_REQUIREMENTS.md](SECURITY_REQUIREMENTS.md) me.
+- **Bacha jokhim:** chori hua session apni umar (D-180, D-181) tak chal sakta hai jab tak band na kiya jaaye; Redis restart pe rate limits ki ginti shuru se (R-010).
+
 ## Change log
 
 | Version | Date       | Badlav                                                               |
@@ -69,3 +87,4 @@ Security ke faisle [../DECISIONS.md](../DECISIONS.md) me (tag `Security`), secur
 | v1.0.0  | 2026-11-17 | Khaali file bani.                                                    |
 | v1.1.1  | 2026-11-19 | §1 bana; pehla hissa 1.1 edge aur hosting (security batch 1, D-210). |
 | v1.1.2  | 2026-11-19 | §1.2 sign-in (security batch 2, D-211).                              |
+| v1.1.3  | 2026-11-19 | §1.3 sessions aur tokens (security batch 3, D-212).                  |

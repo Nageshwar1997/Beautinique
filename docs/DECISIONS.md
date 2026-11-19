@@ -1,6 +1,6 @@
 # DECISIONS: Beautinique
 
-> **Status:** v1.10.5 (2026-11-19). Har faisla ek jagah. Sirf wahi "Tay" jo owner ne khud kaha; Claude ki salah faisla nahi. Cheezein ek-ek karke judti hain.
+> **Status:** v1.10.6 (2026-11-19). Har faisla ek jagah. Sirf wahi "Tay" jo owner ne khud kaha; Claude ki salah faisla nahi. Cheezein ek-ek karke judti hain.
 
 ## 0. Kaise likhein
 
@@ -225,6 +225,7 @@
 | D-209 | Security report ke niyam, threats aur risks area ke hisaab se lagbhag 9 batches me; har batch faislon se mila ke ek sawal me, owner ki haan ke baad hi docs me (4 niyam).                                     | Process      | 2026-11-19 |
 | D-210 | Security batch 1 (edge aur hosting) maana: niyam SR-002 se SR-010, 7 threats, risks R-015 aur R-016 `Maana`; numbers misaal, settings me.                                                                     | Security     | 2026-11-19 |
 | D-211 | Security batch 2 (sign-in) maana: niyam SR-011 se SR-026, 15 threats, risks R-017 aur R-018 `Maana`; D-021 ka email code ke baad authenticator pakka.                                                         | Security     | 2026-11-19 |
+| D-212 | Security batch 3 (sessions aur tokens) maana: niyam SR-027 se SR-031, 6 threats, R-010 me sessions ka sach database me; numbers misaal, settings me.                                                          | Security     | 2026-11-19 |
 
 ## 2. Record
 
@@ -2632,6 +2633,15 @@
 - **Kisne, kab:** owner, 2026-11-19. **Nishaan:** Salah maani.
 - **Asar (Claude):** R1 se. Leak hue passwords ki free API ka chunaav aur social providers ke verified email ki jaanch technical charcha me.
 
+### D-212. Security batch 3: sessions aur tokens
+
+- **Faisla:** sessions aur tokens ke niyam SR-027 se SR-031 ([security/SECURITY_REQUIREMENTS.md](security/SECURITY_REQUIREMENTS.md)), unke 6 threats ([security/THREAT_MODEL.md](security/THREAT_MODEL.md) §1.3), aur [RISKS.md](RISKS.md) ke R-010 me jod: sessions aur unke band hone ka sach database me, aur rate limits ki ginti restart ke baad thodi der shuru se, ye maana. Numbers misaal hain aur settings me rahenge.
+- **Wajah:** Claude ki salah, owner ne maani: session ki umar (D-180, D-181) aur har app ki apni cookies (D-186) ke tay faisle jaanchne layak niyamon me; band hua session Redis restart ke baad bhi band rahe.
+- **Chhode vikalp:** badlav ke saath maanna (owner ne koi badlav nahi diya); batch rokna (sessions ka design bina pakke niyam ke).
+- **Kab dobara khulega:** asli naap ke baad numbers, ya owner khud khole.
+- **Kisne, kab:** owner, 2026-11-19. **Nishaan:** Salah maani.
+- **Asar (Claude):** R1 se. Refresh cookie `__Secure-` prefix ke saath sign-in wale path pe, kyunki `__Host-` me path `/` hi ho sakta hai.
+
 ## Change log
 
 | Version | Date       | Badlav                                                                                                                                                                                                                                                                                  |
@@ -2689,3 +2699,4 @@
 | v1.10.3 | 2026-11-19 | D-209 aaya (security report area ke hisaab se batches me; Q-150).                                                                                                                                                                                                                       |
 | v1.10.4 | 2026-11-19 | D-210 aaya (security batch 1: edge aur hosting maana; Q-151).                                                                                                                                                                                                                           |
 | v1.10.5 | 2026-11-19 | D-211 aaya (security batch 2: sign-in maana; Q-152).                                                                                                                                                                                                                                    |
+| v1.10.6 | 2026-11-19 | D-212 aaya (security batch 3: sessions aur tokens maana; Q-153).                                                                                                                                                                                                                        |
