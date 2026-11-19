@@ -1,6 +1,6 @@
 # OPEN QUESTIONS: Beautinique
 
-> **Status:** v1.3.38 (2026-11-19). Khule sawal, aage ke topics aur jaanchna baaki. Cheezein ek-ek karke judengi.
+> **Status:** v1.3.39 (2026-11-19). Khule sawal, aage ke topics aur jaanchna baaki. Cheezein ek-ek karke judengi.
 
 ## Is file me kya aayega
 
@@ -4229,7 +4229,7 @@ Claude ka kaam: owner ka faisla nahi chahiye, sirf saboot. Nateeja saboot ke saa
 
 ### Q-183. COMPLIANCE batch 2: Legal Metrology ki rows maanein?
 
-- **Status:** `Khula`. Topic: B13 (compliance), B3 (catalog), B4 (pricing).
+- **Status:** `Tay`. Topic: B13 (compliance), B3 (catalog), B4 (pricing).
 - **Sawal:** kanooni jaanch ke Legal Metrology hisse ki ye 14 rows [COMPLIANCE.md](COMPLIANCE.md) me aayein (CL-025 se CL-038), COMPLIANCE ke format me, source ke link aur tareekh ke saath?
 - **Kyun zaroori:**
   - Listing ke zaroori fields, product page ka "pack ki jaankari" hissa aur MRP ke niyam isi se bante hain; catalog aur QA ka aadhaar.
@@ -4259,6 +4259,46 @@ Claude ka kaam: owner ka faisla nahi chahiye, sirf saboot. Nateeja saboot ke saa
   - (b) me har badlav ki ek line.
   - (c) me listing ke fields ka aadhaar baad me.
 - **Kanooni detail:** rules ka text ek law firm ki site pe rakhi consolidated copy se, aur 2026 ka badlav (G.S.R. 128(E)) bhi doosri site pe rakhi gazette copy se; 2025 ki MRP sticker wali chhoot sirf secondary source se. Lawyer se nahi jaancha (R-004).
+- **Owner ka jawab (2026-11-19):** **(a)**, rows jaisi hain waisi maani. Record: [DECISIONS.md](DECISIONS.md) D-245.
+
+### Q-184. COMPLIANCE batch 3: cosmetics kanoon ki rows maanein?
+
+- **Status:** `Khula`. Topic: B13 (compliance), B3 (catalog), B7 (returns).
+- **Sawal:** kanooni jaanch ke cosmetics kanoon (Drugs and Cosmetics Act 1940, Cosmetics Rules 2020) wale hisse ki ye 20 rows [COMPLIANCE.md](COMPLIANCE.md) me aayein (CL-039 se CL-058), COMPLIANCE ke format me, source ke link aur tareekh ke saath?
+- **Kyun zaroori:**
+  - Listing ki jaanch ki checklist, batch aur expiry ke niyam, recall aur returns ka aadhaar isi se banta hai.
+  - Kuch rows nayi cheezein laati hain (label ki checklist, imported ke RC ke fields, "mana shabdon" ki list, "certified cruelty-free" ka naam, recall pe regulator ki suchna ka field, returns me storage ki jaanch, dispatch pe expiry ki rok, khaas products ki checklist); baaki tay faislon (D-099, D-128, D-159, D-230, D-232, D-234, D-235, D-240) se mel ka hawala.
+- **Prastaavit rows** (sources 2026-11-19 ko khole; Cosmetics Rules ka sarkari text 2020 ka, 2025 ka badlav sirf secondary se):
+  1. **CL-039, label ke zaroori fields (rule 33, 34):** naam, manufacturer ka naam aur pata, batch, M.L. number (ya imported pe RC number aur importer), net contents, expiry ki jaankari, ingredients, chetavni. Listing ki jaanch me label ki photo se inki checklist, category ke hisaab se. Jaancha.
+  2. **CL-040, expiry ki jaankari zaroori (rule 34(1)(c), 3(w), 18(2)):** use before, expiry date, ya mfg date + "XX mahine tak"; sirf PAO kaafi nahi (D-083). Receiving pe expiry ka roop (D-232); imported batch pe import ki tareekh se kam se kam 6 mahine ki expiry ki chetavni staff ko. Jaancha.
+  3. **CL-041, "use before" aur "expiry" ka din (2025 ka badlav):** D-232. Aadha jaancha.
+  4. **CL-042, batch number kab nahi (rule 34(2)(a)):** D-234. Jaancha.
+  5. **CL-043, ingredients aur allergens (rule 34(7)):** 1% se zyada wale ghatte kram me; 60 ml ya 30 g tak ke packs pe label pe zaroori nahi (D-235). Online ka alag niyam nahi; allergen ka koi niyam nahi mila, D-099 aur D-159 kanoon se zyada. Allergen chetavni ke saath line: "ye platform ki list se hai; pack ki ingredients list dekhein". Jaancha.
+  6. **CL-044, imported cosmetics (rule 12, 14, 18, 34(5), 34(9)):** CDSCO ka registration zaroori, har 5 saal se pehle retention fee; imported listing pe RC number, RC holder ka naam, product RC me listed hone ki seller ki ghoshna, aur retention ki agli tareekh ki staff ko yaad (D-127). Jaancha.
+  7. **CL-045, licence ka type aur M.L. number (rule 23 se 30, 26(f), 34(2)(b)):** licence ya loan licence; M.L. number label ki photo se staff jaanche; contract manufacturer se bane apne brand pe us manufacturer ka M.L. number (D-128). Jaancha.
+  8. **CL-046, cosmetic aur drug ki seema (Act s.3(aaa), rule 36):** drug claim wala product cosmetic nahi. "Mana shabdon" ki list (jaise treat, cure, heal, bimari se bachav) description ke free text me bhi staff ki queue me bheje; list ka badlav senior role ke haath me, D-132 jaisa (D-043, D-128, D-137). Jaancha.
+  9. **CL-047, Ayurvedic aur AYUSH (Act):** darja licence aur daawe se, naam se nahi. Label pe "Ayurvedic medicine" ya AYUSH licence number dikhe to staff use drug type maane (D-128). Aadha jaancha (AYUSH ke niyam doosre run me).
+  10. **CL-048, cosmetic me mana ingredients (rule 39):** IS 4707 Part 2 Annex A, rang ki seemaayein, hexachlorophene, mercury (D-240). Jaancha (rule); IS ki list khud nahi khuli.
+  11. **CL-049, animals pe testing (rule 39(7), 18(4)):** India me cosmetics ki animal testing mana, aur 12 Nov 2014 ke baad animals pe test hua cosmetic import nahi ho sakta. Isliye claim ka naam "certified cruelty-free (certifier ka naam)", sirf certificate ke saath; filter ka naam bhi yahi (D-100). Jaancha.
+  12. **CL-050, recall (rule 65, 47; Consumer Protection Act s.20):** manufacturer turant recall shuru kare aur regulator ko bataye; "stock mat becho" order ke baad bikri mana. Seller app me recall pe "regulator ko suchna di: haan ya nahi, tareekh, reference" ka field; recall emails pehle (D-129, D-131, D-240). Jaancha.
+  13. **CL-051, skin reaction ki report (rule 65(2)):** marketplace pe report ka saaf niyam nahi; brand ko case ki khabar bina customer ki pehchaan ke (product, batch, kya hua, ginti), aur brand ka jawab case me (D-130). Jaancha.
+  14. **CL-052, lautaye band cosmetics dobara bechna (rule 35, 3(w); Consumer Protection Act s.86):** saaf rok nahi mili. Returns ki jaanch me ek aur check: label pe storage ki shart wala product aur parcel kitne din customer ke paas raha; shak ho to stock me nahi, brand ko (D-112). Aadha jaancha.
+  15. **CL-053, expired cosmetics (rule 3(w), 18(2)):** expired batch kabhi reserve ya dispatch nahi; pick aur dispatch scan pe bhi expiry ki jaanch (D-232 ke aakhri din se) (D-062, D-082). Aadha jaancha.
+  16. **CL-054, bechne ka licence (Cosmetics Rules ka dhaancha, rule 33):** cosmetics ki bikri ya storage ka alag licence nahi; licence sirf banane aur import ke liye. Jaancha.
+  17. **CL-055, label na badalna (rule 35):** D-230. Jaancha.
+  18. **CL-056, khaas products (rule 34(4), 37, 38):** hair dye, fluoride toothpaste aur khatre wale products ki listing checklist me unke khaas fields (chetavni ka text label ki photo se). Jaancha.
+  19. **CL-057, samples ka label (rule 34, 64):** samples ki alag chhoot nahi mili; sample bhi label ki photo se jaanch, chhote pack ki chhooton ke saath (D-234, D-235). Aadha jaancha.
+  20. **CL-058, reviews aur seller ke content me ilaaj jaise daawe (rule 36):** customer ki raay ka saaf niyam nahi (D-146); brand ka jawab (D-160) aur seller ka content "mana shabdon" ki list (CL-046) se moderation me. Aadha jaancha.
+- **Vikalp:**
+  - **(a)** Rows jaisi hain waisi maanein.
+  - **(b)** Maanein, par owner jo row badle, wo badal ke.
+  - **(c)** Ye batch abhi roko.
+- **Salah:** **(a)**.
+- **Trade-off:**
+  - (a) me catalog ki jaanch, warehouse aur returns me kuch kadam aur (checklist, RC ki yaad, storage ki jaanch, dispatch pe expiry).
+  - (b) me har badlav ki ek line.
+  - (c) me listing aur returns ke niyamon ka kanooni aadhaar baad me.
+- **Kanooni detail:** Cosmetics Rules ka sarkari text 2020 ka hai; 2025 ka badlav sirf secondary source se. IS 4707 ki list aur AYUSH ke niyam nahi khule. Lawyer se nahi jaancha (R-004).
 
 ## Change log
 
@@ -4337,3 +4377,4 @@ Claude ka kaam: owner ka faisla nahi chahiye, sirf saboot. Nateeja saboot ke saa
 | v1.3.36 | 2026-11-19 | Consent wale sawal ka text "agar naam platform jaisa ho" ke roop me; "Beautinique brand" ki jagah "apna brand".                                                                           |
 | v1.3.37 | 2026-11-19 | Q-182 tay: (a) tax ki 24 rows (D-244, COMPLIANCE §1); Q-183 khula (COMPLIANCE batch 2: Legal Metrology).                                                                                  |
 | v1.3.38 | 2026-11-19 | Owner ke kehne pe: apne brand ke consent wala sawal hataya (zaroorat nahi; naam ka faisla D-243 me waisa hi); Legal Metrology batch ab Q-183 (numbering ke niyam ka ek apvaad, owner ka). |
+| v1.3.39 | 2026-11-19 | Q-183 tay: (a) Legal Metrology ki 14 rows (D-245, COMPLIANCE §2); Q-184 khula (COMPLIANCE batch 3: cosmetics kanoon).                                                                     |

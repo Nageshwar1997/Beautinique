@@ -1,6 +1,6 @@
 # COMPLIANCE: Beautinique
 
-> **Status:** v1.1.1 (2026-11-19). Kanooni matrix. System me sab poori tarah banta hai, par registrations aur bahar ki companies ki details dummy hain (D-026); apne roles ki jaankari asli (D-241). Kisi lawyer ya CA se jaancha nahi (R-004). Cheezein ek-ek karke, owner ki haan se, judti hain (D-220).
+> **Status:** v1.1.2 (2026-11-19). Kanooni matrix. System me sab poori tarah banta hai, par registrations aur bahar ki companies ki details dummy hain (D-026); apne roles ki jaankari asli (D-241). Kisi lawyer ya CA se jaancha nahi (R-004). Cheezein ek-ek karke, owner ki haan se, judti hain (D-220).
 
 ## Is file me kya aayega
 
@@ -241,9 +241,144 @@
 - **Dummy kya hai:** yahi.
 - **Jaancha ya nahi:** Aadha jaancha (2026-11-19): s.122 [T3, 2021 copy]; GSTIN ke check digit ka format nahi jaancha.
 
+## 2. Legal Metrology (D-245)
+
+### 2.0 Sources (sab 2026-11-19 ko khole)
+
+- **[M1]** Legal Metrology (Packaged Commodities) Rules 2011, 13 Feb 2026 tak ke badlav ke saath (har badlav ke G.S.R. number ke footnotes), ek law firm ki rakhi consolidated copy: <https://www.khaitanco.com/sites/default/files/2026-03/Legal%20Metrology%20%28Packaged%20Commodities%29%20Rules%202011.pdf>. Primary text, secondary host.
+- **[M2]** Legal Metrology (Packaged Commodities) Amendment Rules 2026, G.S.R. 128(E), Gazette of India Extraordinary, 13 Feb 2026, doosri site pe rakhi copy: <https://foxmandal.in/wp-content/uploads/2026/02/Legal-Metrology-Packaged-Commodities-Amendment-Rules-2026.pdf>. Primary document, secondary host.
+- **[M3]** GST rate badlav ke baad MRP sticker ki chhoot (Consumer Affairs vibhag ka 9 Sep 2025 ka circular, rule 33 ke tahat, aur 18 Sep 2025 ki narmi), sirf saar: <https://ssrana.in/articles/government-relaxes-lmpc-compliance-after-gst-rate-revisions/>, <https://www.businesstoday.in/amp/latest/economy/story/govt-allows-use-of-old-mrps-till-dec-but-firms-must-pass-on-gst-cuts-493267-2025-09-09>. Secondary.
+
+### CL-025. MRP saare tax samet
+
+- **Kanoon ya niyam:** rule 6(1)(e): har retail package pe MRP saare tax samet, rupees me. Rule 18(2): koi bhi MRP se zyada pe nahi bech sakta. Rule 18(5): retail dealer MRP mita, badal ya chhupa nahi sakta.
+- **Kis pe laagu:** har listing aur har order.
+- **Kis module me:** catalog, checkout.
+- **System me kya chahiye:** server pe daam ≤ MRP ki jaanch (D-061, SR-042); MRP batch ka, pack se.
+- **Dummy kya hai:** dummy products ke asli jaise MRP.
+- **Jaancha ya nahi:** Jaancha (2026-11-19): [M1].
+
+### CL-026. Online declarations
+
+- **Kanoon ya niyam:** rule 6(10): e-commerce entity rule 6(1) ki saari declarations (sirf mfg mahina-saal chhod ke) platform pe dikhaye. Declarations ke sahi hone ki zimmedari manufacturer, seller ya importer ki, agar platform jaankari na chune, na badle aur due diligence kare; jaankari milne pe turant na hataye to ye suraksha nahi.
+- **Kis pe laagu:** har listing.
+- **Kis module me:** catalog, product page.
+- **System me kya chahiye:** listing ke zaroori fields: generic naam, net quantity, MRP, manufacturer, packer, marketer, importer aur country of origin (imported), size jahan laagu, kit me har cheez (D-134 L2). Product page pe "Pack ki jaankari" ka hissa. Staff khud field nahi badalta (D-098 niyam 3). Galat declaration ki report pe staff listing ko jaanch tak rok sake, wajah ke record ke saath.
+- **Dummy kya hai:** dummy manufacturer ke naam aur pate, "DUMMY" ke saath (D-145).
+- **Jaancha ya nahi:** Jaancha (2026-11-19): [M1].
+
+### CL-027. Unit sale price
+
+- **Kanoon ya niyam:** rule 6(11) (1 Jan 2024 se): pack pe unit sale price (1 kg ya 1 litre se kam pe per gram ya ml, zyada pe per kg ya litre, ginti wale pe per unit); MRP aur unit sale price barabar hon to nahi. Online ka saaf niyam nahi mila (rule 6(10) sirf rule 6(1) maangta hai).
+- **Kis pe laagu:** product page aur cart.
+- **Kis module me:** catalog, cart.
+- **System me kya chahiye:** system se nikla unit sale price (MRP / net quantity), bina seller ke kaam ke; kits pe nahi.
+- **Dummy kya hai:** dummy MRP aur quantity se.
+- **Jaancha ya nahi:** Jaancha (2026-11-19): [M1]; online ka niyam nahi mila, ye bhi jaancha.
+
+### CL-028. Country of origin aur filter
+
+- **Kanoon ya niyam:** rule 6(1)(aa): imported pe country of origin ya manufacture; online bhi (rule 6(10)). Rule 6(10A) (1 Jul 2026 se): imported products bechne wali e-commerce entity country of origin ka searchable aur sortable filter de.
+- **Kis pe laagu:** imported products.
+- **Kis module me:** catalog, search.
+- **System me kya chahiye:** D-127, D-138, D-240.
+- **Dummy kya hai:** test data me ek imported dummy product.
+- **Jaancha ya nahi:** Jaancha (2026-11-19): [M2], [M1].
+
+### CL-029. Manufacturer, packer, marketer, importer
+
+- **Kanoon ya niyam:** rule 6(1)(a): manufacturer ka naam-pata; packer alag ho to dono; imported pe importer. Label pe brand owner marketer ho to wahi "deemed manufacturer"; bina "manufactured by" ya "packed by" ke naam wali company manufacturer maani jaati hai.
+- **Kis pe laagu:** har listing; apna brand "Unibelle" contract manufacturer se banwaye to label pe marketer.
+- **Kis module me:** catalog.
+- **System me kya chahiye:** chaaron ke alag fields; staff label ki photo se milaye.
+- **Dummy kya hai:** dummy naam.
+- **Jaancha ya nahi:** Jaancha (2026-11-19): [M1].
+
+### CL-030. Customer care
+
+- **Kanoon ya niyam:** rule 6(2): har package pe complaint ke liye naam, pata, telephone aur email. Online ke liye rule 6(10) rule 6(1) ki baat karta hai; rule 6(2) uske bahar.
+- **Kis pe laagu:** har listing.
+- **Kis module me:** catalog, product page.
+- **System me kya chahiye:** pack wala customer care (naam, pata, email, phone) listing ka field, "Pack ki jaankari" me; phone sirf contact ke liye.
+- **Dummy kya hai:** bahar ke dummy brand pe dummy ("DUMMY"); jahan kaam apna role karta hai, wahan asli (D-241).
+- **Jaancha ya nahi:** Jaancha (2026-11-19): [M1].
+
+### CL-031. Batch ka MRP aur revised MRP
+
+- **Kanoon ya niyam:** rule 18(2-A): ek jaise package pe unfair trade practice se alag-alag MRP mana (alag batches ka alag MRP theek). Rule 18(3): tax ghatne pe manufacturer ka bataya kam MRP purane packs pe bhi. Rule 6(3): kam MRP ka sticker, asli MRP dhake bina. Sep 2025 ke GST badlav ke baad sticker ki chhoot (31 Dec 2025 tak).
+- **Kis pe laagu:** har batch.
+- **Kis module me:** catalog (batch), checkout, invoice.
+- **System me kya chahiye:** D-064, D-231; customer ko "pack pe MRP ₹X; revised MRP ₹Y".
+- **Dummy kya hai:** test me rate ghatne ki ek tareekh aur ek batch pe revised MRP.
+- **Jaancha ya nahi:** Jaancha (2026-11-19): [M1]; sticker ki chhoot Aadha jaancha [M3].
+
+### CL-032. Online mfg date aur expiry
+
+- **Kanoon ya niyam:** rule 6(10) online declarations se mfg mahina-saal bahar rakhta hai; cosmetics ki mfg date aur expiry Drugs and Cosmetics ke niyam se (rule 6(1)(d), 6(1)(da)).
+- **Kis pe laagu:** har listing.
+- **Kis module me:** product page.
+- **System me kya chahiye:** D-067 (bheje jaane wale batch ki expiry) isse zyada deta hai; cosmetics ka label niyam cosmetics kanoon ke hisse me.
+- **Dummy kya hai:** dummy batches ki expiry.
+- **Jaancha ya nahi:** Jaancha (2026-11-19): [M1].
+
+### CL-033. Net quantity
+
+- **Kanoon ya niyam:** rule 6(1)(c): net quantity standard unit (weight ya measure) me, ya ginti se; schedule me cosmetics ki entry.
+- **Kis pe laagu:** har listing.
+- **Kis module me:** catalog.
+- **System me kya chahiye:** number + unit (g, ml ya ginti) ki tay list se; unit sale price isi se; badlav pe jaanch (D-098).
+- **Dummy kya hai:** dummy data.
+- **Jaancha ya nahi:** Jaancha (2026-11-19): [M1].
+
+### CL-034. Free samples ke pack
+
+- **Kanoon ya niyam:** rule 26(a): 10 g ya 10 ml tak ke package pe ye rules laagu nahi. Bade "not for sale" sample ka saaf niyam nahi mila.
+- **Kis pe laagu:** brand ke samples (R2, D-121, D-229).
+- **Kis module me:** catalog, warehouse.
+- **System me kya chahiye:** sample listing pe net quantity zaroori; bade sample pe CL-026 ke fields.
+- **Dummy kya hai:** R2 ke test samples.
+- **Jaancha ya nahi:** Aadha jaancha (2026-11-19): [M1].
+
+### CL-035. Kit
+
+- **Kanoon ya niyam:** rule 6(1)(b): ek package me kai products hon to har ek ka naam aur ginti ya quantity; rule 6(5): kai units ke components ki declaration main package pe.
+- **Kis pe laagu:** brand ka kit (D-088).
+- **Kis module me:** catalog, product page.
+- **System me kya chahiye:** kit listing me har cheez ka naam aur net quantity, product page pe.
+- **Dummy kya hai:** test ka ek kit.
+- **Jaancha ya nahi:** Jaancha (2026-11-19): [M1].
+
+### CL-036. 10 g ya 10 ml tak ke packs
+
+- **Kanoon ya niyam:** rule 26(a): 10 g ya 10 ml tak ke packages pe ye rules laagu nahi (MRP chhapna zaroori nahi). Cosmetics ke label ke niyam phir bhi.
+- **Kis pe laagu:** minis aur chhote packs.
+- **Kis module me:** catalog.
+- **System me kya chahiye:** D-236.
+- **Dummy kya hai:** kuch nahi.
+- **Jaancha ya nahi:** Jaancha (2026-11-19): [M1].
+
+### CL-037. Veg ya non-veg dot
+
+- **Kanoon ya niyam:** rule 6(8): soap, shampoo, toothpaste aur doosre cosmetics aur toiletries ke pack pe non-vegetarian origin ke liye laal ya bhura dot, vegetarian ke liye hara dot. Online ka saaf niyam nahi.
+- **Kis pe laagu:** cosmetics aur toiletries.
+- **Kis module me:** catalog.
+- **System me kya chahiye:** listing pe "pack pe dot" ka field label ki photo se; staff "vegan" claim (D-100) aur laal dot ka takrav pakde.
+- **Dummy kya hai:** dummy products pe.
+- **Jaancha ya nahi:** Jaancha (2026-11-19): [M1].
+
+### CL-038. Pro buyers aur MRP
+
+- **Kanoon ya niyam:** rule 2(bc), 3(c): "institutional consumer" ki chhoot sirf "not for retail sale" packs pe, jo seedha manufacturer, importer ya wholesale dealer se khud ke istemaal ke liye kharide jaayein. Retail packs pe MRP ki seema sab pe.
+- **Kis pe laagu:** Beauty Pro buyers (D-065).
+- **Kis module me:** catalog, checkout.
+- **System me kya chahiye:** Pro kharid bhi retail packs ki, MRP ki seema sab pe; "not for retail sale" wale packs list nahi hote.
+- **Dummy kya hai:** kuch nahi.
+- **Jaancha ya nahi:** Jaancha (2026-11-19): [M1].
+
 ## Change log
 
 | Version | Date       | Badlav                                                                |
 | ------- | ---------- | --------------------------------------------------------------------- |
 | v1.0.0  | 2026-11-17 | Khaali file bani.                                                     |
 | v1.1.1  | 2026-11-19 | §1 tax: CL-001 se CL-024, sources ke saath (D-244); file ka dhaancha. |
+| v1.1.2  | 2026-11-19 | §2 Legal Metrology: CL-025 se CL-038, sources ke saath (D-245).       |

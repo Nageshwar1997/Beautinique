@@ -1,6 +1,6 @@
 # DECISIONS: Beautinique
 
-> **Status:** v1.10.23 (2026-11-19). Har faisla ek jagah. Sirf wahi "Tay" jo owner ne khud kaha; Claude ki salah faisla nahi. Cheezein ek-ek karke judti hain.
+> **Status:** v1.10.24 (2026-11-19). Har faisla ek jagah. Sirf wahi "Tay" jo owner ne khud kaha; Claude ki salah faisla nahi. Cheezein ek-ek karke judti hain.
 
 ## 0. Kaise likhein
 
@@ -259,6 +259,7 @@
 | D-242 | Naam: storefront "Beautinique", platform company "Beautinique Pvt Ltd", apne brand ki seller company "Beautinique Brands Pvt Ltd", brand "Beautinique" (dummy companies); D-233 badla.                        | Business     | 2026-11-19 |
 | D-243 | Apna brand "Unibelle", seller company "Unibelle Cosmetics Pvt Ltd" (dummy); platform "Beautinique" hi; naam platform se alag, to D-233 phir laagu; D-242 badla.                                               | Business     | 2026-11-19 |
 | D-244 | COMPLIANCE batch 1 maana: tax (GST, TCS, TDS) ki 24 rows, CL-001 se CL-024, source aur tareekh ke saath.                                                                                                      | Business     | 2026-11-19 |
+| D-245 | COMPLIANCE batch 2 maana: Legal Metrology ki 14 rows, CL-025 se CL-038, source aur tareekh ke saath.                                                                                                          | Business     | 2026-11-19 |
 
 ## 2. Record
 
@@ -3064,6 +3065,15 @@
 - **Kisne, kab:** owner, 2026-11-19. **Nishaan:** Salah maani.
 - **Asar (Claude):** CA ke liye khule sawal (replacement, platform ka discount, points, delivery fee, TDS ki baaki shartein, nasht maal pe GST, paid consultation) design me option ki tarah rehte hain. Kanooni detail jaanchi nahi (R-004): har row ka status COMPLIANCE me; CA aur lawyer se nahi.
 
+### D-245. COMPLIANCE batch 2: Legal Metrology
+
+- **Faisla:** kanooni jaanch ke Legal Metrology hisse ki 14 rows (CL-025 se CL-038: MRP, online declarations, unit sale price, country of origin, manufacturer se importer tak ke naam, customer care, batch ka aur revised MRP, mfg date aur expiry, net quantity, samples, kit, chhote packs, veg ya non-veg dot, Pro buyers aur MRP) jaisi prastaavit thi waisi [COMPLIANCE.md](COMPLIANCE.md) me, source ke link aur tareekh ke saath.
+- **Wajah:** Claude ki salah, owner ne maani: listing ke zaroori fields aur MRP ke niyam ek tay aadhaar pe.
+- **Chhode vikalp:** badlav ke saath maanna; batch rokna (listing ke fields ka aadhaar baad me).
+- **Kab dobara khulega:** kanooni jaanch ka primary source, ya owner khud khole.
+- **Kisne, kab:** owner, 2026-11-19. **Nishaan:** Salah maani.
+- **Asar (Claude):** catalog me nayi cheezein: product page pe "Pack ki jaankari" ka hissa; manufacturer, packer, marketer aur importer ke alag fields; galat declaration ki report pe staff listing ko jaanch tak rok sake (wajah ke record ke saath); system se nikla unit sale price; "pack pe dot" ka field aur "vegan" claim se takrav ki jaanch; "not for retail sale" wale packs list nahi hote. Kanooni detail jaanchi nahi (R-004): rules ka text doosri site pe rakhi copy se; 2025 ki MRP sticker wali chhoot sirf secondary source se.
+
 ## Change log
 
 | Version  | Date       | Badlav                                                                                                                                                                                                                                                                                  |
@@ -3139,3 +3149,4 @@
 | v1.10.21 | 2026-11-19 | D-244 aaya (COMPLIANCE batch 1: tax ki 24 rows maani; Q-182).                                                                                                                                                                                                                           |
 | v1.10.22 | 2026-11-19 | D-242 aur D-243 ke Asar se hataye gaye consent wale sawal ka number hataya (owner); faisle waise hi.                                                                                                                                                                                    |
 | v1.10.23 | 2026-11-19 | Owner ke kehne pe D-031 aur D-233 se D-242 wali "badla" line (naam platform jaisa) hatayi; D-233 me D-243 ka naam "jod" ki tarah.                                                                                                                                                       |
+| v1.10.24 | 2026-11-19 | D-245 aaya (COMPLIANCE batch 2: Legal Metrology ki 14 rows maani; Q-183).                                                                                                                                                                                                               |
