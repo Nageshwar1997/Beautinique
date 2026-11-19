@@ -1,6 +1,6 @@
 # RISKS: Beautinique
 
-> **Status:** v1.2.16 (2026-11-18). Saare risks ek jagah, security wale bhi. Cheezein ek-ek karke judti hain.
+> **Status:** v1.2.18 (2026-11-19). Saare risks ek jagah, security wale bhi. Cheezein ek-ek karke judti hain.
 
 ## 0. Kaise likhein
 
@@ -26,6 +26,10 @@
 | R-012 | Render me India ka koi region nahi; sabse paas Singapore (jaancha, §2.4), jabki users India me.                                                                                                                                                                                                                                                            | Architecture | Har API call me India se Singapore aana-jaana: thodi der.                                                                                                                                                                 | Backend, finance ka Neon aur saare Atlas clusters Singapore me (D-058); teeno ka region baad me nahi badalta, isliye banate waqt hi. Database server ke paas, user ke paas nahi. Ek page ke liye calls kam, aur jahan theek ho wahan cache. Owner ne Singapore chuna, yaani India se aane-jaane ki ye der maani (2026-11-18).                | Maana  |
 | R-013 | Din ke 300 emails ki seema (D-028).                                                                                                                                                                                                                                                                                                                        | Operations   | Bhaari din pe OTP aur zaroori emails ruk sakte hain.                                                                                                                                                                      | Owner ne maana (D-028); emails ki line me OTP sabse pehle; har order pe sirf zaroori emails (D-126).                                                                                                                                                                                                                                         | Maana  |
 | R-014 | Neon free plan me har project ko mahine ke 100 CU-ghante (§2.3); database baar-baar jaaga raha to mahine ke beech khatam.                                                                                                                                                                                                                                  | Architecture | Ghante khatam hone pe finance ka database baaki mahine band (data surakshit), yaani finance service band.                                                                                                                 | Finance database se sirf kaam aane pe baat; jagane ke ping aur health check us tak nahi; compute 0.25 CU pe (D-057). Owner ne maana (2026-11-18): use kam hoga.                                                                                                                                                                              | Maana  |
+| R-015 | Koi alag WAF ya DDoS ki suraksha nahi; ek process gire to saara backend band (R-002, R-007 se juda).                                                                                                                                                                                                                                                       | Security     | Hamle ya baadh me saari services ek saath band.                                                                                                                                                                           | Resource ki seemaayein, rate limits aur kill switches ([security/SECURITY_REQUIREMENTS.md](security/SECURITY_REQUIREMENTS.md) SR-007, SR-008, SR-009); providers ki apni suraksha. Owner ne maana (2026-11-19, D-210).                                                                                                                       | Maana  |
+| R-016 | Payment wale page pe payment gateway ki bahar ki script; uski suraksha hamare haath me nahi.                                                                                                                                                                                                                                                               | Security     | Script badle to customer ke payment ke details chhin sakte hain.                                                                                                                                                          | Bahar ki script sirf payment page pe, sirf CSP me uska host (SR-006). Owner ne maana (2026-11-19, D-210).                                                                                                                                                                                                                                    | Maana  |
+| R-017 | Domain nahi (D-028): milte-julte naam ke nakli sign-in pages aur hamare naam se nakli emails; staff aur customer pehchaan nahi paate.                                                                                                                                                                                                                      | Security     | Staff ka password aur authenticator code, ya customer ka code chori; account par kabza.                                                                                                                                   | Authenticator ka code ek baar (SR-011); emails me sign-in links nahi ya sirf apne host ke (SR-012); emails me "hum kabhi password ya code nahi maangte"; R2 me passkey (D-199). Owner ne maana (2026-11-19, D-211).                                                                                                                          | Maana  |
+| R-018 | Customer ka account utna hi surakshit jitna uska email inbox (email code se sign-in, D-021).                                                                                                                                                                                                                                                               | Security     | Inbox chori = customer account chori.                                                                                                                                                                                     | Code ke niyam (SR-015), security badlav pe dobara pehchaan (SR-016), optional authenticator. Owner ne maana (2026-11-19, D-211).                                                                                                                                                                                                             | Maana  |
 
 ## 2. Jaanch (2026-11-17)
 
@@ -56,23 +60,25 @@
 
 ## Change log
 
-| Version | Date       | Badlav                                                                                                     |
-| ------- | ---------- | ---------------------------------------------------------------------------------------------------------- |
-| v1.0.0  | 2026-11-17 | Khaali file bani.                                                                                          |
-| v1.1.1  | 2026-11-17 | §0 likhne ka tareeka aur §1 bane; pehle 9 risks (R-001 se R-009).                                          |
-| v1.2.1  | 2026-11-17 | §2 jaanch bana (Atlas, Render, free PostgreSQL); R-006, R-007, R-008, R-009 me jaanch ke tathya.           |
-| v1.2.2  | 2026-11-17 | Naye risks R-010 se R-013 (Key Value ka data, Vercel Hobby, region, 300 emails).                           |
-| v1.2.3  | 2026-11-17 | R-001: R1 ka scope tay (D-055).                                                                            |
-| v1.2.4  | 2026-11-17 | R-001 Maana (owner); Band tab jab R1 ka pehla poora order chale.                                           |
-| v1.2.5  | 2026-11-17 | R-003 Maana (owner): sirf discovery nahi, poore kaam pe; kaam sessions aur accounts me batna acceptable.   |
-| v1.2.6  | 2026-11-18 | R-006 aur R-008 Maana (owner); R-004: baad me ek agent se kanooni jaanch.                                  |
-| v1.2.7  | 2026-11-18 | §2.1: Atlas me ek organization me 250 projects (8 services ke liye kaafi).                                 |
-| v1.2.8  | 2026-11-18 | §2.2 aur R-008: Key Value 750 ghante nahi khaata (docs ke hisaab se, saaf mana nahi); owner ne maana.      |
-| v1.2.9  | 2026-11-18 | R-008: doosri web service nahi aayegi (D-056).                                                             |
-| v1.2.10 | 2026-11-18 | R-009 me provider Neon (D-057); naya R-014 (Neon ke 100 CU-ghante, Maana); §2.3 providers ke apne docs se. |
-| v1.2.11 | 2026-11-18 | §2.4 regions: Render me India nahi, Singapore sabse paas; Neon me Singapore hai. R-012 update.             |
-| v1.2.12 | 2026-11-18 | §2.4 aur R-012: Atlas ka free cluster AWS Singapore me banta hai; database server ke paas.                 |
-| v1.2.13 | 2026-11-18 | §2.4: owner ne pakka kiya, Atlas ka free cluster Singapore me available.                                   |
-| v1.2.14 | 2026-11-18 | R-012 Maana: saari hosting Singapore (D-058).                                                              |
-| v1.2.15 | 2026-11-18 | R-009 Maana; Band tab jab finance ke PostgreSQL wale hisse ban ke tests me paas hon.                       |
-| v1.2.16 | 2026-11-18 | R-013 me D-126 (har order pe sirf zaroori emails).                                                         |
+| Version | Date       | Badlav                                                                                                             |
+| ------- | ---------- | ------------------------------------------------------------------------------------------------------------------ |
+| v1.0.0  | 2026-11-17 | Khaali file bani.                                                                                                  |
+| v1.1.1  | 2026-11-17 | §0 likhne ka tareeka aur §1 bane; pehle 9 risks (R-001 se R-009).                                                  |
+| v1.2.1  | 2026-11-17 | §2 jaanch bana (Atlas, Render, free PostgreSQL); R-006, R-007, R-008, R-009 me jaanch ke tathya.                   |
+| v1.2.2  | 2026-11-17 | Naye risks R-010 se R-013 (Key Value ka data, Vercel Hobby, region, 300 emails).                                   |
+| v1.2.3  | 2026-11-17 | R-001: R1 ka scope tay (D-055).                                                                                    |
+| v1.2.4  | 2026-11-17 | R-001 Maana (owner); Band tab jab R1 ka pehla poora order chale.                                                   |
+| v1.2.5  | 2026-11-17 | R-003 Maana (owner): sirf discovery nahi, poore kaam pe; kaam sessions aur accounts me batna acceptable.           |
+| v1.2.6  | 2026-11-18 | R-006 aur R-008 Maana (owner); R-004: baad me ek agent se kanooni jaanch.                                          |
+| v1.2.7  | 2026-11-18 | §2.1: Atlas me ek organization me 250 projects (8 services ke liye kaafi).                                         |
+| v1.2.8  | 2026-11-18 | §2.2 aur R-008: Key Value 750 ghante nahi khaata (docs ke hisaab se, saaf mana nahi); owner ne maana.              |
+| v1.2.9  | 2026-11-18 | R-008: doosri web service nahi aayegi (D-056).                                                                     |
+| v1.2.10 | 2026-11-18 | R-009 me provider Neon (D-057); naya R-014 (Neon ke 100 CU-ghante, Maana); §2.3 providers ke apne docs se.         |
+| v1.2.11 | 2026-11-18 | §2.4 regions: Render me India nahi, Singapore sabse paas; Neon me Singapore hai. R-012 update.                     |
+| v1.2.12 | 2026-11-18 | §2.4 aur R-012: Atlas ka free cluster AWS Singapore me banta hai; database server ke paas.                         |
+| v1.2.13 | 2026-11-18 | §2.4: owner ne pakka kiya, Atlas ka free cluster Singapore me available.                                           |
+| v1.2.14 | 2026-11-18 | R-012 Maana: saari hosting Singapore (D-058).                                                                      |
+| v1.2.15 | 2026-11-18 | R-009 Maana; Band tab jab finance ke PostgreSQL wale hisse ban ke tests me paas hon.                               |
+| v1.2.16 | 2026-11-18 | R-013 me D-126 (har order pe sirf zaroori emails).                                                                 |
+| v1.2.17 | 2026-11-19 | R-015 (WAF aur DDoS ki suraksha nahi) aur R-016 (payment page ki bahar ki script), dono Maana (D-210).             |
+| v1.2.18 | 2026-11-19 | R-017 (domain ke bina nakli sign-in pages) aur R-018 (customer account inbox jitna surakshit), dono Maana (D-211). |

@@ -1,6 +1,6 @@
 # DECISIONS: Beautinique
 
-> **Status:** v1.9.1 (2026-11-19). Har faisla ek jagah. Sirf wahi "Tay" jo owner ne khud kaha; Claude ki salah faisla nahi. Cheezein ek-ek karke judti hain.
+> **Status:** v1.10.5 (2026-11-19). Har faisla ek jagah. Sirf wahi "Tay" jo owner ne khud kaha; Claude ki salah faisla nahi. Cheezein ek-ek karke judti hain.
 
 ## 0. Kaise likhein
 
@@ -193,6 +193,38 @@
 | D-177 | Store credit nahi; goodwill sirf ek customer ke ek baar ke coupon se.                                                                                                                                         | Business     | 2026-11-19 |
 | D-178 | Dobara kharid: "dobara order" aur in-app ya push yaad R2 se, bina pehle ke payment; subscription baad me, kanooni aur payment jaanch ke baad.                                                                 | Business     | 2026-11-19 |
 | D-179 | Gift cards ka design abhi, banana kanooni jaanch (R-004) ke baad; tay rakam, paane wale ke email pe, cash nahi.                                                                                               | Business     | 2026-11-19 |
+| D-180 | Customer app ka sign-in har istemaal pe 30 din aage, zyada se zyada 90 din; security badlav pe dobara pehchaan; "My devices" se session band.                                                                 | Security     | 2026-11-19 |
+| D-181 | Staff apps ka session 12 ghante (30 minute bina kaam pe band); Seller 7 din aage, max 30 din; Creator 30 din aage, max 90 din.                                                                                | Security     | 2026-11-19 |
+| D-182 | Galat password ya code pe rok IP aur account mila ke (misaal 10 galat pe us IP ki 1 ghante rok, sab IPs ke 50 pe account 15 minute); reset chalta rahe.                                                       | Security     | 2026-11-19 |
+| D-183 | Delivery app: email aur password, Hub Manager ka manzoor ek phone, session usi phone pe misaal 14 din; Hub Manager session band kar sake.                                                                     | Security     | 2026-11-19 |
+| D-184 | Seller app me authenticator jokhim ke hisaab se: Account Owner, Finance, aur daam, payout, bank, staff ya maal bhejne ke haq wale users.                                                                      | Security     | 2026-11-19 |
+| D-185 | Bade kaamon ki tay list pe dobara authenticator code (misaal 5 minute ki khidki); authenticator band aur naye recovery codes pe har baar code.                                                                | Security     | 2026-11-19 |
+| D-186 | Har app ka apna sign-in aur apni cookies; central sign-in nahi.                                                                                                                                               | Security     | 2026-11-19 |
+| D-187 | Code wale emails ki seema: ek email ko ghante me 5 (ek IP se 3), sab mila ke ghante me 30, sign-up din me 20 (misaal); allowlist band karte waqt dobara.                                                      | Security     | 2026-11-19 |
+| D-188 | Support Agent ki manzoori ki seema (misaal ₹2,000 ek maamla, ₹10,000 din); upar Support Lead; fail refund ka staff raasta Support Lead + Finance.                                                             | Security     | 2026-11-19 |
+| D-189 | Payout "paid" do haath se: Finance batch banaye, Master ka doosra account manzoor kare; ek account dono kaam nahi.                                                                                            | Security     | 2026-11-19 |
+| D-190 | Seller ka bank badle to dobara code, khabar, aur naye khaate pe misaal 72 ghante payout nahi; Account Owner rok sake; asli business pe staff jaanch bhi.                                                      | Security     | 2026-11-19 |
+| D-191 | Delivery ki photo aur location misaal 180 din ya khule maamle band hone tak; sirf maamle ka Support, apne hub ka Hub Manager aur customer dekhe.                                                              | Security     | 2026-11-19 |
+| D-192 | Daawe ki photos maamla band hone ke misaal 180 din, video 90 din, pack ki photo delivered ke 90 din (daawa ho to uske saath); sirf us maamle ka staff dekhe.                                                  | Security     | 2026-11-19 |
+| D-193 | Seller aur Beauty Pro ke dastavez: reject pe 30 din, manzoor seller ke account band hone ke misaal 3 saal tak; sirf jaanch wali team aur Trust & Safety dekhe.                                                | Security     | 2026-11-19 |
+| D-194 | Audit log misaal 2 saal, sign-in aur security events 1 saal, delete account ke bina pehchaan records kanooni samay tak.                                                                                       | Security     | 2026-11-19 |
+| D-195 | Push me sirf order number aur haalat; product, rakam, address aur delivery code push me kabhi nahi; poora address sirf invoice me.                                                                            | Security     | 2026-11-19 |
+| D-196 | Backup files ek key se encrypted (key password manager me); restore key maange; laptop pe aakhri 3 backups (misaal).                                                                                          | Security     | 2026-11-19 |
+| D-197 | Secrets shak ya incident pe turant, baaki saal me ek baar; token sign karne wali keys apne aap (misaal 30 din); staff ke jaane pe turant.                                                                     | Security     | 2026-11-19 |
+| D-198 | Data leak pakka ho to asar wale users ko email aur in-app (misaal 72 ghante me), site pe patti; R1 me likha hua kram.                                                                                         | Security     | 2026-11-19 |
+| D-199 | Staff ka doosra factor R1 me authenticator app; passkey R2 me ek aur raasta; asli business pe Master aur Finance pe passkey owner tab tay kare.                                                               | Security     | 2026-11-19 |
+| D-200 | Authenticator kho jaaye: pehle recovery codes, phir Master se reset (code, audit, sessions band, email); Master ka reset recovery codes ya laptop ka break-glass command.                                     | Security     | 2026-11-19 |
+| D-201 | Staff ki lists me customer ki jaankari chhupi; poori sirf maamla kholne pe wajah ke saath, audit me; partner ko sirf active parcel ki.                                                                        | Security     | 2026-11-19 |
+| D-202 | Support customer ki nazar se ya uske naam se kabhi nahi; support ki apni screens.                                                                                                                             | Security     | 2026-11-19 |
+| D-203 | `+` alias wale accounts alag, par per-customer seemaon ke liye address, payment aur device ka jod gina jaaye; R1 me D-109 wala jod.                                                                           | Security     | 2026-11-19 |
+| D-204 | Ek customer (D-203 ke jod ke saath) ke ek waqt me misaal 2 khule delivery-pe-UPI orders, kul rakam D-109 ki seema tak.                                                                                        | Security     | 2026-11-19 |
+| D-205 | Goodwill coupon ki seedhi: Support Agent misaal ₹200 tak (ek customer ko saal me 2), Support Lead ₹1,000 tak, upar Head of Operations; mahine ka kul budget; R2 se.                                           | Security     | 2026-11-19 |
+| D-206 | Bina sign-in forms pe CAPTCHA nahi: email pe code se pakka, chhupa honeypot field, IP aur email pe rate limit; asli business pe dobara; R2 se.                                                                | Security     | 2026-11-19 |
+| D-207 | Sehat ka data maamle ke hisaab se: notes sirf us maamle ka Skin & Hair Expert (Support Lead wajah ke saath), skin reaction case Support Lead + Expert, allergy profile sirf customer; R2 se.                  | Security     | 2026-11-19 |
+| D-208 | Sehat ke data ka samay: notes aakhri consult ke misaal 2 saal, skin reaction case band hone ke 3 saal, allergy profile customer ke mitane ya account delete tak; R2 se.                                       | Security     | 2026-11-19 |
+| D-209 | Security report ke niyam, threats aur risks area ke hisaab se lagbhag 9 batches me; har batch faislon se mila ke ek sawal me, owner ki haan ke baad hi docs me (4 niyam).                                     | Process      | 2026-11-19 |
+| D-210 | Security batch 1 (edge aur hosting) maana: niyam SR-002 se SR-010, 7 threats, risks R-015 aur R-016 `Maana`; numbers misaal, settings me.                                                                     | Security     | 2026-11-19 |
+| D-211 | Security batch 2 (sign-in) maana: niyam SR-011 se SR-026, 15 threats, risks R-017 aur R-018 `Maana`; D-021 ka email code ke baad authenticator pakka.                                                         | Security     | 2026-11-19 |
 
 ## 2. Record
 
@@ -2288,6 +2320,318 @@
 - **Kisne, kab:** owner, 2026-11-19. **Nishaan:** Salah maani.
 - **Asar (Claude):** data aur finance ke khaate design me; banana R2 ke baad. Gift card ka email D-142 ki chhat me. Kanooni detail jaanchi nahi (R-004): prepaid instrument (closed ya semi-closed) ke niyam, gift card ki kam se kam muddat aur KYC, gift voucher pe GST, aur bina kharch ke balance ka hisaab; jawab kanooni jaanch ke baad badal sakta hai.
 
+### D-180. Customer app ke sign-in ki umar
+
+- **Faisla:** customer app ka sign-in har istemaal pe 30 din aage badhta hai, zyada se zyada 90 din; phir dobara sign-in. Saath me account ki security badalne pe dobara pehchaan, aur "My devices" se customer kisi bhi session ko band kar sake.
+- **Wajah:** Claude ki salah, owner ne maani: guest cart nahi (D-020) aur har sign-in email code (D-021) se hai jo emails ki chhat (D-142) khaata hai; dobara pehchaan aur "My devices" lambe session ka jokhim kam karte hain.
+- **Chhode vikalp:** 7 din aage, max 30 din (har hafte sign-in, zyada codes); 90 din aage, max 1 saal (chori ka asar sabse lamba).
+- **Kab dobara khulega:** owner khud khole.
+- **Kisne, kab:** owner, 2026-11-19. **Nishaan:** Salah maani.
+- **Asar (Claude):** R1 se. Chori hua session 90 din tak chal sakta hai jab tak customer band na kare.
+
+### D-181. Staff, seller aur creator apps ke session
+
+- **Faisla:** staff ke 7 apps (Admin, Super Admin, Master, Support Desk, Finance, Logistics Ops, Growth Studio) me session 12 ghante, aur 30 minute bina kaam pe band. Seller app me har istemaal pe 7 din aage, zyada se zyada 30 din. Creator app (R2) me 30 din aage, zyada se zyada 90 din.
+- **Wajah:** Claude ki salah, owner ne maani: staff ke liye ek kaam ka din, seller ke liye hafte me ek sign-in, Creator customer jaisa; owner ke ~80 accounts (D-017) pe isse kada bojh bhaari padta.
+- **Chhode vikalp:** kada (staff 8 ghante aur 15 minute, seller 1 din aage, max 7 din); dheela (staff 24 ghante aur 2 ghante, seller aur creator 90 din tak).
+- **Kab dobara khulega:** owner khud khole.
+- **Kisne, kab:** owner, 2026-11-19. **Nishaan:** Salah maani.
+- **Asar (Claude):** R1 se (Creator R2). Numbers settings me rahein.
+
+### D-182. Galat password ya code pe rok
+
+- **Faisla:** baar-baar galat password ya code pe rok IP aur account mila ke. Niyam (numbers misaal):
+  1. Ek IP se 15 minute me 10 galat koshish: us IP se us account pe 1 ghante ki rok.
+  2. Saare IPs mila ke 15 minute me 50 galat: poore account pe 15 minute ki rok.
+  3. Rok ke dauraan "password bhool gaye" chalta rahe, aur rok ke dauraan ki koshishein gini na jaayein.
+- **Wajah:** Claude ki salah, owner ne maani: andaaza rukta hai, aur koi galat password daal ke asli user (jaise owner ke staff accounts) ko band nahi kar sakta.
+- **Chhode vikalp:** sirf account pe rok (rok khud hamle ka hathiyar); account pe koi rok nahi (andaaze pe kam rok).
+- **Kab dobara khulega:** owner khud khole.
+- **Kisne, kab:** owner, 2026-11-19. **Nishaan:** Salah maani.
+- **Asar (Claude):** R1 se. Bahut IPs wala hamlavar 15 minute ki poori rok tak pahunch sakta hai; ginti Redis me ho to restart pe thodi der shuru se (R-010).
+
+### D-183. Delivery app ka sign-in aur phone
+
+- **Faisla:** delivery partner email aur password se sign-in kare. Partner ka ek manzoor phone (Hub Manager manzoor kare; naya phone = nayi manzoori); session usi phone pe misaal 14 din; authenticator optional; Hub Manager kabhi bhi session band kar sake.
+- **Wajah:** Claude ki salah, owner ne maani: offline app (D-042) ke saath chalta hai, phone khone pe Hub Manager turant band kar sakta hai, aur gig partner (D-033) pe roz ka bojh nahi.
+- **Chhode vikalp:** har shift authenticator (phone chori = dono factor gaye); bina bandish 30 din ka session (chori ka asar lamba).
+- **Kab dobara khulega:** owner khud khole.
+- **Kisne, kab:** owner, 2026-11-19. **Nishaan:** Salah maani.
+- **Asar (Claude):** R1 se. Phone ki pehchaan browser me rakhi key se; browser ka data saaf hone pe dobara manzoori. Hub Manager ke kaam me naya phone manzoor karna.
+
+### D-184. Seller app me authenticator kin users pe
+
+- **Faisla:** seller app me authenticator jokhim ke hisaab se zaroori: Account Owner, Finance, aur jis bhi user ko daam, payout ya bank, seller ke staff, ya maal bhejne ka haq ho. Sirf listing content ya reports wale users bina authenticator.
+- **Wajah:** Claude ki salah, owner ne maani: jahan seller ka seedha nuksaan ho sakta hai wahan doosra factor, aur content likhne walon pe bojh nahi.
+- **Chhode vikalp:** sirf Account Owner aur Finance (daam aur maal bina doosre factor); saare seller users (chhote brand pe bojh).
+- **Kab dobara khulega:** owner khud khole.
+- **Kisne, kab:** owner, 2026-11-19. **Nishaan:** Salah maani.
+- **Asar (Claude):** R1 se. D-017 ki misaal (Account Owner, Seller Finance) isse badi list me aati hai. Kisi user ko naya haq milte hi authenticator zaroori ho jaaye.
+
+### D-185. Bade kaamon pe dobara authenticator code
+
+- **Faisla:** sign-in ke baad bhi in kaamon se theek pehle dobara authenticator code (misaal 5 minute ki khidki): role ya grant dena aur hatana; authenticator reset; allowlist badalna (D-133); area ke switches aur live karna; fees, policy ke numbers, HSN table, blocklist aur emails ki chhat badalna; payout "paid"; seema se upar refund ya daawe ki manzoori; data export; seller ka bank badalna; kill switches. Authenticator band karna aur naye recovery codes banana har baar apna alag code maangein.
+- **Wajah:** Claude ki salah, owner ne maani: khula chhoda session ya chori hui cookie se sabse bade kaam na hon, aur roz ka kaam na ruke.
+- **Chhode vikalp:** staff ke har likhne wale kaam pe (kaam bahut dheema); sirf Master ke kaamon pe (Finance aur Admin ke bade kaam bina code).
+- **Kab dobara khulega:** owner khud khole.
+- **Kisne, kab:** owner, 2026-11-19. **Nishaan:** Salah maani.
+- **Asar (Claude):** R1 se. Naye bade kaam aane pe list badhani hogi; list ek jagah (code me ek list) rahe.
+
+### D-186. Har app ka apna sign-in
+
+- **Faisla:** har app ka apna sign-in aur apni cookies; ek central sign-in app nahi.
+- **Wajah:** Claude ki salah, owner ne maani: owner ke har role ka alag account hai (D-017), to zyadatar ek account ek hi app me jaata hai; central sign-in se bojh kam nahi hota, aur redirect aur code se hamle ke naye raaste khulte.
+- **Chhode vikalp:** ek central sign-in app (ek jagah chori = saare apps, banane ka kaam bada); abhi alag aur asli business pe central (baad me badlav ka kaam).
+- **Kab dobara khulega:** owner khud khole, jaise asli business pe kai apps wale staff aayen.
+- **Kisne, kab:** owner, 2026-11-19. **Nishaan:** Salah maani.
+- **Asar (Claude):** R1 se. 11 apps alag hosts pe (D-048), to cookies har host ki alag. Password manager se sign-in aasaan.
+
+### D-187. Code wale emails ki seema
+
+- **Faisla:** bina sign-in maange jaane wale code ke emails (sign-in, sign-up, password reset) ki seema (numbers misaal): ek email ko ghante me 5 code (ek IP se unme 3 tak); saare emails mila ke ghante me 30; sign-up ke codes din me 20. Allowlist (D-133) band karte waqt numbers dobara dekhe jaayein.
+- **Wajah:** Claude ki salah, owner ne maani: codes maang-maang ke din ki OTP ki jagah (D-142) koi kha na sake, aur sign-up ki baadh me bhi password reset, invite aur security codes ke liye jagah bache.
+- **Chhode vikalp:** kada (ek email 3, sab 15, sign-up 10); dheela (ek email 10, sab 60, sign-up 60; ek ghante me OTP ki din ki jagah khatam ho sakti).
+- **Kab dobara khulega:** allowlist band karte waqt (asli business).
+- **Kisne, kab:** owner, 2026-11-19. **Nishaan:** Salah maani.
+- **Asar (Claude):** R1 se. Bhaari ghante me asli user ko "thodi der baad koshish karein" ka sandesh. Numbers settings me.
+
+### D-188. Support Agent ki manzoori ki seema
+
+- **Faisla:** Support Agent ek maamle me misaal ₹2,000 tak aur din me kul misaal ₹10,000 tak refund ya daawa khud manzoor kare; usse upar Support Lead (doosra account). Fail hue refund ka staff wala raasta (D-111) hamesha Support Lead aur Finance ki manzoori se.
+- **Wajah:** Claude ki salah, owner ne maani: chori hua account ya mili-bhagat ek account se bada nuksaan na kar sake, aur chhote maamle ek hi account se chalein.
+- **Chhode vikalp:** koi seema nahi, sirf audit (ek account se bada nuksaan); har insaani faisle pe doosre account ki haan (har chhote maamle pe do accounts ka bojh).
+- **Kab dobara khulega:** owner khud khole.
+- **Kisne, kab:** owner, 2026-11-19. **Nishaan:** Salah maani.
+- **Asar (Claude):** R1 se (Support Desk ka patla hissa, D-105). Bade maamle thodi der se. Goodwill coupon ki seema isi dhaanche pe alag sawal.
+
+### D-189. Payout "paid" do haath se
+
+- **Faisla:** Finance role payout batch banaye, aur Master ka doosra account (D-047) use manzoor kare; ek hi account batch banana aur "paid" mark karna, dono kaam nahi kar sakta.
+- **Wajah:** Claude ki salah, owner ne maani: chori hua ek account seller ka paisa "paid" nahi dikha sakta, aur Master ke paas roz ke kaam ka haq nahi aata.
+- **Chhode vikalp:** Finance role akela (ek account ka jokhim); sirf Master (D-047 ki soch ke khilaaf).
+- **Kab dobara khulega:** owner khud khole.
+- **Kisne, kab:** owner, 2026-11-19. **Nishaan:** Salah maani.
+- **Asar (Claude):** R1 se (R1 me payout haath se "paid", [PROJECT_PLAN.md](PROJECT_PLAN.md) §1). Owner ke liye har hafte do accounts se kaam. Dono kadam audit me.
+
+### D-190. Seller ka bank khaata badle to
+
+- **Faisla:** seller apna bank ya payout ka khaata badle to dobara authenticator code, purane email aur in-app pe khabar, aur naye khaate pe misaal 72 ghante tak payout nahi; us dauraan Account Owner "ye maine nahi kiya" daba ke badlav rok sake. Asli business pe naye khaate ka pehla payout Seller Ops ki jaanch ke baad bhi.
+- **Wajah:** Claude ki salah, owner ne maani: sellers ka paisa platform ke paas rehta hai (D-093); account chori karke bank badalna sabse seedha nuksaan hai, aur rok usse bachati hai.
+- **Chhode vikalp:** sirf staff ki jaanch, abhi se (staff ka kaam); koi rok nahi, sirf khabar (chori ka seedha raasta).
+- **Kab dobara khulega:** owner khud khole.
+- **Kisne, kab:** owner, 2026-11-19. **Nishaan:** Salah maani.
+- **Asar (Claude):** R1 me design; bank badalne ke baad payout 3 din der se. Staff ki jaanch wala hissa asli business pe.
+
+### D-191. Delivery ke saboot ka samay aur pahunch
+
+- **Faisla:** delivery ki photo aur partner ki location (D-072) delivered se misaal 180 din tak, ya khula daawa, dispute ya chargeback band hone tak (jo baad me ho). Dekhe: daawe pe Support Agent aur Support Lead, aur apne hub ka Hub Manager; partner submit ke baad nahi; customer apni delivery ki photo dekh sake.
+- **Wajah:** Claude ki salah, owner ne maani: saboot daawe (D-148), partner ke dispute (D-164) aur chargeback (D-095) tak bachta hai, aur ghar ki photo aur location kam haathon me.
+- **Chhode vikalp:** 30 din (baad ka dispute ya chargeback bina saboot); 1 saal (zyada data zyada der).
+- **Kab dobara khulega:** kanooni jaanch (R-004) ke baad, ya owner khud khole.
+- **Kisne, kab:** owner, 2026-11-19. **Nishaan:** Salah maani.
+- **Asar (Claude):** R1 se; samay ke baad apne aap delete. Chargeback ki asli samay-seema payment gateway ke niyam se pakki karni hai (tathya ki jaanch). Kanooni detail jaanchi nahi (R-004): photo aur location jaise personal data rakhne ka samay.
+
+### D-192. Daawe, pickup aur pack ki photos ka samay
+
+- **Faisla:** customer ke daawe ki photos (D-106) aur return pickup ki photo (D-113) maamla band hone ke misaal 180 din baad delete; video misaal 90 din; warehouse pe pack ki photo delivered ke misaal 90 din, ya daawa ho to daawe ke saath. Dekhe: us maamle ka Support staff aur warehouse ka jaanch wala staff.
+- **Wajah:** Claude ki salah, owner ne maani: jhagde ke liye saboot bachta hai, aur ghar ya chehre wali photos bina zaroorat lambi nahi rehti.
+- **Chhode vikalp:** sab 90 din (lamba jhagda bina saboot); sab 1 saal (zyada storage aur personal data).
+- **Kab dobara khulega:** kanooni jaanch (R-004) ke baad, ya owner khud khole.
+- **Kisne, kab:** owner, 2026-11-19. **Nishaan:** Salah maani.
+- **Asar (Claude):** R1 se; alag-alag samay ka delete job. Kanooni detail jaanchi nahi (R-004): customer ki photo aur video rakhne ke niyam.
+
+### D-193. Seller aur Beauty Pro ke dastavez
+
+- **Faisla:** pehchaan ke dastavez ka samay aur pahunch. Niyam (numbers misaal):
+  1. Reject hui application ke dastavez 30 din baad delete; sirf faisla aur wajah rahe.
+  2. Manzoor seller ke KYC dastavez (PAN, GSTIN ka certificate, brand authorisation) account chalne tak, aur band hone ke 3 saal baad delete (kanooni jaanch ke baad number badal sakta hai).
+  3. Claims ke saboot (D-100) unki expiry ke 1 saal baad; Beauty Pro ke dastavez (D-069) darje ki muddat ke 1 saal baad.
+  4. Dekhe: sirf jaanch wali team (Seller Ops, catalog ki jaanch, Pro ki jaanch) aur Trust & Safety; seller apne dastavez.
+- **Wajah:** Claude ki salah, owner ne maani: jaanch, dobara jaanch aur jhagde ke liye dastavez rehte hain, par leak ka bada bhandaar nahi banta.
+- **Chhode vikalp:** sab hamesha (leak ka bada bhandaar); jaanch ke baad turant delete (jhagde ya dobara jaanch pe dastavez nahi).
+- **Kab dobara khulega:** kanooni jaanch (R-004) ke baad, ya owner khud khole.
+- **Kisne, kab:** owner, 2026-11-19. **Nishaan:** Salah maani.
+- **Asar (Claude):** seller ke liye R1 se, Beauty Pro ke liye R2 se (D-055). Kanooni detail jaanchi nahi (R-004): KYC aur tax ke records kitne din rakhne zaroori hain.
+
+### D-194. Audit log aur records ka samay
+
+- **Faisla:** audit log misaal 2 saal (paise ke kaamon ka audit kanooni jaanch ke baad lamba ho sakta hai); sign-in aur security events misaal 1 saal; delete hue account ke bina pehchaan records (invoice, ledger) kanooni samay tak; backups me purana data backup ki umar tak.
+- **Wajah:** Claude ki salah, owner ne maani: jaanch ke liye audit bachta hai, par jagah (R-006) aur IP jaisa personal data bina hadd nahi badhta. D-151 ne records ka samay yahin chhoda tha.
+- **Chhode vikalp:** sab 400 din (saal bhar baad ki jaanch me kami); audit hamesha (jagah aur personal data badhte rehte).
+- **Kab dobara khulega:** kanooni jaanch (R-004) ke baad, ya owner khud khole.
+- **Kisne, kab:** owner, 2026-11-19. **Nishaan:** Salah maani.
+- **Asar (Claude):** R1 se. Audit ke cluster ki 0.5 GB jagah (R-006) ka hisaab architecture me. Kanooni detail jaanchi nahi (R-004): logs rakhne ka samay (CERT-In ke niyam) aur tax records ka samay.
+
+### D-195. Push aur email me kitni jaankari
+
+- **Faisla:** browser push me sirf order number aur haalat (misaal "Order 1234: out for delivery"); product ka naam, rakam, address aur delivery code push me kabhi nahi. Email me order ki detail (D-126), par poora address sirf invoice me.
+- **Wajah:** Claude ki salah, owner ne maani: push lock screen pe koi bhi dekh sakta hai, kuch beauty aur personal care products niji hote hain, aur delivery code (D-072) saboot hai.
+- **Chhode vikalp:** push me product ka naam bhi (niji product lock screen pe); push aur email me poori detail (sabse zyada leak).
+- **Kab dobara khulega:** owner khud khole.
+- **Kisne, kab:** owner, 2026-11-19. **Nishaan:** Salah maani.
+- **Asar (Claude):** R1 se. Detail ke liye customer ko app kholna padta hai.
+
+### D-196. Backup files encrypted
+
+- **Faisla:** backup command (D-013) apni files ek key se encrypt kare; key password manager me, repo me kabhi nahi; restore command key maange; laptop pe misaal sirf aakhri 3 backups, purane apne aap delete.
+- **Wajah:** Claude ki salah, owner ne maani: backup me saara data hai, aur D-013 ke 4 pehre git se bachate hain, laptop chori, malware ya Desktop ke cloud sync se nahi.
+- **Chhode vikalp:** bina encryption, sirf disk encryption (laptop pe khula data); encrypted copy alag device pe bhi (owner ne abhi nahi chuni).
+- **Kab dobara khulega:** owner khud khole (jaise alag device pe copy chahiye ho).
+- **Kisne, kab:** owner, 2026-11-19. **Nishaan:** Salah maani.
+- **Asar (Claude):** R1 se, backup command ke saath. Key kho jaaye to backup bekaar: key ka bachav password manager ke saath. Laptop kharab ho to backup bhi jaata hai.
+
+### D-197. Secrets badalne ka samay
+
+- **Faisla:** secrets (databases ke passwords, payment gateway ki keys, apps se backend ka secret, email ki key, sign-in providers ke secrets, encryption keys) shak ya incident pe turant, tay kram se; baaki saal me ek baar sab; token sign karne wali keys apne aap (misaal har 30 din); asli business pe kisi staff ke jaane pe turant.
+- **Wajah:** Claude ki salah, owner ne maani: leak hua secret badalna hi ilaaj hai, par ek insaan ke liye ~20 secrets baar-baar badalna galti ka mauka bhi hai.
+- **Chhode vikalp:** har 90 din sab (bahut kaam aur galti ka mauka); sirf incident pe (chupchaap leak kabhi theek nahi hota).
+- **Kab dobara khulega:** owner khud khole.
+- **Kisne, kab:** owner, 2026-11-19. **Nishaan:** Salah maani.
+- **Asar (Claude):** R1 se. Secrets ki list aur badalne ka kram operations ke doc me (DevOps ke saath). Keys apne aap badlein to purani key thodi der tak jaanch ke liye chalti rahe.
+
+### D-198. Data leak pe users ko khabar
+
+- **Faisla:** personal data ka leak pakka ho to asar wale users ko email aur in-app, misaal 72 ghante ke andar: kya hua, kaunsa data, unhe kya karna hai; site pe ek patti; aur jo sarkari report kanooni jaanch bataye. R1 me iska likha hua kram (runbook).
+- **Wajah:** Claude ki salah, owner ne maani: registrations dummy hain par system me asli personal data (owner aur testers ka) hai, aur design asli business jaisa (D-026).
+- **Chhode vikalp:** sirf gambhir leak pe khabar (chhota leak chhup jaata); koi khabar nahi (asli business ke liye galat aadat).
+- **Kab dobara khulega:** kanooni jaanch (R-004) ke baad, ya owner khud khole.
+- **Kisne, kab:** owner, 2026-11-19. **Nishaan:** Salah maani.
+- **Asar (Claude):** R1 se (runbook operations ke doc me). Emails ki chhat (D-142) me jagah chahiye. Kanooni detail jaanchi nahi (R-004): data leak pe users aur sarkari sanstha ko suchna ka samay aur tareeka.
+
+### D-199. Staff ka doosra factor
+
+- **Faisla:** R1 me har staff account (staff ke 7 apps) pe password ke saath authenticator app (6 digit code); passkey R2 me ek aur raasta. Asli business pe Master aur Finance pe passkey zaroori karna owner tab tay kare.
+- **Wajah:** Claude ki salah, owner ne maani: R1 me kaam kam; domain nahi (D-028) to nakli sign-in page ka jokhim hai, jisse passkey R2 me bachati hai.
+- **Chhode vikalp:** R1 se passkey pehla raasta (har app ke alag host pe passkey banane ka kaam zyada); hamesha sirf authenticator (phishing ka jokhim hamesha).
+- **Kab dobara khulega:** asli business pe (Master aur Finance pe passkey), ya owner khud khole.
+- **Kisne, kab:** owner, 2026-11-19. **Nishaan:** Salah maani.
+- **Asar (Claude):** R1 se. Authenticator app me 50 se zyada entries. Authenticator ke secrets aur passwords ek hi password manager me hon to dono factor ek jaise ho jaate hain: owner ke liye saavdhani.
+
+### D-200. Authenticator kho jaaye to
+
+- **Faisla:** staff ka authenticator kho jaaye to reset ka raasta:
+  1. Pehle recovery codes (10, har code ek baar).
+  2. Staff account ka reset Master account kare: dobara authenticator code, audit, us account ke saare sessions band, aur user ko email.
+  3. Master ka apna reset sirf recovery codes se; wo bhi na hon to owner ke laptop se ek "break-glass" command jo seedha database pe reset kare aur audit me likhe.
+- **Wajah:** Claude ki salah, owner ne maani: owner ka phone kho jaaye to bhi accounts wapas milte hain, aur reset ka raasta kabze ka aasaan raasta nahi banta.
+- **Chhode vikalp:** ek alag security role sabka reset kare (ek role ke paas sabki chaabi); email code se reset (inbox hi authenticator ban jaata).
+- **Kab dobara khulega:** passkey aane pe (D-199), ya owner khud khole.
+- **Kisne, kab:** owner, 2026-11-19. **Nishaan:** Salah maani.
+- **Asar (Claude):** R1 se. Recovery codes offline sambhalne hain. Break-glass command ke liye production database ki pahunch laptop pe chahiye (backup command ke liye pehle se, D-013).
+
+### D-201. Staff ko customer ki jaankari
+
+- **Faisla:** staff ko customer ki jaankari kam se kam. Niyam:
+  1. Lists me naam ka pehla hissa aur shehar, aadha email, phone ke aakhri 4 ank.
+  2. Poori jaankari sirf maamla kholne pe, wajah chun ke; har baar dekhna audit me.
+  3. Delivery partner ko sirf apne active parcel ka naam, address aur phone; delivered ke misaal 24 ghante baad chhupa.
+  4. Warehouse aur hub ko sirf order number aur label.
+- **Wajah:** Claude ki salah, owner ne maani: staff ki lists se customers ka data bahar jaana sabse aasaan raasta hai; sellers ke liye D-143 pehle se tay tha.
+- **Chhode vikalp:** support ko hamesha poori (list se poora data bahar ja sakta); jise kaam ho use poori (sabse zyada leak).
+- **Kab dobara khulega:** owner khud khole.
+- **Kisne, kab:** owner, 2026-11-19. **Nishaan:** Salah maani.
+- **Asar (Claude):** R1 se. Support ko ek click zyada aur audit ka kaam. Kanooni detail jaanchi nahi (R-004): staff ke paas personal data ki pahunch ke niyam.
+
+### D-202. Support customer ban ke nahi
+
+- **Faisla:** support staff customer ka account usi ki nazar se nahi dekhta, aur uske naam se kaam nahi karta; support ki apni screens (order, return aur refund ki haalat) customer jaisa dikhati hain.
+- **Wajah:** Claude ki salah, owner ne maani: "customer ki nazar" se staff ke haq aur chhupi jaankari (D-201) dono ka bypass ho jaata.
+- **Chhode vikalp:** sirf dekhne wala mode, audit aur khabar ke saath (sirf dekhne me bhi poora data); customer ban ke poora kaam (sabse bada jokhim).
+- **Kab dobara khulega:** owner khud khole.
+- **Kisne, kab:** owner, 2026-11-19. **Nishaan:** Salah maani.
+- **Asar (Claude):** R1 me Support Desk ke patle hisse (D-105) me support ki screens.
+
+### D-203. Ek insaan ke kai accounts aur per-customer seemaayein
+
+- **Faisla:** email ke `+` alias wale accounts alag hi rehte hain (D-017), par per-customer seemaon (D-109, D-116, D-156, D-176) ke liye ek jod bhi gina jaata hai. Niyam:
+  1. Jod: wahi address (ek roop me karke), wahi payment ki pehchaan (gateway de to), aur wahi browser ki device cookie.
+  2. Email ka bina `+` wala roop sirf ek ishara, faisla nahi.
+  3. Jod pe apne aap rok sirf tay seemaon (jaise D-109) pe; baaki staff ki review queue me.
+- **Wajah:** Claude ki salah, owner ne maani: naye alias se naya account bana ke koi per-customer seema dobara shuru na kar sake, aur owner ke alag accounts (D-017) bhi bane rahein.
+- **Chhode vikalp:** email ka ek roop hi ek insaan (owner ke saare customer aliases ek gine jaate); koi jod nahi (har per-customer seema bekaar).
+- **Kab dobara khulega:** owner khud khole.
+- **Kisne, kab:** owner, 2026-11-19. **Nishaan:** Salah maani.
+- **Asar (Claude):** R1 me D-109 wala jod; baaki seemaon ke saath R2 se. Jod ka data bhi personal data hai. Owner ke apne customer aliases ek hi address pe hon to "pehle order" wali seema saath lagegi: testing me dhyaan. Kanooni detail jaanchi nahi (R-004): device ki pehchaan aur accounts ka jod rakhne ke niyam.
+
+### D-204. Khule delivery-pe-UPI orders ki seema
+
+- **Faisla:** ek customer (D-203 ke jod ke saath) ke ek waqt me misaal 2 khule delivery-pe-UPI orders, aur unki kul rakam D-109 ki seema tak.
+- **Wajah:** Claude ki salah, owner ne maani: delivery pe UPI me stock delivery tak ruka rehta hai (D-118), to bina payment kai orders se stock roka na ja sake; D-109 sirf rakam aur mana karne ki ginti dekhta tha.
+- **Chhode vikalp:** ek waqt me 1 khula order (aur kada); koi alag seema nahi (stock rokne ka raasta khula).
+- **Kab dobara khulega:** owner khud khole.
+- **Kisne, kab:** owner, 2026-11-19. **Nishaan:** Salah maani.
+- **Asar (Claude):** R1 se. Kabhi asli customer ka teesra order prepaid hi hoga.
+
+### D-205. Goodwill coupon ki seema
+
+- **Faisla:** support ke goodwill coupon (D-177) ki seedhi (numbers misaal): Support Agent ek coupon ₹200 tak, ek customer ko saal me 2 tak; Support Lead ₹1,000 tak; usse upar Head of Operations (D-044); platform ka mahine ka kul goodwill budget ₹10,000.
+- **Wajah:** Claude ki salah, owner ne maani: coupon paise jaisa hai, to chori hua account ya mili-bhagat bina seema nuksaan na kare; dhaancha refund ki seema (D-188) jaisa.
+- **Chhode vikalp:** koi seema nahi, sirf audit (bada nuksaan ho sakta); sirf Support Lead de (chhote goodwill pe bhi Lead).
+- **Kab dobara khulega:** owner khud khole.
+- **Kisne, kab:** owner, 2026-11-19. **Nishaan:** Salah maani.
+- **Asar (Claude):** R2 se (D-177). Seema aur budget settings me; har coupon audit me.
+
+### D-206. Bina sign-in forms pe bots ki rok
+
+- **Faisla:** "Contact us" (D-161) aur grievance (D-163) jaise bina sign-in wale forms pe CAPTCHA nahi. Rok: pehle form me diye email pe code se pakka karna, ek chhupa "honeypot" field, aur IP aur email pe rate limit. Asli business pe (allowlist band hone pe, D-133) dobara dekhna.
+- **Wajah:** Claude ki salah, owner ne maani: allowlist ke rehte itna kaafi hai, aur bahar ki CAPTCHA script se visitors ka data bahar nahi jaata (D-157 ki soch).
+- **Chhode vikalp:** free CAPTCHA service (bahar ki script aur data); dono saath (dono ka kaam).
+- **Kab dobara khulega:** allowlist band karte waqt (asli business).
+- **Kisne, kab:** owner, 2026-11-19. **Nishaan:** Salah maani.
+- **Asar (Claude):** R2 se (grievance ka page R1 me sirf jaankari, D-163). Code ka email D-142 ki chhat me.
+
+### D-207. Sehat ke data ki pahunch
+
+- **Faisla:** sehat se jude data ki pahunch maamle ke hisaab se. Niyam:
+  1. Consultation notes (D-025): sirf wo Skin & Hair Expert jisne consult kiya ya jise maamla diya gaya; Support Lead sirf maamla khulne pe, wajah ke saath, audit me; customer apne notes dekhe.
+  2. Skin reaction case (D-130): Support Lead aur Skin & Hair Expert; brand ko sirf batch aur bina pehchaan ka saar.
+  3. Allergy wali beauty profile (D-165): sirf customer; staff tabhi jab customer khud support me bataye.
+- **Wajah:** Claude ki salah, owner ne maani: ye privacy ka sabse gambhir data hai, to kam se kam haath, par customer ki shikayat pe Support kuch dekh sake.
+- **Chhode vikalp:** saare Experts aur Support roles (bahut haathon me data); sirf Expert, Support kabhi nahi (shikayat pe Support andha).
+- **Kab dobara khulega:** kanooni jaanch (R-004) ke baad, ya owner khud khole.
+- **Kisne, kab:** owner, 2026-11-19. **Nishaan:** Salah maani.
+- **Asar (Claude):** R2 se (D-055). D-025 ke "zaroori support roles" ab saaf. Kanooni detail jaanchi nahi (R-004): sehat ke data ki consent aur pahunch ke niyam.
+
+### D-208. Sehat ke data ka samay
+
+- **Faisla:** consultation notes aakhri consult ke misaal 2 saal baad delete; skin reaction case band hone ke misaal 3 saal baad (batch aur recall ka itihaas, D-129); allergy profile jab tak customer na mitaye, aur account delete pe turant.
+- **Wajah:** Claude ki salah, owner ne maani: data bina zaroorat lamba nahi rehta, par batch ki dikkat aur recall ka itihaas bachta hai.
+- **Chhode vikalp:** sab 1 saal (batch ka itihaas kho sakta); sab account delete tak (bina zaroorat lamba).
+- **Kab dobara khulega:** kanooni jaanch (R-004) ke baad, ya owner khud khole.
+- **Kisne, kab:** owner, 2026-11-19. **Nishaan:** Salah maani.
+- **Asar (Claude):** R2 se; alag-alag samay ka delete job. Kanooni detail jaanchi nahi (R-004): cosmetics ke side-effect ke records aur sehat ke data rakhne ka samay.
+
+### D-209. Security report docs me kaise aaye
+
+- **Faisla:** Security Architect ki report ke niyam, threats aur risks area ke hisaab se batches me aate hain. Niyam:
+  1. Claude har area (edge aur hosting, sign-in, sessions, authorization aur sellers ki deewar, checkout aur paisa, files aur personal data, data stores aur services, export, audit, logs aur DevOps, R2 ke hisse) ke niyam tay faislon se mila ke SR-002 se aage, us area ke threats aur risks ke saath, ek sawal me rakhe.
+  2. Owner har batch pe haan ya badlav de; haan ke baad hi [security/SECURITY_REQUIREMENTS.md](security/SECURITY_REQUIREMENTS.md), [security/THREAT_MODEL.md](security/THREAT_MODEL.md) aur [RISKS.md](RISKS.md) me.
+  3. Tay faislon pe dhyaan ke points apne area ke batch me; jo pehle se kisi faisle me sambhal gaye, unka sirf hawala.
+  4. Report ki "sirf jaanch" wali technical cheezein Claude khud saboot ke saath jaanche ([RISKS.md](RISKS.md) §2 jaisa); kanooni wali kanooni jaanch (R-004) ke liye.
+- **Wajah:** Claude ki salah, owner ne maani: har batch itni chhoti ki padhi ja sake, aur har niyam faislon se mila hua rahe.
+- **Chhode vikalp:** ek badi batch (padhna mushkil, galti chhoot sakti); har niyam alag sawal (bahut lamba); pehle se haan aur seedha docs me (galat niyam docs me aa sakta).
+- **Kab dobara khulega:** owner khud khole.
+- **Kisne, kab:** owner, 2026-11-19. **Nishaan:** Salah maani.
+- **Asar (Claude):** lagbhag 9 batches. Report ke IDs (threats, niyam, risks) naye docs me nahi jaate; har cheez naye number (SR-xxx, R-xxx) aur naye vakya me.
+
+### D-210. Security batch 1: edge aur hosting
+
+- **Faisla:** edge aur hosting ke niyam SR-002 se SR-010 ([security/SECURITY_REQUIREMENTS.md](security/SECURITY_REQUIREMENTS.md)), unke 7 threats ([security/THREAT_MODEL.md](security/THREAT_MODEL.md) §1.1), aur risks R-015 (alag WAF ya DDoS ki suraksha nahi) aur R-016 (payment page ki bahar ki script) `Maana` ([RISKS.md](RISKS.md)). Niyamon ke numbers misaal hain aur settings me rahenge.
+- **Wajah:** Claude ki salah, owner ne maani: har request ka pehla pehra (backend ka seedha raasta band, asli client IP, cache, headers, seemaayein, rate limits, kill switches) pehle din se.
+- **Chhode vikalp:** badlav ke saath maanna (owner ne koi badlav nahi diya); batch rokna (aage ka design bina edge ke pehre ke).
+- **Kab dobara khulega:** asli naap ke baad numbers (settings se, bina deploy), ya owner khud khole.
+- **Kisne, kab:** owner, 2026-11-19. **Nishaan:** Salah maani.
+- **Asar (Claude):** R1 se. SR-002 aur SR-003 ka tareeka Vercel aur Render ke headers ki jaanch pe tika hai ([OPEN_QUESTIONS.md](OPEN_QUESTIONS.md) §2).
+
+### D-211. Security batch 2: sign-in
+
+- **Faisla:** sign-in ke niyam SR-011 se SR-026 ([security/SECURITY_REQUIREMENTS.md](security/SECURITY_REQUIREMENTS.md)), unke 15 threats ([security/THREAT_MODEL.md](security/THREAT_MODEL.md) §1.2), aur risks R-017 (domain ke bina nakli sign-in pages) aur R-018 (customer ka account inbox jitna surakshit) `Maana` ([RISKS.md](RISKS.md)). D-021 ka "authenticator laga ho to email code ke baad bhi" ab pakka (SR-015). Numbers misaal hain aur settings me rahenge.
+- **Wajah:** Claude ki salah, owner ne maani: sign-in ke tay faisle (D-021, D-133, D-182 se D-187, D-199, D-200) jaanchne layak niyamon me, aur domain ke bina nakli page ke jokhim ke saath.
+- **Chhode vikalp:** badlav ke saath maanna (owner ne koi badlav nahi diya); batch rokna (sign-in ka design bina pakke niyam ke).
+- **Kab dobara khulega:** passkey aane pe (D-199), asli naap ke baad numbers, ya owner khud khole.
+- **Kisne, kab:** owner, 2026-11-19. **Nishaan:** Salah maani.
+- **Asar (Claude):** R1 se. Leak hue passwords ki free API ka chunaav aur social providers ke verified email ki jaanch technical charcha me.
+
 ## Change log
 
 | Version | Date       | Badlav                                                                                                                                                                                                                                                                                  |
@@ -2340,3 +2684,8 @@
 | v1.7.2  | 2026-11-18 | D-131 aur D-132 aaye (Q-072, Q-073; owner ne salah maani); D-090, D-126 aur D-129 me jod; D-099, D-126 aur D-128 ke "Asar" me naye number.                                                                                                                                              |
 | v1.8.1  | 2026-11-19 | D-133 se D-159 aaye (Q-074 se Q-100; owner ne saare sawalon pe salah maani); D-055, D-072, D-099, D-105 aur D-126 me jod; D-072 ke "Asar" me naya number.                                                                                                                               |
 | v1.9.1  | 2026-11-19 | D-160 se D-179 aaye (Q-101 se Q-120; owner ne saare sawalon pe salah maani); D-159 me jod.                                                                                                                                                                                              |
+| v1.10.1 | 2026-11-19 | D-180 se D-204 aaye (Q-121 se Q-145, Security Architect ke R1 sawal; owner ne saare sawalon pe salah maani).                                                                                                                                                                            |
+| v1.10.2 | 2026-11-19 | D-205 se D-208 aaye (Q-146 se Q-149, Security Architect ke R2 sawal; owner ne saare sawalon pe salah maani).                                                                                                                                                                            |
+| v1.10.3 | 2026-11-19 | D-209 aaya (security report area ke hisaab se batches me; Q-150).                                                                                                                                                                                                                       |
+| v1.10.4 | 2026-11-19 | D-210 aaya (security batch 1: edge aur hosting maana; Q-151).                                                                                                                                                                                                                           |
+| v1.10.5 | 2026-11-19 | D-211 aaya (security batch 2: sign-in maana; Q-152).                                                                                                                                                                                                                                    |

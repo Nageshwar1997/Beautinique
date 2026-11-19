@@ -1,6 +1,6 @@
 # OPEN QUESTIONS: Beautinique
 
-> **Status:** v1.3.14 (2026-11-19). Khule sawal, aage ke topics aur jaanchna baaki. Cheezein ek-ek karke judengi.
+> **Status:** v1.3.20 (2026-11-19). Khule sawal, aage ke topics aur jaanchna baaki. Cheezein ek-ek karke judengi.
 
 ## Is file me kya aayega
 
@@ -19,24 +19,24 @@ Q-001, Q-002 ... kram se. Topics B1, B2 ... kram se. Ek baar diya number kabhi b
 
 Topic sirf sawalon ki grouping hai. Har topic ke sawal us topic ki charcha (aur agent, jahan likha hai) ke baad likhe jayenge.
 
-| Topic | Kya                                                                                     | Kaun gehrai me jayega                | Ab tak (2026-11-19)                                                                                                                                                                                                                                                                                                                                                                                          |
-| ----- | --------------------------------------------------------------------------------------- | ------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| B1    | Fulfilment aur logistics: apna warehouse aur delivery partners, courier, launch ka area | Domain expert                        | Zyadatar tay: D-014, D-015, D-016, D-022, D-027, D-033; maal aana (D-096, D-097), RTO (D-108), partner ki kamaai (D-104), delivery ka vaada (D-117), staff list (D-123). Baaki: pincodes ki jaanch (§2).                                                                                                                                                                                                     |
-| B2    | Apps aur roles: kitne apps, launch pe kaunse roles asli                                 | Architect                            | Tay: D-010, D-017, D-044, D-047, D-054.                                                                                                                                                                                                                                                                                                                                                                      |
-| B3    | Catalog: variant, shade, size, ingredients, batch aur expiry, content ka maalik         | Domain expert                        | Tay: sirf beauty aur personal care (D-029), drug items kabhi nahi (D-043); batch aur expiry (D-062, D-064, D-067, D-082, D-083); catalog (D-075, D-076, D-084, D-085, D-086, D-098 se D-100, D-127, D-128); agla batch (D-124), recall (D-129); skin type aur concern ke fields (D-137), allergen chetavni (D-159).                                                                                          |
-| B4    | Pricing, promotions, bundles aur kits                                                   | Domain expert                        | Promotions, coupons aur bundles R2 se (D-055). Tay: daam (D-061, D-065, D-087), kits (D-088), kam expiry ka label (D-089), offers (D-101, D-102), delivery fee (D-107), discount dikhana (D-120), samples (D-121).                                                                                                                                                                                           |
-| B5    | Cart, checkout, order model (split, partial cancel aur return, exchange)                | Domain expert + Architect            | Guest cart nahi (D-020); payment ke raaste (D-034); ek order me kai sellers, invoice har seller ke GSTIN se (D-030, D-041); parcel (D-077), pick pe kami (D-090), quantity seema (D-091), GSTIN invoice (D-092), delivery pe UPI (D-109), cancel (D-110), stock aur payment ka samay (D-118), order ke baad badlav (D-119).                                                                                  |
-| B6    | Payments, refunds, settlement, ledger                                                   | Domain expert + Architect + Security | Finance ka database PostgreSQL (D-001), Neon pe (D-057). Tay: fees (D-078, D-094), payable aur payout (D-081), gateway khaata (D-093), chargeback (D-095), udhaar aur kaat (D-103), refund (D-111), bharpai ka daam (D-125). Baaki: finance ke design ke sawal: library, kaunsa data PostgreSQL me, events, backup ka format (R-009).                                                                        |
-| B7    | Returns aur replacement: cosmetics ke hygiene niyam                                     | Domain expert                        | Tay: wajahein (D-079), samay-seema (D-080), saboot (D-106), lauta maal (D-112), pickup pe jaanch (D-113), kharcha (D-114), refund kab (D-115), baar-baar return (D-116), refund ya replacement (D-122), skin reaction (D-130).                                                                                                                                                                               |
-| B8    | Reviews, ratings, UGC, moderation                                                       | Domain expert                        | Reviews R1 me (D-039); padhna bina sign-in, likhna sign-in se (D-020). Tay: review ka haq (D-135), moderation (D-136, D-146), photo (D-155), nakli review (D-156), inaam nahi (D-158); brand ka jawab (D-160), reviewer ki skin jaankari (D-167), Q&A (D-170), formula badla (D-171).                                                                                                                        |
-| B9    | Search, recommendations, virtual try-on                                                 | Domain expert + Architect            | Try-on aur recommendations R2 se (D-055); try-on ke saath camera permission (SR-001). Tay: R1 ke filters aur sort (D-138), kram (D-139), zero result (D-152), stock khatam (D-153), sach aankde (D-154); beauty profile (D-165), sujhaav (D-166), shade finder (D-168), try-on (D-169).                                                                                                                      |
-| B10   | Loyalty, gift cards, store credit, subscriptions                                        | Domain expert                        | R2 se (D-055). Tay: loyalty points (D-173, D-174, D-175), referral (D-176), store credit nahi (D-177), dobara kharid (D-178), gift cards ka design abhi aur banana kanooni jaanch ke baad (D-179). RBI ke prepaid (PPI) niyam lag sakte hain, jaancha nahi (R-004).                                                                                                                                          |
-| B11   | Support, disputes, notifications                                                        | Domain expert                        | Consultation flow aur Beauty Advisor ka message thread tay (D-025); support desk R2 se (D-055), R1 me patla hissa (D-105); order ke emails (D-126); sellers aur staff ke emails (D-140), baaki khabrein (D-141), emails ki chhat (D-142), appeal (D-147), "parcel nahi mila" ka samay (D-148); tickets (D-161), SLA (D-162), grievance (D-163), seller aur partner ke dispute (D-164), consultation (D-172). |
-| B12   | Analytics aur reporting                                                                 | Architect                            | Finance ki poori reports R2 se (D-055). Tay: seller ki reports (D-143), export (D-144), R1 ke aankde (D-149), behaviour ka data (D-157).                                                                                                                                                                                                                                                                     |
-| B13   | Compliance ki gehrai: kya dummy, kya asli                                               | Domain expert                        | Registrations aur kanooni details dummy (D-026); telemedicine ki dummy row (D-025); kanooni jaanch baad me ek agent se (R-004). Tay: live site pe allowlist (D-133), har area ki gehrai (D-134), demo ka nishaan (D-145), legal pages (D-150), data ke haq (D-151).                                                                                                                                          |
-| B14   | Security: auth, authorization, payments, uploads, abuse, privacy                        | Security Architect                   | Aage bheje: kai apps me sign-in ka bojh (D-010); owner ke ~80 accounts pe authenticator ka bojh (D-017); customer ke email code sign-in ke niyam (D-021); consultation notes ki pahunch aur consent (D-025); alag services ki process security (D-011). Pehla niyam SR-001.                                                                                                                                  |
-| B15   | Technical: service boundaries, hosting, observability, backup, scale targets            | Architect                            | Tay: services aur databases (D-011, D-050), backup (D-013), hosting (D-028, D-048, D-049, D-051, D-052, D-056 se D-058), performance targets (D-053). Baaki: observability, scale targets, 512 MB me memory (R-007).                                                                                                                                                                                         |
-| B16   | Docs aur task files ka dhaancha (PROJECT_PLAN, `tasks/NN-<module>/TASK.md`, subtasks)   | Owner ke saath                       | Tay: dhaancha (D-006), tareeka aur CI me docs ke paths ka check (D-019). Baaki: progress % ka niyam ([PROJECT_PLAN.md](PROJECT_PLAN.md) ke saath).                                                                                                                                                                                                                                                           |
+| Topic | Kya                                                                                     | Kaun gehrai me jayega                | Ab tak (2026-11-19)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              |
+| ----- | --------------------------------------------------------------------------------------- | ------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| B1    | Fulfilment aur logistics: apna warehouse aur delivery partners, courier, launch ka area | Domain expert                        | Zyadatar tay: D-014, D-015, D-016, D-022, D-027, D-033; maal aana (D-096, D-097), RTO (D-108), partner ki kamaai (D-104), delivery ka vaada (D-117), staff list (D-123). Baaki: pincodes ki jaanch (§2).                                                                                                                                                                                                                                                                                                                                                                                         |
+| B2    | Apps aur roles: kitne apps, launch pe kaunse roles asli                                 | Architect                            | Tay: D-010, D-017, D-044, D-047, D-054.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          |
+| B3    | Catalog: variant, shade, size, ingredients, batch aur expiry, content ka maalik         | Domain expert                        | Tay: sirf beauty aur personal care (D-029), drug items kabhi nahi (D-043); batch aur expiry (D-062, D-064, D-067, D-082, D-083); catalog (D-075, D-076, D-084, D-085, D-086, D-098 se D-100, D-127, D-128); agla batch (D-124), recall (D-129); skin type aur concern ke fields (D-137), allergen chetavni (D-159).                                                                                                                                                                                                                                                                              |
+| B4    | Pricing, promotions, bundles aur kits                                                   | Domain expert                        | Promotions, coupons aur bundles R2 se (D-055). Tay: daam (D-061, D-065, D-087), kits (D-088), kam expiry ka label (D-089), offers (D-101, D-102), delivery fee (D-107), discount dikhana (D-120), samples (D-121).                                                                                                                                                                                                                                                                                                                                                                               |
+| B5    | Cart, checkout, order model (split, partial cancel aur return, exchange)                | Domain expert + Architect            | Guest cart nahi (D-020); payment ke raaste (D-034); ek order me kai sellers, invoice har seller ke GSTIN se (D-030, D-041); parcel (D-077), pick pe kami (D-090), quantity seema (D-091), GSTIN invoice (D-092), delivery pe UPI (D-109), cancel (D-110), stock aur payment ka samay (D-118), order ke baad badlav (D-119).                                                                                                                                                                                                                                                                      |
+| B6    | Payments, refunds, settlement, ledger                                                   | Domain expert + Architect + Security | Finance ka database PostgreSQL (D-001), Neon pe (D-057). Tay: fees (D-078, D-094), payable aur payout (D-081), gateway khaata (D-093), chargeback (D-095), udhaar aur kaat (D-103), refund (D-111), bharpai ka daam (D-125). Baaki: finance ke design ke sawal: library, kaunsa data PostgreSQL me, events, backup ka format (R-009).                                                                                                                                                                                                                                                            |
+| B7    | Returns aur replacement: cosmetics ke hygiene niyam                                     | Domain expert                        | Tay: wajahein (D-079), samay-seema (D-080), saboot (D-106), lauta maal (D-112), pickup pe jaanch (D-113), kharcha (D-114), refund kab (D-115), baar-baar return (D-116), refund ya replacement (D-122), skin reaction (D-130).                                                                                                                                                                                                                                                                                                                                                                   |
+| B8    | Reviews, ratings, UGC, moderation                                                       | Domain expert                        | Reviews R1 me (D-039); padhna bina sign-in, likhna sign-in se (D-020). Tay: review ka haq (D-135), moderation (D-136, D-146), photo (D-155), nakli review (D-156), inaam nahi (D-158); brand ka jawab (D-160), reviewer ki skin jaankari (D-167), Q&A (D-170), formula badla (D-171).                                                                                                                                                                                                                                                                                                            |
+| B9    | Search, recommendations, virtual try-on                                                 | Domain expert + Architect            | Try-on aur recommendations R2 se (D-055); try-on ke saath camera permission (SR-001). Tay: R1 ke filters aur sort (D-138), kram (D-139), zero result (D-152), stock khatam (D-153), sach aankde (D-154); beauty profile (D-165), sujhaav (D-166), shade finder (D-168), try-on (D-169).                                                                                                                                                                                                                                                                                                          |
+| B10   | Loyalty, gift cards, store credit, subscriptions                                        | Domain expert                        | R2 se (D-055). Tay: loyalty points (D-173, D-174, D-175), referral (D-176), store credit nahi (D-177), dobara kharid (D-178), gift cards ka design abhi aur banana kanooni jaanch ke baad (D-179). RBI ke prepaid (PPI) niyam lag sakte hain, jaancha nahi (R-004).                                                                                                                                                                                                                                                                                                                              |
+| B11   | Support, disputes, notifications                                                        | Domain expert                        | Consultation flow aur Beauty Advisor ka message thread tay (D-025); support desk R2 se (D-055), R1 me patla hissa (D-105); order ke emails (D-126); sellers aur staff ke emails (D-140), baaki khabrein (D-141), emails ki chhat (D-142), appeal (D-147), "parcel nahi mila" ka samay (D-148); tickets (D-161), SLA (D-162), grievance (D-163), seller aur partner ke dispute (D-164), consultation (D-172).                                                                                                                                                                                     |
+| B12   | Analytics aur reporting                                                                 | Architect                            | Finance ki poori reports R2 se (D-055). Tay: seller ki reports (D-143), export (D-144), R1 ke aankde (D-149), behaviour ka data (D-157).                                                                                                                                                                                                                                                                                                                                                                                                                                                         |
+| B13   | Compliance ki gehrai: kya dummy, kya asli                                               | Domain expert                        | Registrations aur kanooni details dummy (D-026); telemedicine ki dummy row (D-025); kanooni jaanch baad me ek agent se (R-004). Tay: live site pe allowlist (D-133), har area ki gehrai (D-134), demo ka nishaan (D-145), legal pages (D-150), data ke haq (D-151).                                                                                                                                                                                                                                                                                                                              |
+| B14   | Security: auth, authorization, payments, uploads, abuse, privacy                        | Security Architect                   | Security Architect ka pehla run ho gaya. Tay: sessions (D-180, D-181), rok (D-182), sign-in aur authenticator (D-183 se D-186, D-199, D-200), codes ki seema (D-187), paise ke kaam (D-188 se D-190), data ka samay aur pahunch (D-191 se D-195, D-201, D-202), backup aur secrets (D-196, D-197), data leak (D-198), kai accounts (D-203, D-204); R2 me goodwill coupon (D-205), forms pe bots (D-206), sehat ka data (D-207, D-208). Report docs me area ke batches me (D-209). Batch 1 edge aur hosting (D-210), batch 2 sign-in (D-211). Baaki: agli batches (Q-153 se). Pehla niyam SR-001. |
+| B15   | Technical: service boundaries, hosting, observability, backup, scale targets            | Architect                            | Tay: services aur databases (D-011, D-050), backup (D-013), hosting (D-028, D-048, D-049, D-051, D-052, D-056 se D-058), performance targets (D-053). Baaki: observability, scale targets, 512 MB me memory (R-007).                                                                                                                                                                                                                                                                                                                                                                             |
+| B16   | Docs aur task files ka dhaancha (PROJECT_PLAN, `tasks/NN-<module>/TASK.md`, subtasks)   | Owner ke saath                       | Tay: dhaancha (D-006), tareeka aur CI me docs ke paths ka check (D-019). Baaki: progress % ka niyam ([PROJECT_PLAN.md](PROJECT_PLAN.md) ke saath).                                                                                                                                                                                                                                                                                                                                                                                                                                               |
 
 ## 2. Jaanchna baaki
 
@@ -46,6 +46,7 @@ Claude ka kaam: owner ka faisla nahi chahiye, sirf saboot. Nateeja saboot ke saa
 | ------------------------------------------------------------------------------------------------------------------------------- | ------------- | -------------------------------------------------------------------- |
 | Asli location data me main city ke pincodes kis hub pe, aur kitne pincodes do sub-districts, districts ya states me phaile hain | D-015, D-016  | Pincode → hub mapping; D-016 asli data dekh ke dobara khul sakta hai |
 | EU ke CosIng jaise public ingredient database ka license aur download ka format                                                 | D-132         | Ingredient master list ka import (products badhne pe)                |
+| Vercel ke rewrite se backend tak secret header kaise jude, aur Vercel aur Render asli client IP kis header me dete hain         | D-052, Q-151  | Backend ka seedha raasta band karna aur rate limit ke liye asli IP   |
 
 ## 3. Sawal
 
@@ -2754,7 +2755,7 @@ Claude ka kaam: owner ka faisla nahi chahiye, sirf saboot. Nateeja saboot ke saa
 
 ### Q-121. Customer app me ek sign-in kitne din chale?
 
-- **Status:** `Khula`. Topic: B14 (security).
+- **Status:** `Tay`. Topic: B14 (security).
 - **Sawal:** customer app me ek baar sign-in kitne din tak chale, phir dobara sign-in?
 - **Kyun zaroori:**
   - Guest cart nahi (D-020), to cart aur wishlist ke liye sign-in chahiye. Har naya sign-in email code (D-021) se hai, jo emails ki din ki chhat (D-142) khaata hai.
@@ -2768,10 +2769,11 @@ Claude ka kaam: owner ka faisla nahi chahiye, sirf saboot. Nateeja saboot ke saa
   - (a) me chori hua session 90 din tak chal sakta hai, jab tak customer use band na kare.
   - (b) me har hafte sign-in: zyada codes, zyada rukawat.
   - (c) sabse aasaan, par chori ka asar sabse lamba.
+- **Owner ka jawab (2026-11-19):** **(a)**, har istemaal pe 30 din aage, zyada se zyada 90 din. Record: [DECISIONS.md](DECISIONS.md) D-180.
 
 ### Q-122. Staff aur seller apps me sign-in kitni der chale?
 
-- **Status:** `Khula`. Topic: B14 (security), B2 (apps).
+- **Status:** `Tay`. Topic: B14 (security), B2 (apps).
 - **Sawal:** staff ke 7 apps (Admin, Super Admin, Master, Support Desk, Finance, Logistics Ops, Growth Studio), Seller app aur Creator app me session kitni der chale, aur bina kaam ke kitni der me band ho?
 - **Kyun zaroori:**
   - Staff ke accounts sabse taaqatwar hain; khula chhoda laptop ya chori hua session bada nuksaan kar sakta hai.
@@ -2785,10 +2787,11 @@ Claude ka kaam: owner ka faisla nahi chahiye, sirf saboot. Nateeja saboot ke saa
   - (a) me staff ka chori hua session ek din tak chal sakta hai.
   - (b) zyada surakshit, par bahut sign-in.
   - (c) aasaan, par chori ka asar lamba.
+- **Owner ka jawab (2026-11-19):** **(a)**, ek kaam ka din (staff 12 ghante, seller hafte me ek sign-in). Record: [DECISIONS.md](DECISIONS.md) D-181.
 
 ### Q-123. Baar-baar galat password ya code pe rok kaisi ho?
 
-- **Status:** `Khula`. Topic: B14 (security).
+- **Status:** `Tay`. Topic: B14 (security).
 - **Sawal:** baar-baar galat password ya code daalne pe account kaise roka jaaye?
 - **Kyun zaroori:**
   - Rok na ho to password ka andaaza lagta rehta hai.
@@ -2805,10 +2808,11 @@ Claude ka kaam: owner ka faisla nahi chahiye, sirf saboot. Nateeja saboot ke saa
   - (a) me do ginti ka kaam; bahut IPs wala hamlavar 15 minute ki poori rok tak pahunch sakta hai.
   - (b) seedha, par rok khud hamle ka hathiyar ban jaati hai.
   - (c) me andaaze pe kam rok.
+- **Owner ka jawab (2026-11-19):** **(a)**, rok IP aur account mila ke. Record: [DECISIONS.md](DECISIONS.md) D-182.
 
 ### Q-124. Delivery app me sign-in kaise ho, aur kya session ek phone se bandha ho?
 
-- **Status:** `Khula`. Topic: B14 (security), B1 (delivery).
+- **Status:** `Tay`. Topic: B14 (security), B1 (delivery).
 - **Sawal:** delivery partner Delivery app me kaise sign-in kare, aur kya session ek manzoor phone se bandha ho?
 - **Kyun zaroori:**
   - Partner ka phone hi kaam ka auzaar hai, app offline bhi chalta hai (D-042), aur phone pe customers ke naam, address aur phone hote hain.
@@ -2822,10 +2826,11 @@ Claude ka kaam: owner ka faisla nahi chahiye, sirf saboot. Nateeja saboot ke saa
   - (a) me Hub Manager ka kaam (naya phone manzoor karna); phone ki pehchaan browser me rakhi key se hoti hai, to browser ka data saaf hone pe dobara manzoori.
   - (b) zyada surakshit, par authenticator usi phone pe ho to phone chori = dono gaye.
   - (c) aasaan, par chori ka asar lamba.
+- **Owner ka jawab (2026-11-19):** **(a)**, manzoor phone ke saath sign-in. Record: [DECISIONS.md](DECISIONS.md) D-183.
 
 ### Q-125. Seller app me authenticator kin users pe zaroori ho?
 
-- **Status:** `Khula`. Topic: B14 (security), B2 (roles).
+- **Status:** `Tay`. Topic: B14 (security), B2 (roles).
 - **Sawal:** seller ke kaunse users ke liye authenticator zaroori ho?
 - **Kyun zaroori:** D-017 me misaal Account Owner aur Seller Finance hai. Par daam badalna (₹1,999 ki jagah ₹199), maal bhejna aur seller ke staff jodna bhi bade asar wale kaam hain; inka account chori ho to seller ka seedha nuksaan.
 - **Vikalp:**
@@ -2837,10 +2842,11 @@ Claude ka kaam: owner ka faisla nahi chahiye, sirf saboot. Nateeja saboot ke saa
   - (a) me seller ke kai users pe authenticator.
   - (b) me daam aur maal bhejna bina doosre factor ke.
   - (c) sabse surakshit, par chhote brand ke content wale bhi authenticator chalayein.
+- **Owner ka jawab (2026-11-19):** **(a)**, authenticator jokhim ke hisaab se. Record: [DECISIONS.md](DECISIONS.md) D-184.
 
 ### Q-126. Kin kaamon se pehle dobara authenticator maanga jaaye?
 
-- **Status:** `Khula`. Topic: B14 (security).
+- **Status:** `Tay`. Topic: B14 (security).
 - **Sawal:** sign-in ke baad bhi kin kaamon se theek pehle dobara authenticator code maanga jaaye?
 - **Kyun zaroori:** khula chhoda session ya chori hui cookie se sabse bade kaam na ho sakein. Par har kaam pe code maangna kaam rok deta hai.
 - **Vikalp:**
@@ -2852,10 +2858,11 @@ Claude ka kaam: owner ka faisla nahi chahiye, sirf saboot. Nateeja saboot ke saa
   - (a) me naye kaam aane pe list badhani padegi.
   - (b) me staff ka kaam bahut dheema.
   - (c) me Finance aur Admin ke bade kaam bina dobara code ke.
+- **Owner ka jawab (2026-11-19):** **(a)**, bade kaamon ki tay list pe dobara code. Record: [DECISIONS.md](DECISIONS.md) D-185.
 
 ### Q-127. Kai apps me sign-in: har app alag, ya ek jagah sign-in se sab apps?
 
-- **Status:** `Khula`. Topic: B14 (security), B2 (apps).
+- **Status:** `Tay`. Topic: B14 (security), B2 (apps).
 - **Sawal:** jis insaan ke roles kai apps me hon, wo har app me alag sign-in kare, ya ek jagah sign-in karke sab apps khulein?
 - **Kyun zaroori:** 11 apps alag hosts pe hain (D-010, D-048, domain nahi D-028), aur cookies har host ki alag hoti hain.
 - **Vikalp:**
@@ -2867,10 +2874,11 @@ Claude ka kaam: owner ka faisla nahi chahiye, sirf saboot. Nateeja saboot ke saa
   - (a) me asli business pe kai roles wale staff ko kai sign-in.
   - (b) me ek jagah chori = saare apps, aur banane ka kaam bada.
   - (c) me baad me badlav ka kaam.
+- **Owner ka jawab (2026-11-19):** **(a)**, har app ka apna sign-in. Record: [DECISIONS.md](DECISIONS.md) D-186.
 
 ### Q-128. Sign-in, sign-up aur password reset ke code wale emails ki seema kya ho?
 
-- **Status:** `Khula`. Topic: B14 (security), B11 (notifications).
+- **Status:** `Tay`. Topic: B14 (security), B11 (notifications).
 - **Sawal:** bina sign-in maange jaane wale code ke emails (sign-in, sign-up, password reset) kitne bheje ja sakein?
 - **Kyun zaroori:**
   - Code maangna bina sign-in ke hota hai, aur din ke 300 emails me OTP ki 60 pakki jagah hai (D-142).
@@ -2884,10 +2892,11 @@ Claude ka kaam: owner ka faisla nahi chahiye, sirf saboot. Nateeja saboot ke saa
   - (a) me bhaari ghante me asli user ko "thodi der baad koshish karein" ka sandesh.
   - (b) aur kada.
   - (c) me ek ghante me OTP ki poori din ki jagah khatam ho sakti hai.
+- **Owner ka jawab (2026-11-19):** **(a)**, code wale emails ki salah wali seema. Record: [DECISIONS.md](DECISIONS.md) D-187.
 
 ### Q-129. Support Agent kitni rakam tak refund ya daawa khud manzoor kare?
 
-- **Status:** `Khula`. Topic: B14 (security), B11 (support), B6 (refunds).
+- **Status:** `Tay`. Topic: B14 (security), B11 (support), B6 (refunds).
 - **Sawal:** Support Agent ek maamle me aur din me kitni rakam tak refund ya daawa khud manzoor kare, aur kab doosre account ki haan chahiye?
 - **Kyun zaroori:**
   - Zyadatar refund niyam se apne aap shuru hote hain (D-111), par daawe ka faisla aur fail hue refund ka staff wala raasta insaan karta hai (D-105, D-111).
@@ -2901,10 +2910,11 @@ Claude ka kaam: owner ka faisla nahi chahiye, sirf saboot. Nateeja saboot ke saa
   - (a) me bade maamle thodi der se.
   - (b) me ek account se bada nuksaan.
   - (c) me har chhote maamle pe do accounts (owner ke do accounts) ka bojh.
+- **Owner ka jawab (2026-11-19):** **(a)**, Support Agent ki seema, upar Support Lead. Record: [DECISIONS.md](DECISIONS.md) D-188.
 
 ### Q-130. Seller ka payout "paid" mark karne ke liye ek account kaafi ho ya do?
 
-- **Status:** `Khula`. Topic: B14 (security), B6 (settlement).
+- **Status:** `Tay`. Topic: B14 (security), B6 (settlement).
 - **Sawal:** seller ke payout ko "paid" mark karne ke liye ek account kaafi ho, ya do?
 - **Kyun zaroori:**
   - R1 me payout haath se "paid" mark hota hai ([PROJECT_PLAN.md](PROJECT_PLAN.md) §1); asli business pe yahi asli bank transfer banega.
@@ -2918,10 +2928,11 @@ Claude ka kaam: owner ka faisla nahi chahiye, sirf saboot. Nateeja saboot ke saa
   - (a) me har hafte do accounts se kaam (owner ke liye do sign-in).
   - (b) me ek account ka jokhim.
   - (c) me Master ke paas roz ke kaam ka haq aa jaata hai, jo D-047 ki soch ke khilaaf hai.
+- **Owner ka jawab (2026-11-19):** **(a)**, do haath: Finance banaye, Master manzoor kare. Record: [DECISIONS.md](DECISIONS.md) D-189.
 
 ### Q-131. Seller apna bank khaata badle to naye khaate pe payout kab?
 
-- **Status:** `Khula`. Topic: B14 (security), B6 (settlement).
+- **Status:** `Tay`. Topic: B14 (security), B6 (settlement).
 - **Sawal:** seller apna bank ya payout ka khaata badle to naye khaate pe payout turant ho, ya kuch rok ke baad?
 - **Kyun zaroori:** sellers ka paisa platform ke paas rehta hai (D-093). Seller ka account chori karke bank badalna aur agla payout apne khaate me lena sabse seedha nuksaan hai.
 - **Vikalp:**
@@ -2933,10 +2944,11 @@ Claude ka kaam: owner ka faisla nahi chahiye, sirf saboot. Nateeja saboot ke saa
   - (a) me bank badalne ke baad payout 3 din der se.
   - (b) me staff ka kaam.
   - (c) me chori ka seedha raasta.
+- **Owner ka jawab (2026-11-19):** **(a)**, rok ke saath; asli business pe staff ki jaanch bhi. Record: [DECISIONS.md](DECISIONS.md) D-190.
 
 ### Q-132. Delivery ke saboot (photo aur location) kitne din rakhein, aur kaun dekhe?
 
-- **Status:** `Khula`. Topic: B14 (security, privacy), B1 (delivery).
+- **Status:** `Tay`. Topic: B14 (security, privacy), B1 (delivery).
 - **Sawal:** delivery ke waqt li gayi photo aur partner ki location (D-072) kitne din rakhein, aur kaun dekh sake?
 - **Kyun zaroori:**
   - Photo me ghar ka darwaza ya koi insaan aa sakta hai, aur location se customer ka ghar pata chalta hai.
@@ -2951,10 +2963,11 @@ Claude ka kaam: owner ka faisla nahi chahiye, sirf saboot. Nateeja saboot ke saa
   - (b) me baad ka chargeback ya dispute bina saboot.
   - (c) me zyada data zyada der.
 - **Kanooni detail jaanchi nahi** (R-004): photo aur location jaise personal data rakhne ka samay.
+- **Owner ka jawab (2026-11-19):** **(a)**, misaal 180 din ya maamla band hone tak, kam haathon me. Record: [DECISIONS.md](DECISIONS.md) D-191.
 
 ### Q-133. Daawe, return pickup aur pack ki photos aur video kitne din rakhein?
 
-- **Status:** `Khula`. Topic: B14 (security, privacy), B7 (returns).
+- **Status:** `Tay`. Topic: B14 (security, privacy), B7 (returns).
 - **Sawal:** customer ke daawe ki photos aur video (D-106), return pickup ki photo (D-113) aur warehouse pe pack ki photo (D-106) kitne din rakhein, aur kaun dekhe?
 - **Kyun zaroori:** inme ghar, chehra ya personal cheezein aa sakti hain; par baad ke jhagde aur seller ke dispute ke liye saboot chahiye.
 - **Vikalp:**
@@ -2967,10 +2980,11 @@ Claude ka kaam: owner ka faisla nahi chahiye, sirf saboot. Nateeja saboot ke saa
   - (b) me lamba jhagda bina saboot.
   - (c) me zyada storage aur zyada personal data.
 - **Kanooni detail jaanchi nahi** (R-004): customer ki photo aur video rakhne ke niyam.
+- **Owner ka jawab (2026-11-19):** **(a)**, alag-alag samay, sirf us maamle ka staff. Record: [DECISIONS.md](DECISIONS.md) D-192.
 
 ### Q-134. Seller aur Beauty Pro ke dastavez kitne din rakhein, aur kaun dekhe?
 
-- **Status:** `Khula`. Topic: B14 (security, privacy), B3 (seller).
+- **Status:** `Tay`. Topic: B14 (security, privacy), B3 (seller).
 - **Sawal:** seller ke KYC dastavez (PAN, GSTIN ka certificate, brand authorisation), claims ke saboot (D-100) aur Beauty Pro ke dastavez (D-069) kitne din rakhein, aur kaun dekhe?
 - **Kyun zaroori:** ye pehchaan ke dastavez hain; leak ho to pehchaan ki chori. Par jaanch, dobara jaanch aur jhagde ke liye chahiye.
 - **Vikalp:**
@@ -2987,10 +3001,11 @@ Claude ka kaam: owner ka faisla nahi chahiye, sirf saboot. Nateeja saboot ke saa
   - (b) me leak ka bada bhandaar.
   - (c) me jhagde ya dobara jaanch pe dastavez nahi.
 - **Kanooni detail jaanchi nahi** (R-004): KYC aur tax ke records kitne din rakhne zaroori hain.
+- **Owner ka jawab (2026-11-19):** **(a)**, kaam tak, phir tay samay. Record: [DECISIONS.md](DECISIONS.md) D-193.
 
 ### Q-135. Audit log, sign-in events aur delete hue account ke records kitne din rakhein?
 
-- **Status:** `Khula`. Topic: B14 (security), B12 (reporting).
+- **Status:** `Tay`. Topic: B14 (security), B12 (reporting).
 - **Sawal:** audit log, sign-in aur security events, aur delete hue account ke bina pehchaan records kitne din rakhein?
 - **Kyun zaroori:**
   - Audit hi batata hai kisne kya kiya; jaldi mita to jaanch nahi ho sakti.
@@ -3005,10 +3020,11 @@ Claude ka kaam: owner ka faisla nahi chahiye, sirf saboot. Nateeja saboot ke saa
   - (b) me saal bhar baad ki jaanch me kami.
   - (c) me jagah aur personal data badhte rehte hain.
 - **Kanooni detail jaanchi nahi** (R-004): logs rakhne ka samay (CERT-In ke niyam), aur tax records ka samay.
+- **Owner ka jawab (2026-11-19):** **(a)**, audit misaal 2 saal, sign-in events 1 saal. Record: [DECISIONS.md](DECISIONS.md) D-194.
 
 ### Q-136. Browser push aur emails me order ki kitni jaankari ho?
 
-- **Status:** `Khula`. Topic: B14 (security, privacy), B11 (notifications).
+- **Status:** `Tay`. Topic: B14 (security, privacy), B11 (notifications).
 - **Sawal:** browser push aur emails me order ki kitni jaankari likhi jaaye?
 - **Kyun zaroori:**
   - Push lock screen pe koi bhi dekh sakta hai, aur beauty aur personal care ke kuch products niji hote hain.
@@ -3022,10 +3038,11 @@ Claude ka kaam: owner ka faisla nahi chahiye, sirf saboot. Nateeja saboot ke saa
   - (a) me detail ke liye customer ko app kholna padta hai.
   - (b) me niji product lock screen pe.
   - (c) me sabse zyada leak.
+- **Owner ka jawab (2026-11-19):** **(a)**, push me sirf order number aur haalat. Record: [DECISIONS.md](DECISIONS.md) D-195.
 
 ### Q-137. Backup ki files laptop pe encrypted rahein?
 
-- **Status:** `Khula`. Topic: B14 (security), B15 (backup).
+- **Status:** `Tay`. Topic: B14 (security), B15 (backup).
 - **Sawal:** backup command (D-013) ki files laptop pe encrypted rahein?
 - **Kyun zaroori:** backup me saara data hai (customers, sellers, paisa). D-013 ke 4 pehre git se bachate hain, par laptop chori, malware ya Desktop ke cloud sync se nahi.
 - **Vikalp:**
@@ -3036,10 +3053,11 @@ Claude ka kaam: owner ka faisla nahi chahiye, sirf saboot. Nateeja saboot ke saa
 - **Trade-off:**
   - (a) aur (c) me key kho jaaye to backup bekaar.
   - (b) me laptop pe khula data.
+- **Owner ka jawab (2026-11-19):** **(a)**, backup files encrypted. Record: [DECISIONS.md](DECISIONS.md) D-196.
 
 ### Q-138. Secrets (passwords aur keys) kab badle jaayein?
 
-- **Status:** `Khula`. Topic: B14 (security), B15 (operations).
+- **Status:** `Tay`. Topic: B14 (security), B15 (operations).
 - **Sawal:** secrets (databases ke passwords, payment gateway ki keys, apps se backend ka secret, email ki key, sign-in providers ke secrets, encryption keys) kab badle jaayein?
 - **Kyun zaroori:** leak hua secret badalna hi ilaaj hai; par ek insaan ke liye ~20 secrets (11 Vercel projects samet) baar-baar badalna galti ka mauka bhi hai.
 - **Vikalp:**
@@ -3051,10 +3069,11 @@ Claude ka kaam: owner ka faisla nahi chahiye, sirf saboot. Nateeja saboot ke saa
   - (a) me secret saal bhar purana reh sakta hai.
   - (b) me bahut kaam aur galti ka mauka.
   - (c) me chupchaap leak kabhi theek nahi hota.
+- **Owner ka jawab (2026-11-19):** **(a)**, shak pe turant, baaki saal me ek baar. Record: [DECISIONS.md](DECISIONS.md) D-197.
 
 ### Q-139. Personal data ka leak ho to users ko kab aur kaise bataya jaaye?
 
-- **Status:** `Khula`. Topic: B14 (security, incident response).
+- **Status:** `Tay`. Topic: B14 (security, incident response).
 - **Sawal:** personal data ka leak pakka ho to users ko kab aur kaise bataya jaaye?
 - **Kyun zaroori:** registrations dummy hain, par system me asli personal data (owner aur testers ka) hai, aur design asli business jaisa (D-026).
 - **Vikalp:**
@@ -3067,10 +3086,11 @@ Claude ka kaam: owner ka faisla nahi chahiye, sirf saboot. Nateeja saboot ke saa
   - (b) me chhota leak chhup jaata hai.
   - (c) asli business ke liye galat aadat.
 - **Kanooni detail jaanchi nahi** (R-004): data leak pe users aur sarkari sanstha ko suchna ka samay aur tareeka.
+- **Owner ka jawab (2026-11-19):** **(a)**, users ko email aur in-app, R1 me likha hua kram. Record: [DECISIONS.md](DECISIONS.md) D-198.
 
 ### Q-140. Staff accounts pe password ke saath doosra factor kaunsa ho?
 
-- **Status:** `Khula`. Topic: B14 (security). Group G15.
+- **Status:** `Tay`. Topic: B14 (security). Group G15.
 - **Sawal:** staff accounts (staff ke 7 apps) pe password ke saath doosra factor kaunsa ho?
 - **Kyun zaroori:**
   - Owner ke ~80 accounts (D-017) me se zyadatar pe doosra factor lagega.
@@ -3084,10 +3104,11 @@ Claude ka kaam: owner ka faisla nahi chahiye, sirf saboot. Nateeja saboot ke saa
   - (a) me authenticator app me 50 se zyada entries, aur phishing ka jokhim. Authenticator ke secrets usi password manager me hon jisme passwords, to dono factor ek jaise ho jaate hain.
   - (b) phishing se bachav, par har app ka alag host hai (D-048), to har account ki passkey uske app ke host pe banti hai: banane ka kaam zyada.
   - (c) me phishing ka jokhim hamesha.
+- **Owner ka jawab (2026-11-19):** **(a)**, R1 me authenticator, passkey R2 me. Record: [DECISIONS.md](DECISIONS.md) D-199.
 
 ### Q-141. Staff ka authenticator kho jaaye to account kaise wapas mile?
 
-- **Status:** `Khula`. Topic: B14 (security). Group G15.
+- **Status:** `Tay`. Topic: B14 (security). Group G15.
 - **Sawal:** staff ka (aur Master ka) authenticator kho jaaye to reset ka raasta kya ho?
 - **Kyun zaroori:**
   - Owner akela hai; phone kho jaaye to bahut se accounts ek saath band ho jaate hain.
@@ -3104,10 +3125,11 @@ Claude ka kaam: owner ka faisla nahi chahiye, sirf saboot. Nateeja saboot ke saa
   - (a) me recovery codes sambhalne padte hain, aur break-glass command ke liye production database ki pahunch laptop pe chahiye (backup command ke liye pehle se, D-013).
   - (b) me ek role ke paas sabki chaabi.
   - (c) me inbox hi authenticator ban jaata hai: doosre factor ka matlab khatam.
+- **Owner ka jawab (2026-11-19):** **(a)**, recovery codes, phir Master, phir laptop. Record: [DECISIONS.md](DECISIONS.md) D-200.
 
 ### Q-142. Staff ko customer ka naam, email, phone aur address kitna dikhe?
 
-- **Status:** `Khula`. Topic: B14 (privacy), B2 (roles). Group G16.
+- **Status:** `Tay`. Topic: B14 (privacy), B2 (roles). Group G16.
 - **Sawal:** Support, warehouse, hub aur delivery partner ko customer ka naam, email, phone aur address kitna dikhe?
 - **Kyun zaroori:** sellers ke liye D-143 tay hai, par staff ke liye nahi. Staff ki lists se customers ka data bahar jaana sabse aasaan raasta hai.
 - **Vikalp:**
@@ -3124,10 +3146,11 @@ Claude ka kaam: owner ka faisla nahi chahiye, sirf saboot. Nateeja saboot ke saa
   - (b) me support ki list se poora data bahar ja sakta hai.
   - (c) sabse aasaan, par sabse zyada leak.
 - **Kanooni detail jaanchi nahi** (R-004): staff ke paas personal data ki pahunch ke niyam.
+- **Owner ka jawab (2026-11-19):** **(a)**, lists me chhupa, poori sirf maamla kholne pe. Record: [DECISIONS.md](DECISIONS.md) D-201.
 
 ### Q-143. Support customer ka account usi ki nazar se dekh sake?
 
-- **Status:** `Khula`. Topic: B14 (privacy), B11 (support). Group G16.
+- **Status:** `Tay`. Topic: B14 (privacy), B11 (support). Group G16.
 - **Sawal:** support staff customer ka account usi ki nazar se dekh sake, ya uske naam se kaam kar sake?
 - **Kyun zaroori:** shikayat samajhne ke liye ye aasaan lagta hai, par isse staff ke haq aur chhupi jaankari (Q-142) dono ka bypass ho jaata hai.
 - **Vikalp:**
@@ -3139,10 +3162,11 @@ Claude ka kaam: owner ka faisla nahi chahiye, sirf saboot. Nateeja saboot ke saa
   - (a) me support ki screens banane ka kaam.
   - (b) me sirf dekhne me bhi poora data.
   - (c) sabse bada jokhim.
+- **Owner ka jawab (2026-11-19):** **(a)**, kabhi nahi, support ki apni screens. Record: [DECISIONS.md](DECISIONS.md) D-202.
 
 ### Q-144. Ek insaan ke kai accounts per-customer seemaayein reset na karein, iske liye kya gina jaaye?
 
-- **Status:** `Khula`. Topic: B14 (abuse), B5 (checkout). Group G17.
+- **Status:** `Tay`. Topic: B14 (abuse), B5 (checkout). Group G17.
 - **Sawal:** per-customer seemaayein (naye customer ke pehle order ki delivery pe UPI ki seema D-109, baar-baar return D-116, reviews D-156, referral D-176) ek insaan ke kai accounts se reset na hon, iske liye kya gina jaaye?
 - **Kyun zaroori:** email ka `+` alias alag account maana jaata hai (D-017; owner ke accounts isi pe hain). Isse ek insaan naye alias se naya account bana ke har per-customer seema dobara shuru kar sakta hai.
 - **Vikalp:**
@@ -3159,10 +3183,11 @@ Claude ka kaam: owner ka faisla nahi chahiye, sirf saboot. Nateeja saboot ke saa
   - (b) me owner ke saare customer aliases ek insaan gine jaayenge.
   - (c) me har per-customer seema bekaar.
 - **Kanooni detail jaanchi nahi** (R-004): device ki pehchaan aur accounts ka jod rakhne ke niyam.
+- **Owner ka jawab (2026-11-19):** **(a)**, account alag, seemaon ke liye jod. Record: [DECISIONS.md](DECISIONS.md) D-203.
 
 ### Q-145. Ek customer ke ek waqt me kitne delivery-pe-UPI orders khule ho sakein?
 
-- **Status:** `Khula`. Topic: B14 (abuse), B5 (checkout). Group G17.
+- **Status:** `Tay`. Topic: B14 (abuse), B5 (checkout). Group G17.
 - **Sawal:** ek customer ke ek waqt me kitne aise orders khule ho sakte hain jinka payment delivery pe hai?
 - **Kyun zaroori:** delivery pe UPI wale order me stock delivery tak ruka rehta hai (D-118). Bina payment kai orders se stock roka ja sakta hai; D-109 sirf rakam aur mana karne ki ginti dekhta hai.
 - **Vikalp:**
@@ -3174,6 +3199,229 @@ Claude ka kaam: owner ka faisla nahi chahiye, sirf saboot. Nateeja saboot ke saa
   - (a) me kabhi asli customer ka teesra order prepaid hi.
   - (b) aur kada.
   - (c) me stock rokne ka raasta khula.
+- **Owner ka jawab (2026-11-19):** **(a)**, ek waqt me misaal 2 khule orders. Record: [DECISIONS.md](DECISIONS.md) D-204.
+
+### Q-146. Support goodwill coupon kitni rakam tak aur kitni baar de sake?
+
+- **Status:** `Tay`. Topic: B14 (security), B11 (support), B4 (promotions).
+- **Sawal:** support goodwill ka coupon (D-177, R2 se) kitni rakam tak aur ek customer ko kitni baar de sake?
+- **Kyun zaroori:** coupon paise jaisa hai; bina seema ke chori hua account ya mili-bhagat yahin nuksaan karti hai. Refund aur daawe ki seema D-188 me tay hai; coupon ki nahi.
+- **Vikalp:**
+  - **(a) Seedhi ke saath seema (numbers misaal):** Support Agent ek coupon ₹200 tak, ek customer ko saal me 2 tak; Support Lead ₹1,000 tak; usse upar Head of Operations (D-044); platform ka mahine ka kul goodwill budget ₹10,000.
+  - **(b) Koi seema nahi:** sirf audit.
+  - **(c)** Sirf Support Lead de.
+- **Salah:** **(a)**, D-188 jaisa dhaancha.
+- **Trade-off:**
+  - (a) me seema aur budget ki settings ka kaam.
+  - (b) me bada nuksaan ho sakta hai.
+  - (c) me chhote goodwill pe bhi Support Lead.
+- **Owner ka jawab (2026-11-19):** **(a)**, seedhi ke saath seema aur mahine ka budget. Record: [DECISIONS.md](DECISIONS.md) D-205.
+
+### Q-147. Bina sign-in wale forms pe bots aur spam kaise rokein?
+
+- **Status:** `Tay`. Topic: B14 (abuse), B11 (support).
+- **Sawal:** "Contact us" (D-161) aur grievance (D-163) jaise bina sign-in wale forms pe bots aur spam kaise roke jaayein?
+- **Kyun zaroori:**
+  - Har form email kha sakta hai (D-142).
+  - Form me koi bhi kisi aur ka (allowlist wala) email likh sakta hai.
+- **Vikalp:**
+  - **(a) Bina CAPTCHA:** pehle form me diye email pe code se pakka karna, ek chhupa "honeypot" field, aur IP aur email pe rate limit.
+  - **(b) CAPTCHA:** ek free CAPTCHA service; bahar ki script sirf in forms pe.
+  - **(c)** Dono.
+- **Salah:** **(a)** jab tak allowlist (D-133) hai; asli business pe dobara dekhna. R2 se (grievance ka page R1 me sirf jaankari, D-163).
+- **Trade-off:**
+  - (a) me code ka email budget lagta hai.
+  - (b) me bahar ki script aur visitors ka data bahar jaata hai (D-157 ki soch se alag).
+  - (c) me dono ka kaam.
+- **Owner ka jawab (2026-11-19):** **(a)**, bina CAPTCHA: email code, honeypot aur rate limit. Record: [DECISIONS.md](DECISIONS.md) D-206.
+
+### Q-148. Sehat se jude data ko kaun dekh sake?
+
+- **Status:** `Tay`. Topic: B14 (privacy), B11 (consultation). Group G18.
+- **Sawal:** consultation notes (D-025), skin reaction ka case (D-130) aur allergy wali beauty profile (D-165) kaun dekh sake?
+- **Kyun zaroori:** ye sehat ke paas ka data hai: privacy ka sabse gambhir hissa. Consultation notes "sirf zaroori roles" dekhein, par kaunse, ye tay nahi.
+- **Vikalp:**
+  - **(a) Maamle ke hisaab se:**
+    1. Consultation notes: sirf wo Skin & Hair Expert jisne consult kiya ya jise maamla diya gaya; Support Lead sirf maamla khulne pe, wajah ke saath, audit me; customer apne notes dekhe.
+    2. Skin reaction case: Support Lead aur Skin & Hair Expert; brand ko sirf batch aur bina pehchaan ka saar (D-130).
+    3. Allergy profile: sirf customer (D-165); staff tabhi jab customer khud support me bataye.
+  - **(b)** Saare Experts aur saare Support roles.
+  - **(c)** Sirf Expert; Support kabhi nahi.
+- **Salah:** **(a)**. R2 se (D-055).
+- **Trade-off:**
+  - (a) me maamle ke hisaab se pahunch ka kaam.
+  - (b) me bahut haathon me sehat ka data.
+  - (c) me customer ki shikayat pe Support kuch dekh nahi sakta.
+- **Kanooni detail jaanchi nahi** (R-004): sehat ke data ki consent aur pahunch ke niyam.
+- **Owner ka jawab (2026-11-19):** **(a)**, maamle ke hisaab se pahunch. Record: [DECISIONS.md](DECISIONS.md) D-207.
+
+### Q-149. Sehat se jude data kitne din rakhein?
+
+- **Status:** `Tay`. Topic: B14 (privacy), B11 (consultation). Group G18.
+- **Sawal:** consultation notes, skin reaction ke case aur allergy profile kitne din rakhein?
+- **Kyun zaroori:** jitna lamba, utna bada jokhim; par batch ki dikkat aur recall (D-129) ka itihaas bhi chahiye.
+- **Vikalp:**
+  - **(a) Alag samay (numbers misaal):** consultation notes aakhri consult ke 2 saal baad delete; skin reaction case band hone ke 3 saal baad (batch aur recall ka itihaas); allergy profile jab tak customer na mitaye, aur account delete pe turant.
+  - **(b)** Sab 1 saal.
+  - **(c)** Sab account delete tak.
+- **Salah:** **(a)**. R2 se.
+- **Trade-off:**
+  - (a) me alag-alag samay ka kaam.
+  - (b) me batch ka itihaas kho sakta hai.
+  - (c) me bina zaroorat lamba data.
+- **Kanooni detail jaanchi nahi** (R-004): cosmetics ke side-effect ke records aur sehat ke data rakhne ka samay.
+- **Owner ka jawab (2026-11-19):** **(a)**, alag-alag samay. Record: [DECISIONS.md](DECISIONS.md) D-208.
+
+### Q-150. Security report ke niyam, threats aur risks naye docs me kis tareeke se aayein?
+
+- **Status:** `Tay`. Topic: B14 (security), B16 (docs).
+- **Sawal:** Security Architect ki report me 86 prastaavit niyam, 89 threats, 14 risks aur tay faislon pe 26 dhyaan ke points hain. Ye [security/SECURITY_REQUIREMENTS.md](security/SECURITY_REQUIREMENTS.md), [security/THREAT_MODEL.md](security/THREAT_MODEL.md) aur [RISKS.md](RISKS.md) me, owner ki haan se, kis tareeke se aayein?
+- **Kyun zaroori:**
+  - Naye docs me cheez sirf owner ki haan se aati hai; par 86 niyam ek-ek karke poochhna bahut lamba hai.
+  - Kai niyam ab D-180 se D-208 se badalte ya judte hain; report ke numbers (misaal) faislon se milaane hain.
+  - Architecture, database, DevOps aur QA ke kaam ko security ka ek tay aadhaar chahiye; QA ke tests inhi niyamon se bante hain.
+- **Vikalp:**
+  - **(a) Area ke hisaab se batches:**
+    1. Claude har area (edge aur hosting, sign-in, sessions, authorization aur sellers ki deewar, checkout aur paisa, files aur personal data, data stores aur services, export, audit, logs aur DevOps, R2 ke hisse) ke niyam tay faislon se mila ke SR-002 se aage, us area ke threats aur risks ke saath, ek sawal me rakhe.
+    2. Owner har batch pe haan ya badlav de; haan ke baad hi docs me.
+    3. Tay faislon pe dhyaan ke points apne area ke batch me; jo pehle se kisi faisle me sambhal gaye, unka sirf hawala.
+    4. Report ki "sirf jaanch" wali technical cheezein Claude khud saboot ke saath jaanche ([RISKS.md](RISKS.md) §2 jaisa); kanooni wali kanooni jaanch (R-004) ke liye.
+  - **(b) Ek badi batch:** saare niyam, threats aur risks ek saath; owner ek baar me haan ya badlav.
+  - **(c) Ek-ek karke:** har niyam ek alag sawal.
+  - **(d) Pehle se haan:** Claude tay faislon se mila ke sab seedha docs me likhe; owner baad me padh ke badlav bataye.
+- **Salah:** **(a)**: lagbhag 9 batches, har ek itni chhoti ki padhi ja sake, aur har niyam faislon se mila hua.
+- **Trade-off:**
+  - (a) me lagbhag 9 baar ka kaam.
+  - (b) me bahut lambi list: padhna mushkil, galti chhoot sakti hai.
+  - (c) bahut lamba.
+  - (d) tez, par owner ki haan pehle na hone se galat niyam docs me aa sakta hai, aur padhne ka bojh baad me.
+- **Owner ka jawab (2026-11-19):** **(a)**, area ke hisaab se batches. Record: [DECISIONS.md](DECISIONS.md) D-209.
+
+### Q-151. Security batch 1: edge aur hosting ke niyam, threats aur risks maanein?
+
+- **Status:** `Tay`. Topic: B14 (security), B15 (hosting).
+- **Sawal:** apps se backend tak ka raasta (Vercel apps, Render ka gateway), headers, cache, resource ki seemaayein, rate limits, kill switches aur install hone wale apps ke neeche ke niyam, threats aur risks naye security docs me aayein?
+- **Kyun zaroori:**
+  - Saare apps `/api/*` ko Render ke gateway pe bhejte hain (D-052), aur backend ka URL public hai. Saara backend ek 512 MB process me hai (D-049, D-056), aur domain nahi (D-028). Har request ka pehla pehra yahi hai.
+  - Sign-in ki rok (D-182), codes ki seema (D-187) aur dobara code (D-185) asli client IP, rate limit aur kill switch pe hi tikte hain.
+- **Prastaavit niyam** ([security/SECURITY_REQUIREMENTS.md](security/SECURITY_REQUIREMENTS.md) me; numbers misaal, settings me):
+  1. **SR-002, backend ka seedha raasta band:** gateway `/api/*` ki request tabhi maane jab usme app ke raaste se juda secret header ho (constant-time milaan; badalte waqt purani aur nayi dono values chalein); bina header 403. Sirf tay routes (payment webhook, health, jagane wala) bina secret ke, apni jaanch ke saath (jaise webhook signature). Saare 11 apps ki rewrite aur headers ki config ek hi template se. Kahan se: ASVS Configuration. Test: bina ya galat header 403; webhook bina signature 401; har app ke host se 200; ek test har app ki config jaanche.
+  2. **SR-003, asli client IP ek helper se:** forwarded headers sirf tab maane jab secret header sahi ho, warna connection ka IP; IPv6 /64 ke hisaab se gina jaaye. Rate limits, sessions aur audit sab isi helper se. Kahan se: ASVS Business Logic, Logging. Test: jhootha `X-Forwarded-For` bhejne se IP na badle.
+  3. **SR-004, personal jawab cache nahi:** har signed-in ya personal jawab pe `Cache-Control: private, no-store`. Public cache sirf tay public GET routes pe, aur unpe kabhi `Set-Cookie` nahi. Personal hisse (Pro daam, wishlist ka nishaan) alag private endpoint se. Kahan se: ASVS Data Protection. Test: har non-public route ka header (contract test); public route pe cookie bhejne se jawab na badle.
+  4. **SR-005, security headers har app ke har route pe:** CSP (`default-src 'self'`, scripts sirf apni aur hash ya nonce se, `object-src 'none'`, `base-uri 'none'`, `frame-ancestors 'none'`), `X-Content-Type-Options: nosniff`, `Referrer-Policy: strict-origin-when-cross-origin` (private media wale pages pe `no-referrer`), HSTS, aur `Permissions-Policy` jo SR-001 ki cheezon ke alawa sab band rakhe. Kahan se: ASVS Configuration. Test: E2E me har app ke headers; page iframe me na khule; inline script na chale.
+  5. **SR-006, bahar ki script nahi:** kisi page pe bahar ki koi script nahi; sirf payment wale page pe payment gateway ki checkout script, aur sirf usi page ki CSP me uska host. Kahan se: ASVS Configuration, Malicious Code. Test: checkout ke alawa har page ki CSP me gateway ka host nahi.
+  6. **SR-007, resource ki seemaayein:** JSON body 100 KB (files seedha storage pe, backend se nahi); list ka page 100 tak; har MongoDB query pe 2 second ki time limit aur PostgreSQL pe statement timeout; search ka text 100 characters; password hash ek waqt me 2, baaki line me (line bhari to 503); request 30 second. Health aur jagane wale endpoints na version batayein, na database tak jaayein. Kahan se: ASVS Business Logic, API. Test: bada body 413; dheemi query time-out; 20 sign-in ek saath pe memory theek; health ka jawab sirf "ok".
+  7. **SR-008, rate limits IP aur account dono pe:** sign-in, codes, payment shuru, review, report aur daawa "fail-closed" (Redis na mile to 503); padhne wale routes "fail-open" (process ki apni chhoti seema ke saath); 429 pe `Retry-After` aur saaf sandesh. Seemaayein (misaal): password se sign-in ek IP se 10 minute me 20 (account ki rok D-182); code maangna D-187 aur ek IP se 10 minute me 5; ek code pe 5 koshish; bina payment "place order" ek account ghante me 5; review din me 5, report din me 10; daawa ya return din me 3; uploads din me 30 files ya 100 MB; bina sign-in search ek IP minute me 60; baaki likhne wale kaam ek account minute me 60; delivery code ek parcel pe 5 galat; export ghante me 5. Kahan se: ASVS Business Logic. Test: har seema ke ek upar 429; Redis band pe sign-in 503, product page 200.
+  8. **SR-009, kill switches bina deploy:** naye sign-up band; customer sign-in band; checkout band; uploads band; payouts pe rok; "sab sessions band". Har switch sirf Master ka, dobara code (D-185) ke saath, audit me, aur app me saaf sandesh. Kahan se: ASVS Architecture. Test: har switch se flow band; "sab sessions band" ke baad har session 401.
+  9. **SR-010, install hone wale apps ka cache:** har install hone wale app (D-042) ka service worker `/api/*` ko kabhi cache na kare aur `index.html` se jawab na de; signed-in pages aur API ke jawab cache me nahi; sirf Delivery app ka offline hissa tay data rakhe; sign-out pe app ke caches aur offline data saaf. Kahan se: ASVS Data Protection. Test: service worker ke baad `/api` network se; sign-out ke baad Cache Storage aur IndexedDB khaali.
+- **Threats** ([security/THREAT_MODEL.md](security/THREAT_MODEL.md) me "Edge aur hosting" ka hissa):
+  1. Backend ka public URL seedha bula ke app ka raasta aur headers chhodna, ya jhootha client IP bhejna (Spoofing, Tampering): SR-002, SR-003.
+  2. Galat client IP: sab users ek IP pe gine jaayein, rate limit sab ko roke, audit me galat IP (DoS, Repudiation): SR-003, SR-008.
+  3. CDN kisi signed-in ya personal jawab (Pro daam, cart, address) ko cache karke doosre user ko de de (Information disclosure): SR-004.
+  4. Headers ke bina XSS ka bada asar, ya sign-in aur bade buttons iframe me (clickjacking) (Tampering, Elevation): SR-005.
+  5. Payment page pe bahar ki script badle to payment ke details chhin sakte hain (Information disclosure, Tampering): SR-006.
+  6. Ek process me saara backend: bada body, mehnga search, password hash ki baadh ya bada export se sab gire (DoS): SR-007, SR-008, SR-009.
+  7. Service worker `/api/*` ya personal pages cache kare (Information disclosure, DoS): SR-010.
+- **Risks** ([RISKS.md](RISKS.md) me, tag `Security`; haan ka matlab owner ne `Maana`):
+  1. **R-015:** koi alag WAF ya DDoS ki suraksha nahi; ek process gire to sab band (R-002, R-007 se juda). Kam karne ka tareeka: SR-007, SR-008, SR-009, aur providers ki apni suraksha.
+  2. **R-016:** payment page pe gateway ki bahar ki script; uski suraksha hamare haath me nahi. Kam karne ka tareeka: SR-006.
+- **Tathya ki jaanch (Claude, owner ka faisla nahi; §2):** Vercel ke rewrite se backend tak secret header kaise jude, aur Vercel aur Render asli client IP kis header me dete hain. SR-002 aur SR-003 ka tareeka isi pe tika hai.
+- **Vikalp:**
+  - **(a)** List jaisi hai waisi maanein; numbers misaal rahein (settings me); R-015 aur R-016 `Maana`.
+  - **(b)** Maanein, par owner jo niyam ya number badle, wo badal ke.
+  - **(c)** Ye batch abhi roko.
+- **Salah:** **(a)**.
+- **Trade-off:**
+  - (a) me kuch numbers baad me asli naap ke baad badlenge (settings me hain, to bina deploy).
+  - (b) me har badlav ki ek line.
+  - (c) me aage ka design bina edge ke pehre ke.
+- **Owner ka jawab (2026-11-19):** **(a)**, list jaisi hai waisi maani; R-015 aur R-016 `Maana`. Record: [DECISIONS.md](DECISIONS.md) D-210.
+
+### Q-152. Security batch 2: sign-in ke niyam, threats aur risks maanein?
+
+- **Status:** `Tay`. Topic: B14 (security).
+- **Sawal:** customer, staff, seller aur delivery partner ke sign-in (password, email code, social, authenticator, recovery, invites, allowlist) ke neeche ke niyam, threats aur risks naye security docs me aayein?
+- **Kyun zaroori:**
+  - Sign-in ke faisle tay hain (D-021, D-133, D-182 se D-187, D-199, D-200); ye niyam unhe jaanchne layak roop dete hain. D-021 ka "authenticator laga ho to email code ke baad bhi" yahin pakka hota hai (SR-015).
+  - Domain nahi (D-028), to nakli sign-in page sabse aasaan hamla hai.
+- **Prastaavit niyam** ([security/SECURITY_REQUIREMENTS.md](security/SECURITY_REQUIREMENTS.md) me; numbers misaal, settings me):
+  1. **SR-011, staff ka doosra factor:** staff ke 7 apps me har sign-in pe authenticator code (D-199); ek code ek hi baar chale, aur chhoti samay-khidki (misaal ek step aage ya peeche). Kahan se: ASVS Authentication. Test: bina code sign-in mana; wahi code dobara mana; galat codes pe rate limit.
+  2. **SR-012, apps ke asli pate aur emails ke links:** har app ka ek tay URL ek jagah likha ho (operations ke doc aur Master app me). Staff ke emails me sign-in ka koi link nahi, sirf "app kholein". Customer aur seller ke emails me link sirf apne app ke host pe; email provider ki link tracking band. Kahan se: ASVS Authentication. Test: templates ka test: links sirf apne hosts pe; staff templates me link nahi.
+  3. **SR-013, password:** kam se kam 12, zyada se zyada 128 characters, koi "ek capital, ek number" jaisa niyam nahi. Leak hue passwords ki jaanch ek free k-anonymity wali API se; API na mile to password maan lo par account pe nishaan, aur agle sign-in pe dobara jaanch. Hash argon2id se (misaal m=19 MiB, t=2, p=1). Kahan se: ASVS Authentication. Test: 11 characters mana; leak wala password mana; API band pe nishaan aur agle sign-in pe jaanch.
+  4. **SR-014, rok aur alert:** galat password ya code pe rok D-182 ke hisaab se. Ek IP se kai accounts pe fail, ya ek account pe kai IPs se fail, to owner ko security alert. Kahan se: ASVS Authentication. Test: seema ke upar rok; doosre IP se sahi password chale; alert bane.
+  5. **SR-015, customer ka email code:** 6 ank, cryptographically secure random se; sirf hash rakha jaaye; misaal 10 minute; ek code pe 5 koshish; 3 baar dobara bhejna; ek baar istemaal; us sign-in koshish aur us app se bandha. Account pe authenticator ho to code ke baad bhi authenticator (D-021). Email code se sign-in sirf customer app me. Email me maangne ka samay aur browser, aur "ye code kisi ko mat batao". Kahan se: ASVS Authentication. Test: 6th galat koshish pe code band; 11 minute baad mana; doosre browser me mana; authenticator wale account pe code ke baad bhi authenticator; staff apps me ye raasta hi nahi.
+  6. **SR-016, security badlav pe dobara pehchaan:** password badalna, email badalna, authenticator band karna, naye recovery codes, account delete: inse pehle dobara pehchaan (password ya code, aur authenticator ho to wo bhi). Email badle to naye email pe code aur purane pe khabar. Password reset ke baad baaki saare sessions band. Kahan se: ASVS Authentication, Session Management. Test: bina dobara pehchaan badlav mana; purane email pe khabar; reset ke baad doosra device 401.
+  7. **SR-017, social sign-in (Google, LinkedIn, GitHub, D-021):** `state` aur PKCE (S256); jahan provider OIDC de wahan `nonce`; har app ka exact redirect URI; sirf provider ka verified email maana jaaye (GitHub jaise provider pe verified email uski API se). Maujooda account se jodna tabhi jab email allowlist pe ho aur provider use verified kahe; warna pehle maujooda tareeke se sign-in. Band account pe social sign-in bhi band. Aakhri sign-in tareeka hatana mana. Kahan se: ASVS Authentication, Session Management. Test: badla `state` aur bina PKCE mana; unverified email pe jod nahi; allowlist ke bahar sign-up nahi.
+  8. **SR-018, allowlist ek hi jaanch se (D-133):** identity me ek hi function, har raaste pe: password sign-up aur sign-in, social ka pehla sign-in, email code, invite accept, seller, partner aur creator sign-up, waitlist, bina sign-in forms. Allowlist se email hate to uske saare sessions band. Allowlist badalna sirf Master, dobara code (D-185) ke saath, audit me. Kahan se: ASVS Access Control. Test: har raaste ka test allowlist ke bahar wale email se; hatane ke baad agli call 401.
+  9. **SR-019, kaunsa email registered hai, pata na chale:** sign-in, sign-up, password reset aur code maangne ka jawab registered aur anjaan email pe ek jaisa, aur kam se kam ek tay samay (misaal 400 ms) ke baad. Anjaan email pe koi email nahi. D-133 ka "demo store" sandesh sirf allowlist ke bahar walon ko. Kahan se: ASVS Authentication. Test: do emails pe jawab ka body aur samay milao.
+  10. **SR-020, code wale emails ki seema (D-187):** D-142 ki OTP line ke andar; seema pe app turant saaf sandesh de (code chupchaap na ruke); sign-up ke codes ki seema khatam ho to bhi password reset aur security ke codes jaayein. Kahan se: ASVS Business Logic. Test: seema ke upar sandesh; sign-up ki seema ke baad bhi reset ka code jaaye.
+  11. **SR-021, sign-in ke baad redirect:** `next` jaisa parameter sirf apne app ka relative path ho (`/` se shuru, `//` ya `\` se nahi; normalise karke dobara jaancha); warna home page. Kahan se: ASVS Validation. Test: `//evil.example`, `/\evil.example` aur encoded dot-segments sab home pe.
+  12. **SR-022, recovery codes aur reset (D-200):** authenticator lagate waqt 10 recovery codes (hash, har code ek baar). Reset ya naye codes pe us account ke saare sessions band, security email, aur owner ko alert. Kahan se: ASVS Authentication. Test: recovery code dobara mana; reset ke baad sessions 401; D-200 ke bahar wala role reset kare to 403.
+  13. **SR-023, Delivery app (D-183):** offline me sirf us shift ke assigned parcels ka kam se kam data (naam, address, phone, kaam). Delivered ya cancel hote hi us parcel ka data phone se hate; shift khatam ya sign-out pe sab saaf. Hub Manager ek click se partner ka session band kare. Kahan se: ASVS Data Protection, Session Management. Test: delivered ke baad IndexedDB me parcel nahi; Hub Manager ke band karne ke baad agla sync 401.
+  14. **SR-024, seller ke andar haq (D-184):** seller ke andar alag permissions: daam, listing content, maal bhejna, stock dekhna, payout aur bank, seller ke staff manage karna. Seller staff ke roles sirf Account Owner de. Kahan se: ASVS Access Control. Test: listing wale user se daam badlana 403; bina authenticator ke bank badlana mana.
+  15. **SR-025, invites aur pehla account:** invite ek baar ka, misaal 72 ghante, us email aur us app se bandha, allowlist ke andar; sirf appoint karne ke haq wala bheje; staff ko accept pe authenticator lagana zaroori. Koi default account ya password nahi; pehla Master sirf owner ke machine se ek baar ki command se, audit me. Kahan se: ASVS Authentication, Access Control. Test: invite dobara, expiry ke baad ya doosre email se: sab mana; naye install me bina command koi staff sign-in nahi.
+  16. **SR-026, bade kaamon pe dobara code (D-185):** D-185 ki list ke har kaam pe misaal 5 minute ke andar ka authenticator code; authenticator band karna aur naye recovery codes har baar apna alag code maangein. Kahan se: ASVS Authentication, Access Control. Test: list ke har kaam pe bina code 403; khidki ke baad dobara code.
+- **Threats** ([security/THREAT_MODEL.md](security/THREAT_MODEL.md) me "Sign-in" ka hissa):
+  1. Milte-julte naam ka nakli sign-in page: staff ka password aur authenticator code, ya customer ka code (Spoofing): SR-011, SR-012; R-017.
+  2. Leak hue passwords se credential stuffing aur password spraying (Spoofing): SR-013, SR-014, SR-008.
+  3. Email code ka andaaza ya ek code ka dobara istemaal (Spoofing): SR-015.
+  4. Code ka phishing ("code bata do"), ya customer ka inbox hi hamlavar ke paas (Spoofing): SR-015, SR-016; R-018.
+  5. Social sign-in se kabza: bina verified email ka jod, login CSRF, redirect URI se khel (Spoofing, Elevation): SR-017.
+  6. Allowlist ka koi ek raasta khula reh jaaye (Elevation): SR-018.
+  7. Sign-up, sign-in ya reset ke jawab ya samay se pata chale kaunsa email registered hai (Information disclosure): SR-019.
+  8. Code wale emails ki baadh: OTP ki din ki jagah khatam, ya kisi ke inbox pe emails ki baadh (DoS): SR-020, SR-008.
+  9. Sign-in ke baad bahar ki site pe redirect (Spoofing): SR-021.
+  10. Authenticator reset ya recovery ke raaste se kabza, ya owner phone khone pe bahar (Spoofing, DoS): SR-022.
+  11. Jaan-boojh ke galat password se owner ke staff accounts band karna (DoS): SR-014.
+  12. Delivery partner ka phone kho jaaye: chalta session aur offline data (Information disclosure, Spoofing): SR-023, SR-010.
+  13. Seller ka bina authenticator wala user daam, maal ya payout badle (Tampering, Elevation): SR-024, SR-026.
+  14. Invite link kisi aur ke haath, default account, ya pehla Master banane ka khula raasta (Spoofing, Elevation): SR-025.
+  15. Khula chhoda session ya chori hui cookie se bade kaam (Elevation): SR-026.
+- **Risks** ([RISKS.md](RISKS.md) me, tag `Security`; haan ka matlab owner ne `Maana`):
+  1. **R-017:** domain nahi (D-028): milte-julte naam ke nakli sign-in pages aur hamare naam se nakli emails; staff aur customer pehchaan nahi paate. Kam karne ka tareeka: SR-011, SR-012, R2 me passkey (D-199), aur emails me "hum kabhi password ya code nahi maangte".
+  2. **R-018:** customer ka account utna hi surakshit jitna uska email inbox (email code, D-021). Kam karne ka tareeka: SR-015, SR-016, aur optional authenticator.
+- **Vikalp:**
+  - **(a)** List jaisi hai waisi maanein; numbers misaal rahein (settings me); R-017 aur R-018 `Maana`.
+  - **(b)** Maanein, par owner jo niyam ya number badle, wo badal ke.
+  - **(c)** Ye batch abhi roko.
+- **Salah:** **(a)**.
+- **Trade-off:**
+  - (a) me sign-in ke kaam ka hissa bada (invites, recovery, social ke niyam), par sab R1 ke tay faislon ke andar.
+  - (b) me har badlav ki ek line.
+  - (c) me sign-in ka design bina pakke niyam ke.
+- **Owner ka jawab (2026-11-19):** **(a)**, list jaisi hai waisi maani; R-017 aur R-018 `Maana`. Record: [DECISIONS.md](DECISIONS.md) D-211.
+
+### Q-153. Security batch 3: sessions aur tokens ke niyam, threats aur risk ka jod maanein?
+
+- **Status:** `Khula`. Topic: B14 (security).
+- **Sawal:** sign-in ke baad ke session (cookies, tokens, unki umar, band karna, CSRF, signing keys) ke neeche ke niyam, threats aur R-010 me jod naye docs me aayein?
+- **Kyun zaroori:**
+  - Sessions ki umar tay hai (D-180, D-181), aur har app ki apni cookies (D-186). Ye niyam batate hain ki session kaise bane, badle aur band ho.
+  - Apps `*.vercel.app` jaise saajhe hosts pe hain (D-048, domain nahi), to cookies sirf apne host ki honi chahiye.
+  - Redis restart pe data jaata hai (R-010); band hua session phir chal na pade.
+- **Prastaavit niyam** ([security/SECURITY_REQUIREMENTS.md](security/SECURITY_REQUIREMENTS.md) me; numbers misaal, settings me):
+  1. **SR-027, cookies:** session ki cookies sirf apne host ki (koi `Domain` attribute nahi), `HttpOnly`, `Secure`. Access cookie `__Host-` prefix aur `SameSite=Lax` ke saath. Refresh cookie `__Secure-` prefix, `SameSite=Strict`, aur sirf sign-in wale API path pe (`__Host-` me path `/` hi ho sakta hai, isliye refresh pe `__Secure-`). Koi token ya user ka data browser storage me nahi; wahan sirf theme jaisi pasand. Kahan se: ASVS Session Management. Test: Set-Cookie ke flags; localStorage aur sessionStorage me user ka data nahi.
+  2. **SR-028, token ki umar aur badalna:** access token chhota (misaal 10 minute). Refresh token har istemaal pe badle; ek "family" ke saath purane token ka dobara istemaal pakda jaaye: aisa ho to poori family band aur security email. Usi device aur network se pichhla token misaal 60 second ke andar aaye to use khoya jawab maana jaaye, chori nahi. Sessions ki umar aur bina kaam ke band hona D-180 aur D-181 ke hisaab se. "My devices" me har session dikhe aur band ho sake. Kahan se: ASVS Session Management. Test: purana token doosre device se: family band; khidki me usi device se: chori nahi; umar aur bina kaam wale band hone ke tests.
+  3. **SR-029, session ka sach database me:** session aur uske band hone ka record database me; Redis sirf tez cache. Redis khaali ho to gateway database se jaanche. Sign-out, role khatam aur allowlist se hatna agli request pe asar kare. Kahan se: ASVS Session Management. Test: Redis khaali karne ke baad band session 401; role khatam ke baad agli call 403.
+  4. **SR-030, CSRF:** badalne wale har route pe `Origin` (ya `Host`) ki allowlist, ek custom header jo sirf apna app bhejta hai, aur SameSite. Jo routes browser khud kholta hai (social sign-in ka start aur callback) unki alag list: sirf GET, bina doosre asar ke. Kahan se: ASVS Access Control, Session Management. Test: doosre origin se POST 403; custom header ke bina 403.
+  5. **SR-031, tokens ka signature:** tokens asymmetric signature se (misaal ES256), algorithm pakka; `iss`, `aud` (= app), `exp`, `nbf` jaanche jaayein, taaki ek app ka token doosre app pe na chale. Signing keys apne aap badlein (D-197, misaal 30 din) aur private key encrypted rahe. Keys na mil payein to 503, 401 nahi. Kahan se: ASVS Session Management, Cryptography. Test: `alg:none`, HS256 key ka khel, galat `aud`, expired: sab 401; key ki dikkat pe 503.
+- **Threats** ([security/THREAT_MODEL.md](security/THREAT_MODEL.md) me "Sessions aur tokens" ka hissa):
+  1. XSS ya malware se session token ki chori; lamba session chori ke baad bhi chale (Spoofing, Information disclosure): SR-027, SR-028, SR-005.
+  2. Refresh token ki copy chupchaap chale; ya ulta, khoya jawab "chori" maan ke sahi user baar-baar bahar ho (Spoofing, DoS): SR-028.
+  3. Redis restart pe band sessions ke nishaan ud jaayein aur purana session phir chale (Elevation): SR-029.
+  4. Cookie wale sessions pe CSRF (doosri site se badalne wali request) (Tampering): SR-030.
+  5. Token jaali banana (algorithm ka khel), signing key ka leak, ya ek app ka token doosre app pe chalna (Spoofing, Elevation): SR-031.
+  6. Allowlist se hata tester, ya role khatam hua staff, chalte session se kaam karta rahe (Elevation): SR-018, SR-029.
+- **Risk me jod** ([RISKS.md](RISKS.md)): R-010 (Key Value ka data restart pe jaata hai) ke "Kam karne ka tareeka" me: sessions aur unke band hone ka sach database me (SR-029); rate limits ki ginti restart ke baad thodi der shuru se, ye maana. Status `Khula` hi rahe.
+- **Vikalp:**
+  - **(a)** List jaisi hai waisi maanein; numbers misaal rahein (settings me); R-010 me jod.
+  - **(b)** Maanein, par owner jo niyam ya number badle, wo badal ke.
+  - **(c)** Ye batch abhi roko.
+- **Salah:** **(a)**.
+- **Trade-off:**
+  - (a) me har request pe session ki jaanch Redis se, aur Redis khaali ho to database se: thoda dheema us waqt.
+  - (b) me har badlav ki ek line.
+  - (c) me sessions ka design bina pakke niyam ke.
 
 ## Change log
 
@@ -3228,3 +3476,9 @@ Claude ka kaam: owner ka faisla nahi chahiye, sirf saboot. Nateeja saboot ke saa
 | v1.3.12 | 2026-11-19 | Q-101 se Q-120 khule: Agent 2 ke doosre run ke R2 wale sawal; jude sawal G12, G13, G14 me.                                                                        |
 | v1.3.13 | 2026-11-19 | Q-101 se Q-120 tay (D-160 se D-179; owner ne saari salah maani); §1 ke "Ab tak" me naye faisle; koi sawal khula nahi.                                             |
 | v1.3.14 | 2026-11-19 | Q-121 se Q-145 khule: Security Architect ke pehle run ke R1 wale sawal; jude sawal G15, G16, G17 me.                                                              |
+| v1.3.15 | 2026-11-19 | Q-121 se Q-145 tay (D-180 se D-204; owner ne saari salah maani); §1 me B14 ke "Ab tak" me naye faisle.                                                            |
+| v1.3.16 | 2026-11-19 | Q-146 se Q-149 khule: Security Architect ke pehle run ke R2 wale sawal; jude sawal G18 me.                                                                        |
+| v1.3.17 | 2026-11-19 | Q-146 se Q-149 tay (D-205 se D-208; owner ne saari salah maani); Q-150 khula (security report ke niyam, threats aur risks docs me kaise).                         |
+| v1.3.18 | 2026-11-19 | Q-150 tay: (a) area ke hisaab se batches (D-209); Q-151 khula (security batch 1: edge aur hosting); §2 me Vercel aur Render ki jaanch.                            |
+| v1.3.19 | 2026-11-19 | Q-151 tay: (a) batch 1 maana (D-210); Q-152 khula (security batch 2: sign-in).                                                                                    |
+| v1.3.20 | 2026-11-19 | Q-152 tay: (a) batch 2 maana (D-211); Q-153 khula (security batch 3: sessions aur tokens).                                                                        |
