@@ -1,6 +1,6 @@
 # DECISIONS: Beautinique
 
-> **Status:** v1.10.17 (2026-11-19). Har faisla ek jagah. Sirf wahi "Tay" jo owner ne khud kaha; Claude ki salah faisla nahi. Cheezein ek-ek karke judti hain.
+> **Status:** v1.10.23 (2026-11-19). Har faisla ek jagah. Sirf wahi "Tay" jo owner ne khud kaha; Claude ki salah faisla nahi. Cheezein ek-ek karke judti hain.
 
 ## 0. Kaise likhein
 
@@ -256,6 +256,9 @@
 | D-239 | Tax ke chhote sudhaar: HSN + description ki row, invoice pack ya dispatch pe, delivery fee aur TDS ka pal CA se, doosre state ke GSTIN pe chetavni, e-invoice aur TCS registration ke fields.                 | Business     | 2026-11-19 |
 | D-240 | Listing aur pages ke chhote sudhaar: country of origin ka sort, blocklist me "cosmetic me mana", seller ka undertaking, Payments aur "Kram kaise" pages, recall emails pehle, dark patterns ka saal ka audit. | Business     | 2026-11-19 |
 | D-241 | Jahan kaam apna role karta hai, wahan dummy naam nahi: staff role banta hai aur jaankari usi account se; dummy sirf registrations aur bahar ki companies ke liye.                                             | Business     | 2026-11-19 |
+| D-242 | Naam: storefront "Beautinique", platform company "Beautinique Pvt Ltd", apne brand ki seller company "Beautinique Brands Pvt Ltd", brand "Beautinique" (dummy companies); D-233 badla.                        | Business     | 2026-11-19 |
+| D-243 | Apna brand "Unibelle", seller company "Unibelle Cosmetics Pvt Ltd" (dummy); platform "Beautinique" hi; naam platform se alag, to D-233 phir laagu; D-242 badla.                                               | Business     | 2026-11-19 |
+| D-244 | COMPLIANCE batch 1 maana: tax (GST, TCS, TDS) ki 24 rows, CL-001 se CL-024, source aur tareekh ke saath.                                                                                                      | Business     | 2026-11-19 |
 
 ## 2. Record
 
@@ -571,6 +574,7 @@
 ### D-030. Business model
 
 - **Faisla:** Beautinique apne brand ke products bechega, aur doosre beauty brands seller ban ke bechenge. Sab kuch ek hi storefront pe. Har product ka ek seller, aur customer invoice us seller ke GSTIN se.
+- **Jod (owner, 2026-11-19, D-243):** "Beautinique" storefront aur platform ka naam hai, product brand nahi. Apne products ka brand "Unibelle" hai, jo seller company "Unibelle Cosmetics Pvt Ltd" (D-031) bechti hai.
 - **Wajah:** owner ka faisla, 2026-11-17 ko dobara dekh ke waise hi rakha.
 - **Chhode vikalp:** sirf apna maal (1P inventory); sirf doosre brands (pure marketplace).
 - **Kab dobara khulega:** owner khud khole.
@@ -580,6 +584,7 @@
 
 - **Faisla:** apna brand ek **alag (dummy) company ke naam se** seller banega. Wo seller app me ek "house brand" seller account se chalega, jise Own-Brand Manager sambhalega. Iske products bhi baaki brands ki tarah hi check honge. Koi shortcut nahi, Master ke liye bhi nahi.
 - **Jod (owner, 2026-11-19, D-233, D-241):** brand aur dummy company ka naam platform ke naam se alag (D-233). Company dummy hai, par use chalane wale apne roles (jaise Own-Brand Manager) asli staff roles hain (D-241).
+- **Badla (owner, 2026-11-19, D-243):** seller company "Unibelle Cosmetics Pvt Ltd", brand "Unibelle"; platform company "Beautinique Pvt Ltd".
 - **Wajah:** owner ne alag company chuni (2026-11-17). Claude ki daleel: platform company khud seller ho to har jagah special case banta (khud pe TCS nahi, settlement ki jagah andar ka transfer, apne brand ko aage dikhane ke sawal); alag company ke saath apna brand bhi baaki sellers jaisa ek hi raasta.
 - **Chhode vikalp:** platform company khud apne brand ki seller.
 - **Kab dobara khulega:** owner khud khole.
@@ -2934,6 +2939,7 @@
 - **Kab dobara khulega:** owner khud khole.
 - **Kisne, kab:** owner, 2026-11-19. **Nishaan:** Salah maani.
 - **Asar (Claude):** D-031 me jod. Dummy company aur brand ka naam D-145 niyam 7 ki dummy list me. Kanooni detail jaanchi nahi (R-004): E-commerce rules ka 2026 ka badlav (rule 5(6)) sirf secondary source se.
+- **Jod (owner, 2026-11-19, D-243):** naam: brand "Unibelle", seller company "Unibelle Cosmetics Pvt Ltd"; platform se alag, to ye faisla laagu.
 
 ### D-234. Chhote packs pe batch na ho to
 
@@ -3025,6 +3031,39 @@
 - **Kisne, kab:** owner, 2026-11-19. **Nishaan:** Owner.
 - **Asar (Claude):** ab tak ki jagahein: Grievance Officer aur nodal person (D-237, D-145 niyam 4), D-163, platform ka customer care contact (D-026 me jod), aur apne brand ke seller wale officers (D-238, Claude ki samajh). Jab bhi kisi naye kaam ke liye kisi insaan ki jaankari chahiye, pehle dekha jaata hai ki wo kaam apna role karta hai ya bahar ki company. Live site pe ye jaankari public dikhti hai; abhi saare staff accounts owner ke hain (D-017). Repo me koi asli naam nahi (public repo niyam): ye sirf database me.
 
+### D-242. Platform, apne brand aur companies ke naam
+
+- **Faisla:** naam is tarah (dono companies dummy, D-026). Niyam:
+  1. Storefront (website aur apps): "Beautinique".
+  2. Platform company (storefront chalane wali): "Beautinique Pvt Ltd".
+  3. Apne brand ki seller company (D-031): "Beautinique Brands Pvt Ltd".
+  4. Brand (pack pe naam): "Beautinique".
+  5. Dono companies ke poore naam alag; product page pe "Sold by" me seller company ka naam.
+- **Wajah:** owner ka faisla (2026-11-19): apne brand ke liye aise hi karna hai.
+- **Chhode vikalp:** apne brand aur uski dummy company ka naam platform se alag (D-233, Claude ki salah).
+- **Kab dobara khulega:** owner khud khole.
+- **Kisne, kab:** owner, 2026-11-19. **Nishaan:** Owner.
+- **Asar (Claude):** D-233 badla, D-031 me badla. Seller company alag hi hai, to D-031 ke niyam (TCS, TDS, settlement, catalog ki jaanch) waise hi. Naam platform jaisa hone se 2027 ke "platform ke naam jaisa seller" wale niyam (rule 5(6)) ka customer data ka sawal uthta (D-243 ke baad laagu nahi). Kanooni detail jaanchi nahi (R-004): do companies ke milte-julte naam ke niyam, trademark, aur rule 5(6) (sirf secondary source se).
+- **Badla (owner, 2026-11-19, D-243):** niyam 3 aur 4 badle: apni seller company "Unibelle Cosmetics Pvt Ltd" aur brand "Unibelle". Storefront aur platform company (niyam 1, 2) waise hi.
+
+### D-243. Apne brand ka naam: Unibelle
+
+- **Faisla:** apna brand "Unibelle", aur uski seller company (D-031) "Unibelle Cosmetics Pvt Ltd" (dummy). Storefront "Beautinique" aur platform company "Beautinique Pvt Ltd" jaise D-242 me.
+- **Wajah:** owner: Beautinique ka matlab "Beauty + Unique" hai; apne brand ka matlab wahi chahiye, par naam alag. Unibelle = uni (unique) + belle (beauty). Claude ne naam sujhaye aur Unibelle ki salah di, owner ne maani. Naam me "Beautinique" ka koi hissa nahi, to 2027 ke rule 5(6) ka alag consent nahi chahiye (D-233 jaisa).
+- **Chhode vikalp:** brand aur seller company ka naam platform jaisa (D-242; ek aur consent ka kaam); doosre sujhaye naam (Solabelle, Onelle, Unaura).
+- **Kab dobara khulega:** owner khud khole.
+- **Kisne, kab:** owner, 2026-11-19. **Nishaan:** Owner (matlab aur naam alag); Salah maani (Unibelle).
+- **Asar (Claude):** D-242 badla, D-233 phir laagu, D-031 me badla. Apne brand ke liye customer data ke alag consent ka sawal laagu nahi. Naam D-145 niyam 7 ki dummy list me. Kanooni detail jaanchi nahi (R-004): "Unibelle" pehle se kisi ka trademark (class 3) ya brand hai ya nahi, ye nahi jaancha; asli business se pehle trademark search zaroori.
+
+### D-244. COMPLIANCE batch 1: tax
+
+- **Faisla:** kanooni jaanch ke tax hisse ki 24 rows (CL-001 se CL-024: GST rates, invoice aur credit note, e-invoice, discount, samples, kit, platform ki fees aur delivery fee ka invoice, GST TCS, income-tax TDS, apna brand, seller ka registration, nasht maal, B2B invoice, tax records, gift voucher, consultation, demo ke documents) jaisi prastaavit thi waisi [COMPLIANCE.md](COMPLIANCE.md) me, source ke link aur tareekh ke saath.
+- **Wajah:** Claude ki salah, owner ne maani: finance aur catalog ke design ko tax ka ek tay aadhaar milta hai, aur jahan faisla badalna tha wo pehle hi tay ho gaya (D-221 se D-241).
+- **Chhode vikalp:** badlav ke saath maanna; batch rokna (finance ka tax aadhaar baad me).
+- **Kab dobara khulega:** CA ki salah, kanooni jaanch ka primary source, ya owner khud khole.
+- **Kisne, kab:** owner, 2026-11-19. **Nishaan:** Salah maani.
+- **Asar (Claude):** CA ke liye khule sawal (replacement, platform ka discount, points, delivery fee, TDS ki baaki shartein, nasht maal pe GST, paid consultation) design me option ki tarah rehte hain. Kanooni detail jaanchi nahi (R-004): har row ka status COMPLIANCE me; CA aur lawyer se nahi.
+
 ## Change log
 
 | Version  | Date       | Badlav                                                                                                                                                                                                                                                                                  |
@@ -3094,3 +3133,9 @@
 | v1.10.15 | 2026-11-19 | D-221 se D-227 aaye (kanooni asar: return ki muddat, der se delivery, 30 din ka daam, test claims, tax archive, invoice pe naam, seller ke tax dastavez; Q-162 se Q-168); D-079, D-080, D-100, D-117, D-120, D-143, D-151, D-193 me badla ya jod; D-055 me R1 jod.                      |
 | v1.10.16 | 2026-11-19 | D-134 me jod: test wale claims ka saboot R1 se (D-224).                                                                                                                                                                                                                                 |
 | v1.10.17 | 2026-11-19 | D-228 se D-241 aaye (kanooni asar ke baaki 22 points, Q-169 se Q-181; D-237 aur D-241 owner ke apne jawab: Grievance Officer, nodal person aur apne roles ki jaankari dummy nahi); 26 purane faislon me badla ya jod.                                                                   |
+| v1.10.18 | 2026-11-19 | D-242 aaya (platform, apne brand aur companies ke naam; owner); D-233 aur D-031 me badla.                                                                                                                                                                                               |
+| v1.10.19 | 2026-11-19 | D-243 aaya (apna brand "Unibelle", seller company "Unibelle Cosmetics Pvt Ltd"); D-242, D-233 aur D-031 me badla.                                                                                                                                                                       |
+| v1.10.20 | 2026-11-19 | D-030 me jod (D-243): "Beautinique" storefront aur platform ka naam, product brand "Unibelle".                                                                                                                                                                                          |
+| v1.10.21 | 2026-11-19 | D-244 aaya (COMPLIANCE batch 1: tax ki 24 rows maani; Q-182).                                                                                                                                                                                                                           |
+| v1.10.22 | 2026-11-19 | D-242 aur D-243 ke Asar se hataye gaye consent wale sawal ka number hataya (owner); faisle waise hi.                                                                                                                                                                                    |
+| v1.10.23 | 2026-11-19 | Owner ke kehne pe D-031 aur D-233 se D-242 wali "badla" line (naam platform jaisa) hatayi; D-233 me D-243 ka naam "jod" ki tarah.                                                                                                                                                       |
