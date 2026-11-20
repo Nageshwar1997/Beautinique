@@ -1,11 +1,11 @@
 # COMPLIANCE: Beautinique
 
-> **Status:** v1.1.4 (2026-11-19). Kanooni matrix. System me sab poori tarah banta hai, par registrations aur bahar ki companies ki details dummy hain (D-026); apne roles ki jaankari asli (D-241). Kisi lawyer ya CA se jaancha nahi (R-004). Cheezein ek-ek karke, owner ki haan se, judti hain (D-220).
+> **Status:** v1.1.5 (2026-11-20). Kanooni matrix. System me sab poori tarah banta hai, par registrations aur bahar ki companies ki details dummy hain (D-026); apne roles ki jaankari asli (D-241). Project ke Lawyer aur CA AI agents hain (D-257); unhone abhi kuch nahi jaancha (R-004). Cheezein ek-ek karke, owner ki haan se, judti hain (D-220).
 
 ## Is file me kya aayega
 
 - Har row (CL-xxx): **Kanoon ya niyam**, **Kis pe laagu**, **Kis module me**, **System me kya chahiye**, **Dummy kya hai**, **Jaancha ya nahi** (source aur tareekh ke saath).
-- **Jaancha** = public source khol ke milaaya (tareekh ke saath). **Aadha jaancha** = sirf secondary source, ya sarkari text ki purani copy. **Jaancha nahi** = source nahi khula. Lawyer ya CA se kuch nahi jaancha (R-004).
+- **Jaancha** = public source khol ke milaaya (tareekh ke saath). **Aadha jaancha** = sirf secondary source, ya sarkari text ki purani copy. **Jaancha nahi** = source nahi khula. **Lawyer ne jaancha** / **CA ne jaancha** = project ke Lawyer ya CA agent ne dekha, aur owner ki haan se docs me aaya (D-257). Is project me Lawyer aur CA AI agents hain, koi licensed lawyer ya CA nahi (D-257). Abhi tak unhone kuch nahi jaancha (R-004).
 - Rows area ke hisaab se batches me aati hain (D-220): §1 tax, §2 Legal Metrology, §3 cosmetics kanoon, §4 e-commerce aur consumer kanoon. Personal data, payments, gig workers jaise areas kanooni jaanch ke doosre run ke baad.
 - **Number:** CL-001 se kram se. Ek baar diya number kabhi badalta nahi aur dobara use nahi hota.
 - Jahan row kisi faisle se judi hai, wahan D-xxx ka hawala; faisle ka itihaas sirf [DECISIONS.md](DECISIONS.md) me.
@@ -844,3 +844,4 @@
 | v1.1.2  | 2026-11-19 | §2 Legal Metrology: CL-025 se CL-038, sources ke saath (D-245).                                                   |
 | v1.1.3  | 2026-11-19 | §3 cosmetics kanoon: CL-039 se CL-058, sources ke saath (D-246).                                                  |
 | v1.1.4  | 2026-11-19 | §4 e-commerce aur consumer kanoon: CL-059 se CL-087, sources ke saath (D-247); kanooni jaanch ka pehla run poora. |
+| v1.1.5  | 2026-11-20 | Lawyer aur CA ki paribhasha: project ke AI agents, unki raay hi lawyer aur CA ki raay (D-257).                    |
