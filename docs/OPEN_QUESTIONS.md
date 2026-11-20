@@ -1,6 +1,6 @@
 # OPEN QUESTIONS: Beautinique
 
-> **Status:** v1.4.3 (2026-11-20). Khule sawal, aage ke topics aur jaanchna baaki. Cheezein ek-ek karke judengi.
+> **Status:** v1.5.1 (2026-11-20). Khule sawal, aage ke topics aur jaanchna baaki. Cheezein ek-ek karke judengi.
 
 ## Is file me kya aayega
 
@@ -61,6 +61,8 @@ Claude ka kaam: owner ka faisla nahi chahiye, sirf saboot. Nateeja saboot ke saa
 | Leak hue passwords ki free range API ki uplabdhi aur seema                                                                                                                                      | SR-013                         | Password ki jaanch                                                   |
 | Owner ka laptop: Desktop folder kisi cloud sync me hai ya nahi (repo aur backups isi folder me), aur disk encryption chalu hai ya nahi (owner ke saath)                                         | D-013, D-196, R-023            | Backups ki suraksha                                                  |
 | Test mode me gift card dene wala RBI-authorised PPI issuer (API ke saath) milta hai ya nahi                                                                                                     | D-249                          | Gift card ka raasta                                                  |
+| Media provider (Cloudinary ka free plan): private file ka samay wala URL free plan pe chalta hai ya nahi, rakhi copy me EXIF rehta hai ya nahi, file type aur size ki rok, free credits, aur data ki jagah | D-284 | Shart poori na ho to media ka vikalp (c) |
+| Brevo ka free plan: bina domain ek verified sender se bhejna chalta hai ya nahi, din ki seema, aur API key ke haq | D-287 | Email provider pakka karna |
 
 ## 3. Sawal
 
@@ -5087,6 +5089,159 @@ Claude ka kaam: owner ka faisla nahi chahiye, sirf saboot. Nateeja saboot ke saa
 - **Tax detail:** CA (AI, D-257) ki raay; D-275 se D-281 ke saath milaa ke (jaise fulfilment fee ke do hisse, misaal me bhi).
 - **Owner ka jawab (2026-11-20):** **(a)**, ARCHITECTURE me naya hissa. Record: [DECISIONS.md](DECISIONS.md) D-282.
 
+### Q-220. Design ka scale target kitna maanein?
+
+- **Status:** `Tay`. Topic: B15 (technical).
+- **Sawal:** code, indexes, pagination, data ka archive aur load tests kis scale ke liye banein: kitne customers, din me kitne orders, kitne sellers aur variants?
+- **Kyun zaroori:**
+  - Design asli users maan ke hai (D-012), par "kitne users" kahin likha nahi. Isi se tay hota hai ki kaunse indexes, archive, pagination aur load tests chahiye.
+  - ₹0 pe asli seema isse kaafi kam hai (din ke 300 emails se lagbhag 100 orders, D-028). Target sirf code aur tests ke liye hai, hosting ke liye nahi.
+- **Vikalp:**
+  - **(a) Chhota:** 10,000 customers, 100 orders/din (sale ke din 3 guna), 50 sellers, 5,000 variants, 20 staff.
+  - **(b) Madhyam:** 1 lakh customers, 1,000 orders/din (sale ke din 5 guna), 500 sellers, 50,000 variants, 100 staff, 50 delivery partners.
+  - **(c) Bada:** 10 lakh customers, 10,000 orders/din, 5,000 sellers, 5 lakh variants.
+- **Salah:** **(b)**. Asli marketplace ki shuruaat jaisa. MongoDB aur PostgreSQL ke ek-ek server pe aaram se fit hota hai, to code me sharding ya alag search cluster jaisa bojh nahi, aur laptop pe Docker me load test ho sakta hai.
+- **Trade-off:**
+  - (a) me code jaldi, par "asli jaisa" kamzor: bade din pe kya toote, pata nahi chalta.
+  - (b) me har list ka pagination, har query ka index, data ka archive aur 5 guna peak ka load test.
+  - (c) me sharding, alag search aur queue ka dhaancha: ek insaan ki capacity (D-009) pe bahut bhaari.
+- **Owner ka jawab (2026-11-20):** **(b)**, madhyam: 1 lakh customers, 1,000 orders/din (sale ke din 5 guna), 500 sellers, 50,000 variants, 100 staff, 50 delivery partners. Record: [DECISIONS.md](DECISIONS.md) D-283.
+
+### Q-221. Photos, dastavez aur video kahan rakhein?
+
+- **Status:** `Tay`. Topic: B15 (technical), B14 (security). Group G22.
+- **Sawal:** product images, review aur daawe ki photos, delivery ka saboot, KYC dastavez, PDFs aur exports kis provider pe hon?
+- **Kyun zaroori:**
+  - Files database me nahi rakhte (D-155, R-006).
+  - Har image ko dobara encode karna aur EXIF hatana zaroori hai (SR-061). Ye server pe ho to 512 MB me memory bahut kam bachti hai (R-007), aur free server ke kam CPU pe ek photo kai second leti hai.
+  - Private files ko chhote samay wala signed URL chahiye (SR-062).
+- **Vikalp:**
+  - **(a) Managed media service (misaal Cloudinary ka free plan):** upload seedha provider pe; dobara encode aur EXIF hatana provider pe; public images CDN se; private files chhote samay wale URL se; video bhi.
+  - **(b) S3 jaisa object storage (misaal Backblaze B2 ya Cloudflare R2 ka free hissa):** upload seedha; dobara encode server pe, ek-ek karke; delivery apne signed URL se.
+  - **(c) Dono:** public aur review images (a) pe; private dastavez, kanooni rok wali files aur logs ki files (b) pe.
+- **Salah:** **(a)**, is shart ke saath ki free plan pe private file ka samay wala URL chale, rakhi hui copy me EXIF na rahe, aur file type aur size ki rok lage (jaanch §2 me). Jaanch fail ho to **(c)**.
+- **Trade-off:**
+  - (a) me ek processor aur ek account, aur server pe image ka koi kaam nahi; par free credits (storage, bandwidth aur transformations saath me) khatam ho sakte hain, aur data shayad India ke bahar.
+  - (b) me storage zyada muft, par server pe CPU aur memory ka bojh (R-007), dobara encode hui photo ka upload Render ki mahine ki bandwidth me ginta hai, aur provider card maang sakta hai (jaancha nahi).
+  - (c) me dono ke faayde, par do accounts, do keys aur do processors.
+- **Kanooni detail:** provider naya data processor hai (CL-104), aur data ki jagah privacy page pe aati hai (CL-107). Data India ke bahar ho to uska asar Lawyer se nahi jaancha.
+- **Owner ka jawab (2026-11-20):** **(a)**, managed media service, upar ki shart ke saath; shart ki jaanch fail ho to (c). Record: [DECISIONS.md](DECISIONS.md) D-284.
+
+### Q-222. 180 din ke request logs kahan rakhein?
+
+- **Status:** `Tay`. Topic: B15 (technical), B14 (security). Group G22.
+- **Sawal:** CERT-In ke 180 din ke request logs (aur 2027 se 1 saal; D-250 niyam 5, CL-106) kis store me hon?
+- **Kyun zaroori:**
+  - Render ki free service ke apne logs kitne din rehte hain, ye pakka nahi (jaanch §2 me).
+  - Owner akela bhi din me hazaaron requests banata hai (apps ki polling, server jagane ke pings).
+  - Log ki ek line lagbhag 350 bytes hai. Bina dabaaye 0.5 GB me 180 din ke liye sirf lagbhag 5,000 requests/din aate hain; gzip ke chunks me ek line lagbhag 40 bytes.
+- **Vikalp:**
+  - **(a) Audit ke cluster me** gzip chunks (misaal har minute ek document): naya kuch nahi, par audit ke 2 saal (D-194) aur security events ke saath 0.5 GB baantna. Logs ko misaal 150 MB, yaani 1 saal ke liye lagbhag 10,000 requests/din.
+  - **(b) Alag chhoti "logs" service, apne Atlas cluster ke saath**, wahi gzip chunks: 0.5 GB sirf logs ke liye, yaani 180 din ke liye lagbhag 60,000 requests/din, 1 saal ke liye lagbhag 30,000.
+  - **(c) Media provider (D-284) ki private files me** roz ki gzip files: sabse zyada jagah, par provider ke credits aur Render ki bandwidth me ginti, aur incident me file download karke dekhna.
+- **Salah:** **(b)**. ₹0, naya processor nahi (Atlas pehle se), audit se alag (logs me IP jaisa personal data hai, audit ki chain alag), aur jhagde ya incident me samay ke hisaab se seedhi query.
+- **Trade-off:**
+  - (a) sabse kam kaam, par audit aur logs ek doosre ki jagah khaate hain.
+  - (b) me ek aur Atlas project aur DB user (D-011 jaisa), aur process me ek aur DB client.
+  - (c) me jagah zyada, par query mushkil aur media provider pe nirbhar.
+- **Owner ka jawab (2026-11-20):** **(b)**, alag chhoti logs service, apne Atlas cluster me gzip chunks. Record: [DECISIONS.md](DECISIONS.md) D-285.
+
+### Q-223. Errors ka pata kaise chale?
+
+- **Status:** `Tay`. Topic: B15 (technical).
+- **Sawal:** server aur 11 apps ki errors owner tak kaise pahunchein?
+- **Kyun zaroori:**
+  - Free tier pe logs aur alerts seemit hain (R-024).
+  - Apps ki errors browser me hoti hain; bina intezaam ke wo kabhi nahi dikhtin.
+  - Bahar ki service naya processor hai (CL-104), data bahar jaata hai, aur page pe bahar ki script ki rok hai (SR-006).
+- **Vikalp:**
+  - **(a) Apna chhota intezaam:** server ki errors logs me fingerprint ke saath; apps ki errors ek rate-limited route pe (bina personal data, size ki seema ke saath); Master app ke ops inbox me nayi error pe khabar aur roz ka saar.
+  - **(b) Bahar ki error service ka free plan (misaal Sentry):** stack, source maps aur grouping tayyar; scrubbing ka config; CSP me uska host.
+  - **(c) Sirf logs:** koi khabar nahi; owner khud logs dekhe.
+- **Salah:** **(a)**. D-157 aur SR-006 ki soch se mel (data bahar nahi, page pe bahar ka kuch nahi), naya account nahi, aur logs ka store (D-285) pehle se ban raha hai.
+- **Trade-off:**
+  - (a) me thoda apna code, aur grouping ki suvidha kam.
+  - (b) me tayyar tool, par free quota poore organization ka saajha, data bahar, ek aur processor, aur privacy page pe ek aur naam.
+  - (c) me koi kaam nahi, par toota flow kai din tak chhupa reh sakta hai.
+- **Owner ka jawab (2026-11-20):** **(a)**, apna chhota intezaam: logs me fingerprint, apps ki errors ek rate-limited route pe, aur Master ke ops inbox me khabar aur roz ka saar. Record: [DECISIONS.md](DECISIONS.md) D-286.
+
+### Q-224. Emails kis provider se jaayein?
+
+- **Status:** `Tay`. Topic: B15 (technical), B11 (notifications).
+- **Sawal:** OTP aur baaki emails kis email provider ke HTTPS API se jaayein?
+- **Kyun zaroori:**
+  - Din ke 300 emails (D-028) aur domain na hone (R-005) ka niyam provider pe tika hai.
+  - Render ke docs ke hisaab se free service pe SMTP ke ports band hain (2026-11-20), to sirf HTTPS API.
+  - Provider data processor hai (CL-104), aur bheje emails ki copy uske dashboard me reh sakti hai (§2).
+- **Vikalp:**
+  - **(a) Brevo free:** din ke 300, bina domain ek verified sender, HTTPS API.
+  - **(b) Mailjet free:** din ki seema kam (misaal 200; jaanchi nahi), bina domain sender.
+  - **(c) Owner ke Gmail account ka API:** personal account ke niyam aur seema ka jokhim; account band hua to emails band.
+- **Salah:** **(a)**. D-028 ka 300 aur D-142 ki chhat isi number pe bani hain. Bina domain bhejna chalta hai ya nahi, ye jaanchna baaki (§2).
+- **Trade-off:**
+  - (a) me spam ka jokhim waisa hi (R-005).
+  - (b) me din ki chhat kam, aur D-142 ke numbers badalne padenge.
+  - (c) me personal account ka jokhim, aur seema saaf nahi.
+- **Owner ka jawab (2026-11-20):** **(a)**, Brevo ka free plan, HTTPS API se. Record: [DECISIONS.md](DECISIONS.md) D-287.
+
+### Q-225. Seller ke hisaab me nayi bikri kitni der me dikhe?
+
+- **Status:** `Tay`. Topic: B6 (settlement aur ledger), B15 (technical).
+- **Sawal:** payment, return aur refund ke events finance ke database (Neon) me kitni der me pahunchein?
+- **Kyun zaroori:**
+  - Neon ke free plan me mahine ke 100 CU-ghante hain (R-014), aur compute har query ke baad kuch minute jaaga rehta hai.
+  - Har event pe turant likhein to andazan din ke 12 ghante compute jaaga, yaani lagbhag 90 CU-ghante mahine me, aur mahine ke ant me finance band ho sakta hai. Tab pack pe invoice bhi nahi ban paata.
+  - Pack pe invoice har haal me turant (sync) jaari hota hai; ye sawal baaki events ka hai.
+- **Vikalp:**
+  - **(a) Har 15 minute (misaal) ka batch**, sirf jab kuch pending ho: lagbhag 30 se 45 CU-ghante mahine me.
+  - **(b) Turant, har event pe:** lagbhag 90 CU-ghante, seema ke bahut paas.
+  - **(c) Har ghante ka batch:** lagbhag 10 CU-ghante, par seller ka statement ghante bhar purana.
+- **Salah:** **(a)**.
+- **Trade-off:**
+  - (a) me seller aur Finance app me nayi bikri 15 minute tak der se dikhti hai.
+  - (b) sabse taaza, par mahine ke beech finance (aur pack pe invoice) band hone ka asli jokhim.
+  - (c) sabse kam kharch, par der zyada.
+- **Owner ka jawab (2026-11-20):** **(a)**, har 15 minute ka batch, sirf jab kuch pending ho; pack pe invoice turant. Record: [DECISIONS.md](DECISIONS.md) D-288.
+
+### Q-226. Invoice ke email me PDF attach ho ya nahi?
+
+- **Status:** `Tay`. Topic: B6 (invoice), B11 (notifications).
+- **Sawal:** customer ko invoice ke email (D-126 niyam 2) me PDF file jaaye, ya sirf invoice ka saar aur "app me dekhein"?
+- **Kyun zaroori:**
+  - D-126 ne invoice ka email "paise ka record" maana, par attachment tay nahi.
+  - Har PDF server pe banta hai (CPU aur memory), aur Render ki mahine ki bandwidth me ginta hai (300 emails × lagbhag 50 KB = lagbhag 15 MB din).
+  - Email provider ke dashboard me copy reh sakti hai (₹50,000 se upar ke invoice pe naam aur pata, D-226). Asli invoice parcel ke andar hai (D-077).
+- **Vikalp:**
+  - **(a) PDF attach:** inbox me poora record.
+  - **(b) Saar:** invoice number, tareekh, seller ka naam aur GSTIN, rakam; "Customer app me Orders me download karein", bina link.
+  - **(c) Saar + customer app ka link** (sirf apne host ka, SR-012).
+- **Salah:** **(b)**. Record (number, tareekh, rakam) email me rehta hai, personal data provider ke paas kam, aur emails me link pe click ki aadat nahi banti (R-017, SR-073 ki soch).
+- **Trade-off:**
+  - (a) customer ke liye sabse aasaan, par CPU, bandwidth aur privacy ka bojh.
+  - (b) me PDF ke liye app kholna padta hai.
+  - (c) aasaan, par emails me link (R-017).
+- **Kanooni detail:** customer ko invoice ki copy kis roop me deni hai (CL-003, CL-020): Lawyer (ya CA) se nahi jaancha.
+- **Owner ka jawab (2026-11-20):** **(b)**, email me sirf invoice ka saar (number, tareekh, seller ka naam aur GSTIN, rakam) aur app me download ki baat, bina PDF aur bina link. Record: [DECISIONS.md](DECISIONS.md) D-289.
+
+### Q-227. Customer app ke public pages server pe ban ke aayein?
+
+- **Status:** `Tay`. Topic: B15 (technical), B9 (search).
+- **Sawal:** product aur category pages search engines ke liye server pe render hon (SSR), ya R1 me saare apps saade SPA rahein?
+- **Kyun zaroori:**
+  - D-058 ne customer app ke server-side hisse ka Vercel region technical charcha pe chhoda tha.
+  - SSR ke liye Vercel functions, unka region, cache, aur backend tak ek aur raasta chahiye; SPA me ye sab nahi.
+  - Abhi account sirf allowlist se banta hai (D-133), par pages dekhna sabke liye khula hai.
+- **Vikalp:**
+  - **(a) R1 me sirf SPA:** koi server-side rendering nahi.
+  - **(b) Public product aur category pages SSR se**, Vercel functions pe (region Singapore, backend ke paas).
+  - **(c) Build pe static pages:** catalog badalne pe dobara build.
+- **Salah:** **(a)**. Search engine ki koi tay zaroorat nahi; sabse kam hisse, aur ₹0 me sabse surakshit. Asli business ke waqt dobara dekhein.
+- **Trade-off:**
+  - (a) me search engines me kam dikhna, aur pehla page thoda der se.
+  - (b) me SEO aur tez pehla page, par functions ka kharcha aur limits, logs aur secrets ki ek aur jagah, aur CSP ka kaam.
+  - (c) me catalog ka har badlav deploy maangta hai (D-037 ki soch se ulta), aur Render ki build minutes.
+- **Owner ka jawab (2026-11-20):** **(a)**, R1 me saare apps SPA, koi server-side rendering nahi; SSR asli business ke waqt dobara. Record: [DECISIONS.md](DECISIONS.md) D-290.
+
 ## Change log
 
 | Version | Date       | Badlav                                                                                                                                                                                    |
@@ -5183,3 +5338,4 @@ Claude ka kaam: owner ka faisla nahi chahiye, sirf saboot. Nateeja saboot ke saa
 | v1.4.1  | 2026-11-20 | Q-212 se Q-217 (CA (AI) ki report ke sawal aur jod) tay; D-275 se D-280.                                                                                                                  |
 | v1.4.2  | 2026-11-20 | Q-218 (COMPLIANCE pe CA (AI) ki raay) tay; D-281.                                                                                                                                         |
 | v1.4.3  | 2026-11-20 | Q-219 (CA ke ledger aur statements ke niyam kahan) tay; D-282.                                                                                                                            |
+| v1.5.1  | 2026-11-20 | Q-220 se Q-227 (Principal Software Architect ke 8 sawal; G22 media aur logs) tay; D-283 se D-290; §2 me media aur email provider ki jaanch. |

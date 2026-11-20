@@ -1,6 +1,6 @@
 # DECISIONS: Beautinique
 
-> **Status:** v1.11.3 (2026-11-20). Har faisla ek jagah. Sirf wahi "Tay" jo owner ne khud kaha; Claude ki salah faisla nahi. Cheezein ek-ek karke judti hain.
+> **Status:** v1.12.1 (2026-11-20). Har faisla ek jagah. Sirf wahi "Tay" jo owner ne khud kaha; Claude ki salah faisla nahi. Cheezein ek-ek karke judti hain.
 
 ## 0. Kaise likhein
 
@@ -297,6 +297,14 @@
 | D-280 | CA (AI) ke 9 jod tay faislon me: delivery fee, sellers aur partners ka TDS, replacement, records ka samay, books ka backup, chargeback, settlement khaata, doosre state ka stock.                                                                                                       | Business     | 2026-11-20 |
 | D-281 | COMPLIANCE pe CA (AI) ke nishaan (8 jaancha, 22 aadha, 2 nahi), 20 rows me badlav, nayi rows CL-129 se CL-136, Nazar aur documents ke tax hisse.                                                                                                                                        | Business     | 2026-11-20 |
 | D-282 | CA (AI) ke finance ke accounting niyam (ledger, documents, numbering, rounding, statements, milaan) ARCHITECTURE §1 me.                                                                                                                                                                 | Architecture | 2026-11-20 |
+| D-283 | Design ka scale target madhyam: 1 lakh customers, 1,000 orders/din (sale ke din 5 guna), 500 sellers, 50,000 variants, 100 staff, 50 delivery partners; sirf code aur tests ke liye. | Architecture | 2026-11-20 |
+| D-284 | Photos, dastavez aur video managed media service pe (misaal Cloudinary free), shart ke saath (private URL, EXIF, rok); shart fail ho to public images wahan aur private files object storage pe. | Architecture | 2026-11-20 |
+| D-285 | 180 din ke request logs alag chhoti logs service me, apne Atlas cluster me gzip chunks. | Architecture | 2026-11-20 |
+| D-286 | Errors ka apna chhota intezaam: logs me fingerprint, apps ki errors rate-limited route pe, Master ke ops inbox me khabar aur roz ka saar; bahar ki error service nahi. | Architecture | 2026-11-20 |
+| D-287 | Emails Brevo ke free plan se, HTTPS API pe. | Architecture | 2026-11-20 |
+| D-288 | Payment, return aur refund ke events finance me har 15 minute ke batch se (sirf jab pending); pack pe invoice turant. | Architecture | 2026-11-20 |
+| D-289 | Invoice ke email me sirf saar (number, tareekh, seller aur GSTIN, rakam) aur app me download ki baat; PDF aur link nahi. | Architecture | 2026-11-20 |
+| D-290 | R1 me saare apps SPA; server-side rendering nahi, asli business ke waqt dobara. | Architecture | 2026-11-20 |
 
 ## 2. Record
 
@@ -864,7 +872,7 @@
 - **Chhode vikalp:** Atlas Mumbai me (server se door, har query Singapore se Mumbai aur wapas); Render ka koi aur region.
 - **Kab dobara khulega:** Render ya kisi provider me India ka region aaye, ya owner khole. Teeno ka region banne ke baad nahi badalta, isliye badalna = naya banana aur data le jaana.
 - **Kisne, kab:** owner, 2026-11-18. **Nishaan:** Salah maani.
-- **Asar (Claude):** apps Vercel pe hain (D-048); customer app ke server-side hisse ka Vercel region (backend ke paas Singapore, ya users ke paas) technical charcha me tay hoga.
+- **Asar (Claude):** apps Vercel pe hain (D-048); customer app ke server-side hisse ka Vercel region (backend ke paas Singapore, ya users ke paas) technical charcha me tay hoga. Jod (2026-11-20): R1 me server-side rendering nahi (D-290), to R1 me region ka sawal nahi.
 - **Jod (owner, 2026-11-20, D-256):** card aur UPI ka data sirf gateway ke paas, hamare paas sirf ids, rakam aur status; gateway se likhit pakka ki payment data India me rehta hai; asli business se pehle region dobara dekhne ki yaad COMPLIANCE me. Faisla waisa hi.
 
 ### D-059. Pehle diye gaye roles ki jaanch nahi
@@ -3581,6 +3589,78 @@
 - **Kisne, kab:** owner, 2026-11-20. **Nishaan:** Salah maani.
 - **Asar (Claude):** niyam D-275 se D-281 ke saath milaaye gaye (fulfilment fee ke do khaate aur misaal me do hisse; fees ka credit note D-277 se; bharpai D-276 se). CA ki report ka saara kaam ab docs me. CA ne jaancha (2026-11-20): dhaancha aur entries; form numbers aur kuch due dates sirf secondary source se (COMPLIANCE CL-136).
 
+### D-283. Design ka scale target
+
+- **Faisla:** code, indexes, pagination, data ka archive aur load tests is scale ke liye banenge: 1 lakh customers, 1,000 orders/din (sale ke din 5 guna), 500 sellers, 50,000 variants, 100 staff, 50 delivery partners. Ye sirf code aur tests ka target hai; ₹0 hosting ki asli seema isse kam hai (D-028).
+- **Wajah:** Claude ki salah, owner ne maani: asli marketplace ki shuruaat jaisa; MongoDB aur PostgreSQL ke ek-ek server pe fit, to sharding ya alag search cluster jaisa bojh nahi, aur laptop pe Docker me load test ho sakta hai.
+- **Chhode vikalp:** chhota (10,000 customers, 100 orders/din; bade din pe kya toote, pata nahi chalta); bada (10 lakh customers, 10,000 orders/din; sharding aur alag search, ek insaan ki capacity D-009 pe bahut bhaari).
+- **Kab dobara khulega:** asli business shuru ho, ya owner khud khole.
+- **Kisne, kab:** owner, 2026-11-20. **Nishaan:** Salah maani.
+- **Asar (Claude):** har list me pagination, har query ka index, data ka archive, aur 5 guna peak ka load test (QA Architect ke saath). Database Architect isi scale pe indexes aur archive tay karega.
+
+### D-284. Photos, dastavez aur video ki jagah
+
+- **Faisla:** product images, review aur daawe ki photos, delivery ka saboot, KYC dastavez, PDFs, exports aur video ek managed media service pe (misaal Cloudinary ka free plan): upload seedha provider pe, dobara encode aur EXIF hatana provider pe, public images CDN se, private files chhote samay wale URL se. Shart: free plan pe private file ka samay wala URL chale, rakhi hui copy me EXIF na rahe, aur file type aur size ki rok lage. Shart ki jaanch fail ho to public aur review images media service pe, aur private dastavez, kanooni rok wali files aur logs ki files S3 jaise object storage pe (misaal Backblaze B2 ya Cloudflare R2 ka free hissa).
+- **Wajah:** Claude ki salah, owner ne maani: ek processor aur ek account, aur server pe image ka koi kaam nahi, to 512 MB (R-007) aur kam CPU pe bojh nahi; SR-061 aur SR-062 provider pe poore.
+- **Chhode vikalp:** sirf object storage (dobara encode server pe, CPU aur memory ka bojh, upload Render ki bandwidth me).
+- **Kab dobara khulega:** shart ki jaanch ka nateeja ([OPEN_QUESTIONS.md](OPEN_QUESTIONS.md) §2), free credits khatam hone lagein, ya owner khud khole.
+- **Kisne, kab:** owner, 2026-11-20. **Nishaan:** Salah maani.
+- **Asar (Claude):** provider naya data processor hai (CL-104) aur data ki jagah privacy page pe (CL-107); data India ke bahar ho to uska asar Lawyer se nahi jaancha. Provider ki chaabi sirf ek jagah (SR-071); files ka registry aur retention ARCHITECTURE ki media batch me. Database me provider ka URL nahi, sirf file ka record (SR-062).
+
+### D-285. Request logs ki jagah
+
+- **Faisla:** CERT-In ke 180 din ke request logs (aur 2027 se 1 saal; D-250 niyam 5, CL-106) ek alag chhoti "logs" service me, apne Atlas cluster (alag Atlas project aur DB user, D-011 jaisa) me gzip chunks ke roop me (misaal har minute ek document).
+- **Wajah:** Claude ki salah, owner ne maani: ₹0, naya processor nahi, audit se alag (logs me IP jaisa personal data, audit ki chain alag), aur incident ya jhagde me samay ke hisaab se seedhi query. 0.5 GB me andazan 180 din ke liye lagbhag 60,000 requests/din.
+- **Chhode vikalp:** audit ke cluster me (audit aur logs ek doosre ki jagah khaate); media provider ki private files me roz ki gzip files (query mushkil, credits aur bandwidth me ginti).
+- **Kab dobara khulega:** logs 0.5 GB ke paas pahunchein, ya owner khud khole.
+- **Kisne, kab:** owner, 2026-11-20. **Nishaan:** Salah maani.
+- **Asar (Claude):** services ki list me "logs" judti hai (D-011 ke pehle draft ke 9 ke alawa); poori list ARCHITECTURE ki services wali batch me. Render ke apne logs kitne din rehte hain, ye jaanch [OPEN_QUESTIONS.md](OPEN_QUESTIONS.md) §2 me pehle se.
+
+### D-286. Errors ka pata
+
+- **Faisla:** server aur 11 apps ki errors ka apna chhota intezaam: server ki errors logs (D-285) me fingerprint ke saath; apps ki errors ek rate-limited route pe (bina personal data, size ki seema ke saath); Master app ke ops inbox me nayi error pe khabar aur roz ka saar. Bahar ki error service nahi.
+- **Wajah:** Claude ki salah, owner ne maani: D-157 aur SR-006 ki soch se mel (data bahar nahi, page pe bahar ka kuch nahi), naya account nahi, aur logs ka store pehle se ban raha hai.
+- **Chhode vikalp:** bahar ki error service ka free plan (data bahar, ek aur processor, saajha quota); sirf logs (toota flow kai din chhupa reh sakta).
+- **Kab dobara khulega:** owner khud khole.
+- **Kisne, kab:** owner, 2026-11-20. **Nishaan:** Salah maani.
+- **Asar (Claude):** grouping ki suvidha kam; fingerprint ka tareeka aur ops inbox ki khabar ARCHITECTURE ki observability batch me. Alerts ka chalna DevOps / SRE ke saath (R-024).
+
+### D-287. Email provider
+
+- **Faisla:** OTP aur baaki saare emails Brevo ke free plan se, HTTPS API pe (Render ke docs ke hisaab se free service pe SMTP ports band hain, 2026-11-20).
+- **Wajah:** Claude ki salah, owner ne maani: D-028 ka din ke 300 aur D-142 ki chhat isi number pe bani hain.
+- **Chhode vikalp:** Mailjet free (din ki seema kam, D-142 ke numbers badalte); owner ke Gmail account ka API (personal account ka jokhim, seema saaf nahi).
+- **Kab dobara khulega:** bina domain bhejna na chale ([OPEN_QUESTIONS.md](OPEN_QUESTIONS.md) §2), ya owner khud khole.
+- **Kisne, kab:** owner, 2026-11-20. **Nishaan:** Salah maani.
+- **Asar (Claude):** provider data processor hai (CL-104). Spam ka jokhim waisa hi (R-005). Bheje emails ki copy aur link tracking wali jaanch §2 me pehle se.
+
+### D-288. Finance me events kitni der me
+
+- **Faisla:** payment, return aur refund ke events finance ke database (Neon) me har 15 minute (misaal) ke batch se pahunchte hain, sirf jab kuch pending ho. Pack pe invoice har haal me turant (sync) jaari hota hai.
+- **Wajah:** Claude ki salah, owner ne maani: Neon ke free plan ke mahine ke 100 CU-ghante (R-014) me andazan 30 se 45 CU-ghante; har event pe turant likhne se lagbhag 90, aur mahine ke beech finance (aur pack pe invoice) band hone ka jokhim.
+- **Chhode vikalp:** turant, har event pe (seema ke bahut paas); har ghante ka batch (seller ka statement ghante bhar purana).
+- **Kab dobara khulega:** CU-ghante ki asli naap, ya owner khud khole.
+- **Kisne, kab:** owner, 2026-11-20. **Nishaan:** Salah maani.
+- **Asar (Claude):** seller aur Finance app me nayi bikri 15 minute tak der se dikhti hai. Neon ke ghante khatam hon to pack aur dispatch bhi rukte hain (pack pe invoice finance me): ye R-014 me jodne ka prastaav ARCHITECTURE ki risks wali batch ke saath.
+
+### D-289. Invoice ka email
+
+- **Faisla:** customer ko invoice ke email (D-126 niyam 2) me sirf invoice ka saar: invoice number, tareekh, seller ka naam aur GSTIN, aur rakam, saath me "Customer app me Orders me download karein". Email me PDF aur link nahi.
+- **Wajah:** Claude ki salah, owner ne maani: record (number, tareekh, rakam) email me rehta hai, personal data provider ke paas kam (D-226), server pe PDF ka CPU aur bandwidth ka bojh nahi, aur emails me link pe click ki aadat nahi banti (R-017, SR-073 ki soch).
+- **Chhode vikalp:** PDF attach (CPU, bandwidth aur privacy ka bojh); saar ke saath customer app ka link (emails me link, R-017).
+- **Kab dobara khulega:** owner khud khole.
+- **Kisne, kab:** owner, 2026-11-20. **Nishaan:** Salah maani.
+- **Asar (Claude):** asli invoice parcel ke andar (D-077) aur app me download. Kanooni detail jaanchi nahi: customer ko invoice ki copy kis roop me deni hai (CL-003, CL-020), Lawyer (ya CA) se nahi jaancha.
+
+### D-290. Server-side rendering nahi (R1)
+
+- **Faisla:** R1 me saare 11 apps saade SPA; customer app ke product aur category pages bhi server pe render nahi hote. Server-side rendering asli business ke waqt dobara dekhi jayegi.
+- **Wajah:** Claude ki salah, owner ne maani: search engine ki koi tay zaroorat nahi; sabse kam hisse, aur ₹0 me sabse surakshit.
+- **Chhode vikalp:** public pages SSR se, Vercel functions pe (functions ki limits, logs aur secrets ki ek aur jagah, CSP ka kaam); build pe static pages (catalog ka har badlav deploy maangta, D-037 ki soch se ulta).
+- **Kab dobara khulega:** asli business shuru ho, ya owner khud khole.
+- **Kisne, kab:** owner, 2026-11-20. **Nishaan:** Salah maani.
+- **Asar (Claude):** D-058 ka server-side hisse ke region wala sawal R1 me band (D-058 me jod). Search engines me kam dikhna aur pehla page thoda der se.
+
 ## Change log
 
 | Version  | Date       | Badlav                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      |
@@ -3672,3 +3752,4 @@
 | v1.11.1  | 2026-11-20 | D-275 se D-280 aaye (CA (AI) ki report ke sawal aur jod; Q-212 se Q-217). D-063, D-078, D-081, D-095, D-096, D-107, D-122, D-225, D-227, D-228, D-229, D-254, D-256, D-269 me jod.                                                                                                                                                                                                                                                                                                          |
 | v1.11.2  | 2026-11-20 | D-281 aaya (COMPLIANCE pe CA (AI) ke nishaan aur badlav; Q-218).                                                                                                                                                                                                                                                                                                                                                                                                                            |
 | v1.11.3  | 2026-11-20 | D-282 aaya (finance ke accounting niyam ARCHITECTURE §1 me; Q-219).                                                                                                                                                                                                                                                                                                                                                                                                                         |
+| v1.12.1 | 2026-11-20 | D-283 se D-290 aaye (Principal Software Architect ke 8 sawal: scale target, media, logs, errors, email provider, finance ka batch, invoice ka email, SPA; Q-220 se Q-227). D-058 me jod. |
