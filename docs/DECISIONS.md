@@ -1,6 +1,6 @@
 # DECISIONS: Beautinique
 
-> **Status:** v1.10.36 (2026-11-20). Har faisla ek jagah. Sirf wahi "Tay" jo owner ne khud kaha; Claude ki salah faisla nahi. Cheezein ek-ek karke judti hain.
+> **Status:** v1.11.3 (2026-11-20). Har faisla ek jagah. Sirf wahi "Tay" jo owner ne khud kaha; Claude ki salah faisla nahi. Cheezein ek-ek karke judti hain.
 
 ## 0. Kaise likhein
 
@@ -289,6 +289,14 @@
 | D-272 | COMPLIANCE ki 18 rows pe Lawyer (AI) ka nishaan: 4 jaancha, 11 aadha jaancha, 3 hisse nahi; har row me raay ki ek line.                                                                                                                                                                 | Process      | 2026-11-20 |
 | D-273 | Lawyer (AI) ka documents ka dhaancha COMPLIANCE ke naye §14 me: har document ke clauses ki table, ek batch me owner ki haan se.                                                                                                                                                         | Process      | 2026-11-20 |
 | D-274 | COMPLIANCE batch 9 maana: 6 documents ka dhaancha (108 clauses) §14 me, D-262 se D-272 ke saath; Lawyer (AI) ki report docs me poori.                                                                                                                                                   | Business     | 2026-11-20 |
+| D-275 | Fulfilment fee fees invoice pe do lines me: handling 18%, delivery 5% bina ITC; jod wahi.                                                                                                                                                                                               | Business     | 2026-11-20 |
+| D-276 | D-063 ki bharpai GST ke bina wali value pe, fees ghata ke; seller ke statement me ek net line, fees ka alag invoice nahi.                                                                                                                                                               | Business     | 2026-11-20 |
+| D-277 | Return pe fees wajah ke hisaab se: hamari galti aur der se delivery pe dono wapas, brand ki galti pe koi nahi, man badla to sirf commission.                                                                                                                                            | Business     | 2026-11-20 |
+| D-278 | Combo aur shart wala gift: har cheez apne daam aur rate pe, chhoot anupaat me, agar har cheez alag se bhi bikti ho; warna mixed supply.                                                                                                                                                 | Business     | 2026-11-20 |
+| D-279 | GSTIN wale orders pe platform ke offers aur points nahi; sirf brand ke offers.                                                                                                                                                                                                          | Business     | 2026-11-20 |
+| D-280 | CA (AI) ke 9 jod tay faislon me: delivery fee, sellers aur partners ka TDS, replacement, records ka samay, books ka backup, chargeback, settlement khaata, doosre state ka stock.                                                                                                       | Business     | 2026-11-20 |
+| D-281 | COMPLIANCE pe CA (AI) ke nishaan (8 jaancha, 22 aadha, 2 nahi), 20 rows me badlav, nayi rows CL-129 se CL-136, Nazar aur documents ke tax hisse.                                                                                                                                        | Business     | 2026-11-20 |
+| D-282 | CA (AI) ke finance ke accounting niyam (ledger, documents, numbering, rounding, statements, milaan) ARCHITECTURE §1 me.                                                                                                                                                                 | Architecture | 2026-11-20 |
 
 ## 2. Record
 
@@ -922,6 +930,7 @@
 - **Asar (Claude):** 30 din ki khidki aur payout ka cycle settlement ki charcha (B6) me pakke honge. Transporter ya delivery partner se vasooli D-068 me, aur payout ka cycle D-081 me. Kanooni detail jaanchi nahi (R-004): bharpai pe GST, aur kho gaye maal ka brand ke tax me hisaab.
 - **Jod (owner, 2026-11-18, D-112):** return pickup ke scan se warehouse ki receiving tak bhi maal hamari zimmedari hai.
 - **Jod (owner, 2026-11-18, D-125):** niyam 1 ka "selling price" sirf normal daam ka itihaas hai; Pro daam (D-065) ginti me nahi.
+- **Jod (D-276, 2026-11-20):** niyam 1 ka "bikne wala daam" GST ke bina wali value hai, commission aur fees ghata ke; bharpai seller ke statement me ek net line, uspe fees ka alag invoice nahi.
 
 ### D-064. Alag batches ka alag MRP
 
@@ -1130,6 +1139,7 @@
 - **Kab dobara khulega:** owner khud khole.
 - **Kisne, kab:** owner, 2026-11-18. **Nishaan:** Salah maani.
 - **Asar (Claude):** fees ki rakam (dummy) abhi tay nahi. Seller ke hisaab (finance, D-001) me har fee ki alag line, aur D-063 ki bharpai aur D-071 ke udhaar me yahi fees. Kanooni detail jaanchi nahi (R-004): commission aur fees pe GST, platform ka seller ko fees ka invoice.
+- **Jod (D-275, D-277, 2026-11-20):** fulfilment fee fees invoice pe do lines me: handling 18%, delivery 5% bina ITC (D-275). Return pe fees wajah ke hisaab se wapas (D-277).
 
 ### D-079. Return ki wajahein aur "band" maal
 
@@ -1175,6 +1185,7 @@
 - **Kab dobara khulega:** owner khud khole.
 - **Kisne, kab:** owner, 2026-11-18. **Nishaan:** Salah maani.
 - **Asar (Claude):** finance (D-001) me har line ki halat: payable hone ka intezaar, payable, paid. R1 me payout haath se "paid" mark hota hai (D-055). Din aur rakam abhi misaal hain; settings se badal sakein. Payable ke baad koi daawa ya bharpai ulti pade to wo D-071 ke udhaar ke raaste. D-063 ka payout cycle ab yahi. Kanooni detail jaanchi nahi (R-004): marketplace pe seller ko payment ki samay-seema ke niyam (agar koi ho), aur payout pe GST TCS aur income-tax TDS kaatne ka samay.
+- **Jod (D-280, 2026-11-20):** sellers ka TDS GST ke bina rakam pe, pehle credit (invoice) ke pal; return pe usi seller ki usi financial year ki agli bikri me adjust, saal badle to nahi; replacement pe nahi.
 
 ### D-082. Expiry ki seemaon ke number
 
@@ -1352,6 +1363,7 @@
 - **Kab dobara khulega:** owner khud khole.
 - **Kisne, kab:** owner, 2026-11-18. **Nishaan:** Salah maani.
 - **Asar (Claude):** R2 se, kyunki test mode me chargebacks nahi aate (D-055). Seller ka hissa D-071 ke udhaar ke raaste.
+- **Jod (D-280, 2026-11-20):** seller ki galti wale chargeback pe seller ka credit note; platform wale (fraud, delivery) pe credit note nahi, nuksaan platform ka kharcha; gateway ki kati rakam usi din Operating khaate se top-up.
 
 ### D-096. Maal aane ki pehle se suchna aur receiving
 
@@ -1366,6 +1378,7 @@
 - **Kab dobara khulega:** sellers badhein aur slot chahiye ho, ya owner khud khole.
 - **Kisne, kab:** owner, 2026-11-18. **Nishaan:** Salah maani.
 - **Asar (Claude):** R1 ke "maal warehouse me" ([PROJECT_PLAN.md](PROJECT_PLAN.md) §1) me seller app ka shipment form aur Warehouse app me suchna se milan. Aitraaz aur hold ke din settings me.
+- **Jod (D-280, 2026-11-20):** doosre state se aaye stock ke liye ASN me seller ka IGST invoice ya delivery challan aur e-way bill ka number; receiving pe ye document.
 
 ### D-097. Barcode ya platform ka label
 
@@ -1511,6 +1524,7 @@
 - **Kab dobara khulega:** owner khud khole.
 - **Kisne, kab:** owner, 2026-11-18. **Nishaan:** Salah maani.
 - **Asar (Claude):** delivery platform ki seva hai, to fee ka invoice platform ka ho sakta hai (seller ke invoice se alag). Kanooni detail jaanchi nahi (R-004): delivery fee pe GST aur kiska invoice.
+- **Jod (D-280, 2026-11-20):** delivery fee ka platform ka apna B2C invoice, SAC 996813, 1 Nov 2026 se 5% bina ITC; delivery ke kharchon ka ITC ulatna; prepaid order pe fee ka invoice payment capture ke pal.
 
 ### D-108. Delivery na ho paaye (RTO)
 
@@ -1703,6 +1717,7 @@
 - **Kab dobara khulega:** owner khud khole.
 - **Kisne, kab:** owner, 2026-11-18. **Nishaan:** Salah maani.
 - **Asar (Claude):** Kanooni detail jaanchi nahi (R-004): replacement pe invoice aur credit note ke niyam.
+- **Jod (D-280, 2026-11-20):** replacement bina keemat ka, delivery challan ke saath.
 
 ### D-123. Hub aur warehouse ki shuruaati staff list
 
@@ -2909,6 +2924,7 @@
 - **Kab dobara khulega:** personal data ki kanooni jaanch (doosra run) ke baad, ya owner khud khole.
 - **Kisne, kab:** owner, 2026-11-19. **Nishaan:** Salah maani.
 - **Asar (Claude):** D-151 niyam 1 badla. R1 me (D-055 me jod). Archive ki pahunch aur audit security docs me. Kanooni detail jaanchi nahi (R-004): CGST Act s.36 aur rule 46 public source se mile (kuch hissa secondary); personal data wala hissa doosre run me.
+- **Jod (D-280, 2026-11-20):** records ke samay ki do classes: platform ke apne books 8 financial years, sellers ke tax documents 72 mahine (misaal).
 
 ### D-226. Invoice pe customer ka naam aur pata
 
@@ -2930,6 +2946,7 @@
 - **Kab dobara khulega:** personal data ki kanooni jaanch (doosra run) ke baad, ya owner khud khole.
 - **Kisne, kab:** owner, 2026-11-19. **Nishaan:** Salah maani.
 - **Asar (Claude):** D-193 niyam 2 badla. Kanooni detail jaanchi nahi (R-004): CGST Act s.36 public source se mila, lawyer se nahi.
+- **Jod (D-280, 2026-11-20):** records ke samay ki do classes: platform ke apne books 8 financial years, sellers ke tax documents 72 mahine (misaal).
 
 ### D-228. Kit aur combo pe GST
 
@@ -2941,6 +2958,7 @@
 - **Kab dobara khulega:** CA ki salah aane pe, ya owner khud khole.
 - **Kisne, kab:** owner, 2026-11-19. **Nishaan:** Salah maani.
 - **Asar (Claude):** D-088 niyam 3 badla. Kanooni detail jaanchi nahi (R-004): CGST Act s.8(b) public source se mila; CA aur lawyer se nahi.
+- **Jod (D-278, 2026-11-20):** combo aur shart wale gift ka tareeka tay: har cheez apne daam aur rate pe, agar alag se bhi bikti ho (D-278).
 
 ### D-229. Free sample aur shart wala gift
 
@@ -2952,6 +2970,7 @@
 - **Kab dobara khulega:** CA ki salah aane pe, ya owner khud khole.
 - **Kisne, kab:** owner, 2026-11-19. **Nishaan:** Salah maani.
 - **Asar (Claude):** D-121 niyam 2 badla. Kanooni detail jaanchi nahi (R-004): CBIC circular 92/11/2019 sirf secondary source se.
+- **Jod (D-278, 2026-11-20):** shart wale gift ka invoice D-278 ke niyam se.
 
 ### D-230. Platform ka barcode label kahan
 
@@ -3238,6 +3257,7 @@
 - **Kab dobara khulega:** Social Security Code ki tareekh aur Rules notify hon, ya owner khud khole.
 - **Kisne, kab:** owner, 2026-11-20. **Nishaan:** Salah maani.
 - **Asar (Claude):** D-072, D-104 aur D-134 me jod. Kanooni detail jaanchi nahi (R-004): Code ka text primary se mila; laagu hone ki tareekh, Rules 2026, state ke niyam aur TDS sirf secondary source se; CA se nahi.
+- **Jod (D-280, 2026-11-20):** partner payouts pe TDS ki sahi entry (1% ya 2%), saal ki seema paar hone pe poore saal ka catch-up, TDS kaat se pehle ki kamaai pe; nuksaan ki vasooli pe GST nahi.
 
 ### D-255. Personal data ke chhote sudhaar
 
@@ -3271,6 +3291,7 @@
 - **Kab dobara khulega:** owner khud khole.
 - **Kisne, kab:** owner, 2026-11-20. **Nishaan:** Salah maani.
 - **Asar (Claude):** D-045, D-058, D-062, D-093, D-111, D-134 aur D-246 me jod. Sellers ka paisa aur payment data ki jagah lawyer se pakka karne ki baat COMPLIANCE me. Kanooni detail jaanchi nahi (R-004): EPR guidelines, Drugs and Magic Remedies Act aur RBI ka TAT circular public source se mile; payment data ki jagah, sellers ka paisa, nasht karna, Fire Safety, Shops and Establishments aur e-way bill aadha jaancha.
+- **Jod (D-280, 2026-11-20):** asli business se pehle region dobara dekhte waqt company ke electronic books ka roz backup India ke server pe aur audit trail bhi; dummy books pe abhi asar nahi.
 
 ### D-257. Lawyer aur CA ke agents, aur agents ka poora kram
 
@@ -3412,6 +3433,7 @@
 - **Kab dobara khulega:** asli business se pehle, ya owner khud khole.
 - **Kisne, kab:** owner, 2026-11-20. **Nishaan:** Salah maani.
 - **Asar (Claude):** D-093 aur D-256 me jod; finance me ek aur khaata aur roz ka milaan (CA agent ke liye, D-257). Lawyer ne jaancha (2026-11-20): RBI ka text ye seedhe nahi kehta (Sambhav).
+- **Jod (D-280, 2026-11-20):** gateway fees aur platform offer ka top-up Operating khaate se; platform ke kharche kabhi Settlement khaate se nahi; roz ka milaan.
 
 ### D-270. Seller agreement me zimmedari ki chhat
 
@@ -3469,6 +3491,95 @@
 - **Kab dobara khulega:** CA agent ki raay, koi tay faisla badle, ya owner khud khole.
 - **Kisne, kab:** owner, 2026-11-20. **Nishaan:** Salah maani.
 - **Asar (Claude):** D-150 ke pages aur seller, partner agreements isi se. Tax ke clauses (Seller Agreement 10 aur 13, Partner Agreement 9) CA agent (D-257) ke liye. Agla kaam D-257 ke kram me CA (AI). Lawyer ne jaancha (2026-11-20): dhaancha; poore drafts nahi.
+
+### D-275. Fulfilment fee ke do hisse
+
+- **Faisla:** seller ki fulfilment fee (D-078 niyam 2) fees invoice pe do lines me: "handling (pick aur pack)" 18% GST, aur "delivery" 5% bina ITC. Dono per unit, jod wahi (misaal ₹25).
+- **Wajah:** Claude ki salah (CA ki raay), owner ne maani: har hissa apne sahi rate pe, aur jhagde ka jokhim kam.
+- **Chhode vikalp:** ek line 18% (delivery ka hissa galat rate pe); ek line 5% bina ITC (warehouse aur packing ka ITC bhi rukta).
+- **Kab dobara khulega:** GST ka rate badle, ya owner khud khole.
+- **Kisne, kab:** owner, 2026-11-20. **Nishaan:** Salah maani.
+- **Asar (Claude):** D-078 me jod; rate table (D-086) me do rows; delivery ke kharchon ka ITC ulatna finance me. CA ne jaancha (2026-11-20): delivery seva 5% bina ITC, 1 Nov 2026 se; notification ki copy doosri site se padhi.
+
+### D-276. Nuksaan ki bharpai ka aadhaar
+
+- **Faisla:** D-063 ki bharpai GST ke bina wali value pe, commission aur fees ghata ke. Bharpai seller ke statement me ek net line; uspe fees ka alag invoice nahi.
+- **Wajah:** Claude ki salah (CA ki raay), owner ne maani: "bikne jitna" ke sabse kareeb, aur GST samet bharpai seller ko bikri se zyada deti.
+- **Chhode vikalp:** GST samet daam (18% wale item pe bikri se lagbhag 18% zyada); GST ke bina value aur ITC ulatne ka andaaza (andaaze aur jaanch ka kaam).
+- **Kab dobara khulega:** owner khud khole.
+- **Kisne, kab:** owner, 2026-11-20. **Nishaan:** Salah maani.
+- **Asar (Claude):** D-063 me jod. Seller ka apna ITC ulatna uska nuksaan rehta hai. CA ne aadha jaancha (2026-11-20): bharpai pe GST, TCS aur TDS nahi; baaki hissa COMPLIANCE ki CA batch me.
+
+### D-277. Return pe platform ki fees
+
+- **Faisla:** lauti line pe platform ki fees return ki wajah (D-079) ke hisaab se, D-112 jaisa. Niyam:
+  1. Hamari galti, aur hamari delivery ki der: commission aur fulfilment fee dono wapas.
+  2. Brand ki galti (jaise kharab ya nakli maal): koi fee wapas nahi.
+  3. Customer ka man badla: commission wapas, fulfilment fee nahi (kaam ho chuka).
+  4. Wapas hui fees pe platform ka credit note.
+- **Wajah:** Claude ki salah, owner ne maani: nuksaan usi pe jiski galti, aur wajah pehle se record hoti hai. CA ki salah me der se delivery "man badla" ke saath thi; Claude ne use hamari galti me rakha, kyunki delivery hamari apni hai.
+- **Chhode vikalp:** sirf commission wapas (hamari galti pe bhi seller fulfilment deta); dono hamesha wapas (platform ka kharcha zyada); koi wapas nahi (bina bikri ke commission).
+- **Kab dobara khulega:** owner khud khole.
+- **Kisne, kab:** owner, 2026-11-20. **Nishaan:** Salah maani.
+- **Asar (Claude):** D-078 me jod; seller ka statement aur fees ke credit note isi niyam se.
+
+### D-278. Combo aur shart wale gift ka invoice
+
+- **Faisla:** combo aur shart wale gift ("X kharido to Y free") me har cheez apne daam pe, combo ki chhoot har line pe anupaat me, aur har line apne GST rate pe. Shart: har cheez site pe alag se bhi bikti ho, aur invoice pe har line ka daam aur chhoot dikhe. Jo cheez alag se nahi bikti, us combo pe ek daam ka mixed supply (sabse zyada rate). Brand ka ek barcode wala kit (D-088, D-228) pehle jaisa.
+- **Wajah:** Claude ki salah (CA ki raay), owner ne maani: kam tax, aur D-088 ke return niyam (ek cheez ka refund) se mel.
+- **Chhode vikalp:** hamesha ek daam = mixed supply (kam rate wali cheez pe zyada tax).
+- **Kab dobara khulega:** tax vibhag ka koi saaf niyam aaye, ya owner khud khole.
+- **Kisne, kab:** owner, 2026-11-20. **Nishaan:** Salah maani.
+- **Asar (Claude):** D-228 aur D-229 ka bacha hissa tay; promotions R2 se (D-055). CA ne aadha jaancha (2026-11-20): "ek daam" ka tark tax vibhag uthaye to farak ka jokhim.
+
+### D-279. GSTIN wale orders pe platform ke offers
+
+- **Faisla:** GSTIN wale (business) orders pe platform ke offers aur points nahi lagte; sirf brand ke offers.
+- **Wajah:** Claude ki salah (CA ki raay), owner ne maani: platform ka hissa seller ki value me judta hai, to business customer ke ITC pe jhagde ka jokhim nahi rehta.
+- **Chhode vikalp:** offers sab ko, invoice pe "Platform offer" ki saaf line ke saath (ITC pe jhagde ka jokhim).
+- **Kab dobara khulega:** owner khud khole.
+- **Kisne, kab:** owner, 2026-11-20. **Nishaan:** Salah maani.
+- **Asar (Claude):** checkout me GSTIN daalte hi platform ke offers aur points hatein, aur customer ko ye saaf dikhe. CA ne aadha jaancha (2026-11-20).
+
+### D-280. CA (AI) ke jod tay faislon me
+
+- **Faisla:** CA (AI) ki report ke 9 jod maane; koi faisla palat-ta nahi:
+  1. **Delivery fee (D-107):** platform ka apna B2C invoice, SAC 996813, 1 Nov 2026 se 5% bina ITC; delivery ke kharchon ka ITC ulatna; prepaid order pe fee ka invoice payment capture ke pal.
+  2. **Sellers ka TDS (D-081):** GST ke bina rakam pe, pehle credit (invoice) ke pal; return pe usi seller ki usi financial year ki agli bikri me adjust, saal badle to nahi; replacement pe nahi.
+  3. **Replacement (D-122):** bina keemat ka, delivery challan ke saath.
+  4. **Records ka samay (D-225, D-227):** platform ke apne books 8 financial years; sellers ke tax documents 72 mahine (misaal).
+  5. **Books ka backup (D-256):** asli business se pehle region dobara dekhte waqt company ke electronic books ka roz backup India ke server pe aur audit trail bhi.
+  6. **Chargeback (D-095):** seller ki galti pe seller ka credit note; platform wale (fraud, delivery) pe credit note nahi, nuksaan platform ka kharcha; gateway ki kati rakam usi din Operating khaate se top-up.
+  7. **Seller settlement khaata (D-269):** gateway fees aur platform offer ka top-up Operating khaate se; platform ke kharche kabhi Settlement khaate se nahi; roz ka milaan.
+  8. **Doosre state se stock (D-096):** ASN me seller ka IGST invoice ya delivery challan aur e-way bill ka number; receiving pe ye document.
+  9. **Partners ka TDS (D-254):** sahi entry (1% ya 2%), saal ki seema paar hone pe poore saal ka catch-up, TDS kaat se pehle ki kamaai pe; nuksaan ki vasooli pe GST nahi.
+- **Wajah:** Claude ki salah (CA ki raay), owner ne maani: tay faislon ke tax aur accounting ke bache hisse poore hote hain.
+- **Chhode vikalp:** owner ke badlav ke saath maanna; rokna (tax ke chhote hisse adhoore).
+- **Kab dobara khulega:** tax ka koi niyam badle, ya owner khud khole.
+- **Kisne, kab:** owner, 2026-11-20. **Nishaan:** Salah maani.
+- **Asar (Claude):** har jod uske faisle ke record me ek line. CA ne jaancha (2026-11-20): 1 (capture ka pal aadha) aur 7; baaki CA ne aadha jaancha (naye Income-tax Act ke section aur forms, Companies Act ke niyam kuch secondary source se). COMPLIANCE ki rows (CA ke nishaan, badlav, nayi rows CL-129 se) agli CA batch me.
+
+### D-281. COMPLIANCE pe CA (AI) ke nishaan aur badlav
+
+- **Faisla:** CA (AI) ki raay [COMPLIANCE.md](COMPLIANCE.md) me:
+  1. **CA ne jaancha (2026-11-20), 8 rows:** CL-003, CL-010, CL-012, CL-013, CL-019, CL-022, CL-023, CL-024.
+  2. **CA ne aadha jaancha (2026-11-20), 22 rows,** baaki hissa row me: CL-001, CL-002, CL-004 se CL-009, CL-011, CL-014 se CL-018, CL-020, CL-021, CL-108, CL-109, CL-110, CL-113, CL-117, CL-126.
+  3. **CA ne nahi jaancha, 2 rows:** CL-112 (contribution ka "turnover"), CL-128 (stamp duty).
+  4. 20 rows me badlav D-275 se D-280 ke hisaab se; §1.1 me nayi rows CL-129 se CL-136; §13 me 4 Nazar rows; §14 me Seller Agreement clause 10 aur 13 aur Partner Agreement clause 9 ke tax hisse; §1.0 me sources T11 se T27.
+- **Wajah:** Claude ki salah, owner ne maani: tax rows me saaf dikhta hai kya pakka hua aur kya baaki, aur tay faisle rows tak pahunchte hain.
+- **Chhode vikalp:** sirf nishaan (rows tay faislon se peeche); rokna (CA ka kaam adhoora).
+- **Kab dobara khulega:** koi tax niyam ya "Nazar" ki cheez badle, ya owner khud khole.
+- **Kisne, kab:** owner, 2026-11-20. **Nishaan:** Salah maani.
+- **Asar (Claude):** COMPLIANCE ki tax rows ab Lawyer (D-272) aur CA dono ke nishaan ke saath. CA ke ledger, invoice aur statements ke niyam abhi docs me nahi.
+
+### D-282. Finance ke accounting niyam ARCHITECTURE me
+
+- **Faisla:** CA (AI) ke platform ke books ke niyam [ARCHITECTURE.md](ARCHITECTURE.md) §1 me: bunyadi niyam (double-entry, integer paise, append-only, ek ghatna ek entry, sub-ledgers, IST ka tax din, mahine ka close, records ka samay), chart of accounts, ghatnaon ki entries, ek misaal, seller settlement khaate ke niyam, kaun kya document jaari kare, numbering (bina gap), rounding, invoice pe kya, statements aur returns, aur 12 milaan (M1 se M12).
+- **Wajah:** Claude ki salah, owner ne maani: ye poore system ke finance ka dhaancha hai, aur aage ke architecture aur database ke agents isi file pe kaam karte hain.
+- **Chhode vikalp:** COMPLIANCE me naya hissa (kanoon ki rows ka matrix, ledger fit nahi); planning tak report me rakhna (naye docs ke bahar, report hatne ka jokhim).
+- **Kab dobara khulega:** Database Architect ka data model, koi tax niyam badle, ya owner khud khole.
+- **Kisne, kab:** owner, 2026-11-20. **Nishaan:** Salah maani.
+- **Asar (Claude):** niyam D-275 se D-281 ke saath milaaye gaye (fulfilment fee ke do khaate aur misaal me do hisse; fees ka credit note D-277 se; bharpai D-276 se). CA ki report ka saara kaam ab docs me. CA ne jaancha (2026-11-20): dhaancha aur entries; form numbers aur kuch due dates sirf secondary source se (COMPLIANCE CL-136).
 
 ## Change log
 
@@ -3558,3 +3669,6 @@
 | v1.10.34 | 2026-11-20 | D-272 aaya (COMPLIANCE ki 18 rows pe Lawyer (AI) ka nishaan; Q-209).                                                                                                                                                                                                                                                                                                                                                                                                                        |
 | v1.10.35 | 2026-11-20 | D-273 aaya (documents ka dhaancha COMPLIANCE §14 me; Q-210).                                                                                                                                                                                                                                                                                                                                                                                                                                |
 | v1.10.36 | 2026-11-20 | D-274 aaya (COMPLIANCE batch 9: documents ka dhaancha, §14; Q-211); Lawyer (AI) ki report docs me poori.                                                                                                                                                                                                                                                                                                                                                                                    |
+| v1.11.1  | 2026-11-20 | D-275 se D-280 aaye (CA (AI) ki report ke sawal aur jod; Q-212 se Q-217). D-063, D-078, D-081, D-095, D-096, D-107, D-122, D-225, D-227, D-228, D-229, D-254, D-256, D-269 me jod.                                                                                                                                                                                                                                                                                                          |
+| v1.11.2  | 2026-11-20 | D-281 aaya (COMPLIANCE pe CA (AI) ke nishaan aur badlav; Q-218).                                                                                                                                                                                                                                                                                                                                                                                                                            |
+| v1.11.3  | 2026-11-20 | D-282 aaya (finance ke accounting niyam ARCHITECTURE §1 me; Q-219).                                                                                                                                                                                                                                                                                                                                                                                                                         |

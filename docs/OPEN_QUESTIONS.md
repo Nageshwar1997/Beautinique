@@ -1,6 +1,6 @@
 # OPEN QUESTIONS: Beautinique
 
-> **Status:** v1.3.54 (2026-11-20). Khule sawal, aage ke topics aur jaanchna baaki. Cheezein ek-ek karke judengi.
+> **Status:** v1.4.3 (2026-11-20). Khule sawal, aage ke topics aur jaanchna baaki. Cheezein ek-ek karke judengi.
 
 ## Is file me kya aayega
 
@@ -4940,6 +4940,153 @@ Claude ka kaam: owner ka faisla nahi chahiye, sirf saboot. Nateeja saboot ke saa
 - **Kanooni detail:** dhaancha project ke Lawyer (AI, D-257) ka; "Lawyer ne jaancha" ka nishaan owner ki haan ke baad (D-257).
 - **Owner ka jawab (2026-11-20):** **(a)**, 6 documents ka dhaancha jaisa prastaavit tha waisa maana. Record: [DECISIONS.md](DECISIONS.md) D-274.
 
+### Q-212. Fulfilment fee: ek line ya do hisse?
+
+- **Status:** `Tay`. Topic: B6 (payments, settlement aur ledger).
+- **Sawal:** D-078 ki fulfilment fee me rakhna, pack aur delivery teeno hain. Seller ke fees invoice pe ye ek line rahe ya do hisse?
+- **Kyun zaroori:** 1 Nov 2026 se e-commerce operator ke zariye bike maal ki delivery seva pe 5% GST hai, bina input tax credit (ITC). Ek line me poori fee ka rate tay karna mushkil hai, aur delivery ke kharchon ka ITC rukta hai.
+- **Vikalp:**
+  - **(a)** Do lines: "handling (pick aur pack)" 18% aur "delivery" 5% bina ITC, dono per unit; jod wahi (misaal ₹25).
+  - **(b)** Ek line, poori fee 18%, delivery ko handling ka hissa maan ke.
+  - **(c)** Ek line, poori fee 5% bina ITC, delivery ko mukhya maan ke.
+- **Salah:** **(a)**. Har hissa apne sahi rate pe, aur jhagde ka jokhim kam.
+- **Trade-off:**
+  - (a) me rate table me do rows aur seller ke invoice pe do lines.
+  - (b) saral, par delivery ka hissa galat rate pe hone ka jokhim.
+  - (c) saral, par warehouse aur packing ke kharchon ka ITC bhi ruk sakta hai.
+- **Tax detail:** CA (AI, D-257) ki raay; delivery seva ka rate notification ki doosri site pe rakhi copy se padha.
+- **Owner ka jawab (2026-11-20):** **(a)**, fee do lines me (handling 18%, delivery 5% bina ITC). Record: [DECISIONS.md](DECISIONS.md) D-275.
+
+### Q-213. Hamare haath se hue nuksaan ki bharpai: GST ke bina value pe ya GST samet?
+
+- **Status:** `Tay`. Topic: B6 (settlement), B1 (warehouse).
+- **Sawal:** D-063 me bharpai "bikne wale daam" pe hai, aur wo daam GST samet hai. Bharpai GST ke bina wali value pe ho ya GST samet?
+- **Kyun zaroori:** bikne pe seller ko GST ke bina wali value bachti hai (GST sarkar ko jaata hai). Kho gaye maal pe seller ka GST nahi lagta, to GST samet bharpai seller ko bikri se zyada deti hai.
+- **Vikalp:**
+  - **(a)** GST ke bina wali value, commission aur fees ghata ke.
+  - **(b)** GST samet daam, commission aur fees ghata ke.
+  - **(c)** (a), aur upar se seller ke ITC ulatne ka andaaza (jaise value ka tay %).
+- **Salah:** **(a)**, saath me ek niyam: bharpai seller ke statement me ek net line, uspe fees ka alag invoice nahi.
+- **Trade-off:**
+  - (a) "bikne jitna" ke sabse kareeb aur hamara kharcha kam; seller ka apna ITC ulatna uska nuksaan rehta hai.
+  - (b) seller ke liye achha, par 18% wale item pe bikri se lagbhag 18% zyada.
+  - (c) sabse barabar, par andaaza aur uski jaanch ka kaam.
+- **Tax detail:** CA (AI, D-257) ki raay: bharpai pe GST, TCS aur TDS nahi; CA ne aadha jaancha.
+- **Owner ka jawab (2026-11-20):** **(a)**, GST ke bina wali value pe, fees ghata ke, ek net line. Record: [DECISIONS.md](DECISIONS.md) D-276.
+
+### Q-214. Return pe platform ki fees seller ko wapas ho ya nahi?
+
+- **Status:** `Tay`. Topic: B6 (settlement), B7 (returns).
+- **Sawal:** lauti line pe platform ka commission aur fulfilment fee seller ko wapas ho ya nahi?
+- **Kyun zaroori:** D-078 me ye tay nahi. Fees ka invoice, credit note aur seller ka statement isi pe tike hain.
+- **Vikalp:**
+  - **(a)** Commission wapas, fulfilment fee nahi (kaam ho chuka).
+  - **(b)** Dono wapas.
+  - **(c)** Koi wapas nahi.
+  - **(d)** Return ki wajah (D-079) ke hisaab se, D-112 jaisa: hamari galti pe dono wapas; brand ki galti pe koi nahi; customer ka man badla to commission wapas, fulfilment fee nahi.
+- **Salah:** **(d)**, ek sudhaar ke saath: der se delivery hamari apni delivery ki wajah se hoti hai, to use hamari galti me gina jaaye (dono wapas). Nuksaan usi pe jiski galti, aur wajah pehle se record hoti hai.
+- **Trade-off:**
+  - (d) me niyam ke teen raaste.
+  - (a) saral, par hamari galti pe bhi seller fulfilment ka paisa deta hai.
+  - (b) platform ka kharcha zyada.
+  - (c) bina bikri ke commission, seller ke liye kadwa.
+- **Tax detail:** wapas hui fees pe platform ka credit note (CA, D-257).
+- **Owner ka jawab (2026-11-20):** **(d)**, wajah ke hisaab se, der se delivery hamari galti me. Record: [DECISIONS.md](DECISIONS.md) D-277.
+
+### Q-215. Combo aur shart wale gift ka invoice kaise bane?
+
+- **Status:** `Tay`. Topic: B4 (bundles aur kits), B6.
+- **Sawal:** combo (alag cheezein ek daam pe) aur shart wala gift ("X kharido to Y free") ka invoice kaise bane?
+- **Kyun zaroori:** D-228 aur D-229 ne ise R2 se pehle CA aur owner pe chhoda. Farak tab padta hai jab cheezon ke GST rate alag hon (jaise 5% wala shampoo aur 18% wala conditioner).
+- **Vikalp:**
+  - **(a)** Ek daam = mixed supply: poore combo pe sabse zyada rate.
+  - **(b)** Har cheez apne daam pe (jo site pe alag se bhi bikti ho), combo ki chhoot har line pe anupaat me, har line apne rate pe.
+- **Salah:** **(b)**, is shart ke saath ki har cheez site pe alag se bhi bikti ho aur invoice pe har line ka daam aur chhoot dikhe; jo cheez alag se nahi bikti, us combo pe (a).
+- **Trade-off:**
+  - (a) saral aur sabse kam jhagda, par kam rate wali cheez pe zyada tax.
+  - (b) kam tax aur D-088 ke return niyam (ek cheez ka refund) se mel, par "ek daam" ka tark tax vibhag uthaye to farak ka jokhim.
+- **Tax detail:** kit ka sabse zyada rate wala niyam CA ne jaancha; shart wale gift ka tareeka CA ne aadha jaancha (D-257).
+- **Owner ka jawab (2026-11-20):** **(b)**, shart ke saath. Record: [DECISIONS.md](DECISIONS.md) D-278.
+
+### Q-216. GSTIN wale orders pe platform ke offers aur points chalein?
+
+- **Status:** `Tay`. Topic: B4 (promotions), B6.
+- **Sawal:** business customer (GSTIN wala invoice) ke order pe platform ke offers aur points lagein ya nahi?
+- **Kyun zaroori:** platform ka diya hissa seller ki bikri ki value me judta hai, to business customer ke invoice pe poore daam ka GST aata hai jabki usne kam diya; uske ITC pe sawal uth sakta hai.
+- **Vikalp:**
+  - **(a)** GSTIN wale orders pe platform ke offers aur points nahi; sirf brand ke offers.
+  - **(b)** Chalein, invoice pe "Platform offer" ki saaf line ke saath.
+- **Salah:** **(a)**.
+- **Trade-off:**
+  - (a) business customers ko platform ke offers nahi milte.
+  - (b) offers sab ko, par business customer ke ITC pe jhagde ka jokhim.
+- **Tax detail:** CA (AI, D-257) ki raay; CA ne aadha jaancha.
+- **Owner ka jawab (2026-11-20):** **(a)**, GSTIN wale orders pe sirf brand ke offers. Record: [DECISIONS.md](DECISIONS.md) D-279.
+
+### Q-217. CA (AI) ke jod tay faislon me maanein?
+
+- **Status:** `Tay`. Topic: B6 (payments aur ledger), B1 (warehouse), B13 (compliance).
+- **Sawal:** CA (AI) ki report me tay faislon ke liye kuch jod nikle; koi faisla palat-ta nahi. Inhe maanein?
+- **Prastaavit jod:**
+  1. **Delivery fee (D-107):** platform ka apna B2C invoice, SAC 996813, 1 Nov 2026 se 5% bina ITC; delivery ke kharchon ka ITC ulatna; prepaid order pe fee ka invoice payment capture ke pal. (CA ne jaancha; capture ka pal aadha.)
+  2. **Sellers ka TDS (D-081):** GST ke bina rakam pe, pehle credit (invoice) ke pal; return pe usi seller ki usi financial year ki agli bikri me adjust, saal badle to nahi; replacement pe nahi. (Aadha: naye Income-tax Act ke section aur forms secondary source se.)
+  3. **Replacement (D-122):** bina keemat ka replacement, delivery challan ke saath. (Aadha.)
+  4. **Records ka samay (D-225, D-227):** do classes: platform ke apne books 8 financial years (Companies Act), sellers ke tax documents 72 mahine (misaal). (Aadha.)
+  5. **Books ka backup India me (D-256):** asli business se pehle region dobara dekhte waqt company ke electronic books ka roz backup India ke server pe aur audit trail bhi; dummy books pe abhi asar nahi. (Aadha.)
+  6. **Chargeback (D-095):** seller ki galti wale chargeback pe seller ka credit note; platform wale (fraud, delivery) pe credit note nahi, nuksaan platform ka kharcha; gateway ki kati rakam usi din Operating khaate se top-up.
+  7. **Seller settlement khaata (D-269):** gateway fees aur platform offer ka top-up Operating khaate se; platform ke kharche kabhi Settlement khaate se nahi; roz ka milaan. (CA ne jaancha.)
+  8. **Doosre state se stock (D-096):** ASN me seller ka IGST invoice ya delivery challan aur e-way bill ka number; receiving pe ye document. (Aadha.)
+  9. **Partners ka TDS (D-254):** sahi entry (1% ya 2%), saal ki seema paar hone pe poore saal ka catch-up, TDS kaat se pehle ki kamaai pe; nuksaan ki vasooli pe GST nahi. (Aadha.)
+- **Vikalp:**
+  - **(a)** List jaisi hai waisi maanein.
+  - **(b)** Maanein, par owner jo jod badle, wo badal ke.
+  - **(c)** Abhi roko.
+- **Salah:** **(a)**.
+- **Trade-off:**
+  - (a) me finance, invoice aur warehouse me chhote kaam.
+  - (b) me har badlav ki ek line.
+  - (c) me tax ke chhote hisse adhoore.
+- **Tax detail:** har jod ke saath CA (AI, D-257) ka bharosa likha hai.
+- **Owner ka jawab (2026-11-20):** **(a)**, list jaisi hai waisi maani. Record: [DECISIONS.md](DECISIONS.md) D-280.
+
+### Q-218. CA (AI) ki raay aur badlav COMPLIANCE me maanein?
+
+- **Status:** `Tay`. Topic: B13 (compliance), B6 (payments aur ledger).
+- **Sawal:** CA (AI) ne [COMPLIANCE.md](COMPLIANCE.md) ki 32 rows dekhin, 20 rows me badlav aur 8 nayi rows prastaavit kin. Ye COMPLIANCE me aayein?
+- **Prastaav:**
+  1. **CA ke nishaan, 32 rows** (har row me ek line ki raay): `CA ne jaancha` 8 (CL-003, CL-010, CL-012, CL-013, CL-019, CL-022, CL-023, CL-024); `CA ne aadha jaancha` 22 (CL-001, CL-002, CL-004 se CL-009, CL-011, CL-014 se CL-018, CL-020, CL-021, CL-108, CL-109, CL-110, CL-113, CL-117, CL-126); `CA ne nahi jaancha` 2 (CL-112, CL-128).
+  2. **20 rows me badlav,** D-275 se D-280 ke hisaab se: CL-005, CL-006, CL-007, CL-008, CL-011, CL-012, CL-013, CL-014, CL-015, CL-016, CL-017, CL-019, CL-021, CL-022, CL-108, CL-109, CL-110, CL-113, CL-117, CL-126.
+  3. **Nayi rows CL-129 se CL-136** (§1.1): return fee ka invoice aur delivery fee ki wapsi, Nil maal ka bill of supply, company ke books (8 saal, audit trail, India me backup), delivery seva pe ITC ki rok, seller ka inbound maal (invoice, challan, e-way bill), hamari fees pe seller ka TDS, transporter ka GTA aur RCM, platform ke tax returns aur statements.
+  4. **Baaki:** §13 "Nazar" me 4 rows (books ka India me backup, s.9(5) ka aage ka badlav, CBDT ke naye circulars, stamp duty); §14 me Seller Agreement clause 10 aur 13 aur Partner Agreement clause 9 ke tax hisse; §1.0 me naye sources T11 se T27.
+- **Vikalp:**
+  - **(a)** Prastaav jaisa maanein.
+  - **(b)** Sirf nishaan; badlav aur nayi rows baad me.
+  - **(c)** Abhi roko.
+- **Salah:** **(a)**. Tax rows me saaf dikhta hai kya pakka hua aur kya baaki, aur D-275 se D-280 ke faisle rows tak pahunchte hain.
+- **Trade-off:**
+  - (a) me COMPLIANCE ki kai rows me badlav.
+  - (b) me rows tay faislon se peeche.
+  - (c) me CA ka kaam docs me adhoora.
+- **Tax detail:** project ke CA (AI, D-257) ki raay; nishaan owner ki haan ke baad hi (D-257).
+- **Owner ka jawab (2026-11-20):** **(a)**, prastaav jaisa maana. Record: [DECISIONS.md](DECISIONS.md) D-281.
+
+### Q-219. CA (AI) ke ledger, invoice aur statements ke niyam docs me kahan aayein?
+
+- **Status:** `Tay`. Topic: B6 (payments, settlement aur ledger), B15 (technical).
+- **Sawal:** CA (AI) ne platform ke books ke niyam diye: double-entry ledger, chart of accounts, har ghatna ki entry, seller settlement khaate ke niyam, kaun kya document jaari kare, numbering, rounding, statements aur milaan. Ye docs me kahan aayein?
+- **Kyun zaroori:** ye niyam kai services ko chhoote hain (orders invoice banate, payments capture karte, warehouse dispatch karta), aur Database Architect inhi pe finance ka data model banayega. Agent ki report discovery ke baad hat jaati hai (D-073), to niyam naye docs me hone chahiye.
+- **Vikalp:**
+  - **(a)** [ARCHITECTURE.md](ARCHITECTURE.md) me naya hissa "Finance ke accounting niyam".
+  - **(b)** [COMPLIANCE.md](COMPLIANCE.md) me naya hissa.
+  - **(c)** Planning stage me finance module ki `TASK.md` tak report me hi rakhna.
+- **Salah:** **(a)**. Ye poore system ke finance ka dhaancha hai, kanoon ki row nahi; aur aage ke architecture aur database ke agents isi file pe kaam karte hain.
+- **Trade-off:**
+  - (a) me ARCHITECTURE ka pehla hissa finance ka, baaki system ke hisse baad me.
+  - (b) COMPLIANCE kanoon ki rows ka matrix hai; ledger ka dhaancha wahan fit nahi hota.
+  - (c) me niyam naye docs ke bahar, aur report hatne ka jokhim.
+- **Tax detail:** CA (AI, D-257) ki raay; D-275 se D-281 ke saath milaa ke (jaise fulfilment fee ke do hisse, misaal me bhi).
+- **Owner ka jawab (2026-11-20):** **(a)**, ARCHITECTURE me naya hissa. Record: [DECISIONS.md](DECISIONS.md) D-282.
+
 ## Change log
 
 | Version | Date       | Badlav                                                                                                                                                                                    |
@@ -5033,3 +5180,6 @@ Claude ka kaam: owner ka faisla nahi chahiye, sirf saboot. Nateeja saboot ke saa
 | v1.3.52 | 2026-11-20 | Q-209 tay: (a) Lawyer (AI) ke nishaan (D-272, COMPLIANCE); Q-210 khula (documents ka dhaancha docs me kahan).                                                                             |
 | v1.3.53 | 2026-11-20 | Q-210 tay: (a) COMPLIANCE §14 (D-273); Q-211 khula (COMPLIANCE batch 9: documents ka dhaancha).                                                                                           |
 | v1.3.54 | 2026-11-20 | Q-211 tay: (a) documents ka dhaancha (D-274, COMPLIANCE §14); koi sawal khula nahi.                                                                                                       |
+| v1.4.1  | 2026-11-20 | Q-212 se Q-217 (CA (AI) ki report ke sawal aur jod) tay; D-275 se D-280.                                                                                                                  |
+| v1.4.2  | 2026-11-20 | Q-218 (COMPLIANCE pe CA (AI) ki raay) tay; D-281.                                                                                                                                         |
+| v1.4.3  | 2026-11-20 | Q-219 (CA ke ledger aur statements ke niyam kahan) tay; D-282.                                                                                                                            |

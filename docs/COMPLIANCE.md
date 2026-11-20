@@ -1,12 +1,12 @@
 # COMPLIANCE: Beautinique
 
-> **Status:** v1.1.11 (2026-11-20). Kanooni matrix. System me sab poori tarah banta hai, par registrations aur bahar ki companies ki details dummy hain (D-026); apne roles ki jaankari asli (D-241). Project ke Lawyer aur CA AI agents hain (D-257); Lawyer ne 18 rows dekhin (D-272), CA ne abhi kuch nahi (R-004). Cheezein ek-ek karke, owner ki haan se, judti hain (D-220).
+> **Status:** v1.2.1 (2026-11-20). Kanooni matrix. System me sab poori tarah banta hai, par registrations aur bahar ki companies ki details dummy hain (D-026); apne roles ki jaankari asli (D-241). Project ke Lawyer aur CA AI agents hain (D-257); Lawyer ne 18 rows dekhin (D-272), CA ne 32 rows dekhin aur 8 nayi rows di (D-281). Cheezein ek-ek karke, owner ki haan se, judti hain (D-220).
 
 ## Is file me kya aayega
 
 - Har row (CL-xxx): **Kanoon ya niyam**, **Kis pe laagu**, **Kis module me**, **System me kya chahiye**, **Dummy kya hai**, **Jaancha ya nahi** (source aur tareekh ke saath).
-- **Jaancha** = public source khol ke milaaya (tareekh ke saath). **Aadha jaancha** = sirf secondary source, ya sarkari text ki purani copy. **Jaancha nahi** = source nahi khula. **Lawyer ne jaancha** / **CA ne jaancha** = project ke Lawyer ya CA agent ne dekha, aur owner ki haan se docs me aaya (D-257). Is project me Lawyer aur CA AI agents hain, koi licensed lawyer ya CA nahi (D-257). **Lawyer ne aadha jaancha** = Lawyer ne dekha, par row ka kuch hissa baaki (row me likha). Lawyer ne 18 rows dekhin (D-272); CA ne abhi kuch nahi jaancha (R-004).
-- Rows area ke hisaab se batches me aati hain (D-220): §1 tax, §2 Legal Metrology, §3 cosmetics kanoon, §4 e-commerce aur consumer kanoon, §5 personal data, §6 IT Act aur intermediary niyam, §7 CERT-In aur data ki jagah, §8 payments, §9 gig delivery partners, §10 warehouse, transport aur environment, §11 sehat aur AYUSH, §12 IP aur contracts. §13 "Nazar": cheezein jin ke badalne pe rows dobara dekhni hain. §14 documents ka dhaancha: 6 documents ke clauses (D-274).
+- **Jaancha** = public source khol ke milaaya (tareekh ke saath). **Aadha jaancha** = sirf secondary source, ya sarkari text ki purani copy. **Jaancha nahi** = source nahi khula. **Lawyer ne jaancha** / **CA ne jaancha** = project ke Lawyer ya CA agent ne dekha, aur owner ki haan se docs me aaya (D-257). Is project me Lawyer aur CA AI agents hain, koi licensed lawyer ya CA nahi (D-257). **Lawyer ne aadha jaancha** = Lawyer ne dekha, par row ka kuch hissa baaki (row me likha). Lawyer ne 18 rows dekhin (D-272); CA ne 32 rows dekhin (D-281). **CA ne aadha jaancha** = CA ne dekha, par row ka kuch hissa baaki (row me likha).
+- Rows area ke hisaab se batches me aati hain (D-220): §1 tax (CA ke naye points §1.1 me, CL-129 se), §2 Legal Metrology, §3 cosmetics kanoon, §4 e-commerce aur consumer kanoon, §5 personal data, §6 IT Act aur intermediary niyam, §7 CERT-In aur data ki jagah, §8 payments, §9 gig delivery partners, §10 warehouse, transport aur environment, §11 sehat aur AYUSH, §12 IP aur contracts. §13 "Nazar": cheezein jin ke badalne pe rows dobara dekhni hain. §14 documents ka dhaancha: 6 documents ke clauses (D-274).
 - **Number:** CL-001 se kram se. Ek baar diya number kabhi badalta nahi aur dobara use nahi hota.
 - Jahan row kisi faisle se judi hai, wahan D-xxx ka hawala; faisle ka itihaas sirf [DECISIONS.md](DECISIONS.md) me.
 
@@ -24,6 +24,23 @@
 - **[T8]** E-commerce operator ka TDS, Income-tax Act 2025 s.393(1) (10 Nov 2026 ka lekh): <https://blog.tdsman.com/2026/11/tds-on-e-commerce-transactions-section-3931-194o/>. Secondary.
 - **[T9]** Notification 01/2026-Central Tax (Rate) ka saar: <https://taxguru.in/goods-and-service-tax/cbic-revises-gst-rate-notification-under-finance-act-2026.html>. Secondary.
 - **[T10]** Search ke nateeje (sirf ishaara): e-invoice ki seema (Notification 10/2023-Central Tax), s.34(2) ki 30 November ki seema (Finance Act 2022), delivery services pe s.9(5) (Notifications 17/2025, 06/2026, 09/2026-Central Tax (Rate)). Primary text nahi khula. Secondary.
+- **[T11]** Notification 06/2026-Central Tax (Rate), 27 Oct 2026, G.S.R. 936(E), 1 Nov 2026 se: Notification 11/2017-CT(Rate) ki serial 12 (heading 9968) ka item (iii) badla. Gazette ka text ek doosri site ki copy se padha (2026-11-20): <https://a2ztaxcorp.net/wp-content/uploads/2026/10/N.-No.-06-2026-CT-UT-IG-Rate.pdf>. Primary document, secondary host.
+- **[T12]** Notification 09/2026-Central Tax (Rate), 27 Oct 2026, G.S.R. 945(E): s.9(5) me "delivery services, other than postal and courier services" (jab supplier registration ke liye bound na ho), 1 Nov 2026 se: <https://a2ztaxcorp.net/e-commerce-operators-made-liable-under-section-95-for-delivery-services-other-than-postal-and-courier-services-supplied-through-them-by-persons-not-liable-for-registration-replacing-the-earli/>. Secondary (saar).
+- **[T13]** 57th GST Council (8 Oct 2026) ki delivery seva wali salah: <https://www.taxscan.in/gst/gst-council-recommends-5-gst-without-itc-on-delivery-services-through-e-commerce-platforms>. Secondary.
+- **[T14]** Circular 195/07/2023-GST (17 Jul 2023), warranty me bina keemat replacement: <https://gstcouncil.gov.in/sites/default/files/2024-06/circular-cgst-195.pdf>. Primary.
+- **[T15]** Circular 243/37/2024-GST ([T5]) ka para 6 (breakage) aur para 6.3 me Circular 178/10/2022-GST (3 Aug 2022) ka siddhaant: supply ke liye kuch karne ya na karne ka saaf ya nihit agreement chahiye. Primary.
+- **[T16]** Circular 251/08/2025-GST (12 Sep 2025), post-sale discounts; saar: <https://www.ey.com/en_in/technical/alerts-hub/2025/09/cbic-clarifies-treatment-of-post-sale-and-secondary-discount-under-gst>. Secondary.
+- **[T17]** Finance Act 2026 ss.153 se 155 (CGST s.15(3)(b), s.34(1), s.54), Notification 03/2026-Central Tax se 1 Nov 2026: <https://www.lkslaw.com/insights/updates/indirect-tax-update/cgst-act-2017-amendments-by-sections-153-to-155-of-the-finance-act-2026-effective-from-1-november-2026>. Secondary.
+- **[T18]** CBDT Circular 20/2023 (28 Dec 2023), e-commerce TDS ki guidelines (GST alag dikhe to bahar; return pe agli bikri me adjust; operator ka discount gross kam nahi karta); saar: <https://www.bdo.in/en-gb/insights/alerts-updates/cbdt-issues-additional-guidelines-on-tds-by-e-commerce-operators-under-section-194-o-of-the-it-act>. Secondary.
+- **[T19]** Income-tax Rules 2026 (G.S.R. 198(E), 20 Mar 2026, 1 Apr 2026 se); "Form No. 140 (Earlier Form No. 26Q)" aur "Form No. 131 (Earlier Form No. 16A)": sarkari site ke search result titles. Text nahi khula.
+- **[T20]** Income-tax Act 2025 ke TDS aur TCS ke badlav (s.393(1) Table: contractor aur e-commerce; s.397; jama ki tareekh; Form 140, Form 143; correction ki muddat), professional body ki presentation (Apr 2026): <https://bcasonline.org/wp-content/uploads/2026/04/Convergence-Divergence-Provisions-Procedures-of-TDS-and-TCS-Changes-in-Income-Tax-Act-2025-vs-Income-Tax-Act-1961.pdf>. Secondary.
+- **[T21]** NACIN ka "Electronic Way Bill in GST" guide (2019): consignment value har invoice ya challan ki; consolidated e-way bill; rule 138E me e-commerce operator bhi: <https://www.gstcouncil.gov.in/sites/default/files/2024-02/electronic-way-bill-050819.pdf>. Primary, purana.
+- **[T22]** GSTR-1 Table 14 aur 15 (ECO ke through supplies), Notification 26/2022-CT: <https://tutorial.gst.gov.in/contextualhelp/Einv/SUPECO_14.htm>. Primary (search result).
+- **[T23]** Circular 57/31/2018-GST (principal-agent, Schedule I para 3): <https://cbic-gst.gov.in/pdf/Circular_57-31_Principal_Agent.pdf>. Primary site, search ka saar.
+- **[T24]** Companies Act 2013 s.128(5) (books 8 financial years): <http://ebook.mca.gov.in/Actpagedisplay.aspx?PAGENAME=17511>. Primary site, search ka saar.
+- **[T25]** Companies (Accounts) Rules 2014 rule 3(1) (audit trail) aur rule 3(5) (India me roz ka backup): <https://www.scconline.com/blog/post/2022/08/16/record-keeping-requirements-modified-vide-companies-accounts-fourth-amendment-rules-2022>. Secondary.
+- **[T26]** Maharashtra me intra-state e-way bill ki seema ₹1,00,000: search ke nateeje. Secondary.
+- **[T27]** GSTR-3B me GSTR-1 se aayi liability ka lock (GSTN advisories 2025): search ke nateeje. Secondary.
 
 ### CL-001. GST rates: beauty aur personal care
 
@@ -32,7 +49,7 @@
 - **Kis module me:** catalog, finance (rate table).
 - **System me kya chahiye:** rate table ki row = HSN + description ki shart + rate + kis din se (D-086, D-239); seller row chune, staff jaanche. Kit pe CL-010.
 - **Dummy kya hai:** kuch nahi; rates asli (public data). Table me notification ka hawala.
-- **Jaancha ya nahi:** Jaancha (2026-11-19): 5% ki list [T1] se; 18% aur Nil [T2] se; 2026 ke badlav ne Chapter 33 nahi chheda [T9, secondary].
+- **Jaancha ya nahi:** Jaancha (2026-11-19): 5% ki list [T1] se; 18% aur Nil [T2] se; 2026 ke badlav ne Chapter 33 nahi chheda [T9, secondary]. **CA ne aadha jaancha (2026-11-20):** HSN + description ki row aur rates ka dhaancha theek. Baaki: rates ke sources CA ne dobara nahi khole; Nil maal pe bill of supply (CL-130).
 
 ### CL-002. Rate badalne ka pal
 
@@ -41,7 +58,7 @@
 - **Kis module me:** finance, orders (invoice).
 - **System me kya chahiye:** invoice banne ke pal (dispatch, CL-003) ka rate; rate ghatne pe seller ko alert (D-086 niyam 4).
 - **Dummy kya hai:** test me ek rate badlav ki tareekh.
-- **Jaancha ya nahi:** Aadha jaancha (2026-11-19): s.14 [T3, 2021 copy]; anti-profiteering (s.171) ki abhi ki haalat nahi khuli.
+- **Jaancha ya nahi:** Aadha jaancha (2026-11-19): s.14 [T3, 2021 copy]; anti-profiteering (s.171) ki abhi ki haalat nahi khuli. **CA ne aadha jaancha (2026-11-20):** invoice dispatch pe aur maal ke advance pe GST nahi, to naya rate naye invoice se theek. Baaki: s.171 (anti-profiteering) ki abhi ki haalat.
 
 ### CL-003. Invoice ka samay aur number
 
@@ -50,7 +67,7 @@
 - **Kis module me:** orders (invoice), warehouse (dispatch scan).
 - **System me kya chahiye:** invoice pack ya dispatch ke scan pe (D-239); pack se pehle cancel pe invoice nahi; har seller GSTIN aur financial year ki apni series; cancel hua number bhi record me.
 - **Dummy kya hai:** seller ka dummy GSTIN; PDF pe "SPECIMEN" (D-145).
-- **Jaancha ya nahi:** Jaancha (2026-11-19): s.31 [T3]; rule 46 [T6, purana flyer].
+- **Jaancha ya nahi:** Jaancha (2026-11-19): s.31 [T3]; rule 46 [T6, purana flyer]. **CA ne jaancha (2026-11-20):** dispatch pe invoice, GSTIN aur financial year ki series, cancel ka record theek; bina gap ka number database ke lock se.
 
 ### CL-004. E-invoice
 
@@ -59,43 +76,43 @@
 - **Kis module me:** seller onboarding, orders (invoice).
 - **System me kya chahiye:** seller profile me "e-invoice laagu" ka field (D-239); aise seller ke B2B invoice pe IRN aur QR ke fields.
 - **Dummy kya hai:** dummy me IRP nahi; "DUMMY IRN".
-- **Jaancha ya nahi:** Aadha jaancha (2026-11-19): sirf [T10].
+- **Jaancha ya nahi:** Aadha jaancha (2026-11-19): sirf [T10]. **CA ne aadha jaancha (2026-11-20):** field aur dummy IRN theek. Baaki: ₹5 crore ki seema sirf secondary.
 
 ### CL-005. Return pe credit note
 
-- **Kanoon ya niyam:** CGST Act s.34: invoice ke baad maal lautaye ya value kam ho to supplier credit note deta hai; financial year ke baad 30 November (ya annual return) tak declare.
+- **Kanoon ya niyam:** CGST Act s.34: invoice ke baad maal lautaye ya value kam ho to supplier credit note deta hai; financial year ke baad 30 November (ya annual return) tak declare. Jod (D-281): 1 Nov 2026 se s.34(1) me s.15(3)(b) wali baad ki chhoot bhi (Finance Act 2026; registered recipient ka ITC ulatna shart) [T17].
 - **Kis pe laagu:** har return aur RTO.
 - **Kis module me:** orders, finance.
 - **System me kya chahiye:** seller ke GSTIN se, asli invoice number aur tareekh ke saath, apni series; 30 November ki seema ke baad wala maamla aaye to credit note nahi aur finance ko alert.
 - **Dummy kya hai:** PDF pe "SPECIMEN" (D-145).
-- **Jaancha ya nahi:** Aadha jaancha (2026-11-19): s.34 [T3, 2021 copy me "September"]; 30 November aur 2025 ka badlav [T10].
+- **Jaancha ya nahi:** Aadha jaancha (2026-11-19): s.34 [T3, 2021 copy me "September"]; 30 November aur 2025 ka badlav [T10]. **CA ne aadha jaancha (2026-11-20):** seller ke GSTIN se, asli invoice ke hawale ke saath theek. Baaki: 30 November ki seema aur 1 Nov 2026 ka s.34(1) ka badlav sirf secondary [T17].
 
 ### CL-006. Replacement (R2)
 
 - **Kanoon ya niyam:** bina extra paise ke replacement pe GST ka tareeka: credit note + naya invoice, ya bina keemat ka replacement purane invoice ke reference ke saath.
 - **Kis pe laagu:** R2 ka replacement (D-122).
 - **Kis module me:** orders, finance.
-- **System me kya chahiye:** tareeka CA se; data model dono sambhale.
+- **System me kya chahiye:** bina keemat replacement: seller ka delivery challan, asli invoice ke hawale ke saath [T14] (D-280); daam badle ya replacement na ho to credit note (aur zaroorat pe naya invoice); data model dono sambhale.
 - **Dummy kya hai:** test documents "SPECIMEN".
-- **Jaancha ya nahi:** Aadha jaancha (2026-11-19): s.34 [T3]; replacement wala CBIC circular nahi khula.
+- **Jaancha ya nahi:** Aadha jaancha (2026-11-19): s.34 [T3]; replacement wala CBIC circular nahi khula. **CA ne aadha jaancha (2026-11-20):** bina keemat replacement aur delivery challan [T14] (D-280). Baaki: rule 55 ka text.
 
 ### CL-007. Discount
 
 - **Kanoon ya niyam:** CGST Act s.15(3): supply se pehle ya us waqt invoice pe diya discount value me nahi judta; baad ka discount shart ke saath. Price se judi subsidy supplier ki value me judti hai (s.15(2)(e)).
 - **Kis pe laagu:** brand ka discount (R1); platform ka discount (R2).
 - **Kis module me:** orders (invoice), finance.
-- **System me kya chahiye:** brand ka discount invoice pe line; platform ke discount ka ilaaj CA se; data me "customer ne diya" aur "platform ne diya" alag (D-101).
+- **System me kya chahiye:** line pe teen rakam (list price, brand ki chhoot, platform ka hissa; D-101); brand ki chhoot invoice pe value ghatati; platform ka hissa "Platform offer" ki line, aur seller ki taxable value, TCS aur TDS poore daam pe; GSTIN wale orders pe platform offer nahi (D-279).
 - **Dummy kya hai:** R2 ke test offers.
-- **Jaancha ya nahi:** Aadha jaancha (2026-11-19): s.15 [T3]; 56th Council ki salah [T1]; [T7].
+- **Jaancha ya nahi:** Aadha jaancha (2026-11-19): s.15 [T3]; 56th Council ki salah [T1]; [T7]. **CA ne aadha jaancha (2026-11-20):** brand ki chhoot value ghatati; platform ka hissa seller ki value me (teesre paksh ka consideration). Baaki: Circular 251/08/2025 aur CBDT Circular 20/2023 sirf secondary [T16, T18].
 
 ### CL-008. Points ki chhoot (R2)
 
 - **Kanoon ya niyam:** muft mile points khud supply nahi lagte; points se chhoot platform deta hai to CL-007 jaisa sawal.
 - **Kis pe laagu:** R2 ke loyalty points (D-173, D-175).
 - **Kis module me:** finance.
-- **System me kya chahiye:** CL-007 ke saath CA se ek niyam; points ki liability ka khaata GST se alag.
+- **System me kya chahiye:** chhoot CL-007 jaisi; pakke points pe provision (khaata `loyalty_points_liability`), expire pe ulta; GST se alag; GSTIN wale orders pe points nahi (D-279).
 - **Dummy kya hai:** R2 ke test points.
-- **Jaancha ya nahi:** Aadha jaancha (2026-11-19): [T3], [T5] (sirf milta-julta tark).
+- **Jaancha ya nahi:** Aadha jaancha (2026-11-19): [T3], [T5] (sirf milta-julta tark). **CA ne aadha jaancha (2026-11-20):** chhoot CL-007 jaisi; pakke points ka provision. Baaki: income-tax me provision ki deduction.
 
 ### CL-009. Free samples
 
@@ -104,7 +121,7 @@
 - **Kis module me:** orders, warehouse, seller reports.
 - **System me kya chahiye:** D-229; brand ko bheje gaye samples ki report (apna ITC ulatne ke liye).
 - **Dummy kya hai:** R2 ke test samples.
-- **Jaancha ya nahi:** Aadha jaancha (2026-11-19): circular [T7, secondary]; s.17(5)(h) [T3].
+- **Jaancha ya nahi:** Aadha jaancha (2026-11-19): circular [T7, secondary]; s.17(5)(h) [T3]. **CA ne aadha jaancha (2026-11-20):** bina shart sample bahar aur ITC ulatne ki report theek. Baaki: Circular 92/11/2019 sirf secondary.
 
 ### CL-010. Kit aur combo
 
@@ -113,70 +130,70 @@
 - **Kis module me:** catalog, orders (invoice).
 - **System me kya chahiye:** D-228.
 - **Dummy kya hai:** test me ek 5% + 18% ka kit, invoice pe 18%.
-- **Jaancha ya nahi:** Jaancha (2026-11-19): [T3]; kit aur combo pe laagu karna CA ka kaam.
+- **Jaancha ya nahi:** Jaancha (2026-11-19): [T3]; kit aur combo pe laagu karna CA ka kaam. **CA ne jaancha (2026-11-20):** kit mixed supply, sabse zyada rate (s.2(74), s.8(b)); combo ka tareeka D-278.
 
 ### CL-011. Platform ki fees ka invoice
 
 - **Kanoon ya niyam:** platform ki fees (commission, fulfilment, storage, disposal) seller ko taxable seva; seva ka tax invoice (s.31(2)). Related persons ke beech seva ki value ke alag niyam (s.15).
 - **Kis pe laagu:** har seller, apna brand bhi.
 - **Kis module me:** finance.
-- **System me kya chahiye:** platform ke GSTIN se seller ko fees ka tax invoice (har payout ya mahine), har fee ki line, SAC aur rate table se; payout statement alag document; apne brand pe bhi wahi rate card.
+- **System me kya chahiye:** platform ke GSTIN se har payout cycle ka fees tax invoice (seller agreement me continuous supply), seller ke warehouse state wale GSTIN pe; har fee ki line, SAC aur rate table se; fulfilment fee do lines me (D-275); return pe fees D-277 se, credit note ke saath; payout statement alag document; apne brand pe bhi wahi rate card.
 - **Dummy kya hai:** platform ka dummy GSTIN; invoice "SPECIMEN".
-- **Jaancha ya nahi:** Aadha jaancha (2026-11-19): s.15, s.31(2) [T3]; [T1]; seva ka rate aur invoice ka samay (rule 47) primary se nahi.
+- **Jaancha ya nahi:** Aadha jaancha (2026-11-19): s.15, s.31(2) [T3]; [T1]; seva ka rate aur invoice ka samay (rule 47) primary se nahi. **CA ne aadha jaancha (2026-11-20):** har payout cycle ka fees invoice (continuous supply); fulfilment fee ke do hisse (D-275). Baaki: fees ka 18% aur rule 47 primary se nahi.
 
 ### CL-012. Customer se delivery fee
 
-- **Kanoon ya niyam:** local delivery (SAC 996813) pe GST; 1 Nov 2026 se delivery seva pe naya niyam (5% bina ITC, e-commerce operator ki s.9(5) zimmedari).
+- **Kanoon ya niyam:** local delivery (SAC 996813). 1 Nov 2026 se heading 9968 item (iii)(b): e-commerce operator ke zariye bike maal ki delivery seva 5% (2.5% CGST + 2.5% SGST), delivery me lage inputs ka ITC nahi [T11]; s.9(5) sirf tab jab registration ke liye bound na hone wala supplier operator ke zariye de [T12].
 - **Kis pe laagu:** delivery fee wale orders (D-107).
 - **Kis module me:** orders, finance.
-- **System me kya chahiye:** fee ka platform ka alag B2C invoice (order pe ek); SAC aur rate CA se, rate table me tareekh ke saath (D-239).
+- **System me kya chahiye:** fee ka platform ka alag B2C invoice (order pe ek), SAC 996813; rate table me 31.10.2026 tak 18% aur 01.11.2026 se 5% bina ITC (D-239); prepaid pe invoice payment capture pe, delivery pe UPI me delivery pe (D-280); delivery inputs ka ITC ulatna (CL-132).
 - **Dummy kya hai:** invoice "SPECIMEN".
-- **Jaancha ya nahi:** Aadha jaancha (2026-11-19): [T1]; naya badlav sirf [T10].
+- **Jaancha ya nahi:** Aadha jaancha (2026-11-19): [T1]; naya badlav sirf [T10]. **CA ne jaancha (2026-11-20):** platform ka B2C invoice, SAC 996813, 1 Nov 2026 se 5% bina ITC [T11] (notification ki copy doosri site pe).
 
 ### CL-013. GST TCS
 
 - **Kanoon ya niyam:** CGST Act s.52: e-commerce operator doosre suppliers ki net value pe TCS le; 0.25% CGST + 0.25% SGST (10 Jul 2024 se), IGST 0.5%. Net value = mahine ki taxable supplies minus usi mahine lautayi supplies. Jama aur mahine ka statement agle mahine ke 10 din me; saal ka statement 31 December tak. Operator aur us ke through bechne wale seller ka registration zaroori (s.24).
 - **Kis pe laagu:** platform, har seller (apna brand bhi).
 - **Kis module me:** finance.
-- **System me kya chahiye:** har seller, har mahine net value aur TCS; payout me us mahine ki kaat; rate tareekh wali setting me; har warehouse state me TCS registration ka field (D-239); register aur export R2 (D-134).
+- **System me kya chahiye:** har seller, har mahine net value aur TCS; payout me us mahine ki kaat; rate tareekh wali setting me; har warehouse state me TCS registration ka field (D-239); register aur export R2 (D-134). Jod (D-281): net value me platform offer aur points ka hissa; Nil maal bahar.
 - **Dummy kya hai:** platform ka dummy TCS registration ("DUMMY"); report "SPECIMEN".
-- **Jaancha ya nahi:** Jaancha (2026-11-19): [T4]; s.24, s.52 [T3]; IGST rate secondary.
+- **Jaancha ya nahi:** Jaancha (2026-11-19): [T4]; s.24, s.52 [T3]; IGST rate secondary. **CA ne jaancha (2026-11-20):** net value aur mahine ka TCS theek; platform offer ka hissa net value me; Nil maal bahar.
 
 ### CL-014. Income-tax TDS
 
 - **Kanoon ya niyam:** Income-tax Act 2025 s.393(1) (pehle s.194-O): e-commerce operator gross bikri pe 0.1% TDS, seller ke khaate me credit ya payment, jo pehle ho; individual ya HUF seller ki saal ki bikri ₹5 lakh tak (PAN ya Aadhaar ke saath) ho to nahi.
 - **Kis pe laagu:** platform, har seller.
 - **Kis module me:** finance.
-- **System me kya chahiye:** TDS ledger ke pehle credit pe (D-239); GST shaamil ho ya nahi, return pe ulat aur bina PAN ki rate CA se; rate setting me.
+- **System me kya chahiye:** TDS seller ke pehle credit (invoice ka pal) pe (D-239), invoice pe alag dikhe GST ke bina; platform offer ka hissa milaa ke; return pe agli bikri (usi seller, usi financial year) ke TDS me adjust, saal badle ya replacement ho to nahi (D-280); section, rate aur bina PAN ki rate tareekh wali setting me; quarterly TDS statement aur certificate (Form 140, Form 131) [T19].
 - **Dummy kya hai:** dummy PAN; report "SPECIMEN".
-- **Jaancha ya nahi:** Aadha jaancha (2026-11-19): sirf [T8].
+- **Jaancha ya nahi:** Aadha jaancha (2026-11-19): sirf [T8]. **CA ne aadha jaancha (2026-11-20):** credit pe, GST ke bina, return pe agli bikri me adjust (D-280). Baaki: s.393 aur CBDT Circular 20/2023 sirf secondary [T18, T20]; bina PAN ki rate.
 
 ### CL-015. Apna brand
 
 - **Kanoon ya niyam:** alag company doosra supplier hai, to TCS (s.52) aur TDS laagu; dono companies related persons ho sakti hain (s.15).
 - **Kis pe laagu:** apna brand "Unibelle" aur uski seller company (D-031, D-243).
 - **Kis module me:** finance, seller onboarding.
-- **System me kya chahiye:** koi alag raasta nahi: TCS, TDS aur fees invoice baaki sellers jaise; seller record pe "related party" ka field.
+- **System me kya chahiye:** koi alag raasta nahi: TCS, TDS aur fees invoice baaki sellers jaise; seller record pe "related party" ka field. Jod (D-281): related party ki saal ki list (finance report).
 - **Dummy kya hai:** dummy company, dummy GSTIN aur PAN.
-- **Jaancha ya nahi:** Jaancha (2026-11-19): TCS [T3]; TDS [T8, secondary].
+- **Jaancha ya nahi:** Jaancha (2026-11-19): TCS [T3]; TDS [T8, secondary]. **CA ne aadha jaancha (2026-11-20):** koi alag raasta nahi, theek. Baaki: rule 28 ka proviso aur Companies Act s.188 text se nahi.
 
 ### CL-016. Seller ka GST registration
 
 - **Kanoon ya niyam:** CGST Act s.24(ix): e-commerce operator ke through bechne wale supplier ka registration zaroori; teesre paksh ka warehouse seller ke registration me "additional place of business" ki tarah.
 - **Kis pe laagu:** har seller.
 - **Kis module me:** seller onboarding.
-- **System me kya chahiye:** onboarding me saboot ki warehouse ka pata seller ke registration me juda hai; staff jaanch (D-036, D-134 L2).
+- **System me kya chahiye:** onboarding me saboot ki warehouse ka pata seller ke registration me juda hai; staff jaanch (D-036, D-134 L2). Jod (D-281): doosre state se aaye stock pe seller ka invoice aur e-way bill (CL-133).
 - **Dummy kya hai:** dummy GSTIN ke certificate ki dummy image.
-- **Jaancha ya nahi:** Aadha jaancha (2026-11-19): s.24 [T3]; "additional place of business" ka niyam nahi khula.
+- **Jaancha ya nahi:** Aadha jaancha (2026-11-19): s.24 [T3]; "additional place of business" ka niyam nahi khula. **CA ne aadha jaancha (2026-11-20):** registration ki jaanch theek; doosre state se stock pe seller ka IGST invoice (CL-133). Baaki: "additional place of business" ka niyam.
 
 ### CL-017. Kho gaya ya nasht maal
 
 - **Kanoon ya niyam:** kho gaye, chori, nasht ya write-off maal pe ITC nahi (s.17(5)(h)); bharpai pe GST tabhi jab kuch karne ya na karne ka agreement ho.
 - **Kis pe laagu:** warehouse me hamare haath ka nuksaan (D-063), disposal (D-062).
 - **Kis module me:** finance, warehouse, seller reports.
-- **System me kya chahiye:** seller ko har mahine aise units ki report batch ke saath; bharpai payout me alag "compensation" line, GST ka ilaaj CA se.
+- **System me kya chahiye:** seller ko har mahine aise units ki report batch ke saath; bharpai payout me ek net "compensation" line, GST ke bina value pe, fees ghata ke (D-276), us pe GST, TCS aur TDS nahi; dispatch ke baad nuksaan pe pehle seller ka credit note.
 - **Dummy kya hai:** test me ek kho gaya batch; report "SPECIMEN".
-- **Jaancha ya nahi:** Aadha jaancha (2026-11-19): s.17(5)(h) [T3]; [T5]; bharpai wala circular nahi khula.
+- **Jaancha ya nahi:** Aadha jaancha (2026-11-19): s.17(5)(h) [T3]; [T5]; bharpai wala circular nahi khula. **CA ne aadha jaancha (2026-11-20):** bharpai pe GST, TCS, TDS nahi; ek net line; seller apna ITC ulate (D-276). Baaki: Circular 178/10/2022 sirf Circular 243 ke hawale se [T15].
 
 ### CL-018. B2B invoice aur tax credit
 
@@ -185,16 +202,16 @@
 - **Kis module me:** checkout, orders (invoice).
 - **System me kya chahiye:** invoice pe GSTIN, naam aur pata; doosre state ke GSTIN pe chetavni (D-239).
 - **Dummy kya hai:** dummy GSTIN (CL-024).
-- **Jaancha ya nahi:** Aadha jaancha (2026-11-19): [T6], s.16 [T3]; IGST s.10 nahi khola.
+- **Jaancha ya nahi:** Aadha jaancha (2026-11-19): [T6], s.16 [T3]; IGST s.10 nahi khola. **CA ne aadha jaancha (2026-11-20):** GSTIN aur chetavni theek. Baaki: IGST s.10.
 
 ### CL-019. Ek parcel me kai sellers ke invoices
 
 - **Kanoon ya niyam:** har supplier apna invoice deta hai (s.31); ek parcel me kai suppliers ke maal pe GST me rok nahi mili.
 - **Kis pe laagu:** kai sellers wala order (D-077).
 - **Kis module me:** warehouse (packing), orders.
-- **System me kya chahiye:** parcel ke saath har seller ke invoice ki copy (print ya QR), parcel label pe kis invoice ke items.
+- **System me kya chahiye:** parcel ke saath har seller ke invoice ki copy (print ya QR), parcel label pe kis invoice ke items. Jod (D-281): e-way bill har invoice ki value pe (CL-117).
 - **Dummy kya hai:** test ka ek do-seller parcel.
-- **Jaancha ya nahi:** Aadha jaancha (2026-11-19): s.31 [T3]; raste ka document (e-way bill) doosre run me.
+- **Jaancha ya nahi:** Aadha jaancha (2026-11-19): s.31 [T3]; raste ka document (e-way bill) doosre run me. **CA ne jaancha (2026-11-20):** har seller ka invoice parcel me; e-way bill har invoice ki value pe (CL-117).
 
 ### CL-020. Invoice pe customer ka naam aur pata
 
@@ -203,25 +220,25 @@
 - **Kis module me:** orders (invoice), seller ki invoice copy.
 - **System me kya chahiye:** D-226.
 - **Dummy kya hai:** test me ek ₹50,000 se upar ka order.
-- **Jaancha ya nahi:** Aadha jaancha (2026-11-19): [T6]; ₹50,000 se kam wala hissa [T10].
+- **Jaancha ya nahi:** Aadha jaancha (2026-11-19): [T6]; ₹50,000 se kam wala hissa [T10]. **CA ne aadha jaancha (2026-11-20):** ₹50,000 ka niyam theek. Baaki: ₹50,000 se kam wala hissa secondary.
 
 ### CL-021. Tax records ka samay
 
 - **Kanoon ya niyam:** CGST Act s.36: records us saal ke annual return ki due date se 72 mahine; appeal, revision ya jaanch chale to us maamle ke records faisle ke 1 saal baad tak, ya 72 mahine, jo baad me.
 - **Kis pe laagu:** invoices, credit notes, ledger, seller ke tax dastavez.
 - **Kis module me:** finance, seller onboarding, account delete.
-- **System me kya chahiye:** D-225, D-227; retention ki setting.
+- **System me kya chahiye:** D-225, D-227; retention ki do classes: platform ke books 8 financial years (Companies Act s.128(5)), sellers ke tax documents 72 mahine (s.36) (D-280); jhagde tak rok; retention ki setting.
 - **Dummy kya hai:** setting asli; data dummy.
-- **Jaancha ya nahi:** Jaancha (2026-11-19): s.36 [T3]. Income-tax ke records ka samay: Jaancha nahi. **Lawyer ne nahi jaancha:** income-tax records ka hissa CA agent ke liye.
+- **Jaancha ya nahi:** Jaancha (2026-11-19): s.36 [T3]. Income-tax ke records ka samay: Jaancha nahi. **Lawyer ne nahi jaancha:** income-tax records ka hissa CA agent ke liye. **CA ne aadha jaancha (2026-11-20):** GST ke records 72 mahine; platform ke books Companies Act ke 8 financial years [T24] (D-280). Baaki: income-tax ka koi alag niyam nahi mila, naye Act ka text nahi khola.
 
 ### CL-022. Gift voucher (R2)
 
 - **Kanoon ya niyam:** Circular 243/37/2024: voucher ka len-den na maal ki supply hai na seva ki; GST us maal ya seva pe jiske liye istemaal hua; bina istemaal wale balance pe GST nahi.
 - **Kis pe laagu:** R2 ke gift cards (D-179).
 - **Kis module me:** finance, checkout.
-- **System me kya chahiye:** gift card ki bikri "liability" ki entry, GST invoice nahi; istemaal pe order ka normal invoice, payment ka tareeka "gift card".
+- **System me kya chahiye:** gift card issuer bechta hai (D-249): platform ke books me liability nahi; checkout pe payment ka ek tareeka, issuer se receivable; istemaal pe order ka normal invoice, payment ka tareeka "gift card"; issuer ke saath commission ho to us pe GST.
 - **Dummy kya hai:** R2 ke test cards.
-- **Jaancha ya nahi:** Jaancha (2026-11-19): [T5] (GST). Prepaid (PPI) niyam kanooni jaanch ke doosre run me.
+- **Jaancha ya nahi:** Jaancha (2026-11-19): [T5] (GST). Prepaid (PPI) niyam kanooni jaanch ke doosre run me. **CA ne jaancha (2026-11-20):** Circular 243 primary; D-249 ke baad platform ke books me gift card ki liability nahi, issuer se receivable.
 
 ### CL-023. Consultation
 
@@ -230,7 +247,7 @@
 - **Kis module me:** consultation.
 - **System me kya chahiye:** abhi kuch nahi; paid ho to SAC aur rate CA se.
 - **Dummy kya hai:** kuch nahi.
-- **Jaancha ya nahi:** Aadha jaancha (2026-11-19): s.7 [T3]; [T1].
+- **Jaancha ya nahi:** Aadha jaancha (2026-11-19): s.7 [T3]; [T1]. **CA ne jaancha (2026-11-20):** muft seva pe GST nahi; paid ho to tab SAC aur rate.
 
 ### CL-024. Demo ke documents
 
@@ -239,7 +256,81 @@
 - **Kis module me:** orders, finance, demo ka nishaan.
 - **System me kya chahiye:** D-145 ke watermark aur "DUMMY" badge; dummy GSTIN ka check digit jaan-boojh ke galat (asli GSTIN kabhi na bane), PAN wala hissa saaf nakli pattern ka; PDF ke metadata me bhi "SPECIMEN".
 - **Dummy kya hai:** yahi.
-- **Jaancha ya nahi:** Aadha jaancha (2026-11-19): s.122 [T3, 2021 copy]; GSTIN ke check digit ka format nahi jaancha.
+- **Jaancha ya nahi:** Aadha jaancha (2026-11-19): s.122 [T3, 2021 copy]; GSTIN ke check digit ka format nahi jaancha. **CA ne jaancha (2026-11-20):** SPECIMEN, galat check digit aur portal pe kabhi nahi: s.122 ka jokhim bahut kam.
+
+### 1.1 CA (AI) ke naye points (D-281)
+
+### CL-129. Return fee aur delivery fee ki wapsi
+
+- **Kanoon ya niyam:** return fee platform ki customer ko seva hai: tax invoice (s.31); e-commerce operator ke zariye bike maal ki delivery jaisi seva 1 Nov 2026 se 5% bina ITC [T11]; fee ki wapsi pe credit note (s.34).
+- **Kis pe laagu:** "man badla" return (D-114), delivery fee ki wapsi (D-108, D-110, D-114, D-222).
+- **Kis module me:** returns, finance.
+- **System me kya chahiye:** return fee ka platform ka B2C invoice; refund = seller ka credit note minus platform ki return fee; delivery fee wapas ho to platform ka credit note; refund ke saath documents ki list.
+- **Dummy kya hai:** documents "SPECIMEN".
+- **Jaancha ya nahi:** **CA ne aadha jaancha (2026-11-20):** [T11]; "return pickup" ka "delivery services" me aana pakka nahi.
+
+### CL-130. Nil rate ka maal: bill of supply
+
+- **Kanoon ya niyam:** Nil ya exempt maal pe tax invoice nahi, bill of supply (s.31(3)(c)); taxable aur Nil saath ho to invoice-cum-bill of supply (rule 46A).
+- **Kis pe laagu:** kajal, kumkum, bindi, sindur, alta jaise Nil items (CL-001).
+- **Kis module me:** orders (invoice), finance.
+- **System me kya chahiye:** rate table ki row pe document ka type; seller ki series wahi; TCS ki net value me Nil maal nahi.
+- **Dummy kya hai:** test me ek kajal wala order.
+- **Jaancha ya nahi:** **CA ne aadha jaancha (2026-11-20):** s.31 [T3]; rule 46A ka text nahi khola.
+
+### CL-131. Company ke books: samay, audit trail, India me backup
+
+- **Kanoon ya niyam:** Companies Act s.128(5): books aur vouchers kam se kam pichhle 8 financial years [T24]; Companies (Accounts) Rules rule 3(1): accounting software me audit trail (edit log, band na ho sake), 1 Apr 2023 se; rule 3(5): electronic books ka backup India ke server pe roz (2022 ka badlav) [T25].
+- **Kis pe laagu:** platform company aur Unibelle ki company (jahan unke books hamare system me hon).
+- **Kis module me:** finance, architecture (backup).
+- **System me kya chahiye:** journal append-only, har badlav ka log; retention 8 financial years (D-280); asli business se pehle India me roz ka backup (D-256, D-280).
+- **Dummy kya hai:** dummy books; India ka backup asli business pe.
+- **Jaancha ya nahi:** **CA ne aadha jaancha (2026-11-20):** [T24] (sarkari site, search ka saar), [T25] (secondary).
+
+### CL-132. Delivery seva pe ITC ki rok
+
+- **Kanoon ya niyam:** 5% wali delivery seva (heading 9968 item (iii)) ki shart: delivery me lage inputs aur input services ka ITC nahi; saajhe inputs me hissa ulatna [T11].
+- **Kis pe laagu:** platform (delivery fee, return fee, fulfilment fee ka delivery hissa; D-275).
+- **Kis module me:** finance.
+- **System me kya chahiye:** har kharche pe cost centre (delivery, warehouse, saajha); delivery wale ka ITC nahi; saajhe ka mahine me anupaat se ulatna; khaata "ITC not available".
+- **Dummy kya hai:** test kharche.
+- **Jaancha ya nahi:** **CA ne aadha jaancha (2026-11-20):** [T11]; notification ka Explanation (iv) aur rules 42, 43 ka text nahi khola.
+
+### CL-133. Seller ka inbound maal: invoice, challan, e-way bill
+
+- **Kanoon ya niyam:** seller ke doosre state ke GSTIN se hamare warehouse state ke GSTIN ko maal distinct persons ke beech supply hai (Schedule I para 2): tax invoice (IGST) aur seema se upar e-way bill [T3, T21]; usi state ki jagah se aaye to delivery challan.
+- **Kis pe laagu:** har seller ka inbound maal (D-036, D-096).
+- **Kis module me:** warehouse (receiving), seller app.
+- **System me kya chahiye:** ASN me seller ke invoice ya challan ka number, tareekh, value aur e-way bill number (seema paar ho to); receiving pe staff milaaye (D-280).
+- **Dummy kya hai:** dummy numbers.
+- **Jaancha ya nahi:** **CA ne aadha jaancha (2026-11-20):** Schedule I [T3]; [T21].
+
+### CL-134. Hamari fees pe seller ka TDS
+
+- **Kanoon ya niyam:** seller hamari commission aur fees apne books me credit karta hai; us pe seller ko TDS kaatna hai ya nahi, naye Income-tax Act me saaf nahi mila; e-commerce TDS wali rakam pe doosra TDS nahi (CBDT Circular 20/2023, purana Act) [T18].
+- **Kis pe laagu:** har seller, platform.
+- **Kis module me:** finance.
+- **System me kya chahiye:** fees invoice pe "seller ne TDS kaata" ka field; platform ke "TDS receivable" aur seller ke certificate (Form 131) ka milaan.
+- **Dummy kya hai:** field khaali.
+- **Jaancha ya nahi:** **CA ne nahi jaancha:** [T18] (secondary) sirf doosre sawal pe.
+
+### CL-135. Transporter ka bill: GTA aur RCM
+
+- **Kanoon ya niyam:** consignment note dene wala transporter GTA hai (paribhasha 1 Nov 2026 se badli) [T11]; GTA aur gaadi kiraye ki sevaon pe forward ya reverse charge ka niyam aur rate nahi khole.
+- **Kis pe laagu:** platform (D-027, R2).
+- **Kis module me:** finance.
+- **System me kya chahiye:** transporter record pe "GTA / consignment note" aur "forward charge ka option"; RCM ka khaata; ITC ki rok (CL-132) ke saath.
+- **Dummy kya hai:** dummy transporter.
+- **Jaancha ya nahi:** **CA ne nahi jaancha:** sirf GTA ki paribhasha [T11].
+
+### CL-136. Platform ke tax returns aur statements
+
+- **Kanoon ya niyam:** GST: GSTR-1, GSTR-3B (GSTR-1 se aayi liability badli nahi ja sakti, sudhaar GSTR-1A se) [T27], GSTR-8 (agle mahine ki 10), TCS ka saal ka statement (31 December) (s.52) [T3]; ECO ke through supplies GSTR-1 ke Table 14 me [T22]. Income-tax: TDS jama agle mahine ki 7, quarterly Form 140, certificate Form 131, correction ki muddat 2 saal [T19, T20].
+- **Kis pe laagu:** platform.
+- **Kis module me:** finance.
+- **System me kya chahiye:** har return aur statement ka export (R2, D-134); sellers aur partners ke statements; roz aur mahine ka milaan (gateway, settlement bank khaata, sub-ledgers, GSTR-1, GSTR-8, TDS); due dates aur form numbers setting me, yaad ke saath.
+- **Dummy kya hai:** sab exports "SPECIMEN"; koi filing nahi (D-026).
+- **Jaancha ya nahi:** **CA ne aadha jaancha (2026-11-20):** s.52 [T3]; [T19] (sirf titles), [T20], [T22], [T27].
 
 ## 2. Legal Metrology (D-245)
 
@@ -1057,27 +1148,27 @@
 - **Kanoon ya niyam:** marketplace payment aggregator ka merchant hai (para 4(e), 4(f)); aggregator khud marketplace business nahi karta (10(b)); aggregator dekhe ki marketplace sirf onboarded sellers ke liye paisa le (13(f)); settlement agreement ke samay se (Table 1); refund usi raaste (10(f)) [C4].
 - **Kis pe laagu:** platform (Razorpay ka merchant).
 - **Kis module me:** payments, finance.
-- **System me kya chahiye:** ledger me sellers ka paisa liability ki tarah alag; seller agreement me payout ke din (D-081, D-256); baad me linked account ka raasta (D-093). Jod (D-269, D-271): alag "seller settlement" khaata; seller agreement me "limited payment collection agent".
+- **System me kya chahiye:** ledger me sellers ka paisa liability ki tarah alag; seller agreement me payout ke din (D-081, D-256); baad me linked account ka raasta (D-093). Jod (D-269, D-271): alag "seller settlement" khaata; seller agreement me "limited payment collection agent". Jod (D-281): Settlement khaate se sirf sellers ka payout, refunds aur platform ke kamaye hisse ka sweep; gateway fees, platform offer aur chargeback ka usi din Operating se top-up; roz ka milaan (D-280).
 - **Dummy kya hai:** test mode aur haath se payout (D-055).
-- **Jaancha ya nahi:** Aadha jaancha (2026-11-20): [C4]; marketplace ka khud aggregator na hona text ki padhai se, seedha likha nahi. **Lawyer ne jaancha (2026-11-20):** platform gateway ka merchant, khud payment aggregator nahi; payout ka samay contract ka; seller agreement me "limited payment collection agent" (D-271).
+- **Jaancha ya nahi:** Aadha jaancha (2026-11-20): [C4]; marketplace ka khud aggregator na hona text ki padhai se, seedha likha nahi. **Lawyer ne jaancha (2026-11-20):** platform gateway ka merchant, khud payment aggregator nahi; payout ka samay contract ka; seller agreement me "limited payment collection agent" (D-271). **CA ne aadha jaancha (2026-11-20):** accounting ka hissa (alag khaata, top-up, sweep, roz ka milaan; D-280) theek. Baaki: RBI ka hissa Lawyer ka.
 
 ### CL-109. Failed transaction, refund aur chargeback
 
 - **Kanoon ya niyam:** failed transaction (paisa kata, par merchant ko pakki suchna nahi): card aur UPI ke merchant payment pe T+5 din me reversal, phir bank pe roz ₹100 ka harjana [R1]; refund usi raaste; chargeback ka framework aggregator ka, aur customer ke haq bane rehte hain ([C4] para 8(a), 18(h)).
 - **Kis pe laagu:** platform, gateway.
 - **Kis module me:** checkout, finance, support.
-- **System me kya chahiye:** "paisa kata, order nahi bana" ki screen aur email; der se "captured" aaye to apne aap refund, sirf ek baar (D-256); chargeback ka case aur saboot (D-072, D-191).
+- **System me kya chahiye:** "paisa kata, order nahi bana" ki screen aur email; der se "captured" aaye to apne aap refund, sirf ek baar (D-256); chargeback ka case aur saboot (D-072, D-191). Jod (D-281): chargeback: seller ki galti pe seller ka credit note; platform wale (fraud, delivery) pe nahi (D-280).
 - **Dummy kya hai:** test mode ke scenario.
-- **Jaancha ya nahi:** Jaancha (2026-11-20): [C4], [R1].
+- **Jaancha ya nahi:** Jaancha (2026-11-20): [C4], [R1]. **CA ne aadha jaancha (2026-11-20):** refund aur chargeback ki entries aur credit note ka niyam (D-280). Baaki: s.34 ki 2021 copy.
 
 ### CL-110. Gift card, points aur store credit
 
 - **Kanoon ya niyam:** PPI = rakhi hui value se kharid. Closed system PPI (sirf issuer ka apna maal ya seva, cash nahi) ko RBI ki ijazat nahi chahiye, par wo teesre ke liye payment nahi kar sakta. Gift PPI: ₹10,000 tak, reload nahi, cash-out nahi; validity kam se kam 1 saal, aur expiry issue pe batana [R2].
 - **Kis pe laagu:** gift cards (R2), points (R2).
 - **Kis module me:** loyalty, checkout, finance.
-- **System me kya chahiye:** gift card sirf RBI-authorised PPI issuer ke zariye (D-249); points paise se khareede nahi jaate, cash ya transfer nahi (D-173); store credit aur wallet nahi (D-177). Jod (D-271): balance aur expiry dikhe; expiry se 45 din pehle yaad, issuer chahe to.
+- **System me kya chahiye:** gift card sirf RBI-authorised PPI issuer ke zariye (D-249); points paise se khareede nahi jaate, cash ya transfer nahi (D-173); store credit aur wallet nahi (D-177). Jod (D-271): balance aur expiry dikhe; expiry se 45 din pehle yaad, issuer chahe to. Jod (D-281): points ka provision (CL-008).
 - **Dummy kya hai:** test mode ka design; koi asli issuer nahi.
-- **Jaancha ya nahi:** Aadha jaancha (2026-11-20): [R2]; marketplace pe lagna aur points ka darja vyakhya ka sawal. **Lawyer ne aadha jaancha (2026-11-20):** gift card platform khud jaari nahi kar sakta, sirf authorised issuer ke zariye (D-249); expiry ki yaad (D-271). Points CL-081 jaisa.
+- **Jaancha ya nahi:** Aadha jaancha (2026-11-20): [R2]; marketplace pe lagna aur points ka darja vyakhya ka sawal. **Lawyer ne aadha jaancha (2026-11-20):** gift card platform khud jaari nahi kar sakta, sirf authorised issuer ke zariye (D-249); expiry ki yaad (D-271). Points CL-081 jaisa. **CA ne aadha jaancha (2026-11-20):** gift card issuer ka, platform pe liability nahi; points ka provision. Baaki: income-tax ka hissa.
 
 ### CL-111. E-mandate
 
@@ -1105,16 +1196,16 @@
 - **Kis module me:** delivery partners, finance.
 - **System me kya chahiye:** D-254 ke kaam (partner pe portal ka number, roz ke kaam ka export, saal ke kaam ke din ki ginti, contribution ki provision, dar setting me aur shuru ki tareekh notify hone tak band); partner ki kamaai se kaat ka likhit kaaran aur appeal; har state ki row.
 - **Dummy kya hai:** dummy partners; portal pe kabhi upload nahi (D-026).
-- **Jaancha ya nahi:** Aadha jaancha (2026-11-20): [G1], [G2]; Rules aur bill [G3], [G4] (secondary). **Lawyer ne aadha jaancha (2026-11-20):** Code ki paribhasha primary se theek. Baaki: Rules 2026 aur state ke bill sirf secondary.
+- **Jaancha ya nahi:** Aadha jaancha (2026-11-20): [G1], [G2]; Rules aur bill [G3], [G4] (secondary). **Lawyer ne aadha jaancha (2026-11-20):** Code ki paribhasha primary se theek. Baaki: Rules 2026 aur state ke bill sirf secondary. **CA ne nahi jaancha:** contribution ka "turnover" Rules pe tika, text nahi khula; sirf provision ka khaata prastaavit.
 
 ### CL-113. Partner payouts pe TDS
 
-- **Kanoon ya niyam:** contractor ke payment pe TDS, Income-tax Act 2025 s.393(1) (pehle s.194C): individual ya HUF pe 1%, baaki pe 2%; seema ek payment ₹30,000 ya saal me ₹1,00,000 [G5].
+- **Kanoon ya niyam:** contractor ke payment pe TDS, Income-tax Act 2025 s.393(1) (pehle s.194C): individual ya HUF pe 1%, baaki pe 2%; seema ek payment ₹30,000 ya saal me ₹1,00,000 [G5]. Jod (D-281): saal ki seema paar hone pe us saal ki poori rakam pe TDS; kaat (D-068) se pehle ki kamaai pe; vasooli pe GST nahi [T20].
 - **Kis pe laagu:** platform (partner payouts).
 - **Kis module me:** finance.
 - **System me kya chahiye:** D-254 (partner ka PAN encrypted, saal ka jod, kaat ka niyam settings me, payout statement me TDS).
 - **Dummy kya hai:** dummy PAN; koi challan nahi.
-- **Jaancha ya nahi:** Aadha jaancha (2026-11-20): [G5] (sirf secondary); CA agent se pakka karna (D-257).
+- **Jaancha ya nahi:** Aadha jaancha (2026-11-20): [G5] (sirf secondary); CA agent se pakka karna (D-257). **CA ne aadha jaancha (2026-11-20):** 1% ya 2%, ₹30,000 / ₹1,00,000, saal ki seema paar pe poore saal ka catch-up, kaat se pehle ki kamaai pe (D-280). Baaki: sab secondary [T20].
 
 ### CL-114. Partner ka data
 
@@ -1157,12 +1248,12 @@
 
 ### CL-117. E-way bill
 
-- **Kanoon ya niyam:** inter-state ₹50,000 se zyada ki consignment; Maharashtra ke andar ₹1,00,000; ek e-way bill ek invoice ka; ek gaadi ke liye consolidated e-way bill [W5].
+- **Kanoon ya niyam:** seema har consignment (invoice ya challan) ki value pe, tax samet, gaadi ke jod pe nahi: inter-state ₹50,000, Maharashtra ke andar ₹1,00,000 [W5, T26]; seema paar wale invoices ka consolidated e-way bill; rule 138E me e-commerce operator bhi e-way bill bana sakta hai [T21].
 - **Kis pe laagu:** warehouse se hub ke trips.
 - **Kis module me:** logistics (trips, D-027).
-- **System me kya chahiye:** trip ke manifest me har invoice ki rakam; seema paar ho to e-way bill number ke bina dispatch nahi; trip pe consolidated number (D-256).
+- **System me kya chahiye:** trip ke manifest me har invoice ki value; state ki seema setting me; seema paar invoice pe number ke bina dispatch nahi; trip pe consolidated number (D-256); seller agreement me platform ka e-way bill banane ka haq.
 - **Dummy kya hai:** number "DUMMY".
-- **Jaancha ya nahi:** Aadha jaancha (2026-11-20): [W5]; CA agent se pakka karna (D-257).
+- **Jaancha ya nahi:** Aadha jaancha (2026-11-20): [W5]; CA agent se pakka karna (D-257). **CA ne aadha jaancha (2026-11-20):** seema har invoice pe, consolidated e-way bill [T21] (primary par purana). Baaki: Maharashtra ka ₹1 lakh secondary [T26].
 
 ### CL-118. Plastic EPR
 
@@ -1258,9 +1349,9 @@
 - **Kanoon ya niyam:** koi khaas kanoon nahi mila; ye seller agreement (contract) ki baat hai.
 - **Kis pe laagu:** har seller.
 - **Kis module me:** finance, seller agreement.
-- **System me kya chahiye:** D-071; seller agreement me kaat ka haq, notice, listings rokna, aur jhagde ka raasta.
+- **System me kya chahiye:** D-071; seller agreement me kaat ka haq, notice, listings rokna, aur jhagde ka raasta. Jod (D-281): fees ka GST invoice pe deya; write-off pe GST wapas nahi; seller ko 150 din purane bina chukaye invoices ki yaad.
 - **Dummy kya hai:** test mode ka payment link.
-- **Jaancha ya nahi:** Jaancha nahi. **Lawyer ne aadha jaancha (2026-11-20):** contract ka maamla; set-off, notice aur listings rokna theek (D-271). Baaki: MSMED aur Contract Act ka text nahi khola; tax hissa CA ke liye.
+- **Jaancha ya nahi:** Jaancha nahi. **Lawyer ne aadha jaancha (2026-11-20):** contract ka maamla; set-off, notice aur listings rokna theek (D-271). Baaki: MSMED aur Contract Act ka text nahi khola; tax hissa CA ke liye. **CA ne aadha jaancha (2026-11-20):** fees ka GST invoice pe deya; write-off pe GST wapas nahi; seller ka 180 din ka ITC niyam. Baaki: naye Income-tax Act me bad debt ka section.
 
 ### CL-127. Apne brand ka trademark
 
@@ -1278,7 +1369,7 @@
 - **Kis module me:** sign-up, seller onboarding, legal pages.
 - **System me kya chahiye:** har version badla na ja sake; kisne, kab, kaunsa version maana, iska record; "maanta hoon" bina pehle tick ke (D-150).
 - **Dummy kya hai:** dummy sellers ka record.
-- **Jaancha ya nahi:** Aadha jaancha (2026-11-20): [L2].
+- **Jaancha ya nahi:** Aadha jaancha (2026-11-20): [L2]. **CA ne nahi jaancha:** stamp duty (Maharashtra) ka text nahi khola; asli business se pehle.
 
 ## 13. Nazar (D-261)
 
@@ -1295,6 +1386,10 @@ Cheezein jin pe nazar rakhni hai; badlav ho to us row ko dobara dekhna.
 | Hosting ka region aur payment data India me                                                                                                                                           | Asli business se pehle (D-058, D-256)              | CL-107                 |
 | Gift card ka issuer (test mode me milta hai ya nahi)                                                                                                                                  | Gift card banne se pehle (D-249)                   | CL-110                 |
 | Foreign investment (D-040) khule to FDI ki e-commerce shartein: Unibelle me platform ya group ki equity, sab sellers ko barabar fees, platform ke discount, auditor ki saal ki report | Foreign investment se pehle (D-271)                | CL-124                 |
+| Finance ke books ka India me roz ka backup aur audit trail (Companies (Accounts) Rules rule 3)                                                                                        | Asli business se pehle (D-256, D-280)              | CL-131                 |
+| E-commerce operator ke business model se juda s.9(5) ka aage ka badlav (GST Council ki salah)                                                                                         | Finance Bill aane pe                               | CL-012                 |
+| Income-tax Act 2025 ke liye CBDT ke naye circulars (e-commerce TDS)                                                                                                                   | Aane pe                                            | CL-014                 |
+| Stamp duty aur e-stamp                                                                                                                                                                | Asli business se pehle                             | CL-128                 |
 
 ## 14. Documents ka dhaancha (D-274)
 
@@ -1357,54 +1452,54 @@ Do parat: sign-up pe chhota **Data notice** (alag, itemised) aur poora **Privacy
 
 ### 14.3 Seller Agreement
 
-| #   | Clause                          | Kaam                                                                                                                                                                                              | Hawala                                                    |
-| --- | ------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------- |
-| 1   | Parties aur maanna              | `[PLATFORM]` aur `[SELLER]`; likhit electronic contract; version aur maanne ka record.                                                                                                            | CL-060, CL-128                                            |
-| 2   | Kaun bech sakta                 | Brand owner ya authorised distributor; ek brand ek seller; brand ka pehla haq.                                                                                                                    | D-032, D-075                                              |
-| 3   | Onboarding ke dastavez          | PAN, warehouse wale state ka GSTIN, licence ka type, import registration, plastic aur (appliances pe) E-waste EPR number, brand authorisation, seller ka grievance officer; Aadhaar ki copy nahi. | D-036, D-127, D-256, D-238, D-271, CL-095, CL-118, CL-120 |
-| 4   | Marketplace aur barabari        | Platform facilitator; koi differentiated treatment nahi, apna brand bhi isi niyam me; Unibelle ka har kaam sirf uske seller account se; kram ke gun public.                                       | D-139, D-271, CL-066                                      |
-| 5   | Listing aur undertaking         | Content seller ka aur sahi; jokhim wale fields ki jaanch; staff content nahi badalta; claims ke saboot; mana shabd.                                                                               | D-098, D-100, D-224, D-256 niyam 2, CL-069                |
-| 6   | Daam                            | Daam seller ka, platform ke 4 niyam; bade badlav pe confirm; Pro daam.                                                                                                                            | D-061, D-087, D-065                                       |
-| 7   | Fulfilment services             | Inbound ki suchna, receiving, label kahan lage, storage aur pehle expire wala pehle, quarantine, wapsi.                                                                                           | D-014, D-096, D-097, D-124, D-230                         |
-| 8   | Maalikana aur jokhim            | Maal bikne tak seller ka; platform bailee; custody me nuksaan ki bharpai ka tareeka.                                                                                                              | D-060, D-063, D-112                                       |
-| 9   | Expiry aur na bika maal         | Seemaayein, bikri band, brand ka chunaav, nasht karna (authorised handler).                                                                                                                       | D-062, D-082, D-256 niyam 6                               |
-| 10  | Fees                            | Commission, fulfilment, storage, disposal; fees ka tax invoice; badlav pe notice.                                                                                                                 | D-078, D-094, D-066, CL-011                               |
-| 11  | Payment collection aur payout   | Platform limited payment collection agent; paisa alag "seller settlement" khaate me, payout usi se; payable kab, hafte ka payout, kam se kam rakam, statement.                                    | D-081, D-093, D-256 niyam 4, D-269, D-271                 |
-| 12  | Kaat aur udhaar                 | Set-off ka haq; udhaar ka alert, payment link, notice, listings rokna, account band; har kaat ki line aur aapatti.                                                                                | D-071, D-103, D-271, CL-126                               |
-| 13  | Tax                             | Seller ka GST invoice; TCS aur TDS ki kaat aur statement.                                                                                                                                         | CL-013, CL-014, D-239                                     |
-| 14  | Returns aur daawe ka kharcha    | Wajah ke hisaab se kharcha; payable ke baad ulta daawa udhaar ke raaste.                                                                                                                          | D-079, D-112, D-114, D-221                                |
-| 15  | Chargeback (R2)                 | Wajah ke hisaab se nuksaan.                                                                                                                                                                       | D-095                                                     |
-| 16  | Product liability aur indemnity | Seller manufacturer ya product seller ki zimmedari; recall aur regulator ka kharcha; platform ki indemnity sirf apni laparwahi aur custody tak.                                                   | D-129, CL-068                                             |
-| 17  | Recall aur skin reaction        | Recall ka kram, kharcha brand ka; skin reaction ki khabar aur goodwill refund ki seema.                                                                                                           | D-129, D-130                                              |
-| 18  | Kanooni ghoshnayein             | Licensed manufacturer ka maal, poora label, Legal Metrology ki declarations, koi drug ya AYUSH drug nahi, mana ingredients nahi.                                                                  | D-128, D-246, CL-039, CL-026                              |
-| 19  | IP aur asliyat                  | Asli aur jaayaz tareeke se mila maal; photos aur trademark ke istemaal ka haq; imported maal ki authenticity guarantee; nakli pe karwai.                                                          | CL-124, CL-087, CL-085                                    |
-| 20  | Customer data                   | Sirf order ka zaroori data; customer se seedha sampark nahi; DPDP ki zimmedari.                                                                                                                   | D-143, D-144, CL-098                                      |
-| 21  | Reviews aur brand ka jawab      | Brand ka staff review nahi likhta; jawab moderation ke saath, mana shabd nahi.                                                                                                                    | D-156, D-160, CL-077                                      |
-| 22  | Seller ka grievance officer     | Product page pe seller ka block; customer ki shikayat platform ki seedhi me bhi.                                                                                                                  | D-238, CL-060, CL-064                                     |
-| 23  | Rokna aur band karna            | Wajahein, notice, appeal, maal ki wapsi.                                                                                                                                                          | D-084, D-071, D-062                                       |
-| 24  | Seller aur platform ka jhagda   | Tay din me saboot, naya senior, rakam pe rok; phir `[DISPUTE_RESOLUTION]`.                                                                                                                        | D-164, D-268                                              |
-| 25  | Zimmedari ki chhat              | `[LIABILITY_CAP]`; D-063 ki bharpai, dhokha aur kanooni zimmedari is chhat ke bahar; customer ke kanooni haq pe koi chhat nahi.                                                                   | D-270                                                     |
-| 26  | Badlav, muddat, suchna          | Badlav pe pehle notice aur naya version; suchna email aur seller app me; stamp duty ya e-sign asli business pe.                                                                                   | D-150, CL-128                                             |
+| #   | Clause                          | Kaam                                                                                                                                                                                                                                                                                                                                                                                                                                            | Hawala                                                    |
+| --- | ------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------- |
+| 1   | Parties aur maanna              | `[PLATFORM]` aur `[SELLER]`; likhit electronic contract; version aur maanne ka record.                                                                                                                                                                                                                                                                                                                                                          | CL-060, CL-128                                            |
+| 2   | Kaun bech sakta                 | Brand owner ya authorised distributor; ek brand ek seller; brand ka pehla haq.                                                                                                                                                                                                                                                                                                                                                                  | D-032, D-075                                              |
+| 3   | Onboarding ke dastavez          | PAN, warehouse wale state ka GSTIN, licence ka type, import registration, plastic aur (appliances pe) E-waste EPR number, brand authorisation, seller ka grievance officer; Aadhaar ki copy nahi.                                                                                                                                                                                                                                               | D-036, D-127, D-256, D-238, D-271, CL-095, CL-118, CL-120 |
+| 4   | Marketplace aur barabari        | Platform facilitator; koi differentiated treatment nahi, apna brand bhi isi niyam me; Unibelle ka har kaam sirf uske seller account se; kram ke gun public.                                                                                                                                                                                                                                                                                     | D-139, D-271, CL-066                                      |
+| 5   | Listing aur undertaking         | Content seller ka aur sahi; jokhim wale fields ki jaanch; staff content nahi badalta; claims ke saboot; mana shabd.                                                                                                                                                                                                                                                                                                                             | D-098, D-100, D-224, D-256 niyam 2, CL-069                |
+| 6   | Daam                            | Daam seller ka, platform ke 4 niyam; bade badlav pe confirm; Pro daam.                                                                                                                                                                                                                                                                                                                                                                          | D-061, D-087, D-065                                       |
+| 7   | Fulfilment services             | Inbound ki suchna, receiving, label kahan lage, storage aur pehle expire wala pehle, quarantine, wapsi.                                                                                                                                                                                                                                                                                                                                         | D-014, D-096, D-097, D-124, D-230                         |
+| 8   | Maalikana aur jokhim            | Maal bikne tak seller ka; platform bailee; custody me nuksaan ki bharpai ka tareeka.                                                                                                                                                                                                                                                                                                                                                            | D-060, D-063, D-112                                       |
+| 9   | Expiry aur na bika maal         | Seemaayein, bikri band, brand ka chunaav, nasht karna (authorised handler).                                                                                                                                                                                                                                                                                                                                                                     | D-062, D-082, D-256 niyam 6                               |
+| 10  | Fees                            | Commission, fulfilment, storage, disposal; fees ka tax invoice; badlav pe notice. Fees GST ke bina, GST alag; continuous supply, har payout cycle ka ek tax invoice, seller ke warehouse state wale GSTIN pe; fulfilment fee ke do hisse (D-275); return pe fees (D-277).                                                                                                                                                                       | D-078, D-094, D-066, CL-011, D-275, D-277                 |
+| 11  | Payment collection aur payout   | Platform limited payment collection agent; paisa alag "seller settlement" khaate me, payout usi se; payable kab, hafte ka payout, kam se kam rakam, statement.                                                                                                                                                                                                                                                                                  | D-081, D-093, D-256 niyam 4, D-269, D-271                 |
+| 12  | Kaat aur udhaar                 | Set-off ka haq; udhaar ka alert, payment link, notice, listings rokna, account band; har kaat ki line aur aapatti.                                                                                                                                                                                                                                                                                                                              | D-071, D-103, D-271, CL-126                               |
+| 13  | Tax                             | Seller ka GST invoice; TCS aur TDS ki kaat aur statement. Invoice platform seller ki taraf se banata hai, HSN aur rate seller ki zimmedari; TCS aur TDS set-off se pehle poori rakam pe; mahine ka TCS statement aur quarterly TDS certificate; seller apne GSTR-1 me ECO wali supplies dikhaye; platform offer ka hissa seller ki supply ka consideration; bharpai pe GST nahi (D-276); platform seller ki taraf se e-way bill bana sakta hai. | CL-013, CL-014, D-239, D-276, D-280                       |
+| 14  | Returns aur daawe ka kharcha    | Wajah ke hisaab se kharcha; payable ke baad ulta daawa udhaar ke raaste.                                                                                                                                                                                                                                                                                                                                                                        | D-079, D-112, D-114, D-221                                |
+| 15  | Chargeback (R2)                 | Wajah ke hisaab se nuksaan.                                                                                                                                                                                                                                                                                                                                                                                                                     | D-095                                                     |
+| 16  | Product liability aur indemnity | Seller manufacturer ya product seller ki zimmedari; recall aur regulator ka kharcha; platform ki indemnity sirf apni laparwahi aur custody tak.                                                                                                                                                                                                                                                                                                 | D-129, CL-068                                             |
+| 17  | Recall aur skin reaction        | Recall ka kram, kharcha brand ka; skin reaction ki khabar aur goodwill refund ki seema.                                                                                                                                                                                                                                                                                                                                                         | D-129, D-130                                              |
+| 18  | Kanooni ghoshnayein             | Licensed manufacturer ka maal, poora label, Legal Metrology ki declarations, koi drug ya AYUSH drug nahi, mana ingredients nahi.                                                                                                                                                                                                                                                                                                                | D-128, D-246, CL-039, CL-026                              |
+| 19  | IP aur asliyat                  | Asli aur jaayaz tareeke se mila maal; photos aur trademark ke istemaal ka haq; imported maal ki authenticity guarantee; nakli pe karwai.                                                                                                                                                                                                                                                                                                        | CL-124, CL-087, CL-085                                    |
+| 20  | Customer data                   | Sirf order ka zaroori data; customer se seedha sampark nahi; DPDP ki zimmedari.                                                                                                                                                                                                                                                                                                                                                                 | D-143, D-144, CL-098                                      |
+| 21  | Reviews aur brand ka jawab      | Brand ka staff review nahi likhta; jawab moderation ke saath, mana shabd nahi.                                                                                                                                                                                                                                                                                                                                                                  | D-156, D-160, CL-077                                      |
+| 22  | Seller ka grievance officer     | Product page pe seller ka block; customer ki shikayat platform ki seedhi me bhi.                                                                                                                                                                                                                                                                                                                                                                | D-238, CL-060, CL-064                                     |
+| 23  | Rokna aur band karna            | Wajahein, notice, appeal, maal ki wapsi.                                                                                                                                                                                                                                                                                                                                                                                                        | D-084, D-071, D-062                                       |
+| 24  | Seller aur platform ka jhagda   | Tay din me saboot, naya senior, rakam pe rok; phir `[DISPUTE_RESOLUTION]`.                                                                                                                                                                                                                                                                                                                                                                      | D-164, D-268                                              |
+| 25  | Zimmedari ki chhat              | `[LIABILITY_CAP]`; D-063 ki bharpai, dhokha aur kanooni zimmedari is chhat ke bahar; customer ke kanooni haq pe koi chhat nahi.                                                                                                                                                                                                                                                                                                                 | D-270                                                     |
+| 26  | Badlav, muddat, suchna          | Badlav pe pehle notice aur naya version; suchna email aur seller app me; stamp duty ya e-sign asli business pe.                                                                                                                                                                                                                                                                                                                                 | D-150, CL-128                                             |
 
 ### 14.4 Delivery Partner Agreement
 
-| #   | Clause                 | Kaam                                                                                                                                                              | Hawala                      |
-| --- | ---------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------- |
-| 1   | Parties aur maanna     | `[PLATFORM]` aur `[PARTNER]`; electronic contract; version record; 18+.                                                                                           | CL-128                      |
-| 2   | Rishta                 | Independent contractor, employee nahi; koi salary, shift ya attendance nahi.                                                                                      | D-033, D-266                |
-| 3   | Azaadi                 | Offer maanna ya chhodna, chhodne pe saza nahi (sirf baar-baar maan ke chhodne pe); apni availability, koi fixed shift nahi; doosre platforms pe kaam ki rok nahi. | D-266                       |
-| 4   | Patrata aur dastavez   | Licence, RC, insurance jo delivery ka istemaal cover kare, PAN; Aadhaar ki copy nahi; expiry pe kaam band.                                                        | D-254, CL-095, D-267        |
-| 5   | Gaadi aur kharcha      | Apni gaadi, apna kharcha aur maintenance.                                                                                                                         | D-033                       |
-| 6   | App aur device         | Manzoor phone, session, Hub Manager ka band karna.                                                                                                                | D-183                       |
-| 7   | Kaam ka tareeka        | Pickup scan, delivery code, photo aur location sirf delivery aur fail ke pal; return pickup ki jaanch; jalne wale maal ki seema.                                  | D-072, D-113, D-254, CL-115 |
-| 8   | Customer ka data       | Sirf active parcel ki jaankari; kaam ke baad nahi rakhna; koi aur istemaal nahi.                                                                                  | D-201, CL-114               |
-| 9   | Kamaai aur payout      | Har kaam ki rakam, hafte ka payout, statement, TDS.                                                                                                               | D-104, D-254, CL-113        |
-| 10  | Nuksaan ki kaat        | Sirf saboot aur jaanch ke baad; partner ka paksh; ek maamla aur mahine ki seema; record aur appeal.                                                               | D-068, D-103, D-164         |
-| 11  | Social security        | Portal pe registration, kaam ka data portal ko, aggregator ka contribution.                                                                                       | D-254, CL-112               |
-| 12  | Partner ka data        | Data notice aur consent; lagatar tracking nahi.                                                                                                                   | D-254, CL-114               |
-| 13  | Suraksha aur insurance | Traffic niyam partner ke; delivery ka istemaal cover karne wala insurance partner ka; asli business pe platform ka group accident cover `[INSURANCE: DUMMY]`.     | D-267                       |
-| 14  | Account rokna aur band | Saaf wajahein, notice, appeal; baar-baar nuksaan pe rok.                                                                                                          | D-068 niyam 3               |
-| 15  | Jhagda, badlav, suchna | Dispute ka kram, phir `[DISPUTE_RESOLUTION]`; badlav pe notice; suchna email aur Delivery app me.                                                                 | D-164, D-268, D-150         |
+| #   | Clause                 | Kaam                                                                                                                                                                                                                                                        | Hawala                      |
+| --- | ---------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------- |
+| 1   | Parties aur maanna     | `[PLATFORM]` aur `[PARTNER]`; electronic contract; version record; 18+.                                                                                                                                                                                     | CL-128                      |
+| 2   | Rishta                 | Independent contractor, employee nahi; koi salary, shift ya attendance nahi.                                                                                                                                                                                | D-033, D-266                |
+| 3   | Azaadi                 | Offer maanna ya chhodna, chhodne pe saza nahi (sirf baar-baar maan ke chhodne pe); apni availability, koi fixed shift nahi; doosre platforms pe kaam ki rok nahi.                                                                                           | D-266                       |
+| 4   | Patrata aur dastavez   | Licence, RC, insurance jo delivery ka istemaal cover kare, PAN; Aadhaar ki copy nahi; expiry pe kaam band.                                                                                                                                                  | D-254, CL-095, D-267        |
+| 5   | Gaadi aur kharcha      | Apni gaadi, apna kharcha aur maintenance.                                                                                                                                                                                                                   | D-033                       |
+| 6   | App aur device         | Manzoor phone, session, Hub Manager ka band karna.                                                                                                                                                                                                          | D-183                       |
+| 7   | Kaam ka tareeka        | Pickup scan, delivery code, photo aur location sirf delivery aur fail ke pal; return pickup ki jaanch; jalne wale maal ki seema.                                                                                                                            | D-072, D-113, D-254, CL-115 |
+| 8   | Customer ka data       | Sirf active parcel ki jaankari; kaam ke baad nahi rakhna; koi aur istemaal nahi.                                                                                                                                                                            | D-201, CL-114               |
+| 9   | Kamaai aur payout      | Har kaam ki rakam, hafte ka payout, statement, TDS. Contractor TDS (1% ya 2%, saal ki seema paar pe poore saal ka catch-up), PAN na ho to uchi rate; kaat se TDS ka aadhaar nahi ghatta; partner GST registration ki seema paar kare to platform ko bataye. | D-104, D-254, CL-113, D-280 |
+| 10  | Nuksaan ki kaat        | Sirf saboot aur jaanch ke baad; partner ka paksh; ek maamla aur mahine ki seema; record aur appeal.                                                                                                                                                         | D-068, D-103, D-164         |
+| 11  | Social security        | Portal pe registration, kaam ka data portal ko, aggregator ka contribution.                                                                                                                                                                                 | D-254, CL-112               |
+| 12  | Partner ka data        | Data notice aur consent; lagatar tracking nahi.                                                                                                                                                                                                             | D-254, CL-114               |
+| 13  | Suraksha aur insurance | Traffic niyam partner ke; delivery ka istemaal cover karne wala insurance partner ka; asli business pe platform ka group accident cover `[INSURANCE: DUMMY]`.                                                                                               | D-267                       |
+| 14  | Account rokna aur band | Saaf wajahein, notice, appeal; baar-baar nuksaan pe rok.                                                                                                                                                                                                    | D-068 niyam 3               |
+| 15  | Jhagda, badlav, suchna | Dispute ka kram, phir `[DISPUTE_RESOLUTION]`; badlav pe notice; suchna email aur Delivery app me.                                                                                                                                                           | D-164, D-268, D-150         |
 
 ### 14.5 Return aur Refund policy page
 
@@ -1444,17 +1539,18 @@ Do parat: sign-up pe chhota **Data notice** (alag, itemised) aur poora **Privacy
 
 ## Change log
 
-| Version | Date       | Badlav                                                                                                                                     |
-| ------- | ---------- | ------------------------------------------------------------------------------------------------------------------------------------------ |
-| v1.0.0  | 2026-11-17 | Khaali file bani.                                                                                                                          |
-| v1.1.1  | 2026-11-19 | §1 tax: CL-001 se CL-024, sources ke saath (D-244); file ka dhaancha.                                                                      |
-| v1.1.2  | 2026-11-19 | §2 Legal Metrology: CL-025 se CL-038, sources ke saath (D-245).                                                                            |
-| v1.1.3  | 2026-11-19 | §3 cosmetics kanoon: CL-039 se CL-058, sources ke saath (D-246).                                                                           |
-| v1.1.4  | 2026-11-19 | §4 e-commerce aur consumer kanoon: CL-059 se CL-087, sources ke saath (D-247); kanooni jaanch ka pehla run poora.                          |
-| v1.1.5  | 2026-11-20 | Lawyer aur CA ki paribhasha: project ke AI agents, unki raay hi lawyer aur CA ki raay (D-257).                                             |
-| v1.1.6  | 2026-11-20 | §5 personal data: CL-088 se CL-104, sources ke saath (D-258).                                                                              |
-| v1.1.7  | 2026-11-20 | §6 IT Rules, §7 CERT-In aur data ki jagah, §8 payments: CL-105 se CL-111, sources ke saath (D-259).                                        |
-| v1.1.8  | 2026-11-20 | §9 gig delivery partners, §10 warehouse, transport aur environment: CL-112 se CL-120, sources ke saath (D-260).                            |
-| v1.1.9  | 2026-11-20 | §11 sehat aur AYUSH, §12 IP aur contracts: CL-121 se CL-128; §13 Nazar; CL-081 bhara (D-261); kanooni jaanch ke dono run ke nateeje poore. |
-| v1.1.10 | 2026-11-20 | Lawyer (AI) ke nishaan 18 rows pe (D-272): 4 jaancha, 11 aadha, 3 hisse nahi; D-262 se D-271 se badli rows; §13 me FDI ki row (D-271).     |
-| v1.1.11 | 2026-11-20 | §14 Documents ka dhaancha (D-274): 6 documents, 108 clauses, D-262 se D-272 ke saath.                                                      |
+| Version | Date       | Badlav                                                                                                                                                                                                               |
+| ------- | ---------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| v1.0.0  | 2026-11-17 | Khaali file bani.                                                                                                                                                                                                    |
+| v1.1.1  | 2026-11-19 | §1 tax: CL-001 se CL-024, sources ke saath (D-244); file ka dhaancha.                                                                                                                                                |
+| v1.1.2  | 2026-11-19 | §2 Legal Metrology: CL-025 se CL-038, sources ke saath (D-245).                                                                                                                                                      |
+| v1.1.3  | 2026-11-19 | §3 cosmetics kanoon: CL-039 se CL-058, sources ke saath (D-246).                                                                                                                                                     |
+| v1.1.4  | 2026-11-19 | §4 e-commerce aur consumer kanoon: CL-059 se CL-087, sources ke saath (D-247); kanooni jaanch ka pehla run poora.                                                                                                    |
+| v1.1.5  | 2026-11-20 | Lawyer aur CA ki paribhasha: project ke AI agents, unki raay hi lawyer aur CA ki raay (D-257).                                                                                                                       |
+| v1.1.6  | 2026-11-20 | §5 personal data: CL-088 se CL-104, sources ke saath (D-258).                                                                                                                                                        |
+| v1.1.7  | 2026-11-20 | §6 IT Rules, §7 CERT-In aur data ki jagah, §8 payments: CL-105 se CL-111, sources ke saath (D-259).                                                                                                                  |
+| v1.1.8  | 2026-11-20 | §9 gig delivery partners, §10 warehouse, transport aur environment: CL-112 se CL-120, sources ke saath (D-260).                                                                                                      |
+| v1.1.9  | 2026-11-20 | §11 sehat aur AYUSH, §12 IP aur contracts: CL-121 se CL-128; §13 Nazar; CL-081 bhara (D-261); kanooni jaanch ke dono run ke nateeje poore.                                                                           |
+| v1.1.10 | 2026-11-20 | Lawyer (AI) ke nishaan 18 rows pe (D-272): 4 jaancha, 11 aadha, 3 hisse nahi; D-262 se D-271 se badli rows; §13 me FDI ki row (D-271).                                                                               |
+| v1.1.11 | 2026-11-20 | §14 Documents ka dhaancha (D-274): 6 documents, 108 clauses, D-262 se D-272 ke saath.                                                                                                                                |
+| v1.2.1  | 2026-11-20 | CA (AI) ki raay (D-281): 32 rows pe CA ke nishaan, 20 rows me badlav, §1.1 me nayi rows CL-129 se CL-136, sources T11 se T27, §13 me 4 Nazar rows, §14 me Seller clause 10 aur 13 aur Partner clause 9 ke tax hisse. |
