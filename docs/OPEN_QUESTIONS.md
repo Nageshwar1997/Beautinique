@@ -1,6 +1,6 @@
 # OPEN QUESTIONS: Beautinique
 
-> **Status:** v1.3.44 (2026-11-20). Khule sawal, aage ke topics aur jaanchna baaki. Cheezein ek-ek karke judengi.
+> **Status:** v1.3.48 (2026-11-20). Khule sawal, aage ke topics aur jaanchna baaki. Cheezein ek-ek karke judengi.
 
 ## Is file me kya aayega
 
@@ -60,7 +60,7 @@ Claude ka kaam: owner ka faisla nahi chahiye, sirf saboot. Nateeja saboot ke saa
 | Browser me file input ke `capture` se gallery kitni rukti hai                                                                                                                                   | SR-055                         | Delivery saboot ki photo                                             |
 | Leak hue passwords ki free range API ki uplabdhi aur seema                                                                                                                                      | SR-013                         | Password ki jaanch                                                   |
 | Owner ka laptop: Desktop folder kisi cloud sync me hai ya nahi (repo aur backups isi folder me), aur disk encryption chalu hai ya nahi (owner ke saath)                                         | D-013, D-196, R-023            | Backups ki suraksha                                                  |
-| Test mode me gift card dene wala RBI-authorised PPI issuer (API ke saath) milta hai ya nahi | D-249 | Gift card ka raasta |
+| Test mode me gift card dene wala RBI-authorised PPI issuer (API ke saath) milta hai ya nahi                                                                                                     | D-249                          | Gift card ka raasta                                                  |
 
 ## 3. Sawal
 
@@ -4562,7 +4562,7 @@ Claude ka kaam: owner ka faisla nahi chahiye, sirf saboot. Nateeja saboot ke saa
 
 ### Q-195. COMPLIANCE batch 5: personal data ki rows maanein?
 
-- **Status:** `Khula`. Topic: B13 (compliance), B14 (security).
+- **Status:** `Tay`. Topic: B13 (compliance), B14 (security).
 - **Sawal:** kanooni jaanch ke personal data wale hisse ki ye 17 rows [COMPLIANCE.md](COMPLIANCE.md) me ek naye hisse "Personal data" me aayein? Har row COMPLIANCE ke format me jaayegi (kanoon ya niyam, kis pe laagu, kis module me, system me kya chahiye, dummy kya hai, jaancha ya nahi), source ke link aur tareekh ke saath.
 - **Kyun zaroori:**
   - Sign-up, account, support, logs aur backups ke design ko personal data ka ek tay kanooni aadhaar chahiye; QA ke tests bhi inhi se banenge.
@@ -4596,6 +4596,98 @@ Claude ka kaam: owner ka faisla nahi chahiye, sirf saboot. Nateeja saboot ke saa
   - (b) me har badlav ki ek line.
   - (c) me personal data ke design ka kanooni aadhaar baad me.
 - **Kanooni detail:** har row ke saath uska status likha hai. Kuch sarkari sites (MeitY, India Code, eGazette) nahi khuli, isliye kuch sources doosri sites ki copies hain. Lawyer se nahi jaancha (R-004).
+- **Owner ka jawab (2026-11-20):** **(a)**, rows jaisi hain waisi maani. Record: [DECISIONS.md](DECISIONS.md) D-258.
+
+### Q-196. COMPLIANCE batch 6: IT Rules, CERT-In aur payments ki rows maanein?
+
+- **Status:** `Tay`. Topic: B13 (compliance), B14 (security), B6 (payments).
+- **Sawal:** kanooni jaanch ke IT Rules, CERT-In aur payments wale hisse ki ye 7 rows [COMPLIANCE.md](COMPLIANCE.md) me teen naye hisson me aayein? Har row COMPLIANCE ke format me jaayegi, source ke link aur tareekh ke saath.
+- **Kyun zaroori:**
+  - Reviews ki moderation, logs, incident, checkout aur finance ke design ko ek tay kanooni aadhaar chahiye; QA ke tests bhi inhi se banenge.
+  - Jahan kisi row se tay faisla badalta tha, wo pehle hi sawal ban ke tay ho gaya (D-248 se D-256); yahan sirf unka hawala hai.
+- **Sources** (sab 2026-11-20 ko khole): U1 IT Rules 2021 ka consolidated text, 2023 tak (doosri site pe); U2 aur U3 IT Rules ke 2026 ke badlav pe lekh (secondary); C1 CERT-In ke directions (28 Apr 2022); C2 CERT-In ke FAQ (May 2022); C3 RBI ke payment data storage ke FAQ (2019); C4 RBI ki Payment Aggregators Master Direction (15 Sep 2025, 11 Nov 2026 tak ke badlav); R1 RBI ka TAT circular (20 Sep 2019); R2 RBI ke PPI FAQ (22 Nov 2022 tak); R3 RBI ka e-mandate framework (21 Apr 2026).
+- **Prastaavit rows:**
+  1. **CL-105, user content: niyam aur shikayat ke samay (IT Rules ka rule 3 aur 3A; IT Act s.79):** marketplace ko s.79 ki chhoot tabhi jab intermediary niyam maane. Terms me mana content ki list; har 3 mahine in-app suchna; D-251 ke samay; hataya content 180 din tak rakha jaaye (rule 3(1)(g)); registration data band hone ke 180 din baad tak (rule 3(1)(h), D-250); sarkari maang pe 72 ghante (rule 3(1)(j)); shikayat ke jawab me Grievance Appellate Committee ka raasta (30 din me appeal). Aadha jaancha (2026 ke samay sirf secondary).
+  2. **CL-106, CERT-In (28 Apr 2022 ke directions):** ghadi NIC ya NPL se traceable NTP se (cloud ki time service chal sakti hai); data leak, unauthorised access aur e-commerce app pe hamle jaise incidents 6 ghante me CERT-In ko (D-248); Point of Contact = Security Contact role (D-253); saare systems ke logs 180 din (D-250); saare timestamps UTC. CERT-In ko koi test report nahi. Jaancha.
+  3. **CL-107, data ki jagah (RBI ka payment data niyam, DPDP s.16, SPDI rule 7):** payment ka kam se kam data (ids, rakam, status, samay); card ya UPI ki jaankari kabhi hamare paas nahi; gateway se likhit pakka (D-256); privacy page pe data ki jagah (Singapore, D-058); India ke bahar data pe sarkar ki koi rok abhi nahi mili, nazar me. Aadha jaancha (RBI niyam ka merchant pe lagna vyakhya ka sawal).
+  4. **CL-108, payment aggregator aur sellers ka paisa (RBI ki PA Master Direction):** marketplace payment aggregator (Razorpay) ka merchant hai; aggregator dekhe ki marketplace sirf onboarded sellers ke liye paisa le; refund usi raaste. Ledger me sellers ka paisa liability, seller agreement me payout ke din (D-081, D-256); baad me linked account (D-093). Aadha jaancha (marketplace ka khud aggregator na hona text ki padhai se).
+  5. **CL-109, failed transaction, refund aur chargeback (RBI ka TAT circular, PA Direction):** paisa kata par merchant ko pakki suchna nahi to card aur UPI pe T+5 din me wapas, phir bank pe roz ₹100 ka harjana; "paisa kata, order nahi bana" ki screen aur email, der se "captured" pe apne aap refund (D-256); chargeback ka case aur saboot (D-072, D-191). Jaancha.
+  6. **CL-110, gift card, points aur store credit (RBI ke PPI FAQ):** closed system PPI teesre ke liye payment nahi kar sakta; gift PPI ₹10,000 tak, reload aur cash-out nahi, validity kam se kam 1 saal, expiry issue pe. Gift card sirf RBI-authorised issuer se (D-249); points paise se khareede nahi jaate, cash ya transfer nahi (D-173); store credit aur wallet nahi (D-177). Aadha jaancha (marketplace pe lagna aur points ka darja vyakhya ka sawal).
+  7. **CL-111, e-mandate (RBI ka 2026 ka e-mandate framework):** recurring payment abhi nahi (D-178), to abhi kuch nahi banta. Subscription kabhi aaye to: ₹15,000 tak bina extra authentication, 24 ghante pehle suchna, customer kabhi bhi band kare. Jaancha.
+- **Vikalp:**
+  - **(a)** Rows jaisi hain waisi maanein.
+  - **(b)** Maanein, par owner jo row badle, wo badal ke.
+  - **(c)** Ye batch abhi roko.
+- **Salah:** **(a)**.
+- **Trade-off:**
+  - (a) me vyakhya ke kuch sawal (CL-107, CL-108, CL-110) Lawyer agent ke liye khule rehte hain (D-257).
+  - (b) me har badlav ki ek line.
+  - (c) me logs, incident aur payments ke design ka kanooni aadhaar baad me.
+- **Kanooni detail:** har row ke saath uska status likha hai. eGazette aur kuch sarkari sites nahi khuli, isliye IT Rules ke 2026 ke samay sirf secondary source se. Lawyer se nahi jaancha (R-004).
+- **Owner ka jawab (2026-11-20):** **(a)**, rows jaisi hain waisi maani. Record: [DECISIONS.md](DECISIONS.md) D-259.
+
+### Q-197. COMPLIANCE batch 7: gig partners, warehouse aur environment ki rows maanein?
+
+- **Status:** `Tay`. Topic: B13 (compliance), B1 (delivery aur warehouse), B6 (payouts).
+- **Sawal:** kanooni jaanch ke gig delivery partners, warehouse, transport aur environment wale hisse ki ye 9 rows [COMPLIANCE.md](COMPLIANCE.md) me do naye hisson me aayein? Har row COMPLIANCE ke format me jaayegi, source ke link aur tareekh ke saath.
+- **Kyun zaroori:**
+  - Delivery app, partner payouts, warehouse, trips aur seller onboarding ke design ko ek tay kanooni aadhaar chahiye; QA ke tests bhi inhi se banenge.
+  - Jahan kisi row se tay faisla badalta tha, wo pehle hi sawal ban ke tay ho gaya (D-254, D-256); yahan sirf unka hawala hai.
+- **Sources** (sab 2026-11-20 ko khole): G1 Code on Social Security 2020 (doosri site pe copy); G2 PIB ka saar (22 Nov 2025); G3 Social Security (Central) Rules 2026 ka saar (secondary); G4 Maharashtra ke gig workers bill 2026 ka saar (secondary); G5 contractor ke TDS pe search (secondary); W1 Maharashtra Fire Act ka 2023 ka badlav; W2 Maharashtra Shops and Establishments ka 2025 ka bill (doosri site pe copy); W3 aur W4 Plastic Waste Management Rules ke 2022 (EPR guidelines) aur 2024 ke badlav; W5 e-way bill pe search (secondary); W6 Solid Waste Management Rules 2026 pe search (secondary); W7 Gas Cylinders Rules ki paribhasha pe search (secondary).
+- **Prastaavit rows:**
+  1. **CL-112, Social Security Code: aggregator (s.2(2), Seventh Schedule, s.113, s.114):** hum "Logistic services" aur "e-Market place" dono shreniyon me; workers ka registration; contribution saal ke turnover ka 1% se 2% (dar notify hona baaki), workers ko diye paise ke 5% se zyada nahi; shuru ki tareekh notify hogi. Rules 2026 (secondary): maujooda partners ki details 45 din me portal pe, naye roz; scheme ke liye 90 din (ek aggregator) ya 120 din (kai). System: D-254 ke kaam; partner ki kamaai se kaat ka likhit kaaran aur appeal (Maharashtra ke bill se, secondary); har state ki row. Portal pe kabhi upload nahi. Aadha jaancha.
+  2. **CL-113, partner payouts pe TDS (Income-tax Act 2025 s.393(1), pehle s.194C):** individual ya HUF pe 1%, baaki pe 2%; seema ek payment ₹30,000 ya saal me ₹1,00,000. System: D-254. Dummy PAN, koi challan nahi. Aadha jaancha (sirf secondary; CA agent se pakka, D-257).
+  3. **CL-114, partner ka data (DPDP):** notice aur consent partner pe bhi; employment wala "legitimate use" sirf employee ke liye, aur Code gig worker ko employee nahi maanta. System: D-254 (notice aur consent, location sirf "delivered" aur "fail" ke pal pe); photo sirf parcel ki; samay D-191 aur D-250. Jaancha.
+  4. **CL-115, fire safety aur jalne wala maal (Maharashtra Fire Act, 2023 ka badlav):** storage buildings ki shreni; Provisional, Final aur Renewal Fire Safety Approval; saal me do baar (January aur July) licensed agency ka certificate (secondary). Aerosol: Gas Cylinders Rules ka "gas cylinder" 500 ml se bada dhaatu ka container (secondary), to aam chhote cans bahar dikhte hain. Petroleum Rules aur transport ke niyam nahi jaanche. System: warehouse aur hub ke record me approvals aur certificate ki tareekhein aur yaad (D-256); catalog me "flammable" flag; warehouse me alag rack; delivery bag me aise items ki ginti ki seema. Tareekhein aur numbers DUMMY. Aadha jaancha.
+  5. **CL-116, Shops and Establishments (Maharashtra S&E Act 2017):** workers ki ginti se registration (s.6) ya intimation (s.7); 2025 ke Ordinance aur bill me seema 10 se 20 (bill pass hua ya nahi, pakka nahi). System: workers ki ginti; registration ya intimation ka number aur tareekh; seema setting me (D-256). Number DUMMY. Aadha jaancha.
+  6. **CL-117, e-way bill:** inter-state ₹50,000 se zyada ki consignment; Maharashtra ke andar ₹1,00,000; ek e-way bill ek invoice ka; ek gaadi ke liye consolidated e-way bill (secondary). System: warehouse se hub ke trip (D-027) ke manifest me har invoice ki rakam; seema paar ho to e-way bill number ke bina dispatch nahi; trip pe consolidated number (D-256). Number DUMMY. Aadha jaancha (CA agent se pakka).
+  7. **CL-118, plastic EPR (Plastic Waste Management Rules, 2022 aur 2024 ke badlav):** obligated entities me online platforms aur marketplaces samet brand owners, micro aur small enterprise chhod ke (clause 4(iii)); packaging ki shreniyan I se IV; CPCB portal pe registration; bina registration business nahi; unregistered se len-den nahi (clause 6.3); targets aur saal ka return. System: D-045 aur D-256 (seller ka EPR number ya micro/small ki ghoshna, iske bina seller live nahi; packaging master; har dispatch ka record; saal ka return). EPR numbers DUMMY. Jaancha.
+  8. **CL-119, expired ya toote maal ko nasht karna (Solid Waste Management Rules 2026, 1 Apr 2026 se):** kachra chaar hisson me alag; "special care" waste; bulk waste generator ki alag zimmedari (secondary). System: D-062 aur D-256 (authorised handler, certificate of destruction batch ke record me, jalne wala alag). Handler aur certificate dummy. Aadha jaancha.
+  9. **CL-120, e-waste (E-Waste (Management) Rules 2022):** EPR producer pe; laagu sirf agar kabhi beauty appliances (jaise hair dryer) bikein. System: catalog me "electrical appliance" ka flag; aisa product aane se pehle jaanch. Jaancha nahi.
+- **Vikalp:**
+  - **(a)** Rows jaisi hain waisi maanein.
+  - **(b)** Maanein, par owner jo row badle, wo badal ke.
+  - **(c)** Ye batch abhi roko.
+- **Salah:** **(a)**.
+- **Trade-off:**
+  - (a) me kai rows aadha jaancha (secondary sources); CA aur Lawyer agents ke liye kuch sawal khule (CL-113, CL-117, CL-112 ki tareekhein).
+  - (b) me har badlav ki ek line.
+  - (c) me Delivery app, warehouse aur seller onboarding ke kanooni hisse baad me.
+- **Kanooni detail:** har row ke saath uska status likha hai. labour.gov.in, PESO aur eGazette jaisi sarkari sites nahi khuli, isliye kai rows secondary source pe. Lawyer aur CA se nahi jaancha (R-004).
+- **Owner ka jawab (2026-11-20):** **(a)**, rows jaisi hain waisi maani. Record: [DECISIONS.md](DECISIONS.md) D-260.
+
+### Q-198. COMPLIANCE batch 8 (aakhri): sehat, AYUSH, IP aur contracts ki rows, aur chhote badlav maanein?
+
+- **Status:** `Tay`. Topic: B13 (compliance), B11 (consultation), B3 (catalog).
+- **Sawal:** kanooni jaanch ke sehat, AYUSH, IP aur contracts wale hisse ki ye 8 rows [COMPLIANCE.md](COMPLIANCE.md) me do naye hisson me aayein, aur saath me COMPLIANCE ke teen chhote badlav? Har row COMPLIANCE ke format me jaayegi, source ke link aur tareekh ke saath.
+- **Kyun zaroori:**
+  - Consultation, catalog ki jaanch, seller agreement, Terms aur assets ke design ko ek tay kanooni aadhaar chahiye.
+  - Isse kanooni jaanch ke doosre run ke saare nateeje docs me aa jaate hain (D-220 ka tareeka); jahan faisla badalna tha wo pehle hi tay ho gaya (D-248 se D-256).
+- **Sources** (sab 2026-11-20 ko khole): H1 Drugs and Magic Remedies Act 1954 (sarkari site); H2 Telemedicine Practice Guidelines 2020 ka saar; H3 Drugs and Cosmetics Act aur Rules (CDSCO, 2016 tak ka text); H4 rule 170 pe khabrein (secondary); L1 Trade Marks Act 1999 ki s.30(3) (doosri site pe text); L2 IT Act ki s.10A pe search (secondary); L3 EU documents ke reuse ke niyam pe search (secondary); R2 RBI ke PPI FAQ (batch 6 ka source).
+- **Prastaavit rows:**
+  1. **CL-121, online consultation (Telemedicine Practice Guidelines 2020):** telemedicine sirf registered doctor (RMP) kar sakta hai; naam, qualification aur registration dikhana, patient ki pehchaan, consent, record, dawa sirf tay lists se; AI se salah ya dawa nahi. Hamari consultation beauty salah hai, medical nahi (D-252), isliye guidelines laagu nahi; "Ye medical consultation nahi hai" ki line aur ilaaj pe "doctor se milein". Aadha jaancha (saar dekha, mool PDF nahi khula).
+  2. **CL-122, AYUSH drug ki pehchaan (Drugs and Cosmetics Rules ke rule 153 se 157 aur 161(3)):** AYUSH drug ka licence Form 25-D pe, aur label pe "Ayurvedic/Siddha/Unani medicine" aur "Mfg. Lic. No.". AYUSH drug listing pe nahi (D-128): label checklist me aise ishare pe listing reject. Rule 170 hata aur Supreme Court ka stay 11 Aug 2025 ko hata (secondary). Aadha jaancha (Rules ka text 2016 tak).
+  3. **CL-123, Drugs and Magic Remedies Act (s.3, s.4, s.2(d)):** drug ke vigyapan me garbh, yaun kshamata, mahwari aur Schedule ki bimariyon (beauty se jude: breast ki banawat, leucoderma, motapa, lambai) ke ilaaj ka sujhaav mana; jhootha ya gumraah karne wala vigyapan mana; chhapne me hissa lena bhi. System: D-256 (mana shabdon ka alag hissa, Schedule ke number ke saath). Jaancha.
+  4. **CL-124, trademark aur asli maal (Trade Marks Act s.30(3); IT Rules 3(1)(b)):** jaayaz tareeke se kharida maal aage bechna sirf isliye infringement nahi; nakli maal infringement hai; user agreement me IP todne wala content mana. System: brand authorisation (D-075); seller agreement me asli maal aur photos ke haq ki ghoshna; brand owner ke liye IP shikayat ki category. Authorisation letter dummy. Aadha jaancha.
+  5. **CL-125, data aur assets ka license:** EU ke documents ka reuse aam taur pe ijazat ke saath, teesre ke IP ko chhod ke (secondary); CosIng ki apni shartein aur BIS standards ki shartein nahi jaanchi. System: license list (asset, license, link, attribution) ingredient master, blocklist, fonts, icons aur images ke liye; IS ki list ka text copy nahi, sirf hawala. Aadha jaancha.
+  6. **CL-126, seller ka udhaar:** koi khaas kanoon nahi mila; ye seller agreement ki baat hai. System: D-071; seller agreement me kaat ka haq, notice, listings rokna, aur jhagde ka raasta. Jaancha nahi.
+  7. **CL-127, apne brand ka trademark:** search nahi hui (bahar ki search me project ka naam nahi daala gaya). Kis pe: apne brand ki company (D-243). System: asli business se pehle trademark search (class 3) aur application, aur company naam ki uplabdhta; ye search owner kare, ya owner ki haan se. Jaancha nahi.
+  8. **CL-128, electronic contract (IT Act s.10A):** electronic tareeke se bana contract sirf isliye unenforceable nahi; dono paksh baalig hon. Stamp duty nahi jaanchi. System: Terms aur seller agreement ka har version badla na ja sake; kisne, kab, kaunsa version maana, iska record; "maanta hoon" bina pehle tick ke (D-150). Aadha jaancha.
+- **Chhote badlav:**
+  1. **CL-081 (points ki expiry):** kanoon wala hissa bharna: RBI ke PPI niyam khareedi hui value pe hain; jo points paise se khareede na jaayein aur cash ya transfer na hon (D-173), wo inke bahar lagte hain (vyakhya, pakka nahi) [R2]. Expiry ka koi tay number kanoon me nahi; saaf jaankari ka niyam consumer kanoon se. Status "Aadha jaancha".
+  2. **Naya hissa "Nazar":** cheezein jin pe nazar rakhni hai, tareekh aur row ke saath: DPDP Rules ki tareekhein (13 Nov 2026 aur lagbhag 13 May 2027); Significant Data Fiduciary ki notification; India ke bahar data pe koi rok (DPDP s.16); IT Rules ke 2026 ke badlav ka primary text; Social Security Code ki tareekh aur Maharashtra ka gig bill; Maharashtra Shops and Establishments ka bill; asli business se pehle hosting region (D-058, D-256); gift card ka issuer (D-249).
+  3. **"Is file me kya aayega":** hisson ki list §1 se §12 aur "Nazar" ke saath poori.
+- **Vikalp:**
+  - **(a)** Rows aur chhote badlav jaise hain waise maanein.
+  - **(b)** Maanein, par owner jo row ya badlav badle, wo badal ke.
+  - **(c)** Ye batch abhi roko.
+- **Salah:** **(a)**.
+- **Trade-off:**
+  - (a) me teen rows "jaancha nahi" rehti hain (CL-126, CL-127, aur e-waste wali CL-120), jo Lawyer agent ke liye khuli (D-257).
+  - (b) me har badlav ki ek line.
+  - (c) me kanooni jaanch ka doosra run docs me adhoora.
+- **Kanooni detail:** har row ke saath uska status likha hai. Telemedicine guidelines aur Trade Marks Act ka PDF nahi khula, isliye kuch rows saar ya doosri site ke text pe. Lawyer se nahi jaancha (R-004).
+- **Owner ka jawab (2026-11-20):** **(a)**, rows aur chhote badlav jaise the waise maane. Record: [DECISIONS.md](DECISIONS.md) D-261.
 
 ## Change log
 
@@ -4677,6 +4769,10 @@ Claude ka kaam: owner ka faisla nahi chahiye, sirf saboot. Nateeja saboot ke saa
 | v1.3.39 | 2026-11-19 | Q-183 tay: (a) Legal Metrology ki 14 rows (D-245, COMPLIANCE §2); Q-184 khula (COMPLIANCE batch 3: cosmetics kanoon).                                                                     |
 | v1.3.40 | 2026-11-19 | Q-184 tay: (a) cosmetics kanoon ki 20 rows (D-246, COMPLIANCE §3); Q-185 khula (COMPLIANCE batch 4: e-commerce aur consumer kanoon).                                                      |
 | v1.3.41 | 2026-11-19 | Q-185 tay: (a) e-commerce aur consumer kanoon ki 29 rows (D-247, COMPLIANCE §4); koi sawal khula nahi.                                                                                    |
-| v1.3.42 | 2026-11-20 | Q-186 se Q-194 khule (kanooni jaanch ke doosre run ke asar ke sawal). |
-| v1.3.43 | 2026-11-20 | Q-186 se Q-194 tay: saari salah maani (D-248 se D-256); §2 me gift card issuer ki jaanch. |
-| v1.3.44 | 2026-11-20 | Q-195 khula (COMPLIANCE batch 5: personal data ki 17 rows). |
+| v1.3.42 | 2026-11-20 | Q-186 se Q-194 khule (kanooni jaanch ke doosre run ke asar ke sawal).                                                                                                                     |
+| v1.3.43 | 2026-11-20 | Q-186 se Q-194 tay: saari salah maani (D-248 se D-256); §2 me gift card issuer ki jaanch.                                                                                                 |
+| v1.3.44 | 2026-11-20 | Q-195 khula (COMPLIANCE batch 5: personal data ki 17 rows).                                                                                                                               |
+| v1.3.45 | 2026-11-20 | Q-195 tay: (a) personal data ki 17 rows (D-258, COMPLIANCE §5); Q-196 khula (COMPLIANCE batch 6: IT Rules, CERT-In aur payments).                                                         |
+| v1.3.46 | 2026-11-20 | Q-196 tay: (a) IT Rules, CERT-In aur payments ki 7 rows (D-259, COMPLIANCE §6 se §8); Q-197 khula (COMPLIANCE batch 7: gig partners, warehouse aur environment).                          |
+| v1.3.47 | 2026-11-20 | Q-197 tay: (a) gig partners, warehouse aur environment ki 9 rows (D-260, COMPLIANCE §9, §10); Q-198 khula (aakhri COMPLIANCE batch: sehat, AYUSH, IP aur contracts, aur chhote badlav).   |
+| v1.3.48 | 2026-11-20 | Q-198 tay: (a) sehat, AYUSH, IP aur contracts ki 8 rows aur chhote badlav (D-261, COMPLIANCE §11 se §13); koi sawal khula nahi.                                                           |

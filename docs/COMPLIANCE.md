@@ -1,12 +1,12 @@
 # COMPLIANCE: Beautinique
 
-> **Status:** v1.1.5 (2026-11-20). Kanooni matrix. System me sab poori tarah banta hai, par registrations aur bahar ki companies ki details dummy hain (D-026); apne roles ki jaankari asli (D-241). Project ke Lawyer aur CA AI agents hain (D-257); unhone abhi kuch nahi jaancha (R-004). Cheezein ek-ek karke, owner ki haan se, judti hain (D-220).
+> **Status:** v1.1.9 (2026-11-20). Kanooni matrix. System me sab poori tarah banta hai, par registrations aur bahar ki companies ki details dummy hain (D-026); apne roles ki jaankari asli (D-241). Project ke Lawyer aur CA AI agents hain (D-257); unhone abhi kuch nahi jaancha (R-004). Cheezein ek-ek karke, owner ki haan se, judti hain (D-220).
 
 ## Is file me kya aayega
 
 - Har row (CL-xxx): **Kanoon ya niyam**, **Kis pe laagu**, **Kis module me**, **System me kya chahiye**, **Dummy kya hai**, **Jaancha ya nahi** (source aur tareekh ke saath).
 - **Jaancha** = public source khol ke milaaya (tareekh ke saath). **Aadha jaancha** = sirf secondary source, ya sarkari text ki purani copy. **Jaancha nahi** = source nahi khula. **Lawyer ne jaancha** / **CA ne jaancha** = project ke Lawyer ya CA agent ne dekha, aur owner ki haan se docs me aaya (D-257). Is project me Lawyer aur CA AI agents hain, koi licensed lawyer ya CA nahi (D-257). Abhi tak unhone kuch nahi jaancha (R-004).
-- Rows area ke hisaab se batches me aati hain (D-220): §1 tax, §2 Legal Metrology, §3 cosmetics kanoon, §4 e-commerce aur consumer kanoon. Personal data, payments, gig workers jaise areas kanooni jaanch ke doosre run ke baad.
+- Rows area ke hisaab se batches me aati hain (D-220): §1 tax, §2 Legal Metrology, §3 cosmetics kanoon, §4 e-commerce aur consumer kanoon, §5 personal data, §6 IT Act aur intermediary niyam, §7 CERT-In aur data ki jagah, §8 payments, §9 gig delivery partners, §10 warehouse, transport aur environment, §11 sehat aur AYUSH, §12 IP aur contracts. §13 "Nazar": cheezein jin ke badalne pe rows dobara dekhni hain.
 - **Number:** CL-001 se kram se. Ek baar diya number kabhi badalta nahi aur dobara use nahi hota.
 - Jahan row kisi faisle se judi hai, wahan D-xxx ka hawala; faisle ka itihaas sirf [DECISIONS.md](DECISIONS.md) me.
 
@@ -774,12 +774,12 @@
 
 ### CL-081. Points ki expiry aur suchna
 
-- **Kanoon ya niyam:** source nahi khula.
+- **Kanoon ya niyam:** RBI ke PPI niyam khareedi hui value pe hain; jo points paise se khareede na jaayein aur cash ya transfer na hon (D-173), wo inke bahar lagte hain (vyakhya, pakka nahi) [R2]. Expiry ka koi tay number kanoon me nahi; saaf jaankari ka niyam consumer kanoon se.
 - **Kis pe laagu:** R2 ke loyalty points (D-174).
 - **Kis module me:** loyalty.
-- **System me kya chahiye:** kanooni jaanch ke doosre run me prepaid niyamon ke saath.
+- **System me kya chahiye:** D-173 aur D-174 ke niyam; points ki expiry ki saaf jaankari.
 - **Dummy kya hai:** R2 me.
-- **Jaancha ya nahi:** Jaancha nahi.
+- **Jaancha ya nahi:** Aadha jaancha (2026-11-20): [R2]; points ka darja vyakhya ka sawal.
 
 ### CL-082. Recall pe customers ko suchna
 
@@ -835,13 +835,477 @@
 - **Dummy kya hai:** dummy ghoshna.
 - **Jaancha ya nahi:** Jaancha (2026-11-19): [E1]; 2027 wala hissa [E3].
 
+## 5. Personal data (D-258)
+
+### 5.0 Sources (sab 2026-11-20 ko khole)
+
+- **[P1]** Digital Personal Data Protection Act 2023 (Act 22 of 2023), Gazette 11 Aug 2023; TRAI ki site pe copy: <https://www.trai.gov.in/sites/default/files/2024-09/DPDT_11082024.pdf>. Primary.
+- **[P2]** Digital Personal Data Protection Rules 2025, G.S.R. 846(E), 13 Nov 2025; gazette ka text ek doosri site pe: <https://dpdpa.com/DPDP_Rules_2025_English_only.pdf>. Primary document, secondary host.
+- **[P3]** PIB ka saar (17 Nov 2025): <https://static.pib.gov.in/WriteReadData/specificdocs/documents/2025/nov/doc20251117695301.pdf>. Primary.
+- **[P4]** Act ke laagu hone ki tareekhein (G.S.R. 843(E), 13 Nov 2025) ka saar: <https://www.teamleaseregtech.com/updates/article/49364/meity-issued-a-notification-regarding-the-commencement-of-the-dpdp-act/>. Secondary.
+- **[P5]** IT (Reasonable security practices and procedures and sensitive personal data or information) Rules 2011, G.S.R. 313(E), 11 Apr 2011; WIPO ki site pe copy: <https://www.wipo.int/wipolex/edocs/lexdocs/laws/en/in/in098en.pdf>. Primary document, secondary host.
+- **[P6]** Aadhaar (Sharing of Information) Regulations 2016, 21.08.2025 tak ke badlav: <https://www.uidai.gov.in/images/The_Aadhaar_Sharing_of_information_regulation_2016.pdf>. Primary.
+
+### CL-088. Abhi ka kanoon aur DPDP kab se
+
+- **Kanoon ya niyam:** DPDP Rules ka rule 4 (Consent Manager) 13 Nov 2026 se; rule 3, 5 se 16, 22 aur 23, aur Act ke s.3 se 17 aur s.44(2) (jisse IT Act s.43A hat-ta hai) lagbhag 13 May 2027 se. Tab tak IT Act s.43A aur SPDI Rules: sensitive data (password, financial jaankari, sehat, biometric) pe likhit (electronic) consent (rule 5(1)), privacy policy (rule 4), Grievance Officer aur ek mahine me hal (rule 5(9)), data sirf barabar suraksha wale ko (rule 7), likha hua security program (rule 8).
+- **Kis pe laagu:** platform company; apne brand ki company apne data ke liye.
+- **Kis module me:** sign-up, privacy, security.
+- **System me kya chahiye:** design shuru se DPDP ke hisaab se; sign-up ke consent me sensitive data ka zikr; security ke niyam ek likhe program me (security docs).
+- **Dummy kya hai:** kuch nahi; niyam asli.
+- **Jaancha ya nahi:** Aadha jaancha (2026-11-20): [P2] rule 1, [P5]; Act ki tareekhein [P4] (secondary).
+
+### CL-089. Notice aur consent
+
+- **Kanoon ya niyam:** s.5, s.6: har maqsad pe saaf consent, sirf zaroori data; consent se pehle notice. Rule 3: notice baaki jaankari se alag, data ki itemised list, maqsad, aur consent wapas lene, haq chalane aur Board ko shikayat ka link. Waapsi utni hi aasaan jitna consent (s.6(4)); consent ka saboot platform pe (s.6(10)). Consent Manager ka raasta (s.6(7) se (9), rule 4).
+- **Kis pe laagu:** customers, sellers, delivery partners, testers.
+- **Kis module me:** sign-up, account, saare apps.
+- **System me kya chahiye:** sign-up pe alag Data notice (D-255); har consent ka record (notice ka version, samay, raasta, waapsi); har consent ka "band karo"; data model baad me Consent Manager se jud sake.
+- **Dummy kya hai:** notice ka text "DUMMY: lawyer se jaancha nahi" ke saath.
+- **Jaancha ya nahi:** Jaancha (2026-11-20): [P1], [P2].
+
+### CL-090. Sehat ka data
+
+- **Kanoon ya niyam:** SPDI rule 3: sehat ki haalat aur medical records sensitive data; rule 5: likhit consent. DPDP rule 6: encryption, pahunch pe control aur logs.
+- **Kis pe laagu:** consultation notes, skin reaction case, allergy profile (R2).
+- **Kis module me:** consultation, customer profile, support.
+- **System me kya chahiye:** alag consent (D-165); encryption aur audit (D-207, D-208); marketing ya sujhaav me bina alag consent nahi.
+- **Dummy kya hai:** dummy profiles.
+- **Jaancha ya nahi:** Jaancha (2026-11-20): [P5], [P2].
+
+### CL-091. Data ke haq
+
+- **Kanoon ya niyam:** s.11 (data aur processing ka saar, aur kin Data Fiduciaries aur Processors ke saath baanta), s.12 (sudhaar aur erase), s.13 (shikayat), s.14 (nomination). Rule 14: haq ka raasta saaf; jawab 90 din ke andar.
+- **Kis pe laagu:** customers aur baaki Data Principals.
+- **Kis module me:** account, support.
+- **System me kya chahiye:** D-151 ke haq; data ke saar me sellers aur processors ki shreniyan; nomination R2 (D-255); jawab 90 din ke andar (D-163 ke timers isse chhote).
+- **Dummy kya hai:** dummy customers.
+- **Jaancha ya nahi:** Jaancha (2026-11-20): [P1], [P2].
+
+### CL-092. Privacy ka sampark
+
+- **Kanoon ya niyam:** s.8(9), rule 9: Data Protection Officer (sirf Significant Data Fiduciary pe zaroori), ya personal data ke sawalon ka jawab dene wale insaan ka contact website ya app pe, aur haq ke har jawab me. s.8(10): shikayat ka raasta.
+- **Kis pe laagu:** platform.
+- **Kis module me:** legal pages, support, staff roles.
+- **System me kya chahiye:** sampark Grievance Officer (D-253); contact privacy page pe aur haq ke har jawab me apne aap.
+- **Dummy kya hai:** role wale staff account ki asli jaankari (D-241); repo me koi naam nahi.
+- **Jaancha ya nahi:** Jaancha (2026-11-20): [P1], [P2].
+
+### CL-093. Data ka samay aur kanooni rok
+
+- **Kanoon ya niyam:** s.8(7): maqsad poora ho ya consent wapas ho to erase, jab tak kanoon na maange; processor se bhi. Rule 8(3) (lagbhag 13 May 2027 se): har processing ka personal data, traffic data aur logs kam se kam 1 saal, account delete ke baad bhi. Rule 6(1)(e): security ke liye logs aur data 1 saal. Rule 8(1) ka 3 saal wala niyam sirf 2 crore se zyada users wale e-commerce pe. Tax records CL-021 me.
+- **Kis pe laagu:** platform aur uske processors.
+- **Kis module me:** saari services, backups.
+- **System me kya chahiye:** har data class ka samay (D-191 se D-194, D-208) aur kanooni rok (D-250): app se turant hatna, band encrypted store, sirf kanooni maang pe khulna (audit ke saath), phir erase; photos aur video ka sirf record.
+- **Dummy kya hai:** samay settings me.
+- **Jaancha ya nahi:** Aadha jaancha (2026-11-20): text [P2] se; hamari photos aur profile pe lagna vyakhya ka sawal.
+
+### CL-094. Data leak ki suchna
+
+- **Kanoon ya niyam:** rule 7(1): har asar wale user ko bina der (kya hua, asar, humne kya kiya, wo kya karein, sampark). Rule 7(2): Board ko bina der shuruaati suchna, aur 72 ghante me poori report. CERT-In ko 6 ghante (D-248).
+- **Kis pe laagu:** platform.
+- **Kis module me:** operations (runbook), notifications.
+- **System me kya chahiye:** D-248 ki teen ghadiyaan; user email aur in-app ka template; leak ka register.
+- **Dummy kya hai:** saal me ek abhyaas nakli event se; kisi sanstha ko asli ya nakli report nahi.
+- **Jaancha ya nahi:** Jaancha (2026-11-20): [P2] rule 7.
+
+### CL-095. Aadhaar
+
+- **Kanoon ya niyam:** Aadhaar (Sharing of Information) Regulations ka reg. 6: Aadhaar number public nahi; suraksha; internet pe sirf encrypted; maqsad se zyada der nahi (reg. 6(5), 2025).
+- **Kis pe laagu:** seller, Beauty Pro aur partner ke dastavez.
+- **Kis module me:** KYC uploads.
+- **System me kya chahiye:** Aadhaar nahi lena (SR-064); upload form pe "Aadhaar ki copy mat bhejein"; galti se aayi copy reject aur turant delete (D-255).
+- **Dummy kya hai:** koi Aadhaar nahi.
+- **Jaancha ya nahi:** Jaancha (2026-11-20): [P6].
+
+### CL-096. Staff ki pahunch
+
+- **Kanoon ya niyam:** rule 6(1)(b), (c): personal data tak pahunch pe control, logs, monitoring aur review.
+- **Kis pe laagu:** saare staff roles.
+- **Kis module me:** saare staff apps, audit.
+- **System me kya chahiye:** D-201 aur SR-076; "poori jaankari dekhi" wale audit ki mahine me ek review.
+- **Dummy kya hai:** kuch nahi.
+- **Jaancha ya nahi:** Jaancha (2026-11-20): [P2].
+
+### CL-097. Device aur accounts ka jod
+
+- **Kanoon ya niyam:** DPDP me consent aur s.7 ke tay maamle hi aadhaar hain; "legitimate interest" nahi. Cookies pe alag kanoon nahi mila.
+- **Kis pe laagu:** per-customer seemaayein aur galat istemaal ki rok (D-203).
+- **Kis module me:** checkout, referral, reviews.
+- **System me kya chahiye:** ye maqsad notice aur Terms me (D-255); device cookie sirf isi kaam ke liye.
+- **Dummy kya hai:** kuch nahi.
+- **Jaancha ya nahi:** Aadha jaancha (2026-11-20): [P1]; hamare kaam pe lagna vyakhya ka sawal.
+
+### CL-098. Seller aur reviews ke saath data
+
+- **Kanoon ya niyam:** s.8(3)(b): doosre Data Fiduciary ko diya data sahi ho; s.11(1)(b): kin ke saath baanta; s.6(1): sirf zaroori data.
+- **Kis pe laagu:** seller ki reports, invoices, reviews.
+- **Kis module me:** seller app, reviews.
+- **System me kya chahiye:** sellers ko sirf zaroori data (D-143, D-226); review form pe "ye jaankari sabko dikhegi".
+- **Dummy kya hai:** dummy reviews.
+- **Jaancha ya nahi:** Jaancha (2026-11-20): [P1].
+
+### CL-099. Demo site
+
+- **Kanoon ya niyam:** Act India me digital personal data ki har processing pe laagu hai (s.3); demo ki koi chhoot nahi.
+- **Kis pe laagu:** allowlist ke testers.
+- **Kis module me:** sign-up.
+- **System me kya chahiye:** testers pe bhi wahi notice aur haq (D-133).
+- **Dummy kya hai:** testers ka data asli maana jaata hai.
+- **Jaancha ya nahi:** Jaancha (2026-11-20): [P1].
+
+### CL-100. Privacy page
+
+- **Kanoon ya niyam:** SPDI rule 4 (privacy policy); DPDP rule 3, 9 aur 14.
+- **Kis pe laagu:** platform.
+- **Kis module me:** legal pages.
+- **System me kya chahiye:** kaunsa data, kyun, kab tak (kanooni rok samet), kis ke saath (sellers aur processors ki shreniyan), kahan (Singapore, D-058), security ka saar, haq, sampark, Board, aur backups ki umar (D-150, D-255).
+- **Dummy kya hai:** "DUMMY: lawyer se jaancha nahi".
+- **Jaancha ya nahi:** Jaancha (2026-11-20): [P5], [P2].
+
+### CL-101. Marketing consent
+
+- **Kanoon ya niyam:** s.6(1), s.6(4): alag consent, aur aasaan waapsi.
+- **Kis pe laagu:** offers aur marketing ki khabrein.
+- **Kis module me:** notifications.
+- **System me kya chahiye:** D-141; opt-in aur opt-out ka record; push ki permission aur marketing consent alag.
+- **Dummy kya hai:** kuch nahi.
+- **Jaancha ya nahi:** Jaancha (2026-11-20): [P1].
+
+### CL-102. Bachche aur 18+
+
+- **Kanoon ya niyam:** s.2(f): 18 se kam umar child; s.9: parent ki verifiable consent, aur tracking aur targeted ads mana; rule 10; Fourth Schedule ka Part B (child nahi hai, ye pakka karne ki processing).
+- **Kis pe laagu:** sign-up.
+- **Kis module me:** account.
+- **System me kya chahiye:** 18+ ki ghoshna ka tick, pehle se tick nahi, consent record me (D-038, D-255); bachcha pata chale to account band aur data erase; umar ke hisaab se ads nahi.
+- **Dummy kya hai:** kuch nahi.
+- **Jaancha ya nahi:** Aadha jaancha (2026-11-20): [P1], [P2]; sirf ghoshna kaafi hai ya nahi, saaf nahi.
+
+### CL-103. Significant Data Fiduciary
+
+- **Kanoon ya niyam:** s.10, rule 13: sirf sarkar ki notification se; tab India me DPO, independent auditor, saal ka impact assessment aur audit, aur kuch data India me hi.
+- **Kis pe laagu:** abhi nahi.
+- **Kis module me:** koi nahi.
+- **System me kya chahiye:** kuch nahi; notification aaye to dobara dekhna.
+- **Dummy kya hai:** kuch nahi.
+- **Jaancha ya nahi:** Aadha jaancha (2026-11-20): [P1], [P2]; notification na hona sirf search se.
+
+### CL-104. Data processors
+
+- **Kanoon ya niyam:** s.8(1), s.8(2): processor sirf valid contract se, aur zimmedari hamari; rule 6(1)(f): contract me security ki shart; s.8(7)(b): processor se bhi erase.
+- **Kis pe laagu:** hosting, database, email, payment aur push providers.
+- **Kis module me:** operations.
+- **System me kya chahiye:** processors ki list (kaun, kaunsa data, region, data terms ki link aur tareekh, delete ka tareeka) (D-255); naya provider is list ke bina nahi.
+- **Dummy kya hai:** list asli providers ki.
+- **Jaancha ya nahi:** Jaancha (2026-11-20): [P1], [P2].
+
+## 6. IT Act aur intermediary niyam (D-259)
+
+### 6.0 Sources (sab 2026-11-20 ko khole)
+
+- **[U1]** IT (Intermediary Guidelines and Digital Media Ethics Code) Rules 2021, 6 Apr 2023 tak ke badlav samet: <https://indiankanoon.org/doc/111130067/>. Consolidated text, secondary host.
+- **[U2]** IT Rules ke 2026 ke badlav (20 Feb 2026 se) ka saar: <https://khaitanco.com/sites/default/files/2026-02/ERGO%20-%20IT%20Rules%20Amendment%20-%2016%20February%202026.pdf>. Secondary.
+- **[U3]** Usi badlav pe lekh: <https://chambers.com/articles/government-notifies-information-technology-amendment-rules-2026>. Secondary.
+
+### CL-105. User content: niyam aur shikayat ke samay
+
+- **Kanoon ya niyam:** marketplace ko IT Act s.79 ki chhoot tabhi jab wo intermediary niyam maane (E-commerce rules ka rule 5(1), [E1]). IT Rules: rule 3(1)(a) niyam, privacy aur user agreement; 3(1)(b) mana content ki list user agreement me; 3(1)(c) har 3 mahine users ko niyam todne ke nateeje (2026); 3(1)(d) court ya sarkari order pe 3 ghante (2026); 3(1)(g) hataya content 180 din; 3(1)(h) registration data account band hone ke 180 din baad tak; 3(1)(j) sarkari maang pe 72 ghante; 3(2)(a) Grievance Officer, receipt 24 ghante, hal 7 din, aur 3(1)(b) wale content pe 36 ghante (2026); 3(2)(b) nagnata ya kisi aur ban ke dikhane wala content 2 ghante (2026); 3A Grievance Appellate Committee me 30 din me appeal.
+- **Kis pe laagu:** reviews, review photos, sawal-jawab, seller ka content, Creator ka content.
+- **Kis module me:** reviews, moderation, support, legal pages.
+- **System me kya chahiye:** D-251 ke samay (calendar ghante); Terms me 3(1)(b) ki list aur har 3 mahine in-app suchna (D-255); hataya content 180 din tak rakha jaaye aur wapas ho sake (D-136 niyam 6); registration data ka samay (D-250); shikayat ke jawab me appeal ka raasta.
+- **Dummy kya hai:** dummy reviews aur shikayatein; Grievance Officer role se (D-241).
+- **Jaancha ya nahi:** Aadha jaancha (2026-11-20): [U1]; 2026 ke samay [U2], [U3] (secondary).
+
+## 7. CERT-In aur data ki jagah (D-259)
+
+### 7.0 Sources (sab 2026-11-20 ko khole)
+
+- **[C1]** CERT-In Directions, No. 20(3)/2022-CERT-In, 28 Apr 2022: <https://www.cert-in.org.in/PDF/CERT-In_Directions_70B_28.04.2022.pdf>. Primary.
+- **[C2]** CERT-In FAQs (May 2022): <https://www.cert-in.org.in/PDF/FAQs_on_CyberSecurityDirections_May2022.pdf>. Primary.
+- **[C3]** RBI, Storage of Payment System Data, FAQs (26 Jun 2019): <https://www.rbi.org.in/Scripts/FAQView.aspx?Id=130>. Primary.
+- **[C4]** RBI Master Direction on Regulation of Payment Aggregators (15 Sep 2025, 11 Nov 2026 tak ke badlav): <https://www.rbi.org.in/Scripts/NotificationUser.aspx?Id=12896>. Primary.
+
+### CL-106. CERT-In
+
+- **Kanoon ya niyam:** direction (i): systems ki ghadi NIC ya NPL ke NTP se, ya unse traceable (cloud ki time service chal sakti hai, FAQ Q42); (ii): Annexure I ke incidents (data breach, data leak, unauthorised access, e-commerce app pe hamla samet) 6 ghante me CERT-In ko; (iii): ek Point of Contact; (iv): saare ICT systems ke logs 180 din, Indian jurisdiction me (FAQ Q35: bahar bhi chal sakte hain, agar maang pe samay se diye ja sakein).
+- **Kis pe laagu:** platform (body corporate aur intermediary).
+- **Kis module me:** operations, logs.
+- **System me kya chahiye:** request logs aur security events apne store me 180 din (D-250; security events 1 saal, D-194); runbook me 6 ghante (D-248); Point of Contact = Security Contact role (D-253); saare timestamps UTC.
+- **Dummy kya hai:** CERT-In ko koi test report nahi; Point of Contact asli business pe hi register.
+- **Jaancha ya nahi:** Jaancha (2026-11-20): [C1], [C2].
+
+### CL-107. Data ki jagah
+
+- **Kanoon ya niyam:** RBI: payment system ka data sirf India me (payment system providers aur unke vendors pe; bahar processing ho to 24 ghante me wapas) [C3]; merchant apne server pe card ki jaankari nahi rakhta ([C4] Annexure 1, para 2.1). DPDP s.16: sarkar kisi desh me data bhejne pe rok laga sakti hai (abhi koi rok nahi mili); rule 15. SPDI rule 7. CERT-In ke logs CL-106 me.
+- **Kis pe laagu:** saari hosting (Singapore, D-058).
+- **Kis module me:** architecture, finance, privacy page.
+- **System me kya chahiye:** payment ka kam se kam data (ids, rakam, status, samay); card ya UPI ki jaankari kabhi hamare paas nahi; gateway se likhit pakka ki payment data India me (D-256); privacy page pe data ki jagah (CL-100); asli business se pehle region dobara dekhna.
+- **Dummy kya hai:** test mode.
+- **Jaancha ya nahi:** Aadha jaancha (2026-11-20): [C3], [C4], [P1]; RBI niyam ka merchant pe lagna vyakhya ka sawal.
+
+## 8. Payments (D-259)
+
+### 8.0 Sources (sab 2026-11-20 ko khole)
+
+- Payment Aggregators ki Master Direction: [C4].
+- **[R1]** RBI circular, Harmonisation of TAT and customer compensation for failed transactions, 20 Sep 2019: <https://www.rbi.org.in/scripts/NotificationUser.aspx?Id=11693>. Primary.
+- **[R2]** RBI FAQs on PPIs (22 Nov 2022 tak): <https://www.rbi.org.in/Scripts/FAQView.aspx?Id=126>. Primary.
+- **[R3]** RBI Digital Payments – E-mandate Framework 2026 (21 Apr 2026): <https://www.rbi.org.in/Scripts/NotificationUser.aspx?Id=13374>. Primary.
+
+### CL-108. Payment aggregator aur sellers ka paisa
+
+- **Kanoon ya niyam:** marketplace payment aggregator ka merchant hai (para 4(e), 4(f)); aggregator khud marketplace business nahi karta (10(b)); aggregator dekhe ki marketplace sirf onboarded sellers ke liye paisa le (13(f)); settlement agreement ke samay se (Table 1); refund usi raaste (10(f)) [C4].
+- **Kis pe laagu:** platform (Razorpay ka merchant).
+- **Kis module me:** payments, finance.
+- **System me kya chahiye:** ledger me sellers ka paisa liability ki tarah alag; seller agreement me payout ke din (D-081, D-256); baad me linked account ka raasta (D-093).
+- **Dummy kya hai:** test mode aur haath se payout (D-055).
+- **Jaancha ya nahi:** Aadha jaancha (2026-11-20): [C4]; marketplace ka khud aggregator na hona text ki padhai se, seedha likha nahi.
+
+### CL-109. Failed transaction, refund aur chargeback
+
+- **Kanoon ya niyam:** failed transaction (paisa kata, par merchant ko pakki suchna nahi): card aur UPI ke merchant payment pe T+5 din me reversal, phir bank pe roz ₹100 ka harjana [R1]; refund usi raaste; chargeback ka framework aggregator ka, aur customer ke haq bane rehte hain ([C4] para 8(a), 18(h)).
+- **Kis pe laagu:** platform, gateway.
+- **Kis module me:** checkout, finance, support.
+- **System me kya chahiye:** "paisa kata, order nahi bana" ki screen aur email; der se "captured" aaye to apne aap refund, sirf ek baar (D-256); chargeback ka case aur saboot (D-072, D-191).
+- **Dummy kya hai:** test mode ke scenario.
+- **Jaancha ya nahi:** Jaancha (2026-11-20): [C4], [R1].
+
+### CL-110. Gift card, points aur store credit
+
+- **Kanoon ya niyam:** PPI = rakhi hui value se kharid. Closed system PPI (sirf issuer ka apna maal ya seva, cash nahi) ko RBI ki ijazat nahi chahiye, par wo teesre ke liye payment nahi kar sakta. Gift PPI: ₹10,000 tak, reload nahi, cash-out nahi; validity kam se kam 1 saal, aur expiry issue pe batana [R2].
+- **Kis pe laagu:** gift cards (R2), points (R2).
+- **Kis module me:** loyalty, checkout, finance.
+- **System me kya chahiye:** gift card sirf RBI-authorised PPI issuer ke zariye (D-249); points paise se khareede nahi jaate, cash ya transfer nahi (D-173); store credit aur wallet nahi (D-177).
+- **Dummy kya hai:** test mode ka design; koi asli issuer nahi.
+- **Jaancha ya nahi:** Aadha jaancha (2026-11-20): [R2]; marketplace pe lagna aur points ka darja vyakhya ka sawal.
+
+### CL-111. E-mandate
+
+- **Kanoon ya niyam:** cards, PPI aur UPI pe recurring payment: ₹15,000 tak bina extra authentication (kuch shreniyon pe ₹1,00,000), 24 ghante pehle issuer ki suchna, aur customer kabhi bhi band kar sake [R3].
+- **Kis pe laagu:** abhi kuch nahi (D-178: pehle se payment nahi).
+- **Kis module me:** koi nahi.
+- **System me kya chahiye:** kuch nahi; subscription kabhi aaye to yahi niyam.
+- **Dummy kya hai:** kuch nahi.
+- **Jaancha ya nahi:** Jaancha (2026-11-20): [R3].
+
+## 9. Gig delivery partners (D-260)
+
+### 9.0 Sources (sab 2026-11-20 ko khole)
+
+- **[G1]** Code on Social Security 2020, Gazette 29 Sep 2020; PRS ki site pe copy: <https://prsindia.org/files/bills_acts/acts_parliament/2020/Code%20On%20Social%20Security,%202020.pdf>. Primary document, secondary host.
+- **[G2]** PIB ka saar (22 Nov 2025): <https://static.pib.gov.in/WriteReadData/specificdocs/documents/2025/nov/doc20251122702601.pdf>. Primary.
+- **[G3]** Social Security (Central) Rules 2026, G.S.R. 344(E), 8 May 2026; PRS ka saar: <https://prsindia.org/billtrack/the-social-security-central-rules-2026>. Secondary.
+- **[G4]** Maharashtra Gig and Platform Workers (Rights and Protection) Bill 2026 ka saar: <https://teamleaseregtech.com/updates/article/57603/maharashtra-gig-and-platform-workers-rights-and-protection-bill-2026/>. Secondary.
+- **[G5]** Contractor ke payment pe TDS, Income-tax Act 2025 s.393(1): search ke nateeje. Secondary.
+
+### CL-112. Social Security Code: aggregator
+
+- **Kanoon ya niyam:** aggregator ki paribhasha (s.2(2)); Seventh Schedule me "Logistic services" aur "e-Market place", aur hum dono me; workers ka registration (s.113); schemes (s.114); contribution saal ke turnover ka 1% se 2% (dar notify hona baaki), workers ko diye paise ke 5% se zyada nahi; shuru hone ki tareekh notify hogi (s.114(4), (5)) [G1]. Rules 2026: maujooda workers ki details 45 din me portal pe, naye real-time ya roz; scheme ke liye 90 din (ek aggregator) ya 120 din (kai) [G3]. Maharashtra ka 2026 ka bill [G4].
+- **Kis pe laagu:** platform (delivery partners ke liye).
+- **Kis module me:** delivery partners, finance.
+- **System me kya chahiye:** D-254 ke kaam (partner pe portal ka number, roz ke kaam ka export, saal ke kaam ke din ki ginti, contribution ki provision, dar setting me aur shuru ki tareekh notify hone tak band); partner ki kamaai se kaat ka likhit kaaran aur appeal; har state ki row.
+- **Dummy kya hai:** dummy partners; portal pe kabhi upload nahi (D-026).
+- **Jaancha ya nahi:** Aadha jaancha (2026-11-20): [G1], [G2]; Rules aur bill [G3], [G4] (secondary).
+
+### CL-113. Partner payouts pe TDS
+
+- **Kanoon ya niyam:** contractor ke payment pe TDS, Income-tax Act 2025 s.393(1) (pehle s.194C): individual ya HUF pe 1%, baaki pe 2%; seema ek payment ₹30,000 ya saal me ₹1,00,000 [G5].
+- **Kis pe laagu:** platform (partner payouts).
+- **Kis module me:** finance.
+- **System me kya chahiye:** D-254 (partner ka PAN encrypted, saal ka jod, kaat ka niyam settings me, payout statement me TDS).
+- **Dummy kya hai:** dummy PAN; koi challan nahi.
+- **Jaancha ya nahi:** Aadha jaancha (2026-11-20): [G5] (sirf secondary); CA agent se pakka karna (D-257).
+
+### CL-114. Partner ka data
+
+- **Kanoon ya niyam:** DPDP ka notice aur consent partner pe bhi; employment wala "legitimate use" (s.7(i)) sirf employee ke liye, aur Code gig worker ko employer-employee rishte ke bahar rakhta hai; kanoon ke kehne pe sarkar ko jaankari (s.7(d)) [P1], [G1].
+- **Kis pe laagu:** delivery partners.
+- **Kis module me:** Delivery app.
+- **System me kya chahiye:** D-254 (partner ka notice aur consent; location sirf "delivered" aur "fail" ke pal pe); photo sirf parcel ki; samay D-191 aur D-250.
+- **Dummy kya hai:** dummy partners.
+- **Jaancha ya nahi:** Jaancha (2026-11-20): [P1], [G1].
+
+## 10. Warehouse, transport aur environment (D-260)
+
+### 10.0 Sources (sab 2026-11-20 ko khole)
+
+- **[W1]** Maharashtra Fire Prevention and Life Safety Measures (Amendment) Act 2023 (Mah. Act XXIV of 2023): <https://mahafireservice.gov.in/directorate/fire-act/2023/English.pdf>. Primary.
+- **[W2]** Maharashtra Shops and Establishments (Amendment) Bill 2025 (L.A. Bill LXXXIX of 2025; Ordinance VIII of 2025, 1 Oct 2025); PRS ki site pe copy: <https://prsindia.org/files/bills_acts/bills_states/maharashtra/2025/Bill89of2025MH.pdf>. Primary document, secondary host.
+- **[W3]** Plastic Waste Management (Amendment) Rules 2022, G.S.R. 133(E), 16 Feb 2022 (EPR guidelines): <https://tnpcb.gov.in/owems/pdf/regulations/4th%20Amendment%20(EPR%20guidelines)%20Feb%202022.pdf>. Primary.
+- **[W4]** Plastic Waste Management (Amendment) Rules 2024, G.S.R. 201(E), 14 Mar 2024: <https://tnpcb.gov.in/owems/pdf/regulations/Plastic_Waste_Management_Amendment_Rules_2024.pdf>. Primary.
+- **[W5]** E-way bill ki seema aur kai invoices: search ke nateeje. Secondary.
+- **[W6]** Solid Waste Management Rules 2026 (1 Apr 2026 se): search ke nateeje. Secondary.
+- **[W7]** Gas Cylinders Rules 2016 me "gas cylinder" ki paribhasha: search ka saar. Secondary.
+
+### CL-115. Fire safety aur jalne wala maal
+
+- **Kanoon ya niyam:** Maharashtra Fire Act: storage buildings ki shreni; Provisional, Final aur Renewal Fire Safety Approval (2023 ka badlav) [W1]; owner ya occupier licensed agency se saal me do baar (January aur July) certificate de (secondary). Aerosol: "gas cylinder" 500 ml se bada dhaatu ka container [W7], to aam chhote cans is paribhasha ke bahar dikhte hain. Petroleum Rules aur transport ke niyam nahi jaanche.
+- **Kis pe laagu:** warehouse aur hubs.
+- **Kis module me:** warehouse, catalog, delivery.
+- **System me kya chahiye:** warehouse aur hub ke record me approvals aur certificate ki tareekhein aur yaad (D-256); catalog me "flammable" flag; warehouse me alag rack; delivery bag me aise items ki ginti ki seema.
+- **Dummy kya hai:** tareekhein aur numbers "DUMMY".
+- **Jaancha ya nahi:** Aadha jaancha (2026-11-20): [W1]; baaki secondary ya nahi jaancha.
+
+### CL-116. Shops and Establishments
+
+- **Kanoon ya niyam:** Maharashtra Shops and Establishments Act 2017: workers ki ginti se registration (s.6) ya intimation (s.7); 1 Oct 2025 ke Ordinance aur 2025 ke bill me seema 10 se 20 workers [W2] (bill pass hua ya nahi, pakka nahi).
+- **Kis pe laagu:** warehouse, hubs, office.
+- **Kis module me:** warehouse aur hub ka record.
+- **System me kya chahiye:** workers ki ginti; registration ya intimation ka number aur tareekh; seema setting me (D-256).
+- **Dummy kya hai:** number "DUMMY".
+- **Jaancha ya nahi:** Aadha jaancha (2026-11-20): [W2].
+
+### CL-117. E-way bill
+
+- **Kanoon ya niyam:** inter-state ₹50,000 se zyada ki consignment; Maharashtra ke andar ₹1,00,000; ek e-way bill ek invoice ka; ek gaadi ke liye consolidated e-way bill [W5].
+- **Kis pe laagu:** warehouse se hub ke trips.
+- **Kis module me:** logistics (trips, D-027).
+- **System me kya chahiye:** trip ke manifest me har invoice ki rakam; seema paar ho to e-way bill number ke bina dispatch nahi; trip pe consolidated number (D-256).
+- **Dummy kya hai:** number "DUMMY".
+- **Jaancha ya nahi:** Aadha jaancha (2026-11-20): [W5]; CA agent se pakka karna (D-257).
+
+### CL-118. Plastic EPR
+
+- **Kanoon ya niyam:** obligated entities me online platforms aur marketplaces samet brand owners, micro aur small enterprise chhod ke (clause 4(iii)); packaging ki shreniyan I se IV (5.1); CPCB portal pe registration (6.1); bina registration business nahi (6.2); unregistered entity se len-den nahi (6.3); targets aur saal ka return (7) [W3], [W4].
+- **Kis pe laagu:** platform (shipping ki packaging); har seller jo brand owner ya importer hai (apne packs ke liye), apne brand ki company bhi (D-031, D-243).
+- **Kis module me:** seller onboarding, warehouse (packing), finance.
+- **System me kya chahiye:** D-045 aur D-256 (seller ka EPR number ya micro/small hone ki ghoshna, iske bina seller live nahi; packaging master, shreni aur wazan; har dispatch ka record; saal ka return).
+- **Dummy kya hai:** EPR numbers "DUMMY".
+- **Jaancha ya nahi:** Jaancha (2026-11-20): [W3], [W4].
+
+### CL-119. Expired ya toote maal ko nasht karna
+
+- **Kanoon ya niyam:** Solid Waste Management Rules 2026: kachra chaar hisson me alag; "special care" waste; bulk waste generator ki alag zimmedari [W6].
+- **Kis pe laagu:** warehouse.
+- **Kis module me:** warehouse, returns.
+- **System me kya chahiye:** D-062 aur D-256 (sirf authorised handler; certificate of destruction batch ke record me; jalne wala maal alag).
+- **Dummy kya hai:** handler aur certificate dummy.
+- **Jaancha ya nahi:** Aadha jaancha (2026-11-20): [W6].
+
+### CL-120. E-waste
+
+- **Kanoon ya niyam:** source nahi khula (E-Waste (Management) Rules 2022 me EPR producer pe).
+- **Kis pe laagu:** sirf agar kabhi beauty appliances (jaise hair dryer) bikein.
+- **Kis module me:** catalog.
+- **System me kya chahiye:** catalog me "electrical appliance" ka flag; aisa product aane se pehle jaanch.
+- **Dummy kya hai:** kuch nahi.
+- **Jaancha ya nahi:** Jaancha nahi.
+
+## 11. Sehat aur AYUSH (D-261)
+
+### 11.0 Sources (sab 2026-11-20 ko khole)
+
+- **[H1]** Drugs and Magic Remedies (Objectionable Advertisements) Act 1954: <https://thc.nic.in/Central%20Governmental%20Acts/Drugs%20and%20Magic%20Remedies%20(Objectionable%20Advertisement)%20Act,%201954.pdf>. Primary.
+- **[H2]** Telemedicine Practice Guidelines (2020) ka saar: <https://nrces.in/standards/telemedicine-practice-guidelines>. Saar; mool PDF nahi khula.
+- **[H3]** Drugs and Cosmetics Act 1940 aur Rules 1945 (CDSCO, 31 Dec 2016 tak): <https://cdsco.gov.in/opencms/export/sites/CDSCO_WEB/Pdf-documents/acts_rules/2016DrugsandCosmeticsAct1940Rules1945.pdf>. Primary, par purana.
+- **[H4]** Rule 170 ka hatna aur Supreme Court ka stay hatna (11 Aug 2025): khabrein. Secondary.
+
+### CL-121. Online consultation
+
+- **Kanoon ya niyam:** telemedicine sirf registered medical practitioner (RMP) kar sakta hai; naam, qualification aur registration number dikhana; patient ki pehchaan, consent aur record; dawa sirf tay lists se; platform RMP ka registration jaanche aur dikhaye; AI se salah ya dawa nahi [H2].
+- **Kis pe laagu:** Skin & Hair Expert ki consultation (R2). Hamari consultation beauty salah hai, medical nahi (D-252), isliye guidelines laagu nahi.
+- **Kis module me:** consultation.
+- **System me kya chahiye:** D-252 (koi nidaan ya dawa nahi; booking, Meet ke email aur notes pe "Ye medical consultation nahi hai"; ilaaj pe "doctor se milein"; "doctor" ya "dermatologist" jaise shabd nahi). Registration ka koi field nahi.
+- **Dummy kya hai:** kuch nahi.
+- **Jaancha ya nahi:** Aadha jaancha (2026-11-20): [H2] (sirf saar).
+
+### CL-122. AYUSH drug ki pehchaan
+
+- **Kanoon ya niyam:** Ayurvedic, Siddha ya Unani drug banane ka licence Form 25-D pe (rules 153 se 157); label pe "Ayurvedic/Siddha/Unani medicine" aur "Mfg. Lic. No." (rule 161(3)) [H3]. Rule 170 hataya gaya, aur Supreme Court ka stay 11 Aug 2025 ko hata [H4].
+- **Kis pe laagu:** har listing; AYUSH drug listing pe nahi (D-128).
+- **Kis module me:** catalog ki jaanch.
+- **System me kya chahiye:** label checklist me AYUSH drug ke ishare (ye shabd ya aisa licence) pe listing reject.
+- **Dummy kya hai:** test listing.
+- **Jaancha ya nahi:** Aadha jaancha (2026-11-20): [H3] (text 2016 tak), [H4] (secondary).
+
+### CL-123. Drugs and Magic Remedies Act
+
+- **Kanoon ya niyam:** s.3: drug ke vigyapan me garbh, yaun kshamata, mahwari, aur Schedule ki bimariyon (beauty se jude: breast ki banawat, leucoderma, motapa, lambai) ke ilaaj ka sujhaav mana; s.4: jhootha ya gumraah karne wala drug ka vigyapan mana; aise vigyapan ke chhapne me hissa lena bhi (s.2(d)) [H1].
+- **Kis pe laagu:** listings, seller content, Creator content, sponsored content.
+- **Kis module me:** catalog, Creator, ads.
+- **System me kya chahiye:** D-256 ("mana shabdon" me is Act ka alag hissa, har shabd ke saath Schedule ka number; D-246).
+- **Dummy kya hai:** test listing.
+- **Jaancha ya nahi:** Jaancha (2026-11-20): [H1].
+
+## 12. IP aur contracts (D-261)
+
+### 12.0 Sources (sab 2026-11-20 ko khole)
+
+- **[L1]** Trade Marks Act 1999, s.30(3): <https://indiankanoon.org/doc/1928889/>. Statute ka text, secondary host.
+- **[L2]** IT Act 2000, s.10A: search ke nateeje. Secondary.
+- **[L3]** Commission Decision 2011/833/EU (EU documents ka reuse): search ka saar. Secondary.
+
+### CL-124. Trademark aur asli maal
+
+- **Kanoon ya niyam:** jaayaz tareeke se kharide gaye registered mark wale maal ko aage bechna sirf isliye infringement nahi (s.30(3)) [L1]; nakli maal infringement hai, aur doosre kanoonon me bhi; user agreement me IP todne wala content mana (IT Rules 3(1)(b), [U1]).
+- **Kis pe laagu:** har seller.
+- **Kis module me:** seller onboarding, catalog, support.
+- **System me kya chahiye:** brand authorisation (D-075); seller agreement me asli maal aur photos ke haq ki ghoshna; brand owner ke liye IP shikayat ki category.
+- **Dummy kya hai:** authorisation letter dummy.
+- **Jaancha ya nahi:** Aadha jaancha (2026-11-20): [L1].
+
+### CL-125. Data aur assets ka license
+
+- **Kanoon ya niyam:** EU ke documents ka reuse aam taur pe ijazat ke saath, teesre ke IP ko chhod ke [L3]; CosIng ki apni shartein aur BIS standards ki shartein nahi jaanchi.
+- **Kis pe laagu:** ingredient master list, blocklist, fonts, icons, images.
+- **Kis module me:** catalog data, frontend.
+- **System me kya chahiye:** license list (asset, license, link, attribution); IS ki list ka text copy nahi, sirf hawala.
+- **Dummy kya hai:** kuch nahi.
+- **Jaancha ya nahi:** Aadha jaancha (2026-11-20): [L3].
+
+### CL-126. Seller ka udhaar
+
+- **Kanoon ya niyam:** koi khaas kanoon nahi mila; ye seller agreement (contract) ki baat hai.
+- **Kis pe laagu:** har seller.
+- **Kis module me:** finance, seller agreement.
+- **System me kya chahiye:** D-071; seller agreement me kaat ka haq, notice, listings rokna, aur jhagde ka raasta.
+- **Dummy kya hai:** test mode ka payment link.
+- **Jaancha ya nahi:** Jaancha nahi.
+
+### CL-127. Apne brand ka trademark
+
+- **Kanoon ya niyam:** source nahi khula: trademark aur company naam ki search nahi hui (bahar ki search me project ka naam nahi daala gaya).
+- **Kis pe laagu:** apne brand ki company (D-243).
+- **Kis module me:** koi nahi.
+- **System me kya chahiye:** asli business se pehle trademark search (class 3) aur application, aur company naam ki uplabdhta; search owner kare, ya owner ki haan se.
+- **Dummy kya hai:** company dummy (D-026).
+- **Jaancha ya nahi:** Jaancha nahi.
+
+### CL-128. Electronic contract (Terms aur seller agreement)
+
+- **Kanoon ya niyam:** IT Act s.10A: electronic tareeke se bana contract sirf isliye unenforceable nahi [L2]; dono paksh baalig hon. Stamp duty nahi jaanchi.
+- **Kis pe laagu:** customers (Terms), sellers (seller agreement).
+- **Kis module me:** sign-up, seller onboarding, legal pages.
+- **System me kya chahiye:** har version badla na ja sake; kisne, kab, kaunsa version maana, iska record; "maanta hoon" bina pehle tick ke (D-150).
+- **Dummy kya hai:** dummy sellers ka record.
+- **Jaancha ya nahi:** Aadha jaancha (2026-11-20): [L2].
+
+## 13. Nazar (D-261)
+
+Cheezein jin pe nazar rakhni hai; badlav ho to us row ko dobara dekhna.
+
+| Kya                                                     | Kab                                                | Kis row se             |
+| ------------------------------------------------------- | -------------------------------------------------- | ---------------------- |
+| DPDP Rules ki tareekhein                                | 13 Nov 2026 (Consent Manager), lagbhag 13 May 2027 | CL-088, CL-089, CL-093 |
+| Significant Data Fiduciary ki notification              | Jab sarkar notify kare                             | CL-103                 |
+| India ke bahar data pe koi rok (DPDP s.16)              | Jab sarkar notify kare                             | CL-107                 |
+| IT Rules ke 2026 ke badlav ka primary text              | Gazette khulne pe                                  | CL-105                 |
+| Social Security Code ki tareekh aur Maharashtra ka bill | Notify ya pass hone pe                             | CL-112                 |
+| Maharashtra Shops and Establishments ka bill            | Pass hone pe                                       | CL-116                 |
+| Hosting ka region aur payment data India me             | Asli business se pehle (D-058, D-256)              | CL-107                 |
+| Gift card ka issuer (test mode me milta hai ya nahi)    | Gift card banne se pehle (D-249)                   | CL-110                 |
+
 ## Change log
 
-| Version | Date       | Badlav                                                                                                            |
-| ------- | ---------- | ----------------------------------------------------------------------------------------------------------------- |
-| v1.0.0  | 2026-11-17 | Khaali file bani.                                                                                                 |
-| v1.1.1  | 2026-11-19 | §1 tax: CL-001 se CL-024, sources ke saath (D-244); file ka dhaancha.                                             |
-| v1.1.2  | 2026-11-19 | §2 Legal Metrology: CL-025 se CL-038, sources ke saath (D-245).                                                   |
-| v1.1.3  | 2026-11-19 | §3 cosmetics kanoon: CL-039 se CL-058, sources ke saath (D-246).                                                  |
-| v1.1.4  | 2026-11-19 | §4 e-commerce aur consumer kanoon: CL-059 se CL-087, sources ke saath (D-247); kanooni jaanch ka pehla run poora. |
-| v1.1.5  | 2026-11-20 | Lawyer aur CA ki paribhasha: project ke AI agents, unki raay hi lawyer aur CA ki raay (D-257).                    |
+| Version | Date       | Badlav                                                                                                                                     |
+| ------- | ---------- | ------------------------------------------------------------------------------------------------------------------------------------------ |
+| v1.0.0  | 2026-11-17 | Khaali file bani.                                                                                                                          |
+| v1.1.1  | 2026-11-19 | §1 tax: CL-001 se CL-024, sources ke saath (D-244); file ka dhaancha.                                                                      |
+| v1.1.2  | 2026-11-19 | §2 Legal Metrology: CL-025 se CL-038, sources ke saath (D-245).                                                                            |
+| v1.1.3  | 2026-11-19 | §3 cosmetics kanoon: CL-039 se CL-058, sources ke saath (D-246).                                                                           |
+| v1.1.4  | 2026-11-19 | §4 e-commerce aur consumer kanoon: CL-059 se CL-087, sources ke saath (D-247); kanooni jaanch ka pehla run poora.                          |
+| v1.1.5  | 2026-11-20 | Lawyer aur CA ki paribhasha: project ke AI agents, unki raay hi lawyer aur CA ki raay (D-257).                                             |
+| v1.1.6  | 2026-11-20 | §5 personal data: CL-088 se CL-104, sources ke saath (D-258).                                                                              |
+| v1.1.7  | 2026-11-20 | §6 IT Rules, §7 CERT-In aur data ki jagah, §8 payments: CL-105 se CL-111, sources ke saath (D-259).                                        |
+| v1.1.8  | 2026-11-20 | §9 gig delivery partners, §10 warehouse, transport aur environment: CL-112 se CL-120, sources ke saath (D-260).                            |
+| v1.1.9  | 2026-11-20 | §11 sehat aur AYUSH, §12 IP aur contracts: CL-121 se CL-128; §13 Nazar; CL-081 bhara (D-261); kanooni jaanch ke dono run ke nateeje poore. |
