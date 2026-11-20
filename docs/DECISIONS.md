@@ -1,6 +1,6 @@
 # DECISIONS: Beautinique
 
-> **Status:** v1.10.24 (2026-11-19). Har faisla ek jagah. Sirf wahi "Tay" jo owner ne khud kaha; Claude ki salah faisla nahi. Cheezein ek-ek karke judti hain.
+> **Status:** v1.10.26 (2026-11-19). Har faisla ek jagah. Sirf wahi "Tay" jo owner ne khud kaha; Claude ki salah faisla nahi. Cheezein ek-ek karke judti hain.
 
 ## 0. Kaise likhein
 
@@ -260,6 +260,8 @@
 | D-243 | Apna brand "Unibelle", seller company "Unibelle Cosmetics Pvt Ltd" (dummy); platform "Beautinique" hi; naam platform se alag, to D-233 phir laagu; D-242 badla.                                               | Business     | 2026-11-19 |
 | D-244 | COMPLIANCE batch 1 maana: tax (GST, TCS, TDS) ki 24 rows, CL-001 se CL-024, source aur tareekh ke saath.                                                                                                      | Business     | 2026-11-19 |
 | D-245 | COMPLIANCE batch 2 maana: Legal Metrology ki 14 rows, CL-025 se CL-038, source aur tareekh ke saath.                                                                                                          | Business     | 2026-11-19 |
+| D-246 | COMPLIANCE batch 3 maana: cosmetics kanoon ki 20 rows, CL-039 se CL-058, source aur tareekh ke saath.                                                                                                         | Business     | 2026-11-19 |
+| D-247 | COMPLIANCE batch 4 maana: e-commerce aur consumer kanoon ki 29 rows, CL-059 se CL-087; kanooni jaanch ka pehla run docs me poora.                                                                             | Business     | 2026-11-19 |
 
 ## 2. Record
 
@@ -3074,6 +3076,24 @@
 - **Kisne, kab:** owner, 2026-11-19. **Nishaan:** Salah maani.
 - **Asar (Claude):** catalog me nayi cheezein: product page pe "Pack ki jaankari" ka hissa; manufacturer, packer, marketer aur importer ke alag fields; galat declaration ki report pe staff listing ko jaanch tak rok sake (wajah ke record ke saath); system se nikla unit sale price; "pack pe dot" ka field aur "vegan" claim se takrav ki jaanch; "not for retail sale" wale packs list nahi hote. Kanooni detail jaanchi nahi (R-004): rules ka text doosri site pe rakhi copy se; 2025 ki MRP sticker wali chhoot sirf secondary source se.
 
+### D-246. COMPLIANCE batch 3: cosmetics kanoon
+
+- **Faisla:** kanooni jaanch ke cosmetics kanoon (Drugs and Cosmetics Act 1940, Cosmetics Rules 2020) wale hisse ki 20 rows (CL-039 se CL-058: label ke fields, expiry ki jaankari, use before aur expiry ka din, batch, ingredients aur allergens, imported cosmetics, licence, cosmetic aur drug ki seema, AYUSH, mana ingredients, animal testing, recall, skin reaction, lautaye maal ki dobara bikri, expired maal, bechne ka licence, label na badalna, khaas products, samples, reviews ke daawe) jaisi prastaavit thi waisi [COMPLIANCE.md](COMPLIANCE.md) me, source ke link aur tareekh ke saath.
+- **Wajah:** Claude ki salah, owner ne maani: listing ki jaanch, batch aur expiry, recall aur returns ka ek tay kanooni aadhaar.
+- **Chhode vikalp:** badlav ke saath maanna; batch rokna (listing aur returns ke niyamon ka aadhaar baad me).
+- **Kab dobara khulega:** kanooni jaanch ka primary source (jaise 2025 ka gazette), ya owner khud khole.
+- **Kisne, kab:** owner, 2026-11-19. **Nishaan:** Salah maani.
+- **Asar (Claude):** nayi cheezein: listing ki jaanch me label ki checklist (category ke hisaab se, hair dye aur fluoride toothpaste jaise khaas products samet); imported listing pe RC number, RC holder aur retention ki agli tareekh ki yaad; imported batch pe 6 mahine ki expiry ki chetavni; "mana shabdon" ki list (senior role ke haath me, description, seller ke content aur brand ke jawab pe bhi); AYUSH label pe drug type; claim ka naam "certified cruelty-free (certifier)"; recall pe "regulator ko suchna" ka field; skin reaction ka case brand ko bina customer ki pehchaan ke; returns me storage ki jaanch; expired batch ki pick aur dispatch pe rok; allergen chetavni ke saath "pack ki list dekhein" ki line. Kanooni detail jaanchi nahi (R-004): Cosmetics Rules ka sarkari text 2020 ka; 2025 ka badlav sirf secondary source se; IS 4707 ki list aur AYUSH ke niyam nahi khule.
+
+### D-247. COMPLIANCE batch 4: e-commerce aur consumer kanoon
+
+- **Faisla:** kanooni jaanch ke e-commerce aur consumer kanoon wale hisse ki 29 rows (CL-059 se CL-087: platform aur seller ki jaankari, return aur refund, grievance, daam aur bhed, kram aur sponsored, platform ke naam jaisa seller, product liability, seller ka undertaking, dark patterns, consent, discount, claims, endorsement, reviews, cancel, demo store, legal pages, points ki expiry, recall, der se delivery, invoice pe seller ka naam, ullanghan wale sellers, bundled fee, imported maal) jaisi prastaavit thi waisi [COMPLIANCE.md](COMPLIANCE.md) me, source ke link aur tareekh ke saath. Isse kanooni jaanch ke pehle run ke saare nateeje docs me aa gaye (D-220).
+- **Wajah:** Claude ki salah, owner ne maani: pages, product page, checkout, shikayat aur reviews ke niyam ek tay kanooni aadhaar pe.
+- **Chhode vikalp:** badlav ke saath maanna; batch rokna (pehla run adhoora).
+- **Kab dobara khulega:** kanooni jaanch ka primary source (jaise 2026 ka gazette), ya owner khud khole.
+- **Kisne, kab:** owner, 2026-11-19. **Nishaan:** Salah maani.
+- **Asar (Claude):** nayi cheezein: About ya Contact page (company dummy; customer care, grievance officer aur nodal person apne roles, D-241); National Consumer Helpline ka field; product page pe return ki line aur return ka kharcha; refund ka tay vaada order page pe; Pro ki shartein aur "suvidha band" ke niyam public pages pe; kram ke gun mahatva ke kram me, seller agreement me "koi differentiated treatment nahi"; warehouse ke likhit niyam (storage, pehle expire wala pehle, quarantine, returns ki jaanch); "kam stock" ka log; Creator ke content pe hataya na ja sakne wala "Ad / Sponsored / Collab" label (R2); invoice pe seller ka naam sabse upar; listing hatane ki wajahon me trademark, copyright ya IT Act ka code; imported pe "authenticity guarantee" ki ghoshna. Points ki expiry ka kanoon doosre run me. Kanooni detail jaanchi nahi (R-004): E-commerce Rules aur Consumer Protection Act ke text doosri sites ki copies se; 2026 ka badlav aur guidelines sirf secondary source se.
+
 ## Change log
 
 | Version  | Date       | Badlav                                                                                                                                                                                                                                                                                  |
@@ -3150,3 +3170,5 @@
 | v1.10.22 | 2026-11-19 | D-242 aur D-243 ke Asar se hataye gaye consent wale sawal ka number hataya (owner); faisle waise hi.                                                                                                                                                                                    |
 | v1.10.23 | 2026-11-19 | Owner ke kehne pe D-031 aur D-233 se D-242 wali "badla" line (naam platform jaisa) hatayi; D-233 me D-243 ka naam "jod" ki tarah.                                                                                                                                                       |
 | v1.10.24 | 2026-11-19 | D-245 aaya (COMPLIANCE batch 2: Legal Metrology ki 14 rows maani; Q-183).                                                                                                                                                                                                               |
+| v1.10.25 | 2026-11-19 | D-246 aaya (COMPLIANCE batch 3: cosmetics kanoon ki 20 rows maani; Q-184).                                                                                                                                                                                                              |
+| v1.10.26 | 2026-11-19 | D-247 aaya (COMPLIANCE batch 4: e-commerce aur consumer kanoon ki 29 rows maani; Q-185); kanooni jaanch ka pehla run docs me poora.                                                                                                                                                     |

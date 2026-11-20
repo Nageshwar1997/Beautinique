@@ -1,6 +1,6 @@
 # OPEN QUESTIONS: Beautinique
 
-> **Status:** v1.3.39 (2026-11-19). Khule sawal, aage ke topics aur jaanchna baaki. Cheezein ek-ek karke judengi.
+> **Status:** v1.3.41 (2026-11-19). Khule sawal, aage ke topics aur jaanchna baaki. Cheezein ek-ek karke judengi.
 
 ## Is file me kya aayega
 
@@ -4263,7 +4263,7 @@ Claude ka kaam: owner ka faisla nahi chahiye, sirf saboot. Nateeja saboot ke saa
 
 ### Q-184. COMPLIANCE batch 3: cosmetics kanoon ki rows maanein?
 
-- **Status:** `Khula`. Topic: B13 (compliance), B3 (catalog), B7 (returns).
+- **Status:** `Tay`. Topic: B13 (compliance), B3 (catalog), B7 (returns).
 - **Sawal:** kanooni jaanch ke cosmetics kanoon (Drugs and Cosmetics Act 1940, Cosmetics Rules 2020) wale hisse ki ye 20 rows [COMPLIANCE.md](COMPLIANCE.md) me aayein (CL-039 se CL-058), COMPLIANCE ke format me, source ke link aur tareekh ke saath?
 - **Kyun zaroori:**
   - Listing ki jaanch ki checklist, batch aur expiry ke niyam, recall aur returns ka aadhaar isi se banta hai.
@@ -4299,6 +4299,56 @@ Claude ka kaam: owner ka faisla nahi chahiye, sirf saboot. Nateeja saboot ke saa
   - (b) me har badlav ki ek line.
   - (c) me listing aur returns ke niyamon ka kanooni aadhaar baad me.
 - **Kanooni detail:** Cosmetics Rules ka sarkari text 2020 ka hai; 2025 ka badlav sirf secondary source se. IS 4707 ki list aur AYUSH ke niyam nahi khule. Lawyer se nahi jaancha (R-004).
+- **Owner ka jawab (2026-11-19):** **(a)**, rows jaisi hain waisi maani. Record: [DECISIONS.md](DECISIONS.md) D-246.
+
+### Q-185. COMPLIANCE batch 4: e-commerce aur consumer kanoon ki rows maanein?
+
+- **Status:** `Tay`. Topic: B13 (compliance), B11 (support), B5 (checkout).
+- **Sawal:** kanooni jaanch ke e-commerce aur consumer kanoon (Consumer Protection (E-Commerce) Rules 2020, Consumer Protection Act 2019, dark patterns aur misleading ads ki guidelines) wale hisse ki ye 29 rows [COMPLIANCE.md](COMPLIANCE.md) me aayein (CL-059 se CL-087), COMPLIANCE ke format me, source ke link aur tareekh ke saath? Ye kanooni jaanch ke pehle run ki aakhri batch hai.
+- **Kyun zaroori:**
+  - Legal pages, product page ki jaankari, checkout, shikayat aur reviews ke niyam isi se bante hain; UX aur QA ka aadhaar.
+  - Kuch rows nayi cheezein laati hain (About ya Contact page, return ki line product page pe, refund ka vaada, kram ke gun ka kram, Creator ke content ka label, "kam stock" ka log, listing hatane ki wajah ke code, imported pe asli hone ki guarantee, invoice pe seller ka naam); baaki tay faislon se mel ka hawala.
+- **Prastaavit rows** (sources 2026-11-19 ko khole; E-commerce Rules ka text 2020 ka, 2026 ka badlav (1 Jan 2027 se) aur guidelines sirf secondary se):
+  1. **CL-059, platform ki jaankari aur nodal person (rule 4(1), 4(2), 4(6), 4(7)):** About ya Contact page pe legal naam, pata, website, customer care aur grievance officer ke contact; nodal person. Company ka naam aur pata dummy; customer care, grievance officer aur nodal person apne roles ki asli jaankari (D-237, D-241). National Consumer Helpline ka field (2027 se zaroori). Jaancha (2027 wala hissa secondary).
+  2. **CL-060, seller ki jaankari aur seller ka grievance officer (rule 5(3)(a), 6(4), 6(5)):** D-238; seller profile me legal naam, pata, customer care, grievance officer, GSTIN (aur MSME number agar ho), website; seller agreement likhit contract, version ke saath (D-150). Jaancha.
+  3. **CL-061, return policy dikhana (rule 5(3)(c), 6(5)(g)):** product page pe return ki line ("seal aata hai: man badla 7 din" ya "seal nahi: sirf galti pe") aur return ka kharcha; numbers settings se (D-079, D-114, D-150, D-221). Jaancha.
+  4. **CL-062, kharab maal pe haq aur muddat (rule 6(3); Act s.2(47)(viii), s.69):** D-221. Jaancha.
+  5. **CL-063, refund ka samay (rule 4(10); Act s.2(47)(viii)):** return ke refund ka tay vaada ("pickup se X kaam ke din me", setting), order page pe (D-111, D-115); RBI ke samay ke niyam doosre run me. Jaancha.
+  6. **CL-064, grievance officer, receipt aur hal (rule 4(4), 4(5), 5(3)(b), 6(4)(b)):** naam, contact, designation; 48 ghante me receipt, ek mahine me hal; ticket number (D-163, D-237, D-238). Jaancha (receipt me copy wala hissa secondary).
+  7. **CL-065, daam ka khel aur customers me bhed (rule 4(11)):** Pro buyers jaanchi hui class hain, manmani nahi (D-065, D-069); Pro ki shartein public page pe, aur "suvidha band" ke niyam (D-109, D-116) policy page pe. Jaancha.
+  8. **CL-066, kram aur sponsored (rule 5(3), 5(4); 2027 se 4(11)(c), 4(12)):** kram ke page pe mukhya gun mahatva ke kram me; seller agreement me "koi differentiated treatment nahi, apna brand bhi isi niyam me"; sponsored (R2) ka label har jagah (D-139). Jaancha (2027 wale hisse secondary).
+  9. **CL-067, platform ke naam jaisa seller aur customer data (2027 se rule 5(6)):** apne brand ka naam alag hai (D-243), to laagu nahi; seller record pe "related party" ka field (CL-015). Aadha jaancha.
+  10. **CL-068, product liability (Act s.2(17), s.2(37), s.84 se s.87):** platform maal rakhta, jaanchta aur label lagata hai, to "reasonable care" ka jokhim. Warehouse ke niyam likhit (storage ki shart, pehle expire wala pehle, quarantine, returns ki jaanch) aur har kadam ka record; chetavni wale products ki chetavni product page pe (CL-056). Jaancha.
+  11. **CL-069, seller ka undertaking (rule 5(2), 6(4)(c)):** D-240. Jaancha.
+  12. **CL-070, jhoothi jaldi (dark patterns, false urgency):** D-154; "kam stock" ka number aur niyam audit ke liye log me. Aadha jaancha.
+  13. **CL-071, chhupe charges aur basket sneaking (dark patterns; rule 6(5)(b)):** D-107; cart aur checkout pe delivery fee alag line me; server ka total aur dikha total na mile to order nahi (SR-044). Aadha jaancha.
+  14. **CL-072, saaf consent (rule 4(9); dark patterns):** koi checkbox pehle se tick nahi; "Haan" aur "Nahi" barabar dikhen; QA ka test (D-141, D-150, D-155). Jaancha.
+  15. **CL-073, dark patterns ka saal ka audit (2027 se):** D-240. Aadha jaancha.
+  16. **CL-074, discount aur pehle ka daam (Act s.2(47)(i)(i); 2027 se prior price):** D-223. Aadha jaancha.
+  17. **CL-075, claims aur gumraah karne wale vigyapan (Act s.2(28), s.2(47)(i)(g), s.21):** D-224. Jaancha (Act); 2022 ki guidelines secondary.
+  18. **CL-076, endorsement aur influencers (2022 ki guidelines):** D-158; Creator (R2) ke har content pe "Ad / Sponsored / Collab" ka label system se, jo hataya na ja sake. Aadha jaancha.
+  19. **CL-077, nakli reviews (rule 6(2), 4(3)):** D-146, D-156; reviews ka BIS standard (IS 19000, voluntary) baad me. Aadha jaancha.
+  20. **CL-078, cancel pe charge (rule 4(8)):** customer pe charge tabhi jab platform bhi apne cancel pe waisa uthaye; D-110 me koi cancel fee nahi. Jaancha.
+  21. **CL-079, demo store (Act s.2(47)(ii); bait and switch):** D-133, D-145; product page aur checkout pe bhi demo ki patti. Aadha jaancha.
+  22. **CL-080, legal pages (rules 4, 5, 6):** D-150, D-240, aur About ya Contact (CL-059). Jaancha.
+  23. **CL-081, points ki expiry aur suchna:** source nahi khula; prepaid niyamon ke saath doosre run me (D-174). Jaancha nahi.
+  24. **CL-082, recall pe customers ko suchna (Act s.20; Cosmetics Rules rule 65):** D-129, D-131, D-240. Jaancha.
+  25. **CL-083, der se delivery (rule 6(3)):** D-222. Jaancha.
+  26. **CL-084, invoice pe seller ka naam (2027 se):** invoice template me seller ka naam sabse upar, platform ka naam usse bada nahi. Aadha jaancha.
+  27. **CL-085, baar-baar ullanghan wale sellers (rule 5(5)):** listing hatane ki wajahon me "trademark, copyright ya IT Act ki shikayat" ka alag code, aur seller pe ginti. Jaancha.
+  28. **CL-086, asambandhit sevaon ki bundled fee (2027 se):** koi platform ya packing fee nahi (D-107), points pe fee nahi (D-173). Aadha jaancha.
+  29. **CL-087, imported: importer aur asli hone ki guarantee (rule 4(6), 6(5)(f)):** imported listing pe seller ki "authenticity guarantee" ki ghoshna (text + checkbox, pehle se tick nahi), product page pe, brand authorisation (D-075) se judi. Jaancha.
+- **Vikalp:**
+  - **(a)** Rows jaisi hain waisi maanein.
+  - **(b)** Maanein, par owner jo row badle, wo badal ke.
+  - **(c)** Ye batch abhi roko.
+- **Salah:** **(a)**.
+- **Trade-off:**
+  - (a) me pages, product page, checkout, seller app aur reviews me kuch chhote kaam.
+  - (b) me har badlav ki ek line.
+  - (c) me e-commerce ke kanooni niyam baad me, aur kanooni jaanch ka pehla run adhoora.
+- **Kanooni detail:** E-commerce Rules aur Consumer Protection Act ke text doosri sites pe rakhi copies se; 2026 ka badlav, dark patterns aur misleading ads ki guidelines sirf secondary source se; points ki expiry ka source nahi khula. Lawyer se nahi jaancha (R-004).
+- **Owner ka jawab (2026-11-19):** **(a)**, rows jaisi hain waisi maani. Record: [DECISIONS.md](DECISIONS.md) D-247.
 
 ## Change log
 
@@ -4378,3 +4428,5 @@ Claude ka kaam: owner ka faisla nahi chahiye, sirf saboot. Nateeja saboot ke saa
 | v1.3.37 | 2026-11-19 | Q-182 tay: (a) tax ki 24 rows (D-244, COMPLIANCE §1); Q-183 khula (COMPLIANCE batch 2: Legal Metrology).                                                                                  |
 | v1.3.38 | 2026-11-19 | Owner ke kehne pe: apne brand ke consent wala sawal hataya (zaroorat nahi; naam ka faisla D-243 me waisa hi); Legal Metrology batch ab Q-183 (numbering ke niyam ka ek apvaad, owner ka). |
 | v1.3.39 | 2026-11-19 | Q-183 tay: (a) Legal Metrology ki 14 rows (D-245, COMPLIANCE §2); Q-184 khula (COMPLIANCE batch 3: cosmetics kanoon).                                                                     |
+| v1.3.40 | 2026-11-19 | Q-184 tay: (a) cosmetics kanoon ki 20 rows (D-246, COMPLIANCE §3); Q-185 khula (COMPLIANCE batch 4: e-commerce aur consumer kanoon).                                                      |
+| v1.3.41 | 2026-11-19 | Q-185 tay: (a) e-commerce aur consumer kanoon ki 29 rows (D-247, COMPLIANCE §4); koi sawal khula nahi.                                                                                    |
