@@ -1,6 +1,6 @@
 # DECISIONS: Beautinique
 
-> **Status:** v1.10.32 (2026-11-20). Har faisla ek jagah. Sirf wahi "Tay" jo owner ne khud kaha; Claude ki salah faisla nahi. Cheezein ek-ek karke judti hain.
+> **Status:** v1.10.36 (2026-11-20). Har faisla ek jagah. Sirf wahi "Tay" jo owner ne khud kaha; Claude ki salah faisla nahi. Cheezein ek-ek karke judti hain.
 
 ## 0. Kaise likhein
 
@@ -276,6 +276,19 @@
 | D-259 | COMPLIANCE batch 6 maana: IT Rules, CERT-In aur payments ki 7 rows, CL-105 se CL-111.                                                                                                                                                                                                   | Business     | 2026-11-20 |
 | D-260 | COMPLIANCE batch 7 maana: gig partners, warehouse aur environment ki 9 rows, CL-112 se CL-120.                                                                                                                                                                                          | Business     | 2026-11-20 |
 | D-261 | COMPLIANCE batch 8 maana: sehat, AYUSH, IP aur contracts ki 8 rows, CL-121 se CL-128, aur "Nazar" ka hissa; kanooni jaanch ke dono run docs me poore.                                                                                                                                   | Business     | 2026-11-20 |
+| D-262 | Delivery aur daawon ki photos aur video lagbhag 13 May 2027 se kanooni rok me: capture se 1 saal band encrypted store me, app se apne samay pe hi hatein; D-250 niyam 4 badla.                                                                                                          | Security     | 2026-11-20 |
+| D-263 | Drugs and Magic Remedies Act ki Schedule wale ilaaj ke daawe wale reviews chhupte hain ("kanoon ke khilaaf daawa"); baaki ilaaj jaise anubhav note ke saath; D-146 niyam 4 badla.                                                                                                       | Business     | 2026-11-20 |
+| D-264 | Legal pages ka badge hamesha "DUMMY: kisi licensed lawyer ne nahi dekha"; AI Lawyer ka nishaan sirf docs me; D-150 niyam 2 badla.                                                                                                                                                       | Business     | 2026-11-20 |
+| D-265 | Skin & Hair Expert aur Beauty Advisor ke liye beauty ya cosmetology ka certificate zaroori, staff jaanche, profile pe dikhe (dummy).                                                                                                                                                    | Business     | 2026-11-20 |
+| D-266 | Delivery partner offer bina saza chhod sake, availability khud chune, koi fixed shift nahi, doosre platforms pe kaam ki rok nahi.                                                                                                                                                       | Business     | 2026-11-20 |
+| D-267 | Delivery ke istemaal ka insurance abhi partner ki zimmedari (licence, RC, insurance ka saboot aur expiry, dummy); asli business pe platform ka group accident cover bhi.                                                                                                                | Business     | 2026-11-20 |
+| D-268 | Jhagde ka aakhri raasta: sellers ke liye pehle mediation, phir ek arbitrator ka arbitration; partners ke liye court (shahar dummy).                                                                                                                                                     | Business     | 2026-11-20 |
+| D-269 | Sellers ka paisa alag "seller settlement" khaate me, payout usi se; design me abhi se (test mode me dummy).                                                                                                                                                                             | Business     | 2026-11-20 |
+| D-270 | Seller agreement me platform ki zimmedari ki chhat: pichhle 12 mahine me us seller se mili fees; D-063 ki bharpai, dhokha aur kanooni zimmedari bahar.                                                                                                                                  | Business     | 2026-11-20 |
+| D-271 | Lawyer (AI) ki report ke 8 chhote sudhaar: related brand ka label, appliances ka E-waste EPR, Unibelle sirf apne seller account se, sellers ki list, collection agent, returns me storage check, gift card ki yaad, FDI ki nazar.                                                       | Business     | 2026-11-20 |
+| D-272 | COMPLIANCE ki 18 rows pe Lawyer (AI) ka nishaan: 4 jaancha, 11 aadha jaancha, 3 hisse nahi; har row me raay ki ek line.                                                                                                                                                                 | Process      | 2026-11-20 |
+| D-273 | Lawyer (AI) ka documents ka dhaancha COMPLIANCE ke naye §14 me: har document ke clauses ki table, ek batch me owner ki haan se.                                                                                                                                                         | Process      | 2026-11-20 |
+| D-274 | COMPLIANCE batch 9 maana: 6 documents ka dhaancha (108 clauses) §14 me, D-262 se D-272 ke saath; Lawyer (AI) ki report docs me poori.                                                                                                                                                   | Business     | 2026-11-20 |
 
 ## 2. Record
 
@@ -2039,6 +2052,7 @@
 - **Kab dobara khulega:** owner khud khole.
 - **Kisne, kab:** owner, 2026-11-19. **Nishaan:** Salah maani.
 - **Asar (Claude):** R1 se. Brand ki rating pe hamari delivery ka asar dikhega. Appeal ke liye doosra moderator account (D-017). Kanooni detail jaanchi nahi (R-004): negative review chhupane ke niyam, review me ilaaj ke daawe, aur user content hatane ke niyam.
+- **Badla (owner, 2026-11-20, D-263):** niyam 4 badla: Drugs and Magic Remedies Act ki Schedule wale ilaaj ke daawe wale reviews chhupte hain (wajah "kanoon ke khilaaf daawa"); baaki ilaaj jaise anubhav note ke saath.
 
 ### D-147. Return ya daawa reject pe customer ki appeal
 
@@ -2086,6 +2100,7 @@
 - **Kisne, kab:** owner, 2026-11-19. **Nishaan:** Salah maani.
 - **Asar (Claude):** R1 me (sign-up ka consent version ke saath). Pages likhne aur version rakhne ka kaam. Kanooni detail jaanchi nahi (R-004): in pages ke zaroori hisse.
 - **Jod (owner, 2026-11-20, D-255):** sign-up pe alag "Data notice" (har maqsad, data, consent wapas lene ka link, haq, Board ke paas shikayat); Privacy page pe data ka desh, processors ki shreniyan aur rakhne ka samay; Terms me mana content ki list, har 3 mahine ki in-app suchna, aur shikayat ke jawab me Grievance Appellate Committee ka raasta.
+- **Badla (owner, 2026-11-20, D-264):** niyam 2 badla: badge hamesha "DUMMY: kisi licensed lawyer ne nahi dekha"; AI Lawyer ka nishaan sirf docs me.
 
 ### D-151. Customer ke data ke haq
 
@@ -3174,6 +3189,7 @@
 - **Kab dobara khulega:** lawyer ki raay (R-004), ya owner khud khole.
 - **Kisne, kab:** owner, 2026-11-20. **Nishaan:** Salah maani.
 - **Asar (Claude):** D-151, D-191, D-192, D-194 aur D-208 me jod; D-055 me R1 jod, kyunki account delete aur logs R1 me hain. Rok ka store aur uski jagah (R-006) architecture me; tax archive (D-225) ke saath ek hi tareeka ho sakta hai. Kanooni detail jaanchi nahi (R-004): DPDP Rules ke rule 8(3) ka text primary se mila; laagu hone ki tareekh aur hamare data pe lagna aadha jaancha; IT Rules ka rule 3(1)(h) aur CERT-In ke 180 din public source se mile.
+- **Badla (owner, 2026-11-20, D-262):** niyam 4 badla: lagbhag 13 May 2027 se photos aur video bhi rok me: app se apne samay pe hatein, file band encrypted store me capture se 1 saal, phir erase.
 
 ### D-251. Content ki shikayat ke samay
 
@@ -3315,6 +3331,145 @@
 - **Kisne, kab:** owner, 2026-11-20. **Nishaan:** Salah maani.
 - **Asar (Claude):** nayi cheezein: AYUSH drug ke ishare pe listing reject; seller agreement me asli maal aur photos ke haq ki ghoshna aur brand owner ke liye IP shikayat ki category; assets ki license list; Terms aur seller agreement ke versions badle na ja sakein. "Jaancha nahi" wali rows (CL-120, CL-126, CL-127) aur vyakhya ke sawal Lawyer agent ke liye (D-257); apne brand ka trademark search owner kare, ya owner ki haan se. Agla kaam D-257 ke kram me Lawyer agent. Kanooni detail jaanchi nahi (R-004): Telemedicine guidelines sirf saar se; Drugs and Cosmetics Rules ka text 2016 tak; Trade Marks Act aur IT Act ke text doosri site se.
 
+### D-262. Photos aur video ki kanooni rok
+
+- **Faisla:** lagbhag 13 May 2027 se delivery aur daawon ki photos aur video bhi kanooni rok (D-250) me. Niyam:
+  1. App aur staff screens se apne samay pe hi hatein (D-191, D-192 waise hi).
+  2. File encrypted band store me capture ke din se 1 saal; sirf kanooni maang pe khule, har pahunch audit me.
+  3. Samay ke baad apne aap erase.
+- **Wajah:** Claude ki salah, owner ne maani: Lawyer (AI) ki raay me DPDP Rules ka rule 8(3) personal data bhi (sirf logs nahi) 1 saal maangta hai; kanoon ki tareekh se laagu, aur staff ko dikhne ka samay waisa hi chhota.
+- **Chhode vikalp:** D-250 jaisa sirf record (2027 se kanoon se takrav ka jokhim); abhi se 1 saal (bina zaroorat jagah ka bojh).
+- **Kab dobara khulega:** DPDP Rules ki tareekh ya text badle, ya owner khud khole.
+- **Kisne, kab:** owner, 2026-11-20. **Nishaan:** Salah maani.
+- **Asar (Claude):** D-250 niyam 4 badla. 2027 se media ki jagah ka hisaab architecture me (R-006). Lawyer ne jaancha (2026-11-20): rule 8(3) ka text saaf; hamari photos aur video pe lagna Sambhav.
+
+### D-263. Kanoon ke khilaaf ilaaj ke daawe wale reviews
+
+- **Faisla:** Drugs and Magic Remedies Act ki Schedule ki haalaton (jaise leucoderma, motapa, breast ki banawat, lambai, yaun kshamata) ke ilaaj ka daawa karne wale reviews chhupte hain. Niyam:
+  1. Wajah "kanoon ke khilaaf daawa", D-146 niyam 1 ki list me nayi wajah.
+  2. Customer badal ke dobara bhej sake (D-146 niyam 6).
+  3. Baaki ilaaj jaise anubhav note ke saath rahein (D-146 niyam 4).
+  4. Aise review kabhi "top" ya prachaar me nahi.
+- **Wajah:** Claude ki salah, owner ne maani: sirf kanoon wala hissa chhupta hai; kadwi ya imaandaar raay nahi dabti (D-146 niyam 2).
+- **Chhode vikalp:** D-146 jaisa, sab note ke saath (kanooni jokhim); har ilaaj jaisa daawa chhupana (bahut reviews chhupte, reviews dabane ka shak).
+- **Kab dobara khulega:** owner khud khole.
+- **Kisne, kab:** owner, 2026-11-20. **Nishaan:** Salah maani.
+- **Asar (Claude):** D-146 niyam 4 badla. D-256 niyam 2 ke mana shabd ab review ki apne aap ki jaanch (D-136) me bhi. Lawyer ne jaancha (2026-11-20): DMR Act s.3 aur IT Rules ka rule 3(1)(b); Sambhav.
+
+### D-264. Legal pages ka badge
+
+- **Faisla:** legal pages ka badge hamesha "DUMMY: kisi licensed lawyer ne nahi dekha". AI Lawyer ka "Lawyer ne jaancha" sirf docs me (COMPLIANCE jaisa), public site pe nahi.
+- **Wajah:** Claude ki salah, owner ne maani: site padhne wala "lawyer" ko licensed lawyer samjhega; ye badge saaf hai aur gumraah nahi karta (CPA s.2(28)).
+- **Chhode vikalp:** "DUMMY: AI Lawyer ne dekha, licensed lawyer ne nahi" (phir bhi "dekha gaya" jaisa bharosa); D-150 jaisa aur AI ke baad badge hatana (gumraah karne ka jokhim).
+- **Kab dobara khulega:** owner khud khole (jaise project asli business bane).
+- **Kisne, kab:** owner, 2026-11-20. **Nishaan:** Salah maani.
+- **Asar (Claude):** D-150 niyam 2 badla. Lawyer ne jaancha (2026-11-20).
+
+### D-265. Expert aur Advisor ki qualification
+
+- **Faisla:** Skin & Hair Expert aur Beauty Advisor (D-025, D-252) ke liye beauty ya cosmetology ka certificate zaroori. Staff jaanche, aur profile pe dikhe (dummy, D-026).
+- **Wajah:** Claude ki salah, owner ne maani: "Expert" kehna ek daawa hai, jo is shart se sach aur jaanchne layak banta hai; kaam bas ek field aur ek jaanch ka.
+- **Chhode vikalp:** koi shart nahi, sirf "medical nahi" ki line ("Expert" shabd kamzor); saath me saal ki training ka record (akele owner pe bojh).
+- **Kab dobara khulega:** owner khud khole.
+- **Kisne, kab:** owner, 2026-11-20. **Nishaan:** Salah maani.
+- **Asar (Claude):** staff profile me qualification ka field aur jaanch ka kadam (D-025, D-252 me jod). Lawyer ne jaancha (2026-11-20): beauty salah ke liye koi kanooni qualification nahi mili; NMC Act ka hissa sirf secondary source se.
+
+### D-266. Delivery partner ki azaadi
+
+- **Faisla:** delivery partner kaam ki offer bina saza chhod sake, aur doosre platforms pe bhi kaam kar sake. Niyam:
+  1. Delivery app me "offer maano ya chhodo"; chhodne pe saza nahi, sirf baar-baar maan ke chhodne pe; chhodne ki ginti sirf jaankari ke liye.
+  2. Availability partner khud chune; koi fixed shift ya attendance nahi.
+  3. Doosre platforms pe kaam ki rok nahi.
+- **Wajah:** Claude ki salah, owner ne maani: Lawyer (AI) ki raay me contractor ka rishta (D-033) sabse zyada isi pe tika hai; ye D-068 aur D-104 ke saath mel khaata hai.
+- **Chhode vikalp:** offer chhodne ki azaadi par kaam ke ghanton me exclusivity (control ka ishara); tay shifts aur exclusivity (employment ka jokhim).
+- **Kab dobara khulega:** owner khud khole.
+- **Kisne, kab:** owner, 2026-11-20. **Nishaan:** Salah maani.
+- **Asar (Claude):** D-033 me jod. Din ki planning kam pakki; hub ki planning partners ki di hui availability se. Lawyer ne jaancha (2026-11-20): kasauti tathyon pe tiki hai (Anishchit).
+
+### D-267. Delivery partner ki gaadi aur insurance
+
+- **Faisla:** delivery ke istemaal ka insurance abhi partner ki zimmedari: valid licence, RC aur aisa insurance jo delivery ka istemaal cover kare; onboarding pe number aur expiry (dummy); expiry pe kaam band. Asli business pe platform ka group accident cover bhi.
+- **Wajah:** Claude ki salah, owner ne maani: abhi ₹0 (D-028), aur asli business pe partner ki suraksha aur bharosa.
+- **Chhode vikalp:** sirf partner ki zimmedari hamesha (partner pe poora bojh); sirf cycle ya kam speed wale electric vahan (door ke pincodes me dheema).
+- **Kab dobara khulega:** asli business se pehle, ya owner khud khole.
+- **Kisne, kab:** owner, 2026-11-20. **Nishaan:** Salah maani.
+- **Asar (Claude):** D-033 me jod; partner onboarding me teen dastavez aur expiry ki yaad. Lawyer ne jaancha (2026-11-20): vahan ke niyam sirf secondary source se (Anishchit).
+
+### D-268. Jhagde ka aakhri raasta
+
+- **Faisla:** platform ke andar ka dispute (D-164) na sulje to: sellers ke liye pehle mediation, phir ek arbitrator ka arbitration, seat `[CITY: DUMMY]`; partners ke liye `[CITY: DUMMY]` ke court.
+- **Wajah:** Claude ki salah, owner ne maani: sellers ke bade jhagde mediation me jaldi sulajhte hain; partners ke chhote daawon pe arbitration ka kharcha bhaari hai.
+- **Chhode vikalp:** dono ke liye court (dheema); dono ke liye mediation aur arbitration (chhote daawon pe kharcha).
+- **Kab dobara khulega:** owner khud khole.
+- **Kisne, kab:** owner, 2026-11-20. **Nishaan:** Salah maani.
+- **Asar (Claude):** seller agreement aur partner agreement me alag clause; D-164 me jod. Lawyer ne jaancha (2026-11-20).
+
+### D-269. Sellers ke paise ka alag khaata
+
+- **Faisla:** gateway ka settlement alag "seller settlement" bank account me, aur sellers ka payout usi se. Design me ye khaata abhi se (test mode me dummy).
+- **Wajah:** Claude ki salah, owner ne maani: Lawyer (AI) ki raay me platform payment aggregator ka merchant hai, aur ledger ki liability (D-256 niyam 4) sirf hisaab hai; alag khaate se roz ka milaan saaf, aur asli business pe design nahi badalta.
+- **Chhode vikalp:** ek hi current account (sellers ki suraksha kam); saath me "sellers ke liye rakha paisa" ka clause (platform pe kanooni bandish).
+- **Kab dobara khulega:** asli business se pehle, ya owner khud khole.
+- **Kisne, kab:** owner, 2026-11-20. **Nishaan:** Salah maani.
+- **Asar (Claude):** D-093 aur D-256 me jod; finance me ek aur khaata aur roz ka milaan (CA agent ke liye, D-257). Lawyer ne jaancha (2026-11-20): RBI ka text ye seedhe nahi kehta (Sambhav).
+
+### D-270. Seller agreement me zimmedari ki chhat
+
+- **Faisla:** seller ke saamne platform ki zimmedari ki chhat: pichhle 12 mahine me us seller se mili fees jitni. D-063 ki bharpai, dhokha aur kanooni zimmedari is chhat ke bahar. Customer ke kanooni haq pe koi chhat nahi.
+- **Wajah:** Claude ki salah, owner ne maani: santulit: seller ki bharpai bachi rehti hai, aur platform ka jokhim uski kamaai se juda rehta hai.
+- **Chhode vikalp:** koi chhat nahi (platform pe bada jokhim); ek tay rakam (chhote aur bade sellers pe barabar nahi baithti).
+- **Kab dobara khulega:** owner khud khole.
+- **Kisne, kab:** owner, 2026-11-20. **Nishaan:** Salah maani.
+- **Asar (Claude):** seller agreement ka clause. Lawyer ne jaancha (2026-11-20).
+
+### D-271. Lawyer (AI) ki report ke chhote sudhaar
+
+- **Faisla:** Lawyer (AI) ki report ke aath chhote sudhaar:
+  1. **Related brand ka label:** Skin & Hair Expert ya Beauty Advisor Unibelle ya kisi related seller ka product sujhaye, to uske saath tay label "related brand"; kisi brand ki taraf jhukav nahi (D-139 jaisa).
+  2. **Appliances ka E-waste EPR:** hair dryer, electric shaver jaise "electrical appliance" category pe seller ka E-waste EPR number (dummy), iske bina listing nahi; aisi listing se pehle BIS ke niyam jaanchne hain.
+  3. **Apna brand:** Own-Brand Manager Unibelle ka har kaam sirf Unibelle ke seller account se, seller ke haq ke saath; platform ke haq se Unibelle ka content nahi badalta, aur doosre sellers ka data nahi dekhta.
+  4. **Sellers ki list:** gateway ke liye sellers ki list aur KYC ka export (dummy); gateway ki marketplace shartein asli business se pehle tathya ki tarah jaanchni hain.
+  5. **Collection agent:** seller agreement me platform seller ka "limited payment collection agent"; fees, kaat aur udhaar (D-071) ka set-off saaf likha.
+  6. **Returns me storage check:** storage shart wale maal (jaise sunscreen, perfume) pe customer ke paas rehne ka check; shak ho to wapas bikne wala stock nahi.
+  7. **Gift card ki yaad:** platform pe balance aur expiry dikhe; issuer chahe to expiry se 45 din pehle ki yaad hamari in-app aur email se (D-142 ki chhat me).
+  8. **FDI ki nazar:** COMPLIANCE §13 me row: foreign investment (D-040) khule to FDI ki e-commerce shartein (Unibelle me platform ya uski group company ki equity, sab sellers ko barabar fees, platform ke discount D-101, auditor ki saal ki report); seller record me "platform ya group ki equity %" ka field (dummy).
+- **Wajah:** Claude ki salah, owner ne maani: catalog, consultation, finance, returns aur seller agreement ke chhote kanooni hisse ek saath poore.
+- **Chhode vikalp:** badlav ke saath maanna; rokna (kanoon ke chhote hisse adhoore).
+- **Kab dobara khulega:** owner khud khole.
+- **Kisne, kab:** owner, 2026-11-20. **Nishaan:** Salah maani.
+- **Asar (Claude):** D-025, D-031, D-040, D-071, D-081, D-093, D-112, D-128, D-249 aur D-252 me jod. Lawyer ne jaancha (2026-11-20): E-waste aur gift card ki yaad Pakka; Unibelle ka "group company" hona Anishchit; baaki Sambhav.
+
+### D-272. COMPLIANCE pe Lawyer (AI) ke nishaan
+
+- **Faisla:** Lawyer (AI) ki 18 rows ki raay [COMPLIANCE.md](COMPLIANCE.md) me:
+  1. **Lawyer ne jaancha (2026-11-20), 4 rows:** CL-068, CL-093, CL-108, CL-120.
+  2. **Lawyer ne aadha jaancha (2026-11-20), 11 rows,** baaki hissa row me: CL-052, CL-058, CL-081, CL-097, CL-102, CL-107, CL-110, CL-112, CL-121, CL-124, CL-126.
+  3. **Lawyer ne nahi jaancha, 3 hisse:** CL-127 (trademark search owner kare), CL-021 ka income-tax hissa (CA agent ke liye), CL-048 ki IS ki list.
+  4. Har row me Lawyer ki ek line ki raay; D-262 se D-271 se badli rows ka "System me kya chahiye" un faislon ke hisaab se; "Is file me kya aayega" me "Lawyer ne aadha jaancha" ka matlab; §13 me FDI ki row (D-271).
+- **Wajah:** Claude ki salah, owner ne maani: har row me saaf dikhta hai kya pakka hua aur kya baaki, aur CA agent ko apna hissa milta hai.
+- **Chhode vikalp:** sirf 4 "jaancha" rows pe nishaan ("aadha" wali raay docs me nahi aati); rokna (Lawyer ka kaam docs me adhoora).
+- **Kab dobara khulega:** CA agent ki raay, "Nazar" ki koi cheez badle, ya owner khud khole.
+- **Kisne, kab:** owner, 2026-11-20. **Nishaan:** Salah maani.
+- **Asar (Claude):** COMPLIANCE ki 18 rows aur §13 me badlav. CL-021 aur CL-126 ke tax hisse CA agent (D-257) ke liye.
+
+### D-273. Documents ka dhaancha kahan
+
+- **Faisla:** Lawyer (AI) ka 6 documents ka dhaancha (customer Terms of Use, Privacy Notice, Seller Agreement, Delivery Partner Agreement, Return aur Refund page, Grievance page) [COMPLIANCE.md](COMPLIANCE.md) ke naye §14 "Documents ka dhaancha" me aata hai: har document ke clauses ki ek table (clause, maqsad, D-xxx ya CL-xxx), ek batch me owner ki haan se. Sirf clauses, poore drafts nahi.
+- **Wajah:** Claude ki salah, owner ne maani: kanooni cheezein ek jagah, naye doc aur index ka kaam nahi, aur agents ki reports hatne (D-073) se pehle dhaancha naye docs me.
+- **Chhode vikalp:** naya doc `docs/LEGAL_DOCS.md` (ek aur doc aur index); abhi nahi, pages likhte waqt (dhaancha khone ka jokhim).
+- **Kab dobara khulega:** owner khud khole.
+- **Kisne, kab:** owner, 2026-11-20. **Nishaan:** Salah maani.
+- **Asar (Claude):** COMPLIANCE me §14; D-150 ke pages isi dhaanche se likhe jayenge.
+
+### D-274. COMPLIANCE batch 9: documents ka dhaancha
+
+- **Faisla:** Lawyer (AI) ka 6 documents ka dhaancha (customer Terms of Use 25, Privacy Notice 16, Seller Agreement 26, Delivery Partner Agreement 15, Return aur Refund page 14, Grievance page 12 clauses) jaisa prastaavit tha waisa [COMPLIANCE.md](COMPLIANCE.md) §14 me, D-262 se D-272 ke faislon ke saath: badge D-264, jhagde ka raasta D-268, zimmedari ki chhat D-270, insurance D-267, partner ki azaadi D-266, seller settlement khaata D-269, aur D-263, D-265, D-271 ke jod. Isse Lawyer (AI) ki report ke saare nateeje docs me aa gaye (D-220, D-257).
+- **Wajah:** Claude ki salah, owner ne maani: saare tay faisle ek dhaanche me, aur legal pages (D-150) isi se likhe jaate hain.
+- **Chhode vikalp:** badlav ke saath maanna; rokna (dhaancha sirf agent ki report me, jo discovery ke baad hat jaati hai, D-073).
+- **Kab dobara khulega:** CA agent ki raay, koi tay faisla badle, ya owner khud khole.
+- **Kisne, kab:** owner, 2026-11-20. **Nishaan:** Salah maani.
+- **Asar (Claude):** D-150 ke pages aur seller, partner agreements isi se. Tax ke clauses (Seller Agreement 10 aur 13, Partner Agreement 9) CA agent (D-257) ke liye. Agla kaam D-257 ke kram me CA (AI). Lawyer ne jaancha (2026-11-20): dhaancha; poore drafts nahi.
+
 ## Change log
 
 | Version  | Date       | Badlav                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      |
@@ -3399,3 +3554,7 @@
 | v1.10.30 | 2026-11-20 | D-259 aaya (COMPLIANCE batch 6: IT Rules, CERT-In aur payments ki 7 rows maani, CL-105 se CL-111; Q-196).                                                                                                                                                                                                                                                                                                                                                                                   |
 | v1.10.31 | 2026-11-20 | D-260 aaya (COMPLIANCE batch 7: gig partners, warehouse aur environment ki 9 rows maani, CL-112 se CL-120; Q-197).                                                                                                                                                                                                                                                                                                                                                                          |
 | v1.10.32 | 2026-11-20 | D-261 aaya (COMPLIANCE batch 8: sehat, AYUSH, IP aur contracts ki 8 rows, "Nazar" aur CL-081; Q-198); kanooni jaanch ke dono run docs me poore.                                                                                                                                                                                                                                                                                                                                             |
+| v1.10.33 | 2026-11-20 | D-262 se D-271 aaye (Lawyer (AI) ki report ke asar aur sawal; Q-199 se Q-208); D-146, D-150 aur D-250 me "Badla" line.                                                                                                                                                                                                                                                                                                                                                                      |
+| v1.10.34 | 2026-11-20 | D-272 aaya (COMPLIANCE ki 18 rows pe Lawyer (AI) ka nishaan; Q-209).                                                                                                                                                                                                                                                                                                                                                                                                                        |
+| v1.10.35 | 2026-11-20 | D-273 aaya (documents ka dhaancha COMPLIANCE §14 me; Q-210).                                                                                                                                                                                                                                                                                                                                                                                                                                |
+| v1.10.36 | 2026-11-20 | D-274 aaya (COMPLIANCE batch 9: documents ka dhaancha, §14; Q-211); Lawyer (AI) ki report docs me poori.                                                                                                                                                                                                                                                                                                                                                                                    |
