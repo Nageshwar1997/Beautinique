@@ -1,6 +1,6 @@
 # PROJECT PLAN: Beautinique
 
-> **Status:** v1.1.6 (2026-11-19). Project ki kendriya file. Cheezein ek-ek karke, owner ki haan ke baad judti hain.
+> **Status:** v1.1.7 (2026-11-20). Project ki kendriya file. Cheezein ek-ek karke, owner ki haan ke baad judti hain.
 
 ## 0. Is file me kya aayega
 
@@ -22,11 +22,11 @@ Design poore ecosystem ka, banana releases me; koi feature kata nahi (D-008). Jo
 **Andar:**
 
 1. **Area:** poore India ka location data import; Maharashtra → Pune → warehouse wala sub-district live, 1 warehouse + 1 hub (D-014, D-015, D-016, D-022). Unserved pincode pe "unavailable" aur notify-me waitlist me judna (D-046). Area khulne ki khabar in-app aur push se (D-141).
-2. **Staff aur roles:** sirf in flows ke roles chalu (D-017, D-054), owner ke alag accounts ke saath; staff ke kaam audit log me. Return, daawe aur refund ki manzoori ke liye Support Desk app ka patla hissa, Support Agent role ke saath (D-105); customer ki appeal ke liye Support Lead (D-147). Reviews ke liye Review Moderator (D-136). Grievance Officer aur Nodal Officer apne staff roles, unki asli jaankari site ke page pe (D-237, D-241).
+2. **Staff aur roles:** sirf in flows ke roles chalu (D-017, D-054), owner ke alag accounts ke saath; staff ke kaam audit log me. Return, daawe aur refund ki manzoori ke liye Support Desk app ka patla hissa, Support Agent role ke saath (D-105); customer ki appeal ke liye Support Lead (D-147). Reviews ke liye Review Moderator (D-136). Grievance Officer aur Nodal Officer apne staff roles, unki asli jaankari site ke page pe (D-237, D-241); Grievance Officer hi personal data ke sawalon ka sampark, aur CERT-In ke liye "Security Contact" role owner ke paas (D-253).
 3. **Sellers:** 2 sellers: apna brand (alag dummy company, D-031) aur ek dummy brand. Onboarding dummy KYC aur Maharashtra GSTIN ke saath (D-036); staff ki approval.
 4. **Catalog:** seller products daale (shade aur size jaise variants, MRP, price, HSN aur GST rate, images); staff ki jaanch ke baad live. Customer ke liye list, product page, basic search aur filter. Ingredients text + label photo se, INCI structured list, free-from filters aur allergen ki chetavni (D-099, D-159). Skin type, concern aur active % ke fields (D-137); filters, sort aur kram (D-138, D-139); zero result pe madad (D-152); stock khatam product neeche dikhe (D-153); sirf sach aankde (D-154). Test wale claims saboot ke saath hi (D-224); har kate MRP ya "% off" ke saath pichhle 30 din ka sabse kam daam (D-223).
 5. **Maal warehouse me:** seller maal bheje; receiving pe batch aur expiry ki jaanch (D-014); stock dikhe.
-6. **Customer:** sign-up sirf 18+ (D-038), sign-in ke teen raaste (D-021); pincode check; cart aur wishlist sign-in ke saath (D-020); address. Live site pe account sirf allowlist se (D-133); legal pages aur sign-up ka consent (D-150); profile sudhaar, marketing consent band aur account delete (D-151); delete pe jaari invoice alag tax archive me (D-225).
+6. **Customer:** sign-up sirf 18+ (D-038), sign-in ke teen raaste (D-021); pincode check; cart aur wishlist sign-in ke saath (D-020); address. Live site pe account sirf allowlist se (D-133); legal pages aur sign-up ka consent (D-150); profile sudhaar, marketing consent band aur account delete (D-151); delete pe jaari invoice alag tax archive me (D-225); delete pe data app se turant hat-ta hai, phir kanooni rok me, aur request logs aur security events apne store me kam se kam 180 din (D-250).
 7. **Checkout aur payment:** Razorpay test mode (prepaid) aur delivery pe UPI QR (D-034); stock reservation; ek order me dono sellers ke items ho sakein, invoice har seller ke GSTIN se (D-030, D-041).
 8. **Fulfilment:** warehouse me pick aur pack; hub tak trip ka record (D-027); hub pe receive; delivery partner ko assign; Delivery app (PWA, D-042) se delivery aur proof. Order ka status customer ko in-app aur email se.
 9. **Return aur refund:** customer return maange (abhi simple niyam: sirf band ya kharab maal; cosmetics ke poore niyam domain charcha ke baad), delivery partner pickup kare (D-014), warehouse me jaanch, refund (Razorpay test mode). Muddatein invoice aur pages pe likhi (D-221); "der se pahuncha" bhi return ki wajah (D-222).
@@ -57,3 +57,4 @@ Design poore ecosystem ka, banana releases me; koi feature kata nahi (D-008). Jo
 | v1.1.4  | 2026-11-19 | R1 review me listing version aur seller ka reviews dekhna (D-160, D-171); "Bahar" me R2 ke naye faisle (D-160 se D-179).                                                         |
 | v1.1.5  | 2026-11-19 | R1 me kanooni jaanch se jod (owner): test claims ka saboot (D-224), 30 din ka daam (D-223), tax archive (D-225), der se delivery ka return (D-222); return ki muddatein (D-221). |
 | v1.1.6  | 2026-11-19 | R1 roles me Grievance Officer aur Nodal Officer, asli staff jaankari ke saath (D-237, D-241).                                                                                    |
+| v1.1.7  | 2026-11-20 | R1 me kanooni rok aur 180 din ke logs (D-250), aur Security Contact role (D-253). |

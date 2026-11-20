@@ -1,6 +1,6 @@
 # DECISIONS: Beautinique
 
-> **Status:** v1.10.26 (2026-11-19). Har faisla ek jagah. Sirf wahi "Tay" jo owner ne khud kaha; Claude ki salah faisla nahi. Cheezein ek-ek karke judti hain.
+> **Status:** v1.10.27 (2026-11-20). Har faisla ek jagah. Sirf wahi "Tay" jo owner ne khud kaha; Claude ki salah faisla nahi. Cheezein ek-ek karke judti hain.
 
 ## 0. Kaise likhein
 
@@ -262,6 +262,15 @@
 | D-245 | COMPLIANCE batch 2 maana: Legal Metrology ki 14 rows, CL-025 se CL-038, source aur tareekh ke saath.                                                                                                          | Business     | 2026-11-19 |
 | D-246 | COMPLIANCE batch 3 maana: cosmetics kanoon ki 20 rows, CL-039 se CL-058, source aur tareekh ke saath.                                                                                                         | Business     | 2026-11-19 |
 | D-247 | COMPLIANCE batch 4 maana: e-commerce aur consumer kanoon ki 29 rows, CL-059 se CL-087; kanooni jaanch ka pehla run docs me poora.                                                                             | Business     | 2026-11-19 |
+| D-248 | Data leak pe teen ghadiyaan: CERT-In ko 6 ghante, Board ko bina der aur 72 ghante me poori report, users ko pakka hote hi bina der; D-198 badla. | Security | 2026-11-20 |
+| D-249 | Gift card sirf RBI-authorised PPI issuer ke zariye, checkout pe payment ka tareeka; validity kam se kam 1 saal, expiry dikhe; R2 ke baad; D-179 badla. | Business | 2026-11-20 |
+| D-250 | Kanooni rok: delete ya samay pe data app se turant hate, band encrypted store me 180 din ya 1 saal, phir erase; photos aur video ka sirf record; logs apne store me 180 din, 2027 se 1 saal. | Security | 2026-11-20 |
+| D-251 | Content ki shikayat ke naye samay: receipt 24 ghante, nagnata wali report pe turant chhupna aur 2 ghante, baaki 36 ghante, hal 7 din, sarkari order 3 ghante; D-136, D-163 badla. | Business | 2026-11-20 |
+| D-252 | Skin & Hair Expert ki seva beauty aur skincare salah, medical consultation nahi: nidaan ya dawa nahi, "medical consultation nahi" ki line, ilaaj pe "doctor se milein". | Business | 2026-11-20 |
+| D-253 | Personal data ke sawalon ka sampark Grievance Officer; CERT-In ka Point of Contact naya "Security Contact" role, owner ke paas. | Security | 2026-11-20 |
+| D-254 | Delivery partners: Social Security Code ke aggregator kaam, payouts pe TDS, partner ka data notice aur location sirf delivery ke pal pe. | Business | 2026-11-20 |
+| D-255 | Personal data ke 8 chhote sudhaar: alag Data notice, Privacy aur Terms ke hisse, nomination aur data kin ke saath, kai accounts ka maqsad, 18+ ka record, Aadhaar ki copy nahi, processors ki list. | Security | 2026-11-20 |
+| D-256 | Seller, warehouse aur payment ke 7 chhote sudhaar: seller ka EPR number, DMR ke mana shabd, payment data ki jagah, sellers ka paisa liability, "paisa kata, order nahi bana", nasht karna, D-134 ki nayi rows. | Business | 2026-11-20 |
 
 ## 2. Record
 
@@ -449,6 +458,7 @@
 - **Chhode vikalp:** saare roles abhi system me; roles kam karna (12 se 15).
 - **Kab dobara khulega:** owner khud khole.
 - **Kisne, kab:** owner, 2026-11-17. **Nishaan:** Salah maani (roles); Owner (accounts, alias).
+- **Jod (owner, 2026-11-20, D-253):** naya staff role "Security Contact" (CERT-In ka Point of Contact), owner ke paas.
 
 ### D-018. Faislon ki process
 
@@ -532,6 +542,7 @@
 - **Chhode vikalp:** apna video system; live chat; roles hatana.
 - **Kab dobara khulega:** owner khud khole.
 - **Kisne, kab:** owner, 2026-11-17. **Nishaan:** Owner (roles, Meet link); Salah maani (flow ke niyam, message thread).
+- **Jod (owner, 2026-11-20, D-252):** Skin & Hair Expert ki consultation beauty aur skincare salah hai, medical consultation nahi: nidaan ya dawa nahi; booking, Meet ke email aur notes pe "Ye medical consultation nahi hai"; ilaaj ya dawa ke sawal pe "doctor se milein"; profile pe "doctor" ya "dermatologist" jaise shabd nahi.
 
 ### D-026. Project ka lakshya
 
@@ -653,6 +664,7 @@
 - **Chhode vikalp:** umar ki koi shart nahi.
 - **Kab dobara khulega:** owner khud khole.
 - **Kisne, kab:** owner, 2026-11-17. **Nishaan:** Owner.
+- **Jod (owner, 2026-11-20, D-255):** 18+ ki ghoshna ka tick consent record me; bachcha pata chale to account band aur data erase.
 
 ### D-039. Reviews
 
@@ -711,6 +723,7 @@
 - **Chhode vikalp:** micro ya small enterprise maan ke EPR chhodna.
 - **Kab dobara khulega:** owner khud khole.
 - **Kisne, kab:** owner, 2026-11-17. **Nishaan:** Owner.
+- **Jod (owner, 2026-11-20, D-256):** seller onboarding pe seller ka plastic EPR number, ya micro/small enterprise hone ki ghoshna; packaging ka master (shreni I se IV, wazan) aur har dispatch ka record; saal ka return (dummy).
 
 ### D-046. Notify-me waitlist
 
@@ -799,6 +812,7 @@
 - **Jod (owner, 2026-11-18, D-099, D-105):** R1 me do cheezein judin: ingredients ki structured list, free-from filters aur allergen ki chetavni (D-099); aur Support Desk app ka patla hissa, Support Agent role ke saath (D-105). [PROJECT_PLAN.md](PROJECT_PLAN.md) §1 me bhi.
 - **Jod (owner, 2026-11-19, D-137, D-147, D-155):** R1 me teen chhote jod: skin type, concern aur active % ke catalog fields (D-137); customer ki appeal ke liye Support Lead role (D-147); review me photo (D-155). D-133 se D-159 ke baaki R1 wale niyam R1 ke apne hisson me. [PROJECT_PLAN.md](PROJECT_PLAN.md) §1 me bhi.
 - **Jod (owner, 2026-11-19, D-222 se D-225):** kanooni jaanch se R1 me chaar jod: "der se pahuncha" return (D-222), har discount ke saath pichhle 30 din ka sabse kam daam (D-223), test wale claims ka saboot (D-224), aur invoices ka tax archive (D-225).
+- **Jod (owner, 2026-11-20, D-250, D-253):** R1 me kanooni rok ki class aur apne store me kam se kam 180 din ke request logs aur security events (D-250), aur Security Contact role (D-253).
 
 ### D-056. Render pe sirf ek web service
 
@@ -825,6 +839,7 @@
 - **Kab dobara khulega:** Render ya kisi provider me India ka region aaye, ya owner khole. Teeno ka region banne ke baad nahi badalta, isliye badalna = naya banana aur data le jaana.
 - **Kisne, kab:** owner, 2026-11-18. **Nishaan:** Salah maani.
 - **Asar (Claude):** apps Vercel pe hain (D-048); customer app ke server-side hisse ka Vercel region (backend ke paas Singapore, ya users ke paas) technical charcha me tay hoga.
+- **Jod (owner, 2026-11-20, D-256):** card aur UPI ka data sirf gateway ke paas, hamare paas sirf ids, rakam aur status; gateway se likhit pakka ki payment data India me rehta hai; asli business se pehle region dobara dekhne ki yaad COMPLIANCE me. Faisla waisa hi.
 
 ### D-059. Pehle diye gaye roles ki jaanch nahi
 
@@ -872,6 +887,7 @@
 - **Kab dobara khulega:** owner khud khole.
 - **Kisne, kab:** owner, 2026-11-18. **Nishaan:** Salah maani.
 - **Asar (Claude):** teeno numbers (receiving ki seema, bikri band ki seema, brand ke jawab ke din; misaal 6 mahine, 3 mahine, 15 din) B3 ki charcha me tay honge, category ke hisaab se alag ho sakte hain. Disposal fee aur wapsi ka kharcha seller ke hisaab (B6) me. Storage fee D-066 me, product page pe expiry D-067 me, aur teeno numbers D-082 me. Kanooni detail jaanchi nahi (R-004): label pe expiry ke niyam aur cosmetics nasht karne ke niyam.
+- **Jod (owner, 2026-11-20, D-256):** nasht sirf authorised handler se; certificate of destruction batch ke record me; jalne wala maal alag.
 
 ### D-063. Hamare haath se hue nuksaan ki bharpai
 
@@ -1011,6 +1027,7 @@
 - **Jod (owner, 2026-11-18, D-077):** order alag parcels me jaaye to delivery code har parcel ka apna hota hai; tab niyam 1 ka "order ka code" parcel ka code hai.
 - **Jod (owner, 2026-11-18, D-126):** niyam 1 ka email order confirmation ka email hi hai; delivery code usi me jaata hai.
 - **Jod (owner, 2026-11-19, D-148):** niyam 3 ka samay: code se delivered pe 48 ghante, sirf photo aur location wali delivery pe misaal 7 din, dono "delivered" scan se.
+- **Jod (owner, 2026-11-20, D-254):** partner ki location sirf "delivered" aur "fail" ke pal pe, lagatar tracking nahi; partner ke liye Delivery app me data notice aur consent.
 
 ### D-073. Pehle ka kaam kab aur kaise hatega
 
@@ -1290,6 +1307,7 @@
 - **Kab dobara khulega:** owner khud khole.
 - **Kisne, kab:** owner, 2026-11-18. **Nishaan:** Salah maani.
 - **Asar (Claude):** platform ke paas sellers ka paisa rehta hai (zimmedari); finance ke ledger aur milaan ka design Database Architect ke saath. Kanooni detail jaanchi nahi (R-004): marketplace ke liye payment aggregator aur sellers ka paisa rakhne ke niyam.
+- **Jod (owner, 2026-11-20, D-256):** ledger me sellers ka paisa liability ki tarah alag dikhe; seller agreement me payout ke din.
 
 ### D-094. Fees ki shuruaati rakam (dummy)
 
@@ -1432,6 +1450,7 @@
 - **Kab dobara khulega:** hubs ka ilaaka bada ho aur door ke pincode pe partner ka nuksaan dikhe, ya owner khud khole.
 - **Kisne, kab:** owner, 2026-11-18. **Nishaan:** Salah maani.
 - **Asar (Claude):** D-068 ki kaat isi kamaai se, D-103 ki seema ke andar. Partners ka payout finance me. Kanooni detail jaanchi nahi (R-004): gig partners ke niyam, unke payout pe TDS, aur aggregator ka contribution.
+- **Jod (owner, 2026-11-20, D-254):** Social Security Code ke aggregator kaam: har partner pe portal ka number (dummy), roz ke kaam ka export (DUMMY), saal ke kaam ke din ki ginti, contribution ki provision (dar setting me, shuru hone ki tareekh notify hone tak band); payouts pe TDS (PAN encrypted, saal ka jod, seema paar pe kaat, statement me TDS).
 
 ### D-105. R1 me customer ke maamle
 
@@ -1528,6 +1547,7 @@
 - **Kab dobara khulega:** owner khud khole.
 - **Kisne, kab:** owner, 2026-11-18. **Nishaan:** Salah maani.
 - **Asar (Claude):** saara paisa platform ke ek gateway account me (D-093), to refund bhi wahin se. Kanooni detail jaanchi nahi (R-004): refund ka samay (RBI ke niyam) aur store credit ke niyam.
+- **Jod (owner, 2026-11-20, D-256):** "paisa kata, order nahi bana" ki screen aur email (bank ka samay, jaise UPI pe T+5); der se "captured" aaye to apne aap refund, sirf ek baar.
 
 ### D-112. Lauta maal kahan jaaye, aur nuksaan kiska
 
@@ -1840,6 +1860,7 @@
 - **Jod (owner, 2026-11-19, D-224):** claims ke saboot me test wale claims (sirf SPF nahi) R1 se.
 - **Kisne, kab:** owner, 2026-11-19. **Nishaan:** Salah maani.
 - **Asar (Claude):** [COMPLIANCE.md](COMPLIANCE.md) ki har row ka "System me kya chahiye" khana is level se bharega. Kanooni detail jaanchi nahi (R-004): table ki har row; ye sirf "system kya banaye" ki baat hai, kanoon kya maangta hai ye kanooni jaanch batayegi.
+- **Jod (owner, 2026-11-20, D-253, D-254, D-256):** naye rows: CERT-In ka Point of Contact (D-253); Gig workers (D-254); seller ka EPR number, Fire Safety (provisional, final, renewal aur saal ka certificate), Shops and Establishments aur e-way bill ka number (D-256); sab dummy.
 
 ### D-135. Review ka haq
 
@@ -1870,6 +1891,7 @@
 - **Kab dobara khulega:** owner khud khole.
 - **Kisne, kab:** owner, 2026-11-19. **Nishaan:** Salah maani.
 - **Asar (Claude):** Review Moderator role roles ki list (D-017) me, R1 me chalu (D-054). Shabdon ki list aur apne aap ki jaanch ka kaam; kuch galat review thodi der live reh sakte hain. Chhupane ke niyam D-146 me. Kanooni detail jaanchi nahi (R-004): reviews jaise user content pe platform ki zimmedari aur hatane ke samay.
+- **Badla (owner, 2026-11-20, D-251):** niyam 5 ki jagah naye samay: nagnata ya kisi aur ban ke dikhane wale content ki report pe content turant apne aap chhupe aur faisla 2 ghante me; baaki content ki report pe faisla 36 ghante me.
 
 ### D-137. Skin type, concern aur active ingredient ka data
 
@@ -1952,6 +1974,7 @@
 - **Kab dobara khulega:** emails ki seema badle, ya owner khud khole.
 - **Kisne, kab:** owner, 2026-11-19. **Nishaan:** Salah maani.
 - **Asar (Claude):** D-126 me jod. Number misaal hain; asli number Architect aur DevOps ke saath. Bade recall ke emails kuch dinon me bant sakte hain (in-app aur push usi din). Kanooni detail jaanchi nahi (R-004): recall pe customer ko suchna dene ke samay ke niyam.
+- **Jod (owner, 2026-11-20, D-248):** data leak ke emails OTP aur recall ke saath sabse aage; chhat paar ho to in-app aur push usi din.
 
 ### D-143. Seller ki reports aur customer ki jaankari
 
@@ -2057,6 +2080,7 @@
 - **Kab dobara khulega:** kanooni jaanch (R-004) ke baad, ya owner khud khole.
 - **Kisne, kab:** owner, 2026-11-19. **Nishaan:** Salah maani.
 - **Asar (Claude):** R1 me (sign-up ka consent version ke saath). Pages likhne aur version rakhne ka kaam. Kanooni detail jaanchi nahi (R-004): in pages ke zaroori hisse.
+- **Jod (owner, 2026-11-20, D-255):** sign-up pe alag "Data notice" (har maqsad, data, consent wapas lene ka link, haq, Board ke paas shikayat); Privacy page pe data ka desh, processors ki shreniyan aur rakhne ka samay; Terms me mana content ki list, har 3 mahine ki in-app suchna, aur shikayat ke jawab me Grievance Appellate Committee ka raasta.
 
 ### D-151. Customer ke data ke haq
 
@@ -2069,6 +2093,7 @@
 - **Kisne, kab:** owner, 2026-11-19. **Nishaan:** Salah maani.
 - **Asar (Claude):** delete ke saath pehchaan hatane ka kaam R1 me; records kitne din rakhein, Security Architect ke saath (B14). Kanooni detail jaanchi nahi (R-004): data ke haq, jawab ka samay, aur records rakhne ka samay.
 - **Badla (owner, 2026-11-19, D-225):** niyam 1 badla: jaari invoice aur credit note nahi badalte; unki asli copy alag tax archive me 72 mahine (misaal), sirf finance dekhe; app ki baaki jagah se pehchaan hatti hai.
+- **Jod (owner, 2026-11-20, D-250, D-255):** delete pe data app se turant hat-ta hai, phir kanooni rok ke niyam se (D-250); R2 ke data haq me nomination ka form aur record, aur data ke saar me kin ke saath data baanta (D-255).
 
 ### D-152. Zero result aur synonyms
 
@@ -2217,6 +2242,7 @@
 - **Kab dobara khulega:** kanooni jaanch (R-004) ke baad, ya owner khud khole.
 - **Kisne, kab:** owner, 2026-11-19. **Nishaan:** Salah maani.
 - **Asar (Claude):** site pe Grievance Officer ka saada page R1 se (D-134, officer ki jaankari dummy D-145 niyam 4 se); poora raasta R2 se. Register aur timers ka kaam. Kanooni detail jaanchi nahi (R-004): grievance officer, receipt aur hal ke samay, aur user content ki shikayat ke samay.
+- **Badla (owner, 2026-11-20, D-251):** niyam 3 me: content ki shikayat ka hal 7 din me (receipt 24 ghante, jaisa tha); court ya sarkari order ka alag raasta 3 ghante, Master ko alert; baaki shikayat ke timers jaise the.
 
 ### D-164. Seller aur delivery partner ke dispute
 
@@ -2393,6 +2419,7 @@
 - **Kab dobara khulega:** kanooni jaanch ke baad.
 - **Kisne, kab:** owner, 2026-11-19. **Nishaan:** Salah maani.
 - **Asar (Claude):** data aur finance ke khaate design me; banana R2 ke baad. Gift card ka email D-142 ki chhat me. Kanooni detail jaanchi nahi (R-004): prepaid instrument (closed ya semi-closed) ke niyam, gift card ki kam se kam muddat aur KYC, gift voucher pe GST, aur bina kharch ke balance ka hisaab; jawab kanooni jaanch ke baad badal sakta hai.
+- **Badla (owner, 2026-11-20, D-249):** gift card sirf RBI-authorised PPI issuer ke zariye, checkout pe payment ke ek tareeke ki tarah; validity kam se kam 1 saal, expiry issue pe dikhe; banana R2 ke baad.
 
 ### D-180. Customer app ke sign-in ki umar
 
@@ -2504,6 +2531,7 @@
 - **Kab dobara khulega:** kanooni jaanch (R-004) ke baad, ya owner khud khole.
 - **Kisne, kab:** owner, 2026-11-19. **Nishaan:** Salah maani.
 - **Asar (Claude):** R1 se; samay ke baad apne aap delete. Chargeback ki asli samay-seema payment gateway ke niyam se pakki karni hai (tathya ki jaanch). Kanooni detail jaanchi nahi (R-004): photo aur location jaise personal data rakhne ka samay.
+- **Jod (owner, 2026-11-20, D-250):** samay ke baad photo aur location mitti hain; kanooni rok me sirf unka record (kab, kisne, kis maamle me, hash).
 
 ### D-192. Daawe, pickup aur pack ki photos ka samay
 
@@ -2513,6 +2541,7 @@
 - **Kab dobara khulega:** kanooni jaanch (R-004) ke baad, ya owner khud khole.
 - **Kisne, kab:** owner, 2026-11-19. **Nishaan:** Salah maani.
 - **Asar (Claude):** R1 se; alag-alag samay ka delete job. Kanooni detail jaanchi nahi (R-004): customer ki photo aur video rakhne ke niyam.
+- **Jod (owner, 2026-11-20, D-250):** photos aur video apne samay pe mitein; kanooni rok me sirf unka record (kab, kisne, kis maamle me, hash).
 
 ### D-193. Seller aur Beauty Pro ke dastavez
 
@@ -2536,6 +2565,7 @@
 - **Kab dobara khulega:** kanooni jaanch (R-004) ke baad, ya owner khud khole.
 - **Kisne, kab:** owner, 2026-11-19. **Nishaan:** Salah maani.
 - **Asar (Claude):** R1 se. Audit ke cluster ki 0.5 GB jagah (R-006) ka hisaab architecture me. Kanooni detail jaanchi nahi (R-004): logs rakhne ka samay (CERT-In ke niyam) aur tax records ka samay.
+- **Jod (owner, 2026-11-20, D-250):** request logs aur security events apne store me kam se kam 180 din, aur 13 May 2027 (lagbhag) se 1 saal; delete hue data ki kanooni rok D-250 ke niyam se.
 
 ### D-195. Push aur email me kitni jaankari
 
@@ -2572,6 +2602,7 @@
 - **Kab dobara khulega:** kanooni jaanch (R-004) ke baad, ya owner khud khole.
 - **Kisne, kab:** owner, 2026-11-19. **Nishaan:** Salah maani.
 - **Asar (Claude):** R1 se (runbook operations ke doc me). Emails ki chhat (D-142) me jagah chahiye. Kanooni detail jaanchi nahi (R-004): data leak pe users aur sarkari sanstha ko suchna ka samay aur tareeka.
+- **Badla (owner, 2026-11-20, D-248):** "72 ghante" ki jagah teen ghadiyaan: users ko leak pakka hote hi bina der; Data Protection Board ko bina der aur 72 ghante me poori report; CERT-In ko 6 ghante me.
 
 ### D-199. Staff ka doosra factor
 
@@ -2627,6 +2658,7 @@
 - **Kab dobara khulega:** owner khud khole.
 - **Kisne, kab:** owner, 2026-11-19. **Nishaan:** Salah maani.
 - **Asar (Claude):** R1 me D-109 wala jod; baaki seemaon ke saath R2 se. Jod ka data bhi personal data hai. Owner ke apne customer aliases ek hi address pe hon to "pehle order" wali seema saath lagegi: testing me dhyaan. Kanooni detail jaanchi nahi (R-004): device ki pehchaan aur accounts ka jod rakhne ke niyam.
+- **Jod (owner, 2026-11-20, D-255):** notice aur Terms me "per-customer seemaayein aur galat istemaal ki rok" ek maqsad ki tarah; device cookie sirf isi kaam ke liye.
 
 ### D-204. Khule delivery-pe-UPI orders ki seema
 
@@ -2675,6 +2707,7 @@
 - **Kab dobara khulega:** kanooni jaanch (R-004) ke baad, ya owner khud khole.
 - **Kisne, kab:** owner, 2026-11-19. **Nishaan:** Salah maani.
 - **Asar (Claude):** R2 se; alag-alag samay ka delete job. Kanooni detail jaanchi nahi (R-004): cosmetics ke side-effect ke records aur sehat ke data rakhne ka samay.
+- **Jod (owner, 2026-11-20, D-250):** delete pe data app se turant hat-ta hai, phir kanooni rok ke niyam se.
 
 ### D-209. Security report docs me kaise aaye
 
@@ -2751,6 +2784,7 @@
 - **Kab dobara khulega:** kanooni jaanch (R-004) ke baad, asli naap ke baad numbers, ya owner khud khole.
 - **Kisne, kab:** owner, 2026-11-19. **Nishaan:** Salah maani.
 - **Asar (Claude):** R1 se (sehat ka data R2). Images ka dobara encode aur encryption CPU aur memory lete hain (R-007). Kanooni detail jaanchi nahi (R-004): KYC me Aadhaar ya doosre ID ke niyam, aur personal data ke delete ke niyam.
+- **Jod (owner, 2026-11-20, D-255):** upload form pe "Aadhaar ki copy mat bhejein"; galti se aayi copy reject aur turant delete.
 
 ### D-217. Security batch 8: data stores, services aur khabrein
 
@@ -2982,6 +3016,7 @@
 - **Kab dobara khulega:** owner khud khole.
 - **Kisne, kab:** owner, 2026-11-19. **Nishaan:** Salah nahi maani.
 - **Asar (Claude):** D-145 niyam 4 badla; D-163 ki "officer ki jaankari dummy" wali baat bhi badli. Roles ki list (D-017) me Grievance Officer (D-163 niyam 5) ke saath Nodal Officer judta hai, alag account pe. Page pe naam, designation aur contact role wale staff account se aate hain, to role kisi aur ko diya jaaye to page apne aap badle. Abhi saare staff accounts owner ke hain (D-017), to live site pe owner ki di hui jaankari public dikhegi. Repo me koi asli naam nahi (public repo niyam): ye sirf database me. Kanooni detail jaanchi nahi (R-004): E-commerce rules rule 4(1) aur 4(4) public source se mile, lawyer se nahi.
+- **Jod (owner, 2026-11-20, D-253):** Grievance Officer hi personal data ke sawalon ka sampark (DPDP Rules ka rule 9): contact website pe, aur data ke haq ke har jawab me.
 
 ### D-238. Seller ki jaankari aur seller pe shikayat
 
@@ -3084,6 +3119,7 @@
 - **Kab dobara khulega:** kanooni jaanch ka primary source (jaise 2025 ka gazette), ya owner khud khole.
 - **Kisne, kab:** owner, 2026-11-19. **Nishaan:** Salah maani.
 - **Asar (Claude):** nayi cheezein: listing ki jaanch me label ki checklist (category ke hisaab se, hair dye aur fluoride toothpaste jaise khaas products samet); imported listing pe RC number, RC holder aur retention ki agli tareekh ki yaad; imported batch pe 6 mahine ki expiry ki chetavni; "mana shabdon" ki list (senior role ke haath me, description, seller ke content aur brand ke jawab pe bhi); AYUSH label pe drug type; claim ka naam "certified cruelty-free (certifier)"; recall pe "regulator ko suchna" ka field; skin reaction ka case brand ko bina customer ki pehchaan ke; returns me storage ki jaanch; expired batch ki pick aur dispatch pe rok; allergen chetavni ke saath "pack ki list dekhein" ki line. Kanooni detail jaanchi nahi (R-004): Cosmetics Rules ka sarkari text 2020 ka; 2025 ka badlav sirf secondary source se; IS 4707 ki list aur AYUSH ke niyam nahi khule.
+- **Jod (owner, 2026-11-20, D-256):** "mana shabdon" me Drugs and Magic Remedies Act ki Schedule ka alag hissa, har shabd ke saath Schedule ka number; seller content, description, Creator aur sponsored content sab pe.
 
 ### D-247. COMPLIANCE batch 4: e-commerce aur consumer kanoon
 
@@ -3093,6 +3129,126 @@
 - **Kab dobara khulega:** kanooni jaanch ka primary source (jaise 2026 ka gazette), ya owner khud khole.
 - **Kisne, kab:** owner, 2026-11-19. **Nishaan:** Salah maani.
 - **Asar (Claude):** nayi cheezein: About ya Contact page (company dummy; customer care, grievance officer aur nodal person apne roles, D-241); National Consumer Helpline ka field; product page pe return ki line aur return ka kharcha; refund ka tay vaada order page pe; Pro ki shartein aur "suvidha band" ke niyam public pages pe; kram ke gun mahatva ke kram me, seller agreement me "koi differentiated treatment nahi"; warehouse ke likhit niyam (storage, pehle expire wala pehle, quarantine, returns ki jaanch); "kam stock" ka log; Creator ke content pe hataya na ja sakne wala "Ad / Sponsored / Collab" label (R2); invoice pe seller ka naam sabse upar; listing hatane ki wajahon me trademark, copyright ya IT Act ka code; imported pe "authenticity guarantee" ki ghoshna. Points ki expiry ka kanoon doosre run me. Kanooni detail jaanchi nahi (R-004): E-commerce Rules aur Consumer Protection Act ke text doosri sites ki copies se; 2026 ka badlav aur guidelines sirf secondary source se.
+### D-248. Data leak pe khabar ke samay
+
+- **Faisla:** data leak pe teen alag ghadiyaan runbook me. Niyam:
+  1. CERT-In: incident pata chalne ke 6 ghante me report (dummy, D-026).
+  2. Data Protection Board: bina der shuruaati suchna, aur 72 ghante me poori report.
+  3. Users: leak pakka hote hi, bina der, email aur in-app. Email me: kya hua, kab, kya asar, humne kya kiya, unhe kya karna hai, aur sampark.
+  4. Leak ke emails din ki chhat (D-142) me OTP aur recall ke saath sabse aage; chhat paar ho to in-app aur push usi din.
+- **Wajah:** Claude ki salah, owner ne maani: kanoon users ke liye "bina der" kehta hai, koi tay ghanta nahi; teeno ghadiyaan alag likhne se runbook me koi chhootta nahi.
+- **Chhode vikalp:** users ke liye tay 24 ghante (kuch maamlon me kanoon se lamba); 72 ghante jaisa, sirf CERT-In ki line jod ke (users ki khabar me der ka jokhim).
+- **Kab dobara khulega:** owner khud khole.
+- **Kisne, kab:** owner, 2026-11-20. **Nishaan:** Salah maani.
+- **Asar (Claude):** D-198 badla, D-142 me jod. Runbook me "leak pakka" kab maana jaaye, ye saaf likhna (operations ka doc). Kanooni detail jaanchi nahi (R-004): DPDP Rules ka rule 7 aur CERT-In ke directions public source se mile, lawyer se nahi.
+
+### D-249. Gift card ka raasta
+
+- **Faisla:** gift card sirf kisi RBI-authorised PPI issuer ke zariye. Niyam:
+  1. Gift card issuer (jaise payment gateway ya gift card company) ka product ho, aur checkout pe payment ke ek tareeke ki tarah chale.
+  2. D-179 ke design niyam (tay rakam, paane wale ke email pe code, thoda-thoda kharch, balance dikhe, cash me nahi) issuer ke niyamon ke andar.
+  3. Validity kam se kam 1 saal, expiry issue pe dikhe, rakam ki seema issuer ke niyam se.
+  4. Banana R2 ke baad, test mode me (D-026).
+- **Wajah:** Claude ki salah, owner ne maani: design asli kanoon ke hisaab se rehta hai, gift card ka paisa hamare khaate me nahi rukta, aur KYC aur RBI ka bojh issuer pe.
+- **Chhode vikalp:** gift card rokna (feature rukta); apna gift card sirf test mode me (kanoon ke khilaaf design, asli business ke liye dobara banana).
+- **Kab dobara khulega:** owner khud khole.
+- **Kisne, kab:** owner, 2026-11-20. **Nishaan:** Salah maani.
+- **Asar (Claude):** D-179 badla. Test mode me aisa issuer milta hai ya nahi, tathya ki jaanch ([OPEN_QUESTIONS.md](OPEN_QUESTIONS.md) §2). Kanooni detail jaanchi nahi (R-004): gift card ka niyam RBI ke FAQ se mila; Master Direction ka abhi ka version nahi khula, aur marketplace pe lagna vyakhya ka sawal.
+
+### D-250. Kanooni rok aur logs ka samay
+
+- **Faisla:** personal data aur logs ke liye "kanooni rok" ki class. Niyam:
+  1. Account delete ya data ka samay poora hone pe data app se turant hat jaaye; kisi staff screen pe na dikhe.
+  2. Phir ek band, encrypted store me rahe: 13 May 2027 (lagbhag) tak registration data account band hone ke 180 din, uske baad sab data 1 saal. Sirf kanooni maang pe khule; har pahunch audit me.
+  3. Samay ke baad apne aap erase.
+  4. Photos aur video apne samay pe mitein (D-191, D-192); rok me sirf unka record: kab, kisne, kis maamle me, file ka hash.
+  5. Request logs aur security events apne store me kam se kam 180 din abhi se, aur 13 May 2027 (lagbhag) se 1 saal.
+- **Wajah:** Claude ki salah, owner ne maani: jaanch ke liye zaroori baat (kaun, kab, kya) record se mil jaati hai, aur ghar ki photos aur videos saal bhar rakhna privacy ka bada jokhim aur free tier pe jagah ka bojh (R-006). Lawyer files maange to poori file wala raasta aasaan.
+- **Chhode vikalp:** photos aur video bhi poori file ke saath rok me (privacy jokhim aur jagah); abhi sirf logs, baaki 2027 se pehle (tab design badalna).
+- **Kab dobara khulega:** lawyer ki raay (R-004), ya owner khud khole.
+- **Kisne, kab:** owner, 2026-11-20. **Nishaan:** Salah maani.
+- **Asar (Claude):** D-151, D-191, D-192, D-194 aur D-208 me jod; D-055 me R1 jod, kyunki account delete aur logs R1 me hain. Rok ka store aur uski jagah (R-006) architecture me; tax archive (D-225) ke saath ek hi tareeka ho sakta hai. Kanooni detail jaanchi nahi (R-004): DPDP Rules ke rule 8(3) ka text primary se mila; laagu hone ki tareekh aur hamare data pe lagna aadha jaancha; IT Rules ka rule 3(1)(h) aur CERT-In ke 180 din public source se mile.
+
+### D-251. Content ki shikayat ke samay
+
+- **Faisla:** reviews, photos aur sawal-jawab jaise content ki shikayat ke naye samay, calendar ghanton me. Niyam:
+  1. Shikayat ki receipt 24 ghante me.
+  2. Nagnata ya kisi aur ban ke dikhane wale content ki report pe content turant apne aap chhupe (D-136 niyam 4 jaisa), faisla 2 ghante me.
+  3. Baaki content ki report pe faisla 36 ghante me.
+  4. Content ki shikayat (grievance) ka hal 7 din me.
+  5. Court ya sarkari order ka alag raasta: 3 ghante, Master ko alert.
+- **Wajah:** Claude ki salah, owner ne maani: chhote samay maanne me kanooni jokhim nahi, chahe secondary source galat nikle; ulta hua to ullanghan. Akele owner ke liye 2 ghante bhaari hain, isliye content apne aap chhupta hai.
+- **Chhode vikalp:** primary source (gazette) khulne tak purane samay (secondary sahi nikla to takrav); sirf shikayat ka hal 7 din, baaki jaisa.
+- **Kab dobara khulega:** IT Rules ke 2026 ke badlav ka primary source khule, ya owner khud khole.
+- **Kisne, kab:** owner, 2026-11-20. **Nishaan:** Salah maani.
+- **Asar (Claude):** D-136 niyam 5 aur D-163 niyam 3 badle; baaki (consumer) shikayat ke timers D-163 jaise. Alert aur queue ke timers support aur reviews ke design me. Kanooni detail jaanchi nahi (R-004): 2026 ke saare samay sirf secondary source se; gazette nahi khula.
+
+### D-252. Skin & Hair Expert ki seva
+
+- **Faisla:** Skin & Hair Expert (D-025) ki consultation beauty aur skincare salah hai, medical consultation nahi. Niyam:
+  1. Koi nidaan ya dawa nahi.
+  2. Booking, Meet ke email aur notes pe "Ye medical consultation nahi hai" ki line.
+  3. Ilaaj ya dawa ke sawal pe "doctor se milein".
+  4. Profile pe "doctor" ya "dermatologist" jaise shabd nahi; role ka naam jaisa hai.
+- **Wajah:** Claude ki salah, owner ne maani: doctor ki seva me licence, records aur zimmedari ka bada bojh hai, aur dummy registration pe doctor ki seva dikhana gumraah kar sakta hai. Sahi product aur routine ki salah isi se poori hoti hai.
+- **Chhode vikalp:** doctor (RMP) ki seva, Telemedicine guidelines ke saath (registration ki jaanch, records, dawa ke niyam).
+- **Kab dobara khulega:** owner khud khole.
+- **Kisne, kab:** owner, 2026-11-20. **Nishaan:** Salah maani.
+- **Asar (Claude):** D-025 me jod. Skin reaction (D-130) me Expert ki salah bhi isi seema me; gambhir reaction pe doctor. Expert ke notes phir bhi sehat ka data (D-207, D-208). Kanooni detail jaanchi nahi (R-004): Telemedicine Practice Guidelines 2020 ka saar dekha, mool PDF nahi khula.
+
+### D-253. Privacy aur CERT-In ka sampark
+
+- **Faisla:** personal data ke sawalon ka sampark (DPDP Rules ka rule 9) Grievance Officer ka role (D-237) hai; uska contact website pe aur data ke haq ke har jawab me. CERT-In ka Point of Contact ek naya "Security Contact" staff role hai, owner ke paas; uski jaankari us role ke account se (D-241).
+- **Wajah:** Claude ki salah, owner ne maani: customer ke liye shikayat aur privacy ka ek hi darwaza; CERT-In ka kaam technical hai, to security ke alerts usi role ke paas.
+- **Chhode vikalp:** do naye roles, Privacy Contact aur Security Contact (zyada accounts, D-017); ek naya role dono ke liye (customer ke do darwaze).
+- **Kab dobara khulega:** owner khud khole.
+- **Kisne, kab:** owner, 2026-11-20. **Nishaan:** Salah maani.
+- **Asar (Claude):** D-017, D-237 aur D-134 me jod; D-055 me R1 jod (runbook R1 me hai, D-198). Significant Data Fiduciary na hon to Data Protection Officer zaroori nahi. Kanooni detail jaanchi nahi (R-004): rule 9 aur CERT-In ka Point of Contact public source se mile.
+
+### D-254. Delivery partners ke kanooni sudhaar
+
+- **Faisla:** delivery partners ke teen sudhaar:
+  1. **Social Security Code:** hum aggregator ki do shreniyon me ("Logistic services" aur "e-Market place"). D-134 ki table me "Gig workers" ki row; har partner pe portal ka number (dummy); roz ke kaam ka export (DUMMY); saal ke kaam ke din ki ginti; contribution ki provision ka hisaab, dar setting me, shuru hone ki tareekh notify hone tak band.
+  2. **Payouts pe TDS:** partner ka PAN (encrypted), saal ka jod, seema paar hone pe kaat ka niyam settings me (CA se pakka), payout statement me TDS.
+  3. **Partner ka data:** Delivery app me partner ke liye data notice aur consent; location sirf "delivered" aur "fail" ke pal pe; lagatar tracking nahi, aur kabhi chahiye to alag consent.
+- **Wajah:** Claude ki salah, owner ne maani: partners ke kanooni kaam ek jagah tay, aur Delivery app aur payouts ka design inhi pe.
+- **Chhode vikalp:** badlav ke saath maanna; rokna (partners ke kanooni kaam adhoore).
+- **Kab dobara khulega:** Social Security Code ki tareekh aur Rules notify hon, ya owner khud khole.
+- **Kisne, kab:** owner, 2026-11-20. **Nishaan:** Salah maani.
+- **Asar (Claude):** D-072, D-104 aur D-134 me jod. Kanooni detail jaanchi nahi (R-004): Code ka text primary se mila; laagu hone ki tareekh, Rules 2026, state ke niyam aur TDS sirf secondary source se; CA se nahi.
+
+### D-255. Personal data ke chhote sudhaar
+
+- **Faisla:** personal data ke aath sudhaar:
+  1. **Data notice:** sign-up pe alag "Data notice" (Privacy page se alag): har maqsad, kaunsa data, consent wapas lene ka link, data ke haq, aur Board ke paas shikayat ka raasta.
+  2. **Privacy page:** data kis desh me rehta hai (Singapore, D-058), processors ki shreniyan, aur data rakhne ka samay.
+  3. **Terms:** mana content ki list (IT Rules ka rule 3(1)(b)); har 3 mahine in-app suchna ki niyam todne pe kya hota hai; shikayat ke jawab me Grievance Appellate Committee ka raasta.
+  4. **Data ke haq (R2):** nomination ka form aur record; data ke saar me kin ke saath data baanta: sellers (order ke hisaab se) aur processors ki shreniyan.
+  5. **Kai accounts (D-203):** notice aur Terms me "per-customer seemaayein aur galat istemaal ki rok" ek maqsad ki tarah; device cookie sirf isi kaam ke liye.
+  6. **Umar (D-038):** 18+ ki ghoshna ka tick consent record me; bachcha pata chale to account band aur data erase.
+  7. **Aadhaar:** upload form pe "Aadhaar ki copy mat bhejein"; galti se aayi copy reject aur turant delete.
+  8. **Processors:** operations ke doc me processors ki list: kaun, kaunsa data, region, data terms ki link, delete ka tareeka; har ek ke saath contract.
+- **Wajah:** Claude ki salah, owner ne maani: DPDP ke chhote hisse pages, sign-up aur operations ke doc me ek saath poore.
+- **Chhode vikalp:** badlav ke saath maanna; rokna (DPDP ke chhote hisse adhoore).
+- **Kab dobara khulega:** owner khud khole.
+- **Kisne, kab:** owner, 2026-11-20. **Nishaan:** Salah maani.
+- **Asar (Claude):** D-038, D-150, D-151, D-203 aur D-216 me jod. Kanooni detail jaanchi nahi (R-004): DPDP Act aur Rules (rule 3, s.11, s.14, s.8(2)) aur Aadhaar Regulations public source se mile; IT Rules ke 2026 ke hisse, kai accounts ka maqsad aur umar ki ghoshna aadha jaancha.
+
+### D-256. Seller, warehouse aur payment ke chhote sudhaar
+
+- **Faisla:** seller, warehouse aur payment ke saat sudhaar:
+  1. **Plastic EPR:** seller onboarding pe seller ka plastic EPR number, ya micro/small enterprise hone ki ghoshna; packaging ka master (shreni I se IV, wazan) aur har dispatch ka record; saal ka return (dummy).
+  2. **Mana shabd:** Drugs and Magic Remedies Act ki Schedule ki haalatein "mana shabdon" me alag hissa, har shabd ke saath Schedule ka number; seller content, description, Creator aur sponsored content sab pe.
+  3. **Payment data ki jagah:** card aur UPI ka data sirf gateway ke paas; hamare paas sirf ids, rakam aur status; gateway se likhit pakka ki payment data India me rehta hai; asli business se pehle region dobara dekhne ki yaad COMPLIANCE me. D-058 waisa hi.
+  4. **Sellers ka paisa:** ledger me sellers ka paisa liability ki tarah alag dikhe; seller agreement me payout ke din.
+  5. **"Paisa kata, order nahi bana":** us haalat ki screen aur email (bank ka samay, jaise UPI pe T+5); der se "captured" aaye to apne aap refund, sirf ek baar.
+  6. **Nasht karna:** expired ya toota maal sirf authorised handler se nasht; certificate of destruction batch ke record me; jalne wala maal alag.
+  7. **D-134 ki table me rows:** Fire Safety (provisional, final, renewal aur saal ka certificate), Shops and Establishments (seema state ke hisaab se), aur e-way bill ka number (sab dummy).
+- **Wajah:** Claude ki salah, owner ne maani: seller onboarding, catalog, finance aur warehouse ke chhote kanooni hisse ek saath poore.
+- **Chhode vikalp:** badlav ke saath maanna; rokna (kanoon ke chhote hisse adhoore).
+- **Kab dobara khulega:** owner khud khole.
+- **Kisne, kab:** owner, 2026-11-20. **Nishaan:** Salah maani.
+- **Asar (Claude):** D-045, D-058, D-062, D-093, D-111, D-134 aur D-246 me jod. Sellers ka paisa aur payment data ki jagah lawyer se pakka karne ki baat COMPLIANCE me. Kanooni detail jaanchi nahi (R-004): EPR guidelines, Drugs and Magic Remedies Act aur RBI ka TAT circular public source se mile; payment data ki jagah, sellers ka paisa, nasht karna, Fire Safety, Shops and Establishments aur e-way bill aadha jaancha.
 
 ## Change log
 
@@ -3172,3 +3328,4 @@
 | v1.10.24 | 2026-11-19 | D-245 aaya (COMPLIANCE batch 2: Legal Metrology ki 14 rows maani; Q-183).                                                                                                                                                                                                               |
 | v1.10.25 | 2026-11-19 | D-246 aaya (COMPLIANCE batch 3: cosmetics kanoon ki 20 rows maani; Q-184).                                                                                                                                                                                                              |
 | v1.10.26 | 2026-11-19 | D-247 aaya (COMPLIANCE batch 4: e-commerce aur consumer kanoon ki 29 rows maani; Q-185); kanooni jaanch ka pehla run docs me poora.                                                                                                                                                     |
+| v1.10.27 | 2026-11-20 | D-248 se D-256 aaye (kanooni jaanch ke doosre run ka asar: data leak ke samay, gift card, kanooni rok aur logs, content ki shikayat ke samay, Skin & Hair Expert, privacy aur CERT-In ka sampark, delivery partners, personal data aur seller ke chhote sudhaar; Q-186 se Q-194); D-136, D-163, D-179, D-198 badle; D-017, D-025, D-038, D-045, D-055, D-058, D-062, D-072, D-093, D-104, D-111, D-134, D-142, D-150, D-151, D-191, D-192, D-194, D-203, D-208, D-216, D-237, D-246 me jod. |

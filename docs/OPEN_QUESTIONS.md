@@ -1,6 +1,6 @@
 # OPEN QUESTIONS: Beautinique
 
-> **Status:** v1.3.41 (2026-11-19). Khule sawal, aage ke topics aur jaanchna baaki. Cheezein ek-ek karke judengi.
+> **Status:** v1.3.44 (2026-11-20). Khule sawal, aage ke topics aur jaanchna baaki. Cheezein ek-ek karke judengi.
 
 ## Is file me kya aayega
 
@@ -60,6 +60,7 @@ Claude ka kaam: owner ka faisla nahi chahiye, sirf saboot. Nateeja saboot ke saa
 | Browser me file input ke `capture` se gallery kitni rukti hai                                                                                                                                   | SR-055                         | Delivery saboot ki photo                                             |
 | Leak hue passwords ki free range API ki uplabdhi aur seema                                                                                                                                      | SR-013                         | Password ki jaanch                                                   |
 | Owner ka laptop: Desktop folder kisi cloud sync me hai ya nahi (repo aur backups isi folder me), aur disk encryption chalu hai ya nahi (owner ke saath)                                         | D-013, D-196, R-023            | Backups ki suraksha                                                  |
+| Test mode me gift card dene wala RBI-authorised PPI issuer (API ke saath) milta hai ya nahi | D-249 | Gift card ka raasta |
 
 ## 3. Sawal
 
@@ -4350,6 +4351,252 @@ Claude ka kaam: owner ka faisla nahi chahiye, sirf saboot. Nateeja saboot ke saa
 - **Kanooni detail:** E-commerce Rules aur Consumer Protection Act ke text doosri sites pe rakhi copies se; 2026 ka badlav, dark patterns aur misleading ads ki guidelines sirf secondary source se; points ki expiry ka source nahi khula. Lawyer se nahi jaancha (R-004).
 - **Owner ka jawab (2026-11-19):** **(a)**, rows jaisi hain waisi maani. Record: [DECISIONS.md](DECISIONS.md) D-247.
 
+### Q-186. Data leak pe khabar ka samay (D-198) kanoon ke saath kaise tike?
+
+- **Status:** `Tay`. Topic: B14 (security), B13 (compliance).
+- **Sawal:** D-198 me data leak pakka hone pe asar wale users ko "misaal 72 ghante ke andar" khabar hai. Kanoon me alag-alag logon ke liye alag samay hain. Kya badle?
+- **Kyun zaroori:**
+  - DPDP Rules 2025 ka rule 7(1): asar wale users ko **bina der** khabar. 72 ghante sirf Data Protection Board ko poori report ki seema hai (rule 7(2)(b)); Board ko shuruaati suchna bhi bina der.
+  - CERT-In ke directions (28 April 2022): cyber incident ki report 6 ghante me. Ye ghadi abhi kisi runbook me nahi.
+  - "72 ghante tak" likhne se users ke liye wahi seema ban jaati hai, jo kanoon ke "bina der" se lambi pad sakti hai.
+- **Vikalp:**
+  - **(a) Teen ghadiyaan runbook me:**
+    1. CERT-In: incident pata chalne ke 6 ghante me report (dummy, D-026).
+    2. Board: bina der shuruaati suchna, aur 72 ghante me poori report.
+    3. Users: leak pakka hote hi, bina der, email aur in-app. Email me rule 7(1) ke hisse: kya hua, kab, kya asar, humne kya kiya, unhe kya karna hai, aur sampark.
+    4. Leak ke emails din ki chhat (D-142) me OTP aur recall ke saath sabse aage; chhat paar ho to in-app aur push usi din.
+  - **(b) Users ke liye tay seema:** 24 ghante (misaal), baaki (a) jaisa.
+  - **(c) Jaisa hai:** 72 ghante, sirf CERT-In ki 6 ghante wali line jodo.
+- **Salah:** **(a)**. Kanoon "bina der" kehta hai, koi tay ghanta nahi; teeno ghadiyaan alag likhne se runbook me koi chhootta nahi.
+- **Trade-off:**
+  - (a) me "leak pakka" kab maana jaaye, ye runbook me saaf likhna padega.
+  - (b) me ek saaf number, par kuch maamlon me kanoon se lamba.
+  - (c) me users ki khabar me der ka jokhim bacha rehta hai.
+- **Kanooni detail:** rule 7 aur CERT-In ke directions public source se milaaye gaye (kanooni jaanch, doosra run); lawyer se nahi jaancha (R-004).
+- **Owner ka jawab (2026-11-20):** **(a)**, teen ghadiyaan runbook me (CERT-In ko 6 ghante, Board ko bina der aur 72 ghante me poori report, users ko pakka hote hi bina der). Record: [DECISIONS.md](DECISIONS.md) D-248.
+
+### Q-187. Gift card (D-179) kis raaste se bane?
+
+- **Status:** `Tay`. Topic: B10 (gift cards), B6 (payments), B13 (compliance).
+- **Sawal:** D-179 me gift card ka design abhi hai, aur banana kanooni jaanch ke baad. Jaanch me pata chala ki hamara gift card RBI ke prepaid (PPI) niyamon me aata hai. Gift card kis raaste se bane?
+- **Kyun zaroori:**
+  - RBI ke PPI niyam: "closed system" PPI sirf issuer ke apne maal ya seva ke liye hota hai, aur use RBI ki ijazat nahi chahiye. Hamara gift card kisi bhi seller ka maal khareedta hai, aur platform company khud maal nahi bechti (D-030, D-031), to ye closed system nahi lagta (RBI ke FAQ ke hisaab se).
+  - Aisa gift card khud issue karne ke liye RBI authorisation chahiye, jo ek chhote business ke liye practical nahi.
+  - Gift PPI ke niyam: validity kam se kam 1 saal, expiry issue pe dikhe, aur rakam ki seema (misaal ₹10,000).
+- **Vikalp:**
+  - **(a) RBI-authorised issuer ke zariye:**
+    1. Gift card kisi RBI-authorised PPI issuer (jaise payment gateway ya gift card company) ka product ho, aur checkout pe payment ke ek tareeke ki tarah chale.
+    2. D-179 ke design niyam (tay rakam, paane wale ke email pe code, thoda-thoda kharch, balance dikhe, cash me nahi) issuer ke niyamon ke andar.
+    3. Validity kam se kam 1 saal, expiry issue pe dikhe, rakam ki seema issuer ke niyam se.
+    4. Banana R2 ke baad, test mode me (D-026), jaisa D-179 me hai.
+  - **(b) Gift card roko:** gift card ka feature abhi nahi banega; owner baad me khole.
+  - **(c) Apna gift card, sirf test mode me:** demo ke liye apna gift card, aur "asli business se pehle issuer pe jaana" ki yaad COMPLIANCE me.
+- **Salah:** **(a)**. Design asli kanoon ke hisaab se rehta hai, gift card ka paisa hamare khaate me nahi rukta, aur KYC aur RBI ka bojh issuer pe.
+- **Trade-off:**
+  - (a) me issuer ki API pe nirbharta; test mode me aisa issuer milta hai ya nahi, ye tathya ki jaanch.
+  - (b) me gift card ka feature rukta hai.
+  - (c) jaldi banta hai, par design kanoon ke khilaaf, aur asli business ke liye dobara banana.
+- **Kanooni detail:** gift card pe niyam RBI ke FAQ se mila; Master Direction ka abhi ka version nahi khula, aur marketplace pe lagna vyakhya ka sawal: aadha jaancha. Lawyer se nahi jaancha (R-004).
+- **Owner ka jawab (2026-11-20):** **(a)**, gift card RBI-authorised issuer ke zariye. Record: [DECISIONS.md](DECISIONS.md) D-249.
+
+### Q-188. Personal data aur logs kitne din rahein: "kanooni rok"?
+
+- **Status:** `Tay`. Topic: B14 (security), B13 (compliance).
+- **Sawal:** kai faislon me personal data tay samay pe mitta hai: account delete (D-151), delivery ki photo aur location 180 din (D-191), daawe aur pickup ki photos (D-192), sehat ka data (D-208), aur logs (D-194). Kanoon me kam se kam rakhne ke samay mile. Kya badle?
+- **Kyun zaroori:**
+  - DPDP Rules 2025 ka rule 8(3) (lagbhag 13 May 2027 se): har processing ka personal data, uska traffic data aur logs kam se kam 1 saal rakhne hain, account delete ke baad bhi, sarkari jaanch jaise maqsadon ke liye. Ye hamari photos aur profile pe kitna lagta hai, vyakhya ka sawal hai.
+  - IT Rules ka rule 3(1)(h): user ka registration data account band hone ke 180 din baad tak.
+  - CERT-In ke directions: saare systems ke logs 180 din. Render free plan pe logs kitne din rehte hain, pakka nahi (R-024), to request logs (SR-077) aur security events apne store me chahiye.
+- **Vikalp:**
+  - **(a) "Kanooni rok" ki class, poori files ke saath:**
+    1. Delete ya samay poora hone pe data app se turant hat jaaye; kisi staff screen pe na dikhe.
+    2. Phir ek band, encrypted store me rahe: 13 May 2027 tak registration data 180 din, uske baad sab 1 saal. Sirf kanooni maang pe khule; har pahunch audit me.
+    3. Samay ke baad apne aap erase.
+    4. Request logs aur security events apne store me kam se kam 180 din abhi se, 13 May 2027 se 1 saal.
+    5. Photos aur video bhi poori file ke roop me rok me.
+  - **(b) (a) jaisa, par photos aur video ka sirf record:** file apne samay pe mite; rok me sirf uska record (kab, kisne, kis maamle me, file ka hash).
+  - **(c) Abhi sirf logs:** CERT-In ke 180 din ke logs abhi; baaki rule 8(3) ke laagu hone se pehle tay.
+- **Salah:** **(b)**. Jaanch ke liye zaroori baat (kaun, kab, kya) record se mil jaati hai, aur ghar ki photos aur videos saal bhar rakhna privacy ka bada jokhim aur free tier pe jagah ka bojh (R-006). Lawyer files maange to (a) pe jaana aasaan.
+- **Trade-off:**
+  - (a) kanoon ke sabse kareeb, par ghar aur logon ki photos 1 saal tak, aur jagah zyada.
+  - (b) me jokhim aur jagah kam, par agar kanoon poori file maange to kami.
+  - (c) me abhi kaam kam, par 2027 ke paas design badalna padega.
+- **Kanooni detail:** rule 8(3) ka text primary se jaancha; laagu hone ki tareekh aur hamare data pe lagna aadha jaancha. CERT-In ke 180 din jaancha. Lawyer se nahi jaancha (R-004).
+- **Owner ka jawab (2026-11-20):** **(b)**, kanooni rok ki class, aur photos aur video ka sirf record. Record: [DECISIONS.md](DECISIONS.md) D-250.
+
+### Q-189. Reviews aur content ki shikayat ke samay (D-136, D-163) kitne hon?
+
+- **Status:** `Tay`. Topic: B8 (reviews), B11 (support), B13 (compliance).
+- **Sawal:** D-136 niyam 5 me moderation queue ka faisla misaal 2 kaam ke din me hai, aur D-163 niyam 3 me shikayat ka hal misaal 30 din me. IT Rules ke 2026 ke badlav inse chhote samay maangte hain. Kya badle?
+- **Kyun zaroori:**
+  - Reviews, photos aur sawal-jawab user content hain, to platform pe IT Rules 2021 laagu.
+  - 2026 ke badlav ke samay (sirf secondary source se mile): content ki shikayat ka hal 7 din; rule 3(1)(b) wale content (jaise doosre ki niji jaankari ya gumraah karne wala) pe 36 ghante; nagnata ya kisi aur ban ke dikhane wale content pe 2 ghante; court ya sarkari order pe 3 ghante.
+  - "2 kaam ke din" aur "30 din" in sab se lambe hain.
+- **Vikalp:**
+  - **(a) Naye samay abhi se (calendar ghante):**
+    1. Shikayat ki receipt 24 ghante me.
+    2. Nagnata ya kisi aur ban ke dikhane wale content ki report pe content turant apne aap chhupe (D-136 niyam 4 jaisa), faisla 2 ghante me.
+    3. Baaki content ki report pe faisla 36 ghante me.
+    4. Shikayat (grievance) ka hal 7 din me.
+    5. Court ya sarkari order ka alag raasta: 3 ghante, Master ko alert.
+  - **(b) Primary source tak ruko:** gazette khulne tak purane samay; khulte hi badlo.
+  - **(c) Sirf grievance:** shikayat ka hal 7 din, baaki jaisa.
+- **Salah:** **(a)**. Chhote samay maanne me kanooni jokhim nahi, chahe secondary galat nikle; ulta hua to ullanghan. Akele owner ke liye 2 ghante bhaari hain, isliye content apne aap chhupta hai.
+- **Trade-off:**
+  - (a) me tez jawab ka bojh, aur alert aur queue ka kaam.
+  - (b) me kaam kam, par secondary sahi nikla to takrav.
+  - (c) beech ka raasta; content wale samay bache rehte hain.
+- **Kanooni detail:** 2026 ke saare samay sirf secondary source se (gazette nahi khula): aadha jaancha. Lawyer se nahi jaancha (R-004).
+- **Owner ka jawab (2026-11-20):** **(a)**, naye samay abhi se (5 niyam). Record: [DECISIONS.md](DECISIONS.md) D-251.
+
+### Q-190. Skin & Hair Expert: doctor ki seva ya beauty salah?
+
+- **Status:** `Tay`. Topic: B11 (consultation), B13 (compliance).
+- **Sawal:** D-025 me Skin & Hair Expert ek staff role hai jo Google Meet pe consultation deta hai. Ye doctor ki seva hai ya beauty salah, tay nahi. Kya ho?
+- **Kyun zaroori:**
+  - Telemedicine Practice Guidelines 2020 sirf registered medical practitioner (RMP) pe laagu hain: platform RMP ka registration jaanche aur dikhaye, aur dawa ke niyam maane.
+  - "Expert" naam aur skin reaction ke maamle (D-130) me salah se customer ise doctor ki seva maan sakta hai.
+  - Ilaaj jaise daawon pe claims ke niyam aur Drugs and Magic Remedies Act sakht hain.
+- **Vikalp:**
+  - **(a) Beauty aur skincare salah, medical nahi:**
+    1. Koi nidaan ya dawa nahi.
+    2. Booking, Meet ke email aur notes pe "Ye medical consultation nahi hai" ki line.
+    3. Ilaaj ya dawa ke sawal pe "doctor se milein".
+    4. Profile pe "doctor" ya "dermatologist" jaise shabd nahi; role ka naam jaisa hai.
+  - **(b) Doctor (RMP) ki seva:** registration number ka field aur staff ki jaanch; profile pe naam aur registration; customer ki pehchaan aur consent; dawa ke niyam (Telemedicine guidelines); registration dummy (D-026).
+- **Salah:** **(a)**. Doctor ki seva me licence, records aur zimmedari ka bada bojh hai, aur dummy registration pe doctor ki seva dikhana gumraah kar sakta hai. Sahi product aur routine ki salah (a) se poori hoti hai.
+- **Trade-off:**
+  - (a) me skin reaction jaise maamlon me salah seemit; customer ko doctor ke paas bhejna padta hai.
+  - (b) asli medical seva, par telemedicine ke niyam, records aur zimmedari, aur dummy registration ka sawal.
+- **Kanooni detail:** Telemedicine guidelines ka saar dekha, mool PDF nahi khula: aadha jaancha. Lawyer se nahi jaancha (R-004).
+- **Owner ka jawab (2026-11-20):** **(a)**, beauty aur skincare salah, medical consultation nahi. Record: [DECISIONS.md](DECISIONS.md) D-252.
+
+### Q-191. Privacy ka sampark aur CERT-In ka Point of Contact kaun?
+
+- **Status:** `Tay`. Topic: B14 (security), B2 (roles), B13 (compliance).
+- **Sawal:** DPDP aur CERT-In dono ek sampark wala insaan maangte hain. Ye kis role ke paas ho?
+- **Kyun zaroori:**
+  - DPDP Rules ka rule 9: personal data ke sawalon ka jawab dene wale insaan ka contact website pe, aur data ke haq ke har jawab me. (Significant Data Fiduciary na hon to Data Protection Officer zaroori nahi.)
+  - CERT-In ke directions: har entity ka ek Point of Contact, jiska naam CERT-In ko diya jaata hai.
+  - Dono abhi kisi role pe nahi. D-241: jo kaam apna role karta hai, uska role banta hai, aur jaankari us role wale staff account se aati hai.
+- **Vikalp:**
+  - **(a)** Privacy ka sampark = Grievance Officer ka role (D-237); CERT-In ka Point of Contact = ek naya "Security Contact" role, owner ke paas.
+  - **(b)** Do naye role: "Privacy Contact" aur "Security Contact".
+  - **(c)** Ek naya role dono ke liye: "Privacy & Security Contact".
+- **Salah:** **(a)**. Customer ke liye shikayat aur privacy ka ek hi darwaza; CERT-In ka kaam technical hai, to security ke alerts usi role ke paas.
+- **Trade-off:**
+  - (a) me Grievance Officer pe privacy ke sawal bhi.
+  - (b) me zyada roles aur owner ke zyada accounts (D-017).
+  - (c) me privacy aur security ek role pe, par grievance alag reh jaata hai: customer ke do darwaze.
+- **Kanooni detail:** rule 9 aur CERT-In ka Point of Contact public source se milaaye gaye; lawyer se nahi jaancha (R-004).
+- **Owner ka jawab (2026-11-20):** **(a)**, personal data ka sampark Grievance Officer, aur CERT-In ka Point of Contact naya Security Contact role. Record: [DECISIONS.md](DECISIONS.md) D-253.
+
+### Q-192. Delivery partners ke kanooni sudhaar maanein?
+
+- **Status:** `Tay`. Topic: B1 (delivery), B6 (payouts), B13 (compliance).
+- **Sawal:** kanooni jaanch me delivery partners ke kuch sudhaar nikle. Inhe maanein?
+- **Prastaavit sudhaar:**
+  1. **Social Security Code (D-033, D-104, D-134):** hum aggregator ki do shreniyon me aate hain ("Logistic services" aur "e-Market place"). D-134 ki table me "Gig workers" ki row; har partner pe portal ka number (dummy); roz ke kaam ka export (DUMMY); saal ke kaam ke din ki ginti; contribution ki provision ka hisaab, dar setting me, shuru hone ki tareekh notify hone tak band. (Code ka text jaancha; laagu hone ki tareekh, Rules 2026 aur state ke niyam sirf secondary: aadha jaancha.)
+  2. **Partner payouts pe TDS (D-104):** partner ka PAN (encrypted), saal ka jod, seema paar hone pe kaat ka niyam settings me (CA se pakka), payout statement me TDS. (Aadha jaancha.)
+  3. **Partner ka data (D-072, D-191):** Delivery app me partner ke liye data notice aur consent; location sirf "delivered" aur "fail" ke pal pe; lagatar tracking nahi, aur kabhi chahiye to alag consent. (Jaancha.)
+- **Vikalp:**
+  - **(a)** List jaisi hai waisi maanein.
+  - **(b)** Maanein, par owner jo sudhaar badle, wo badal ke.
+  - **(c)** Abhi roko.
+- **Salah:** **(a)**.
+- **Trade-off:**
+  - (a) me Delivery app aur payouts me chhote kaam.
+  - (b) me har badlav ki ek line.
+  - (c) me partners ke kanooni kaam adhoore.
+- **Kanooni detail:** har sudhaar ke saath uska status likha hai; CA aur lawyer se nahi jaancha (R-004).
+- **Owner ka jawab (2026-11-20):** **(a)**, list jaisi hai waisi maani. Record: [DECISIONS.md](DECISIONS.md) D-254.
+
+### Q-193. Personal data ke chhote sudhaar maanein?
+
+- **Status:** `Tay`. Topic: B14 (security), B13 (compliance).
+- **Sawal:** kanooni jaanch me personal data ke kuch chhote sudhaar nikle. Inhe maanein?
+- **Prastaavit sudhaar:**
+  1. **Data notice (D-150):** sign-up pe alag "Data notice" (Privacy page se alag): har maqsad, kaunsa data, consent wapas lene ka link, data ke haq, aur Board ke paas shikayat ka raasta (DPDP rule 3). (Jaancha.)
+  2. **Privacy page (D-150):** data kis desh me rehta hai (Singapore, D-058), processors ki shreniyan, aur data rakhne ka samay. (Jaancha.)
+  3. **Terms (D-150):** rule 3(1)(b) ke mana content ki list; har 3 mahine in-app suchna ki niyam todne pe kya hota hai; shikayat ke jawab me Grievance Appellate Committee ka raasta. (Sirf secondary source: aadha jaancha.)
+  4. **Data ke haq (D-151, R2):** nomination ka form aur record (DPDP s.14); data ke saar me kin ke saath data baanta: sellers (order ke hisaab se) aur processors ki shreniyan (s.11(1)(b)). (Jaancha.)
+  5. **Ek insaan ke kai accounts (D-203):** notice aur Terms me "per-customer seemaayein aur galat istemaal ki rok" ek maqsad ki tarah; device cookie sirf isi kaam ke liye. (Aadha jaancha.)
+  6. **Umar (D-038):** 18+ ki ghoshna ka tick consent record me; bachcha pata chale to account band aur data erase; lawyer se pakka. (Aadha jaancha.)
+  7. **Aadhaar (D-216):** upload form pe "Aadhaar ki copy mat bhejein"; galti se aayi copy reject aur turant delete (Aadhaar Regulations ka reg. 6(5), 2025). (Jaancha.)
+  8. **Processors (D-011, D-056 se D-058):** operations doc me processors ki list: kaun, kaunsa data, region, data terms ki link, delete ka tareeka; har ek ke saath contract (DPDP s.8(2)). (Jaancha.)
+- **Vikalp:**
+  - **(a)** List jaisi hai waisi maanein.
+  - **(b)** Maanein, par owner jo sudhaar badle, wo badal ke.
+  - **(c)** Abhi roko.
+- **Salah:** **(a)**.
+- **Trade-off:**
+  - (a) me pages, sign-up aur operations doc me chhote kaam.
+  - (b) me har badlav ki ek line.
+  - (c) me DPDP ke chhote hisse adhoore.
+- **Kanooni detail:** har sudhaar ke saath uska status likha hai; lawyer se nahi jaancha (R-004).
+- **Owner ka jawab (2026-11-20):** **(a)**, list jaisi hai waisi maani. Record: [DECISIONS.md](DECISIONS.md) D-255.
+
+### Q-194. Seller, warehouse aur payment ke chhote sudhaar maanein?
+
+- **Status:** `Tay`. Topic: B3 (catalog), B6 (payments), B1 (warehouse), B13 (compliance).
+- **Sawal:** kanooni jaanch me seller, warehouse aur payment ke kuch chhote sudhaar nikle. Inhe maanein?
+- **Prastaavit sudhaar:**
+  1. **Plastic EPR (D-045, D-134):** seller onboarding pe seller ka plastic EPR number, ya micro/small enterprise hone ki ghoshna (EPR guidelines ka clause 6.3: registered brand owner unregistered se len-den nahi karta); packaging ka master (shreni I se IV, wazan) aur har dispatch ka record; saal ka return (dummy). (Jaancha.)
+  2. **Mana shabd (D-246):** Drugs and Magic Remedies Act ki Schedule ki haalatein (jaise breast ki banawat, motapa, lambai badhana, leucoderma, yaun kshamata) "mana shabdon" me alag hissa, har shabd ke saath Schedule ka number; seller content, description, Creator aur sponsored content sab pe. (Jaancha.)
+  3. **Payment data ki jagah (D-058):** card aur UPI ka data sirf gateway ke paas; hamare paas sirf ids, rakam aur status; gateway se likhit pakka ki payment data India me rehta hai; asli business se pehle region dobara dekhne ki yaad COMPLIANCE me. D-058 nahi khulta. (Aadha jaancha.)
+  4. **Sellers ka paisa (D-093):** ledger me sellers ka paisa liability ki tarah alag dikhe; seller agreement me payout ke din; lawyer se pakka. (Aadha jaancha.)
+  5. **"Paisa kata, order nahi bana" (D-111):** us haalat ki screen aur email (bank ka samay, jaise UPI pe T+5); der se "captured" aaye to apne aap refund, sirf ek baar (idempotent). (Jaancha.)
+  6. **Nasht karna (D-062):** expired ya toota maal sirf authorised handler se nasht; certificate of destruction batch ke record me; jalne wala maal alag. (Aadha jaancha.)
+  7. **D-134 ki table me rows:** Fire Safety (provisional, final, renewal aur saal ka certificate), Shops and Establishments (seema state ke hisaab se), aur e-way bill ka number (sab dummy). (Aadha jaancha.)
+- **Vikalp:**
+  - **(a)** List jaisi hai waisi maanein.
+  - **(b)** Maanein, par owner jo sudhaar badle, wo badal ke.
+  - **(c)** Abhi roko.
+- **Salah:** **(a)**.
+- **Trade-off:**
+  - (a) me seller onboarding, catalog, finance aur warehouse me chhote kaam.
+  - (b) me har badlav ki ek line.
+  - (c) me kanoon ke chhote hisse adhoore.
+- **Kanooni detail:** har sudhaar ke saath uska status likha hai; lawyer se nahi jaancha (R-004).
+- **Owner ka jawab (2026-11-20):** **(a)**, list jaisi hai waisi maani. Record: [DECISIONS.md](DECISIONS.md) D-256.
+
+### Q-195. COMPLIANCE batch 5: personal data ki rows maanein?
+
+- **Status:** `Khula`. Topic: B13 (compliance), B14 (security).
+- **Sawal:** kanooni jaanch ke personal data wale hisse ki ye 17 rows [COMPLIANCE.md](COMPLIANCE.md) me ek naye hisse "Personal data" me aayein? Har row COMPLIANCE ke format me jaayegi (kanoon ya niyam, kis pe laagu, kis module me, system me kya chahiye, dummy kya hai, jaancha ya nahi), source ke link aur tareekh ke saath.
+- **Kyun zaroori:**
+  - Sign-up, account, support, logs aur backups ke design ko personal data ka ek tay kanooni aadhaar chahiye; QA ke tests bhi inhi se banenge.
+  - Jahan kisi row se tay faisla badalta tha, wo pehle hi sawal ban ke tay ho gaya (D-248 se D-256); yahan sirf unka hawala hai.
+- **Sources** (sab 2026-11-20 ko khole): P1 DPDP Act 2023 (sarkari site pe copy); P2 DPDP Rules 2025 (gazette ka text, doosri site pe copy); P3 PIB ka saar (17 Nov 2025); P4 Act ke laagu hone ki tareekhein (sirf secondary); P5 SPDI Rules 2011 (doosri site pe copy); P6 Aadhaar (Sharing of Information) Regulations (UIDAI).
+- **Prastaavit rows:**
+  1. **CL-088, abhi ka kanoon aur DPDP kab se:** DPDP Rules ka rule 4 (Consent Manager) 13 Nov 2026 se; baaki zyadatar rules aur Act ke s.3 se 17 lagbhag 13 May 2027 se. Tab tak IT Act s.43A aur SPDI Rules: sensitive data (password, financial jaankari, sehat) pe likhit consent, privacy policy, Grievance Officer aur ek mahine me hal, likha hua security program. Design shuru se DPDP ke hisaab se. Aadha jaancha (Act ki tareekhein sirf secondary).
+  2. **CL-089, notice aur consent (s.5, s.6, rule 3):** har maqsad pe saaf consent, sirf zaroori data; alag Data notice (D-255); har consent ka record (notice ka version, samay, raasta, waapsi); waapsi utni hi aasaan jitna consent; data model baad me Consent Manager se jud sake. Notice ka text "DUMMY: lawyer se jaancha nahi" ke saath. Jaancha.
+  3. **CL-090, sehat ka data (SPDI rule 3 aur 5, DPDP rule 6):** consultation notes, skin reaction case aur allergy profile; alag consent (D-165), encryption aur audit (D-207, D-208); marketing ya sujhaav me bina alag consent nahi. Jaancha.
+  4. **CL-091, data ke haq (s.11 se s.14, rule 14):** D-151 ke haq; data ke saar me sellers aur processors ki shreniyan; nomination R2 (D-255); jawab 90 din ke andar. Jaancha.
+  5. **CL-092, privacy ka sampark (s.8(9), rule 9):** Grievance Officer (D-253); contact privacy page pe aur haq ke har jawab me apne aap; jaankari role wale staff account se (D-241). Jaancha.
+  6. **CL-093, data ka samay aur kanooni rok (s.8(7), rule 8(3), rule 6(1)(e)):** har data class ka samay (D-191 se D-194, D-208) aur kanooni rok (D-250): app se turant hatna, band encrypted store, sirf kanooni maang pe khulna, phir erase; photos aur video ka sirf record. Rule 8(1) ka 3 saal wala niyam sirf 2 crore se zyada users wale e-commerce pe. Tax records CL-021 me. Aadha jaancha (hamare data pe lagna vyakhya ka sawal).
+  7. **CL-094, data leak ki suchna (rule 7):** D-248 ki teen ghadiyaan; user email aur in-app ka template; leak ka register; saal me ek abhyaas nakli event se, kisi sanstha ko asli ya nakli report nahi. Jaancha.
+  8. **CL-095, Aadhaar (Aadhaar Regulations ka reg. 6):** Aadhaar nahi lena (SR-064); upload form pe saaf line, aur galti se aayi copy reject aur turant delete (D-255). Jaancha.
+  9. **CL-096, staff ki pahunch (rule 6(1)(b), (c)):** pahunch pe control, logs aur review (D-201, SR-076); "poori jaankari dekhi" wale audit ki mahine ki review. Jaancha.
+  10. **CL-097, device aur accounts ka jod:** DPDP me "legitimate interest" nahi; ye maqsad notice aur Terms me (D-255); device cookie sirf isi kaam ke liye; cookies pe alag kanoon nahi mila. Aadha jaancha.
+  11. **CL-098, seller aur reviews ke saath data (s.8(3)(b), s.11(1)(b), s.6(1)):** sellers ko sirf zaroori data (D-143, D-226); review form pe "ye jaankari sabko dikhegi". Jaancha.
+  12. **CL-099, demo site (s.3):** testers ka data asli maana jaata hai; unpe bhi wahi notice aur haq (D-133). Jaancha.
+  13. **CL-100, privacy page (SPDI rule 4; DPDP rule 3, 9, 14):** kaunsa data, kyun, kab tak (kanooni rok samet), kis ke saath, kahan (Singapore), security ka saar, haq, sampark, Board, aur backups ki umar (D-150, D-255); "DUMMY: lawyer se jaancha nahi". Jaancha.
+  14. **CL-101, marketing consent (s.6(1), s.6(4)):** D-141; opt-in aur opt-out ka record; push ki permission aur marketing consent alag. Jaancha.
+  15. **CL-102, bachche aur 18+ (s.2(f), s.9, rule 10):** ghoshna ka tick, pehle se tick nahi, record me (D-038, D-255); bachcha pata chale to account band aur data erase; umar ke hisaab se ads nahi. Aadha jaancha (sirf ghoshna kaafi hai ya nahi, saaf nahi).
+  16. **CL-103, Significant Data Fiduciary (s.10, rule 13):** sirf sarkar ki notification se; tab India me DPO, auditor aur saal ka audit. Abhi laagu nahi; COMPLIANCE ki nazar me. Aadha jaancha (notification na hona sirf search se).
+  17. **CL-104, data processors (s.8(1), s.8(2), rule 6(1)(f), s.8(7)(b)):** processors ki list (D-255); naya provider is list ke bina nahi; processor se bhi erase. Jaancha.
+- **Vikalp:**
+  - **(a)** Rows jaisi hain waisi maanein.
+  - **(b)** Maanein, par owner jo row badle, wo badal ke.
+  - **(c)** Ye batch abhi roko.
+- **Salah:** **(a)**.
+- **Trade-off:**
+  - (a) me vyakhya ke kuch sawal (CL-093, CL-097, CL-102) lawyer ke liye khule rehte hain, jo design me option ki tarah rahenge.
+  - (b) me har badlav ki ek line.
+  - (c) me personal data ke design ka kanooni aadhaar baad me.
+- **Kanooni detail:** har row ke saath uska status likha hai. Kuch sarkari sites (MeitY, India Code, eGazette) nahi khuli, isliye kuch sources doosri sites ki copies hain. Lawyer se nahi jaancha (R-004).
+
 ## Change log
 
 | Version | Date       | Badlav                                                                                                                                                                                    |
@@ -4430,3 +4677,6 @@ Claude ka kaam: owner ka faisla nahi chahiye, sirf saboot. Nateeja saboot ke saa
 | v1.3.39 | 2026-11-19 | Q-183 tay: (a) Legal Metrology ki 14 rows (D-245, COMPLIANCE §2); Q-184 khula (COMPLIANCE batch 3: cosmetics kanoon).                                                                     |
 | v1.3.40 | 2026-11-19 | Q-184 tay: (a) cosmetics kanoon ki 20 rows (D-246, COMPLIANCE §3); Q-185 khula (COMPLIANCE batch 4: e-commerce aur consumer kanoon).                                                      |
 | v1.3.41 | 2026-11-19 | Q-185 tay: (a) e-commerce aur consumer kanoon ki 29 rows (D-247, COMPLIANCE §4); koi sawal khula nahi.                                                                                    |
+| v1.3.42 | 2026-11-20 | Q-186 se Q-194 khule (kanooni jaanch ke doosre run ke asar ke sawal). |
+| v1.3.43 | 2026-11-20 | Q-186 se Q-194 tay: saari salah maani (D-248 se D-256); §2 me gift card issuer ki jaanch. |
+| v1.3.44 | 2026-11-20 | Q-195 khula (COMPLIANCE batch 5: personal data ki 17 rows). |
