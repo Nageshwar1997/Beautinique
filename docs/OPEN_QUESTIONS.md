@@ -1,6 +1,6 @@
 # OPEN QUESTIONS: Beautinique
 
-> **Status:** v1.5.1 (2026-11-20). Khule sawal, aage ke topics aur jaanchna baaki. Cheezein ek-ek karke judengi.
+> **Status:** v1.6.2 (2026-11-20). Khule sawal, aage ke topics aur jaanchna baaki. Cheezein ek-ek karke judengi.
 
 ## Is file me kya aayega
 
@@ -42,27 +42,30 @@ Topic sirf sawalon ki grouping hai. Har topic ke sawal us topic ki charcha (aur 
 
 Claude ka kaam: owner ka faisla nahi chahiye, sirf saboot. Nateeja saboot ke saath sahi file me jaata hai (jaise [RISKS.md](RISKS.md) §2).
 
-| Kya                                                                                                                                                                                             | Kis faisle se                  | Kyun                                                                 |
-| ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------ | -------------------------------------------------------------------- |
-| Asli location data me main city ke pincodes kis hub pe, aur kitne pincodes do sub-districts, districts ya states me phaile hain                                                                 | D-015, D-016                   | Pincode → hub mapping; D-016 asli data dekh ke dobara khul sakta hai |
-| EU ke CosIng jaise public ingredient database ka license aur download ka format                                                                                                                 | D-132                          | Ingredient master list ka import (products badhne pe)                |
-| Vercel ke rewrite se backend tak secret header kaise jude, aur Vercel aur Render asli client IP kis header me dete hain                                                                         | D-052, Q-151                   | Backend ka seedha raasta band karna aur rate limit ke liye asli IP   |
-| Atlas ke free cluster, Neon ke free plan aur Render Key Value me network allowlist ya IP access list milti hai ya nahi, aur Render ki free web service ke bahar jaane wale IPs tay hain ya nahi | D-011, D-050, Q-158            | Databases ka network band karna (R-022)                              |
-| Render ki free web service ke logs kitne din rehte hain, aur public repo pe GitHub secret scanning aur push protection muft chalu hote hain ya nahi                                             | Q-159                          | Incident me logs ki copy (R-024) aur repo ke pehre                   |
-| `vercel.app` aur `onrender.com` Public Suffix List me hain ya nahi                                                                                                                              | D-048, SR-027                  | Ek app ki cookie doosre app tak na jaaye                             |
-| Vercel ka CDN bahar ke rewrite pe backend ke cache headers kaise maanta hai, aur `Set-Cookie` aur `Cookie` wale jawab pe cache kaisa                                                            | D-052, SR-004                  | Personal jawab cache na ho                                           |
-| Neon ke free plan me roles, `sslmode` aur point-in-time restore ki khidki                                                                                                                       | D-057, SR-068, SR-053          | Finance database ke haq aur restore                                  |
-| Render Key Value ke free plan me password aur TLS, aur memory bharne pe kya mitta hai                                                                                                           | D-051, SR-070, SR-008          | Rate limits aur cache ka vyavhaar                                    |
-| Razorpay: webhook signature ka header aur algorithm, event id aur retry, payment signature ki jaanch, test mode me exact rakam ka UPI QR, refund ki idempotency, chargeback ki samay-seema      | D-034, SR-048 se SR-050, D-191 | Payment aur webhooks ke niyam, delivery saboot ka samay              |
-| Email provider: bheje emails ki copy dashboard me kitne din (OTP dikhta hai ya nahi), link tracking default, API key ke haq, shared domain pe SPF aur DKIM                                      | D-028, SR-012, SR-073          | Emails me codes aur links ki suraksha                                |
-| Web Push: push services ke hosts ki list aur payload ki seema                                                                                                                                   | SR-072, SR-074                 | Push ki allowlist aur payload                                        |
-| LinkedIn aur GitHub sign-in se email "verified" hone ki jaankari milti hai ya nahi                                                                                                              | D-021, SR-017                  | Social sign-in se account jodna                                      |
-| Browser me file input ke `capture` se gallery kitni rukti hai                                                                                                                                   | SR-055                         | Delivery saboot ki photo                                             |
-| Leak hue passwords ki free range API ki uplabdhi aur seema                                                                                                                                      | SR-013                         | Password ki jaanch                                                   |
-| Owner ka laptop: Desktop folder kisi cloud sync me hai ya nahi (repo aur backups isi folder me), aur disk encryption chalu hai ya nahi (owner ke saath)                                         | D-013, D-196, R-023            | Backups ki suraksha                                                  |
-| Test mode me gift card dene wala RBI-authorised PPI issuer (API ke saath) milta hai ya nahi                                                                                                     | D-249                          | Gift card ka raasta                                                  |
-| Media provider (Cloudinary ka free plan): private file ka samay wala URL free plan pe chalta hai ya nahi, rakhi copy me EXIF rehta hai ya nahi, file type aur size ki rok, free credits, aur data ki jagah | D-284 | Shart poori na ho to media ka vikalp (c) |
-| Brevo ka free plan: bina domain ek verified sender se bhejna chalta hai ya nahi, din ki seema, aur API key ke haq | D-287 | Email provider pakka karna |
+| Kya                                                                                                                                                                                                        | Kis faisle se                  | Kyun                                                                 |
+| ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------ | -------------------------------------------------------------------- |
+| Asli location data me main city ke pincodes kis hub pe, aur kitne pincodes do sub-districts, districts ya states me phaile hain                                                                            | D-015, D-016                   | Pincode → hub mapping; D-016 asli data dekh ke dobara khul sakta hai |
+| EU ke CosIng jaise public ingredient database ka license aur download ka format                                                                                                                            | D-132                          | Ingredient master list ka import (products badhne pe)                |
+| Vercel ke rewrite se backend tak secret header kaise jude, aur Vercel aur Render asli client IP kis header me dete hain                                                                                    | D-052, Q-151                   | Backend ka seedha raasta band karna aur rate limit ke liye asli IP   |
+| Atlas ke free cluster, Neon ke free plan aur Render Key Value me network allowlist ya IP access list milti hai ya nahi, aur Render ki free web service ke bahar jaane wale IPs tay hain ya nahi            | D-011, D-050, Q-158            | Databases ka network band karna (R-022)                              |
+| Render ki free web service ke logs kitne din rehte hain, aur public repo pe GitHub secret scanning aur push protection muft chalu hote hain ya nahi                                                        | Q-159                          | Incident me logs ki copy (R-024) aur repo ke pehre                   |
+| `vercel.app` aur `onrender.com` Public Suffix List me hain ya nahi                                                                                                                                         | D-048, SR-027                  | Ek app ki cookie doosre app tak na jaaye                             |
+| Vercel ka CDN bahar ke rewrite pe backend ke cache headers kaise maanta hai, aur `Set-Cookie` aur `Cookie` wale jawab pe cache kaisa                                                                       | D-052, SR-004                  | Personal jawab cache na ho                                           |
+| Neon ke free plan me roles, `sslmode` aur point-in-time restore ki khidki                                                                                                                                  | D-057, SR-068, SR-053          | Finance database ke haq aur restore                                  |
+| Render Key Value ke free plan me password aur TLS, aur memory bharne pe kya mitta hai                                                                                                                      | D-051, SR-070, SR-008          | Rate limits aur cache ka vyavhaar                                    |
+| Razorpay: webhook signature ka header aur algorithm, event id aur retry, payment signature ki jaanch, test mode me exact rakam ka UPI QR, refund ki idempotency, chargeback ki samay-seema                 | D-034, SR-048 se SR-050, D-191 | Payment aur webhooks ke niyam, delivery saboot ka samay              |
+| Email provider: bheje emails ki copy dashboard me kitne din (OTP dikhta hai ya nahi), link tracking default, API key ke haq, shared domain pe SPF aur DKIM                                                 | D-028, SR-012, SR-073          | Emails me codes aur links ki suraksha                                |
+| Web Push: push services ke hosts ki list aur payload ki seema                                                                                                                                              | SR-072, SR-074                 | Push ki allowlist aur payload                                        |
+| LinkedIn aur GitHub sign-in se email "verified" hone ki jaankari milti hai ya nahi                                                                                                                         | D-021, SR-017                  | Social sign-in se account jodna                                      |
+| Browser me file input ke `capture` se gallery kitni rukti hai                                                                                                                                              | SR-055                         | Delivery saboot ki photo                                             |
+| Leak hue passwords ki free range API ki uplabdhi aur seema                                                                                                                                                 | SR-013                         | Password ki jaanch                                                   |
+| Owner ka laptop: Desktop folder kisi cloud sync me hai ya nahi (repo aur backups isi folder me), aur disk encryption chalu hai ya nahi (owner ke saath)                                                    | D-013, D-196, R-023            | Backups ki suraksha                                                  |
+| Test mode me gift card dene wala RBI-authorised PPI issuer (API ke saath) milta hai ya nahi                                                                                                                | D-249                          | Gift card ka raasta                                                  |
+| Media provider (Cloudinary ka free plan): private file ka samay wala URL free plan pe chalta hai ya nahi, rakhi copy me EXIF rehta hai ya nahi, file type aur size ki rok, free credits, aur data ki jagah | D-284                          | Shart poori na ho to media ka vikalp (c)                             |
+| Atlas ka free cluster bina connection ke kitne din me ruk jaata hai, aur Render free instance ka CPU kitna hai                                                                                             | D-293, D-298                   | Clusters ko jaaga rakhna aur capacity ke number                      |
+| Render Key Value ke free plan ki memory aur connections ki seema                                                                                                                                           | D-293, D-298                   | Queues, connections aur Redis ka alert                               |
+| Atlas Search ke free cluster pe fuzzy, autocomplete aur synonyms ki seema                                                                                                                                  | D-295                          | Search ke niyam                                                      |
+| Brevo ka free plan: bina domain ek verified sender se bhejna chalta hai ya nahi, din ki seema, aur API key ke haq                                                                                          | D-287                          | Email provider pakka karna                                           |
 
 ## 3. Sawal
 
@@ -5242,6 +5245,225 @@ Claude ka kaam: owner ka faisla nahi chahiye, sirf saboot. Nateeja saboot ke saa
   - (c) me catalog ka har badlav deploy maangta hai (D-037 ki soch se ulta), aur Render ki build minutes.
 - **Owner ka jawab (2026-11-20):** **(a)**, R1 me saare apps SPA, koi server-side rendering nahi; SSR asli business ke waqt dobara. Record: [DECISIONS.md](DECISIONS.md) D-290.
 
+### Q-228. ARCHITECTURE batch 1: services aur data ki seema maanein?
+
+- **Status:** `Tay`. Topic: B15 (technical).
+- **Sawal:** Principal Software Architect ke services aur data ki seema ke niyam [ARCHITECTURE.md](ARCHITECTURE.md) §2 me aayein: 12 hisse (gateway aur 11 data wali services), har data ka ek maalik, sync calls ki tay list, aur 11 niyam?
+- **Kyun zaroori:** D-011 ne services ka sirf pehla draft diya tha, aur "data sirf events se" ka matlab saaf nahi tha. Kuch kaam (checkout pe payment order, pack pe invoice, darwaze pe UPI QR, OTP) usi pal jawab maangte hain. Database Architect aur baaki agents isi seema pe kaam karenge.
+- **Vikalp:**
+  - **(a)** Jaise hain waise maanein.
+  - **(b)** Badlav ke saath maanein (owner bataye).
+  - **(c)** Batch roko.
+- **Salah:** **(a)**. Har data ka ek maalik; copy sirf events se, aur turant jawab wale kaam sirf ek chhoti tay list se; stock aur order ek transaction me, serviceability aur daam ki copy commerce me (D-016 niyam 9, SR-044).
+- **Trade-off:**
+  - (a) me do nayi services (media, logs) aur commerce me logistics aur catalog ki copy, jo kuch second peeche reh sakti hai.
+  - (b) me owner ka samay.
+  - (c) me Database Architect bina seema ke.
+- **Owner ka jawab (2026-11-20):** **(a)**, services aur data ki seema jaise hain. Record: [DECISIONS.md](DECISIONS.md) D-291.
+
+### Q-229. ARCHITECTURE batch 2: events aur messaging maanein?
+
+- **Status:** `Tay`. Topic: B15 (technical).
+- **Sawal:** events ke niyam [ARCHITECTURE.md](ARCHITECTURE.md) §3 me aayein: outbox se seedhi delivery, inbox se dedupe, aggregate ke hisaab se kram, retry aur dead letter, envelope, event me kya kabhi nahi, versioning, outbox se audit (11 niyam)?
+- **Kyun zaroori:** Redis kabhi sach nahi (R-010), aur Redis ki free memory chhoti hai. Event khona nahi chahiye, aur ek order ke events ulte kram me nahi pahunchne chahiye.
+- **Vikalp:**
+  - **(a)** Jaise hain waise maanein.
+  - **(b)** Badlav ke saath maanein (owner bataye).
+  - **(c)** Batch roko.
+- **Salah:** **(a)**. Event ka sach outbox me, to Redis ke restart se event nahi khota; delivery kam se kam ek baar, asar ek baar.
+- **Trade-off:**
+  - (a) me har producer ka dispatcher aur har consumer ki `processed_events` collection.
+  - (b) me owner ka samay.
+  - (c) me services ke beech baat ka dhaancha baaki.
+- **Owner ka jawab (2026-11-20):** **(a)**, events ke 11 niyam jaise hain. Record: [DECISIONS.md](DECISIONS.md) D-292.
+
+### Q-230. ARCHITECTURE batch 3: background jobs aur samay maanein?
+
+- **Status:** `Tay`. Topic: B15 (technical).
+- **Sawal:** jobs ke niyam [ARCHITECTURE.md](ARCHITECTURE.md) §4 me aayein: samay wale kaam DB me due date ke saath, ticker aur lease, BullMQ sirf kaam chalane ke liye, queues ki seema, IST ka din, chhoote din ka catch-up, finance ka batch, turant wale kaam job nahi, aur R1 ki jobs ki table (9 niyam)?
+- **Kyun zaroori:** server raat ko soya rehta hai (R-002) aur Redis khaali ho sakta hai (R-010); kaam late ho sakta hai, khona nahi chahiye. Chhote kanooni samay (D-248, D-251) soye server pe job se poore nahi hote.
+- **Vikalp:**
+  - **(a)** Jaise hain waise maanein.
+  - **(b)** Badlav ke saath maanein (owner bataye).
+  - **(c)** Batch roko.
+- **Salah:** **(a)**.
+- **Trade-off:**
+  - (a) me har service me `timers` aur lease ka kaam.
+  - (b) me owner ka samay.
+  - (c) me jobs ka dhaancha baaki.
+- **Owner ka jawab (2026-11-20):** **(a)**, jobs ke 9 niyam aur R1 ki jobs ki table jaise hain. Record: [DECISIONS.md](DECISIONS.md) D-293.
+
+### Q-231. ARCHITECTURE batch 4: API aur apps se baat maanein?
+
+- **Status:** `Tay`. Topic: B15 (technical).
+- **Sawal:** API ke niyam [ARCHITECTURE.md](ARCHITECTURE.md) §5 me aayein: REST aur ek contract, ek screen ek ya do calls, pagination, versioning, app ka version, Delivery app ka sync, polling, error ka roop aur status codes, idempotency, retries aur timeouts, apps ka raasta, `/wake`, aur SPA (15 niyam)?
+- **Kyun zaroori:** 11 apps ek hi backend se baat karte hain (D-010), India se Singapore ki der hai (R-012), aur Delivery app offline bhi chalta hai (D-042). Ek contract se validation, manifest aur typed client ek saath bante hain.
+- **Vikalp:**
+  - **(a)** Jaise hain waise maanein.
+  - **(b)** Badlav ke saath maanein (owner bataye).
+  - **(c)** Batch roko.
+- **Salah:** **(a)**.
+- **Trade-off:**
+  - (a) me WebSocket nahi, to live halat polling se (thodi der).
+  - (b) me owner ka samay.
+  - (c) me apps aur backend ka contract baaki.
+- **Owner ka jawab (2026-11-20):** **(a)**, API ke 15 niyam jaise hain. Record: [DECISIONS.md](DECISIONS.md) D-294.
+
+### Q-232. ARCHITECTURE batch 5: search aur caching maanein?
+
+- **Status:** `Tay`. Topic: B15 (technical), B9 (search).
+- **Sawal:** search aur cache ke niyam [ARCHITECTURE.md](ARCHITECTURE.md) §6 me aayein: catalog ke cluster pe Atlas Search, 3 indexes, kram, synonyms bina deploy, zero result ki ginti, CDN pe sirf public cache, personal jawab kabhi cache nahi, aur Redis me koi data cache nahi (11 niyam)?
+- **Kyun zaroori:** D-138 ke filters aur D-139 ka kram ek index se chahiye; Render ki mahine ki bandwidth chhoti hai (5 GB), to public browsing CDN se bachni chahiye.
+- **Vikalp:**
+  - **(a)** Jaise hain waise maanein.
+  - **(b)** Badlav ke saath maanein (owner bataye).
+  - **(c)** Batch roko.
+- **Salah:** **(a)**. ₹0, data bahar nahi (D-157 ki soch), aur synonyms bina deploy (D-037 ki soch).
+- **Trade-off:**
+  - (a) me laptop aur CI ke liye ek alag search adapter, aur CDN pe daam 30 second tak purana (sirf dikhne me, bill me nahi).
+  - (b) me owner ka samay.
+  - (c) me search aur bandwidth ka bachaav baaki.
+- **Owner ka jawab (2026-11-20):** **(a)**, search aur caching ke 11 niyam jaise hain. Record: [DECISIONS.md](DECISIONS.md) D-295.
+
+### Q-233. ARCHITECTURE batch 6: media aur files maanein?
+
+- **Status:** `Tay`. Topic: B15 (technical), B14 (security).
+- **Sawal:** files ke niyam [ARCHITECTURE.md](ARCHITECTURE.md) §7 me aayein: upload seedha provider pe, har file ka record media me, dobara encode provider pe, private file ka chhota URL, retention, ek file ek maalik, PDF aur export, aur cleanup (9 niyam)?
+- **Kyun zaroori:** media provider D-284 se tay hai; ab upload, private files, retention aur PDFs ka ek tareeka chahiye (SR-061, SR-062, D-191 se D-193, D-262).
+- **Vikalp:**
+  - **(a)** Jaise hain waise maanein.
+  - **(b)** Badlav ke saath maanein (owner bataye).
+  - **(c)** Batch roko.
+- **Salah:** **(a)**. Backend ke raaste file kabhi nahi, to memory (R-007) aur bandwidth dono bachte hain.
+- **Trade-off:**
+  - (a) me media service ka registry aur provider se milaan ka kaam.
+  - (b) me owner ka samay.
+  - (c) me uploads ka dhaancha baaki.
+- **Kanooni detail:** jaari document ka PDF tax archive ki "asli copy" maana jaaye ya nahi: Lawyer (ya CA) se nahi jaancha (CL-021).
+- **Owner ka jawab (2026-11-20):** **(a)**, media aur files ke 9 niyam jaise hain. Record: [DECISIONS.md](DECISIONS.md) D-296.
+
+### Q-234. ARCHITECTURE batch 7: observability maanein?
+
+- **Status:** `Tay`. Topic: B15 (technical), B14 (security).
+- **Sawal:** logs aur alerts ke niyam [ARCHITECTURE.md](ARCHITECTURE.md) §8 me aayein: structured logs aur request id, 180 din ke logs, kya kabhi log nahi, audit ke compressed chunks, errors, ops snapshot, health aur ready, alerts ke misaal thresholds, hafte ka dekhna, aur server ki ghadi (10 niyam)?
+- **Kyun zaroori:** free tier pe logs aur alerts seemit hain (R-024); CERT-In ke logs (CL-106) aur audit ke 2 saal (D-194) Atlas ke 0.5 GB me fit hone chahiye.
+- **Vikalp:**
+  - **(a)** Jaise hain waise maanein.
+  - **(b)** Badlav ke saath maanein (owner bataye).
+  - **(c)** Batch roko.
+- **Salah:** **(a)**.
+- **Trade-off:**
+  - (a) me audit ke purane din compressed chunks me (padhne me ek kadam zyada), aur metrics ke liye Grafana jaisa tool nahi, sirf snapshot.
+  - (b) me owner ka samay.
+  - (c) me logs aur alerts ka dhaancha baaki.
+- **Owner ka jawab (2026-11-20):** **(a)**, observability ke 10 niyam jaise hain. Record: [DECISIONS.md](DECISIONS.md) D-297.
+
+### Q-235. ARCHITECTURE batch 8: scale aur capacity maanein?
+
+- **Status:** `Tay`. Topic: B15 (technical).
+- **Sawal:** capacity ke niyam [ARCHITECTURE.md](ARCHITECTURE.md) §9 me aayein: ₹0 ki seema ki table, ek order ka data, memory budget, performance targets, aur 8 niyam (memory ke pehre, jagah ka naap, R1 se pehle 512 MB pe naap, hafte ka dekhna)?
+- **Kyun zaroori:** design target (D-283) aur ₹0 pe asli seema alag hain. 512 MB me saari services ek process me hain (D-049, R-007), aur Render ki bandwidth khatam ho to free services mahine ke ant tak band ho sakti hain.
+- **Vikalp:**
+  - **(a)** Jaise hain waise maanein.
+  - **(b)** Badlav ke saath maanein (owner bataye).
+  - **(c)** Batch roko.
+- **Salah:** **(a)**. Numbers saaf likhe hain aur naap ke badlenge; D-049 dobara kholne ka gate bhi saaf.
+- **Trade-off:**
+  - (a) me R1 se pehle naap ka kaam.
+  - (b) me owner ka samay.
+  - (c) me capacity ke number baaki.
+- **Owner ka jawab (2026-11-20):** **(a)**, scale aur capacity ke niyam jaise hain. Record: [DECISIONS.md](DECISIONS.md) D-298.
+
+### Q-236. Principal Software Architect ke 8 naye risks aur 5 risks me jod maanein?
+
+- **Status:** `Tay`. Topic: B15 (technical).
+- **Sawal:** architecture se nikle 8 naye risks ([RISKS.md](RISKS.md) R-028 se R-035) aur R-002, R-007, R-010, R-014, R-024 me jod RISKS me aayein?
+- **Kyun zaroori:** ₹0 ki seemaayein (Neon ke ghante, Render ki bandwidth aur CPU, Atlas ki jagah aur Search, cluster ka ruk jaana, media ke credits) asli khatre hain. Inka bachav ARCHITECTURE §2 se §9 me hai, par khatra RISKS me saaf dikhna chahiye.
+- **Naye risks (saar):**
+  1. **R-028:** finance (Neon) band ho to pack pe invoice nahi, yaani dispatch ruke.
+  2. **R-029:** Render ki 5 GB mahine ki bandwidth khatam ho aur payment method na ho to saari free services mahine ke ant tak band.
+  3. **R-030:** Render free ka kam CPU: bade pal me sab dheema, asli load ₹0 pe nahi.
+  4. **R-031:** Atlas ke 0.5 GB me audit sabse pehle bharta hai.
+  5. **R-032:** Atlas Search ke free cluster ki seemaayein jaanchi nahi.
+  6. **R-033:** Atlas free cluster lambe samay bina connection ke ruk jaata hai.
+  7. **R-034:** install hue apps ka purana version (Delivery ka offline data) naye API se na mile.
+  8. **R-035:** media provider ke free credits khatam.
+- **Vikalp:**
+  - **(a)** Sab risks bachav ke saath: R-030 `Maana` (₹0 ki seema), baaki `Khula`; aur 5 risks me jod.
+  - **(b)** Sab `Khula`, koi `Maana` nahi.
+  - **(c)** Risks roko.
+- **Salah:** **(a)**. Kam CPU ₹0 ka hi hissa hai (D-028 ki tarah jaan ke maana); baaki ka bachav likha hai par khatra bacha hai.
+- **Trade-off:**
+  - (a) me R-030 pe aage kaam nahi, sirf seema saaf likhi.
+  - (b) me R-030 hamesha khula dikhta, jabki ₹0 pe uska hal nahi.
+  - (c) me ₹0 ke khatre chhupe rehte.
+- **Owner ka jawab (2026-11-20):** **(a)**, 8 naye risks (R-030 `Maana`, baaki `Khula`) aur 5 risks me jod. Record: [DECISIONS.md](DECISIONS.md) D-299.
+
+### Q-237. Area band karne pe commerce ki copy ki der ka kya karein?
+
+- **Status:** `Tay`. Topic: B1 (logistics), B15 (technical).
+- **Sawal:** serviceability ki jaanch order ke transaction me commerce ki apni copy pe hoti hai (D-016 niyam 9, D-291), jo logistics ke badlav se kuch second peeche reh sakti hai. Area band karte hi aaye ek-do orders ka kya ho?
+- **Kyun zaroori:** area band karne ke turant baad copy ki der me order aa sakta hai, jise deliver nahi kiya ja sakta.
+- **Vikalp:**
+  - **(a) Do kadam aur pakki rok:** area band karne ka kram: pehle checkout pe us area ki rok ka event, phir band. Parcel banate waqt logistics band area wale order ko rokta hai, aur wo order cancel aur refund (D-111).
+  - **(b) Band karte waqt commerce ko sync call:** copy turant badle, par sync calls ki list (ARCHITECTURE §2.3) me ek aur call.
+  - **(c) Kuch nahi:** aise orders staff haath se cancel kare.
+- **Salah:** **(a)**. Copy ki der ka asar sirf ek-do order, aur wo bhi parcel se pehle pakda jaata hai; sync list chhoti rehti hai.
+- **Trade-off:**
+  - (a) me area band karne ke kram me ek kadam zyada, aur kabhi ek order ka cancel aur refund.
+  - (b) me sync calls ka graph bada.
+  - (c) me order chhoot sakta hai aur customer ko der se pata chalta.
+- **Owner ka jawab (2026-11-20):** **(a)**, pehle checkout pe rok ka event, phir band; parcel banate waqt logistics band area ka order roke, cancel aur refund. Record: [DECISIONS.md](DECISIONS.md) D-300.
+
+### Q-238. Bina network ke darwaze pe delivery code ka kya ho?
+
+- **Status:** `Tay`. Topic: B1 (delivery), B14 (security).
+- **Sawal:** delivery code ka milaan sirf online hota hai (code partner ke phone pe kabhi nahi, SR-054; D-294), par Delivery app offline bhi chalta hai (D-042). Darwaze pe network na ho to kya ho?
+- **Kyun zaroori:** D-072 me photo aur location ka raasta "code na mile" ke liye hai, "network nahi" ke liye nahi. Bina niyam ke partner photo wala raasta har baar le sakta hai, aur code ka saboot kamzor ho jaata hai.
+- **Vikalp:**
+  - **(a) Code wali delivery sirf online:** offline me list, scans aur photo line me rehte hain; network na ho to partner thoda intezaar kare ya Hub Manager se baat kare.
+  - **(b) Network na ho to photo aur location ka raasta:** D-072 ke code na milne jaisa.
+  - **(c) Code ka hash partner ke phone pe, offline jaanch:** SR-054 ke khilaaf.
+- **Salah:** **(a)**. Code ka saboot pakka rehta hai (D-072, D-068), aur SR-054 nahi toot-ta.
+- **Trade-off:**
+  - (a) me kamzor network wale ilaake me delivery me der.
+  - (b) me "network nahi" bol ke code se bachna aasaan, aur daawe badhte.
+  - (c) me code chori ho sakta hai.
+- **Owner ka jawab (2026-11-20):** **(a)**, code wali delivery sirf online; offline me list, scans aur photo line me; network na ho to partner intezaar kare ya Hub Manager se baat kare. Record: [DECISIONS.md](DECISIONS.md) D-301.
+
+### Q-239. Order confirmation ka email emails ki kaunsi line me?
+
+- **Status:** `Tay`. Topic: B11 (notifications).
+- **Sawal:** din ki seema ke paas emails ki line hai: pehle OTP, phir paise ke emails, phir baaki (D-126 niyam 4, D-142). Order confirmation (jisme delivery code hai) kis line me ho?
+- **Kyun zaroori:** line tay nahi hai. Chhat paar ho to confirmation agle din khisak sakta hai.
+- **Vikalp:**
+  - **(a) Paise ki line:** confirmation order ka record hai.
+  - **(b) Baaki ki line:** code customer app me bhi hai (D-072).
+  - **(c) OTP ki line:** sabse pakka, par OTP ki pakki jagah kam.
+- **Salah:** **(a)**. Confirmation order ka record hai aur usme delivery code hai; OTP ki pakki jagah nahi ghat-ti.
+- **Trade-off:**
+  - (a) me bhaari din pe invoice aur refund ke emails ke saath jagah baant-ni.
+  - (b) me bhaari din pe confirmation agle din tak, halaanki delivery nahi rukti (code app me).
+  - (c) me OTP ruk sakte, jo sign-in rokta hai.
+- **Owner ka jawab (2026-11-20):** **(a)**, order confirmation paise ki line me. Record: [DECISIONS.md](DECISIONS.md) D-302.
+
+### Q-240. Media provider ki files ka backup ho ya nahi?
+
+- **Status:** `Tay`. Topic: B15 (technical), B13 (compliance).
+- **Sawal:** D-013 ka backup saare databases ka hai, par media provider (D-284) ki files databases me nahi. Unka backup ho ya nahi?
+- **Kyun zaroori:** provider pe file kho jaaye to product image, review photo ya daawe ka saboot gaya. Free tier pe har file ki doosri copy ka matlab dugni jagah aur bandwidth.
+- **Vikalp:**
+  - **(a) Backup nahi:** product images seller se dobara li jaayein; daawe aur saboot ki files apne samay pe waise bhi mitti hain. OPERATIONS me ye ek line (DevOps / SRE ke saath).
+  - **(b) Hafte ka backup owner ke laptop pe:** Render aur provider ki bandwidth, aur laptop pe personal data (D-196, R-023).
+  - **(c) Do providers me copy:** dugna kaam, do processors.
+- **Salah:** **(a)**. ₹0 pe sabse saral; product images seller ke paas hain; aur laptop pe personal data ki copy nahi badhti.
+- **Trade-off:**
+  - (a) me provider pe file kho jaaye to daawe ya kanooni rok (D-262) wali photo ka saboot nahi bachta.
+  - (b) me bandwidth (R-029) aur laptop ki suraksha ka bojh.
+  - (c) me dugna kaam aur ek aur processor.
+- **Kanooni detail:** kanooni rok wali files (D-262) ki ek hi copy kaafi hai ya nahi: Lawyer se nahi jaancha.
+- **Owner ka jawab (2026-11-20):** **(a)**, media provider ki files ka backup nahi; OPERATIONS me ek line. Record: [DECISIONS.md](DECISIONS.md) D-303.
+
 ## Change log
 
 | Version | Date       | Badlav                                                                                                                                                                                    |
@@ -5338,4 +5560,6 @@ Claude ka kaam: owner ka faisla nahi chahiye, sirf saboot. Nateeja saboot ke saa
 | v1.4.1  | 2026-11-20 | Q-212 se Q-217 (CA (AI) ki report ke sawal aur jod) tay; D-275 se D-280.                                                                                                                  |
 | v1.4.2  | 2026-11-20 | Q-218 (COMPLIANCE pe CA (AI) ki raay) tay; D-281.                                                                                                                                         |
 | v1.4.3  | 2026-11-20 | Q-219 (CA ke ledger aur statements ke niyam kahan) tay; D-282.                                                                                                                            |
-| v1.5.1  | 2026-11-20 | Q-220 se Q-227 (Principal Software Architect ke 8 sawal; G22 media aur logs) tay; D-283 se D-290; §2 me media aur email provider ki jaanch. |
+| v1.5.1  | 2026-11-20 | Q-220 se Q-227 (Principal Software Architect ke 8 sawal; G22 media aur logs) tay; D-283 se D-290; §2 me media aur email provider ki jaanch.                                               |
+| v1.6.1  | 2026-11-20 | Q-228 se Q-235 (ARCHITECTURE ki 8 batches) tay; D-291 se D-298; §2 me Atlas, Render aur Atlas Search ki 3 jaanch.                                                                         |
+| v1.6.2  | 2026-11-20 | Q-236 se Q-240 (Architect ke risks aur tay faislon pe dhyaan ke points) tay; D-299 se D-303.                                                                                              |

@@ -1,6 +1,6 @@
 # DECISIONS: Beautinique
 
-> **Status:** v1.12.1 (2026-11-20). Har faisla ek jagah. Sirf wahi "Tay" jo owner ne khud kaha; Claude ki salah faisla nahi. Cheezein ek-ek karke judti hain.
+> **Status:** v1.13.2 (2026-11-20). Har faisla ek jagah. Sirf wahi "Tay" jo owner ne khud kaha; Claude ki salah faisla nahi. Cheezein ek-ek karke judti hain.
 
 ## 0. Kaise likhein
 
@@ -297,14 +297,27 @@
 | D-280 | CA (AI) ke 9 jod tay faislon me: delivery fee, sellers aur partners ka TDS, replacement, records ka samay, books ka backup, chargeback, settlement khaata, doosre state ka stock.                                                                                                       | Business     | 2026-11-20 |
 | D-281 | COMPLIANCE pe CA (AI) ke nishaan (8 jaancha, 22 aadha, 2 nahi), 20 rows me badlav, nayi rows CL-129 se CL-136, Nazar aur documents ke tax hisse.                                                                                                                                        | Business     | 2026-11-20 |
 | D-282 | CA (AI) ke finance ke accounting niyam (ledger, documents, numbering, rounding, statements, milaan) ARCHITECTURE §1 me.                                                                                                                                                                 | Architecture | 2026-11-20 |
-| D-283 | Design ka scale target madhyam: 1 lakh customers, 1,000 orders/din (sale ke din 5 guna), 500 sellers, 50,000 variants, 100 staff, 50 delivery partners; sirf code aur tests ke liye. | Architecture | 2026-11-20 |
-| D-284 | Photos, dastavez aur video managed media service pe (misaal Cloudinary free), shart ke saath (private URL, EXIF, rok); shart fail ho to public images wahan aur private files object storage pe. | Architecture | 2026-11-20 |
-| D-285 | 180 din ke request logs alag chhoti logs service me, apne Atlas cluster me gzip chunks. | Architecture | 2026-11-20 |
-| D-286 | Errors ka apna chhota intezaam: logs me fingerprint, apps ki errors rate-limited route pe, Master ke ops inbox me khabar aur roz ka saar; bahar ki error service nahi. | Architecture | 2026-11-20 |
-| D-287 | Emails Brevo ke free plan se, HTTPS API pe. | Architecture | 2026-11-20 |
-| D-288 | Payment, return aur refund ke events finance me har 15 minute ke batch se (sirf jab pending); pack pe invoice turant. | Architecture | 2026-11-20 |
-| D-289 | Invoice ke email me sirf saar (number, tareekh, seller aur GSTIN, rakam) aur app me download ki baat; PDF aur link nahi. | Architecture | 2026-11-20 |
-| D-290 | R1 me saare apps SPA; server-side rendering nahi, asli business ke waqt dobara. | Architecture | 2026-11-20 |
+| D-283 | Design ka scale target madhyam: 1 lakh customers, 1,000 orders/din (sale ke din 5 guna), 500 sellers, 50,000 variants, 100 staff, 50 delivery partners; sirf code aur tests ke liye.                                                                                                    | Architecture | 2026-11-20 |
+| D-284 | Photos, dastavez aur video managed media service pe (misaal Cloudinary free), shart ke saath (private URL, EXIF, rok); shart fail ho to public images wahan aur private files object storage pe.                                                                                        | Architecture | 2026-11-20 |
+| D-285 | 180 din ke request logs alag chhoti logs service me, apne Atlas cluster me gzip chunks.                                                                                                                                                                                                 | Architecture | 2026-11-20 |
+| D-286 | Errors ka apna chhota intezaam: logs me fingerprint, apps ki errors rate-limited route pe, Master ke ops inbox me khabar aur roz ka saar; bahar ki error service nahi.                                                                                                                  | Architecture | 2026-11-20 |
+| D-287 | Emails Brevo ke free plan se, HTTPS API pe.                                                                                                                                                                                                                                             | Architecture | 2026-11-20 |
+| D-288 | Payment, return aur refund ke events finance me har 15 minute ke batch se (sirf jab pending); pack pe invoice turant.                                                                                                                                                                   | Architecture | 2026-11-20 |
+| D-289 | Invoice ke email me sirf saar (number, tareekh, seller aur GSTIN, rakam) aur app me download ki baat; PDF aur link nahi.                                                                                                                                                                | Architecture | 2026-11-20 |
+| D-290 | R1 me saare apps SPA; server-side rendering nahi, asli business ke waqt dobara.                                                                                                                                                                                                         | Architecture | 2026-11-20 |
+| D-291 | ARCHITECTURE batch 1: gateway aur 11 data wali services, har data ka ek maalik, copy sirf events se, turant jawab wale kaam sirf tay sync list se (ARCHITECTURE §2).                                                                                                                    | Architecture | 2026-11-20 |
+| D-292 | ARCHITECTURE batch 2: outbox se seedhi delivery, inbox se dedupe, aggregate ka kram, retry aur dead letter, envelope, outbox se audit (ARCHITECTURE §3).                                                                                                                                | Architecture | 2026-11-20 |
+| D-293 | ARCHITECTURE batch 3: samay wale kaam DB me, ticker aur lease, BullMQ sirf kaam chalane ko, finance ka batch, turant wale kaam job nahi, R1 ki jobs (ARCHITECTURE §4).                                                                                                                  | Architecture | 2026-11-20 |
+| D-294 | ARCHITECTURE batch 4: REST aur ek contract, versioning, app ka version, Delivery sync, polling, error ka roop, idempotency, retries, `/wake` (ARCHITECTURE §5).                                                                                                                         | Architecture | 2026-11-20 |
+| D-295 | ARCHITECTURE batch 5: Atlas Search catalog ke cluster pe, kram aur synonyms, CDN pe sirf public cache, personal jawab cache nahi, Redis me data nahi (ARCHITECTURE §6).                                                                                                                 | Architecture | 2026-11-20 |
+| D-296 | ARCHITECTURE batch 6: upload seedha provider pe, media me har file ka record, private file ka chhota URL, retention, PDF aur export (ARCHITECTURE §7).                                                                                                                                  | Architecture | 2026-11-20 |
+| D-297 | ARCHITECTURE batch 7: structured logs, 180 din ke logs, audit ke compressed chunks, ops snapshot, health aur ready, alerts (ARCHITECTURE §8).                                                                                                                                           | Architecture | 2026-11-20 |
+| D-298 | ARCHITECTURE batch 8: ₹0 ki seema, ek order ka data, memory budget, performance targets, memory ke pehre aur R1 se pehle 512 MB pe naap (ARCHITECTURE §9).                                                                                                                              | Architecture | 2026-11-20 |
+| D-299 | Architect ke 8 naye risks R-028 se R-035 (R-030 Maana, baaki bachav ke saath khula); R-002, R-007, R-010, R-014, R-024 me jod.                                                                                                                                                          | Architecture | 2026-11-20 |
+| D-300 | Area band karne ka kram: pehle checkout pe rok ka event, phir band; parcel banate waqt logistics band area ka order roke, cancel aur refund.                                                                                                                                            | Architecture | 2026-11-20 |
+| D-301 | Code wali delivery sirf online; offline me list, scans aur photo line me; network na ho to partner intezaar kare ya Hub Manager se baat kare.                                                                                                                                           | Business     | 2026-11-20 |
+| D-302 | Order confirmation ka email paise ki line me (D-126 niyam 4).                                                                                                                                                                                                                           | Business     | 2026-11-20 |
+| D-303 | Media provider ki files ka backup nahi; product images seller se dobara; OPERATIONS me ek line.                                                                                                                                                                                         | Architecture | 2026-11-20 |
 
 ## 2. Record
 
@@ -414,7 +427,7 @@
 - **Kab dobara khulega:** Atlas free tier ka niyam (ek project me ek free cluster) ya ek 512 MB process 9 services na sambhal sake (Claude; dono ki jaanch baaki).
 - **Kisne, kab:** owner, 2026-11-17; seema Claude ki salah, owner ne maani. **Nishaan:** Salah nahi maani (services), Salah maani (seema).
 - **Note (Claude):** alag cluster aur alag DB user se data ki security abhi se milti hai; process ki security tab milegi jab services alag servers pe chalein. Design aisa rahe ki wo kadam baad me bina rewrite ke ho.
-- **Asar (Claude):** naya service banane wala generator har service me uska apna MongoDB URI jode, aur finance ke liye PostgreSQL ka option de (D-001).
+- **Asar (Claude):** naya service banane wala generator har service me uska apna MongoDB URI jode, aur finance ke liye PostgreSQL ka option de (D-001). Jod (2026-11-20, D-291): "data sirf events se" ka matlab: data ki copy sirf events se aur doosri service ka database koi nahi padhta; jo kaam usi pal jawab maangte hain wo sirf [ARCHITECTURE.md](ARCHITECTURE.md) §2.3 ki tay sync list se. Services ki list §2.4 me (media aur logs judi).
 
 ### D-012. Asli users maan ke design
 
@@ -1058,7 +1071,7 @@
 - **Chhode vikalp:** partner ka "delivered" hi sach (faisla andaaze pe); customer hamesha sahi (daawa aate hi refund; jhooth bol ke refund aasaan).
 - **Kab dobara khulega:** owner khud khole.
 - **Kisne, kab:** owner, 2026-11-18. **Nishaan:** Salah maani.
-- **Asar (Claude):** Delivery app me code daalne, photo aur location ka kadam (R1 ka delivery saboot, [PROJECT_PLAN.md](PROJECT_PLAN.md) §1). Photo aur location personal data hain: kitne din rakhein aur kaun dekhe, Security Architect ke saath (B14). Daawe ka samay D-148 me. Kanooni detail jaanchi nahi (R-004): photo aur location jaise personal data rakhne ke niyam.
+- **Asar (Claude):** Delivery app me code daalne, photo aur location ka kadam (R1 ka delivery saboot, [PROJECT_PLAN.md](PROJECT_PLAN.md) §1). Photo aur location personal data hain: kitne din rakhein aur kaun dekhe, Security Architect ke saath (B14). Daawe ka samay D-148 me. Kanooni detail jaanchi nahi (R-004): photo aur location jaise personal data rakhne ke niyam. Jod (2026-11-20, D-301): "network nahi" is faisle ka "code na mile" wala raasta nahi; code wali delivery sirf online.
 - **Jod (owner, 2026-11-18, D-077):** order alag parcels me jaaye to delivery code har parcel ka apna hota hai; tab niyam 1 ka "order ka code" parcel ka code hai.
 - **Jod (owner, 2026-11-18, D-126):** niyam 1 ka email order confirmation ka email hi hai; delivery code usi me jaata hai.
 - **Jod (owner, 2026-11-19, D-148):** niyam 3 ka samay: code se delivered pe 48 ghante, sirf photo aur location wali delivery pe misaal 7 din, dono "delivered" scan se.
@@ -1770,7 +1783,7 @@
 - **Chhode vikalp:** har haalat pe email (bhaari din pe emails ruk sakte); customer khud chune (settings ka kaam, aur zyada emails ka jokhim).
 - **Kab dobara khulega:** emails ki seema badle, ya owner khud khole.
 - **Kisne, kab:** owner, 2026-11-18. **Nishaan:** Salah maani.
-- **Asar (Claude):** D-072 aur D-108 me jod. Browser push band rakhne wale customer ko kam khabar milti hai. Push band wale customer ko D-090 ke sawal aur recall (D-129) ka email D-131 me. Kai parcels wale order (D-077, D-072 ka jod) me har parcel ka code confirmation email me tabhi jaa sakta hai jab parcels order ke waqt tay hon; ye order ke design me.
+- **Asar (Claude):** D-072 aur D-108 me jod. Browser push band rakhne wale customer ko kam khabar milti hai. Push band wale customer ko D-090 ke sawal aur recall (D-129) ka email D-131 me. Kai parcels wale order (D-077, D-072 ka jod) me har parcel ka code confirmation email me tabhi jaa sakta hai jab parcels order ke waqt tay hon; ye order ke design me. Jod (2026-11-20, D-302): order confirmation niyam 4 ki paise wali line me.
 - **Jod (owner, 2026-11-18, D-131):** niyam 3 me: push band ho to jawab maangne wali khabar (jaise D-090) ka email, aur recall ki khabar (D-129) har customer ko email se bhi; dono emails ki line me OTP ke baad, paise ke emails ke saath.
 - **Jod (owner, 2026-11-19, D-142):** niyam 4 ki har line ki apni din ki chhat; OTP ke liye misaal 60 emails hamesha pakke.
 
@@ -3661,6 +3674,121 @@
 - **Kisne, kab:** owner, 2026-11-20. **Nishaan:** Salah maani.
 - **Asar (Claude):** D-058 ka server-side hisse ke region wala sawal R1 me band (D-058 me jod). Search engines me kam dikhna aur pehla page thoda der se.
 
+### D-291. ARCHITECTURE batch 1: services aur data ki seema
+
+- **Faisla:** services aur data ki seema [ARCHITECTURE.md](ARCHITECTURE.md) §2 me: gateway (bina database) aur 11 data wali services (identity, notify, payments, catalog, commerce, logistics, finance, support, audit, media, logs), har data ka ek maalik (§2.2), sync calls ki tay list (§2.3) aur 11 niyam (§2.4). Numbers misaal hain aur settings me.
+- **Wajah:** Claude ki salah, owner ne maani: har data ka ek maalik; copy sirf events se, aur jo kaam usi pal jawab maangte hain wo sirf ek chhoti tay list se; stock aur order ek transaction me.
+- **Chhode vikalp:** badlav ke saath maanna (owner ne koi badlav nahi diya); batch rokna (Database Architect bina seema ke).
+- **Kab dobara khulega:** module design ya Database Architect ka data model, ya owner khud khole.
+- **Kisne, kab:** owner, 2026-11-20. **Nishaan:** Salah maani.
+- **Asar (Claude):** D-011 ka "data sirf events se" ab saaf (D-011 me jod). Commerce me logistics aur catalog ki copy kuch second peeche reh sakti hai; area band karne ke turant baad ka asar operations ke kram me. Services ka asli data model Database Architect ke saath.
+
+### D-292. ARCHITECTURE batch 2: events aur messaging
+
+- **Faisla:** events ke 11 niyam [ARCHITECTURE.md](ARCHITECTURE.md) §3 me: outbox usi transaction me, har producer ka dispatcher har subscriber ko seedha deliver kare, inbox (`processed_events`) se dedupe, ek aggregate ke events kram se, retry aur dead letter, envelope, event me secrets kabhi nahi, versioning, aur staff ke kaam ka audit outbox se.
+- **Wajah:** Claude ki salah, owner ne maani: event ka sach outbox me, to Redis ke restart se event nahi khota (R-010), Redis ki chhoti memory events se nahi bharti, aur ek order ke events kram se pahunchte hain.
+- **Chhode vikalp:** outbox se BullMQ queue (ek aur hop, kram nahi); MongoDB change streams (finance pe nahi chalte, free cluster pe seemit); process ki memory ka event emitter (crash pe event gayab); bahar ka message broker (naya processor).
+- **Kab dobara khulega:** owner khud khole.
+- **Kisne, kab:** owner, 2026-11-20. **Nishaan:** Salah maani.
+
+### D-293. ARCHITECTURE batch 3: background jobs aur samay
+
+- **Faisla:** jobs ke 9 niyam aur R1 ki jobs ki table [ARCHITECTURE.md](ARCHITECTURE.md) §4 me: har samay wala kaam maalik service ke DB me due date ke saath, ticker aur lease, BullMQ sirf kaam chalane ke liye, queues ki seema, IST ka din, chhoote din ka catch-up, finance ka 15 minute ka batch (D-288), aur chhote kanooni ya suraksha samay wale kaam usi request me.
+- **Wajah:** Claude ki salah, owner ne maani: soya server (R-002) aur khaali Redis (R-010) ke baad bhi kaam late hota hai, khota nahi; aur D-248 aur D-251 ke chhote samay soye server pe job ke bharose nahi rehte.
+- **Chhode vikalp:** BullMQ ke delayed jobs aur schedulers ko sach maanna (Redis restart pe gayab); alag cron service (D-056: doosri web service nahi); GitHub Actions se business jobs (D-028 me sirf jagana).
+- **Kab dobara khulega:** owner khud khole.
+- **Kisne, kab:** owner, 2026-11-20. **Nishaan:** Salah maani.
+- **Asar (Claude):** Atlas ka free cluster lambe samay bina connection ke ruk sakta hai, aur Render Key Value ki seema: dono jaanch [OPEN_QUESTIONS.md](OPEN_QUESTIONS.md) §2 me.
+
+### D-294. ARCHITECTURE batch 4: API aur apps se baat
+
+- **Faisla:** API ke 15 niyam [ARCHITECTURE.md](ARCHITECTURE.md) §5 me: REST aur ek contract (validation, manifest, typed client), ek screen ek ya do calls, cursor pagination, v1 me sirf jodna, app ka version aur 426, Delivery app ka batch sync (delivery code ka milaan sirf online), polling aur push (WebSocket nahi), error ka ek roop aur status codes, idempotency ke routes, retries aur timeouts, apps ka raasta, `/wake`, aur R1 me SPA (D-290).
+- **Wajah:** Claude ki salah, owner ne maani: 11 apps ek backend se ek hi contract pe; India se Singapore ki der (R-012) me kam calls; khula connection server ko sone nahi deta (R-008).
+- **Chhode vikalp:** GraphQL (koi tay zaroorat nahi, permissions har field pe mehnge); tRPC (REST manifest aur public cache ke saath fit kam); WebSocket ya SSE (R-008); RFC 9457 problem details (apna domain chahiye, D-028).
+- **Kab dobara khulega:** owner khud khole.
+- **Kisne, kab:** owner, 2026-11-20. **Nishaan:** Salah maani.
+- **Asar (Claude):** `/wake` seedha Render pe jaata hai, to SR-005 ki CSP me iska apvaad chahiye: Security Architect ke doosre run me. Delivery code ka milaan sirf online hai, to bina network ke darwaze pe kya ho, ye UX aur Security ke saath.
+
+### D-295. ARCHITECTURE batch 5: search aur caching
+
+- **Faisla:** search aur cache ke 11 niyam [ARCHITECTURE.md](ARCHITECTURE.md) §6 me: catalog ke cluster pe Atlas Search ek `search_documents` read model pe, free cluster pe 3 indexes, D-139 ka kram, synonyms bina deploy, zero result ki ginti bina user id, laptop aur CI ke liye text index ka adapter, CDN pe sirf "public cacheable" routes, personal jawab `private, no-store`, polling pe ETag, aur Redis me koi data cache nahi.
+- **Wajah:** Claude ki salah, owner ne maani: D-138 ke filters aur D-139 ka kram ek index se, ₹0 aur data bahar nahi (D-157 ki soch); Render ki mahine ki bandwidth aur kam CPU public browsing CDN se bachte hain.
+- **Chhode vikalp:** sirf MongoDB text index (na fuzzy, na synonyms ki setting); process ki memory me search index (R-007); bahar ki search service (naya processor, data bahar); Redis me catalog ka cache (chhoti memory, restart pe khaali).
+- **Kab dobara khulega:** owner khud khole.
+- **Kisne, kab:** owner, 2026-11-20. **Nishaan:** Salah maani.
+- **Asar (Claude):** free cluster pe fuzzy, autocomplete aur synonyms ki seema, aur Vercel ka cache vyavhaar: jaanch [OPEN_QUESTIONS.md](OPEN_QUESTIONS.md) §2 me.
+
+### D-296. ARCHITECTURE batch 6: media aur files
+
+- **Faisla:** files ke 9 niyam [ARCHITECTURE.md](ARCHITECTURE.md) §7 me: upload maalik service ki ijazat se seedha provider pe (D-284), har file ka record media me, dobara encode aur EXIF hatana provider pe, private file ka chhota URL, har maqsad ka retention aur D-262 ki band jagah, ek file ek maalik, PDF ek halki library se (headless browser nahi), export stream se, aur roz aur hafte ka cleanup.
+- **Wajah:** Claude ki salah, owner ne maani: backend ke raaste file kabhi nahi, to memory (R-007) aur bandwidth dono bachte hain; SR-061 aur SR-062 ek jagah poore.
+- **Chhode vikalp:** files MongoDB me (har cluster 0.5 GB, R-006); files backend ke raaste (memory, bandwidth); har service ki apni registry (provider ki chaabi har jagah, SR-071).
+- **Kab dobara khulega:** D-284 ki shart ki jaanch ka nateeja, ya owner khud khole.
+- **Kisne, kab:** owner, 2026-11-20. **Nishaan:** Salah maani.
+- **Asar (Claude):** jaari document ka PDF tax archive ki "asli copy" maana jaaye ya nahi: Lawyer (ya CA) se nahi jaancha (CL-021). Media provider ki files ka backup nahi: OPERATIONS me DevOps / SRE ke saath.
+
+### D-297. ARCHITECTURE batch 7: observability
+
+- **Faisla:** logs aur alerts ke 10 niyam [ARCHITECTURE.md](ARCHITECTURE.md) §8 me: structured JSON logs aur request id, logs service me 180 din (2027 se 1 saal) ke gzip chunks, kya kabhi log nahi, audit ke purane din compressed chunks me usi chain ke saath, errors ka apna intezaam (D-286), ops snapshot, `/health` aur `/ready`, alerts ke misaal thresholds, hafte ka haath se dekhna, aur server ki ghadi.
+- **Wajah:** Claude ki salah, owner ne maani: free tier pe logs aur alerts seemit (R-024); CERT-In ke logs (CL-106) aur audit ke 2 saal (D-194) Atlas ke 0.5 GB me tabhi fit hote hain jab dabaaye jaayein.
+- **Chhode vikalp:** Prometheus, Grafana ya tracing backend (₹0 pe koi host nahi, D-056); sampled request logs (CERT-In saare logs maangta hai, CL-106); Render ke apne logs pe bharosa (umar pakki nahi).
+- **Kab dobara khulega:** owner khud khole.
+- **Kisne, kab:** owner, 2026-11-20. **Nishaan:** Salah maani.
+- **Asar (Claude):** alerts ka asli chalna aur thresholds DevOps / SRE ke saath (OPERATIONS).
+
+### D-298. ARCHITECTURE batch 8: scale aur capacity
+
+- **Faisla:** capacity ke niyam [ARCHITECTURE.md](ARCHITECTURE.md) §9 me: ₹0 pe chalne ki seema ki table, ek order ka data, memory budget (aam lagbhag 200 MB, sabse zyada lagbhag 345 MB), performance targets (D-053), aur 8 niyam: D-283 ka design target, memory ke pehre (400 MB pe alert, 450 MB pe heavy kaam ruke), har cluster ki jagah ka naap, R1 se pehle Docker me 512 MB pe naap, aur hafte ka bandwidth, ghante aur CU-ghante ka dekhna.
+- **Wajah:** Claude ki salah, owner ne maani: design target aur ₹0 ki asli seema alag aur saaf likhi; D-049 dobara kholne ka gate bhi saaf.
+- **Chhode vikalp:** badlav ke saath maanna (owner ne koi badlav nahi diya); batch rokna (capacity ke number baaki).
+- **Kab dobara khulega:** asli naap ke baad numbers (settings se), aam RSS 400 MB se upar ya hafte me ek se zyada OOM restart (D-049), ya owner khud khole.
+- **Kisne, kab:** owner, 2026-11-20. **Nishaan:** Salah maani.
+- **Asar (Claude):** Render ki mahine ki 5 GB bandwidth khatam ho aur payment method na ho to free services mahine ke ant tak band: ye risk R-029 (D-299). Render free instance ka CPU jaanchna baaki ([OPEN_QUESTIONS.md](OPEN_QUESTIONS.md) §2).
+
+### D-299. Architect ke risks
+
+- **Faisla:** 8 naye risks [RISKS.md](RISKS.md) me: R-028 (Neon band to pack aur dispatch ruke), R-029 (Render ki 5 GB bandwidth), R-030 (kam CPU), R-031 (Atlas ke 0.5 GB me audit pehle bhare), R-032 (Atlas Search ki free seema), R-033 (Atlas cluster ka ruk jaana), R-034 (apps ka purana version), R-035 (media ke free credits). R-030 `Maana`, baaki bachav ke saath `Khula`. R-002, R-007, R-010, R-014 aur R-024 me jod.
+- **Wajah:** Claude ki salah, owner ne maani: kam CPU ₹0 ka hi hissa hai (D-028 ki tarah jaan ke maana); baaki ka bachav ARCHITECTURE §2 se §9 me likha hai, par khatra bacha hai.
+- **Chhode vikalp:** sab `Khula` (R-030 hamesha khula dikhta, jabki ₹0 pe hal nahi); risks rokna (₹0 ke khatre chhupe rehte).
+- **Kab dobara khulega:** asli naap, provider ki seema badle, ya owner khud khole.
+- **Kisne, kab:** owner, 2026-11-20. **Nishaan:** Salah maani.
+
+### D-300. Area band karne ka kram
+
+- **Faisla:** area band karne ka kram do kadam me: pehle checkout pe us area ki rok ka event, phir area band. Parcel banate waqt logistics band area wale order ko rokta hai, aur wo order cancel aur refund (D-111).
+- **Wajah:** Claude ki salah, owner ne maani: serviceability ki jaanch commerce ki copy pe hoti hai (D-016 niyam 9, D-291), jo kuch second peeche reh sakti hai; is kram se der ka asar sirf ek-do order, aur wo bhi parcel se pehle pakda jaata hai. Sync calls ki list chhoti rehti hai.
+- **Chhode vikalp:** band karte waqt commerce ko sync call (sync graph bada); kuch nahi, staff haath se cancel kare (order chhoot sakta).
+- **Kab dobara khulega:** owner khud khole.
+- **Kisne, kab:** owner, 2026-11-20. **Nishaan:** Salah maani.
+- **Asar (Claude):** area band karne ka flow operations me (D-015, D-037); customer ko cancel ki khabar D-111 ke raaste se.
+
+### D-301. Bina network ke delivery code
+
+- **Faisla:** code wali delivery sirf online hoti hai: code ka milaan server pe (SR-054, D-294). Offline me delivery ki list, scans aur photo line me rehte hain. Darwaze pe network na ho to partner thoda intezaar kare ya Hub Manager se baat kare; "network nahi" D-072 ka "code na mile" wala raasta nahi hai.
+- **Wajah:** Claude ki salah, owner ne maani: code ka saboot pakka rehta hai (D-072, D-068), aur SR-054 nahi toot-ta.
+- **Chhode vikalp:** network na ho to photo aur location ka raasta ("network nahi" bol ke code se bachna aasaan); code ka hash partner ke phone pe (SR-054 ke khilaaf, code chori ho sakta).
+- **Kab dobara khulega:** kamzor network se deliveries me der ka asli naap, ya owner khud khole.
+- **Kisne, kab:** owner, 2026-11-20. **Nishaan:** Salah maani.
+- **Asar (Claude):** Delivery app me "network nahi" ki saaf screen aur Hub Manager se baat ka raasta (UX ke saath); D-072 me jod.
+
+### D-302. Order confirmation ki email line
+
+- **Faisla:** din ki seema ke paas emails ki line (D-126 niyam 4) me order confirmation (jisme delivery code hai) paise ki line me jaata hai.
+- **Wajah:** Claude ki salah, owner ne maani: confirmation order ka record hai aur usme delivery code hai; OTP ki pakki jagah nahi ghat-ti.
+- **Chhode vikalp:** baaki ki line (bhaari din pe confirmation agle din tak); OTP ki line (OTP ruk sakte, sign-in rukta).
+- **Kab dobara khulega:** emails ki seema badle, ya owner khud khole.
+- **Kisne, kab:** owner, 2026-11-20. **Nishaan:** Salah maani.
+- **Asar (Claude):** D-126 me jod. Bhaari din pe paise ki line me invoice aur refund ke emails ke saath jagah baant-ni (D-142).
+
+### D-303. Media provider ki files ka backup
+
+- **Faisla:** media provider (D-284) ki files ka backup nahi. Product images seller se dobara li jaati hain; daawe aur saboot ki files apne samay pe waise bhi mitti hain. Ye baat OPERATIONS me ek line me (DevOps / SRE ke saath). Databases ka backup D-013 ke hisaab se waise hi.
+- **Wajah:** Claude ki salah, owner ne maani: ₹0 pe sabse saral; product images seller ke paas hain; aur owner ke laptop pe personal data ki copy nahi badhti (D-196, R-023).
+- **Chhode vikalp:** hafte ka backup laptop pe (bandwidth R-029, laptop pe personal data); do providers me copy (dugna kaam, ek aur processor).
+- **Kab dobara khulega:** provider pe koi file kho jaaye, asli business shuru ho, ya owner khud khole.
+- **Kisne, kab:** owner, 2026-11-20. **Nishaan:** Salah maani.
+- **Asar (Claude):** provider pe file kho jaaye to daawe ya kanooni rok (D-262) wali photo ka saboot nahi bachta. Kanooni rok wali files ki ek hi copy kaafi hai ya nahi: Lawyer se nahi jaancha.
+
 ## Change log
 
 | Version  | Date       | Badlav                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      |
@@ -3752,4 +3880,6 @@
 | v1.11.1  | 2026-11-20 | D-275 se D-280 aaye (CA (AI) ki report ke sawal aur jod; Q-212 se Q-217). D-063, D-078, D-081, D-095, D-096, D-107, D-122, D-225, D-227, D-228, D-229, D-254, D-256, D-269 me jod.                                                                                                                                                                                                                                                                                                          |
 | v1.11.2  | 2026-11-20 | D-281 aaya (COMPLIANCE pe CA (AI) ke nishaan aur badlav; Q-218).                                                                                                                                                                                                                                                                                                                                                                                                                            |
 | v1.11.3  | 2026-11-20 | D-282 aaya (finance ke accounting niyam ARCHITECTURE §1 me; Q-219).                                                                                                                                                                                                                                                                                                                                                                                                                         |
-| v1.12.1 | 2026-11-20 | D-283 se D-290 aaye (Principal Software Architect ke 8 sawal: scale target, media, logs, errors, email provider, finance ka batch, invoice ka email, SPA; Q-220 se Q-227). D-058 me jod. |
+| v1.12.1  | 2026-11-20 | D-283 se D-290 aaye (Principal Software Architect ke 8 sawal: scale target, media, logs, errors, email provider, finance ka batch, invoice ka email, SPA; Q-220 se Q-227). D-058 me jod.                                                                                                                                                                                                                                                                                                    |
+| v1.13.1  | 2026-11-20 | D-291 se D-298 aaye (ARCHITECTURE ki 8 batches, §2 se §9; Q-228 se Q-235). D-011 me jod.                                                                                                                                                                                                                                                                                                                                                                                                    |
+| v1.13.2  | 2026-11-20 | D-299 se D-303 aaye (Architect ke risks, area band karne ka kram, bina network ke delivery code, confirmation email ki line, media ka backup; Q-236 se Q-240). D-072, D-126 aur D-298 me jod.                                                                                                                                                                                                                                                                                               |
