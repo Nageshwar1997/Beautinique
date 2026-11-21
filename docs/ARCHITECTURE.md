@@ -1,6 +1,6 @@
 # ARCHITECTURE: Beautinique
 
-> **Status:** v1.2.1 (2026-11-20). System kaise bana hai, ek nazar me. Cheezein ek-ek karke, owner ki haan ke baad judengi. Abhi §1 (finance ke accounting niyam, D-282) aur §2 se §9 (system ke hisse, D-291 se D-298).
+> **Status:** v1.2.2 (2026-11-21). System kaise bana hai, ek nazar me. Cheezein ek-ek karke, owner ki haan ke baad judengi. Abhi §1 (finance ke accounting niyam, D-282) aur §2 se §9 (system ke hisse, D-291 se D-298).
 
 ## Is file me kya aayega
 
@@ -425,6 +425,7 @@ return: commerce.return.requested -> support.return.decided -> logistics.pickup.
 7. PDFs (invoice, credit note, statements, labels) ek halki PDF library se, ek waqt me 1; headless browser kabhi nahi (R-007). Jaari document ka PDF uske na badalne wale data aur template ke version se; template jagah pe nahi badalta, naya version banta hai (D-225). Ye PDF tax archive ki "asli copy" maani jaaye ya nahi: Lawyer (ya CA) se nahi jaancha (CL-021).
 8. Export DB cursor se stream, CSV seedha private file me (buffer me poora nahi), ek baar ka chhota link (D-144, SR-075).
 9. Roz: 24 ghante se purane bina jude uploads aur atke deletes saaf; hafte: provider ki list se milaan.
+10. File badalna (jaise nayi photo): nayi file nayi `assetId` ke saath judti hai, to uska URL bhi naya hota hai aur CDN me purani cached copy nahi dikhti. Purani file turant `deleting` me jaati hai, aur niyam 9 ka roz ka job use provider se mitata hai. Apvaad: jis purani file ki kisi record ko zaroorat hai (niyam 5 aur 6, jaise jis product ka order hua uski images, ya kanooni rok wali review aur daawe ki photos), wo apne retention ke samay tak rehti hai. Nateeja: koi file bina kisi record ke hamesha nahi rehti; bina judi upload lagbhag 24 ghante tak, aur hafte ke milaan me pakdi file agle milaan tak.
 
 ## 8. Observability (D-297)
 
@@ -493,3 +494,4 @@ Images ka dobara encode provider pe hai (D-284); server pe hota to sabse bure pa
 | v1.0.0  | 2026-11-17 | Khaali file bani.                                                                                                                                            |
 | v1.1.1  | 2026-11-20 | §1 finance ke accounting niyam (CA (AI) ki raay, D-282): ledger, documents, numbering, rounding, statements aur milaan.                                      |
 | v1.2.1  | 2026-11-20 | §2 se §9 (Principal Software Architect, D-291 se D-298): services aur data, events, jobs, API, search aur caching, media, observability, scale aur capacity. |
+| v1.2.2  | 2026-11-21 | §7 niyam 10: file badalne pe purani file ka niyam (owner, D-296 me jod).                                                                                     |

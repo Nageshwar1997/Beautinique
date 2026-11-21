@@ -1,6 +1,6 @@
 # DECISIONS: Beautinique
 
-> **Status:** v1.13.2 (2026-11-20). Har faisla ek jagah. Sirf wahi "Tay" jo owner ne khud kaha; Claude ki salah faisla nahi. Cheezein ek-ek karke judti hain.
+> **Status:** v1.13.3 (2026-11-21). Har faisla ek jagah. Sirf wahi "Tay" jo owner ne khud kaha; Claude ki salah faisla nahi. Cheezein ek-ek karke judti hain.
 
 ## 0. Kaise likhein
 
@@ -3726,6 +3726,7 @@
 - **Kab dobara khulega:** D-284 ki shart ki jaanch ka nateeja, ya owner khud khole.
 - **Kisne, kab:** owner, 2026-11-20. **Nishaan:** Salah maani.
 - **Asar (Claude):** jaari document ka PDF tax archive ki "asli copy" maana jaaye ya nahi: Lawyer (ya CA) se nahi jaancha (CL-021). Media provider ki files ka backup nahi: OPERATIONS me DevOps / SRE ke saath.
+- **Jod (owner, 2026-11-21):** §7 me niyam 10: file badalne pe nayi file nayi `assetId` (naya URL) ke saath judti hai, purani turant `deleting` me jaati hai aur roz ka job use mitata hai; jis purani file ki kisi record ko zaroorat ho, wo apne retention tak rehti hai. Koi file bina record ke hamesha nahi rehti. Provider mitayi files ko trash ya backup me kitne din rakhta hai, ye jaanch [OPEN_QUESTIONS.md](OPEN_QUESTIONS.md) §2 ki media wali row me.
 
 ### D-297. ARCHITECTURE batch 7: observability
 
@@ -3883,3 +3884,4 @@
 | v1.12.1  | 2026-11-20 | D-283 se D-290 aaye (Principal Software Architect ke 8 sawal: scale target, media, logs, errors, email provider, finance ka batch, invoice ka email, SPA; Q-220 se Q-227). D-058 me jod.                                                                                                                                                                                                                                                                                                    |
 | v1.13.1  | 2026-11-20 | D-291 se D-298 aaye (ARCHITECTURE ki 8 batches, §2 se §9; Q-228 se Q-235). D-011 me jod.                                                                                                                                                                                                                                                                                                                                                                                                    |
 | v1.13.2  | 2026-11-20 | D-299 se D-303 aaye (Architect ke risks, area band karne ka kram, bina network ke delivery code, confirmation email ki line, media ka backup; Q-236 se Q-240). D-072, D-126 aur D-298 me jod.                                                                                                                                                                                                                                                                                               |
+| v1.13.3  | 2026-11-21 | D-296 me jod (owner): file badalne pe purani file ka niyam, ARCHITECTURE §7 niyam 10.                                                                                                                                                                                                                                                                                                                                                                                                       |
