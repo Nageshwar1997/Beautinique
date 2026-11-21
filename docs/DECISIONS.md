@@ -1,6 +1,6 @@
 # DECISIONS: Beautinique
 
-> **Status:** v1.14.6 (2026-11-21). Har faisla ek jagah. Sirf wahi "Tay" jo owner ne khud kaha; Claude ki salah faisla nahi. Cheezein ek-ek karke judti hain.
+> **Status:** v1.14.7 (2026-11-21). Har faisla ek jagah. Sirf wahi "Tay" jo owner ne khud kaha; Claude ki salah faisla nahi. Cheezein ek-ek karke judti hain.
 
 ## 0. Kaise likhein
 
@@ -353,15 +353,16 @@
 | D-336 | OPERATIONS batch 11 (dependencies aur packages ka publish) maana: 8 niyam [OPERATIONS.md](OPERATIONS.md) §11 me.                                                                                                                                                                        | Security     | 2026-11-21 |
 | D-337 | DevOps / SRE ke 12 naye risks R-043 se R-054, sab bachav ke saath khula.                                                                                                                                                                                                                | Architecture | 2026-11-21 |
 | D-338 | Operations ke 6 sudhaar: release step ka samay, UptimeRobot ka samay, CI ka secret scan asli pehra, seekh fix ke baad, default branch se pehle schedule, 10 Atlas projects.                                                                                                             | Architecture | 2026-11-21 |
+| D-339 | Stack me jod: frontend me state management ke liye Zustand; backend ka logger pino, saath me pino-pretty.                                                                                                                                                                               | Architecture | 2026-11-21 |
 
 ## 2. Record
 
 ### D-001. Tech stack
 
 - **Faisla:**
-  - **Backend:** Node.js 24, TypeScript (strict, sirf ESM), Express; validation zod se; HTTP calls axios se.
+  - **Backend:** Node.js 24, TypeScript (strict, sirf ESM), Express; validation zod se; HTTP calls axios se; logger pino, saath me pino-pretty (D-339).
   - **Data:** MongoDB (native driver) saari services ke liye, **siwaye finance service ke, jiska database PostgreSQL hoga**. Redis-compatible store (Valkey) aur BullMQ background kaam aur queues ke liye.
-  - **Frontend:** React, React Router, TanStack Query, react-hook-form, react-aria-components; build Vite se, styling Tailwind CSS se.
+  - **Frontend:** React, React Router, TanStack Query, react-hook-form, react-aria-components; state management Zustand se (D-339); build Vite se, styling Tailwind CSS se.
   - **Tooling:** npm workspaces ka monorepo, Turborepo, tsdown (packages ka build), Vitest aur Testing Library, Playwright (E2E), ESLint, Prettier, GitHub Actions (CI).
   - **Finance ke niyam:** har niyam ki saaf list (unique index, conditional update, ya code + raat ki jaanch se pakka), aur har niyam ka test, ek saath chalne wale requests ke tests samet.
 - **Wajah:** stack owner ne shuru me hi tay kiya. Finance ke liye PostgreSQL Claude ki daleel se aaya: finance ka poora scope (ledger, settlement, TCS / TDS, GST registers) rahe to uske niyam aur reports relational database me zyada mazboot rehte hain. Owner ne yahi chuna.
@@ -4124,6 +4125,20 @@
 - **Chhode vikalp:** kuch sudhaar (owner ne koi nahi chuna); koi sudhaar nahi (kamiyaan bachi rehti).
 - **Kab dobara khulega:** owner khud khole.
 - **Kisne, kab:** owner, 2026-11-21. **Nishaan:** Salah maani.
+
+### D-339. Stack me jod: Zustand aur pino
+
+- **Faisla:** D-001 ke stack me do cheezein judti hain:
+  1. **Frontend:** state management ke liye Zustand.
+  2. **Backend:** logger pino, aur uske saath pino-pretty.
+- **Wajah:** owner ka faisla (2026-11-21).
+- **Chhode vikalp:** koi vikalp nahi rakha gaya; owner ne seedha chuna.
+- **Kab dobara khulega:** owner khud khole.
+- **Kisne, kab:** owner, 2026-11-21. **Nishaan:** Owner.
+- **Asar (Claude):**
+  - Server se aaya data TanStack Query me hi rehta hai (D-001; [ARCHITECTURE.md](ARCHITECTURE.md) me har app ka typed client TanStack Query ke saath). Zustand browser ki apni state ke liye (jaise khule panels, filters ka draft). Zustand ka `persist` (browser storage) bhi SR-027 ke andar: token ya user ka data nahi, sirf theme jaisi pasand.
+  - D-297 ([ARCHITECTURE.md](ARCHITECTURE.md) §8) ke structured JSON logs pino se. pino-pretty sirf local development me logs padhne ke liye (dev dependency); CI aur production ke logs JSON hi rehte hain, taaki D-297 na toote.
+
 ## Change log
 
 | Version  | Date       | Badlav                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      |
@@ -4225,3 +4240,4 @@
 | v1.14.4  | 2026-11-21 | D-322 se D-325 aaye (server jagaane ka samay, backup kitni baar, alerts dekhne ka samay, npm publish nahi; Q-259 se Q-262).                                                                                                                                                                                                                                                                                                                                                                 |
 | v1.14.5  | 2026-11-21 | D-326 se D-336 aaye (OPERATIONS ki 11 batches; Q-263 se Q-273). D-324 ke asar me D-248 ki ghadi saaf ki.                                                                                                                                                                                                                                                                                                                                                                                    |
 | v1.14.6  | 2026-11-21 | D-337 aur D-338 aaye (DevOps ke 12 risks, operations ke 6 sudhaar; Q-274, Q-275); D-024 me jod (D-338).                                                                                                                                                                                                                                                                                                                                                                                     |
+| v1.14.7  | 2026-11-21 | D-339 aaya (stack me Zustand, pino aur pino-pretty; owner); D-001 me jod.                                                                                                                                                                                                                                                                                                                                                                                                                   |
