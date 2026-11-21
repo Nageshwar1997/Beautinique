@@ -1,6 +1,6 @@
 # OPEN QUESTIONS: Beautinique
 
-> **Status:** v1.7.24 (2026-11-21). Khule sawal, aage ke topics aur jaanchna baaki. Cheezein ek-ek karke judengi.
+> **Status:** v1.7.25 (2026-11-21). Khule sawal, aage ke topics aur jaanchna baaki. Cheezein ek-ek karke judengi.
 
 ## Is file me kya aayega
 
@@ -6760,6 +6760,169 @@ Claude ka kaam: owner ka faisla nahi chahiye, sirf saboot. Nateeja saboot ke saa
 - **Trade-off:** (a) me 5 aur pehre aur tests banane; (c) me jani-pehchani galtiyan dobara aa sakti hain.
 - **Owner ka jawab (2026-11-21):** **(a)**, paanchon niyam. Record: [DECISIONS.md](DECISIONS.md) D-398.
 
+### Q-335. Kanooni rok aur band FY ki file ki chaabi kahan rahe?
+
+- **Status:** `Tay`. Topic: B14 (security).
+- **Sawal:** kanooni rok me rakha data (delete ke baad ka, D-250), rok wali photos aur video (D-262) aur band FY ki export file (D-309): inhe kholne wali chaabi live server ke paas ho, ya sirf owner ke laptop ke raaste (offline)?
+- **Kyun zaroori:**
+  - D-250 kehta hai ye data sirf kanooni maang pe khule. Abhi har service ki `hold` key live server ke env me hai ([ARCHITECTURE.md](ARCHITECTURE.md) §10.3 niyam 4).
+  - To server ki chaabiyon ka ek leak, aur database ya media provider ki pahunch, dono milke sab khol dete hain, delete hua personal data bhi.
+- **Vikalp:**
+  - **(a) Abhi jaisa:** har service ki apni chaabi live env me; kholna break-glass facade se.
+  - **(b) Server pe sirf band karne wali (public) chaabi:** kholne wali (private) chaabi password manager me aur ek doosri offline copy me; kholna sirf laptop ke break-glass command se.
+  - **(c) Sirf band FY ki file ke liye (b), baaki (a).**
+- **Salah:** **(b)**. Ye data roz kabhi nahi khulta, to server ko kholne ki zaroorat hi nahi; server leak hone pe bhi band data band rehta hai.
+- **Trade-off:**
+  - (b) me kanooni maang pe kholna sirf owner ke laptop se. Chaabi kho jaaye to band data aur purane FY ki books hamesha ke liye band, isliye do offline copies aur saal me ek baar kholne ka abhyaas zaroori.
+  - (a) me server ke ek leak pe sab khula.
+  - (c) beech ka.
+- **Kanooni detail:** Lawyer (AI) ne nahi jaancha: kanooni maang pe data kitni der me dena hota hai, aur laptop wala raasta us samay me chalega ya nahi.
+- **R1 ya baad me:** R1 (rok ki copy R1 me banti hai).
+- **Owner ka jawab (2026-11-21):** **(b)**, server pe sirf band karne wali (public) chaabi; kholne wali (private) chaabi password manager me aur ek doosri offline copy me, aur kholna sirf laptop ke break-glass command se. Record: [DECISIONS.md](DECISIONS.md) D-399.
+
+### Q-336. Audit aur logs ke database ka dhaancha (indexes, TTL, validators) kaun badle?
+
+- **Status:** `Tay`. Topic: B14 (security), B15 (technical).
+- **Sawal:** audit aur logs ke clusters me indexes, TTL aur validators ka badlav har boot pe live server ke release step se ho (baaki services jaisa), ya sirf owner ke laptop ke release command se?
+- **Kyun zaroori:**
+  - Boot ka release step ek alag release user se chalta hai jise TTL aur validators badalne ka haq hai ([ARCHITECTURE.md](ARCHITECTURE.md) §10.4 niyam 5), aur wo user live server ke env me rehta hai.
+  - Hamlavar us user se audit ya logs ka TTL bahut chhota karke sab mita sakta hai, "sirf insert" wale user (D-317) ke bawajood. Audit hi staff ke kaam ka saboot hai.
+- **Vikalp:**
+  - **(a) Abhi jaisa:** boot pe, release user live env me; bachav sirf audit chain ka hash bahar likhna (mitana pakda jaata hai, rukta nahi).
+  - **(b) Audit aur logs ke liye sirf laptop:** boot pe in dono me sirf jaanch (dhaanche ka fingerprint na mile to alert, badlav nahi); badlav laptop ke command se, alag credentials se. Baaki services boot pe hi.
+- **Salah:** **(b)**, saath me audit chain ka hash bahar likhna bhi. Audit aur logs ka dhaancha kam badalta hai, to haath ka kadam kabhi-kabhi hi aata hai.
+- **Trade-off:**
+  - (b) me audit ya logs ke dhaanche wale release me owner ka ek haath ka kadam; bhoolne pe alert aane tak purana dhaancha.
+  - (a) me koi haath ka kaam nahi, par mitana sambhav, aur pata baad me chalta hai.
+- **R1 ya baad me:** R1.
+- **Owner ka jawab (2026-11-21):** **(b)**, audit aur logs ke clusters ka dhaancha sirf laptop ke release command se, alag credentials se; boot pe in dono me sirf fingerprint ki jaanch aur alert; saath me audit chain ka hash bahar likhna. Record: [DECISIONS.md](DECISIONS.md) D-400.
+
+### Q-337. Raat ke alerts ki push subscription kab tak rahe?
+
+- **Status:** `Tay`. Topic: B14 (security), B11 (notifications).
+- **Sawal:** Master app me owner ke alerts ki browser push subscription session ke saath khatam ho (baaki khabron jaisa), ya device ke saath rahe jab tak owner khud na hataye?
+- **Kyun zaroori:**
+  - Gambhirta 1 ke alerts raat me bhi push se aate hain (D-324).
+  - SR-074 subscription ko session se baandhta hai, aur staff ka session 12 ghante ka hai (D-181). To agle din se raat ke alerts chupchaap band ho sakte hain.
+- **Vikalp:**
+  - **(a) Session ke saath** (abhi jaisa): session khatam, push band.
+  - **(b) Device ke saath, sirf owner ke alerts:** session khatam hone pe bhi rehti hai; sirf "is device pe alerts band", device hatane ya account band hone pe hat-ti hai; payload me koi detail nahi.
+- **Salah:** **(b)**, saath me subscription khatam hone pe gambhir email, aur roz ek test push.
+- **Trade-off:**
+  - (b) me band session wale device pe bhi "alert hai" ki khabar dikhti hai (bina detail); device chori ho to devices ki list se hatana padta hai.
+  - (a) me raat ke alert ka bharosa nahi.
+- **R1 ya baad me:** R1.
+- **Owner ka jawab (2026-11-21):** **(b)**, owner ke alerts ki subscription device ke saath, jab tak owner "is device pe alerts band" na kare, device na hataye ya account band na ho; payload me koi detail nahi; subscription khatam hone pe gambhir email, aur roz ek test push. Record: [DECISIONS.md](DECISIONS.md) D-401.
+
+### Q-338. Request logs kaun aur kaise padhe?
+
+- **Status:** `Tay`. Topic: B14 (security).
+- **Sawal:** logs service ke request logs (IP, account id, route, samay; D-250 ke hisaab se 180 din, 2027 se 1 saal) kaun padh sakta hai?
+- **Kyun zaroori:**
+  - Logs me har user ka IP aur har kaam ka samay hai: ye personal data hai, aur incident ya kanooni maang pe yahi saboot hai.
+  - Padhne ka haq tay nahi. Bina niyam ke ye staff ke liye "sab ki jaankari" ka sabse bada raasta ban sakta hai.
+- **Vikalp:**
+  - **(a) Sirf laptop ka command:** owner, alag credentials se.
+  - **(b) Master app me sirf owner:** `logs.read` permission, dobara code, wajah, ek samay-khidki ya request id se khojna, har padhna audit me; bulk export nahi.
+  - **(c) (b) ke saath Support Lead:** sirf apne maamle ke request id se.
+- **Salah:** **(b)**. Incident me tez, aur har padhne ka record.
+- **Trade-off:**
+  - (a) me har jaanch laptop pe aur dheemi.
+  - (b) me Master app ki ek screen ka kaam.
+  - (c) me zyada log, zyada jokhim.
+- **Kanooni detail:** Lawyer (AI) ne nahi jaancha: logs me IP ka personal data hona, aur CERT-In ya kisi kanooni maang pe logs dene ka samay.
+- **R1 ya baad me:** R1.
+- **Owner ka jawab (2026-11-21):** **(b)**, request logs sirf owner Master app me padhe: `logs.read` permission, dobara code aur wajah ke saath, samay-khidki ya request id se khoj, har padhna audit me, aur bulk export nahi. Record: [DECISIONS.md](DECISIONS.md) D-402.
+
+### Q-339. Security bug ka private record kahan rahe?
+
+- **Status:** `Tay`. Topic: B14 (security). Group G25.
+- **Sawal:** security bug aur scan ki findings ki detail, fix live hone tak, kahan likhi jaaye?
+- **Kyun zaroori:** repo public hai. Detail issue, PR ya commit me aayi to fix se pehle hamle ka tareeka sabke saamne. Niyam hai ki record private jagah me ho ([RULES.md](RULES.md) RT-39), par jagah tay nahi.
+- **Vikalp:**
+  - **(a) GitHub ki private security advisory (draft):** repo ke saath, sirf admin ko dikhti hai.
+  - **(b) Ek alag private GitHub repo:** sirf records ke liye.
+  - **(c) Password manager ke secure notes.**
+  - **(d) Laptop ki git-ignored file.**
+- **Salah:** **(a)** agar public repo pe muft chale, warna **(b)**.
+- **Trade-off:**
+  - (a) code ke paas, par muft hai ya nahi, aur uske private fork me CI chalti hai ya nahi, ye jaanchna baaki.
+  - (b) muft aur saaf, par ek aur repo.
+  - (c) surakshit, par dhoondhna mushkil.
+  - (d) laptop kho jaaye to record bhi gaya, aur doosre account se nahi dikhta.
+- **Tathya ki jaanch pe tika:** §2 ki "GitHub ki private security advisory" wali row.
+- **R1 ya baad me:** R1.
+- **Owner ka jawab (2026-11-21):** **(a)**, GitHub ki private security advisory (draft), agar public repo pe muft chale; warna **(b)**, ek alag private GitHub repo. Record: [DECISIONS.md](DECISIONS.md) D-403.
+
+### Q-340. Record wale security niyamon ka saboot kahan likha jaaye?
+
+- **Status:** `Tay`. Topic: B14 (security). Group G25 (Q-339 pe tika, kyunki kami ki detail wahi jaati hai).
+- **Sawal:** jin security niyamon ka saboot test nahi, record hai (jaise providers pe MFA, live headers, restore ka abhyaas), unki table kahan rahe?
+- **Kyun zaroori:** release gate ([RULES.md](RULES.md) RG-2) aur niyamon ki ginti ki script record ko tabhi gin sakti hai jab wo repo me ek tay jagah ho.
+- **Vikalp:**
+  - **(a) [OPERATIONS.md](OPERATIONS.md) me naya hissa "Security ke record":** public table, sirf `Pass` ya `Baaki`, tareekh aur release; kami ki detail sirf private record (Q-339) me.
+  - **(b) Har release ke test report (PR ke description) me:** repo ki file me nahi.
+  - **(c) Laptop ki git-ignored file.**
+- **Salah:** **(a)**, aur release ke test report me uski link.
+- **Trade-off:**
+  - (a) me public ko dikhta hai ki kaunse check hue, detail nahi.
+  - (b) me ginti ki script ko PR padhne padte.
+  - (c) me doosra account ya CI nahi dekh paata.
+- **R1 ya baad me:** R1.
+- **Owner ka jawab (2026-11-21):** **(a)**, OPERATIONS me naya hissa "Security ke record": public table me sirf `Pass` ya `Baaki`, tareekh aur release; kami ki detail sirf private record me; release ke test report me us table ki link. Record: [DECISIONS.md](DECISIONS.md) D-404.
+
+### Q-341. Testers ki allowlist entries pe `+` alias chale?
+
+- **Status:** `Tay`. Topic: B14 (security), B2 (apps aur roles).
+- **Sawal:** owner jinhe allowlist (D-133) me jodta hai (testers), unke email ke `+` alias se bhi accounts ban sakein, ya sirf wahi exact email?
+- **Kyun zaroori:** owner ke apne emails pe alias jaan-boojh ke chalte hain, par testers ke liye niyam likha nahi. Alias chale to ek tester kai customer accounts bana sakta hai, aur uske inbox pe aliases se codes ki baadh ho sakti hai.
+- **Vikalp:**
+  - **(a) Sirf exact email.**
+  - **(b) Alias bhi.**
+  - **(c) Har entry pe owner chune.**
+- **Salah:** **(a)**. Tester ko doosra account chahiye to owner doosra email jode.
+- **Trade-off:**
+  - (a) me tester ke har naye account ke liye owner ka chhota kaam.
+  - (b) me per-customer seemaon ki testing aasaan, par baadh ka raasta.
+  - (c) lachila, par ek aur setting.
+- **R1 ya baad me:** R1.
+- **Owner ka jawab (2026-11-21):** **(a)**, testers ki allowlist entry sirf usi exact email se mel khaye, `+` alias se nahi; doosre account ke liye owner doosra email jode. Record: [DECISIONS.md](DECISIONS.md) D-405.
+
+### Q-342. Kam jaankari wale requests ki har log line ya sirf ginti?
+
+- **Status:** `Tay`. Topic: B14 (security), B15 (technical).
+- **Sawal:** Render ke host pe aaye rejected requests (bina secret ke `/api`, jinka jawab 403) aur `/wake` ki pings: har request ki log line bane, ya baadh ke dauraan per IP har minute ki ek ginti?
+- **Kyun zaroori:** Render ka host sabke liye khula hai. Koi bhi sasti requests ki baadh bhej ke logs ki 0.5 GB jagah aur mahine ki 5 GB bandwidth khaa sakta hai; har khule tab ki ping bhi har 10 minute ek line banati hai.
+- **Vikalp:**
+  - **(a) Har request ki line** (abhi jaisa).
+  - **(b) Aam din har line; ek IP se seema (misaal 100 requests/minute) ke upar sirf ginti:** pehla aur aakhri samay, ginti, route.
+  - **(c) In dono qism ki hamesha sirf ginti.**
+- **Salah:** **(b)**.
+- **Trade-off:**
+  - (a) me poora record, par baadh pe logs ki jagah khatam.
+  - (b) me baadh ke dauraan har request alag nahi dikhti.
+  - (c) me sabse kam jagah, par sabse kam detail.
+- **Kanooni detail:** Lawyer (AI) ne nahi jaancha: CERT-In ke logs ke niyam me ginti wala record chalta hai ya har request ki line chahiye.
+- **R1 ya baad me:** R1.
+- **Owner ka jawab (2026-11-21):** **(b)**, aam din har request ki line; ek IP se seema (misaal 100 requests/minute) ke upar sirf ginti, pehle aur aakhri samay aur route ke saath. Record: [DECISIONS.md](DECISIONS.md) D-406.
+
+### Q-343. Payment screen pe gateway ki script baaki app se kaise alag rahe?
+
+- **Status:** `Tay`. Topic: B14 (security), B6 (payments).
+- **Sawal:** Customer app SPA hai (D-290), yaani ek HTML document. Payment gateway ki checkout script ko baaki app se kaise alag rakhein?
+- **Kyun zaroori:** browser ki CSP poore document ki hoti hai, route ki nahi. Ek baar load hui gateway ki script baaki screens (cart, address, orders) ke saath rehti hai, aur uske hosts poore app ki CSP me jaate hain. SR-006 ka "sirf payment wale page ki CSP me" SPA me poora nahi ho sakta.
+- **Vikalp:**
+  - **(a) Payment screen alag HTML document:** wahan aana-jaana poore page ka load; CSP aur gateway ki script sirf wahan.
+  - **(b) Gateway ka apna hosted payment page (redirect):** hamare kisi page pe gateway ki script nahi.
+  - **(c) Poore Customer app ki CSP me gateway ke hosts,** jokhim maan ke.
+- **Salah:** **(a)**. Checkout ka roop (D-345) waisa hi rehta hai, aur bahar ki script sirf ek chhote document tak.
+- **Trade-off:**
+  - (a) me Payment pe aate-jaate ek poora page load, aur app ki state wahan nahi (sirf order ka id).
+  - (b) me sabse kam jokhim, par customer app se bahar jaata hai, aur test mode me ye raasta jaanchna baaki.
+  - (c) sabse aasaan, par bahar ki script ka asar poore app pe (R-016).
+- **R1 ya baad me:** R1.
+- **Owner ka jawab (2026-11-21):** **(a)**, Payment screen ek alag HTML document; gateway ki script aur uski CSP sirf wahan, aur checkout ka roop (D-345) waisa hi. Record: [DECISIONS.md](DECISIONS.md) D-407.
+
 ## Change log
 
 | Version | Date       | Badlav                                                                                                                                                                                    |
@@ -6884,3 +7047,4 @@ Claude ka kaam: owner ka faisla nahi chahiye, sirf saboot. Nateeja saboot ke saa
 | v1.7.22 | 2026-11-21 | Q-324 (criteria ki jagah: naya ACCEPTANCE.md) aur Q-325 se Q-331 (QA ke criteria ki 7 batches, 184 criteria) tay; D-388 se D-395.                                                         |
 | v1.7.23 | 2026-11-21 | Q-332 (QA ke 12 risks, R-065 se R-076) tay; D-396.                                                                                                                                        |
 | v1.7.24 | 2026-11-21 | §2 me QA ki 18 jaanch judi; Q-333 (5 chhote sudhaar) aur Q-334 (5 lene layak niyam) tay; D-397, D-398.                                                                                    |
+| v1.7.25 | 2026-11-21 | Q-335 se Q-343 (Security Architect ke doosre run ke 9 sawal; G25 security bug ka record) tay; D-399 se D-407.                                                                             |

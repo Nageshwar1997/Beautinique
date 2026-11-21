@@ -1,6 +1,6 @@
 # DECISIONS: Beautinique
 
-> **Status:** v1.14.23 (2026-11-21). Har faisla ek jagah. Sirf wahi "Tay" jo owner ne khud kaha; Claude ki salah faisla nahi. Cheezein ek-ek karke judti hain.
+> **Status:** v1.14.24 (2026-11-21). Har faisla ek jagah. Sirf wahi "Tay" jo owner ne khud kaha; Claude ki salah faisla nahi. Cheezein ek-ek karke judti hain.
 
 ## 0. Kaise likhein
 
@@ -413,6 +413,15 @@
 | D-396 | QA ke 12 naye risks (R-065 se R-076) bachav ke saath khule: fakes, containers ka farak, lamba CI, flaky, samay, laptop pe bojh, screenshots, personal data, ek tester, ek haath, smoke ka kharcha, replica set.                                                                         | Operations   | 2026-11-21 |
 | D-397 | QA ke 5 chhote sudhaar: p95 ka pass live jaisi CPU seema pe (RT-31), SR-019 ka naap laptop pe, flow ka DB budget `TASK.md` me (RT-19), OPERATIONS me WebKit aur smoke order, DS-8.1 me screen readers.                                                                                  | Process      | 2026-11-21 |
 | D-398 | QA ke 5 lene layak niyam [RULES.md](RULES.md) §4.7 me (RT-43 se RT-47): scan ki chhoot likhi wajah se, ids ka pehra, CI config ka test, release ka test report, 4 regression tests.                                                                                                     | Process      | 2026-11-21 |
+| D-399 | Kanooni rok aur band FY ki file: server pe sirf band karne wali (public) chaabi; kholne wali chaabi password manager aur ek offline copy me, kholna sirf laptop se.                                                                                                                     | Security     | 2026-11-21 |
+| D-400 | Audit aur logs ke clusters ka dhaancha sirf laptop ke release command se; boot pe sirf fingerprint ki jaanch aur alert; audit chain ka hash bahar.                                                                                                                                      | Security     | 2026-11-21 |
+| D-401 | Owner ke alerts ki push subscription device ke saath (session se nahi); khatam hone pe gambhir email, aur roz ek test push.                                                                                                                                                             | Security     | 2026-11-21 |
+| D-402 | Request logs sirf owner Master app me padhe (`logs.read`, dobara code, wajah, har padhna audit me); bulk export nahi.                                                                                                                                                                   | Security     | 2026-11-21 |
+| D-403 | Security bug ka private record GitHub ki private security advisory me, agar public repo pe muft chale; warna alag private repo.                                                                                                                                                         | Security     | 2026-11-21 |
+| D-404 | Record wale security niyamon ka saboot OPERATIONS ke naye hisse "Security ke record" me (sirf `Pass`/`Baaki`); detail private record me.                                                                                                                                                | Security     | 2026-11-21 |
+| D-405 | Testers ki allowlist entry sirf exact email se mel khaye, `+` alias se nahi.                                                                                                                                                                                                            | Security     | 2026-11-21 |
+| D-406 | Render host pe rejected requests aur `/wake` pings: aam din har line, ek IP ki seema (misaal 100/minute) ke upar sirf ginti.                                                                                                                                                            | Security     | 2026-11-21 |
+| D-407 | Payment screen ek alag HTML document; gateway ki script aur uski CSP sirf wahan; checkout ka roop (D-345) waisa hi.                                                                                                                                                                     | Security     | 2026-11-21 |
 
 ## 2. Record
 
@@ -4746,6 +4755,87 @@
 - **Kab dobara khulega:** owner khud khole.
 - **Kisne, kab:** owner, 2026-11-21. **Nishaan:** Salah maani.
 
+### D-399. Kanooni rok aur band FY ki file ki chaabi
+
+- **Faisla:** kanooni rok me rakha data (D-250), rok wali photos aur video (D-262) aur band FY ki export file (D-309) ke liye server pe sirf band karne wali (public) chaabi. Kholne wali (private) chaabi password manager me aur ek doosri offline copy me; kholna sirf owner ke laptop ke break-glass command se.
+- **Wajah:** Claude ki salah, owner ne maani: ye data roz kabhi nahi khulta, to server ko kholne ki zaroorat nahi; server ki chaabiyon ke leak pe bhi band data band rehta hai.
+- **Chhode vikalp:** abhi jaisa, har service ki `hold` key live env me (server ke ek leak pe sab khula); sirf band FY ki file ke liye offline chaabi (beech ka raasta).
+- **Kab dobara khulega:** owner khud khole.
+- **Kisne, kab:** owner, 2026-11-21. **Nishaan:** Salah maani.
+- **Asar (Claude):** [ARCHITECTURE.md](ARCHITECTURE.md) §10.3 niyam 4 aur D-309 ka roop, aur security niyam, security ki batches me badlenge. Chaabi kho jaaye to band data aur purane FY ki books hamesha ke liye band: do offline copies aur saal me ek baar kholne ka abhyaas zaroori (risk security ki risks wali batch me). Kanooni detail: Lawyer (AI) ne nahi jaancha: kanooni maang pe data dene ka samay, aur laptop wala raasta us samay me chalega ya nahi.
+
+### D-400. Audit aur logs ke dhaanche ka badlav
+
+- **Faisla:** audit aur logs ke clusters me indexes, TTL aur validators ka badlav sirf owner ke laptop ke release command se, alag credentials se. Boot pe in dono me sirf dhaanche ke fingerprint ki jaanch: na mile to alert, badlav nahi. Baaki services ka release step boot pe hi (ARCHITECTURE §10.4). Saath me audit chain ka hash bahar bhi likha jaata hai.
+- **Wajah:** Claude ki salah, owner ne maani: live env me release user ke rehte audit ya logs ka TTL chhota karke sab mitaya ja sakta hai, "sirf insert" wale user (D-317) ke bawajood; audit aur logs ka dhaancha kam badalta hai, to haath ka kadam kabhi-kabhi hi.
+- **Chhode vikalp:** abhi jaisa, boot pe release user live env me aur sirf hash bahar (mitana pakda jaata, rukta nahi).
+- **Kab dobara khulega:** owner khud khole.
+- **Kisne, kab:** owner, 2026-11-21. **Nishaan:** Salah maani.
+- **Asar (Claude):** [ARCHITECTURE.md](ARCHITECTURE.md) §10.4 niyam 5, OPERATIONS ka release ka kram aur security niyam security ki batches me badlenge. Audit ya logs ke dhaanche wale release me owner ka ek haath ka kadam; bhoolne pe alert aane tak purana dhaancha.
+
+### D-401. Raat ke alerts ki push subscription
+
+- **Faisla:** Master app me owner ke alerts ki browser push subscription device ke saath, session ke saath nahi. Wo tab tak rehti hai jab tak owner "is device pe alerts band" na kare, device na hataye ya account band na ho. Payload me koi detail nahi. Subscription khatam ho to gambhir email, aur roz ek test push. Baaki khabron ki subscription SR-074 jaisi, session ke saath.
+- **Wajah:** Claude ki salah, owner ne maani: gambhirta 1 ke alerts raat me bhi push se aate hain (D-324), aur session ke saath bandhi subscription 12 ghante (D-181) ke baad chupchaap band ho jaati.
+- **Chhode vikalp:** session ke saath (raat ke alert ka bharosa nahi).
+- **Kab dobara khulega:** owner khud khole.
+- **Kisne, kab:** owner, 2026-11-21. **Nishaan:** Salah maani.
+- **Asar (Claude):** SR-074 me apvaad aur OPERATIONS ke alerts security ki batches me. Band session wale device pe bhi "alert hai" ki khabar (bina detail) dikhti hai; device chori ho to devices ki list se hatana padta hai.
+
+### D-402. Request logs kaun padhe
+
+- **Faisla:** logs service ke request logs sirf owner Master app me padhe: `logs.read` permission, dobara code aur wajah ke saath, samay-khidki ya request id se khoj, har padhna audit me. Bulk export nahi.
+- **Wajah:** Claude ki salah, owner ne maani: incident me tez jaanch, aur har padhne ka record; logs me har user ka IP aur kaam ka samay hai, to padhna kam se kam logon tak.
+- **Chhode vikalp:** sirf laptop ka command (har jaanch dheemi); owner ke saath Support Lead bhi apne maamle ke request id se (zyada log, zyada jokhim).
+- **Kab dobara khulega:** owner khud khole.
+- **Kisne, kab:** owner, 2026-11-21. **Nishaan:** Salah maani.
+- **Asar (Claude):** `logs.read` permission roles ki list me sirf owner ke paas; Master app me ek screen. Kanooni detail: Lawyer (AI) ne nahi jaancha: logs me IP ka personal data hona, aur CERT-In ya kanooni maang pe logs dene ka samay.
+
+### D-403. Security bug ka private record
+
+- **Faisla:** security bug aur scan ki findings ki detail, fix live hone tak, GitHub ki private security advisory (draft) me, agar public repo pe ye muft chale. Na chale to ek alag private GitHub repo me. Issue, PR ya commit me detail kabhi nahi ([RULES.md](RULES.md) RT-39).
+- **Wajah:** Claude ki salah, owner ne maani: advisory code ke paas hai aur sirf admin ko dikhti hai; alag private repo muft aur saaf raasta hai.
+- **Chhode vikalp:** password manager ke secure notes (dhoondhna mushkil); laptop ki git-ignored file (laptop kho jaaye to record gaya, doosre account se nahi dikhta).
+- **Kab dobara khulega:** owner khud khole.
+- **Kisne, kab:** owner, 2026-11-21. **Nishaan:** Salah maani.
+- **Asar (Claude):** kaunsa raasta chalega, ye [OPEN_QUESTIONS.md](OPEN_QUESTIONS.md) §2 ki "GitHub ki private security advisory" wali jaanch pe tika (muft hai ya nahi, aur private fork me CI chalti hai ya nahi). R-054 ka bachav security ki risks wali batch me.
+
+### D-404. Record wale security niyamon ka saboot
+
+- **Faisla:** jin security niyamon ka saboot test nahi, record hai (jaise providers pe MFA, live headers, restore ka abhyaas), unki table [OPERATIONS.md](OPERATIONS.md) ke naye hisse "Security ke record" me: public table me sirf `Pass` ya `Baaki`, tareekh aur release. Kami ki detail sirf private record (D-403) me. Release ke test report me us table ki link.
+- **Wajah:** Claude ki salah, owner ne maani: release gate ([RULES.md](RULES.md) RG-2) aur niyamon ki ginti ki script record ko tabhi gin sakti hai jab wo repo me ek tay jagah ho.
+- **Chhode vikalp:** har release ke test report (PR ke description) me (script ko PR padhne padte); laptop ki git-ignored file (doosra account aur CI nahi dekh paate).
+- **Kab dobara khulega:** owner khud khole.
+- **Kisne, kab:** owner, 2026-11-21. **Nishaan:** Salah maani.
+- **Asar (Claude):** OPERATIONS ka naya hissa aur table ke columns security ki batches ke saath. Public ko dikhta hai ki kaunse check hue, detail nahi.
+
+### D-405. Testers ki allowlist aur `+` alias
+
+- **Faisla:** testers ki allowlist entry (D-133) sirf usi exact email se mel khaye, `+` alias se nahi. Tester ko doosra account chahiye to owner doosra email jode. Owner ke apne emails pe alias pehle jaisa chalta hai.
+- **Wajah:** Claude ki salah, owner ne maani: alias chale to ek tester kai customer accounts bana sakta, aur uske inbox pe aliases se codes ki baadh ho sakti.
+- **Chhode vikalp:** alias bhi (baadh ka raasta); har entry pe owner chune (ek aur setting).
+- **Kab dobara khulega:** owner khud khole.
+- **Kisne, kab:** owner, 2026-11-21. **Nishaan:** Salah maani.
+- **Asar (Claude):** email ko milaane ka niyam (alias aur normalization) security niyam me security ki batches me. Tester ke har naye account ke liye owner ka chhota kaam.
+
+### D-406. Kam jaankari wale requests ki log line
+
+- **Faisla:** Render ke host pe aaye rejected requests (bina secret ke `/api`, jinka jawab 403) aur `/wake` ki pings: aam din har request ki log line. Ek IP se seema (misaal 100 requests/minute) ke upar sirf ginti: pehla aur aakhri samay, ginti aur route.
+- **Wajah:** Claude ki salah, owner ne maani: Render ka host sabke liye khula hai, aur sasti requests ki baadh logs ki 0.5 GB jagah kha sakti hai; aam din poora record bhi rehta hai.
+- **Chhode vikalp:** hamesha har request ki line (baadh pe logs ki jagah khatam); in dono qism ki hamesha sirf ginti (sabse kam detail).
+- **Kab dobara khulega:** owner khud khole.
+- **Kisne, kab:** owner, 2026-11-21. **Nishaan:** Salah maani.
+- **Asar (Claude):** asli seema ka number aur bandwidth ka bachav security ki batches me. Baadh ke dauraan har request alag nahi dikhti. Kanooni detail: Lawyer (AI) ne nahi jaancha: CERT-In ke logs ke niyam me ginti wala record chalta hai ya har request ki line chahiye.
+
+### D-407. Payment screen ka alag document
+
+- **Faisla:** Customer app me Payment screen ek alag HTML document. Payment gateway ki checkout script aur uske hosts wali CSP sirf us document me; baaki app (SPA, D-290) me gateway ki koi script nahi. Checkout ka roop (D-345) waisa hi; Payment pe sirf order ka id jaata hai.
+- **Wajah:** Claude ki salah, owner ne maani: browser ki CSP poore document ki hoti hai, route ki nahi, to SPA me SR-006 tabhi poora hota hai jab Payment alag document ho; bahar ki script (R-016) sirf ek chhote document tak.
+- **Chhode vikalp:** gateway ka hosted payment page (customer app se bahar, test mode me raasta jaanchna baaki); poore Customer app ki CSP me gateway ke hosts (bahar ki script ka asar poore app pe).
+- **Kab dobara khulega:** owner khud khole.
+- **Kisne, kab:** owner, 2026-11-21. **Nishaan:** Salah maani.
+- **Asar (Claude):** SR-006, [DESIGN.md](DESIGN.md) DS-10.9 aur [ACCEPTANCE.md](ACCEPTANCE.md) AC-CUSTOMER-6 me badlav security ki batches me. Payment pe aate-jaate ek poora page load.
+
 ## Change log
 
 | Version  | Date       | Badlav                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      |
@@ -4864,3 +4954,4 @@
 | v1.14.21 | 2026-11-21 | D-388 se D-395 aaye (acceptance criteria ki jagah ACCEPTANCE.md, aur QA ke criteria ki 7 batches; Q-324 se Q-331).                                                                                                                                                                                                                                                                                                                                                                          |
 | v1.14.22 | 2026-11-21 | D-396 aaya (QA ke 12 risks R-065 se R-076; Q-332).                                                                                                                                                                                                                                                                                                                                                                                                                                          |
 | v1.14.23 | 2026-11-21 | D-397 aur D-398 aaye (QA ke 5 sudhaar aur 5 lene layak niyam; Q-333, Q-334); D-376 aur D-380 ke Asar me "jod diya".                                                                                                                                                                                                                                                                                                                                                                         |
+| v1.14.24 | 2026-11-21 | D-399 se D-407 aaye (Security Architect ke doosre run ke 9 sawal; Q-335 se Q-343).                                                                                                                                                                                                                                                                                                                                                                                                          |
