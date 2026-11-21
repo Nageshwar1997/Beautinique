@@ -1,6 +1,6 @@
 # OPEN QUESTIONS: Beautinique
 
-> **Status:** v1.7.1 (2026-11-21). Khule sawal, aage ke topics aur jaanchna baaki. Cheezein ek-ek karke judengi.
+> **Status:** v1.7.3 (2026-11-21). Khule sawal, aage ke topics aur jaanchna baaki. Cheezein ek-ek karke judengi.
 
 ## Is file me kya aayega
 
@@ -66,6 +66,7 @@ Claude ka kaam: owner ka faisla nahi chahiye, sirf saboot. Nateeja saboot ke saa
 | Render Key Value ke free plan ki memory aur connections ki seema                                                                                                                                                                                                                             | D-293, D-298                   | Queues, connections aur Redis ka alert                               |
 | Atlas Search ke free cluster pe fuzzy, autocomplete aur synonyms ki seema                                                                                                                                                                                                                    | D-295                          | Search ke niyam                                                      |
 | Neon ke free plan me ek project ki jagah (0.5 GB ya 1 GB), aur khule connection pe compute sota hai ya nahi                                                                                                                                                                                  | D-288, D-309                   | Finance kab bhare, aur CU-ghante                                     |
+| Atlas M0 pe custom roles milte hain ya nahi (audit ka sirf insert aur find wala user), aur `readWrite` role me `collMod` hai ya nahi (release user)                                                                                                                                          | D-313, D-317                   | Audit ka pehra aur migrations ke users                               |
 | Brevo ka free plan: bina domain ek verified sender se bhejna chalta hai ya nahi, din ki seema, aur API key ke haq                                                                                                                                                                            | D-287                          | Email provider pakka karna                                           |
 
 ## 3. Sawal
@@ -5578,6 +5579,152 @@ Claude ka kaam: owner ka faisla nahi chahiye, sirf saboot. Nateeja saboot ke saa
 - **Kanooni detail:** export file books ka "electronic roop" maani jaaye ya nahi, aur asli business pe India me roz ka backup (CL-131): CA (aur Lawyer) se nahi jaancha.
 - **Owner ka jawab (2026-11-21):** **(b)**, band FY ka encrypted, hash se band export file private storage pe; Neon me closing balances, documents ki list aur hash. Design ab, kaam pehla FY band hone ke baad. Record: [DECISIONS.md](DECISIONS.md) D-309.
 
+### Q-247. ARCHITECTURE data batch 1: ids, numbers, paisa aur samay maanein?
+
+- **Status:** `Tay`. Topic: B15 (technical), B6 (paisa).
+- **Sawal:** Database Architect ke ids, numbers, paisa aur samay ke 10 niyam aur numbers ki table [ARCHITECTURE.md](ARCHITECTURE.md) §10.1 me aayein (seller code 3 characters, §1.7 ki misaal bhi)?
+- **Kyun zaroori:** rakam integer paise me na ho to rounding ki galti (§1.8); ids aur numbers ka ek roop saari services me chahiye; seller code ki misaal `S01` 500 sellers ke liye chhoti thi.
+- **Vikalp:** **(a)** jaise hain waise; **(b)** badlav ke saath (owner bataye); **(c)** batch roko.
+- **Salah:** **(a)**.
+- **Trade-off:** (a) me saajha money codec aur package har service me; (b) me owner ka samay; (c) me data ka bunyadi roop baaki.
+- **Owner ka jawab (2026-11-21):** **(a)**, 10 niyam aur table jaise hain. Record: [DECISIONS.md](DECISIONS.md) D-310.
+
+### Q-248. ARCHITECTURE data batch 2: transactions, concurrency aur platform collections maanein?
+
+- **Status:** `Tay`. Topic: B15 (technical).
+- **Sawal:** transaction helper, versions, conditional updates, unique indexes, copies ka `srcVersion`, dispatcher ke niyam aur har service ki platform collections (13 niyam aur table) [ARCHITECTURE.md](ARCHITECTURE.md) §10.2 me aayein?
+- **Kyun zaroori:** do scans, do staff ya dobara aaya event ek kaam do baar na kare; finance ka database band ho to events dead letter me na jaayein.
+- **Vikalp:** **(a)** jaise hain waise; **(b)** badlav ke saath (owner bataye); **(c)** batch roko.
+- **Salah:** **(a)**.
+- **Trade-off:** (a) me har service me 9 platform collections; (b) me owner ka samay; (c) me concurrency ke niyam baaki.
+- **Owner ka jawab (2026-11-21):** **(a)**, 13 niyam aur table jaise hain. Record: [DECISIONS.md](DECISIONS.md) D-311.
+
+### Q-249. ARCHITECTURE data batch 3: personal data, retention aur kanooni rok maanein?
+
+- **Status:** `Tay`. Topic: B13 (compliance), B14 (security).
+- **Sawal:** retention classes, erase ka tareeka, rok ki copy (`sealed_records`), field encryption aur blind index, codes ka hash aur delivery code encrypted, tax archive, aur account delete pe har service ka kaam (11 niyam aur table) [ARCHITECTURE.md](ARCHITECTURE.md) §10.3 me aayein?
+- **Kyun zaroori:** delete (D-151, SR-066), kanooni rok (D-250, D-262) aur tax archive (D-225) ek saath chalne chahiye, bina ek doosre ko tode.
+- **Vikalp:** **(a)** jaise hain waise; **(b)** badlav ke saath (owner bataye); **(c)** batch roko.
+- **Salah:** **(a)**. Delivery code customer ko dikhana zaroori hai, isliye wo hash nahi, encrypted; baaki codes sirf hash.
+- **Trade-off:** (a) me SR-063 ke "baaki codes sirf hash" se delivery code ka apvaad (Security Architect ke doosre run me pakka); (b) me owner ka samay; (c) me delete aur rok ka tareeka baaki.
+- **Owner ka jawab (2026-11-21):** **(a)**, 11 niyam aur table jaise hain. Record: [DECISIONS.md](DECISIONS.md) D-312.
+
+### Q-250. ARCHITECTURE data batch 4: migrations, release steps, seeds aur M0 ki aadatein maanein?
+
+- **Status:** `Tay`. Topic: B15 (technical).
+- **Sawal:** release step, index ke naam, expand aur contract, data migrations, release user, finance ki SQL migrations, validators, cursor wali lists, seeds aur backup ka roop (10 niyam) [ARCHITECTURE.md](ARCHITECTURE.md) §10.4 me aayein?
+- **Kyun zaroori:** deploy ke waqt do instance saath chalte hain, aur M0 pe 100 ops/second ki seema hai; badlav bina downtime ke aur dobara chalne layak hone chahiye.
+- **Vikalp:** **(a)** jaise hain waise; **(b)** badlav ke saath (owner bataye); **(c)** batch roko.
+- **Salah:** **(a)**.
+- **Trade-off:** (a) me har badlav do releases me; (b) me owner ka samay; (c) me migrations ka tareeka baaki.
+- **Owner ka jawab (2026-11-21):** **(a)**, 10 niyam jaise hain. Record: [DECISIONS.md](DECISIONS.md) D-313.
+
+### Q-251. ARCHITECTURE data batch 5: commerce ke orders, stock aur reservation maanein?
+
+- **Status:** `Tay`. Topic: B5 (orders), B3 (batch aur expiry).
+- **Sawal:** order ka dhaancha, batch ke level pe stock, place order ka ek transaction, FEFO, dikha hua batch hi, reservation ka timer, der se payment, pack ke teen kadam, cancel, raat ki jaanch, storage fee, recall ki list aur archive (14 niyam) [ARCHITECTURE.md](ARCHITECTURE.md) §10.5 me aayein?
+- **Kyun zaroori:** stock kabhi minus na ho (SR-045), customer ko dikhe batch ka MRP aur expiry hi mile (D-064, D-067), aur pack pe invoice dobara na bane.
+- **Vikalp:** **(a)** jaise hain waise; **(b)** badlav ke saath (owner bataye); **(c)** batch roko.
+- **Salah:** **(a)**.
+- **Trade-off:** (a) me pack teen kadam me (thoda zyada kaam); (b) me owner ka samay; (c) me commerce ka data baaki.
+- **Owner ka jawab (2026-11-21):** **(a)**, 14 niyam jaise hain. Record: [DECISIONS.md](DECISIONS.md) D-314.
+
+### Q-252. ARCHITECTURE data batch 6: finance ka PostgreSQL maanein?
+
+- **Status:** `Tay`. Topic: B6 (ledger), B15 (technical).
+- **Sawal:** schemas, journal ka barabar hona, ek ghatna ek journal, sirf insert, band mahina, bina gap number, cancel aur credit note, pack ki idempotency, tax archive, payout ke do haath, TDS aur TCS, `sys` tables, Neon ko na jagaana aur query builder (15 niyam aur table) [ARCHITECTURE.md](ARCHITECTURE.md) §10.6 me aayein?
+- **Kyun zaroori:** books ke niyam (§1) database ke constraints se pakke hone chahiye, aur Neon ke CU-ghante bachne chahiye (R-014).
+- **Vikalp:** **(a)** jaise hain waise; **(b)** badlav ke saath (owner bataye); **(c)** batch roko.
+- **Salah:** **(a)**.
+- **Trade-off:** (a) me ORM nahi, to queries thodi zyada likhni; (b) me owner ka samay; (c) me finance ka data baaki.
+- **Owner ka jawab (2026-11-21):** **(a)**, 15 niyam aur table jaise hain. Record: [DECISIONS.md](DECISIONS.md) D-315.
+
+### Q-253. ARCHITECTURE data batch 7: baaki services ke data niyam maanein?
+
+- **Status:** `Tay`. Topic: B15 (technical).
+- **Sawal:** identity, notify, payments, catalog, logistics aur support ke data niyam (10 niyam) [ARCHITECTURE.md](ARCHITECTURE.md) §10.7 me aayein?
+- **Kyun zaroori:** har service ke "ek hi" wale niyam (ek review, ek refund, ek brand ek seller) aur personal data ki jagah (logistics me address save nahi) data ke level pe pakke hone chahiye.
+- **Vikalp:** **(a)** jaise hain waise; **(b)** badlav ke saath (owner bataye); **(c)** batch roko.
+- **Salah:** **(a)**.
+- **Trade-off:** (a) me logistics ko address maalik se lena padta; (b) me owner ka samay; (c) me baaki services ke niyam baaki.
+- **Owner ka jawab (2026-11-21):** **(a)**, 10 niyam jaise hain. Record: [DECISIONS.md](DECISIONS.md) D-316.
+
+### Q-254. ARCHITECTURE data batch 8: audit, media, logs aur jagah maanein?
+
+- **Status:** `Tay`. Topic: B15 (technical), B14 (security).
+- **Sawal:** audit ka sirf insert user aur chunks, media ka record, logs ke chunks, band records ka archive, jagah ka roz ka naap, aur clusters kab bharte hain ki table (7 niyam aur table) [ARCHITECTURE.md](ARCHITECTURE.md) §10.8 me aayein?
+- **Kyun zaroori:** Atlas ke 0.5 GB (R-031) me audit sabse pehle bharta hai; design target (D-283) aur ₹0 ki seema alag likhi honi chahiye.
+- **Vikalp:** **(a)** jaise hain waise; **(b)** badlav ke saath (owner bataye); **(c)** batch roko.
+- **Salah:** **(a)**.
+- **Trade-off:** (a) me audit padhne me chunks ka ek kadam; (b) me owner ka samay; (c) me jagah ka plan baaki.
+- **Owner ka jawab (2026-11-21):** **(a)**, 7 niyam aur table jaise hain. Record: [DECISIONS.md](DECISIONS.md) D-317.
+
+### Q-255. Database Architect ke 7 naye risks maanein?
+
+- **Status:** `Tay`. Topic: B15 (technical), B14 (security).
+- **Sawal:** data se nikle 7 naye risks ([RISKS.md](RISKS.md) R-036 se R-042) RISKS me aayein?
+- **Naye risks (saar):**
+  1. **R-036:** Neon ki jagah me books ke 8 FY ₹0 pe nahi samaate; finance sabse pehle bharta hai.
+  2. **R-037:** sale ke din hot documents (batch ka balance, din ke counter) pe transactions takraate hain.
+  3. **R-038:** events se bani copies (daam, area, stock) peeche ya galat reh jaayein.
+  4. **R-039:** field encryption ki key kho jaaye ya galat badle.
+  5. **R-040:** nayi collection bina delete handler ya retention class ke aa jaaye.
+  6. **R-041:** deploy ke waqt ek hi release me field ya index jodna aur hatana.
+  7. **R-042:** audit ka chunk job ruke aur TTL taaza entries mita de.
+- **Kyun zaroori:** inka bachav ARCHITECTURE §10 me hai, par khatra RISKS me saaf dikhna chahiye.
+- **Vikalp:** **(a)** saare bachav ke saath `Khula`; **(b)** kuch `Maana` (owner bataye); **(c)** risks roko.
+- **Salah:** **(a)**. Har ek ka bachav likha hai, par ₹0 aur ek insaan ke kaam me khatra bacha hai.
+- **Trade-off:** (a) me 7 aur khule risks; (b) me owner ka samay; (c) me khatre chhupe rehte.
+- **Owner ka jawab (2026-11-21):** **(a)**, 7 naye risks bachav ke saath `Khula`. Record: [DECISIONS.md](DECISIONS.md) D-318.
+
+### Q-256. Data ke 5 chhote sudhaar ARCHITECTURE aur security docs me maanein?
+
+- **Status:** `Tay`. Topic: B15 (technical), B14 (security).
+- **Sawal:** tay faislon me 5 chhoti kamiyaan mili hain. Inke sudhaar maanein?
+  1. **Logistics ko address ka raasta:** events me poora address nahi jaata (§3), par partner ko darwaze ka pata chahiye. [ARCHITECTURE.md](ARCHITECTURE.md) §2.3 me ek sync row: logistics → commerce, assign aur Delivery sync ke waqt parcel ka naam, address aur phone (resolver); logistics me copy nahi.
+  2. **Finance ko delivered ka event:** return window ke baad payable (D-081) aur delivery pe UPI wale order ka delivery fee invoice (§1.6) delivered ke pal pe tike hain. §2.2 me finance `commerce.orderLine.delivered` bhi leta hai.
+  3. **Pack ka chhootna:** pack adhoora rahe ya dobara ho (D-090), to invoice cancel ka raasta nahi. Commerce ka naya event `commerce.parcel.packVoided` (parcel, seller, `packSeq`); finance dispatch se pehle us invoice ko cancel karta hai; naya pack naye `packSeq` se.
+  4. **Delivery code ka apvaad:** [security/SECURITY_REQUIREMENTS.md](security/SECURITY_REQUIREMENTS.md) SR-063 me line: delivery code encrypted, kyunki customer ko dikhana zaroori hai; milaan server pe; baaki codes sirf hash.
+  5. **Neon ki jagah:** §9 ki ₹0 table me Neon ki jagah ki line (0.5 GB ya 1 GB, jaanch §2; ₹0 pe 100 orders/din pe lagbhag 1.4 se 2.8 saal).
+- **Kyun zaroori:** inke bina partner ko pata nahi milta, seller ka payable aur delivery fee ka invoice nahi banta, aur pack dobara hone pe galat invoice reh jaata hai.
+- **Vikalp:** **(a)** paanchon sudhaar; **(b)** kuch hi (owner bataye); **(c)** roko.
+- **Salah:** **(a)**.
+- **Trade-off:** (a) me sync list me ek call aur ek naya event; (b) me owner ka samay; (c) me upar ki kamiyaan bani rehti.
+- **Owner ka jawab (2026-11-21):** **(a)**, paanchon sudhaar. Record: [DECISIONS.md](DECISIONS.md) D-319.
+
+### Q-257. Account delete ke baad ₹50,000 se upar ke invoice ki seller copy kaise mile?
+
+- **Status:** `Tay`. Topic: B6 (invoice), B13 (compliance).
+- **Sawal:** ₹50,000 ya zyada ke invoice ki seller ki copy me customer ka naam aur pata hota hai (D-226), par account delete ke baad naam aur pata sirf finance ke tax archive me rehta hai (§10.3 niyam 9). Seller ko apne records 72 mahine rakhne hain (CL-021). Delete ke baad seller ko ye copy kaise mile?
+- **Vikalp:**
+  - **(a) Archive se, finance ke raaste:** delete ke baad bhi seller apne invoice ki copy ek-ek karke download kar sake, finance ke tax archive se, har download audit me.
+  - **(b) Copy sirf jaari hote waqt:** seller ko copy invoice jaari hote hi milti hai; delete ke baad naam aur pata wali copy nahi.
+  - **(c) Delete pe seller ko suchna:** delete se pehle seller ko apni copies le lene ki khabar.
+- **Salah:** **(a)**. Seller ka 72 mahine ka record poora rehta hai, aur naam aur pata sirf ek band jagah se, audit ke saath, nikalta hai.
+- **Trade-off:**
+  - (a) me tax archive ka ek padhne ka raasta seller ke liye (SR-088 ke saath).
+  - (b) me seller apni copy kho de to wapas nahi.
+  - (c) me har delete pe sellers ko khabar, aur customer ke delete ki baat bahar.
+- **Kanooni detail:** delete ke baad seller ko customer ka naam aur pata dena (CL-020, CL-021): Lawyer (ya CA) se nahi jaancha.
+- **Owner ka jawab (2026-11-21):** **(a)**, delete ke baad bhi seller archive se, finance ke raaste, ek-ek copy le sake, har download audit me. Record: [DECISIONS.md](DECISIONS.md) D-320.
+
+### Q-258. Kanooni rok me chhote samay wale technical records bhi aayein ya nahi?
+
+- **Status:** `Tay`. Topic: B13 (compliance), B15 (technical).
+- **Sawal:** lagbhag 13 May 2027 se "sab data 1 saal" ki rok (D-250 niyam 2) hai. OTP ke hash, idempotency ke jawab, sessions, outbox aur inbox jaise chhote TTL wale records ki har deletion pe bhi rok ki copy bane?
+- **Kyun zaroori:** in records ki ginti bahut zyada hai; har deletion pe rok ki copy har cluster ki jagah kha jaati (R-031).
+- **Vikalp:**
+  - **(a) `tech` class rok me nahi:** retention class `tech` (§10.3 niyam 1) ke records rok me nahi aate, kyunki unka personal data (IP, samay) request logs me pehle se 1 saal rehta hai (D-285).
+  - **(b) Sab rok me:** har deletion pe rok ki copy.
+  - **(c) Sirf personal data wale technical records rok me:** har collection ki alag jaanch.
+- **Salah:** **(a)**.
+- **Trade-off:**
+  - (a) me ek class pe niyam saaf, par Lawyer ki jaanch baaki.
+  - (b) me jagah bhaari, clusters jaldi bharte.
+  - (c) me har collection pe alag faisla aur kaam.
+- **Kanooni detail:** `tech` class ko rok se bahar rakhna D-250 ki seema me aata hai ya nahi (CL-093): Lawyer se nahi jaancha.
+- **Owner ka jawab (2026-11-21):** **(a)**, `tech` class ke records kanooni rok me nahi. Record: [DECISIONS.md](DECISIONS.md) D-321.
+
 ## Change log
 
 | Version | Date       | Badlav                                                                                                                                                                                    |
@@ -5679,3 +5826,5 @@ Claude ka kaam: owner ka faisla nahi chahiye, sirf saboot. Nateeja saboot ke saa
 | v1.6.2  | 2026-11-20 | Q-236 se Q-240 (Architect ke risks aur tay faislon pe dhyaan ke points) tay; D-299 se D-303.                                                                                              |
 | v1.6.3  | 2026-11-21 | §2 media wali jaanch me jod: mitayi files provider ke trash ya backup me kitne din (D-296 ka jod).                                                                                        |
 | v1.7.1  | 2026-11-21 | Q-241 se Q-246 (Database Architect ke 6 sawal) tay; D-304 se D-309; §2 me Neon ki jagah ki jaanch.                                                                                        |
+| v1.7.2  | 2026-11-21 | Q-247 se Q-254 (ARCHITECTURE §10 data ki 8 batches) tay; D-310 se D-317.                                                                                                                  |
+| v1.7.3  | 2026-11-21 | Q-255 se Q-258 (Database Architect ke risks aur tay faislon pe dhyaan ke points) tay; D-318 se D-321.                                                                                     |

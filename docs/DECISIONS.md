@@ -1,6 +1,6 @@
 # DECISIONS: Beautinique
 
-> **Status:** v1.14.1 (2026-11-21). Har faisla ek jagah. Sirf wahi "Tay" jo owner ne khud kaha; Claude ki salah faisla nahi. Cheezein ek-ek karke judti hain.
+> **Status:** v1.14.3 (2026-11-21). Har faisla ek jagah. Sirf wahi "Tay" jo owner ne khud kaha; Claude ki salah faisla nahi. Cheezein ek-ek karke judti hain.
 
 ## 0. Kaise likhein
 
@@ -324,6 +324,18 @@
 | D-307 | Jin cheezon ka samay tay nahi tha unke rakhne ke samay (inbox, emails ka record, cart, wishlist, waitlist, sessions, daam ka itihaas, zero result, fraud signals, aankde), settings me.                                                                                                 | Architecture | 2026-11-21 |
 | D-308 | Order number 10 ank ka random jaisa, aakhri ank check digit (jaise `4827-1930-56`).                                                                                                                                                                                                     | Business     | 2026-11-21 |
 | D-309 | Finance ke band FY ka data encrypted, hash se band export file me private storage pe; Neon me closing balances, documents ki list aur hash.                                                                                                                                             | Architecture | 2026-11-21 |
+| D-310 | Data batch 1: ids, numbers, integer paise, UTC aur `istDay`, seller code 3 characters (ARCHITECTURE §10.1).                                                                                                                                                                             | Architecture | 2026-11-21 |
+| D-311 | Data batch 2: transaction helper, versions, conditional updates, unique indexes, copies ka `srcVersion`, platform collections (ARCHITECTURE §10.2).                                                                                                                                     | Architecture | 2026-11-21 |
+| D-312 | Data batch 3: retention classes, erase aur rok ki copy, field encryption, codes ka hash, delivery code encrypted, tax archive, delete pe har service (ARCHITECTURE §10.3).                                                                                                              | Architecture | 2026-11-21 |
+| D-313 | Data batch 4: release step, expand aur contract, migrations, validators, cursor lists, seeds aur backup ka roop (ARCHITECTURE §10.4).                                                                                                                                                   | Architecture | 2026-11-21 |
+| D-314 | Data batch 5: order ka dhaancha, batch ke level pe stock, place order ek transaction, FEFO, pack ke teen kadam, recall ki list (ARCHITECTURE §10.5).                                                                                                                                    | Architecture | 2026-11-21 |
+| D-315 | Data batch 6: finance ka PostgreSQL: schemas, journal ka barabar hona, sirf insert, bina gap number, tax archive, Neon ko na jagaana (ARCHITECTURE §10.6).                                                                                                                              | Architecture | 2026-11-21 |
+| D-316 | Data batch 7: identity, notify, payments, catalog, logistics aur support ke data niyam (ARCHITECTURE §10.7).                                                                                                                                                                            | Architecture | 2026-11-21 |
+| D-317 | Data batch 8: audit ke chunks aur sirf insert user, media aur logs, band records ka archive, jagah ka naap (ARCHITECTURE §10.8).                                                                                                                                                        | Architecture | 2026-11-21 |
+| D-318 | Database Architect ke 7 naye risks R-036 se R-042, sab bachav ke saath khula.                                                                                                                                                                                                           | Architecture | 2026-11-21 |
+| D-319 | Data ke 5 sudhaar: logistics → commerce address resolver, finance ko delivered ka event, `commerce.parcel.packVoided`, SR-063 me delivery code ka apvaad, §9 me Neon ki jagah.                                                                                                          | Architecture | 2026-11-21 |
+| D-320 | Account delete ke baad bhi seller ₹50,000 se upar ke invoice ki copy finance ke tax archive se ek-ek karke le sake, har download audit me.                                                                                                                                              | Business     | 2026-11-21 |
+| D-321 | Kanooni rok (D-250) me retention class `tech` ke chhote technical records nahi aate.                                                                                                                                                                                                    | Security     | 2026-11-21 |
 
 ## 2. Record
 
@@ -3849,6 +3861,109 @@
 - **Kisne, kab:** owner, 2026-11-21. **Nishaan:** Salah maani.
 - **Asar (Claude):** purane saal ki detail turant nahi (restore chahiye), aur ek file ki suraksha. Kanooni detail jaanchi nahi: export file books ka "electronic roop" maani jaaye ya nahi, aur asli business pe India me roz ka backup (CL-131), CA (aur Lawyer) se nahi jaancha.
 
+### D-310. Data batch 1: ids, numbers, paisa aur samay
+
+- **Faisla:** ids, numbers, paisa aur samay ke 10 niyam aur numbers ki table [ARCHITECTURE.md](ARCHITECTURE.md) §10.1 me: ObjectId aur naam wale `_id`, finance ke `bigint` keys, client ke UUIDv7 ka sirf hash, rakam integer paise (BSON `long`, PostgreSQL `bigint`), rates basis points, UTC timestamps aur `istDay`, bahar ke numbers `counters` se, aur seller ka code 3 characters (§1.7 ki misaal badli). Numbers misaal, settings me.
+- **Wajah:** Claude ki salah, owner ne maani: rakam aur rounding ki galti jad se band (§1.8), aur ids aur numbers ka ek roop saari services me.
+- **Chhode vikalp:** badlav ke saath maanna (owner ne koi badlav nahi diya); batch rokna (data ka bunyadi roop baaki).
+- **Kab dobara khulega:** owner khud khole.
+- **Kisne, kab:** owner, 2026-11-21. **Nishaan:** Salah maani.
+
+### D-311. Data batch 2: transactions, concurrency aur platform collections
+
+- **Faisla:** 13 niyam aur har service ki platform collections ki table [ARCHITECTURE.md](ARCHITECTURE.md) §10.2 me: transaction helper, ek transaction me badlav aur outbox, `version` aur 409, purani halat filter me, "ek hi" wali cheezon ke unique indexes, counters pe conditional `$inc`, copies ka `srcVersion`, dispatcher ke niyam, band subscriber pe koshish ki ginti nahi, aur PostgreSQL ke locks aur retries.
+- **Wajah:** Claude ki salah, owner ne maani: do scans, do staff ya dobara aaya event ek kaam do baar nahi karta; finance ka database band ho to events dead letter me nahi jaate (R-028).
+- **Chhode vikalp:** badlav ke saath maanna (owner ne koi badlav nahi diya); batch rokna (concurrency ke niyam baaki).
+- **Kab dobara khulega:** owner khud khole.
+- **Kisne, kab:** owner, 2026-11-21. **Nishaan:** Salah maani.
+
+### D-312. Data batch 3: personal data, retention aur kanooni rok
+
+- **Faisla:** 11 niyam aur delete ki table [ARCHITECTURE.md](ARCHITECTURE.md) §10.3 me: har collection ki retention class (CI ka pehra), business cheezein sirf `archived`, erase = field hatana ya delete, rok ki copy `sealed_records` me alag key se, field encryption aur blind index (SR-063), codes sirf hash, delivery code encrypted (customer ko dikhana zaroori), PAN aur bank finance me, naam aur pata sirf tax archive me, aur account delete pe har service ka kaam.
+- **Wajah:** Claude ki salah, owner ne maani: delete (D-151, SR-066), kanooni rok (D-250, D-262) aur tax archive (D-225) ek doosre ko tode bina saath chalte hain.
+- **Chhode vikalp:** badlav ke saath maanna (owner ne koi badlav nahi diya); batch rokna (delete aur rok ka tareeka baaki).
+- **Kab dobara khulega:** Security Architect ka doosra run, Lawyer ki raay, ya owner khud khole.
+- **Kisne, kab:** owner, 2026-11-21. **Nishaan:** Salah maani.
+- **Asar (Claude):** SR-063 me "baaki codes sirf hash" se delivery code ka apvaad: Security Architect ke doosre run me pakka. Reviews pe delete D-305 se.
+
+### D-313. Data batch 4: migrations, release steps, seeds aur M0 ki aadatein
+
+- **Faisla:** 10 niyam [ARCHITECTURE.md](ARCHITECTURE.md) §10.4 me: lease ke peeche release step aur fingerprint, index ka naam aur roop, expand aur contract do releases me, idempotent data migrations, alag release user, finance ki numbered SQL migrations (Neon ke pehle kaam pe), zaroori fields pe validators, cursor wali lists aur collection scan ka pehra, seeds (demo me koi asli personal data nahi), aur backup ka roop.
+- **Wajah:** Claude ki salah, owner ne maani: deploy ke waqt do instance aur M0 ke 100 ops/second me badlav bina downtime ke aur dobara chalne layak.
+- **Chhode vikalp:** badlav ke saath maanna (owner ne koi badlav nahi diya); batch rokna (migrations ka tareeka baaki).
+- **Kab dobara khulega:** owner khud khole.
+- **Kisne, kab:** owner, 2026-11-21. **Nishaan:** Salah maani.
+- **Asar (Claude):** backup ka asli chalna DevOps / SRE ke saath (D-013).
+
+### D-314. Data batch 5: commerce ke orders, stock aur reservation
+
+- **Faisla:** 14 niyam [ARCHITECTURE.md](ARCHITECTURE.md) §10.5 me: order ka ek document, batch ke level pe stock (`stock_batches`, `stock_balances`, `stock_bins`, `stock_movements`), place order ek transaction me, FEFO, dikha hua batch hi, prepaid reservation ka timer, der se payment pe usi MRP aur expiry ka batch ya ek refund, pack ke teen kadam (`packSeq`), cancel sirf pack se pehle, raat ki stock jaanch, storage fee ki ghadi, recall ki list, aur band orders ka archive (D-306).
+- **Wajah:** Claude ki salah, owner ne maani: stock kabhi minus nahi (SR-045), customer ko dikhe batch ka MRP aur expiry hi milte hain (D-064, D-067), aur pack pe invoice dobara nahi banta.
+- **Chhode vikalp:** badlav ke saath maanna (owner ne koi badlav nahi diya); batch rokna (commerce ka data baaki).
+- **Kab dobara khulega:** owner khud khole.
+- **Kisne, kab:** owner, 2026-11-21. **Nishaan:** Salah maani.
+
+### D-315. Data batch 6: finance ka PostgreSQL
+
+- **Faisla:** 15 niyam aur tables ki list [ARCHITECTURE.md](ARCHITECTURE.md) §10.6 me: 7 schemas, journal ka barabar hona (deferred trigger), ek ghatna ek journal, books pe sirf insert, band mahina, bina gap number (series row ka lock), cancel aur credit note, pack ki idempotency, tax archive, payout ke do haath (D-189), TDS aur TCS, `sys` tables aur roz ka purge, dispatcher aur ticker sirf jaage finance pe, aur `pg` ke saath query builder (ORM nahi).
+- **Wajah:** Claude ki salah, owner ne maani: books ke niyam (§1) database ke constraints se pakke, aur Neon ke CU-ghante bachte hain (R-014).
+- **Chhode vikalp:** badlav ke saath maanna (owner ne koi badlav nahi diya); batch rokna (finance ka data baaki).
+- **Kab dobara khulega:** CA ki raay, ya owner khud khole.
+- **Kisne, kab:** owner, 2026-11-21. **Nishaan:** Salah maani.
+
+### D-316. Data batch 7: baaki services ke data niyam
+
+- **Faisla:** 10 niyam [ARCHITECTURE.md](ARCHITECTURE.md) §10.7 me: identity (unique email aur parivaar D-304, credentials alag, refresh token, codes ki koshishein, delete ka timer), notify (chhat ka counter, OTP DB me nahi), payments (webhook ka event id, refund ki seema, ek parcel ek QR), catalog (ek brand ek seller, barcode unique, listing versions, daam ka itihaas, ek review), logistics (address save nahi, code ka milaan, location sirf kuch pal) aur support (daawe ki khidki, rakam ki seema, appeal).
+- **Wajah:** Claude ki salah, owner ne maani: har service ke "ek hi" wale niyam aur personal data ki jagah data ke level pe pakke.
+- **Chhode vikalp:** badlav ke saath maanna (owner ne koi badlav nahi diya); batch rokna (baaki services ke niyam baaki).
+- **Kab dobara khulega:** owner khud khole.
+- **Kisne, kab:** owner, 2026-11-21. **Nishaan:** Salah maani.
+- **Asar (Claude):** logistics ko naam, address aur phone maalik se chahiye; ye raasta (sync list ya offline data) tay faislon pe dhyaan ke points ke saath aage.
+
+### D-317. Data batch 8: audit, media, logs aur jagah
+
+- **Faisla:** 7 niyam aur clusters ki table [ARCHITECTURE.md](ARCHITECTURE.md) §10.8 me: audit ka sirf insert aur find wala user, din ki chain aur gzip chunks, chunk ki umar setting, media ka record aur rok, logs ke chunks ka TTL, band records ka mahine ka archive (likho, hash jaancho, phir delete), aur har collection ka roz ka naap aur alert.
+- **Wajah:** Claude ki salah, owner ne maani: Atlas ke 0.5 GB me audit sabse pehle bharta hai (R-031); design target (D-283) aur ₹0 ki seema alag aur saaf likhi.
+- **Chhode vikalp:** badlav ke saath maanna (owner ne koi badlav nahi diya); batch rokna (jagah ka plan baaki).
+- **Kab dobara khulega:** asli naap, ya owner khud khole.
+- **Kisne, kab:** owner, 2026-11-21. **Nishaan:** Salah maani.
+- **Asar (Claude):** audit ka sirf insert user M0 pe custom roles milne pe tika hai: jaanch [OPEN_QUESTIONS.md](OPEN_QUESTIONS.md) §2 me.
+
+
+### D-318. Database Architect ke risks
+
+- **Faisla:** 7 naye risks [RISKS.md](RISKS.md) me: R-036 (Neon ki jagah me books ke 8 FY nahi samaate), R-037 (sale ke din hot documents pe takraav), R-038 (copies peeche ya galat), R-039 (field encryption ki key), R-040 (nayi collection bina retention class ke), R-041 (ek release me jodna aur hatana), R-042 (audit ka chunk job ruke). Sab bachav ke saath `Khula`.
+- **Wajah:** Claude ki salah, owner ne maani: har ek ka bachav [ARCHITECTURE.md](ARCHITECTURE.md) §10 me likha hai, par ₹0 aur ek insaan ke kaam me khatra bacha hai.
+- **Chhode vikalp:** kuch `Maana` (owner ne koi nahi chuna); risks rokna (khatre chhupe rehte).
+- **Kab dobara khulega:** asli naap, ya owner khud khole.
+- **Kisne, kab:** owner, 2026-11-21. **Nishaan:** Salah maani.
+
+### D-319. Data ke 5 sudhaar
+
+- **Faisla:** (1) [ARCHITECTURE.md](ARCHITECTURE.md) §2.3 me sync call logistics → commerce: assign aur Delivery sync ke waqt parcel ka naam, address aur phone (resolver), logistics me copy nahi. (2) §2.2 me finance `commerce.orderLine.delivered` aur `commerce.parcel.packVoided` bhi leta hai. (3) Pack adhoora rahe ya dobara ho to commerce `commerce.parcel.packVoided` (parcel, seller, `packSeq`) bhejta hai; finance dispatch se pehle us invoice ko cancel karta hai (§10.5 niyam 9). (4) [security/SECURITY_REQUIREMENTS.md](security/SECURITY_REQUIREMENTS.md) SR-063 me: delivery code encrypted, kyunki customer ko dikhana zaroori hai; milaan server pe; baaki codes sirf hash. (5) §9 ki ₹0 table me Neon ki jagah ki line.
+- **Wajah:** Claude ki salah, owner ne maani: inke bina partner ko darwaze ka pata nahi milta, seller ka payable (D-081) aur delivery fee ka invoice (§1.6) delivered ke pal pe nahi bante, aur pack dobara hone pe galat invoice reh jaata.
+- **Chhode vikalp:** kuch hi sudhaar (owner ne sab maane); rokna (kamiyaan bani rehti).
+- **Kab dobara khulega:** Security Architect ka doosra run, ya owner khud khole.
+- **Kisne, kab:** owner, 2026-11-21. **Nishaan:** Salah maani.
+- **Asar (Claude):** sync calls ki list me ek call aur commerce ka ek naya event. Delivery code ka apvaad pehle D-312 ke asar me tha; ab SR-063 me likha.
+
+### D-320. Delete ke baad seller ki invoice copy
+
+- **Faisla:** customer ka account delete hone ke baad bhi seller apne invoice ki copy (₹50,000 ya zyada pe customer ke naam aur pata ke saath, D-226) ek-ek karke finance ke tax archive se download kar sakta hai, finance ke raaste, har download audit me ([ARCHITECTURE.md](ARCHITECTURE.md) §10.3 niyam 12).
+- **Wajah:** Claude ki salah, owner ne maani: seller ka 72 mahine ka record (CL-021) poora rehta hai, aur naam aur pata sirf ek band jagah se, audit ke saath, nikalta hai.
+- **Chhode vikalp:** copy sirf jaari hote waqt (seller copy kho de to wapas nahi); delete pe sellers ko suchna (har delete ki baat bahar).
+- **Kab dobara khulega:** Lawyer ya CA ki raay, ya owner khud khole.
+- **Kisne, kab:** owner, 2026-11-21. **Nishaan:** Salah maani.
+- **Asar (Claude):** SR-088 (seller ko invoice ki copy) ke saath tax archive ka ek padhne ka raasta. Kanooni detail jaanchi nahi: delete ke baad seller ko customer ka naam aur pata dena (CL-020, CL-021), Lawyer (ya CA) se nahi jaancha.
+
+### D-321. Kanooni rok aur technical records
+
+- **Faisla:** lagbhag 13 May 2027 se "sab data 1 saal" ki rok (D-250 niyam 2) me retention class `tech` ke records (OTP ke hash, idempotency ke jawab, sessions, outbox, inbox) nahi aate; unka personal data (IP, samay) request logs me pehle se 1 saal rehta hai (D-285) ([ARCHITECTURE.md](ARCHITECTURE.md) §10.3 niyam 4).
+- **Wajah:** Claude ki salah, owner ne maani: in records ki ginti bahut zyada hai, aur har deletion pe rok ki copy har cluster ki jagah kha jaati (R-031).
+- **Chhode vikalp:** sab rok me (jagah bhaari); sirf personal data wale technical records rok me (har collection pe alag faisla).
+- **Kab dobara khulega:** Lawyer ki raay, ya owner khud khole.
+- **Kisne, kab:** owner, 2026-11-21. **Nishaan:** Salah maani.
+- **Asar (Claude):** Kanooni detail jaanchi nahi: `tech` class ko rok se bahar rakhna D-250 ki seema me aata hai ya nahi (CL-093), Lawyer se nahi jaancha.
 ## Change log
 
 | Version  | Date       | Badlav                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      |
@@ -3945,3 +4060,5 @@
 | v1.13.2  | 2026-11-20 | D-299 se D-303 aaye (Architect ke risks, area band karne ka kram, bina network ke delivery code, confirmation email ki line, media ka backup; Q-236 se Q-240). D-072, D-126 aur D-298 me jod.                                                                                                                                                                                                                                                                                               |
 | v1.13.3  | 2026-11-21 | D-296 me jod (owner): file badalne pe purani file ka niyam, ARCHITECTURE §7 niyam 10.                                                                                                                                                                                                                                                                                                                                                                                                       |
 | v1.14.1  | 2026-11-21 | D-304 se D-309 aaye (Database Architect ke 6 sawal: har parivaar ka alag account, delete pe reviews, purane orders ka archive, rakhne ke samay, order number, finance ke band FY; Q-241 se Q-246).                                                                                                                                                                                                                                                                                          |
+| v1.14.2  | 2026-11-21 | D-310 se D-317 aaye (ARCHITECTURE §10 data ki 8 batches; Q-247 se Q-254).                                                                                                                                                                                                                                                                                                                                                                                                                   |
+| v1.14.3  | 2026-11-21 | D-318 se D-321 aaye (Database Architect ke risks, data ke 5 sudhaar, delete ke baad seller ki invoice copy, rok aur technical records; Q-255 se Q-258).                                                                                                                                                                                                                                                                                                                                     |
