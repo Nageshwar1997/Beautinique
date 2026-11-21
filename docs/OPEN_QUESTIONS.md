@@ -1,6 +1,6 @@
 # OPEN QUESTIONS: Beautinique
 
-> **Status:** v1.7.5 (2026-11-21). Khule sawal, aage ke topics aur jaanchna baaki. Cheezein ek-ek karke judengi.
+> **Status:** v1.7.7 (2026-11-21). Khule sawal, aage ke topics aur jaanchna baaki. Cheezein ek-ek karke judengi.
 
 ## Is file me kya aayega
 
@@ -75,6 +75,7 @@ Claude ka kaam: owner ka faisla nahi chahiye, sirf saboot. Nateeja saboot ke saa
 | Razorpay payment method ki koi sthir pehchaan (card fingerprint ya token) deta hai ya nahi, bina UPI ID ke                                                                                                                                                                                   | D-203, D-312, SR-064           | Accounts ke jod ka payment wala hissa                                |
 | M0 ke 7 din ke 10 GB transfer me backup command (D-013) aur location import ka hissa, aur M0 pe `$jsonSchema` validator aur partial indexes ki koi alag seema                                                                                                                                | D-013, D-313, R-006            | Backup aur import ka samay, validators                               |
 | Brevo ka free plan: bina domain ek verified sender se bhejna chalta hai ya nahi, din ki seema, aur API key ke haq                                                                                                                                                                            | D-287                          | Email provider pakka karna                                           |
+| GitHub pe public repo ka push protection (repo ke level pe) muft chalu hota hai ya nahi, aur users wala push protection bypass ho sakta hai ya nahi                                                                                                                                          | SR-080, D-338                  | CI ka secret scan asli pehra hai; repo ka pehra mile to ek aur parat |
 
 ## 3. Sawal
 
@@ -5784,7 +5785,7 @@ Claude ka kaam: owner ka faisla nahi chahiye, sirf saboot. Nateeja saboot ke saa
   - (a) me raat ki ghatna pe kanooni ghadi chhoot sakti hai.
   - (b) me kabhi-kabhi raat ko neend tootegi.
   - (c) me har chhote alert pe neend aur thakaan.
-- **Kanooni detail:** CERT-In ki 6 ghante ki ghadi kab se ginti hai ("pata chalne" se ya "pakka hone" se), aur 2 ya 3 ghante wali ghadiyaan ek insaan ke system pe kaise poori hon: Lawyer se nahi jaancha.
+- **Kanooni detail:** CERT-In ki 6 ghante ki ghadi incident pata chalne se ginti hai (D-248); 2 ya 3 ghante wali ghadiyaan ek insaan ke system pe kaise poori hon: Lawyer se nahi jaancha.
 - **Owner ka jawab (2026-11-21):** **(b)**, ops inbox din ke tay samay pe, aur gambhirta 1 ka browser push raat me bhi; gambhirta 2 aur 3 subah. Record: [DECISIONS.md](DECISIONS.md) D-324.
 
 ### Q-262. Saajhe packages npm pe publish honge ya nahi?
@@ -5805,6 +5806,156 @@ Claude ka kaam: owner ka faisla nahi chahiye, sirf saboot. Nateeja saboot ke saa
   - (c) me har release pe sabse zyada bojh aur jokhim.
 - **Owner ka jawab (2026-11-21):** **(a)**, abhi koi publish nahi; har package `private: true` aur CI me iska pehra; R1 ke baad owner dobara dekhe. Record: [DECISIONS.md](DECISIONS.md) D-325.
 
+### Q-263. OPERATIONS batch 1: environments aur laptop ka setup maanein?
+
+- **Status:** `Tay`. Topic: B15 (technical).
+- **Sawal:** DevOps / SRE ke 10 niyam (teen jagah (laptop, CI, live), koi staging nahi, laptop ka infra aur version ka mel, sirf zaroori containers, `.env.example` ke teen hisse, ek command ka setup) [OPERATIONS.md](OPERATIONS.md) §1 me aayein?
+- **Kyun zaroori:** laptop aur live ka farak (version, Redis ki memory) bugs chhupata hai, aur laptop, tests aur CI kabhi live data ko na chhooein.
+- **Vikalp:** **(a)** jaise hain waise; **(b)** badlav ke saath (owner bataye); **(c)** batch roko.
+- **Salah:** **(a)**.
+- **Trade-off:** (a) me har image aur version pinned rakhne ka kaam; (b) me owner ka samay; (c) me laptop ka setup baaki.
+- **Owner ka jawab (2026-11-21):** **(a)**, 10 niyam jaise hain. Record: [DECISIONS.md](DECISIONS.md) D-326.
+
+### Q-264. OPERATIONS batch 2: CI aur branch ke pehre maanein?
+
+- **Status:** `Tay`. Topic: B15 (technical).
+- **Sawal:** DevOps / SRE ke 12 niyam (ek `check` job, `guard` (secret scan, branch flow, `npm audit`), static checks, asli containers pe tests aur repo ke pehre, supply chain, CI me koi production secret nahi, rulesets) [OPERATIONS.md](OPERATIONS.md) §2 me aayein?
+- **Kyun zaroori:** Render aur Vercel sirf green `check` pe deploy karein, aur public repo me secrets aur supply chain ka pehra ho (SR-082).
+- **Vikalp:** **(a)** jaise hain waise; **(b)** badlav ke saath (owner bataye); **(c)** batch roko.
+- **Salah:** **(a)**.
+- **Trade-off:** (a) me CI ka chalne ka samay aur workflows sambhalna; (b) me owner ka samay; (c) me deploy aur branches ka pehra baaki.
+- **Owner ka jawab (2026-11-21):** **(a)**, 12 niyam jaise hain. Record: [DECISIONS.md](DECISIONS.md) D-327.
+
+### Q-265. OPERATIONS batch 3: release, deploy, migrations aur rollback maanein?
+
+- **Status:** `Tay`. Topic: B15 (technical).
+- **Sawal:** DevOps / SRE ke 12 niyam (release ka kram, Render aur Vercel ki settings, SIGTERM pe band hona, release step, expand aur contract, sirf ek release peeche rollback, smoke check, hotfix, release ka note) [OPERATIONS.md](OPERATIONS.md) §3 me aayein?
+- **Kyun zaroori:** Render sirf pichhle 2 deploys tak wapas ja sakta hai, aur expand aur contract ke bina rollback data tod sakta hai.
+- **Vikalp:** **(a)** jaise hain waise; **(b)** badlav ke saath (owner bataye); **(c)** batch roko.
+- **Salah:** **(a)**.
+- **Trade-off:** (a) me har release pe kram aur smoke check ka samay; (b) me owner ka samay; (c) me release ka kram baaki.
+- **Owner ka jawab (2026-11-21):** **(a)**, 12 niyam jaise hain. Record: [DECISIONS.md](DECISIONS.md) D-328.
+
+### Q-266. OPERATIONS batch 4: secrets aur config maanein?
+
+- **Status:** `Tay`. Topic: B15 (technical).
+- **Sawal:** DevOps / SRE ke 10 niyam (secrets ki table (value kabhi nahi), kaunsa secret kahan, test aur live keys alag, config ka schema, do values ke saath badlav, kab badalna, providers pe MFA, settings DB me) [OPERATIONS.md](OPERATIONS.md) §4 me aayein?
+- **Kyun zaroori:** repo public hai; secret kahan rahe, kaise badle aur test ya live key ka farak pehle se tay ho.
+- **Vikalp:** **(a)** jaise hain waise; **(b)** badlav ke saath (owner bataye); **(c)** batch roko.
+- **Salah:** **(a)**.
+- **Trade-off:** (a) me saal me ek baar secrets badalne ka kaam; (b) me owner ka samay; (c) me secrets ka kram baaki.
+- **Owner ka jawab (2026-11-21):** **(a)**, 10 niyam jaise hain. Record: [DECISIONS.md](DECISIONS.md) D-329.
+
+### Q-267. OPERATIONS batch 5: soya server, jagana aur samay wale kaam maanein?
+
+- **Status:** `Tay`. Topic: B15 (technical).
+- **Sawal:** DevOps / SRE ke 12 niyam (jagane ke raaste, pinger sirf `/wake` ya `/health`, jagane ki khidki (D-322), do call aur UptimeRobot ka samay, jaag pe sweep, cold start 90 second, ghanton ka hisaab, Key Value khaali hone pe, lamba break aur Atlas resume) [OPERATIONS.md](OPERATIONS.md) §5 me aayein?
+- **Kyun zaroori:** free server 15 minute me so jaata hai; D-322 ka niyam lagu karna hai, aur GitHub ke schedule ki kamiyaan sambhalni hain.
+- **Vikalp:** **(a)** jaise hain waise; **(b)** badlav ke saath (owner bataye); **(c)** batch roko.
+- **Salah:** **(a)**.
+- **Trade-off:** (a) me do bahar ke pinger aur unki jaanch; (b) me owner ka samay; (c) me jagane ka kram baaki.
+- **Owner ka jawab (2026-11-21):** **(a)**, 12 niyam jaise hain. Record: [DECISIONS.md](DECISIONS.md) D-330.
+
+### Q-268. OPERATIONS batch 6: backup aur restore maanein?
+
+- **Status:** `Tay`. Topic: B15 (technical).
+- **Sawal:** DevOps / SRE ke 12 niyam (backup me kya aur kya nahi, providers ke backup pe bharosa nahi, kab (D-323), kahan, manifest, transfer ki seema, pehle laptop pe restore, production restore ka kram, har 3 mahine abhyaas, RPO aur RTO) [OPERATIONS.md](OPERATIONS.md) §6 me aayein?
+- **Kyun zaroori:** free tier pe providers ka backup nahi milta, aur restore ke abhyaas ke bina backup pe bharosa nahi.
+- **Vikalp:** **(a)** jaise hain waise; **(b)** badlav ke saath (owner bataye); **(c)** batch roko.
+- **Salah:** **(a)**.
+- **Trade-off:** (a) me hafte ka backup aur har 3 mahine ka abhyaas; (b) me owner ka samay; (c) me backup ka bharosa baaki.
+- **Owner ka jawab (2026-11-21):** **(a)**, 12 niyam jaise hain. Record: [DECISIONS.md](DECISIONS.md) D-331.
+
+### Q-269. OPERATIONS batch 7: monitoring, health aur alerts maanein?
+
+- **Status:** `Tay`. Topic: B15 (technical).
+- **Sawal:** DevOps / SRE ke 9 niyam (`/health`, `/ready` aur `/wake`, alerts ke teen raaste, gambhirta ke teen level, alerts ki ginti ki seema, bahar ke free alerts, ops page, logs ki umar, "dead man" check) [OPERATIONS.md](OPERATIONS.md) §7 me aayein?
+- **Kyun zaroori:** soye server pe hamare apne alerts nahi bante, isliye bahar ke free alerts bhi chahiye.
+- **Vikalp:** **(a)** jaise hain waise; **(b)** badlav ke saath (owner bataye); **(c)** batch roko.
+- **Salah:** **(a)**.
+- **Trade-off:** (a) me bahar ke alerts set karna aur sambhalna; (b) me owner ka samay; (c) me alerts ka dhaancha baaki.
+- **Owner ka jawab (2026-11-21):** **(a)**, 9 niyam jaise hain. Record: [DECISIONS.md](DECISIONS.md) D-332.
+
+### Q-270. OPERATIONS batch 8: incident ke runbooks maanein?
+
+- **Status:** `Tay`. Topic: B15 (technical).
+- **Sawal:** DevOps / SRE ke 12 niyam (ek dhaancha, jawab ka samay (D-324), data leak (D-248), secret leak, provider account pe kabza, laptop kho jaaye, OOM, free tier khatam, sarkari order, chhote kram, seekh aur saal ka abhyaas) [OPERATIONS.md](OPERATIONS.md) §8 me aayein?
+- **Kyun zaroori:** kanooni ghadiyaan chhoti hain (D-248, D-251), aur sab ek hi insaan sambhalta hai.
+- **Vikalp:** **(a)** jaise hain waise; **(b)** badlav ke saath (owner bataye); **(c)** batch roko.
+- **Salah:** **(a)**.
+- **Trade-off:** (a) me runbooks ke drafts aur saal ka abhyaas; (b) me owner ka samay; (c) me incident ka kram baaki.
+- **Kanooni detail:** data leak me "pakka" ki paribhasha aur users ko khabar ka samay: Lawyer se nahi jaancha.
+- **Owner ka jawab (2026-11-21):** **(a)**, 12 niyam jaise hain. Record: [DECISIONS.md](DECISIONS.md) D-333.
+
+### Q-271. OPERATIONS batch 9: capacity aur free tier ki nigrani maanein?
+
+- **Status:** `Tay`. Topic: B15 (technical).
+- **Sawal:** DevOps / SRE ke 7 niyam (hafte ki jaanch, numbers ki table git ke bahar, 70% pe kaam, ₹0 ki table har 6 mahine dobara, ek hi Render service, Vercel ke deploys, repo personal account me) [OPERATIONS.md](OPERATIONS.md) §9 me aayein?
+- **Kyun zaroori:** free sharten bina khabar badal sakti hain, aur 70% pe pehle se kaam ho to service band nahi hoti.
+- **Vikalp:** **(a)** jaise hain waise; **(b)** badlav ke saath (owner bataye); **(c)** batch roko.
+- **Salah:** **(a)**.
+- **Trade-off:** (a) me hafte ke 15 minute; (b) me owner ka samay; (c) me nigrani baaki.
+- **Owner ka jawab (2026-11-21):** **(a)**, 7 niyam jaise hain. Record: [DECISIONS.md](DECISIONS.md) D-334.
+
+### Q-272. OPERATIONS batch 10: 512 MB pe memory ka naap maanein?
+
+- **Status:** `Tay`. Topic: B15 (technical).
+- **Sawal:** DevOps / SRE ke 7 niyam (Docker me 512 MB aur kam CPU pe naap, chaar halat, kya naapna, nateeja aur D-049 kab khule, dobara naap, live se milaan, script sirf laptop pe) [OPERATIONS.md](OPERATIONS.md) §10 me aayein?
+- **Kyun zaroori:** R-007: bundle mode 512 MB me chalega ya nahi, ye R1 se pehle naap se pata chalna chahiye.
+- **Vikalp:** **(a)** jaise hain waise; **(b)** badlav ke saath (owner bataye); **(c)** batch roko.
+- **Salah:** **(a)**.
+- **Trade-off:** (a) me R1 se pehle aur har 3 mahine naap ka kaam; (b) me owner ka samay; (c) me memory ka jokhim bina naap ke.
+- **Owner ka jawab (2026-11-21):** **(a)**, 7 niyam jaise hain. Record: [DECISIONS.md](DECISIONS.md) D-335.
+
+### Q-273. OPERATIONS batch 11: dependencies aur packages ka publish maanein?
+
+- **Status:** `Tay`. Topic: B15 (technical).
+- **Sawal:** DevOps / SRE ke 8 niyam (mahine ke dependency PRs, naye dependency ka review, Node ka version pinned, Atlas ka version, merge owner kare, `private: true` ka pehra (D-325), publish ka plan bane to uske niyam, fake registry) [OPERATIONS.md](OPERATIONS.md) §11 me aayein?
+- **Kyun zaroori:** supply chain ka jokhim (R-026) aur D-325 ka pehra CI me chahiye.
+- **Vikalp:** **(a)** jaise hain waise; **(b)** badlav ke saath (owner bataye); **(c)** batch roko.
+- **Salah:** **(a)**.
+- **Trade-off:** (a) me mahine ke dependency PRs ka review; (b) me owner ka samay; (c) me dependencies ka kram baaki.
+- **Owner ka jawab (2026-11-21):** **(a)**, 8 niyam jaise hain. Record: [DECISIONS.md](DECISIONS.md) D-336.
+
+### Q-274. DevOps / SRE ke 12 naye risks maanein?
+
+- **Status:** `Tay`. Topic: B15 (technical), B14 (security).
+- **Sawal:** operations se nikle 12 naye risks ([RISKS.md](RISKS.md) R-043 se R-054) RISKS me aayein?
+- **Naye risks (saar):**
+  1. **R-043:** GitHub ke scheduled runs late ya chhoot jaate hain, aur 60 din bina activity ke band.
+  2. **R-044:** Render keep-alive ko apne niyam ke khilaaf maane.
+  3. **R-045:** Render ka rollback sirf pichhle do deploys tak.
+  4. **R-046:** providers ka backup nahi, apna backup sirf laptop pe.
+  5. **R-047:** Neon ka 5 GB/mahina transfer khatam ho to finance band.
+  6. **R-048:** Vercel ke logs 1 ghanta, Render ke logs ki umar pata nahi.
+  7. **R-049:** cold start aur Vercel ke 120 second ke beech kam jagah.
+  8. **R-050:** saare alerts ek insaan pe, kanooni ghadiyaan chhoot sakti hain.
+  9. **R-051:** lagbhag 20 secrets ka haath se badlav, galti se outage.
+  10. **R-052:** providers ki free sharten bina khabar badalti hain.
+  11. **R-053:** Atlas MongoDB ka version khud badhata hai.
+  12. **R-054:** public repo me fix se pehle kamzori ki detail dikh jaaye.
+- **Kyun zaroori:** inka bachav [OPERATIONS.md](OPERATIONS.md) me hai, par khatra RISKS me saaf dikhna chahiye.
+- **Vikalp:** **(a)** saare bachav ke saath `Khula`; **(b)** kuch `Maana` (owner bataye); **(c)** risks roko.
+- **Salah:** **(a)**. Har ek ka bachav likha hai, par ₹0 aur ek insaan ke kaam me khatra bacha hai.
+- **Trade-off:** (a) me 12 aur khule risks; (b) me owner ka samay; (c) me khatre chhupe rehte.
+- **Kanooni detail:** R-050 me kanooni ghadiyaan chhootne ka asar: Lawyer se nahi jaancha.
+- **Owner ka jawab (2026-11-21):** **(a)**, 12 naye risks bachav ke saath `Khula`. Record: [DECISIONS.md](DECISIONS.md) D-337.
+
+### Q-275. Operations ke 6 chhote sudhaar maanein?
+
+- **Status:** `Tay`. Topic: B15 (technical), B14 (security).
+- **Sawal:** tay faislon aur docs me 6 chhoti kamiyaan mili hain. Inke sudhaar maanein?
+  1. **Release step ka samay:** [ARCHITECTURE.md](ARCHITECTURE.md) §10.4 niyam 1 me jod: schema wala hissa listen se pehle, lambi data migration listen ke baad background me, lease ke saath. Warna naya instance cold start aur Vercel ke 120 second ki seema me nahi uthta.
+  2. **UptimeRobot ka samay:** SR-078 me jod: check jaage server pe pade, jagane wale pinger ke kuch minute baad, warna cold start pe har baar jhootha "down" aur asli down shor me kho jaata hai.
+  3. **Secret scan ka asli pehra:** SR-080 me jod: CI ka secret scan hi asli pehra; GitHub ka users wala push protection bypass ho sakta hai, aur repo ka push protection muft milta hai ya nahi, ye jaanch [OPEN_QUESTIONS.md](OPEN_QUESTIONS.md) §2 me.
+  4. **Seekh kab likhein:** SR-084 me jod: LESSONS ki line fix live hone ke baad hi, bina personal data aur bina hamle ke tareeke ki detail, kyunki repo public hai.
+  5. **Default branch aur schedule:** D-024 ke kram me jod: default branch badalne se pehle scheduled workflows (jaise server jagane wala) nayi default branch pe hon, kyunki GitHub ka schedule sirf default branch pe chalta hai.
+  6. **Atlas projects ki ginti:** [RISKS.md](RISKS.md) §2.1 me: media aur logs judne se ab MongoDB ki 10 services = 10 projects aur clusters, 250 ki seema ke andar.
+- **Kyun zaroori:** ye chhoti baatein chhoot jaayein to deploy ka health check fail, jhoothe alerts, ya chupchaap band jagana ho sakta hai.
+- **Vikalp:** **(a)** chhaho sudhaar; **(b)** kuch sudhaar (owner bataye); **(c)** koi nahi.
+- **Salah:** **(a)**.
+- **Trade-off:** (a) me chaar docs me chhote jod; (b) me owner ka samay; (c) me kamiyaan bachi rehti.
+- **Owner ka jawab (2026-11-21):** **(a)**, chhaho sudhaar. Record: [DECISIONS.md](DECISIONS.md) D-338.
 ## Change log
 
 | Version | Date       | Badlav                                                                                                                                                                                    |
@@ -5910,3 +6061,5 @@ Claude ka kaam: owner ka faisla nahi chahiye, sirf saboot. Nateeja saboot ke saa
 | v1.7.3  | 2026-11-21 | Q-255 se Q-258 (Database Architect ke risks aur tay faislon pe dhyaan ke points) tay; D-318 se D-321.                                                                                     |
 | v1.7.4  | 2026-11-21 | §2 me Database Architect ki 7 aur jaanch (Neon pooler, M0 ki seemaayein, Atlas Search, TTL, driver ka `Long`, Razorpay ki pehchaan, transfer aur validators).                             |
 | v1.7.5  | 2026-11-21 | Q-259 se Q-262 (DevOps / SRE ke 4 sawal: server jagane ka samay, backup kitni baar, raat ke alerts, npm publish) tay; D-322 se D-325.                                                     |
+| v1.7.6  | 2026-11-21 | Q-263 se Q-273 (OPERATIONS ki 11 batches) tay; D-326 se D-336. Q-261 ki kanooni line me D-248 ki ghadi saaf ki.                                                                           |
+| v1.7.7  | 2026-11-21 | Q-274 (DevOps ke 12 risks) aur Q-275 (operations ke 6 sudhaar) tay; D-337, D-338. §2 me GitHub push protection ki jaanch.                                                                 |

@@ -1,6 +1,6 @@
 # DECISIONS: Beautinique
 
-> **Status:** v1.14.4 (2026-11-21). Har faisla ek jagah. Sirf wahi "Tay" jo owner ne khud kaha; Claude ki salah faisla nahi. Cheezein ek-ek karke judti hain.
+> **Status:** v1.14.6 (2026-11-21). Har faisla ek jagah. Sirf wahi "Tay" jo owner ne khud kaha; Claude ki salah faisla nahi. Cheezein ek-ek karke judti hain.
 
 ## 0. Kaise likhein
 
@@ -340,6 +340,19 @@
 | D-323 | Databases ka backup har release se pehle aur hafte me ek baar; aakhri backup 8 din se purana ho to hafte ki jaanch me laal nishaan.                                                                                                                                                     | Architecture | 2026-11-21 |
 | D-324 | Ops inbox din ke tay samay pe; gambhirta 1 ka browser push raat me bhi, gambhirta 2 aur 3 subah.                                                                                                                                                                                        | Security     | 2026-11-21 |
 | D-325 | Abhi koi package npm pe publish nahi: har package `private: true`, CI me pehra; R1 ke baad owner dobara dekhe.                                                                                                                                                                          | Process      | 2026-11-21 |
+| D-326 | OPERATIONS batch 1 (environments aur laptop ka setup) maana: 10 niyam [OPERATIONS.md](OPERATIONS.md) §1 me.                                                                                                                                                                             | Architecture | 2026-11-21 |
+| D-327 | OPERATIONS batch 2 (CI aur branch ke pehre) maana: 12 niyam [OPERATIONS.md](OPERATIONS.md) §2 me.                                                                                                                                                                                       | Process      | 2026-11-21 |
+| D-328 | OPERATIONS batch 3 (release, deploy, migrations aur rollback) maana: 12 niyam [OPERATIONS.md](OPERATIONS.md) §3 me.                                                                                                                                                                     | Process      | 2026-11-21 |
+| D-329 | OPERATIONS batch 4 (secrets aur config) maana: 10 niyam [OPERATIONS.md](OPERATIONS.md) §4 me.                                                                                                                                                                                           | Security     | 2026-11-21 |
+| D-330 | OPERATIONS batch 5 (soya server, jagana aur samay wale kaam) maana: 12 niyam [OPERATIONS.md](OPERATIONS.md) §5 me.                                                                                                                                                                      | Architecture | 2026-11-21 |
+| D-331 | OPERATIONS batch 6 (backup aur restore) maana: 12 niyam [OPERATIONS.md](OPERATIONS.md) §6 me.                                                                                                                                                                                           | Architecture | 2026-11-21 |
+| D-332 | OPERATIONS batch 7 (monitoring, health aur alerts) maana: 9 niyam [OPERATIONS.md](OPERATIONS.md) §7 me.                                                                                                                                                                                 | Architecture | 2026-11-21 |
+| D-333 | OPERATIONS batch 8 (incident ke runbooks) maana: 12 niyam [OPERATIONS.md](OPERATIONS.md) §8 me.                                                                                                                                                                                         | Security     | 2026-11-21 |
+| D-334 | OPERATIONS batch 9 (capacity aur free tier ki nigrani) maana: 7 niyam [OPERATIONS.md](OPERATIONS.md) §9 me.                                                                                                                                                                             | Architecture | 2026-11-21 |
+| D-335 | OPERATIONS batch 10 (512 MB pe memory ka naap) maana: 7 niyam [OPERATIONS.md](OPERATIONS.md) §10 me.                                                                                                                                                                                    | Architecture | 2026-11-21 |
+| D-336 | OPERATIONS batch 11 (dependencies aur packages ka publish) maana: 8 niyam [OPERATIONS.md](OPERATIONS.md) §11 me.                                                                                                                                                                        | Security     | 2026-11-21 |
+| D-337 | DevOps / SRE ke 12 naye risks R-043 se R-054, sab bachav ke saath khula.                                                                                                                                                                                                                | Architecture | 2026-11-21 |
+| D-338 | Operations ke 6 sudhaar: release step ka samay, UptimeRobot ka samay, CI ka secret scan asli pehra, seekh fix ke baad, default branch se pehle schedule, 10 Atlas projects.                                                                                                             | Architecture | 2026-11-21 |
 
 ## 2. Record
 
@@ -593,6 +606,7 @@
 
 - **Faisla:** `main` branch hategi. Flow: feature branch → `prerelease` (development) → `release` (production); back-merge `release` → `prerelease` waise hi. GitHub default branch `release`.
 - **Kram:** pehle saari jagah `main` ka zikr badle (CI, git skills, `CLAUDE.md`), phir default branch, aakhir me delete; sirf implementation me, owner ke kehne pe. Tab tak `CLAUDE.md` ka git flow hi laagu.
+- **Jod (D-338, 2026-11-21):** default branch badalne se pehle scheduled workflows (jaise server jagane wala, D-322) nayi default branch pe hon; GitHub ka schedule sirf default branch pe chalta hai.
 - **Wajah:** owner: `main` branch delete karni hai; ek insaan ke liye teen lambi branches bhaari.
 - **Chhode vikalp:** teeno branches rakhna; sirf `main` + feature branches.
 - **Kab dobara khulega:** owner khud khole.
@@ -3994,7 +4008,7 @@
 - **Chhode vikalp:** sirf din me (raat ki ghatna pe kanooni ghadi chhoot sakti hai); har alert pe 24 ghante push (har chhote alert pe neend aur thakaan).
 - **Kab dobara khulega:** owner khud khole.
 - **Kisne, kab:** owner, 2026-11-21. **Nishaan:** Salah maani.
-- **Asar (Claude):** incident ka kram (SR-084) aur owner ko alerts (SR-078) is samay ke saath OPERATIONS ke runbook me. Gambhirta ki list SR-084 wali hi. Kanooni detail jaanchi nahi: CERT-In ki 6 ghante ki ghadi kab se ginti hai ("pata chalne" se ya "pakka hone" se), aur 2 ya 3 ghante wali ghadiyaan ek insaan ke system pe kaise poori hon, Lawyer se nahi jaancha.
+- **Asar (Claude):** incident ka kram (SR-084) aur owner ko alerts (SR-078) is samay ke saath OPERATIONS ke runbook me. Gambhirta ki list SR-084 wali hi. CERT-In ki 6 ghante ki ghadi incident pata chalne se ginti hai (D-248). Kanooni detail jaanchi nahi: 2 ya 3 ghante wali ghadiyaan ek insaan ke system pe kaise poori hon, Lawyer se nahi jaancha.
 
 ### D-325. Packages ka npm pe publish
 
@@ -4004,6 +4018,112 @@
 - **Kab dobara khulega:** R1 ke baad, ya owner khud khole.
 - **Kisne, kab:** owner, 2026-11-21. **Nishaan:** Salah maani.
 - **Asar (Claude):** D-023 ke packages CLI pe naya kaam tab tak nahi. CI me `private: true` ka check OPERATIONS ki batch me. npm pe publish, `npm login/logout` aur `npm trust` hamesha sirf owner ke kehne pe.
+
+### D-326. OPERATIONS batch 1: environments aur laptop ka setup
+
+- **Faisla:** 10 niyam [OPERATIONS.md](OPERATIONS.md) §1 me: teen jagah (laptop, CI, live), koi staging nahi, laptop ka infra aur version ka mel, sirf zaroori containers, `.env.example` ke teen hisse, ek command ka setup. Numbers misaal, settings me ya code ke saath pakke.
+- **Wajah:** Claude ki salah, owner ne maani: laptop aur live ka farak (version, Redis ki memory) bugs chhupata hai, aur laptop, tests aur CI kabhi live data ko na chhooein.
+- **Chhode vikalp:** badlav ke saath maanna (owner ne koi badlav nahi diya); batch rokna (laptop ka setup baaki).
+- **Kab dobara khulega:** owner khud khole.
+- **Kisne, kab:** owner, 2026-11-21. **Nishaan:** Salah maani.
+
+### D-327. OPERATIONS batch 2: CI aur branch ke pehre
+
+- **Faisla:** 12 niyam [OPERATIONS.md](OPERATIONS.md) §2 me: ek `check` job, `guard` (secret scan, branch flow, `npm audit`), static checks, asli containers pe tests aur repo ke pehre, supply chain, CI me koi production secret nahi, rulesets. Numbers misaal, settings me ya code ke saath pakke.
+- **Wajah:** Claude ki salah, owner ne maani: Render aur Vercel sirf green `check` pe deploy karein, aur public repo me secrets aur supply chain ka pehra ho (SR-082).
+- **Chhode vikalp:** badlav ke saath maanna (owner ne koi badlav nahi diya); batch rokna (deploy aur branches ka pehra baaki).
+- **Kab dobara khulega:** owner khud khole.
+- **Kisne, kab:** owner, 2026-11-21. **Nishaan:** Salah maani.
+
+### D-328. OPERATIONS batch 3: release, deploy, migrations aur rollback
+
+- **Faisla:** 12 niyam [OPERATIONS.md](OPERATIONS.md) §3 me: release ka kram, Render aur Vercel ki settings, SIGTERM pe band hona, release step, expand aur contract, sirf ek release peeche rollback, smoke check, hotfix, release ka note. Numbers misaal, settings me ya code ke saath pakke.
+- **Wajah:** Claude ki salah, owner ne maani: Render sirf pichhle 2 deploys tak wapas ja sakta hai, aur expand aur contract ke bina rollback data tod sakta hai.
+- **Chhode vikalp:** badlav ke saath maanna (owner ne koi badlav nahi diya); batch rokna (release ka kram baaki).
+- **Kab dobara khulega:** owner khud khole.
+- **Kisne, kab:** owner, 2026-11-21. **Nishaan:** Salah maani.
+
+### D-329. OPERATIONS batch 4: secrets aur config
+
+- **Faisla:** 10 niyam [OPERATIONS.md](OPERATIONS.md) §4 me: secrets ki table (value kabhi nahi), kaunsa secret kahan, test aur live keys alag, config ka schema, do values ke saath badlav, kab badalna, providers pe MFA, settings DB me. Numbers misaal, settings me ya code ke saath pakke.
+- **Wajah:** Claude ki salah, owner ne maani: repo public hai; secret kahan rahe, kaise badle aur test ya live key ka farak pehle se tay ho.
+- **Chhode vikalp:** badlav ke saath maanna (owner ne koi badlav nahi diya); batch rokna (secrets ka kram baaki).
+- **Kab dobara khulega:** owner khud khole.
+- **Kisne, kab:** owner, 2026-11-21. **Nishaan:** Salah maani.
+
+### D-330. OPERATIONS batch 5: soya server, jagana aur samay wale kaam
+
+- **Faisla:** 12 niyam [OPERATIONS.md](OPERATIONS.md) §5 me: jagane ke raaste, pinger sirf `/wake` ya `/health`, jagane ki khidki (D-322), do call aur UptimeRobot ka samay, jaag pe sweep, cold start 90 second, ghanton ka hisaab, Key Value khaali hone pe, lamba break aur Atlas resume. Numbers misaal, settings me ya code ke saath pakke.
+- **Wajah:** Claude ki salah, owner ne maani: free server 15 minute me so jaata hai; D-322 ka niyam lagu karna hai, aur GitHub ke schedule ki kamiyaan sambhalni hain.
+- **Chhode vikalp:** badlav ke saath maanna (owner ne koi badlav nahi diya); batch rokna (jagane ka kram baaki).
+- **Kab dobara khulega:** owner khud khole.
+- **Kisne, kab:** owner, 2026-11-21. **Nishaan:** Salah maani.
+
+### D-331. OPERATIONS batch 6: backup aur restore
+
+- **Faisla:** 12 niyam [OPERATIONS.md](OPERATIONS.md) §6 me: backup me kya aur kya nahi, providers ke backup pe bharosa nahi, kab (D-323), kahan, manifest, transfer ki seema, pehle laptop pe restore, production restore ka kram, har 3 mahine abhyaas, RPO aur RTO. Numbers misaal, settings me ya code ke saath pakke.
+- **Wajah:** Claude ki salah, owner ne maani: free tier pe providers ka backup nahi milta, aur restore ke abhyaas ke bina backup pe bharosa nahi.
+- **Chhode vikalp:** badlav ke saath maanna (owner ne koi badlav nahi diya); batch rokna (backup ka bharosa baaki).
+- **Kab dobara khulega:** owner khud khole.
+- **Kisne, kab:** owner, 2026-11-21. **Nishaan:** Salah maani.
+
+### D-332. OPERATIONS batch 7: monitoring, health aur alerts
+
+- **Faisla:** 9 niyam [OPERATIONS.md](OPERATIONS.md) §7 me: `/health`, `/ready` aur `/wake`, alerts ke teen raaste, gambhirta ke teen level, alerts ki ginti ki seema, bahar ke free alerts, ops page, logs ki umar, "dead man" check. Numbers misaal, settings me ya code ke saath pakke.
+- **Wajah:** Claude ki salah, owner ne maani: soye server pe hamare apne alerts nahi bante, isliye bahar ke free alerts bhi chahiye.
+- **Chhode vikalp:** badlav ke saath maanna (owner ne koi badlav nahi diya); batch rokna (alerts ka dhaancha baaki).
+- **Kab dobara khulega:** owner khud khole.
+- **Kisne, kab:** owner, 2026-11-21. **Nishaan:** Salah maani.
+
+### D-333. OPERATIONS batch 8: incident ke runbooks
+
+- **Faisla:** 12 niyam [OPERATIONS.md](OPERATIONS.md) §8 me: ek dhaancha, jawab ka samay (D-324), data leak (D-248), secret leak, provider account pe kabza, laptop kho jaaye, OOM, free tier khatam, sarkari order, chhote kram, seekh aur saal ka abhyaas. Numbers misaal, settings me ya code ke saath pakke.
+- **Wajah:** Claude ki salah, owner ne maani: kanooni ghadiyaan chhoti hain (D-248, D-251), aur sab ek hi insaan sambhalta hai.
+- **Chhode vikalp:** badlav ke saath maanna (owner ne koi badlav nahi diya); batch rokna (incident ka kram baaki).
+- **Kab dobara khulega:** owner khud khole.
+- **Kisne, kab:** owner, 2026-11-21. **Nishaan:** Salah maani.
+- **Asar (Claude):** Kanooni detail jaanchi nahi: data leak me "pakka" ki paribhasha aur users ko khabar ka samay, Lawyer se nahi jaancha.
+
+### D-334. OPERATIONS batch 9: capacity aur free tier ki nigrani
+
+- **Faisla:** 7 niyam [OPERATIONS.md](OPERATIONS.md) §9 me: hafte ki jaanch, numbers ki table git ke bahar, 70% pe kaam, ₹0 ki table har 6 mahine dobara, ek hi Render service, Vercel ke deploys, repo personal account me. Numbers misaal, settings me ya code ke saath pakke.
+- **Wajah:** Claude ki salah, owner ne maani: free sharten bina khabar badal sakti hain, aur 70% pe pehle se kaam ho to service band nahi hoti.
+- **Chhode vikalp:** badlav ke saath maanna (owner ne koi badlav nahi diya); batch rokna (nigrani baaki).
+- **Kab dobara khulega:** har 6 mahine ki jaanch (§9 niyam 4) me providers ki sharten badlein, ya owner khud khole.
+- **Kisne, kab:** owner, 2026-11-21. **Nishaan:** Salah maani.
+
+### D-335. OPERATIONS batch 10: 512 MB pe memory ka naap
+
+- **Faisla:** 7 niyam [OPERATIONS.md](OPERATIONS.md) §10 me: Docker me 512 MB aur kam CPU pe naap, chaar halat, kya naapna, nateeja aur D-049 kab khule, dobara naap, live se milaan, script sirf laptop pe. Numbers misaal, settings me ya code ke saath pakke.
+- **Wajah:** Claude ki salah, owner ne maani: R-007: bundle mode 512 MB me chalega ya nahi, ye R1 se pehle naap se pata chalna chahiye.
+- **Chhode vikalp:** badlav ke saath maanna (owner ne koi badlav nahi diya); batch rokna (memory ka jokhim bina naap ke).
+- **Kab dobara khulega:** owner khud khole.
+- **Kisne, kab:** owner, 2026-11-21. **Nishaan:** Salah maani.
+
+### D-336. OPERATIONS batch 11: dependencies aur packages ka publish
+
+- **Faisla:** 8 niyam [OPERATIONS.md](OPERATIONS.md) §11 me: mahine ke dependency PRs, naye dependency ka review, Node ka version pinned, Atlas ka version, merge owner kare, `private: true` ka pehra (D-325), publish ka plan bane to uske niyam, fake registry. Numbers misaal, settings me ya code ke saath pakke.
+- **Wajah:** Claude ki salah, owner ne maani: supply chain ka jokhim (R-026) aur D-325 ka pehra CI me chahiye.
+- **Chhode vikalp:** badlav ke saath maanna (owner ne koi badlav nahi diya); batch rokna (dependencies ka kram baaki).
+- **Kab dobara khulega:** owner khud khole.
+- **Kisne, kab:** owner, 2026-11-21. **Nishaan:** Salah maani.
+
+### D-337. DevOps / SRE ke risks
+
+- **Faisla:** 12 naye risks [RISKS.md](RISKS.md) me: R-043 (GitHub ka schedule late ya band), R-044 (Render keep-alive ki policy), R-045 (rollback sirf do deploys tak), R-046 (providers ka backup nahi, apna sirf laptop pe), R-047 (Neon ka transfer), R-048 (logs ki chhoti umar), R-049 (cold start aur 120 second), R-050 (alerts ek insaan pe), R-051 (secrets ka haath se badlav), R-052 (free sharten badalna), R-053 (Atlas ka version), R-054 (public repo me kamzori ki detail). Sab bachav ke saath `Khula`.
+- **Wajah:** Claude ki salah, owner ne maani: har ek ka bachav [OPERATIONS.md](OPERATIONS.md) me likha hai, par ₹0 aur ek insaan ke kaam me khatra bacha hai.
+- **Chhode vikalp:** kuch `Maana` (owner ne koi nahi chuna); risks rokna (khatre chhupe rehte).
+- **Kab dobara khulega:** asli naap ya providers ki sharten badlein, ya owner khud khole.
+- **Kisne, kab:** owner, 2026-11-21. **Nishaan:** Salah maani.
+- **Asar (Claude):** Kanooni detail jaanchi nahi: R-050 me kanooni ghadiyaan chhootne ka asar, Lawyer se nahi jaancha.
+
+### D-338. Operations ke 6 sudhaar
+
+- **Faisla:** 6 chhote sudhaar: (1) [ARCHITECTURE.md](ARCHITECTURE.md) §10.4 niyam 1 me schema wala hissa listen se pehle aur lambi data migration background me; (2) SR-078 me UptimeRobot ka check jaage server pe; (3) SR-080 me CI ka secret scan asli pehra, aur repo ke push protection ki jaanch [OPEN_QUESTIONS.md](OPEN_QUESTIONS.md) §2 me; (4) SR-084 me LESSONS ki line fix live hone ke baad hi; (5) D-024 me jod: default branch badalne se pehle scheduled workflows nayi default branch pe; (6) [RISKS.md](RISKS.md) §2.1 me 10 Atlas projects ki ginti.
+- **Wajah:** Claude ki salah, owner ne maani: ye chhoti baatein chhoot jaayein to deploy ka health check fail, jhoothe alerts, ya chupchaap band jagana ho sakta hai.
+- **Chhode vikalp:** kuch sudhaar (owner ne koi nahi chuna); koi sudhaar nahi (kamiyaan bachi rehti).
+- **Kab dobara khulega:** owner khud khole.
+- **Kisne, kab:** owner, 2026-11-21. **Nishaan:** Salah maani.
 ## Change log
 
 | Version  | Date       | Badlav                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      |
@@ -4103,3 +4223,5 @@
 | v1.14.2  | 2026-11-21 | D-310 se D-317 aaye (ARCHITECTURE §10 data ki 8 batches; Q-247 se Q-254).                                                                                                                                                                                                                                                                                                                                                                                                                   |
 | v1.14.3  | 2026-11-21 | D-318 se D-321 aaye (Database Architect ke risks, data ke 5 sudhaar, delete ke baad seller ki invoice copy, rok aur technical records; Q-255 se Q-258).                                                                                                                                                                                                                                                                                                                                     |
 | v1.14.4  | 2026-11-21 | D-322 se D-325 aaye (server jagaane ka samay, backup kitni baar, alerts dekhne ka samay, npm publish nahi; Q-259 se Q-262).                                                                                                                                                                                                                                                                                                                                                                 |
+| v1.14.5  | 2026-11-21 | D-326 se D-336 aaye (OPERATIONS ki 11 batches; Q-263 se Q-273). D-324 ke asar me D-248 ki ghadi saaf ki.                                                                                                                                                                                                                                                                                                                                                                                    |
+| v1.14.6  | 2026-11-21 | D-337 aur D-338 aaye (DevOps ke 12 risks, operations ke 6 sudhaar; Q-274, Q-275); D-024 me jod (D-338).                                                                                                                                                                                                                                                                                                                                                                                     |

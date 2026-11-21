@@ -1,6 +1,6 @@
 # ARCHITECTURE: Beautinique
 
-> **Status:** v1.3.2 (2026-11-21). System kaise bana hai, ek nazar me. Cheezein ek-ek karke, owner ki haan ke baad judengi. Abhi §1 (finance ke accounting niyam, D-282), §2 se §9 (system ke hisse, D-291 se D-298) aur §10 (data aur database, D-310 se D-317).
+> **Status:** v1.3.3 (2026-11-21). System kaise bana hai, ek nazar me. Cheezein ek-ek karke, owner ki haan ke baad judengi. Abhi §1 (finance ke accounting niyam, D-282), §2 se §9 (system ke hisse, D-291 se D-298) aur §10 (data aur database, D-310 se D-317).
 
 ## Is file me kya aayega
 
@@ -573,7 +573,7 @@ Database Architect ki raay se (D-257 ka kram), owner ki haan ke baad. Ye saare s
 
 ### 10.4 Migrations, release steps, seeds aur M0 ki aadatein (D-313)
 
-1. Boot pe har MongoDB service ka release step lease ke peeche: collections aur validators, indexes, data migrations, aur (catalog me) Atlas Search ki definitions; ek fingerprint, wahi ho to kuch nahi.
+1. Boot pe har MongoDB service ka release step lease ke peeche: collections aur validators, indexes, data migrations, aur (catalog me) Atlas Search ki definitions; ek fingerprint, wahi ho to kuch nahi. Schema wala hissa (collections, validators, indexes, Search ki definitions) listen se pehle; lambi data migration listen ke baad background me, lease ke saath ([OPERATIONS.md](OPERATIONS.md) §3 niyam 5; D-338).
 2. Index ke naam ke neeche roop kabhi nahi badalta; naya roop naya naam; purana agle release me drop.
 3. Expand aur contract do releases me: pehle optional field aur dono roop padhna, backfill, phir purana hatana. Ek release me jodna aur hatana kabhi nahi.
 4. Data migration idempotent, `_id` ke kram me chhote batches, M0 ke 100 ops/second ke hisaab se ruk-ruk ke; kahan tak hua, ye `migrations` me.
@@ -676,3 +676,4 @@ Design target pe ₹0 ke clusters kuch hafton me bhar jaate hain: target sirf co
 | v1.2.2  | 2026-11-21 | §7 niyam 10: file badalne pe purani file ka niyam (owner, D-296 me jod).                                                                                                                                                                  |
 | v1.3.1  | 2026-11-21 | §10 data aur database (Database Architect, D-310 se D-317): ids aur paisa, transactions, personal data aur rok, migrations aur seeds, commerce, finance ka PostgreSQL, baaki services, audit aur jagah; §1.7 me seller code 3 characters. |
 | v1.3.2  | 2026-11-21 | D-319 se D-321 ke sudhaar: §2.3 me logistics → commerce, §2.2 me finance ke naye events aur `packVoided`, §9 me Neon ki jagah, §10.3 aur §10.5 me jod.                                                                                    |
+| v1.3.3  | 2026-11-21 | §10.4 niyam 1 me jod: schema wala hissa listen se pehle, lambi data migration background me (D-338).                                                                                                                                      |
