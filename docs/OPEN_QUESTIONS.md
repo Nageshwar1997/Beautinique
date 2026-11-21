@@ -1,6 +1,6 @@
 # OPEN QUESTIONS: Beautinique
 
-> **Status:** v1.7.19 (2026-11-21). Khule sawal, aage ke topics aur jaanchna baaki. Cheezein ek-ek karke judengi.
+> **Status:** v1.7.20 (2026-11-21). Khule sawal, aage ke topics aur jaanchna baaki. Cheezein ek-ek karke judengi.
 
 ## Is file me kya aayega
 
@@ -6352,6 +6352,186 @@ Claude ka kaam: owner ka faisla nahi chahiye, sirf saboot. Nateeja saboot ke saa
 - **Trade-off:** (a) me do faislon me ek-ek line; (c) me niyam aapas me bina link ke.
 - **Owner ka jawab (2026-11-21):** **(a)**, dono jod. Record: [DECISIONS.md](DECISIONS.md) D-370.
 
+### Q-307. Coverage ki seema ka gate kitna sakht ho?
+
+- **Status:** `Tay`. Topic: B15 (technical).
+- **Sawal:** tests code ka kitna hissa chalate hain (coverage), iski seema se neeche aane pe kya ho: PR ruke, ya sirf report bane?
+- **Kyun zaroori:**
+  - Seema ka matlab tabhi hai jab uska asar ho. Par ek insaan ke kaam me (D-009) har PR pe sakht gate rukawat bhi ban sakta hai.
+  - Paisa, stock aur permissions ki galti sabse mehngi hai; UI ki chhoti galti sasti.
+- **Vikalp:**
+  - **(a) Har area me sakht:** seema se neeche koi PR merge nahi.
+  - **(b) Sirf mehngi jagahon pe sakht:** kernel packages (saajhe bunyadi packages, jaise paisa aur tax ka hisaab, authorization ke checks, transactions, outbox, idempotency) aur paisa, stock aur permissions ke code me seema se neeche PR rukta hai. Baaki areas me PR pe sirf report, aur release se pehle jaanch. Misaal seema: kernel 90% branch, paisa, stock aur permissions 85% branch, baaki 70% lines.
+  - **(c) Kahin na roke:** sirf report.
+- **Salah:** **(b)**. Jahan galti sabse mehngi hai wahan pakka pehra, aur baaki jagah rukawat nahi, par release se pehle nazar.
+- **Trade-off:**
+  - (a) me UI ke chhote badlav pe bhi bina zaroorat tests.
+  - (b) me do tarah ke areas ki list sambhalni padti hai.
+  - (c) me coverage dheere-dheere girta hai aur pata nahi chalta.
+  - Coverage sirf batata hai ki line chali, ye nahi ki test sahi jaanchta hai; uske liye mutation testing hai.
+- **R1 ya baad me:** R1 (pehle code se).
+- **Owner ka jawab (2026-11-21):** **(b)**, kernel packages aur paisa, stock aur permissions ke code me coverage ki seema se neeche PR rukta hai; baaki areas me PR pe sirf report aur release se pehle jaanch. Seema ke number testing ke niyamon ke saath tay honge. Record: [DECISIONS.md](DECISIONS.md) D-371.
+
+### Q-308. Mutation testing ka gate kahan chale?
+
+- **Status:** `Tay`. Topic: B15 (technical).
+- **Sawal:** mutation testing (code me jaan-boojh ke chhoti galti daal ke dekhna ki koi test use pakadta hai ya nahi) me jo galti kisi test ne na pakdi ho (bacha mutant), wo PR rok de, ya sirf laptop pe kaam "done" hone ka hissa ho?
+- **Kyun zaroori:**
+  - CLAUDE.md batata hai ki mutation sirf teen jagah ho aur copy me ho, asli files me nahi. Par ye nahi batata ki bacha mutant merge roke ya nahi, aur run kahan ho.
+  - CI ka checkout khud ek alag copy hai; laptop pe dev server chalta hai, jo file badalte hi reload hota hai.
+- **Vikalp:**
+  - **(a) CI me PR pe alag job:** sirf badli lines, sirf kernel packages aur paisa, stock aur permissions ke code me. Bina likhi wajah ka bacha mutant PR ka check laal karta hai. Kernel packages ka pehla poora run laptop pe background me, copy me.
+  - **(b) Sirf laptop pe:** kaam ke Definition of Done ka hissa; CI me nahi.
+  - **(c) Sirf release se pehle.**
+- **Salah:** **(a)**. Pehra apne aap chalta hai aur bhoolne ka mauka nahi; CI ki copy asli files se alag hai; pehla poora run CLAUDE.md jaisa laptop pe background me.
+- **Trade-off:**
+  - (a) me un PRs ka samay aur CI ke minutes badhte hain jo in jagahon ko chhoote hain.
+  - (b) me laptop pe bojh aur bhoolne ka mauka.
+  - (c) me kamzor test der se pakde jaate hain, tab tak kai PR us pe tik chuke hote hain.
+- **R1 ya baad me:** R1 (pehle code se).
+- **Owner ka jawab (2026-11-21):** **(a)**, CI me PR pe alag job sirf badli lines pe (kernel packages aur paisa, stock aur permissions ka code); bina likhi wajah ka bacha mutant PR rokta hai; kernel packages ka pehla poora run laptop pe background me, copy me. Record: [DECISIONS.md](DECISIONS.md) D-372.
+
+### Q-309. Flaky test pe retry ki chhoot ho?
+
+- **Status:** `Tay`. Topic: B15 (technical).
+- **Sawal:** jo test bina code badle kabhi pass aur kabhi fail ho (flaky), use dobara chalane (retry) ki chhoot ho?
+- **Kyun zaroori:** browser wale tests kabhi-kabhi bina bug ke fail hote hain. Retry na ho to PR rukte hain; retry ho to asli race (do kaam ek saath chalne se hui galti) chhup sakti hai.
+- **Vikalp:**
+  - **(a) Koi retry nahi:** ek fail matlab laal.
+  - **(b) Sirf E2E (browser) tests pe ek retry:** retry se pass ho tab bhi summary me "flaky" dikhe aur uska issue bane. Unit aur integration tests, aur paisa, stock, permissions, idempotency aur events ke tests pe kabhi retry nahi.
+  - **(c) Har test pe 2 retry.**
+- **Salah:** **(b)**. Browser ki chhoti hichki se kaam nahi rukta, aur jahan race asli galti ho sakti hai wahan koi chhoot nahi.
+- **Trade-off:**
+  - (a) me chhoti hichki pe kaam rukta hai.
+  - (b) me flaky tests ke issues ki list sambhalni padti hai.
+  - (c) me race aur timing ke bug green ke peeche chhupte hain.
+- **R1 ya baad me:** R1 (pehle code se).
+- **Owner ka jawab (2026-11-21):** **(b)**, sirf E2E tests pe ek retry; retry se pass hone pe bhi "flaky" ka nishaan aur issue; baaki tests, aur paisa, stock, permissions, idempotency aur events ke tests pe retry nahi. Record: [DECISIONS.md](DECISIONS.md) D-373.
+
+### Q-310. Chromium ke alawa browsers pe E2E kab chale?
+
+- **Status:** `Tay`. Topic: B15 (technical), B2 (apps).
+- **Sawal:** CI ki E2E Chromium pe tay hai ([OPERATIONS.md](OPERATIONS.md) §2 niyam 6). Doosre browser engines pe E2E kab chale?
+- **Kyun zaroori:** iPhone pe har browser Safari ka engine (WebKit) chalata hai, aur push, install aur kuch CSS wahan alag chalte hain.
+- **Vikalp:**
+  - **(a) Nightly me WebKit aur Firefox, saare flows.**
+  - **(b) Nightly me sirf WebKit, Customer app ke mukhya flows:** sign-up (FL-1), sign-in (FL-2), prepaid order (FL-7), cancel (FL-11), return se refund (FL-12) aur review (FL-19).
+  - **(c) Sirf release se pehle laptop pe WebKit, mukhya flows.**
+  - **(d) Sirf Chromium.**
+- **Salah:** **(b)**. iPhone wale customers ka raasta har raat jaancha jaata hai, nightly chhota rehta hai, aur staff apps desktop Chromium pe hi chalte hain.
+- **Trade-off:**
+  - Linux ka WebKit asli iPhone ka Safari nahi, to (a) aur (b) bhi asli phone ki jagah nahi lete.
+  - (a) me nightly lamba.
+  - (d) me Safari ki dikkat live pe hi dikhegi.
+- **R1 ya baad me:** R1.
+- **Owner ka jawab (2026-11-21):** **(b)**, nightly me WebKit pe Customer app ke mukhya flows (FL-1, FL-2, FL-7, FL-11, FL-12, FL-19); PR pe E2E Chromium pe hi. Record: [DECISIONS.md](DECISIONS.md) D-374.
+
+### Q-311. Asli phone pe testing: kaunse phones aur kab?
+
+- **Status:** `Tay`. Topic: B2 (apps), B1 (delivery). Group G24.
+- **Sawal:** asli phone pe haath se testing kis phone pe, kitni baar aur kin flows pe ho?
+- **Kyun zaroori:** camera se photo, location, Delivery app ka offline data (R-061), dhoop me padhna, UPI app ya bank ke page ke baad app me wapsi, aur iPhone ka push (R-062) desktop browser me pakke nahi hote.
+- **Vikalp:**
+  - **(a) Owner ka Android phone, har release se pehle:** Delivery app ke ek din ka kaam (pack se delivery FL-9, delivery fail aur RTO FL-10, return pickup) aur Customer app ka checkout.
+  - **(b) (a) ke saath ek iPhone (apna ya udhaar), sirf R1 se pehle ek baar:** Customer app ka checkout, home screen pe install aur push.
+  - **(c) Sirf R1 se pehle ek baar, Android pe.**
+  - **(d) Asli phone nahi.**
+- **Salah:** **(b)**. Delivery app ka asli jokhim phone pe hi dikhta hai, aur iPhone pe push aur install ek baar asli phone pe dekhe bina R-062 khula rehta hai.
+- **Trade-off:**
+  - (a) aur (b) me har release pe lagbhag ek ghanta.
+  - (b) me iPhone ka intezaam; na mile to R-062 khula rehta hai.
+  - (d) me Delivery app ki dikkat live pe hi dikhegi.
+- **R1 ya baad me:** R1.
+- **Owner ka jawab (2026-11-21):** **(b)**, har release se pehle owner ke Android phone pe Delivery app ke ek din ka kaam aur Customer app ka checkout; R1 se pehle ek baar iPhone (apna ya udhaar) pe Customer app ka checkout, install aur push. Record: [DECISIONS.md](DECISIONS.md) D-375.
+
+### Q-312. Screen reader ki haath ki jaanch kis par ho?
+
+- **Status:** `Tay`. Topic: B2 (apps). Group G24.
+- **Sawal:** release se pehle screen reader ki haath ki checklist ([DESIGN.md](DESIGN.md) DS-8.1) kaunse screen readers pe ho?
+- **Kyun zaroori:** DS-8.1 checklist tay karta hai, par screen reader nahi; har screen reader ka vyavhaar alag hota hai. Q-311 (D-375) ke hisaab se iPhone R1 se pehle ek baar milta hai.
+- **Vikalp:**
+  - **(a) Har release:** NVDA (Windows laptop pe muft) desktop apps pe, aur TalkBack (Android) Customer aur Delivery apps pe.
+  - **(b) (a) ke saath VoiceOver (iPhone) Customer app pe:** R1 se pehle ek baar, usi iPhone wale round me.
+  - **(c) Sirf NVDA.**
+- **Salah:** **(b)**. Customers aur delivery partners phone pe hain; iPhone ka round pehle se tay hai, to VoiceOver bhi usi me ho jaata hai.
+- **Trade-off:**
+  - Har screen reader seekhne aur chalane ka samay.
+  - (c) me phone pe padhne ki dikkatein chhoot-ti hain.
+- **R1 ya baad me:** R1.
+- **Owner ka jawab (2026-11-21):** **(b)**, har release se pehle NVDA desktop apps pe aur TalkBack Customer aur Delivery apps pe; R1 se pehle ek baar VoiceOver pe Customer app, iPhone wale round me. Record: [DECISIONS.md](DECISIONS.md) D-376.
+
+### Q-313. Har release pe owner kitna khoj wala (haath ka) testing kare?
+
+- **Status:** `Tay`. Topic: B15 (technical).
+- **Sawal:** likhe hue tests ke alawa, owner khud app chala ke anjaani dikkatein dhoondhe (khoj wala testing): kitna aur kab?
+- **Kyun zaroori:** automated tests likhe hue niyam jaanchte hain; ulajhne wala sandesh ya bahut lamba page insaan hi pakadta hai. Owner ke paas hafte ke 30 ghante hain (D-009).
+- **Vikalp:**
+  - **(a) Har release pe misaal 2 ghante:** badle flows pe chhote round (ek flow, ek lakshya, misaal 30 minute).
+  - **(b) Sirf R1 se pehle ek bada round** (misaal 1 din), baad me sirf smoke check.
+  - **(c) (a) ke saath, R1 se pehle allowlist (D-133) ke 1 ya 2 bharose ke testers ka ek round.**
+  - **(d) Koi khoj wala testing nahi.**
+- **Salah:** **(c)**. Har release pe chhota aur seemit samay, aur R1 se pehle nayi aankhon se ek round, kyunki banane wala apni galtiyan kam dekhta hai.
+- **Trade-off:**
+  - (c) me testers ke emails live pe personal data hain, aur unke sawalon ka samay lagta hai.
+  - (d) me chhoti par chubhne wali galtiyan reh jaati hain.
+- **Kanooni detail:** testers ka personal data privacy ke niyamon ([COMPLIANCE.md](COMPLIANCE.md) §5) ke andar; Lawyer ya CA se nahi jaancha.
+- **R1 ya baad me:** R1.
+- **Owner ka jawab (2026-11-21):** **(c)**, har release pe owner misaal 2 ghante badle flows pe chhote round, aur R1 se pehle allowlist ke 1 ya 2 bharose ke testers ka ek round; har haath ke check ka chhota record. Record: [DECISIONS.md](DECISIONS.md) D-377.
+
+### Q-314. Kis gambhirta ka khula bug release roke?
+
+- **Status:** `Tay`. Topic: B15 (technical).
+- **Sawal:** release ke waqt khule bugs me se kaunse release rokein?
+- **Kyun zaroori:** release ke faisle ko saaf paimana chahiye, warna har release pe naye sire se behas hoti hai.
+- **Gambhirta ka paimana:** **P0** paisa galat, data leak, security bypass ya data khona; **P1** koi flow ruka aur doosra raasta nahi; **P2** flow doosre raaste se chalta hai, ya paise ke bina koi galat jaankari; **P3** sirf dikhawat.
+- **Vikalp:**
+  - **(a) P0 aur P1 release rokein;** P2 release note me likh ke release chale.
+  - **(b) Sirf P0 roke.**
+  - **(c) P0, P1 aur P2 sab rokein.**
+- **Salah:** **(a)**. Paisa, data aur koi bhi ruka hua flow live nahi jaata, aur chhoti galti release ko nahi rokti.
+- **Trade-off:**
+  - (a) me P2 ki list release notes me sambhalni padti hai.
+  - (b) me koi flow toota hua live ja sakta hai.
+  - (c) me chhoti galtiyon pe release der se.
+- **R1 ya baad me:** R1.
+- **Owner ka jawab (2026-11-21):** **(a)**, P0 se P3 ke paimane ke saath; khula P0 ya P1 release rokta hai, P2 release note me likh ke release chalta hai. Record: [DECISIONS.md](DECISIONS.md) D-378.
+
+### Q-315. Design target ka load test kitni baar ho?
+
+- **Status:** `Tay`. Topic: B15 (technical).
+- **Sawal:** design ke target ([ARCHITECTURE.md](ARCHITECTURE.md) §9, D-283) pe load test kitni baar ho?
+- **Kyun zaroori:**
+  - Load test laptop ke kuch ghante leta hai (setup, run, baad me data ki jaanch), aur owner ka samay seemit hai.
+  - Laptop ke containers live ki free tier seemaayein poori nahi dikhate, to load test akela saboot nahi.
+- **Vikalp:**
+  - **(a) Har release se pehle.**
+  - **(b) R1 se pehle ek baar, phir sirf us release me** jo order place, pack, delivery scan ya payout ka raasta badle, ya nayi service jode.
+  - **(c) Sirf R1 se pehle.**
+- **Salah:** **(b)**. Bina badlav ke dobara chalane se kuch naya nahi milta, aur load wale raaste badalte hi test dobara.
+- **Trade-off:**
+  - (a) me har release pe ghante.
+  - (b) me har release pe tay karna padta hai ki load wala raasta badla ya nahi.
+  - (c) me baad ke badlav ka load pe asar anjaana.
+- **R1 ya baad me:** R1.
+- **Owner ka jawab (2026-11-21):** **(b)**, R1 se pehle ek baar, phir sirf us release me jo order place, pack, delivery scan ya payout ka raasta badle ya nayi service jode. Record: [DECISIONS.md](DECISIONS.md) D-379.
+
+### Q-316. Release ke live smoke order ka kya ho?
+
+- **Status:** `Tay`. Topic: B15 (technical), B12 (analytics).
+- **Sawal:** har release ke baad live smoke check ([OPERATIONS.md](OPERATIONS.md) §3 niyam 9) ek test-mode order payment tak banata hai. Us order ka aage kya ho?
+- **Kyun zaroori:** order se stock rukta hai, emails din ki chhat (D-028) me gine jaate hain, aur "Bestseller" (D-154), search ke kram me bikri (D-139) aur owner ke aankde (D-149) badalte hain. Har release pe ek jhootha order customer ko dikhne wale aankde bigaadta hai.
+- **Vikalp:**
+  - **(a) Turant cancel aur "smoke" ka nishaan:** payment ke baad pack se pehle cancel; nishaan wala order bikri, Bestseller, search ke kram aur owner ke aankdon ki ginti se bahar.
+  - **(b) Turant cancel,** baaki orders jaisa gina jaaye.
+  - **(c) Poora delivery tak chalaya jaaye** (owner ke warehouse, hub aur partner ke accounts se).
+- **Salah:** **(a)**, in niyam ke saath: nishaan sirf setting se tay ek allowlist account ke orders pe lagta hai, koi customer khud nahi laga sakta; finance ki entries aur audit me order waisa hi rehta hai (kuch mitta nahi), sirf ginti aur aankdon se bahar.
+- **Trade-off:**
+  - (a) me ek naya nishaan, uska test aur uski seema.
+  - (b) me har release pe customer ko dikhne wale aankdon me thoda jhooth.
+  - (c) me har release pe ghante.
+- **R1 ya baad me:** R1.
+- **Owner ka jawab (2026-11-21):** **(a)**, smoke order payment ke baad pack se pehle cancel hota hai, aur "smoke" nishaan (sirf setting se tay allowlist account pe) use bikri, Bestseller, search ke kram aur owner ke aankdon se bahar rakhta hai; finance aur audit me kuch nahi mitta. Record: [DECISIONS.md](DECISIONS.md) D-380.
+
 ## Change log
 
 | Version | Date       | Badlav                                                                                                                                                                                    |
@@ -6471,3 +6651,4 @@ Claude ka kaam: owner ka faisla nahi chahiye, sirf saboot. Nateeja saboot ke saa
 | v1.7.17 | 2026-11-21 | Q-286: mukhya set Solar, doosra Lucide, har app me credit page (owner, D-350).                                                                                                            |
 | v1.7.18 | 2026-11-21 | Q-286: ek saajha Credits page, har package ka credit component (owner, D-350).                                                                                                            |
 | v1.7.19 | 2026-11-21 | Q-287 ki salah me RTO ka matlab saaf kiya (GLOSSARY ki link).                                                                                                                             |
+| v1.7.20 | 2026-11-21 | Q-307 se Q-316 (QA Architect ke 10 sawal; G24 asli phone aur screen reader) tay; D-371 se D-380.                                                                                          |

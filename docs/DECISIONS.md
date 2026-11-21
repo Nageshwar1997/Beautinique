@@ -1,6 +1,6 @@
 # DECISIONS: Beautinique
 
-> **Status:** v1.14.18 (2026-11-21). Har faisla ek jagah. Sirf wahi "Tay" jo owner ne khud kaha; Claude ki salah faisla nahi. Cheezein ek-ek karke judti hain.
+> **Status:** v1.14.19 (2026-11-21). Har faisla ek jagah. Sirf wahi "Tay" jo owner ne khud kaha; Claude ki salah faisla nahi. Cheezein ek-ek karke judti hain.
 
 ## 0. Kaise likhein
 
@@ -385,6 +385,16 @@
 | D-368 | UX ke 9 naye risks (R-055 se R-063) bachav ke saath khule: jaagne ka parda, rose ka contrast, visual tests ka bojh, polling, lamba product page, idle logout, offline data, iPhone push, warehouse ka network.                                                                          | Architecture | 2026-11-21 |
 | D-369 | Seller ka payable man badle wali return muddat (misaal 7 din) ke baad; kharab maal ki lambi muddat me baad ki return D-071 ke udhaar se.                                                                                                                                                | Business     | 2026-11-21 |
 | D-370 | UX ke chhote sudhaar: D-072 me jod (location na mile to D-351; R1 me sirf refund, D-122) aur SR-055 me jod (pin D-347 se, "No pin").                                                                                                                                                    | Architecture | 2026-11-21 |
+| D-371 | Coverage ka gate: kernel packages aur paisa, stock aur permissions ke code me seema se neeche PR rukta hai; baaki areas me sirf report aur release se pehle jaanch.                                                                                                                     | Process      | 2026-11-21 |
+| D-372 | Mutation testing: CI me PR pe alag job sirf badli lines pe (kernel aur paisa, stock, permissions); bina wajah ka bacha mutant PR roke; kernel ka pehla poora run laptop pe copy me.                                                                                                     | Process      | 2026-11-21 |
+| D-373 | Flaky tests: sirf E2E pe ek retry, pass pe bhi "flaky" aur issue; paisa, stock, permissions, idempotency aur events ke tests pe kabhi retry nahi.                                                                                                                                       | Process      | 2026-11-21 |
+| D-374 | Nightly me WebKit pe Customer app ke 6 mukhya flows; PR pe E2E Chromium pe hi.                                                                                                                                                                                                          | Process      | 2026-11-21 |
+| D-375 | Asli phone: har release se pehle Android pe Delivery app ka ek din aur Customer checkout; R1 se pehle ek baar iPhone pe checkout, install aur push.                                                                                                                                     | Process      | 2026-11-21 |
+| D-376 | Screen reader: har release NVDA (desktop apps) aur TalkBack (Customer, Delivery); R1 se pehle ek baar VoiceOver pe Customer app.                                                                                                                                                        | Process      | 2026-11-21 |
+| D-377 | Khoj wala testing: har release pe owner misaal 2 ghante; R1 se pehle allowlist ke 1-2 testers; har haath ke check ka record, "verified" usi se.                                                                                                                                         | Process      | 2026-11-21 |
+| D-378 | Bug ki gambhirta P0 se P3; khula P0 ya P1 release roke, P2 release note me.                                                                                                                                                                                                             | Process      | 2026-11-21 |
+| D-379 | Load test R1 se pehle ek baar, phir sirf load wale raaste badalne ya nayi service pe.                                                                                                                                                                                                   | Process      | 2026-11-21 |
+| D-380 | Live smoke order: pack se pehle cancel, "smoke" nishaan se bikri, Bestseller, search aur aankdon se bahar; finance aur audit me kuch nahi mitta.                                                                                                                                        | Process      | 2026-11-21 |
 
 ## 2. Record
 
@@ -4460,6 +4470,107 @@
 - **Kab dobara khulega:** owner khud khole.
 - **Kisne, kab:** owner, 2026-11-21. **Nishaan:** Salah maani.
 
+### D-371. Coverage ka gate
+
+- **Faisla:** kernel packages (saajhe bunyadi packages, jaise paisa aur tax ka hisaab, authorization ke checks, transactions, outbox, idempotency) aur paisa, stock aur permissions ke code me coverage ki seema se neeche PR merge nahi hota. Baaki areas me PR pe sirf report, aur release se pehle jaanch. Seema ke number testing ke niyamon ke saath tay honge (misaal: kernel 90% branch, paisa, stock aur permissions 85% branch, baaki 70% lines).
+- **Wajah:** Claude ki salah, owner ne maani: jahan galti sabse mehngi wahan pakka pehra, aur ek insaan ke kaam me (D-009) baaki jagah rukawat nahi.
+- **Chhode vikalp:** har area me PR rokna (UI ke chhote badlav pe bhi bina zaroorat tests); kahin na rokna (coverage chupke girta).
+- **Kab dobara khulega:** owner khud khole.
+- **Kisne, kab:** owner, 2026-11-21. **Nishaan:** Salah maani.
+- **Asar (Claude):** kernel packages ki poori list naye docs me abhi nahi; wo testing ke niyamon ki batch me aayegi. Coverage sirf batata hai ki line chali; test ki asli taakat mutation testing (D-372) se jaanchi jaati hai.
+
+### D-372. Mutation testing ka gate
+
+- **Faisla:** CI me PR pe ek alag job: sirf badli lines, sirf kernel packages aur paisa, stock aur permissions ke code me. Bacha mutant (jise kisi test ne na pakda) PR ka check laal karta hai, jab tak uski wajah package ke saath likhi na ho (jaise "equivalent": badla code bhi wahi kaam karta hai). Kernel packages ka pehla poora run laptop pe background me, copy me, asli files me nahi (CLAUDE.md). Baaki apps aur modules me mutation nahi.
+- **Wajah:** Claude ki salah, owner ne maani: pehra apne aap chalta hai aur bhoolne ka mauka nahi; CI ka checkout asli files se alag copy hai.
+- **Chhode vikalp:** sirf laptop pe, kaam ke "done" ka hissa (bojh aur bhoolne ka mauka); sirf release se pehle (kamzor test der se pakde jaate).
+- **Kab dobara khulega:** owner khud khole.
+- **Kisne, kab:** owner, 2026-11-21. **Nishaan:** Salah maani.
+- **Asar (Claude):** tool aur badli lines nikaalne ka tareeka testing ke niyamon ki batch me. Is job se CI ke minutes badhte hain; CI ki seema ki jaanch baaki.
+
+### D-373. Flaky tests
+
+- **Faisla:** sirf E2E (browser) tests pe ek retry. Retry se pass ho tab bhi summary me "flaky" dikhta hai aur uska issue banta hai. Unit aur integration tests, aur paisa, stock, permissions, idempotency aur events ke tests pe kabhi retry nahi; unka flaky hona bug maana jaata hai.
+- **Wajah:** Claude ki salah, owner ne maani: browser ki chhoti hichki se kaam nahi rukta, aur jahan race asli galti ho sakti hai wahan koi chhoot nahi.
+- **Chhode vikalp:** koi retry nahi (chhoti hichki pe kaam rukta); har test pe 2 retry (race aur timing ke bug chhupte).
+- **Kab dobara khulega:** owner khud khole.
+- **Kisne, kab:** owner, 2026-11-21. **Nishaan:** Salah maani.
+
+### D-374. Doosre browsers pe E2E
+
+- **Faisla:** nightly me WebKit (Safari ka engine) pe Customer app ke mukhya flows: sign-up (FL-1), sign-in (FL-2), prepaid order (FL-7), cancel (FL-11), return se refund (FL-12) aur review (FL-19). PR pe E2E Chromium pe hi ([OPERATIONS.md](OPERATIONS.md) §2 niyam 6). Firefox pe E2E nahi.
+- **Wajah:** Claude ki salah, owner ne maani: iPhone wale customers ka raasta har raat jaancha jaata hai, nightly chhota rehta hai, aur staff apps desktop Chromium pe hi chalte hain.
+- **Chhode vikalp:** nightly me WebKit aur Firefox, saare flows (nightly lamba); sirf release se pehle laptop pe WebKit (dikkat der se); sirf Chromium (Safari ki dikkat live pe).
+- **Kab dobara khulega:** owner khud khole.
+- **Kisne, kab:** owner, 2026-11-21. **Nishaan:** Salah maani.
+- **Asar (Claude):** Linux ka WebKit asli iPhone ka Safari nahi; asli iPhone ki jaanch D-375 me.
+
+### D-375. Asli phone pe testing
+
+- **Faisla:**
+  1. Har release se pehle owner ke Android phone pe: Delivery app ke ek din ka kaam (pack se delivery FL-9, delivery fail aur RTO FL-10, return pickup) aur Customer app ka checkout.
+  2. R1 se pehle ek baar iPhone (apna ya udhaar) pe: Customer app ka checkout, home screen pe install aur push.
+  3. iPhone na mile to R-062 khula rehta hai, aur ye R1 ke release note me likha jaata hai.
+  4. Har round ka record D-377 jaisa.
+- **Wajah:** Claude ki salah, owner ne maani: camera, location, offline data (R-061), dhoop me padhna aur payment ke baad app me wapsi asli phone pe hi pakke hote hain, aur iPhone pe push aur install ek baar dekhe bina R-062 khula rehta.
+- **Chhode vikalp:** sirf R1 se pehle ek baar Android pe (baad ke releases ki phone wali dikkat live pe); asli phone nahi.
+- **Kab dobara khulega:** owner khud khole.
+- **Kisne, kab:** owner, 2026-11-21. **Nishaan:** Salah maani.
+- **Asar (Claude):** har release pe lagbhag ek ghanta. Phone pe camera aur location ke liye page secure context (HTTPS) pe chahiye; laptop ka app phone pe kaise khule, ye testing ke niyamon ki batch me (jaanch baaki).
+
+### D-376. Screen reader ki jaanch
+
+- **Faisla:** har release se pehle [DESIGN.md](DESIGN.md) DS-8.1 ki screen reader checklist NVDA (Windows laptop pe) pe desktop apps me, aur TalkBack (Android) pe Customer aur Delivery apps me. R1 se pehle ek baar VoiceOver (iPhone) pe Customer app, D-375 ke iPhone wale round me. iPhone na mile to VoiceOver wala hissa bhi R1 ke release note me khula likha jaata hai.
+- **Wajah:** Claude ki salah, owner ne maani: customers aur delivery partners phone pe hain, aur iPhone ka round pehle se tay hai.
+- **Chhode vikalp:** sirf NVDA aur TalkBack (iPhone pe padhne ki dikkat chhoot-ti); sirf NVDA (phone ki dikkatein chhoot-ti).
+- **Kab dobara khulega:** owner khud khole.
+- **Kisne, kab:** owner, 2026-11-21. **Nishaan:** Salah maani.
+- **Asar (Claude):** DS-8.1 me screen readers ke naam DESIGN ki agli badli me jod.
+
+### D-377. Khoj wala (haath ka) testing
+
+- **Faisla:**
+  1. Har release pe owner misaal 2 ghante, badle flows pe chhote round (ek flow, ek lakshya, misaal 30 minute).
+  2. R1 se pehle allowlist (D-133) ke 1 ya 2 bharose ke testers ka ek round.
+  3. Har haath ke check ka chhota record: kya, kis device aur browser pe, kisne, kab, nateeja.
+  4. "Verified" sirf isi record ya live smoke check se likha jaata hai (CLAUDE.md ka imaandari niyam); sirf test pass hona "verified" nahi.
+- **Wajah:** Claude ki salah, owner ne maani: har release pe chhota aur seemit samay, aur R1 se pehle nayi aankhon se ek round, kyunki banane wala apni galtiyan kam dekhta hai.
+- **Chhode vikalp:** sirf R1 se pehle ek bada round (baad ke badlav bina khoj ke); koi khoj wala testing nahi.
+- **Kab dobara khulega:** owner khud khole.
+- **Kisne, kab:** owner, 2026-11-21. **Nishaan:** Salah maani.
+- **Asar (Claude):** record kahan rahe, ye testing ke niyamon ki batch me. Testers ke emails live pe personal data hain, privacy ke niyamon ([COMPLIANCE.md](COMPLIANCE.md) §5) ke andar. Kanooni detail: Lawyer ya CA se nahi jaancha.
+
+### D-378. Bug ki gambhirta aur release
+
+- **Faisla:** bug ki gambhirta ka paimana: **P0** paisa galat, data leak, security bypass ya data khona; **P1** koi flow ruka aur doosra raasta nahi; **P2** flow doosre raaste se chalta hai, ya paise ke bina koi galat jaankari; **P3** sirf dikhawat. Khula P0 ya P1 release rokta hai; P2 release note me likh ke release chalta hai.
+- **Wajah:** Claude ki salah, owner ne maani: paisa, data aur koi bhi ruka hua flow live nahi jaata, aur chhoti galti release nahi rokti.
+- **Chhode vikalp:** sirf P0 roke (toota flow live); P0, P1 aur P2 sab rokein (chhoti galtiyon pe release der se).
+- **Kab dobara khulega:** owner khud khole.
+- **Kisne, kab:** owner, 2026-11-21. **Nishaan:** Salah maani.
+- **Asar (Claude):** R1 ke release gate ki baaki sharten testing ke niyamon ki batch me.
+
+### D-379. Load test kitni baar
+
+- **Faisla:** design ke target ([ARCHITECTURE.md](ARCHITECTURE.md) §9, D-283) pe load test R1 se pehle ek baar. Phir sirf us release me jo order place, pack, delivery scan ya payout ka raasta badle, ya nayi service jode.
+- **Wajah:** Claude ki salah, owner ne maani: bina badlav ke dobara chalane se kuch naya nahi milta, aur load wale raaste badalte hi test dobara.
+- **Chhode vikalp:** har release se pehle (har baar ghante); sirf R1 se pehle (baad ke badlav ka asar anjaana).
+- **Kab dobara khulega:** owner khud khole.
+- **Kisne, kab:** owner, 2026-11-21. **Nishaan:** Salah maani.
+- **Asar (Claude):** laptop ke containers live ki free tier seemaayein (jaise Atlas M0 ki operations ki seema) poori nahi dikhate, to load test akela saboot nahi; har flow ke database operations ki ginti ka budget testing ke niyamon ki batch me.
+
+### D-380. Live smoke order
+
+- **Faisla:** release ke baad live smoke check ([OPERATIONS.md](OPERATIONS.md) §3 niyam 9) ka test-mode order:
+  1. Payment ke baad, pack se pehle, turant cancel.
+  2. Order pe "smoke" ka nishaan, jo use bikri, Bestseller (D-154), search ke kram (D-139) aur owner ke aankdon (D-149) ki ginti se bahar rakhta hai.
+  3. Nishaan sirf setting se tay ek allowlist account ke orders pe lagta hai; koi customer khud nahi laga sakta.
+  4. Finance ki entries aur audit me order waisa hi rehta hai: kuch mitta nahi, sirf ginti aur aankdon se bahar.
+- **Wajah:** Claude ki salah, owner ne maani: har release pe ek jhootha order customer ko dikhne wale aankde na bigaade, aur paise ka record poora rahe.
+- **Chhode vikalp:** turant cancel par baaki orders jaisa gina jaaye (aankdon me thoda jhooth); poora delivery tak chalana (har release pe ghante).
+- **Kab dobara khulega:** owner khud khole.
+- **Kisne, kab:** owner, 2026-11-21. **Nishaan:** Salah maani.
+- **Asar (Claude):** smoke order ke emails D-028 ki din ki chhat me gine jaate hain. OPERATIONS §3 niyam 9 me iska link agli badli me. Nishaan ka field data ke niyamon ([ARCHITECTURE.md](ARCHITECTURE.md) §10.5) ke saath.
+
 ## Change log
 
 | Version  | Date       | Badlav                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      |
@@ -4573,3 +4684,4 @@
 | v1.14.16 | 2026-11-21 | D-350 me owner ka jod: mukhya set Solar, doosra Lucide, phir baaki; har app me Icon credits page.                                                                                                                                                                                                                                                                                                                                                                                           |
 | v1.14.17 | 2026-11-21 | D-350 (owner): icons ka alag page nahi, sab apps me ek saajha Credits page, har package ka apna credit component; D-347 niyam 9 me Ola Maps ka credit.                                                                                                                                                                                                                                                                                                                                      |
 | v1.14.18 | 2026-11-21 | D-351 ki wajah me RTO ka matlab saaf kiya (GLOSSARY ki link).                                                                                                                                                                                                                                                                                                                                                                                                                               |
+| v1.14.19 | 2026-11-21 | D-371 se D-380 aaye (QA Architect ke 10 sawal: coverage aur mutation ke gate, flaky tests, WebKit, asli phone, screen reader, khoj wala testing, bug ki gambhirta, load test, smoke order; Q-307 se Q-316).                                                                                                                                                                                                                                                                                 |
