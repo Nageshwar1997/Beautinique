@@ -1,6 +1,6 @@
 # RULES: Beautinique
 
-> **Status:** v1.1.1 (2026-11-21). Kaam ke niyam. Abhi §1 (Definition of Done), §2.1 (R1 ka release gate) aur §4 (Testing), D-381 se D-387. Baaki cheezein ek-ek karke, owner ki haan ke baad judengi.
+> **Status:** v1.1.3 (2026-11-21). Kaam ke niyam. Abhi §1 (Definition of Done), §2.1 (R1 ka release gate) aur §4 (Testing), D-381 se D-387, D-397, D-398. Baaki cheezein ek-ek karke, owner ki haan ke baad judengi.
 
 ## Is file me kya aayega
 
@@ -22,7 +22,7 @@ Hamesha laagu niyam root [CLAUDE.md](../CLAUDE.md) me hain. Unhe laagu karne wal
 
 Ek subtask tab "ho gaya" jab:
 
-1. **DD-1:** uske har acceptance criterion ka kam se kam ek automated test, test ke naam me criterion ka id; mana hone wale raaste bhi (RT-20).
+1. **DD-1:** uske har acceptance criterion ([ACCEPTANCE.md](ACCEPTANCE.md)) ka kam se kam ek automated test, test ke naam me criterion ka id; mana hone wale raaste bhi (RT-20).
 2. **DD-2:** badle routes, events aur facades ke contract tests update; naya route route × actor matrix me (RT-35).
 3. **DD-3:** jis flow ko chhua, uski E2E spec update aur green.
 4. **DD-4:** CI ka `check` green; koi naya `.skip` bina issue ke nahi; koi naya flaky nahi.
@@ -186,7 +186,7 @@ Har fake ka apna chhota test, aur har fake ka vyavhaar provider ke docs ke saath
 
 1. **RT-17:** paise, stock aur har "ek hi" wali cheez ka test ek saath N requests (misaal 50) se: unique index, conditional update aur transaction ka asli takraav. _Wajah:_ asli users ek saath aate hain; ek user wala test race nahi pakadta.
 2. **RT-18:** paise ke har function pe property tests (random carts, rates, refunds, chhoot): jod barabar, refund captured se kabhi zyada nahi, float kahin nahi. _Wajah:_ haath ki misaalein kinaare ke cases chhod deti hain.
-3. **RT-19:** har mukhya flow (place order, pack, delivery, return, payout) ke database operations gine jaayein aur tay budget se upar test fail; har repository query ka `explain` index se. _Wajah:_ free cluster ki operations ki seema container me nahi dikhti.
+3. **RT-19:** har mukhya flow (place order, pack, delivery, return, payout) ke database operations gine jaayein aur tay budget se upar test fail; har flow ka budget us module ki planning (`TASK.md`) me tay hota hai; har repository query ka `explain` index se. _Wajah:_ free cluster ki operations ki seema container me nahi dikhti.
 4. **RT-20:** har mana hone wale raaste ka apna test: galat permission (403), scope ke bahar (404), wahi idempotency key alag body (422), seema ke upar, galat halat (409). Sirf "happy path" wala badlav adhoora maana jaaye. _Wajah:_ hamle aur galtiyan inhi raaston se aati hain.
 
 ### 4.4 Mutation, coverage, flaky aur ginti (D-384)
@@ -197,7 +197,7 @@ Har fake ka apna chhota test, aur har fake ka vyavhaar provider ke docs ke saath
    - **Tool (prastaav):** StrykerJS, Vitest runner ke saath. Copy (sandbox) repo ke bahar ya aisi jagah jo dev server aur watchers nahi dekhte. Badli lines ek chhoti script `git diff` se nikaal ke deti hai. Line ranges aur sandbox ki baatein jaanchna baaki.
 2. **RT-22:** bacha mutant ya to naye test se mare, ya package ke saath "equivalent" ki likhi wajah ho; bina wajah ka bacha mutant job ko fail karta hai. _Wajah:_ mutation score ka matlab bana rahe.
 3. **RT-23:** coverage ki seema area ke hisaab se: kernel packages misaal 90% branch, paisa, stock aur permissions misaal 85% branch, baaki misaal 70% lines. Pehle do areas me seema se neeche PR rukta hai; baaki me sirf report aur release se pehle jaanch (D-371). Coverage Vitest ke v8 coverage se. _Wajah:_ poore repo ka ek number kamzor jagah chhupa deta hai.
-4. **RT-24:** har test ke naam me uske niyam ka id (`SR-045`, `FL-7`, `CL-003`, acceptance criterion ka id). Ek script tests se ids nikaal ke R1 ki list (SECURITY_REQUIREMENTS, FLOWS, TASK.md ke criteria, COMPLIANCE ke R1 rows) se milaati hai: PR pe report, release pe kami 0. _Wajah:_ "bana hai" sirf test ki link se kaha jaaye, aur chhoota niyam dikhe.
+4. **RT-24:** har test ke naam me uske niyam ka id (`SR-045`, `FL-7`, `CL-003`, acceptance criterion ka id). Ek script tests se ids nikaal ke R1 ki list (SECURITY_REQUIREMENTS, FLOWS, [ACCEPTANCE.md](ACCEPTANCE.md) ke criteria, COMPLIANCE ke R1 rows) se milaati hai: PR pe report, release pe kami 0. _Wajah:_ "bana hai" sirf test ki link se kaha jaaye, aur chhoota niyam dikhe.
 5. **RT-25:** flaky ka matlab: wahi commit, wahi test, kabhi pass kabhi fail. Sirf E2E tests pe ek retry; retry se pass hua test summary me "flaky" dikhe aur uska issue bane. Paise, stock, permissions, idempotency aur events ke tests pe retry nahi aur kabhi quarantine nahi; unka flaky hona bug hai (D-373). Asli `sleep` mana; intezaar sirf halat pe. _Wajah:_ race asli ho sakta hai, aur chupka green bharosa todta hai.
 6. **RT-26:** `.only` CI me mana; `.skip` sirf issue ki link aur tareekh ke saath. _Wajah:_ chhupa adhoora test sabse mehnga hota hai.
 
@@ -257,7 +257,7 @@ Ek "poora R1" spec bhi: area khulne se seller ke payout tak, saare apps ek ke ba
 2. **RT-28:** har mukhya screen 320, 360, 768 aur 1280 px pe; 320 pe horizontal scroll ka test aur focus ka header ya neeche ki bar ke neeche na chhupna. _Wajah:_ reflow aur focus WCAG ke niyam hain, aankh se chhoot jaate hain.
 3. **RT-29:** screenshot tests sirf mukhya screens pe, sirf Linux container me, animations band; baseline sirf ek tay command se badle aur PR me dikhe. _Wajah:_ operating system ke font ka farak jhoothe fail deta hai, aur baseline chupke se na badle.
 4. **RT-30:** har haath ke check ka record (kya, kis device aur browser pe, kisne, kab, nateeja); bina record "verified" nahi likha jaata (D-377). _Wajah:_ imaandari ka niyam.
-5. **RT-31:** server ke p95 targets Docker me 512 MB aur ek tay CPU seema pe naape jaayein, jo live plan jaisi ho aur pehle naap ke saath likhi jaaye; har naap 3 baar, nateeja tareekh aur commit ke saath. _Wajah:_ naap dohraya ja sake; CPU seema ke bina nateeja kai guna alag ho sakta hai; targets sirf jaage server pe (D-053).
+5. **RT-31:** server ke p95 targets Docker me 512 MB aur [OPERATIONS.md](OPERATIONS.md) §10 niyam 1 ki live jaisi CPU seema (misaal `--cpus=0.1`) pe naape jaayein; pass ya fail usi seema pe, 0.5 wala naap sirf tulna ke liye; har naap 3 baar, nateeja tareekh aur commit ke saath. _Wajah:_ naap dohraya ja sake; CPU seema ke bina nateeja kai guna alag ho sakta hai; targets sirf jaage server pe (D-053).
 6. **RT-32:** design target ka load test laptop pe (D-379); nateeja sirf samay nahi, baad me data ki sachchai bhi: stock minus nahi, reservations aur movements milte hain, outbox me atka event nahi, journal barabar. Laptop ka load test live ki free tier seemaayein poori nahi dikhata, isliye saath me RT-19. _Wajah:_ load me hi race aur takraav dikhte hain.
 7. **RT-33:** E2E me elements role aur label se dhoondhe jaayein (jaise button ka naam); CSS class ya test id tabhi jab koi aur raasta na ho. _Wajah:_ test accessibility ka bhi pehra ban jaata hai.
 
@@ -278,6 +278,8 @@ Ek "poora R1" spec bhi: area khulne se seller ke payout tak, saare apps ek ke ba
 | SR-088                                         | Seller export me invoice ki copy nahi; har download audit me                                          |
 
 Kuch niyamon ka saboot test nahi, record hai (jaise schema ki review checklist, providers pe MFA ki checklist, abhyaas ka record); release gate me inka record dekha jaata hai (§2.1).
+
+**SR-019 ka ek jaisa jawab:** CI me sirf jawab ke body ki barabari aur kam se kam tay samay jaancha jaata hai; registered aur anjaan email ke samay ka farak CI ke shor me pakka nahi, isliye uska naap laptop pe kai baar (misaal 50 baar), ek seema ke saath (misaal p95 ka farak 50 ms se kam).
 
 **Migration, release step aur rollback:**
 
@@ -327,9 +329,19 @@ Kuch niyamon ka saboot test nahi, record hai (jaise schema ki review checklist, 
 8. **RT-41:** har bug ki gambhirta D-378 ke paimane (P0 se P3) se; release ka faisla usi se (RG-13). _Wajah:_ release gate ek saaf paimane pe tike.
 9. **RT-42:** har PR ke description me "kaise jaancha": kaunse tests chale, kya haath se dekha, aur kya nahi dekha; release note me tests ka saar. _Wajah:_ review aur release ka faisla saboot pe ho.
 
+### 4.7 Pehre aur regression (D-398)
+
+1. **RT-43:** collection scan ke pehre me chhoot sirf us query ke saath likhi wajah (comment) se; bina wajah ka scan CI laal kare. _Wajah:_ jaan-boojh ke poora padhna bhi dikhe, chupke se nahi.
+2. **RT-44:** integration aur E2E ke aakhir me ids ka pehra: doosri service ke references aur entity `_id` asli ObjectId hon, string nahi ([ARCHITECTURE.md](ARCHITECTURE.md) §10.1 niyam 1 aur 2). _Wajah:_ string id chupke se queries aur joins tod deta hai.
+3. **RT-45:** CI ki config ka apna test: har app aur service jiske tests hain, CI ki jobs me ho. _Wajah:_ naya app ya service CI se chhoot na jaaye.
+4. **RT-46:** release ka test report: har command ka nateeja aur samay ki chhoti table, release note ke saath (RT-42). _Wajah:_ "kaise jaancha" ka saboot dohraane layak rahe.
+5. **RT-47:** in galtiyon ke regression tests: Valkey ruka par connection juda (disconnect nahi) to signed-in route jaldi 503 de, latke nahi; apps ki har API call pe timeout; edge ya proxy ka 5xx user ko raw text me na dikhe, saaf screen pe; E2E ki safai backend band hone ke baad bhi chale. _Wajah:_ ye galtiyan ek baar asli me ho chuki hain.
+
 ## Change log
 
 | Version | Date       | Badlav                                                                                                                                                     |
 | ------- | ---------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | v1.0.0  | 2026-11-17 | Khaali file bani.                                                                                                                                          |
 | v1.1.1  | 2026-11-21 | QA ki 7 batches: §4 Testing (§4.1 se §4.6, RT-1 se RT-42), §1 Definition of Done (DD-1 se DD-12), §2.1 R1 ka release gate (RG-1 se RG-14); D-381 se D-387. |
+| v1.1.2  | 2026-11-21 | DD-1 aur RT-24 me criteria ki jagah ACCEPTANCE.md (D-388).                                                                                                 |
+| v1.1.3  | 2026-11-21 | RT-19 me budget ki jagah, RT-31 me CPU seema, §4.6 me SR-019 ka naap (D-397); naya §4.7, RT-43 se RT-47 (D-398).                                           |

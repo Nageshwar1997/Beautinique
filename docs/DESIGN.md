@@ -1,6 +1,6 @@
 # DESIGN: Beautinique
 
-> **Status:** v1.1.7 (2026-11-21). Saare apps ka UI design system (§1 se §10). Cheezein ek-ek karke, owner ki haan ke baad judti hain.
+> **Status:** v1.1.8 (2026-11-21). Saare apps ka UI design system (§1 se §10). Cheezein ek-ek karke, owner ki haan ke baad judti hain.
 
 ## Is file me kya aayega
 
@@ -194,7 +194,7 @@ Har niyam ka id `DS-<section>.<n>`. Tokens ke naam code me waise hi (CSS custom 
 
 **Kis par:** DS-1.7, D-206 (CAPTCHA nahi). **R1.**
 
-1. **DS-8.1 Lakshya:** saare apps WCAG 2.2 AA, light, dark aur high contrast me. Component tests aur E2E me automated accessibility jaanch (misaal axe): serious ya critical ek bhi nahi to hi pass. Har release se pehle mukhya flows (sign-in, checkout, delivery code, return, listing, scan, delivery) pe keyboard aur screen reader ki haath ki checklist.
+1. **DS-8.1 Lakshya:** saare apps WCAG 2.2 AA, light, dark aur high contrast me. Component tests aur E2E me automated accessibility jaanch (misaal axe): serious ya critical ek bhi nahi to hi pass. Har release se pehle mukhya flows (sign-in, checkout, delivery code, return, listing, scan, delivery) pe keyboard aur screen reader ki haath ki checklist: NVDA pe desktop apps, TalkBack pe Customer aur Delivery, aur R1 se pehle ek baar VoiceOver pe Customer (D-376).
 2. **DS-8.2 Contrast:** §2 aur §3 ke tokens se; text 4.5:1, bada text aur UI parts (input ki seema, focus, icons) 3:1.
 3. **DS-8.3 Focus:** hamesha dikhe: 2 px `focus-ring`, 2 px offset (high contrast me 3 px); sticky header ya neeche ki bar focus ko na dhake (WCAG 2.4.11): `scroll-padding-top` header jitna, `scroll-padding-bottom` bar jitna.
 4. **DS-8.4 Keyboard:** har kaam keyboard se; koi trap nahi; dialog focus andar rakhe aur band hone pe kholne wale button pe lautaye; har page pe "Skip to content".
@@ -269,3 +269,4 @@ Har niyam ka id `DS-<section>.<n>`. Tokens ke naam code me waise hi (CSS custom 
 | v1.1.5  | 2026-11-21 | DS-7.1: icons icones.js.org se, script aur test ke saath (D-350).                                                                                                                                                                                   |
 | v1.1.6  | 2026-11-21 | DS-7.1: mukhya set Solar, phir Lucide; har app me Icon credits page (D-350).                                                                                                                                                                        |
 | v1.1.7  | 2026-11-21 | DS-6.15 saajha Credits page; DS-7.1 me icons ka credit component (D-350).                                                                                                                                                                           |
+| v1.1.8  | 2026-11-21 | DS-8.1 me screen readers ke naam (D-376, D-397).                                                                                                                                                                                                    |

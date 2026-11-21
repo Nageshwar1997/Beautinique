@@ -1,6 +1,6 @@
 # DECISIONS: Beautinique
 
-> **Status:** v1.14.20 (2026-11-21). Har faisla ek jagah. Sirf wahi "Tay" jo owner ne khud kaha; Claude ki salah faisla nahi. Cheezein ek-ek karke judti hain.
+> **Status:** v1.14.23 (2026-11-21). Har faisla ek jagah. Sirf wahi "Tay" jo owner ne khud kaha; Claude ki salah faisla nahi. Cheezein ek-ek karke judti hain.
 
 ## 0. Kaise likhein
 
@@ -402,6 +402,17 @@
 | D-385 | QA batch 5 (E2E, accessibility, visual aur performance, RT-27 se RT-33) maana: [RULES.md](RULES.md) §4.5; D-342 ke Asar me sudhaar.                                                                                                                                                     | Process      | 2026-11-21 |
 | D-386 | QA batch 6 (security, migrations, backup, COMPLIANCE checks aur bugs, RT-34 se RT-42) maana: [RULES.md](RULES.md) §4.6.                                                                                                                                                                 | Process      | 2026-11-21 |
 | D-387 | QA batch 7 (Definition of Done DD-1 se DD-12, R1 release gate RG-1 se RG-14) maana: [RULES.md](RULES.md) §1 aur §2.1.                                                                                                                                                                   | Process      | 2026-11-21 |
+| D-388 | Acceptance criteria naye doc [ACCEPTANCE.md](ACCEPTANCE.md) me hamesha ke liye; planning me `TASK.md` uske hisse ki link de, copy nahi.                                                                                                                                                 | Process      | 2026-11-21 |
+| D-389 | QA batch 8 (PLATFORM, GATEWAY, AUDIT, LOGS ke 32 criteria) maana: [ACCEPTANCE.md](ACCEPTANCE.md) §1.1, §1.2, §1.11, §1.13.                                                                                                                                                              | Process      | 2026-11-21 |
+| D-390 | QA batch 9 (IDENTITY, NOTIFY, MEDIA ke 27 criteria) maana: [ACCEPTANCE.md](ACCEPTANCE.md) §1.3, §1.4, §1.12.                                                                                                                                                                            | Process      | 2026-11-21 |
+| D-391 | QA batch 10 (CATALOG, COMMERCE ke 24 criteria) maana: [ACCEPTANCE.md](ACCEPTANCE.md) §1.6, §1.7.                                                                                                                                                                                        | Process      | 2026-11-21 |
+| D-392 | QA batch 11 (PAYMENTS, FINANCE ke 22 criteria) maana: [ACCEPTANCE.md](ACCEPTANCE.md) §1.5, §1.9.                                                                                                                                                                                        | Process      | 2026-11-21 |
+| D-393 | QA batch 12 (LOGISTICS, SUPPORT ke 20 criteria) maana: [ACCEPTANCE.md](ACCEPTANCE.md) §1.8, §1.10.                                                                                                                                                                                      | Process      | 2026-11-21 |
+| D-394 | QA batch 13 (Customer, Seller, Delivery apps ke 26 criteria) maana: [ACCEPTANCE.md](ACCEPTANCE.md) §2.1, §2.2, §2.9.                                                                                                                                                                    | Process      | 2026-11-21 |
+| D-395 | QA batch 14 (6 staff apps ke 33 criteria) maana: [ACCEPTANCE.md](ACCEPTANCE.md) §2.3 se §2.8.                                                                                                                                                                                           | Process      | 2026-11-21 |
+| D-396 | QA ke 12 naye risks (R-065 se R-076) bachav ke saath khule: fakes, containers ka farak, lamba CI, flaky, samay, laptop pe bojh, screenshots, personal data, ek tester, ek haath, smoke ka kharcha, replica set.                                                                         | Operations   | 2026-11-21 |
+| D-397 | QA ke 5 chhote sudhaar: p95 ka pass live jaisi CPU seema pe (RT-31), SR-019 ka naap laptop pe, flow ka DB budget `TASK.md` me (RT-19), OPERATIONS me WebKit aur smoke order, DS-8.1 me screen readers.                                                                                  | Process      | 2026-11-21 |
+| D-398 | QA ke 5 lene layak niyam [RULES.md](RULES.md) §4.7 me (RT-43 se RT-47): scan ki chhoot likhi wajah se, ids ka pehra, CI config ka test, release ka test report, 4 regression tests.                                                                                                     | Process      | 2026-11-21 |
 
 ## 2. Record
 
@@ -4532,7 +4543,7 @@
 - **Chhode vikalp:** sirf NVDA aur TalkBack (iPhone pe padhne ki dikkat chhoot-ti); sirf NVDA (phone ki dikkatein chhoot-ti).
 - **Kab dobara khulega:** owner khud khole.
 - **Kisne, kab:** owner, 2026-11-21. **Nishaan:** Salah maani.
-- **Asar (Claude):** DS-8.1 me screen readers ke naam DESIGN ki agli badli me jod.
+- **Asar (Claude):** DS-8.1 me screen readers ke naam jode gaye (D-397).
 
 ### D-377. Khoj wala (haath ka) testing
 
@@ -4576,7 +4587,7 @@
 - **Chhode vikalp:** turant cancel par baaki orders jaisa gina jaaye (aankdon me thoda jhooth); poora delivery tak chalana (har release pe ghante).
 - **Kab dobara khulega:** owner khud khole.
 - **Kisne, kab:** owner, 2026-11-21. **Nishaan:** Salah maani.
-- **Asar (Claude):** smoke order ke emails D-028 ki din ki chhat me gine jaate hain. OPERATIONS §3 niyam 9 me iska link agli badli me. Nishaan ka field data ke niyamon ([ARCHITECTURE.md](ARCHITECTURE.md) §10.5) ke saath.
+- **Asar (Claude):** smoke order ke emails D-028 ki din ki chhat me gine jaate hain. OPERATIONS §3 niyam 9 me iska link jod diya (D-397). Nishaan ka field data ke niyamon ([ARCHITECTURE.md](ARCHITECTURE.md) §10.5) ke saath.
 
 ### D-381. QA batch 1: siddhaant, levels aur kab kya chalta hai
 
@@ -4637,6 +4648,103 @@
 - **Kab dobara khulega:** owner khud khole.
 - **Kisne, kab:** owner, 2026-11-21. **Nishaan:** Salah maani.
 - **Asar (Claude):** planning stage me `TASK.md` ka template DD-1 se DD-12 se banega ([tasks/README.md](tasks/README.md)).
+
+### D-388. Acceptance criteria ki jagah
+
+- **Faisla:** R1 ke acceptance criteria naye doc [ACCEPTANCE.md](ACCEPTANCE.md) me hamesha ke liye. Planning stage me har module ki `TASK.md` apne hisse ki link deti hai, criteria copy nahi karti. Id `AC-<MODULE>-<n>` kabhi nahi badalta.
+- **Wajah:** Claude ki salah, owner ne maani: `TASK.md` abhi nahi ban sakti (D-004), har baat ek jagah rahe, aur requirement ki ginti ki script ([RULES.md](RULES.md) RT-24) ek hi file padhe.
+- **Chhode vikalp:** ACCEPTANCE.md sirf planning tak, phir criteria `TASK.md` me (184 criteria ka move aur links badalna); PROJECT_PLAN me ek hissa (PROJECT_PLAN bhaari).
+- **Kab dobara khulega:** owner khud khole.
+- **Kisne, kab:** owner, 2026-11-21. **Nishaan:** Salah maani.
+- **Asar (Claude):** [README.md](README.md) me nayi file ki line; [tasks/README.md](tasks/README.md) me `TASK.md` ka "acceptance criteria" ab ACCEPTANCE ki link; RULES RT-24 me ACCEPTANCE.
+
+### D-389. QA batch 8: PLATFORM, GATEWAY, AUDIT aur LOGS ke criteria
+
+- **Faisla:** 32 criteria [ACCEPTANCE.md](ACCEPTANCE.md) §1.1 (PLATFORM), §1.2 (GATEWAY), §1.11 (AUDIT) aur §1.13 (LOGS) me. Misaal wale numbers settings ya code me badal sakte hain.
+- **Wajah:** Claude ki salah, owner ne maani: baaki saari services inhi saajhe hisson pe tiki hain.
+- **Chhode vikalp:** badlav ke saath maanna (owner ne koi badlav nahi diya); batch rokna (in modules ka "done" ka paimana baaki).
+- **Kab dobara khulega:** owner khud khole.
+- **Kisne, kab:** owner, 2026-11-21. **Nishaan:** Salah maani.
+
+### D-390. QA batch 9: IDENTITY, NOTIFY aur MEDIA ke criteria
+
+- **Faisla:** 27 criteria [ACCEPTANCE.md](ACCEPTANCE.md) §1.3 (IDENTITY), §1.4 (NOTIFY) aur §1.12 (MEDIA) me.
+- **Wajah:** Claude ki salah, owner ne maani: sign-in, khabrein aur files personal data aur security ke sabse bade darwaze hain.
+- **Chhode vikalp:** badlav ke saath maanna (owner ne koi badlav nahi diya); batch rokna (in modules ka "done" ka paimana baaki).
+- **Kab dobara khulega:** owner khud khole.
+- **Kisne, kab:** owner, 2026-11-21. **Nishaan:** Salah maani.
+
+### D-391. QA batch 10: CATALOG aur COMMERCE ke criteria
+
+- **Faisla:** 24 criteria [ACCEPTANCE.md](ACCEPTANCE.md) §1.6 (CATALOG) aur §1.7 (COMMERCE) me.
+- **Wajah:** Claude ki salah, owner ne maani: stock aur daam ki galti seedhe customer aur seller ke paise pe padti hai.
+- **Chhode vikalp:** badlav ke saath maanna (owner ne koi badlav nahi diya); batch rokna (in modules ka "done" ka paimana baaki).
+- **Kab dobara khulega:** owner khud khole.
+- **Kisne, kab:** owner, 2026-11-21. **Nishaan:** Salah maani.
+- **Asar (Claude):** AC-CATALOG-10 ke tests dono search adapters pe ([ARCHITECTURE.md](ARCHITECTURE.md) §6 niyam 7); Atlas Search wala hissa laptop aur CI pe tabhi jab MongoDB ka local Atlas image chale (jaanchna baaki).
+
+### D-392. QA batch 11: PAYMENTS aur FINANCE ke criteria
+
+- **Faisla:** 22 criteria [ACCEPTANCE.md](ACCEPTANCE.md) §1.5 (PAYMENTS) aur §1.9 (FINANCE) me.
+- **Wajah:** Claude ki salah, owner ne maani: paise ki har galti P0 hai (D-378), aur books ke niyam (D-282) tests se hi pakke hote hain.
+- **Chhode vikalp:** badlav ke saath maanna (owner ne koi badlav nahi diya); batch rokna (paise ke modules ka "done" ka paimana baaki).
+- **Kab dobara khulega:** owner khud khole.
+- **Kisne, kab:** owner, 2026-11-21. **Nishaan:** Salah maani.
+
+### D-393. QA batch 12: LOGISTICS aur SUPPORT ke criteria
+
+- **Faisla:** 20 criteria [ACCEPTANCE.md](ACCEPTANCE.md) §1.8 (LOGISTICS) aur §1.10 (SUPPORT) me.
+- **Wajah:** Claude ki salah, owner ne maani: delivery aur daawe dono taraf ke dhokhe ka raasta hain (D-072), aur inka saboot inhi niyamon se banta hai.
+- **Chhode vikalp:** badlav ke saath maanna (owner ne koi badlav nahi diya); batch rokna (in modules ka "done" ka paimana baaki).
+- **Kab dobara khulega:** owner khud khole.
+- **Kisne, kab:** owner, 2026-11-21. **Nishaan:** Salah maani.
+
+### D-394. QA batch 13: Customer, Seller aur Delivery apps ke criteria
+
+- **Faisla:** 26 criteria [ACCEPTANCE.md](ACCEPTANCE.md) §2.1 (Customer), §2.2 (Seller) aur §2.9 (Delivery) me.
+- **Wajah:** Claude ki salah, owner ne maani: ye teen apps bahar ke users ke hain, aur unka bharosa inhi screens pe banta hai.
+- **Chhode vikalp:** badlav ke saath maanna (owner ne koi badlav nahi diya); batch rokna (in apps ka "done" ka paimana baaki).
+- **Kab dobara khulega:** owner khud khole.
+- **Kisne, kab:** owner, 2026-11-21. **Nishaan:** Salah maani.
+- **Asar (Claude):** Delivery app ke offline, camera aur location wale criteria ka pakka saboot asli phone pe (D-375).
+
+### D-395. QA batch 14: staff apps ke criteria
+
+- **Faisla:** 33 criteria [ACCEPTANCE.md](ACCEPTANCE.md) §2.3 se §2.8 (Admin, Super Admin, Master, Support Desk, Finance, Logistics Ops) me.
+- **Wajah:** Claude ki salah, owner ne maani: staff ke haath me paisa, manzoori aur personal data hain, aur "do haath" aur audit ke niyam inhi screens pe dikhte hain.
+- **Chhode vikalp:** badlav ke saath maanna (owner ne koi badlav nahi diya); batch rokna (staff apps ka "done" ka paimana baaki).
+- **Kab dobara khulega:** owner khud khole.
+- **Kisne, kab:** owner, 2026-11-21. **Nishaan:** Salah maani.
+
+### D-396. QA Architect ke risks
+
+- **Faisla:** 12 naye risks [RISKS.md](RISKS.md) me: R-065 (fakes asli providers se alag), R-066 (containers aur free clusters ka farak), R-067 (lamba CI), R-068 (E2E me timing se flaky), R-069 (samay wale niyamon me galti), R-070 (laptop pe mutation aur load ka bojh), R-071 (screenshots ki baseline), R-072 (fixtures ya artifacts me personal data), R-073 (ek hi insaan tester), R-074 (code aur test ek hi haath se), R-075 (smoke check ka free tier pe kharcha), R-076 (single-member replica set). Sab bachav ke saath `Khula`.
+- **Wajah:** Claude ki salah, owner ne maani: har ek ka bachav [RULES.md](RULES.md) §4 ya D-371 se D-380 me likha hai, par tests green hone ke baad bhi khatra bacha hai.
+- **Chhode vikalp:** kuch `Maana` (owner ne koi nahi chuna); risks rokna (khatre chhupe rehte).
+- **Kab dobara khulega:** asli naap ya jaanch ke nateeje aayein, ya owner khud khole.
+- **Kisne, kab:** owner, 2026-11-21. **Nishaan:** Salah maani.
+
+### D-397. QA ke chhote sudhaar
+
+- **Faisla:** 5 sudhaar:
+  1. [RULES.md](RULES.md) RT-31: server ke p95 ka pass ya fail [OPERATIONS.md](OPERATIONS.md) §10 niyam 1 ki live jaisi CPU seema (misaal `--cpus=0.1`) pe; 0.5 wala naap sirf tulna ke liye.
+  2. RULES §4.6 me SR-019 ka niyam: CI me sirf body ki barabari aur kam se kam samay; samay ke farak ka naap laptop pe kai baar, ek seema ke saath (misaal).
+  3. RULES RT-19: har flow ke database operations ka budget us module ki planning (`TASK.md`) me tay.
+  4. OPERATIONS §2 niyam 6 me nightly WebKit (D-374) aur RULES ki link; §3 niyam 9 me smoke order (D-380).
+  5. [DESIGN.md](DESIGN.md) DS-8.1 me screen readers ke naam (D-376).
+- **Wajah:** Claude ki salah, owner ne maani: CPU seema ke bina p95 ka "pass" tay nahi tha, samay ka chhota farak CI me pakka nahi naapa ja sakta, aur D-374, D-376 aur D-380 ke niyam unhi docs me dikhne chahiye jinhe log padhte hain.
+- **Chhode vikalp:** kuch hi sudhaar (owner ne koi nahi chuna); koi sudhaar nahi (niyam aapas me bina link ke).
+- **Kab dobara khulega:** owner khud khole, ya 0.1 CPU ke pehle naap ke baad.
+- **Kisne, kab:** owner, 2026-11-21. **Nishaan:** Salah maani.
+- **Asar (Claude):** 0.1 CPU pe password hashing aur PDF jaise kaam p95 targets se upar ja sakte hain; pehle naap ke baad [ARCHITECTURE.md](ARCHITECTURE.md) §9 ke targets dobara dekhne padenge.
+
+### D-398. QA ke lene layak niyam
+
+- **Faisla:** pehle ke kaam se lene layak (D-074) 5 testing niyam [RULES.md](RULES.md) ke naye §4.7 me: RT-43 (collection scan ki chhoot sirf likhi wajah se), RT-44 (ids ka pehra), RT-45 (CI ki config ka apna test), RT-46 (release ka test report), RT-47 (4 regression tests: Valkey ruka par juda, API calls pe timeout, 5xx raw text me nahi, E2E ki safai backend band hone ke baad bhi).
+- **Wajah:** Claude ki salah, owner ne maani: ye pehre aur galtiyan pehle asli me kaam aaye ya ho chuke hain; QA ki baaki lene layak cheezein RULES §4.1 se §4.6 aur ACCEPTANCE me pehle hi aa chuki hain.
+- **Chhode vikalp:** kuch hi niyam (owner ne koi nahi chuna); koi nahi (jani-pehchani galtiyan dobara aa sakti).
+- **Kab dobara khulega:** owner khud khole.
+- **Kisne, kab:** owner, 2026-11-21. **Nishaan:** Salah maani.
 
 ## Change log
 
@@ -4753,3 +4861,6 @@
 | v1.14.18 | 2026-11-21 | D-351 ki wajah me RTO ka matlab saaf kiya (GLOSSARY ki link).                                                                                                                                                                                                                                                                                                                                                                                                                               |
 | v1.14.19 | 2026-11-21 | D-371 se D-380 aaye (QA Architect ke 10 sawal: coverage aur mutation ke gate, flaky tests, WebKit, asli phone, screen reader, khoj wala testing, bug ki gambhirta, load test, smoke order; Q-307 se Q-316).                                                                                                                                                                                                                                                                                 |
 | v1.14.20 | 2026-11-21 | D-381 se D-387 aaye (QA ki 7 batches RULES me; Q-317 se Q-323); D-342 ke Asar me sudhaar (screenshot sirf mukhya screens, axe har screen).                                                                                                                                                                                                                                                                                                                                                  |
+| v1.14.21 | 2026-11-21 | D-388 se D-395 aaye (acceptance criteria ki jagah ACCEPTANCE.md, aur QA ke criteria ki 7 batches; Q-324 se Q-331).                                                                                                                                                                                                                                                                                                                                                                          |
+| v1.14.22 | 2026-11-21 | D-396 aaya (QA ke 12 risks R-065 se R-076; Q-332).                                                                                                                                                                                                                                                                                                                                                                                                                                          |
+| v1.14.23 | 2026-11-21 | D-397 aur D-398 aaye (QA ke 5 sudhaar aur 5 lene layak niyam; Q-333, Q-334); D-376 aur D-380 ke Asar me "jod diya".                                                                                                                                                                                                                                                                                                                                                                         |

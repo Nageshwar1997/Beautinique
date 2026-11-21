@@ -1,6 +1,6 @@
 # Docs: Beautinique
 
-> **Status:** v1.0.1 (2026-11-18). Docs ka index. Files khaali shuru hui hain; cheezein ek-ek karke, owner ki haan ke baad judti hain.
+> **Status:** v1.0.2 (2026-11-21). Docs ka index. Files khaali shuru hui hain; cheezein ek-ek karke, owner ki haan ke baad judti hain.
 
 ## Niyam
 
@@ -22,6 +22,7 @@
 | [RISKS.md](RISKS.md)                                                   | Risks (R-xxx), security wale bhi                                     |
 | [GLOSSARY.md](GLOSSARY.md)                                             | Shabdon ka ek matlab                                                 |
 | [COMPLIANCE.md](COMPLIANCE.md)                                         | Kanooni matrix (sab dummy)                                           |
+| [ACCEPTANCE.md](ACCEPTANCE.md)                                         | Har service aur app ke acceptance criteria (AC-xxx)                  |
 | [DESIGN.md](DESIGN.md)                                                 | UI design system                                                     |
 | [OPERATIONS.md](OPERATIONS.md)                                         | Chalane ka manual                                                    |
 | [RULES.md](RULES.md)                                                   | Kaam ke niyam                                                        |
@@ -45,3 +46,4 @@
 | ------- | ---------- | ------------------------------------------------------ |
 | v1.0.0  | 2026-11-17 | Pehla version: docs ka index aur niyam.                |
 | v1.0.1  | 2026-11-18 | OPEN_QUESTIONS ki line: topics aur jaanchna baaki bhi. |
+| v1.0.2  | 2026-11-21 | Nayi file ACCEPTANCE.md (D-388).                       |

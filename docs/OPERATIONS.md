@@ -1,6 +1,6 @@
 # OPERATIONS: Beautinique
 
-> **Status:** v1.1.2 (2026-11-21). System chalane ka manual. Cheezein ek-ek karke judengi.
+> **Status:** v1.1.3 (2026-11-21). System chalane ka manual. Cheezein ek-ek karke judengi.
 
 ## Is file me kya aayega
 
@@ -35,7 +35,7 @@ DevOps / SRE Architect ki raay se (D-257 ka kram), owner ki haan ke baad (D-326 
 3. Har run pe `guard`: poori git history ka secret scan (scanner ka binary version aur checksum se pinned, finding ka secret log me chhupa), branch flow ki jaanch (`prerelease` me feature branches, `release` me sirf `prerelease` ya `hotfix/*`, `main` me sirf `release`; sab isi repo ki branches se, fork se nahi), aur `npm audit` (high aur critical pe laal).
 4. Branch flow ki jaanch galti se bachati hai, hamle se nahi: PR apna workflow khud badal sakta hai. Asli taala branch ke rulesets aur merge ka haq hai.
 5. Static: Prettier, ESLint (service ki deewar aur config namespace ke lint, SR-071), typecheck, build. Docs badle to docs ke paths ka check (D-019).
-6. Tests asli MongoDB replica set, Valkey aur PostgreSQL containers pe; E2E Playwright Chromium pe. Saath me repo ke pehre: backup folder ki koi file git me na ho (D-013), koi `.env` file git me na ho, har collection ki retention class (R-040), har repository query ka `explain` aur collection scan ka pehra, services ke beech dependency rule, aur migrations ka test (naya code purane data pe, purana code naye data pe; R-041).
+6. Tests asli MongoDB replica set, Valkey aur PostgreSQL containers pe; E2E Playwright Chromium pe, aur nightly me WebKit pe Customer app ke mukhya flows (D-374). Testing ke poore niyam [RULES.md](RULES.md) §4 me. Saath me repo ke pehre: backup folder ki koi file git me na ho (D-013), koi `.env` file git me na ho, har collection ki retention class (R-040), har repository query ka `explain` aur collection scan ka pehra, services ke beech dependency rule, aur migrations ka test (naya code purane data pe, purana code naye data pe; R-041).
 7. Supply chain: har action commit SHA pe pinned; workflow ka default `permissions: {}`, har job ko sirf zaroori haq; fork PRs ko koi secret nahi; `pull_request_target` nahi; `npm ci` lockfile se (SR-082).
 8. CI me koi production secret ya deploy key nahi. Render aur Vercel apne Git integration se deploy karte hain, sirf `release` se (SR-081). Packages ke tests kabhi asli npm registry ko nahi chhoote (fake registry).
 9. E2E fail ho to traces ek artifact me, chhoti umar (misaal 7 din), bina personal data; backup files kabhi artifact nahi (SR-083).
@@ -53,7 +53,7 @@ DevOps / SRE Architect ki raay se (D-257 ka kram), owner ki haan ke baad (D-326 
 6. Expand aur contract: contract wala release tabhi jab expand wala release live pe misaal 7 din chal chuka ho aur rollback ki zaroorat na dikhi ho. Release ke note me "contract baaki" ki list.
 7. Rollback sirf ek release peeche: Render pichhle do deploys tak hi wapas ja sakta hai (jaancha 2026-11-21), aur expand aur contract ki wajah se sirf pichhla release naye data ke saath surakshit hai. Usse peeche kabhi nahi; aage ka fix (roll-forward).
 8. Rollback ka kram: (1) Render pe pichhla deploy wapas; (2) jis app me gadbad, uska Vercel pe pichhla production deploy wapas; (3) git me revert normal flow se; (4) galat likha data ek naye idempotent migration se theek, restore sirf jab data kho gaya ho. Finance ki SQL migrations sirf aage: unka rollback bhi naya migration.
-9. Live smoke check (misaal 10 minute): `/health` aur `/ready`, ek public product page, allowlist ke ek account se sign-in, ek test-mode order shuru se payment tak, aur ops inbox me nayi errors. Kuch fail ho to niyam 8.
+9. Live smoke check (misaal 10 minute): `/health` aur `/ready`, ek public product page, allowlist ke ek account se sign-in, ek test-mode order shuru se payment tak (phir pack se pehle cancel aur "smoke" ka nishaan, D-380), aur ops inbox me nayi errors. Kuch fail ho to niyam 8.
 10. Hotfix: `release` se `hotfix/<naam>` → PR `release`; phir back-merge `release` → `prerelease`.
 11. Har app ka kam se kam version setting me ([ARCHITECTURE.md](ARCHITECTURE.md) §5 niyam 5): API me tootne wala badlav aaye to pehle naya version path, phir apps, aur aakhir me kam se kam version badhana.
 12. Har release ka chhota note PR ke description me: kya badla, migrations, "contract baaki", rollback surakshit hai ya nahi. Tag aur release notes sirf owner ke kehne pe; kahin koi AI attribution nahi.
@@ -167,3 +167,4 @@ DevOps / SRE Architect ki raay se (D-257 ka kram), owner ki haan ke baad (D-326 
 | v1.0.0  | 2026-11-17 | Khaali file bani.                                                                                                                                                                                        |
 | v1.1.1  | 2026-11-21 | §1 se §11 aaye (DevOps / SRE ki 11 batches; D-326 se D-336): environments, CI, release aur rollback, secrets, soya server, backup aur restore, alerts, runbooks, capacity, memory ka naap, dependencies. |
 | v1.1.2  | 2026-11-21 | §5 niyam 13: app ki background ping (D-349).                                                                                                                                                             |
+| v1.1.3  | 2026-11-21 | §2 niyam 6 me nightly WebKit (D-374) aur RULES ki link; §3 niyam 9 me smoke order (D-380); D-397.                                                                                                        |
