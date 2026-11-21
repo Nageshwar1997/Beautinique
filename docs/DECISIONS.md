@@ -1,6 +1,6 @@
 # DECISIONS: Beautinique
 
-> **Status:** v1.13.3 (2026-11-21). Har faisla ek jagah. Sirf wahi "Tay" jo owner ne khud kaha; Claude ki salah faisla nahi. Cheezein ek-ek karke judti hain.
+> **Status:** v1.14.1 (2026-11-21). Har faisla ek jagah. Sirf wahi "Tay" jo owner ne khud kaha; Claude ki salah faisla nahi. Cheezein ek-ek karke judti hain.
 
 ## 0. Kaise likhein
 
@@ -318,6 +318,12 @@
 | D-301 | Code wali delivery sirf online; offline me list, scans aur photo line me; network na ho to partner intezaar kare ya Hub Manager se baat kare.                                                                                                                                           | Business     | 2026-11-20 |
 | D-302 | Order confirmation ka email paise ki line me (D-126 niyam 4).                                                                                                                                                                                                                           | Business     | 2026-11-20 |
 | D-303 | Media provider ki files ka backup nahi; product images seller se dobara; OPERATIONS me ek line.                                                                                                                                                                                         | Architecture | 2026-11-20 |
+| D-304 | Har app parivaar (customer, seller, partner, Creator, staff) ka alag account; email wahi ho sakta hai, unique (email, parivaar).                                                                                                                                                        | Architecture | 2026-11-21 |
+| D-305 | Account delete pe review ke star aur text rahein, naam "Deleted customer", "Verified purchase" rahe; photos hatein.                                                                                                                                                                     | Business     | 2026-11-21 |
+| D-306 | Band order ki poori detail misaal 13 mahine live, phir mahine ka compressed archive; list me saar, invoice hamesha finance se.                                                                                                                                                          | Architecture | 2026-11-21 |
+| D-307 | Jin cheezon ka samay tay nahi tha unke rakhne ke samay (inbox, emails ka record, cart, wishlist, waitlist, sessions, daam ka itihaas, zero result, fraud signals, aankde), settings me.                                                                                                 | Architecture | 2026-11-21 |
+| D-308 | Order number 10 ank ka random jaisa, aakhri ank check digit (jaise `4827-1930-56`).                                                                                                                                                                                                     | Business     | 2026-11-21 |
+| D-309 | Finance ke band FY ka data encrypted, hash se band export file me private storage pe; Neon me closing balances, documents ki list aur hash.                                                                                                                                             | Architecture | 2026-11-21 |
 
 ## 2. Record
 
@@ -3790,6 +3796,59 @@
 - **Kisne, kab:** owner, 2026-11-20. **Nishaan:** Salah maani.
 - **Asar (Claude):** provider pe file kho jaaye to daawe ya kanooni rok (D-262) wali photo ka saboot nahi bachta. Kanooni rok wali files ki ek hi copy kaafi hai ya nahi: Lawyer se nahi jaancha.
 
+### D-304. Har app parivaar ka alag account
+
+- **Faisla:** ek insaan ek hi email se kai parivaaron me ho sakta hai, par har parivaar (customer, seller, delivery partner, Creator, staff) ka alag account: unique (email, parivaar); password, authenticator aur sessions alag; customer ka delete seller, partner ya Creator ke account ko nahi chhoota. Staff ke accounts pehle se alag (D-017).
+- **Wajah:** Claude ki salah, owner ne maani: customer ka email code wala sign-in (D-021) aur seller ke paise ke kaam (D-184) ek credential pe nahi rehte, aur customer ka delete (D-151) seller ka business account nahi le jaata.
+- **Chhode vikalp:** ek email, ek account (grants se sab kaam; customer ka delete business account bhi le jaata); ek email sirf ek parivaar me (asli sellers pe bojh).
+- **Kab dobara khulega:** owner khud khole.
+- **Kisne, kab:** owner, 2026-11-21. **Nishaan:** Salah maani.
+- **Asar (Claude):** ek insaan ke do passwords ho sakte hain. Brand ke staff ka apne product pe review roko (D-156) email ke mel se (SR-059). Har app ka apna sign-in (D-186) isi se mel khaata hai.
+
+### D-305. Account delete pe reviews
+
+- **Faisla:** customer account delete kare to uske chhape reviews ke star aur text rehte hain; naam ki jagah "Deleted customer", aur "Verified purchase" ka nishaan rehta hai; review ki photos hat-ti hain.
+- **Wajah:** Claude ki salah, owner ne maani: rating sach rehti hai (D-139, D-154), aur chehre wali photo (D-155) account ke saath chali jaati hai.
+- **Chhode vikalp:** review poora hatana (brand ki rating achanak badalti); sab rakhna, sirf naam hatana (chehre wali photo bina account ke rehti).
+- **Kab dobara khulega:** Lawyer ki raay, ya owner khud khole.
+- **Kisne, kab:** owner, 2026-11-21. **Nishaan:** Salah maani.
+- **Asar (Claude):** text me customer ne khud apni pehchaan likhi ho to wo rehti hai; report ya staff se hat sakti hai. Kanooni detail jaanchi nahi: erase ka haq aur maqsad poora hone pe erase (CL-091, CL-093) reviews pe kaise laagu, Lawyer se nahi jaancha.
+
+### D-306. Purane orders ka archive
+
+- **Faisla:** band order (delivered, return ki khidki aur khule maamle khatam) ki poori detail misaal 13 mahine live rehti hai; uske baad mahine ke compressed archive me. Orders ki list me saar (number, tareekh, rakam, items ke naam); detail kholne pe archive se (misaal 1 se 2 second); invoice hamesha finance se. Design R1 me (`closedAt`, `archivedAt`, ek chhota `order_index`); archive ka job tab chalu jab commerce ki jagah 50% pahunche.
+- **Wajah:** Claude ki salah, owner ne maani: ₹0 pe 100 orders/din pe commerce ka 0.5 GB lagbhag 1.7 saal me bharta hai ([ARCHITECTURE.md](ARCHITECTURE.md) §9); archive se purana order review (D-135), return (D-221), recall (D-129) aur support ke kaam ka rehta hai.
+- **Chhode vikalp:** har order hamesha live (₹0 pe lagbhag 1.7 saal me ruk); 13 mahine ke baad sirf saar aur invoice (support aur R2 ka "dobara order" D-178 kamzor).
+- **Kab dobara khulega:** asli naap, paid plan, ya owner khud khole.
+- **Kisne, kab:** owner, 2026-11-21. **Nishaan:** Salah maani.
+
+### D-307. Baaki cheezon ke rakhne ke samay
+
+- **Faisla:** jin cheezon ka samay pehle tay nahi tha, unke samay (misaal, sab settings me): in-app inbox ki khabar 180 din; bheje emails ka record (bina code) 90 din; cart bina chhue 90 din; wishlist account tak, 200 items tak; waitlist (D-046) area khulne ki khabar ke 30 din baad, warna 1 saal; band sessions ka record 30 din; daam ka itihaas (D-061) 400 din live, purana audit me 2 saal (SR-076); zero result ke shabd (D-152) 90 din; fraud ke signals (SR-058) 2 saal; owner ke aankde (D-149) 3 saal.
+- **Wajah:** Claude ki salah, owner ne maani: har cheez ka samay uske kaam jitna; D-191 se D-194 aur D-250 ki classes ke bahar ki cheezon ke TTL indexes aur jagah isi se.
+- **Chhode vikalp:** personal data wali sab cheezein 1 saal (jagah zyada); sab 90 din (waitlist aur fraud ke pattern kho jaate).
+- **Kab dobara khulega:** asli naap, Lawyer ki raay, ya owner khud khole.
+- **Kisne, kab:** owner, 2026-11-21. **Nishaan:** Salah maani.
+- **Asar (Claude):** TTL indexes pehle din se. Lagbhag 13 May 2027 se kanooni rok (D-250) in cheezon pe bhi laagu ho sakti hai: uski seema Lawyer se nahi jaanchi.
+
+### D-308. Order number ka roop
+
+- **Faisla:** customer ko dikhne wala order number 10 ank ka random jaisa number, aakhri ank check digit (jaise `4827-1930-56`); unique index, takrav pe dobara number. Return aur daawe ke numbers wahi roop, apne prefix ke saath.
+- **Wajah:** Claude ki salah, owner ne maani: din ya kul orders ki ginti bahar nahi dikhti, aur galat type kiya number check digit se pakda jaata hai.
+- **Chhode vikalp:** tareekh aur din ki ginti (din ki bikri ka andaza bahar); lagataar ginti (kul orders saaf dikhte).
+- **Kab dobara khulega:** owner khud khole.
+- **Kisne, kab:** owner, 2026-11-21. **Nishaan:** Salah maani.
+- **Asar (Claude):** invoice ka number alag hai (ARCHITECTURE §1.7, bina gap); order number push (D-195), emails aur seller ki report (D-143) me jaata hai.
+
+### D-309. Finance ke band financial years
+
+- **Faisla:** jis FY ka annual return aur sudhaar ki khidki band ho gayi, uske journals, documents aur lines ek encrypted, hash se band export file (har FY ek) me private file storage (D-284) pe jaate hain. Neon me us FY ke closing balances, documents ki list (number, tareekh, rakam, hash) aur file ka hash rehta hai. Purani detail ke liye file ko ek alag database me restore. File backup command (D-013) me bhi. Design ab (`fy` column, documents ki list, hash); kaam pehla FY band hone ke baad.
+- **Wajah:** Claude ki salah, owner ne maani: books 8 FY (ARCHITECTURE §1.1, CL-131) aur tax documents 72 mahine (CL-021) rakhne hain, par ₹0 pe 100 orders/din pe Neon lagbhag 1.4 se 2.8 saal me bharta hai.
+- **Chhode vikalp:** sab Neon me (bharne pe paid plan, warna finance aur pack ruke, R-028); band FY ki lines mahine ke saar me milana (books ki detail badalti, CL-131 ke khilaaf).
+- **Kab dobara khulega:** Neon ki asli jagah ki jaanch ([OPEN_QUESTIONS.md](OPEN_QUESTIONS.md) §2), CA ki raay, ya owner khud khole.
+- **Kisne, kab:** owner, 2026-11-21. **Nishaan:** Salah maani.
+- **Asar (Claude):** purane saal ki detail turant nahi (restore chahiye), aur ek file ki suraksha. Kanooni detail jaanchi nahi: export file books ka "electronic roop" maani jaaye ya nahi, aur asli business pe India me roz ka backup (CL-131), CA (aur Lawyer) se nahi jaancha.
+
 ## Change log
 
 | Version  | Date       | Badlav                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      |
@@ -3885,3 +3944,4 @@
 | v1.13.1  | 2026-11-20 | D-291 se D-298 aaye (ARCHITECTURE ki 8 batches, §2 se §9; Q-228 se Q-235). D-011 me jod.                                                                                                                                                                                                                                                                                                                                                                                                    |
 | v1.13.2  | 2026-11-20 | D-299 se D-303 aaye (Architect ke risks, area band karne ka kram, bina network ke delivery code, confirmation email ki line, media ka backup; Q-236 se Q-240). D-072, D-126 aur D-298 me jod.                                                                                                                                                                                                                                                                                               |
 | v1.13.3  | 2026-11-21 | D-296 me jod (owner): file badalne pe purani file ka niyam, ARCHITECTURE §7 niyam 10.                                                                                                                                                                                                                                                                                                                                                                                                       |
+| v1.14.1  | 2026-11-21 | D-304 se D-309 aaye (Database Architect ke 6 sawal: har parivaar ka alag account, delete pe reviews, purane orders ka archive, rakhne ke samay, order number, finance ke band FY; Q-241 se Q-246).                                                                                                                                                                                                                                                                                          |

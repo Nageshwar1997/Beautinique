@@ -1,6 +1,6 @@
 # OPEN QUESTIONS: Beautinique
 
-> **Status:** v1.6.3 (2026-11-21). Khule sawal, aage ke topics aur jaanchna baaki. Cheezein ek-ek karke judengi.
+> **Status:** v1.7.1 (2026-11-21). Khule sawal, aage ke topics aur jaanchna baaki. Cheezein ek-ek karke judengi.
 
 ## Is file me kya aayega
 
@@ -65,6 +65,7 @@ Claude ka kaam: owner ka faisla nahi chahiye, sirf saboot. Nateeja saboot ke saa
 | Atlas ka free cluster bina connection ke kitne din me ruk jaata hai, aur Render free instance ka CPU kitna hai                                                                                                                                                                               | D-293, D-298                   | Clusters ko jaaga rakhna aur capacity ke number                      |
 | Render Key Value ke free plan ki memory aur connections ki seema                                                                                                                                                                                                                             | D-293, D-298                   | Queues, connections aur Redis ka alert                               |
 | Atlas Search ke free cluster pe fuzzy, autocomplete aur synonyms ki seema                                                                                                                                                                                                                    | D-295                          | Search ke niyam                                                      |
+| Neon ke free plan me ek project ki jagah (0.5 GB ya 1 GB), aur khule connection pe compute sota hai ya nahi                                                                                                                                                                                  | D-288, D-309                   | Finance kab bhare, aur CU-ghante                                     |
 | Brevo ka free plan: bina domain ek verified sender se bhejna chalta hai ya nahi, din ki seema, aur API key ke haq                                                                                                                                                                            | D-287                          | Email provider pakka karna                                           |
 
 ## 3. Sawal
@@ -5464,6 +5465,119 @@ Claude ka kaam: owner ka faisla nahi chahiye, sirf saboot. Nateeja saboot ke saa
 - **Kanooni detail:** kanooni rok wali files (D-262) ki ek hi copy kaafi hai ya nahi: Lawyer se nahi jaancha.
 - **Owner ka jawab (2026-11-20):** **(a)**, media provider ki files ka backup nahi; OPERATIONS me ek line. Record: [DECISIONS.md](DECISIONS.md) D-303.
 
+### Q-241. Ek email se kai app parivaar: ek account ya alag?
+
+- **Status:** `Tay`. Topic: B2 (apps aur roles), B14 (security).
+- **Sawal:** ek insaan ek hi email se customer bhi ho aur seller (ya delivery partner, ya Creator) ka user bhi, to system me uska ek account ho ya har parivaar ka alag?
+- **Kyun zaroori:** identity ka unique key, sessions, authenticator ke niyam aur account delete isi pe tike hain (D-021, D-184, D-186, D-151). Staff ke accounts pehle se alag hain (D-017).
+- **Vikalp:**
+  - **(a) Ek email, ek account:** customer hona default; seller, partner aur Creator ka kaam grants se; delete poore account ka.
+  - **(b) Har parivaar ka alag account:** customer, seller, partner, Creator aur staff ke alag accounts; email wahi ho sakta hai, unique (email, parivaar); password, authenticator aur sessions alag; customer ka delete seller ke account ko nahi chhoota.
+  - **(c) Ek email sirf ek parivaar me:** doosre ke liye `+` alias ya doosra email.
+- **Salah:** **(b)**. Customer ka email code wala sign-in (D-021) aur seller ke paise ke kaam ek credential pe nahi rehte, aur customer ka delete seller ka business account nahi le jaata.
+- **Trade-off:**
+  - (a) me customer ka delete seller ka business account bhi le jaata, aur ek credential pe sab kaam.
+  - (b) me ek insaan ke do passwords; brand ke staff ka apne product pe review roko (D-156) email ke mel se hota hai (SR-059).
+  - (c) asli sellers ke liye bojh.
+- **Owner ka jawab (2026-11-21):** **(b)**, har parivaar ka alag account; unique (email, parivaar). Record: [DECISIONS.md](DECISIONS.md) D-304.
+
+### Q-242. Account delete pe customer ke reviews ka kya ho?
+
+- **Status:** `Tay`. Topic: B8 (reviews), B13 (compliance).
+- **Sawal:** customer apna account delete kare to uske chhape hue reviews ka kya ho?
+- **Kyun zaroori:** delete pe "records me pehchaan hata ke" tay hai (D-151, SR-066), par reviews ka zikr nahi. Rating ka jod (D-139, D-154) aur review ki photos (D-155, chehra) pe asar.
+- **Vikalp:**
+  - **(a)** Star aur text rahein, naam ki jagah "Deleted customer", "Verified purchase" ka nishaan rahe; photos hatein.
+  - **(b)** Review poora hate (star, text, photos); rating dobara gini jaaye.
+  - **(c)** Sab rahe (photos bhi), sirf naam hate.
+- **Salah:** **(a)**. Rating sach rehti hai, aur chehre wali photo account ke saath chali jaati hai.
+- **Trade-off:**
+  - (a) me text me customer ne khud apni pehchaan likhi ho to wo rehti hai (report ya staff se hat sakti).
+  - (b) me brand ki rating achanak badalti.
+  - (c) me chehre wali photo bina account ke rehti.
+- **Kanooni detail:** erase ka haq aur maqsad poora hone pe erase (CL-091, CL-093) reviews pe kaise laagu: Lawyer se nahi jaancha.
+- **Owner ka jawab (2026-11-21):** **(a)**, star aur text rahein, naam "Deleted customer", "Verified purchase" rahe, photos hatein. Record: [DECISIONS.md](DECISIONS.md) D-305.
+
+### Q-243. Purane orders ki poori detail kitne samay turant dikhe?
+
+- **Status:** `Tay`. Topic: B5 (orders), B15 (technical).
+- **Sawal:** customer, seller aur staff ko purane orders ki poori detail kitne samay tak turant dikhe?
+- **Kyun zaroori:** ek order ka commerce data lagbhag 6 KB hai ([ARCHITECTURE.md](ARCHITECTURE.md) §9), to ₹0 pe 100 orders/din pe commerce ka 0.5 GB lagbhag 1.7 saal me bharta hai. Purana order review (D-135, 365 din), return (D-221), recall (D-129) aur support ke liye chahiye; invoice finance me alag rehta hai (CL-021).
+- **Vikalp:**
+  - **(a)** Har order hamesha poori detail ke saath live; jagah bharne pe paid plan.
+  - **(b)** Band order (delivered, return ki khidki aur khule maamle khatam) ki poori detail misaal 13 mahine live; uske baad mahine ke compressed archive me. List me saar (number, tareekh, rakam, items ke naam); detail kholne pe archive se (misaal 1 se 2 second); invoice hamesha finance se.
+  - **(c)** 13 mahine ke baad sirf saar aur invoice; poori detail nahi.
+- **Salah:** **(b)**.
+- **Trade-off:**
+  - (a) ₹0 pe lagbhag 1.7 saal me ruk.
+  - (b) me ek archive job aur padhne ka ek aur raasta.
+  - (c) me purane order pe support aur R2 ka "dobara order" (D-178) kamzor.
+- **Owner ka jawab (2026-11-21):** **(b)**, band order 13 mahine (misaal) live, phir mahine ka compressed archive; list me saar, invoice hamesha finance se. Design R1 me, archive ka job jab commerce 50% bhare. Record: [DECISIONS.md](DECISIONS.md) D-306.
+
+### Q-244. Jin cheezon ka rakhne ka samay abhi tay nahi, unka samay kya ho?
+
+- **Status:** `Tay`. Topic: B13 (compliance), B15 (technical).
+- **Sawal:** neeche ki cheezon ke rakhne ka samay kya ho?
+
+  | Cheez                                  | Prastaav (misaal)                                  | Wajah                                       |
+  | -------------------------------------- | -------------------------------------------------- | ------------------------------------------- |
+  | In-app inbox ki khabar                 | 180 din                                            | Order ke saath purani khabar kaam ki nahi   |
+  | Bheje emails ka record (bina code)     | 90 din                                             | Delivery ki jaanch aur din ki ginti (D-142) |
+  | Cart                                   | Bina chhue 90 din                                  | Cart me stock nahi rukta (D-118)            |
+  | Wishlist                               | Account tak, 200 items tak                         | Customer ki apni list                       |
+  | Waitlist (D-046)                       | Area khulne ki khabar ke 30 din baad, warna 1 saal | Kholne ke sujhaav ki ginti                  |
+  | Band sessions ka record ("My devices") | Khatam hone ke 30 din baad                         | Security events alag 1 saal (D-194)         |
+  | Daam ka itihaas (D-061)                | 400 din live; purana audit me 2 saal (SR-076)      | D-063 aur D-223 ko pichhla daam chahiye     |
+  | Zero result ke shabd (D-152)           | 90 din                                             | Hafte ki report; bina user id               |
+  | Fraud ke signals (SR-058)              | 2 saal                                             | Baar-baar ke pattern dekhne ke liye         |
+  | Owner ke aankde (D-149)                | 3 saal                                             | Bina personal data                          |
+
+- **Kyun zaroori:** D-191 se D-194 aur D-250 kuch classes tay karte hain; ye cheezein unme nahi. Inka TTL index aur jagah isi se tay hoti hai.
+- **Vikalp:**
+  - **(a)** Table ke numbers (sab settings me).
+  - **(b)** Personal data wali sab cheezein 1 saal, aankde 3 saal.
+  - **(c)** Sab 90 din (kam se kam data).
+- **Salah:** **(a)**.
+- **Trade-off:**
+  - (a) me alag-alag numbers yaad rakhne.
+  - (b) me jagah zyada (D-283 ke target pe notify aur commerce bharte).
+  - (c) me waitlist aur fraud ke pattern kho jaate.
+- **Kanooni detail:** lagbhag 13 May 2027 se kanooni rok (D-250) in cheezon pe bhi laagu ho sakti hai: uski seema Lawyer se nahi jaanchi.
+- **Owner ka jawab (2026-11-21):** **(a)**, table ke numbers, sab settings me. Record: [DECISIONS.md](DECISIONS.md) D-307.
+
+### Q-245. Customer ko dikhne wala order number kis roop ka ho?
+
+- **Status:** `Tay`. Topic: B5 (orders).
+- **Sawal:** customer ko dikhne wala order number kis roop ka ho?
+- **Kyun zaroori:** number invoice, emails, push (D-195), seller ki report (D-143) aur support me jaata hai. Roop se din ke orders ki ginti bahar dikh sakti hai. Wahi roop return aur daawe ke numbers pe bhi (apne prefix ke saath).
+- **Vikalp:**
+  - **(a) Tareekh + din ki ginti:** jaise `BQ261120-0042` (padhna aasaan; din ki bikri ka andaza bahar).
+  - **(b) 10 ank ka random jaisa number, aakhri ank check digit:** jaise `4827-1930-56` (ginti nahi dikhti; galat type pakda jaata).
+  - **(c) Lagataar ginti:** jaise `1000123` (sabse chhota; kul orders saaf dikhte).
+- **Salah:** **(b)**.
+- **Trade-off:**
+  - (a) me din ki bikri ka andaza bahar.
+  - (b) yaad rakhna thoda mushkil; takrav unique index aur dobara number se (bahut kam).
+  - (c) me kul orders sabko dikhte.
+- **Owner ka jawab (2026-11-21):** **(b)**, 10 ank ka random jaisa number, aakhri ank check digit. Record: [DECISIONS.md](DECISIONS.md) D-308.
+
+### Q-246. Finance ke band financial years ka data ₹0 pe kahan rahe?
+
+- **Status:** `Tay`. Topic: B6 (ledger), B15 (technical).
+- **Sawal:** finance ka database (Neon free) bharne lage to band financial years ka data kahan rahe?
+- **Kyun zaroori:** books 8 FY (ARCHITECTURE §1.1, CL-131) aur sellers ke tax documents 72 mahine (CL-021) rakhne hain. Finance lagbhag 8 KB har order hai ([ARCHITECTURE.md](ARCHITECTURE.md) §9), to ₹0 pe 100 orders/din pe Neon lagbhag 1.4 se 2.8 saal me bharta hai (Neon ki asli jagah ki jaanch §2 me).
+- **Vikalp:**
+  - **(a)** Sab Neon me; bharne pe paid plan, warna finance (aur pack, R-028) ruk.
+  - **(b)** Jis FY ka annual return aur sudhaar ki khidki band ho gayi, uske journals, documents aur lines ek encrypted, hash se band export file (har FY ek) me, private file storage (D-284) pe. Neon me us FY ke closing balances, documents ki list (number, tareekh, rakam, hash) aur file ka hash. Purani detail ke liye file ko ek alag database me restore. File backup command (D-013) me bhi.
+  - **(c)** Band FY Neon me hi, par lines mahine ke saar me milana (detail hatana).
+- **Salah:** **(b)**.
+- **Trade-off:**
+  - (a) me paid plan ya finance aur pack ka rukna.
+  - (b) me purane saal ki detail turant nahi (restore chahiye), aur ek file ki suraksha.
+  - (c) me books ki detail badalti, audit trail (CL-131) ke khilaaf.
+- **Kanooni detail:** export file books ka "electronic roop" maani jaaye ya nahi, aur asli business pe India me roz ka backup (CL-131): CA (aur Lawyer) se nahi jaancha.
+- **Owner ka jawab (2026-11-21):** **(b)**, band FY ka encrypted, hash se band export file private storage pe; Neon me closing balances, documents ki list aur hash. Design ab, kaam pehla FY band hone ke baad. Record: [DECISIONS.md](DECISIONS.md) D-309.
+
 ## Change log
 
 | Version | Date       | Badlav                                                                                                                                                                                    |
@@ -5564,3 +5678,4 @@ Claude ka kaam: owner ka faisla nahi chahiye, sirf saboot. Nateeja saboot ke saa
 | v1.6.1  | 2026-11-20 | Q-228 se Q-235 (ARCHITECTURE ki 8 batches) tay; D-291 se D-298; §2 me Atlas, Render aur Atlas Search ki 3 jaanch.                                                                         |
 | v1.6.2  | 2026-11-20 | Q-236 se Q-240 (Architect ke risks aur tay faislon pe dhyaan ke points) tay; D-299 se D-303.                                                                                              |
 | v1.6.3  | 2026-11-21 | §2 media wali jaanch me jod: mitayi files provider ke trash ya backup me kitne din (D-296 ka jod).                                                                                        |
+| v1.7.1  | 2026-11-21 | Q-241 se Q-246 (Database Architect ke 6 sawal) tay; D-304 se D-309; §2 me Neon ki jagah ki jaanch.                                                                                        |
