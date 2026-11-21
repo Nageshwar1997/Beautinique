@@ -1,6 +1,6 @@
 # OPEN QUESTIONS: Beautinique
 
-> **Status:** v1.7.20 (2026-11-21). Khule sawal, aage ke topics aur jaanchna baaki. Cheezein ek-ek karke judengi.
+> **Status:** v1.7.21 (2026-11-21). Khule sawal, aage ke topics aur jaanchna baaki. Cheezein ek-ek karke judengi.
 
 ## Is file me kya aayega
 
@@ -6532,6 +6532,76 @@ Claude ka kaam: owner ka faisla nahi chahiye, sirf saboot. Nateeja saboot ke saa
 - **R1 ya baad me:** R1.
 - **Owner ka jawab (2026-11-21):** **(a)**, smoke order payment ke baad pack se pehle cancel hota hai, aur "smoke" nishaan (sirf setting se tay allowlist account pe) use bikri, Bestseller, search ke kram aur owner ke aankdon se bahar rakhta hai; finance aur audit me kuch nahi mitta. Record: [DECISIONS.md](DECISIONS.md) D-380.
 
+### Q-317. QA batch 1: siddhaant, levels aur kab kya chalta hai maanein?
+
+- **Status:** `Tay`. Topic: B15 (technical).
+- **Sawal:** QA Architect ke testing ke 6 siddhaant, test levels ki table, "kab kya chalta hai" ki table, ₹0 CI me fit ke 5 niyam, contract tests ke 3 niyam aur 8 niyam (RT-1 se RT-8: har PR pe saare levels, asli engines ke containers, har test worker ka alag data, live jaisa bundle, facade aur events ke contract, har flow ki E2E, nightly pe gate nahi) [RULES.md](RULES.md) §4.1 me aayein?
+- **Kyun zaroori:** testing ka dhaancha D-371 se D-380 ke faislon ko ek jagah jodta hai, aur har PR pe kya chalta hai ye pehle code se tay rehna chahiye.
+- **Vikalp:** **(a)** jaise hain waise; **(b)** badlav ke saath (owner bataye); **(c)** batch roko.
+- **Salah:** **(a)**.
+- **Trade-off:** (a) me har PR pe CI ka samay zyada (saare levels aur 20 flows), par galti PR pe hi pakdi jaati hai. (b) me owner ka samay; (c) me testing ka ye hissa baaki.
+- **Owner ka jawab (2026-11-21):** **(a)**, niyam jaise hain. Record: [DECISIONS.md](DECISIONS.md) D-381.
+
+### Q-318. QA batch 2: test data, fakes aur ghadi maanein?
+
+- **Status:** `Tay`. Topic: B15 (technical), B14 (security).
+- **Sawal:** test data aur seeds ke 6 niyam, bahar ki 9 services ke fakes ki table, ghadi ke 5 niyam aur 8 niyam (RT-9 se RT-16: asli personal data kabhi nahi, artifacts me sirf fake data, production me koi test raasta nahi, network bahar nahi, injected clock, fake aur asli test mode ka milaan, npm ka fake registry, edge proxy live jaisa) [RULES.md](RULES.md) §4.2 me aayein?
+- **Kyun zaroori:** repo public hai, aur tests kabhi asli provider, asli paisa, asli inbox ya asli npm registry tak nahi pahunchne chahiye (CLAUDE.md).
+- **Vikalp:** **(a)** jaise hain waise; **(b)** badlav ke saath (owner bataye); **(c)** batch roko.
+- **Salah:** **(a)**.
+- **Trade-off:** (a) me har bahar ki service ka fake aur uska apna test banana, aur R1 se pehle asli test mode se ek milaan. (b) me owner ka samay; (c) me testing ka ye hissa baaki.
+- **Owner ka jawab (2026-11-21):** **(a)**, niyam jaise hain. Record: [DECISIONS.md](DECISIONS.md) D-382.
+
+### Q-319. QA batch 3: paisa, stock aur permissions ke tests maanein?
+
+- **Status:** `Tay`. Topic: B6 (paisa), B15 (technical).
+- **Sawal:** integration ki gehrai ke 5 niyam (MongoDB, PostgreSQL, Valkey, ek saath requests, database operations ki ginti) aur 4 niyam (RT-17 se RT-20: ek saath N requests, paise pe property tests, har flow ka database operations ka budget, har mana hone wale raaste ka test) [RULES.md](RULES.md) §4.3 me aayein?
+- **Kyun zaroori:** paisa, stock aur permissions ki galti sabse mehngi hai, aur asli users ek saath aate hain. Free cluster ki operations ki seema container me nahi dikhti, to uska pehra ginti se.
+- **Vikalp:** **(a)** jaise hain waise; **(b)** badlav ke saath (owner bataye); **(c)** batch roko.
+- **Salah:** **(a)**.
+- **Trade-off:** (a) me concurrency aur property tests likhne ka samay, aur har flow ke budget ko sambhalna. (b) me owner ka samay; (c) me testing ka ye hissa baaki.
+- **Owner ka jawab (2026-11-21):** **(a)**, niyam jaise hain. Record: [DECISIONS.md](DECISIONS.md) D-383.
+
+### Q-320. QA batch 4: mutation, coverage, flaky aur ginti maanein?
+
+- **Status:** `Tay`. Topic: B15 (technical).
+- **Sawal:** 6 niyam (RT-21 se RT-26: mutation ki teen jagah aur kernel packages ki list, bacha mutant, coverage ki seema area ke hisaab se, test ke naam me niyam ka id aur R1 ki ginti, flaky tests, `.only` aur `.skip`) [RULES.md](RULES.md) §4.4 me aayein?
+- **Kyun zaroori:** D-371, D-372 aur D-373 ke faisle tabhi laagu hote hain jab kernel packages ki list, seema ke number aur ginti ka tareeka likha ho; naye docs me kernel packages ki list abhi kahin nahi thi.
+- **Vikalp:** **(a)** jaise hain waise; **(b)** badlav ke saath (owner bataye); **(c)** batch roko.
+- **Salah:** **(a)**.
+- **Trade-off:** (a) me kernel packages ki list code ke saath sambhalni, aur mutation tool ki kuch baatein jaanchna baaki. (b) me owner ka samay; (c) me D-371 se D-373 adhoore.
+- **Owner ka jawab (2026-11-21):** **(a)**, niyam jaise hain. Record: [DECISIONS.md](DECISIONS.md) D-384.
+
+### Q-321. QA batch 5: E2E, accessibility, visual aur performance maanein?
+
+- **Status:** `Tay`. Topic: B2 (apps), B15 (technical).
+- **Sawal:** 20 flows ki E2E table aur "poora R1" spec, accessibility aur visual ke 5 niyam, performance ki table, haath ki jaanch, aur 7 niyam (RT-27 se RT-33: asli browser me axe, 4 widths, screenshot sirf mukhya screens, haath ka record, p95 ka naap tay CPU seema pe, load test ke baad data ki sachchai, role aur label se elements) [RULES.md](RULES.md) §4.5 me aayein?
+- **Kyun zaroori:** flows hi product hain; WCAG 2.2 AA (DESIGN) aur performance ke targets (D-053, DS-10.9, DS-10.10) ka pakka saboot yahi tests hain.
+- **Vikalp:** **(a)** jaise hain waise; **(b)** badlav ke saath (owner bataye); **(c)** batch roko.
+- **Salah:** **(a)**. Saath me ek chhota sudhaar: D-342 ke "Asar" me "har screen ka visual test" tha; screenshot tests sirf mukhya screens pe (R-057), aur har screen ka contrast aur accessibility axe se dono themes me.
+- **Trade-off:** (a) me CI ka samay aur screenshot baselines sambhalna; p95 ki CPU seema pehle naap ke saath likhni. (b) me owner ka samay; (c) me testing ka ye hissa baaki.
+- **Owner ka jawab (2026-11-21):** **(a)**, niyam jaise hain, aur D-342 ke Asar me sudhaar. Record: [DECISIONS.md](DECISIONS.md) D-385.
+
+### Q-322. QA batch 6: security, migrations, backup aur bugs maanein?
+
+- **Status:** `Tay`. Topic: B14 (security), B15 (technical).
+- **Sawal:** SR niyamon ke tests ki table, migration aur rollback ke 6 niyam, backup ke 3 niyam, COMPLIANCE rows ke automated checks ki table, aur 9 niyam (RT-34 se RT-42: har R1 SR ka test ya record, route × actor matrix, passive DAST, release step ke tests, backup ka round trip, security bug ki detail private, bug ka roop, gambhirta D-378 se, PR me "kaise jaancha") [RULES.md](RULES.md) §4.6 me aayein?
+- **Kyun zaroori:** bahar ki security jaanch (pentest) nahi hai, to tests hi pehra hain; aur deploy, migration aur restore ki galti sabse mushkil ghadi me dikhti hai.
+- **Vikalp:** **(a)** jaise hain waise; **(b)** badlav ke saath (owner bataye); **(c)** batch roko.
+- **Salah:** **(a)**.
+- **Trade-off:** (a) me har R1 SR niyam ka test ya record, aur DAST ke findings sambhalna. (b) me owner ka samay; (c) me testing ka ye hissa baaki.
+- **Owner ka jawab (2026-11-21):** **(a)**, niyam jaise hain. Record: [DECISIONS.md](DECISIONS.md) D-386.
+
+### Q-323. QA batch 7: Definition of Done aur R1 ka release gate maanein?
+
+- **Status:** `Tay`. Topic: B16 (docs aur dhaancha), B15 (technical).
+- **Sawal:** Definition of Done ke 12 hisse (DD-1 se DD-12) [RULES.md](RULES.md) §1 me, aur R1 ke release gate ki 14 sharten (RG-1 se RG-14) RULES §2.1 me aayein?
+- **Kyun zaroori:** "ho gaya" aur "release ho sakta hai" dono ka saaf paimana chahiye; inke bina D-019 ka "bana hai" aur CLAUDE.md ka "verified" andaaze pe rehte hain.
+- **Vikalp:** **(a)** jaise hain waise; **(b)** badlav ke saath (owner bataye); **(c)** batch roko.
+- **Salah:** **(a)**.
+- **Trade-off:** (a) me har subtask aur R1 pe poori list ki jaanch; R1 se pehle haath ke kaam (phone, screen reader, khoj wala testing, providers ka milaan). (b) me owner ka samay; (c) me "done" aur release ka paimana baaki.
+- **Owner ka jawab (2026-11-21):** **(a)**, niyam jaise hain. Record: [DECISIONS.md](DECISIONS.md) D-387.
+
 ## Change log
 
 | Version | Date       | Badlav                                                                                                                                                                                    |
@@ -6652,3 +6722,4 @@ Claude ka kaam: owner ka faisla nahi chahiye, sirf saboot. Nateeja saboot ke saa
 | v1.7.18 | 2026-11-21 | Q-286: ek saajha Credits page, har package ka credit component (owner, D-350).                                                                                                            |
 | v1.7.19 | 2026-11-21 | Q-287 ki salah me RTO ka matlab saaf kiya (GLOSSARY ki link).                                                                                                                             |
 | v1.7.20 | 2026-11-21 | Q-307 se Q-316 (QA Architect ke 10 sawal; G24 asli phone aur screen reader) tay; D-371 se D-380.                                                                                          |
+| v1.7.21 | 2026-11-21 | Q-317 se Q-323 (QA ki 7 batches: RULES ke testing niyam, Definition of Done, R1 release gate) tay; D-381 se D-387.                                                                        |

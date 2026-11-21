@@ -1,6 +1,6 @@
 # DECISIONS: Beautinique
 
-> **Status:** v1.14.19 (2026-11-21). Har faisla ek jagah. Sirf wahi "Tay" jo owner ne khud kaha; Claude ki salah faisla nahi. Cheezein ek-ek karke judti hain.
+> **Status:** v1.14.20 (2026-11-21). Har faisla ek jagah. Sirf wahi "Tay" jo owner ne khud kaha; Claude ki salah faisla nahi. Cheezein ek-ek karke judti hain.
 
 ## 0. Kaise likhein
 
@@ -395,6 +395,13 @@
 | D-378 | Bug ki gambhirta P0 se P3; khula P0 ya P1 release roke, P2 release note me.                                                                                                                                                                                                             | Process      | 2026-11-21 |
 | D-379 | Load test R1 se pehle ek baar, phir sirf load wale raaste badalne ya nayi service pe.                                                                                                                                                                                                   | Process      | 2026-11-21 |
 | D-380 | Live smoke order: pack se pehle cancel, "smoke" nishaan se bikri, Bestseller, search aur aankdon se bahar; finance aur audit me kuch nahi mitta.                                                                                                                                        | Process      | 2026-11-21 |
+| D-381 | QA batch 1 (testing ke siddhaant, levels, kab kya chalta hai, RT-1 se RT-8) maana: [RULES.md](RULES.md) §4.1.                                                                                                                                                                           | Process      | 2026-11-21 |
+| D-382 | QA batch 2 (test data, fakes aur ghadi, RT-9 se RT-16) maana: [RULES.md](RULES.md) §4.2.                                                                                                                                                                                                | Process      | 2026-11-21 |
+| D-383 | QA batch 3 (paisa, stock aur permissions ke tests, RT-17 se RT-20) maana: [RULES.md](RULES.md) §4.3.                                                                                                                                                                                    | Process      | 2026-11-21 |
+| D-384 | QA batch 4 (mutation, kernel packages ki list, coverage, flaky aur ginti, RT-21 se RT-26) maana: [RULES.md](RULES.md) §4.4.                                                                                                                                                             | Process      | 2026-11-21 |
+| D-385 | QA batch 5 (E2E, accessibility, visual aur performance, RT-27 se RT-33) maana: [RULES.md](RULES.md) §4.5; D-342 ke Asar me sudhaar.                                                                                                                                                     | Process      | 2026-11-21 |
+| D-386 | QA batch 6 (security, migrations, backup, COMPLIANCE checks aur bugs, RT-34 se RT-42) maana: [RULES.md](RULES.md) §4.6.                                                                                                                                                                 | Process      | 2026-11-21 |
+| D-387 | QA batch 7 (Definition of Done DD-1 se DD-12, R1 release gate RG-1 se RG-14) maana: [RULES.md](RULES.md) §1 aur §2.1.                                                                                                                                                                   | Process      | 2026-11-21 |
 
 ## 2. Record
 
@@ -4208,7 +4215,7 @@
 - **Chhode vikalp:** R1 me sirf light, toggle R2 me (R2 me har screen dobara dekhna); Customer app sirf light (ek app ka alag niyam).
 - **Kab dobara khulega:** owner khud khole.
 - **Kisne, kab:** owner, 2026-11-21. **Nishaan:** Salah maani.
-- **Asar (Claude):** har screen ka visual aur contrast test dono themes me (QA Architect ke saath).
+- **Asar (Claude):** har screen ka contrast aur accessibility test (axe) dono themes me; screenshot (visual) tests sirf mukhya screens pe (R-057, [RULES.md](RULES.md) RT-29, D-385).
 
 ### D-343. Customer app ki neeche ki bar
 
@@ -4571,6 +4578,66 @@
 - **Kisne, kab:** owner, 2026-11-21. **Nishaan:** Salah maani.
 - **Asar (Claude):** smoke order ke emails D-028 ki din ki chhat me gine jaate hain. OPERATIONS §3 niyam 9 me iska link agli badli me. Nishaan ka field data ke niyamon ([ARCHITECTURE.md](ARCHITECTURE.md) §10.5) ke saath.
 
+### D-381. QA batch 1: siddhaant, levels aur kab kya chalta hai
+
+- **Faisla:** testing ke 6 siddhaant, test levels aur "kab kya chalta hai" ki tables, ₹0 CI me fit ke 5 niyam, contract tests ke 3 niyam aur RT-1 se RT-8 [RULES.md](RULES.md) §4.1 me. Misaal wale numbers settings ya code me badal sakte hain.
+- **Wajah:** Claude ki salah, owner ne maani: har PR pe kya chalta hai pehle code se tay rahe, aur galti PR pe hi pakdi jaaye.
+- **Chhode vikalp:** badlav ke saath maanna (owner ne koi badlav nahi diya); batch rokna (testing ka ye hissa baaki).
+- **Kab dobara khulega:** owner khud khole.
+- **Kisne, kab:** owner, 2026-11-21. **Nishaan:** Salah maani.
+
+### D-382. QA batch 2: test data, fakes aur ghadi
+
+- **Faisla:** test data aur seeds ke 6 niyam, bahar ki 9 services ke fakes ki table, ghadi ke 5 niyam aur RT-9 se RT-16 [RULES.md](RULES.md) §4.2 me.
+- **Wajah:** Claude ki salah, owner ne maani: repo public hai, aur tests kabhi asli provider, asli paisa, asli inbox ya asli npm registry tak nahi pahunchne chahiye.
+- **Chhode vikalp:** badlav ke saath maanna (owner ne koi badlav nahi diya); batch rokna (testing ka ye hissa baaki).
+- **Kab dobara khulega:** owner khud khole.
+- **Kisne, kab:** owner, 2026-11-21. **Nishaan:** Salah maani.
+
+### D-383. QA batch 3: paisa, stock aur permissions ke tests
+
+- **Faisla:** integration ki gehrai ke 5 niyam aur RT-17 se RT-20 [RULES.md](RULES.md) §4.3 me.
+- **Wajah:** Claude ki salah, owner ne maani: paisa, stock aur permissions ki galti sabse mehngi hai, asli users ek saath aate hain, aur free cluster ki operations ki seema container me nahi dikhti.
+- **Chhode vikalp:** badlav ke saath maanna (owner ne koi badlav nahi diya); batch rokna (testing ka ye hissa baaki).
+- **Kab dobara khulega:** owner khud khole.
+- **Kisne, kab:** owner, 2026-11-21. **Nishaan:** Salah maani.
+
+### D-384. QA batch 4: mutation, coverage, flaky aur ginti
+
+- **Faisla:** RT-21 se RT-26 [RULES.md](RULES.md) §4.4 me, kernel packages ki list ke saath; D-371, D-372 aur D-373 inhi niyamon se laagu.
+- **Wajah:** Claude ki salah, owner ne maani: kernel packages ki list, seema ke number aur ginti ke tareeke ke bina D-371 se D-373 adhoore the.
+- **Chhode vikalp:** badlav ke saath maanna (owner ne koi badlav nahi diya); batch rokna (D-371 se D-373 adhoore).
+- **Kab dobara khulega:** owner khud khole.
+- **Kisne, kab:** owner, 2026-11-21. **Nishaan:** Salah maani.
+- **Asar (Claude):** mutation tool (StrykerJS) ki line ranges aur sandbox ki baatein jaanchna baaki.
+
+### D-385. QA batch 5: E2E, accessibility, visual aur performance
+
+- **Faisla:** 20 flows ki E2E table aur "poora R1" spec, accessibility aur visual ke 5 niyam, performance ki table, haath ki jaanch aur RT-27 se RT-33 [RULES.md](RULES.md) §4.5 me. D-342 ke "Asar" me sudhaar: screenshot tests sirf mukhya screens pe (R-057), aur har screen ka contrast aur accessibility axe se dono themes me.
+- **Wajah:** Claude ki salah, owner ne maani: flows hi product hain, aur WCAG 2.2 AA aur performance ke targets ka pakka saboot yahi tests hain.
+- **Chhode vikalp:** badlav ke saath maanna (owner ne koi badlav nahi diya); batch rokna (testing ka ye hissa baaki).
+- **Kab dobara khulega:** owner khud khole.
+- **Kisne, kab:** owner, 2026-11-21. **Nishaan:** Salah maani.
+- **Asar (Claude):** server ke p95 ki CPU seema (RT-31) pehle naap ke saath likhi jayegi.
+
+### D-386. QA batch 6: security, migrations, backup aur bugs
+
+- **Faisla:** SR niyamon ke tests ki table, migration aur rollback ke 6 niyam, backup ke 3 niyam, COMPLIANCE rows ke automated checks ki table aur RT-34 se RT-42 [RULES.md](RULES.md) §4.6 me.
+- **Wajah:** Claude ki salah, owner ne maani: bahar ki security jaanch nahi hai to tests hi pehra hain, aur deploy, migration aur restore ki galti sabse mushkil ghadi me dikhti hai.
+- **Chhode vikalp:** badlav ke saath maanna (owner ne koi badlav nahi diya); batch rokna (testing ka ye hissa baaki).
+- **Kab dobara khulega:** owner khud khole.
+- **Kisne, kab:** owner, 2026-11-21. **Nishaan:** Salah maani.
+- **Asar (Claude):** RT-39 (security bug ki detail private) RULES ke "Security aur privacy" section me bhi aayega jab wo bane. COMPLIANCE ke checks sirf "system me hai ya nahi" jaanchte hain, kanooni raay nahi.
+
+### D-387. QA batch 7: Definition of Done aur R1 ka release gate
+
+- **Faisla:** Definition of Done ke 12 hisse (DD-1 se DD-12) [RULES.md](RULES.md) §1 me, aur R1 ke release gate ki 14 sharten (RG-1 se RG-14) RULES §2.1 me.
+- **Wajah:** Claude ki salah, owner ne maani: "ho gaya" aur "release ho sakta hai" dono ka saaf paimana chahiye, warna D-019 ka "bana hai" aur CLAUDE.md ka "verified" andaaze pe rehte.
+- **Chhode vikalp:** badlav ke saath maanna (owner ne koi badlav nahi diya); batch rokna ("done" aur release ka paimana baaki).
+- **Kab dobara khulega:** owner khud khole.
+- **Kisne, kab:** owner, 2026-11-21. **Nishaan:** Salah maani.
+- **Asar (Claude):** planning stage me `TASK.md` ka template DD-1 se DD-12 se banega ([tasks/README.md](tasks/README.md)).
+
 ## Change log
 
 | Version  | Date       | Badlav                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      |
@@ -4685,3 +4752,4 @@
 | v1.14.17 | 2026-11-21 | D-350 (owner): icons ka alag page nahi, sab apps me ek saajha Credits page, har package ka apna credit component; D-347 niyam 9 me Ola Maps ka credit.                                                                                                                                                                                                                                                                                                                                      |
 | v1.14.18 | 2026-11-21 | D-351 ki wajah me RTO ka matlab saaf kiya (GLOSSARY ki link).                                                                                                                                                                                                                                                                                                                                                                                                                               |
 | v1.14.19 | 2026-11-21 | D-371 se D-380 aaye (QA Architect ke 10 sawal: coverage aur mutation ke gate, flaky tests, WebKit, asli phone, screen reader, khoj wala testing, bug ki gambhirta, load test, smoke order; Q-307 se Q-316).                                                                                                                                                                                                                                                                                 |
+| v1.14.20 | 2026-11-21 | D-381 se D-387 aaye (QA ki 7 batches RULES me; Q-317 se Q-323); D-342 ke Asar me sudhaar (screenshot sirf mukhya screens, axe har screen).                                                                                                                                                                                                                                                                                                                                                  |
