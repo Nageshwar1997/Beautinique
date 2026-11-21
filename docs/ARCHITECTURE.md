@@ -1,6 +1,6 @@
 # ARCHITECTURE: Beautinique
 
-> **Status:** v1.3.5 (2026-11-21). System kaise bana hai, ek nazar me. Cheezein ek-ek karke, owner ki haan ke baad judengi. Abhi §1 (finance ke accounting niyam, D-282), §2 se §9 (system ke hisse, D-291 se D-298) aur §10 (data aur database, D-310 se D-317).
+> **Status:** v1.3.10 (2026-11-22). System kaise bana hai, ek nazar me. Cheezein ek-ek karke, owner ki haan ke baad judengi. Abhi §1 (finance ke accounting niyam, D-282), §2 se §9 (system ke hisse, D-291 se D-298) aur §10 (data aur database, D-310 se D-317).
 
 ## Is file me kya aayega
 
@@ -391,15 +391,15 @@ return: commerce.return.requested -> support.return.decided -> logistics.pickup.
 4. v1 me sirf jodna; tootne wala badlav naye version ke path pe, aur purana misaal 30 din `Deprecation` aur `Sunset` header ke saath.
 5. Har app `X-App-Version` bhejta hai; har app ka kam se kam version setting me. Purana ho to 426 aur saaf sandesh. Delivery app (D-042) ka offline data purane version ka ho sakta hai, isliye sync API pichhla version bhi maanti hai.
 6. Delivery app ka sync ek batch route (misaal 50 kaam tak): har kaam ka client ka UUIDv7 id idempotency key, har kaam ka alag nateeja, device ka samay `deviceAt` aur server ka `serverAt` (SR-055); photos alag upload, sync me sirf `assetId`. Delivery code ka milaan sirf online (SR-054).
-7. Live halat polling se (misaal har 60 second, sirf jab tab dikhe; delivery pe UPI ke 10 minute me order page misaal har 5 second) aur browser push (D-126, D-141). Khule connection (WebSocket, SSE) nahi (R-008).
+7. Live halat polling se (misaal har 60 second, sirf jab tab dikhe; delivery pe UPI ke 10 minute me order page misaal har 5 second) aur browser push (D-126, D-141). Khule connection (WebSocket, SSE) nahi (R-008). Polling aur ping background ke header ke saath; ye session ka bina kaam ka samay nahi badhate (SR-094).
 8. Error ka ek roop: `{"error": {"code", "message", "details", "requestId"}}`. `code` sthir aur bade aksharon me (common codes ke alawa module ka prefix, jaise `COMMERCE_STOCK_UNAVAILABLE`); `message` user ke liye saada; stack kabhi nahi (SR-077).
 9. Status codes: 400 validation (SR-036), 401, 403 permission, 404 scope ke bahar (SR-032), 409 halat ka takrav ya wahi idempotency key chal rahi (SR-045), 413 (SR-007), 422 business niyam ya key alag body ke saath (SR-045), 426 app purana, 429 `Retry-After` ke saath (SR-008), 503 `Retry-After` ke saath (fail-closed ya server ki seema, SR-031).
 10. Idempotency key in routes pe zaroori: place order (SR-045), payment retry, refund aur daawe ka faisla, payout ki manzoori, receiving aur scans, delivery attempt aur saboot, offline sync, upload ka jodna, export. Key + route + caller; wahi body pe pehla jawab; 2xx aur 4xx yaad, 5xx nahi; record misaal 48 ghante maalik service ke DB me.
 11. Client sirf GET aur idempotency key wale routes ko retry karta hai, network ya 503 pe, backoff aur `Retry-After` ke saath, misaal 2 baar; baaki mutations pe apne aap retry nahi.
 12. Server se provider ki har call pe timeout (misaal payment 10 s, email 10 s, push 5 s); retry sirf job queue se, request ke andar nahi; provider ki idempotency (jaise refund) jahan mile wahan. Redis na mile to sign-in, codes, payment shuru, review, report aur daawa 503; padhna chalta rahe (SR-008).
 13. Har app ka apna Vercel project aur host (D-010, D-048); `/api/*` gateway pe rewrite ek hi template se (SR-002); token ka `aud` app (SR-031, SR-035). Har app ek saajhe typed client se (contracts se bana), TanStack Query ke saath; custom header (SR-030) aur `X-App-Version` client khud lagata hai.
-14. App khulte hi app-shell `/wake` ko seedha Render pe bulata hai aur jawab tak "server jaag raha hai" dikhata hai; jawab se pehle koi API call nahi (D-028). Razorpay ka webhook bhi seedha Render pe (SR-002 ki tay list, signature ke saath, SR-049); soya server pehli koshish pe der se jaage to Razorpay ki dobara koshish aur roz ka milaan M1 (§1.11). `/wake` ke liye CSP ka apvaad Security Architect ke doosre run me (SR-005). Jab tak jawab na aaye app ka koi hissa nahi khulta; jaagne ke baad app use hote tak background me `/wake` ki ping (D-349).
-15. R1 me saare apps SPA; koi server-side rendering nahi (D-290).
+14. App khulte hi app-shell `/wake` ko seedha Render pe bulata hai aur jawab tak "server jaag raha hai" dikhata hai; jawab se pehle koi API call nahi (D-028). Razorpay ka webhook bhi seedha Render pe (SR-002 ki tay list, signature ke saath, SR-049); soya server pehli koshish pe der se jaage to Razorpay ki dobara koshish aur roz ka milaan M1 (§1.11). `/wake` SR-089 ke hisaab se: CSP me sirf exact URL, CORS sirf apne apps ke origins bina credentials, jawab 204 bina body aur cookie, koi database nahi. Jab tak jawab na aaye app ka koi hissa nahi khulta; jaagne ke baad app use hote tak background me `/wake` ki ping (D-349).
+15. R1 me saare apps SPA; koi server-side rendering nahi (D-290). Customer app ka Payment screen alag HTML document, poore page ke load ke saath (SR-090, D-407).
 
 ## 6. Search aur caching (D-295)
 
@@ -424,7 +424,7 @@ return: commerce.return.requested -> support.return.decided -> logistics.pickup.
 5. Har maqsad ka samay (D-191, D-192, D-193, D-227) maalik service ke "maamla band" se; roz ka job mitata hai (SR-065). Lagbhag 13 May 2027 se delivery aur daawon ki photos aur video app se hat ke encrypted band jagah me, capture se 1 saal (D-262).
 6. Ek file ek maalik: wahi image doosri jagah chahiye to nayi copy, apne maalik ke saath. Jis product ka order hua uski images archive ke saath rehti hain (order, return, invoice aur daawe ke liye).
 7. PDFs (invoice, credit note, statements, labels) ek halki PDF library se, ek waqt me 1; headless browser kabhi nahi (R-007). Jaari document ka PDF uske na badalne wale data aur template ke version se; template jagah pe nahi badalta, naya version banta hai (D-225). Ye PDF tax archive ki "asli copy" maani jaaye ya nahi: Lawyer (ya CA) se nahi jaancha (CL-021).
-8. Export DB cursor se stream, CSV seedha private file me (buffer me poora nahi), ek baar ka chhota link (D-144, SR-075).
+8. Export DB cursor se stream, CSV seedha private file me (buffer me poora nahi), ek baar ka chhota link (D-144, SR-075). File pehle download ke baad ya misaal 24 ghante me mite.
 9. Roz: 24 ghante se purane bina jude uploads aur atke deletes saaf; hafte: provider ki list se milaan.
 10. File badalna (jaise nayi photo): nayi file nayi `assetId` ke saath judti hai, to uska URL bhi naya hota hai aur CDN me purani cached copy nahi dikhti. Purani file turant `deleting` me jaati hai, aur niyam 9 ka roz ka job use provider se mitata hai. Apvaad: jis purani file ki kisi record ko zaroorat hai (niyam 5 aur 6, jaise jis product ka order hua uski images, ya kanooni rok wali review aur daawe ki photos), wo apne retention ke samay tak rehti hai. Nateeja: koi file bina kisi record ke hamesha nahi rehti; bina judi upload lagbhag 24 ghante tak, aur hafte ke milaan me pakdi file agle milaan tak.
 
@@ -432,9 +432,9 @@ return: commerce.return.requested -> support.return.decided -> logistics.pickup.
 
 1. Logs structured JSON, stdout pe; request pe SR-077 ke fields; route ka template, raw URL aur query nahi. Request id gateway pe banta hai aur jawab, facade calls, events (`correlationId`), audit aur error me jaata hai.
 2. Request logs logs service (D-285) me kam se kam 180 din, lagbhag 13 May 2027 se 1 saal (D-250 niyam 5, CL-106): lines misaal har 60 second ya 1,000 lines pe ek gzip chunk me (ek document = ek chunk). Security events audit service me 1 saal (D-194).
-3. Kabhi log nahi: SR-077 ki list, private media ke signed URLs, idempotency keys, event ka poora `data`, search ka text.
+3. Kabhi log nahi: SR-077 ki list, private media ke signed URLs, idempotency keys, event ka poora `data`, search ka text. Error objects ka serializer aur redaction SR-098 se.
 4. Audit ke misaal 30 din se purane din ek compressed, hash se band chunk me, usi chain ke saath; roz ki jaanch chunk pe bhi (SR-076, D-194, R-006).
-5. Server ki errors fingerprint ke saath logs me; apps ki errors ek rate-limited route se, bina personal data aur size ki seema ke saath; nayi error ki khabar aur roz ka saar Master ke ops inbox me (D-286, R-024).
+5. Server ki errors fingerprint ke saath logs me; apps ki errors ek rate-limited route se, bina personal data aur size ki seema ke saath; nayi error ki khabar aur roz ka saar Master ke ops inbox me (D-286, R-024). Route ki seemaayein aur safai SR-099 se.
 6. Ops snapshot har 60 second (jab server jaaga ho): RSS, heap, event loop ki der, chalte requests, har queue ki gehrai, sabse purane outbox event ki umar, dead letters, Redis ki memory aur connections, DB pool ka intezaar; roz ka saar logs store me (R-007).
 7. `/health` sirf process aur event loop (DB nahi); `/ready` Mongo clusters, Redis, dispatcher aur ticker (finance nahi, D-057); Render ka health check `/health` (SR-007).
 8. Alerts Master ke ops inbox aur push me; email sirf gambhir pe (SR-078). Misaal thresholds: RSS 400 MB se upar; event loop ki der 1 minute tak 500 ms se upar; 5 minute me 2% se zyada 5xx; sabse purana outbox event 60 second se upar; dead letter 0 se upar; Redis ki memory 60% se upar; kisi cluster ki jagah 70% aur 85%; Neon ke CU-ghante mahine ke 70%; emails din ke 80% (D-142); audit chain tooti, ya milaan me farak (SR-078).
@@ -549,7 +549,7 @@ Database Architect ki raay se (D-257 ka kram), owner ki haan ke baad. Ye saare s
 1. Har collection ki ek retention class (`tech`, `case`, `account`, `book`, `tax`, `ref`, `agg`) code ki registry me; koi collection bina class ya bina delete handler ke ho to CI fail.
 2. Business ki cheez (product, variant, seller, hub) jise koi order ya document dekhta hai, kabhi delete nahi; `archived`.
 3. Personal data ka erase = field hatana ya document delete, usi transaction me rok ki copy aur event; sirf flag kaafi nahi.
-4. Rok ki copy har service ke apne `sealed_records` me: hate fields ka JSON, service ki alag `hold` key se AES-256-GCM, `eraseAt` setting se (abhi 180 din, lagbhag 13 May 2027 se 365 din; D-250, D-262). Sirf break-glass facade se, Master aur wajah ke saath, audit me; kisi staff screen ya list me kabhi nahi. Retention class `tech` ke records (OTP ke hash, idempotency ke jawab, sessions, outbox, inbox) rok me nahi aate; unka personal data request logs me pehle se rehta hai (D-321).
+4. Rok ki copy har service ke apne `sealed_records` me: hate fields ka JSON, ek public key se band (sealed; SR-097, D-399), live server ke paas sirf public key, `eraseAt` setting se (abhi 180 din, lagbhag 13 May 2027 se 365 din; D-250, D-262). Sirf break-glass facade se, Master aur wajah ke saath, audit me; kisi staff screen ya list me kabhi nahi. Retention class `tech` ke records (OTP ke hash, idempotency ke jawab, sessions, outbox, inbox) rok me nahi aate; unka personal data request logs me pehle se rehta hai (D-321).
 5. Field encryption AES-256-GCM, roop `v1.<keyId>.<iv>.<ciphertext>.<tag>`, associated data `<service>.<collection>.<field>:<recordId>` (SR-063). Keys service ke namespace me (`field`, `blind`, `hold`, finance me `taxArchive`), har key ka id, aur purane records ka roz ka chhota re-encrypt.
 6. Dhoondhne ke liye HMAC-SHA256 blind index (alag key); dikhane ke liye aakhri 4.
 7. Codes, recovery codes aur invite tokens sirf hash. Delivery code encrypted, kyunki customer ko dikhana zaroori hai; milaan server pe (SR-054).
@@ -563,7 +563,7 @@ Database Architect ki raay se (D-257 ka kram), owner ki haan ke baad. Ye saare s
 | ----------- | -------------------------------------------------------------------------------------------------------------------------------------- |
 | identity    | Account tombstone; credentials, sessions, devices, codes delete; consents aur registration data rok me; id restore wali list me        |
 | notify      | Inbox, push subscriptions, digest, email jobs delete                                                                                   |
-| commerce    | Addresses, cart, wishlist, link keys delete; orders ke address se naam, phone aur lines hatein (shehar, pincode, state rahein); rok me |
+| commerce    | Addresses, cart, wishlist, link keys delete; orders ke address se naam, phone aur lines hatein (shehar, pincode, state rahein); band orders ke archive ke chunks bhi naye hash ke saath (SR-066); rok me |
 | catalog     | Reviews D-305 ke hisaab se (star aur text rahein, photos hatein); review ka haq delete                                                 |
 | logistics   | Waitlist delete; photos aur location apne samay pe                                                                                     |
 | support     | Case ke text se pehchaan hate; saboot apne samay pe                                                                                    |
@@ -577,7 +577,7 @@ Database Architect ki raay se (D-257 ka kram), owner ki haan ke baad. Ye saare s
 2. Index ke naam ke neeche roop kabhi nahi badalta; naya roop naya naam; purana agle release me drop.
 3. Expand aur contract do releases me: pehle optional field aur dono roop padhna, backfill, phir purana hatana. Ek release me jodna aur hatana kabhi nahi.
 4. Data migration idempotent, `_id` ke kram me chhote batches, M0 ke 100 ops/second ke hisaab se ruk-ruk ke; kahan tak hua, ye `migrations` me.
-5. Validators aur TTL badalne ka kaam alag release user se, jo sirf release step me judta hai; app ka user sirf apne database pe data ke kaam.
+5. Validators aur TTL badalne ka kaam alag release user se, jo sirf release step me judta hai; app ka user sirf apne database pe data ke kaam. Audit aur logs ke clusters me ye kaam sirf laptop ke release command se, alag credentials se; boot pe in dono me sirf fingerprint ki jaanch aur alert (D-400, SR-100).
 6. Finance ki migrations numbered SQL files, sirf aage, checksum ke saath, advisory lock aur migration role se; boot pe nahi, finance ke pehle kaam pe (taaki Neon na jaage).
 7. Har collection ka `$jsonSchema` validator sirf zaroori fields pe (ids, rakam `long` aur 0 se upar, `status` ki list, `version`); baaki khule.
 8. Har list cursor se, page 100 tak, `skip` nahi; har sort index se; CI me har repository query ka `explain` aur collection scan ka pehra; bade reports cursor aur stream se.
@@ -617,7 +617,7 @@ Database Architect ki raay se (D-257 ka kram), owner ki haan ke baad. Ye saare s
 12. `sys` me outbox, deliveries, processed events, idempotency, timers aur dead letters; purge roz ke batch me (PostgreSQL me TTL nahi).
 13. Finance ka dispatcher aur ticker sirf jab finance pehle se jaaga ho (batch, pack, Finance app), aur roz ke ek batch me; pool 2, idle timeout chhota (R-014).
 14. Driver `pg` aur ek type-safe query builder; sirf parameterized queries; ORM nahi.
-15. Band financial years D-309 ke hisaab se: encrypted export file aur Neon me closing balances, documents ki list aur hash.
+15. Band financial years D-309 ke hisaab se: encrypted export file aur Neon me closing balances, documents ki list aur hash. File public key se band, aur uska hash audit chain aur backup ke manifest me bhi (SR-097).
 
 | Table                                                         | Kaam                                              |
 | ------------------------------------------------------------- | ------------------------------------------------- |
@@ -632,7 +632,7 @@ Database Architect ki raay se (D-257 ka kram), owner ki haan ke baad. Ye saare s
 
 ### 10.7 Baaki services ke data niyam (D-316)
 
-1. identity: unique `(emailNorm, family)` (D-304); credentials alag collection me; refresh token `<sessionId>.<random>`, session me abhi aur pichhla hash; consents sirf jodna.
+1. identity: unique `(emailNorm, family)` (D-304); `emailNorm` ka roop SR-092 se (lowercase, domain ASCII, `+` aur dots waise hi); credentials alag collection me; refresh token `<sessionId>.<random>`, session me abhi aur pichhla hash; consents sirf jodna.
 2. identity: code ek baar aur 5 koshish tak, ek conditional update se; delete ka 7 din ka timer, wapsi pe cancel.
 3. notify: line ki din ki chhat ek counter document pe conditional `$inc`; OTP ka code notify ke DB ya outbox me kabhi nahi; email job ka id hi queue ka job id.
 4. payments: webhook ka event id `_id` pe, asar ke transaction me; refund kabhi captured se zyada nahi (payment pe conditional `$inc`); ek refund request ek refund; ek parcel ek khula QR; halat sirf aage badhti hai.
@@ -645,11 +645,11 @@ Database Architect ki raay se (D-257 ka kram), owner ki haan ke baad. Ye saare s
 
 ### 10.8 Audit, media, logs aur jagah (D-317)
 
-1. audit: app ka DB user sirf `insert` aur `find`; har entry ka `contentHash`; din ki chain roz ke job me (`audit_days`), pichhle din se judi (SR-076).
+1. audit: app ka DB user sirf `insert` aur `find`; har entry ka `contentHash`; din ki chain roz ke job me (`audit_days`), pichhle din se judi (SR-076); din ki chain ka aakhri hash logs aur roz ke saar me bhi (SR-100).
 2. audit: purane din gzip chunk me (`audit_chunks`, hash ke saath); taaza entries ka hatna sirf TTL se, chunk ki umar se misaal 15 din baad; chunk 7 din peeche ho to alert.
 3. audit: chunk ki umar setting (design target pe misaal 3 din, ₹0 pe 30 din); security events alag, 1 saal TTL (D-194).
 4. media: har file ka record; `ready` hone pe hi judna; samay pe file delete aur record rok ke samay tak; lagbhag 13 May 2027 se photos aur video capture se 1 saal rok ki jagah me (D-262).
-5. logs: ek chunk ek document, `startAt` pe TTL (180 din, lagbhag 13 May 2027 se 365 din; D-285); errors fingerprint ke hisaab se.
+5. logs: ek chunk ek document, `startAt` pe TTL (180 din, lagbhag 13 May 2027 se 365 din; D-285); errors fingerprint ke hisaab se. Logs ka DB user sirf `insert` aur `find`; padhna SR-100 ke hisaab se (D-402).
 6. Band records (orders, payments, parcels, stock movements) ka mahine ka gzip archive usi cluster me, hash ke saath; kram: chunk likho, hash jaancho, phir delete.
 7. Har collection ka roz ka `collStats` ops snapshot me; 70% aur 85% pe alert (§9).
 
@@ -679,3 +679,8 @@ Design target pe ₹0 ke clusters kuch hafton me bhar jaate hain: target sirf co
 | v1.3.3  | 2026-11-21 | §10.4 niyam 1 me jod: schema wala hissa listen se pehle, lambi data migration background me (D-338).                                                                                                                                      |
 | v1.3.4  | 2026-11-21 | §9 aur §10.8 me Neon ki jagah 1 GB pakki (RISKS §2.5): finance lagbhag 2.8 saal me bharta hai.                                                                                                                                            |
 | v1.3.5  | 2026-11-21 | §5 niyam 14: jaagne tak app band, phir background ping (D-349).                                                                                                                                                                           |
+| v1.3.6 | 2026-11-21 | §5 niyam 14 me `/wake` SR-089 se; niyam 15 me Payment ka alag document (security review batch 1, D-408). |
+| v1.3.7 | 2026-11-22 | §5 niyam 7 me background header (SR-094); §10.7 niyam 1 me `emailNorm` ka roop (SR-092) (security review batch 2, D-409). |
+| v1.3.8 | 2026-11-22 | §7 niyam 8: export ki file pehle download ke baad ya 24 ghante me mite (security review batch 3, D-410). |
+| v1.3.9 | 2026-11-22 | §10.3 niyam 4 aur commerce row, §10.6 niyam 15: band data public key se, archive ka delete (security review batch 5, D-412). |
+| v1.3.10 | 2026-11-22 | §8 niyam 3 aur 5, §10.4 niyam 5, §10.8 niyam 1 aur 5: logger, errors ka route, audit aur logs (security review batch 6, D-413). |

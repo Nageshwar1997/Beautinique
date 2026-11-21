@@ -1,6 +1,6 @@
 # FLOWS: Beautinique
 
-> **Status:** v1.1.2 (2026-11-21). Poore flows jo kai modules me chalte hain (jaise order se delivery, return se refund): §1 se §6, 20 flows. Cheezein ek-ek karke, owner ki haan ke baad judti hain.
+> **Status:** v1.1.3 (2026-11-21). Poore flows jo kai modules me chalte hain (jaise order se delivery, return se refund): §1 se §6, 20 flows. Cheezein ek-ek karke, owner ki haan ke baad judti hain.
 
 ## Is file me kya aayega
 
@@ -71,7 +71,7 @@ Har flow ka id `FL-<n>`. Har step ke saath module (`identity`, `notify`, `paymen
 1. Cart (sirf sign-in ke saath, D-020); cart me stock nahi rukta, sirf "kam stock" (commerce; D-118 niyam 3).
 2. Checkout: address (pincode serviceable), delivery ka vaada, payment ka tareeka, har line ka batch ka MRP aur expiry, poora breakup alag lines me (commerce, catalog; D-067, D-107, D-345).
 3. "Place order": client sirf variant aur quantity bheje; server daam, MRP, fee, tax, seema aur serviceability nikale; ek transaction me order aur batch ke level pe stock ka reservation (FEFO), idempotency key ke saath (commerce; SR-044, SR-045, ARCHITECTURE §10.5).
-4. Payment screen: server gateway ka order exact rakam se banaye; 15 minute (misaal) ka timer (payments; SR-048, D-118).
+4. Payment screen (alag HTML document, poore page ka load; SR-090): server gateway ka order exact rakam se banaye; 15 minute (misaal) ka timer (payments; SR-048, D-118).
 5. "Paid" sirf signature ki jaanch ya webhook se; browser ka "success" sirf screen ke liye (payments; SR-048).
 6. Order pakka: confirmation email delivery code ke saath (paise ki line), in-app khabar; push ki ijazat ka card (D-346) (notify; D-126, D-302).
 7. Finance ko events har 15 minute ke batch me (finance; D-288).
@@ -215,3 +215,4 @@ Har flow ka id `FL-<n>`. Har step ke saath module (`identity`, `notify`, `paymen
 | v1.0.0  | 2026-11-17 | Khaali file bani.                                                                                                                                                          |
 | v1.1.1  | 2026-11-21 | §1 se §6 aaye: account aur sign-in, browse se order aur payment, order se delivery, cancel, return, daawa aur refund, seller ke flows, reviews (20 flows; D-362 se D-367). |
 | v1.1.2  | 2026-11-21 | FL-18 step 1 me payable ki muddat (D-369).                                                                                                                                 |
+| v1.1.3 | 2026-11-21 | FL-7 kadam 4: Payment alag document (security review batch 1, D-408). |

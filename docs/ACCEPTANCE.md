@@ -1,6 +1,6 @@
 # ACCEPTANCE: Beautinique
 
-> **Status:** v1.0.0 (2026-11-21). R1 ke har service aur app ke acceptance criteria (D-388 se D-395). Cheezein ek-ek karke, owner ki haan ke baad judti hain.
+> **Status:** v1.0.3 (2026-11-22). R1 ke har service aur app ke acceptance criteria (D-388 se D-395). Cheezein ek-ek karke, owner ki haan ke baad judti hain.
 
 ## Is file me kya aayega
 
@@ -40,6 +40,7 @@
 7. **AC-GATEWAY-7** (SR-007): **Given** JSON body misaal 100 KB se bada, **When** aaye, **Then** 413; request misaal 30 second pe kat-ti hai; `/health` ka jawab sirf "ok", na version na database.
 8. **AC-GATEWAY-8** (D-294; §5 niyam 5): **Given** `X-App-Version` app ke kam se kam version se purana, **When** request aaye, **Then** 426; Delivery ka sync route pichhla version bhi maane.
 9. **AC-GATEWAY-9** (SR-077; §5 niyam 8, §8 niyam 1): **Given** koi bhi error, **When** jawab jaaye, **Then** ek hi roop `{"error": {"code", "message", "details", "requestId"}}`, 500 pe stack nahi, aur wahi request id logs, facade calls, events (`correlationId`) aur audit me.
+10. **AC-GATEWAY-10** (SR-089): **Given** `/wake`, **When** kisi app ke origin se `GET` aaye, **Then** 204 bina body aur cookie, database tak call nahi; anjaan origin pe CORS header nahi; har app ki CSP me Render ka sirf `/wake` ka exact URL.
 
 ### 1.3 IDENTITY
 
@@ -55,6 +56,7 @@
 10. **AC-IDENTITY-10** (SR-022, SR-025, D-200): **Given** invite, **When** dobara, misaal 72 ghante ke baad, ya doosre email se use ho, **Then** mana; recovery code ek hi baar; authenticator reset pe saare sessions band, security email aur owner ko alert; D-200 ke bahar ka role reset kare to 403.
 11. **AC-IDENTITY-11** (D-038, D-255, CL-089, CL-101, CL-102): **Given** sign-up, **When** account bane, **Then** har consent ka record (notice ka version, samay, raasta) sirf jodne wala, marketing opt-in alag aur khaali shuru, aur 18+ ki ghoshna ka record.
 12. **AC-IDENTITY-12** (D-151, D-304, SR-016, SR-066): **Given** account delete, **When** dobara pehchaan ke baad maanga jaaye, **Then** misaal 7 din me wapsi ho sake, aur 7 din baad `identity.account.erased` har service ke handler (ARCHITECTURE §10.3 ki table) tak pahunche; wahi email doosre app parivaar me alag account ho sake.
+13. **AC-IDENTITY-13** (SR-092, D-017, D-133, D-405): **Given** owner ke base email ke 10 `+` aliases, **When** sign-up ke codes maange jaayein, **Then** mailbox key ki seema pe rukein; tester ki `exact` entry ke email ka alias "demo store" paaye; bade akshar ya domain ke peeche jude text wala email allowlist se bahar.
 
 ### 1.4 NOTIFY
 
@@ -174,7 +176,7 @@
 
 1. **AC-LOGS-1** (SR-077; §8 niyam 3): **Given** request me password, code, token, cookie, `Authorization`, email, phone, address ya PAN ho, **When** log bane, **Then** inme se kuch nahi; route ka template, raw URL aur query nahi.
 2. **AC-LOGS-2** (D-250, D-285, CL-106; §8 niyam 2, 10): **Given** request logs, **When** likhe jaayein, **Then** misaal har 60 second ya 1,000 lines pe ek gzip chunk, samay UTC, aur TTL setting se (abhi 180 din).
-3. **AC-LOGS-3** (D-286; §8 niyam 5): **Given** server ki error, **When** ho, **Then** fingerprint ke saath; apps ki errors rate-limited route se, size ki seema aur bina personal data; nayi error ki khabar ops inbox me.
+3. **AC-LOGS-3** (D-286; §8 niyam 5): **Given** server ki error, **When** ho, **Then** fingerprint ke saath; apps ki errors rate-limited route se, size ki seema aur bina personal data; nayi error ki khabar ops inbox me; error ka text Master me sirf text (HTML nahi chalta); URL me sirf route ka template; error objects ke log me headers, keys ya email nahi (SR-098, SR-099).
 4. **AC-LOGS-4** (D-297; §8 niyam 6, 8): **Given** ops snapshot ke number (RSS, outbox ki umar, dead letters, Redis memory), **When** seema paar hon, **Then** sahi gambhirta ka alert, ek fingerprint ka misaal ek ghante me ek, theek hone pe "theek" ki khabar.
 5. **AC-LOGS-5** (D-332; OPERATIONS §7 niyam 1): **Given** Redis ya ek cluster band, **When** Render ka health check `/health` bulaye, **Then** 200 (process zinda); `/ready` me wo band hissa dikhe, aur finance `/ready` me nahi.
 
@@ -187,7 +189,7 @@
 3. **AC-CUSTOMER-3** (D-067, D-223, D-232, DS-9.1, DS-9.2): **Given** discount wala product, **When** card, product page, cart aur checkout dikhein, **Then** kata MRP, daam, neeche round "% off", 30 din ka sabse kam daam, aur agle batch ki expiry mahina-saal "Use before" ya "Expiry" ke roop me.
 4. **AC-CUSTOMER-4** (D-221, D-238, DS-9.7, DS-9.8, CL-061): **Given** product page aur order detail, **When** khulein, **Then** seller ka block aur return ki line add-to-cart ke paas aur order pe.
 5. **AC-CUSTOMER-5** (DS-1.5, DS-9.9, DS-9.18, CL-070 se CL-072): **Given** sign-up aur checkout, **When** dikhein, **Then** koi tick pehle se nahi, marketing alag, delivery fee alag line aur "₹X se upar muft" pehle se, countdown sirf asli offer pe.
-6. **AC-CUSTOMER-6** (D-345, SR-006, DS-8.7): **Given** checkout, **When** "Place order" ke baad Payment screen khule, **Then** gateway ki script sirf usi route ki CSP me; payment ka timer sirf 5 aur 1 minute bache pe padha jaaye.
+6. **AC-CUSTOMER-6** (D-345, SR-006, SR-090, DS-8.7): **Given** checkout, **When** "Place order" ke baad Payment screen khule, **Then** Payment alag HTML document; gateway ki script aur host sirf us document ki CSP me; Payment me aana aur jaana poore page ka load; payment ka timer sirf 5 aur 1 minute bache pe padha jaaye.
 7. **AC-CUSTOMER-7** (D-343, D-195): **Given** out for delivery parcel, **When** Orders khule, **Then** DeliveryCodeCard sabse upar; push me code kabhi nahi.
 8. **AC-CUSTOMER-8** (D-145, D-264, DS-9.14, DS-9.16, CL-079, CL-080): **Given** koi bhi page, **When** khule, **Then** demo ki patti jo band nahi hoti; legal pages pe DUMMY badge, version aur tareekh.
 9. **AC-CUSTOMER-9** (SR-005, SR-010, SR-021, SR-027, D-359): **Given** har route, **When** khule, **Then** security headers aur CSP; browser storage me user ka data nahi; service worker `/api/*` cache nahi kare aur sign-out pe Cache Storage aur IndexedDB khaali; `next` me `//evil.example` aur encoded dot-segments home pe; axe me serious ya critical 0, light aur dark, 320 se 1280.
@@ -227,6 +229,7 @@
 4. **AC-MASTER-4** (D-022, SR-043): **Given** location data ka import, **When** chale, **Then** pehle "dry run" aur schema ki jaanch; galat file ka koi asar nahi; audit me ginti.
 5. **AC-MASTER-5** (D-297; OPERATIONS §7 niyam 6; ARCHITECTURE §3 niyam 6): **Given** ops page, **When** khule, **Then** aakhri jaag, aakhri sweep, har roz ke kaam ka aakhri poora din, aakhri backup ki tareekh aur khule alerts; dead letter dobara chalana sirf permission ke saath.
 6. **AC-MASTER-6** (D-047, SR-037): **Given** Master ka account, **When** listing manzoor kare ya aisa sub-role banaye jisme grants dena ya payout manzoori ho, **Then** 403 ya mana; koi role khud ko appoint nahi kar sakta.
+7. **AC-MASTER-7** (SR-101, D-324, D-401): **Given** owner ka Master session khatam, **When** gambhirta 1 ka alert bane, **Then** us device pe push aaye bina detail ke; subscription 410 de to gambhir email.
 
 ### 2.6 SUPPORT DESK app
 
@@ -271,10 +274,10 @@
 | Module    | Ginti   | App           | Ginti  |
 | --------- | ------- | ------------- | ------ |
 | PLATFORM  | 12      | CUSTOMER      | 10     |
-| GATEWAY   | 9       | SELLER        | 6      |
-| IDENTITY  | 12      | ADMIN         | 6      |
+| GATEWAY   | 10      | SELLER        | 6      |
+| IDENTITY  | 13      | ADMIN         | 6      |
 | NOTIFY    | 8       | SUPER ADMIN   | 5      |
-| PAYMENTS  | 10      | MASTER        | 6      |
+| PAYMENTS  | 10      | MASTER        | 7      |
 | CATALOG   | 12      | SUPPORT DESK  | 5      |
 | COMMERCE  | 12      | FINANCE       | 5      |
 | LOGISTICS | 12      | LOGISTICS OPS | 6      |
@@ -283,9 +286,9 @@
 | AUDIT     | 6       |               |        |
 | MEDIA     | 7       |               |        |
 | LOGS      | 5       |               |        |
-| **Kul**   | **125** | **Kul**       | **59** |
+| **Kul**   | **127** | **Kul**       | **60** |
 
-Kul 184 criteria (R1).
+Kul 187 criteria (R1).
 
 
 ## 4. R2 ka chhota khaka
@@ -305,3 +308,6 @@ Kul 184 criteria (R1).
 | Version | Date       | Badlav                                                                                                     |
 | ------- | ---------- | ---------------------------------------------------------------------------------------------------------- |
 | v1.0.0  | 2026-11-21 | Pehla version: R1 ke 184 acceptance criteria (13 services, 9 apps), ginti aur R2 ka khaka; D-388 se D-395. |
+| v1.0.1 | 2026-11-21 | AC-CUSTOMER-6 me Payment ka alag document; naya AC-GATEWAY-10 (`/wake`); kul 185 (security review batch 1, D-408). |
+| v1.0.2 | 2026-11-22 | Naya AC-IDENTITY-13 (aliases aur allowlist); kul 186 (security review batch 2, D-409). |
+| v1.0.3 | 2026-11-22 | AC-LOGS-3 me jod; naya AC-MASTER-7; kul 187 (security review batch 6, D-413). |

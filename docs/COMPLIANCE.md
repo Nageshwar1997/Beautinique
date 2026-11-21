@@ -1,6 +1,6 @@
 # COMPLIANCE: Beautinique
 
-> **Status:** v1.2.1 (2026-11-20). Kanooni matrix. System me sab poori tarah banta hai, par registrations aur bahar ki companies ki details dummy hain (D-026); apne roles ki jaankari asli (D-241). Project ke Lawyer aur CA AI agents hain (D-257); Lawyer ne 18 rows dekhin (D-272), CA ne 32 rows dekhin aur 8 nayi rows di (D-281). Cheezein ek-ek karke, owner ki haan se, judti hain (D-220).
+> **Status:** v1.2.2 (2026-11-22). Kanooni matrix. System me sab poori tarah banta hai, par registrations aur bahar ki companies ki details dummy hain (D-026); apne roles ki jaankari asli (D-241). Project ke Lawyer aur CA AI agents hain (D-257); Lawyer ne 18 rows dekhin (D-272), CA ne 32 rows dekhin aur 8 nayi rows di (D-281). Cheezein ek-ek karke, owner ki haan se, judti hain (D-220).
 
 ## Is file me kya aayega
 
@@ -1535,7 +1535,7 @@ Do parat: sign-up pe chhota **Data notice** (alag, itemised) aur poora **Privacy
 | 9   | Privacy ke sawal           | Wahi officer (rule 9); Data Protection Board ka raasta.                                   | D-253, CL-092        |
 | 10  | IP ki shikayat             | Brand owner ke liye category, saboot ke saath.                                            | CL-124               |
 | 11  | Aage ka raasta             | Grievance Appellate Committee (content); National Consumer Helpline; consumer commission. | CL-105, CL-059       |
-| 12  | Security ki report         | `[SECURITY_CONTACT]` (CERT-In ka Point of Contact alag role).                             | D-253, CL-106        |
+| 12  | Security ki report         | `[SECURITY_CONTACT]` (CERT-In ka Point of Contact alag role). Har app pe `/.well-known/security.txt` isi sampark ke saath (SR-103).                             | D-253, CL-106        |
 
 ## Change log
 
@@ -1554,3 +1554,4 @@ Do parat: sign-up pe chhota **Data notice** (alag, itemised) aur poora **Privacy
 | v1.1.10 | 2026-11-20 | Lawyer (AI) ke nishaan 18 rows pe (D-272): 4 jaancha, 11 aadha, 3 hisse nahi; D-262 se D-271 se badli rows; §13 me FDI ki row (D-271).                                                                               |
 | v1.1.11 | 2026-11-20 | §14 Documents ka dhaancha (D-274): 6 documents, 108 clauses, D-262 se D-272 ke saath.                                                                                                                                |
 | v1.2.1  | 2026-11-20 | CA (AI) ki raay (D-281): 32 rows pe CA ke nishaan, 20 rows me badlav, §1.1 me nayi rows CL-129 se CL-136, sources T11 se T27, §13 me 4 Nazar rows, §14 me Seller clause 10 aur 13 aur Partner clause 9 ke tax hisse. |
+| v1.2.2 | 2026-11-22 | §14.6 row 12 me security.txt (security review batch 7, D-414). |

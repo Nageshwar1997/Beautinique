@@ -1,6 +1,6 @@
 # OPEN QUESTIONS: Beautinique
 
-> **Status:** v1.7.25 (2026-11-21). Khule sawal, aage ke topics aur jaanchna baaki. Cheezein ek-ek karke judengi.
+> **Status:** v1.7.35 (2026-11-22). Khule sawal, aage ke topics aur jaanchna baaki. Cheezein ek-ek karke judengi.
 
 ## Is file me kya aayega
 
@@ -46,7 +46,7 @@ Claude ka kaam: owner ka faisla nahi chahiye, sirf saboot. Nateeja saboot ke saa
 | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------- | ---------------------------------------------------------------------------------------- |
 | Asli location data me main city ke pincodes kis hub pe, aur kitne pincodes do sub-districts, districts ya states me phaile hain                                                                                                                                                              | D-015, D-016                                       | Pincode → hub mapping; D-016 asli data dekh ke dobara khul sakta hai                     |
 | EU ke CosIng jaise public ingredient database ka license aur download ka format                                                                                                                                                                                                              | D-132                                              | Ingredient master list ka import (products badhne pe)                                    |
-| Vercel ke rewrite se backend tak secret header kaise jude, aur Vercel aur Render asli client IP kis header me dete hain                                                                                                                                                                      | D-052, Q-151                                       | Backend ka seedha raasta band karna aur rate limit ke liye asli IP                       |
+| Vercel ke rewrite se backend tak secret header kaise jude, aur Vercel aur Render asli client IP kis header me dete hain                                                                                                                                                                      | D-052, Q-151                                       | Backend ka seedha raasta band karna aur rate limit ke liye asli IP. Ishara: request header sirf route ke `transforms` se judta hai, rewrite se nahi (jaanchna) |
 | Atlas ke free cluster, Neon ke free plan aur Render Key Value me network allowlist ya IP access list milti hai ya nahi, aur Render ki free web service ke bahar jaane wale IPs tay hain ya nahi                                                                                              | D-011, D-050, Q-158                                | Databases ka network band karna (R-022)                                                  |
 | Render ki free web service ke logs kitne din rehte hain                                                                                                                                                                                                                                      | Q-159                                              | Incident me logs ki copy (R-024)                                                         |
 | `vercel.app` aur `onrender.com` Public Suffix List me hain ya nahi                                                                                                                                                                                                                           | D-048, SR-027                                      | Ek app ki cookie doosre app tak na jaaye                                                 |
@@ -54,25 +54,25 @@ Claude ka kaam: owner ka faisla nahi chahiye, sirf saboot. Nateeja saboot ke saa
 | Neon ke free plan me roles aur `sslmode`                                                                                                                                                                                                                                                     | D-057, SR-068, SR-053                              | Finance database ke haq                                                                  |
 | Render Key Value ke free plan me internal URL pe TLS, aur memory bharne pe kya mitta hai                                                                                                                                                                                                     | D-051, SR-070, SR-008                              | Rate limits aur cache ka vyavhaar                                                        |
 | Razorpay: webhook signature ka header aur algorithm, event id aur retry, payment signature ki jaanch, test mode me exact rakam ka UPI QR, refund ki idempotency, chargeback ki samay-seema                                                                                                   | D-034, SR-048 se SR-050, D-191                     | Payment aur webhooks ke niyam, delivery saboot ka samay                                  |
-| Email provider: bheje emails ki copy dashboard me kitne din (OTP dikhta hai ya nahi), link tracking default, API key ke haq, shared domain pe SPF aur DKIM                                                                                                                                   | D-028, SR-012, SR-073                              | Emails me codes aur links ki suraksha                                                    |
+| Email provider: bheje emails ki copy dashboard me kitne din (OTP dikhta hai ya nahi), link tracking default, API key ke haq, shared domain pe SPF aur DKIM                                                                                                                                   | D-028, SR-012, SR-073                              | Emails me codes aur links ki suraksha; ab zyada zaroori (R-079) |
 | Web Push: push services ke hosts ki list aur payload ki seema                                                                                                                                                                                                                                | SR-072, SR-074                                     | Push ki allowlist aur payload                                                            |
 | LinkedIn aur GitHub sign-in se email "verified" hone ki jaankari milti hai ya nahi                                                                                                                                                                                                           | D-021, SR-017                                      | Social sign-in se account jodna                                                          |
 | Browser me file input ke `capture` se gallery kitni rukti hai                                                                                                                                                                                                                                | SR-055                                             | Delivery saboot ki photo                                                                 |
 | Leak hue passwords ki free range API ki uplabdhi aur seema                                                                                                                                                                                                                                   | SR-013                                             | Password ki jaanch                                                                       |
-| Owner ka laptop: Desktop folder kisi cloud sync me hai ya nahi (repo aur backups isi folder me), aur disk encryption chalu hai ya nahi (owner ke saath)                                                                                                                                      | D-013, D-196, R-023                                | Backups ki suraksha                                                                      |
+| Owner ka laptop: Desktop folder kisi cloud sync me hai ya nahi (repo aur backups isi folder me), aur disk encryption chalu hai ya nahi (owner ke saath)                                                                                                                                      | D-013, D-196, R-023                                | Backups ki suraksha; ab sabse pehle: sync mile to backups ka folder Desktop ke bahar (D-013) |
 | Test mode me gift card dene wala RBI-authorised PPI issuer (API ke saath) milta hai ya nahi                                                                                                                                                                                                  | D-249                                              | Gift card ka raasta                                                                      |
 | Media provider (Cloudinary ka free plan): private file ka samay wala URL free plan pe chalta hai ya nahi, rakhi copy me EXIF rehta hai ya nahi, file type aur size ki rok, free credits, data ki jagah, aur mitayi files trash ya backup me kitne din rehti hain (aur use band kaise karein) | D-284                                              | Shart poori na ho to media ka vikalp (c)                                                 |
 | Render free instance ka CPU kitna hai                                                                                                                                                                                                                                                        | D-293, D-298                                       | Capacity ke number                                                                       |
 | Render Key Value ke free plan ki memory aur connections ki seema                                                                                                                                                                                                                             | D-293, D-298                                       | Queues, connections aur Redis ka alert                                                   |
 | Atlas Search ke free cluster pe fuzzy, autocomplete aur synonyms ki seema                                                                                                                                                                                                                    | D-295                                              | Search ke niyam                                                                          |
 | Neon ke free plan me khule connection pe compute sota hai ya nahi                                                                                                                                                                                                                            | D-288, D-309                                       | CU-ghante                                                                                |
-| Atlas M0 pe audit ke sirf insert aur find wale custom role ka asli test, aur `readWrite` role me `collMod` hai ya nahi (release user)                                                                                                                                                        | D-313, D-317                                       | Audit ka pehra aur migrations ke users                                                   |
+| Atlas M0 pe audit ke sirf insert aur find wale custom role ka asli test, aur `readWrite` role me `collMod` hai ya nahi (release user)                                                                                                                                                        | D-313, D-317                                       | Audit ka pehra aur migrations ke users; ab zyada zaroori (D-400, R-080) |
 | Neon ke pooler (transaction mode) pe advisory lock aur prepared statements chalte hain ya nahi, aur har wake ka kam se kam bill                                                                                                                                                              | D-288, D-313, D-315                                | Finance ki migrations ka lock aur pool ka niyam                                          |
 | Atlas M0: multi-document transactions aur unki umar ki seema, collections aur databases ki ginti ki seema, memory sort ki seema aur `allowDiskUse`, `$out` aur `$merge`                                                                                                                      | D-311, D-314, R-006                                | Transaction helper aur reports                                                           |
 | Atlas Search M0 pe index ki definition ki size ki seema, search index ki jagah 0.5 GB me ginti hai ya nahi, aur driver se `createSearchIndex`                                                                                                                                                | D-295, D-313, R-032                                | Catalog ka cluster aur release step                                                      |
 | M0 pe TTL monitor ka chakkar, aur TTL ke deletes 100 ops/second me gine jaate hain ya nahi                                                                                                                                                                                                   | D-311, D-317, R-006                                | Bade TTL deletes ka asar                                                                 |
 | Node ke MongoDB driver me integer ka `int32` ya `double` me likha jaana, `Long` aur `useBigInt64`                                                                                                                                                                                            | D-310                                              | Paise ka money codec (`long`)                                                            |
-| Razorpay payment method ki koi sthir pehchaan (card fingerprint ya token) deta hai ya nahi, bina UPI ID ke                                                                                                                                                                                   | D-203, D-312, SR-064                               | Accounts ke jod ka payment wala hissa                                                    |
+| Razorpay payment method ki koi sthir pehchaan (card fingerprint ya token) deta hai ya nahi, bina UPI ID ke                                                                                                                                                                                   | D-203, D-312, SR-064                               | Accounts ke jod ka payment wala hissa; ab zyada zaroori (SR-093) |
 | M0 ke 7 din ke 10 GB transfer me backup command (D-013) aur location import ka hissa, aur M0 pe `$jsonSchema` validator aur partial indexes ki koi alag seema                                                                                                                                | D-013, D-313, R-006                                | Backup aur import ka samay, validators                                                   |
 | Brevo ka free plan: bina domain ek verified sender se bhejna chalta hai ya nahi, din ki seema, aur API key ke haq                                                                                                                                                                            | D-287                                              | Email provider pakka karna                                                               |
 | GitHub pe public repo ka push protection (repo ke level pe, default band, GitHub Secret Protection maangta hai) muft chalu ho sakta hai ya nahi; GitHub ke artifacts aur cache ki umar                                                                                                       | SR-080, D-327, D-338                               | CI ka secret scan asli pehra hai; repo ka pehra mile to ek aur parat; E2E traces ki umar |
@@ -112,6 +112,17 @@ Claude ka kaam: owner ka faisla nahi chahiye, sirf saboot. Nateeja saboot ke saa
 | Lighthouse ka mobile preset Windows laptop pe dohraane layak number deta hai ya nahi (CPU throttling)                                                                                                                                                                                        | DS-10.10                                           | Page ke targets                                                                          |
 | Security bug ka private record: public repo me GitHub ki private security advisory muft chalti hai ya nahi                                                                                                                                                                                   | RT-39                                              | Security bug ki detail private                                                           |
 | Laptop ki memory me ek saath kya chal sakta hai: saare databases, fakes, 9 apps ki static copy, Playwright, aur mutation ke alag containers                                                                                                                                                  | R-070                                              | Laptop pe tests ka bojh                                                                  |
+| CSP `connect-src` me path wala source (exact path, bina aakhri `/`) Chromium, WebKit aur Firefox me kaise milta hai, aur redirect ke baad path ka milaan chhootna | SR-089 | `/wake` ka apvaad sirf ek exact URL tak tike |
+| Render free: kisi bhi path ki request (403 samet) soya service jagati hai ya nahi; rejected jawab bandwidth me gine jaate hain ya nahi; `onrender.com` pe Render ka apna DDoS ya rate ka bachav; aur Vercel ke `/api` raaste se soya service jaagta hai ya sirf seedhi call se | SR-105, SR-089, R-077 | Baadh se bandwidth aur ghanton ka khatra kitna asli |
+| Media provider ke free plan pe: strict transformations, bina signature presets band karna, `overwrite` band, aur API key ke haq | SR-096 | Media ki settings niyam ke hisaab se ban sakein |
+| Ola Maps: key ki whitelist exact host pe ya wildcard pe, har API ke liye alag rok; web SDK npm se bundle hoke bina Ola ke CDN ki script chalta hai ya nahi | SR-091, R-082 | Map ka SDK bundle me aur key sirf apne hosts pe |
+| GitHub: private security advisory ke temporary private fork me Actions chalti hain ya nahi; public repo ke Actions artifacts kaun download kar sakta hai | D-403, SR-103 | Security fix ke tests aur scan ki report private rahein |
+| pino ka default `err` serializer kaunse fields leta hai, `redact.remove`, transports ka worker thread aur memory; MongoDB Node driver ki duplicate key error me `keyValue` aur message me value | SR-098 | Logs me secrets aur emails na jaayein |
+| Web Push: subscription ki apni umar (`expirationTime`), browser band hone pe push (Android Chrome, desktop), 404 aur 410 ka matlab | SR-101, D-401, R-081 | Raat ke alerts ka raasta chupke se band na ho |
+| Vercel: static multi-page build me har path ke alag headers, aur SPA ka fallback rewrite Payment document ko main `index.html` se na badle | SR-090, D-407 | Payment ka alag document aur uski alag CSP |
+| Zustand ka `devtools` production build me band karne ka tareeka (setting ya tree-shaking) | SR-095 | Production me store ki state bahar na dikhe |
+| RFC 9116 ke zaroori fields (`Contact`, `Expires`) aur Vercel static pe `/.well-known/` ka serve hona | SR-103 | `security.txt` har app pe sahi roop me |
+| Razorpay ka hosted payment page (Payment Links ya redirect wala checkout) test mode me: exact rakam, apne order ka reference, callback aur wahi webhooks | D-407 | Alag document me dikkat aaye to chhoda hua doosra raasta kitna chalta hai |
 
 ## 3. Sawal
 
@@ -6923,6 +6934,180 @@ Claude ka kaam: owner ka faisla nahi chahiye, sirf saboot. Nateeja saboot ke saa
 - **R1 ya baad me:** R1.
 - **Owner ka jawab (2026-11-21):** **(a)**, Payment screen ek alag HTML document; gateway ki script aur uski CSP sirf wahan, aur checkout ka roop (D-345) waisa hi. Record: [DECISIONS.md](DECISIONS.md) D-407.
 
+### Q-344. Security review batch 1: edge aur hosting ke niyam, threats aur docs ke badlav maanein?
+
+- **Status:** `Tay`. Topic: B14 (security), B15 (hosting).
+- **Sawal:** Security Architect ke doosre run ke edge aur hosting wale hisse naye docs me aayein?
+  1. **Naye niyam** ([security/SECURITY_REQUIREMENTS.md](security/SECURITY_REQUIREMENTS.md)): **SR-089** `/wake` ka alag route (sirf `GET`, 204 bina body aur cookie, koi database nahi, redirect nahi, CORS sirf apne apps ke origins bina credentials, CSP me sirf exact URL, IP ki chhoti seema); **SR-090** Payment screen alag HTML document (D-407); **SR-105** Render ke public host pe tay routes ke bahar sabse chhota jawab, bandwidth ki raftaar pe alert, aur baadh me log line ki jagah ginti (D-406).
+  2. **Badle niyam:** SR-005 (CSP har document ki apni, `connect-src` me sirf `/wake`, media ka CDN, `font-src 'self'`, inline script sirf hash se; release ke baad live headers ki jaanch) aur SR-006 (gateway ki script sirf Payment ke alag document pe).
+  3. **Threats** ([security/THREAT_MODEL.md](security/THREAT_MODEL.md) §1.1): 4 naye (`/wake` ka bada apvaad, SPA me gateway ki script, Render host pe baadh, edge ke tests ka live config na chalana), aur DAST ki line.
+  4. **Doosre docs:** [RULES.md](RULES.md) RT-14 (edge ka milaan) aur RT-36 (release se pehle bhi, findings private); [OPERATIONS.md](OPERATIONS.md) §3 niyam 9 (live smoke me security ki jaanch); [ARCHITECTURE.md](ARCHITECTURE.md) §5 niyam 14 aur 15; [DESIGN.md](DESIGN.md) DS-10.9; [FLOWS.md](FLOWS.md) FL-7 kadam 4; [ACCEPTANCE.md](ACCEPTANCE.md) AC-CUSTOMER-6 aur naya AC-GATEWAY-10; [RISKS.md](RISKS.md) R-016 ka bachav.
+- **Kyun zaroori:**
+  - SPA (D-290) me CSP poore document ki hoti hai, to SR-006 ka purana roop poora nahi ho sakta tha.
+  - `/wake` aur Render ka host sabke liye khule hain; apvaad chhota na ho to bandwidth (5 GB/mahina) aur logs ki jagah koi bhi kha sakta hai.
+  - Laptop ke tests Vercel ki asli config nahi chalate, to live headers ki jaanch release ke baad hi pakki hoti hai.
+- **Vikalp:** **(a)** saare hisse; **(b)** kuch (owner bataye); **(c)** koi nahi.
+- **Salah:** **(a)**.
+- **Trade-off:** (a) me Payment pe aate-jaate poora page load, aur har release ke smoke check me kuch minute zyada. (c) me SPA me payment ki script ka asar poore app pe, aur Render ke host pe baadh ka khula raasta.
+- **R1 ya baad me:** R1.
+- **Owner ka jawab (2026-11-21):** **(a)**, saare hisse: SR-089, SR-090, SR-105, SR-005 aur SR-006 ke badlav, §1.1 ke 4 threats, aur doosre docs ke badlav. Record: [DECISIONS.md](DECISIONS.md) D-408.
+
+### Q-345. Security review batch 2: sign-in aur sessions ke niyam, threats aur docs ke badlav maanein?
+
+- **Status:** `Tay`. Topic: B14 (security).
+- **Sawal:** Security Architect ke doosre run ke sign-in aur sessions wale hisse naye docs me aayein?
+  1. **Naye niyam** ([security/SECURITY_REQUIREMENTS.md](security/SECURITY_REQUIREMENTS.md)): **SR-092** email ka ek roop (`emailNorm`), allowlist ki entry `exact` ya `aliases` (testers hamesha `exact`, D-405), aur codes ki seema mailbox key pe bhi; **SR-093** seemaon ka jod (address, payment ki pehchaan aur device cookie, sirf HMAC; R1 me D-109 ka jod); **SR-094** polling, ping aur refresh session ka "kaam" nahi; **SR-095** apps ke stores aur query cache: devtools sirf development me, sign-out pe reset, `persist` sirf allowlist ki keys.
+  2. **Badle niyam:** SR-012 (har email me app ka naam, link tracking band ka record) aur SR-020 (seema mailbox key pe bhi).
+  3. **Threats** ([security/THREAT_MODEL.md](security/THREAT_MODEL.md)): §1.2 me 3 (aliases se codes ki baadh, email ke dhile milaan se allowlist ke bahar wala andar, kai app parivaaron me kis app ka email) aur §1.3 me 2 (background requests se session kabhi band nahi, sign-out ke baad store me pichhle user ka data).
+  4. **Doosre docs:** [ARCHITECTURE.md](ARCHITECTURE.md) §5 niyam 7 aur §10.7 niyam 1; [DESIGN.md](DESIGN.md) DS-6.10; [ACCEPTANCE.md](ACCEPTANCE.md) naya AC-IDENTITY-13.
+- **Kyun zaroori:**
+  - Allowlist hi R1 ka darwaza hai (D-133); email ka roop tay na ho to case, Unicode ya domain ke khel se bahar wala andar aa sakta hai.
+  - Owner ke emails pe aliases jaan-boojh ke chalte hain, to ek inbox pe codes ki baadh aur sign-up ki din ki chhat ka khatam hona rokna zaroori.
+  - Polling har 60 second chalti hai; use "kaam" gina to staff ka 30 minute wala bina kaam ka niyam (D-181) kabhi laagu nahi hota.
+- **Vikalp:** **(a)** saare hisse; **(b)** kuch (owner bataye); **(c)** koi nahi.
+- **Salah:** **(a)**.
+- **Trade-off:** (a) me email ke roop ki ek saajhi library aur seemaon ka ek aur hisaab. (c) me allowlist ka dhila milaan aur khula chhoda staff ka tab kabhi band nahi.
+- **R1 ya baad me:** R1 (SR-093 me D-109 ka jod R1, baaki seemaon ke saath R2).
+- **Owner ka jawab (2026-11-22):** **(a)**, saare hisse: SR-092 se SR-095, SR-012 aur SR-020 ke badlav, §1.2 aur §1.3 ke 5 threats, aur doosre docs ke badlav. Record: [DECISIONS.md](DECISIONS.md) D-409.
+
+### Q-346. Security review batch 3: authorization aur paisa ke niyamon ke badlav aur threats maanein?
+
+- **Status:** `Tay`. Topic: B14 (security), B6 (payments).
+- **Sawal:** Security Architect ke doosre run ke authorization aur paisa wale hisse naye docs me aayein?
+  1. **Badle niyam** ([security/SECURITY_REQUIREMENTS.md](security/SECURITY_REQUIREMENTS.md)): SR-032 (matrix ke aayam: route, role, app `aud` aur scope, jisme hub, warehouse, area aur partner bhi); SR-033 (order, return, daawa aur parcel ke number (D-308) bhi id jaise: secure random, khoj sirf owner ya scope ke filter aur rate limit ke saath, "nahi hai" aur "aapka nahi" dono 404); SR-043 (bank statement aur settlement report ke imports: Finance ka haq, dobara code, file ka hash audit me, dry run); SR-059 (seller ke user ka `emailNorm` aur mailbox key bhi); SR-075 (export ki file pehle download ke baad ya misaal 24 ghante me mite; PAN aur bank ke columns sirf zaroori exports aur roles me).
+  2. **Threats** ([security/THREAT_MODEL.md](security/THREAT_MODEL.md)): §1.4 me 3 (matrix me scope chhootna, number ko secret maanna, alias se apne brand pe review) aur §1.5 me 2 (milaan ke import se farak chhupana, exports me PAN lambe samay).
+  3. **Doosre docs:** [RULES.md](RULES.md) RT-35 me matrix ke aayam; [ARCHITECTURE.md](ARCHITECTURE.md) §7 niyam 8 me export ki file ka mitna.
+- **Kyun zaroori:**
+  - Staff ke scope (hub, warehouse, area) aur partner ke assignment ka bug sirf doosre customer ki id wale test se nahi pakda jaata.
+  - Settlement ka milaan sellers ke paise ka pehra hai; uska import badla to farak chhup sakta hai.
+  - Ek export file me saare sellers aur partners ke PAN hote hain; file jitni der rahe, jokhim utna.
+- **Vikalp:** **(a)** saare hisse; **(b)** kuch (owner bataye); **(c)** koi nahi.
+- **Salah:** **(a)**.
+- **Trade-off:** (a) me matrix test bada hota hai aur export dobara chahiye to dobara banana padta hai. (c) me scope ke bug aur PAN wali files ka khula raasta.
+- **R1 ya baad me:** R1 (SR-059 ka D-203 wala hissa R2).
+- **Owner ka jawab (2026-11-22):** **(a)**, saare hisse: SR-032, SR-033, SR-043, SR-059 aur SR-075 ke badlav, §1.4 aur §1.5 ke 5 threats, aur RT-35 aur ARCHITECTURE §7 niyam 8 ke badlav. Record: [DECISIONS.md](DECISIONS.md) D-410.
+
+### Q-347. Security review batch 4: delivery, reviews aur content ki ghadiyon ke badlav aur threats maanein?
+
+- **Status:** `Tay`. Topic: B14 (security), B8 (reviews), B11 (support).
+- **Sawal:** Security Architect ke doosre run ke delivery, reviews aur content ki ghadiyon wale hisse naye docs me aayein?
+  1. **Badle niyam** ([security/SECURITY_REQUIREMENTS.md](security/SECURITY_REQUIREMENTS.md)): SR-060 (nagnata ya kisi aur ban ke dikhane wale content ki report pe content turant chhupe, faisla 2 ghante me, na ho to gambhirta 1 ka alert raat me bhi; baaki reports pe 36 ghante (D-251); jis account ki misaal 3 reports jhoothi niklein, uski aisi reports apne aap content nahi chhupatin, sirf queue me upar jaati hain); SR-078 (har event ki gambhirta 1, 2 ya 3, jisme nagnata wali report, court ya sarkari order aur owner ke alerts ki push subscription khatam hona gambhirta 1 me).
+  2. **Threats** ([security/THREAT_MODEL.md](security/THREAT_MODEL.md) §1.6): 3 naye (email provider ke paas delivery code aur OTP, content ki kanooni ghadi niyam aur alerts me na hona, jhoothi report se content chhupwana).
+  3. **Doosre docs:** [OPERATIONS.md](OPERATIONS.md) §7 niyam 3 me gambhirta ki poori list.
+- **Kyun zaroori:**
+  - SR-060 ab bhi 24 ghante kehta tha, jabki D-251 me nagnata wali report pe turant chhupna aur 2 ghante hain; aur raat ka alert D-324 ki gambhirta 1 me na ho to report subah tak padi rehti.
+  - D-251 niyam 2 content apne aap chhupata hai, to jhoothi reports se kisi ka bhi content chhupwaya ja sakta hai.
+- **Vikalp:** **(a)** saare hisse; **(b)** kuch (owner bataye); **(c)** koi nahi.
+- **Salah:** **(a)**.
+- **Trade-off:** (a) me raat me bhi gambhirta 1 ke alerts zyada, aur baar-baar jhoothi report karne wale ki report pe content tab tak dikhta hai jab tak staff na dekhe. (c) me kanooni ghadi chhootne ka jokhim aur jhoothi report ka khula raasta.
+- **Kanooni detail:** Lawyer (AI) ne nahi jaancha: jhoothi report karne wale ki report pe content apne aap na chhupana D-251 niyam 2 ke saath chalega ya nahi.
+- **R1 ya baad me:** R1.
+- **Owner ka jawab (2026-11-22):** **(a)**, saare hisse: SR-060 aur SR-078 ke badlav, §1.6 ke 3 threats, aur OPERATIONS §7 niyam 3 ki gambhirta ki list. Record: [DECISIONS.md](DECISIONS.md) D-411.
+
+### Q-348. Security review batch 5: files, media, map aur band data ke niyam, threats aur docs ke badlav maanein?
+
+- **Status:** `Tay`. Topic: B14 (security), B3 (catalog aur media).
+- **Sawal:** Security Architect ke doosre run ke files, media, map aur band data wale hisse naye docs me aayein?
+  1. **Naye niyam** ([security/SECURITY_REQUIREMENTS.md](security/SECURITY_REQUIREMENTS.md)): **SR-091** map ka SDK hamare bundle me, Ola ke hosts sirf `connect-src` aur `img-src` me, key ki whitelist sirf apne exact hosts, Ola ko koi personal pehchaan nahi; **SR-096** media provider pe sirf signed upload, server ke tay params, metadata hatana, sirf tay transformations; **SR-097** band data (rok ki copy, rok wali photos aur video, band FY ki file) public key se band, private key offline (D-399), hash audit chain aur backup manifest me, saal ka abhyaas.
+  2. **Badle niyam:** SR-006 (map ka SDK bundle me), SR-062 (private media ki list me certificates, band FY ki file, exports aur rok wali photos), SR-065 (naye samay ke references), SR-066 (delete pe band orders ka archive bhi).
+  3. **Threats** ([security/THREAT_MODEL.md](security/THREAT_MODEL.md)): §1.7 me 5 (media provider ki galat setting, band data ki chaabi live server pe, band FY ki file ka hash ek hi jagah, map ki key aur bahar ki script, delete ke baad archive me naam) aur §1.10 me 1 (certificates private media me nahi).
+  4. **Doosre docs:** [OPERATIONS.md](OPERATIONS.md) §4 niyam 2 aur 3 (secrets ki list aur band data ki private key), §6 niyam 10 (saal ka abhyaas); [ARCHITECTURE.md](ARCHITECTURE.md) §10.3 niyam 4, §10.3 ki commerce row aur §10.6 niyam 15; [DESIGN.md](DESIGN.md) DS-7.10; [RULES.md](RULES.md) RT-14 me map ki key ki whitelist.
+- **Kyun zaroori:**
+  - KYC, daawe aur delivery ki photos media provider pe hain; uski ek galat setting se doosre ki file badalna ya free credits khatam karna aasaan.
+  - D-399 ne band data ki chaabi offline rakhna tay kiya; niyam aur docs me wahi roop chahiye.
+  - Delete (D-151) ka vaada tabhi poora hai jab band orders ke archive se bhi naam aur phone hatein.
+- **Vikalp:** **(a)** saare hisse; **(b)** kuch (owner bataye); **(c)** koi nahi.
+- **Salah:** **(a)**.
+- **Trade-off:** (a) me band data kholna sirf laptop se, private key ki do offline copies sambhalni, aur delete pe archive ke chunks dobara likhne ka kaam. (c) me band data ka ek leak se khulna aur media provider ki galat setting ka khula raasta.
+- **R1 ya baad me:** R1 (SR-062 me certificates R2; band FY ki file pehla FY band hone pe).
+- **Owner ka jawab (2026-11-22):** **(a)**, saare hisse: SR-091, SR-096, SR-097, SR-006, SR-062, SR-065 aur SR-066 ke badlav, §1.7 ke 5 aur §1.10 ka 1 threat, aur doosre docs ke badlav. Record: [DECISIONS.md](DECISIONS.md) D-412.
+
+### Q-349. Security review batch 6: logs, audit, errors aur alerts ke niyam, threats aur docs ke badlav maanein?
+
+- **Status:** `Tay`. Topic: B14 (security), B15 (observability).
+- **Sawal:** Security Architect ke doosre run ke logs, audit, errors aur alerts wale hisse naye docs me aayein?
+  1. **Naye niyam** ([security/SECURITY_REQUIREMENTS.md](security/SECURITY_REQUIREMENTS.md)): **SR-098** saajha logger: error ka serializer allowlist se, redaction, production me pretty transport nahi; **SR-099** apps ki errors ka route bahar ka input: schema, size, rate limit, safai, Master me sirf text; **SR-100** audit aur logs ki suraksha: chain ka hash bahar bhi, baadh wale events ki ginti, logs padhna sirf owner (D-402), likhna fail to alert, aur dhaancha sirf laptop se (D-400); **SR-101** owner ke alerts ki push device ke saath (D-401).
+  2. **Badle niyam:** SR-005 (CSP ki violation reports errors ke route pe), SR-072 (media provider aur map ki API bhi allowlist me), SR-074 (owner ke alerts ki subscription SR-101 se).
+  3. **Threats** ([security/THREAT_MODEL.md](security/THREAT_MODEL.md) §1.8): 7 naye (logs padhne ka haq, release user se TTL badal ke mitana, audit ki baadh, errors ka route, logger me secrets, raat ka push band, events ki gambhirta).
+  4. **Doosre docs:** [ARCHITECTURE.md](ARCHITECTURE.md) §8 niyam 3 aur 5, §10.4 niyam 5, §10.8 niyam 1 aur 5; [OPERATIONS.md](OPERATIONS.md) §7 niyam 9 (roz ka test push); [ACCEPTANCE.md](ACCEPTANCE.md) AC-LOGS-3 aur naya AC-MASTER-7.
+- **Kyun zaroori:**
+  - Audit hi staff ke kaam ka saboot hai; release user ke rehte use mitaya ja sakta tha, aur bots ki baadh se uski 0.5 GB jagah bhar sakti thi.
+  - Apps ki errors ka route bahar se likha ja sakta hai, aur uska text Master app me dikhta hai, jo sabse bade haq wala app hai.
+  - Logger ka default serializer provider ki keys aur emails logs me likh sakta tha.
+- **Vikalp:** **(a)** saare hisse; **(b)** kuch (owner bataye); **(c)** koi nahi.
+- **Salah:** **(a)**.
+- **Trade-off:** (a) me logger ki config aur errors ke route ki seemaayein sambhalni, aur audit aur logs ke dhaanche ka badlav haath se. (c) me audit ka mitna, Master me XSS aur logs me secrets ka khula raasta.
+- **R1 ya baad me:** R1.
+- **Owner ka jawab (2026-11-22):** **(a)**, saare hisse: SR-098 se SR-101, SR-005, SR-072 aur SR-074 ke badlav, §1.8 ke 7 threats, aur doosre docs ke badlav. Record: [DECISIONS.md](DECISIONS.md) D-413.
+
+### Q-350. Security review batch 7: DevOps, testing aur security bugs ke niyam, threats aur docs ke badlav maanein?
+
+- **Status:** `Tay`. Topic: B14 (security), B15 (DevOps).
+- **Sawal:** Security Architect ke doosre run ke DevOps, testing aur security bugs wale hisse naye docs me aayein?
+  1. **Naye niyam** ([security/SECURITY_REQUIREMENTS.md](security/SECURITY_REQUIREMENTS.md)): **SR-102** production config me test ka koi hissa mile to boot ruke; **SR-103** security bug ka raasta: har app pe `security.txt`, private record (D-403), pehle kill switch, phir ek hi baithak me hotfix; **SR-104** icons ka package sirf allowlist ke SVG elements se.
+  2. **Badle niyam:** SR-081 (media provider, Ola Maps, cron-job.org, UptimeRobot aur password manager pe bhi MFA) aur SR-084 (khabar D-248 se; security bug ka fix SR-103 ke kram se).
+  3. **Threats** ([security/THREAT_MODEL.md](security/THREAT_MODEL.md) §1.9): 6 naye (test ka raasta live me, security fix ka pehle public merge, private report ka raasta nahi, DAST ki finding public, icons ki script, naye providers bina MFA), aur "Bachav aur test" aur "Bacha jokhim" ki lines.
+  4. **Doosre docs:** [RULES.md](RULES.md) §4.1 (release se pehle DAST), §4.6 ki table, RT-39 (jagah D-403) aur naya RT-48 (record ki table); [OPERATIONS.md](OPERATIONS.md) §3 niyam 9 aur 10, aur naya §12 "Security ke record" (D-404); [COMPLIANCE.md](COMPLIANCE.md) §14.6 row 12; [RISKS.md](RISKS.md) R-054 ka bachav.
+- **Kyun zaroori:**
+  - Repo public hai: security fix pehle `prerelease` pe merge ho to live hone se pehle hi hamle ka tareeka dikh jaata hai.
+  - Fake payment adapter ya test seed live me chal jaaye to bina paise "paid" aur jaane-maane passwords.
+  - Release gate tabhi record gin sakta hai jab record ki ek tay jagah ho (D-404).
+- **Vikalp:** **(a)** saare hisse; **(b)** kuch (owner bataye); **(c)** koi nahi.
+- **Salah:** **(a)**.
+- **Trade-off:** (a) me har release pe record ki table bharni, aur security fix ek hi baithak me poora karna. (c) me test ka raasta live me aur fix se pehle kamzori public hone ka khatra.
+- **R1 ya baad me:** R1.
+- **Owner ka jawab (2026-11-22):** **(a)**, saare hisse: SR-102 se SR-104, SR-081 aur SR-084 ke badlav, §1.9 ke 6 threats, aur doosre docs ke badlav. Record: [DECISIONS.md](DECISIONS.md) D-414.
+
+### Q-351. Security review batch 8: 7 naye security risks maanein?
+
+- **Status:** `Tay`. Topic: B14 (security).
+- **Sawal:** Security Architect ke doosre run ke 7 naye risks [RISKS.md](RISKS.md) me aayein (tag `Security`, har ek bachav ke saath)?
+  1. **R-077:** Render ke public host pe sasti requests ki baadh (bandwidth, logs ki jagah, raat ke ghante).
+  2. **R-078:** band data ki offline private chaabi kho jaana (D-399).
+  3. **R-079:** OTP aur delivery code email provider ke paas; provider account ke kabze se live codes.
+  4. **R-080:** audit aur logs ke dhaanche ka badlav galat haathon me, ya laptop ka kadam bhoolna (D-400).
+  5. **R-081:** owner ke raat ke alerts ka raasta chupke se band (D-401).
+  6. **R-082:** map ki browser key se free seema khaana.
+  7. **R-083:** bahar se likhne wale raaston ki baadh se ops inbox me asli errors chhupna.
+- **Kyun zaroori:** in sabka bachav security ke niyamon (SR-089, SR-091, SR-097, SR-099 se SR-101, SR-105) aur D-399 se D-406 me likha hai, par ₹0 aur akele owner ke saath khatra phir bhi bacha hai; risk ki list me rahe to har release pe dekha jaata hai.
+- **Vikalp:** **(a)** saaton, bachav ke saath `Khula`; **(b)** kuch (owner bataye); **(c)** koi nahi.
+- **Salah:** **(a)**.
+- **Trade-off:** (a) me risks ki list lambi, par har ek ka bachav likha hai. (c) me ye khatre kahin likhe nahi rehte.
+- **R1 ya baad me:** R1.
+- **Owner ka jawab (2026-11-22):** **(a)**, saaton risks R-077 se R-083 bachav ke saath `Khula`. Record: [DECISIONS.md](DECISIONS.md) D-415.
+
+### Q-352. Security review batch 9: SR doc ka dhaancha aur OWASP ke naye versions maanein?
+
+- **Status:** `Tay`. Topic: B14 (security), B16 (docs ka dhaancha).
+- **Sawal:** [security/SECURITY_REQUIREMENTS.md](security/SECURITY_REQUIREMENTS.md) ka dhaancha badle?
+  1. Har niyam ke saath naya **`Release`** column: `R1`, `R2`, ya `R1; R2 me: ...` (abhi 4 niyam poore R2: SR-067, SR-085, SR-086, SR-087; 7 me R2 ka hissa: SR-051, SR-058, SR-059, SR-060, SR-062, SR-063, SR-093).
+  2. Saare 105 niyamon ka **"Kahan se"** ASVS 5.0.0 ke chapter ke naam pe (jaise "Configuration" ki jagah "V13 Configuration").
+  3. Naya **§2 OWASP ka naksha:** OWASP Top 10:2025 aur OWASP API Security Top 10 2023 ki har category ke saamne jude niyam.
+  4. [RULES.md](RULES.md) RG-2: requirement ki ginti `Release` column se R1 wale niyam (aur mile-jule niyam ka R1 hissa) gine.
+- **Kyun zaroori:**
+  - Release gate (RG-2) ki ginti ki script ko pata hona chahiye kaunsa niyam ya hissa R1 ka hai; bina column ke ye text padh ke andaaza hota.
+  - Pehle run ki mapping OWASP ke purane versions (Top 10 2021, ASVS 4.0.3) pe thi; naye versions ab aa chuke hain.
+- **Vikalp:** **(a)** saare hisse; **(b)** kuch (owner bataye); **(c)** koi nahi.
+- **Salah:** **(a)**.
+- **Trade-off:** (a) me ASVS 5.0.0 ka naksha sirf chapter ke naam se hai, requirement IDs aur levels (L1 se L3) nahi jaanche; aage ki review me. (c) me ginti ki script R1 ke niyam nahi pehchan paati, aur mapping purane versions pe rehti.
+- **R1 ya baad me:** R1.
+- **Owner ka jawab (2026-11-22):** **(a)**, saare hisse: `Release` column, ASVS 5.0.0 ke chapter ke naam, naya §2 OWASP ka naksha, aur RULES RG-2 ka badlav. Record: [DECISIONS.md](DECISIONS.md) D-416.
+
+### Q-353. Security review ke baaki hisse: 11 jaanch, 2 lene layak aur ek dhyaan ka point maanein?
+
+- **Status:** `Tay`. Topic: B14 (security).
+- **Sawal:** Security Architect ke doosre run ke bache hisse naye docs me aayein?
+  1. **11 sirf jaanch wali cheezein** §2 me nayi rows: CSP me path wala source, Render pe 403 aur jaagna, media provider ki settings, Ola ki key aur SDK, GitHub advisory ka fork aur artifacts, logger aur MongoDB ki errors, Web Push ki umar, Vercel ke har path ke headers, Zustand ka devtools, `security.txt`, aur Razorpay ka hosted page.
+  2. **§2 ki 4 maujooda rows ab zyada zaroori:** owner ke laptop ka Desktop folder (sync mile to backups ka folder Desktop ke bahar, D-013), email provider ke dashboard me copy, Atlas M0 ka custom role aur `collMod`, aur Razorpay ki sthir pehchaan.
+  3. **Pehle ke kaam se lene layak (D-074):** SR-002 ke test me Vercel ki apni routing library se config ki jaanch; aur §2 ki Vercel ke secret header wali row me ishara ki request header sirf route ke `transforms` se judta hai. Baaki lene layak cheezein (CSP ka hash, logger ke redact paths, errors ki page load ki seema) pichhli batches me SR-005, SR-098 aur SR-099 me aa chuki hain.
+  4. **Tay faislon pe dhyaan ke 17 points:** 15 pichhli batches ke niyamon me sambhal liye gaye (D-399 se D-416); D-322 wala point R-077 me hai; aur backups ke folder wala point upar ki row me.
+- **Kyun zaroori:** jaanch ke bina kai niyam (jaise `/wake` ka exact URL, Payment ka alag document, raat ka push) kaagaz pe hi pakke hain; aur repo ke saath backups ka folder kisi cloud sync me ho to band data bahar ja sakta hai.
+- **Vikalp:** **(a)** saare hisse; **(b)** kuch (owner bataye); **(c)** koi nahi.
+- **Salah:** **(a)**.
+- **Trade-off:** (a) me §2 ki jaanch ki list lambi hoti hai; (c) me niyamon ke tathya bina jaanche rehte.
+- **R1 ya baad me:** R1 se pehle jaanch.
+- **Owner ka jawab (2026-11-22):** **(a)**, saare hisse: 11 nayi jaanch, 4 rows zyada zaroori, 2 lene layak cheezein, aur dhyaan ke points ka hisaab. Record: [DECISIONS.md](DECISIONS.md) D-417.
+
 ## Change log
 
 | Version | Date       | Badlav                                                                                                                                                                                    |
@@ -7048,3 +7233,13 @@ Claude ka kaam: owner ka faisla nahi chahiye, sirf saboot. Nateeja saboot ke saa
 | v1.7.23 | 2026-11-21 | Q-332 (QA ke 12 risks, R-065 se R-076) tay; D-396.                                                                                                                                        |
 | v1.7.24 | 2026-11-21 | §2 me QA ki 18 jaanch judi; Q-333 (5 chhote sudhaar) aur Q-334 (5 lene layak niyam) tay; D-397, D-398.                                                                                    |
 | v1.7.25 | 2026-11-21 | Q-335 se Q-343 (Security Architect ke doosre run ke 9 sawal; G25 security bug ka record) tay; D-399 se D-407.                                                                             |
+| v1.7.26 | 2026-11-21 | Q-344 (security review batch 1: edge aur hosting) tay; D-408.                                                                                                                             |
+| v1.7.27 | 2026-11-22 | Q-345 (security review batch 2: sign-in aur sessions) tay; D-409.                                                                                                                         |
+| v1.7.28 | 2026-11-22 | Q-346 (security review batch 3: authorization aur paisa) tay; D-410.                                                                                                                      |
+| v1.7.29 | 2026-11-22 | Q-347 (security review batch 4: delivery, reviews aur content ki ghadiyaan) tay; D-411.                                                                                                   |
+| v1.7.30 | 2026-11-22 | Q-348 (security review batch 5: files, media, map aur band data) tay; D-412.                                                                                                              |
+| v1.7.31 | 2026-11-22 | Q-349 (security review batch 6: logs, audit, errors aur alerts) tay; D-413.                                                                                                               |
+| v1.7.32 | 2026-11-22 | Q-350 (security review batch 7: DevOps, testing aur security bugs) tay; D-414.                                                                                                            |
+| v1.7.33 | 2026-11-22 | Q-351 (security review batch 8: 7 naye risks) tay; D-415. |
+| v1.7.34 | 2026-11-22 | Q-352 (security review batch 9: SR doc ka dhaancha aur OWASP ke versions) tay; D-416. |
+| v1.7.35 | 2026-11-22 | §2 me security review ki 11 nayi jaanch aur 4 rows me jod; Q-353 (security review ke baaki hisse) tay; D-417. |

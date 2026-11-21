@@ -1,6 +1,6 @@
 # OPERATIONS: Beautinique
 
-> **Status:** v1.1.3 (2026-11-21). System chalane ka manual. Cheezein ek-ek karke judengi.
+> **Status:** v1.1.8 (2026-11-22). System chalane ka manual. Cheezein ek-ek karke judengi.
 
 ## Is file me kya aayega
 
@@ -53,16 +53,16 @@ DevOps / SRE Architect ki raay se (D-257 ka kram), owner ki haan ke baad (D-326 
 6. Expand aur contract: contract wala release tabhi jab expand wala release live pe misaal 7 din chal chuka ho aur rollback ki zaroorat na dikhi ho. Release ke note me "contract baaki" ki list.
 7. Rollback sirf ek release peeche: Render pichhle do deploys tak hi wapas ja sakta hai (jaancha 2026-11-21), aur expand aur contract ki wajah se sirf pichhla release naye data ke saath surakshit hai. Usse peeche kabhi nahi; aage ka fix (roll-forward).
 8. Rollback ka kram: (1) Render pe pichhla deploy wapas; (2) jis app me gadbad, uska Vercel pe pichhla production deploy wapas; (3) git me revert normal flow se; (4) galat likha data ek naye idempotent migration se theek, restore sirf jab data kho gaya ho. Finance ki SQL migrations sirf aage: unka rollback bhi naya migration.
-9. Live smoke check (misaal 10 minute): `/health` aur `/ready`, ek public product page, allowlist ke ek account se sign-in, ek test-mode order shuru se payment tak (phir pack se pehle cancel aur "smoke" ka nishaan, D-380), aur ops inbox me nayi errors. Kuch fail ho to niyam 8.
-10. Hotfix: `release` se `hotfix/<naam>` → PR `release`; phir back-merge `release` → `prerelease`.
+9. Live smoke check (misaal 10 minute): `/health` aur `/ready`, ek public product page, allowlist ke ek account se sign-in, ek test-mode order shuru se payment tak (phir pack se pehle cancel aur "smoke" ka nishaan, D-380), aur ops inbox me nayi errors. Saath me security ki live jaanch: har app ke headers aur CSP live pe (SR-005); Render ke host pe bina secret `/api` pe 403 (SR-002); jhootha `X-Forwarded-For` ka asar nahi (SR-003); ek personal route do alag sessions se, CDN se cache nahi (SR-004); har app ka `security.txt` (SR-103). Nateeja §12 ki table me (D-404). Kuch fail ho to niyam 8.
+10. Hotfix: `release` se `hotfix/<naam>` → PR `release`; phir back-merge `release` → `prerelease`. Security fix bhi isi raaste se, ek hi baithak me, saade naam aur text ke saath (SR-103).
 11. Har app ka kam se kam version setting me ([ARCHITECTURE.md](ARCHITECTURE.md) §5 niyam 5): API me tootne wala badlav aaye to pehle naya version path, phir apps, aur aakhir me kam se kam version badhana.
 12. Har release ka chhota note PR ke description me: kya badla, migrations, "contract baaki", rollback surakshit hai ya nahi. Tag aur release notes sirf owner ke kehne pe; kahin koi AI attribution nahi.
 
 ## 4. Secrets aur config (D-329)
 
 1. Yahan secrets ki ek table banegi: naam, kaam, kahan rehta hai, kaun si service padhti hai, aakhri badlav ki tareekh, badalne ka kram. Value kabhi nahi.
-2. Secrets ki list (misaal, code ke saath pakki): har Atlas cluster ka app user, release user aur read-only backup user; Neon ke app, migration aur backup roles; Redis ka internal URL; apps se gateway ka secret header; token sign karne wali keys; field encryption ki keys; payment gateway ki key aur webhook secret; email provider ki API key; push ki private key; teen social sign-in apps ke secrets; media provider ki key; backup encryption key; break-glass ka credential.
-3. Kahan: backend ke secrets Render ke env me; apps ke liye sirf wo jo build ya rewrite ko chahiye, Vercel ke Sensitive env me; app ke bundle me kabhi koi secret nahi. Backup ki key aur recovery codes sirf password manager me, kisi provider ke env me nahi.
+2. Secrets ki list (misaal, code ke saath pakki): har Atlas cluster ka app user, release user aur read-only backup user; Neon ke app, migration aur backup roles; Redis ka internal URL; apps se gateway ka secret header; token sign karne wali keys; field encryption ki keys; payment gateway ki key aur webhook secret; email provider ki API key; push ki private key; teen social sign-in apps ke secrets; media provider ki key; backup encryption key; break-glass ka credential; logs cluster ke users; band data ki public key (secret nahi, par list me; D-399); map ki browser key (public, apps ke exact hosts ki whitelist ke saath, SR-091) aur server ka map client (agar ho).
+3. Kahan: backend ke secrets Render ke env me; apps ke liye sirf wo jo build ya rewrite ko chahiye, Vercel ke Sensitive env me; app ke bundle me kabhi koi secret nahi. Backup ki key, recovery codes aur band data ki private key (D-399, SR-097) sirf password manager me, aur band data ki private key ki ek doosri offline copy bhi; kisi provider ke env me nahi.
 4. Test aur live keys naam se alag pehchaan me. Jab tak payments test mode me hain, boot pe jaanch: payment key test wali na ho to process shuru hi na ho.
 5. Har service ka config zod schema se, apne namespace me; boot pe koi key kam ya anjaan ho to process key ke naam ke saath (value ke bina) ruk jaaye.
 6. Badlav do values ke saath, bina downtime: (1) nayi value "agli" ki tarah jodo, deploy; (2) provider ya bhejne wale ko nayi pe badlo; (3) purani hatao, deploy. **Misaal:** apps ka secret header: gateway dono values maane, phir Vercel me nayi, phir gateway se purani hate.
@@ -98,7 +98,7 @@ DevOps / SRE Architect ki raay se (D-257 ka kram), owner ki haan ke baad (D-326 
 7. Backup laptop se seedha databases pe chalta hai, Render ko nahi jagata. M0 ke 100 ops/second ki wajah se bade batch aur ruk-ruk ke padhna.
 8. Restore pehle laptop ya alag test database me: ginti aur hash ka milaan, audit chain ka verify, finance ke journal ka barabar hona, aur ek E2E smoke. Iske baad hi production me. Har restore audit me.
 9. Production restore ka kram: (1) checkout, sign-up aur uploads ke kill switches band; (2) jis cluster ka restore, sirf usi ka; (3) restore ke baad delete hue accounts ki list ke deletes dobara; (4) release step ka fingerprint aur `/ready`; (5) smoke check; (6) switches kholna.
-10. Restore ka abhyaas har 3 mahine (misaal) aur har bade schema badlav ke baad: aakhri backup laptop pe restore karke niyam 8 ki jaanch, aur key ka chalna bhi. Nateeja, samay aur tareekh yahan abhyaas wali table me ek line. Pehla abhyaas R1 se pehle.
+10. Restore ka abhyaas har 3 mahine (misaal) aur har bade schema badlav ke baad: aakhri backup laptop pe restore karke niyam 8 ki jaanch, aur key ka chalna bhi. Nateeja, samay aur tareekh yahan abhyaas wali table me ek line. Pehla abhyaas R1 se pehle. Saal me ek baar band record aur band FY ki export file kholne ka abhyaas bhi (SR-097).
 11. RPO aur RTO: RPO = aakhri backup tak (6 ghante ke andar ki finance ki galti Neon ke restore se); RTO misaal 1 din.
 12. Backup, restore aur break-glass ke credentials laptop pe alag aur kam haq wale; har chalana audit me.
 
@@ -106,13 +106,13 @@ DevOps / SRE Architect ki raay se (D-257 ka kram), owner ki haan ke baad (D-326 
 
 1. `/health` sirf process aur event loop (Render ka health check); `/ready` Mongo clusters, Redis, dispatcher aur ticker (finance nahi); `/wake` 204. `/ready` kabhi Render ka health check nahi, warna Redis ya Atlas ki chhoti gadbad pe poora backend restart hota.
 2. Alerts ke raaste sirf teen: Master app ka ops inbox, browser push, aur gambhir pe email (din me misaal 5 tak, SR-078).
-3. Gambhirta: **1** (turant push + email): audit chain toota, milaan me farak, refresh token ka dobara istemaal, webhook signature ke fail ki baadh, kill switch chala, RSS 450 MB, cluster ya Neon 85%; **2** (push + inbox): RSS 400 MB, 5xx 2% se upar, outbox 60 second se purana, dead letter, Redis 60%, cluster 70%, emails 80%; **3** (roz ka saar). Owner alerts kab dekhta hai: D-324 (§8 niyam 2).
+3. Gambhirta: **1** (turant push + email): audit chain toota ya din gayab, milaan me farak, refresh token ka dobara istemaal, authenticator reset, naya staff grant, bada export, webhook signature ke fail ki baadh, kill switch chala, nagnata wali report aur court ya sarkari order (D-251), owner ke alerts ki push subscription khatam (D-401), RSS 450 MB, cluster ya Neon 85%; **2** (push + inbox): allowlist badla, ek IP se bahut fail, "poori jaankari dekhi" ki ginti seema se upar, RSS 400 MB, 5xx 2% se upar, outbox 60 second se purana, dead letter, Redis 60%, cluster 70%, emails 80%; **3** (roz ka saar). Owner alerts kab dekhta hai: D-324 (§8 niyam 2).
 4. Ek hi fingerprint ka alert misaal ek ghante me ek baar; theek hone pe "theek" ki khabar.
 5. Hamare apne alerts sirf jaage server pe bante hain. Isliye bahar ke free alerts bhi chalu, jo soye server pe chalte hain: UptimeRobot ke down aur up email; har Atlas project me Logical Size (70% aur 85%), Connections aur Network ke alerts email pe (free cluster pe yahi conditions milti hain, jaancha 2026-11-21); Render, Vercel aur Neon ke usage emails jahan milein (jaanchna baaki).
 6. Master app ke ops page pe: aakhri jaag, aakhri sweep, har roz ke kaam ka "aakhri poora din", aakhri backup ki tareekh (haath se darj), aur khule alerts.
 7. Vercel ke runtime logs Hobby pe sirf 1 ghanta rehte hain (jaancha 2026-11-21), aur Render ke logs ki umar jaanchna baaki: server ki har zaroori baat apne logs service me; incident me Render ke logs ki turant copy.
 8. Apps ki errors rate-limited route se ops inbox tak (D-286); server band ho to ye nahi pahunchti, tab UptimeRobot hi saboot hai.
-9. Hafte ki jaanch (§9) me alerts ka "dead man" check: ops inbox me pichhle 7 din ka roz ka saar har din aaya ya nahi.
+9. Hafte ki jaanch (§9) me alerts ka "dead man" check: ops inbox me pichhle 7 din ka roz ka saar har din aaya ya nahi, aur owner ke har device pe roz ka test push aaya ya nahi (SR-101).
 
 ## 8. Incident ke runbooks (D-333)
 
@@ -160,6 +160,15 @@ DevOps / SRE Architect ki raay se (D-257 ka kram), owner ki haan ke baad (D-326 
 7. **Baad me**, publish ka plan bane to: npm pe publish, `npm login` aur `npm logout` aur `npm trust` sirf owner ke haath; workflow sirf `release` se, haath se chalaya; do jobs: ek bina haq ke build, test aur pack kare, doosri sirf bane tarballs utaar ke trusted publishing (OIDC) aur provenance se publish kare; naya package pehli baar owner laptop se publish kare; release ka sandesh `release` branch ka naam bataye, back-merge `release` → `prerelease` likha ho, aur CLI ke tests ke liye local infra chalu ho (D-023 ke teen niyam).
 8. Packages ke tests kabhi asli npm registry ko nahi chhoote; fake registry hi.
 
+## 12. Security ke record (D-404)
+
+1. Jin security niyamon ka saboot test nahi, record hai (jaise providers pe MFA, live headers, restore aur band data ka abhyaas, provider ki settings), unka record isi table me (RULES RT-48).
+2. Public table me sirf `Pass` ya `Baaki`, tareekh aur release; kami ki detail, screenshots, secrets aur account ki pehchaan sirf private record (D-403) me.
+3. Release ke test report (RT-46) me is table ki link; release gate (RG-2) sirf us release ke `Pass` ko ginta hai.
+
+| SR | Hissa | Kya dekha | Kaise | Nateeja | Private record | Release aur commit | Tareekh (IST) | Role | Agli baar |
+| -- | ----- | --------- | ----- | ------- | -------------- | ------------------ | ------------- | ---- | --------- |
+
 ## Change log
 
 | Version | Date       | Badlav                                                                                                                                                                                                   |
@@ -168,3 +177,8 @@ DevOps / SRE Architect ki raay se (D-257 ka kram), owner ki haan ke baad (D-326 
 | v1.1.1  | 2026-11-21 | §1 se §11 aaye (DevOps / SRE ki 11 batches; D-326 se D-336): environments, CI, release aur rollback, secrets, soya server, backup aur restore, alerts, runbooks, capacity, memory ka naap, dependencies. |
 | v1.1.2  | 2026-11-21 | §5 niyam 13: app ki background ping (D-349).                                                                                                                                                             |
 | v1.1.3  | 2026-11-21 | §2 niyam 6 me nightly WebKit (D-374) aur RULES ki link; §3 niyam 9 me smoke order (D-380); D-397.                                                                                                        |
+| v1.1.4 | 2026-11-21 | §3 niyam 9 me security ki live jaanch (security review batch 1, D-408). |
+| v1.1.5 | 2026-11-22 | §7 niyam 3 me gambhirta ki poori list (security review batch 4, D-411). |
+| v1.1.6 | 2026-11-22 | §4 niyam 2 aur 3 me band data aur map ki keys, §6 niyam 10 me saal ka abhyaas (security review batch 5, D-412). |
+| v1.1.7 | 2026-11-22 | §7 niyam 9 me roz ka test push (security review batch 6, D-413). |
+| v1.1.8 | 2026-11-22 | §3 niyam 9 aur 10, naya §12 Security ke record (security review batch 7, D-414). |

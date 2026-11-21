@@ -1,6 +1,6 @@
 # DECISIONS: Beautinique
 
-> **Status:** v1.14.24 (2026-11-21). Har faisla ek jagah. Sirf wahi "Tay" jo owner ne khud kaha; Claude ki salah faisla nahi. Cheezein ek-ek karke judti hain.
+> **Status:** v1.14.34 (2026-11-22). Har faisla ek jagah. Sirf wahi "Tay" jo owner ne khud kaha; Claude ki salah faisla nahi. Cheezein ek-ek karke judti hain.
 
 ## 0. Kaise likhein
 
@@ -422,6 +422,16 @@
 | D-405 | Testers ki allowlist entry sirf exact email se mel khaye, `+` alias se nahi.                                                                                                                                                                                                            | Security     | 2026-11-21 |
 | D-406 | Render host pe rejected requests aur `/wake` pings: aam din har line, ek IP ki seema (misaal 100/minute) ke upar sirf ginti.                                                                                                                                                            | Security     | 2026-11-21 |
 | D-407 | Payment screen ek alag HTML document; gateway ki script aur uski CSP sirf wahan; checkout ka roop (D-345) waisa hi.                                                                                                                                                                     | Security     | 2026-11-21 |
+| D-408 | Security review batch 1 (edge aur hosting) maana: SR-089, SR-090, SR-105 naye; SR-005, SR-006 badle; §1.1 me 4 threats; RULES, OPERATIONS, ARCHITECTURE, DESIGN, FLOWS, ACCEPTANCE aur RISKS me badlav. | Security | 2026-11-21 |
+| D-409 | Security review batch 2 (sign-in aur sessions) maana: SR-092 se SR-095 naye; SR-012, SR-020 badle; §1.2 aur §1.3 me 5 threats; ARCHITECTURE, DESIGN aur ACCEPTANCE me badlav. | Security | 2026-11-22 |
+| D-410 | Security review batch 3 (authorization aur paisa) maana: SR-032, SR-033, SR-043, SR-059, SR-075 badle; §1.4 aur §1.5 me 5 threats; RT-35 aur ARCHITECTURE §7 niyam 8 me badlav. | Security | 2026-11-22 |
+| D-411 | Security review batch 4 (delivery, reviews aur content ki ghadiyaan) maana: SR-060 aur SR-078 badle; §1.6 me 3 threats; OPERATIONS §7 niyam 3 me gambhirta ki list. | Security | 2026-11-22 |
+| D-412 | Security review batch 5 (files, media, map aur band data) maana: SR-091, SR-096, SR-097 naye; SR-006, SR-062, SR-065, SR-066 badle; §1.7 me 5 aur §1.10 me 1 threat; OPERATIONS, ARCHITECTURE, DESIGN aur RULES me badlav. | Security | 2026-11-22 |
+| D-413 | Security review batch 6 (logs, audit, errors aur alerts) maana: SR-098 se SR-101 naye; SR-005, SR-072, SR-074 badle; §1.8 me 7 threats; ARCHITECTURE, OPERATIONS aur ACCEPTANCE me badlav. | Security | 2026-11-22 |
+| D-414 | Security review batch 7 (DevOps, testing aur security bugs) maana: SR-102 se SR-104 naye; SR-081, SR-084 badle; §1.9 me 6 threats; RULES (RT-48), OPERATIONS (§12), COMPLIANCE aur RISKS me badlav. | Security | 2026-11-22 |
+| D-415 | Security review batch 8: 7 naye risks R-077 se R-083 (tag Security), bachav ke saath Khula. | Security | 2026-11-22 |
+| D-416 | Security review batch 9: SECURITY_REQUIREMENTS me Release column, Kahan se ASVS 5.0.0 ke chapter, OWASP Top 10:2025 aur API Top 10 2023 ka naksha; RULES RG-2 Release column se. | Security | 2026-11-22 |
+| D-417 | Security review ke baaki hisse: OPEN_QUESTIONS §2 me 11 nayi jaanch aur 4 rows zyada zaroori, 2 lene layak cheezein, aur dhyaan ke 17 points ka hisaab. | Security | 2026-11-22 |
 
 ## 2. Record
 
@@ -4836,6 +4846,129 @@
 - **Kisne, kab:** owner, 2026-11-21. **Nishaan:** Salah maani.
 - **Asar (Claude):** SR-006, [DESIGN.md](DESIGN.md) DS-10.9 aur [ACCEPTANCE.md](ACCEPTANCE.md) AC-CUSTOMER-6 me badlav security ki batches me. Payment pe aate-jaate ek poora page load.
 
+### D-408. Security review batch 1: edge aur hosting
+
+- **Faisla:** Security Architect ke doosre run ke edge aur hosting wale hisse docs me:
+  1. Naye niyam SR-089 (`/wake` ka chhota apvaad), SR-090 (Payment ka alag HTML document, D-407) aur SR-105 (Render ke public host pe sabse chhota jawab, bandwidth ki raftaar pe alert, baadh me sirf ginti, D-406) ([security/SECURITY_REQUIREMENTS.md](security/SECURITY_REQUIREMENTS.md)).
+  2. SR-005 aur SR-006 me badlav (CSP har document ki apni, `connect-src` me sirf `/wake`, inline script sirf hash se, live headers ki jaanch; gateway ki script sirf Payment ke document pe).
+  3. [security/THREAT_MODEL.md](security/THREAT_MODEL.md) §1.1 me 4 naye threats aur DAST ki line.
+  4. [RULES.md](RULES.md) RT-14 aur RT-36, [OPERATIONS.md](OPERATIONS.md) §3 niyam 9, [ARCHITECTURE.md](ARCHITECTURE.md) §5 niyam 14 aur 15, [DESIGN.md](DESIGN.md) DS-10.9, [FLOWS.md](FLOWS.md) FL-7, [ACCEPTANCE.md](ACCEPTANCE.md) AC-CUSTOMER-6 aur naya AC-GATEWAY-10 (kul 185), aur [RISKS.md](RISKS.md) R-016 ka bachav.
+- **Wajah:** Claude ki salah, owner ne maani: SPA me CSP poore document ki hoti hai, `/wake` aur Render ka host sabke liye khule hain, aur laptop ke tests Vercel ki asli config nahi chalate.
+- **Chhode vikalp:** kuch hi hisse (owner ne koi nahi chuna); koi nahi (payment ki script ka asar poore app pe, aur Render host pe baadh ka raasta khula).
+- **Kab dobara khulega:** asli naap ke baad numbers (settings se, bina deploy), ya owner khud khole.
+- **Kisne, kab:** owner, 2026-11-21. **Nishaan:** Salah maani.
+- **Asar (Claude):** R1 se. Numbers (`/wake` ki seema, raftaar ka 3 guna, 100 requests/minute) misaal hain. CSP ki violation reports ka route, `security.txt`, map ki key aur record ki table aage ki security batches me.
+
+### D-409. Security review batch 2: sign-in aur sessions
+
+- **Faisla:** Security Architect ke doosre run ke sign-in aur sessions wale hisse docs me:
+  1. Naye niyam SR-092 (email ka ek roop `emailNorm`, allowlist ki `exact` ya `aliases` entry, testers hamesha `exact` (D-405), aur codes ki seema mailbox key pe bhi), SR-093 (seemaon ka jod sirf HMAC ke roop me; R1 me D-109 ka jod), SR-094 (background requests session ka kaam nahi) aur SR-095 (apps ke stores aur query cache ke niyam) ([security/SECURITY_REQUIREMENTS.md](security/SECURITY_REQUIREMENTS.md)).
+  2. SR-012 (har email me app ka naam) aur SR-020 (mailbox key ki seema) me badlav.
+  3. [security/THREAT_MODEL.md](security/THREAT_MODEL.md) §1.2 me 3 aur §1.3 me 2 naye threats.
+  4. [ARCHITECTURE.md](ARCHITECTURE.md) §5 niyam 7 aur §10.7 niyam 1, [DESIGN.md](DESIGN.md) DS-6.10, aur [ACCEPTANCE.md](ACCEPTANCE.md) naya AC-IDENTITY-13 (kul 186).
+- **Wajah:** Claude ki salah, owner ne maani: allowlist hi R1 ka darwaza hai aur uska milaan pakka chahiye; aliases se ek inbox pe codes ki baadh rukni chahiye; aur polling ko "kaam" ginne se staff ka bina kaam ka niyam (D-181) kabhi laagu nahi hota.
+- **Chhode vikalp:** kuch hi hisse (owner ne koi nahi chuna); koi nahi (allowlist ka dhila milaan aur staff ka tab kabhi band nahi).
+- **Kab dobara khulega:** asli naap ke baad numbers (settings se, bina deploy), ya owner khud khole.
+- **Kisne, kab:** owner, 2026-11-22. **Nishaan:** Salah maani.
+- **Asar (Claude):** R1 se; SR-093 ka baaki hissa R2 ki seemaon ke saath. Mailbox key ki din ki seema (misaal 3) aur device cookie ki umar (misaal 1 saal) misaal hain. SR-059 ka "wahi email" mailbox key ke saath authorization wali batch me.
+
+### D-410. Security review batch 3: authorization aur paisa
+
+- **Faisla:** Security Architect ke doosre run ke authorization aur paisa wale hisse docs me:
+  1. [security/SECURITY_REQUIREMENTS.md](security/SECURITY_REQUIREMENTS.md) me badlav: SR-032 (matrix ke aayam: route, role, app `aud` aur scope), SR-033 (bahar dikhne wale number bhi id jaise; secure random; "nahi hai" aur "aapka nahi" dono 404), SR-043 (bank statement aur settlement report ke imports), SR-059 (`emailNorm` aur mailbox key), SR-075 (export ki file pehle download ke baad ya misaal 24 ghante me mite; PAN aur bank ke columns sirf zaroori exports aur roles me).
+  2. [security/THREAT_MODEL.md](security/THREAT_MODEL.md) §1.4 me 3 aur §1.5 me 2 naye threats.
+  3. [RULES.md](RULES.md) RT-35 aur [ARCHITECTURE.md](ARCHITECTURE.md) §7 niyam 8 me badlav.
+- **Wajah:** Claude ki salah, owner ne maani: staff ke scope aur partner ke assignment ka bug sirf doosre customer ki id wale test se nahi pakda jaata; settlement ka milaan sellers ke paise ka pehra hai; aur PAN wali export file jitni der rahe, jokhim utna.
+- **Chhode vikalp:** kuch hi hisse (owner ne koi nahi chuna); koi nahi (scope ke bug aur PAN wali files ka khula raasta).
+- **Kab dobara khulega:** asli naap ke baad numbers (settings se, bina deploy), ya owner khud khole.
+- **Kisne, kab:** owner, 2026-11-22. **Nishaan:** Salah maani.
+- **Asar (Claude):** R1 se; SR-059 ka D-203 wala hissa R2. Export ki file ka 24 ghante misaal hai. Is batch me koi naya SR nahi.
+
+### D-411. Security review batch 4: delivery, reviews aur content ki ghadiyaan
+
+- **Faisla:** Security Architect ke doosre run ke delivery, reviews aur content ki ghadiyon wale hisse docs me:
+  1. [security/SECURITY_REQUIREMENTS.md](security/SECURITY_REQUIREMENTS.md) me badlav: SR-060 (D-251 ki ghadiyaan: nagnata wali report pe turant chhupna, 2 ghante me faisla aur gambhirta 1 ka alert raat me bhi; baaki 36 ghante; jis account ki misaal 3 reports jhoothi niklein uski aisi reports apne aap content nahi chhupatin, sirf queue me upar) aur SR-078 (har event ki gambhirta 1, 2 ya 3).
+  2. [security/THREAT_MODEL.md](security/THREAT_MODEL.md) §1.6 me 3 naye threats.
+  3. [OPERATIONS.md](OPERATIONS.md) §7 niyam 3 me gambhirta ki poori list.
+- **Wajah:** Claude ki salah, owner ne maani: SR-060 D-251 ke naye samay se peeche tha, raat ki nagnata wali report gambhirta 1 me na hoti to subah tak padi rehti, aur apne aap chhupne wale niyam ka jhoothi reports se galat istemaal rokna zaroori.
+- **Chhode vikalp:** kuch hi hisse (owner ne koi nahi chuna); koi nahi (kanooni ghadi chhootne ka jokhim, jhoothi report ka khula raasta).
+- **Kab dobara khulega:** asli naap ke baad numbers (settings se, bina deploy), ya owner khud khole.
+- **Kisne, kab:** owner, 2026-11-22. **Nishaan:** Salah maani.
+- **Asar (Claude):** R1 se. "3 jhoothi reports" misaal hai. Email provider wala threat [OPEN_QUESTIONS.md](OPEN_QUESTIONS.md) §2 ki email provider wali jaanch se juda; uska risk security ki risks wali batch me. Kanooni detail: Lawyer (AI) ne nahi jaancha: jhoothi report karne wale ki report pe content apne aap na chhupana D-251 niyam 2 ke saath chalega ya nahi.
+
+### D-412. Security review batch 5: files, media, map aur band data
+
+- **Faisla:** Security Architect ke doosre run ke files, media, map aur band data wale hisse docs me:
+  1. Naye niyam SR-091 (map ka SDK bundle me, Ola ke hosts aur key ki whitelist, Ola ko koi personal pehchaan nahi), SR-096 (media provider pe signed upload aur tay params) aur SR-097 (band data public key se band, private key offline, D-399) ([security/SECURITY_REQUIREMENTS.md](security/SECURITY_REQUIREMENTS.md)).
+  2. SR-006, SR-062, SR-065 aur SR-066 me badlav.
+  3. [security/THREAT_MODEL.md](security/THREAT_MODEL.md) §1.7 me 5 aur §1.10 me 1 naya threat.
+  4. [OPERATIONS.md](OPERATIONS.md) §4 niyam 2 aur 3, §6 niyam 10; [ARCHITECTURE.md](ARCHITECTURE.md) §10.3 niyam 4, §10.3 ki commerce row, §10.6 niyam 15; [DESIGN.md](DESIGN.md) DS-7.10; [RULES.md](RULES.md) RT-14.
+- **Wajah:** Claude ki salah, owner ne maani: media provider pe KYC aur daawon ki files hain, band data ki chaabi offline rakhna D-399 me tay hua, aur delete ka vaada archive tak poora hona chahiye.
+- **Chhode vikalp:** kuch hi hisse (owner ne koi nahi chuna); koi nahi (band data ek leak se khulta, media ki galat setting ka raasta khula).
+- **Kab dobara khulega:** asli naap ke baad numbers (settings se, bina deploy), ya owner khud khole.
+- **Kisne, kab:** owner, 2026-11-22. **Nishaan:** Salah maani.
+- **Asar (Claude):** R1 se; SR-062 me certificates R2, band FY ki file pehla FY band hone pe. Private key kho jaaye to band data aur purane FY ki books hamesha ke liye band; iska risk security ki risks wali batch me. Ola Maps ki key aur whitelist ka record D-404 ki table me.
+
+### D-413. Security review batch 6: logs, audit, errors aur alerts
+
+- **Faisla:** Security Architect ke doosre run ke logs, audit, errors aur alerts wale hisse docs me:
+  1. Naye niyam SR-098 (saajha logger aur redaction), SR-099 (apps ki errors ka route), SR-100 (audit aur logs ki suraksha, D-400 aur D-402 ke saath) aur SR-101 (owner ke alerts ki push device ke saath, D-401) ([security/SECURITY_REQUIREMENTS.md](security/SECURITY_REQUIREMENTS.md)).
+  2. SR-005, SR-072 aur SR-074 me badlav.
+  3. [security/THREAT_MODEL.md](security/THREAT_MODEL.md) §1.8 me 7 naye threats.
+  4. [ARCHITECTURE.md](ARCHITECTURE.md) §8 niyam 3 aur 5, §10.4 niyam 5, §10.8 niyam 1 aur 5; [OPERATIONS.md](OPERATIONS.md) §7 niyam 9; [ACCEPTANCE.md](ACCEPTANCE.md) AC-LOGS-3 aur naya AC-MASTER-7 (kul 187).
+- **Wajah:** Claude ki salah, owner ne maani: audit staff ke kaam ka saboot hai aur use mitane ya bharne ka raasta band hona chahiye; errors ka route bahar se likha ja sakta hai aur Master me dikhta hai; aur logger ka default roop keys aur emails likh sakta hai.
+- **Chhode vikalp:** kuch hi hisse (owner ne koi nahi chuna); koi nahi (audit ka mitna, Master me XSS, logs me secrets).
+- **Kab dobara khulega:** asli naap ke baad numbers (settings se, bina deploy), ya owner khud khole.
+- **Kisne, kab:** owner, 2026-11-22. **Nishaan:** Salah maani.
+- **Asar (Claude):** R1 se. Errors ke route ki seemaayein (4 KB, 10, 20) aur message ke 300 akshar misaal hain. Audit ya logs ke dhaanche wale release me owner ka haath ka kadam (D-400); iska risk security ki risks wali batch me.
+
+### D-414. Security review batch 7: DevOps, testing aur security bugs
+
+- **Faisla:** Security Architect ke doosre run ke DevOps, testing aur security bugs wale hisse docs me:
+  1. Naye niyam SR-102 (production me test ka koi hissa nahi), SR-103 (security bug ka raasta: `security.txt`, private record D-403, kill switch, ek baithak ka hotfix) aur SR-104 (icons ka package allowlist se) ([security/SECURITY_REQUIREMENTS.md](security/SECURITY_REQUIREMENTS.md)).
+  2. SR-081 aur SR-084 me badlav.
+  3. [security/THREAT_MODEL.md](security/THREAT_MODEL.md) §1.9 me 6 naye threats aur bachav ki lines.
+  4. [RULES.md](RULES.md) §4.1, §4.6 ki table, RT-39 aur naya RT-48; [OPERATIONS.md](OPERATIONS.md) §3 niyam 9 aur 10, aur naya §12 "Security ke record" (D-404); [COMPLIANCE.md](COMPLIANCE.md) §14.6 row 12; [RISKS.md](RISKS.md) R-054.
+- **Wajah:** Claude ki salah, owner ne maani: repo public hai, to security fix aur findings ki detail live hone tak private rehni chahiye; test ka raasta live me paise aur sign-in dono tod deta; aur record ki ek tay jagah ke bina release gate use gin nahi sakta.
+- **Chhode vikalp:** kuch hi hisse (owner ne koi nahi chuna); koi nahi (test ka raasta live me, fix se pehle kamzori public).
+- **Kab dobara khulega:** asli naap ke baad numbers (settings se, bina deploy), ya owner khud khole.
+- **Kisne, kab:** owner, 2026-11-22. **Nishaan:** Salah maani.
+- **Asar (Claude):** R1 se. `security.txt` ka `Expires` (misaal 1 saal) misaal hai. Record ki table [OPERATIONS.md](OPERATIONS.md) §12 me abhi khaali; pehli entries R1 ki tayyari me.
+
+### D-415. Security review batch 8: 7 naye risks
+
+- **Faisla:** 7 naye risks [RISKS.md](RISKS.md) me (tag `Security`): R-077 (Render ke public host pe baadh), R-078 (band data ki offline chaabi kho jaana), R-079 (email provider ke paas codes), R-080 (audit aur logs ke dhaanche ka badlav), R-081 (raat ke alerts ka raasta band), R-082 (map ki browser key), R-083 (bahar se likhne wale raaston ki baadh). Saare bachav ke saath `Khula`.
+- **Wajah:** Claude ki salah, owner ne maani: har ek ka bachav security ke niyamon aur D-399 se D-406 me likha hai, par ₹0 aur akele owner ke saath khatra bacha hai.
+- **Chhode vikalp:** kuch hi risks (owner ne koi nahi chuna); koi nahi (khatre kahin likhe nahi rehte).
+- **Kab dobara khulega:** risks ki ek-ek jaanch pe, ya owner khud khole.
+- **Kisne, kab:** owner, 2026-11-22. **Nishaan:** Salah maani.
+- **Asar (Claude):** R-001 se R-076 `Maana` hain; ye 7 owner ki ek-ek jaanch tak `Khula`. Sambhavna ke andaze Claude ke hain.
+
+### D-416. Security review batch 9: SR doc ka dhaancha aur OWASP ke versions
+
+- **Faisla:** [security/SECURITY_REQUIREMENTS.md](security/SECURITY_REQUIREMENTS.md) ka naya dhaancha:
+  1. Har niyam ke saath `Release` column (`R1`, `R2`, ya `R1; R2 me: ...`).
+  2. Saare 105 niyamon ka "Kahan se" ASVS 5.0.0 ke chapter ke naam pe.
+  3. Naya §2: OWASP Top 10:2025 aur OWASP API Security Top 10 2023 ka naksha.
+  4. [RULES.md](RULES.md) RG-2 ki ginti `Release` column se.
+- **Wajah:** Claude ki salah, owner ne maani: release gate ki ginti ko R1 ke niyam saaf pehchanne chahiye, aur mapping OWASP ke abhi ke versions pe honi chahiye.
+- **Chhode vikalp:** kuch hi hisse (owner ne koi nahi chuna); koi nahi (ginti ki script R1 ke niyam nahi pehchanti, mapping purane versions pe).
+- **Kab dobara khulega:** OWASP ka naya version aaye, ya owner khud khole.
+- **Kisne, kab:** owner, 2026-11-22. **Nishaan:** Salah maani.
+- **Asar (Claude):** versions owasp.org pe 2026-11-21 ko jaanche (Security Architect ke doosre run me). ASVS 5.0.0 ka naksha sirf chapter ke naam se; requirement IDs aur levels (L1 se L3) nahi jaanche, aage ki security review me. Security Architect ke doosre run ke saare 9 sawal aur 9 batches ab docs me.
+
+### D-417. Security review ke baaki hisse
+
+- **Faisla:** Security Architect ke doosre run ke bache hisse docs me:
+  1. [OPEN_QUESTIONS.md](OPEN_QUESTIONS.md) §2 me 11 nayi jaanch (CSP me path, Render pe 403 aur jaagna, media provider, Ola ki key aur SDK, GitHub advisory ka fork aur artifacts, logger aur MongoDB ki errors, Web Push ki umar, Vercel ke headers, Zustand ka devtools, `security.txt`, Razorpay ka hosted page), aur 4 maujooda rows "ab zyada zaroori" (laptop ka Desktop folder: sync mile to backups ka folder Desktop ke bahar; email provider; Atlas M0 ka custom role; Razorpay ki sthir pehchaan).
+  2. Lene layak (D-074): SR-002 ke test me Vercel ki routing library se config ki jaanch; §2 ki Vercel secret header wali row me `transforms` ka ishara.
+  3. Tay faislon pe dhyaan ke 17 points ka hisaab: 15 D-399 se D-416 ke niyamon me, D-322 wala R-077 me, backups ke folder wala §2 ki row me.
+- **Wajah:** Claude ki salah, owner ne maani: kai naye niyam tathyon pe tike hain jo jaanche nahi gaye, aur backups ka folder sync me ho to band data bahar ja sakta hai.
+- **Chhode vikalp:** kuch hi hisse (owner ne koi nahi chuna); koi nahi (tathya bina jaanche).
+- **Kab dobara khulega:** jaanch ke nateeje aane pe, ya owner khud khole.
+- **Kisne, kab:** owner, 2026-11-22. **Nishaan:** Salah maani.
+- **Asar (Claude):** Security Architect ke doosre run ka saara kaam ab docs me. Ye sab jaanch Claude ki hai (owner ka faisla nahi), R1 se pehle; laptop ki jaanch owner ke saath.
+
 ## Change log
 
 | Version  | Date       | Badlav                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      |
@@ -4955,3 +5088,13 @@
 | v1.14.22 | 2026-11-21 | D-396 aaya (QA ke 12 risks R-065 se R-076; Q-332).                                                                                                                                                                                                                                                                                                                                                                                                                                          |
 | v1.14.23 | 2026-11-21 | D-397 aur D-398 aaye (QA ke 5 sudhaar aur 5 lene layak niyam; Q-333, Q-334); D-376 aur D-380 ke Asar me "jod diya".                                                                                                                                                                                                                                                                                                                                                                         |
 | v1.14.24 | 2026-11-21 | D-399 se D-407 aaye (Security Architect ke doosre run ke 9 sawal; Q-335 se Q-343).                                                                                                                                                                                                                                                                                                                                                                                                          |
+| v1.14.25 | 2026-11-21 | D-408 aaya (security review batch 1: edge aur hosting; Q-344). |
+| v1.14.26 | 2026-11-22 | D-409 aaya (security review batch 2: sign-in aur sessions; Q-345). |
+| v1.14.27 | 2026-11-22 | D-410 aaya (security review batch 3: authorization aur paisa; Q-346). |
+| v1.14.28 | 2026-11-22 | D-411 aaya (security review batch 4: delivery, reviews aur content ki ghadiyaan; Q-347). |
+| v1.14.29 | 2026-11-22 | D-412 aaya (security review batch 5: files, media, map aur band data; Q-348). |
+| v1.14.30 | 2026-11-22 | D-413 aaya (security review batch 6: logs, audit, errors aur alerts; Q-349). |
+| v1.14.31 | 2026-11-22 | D-414 aaya (security review batch 7: DevOps, testing aur security bugs; Q-350). |
+| v1.14.32 | 2026-11-22 | D-415 aaya (security review batch 8: 7 naye risks; Q-351). |
+| v1.14.33 | 2026-11-22 | D-416 aaya (security review batch 9: SR doc ka dhaancha aur OWASP ke versions; Q-352). |
+| v1.14.34 | 2026-11-22 | D-417 aaya (security review ke baaki hisse; Q-353). |

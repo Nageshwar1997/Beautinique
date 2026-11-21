@@ -1,6 +1,6 @@
 # RULES: Beautinique
 
-> **Status:** v1.1.3 (2026-11-21). Kaam ke niyam. Abhi §1 (Definition of Done), §2.1 (R1 ka release gate) aur §4 (Testing), D-381 se D-387, D-397, D-398. Baaki cheezein ek-ek karke, owner ki haan ke baad judengi.
+> **Status:** v1.1.8 (2026-11-22). Kaam ke niyam. Abhi §1 (Definition of Done), §2.1 (R1 ka release gate) aur §4 (Testing), D-381 se D-387, D-397, D-398. Baaki cheezein ek-ek karke, owner ki haan ke baad judengi.
 
 ## Is file me kya aayega
 
@@ -46,7 +46,7 @@ R1 tab release ho jab saari sharten poori hon ([OPERATIONS.md](OPERATIONS.md) §
 | #     | Shart                                                                                                                                   | Saboot                              |
 | ----- | --------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------- |
 | RG-1  | FL-1 se FL-20 aur "poora R1" spec green, compiled JS aur bundle mode pe, laptop pe                                                      | E2E ka report                       |
-| RG-2  | Requirement ki ginti: R1 ke har SR, flow, acceptance criterion aur R1 wale CL row ka test ya likha record; kami 0 (RT-24)               | Ginti ki script ka report           |
+| RG-2  | Requirement ki ginti: SECURITY_REQUIREMENTS ke `Release` column me R1 wale har SR (aur `R1; R2 me` wale ka R1 hissa), flow, acceptance criterion aur R1 wale CL row ka test ya likha record; kami 0 (RT-24)               | Ginti ki script ka report           |
 | RG-3  | Paise ke invariants: property aur concurrency tests green; "poora R1" ke data pe milaan me farak 0                                      | Test report, milaan ka nateeja      |
 | RG-4  | Kernel packages ka pehla poora mutation run ho chuka (D-372); bache mutants ki wajah likhi; score seema ke upar                         | Mutation report                     |
 | RG-5  | Security: `guard` green; high ya critical dependency alert nahi; passive DAST me high nahi; headers ke tests green                      | CI aur scan ka report               |
@@ -97,7 +97,7 @@ R1 tab release ho jab saari sharten poori hon ([OPERATIONS.md](OPERATIONS.md) §
 | -------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | Har PR aur `prerelease`, `release`, `main` pe push | `guard` aur static checks; unit, component, integration, contract, migration aur backup-tool tests; Chromium pe saare 20 flows ki E2E (har app ek job); axe; mukhya screens ke screenshots; contrast script; bundle budget; collection scan aur `explain` ka pehra; retention class ka pehra; mutation job (D-372); requirement ki ginti sirf report me |
 | Nightly (sirf koshish)                             | WebKit pe Customer app ke mukhya flows (D-374); poora screenshot set; passive DAST; E2E 3 baar (flaky pakadna); lambi ghadi wale scenarios (raat ki neend, mahine ka close). Release ka koi gate nightly pe nahi tika (RT-8)                                                                                                                            |
-| Release se pehle (laptop)                          | OPERATIONS §3 niyam 1 ka poora E2E aur 512 MB naap; load test (D-379); 5 pages ke page targets; haath ki accessibility checklist (D-376); asli phone (D-375); khoj wala testing (D-377); providers ke test mode se milaan (RT-14); backup; requirement ki ginti me 0 kami                                                                               |
+| Release se pehle (laptop)                          | OPERATIONS §3 niyam 1 ka poora E2E aur 512 MB naap; load test (D-379); 5 pages ke page targets; haath ki accessibility checklist (D-376); asli phone (D-375); khoj wala testing (D-377); providers ke test mode se milaan (RT-14); passive DAST (RT-36), kyunki RG-5 isi ka nateeja dekhta hai; backup; requirement ki ginti me 0 kami                                                                               |
 | Release ke baad (live)                             | OPERATIONS §3 niyam 9 ka smoke check, smoke order D-380 ke niyam se; uske baad hi "verified"                                                                                                                                                                                                                                                            |
 | Har 3 mahine                                       | Restore ka abhyaas, 512 MB ka dobara naap                                                                                                                                                                                                                                                                                                               |
 
@@ -168,7 +168,7 @@ Har fake ka apna chhota test, aur har fake ka vyavhaar provider ke docs ke saath
 3. **RT-11:** production bundle me koi test route, test switch, fake adapter ya test seed nahi. Boot pe jaanch: production config me fake adapter ya test seed mile to process na uthe. E2E ka harness halat seedha us run ke database me badalta hai, app ke kisi route se nahi. _Wajah:_ test ka raasta hamle ka raasta na bane.
 4. **RT-12:** tests ka koi network request loopback ke bahar nahi jaata; test setup bahar ke connections band karta hai, aur har bahar ki service ka fake hota hai. _Wajah:_ galti se asli provider, asli paisa ya asli inbox tak na pahunchein.
 5. **RT-13:** business code "abhi" sirf injected clock se leta hai; `Date.now()` aur bina argument ka `new Date()` lint se mana (clock package aur tests ko chhod ke); tests me asli `sleep` nahi. _Wajah:_ samay wale niyam seconds me aur pakke jaanchein.
-6. **RT-14:** har fake ka vyavhaar provider ke docs ke saath likha ho. R1 se pehle aur jab bhi kisi provider ka integration badle, laptop pe ek baar provider ke asli test mode se milaan (payment, email, social sign-in, media), test key sirf us din (OPERATIONS §1 niyam 8). _Wajah:_ fake aur asli ka farak tests ko jhootha green kar deta hai.
+6. **RT-14:** har fake ka vyavhaar provider ke docs ke saath likha ho. R1 se pehle aur jab bhi kisi provider ka integration badle, laptop pe ek baar provider ke asli test mode se milaan (payment, email, social sign-in, media, aur edge: Vercel ka rewrite, secret header, forwarded IP aur CDN cache, aur map ki key ki whitelist), test key sirf us din (OPERATIONS §1 niyam 8). _Wajah:_ fake aur asli ka farak tests ko jhootha green kar deta hai.
 7. **RT-15:** packages ke tests me npm registry hamesha local fake; test process me registry ki setting jabran fake pe, aur asli registry ka koi request test ko fail kare (CLAUDE.md). _Wajah:_ koi test kabhi asli registry ko na chhoe.
 8. **RT-16:** E2E ka edge proxy live ke rewrite jaisa: secret header aur har test ka alag forwarded IP. Rate limits aur seemaayein asli settings ke saath jaanchi jaati hain; tests seemaayein badal ke nahi, apna IP aur apna account le ke alag rehte hain. _Wajah:_ niyam usi roop me jaanche jaayein jo live pe chalta hai.
 
@@ -268,7 +268,7 @@ Ek "poora R1" spec bhi: area khulne se seller ke payout tak, saare apps ek ke ba
 | SR ka hissa                                    | Kaun sa level                                                                                         |
 | ---------------------------------------------- | ----------------------------------------------------------------------------------------------------- |
 | SR-001 se SR-010 (edge aur hosting)            | Gateway ke integration tests; har app ke headers, CSP aur service worker E2E me                       |
-| SR-011 se SR-031 (sign-in, sessions, tokens)   | Identity ke integration tests (ghadi ke saath); FL-1 se FL-4 E2E; JWT ke hamle unit me                |
+| SR-011 se SR-031 (sign-in, sessions, tokens)   | Identity ke integration tests (ghadi ke saath); FL-1 se FL-4 E2E; JWT ke hamle unit me; SR-012 aur SR-020 notify ke template aur seema ke tests                |
 | SR-032 se SR-039 (authorization)               | Contracts se bana route × actor matrix; har resource pe doosre customer aur seller ki id se 404       |
 | SR-040 se SR-053 (catalog, checkout, paisa)    | XSS aur injection ki suchi har text field pe; concurrency aur property tests; finance ke triggers     |
 | SR-054 se SR-060 (delivery, daawe, reviews)    | Logistics aur catalog ke integration; FL-9, FL-13, FL-19, FL-20                                       |
@@ -276,6 +276,8 @@ Ek "poora R1" spec bhi: area khulne se seller ke payout tak, saare apps ek ke ba
 | SR-068 se SR-074 (data stores, khabrein)       | Ek service ke DB user se doosri ka database mana (containers me alag users); SSRF allowlist; push     |
 | SR-075 se SR-084 (export, audit, logs, DevOps) | CSV injection; audit chain ki chhed-chhaad; logs ki redaction; secret scan aur workflow lint          |
 | SR-088                                         | Seller export me invoice ki copy nahi; har download audit me                                          |
+| SR-089 se SR-105 (security review ke niyam) | Har niyam ke "Test kaise" ke hisaab se ([security/SECURITY_REQUIREMENTS.md](security/SECURITY_REQUIREMENTS.md)) |
+| SR-067, SR-085 se SR-087 | R2: apne feature ke saath |
 
 Kuch niyamon ka saboot test nahi, record hai (jaise schema ki review checklist, providers pe MFA ki checklist, abhyaas ka record); release gate me inka record dekha jaata hai (§2.1).
 
@@ -320,13 +322,14 @@ Kuch niyamon ka saboot test nahi, record hai (jaise schema ki review checklist, 
 **Niyam:**
 
 1. **RT-34:** R1 ke har SR niyam ka kam se kam ek automated test, ya jahan test nahi ho sakta wahan likha record. _Wajah:_ bahar ki jaanch (pentest) nahi hai, to yahi pehra hai.
-2. **RT-35:** route × actor ka matrix aur doosre customer ya seller ki id wala test contracts se apne aap bane; naya route bina matrix entry ke CI fail kare. _Wajah:_ naya route permission ke bina na nikle.
-3. **RT-36:** local bundle pe passive DAST scan nightly; high finding ka issue. _Wajah:_ headers aur config ki galti jo tests ke bahar reh jaaye.
+2. **RT-35:** route × actor ka matrix aur doosre customer ya seller ki id wala test contracts se apne aap bane; matrix ke aayam: route, actor ka role, app (`aud`) aur scope (apna, doosre customer, seller, hub, warehouse, area, partner); naya route bina matrix entry ke CI fail kare. _Wajah:_ naya route permission ke bina na nikle.
+3. **RT-36:** local bundle pe passive DAST scan nightly aur release se pehle; high finding ka record private jagah me (RT-39); public issue, CI ke log aur artifact me sirf findings ki ginti. Vercel ki asli config release ke baad ki live jaanch se (OPERATIONS §3 niyam 9). _Wajah:_ headers aur config ki galti jo tests ke bahar reh jaaye.
 4. **RT-37:** release step, migrations aur rollback ke tests har PR pe (dobara chalna, lease, lambi migration ke beech health, pichhle release ka data); ek PR me ek hi field ya index ka jodna aur hatana dono nahi. _Wajah:_ deploy ke waqt do instances ek saath chalte hain.
 5. **RT-38:** backup tool ka round trip test har PR pe containers pe (ginti, hash, audit chain, journal, delete hue accounts ka dobara delete, bina key na khulna). _Wajah:_ restore ka pehla asli istemaal mushkil ghadi me hota hai.
-6. **RT-39:** security bug ki detail fix live hone se pehle public issue, PR ya commit message me nahi; uska record private jagah me. _Wajah:_ repo public hai.
+6. **RT-39:** security bug ki detail fix live hone se pehle public issue, PR ya commit message me nahi; uska record private jagah me: D-403 ke hisaab se GitHub ki private security advisory, ya alag private repo. Scan ki findings bhi. Fix ka kram SR-103. _Wajah:_ repo public hai.
 7. **RT-40:** har bug ka ek roop: user pe asar wala title, steps, umeed aur asal, saboot ka level (chala ke dekha, ya sirf code padh ke), gambhirta, jude niyam ke ids, aur fix ke saath regression test ki link. _Wajah:_ bug dohraya ja sake aur dobara na aaye.
 8. **RT-41:** har bug ki gambhirta D-378 ke paimane (P0 se P3) se; release ka faisla usi se (RG-13). _Wajah:_ release gate ek saaf paimane pe tike.
+9. **RT-48:** jis SR ka hissa test se nahi, uska record ek tay table me ([OPERATIONS.md](OPERATIONS.md) §12, D-404): SR, hissa, kya dekha, kaise, nateeja (`Pass` ya `Baaki`), private record ka id, release aur commit, tareekh (IST), role, agli baar. Kami ki detail, screenshots, secrets aur account ki pehchaan public table me kabhi nahi. Requirement ki ginti (RT-24) sirf us release ke `Pass` ko ginti hai. _Wajah:_ record bhi test jitna saaf aur ginne layak ho, par repo public hai.
 9. **RT-42:** har PR ke description me "kaise jaancha": kaunse tests chale, kya haath se dekha, aur kya nahi dekha; release note me tests ka saar. _Wajah:_ review aur release ka faisla saboot pe ho.
 
 ### 4.7 Pehre aur regression (D-398)
@@ -345,3 +348,8 @@ Kuch niyamon ka saboot test nahi, record hai (jaise schema ki review checklist, 
 | v1.1.1  | 2026-11-21 | QA ki 7 batches: §4 Testing (§4.1 se §4.6, RT-1 se RT-42), §1 Definition of Done (DD-1 se DD-12), §2.1 R1 ka release gate (RG-1 se RG-14); D-381 se D-387. |
 | v1.1.2  | 2026-11-21 | DD-1 aur RT-24 me criteria ki jagah ACCEPTANCE.md (D-388).                                                                                                 |
 | v1.1.3  | 2026-11-21 | RT-19 me budget ki jagah, RT-31 me CPU seema, §4.6 me SR-019 ka naap (D-397); naya §4.7, RT-43 se RT-47 (D-398).                                           |
+| v1.1.4 | 2026-11-21 | RT-14 me edge ka milaan; RT-36 release se pehle bhi aur findings private (security review batch 1, D-408). |
+| v1.1.5 | 2026-11-22 | RT-35 me matrix ke aayam (security review batch 3, D-410). |
+| v1.1.6 | 2026-11-22 | RT-14 me map ki key ki whitelist (security review batch 5, D-412). |
+| v1.1.7 | 2026-11-22 | §4.1 me DAST, §4.6 ki table, RT-39 ki jagah aur naya RT-48 (security review batch 7, D-414). |
+| v1.1.8 | 2026-11-22 | RG-2 ki ginti SECURITY_REQUIREMENTS ke Release column se (security review batch 9, D-416). |

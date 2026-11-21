@@ -1,6 +1,6 @@
 # DESIGN: Beautinique
 
-> **Status:** v1.1.8 (2026-11-21). Saare apps ka UI design system (§1 se §10). Cheezein ek-ek karke, owner ki haan ke baad judti hain.
+> **Status:** v1.1.11 (2026-11-22). Saare apps ka UI design system (§1 se §10). Cheezein ek-ek karke, owner ki haan ke baad judti hain.
 
 ## Is file me kya aayega
 
@@ -168,7 +168,7 @@ Har niyam ka id `DS-<section>.<n>`. Tokens ke naam code me waise hi (CSS custom 
 7. **DS-6.7 Rukawat ke sandesh (SR-009):** har kill switch ka apna saaf sandesh, misaal checkout band: "Checkout is paused right now. Your cart is saved."; sign-up band: "New sign-ups are paused."; uploads band: upload ke button pe wajah. Sandesh banner me, page band nahi.
 8. **DS-6.8 Offline:** Delivery ke alawa apps offline me OfflineBanner ("You're offline") aur aakhri dikha data padhne ke liye; badalne wale buttons band, wajah ke saath; koi kaam line me nahi rukta. Delivery app ka offline §5 niyam 8 aur FL-9 me.
 9. **DS-6.9 Jaagne ka parda (D-349):** app khulte hi pehle 1.5 second (misaal) sirf page ka rang aur patli progress bar; jawab na aaye to WakeScreen: logo, "Starting up. This can take up to a minute.", andaaze wali progress, aur 150 second (misaal) pe "Try again". Beech me rewrite 502 ya 504 de to wahi parda dobara (OPERATIONS §5 niyam 8). Parde pe koi API call nahi. Parda sirf jaagne tak (pehli baar, ya server beech me so gaya ho to); tab tak app ka koi hissa nahi khulta. Jaagne ke baad ki background ping (D-349) pe koi loading ya nishaan nahi.
-10. **DS-6.10 Staff ka bina kaam ka samay (D-181):** 30 minute bina kaam pe band hone se 2 minute pehle IdleWarning dialog, ulti ginti aur "Stay signed in" ke saath (WCAG 2.2.1); band hone ke baad sign-in pe wapas usi page pe. Bhara hua form khone se pehle bhi yahi chetavni.
+10. **DS-6.10 Staff ka bina kaam ka samay (D-181):** 30 minute bina kaam pe band hone se 2 minute pehle IdleWarning dialog, ulti ginti aur "Stay signed in" ke saath (WCAG 2.2.1); band hone ke baad sign-in pe wapas usi page pe. Bhara hua form khone se pehle bhi yahi chetavni. Polling aur background ping bina kaam ka samay nahi badhate (SR-094).
 11. **DS-6.11 Forms:** label hamesha dikhe (sirf placeholder nahi); jaanch blur aur submit pe; lambe form me upar errors ki list (har error field ki link); error pe bhara data kabhi saaf nahi; form ka schema wahi jo contract ka (zod), react-hook-form ke saath.
 12. **DS-6.12 Pakka karne wale dialog:** cancel, delete, payout, refund jaise kaam pe ConfirmDialog cheez ka naam aur asar likhe ("Cancel 1 item: Lip Tint, Ruby. ₹499 will be refunded to your original payment method."); "Cancel" aur "Confirm" ek size ke; destructive button pe `error` tone.
 13. **DS-6.13 Optimistic UI** sirf wishlist, filters aur sort pe; paisa, stock, order aur status ke kaam pe kabhi nahi.
@@ -188,7 +188,7 @@ Har niyam ka id `DS-<section>.<n>`. Tokens ke naam code me waise hi (CSS custom 
 7. **DS-7.7 Private media** (delivery ki photo, daawe ki photos aur video, dastavez): sirf chhote signed URL se (D-296), service worker kabhi cache nahi, page pe `no-referrer` (SR-005); sirf haq wale ki screen pe (D-191, D-192).
 8. **DS-7.8 Camera:** Delivery app me saboot ki photo app ke camera se (file input pe `capture`, SR-055); pehli baar se pehle app ki apni samjhane wali screen, phir browser ka prompt. Customer ke daawe ki photos (D-106) aam file picker se; EXIF server hataata hai (SR-061).
 9. **DS-7.9 Video** sirf daawe me (optional, D-106), poster ke saath, apne aap nahi chalta.
-10. **DS-7.10 Address aur map (Ola Maps, D-347):** address ki screen pe form aur "Search on map" dono; map ka script sirf usi screen pe load. Map ke search, pin ya "Use my current location" se form ke fields bhare jaayein to wo field "Filled from map" jaise halke nishaan ke saath, badle ja sakein; customer ke khud likhe fields kabhi nahi mitte. Pin ke saath address ka text hamesha; khinchne ka vikalp search aur "Use my current location" (DS-8.6). "Ola Maps" attribution hamesha dikhe. Map load na ho to sirf form. Delivery ke stop ki detail pe pin wala chhota map.
+10. **DS-7.10 Address aur map (Ola Maps, D-347):** address ki screen pe form aur "Search on map" dono; map ka code hamare bundle ka alag hissa, sirf isi screen pe load; Ola ki koi bahar ki script nahi (SR-091). Map ke search, pin ya "Use my current location" se form ke fields bhare jaayein to wo field "Filled from map" jaise halke nishaan ke saath, badle ja sakein; customer ke khud likhe fields kabhi nahi mitte. Pin ke saath address ka text hamesha; khinchne ka vikalp search aur "Use my current location" (DS-8.6). "Ola Maps" attribution hamesha dikhe. Map load na ho to sirf form. Delivery ke stop ki detail pe pin wala chhota map.
 
 ## 8. Accessibility (WCAG 2.2 AA)
 
@@ -253,7 +253,7 @@ Har niyam ka id `DS-<section>.<n>`. Tokens ke naam code me waise hi (CSS custom 
 6. **DS-10.6 Push aur emails ka text:** push me sirf order number aur halat, delivery code kabhi nahi (D-195); email ki links sirf apne app ke host pe, staff emails me koi sign-in link nahi, "Open the <App> app" (SR-012).
 7. **DS-10.7 User ka content:** reviews, description, ingredients ka text aur naam sirf text ki tarah (escape); rich text sirf bold aur list; links `rel="nofollow ugc noopener"` (SR-040).
 8. **DS-10.8 PWA cache:** service worker sirf versioned static app shell aur assets rakhe, `/api/*` kabhi nahi; sign-out pe caches aur IndexedDB saaf (SR-010); Delivery ka offline data SR-023 ke hisaab se.
-9. **DS-10.9 Bundle ke budget** (misaal, gzip, har route ki pehli load): Customer JS 170 KB, staff aur partner apps 250 KB, CSS 30 KB, fonts D-341 ke hisaab se; fold ke upar images 200 KB tak. Payment gateway ki script sirf Payment route pe (SR-006). Budget toote to CI laal.
+9. **DS-10.9 Bundle ke budget** (misaal, gzip, har route ki pehli load): Customer JS 170 KB, staff aur partner apps 250 KB, CSS 30 KB, fonts D-341 ke hisaab se; fold ke upar images 200 KB tak. Payment gateway ki script sirf Payment ke alag HTML document pe (SR-006, SR-090). Budget toote to CI laal.
 10. **DS-10.10 Page ke targets** (misaal, jaage server pe, D-053; laptop pe mobile preset ke Lighthouse se, 5 mukhya pages: Home, list, product, cart, order): LCP 2.5 s, CLS 0.1, INP 200 ms. Server ke targets ARCHITECTURE §9 me hi.
 11. **DS-10.11 Kam calls:** ek screen ke liye ek ya do calls (ARCHITECTURE §5 niyam 2); polling sirf dikhte tab pe (niyam 7); TanStack Query ka `staleTime` data ke hisaab se (misaal catalog 5 minute, order ki halat polling se); hover pe prefetch sirf product page ke liye.
 
@@ -270,3 +270,6 @@ Har niyam ka id `DS-<section>.<n>`. Tokens ke naam code me waise hi (CSS custom 
 | v1.1.6  | 2026-11-21 | DS-7.1: mukhya set Solar, phir Lucide; har app me Icon credits page (D-350).                                                                                                                                                                        |
 | v1.1.7  | 2026-11-21 | DS-6.15 saajha Credits page; DS-7.1 me icons ka credit component (D-350).                                                                                                                                                                           |
 | v1.1.8  | 2026-11-21 | DS-8.1 me screen readers ke naam (D-376, D-397).                                                                                                                                                                                                    |
+| v1.1.9 | 2026-11-21 | DS-10.9: gateway ki script sirf Payment ke alag document pe (security review batch 1, D-408). |
+| v1.1.10 | 2026-11-22 | DS-6.10: polling aur ping bina kaam ka samay nahi badhate (security review batch 2, D-409). |
+| v1.1.11 | 2026-11-22 | DS-7.10: map ka code bundle me, bahar ki script nahi (security review batch 5, D-412). |
