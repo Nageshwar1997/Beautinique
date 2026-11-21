@@ -1,6 +1,6 @@
 # ARCHITECTURE: Beautinique
 
-> **Status:** v1.3.3 (2026-11-21). System kaise bana hai, ek nazar me. Cheezein ek-ek karke, owner ki haan ke baad judengi. Abhi §1 (finance ke accounting niyam, D-282), §2 se §9 (system ke hisse, D-291 se D-298) aur §10 (data aur database, D-310 se D-317).
+> **Status:** v1.3.4 (2026-11-21). System kaise bana hai, ek nazar me. Cheezein ek-ek karke, owner ki haan ke baad judengi. Abhi §1 (finance ke accounting niyam, D-282), §2 se §9 (system ke hisse, D-291 se D-298) aur §10 (data aur database, D-310 se D-317).
 
 ## Is file me kya aayega
 
@@ -447,17 +447,17 @@ return: commerce.return.requested -> support.return.decided -> logistics.pickup.
 
 **₹0 pe seema (misaal; naap ke pakka):**
 
-| Seema                     | Number                                                                                                                  | Matlab                                                                                           |
-| ------------------------- | ----------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------ |
-| Render CPU                | Free instance ka CPU kam hai (misaal 0.1; Render ne number nahi diya, jaanch [OPEN_QUESTIONS.md](OPEN_QUESTIONS.md) §2) | Lagbhag 5 requests/second lagataar; password se sign-in lagbhag 2/second (argon2id, SR-013)      |
-| Render RAM                | 512 MB (D-049)                                                                                                          | Neeche memory budget                                                                             |
-| Render outbound bandwidth | 5 GB/mahina (Render ke docs, 2026-11-20); khatam ho aur payment method na ho to free services mahine ke ant tak band    | Lagbhag 170 MB din; isliye public browsing CDN se (§6)                                           |
-| Render ghante             | 750/mahina (R-008)                                                                                                      | Raat ko server soya                                                                              |
-| Atlas har cluster         | 0.5 GB (bina compression BSON + indexes), 100 ops/second, 500 connections (Atlas ke docs, 2026-11-20)                   | Neeche ek order ka hisaab                                                                        |
-| Neon                      | 100 CU-ghante/mahina, 0.25 CU (D-057, R-014)                                                                            | Finance ke batch (D-288)                                                                         |
-| Neon ki jagah             | 0.5 GB ya 1 GB (jaanch [OPEN_QUESTIONS.md](OPEN_QUESTIONS.md) §2; D-319)                                                | Finance ₹0 pe 100 orders/din pe lagbhag 1.4 se 2.8 saal me bharta hai; band FY ka export (D-309) |
-| Redis                     | Free plan ki chhoti memory aur connections ki seema (jaanch [OPEN_QUESTIONS.md](OPEN_QUESTIONS.md) §2)                  | §4 aur §6 ke niyam                                                                               |
-| Emails                    | 300/din, OTP ke pakke aur "baaki" ki chhat (D-142)                                                                      | Lagbhag 100 orders/din se upar confirmation aur invoice ke emails agle din pe khisakte           |
+| Seema                     | Number                                                                                                                  | Matlab                                                                                      |
+| ------------------------- | ----------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------- |
+| Render CPU                | Free instance ka CPU kam hai (misaal 0.1; Render ne number nahi diya, jaanch [OPEN_QUESTIONS.md](OPEN_QUESTIONS.md) §2) | Lagbhag 5 requests/second lagataar; password se sign-in lagbhag 2/second (argon2id, SR-013) |
+| Render RAM                | 512 MB (D-049)                                                                                                          | Neeche memory budget                                                                        |
+| Render outbound bandwidth | 5 GB/mahina (Render ke docs, 2026-11-20); khatam ho aur payment method na ho to free services mahine ke ant tak band    | Lagbhag 170 MB din; isliye public browsing CDN se (§6)                                      |
+| Render ghante             | 750/mahina (R-008)                                                                                                      | Raat ko server soya                                                                         |
+| Atlas har cluster         | 0.5 GB (bina compression BSON + indexes), 100 ops/second, 500 connections (Atlas ke docs, 2026-11-20)                   | Neeche ek order ka hisaab                                                                   |
+| Neon                      | 100 CU-ghante/mahina, 0.25 CU (D-057, R-014)                                                                            | Finance ke batch (D-288)                                                                    |
+| Neon ki jagah             | 1 GB (jaancha 2026-11-21, [RISKS.md](RISKS.md) §2.5; D-319)                                                             | Finance ₹0 pe 100 orders/din pe lagbhag 2.8 saal me bharta hai; band FY ka export (D-309)   |
+| Redis                     | Free plan ki chhoti memory aur connections ki seema (jaanch [OPEN_QUESTIONS.md](OPEN_QUESTIONS.md) §2)                  | §4 aur §6 ke niyam                                                                          |
+| Emails                    | 300/din, OTP ke pakke aur "baaki" ki chhat (D-142)                                                                      | Lagbhag 100 orders/din se upar confirmation aur invoice ke emails agle din pe khisakte      |
 
 **Ek order ka data (misaal):** commerce lagbhag 6 KB, logistics 3 KB, finance 8 KB, notify 3 KB, payments 2 KB, aur audit me staff ke scans (SR-076) lagbhag 12 KB. 0.5 GB ka 80% istemaal karein to commerce lagbhag 65,000 orders, finance lagbhag 50,000, aur audit bina compression sirf lagbhag 33,000 orders, yaani 2 saal (D-194) me lagbhag 45 orders/din. Compressed chunks (§8 niyam 4) ke saath 2 saal me lagbhag 250 orders/din tak.
 
@@ -657,7 +657,7 @@ Database Architect ki raay se (D-257 ka kram), owner ki haan ke baad. Ye saare s
 | ------------------------- | ------------------------------------- | -------------------------- | --------------- |
 | audit                     | Lagbhag 1 mahina (30 din ki khidki)   | 2 saal me nahi (~45%)      | Chunks, khidki  |
 | commerce                  | Lagbhag 7 hafte                       | Lagbhag 1.7 saal           | Archive (D-306) |
-| finance (Neon)            | Lagbhag 50 din                        | 1.4 se 2.8 saal            | Export (D-309)  |
+| finance (Neon)            | Lagbhag 50 din                        | Lagbhag 2.8 saal (1 GB)    | Export (D-309)  |
 | logs                      | Lagbhag 2.5 mahine                    | Nahi                       | TTL             |
 | logistics                 | Lagbhag 4.5 mahine                    | Lagbhag 3.5 saal           | Archive         |
 | payments                  | Lagbhag 7 mahine                      | Lagbhag 5 saal             | Archive         |
@@ -677,3 +677,4 @@ Design target pe ₹0 ke clusters kuch hafton me bhar jaate hain: target sirf co
 | v1.3.1  | 2026-11-21 | §10 data aur database (Database Architect, D-310 se D-317): ids aur paisa, transactions, personal data aur rok, migrations aur seeds, commerce, finance ka PostgreSQL, baaki services, audit aur jagah; §1.7 me seller code 3 characters. |
 | v1.3.2  | 2026-11-21 | D-319 se D-321 ke sudhaar: §2.3 me logistics → commerce, §2.2 me finance ke naye events aur `packVoided`, §9 me Neon ki jagah, §10.3 aur §10.5 me jod.                                                                                    |
 | v1.3.3  | 2026-11-21 | §10.4 niyam 1 me jod: schema wala hissa listen se pehle, lambi data migration background me (D-338).                                                                                                                                      |
+| v1.3.4  | 2026-11-21 | §9 aur §10.8 me Neon ki jagah 1 GB pakki (RISKS §2.5): finance lagbhag 2.8 saal me bharta hai.                                                                                                                                            |
