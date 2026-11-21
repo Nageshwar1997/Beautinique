@@ -1,6 +1,6 @@
 # OPEN QUESTIONS: Beautinique
 
-> **Status:** v1.7.4 (2026-11-21). Khule sawal, aage ke topics aur jaanchna baaki. Cheezein ek-ek karke judengi.
+> **Status:** v1.7.5 (2026-11-21). Khule sawal, aage ke topics aur jaanchna baaki. Cheezein ek-ek karke judengi.
 
 ## Is file me kya aayega
 
@@ -5732,6 +5732,79 @@ Claude ka kaam: owner ka faisla nahi chahiye, sirf saboot. Nateeja saboot ke saa
 - **Kanooni detail:** `tech` class ko rok se bahar rakhna D-250 ki seema me aata hai ya nahi (CL-093): Lawyer se nahi jaancha.
 - **Owner ka jawab (2026-11-21):** **(a)**, `tech` class ke records kanooni rok me nahi. Record: [DECISIONS.md](DECISIONS.md) D-321.
 
+### Q-259. Server ko din me kab aur kitni baar jagaayein?
+
+- **Status:** `Tay`. Topic: B15 (technical).
+- **Sawal:** koi app na khule tab bhi roz ke kaam (samay wale kaam, sellers ka din ka saar, audit ki jaanch, alerts) chalein, iske liye bahar ka pinger live server ko din me kis samay aur kitni baar jagaaye?
+- **Kyun zaroori:**
+  - D-028 kehta hai server baar-baar jagaya jayega, par samay aur kitni baar, ye tay nahi.
+  - Render ki free web service ke mahine ke 750 ghante (R-008) isi se khatam hote ya bachte hain. [ARCHITECTURE.md](ARCHITECTURE.md) §9 me "raat ko server soya" hai, aur D-056 kehta hai 24 ghante jaagi rahe to bhi fit: dono ek hi niyam se saaf hone chahiye.
+  - Jo kaam user karta hai wo server ko waise bhi jagata hai, aur jaagte hi sweep pichhla kaam pakad leta hai ([ARCHITECTURE.md](ARCHITECTURE.md) §4 niyam 1). Pinger sirf bina user wale kaamon ke liye hai.
+- **Vikalp:**
+  - **(a) Ghante me ek baar, 09:00 se 22:00 IST (din me 14 baar):** har jaag lagbhag 16 minute (15 minute khaali rehne pe server so jaata hai). Mahine me lagbhag 115 ghante, upar se asli use. Din me samay wale kaam zyada se zyada lagbhag 1 ghanta late, raat ke kaam subah.
+  - **(b) Din me lagataar jaaga, 09:00 se 23:00 IST** (har 10 minute ping): mahine me lagbhag 435 ghante; din me kaam lagbhag 1 minute late.
+  - **(c) 24 ghante jaaga:** mahine me lagbhag 744 ghante; 750 me lagbhag koi jagah nahi, aur ghante khatam to mahine ke baaki din saara backend band.
+- **Salah:** **(a)**. Bina user ke sirf roz ke kaam aur saar bachte hain, unke liye ghante ki jaag kaafi hai, aur ghanton me sabse zyada jagah bachti hai. Lagataar jagaaye rakhne pe Render ka koi likhit niyam nahi mila, to kam se kam jagaana sabse surakshit.
+- **Trade-off:**
+  - (a) me raat ke kaam subah tak, aur din me lagbhag 1 ghante tak ki der.
+  - (b) me ghanton ki aadhi jagah chali jaati hai, aur lagataar jagaane pe provider ki policy ka jokhim zyada.
+  - (c) me ek galti (lamba deploy, zyada use) pe mahine ke baaki din backend band.
+- **Tathya:** 750 ghante aur 15 minute ki neend DevOps / SRE agent ne provider ke docs se 2026-11-21 ko jaanche; main session ne source dobara nahi khola.
+- **Owner ka jawab (2026-11-21):** **(a)**, pinger ghante me ek baar, 09:00 se 22:00 IST; raat ko server soya rehta hai. Record: [DECISIONS.md](DECISIONS.md) D-322.
+
+### Q-260. Databases ka backup kitni baar ho?
+
+- **Status:** `Tay`. Topic: B15 (technical).
+- **Sawal:** backup command (D-013) production me jaane se pehle ke alawa kitni baar chale?
+- **Kyun zaroori:**
+  - Atlas ke free cluster pe provider ka backup nahi milta, aur Neon free me sirf 6 ghante tak ka restore aur ek snapshot hai (DevOps / SRE agent ne provider ke docs se 2026-11-21 ko jaancha; main session ne source dobara nahi khola). Isliye aakhri backup ke baad ka data kisi galti ya provider ki ghatna me kho sakta hai: backup kitni baar hota hai, wahi data kho jaane ki seema hai.
+  - Media provider ki files ka backup nahi hota (D-303); ye sawal sirf databases ka hai.
+- **Vikalp:**
+  - **(a) Sirf har release se pehle:** release mahine me ek ho to mahine bhar ka data jokhim me.
+  - **(b) Har release se pehle aur hafte me ek baar** (misaal Sunday): aakhri backup 8 din se purana ho to hafte ki jaanch me laal nishaan. Data jokhim lagbhag 7 din.
+  - **(c) Har release se pehle aur roz:** data jokhim lagbhag 1 din; owner ka roz lagbhag 10 minute, laptop pe personal data ki copy roz badalti, aur providers ke transfer (jaise Neon ka 5 GB/mahina) ka zyada hissa.
+- **Salah:** **(b)**. R1 me asli data kam hai, aur hafte ka ek kaam owner ke hafte ke 30 ghante (D-009) me fit hai.
+- **Trade-off:** zyada baar = kam data jokhim, par owner ka zyada samay aur laptop pe data ki zyada copies (R-023).
+- **Kanooni detail:** asli business pe company ke books ka India me backup (CL-131) kitni baar zaroori: Lawyer ya CA se nahi jaancha.
+- **Owner ka jawab (2026-11-21):** **(b)**, har release se pehle aur hafte me ek baar; aakhri backup 8 din se purana ho to hafte ki jaanch me laal nishaan. Record: [DECISIONS.md](DECISIONS.md) D-323.
+
+### Q-261. Gambhir alerts owner kab tak dekhe, khaas kar raat me?
+
+- **Status:** `Tay`. Topic: B14 (security), B15 (technical), B13 (compliance).
+- **Sawal:** system alert bhejta hai, par kaam ek hi insaan (owner) karta hai. Ops inbox ke alerts owner kab dekhe, aur raat me kaunse alerts use jagaayein?
+- **Kyun zaroori:**
+  - Kai ghadiyaan chhoti hain: CERT-In ko 6 ghante (D-248), court ya sarkari order pe content 3 ghante, aur nagnata wali report pe faisla 2 ghante (D-251).
+  - Incident ke kram (SR-084) me likhna hoga ki alert kab dekha jaata hai; bina iske ye ghadiyaan sirf kaagaz pe hain.
+- **Vikalp:**
+  - **(a) Sirf din me:** ops inbox din me tay samay pe (misaal 09:00, 14:00, 20:00 IST); raat ke alerts subah.
+  - **(b) Din ke tay samay, aur gambhirta 1 pe 24 ghante:** gambhirta 1 (paisa, dastavez, staff ya provider account, data leak ka shak, sarkari order) ka browser push owner ke browser pe raat me bhi; gambhirta 2 aur 3 subah.
+  - **(c) Har alert pe 24 ghante browser push.**
+- **Salah:** **(b)**. Raat ko server soya rehta hai (D-322), to gambhirta 1 ke alerts tabhi bante hain jab koi request aaye: raat me ye kam aayenge, par jo aayein wo chhootein nahi.
+- **Trade-off:**
+  - (a) me raat ki ghatna pe kanooni ghadi chhoot sakti hai.
+  - (b) me kabhi-kabhi raat ko neend tootegi.
+  - (c) me har chhote alert pe neend aur thakaan.
+- **Kanooni detail:** CERT-In ki 6 ghante ki ghadi kab se ginti hai ("pata chalne" se ya "pakka hone" se), aur 2 ya 3 ghante wali ghadiyaan ek insaan ke system pe kaise poori hon: Lawyer se nahi jaancha.
+- **Owner ka jawab (2026-11-21):** **(b)**, ops inbox din ke tay samay pe, aur gambhirta 1 ka browser push raat me bhi; gambhirta 2 aur 3 subah. Record: [DECISIONS.md](DECISIONS.md) D-324.
+
+### Q-262. Saajhe packages npm pe publish honge ya nahi?
+
+- **Status:** `Tay`. Topic: B15 (technical), B16 (dhaancha).
+- **Sawal:** `packages/` ke saajhe packages kabhi public npm pe publish honge, aur kab?
+- **Kyun zaroori:**
+  - D-023 kehta hai packages ke CLI pe naya kaam tabhi jab publish ka plan bane.
+  - Plan hone ya na hone se R1 ke CI, release workflow, versions aur changelog ka kaam badalta hai. npm pe publish har baar sirf owner ke haath se hota hai.
+- **Vikalp:**
+  - **(a) Abhi koi publish nahi:** har package `private: true`, aur CI ye pakka kare; R1 ke baad dobara dekhna.
+  - **(b) R1 ke baad chune hue packages** (misaal utils, India ke validation helpers, UI components) public npm pe, trusted publishing aur provenance ke saath, har publish owner ke haath se.
+  - **(c) Har package har release pe publish.**
+- **Salah:** **(a)**. Publish har package ke version, changelog aur supply chain (R-026) ka bojh laata hai, jo R1 ke order flow me madad nahi karta.
+- **Trade-off:**
+  - (a) me portfolio me packages npm pe nahi dikhte.
+  - (b) me R1 ke baad versions, changelog aur supply chain ka kaam.
+  - (c) me har release pe sabse zyada bojh aur jokhim.
+- **Owner ka jawab (2026-11-21):** **(a)**, abhi koi publish nahi; har package `private: true` aur CI me iska pehra; R1 ke baad owner dobara dekhe. Record: [DECISIONS.md](DECISIONS.md) D-325.
+
 ## Change log
 
 | Version | Date       | Badlav                                                                                                                                                                                    |
@@ -5836,3 +5909,4 @@ Claude ka kaam: owner ka faisla nahi chahiye, sirf saboot. Nateeja saboot ke saa
 | v1.7.2  | 2026-11-21 | Q-247 se Q-254 (ARCHITECTURE §10 data ki 8 batches) tay; D-310 se D-317.                                                                                                                  |
 | v1.7.3  | 2026-11-21 | Q-255 se Q-258 (Database Architect ke risks aur tay faislon pe dhyaan ke points) tay; D-318 se D-321.                                                                                     |
 | v1.7.4  | 2026-11-21 | §2 me Database Architect ki 7 aur jaanch (Neon pooler, M0 ki seemaayein, Atlas Search, TTL, driver ka `Long`, Razorpay ki pehchaan, transfer aur validators).                             |
+| v1.7.5  | 2026-11-21 | Q-259 se Q-262 (DevOps / SRE ke 4 sawal: server jagane ka samay, backup kitni baar, raat ke alerts, npm publish) tay; D-322 se D-325.                                                     |

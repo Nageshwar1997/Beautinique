@@ -1,6 +1,6 @@
 # DECISIONS: Beautinique
 
-> **Status:** v1.14.3 (2026-11-21). Har faisla ek jagah. Sirf wahi "Tay" jo owner ne khud kaha; Claude ki salah faisla nahi. Cheezein ek-ek karke judti hain.
+> **Status:** v1.14.4 (2026-11-21). Har faisla ek jagah. Sirf wahi "Tay" jo owner ne khud kaha; Claude ki salah faisla nahi. Cheezein ek-ek karke judti hain.
 
 ## 0. Kaise likhein
 
@@ -336,6 +336,10 @@
 | D-319 | Data ke 5 sudhaar: logistics → commerce address resolver, finance ko delivered ka event, `commerce.parcel.packVoided`, SR-063 me delivery code ka apvaad, §9 me Neon ki jagah.                                                                                                          | Architecture | 2026-11-21 |
 | D-320 | Account delete ke baad bhi seller ₹50,000 se upar ke invoice ki copy finance ke tax archive se ek-ek karke le sake, har download audit me.                                                                                                                                              | Business     | 2026-11-21 |
 | D-321 | Kanooni rok (D-250) me retention class `tech` ke chhote technical records nahi aate.                                                                                                                                                                                                    | Security     | 2026-11-21 |
+| D-322 | Pinger live server ko ghante me ek baar, 09:00 se 22:00 IST jagaaye; raat ko server soya, raat ke samay wale kaam subah.                                                                                                                                                                | Architecture | 2026-11-21 |
+| D-323 | Databases ka backup har release se pehle aur hafte me ek baar; aakhri backup 8 din se purana ho to hafte ki jaanch me laal nishaan.                                                                                                                                                     | Architecture | 2026-11-21 |
+| D-324 | Ops inbox din ke tay samay pe; gambhirta 1 ka browser push raat me bhi, gambhirta 2 aur 3 subah.                                                                                                                                                                                        | Security     | 2026-11-21 |
+| D-325 | Abhi koi package npm pe publish nahi: har package `private: true`, CI me pehra; R1 ke baad owner dobara dekhe.                                                                                                                                                                          | Process      | 2026-11-21 |
 
 ## 2. Record
 
@@ -3964,6 +3968,42 @@
 - **Kab dobara khulega:** Lawyer ki raay, ya owner khud khole.
 - **Kisne, kab:** owner, 2026-11-21. **Nishaan:** Salah maani.
 - **Asar (Claude):** Kanooni detail jaanchi nahi: `tech` class ko rok se bahar rakhna D-250 ki seema me aata hai ya nahi (CL-093), Lawyer se nahi jaancha.
+
+### D-322. Server ko jagaane ka samay
+
+- **Faisla:** bahar ka pinger live server ko ghante me ek baar, 09:00 se 22:00 IST (din me 14 baar) jagaata hai. Raat ko server soya rehta hai; jo kaam user karta hai wo server ko waise bhi jagata hai, aur raat ke samay wale kaam jaagte hi sweep se pakde jaate hain ([ARCHITECTURE.md](ARCHITECTURE.md) §4 niyam 1).
+- **Wajah:** Claude ki salah, owner ne maani: bina user ke sirf roz ke kaam aur saar bachte hain, unke liye ghante ki jaag kaafi hai, aur Render ke mahine ke 750 ghante (R-008) me sabse zyada jagah bachti hai (lagbhag 115 ghante, upar se asli use).
+- **Chhode vikalp:** din me lagataar jaaga, 09:00 se 23:00 IST (lagbhag 435 ghante, provider ki policy ka jokhim zyada); 24 ghante jaaga (750 me lagbhag koi jagah nahi, ek galti pe mahine ke baaki din band).
+- **Kab dobara khulega:** asli business ke waqt (paid hosting), ya owner khud khole.
+- **Kisne, kab:** owner, 2026-11-21. **Nishaan:** Salah maani.
+- **Asar (Claude):** [ARCHITECTURE.md](ARCHITECTURE.md) §9 ka "raat ko server soya" isi niyam se mel khaata hai; D-056 ki "24 ghante bhi fit" wali line sirf ghanton ka hisaab hai, server 24 ghante jagaaya nahi jaata. Pinger ka tool aur uski kamiyaan (misaal GitHub ka schedule late ya chhoot sakta hai aur sirf default branch pe chalta hai) OPERATIONS ki batch me. Din me samay wale kaam zyada se zyada lagbhag 1 ghanta late. R1 me pehle live deploy se.
+
+### D-323. Databases ke backup ki ginti
+
+- **Faisla:** backup command (D-013) har release se pehle aur hafte me ek baar (misaal Sunday) chalta hai. Aakhri backup 8 din se purana ho to hafte ki jaanch me laal nishaan. Ye sirf databases ka hai; media provider ki files ka backup nahi (D-303).
+- **Wajah:** Claude ki salah, owner ne maani: Atlas ke free cluster pe provider ka backup nahi, aur Neon free me sirf 6 ghante tak ka restore aur ek snapshot hai, to backup ki ginti hi data kho jaane ki seema hai; R1 me asli data kam hai, aur hafte ka ek kaam owner ke hafte ke 30 ghante (D-009) me fit hai. Provider ke tathya DevOps / SRE agent ne 2026-11-21 ko jaanche; main session ne source dobara nahi khola.
+- **Chhode vikalp:** sirf har release se pehle (mahine bhar ka data jokhim); har release se pehle aur roz (owner ka roz samay, laptop pe roz badalti personal data ki copy, providers ke transfer ka zyada hissa).
+- **Kab dobara khulega:** asli business ke waqt, ya owner khud khole.
+- **Kisne, kab:** owner, 2026-11-21. **Nishaan:** Salah maani.
+- **Asar (Claude):** data jokhim lagbhag 7 din. Backup ka niyam aur restore ka abhyaas OPERATIONS ki batch me. Laptop pe backup ki copies ka jokhim R-023 me. Kanooni detail jaanchi nahi: asli business pe company ke books ka India me backup (CL-131) kitni baar zaroori, Lawyer ya CA se nahi jaancha.
+
+### D-324. Alerts dekhne ka samay
+
+- **Faisla:** owner ops inbox din ke tay samay pe dekhta hai (misaal 09:00, 14:00, 20:00 IST). Gambhirta 1 (paisa, dastavez, staff ya provider account, data leak ka shak, sarkari order) ka browser push owner ke browser pe raat me bhi aata hai; gambhirta 2 aur 3 subah dekhe jaate hain.
+- **Wajah:** Claude ki salah, owner ne maani: kai ghadiyaan chhoti hain (CERT-In ko 6 ghante, D-248; sarkari order pe 3 ghante aur nagnata wali report pe 2 ghante, D-251), aur raat ko server soya rehta hai (D-322), to gambhirta 1 ke alerts raat me kam aayenge, par jo aayein wo chhootein nahi.
+- **Chhode vikalp:** sirf din me (raat ki ghatna pe kanooni ghadi chhoot sakti hai); har alert pe 24 ghante push (har chhote alert pe neend aur thakaan).
+- **Kab dobara khulega:** owner khud khole.
+- **Kisne, kab:** owner, 2026-11-21. **Nishaan:** Salah maani.
+- **Asar (Claude):** incident ka kram (SR-084) aur owner ko alerts (SR-078) is samay ke saath OPERATIONS ke runbook me. Gambhirta ki list SR-084 wali hi. Kanooni detail jaanchi nahi: CERT-In ki 6 ghante ki ghadi kab se ginti hai ("pata chalne" se ya "pakka hone" se), aur 2 ya 3 ghante wali ghadiyaan ek insaan ke system pe kaise poori hon, Lawyer se nahi jaancha.
+
+### D-325. Packages ka npm pe publish
+
+- **Faisla:** abhi koi package npm pe publish nahi hota. Har package `private: true` rehta hai, aur CI iska pehra deta hai. R1 ke baad owner dobara dekhe.
+- **Wajah:** Claude ki salah, owner ne maani: publish har package ke version, changelog aur supply chain (R-026) ka bojh laata hai, jo R1 ke order flow me madad nahi karta.
+- **Chhode vikalp:** R1 ke baad chune hue packages public npm pe, trusted publishing aur provenance ke saath (R1 ke baad versions aur supply chain ka kaam); har package har release pe publish (sabse zyada bojh aur jokhim).
+- **Kab dobara khulega:** R1 ke baad, ya owner khud khole.
+- **Kisne, kab:** owner, 2026-11-21. **Nishaan:** Salah maani.
+- **Asar (Claude):** D-023 ke packages CLI pe naya kaam tab tak nahi. CI me `private: true` ka check OPERATIONS ki batch me. npm pe publish, `npm login/logout` aur `npm trust` hamesha sirf owner ke kehne pe.
 ## Change log
 
 | Version  | Date       | Badlav                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      |
@@ -4062,3 +4102,4 @@
 | v1.14.1  | 2026-11-21 | D-304 se D-309 aaye (Database Architect ke 6 sawal: har parivaar ka alag account, delete pe reviews, purane orders ka archive, rakhne ke samay, order number, finance ke band FY; Q-241 se Q-246).                                                                                                                                                                                                                                                                                          |
 | v1.14.2  | 2026-11-21 | D-310 se D-317 aaye (ARCHITECTURE §10 data ki 8 batches; Q-247 se Q-254).                                                                                                                                                                                                                                                                                                                                                                                                                   |
 | v1.14.3  | 2026-11-21 | D-318 se D-321 aaye (Database Architect ke risks, data ke 5 sudhaar, delete ke baad seller ki invoice copy, rok aur technical records; Q-255 se Q-258).                                                                                                                                                                                                                                                                                                                                     |
+| v1.14.4  | 2026-11-21 | D-322 se D-325 aaye (server jagaane ka samay, backup kitni baar, alerts dekhne ka samay, npm publish nahi; Q-259 se Q-262).                                                                                                                                                                                                                                                                                                                                                                 |
