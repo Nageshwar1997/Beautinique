@@ -1,6 +1,6 @@
 # HANDOFF: Beautinique
 
-> **Status:** v1.1.77 (2026-11-21). Ek session ya account se agle tak ki halat. Chhota rakho: sirf abhi ki halat aur agla kaam.
+> **Status:** v1.1.78 (2026-11-21). Ek session ya account se agle tak ki halat. Chhota rakho: sirf abhi ki halat aur agla kaam.
 
 ## 1. Abhi ki halat (2026-11-17)
 
@@ -14,7 +14,7 @@
 
 ## 2. Uncommitted
 
-- [DECISIONS.md](DECISIONS.md) v1.14.3 (D-304 se D-321), [OPEN_QUESTIONS.md](OPEN_QUESTIONS.md) v1.7.3 (Q-241 se Q-258, §2 me Neon aur Atlas roles ki jaanch), [ARCHITECTURE.md](ARCHITECTURE.md) v1.3.2 (§10 data, §1.7 seller code, D-319 ke sudhaar), [RISKS.md](RISKS.md) v1.4.1 (R-036 se R-042), [security/SECURITY_REQUIREMENTS.md](security/SECURITY_REQUIREMENTS.md) v1.2.11 (SR-063) aur ye HANDOFF. Baaki sab commit ho chuka.
+- [DECISIONS.md](DECISIONS.md) v1.14.3 (D-304 se D-321), [OPEN_QUESTIONS.md](OPEN_QUESTIONS.md) v1.7.4 (Q-241 se Q-258, §2 me Database Architect ki 10 jaanch), [ARCHITECTURE.md](ARCHITECTURE.md) v1.3.2 (§10 data, §1.7 seller code, D-319 ke sudhaar), [RISKS.md](RISKS.md) v1.4.1 (R-036 se R-042), [security/SECURITY_REQUIREMENTS.md](security/SECURITY_REQUIREMENTS.md) v1.2.11 (SR-063) aur ye HANDOFF. Baaki sab commit ho chuka.
 
 ## 3. Agla kaam
 
@@ -45,6 +45,7 @@
 | v1.1.75 | 2026-11-21 | Q-241 se Q-246 tay (D-304 se D-309; Database Architect ke 6 sawal), owner ke kehne pe weekly 89% pe; agla: data ki 8 batches; purani lines sahi ki. |
 | v1.1.76 | 2026-11-21 | Q-247 se Q-254 tay (D-310 se D-317; ARCHITECTURE §10 data); agla: DB ke risks aur dhyaan ke points.                                                 |
 | v1.1.77 | 2026-11-21 | Q-255 se Q-258 tay (D-318 se D-321; R-036 se R-042); Database Architect ka saara kaam docs me; agla: DevOps / SRE.                                  |
+| v1.1.78 | 2026-11-21 | OPEN_QUESTIONS §2 me Database Architect ki baaki 7 jaanch judi.                                                                                     |
 | v1.0.7  | 2026-11-17 | Roles ka timing tay (D-054); koi khula sawal nahi; agla kaam agent 2.                                                                               |
 | v1.0.8  | 2026-11-17 | Usage: weekly 85% pahuncha; is account pe naya kaam nahi.                                                                                           |
 | v1.0.9  | 2026-11-17 | Risks aur SR-001 naye docs me aaye; agla kaam sawalon ki list aur queue.                                                                            |
