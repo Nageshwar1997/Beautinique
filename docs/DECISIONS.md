@@ -1,6 +1,6 @@
 # DECISIONS: Beautinique
 
-> **Status:** v1.14.7 (2026-11-21). Har faisla ek jagah. Sirf wahi "Tay" jo owner ne khud kaha; Claude ki salah faisla nahi. Cheezein ek-ek karke judti hain.
+> **Status:** v1.14.18 (2026-11-21). Har faisla ek jagah. Sirf wahi "Tay" jo owner ne khud kaha; Claude ki salah faisla nahi. Cheezein ek-ek karke judti hain.
 
 ## 0. Kaise likhein
 
@@ -354,6 +354,37 @@
 | D-337 | DevOps / SRE ke 12 naye risks R-043 se R-054, sab bachav ke saath khula.                                                                                                                                                                                                                | Architecture | 2026-11-21 |
 | D-338 | Operations ke 6 sudhaar: release step ka samay, UptimeRobot ka samay, CI ka secret scan asli pehra, seekh fix ke baad, default branch se pehle schedule, 10 Atlas projects.                                                                                                             | Architecture | 2026-11-21 |
 | D-339 | Stack me jod: frontend me state management ke liye Zustand; backend ka logger pino, saath me pino-pretty.                                                                                                                                                                               | Architecture | 2026-11-21 |
+| D-340 | Brand ke rang: garam rose, gehra plum, champagne gold accent aur garam neutrals; hover aur pressed roop hamesha gehre.                                                                                                                                                                  | Architecture | 2026-11-21 |
+| D-341 | Fonts: Plus Jakarta Sans (body aur UI) aur Fraunces (Customer app ki headings), self-hosted; daam me `tabular-nums`; staff apps me sirf sans.                                                                                                                                           | Architecture | 2026-11-21 |
+| D-342 | R1 se saare apps me light aur dark theme; default system ki setting, har app me toggle; print, PDF aur labels hamesha light.                                                                                                                                                            | Architecture | 2026-11-21 |
+| D-343 | Customer app ki neeche ki bar: Home, Categories, Orders, Cart, Account; search aur wishlist header me; Orders me delivery code sabse upar.                                                                                                                                              | Business     | 2026-11-21 |
+| D-344 | Search ke sujhaav categories, brands aur concerns ki public list se browser me hi; products ka search Enter pe.                                                                                                                                                                         | Architecture | 2026-11-21 |
+| D-345 | Checkout do screens me: "Checkout" pe poora order aur "Place order", phir online payment ke liye alag "Payment" screen.                                                                                                                                                                 | Business     | 2026-11-21 |
+| D-346 | Browser push ki ijazat pehle order ke baad apne card se; "Not now" ke baad misaal 30 din card nahi; Account me hamesha.                                                                                                                                                                 | Business     | 2026-11-21 |
+| D-347 | Address do raaston se (owner): form, aur Ola Maps ka search jo form aur lat/lng apne aap bhare; map pe pin aur "Use my current location" bhi; free seema kaafi maani.                                                                                                                   | Business     | 2026-11-21 |
+| D-348 | R1 ka Customer Home sirf data se bane hisson se (pincode card, categories, Bestseller, naye, top rated); koi banner nahi.                                                                                                                                                               | Business     | 2026-11-21 |
+| D-349 | Server jaagne ka parda sirf jaagne tak, tab tak app band; jaagne ke baad app use hote tak har misaal 10 minute background ping, bina loading (owner).                                                                                                                                   | Architecture | 2026-11-21 |
+| D-350 | Icons icones.js.org se copy karke apna package (owner); mukhya set Solar, phir Lucide, phir baaki; ek saajha Credits page, har package ka credit component; copy ki script aur test.                                                                                                    | Architecture | 2026-11-21 |
+| D-351 | Location na mile to bhi photo wali delivery "No location" nishaan ke saath, partner pe mahine ki seema (misaal 3); seema ke baad band.                                                                                                                                                  | Business     | 2026-11-21 |
+| D-352 | DESIGN batch 1 (design ke siddhaant) maana: [DESIGN.md](DESIGN.md) §1.                                                                                                                                                                                                                  | Architecture | 2026-11-21 |
+| D-353 | DESIGN batch 2 (rang ke tokens aur light theme) maana: [DESIGN.md](DESIGN.md) §2.                                                                                                                                                                                                       | Architecture | 2026-11-21 |
+| D-354 | DESIGN batch 3 (dark theme aur high contrast) maana: [DESIGN.md](DESIGN.md) §3.                                                                                                                                                                                                         | Architecture | 2026-11-21 |
+| D-355 | DESIGN batch 4 (typography, spacing, radius, shadow, layers aur motion) maana: [DESIGN.md](DESIGN.md) §4.                                                                                                                                                                               | Architecture | 2026-11-21 |
+| D-356 | DESIGN batch 5 (breakpoints, layout aur app parivaar) maana: [DESIGN.md](DESIGN.md) §5.                                                                                                                                                                                                 | Architecture | 2026-11-21 |
+| D-357 | DESIGN batch 6 (components aur screen ki halatein) maana: [DESIGN.md](DESIGN.md) §6.                                                                                                                                                                                                    | Architecture | 2026-11-21 |
+| D-358 | DESIGN batch 7 (icons, logo, images aur media) maana: [DESIGN.md](DESIGN.md) §7.                                                                                                                                                                                                        | Architecture | 2026-11-21 |
+| D-359 | DESIGN batch 8 (accessibility (WCAG 2.2 AA)) maana: [DESIGN.md](DESIGN.md) §8.                                                                                                                                                                                                          | Architecture | 2026-11-21 |
+| D-360 | DESIGN batch 9 (kanooni aur bharose ki jaankari UI me kahan) maana: [DESIGN.md](DESIGN.md) §9.                                                                                                                                                                                          | Architecture | 2026-11-21 |
+| D-361 | DESIGN batch 10 (security aur performance ke UI niyam) maana: [DESIGN.md](DESIGN.md) §10.                                                                                                                                                                                               | Architecture | 2026-11-21 |
+| D-362 | FLOWS batch 1 (account aur sign-in) maana: [FLOWS.md](FLOWS.md) §1.                                                                                                                                                                                                                     | Architecture | 2026-11-21 |
+| D-363 | FLOWS batch 2 (browse se order aur payment) maana: [FLOWS.md](FLOWS.md) §2.                                                                                                                                                                                                             | Architecture | 2026-11-21 |
+| D-364 | FLOWS batch 3 (order se delivery) maana: [FLOWS.md](FLOWS.md) §3.                                                                                                                                                                                                                       | Architecture | 2026-11-21 |
+| D-365 | FLOWS batch 4 (cancel, return, daawa aur refund) maana: [FLOWS.md](FLOWS.md) §4.                                                                                                                                                                                                        | Architecture | 2026-11-21 |
+| D-366 | FLOWS batch 5 (seller: onboarding, listing, maal aur payout) maana: [FLOWS.md](FLOWS.md) §5.                                                                                                                                                                                            | Architecture | 2026-11-21 |
+| D-367 | FLOWS batch 6 (reviews) maana: [FLOWS.md](FLOWS.md) §6.                                                                                                                                                                                                                                 | Architecture | 2026-11-21 |
+| D-368 | UX ke 9 naye risks (R-055 se R-063) bachav ke saath khule: jaagne ka parda, rose ka contrast, visual tests ka bojh, polling, lamba product page, idle logout, offline data, iPhone push, warehouse ka network.                                                                          | Architecture | 2026-11-21 |
+| D-369 | Seller ka payable man badle wali return muddat (misaal 7 din) ke baad; kharab maal ki lambi muddat me baad ki return D-071 ke udhaar se.                                                                                                                                                | Business     | 2026-11-21 |
+| D-370 | UX ke chhote sudhaar: D-072 me jod (location na mile to D-351; R1 me sirf refund, D-122) aur SR-055 me jod (pin D-347 se, "No pin").                                                                                                                                                    | Architecture | 2026-11-21 |
 
 ## 2. Record
 
@@ -1113,6 +1144,7 @@
 - **Jod (owner, 2026-11-18, D-126):** niyam 1 ka email order confirmation ka email hi hai; delivery code usi me jaata hai.
 - **Jod (owner, 2026-11-19, D-148):** niyam 3 ka samay: code se delivered pe 48 ghante, sirf photo aur location wali delivery pe misaal 7 din, dono "delivered" scan se.
 - **Jod (owner, 2026-11-20, D-254):** partner ki location sirf "delivered" aur "fail" ke pal pe, lagatar tracking nahi; partner ke liye Delivery app me data notice aur consent.
+- **Jod (owner, 2026-11-21, D-370):** niyam 2 me location na mile to D-351 ka apvaad; niyam 3 ka "refund ya dobara maal" R1 me sirf refund (D-122).
 
 ### D-073. Pehle ka kaam kab aur kaise hatega
 
@@ -1238,6 +1270,7 @@
   4. Kam se kam payout rakam (misaal ₹100); usse kam ho to agle hafte me judti hai.
   5. Seller ko har line ki halat dikhe: kab payable hogi, aur kis payout me gayi.
 - **Jod (owner, 2026-11-19, D-239):** income-tax TDS seller ke ledger me pehle credit pe (ya payment pe, jo pehle), payable ke din nahi; return pe ulat CA se.
+- **Jod (owner, 2026-11-21, D-369):** niyam 1 ki muddat man badle wali return muddat (D-221 niyam 4, misaal 7 din); kharab maal ki lambi muddat me payable ke baad aayi return D-071 ke udhaar ke raaste.
 - **Wajah:** Claude ki salah, owner ne maani: return ka khatra khatam hone ke baad hi paisa jaata hai, to returns se udhaar kam banta hai, aur hafte ka payout chhote brand ke liye bahut lamba intezaar nahi.
 - **Chhode vikalp:** delivery ke din se payable (har return pe udhaar ka khatra); mahine me do baar payout (chhote brand ke liye lamba intezaar).
 - **Kab dobara khulega:** owner khud khole.
@@ -3992,6 +4025,7 @@
 - **Kab dobara khulega:** asli business ke waqt (paid hosting), ya owner khud khole.
 - **Kisne, kab:** owner, 2026-11-21. **Nishaan:** Salah maani.
 - **Asar (Claude):** [ARCHITECTURE.md](ARCHITECTURE.md) §9 ka "raat ko server soya" isi niyam se mel khaata hai; D-056 ki "24 ghante bhi fit" wali line sirf ghanton ka hisaab hai, server 24 ghante jagaaya nahi jaata. Pinger ka tool aur uski kamiyaan (misaal GitHub ka schedule late ya chhoot sakta hai aur sirf default branch pe chalta hai) OPERATIONS ki batch me. Din me samay wale kaam zyada se zyada lagbhag 1 ghanta late. R1 me pehle live deploy se.
+- **Jod (owner, 2026-11-21, D-349):** app use ho raha ho to app ki background ping (misaal har 10 minute) bhi server ko jaaga rakhti hai, raat ko bhi.
 
 ### D-323. Databases ke backup ki ginti
 
@@ -4139,6 +4173,293 @@
   - Server se aaya data TanStack Query me hi rehta hai (D-001; [ARCHITECTURE.md](ARCHITECTURE.md) me har app ka typed client TanStack Query ke saath). Zustand browser ki apni state ke liye (jaise khule panels, filters ka draft). Zustand ka `persist` (browser storage) bhi SR-027 ke andar: token ya user ka data nahi, sirf theme jaisi pasand.
   - D-297 ([ARCHITECTURE.md](ARCHITECTURE.md) §8) ke structured JSON logs pino se. pino-pretty sirf local development me logs padhne ke liye (dev dependency); CI aur production ke logs JSON hi rehte hain, taaki D-297 na toote.
 
+### D-340. Brand ke rang
+
+- **Faisla:** saare apps ke brand rang garam rose, gehra plum aur champagne gold accent ke saath, garam neutrals (ivory se ink). Misaal: rose `rgb(214, 51, 108)`, plum `rgb(92, 26, 70)`, gold `rgb(196, 154, 82)`, ivory `rgb(253, 248, 245)`, ink `rgb(28, 22, 25)`. Button ke hover aur pressed roop hamesha gehre, kabhi halke nahi (rose pe safed text 4.62:1, AA ke paas).
+- **Wajah:** Claude ki salah, owner ne maani: beauty category me garam rose aur plum pehchaan banate hain, garam neutrals skin tones ki photos ke saath kam takraate hain, aur poori scale ke contrast pehle se gine ja sakte hain.
+- **Chhode vikalp:** neutral premium (pehchaan kam); halka pastel (contrast ka kaam aur galti ka mauka zyada).
+- **Kab dobara khulega:** owner khud khole.
+- **Kisne, kab:** owner, 2026-11-21. **Nishaan:** Salah maani.
+- **Asar (Claude):** poori scale (50 se 950) aur har jodi ka contrast [DESIGN.md](DESIGN.md) ki batch me aayega. Contrast ratios UX / Product Architect agent ne WCAG ke formula se gine, kisi audit tool se nahi: CI ka contrast check hi pakka saboot hoga.
+
+### D-341. Fonts
+
+- **Faisla:** body aur UI ke liye Plus Jakarta Sans, Customer app ki headings ke liye Fraunces; dono variable fonts, OFL license, self-hosted (apne app ke saath Vercel se, bahar ka font CDN nahi). Sirf Latin subset jisme ₹ (U+20B9) ho, woff2 me; `font-display: swap` aur sirf ek preload. Daam aur tables hamesha body font me `tabular-nums` ke saath. Staff apps me sirf sans.
+- **Wajah:** Claude ki salah, owner ne maani: Customer app ko brand ka roop, staff apps halke, aur ₹ aur ank har device pe ek jaise.
+- **Chhode vikalp:** ek hi sans font saare apps me (roop saada); system font stack (₹ aur ank har device pe alag).
+- **Kab dobara khulega:** owner khud khole.
+- **Kisne, kab:** owner, 2026-11-21. **Nishaan:** Salah maani.
+- **Asar (Claude):** Customer app ki pehli load pe lagbhag 70 KB zyada (misaal). Fonts ka license CL-125 ki list me. Kanooni detail: Lawyer ya CA se nahi jaancha.
+
+### D-342. Dark theme
+
+- **Faisla:** R1 se saare apps me light aur dark theme. Default system ki setting; har app me toggle (Light, Dark, System); pasand sirf browser storage me (SR-027). Print, PDF aur labels hamesha light.
+- **Wajah:** Claude ki salah, owner ne maani: tokens ek baar bante hain; staff raat me aur partners dhoop me kaam karte hain, dono ko apni pasand chahiye.
+- **Chhode vikalp:** R1 me sirf light, toggle R2 me (R2 me har screen dobara dekhna); Customer app sirf light (ek app ka alag niyam).
+- **Kab dobara khulega:** owner khud khole.
+- **Kisne, kab:** owner, 2026-11-21. **Nishaan:** Salah maani.
+- **Asar (Claude):** har screen ka visual aur contrast test dono themes me (QA Architect ke saath).
+
+### D-343. Customer app ki neeche ki bar
+
+- **Faisla:** phone pe Customer app ki neeche ki bar me 5 tabs: Home, Categories, Orders, Cart, Account. Search har list aur Home ke header me hamesha khula; wishlist header ke dil (heart) ke icon se. Orders me delivery code (D-072) ka card sabse upar.
+- **Wajah:** Claude ki salah, owner ne maani: door pe delivery code ek tap me khulta hai, aur search header me pehle se hai.
+- **Chhode vikalp:** Search ka tab aur Orders Account ke andar (delivery code do tap door); neeche bar nahi, hamburger menu (har cheez ek tap aur door).
+- **Kab dobara khulega:** owner khud khole.
+- **Kisne, kab:** owner, 2026-11-21. **Nishaan:** Salah maani.
+
+### D-344. Search ke sujhaav
+
+- **Faisla:** search box ke sujhaav categories, brands aur concerns ki chhoti public list se aate hain: list ek public GET se, CDN pe cache (misaal 10 minute, SR-004 ki public cache list me), aur filter browser me hi. Products ka search Enter ya search button pe.
+- **Wajah:** Claude ki salah, owner ne maani: ek customer ki ek call, sujhaav turant, aur ₹0 ke server pe har akshar ka bhaar nahi ([ARCHITECTURE.md](ARCHITECTURE.md) §9).
+- **Chhode vikalp:** sujhaav nahi (dhoondhna dheema); har akshar pe server se product sujhaav (free tier pe bhaar aur der).
+- **Kab dobara khulega:** owner khud khole.
+- **Kisne, kab:** owner, 2026-11-21. **Nishaan:** Salah maani.
+- **Asar (Claude):** product ke naam ka sujhaav nahi; zero result pe sujhaav D-152 se. SR-004 ki public cache list me ye route judna hai (Security Architect ka doosra run).
+
+### D-345. Checkout ke kadam
+
+- **Faisla:** cart se order do screens me:
+  1. **Checkout:** address, delivery ki tareekh ka vaada, payment ka tareeka, har item ka batch ka MRP aur expiry, poora breakup, aur "Place order".
+  2. **Payment:** sirf online payment pe, jahan gateway khulta hai; delivery pe UPI ho to "Place order" ke baad seedha order ki screen.
+- **Wajah:** Claude ki salah, owner ne maani: ek nazar me poora order, aur gateway ki script sirf Payment route pe (SR-006).
+- **Chhode vikalp:** chaar kadam ka wizard (kadam aur server calls zyada); ek hi screen jisme gateway bhi khule (bina payment wale kaam bhi gateway ki script ke saath).
+- **Kab dobara khulega:** owner khud khole.
+- **Kisne, kab:** owner, 2026-11-21. **Nishaan:** Salah maani.
+- **Asar (Claude):** "Place order" pe hi stock rukta hai (D-118), to 15 minute ka timer Payment screen pe. Order se pehle ki jaankari D-067, D-107 aur CL-071 ke hisaab se Checkout pe.
+
+### D-346. Browser push ki ijazat
+
+- **Faisla:** Customer app browser notifications ki ijazat pehle order ke baad maangta hai: order ki screen pe apna card ("Get delivery updates on this device?" jaisa), "Turn on" aur "Not now" barabar ke buttons ke saath; "Turn on" pe hi browser ka prompt. "Not now" ke baad misaal 30 din tak card nahi. Account → Notifications me hamesha.
+- **Wajah:** Claude ki salah, owner ne maani: wajah saaf ho to log zyada haan kehte hain aur browser ka "Block" kam hota hai; "Not now" ke baad bhi raasta khula rehta hai.
+- **Chhode vikalp:** sign-up ke turant baad prompt ("Block" zyada); kabhi apne aap nahi (push wale kam, emails zyada).
+- **Kab dobara khulega:** owner khud khole.
+- **Kisne, kab:** owner, 2026-11-21. **Nishaan:** Salah maani.
+- **Asar (Claude):** pehle order se pehle push nahi: area khulne ki khabar (D-141) unhe email se hi. Emails ki din ki chhat (D-142) pe asar QA aur DevOps ki ginti me.
+
+### D-347. Address: form aur Ola Maps
+
+- **Faisla:** customer address do raaston se de sakta hai, dono ek hi screen pe. Niyam:
+  1. **Form:** address ke saare fields customer khud likh sakta hai, bina map ke.
+  2. **Ola Maps se search:** map pe search (Ola ka autocomplete) se jagah chune to form ke fields apne aap bhar jaate hain, aur us jagah ka lat/lng (pin) bhi saath me save hota hai. Ghar ya flat number jaise hisse customer khud jode; bhare hue fields customer badal sakta hai.
+  3. **Pin khud chunna:** map pe pin khiska ke ya tap karke sahi jagah chune; pin badalne pe lat/lng naya, aur form ke khaali fields usi jagah se bhar jaate hain (customer ke khud likhe fields nahi mitte).
+  4. **"Use my current location":** browser ki location ek hi baar, accuracy ke saath; usse pin lagta hai aur form ke khaali fields bhar jaate hain.
+  5. Pin "Remove pin" se hataya ja sake. Sirf form se diya address bina pin ke bhi chalta hai; tab SR-055 ka doori ka check "No pin" nishaan ke saath chhoot jaata hai.
+  6. Map sirf address jodne ya badalne ki screen pe aur Delivery app me stop ki detail pe (pin ke saath). Delivery me raasta phone ke apne maps app ki link ("Open in maps") se; Ola ka routing R1 me nahi.
+  7. API key sirf apne apps ke domains pe whitelist; server ko Ola chahiye to OAuth client credentials, key browser se bahar.
+  8. **Limit:** Ola ki free seema (har API lagbhag 100,000 calls mahina) hamare istemaal ke liye kaafi maani gayi; alag ginti ya nigrani nahi. Credit nahi daalte (D-028). Ola na chale to form wala raasta chalta rehta hai.
+  9. Map pe "Ola Maps" attribution (openstreetmap.org/copyright ki link ke saath) hamesha dikhe, aur jis app me map hai uske Credits page (D-350) pe Ola Maps ka credit component bhi; Ola ke End User Terms aur Privacy Policy ki link Privacy page aur address form pe.
+- **Wajah:** owner ne khud chuna (2026-11-21): Ola Maps bhi aur form bhi; map se search pe form apne aap bhare, pin aur "Use my current location" bhi. Sahi pin se partner sahi ghar tak, aur India ke adhoore address me madad. Niyam 3, 5, 6, 7 aur 9 ki detail Claude ki salah, owner ne maani.
+- **Chhode vikalp:** sirf "Use my current location", koi map nahi (Claude ki pehli salah); sirf map, bina form; OpenStreetMap ke free tiles; R1 me pin nahi.
+- **Kab dobara khulega:** Ola ki sharten badlein, ya owner khud khole.
+- **Kisne, kab:** owner, 2026-11-21. **Nishaan:** Owner (form aur Ola Maps dono, autofill, pin, current location, limit); Salah maani (baaki detail).
+- **Asar (Claude):** Ola (ANI Technologies Pvt. Ltd.) naya processor: address ka text, pin aur browser ki requests; D-255 niyam 8 ki processors list me. CSP (SR-005) me Ola ke hosts sirf in screens pe: Security Architect ka doosra run. Tathya [RISKS.md](RISKS.md) §2.6, risk R-064, aur baaki jaanch [OPEN_QUESTIONS.md](OPEN_QUESTIONS.md) §2. Ola ki terms me geocoding ke coordinates rakhne ka saaf niyam nahi mila: customer ka pakka kiya address aur pin hamara data, Ola ka content (jaise autocomplete ke results ki list) nahi rakhte. Kanooni detail: address aur location personal data, Lawyer se nahi jaancha.
+
+### D-348. R1 ka Customer Home
+
+- **Faisla:** jab tak Growth Studio (R2) nahi, Customer app ka Home sirf data se bane hisson se: pincode ka card (area live hai ya nahi, D-046), categories, "Bestseller" (D-154 ke niyam se), naye products aur top rated. Koi banner nahi.
+- **Wajah:** Claude ki salah, owner ne maani: koi naya role ya upload ka raasta nahi, aur har hissa niyam se bana to bhed ka sawal nahi (D-139).
+- **Chhode vikalp:** 1 se 3 static banners Master ki setting se (setting, upload aur maalik role); R1 me chhota banner editor (R1 ka scope badhta).
+- **Kab dobara khulega:** owner khud khole.
+- **Kisne, kab:** owner, 2026-11-21. **Nishaan:** Salah maani.
+
+### D-349. Server jaagne ka parda aur background ping
+
+- **Faisla:** server ka parda sirf jaagne tak, aur jaagne ke baad app use hote tak server ko jaaga rakhta hai. Niyam:
+  1. **Pehli jaag:** app khulte hi `/wake` ([ARCHITECTURE.md](ARCHITECTURE.md) §5 niyam 14); jawab tak wahi saada parda: pehle misaal 1.5 second sirf page ka rang aur patli progress bar, phir logo, ek line "Starting up. This can take up to a minute on our free server." aur andaaze wali progress bar; misaal 150 second baad "Try again". Customer app me demo ki patti bhi.
+  2. **Tab tak app band:** jab tak server na jaage, app ka koi hissa nahi khulta: koi screen nahi, koi API call nahi.
+  3. **Background ping:** jaagne ke baad app, jab tak use ho raha ho, har misaal 10 minute `/wake` ko ping karta hai (Render 15 minute bina traffic ke sota hai). Ping pe koi loading screen ya nishaan nahi.
+  4. **"Use ho raha" ka matlab:** tab dikh raha ho aur user ne pichhle misaal 30 minute me kuch kiya ho (click, type, scroll). Tab chhupa ho ya bina kaam ke, to ping ruki; wapas aane pe turant ek ping.
+  5. **Beech me so gaya:** ping fail ho ya server so gaya ho (rewrite 502 ya 504), to agle kaam pe wahi parda dobara aur app tab tak ruka ([OPERATIONS.md](OPERATIONS.md) §5 niyam 8).
+  6. **Band karne ka switch:** ping ka interval aur on/off server ki setting se (Master), taaki Render ki keep-alive pe chetavni aaye to ye bhi band ho sake ([OPERATIONS.md](OPERATIONS.md) §5 niyam 11).
+  7. **Delivery app ka offline (D-042):** network na ho to offline data wala kaam chalta hai; network ho par server soya ho to parda.
+- **Wajah:** owner ne khud chuna (2026-11-21): pehli jaag pe saaf parda, jaagne tak app band, aur use ke dauraan server jaaga rahe taaki beech me 1 minute ka intezaar na aaye. Niyam 4 se 7 Claude ki salah, owner ne maani.
+- **Chhode vikalp:** sirf parda, bina ping (15 minute khaali pe beech me phir parda); bundle me rakhi static jaankari (do jagah ki jaankari ka mel bigad sakta); bundle ki images ka lookbook (bundle bhaari).
+- **Kab dobara khulega:** Render ki sharten badlein ya keep-alive pe chetavni aaye, ya owner khud khole.
+- **Kisne, kab:** owner, 2026-11-21. **Nishaan:** Owner (niyam 1 se 3); Salah maani (niyam 4 se 7).
+- **Asar (Claude):** app ki ping se server asli use ke dauraan jaaga rehta hai, raat ko bhi agar koi app use kare; ghante D-322 ke hisaab me "upar se asli use" me aate hain, aur [OPERATIONS.md](OPERATIONS.md) §5 niyam 9 ka 525 ghante ka alert. Har khule tab se 10 minute me ek call, [ARCHITECTURE.md](ARCHITECTURE.md) §9 ki seema pe na ke barabar. R-044 me app ki ping bhi keep-alive maani ja sakti hai; niyam 6 se band.
+
+### D-350. Icons: icones.js.org se apna package
+
+- **Faisla:** icons ka source icones.js.org (Iconify ke open sets). Hamara apna icons package, jisme sirf istemaal hone wale icons copy hote hain (development me ek baar); runtime pe Iconify ki library ya API nahi. Niyam:
+  1. **Sets ka kram:** mukhya set Solar (CC BY 4.0, linear style), taaki roop ek jaisa rahe; Solar me icon na ho to Lucide (ISC); dono me na ho to baaki sets, stroke ka wazan kareeb rakh ke.
+  2. **Credits page:** har app me ek "Credits" page, sab apps me ek hi saajha page. Har package apna credit component deta hai (icons ka credits file se: har set ka naam, author, license aur link; aage charts, Ola Maps jaise doosre packages ke bhi). Har app apne page pe sirf un cheezon ke components jodta hai jo wo use karta hai. Link har app ke footer ya account menu me. Sirf khule licenses: CC BY 4.0, MIT, ISC, Apache-2.0 aur CC0; GPL, non-commercial (NC) ya bina license wale sets nahi.
+  3. **Sign-in ke brand logos** (Google, LinkedIn, GitHub) CC0 sets se, sirf us sign-in ka naam batane ke liye; marks unki companies ke trademark rehte hain.
+  4. **Package ka dhaancha:** har icon ki apni file, ek base component (`size`, `label`, `currentColor`), aur package bina side effects ke, taaki app me sirf wahi icons bundle hon jo wo use kare.
+  5. **Naya icon jodne ka kram:** pehle set ka credit (credits file aur licenses file), phir set ka data (Iconify se, sirf development me), phir script se component. Script SVG ko code me badalti hai aur aisa kuch bhi mana karti hai jo code chala sake ya bahar jaaye (`<script>`, `<foreignObject>`, `on*` handlers, `style`, bahar ke links). Test har icon ka source, credit aur license ki line jaanchta hai.
+  6. Beauty ke khaas icons (jaise lipstick, swatch, dropper) aur logo apne banaye, usi grid pe.
+  7. Har set ka license CL-125 ki list me.
+- **Wajah:** owner ne khud chuna (2026-11-21): icons icones.js.org se copy karke apna package, copy ki script aur test ke saath (niyam 4, 5). Sets ka kram aur ek saajha Credits page jisme har package ka apna credit component (niyam 1, 2) bhi owner ne khud chuna. Niyam 3, 6 aur 7 aur licenses ki seema Claude ki salah, owner ne maani.
+- **Chhode vikalp:** runtime pe Iconify ki library ya API (bahar ki call, PWA offline me nahi); mukhya set Lucide (Claude ki pehli salah, credit page ki zaroorat nahi); Phosphor (weights ka chunaav har jagah).
+- **Kab dobara khulega:** owner khud khole.
+- **Kisne, kab:** owner, 2026-11-21. **Nishaan:** Owner (source aur apna package, script aur test, sets ka kram, saajha Credits page aur credit components); Salah maani (niyam 3, 6, 7, licenses ki seema).
+- **Asar (Claude):** [DESIGN.md](DESIGN.md) DS-7.1 isi se. Kanooni detail: icons aur brand marks ke license aur trademark, Lawyer ya CA se nahi jaancha.
+
+### D-351. Location na mile to photo wali delivery
+
+- **Faisla:** code na mile aur partner ke phone se location na mile, to bhi photo wali delivery ho sakti hai. Niyam:
+  1. Delivery pe "No location" ka nishaan, aur aisi har delivery Support ki jaanch ki list me.
+  2. Aisi delivery pe daawa aaye to D-072 niyam 3 ka "koi saboot nahi" jaisa maana jaata hai.
+  3. Har partner ke liye mahine me tay seema (misaal 3); seema ke baad location ke bina photo wali delivery band: app "Turn on location" ka raasta dikhaye, na ho sake to "attempt fail" (D-108) ya Hub Manager se baat (D-301 jaisa).
+- **Wajah:** Claude ki salah, owner ne maani: GPS kabhi-kabhi fail hota hai aur har baar parcel ka RTO (Return to Origin, [GLOSSARY.md](GLOSSARY.md)) customer ke liye nuksaan (saamaan nahi mila) aur hamare liye kharcha (wapas laana, jaanch, dobara stock); seema se galat istemaal ruka rehta hai aur D-072 niyam 4 ka record bhi banta hai.
+- **Chhode vikalp:** location ke bina band (RTO aur fail koshishein badhti); bina seema ke ijazat (saboot kamzor, daawe pe nuksaan platform ka).
+- **Kab dobara khulega:** owner khud khole.
+- **Kisne, kab:** owner, 2026-11-21. **Nishaan:** Salah maani.
+- **Asar (Claude):** D-072 niyam 2 me ye apvaad. Seema ka asli number aur setting ka maalik role operations ke saath.
+
+### D-352. DESIGN batch 1: design ke siddhaant
+
+- **Faisla:** 9 niyam (bharosa pehle, ek design system, kaam ke hisaab se device, server ka sach, koi dark pattern nahi, saaf halat, sabke liye, halka aur tez, demo saaf) [DESIGN.md](DESIGN.md) §1 me. Misaal wale numbers settings ya code me badal sakte hain.
+- **Wajah:** Claude ki salah, owner ne maani: har screen ka faisla inhi siddhaanton se, aur dark patterns ki rok (CL-070 se CL-073) design me hi.
+- **Chhode vikalp:** badlav ke saath maanna (owner ne koi badlav nahi diya); batch rokna (design ka ye hissa baaki).
+- **Kab dobara khulega:** owner khud khole.
+- **Kisne, kab:** owner, 2026-11-21. **Nishaan:** Salah maani.
+
+### D-353. DESIGN batch 2: rang ke tokens aur light theme
+
+- **Faisla:** 10 niyam (sirf apne tokens, 11 step ki palette, light ke semantic tokens ratios ke saath, text sirf text wale tokens me, hover gehra, ulti patti, rang akela matlab nahi, order status ke tone, charts, CI me contrast ki jaanch) [DESIGN.md](DESIGN.md) §2 me. Misaal wale numbers settings ya code me badal sakte hain.
+- **Wajah:** Claude ki salah, owner ne maani: D-340 ke rang ko asli tokens aur har jodi ke contrast me badalna, taaki koi screen AA se neeche na jaaye.
+- **Chhode vikalp:** badlav ke saath maanna (owner ne koi badlav nahi diya); batch rokna (design ka ye hissa baaki).
+- **Kab dobara khulega:** owner khud khole.
+- **Kisne, kab:** owner, 2026-11-21. **Nishaan:** Salah maani.
+
+### D-354. DESIGN batch 3: dark theme aur high contrast
+
+- **Faisla:** 7 niyam (theme ka chunaav, dark ke semantic tokens, dark me hover halka, dark me charts, images aur swatches kabhi invert nahi, high contrast 7:1, print hamesha light) [DESIGN.md](DESIGN.md) §3 me. Misaal wale numbers settings ya code me badal sakte hain.
+- **Wajah:** Claude ki salah, owner ne maani: D-342 ki dark theme ke tokens aur high contrast (Delivery ka Sunlight mode) ek saath tay hon.
+- **Chhode vikalp:** badlav ke saath maanna (owner ne koi badlav nahi diya); batch rokna (design ka ye hissa baaki).
+- **Kab dobara khulega:** owner khud khole.
+- **Kisne, kab:** owner, 2026-11-21. **Nishaan:** Salah maani.
+
+### D-355. DESIGN batch 4: typography, spacing, radius, shadow, layers aur motion
+
+- **Faisla:** 12 niyam (D-341 ke fonts, size scale, weights, ank, paisa aur tareekh en-IN me, order number aur codes, spacing, radius, shadows, layers, motion, reduced motion) [DESIGN.md](DESIGN.md) §4 me. Misaal wale numbers settings ya code me badal sakte hain.
+- **Wajah:** Claude ki salah, owner ne maani: saare apps ek hi scale pe, aur paisa, tareekh aur codes har jagah ek roop me.
+- **Chhode vikalp:** badlav ke saath maanna (owner ne koi badlav nahi diya); batch rokna (design ka ye hissa baaki).
+- **Kab dobara khulega:** owner khud khole.
+- **Kisne, kab:** owner, 2026-11-21. **Nishaan:** Salah maani.
+
+### D-356. DESIGN batch 5: breakpoints, layout aur app parivaar
+
+- **Faisla:** 10 niyam (breakpoints, shell ke size, media ratios, Customer app, partner dashboards, staff data-dense apps, Logistics Ops, Delivery PWA, app ki pehchaan, sign-in pe app ka host) [DESIGN.md](DESIGN.md) §5 me. Misaal wale numbers settings ya code me badal sakte hain.
+- **Wajah:** Claude ki salah, owner ne maani: 11 apps ke layout kaam ke hisaab se, aur nakli sign-in page pehchanna aasaan (R-017).
+- **Chhode vikalp:** badlav ke saath maanna (owner ne koi badlav nahi diya); batch rokna (design ka ye hissa baaki).
+- **Kab dobara khulega:** owner khud khole.
+- **Kisne, kab:** owner, 2026-11-21. **Nishaan:** Salah maani.
+
+### D-357. DESIGN batch 6: components aur screen ki halatein
+
+- **Faisla:** 14 niyam (react-aria-components ki neev, bunyadi aur commerce components, loading, khaali halat, error ka map, rukawat ke sandesh, offline, jaagne ka parda, idle warning, forms, pakka karne wale dialog, optimistic UI ki seema, gol kone ke dibbe me scroll) [DESIGN.md](DESIGN.md) §6 me. Misaal wale numbers settings ya code me badal sakte hain.
+- **Wajah:** Claude ki salah, owner ne maani: har error aur halat ka ek roop har app me, ARCHITECTURE §5 aur SR-009 ke saath.
+- **Chhode vikalp:** badlav ke saath maanna (owner ne koi badlav nahi diya); batch rokna (design ka ye hissa baaki).
+- **Kab dobara khulega:** owner khud khole.
+- **Kisne, kab:** owner, 2026-11-21. **Nishaan:** Salah maani.
+
+### D-358. DESIGN batch 7: icons, logo, images aur media
+
+- **Faisla:** 9 niyam (apna icons package, icon ki accessibility, logo, product images, alt text data se, shade, private media, camera, video) [DESIGN.md](DESIGN.md) §7 me. Misaal wale numbers settings ya code me badal sakte hain.
+- **Wajah:** Claude ki salah, owner ne maani: images ka wazan aur private media ki suraksha (D-296, SR-005) design ka hissa bane.
+- **Chhode vikalp:** badlav ke saath maanna (owner ne koi badlav nahi diya); batch rokna (design ka ye hissa baaki).
+- **Kab dobara khulega:** owner khud khole.
+- **Kisne, kab:** owner, 2026-11-21. **Nishaan:** Salah maani.
+
+### D-359. DESIGN batch 8: accessibility (WCAG 2.2 AA)
+
+- **Faisla:** 12 niyam (lakshya aur automated jaanch, contrast, focus, keyboard, touch targets, dragging ka vikalp, screen reader, forms, kai kadam wale forms, madad ek jagah, zoom aur reflow, charts ki table) [DESIGN.md](DESIGN.md) §8 me. Misaal wale numbers settings ya code me badal sakte hain.
+- **Wajah:** Claude ki salah, owner ne maani: asli users me har tarah ke log; CAPTCHA nahi (D-206) to sign-in bhi sabke liye khula rahe.
+- **Chhode vikalp:** badlav ke saath maanna (owner ne koi badlav nahi diya); batch rokna (design ka ye hissa baaki).
+- **Kab dobara khulega:** owner khud khole.
+- **Kisne, kab:** owner, 2026-11-21. **Nishaan:** Salah maani.
+
+### D-360. DESIGN batch 9: kanooni aur bharose ki jaankari UI me kahan
+
+- **Faisla:** 27 rows (MRP aur daam, expiry, batch badla, pack ki jaankari, ingredients aur allergen, claims, seller, return, delivery fee aur vaada, Bestseller, stock, kram, demo aur DUMMY, legal pages, grievance, sign-up ke consent, consent wapas, push, review photo, payment fail, cancel, account delete, partner ka notice, seller agreement, R2 ki medical line) [DESIGN.md](DESIGN.md) §9 me. Misaal wale numbers settings ya code me badal sakte hain.
+- **Wajah:** Claude ki salah, owner ne maani: har tay jaankari ki UI me ek pakki jagah, taaki koi zaroori baat chhoot na jaaye. Kya dikhe wo apne faisle me tay hai; yahan sirf kahan.
+- **Chhode vikalp:** badlav ke saath maanna (owner ne koi badlav nahi diya); batch rokna (design ka ye hissa baaki).
+- **Kab dobara khulega:** owner khud khole.
+- **Kisne, kab:** owner, 2026-11-21. **Nishaan:** Salah maani.
+
+### D-361. DESIGN batch 10: security aur performance ke UI niyam
+
+- **Faisla:** 11 niyam (browser ki ijazatein, StepUpDialog, sign-in ke jawab, password, staff ki lists me chhupi jaankari, push aur emails ka text, user ka content, PWA cache, bundle ke budget, page ke targets, kam calls) [DESIGN.md](DESIGN.md) §10 me. Misaal wale numbers settings ya code me badal sakte hain.
+- **Wajah:** Claude ki salah, owner ne maani: security niyamon (SR-001 se SR-054) ka UI wala hissa aur ₹0 hosting pe tez pages (D-053).
+- **Chhode vikalp:** badlav ke saath maanna (owner ne koi badlav nahi diya); batch rokna (design ka ye hissa baaki).
+- **Kab dobara khulega:** owner khud khole.
+- **Kisne, kab:** owner, 2026-11-21. **Nishaan:** Salah maani.
+
+### D-362. FLOWS batch 1: account aur sign-in
+
+- **Faisla:** 5 flows (FL-1 se FL-5: customer ka sign-up, customer ka sign-in, staff ka sign-in aur bada kaam, delivery partner ka sign-in, customer ka account delete) [FLOWS.md](FLOWS.md) §1 me. Misaal wale numbers settings me.
+- **Wajah:** Claude ki salah, owner ne maani: sign-in ke saare raaste aur unke fail hone ke tareeke ek jagah, security niyamon (SR-011 se SR-026) ke saath.
+- **Chhode vikalp:** badlav ke saath maanna (owner ne koi badlav nahi diya); batch rokna (flows ka ye hissa baaki).
+- **Kab dobara khulega:** owner khud khole.
+- **Kisne, kab:** owner, 2026-11-21. **Nishaan:** Salah maani.
+
+### D-363. FLOWS batch 2: browse se order aur payment
+
+- **Faisla:** 3 flows (FL-6 se FL-8: area, pincode aur waitlist; cart se prepaid order; delivery pe UPI wala order) [FLOWS.md](FLOWS.md) §2 me. Misaal wale numbers settings me.
+- **Wajah:** Claude ki salah, owner ne maani: order ka paisa aur stock kai modules se guzarta hai; har kadam aur har fail ka raasta tay ho, taaki paisa kata par order nahi bana jaisi halat sambhli rahe.
+- **Chhode vikalp:** badlav ke saath maanna (owner ne koi badlav nahi diya); batch rokna (flows ka ye hissa baaki).
+- **Kab dobara khulega:** owner khud khole.
+- **Kisne, kab:** owner, 2026-11-21. **Nishaan:** Salah maani.
+
+### D-364. FLOWS batch 3: order se delivery
+
+- **Faisla:** 2 flows (FL-9 pack se delivery tak, FL-10 delivery fail aur RTO) [FLOWS.md](FLOWS.md) §3 me. Misaal wale numbers settings me.
+- **Wajah:** Claude ki salah, owner ne maani: pick, pack, hub, partner aur door ka saboot ek kram me, D-072 aur D-351 ke saath.
+- **Chhode vikalp:** badlav ke saath maanna (owner ne koi badlav nahi diya); batch rokna (flows ka ye hissa baaki).
+- **Kab dobara khulega:** owner khud khole.
+- **Kisne, kab:** owner, 2026-11-21. **Nishaan:** Salah maani.
+
+### D-365. FLOWS batch 4: cancel, return, daawa aur refund
+
+- **Faisla:** 4 flows (FL-11 se FL-14: cancel, return se refund, parcel nahi mila ka daawa, appeal) [FLOWS.md](FLOWS.md) §4 me. Misaal wale numbers settings me.
+- **Wajah:** Claude ki salah, owner ne maani: customer ke paise wapas aane ke saare raaste aur unki seemaayein ek jagah.
+- **Chhode vikalp:** badlav ke saath maanna (owner ne koi badlav nahi diya); batch rokna (flows ka ye hissa baaki).
+- **Kab dobara khulega:** owner khud khole.
+- **Kisne, kab:** owner, 2026-11-21. **Nishaan:** Salah maani.
+
+### D-366. FLOWS batch 5: seller: onboarding, listing, maal aur payout
+
+- **Faisla:** 4 flows (FL-15 se FL-18: seller onboarding, listing se live, maal warehouse me, payout) [FLOWS.md](FLOWS.md) §5 me. Misaal wale numbers settings me.
+- **Wajah:** Claude ki salah, owner ne maani: seller ke judne se paisa milne tak ka poora raasta, jaanch aur manzoori ke saath.
+- **Chhode vikalp:** badlav ke saath maanna (owner ne koi badlav nahi diya); batch rokna (flows ka ye hissa baaki).
+- **Kab dobara khulega:** owner khud khole.
+- **Kisne, kab:** owner, 2026-11-21. **Nishaan:** Salah maani.
+
+### D-367. FLOWS batch 6: reviews
+
+- **Faisla:** 2 flows (FL-19 review likhna, FL-20 review ki report) [FLOWS.md](FLOWS.md) §6 me. Misaal wale numbers settings me.
+- **Wajah:** Claude ki salah, owner ne maani: reviews ka haq, moderation aur report ke samay ek jagah.
+- **Chhode vikalp:** badlav ke saath maanna (owner ne koi badlav nahi diya); batch rokna (flows ka ye hissa baaki).
+- **Kab dobara khulega:** owner khud khole.
+- **Kisne, kab:** owner, 2026-11-21. **Nishaan:** Salah maani.
+
+### D-368. UX / Product Architect ke risks
+
+- **Faisla:** 9 naye risks [RISKS.md](RISKS.md) me: R-055 (server jaagne ka parda), R-056 (rose button ka contrast AA ke paas), R-057 (visual tests ka bojh), R-058 (polling ka bhaar), R-059 (lamba product page), R-060 (idle logout me form khona), R-061 (Delivery ka offline data mitna), R-062 (iPhone pe push), R-063 (warehouse ka network ruka to scan band). Sab bachav ke saath `Khula`.
+- **Wajah:** Claude ki salah, owner ne maani: har ek ka bachav [DESIGN.md](DESIGN.md) ya docs me likha hai, par ₹0 aur ek insaan ke kaam me khatra bacha hai.
+- **Chhode vikalp:** kuch `Maana` (owner ne koi nahi chuna); risks rokna (khatre chhupe rehte).
+- **Kab dobara khulega:** asli naap ya jaanch ke nateeje aayein, ya owner khud khole.
+- **Kisne, kab:** owner, 2026-11-21. **Nishaan:** Salah maani.
+
+### D-369. Seller ka payable aur lambi return muddat
+
+- **Faisla:** D-081 niyam 1 ki "sabse lambi return samay-seema" ka matlab man badle wali muddat (D-221 niyam 4, misaal 7 din). Us muddat ke baad line payable hoti hai (agar koi return khula na ho). Kharab maal, nakli ka shak ya galat item ki lambi muddat (D-221 niyam 2, misaal 30 din) me payable ke baad aayi return ka paisa seller pe D-071 ke udhaar ke raaste.
+- **Wajah:** Claude ki salah, owner ne maani: aisi returns kam hoti hain, brand ka paisa 30 din nahi rukta, aur payable ke baad ulti ka raasta D-081 ke asar me pehle se D-071 ka udhaar hai, jiski seemaayein (D-071, D-103) khatra rokti hain.
+- **Chhode vikalp:** 30 din (sabse lambi muddat) tak har line rokna (chhote brand ka paisa lamba ruka); 7 din ke baad payable par har line ka ek hissa (misaal 10%) 30 din tak rokna (hisaab ka naya bojh).
+- **Kab dobara khulega:** asli business pe ya owner khud khole.
+- **Kisne, kab:** owner, 2026-11-21. **Nishaan:** Salah maani.
+- **Asar (Claude):** D-081 me jod; [FLOWS.md](FLOWS.md) FL-18 step 1 me ye muddat. Hamari galti wali return ka nuksaan seller pe nahi (D-063). Kanooni detail: Lawyer ya CA se nahi jaancha.
+
+### D-370. UX ke chhote sudhaar
+
+- **Faisla:** 2 jod: (1) D-072 me: niyam 2 me location na mile to D-351 ka apvaad, aur niyam 3 ka "refund ya dobara maal" R1 me sirf refund (D-122). (2) SR-055 me: address ka pin D-347 se; pin na ho to doori ka check "No pin" nishaan ke saath; location na mile to D-351.
+- **Wajah:** Claude ki salah, owner ne maani: inke bina D-072 aur SR-055 padhne wala R1 me galat samajh sakta hai.
+- **Chhode vikalp:** koi jod nahi (niyam aapas me bina link ke rehte).
+- **Kab dobara khulega:** owner khud khole.
+- **Kisne, kab:** owner, 2026-11-21. **Nishaan:** Salah maani.
+
 ## Change log
 
 | Version  | Date       | Badlav                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      |
@@ -4241,3 +4562,14 @@
 | v1.14.5  | 2026-11-21 | D-326 se D-336 aaye (OPERATIONS ki 11 batches; Q-263 se Q-273). D-324 ke asar me D-248 ki ghadi saaf ki.                                                                                                                                                                                                                                                                                                                                                                                    |
 | v1.14.6  | 2026-11-21 | D-337 aur D-338 aaye (DevOps ke 12 risks, operations ke 6 sudhaar; Q-274, Q-275); D-024 me jod (D-338).                                                                                                                                                                                                                                                                                                                                                                                     |
 | v1.14.7  | 2026-11-21 | D-339 aaya (stack me Zustand, pino aur pino-pretty; owner); D-001 me jod.                                                                                                                                                                                                                                                                                                                                                                                                                   |
+| v1.14.8  | 2026-11-21 | D-340 se D-351 aaye (UX: rang, fonts, dark theme, navigation, search ke sujhaav, checkout, push ki ijazat, address ka pin, R1 Home, jaagne ka parda, icons, location ke bina photo delivery; Q-276 se Q-287).                                                                                                                                                                                                                                                                               |
+| v1.14.9  | 2026-11-21 | D-352 se D-361 aaye (DESIGN ki 10 batches, 121 niyam; Q-288 se Q-297).                                                                                                                                                                                                                                                                                                                                                                                                                      |
+| v1.14.10 | 2026-11-21 | D-362 se D-367 aaye (FLOWS ki 6 batches, 20 flows; Q-298 se Q-303).                                                                                                                                                                                                                                                                                                                                                                                                                         |
+| v1.14.11 | 2026-11-21 | D-368 se D-370 aaye (UX ke 9 risks, seller ka payable aur lambi return muddat, UX ke chhote sudhaar; Q-304 se Q-306); D-081 aur D-072 me jod.                                                                                                                                                                                                                                                                                                                                               |
+| v1.14.12 | 2026-11-21 | D-347 badla: owner ne Ola Maps chuna (address ka pin Ola ke autocomplete aur map se, 5 niyam; Q-283).                                                                                                                                                                                                                                                                                                                                                                                       |
+| v1.14.13 | 2026-11-21 | D-347 me owner ka jod: form aur Ola Maps dono, map ke search se form aur lat/lng apne aap, pin aur "Use my current location"; limit ki nigrani nahi (9 niyam).                                                                                                                                                                                                                                                                                                                              |
+| v1.14.14 | 2026-11-21 | D-349 badla (owner): parda sirf jaagne tak, tab tak app band, phir app use hote tak background ping (7 niyam); D-322 me jod.                                                                                                                                                                                                                                                                                                                                                                |
+| v1.14.15 | 2026-11-21 | D-350 badla (owner): icons icones.js.org se copy karke apna package, mukhya set Lucide (7 niyam).                                                                                                                                                                                                                                                                                                                                                                                           |
+| v1.14.16 | 2026-11-21 | D-350 me owner ka jod: mukhya set Solar, doosra Lucide, phir baaki; har app me Icon credits page.                                                                                                                                                                                                                                                                                                                                                                                           |
+| v1.14.17 | 2026-11-21 | D-350 (owner): icons ka alag page nahi, sab apps me ek saajha Credits page, har package ka apna credit component; D-347 niyam 9 me Ola Maps ka credit.                                                                                                                                                                                                                                                                                                                                      |
+| v1.14.18 | 2026-11-21 | D-351 ki wajah me RTO ka matlab saaf kiya (GLOSSARY ki link).                                                                                                                                                                                                                                                                                                                                                                                                                               |

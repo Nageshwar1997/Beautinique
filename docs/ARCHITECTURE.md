@@ -1,6 +1,6 @@
 # ARCHITECTURE: Beautinique
 
-> **Status:** v1.3.4 (2026-11-21). System kaise bana hai, ek nazar me. Cheezein ek-ek karke, owner ki haan ke baad judengi. Abhi §1 (finance ke accounting niyam, D-282), §2 se §9 (system ke hisse, D-291 se D-298) aur §10 (data aur database, D-310 se D-317).
+> **Status:** v1.3.5 (2026-11-21). System kaise bana hai, ek nazar me. Cheezein ek-ek karke, owner ki haan ke baad judengi. Abhi §1 (finance ke accounting niyam, D-282), §2 se §9 (system ke hisse, D-291 se D-298) aur §10 (data aur database, D-310 se D-317).
 
 ## Is file me kya aayega
 
@@ -398,7 +398,7 @@ return: commerce.return.requested -> support.return.decided -> logistics.pickup.
 11. Client sirf GET aur idempotency key wale routes ko retry karta hai, network ya 503 pe, backoff aur `Retry-After` ke saath, misaal 2 baar; baaki mutations pe apne aap retry nahi.
 12. Server se provider ki har call pe timeout (misaal payment 10 s, email 10 s, push 5 s); retry sirf job queue se, request ke andar nahi; provider ki idempotency (jaise refund) jahan mile wahan. Redis na mile to sign-in, codes, payment shuru, review, report aur daawa 503; padhna chalta rahe (SR-008).
 13. Har app ka apna Vercel project aur host (D-010, D-048); `/api/*` gateway pe rewrite ek hi template se (SR-002); token ka `aud` app (SR-031, SR-035). Har app ek saajhe typed client se (contracts se bana), TanStack Query ke saath; custom header (SR-030) aur `X-App-Version` client khud lagata hai.
-14. App khulte hi app-shell `/wake` ko seedha Render pe bulata hai aur jawab tak "server jaag raha hai" dikhata hai; jawab se pehle koi API call nahi (D-028). Razorpay ka webhook bhi seedha Render pe (SR-002 ki tay list, signature ke saath, SR-049); soya server pehli koshish pe der se jaage to Razorpay ki dobara koshish aur roz ka milaan M1 (§1.11). `/wake` ke liye CSP ka apvaad Security Architect ke doosre run me (SR-005).
+14. App khulte hi app-shell `/wake` ko seedha Render pe bulata hai aur jawab tak "server jaag raha hai" dikhata hai; jawab se pehle koi API call nahi (D-028). Razorpay ka webhook bhi seedha Render pe (SR-002 ki tay list, signature ke saath, SR-049); soya server pehli koshish pe der se jaage to Razorpay ki dobara koshish aur roz ka milaan M1 (§1.11). `/wake` ke liye CSP ka apvaad Security Architect ke doosre run me (SR-005). Jab tak jawab na aaye app ka koi hissa nahi khulta; jaagne ke baad app use hote tak background me `/wake` ki ping (D-349).
 15. R1 me saare apps SPA; koi server-side rendering nahi (D-290).
 
 ## 6. Search aur caching (D-295)
@@ -678,3 +678,4 @@ Design target pe ₹0 ke clusters kuch hafton me bhar jaate hain: target sirf co
 | v1.3.2  | 2026-11-21 | D-319 se D-321 ke sudhaar: §2.3 me logistics → commerce, §2.2 me finance ke naye events aur `packVoided`, §9 me Neon ki jagah, §10.3 aur §10.5 me jod.                                                                                    |
 | v1.3.3  | 2026-11-21 | §10.4 niyam 1 me jod: schema wala hissa listen se pehle, lambi data migration background me (D-338).                                                                                                                                      |
 | v1.3.4  | 2026-11-21 | §9 aur §10.8 me Neon ki jagah 1 GB pakki (RISKS §2.5): finance lagbhag 2.8 saal me bharta hai.                                                                                                                                            |
+| v1.3.5  | 2026-11-21 | §5 niyam 14: jaagne tak app band, phir background ping (D-349).                                                                                                                                                                           |

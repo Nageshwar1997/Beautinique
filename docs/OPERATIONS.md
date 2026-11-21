@@ -1,6 +1,6 @@
 # OPERATIONS: Beautinique
 
-> **Status:** v1.1.1 (2026-11-21). System chalane ka manual. Cheezein ek-ek karke judengi.
+> **Status:** v1.1.2 (2026-11-21). System chalane ka manual. Cheezein ek-ek karke judengi.
 
 ## Is file me kya aayega
 
@@ -85,6 +85,7 @@ DevOps / SRE Architect ki raay se (D-257 ka kram), owner ki haan ke baad (D-326 
 10. Render Key Value free restart pe khaali hota hai, aur Render use kabhi bhi restart kar sakta hai (jaancha 2026-11-21): ticker "pending par queue me nahi" wale kaam dobara daalta hai.
 11. Render ki taraf se keep-alive pe chetavni aaye to bahar ke pinger turant band; system app ke `/wake` aur DB ke timers pe bina code change chalta rahe.
 12. Lamba break (misaal 3 hafte se zyada) ho to bhi pinger chalu rahein. Atlas ka free cluster 30 din bina connection ke apne aap ruk jaata hai (jaancha 2026-11-21): resume ka kram har cluster ke project me "Resume", phir `/ready` dekhna.
+13. App ki background ping (D-349): jaagne ke baad app use hote tak har misaal 10 minute `/wake`; ping ka interval aur on/off Master ki setting se. Render ki keep-alive pe chetavni aaye to (niyam 11) ye bhi band.
 
 ## 6. Backup aur restore (D-331)
 
@@ -165,3 +166,4 @@ DevOps / SRE Architect ki raay se (D-257 ka kram), owner ki haan ke baad (D-326 
 | ------- | ---------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | v1.0.0  | 2026-11-17 | Khaali file bani.                                                                                                                                                                                        |
 | v1.1.1  | 2026-11-21 | §1 se §11 aaye (DevOps / SRE ki 11 batches; D-326 se D-336): environments, CI, release aur rollback, secrets, soya server, backup aur restore, alerts, runbooks, capacity, memory ka naap, dependencies. |
+| v1.1.2  | 2026-11-21 | §5 niyam 13: app ki background ping (D-349).                                                                                                                                                             |

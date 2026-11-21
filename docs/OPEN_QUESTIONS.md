@@ -1,6 +1,6 @@
 # OPEN QUESTIONS: Beautinique
 
-> **Status:** v1.7.8 (2026-11-21). Khule sawal, aage ke topics aur jaanchna baaki. Cheezein ek-ek karke judengi.
+> **Status:** v1.7.19 (2026-11-21). Khule sawal, aage ke topics aur jaanchna baaki. Cheezein ek-ek karke judengi.
 
 ## Is file me kya aayega
 
@@ -81,6 +81,20 @@ Claude ka kaam: owner ka faisla nahi chahiye, sirf saboot. Nateeja saboot ke saa
 | UptimeRobot free: email alert milta hai ya nahi, aur request ka timeout                                                                                                                                                                                                                      | D-330, D-332, SR-078           | Server down ka alert                                                                     |
 | Vercel Hobby: bandwidth aur edge requests ki maatra, seema paar hone pe kya hota hai, aur non-commercial ki shart (R-011)                                                                                                                                                                    | D-048, D-334                   | Apps ki capacity                                                                         |
 | Neon: backup ka `pg_dump` 5 GB/mahina public transfer me ginta hai ya nahi, aur usage ka email                                                                                                                                                                                               | D-323, R-047                   | Backup ka transfer                                                                       |
+| iPhone pe web push: Safari me sirf home screen pe jode web app me milta hai ya nahi, aur kis iOS version se                                                                                                                                                                                  | D-346, R-062                   | Push ke card ka text aur emails ki ginti                                                 |
+| Font me ₹: chune fonts ke Latin subset me U+20B9 hai ya nahi (build pe ek test)                                                                                                                                                                                                              | D-341                          | ₹ har jagah sahi dikhe                                                                   |
+| Kaunsa kaam kis app aur role me: Seller Ops ki manzoori (D-084), search synonyms (D-152), HSN table (D-086), ingredient master list (D-132), area settings (D-107, D-117, D-109)                                                                                                             | D-010, D-017                   | Apps ki screens aur permissions                                                          |
+| Sign-up ka pakka hona: password wala sign-up bhi email code se pura ho, tabhi SR-019 ka ek jaisa jawab sach; identity ke niyamon me likha hai ya nahi                                                                                                                                        | SR-019, FL-1                   | Account hone ya na hone ka pata na chale                                                 |
+| Khule order, return ya refund ke saath account delete ruke ya chale                                                                                                                                                                                                                          | SR-066, FL-5                   | Delete ka flow                                                                           |
+| Desktop pe "Use my current location": laptop ki location aksar IP se aur kai km galat; accuracy (misaal 100 m se zyada) pe pin na rakhne ka niyam chahiye ya nahi                                                                                                                            | D-347, SR-055                  | Galat pin se galat doori ka nishaan                                                      |
+| Installed app (PWA) me payment: gateway UPI app ke intent aur bank ke 3DS page ke baad wapas app me aata hai ya nahi (test mode, asli phone pe)                                                                                                                                              | D-345, SR-048                  | Payment ka flow                                                                          |
+| Camera ka `capture`: Android Chrome aur iOS Safari pe file input seedha camera kholta hai ya nahi                                                                                                                                                                                            | SR-055, D-072                  | Delivery ka saboot                                                                       |
+| Accessibility ka automated tool WCAG 2.2 ke naye niyam (jaise 2.5.8 target size) kitne pakadta hai; baaki haath ki checklist me                                                                                                                                                              | DS-8.1                         | Accessibility ki jaanch                                                                  |
+| Cookies ka banner: sirf zaroori cookies aur theme ki pasand hai (D-157); CL-089 ya CL-072 me aata hai ya COMPLIANCE me nayi row chahiye (D-257 ke tareeke se)                                                                                                                                | D-157, CL-089                  | Cookies ke kanooni niyam                                                                 |
+| Ola Maps: geocoding aur autocomplete ke coordinates kitne din rakh sakte hain, aur customer ka pakka kiya pin "Your Content" maana jaata hai ya nahi                                                                                                                                         | D-347                          | Address ka data rakhna                                                                   |
+| Ola Maps ki Privacy Policy: customer ki queries (address, location) Ola kitne din aur kis kaam ke liye rakhta hai                                                                                                                                                                            | D-347, D-255                   | Processors ki list aur Privacy page                                                      |
+| Ola Web SDK: bundle ka size, MapLibre pe hai ya nahi, aur CSP ke liye kaunse hosts                                                                                                                                                                                                           | D-347, SR-005, DS-10.9         | Bundle ka budget aur CSP                                                                 |
+
 ## 3. Sawal
 
 ### Q-001. Warehouse me rakhe maal ka maalik kaun?
@@ -5960,6 +5974,384 @@ Claude ka kaam: owner ka faisla nahi chahiye, sirf saboot. Nateeja saboot ke saa
 - **Salah:** **(a)**.
 - **Trade-off:** (a) me chaar docs me chhote jod; (b) me owner ka samay; (c) me kamiyaan bachi rehti.
 - **Owner ka jawab (2026-11-21):** **(a)**, chhaho sudhaar. Record: [DECISIONS.md](DECISIONS.md) D-338.
+### Q-276. Brand ke rang ki disha
+
+- **Status:** `Tay`. Topic: B2 (apps). Group G23.
+- **Sawal:** saare 11 apps ke brand rang kis disha me hon?
+- **Kyun zaroori:** docs me brand ka koi rang tay nahi. Tokens, har jodi ka contrast, install icons, invoice aur label ke PDF, charts aur order status ke rang sab isi pe tike hain. Baad me badalna matlab har screen ka visual test dobara.
+- **Vikalp:**
+  - **(a) Garam rose + gehra plum + champagne gold accent, garam neutrals (ivory se ink).** Misaal: brand rose `rgb(214, 51, 108)`, plum `rgb(92, 26, 70)`, gold `rgb(196, 154, 82)`, page ivory `rgb(253, 248, 245)`, ink `rgb(28, 22, 25)`. Ginti: rose pe safed text 4.62:1, ivory pe ink 16.91:1 (UX / Product Architect agent ne WCAG ke formula se gina, kisi audit tool se nahi).
+  - **(b) Neutral premium:** lagbhag kaala-safed UI aur ek hi accent (misaal gehra rose) sirf main buttons aur links pe; rang product photos se aata hai.
+  - **(c) Halka pastel (blush, lilac, mint):** naram roop; par pastel pe text ke liye har rang ka alag gehra roop chahiye, aur contrast ka kaam sabse zyada.
+- **Salah:** **(a)**. Beauty category me garam rose aur plum pehchaan banate hain; garam neutrals product photos (skin tones) ke saath thande grey se kam takraate hain; aur 50 se 950 tak ki poori scale ke contrast pehle se gine ja sakte hain.
+- **Trade-off:** (a) me rose button pe safed text 4.62:1 hai, AA (4.5) se thoda hi upar, to hover aur pressed roop gehre hi hon, kabhi halke nahi. (b) me pehchaan kam, site "aam" lagti hai. (c) me accessibility ka kaam aur galti ka mauka zyada.
+- **R1 ya baad me:** R1 (pehli screen se pehle).
+- **Owner ka jawab (2026-11-21):** **(a)**, garam rose, gehra plum aur champagne gold accent, garam neutrals ke saath; hover aur pressed roop hamesha gehre. Record: [DECISIONS.md](DECISIONS.md) D-340.
+
+### Q-277. Fonts
+
+- **Status:** `Tay`. Topic: B2 (apps). Group G23.
+- **Sawal:** apps ka text kis font me ho?
+- **Kyun zaroori:** font page ke wazan (India se Singapore aur Vercel CDN, R-012), daam ke ankon ki line (tabular figures) aur ₹ ke nishaan pe asar karta hai. Rang aur font ka mood ek saath chuna jaata hai. Docs chup hain.
+- **Vikalp:**
+  - **(a) Do self-hosted variable fonts (OFL license):** body aur UI ke liye Plus Jakarta Sans, Customer app ki headings ke liye Fraunces; daam aur tables hamesha body font me `tabular-nums` ke saath. Sirf Latin subset jisme ₹ (U+20B9) ho, woff2 me: misaal sans lagbhag 32 KB, display lagbhag 36 KB (italic alag, sirf zaroorat pe). Staff apps me sirf sans.
+  - **(b) Ek hi sans font** (misaal Plus Jakarta Sans) saare apps me, headings bhi.
+  - **(c) System font stack** (download 0 KB): har phone aur laptop pe alag roop.
+- **Salah:** **(a)**. Customer app ko brand ka roop milta hai, staff apps halke rehte hain; dono fonts apne app ke saath Vercel se aate hain (bahar ka font CDN nahi, SR-006 ki bhaavna), `font-display: swap` aur sirf ek preload.
+- **Trade-off:** (a) me Customer app ki pehli load pe lagbhag 70 KB zyada; (b) me roop saada; (c) me ₹ aur ank har device pe alag dikh sakte hain aur brand ka roop nahi.
+- **Kanooni detail:** fonts ka license (OFL) license ki list (CL-125) me; Lawyer ya CA se nahi jaancha.
+- **R1 ya baad me:** R1.
+- **Owner ka jawab (2026-11-21):** **(a)**, Plus Jakarta Sans (body aur UI) aur Fraunces (Customer app ki headings), dono self-hosted; daam aur tables me `tabular-nums`; staff apps me sirf sans. Record: [DECISIONS.md](DECISIONS.md) D-341.
+
+### Q-278. Dark theme kab aur kahan
+
+- **Status:** `Tay`. Topic: B2 (apps).
+- **Sawal:** dark theme kis release me aur kin apps me ho?
+- **Kyun zaroori:** tokens dono themes ke ek saath bante hain, par har screen ko do themes me test karna (visual aur contrast) kaam doguna karta hai. Docs chup hain.
+- **Vikalp:**
+  - **(a) R1 se saare apps me light aur dark:** default system ki setting, har app me toggle (Light, Dark, System); pasand sirf browser storage me (SR-027 isi ki ijazat deta hai). Print, PDF aur labels hamesha light.
+  - **(b) R1 me sirf light;** tokens dono ke bane, toggle R2 me.
+  - **(c) Customer app sirf light** (product photos ke rang ke liye), staff aur partner apps dono.
+- **Salah:** **(a)**. Tokens ek baar bante hain; extra kaam sirf har screen ka do theme me screenshot test hai, jo E2E ke saath chalta hai. Staff raat me (ops inbox, D-324) aur partners dhoop me (Delivery) kaam karte hain; dono ko apni pasand chahiye.
+- **Trade-off:** (a) me visual tests doguna; (b) me R2 me har screen dobara dekhna; (c) me ek app ka alag niyam.
+- **R1 ya baad me:** R1.
+- **Owner ka jawab (2026-11-21):** **(a)**, R1 se saare apps me light aur dark, default system ki setting aur har app me toggle; print, PDF aur labels hamesha light. Record: [DECISIONS.md](DECISIONS.md) D-342.
+
+### Q-279. Customer app ka phone pe navigation
+
+- **Status:** `Tay`. Topic: B2 (apps).
+- **Sawal:** Customer app me phone pe neeche ki bar (bottom navigation) me kaunse tabs hon?
+- **Kyun zaroori:** delivery code (D-072) door pe customer ko turant dikhana padta hai; order ka page jitna paas, utni tez delivery. Search aur cart kahan hain, ye bhi isi se tay hota hai.
+- **Vikalp:**
+  - **(a) 5 tabs: Home, Categories, Orders, Cart, Account;** search har list aur Home ke header me hamesha khula; wishlist header ke dil (heart) ke icon se.
+  - **(b) 5 tabs: Home, Categories, Search, Cart, Account;** Orders Account ke andar.
+  - **(c) Neeche bar nahi;** header me menu (hamburger), search aur cart.
+- **Salah:** **(a)**. Door pe "Orders" ek tap me khulta hai aur wahan delivery code ka card sabse upar hota hai; search header me pehle se hai, to alag tab ki zaroorat nahi.
+- **Trade-off:** (a) me wishlist ek tap door; (b) me delivery code do tap door; (c) me phone pe har cheez ek tap aur door, aur menu me cheezein chhupti hain.
+- **R1 ya baad me:** R1.
+- **Owner ka jawab (2026-11-21):** **(a)**, neeche 5 tabs: Home, Categories, Orders, Cart, Account; search header me, wishlist header ke icon se, aur Orders me delivery code ka card sabse upar. Record: [DECISIONS.md](DECISIONS.md) D-343.
+
+### Q-280. Search ke sujhaav (typeahead)
+
+- **Status:** `Tay`. Topic: B9 (search).
+- **Sawal:** search box me likhte waqt sujhaav kaise aayein?
+- **Kyun zaroori:** ₹0 pe server lagbhag 5 requests/second lagataar hi sambhaal sakta hai ([ARCHITECTURE.md](ARCHITECTURE.md) §9). Har akshar pe server call ek customer se hi 5 se 10 calls bana deti hai. Docs me sujhaav ka tareeka tay nahi.
+- **Vikalp:**
+  - **(a) Sujhaav nahi:** sirf Enter ya search button pe result.
+  - **(b) Har akshar pe server se product sujhaav** (misaal 300 ms ruk ke, kam se kam 2 akshar).
+  - **(c) Chhoti public list se sujhaav:** categories, brands aur concerns ki list ek public GET se, CDN pe cache (misaal 10 minute, SR-004 ki public cache list me), browser me hi filter; products ka search Enter pe.
+- **Salah:** **(c)**. Ek customer ki ek call, aur sujhaav turant (network ke bina). Zero result pe sujhaav waise bhi D-152 se aate hain.
+- **Trade-off:** (c) me product ke naam ka sujhaav nahi; (b) me free tier pe bhaar aur der (India se Singapore); (a) me sabse saada, par dhoondhna dheema.
+- **R1 ya baad me:** R1.
+- **Owner ka jawab (2026-11-21):** **(c)**, categories, brands aur concerns ki chhoti public list se browser me hi sujhaav; products ka search Enter pe. Record: [DECISIONS.md](DECISIONS.md) D-344.
+
+### Q-281. Checkout ke kadam
+
+- **Status:** `Tay`. Topic: B5 (checkout).
+- **Sawal:** cart se order tak kitni screens hon?
+- **Kyun zaroori:** payment gateway ki script sirf payment wale page pe aa sakti hai (SR-006), to payment alag route hi hoga. Kadam jitne kam, chhodne wale utne kam; par saari jaankari (batch ka MRP aur expiry, fee, delivery ki tareekh) order se pehle dikhni hai (D-067, D-107, CL-071).
+- **Vikalp:**
+  - **(a) Do screens:** "Checkout" (address, delivery ki tareekh ka vaada, payment ka tareeka, har item ka batch ka MRP aur expiry, poora breakup, "Place order"), phir online payment ho to "Payment" screen jahan gateway khulta hai; delivery pe UPI ho to seedha order ki screen.
+  - **(b) Chaar kadam ka wizard:** Address → Delivery → Payment ka tareeka → Review.
+  - **(c) Ek hi screen** jisme gateway bhi khule; tab CSP me gateway ka host checkout route pe khulega.
+- **Salah:** **(a)**. Ek nazar me poora order, aur gateway ki script sirf Payment route pe. "Place order" pe hi stock rukta hai (D-118), to 15 minute ka timer Payment screen pe dikhta hai.
+- **Trade-off:** (a) me checkout ki screen lambi (phone pe sections ke saath); (b) me kadam zyada aur har kadam pe server call; (c) me bina payment wale kaam (address badalna) bhi gateway ki script ke saath.
+- **R1 ya baad me:** R1.
+- **Owner ka jawab (2026-11-21):** **(a)**, do screens: "Checkout" pe poora order aur "Place order", phir online payment ho to alag "Payment" screen; delivery pe UPI ho to seedha order ki screen. Record: [DECISIONS.md](DECISIONS.md) D-345.
+
+### Q-282. Browser push ki permission kab maangein
+
+- **Status:** `Tay`. Topic: B11 (notifications).
+- **Sawal:** Customer app browser notifications ki ijazat kab maange?
+- **Kyun zaroori:** push band ho to delivery fail aur jawab maangne wali khabrein email se jaati hain (D-126, D-131), jo din ki chhat (D-142) khaati hain. Browser ka prompt ek baar "Block" ho jaaye to app dobara nahi maang sakta.
+- **Vikalp:**
+  - **(a) Pehle order ke baad:** order ki screen pe apna card ("Get delivery updates on this device?" jaisa) "Turn on" aur "Not now" barabar ke buttons ke saath; "Turn on" pe hi browser ka prompt. "Not now" ke baad misaal 30 din tak card nahi. Account → Notifications me hamesha.
+  - **(b) Sign-up ke turant baad** browser ka prompt.
+  - **(c) Kabhi apne aap nahi,** sirf Account → Notifications se.
+- **Salah:** **(a)**. Wajah saaf ho to log zyada haan kehte hain, aur browser ka "Block" kam hota hai; pehle apna card isliye ki "Not now" ke baad bhi raasta khula rahe.
+- **Trade-off:** (a) me pehle order se pehle push nahi (area khulne ki khabar, D-141, jinke push band unhe email se hi); (b) me "Block" zyada; (c) me push wale kam, emails zyada.
+- **R1 ya baad me:** R1.
+- **Owner ka jawab (2026-11-21):** **(a)**, pehle order ke baad order ki screen pe apna card ("Turn on" aur "Not now"), "Turn on" pe hi browser ka prompt; "Not now" ke baad misaal 30 din tak card nahi; Account → Notifications me hamesha. Record: [DECISIONS.md](DECISIONS.md) D-346.
+
+### Q-283. Customer ke address ka pin
+
+- **Status:** `Tay`. Topic: B1 (delivery), B14 (security).
+- **Sawal:** customer ke address ki location (pin) R1 me kaise bane?
+- **Kyun zaroori:** delivery ke saboot me address ke pin se partner ki doori ka nishaan hai (SR-055, misaal 300 m), aur SR-001 location tabhi kholta hai jab address pin bane. India ke address aksar adhoore hote hain; sahi pin se partner sahi ghar tak pahunchta hai. Bina pin ke doori ka check chalega hi nahi.
+- **Vikalp:**
+  - **(a) Sirf "Use my current location"** (browser ki location, ek hi baar, accuracy ke saath, hataya ja sake); koi map nahi.
+  - **(b) Form aur Ola Maps dono:** form khud bhare, ya map pe search kare to form aur lat/lng apne aap bhar jaayein; map pe pin khud chune; aur "Use my current location" bhi. Free seema abhi har API lagbhag 100,000 calls har mahina ([RISKS.md](RISKS.md) §2.6).
+  - **(c) OpenStreetMap ke free tiles** pe khiskane wala pin (unki usage policy aur attribution jaanchna baaki).
+  - **(d) R1 me pin nahi;** doori ka check R2 se.
+- **Salah:** **(a)**, ₹0 aur koi naya processor nahi. Par jaanch ke hisaab se Ola ki free seema demo ke liye kaafi hai, to (b) bhi ₹0 me chal sakta hai, bina map wale raaste ke saath.
+- **Trade-off:** (a) me galat jagah se dabaya to galat pin, aur adhoore address me madad nahi; (b) me naya processor (Ola), browser me API key (domain ki whitelist), attribution, aur free seema ya sharten badal sakti hain (R-064); (c) me tiles ki shartein aur bhaari page; (d) me daawe ki jaanch kamzor.
+- **Kanooni detail:** address aur location personal data hain, aur (b) me Ola tak jaate hain; Ola ki terms ke hisaab se Ola ke End User Terms aur Privacy Policy users ko dikhani hai. Lawyer se nahi jaancha.
+- **R1 ya baad me:** R1 (delivery ka saboot R1 me hai).
+- **Owner ka jawab (2026-11-21):** **(b)**, owner ne khud chuna: form aur Ola Maps dono; map pe search kare to form apne aap bhare aur lat/lng bhi save ho; map pe pin khud chune; "Use my current location" bhi; Ola ki limit (lagbhag 100,000) ki chinta nahi. Record: [DECISIONS.md](DECISIONS.md) D-347.
+
+### Q-284. R1 me Customer app ka Home
+
+- **Status:** `Tay`. Topic: B2 (apps), B4 (promotions).
+- **Sawal:** jab tak Growth Studio (R2) nahi, Home pe kya dikhe?
+- **Kyun zaroori:** Home ka content Marketing Head ka kaam hai (D-047, Growth Studio), jo R1 me nahi. R1 ka Home khaali ya haath se bana nahi hona chahiye, aur sirf sach aankde (D-154) aur kisi seller ka boost nahi (D-139) laagu hain.
+- **Vikalp:**
+  - **(a) Sirf data se bane hisse:** pincode ka card (area live hai ya nahi, D-046), categories, "Bestseller" (D-154 ke niyam se), naye products, top rated; koi banner nahi.
+  - **(b) (a) + 1 se 3 static banners** (image + link) Master ki setting se.
+  - **(c) Growth Studio ka chhota banner editor R1 me** (R1 ka scope badhta hai).
+- **Salah:** **(a)**. Koi naya role ya upload ka raasta nahi, aur har hissa niyam se bana to bhed ka sawal nahi.
+- **Trade-off:** (a) me Home kam sajaa; (b) me ek setting aur image upload, aur banners ka maalik role R1 me chahiye; (c) R1 me naya kaam.
+- **R1 ya baad me:** R1.
+- **Owner ka jawab (2026-11-21):** **(a)**, R1 ka Home sirf data se bane hisson se: pincode ka card, categories, Bestseller, naye products aur top rated; koi banner nahi. Record: [DECISIONS.md](DECISIONS.md) D-348.
+
+### Q-285. Server jaagne ke parde pe kya
+
+- **Status:** `Tay`. Topic: B15 (technical), B2 (apps).
+- **Sawal:** app khulne pe jab server jaag raha ho (cold start 90 second tak), parde pe kya ho?
+- **Kyun zaroori:** raat 22:00 se 09:00 IST aur din me bhi 15 minute khaali rehne pe server soya hota hai (D-322, [OPERATIONS.md](OPERATIONS.md) §5), to bahut se visits ki pehli cheez yahi parda hai. Jawab se pehle koi API call nahi ([ARCHITECTURE.md](ARCHITECTURE.md) §5 niyam 14) tay hai; parde ka roop tay nahi.
+- **Vikalp:**
+  - **(a) Saada parda:** pehle misaal 1.5 second sirf page ka rang aur patli progress bar (jaage server pe bas ek jhalak); phir logo, ek line "Starting up. This can take up to a minute on our free server." aur andaaze wali progress bar; misaal 150 second baad "Try again". Customer app me demo ki patti bhi.
+  - **(b) (a) + bundle me rakhi static jaankari** (About aur contact) bina server ke.
+  - **(c) Customer app me bundle ki images ka "lookbook"** jab tak server jaage.
+  - **(d) (a) ka parda sirf pehli jaag pe, aur jaagne ke baad background ping:** jab tak server na jaage app ka access nahi; jaagne ke baad app, jab tak use ho raha ho, har kuch minute server ko background me ping kare taaki wo jaaga rahe; ping pe koi loading screen nahi.
+- **Salah:** **(a)**. Jaage server pe parda dikhta hi nahi; soye pe saaf sandesh. Static copies (b) purani ho sakti hain, kyunki legal pages aur contact settings se aate hain (D-150).
+- **Trade-off:** (a) me intezaar me kuch padhne ko nahi; (b) me do jagah ki jaankari ka mel bigad sakta hai; (c) me bundle bhaari.
+- **R1 ya baad me:** R1.
+- **Owner ka jawab (2026-11-21):** **(d)**, owner ne khud chuna: pehli jaag pe wahi parda jo bana hai, aur jab tak server na jaage app ka access nahi; jaagne ke baad app use hote tak har kuch minute background me ping, bina loading screen ke. Record: [DECISIONS.md](DECISIONS.md) D-349.
+
+### Q-286. Icons ka set
+
+- **Status:** `Tay`. Topic: B2 (apps).
+- **Sawal:** apps ke icons kis open set se liye jaayein?
+- **Kyun zaroori:** icons ka license har copy pe laagu hota hai, aur license ki list (CL-125) me har asset ka license aur attribution chahiye. Ek set se roop ek jaisa rehta hai.
+- **Vikalp:**
+  - **(a) Lucide (ISC license):** 24 px grid, 2 px stroke; sirf istemaal hone wale SVG apne icons package me copy; license ka notice ek file me.
+  - **(b) Solar (CC BY 4.0):** zyada style; har app me "Icon credits" page zaroori.
+  - **(c) Phosphor (MIT):** kai weights; license notice ek file me.
+  - **(d) icones.js.org (Iconify ke open sets) se copy, apna icons package:** sirf istemaal hone wale icons ek baar copy, runtime pe koi bahar ki library ya API nahi; mukhya set Solar, doosra Lucide, uske baad baaki; sab apps me ek saajha Credits page, jisme har package ka credit component.
+- **Salah:** **(a)**. Saada license, e-commerce ke saare aam icons, ek jaisa stroke; beauty ke khaas icons (lipstick, swatch) apne banaye, usi grid pe.
+- **Trade-off:** (a) me beauty ke icons apne banane padte hain; (b) me credit page har app me; (c) me weights ka chunaav har jagah.
+- **Kanooni detail:** icons ka license CL-125 ki list me; Lawyer ya CA se nahi jaancha.
+- **R1 ya baad me:** R1.
+- **Owner ka jawab (2026-11-21):** **(d)**, owner ne khud chuna: icons icones.js.org se copy karke apna icons package; mukhya set Solar (CC BY 4.0), doosra Lucide (ISC), uske baad baaki sets; icons ka alag page nahi: sab apps me ek hi saajha Credits page, jisme har package (icons, aage charts, Ola Maps) apna credit component deta hai aur har app wahi jodta hai jo wo use karta hai. Record: [DECISIONS.md](DECISIONS.md) D-350.
+
+### Q-287. Phone ki location na mile to photo wali delivery
+
+- **Status:** `Tay`. Topic: B1 (delivery), B11 (disputes).
+- **Sawal:** code na mile aur partner ke phone se location na mile (GPS band, ijazat mana, ya andar signal nahi), to kya photo wali delivery ho sakti hai?
+- **Kyun zaroori:** D-072 niyam 2 ka saboot photo **aur** location hai. Location kabhi-kabhi milti hi nahi; tab app kya kare, tay nahi. Code wali delivery online hoti hai (D-301), par photo wala raasta usi pal ki location pe tika hai.
+- **Vikalp:**
+  - **(a) Location ke bina photo wali delivery band:** app wajah dikhaye ("Turn on location" ka raasta); na ho sake to "attempt fail" (D-108) ya Hub Manager se baat (D-301 jaisa).
+  - **(b) Location ke bina bhi photo wali delivery,** "No location" ke nishaan ke saath; aisi har delivery Support ki jaanch ki list me, aur daawa aaye to D-072 niyam 3 ka "koi saboot nahi" jaisa maana jaaye.
+  - **(c) (b), par partner ke liye mahine me tay seema** (misaal 3); seema ke baad (a).
+- **Salah:** **(c)**. Asli duniya me GPS kabhi-kabhi fail hota hai, aur har baar parcel ka RTO (Return to Origin: parcel wapas warehouse, [GLOSSARY.md](GLOSSARY.md)) customer ke liye nuksaan hai (saamaan nahi mila) aur hamare liye kharcha (wapas laana, jaanch, dobara stock); seema se galat istemaal ruka rehta hai aur D-072 niyam 4 ka record bhi banta hai.
+- **Trade-off:** (a) me saboot pakka, par RTO aur fail koshishein badhti hain; (b) me saboot kamzor aur daawe pe nuksaan platform ka; (c) me ek aur setting aur ginti.
+- **R1 ya baad me:** R1 (delivery ka saboot R1 me hai).
+- **Owner ka jawab (2026-11-21):** **(c)**, location ke bina bhi photo wali delivery "No location" ke nishaan ke saath, Support ki jaanch ki list me, daawa aaye to "koi saboot nahi" jaisa; har partner ke liye mahine me tay seema (misaal 3), uske baad location ke bina band. Record: [DECISIONS.md](DECISIONS.md) D-351.
+
+### Q-288. DESIGN batch 1: design ke siddhaant maanein?
+
+- **Status:** `Tay`. Topic: B2 (apps).
+- **Sawal:** UX / Product Architect ke 9 niyam (bharosa pehle, ek design system, kaam ke hisaab se device, server ka sach, koi dark pattern nahi, saaf halat, sabke liye, halka aur tez, demo saaf) [DESIGN.md](DESIGN.md) §1 me aayein?
+- **Kyun zaroori:** har screen ka faisla inhi siddhaanton se, aur dark patterns ki rok (CL-070 se CL-073) design me hi.
+- **Vikalp:** **(a)** jaise hain waise; **(b)** badlav ke saath (owner bataye); **(c)** batch roko.
+- **Salah:** **(a)**.
+- **Trade-off:** (a) me har naye component pe in niyamon ki jaanch. (b) me owner ka samay; (c) me design ka ye hissa baaki.
+- **Owner ka jawab (2026-11-21):** **(a)**, niyam jaise hain. Record: [DECISIONS.md](DECISIONS.md) D-352.
+
+### Q-289. DESIGN batch 2: rang ke tokens aur light theme maanein?
+
+- **Status:** `Tay`. Topic: B2 (apps).
+- **Sawal:** UX / Product Architect ke 10 niyam (sirf apne tokens, 11 step ki palette, light ke semantic tokens ratios ke saath, text sirf text wale tokens me, hover gehra, ulti patti, rang akela matlab nahi, order status ke tone, charts, CI me contrast ki jaanch) [DESIGN.md](DESIGN.md) §2 me aayein?
+- **Kyun zaroori:** D-340 ke rang ko asli tokens aur har jodi ke contrast me badalna, taaki koi screen AA se neeche na jaaye.
+- **Vikalp:** **(a)** jaise hain waise; **(b)** badlav ke saath (owner bataye); **(c)** batch roko.
+- **Salah:** **(a)**.
+- **Trade-off:** (a) me CI ka contrast script banana aur Tailwind ke default rang hatana. (b) me owner ka samay; (c) me design ka ye hissa baaki.
+- **Owner ka jawab (2026-11-21):** **(a)**, niyam jaise hain. Record: [DECISIONS.md](DECISIONS.md) D-353.
+
+### Q-290. DESIGN batch 3: dark theme aur high contrast maanein?
+
+- **Status:** `Tay`. Topic: B2 (apps).
+- **Sawal:** UX / Product Architect ke 7 niyam (theme ka chunaav, dark ke semantic tokens, dark me hover halka, dark me charts, images aur swatches kabhi invert nahi, high contrast 7:1, print hamesha light) [DESIGN.md](DESIGN.md) §3 me aayein?
+- **Kyun zaroori:** D-342 ki dark theme ke tokens aur high contrast (Delivery ka Sunlight mode) ek saath tay hon.
+- **Vikalp:** **(a)** jaise hain waise; **(b)** badlav ke saath (owner bataye); **(c)** batch roko.
+- **Salah:** **(a)**.
+- **Trade-off:** (a) me har screen ka teen roop me test. (b) me owner ka samay; (c) me design ka ye hissa baaki.
+- **Owner ka jawab (2026-11-21):** **(a)**, niyam jaise hain. Record: [DECISIONS.md](DECISIONS.md) D-354.
+
+### Q-291. DESIGN batch 4: typography, spacing, radius, shadow, layers aur motion maanein?
+
+- **Status:** `Tay`. Topic: B2 (apps).
+- **Sawal:** UX / Product Architect ke 12 niyam (D-341 ke fonts, size scale, weights, ank, paisa aur tareekh en-IN me, order number aur codes, spacing, radius, shadows, layers, motion, reduced motion) [DESIGN.md](DESIGN.md) §4 me aayein?
+- **Kyun zaroori:** saare apps ek hi scale pe, aur paisa, tareekh aur codes har jagah ek roop me.
+- **Vikalp:** **(a)** jaise hain waise; **(b)** badlav ke saath (owner bataye); **(c)** batch roko.
+- **Salah:** **(a)**.
+- **Trade-off:** (a) me ek saajha formatting helper aur tokens ka package. (b) me owner ka samay; (c) me design ka ye hissa baaki.
+- **Owner ka jawab (2026-11-21):** **(a)**, niyam jaise hain. Record: [DECISIONS.md](DECISIONS.md) D-355.
+
+### Q-292. DESIGN batch 5: breakpoints, layout aur app parivaar maanein?
+
+- **Status:** `Tay`. Topic: B2 (apps).
+- **Sawal:** UX / Product Architect ke 10 niyam (breakpoints, shell ke size, media ratios, Customer app, partner dashboards, staff data-dense apps, Logistics Ops, Delivery PWA, app ki pehchaan, sign-in pe app ka host) [DESIGN.md](DESIGN.md) §5 me aayein?
+- **Kyun zaroori:** 11 apps ke layout kaam ke hisaab se, aur nakli sign-in page pehchanna aasaan (R-017).
+- **Vikalp:** **(a)** jaise hain waise; **(b)** badlav ke saath (owner bataye); **(c)** batch roko.
+- **Salah:** **(a)**.
+- **Trade-off:** (a) me har app parivaar ka apna shell. (b) me owner ka samay; (c) me design ka ye hissa baaki.
+- **Owner ka jawab (2026-11-21):** **(a)**, niyam jaise hain. Record: [DECISIONS.md](DECISIONS.md) D-356.
+
+### Q-293. DESIGN batch 6: components aur screen ki halatein maanein?
+
+- **Status:** `Tay`. Topic: B2 (apps).
+- **Sawal:** UX / Product Architect ke 14 niyam (react-aria-components ki neev, bunyadi aur commerce components, loading, khaali halat, error ka map, rukawat ke sandesh, offline, jaagne ka parda, idle warning, forms, pakka karne wale dialog, optimistic UI ki seema, gol kone ke dibbe me scroll) [DESIGN.md](DESIGN.md) §6 me aayein?
+- **Kyun zaroori:** har error aur halat ka ek roop har app me, ARCHITECTURE §5 aur SR-009 ke saath.
+- **Vikalp:** **(a)** jaise hain waise; **(b)** badlav ke saath (owner bataye); **(c)** batch roko.
+- **Salah:** **(a)**.
+- **Trade-off:** (a) me components ki lambi list, har ek ki playground aur test. (b) me owner ka samay; (c) me design ka ye hissa baaki.
+- **Owner ka jawab (2026-11-21):** **(a)**, niyam jaise hain. Record: [DECISIONS.md](DECISIONS.md) D-357.
+
+### Q-294. DESIGN batch 7: icons, logo, images aur media maanein?
+
+- **Status:** `Tay`. Topic: B2 (apps).
+- **Sawal:** UX / Product Architect ke 9 niyam (apna icons package, icon ki accessibility, logo, product images, alt text data se, shade, private media, camera, video) [DESIGN.md](DESIGN.md) §7 me aayein?
+- **Kyun zaroori:** images ka wazan aur private media ki suraksha (D-296, SR-005) design ka hissa bane.
+- **Vikalp:** **(a)** jaise hain waise; **(b)** badlav ke saath (owner bataye); **(c)** batch roko.
+- **Salah:** **(a)**.
+- **Trade-off:** (a) me apne beauty icons banana aur alt text ka generator. (b) me owner ka samay; (c) me design ka ye hissa baaki.
+- **Owner ka jawab (2026-11-21):** **(a)**, niyam jaise hain. Record: [DECISIONS.md](DECISIONS.md) D-358.
+
+### Q-295. DESIGN batch 8: accessibility (WCAG 2.2 AA) maanein?
+
+- **Status:** `Tay`. Topic: B2 (apps).
+- **Sawal:** UX / Product Architect ke 12 niyam (lakshya aur automated jaanch, contrast, focus, keyboard, touch targets, dragging ka vikalp, screen reader, forms, kai kadam wale forms, madad ek jagah, zoom aur reflow, charts ki table) [DESIGN.md](DESIGN.md) §8 me aayein?
+- **Kyun zaroori:** asli users me har tarah ke log; CAPTCHA nahi (D-206) to sign-in bhi sabke liye khula rahe.
+- **Vikalp:** **(a)** jaise hain waise; **(b)** badlav ke saath (owner bataye); **(c)** batch roko.
+- **Salah:** **(a)**.
+- **Trade-off:** (a) me har release se pehle haath ki checklist ka samay. (b) me owner ka samay; (c) me design ka ye hissa baaki.
+- **Owner ka jawab (2026-11-21):** **(a)**, niyam jaise hain. Record: [DECISIONS.md](DECISIONS.md) D-359.
+
+### Q-296. DESIGN batch 9: kanooni aur bharose ki jaankari UI me kahan maanein?
+
+- **Status:** `Tay`. Topic: B13 (compliance), B2 (apps).
+- **Sawal:** UX / Product Architect ke 27 rows (MRP aur daam, expiry, batch badla, pack ki jaankari, ingredients aur allergen, claims, seller, return, delivery fee aur vaada, Bestseller, stock, kram, demo aur DUMMY, legal pages, grievance, sign-up ke consent, consent wapas, push, review photo, payment fail, cancel, account delete, partner ka notice, seller agreement, R2 ki medical line) [DESIGN.md](DESIGN.md) §9 me aayein?
+- **Kyun zaroori:** har tay jaankari ki UI me ek pakki jagah, taaki koi zaroori baat chhoot na jaaye. Kya dikhe wo apne faisle me tay hai; yahan sirf kahan.
+- **Vikalp:** **(a)** jaise hain waise; **(b)** badlav ke saath (owner bataye); **(c)** batch roko.
+- **Salah:** **(a)**.
+- **Trade-off:** (a) me product page lamba (phone pe accordion). (b) me owner ka samay; (c) me design ka ye hissa baaki.
+- **Owner ka jawab (2026-11-21):** **(a)**, niyam jaise hain. Record: [DECISIONS.md](DECISIONS.md) D-360.
+
+### Q-297. DESIGN batch 10: security aur performance ke UI niyam maanein?
+
+- **Status:** `Tay`. Topic: B14 (security), B2 (apps).
+- **Sawal:** UX / Product Architect ke 11 niyam (browser ki ijazatein, StepUpDialog, sign-in ke jawab, password, staff ki lists me chhupi jaankari, push aur emails ka text, user ka content, PWA cache, bundle ke budget, page ke targets, kam calls) [DESIGN.md](DESIGN.md) §10 me aayein?
+- **Kyun zaroori:** security niyamon (SR-001 se SR-054) ka UI wala hissa aur ₹0 hosting pe tez pages (D-053).
+- **Vikalp:** **(a)** jaise hain waise; **(b)** badlav ke saath (owner bataye); **(c)** batch roko.
+- **Salah:** **(a)**.
+- **Trade-off:** (a) me bundle aur page ke budget CI me. (b) me owner ka samay; (c) me design ka ye hissa baaki.
+- **Owner ka jawab (2026-11-21):** **(a)**, niyam jaise hain. Record: [DECISIONS.md](DECISIONS.md) D-361.
+
+### Q-298. FLOWS batch 1: account aur sign-in maanein?
+
+- **Status:** `Tay`. Topic: B14 (security), B2 (apps).
+- **Sawal:** UX / Product Architect ke 5 flows (FL-1 se FL-5: customer ka sign-up, customer ka sign-in, staff ka sign-in aur bada kaam, delivery partner ka sign-in, customer ka account delete) [FLOWS.md](FLOWS.md) §1 me aayein?
+- **Kyun zaroori:** sign-in ke saare raaste aur unke fail hone ke tareeke ek jagah, security niyamon (SR-011 se SR-026) ke saath.
+- **Vikalp:** **(a)** jaise hain waise; **(b)** badlav ke saath (owner bataye); **(c)** batch roko.
+- **Salah:** **(a)**. Har kadam tay faislon (D, SR, CL) se hai; koi naya niyam nahi.
+- **Trade-off:** (a) me module ki TASK.md banne pe links jodna; (b) me owner ka samay; (c) me flows ka ye hissa baaki.
+- **Owner ka jawab (2026-11-21):** **(a)**, flows jaise hain. Record: [DECISIONS.md](DECISIONS.md) D-362.
+
+### Q-299. FLOWS batch 2: browse se order aur payment maanein?
+
+- **Status:** `Tay`. Topic: B5 (checkout), B6 (payments).
+- **Sawal:** UX / Product Architect ke 3 flows (FL-6 se FL-8: area, pincode aur waitlist; cart se prepaid order; delivery pe UPI wala order) [FLOWS.md](FLOWS.md) §2 me aayein?
+- **Kyun zaroori:** order ka paisa aur stock kai modules se guzarta hai; har kadam aur har fail ka raasta tay ho, taaki paisa kata par order nahi bana jaisi halat sambhli rahe.
+- **Vikalp:** **(a)** jaise hain waise; **(b)** badlav ke saath (owner bataye); **(c)** batch roko.
+- **Salah:** **(a)**. Har kadam tay faislon (D, SR, CL) se hai; koi naya niyam nahi.
+- **Trade-off:** (a) me module ki TASK.md banne pe links jodna; (b) me owner ka samay; (c) me flows ka ye hissa baaki.
+- **Owner ka jawab (2026-11-21):** **(a)**, flows jaise hain. Record: [DECISIONS.md](DECISIONS.md) D-363.
+
+### Q-300. FLOWS batch 3: order se delivery maanein?
+
+- **Status:** `Tay`. Topic: B1 (delivery).
+- **Sawal:** UX / Product Architect ke 2 flows (FL-9 pack se delivery tak, FL-10 delivery fail aur RTO) [FLOWS.md](FLOWS.md) §3 me aayein?
+- **Kyun zaroori:** pick, pack, hub, partner aur door ka saboot ek kram me, D-072 aur D-351 ke saath.
+- **Vikalp:** **(a)** jaise hain waise; **(b)** badlav ke saath (owner bataye); **(c)** batch roko.
+- **Salah:** **(a)**. Har kadam tay faislon (D, SR, CL) se hai; koi naya niyam nahi.
+- **Trade-off:** (a) me module ki TASK.md banne pe links jodna; (b) me owner ka samay; (c) me flows ka ye hissa baaki.
+- **Owner ka jawab (2026-11-21):** **(a)**, flows jaise hain. Record: [DECISIONS.md](DECISIONS.md) D-364.
+
+### Q-301. FLOWS batch 4: cancel, return, daawa aur refund maanein?
+
+- **Status:** `Tay`. Topic: B7 (returns), B11 (disputes).
+- **Sawal:** UX / Product Architect ke 4 flows (FL-11 se FL-14: cancel, return se refund, parcel nahi mila ka daawa, appeal) [FLOWS.md](FLOWS.md) §4 me aayein?
+- **Kyun zaroori:** customer ke paise wapas aane ke saare raaste aur unki seemaayein ek jagah.
+- **Vikalp:** **(a)** jaise hain waise; **(b)** badlav ke saath (owner bataye); **(c)** batch roko.
+- **Salah:** **(a)**. Har kadam tay faislon (D, SR, CL) se hai; koi naya niyam nahi.
+- **Trade-off:** (a) me module ki TASK.md banne pe links jodna; (b) me owner ka samay; (c) me flows ka ye hissa baaki.
+- **Owner ka jawab (2026-11-21):** **(a)**, flows jaise hain. Record: [DECISIONS.md](DECISIONS.md) D-365.
+
+### Q-302. FLOWS batch 5: seller: onboarding, listing, maal aur payout maanein?
+
+- **Status:** `Tay`. Topic: B3 (catalog), B6 (settlement).
+- **Sawal:** UX / Product Architect ke 4 flows (FL-15 se FL-18: seller onboarding, listing se live, maal warehouse me, payout) [FLOWS.md](FLOWS.md) §5 me aayein?
+- **Kyun zaroori:** seller ke judne se paisa milne tak ka poora raasta, jaanch aur manzoori ke saath.
+- **Vikalp:** **(a)** jaise hain waise; **(b)** badlav ke saath (owner bataye); **(c)** batch roko.
+- **Salah:** **(a)**. Har kadam tay faislon (D, SR, CL) se hai; koi naya niyam nahi.
+- **Trade-off:** (a) me module ki TASK.md banne pe links jodna; (b) me owner ka samay; (c) me flows ka ye hissa baaki.
+- **Owner ka jawab (2026-11-21):** **(a)**, flows jaise hain. Record: [DECISIONS.md](DECISIONS.md) D-366.
+
+### Q-303. FLOWS batch 6: reviews maanein?
+
+- **Status:** `Tay`. Topic: B8 (reviews).
+- **Sawal:** UX / Product Architect ke 2 flows (FL-19 review likhna, FL-20 review ki report) [FLOWS.md](FLOWS.md) §6 me aayein?
+- **Kyun zaroori:** reviews ka haq, moderation aur report ke samay ek jagah.
+- **Vikalp:** **(a)** jaise hain waise; **(b)** badlav ke saath (owner bataye); **(c)** batch roko.
+- **Salah:** **(a)**. Har kadam tay faislon (D, SR, CL) se hai; koi naya niyam nahi.
+- **Trade-off:** (a) me module ki TASK.md banne pe links jodna; (b) me owner ka samay; (c) me flows ka ye hissa baaki.
+- **Owner ka jawab (2026-11-21):** **(a)**, flows jaise hain. Record: [DECISIONS.md](DECISIONS.md) D-367.
+
+### Q-304. UX / Product Architect ke 9 naye risks maanein?
+
+- **Status:** `Tay`. Topic: B2 (apps), B15 (technical).
+- **Sawal:** UX se nikle 9 naye risks ([RISKS.md](RISKS.md) R-055 se R-063) RISKS me aayein?
+- **Naye risks (saar):**
+  1. **R-055:** har pehli visit pe server jaagne ka parda.
+  2. **R-056:** rose button pe safed text AA ke bilkul paas.
+  3. **R-057:** 11 apps × teen roop ke visual tests ka bojh.
+  4. **R-058:** khule tabs ki polling ka bhaar.
+  5. **R-059:** phone pe lamba product page.
+  6. **R-060:** idle logout me lamba form khona.
+  7. **R-061:** Delivery app ka offline data mitna.
+  8. **R-062:** iPhone pe push sirf installed app me (jaanchna baaki).
+  9. **R-063:** warehouse ka network ruka to scan band.
+- **Kyun zaroori:** inka bachav [DESIGN.md](DESIGN.md) aur baaki docs me hai, par khatra RISKS me saaf dikhna chahiye.
+- **Vikalp:** **(a)** saare bachav ke saath `Khula`; **(b)** kuch `Maana` (owner bataye); **(c)** risks roko.
+- **Salah:** **(a)**.
+- **Trade-off:** (a) me 9 aur khule risks; (b) me owner ka samay; (c) me khatre chhupe rehte.
+- **Owner ka jawab (2026-11-21):** **(a)**, 9 naye risks bachav ke saath `Khula`. Record: [DECISIONS.md](DECISIONS.md) D-368.
+
+### Q-305. Seller ka paisa kab payable, jab kharab maal ki return muddat lambi hai?
+
+- **Status:** `Tay`. Topic: B6 (settlement), B7 (returns).
+- **Sawal:** D-081 kehta hai line "sabse lambi return samay-seema" ke baad payable hoti hai, aur D-221 ne kharab maal ki muddat misaal 30 din kar di. To payable 7 din (man badla) ke baad ho ya 30 din ke baad?
+- **Kyun zaroori:** D-221 ke asar me ye "finance ki charcha me" likha tha, par D-081 me jod nahi aaya. Seller app ki "kab payable" (D-081 niyam 5) aur payout ka flow (FLOWS FL-18) iske bina pakke nahi.
+- **Vikalp:**
+  - **(a) 30 din tak rokna:** har line sabse lambi muddat ke baad payable; udhaar kam, par chhote brand ka paisa lamba ruka.
+  - **(b) Man badle wali muddat ke baad payable:** misaal 7 din ke baad payable; lambi muddat me baad ki kharab maal wali return D-071 ke udhaar ke raaste (D-081 ke asar me ye raasta pehle se).
+  - **(c) (b) + rok ka hissa:** 7 din ke baad payable, par har line ka ek hissa (misaal 10%) 30 din tak ruka.
+- **Salah:** **(b)**. Kharab maal wali returns kam hoti hain, brand ka paisa 30 din nahi rukta, aur udhaar ki seemaayein (D-071, D-103) khatra rokti hain.
+- **Trade-off:** (a) seller ke liye dheema; (b) me kuch maamlon me udhaar; (c) me hisaab ka naya bojh.
+- **Kanooni detail:** marketplace pe seller ko payment ki samay-seema: Lawyer ya CA se nahi jaancha.
+- **Owner ka jawab (2026-11-21):** **(b)**, man badle wali return muddat (misaal 7 din) ke baad payable; baad ki kharab maal wali return D-071 ke udhaar se. Record: [DECISIONS.md](DECISIONS.md) D-369.
+
+### Q-306. UX ke 2 chhote sudhaar maanein?
+
+- **Status:** `Tay`. Topic: B1 (delivery), B14 (security).
+- **Sawal:** (1) D-072 me jod: niyam 2 me location na mile to D-351, aur niyam 3 ka "refund ya dobara maal" R1 me sirf refund (D-122). (2) SR-055 me jod: address ka pin D-347 se, pin na ho to "No pin", location na mile to D-351. Ye dono jod aayein?
+- **Kyun zaroori:** D-072 aur SR-055 akele padhne wala R1 me galat samajh sakta hai; naye faisle (D-347, D-351) aur D-122 ka link wahin dikhna chahiye.
+- **Vikalp:** **(a)** dono jod; **(b)** sirf ek (owner bataye); **(c)** koi jod nahi.
+- **Salah:** **(a)**.
+- **Trade-off:** (a) me do faislon me ek-ek line; (c) me niyam aapas me bina link ke.
+- **Owner ka jawab (2026-11-21):** **(a)**, dono jod. Record: [DECISIONS.md](DECISIONS.md) D-370.
+
 ## Change log
 
 | Version | Date       | Badlav                                                                                                                                                                                    |
@@ -6068,3 +6460,14 @@ Claude ka kaam: owner ka faisla nahi chahiye, sirf saboot. Nateeja saboot ke saa
 | v1.7.6  | 2026-11-21 | Q-263 se Q-273 (OPERATIONS ki 11 batches) tay; D-326 se D-336. Q-261 ki kanooni line me D-248 ki ghadi saaf ki.                                                                           |
 | v1.7.7  | 2026-11-21 | Q-274 (DevOps ke 12 risks) aur Q-275 (operations ke 6 sudhaar) tay; D-337, D-338. §2 me GitHub push protection ki jaanch.                                                                 |
 | v1.7.8  | 2026-11-21 | §2: DevOps / SRE ki jaanch se 8 rows ke suljhe hisse hataye (nateeja RISKS §2.5 me), aur 5 nayi jaanch judi.                                                                              |
+| v1.7.9  | 2026-11-21 | Q-276 se Q-287 (UX / Product Architect ke 12 sawal; G23 rang aur fonts) tay; D-340 se D-351.                                                                                              |
+| v1.7.10 | 2026-11-21 | Q-288 se Q-297 (DESIGN ki 10 batches) tay; D-352 se D-361.                                                                                                                                |
+| v1.7.11 | 2026-11-21 | Q-298 se Q-303 (FLOWS ki 6 batches) tay; D-362 se D-367.                                                                                                                                  |
+| v1.7.12 | 2026-11-21 | Q-304 se Q-306 tay (UX ke 9 risks, seller ka payable, 2 chhote sudhaar; D-368 se D-370); §2 me UX ki 10 jaanch judi.                                                                      |
+| v1.7.13 | 2026-11-21 | Q-283 me owner ka naya jawab: Ola Maps (D-347); §2 me Ola Maps ki 4 jaanch.                                                                                                               |
+| v1.7.14 | 2026-11-21 | Q-283 me owner ka poora jawab (form aur Ola Maps dono, autofill, pin, current location); §2 se Ola ki limit wali jaanch hati (owner).                                                     |
+| v1.7.15 | 2026-11-21 | Q-285 me owner ka jawab: (d) parda sirf pehli jaag pe, tab tak app band, phir background ping (D-349).                                                                                    |
+| v1.7.16 | 2026-11-21 | Q-286 me owner ka jawab: (d) icones.js.org se copy, apna icons package (D-350).                                                                                                           |
+| v1.7.17 | 2026-11-21 | Q-286: mukhya set Solar, doosra Lucide, har app me credit page (owner, D-350).                                                                                                            |
+| v1.7.18 | 2026-11-21 | Q-286: ek saajha Credits page, har package ka credit component (owner, D-350).                                                                                                            |
+| v1.7.19 | 2026-11-21 | Q-287 ki salah me RTO ka matlab saaf kiya (GLOSSARY ki link).                                                                                                                             |
