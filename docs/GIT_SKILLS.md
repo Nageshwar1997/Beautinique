@@ -1,6 +1,6 @@
 # GIT SKILLS: Beautinique
 
-> **Status:** v1.1.4 (2026-11-22). Git skills (`/commit`, `/push`, `/pr`, `/sync`, `/git-status`, `/undo-commit`) ka manual, owner ke liye. Skills ka asli kaam `.claude/skills/` me; dono saath badlein.
+> **Status:** v1.1.5 (2026-11-22). Git skills (`/commit`, `/push`, `/pr`, `/sync`, `/git-status`, `/undo-commit`) ka manual, owner ke liye. Skills ka asli kaam `.claude/skills/` me; dono saath badlein.
 
 ## Is file me kya aayega
 
@@ -45,7 +45,7 @@ Flow root [CLAUDE.md](../CLAUDE.md) ka hai: `prerelease` se feature branch → P
 ## 4. Roz ka kaam (ek kaam)
 
 1. `prerelease` se nayi branch: `git fetch origin`, phir `git switch -c feat/<kaam> origin/prerelease`.
-2. Kaam aur local checks.
+2. Kaam aur local checks; saath me us role ka manual, us app ki testing file aur owner ke naye kaam (RULES DD-13, D-440).
 3. `/commit` (zaroorat ho to kai baar, har baar ek baat).
 4. `/push`.
 5. `/pr prerelease`. PR pe CI green hone ke baad merge aap karte hain.
@@ -87,3 +87,4 @@ Flow root [CLAUDE.md](../CLAUDE.md) ka hai: `prerelease` se feature branch → P
 | v1.1.2  | 2026-11-22 | §2: suraksha ke niyam ab `.claude/settings.json` ke deny aur ask rules se bhi laagu.                                  |
 | v1.1.3  | 2026-11-22 | §7: PR pe abhi ka CI (guard, Prettier, check); fail hone wali baat hati.                                              |
 | v1.1.4  | 2026-11-22 | §1, §3 se §5: `main` hata; default branch `release`, nayi branch `origin/prerelease` se (D-024).                      |
+| v1.1.5  | 2026-11-22 | §4 kadam 2: manual, testing file aur owner ke kaam usi PR me (D-440).                                                 |

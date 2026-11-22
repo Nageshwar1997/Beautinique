@@ -1,6 +1,6 @@
 # DECISIONS: Beautinique
 
-> **Status:** v1.14.40 (2026-11-22). Har faisla ek jagah. Sirf wahi "Tay" jo owner ne khud kaha; Claude ki salah faisla nahi. Cheezein ek-ek karke judti hain.
+> **Status:** v1.14.43 (2026-11-22). Har faisla ek jagah. Sirf wahi "Tay" jo owner ne khud kaha; Claude ki salah faisla nahi. Cheezein ek-ek karke judti hain.
 
 ## 0. Kaise likhein
 
@@ -454,6 +454,8 @@
 | D-437 | Address screen pe pehle form; Ola ka map aur search sirf customer ke dabane pe, Ola ki suchna ke saath.                                                                                                                                                                                 | Business     | 2026-11-22 |
 | D-438 | Account delete pe "Also delete my reviews" ka vikalp, pehle se tick nahi; default me reviews bina naam ke.                                                                                                                                                                              | Business     | 2026-11-22 |
 | D-439 | Kanooni rok wali private files pe object storage ka lock, lagbhag 13 May 2027 se.                                                                                                                                                                                                       | Security     | 2026-11-22 |
+| D-440 | Owner ke bahar ke kaam OWNER_TASKS.md me, har role ka manual manuals/ me, har app ki testing testing/ me; Claude apne aap update kare (CLAUDE.md, DD-13, /pr, RT-56).                                                                                                                   | Process      | 2026-11-22 |
+| D-441 | Env ki chaar files: `.env.development`, `.env.test` (folder me, git se bahar), `.env.production` (repo ke bahar), `.env.example` me teeno hisse; har key required, koi default nahi.                                                                                                    | Security     | 2026-11-22 |
 
 ## 2. Record
 
@@ -4173,6 +4175,7 @@
 - **Chhode vikalp:** badlav ke saath maanna (owner ne koi badlav nahi diya); batch rokna (secrets ka kram baaki).
 - **Kab dobara khulega:** owner khud khole.
 - **Kisne, kab:** owner, 2026-11-21. **Nishaan:** Salah maani.
+- **Badla (owner, 2026-11-22, D-441):** `.env.example` ke LOCAL, OPTIONAL aur PRODUCTION hisson ki jagah DEVELOPMENT, TEST aur PRODUCTION; har environment ki apni file; koi optional key ya default nahi.
 
 ### D-330. OPERATIONS batch 5: soya server, jagana aur samay wale kaam
 
@@ -5255,6 +5258,46 @@
 - **Kisne, kab:** owner, 2026-11-22. **Nishaan:** Salah maani.
 - **Asar (Claude):** lock ki muddat retention ke niyam se hi tay hoti hai, warna file samay pe nahi mitti. Lock free plan pe milta hai ya nahi, ye [OPEN_QUESTIONS.md](OPEN_QUESTIONS.md) §2 ki object storage wali jaanch me.
 
+### D-440. Owner ke kaam, roles ke manuals aur testing ki files
+
+- **Faisla:** teen nayi jagah, jinhe Claude apne aap update karta hai:
+  1. [OWNER_TASKS.md](OWNER_TASKS.md): owner ke bahar ke kaam (account banana, env key daalna, download, provider ki setting, kisi se poochhna). Claude naya kaam jodta hai; owner "ho gaya" kahe to Claude use §2 me tareekh ke saath le jaata hai, aur us pe tike docs bhi badalta hai. Secret ki value kabhi nahi.
+  2. [manuals/](manuals/README.md): har role ki ek file (`manuals/<app>/<ROLE_NAME>.md`), us role ke bane features kaise use karein. File us role ka pehla feature bante hi banti hai, aur har feature ke PR me badalti hai. Jo feature kai apps me bilkul ek jaisa hai, uska manual ek hi baar [manuals/COMMON.md](manuals/COMMON.md) me, saath me kis-kis app me hai (owner, 2026-11-22).
+  3. [testing/](testing/COMMON.md): owner ki haath ki testing, har app ki ek file (flows, unki halat, khaas baatein, record) aur ek COMMON file (kab test, har screen pe kya, test ka data, record ka tareeka, bug).
+- **Automation:**
+  1. Root [CLAUDE.md](../CLAUDE.md) ka niyam (har session me apne aap padha jaata hai): owner ka naya kaam turant OWNER_TASKS me; feature ke PR me manual aur testing file; session ki shuruaat me aaj ke kaam se jude khule owner ke kaam yaad dilana.
+  2. [RULES.md](RULES.md) DD-13 (Definition of Done) aur §6 niyam 4.
+  3. `/pr` skill ka check: manual aur testing file badli ho, warna PR me "No manual change: <wajah>".
+  4. CI ka pehra RT-56, naye root setup ke saath.
+- **Wajah:** owner ne khud kaha (2026-11-22): bahar ke kaam alag file me, har role ka manual, har app ki testing file aur ek common file, aur sab automate ho taaki owner ko yaad na dilana pade. Files ke naam, folder, dhaancha aur automation ke chaar raaste Claude ki salah.
+- **Chhode vikalp:** har role ki khaali file abhi (bina feature ke koi kaam nahi seekhta); sirf yaad pe chalna (owner ki chinta yahi thi).
+- **Kab dobara khulega:** owner khud khole.
+- **Kisne, kab:** owner, 2026-11-22. **Nishaan:** Owner (teen files aur automation); Salah maani (dhaancha).
+- **Asar (Claude):** OWNER_TASKS me abhi 4 khule kaam (location data, disk encryption, object storage, gift card issuer) [OPEN_QUESTIONS.md](OPEN_QUESTIONS.md) §2 se. Manuals ki koi role file abhi nahi, kyunki koi feature bana nahi. Testing ki 11 app files me R1 ke flows `Bana nahi` ki halat me. RT-56 ka CI pehra naye root setup ke saath banega; tab tak CLAUDE.md, DD-13 aur `/pr` ka check.
+
+### D-441. Env files: har environment ki apni file
+
+- **Faisla:** har deployable ki chaar env files ([OPERATIONS.md](OPERATIONS.md) §1 niyam 9):
+  1. **`.env.development`:** laptop pe chalane ki har key, required.
+  2. **`.env.test`:** tests ki har key, required; laptop aur CI dono pe sirf yahi.
+  3. **`.env.production`:** production ki har key aur value, repo ke bahar owner ke private env folder me; Render aur Vercel me wahi values isi se.
+  4. **`.env.example`:** git me, DEVELOPMENT, TEST aur PRODUCTION ke teen hisse, har hisse me us environment ki saari keys dummy values ke saath (TEST me tests ki nakli values hi).
+
+  Saath ke niyam:
+  - Koi optional key nahi, aur code me koi default nahi (RULES CR-3).
+  - Kam ya anjaan key pe boot ruke.
+  - CI ka test RT-57.
+  - Backup aur break-glass ke credentials alag, `.env.production` se nahi.
+- **Wajah:** owner ne khud kaha (2026-11-22): development me kuch optional nahi; har environment ki values apni file se; `.env.example` me teeno ki saari keys dummy values ke saath. `.env.production` ki jagah aur CI ka tareeka Claude ki salah, owner ne maani: production ke secrets repo ke folder me kabhi nahi aate, aur CI ko test ki values ke liye koi secret nahi chahiye.
+- **Chhode vikalp:** pehle ka LOCAL, OPTIONAL aur PRODUCTION wala dhaancha (default wali settings ke saath); `.env.production` deployable ke folder me (`.gitignore` ki ek galti se public repo me); production ki file nahi, sirf dashboards (owner ke niyam ke khilaaf).
+- **Kab dobara khulega:** owner khud khole.
+- **Kisne, kab:** owner, 2026-11-22. **Nishaan:** Owner (niyam); Salah maani (`.env.production` ki jagah, CI ka tareeka).
+- **Asar (Claude):**
+  - Production ki values do jagah (file aur platform), to har badlav dono me (OPERATIONS §4 niyam 6).
+  - Laptop pe production ki file hai, to disk encryption (OWNER_TASKS OT-2) aur zaroori.
+  - Claude `.env` aur `.env.*` files kabhi nahi kholta, sirf `.env.example` ([CLAUDE.md](../CLAUDE.md)).
+  - D-329 ka `.env.example` wala hissa isi se badla.
+
 ## Change log
 
 | Version  | Date       | Badlav                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      |
@@ -5390,3 +5433,6 @@
 | v1.14.38 | 2026-11-22 | D-433 se D-435 aaye (progress %, purane docs ka hatna, Lawyer ka chhota run; Q-370 se Q-372).                                                                                                                                                                                                                                                                                                                                                                                               |
 | v1.14.39 | 2026-11-22 | D-436 se D-439 aaye (Lawyer ke chhote run se; Q-373 se Q-376); 20 faislon me Lawyer (AI) ki raay ki Jod line.                                                                                                                                                                                                                                                                                                                                                                               |
 | v1.14.40 | 2026-11-22 | D-024 ka amal: default branch `release`, ruleset me sirf `release`, `main` GitHub se delete (owner ke kehne pe).                                                                                                                                                                                                                                                                                                                                                                            |
+| v1.14.41 | 2026-11-22 | D-440 aaya (owner ke kaam, roles ke manuals aur testing ki files, apne aap update).                                                                                                                                                                                                                                                                                                                                                                                                         |
+| v1.14.42 | 2026-11-22 | D-441 aaya (env ki chaar files; Q-377); D-329 me Badla.                                                                                                                                                                                                                                                                                                                                                                                                                                     |
+| v1.14.43 | 2026-11-22 | D-440 me jod: saajhe features ka manual manuals/COMMON.md me (owner).                                                                                                                                                                                                                                                                                                                                                                                                                       |

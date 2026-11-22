@@ -66,6 +66,10 @@ Record `git rev-parse HEAD` (the way back).
    and versions);
    config and env keys (`.env.example`); DB migrations and indexes; CI or workflow changes; breaking changes; missing
    docs; task ids (`T<n>`, `QA-...`, `LIVE-...`).
+   Feature work in an app or a service's routes: the role manuals (`docs/manuals/`) and that app's testing file
+   (`docs/testing/<APP>.md`) must change in the same PR, and new owner work (env keys, accounts) must be in
+   `docs/OWNER_TASKS.md` (`docs/RULES.md` DD-13, RT-56). Missing → add them first, or write
+   "No manual change: <reason>" under Testing.
 4. Checks for what changed (shared §5). Keep each command and its real result. A failure → show it and ask: fix
    first, or open the PR with the failure written under Testing.
 

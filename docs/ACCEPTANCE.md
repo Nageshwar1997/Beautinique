@@ -1,6 +1,6 @@
 # ACCEPTANCE: Beautinique
 
-> **Status:** v1.0.4 (2026-11-22). R1 ke har service aur app ke acceptance criteria (D-388 se D-395). Cheezein ek-ek karke, owner ki haan ke baad judti hain.
+> **Status:** v1.0.5 (2026-11-22). R1 ke har service aur app ke acceptance criteria (D-388 se D-395). Cheezein ek-ek karke, owner ki haan ke baad judti hain.
 
 ## Is file me kya aayega
 
@@ -27,7 +27,7 @@
 9. **AC-PLATFORM-9** (SR-047; ARCHITECTURE §1.8, §10.1 niyam 5): **Given** random daam, rates aur quantity (property test), **When** tax nikle, **Then** taxable + CGST + SGST = daam bilkul, ₹49 pe 5% = ₹46.66 + ₹1.17 + ₹1.17, chhoot ka bantwara jod me barabar, aur kahin float nahi.
 10. **AC-PLATFORM-10** (SR-063; §10.3 niyam 5): **Given** record A ka encrypted field, **When** use record B ya doosre field me copy karke kholein, **Then** khulna fail; database me plaintext ka pattern kahin nahi.
 11. **AC-PLATFORM-11** (R-040, D-250, D-321; §10.3 niyam 1, 3, 4): **Given** nayi collection bina retention class ya delete handler ke, **When** CI chale, **Then** fail; **Given** personal data ka erase, **Then** field hatna, rok ki copy aur event ek transaction me, aur `tech` class ke records rok me nahi.
-12. **AC-PLATFORM-12** (D-329; OPERATIONS §1 niyam 9, §4 niyam 4, 5): **Given** config me anjaan ya kam key, **When** boot ho, **Then** process key ke naam ke saath (value ke bina) ruke; payments test mode me hon aur key live wali ho to process na uthe; har config key `.env.example` me aur `.env.example` me koi anjaan key nahi.
+12. **AC-PLATFORM-12** (D-329, D-441; OPERATIONS §1 niyam 9, §4 niyam 4, 5): **Given** config me anjaan ya kam key, **When** boot ho, **Then** process key ke naam ke saath (value ke bina) ruke; payments test mode me hon aur key live wali ho to process na uthe; har config key `.env.example` me aur `.env.example` me koi anjaan key nahi.
 
 ### 1.2 GATEWAY
 
@@ -312,3 +312,4 @@ Kul 187 criteria (R1).
 | v1.0.2  | 2026-11-22 | Naya AC-IDENTITY-13 (aliases aur allowlist); kul 186 (security review batch 2, D-409).                             |
 | v1.0.3  | 2026-11-22 | AC-LOGS-3 me jod; naya AC-MASTER-7; kul 187 (security review batch 6, D-413).                                      |
 | v1.0.4  | 2026-11-22 | AC-PAYMENTS-8 aur AC-DELIVERY-4 me test mode ka QR (D-418).                                                        |
+| v1.0.5  | 2026-11-22 | AC-PLATFORM-12 me D-441 (env ki chaar files).                                                                      |

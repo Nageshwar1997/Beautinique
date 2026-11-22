@@ -1,6 +1,6 @@
 # CLAUDE.md: Beautinique
 
-> **Status:** v1.0.4 (2026-11-22). Docs aur code naye sire se ban rahe hain.
+> **Status:** v1.0.6 (2026-11-22). Docs aur code naye sire se ban rahe hain.
 
 Ye file Claude Code har session ki shuruaat me padhta hai. Project pe ek hi insaan (owner) kaam karta hai,
 2 Claude accounts se baari-baari. **Kaam shuru karne se pehle [docs/HANDOFF.md](docs/HANDOFF.md) padho.**
@@ -54,6 +54,14 @@ Ye file Claude Code har session ki shuruaat me padhta hai. Project pe ek hi insa
   sirf chhota fix (1–10 files, local checks ke baad, force push nahi) aur `linkedin-posts/` ki files aur
   `/linkedin-post` skill seedha push ho sakti hain. Release pe bane commits (hotfix) ke baad `release` →
   `prerelease` back-merge bhi. CI ye flow check karta hai.
+- **Owner ke kaam, manuals aur testing apne aap (owner, 2026-11-22; D-440):** owner ka koi bahar ka kaam
+  nikle (account, env key, download, provider ki setting, kisi se poochhna) to turant
+  [docs/OWNER_TASKS.md](docs/OWNER_TASKS.md) me; owner "ho gaya" kahe to wahin §2 me tareekh ke saath, aur
+  jo docs us pe tike hain wo bhi. Kisi role ka feature bane ya badle to usi PR me
+  [docs/manuals/](docs/manuals/README.md) me us role ka manual (kai apps me ek jaisa feature
+  ho to ek hi baar `manuals/COMMON.md` me, apps ki list ke saath), aur us app ki [docs/testing/](docs/testing/COMMON.md)
+  file (flow ki halat aur kya dekhna). Session ki shuruaat me, aaj ke kaam se jude khule owner ke kaam owner ko
+  yaad dilao. Owner ko ye yaad nahi dilana padta.
 - **Commit/push sirf owner ke kehne pe.** Destructive kaam se pehle poochho.
 - **Koi AI attribution nahi (owner, 2026-11-14):** commit message/trailer, PR title/description, tag ya
   release notes me `Co-Authored-By: Claude`, "Generated with Claude Code", 🤖 ya koi AI signature nahi, chahe
@@ -91,3 +99,5 @@ khula hai. Jis doc me badlav kiya, uske change log me ek line. Progress % ka niy
 | v1.0.2  | 2026-11-22 | Progress % ka niyam ab PROJECT_PLAN §2 me (D-433).                               |
 | v1.0.3  | 2026-11-22 | `.env` aur `All-ENVs` ka niyam `.claude/settings.json` ke deny rules se bhi.     |
 | v1.0.4  | 2026-11-22 | Git flow se `main` hata; default branch `release`, nayi branch `prerelease` se.  |
+| v1.0.5  | 2026-11-22 | Owner ke kaam, manuals aur testing ki files apne aap update (D-440).             |
+| v1.0.6  | 2026-11-22 | Kai apps ka saajha feature: manual ek hi baar manuals/COMMON.md me (D-440).      |

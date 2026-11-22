@@ -1,6 +1,6 @@
 # OPEN QUESTIONS: Beautinique
 
-> **Status:** v1.8.9 (2026-11-22). Khule sawal, aage ke topics aur jaanchna baaki. Cheezein ek-ek karke judengi.
+> **Status:** v1.8.10 (2026-11-22). Khule sawal, aage ke topics aur jaanchna baaki. Cheezein ek-ek karke judengi.
 
 ## Is file me kya aayega
 
@@ -7419,6 +7419,33 @@ Claude ka kaam: owner ka faisla nahi chahiye, sirf saboot. Nateeja saboot ke saa
 - **R1 ya baad me:** lagbhag 13 May 2027 se pehle; R1 me sirf design.
 - **Owner ka jawab (2026-11-22):** **(a)**, kanooni rok wali files ke folder pe object storage ka lock, rok ki muddat jitna, lagbhag 13 May 2027 se. Record: [DECISIONS.md](DECISIONS.md) D-439.
 
+### Q-377. Env files: har environment ki apni file, aur `.env.production` kahan?
+
+- **Status:** `Tay`. Topic: B15 (technical), B14 (security).
+- **Sawal:** owner ka niyam (2026-11-22): development me kuch bhi optional nahi; jo env laptop pe chalane ya testing ke liye chahiye, wo saaf aur required ho. Development ki values development ki env file se, testing ki values testing ki alag file se, aur production ki values `.env.production` se aayein. `.env.example` me teeno ki saari keys dummy values ke saath hon. Niyam ki detail kaise ho, aur `.env.production` kahan rahe?
+- **Kyun zaroori:** pehle ka niyam (OPERATIONS §1 niyam 9) LOCAL, OPTIONAL aur PRODUCTION ke teen hisse aur default wali settings maanta tha; owner ka niyam usse alag hai. Repo public hai, to production ki values wali file kahan rahe, ye security ka sawal hai.
+- **Vikalp:**
+  - **(a) Chaar files, `.env.production` repo ke bahar:**
+    - `.env.development` aur `.env.test` har deployable ke folder me, git se bahar.
+    - `.env.production` owner ke private env folder me, repo ke bahar. Render aur Vercel me wahi values isi se jaati hain.
+    - `.env.example` me DEVELOPMENT, TEST aur PRODUCTION ke teen hisse. TEST me tests ki nakli values hi, taaki CI `.env.test` usi se bana sake.
+    - Har key required, code me koi default nahi, aur CI ka test RT-57.
+  - **(b) Chaaron files deployable ke folder me:** `.env.production` bhi repo ke folder me, sirf `.gitignore` ke bharose.
+  - **(c) Production ki file nahi:** production ki values sirf Render aur Vercel ke dashboards me (pehle jaisa).
+- **Salah:** **(a)**. Owner ka niyam poora hota hai. Production ke secrets repo ke folder me kabhi nahi aate, to galti se commit ya kisi tool ke padhne ka khatra nahi rehta. Aur CI ko test ki values ke liye koi secret nahi chahiye.
+- **Trade-off:**
+  - (a) me production ki values do jagah hain (file aur platform), to har badlav dono me karna padta hai (OPERATIONS §4 niyam 6). File laptop pe hai, to disk encryption (OWNER_TASKS OT-2) aur zaroori ho jaata hai.
+  - (b) me ek `.gitignore` ki galti se production ke secrets public repo me ja sakte hain.
+  - (c) me owner ke niyam wali production file hi nahi banti.
+- **R1 ya baad me:** R1 (naye root setup se).
+- **Owner ka jawab (2026-11-22):**
+  - **Owner ka niyam:** development me koi optional env nahi; development, testing aur production ki values apni-apni env file se; `.env.example` me teeno ki saari keys dummy values ke saath.
+  - **Detail (a):**
+    - `.env.development` aur `.env.test` deployable ke folder me, git se bahar.
+    - `.env.production` repo ke bahar, owner ke private env folder me.
+    - Har key required, aur code me koi default nahi.
+  - **Record:** [DECISIONS.md](DECISIONS.md) D-441.
+
 ## Change log
 
 | Version | Date       | Badlav                                                                                                                                                                                              |
@@ -7563,3 +7590,4 @@ Claude ka kaam: owner ka faisla nahi chahiye, sirf saboot. Nateeja saboot ke saa
 | v1.8.7  | 2026-11-22 | Q-370 se Q-372 Tay (D-433 se D-435).                                                                                                                                                                |
 | v1.8.8  | 2026-11-22 | Lawyer (AI) ke chhote run se Q-373 (14 sudhaar) aur Q-374 se Q-376 (Ola ka map, delete pe reviews, private files ka bachav) khule.                                                                  |
 | v1.8.9  | 2026-11-22 | Q-373 se Q-376 Tay (D-436 se D-439); §2 ki object storage row me lock ki jaanch.                                                                                                                    |
+| v1.8.10 | 2026-11-22 | Q-377 Tay: env ki chaar files, owner ka niyam (D-441).                                                                                                                                              |

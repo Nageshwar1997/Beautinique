@@ -1,6 +1,6 @@
 # Docs: Beautinique
 
-> **Status:** v1.0.2 (2026-11-21). Docs ka index. Files khaali shuru hui hain; cheezein ek-ek karke, owner ki haan ke baad judti hain.
+> **Status:** v1.0.3 (2026-11-22). Docs ka index. Files khaali shuru hui hain; cheezein ek-ek karke, owner ki haan ke baad judti hain.
 
 ## Niyam
 
@@ -27,23 +27,28 @@
 | [OPERATIONS.md](OPERATIONS.md)                                         | Chalane ka manual                                                    |
 | [RULES.md](RULES.md)                                                   | Kaam ke niyam                                                        |
 | [HANDOFF.md](HANDOFF.md)                                               | Abhi ki halat aur agla kaam                                          |
+| [OWNER_TASKS.md](OWNER_TASKS.md)                                       | Owner ke bahar ke kaam (account, env key, download)                  |
 | [LESSONS.md](LESSONS.md)                                               | Sabak aur traps                                                      |
 | [GIT_SKILLS.md](GIT_SKILLS.md)                                         | Git skills ka manual                                                 |
 | [security/THREAT_MODEL.md](security/THREAT_MODEL.md)                   | Har module ka threat model                                           |
 | [security/SECURITY_REQUIREMENTS.md](security/SECURITY_REQUIREMENTS.md) | Security ke niyam, module-wise                                       |
 | [tasks/](tasks/README.md)                                              | Har module ka folder: `TASK.md` aur subtasks                         |
+| [manuals/](manuals/README.md)                                          | Har role ka manual: bane features kaise use karein                   |
+| [testing/](testing/COMMON.md)                                          | Owner ki haath ki testing: har app ki file aur saajhe niyam          |
 
 ## Padhne ka order
 
 1. [HANDOFF.md](HANDOFF.md)
-2. [RULES.md](RULES.md)
-3. [PROJECT_PLAN.md](PROJECT_PLAN.md)
-4. Baaki files zaroorat ke hisaab se.
+2. [OWNER_TASKS.md](OWNER_TASKS.md) (owner ke khule kaam)
+3. [RULES.md](RULES.md)
+4. [PROJECT_PLAN.md](PROJECT_PLAN.md)
+5. Baaki files zaroorat ke hisaab se.
 
 ## Change log
 
-| Version | Date       | Badlav                                                 |
-| ------- | ---------- | ------------------------------------------------------ |
-| v1.0.0  | 2026-11-17 | Pehla version: docs ka index aur niyam.                |
-| v1.0.1  | 2026-11-18 | OPEN_QUESTIONS ki line: topics aur jaanchna baaki bhi. |
-| v1.0.2  | 2026-11-21 | Nayi file ACCEPTANCE.md (D-388).                       |
+| Version | Date       | Badlav                                                    |
+| ------- | ---------- | --------------------------------------------------------- |
+| v1.0.0  | 2026-11-17 | Pehla version: docs ka index aur niyam.                   |
+| v1.0.1  | 2026-11-18 | OPEN_QUESTIONS ki line: topics aur jaanchna baaki bhi.    |
+| v1.0.2  | 2026-11-21 | Nayi file ACCEPTANCE.md (D-388).                          |
+| v1.0.3  | 2026-11-22 | Nayi files OWNER_TASKS.md, manuals/ aur testing/ (D-440). |

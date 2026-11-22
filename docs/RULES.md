@@ -1,6 +1,6 @@
 # RULES: Beautinique
 
-> **Status:** v1.2.2 (2026-11-22). Kaam ke niyam. Saare sections: §1 (Definition of Done), §2 (Git aur release gate), §3 (Code), §4 (Testing), §5 se §7 (security, docs, AI); D-381 se D-387, D-397, D-398, D-429, D-430. Cheezein ek-ek karke, owner ki haan ke baad judti hain.
+> **Status:** v1.2.4 (2026-11-22). Kaam ke niyam. Saare sections: §1 (Definition of Done), §2 (Git aur release gate), §3 (Code), §4 (Testing), §5 se §7 (security, docs, AI); D-381 se D-387, D-397, D-398, D-429, D-430. Cheezein ek-ek karke, owner ki haan ke baad judti hain.
 
 ## Is file me kya aayega
 
@@ -34,6 +34,7 @@ Ek subtask tab "ho gaya" jab:
 10. **DD-10:** bundle budget aur database operations ka budget nahi toota; nayi query index se.
 11. **DD-11:** `TASK.md` me status, tests ki links aur change log ki line; "verified" sirf haath ke record ya live smoke ke saath (D-377).
 12. **DD-12:** PR ke description me "kaise jaancha" (RT-42).
+13. **DD-13:** jis role ka feature bana ya badla, uska manual ([manuals/](manuals/README.md)) (kai apps ka saajha feature ho to [manuals/COMMON.md](manuals/COMMON.md) me, apps ki list ke saath) aur us app ki testing file ([testing/](testing/COMMON.md)) usi PR me; owner ka koi naya bahar ka kaam (jaise env key) [OWNER_TASKS.md](OWNER_TASKS.md) me (D-440).
 
 ## 2. Git aur release
 
@@ -68,7 +69,7 @@ Tools D-001 ke; folder aur naam D-002 ke. Jahan niyam ke saath lint ya CI ka peh
 
 1. **CR-1:** TypeScript strict, sirf ESM. `any` nahi; bahar se aaya data `unknown` hai jab tak zod se parse na ho.
 2. **CR-2:** bahar se aane wala har data zod se jaancha jaaye: API input, env, webhooks, events (RT-6), queue ke jobs, files ki jaankari, aur providers ke jawab.
-3. **CR-3:** config sirf us service ke config module se; `process.env` uske bahar nahi padha jaata (lint). Har service sirf apne namespace ke secrets (SR-071).
+3. **CR-3:** config sirf us service ke config module se; `process.env` uske bahar nahi padha jaata (lint). Har service sirf apne namespace ke secrets (SR-071). Har environment ki har key required aur apni env file se; code me koi default ya optional key nahi ([OPERATIONS.md](OPERATIONS.md) §1 niyam 9, D-441).
 4. **CR-4:** jo data hai wo code me nahi likha jaata: states, districts, sub-districts, pincodes, hubs, warehouses, roles, rates (GST, TCS, TDS, fees) aur kanooni seemaayein; ye data ya settings me (D-037). Lint `src/` me state ke naam aur pincode jaisi 6 ank ki string rokta hai (tests aur fixtures chhod ke). _Wajah:_ naya area bina code change ke khule.
 5. **CR-5:** role ke naam se koi faisla nahi (jaise `role === "MASTER"`); faisla hamesha permission aur scope se ([ARCHITECTURE.md](ARCHITECTURE.md) §11). Lint role ki keys ki tulna rokta hai. _Wajah:_ sub-role bina deploy judte hain (D-017), aur bypass ka raasta na bane.
 6. **CR-6:** naam: files `kebab-case`; React components `PascalCase`; functions aur variables `camelCase`; constants `UPPER_SNAKE_CASE`; events `<service>.<cheez>.<past tense>` (jaise `logistics.area.changed`); permissions `<service>.<resource>.<action>`.
@@ -391,6 +392,8 @@ Kuch niyamon ka saboot test nahi, record hai (jaise schema ki review checklist, 
 3. **RT-45:** CI ki config ka apna test: har app aur service jiske tests hain, CI ki jobs me ho. _Wajah:_ naya app ya service CI se chhoot na jaaye.
 4. **RT-46:** release ka test report: har command ka nateeja aur samay ki chhoti table, release note ke saath (RT-42). _Wajah:_ "kaise jaancha" ka saboot dohraane layak rahe.
 5. **RT-47:** in galtiyon ke regression tests: Valkey ruka par connection juda (disconnect nahi) to signed-in route jaldi 503 de, latke nahi; apps ki har API call pe timeout; edge ya proxy ka 5xx user ko raw text me na dikhe, saaf screen pe; E2E ki safai backend band hone ke baad bhi chale. _Wajah:_ ye galtiyan ek baar asli me ho chuki hain.
+6. **RT-56:** CI ka pehra: PR me kisi app (`frontend/<app>/`) ya service ke routes ka code badla aur na us app ki testing file badli, na kisi manual, to CI laal; chhoot sirf jab PR ke description me "No manual change: <wajah>" ho (D-440). _Wajah:_ manual aur testing ki files code ke saath chalein, yaad ke bharose nahi.
+7. **RT-57:** env files ka test: har service ke config schema ki har key `.env.example` ke us environment ke hisse (DEVELOPMENT, TEST, PRODUCTION) me; koi anjaan key nahi; TEST aur DEVELOPMENT me database, Redis aur providers ke hosts sirf loopback ya fake; aur test runner `.env.test` ke bina shuru hi na ho (D-441). _Wajah:_ koi key chupke se kam ya galat environment ki na ho.
 
 ### 4.8 Testing ke jaane-pehchaane jaal (D-429)
 
@@ -414,6 +417,7 @@ Kuch niyamon ka saboot test nahi, record hai (jaise schema ki review checklist, 
 1. Docs ke niyam [README.md](README.md) aur root [CLAUDE.md](../CLAUDE.md) me: Hinglish, har file ke top pe status (version aur date), neeche change log, `vX.Y.Z` ka niyam, aur har baat sirf ek jagah (D-019).
 2. "Bana hai" sirf code ya test ki link ke saath (D-019).
 3. Har package me README (CR-34); code ka koi niyam badle to usi PR me uska doc.
+4. Owner ke bahar ke kaam [OWNER_TASKS.md](OWNER_TASKS.md) me, roles ke manuals [manuals/](manuals/README.md) me, aur owner ki haath ki testing [testing/](testing/COMMON.md) me; teeno Claude apne aap update karta hai (DD-13, RT-56, D-440).
 
 ## 7. AI ke saath kaam (D-430)
 
@@ -438,3 +442,6 @@ Kuch niyamon ka saboot test nahi, record hai (jaise schema ki review checklist, 
 | v1.1.9  | 2026-11-22 | RT-2 (MongoDB pin, local Atlas container, PgBouncer, `noeviction`), RT-14 (`zrok`), accessibility me `wcag22aa`, Lighthouse ka median, §4.6 finance migrations aur PgBouncer, nightly me service worker ke tests (D-422, D-425). |
 | v1.2.1  | 2026-11-22 | Naye §3 code ke niyam CR-1 se CR-36, §4.8 testing ke jaal RT-49 se RT-55 (D-429), aur §5 se §7 (D-430).                                                                                                                          |
 | v1.2.2  | 2026-11-22 | §4.1 ki table se `main` pe push hata (D-024).                                                                                                                                                                                    |
+| v1.2.2  | 2026-11-22 | DD-13, RT-56 aur §6 niyam 4: manuals, testing aur owner ke kaam ki files (D-440).                                                                                                                                                |
+| v1.2.3  | 2026-11-22 | CR-3 me har key required aur koi default nahi; naya RT-57 env files ka test (D-441).                                                                                                                                             |
+| v1.2.4  | 2026-11-22 | DD-13 me saajhe features ka manual COMMON.md me (D-440).                                                                                                                                                                         |

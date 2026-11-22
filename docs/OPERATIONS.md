@@ -1,6 +1,6 @@
 # OPERATIONS: Beautinique
 
-> **Status:** v1.1.12 (2026-11-22). System chalane ka manual. Cheezein ek-ek karke judengi.
+> **Status:** v1.1.13 (2026-11-22). System chalane ka manual. Cheezein ek-ek karke judengi.
 
 ## Is file me kya aayega
 
@@ -25,8 +25,17 @@ DevOps / SRE Architect ki raay se (D-257 ka kram), owner ki haan ke baad (D-326 
 6. Laptop pe har service ka alag database aur alag DB user (live jaisa), ek hi local MongoDB server me.
 7. Laptop, tests aur CI kabhi live databases ya live Redis se nahi judte. Live databases tak laptop ki pahunch sirf teen commands ko: backup, restore ka abhyaas aur break-glass, apne alag credentials se.
 8. Laptop pe asli provider keys ki zaroorat nahi: email local inbox me, payment, push, media aur social sign-in ke fake adapters. Kisi provider ka asli test-mode kaam karna ho tabhi uski test key, sirf us din.
-9. Har deployable ki `.env.example` git me, teen hisson me: **LOCAL** (laptop ki public values), **OPTIONAL** (default wali settings, commented), **PRODUCTION** (sirf naam aur `<...>` jaisi dummy value). Laptop ki `.env` me sirf LOCAL hissa. CI ka test pakka kare ki har service ke config schema ki har key `.env.example` me hai, aur `.env.example` me koi anjaan key nahi.
-10. Naye laptop ka setup ek command se: Node aur npm ke version ki jaanch, `npm ci`, `.env` banana (LOCAL hisse se), `infra:up`, seed. **Misaal:** `npm run setup`. Commands ki asli list code ke saath yahan judegi.
+9. **Env files (owner ka niyam, D-441):** har deployable ki chaar files, har environment ki values sirf apni file se:
+   1. **`.env.development`** (laptop pe chalana): development ki har key, saaf aur required. Koi optional key nahi, aur code me koi default nahi.
+   2. **`.env.test`** (unit, integration aur E2E tests, laptop aur CI dono pe): testing ki har key, required. Test runner sirf yahi file padhta hai.
+   3. **`.env.production`** (live): production ki har key aur value. Ye file repo ke bahar owner ke private env folder me rehti hai, repo ke andar kabhi nahi. Render aur Vercel ke env me wahi values isi file se jaati hain; live process apne platform ka env padhta hai.
+   4. **`.env.example`** (git me, sirf yahi): teen hisse, **DEVELOPMENT**, **TEST** aur **PRODUCTION**. Har hisse me us environment ki saari keys, dummy values ke saath. DEVELOPMENT me laptop ke public values (jaise `127.0.0.1` ke ports) jaise hain, aur har secret ki jagah `<...>`. TEST me tests ki asli values hi, kyunki wo sab nakli hain (loopback ke hosts aur fake keys, RULES RT-12). PRODUCTION me sirf naam aur `<...>`.
+
+   `.env.development` aur `.env.test` git se bahar hain (`.gitignore`). CI `.env.test` ko `.env.example` ke TEST hisse se banata hai. CI ka test (RULES RT-57) pakka karta hai:
+   - har service ke config schema ki har key us environment ke hisse me hai;
+   - koi anjaan key nahi hai;
+   - TEST aur DEVELOPMENT me database, Redis aur providers ke hosts sirf loopback ya fake hain (SR-068).
+10. Naye laptop ka setup ek command se: Node aur npm ke version ki jaanch, `npm ci`, `.env.development` aur `.env.test` banana (`.env.example` ke DEVELOPMENT aur TEST hisson se; development ke secrets owner bhare), `infra:up`, seed. **Misaal:** `npm run setup`. Commands ki asli list code ke saath yahan judegi.
 
 ## 2. CI aur branch ke pehre (D-327)
 
@@ -64,13 +73,13 @@ DevOps / SRE Architect ki raay se (D-257 ka kram), owner ki haan ke baad (D-326 
 2. Secrets ki list (misaal, code ke saath pakki): har Atlas cluster ka app user, release user aur read-only backup user; Neon ke app, migration aur backup roles; Redis ka internal URL; apps se gateway ka secret header; token sign karne wali keys; field encryption ki keys; payment gateway ki key aur webhook secret; email provider ki API key; push ki private key; teen social sign-in apps ke secrets; media provider ki key; backup encryption key; break-glass ka credential; logs cluster ke users; band data ki public key (secret nahi, par list me; D-399); map ki browser key (public, apps ke exact hosts ki whitelist ke saath, SR-091) aur server ka map client (agar ho).
 3. Kahan: backend ke secrets Render ke env me; apps ke liye sirf wo jo build ya rewrite ko chahiye, Vercel ke Sensitive env me; app ke bundle me kabhi koi secret nahi. Backup ki key, recovery codes aur band data ki private key (D-399, SR-097) sirf password manager me, aur band data ki private key ki ek doosri offline copy bhi; kisi provider ke env me nahi.
 4. Test aur live keys naam se alag pehchaan me. Jab tak payments test mode me hain, boot pe jaanch: payment key test wali na ho to process shuru hi na ho.
-5. Har service ka config zod schema se, apne namespace me; boot pe koi key kam ya anjaan ho to process key ke naam ke saath (value ke bina) ruk jaaye.
-6. Badlav do values ke saath, bina downtime: (1) nayi value "agli" ki tarah jodo, deploy; (2) provider ya bhejne wale ko nayi pe badlo; (3) purani hatao, deploy. **Misaal:** apps ka secret header: gateway dono values maane, phir Vercel me nayi, phir gateway se purani hate.
+5. Har service ka config zod schema se, apne namespace me; har environment (development, test, production) ki apni keys, sab required, code me koi default nahi (D-441). Boot pe koi key kam ya anjaan ho to process key ke naam ke saath (value ke bina) ruk jaaye.
+6. Badlav do values ke saath, bina downtime: (1) nayi value "agli" ki tarah jodo, deploy; (2) provider ya bhejne wale ko nayi pe badlo; (3) purani hatao, deploy. Har badlav owner ki `.env.production` me bhi usi waqt (§1 niyam 9, D-441). **Misaal:** apps ka secret header: gateway dono values maane, phir Vercel me nayi, phir gateway se purani hate.
 7. Render me env badalne ke baad naya deploy zaroori; sirf restart naya env nahi uthata (jaancha 2026-11-21).
 8. Kab: shak ya incident pe turant (gambhirta 1 pe misaal 1 ghante me, 2 pe 1 din); baaki saal me ek baar, tay mahine me (misaal April), ops inbox me yaad ke saath; signing keys apne aap.
 9. Providers ke accounts pe MFA, recovery codes offline, tokens kam haq aur kam umar ke, production dashboards ek alag browser profile me.
 10. Settings (thresholds, allowlist, kill switches, emails ki chhat) maalik service ke DB me aur Master app se badalti hain, bina deploy; env me sirf boot ka config aur secrets.
-11. Nayi env key Render ya Vercel me tabhi daali jaaye jab code use padhta ho, kyunki niyam 5 anjaan key pe boot rok deta hai; PR ke note me nayi keys ke naam aur value kahan se aayegi, aur dashboard me daalna owner ka kaam (D-430).
+11. Nayi env key Render ya Vercel me tabhi daali jaaye jab code use padhta ho, kyunki niyam 5 anjaan key pe boot rok deta hai; PR ke note me nayi keys ke naam aur value kahan se aayegi, aur dashboard me daalna owner ka kaam (D-430). Ye kaam [OWNER_TASKS.md](OWNER_TASKS.md) me bhi judta hai (D-440).
 
 ## 5. Soya server, jagana aur samay wale kaam (D-330)
 
@@ -101,7 +110,7 @@ DevOps / SRE Architect ki raay se (D-257 ka kram), owner ki haan ke baad (D-326 
 9. Production restore ka kram: (1) checkout, sign-up aur uploads ke kill switches band; (2) jis cluster ka restore, sirf usi ka; (3) restore ke baad delete hue accounts ki list ke deletes dobara; (4) release step ka fingerprint aur `/ready`; (5) smoke check; (6) switches kholna.
 10. Restore ka abhyaas har 3 mahine (misaal) aur har bade schema badlav ke baad: aakhri backup laptop pe restore karke niyam 8 ki jaanch, aur key ka chalna bhi. Nateeja, samay aur tareekh yahan abhyaas wali table me ek line. Pehla abhyaas R1 se pehle. Saal me ek baar band record aur band FY ki export file kholne ka abhyaas bhi (SR-097).
 11. RPO aur RTO: RPO = aakhri backup tak (6 ghante ke andar ki finance ki galti Neon ke restore se); RTO misaal 1 din.
-12. Backup, restore aur break-glass ke credentials laptop pe alag aur kam haq wale; har chalana audit me.
+12. Backup, restore aur break-glass ke credentials laptop pe alag aur kam haq wale; `.env.production` se nahi (D-441); har chalana audit me.
 
 ## 7. Monitoring, health aur alerts (D-332)
 
@@ -188,3 +197,5 @@ DevOps / SRE Architect ki raay se (D-257 ka kram), owner ki haan ke baad (D-326 
 | v1.1.10 | 2026-11-22 | §4 niyam 11: nayi env key tabhi jab code padhe (D-430).                                                                                                                                                        |
 | v1.1.11 | 2026-11-22 | §6 niyam 1 private files ka kho jaana breach (D-439); §8 niyam 2 CERT-In ki ghadi aur niyam 3 breach ki paribhasha (D-436).                                                                                    |
 | v1.1.12 | 2026-11-22 | §2 niyam 3, 10, 11 aur §3 niyam 1 se `main` hata; default branch `release` (D-024).                                                                                                                            |
+| v1.1.12 | 2026-11-22 | §4 niyam 11: env key ka kaam OWNER_TASKS me bhi (D-440).                                                                                                                                                       |
+| v1.1.13 | 2026-11-22 | §1 niyam 9 aur 10, §4 niyam 5 aur 6, §6 niyam 12: env ki chaar files, har key required, koi default nahi (D-441).                                                                                              |
