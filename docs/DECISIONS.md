@@ -1,6 +1,6 @@
 # DECISIONS: Beautinique
 
-> **Status:** v1.14.44 (2026-11-22). Har faisla ek jagah. Sirf wahi "Tay" jo owner ne khud kaha; Claude ki salah faisla nahi. Cheezein ek-ek karke judti hain.
+> **Status:** v1.14.45 (2026-11-22). Har faisla ek jagah. Sirf wahi "Tay" jo owner ne khud kaha; Claude ki salah faisla nahi. Cheezein ek-ek karke judti hain.
 
 ## 0. Kaise likhein
 
@@ -456,7 +456,8 @@
 | D-439 | Kanooni rok wali private files pe object storage ka lock, lagbhag 13 May 2027 se.                                                                                                                                                                                                       | Security     | 2026-11-22 |
 | D-440 | Owner ke bahar ke kaam OWNER_TASKS.md me, har role ka manual manuals/ me, har app ki testing testing/ me; Claude apne aap update kare (CLAUDE.md, DD-13, /pr, RT-56).                                                                                                                   | Process      | 2026-11-22 |
 | D-441 | Env ki chaar files: `.env.development`, `.env.test` (folder me, git se bahar), `.env.production` (repo ke bahar), `.env.example` me teeno hisse; har key required, koi default nahi.                                                                                                    | Security     | 2026-11-22 |
-| D-442 | Change log chhota: 2026-11-22 tak ki lines har file me ek line me; aage se ek din ki ek hi line; purana itihaas git me. | Process | 2026-11-22 |
+| D-442 | Change log chhota: 2026-11-22 tak ki lines har file me ek line me; aage se ek din ki ek hi line; purana itihaas git me.                                                                                                                                                                 | Process      | 2026-11-22 |
+| D-443 | Discovery poori, planning stage khula: PROJECT_PLAN me modules, dependencies aur progress ki table, phir har module ki TASK.md; code aur PR implementation stage me, owner ke kholne pe.                                                                                                | Process      | 2026-11-22 |
 
 ## 2. Record
 
@@ -5312,8 +5313,22 @@
 - **Kisne, kab:** owner, 2026-11-22. **Nishaan:** Owner (chhota karna); Salah maani (din ki ek line).
 - **Asar (Claude):** CLAUDE.md aur docs ke index ka "har badlav ki ek line" wala niyam isi se badla. Faislon ka itihaas DECISIONS ke records me rehta hai, change log me nahi.
 
+### D-443. Planning stage khula
+
+- **Faisla:**
+  1. Discovery poori; planning stage 2026-11-22 se khula (D-004 ka agla stage).
+  2. Planning me [PROJECT_PLAN.md](PROJECT_PLAN.md) me modules ki list, unki dependencies, releases me bantwara aur progress ki table (D-433); phir har module ki `tasks/NN-<module>/TASK.md` ([tasks/README.md](tasks/README.md)).
+  3. Planning me bhi har cheez owner ki haan ke baad judti hai, aur sawal-jawab discovery ke niyamon se ([OPEN_QUESTIONS.md](OPEN_QUESTIONS.md)).
+  4. Code abhi bhi nahi: wo implementation stage me, jab owner use khole.
+  5. Planning ke docs pe PR nahi: sirf commit aur push, owner ke kehne pe. PR asli code shuru hone pe.
+- **Wajah:** owner ne khud kaha (2026-11-22): planning stage kholo. Discovery ke saare sawal (Q-001 se Q-377) `Tay` the, koi khula nahi. PR wala niyam bhi owner ne khud kaha (2026-11-22).
+- **Chhode vikalp:** discovery aur chalana (koi sawal khula nahi tha); plan aur code saath shuru karna (plan ke bina code ka kram aur progress ka hisaab nahi banta).
+- **Kab dobara khulega:** jab owner implementation stage khole.
+- **Kisne, kab:** owner, 2026-11-22. **Nishaan:** Owner.
+- **Asar (Claude):** [CLAUDE.md](../CLAUDE.md) aur [HANDOFF.md](HANDOFF.md) ki "abhi ki halat" isi se badli. Modules ki list ka pehla sawal Q-378.
+
 ## Change log
 
-| Version | Date | Badlav |
-| --- | --- | --- |
-| v1.0.0 se v1.14.44 | 2026-11-17 se 2026-11-22 | Faisle D-001 se D-442; har badlav ka poora itihaas git me (D-442). |
+| Version            | Date                     | Badlav                                                             |
+| ------------------ | ------------------------ | ------------------------------------------------------------------ |
+| v1.0.0 se v1.14.45 | 2026-11-17 se 2026-11-22 | Faisle D-001 se D-443; har badlav ka poora itihaas git me (D-442). |

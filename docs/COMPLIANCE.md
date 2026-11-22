@@ -1,6 +1,6 @@
 # COMPLIANCE: Beautinique
 
-> **Status:** v1.2.5 (2026-11-22). Kanooni matrix. System me sab poori tarah banta hai, par registrations aur bahar ki companies ki details dummy hain (D-026); apne roles ki jaankari asli (D-241). Project ke Lawyer aur CA AI agents hain (D-257); Lawyer ne 18 rows dekhin (D-272), CA ne 32 rows dekhin aur 8 nayi rows di (D-281). Cheezein ek-ek karke, owner ki haan se, judti hain (D-220).
+> **Status:** v1.2.6 (2026-11-22). Kanooni matrix. System me sab poori tarah banta hai, par registrations aur bahar ki companies ki details dummy hain (D-026); apne roles ki jaankari asli (D-241). Project ke Lawyer aur CA AI agents hain (D-257); Lawyer ne 18 rows dekhin (D-272), CA ne 32 rows dekhin aur 8 nayi rows di (D-281). Cheezein ek-ek karke, owner ki haan se, judti hain (D-220).
 
 ## Is file me kya aayega
 
@@ -1540,6 +1540,6 @@ Do parat: sign-up pe chhota **Data notice** (alag, itemised) aur poora **Privacy
 
 ## Change log
 
-| Version          | Date                     | Badlav                                                                                                                                          |
-| ---------------- | ------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------- |
-| v1.0.0 se v1.2.5 | 2026-11-17 se 2026-11-22 | Kanooni matrix CL-001 se CL-136, documents ka dhaancha (Â§14), aur Lawyer (AI) aur CA (AI) ki raay; har badlav ka poora itihaas git me (D-442). |
+| Version          | Date                     | Badlav                                                                                                                                         |
+| ---------------- | ------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------- |
+| v1.0.0 se v1.2.6 | 2026-11-17 se 2026-11-22 | Kanooni matrix CL-001 se CL-136, documents ka dhaancha (§14), aur Lawyer (AI) aur CA (AI) ki raay; har badlav ka poora itihaas git me (D-442). |

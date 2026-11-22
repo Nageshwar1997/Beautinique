@@ -1,6 +1,6 @@
 # OPERATIONS: Beautinique
 
-> **Status:** v1.1.14 (2026-11-22). System chalane ka manual. Cheezein ek-ek karke judengi.
+> **Status:** v1.1.15 (2026-11-22). System chalane ka manual. Cheezein ek-ek karke judengi.
 
 ## Is file me kya aayega
 
@@ -182,6 +182,6 @@ DevOps / SRE Architect ki raay se (D-257 ka kram), owner ki haan ke baad (D-326 
 
 ## Change log
 
-| Version           | Date                     | Badlav                                                                    |
-| ----------------- | ------------------------ | ------------------------------------------------------------------------- |
-| v1.0.0 se v1.1.14 | 2026-11-17 se 2026-11-22 | Chalane ke niyam Â§1 se Â§12; har badlav ka poora itihaas git me (D-442). |
+| Version           | Date                     | Badlav                                                                  |
+| ----------------- | ------------------------ | ----------------------------------------------------------------------- |
+| v1.0.0 se v1.1.15 | 2026-11-17 se 2026-11-22 | Chalane ke niyam §1 se §12; har badlav ka poora itihaas git me (D-442). |

@@ -1,14 +1,15 @@
 # CLAUDE.md: Beautinique
 
-> **Status:** v1.0.7 (2026-11-22). Docs aur code naye sire se ban rahe hain.
+> **Status:** v1.0.8 (2026-11-22). Docs aur code naye sire se ban rahe hain.
 
 Ye file Claude Code har session ki shuruaat me padhta hai. Project pe ek hi insaan (owner) kaam karta hai,
 2 Claude accounts se baari-baari. **Kaam shuru karne se pehle [docs/HANDOFF.md](docs/HANDOFF.md) padho.**
 
 ## Abhi kya chal raha hai
 
-- **Discovery phase (2026-11-17 se):** Cosmetics e-commerce ecosystem sawal-jawab se tay ho raha hai.
-  Plan, task files aur code tab tak nahi jab tak owner agla stage na khole.
+- **Planning stage (2026-11-22 se, D-443):** discovery poori. Ab [docs/PROJECT_PLAN.md](docs/PROJECT_PLAN.md)
+  me modules, dependencies aur progress ki table, phir har module ki `TASK.md`. Code tab tak nahi jab tak owner
+  implementation stage na khole; planning ke docs pe PR nahi, sirf commit aur push owner ke kehne pe.
 - **Naye docs khaali shuru hue hain.** Unme cheezein ek-ek karke judti hain, owner ki haan ke baad. Index:
   [docs/README.md](docs/README.md).
 - **Sach sirf naye docs (`docs/`) aur ye file.** Code bhi naye sire se banega (owner, 2026-11-17): naya root
@@ -16,7 +17,7 @@ Ye file Claude Code har session ki shuruaat me padhta hai. Project pe ek hi insa
 - **Naye docs aur naye code me purane code ya purane docs ka koi zikr ya link nahi** (owner, 2026-11-17): wo
   aage hat jayenge.
 
-## Discovery ke niyam
+## Sawal-jawab ke niyam (discovery aur planning)
 
 - Jo sawal kisi khule sawal pe tike nahi, wo ek saath do; jo tika ho, wo us sawal ke jawab ke baad (owner,
   2026-11-18). Sawal me agle sawal ka zikr nahi. Har sawal ke saath: kyun zaroori, vikalp, salah, trade-off.
@@ -93,6 +94,6 @@ khula hai. Jis doc me badlav kiya, uske change log me us din ki line (D-442). Pr
 
 ## Change log
 
-| Version          | Date                     | Badlav                                                                                                 |
-| ---------------- | ------------------------ | ------------------------------------------------------------------------------------------------------ |
-| v1.0.0 se v1.0.7 | 2026-11-17 se 2026-11-22 | Abhi ki halat, discovery ke niyam aur hamesha laagu niyam; har badlav ka poora itihaas git me (D-442). |
+| Version          | Date                     | Badlav                                                                                                                           |
+| ---------------- | ------------------------ | -------------------------------------------------------------------------------------------------------------------------------- |
+| v1.0.0 se v1.0.8 | 2026-11-17 se 2026-11-22 | Abhi ki halat (planning stage, D-443), sawal-jawab ke niyam aur hamesha laagu niyam; har badlav ka poora itihaas git me (D-442). |

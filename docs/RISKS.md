@@ -1,6 +1,6 @@
 # RISKS: Beautinique
 
-> **Status:** v1.6.4 (2026-11-22). Saare risks ek jagah, security wale bhi. Cheezein ek-ek karke judti hain.
+> **Status:** v1.6.5 (2026-11-22). Saare risks ek jagah, security wale bhi. Cheezein ek-ek karke judti hain.
 
 ## 0. Kaise likhein
 
@@ -242,6 +242,6 @@ Main session ne providers ke apne docs padhe (2026-11-22). Brevo aur Cloudinary 
 
 ## Change log
 
-| Version          | Date                     | Badlav                                                                                                   |
-| ---------------- | ------------------------ | -------------------------------------------------------------------------------------------------------- |
-| v1.0.0 se v1.6.4 | 2026-11-17 se 2026-11-22 | Risks R-001 se R-083 aur jaanch ke tathya (Â§2.1 se Â§2.12); har badlav ka poora itihaas git me (D-442). |
+| Version          | Date                     | Badlav                                                                                                 |
+| ---------------- | ------------------------ | ------------------------------------------------------------------------------------------------------ |
+| v1.0.0 se v1.6.5 | 2026-11-17 se 2026-11-22 | Risks R-001 se R-083 aur jaanch ke tathya (§2.1 se §2.12); har badlav ka poora itihaas git me (D-442). |

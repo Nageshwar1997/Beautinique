@@ -1,6 +1,6 @@
 # DESIGN: Beautinique
 
-> **Status:** v1.1.14 (2026-11-22). Saare apps ka UI design system (§1 se §10). Cheezein ek-ek karke, owner ki haan ke baad judti hain.
+> **Status:** v1.1.15 (2026-11-22). Saare apps ka UI design system (§1 se §10). Cheezein ek-ek karke, owner ki haan ke baad judti hain.
 
 ## Is file me kya aayega
 
@@ -259,6 +259,6 @@ Har niyam ka id `DS-<section>.<n>`. Tokens ke naam code me waise hi (CSS custom 
 
 ## Change log
 
-| Version           | Date                     | Badlav                                                                 |
-| ----------------- | ------------------------ | ---------------------------------------------------------------------- |
-| v1.0.0 se v1.1.14 | 2026-11-17 se 2026-11-22 | Design system Â§1 se Â§10; har badlav ka poora itihaas git me (D-442). |
+| Version           | Date                     | Badlav                                                               |
+| ----------------- | ------------------------ | -------------------------------------------------------------------- |
+| v1.0.0 se v1.1.15 | 2026-11-17 se 2026-11-22 | Design system §1 se §10; har badlav ka poora itihaas git me (D-442). |

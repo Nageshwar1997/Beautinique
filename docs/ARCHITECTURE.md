@@ -1,6 +1,6 @@
 # ARCHITECTURE: Beautinique
 
-> **Status:** v1.3.15 (2026-11-22). System kaise bana hai, ek nazar me. Cheezein ek-ek karke, owner ki haan ke baad judengi. Abhi §1 (finance ke accounting niyam, D-282), §2 se §9 (system ke hisse, D-291 se D-298) aur §10 (data aur database, D-310 se D-317).
+> **Status:** v1.3.16 (2026-11-22). System kaise bana hai, ek nazar me. Cheezein ek-ek karke, owner ki haan ke baad judengi. Abhi §1 (finance ke accounting niyam, D-282), §2 se §9 (system ke hisse, D-291 se D-298) aur §10 (data aur database, D-310 se D-317).
 
 ## Is file me kya aayega
 
@@ -735,6 +735,6 @@ Lint aur TypeScript ke saajhe config `configs/` me (D-002), package nahi.
 
 ## Change log
 
-| Version           | Date                     | Badlav                                                                                                   |
-| ----------------- | ------------------------ | -------------------------------------------------------------------------------------------------------- |
-| v1.0.0 se v1.3.15 | 2026-11-17 se 2026-11-22 | Â§1 finance ke accounting niyam se Â§12 saajhe packages tak; har badlav ka poora itihaas git me (D-442). |
+| Version           | Date                     | Badlav                                                                                                 |
+| ----------------- | ------------------------ | ------------------------------------------------------------------------------------------------------ |
+| v1.0.0 se v1.3.16 | 2026-11-17 se 2026-11-22 | §1 finance ke accounting niyam se §12 saajhe packages tak; har badlav ka poora itihaas git me (D-442). |

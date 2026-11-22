@@ -1,6 +1,6 @@
 # PROJECT PLAN: Beautinique
 
-> **Status:** v1.2.2 (2026-11-22). Project ki kendriya file. Cheezein ek-ek karke, owner ki haan ke baad judti hain.
+> **Status:** v1.2.3 (2026-11-22). Project ki kendriya file. Cheezein ek-ek karke, owner ki haan ke baad judti hain.
 
 ## 0. Is file me kya aayega
 
@@ -59,6 +59,6 @@ Design poore ecosystem ka, banana releases me; koi feature kata nahi (D-008). Jo
 
 ## Change log
 
-| Version          | Date                     | Badlav                                                                                        |
-| ---------------- | ------------------------ | --------------------------------------------------------------------------------------------- |
-| v1.0.0 se v1.2.2 | 2026-11-17 se 2026-11-22 | R1 ka scope (Â§1) aur progress % ka hisaab (Â§2); har badlav ka poora itihaas git me (D-442). |
+| Version          | Date                     | Badlav                                                                                      |
+| ---------------- | ------------------------ | ------------------------------------------------------------------------------------------- |
+| v1.0.0 se v1.2.3 | 2026-11-17 se 2026-11-22 | R1 ka scope (§1) aur progress % ka hisaab (§2); har badlav ka poora itihaas git me (D-442). |
