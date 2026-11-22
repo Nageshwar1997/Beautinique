@@ -1,6 +1,6 @@
 # PROJECT PLAN: Beautinique
 
-> **Status:** v1.5.1 (2026-11-22). Project ki kendriya file. Cheezein ek-ek karke, owner ki haan ke baad judti hain.
+> **Status:** v1.5.2 (2026-11-22). Project ki kendriya file. Cheezein ek-ek karke, owner ki haan ke baad judti hain.
 
 ## 0. Is file me kya aayega
 
@@ -63,7 +63,7 @@ Har module ka folder `tasks/NN-<module>/` aur uski `TASK.md` ([tasks/README.md](
 
 | Module                 | Kya                                                                                                                                                                                                                                           | Release        | Tika hai                               |
 | ---------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------- | -------------------------------------- |
-| `01-foundation`        | Naya root setup: workspace, tools (D-001), `configs/`, CI ke jobs, dev ke containers; purane code ka hatna (D-073)                                                                                                                            | R1             | Kuch nahi                              |
+| `01-foundation`        | Naya root setup: workspace, tools (D-001), `configs/`, CI ke jobs, dev ke containers; purane code ka hatna (D-073) ([TASK.md](tasks/01-foundation/TASK.md))                                                                                   | R1             | Kuch nahi                              |
 | `02-platform`          | Shared aur backend ke saajhe packages (ARCHITECTURE §12): contracts, validators, money, clock, server-kit, config, mongo, postgres, events, media ke ports, logger                                                                            | R1             | 01, 28                                 |
 | `03-frontend-kit`      | Frontend ke saajhe packages (ARCHITECTURE §12, [DESIGN.md](DESIGN.md)): styles, icons, components, api-client, authz, app-shell, auth-ui, forms, data-table, maps, pwa                                                                        | R1             | 01, 02, 28                             |
 | `04-logs`              | Request logs ke chunks (D-285)                                                                                                                                                                                                                | R1             | 02                                     |
@@ -99,12 +99,12 @@ Har module ka folder `tasks/NN-<module>/` aur uski `TASK.md` ([tasks/README.md](
 
 §2 ke hisaab se. "—" ka matlab: us module ki `TASK.md` abhi nahi bani, to points tay nahi.
 
-- **R1:** 0 / 18 points = 0%. Abhi sirf `28-packages` ke points tay hain; baaki modules ke points unki `TASK.md` ke saath judenge.
-- **Ecosystem:** 0 / 18 points = 0%, usi wajah se.
+- **R1:** 0 / 32 points = 0%. Abhi sirf `01-foundation` aur `28-packages` ke points tay hain; baaki modules ke points unki `TASK.md` ke saath judenge.
+- **Ecosystem:** 0 / 32 points = 0%, usi wajah se.
 
 | Module                 | Release        | Kul points | Poore | %   |
 | ---------------------- | -------------- | ---------- | ----- | --- |
-| `01-foundation`        | R1             | —          | —     | —   |
+| `01-foundation`        | R1             | 14         | 0     | 0%  |
 | `02-platform`          | R1             | —          | —     | —   |
 | `03-frontend-kit`      | R1             | —          | —     | —   |
 | `04-logs`              | R1             | —          | —     | —   |
@@ -163,4 +163,4 @@ Modules charan wise bante hain. Har charan me us hisse ke liye zaroori service a
 
 | Version          | Date                     | Badlav                                                                                                                                                                            |
 | ---------------- | ------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| v1.0.0 se v1.5.1 | 2026-11-17 se 2026-11-22 | R1 ka scope (§1), progress % ka hisaab (§2) modules ki list (§3, D-444, D-445) progress ki table (§4) aur banane ka kram (§5, D-446); har badlav ka poora itihaas git me (D-442). |
+| v1.0.0 se v1.5.2 | 2026-11-17 se 2026-11-22 | R1 ka scope (§1), progress % ka hisaab (§2) modules ki list (§3, D-444, D-445) progress ki table (§4) aur banane ka kram (§5, D-446); har badlav ka poora itihaas git me (D-442). |

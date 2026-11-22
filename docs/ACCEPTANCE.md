@@ -1,6 +1,6 @@
 # ACCEPTANCE: Beautinique
 
-> **Status:** v1.0.7 (2026-11-22). R1 ke har service aur app ke acceptance criteria (D-388 se D-395, aur packages ke flow ke D-445). Cheezein ek-ek karke, owner ki haan ke baad judti hain.
+> **Status:** v1.0.8 (2026-11-22). R1 ke har service aur app ke acceptance criteria (D-388 se D-395; packages ke flow ke D-445, aur root setup ke D-447). Cheezein ek-ek karke, owner ki haan ke baad judti hain.
 
 ## Is file me kya aayega
 
@@ -195,6 +195,20 @@
 11. **AC-PACKAGES-11**: **Given** `update-deps` me install fail ho ya beech me roka jaaye, **When** aisa ho, **Then** har `package.json` aur `package-lock.json` pehle jaisa.
 12. **AC-PACKAGES-12** (OPERATIONS §11 niyam 8): **Given** CLI ke saare tests, **When** chalein, **Then** koi request asli npm registry tak nahi jaati (network ka pehra), sirf fake registry tak.
 
+### 1.15 FOUNDATION (root setup, D-447)
+
+1. **AC-FOUNDATION-1** (OPERATIONS §1 niyam 10, §11 niyam 3): **Given** saaf clone, **When** `npm run setup` chale, **Then** `npm ci`, `.env.development` aur `.env.test` `.env.example` se (pehle se hon to nahi chhede jaate), aur `infra:up`; galat Node ya npm version pe saaf error ke saath ruke.
+2. **AC-FOUNDATION-2** (OPERATIONS §1 niyam 2 se 4): **Given** compose file, **When** `infra:up` kisi profile ke saath chale, **Then** sirf us profile ke containers, exact versions pe, ports sirf `127.0.0.1` pe, aur MongoDB replica set transaction ke liye taiyaar; `infra:down` sab band kare.
+3. **AC-FOUNDATION-3** (D-441, CLAUDE.md): **Given** `.env.example` ke alawa koi `.env` ya `.env.*` file, **When** git me jodi jaaye ya CI chale, **Then** git use ignore kare, aur git me ho to CI laal; `setup` `.env.production` kabhi na banaye ya padhe.
+4. **AC-FOUNDATION-4** (OPERATIONS §2 niyam 1 aur 2): **Given** koi PR ya push, **When** CI chale, **Then** saari jobs ek saath, sirf `check` baaki sabka nateeja jode, aur ek bhi job fail ho to `check` laal.
+5. **AC-FOUNDATION-5** (OPERATIONS §2 niyam 3): **Given** secret wala commit, galat branch flow (misaal feature branch se seedha `release`), ya high ya critical `npm audit`, **When** `guard` chale, **Then** laal, aur secret log me chhupa.
+6. **AC-FOUNDATION-6** (OPERATIONS §2 niyam 5, D-019): **Given** Prettier, ESLint ya typecheck ki galti, ya docs me tooti link ya path, **When** `static` chale, **Then** laal, file aur line ke saath.
+7. **AC-FOUNDATION-7** (SR-082, OPERATIONS §2 niyam 7): **Given** workflows, **When** CI ka pehra chale, **Then** SHA pe pinned na hone wala action, `permissions: {}` ke bina workflow, ya `pull_request_target` pe laal.
+8. **AC-FOUNDATION-8** (D-013, OPERATIONS §2 niyam 6): **Given** backup folder ki koi file git me, **When** CI chale, **Then** laal.
+9. **AC-FOUNDATION-9** (D-001): **Given** do workspaces jisme ek doosre pe tika, **When** root se `build` ya `test` chale, **Then** dependency pehle, aur jo nahi badla uska kaam local cache se.
+10. **AC-FOUNDATION-10** (OPERATIONS §11 niyam 1): **Given** dependency updates ka config, **When** mahine ka run ho, **Then** PRs `prerelease` pe, minor aur patch ek group me, major alag PR me.
+11. **AC-FOUNDATION-11** (D-073): **Given** naye root setup ka PR, **When** wo merge ho, **Then** repo me koi `*-old/` folder ya purani root config nahi, aur CI green.
+
 ## 2. Apps (R1)
 
 ### 2.1 CUSTOMER app
@@ -286,25 +300,26 @@
 
 ## 3. Ginti
 
-| Module    | Ginti   | App           | Ginti  |
-| --------- | ------- | ------------- | ------ |
-| PLATFORM  | 12      | CUSTOMER      | 10     |
-| GATEWAY   | 10      | SELLER        | 6      |
-| IDENTITY  | 13      | ADMIN         | 6      |
-| NOTIFY    | 8       | SUPER ADMIN   | 5      |
-| PAYMENTS  | 10      | MASTER        | 7      |
-| CATALOG   | 12      | SUPPORT DESK  | 5      |
-| COMMERCE  | 12      | FINANCE       | 5      |
-| LOGISTICS | 12      | LOGISTICS OPS | 6      |
-| FINANCE   | 12      | DELIVERY      | 10     |
-| SUPPORT   | 8       |               |        |
-| AUDIT     | 6       |               |        |
-| MEDIA     | 7       |               |        |
-| LOGS      | 5       |               |        |
-| PACKAGES  | 12      |               |        |
-| **Kul**   | **139** | **Kul**       | **60** |
+| Module     | Ginti   | App           | Ginti  |
+| ---------- | ------- | ------------- | ------ |
+| PLATFORM   | 12      | CUSTOMER      | 10     |
+| GATEWAY    | 10      | SELLER        | 6      |
+| IDENTITY   | 13      | ADMIN         | 6      |
+| NOTIFY     | 8       | SUPER ADMIN   | 5      |
+| PAYMENTS   | 10      | MASTER        | 7      |
+| CATALOG    | 12      | SUPPORT DESK  | 5      |
+| COMMERCE   | 12      | FINANCE       | 5      |
+| LOGISTICS  | 12      | LOGISTICS OPS | 6      |
+| FINANCE    | 12      | DELIVERY      | 10     |
+| SUPPORT    | 8       |               |        |
+| AUDIT      | 6       |               |        |
+| MEDIA      | 7       |               |        |
+| LOGS       | 5       |               |        |
+| PACKAGES   | 12      |               |        |
+| FOUNDATION | 11      |               |        |
+| **Kul**    | **150** | **Kul**       | **60** |
 
-Kul 199 criteria (R1).
+Kul 210 criteria (R1).
 
 
 ## 4. R2 ka chhota khaka
@@ -321,6 +336,6 @@ Kul 199 criteria (R1).
 
 ## Change log
 
-| Version          | Date                     | Badlav                                                                                                    |
-| ---------------- | ------------------------ | --------------------------------------------------------------------------------------------------------- |
-| v1.0.0 se v1.0.7 | 2026-11-21 se 2026-11-22 | R1 ke 199 acceptance criteria (packages ke flow ke 12 samet); har badlav ka poora itihaas git me (D-442). |
+| Version          | Date                     | Badlav                                                                                                                 |
+| ---------------- | ------------------------ | ---------------------------------------------------------------------------------------------------------------------- |
+| v1.0.0 se v1.0.8 | 2026-11-21 se 2026-11-22 | R1 ke 210 acceptance criteria (packages ke 12 aur foundation ke 11 samet); har badlav ka poora itihaas git me (D-442). |

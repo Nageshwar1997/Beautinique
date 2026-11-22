@@ -1,6 +1,6 @@
 # DECISIONS: Beautinique
 
-> **Status:** v1.14.51 (2026-11-22). Har faisla ek jagah. Sirf wahi "Tay" jo owner ne khud kaha; Claude ki salah faisla nahi. Cheezein ek-ek karke judti hain.
+> **Status:** v1.14.52 (2026-11-22). Har faisla ek jagah. Sirf wahi "Tay" jo owner ne khud kaha; Claude ki salah faisla nahi. Cheezein ek-ek karke judti hain.
 
 ## 0. Kaise likhein
 
@@ -461,6 +461,7 @@
 | D-444 | Modules service aur app ke hisaab se: saajhe kaam ke 5, har backend service ka ek (12), har app ka ek (11); list aur dependencies PROJECT_PLAN §3 me.                                                                                                                                   | Process      | 2026-11-22 |
 | D-445 | Packages ka poora flow R1 se pehle, module `28-packages` me; saare packages public npm pe (publish owner karta hai), README me "asal me private ya public" ka note; tests me fake registry; 12 acceptance criteria; D-325 badla.                                                        | Process      | 2026-11-22 |
 | D-446 | Banane ka kram charan wise: charan 0 neev, charan 1 chalta dhaancha aur pehla deploy, charan 2 se 13 R1 ke hisse; kram PROJECT_PLAN §5 me.                                                                                                                                              | Process      | 2026-11-22 |
+| D-447 | Foundation (`01-foundation`) ke 11 acceptance criteria ACCEPTANCE §1.15 me. | Process | 2026-11-22 |
 
 ## 2. Record
 
@@ -5385,8 +5386,17 @@
   - Owner ke kaam charan ke hisaab se chahiye: OT-5 (npm) charan 0 ke `28-packages` se pehle, OT-3 (object storage) charan 1 ke media se pehle, OT-1 (location data) charan 2 se pehle, OT-2 (disk encryption) pehle backup se pehle ([OWNER_TASKS.md](OWNER_TASKS.md)).
   - Agli `TASK.md`: charan 0 ke `01-foundation`, `02-platform` aur `03-frontend-kit`.
 
+### D-447. Foundation ke acceptance criteria
+
+- **Faisla:** module `01-foundation` ([tasks/01-foundation/TASK.md](tasks/01-foundation/TASK.md)) ke 11 acceptance criteria, `AC-FOUNDATION-1` se `AC-FOUNDATION-11`, [ACCEPTANCE.md](ACCEPTANCE.md) §1.15 me (Q-385 ka vikalp (a)).
+- **Wajah:** Claude ki salah, owner ne maani: root setup ke har pehre (secret, `.env`, branch flow, supply chain, backup) ka apna criterion, aur Definition of Done (RULES DD-1) har criterion ka test maangta hai.
+- **Chhode vikalp:** badlav ke saath (owner ki koi baat jodna).
+- **Kab dobara khulega:** module ki planning ya code me koi criterion galat ya adhoora nikle (owner ki haan se).
+- **Kisne, kab:** owner, 2026-11-22. **Nishaan:** Salah maani.
+- **Asar (Claude):** R1 ke criteria ab 210. CI ke har pehre ka "galat" misaal wala test ST-5 me.
+
 ## Change log
 
 | Version            | Date                     | Badlav                                                             |
 | ------------------ | ------------------------ | ------------------------------------------------------------------ |
-| v1.0.0 se v1.14.51 | 2026-11-17 se 2026-11-22 | Faisle D-001 se D-446; har badlav ka poora itihaas git me (D-442). |
+| v1.0.0 se v1.14.52 | 2026-11-17 se 2026-11-22 | Faisle D-001 se D-447; har badlav ka poora itihaas git me (D-442). |

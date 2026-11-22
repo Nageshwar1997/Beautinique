@@ -1,6 +1,6 @@
 # TASKS: Beautinique
 
-> **Status:** v1.0.5 (2026-11-22). Har module ka apna folder; modules ki list [../PROJECT_PLAN.md](../PROJECT_PLAN.md) §3 me. Abhi ek `TASK.md`: [28-packages](28-packages/TASK.md). Cheezein ek-ek karke judti hain.
+> **Status:** v1.0.6 (2026-11-22). Har module ka apna folder; modules ki list [../PROJECT_PLAN.md](../PROJECT_PLAN.md) §3 me. Abhi do `TASK.md`: [01-foundation](01-foundation/TASK.md) aur [28-packages](28-packages/TASK.md). Cheezein ek-ek karke judti hain.
 
 ## Dhaancha
 
@@ -18,6 +18,6 @@ tasks/
 
 ## Change log
 
-| Version          | Date                     | Badlav                                                                                                        |
-| ---------------- | ------------------------ | ------------------------------------------------------------------------------------------------------------- |
-| v1.0.0 se v1.0.5 | 2026-11-17 se 2026-11-22 | Modules ke folder ka dhaancha, aur pehli `TASK.md` (28-packages); har badlav ka poora itihaas git me (D-442). |
+| Version          | Date                     | Badlav                                                                                                                       |
+| ---------------- | ------------------------ | ---------------------------------------------------------------------------------------------------------------------------- |
+| v1.0.0 se v1.0.6 | 2026-11-17 se 2026-11-22 | Modules ke folder ka dhaancha, aur pehli `TASK.md` (01-foundation, 28-packages); har badlav ka poora itihaas git me (D-442). |
