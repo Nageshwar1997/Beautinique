@@ -12,7 +12,7 @@ First read `.claude/skills/_shared/git-rules.md`; §1 to §3 apply here.
 2. **Uncommitted changes** → list them, say they will not be pushed, and ask whether to push the committed work anyway.
    Never commit them yourself (suggest `/commit`).
 3. **Branch rules** (shared §3):
-   - `main`, `master`, `release`, `production` or any other protected branch → do not push; PR only. Stop and explain.
+   - `release` or any other protected branch (ruleset) → do not push; PR only. Stop and explain.
    - `prerelease` → only a small fix or `linkedin-posts/` work: show the file list and count
      (`git diff --stat origin/prerelease...HEAD`), check the size and area rules, run
      `git pull --rebase origin prerelease` and the required checks, then ask the user to confirm the direct push.

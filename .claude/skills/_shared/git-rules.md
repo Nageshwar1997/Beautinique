@@ -44,22 +44,23 @@ differ, follow the repository and tell the user.
 
 ## 3. Branches in this repository (`CLAUDE.md` git flow)
 
-- Long-lived: `prerelease` (development), `release` (production), `main` (final code only). Never rebase them onto
-  another branch, never force-push them. `main` and `release`: no direct push (ruleset), PR only. The package release
-  commit and tags on `release` are the owner's own CLI step, not these skills.
-- Work branches start from `prerelease`: `feat/<task>`, `fix/<task>`, `docs/<topic>`. A hotfix starts from `release`:
-  `hotfix/<name>`.
+- Long-lived: `prerelease` (development) and `release` (production). There is no `main` (D-024). Never rebase them
+  onto another branch, never force-push them. `release`: no direct push (ruleset), PR only. Tags on `release` are the
+  owner's own step, not these skills.
+- `release` is the GitHub default branch, so a clone checks it out and `gh pr create` without `--base` (and GitHub's
+  "Compare & pull request") targets it. Work branches still start from `origin/prerelease`
+  (`git switch -c feat/<task> origin/prerelease`): `feat/<task>`, `fix/<task>`, `docs/<topic>`. A hotfix starts from
+  `origin/release`: `hotfix/<name>`. Always pass the base explicitly (`--base`).
 
-| Head                                | Allowed base                                     | PR title                                             |
-| ----------------------------------- | ------------------------------------------------ | ---------------------------------------------------- |
-| work branch (`feat/*`, `fix/*` ...) | `prerelease`                                     | `type(scope): summary (T<id>)`                       |
-| `prerelease`                        | `release`                                        | `release: <summary>`                                 |
-| `hotfix/*`                          | `release`                                        | `fix(scope): summary`                                |
-| `release`                           | `main` (only after the release is live and good) | `main: <summary> (#<PRs>)`                           |
-| `release`                           | `prerelease` (back-merge after release commits)  | `chore(release): back-merge release into prerelease` |
+| Head                                | Allowed base                                    | PR title                                             |
+| ----------------------------------- | ----------------------------------------------- | ---------------------------------------------------- |
+| work branch (`feat/*`, `fix/*` ...) | `prerelease`                                    | `type(scope): summary (T<id>)`                       |
+| `prerelease`                        | `release`                                       | `release: <summary>`                                 |
+| `hotfix/*`                          | `release`                                       | `fix(scope): summary`                                |
+| `release`                           | `prerelease` (back-merge after release commits) | `chore(release): back-merge release into prerelease` |
 
-Any other pair → stop and explain. The CI branch-flow check (`docs/OPERATIONS.md` §2, rule 3) rejects wrong pairs into
-`prerelease`, `release` and `main`.
+Any other pair → stop and explain. The CI branch-flow check (`.github/scripts/branch-flow.mjs`, `docs/OPERATIONS.md`
+§2 rule 3) rejects wrong pairs into `prerelease` and `release`, and any pull request into them from a fork.
 
 - **Direct push to `prerelease`** only for a small fix (1–10 files: typo, doc line, message or config value, flaky
   test, one- or two-line bug fix) or for `linkedin-posts/` and `.claude/skills/linkedin-post/`. Never for a new
@@ -85,8 +86,9 @@ Any other pair → stop and explain. The CI branch-flow check (`docs/OPERATIONS.
 
 - **For now (2026-11-17):** the code is being rebuilt from scratch and the root tooling does not run, so the
   only check is `npx prettier --check <changed files>`. Say that instead of running build, lint, typecheck or
-  tests, and say that CI on a pull request will fail until the new root setup exists. The rest of this section
-  applies again once the new code has its own setup.
+  tests. Until the new root setup adds the other jobs, CI runs only `guard` (secret scan, branch flow,
+  `npm audit`), the Prettier check and `check`. The rest of this section applies again once the new code has
+  its own setup.
 - CI order: `npm run build`, then `npm run format:check`, `npm run lint`, `npm run typecheck`, `npm test`.
 - Locally: `format:check`, `lint` and `typecheck` always (run `npm run build` first if anything under `packages/`
   changed); tests only for changed workspaces (`npm test --workspace <path>`). Run long commands in the background.

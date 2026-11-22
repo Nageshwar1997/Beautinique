@@ -53,9 +53,8 @@ Record `git rev-parse HEAD` (the way back).
 
 - `prerelease` → `release`: `git rev-list --count origin/prerelease..origin/release` above 0 means `release` has
   commits `prerelease` lacks (release commit, hotfix) → a back-merge comes first (`/pr prerelease release`); ask.
-- `release` → `main`: `git rev-list --count origin/release..origin/main` must be 0; otherwise stop and report.
 - `release` → `prerelease`: the PR itself is the sync.
-- Unpushed local commits on the head: `release` or `main` → stop (no direct push); `prerelease` → the small-fix rule
+- Unpushed local commits on the head: `release` → stop (no direct push); `prerelease` → the small-fix rule
   (shared §3) or stop.
 
 ## Step 3: Analyse the changes

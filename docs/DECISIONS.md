@@ -1,6 +1,6 @@
 # DECISIONS: Beautinique
 
-> **Status:** v1.14.39 (2026-11-22). Har faisla ek jagah. Sirf wahi "Tay" jo owner ne khud kaha; Claude ki salah faisla nahi. Cheezein ek-ek karke judti hain.
+> **Status:** v1.14.40 (2026-11-22). Har faisla ek jagah. Sirf wahi "Tay" jo owner ne khud kaha; Claude ki salah faisla nahi. Cheezein ek-ek karke judti hain.
 
 ## 0. Kaise likhein
 
@@ -710,6 +710,7 @@
 - **Faisla:** `main` branch hategi. Flow: feature branch → `prerelease` (development) → `release` (production); back-merge `release` → `prerelease` waise hi. GitHub default branch `release`.
 - **Kram:** pehle saari jagah `main` ka zikr badle (CI, git skills, `CLAUDE.md`), phir default branch, aakhir me delete; sirf implementation me, owner ke kehne pe. Tab tak `CLAUDE.md` ka git flow hi laagu.
 - **Jod (D-338, 2026-11-21):** default branch badalne se pehle scheduled workflows (jaise server jagane wala, D-322) nayi default branch pe hon; GitHub ka schedule sirf default branch pe chalta hai.
+- **Amal (owner ke kehne pe, 2026-11-22):** `main` ka zikr CI, git skills, `CLAUDE.md` aur docs se hata; GitHub ki default branch `release` (`release` pe pehle se `wake.yml` tha); ruleset `protected-branches` me ab sirf `release`; phir `main` GitHub se delete (aakhri commit `cdcd570`, content `release` jaisa, sirf 3 merge commits zyada). Vercel aur Render production ke liye `release` pe (owner). Nayi branch phir bhi `origin/prerelease` se.
 - **Wajah:** owner: `main` branch delete karni hai; ek insaan ke liye teen lambi branches bhaari.
 - **Chhode vikalp:** teeno branches rakhna; sirf `main` + feature branches.
 - **Kab dobara khulega:** owner khud khole.
@@ -5388,3 +5389,4 @@
 | v1.14.37 | 2026-11-22 | D-426 me State Admin (owner ka chunav, Q-369): state ka area aur operations ka head.                                                                                                                                                                                                                                                                                                                                                                                                        |
 | v1.14.38 | 2026-11-22 | D-433 se D-435 aaye (progress %, purane docs ka hatna, Lawyer ka chhota run; Q-370 se Q-372).                                                                                                                                                                                                                                                                                                                                                                                               |
 | v1.14.39 | 2026-11-22 | D-436 se D-439 aaye (Lawyer ke chhote run se; Q-373 se Q-376); 20 faislon me Lawyer (AI) ki raay ki Jod line.                                                                                                                                                                                                                                                                                                                                                                               |
+| v1.14.40 | 2026-11-22 | D-024 ka amal: default branch `release`, ruleset me sirf `release`, `main` GitHub se delete (owner ke kehne pe).                                                                                                                                                                                                                                                                                                                                                                            |

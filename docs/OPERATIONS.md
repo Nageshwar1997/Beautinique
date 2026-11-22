@@ -1,6 +1,6 @@
 # OPERATIONS: Beautinique
 
-> **Status:** v1.1.11 (2026-11-22). System chalane ka manual. Cheezein ek-ek karke judengi.
+> **Status:** v1.1.12 (2026-11-22). System chalane ka manual. Cheezein ek-ek karke judengi.
 
 ## Is file me kya aayega
 
@@ -32,20 +32,20 @@ DevOps / SRE Architect ki raay se (D-257 ka kram), owner ki haan ke baad (D-326 
 
 1. CI GitHub Actions pe; public repo pe standard runners muft (jaancha 2026-11-21). Jobs ek saath chalti hain, aur sirf aakhri `check` job baaki sabka nateeja jodti hai. Branch ke rules aur deploy sirf `check` ko dekhte hain, isliye uska naam nahi badalta.
 2. Koi job `needs` se doosri ka intezaar nahi karti (sirf `check`): Render "After CI checks pass" tab deploy karta hai jab commit ke saare dikhte checks pass hon, aur ek bhi check na dikhe to deploy nahi karta (jaancha 2026-11-21).
-3. Har run pe `guard`: poori git history ka secret scan (scanner ka binary version aur checksum se pinned, finding ka secret log me chhupa), branch flow ki jaanch (`prerelease` me feature branches, `release` me sirf `prerelease` ya `hotfix/*`, `main` me sirf `release`; sab isi repo ki branches se, fork se nahi), aur `npm audit` (high aur critical pe laal).
+3. Har run pe `guard`: poori git history ka secret scan (scanner ka binary version aur checksum se pinned, finding ka secret log me chhupa), branch flow ki jaanch (`prerelease` me feature branches aur `release` ka back-merge, `release` me sirf `prerelease` ya `hotfix/*`; sab isi repo ki branches se, fork se nahi), aur `npm audit` (high aur critical pe laal).
 4. Branch flow ki jaanch galti se bachati hai, hamle se nahi: PR apna workflow khud badal sakta hai. Asli taala branch ke rulesets aur merge ka haq hai.
 5. Static: Prettier, ESLint (service ki deewar aur config namespace ke lint, SR-071), typecheck, build. Docs badle to docs ke paths ka check (D-019).
 6. Tests asli MongoDB replica set, Valkey aur PostgreSQL containers pe; E2E Playwright Chromium pe, aur nightly me WebKit pe Customer app ke mukhya flows (D-374). Testing ke poore niyam [RULES.md](RULES.md) §4 me. Saath me repo ke pehre: backup folder ki koi file git me na ho (D-013), koi `.env` file git me na ho, har collection ki retention class (R-040), har repository query ka `explain` aur collection scan ka pehra, services ke beech dependency rule, aur migrations ka test (naya code purane data pe, purana code naye data pe; R-041).
 7. Supply chain: har action commit SHA pe pinned; workflow ka default `permissions: {}`, har job ko sirf zaroori haq; fork PRs ko koi secret nahi; `pull_request_target` nahi; `npm ci` lockfile se (SR-082).
 8. CI me koi production secret ya deploy key nahi. Render aur Vercel apne Git integration se deploy karte hain, sirf `release` se (SR-081). Packages ke tests kabhi asli npm registry ko nahi chhoote (fake registry).
 9. E2E fail ho to traces ek artifact me, chhoti umar (misaal 7 din), bina personal data; backup files kabhi artifact nahi (SR-083).
-10. Rulesets: `release` aur `main` pe seedha push, force push aur delete band, `check` zaroori; `prerelease` pe force push aur delete band (chhote fix ka seedha push CLAUDE.md ke niyam se).
-11. `release` aur `main` pe `push` trigger rehta hai, kyunki Render aur Vercel merge commit ke checks dekhte hain.
+10. Rulesets: `release` pe seedha push, force push aur delete band, `check` zaroori; `prerelease` pe force push aur delete band (chhote fix ka seedha push CLAUDE.md ke niyam se). GitHub ki default branch `release` (D-024); nayi branch phir bhi `prerelease` se, aur PR ka base hamesha saaf.
+11. `prerelease` aur `release` pe `push` trigger rehta hai, kyunki Render aur Vercel merge commit ke checks dekhte hain.
 12. **Baad me:** jab ek poora run misaal 15 minute se upar jaaye, tab PR pe sirf badle hisson ke tests, aur jo git tree pehle poora pass ho chuka uska nishaan (artifact) dekh ke dobara poora run nahi. Tab tak har run poora.
 
 ## 3. Release, deploy, migrations aur rollback (D-328)
 
-1. Release ka kram: (1) `prerelease` pe laptop pe poora E2E aur bundle mode ka chhota naap 512 MB pe; (2) backup (§6); (3) PR `prerelease` → `release`, `check` green; (4) Render aur Vercel apne aap deploy; (5) live pe smoke check (niyam 9); (6) release safal to PR `release` → `main` (jab tak `main` hai, D-024); (7) `release` pe koi commit bana to back-merge `release` → `prerelease`.
+1. Release ka kram: (1) `prerelease` pe laptop pe poora E2E aur bundle mode ka chhota naap 512 MB pe; (2) backup (§6); (3) PR `prerelease` → `release`, `check` green; (4) Render aur Vercel apne aap deploy; (5) live pe smoke check (niyam 9); (6) `release` pe koi commit bana to back-merge `release` → `prerelease`.
 2. Render ki settings: auto-deploy "After CI checks pass", build filter sirf backend aur saajhe packages ke paths aur lockfile pe, region Singapore, health check path `/health`, start command seedha `node` (npm ke through nahi: memory bachti hai aur Render ka SIGTERM seedha app ko milta hai), flags `--max-old-space-size` misaal 256 aur `UV_THREADPOOL_SIZE` misaal 2.
 3. Vercel: har app ka apna project, production branch `release`, preview deployments band, "kuch nahi badla to deploy chhodo" wali setting chalu, aur deploy `check` ka intezaar kare. Hobby pe din ke 100 deploys aur ek waqt me ek build (jaancha 2026-11-21): ek release me 11 apps ek-ek karke build hote hain.
 4. Deploy ke waqt purana instance traffic leta rehta hai; naya uthne pe traffic badalta hai, purane ko 60 second baad SIGTERM, aur default 30 second baad SIGKILL (jaancha 2026-11-21). Isliye SIGTERM pe: naye requests band, chalte requests poore, ticker aur dispatcher ki lease chhodna, queue workers band, DB clients band, sab misaal 25 second me.
@@ -187,3 +187,4 @@ DevOps / SRE Architect ki raay se (D-257 ka kram), owner ki haan ke baad (D-326 
 | v1.1.9  | 2026-11-22 | §1 local Atlas container, PgBouncer, MongoDB 8.0.30 ka pin aur Valkey `noeviction`; §3 rollback ke baad auto-deploy; §5 do ping (D-424); §6 aur §9 Atlas ki IP list (D-421); §12 niyam 4 private fork (D-425). |
 | v1.1.10 | 2026-11-22 | §4 niyam 11: nayi env key tabhi jab code padhe (D-430).                                                                                                                                                        |
 | v1.1.11 | 2026-11-22 | §6 niyam 1 private files ka kho jaana breach (D-439); §8 niyam 2 CERT-In ki ghadi aur niyam 3 breach ki paribhasha (D-436).                                                                                    |
+| v1.1.12 | 2026-11-22 | §2 niyam 3, 10, 11 aur §3 niyam 1 se `main` hata; default branch `release` (D-024).                                                                                                                            |

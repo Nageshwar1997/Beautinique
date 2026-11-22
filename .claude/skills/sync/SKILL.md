@@ -15,7 +15,7 @@ First read `.claude/skills/_shared/git-rules.md`; §2 and §3 apply here.
 1. **State.** `git branch --show-current` (detached → stop). An operation in progress → stop.
    `git status --porcelain`: staged or unstaged changes → stop and ask the user to `/commit` or stash them
    themselves. Untracked files may stay (Git refuses if one would be overwritten; then stop). Never `--autostash`.
-2. **Long-lived branch** (`prerelease`, `release`, `main`) → never rebase it onto another branch. Base is its own
+2. **Long-lived branch** (`prerelease`, `release`) → never rebase it onto another branch. Base is its own
    upstream (`/sync prerelease` on `prerelease`) and the local commits are unpushed →
    `git pull --rebase origin <branch>` is allowed. Anything else (such as `release` into `prerelease`) → stop: that
    is a back-merge PR (`/pr prerelease release`).

@@ -1,6 +1,6 @@
 # CLAUDE.md: Beautinique
 
-> **Status:** v1.0.3 (2026-11-22). Docs aur code naye sire se ban rahe hain.
+> **Status:** v1.0.4 (2026-11-22). Docs aur code naye sire se ban rahe hain.
 
 Ye file Claude Code har session ki shuruaat me padhta hai. Project pe ek hi insaan (owner) kaam karta hai,
 2 Claude accounts se baari-baari. **Kaam shuru karne se pehle [docs/HANDOFF.md](docs/HANDOFF.md) padho.**
@@ -47,13 +47,13 @@ Ye file Claude Code har session ki shuruaat me padhta hai. Project pe ek hi insa
 - **Public repo:** koi secret, `.env`, token, password, DB dump ya asli personal data commit nahi; sirf
   `.env.example`. Claude `.env`/`.env.*` files aur repo ke bahar ka `All-ENVs` folder kabhi nahi kholta;
   `.claude/settings.json` ke deny rules ise tool ke level pe bhi rokte hain, unhe mat hatao.
-- **Git flow (owner, 2026-10-25):** `prerelease` se feature branch → PR → **`prerelease`** (development)
-  → PR → **`release`** (production) → release safal hone ke baad PR `release` → **`main`** (sirf final code).
-  `main` pe kabhi seedha kaam ya feature PR nahi; `main` aur `release` pe seedha push nahi. `prerelease` pe
+- **Git flow (owner, 2026-10-25; D-024, 2026-11-22):** `prerelease` se feature branch → PR →
+  **`prerelease`** (development) → PR → **`release`** (production). `main` branch nahi hai. GitHub ki
+  default branch `release` hai, par nayi branch hamesha `origin/prerelease` se banti hai aur PR ka base
+  hamesha saaf likha jaata hai. `release` pe seedha kaam, feature PR ya seedha push nahi. `prerelease` pe
   sirf chhota fix (1–10 files, local checks ke baad, force push nahi) aur `linkedin-posts/` ki files aur
-  `/linkedin-post` skill seedha push ho sakti hain. Release pe bane commits (package release, hotfix) ke baad
-  `release` → `prerelease` back-merge bhi. CI ye flow check karta hai. `main` hatana tay ho chuka hai, par
-  jab tak owner na kahe ye flow hi laagu hai.
+  `/linkedin-post` skill seedha push ho sakti hain. Release pe bane commits (hotfix) ke baad `release` →
+  `prerelease` back-merge bhi. CI ye flow check karta hai.
 - **Commit/push sirf owner ke kehne pe.** Destructive kaam se pehle poochho.
 - **Koi AI attribution nahi (owner, 2026-11-14):** commit message/trailer, PR title/description, tag ya
   release notes me `Co-Authored-By: Claude`, "Generated with Claude Code", 🤖 ya koi AI signature nahi, chahe
@@ -90,3 +90,4 @@ khula hai. Jis doc me badlav kiya, uske change log me ek line. Progress % ka niy
 | v1.0.1  | 2026-11-18 | Discovery: bina dependency wale sawal ek saath; agle sawal ka zikr nahi (owner). |
 | v1.0.2  | 2026-11-22 | Progress % ka niyam ab PROJECT_PLAN §2 me (D-433).                               |
 | v1.0.3  | 2026-11-22 | `.env` aur `All-ENVs` ka niyam `.claude/settings.json` ke deny rules se bhi.     |
+| v1.0.4  | 2026-11-22 | Git flow se `main` hata; default branch `release`, nayi branch `prerelease` se.  |

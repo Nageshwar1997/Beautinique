@@ -1,8 +1,9 @@
-# Secret scan config (TASKS T0.6). CI's `check` job runs gitleaks with this file over the whole history
-# of the commit it tests (.github/workflows/ci.yml); any finding fails the job. Run the same scan locally
-# with the gitleaks version pinned in ci.yml: `gitleaks git --config .gitleaks.toml --redact .`
+# Secret scan config (docs/OPERATIONS.md §2, rule 3). CI's `guard` job runs gitleaks with this file
+# over the whole history of the commit it tests (.github/workflows/ci.yml); any finding fails the job.
+# Run the same scan locally with the gitleaks version pinned in ci.yml:
+# `gitleaks git --config .gitleaks.toml --redact .`
 #
-# There is deliberately no path allow-list (not for docs/, scripts/packages/test/ or .env.example): the
+# There is deliberately no path allow-list (not for docs/, test folders or .env.example): the
 # fake values there (the fake registry's `test-token`, dummy GSTIN/PAN data, local ports and URLs) match
 # no rule, and a path allow-list would hide a real key pasted into those files later. Allow-list a
 # finding only when it is provably fake, and say why next to it.
