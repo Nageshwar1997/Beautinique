@@ -1,6 +1,6 @@
 # OPERATIONS: Beautinique
 
-> **Status:** v1.1.15 (2026-11-22). System chalane ka manual. Cheezein ek-ek karke judengi.
+> **Status:** v1.1.18 (2026-11-22). System chalane ka manual. Cheezein ek-ek karke judengi.
 
 ## Is file me kya aayega
 
@@ -166,8 +166,8 @@ DevOps / SRE Architect ki raay se (D-257 ka kram), owner ki haan ke baad (D-326 
 3. Node ka version ek jagah pinned (`engines` aur `devEngines`), Render pe wahi version, Docker images exact version pe.
 4. Atlas free cluster ka MongoDB version Atlas khud badhata hai aur maintenance ka samay hum nahi chunte (jaancha 2026-11-21): CI usi major ke taaza patch pe chale, aur Atlas ke upgrade ke email ke baad live pe smoke check.
 5. Dependency ke PR pe wahi poora CI; merge owner kare, apne aap nahi.
-6. Abhi koi publish nahi (D-325): har package `private: true`, aur CI pakka kare ki koi package bina iske nahi.
-7. **Baad me**, publish ka plan bane to: npm pe publish, `npm login` aur `npm logout` aur `npm trust` sirf owner ke haath; workflow sirf `release` se, haath se chalaya; do jobs: ek bina haq ke build, test aur pack kare, doosri sirf bane tarballs utaar ke trusted publishing (OIDC) aur provenance se publish kare; naya package pehli baar owner laptop se publish kare; release ka sandesh `release` branch ka naam bataye, back-merge `release` → `prerelease` likha ho, aur CLI ke tests ke liye local infra chalu ho (D-023 ke teen niyam).
+6. Saare packages public npm pe (D-445): kisi package pe `private: true` nahi, kyunki npm free plan pe private packages nahi deta. CI pakka kare ki har package ke README me "Visibility" ka hissa ho (asal me private ya public, aur kyun).
+7. **Publish ke niyam (D-445):** npm pe publish, `npm login` aur `npm logout` aur `npm trust` sirf owner ke haath; workflow sirf `release` se, haath se chalaya; do jobs: ek bina haq ke build, test aur pack kare, doosri sirf bane tarballs utaar ke trusted publishing (OIDC) aur provenance se publish kare; naya package pehli baar owner laptop se publish kare; release ka sandesh `release` branch ka naam bataye, back-merge `release` → `prerelease` likha ho, aur CLI ke tests ke liye local infra chalu ho (D-023 ke teen niyam).
 8. Packages ke tests kabhi asli npm registry ko nahi chhoote; fake registry hi.
 
 ## 12. Security ke record (D-404)
@@ -184,4 +184,4 @@ DevOps / SRE Architect ki raay se (D-257 ka kram), owner ki haan ke baad (D-326 
 
 | Version           | Date                     | Badlav                                                                  |
 | ----------------- | ------------------------ | ----------------------------------------------------------------------- |
-| v1.0.0 se v1.1.15 | 2026-11-17 se 2026-11-22 | Chalane ke niyam §1 se §12; har badlav ka poora itihaas git me (D-442). |
+| v1.0.0 se v1.1.18 | 2026-11-17 se 2026-11-22 | Chalane ke niyam §1 se §12; har badlav ka poora itihaas git me (D-442). |

@@ -1,6 +1,6 @@
 # RULES: Beautinique
 
-> **Status:** v1.2.5 (2026-11-22). Kaam ke niyam. Saare sections: §1 (Definition of Done), §2 (Git aur release gate), §3 (Code), §4 (Testing), §5 se §7 (security, docs, AI); D-381 se D-387, D-397, D-398, D-429, D-430. Cheezein ek-ek karke, owner ki haan ke baad judti hain.
+> **Status:** v1.2.8 (2026-11-22). Kaam ke niyam. Saare sections: §1 (Definition of Done), §2 (Git aur release gate), §3 (Code), §4 (Testing), §5 se §7 (security, docs, AI); D-381 se D-387, D-397, D-398, D-429, D-430. Cheezein ek-ek karke, owner ki haan ke baad judti hain.
 
 ## Is file me kya aayega
 
@@ -111,7 +111,7 @@ Tools D-001 ke; folder aur naam D-002 ke. Jahan niyam ke saath lint ya CI ka peh
 
 1. **CR-34:** naam aur folder D-002 se; sirf ESM; build tsdown se (D-001); har package me README, aur frontend package me playground.
 2. **CR-35:** bahar ki library peer dependency ho to devDependencies me bilkul wahi range; jis library ke types package ki public types me aate hain, wo peer dependency ho.
-3. **CR-36:** abhi har package `private: true`; publish ka niyam [OPERATIONS.md](OPERATIONS.md) §11 me (D-325).
+3. **CR-36:** saare packages public npm pe, kisi pe `private: true` nahi; har package ke README me "Visibility" ka hissa: security ke hisaab se asal me private hona chahiye ya public, aur kyun (D-445). Publish ke niyam [OPERATIONS.md](OPERATIONS.md) §11 me.
 
 ## 4. Testing
 
@@ -430,4 +430,4 @@ Kuch niyamon ka saboot test nahi, record hai (jaise schema ki review checklist, 
 
 | Version          | Date                     | Badlav                                                                                                                                   |
 | ---------------- | ------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------- |
-| v1.0.0 se v1.2.5 | 2026-11-17 se 2026-11-22 | Definition of Done, release gate, code ke niyam, testing aur security, docs aur AI ke niyam; har badlav ka poora itihaas git me (D-442). |
+| v1.0.0 se v1.2.8 | 2026-11-17 se 2026-11-22 | Definition of Done, release gate, code ke niyam, testing aur security, docs aur AI ke niyam; har badlav ka poora itihaas git me (D-442). |

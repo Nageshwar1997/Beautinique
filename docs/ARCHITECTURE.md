@@ -1,6 +1,6 @@
 # ARCHITECTURE: Beautinique
 
-> **Status:** v1.3.16 (2026-11-22). System kaise bana hai, ek nazar me. Cheezein ek-ek karke, owner ki haan ke baad judengi. Abhi §1 (finance ke accounting niyam, D-282), §2 se §9 (system ke hisse, D-291 se D-298) aur §10 (data aur database, D-310 se D-317).
+> **Status:** v1.3.19 (2026-11-22). System kaise bana hai, ek nazar me. Cheezein ek-ek karke, owner ki haan ke baad judengi. Abhi §1 (finance ke accounting niyam, D-282), §2 se §9 (system ke hisse, D-291 se D-298) aur §10 (data aur database, D-310 se D-317).
 
 ## Is file me kya aayega
 
@@ -703,7 +703,7 @@ Roles ki list aur har role ka kaam [PRODUCT.md](PRODUCT.md) §3 me; yahan sirf s
 
 ## 12. Saajhe packages (D-428)
 
-Naam aur folder D-002 ke hisaab se: `packages/<shared|frontend|backend>/<name>`, naam `@beautinique/<category>-<name>`. Ye list sujhaav hai; pakki list aur har package ka kaam [PROJECT_PLAN.md](PROJECT_PLAN.md) ke modules ke saath aata hai. Abhi koi package publish nahi hota (D-325).
+Naam aur folder D-002 ke hisaab se: `packages/<shared|frontend|backend>/<name>`, naam `@beautinique/<category>-<name>`. Ye list sujhaav hai; pakki list aur har package ka kaam [PROJECT_PLAN.md](PROJECT_PLAN.md) ke modules ke saath aata hai. Saare packages public npm pe jaate hain; har package ke README me likha hota hai ki security ke hisaab se wo asal me private hona chahiye ya public (D-445).
 
 | Category | Package (misaal naam) | Kaam                                                                                                                                 |
 | -------- | --------------------- | ------------------------------------------------------------------------------------------------------------------------------------ |
@@ -737,4 +737,4 @@ Lint aur TypeScript ke saajhe config `configs/` me (D-002), package nahi.
 
 | Version           | Date                     | Badlav                                                                                                 |
 | ----------------- | ------------------------ | ------------------------------------------------------------------------------------------------------ |
-| v1.0.0 se v1.3.16 | 2026-11-17 se 2026-11-22 | §1 finance ke accounting niyam se §12 saajhe packages tak; har badlav ka poora itihaas git me (D-442). |
+| v1.0.0 se v1.3.19 | 2026-11-17 se 2026-11-22 | §1 finance ke accounting niyam se §12 saajhe packages tak; har badlav ka poora itihaas git me (D-442). |

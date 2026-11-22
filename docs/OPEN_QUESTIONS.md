@@ -1,6 +1,6 @@
 # OPEN QUESTIONS: Beautinique
 
-> **Status:** v1.8.14 (2026-11-22). Khule sawal, aage ke topics aur jaanchna baaki. Cheezein ek-ek karke judengi.
+> **Status:** v1.8.19 (2026-11-22). Khule sawal, aage ke topics aur jaanchna baaki. Cheezein ek-ek karke judengi.
 
 ## Is file me kya aayega
 
@@ -36,7 +36,7 @@ Topic sirf sawalon ki grouping hai. Har topic ke sawal us topic ki charcha (aur 
 | B13   | Compliance ki gehrai: kya dummy, kya asli                                               | Domain expert                        | Registrations aur kanooni details dummy (D-026); telemedicine ki dummy row (D-025); kanooni jaanch baad me ek agent se (R-004). Tay: live site pe allowlist (D-133), har area ki gehrai (D-134), demo ka nishaan (D-145), legal pages (D-150), data ke haq (D-151).                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           |
 | B14   | Security: auth, authorization, payments, uploads, abuse, privacy                        | Security Architect                   | Security Architect ka pehla run ho gaya. Tay: sessions (D-180, D-181), rok (D-182), sign-in aur authenticator (D-183 se D-186, D-199, D-200), codes ki seema (D-187), paise ke kaam (D-188 se D-190), data ka samay aur pahunch (D-191 se D-195, D-201, D-202), backup aur secrets (D-196, D-197), data leak (D-198), kai accounts (D-203, D-204); R2 me goodwill coupon (D-205), forms pe bots (D-206), sehat ka data (D-207, D-208). Report docs me area ke batches me (D-209). Batch 1 edge aur hosting (D-210), batch 2 sign-in (D-211), batch 3 sessions (D-212), batch 4 authorization (D-213), batch 5 checkout aur paisa (D-214), batch 6 delivery, daawe aur reviews (D-215), batch 7 files aur personal data (D-216), batch 8 data stores aur services (D-217), batch 9 export, audit, logs aur DevOps (D-218), batch 10 R2 ke hisse (D-219); saari batches poori: niyam SR-001 se SR-088. Doosra security run bhi poora (D-399 se D-417), tathya ki jaanch (D-418 se D-425). Baaki: kanooni jaanch (R-004) aur §2 ke bache tathya. |
 | B15   | Technical: service boundaries, hosting, observability, backup, scale targets            | Architect                            | **Kuch baaki nahi.** Tay: services aur databases (D-011, D-050), backup (D-013), hosting (D-028, D-048, D-049, D-051, D-052, D-056 se D-058), performance targets (D-053). Observability (D-297), scale (D-298), 512 MB ka naap (OPERATIONS §10) aur saajhe packages (D-428) bhi tay.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         |
-| B16   | Docs aur task files ka dhaancha (PROJECT_PLAN, `tasks/NN-<module>/TASK.md`, subtasks)   | Owner ke saath                       | Planning khula (D-443); modules ki list ka sawal Q-378 `Khula`. Tay: dhaancha (D-006), tareeka aur CI me docs ke paths ka check (D-019), progress % ka niyam ([PROJECT_PLAN.md](PROJECT_PLAN.md) §2, D-433), aur manuals aur testing ki files (D-440).                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        |
+| B16   | Docs aur task files ka dhaancha (PROJECT_PLAN, `tasks/NN-<module>/TASK.md`, subtasks)   | Owner ke saath                       | Planning khula (D-443); modules tay (D-444); packages ka poora flow R1 se pehle (D-445); module `28-packages`, saare packages public (D-445); packages ke 12 acceptance criteria (D-445). Tay: dhaancha (D-006), tareeka aur CI me docs ke paths ka check (D-019), progress % ka niyam ([PROJECT_PLAN.md](PROJECT_PLAN.md) §2, D-433), aur manuals aur testing ki files (D-440).                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              |
 
 ## 2. Jaanchna baaki
 
@@ -7448,7 +7448,7 @@ Claude ka kaam: owner ka faisla nahi chahiye, sirf saboot. Nateeja saboot ke saa
 
 ### Q-378. Modules kis hisaab se banein, aur unki list kya ho?
 
-- **Status:** `Khula`. Topic: B16 (docs aur task files).
+- **Status:** `Tay`. Topic: B16 (docs aur task files).
 - **Sawal:** planning ka pehla kaam [PROJECT_PLAN.md](PROJECT_PLAN.md) me modules ki list aur unki dependencies hai (D-443). Har module ka ek folder `tasks/NN-<module>/` aur ek `TASK.md` hoga. Modules kis hisaab se kaatein?
 - **Kyun zaroori:**
   - Module hi `TASK.md`, subtasks, progress ke points (D-433) aur acceptance criteria ki link ki ikaai hai. Baad me kaatna badla to saari task files dobara banti hain.
@@ -7458,41 +7458,7 @@ Claude ka kaam: owner ka faisla nahi chahiye, sirf saboot. Nateeja saboot ke saa
   - **(a) Service aur app ke modules (27):** har backend service ka ek module, har app ka ek module, aur saajhe kaam ke 4 module. App ke module me us app ka dhaancha aur saari screens; screen ka subtask us service ke subtask pe tika hota hai jiska data wo dikhata hai. List neeche.
   - **(b) Feature ke modules:** saajhe kaam ke 4 module, phir [PROJECT_PLAN.md](PROJECT_PLAN.md) §1 ke R1 ke hisse jaise modules (area, staff aur roles, sellers, catalog, maal aana, customer, checkout, fulfilment, return, review, paisa), aur R2 ke features alag modules. Har module me apni services aur apps ke saare hisse.
   - **(c) Service ke modules, screens bhi wahin (16):** saajhe kaam ke 4 aur 12 services ke modules; har screen us service ke module me jiska data wo dikhata hai. Apps ke alag module nahi; har app ka dhaancha frontend-kit me.
-- **(a) ki list (draft).** "Tika hai" me sirf wo modules jinke bina ye module poora nahi chalta (sync call, zaroori event ya package). 02-platform, 08-identity aur 09-gateway pe har business service aur har app tiki hai, isliye wo table me baar-baar nahi likhe:
-
-  | Module                 | Kya                                                                                                                                                                    | Release        | Tika hai                               |
-  | ---------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------- | -------------------------------------- |
-  | `01-foundation`        | Naya root setup: workspace, tools (D-001), `configs/`, CI ke jobs, dev ke containers; purane code ka hatna (D-073)                                                     | R1             | Kuch nahi                              |
-  | `02-platform`          | Shared aur backend ke saajhe packages (ARCHITECTURE §12): contracts, validators, money, clock, server-kit, config, mongo, postgres, events, media ke ports, logger     | R1             | 01                                     |
-  | `03-frontend-kit`      | Frontend ke saajhe packages (ARCHITECTURE §12, [DESIGN.md](DESIGN.md)): styles, icons, components, api-client, authz, app-shell, auth-ui, forms, data-table, maps, pwa | R1             | 01, 02                                 |
-  | `04-logs`              | Request logs ke chunks (D-285)                                                                                                                                         | R1             | 02                                     |
-  | `05-audit`             | Audit entries hash chain ke saath, aur security events (D-194)                                                                                                         | R1             | 02                                     |
-  | `06-media`             | Har file ka record, upload ke signed URL, private files aur unka lock (D-284, D-439)                                                                                   | R1             | 02                                     |
-  | `07-notify`            | Templates, in-app inbox, browser push, emails ki line aur chhat (D-140, D-142)                                                                                         | R1             | 02                                     |
-  | `08-identity`          | Accounts, sign-in ke teen raaste, authenticator, sessions, roles aur grants, allowlist, consents aur 18+                                                               | R1             | 02, 07                                 |
-  | `09-gateway`           | Session ki jaanch, rate limit, CSRF, route manifest, `/wake`                                                                                                           | R1             | 02, 04, 08                             |
-  | `10-logistics`         | Location master aur areas, hub aur warehouse, trips, partners, delivery, return pickup, waitlist                                                                       | R1             | 06; delivery pe UPI ke liye 12         |
-  | `11-catalog`           | Sellers aur KYC, brands, products aur variants, listing ki jaanch, daam, ingredients, search, reviews                                                                  | R1             | 06                                     |
-  | `12-payments`          | Razorpay test mode, webhook, refunds, delivery pe UPI QR, settlement reports                                                                                           | R1             | Koi aur nahi                           |
-  | `13-commerce`          | Cart, wishlist, address, order, stock aur reservation, maal aana, pick aur pack, cancel, return                                                                        | R1             | 10, 11, 12, 14                         |
-  | `14-finance`           | Journal, invoice aur credit note, seller ka hisaab, TCS aur TDS, payout, milaan (PostgreSQL)                                                                           | R1             | 12                                     |
-  | `15-support`           | Return aur daawe ke faisle, appeals, staff ki rakam ki seema, fraud ke signals; R2 me tickets aur SLA                                                                  | R1 (patla), R2 | 06, 13                                 |
-  | `16-app-customer`      | Customers: browse, search, product page, cart, checkout, orders, return, review, account                                                                               | R1             | 03, 07, 10, 11, 12, 13                 |
-  | `17-app-seller`        | Seller ki team: onboarding, products, maal bhejna, orders, reviews, reports                                                                                            | R1             | 03, 11, 13, 14                         |
-  | `18-app-admin`         | Marketplace ki teams aur sub-district ke Admins: seller aur listing ki jaanch, review ki moderation                                                                    | R1             | 03, 11                                 |
-  | `19-app-super-admin`   | State Admins aur district ke Super Admins: area ke switches aur staff                                                                                                  | R1             | 03, 10                                 |
-  | `20-app-master`        | Owner aur governance: roles, settings, kill switches, aankde                                                                                                           | R1             | 03, 05, aur saari services ki settings |
-  | `21-app-support-desk`  | Support Agent aur Support Lead: return, daawe aur appeal ke faisle                                                                                                     | R1 (patla), R2 | 03, 15                                 |
-  | `22-app-finance`       | Finance ki team: seller ka hisaab, payout ko "paid" mark karna, reports                                                                                                | R1             | 03, 14                                 |
-  | `23-app-logistics-ops` | Warehouse aur hub ki team: receiving, pick aur pack, trips, assign, returns ki jaanch                                                                                  | R1             | 03, 10, 13                             |
-  | `24-app-delivery`      | Delivery partners ka PWA (offline): delivery, saboot, UPI QR, return pickup                                                                                            | R1             | 03, 10, 12                             |
-  | `25-app-growth-studio` | Marketing aur growth ki team                                                                                                                                           | R2             | 03, aur R2 ke features                 |
-  | `26-app-creator`       | Creators aur affiliates                                                                                                                                                | R2             | 03, aur R2 ke features                 |
-  | `27-operations`        | Deploy (Render, Vercel), backup aur restore (D-013), jagane ke pings aur nigrani (D-028), R1 ka release gate ([RULES.md](RULES.md) §2.1)                               | R1             | 01, 09                                 |
-
-  - `NN` sirf pehchaan hai, banane ka order nahi ([tasks/README.md](tasks/README.md)).
-  - R2 ke features (promotions, points, try-on, tickets ...) apne maalik service ke module me R2 ke subtasks banenge. Jinka maalik service abhi tay nahi (misaal promotions aur points), unka module R2 ki planning me.
-
+- **(a) ki list aur dependencies:** ab [PROJECT_PLAN.md](PROJECT_PLAN.md) §3 me (D-444).
 - **Salah:** **(a)**.
   - ACCEPTANCE ke ids, ARCHITECTURE ka "har data ka ek maalik" aur testing ki files ([testing/](testing/COMMON.md), har app ki ek) teeno ek-ek module se milte hain, to koi criterion ya file do modules me nahi bat-ti.
   - Ek service ka data model, API aur security ek hi `TASK.md` me rehte hain.
@@ -7502,9 +7468,148 @@ Claude ka kaam: owner ka faisla nahi chahiye, sirf saboot. Nateeja saboot ke saa
   - (b) me R1 ka har hissa seedha dikhta hai, par ek service ka data model kai `TASK.md` me bikharta hai, ACCEPTANCE ke ids modules se nahi milte, aur ek PR aksar kai services ko chhoota hai.
   - (c) me folders kam hain, par Customer app ki screens kai service modules me bikhrti hain, aur app ke criteria (`AC-CUSTOMER-*`) aur testing ki file ka koi ek module nahi.
 - **R1 ya baad me:** abhi (planning ka pehla kaam).
+- **Owner ka jawab (2026-11-22):** **(a)**, har backend service aur har app ka apna module, aur saajhe kaam ke 4 module: kul 27, draft wali list ke saath ([PROJECT_PLAN.md](PROJECT_PLAN.md) §3). Record: [DECISIONS.md](DECISIONS.md) D-444.
+
+### Q-379. Packages ka flow (banana, publish, republish) kab aur kitna?
+
+- **Status:** `Tay`. Topic: B15 (technical), B16 (task files).
+- **Sawal:** owner ka khayal (2026-11-22): code shuru hote hi sabse pehle packages ka kaam lagega, isliye packages ka poora flow (naya package banana, publish aur republish) sabse pehle plan ho aur repo me aaye. Abhi D-325 kehta hai ki koi package npm pe publish nahi hoga (R1 ke baad owner dobara dekhe). D-023 kehta hai ki packages ke CLI (create, publish, republish, verify, update-deps) pe naya kaam publish ka plan banne pe hi hoga. Kya karein?
+- **Kyun zaroori:**
+  - Owner ki baat sahi hai ki pehla code packages ka hai: har service aur app `02-platform` aur `03-frontend-kit` pe tiki hai ([PROJECT_PLAN.md](PROJECT_PLAN.md) §3). Package kaise banta hai, kaise build hota hai (tsdown, [RULES.md](RULES.md) CR-34) aur apps use kaise jodte hain, ye pehle din se chahiye.
+  - Par monorepo me apps aur services packages ko workspace se seedha jodte hain. R1 chalane ke liye npm pe publish ki zaroorat nahi.
+  - Publish se D-325 khulta hai, aur saath me uska bojh aata hai: har package ka version aur changelog, supply chain ka khatra (R-026), npm account aur trusted publishing ki setting (owner ka kaam), aur fake registry wale tests.
+- **Vikalp:**
+  - **(a) Pehle banana aur jodna, publish baad me:**
+    - Packages ke CLI ka `create` aur `verify` sabse pehle, `01-foundation` ke hisse ke roop me. `create` sahi dhaancha wala naya package banata hai: README, frontend me playground, `private: true`, tsdown build aur tests. `verify` package ke niyam (CR-33 se CR-36) jaanchta hai.
+    - Har package shuru se publish ke layak banta hai: ESM, exports, types aur README.
+    - `publish`, `republish` aur `update-deps` ka plan abhi likha jaata hai ([OPERATIONS.md](OPERATIONS.md) §11 niyam 7 ke hisaab se). Unka code aur npm pe pehla publish R1 ke baad, D-325 jaisa.
+  - **(b) Poora flow abhi:**
+    - `create`, `verify`, `publish`, `republish` aur `update-deps` sab R1 se pehle.
+    - Chune hue packages public npm pe jaate hain, trusted publishing (OIDC) aur provenance ke saath, aur workflow sirf `release` se chalta hai. D-325 badalta hai.
+  - **(c) Jaisa tay hai:** packages ka koi alag flow nahi. Packages `02-platform` aur `03-frontend-kit` ke kaam ke saath haath se bante hain, aur CLI aur publish dono R1 ke baad.
+- **Salah:** **(a)**.
+  - Owner ki baat ka zaroori hissa isse poora hota hai: package banana aur jodna sabse pehle, aur pehle din se har package ek jaisa banta hai.
+  - Publish se R1 ke order flow me koi madad nahi milti, aur uske bojh se pehla chalta order der se aata hai.
+  - Plan abhi likha hone se baad me publish ke liye sirf workflow aur owner ke account ka kaam bachta hai. Koi feature kata nahi.
+  - Agar packages ko abhi doosre projects me use karna ho ya public dikhana lakshya ho, to (b) ka fayda hai. Warna (a).
+- **Trade-off:**
+  - (a) me publish ki asli jaanch (npm pe pehla publish, provenance) R1 ke baad hogi. Tab kuch packages ke naam ya exports badalne pad sakte hain.
+  - (b) me R1 se pehle ek alag bada kaam judta hai: har package ka version aur changelog, npm account aur MFA, trusted publishing, `release` se workflow, aur har publish pe supply chain ki jaanch. Pehla chalta order kai PR der se aata hai.
+  - (c) me har package haath se banta hai, to dhaancha alag-alag ho sakta hai (README, playground ya Tailwind import jaise niyam chhoot sakte hain, CR-33). CLI ka fayda R1 me nahi milta.
+- **R1 ya baad me:** (a) me `create` aur `verify` R1 me, publish R1 ke baad. (b) me sab R1 me.
+- **Owner ka jawab (2026-11-22):** **(b)**, packages ka poora flow abhi, R1 se pehle: `create`, `verify`, `publish`, `republish` aur `update-deps`. Owner ne baad me saaf kiya ki saare packages public npm pe jaayenge aur publish owner karega; tests me fake registry hi. Record: [DECISIONS.md](DECISIONS.md) D-445.
+
+### Q-380. Packages ke flow ka plan maanein?
+
+- **Status:** `Tay`. Topic: B15 (technical), B16 (task files).
+- **Sawal:** D-445 ke hisaab se packages ka poora flow R1 se pehle banta hai, aur code shuru hone pe pehla kaam yahi hai. Neeche plan ka draft hai. Haan ho to ye ek module ki `TASK.md` banta hai, poori detail ke saath. Plan maanein?
+- **Kyun zaroori:**
+  - Har package isi flow se banega, jaanchega aur publish hoga, to iski kami har package me jaati hai.
+  - npm pe chhapa version wapas lena mushkil hai, aur wahi version number dobara kabhi use nahi hota. Galat file, secret ya galat version ek baar public hua to wahin rehta hai.
+- **Plan (draft):**
+  1. **Module:** naya module `28-packages` (packages ka flow), R1, `01-foundation` pe tika. `02-platform` aur `03-frontend-kit` ke packages iske `create` se bante hain, to wo is pe tike.
+  2. **Commands** (repo ke root se `npm run <naam>`):
+
+     | Command       | Kya karta hai                                                                                                                                                                                                                                                                                                                             | Kaun chalata hai                  |
+     | ------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------- |
+     | `create`      | Naya package sahi jagah aur dhaanche me: `packages/<category>/<name>`, naam `@beautinique/<category>-<name>`, ESM, exports aur types, tsdown build, tests, README, CHANGELOG, frontend me playground aur `tailwind.css` (CR-33, CR-34). README me "Visibility" ka hissa (asal me private ya public); naam npm pe pehle se ho to ruk jaana | Claude ya owner                   |
+     | `build`       | Saare packages, andar ki dependencies pehle                                                                                                                                                                                                                                                                                               | Koi bhi                           |
+     | `verify`      | Publish wali saari jaanch, bina publish: build, typecheck, lint, tests, package me kya jaayega (sirf build, README, CHANGELOG aur LICENSE; secret ka koi pattern nahi), exports aur types sahi, CR-33 se CR-36                                                                                                                            | Koi bhi; CI har PR pe             |
+     | `status`      | Har package ka repo wala aur npm wala version, aur kya publish hona baaki                                                                                                                                                                                                                                                                 | Koi bhi                           |
+     | `republish`   | Badle hue public packages ka naya version (patch, minor ya major), aur jo packages unpe tike hain unka bhi jahan zaroorat ho. Har package ka CHANGELOG uske commits se. Sab ek branch pe commit, phir PR se `prerelease` aur `release`                                                                                                    | Claude, owner ke kehne pe         |
+     | `publish`     | Jo version npm pe nahi, wo publish. Naya package pehli baar owner ke laptop se; uske baad GitHub ka workflow                                                                                                                                                                                                                              | Owner (pehli baar), phir workflow |
+     | `update-deps` | Bahar ki dependencies ke naye versions dikhana, poochh ke likhna aur install karna; galti ho to sab pehle jaisa                                                                                                                                                                                                                           | Claude, owner ke kehne pe         |
+
+  3. **Publish ka workflow** ([OPERATIONS.md](OPERATIONS.md) §11 niyam 7): sirf `release` se, haath se chalaya. Pehla job bina haq ke build, test aur pack karta hai; doosra sirf bane tarballs utaar ke trusted publishing (OIDC) aur provenance se publish karta hai. npm ka koi token repo ya CI me nahi. Publish ke baad har package-version ka git tag, sandesh me `release` branch ka naam, aur back-merge `release` → `prerelease` (D-023).
+  4. **Hifazat:**
+     - Pehle dry run, phir poochh ke hi publish; working tree saaf ho.
+     - Package me sirf `files` ki allowlist wali cheezein.
+     - `npm login`, `npm logout` aur `npm trust` sirf owner chalata hai; owner ke npm account pe MFA (SR-081).
+     - Har naya dependency review ke baad ([OPERATIONS.md](OPERATIONS.md) §11 niyam 2).
+  5. **Tests:** CLI ke tests fake npm registry pe ([RULES.md](RULES.md) §4.2), asli npm kabhi nahi; publish fail aur session khatam jaise haalat bhi. Tests ke liye local infra ki baat docs me (D-023).
+  6. **Docs:** [OPERATIONS.md](OPERATIONS.md) me publish ka manual (kab kya chalana), aur [OWNER_TASKS.md](OWNER_TASKS.md) me owner ke npm wale kaam.
+  7. **Subtasks (andaaza, D-433 ke points):**
+
+     | Subtask                                             | Size   |
+     | --------------------------------------------------- | ------ |
+     | CLI ka dhaancha aur `build`                         | M (2)  |
+     | Fake npm registry aur CLI ke tests ka dhaancha      | M (2)  |
+     | `create`                                            | M (2)  |
+     | `verify`                                            | M (2)  |
+     | `status` aur laptop se `publish`                    | M (2)  |
+     | `republish`: versions, tike packages aur CHANGELOG  | L (4)  |
+     | GitHub ka publish workflow (OIDC, provenance, tags) | M (2)  |
+     | `update-deps`                                       | M (2)  |
+     | **Kul**                                             | **18** |
+
+- **Vikalp:**
+  - **(a) Draft jaisa, naya module `28-packages`.**
+  - **(b) Draft jaisa, par `01-foundation` ke andar:** alag module nahi.
+  - **(c) Badlav ke saath:** owner bataye kya badle.
+- **Salah:** **(a)**. Ye flow apne aap me bada kaam hai (lagbhag 18 points), apne CI workflow aur apne tests ke saath. Alag module me iska progress aur `TASK.md` saaf rehte hain, aur `01-foundation` sirf root setup ka rehta hai.
+- **Trade-off:**
+  - (a) me 28 modules ho jaate hain.
+  - (b) me `01-foundation` bada ho jaata hai, aur root setup aur packages ka progress ek number me mil jaata hai.
+  - Dono me ye kaam pehle chalte order ko lagbhag 18 points der se laata hai. Mahine ke dependency PRs ([OPERATIONS.md](OPERATIONS.md) §11 niyam 1) aur `update-deps` ka kaam milta-julta hai; `update-deps` sirf haath ke turant update ke liye.
+- **R1 ya baad me:** R1 se pehle (code ka pehla kaam).
+- **Owner ka jawab (2026-11-22):** **(a)**, draft jaisa plan, aur naya module `28-packages`. Record: [DECISIONS.md](DECISIONS.md) D-445.
+
+### Q-381. Kaunse packages public npm pe jaayein?
+
+- **Status:** `Tay`. Topic: B15 (technical).
+- **Sawal:** D-445 kehta hai ki chune hue packages public npm pe jaayenge. Kaunse packages?
+- **Kyun zaroori:**
+  - Public package ka har version hamesha npm pe rehta hai. Todne wala (breaking) badlav naya major version maangta hai, aur har version ka CHANGELOG bahar ke logon ke liye hota hai.
+  - Har public package supply chain ka hissa hai (R-026).
+  - R1 ke dauraan packages tezi se badlenge, to public packages jitne zyada, versions ka kaam utna zyada.
+- **Vikalp:**
+  - **(a) Saare packages public:** [ARCHITECTURE.md](ARCHITECTURE.md) §12 ki poori list.
+  - **(b) Sirf aam kaam ke packages public:** jo Beautinique ke data ya API se bandhe nahi (misaal `shared-validators`, `shared-money`, `shared-clock`, `backend-logger`, `backend-events`, `frontend-components`, `frontend-forms`, `frontend-data-table`). Beautinique se bandhe packages (misaal `shared-contracts`, `frontend-api-client`, `frontend-authz`, `frontend-app-shell`, `frontend-auth-ui`, `frontend-styles`) private.
+  - **(c) Shuru me 2 se 3 tike hue packages public:** misaal `shared-validators`, `shared-money` aur `shared-clock`; baaki private. Aage koi package public karna ho to owner ki haan se.
+- **Salah:** **(c)**. Poora flow (`create` se `publish` tak) asli npm pe chalta aur jaancha jaata hai, par shuru me bojh kam rehta hai: kam versions, kam major badlav, aur supply chain ka kam hissa. Jo package tik jaaye, use public karna sirf `private` hatana aur owner ka pehla publish hai.
+- **Trade-off:**
+  - (a) me R1 ke dauraan har badlav pe kai packages ke naye versions aur majors. Beautinique ke API wale packages ka bahar koi kaam nahi.
+  - (b) me (c) se zyada versions ka kaam, par aam packages turant doosre projects me kaam aate hain.
+  - (c) me baaki packages ke publish ka asli test baad me hota hai, aur shuru ki public list chhoti hai.
+- **R1 ya baad me:** R1 se pehle (packages ke flow ke saath).
+- **Owner ka jawab (2026-11-22):** **(a)**, saare packages public, kyunki npm free plan pe private packages publish nahi karne deta. Har package ke README me note ki security ke hisaab se wo asal me private hona chahiye ya public. Record: [DECISIONS.md](DECISIONS.md) D-445.
+
+### Q-382. Asli publish ke bina packages ka flow kaise poora ho?
+
+- **Status:** `Tay`. Topic: B15 (technical).
+- **Sawal:** owner ne kaha (2026-11-22) ki koi package asli npm pe publish nahi hoga, par flow poora chahiye (D-445). Bina asli npm ke flow kaise chale aur kaise jaancha jaaye?
+- **Kyun zaroori:**
+  - Jis package pe `private: true` ho, use npm khud kisi bhi registry pe publish nahi karta. Saare packages private rahein to `publish` aur `republish` asli packages pe kabhi nahi chalte, sirf tests ke packages pe.
+  - Package private na ho to galti se asli npm pe jaane ka raasta khulta hai, aur use alag se rokna padta hai.
+  - GitHub workflow ka aakhri kadam (trusted publishing se npm pe upload) asli npm ke bina kabhi chala ke jaancha nahi ja sakta.
+- **Vikalp:**
+  - **(a) Saare packages `private: true`, flow tests me:** CLI ka poora flow (`create` se `publish` aur `republish` tak) tests ke packages ke saath fake npm registry pe chalta aur jaancha jaata hai. GitHub workflow `release` pe sirf dry run karta hai (build, test, pack aur `npm publish --dry-run`). Asli packages ke version aur CHANGELOG ka kaam nahi.
+  - **(b) Laptop pe local registry:** packages `private: true` nahi. Har package ka `publishConfig.registry` laptop ka local npm registry hai (misaal Verdaccio, Docker me), to `npm publish` bhi wahin jaata hai. CI pakka karta hai ki koi package asli npm ki taraf na ho. Owner apne asli packages ke saath poora flow (`create`, `verify`, `republish`, `publish`, aur local registry se install) laptop pe chala ke dekh sakta hai. GitHub workflow sirf dry run.
+  - **(c) Badlav ke saath:** owner bataye.
+- **Salah:** **(b)**. Owner ko poora flow chahiye, aur (b) me wo asli packages ke saath sach me chalta dikhta hai, sirf tests me nahi. Asli npm ka raasta do jagah band rehta hai (`publishConfig.registry` aur CI ka pehra), aur npm ka login sirf owner ke paas hai.
+- **Trade-off:**
+  - (a) sabse surakshit aur sabse kam kaam hai, par asli packages pe flow kabhi nahi chalta; saboot sirf tests.
+  - (b) me laptop ke infra me ek local registry ka container judta hai, aur R1 ke dauraan asli packages ke versions, CHANGELOG aur tags ka kaam bhi. `private: true` ka pehra hat-ta hai, aur uski jagah `publishConfig.registry` aur CI ka pehra aata hai.
+  - Dono me workflow ka npm upload wala kadam kabhi asli chala ke nahi jaancha jaata.
+- **R1 ya baad me:** R1 se pehle (packages ke flow ke saath).
+- **Owner ka jawab (2026-11-22):** ye sawal ab laagu nahi: owner asli npm pe publish karega (Q-381). Tests me fake npm registry hi. Record: [DECISIONS.md](DECISIONS.md) D-445.
+
+### Q-383. Packages ke flow ke acceptance criteria maanein?
+
+- **Status:** `Tay`. Topic: B15 (technical), B16 (task files).
+- **Sawal:** module `28-packages` ([tasks/28-packages/TASK.md](tasks/28-packages/TASK.md)) ke liye neeche ke 12 criteria [ACCEPTANCE.md](ACCEPTANCE.md) me `PACKAGES` ke naam se jod dein?
+- **Kyun zaroori:** Definition of Done ([RULES.md](RULES.md) DD-1) kehta hai ki har criterion ka kam se kam ek automated test ho. [ACCEPTANCE.md](ACCEPTANCE.md) me abhi sirf services aur apps ke criteria hain, packages ke flow ke nahi. Criteria ke bina is module ka koi subtask "ho gaya" nahi ho sakta.
+- **Criteria:** ab [ACCEPTANCE.md](ACCEPTANCE.md) §1.14 me (`AC-PACKAGES-1` se `AC-PACKAGES-12`).
+- **Vikalp:**
+  - **(a) Draft jaisa:** 12 criteria [ACCEPTANCE.md](ACCEPTANCE.md) §1.14 `PACKAGES` me.
+  - **(b) Badlav ke saath:** owner bataye.
+- **Salah:** **(a)**. Har command ka khushi wala raasta aur uska mana hone wala raasta, dono jaanche jaate hain. Sabse bade khatre (galat file ya secret ka publish, aadha publish, galat branch se publish, asli npm ko chhoone wale tests) ka apna criterion hai.
+- **Trade-off:** (a) me har criterion ka kam se kam ek test chahiye, to module ka test ka kaam badhta hai. (b) me der, par owner apni koi zaroori baat jod sakta hai.
+- **R1 ya baad me:** R1 se pehle (packages ke flow ke saath).
+- **Owner ka jawab (2026-11-22):** **(a)**, draft jaise 12 criteria [ACCEPTANCE.md](ACCEPTANCE.md) §1.14 `PACKAGES` me. Record: [DECISIONS.md](DECISIONS.md) D-445.
 
 ## Change log
 
-| Version           | Date                     | Badlav                                                                                                                               |
-| ----------------- | ------------------------ | ------------------------------------------------------------------------------------------------------------------------------------ |
-| v1.0.0 se v1.8.14 | 2026-11-17 se 2026-11-22 | Topics B1 se B16, jaanchna baaki (§2) aur sawal Q-001 se Q-378 (Q-378 khula, baaki Tay); har badlav ka poora itihaas git me (D-442). |
+| Version           | Date                     | Badlav                                                                                                               |
+| ----------------- | ------------------------ | -------------------------------------------------------------------------------------------------------------------- |
+| v1.0.0 se v1.8.19 | 2026-11-17 se 2026-11-22 | Topics B1 se B16, jaanchna baaki (§2) aur sawal Q-001 se Q-383, sab Tay; har badlav ka poora itihaas git me (D-442). |

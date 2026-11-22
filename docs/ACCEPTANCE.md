@@ -1,6 +1,6 @@
 # ACCEPTANCE: Beautinique
 
-> **Status:** v1.0.6 (2026-11-22). R1 ke har service aur app ke acceptance criteria (D-388 se D-395). Cheezein ek-ek karke, owner ki haan ke baad judti hain.
+> **Status:** v1.0.7 (2026-11-22). R1 ke har service aur app ke acceptance criteria (D-388 se D-395, aur packages ke flow ke D-445). Cheezein ek-ek karke, owner ki haan ke baad judti hain.
 
 ## Is file me kya aayega
 
@@ -180,6 +180,21 @@
 4. **AC-LOGS-4** (D-297; §8 niyam 6, 8): **Given** ops snapshot ke number (RSS, outbox ki umar, dead letters, Redis memory), **When** seema paar hon, **Then** sahi gambhirta ka alert, ek fingerprint ka misaal ek ghante me ek, theek hone pe "theek" ki khabar.
 5. **AC-LOGS-5** (D-332; OPERATIONS §7 niyam 1): **Given** Redis ya ek cluster band, **When** Render ka health check `/health` bulaye, **Then** 200 (process zinda); `/ready` me wo band hissa dikhe, aur finance `/ready` me nahi.
 
+### 1.14 PACKAGES (packages ka flow, D-445)
+
+1. **AC-PACKAGES-1** (D-002, CR-34, D-445): **Given** category aur naam, **When** `create` chale, **Then** package `packages/<category>/<name>` me, naam `@beautinique/<category>-<name>`, ESM, exports aur types, tsdown build, ek test, README ("Visibility" ke hisse samet) aur CHANGELOG ke saath; frontend me playground aur `tailwind.css` bhi. Galat category ya naam, ya repo ya npm pe pehle se maujood naam pe kuch likhe bina ruk jaaye.
+2. **AC-PACKAGES-2** (CR-33 se CR-36): **Given** package jisme README ka "Visibility" hissa, playground ya Tailwind ka import na ho, peer dependency ki range galat ho, ya `private: true` ho, **When** `verify` chale, **Then** fail, package aur niyam ke naam ke saath.
+3. **AC-PACKAGES-3** (DD-7, SR-082): **Given** package ke folder me `.env`, test file ya secret jaisa pattern, **When** `verify` ya `publish` package banaye, **Then** fail; tarball me sirf `files` ki allowlist (build, README, CHANGELOG, LICENSE).
+4. **AC-PACKAGES-4**: **Given** packages ki aapas me dependencies, **When** `build` chale, **Then** andar ki dependencies pehle build hon; chakkar (cycle) ho to saaf error, packages ke naam ke saath.
+5. **AC-PACKAGES-5**: **Given** fake registry pe kuch versions, **When** `status` chale, **Then** har package ka repo wala version, registry wala version aur halat (chhapa, publish baaki, naya) sahi.
+6. **AC-PACKAGES-6**: **Given** package A badla aur package B us pe tika, **When** A ke minor ke saath `republish` chale, **Then** A ka minor badhe; B ka version tabhi badhe jab B ki range naye A ko na maane, aur tab B ki range bhi naye version pe; dono ke CHANGELOG me commits se entry; sab ek commit me; kuch publish nahi.
+7. **AC-PACKAGES-7**: **Given** kuch versions registry pe pehle se, **When** `publish` chale, **Then** sirf wahi versions chhapein jo registry pe nahi, dependency ke kram me; `--dry-run` me registry waisa hi rahe.
+8. **AC-PACKAGES-8** (OPERATIONS §11 niyam 7): **Given** `release` ke alawa branch, gandi working tree, git identity nahi, ya npm login nahi, **When** laptop se `publish` chale, **Then** kuch chhapne se pehle ruk jaaye, wajah ke saath; "haan" ke bina kuch nahi chhapta.
+9. **AC-PACKAGES-9** (OPERATIONS §11 niyam 7): **Given** workflow me ek naya package (npm pe kabhi chhapa nahi), **When** workflow chale, **Then** mana, aur sandesh ki pehli baar laptop se; workflow `release` ke alawa branch se chale hi nahi.
+10. **AC-PACKAGES-10**: **Given** publish beech me fail (registry ka 5xx ya session khatam), **When** `publish` dobara chale, **Then** jo chhap gaye wo dobara nahi, baaki chhapein; tag sirf chhape versions ke.
+11. **AC-PACKAGES-11**: **Given** `update-deps` me install fail ho ya beech me roka jaaye, **When** aisa ho, **Then** har `package.json` aur `package-lock.json` pehle jaisa.
+12. **AC-PACKAGES-12** (OPERATIONS §11 niyam 8): **Given** CLI ke saare tests, **When** chalein, **Then** koi request asli npm registry tak nahi jaati (network ka pehra), sirf fake registry tak.
+
 ## 2. Apps (R1)
 
 ### 2.1 CUSTOMER app
@@ -286,9 +301,10 @@
 | AUDIT     | 6       |               |        |
 | MEDIA     | 7       |               |        |
 | LOGS      | 5       |               |        |
-| **Kul**   | **127** | **Kul**       | **60** |
+| PACKAGES  | 12      |               |        |
+| **Kul**   | **139** | **Kul**       | **60** |
 
-Kul 187 criteria (R1).
+Kul 199 criteria (R1).
 
 
 ## 4. R2 ka chhota khaka
@@ -305,6 +321,6 @@ Kul 187 criteria (R1).
 
 ## Change log
 
-| Version          | Date                     | Badlav                                                                     |
-| ---------------- | ------------------------ | -------------------------------------------------------------------------- |
-| v1.0.0 se v1.0.6 | 2026-11-21 se 2026-11-22 | R1 ke 184 acceptance criteria; har badlav ka poora itihaas git me (D-442). |
+| Version          | Date                     | Badlav                                                                                                    |
+| ---------------- | ------------------------ | --------------------------------------------------------------------------------------------------------- |
+| v1.0.0 se v1.0.7 | 2026-11-21 se 2026-11-22 | R1 ke 199 acceptance criteria (packages ke flow ke 12 samet); har badlav ka poora itihaas git me (D-442). |

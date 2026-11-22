@@ -1,6 +1,6 @@
 # DECISIONS: Beautinique
 
-> **Status:** v1.14.45 (2026-11-22). Har faisla ek jagah. Sirf wahi "Tay" jo owner ne khud kaha; Claude ki salah faisla nahi. Cheezein ek-ek karke judti hain.
+> **Status:** v1.14.50 (2026-11-22). Har faisla ek jagah. Sirf wahi "Tay" jo owner ne khud kaha; Claude ki salah faisla nahi. Cheezein ek-ek karke judti hain.
 
 ## 0. Kaise likhein
 
@@ -458,6 +458,8 @@
 | D-441 | Env ki chaar files: `.env.development`, `.env.test` (folder me, git se bahar), `.env.production` (repo ke bahar), `.env.example` me teeno hisse; har key required, koi default nahi.                                                                                                    | Security     | 2026-11-22 |
 | D-442 | Change log chhota: 2026-11-22 tak ki lines har file me ek line me; aage se ek din ki ek hi line; purana itihaas git me.                                                                                                                                                                 | Process      | 2026-11-22 |
 | D-443 | Discovery poori, planning stage khula: PROJECT_PLAN me modules, dependencies aur progress ki table, phir har module ki TASK.md; code aur PR implementation stage me, owner ke kholne pe.                                                                                                | Process      | 2026-11-22 |
+| D-444 | Modules service aur app ke hisaab se: saajhe kaam ke 5, har backend service ka ek (12), har app ka ek (11); list aur dependencies PROJECT_PLAN §3 me.                                                                                                                                   | Process      | 2026-11-22 |
+| D-445 | Packages ka poora flow R1 se pehle, module `28-packages` me; saare packages public npm pe (publish owner karta hai), README me "asal me private ya public" ka note; tests me fake registry; 12 acceptance criteria; D-325 badla.                                                        | Process      | 2026-11-22 |
 
 ## 2. Record
 
@@ -708,6 +710,7 @@
 - **Chhode vikalp:** CLI hatana; CLI ko aage badhana.
 - **Kab dobara khulega:** jab packages publish karne ka plan bane.
 - **Kisne, kab:** owner, 2026-11-17. **Nishaan:** Salah maani.
+- **Badla (owner, 2026-11-22, D-445):** publish ka plan ab ban raha hai; CLI ka poora kaam R1 se pehle.
 
 ### D-024. Branches
 
@@ -4145,6 +4148,7 @@
 - **Kab dobara khulega:** R1 ke baad, ya owner khud khole.
 - **Kisne, kab:** owner, 2026-11-21. **Nishaan:** Salah maani.
 - **Asar (Claude):** D-023 ke packages CLI pe naya kaam tab tak nahi. CI me `private: true` ka check OPERATIONS ki batch me. npm pe publish, `npm login/logout` aur `npm trust` hamesha sirf owner ke kehne pe.
+- **Badla (owner, 2026-11-22, D-445):** packages ka poora flow R1 se pehle; saare packages public npm pe, publish owner karta hai; har README me "asal me private ya public" ka note. `npm login/logout` aur `npm trust` ab bhi sirf owner ke haath.
 
 ### D-326. OPERATIONS batch 1: environments aur laptop ka setup
 
@@ -5327,8 +5331,44 @@
 - **Kisne, kab:** owner, 2026-11-22. **Nishaan:** Owner.
 - **Asar (Claude):** [CLAUDE.md](../CLAUDE.md) aur [HANDOFF.md](HANDOFF.md) ki "abhi ki halat" isi se badli. Modules ki list ka pehla sawal Q-378.
 
+### D-444. Modules service aur app ke hisaab se
+
+- **Faisla:** modules service aur app ke hisaab se (Q-378 ka vikalp (a)), kul 28:
+  1. Saajhe kaam ke 5: `01-foundation`, `02-platform`, `03-frontend-kit`, `27-operations` aur `28-packages` (packages ka flow, D-445).
+  2. Har backend service ka ek (12): `04-logs` se `15-support`.
+  3. Har app ka ek (11): `16-app-customer` se `26-app-creator`; Growth Studio aur Creator R2 me.
+  4. App ke module me us app ka dhaancha aur saari screens. Screen ka subtask us service ke subtask pe tika hota hai jiska data wo dikhata hai (D-010).
+  5. R2 ke features apne maalik service ke module me R2 ke subtasks. Jinka maalik service abhi tay nahi (misaal promotions aur points), unka module R2 ki planning me.
+  6. List aur dependencies [PROJECT_PLAN.md](PROJECT_PLAN.md) §3 me. `NN` sirf pehchaan hai, banane ka order nahi.
+- **Wajah:** Claude ki salah, owner ne maani: [ACCEPTANCE.md](ACCEPTANCE.md) ke ids, ARCHITECTURE §2.2 ka "har data ka ek maalik service" aur har app ki testing file ek-ek module se milte hain; ek service ka data model, API aur security ek hi `TASK.md` me.
+- **Chhode vikalp:** feature ke modules (R1 ke hisson jaise; service ka data model kai `TASK.md` me bikharta); service ke modules aur screens bhi wahin (app ki screens aur criteria kai modules me bikharte).
+- **Kab dobara khulega:** owner khud khole.
+- **Kisne, kab:** owner, 2026-11-22. **Nishaan:** Salah maani.
+- **Asar (Claude):** R1 ka ek hissa (jaise return) kai modules me phaila hota hai, to PROJECT_PLAN §1 ke hisson se subtasks ka rishta banane ke kram ke saath alag se rakhna hoga.
+
+### D-445. Packages ka poora flow R1 se pehle, saare packages public
+
+- **Faisla:**
+  1. Packages ka poora flow abhi, R1 se pehle (Q-379 ka vikalp (b)): CLI ke `create`, `build`, `verify`, `status`, `republish`, `publish` aur `update-deps`, aur GitHub ka publish workflow (trusted publishing aur provenance ke saath, sirf `release` se, haath se; [OPERATIONS.md](OPERATIONS.md) §11 niyam 7).
+  2. Saare packages public npm pe (Q-381 ka vikalp (a)), aur publish owner karta hai. Kisi package pe `private: true` nahi.
+  3. Har package ke README me "Visibility" ka hissa: security ke hisaab se wo asal me private hona chahiye ya public, aur kyun. Ye sirf samajh ke liye hai; publish saare hote hain. `create` ye hissa banata hai aur `verify` use jaanchta hai.
+  4. Tests kabhi asli npm ko nahi chhoote; sirf fake npm registry ([RULES.md](RULES.md) §4.2, [OPERATIONS.md](OPERATIONS.md) §11 niyam 8).
+  5. Flow ek alag module `28-packages` me (Q-380 ka vikalp (a)): R1, `01-foundation` pe tika, aur `02-platform` aur `03-frontend-kit` is pe tike. Detail [tasks/28-packages/TASK.md](tasks/28-packages/TASK.md) me.
+  6. Code shuru hone pe pehla kaam yahi. D-325 isi se badla, aur D-023 ka "naya kaam publish ke plan pe" khula.
+  7. Module ke 12 acceptance criteria (`AC-PACKAGES-1` se `AC-PACKAGES-12`) [ACCEPTANCE.md](ACCEPTANCE.md) §1.14 me (Q-383 ka vikalp (a)).
+- **Wajah:** owner ne khud kaha (2026-11-22): code shuru hote hi sabse pehle packages ka kaam lagega, isliye banana, publish aur republish ka poora flow sabse pehle plan ho aur repo me aaye. Owner khud publish karega, aur saare packages public rahenge, kyunki npm free plan pe private packages publish nahi karne deta. README ka note security ki samajh ke liye, aur tests me fake registry. Claude ki salah thi ki `create` aur `verify` pehle bane aur publish R1 ke baad; owner ne poora flow abhi chuna. Alag module Claude ki salah thi, owner ne maani.
+- **Chhode vikalp:** publish R1 ke baad (Claude ki salah); koi alag package flow nahi; sirf chune hue packages public; asli publish bilkul nahi (local registry ya sirf tests, Q-382); flow `01-foundation` ke andar.
+- **Kab dobara khulega:** owner khud khole.
+- **Kisne, kab:** owner, 2026-11-22. **Nishaan:** Salah nahi maani (flow abhi, saare public); Owner (README ka note, tests me fake registry); Salah maani (alag module, acceptance criteria).
+- **Asar (Claude):**
+  - Repo pehle se public hai, to npm pe daalne se code ka koi naya hissa bahar nahi jaata. Asli khatra galti se secret, `.env` ya test data ka package me chala jaana hai; `files` ki allowlist aur `verify` ki secret wali jaanch ise rokti hai.
+  - Har public version npm pe hamesha rehta hai, aur wahi number dobara nahi milta. Har publish supply chain (R-026) ka hissa hai.
+  - npm account, MFA, `@beautinique` scope aur trusted publishing ki setting owner ka kaam ([OWNER_TASKS.md](OWNER_TASKS.md) OT-5). `npm login/logout` aur `npm trust` sirf owner ke haath (CLAUDE.md).
+  - [RULES.md](RULES.md) CR-36, [OPERATIONS.md](OPERATIONS.md) §11 niyam 6 aur [ARCHITECTURE.md](ARCHITECTURE.md) §12 isi se badle.
+  - Flow ka kaam (lagbhag 18 points) pehle chalte order ko utna der se laata hai.
+
 ## Change log
 
 | Version            | Date                     | Badlav                                                             |
 | ------------------ | ------------------------ | ------------------------------------------------------------------ |
-| v1.0.0 se v1.14.45 | 2026-11-17 se 2026-11-22 | Faisle D-001 se D-443; har badlav ka poora itihaas git me (D-442). |
+| v1.0.0 se v1.14.50 | 2026-11-17 se 2026-11-22 | Faisle D-001 se D-445; har badlav ka poora itihaas git me (D-442). |
