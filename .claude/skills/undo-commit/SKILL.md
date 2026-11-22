@@ -25,7 +25,7 @@ First read `.claude/skills/_shared/git-rules.md`; §1 and §2 apply here. Never 
      EOF
      ```
 
-     On `main` or `release` the revert still reaches the remote only through a branch and a PR; say so. Conflicts →
+     On `release` the revert still reaches the remote only through a branch and a PR; say so. Conflicts →
      stop and offer `git revert --abort`. Rewriting a pushed commit (reset plus force push) only if the user asks for
      it in so many words, and never on a long-lived branch.
 

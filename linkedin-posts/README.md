@@ -1,6 +1,6 @@
 # LinkedIn posts — Beautinique
 
-> **Status:** v1.12 (2026-11-14). Project ke build-in-public LinkedIn posts: har post ka text, hashtags aur
+> **Status:** v1.12.1 (2026-11-22). Project ke build-in-public LinkedIn posts: har post ka text, hashtags aur
 > PDF carousel ki slides ka image prompt yahan date ke folder me rehte hain. Post insaan khud
 > LinkedIn pe karta hai; koi API ya browser automation nahi.
 
@@ -64,7 +64,7 @@ linkedin-posts/
   tool har slide ki alag image ek saath banata hai. Upar 5 common lines, saare posts me same
   ([_template/carousel.md](_template/carousel.md)): kitni images (har slide ki ek, variants nahi), size (landscape
   16:9), style line, layout niyam (text baayein, picture daayein, bada headline: phone pe page ~400 px ooncha
-  dikhta hai) aur saari images ek set jaisi. Brand color rose `#D6336C` (`packages/frontend/styles`). Phir har
+  dikhta hai) aur saari images ek set jaisi. Brand color rose `#D6336C` (`rose-600`, [DESIGN.md](../docs/DESIGN.md) §2). Phir har
   slide ka `Slide N`, `Layout:` aur `Text:` (exact text; spelling check isi se).
 - Images insaan doosre AI tool se banata hai. Slide pe text ho to prompt me exact text quotes me, kam words;
   image banne ke baad spelling check. Images banane ke common steps: [IMAGES.md](IMAGES.md) (har
@@ -91,8 +91,8 @@ Naye Claude Code session me (worktree me, taaki chal rahi feature branch pe asar
 
 - `linkedin-posts/` ki **saari** files (post, carousel, HISTORY, README, `IMAGES.md`, `_template/`) aur
   `/linkedin-post` skill **seedha `prerelease` pe push**, bina branch/PR (owner, 2026-11-03: chhote badlav ke liye
-  PR aur CI ka intezaar nahi). Pehle `git pull --rebase` aur `npm run format:check`; force push nahi, `slides/`
-  kabhi nahi ([RULES §2](../docs/RULES.md)).
+  PR aur CI ka intezaar nahi). Pehle `git pull --rebase` aur `npx prettier --check linkedin-posts`; force push nahi, `slides/`
+  kabhi nahi ([CLAUDE.md](../CLAUDE.md) git flow).
 
 ## Change log
 
@@ -111,3 +111,4 @@ Naye Claude Code session me (worktree me, taaki chal rahi feature branch pe asar
 | v1.10   | 2026-11-03 | §3: alt text sirf akeli image wale post me; carousel me nahi (owner ka faisla).                                     |
 | v1.11   | 2026-11-03 | §1: post folder ka naam `D<N>-YYYY-MM-DD` (Day number + date; owner ka faisla).                                     |
 | v1.12   | 2026-11-14 | §1, §3: `hashtags.md` hata, hashtags `post.md` ke text block ki aakhri line me; 8–10 hashtags (owner ka faisla).    |
+| v1.12.1 | 2026-11-22 | §4, §6: brand rang ka source `docs/DESIGN.md` §2, aur push se pehle `npx prettier --check linkedin-posts`.          |

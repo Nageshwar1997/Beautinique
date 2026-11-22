@@ -16,3 +16,12 @@ packages/frontend/styles/src/variables.css
 packages/frontend/styles/src/fonts.css
 packages/frontend/styles/src/fonts
 packages/shared/contracts/generated
+
+# Old code and docs, kept only for reference while the project is rebuilt from scratch.
+# TEMPORARY: delete these lines together with the folders once the old code is removed.
+backend-old
+configs-old
+frontend-old
+infra-old
+packages-old
+scripts-old

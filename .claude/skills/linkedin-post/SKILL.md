@@ -20,7 +20,7 @@ Read both first, nothing else unless needed (keep tokens low). Ask the user whic
 4. If nothing worth showing, tell the user and stop.
 5. Copy `_template/` to `linkedin-posts/D<N>-<post date YYYY-MM-DD>/` (N = the day number, e.g. `D3-2026-11-05`). Fill `post.md`
    (8–10 hashtags as the last line of its text block, no separate file) and `carousel.md` per README §3–4. Facts only from PR bodies/commits. Next day number from HISTORY.
-   Brand colors: `packages/frontend/styles/src/variables.css` if more than the README's rose is needed.
+   Brand colors: `docs/DESIGN.md` §2 (colour tokens) if more than the README's rose is needed.
 6. Add a `draft` row to HISTORY.md (Kya cover hua = PR numbers), bump its status and change log.
 7. `npx prettier --write linkedin-posts`, then show the user the post text and the slide list.
 
@@ -62,7 +62,7 @@ update the HISTORY row, move the marker to the last covered `prerelease` commit 
 
 Only when the user says so. Everything under `linkedin-posts/` (posts, HISTORY, README, `IMAGES.md`,
 `_template/`) and this skill go straight to `prerelease`, no branch or PR (owner, README §6): from a
-`prerelease` checkout, `git pull --rebase`, `npm run format:check`, commit only `linkedin-posts/` and
+`prerelease` checkout, `git pull --rebase`, `npx prettier --check linkedin-posts`, commit only `linkedin-posts/` and
 `.claude/skills/linkedin-post/` paths, `git push`. Never force push, never commit `slides/`.
 
 ## Never

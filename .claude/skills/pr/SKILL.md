@@ -53,9 +53,8 @@ Record `git rev-parse HEAD` (the way back).
 
 - `prerelease` → `release`: `git rev-list --count origin/prerelease..origin/release` above 0 means `release` has
   commits `prerelease` lacks (release commit, hotfix) → a back-merge comes first (`/pr prerelease release`); ask.
-- `release` → `main`: `git rev-list --count origin/release..origin/main` must be 0; otherwise stop and report.
 - `release` → `prerelease`: the PR itself is the sync.
-- Unpushed local commits on the head: `release` or `main` → stop (no direct push); `prerelease` → the small-fix rule
+- Unpushed local commits on the head: `release` → stop (no direct push); `prerelease` → the small-fix rule
   (shared §3) or stop.
 
 ## Step 3: Analyse the changes
@@ -63,9 +62,14 @@ Record `git rev-parse HEAD` (the way back).
 1. Range: `origin/<base>...HEAD` (long-lived head: `origin/<base>...origin/<head>`).
 2. `git log --oneline <range>` and `git diff --stat <range>`; then read the full diff (`git diff <range>`, file by
    file when large; lockfiles and generated files by stat only). The PR is every commit, not the last one.
-3. Note features, fixes, refactors; API and contract changes (`defineRoute` contracts, package exports and versions);
+3. Note features, fixes, refactors; API and contract changes (route, event and permission contracts, package exports
+   and versions);
    config and env keys (`.env.example`); DB migrations and indexes; CI or workflow changes; breaking changes; missing
    docs; task ids (`T<n>`, `QA-...`, `LIVE-...`).
+   Feature work in an app or a service's routes: the role manuals (`docs/manuals/`) and that app's testing file
+   (`docs/testing/<APP>.md`) must change in the same PR, and new owner work (env keys, accounts) must be in
+   `docs/OWNER_TASKS.md` (`docs/RULES.md` DD-13, RT-56). Missing → add them first, or write
+   "No manual change: <reason>" under Testing.
 4. Checks for what changed (shared §5). Keep each command and its real result. A failure → show it and ask: fix
    first, or open the PR with the failure written under Testing.
 

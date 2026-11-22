@@ -1,8 +1,14 @@
 version: 2
 updates:
+  # Monthly pull requests into the development branch; minor and patch updates in one group, each major
+  # in its own pull request (docs/OPERATIONS.md §11, rule 1). npm joins with the new root setup.
   - package-ecosystem: github-actions
     directory: /
-    # Development branch (RULES §2): main only takes release.
     target-branch: prerelease
     schedule:
       interval: monthly
+    commit-message:
+      prefix: ci
+    groups:
+      github-actions:
+        update-types: [minor, patch]

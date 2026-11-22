@@ -1,44 +1,32 @@
 name: CI
 
+# The rules this workflow follows: docs/OPERATIONS.md §2.
+# Pushes run on the long-lived branches only (rule 11: Render and Vercel read the merge commit's checks).
 on:
   push:
-    branches: [main, prerelease, release]
+    branches: [prerelease, release]
   pull_request:
 
-# actions: read lets each job look for the marker of an earlier run that passed the same code
-# (scripts/ci/lib/plan.ts).
-permissions:
-  contents: read
-  actions: read
+# No rights by default; each job asks only for what it needs (rule 7).
+permissions: {}
 
 concurrency:
   group: ci-${{ github.ref }}
   cancel-in-progress: true
 
-# Turborepo, the CI build cache (T0.5): no telemetry, no update notice.
-env:
-  TURBO_TELEMETRY_DISABLED: '1'
-  TURBO_NO_UPDATE_NOTIFIER: '1'
-
-# Parallel jobs (owner, 2026-11-14; RULES §2 "CI"). Each job checks out, asks scripts/ci/bin/plan.ts
-# what it has to do and skips its steps when that is nothing, so it still ends green:
-# - same code already passed (a marker artifact ci-pass-<git tree>): nothing heavy runs;
-# - a pull request into prerelease (or another work branch): only what its change affects;
-# - every push, a pull request into release or main, or a change outside the workspaces: everything.
-# No job waits for a "plan" job: Render's "After CI checks pass" deploys once every check it sees has
-# passed, and a job that waits (needs) may have no check yet. Only `check` waits for the others; the
-# rulesets and Vercel's Deployment Checks name it, so it keeps its name. Every job but guard,
-# turbo-cache and check starts the same way (checkout, Node, plan); scripts/ci/test/ci-workflow.test.ts
-# keeps them in step. Builds: static with the package CLI (`npm run build`, never cached, the way
-# Vercel and Render build); the test and E2E jobs with Turborepo and its cache (turbo.json, T0.5).
-# Display names start with their group (guard, static, tests, verify, cache) so the checks read as
-# flows; they change nothing else. `check` has no display name: the rulesets and Vercel name it.
+# Jobs run side by side and none waits for another (needs) except `check` (rules 1 and 2): Render's
+# "After CI checks pass" deploys once every check it sees has passed, and a job that waits may have no
+# check yet. The rulesets and Vercel's Deployment Checks name `check`, so it keeps its name and has no
+# display name. Build, lint, typecheck, tests and E2E join as jobs here with the new root setup; until
+# then the repository holds docs, so guard and the format check are the whole run.
 jobs:
-  # Runs on every run, same code or not: the history, the branch flow and the advisories change.
+  # Every run: the history, the branch flow and the advisories change even when the code does not.
   guard:
-    name: guard / secrets, branch flow
+    name: guard / secrets, branch flow, audit
     runs-on: ubuntu-latest
     timeout-minutes: 10
+    permissions:
+      contents: read
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
@@ -61,18 +49,21 @@ jobs:
           tar -xzf "$archive" -C "$RUNNER_TEMP" gitleaks
           "$RUNNER_TEMP/gitleaks" git --config .gitleaks.toml --log-opts="--full-history HEAD" --redact --verbose --no-banner --exit-code 1 .
 
-      # No cache here: setup-node's cache step runs `npm config get cache` with the bundled npm 11,
-      # which the repo's devEngines (npm >=12.2.0, onFail error) rejects (EBADDEVENGINES).
+      # No cache here: setup-node's cache step runs `npm config get cache` with the bundled npm, which
+      # the repository's devEngines (npm >=12.2.0, onFail error) rejects.
       - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
         with:
           node-version: 24
           package-manager-cache: false
 
-      # The branch flow (RULES §2): main takes only release, release only prerelease or hotfix/*, and
-      # both only from this repository, not a fork (QA-CI-001). Rules and tests: scripts/ci/. The names
-      # come in through env, never straight into the command (whoever opens the pull request names
-      # the branch). A base change (edited) does not rerun this; the ruleset's "up to date" rule makes
-      # such a pull request update its branch, which does.
+      # The check's own tests first, so a broken check cannot pass a wrong pull request.
+      - name: Test the branch flow check
+        run: node --test .github/scripts/branch-flow.test.mjs
+
+      # The branch flow (rule 3; .github/scripts/branch-flow.mjs). The names come in through env, never
+      # straight into the command: whoever opens the pull request names the head branch. A base change
+      # (edited) does not rerun this; the ruleset's "up to date" rule makes such a pull request update
+      # its branch, which does.
       - name: Check the branch flow
         if: github.event_name == 'pull_request'
         env:
@@ -80,375 +71,20 @@ jobs:
           HEAD_REF: ${{ github.head_ref }}
           HEAD_REPO: ${{ github.event.pull_request.head.repo.full_name }}
           REPO: ${{ github.repository }}
-        run: node scripts/ci/bin/branch-flow.ts
+        run: node .github/scripts/branch-flow.mjs
 
-      # The repo needs npm 12 (devEngines); Node 24 ships npm 11. A global install is not checked
-      # against devEngines, so this runs fine with npm 11.
+      # Node 24 ships npm 11 and devEngines needs npm 12. A global install is not checked against
+      # devEngines, so it runs with npm 11.
       - run: npm install --global npm@12.2.0
-      # From the lock file alone, no install needed.
+      # High and critical advisories fail the run (rule 3), read from the lockfile alone.
       - run: npm audit --audit-level=high --package-lock-only
 
-  # Prettier on every run; build, lint and typecheck of everything whenever code changed. Its outputs
-  # tell `check` whether a pass may leave the marker.
   static:
-    name: static / format, lint, types
+    name: static / format
     runs-on: ubuntu-latest
-    timeout-minutes: 20
-    outputs:
-      tree: ${{ steps.plan.outputs.tree }}
-      upload: ${{ steps.plan.outputs.upload }}
-    steps:
-      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-        with:
-          persist-credentials: false
-          # A pull request's merge commit and its first parent (the base): the diff plan.ts reads.
-          fetch-depth: 2
-      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
-        with:
-          node-version: 24
-          package-manager-cache: false
-      - name: Plan
-        id: plan
-        env:
-          GH_TOKEN: ${{ github.token }}
-          EVENT_NAME: ${{ github.event_name }}
-          BASE_REF: ${{ github.base_ref }}
-          REPO: ${{ github.repository }}
-        run: node scripts/ci/bin/plan.ts --job static
-      - if: steps.plan.outputs.run == 'true'
-        run: npm install --global npm@12.2.0
-      - if: steps.plan.outputs.run == 'true'
-        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
-        with:
-          path: ~/.npm
-          key: npm-${{ runner.os }}-${{ hashFiles('package-lock.json') }}
-          restore-keys: npm-${{ runner.os }}-
-      - if: steps.plan.outputs.run == 'true'
-        run: npm ci
-      - if: steps.plan.outputs.run == 'true'
-        run: npm run format:check
-      # Packages import each other's dist (types too), so build them before lint and typecheck.
-      - if: steps.plan.outputs.code == 'true'
-        run: npm run build
-      - if: steps.plan.outputs.code == 'true'
-        run: npm run lint
-      - if: steps.plan.outputs.code == 'true'
-        run: npm run typecheck
-
-  # The repo's own tests (CLI, CI guards that read every app and package, E2E helpers): whenever code
-  # changed anywhere, since they read across the workspaces.
-  test-scripts:
-    name: tests / scripts
-    runs-on: ubuntu-latest
-    timeout-minutes: 25
-    steps:
-      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-        with:
-          persist-credentials: false
-          fetch-depth: 2
-      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
-        with:
-          node-version: 24
-          package-manager-cache: false
-      - name: Plan
-        id: plan
-        env:
-          GH_TOKEN: ${{ github.token }}
-          EVENT_NAME: ${{ github.event_name }}
-          BASE_REF: ${{ github.base_ref }}
-          REPO: ${{ github.repository }}
-        run: node scripts/ci/bin/plan.ts --job test-scripts
-      - if: steps.plan.outputs.run == 'true'
-        run: npm install --global npm@12.2.0
-      - if: steps.plan.outputs.run == 'true'
-        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
-        with:
-          path: ~/.npm
-          key: npm-${{ runner.os }}-${{ hashFiles('package-lock.json') }}
-          restore-keys: npm-${{ runner.os }}-
-      - if: steps.plan.outputs.run == 'true'
-        run: npm ci
-      - name: Restore the build cache
-        if: steps.plan.outputs.run == 'true'
-        uses: actions/cache/restore@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
-        with:
-          path: .turbo/cache
-          key: turbo-${{ runner.os }}-${{ github.sha }}
-          restore-keys: turbo-${{ runner.os }}-
-      # What this job runs and what that needs (T0.6; plan.ts, plain names, through env); unchanged
-      # workspaces come from the cache (T0.5). One build at a time: the customer app's prerender times
-      # out under load.
-      - if: steps.plan.outputs.run == 'true'
-        env:
-          BUILD: ${{ steps.plan.outputs.build }}
-        run: npx turbo run build $BUILD --concurrency=1 --output-logs=new-only
-      # The E2E helpers' tests use MongoDB. Every job that needs a service starts it like this, from
-      # the same compose file as the laptops (`npm run infra:up`), and so does release.yml.
-      - name: Start MongoDB, Valkey and Mailpit for the tests
-        if: steps.plan.outputs.run == 'true'
-        run: |
-          # MongoDB 8.0 needs a workaround on Linux 6.19+ (infra/docker-compose.yml)
-          echo "kernel $(uname -r)"
-          if ! docker compose -f infra/docker-compose.yml up --detach --wait --wait-timeout 180 mongo valkey mailpit; then
-            # compose only says "exited (1)"; the servers' own logs say why
-            docker compose -f infra/docker-compose.yml ps --all
-            docker compose -f infra/docker-compose.yml logs --no-color --tail 200 mongo valkey mailpit
-            exit 1
-          fi
-      - if: steps.plan.outputs.run == 'true'
-        run: npm run test:scripts
-
-  # Backend packages, shared packages and the deployables, against a real MongoDB replica set, Valkey
-  # and Mailpit.
-  test-backend:
-    name: tests / backend
-    runs-on: ubuntu-latest
-    timeout-minutes: 25
-    steps:
-      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-        with:
-          persist-credentials: false
-          fetch-depth: 2
-      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
-        with:
-          node-version: 24
-          package-manager-cache: false
-      - name: Plan
-        id: plan
-        env:
-          GH_TOKEN: ${{ github.token }}
-          EVENT_NAME: ${{ github.event_name }}
-          BASE_REF: ${{ github.base_ref }}
-          REPO: ${{ github.repository }}
-        run: node scripts/ci/bin/plan.ts --job test-backend
-      - if: steps.plan.outputs.run == 'true'
-        run: npm install --global npm@12.2.0
-      - if: steps.plan.outputs.run == 'true'
-        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
-        with:
-          path: ~/.npm
-          key: npm-${{ runner.os }}-${{ hashFiles('package-lock.json') }}
-          restore-keys: npm-${{ runner.os }}-
-      - if: steps.plan.outputs.run == 'true'
-        run: npm ci
-      - name: Restore the build cache
-        if: steps.plan.outputs.run == 'true'
-        uses: actions/cache/restore@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
-        with:
-          path: .turbo/cache
-          key: turbo-${{ runner.os }}-${{ github.sha }}
-          restore-keys: turbo-${{ runner.os }}-
-      # What this job runs and what that needs (T0.6; plan.ts, plain names, through env); unchanged
-      # workspaces come from the cache (T0.5). One build at a time: the customer app's prerender times
-      # out under load.
-      - if: steps.plan.outputs.run == 'true'
-        env:
-          BUILD: ${{ steps.plan.outputs.build }}
-        run: npx turbo run build $BUILD --concurrency=1 --output-logs=new-only
-      - name: Start MongoDB, Valkey and Mailpit for the tests
-        if: steps.plan.outputs.run == 'true'
-        run: |
-          # MongoDB 8.0 needs a workaround on Linux 6.19+ (infra/docker-compose.yml)
-          echo "kernel $(uname -r)"
-          if ! docker compose -f infra/docker-compose.yml up --detach --wait --wait-timeout 180 mongo valkey mailpit; then
-            # compose only says "exited (1)"; the servers' own logs say why
-            docker compose -f infra/docker-compose.yml ps --all
-            docker compose -f infra/docker-compose.yml logs --no-color --tail 200 mongo valkey mailpit
-            exit 1
-          fi
-      # The workspaces come from plan.ts (plain names only), through env, not into the command.
-      - if: steps.plan.outputs.run == 'true'
-        env:
-          WORKSPACES: ${{ steps.plan.outputs.args }}
-        run: npm run test $WORKSPACES --if-present
-
-  # Frontend packages and the apps' unit tests: no service needed.
-  test-frontend:
-    name: tests / frontend
-    runs-on: ubuntu-latest
-    timeout-minutes: 25
-    steps:
-      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-        with:
-          persist-credentials: false
-          fetch-depth: 2
-      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
-        with:
-          node-version: 24
-          package-manager-cache: false
-      - name: Plan
-        id: plan
-        env:
-          GH_TOKEN: ${{ github.token }}
-          EVENT_NAME: ${{ github.event_name }}
-          BASE_REF: ${{ github.base_ref }}
-          REPO: ${{ github.repository }}
-        run: node scripts/ci/bin/plan.ts --job test-frontend
-      - if: steps.plan.outputs.run == 'true'
-        run: npm install --global npm@12.2.0
-      - if: steps.plan.outputs.run == 'true'
-        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
-        with:
-          path: ~/.npm
-          key: npm-${{ runner.os }}-${{ hashFiles('package-lock.json') }}
-          restore-keys: npm-${{ runner.os }}-
-      - if: steps.plan.outputs.run == 'true'
-        run: npm ci
-      - name: Restore the build cache
-        if: steps.plan.outputs.run == 'true'
-        uses: actions/cache/restore@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
-        with:
-          path: .turbo/cache
-          key: turbo-${{ runner.os }}-${{ github.sha }}
-          restore-keys: turbo-${{ runner.os }}-
-      # What this job runs and what that needs (T0.6; plan.ts, plain names, through env); unchanged
-      # workspaces come from the cache (T0.5). One build at a time: the customer app's prerender times
-      # out under load.
-      - if: steps.plan.outputs.run == 'true'
-        env:
-          BUILD: ${{ steps.plan.outputs.build }}
-        run: npx turbo run build $BUILD --concurrency=1 --output-logs=new-only
-      - if: steps.plan.outputs.run == 'true'
-        env:
-          WORKSPACES: ${{ steps.plan.outputs.args }}
-        run: npm run test $WORKSPACES --if-present
-
-  # The apps' E2E (ARCHITECTURE §9.2): the real app on its dev server and the whole backend
-  # (scripts/e2e/backend.ts) on the services, Chromium at 360/768/1280 px, light and dark, axe on
-  # every screen (owner, 2026-11-02: Chromium only in CI). One job per app; every app with an e2e
-  # script is in the list (scripts/ci/test/ci-workflow.test.ts).
-  e2e:
-    name: tests / e2e (${{ matrix.app }})
-    runs-on: ubuntu-latest
-    timeout-minutes: 30
-    strategy:
-      fail-fast: false
-      matrix:
-        app: [customer, admin, master]
-    steps:
-      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-        with:
-          persist-credentials: false
-          fetch-depth: 2
-      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
-        with:
-          node-version: 24
-          package-manager-cache: false
-      - name: Plan
-        id: plan
-        env:
-          GH_TOKEN: ${{ github.token }}
-          EVENT_NAME: ${{ github.event_name }}
-          BASE_REF: ${{ github.base_ref }}
-          REPO: ${{ github.repository }}
-          APP: ${{ matrix.app }}
-        run: node scripts/ci/bin/plan.ts --job e2e --app "$APP"
-      - if: steps.plan.outputs.run == 'true'
-        run: npm install --global npm@12.2.0
-      - if: steps.plan.outputs.run == 'true'
-        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
-        with:
-          path: ~/.npm
-          key: npm-${{ runner.os }}-${{ hashFiles('package-lock.json') }}
-          restore-keys: npm-${{ runner.os }}-
-      - if: steps.plan.outputs.run == 'true'
-        run: npm ci
-      - name: Restore the build cache
-        if: steps.plan.outputs.run == 'true'
-        uses: actions/cache/restore@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
-        with:
-          path: .turbo/cache
-          key: turbo-${{ runner.os }}-${{ github.sha }}
-          restore-keys: turbo-${{ runner.os }}-
-      # What this job runs and what that needs (T0.6; plan.ts, plain names, through env); unchanged
-      # workspaces come from the cache (T0.5). One build at a time: the customer app's prerender times
-      # out under load.
-      - if: steps.plan.outputs.run == 'true'
-        env:
-          BUILD: ${{ steps.plan.outputs.build }}
-        run: npx turbo run build $BUILD --concurrency=1 --output-logs=new-only
-      - name: Start MongoDB, Valkey and Mailpit for the tests
-        if: steps.plan.outputs.run == 'true'
-        run: |
-          # MongoDB 8.0 needs a workaround on Linux 6.19+ (infra/docker-compose.yml)
-          echo "kernel $(uname -r)"
-          if ! docker compose -f infra/docker-compose.yml up --detach --wait --wait-timeout 180 mongo valkey mailpit; then
-            # compose only says "exited (1)"; the servers' own logs say why
-            docker compose -f infra/docker-compose.yml ps --all
-            docker compose -f infra/docker-compose.yml logs --no-color --tail 200 mongo valkey mailpit
-            exit 1
-          fi
-      - if: steps.plan.outputs.run == 'true'
-        run: npx playwright install --with-deps chromium
-      - if: steps.plan.outputs.run == 'true'
-        env:
-          APP: ${{ matrix.app }}
-        run: npm run e2e --workspace "$APP"
-      - name: Keep the E2E traces of a failed run
-        if: failure() && steps.plan.outputs.run == 'true'
-        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
-        with:
-          name: e2e-traces-${{ matrix.app }}
-          path: frontend/${{ matrix.app }}/test-results
-          retention-days: 7
-
-  # Every check a publish runs (build, lint, typecheck, tests, package contents, publint, types),
-  # nothing published: the affected packages, or all of them. It builds what it checks itself.
-  verify:
-    name: verify / packages
-    runs-on: ubuntu-latest
-    timeout-minutes: 25
-    steps:
-      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-        with:
-          persist-credentials: false
-          fetch-depth: 2
-      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
-        with:
-          node-version: 24
-          package-manager-cache: false
-      - name: Plan
-        id: plan
-        env:
-          GH_TOKEN: ${{ github.token }}
-          EVENT_NAME: ${{ github.event_name }}
-          BASE_REF: ${{ github.base_ref }}
-          REPO: ${{ github.repository }}
-        run: node scripts/ci/bin/plan.ts --job verify
-      - if: steps.plan.outputs.run == 'true'
-        run: npm install --global npm@12.2.0
-      - if: steps.plan.outputs.run == 'true'
-        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
-        with:
-          path: ~/.npm
-          key: npm-${{ runner.os }}-${{ hashFiles('package-lock.json') }}
-          restore-keys: npm-${{ runner.os }}-
-      - if: steps.plan.outputs.run == 'true'
-        run: npm ci
-      - name: Start MongoDB, Valkey and Mailpit for the tests
-        if: steps.plan.outputs.run == 'true'
-        run: |
-          # MongoDB 8.0 needs a workaround on Linux 6.19+ (infra/docker-compose.yml)
-          echo "kernel $(uname -r)"
-          if ! docker compose -f infra/docker-compose.yml up --detach --wait --wait-timeout 180 mongo valkey mailpit; then
-            # compose only says "exited (1)"; the servers' own logs say why
-            docker compose -f infra/docker-compose.yml ps --all
-            docker compose -f infra/docker-compose.yml logs --no-color --tail 200 mongo valkey mailpit
-            exit 1
-          fi
-      - if: steps.plan.outputs.run == 'true'
-        env:
-          PACKAGES: ${{ steps.plan.outputs.args }}
-        run: npm run verify -- $PACKAGES --yes
-
-  # Fills the build cache that pull requests restore (T0.5): only on a push to prerelease, where the
-  # merged code usually skips every build (same code), so nothing else would. Nobody waits for it and
-  # check does not need it; elsewhere it is skipped.
-  turbo-cache:
-    name: cache / turbo
-    if: github.event_name == 'push' && github.ref == 'refs/heads/prerelease'
-    runs-on: ubuntu-latest
-    timeout-minutes: 20
+    timeout-minutes: 15
+    permissions:
+      contents: read
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
@@ -463,27 +99,18 @@ jobs:
           path: ~/.npm
           key: npm-${{ runner.os }}-${{ hashFiles('package-lock.json') }}
           restore-keys: npm-${{ runner.os }}-
-      - run: npm ci
-      - uses: actions/cache/restore@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
-        with:
-          path: .turbo/cache
-          key: turbo-${{ runner.os }}-${{ github.sha }}
-          restore-keys: turbo-${{ runner.os }}-
-      - run: npx turbo run build --concurrency=1 --output-logs=new-only
-      # An entry not rebuilt for a week goes (one rebuild then), so the cache stays small.
-      - run: find .turbo/cache -type f -mtime +7 -delete
-      - uses: actions/cache/save@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
-        with:
-          path: .turbo/cache
-          key: turbo-${{ runner.os }}-${{ github.sha }}
+      # From the lockfile (rule 7). Prettier needs no install script, so none runs.
+      - run: npm ci --ignore-scripts
+      - run: npx prettier --check .
 
   # The one check the rulesets require and Vercel's Deployment Checks wait for: green only when every
-  # job above is. A run that tested everything and passed leaves the marker for this tree.
+  # job above is.
   check:
     if: ${{ !cancelled() }}
-    needs: [guard, static, test-scripts, test-backend, test-frontend, e2e, verify]
+    needs: [guard, static]
     runs-on: ubuntu-latest
     timeout-minutes: 5
+    permissions: {}
     steps:
       - name: Every job passed
         env:
@@ -491,17 +118,3 @@ jobs:
         run: |
           echo "$NEEDS" | jq -r 'to_entries[] | "\(.key): \(.value.result)"'
           echo "$NEEDS" | jq -e 'all(.[]; .result == "success")' > /dev/null
-      - name: Write the marker
-        if: needs.static.outputs.upload == 'true'
-        env:
-          TREE: ${{ needs.static.outputs.tree }}
-        run: |
-          mkdir -p "$RUNNER_TEMP/ci-pass"
-          printf 'tree %s\ncommit %s\nrun %s\n' "$TREE" "$GITHUB_SHA" "$GITHUB_RUN_ID" > "$RUNNER_TEMP/ci-pass/ci-pass.txt"
-      - name: Keep the marker
-        if: needs.static.outputs.upload == 'true'
-        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
-        with:
-          name: ci-pass-${{ needs.static.outputs.tree }}
-          path: ${{ runner.temp }}/ci-pass/ci-pass.txt
-          retention-days: 30

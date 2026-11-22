@@ -1,125 +1,85 @@
-# GIT_SKILLS — BQ
+# GIT SKILLS: Beautinique
 
-> **Status:** v1.0 (2026-11-14). Git aur GitHub ke kaam Claude Code ke 6 slash commands se: `/commit`, `/push`, `/pr`, `/sync`, `/git-status`, `/undo-commit`. Ye file insaan ke liye manual hai: kab kaunsa command, wo kya karta hai, kab rukta hai. Claude ke liye niyam skills me hain (`.claude/skills/<naam>/SKILL.md`) aur sabke saajhe niyam `.claude/skills/_shared/git-rules.md` me. Branch flow ka sach [RULES.md](RULES.md) §2 hai.
+> **Status:** v1.1.6 (2026-11-22). Git skills (`/commit`, `/push`, `/pr`, `/sync`, `/git-status`, `/undo-commit`) ka manual, owner ke liye. Skills ka asli kaam `.claude/skills/` me; dono saath badlein.
 
-## 1. Ek nazar me
+## Is file me kya aayega
 
-| Command                  | Kab                                      | Badalta kya hai                     |
-| ------------------------ | ---------------------------------------- | ----------------------------------- |
-| `/git-status [fetch]`    | Kuch bhi karne se pehle halat dekhni ho  | Kuch nahi (sirf padhta hai)         |
-| `/commit [hint/paths]`   | Kaam ka ek hissa poora hua               | Ek commit (push nahi)               |
-| `/push`                  | Commits GitHub pe bhejne hain            | Remote branch                       |
-| `/sync [base]`           | Branch ko naye `prerelease` pe laana hai | Apni branch ki history (rebase)     |
-| `/pr <base> [branch]`    | Kaam review/merge ke liye taiyaar        | Sync + push + naya PR (merge nahi)  |
-| `/undo-commit`           | Aakhri commit galat tha                  | Aakhri commit hatata/revert karta   |
+Har skill: kab chalao, kya karta hai, kya kabhi nahi karta.
 
-Sabme pakka:
+## 1. Ek nazar me (D-432)
 
-- **Koi AI attribution nahi:** commit, PR, tag me na `Co-Authored-By: Claude`, na "Generated with Claude Code", na 🤖. Sirf aapki apni git identity (`git config user.name/email`); git config kabhi nahi badalta. `.claude/settings.json` me Claude Code ki attribution band hai; use mat hatao.
-- **Kabhi nahi:** force push (sirf aapki saaf haan pe `--force-with-lease`, wo bhi long-lived branch pe kabhi nahi), `reset --hard`, hooks skip (`--no-verify`), uncommitted kaam phenkna, PR merge, branch delete, `main`/`release` pe seedha push.
-- **Rukta hai aur poochhta hai** jab: tree saaf nahi, conflict aaya, branch pehle se push hai aur rebase history badlega, PR pehle se khula/merged hai, ya baat saaf nahi.
-- `/sync` aur `/undo-commit` sirf aapke type karne pe chalte hain. Baaki chaar shabdon me kehne pe bhi chalte hain ("commit karo", "PR bana do").
+| Command                   | Kab                            | Kya karta hai                                                                     | Kabhi nahi                                   |
+| ------------------------- | ------------------------------ | --------------------------------------------------------------------------------- | -------------------------------------------- |
+| `/git-status [fetch]`     | Kahin bhi, halat dekhni ho     | Branch, staged, badli aur nayi files, ahead aur behind, khula PR; agla command    | Kuch badalna                                 |
+| `/commit [hint ya paths]` | Kaam ka ek hissa poora ho      | Badlav padh ke ek saaf Conventional Commit                                        | Push, `--amend`, `git add .`, AI attribution |
+| `/push`                   | Commit ke baad, apni branch pe | Upstream ke saath push, bahar jaane wale commits ki jaanch                        | Force push, `release` pe push                |
+| `/pr <base> [branch]`     | Branch ka kaam poora           | Base se sync, poora diff padh ke PR ka title aur description, checks              | Merge, approve, auto-merge, doosra PR        |
+| `/sync [base]`            | Base aage badh gaya ho         | Branch ko naye base pe rebase; conflict pe ruk ke saath me hal                    | Reset, force push, push                      |
+| `/undo-commit`            | Aakhri commit galat ho         | Pushed: revert commit; bina push: soft ya mixed reset; badlav hamesha bachte hain | `reset --hard`, push                         |
 
-## 2. Shuru karne se pehle (ek baar)
+`/sync` aur `/undo-commit` sirf aapke type karne pe chalte hain, Claude khud nahi chalata. Commit aur push sirf aapke kehne pe ([CLAUDE.md](../CLAUDE.md)).
 
-1. `gh` (GitHub CLI) install aur login: `gh auth status` me "Logged in" dikhe. `/pr` aur PR wali jaanch ke liye zaroori.
-2. Git identity set: `git config user.name` aur `git config user.email` me aapka naam/email.
-3. Claude Code isi repo me khulo; message box me `/` likho to ye commands list me dikhte hain. Naam lowercase hain: `/pr` (na ki `/PR`).
+## 2. Hamesha laagu niyam
 
-## 3. Roz ka flow (ek task)
+1. **Pehchaan:** sirf aapki apni git identity; git config kabhi nahi badalta. Kisi commit, PR, tag ya release note me AI attribution nahi; har commit aur PR ke baad iski jaanch.
+2. **Suraksha:** force push nahi (sirf apni branch pe, aapki saaf haan pe, `--force-with-lease`); `reset --hard`, branch delete, hooks chhodna (`--no-verify`) aur bina kahe history badalna kabhi nahi. Itihaas badalne wale kadam se pehle pichhla SHA bataya jaata hai, taaki wapsi ho sake. Inme se zyadatar `.claude/settings.json` ke deny rules se tool ke level pe bhi band, aur har `git push` aur PR banane se pehle Claude Code aapse poochhta hai.
+3. **Public repo:** `.env` ya `.env.*` (sirf `.env.example`), keys, tokens, passwords, DB dumps aur asli personal data kabhi stage nahi.
+4. **Ruk ke poochhna:** working tree saaf na ho, koi rebase ya merge beech me ho, HEAD detached ho, ya kuch saaf na ho.
 
-```text
-prerelease se branch  →  kaam  →  /commit  →  /push  →  /pr prerelease feat/<task>  →  CI green  →  GitHub pe merge (aap)
-```
+## 3. Branch ka flow
 
-1. **Branch:** `git switch prerelease`, `git pull`, `git switch -c feat/<task>` (jaise `feat/t4.1-catalog`; fix ho to `fix/<kaam>`). Skills khud branch nahi banate; `/commit` galat branch pe ho to bas sujhaata hai.
-2. **Kaam karo**, beech me `/git-status` se halat dekho.
-3. **`/commit`:** badlav padh ke ek kaam ka set chunta hai, Conventional Commit message banata hai, phir commit. Alag-alag kaam mile to poochhta hai kaunsa pehle.
-4. **`/push`:** pehli baar upstream khud set (`--set-upstream`).
-5. **`/pr prerelease feat/<task>`:** naye `prerelease` pe rebase, poora diff padhna, checks, push, PR. Link milta hai.
-6. **CI `check` green** hone pe aap GitHub pe merge karte ho. Skill kabhi merge nahi karta.
-7. Task khatam → HANDOFF/TASKS update (CLAUDE.md "Kaam rokte waqt").
+Flow root [CLAUDE.md](../CLAUDE.md) ka hai: `prerelease` se feature branch → PR → `prerelease` (development) → PR → `release` (production). `main` branch nahi hai (D-024).
 
-## 4. Release flow (RULES §2)
+| Head                                         | Base                                      | PR ka title                                          |
+| -------------------------------------------- | ----------------------------------------- | ---------------------------------------------------- |
+| Kaam ki branch (`feat/*`, `fix/*`, `docs/*`) | `prerelease`                              | `type(scope): summary`                               |
+| `prerelease`                                 | `release`                                 | `release: <summary>`                                 |
+| `hotfix/*` (`release` se)                    | `release`                                 | `fix(scope): summary`                                |
+| `release`                                    | `prerelease` (release ke commits ke baad) | `chore(release): back-merge release into prerelease` |
 
-| Kaam                                     | Command                    | Note                                                       |
-| ---------------------------------------- | -------------------------- | ---------------------------------------------------------- |
-| Development → production                 | `/pr release prerelease`   | `release` me aisa commit ho jo `prerelease` me nahi, to pehle back-merge |
-| Release live aur theek → final code      | `/pr main release`         | Sirf release safal hone ke baad                            |
-| Release ke commits wapas development me  | `/pr prerelease release`   | Back-merge (package release commit, hotfix ke baad)        |
-| Production me turant fix                 | `release` se `hotfix/<naam>`, phir `/pr release hotfix/<naam>` | Baad me back-merge bhi                 |
+- GitHub ki default branch `release` hai, isliye clone `release` pe khulta hai aur GitHub ka "Compare & pull request" base `release` sujhaata hai. Nayi branch hamesha `origin/prerelease` se, aur PR ka base hamesha saaf (`/pr prerelease`); galat base pe CI ki branch flow jaanch laal hoti hai.
+- `release` pe seedha push nahi, sirf PR.
+- `prerelease` pe seedha push sirf chhote fix (1 se 10 files: typo, doc ki line, galat sandesh ya config ki value, flaky test, ek-do line ka bug) aur `linkedin-posts/` ke liye; pehle `git pull --rebase` aur local checks. Naya feature, paisa, stock, permissions, schema, dependencies aur CI kabhi seedhe nahi.
+- **Merge ho chuka PR:** jis branch ka PR merge ya band ho chuka, uspe dobara push nahi; nayi branch aur naye commits ka cherry-pick (pehle poochh ke).
 
-Long-lived branches (`prerelease`, `release`, `main`) pe kabhi rebase ya force push nahi hota; in PRs me skill sirf jaanchta hai ki kaunsi branch aage hai. PR titles repo ki aadat se: `release: ...`, `main: ... (#PRs)`, `chore(release): back-merge release into prerelease`.
+## 4. Roz ka kaam (ek kaam)
 
-## 5. Har command detail me
+1. `prerelease` se nayi branch: `git fetch origin`, phir `git switch -c feat/<kaam> origin/prerelease`.
+2. Kaam aur local checks; saath me us role ka manual, us app ki testing file aur owner ke naye kaam (RULES DD-13, D-440).
+3. `/commit` (zaroorat ho to kai baar, har baar ek baat).
+4. `/push`.
+5. `/pr prerelease`. PR pe CI green hone ke baad merge aap karte hain.
+6. Base aage badh jaaye to `/sync`.
 
-### `/git-status [fetch]`
+## 5. Release
 
-- Branch, tracking branch, staged/modified/untracked files, ahead/behind, aakhri commit, unpushed commits, stash, chalu rebase/merge, khula PR.
-- Bina `fetch` ke network nahi: remote ke numbers aakhri fetch ke hisaab se (waqt bhi batata hai). `/git-status fetch` pehle `git fetch origin` karta hai.
-- Aakhir me agla sahi command sujhaata hai. Kuch nahi badalta.
+1. `/pr release prerelease`: `prerelease` → `release`. `release` me aise commits hon jo `prerelease` me nahi (release ya hotfix), to pehle back-merge.
+2. `release` pe bane commits ke baad back-merge: `/pr prerelease release`.
 
-### `/commit [hint ya paths]`
+## 6. Commit message
 
-- Misaal: `/commit`, `/commit OTP rate limit`, `/commit backend/identity/src/otp.ts`.
-- Staged files hon to wahi set; na hon to badlav ko kaam ke hisaab se group karta hai. `git add -A`/`git add .` kabhi nahi, sirf naam se.
-- `.env`, secrets, dumps kabhi stage nahi. `git diff --cached --check` aur Prettier check chalata hai.
-- Message: `type(scope): description` (types: feat, fix, refactor, perf, style, docs, test, build, ci, chore, revert), 72 characters tak, "update"/"changes" jaise khaali shabd nahi.
-- `main`/`release` pe ho to rukta hai; `prerelease` pe chhota fix na ho to `feat/` branch sujhaata hai aur poochhta hai.
-- Commit ke baad author aur attribution jaanchta hai. **Push nahi karta.**
+- `type(scope): description`. Types: `feat`, `fix`, `refactor`, `perf`, `style`, `docs`, `test`, `build`, `ci`, `chore`, `revert`. Chhote aksharon me, aagya ke roop me, aakhir me full stop nahi, header 72 akshar tak.
+- Scope = area: package, app, service, `ci`, ya docs ka hissa. Body sirf jab kaam aaye: kyun, kaise nahi.
+- "update", "changes", "fix bugs", "wip" jaise saadharan sandesh nahi. Ek commit me ek baat ([RULES.md](RULES.md) CR-11).
 
-### `/push`
+## 7. Checks
 
-- Uncommitted badlav ho to batata hai aur poochhta hai (khud commit nahi karta).
-- `main`, `release` pe push nahi. `prerelease` pe sirf RULES §2 ka chhota fix: files gin ke, `git pull --rebase` aur checks ke baad, aapki haan pe.
-- Branch ka PR pehle hi merge/close ho chuka ho to rukta hai: nayi branch + cherry-pick sujhaata hai.
-- Bahar jaane wale har commit message me attribution jaanchta hai.
-- Branch diverge (rebase ke baad) ho to sirf aapki saaf haan pe `--force-with-lease`; kisi aur ne push kiya ho to kabhi force nahi.
+- **Abhi:** naya root setup banne tak sirf `npx prettier --check <badli files>` ([CLAUDE.md](../CLAUDE.md)). PR pe CI abhi sirf `guard` (secrets ka scan, branch flow, `npm audit`), Prettier aur `check` chalata hai; baaki jobs naye setup ke saath.
+- **Naye setup ke baad:** format, lint aur typecheck hamesha; tests sirf badle workspaces ke; har command ka asli nateeja bataya jaata hai.
 
-### `/pr <base> [branch]`
+## 8. Jab skill ruk jaaye
 
-- Argument order: **pehle base (jahan merge hoga), phir apni branch.** Branch na do to abhi wali; base na do to flow se (`feat/*` → `prerelease`).
-- Step: branches aur `gh` jaanch → duplicate PR jaanch → base se sync → poora diff aur commits padhna → checks → push → PR → aakhri report.
-- **Sync:** `feat/*`/`fix/*` branch `origin/<base>` pe rebase. Branch pehle se push ho to rebase se pehle poochhta hai: (a) rebase + force-with-lease, (b) `merge origin/<base>` (history nahi badalti), (c) sync nahi.
-- **Checks:** `format:check`, `lint`, `typecheck` hamesha (`packages/` badla to pehle `build`); badle workspaces ke tests; Docker sirf zaroorat ke containers. Fail ho to poochhta hai: pehle theek karein ya PR me fail likh ke kholein.
-- **PR body:** Summary, Changes, Technical Details, Testing (sirf jo sach me chala), Breaking Changes, Related Issues.
-- Khula PR pehle se ho to naya nahi banata; description badalne se pehle poochhta hai. Merge, approve, auto-merge kabhi nahi.
-
-### `/sync [base]`
-
-- Misaal: `/sync` (flow se base), `/sync prerelease`.
-- Tree me staged/unstaged badlav ho to rukta hai (pehle `/commit` ya khud stash). Autostash nahi.
-- Rebase se pehle purana SHA likhta hai (wapas jaane ka raasta). Branch pehle se push ho to poochhta hai (merge bhi option).
-- Long-lived branch pe doosri branch ka rebase nahi: `release` → `prerelease` back-merge PR se hota hai (`/pr prerelease release`).
-- Push nahi karta; batata hai ki agla push force-with-lease maangega ya nahi.
-
-### `/undo-commit`
-
-- Aakhri commit dikha ke poochhta hai; aapki haan ke bina kuch nahi.
-- **Push nahi hua:** `git reset --soft HEAD~1` (badlav staged rehte hain, recommended) ya `--mixed` (unstaged). Purana SHA deta hai.
-- **Push ho chuka:** `git revert` (naya `revert: ...` commit, history nahi badalti). `main`/`release` pe wo bhi branch + PR se.
-- `reset --hard` kabhi nahi; aapka koi badlav nahi jaata. Push nahi karta.
-
-## 6. Jab skill ruk jaye
-
-| Halat                          | Kya karein                                                                 |
-| ------------------------------ | -------------------------------------------------------------------------- |
-| Rebase me conflict             | Skill files aur dono taraf ka badlav dikhata hai. `git rebase --abort` (wapas pehle jaisa) chuno, ya saath me file-by-file theek karo (har file aap dekhte ho). |
-| Branch pehle se push, rebase chahiye | Haan bolo to rebase + `--force-with-lease`; ya merge chuno.          |
-| PR pehle hi merge ho chuka     | Nayi branch `origin/prerelease` se + naye commits ka cherry-pick (skill sujhaata hai). |
-| Hook fail                      | Output dikhata hai, hook skip nahi karta. Galti theek karke phir chalao.   |
-| `gh` login nahi                | `gh auth login`, phir dobara.                                              |
-| Commit/PR me attribution dikhe | Skill batata hai; aapki haan pe hi theek karta hai. `.claude/settings.json` dekho. |
-
-## 7. Sawal-jawab
-
-- **`/PR` kyun nahi chala?** Skill ke naam lowercase hote hain: `/pr`.
-- **Purane commits me `Co-Authored-By: Claude` hai?** Haan, 2026-11-14 se pehle wale. Published history rewrite nahi karte; naye commits me nahi aayega.
-- **Doosra developer bhi yahi use kare?** Haan, skills aur `.claude/settings.json` repo me hain; `git pull` ke baad dono ke Claude Code pe chalte hain.
-- **Flow badla to?** Pehle RULES §2, phir `.claude/skills/_shared/git-rules.md` (§3) aur ye file.
+| Halat                               | Kya karein                                                              |
+| ----------------------------------- | ----------------------------------------------------------------------- |
+| Working tree saaf nahi              | Pehle `/commit`, ya badlav khud stash karein                            |
+| Rebase me conflict                  | `git rebase --abort` se wapas, ya ek-ek file saath me hal               |
+| Push reject (rebase ke baad)        | Sirf apni branch pe, aapki haan se `--force-with-lease`                 |
+| Hook fail                           | Hook ka output dekh ke wajah theek karein; hook kabhi chhoda nahi jaata |
+| Identity set nahi                   | `git config user.name` aur `user.email` aap khud set karein             |
+| Commit ya PR me AI attribution mila | Aapki haan pe sudhaar; pushed ho to pehle batana                        |
 
 ## Change log
 
-| Version | Date       | Badlav                                                                                   |
-| ------- | ---------- | ---------------------------------------------------------------------------------------- |
-| v1.0    | 2026-11-14 | Pehla version: 6 git skills ka manual, roz ka aur release flow, rukne pe kya karein (owner). |
+| Version          | Date                     | Badlav                                                                  |
+| ---------------- | ------------------------ | ----------------------------------------------------------------------- |
+| v1.0.0 se v1.1.6 | 2026-11-17 se 2026-11-22 | Git skills ka poora manual; har badlav ka poora itihaas git me (D-442). |

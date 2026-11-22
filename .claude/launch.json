@@ -4,50 +4,68 @@
     {
       "name": "customer",
       "runtimeExecutable": "npm",
-      "runtimeArgs": ["run", "dev", "--workspace", "customer"],
+      "runtimeArgs": ["run", "dev", "--workspace", "frontend/customer"],
       "port": 3001
     },
     {
-      "name": "app-shell-playground",
+      "name": "seller",
       "runtimeExecutable": "npm",
-      "runtimeArgs": ["run", "playground", "--workspace", "@beautinique/frontend-app-shell"],
-      "port": 5182
+      "runtimeArgs": ["run", "dev", "--workspace", "frontend/seller"],
+      "port": 3002
     },
     {
-      "name": "hooks-playground",
+      "name": "admin",
       "runtimeExecutable": "npm",
-      "runtimeArgs": ["run", "playground", "--workspace", "@beautinique/frontend-hooks"],
-      "port": 5183
+      "runtimeArgs": ["run", "dev", "--workspace", "frontend/admin"],
+      "port": 3003
     },
     {
-      "name": "components-playground",
+      "name": "super-admin",
       "runtimeExecutable": "npm",
-      "runtimeArgs": ["run", "playground", "--workspace", "@beautinique/frontend-components"],
-      "port": 5184
+      "runtimeArgs": ["run", "dev", "--workspace", "frontend/super-admin"],
+      "port": 3004
     },
     {
-      "name": "forms-playground",
+      "name": "master",
       "runtimeExecutable": "npm",
-      "runtimeArgs": ["run", "playground", "--workspace", "@beautinique/frontend-forms"],
-      "port": 5185
+      "runtimeArgs": ["run", "dev", "--workspace", "frontend/master"],
+      "port": 3005
     },
     {
-      "name": "auth-ui-playground",
+      "name": "support-desk",
       "runtimeExecutable": "npm",
-      "runtimeArgs": ["run", "playground", "--workspace", "@beautinique/frontend-auth-ui"],
-      "port": 5186
+      "runtimeArgs": ["run", "dev", "--workspace", "frontend/support-desk"],
+      "port": 3006
     },
     {
-      "name": "authz-playground",
+      "name": "finance",
       "runtimeExecutable": "npm",
-      "runtimeArgs": ["run", "playground", "--workspace", "@beautinique/frontend-authz"],
-      "port": 5187
+      "runtimeArgs": ["run", "dev", "--workspace", "frontend/finance"],
+      "port": 3007
     },
     {
-      "name": "data-table-playground",
+      "name": "logistics-ops",
       "runtimeExecutable": "npm",
-      "runtimeArgs": ["run", "playground", "--workspace", "@beautinique/frontend-data-table"],
-      "port": 5188
+      "runtimeArgs": ["run", "dev", "--workspace", "frontend/logistics-ops"],
+      "port": 3008
+    },
+    {
+      "name": "delivery",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": ["run", "dev", "--workspace", "frontend/delivery"],
+      "port": 3009
+    },
+    {
+      "name": "growth-studio",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": ["run", "dev", "--workspace", "frontend/growth-studio"],
+      "port": 3010
+    },
+    {
+      "name": "creator",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": ["run", "dev", "--workspace", "frontend/creator"],
+      "port": 3011
     },
     {
       "name": "backend",
