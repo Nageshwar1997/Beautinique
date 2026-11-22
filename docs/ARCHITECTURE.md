@@ -1,6 +1,6 @@
 # ARCHITECTURE: Beautinique
 
-> **Status:** v1.3.10 (2026-11-22). System kaise bana hai, ek nazar me. Cheezein ek-ek karke, owner ki haan ke baad judengi. Abhi §1 (finance ke accounting niyam, D-282), §2 se §9 (system ke hisse, D-291 se D-298) aur §10 (data aur database, D-310 se D-317).
+> **Status:** v1.3.11 (2026-11-22). System kaise bana hai, ek nazar me. Cheezein ek-ek karke, owner ki haan ke baad judengi. Abhi §1 (finance ke accounting niyam, D-282), §2 se §9 (system ke hisse, D-291 se D-298) aur §10 (data aur database, D-310 se D-317).
 
 ## Is file me kya aayega
 
@@ -409,7 +409,7 @@ return: commerce.return.requested -> support.return.decided -> logistics.pickup.
 4. Synonyms staff ki setting wali collection se, bina deploy (D-152); spelling ki galti ke liye fuzzy matching, aur naam aur brand pe autocomplete. Free cluster pe in operators ka chalna jaanchna baaki ([OPEN_QUESTIONS.md](OPEN_QUESTIONS.md) §2).
 5. Zero result ke shabd ki din ki ginti, bina user id ke (D-152, D-157); search ke jawab CDN pe cache nahi.
 6. Search ka text 100 characters tak, regex escape, IP pe rate limit (SR-007, SR-008, SR-069).
-7. Laptop aur CI pe Atlas Search nahi milta, to ek adapter jo MongoDB text index se chale; ranking ke tests dono pe.
+7. Laptop aur CI pe search ke tests MongoDB ke local Atlas container (`mongodb/mongodb-atlas-local`, exact version pe) pe, asli search ke saath; text index ka adapter nahi (D-422). Container ko kam se kam 2 GB khaali RAM aur 2 CPU cores (R-070); free cluster ki apni seemaayein us me nahi dikhti (R-066).
 8. CDN (Vercel) pe public cache sirf contract me "public cacheable" routes pe (SR-004): category tree, brand page, product ka content (misaal `s-maxage=300, stale-while-revalidate=600`), aur product ki availability (daam, agle batch ka MRP aur expiry D-064 aur D-067, stock ki halat, kam stock ka label; misaal `s-maxage=30`). Inpe kabhi `Set-Cookie` nahi.
 9. Kabhi public cache nahi: search, cart, checkout, Pro daam (SR-042), aur signed-in ka har jawab (`private, no-store`, SR-004). Checkout pe daam server pe dobara (SR-044): CDN ka purana daam sirf dikhne me, kabhi bill me nahi.
 10. Polling routes (inbox ka saar, order ki halat) pe ETag aur `304`.
@@ -417,10 +417,10 @@ return: commerce.return.requested -> support.return.decided -> logistics.pickup.
 
 ## 7. Media aur files (D-296)
 
-1. Upload: client maalik service se upload maangta hai (maqsad, type, size); maalik service authorize karti hai aur media se chhota signed upload URL leti hai (misaal 10 minute, exact type aur size, SR-061); file seedha provider pe (D-284); phir client maalik service ko `assetId` deta hai, aur media file ki asli halat dekh ke `ready` hone pe hi use record se jodta hai. Backend ke raaste file kabhi nahi (SR-007, R-007).
+1. Upload: client maalik service se upload maangta hai (maqsad, type, size); maalik service authorize karti hai aur media se chhota signed upload URL leti hai (misaal 10 minute, exact type aur size, SR-061); file seedha provider pe: public aur review images media service pe, private files object storage pe presigned PUT se (D-284, D-420); phir client maalik service ko `assetId` deta hai, aur media file ki asli halat dekh ke `ready` hone pe hi use record se jodta hai. Backend ke raaste file kabhi nahi (SR-007, R-007).
 2. Har file ka record media me: maalik service aur record, maqsad, public ya private, type, size, hash (SR-055), halat (`uploaded`, `ready`, `attached`, `deleting`, `deleted`, `rejected`), retention ki tareekh. Business data me sirf `assetId` (SR-062).
-3. Type bytes se (JPEG, PNG, WebP; PDF jahan zaroori; video sirf daawe me). Har image ka dobara encode aur EXIF hatana (SR-061) provider pe (D-284). Server pe karna pade to `heavy` queue, concurrency 1, pixels ki seema (misaal 24 MP) aur memory ka pehra (§9).
-4. Private file: maalik service authorize kare, phir media chhota URL de (misaal 5 minute); PDF attachment ke roop me; app ke origin se kabhi nahi (SR-062).
+3. Type bytes se (JPEG, PNG, WebP; PDF jahan zaroori; video sirf daawe me). Har image ka dobara encode aur EXIF hatana (SR-061): public aur review images ka provider pe (D-284); private images ka server pe, kyunki object storage file jaisi aayi waisi rakhta hai (D-420): `heavy` queue, concurrency 1, pixels ki seema (misaal 24 MP) aur memory ka pehra (§9); bani copy rakhi jaati hai aur kachchi file turant mitti hai.
+4. Private file: maalik service authorize kare, phir media object storage ka chhota presigned URL de (misaal 5 minute, D-420); PDF attachment ke roop me; app ke origin se kabhi nahi (SR-062).
 5. Har maqsad ka samay (D-191, D-192, D-193, D-227) maalik service ke "maamla band" se; roz ka job mitata hai (SR-065). Lagbhag 13 May 2027 se delivery aur daawon ki photos aur video app se hat ke encrypted band jagah me, capture se 1 saal (D-262).
 6. Ek file ek maalik: wahi image doosri jagah chahiye to nayi copy, apne maalik ke saath. Jis product ka order hua uski images archive ke saath rehti hain (order, return, invoice aur daawe ke liye).
 7. PDFs (invoice, credit note, statements, labels) ek halki PDF library se, ek waqt me 1; headless browser kabhi nahi (R-007). Jaari document ka PDF uske na badalne wale data aur template ke version se; template jagah pe nahi badalta, naya version banta hai (D-225). Ye PDF tax archive ki "asli copy" maani jaaye ya nahi: Lawyer (ya CA) se nahi jaancha (CL-021).
@@ -456,7 +456,7 @@ return: commerce.return.requested -> support.return.decided -> logistics.pickup.
 | Atlas har cluster         | 0.5 GB (bina compression BSON + indexes), 100 ops/second, 500 connections (Atlas ke docs, 2026-11-20)                   | Neeche ek order ka hisaab                                                                   |
 | Neon                      | 100 CU-ghante/mahina, 0.25 CU (D-057, R-014)                                                                            | Finance ke batch (D-288)                                                                    |
 | Neon ki jagah             | 1 GB (jaancha 2026-11-21, [RISKS.md](RISKS.md) §2.5; D-319)                                                             | Finance ₹0 pe 100 orders/din pe lagbhag 2.8 saal me bharta hai; band FY ka export (D-309)   |
-| Redis                     | Free plan ki chhoti memory aur connections ki seema (jaanch [OPEN_QUESTIONS.md](OPEN_QUESTIONS.md) §2)                  | §4 aur §6 ke niyam                                                                          |
+| Redis                     | Free Key Value 25 MB aur 50 connections; maxmemory policy `noeviction` (BullMQ ki shart, D-425)                         | §4 aur §6 ke niyam                                                                          |
 | Emails                    | 300/din, OTP ke pakke aur "baaki" ki chhat (D-142)                                                                      | Lagbhag 100 orders/din se upar confirmation aur invoice ke emails agle din pe khisakte      |
 
 **Ek order ka data (misaal):** commerce lagbhag 6 KB, logistics 3 KB, finance 8 KB, notify 3 KB, payments 2 KB, aur audit me staff ke scans (SR-076) lagbhag 12 KB. 0.5 GB ka 80% istemaal karein to commerce lagbhag 65,000 orders, finance lagbhag 50,000, aur audit bina compression sirf lagbhag 33,000 orders, yaani 2 saal (D-194) me lagbhag 45 orders/din. Compressed chunks (§8 niyam 4) ke saath 2 saal me lagbhag 250 orders/din tak.
@@ -559,17 +559,17 @@ Database Architect ki raay se (D-257 ka kram), owner ki haan ke baad. Ye saare s
 11. Accounts ke jod ke liye address, device cookie aur payment ki pehchaan sirf HMAC ke roop me (`limits_link_keys`).
 12. Account delete ke baad bhi seller apne invoice ki copy (₹50,000 ya zyada pe naam aur pata ke saath, D-226) ek-ek karke finance ke tax archive se download kar sakta hai, finance ke raaste, har download audit me (D-320).
 
-| Service     | Account delete pe                                                                                                                      |
-| ----------- | -------------------------------------------------------------------------------------------------------------------------------------- |
-| identity    | Account tombstone; credentials, sessions, devices, codes delete; consents aur registration data rok me; id restore wali list me        |
-| notify      | Inbox, push subscriptions, digest, email jobs delete                                                                                   |
+| Service     | Account delete pe                                                                                                                                                                                        |
+| ----------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| identity    | Account tombstone; credentials, sessions, devices, codes delete; consents aur registration data rok me; id restore wali list me                                                                          |
+| notify      | Inbox, push subscriptions, digest, email jobs delete                                                                                                                                                     |
 | commerce    | Addresses, cart, wishlist, link keys delete; orders ke address se naam, phone aur lines hatein (shehar, pincode, state rahein); band orders ke archive ke chunks bhi naye hash ke saath (SR-066); rok me |
-| catalog     | Reviews D-305 ke hisaab se (star aur text rahein, photos hatein); review ka haq delete                                                 |
-| logistics   | Waitlist delete; photos aur location apne samay pe                                                                                     |
-| support     | Case ke text se pehchaan hate; saboot apne samay pe                                                                                    |
-| payments    | Payment ki pehchaan ka hash delete                                                                                                     |
-| finance     | Kuch nahi badalta                                                                                                                      |
-| audit, logs | Apne samay tak waise                                                                                                                   |
+| catalog     | Reviews D-305 ke hisaab se (star aur text rahein, photos hatein); review ka haq delete                                                                                                                   |
+| logistics   | Waitlist delete; photos aur location apne samay pe                                                                                                                                                       |
+| support     | Case ke text se pehchaan hate; saboot apne samay pe                                                                                                                                                      |
+| payments    | Payment ki pehchaan ka hash delete                                                                                                                                                                       |
+| finance     | Kuch nahi badalta                                                                                                                                                                                        |
+| audit, logs | Apne samay tak waise                                                                                                                                                                                     |
 
 ### 10.4 Migrations, release steps, seeds aur M0 ki aadatein (D-313)
 
@@ -577,8 +577,8 @@ Database Architect ki raay se (D-257 ka kram), owner ki haan ke baad. Ye saare s
 2. Index ke naam ke neeche roop kabhi nahi badalta; naya roop naya naam; purana agle release me drop.
 3. Expand aur contract do releases me: pehle optional field aur dono roop padhna, backfill, phir purana hatana. Ek release me jodna aur hatana kabhi nahi.
 4. Data migration idempotent, `_id` ke kram me chhote batches, M0 ke 100 ops/second ke hisaab se ruk-ruk ke; kahan tak hua, ye `migrations` me.
-5. Validators aur TTL badalne ka kaam alag release user se, jo sirf release step me judta hai; app ka user sirf apne database pe data ke kaam. Audit aur logs ke clusters me ye kaam sirf laptop ke release command se, alag credentials se; boot pe in dono me sirf fingerprint ki jaanch aur alert (D-400, SR-100).
-6. Finance ki migrations numbered SQL files, sirf aage, checksum ke saath, advisory lock aur migration role se; boot pe nahi, finance ke pehle kaam pe (taaki Neon na jaage).
+5. Validators aur TTL badalne ka kaam alag release user se (`dbAdmin` ya `collMod` wala custom role; app ke user ke `readWrite` me `collMod` nahi, D-425), jo sirf release step me judta hai; app ka user sirf apne database pe data ke kaam. Audit aur logs ke clusters me ye kaam sirf laptop ke release command se, alag credentials se; boot pe in dono me sirf fingerprint ki jaanch aur alert (D-400, SR-100).
+6. Finance ki migrations numbered SQL files, sirf aage, checksum ke saath, advisory lock aur migration role se; boot pe nahi, finance ke pehle kaam pe (taaki Neon na jaage). Migrations aur `pg_dump` Neon ke seedhe connection se, pooler se nahi (pooler pe session wala advisory lock nahi chalta); app ka pool pooler se, bina SQL `PREPARE`, `SET` aur session wale locks (D-425).
 7. Har collection ka `$jsonSchema` validator sirf zaroori fields pe (ids, rakam `long` aur 0 se upar, `status` ki list, `version`); baaki khule.
 8. Har list cursor se, page 100 tak, `skip` nahi; har sort index se; CI me har repository query ka `explain` aur collection scan ka pehra; bade reports cursor aur stream se.
 9. Seeds: reference data (chart of accounts, series, HSN, roles, ingredients, settings) har jagah release step se; location master Master app ke import se; local seed tay ObjectIds ke saath; tests me factories aur har worker ka alag database; live demo me sirf reference aur catalog, `demo: true` ke nishaan ke saath, koi customer account ya asli personal data nahi.
@@ -679,8 +679,9 @@ Design target pe ₹0 ke clusters kuch hafton me bhar jaate hain: target sirf co
 | v1.3.3  | 2026-11-21 | §10.4 niyam 1 me jod: schema wala hissa listen se pehle, lambi data migration background me (D-338).                                                                                                                                      |
 | v1.3.4  | 2026-11-21 | §9 aur §10.8 me Neon ki jagah 1 GB pakki (RISKS §2.5): finance lagbhag 2.8 saal me bharta hai.                                                                                                                                            |
 | v1.3.5  | 2026-11-21 | §5 niyam 14: jaagne tak app band, phir background ping (D-349).                                                                                                                                                                           |
-| v1.3.6 | 2026-11-21 | §5 niyam 14 me `/wake` SR-089 se; niyam 15 me Payment ka alag document (security review batch 1, D-408). |
-| v1.3.7 | 2026-11-22 | §5 niyam 7 me background header (SR-094); §10.7 niyam 1 me `emailNorm` ka roop (SR-092) (security review batch 2, D-409). |
-| v1.3.8 | 2026-11-22 | §7 niyam 8: export ki file pehle download ke baad ya 24 ghante me mite (security review batch 3, D-410). |
-| v1.3.9 | 2026-11-22 | §10.3 niyam 4 aur commerce row, §10.6 niyam 15: band data public key se, archive ka delete (security review batch 5, D-412). |
-| v1.3.10 | 2026-11-22 | §8 niyam 3 aur 5, §10.4 niyam 5, §10.8 niyam 1 aur 5: logger, errors ka route, audit aur logs (security review batch 6, D-413). |
+| v1.3.6  | 2026-11-21 | §5 niyam 14 me `/wake` SR-089 se; niyam 15 me Payment ka alag document (security review batch 1, D-408).                                                                                                                                  |
+| v1.3.7  | 2026-11-22 | §5 niyam 7 me background header (SR-094); §10.7 niyam 1 me `emailNorm` ka roop (SR-092) (security review batch 2, D-409).                                                                                                                 |
+| v1.3.8  | 2026-11-22 | §7 niyam 8: export ki file pehle download ke baad ya 24 ghante me mite (security review batch 3, D-410).                                                                                                                                  |
+| v1.3.9  | 2026-11-22 | §10.3 niyam 4 aur commerce row, §10.6 niyam 15: band data public key se, archive ka delete (security review batch 5, D-412).                                                                                                              |
+| v1.3.10 | 2026-11-22 | §8 niyam 3 aur 5, §10.4 niyam 5, §10.8 niyam 1 aur 5: logger, errors ka route, audit aur logs (security review batch 6, D-413).                                                                                                           |
+| v1.3.11 | 2026-11-22 | §6 niyam 7 local Atlas container (D-422); §7 niyam 1, 3, 4 private files object storage pe (D-420); §9 Redis row aur §10.4 niyam 5, 6 (D-425).                                                                                            |

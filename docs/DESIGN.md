@@ -1,6 +1,6 @@
 # DESIGN: Beautinique
 
-> **Status:** v1.1.11 (2026-11-22). Saare apps ka UI design system (§1 se §10). Cheezein ek-ek karke, owner ki haan ke baad judti hain.
+> **Status:** v1.1.12 (2026-11-22). Saare apps ka UI design system (§1 se §10). Cheezein ek-ek karke, owner ki haan ke baad judti hain.
 
 ## Is file me kya aayega
 
@@ -120,7 +120,7 @@ Har niyam ka id `DS-<section>.<n>`. Tokens ke naam code me waise hi (CSS custom 
 
 **Kis par:** D-341, ARCHITECTURE §10.1 (integer paise), D-308. **R1.**
 
-1. **DS-4.1 Fonts:** `--font-sans`: "Plus Jakarta Sans", system-ui, sans-serif; `--font-display` (sirf Customer app ki headings aur banners): "Fraunces", Georgia, serif; `--font-mono`: ui-monospace, Menlo, Consolas, monospace. Dono variable woff2, apne app ke saath served, Latin subset jisme ₹ (U+20B9) ho; `font-display: swap`; sirf body font ka preload. License (OFL) CL-125 ki list me.
+1. **DS-4.1 Fonts:** `--font-sans`: "Plus Jakarta Sans", system-ui, sans-serif; `--font-display` (sirf Customer app ki headings aur banners): "Fraunces", Georgia, serif; `--font-mono`: ui-monospace, Menlo, Consolas, monospace. Dono variable woff2, apne app ke saath served, Latin subset jisme ₹ (U+20B9) ho: Google Fonts ka `latin` subset ₹ nahi rakhta, to `latin` aur U+20B9 ka apna subset (D-341, D-425); `font-display: swap`; sirf body font ka preload. License (OFL) CL-125 ki list me.
 2. **DS-4.2 Size scale** (size / line-height, px): `xs` 12/16, `sm` 14/20, `base` 16/24, `lg` 18/28, `xl` 20/28, `2xl` 24/32, `3xl` 30/36, `4xl` 36/40. Customer aur Delivery me body 16 se chhota nahi; staff ki dense tables me 14 tak; 12 sirf badge aur caption me. Inputs hamesha 16 (phone pe apne aap zoom na ho).
 3. **DS-4.3 Weights:** 400 body, 500 labels aur nav, 600 headings aur buttons, 700 sirf daam aur bade aankde.
 4. **DS-4.4 Ank:** daam, quantity, tables, order number aur codes `tabular-nums`. Daam hamesha `font-sans` me.
@@ -194,7 +194,7 @@ Har niyam ka id `DS-<section>.<n>`. Tokens ke naam code me waise hi (CSS custom 
 
 **Kis par:** DS-1.7, D-206 (CAPTCHA nahi). **R1.**
 
-1. **DS-8.1 Lakshya:** saare apps WCAG 2.2 AA, light, dark aur high contrast me. Component tests aur E2E me automated accessibility jaanch (misaal axe): serious ya critical ek bhi nahi to hi pass. Har release se pehle mukhya flows (sign-in, checkout, delivery code, return, listing, scan, delivery) pe keyboard aur screen reader ki haath ki checklist: NVDA pe desktop apps, TalkBack pe Customer aur Delivery, aur R1 se pehle ek baar VoiceOver pe Customer (D-376).
+1. **DS-8.1 Lakshya:** saare apps WCAG 2.2 AA, light, dark aur high contrast me. Component tests aur E2E me automated accessibility jaanch (misaal axe; WCAG 2.2 ke rules, jaise `target-size`, default band hain, to `wcag22aa` tag chalu, D-425): serious ya critical ek bhi nahi to hi pass. Har release se pehle mukhya flows (sign-in, checkout, delivery code, return, listing, scan, delivery) pe keyboard aur screen reader ki haath ki checklist: NVDA pe desktop apps, TalkBack pe Customer aur Delivery, aur R1 se pehle ek baar VoiceOver pe Customer (D-376).
 2. **DS-8.2 Contrast:** §2 aur §3 ke tokens se; text 4.5:1, bada text aur UI parts (input ki seema, focus, icons) 3:1.
 3. **DS-8.3 Focus:** hamesha dikhe: 2 px `focus-ring`, 2 px offset (high contrast me 3 px); sticky header ya neeche ki bar focus ko na dhake (WCAG 2.4.11): `scroll-padding-top` header jitna, `scroll-padding-bottom` bar jitna.
 4. **DS-8.4 Keyboard:** har kaam keyboard se; koi trap nahi; dialog focus andar rakhe aur band hone pe kholne wale button pe lautaye; har page pe "Skip to content".
@@ -245,16 +245,16 @@ Har niyam ka id `DS-<section>.<n>`. Tokens ke naam code me waise hi (CSS custom 
 
 **Kis par:** SR-001, SR-004 se SR-006, SR-010, SR-012, SR-013, SR-015, SR-019 se SR-021, SR-023, SR-039, SR-040, SR-052, SR-054, D-053, D-185, D-195, D-254, ARCHITECTURE §5 niyam 2, 7. **R1.**
 
-1. **DS-10.1 Browser ki ijazatein:** Customer app me camera aur location header se band (SR-001); location sirf D-347 ke button pe, tap ke baad aur pehle ek line ki wajah. Delivery app me camera aur location pehli baar se pehle app ki samjhane wali screen; mana ho to wapas chalu karne ka tareeka dikhe (D-351).
+1. **DS-10.1 Browser ki ijazatein:** Customer app me camera aur location header se band (SR-001); location sirf D-347 ke button pe, tap ke baad aur pehle ek line ki wajah. Location ki `accuracy` misaal 100 m se zyada ho to pin apne aap nahi; map us jagah ke paas khule aur sandesh "Move the pin to your door" (D-423). Delivery app me camera aur location pehli baar se pehle app ki samjhane wali screen; mana ho to wapas chalu karne ka tareeka dikhe (D-351).
 2. **DS-10.2 StepUpDialog (D-185):** kaam ka naam ("Approve payout batch PB-…"), 6 ank ka CodeInput, 5 minute ki khidki ka nishaan; code sahi to wahi kaam chale, page na badle.
 3. **DS-10.3 Sign-in ke jawab:** anjaan aur registered email pe ek hi sandesh ("If an account exists, we've sent a code.") (SR-019); code ka 10 minute aur 3 baar dobara bhejna ulti ginti ke saath (SR-015); seema pe saaf sandesh (SR-020); `next` sirf apna relative path (SR-021).
 4. **DS-10.4 Password:** 12 se 128 akshar, koi "capital aur number" ka niyam nahi; sandesh sirf "Too short" aur "This password has appeared in a data breach" (SR-013); dikhao/chhupao.
 5. **DS-10.5 Staff ki lists me chhupi jaankari:** naam aur phone chhupe ("R••• K•••, 411001"); "Show details" pe wajah (list + text), phir dikhe aur audit me (SR-039, D-201). Seller ka bank sirf aakhri 4 ank (SR-052).
-6. **DS-10.6 Push aur emails ka text:** push me sirf order number aur halat, delivery code kabhi nahi (D-195); email ki links sirf apne app ke host pe, staff emails me koi sign-in link nahi, "Open the <App> app" (SR-012).
+6. **DS-10.6 Push aur emails ka text:** push me sirf order number aur halat, delivery code kabhi nahi (D-195); kisi email me sign-in ya action ka link nahi, sirf code aur "Open the <App> app" (SR-012, D-419).
 7. **DS-10.7 User ka content:** reviews, description, ingredients ka text aur naam sirf text ki tarah (escape); rich text sirf bold aur list; links `rel="nofollow ugc noopener"` (SR-040).
 8. **DS-10.8 PWA cache:** service worker sirf versioned static app shell aur assets rakhe, `/api/*` kabhi nahi; sign-out pe caches aur IndexedDB saaf (SR-010); Delivery ka offline data SR-023 ke hisaab se.
 9. **DS-10.9 Bundle ke budget** (misaal, gzip, har route ki pehli load): Customer JS 170 KB, staff aur partner apps 250 KB, CSS 30 KB, fonts D-341 ke hisaab se; fold ke upar images 200 KB tak. Payment gateway ki script sirf Payment ke alag HTML document pe (SR-006, SR-090). Budget toote to CI laal.
-10. **DS-10.10 Page ke targets** (misaal, jaage server pe, D-053; laptop pe mobile preset ke Lighthouse se, 5 mukhya pages: Home, list, product, cart, order): LCP 2.5 s, CLS 0.1, INP 200 ms. Server ke targets ARCHITECTURE §9 me hi.
+10. **DS-10.10 Page ke targets** (misaal, jaage server pe, D-053; laptop pe mobile preset ke Lighthouse se, har page 5 baar aur median (D-425), 5 mukhya pages: Home, list, product, cart, order): LCP 2.5 s, CLS 0.1, INP 200 ms. Server ke targets ARCHITECTURE §9 me hi.
 11. **DS-10.11 Kam calls:** ek screen ke liye ek ya do calls (ARCHITECTURE §5 niyam 2); polling sirf dikhte tab pe (niyam 7); TanStack Query ka `staleTime` data ke hisaab se (misaal catalog 5 minute, order ki halat polling se); hover pe prefetch sirf product page ke liye.
 
 ## Change log
@@ -270,6 +270,7 @@ Har niyam ka id `DS-<section>.<n>`. Tokens ke naam code me waise hi (CSS custom 
 | v1.1.6  | 2026-11-21 | DS-7.1: mukhya set Solar, phir Lucide; har app me Icon credits page (D-350).                                                                                                                                                                        |
 | v1.1.7  | 2026-11-21 | DS-6.15 saajha Credits page; DS-7.1 me icons ka credit component (D-350).                                                                                                                                                                           |
 | v1.1.8  | 2026-11-21 | DS-8.1 me screen readers ke naam (D-376, D-397).                                                                                                                                                                                                    |
-| v1.1.9 | 2026-11-21 | DS-10.9: gateway ki script sirf Payment ke alag document pe (security review batch 1, D-408). |
-| v1.1.10 | 2026-11-22 | DS-6.10: polling aur ping bina kaam ka samay nahi badhate (security review batch 2, D-409). |
-| v1.1.11 | 2026-11-22 | DS-7.10: map ka code bundle me, bahar ki script nahi (security review batch 5, D-412). |
+| v1.1.9  | 2026-11-21 | DS-10.9: gateway ki script sirf Payment ke alag document pe (security review batch 1, D-408).                                                                                                                                                       |
+| v1.1.10 | 2026-11-22 | DS-6.10: polling aur ping bina kaam ka samay nahi badhate (security review batch 2, D-409).                                                                                                                                                         |
+| v1.1.11 | 2026-11-22 | DS-7.10: map ka code bundle me, bahar ki script nahi (security review batch 5, D-412).                                                                                                                                                              |
+| v1.1.12 | 2026-11-22 | DS-4.1 ₹ ka apna subset, DS-8.1 `wcag22aa`, DS-10.10 Lighthouse ka median (D-425); DS-10.1 location ki accuracy (D-423); DS-10.6 emails me link nahi (D-419).                                                                                       |

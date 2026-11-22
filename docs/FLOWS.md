@@ -1,6 +1,6 @@
 # FLOWS: Beautinique
 
-> **Status:** v1.1.3 (2026-11-21). Poore flows jo kai modules me chalte hain (jaise order se delivery, return se refund): §1 se §6, 20 flows. Cheezein ek-ek karke, owner ki haan ke baad judti hain.
+> **Status:** v1.1.5 (2026-11-22). Poore flows jo kai modules me chalte hain (jaise order se delivery, return se refund): §1 se §6, 20 flows. Cheezein ek-ek karke, owner ki haan ke baad judti hain.
 
 ## Is file me kya aayega
 
@@ -54,7 +54,7 @@ Har flow ka id `FL-<n>`. Har step ke saath module (`identity`, `notify`, `paymen
 2. Email aur in-app khabar; misaal 7 din me wapas le sakta hai (identity, notify; SR-066).
 3. 7 din baad ek event se har service apni copy hataye ya pehchaan hataye; sessions, push subscriptions, waitlist bhi (saari services; SR-066, D-250).
 
-**Fail ho to:** khula order ya return ho to delete ruka, wajah ke saath (abhi jaanchna baaki); kisi service ka handler fail: retry aur dead letter (ARCHITECTURE §3), owner ke inbox me.
+**Fail ho to:** khula order, return ya refund ho to delete ruka, wajah ke saath (D-151 niyam 1: delete chalte orders, returns aur refunds ke baad); kisi service ka handler fail: retry aur dead letter (ARCHITECTURE §3), owner ke inbox me.
 
 ## 2. Browse se order aur payment
 
@@ -94,7 +94,7 @@ Har flow ka id `FL-<n>`. Har step ke saath module (`identity`, `notify`, `paymen
 2. Warehouse se hub ka trip: manifest aur seal number; hub pe receive scan, ginti ka farak apne aap nishaan (logistics; D-027, SR-057).
 3. Hub Manager ya Hub Operations partner ko assign kare; partner ke phone pe us shift ke parcels ka kam data (logistics; SR-023).
 4. "Out for delivery": customer ko khabar; order page pe DeliveryCodeCard sabse upar (notify, commerce; D-195, D-343).
-5. Door pe: delivery pe UPI ho to server QR banaye exact rakam ka; "paid" sirf webhook se, customer ke app me "Payment received", partner ke app me "paid" karne ka koi button nahi (payments; SR-050).
+5. Door pe: delivery pe UPI ho to server QR banaye exact rakam ka (test mode me hamare Payment page ka link, live me Razorpay ka QR; D-418); "paid" sirf webhook se, customer ke app me "Payment received", partner ke app me "paid" karne ka koi button nahi (payments; SR-050).
 6. Code wali delivery (online hi): partner customer ka 6 ank ka code daale; milaan server pe; usi pal partner ki location (logistics; D-072, D-254, D-301, SR-054).
 7. Code na mile (customer ghar pe nahi, koi aur le raha): parcel ki photo app ke camera se aur location; server ka samay, accuracy, address ke pin se doori ka nishaan, photo ka hash (logistics, media; D-072 niyam 2, SR-055; D-347, D-351).
 8. "Delivered": khabar; daawe ki khidki shuru (code se 48 ghante, photo wali pe misaal 7 din) (commerce, notify; D-148); finance ko delivered ka event (D-319).
@@ -215,4 +215,6 @@ Har flow ka id `FL-<n>`. Har step ke saath module (`identity`, `notify`, `paymen
 | v1.0.0  | 2026-11-17 | Khaali file bani.                                                                                                                                                          |
 | v1.1.1  | 2026-11-21 | §1 se §6 aaye: account aur sign-in, browse se order aur payment, order se delivery, cancel, return, daawa aur refund, seller ke flows, reviews (20 flows; D-362 se D-367). |
 | v1.1.2  | 2026-11-21 | FL-18 step 1 me payable ki muddat (D-369).                                                                                                                                 |
-| v1.1.3 | 2026-11-21 | FL-7 kadam 4: Payment alag document (security review batch 1, D-408). |
+| v1.1.3  | 2026-11-21 | FL-7 kadam 4: Payment alag document (security review batch 1, D-408).                                                                                                      |
+| v1.1.4  | 2026-11-22 | FL-5: khule order wali jaanch D-151 niyam 1 se poori.                                                                                                                      |
+| v1.1.5  | 2026-11-22 | FL-9 kadam 5: test mode me QR me Payment page ka link (D-418).                                                                                                             |

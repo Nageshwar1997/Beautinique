@@ -1,6 +1,6 @@
 # OPERATIONS: Beautinique
 
-> **Status:** v1.1.8 (2026-11-22). System chalane ka manual. Cheezein ek-ek karke judengi.
+> **Status:** v1.1.9 (2026-11-22). System chalane ka manual. Cheezein ek-ek karke judengi.
 
 ## Is file me kya aayega
 
@@ -18,9 +18,9 @@ DevOps / SRE Architect ki raay se (D-257 ka kram), owner ki haan ke baad (D-326 
 ## 1. Environments aur laptop ka setup (D-326)
 
 1. Teen jagah hain: **laptop** (development, split mode: har service alag process), **CI** (GitHub Actions, laptop wale hi containers) aur **live** (Render ki ek free web service me bundle mode, Render Key Value, har service ka Atlas cluster, finance ka Neon, aur 11 apps ke Vercel projects). Koi staging ya preview environment nahi; release ki poori jaanch laptop pe hoti hai.
-2. Laptop ka infra `infra/` ki ek compose file me: MongoDB replica set (transactions ke liye), Valkey, PostgreSQL aur ek local email inbox. Har image exact version pe pinned. Ports sirf `127.0.0.1` pe.
-3. Laptop ke version live se milte hain: MongoDB wahi major jo Atlas ke free cluster pe (abhi 8.0), PostgreSQL wahi major jo Neon project me, aur Valkey me Render jaisi chhoti memory seema aur wahi eviction policy.
-4. Sirf us kaam ke containers chalu jo abhi chahiye (compose profiles). **Misaal:** backend tests pe `mongo` aur `valkey`; finance ka kaam ho to `postgres` bhi; email dekhna ho to `mail` bhi. Kaam khatam to `infra:down`.
+2. Laptop ka infra `infra/` ki ek compose file me: MongoDB replica set (transactions ke liye), search ke tests ke liye MongoDB ka local Atlas container (D-422), Valkey, PostgreSQL, finance tests ke liye PgBouncer (transaction mode, D-425) aur ek local email inbox. Har image exact version pe pinned. Ports sirf `127.0.0.1` pe.
+3. Laptop ke version live se milte hain: MongoDB wahi major jo Atlas ke free cluster pe (abhi 8.0), patch version tak pin, 8.0.30 ya upar (Linux kernel 6.19 se 7.0.13 pe purane 8.0 crash karte ya band hote hain; laptop ka WSL kernel abhi 6.18.58, D-425), PostgreSQL wahi major jo Neon project me, aur Valkey me Render jaisi chhoti memory seema (25 MB) aur policy `noeviction` (BullMQ ki shart, D-425).
+4. Sirf us kaam ke containers chalu jo abhi chahiye (compose profiles). **Misaal:** backend tests pe `mongo` aur `valkey`; search ke tests pe `atlas-local` bhi (kam se kam 2 GB khaali RAM); finance ka kaam ho to `postgres` bhi; email dekhna ho to `mail` bhi. Kaam khatam to `infra:down`.
 5. Mutation testing ke liye alag containers alag ports pe, aur asli files ki copy me; development wale containers aur files kabhi nahi.
 6. Laptop pe har service ka alag database aur alag DB user (live jaisa), ek hi local MongoDB server me.
 7. Laptop, tests aur CI kabhi live databases ya live Redis se nahi judte. Live databases tak laptop ki pahunch sirf teen commands ko: backup, restore ka abhyaas aur break-glass, apne alag credentials se.
@@ -52,7 +52,7 @@ DevOps / SRE Architect ki raay se (D-257 ka kram), owner ki haan ke baad (D-326 
 5. Release step ([ARCHITECTURE.md](ARCHITECTURE.md) §10.4 niyam 1) ka schema wala hissa (collections, validators, indexes) listen se pehle; lambi data migration listen ke baad background me lease ke saath, taaki naya instance health check aur cold start ki seema me uthe.
 6. Expand aur contract: contract wala release tabhi jab expand wala release live pe misaal 7 din chal chuka ho aur rollback ki zaroorat na dikhi ho. Release ke note me "contract baaki" ki list.
 7. Rollback sirf ek release peeche: Render pichhle do deploys tak hi wapas ja sakta hai (jaancha 2026-11-21), aur expand aur contract ki wajah se sirf pichhla release naye data ke saath surakshit hai. Usse peeche kabhi nahi; aage ka fix (roll-forward).
-8. Rollback ka kram: (1) Render pe pichhla deploy wapas; (2) jis app me gadbad, uska Vercel pe pichhla production deploy wapas; (3) git me revert normal flow se; (4) galat likha data ek naye idempotent migration se theek, restore sirf jab data kho gaya ho. Finance ki SQL migrations sirf aage: unka rollback bhi naya migration.
+8. Rollback ka kram: (1) Render pe pichhla deploy wapas (dashboard ka rollback auto-deploy band kar deta hai; (3) ka revert merge hone ke baad auto-deploy wapas chalu, D-425); (2) jis app me gadbad, uska Vercel pe pichhla production deploy wapas; (3) git me revert normal flow se; (4) galat likha data ek naye idempotent migration se theek, restore sirf jab data kho gaya ho. Finance ki SQL migrations sirf aage: unka rollback bhi naya migration.
 9. Live smoke check (misaal 10 minute): `/health` aur `/ready`, ek public product page, allowlist ke ek account se sign-in, ek test-mode order shuru se payment tak (phir pack se pehle cancel aur "smoke" ka nishaan, D-380), aur ops inbox me nayi errors. Saath me security ki live jaanch: har app ke headers aur CSP live pe (SR-005); Render ke host pe bina secret `/api` pe 403 (SR-002); jhootha `X-Forwarded-For` ka asar nahi (SR-003); ek personal route do alag sessions se, CDN se cache nahi (SR-004); har app ka `security.txt` (SR-103). Nateeja §12 ki table me (D-404). Kuch fail ho to niyam 8.
 10. Hotfix: `release` se `hotfix/<naam>` → PR `release`; phir back-merge `release` → `prerelease`. Security fix bhi isi raaste se, ek hi baithak me, saade naam aur text ke saath (SR-103).
 11. Har app ka kam se kam version setting me ([ARCHITECTURE.md](ARCHITECTURE.md) §5 niyam 5): API me tootne wala badlav aaye to pehle naya version path, phir apps, aur aakhir me kam se kam version badhana.
@@ -77,7 +77,7 @@ DevOps / SRE Architect ki raay se (D-257 ka kram), owner ki haan ke baad (D-326 
 2. Jagane ke raaste: (1) app khulte hi `/wake` seedha Render pe; (2) cron-job.org tay samay pe; (3) UptimeRobot ka monitor; (4) GitHub Actions ka schedule sirf backup ke roop me, kyunki wo bheed me late hota hai, kabhi chhoot jaata hai, sirf default branch pe chalta hai, aur public repo me 60 din koi activity na ho to band ho jaata hai (jaancha 2026-11-21).
 3. Pinger sirf `/wake` ya `/health` bulaate hain: DB tak nahi, finance tak kabhi nahi; jawab me version nahi.
 4. Jagane ki khidki (D-322): ghante me ek baar, 09:00 se 22:00 IST (din me 14 baar); raat ko server soya. Ise badalna owner ka faisla hai.
-5. Pehla pinger cold start se chhote timeout pe kaat deta ho to do call: :00 pe jagana, :03 pe jaanchna. UptimeRobot ka check pehle pinger ke kuch minute baad pade (misaal :10), taaki jaage server ko dekhe aur har ghante jhootha "down" na bane.
+5. cron-job.org 30 second me jawab na mile to fail maanta hai aur lagataar 25 se zyada fail pe job band kar deta hai, to har jagane ke samay do jobs: :00 pe jagana (fail ho sakta hai), :03 pe jaanchna (jaage server pe safal), taaki lagataar fail ki ginti tootti rahe (D-424). UptimeRobot ka check pehle pinger ke kuch minute baad pade (misaal :10), taaki jaage server ko dekhe aur har ghante jhootha "down" na bane.
 6. GitHub ka scheduled workflow `permissions: {}` ke saath, aur andar IST ki khidki ki jaanch: late shuru hua run khidki ke bahar server nahi jagata. Hafte ki jaanch (§9) me dekhna ki workflow band to nahi hua.
 7. Har jaag pe: boot ke misaal 30 second baad poora sweep, dispatcher har Atlas cluster se judta hai, aur roz ke kaam "aakhri poora din" se chhoote din kram se banate hain. Khidki ka pehla pinger 09:00 IST pe, taaki sellers aur staff ka din ka saar subah bane.
 8. Cold start ka target 90 second tak. Vercel ka bahar ke rewrite ka timeout 120 second (jaancha 2026-11-21), isliye app pehle `/wake` ka jawab leti hai; beech me server so gaya ho aur rewrite 502 ya 504 de to client dobara wake ka parda dikhata hai.
@@ -95,7 +95,7 @@ DevOps / SRE Architect ki raay se (D-257 ka kram), owner ki haan ke baad (D-326 
 4. Kahan: repo ke andar git se bahar wala folder, chaar pehron ke saath (D-013); encrypted; laptop pe aakhri 3; kabhi CI artifact ya cloud sync wale folder me nahi.
 5. Har backup ke saath ek manifest: samay (UTC), git commit, har collection ki ginti aur hash, schema ka fingerprint, encrypted file ka hash. Encrypted fields backup me bhi encrypted; keys backup me kabhi nahi.
 6. Transfer ki seema: Atlas ka har free cluster 7 din me 10 GB bahar, aur Neon ka project mahine me 5 GB public transfer (jaancha 2026-11-21). Backup command har cluster ka size bataye; ek hafte me ek se zyada poora backup na ho jab tak zaroorat na ho.
-7. Backup laptop se seedha databases pe chalta hai, Render ko nahi jagata. M0 ke 100 ops/second ki wajah se bade batch aur ruk-ruk ke padhna.
+7. Backup laptop se seedha databases pe chalta hai, Render ko nahi jagata. M0 ke 100 ops/second ki wajah se bade batch aur ruk-ruk ke padhna. Atlas ki IP list me laptop ka IP sirf backup ya laptop ke release command ([ARCHITECTURE.md](ARCHITECTURE.md) §10.4 niyam 5) ke waqt judta hai aur kaam ke baad hatta hai; list me baaki sirf Render Singapore ke outbound ranges (D-421).
 8. Restore pehle laptop ya alag test database me: ginti aur hash ka milaan, audit chain ka verify, finance ke journal ka barabar hona, aur ek E2E smoke. Iske baad hi production me. Har restore audit me.
 9. Production restore ka kram: (1) checkout, sign-up aur uploads ke kill switches band; (2) jis cluster ka restore, sirf usi ka; (3) restore ke baad delete hue accounts ki list ke deletes dobara; (4) release step ka fingerprint aur `/ready`; (5) smoke check; (6) switches kholna.
 10. Restore ka abhyaas har 3 mahine (misaal) aur har bade schema badlav ke baad: aakhri backup laptop pe restore karke niyam 8 ki jaanch, aur key ka chalna bhi. Nateeja, samay aur tareekh yahan abhyaas wali table me ek line. Pehla abhyaas R1 se pehle. Saal me ek baar band record aur band FY ki export file kholne ka abhyaas bhi (SR-097).
@@ -131,7 +131,7 @@ DevOps / SRE Architect ki raay se (D-257 ka kram), owner ki haan ke baad (D-326 
 
 ## 9. Capacity aur free tier ki nigrani (D-334)
 
-1. Hafte ki jaanch (misaal Sunday, 15 minute), providers ke dashboards se: Render (ghante, bandwidth, build minutes), Vercel (deploys, usage), har Atlas cluster (jagah, 7 din ka network), Neon (CU-ghante, jagah, public transfer), email provider (din ke emails, bounce), media provider (credits), Redis ki memory (ops snapshot), GitHub (schedule chalu hai, dependency alerts), aakhri backup ki tareekh, UptimeRobot ke incidents.
+1. Hafte ki jaanch (misaal Sunday, 15 minute), providers ke dashboards se: Render (ghante, bandwidth, build minutes, outbound IPs ka Atlas ki IP list se milaan, D-421), Vercel (deploys, usage), har Atlas cluster (jagah, 7 din ka network), Neon (CU-ghante, jagah, public transfer), email provider (din ke emails, bounce), media provider (credits), Redis ki memory (ops snapshot), GitHub (schedule chalu hai, dependency alerts), aakhri backup ki tareekh, UptimeRobot ke incidents.
 2. Number ek chhoti table me, git ke bahar (misaal laptop ki git-ignored file); 70% pe owner ka kaam.
 3. 70% pe kaam ki misaal: bandwidth pe polling kam aur CDN cache ki jaanch; Render ke ghanton pe jagane ki khidki chhoti; Neon pe batch ka interval; Atlas pe archive aur chunks ki umar.
 4. ₹0 ki seema ki table ([ARCHITECTURE.md](ARCHITECTURE.md) §9) har 6 mahine providers ke docs se dobara jaanchi jaaye, tareekh ke saath; providers ki free sharten bina khabar badal sakti hain.
@@ -165,20 +165,22 @@ DevOps / SRE Architect ki raay se (D-257 ka kram), owner ki haan ke baad (D-326 
 1. Jin security niyamon ka saboot test nahi, record hai (jaise providers pe MFA, live headers, restore aur band data ka abhyaas, provider ki settings), unka record isi table me (RULES RT-48).
 2. Public table me sirf `Pass` ya `Baaki`, tareekh aur release; kami ki detail, screenshots, secrets aur account ki pehchaan sirf private record (D-403) me.
 3. Release ke test report (RT-46) me is table ki link; release gate (RG-2) sirf us release ke `Pass` ko ginta hai.
+4. Security advisory ke temporary private fork me CI nahi chalta, to security fix ke saare tests laptop pe, merge se pehle; nateeja private record (D-403) me (D-425).
 
-| SR | Hissa | Kya dekha | Kaise | Nateeja | Private record | Release aur commit | Tareekh (IST) | Role | Agli baar |
-| -- | ----- | --------- | ----- | ------- | -------------- | ------------------ | ------------- | ---- | --------- |
+| SR  | Hissa | Kya dekha | Kaise | Nateeja | Private record | Release aur commit | Tareekh (IST) | Role | Agli baar |
+| --- | ----- | --------- | ----- | ------- | -------------- | ------------------ | ------------- | ---- | --------- |
 
 ## Change log
 
-| Version | Date       | Badlav                                                                                                                                                                                                   |
-| ------- | ---------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| v1.0.0  | 2026-11-17 | Khaali file bani.                                                                                                                                                                                        |
-| v1.1.1  | 2026-11-21 | §1 se §11 aaye (DevOps / SRE ki 11 batches; D-326 se D-336): environments, CI, release aur rollback, secrets, soya server, backup aur restore, alerts, runbooks, capacity, memory ka naap, dependencies. |
-| v1.1.2  | 2026-11-21 | §5 niyam 13: app ki background ping (D-349).                                                                                                                                                             |
-| v1.1.3  | 2026-11-21 | §2 niyam 6 me nightly WebKit (D-374) aur RULES ki link; §3 niyam 9 me smoke order (D-380); D-397.                                                                                                        |
-| v1.1.4 | 2026-11-21 | §3 niyam 9 me security ki live jaanch (security review batch 1, D-408). |
-| v1.1.5 | 2026-11-22 | §7 niyam 3 me gambhirta ki poori list (security review batch 4, D-411). |
-| v1.1.6 | 2026-11-22 | §4 niyam 2 aur 3 me band data aur map ki keys, §6 niyam 10 me saal ka abhyaas (security review batch 5, D-412). |
-| v1.1.7 | 2026-11-22 | §7 niyam 9 me roz ka test push (security review batch 6, D-413). |
-| v1.1.8 | 2026-11-22 | §3 niyam 9 aur 10, naya §12 Security ke record (security review batch 7, D-414). |
+| Version | Date       | Badlav                                                                                                                                                                                                         |
+| ------- | ---------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| v1.0.0  | 2026-11-17 | Khaali file bani.                                                                                                                                                                                              |
+| v1.1.1  | 2026-11-21 | §1 se §11 aaye (DevOps / SRE ki 11 batches; D-326 se D-336): environments, CI, release aur rollback, secrets, soya server, backup aur restore, alerts, runbooks, capacity, memory ka naap, dependencies.       |
+| v1.1.2  | 2026-11-21 | §5 niyam 13: app ki background ping (D-349).                                                                                                                                                                   |
+| v1.1.3  | 2026-11-21 | §2 niyam 6 me nightly WebKit (D-374) aur RULES ki link; §3 niyam 9 me smoke order (D-380); D-397.                                                                                                              |
+| v1.1.4  | 2026-11-21 | §3 niyam 9 me security ki live jaanch (security review batch 1, D-408).                                                                                                                                        |
+| v1.1.5  | 2026-11-22 | §7 niyam 3 me gambhirta ki poori list (security review batch 4, D-411).                                                                                                                                        |
+| v1.1.6  | 2026-11-22 | §4 niyam 2 aur 3 me band data aur map ki keys, §6 niyam 10 me saal ka abhyaas (security review batch 5, D-412).                                                                                                |
+| v1.1.7  | 2026-11-22 | §7 niyam 9 me roz ka test push (security review batch 6, D-413).                                                                                                                                               |
+| v1.1.8  | 2026-11-22 | §3 niyam 9 aur 10, naya §12 Security ke record (security review batch 7, D-414).                                                                                                                               |
+| v1.1.9  | 2026-11-22 | §1 local Atlas container, PgBouncer, MongoDB 8.0.30 ka pin aur Valkey `noeviction`; §3 rollback ke baad auto-deploy; §5 do ping (D-424); §6 aur §9 Atlas ki IP list (D-421); §12 niyam 4 private fork (D-425). |

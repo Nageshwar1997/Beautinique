@@ -1,6 +1,6 @@
 # DECISIONS: Beautinique
 
-> **Status:** v1.14.34 (2026-11-22). Har faisla ek jagah. Sirf wahi "Tay" jo owner ne khud kaha; Claude ki salah faisla nahi. Cheezein ek-ek karke judti hain.
+> **Status:** v1.14.35 (2026-11-22). Har faisla ek jagah. Sirf wahi "Tay" jo owner ne khud kaha; Claude ki salah faisla nahi. Cheezein ek-ek karke judti hain.
 
 ## 0. Kaise likhein
 
@@ -422,16 +422,24 @@
 | D-405 | Testers ki allowlist entry sirf exact email se mel khaye, `+` alias se nahi.                                                                                                                                                                                                            | Security     | 2026-11-21 |
 | D-406 | Render host pe rejected requests aur `/wake` pings: aam din har line, ek IP ki seema (misaal 100/minute) ke upar sirf ginti.                                                                                                                                                            | Security     | 2026-11-21 |
 | D-407 | Payment screen ek alag HTML document; gateway ki script aur uski CSP sirf wahan; checkout ka roop (D-345) waisa hi.                                                                                                                                                                     | Security     | 2026-11-21 |
-| D-408 | Security review batch 1 (edge aur hosting) maana: SR-089, SR-090, SR-105 naye; SR-005, SR-006 badle; §1.1 me 4 threats; RULES, OPERATIONS, ARCHITECTURE, DESIGN, FLOWS, ACCEPTANCE aur RISKS me badlav. | Security | 2026-11-21 |
-| D-409 | Security review batch 2 (sign-in aur sessions) maana: SR-092 se SR-095 naye; SR-012, SR-020 badle; §1.2 aur §1.3 me 5 threats; ARCHITECTURE, DESIGN aur ACCEPTANCE me badlav. | Security | 2026-11-22 |
-| D-410 | Security review batch 3 (authorization aur paisa) maana: SR-032, SR-033, SR-043, SR-059, SR-075 badle; §1.4 aur §1.5 me 5 threats; RT-35 aur ARCHITECTURE §7 niyam 8 me badlav. | Security | 2026-11-22 |
-| D-411 | Security review batch 4 (delivery, reviews aur content ki ghadiyaan) maana: SR-060 aur SR-078 badle; §1.6 me 3 threats; OPERATIONS §7 niyam 3 me gambhirta ki list. | Security | 2026-11-22 |
-| D-412 | Security review batch 5 (files, media, map aur band data) maana: SR-091, SR-096, SR-097 naye; SR-006, SR-062, SR-065, SR-066 badle; §1.7 me 5 aur §1.10 me 1 threat; OPERATIONS, ARCHITECTURE, DESIGN aur RULES me badlav. | Security | 2026-11-22 |
-| D-413 | Security review batch 6 (logs, audit, errors aur alerts) maana: SR-098 se SR-101 naye; SR-005, SR-072, SR-074 badle; §1.8 me 7 threats; ARCHITECTURE, OPERATIONS aur ACCEPTANCE me badlav. | Security | 2026-11-22 |
-| D-414 | Security review batch 7 (DevOps, testing aur security bugs) maana: SR-102 se SR-104 naye; SR-081, SR-084 badle; §1.9 me 6 threats; RULES (RT-48), OPERATIONS (§12), COMPLIANCE aur RISKS me badlav. | Security | 2026-11-22 |
-| D-415 | Security review batch 8: 7 naye risks R-077 se R-083 (tag Security), bachav ke saath Khula. | Security | 2026-11-22 |
-| D-416 | Security review batch 9: SECURITY_REQUIREMENTS me Release column, Kahan se ASVS 5.0.0 ke chapter, OWASP Top 10:2025 aur API Top 10 2023 ka naksha; RULES RG-2 Release column se. | Security | 2026-11-22 |
-| D-417 | Security review ke baaki hisse: OPEN_QUESTIONS §2 me 11 nayi jaanch aur 4 rows zyada zaroori, 2 lene layak cheezein, aur dhyaan ke 17 points ka hisaab. | Security | 2026-11-22 |
+| D-408 | Security review batch 1 (edge aur hosting) maana: SR-089, SR-090, SR-105 naye; SR-005, SR-006 badle; §1.1 me 4 threats; RULES, OPERATIONS, ARCHITECTURE, DESIGN, FLOWS, ACCEPTANCE aur RISKS me badlav.                                                                                 | Security     | 2026-11-21 |
+| D-409 | Security review batch 2 (sign-in aur sessions) maana: SR-092 se SR-095 naye; SR-012, SR-020 badle; §1.2 aur §1.3 me 5 threats; ARCHITECTURE, DESIGN aur ACCEPTANCE me badlav.                                                                                                           | Security     | 2026-11-22 |
+| D-410 | Security review batch 3 (authorization aur paisa) maana: SR-032, SR-033, SR-043, SR-059, SR-075 badle; §1.4 aur §1.5 me 5 threats; RT-35 aur ARCHITECTURE §7 niyam 8 me badlav.                                                                                                         | Security     | 2026-11-22 |
+| D-411 | Security review batch 4 (delivery, reviews aur content ki ghadiyaan) maana: SR-060 aur SR-078 badle; §1.6 me 3 threats; OPERATIONS §7 niyam 3 me gambhirta ki list.                                                                                                                     | Security     | 2026-11-22 |
+| D-412 | Security review batch 5 (files, media, map aur band data) maana: SR-091, SR-096, SR-097 naye; SR-006, SR-062, SR-065, SR-066 badle; §1.7 me 5 aur §1.10 me 1 threat; OPERATIONS, ARCHITECTURE, DESIGN aur RULES me badlav.                                                              | Security     | 2026-11-22 |
+| D-413 | Security review batch 6 (logs, audit, errors aur alerts) maana: SR-098 se SR-101 naye; SR-005, SR-072, SR-074 badle; §1.8 me 7 threats; ARCHITECTURE, OPERATIONS aur ACCEPTANCE me badlav.                                                                                              | Security     | 2026-11-22 |
+| D-414 | Security review batch 7 (DevOps, testing aur security bugs) maana: SR-102 se SR-104 naye; SR-081, SR-084 badle; §1.9 me 6 threats; RULES (RT-48), OPERATIONS (§12), COMPLIANCE aur RISKS me badlav.                                                                                     | Security     | 2026-11-22 |
+| D-415 | Security review batch 8: 7 naye risks R-077 se R-083 (tag Security), bachav ke saath Khula.                                                                                                                                                                                             | Security     | 2026-11-22 |
+| D-416 | Security review batch 9: SECURITY_REQUIREMENTS me Release column, Kahan se ASVS 5.0.0 ke chapter, OWASP Top 10:2025 aur API Top 10 2023 ka naksha; RULES RG-2 Release column se.                                                                                                        | Security     | 2026-11-22 |
+| D-417 | Security review ke baaki hisse: OPEN_QUESTIONS §2 me 11 nayi jaanch aur 4 rows zyada zaroori, 2 lene layak cheezein, aur dhyaan ke 17 points ka hisaab.                                                                                                                                 | Security     | 2026-11-22 |
+| D-418 | Delivery pe UPI test mode me: partner ke app ka QR hamare Payment page ka link, us parcel ke Razorpay order ke saath; live mode me isi jagah Razorpay ka QR.                                                                                                                            | Architecture | 2026-11-22 |
+| D-419 | Brevo hi, bina apne domain ke: kisi email me link nahi, sirf code aur "app kholein"; click tracking anonymous, aur uska record.                                                                                                                                                         | Security     | 2026-11-22 |
+| D-420 | Public aur review images Cloudinary pe; private files S3 jaise object storage pe chhote presigned URL se (D-284 ka doosra raasta).                                                                                                                                                      | Architecture | 2026-11-22 |
+| D-421 | Atlas ki IP list me Render Singapore ke outbound ranges, aur laptop ka IP sirf backup ya release ke kaam tak; Neon pe password, TLS `verify-full` aur `channel_binding=require`.                                                                                                        | Security     | 2026-11-22 |
+| D-422 | Search ke tests laptop aur CI pe MongoDB ke local Atlas container pe; text index wala adapter nahi.                                                                                                                                                                                     | Architecture | 2026-11-22 |
+| D-423 | "Use my current location": accuracy misaal 100 m se zyada ho to pin apne aap nahi; map paas khule, sandesh "Move the pin to your door".                                                                                                                                                 | Business     | 2026-11-22 |
+| D-424 | cron-job.org ka har jagana do ping se: pehla jagaaye, doosra kuch minute baad jaage server pe, taaki lagataar fail se job band na ho.                                                                                                                                                   | Operations   | 2026-11-22 |
+| D-425 | §2 ki jaanch se 13 chhote sudhaar: Neon ka seedha connection, release user ka role, Key Value ki seema, MongoDB ka pin, rollback, ₹ ka font, axe, zrok, service worker tests, Lighthouse, private fork, PgBouncer, aur Ola ka data.                                                     | Process      | 2026-11-22 |
 
 ## 2. Record
 
@@ -1691,6 +1699,7 @@
 - **Chhode vikalp:** sab customers, koi seema nahi (mana karne ka nuksaan); sirf purane customers (naye customer ke liye rukawat).
 - **Kab dobara khulega:** owner khud khole.
 - **Kisne, kab:** owner, 2026-11-18. **Nishaan:** Salah maani.
+- **Jod (owner, 2026-11-22, D-418):** test mode me QR me hamare Payment page ka link, us parcel ke Razorpay order ke saath; live mode me isi jagah Razorpay ka QR.
 
 ### D-110. Customer cancel
 
@@ -3736,6 +3745,7 @@
 - **Kab dobara khulega:** shart ki jaanch ka nateeja ([OPEN_QUESTIONS.md](OPEN_QUESTIONS.md) §2), free credits khatam hone lagein, ya owner khud khole.
 - **Kisne, kab:** owner, 2026-11-20. **Nishaan:** Salah maani.
 - **Asar (Claude):** provider naya data processor hai (CL-104) aur data ki jagah privacy page pe (CL-107); data India ke bahar ho to uska asar Lawyer se nahi jaancha. Provider ki chaabi sirf ek jagah (SR-071); files ka registry aur retention ARCHITECTURE ki media batch me. Database me provider ka URL nahi, sirf file ka record (SR-062).
+- **Jod (owner, 2026-11-22, D-420):** shart ki jaanch me do shartein kamzor nikli, to doosra raasta abhi se: public aur review images Cloudinary pe, private files S3 jaise object storage pe.
 
 ### D-285. Request logs ki jagah
 
@@ -3763,6 +3773,7 @@
 - **Kab dobara khulega:** bina domain bhejna na chale ([OPEN_QUESTIONS.md](OPEN_QUESTIONS.md) §2), ya owner khud khole.
 - **Kisne, kab:** owner, 2026-11-20. **Nishaan:** Salah maani.
 - **Asar (Claude):** provider data processor hai (CL-104). Spam ka jokhim waisa hi (R-005). Bheje emails ki copy aur link tracking wali jaanch §2 me pehle se.
+- **Jod (owner, 2026-11-22, D-419):** Brevo hi, bina apne domain ke (From badla hua); kisi email me link nahi, sirf code aur "app kholein"; click tracking anonymous, aur uska record.
 
 ### D-288. Finance me events kitni der me
 
@@ -3834,6 +3845,7 @@
 - **Kab dobara khulega:** owner khud khole.
 - **Kisne, kab:** owner, 2026-11-20. **Nishaan:** Salah maani.
 - **Asar (Claude):** free cluster pe fuzzy, autocomplete aur synonyms ki seema, aur Vercel ka cache vyavhaar: jaanch [OPEN_QUESTIONS.md](OPEN_QUESTIONS.md) §2 me.
+- **Badla (owner, 2026-11-22, D-422):** laptop aur CI pe text index ka adapter nahi; search ke tests MongoDB ke local Atlas container pe.
 
 ### D-296. ARCHITECTURE batch 6: media aur files
 
@@ -4073,6 +4085,7 @@
 - **Kisne, kab:** owner, 2026-11-21. **Nishaan:** Salah maani.
 - **Asar (Claude):** [ARCHITECTURE.md](ARCHITECTURE.md) §9 ka "raat ko server soya" isi niyam se mel khaata hai; D-056 ki "24 ghante bhi fit" wali line sirf ghanton ka hisaab hai, server 24 ghante jagaaya nahi jaata. Pinger ka tool aur uski kamiyaan (misaal GitHub ka schedule late ya chhoot sakta hai aur sirf default branch pe chalta hai) OPERATIONS ki batch me. Din me samay wale kaam zyada se zyada lagbhag 1 ghanta late. R1 me pehle live deploy se.
 - **Jod (owner, 2026-11-21, D-349):** app use ho raha ho to app ki background ping (misaal har 10 minute) bhi server ko jaaga rakhti hai, raat ko bhi.
+- **Jod (owner, 2026-11-22, D-424):** cron-job.org pe har jagane ke samay do ping, taaki 30 second ke timeout ke lagataar fail se job band na ho.
 
 ### D-323. Databases ke backup ki ginti
 
@@ -4237,6 +4250,7 @@
 - **Kab dobara khulega:** owner khud khole.
 - **Kisne, kab:** owner, 2026-11-21. **Nishaan:** Salah maani.
 - **Asar (Claude):** Customer app ki pehli load pe lagbhag 70 KB zyada (misaal). Fonts ka license CL-125 ki list me. Kanooni detail: Lawyer ya CA se nahi jaancha.
+- **Jod (owner, 2026-11-22, D-425):** Google Fonts ka `latin` subset ₹ nahi rakhta, to self-host ke liye `latin` aur U+20B9 ka apna subset; build ka test waisa hi.
 
 ### D-342. Dark theme
 
@@ -4301,6 +4315,7 @@
 - **Kab dobara khulega:** Ola ki sharten badlein, ya owner khud khole.
 - **Kisne, kab:** owner, 2026-11-21. **Nishaan:** Owner (form aur Ola Maps dono, autofill, pin, current location, limit); Salah maani (baaki detail).
 - **Asar (Claude):** Ola (ANI Technologies Pvt. Ltd.) naya processor: address ka text, pin aur browser ki requests; D-255 niyam 8 ki processors list me. CSP (SR-005) me Ola ke hosts sirf in screens pe: Security Architect ka doosra run. Tathya [RISKS.md](RISKS.md) §2.6, risk R-064, aur baaki jaanch [OPEN_QUESTIONS.md](OPEN_QUESTIONS.md) §2. Ola ki terms me geocoding ke coordinates rakhne ka saaf niyam nahi mila: customer ka pakka kiya address aur pin hamara data, Ola ka content (jaise autocomplete ke results ki list) nahi rakhte. Kanooni detail: address aur location personal data, Lawyer se nahi jaancha.
+- **Jod (owner, 2026-11-22, D-423):** niyam 4 me `accuracy` misaal 100 m se zyada ho to pin apne aap nahi; map paas khule aur sandesh "Move the pin to your door".
 
 ### D-348. R1 ka Customer Home
 
@@ -4541,6 +4556,7 @@
 - **Kab dobara khulega:** owner khud khole.
 - **Kisne, kab:** owner, 2026-11-21. **Nishaan:** Salah maani.
 - **Asar (Claude):** Linux ka WebKit asli iPhone ka Safari nahi; asli iPhone ki jaanch D-375 me.
+- **Jod (owner, 2026-11-22, D-425):** Playwright me service workers sirf Chromium pe chalte hain, to service worker aur push ke tests Chromium aur asli phone pe; WebKit pe baaki flows.
 
 ### D-375. Asli phone pe testing
 
@@ -4809,6 +4825,7 @@
 - **Kab dobara khulega:** owner khud khole.
 - **Kisne, kab:** owner, 2026-11-21. **Nishaan:** Salah maani.
 - **Asar (Claude):** kaunsa raasta chalega, ye [OPEN_QUESTIONS.md](OPEN_QUESTIONS.md) §2 ki "GitHub ki private security advisory" wali jaanch pe tika (muft hai ya nahi, aur private fork me CI chalti hai ya nahi). R-054 ka bachav security ki risks wali batch me.
+- **Jod (owner, 2026-11-22, D-425):** advisory ke temporary private fork me CI nahi chalta, to security fix ke tests laptop pe, merge se pehle ([OPERATIONS.md](OPERATIONS.md) §12).
 
 ### D-404. Record wale security niyamon ka saboot
 
@@ -4969,6 +4986,91 @@
 - **Kisne, kab:** owner, 2026-11-22. **Nishaan:** Salah maani.
 - **Asar (Claude):** Security Architect ke doosre run ka saara kaam ab docs me. Ye sab jaanch Claude ki hai (owner ka faisla nahi), R1 se pehle; laptop ki jaanch owner ke saath.
 
+### D-418. Delivery pe UPI test mode me
+
+- **Faisla:** test mode me partner ke app ka QR server banata hai, aur usme us parcel ke Razorpay order ke liye hamare Payment page (D-407) ka link hota hai. Customer phone ke camera se scan karke page kholta hai aur test mode ke checkout se UPI (misaal `success@razorpay`) se bharta hai. "Paid" waise hi sirf webhook se (SR-050). Live mode me baad me isi jagah Razorpay ka asli QR.
+- **Wajah:** Claude ki salah, owner ne maani: Razorpay ke test mode ka QR do second me gayab ho jaata hai aur scan sirf live mode ke QR hote hain ([RISKS.md](RISKS.md) §2.9); is raaste se SR-050 ke saare niyam bache rehte hain aur poora flow test mode me chalta hai.
+- **Chhode vikalp:** Razorpay ka Payment Link QR me (test mode me chalta hai ya nahi, jaancha nahi); delivery pe UPI R2 me (door pe payment ka flow R1 me test hi nahi hota).
+- **Kab dobara khulega:** live mode khule, Razorpay ka test QR scan hone lage, ya owner khud khole.
+- **Kisne, kab:** owner, 2026-11-22. **Nishaan:** Salah maani.
+- **Asar (Claude):** customer ko phone pe page kholna padta hai (ek kadam zyada), aur uska phone online hona chahiye. Link ka token random aur andaaze se bahar, sirf us parcel ke khule QR tak (ek parcel pe ek khula QR) aur D-109 niyam 3 ke samay tak; bina sign-in ke page pe sirf order number aur rakam, koi personal data nahi. Ye detail payments ke code ke saath.
+
+### D-419. Email: Brevo bina apne domain ke
+
+- **Faisla:** Brevo hi rehta hai, bina apne domain ke, aur From address Brevo ka badla hua maan ke chalte hain. Kisi bhi email me sign-in ya action ka koi link nahi, sirf code aur "app kholein" (SR-012 ka staff wala niyam ab saare emails pe). Click tracking free plan pe poori band nahi hoti, sirf anonymous; wo anonymous, aur iska record (D-404).
+- **Wajah:** Claude ki salah, owner ne maani: D-028 ka ₹0 bachta hai, aur emails me link hi na hon to tracking se koi khatra nahi; codes email me waise hi jaate hain.
+- **Chhode vikalp:** apna domain (D-028 badalta, mahine ka chhota kharcha, tracking wali baat phir bhi); doosra email provider (free email ka domain koi authenticate nahi karta, aur D-142 ke numbers badalte).
+- **Kab dobara khulega:** apna domain aaye, pehle bhejne pe From ya tracking alag dikhe, ya owner khud khole.
+- **Kisne, kab:** owner, 2026-11-22. **Nishaan:** Salah maani.
+- **Asar (Claude):** anjaana From spam ka khatra badhata hai (R-005), aur customer ko link ki jagah app kholna padta hai. Ye baatein Brevo ke help center ke search ke saar se hain; pehle bhejne pe From aur tracking ek baar dekhna ([OPEN_QUESTIONS.md](OPEN_QUESTIONS.md) §2).
+
+### D-420. Media: private files object storage pe
+
+- **Faisla:** D-284 ka doosra raasta abhi se: product, public aur review images Cloudinary pe. Private dastavez, daawe aur delivery ki photos, kanooni rok wali files aur logs ki files S3 jaise object storage pe (misaal Cloudflare R2 ya Backblaze B2 ka free hissa), chhote samay ke presigned URL se. Object storage chunne se pehle uski apni shart (samay wala URL, size ki rok, region) jaanchni hai.
+- **Wajah:** Claude ki salah, owner ne maani: Cloudinary pe samay wale token URL sirf paid plan pe, signed URL expire nahi hota, preset me size ki rok nahi, EXIF ka niyam saaf nahi, aur data US me ([RISKS.md](RISKS.md) §2.9). Teen me se do shartein free pe kamzor nikli, aur KYC dastavez US me rakhne ki baat bhi hat jaati hai.
+- **Chhode vikalp:** pehle Cloudinary pe test, phir faisla (faisla der se, US wali baat bani rehti); sab Cloudinary pe, private files bina samay ke signed URL se (leak hua URL hamesha chalta, SR-062 ke khilaaf).
+- **Kab dobara khulega:** object storage ki jaanch fail ho, ya owner khud khole.
+- **Kisne, kab:** owner, 2026-11-22. **Nishaan:** Salah maani.
+- **Asar (Claude):** do providers, do chaabiyaan (SR-071) aur upload ke do raaste. Object storage ki pehli jaanch (2026-11-22, [RISKS.md](RISKS.md) §2.9): R2 me presigned URL 1 second se 7 din tak, `apac` location hint (pakki jagah nahi; jurisdiction sirf EU, FedRAMP aur US), 10 GB free; B2 ke regions US, Canada aur EU me, Asia me nahi. Dono me presigned upload PUT se; size ki rok signature me aati hai ya nahi, jaancha nahi, to upload ke baad media asli size aur type dekh ke hi `ready` kare (ARCHITECTURE §7 niyam 1). Object storage file ko jaisi aayi waisi rakhta hai, to private images ka dobara encode aur EXIF hatana server pe `heavy` queue me (ARCHITECTURE §7 niyam 3). Account banate waqt card maangta hai ya nahi, aur kaunsa provider: [OPEN_QUESTIONS.md](OPEN_QUESTIONS.md) §2 ki jaanch ke baad, owner ke saath. Kanooni detail: private files India ke bahar rakhne ka asar (CL-107) Lawyer (AI) ne nahi dekha.
+
+### D-421. Databases ka network
+
+- **Faisla:** Atlas ke har project ki IP access list me Render Singapore ke outbound ranges. Laptop ke kaam (backup, release command) ke waqt laptop ka IP thodi der ke liye judta hai aur kaam ke baad hatta hai. Neon ke free plan pe IP Allow nahi, to wahan password, TLS `verify-full` aur `channel_binding=require`.
+- **Wajah:** Claude ki salah, owner ne maani: Render ke ranges region ke customers ke saajhe hain, par duniya bhar ke scanners database tak nahi pahunchte, aur R-022 ka khatra kam hota hai.
+- **Chhode vikalp:** sab khula (`0.0.0.0/0`), sirf password aur TLS pe (R-022 jaisa tha waisa).
+- **Kab dobara khulega:** Neon pe IP Allow muft mile, Render ke ranges ka tareeka badle, ya owner khud khole.
+- **Kisne, kab:** owner, 2026-11-22. **Nishaan:** Salah maani.
+- **Asar (Claude):** Render ke ranges badlein to connection toot sakta hai, to hafte ki jaanch ([OPERATIONS.md](OPERATIONS.md) §9) me dashboard ke ranges milana. Laptop ka IP har baar jodna aur hatana ([OPERATIONS.md](OPERATIONS.md) §6). Tathya [RISKS.md](RISKS.md) §2.7.
+
+### D-422. Search ke tests
+
+- **Faisla:** laptop aur CI pe search ke tests MongoDB ke local Atlas container (`mongodb/mongodb-atlas-local`, exact version pe) pe, asli search ke saath. MongoDB text index wala adapter nahi banta ([ARCHITECTURE.md](ARCHITECTURE.md) §6 niyam 7).
+- **Wajah:** Claude ki salah, owner ne maani: search ke niyam (fuzzy, synonyms, kram) usi engine pe parkhe jaate hain jo live pe hai, aur ek adapter ka code kam hota hai.
+- **Chhode vikalp:** dono adapters, ranking ke tests dono pe (do adapters ka code, aur text index live ka kram nahi parakhta).
+- **Kab dobara khulega:** local container band ho ya live se alag chale, ya owner khud khole.
+- **Kisne, kab:** owner, 2026-11-22. **Nishaan:** Salah maani.
+- **Asar (Claude):** container ko kam se kam 2 GB khaali RAM aur 2 CPU cores (R-070), aur usme ek saath kai search nahi chalte. Free cluster ki apni seemaayein (3 indexes, operators) container me nahi dikhti; unki jaanch [OPEN_QUESTIONS.md](OPEN_QUESTIONS.md) §2 ke Atlas free cluster wale test me (R-066).
+
+### D-423. Desktop pe "Use my current location"
+
+- **Faisla:** browser ki location ki `accuracy` misaal 100 m se zyada ho to pin apne aap nahi lagta; map us jagah ke paas khulta hai aur sandesh "Move the pin to your door" (D-347 niyam 4).
+- **Wajah:** Claude ki salah, owner ne maani: phone pe button waise hi kaam karta hai, aur laptop pe galat pin chupchaap nahi lagta (galat pin se galat doori, galat hub aur SR-055 ka 300 m wala niyam galat jagah pe).
+- **Chhode vikalp:** koi rok nahi (galat pin ka khatra); desktop pe button nahi (desktop pe aasani kam).
+- **Kab dobara khulega:** asli use me seema zyada sakht ya dheeli lage, ya owner khud khole.
+- **Kisne, kab:** owner, 2026-11-22. **Nishaan:** Salah maani.
+- **Asar (Claude):** `accuracy` meters me, 68% bharose ke saath ([RISKS.md](RISKS.md) §2.11). Seema setting me.
+
+### D-424. Server jagane ka ping: do baar
+
+- **Faisla:** cron-job.org pe har jagane ke samay do jobs: pehla server jagaata hai (30 second ke timeout pe fail ho sakta hai), doosra kuch minute baad (misaal :03, [OPERATIONS.md](OPERATIONS.md) §5 niyam 5) jaage server pe safal hota hai, taaki lagataar fail ki ginti tootti rahe aur job band na ho.
+- **Wajah:** Claude ki salah, owner ne maani: cron-job.org 30 second me jawab na mile to fail maanta hai aur lagataar 25 se zyada fail pe job band kar deta hai ([RISKS.md](RISKS.md) §2.9), jabki soya server lagbhag 1 minute me jaagta hai; isse D-322 ka job lagbhag 2 din me band ho jaata. cron-job.org hi rehta hai, bas ek aur job judta hai.
+- **Chhode vikalp:** UptimeRobot se jagana (uska timeout jaancha nahi); GitHub Actions ka schedule (late ho sakta ya chhoot sakta, RISKS §2.5).
+- **Kab dobara khulega:** cron-job.org ki sharten badlein, ya owner khud khole.
+- **Kisne, kab:** owner, 2026-11-22. **Nishaan:** Salah maani.
+- **Asar (Claude):** din ke 28 requests (14 ki jagah); doosra ping jaage server pe, to Render ke ghanton pe asar na ke barabar. Hafte ki jaanch me dekhna ki koi job band to nahi hua.
+
+### D-425. Jaanch se nikle chhote sudhaar
+
+- **Faisla:** [OPEN_QUESTIONS.md](OPEN_QUESTIONS.md) §2 ki jaanch ke tathyon se 13 badlav:
+  1. [ARCHITECTURE.md](ARCHITECTURE.md) §10.4 niyam 6: finance ki migrations aur `pg_dump` Neon ke seedhe connection se, pooler se nahi; app ka pool pooler se, bina SQL `PREPARE`, `SET` aur session wale locks.
+  2. ARCHITECTURE §10.4 niyam 5: release user ko `dbAdmin` ya `collMod` wala custom role; app ke user ka `readWrite` (usme `collMod` nahi).
+  3. ARCHITECTURE §9 ki Redis row: free Key Value 25 MB aur 50 connections, maxmemory policy `noeviction` (BullMQ ki shart); [OPERATIONS.md](OPERATIONS.md) §1 niyam 3 me laptop ka Valkey bhi `noeviction`.
+  4. OPERATIONS §1 niyam 3 aur [RULES.md](RULES.md) RT-2: MongoDB ka container patch version tak pin, 8.0.30 ya upar.
+  5. OPERATIONS §3 niyam 8: Render dashboard ke rollback ke baad auto-deploy band; git revert merge hone ke baad wapas chalu.
+  6. D-341 ke fonts: `latin` aur U+20B9 ka apna subset.
+  7. [DESIGN.md](DESIGN.md) DS-8.1 aur RULES ka accessibility test: axe me `wcag22aa` tag chalu.
+  8. RULES RT-14: laptop pe Razorpay ke webhooks `zrok` se, ya fake se.
+  9. D-374: service worker aur push ke tests Chromium aur asli phone pe; WebKit pe baaki flows.
+  10. DESIGN DS-10.10: Lighthouse har page pe 5 baar, aur median.
+  11. OPERATIONS §12: advisory ke temporary private fork me CI nahi chalta, to security fix ke tests laptop pe, merge se pehle.
+  12. RULES §4.6 ke finance tests: PostgreSQL ke saath PgBouncer (transaction mode) ka container.
+  13. [COMPLIANCE.md](COMPLIANCE.md) §14.2 ke Privacy page me Ola ke paas jaane wale location data ka zikr.
+- **Wajah:** Claude ki salah, owner ne maani: ye niyam jin tathyon pe tike the, unme se kai ab pakke ya alag nikle ([RISKS.md](RISKS.md) §2.7 se §2.11); bina badlav ke implementation me galti, crash ya jhootha test.
+- **Chhode vikalp:** kuch hi (owner ne koi nahi chuna); koi nahi (niyam galat ya adhoore tathyon pe).
+- **Kab dobara khulega:** tathya badlein, ya owner khud khole.
+- **Kisne, kab:** owner, 2026-11-22. **Nishaan:** Salah maani.
+- **Asar (Claude):** niyam 4 ki wajah: Linux kernel 6.19 se 7.0.13 pe purane 8.0 crash karte ya band hote hain; laptop ka WSL kernel abhi 6.18.58 ([RISKS.md](RISKS.md) §2.8, §2.11). Niyam 13 ki kanooni detail (D-255, CL-104) Lawyer (AI) ne nahi dekhi.
+
 ## Change log
 
 | Version  | Date       | Badlav                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      |
@@ -5088,13 +5190,14 @@
 | v1.14.22 | 2026-11-21 | D-396 aaya (QA ke 12 risks R-065 se R-076; Q-332).                                                                                                                                                                                                                                                                                                                                                                                                                                          |
 | v1.14.23 | 2026-11-21 | D-397 aur D-398 aaye (QA ke 5 sudhaar aur 5 lene layak niyam; Q-333, Q-334); D-376 aur D-380 ke Asar me "jod diya".                                                                                                                                                                                                                                                                                                                                                                         |
 | v1.14.24 | 2026-11-21 | D-399 se D-407 aaye (Security Architect ke doosre run ke 9 sawal; Q-335 se Q-343).                                                                                                                                                                                                                                                                                                                                                                                                          |
-| v1.14.25 | 2026-11-21 | D-408 aaya (security review batch 1: edge aur hosting; Q-344). |
-| v1.14.26 | 2026-11-22 | D-409 aaya (security review batch 2: sign-in aur sessions; Q-345). |
-| v1.14.27 | 2026-11-22 | D-410 aaya (security review batch 3: authorization aur paisa; Q-346). |
-| v1.14.28 | 2026-11-22 | D-411 aaya (security review batch 4: delivery, reviews aur content ki ghadiyaan; Q-347). |
-| v1.14.29 | 2026-11-22 | D-412 aaya (security review batch 5: files, media, map aur band data; Q-348). |
-| v1.14.30 | 2026-11-22 | D-413 aaya (security review batch 6: logs, audit, errors aur alerts; Q-349). |
-| v1.14.31 | 2026-11-22 | D-414 aaya (security review batch 7: DevOps, testing aur security bugs; Q-350). |
-| v1.14.32 | 2026-11-22 | D-415 aaya (security review batch 8: 7 naye risks; Q-351). |
-| v1.14.33 | 2026-11-22 | D-416 aaya (security review batch 9: SR doc ka dhaancha aur OWASP ke versions; Q-352). |
-| v1.14.34 | 2026-11-22 | D-417 aaya (security review ke baaki hisse; Q-353). |
+| v1.14.25 | 2026-11-21 | D-408 aaya (security review batch 1: edge aur hosting; Q-344).                                                                                                                                                                                                                                                                                                                                                                                                                              |
+| v1.14.26 | 2026-11-22 | D-409 aaya (security review batch 2: sign-in aur sessions; Q-345).                                                                                                                                                                                                                                                                                                                                                                                                                          |
+| v1.14.27 | 2026-11-22 | D-410 aaya (security review batch 3: authorization aur paisa; Q-346).                                                                                                                                                                                                                                                                                                                                                                                                                       |
+| v1.14.28 | 2026-11-22 | D-411 aaya (security review batch 4: delivery, reviews aur content ki ghadiyaan; Q-347).                                                                                                                                                                                                                                                                                                                                                                                                    |
+| v1.14.29 | 2026-11-22 | D-412 aaya (security review batch 5: files, media, map aur band data; Q-348).                                                                                                                                                                                                                                                                                                                                                                                                               |
+| v1.14.30 | 2026-11-22 | D-413 aaya (security review batch 6: logs, audit, errors aur alerts; Q-349).                                                                                                                                                                                                                                                                                                                                                                                                                |
+| v1.14.31 | 2026-11-22 | D-414 aaya (security review batch 7: DevOps, testing aur security bugs; Q-350).                                                                                                                                                                                                                                                                                                                                                                                                             |
+| v1.14.32 | 2026-11-22 | D-415 aaya (security review batch 8: 7 naye risks; Q-351).                                                                                                                                                                                                                                                                                                                                                                                                                                  |
+| v1.14.33 | 2026-11-22 | D-416 aaya (security review batch 9: SR doc ka dhaancha aur OWASP ke versions; Q-352).                                                                                                                                                                                                                                                                                                                                                                                                      |
+| v1.14.34 | 2026-11-22 | D-417 aaya (security review ke baaki hisse; Q-353).                                                                                                                                                                                                                                                                                                                                                                                                                                         |
+| v1.14.35 | 2026-11-22 | D-418 se D-425 aaye (§2 ki jaanch ke sawal Q-354 se Q-361); D-109, D-284, D-287, D-322, D-341, D-347, D-374 aur D-403 me Jod, D-295 me Badla.                                                                                                                                                                                                                                                                                                                                               |

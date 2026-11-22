@@ -1,6 +1,6 @@
 # COMPLIANCE: Beautinique
 
-> **Status:** v1.2.2 (2026-11-22). Kanooni matrix. System me sab poori tarah banta hai, par registrations aur bahar ki companies ki details dummy hain (D-026); apne roles ki jaankari asli (D-241). Project ke Lawyer aur CA AI agents hain (D-257); Lawyer ne 18 rows dekhin (D-272), CA ne 32 rows dekhin aur 8 nayi rows di (D-281). Cheezein ek-ek karke, owner ki haan se, judti hain (D-220).
+> **Status:** v1.2.3 (2026-11-22). Kanooni matrix. System me sab poori tarah banta hai, par registrations aur bahar ki companies ki details dummy hain (D-026); apne roles ki jaankari asli (D-241). Project ke Lawyer aur CA AI agents hain (D-257); Lawyer ne 18 rows dekhin (D-272), CA ne 32 rows dekhin aur 8 nayi rows di (D-281). Cheezein ek-ek karke, owner ki haan se, judti hain (D-220).
 
 ## Is file me kya aayega
 
@@ -1431,24 +1431,24 @@ Project ke Lawyer (AI, D-257) ka dhaancha (D-273), D-262 se D-272 ke faislon ke 
 
 Do parat: sign-up pe chhota **Data notice** (alag, itemised) aur poora **Privacy page** (D-255 niyam 1, 2). Delivery partner aur seller ke apne notice (D-254, CL-089).
 
-| #   | Hissa                      | Kaam                                                                                                                               | Hawala                                      |
-| --- | -------------------------- | ---------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------- |
-| 1   | Hum kaun                   | Data Fiduciary `[PLATFORM]`; sellers apne order data ke liye alag Data Fiduciary.                                                  | CL-089, CL-098                              |
-| 2   | Data aur maqsad (itemised) | Har maqsad ke saath data ki list: account, order, delivery, payment ids, reviews, support, seemaayein aur fraud ki rok, marketing. | CL-089, D-255, CL-097                       |
-| 3   | Kis kanooni aadhaar pe     | Har maqsad ki consent ya s.7 ka maamla; "legitimate interest" nahi.                                                                | CL-097                                      |
-| 4   | Sehat ka data              | Allergy profile, consultation notes, skin reaction: alag consent, seemit pahunch, samay.                                           | D-165, D-207, D-208, CL-090                 |
-| 5   | Bachche                    | Sirf 18+; ghoshna ka record; bachcha pata chale to band aur erase; umar se ads nahi.                                               | D-038, CL-102                               |
-| 6   | Kis ke saath               | Sellers (sirf order ka zaroori data), delivery partners (sirf active parcel), processors ki shreniyan, kanooni maang.              | D-143, D-201, CL-098, CL-104                |
-| 7   | Data kahan                 | Singapore (D-058); card aur UPI ka data sirf gateway ke paas.                                                                      | D-058, D-256, CL-107                        |
-| 8   | Kitne din                  | Har class ka samay; kanooni rok (1 saal); tax archive; logs; backups ki umar.                                                      | D-191 se D-194, D-225, D-250, D-262, CL-093 |
-| 9   | Suraksha                   | Encryption, pahunch ka control, audit, staff ki seemit pahunch.                                                                    | D-201, CL-096                               |
-| 10  | Aapke haq                  | Saar, sudhaar, erase, shikayat, nomination (R2); jawab 90 din ke andar.                                                            | D-151, D-255 niyam 4, CL-091                |
-| 11  | Consent wapas              | Har consent ka "band karo", utna hi aasaan; nateeja kya hoga.                                                                      | CL-089, CL-101                              |
-| 12  | Sampark aur shikayat       | `[GRIEVANCE_OFFICER]` (rule 9); Data Protection Board ka raasta; Consent Manager (jab aaye).                                       | D-253, CL-092                               |
-| 13  | Device aur cookies         | Sign-in cookies aur device cookie sirf seemaon ke kaam ke liye; bahar ki analytics nahi.                                           | D-157, D-186, D-255 niyam 5                 |
-| 14  | Data leak                  | Asar wale user ko bina der email aur in-app.                                                                                       | D-248, CL-094                               |
-| 15  | Testers                    | Demo ke testers pe bhi wahi notice aur haq.                                                                                        | D-133, CL-099                               |
-| 16  | Badlav aur version         | Version, tareekh, bade badlav pe naya consent.                                                                                     | D-150 niyam 3                               |
+| #   | Hissa                      | Kaam                                                                                                                                                                                                                                                                                           | Hawala                                      |
+| --- | -------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------- |
+| 1   | Hum kaun                   | Data Fiduciary `[PLATFORM]`; sellers apne order data ke liye alag Data Fiduciary.                                                                                                                                                                                                              | CL-089, CL-098                              |
+| 2   | Data aur maqsad (itemised) | Har maqsad ke saath data ki list: account, order, delivery, payment ids, reviews, support, seemaayein aur fraud ki rok, marketing.                                                                                                                                                             | CL-089, D-255, CL-097                       |
+| 3   | Kis kanooni aadhaar pe     | Har maqsad ki consent ya s.7 ka maamla; "legitimate interest" nahi.                                                                                                                                                                                                                            | CL-097                                      |
+| 4   | Sehat ka data              | Allergy profile, consultation notes, skin reaction: alag consent, seemit pahunch, samay.                                                                                                                                                                                                       | D-165, D-207, D-208, CL-090                 |
+| 5   | Bachche                    | Sirf 18+; ghoshna ka record; bachcha pata chale to band aur erase; umar se ads nahi.                                                                                                                                                                                                           | D-038, CL-102                               |
+| 6   | Kis ke saath               | Sellers (sirf order ka zaroori data), delivery partners (sirf active parcel), processors ki shreniyan, kanooni maang. Map (Ola) ke paas jaane wala address aur location data, aur Ola ki apni policy me uska istemaal ads aur research ke liye bhi (kanooni detail Lawyer (AI) ne nahi dekhi). | D-143, D-201, D-347, D-425, CL-098, CL-104  |
+| 7   | Data kahan                 | Singapore (D-058); public aur review images media provider ke paas (US, D-284); private files object storage pe (jagah D-420 ke chunav se); card aur UPI ka data sirf gateway ke paas.                                                                                                         | D-058, D-256, D-420, CL-107                 |
+| 8   | Kitne din                  | Har class ka samay; kanooni rok (1 saal); tax archive; logs; backups ki umar.                                                                                                                                                                                                                  | D-191 se D-194, D-225, D-250, D-262, CL-093 |
+| 9   | Suraksha                   | Encryption, pahunch ka control, audit, staff ki seemit pahunch.                                                                                                                                                                                                                                | D-201, CL-096                               |
+| 10  | Aapke haq                  | Saar, sudhaar, erase, shikayat, nomination (R2); jawab 90 din ke andar.                                                                                                                                                                                                                        | D-151, D-255 niyam 4, CL-091                |
+| 11  | Consent wapas              | Har consent ka "band karo", utna hi aasaan; nateeja kya hoga.                                                                                                                                                                                                                                  | CL-089, CL-101                              |
+| 12  | Sampark aur shikayat       | `[GRIEVANCE_OFFICER]` (rule 9); Data Protection Board ka raasta; Consent Manager (jab aaye).                                                                                                                                                                                                   | D-253, CL-092                               |
+| 13  | Device aur cookies         | Sign-in cookies aur device cookie sirf seemaon ke kaam ke liye; bahar ki analytics nahi.                                                                                                                                                                                                       | D-157, D-186, D-255 niyam 5                 |
+| 14  | Data leak                  | Asar wale user ko bina der email aur in-app.                                                                                                                                                                                                                                                   | D-248, CL-094                               |
+| 15  | Testers                    | Demo ke testers pe bhi wahi notice aur haq.                                                                                                                                                                                                                                                    | D-133, CL-099                               |
+| 16  | Badlav aur version         | Version, tareekh, bade badlav pe naya consent.                                                                                                                                                                                                                                                 | D-150 niyam 3                               |
 
 ### 14.3 Seller Agreement
 
@@ -1522,20 +1522,20 @@ Do parat: sign-up pe chhota **Data notice** (alag, itemised) aur poora **Privacy
 
 ### 14.6 Grievance page
 
-| #   | Hissa                      | Kaam                                                                                      | Hawala               |
-| --- | -------------------------- | ----------------------------------------------------------------------------------------- | -------------------- |
-| 1   | Platform ki jaankari       | Legal naam, pata, `[CIN: DUMMY]`, customer care.                                          | CL-059               |
-| 2   | Grievance Officer          | Naam, designation, contact (role account se).                                             | D-237, D-241, CL-064 |
-| 3   | Nodal officer              | India me rehne wala nodal person (role account se).                                       | D-237, CL-059        |
-| 4   | Shikayat kaise             | Alag form, ticket number, shikayat ka text receipt me.                                    | D-163, D-238, CL-064 |
-| 5   | Samay: consumer shikayat   | Receipt 48 ghante, hal ek mahine.                                                         | D-163, CL-064        |
-| 6   | Samay: content ki shikayat | Receipt 24 ghante; nagnata wali report 2 ghante; baaki 36 ghante; hal 7 din.              | D-251, CL-105        |
-| 7   | Sarkari ya court order     | Alag raasta, 3 ghante.                                                                    | D-251                |
-| 8   | Seller pe shikayat         | Seller ka grievance officer product page pe; platform ki seedhi bhi.                      | D-238                |
-| 9   | Privacy ke sawal           | Wahi officer (rule 9); Data Protection Board ka raasta.                                   | D-253, CL-092        |
-| 10  | IP ki shikayat             | Brand owner ke liye category, saboot ke saath.                                            | CL-124               |
-| 11  | Aage ka raasta             | Grievance Appellate Committee (content); National Consumer Helpline; consumer commission. | CL-105, CL-059       |
-| 12  | Security ki report         | `[SECURITY_CONTACT]` (CERT-In ka Point of Contact alag role). Har app pe `/.well-known/security.txt` isi sampark ke saath (SR-103).                             | D-253, CL-106        |
+| #   | Hissa                      | Kaam                                                                                                                                | Hawala               |
+| --- | -------------------------- | ----------------------------------------------------------------------------------------------------------------------------------- | -------------------- |
+| 1   | Platform ki jaankari       | Legal naam, pata, `[CIN: DUMMY]`, customer care.                                                                                    | CL-059               |
+| 2   | Grievance Officer          | Naam, designation, contact (role account se).                                                                                       | D-237, D-241, CL-064 |
+| 3   | Nodal officer              | India me rehne wala nodal person (role account se).                                                                                 | D-237, CL-059        |
+| 4   | Shikayat kaise             | Alag form, ticket number, shikayat ka text receipt me.                                                                              | D-163, D-238, CL-064 |
+| 5   | Samay: consumer shikayat   | Receipt 48 ghante, hal ek mahine.                                                                                                   | D-163, CL-064        |
+| 6   | Samay: content ki shikayat | Receipt 24 ghante; nagnata wali report 2 ghante; baaki 36 ghante; hal 7 din.                                                        | D-251, CL-105        |
+| 7   | Sarkari ya court order     | Alag raasta, 3 ghante.                                                                                                              | D-251                |
+| 8   | Seller pe shikayat         | Seller ka grievance officer product page pe; platform ki seedhi bhi.                                                                | D-238                |
+| 9   | Privacy ke sawal           | Wahi officer (rule 9); Data Protection Board ka raasta.                                                                             | D-253, CL-092        |
+| 10  | IP ki shikayat             | Brand owner ke liye category, saboot ke saath.                                                                                      | CL-124               |
+| 11  | Aage ka raasta             | Grievance Appellate Committee (content); National Consumer Helpline; consumer commission.                                           | CL-105, CL-059       |
+| 12  | Security ki report         | `[SECURITY_CONTACT]` (CERT-In ka Point of Contact alag role). Har app pe `/.well-known/security.txt` isi sampark ke saath (SR-103). | D-253, CL-106        |
 
 ## Change log
 
@@ -1554,4 +1554,5 @@ Do parat: sign-up pe chhota **Data notice** (alag, itemised) aur poora **Privacy
 | v1.1.10 | 2026-11-20 | Lawyer (AI) ke nishaan 18 rows pe (D-272): 4 jaancha, 11 aadha, 3 hisse nahi; D-262 se D-271 se badli rows; §13 me FDI ki row (D-271).                                                                               |
 | v1.1.11 | 2026-11-20 | §14 Documents ka dhaancha (D-274): 6 documents, 108 clauses, D-262 se D-272 ke saath.                                                                                                                                |
 | v1.2.1  | 2026-11-20 | CA (AI) ki raay (D-281): 32 rows pe CA ke nishaan, 20 rows me badlav, §1.1 me nayi rows CL-129 se CL-136, sources T11 se T27, §13 me 4 Nazar rows, §14 me Seller clause 10 aur 13 aur Partner clause 9 ke tax hisse. |
-| v1.2.2 | 2026-11-22 | §14.6 row 12 me security.txt (security review batch 7, D-414). |
+| v1.2.2  | 2026-11-22 | §14.6 row 12 me security.txt (security review batch 7, D-414).                                                                                                                                                       |
+| v1.2.3  | 2026-11-22 | §14.2 Privacy page: row 6 me Ola ke paas jaane wala location data (D-425), row 7 me media ki jagah (D-420).                                                                                                          |

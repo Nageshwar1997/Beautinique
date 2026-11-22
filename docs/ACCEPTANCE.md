@@ -1,6 +1,6 @@
 # ACCEPTANCE: Beautinique
 
-> **Status:** v1.0.3 (2026-11-22). R1 ke har service aur app ke acceptance criteria (D-388 se D-395). Cheezein ek-ek karke, owner ki haan ke baad judti hain.
+> **Status:** v1.0.4 (2026-11-22). R1 ke har service aur app ke acceptance criteria (D-388 se D-395). Cheezein ek-ek karke, owner ki haan ke baad judti hain.
 
 ## Is file me kya aayega
 
@@ -78,7 +78,7 @@
 5. **AC-PAYMENTS-5** (SR-048): **Given** captured rakam order se kam ya currency alag, **When** webhook aaye, **Then** payment order se na jude aur alert bane.
 6. **AC-PAYMENTS-6** (SR-047, D-111; §10.7 niyam 4): **Given** ek order pe cancel, return aur appeal ke refund ek saath, **When** sab chalein, **Then** refunds ka jod captured se kabhi zyada nahi, aur ek refund request ka ek hi refund.
 7. **AC-PAYMENTS-7** (D-111, D-188): **Given** refund fail (jaise khaata band), **When** nateeja aaye, **Then** customer ko khabar aur staff ka raasta sirf Support Lead aur Finance ki manzoori se.
-8. **AC-PAYMENTS-8** (SR-050, D-109): **Given** delivery pe UPI, **When** QR maanga jaaye, **Then** QR server se, us parcel ki exact rakam ka, ek parcel pe ek hi khula QR; "paid" sirf webhook se, partner ke liye "paid" ka koi API nahi.
+8. **AC-PAYMENTS-8** (SR-050, D-109, D-418): **Given** delivery pe UPI, **When** QR maanga jaaye, **Then** QR server se, us parcel ki exact rakam ka, ek parcel pe ek hi khula QR; "paid" sirf webhook se, partner ke liye "paid" ka koi API nahi; test mode me QR me Payment page ka link, jiska token doosre parcel pe ya samay ke baad nahi chalta.
 9. **AC-PAYMENTS-9** (SR-008; §5 niyam 12): **Given** provider misaal 10 second tak jawab na de, **When** payment shuru ho, **Then** request jaldi saaf error ke saath lautaye, request ke andar retry nahi; Valkey band ho to payment shuru 503.
 10. **AC-PAYMENTS-10** (D-093, D-269; ARCHITECTURE §1.11 M1): **Given** gateway ki settlement report, **When** roz ka milaan chale, **Then** har payment id ki rakam aur halat ledger se mile, aur farak suspense me jaaye aur alert bane.
 
@@ -261,7 +261,7 @@
 1. **AC-DELIVERY-1** (D-042, DS-5.8; ARCHITECTURE §5 niyam 6): **Given** network nahi, **When** partner list, scans aur photo kare, **Then** line me rukein, upar "N waiting to sync", aur network aate hi ek baar sync.
 2. **AC-DELIVERY-2** (D-301): **Given** offline, **When** code wali delivery try ho, **Then** button band, wajah ke saath (intezaar ya Hub Manager).
 3. **AC-DELIVERY-3** (SR-054): **Given** code, **When** 5 galat, **Then** code daalna band jab tak Hub Manager na khole; app ke data me code kabhi nahi.
-4. **AC-DELIVERY-4** (SR-050, D-109): **Given** delivery pe UPI, **When** QR dikhe, **Then** server ka QR exact rakam ka; "Payment received" sirf webhook ke baad; "paid" ka koi button nahi; fail pe misaal 10 minute tak QR, phir "attempt fail".
+4. **AC-DELIVERY-4** (SR-050, D-109, D-418): **Given** delivery pe UPI, **When** QR dikhe, **Then** server ka QR exact rakam ka (test mode me Payment page ka link); "Payment received" sirf webhook ke baad; "paid" ka koi button nahi; fail pe misaal 10 minute tak QR, phir "attempt fail".
 5. **AC-DELIVERY-5** (SR-055, D-351, DS-7.8, DS-10.1): **Given** pehli photo ya location, **When** maangi jaaye, **Then** pehle app ki samjhane wali screen, phir browser ka prompt; mana ho to wapas chalu karne ka tareeka aur "No location" ka raasta; file input pe `capture`.
 6. **AC-DELIVERY-6** (SR-010, SR-023): **Given** parcel delivered ya cancel, **When** ho, **Then** uska data IndexedDB se hate; shift khatam ya sign-out pe sab saaf.
 7. **AC-DELIVERY-7** (D-183): **Given** manzoor phone pe session, **When** misaal 14 din poore hon ya Hub Manager band kare, **Then** agla sync 401.
@@ -305,9 +305,10 @@ Kul 187 criteria (R1).
 
 ## Change log
 
-| Version | Date       | Badlav                                                                                                     |
-| ------- | ---------- | ---------------------------------------------------------------------------------------------------------- |
-| v1.0.0  | 2026-11-21 | Pehla version: R1 ke 184 acceptance criteria (13 services, 9 apps), ginti aur R2 ka khaka; D-388 se D-395. |
-| v1.0.1 | 2026-11-21 | AC-CUSTOMER-6 me Payment ka alag document; naya AC-GATEWAY-10 (`/wake`); kul 185 (security review batch 1, D-408). |
-| v1.0.2 | 2026-11-22 | Naya AC-IDENTITY-13 (aliases aur allowlist); kul 186 (security review batch 2, D-409). |
-| v1.0.3 | 2026-11-22 | AC-LOGS-3 me jod; naya AC-MASTER-7; kul 187 (security review batch 6, D-413). |
+| Version | Date       | Badlav                                                                                                             |
+| ------- | ---------- | ------------------------------------------------------------------------------------------------------------------ |
+| v1.0.0  | 2026-11-21 | Pehla version: R1 ke 184 acceptance criteria (13 services, 9 apps), ginti aur R2 ka khaka; D-388 se D-395.         |
+| v1.0.1  | 2026-11-21 | AC-CUSTOMER-6 me Payment ka alag document; naya AC-GATEWAY-10 (`/wake`); kul 185 (security review batch 1, D-408). |
+| v1.0.2  | 2026-11-22 | Naya AC-IDENTITY-13 (aliases aur allowlist); kul 186 (security review batch 2, D-409).                             |
+| v1.0.3  | 2026-11-22 | AC-LOGS-3 me jod; naya AC-MASTER-7; kul 187 (security review batch 6, D-413).                                      |
+| v1.0.4  | 2026-11-22 | AC-PAYMENTS-8 aur AC-DELIVERY-4 me test mode ka QR (D-418).                                                        |
