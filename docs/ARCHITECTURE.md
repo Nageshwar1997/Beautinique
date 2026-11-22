@@ -1,6 +1,6 @@
 # ARCHITECTURE: Beautinique
 
-> **Status:** v1.3.19 (2026-11-22). System kaise bana hai, ek nazar me. Cheezein ek-ek karke, owner ki haan ke baad judengi. Abhi §1 (finance ke accounting niyam, D-282), §2 se §9 (system ke hisse, D-291 se D-298) aur §10 (data aur database, D-310 se D-317).
+> **Status:** v1.3.21 (2026-11-22). System kaise bana hai, ek nazar me. Cheezein ek-ek karke, owner ki haan ke baad judengi. Abhi §1 (finance ke accounting niyam, D-282), §2 se §9 (system ke hisse, D-291 se D-298) aur §10 (data aur database, D-310 se D-317).
 
 ## Is file me kya aayega
 
@@ -716,11 +716,13 @@ Naam aur folder D-002 ke hisaab se: `packages/<shared|frontend|backend>/<name>`,
 | backend  | `backend-mongo`       | Transaction helper (§10.2), repositories, release step aur indexes (§10.4)                                                           |
 | backend  | `backend-postgres`    | Finance ke liye pool, migrations aur transactions (§10.6)                                                                            |
 | backend  | `backend-events`      | Outbox, dispatcher, `processed_events`, dead letters aur samay wale kaam (§3, §4)                                                    |
+| backend  | `backend-crypto`      | Field encryption, blind index, hash aur rok ki band copy (§10.3); MongoDB aur finance dono ke liye                                   |
 | backend  | `backend-media`       | Media provider aur object storage ke ports aur fakes (§7)                                                                            |
 | backend  | `backend-logger`      | Structured logs aur redaction (SR-077, SR-098)                                                                                       |
 | frontend | `frontend-styles`     | Tokens, themes, fonts aur Tailwind ki base (DESIGN §2 se §5)                                                                         |
 | frontend | `frontend-icons`      | Apne icon components (DESIGN §7)                                                                                                     |
 | frontend | `frontend-components` | react-aria-components pe bane components (DESIGN §6)                                                                                 |
+| frontend | `frontend-commerce`   | Commerce ke components (DESIGN DS-6.3): catalog, order, Delivery aur Logistics ke                                                    |
 | frontend | `frontend-api-client` | Typed client, query keys, timeout, retry ke niyam aur idempotency key (§5 niyam 11, 13)                                              |
 | frontend | `frontend-authz`      | Permission ke hisaab se nav, buttons aur route guards (§11 niyam 7)                                                                  |
 | frontend | `frontend-app-shell`  | Layout, nav, jaagne ka parda (§5 niyam 14), errors, offline aur idle ki chetavni                                                     |
@@ -735,6 +737,6 @@ Lint aur TypeScript ke saajhe config `configs/` me (D-002), package nahi.
 
 ## Change log
 
-| Version           | Date                     | Badlav                                                                                                 |
-| ----------------- | ------------------------ | ------------------------------------------------------------------------------------------------------ |
-| v1.0.0 se v1.3.19 | 2026-11-17 se 2026-11-22 | §1 finance ke accounting niyam se §12 saajhe packages tak; har badlav ka poora itihaas git me (D-442). |
+| Version           | Date                     | Badlav                                                                                                                                                  |
+| ----------------- | ------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| v1.0.0 se v1.3.21 | 2026-11-17 se 2026-11-22 | §1 finance ke accounting niyam se §12 saajhe packages tak (`backend-crypto` aur `frontend-commerce` samet); har badlav ka poora itihaas git me (D-442). |

@@ -1,6 +1,6 @@
 # TASK 01: foundation (root setup)
 
-> **Status:** v1.0.1 (2026-11-22). Halat: planning; code abhi nahi. Module [PROJECT_PLAN.md](../../PROJECT_PLAN.md) §3 ka `01-foundation`, charan 0 ka pehla module (D-446). Progress: 0 / 14 points.
+> **Status:** v1.0.2 (2026-11-22). Halat: planning; code abhi nahi. Module [PROJECT_PLAN.md](../../PROJECT_PLAN.md) §3 ka `01-foundation`, charan 0 ka pehla module (D-446). Progress: 0 / 14 points.
 
 ## 1. Lakshya
 
@@ -32,7 +32,7 @@ Naya root setup, jis pe saara naya code chalta hai: npm workspaces ka monorepo, 
 
 ### 3.1 Root aur workspaces
 
-1. Root `package.json`: `private: true` (root kabhi publish nahi hota), `type: module`, workspaces `packages/*/*`, `frontend/*`, `backend/*` aur `scripts/*`.
+1. Root `package.json`: `private: true` (root kabhi publish nahi hota), `type: module`, workspaces `packages/*/*`, `frontend/*`, `backend/*` aur `scripts/*`. `frontend/*` aur `backend/*` ke deployables aur `scripts/*` npm packages nahi, isliye unpe bhi `private: true`; "saare packages public" (CR-36, D-445) sirf `packages/` ke packages pe.
 2. Node ka version ek jagah pinned: `engines` aur `devEngines` ([OPERATIONS.md](../../OPERATIONS.md) §11 niyam 3). npm ka version bhi pinned.
 3. Turborepo ke tasks: `build`, `typecheck`, `lint`, `test`, `dev`. Dependency pehle, aur jo nahi badla uska kaam local cache se. Remote cache nahi.
 4. Root ke scripts sirf Turborepo ya `scripts/` ke tools bulate hain; root me koi business code nahi.
@@ -139,6 +139,6 @@ Har subtask lagbhag ek PR jitna, aur saare charan 0 me ([PROJECT_PLAN.md](../../
 
 ## Change log
 
-| Version          | Date       | Badlav                                                                                               |
-| ---------------- | ---------- | ---------------------------------------------------------------------------------------------------- |
-| v1.0.0 se v1.0.1 | 2026-11-22 | Module 01 ka pehla spec, 7 subtasks (D-446) aur acceptance criteria ki link (D-447); code abhi nahi. |
+| Version          | Date       | Badlav                                                                                                                              |
+| ---------------- | ---------- | ----------------------------------------------------------------------------------------------------------------------------------- |
+| v1.0.0 se v1.0.2 | 2026-11-22 | Module 01 ka pehla spec, 7 subtasks (D-446) acceptance criteria ki link (D-447) aur deployables pe `private: true`; code abhi nahi. |

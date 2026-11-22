@@ -1,6 +1,6 @@
 # OPEN QUESTIONS: Beautinique
 
-> **Status:** v1.8.23 (2026-11-22). Khule sawal, aage ke topics aur jaanchna baaki. Cheezein ek-ek karke judengi.
+> **Status:** v1.8.39 (2026-11-22). Khule sawal, aage ke topics aur jaanchna baaki. Cheezein ek-ek karke judengi.
 
 ## Is file me kya aayega
 
@@ -36,7 +36,7 @@ Topic sirf sawalon ki grouping hai. Har topic ke sawal us topic ki charcha (aur 
 | B13   | Compliance ki gehrai: kya dummy, kya asli                                               | Domain expert                        | Registrations aur kanooni details dummy (D-026); telemedicine ki dummy row (D-025); kanooni jaanch baad me ek agent se (R-004). Tay: live site pe allowlist (D-133), har area ki gehrai (D-134), demo ka nishaan (D-145), legal pages (D-150), data ke haq (D-151).                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           |
 | B14   | Security: auth, authorization, payments, uploads, abuse, privacy                        | Security Architect                   | Security Architect ka pehla run ho gaya. Tay: sessions (D-180, D-181), rok (D-182), sign-in aur authenticator (D-183 se D-186, D-199, D-200), codes ki seema (D-187), paise ke kaam (D-188 se D-190), data ka samay aur pahunch (D-191 se D-195, D-201, D-202), backup aur secrets (D-196, D-197), data leak (D-198), kai accounts (D-203, D-204); R2 me goodwill coupon (D-205), forms pe bots (D-206), sehat ka data (D-207, D-208). Report docs me area ke batches me (D-209). Batch 1 edge aur hosting (D-210), batch 2 sign-in (D-211), batch 3 sessions (D-212), batch 4 authorization (D-213), batch 5 checkout aur paisa (D-214), batch 6 delivery, daawe aur reviews (D-215), batch 7 files aur personal data (D-216), batch 8 data stores aur services (D-217), batch 9 export, audit, logs aur DevOps (D-218), batch 10 R2 ke hisse (D-219); saari batches poori: niyam SR-001 se SR-088. Doosra security run bhi poora (D-399 se D-417), tathya ki jaanch (D-418 se D-425). Baaki: kanooni jaanch (R-004) aur §2 ke bache tathya. |
 | B15   | Technical: service boundaries, hosting, observability, backup, scale targets            | Architect                            | **Kuch baaki nahi.** Tay: services aur databases (D-011, D-050), backup (D-013), hosting (D-028, D-048, D-049, D-051, D-052, D-056 se D-058), performance targets (D-053). Observability (D-297), scale (D-298), 512 MB ka naap (OPERATIONS §10) aur saajhe packages (D-428) bhi tay.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         |
-| B16   | Docs aur task files ka dhaancha (PROJECT_PLAN, `tasks/NN-<module>/TASK.md`, subtasks)   | Owner ke saath                       | Planning khula (D-443); modules tay (D-444); packages ka poora flow R1 se pehle (D-445); module `28-packages`, saare packages public (D-445); packages ke 12 acceptance criteria (D-445); banane ka kram charan wise (D-446); foundation ke 11 acceptance criteria (D-447). Tay: dhaancha (D-006), tareeka aur CI me docs ke paths ka check (D-019), progress % ka niyam ([PROJECT_PLAN.md](PROJECT_PLAN.md) §2, D-433), aur manuals aur testing ki files (D-440).                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          |
+| B16   | Docs aur task files ka dhaancha (PROJECT_PLAN, `tasks/NN-<module>/TASK.md`, subtasks)   | Owner ke saath                       | Planning khula (D-443); modules tay (D-444); packages ka poora flow R1 se pehle (D-445); module `28-packages`, saare packages public (D-445); packages ke 12 acceptance criteria (D-445); banane ka kram charan wise (D-446); foundation ke 11 acceptance criteria (D-447); platform ke 4 naye criteria (D-448); frontend kit ke 10 criteria (D-449); charan 1 ki `TASK.md` bani, operations ke 6 criteria (D-450); charan 2 ki `TASK.md` bani, Admin app ka area wala hissa charan 2 me (D-451); waitlist ka criterion (D-452); R1 ki saari `TASK.md` bani, Finance app ka dhaancha aur fail refund ka raasta charan 10 me (D-453). Tay: dhaancha (D-006), tareeka aur CI me docs ke paths ka check (D-019), progress % ka niyam ([PROJECT_PLAN.md](PROJECT_PLAN.md) §2, D-433), aur manuals aur testing ki files (D-440).                                                                                                                                                                                                                   |
 
 ## 2. Jaanchna baaki
 
@@ -44,7 +44,6 @@ Claude ka kaam: owner ka faisla nahi chahiye, sirf saboot. Nateeja saboot ke saa
 
 | Kya                                                                                                                                                                                                                                                                                                                                                                                                                | Kis faisle se                            | Kyun                                                                 |
 | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ---------------------------------------- | -------------------------------------------------------------------- |
-| Asli location data me main city ke pincodes kis hub pe, aur kitne pincodes do sub-districts, districts ya states me phaile hain. Local Government Directory ki "Pincode to Village Mapping" file captcha ke peeche hai: owner download kare, phir Claude ginti kare ([RISKS.md](RISKS.md) §2.12)                                                                                                                   | D-015, D-016                             | Pincode → hub mapping; D-016 asli data dekh ke dobara khul sakta hai |
 | CosIng ka apna license aur bulk download: Commission ki site ka aam niyam CC BY 4.0, par CosIng pe laagu hai ya nahi, saaf nahi ([RISKS.md](RISKS.md) §2.12)                                                                                                                                                                                                                                                       | D-132                                    | Ingredient master list ka import (products badhne pe)                |
 | Render tak Vercel ka `x-forwarded-for` kaise pahunchta hai (Render beech me apna hop jodta hai ya nahi): pehle deploy pe test                                                                                                                                                                                                                                                                                      | D-052, Q-151                             | Rate limit ke liye asli IP                                           |
 | Render Key Value ke andar wale URL pe TLS (`rediss://`) hai ya nahi, aur default maxmemory policy kya hai: Key Value banate waqt dekhna                                                                                                                                                                                                                                                                            | D-051, SR-070, SR-008                    | Redis ka raasta aur vyavhaar                                         |
@@ -7644,8 +7643,122 @@ Claude ka kaam: owner ka faisla nahi chahiye, sirf saboot. Nateeja saboot ke saa
 - **R1 ya baad me:** R1 se pehle (charan 0).
 - **Owner ka jawab (2026-11-22):** **(a)**, draft jaise 11 criteria [ACCEPTANCE.md](ACCEPTANCE.md) §1.15 `FOUNDATION` me. Record: [DECISIONS.md](DECISIONS.md) D-447.
 
+### Q-386. Platform ke 4 naye acceptance criteria jodein?
+
+- **Status:** `Tay`. Topic: B15 (technical), B16 (task files).
+- **Sawal:** module `02-platform` ([tasks/02-platform/TASK.md](tasks/02-platform/TASK.md)) ke liye [ACCEPTANCE.md](ACCEPTANCE.md) §1.1 me pehle se 12 criteria hain. Unme validators, logs ki redaction, contracts se bane hisse aur PostgreSQL ka koi criterion nahi. Neeche ke 4 criteria §1.1 me jod dein?
+- **Kyun zaroori:** in chaar hisson ki galti chupke se hoti hai: galat GSTIN maan liya jaana, log me OTP ya PAN chala jaana, bina contract ka route khul jaana, aur finance ki transaction ka beech me toot jaana. Criterion ho to har ek ka test zaroori ho jaata hai ([RULES.md](RULES.md) DD-1).
+- **Criteria:** ab [ACCEPTANCE.md](ACCEPTANCE.md) §1.1 me (`AC-PLATFORM-13` se `AC-PLATFORM-16`).
+- **Vikalp:**
+  - **(a) Draft jaisa:** 4 criteria §1.1 me, `AC-PLATFORM-13` se `AC-PLATFORM-16`.
+  - **(b) Badlav ke saath:** owner bataye.
+  - **(c) Na jodein:** in hisson ke tests sirf SR aur CR ke ids se.
+- **Salah:** **(a)**. Ye chaaron hisse kernel ya paise ke raaste me hain, aur criterion se unka test ginti ki script ([RULES.md](RULES.md) RT-24) me bhi dikhta hai.
+- **Trade-off:** (a) me 4 test aur. (c) me kaam kam, par validators aur PostgreSQL ka koi pakka test zaroori nahi rehta.
+- **R1 ya baad me:** R1 se pehle (charan 0; AC-PLATFORM-16 charan 8 me).
+- **Owner ka jawab (2026-11-22):** **(a)**, draft jaise 4 criteria [ACCEPTANCE.md](ACCEPTANCE.md) §1.1 me. Record: [DECISIONS.md](DECISIONS.md) D-448.
+
+### Q-387. Frontend kit ke acceptance criteria maanein?
+
+- **Status:** `Tay`. Topic: B15 (technical), B16 (task files).
+- **Sawal:** module `03-frontend-kit` ([tasks/03-frontend-kit/TASK.md](tasks/03-frontend-kit/TASK.md)) ke liye neeche ke 10 criteria [ACCEPTANCE.md](ACCEPTANCE.md) me `FRONTEND-KIT` ke naam se jod dein?
+- **Kyun zaroori:** [ACCEPTANCE.md](ACCEPTANCE.md) §2 me apps ke criteria hain, par saajhe packages ke apne nahi. Design system ki galti (contrast, label ke bina button, galat retry, cache me API ka data) ek saath saare 11 apps me jaati hai, to uska pehra package pe hi chahiye ([RULES.md](RULES.md) DD-1).
+- **Criteria:** ab [ACCEPTANCE.md](ACCEPTANCE.md) §1.16 me (`AC-FRONTEND-KIT-1` se `AC-FRONTEND-KIT-10`).
+- **Vikalp:**
+  - **(a) Draft jaisa:** 10 criteria [ACCEPTANCE.md](ACCEPTANCE.md) §1.16 `FRONTEND-KIT` me.
+  - **(b) Badlav ke saath:** owner bataye.
+- **Salah:** **(a)**. Ye criteria design system ke wo pehre hain jinki galti har app me ek saath jaati hai; package pe test hone se har app ko alag se jaanchna nahi padta.
+- **Trade-off:** (a) me har criterion ka test chahiye, aur kuch (maps, PWA) apne charan me hi jaanche ja sakte hain. (b) me der.
+- **R1 ya baad me:** R1 (har criterion apne subtask ke charan me).
+- **Owner ka jawab (2026-11-22):** **(a)**, draft jaise 10 criteria [ACCEPTANCE.md](ACCEPTANCE.md) §1.16 `FRONTEND-KIT` me. Record: [DECISIONS.md](DECISIONS.md) D-449.
+
+### Q-388. Operations ke acceptance criteria maanein?
+
+- **Status:** `Tay`. Topic: B15 (technical), B16 (task files).
+- **Sawal:** charan 1 ke 8 modules ki `TASK.md` ban gayi (owner ne saath me banane ki haan di, 2026-11-22). Inme se 7 ke criteria [ACCEPTANCE.md](ACCEPTANCE.md) me pehle se hain. Sirf `27-operations` ([tasks/27-operations/TASK.md](tasks/27-operations/TASK.md)) ke nahi. Neeche ke 6 criteria `OPERATIONS` ke naam se jod dein?
+- **Kyun zaroori:** deploy, jagana aur backup ki galti poore system ko rokti hai ya data khota hai, aur ye kaam zyadatar haath se hote hain. Criterion ho to har ek ka test ya likha record zaroori ho jaata hai ([RULES.md](RULES.md) DD-1, RT-34).
+- **Criteria:** ab [ACCEPTANCE.md](ACCEPTANCE.md) §1.17 me (`AC-OPERATIONS-1` se `AC-OPERATIONS-6`).
+- **Vikalp:**
+  - **(a) Draft jaisa:** 6 criteria [ACCEPTANCE.md](ACCEPTANCE.md) §1.17 `OPERATIONS` me.
+  - **(b) Badlav ke saath:** owner bataye.
+- **Salah:** **(a)**. Deploy, jagane aur backup ke sabse bade khatre (purane instance ka adhoora kaam, galat rewrite, raat ko jagana, bina encryption ka backup, bina jaanch ka restore, memory) ka apna criterion hai.
+- **Trade-off:** (a) me kuch criteria (naap, restore) ka saboot laptop ka record hai, CI ka test nahi. (b) me der.
+- **R1 ya baad me:** R1 (charan 1, 2 aur 13 me).
+- **Owner ka jawab (2026-11-22):** **(a)**, draft jaise 6 criteria [ACCEPTANCE.md](ACCEPTANCE.md) §1.17 `OPERATIONS` me. Record: [DECISIONS.md](DECISIONS.md) D-450.
+
+### Q-389. Location ka data ek saath poore India ka, ya zaroorat pe state ke hisaab se?
+
+- **Status:** `Tay`. Topic: B1 (launch ka area), B15 (technical).
+- **Sawal:** owner ka idea (2026-11-22, abhi faisla nahi): R1 me sirf Maharashtra → Pune → ek sub-district me 1 hub aur 1 warehouse khulna hai, to poore India ka location data abhi ek saath DB me daalne ki jagah, jab zaroorat ho tab ek-ek state (aur uske districts aur sub-districts) ka data jodein. D-022 abhi kehta hai "poore India ka location data import". Kya karein?
+- **Kyun zaroori:**
+  - DB me location master sirf states, districts, sub-districts aur pincode → sub-district ki mapping hai ([ARCHITECTURE.md](ARCHITECTURE.md) §2.2); villages DB me kabhi nahi. Poore India ka ye data chhota hai: 7,112 sub-districts aur 17,869 pincodes (2026-11-22 ki ginti, [RISKS.md](RISKS.md) §2).
+  - Pincode → sub-district ki mapping LGD ki "Pincode to Village Mapping" aur "Pincode to Urban Mapping" files se nikalti hai, jo sirf poore India ki milti hain (2026-11-22 ko jaancha). Villages aur ULBs ki files sirf laptop pe mapping nikaalne ke kaam aati hain.
+  - Location ka data kai faislon ke neeche hai: pincode → theek ek hub (D-016), do states me phaile pincode pe state chunna aur GST (D-016 niyam 4), unserved pincode pe waitlist aur "agla area" ka sujhaav (D-046), area khulne ki khabar (D-141), aur bina code change ke naya area kholna (D-037).
+- **Vikalp:**
+  - **(a) Jaisa tay hai (D-022):** poore India ka location master ek saath DB me: states, districts, sub-districts aur pincode → sub-district. Villages nahi. Naya area kholna sirf switch aur staff ka kaam.
+  - **(b) Owner ka idea:** jab koi area kholna ho, tab us state ke districts, sub-districts aur pincodes ka data DB me.
+- **(b) ka asar tay flow pe:**
+  - **Waitlist aur "agla area" (D-046):** jis state ka data nahi, uske pincode ka district pata nahi chalega; waitlist sirf pincode rakhegi, aur demand ki report me district ka naam us state ke import ke baad hi aayega.
+  - **Do states me phaila pincode (D-016 niyam 4):** padosi state ka data na ho to ye pakda nahi jaata; border ke paas galat state aur galat GST ka khatra. Pune ke andar ka sub-district hone se R1 me khatra kam hai, par niyam kamzor hota hai.
+  - **D-022 badlega**; D-037 bacha rehta hai, kyunki import Master app se hota hai, code se nahi.
+  - **Download ya jagah ki bachat nahi:** pincode files phir bhi poore India ki download hoti hain, aur poore India ka location master pehle se hi chhota hai.
+  - Har naye state pe import ka kaam dobara.
+- **Salah:** **(a)**. Villages DB me waise bhi nahi jaate, to poore India ka data chhota hai; (b) se jagah ya download nahi bachta, par waitlist, do states wale pincode aur GST ke niyam sirf khule states me chalte. (a) me ye sab poore India pe chalte hain, aur naya area kholne pe koi naya import nahi.
+- **Trade-off:**
+  - (a) me ek baar poore India ka import aur uski jaanch; shak wale pincodes ki jaanch phir bhi sirf live hone wale district ki (D-022).
+  - (b) me shuru ka import sabse chhota, par upar ke niyam adhoore, aur har naye state pe import ka kaam.
+- **R1 ya baad me:** R1 (charan 2 se pehle).
+- **Owner ka jawab (2026-11-22):** **(a)**, poore India ka location master ek saath, jaisa tay tha: states, districts, sub-districts aur pincode → sub-district; villages DB me nahi. Record: [DECISIONS.md](DECISIONS.md) D-022 ka jod.
+
+### Q-390. Admin app ka area wala hissa charan 2 me laayein?
+
+- **Status:** `Tay`. Topic: B16 (task files), B2 (apps aur roles).
+- **Sawal:** D-015 ke hisaab se sub-district aur hub ka switch aur live Admin ka kaam hai, aur shak wale pincodes ka primary sub-district bhi Admin jaanchta aur badalta hai (D-016 niyam 1, D-022). Banane ke kram ([PROJECT_PLAN.md](PROJECT_PLAN.md) §5, D-446) me Admin app (`18-app-admin`) charan 3 me hai, jabki area charan 2 me live hota hai. Kya karein?
+- **Kyun zaroori:** charan 2 ke ant me Pune ka area live hona hai. Hub ke switch aur pincode ki jaanch ke bina area live nahi hota, aur FL-6 (area, pincode, waitlist) ka E2E Admin app pe bhi chalta hai ([RULES.md](RULES.md) §4.5).
+- **Vikalp:**
+  - **(a) Admin app ka dhaancha aur area ki screens charan 2 me:** `18-app-admin` ki `TASK.md` abhi, aur uska dhaancha, sign-in, hub ka switch aur live, aur pincode ka primary sub-district charan 2 me. Baaki Admin ka kaam (sellers, listings, reviews) apne charan me.
+  - **(b) Charan 2 me ye kaam Super Admin kare:** D-015 kehta hai ki upar wala role neeche ka switch chala sakta hai; pincode badalne ka haq bhi Super Admin ke role me. Admin app charan 3 me.
+  - **(c) Badlav ke saath:** owner bataye.
+- **Salah:** **(a)**. Role ka kaam wahi karta hai jiska wo hai, FL-6 ka E2E pehle din se poora chalta hai, aur charan 3 me Admin app pe sirf staff aur roles judte hain.
+- **Trade-off:**
+  - (a) me charan 2 lagbhag ek app ke dhaanche jitna bada (misaal 6 se 8 points), aur charan 2 me teen naye app ek saath (Customer, Super Admin, Admin).
+  - (b) me charan 2 chhota, par Super Admin ke role me ek aisi permission judti hai jo design me Admin ki hai, aur FL-6 ka Admin wala hissa charan 3 tak adhoora.
+- **R1 ya baad me:** abhi (charan 2 ki planning).
+- **Owner ka jawab (2026-11-22):** **(a)**, Admin app ka dhaancha aur area ki screens charan 2 me. Record: [DECISIONS.md](DECISIONS.md) D-451.
+
+### Q-391. Waitlist ka acceptance criterion jodein?
+
+- **Status:** `Tay`. Topic: B1 (fulfilment aur launch ka area), B16 (task files).
+- **Sawal:** [ACCEPTANCE.md](ACCEPTANCE.md) §1.8 `LOGISTICS` me notify-me waitlist (D-046, D-141) ka koi criterion nahi. Neeche ka ek criterion jod dein?
+- **Kyun zaroori:** waitlist se hi pata chalta hai ki agla area kahan kholna hai, aur area khulne ki khabar ek baar aur sahi raaste se jaani chahiye. Abhi iska pehra sirf FL-6 ke E2E me hai, module ke test me nahi ([RULES.md](RULES.md) DD-1).
+- **Criterion:** ab [ACCEPTANCE.md](ACCEPTANCE.md) §1.8 me (`AC-LOGISTICS-13`).
+- **Vikalp:**
+  - **(a) Draft jaisa:** `AC-LOGISTICS-13` §1.8 me.
+  - **(b) Badlav ke saath:** owner bataye.
+  - **(c) Na jodein:** pehra sirf FL-6 ke E2E me.
+- **Salah:** **(a)**. Ek entry aur ek khabar ka niyam module ke test me pakka hota hai, aur E2E toote bina bhi galti pakdi jaati hai.
+- **Trade-off:** (a) me ek test aur. (c) me galti sirf poore flow ke E2E me dikhti hai.
+- **R1 ya baad me:** R1 (charan 2).
+- **Owner ka jawab (2026-11-22):** **(a)**, draft jaisa `AC-LOGISTICS-13` [ACCEPTANCE.md](ACCEPTANCE.md) §1.8 me. Record: [DECISIONS.md](DECISIONS.md) D-452.
+
+### Q-392. Finance app ka dhaancha aur fail refund ka raasta charan 10 me laayein?
+
+- **Status:** `Tay`. Topic: B16 (task files), B6 (payments aur refunds).
+- **Sawal:** fail refund ka haath ka raasta Support Lead aur Finance dono ki manzoori maangta hai (D-188, AC-FINANCEAPP-2), aur FL-12 (return se refund) ka E2E Finance app pe bhi chalta hai ([RULES.md](RULES.md) §4.5). Banane ke kram ([PROJECT_PLAN.md](PROJECT_PLAN.md) §5, D-446) me Finance app (`22-app-finance`) charan 12 me hai, jabki return aur refund charan 10 me aate hain. Kya karein?
+- **Kyun zaroori:** charan 10 ke ant me return se refund tak ka flow poora chalna hai. Refund fail ho (jaise khaata band) to Finance ki manzoori ke bina wo paisa kahin nahi jaata.
+- **Vikalp:**
+  - **(a) Finance app ka dhaancha aur fail refund ka raasta charan 10 me:** [tasks/22-app-finance/TASK.md](tasks/22-app-finance/TASK.md) ke ST-1 aur ST-2 charan 10 me; baaki Finance ka kaam (payouts, milaan, fees, exports) charan 12 me.
+  - **(b) Charan 12 tak fail refund ruke:** charan 10 me fail refund Support Lead ki queue me ruka rehta hai, aur Finance ki manzoori charan 12 me judti hai; FL-12 ka Finance wala hissa tab tak adhoora.
+  - **(c) Badlav ke saath:** owner bataye.
+- **Salah:** **(a)**. Charan 10 ka flow apne ant me poora chalta hai, aur fail refund ka paisa kisi charan me atakta nahi. Charan 10 me lagbhag 5 points aur judte hain.
+- **Trade-off:**
+  - (a) me charan 10 thoda bada, aur ek aur app ka dhaancha charan 10 me.
+  - (b) me charan 10 chhota, par FL-12 ka E2E charan 12 tak poora nahi chalta, aur testing me fail refund ka raasta tab tak band.
+- **R1 ya baad me:** abhi (charan 10 ki planning).
+- **Owner ka jawab (2026-11-22):** **(a)**, Finance app ka dhaancha aur fail refund ka raasta charan 10 me. Record: [DECISIONS.md](DECISIONS.md) D-453.
+
 ## Change log
 
 | Version           | Date                     | Badlav                                                                                                               |
 | ----------------- | ------------------------ | -------------------------------------------------------------------------------------------------------------------- |
-| v1.0.0 se v1.8.23 | 2026-11-17 se 2026-11-22 | Topics B1 se B16, jaanchna baaki (§2) aur sawal Q-001 se Q-385, sab Tay; har badlav ka poora itihaas git me (D-442). |
+| v1.0.0 se v1.8.39 | 2026-11-17 se 2026-11-22 | Topics B1 se B16, jaanchna baaki (§2) aur sawal Q-001 se Q-392, sab Tay; har badlav ka poora itihaas git me (D-442). |

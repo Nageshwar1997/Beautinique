@@ -1,6 +1,6 @@
 # DECISIONS: Beautinique
 
-> **Status:** v1.14.52 (2026-11-22). Har faisla ek jagah. Sirf wahi "Tay" jo owner ne khud kaha; Claude ki salah faisla nahi. Cheezein ek-ek karke judti hain.
+> **Status:** v1.14.59 (2026-11-22). Har faisla ek jagah. Sirf wahi "Tay" jo owner ne khud kaha; Claude ki salah faisla nahi. Cheezein ek-ek karke judti hain.
 
 ## 0. Kaise likhein
 
@@ -461,7 +461,13 @@
 | D-444 | Modules service aur app ke hisaab se: saajhe kaam ke 5, har backend service ka ek (12), har app ka ek (11); list aur dependencies PROJECT_PLAN §3 me.                                                                                                                                   | Process      | 2026-11-22 |
 | D-445 | Packages ka poora flow R1 se pehle, module `28-packages` me; saare packages public npm pe (publish owner karta hai), README me "asal me private ya public" ka note; tests me fake registry; 12 acceptance criteria; D-325 badla.                                                        | Process      | 2026-11-22 |
 | D-446 | Banane ka kram charan wise: charan 0 neev, charan 1 chalta dhaancha aur pehla deploy, charan 2 se 13 R1 ke hisse; kram PROJECT_PLAN §5 me.                                                                                                                                              | Process      | 2026-11-22 |
-| D-447 | Foundation (`01-foundation`) ke 11 acceptance criteria ACCEPTANCE §1.15 me. | Process | 2026-11-22 |
+| D-447 | Foundation (`01-foundation`) ke 11 acceptance criteria ACCEPTANCE §1.15 me.                                                                                                                                                                                                             | Process      | 2026-11-22 |
+| D-448 | Platform ke 4 naye acceptance criteria (validators, logs ki redaction, contracts, PostgreSQL) ACCEPTANCE §1.1 me.                                                                                                                                                                       | Process      | 2026-11-22 |
+| D-449 | Frontend kit (`03-frontend-kit`) ke 10 acceptance criteria ACCEPTANCE §1.16 me.                                                                                                                                                                                                         | Process      | 2026-11-22 |
+| D-450 | Operations (`27-operations`) ke 6 acceptance criteria ACCEPTANCE §1.17 me.                                                                                                                                                                                                              | Process      | 2026-11-22 |
+| D-451 | Admin app ka dhaancha aur area ki screens (hub ka switch, pincode ka primary sub-district) charan 2 me; D-446 badla.                                                                                                                                                                    | Process      | 2026-11-22 |
+| D-452 | Waitlist ka acceptance criterion `AC-LOGISTICS-13` ACCEPTANCE §1.8 me.                                                                                                                                                                                                                  | Process      | 2026-11-22 |
+| D-453 | Finance app ka dhaancha aur fail refund ka raasta charan 10 me; D-446 badla.                                                                                                                                                                                                            | Process      | 2026-11-22 |
 
 ## 2. Record
 
@@ -701,6 +707,7 @@
 - **Chhode vikalp:** sirf pincode → hub table; location ka bada poora engine pehle; staff kam hote hi turant band; purane hubs pe naya niyam na lagana.
 - **Kab dobara khulega:** owner khud khole.
 - **Kisne, kab:** owner, 2026-11-17. **Nishaan:** Salah maani.
+- **Jod (owner, 2026-11-22, Q-389):** location master poore India ka ek saath, jaisa tay tha; zaroorat pe state ke hisaab se jodna nahi. DB me sirf states, districts, sub-districts aur pincode → sub-district ki mapping (lagbhag 7,112 sub-districts aur 17,869 pincodes, RISKS §2); villages aur municipal bodies ki LGD files sirf laptop pe mapping nikaalne ke kaam aati hain, DB me kabhi nahi. Wajah: Claude ki salah, owner ne maani: poore India ka data chhota hai, aur waitlist, do states wale pincode aur GST ke niyam poore India pe chalte rehte hain.
 
 ### D-023. Package CLI
 
@@ -5381,6 +5388,8 @@
 - **Chhode vikalp:** parat-dar-parat (pehle saare saajhe packages, phir saari services, phir saare apps, aakhir me operations).
 - **Kab dobara khulega:** owner khud khole, ya kisi charan me dependency ki wajah se kram badalna pade (owner ki haan se).
 - **Kisne, kab:** owner, 2026-11-22. **Nishaan:** Salah maani.
+- **Badla (owner, 2026-11-22, D-451):** charan 2 me `18-app-admin` ka dhaancha aur area ki screens bhi.
+- **Badla (owner, 2026-11-22, D-453):** charan 10 me `22-app-finance` ka dhaancha aur fail refund ka raasta bhi.
 - **Asar (Claude):**
   - Ek module kai charanon me thoda-thoda banta hai, to progress ki table ([PROJECT_PLAN.md](PROJECT_PLAN.md) §4) me module ka % kai charanon me badhta hai.
   - Owner ke kaam charan ke hisaab se chahiye: OT-5 (npm) charan 0 ke `28-packages` se pehle, OT-3 (object storage) charan 1 ke media se pehle, OT-1 (location data) charan 2 se pehle, OT-2 (disk encryption) pehle backup se pehle ([OWNER_TASKS.md](OWNER_TASKS.md)).
@@ -5395,8 +5404,62 @@
 - **Kisne, kab:** owner, 2026-11-22. **Nishaan:** Salah maani.
 - **Asar (Claude):** R1 ke criteria ab 210. CI ke har pehre ka "galat" misaal wala test ST-5 me.
 
+### D-448. Platform ke 4 naye acceptance criteria
+
+- **Faisla:** [ACCEPTANCE.md](ACCEPTANCE.md) §1.1 `PLATFORM` me 4 naye criteria, `AC-PLATFORM-13` se `AC-PLATFORM-16` (Q-386 ka vikalp (a)): India ke validators, logs ki redaction, contracts se bane route manifest, typed client aur `openapi.json`, aur PostgreSQL ki transaction aur migrations.
+- **Wajah:** Claude ki salah, owner ne maani: ye chaaron hisse kernel ya paise ke raaste me hain, inki galti chupke se hoti hai, aur criterion se inka test ginti ki script (RULES RT-24) me dikhta hai.
+- **Chhode vikalp:** badlav ke saath; na jodna (tests sirf SR aur CR ke ids se).
+- **Kab dobara khulega:** module ki planning ya code me koi criterion galat ya adhoora nikle (owner ki haan se).
+- **Kisne, kab:** owner, 2026-11-22. **Nishaan:** Salah maani.
+- **Asar (Claude):** R1 ke criteria ab 214. `AC-PLATFORM-16` ka test charan 8 me, `backend-postgres` ke saath ([tasks/02-platform/TASK.md](tasks/02-platform/TASK.md) ST-11).
+
+### D-449. Frontend kit ke acceptance criteria
+
+- **Faisla:** module `03-frontend-kit` ([tasks/03-frontend-kit/TASK.md](tasks/03-frontend-kit/TASK.md)) ke 10 acceptance criteria, `AC-FRONTEND-KIT-1` se `AC-FRONTEND-KIT-10`, [ACCEPTANCE.md](ACCEPTANCE.md) §1.16 me (Q-387 ka vikalp (a)): playground pe axe, tokens ka contrast, fonts ka subset aur license, icons ki copy script, icon button ka label, props ka milna, typed client ke headers aur retry, errors ka map, PWA ka cache, aur map ka alag chunk.
+- **Wajah:** Claude ki salah, owner ne maani: design system ki galti saare 11 apps me ek saath jaati hai, to uska pehra package pe hi chahiye.
+- **Chhode vikalp:** badlav ke saath.
+- **Kab dobara khulega:** module ki planning ya code me koi criterion galat ya adhoora nikle (owner ki haan se).
+- **Kisne, kab:** owner, 2026-11-22. **Nishaan:** Salah maani.
+- **Asar (Claude):** R1 ke criteria ab 224. Har criterion ka test apne subtask ke charan me (maps charan 7, PWA charan 2).
+
+### D-450. Operations ke acceptance criteria
+
+- **Faisla:** module `27-operations` ([tasks/27-operations/TASK.md](tasks/27-operations/TASK.md)) ke 6 acceptance criteria, `AC-OPERATIONS-1` se `AC-OPERATIONS-6`, [ACCEPTANCE.md](ACCEPTANCE.md) §1.17 me (Q-388 ka vikalp (a)): deploy pe SIGTERM, apps ka Vercel template, jagane ki khidki, backup ki encryption aur manifest, restore ki jaanch, aur 512 MB ka naap.
+- **Wajah:** Claude ki salah, owner ne maani: deploy, jagane aur backup ki galti poore system ko rokti hai ya data khota hai, aur ye kaam zyadatar haath se hote hain.
+- **Chhode vikalp:** badlav ke saath.
+- **Kab dobara khulega:** module ki planning ya code me koi criterion galat ya adhoora nikle (owner ki haan se).
+- **Kisne, kab:** owner, 2026-11-22. **Nishaan:** Salah maani.
+- **Asar (Claude):** R1 ke criteria ab 230. Naap aur restore ka saboot laptop ka record bhi ho sakta hai (RULES RT-30, RT-34). Charan 0 aur charan 1 ke saare modules ke criteria ab ACCEPTANCE me.
+
+### D-451. Admin app ka area wala hissa charan 2 me
+
+- **Faisla:** `18-app-admin` ka dhaancha, staff ka sign-in, hub ka switch aur live, aur pincode ka primary sub-district charan 2 me (Q-390 ka vikalp (a)); Admin ka baaki kaam apne charan me ([tasks/18-app-admin/TASK.md](tasks/18-app-admin/TASK.md)). D-446 ka charan 2 isi se badla.
+- **Wajah:** Claude ki salah, owner ne maani: D-015 ke hisaab se hub ka switch aur pincode ki jaanch Admin ka kaam hai, aur FL-6 (area, pincode, waitlist) ka E2E pehle din se poora chale.
+- **Chhode vikalp:** charan 2 me ye kaam Super Admin kare (upar wala role) aur Admin app charan 3 me.
+- **Kab dobara khulega:** owner khud khole.
+- **Kisne, kab:** owner, 2026-11-22. **Nishaan:** Salah maani.
+- **Asar (Claude):** charan 2 me teen naye app ek saath (Customer, Super Admin, Admin); charan 2 me lagbhag 6 points aur.
+
+### D-452. Waitlist ka acceptance criterion
+
+- **Faisla:** [ACCEPTANCE.md](ACCEPTANCE.md) §1.8 `LOGISTICS` me `AC-LOGISTICS-13` (Q-391 ka vikalp (a)): ek pincode pe ek account ki ek hi waitlist entry; area live hone pe har entry ko ek hi khabar (in-app aur push; push band ho to email "baaki" line me, chhat ke andar); aur waitlist se agle area ka sujhaav Master ko, bina kisi tay kram ke (D-046, D-141).
+- **Wajah:** Claude ki salah, owner ne maani: ek entry aur ek khabar ka niyam module ke test me pakka hota hai, sirf FL-6 ke E2E pe nahi.
+- **Chhode vikalp:** badlav ke saath; na jodna (pehra sirf E2E me).
+- **Kab dobara khulega:** module ki planning ya code me criterion galat ya adhoora nikle (owner ki haan se).
+- **Kisne, kab:** owner, 2026-11-22. **Nishaan:** Salah maani.
+- **Asar (Claude):** R1 ke criteria ab 231. Test charan 2 me, [tasks/10-logistics/TASK.md](tasks/10-logistics/TASK.md) ST-5 ke saath.
+
+### D-453. Finance app ka dhaancha aur fail refund ka raasta charan 10 me
+
+- **Faisla:** `22-app-finance` ka dhaancha, staff ka sign-in aur fail refund ka haath ka raasta charan 10 me (Q-392 ka vikalp (a)); Finance ka baaki kaam (payouts, milaan, fees, exports) charan 12 me ([tasks/22-app-finance/TASK.md](tasks/22-app-finance/TASK.md)). D-446 ka charan 10 isi se badla.
+- **Wajah:** Claude ki salah, owner ne maani: fail refund ka raasta Support Lead aur Finance dono ki manzoori maangta hai (D-188), aur FL-12 ka E2E charan 10 ke ant me poora chale; refund ka paisa kisi charan me na atke.
+- **Chhode vikalp:** charan 12 tak fail refund Support Lead ki queue me ruka rahe.
+- **Kab dobara khulega:** owner khud khole.
+- **Kisne, kab:** owner, 2026-11-22. **Nishaan:** Salah maani.
+- **Asar (Claude):** charan 10 me lagbhag 5 points aur, aur ek aur app ka dhaancha.
+
 ## Change log
 
 | Version            | Date                     | Badlav                                                             |
 | ------------------ | ------------------------ | ------------------------------------------------------------------ |
-| v1.0.0 se v1.14.52 | 2026-11-17 se 2026-11-22 | Faisle D-001 se D-447; har badlav ka poora itihaas git me (D-442). |
+| v1.0.0 se v1.14.59 | 2026-11-17 se 2026-11-22 | Faisle D-001 se D-453; har badlav ka poora itihaas git me (D-442). |

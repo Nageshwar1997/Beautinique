@@ -1,6 +1,6 @@
 # RISKS: Beautinique
 
-> **Status:** v1.6.5 (2026-11-22). Saare risks ek jagah, security wale bhi. Cheezein ek-ek karke judti hain.
+> **Status:** v1.6.7 (2026-11-22). Saare risks ek jagah, security wale bhi. Cheezein ek-ek karke judti hain.
 
 ## 0. Kaise likhein
 
@@ -238,10 +238,15 @@ Main session ne providers ke apne docs padhe (2026-11-22). Brevo aur Cloudinary 
 ### 2.12 Data ke source (jaancha 2026-11-22)
 
 - **CosIng:** Commission ka page kehta hai CosIng "has informative purpose and no legal value"; license ya bulk download ka zikr nahi. Commission ki site ka aam niyam CC BY 4.0 (Decision 2011/833/EU), par CosIng pe laagu hai ya nahi, saaf nahi. Sources: [CosIng](https://single-market-economy.ec.europa.eu/sectors/cosmetics/cosmetic-ingredient-database_en), [legal notice](https://commission.europa.eu/legal-notice_en).
-- **Location data:** Local Government Directory pe sub-districts, villages aur "Pincode to Village Mapping" Xls me milte, par download captcha ke peeche; license ya terms ka page nahi padha. data.gov.in ka pincode directory page 403 tha. Source: [LGD](https://lgdirectory.gov.in/).
+- **Location data:** Local Government Directory ki Download Directory pe states, districts, sub-districts, villages, "Pincode to Village Mapping" aur "Pincode to Urban Mapping" (shehar ke pincodes) Pdf, Html, Xls aur ODT me milte hain, par har download captcha ke peeche (2026-11-22 ko jaancha); license ya terms ka page nahi padha. data.gov.in ka pincode directory page 403 tha. Source: [LGD](https://lgdirectory.gov.in/downloadDirectory.do).
+- **Location data ki asli ginti (2026-11-22, LGD ki 6 files se, laptop ki script):**
+  - 17,869 pincodes aur 7,112 sub-districts. "Pincode to Village Mapping" me 6,72,578 lines aur 35 states/UTs; Chandigarh poora shehri hai, isliye sirf "Pincode to Urban Mapping" me. File ke aakhir me site ki report engine ka error chhapa hai, par lines aakhri state (West Bengal) ki aakhri district tak hain.
+  - Phailaav: 7,423 pincodes (42%) ek hi sub-district me; 8,155 (46%) ek district ke kai sub-districts me; 2,111 (12%) ek state ke kai districts me; 29 do states me (zyadatar Assam aur Meghalaya, Gujarat aur Dadra Nagar Haveli, Tamil Nadu aur Puducherry ke border pe). 151 shehri pincodes ka sub-district nahi mila, kyunki unki municipal body ki coverage LGD me nahi.
+  - Shehri pincode ka sub-district sirf municipal body ke level pe milta hai, pincode ke level pe nahi. Misaal: Pune Municipal Corporation Haveli, Pune City aur Mulshi me phaili hai, isliye data se Pune ke saare shehri pincodes (411001 samet) ka primary Haveli aata hai aur Pune City ka ek bhi nahi. Live hone wale district me aise pincodes Admin jaanchta aur badalta hai (D-016 niyam 1, D-022).
+  - Pune district (LGD code 490) ke 14 sub-districts me 143 pincodes ka primary sub-district; sabse zyada Haveli me (65).
 
 ## Change log
 
 | Version          | Date                     | Badlav                                                                                                 |
 | ---------------- | ------------------------ | ------------------------------------------------------------------------------------------------------ |
-| v1.0.0 se v1.6.5 | 2026-11-17 se 2026-11-22 | Risks R-001 se R-083 aur jaanch ke tathya (§2.1 se §2.12); har badlav ka poora itihaas git me (D-442). |
+| v1.0.0 se v1.6.7 | 2026-11-17 se 2026-11-22 | Risks R-001 se R-083 aur jaanch ke tathya (§2.1 se §2.12); har badlav ka poora itihaas git me (D-442). |

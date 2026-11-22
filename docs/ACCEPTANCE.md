@@ -1,6 +1,6 @@
 # ACCEPTANCE: Beautinique
 
-> **Status:** v1.0.8 (2026-11-22). R1 ke har service aur app ke acceptance criteria (D-388 se D-395; packages ke flow ke D-445, aur root setup ke D-447). Cheezein ek-ek karke, owner ki haan ke baad judti hain.
+> **Status:** v1.0.12 (2026-11-22). R1 ke har service aur app ke acceptance criteria (D-388 se D-395; packages ke flow ke D-445, root setup ke D-447, platform ke naye criteria D-448, frontend kit ke D-449, operations ke D-450, aur waitlist ka D-452). Cheezein ek-ek karke, owner ki haan ke baad judti hain.
 
 ## Is file me kya aayega
 
@@ -28,6 +28,10 @@
 10. **AC-PLATFORM-10** (SR-063; §10.3 niyam 5): **Given** record A ka encrypted field, **When** use record B ya doosre field me copy karke kholein, **Then** khulna fail; database me plaintext ka pattern kahin nahi.
 11. **AC-PLATFORM-11** (R-040, D-250, D-321; §10.3 niyam 1, 3, 4): **Given** nayi collection bina retention class ya delete handler ke, **When** CI chale, **Then** fail; **Given** personal data ka erase, **Then** field hatna, rok ki copy aur event ek transaction me, aur `tech` class ke records rok me nahi.
 12. **AC-PLATFORM-12** (D-329, D-441; OPERATIONS §1 niyam 9, §4 niyam 4, 5): **Given** config me anjaan ya kam key, **When** boot ho, **Then** process key ke naam ke saath (value ke bina) ruke; payments test mode me hon aur key live wali ho to process na uthe; har config key `.env.example` me aur `.env.example` me koi anjaan key nahi.
+13. **AC-PLATFORM-13** (D-428; ARCHITECTURE §12): **Given** GSTIN, PAN, IFSC, pincode aur UPI id ke sahi aur galat roop (GSTIN ka galat check digit samet), **When** validators chalein, **Then** sahi maane jaayein aur galat pe field ke naam ke saath error.
+14. **AC-PLATFORM-14** (CR-22, SR-077, SR-098): **Given** log me OTP, password, token, cookie, PAN, bank number ya poora address, **When** logger likhe, **Then** value chhupi rahe aur sirf key ka naam dikhe.
+15. **AC-PLATFORM-15** (CR-12; ARCHITECTURE §5 niyam 1): **Given** contracts, **When** build ho, **Then** route manifest, typed client aur `openapi.json` usi se banein; bina contract ka route register ho to boot ya CI fail.
+16. **AC-PLATFORM-16** (ARCHITECTURE §10.2 niyam 13, §10.4 niyam 6): **Given** finance ki transaction pe `40001` ya `40P01`, **When** kaam chale, **Then** misaal 3 baar dobara; **Given** pehle chal chuki migration file ka checksum badla, **Then** migrations ruk jaayein; do runners saath chalein to advisory lock se sirf ek chale.
 
 ### 1.2 GATEWAY
 
@@ -126,6 +130,7 @@
 10. **AC-LOGISTICS-10** (SR-057, D-027): **Given** trip, **When** hub pe receive scan me ginti kam ho, **Then** apne aap nishaan aur audit; har scan me kaun, kis device se aur kab; manifest aur seal number.
 11. **AC-LOGISTICS-11** (D-113): **Given** return pickup, **When** label ka batch order ke batch se na mile ya man badla me seal toota ho, **Then** pickup nahi, wajah ke saath khabar; pickup pe item ki photo.
 12. **AC-LOGISTICS-12** (D-117, D-222, D-109): **Given** cut-off, Sunday aur chhuttiyan area setting me, **When** order ho, **Then** sahi vaade ki tareekh; vaada toote to "Delayed" aur khabar; door pe UPI fail ho to misaal 10 minute tak QR, phir "attempt fail".
+13. **AC-LOGISTICS-13** (D-046, D-141): **Given** unserved pincode, **When** customer notify-me me jude, **Then** ek pincode pe ek account ki ek hi entry; area live hone pe har entry ko ek hi khabar (in-app aur push; push band ho to email "baaki" line me, chhat ke andar); aur waitlist se agle area ka sujhaav Master ko dikhe, bina kisi tay kram ke.
 
 ### 1.9 FINANCE
 
@@ -208,6 +213,28 @@
 9. **AC-FOUNDATION-9** (D-001): **Given** do workspaces jisme ek doosre pe tika, **When** root se `build` ya `test` chale, **Then** dependency pehle, aur jo nahi badla uska kaam local cache se.
 10. **AC-FOUNDATION-10** (OPERATIONS §11 niyam 1): **Given** dependency updates ka config, **When** mahine ka run ho, **Then** PRs `prerelease` pe, minor aur patch ek group me, major alag PR me.
 11. **AC-FOUNDATION-11** (D-073): **Given** naye root setup ka PR, **When** wo merge ho, **Then** repo me koi `*-old/` folder ya purani root config nahi, aur CI green.
+
+### 1.16 FRONTEND-KIT (frontend ke saajhe packages, D-449)
+
+1. **AC-FRONTEND-KIT-1** (DS-8.1, RT-27): **Given** har component ki playground page, **When** axe asli browser me light, dark aur high contrast me chale, **Then** serious ya critical 0.
+2. **AC-FRONTEND-KIT-2** (DS-8.2, DS-4.10): **Given** tokens, **When** contrast ki jaanch chale, **Then** teeno themes me text 4.5:1 aur UI ke hisse 3:1; token ke bahar ka rang ya z-index code me ho to lint fail.
+3. **AC-FRONTEND-KIT-3** (DS-4.1, D-341, D-436): **Given** fonts ka build, **When** chale, **Then** subset me ₹ (U+20B9), copyright aur license ki metadata (name ID 0, 13, 14) bani, aur har font ka OFL.txt saath.
+4. **AC-FRONTEND-KIT-4** (DS-7.1): **Given** icons ki copy script, **When** kisi SVG me script, event handler ya bahar ka link ho, **Then** script roke; har icon ka source, credit aur license test me.
+5. **AC-FRONTEND-KIT-5** (DS-7.2): **Given** akele icon wala button bina label, **When** typecheck chale, **Then** type error.
+6. **AC-FRONTEND-KIT-6** (CR-31): **Given** component jo `id`, `aria-describedby`, `className` ya event handler khud lagata hai, **When** bahar se wahi prop aaye, **Then** dono milein, chupke se overwrite nahi.
+7. **AC-FRONTEND-KIT-7** (ARCHITECTURE §5 niyam 5, 11 aur 13; SR-030, SR-094): **Given** typed client, **When** call ho, **Then** custom header aur `X-App-Version` lagein; retry sirf GET aur idempotency key wale calls pe, network ya 503 pe, `Retry-After` ke saath, misaal 2 baar; polling aur background calls `X-Activity: background` ke saath.
+8. **AC-FRONTEND-KIT-8** (DS-6.6): **Given** server ka har error code (400, 401, 403, 404, 409, 413, 422, 426, 429, 503), **When** jawab aaye, **Then** DS-6.6 jaisa UI, aur `requestId` "Ref" ke roop me copy ho sake.
+9. **AC-FRONTEND-KIT-9** (SR-010, DS-10.8, DS-7.7): **Given** service worker, **When** `/api/*` ya private media ki request ho, **Then** kabhi cache nahi; sign-out pe saare caches aur IndexedDB saaf.
+10. **AC-FRONTEND-KIT-10** (SR-091, DS-7.10): **Given** maps package, **When** app build ho, **Then** map ka code alag chunk me aur sirf address ya stop ki screen pe load; bahar ki koi script nahi; map load na ho to form chale.
+
+### 1.17 OPERATIONS (deploy, jagana aur backup, D-450)
+
+1. **AC-OPERATIONS-1** (OPERATIONS §3 niyam 4): **Given** naya deploy, **When** purane instance ko SIGTERM mile, **Then** chalte requests misaal 25 second me poore, koi job do baar nahi chalta, aur leases chhoot jaati hain.
+2. **AC-OPERATIONS-2** (SR-002, SR-005, SR-089): **Given** saare apps ka Vercel template, **When** koi app build ho, **Then** `/api/*` ka rewrite secret header ke saath, aur CSP ke `connect-src` me Render ka sirf exact `/wake` URL; template ke bahar kisi app ka apna rewrite nahi.
+3. **AC-OPERATIONS-3** (OPERATIONS §5 niyam 5 aur 6): **Given** jagane ke jobs, **When** GitHub ka late run IST ki khidki ke bahar chale, **Then** server nahi jagata; cron-job.org ke :00 aur :03 dono jobs config me.
+4. **AC-OPERATIONS-4** (D-013; OPERATIONS §6 niyam 4 aur 5): **Given** backup command, **When** chale, **Then** har cluster ki file encrypted, manifest me ginti aur hash, file git se bahar wale folder me, aur keys backup me nahi.
+5. **AC-OPERATIONS-5** (OPERATIONS §6 niyam 8): **Given** backup, **When** laptop pe restore ho, **Then** ginti aur hash milein, audit chain verify ho aur smoke pass ho; mel na ho to restore ruk jaaye.
+6. **AC-OPERATIONS-6** (OPERATIONS §10): **Given** bundle mode Docker me 512 MB aur `--cpus=0.1`, **When** chaar halat naapi jaayein, **Then** aam RSS 400 MB se neeche aur koi OOM nahi; nateeja naap ki table me.
 
 ## 2. Apps (R1)
 
@@ -300,26 +327,28 @@
 
 ## 3. Ginti
 
-| Module     | Ginti   | App           | Ginti  |
-| ---------- | ------- | ------------- | ------ |
-| PLATFORM   | 12      | CUSTOMER      | 10     |
-| GATEWAY    | 10      | SELLER        | 6      |
-| IDENTITY   | 13      | ADMIN         | 6      |
-| NOTIFY     | 8       | SUPER ADMIN   | 5      |
-| PAYMENTS   | 10      | MASTER        | 7      |
-| CATALOG    | 12      | SUPPORT DESK  | 5      |
-| COMMERCE   | 12      | FINANCE       | 5      |
-| LOGISTICS  | 12      | LOGISTICS OPS | 6      |
-| FINANCE    | 12      | DELIVERY      | 10     |
-| SUPPORT    | 8       |               |        |
-| AUDIT      | 6       |               |        |
-| MEDIA      | 7       |               |        |
-| LOGS       | 5       |               |        |
-| PACKAGES   | 12      |               |        |
-| FOUNDATION | 11      |               |        |
-| **Kul**    | **150** | **Kul**       | **60** |
+| Module       | Ginti   | App           | Ginti  |
+| ------------ | ------- | ------------- | ------ |
+| PLATFORM     | 16      | CUSTOMER      | 10     |
+| GATEWAY      | 10      | SELLER        | 6      |
+| IDENTITY     | 13      | ADMIN         | 6      |
+| NOTIFY       | 8       | SUPER ADMIN   | 5      |
+| PAYMENTS     | 10      | MASTER        | 7      |
+| CATALOG      | 12      | SUPPORT DESK  | 5      |
+| COMMERCE     | 12      | FINANCE       | 5      |
+| LOGISTICS    | 13      | LOGISTICS OPS | 6      |
+| FINANCE      | 12      | DELIVERY      | 10     |
+| SUPPORT      | 8       |               |        |
+| AUDIT        | 6       |               |        |
+| MEDIA        | 7       |               |        |
+| LOGS         | 5       |               |        |
+| PACKAGES     | 12      |               |        |
+| FOUNDATION   | 11      |               |        |
+| FRONTEND-KIT | 10      |               |        |
+| OPERATIONS   | 6       |               |        |
+| **Kul**      | **171** | **Kul**       | **60** |
 
-Kul 210 criteria (R1).
+Kul 231 criteria (R1).
 
 
 ## 4. R2 ka chhota khaka
@@ -336,6 +365,6 @@ Kul 210 criteria (R1).
 
 ## Change log
 
-| Version          | Date                     | Badlav                                                                                                                 |
-| ---------------- | ------------------------ | ---------------------------------------------------------------------------------------------------------------------- |
-| v1.0.0 se v1.0.8 | 2026-11-21 se 2026-11-22 | R1 ke 210 acceptance criteria (packages ke 12 aur foundation ke 11 samet); har badlav ka poora itihaas git me (D-442). |
+| Version           | Date                     | Badlav                                                                                                                                                                                         |
+| ----------------- | ------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| v1.0.0 se v1.0.12 | 2026-11-21 se 2026-11-22 | R1 ke 231 acceptance criteria (packages ke 12, foundation ke 11, platform ke 4 naye, frontend kit ke 10, operations ke 6 aur waitlist ka 1 samet); har badlav ka poora itihaas git me (D-442). |
