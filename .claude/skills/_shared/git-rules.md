@@ -28,6 +28,10 @@ differ, follow the repository and tell the user.
   `branch -D`, `--no-verify`, `-c core.hooksPath=...`, `commit --amend` (unless asked), rewriting pushed commits
   (unless asked), merging or deleting branches, merging a PR, approving it or enabling auto-merge, `git add -A` or
   `git add .` (stage named paths). A hook fails → show its output and stop; never bypass it.
+- `.claude/settings.json` enforces part of this at the tool level: `permissions.deny` blocks force push, `reset --hard`,
+  `clean`, `--no-verify`, branch delete, `gh pr merge` and reading or editing `.env` files and `All-ENVs`;
+  `permissions.ask` asks before every `git push`, `gh pr create`/`edit` and npm registry command. Never remove or loosen
+  those rules.
 - Never discard, overwrite or auto-stash uncommitted work. Before any history-changing step, record
   `git rev-parse HEAD` and give that SHA to the user as the way back.
 - Stop and ask when: the working tree is not clean for a rebase or branch switch; an operation is in progress
@@ -54,7 +58,8 @@ differ, follow the repository and tell the user.
 | `release`                           | `main` (only after the release is live and good) | `main: <summary> (#<PRs>)`                           |
 | `release`                           | `prerelease` (back-merge after release commits)  | `chore(release): back-merge release into prerelease` |
 
-Any other pair → stop and explain. CI (`scripts/ci/lib/branch-flow.ts`) rejects wrong pairs into `main` and `release`.
+Any other pair → stop and explain. The CI branch-flow check (`docs/OPERATIONS.md` §2, rule 3) rejects wrong pairs into
+`prerelease`, `release` and `main`.
 
 - **Direct push to `prerelease`** only for a small fix (1–10 files: typo, doc line, message or config value, flaky
   test, one- or two-line bug fix) or for `linkedin-posts/` and `.claude/skills/linkedin-post/`. Never for a new
@@ -70,7 +75,7 @@ Any other pair → stop and explain. CI (`scripts/ci/lib/branch-flow.ts`) reject
 
 - `type(scope): description`. Types: `feat`, `fix`, `refactor`, `perf`, `style`, `docs`, `test`, `build`, `ci`,
   `chore`, `revert`. Lowercase type, imperative mood, no trailing period, header at most 72 characters.
-- Scope = the area: package short name (`backend-server-queue`, `frontend-auth-ui`), app (`master`, `customer`),
+- Scope = the area: package short name (`backend-events`, `frontend-auth-ui`), app (`master`, `customer`),
   deployable (`identity`, `gateway`), `ci`, or a docs area (`linkedin-posts`). Scope may be dropped for repo-wide work.
 - Body only when it helps: why, not how, wrapped near 72 characters. Add the task id (`T3.7`, `QA-CI-001`) when known.
 - Never generic: "update", "changes", "fix bugs", "wip", "misc".
@@ -84,11 +89,10 @@ Any other pair → stop and explain. CI (`scripts/ci/lib/branch-flow.ts`) reject
   applies again once the new code has its own setup.
 - CI order: `npm run build`, then `npm run format:check`, `npm run lint`, `npm run typecheck`, `npm test`.
 - Locally: `format:check`, `lint` and `typecheck` always (run `npm run build` first if anything under `packages/`
-  changed); tests only for changed workspaces (`npm test --workspace <path>`); `npm run test:scripts` (about 10 min)
-  only if `scripts/` changed. Run long commands in the background.
-- Tests that need Mongo or Valkey: start only the services needed
-  (`docker compose -f infra/docker-compose.yml up --detach --wait mongo valkey`, plus `mailpit` for email tests) and
-  stop the ones you started when done. No Docker for frontend-only work.
+  changed); tests only for changed workspaces (`npm test --workspace <path>`). Run long commands in the background.
+- Tests that need containers: start only the ones that step needs (`docs/OPERATIONS.md` §1, rule 4: `mongo` and
+  `valkey` for backend tests, plus `atlas-local` for search, `postgres` for finance, `mail` for email) and stop the
+  ones you started when done. No Docker for frontend-only work.
 - Report each command with its real result. Never claim a check that did not run.
 
 ## 6. Attribution check

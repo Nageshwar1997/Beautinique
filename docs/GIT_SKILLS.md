@@ -1,6 +1,6 @@
 # GIT SKILLS: Beautinique
 
-> **Status:** v1.1.1 (2026-11-22). Git skills (`/commit`, `/push`, `/pr`, `/sync`, `/git-status`, `/undo-commit`) ka manual, owner ke liye. Skills ka asli kaam `.claude/skills/` me; dono saath badlein.
+> **Status:** v1.1.2 (2026-11-22). Git skills (`/commit`, `/push`, `/pr`, `/sync`, `/git-status`, `/undo-commit`) ka manual, owner ke liye. Skills ka asli kaam `.claude/skills/` me; dono saath badlein.
 
 ## Is file me kya aayega
 
@@ -22,7 +22,7 @@ Har skill: kab chalao, kya karta hai, kya kabhi nahi karta.
 ## 2. Hamesha laagu niyam
 
 1. **Pehchaan:** sirf aapki apni git identity; git config kabhi nahi badalta. Kisi commit, PR, tag ya release note me AI attribution nahi; har commit aur PR ke baad iski jaanch.
-2. **Suraksha:** force push nahi (sirf apni branch pe, aapki saaf haan pe, `--force-with-lease`); `reset --hard`, branch delete, hooks chhodna (`--no-verify`) aur bina kahe history badalna kabhi nahi. Itihaas badalne wale kadam se pehle pichhla SHA bataya jaata hai, taaki wapsi ho sake.
+2. **Suraksha:** force push nahi (sirf apni branch pe, aapki saaf haan pe, `--force-with-lease`); `reset --hard`, branch delete, hooks chhodna (`--no-verify`) aur bina kahe history badalna kabhi nahi. Itihaas badalne wale kadam se pehle pichhla SHA bataya jaata hai, taaki wapsi ho sake. Inme se zyadatar `.claude/settings.json` ke deny rules se tool ke level pe bhi band, aur har `git push` aur PR banane se pehle Claude Code aapse poochhta hai.
 3. **Public repo:** `.env` ya `.env.*` (sirf `.env.example`), keys, tokens, passwords, DB dumps aur asli personal data kabhi stage nahi.
 4. **Ruk ke poochhna:** working tree saaf na ho, koi rebase ya merge beech me ho, HEAD detached ho, ya kuch saaf na ho.
 
@@ -85,3 +85,4 @@ Flow root [CLAUDE.md](../CLAUDE.md) ka hai: `prerelease` se feature branch → P
 | ------- | ---------- | --------------------------------------------------------------------------------------------------------------------- |
 | v1.0.0  | 2026-11-17 | Khaali file bani.                                                                                                     |
 | v1.1.1  | 2026-11-22 | Poora manual (D-432): ek nazar me, niyam, branch ka flow, roz ka kaam, release, commit message, checks, rukne pe kya. |
+| v1.1.2  | 2026-11-22 | §2: suraksha ke niyam ab `.claude/settings.json` ke deny aur ask rules se bhi laagu.                                  |

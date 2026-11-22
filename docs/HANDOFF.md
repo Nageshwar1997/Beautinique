@@ -1,6 +1,6 @@
 # HANDOFF: Beautinique
 
-> **Status:** v1.1.130 (2026-11-22). Ek session ya account se agle tak ki halat. Chhota rakho: sirf abhi ki halat aur agla kaam.
+> **Status:** v1.1.131 (2026-11-22). Ek session ya account se agle tak ki halat. Chhota rakho: sirf abhi ki halat aur agla kaam.
 
 ## 1. Abhi ki halat (2026-11-17)
 
@@ -15,7 +15,7 @@
 
 ## 2. Uncommitted
 
-- Kuch nahi. Purane docs ka hatna (D-434: 28 files aur `.prettierignore` ki ek line) commit aur push ho gaya; tag `discovery-old-docs` (commit `70a1b2b`) bhi push.
+- `.claude/` poora kiya (2026-11-22): `settings.json` me `.env`, `All-ENVs` aur khatarnaak git commands ke deny rules, push aur PR pe ask; `launch.json` me naye structure ke 11 apps (`frontend/<app>`, ports 3001 se 3011) aur backend (8080); skills me purane dhaanche ke paths naye docs se mile. Saath me `CLAUDE.md` v1.0.3, [GIT_SKILLS.md](GIT_SKILLS.md) v1.1.2 aur `linkedin-posts/README.md` v1.12.1 (brand rang ka source aur prettier check). Commit ho gaya, push baaki.
 
 ## 3. Agla kaam
 
@@ -217,4 +217,5 @@
 | v1.1.127 | 2026-11-22 | Q-370 se Q-372 tay (D-433 se D-435); Lawyer (AI) ka chhota run chalu; agla kaam.                                                                                  |
 | v1.1.128 | 2026-11-22 | Lawyer (AI) ka chhota run poora; Q-373 se Q-376 khule.                                                                                                            |
 | v1.1.129 | 2026-11-22 | Q-373 se Q-376 tay (D-436 se D-439); Lawyer ke sudhaar docs me; uncommitted list.                                                                                 |
-| v1.1.130 | 2026-11-22 | Purane docs hate (D-434, tag `discovery-old-docs`); discovery poori; uncommitted list. |
+| v1.1.130 | 2026-11-22 | Purane docs hate (D-434, tag `discovery-old-docs`); discovery poori; uncommitted list.                                                                            |
+| v1.1.131 | 2026-11-22 | `.claude/` ki settings, launch aur skills poori; uncommitted list.                                                                                                |

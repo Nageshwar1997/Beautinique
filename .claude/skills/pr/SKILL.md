@@ -63,7 +63,8 @@ Record `git rev-parse HEAD` (the way back).
 1. Range: `origin/<base>...HEAD` (long-lived head: `origin/<base>...origin/<head>`).
 2. `git log --oneline <range>` and `git diff --stat <range>`; then read the full diff (`git diff <range>`, file by
    file when large; lockfiles and generated files by stat only). The PR is every commit, not the last one.
-3. Note features, fixes, refactors; API and contract changes (`defineRoute` contracts, package exports and versions);
+3. Note features, fixes, refactors; API and contract changes (route, event and permission contracts, package exports
+   and versions);
    config and env keys (`.env.example`); DB migrations and indexes; CI or workflow changes; breaking changes; missing
    docs; task ids (`T<n>`, `QA-...`, `LIVE-...`).
 4. Checks for what changed (shared §5). Keep each command and its real result. A failure → show it and ask: fix

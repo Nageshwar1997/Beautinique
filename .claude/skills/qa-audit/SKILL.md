@@ -191,7 +191,7 @@ Follow the project's doc style: status line at the top, Hinglish prose, change-l
 ```markdown
 # QA AUDIT REPORT — BQ
 
-> **Status:** v0.<n> (YYYY-MM-DD). Audit base: `origin/prerelease` @ `<sha>`. Auditor: Claude Code (<model>). Ye report audit ki single source of truth hai; fixes alag se, ek-ek karke.
+> **Status:** vX.Y.Z (YYYY-MM-DD). Audit base: `origin/prerelease` @ `<sha>`. Auditor: Claude Code (<model>). Ye report audit ki single source of truth hai; fixes alag se, ek-ek karke.
 
 ## 0. Audit state (har session ke aakhir me update)
 
@@ -270,7 +270,7 @@ Numbered: bug IDs, is order ki wajah, dependencies, kaun se ek PR me saath ja sa
 | Version | Date | Badlav |
 ```
 
-Update rules: bump the version and add a change-log line at the end of every module. Never delete a finding: if it is disproved, set `Status: Invalid` with the reason. Bug IDs are never reused. Areas: one short code per module, fixed at Gate 1, plus `BASE`, `CI`, `TOOL` and `DOC`.
+Update rules: the version follows the `CLAUDE.md` rule (new report `v1.0.0`; each finished module is a big change: Y+1, Z back to 1). Bump it and add a change-log line at the end of every module. Never delete a finding: if it is disproved, set `Status: Invalid` with the reason. Bug IDs are never reused. Areas: one short code per module, fixed at Gate 1, plus `BASE`, `CI`, `TOOL` and `DOC`.
 
 ## 10. Session protocol (several sessions)
 

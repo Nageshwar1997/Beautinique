@@ -1,6 +1,6 @@
 # CLAUDE.md: Beautinique
 
-> **Status:** v1.0.2 (2026-11-22). Docs aur code naye sire se ban rahe hain.
+> **Status:** v1.0.3 (2026-11-22). Docs aur code naye sire se ban rahe hain.
 
 Ye file Claude Code har session ki shuruaat me padhta hai. Project pe ek hi insaan (owner) kaam karta hai,
 2 Claude accounts se baari-baari. **Kaam shuru karne se pehle [docs/HANDOFF.md](docs/HANDOFF.md) padho.**
@@ -45,7 +45,8 @@ Ye file Claude Code har session ki shuruaat me padhta hai. Project pe ek hi insa
 - **Imaandari:** jo asli user action karke check nahi kiya, use "verified" mat kaho. Test fail ho to
   output ke saath batao.
 - **Public repo:** koi secret, `.env`, token, password, DB dump ya asli personal data commit nahi; sirf
-  `.env.example`. Claude `.env`/`.env.*` files aur repo ke bahar ka `All-ENVs` folder kabhi nahi kholta.
+  `.env.example`. Claude `.env`/`.env.*` files aur repo ke bahar ka `All-ENVs` folder kabhi nahi kholta;
+  `.claude/settings.json` ke deny rules ise tool ke level pe bhi rokte hain, unhe mat hatao.
 - **Git flow (owner, 2026-10-25):** `prerelease` se feature branch → PR → **`prerelease`** (development)
   → PR → **`release`** (production) → release safal hone ke baad PR `release` → **`main`** (sirf final code).
   `main` pe kabhi seedha kaam ya feature PR nahi; `main` aur `release` pe seedha push nahi. `prerelease` pe
@@ -88,3 +89,4 @@ khula hai. Jis doc me badlav kiya, uske change log me ek line. Progress % ka niy
 | v1.0.0  | 2026-11-17 | Pehla version: abhi ki halat, discovery ke niyam aur hamesha laagu niyam.        |
 | v1.0.1  | 2026-11-18 | Discovery: bina dependency wale sawal ek saath; agle sawal ka zikr nahi (owner). |
 | v1.0.2  | 2026-11-22 | Progress % ka niyam ab PROJECT_PLAN §2 me (D-433).                               |
+| v1.0.3  | 2026-11-22 | `.env` aur `All-ENVs` ka niyam `.claude/settings.json` ke deny rules se bhi.     |
