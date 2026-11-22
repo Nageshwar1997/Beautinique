@@ -1,6 +1,6 @@
 # DECISIONS: Beautinique
 
-> **Status:** v1.14.50 (2026-11-22). Har faisla ek jagah. Sirf wahi "Tay" jo owner ne khud kaha; Claude ki salah faisla nahi. Cheezein ek-ek karke judti hain.
+> **Status:** v1.14.51 (2026-11-22). Har faisla ek jagah. Sirf wahi "Tay" jo owner ne khud kaha; Claude ki salah faisla nahi. Cheezein ek-ek karke judti hain.
 
 ## 0. Kaise likhein
 
@@ -460,6 +460,7 @@
 | D-443 | Discovery poori, planning stage khula: PROJECT_PLAN me modules, dependencies aur progress ki table, phir har module ki TASK.md; code aur PR implementation stage me, owner ke kholne pe.                                                                                                | Process      | 2026-11-22 |
 | D-444 | Modules service aur app ke hisaab se: saajhe kaam ke 5, har backend service ka ek (12), har app ka ek (11); list aur dependencies PROJECT_PLAN §3 me.                                                                                                                                   | Process      | 2026-11-22 |
 | D-445 | Packages ka poora flow R1 se pehle, module `28-packages` me; saare packages public npm pe (publish owner karta hai), README me "asal me private ya public" ka note; tests me fake registry; 12 acceptance criteria; D-325 badla.                                                        | Process      | 2026-11-22 |
+| D-446 | Banane ka kram charan wise: charan 0 neev, charan 1 chalta dhaancha aur pehla deploy, charan 2 se 13 R1 ke hisse; kram PROJECT_PLAN §5 me.                                                                                                                                              | Process      | 2026-11-22 |
 
 ## 2. Record
 
@@ -5367,8 +5368,25 @@
   - [RULES.md](RULES.md) CR-36, [OPERATIONS.md](OPERATIONS.md) §11 niyam 6 aur [ARCHITECTURE.md](ARCHITECTURE.md) §12 isi se badle.
   - Flow ka kaam (lagbhag 18 points) pehle chalte order ko utna der se laata hai.
 
+### D-446. Banane ka kram: charan wise
+
+- **Faisla:** modules charan wise bante hain (Q-384 ka vikalp (a)); kram [PROJECT_PLAN.md](PROJECT_PLAN.md) §5 me:
+  1. **Charan 0, neev:** `01-foundation`, phir `28-packages`, phir `02-platform` aur `03-frontend-kit`.
+  2. **Charan 1, chalta dhaancha:** `04` se `09`, `27-operations` ka pehla deploy, aur `20-app-master` ka dhaancha aur sign-in.
+  3. **Charan 2 se 13:** R1 ke 12 hisse, PROJECT_PLAN §1 ke kram se; har charan me us hisse ke service aur app ke subtasks.
+  4. **R2:** `25`, `26` aur baaki modules ke R2 subtasks, R2 ki planning me.
+  5. Har charan ke ant me wo flow shuru se aakhir tak chalta hai. Har module ki `TASK.md` us charan se pehle jisme wo pehli baar aata hai, aur har subtask ke saath uska charan.
+- **Wajah:** Claude ki salah, owner ne maani: har charan ke ant me asli flow chalta dikhta hai, to galti aur design ki dikkat jaldi pakdi jaati hai; pehla deploy charan 1 me, to hosting ki dikkatein shuru me; services aur apps ka jod har charan me jaancha jaata hai.
+- **Chhode vikalp:** parat-dar-parat (pehle saare saajhe packages, phir saari services, phir saare apps, aakhir me operations).
+- **Kab dobara khulega:** owner khud khole, ya kisi charan me dependency ki wajah se kram badalna pade (owner ki haan se).
+- **Kisne, kab:** owner, 2026-11-22. **Nishaan:** Salah maani.
+- **Asar (Claude):**
+  - Ek module kai charanon me thoda-thoda banta hai, to progress ki table ([PROJECT_PLAN.md](PROJECT_PLAN.md) §4) me module ka % kai charanon me badhta hai.
+  - Owner ke kaam charan ke hisaab se chahiye: OT-5 (npm) charan 0 ke `28-packages` se pehle, OT-3 (object storage) charan 1 ke media se pehle, OT-1 (location data) charan 2 se pehle, OT-2 (disk encryption) pehle backup se pehle ([OWNER_TASKS.md](OWNER_TASKS.md)).
+  - Agli `TASK.md`: charan 0 ke `01-foundation`, `02-platform` aur `03-frontend-kit`.
+
 ## Change log
 
 | Version            | Date                     | Badlav                                                             |
 | ------------------ | ------------------------ | ------------------------------------------------------------------ |
-| v1.0.0 se v1.14.50 | 2026-11-17 se 2026-11-22 | Faisle D-001 se D-445; har badlav ka poora itihaas git me (D-442). |
+| v1.0.0 se v1.14.51 | 2026-11-17 se 2026-11-22 | Faisle D-001 se D-446; har badlav ka poora itihaas git me (D-442). |

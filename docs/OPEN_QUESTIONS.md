@@ -1,6 +1,6 @@
 # OPEN QUESTIONS: Beautinique
 
-> **Status:** v1.8.19 (2026-11-22). Khule sawal, aage ke topics aur jaanchna baaki. Cheezein ek-ek karke judengi.
+> **Status:** v1.8.21 (2026-11-22). Khule sawal, aage ke topics aur jaanchna baaki. Cheezein ek-ek karke judengi.
 
 ## Is file me kya aayega
 
@@ -36,7 +36,7 @@ Topic sirf sawalon ki grouping hai. Har topic ke sawal us topic ki charcha (aur 
 | B13   | Compliance ki gehrai: kya dummy, kya asli                                               | Domain expert                        | Registrations aur kanooni details dummy (D-026); telemedicine ki dummy row (D-025); kanooni jaanch baad me ek agent se (R-004). Tay: live site pe allowlist (D-133), har area ki gehrai (D-134), demo ka nishaan (D-145), legal pages (D-150), data ke haq (D-151).                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           |
 | B14   | Security: auth, authorization, payments, uploads, abuse, privacy                        | Security Architect                   | Security Architect ka pehla run ho gaya. Tay: sessions (D-180, D-181), rok (D-182), sign-in aur authenticator (D-183 se D-186, D-199, D-200), codes ki seema (D-187), paise ke kaam (D-188 se D-190), data ka samay aur pahunch (D-191 se D-195, D-201, D-202), backup aur secrets (D-196, D-197), data leak (D-198), kai accounts (D-203, D-204); R2 me goodwill coupon (D-205), forms pe bots (D-206), sehat ka data (D-207, D-208). Report docs me area ke batches me (D-209). Batch 1 edge aur hosting (D-210), batch 2 sign-in (D-211), batch 3 sessions (D-212), batch 4 authorization (D-213), batch 5 checkout aur paisa (D-214), batch 6 delivery, daawe aur reviews (D-215), batch 7 files aur personal data (D-216), batch 8 data stores aur services (D-217), batch 9 export, audit, logs aur DevOps (D-218), batch 10 R2 ke hisse (D-219); saari batches poori: niyam SR-001 se SR-088. Doosra security run bhi poora (D-399 se D-417), tathya ki jaanch (D-418 se D-425). Baaki: kanooni jaanch (R-004) aur §2 ke bache tathya. |
 | B15   | Technical: service boundaries, hosting, observability, backup, scale targets            | Architect                            | **Kuch baaki nahi.** Tay: services aur databases (D-011, D-050), backup (D-013), hosting (D-028, D-048, D-049, D-051, D-052, D-056 se D-058), performance targets (D-053). Observability (D-297), scale (D-298), 512 MB ka naap (OPERATIONS §10) aur saajhe packages (D-428) bhi tay.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         |
-| B16   | Docs aur task files ka dhaancha (PROJECT_PLAN, `tasks/NN-<module>/TASK.md`, subtasks)   | Owner ke saath                       | Planning khula (D-443); modules tay (D-444); packages ka poora flow R1 se pehle (D-445); module `28-packages`, saare packages public (D-445); packages ke 12 acceptance criteria (D-445). Tay: dhaancha (D-006), tareeka aur CI me docs ke paths ka check (D-019), progress % ka niyam ([PROJECT_PLAN.md](PROJECT_PLAN.md) §2, D-433), aur manuals aur testing ki files (D-440).                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              |
+| B16   | Docs aur task files ka dhaancha (PROJECT_PLAN, `tasks/NN-<module>/TASK.md`, subtasks)   | Owner ke saath                       | Planning khula (D-443); modules tay (D-444); packages ka poora flow R1 se pehle (D-445); module `28-packages`, saare packages public (D-445); packages ke 12 acceptance criteria (D-445); banane ka kram charan wise (D-446). Tay: dhaancha (D-006), tareeka aur CI me docs ke paths ka check (D-019), progress % ka niyam ([PROJECT_PLAN.md](PROJECT_PLAN.md) §2, D-433), aur manuals aur testing ki files (D-440).                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          |
 
 ## 2. Jaanchna baaki
 
@@ -7608,8 +7608,30 @@ Claude ka kaam: owner ka faisla nahi chahiye, sirf saboot. Nateeja saboot ke saa
 - **R1 ya baad me:** R1 se pehle (packages ke flow ke saath).
 - **Owner ka jawab (2026-11-22):** **(a)**, draft jaise 12 criteria [ACCEPTANCE.md](ACCEPTANCE.md) §1.14 `PACKAGES` me. Record: [DECISIONS.md](DECISIONS.md) D-445.
 
+### Q-384. Modules kis kram me banein?
+
+- **Status:** `Tay`. Topic: B16 (docs aur task files).
+- **Sawal:** 28 modules ([PROJECT_PLAN.md](PROJECT_PLAN.md) §3) kis kram me banein? `NN` sirf pehchaan hai, isliye banane ka kram alag se tay karna hai.
+- **Kyun zaroori:**
+  - Kram se tay hota hai ki pehla chalta hissa kab dikhega, aur kaunsi `TASK.md` pehle likhi jaaye.
+  - R1 ka ek hissa (jaise return) kai modules me phaila hai (D-444), to kram modules ka ho ya R1 ke hisson ka, ye chunna padta hai.
+- **Vikalp:**
+  - **(a) Neev, phir chalta dhaancha, phir R1 ke hisse ek-ek karke:** har charan me us hisse ke liye zaroori service aur app ke subtasks. Charan poora hone pe wo flow shuru se aakhir tak chalta hai. Kram neeche.
+  - **(b) Parat-dar-parat:** pehle saajhe 4 module (`01`, `28`, `02`, `03`), phir saari services dependency ke kram me (`04` se `15`), phir saare apps (`16` se `24`), aakhir me `27`. Har module ek baar me poora.
+  - **(c) Badlav ke saath:** owner bataye.
+- **(a) ka kram:** ab [PROJECT_PLAN.md](PROJECT_PLAN.md) §5 me (D-446).
+- **Salah:** **(a)**.
+  - Har charan ke ant me ek asli flow chalta dikhta hai, to galti aur design ki dikkat jaldi pakdi jaati hai.
+  - Live pe pehla deploy charan 1 me hota hai, to hosting ki dikkatein (free tier, `/wake`) shuru me hi saamne aati hain.
+  - Services aur apps ka jod har charan me jaancha jaata hai, aakhir me ek saath nahi.
+- **Trade-off:**
+  - (a) me ek module kai charanon me thoda-thoda banta hai, to module ka "poora" hona der se hota hai, aur kaam ek module se doosre pe jaata rehta hai.
+  - (b) me har module ek baar me poora aur seedha banta hai, par pehli screen aur pehla chalta flow bahut der se aata hai (saari services ke baad), aur services aur apps ke jod ki galtiyan aakhir me ek saath nikalti hain.
+- **R1 ya baad me:** abhi (planning).
+- **Owner ka jawab (2026-11-22):** **(a)**, charan wise: neev, phir chalta dhaancha aur pehla deploy, phir R1 ke hisse ek-ek karke, draft wale kram se. Record: [DECISIONS.md](DECISIONS.md) D-446.
+
 ## Change log
 
 | Version           | Date                     | Badlav                                                                                                               |
 | ----------------- | ------------------------ | -------------------------------------------------------------------------------------------------------------------- |
-| v1.0.0 se v1.8.19 | 2026-11-17 se 2026-11-22 | Topics B1 se B16, jaanchna baaki (§2) aur sawal Q-001 se Q-383, sab Tay; har badlav ka poora itihaas git me (D-442). |
+| v1.0.0 se v1.8.21 | 2026-11-17 se 2026-11-22 | Topics B1 se B16, jaanchna baaki (§2) aur sawal Q-001 se Q-384, sab Tay; har badlav ka poora itihaas git me (D-442). |

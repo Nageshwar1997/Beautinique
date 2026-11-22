@@ -1,6 +1,6 @@
 # PROJECT PLAN: Beautinique
 
-> **Status:** v1.3.3 (2026-11-22). Project ki kendriya file. Cheezein ek-ek karke, owner ki haan ke baad judti hain.
+> **Status:** v1.5.1 (2026-11-22). Project ki kendriya file. Cheezein ek-ek karke, owner ki haan ke baad judti hain.
 
 ## 0. Is file me kya aayega
 
@@ -55,7 +55,7 @@ Design poore ecosystem ka, banana releases me; koi feature kata nahi (D-008). Jo
    - **Ecosystem ka %** = saare modules ke liye wahi hisaab.
    - Dono poore number tak round.
 4. **Kab badalta hai:** jis PR me koi subtask poora ho, ya subtask jude, hate ya uska size badle, usi PR me is file ki table aur [HANDOFF.md](HANDOFF.md) §1 ki "Progress" line.
-5. **Table:** module, release, kul points, poore points aur % ki table modules ki list ke saath banti hai (planning stage). Tab tak kisi PR me progress badalne ko kuch nahi.
+5. **Table:** module, release, kul points, poore points aur % ki table §4 me. Jis module ki `TASK.md` nahi bani, uske points "—".
 
 ## 3. Modules (D-444)
 
@@ -92,11 +92,75 @@ Har module ka folder `tasks/NN-<module>/` aur uski `TASK.md` ([tasks/README.md](
 | `27-operations`        | Deploy (Render, Vercel), backup aur restore (D-013), jagane ke pings aur nigrani (D-028), R1 ka release gate ([RULES.md](RULES.md) §2.1)                                                                                                      | R1             | 01, 09                                 |
 | `28-packages`          | Packages ka flow (D-445): CLI ke `create`, `build`, `verify`, `status`, `republish`, `publish` aur `update-deps`, aur GitHub ka publish workflow; saare packages public npm pe, tests me fake registry ([TASK.md](tasks/28-packages/TASK.md)) | R1             | 01                                     |
 
-- `NN` sirf pehchaan hai, banane ka order nahi ([tasks/README.md](tasks/README.md)).
+- `NN` sirf pehchaan hai, banane ka order nahi; banane ka kram §5 me.
 - R2 ke features (promotions, points, try-on, tickets ...) apne maalik service ke module me R2 ke subtasks banenge. Jinka maalik service abhi tay nahi (misaal promotions aur points), unka module R2 ki planning me.
+
+## 4. Progress (D-433)
+
+§2 ke hisaab se. "—" ka matlab: us module ki `TASK.md` abhi nahi bani, to points tay nahi.
+
+- **R1:** 0 / 18 points = 0%. Abhi sirf `28-packages` ke points tay hain; baaki modules ke points unki `TASK.md` ke saath judenge.
+- **Ecosystem:** 0 / 18 points = 0%, usi wajah se.
+
+| Module                 | Release        | Kul points | Poore | %   |
+| ---------------------- | -------------- | ---------- | ----- | --- |
+| `01-foundation`        | R1             | —          | —     | —   |
+| `02-platform`          | R1             | —          | —     | —   |
+| `03-frontend-kit`      | R1             | —          | —     | —   |
+| `04-logs`              | R1             | —          | —     | —   |
+| `05-audit`             | R1             | —          | —     | —   |
+| `06-media`             | R1             | —          | —     | —   |
+| `07-notify`            | R1             | —          | —     | —   |
+| `08-identity`          | R1             | —          | —     | —   |
+| `09-gateway`           | R1             | —          | —     | —   |
+| `10-logistics`         | R1             | —          | —     | —   |
+| `11-catalog`           | R1             | —          | —     | —   |
+| `12-payments`          | R1             | —          | —     | —   |
+| `13-commerce`          | R1             | —          | —     | —   |
+| `14-finance`           | R1             | —          | —     | —   |
+| `15-support`           | R1 (patla), R2 | —          | —     | —   |
+| `16-app-customer`      | R1             | —          | —     | —   |
+| `17-app-seller`        | R1             | —          | —     | —   |
+| `18-app-admin`         | R1             | —          | —     | —   |
+| `19-app-super-admin`   | R1             | —          | —     | —   |
+| `20-app-master`        | R1             | —          | —     | —   |
+| `21-app-support-desk`  | R1 (patla), R2 | —          | —     | —   |
+| `22-app-finance`       | R1             | —          | —     | —   |
+| `23-app-logistics-ops` | R1             | —          | —     | —   |
+| `24-app-delivery`      | R1             | —          | —     | —   |
+| `25-app-growth-studio` | R2             | —          | —     | —   |
+| `26-app-creator`       | R2             | —          | —     | —   |
+| `27-operations`        | R1             | —          | —     | —   |
+| `28-packages`          | R1             | 18         | 0     | 0%  |
+
+## 5. Banane ka kram (D-446)
+
+Modules charan wise bante hain. Har charan me us hisse ke liye zaroori service aur app ke subtasks, aur charan ke ant me wo flow shuru se aakhir tak chalta hai. Charan 2 se 13 §1 ke R1 ke hisson ke kram se.
+
+| Charan | Kya                                                                                          | Modules                                                       | Ant me kya chalta hai                                 |
+| ------ | -------------------------------------------------------------------------------------------- | ------------------------------------------------------------- | ----------------------------------------------------- |
+| 0      | Neev: root setup, packages ka flow, saajhe packages                                          | `01`, `28`, `02`, `03`                                        | Packages bante, jaanche jaate aur npm pe chhapte hain |
+| 1      | Chalta dhaancha: logs, audit, media, notify, identity, gateway; pehla deploy (`/wake` samet) | `04` se `09`, `27` (deploy), `20` (sirf dhaancha aur sign-in) | Owner live pe Master app me sign-in kar sake          |
+| 2      | Area (§1 hissa 1)                                                                            | `10`, `19`, `20`, `16` (pincode ki jaanch)                    | Pune ka area live; unserved pincode pe waitlist       |
+| 3      | Staff aur roles (hissa 2)                                                                    | `08`, `20`, `18`, `21` (dhaancha)                             | Staff ka invite, roles aur audit                      |
+| 4      | Sellers (hissa 3)                                                                            | `11`, `06`, `17`, `18`                                        | Dono sellers onboard aur approved                     |
+| 5      | Catalog (hissa 4)                                                                            | `11`, `17`, `18`, `16`                                        | Product live aur customer ko dikhe; search aur filter |
+| 6      | Maal warehouse me (hissa 5)                                                                  | `13`, `23`, `17`                                              | Maal receive, batch aur expiry, stock dikhe           |
+| 7      | Customer (hissa 6)                                                                           | `08`, `13`, `16`                                              | 18+ sign-up, cart, wishlist, address                  |
+| 8      | Checkout aur payment (hissa 7)                                                               | `13`, `12`, `14`, `16`                                        | Order aur payment (test mode), invoice                |
+| 9      | Fulfilment (hissa 8)                                                                         | `13`, `10`, `23`, `24`, `07`                                  | Pick, pack, hub, delivery aur saboot                  |
+| 10     | Return aur refund (hissa 9)                                                                  | `13`, `15`, `10`, `12`, `14`, `21`, `16`, `24`                | Return ki maang se refund tak                         |
+| 11     | Review (hissa 10)                                                                            | `11`, `16`, `18`, `17`                                        | Verified review aur moderation                        |
+| 12     | Paisa (hissa 11)                                                                             | `14`, `22`, `17`                                              | Seller ka hisaab, payout "paid", reports              |
+| 13     | Chalana aur release (hissa 12)                                                               | `27`, `20`                                                    | Backup, nigrani, aankde aur R1 ka release gate        |
+| R2     | Growth Studio, Creator aur R2 ke features                                                    | `25`, `26`, aur baaki modules ke R2 subtasks                  | R2 ki planning me                                     |
+
+- **Charan 0 ke andar:** pehle `01`, phir `28`, phir `02` aur `03` (dependencies, §3).
+- Har module ki `TASK.md` us charan se pehle likhi jaati hai jisme wo pehli baar aata hai, aur har subtask ke saath uska charan likha hota hai.
+- Kisi charan me dependency ki wajah se kram badalna pade, to owner ki haan se.
 
 ## Change log
 
-| Version          | Date                     | Badlav                                                                                                                          |
-| ---------------- | ------------------------ | ------------------------------------------------------------------------------------------------------------------------------- |
-| v1.0.0 se v1.3.3 | 2026-11-17 se 2026-11-22 | R1 ka scope (§1), progress % ka hisaab (§2) aur modules ki list (§3, D-444, D-445); har badlav ka poora itihaas git me (D-442). |
+| Version          | Date                     | Badlav                                                                                                                                                                            |
+| ---------------- | ------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| v1.0.0 se v1.5.1 | 2026-11-17 se 2026-11-22 | R1 ka scope (§1), progress % ka hisaab (§2) modules ki list (§3, D-444, D-445) progress ki table (§4) aur banane ka kram (§5, D-446); har badlav ka poora itihaas git me (D-442). |

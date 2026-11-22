@@ -1,6 +1,6 @@
 # TASK 28: packages ka flow
 
-> **Status:** v1.0.1 (2026-11-22). Halat: planning; code abhi nahi. Module [PROJECT_PLAN.md](../../PROJECT_PLAN.md) §3 ka `28-packages` (D-445). Progress: 0 / 18 points.
+> **Status:** v1.0.2 (2026-11-22). Halat: planning; code abhi nahi. Module [PROJECT_PLAN.md](../../PROJECT_PLAN.md) §3 ka `28-packages` (D-445). Progress: 0 / 18 points.
 
 ## 1. Lakshya
 
@@ -148,7 +148,7 @@ HTTP API nahi. CLI ke commands §3 me. Saajhe flags: `--dry-run` (sirf plan aur 
 
 ## 11. Subtasks
 
-Har subtask lagbhag ek PR jitna. Points D-433 ke hisaab se, aur "ho gaya" sirf [RULES.md](../../RULES.md) §1 ki Definition of Done ke baad.
+Har subtask lagbhag ek PR jitna, aur saare charan 0 me ([PROJECT_PLAN.md](../../PROJECT_PLAN.md) §5, D-446). Points D-433 ke hisaab se, aur "ho gaya" sirf [RULES.md](../../RULES.md) §1 ki Definition of Done ke baad.
 
 | #    | Subtask                                                               | Size   | Halat |
 | ---- | --------------------------------------------------------------------- | ------ | ----- |
@@ -164,6 +164,6 @@ Har subtask lagbhag ek PR jitna. Points D-433 ke hisaab se, aur "ho gaya" sirf [
 
 ## Change log
 
-| Version          | Date       | Badlav                                                                                       |
-| ---------------- | ---------- | -------------------------------------------------------------------------------------------- |
-| v1.0.0 se v1.0.1 | 2026-11-22 | Module 28 ka pehla spec, 8 subtasks aur acceptance criteria ki link (D-445); code abhi nahi. |
+| Version          | Date       | Badlav                                                                                                        |
+| ---------------- | ---------- | ------------------------------------------------------------------------------------------------------------- |
+| v1.0.0 se v1.0.2 | 2026-11-22 | Module 28 ka pehla spec, 8 subtasks acceptance criteria ki link (D-445) aur charan 0 (D-446); code abhi nahi. |
