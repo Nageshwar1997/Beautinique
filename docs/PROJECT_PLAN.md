@@ -1,6 +1,6 @@
 # PROJECT PLAN: Beautinique
 
-> **Status:** v1.1.7 (2026-11-20). Project ki kendriya file. Cheezein ek-ek karke, owner ki haan ke baad judti hain.
+> **Status:** v1.2.1 (2026-11-22). Project ki kendriya file. Cheezein ek-ek karke, owner ki haan ke baad judti hain.
 
 ## 0. Is file me kya aayega
 
@@ -46,6 +46,17 @@ Design poore ecosystem ka, banana releases me; koi feature kata nahi (D-008). Jo
 
 **Note:** har module ki detail (screens, fields, niyam) domain charcha ke baad us module ki `TASK.md` me aayegi. Usme R1 ke liye kuch aur zaroori nikla to R1 owner ki haan se badlega.
 
+## 2. Progress % ka hisaab (D-433)
+
+1. **Size:** har subtask ka size planning me tay hota hai: misaal S = 1, M = 2, L = 4 point. Subtask lagbhag ek PR jitna ([tasks/README.md](tasks/README.md)); L se bada kaam chhote subtasks me toota jaata hai.
+2. **Kab ginta hai:** point tabhi gina jaata hai jab subtask [RULES.md](RULES.md) §1 ki Definition of Done poori kare. Adhoora kaam 0 point.
+3. **Do number:**
+   - **R1 ka %** = R1 ke poore subtasks ke points ÷ R1 ke saare subtasks ke points.
+   - **Ecosystem ka %** = saare modules ke liye wahi hisaab.
+   - Dono poore number tak round.
+4. **Kab badalta hai:** jis PR me koi subtask poora ho, ya subtask jude, hate ya uska size badle, usi PR me is file ki table aur [HANDOFF.md](HANDOFF.md) §1 ki "Progress" line.
+5. **Table:** module, release, kul points, poore points aur % ki table modules ki list ke saath banti hai (planning stage). Tab tak kisi PR me progress badalne ko kuch nahi.
+
 ## Change log
 
 | Version | Date       | Badlav                                                                                                                                                                           |
@@ -57,4 +68,5 @@ Design poore ecosystem ka, banana releases me; koi feature kata nahi (D-008). Jo
 | v1.1.4  | 2026-11-19 | R1 review me listing version aur seller ka reviews dekhna (D-160, D-171); "Bahar" me R2 ke naye faisle (D-160 se D-179).                                                         |
 | v1.1.5  | 2026-11-19 | R1 me kanooni jaanch se jod (owner): test claims ka saboot (D-224), 30 din ka daam (D-223), tax archive (D-225), der se delivery ka return (D-222); return ki muddatein (D-221). |
 | v1.1.6  | 2026-11-19 | R1 roles me Grievance Officer aur Nodal Officer, asli staff jaankari ke saath (D-237, D-241).                                                                                    |
-| v1.1.7  | 2026-11-20 | R1 me kanooni rok aur 180 din ke logs (D-250), aur Security Contact role (D-253). |
+| v1.1.7  | 2026-11-20 | R1 me kanooni rok aur 180 din ke logs (D-250), aur Security Contact role (D-253).                                                                                                |
+| v1.2.1  | 2026-11-22 | Naya §2: progress % ka hisaab (D-433).                                                                                                                                           |

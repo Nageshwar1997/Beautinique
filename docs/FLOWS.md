@@ -1,6 +1,6 @@
 # FLOWS: Beautinique
 
-> **Status:** v1.1.5 (2026-11-22). Poore flows jo kai modules me chalte hain (jaise order se delivery, return se refund): §1 se §6, 20 flows. Cheezein ek-ek karke, owner ki haan ke baad judti hain.
+> **Status:** v1.1.6 (2026-11-22). Poore flows jo kai modules me chalte hain (jaise order se delivery, return se refund): §1 se §6, 20 flows. Cheezein ek-ek karke, owner ki haan ke baad judti hain.
 
 ## Is file me kya aayega
 
@@ -50,7 +50,7 @@ Har flow ka id `FL-<n>`. Har step ke saath module (`identity`, `notify`, `paymen
 
 **FL-5. Customer ka account delete.** Shuru: customer (Customer app, Account → Privacy).
 
-1. Dobara pehchaan (identity; SR-016); screen pe kya hatega aur kya rahega (tax archive, review "Deleted customer") (D-225, D-305).
+1. Dobara pehchaan (identity; SR-016); screen pe kya hatega aur kya rahega (tax archive, review "Deleted customer"), aur "Also delete my reviews" ka vikalp, pehle se tick nahi (D-225, D-305, D-438).
 2. Email aur in-app khabar; misaal 7 din me wapas le sakta hai (identity, notify; SR-066).
 3. 7 din baad ek event se har service apni copy hataye ya pehchaan hataye; sessions, push subscriptions, waitlist bhi (saari services; SR-066, D-250).
 
@@ -218,3 +218,4 @@ Har flow ka id `FL-<n>`. Har step ke saath module (`identity`, `notify`, `paymen
 | v1.1.3  | 2026-11-21 | FL-7 kadam 4: Payment alag document (security review batch 1, D-408).                                                                                                      |
 | v1.1.4  | 2026-11-22 | FL-5: khule order wali jaanch D-151 niyam 1 se poori.                                                                                                                      |
 | v1.1.5  | 2026-11-22 | FL-9 kadam 5: test mode me QR me Payment page ka link (D-418).                                                                                                             |
+| v1.1.6  | 2026-11-22 | FL-5 kadam 1: "Also delete my reviews" ka vikalp (D-438).                                                                                                                  |

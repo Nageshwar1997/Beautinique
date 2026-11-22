@@ -1,6 +1,6 @@
 # CLAUDE.md: Beautinique
 
-> **Status:** v1.0.1 (2026-11-18). Docs aur code naye sire se ban rahe hain.
+> **Status:** v1.0.2 (2026-11-22). Docs aur code naye sire se ban rahe hain.
 
 Ye file Claude Code har session ki shuruaat me padhta hai. Project pe ek hi insaan (owner) kaam karta hai,
 2 Claude accounts se baari-baari. **Kaam shuru karne se pehle [docs/HANDOFF.md](docs/HANDOFF.md) padho.**
@@ -78,8 +78,8 @@ Abhi koi npm command nahi chalta: naya root setup implementation stage me banega
 ## Kaam rokte waqt
 
 [docs/HANDOFF.md](docs/HANDOFF.md) update karo: kya kiya, kya adhoora hai, kya uncommitted hai, kaunsa sawal
-khula hai. Jis doc me badlav kiya, uske change log me ek line. Progress % ka niyam naye
-[docs/PROJECT_PLAN.md](docs/PROJECT_PLAN.md) ke saath tay hoga.
+khula hai. Jis doc me badlav kiya, uske change log me ek line. Progress % ka niyam
+[docs/PROJECT_PLAN.md](docs/PROJECT_PLAN.md) §2 me (D-433).
 
 ## Change log
 
@@ -87,3 +87,4 @@ khula hai. Jis doc me badlav kiya, uske change log me ek line. Progress % ka niy
 | ------- | ---------- | -------------------------------------------------------------------------------- |
 | v1.0.0  | 2026-11-17 | Pehla version: abhi ki halat, discovery ke niyam aur hamesha laagu niyam.        |
 | v1.0.1  | 2026-11-18 | Discovery: bina dependency wale sawal ek saath; agle sawal ka zikr nahi (owner). |
+| v1.0.2  | 2026-11-22 | Progress % ka niyam ab PROJECT_PLAN §2 me (D-433).                               |

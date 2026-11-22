@@ -1,6 +1,6 @@
 # ARCHITECTURE: Beautinique
 
-> **Status:** v1.3.13 (2026-11-22). System kaise bana hai, ek nazar me. Cheezein ek-ek karke, owner ki haan ke baad judengi. Abhi §1 (finance ke accounting niyam, D-282), §2 se §9 (system ke hisse, D-291 se D-298) aur §10 (data aur database, D-310 se D-317).
+> **Status:** v1.3.14 (2026-11-22). System kaise bana hai, ek nazar me. Cheezein ek-ek karke, owner ki haan ke baad judengi. Abhi §1 (finance ke accounting niyam, D-282), §2 se §9 (system ke hisse, D-291 se D-298) aur §10 (data aur database, D-310 se D-317).
 
 ## Is file me kya aayega
 
@@ -428,6 +428,7 @@ return: commerce.return.requested -> support.return.decided -> logistics.pickup.
 8. Export DB cursor se stream, CSV seedha private file me (buffer me poora nahi), ek baar ka chhota link (D-144, SR-075). File pehle download ke baad ya misaal 24 ghante me mite.
 9. Roz: 24 ghante se purane bina jude uploads aur atke deletes saaf; hafte: provider ki list se milaan.
 10. File badalna (jaise nayi photo): nayi file nayi `assetId` ke saath judti hai, to uska URL bhi naya hota hai aur CDN me purani cached copy nahi dikhti. Purani file turant `deleting` me jaati hai, aur niyam 9 ka roz ka job use provider se mitata hai. Apvaad: jis purani file ki kisi record ko zaroorat hai (niyam 5 aur 6, jaise jis product ka order hua uski images, ya kanooni rok wali review aur daawe ki photos), wo apne retention ke samay tak rehti hai. Nateeja: koi file bina kisi record ke hamesha nahi rehti; bina judi upload lagbhag 24 ghante tak, aur hafte ke milaan me pakdi file agle milaan tak.
+11. Kanooni rok wali private files ke folder (prefix) pe object storage ka lock, rok ki muddat jitna, lagbhag 13 May 2027 se; galti se ya code se bhi file na mite. Lock free plan pe milta hai ya nahi, object storage ki jaanch me (D-439).
 
 ## 8. Observability (D-297)
 
@@ -550,7 +551,7 @@ Database Architect ki raay se (D-257 ka kram), owner ki haan ke baad. Ye saare s
 1. Har collection ki ek retention class (`tech`, `case`, `account`, `book`, `tax`, `ref`, `agg`) code ki registry me; koi collection bina class ya bina delete handler ke ho to CI fail.
 2. Business ki cheez (product, variant, seller, hub) jise koi order ya document dekhta hai, kabhi delete nahi; `archived`.
 3. Personal data ka erase = field hatana ya document delete, usi transaction me rok ki copy aur event; sirf flag kaafi nahi.
-4. Rok ki copy har service ke apne `sealed_records` me: hate fields ka JSON, ek public key se band (sealed; SR-097, D-399), live server ke paas sirf public key, `eraseAt` setting se (abhi 180 din, lagbhag 13 May 2027 se 365 din; D-250, D-262). Sirf break-glass facade se, Master aur wajah ke saath, audit me; kisi staff screen ya list me kabhi nahi. Retention class `tech` ke records (OTP ke hash, idempotency ke jawab, sessions, outbox, inbox) rok me nahi aate; unka personal data request logs me pehle se rehta hai (D-321).
+4. Rok ki copy har service ke apne `sealed_records` me: hate fields ka JSON, ek public key se band (sealed; SR-097, D-399), live server ke paas sirf public key, `eraseAt` setting se (abhi 180 din, lagbhag 13 May 2027 se 365 din; D-250, D-262). Sirf break-glass facade se, Master aur wajah ke saath, audit me; kisi staff screen ya list me kabhi nahi. Retention class `tech` ke records (OTP ke hash, idempotency ke jawab, sessions, outbox, inbox) rok me nahi aate; unka personal data request logs me pehle se rehta hai (D-321). Ye chhoot tabhi jab session ka shuru aur band hona, OTP ka bhejna aur jaanch (bina code), aur har outbox event ka asal kaam security events, audit ya request logs me kam se kam 1 saal rahe; iska ek test (D-436).
 5. Field encryption AES-256-GCM, roop `v1.<keyId>.<iv>.<ciphertext>.<tag>`, associated data `<service>.<collection>.<field>:<recordId>` (SR-063). Keys service ke namespace me (`field`, `blind`, `hold`, finance me `taxArchive`), har key ka id, aur purane records ka roz ka chhota re-encrypt.
 6. Dhoondhne ke liye HMAC-SHA256 blind index (alag key); dikhane ke liye aakhri 4.
 7. Codes, recovery codes aur invite tokens sirf hash. Delivery code encrypted, kyunki customer ko dikhana zaroori hai; milaan server pe (SR-054).
@@ -560,17 +561,17 @@ Database Architect ki raay se (D-257 ka kram), owner ki haan ke baad. Ye saare s
 11. Accounts ke jod ke liye address, device cookie aur payment ki pehchaan sirf HMAC ke roop me (`limits_link_keys`).
 12. Account delete ke baad bhi seller apne invoice ki copy (₹50,000 ya zyada pe naam aur pata ke saath, D-226) ek-ek karke finance ke tax archive se download kar sakta hai, finance ke raaste, har download audit me (D-320).
 
-| Service     | Account delete pe                                                                                                                                                                                        |
-| ----------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| identity    | Account tombstone; credentials, sessions, devices, codes delete; consents aur registration data rok me; id restore wali list me                                                                          |
-| notify      | Inbox, push subscriptions, digest, email jobs delete                                                                                                                                                     |
-| commerce    | Addresses, cart, wishlist, link keys delete; orders ke address se naam, phone aur lines hatein (shehar, pincode, state rahein); band orders ke archive ke chunks bhi naye hash ke saath (SR-066); rok me |
-| catalog     | Reviews D-305 ke hisaab se (star aur text rahein, photos hatein); review ka haq delete                                                                                                                   |
-| logistics   | Waitlist delete; photos aur location apne samay pe                                                                                                                                                       |
-| support     | Case ke text se pehchaan hate; saboot apne samay pe                                                                                                                                                      |
-| payments    | Payment ki pehchaan ka hash delete                                                                                                                                                                       |
-| finance     | Kuch nahi badalta                                                                                                                                                                                        |
-| audit, logs | Apne samay tak waise                                                                                                                                                                                     |
+| Service     | Account delete pe                                                                                                                                                                                                    |
+| ----------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| identity    | Account tombstone; credentials, sessions, devices, codes delete; consents aur registration data rok me; id restore wali list me                                                                                      |
+| notify      | Inbox, push subscriptions, digest, email jobs delete                                                                                                                                                                 |
+| commerce    | Addresses, cart, wishlist, link keys delete; orders ke address se naam, phone aur lines hatein (shehar, pincode, state rahein); band orders ke archive ke chunks bhi naye hash ke saath (SR-066); rok me             |
+| catalog     | Reviews D-305 ke hisaab se (star aur text rahein, photos hatein, account aur order ka link hate, "Verified purchase" sirf flag; delete screen pe customer reviews bhi hata sake; D-436, D-438); review ka haq delete |
+| logistics   | Waitlist delete; photos aur location apne samay pe                                                                                                                                                                   |
+| support     | Case ke text se pehchaan hate; saboot apne samay pe                                                                                                                                                                  |
+| payments    | Payment ki pehchaan ka hash delete                                                                                                                                                                                   |
+| finance     | Kuch nahi badalta                                                                                                                                                                                                    |
+| audit, logs | Apne samay tak waise                                                                                                                                                                                                 |
 
 ### 10.4 Migrations, release steps, seeds aur M0 ki aadatein (D-313)
 
@@ -753,3 +754,4 @@ Lint aur TypeScript ke saajhe config `configs/` me (D-002), package nahi.
 | v1.3.11 | 2026-11-22 | §6 niyam 7 local Atlas container (D-422); §7 niyam 1, 3, 4 private files object storage pe (D-420); §9 Redis row aur §10.4 niyam 5, 6 (D-425).                                                                                            |
 | v1.3.12 | 2026-11-22 | Naye §11 roles aur permissions ka model (D-427) aur §12 saajhe packages (D-428).                                                                                                                                                          |
 | v1.3.13 | 2026-11-22 | §11 ki appointment table me State Admin (D-426).                                                                                                                                                                                          |
+| v1.3.14 | 2026-11-22 | §7 niyam 11 rok wali files pe lock (D-439); §10.3 niyam 4 tech ki shart aur catalog row (D-436, D-438).                                                                                                                                   |

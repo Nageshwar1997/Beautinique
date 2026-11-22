@@ -74,8 +74,7 @@ Any other pair → stop and explain. CI (`scripts/ci/lib/branch-flow.ts`) reject
   deployable (`identity`, `gateway`), `ci`, or a docs area (`linkedin-posts`). Scope may be dropped for repo-wide work.
 - Body only when it helps: why, not how, wrapped near 72 characters. Add the task id (`T3.7`, `QA-CI-001`) when known.
 - Never generic: "update", "changes", "fix bugs", "wip", "misc".
-- One concern per commit. The progress-% rule is being redefined with the new
-  `docs/PROJECT_PLAN.md` (`CLAUDE.md`); until it is, no progress table has to change with a commit.
+- One concern per commit. The progress-% rule is in `docs/PROJECT_PLAN.md` §2: when a PR finishes, adds, removes or resizes a subtask, update that table and the HANDOFF progress line in the same PR. Until the module table exists, there is nothing to update.
 
 ## 5. Checks
 

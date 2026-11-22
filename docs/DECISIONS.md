@@ -1,6 +1,6 @@
 # DECISIONS: Beautinique
 
-> **Status:** v1.14.37 (2026-11-22). Har faisla ek jagah. Sirf wahi "Tay" jo owner ne khud kaha; Claude ki salah faisla nahi. Cheezein ek-ek karke judti hain.
+> **Status:** v1.14.39 (2026-11-22). Har faisla ek jagah. Sirf wahi "Tay" jo owner ne khud kaha; Claude ki salah faisla nahi. Cheezein ek-ek karke judti hain.
 
 ## 0. Kaise likhein
 
@@ -447,6 +447,13 @@
 | D-430 | RULES §5 se §7 me links aur bache niyam; nayi env key tabhi jab code padhe (OPERATIONS §4).                                                                                                                                                                                             | Process      | 2026-11-22 |
 | D-431 | GLOSSARY me docs ke 51 shabd, matlab aur link ke saath.                                                                                                                                                                                                                                 | Process      | 2026-11-22 |
 | D-432 | GIT_SKILLS ka poora manual.                                                                                                                                                                                                                                                             | Process      | 2026-11-22 |
+| D-433 | Progress % size ke points se (S 1, M 2, L 4), sirf Definition of Done poori hone pe; R1 ka aur ecosystem ka % alag (PROJECT_PLAN §2).                                                                                                                                                   | Process      | 2026-11-22 |
+| D-434 | Purane docs ab hatein: pehle commit, phir git tag, phir alag commit me hatana; commit, hatana aur push owner ki haan se.                                                                                                                                                                | Process      | 2026-11-22 |
+| D-435 | Lawyer (AI) ka chhota doosra run, 18 faislon pe; report alag file me, nateeje sawalon ke roop me.                                                                                                                                                                                       | Process      | 2026-11-22 |
+| D-436 | Lawyer (AI) ke chhote run ke 14 sudhaar: data ki jagah aur DPA, Ola ki bhoomika, fonts aur icons ke license, invoice email, breach ki paribhasha, CERT-In ki ghadi, testers ka alias.                                                                                                   | Security     | 2026-11-22 |
+| D-437 | Address screen pe pehle form; Ola ka map aur search sirf customer ke dabane pe, Ola ki suchna ke saath.                                                                                                                                                                                 | Business     | 2026-11-22 |
+| D-438 | Account delete pe "Also delete my reviews" ka vikalp, pehle se tick nahi; default me reviews bina naam ke.                                                                                                                                                                              | Business     | 2026-11-22 |
+| D-439 | Kanooni rok wali private files pe object storage ka lock, lagbhag 13 May 2027 se.                                                                                                                                                                                                       | Security     | 2026-11-22 |
 
 ## 2. Record
 
@@ -2462,6 +2469,7 @@
 - **Kab dobara khulega:** owner khud khole.
 - **Kisne, kab:** owner, 2026-11-19. **Nishaan:** Salah maani.
 - **Asar (Claude):** R2 se; D-159 me jod. Allergy aur skin concerns sehat ke paas ka data: consent, kaun dekhe aur kitne din, Security Architect ke saath (B14). Kanooni detail jaanchi nahi (R-004): sehat ke paas ke data ki consent aur rakhna.
+- **Jod (owner, 2026-11-22, D-436):** sehat ki consent me line ki ye data India ke bahar hamare storage provider ke paas reh sakta hai (SPDI rules ka rule 7, lagbhag 13 May 2027 tak).
 
 ### D-166. Product sujhaav
 
@@ -3431,6 +3439,7 @@
 - **Kab dobara khulega:** owner khud khole.
 - **Kisne, kab:** owner, 2026-11-20. **Nishaan:** Salah maani.
 - **Asar (Claude):** D-038, D-150, D-151, D-203 aur D-216 me jod. Kanooni detail jaanchi nahi (R-004): DPDP Act aur Rules (rule 3, s.11, s.14, s.8(2)) aur Aadhaar Regulations public source se mile; IT Rules ke 2026 ke hisse, kai accounts ka maqsad aur umar ki ghoshna aadha jaancha.
+- **Jod (owner, 2026-11-22, D-436):** niyam 8 ki processors list me Ola: processor, aur apne kaam (ads, research) ke liye alag data fiduciary.
 
 ### D-256. Seller, warehouse aur payment ke chhote sudhaar
 
@@ -3755,6 +3764,7 @@
 - **Kisne, kab:** owner, 2026-11-20. **Nishaan:** Salah maani.
 - **Asar (Claude):** provider naya data processor hai (CL-104) aur data ki jagah privacy page pe (CL-107); data India ke bahar ho to uska asar Lawyer se nahi jaancha. Provider ki chaabi sirf ek jagah (SR-071); files ka registry aur retention ARCHITECTURE ki media batch me. Database me provider ka URL nahi, sirf file ka record (SR-062).
 - **Jod (owner, 2026-11-22, D-420):** shart ki jaanch me do shartein kamzor nikli, to doosra raasta abhi se: public aur review images Cloudinary pe, private files S3 jaise object storage pe.
+- **Jod (owner, 2026-11-22, D-436):** Lawyer (AI) ne jaancha (2026-11-22): images Cloudinary (US) pe jaayaz; badlav D-420 me hi.
 
 ### D-285. Request logs ki jagah
 
@@ -3801,6 +3811,7 @@
 - **Kab dobara khulega:** owner khud khole.
 - **Kisne, kab:** owner, 2026-11-20. **Nishaan:** Salah maani.
 - **Asar (Claude):** asli invoice parcel ke andar (D-077) aur app me download. Kanooni detail jaanchi nahi: customer ko invoice ki copy kis roop me deni hai (CL-003, CL-020), Lawyer (ya CA) se nahi jaancha.
+- **Jod (owner, 2026-11-22, D-436):** Lawyer (AI) ne jaancha (2026-11-22): email me line "This is not a tax invoice. Your invoice is in the parcel and in Orders."; demo pe SPECIMEN aur DUMMY (D-145).
 
 ### D-290. Server-side rendering nahi (R1)
 
@@ -3927,6 +3938,7 @@
 - **Kab dobara khulega:** provider pe koi file kho jaaye, asli business shuru ho, ya owner khud khole.
 - **Kisne, kab:** owner, 2026-11-20. **Nishaan:** Salah maani.
 - **Asar (Claude):** provider pe file kho jaaye to daawe ya kanooni rok (D-262) wali photo ka saboot nahi bachta. Kanooni rok wali files ki ek hi copy kaafi hai ya nahi: Lawyer se nahi jaancha.
+- **Jod (owner, 2026-11-22, D-436, D-439):** Lawyer (AI) ne jaancha (2026-11-22): private files ka kho jaana personal data breach hai (DPDP s.2(u)); kanooni rok wali files ka bachav object storage ke lock se (D-439).
 
 ### D-304. Har app parivaar ka alag account
 
@@ -3945,6 +3957,7 @@
 - **Kab dobara khulega:** Lawyer ki raay, ya owner khud khole.
 - **Kisne, kab:** owner, 2026-11-21. **Nishaan:** Salah maani.
 - **Asar (Claude):** text me customer ne khud apni pehchaan likhi ho to wo rehti hai; report ya staff se hat sakti hai. Kanooni detail jaanchi nahi: erase ka haq aur maqsad poora hone pe erase (CL-091, CL-093) reviews pe kaise laagu, Lawyer se nahi jaancha.
+- **Jod (owner, 2026-11-22, D-436, D-438):** Lawyer (AI) ne jaancha (2026-11-22): delete pe review se account aur order ka link hatta hai, "Verified purchase" sirf flag rehta hai; customer maange to review hatta hai; delete screen pe "Also delete my reviews" ka vikalp (D-438).
 
 ### D-306. Purane orders ka archive
 
@@ -3980,6 +3993,7 @@
 - **Kab dobara khulega:** Neon ki asli jagah ki jaanch ([OPEN_QUESTIONS.md](OPEN_QUESTIONS.md) §2), CA ki raay, ya owner khud khole.
 - **Kisne, kab:** owner, 2026-11-21. **Nishaan:** Salah maani.
 - **Asar (Claude):** purane saal ki detail turant nahi (restore chahiye), aur ek file ki suraksha. Kanooni detail jaanchi nahi: export file books ka "electronic roop" maani jaaye ya nahi, aur asli business pe India me roz ka backup (CL-131), CA (aur Lawyer) se nahi jaancha.
+- **Jod (owner, 2026-11-22, D-436):** Lawyer (AI) ne jaancha (2026-11-22): asli business pe export file ki copy India ke backup me, Registrar ko provider ki jaankari, aur key ki do alag copies (CL-131).
 
 ### D-310. Data batch 1: ids, numbers, paisa aur samay
 
@@ -4075,6 +4089,7 @@
 - **Kab dobara khulega:** Lawyer ya CA ki raay, ya owner khud khole.
 - **Kisne, kab:** owner, 2026-11-21. **Nishaan:** Salah maani.
 - **Asar (Claude):** SR-088 (seller ko invoice ki copy) ke saath tax archive ka ek padhne ka raasta. Kanooni detail jaanchi nahi: delete ke baad seller ko customer ka naam aur pata dena (CL-020, CL-021), Lawyer (ya CA) se nahi jaancha.
+- **Jod (owner, 2026-11-22, D-436):** Lawyer (AI) ne jaancha (2026-11-22): theek, badlav nahi.
 
 ### D-321. Kanooni rok aur technical records
 
@@ -4084,6 +4099,7 @@
 - **Kab dobara khulega:** Lawyer ki raay, ya owner khud khole.
 - **Kisne, kab:** owner, 2026-11-21. **Nishaan:** Salah maani.
 - **Asar (Claude):** Kanooni detail jaanchi nahi: `tech` class ko rok se bahar rakhna D-250 ki seema me aata hai ya nahi (CL-093), Lawyer se nahi jaancha.
+- **Jod (owner, 2026-11-22, D-436):** Lawyer (AI) ne jaancha (2026-11-22): chhoot tabhi jab session, OTP aur outbox ke asal kaam ka saboot 1 saal security events, audit ya logs me rahe; iska test ([ARCHITECTURE.md](ARCHITECTURE.md) §10.3 niyam 4).
 
 ### D-322. Server ko jagaane ka samay
 
@@ -4104,6 +4120,7 @@
 - **Kab dobara khulega:** asli business ke waqt, ya owner khud khole.
 - **Kisne, kab:** owner, 2026-11-21. **Nishaan:** Salah maani.
 - **Asar (Claude):** data jokhim lagbhag 7 din. Backup ka niyam aur restore ka abhyaas OPERATIONS ki batch me. Laptop pe backup ki copies ka jokhim R-023 me. Kanooni detail jaanchi nahi: asli business pe company ke books ka India me backup (CL-131) kitni baar zaroori, Lawyer ya CA se nahi jaancha.
+- **Jod (owner, 2026-11-22, D-436):** Lawyer (AI) ne jaancha (2026-11-22): R1 me theek, badlav nahi.
 
 ### D-324. Alerts dekhne ka samay
 
@@ -4113,6 +4130,7 @@
 - **Kab dobara khulega:** owner khud khole.
 - **Kisne, kab:** owner, 2026-11-21. **Nishaan:** Salah maani.
 - **Asar (Claude):** incident ka kram (SR-084) aur owner ko alerts (SR-078) is samay ke saath OPERATIONS ke runbook me. Gambhirta ki list SR-084 wali hi. CERT-In ki 6 ghante ki ghadi incident pata chalne se ginti hai (D-248). Kanooni detail jaanchi nahi: 2 ya 3 ghante wali ghadiyaan ek insaan ke system pe kaise poori hon, Lawyer se nahi jaancha.
+- **Jod (owner, 2026-11-22, D-436):** Lawyer (AI) ne jaancha (2026-11-22): CERT-In ke 6 ghante alert ke samay se ([OPERATIONS.md](OPERATIONS.md) §8 niyam 2); 2 aur 3 ghante wali ghadiyon ke liye asli business se pehle doosra on-call insaan ([COMPLIANCE.md](COMPLIANCE.md) §13).
 
 ### D-325. Packages ka npm pe publish
 
@@ -4187,6 +4205,7 @@
 - **Kab dobara khulega:** owner khud khole.
 - **Kisne, kab:** owner, 2026-11-21. **Nishaan:** Salah maani.
 - **Asar (Claude):** Kanooni detail jaanchi nahi: data leak me "pakka" ki paribhasha aur users ko khabar ka samay, Lawyer se nahi jaancha.
+- **Jod (owner, 2026-11-22, D-436):** Lawyer (AI) ne jaancha (2026-11-22): data leak ki paribhasha DPDP s.2(u) se, aur ghadi bharosa hote hi ([OPERATIONS.md](OPERATIONS.md) §8 niyam 3).
 
 ### D-334. OPERATIONS batch 9: capacity aur free tier ki nigrani
 
@@ -4220,6 +4239,7 @@
 - **Kab dobara khulega:** asli naap ya providers ki sharten badlein, ya owner khud khole.
 - **Kisne, kab:** owner, 2026-11-21. **Nishaan:** Salah maani.
 - **Asar (Claude):** Kanooni detail jaanchi nahi: R-050 me kanooni ghadiyaan chhootne ka asar, Lawyer se nahi jaancha.
+- **Jod (owner, 2026-11-22, D-436):** Lawyer (AI) ne jaancha (2026-11-22): kanooni asar sirf R-048 (CERT-In ke 180 din) aur R-050 (D-324) me.
 
 ### D-338. Operations ke 6 sudhaar
 
@@ -4260,6 +4280,7 @@
 - **Kisne, kab:** owner, 2026-11-21. **Nishaan:** Salah maani.
 - **Asar (Claude):** Customer app ki pehli load pe lagbhag 70 KB zyada (misaal). Fonts ka license CL-125 ki list me. Kanooni detail: Lawyer ya CA se nahi jaancha.
 - **Jod (owner, 2026-11-22, D-425):** Google Fonts ka `latin` subset ₹ nahi rakhta, to self-host ke liye `latin` aur U+20B9 ka apna subset; build ka test waisa hi.
+- **Jod (owner, 2026-11-22, D-436):** Lawyer (AI) ne jaancha (2026-11-22): OFL ke saath apna subset jaayaz; subset me license ki metadata, OFL.txt files ke saath, aur Credits pe font ka copyright ([DESIGN.md](DESIGN.md) DS-4.1).
 
 ### D-342. Dark theme
 
@@ -4325,6 +4346,7 @@
 - **Kisne, kab:** owner, 2026-11-21. **Nishaan:** Owner (form aur Ola Maps dono, autofill, pin, current location, limit); Salah maani (baaki detail).
 - **Asar (Claude):** Ola (ANI Technologies Pvt. Ltd.) naya processor: address ka text, pin aur browser ki requests; D-255 niyam 8 ki processors list me. CSP (SR-005) me Ola ke hosts sirf in screens pe: Security Architect ka doosra run. Tathya [RISKS.md](RISKS.md) §2.6, risk R-064, aur baaki jaanch [OPEN_QUESTIONS.md](OPEN_QUESTIONS.md) §2. Ola ki terms me geocoding ke coordinates rakhne ka saaf niyam nahi mila: customer ka pakka kiya address aur pin hamara data, Ola ka content (jaise autocomplete ke results ki list) nahi rakhte. Kanooni detail: address aur location personal data, Lawyer se nahi jaancha.
 - **Jod (owner, 2026-11-22, D-423):** niyam 4 me `accuracy` misaal 100 m se zyada ho to pin apne aap nahi; map paas khule aur sandesh "Move the pin to your door".
+- **Jod (owner, 2026-11-22, D-436, D-437):** Lawyer (AI) ne jaancha (2026-11-22): Ola is data ka apne kaam ke liye alag data fiduciary hai; address form pe Ola ki suchna ki line aur policy ki link; map sirf customer ki pehal pe khulta hai (D-437).
 
 ### D-348. R1 ka Customer Home
 
@@ -4365,6 +4387,7 @@
 - **Kab dobara khulega:** owner khud khole.
 - **Kisne, kab:** owner, 2026-11-21. **Nishaan:** Owner (source aur apna package, script aur test, sets ka kram, saajha Credits page aur credit components); Salah maani (niyam 3, 6, 7, licenses ki seema).
 - **Asar (Claude):** [DESIGN.md](DESIGN.md) DS-7.1 isi se. Kanooni detail: icons aur brand marks ke license aur trademark, Lawyer ya CA se nahi jaancha.
+- **Jod (owner, 2026-11-22, D-436):** Lawyer (AI) ne jaancha (2026-11-22): Credits page pe har set ka poora license notice; sign-in ke buttons providers ke branding niyamon aur official logos se; trademark ki line ([DESIGN.md](DESIGN.md) DS-6.15).
 
 ### D-351. Location na mile to photo wali delivery
 
@@ -4522,6 +4545,7 @@
 - **Kab dobara khulega:** asli business pe ya owner khud khole.
 - **Kisne, kab:** owner, 2026-11-21. **Nishaan:** Salah maani.
 - **Asar (Claude):** D-081 me jod; [FLOWS.md](FLOWS.md) FL-18 step 1 me ye muddat. Hamari galti wali return ka nuksaan seller pe nahi (D-063). Kanooni detail: Lawyer ya CA se nahi jaancha.
+- **Jod (owner, 2026-11-22, D-436):** Lawyer (AI) ne jaancha (2026-11-22): theek, badlav nahi.
 
 ### D-370. UX ke chhote sudhaar
 
@@ -4601,6 +4625,7 @@
 - **Kab dobara khulega:** owner khud khole.
 - **Kisne, kab:** owner, 2026-11-21. **Nishaan:** Salah maani.
 - **Asar (Claude):** record kahan rahe, ye testing ke niyamon ki batch me. Testers ke emails live pe personal data hain, privacy ke niyamon ([COMPLIANCE.md](COMPLIANCE.md) §5) ke andar. Kanooni detail: Lawyer ya CA se nahi jaancha.
+- **Jod (owner, 2026-11-22, D-436):** Lawyer (AI) ne jaancha (2026-11-22): niyam 3 ke record me tester ka naam ya email nahi, sirf alias (misaal "Tester A"); repo public hai.
 
 ### D-378. Bug ki gambhirta aur release
 
@@ -5021,6 +5046,7 @@
 - **Kab dobara khulega:** object storage ki jaanch fail ho, ya owner khud khole.
 - **Kisne, kab:** owner, 2026-11-22. **Nishaan:** Salah maani.
 - **Asar (Claude):** do providers, do chaabiyaan (SR-071) aur upload ke do raaste. Object storage ki pehli jaanch (2026-11-22, [RISKS.md](RISKS.md) §2.9): R2 me presigned URL 1 second se 7 din tak, `apac` location hint (pakki jagah nahi; jurisdiction sirf EU, FedRAMP aur US), 10 GB free; B2 ke regions US, Canada aur EU me, Asia me nahi. Dono me presigned upload PUT se; size ki rok signature me aati hai ya nahi, jaancha nahi, to upload ke baad media asli size aur type dekh ke hi `ready` kare (ARCHITECTURE §7 niyam 1). Object storage file ko jaisi aayi waisi rakhta hai, to private images ka dobara encode aur EXIF hatana server pe `heavy` queue me (ARCHITECTURE §7 niyam 3). Account banate waqt card maangta hai ya nahi, aur kaunsa provider: [OPEN_QUESTIONS.md](OPEN_QUESTIONS.md) §2 ki jaanch ke baad, owner ke saath. Kanooni detail: private files India ke bahar rakhne ka asar (CL-107) Lawyer (AI) ne nahi dekha.
+- **Jod (owner, 2026-11-22, D-436, D-439):** Lawyer (AI) ne jaancha (2026-11-22): India ke bahar jaayaz; har provider ka likhit DPA; sehat ki photos ki consent me bahar rakhne ki baat; kanooni rok wali files pe lock (D-439).
 
 ### D-421. Databases ka network
 
@@ -5079,6 +5105,7 @@
 - **Kab dobara khulega:** tathya badlein, ya owner khud khole.
 - **Kisne, kab:** owner, 2026-11-22. **Nishaan:** Salah maani.
 - **Asar (Claude):** niyam 4 ki wajah: Linux kernel 6.19 se 7.0.13 pe purane 8.0 crash karte ya band hote hain; laptop ka WSL kernel abhi 6.18.58 ([RISKS.md](RISKS.md) §2.8, §2.11). Niyam 13 ki kanooni detail (D-255, CL-104) Lawyer (AI) ne nahi dekhi.
+- **Jod (owner, 2026-11-22, D-436):** Lawyer (AI) ne jaancha (2026-11-22): niyam 13 ka Privacy page wala vakya ab Ola ki bhoomika saaf batata hai ([COMPLIANCE.md](COMPLIANCE.md) §14.2 row 6).
 
 ### D-426. PRODUCT.md aur roles ki poori list
 
@@ -5147,6 +5174,85 @@
 - **Kab dobara khulega:** koi skill badle.
 - **Kisne, kab:** owner, 2026-11-22. **Nishaan:** Salah maani.
 - **Asar (Claude):** manual skills ke saajhe niyam se milta hai; skill badle to manual bhi usi badlav me.
+
+### D-433. Progress % ka niyam
+
+- **Faisla:** progress [PROJECT_PLAN.md](PROJECT_PLAN.md) §2 ke hisaab se: har subtask ka size planning me (misaal S = 1, M = 2, L = 4 point); point tabhi gine jab subtask [RULES.md](RULES.md) §1 ki Definition of Done poori kare, adhoora 0. Do number: R1 ka % aur poore ecosystem ka %. Jis PR me subtask poora ho (ya jude, hate ya size badle), usi PR me PROJECT_PLAN ki table aur HANDOFF ki line.
+- **Wajah:** Claude ki salah, owner ne maani: bada kaam bada ginta hai, adhoora kaam number nahi badhata, aur R1 ka number alag dikhta hai.
+- **Chhode vikalp:** sirf subtasks ki ginti (chhota aur bada kaam barabar); hafton ka andaaza (andaaza aksar galat).
+- **Kab dobara khulega:** planning me sizes ka tareeka kaam na aaye, ya owner khud khole.
+- **Kisne, kab:** owner, 2026-11-22. **Nishaan:** Salah maani.
+- **Asar (Claude):** modules ki table planning ke saath banegi; tab tak kisi PR me progress badalne ko kuch nahi.
+
+### D-434. Purane docs ka hatna
+
+- **Faisla:** D-073 niyam 2 abhi: (1) abhi ke uncommitted docs ka commit, owner ke kehne pe; (2) ek git tag (misaal `discovery-old-docs`), jisse purane docs ek command se mil sakein; (3) purane docs ka folder aur purani CLAUDE file ek alag commit me hatana. Tag aur commits ka push owner ke kehne pe. Purana code D-073 niyam 3 ke hisaab se naye root setup ke saath hatega.
+- **Wajah:** Claude ki salah, owner ne maani: pehle ke kaam se lene layak sab naye docs me aa chuka hai (D-074 ki aakhri jaanch, D-426 se D-432), aur tag se purana kaam kabhi bhi mil sakta hai.
+- **Chhode vikalp:** planning ke baad (planning me galti se purana doc padhne ka khatra); Lawyer (AI) ki jaanch ke baad (wo run purane docs nahi padhta).
+- **Kab dobara khulega:** owner khud khole.
+- **Kisne, kab:** owner, 2026-11-22. **Nishaan:** Salah maani.
+- **Asar (Claude):** commit aur hatana owner ki alag haan ke baad hi (destructive kaam). Hatane ke baad Claude ki memory se bhi purane folders ke hawale hatenge.
+
+### D-435. Lawyer (AI) ka chhota doosra run
+
+- **Faisla:** Lawyer (AI) ka ek chhota run, sirf un 18 faislon pe jinke baad uski raay nahi: D-284, D-289, D-303, D-305, D-309, D-320, D-321, D-323, D-324, D-333, D-337, D-341, D-347, D-350, D-369, D-377, D-420, D-425. Agent report alag local file me likhe, seedha naye docs me nahi; main session jaanche, aur nateeje sawalon ke roop me owner ke saamne.
+- **Wajah:** Claude ki salah, owner ne maani: D-257 ke hisaab se AI Lawyer hi project ka lawyer hai, aur Privacy page jaise user ke saamne aane wale hisse bina jaanch ke na rahein.
+- **Chhode vikalp:** nahi (in faislon ki kanooni detail jaanchi hi nahi jaati); planning ke baad (jaanch bikhri aur der se).
+- **Kab dobara khulega:** owner khud khole.
+- **Kisne, kab:** owner, 2026-11-22. **Nishaan:** Salah maani.
+- **Asar (Claude):** run 2026-11-22 ko shuru (5-hour lagbhag 45%, weekly 39%), ek waqt me ek agent (D-005).
+
+### D-436. Lawyer (AI) ke chhote run ke sudhaar
+
+- **Faisla:** Lawyer (AI) ke chhote run (D-435) ke 14 sudhaar docs me:
+  1. Data ki jagah ([COMPLIANCE.md](COMPLIANCE.md) §14.2 row 7, CL-107), har provider ka likhit DPA, aur sehat ki consent me bahar rakhne ki baat (row 4, D-165).
+  2. Ola ki bhoomika: processor, aur apne kaam ke liye alag data fiduciary (D-255); address form pe Ola ki suchna ki line ([DESIGN.md](DESIGN.md) DS-10.1).
+  3. Privacy page pe Ola (row 6).
+  4. Fonts ki metadata aur OFL (DS-4.1, CL-125).
+  5. Icons ke license notice aur sign-in ke logos (DS-6.15, CL-125).
+  6. Invoice ke email me "This is not a tax invoice" (D-289).
+  7. Private files ka kho jaana breach ([OPERATIONS.md](OPERATIONS.md) §6 niyam 1).
+  8. Delete ke baad review se link hatna ([ARCHITECTURE.md](ARCHITECTURE.md) §10.3, row 8).
+  9. Band FY ki export ka India backup aur Registrar ki jaankari (CL-131).
+  10. `tech` class ki shart aur test (ARCHITECTURE §10.3 niyam 4).
+  11. CERT-In ki ghadi (OPERATIONS §8 niyam 2) aur doosre on-call insaan ki nazar (COMPLIANCE §13).
+  12. Data leak ki paribhasha (OPERATIONS §8 niyam 3).
+  13. Logs ke 180 din (R-048).
+  14. Testers ka alias (D-377).
+
+  In 18 faislon me Lawyer (AI) ki raay ki Jod line.
+- **Wajah:** Claude ki salah, owner ne maani: user ke saamne aane wale hisse (Privacy page, address form, Credits, emails) aur kanoon ki ghadi wale niyam (breach, CERT-In) kanoon ke hisaab se hon.
+- **Chhode vikalp:** kuch hi sudhaar (owner ne koi nahi chuna); koi nahi (Privacy page aur breach ke niyam kanoon se kam).
+- **Kab dobara khulega:** koi kanoon ya provider ki shart badle, ya owner khud khole.
+- **Kisne, kab:** owner, 2026-11-22. **Nishaan:** Salah maani.
+- **Asar (Claude):** Lawyer (AI) ka Ola wala daawa main session ne Ola ki Privacy Policy ke text se milaya (2026-11-22). Kuch kanoon usne sirf secondary sources se dekhe: Companies (Accounts) Rules rule 3, CGST rule 48 aur 57, Consumer Protection Act s.2(47), MSMED s.15, aur IT Rules ke 2026 ke badlav. Providers ke DPA aur Ola ki End User Terms usne nahi padhi.
+
+### D-437. Address screen pe Ola ka map
+
+- **Faisla:** address screen pe pehle form dikhta hai. Ola ka map aur search sirf "Find on map" ya "Use my current location" dabane pe khulte hain, Ola wali ek line ki suchna ke saath. D-347 ke saare raaste (form, search, pin, current location) waise hi rehte hain.
+- **Wajah:** Claude ki salah, owner ne maani: data sirf customer ki apni pehal pe Ola tak jaata hai (DPDP s.6(1)), kyunki Ola us data pe apni policy chalata hai, jisme location wale ads bhi hain.
+- **Chhode vikalp:** screen khulte hi map (bina pehal data jaata hai); autocomplete aur geocoding server ke raaste (512 MB pe bojh, aur Ola ki terms me proxy ki ijazat jaanchni padti).
+- **Kab dobara khulega:** Ola ki policy badle, ya owner khud khole.
+- **Kisne, kab:** owner, 2026-11-22. **Nishaan:** Salah maani.
+- **Asar (Claude):** ek tap zyada. [DESIGN.md](DESIGN.md) DS-10.1 aur SR-091 me niyam.
+
+### D-438. Account delete pe reviews ka vikalp
+
+- **Faisla:** delete ke baad reviews default me bina naam ke rehte hain (D-305). Delete screen pe "Also delete my reviews" ka vikalp hota hai, pehle se tick nahi; customer chune to uske reviews bhi hat jaate hain.
+- **Wajah:** Claude ki salah, owner ne maani: rating zyadatar sach rehti hai, aur customer ke haath me control bhi (DPDP s.12(3)).
+- **Chhode vikalp:** reviews hamesha rahein, sirf maang pe support se hatana; delete pe saare reviews hatna (brand ki rating achanak badal sakti).
+- **Kab dobara khulega:** owner khud khole.
+- **Kisne, kab:** owner, 2026-11-22. **Nishaan:** Salah maani.
+- **Asar (Claude):** [FLOWS.md](FLOWS.md) FL-5 kadam 1 me vikalp, aur ARCHITECTURE §10.3 ki catalog row me.
+
+### D-439. Kanooni rok wali private files pe lock
+
+- **Faisla:** kanooni rok wali private files ke folder (prefix) pe object storage ka lock, rok ki muddat jitna, lagbhag 13 May 2027 se ([ARCHITECTURE.md](ARCHITECTURE.md) §7 niyam 11).
+- **Wajah:** Claude ki salah, owner ne maani: private files ka kho jaana personal data breach hai (DPDP s.2(u)), aur rok wali file 1 saal rakhni hai (rule 8(3)); lock se code ki galti se bhi file nahi mitti, aur ye ₹0 ho sakta hai.
+- **Chhode vikalp:** hafte ki doosri copy (personal data ki ek aur copy aur owner ka kaam); jaisa tha (kho jaane pe breach aur rule 8(3) ki chook).
+- **Kab dobara khulega:** lock free plan pe na mile, ya owner khud khole.
+- **Kisne, kab:** owner, 2026-11-22. **Nishaan:** Salah maani.
+- **Asar (Claude):** lock ki muddat retention ke niyam se hi tay hoti hai, warna file samay pe nahi mitti. Lock free plan pe milta hai ya nahi, ye [OPEN_QUESTIONS.md](OPEN_QUESTIONS.md) §2 ki object storage wali jaanch me.
 
 ## Change log
 
@@ -5280,3 +5386,5 @@
 | v1.14.35 | 2026-11-22 | D-418 se D-425 aaye (§2 ki jaanch ke sawal Q-354 se Q-361); D-109, D-284, D-287, D-322, D-341, D-347, D-374 aur D-403 me Jod, D-295 me Badla.                                                                                                                                                                                                                                                                                                                                               |
 | v1.14.36 | 2026-11-22 | D-426 se D-432 aaye (pehle ke kaam ke bache hisse; Q-362 se Q-368); D-002 aur D-017 me Jod.                                                                                                                                                                                                                                                                                                                                                                                                 |
 | v1.14.37 | 2026-11-22 | D-426 me State Admin (owner ka chunav, Q-369): state ka area aur operations ka head.                                                                                                                                                                                                                                                                                                                                                                                                        |
+| v1.14.38 | 2026-11-22 | D-433 se D-435 aaye (progress %, purane docs ka hatna, Lawyer ka chhota run; Q-370 se Q-372).                                                                                                                                                                                                                                                                                                                                                                                               |
+| v1.14.39 | 2026-11-22 | D-436 se D-439 aaye (Lawyer ke chhote run se; Q-373 se Q-376); 20 faislon me Lawyer (AI) ki raay ki Jod line.                                                                                                                                                                                                                                                                                                                                                                               |

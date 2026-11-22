@@ -1,6 +1,6 @@
 # OPERATIONS: Beautinique
 
-> **Status:** v1.1.10 (2026-11-22). System chalane ka manual. Cheezein ek-ek karke judengi.
+> **Status:** v1.1.11 (2026-11-22). System chalane ka manual. Cheezein ek-ek karke judengi.
 
 ## Is file me kya aayega
 
@@ -90,7 +90,7 @@ DevOps / SRE Architect ki raay se (D-257 ka kram), owner ki haan ke baad (D-326 
 
 ## 6. Backup aur restore (D-331)
 
-1. Backup me: saare Atlas clusters (Extended JSON, har collection ek file), Neon (`pg_dump` custom format, read-only backup role, usi major version ke container se) aur band FY ki export files (D-309). Backup me nahi: media provider ki files (D-303: product images seller se dobara; daawe aur saboot ki files apne samay pe waise bhi mitti hain), Redis (cache aur queue, dobara banta hai), aur providers ke logs.
+1. Backup me: saare Atlas clusters (Extended JSON, har collection ek file), Neon (`pg_dump` custom format, read-only backup role, usi major version ke container se) aur band FY ki export files (D-309). Backup me nahi: media provider ki files (D-303: product images seller se dobara; daawe aur saboot ki files apne samay pe waise bhi mitti hain), Redis (cache aur queue, dobara banta hai), aur providers ke logs. Private files (KYC, daawe, saboot, kanooni rok) ka kho jaana personal data breach maana jaata hai (§8 niyam 3); kanooni rok wali files ka bachav object storage ke lock se (D-439).
 2. Providers ke apne backup pe bharosa nahi: Atlas ke free cluster pe backup nahi milta, aur Neon free me sirf 6 ghante ka instant restore aur ek manual snapshot (jaancha 2026-11-21). Neon ka 6 ghante ka restore sirf "abhi hui galti" ke liye.
 3. Kab (D-323): har release se pehle (har contract wale release se pehle zaroor), aur hafte me ek baar (misaal Sunday). Aakhri backup 8 din se purana ho to hafte ki jaanch (§9) me laal nishaan.
 4. Kahan: repo ke andar git se bahar wala folder, chaar pehron ke saath (D-013); encrypted; laptop pe aakhri 3; kabhi CI artifact ya cloud sync wale folder me nahi.
@@ -118,8 +118,8 @@ DevOps / SRE Architect ki raay se (D-257 ka kram), owner ki haan ke baad (D-326 
 ## 8. Incident ke runbooks (D-333)
 
 1. Har runbook ek hi dhaanche me: pehchaan, gambhirta, turant rokna, jaanch, theek aur wapsi, khabar, seekh. Gambhirta SR-084 ke teen level.
-2. Jawab ka samay (D-324): ops inbox din ke tay samay pe (misaal 09:00, 14:00, 20:00 IST); gambhirta 1 ka browser push raat me bhi, aur alert dekhte hi kaam; gambhirta 2 aur 3 subah.
-3. **Data leak** (D-248): CERT-In ko incident pata chalne ke 6 ghante me; Board ko bina der shuruaati suchna aur 72 ghante me poori report; users ko leak pakka hote hi, bina der. "Pakka" tab maana jaaye jab audit ya logs se dikhe ki personal data kisi anadhikrit tak gaya, ya aisa secret leak hua jisse data padha ja sakta tha. Users ke email, in-app sandesh aur site ki patti ke draft pehle se taiyar; leak ke emails din ki chhat me OTP ke saath sabse aage.
+2. Jawab ka samay (D-324): ops inbox din ke tay samay pe (misaal 09:00, 14:00, 20:00 IST); gambhirta 1 ka browser push raat me bhi, aur alert dekhte hi kaam; gambhirta 2 aur 3 subah. CERT-In ke 6 ghante us alert ke samay se gine jaate hain jisne incident pakda; 6 ghante me jitni jaankari ho utni report, baaki baad me (CERT-In FAQ Q30; D-436).
+3. **Data leak** (D-248): CERT-In ko incident pata chalne ke 6 ghante me; Board ko bina der shuruaati suchna aur 72 ghante me poori report; users ko breach ka bharosa hote hi, bina der. Data leak ka matlab DPDP s.2(u) ka personal data breach: personal data ka bina haq istemaal, khulna, badalna, mitna, ya uski pahunch kho jaana jo restore se wapas na aaye. Ghadi tab chalti hai jab kisi alert, log ya report se itna bharosa ho ki breach hua hai; poori jaanch ka intezaar nahi. Board aur users ko pehli suchna tab jitna pata ho utni, baad me update; 72 ghante ki report me users ko di gayi suchna ka record bhi (D-436). Users ke email, in-app sandesh aur site ki patti ke draft pehle se taiyar; leak ke emails din ki chhat me OTP ke saath sabse aage.
 4. **Secret leak** (repo, logs ya kahin aur): pehle secret badlo, phir jaanch. Public repo me history saaf karna ilaaj nahi: secret ko leak maan ke hi chalo.
 5. **Provider account pe kabza** (GitHub, Render, Vercel, Atlas, Neon, payment gateway, email): sessions aur tokens band, MFA dobara, Render ka auto-deploy band, us account ke saare secrets badlo, audit aur git history dekho.
 6. **Laptop kho jaaye ya chori ho:** laptop pe jo bhi pahunch thi (DB credentials, GitHub, password manager ka session) sab badlo; backups encrypted hain, key password manager me.
@@ -186,3 +186,4 @@ DevOps / SRE Architect ki raay se (D-257 ka kram), owner ki haan ke baad (D-326 
 | v1.1.8  | 2026-11-22 | §3 niyam 9 aur 10, naya §12 Security ke record (security review batch 7, D-414).                                                                                                                               |
 | v1.1.9  | 2026-11-22 | §1 local Atlas container, PgBouncer, MongoDB 8.0.30 ka pin aur Valkey `noeviction`; §3 rollback ke baad auto-deploy; §5 do ping (D-424); §6 aur §9 Atlas ki IP list (D-421); §12 niyam 4 private fork (D-425). |
 | v1.1.10 | 2026-11-22 | §4 niyam 11: nayi env key tabhi jab code padhe (D-430).                                                                                                                                                        |
+| v1.1.11 | 2026-11-22 | §6 niyam 1 private files ka kho jaana breach (D-439); §8 niyam 2 CERT-In ki ghadi aur niyam 3 breach ki paribhasha (D-436).                                                                                    |

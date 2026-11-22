@@ -1,6 +1,6 @@
 # DESIGN: Beautinique
 
-> **Status:** v1.1.12 (2026-11-22). Saare apps ka UI design system (§1 se §10). Cheezein ek-ek karke, owner ki haan ke baad judti hain.
+> **Status:** v1.1.13 (2026-11-22). Saare apps ka UI design system (§1 se §10). Cheezein ek-ek karke, owner ki haan ke baad judti hain.
 
 ## Is file me kya aayega
 
@@ -120,7 +120,7 @@ Har niyam ka id `DS-<section>.<n>`. Tokens ke naam code me waise hi (CSS custom 
 
 **Kis par:** D-341, ARCHITECTURE §10.1 (integer paise), D-308. **R1.**
 
-1. **DS-4.1 Fonts:** `--font-sans`: "Plus Jakarta Sans", system-ui, sans-serif; `--font-display` (sirf Customer app ki headings aur banners): "Fraunces", Georgia, serif; `--font-mono`: ui-monospace, Menlo, Consolas, monospace. Dono variable woff2, apne app ke saath served, Latin subset jisme ₹ (U+20B9) ho: Google Fonts ka `latin` subset ₹ nahi rakhta, to `latin` aur U+20B9 ka apna subset (D-341, D-425); `font-display: swap`; sirf body font ka preload. License (OFL) CL-125 ki list me.
+1. **DS-4.1 Fonts:** `--font-sans`: "Plus Jakarta Sans", system-ui, sans-serif; `--font-display` (sirf Customer app ki headings aur banners): "Fraunces", Georgia, serif; `--font-mono`: ui-monospace, Menlo, Consolas, monospace. Dono variable woff2, apne app ke saath served, Latin subset jisme ₹ (U+20B9) ho: Google Fonts ka `latin` subset ₹ nahi rakhta, to `latin` aur U+20B9 ka apna subset (D-341, D-425); subset me font ki copyright aur license ki metadata (name table ID 0, 13, 14) bani rahe aur build ka test use jaanche; har font ka OFL.txt font files ke saath (D-436); `font-display: swap`; sirf body font ka preload. License (OFL) CL-125 ki list me.
 2. **DS-4.2 Size scale** (size / line-height, px): `xs` 12/16, `sm` 14/20, `base` 16/24, `lg` 18/28, `xl` 20/28, `2xl` 24/32, `3xl` 30/36, `4xl` 36/40. Customer aur Delivery me body 16 se chhota nahi; staff ki dense tables me 14 tak; 12 sirf badge aur caption me. Inputs hamesha 16 (phone pe apne aap zoom na ho).
 3. **DS-4.3 Weights:** 400 body, 500 labels aur nav, 600 headings aur buttons, 700 sirf daam aur bade aankde.
 4. **DS-4.4 Ank:** daam, quantity, tables, order number aur codes `tabular-nums`. Daam hamesha `font-sans` me.
@@ -173,7 +173,7 @@ Har niyam ka id `DS-<section>.<n>`. Tokens ke naam code me waise hi (CSS custom 
 12. **DS-6.12 Pakka karne wale dialog:** cancel, delete, payout, refund jaise kaam pe ConfirmDialog cheez ka naam aur asar likhe ("Cancel 1 item: Lip Tint, Ruby. ₹499 will be refunded to your original payment method."); "Cancel" aur "Confirm" ek size ke; destructive button pe `error` tone.
 13. **DS-6.13 Optimistic UI** sirf wishlist, filters aur sort pe; paisa, stock, order aur status ke kaam pe kabhi nahi.
 14. **DS-6.14 Gol kone wale dibbe me scroll:** dibba khud scroll nahi karta; dibba `overflow: hidden` se kone kaat-ta hai aur andar ka hissa scroll karta hai, patle theme wale scrollbar ke saath (table, picker ki list, dialog), taaki scrollbar kone se bahar na dikhe.
-15. **DS-6.15 Credits page (D-350):** har app me ek "Credits" page, sab apps me ek hi saajha page component. Har package apna credit component deta hai (icons, aage charts, Ola Maps jaise); app sirf un packages ke components jodta hai jo wo use karta hai. Har component me naam, author, license aur link. Link footer ya account menu me (DS-8.10 ki jagah ke paas). Map pe Ola Maps ka attribution map pe bhi rehta hai (DS-7.10).
+15. **DS-6.15 Credits page (D-350):** har app me ek "Credits" page, sab apps me ek hi saajha page component. Har package apna credit component deta hai (icons, aage charts, Ola Maps jaise); app sirf un packages ke components jodta hai jo wo use karta hai. Har component me naam, author, license aur link. Link footer ya account menu me (DS-8.10 ki jagah ke paas). Map pe Ola Maps ka attribution map pe bhi rehta hai (DS-7.10). Har set ka poora license notice (MIT, ISC, aur Apache-2.0 ka NOTICE ho to wo bhi); fonts ka naam, copyright aur OFL 1.1; aur line "Brand names and logos are trademarks of their owners." Sign-in ke buttons (Google, LinkedIn, GitHub) un companies ke branding niyamon aur official logos se (D-436).
 
 ## 7. Icons, logo, images aur media
 
@@ -245,7 +245,7 @@ Har niyam ka id `DS-<section>.<n>`. Tokens ke naam code me waise hi (CSS custom 
 
 **Kis par:** SR-001, SR-004 se SR-006, SR-010, SR-012, SR-013, SR-015, SR-019 se SR-021, SR-023, SR-039, SR-040, SR-052, SR-054, D-053, D-185, D-195, D-254, ARCHITECTURE §5 niyam 2, 7. **R1.**
 
-1. **DS-10.1 Browser ki ijazatein:** Customer app me camera aur location header se band (SR-001); location sirf D-347 ke button pe, tap ke baad aur pehle ek line ki wajah. Location ki `accuracy` misaal 100 m se zyada ho to pin apne aap nahi; map us jagah ke paas khule aur sandesh "Move the pin to your door" (D-423). Delivery app me camera aur location pehli baar se pehle app ki samjhane wali screen; mana ho to wapas chalu karne ka tareeka dikhe (D-351).
+1. **DS-10.1 Browser ki ijazatein:** Customer app me camera aur location header se band (SR-001); location sirf D-347 ke button pe, tap ke baad aur pehle ek line ki wajah. Location ki `accuracy` misaal 100 m se zyada ho to pin apne aap nahi; map us jagah ke paas khule aur sandesh "Move the pin to your door" (D-423). Address screen pe pehle form; Ola ka map sirf "Find on map" ya "Use my current location" dabane pe khule, aur map ke paas line "Map search and pin use Ola Maps. What you type and the pin go to Ola under its Privacy Policy.", Ola ki policy ki link ke saath (D-436, D-437). Delivery app me camera aur location pehli baar se pehle app ki samjhane wali screen; mana ho to wapas chalu karne ka tareeka dikhe (D-351).
 2. **DS-10.2 StepUpDialog (D-185):** kaam ka naam ("Approve payout batch PB-…"), 6 ank ka CodeInput, 5 minute ki khidki ka nishaan; code sahi to wahi kaam chale, page na badle.
 3. **DS-10.3 Sign-in ke jawab:** anjaan aur registered email pe ek hi sandesh ("If an account exists, we've sent a code.") (SR-019); code ka 10 minute aur 3 baar dobara bhejna ulti ginti ke saath (SR-015); seema pe saaf sandesh (SR-020); `next` sirf apna relative path (SR-021).
 4. **DS-10.4 Password:** 12 se 128 akshar, koi "capital aur number" ka niyam nahi; sandesh sirf "Too short" aur "This password has appeared in a data breach" (SR-013); dikhao/chhupao.
@@ -274,3 +274,4 @@ Har niyam ka id `DS-<section>.<n>`. Tokens ke naam code me waise hi (CSS custom 
 | v1.1.10 | 2026-11-22 | DS-6.10: polling aur ping bina kaam ka samay nahi badhate (security review batch 2, D-409).                                                                                                                                                         |
 | v1.1.11 | 2026-11-22 | DS-7.10: map ka code bundle me, bahar ki script nahi (security review batch 5, D-412).                                                                                                                                                              |
 | v1.1.12 | 2026-11-22 | DS-4.1 ₹ ka apna subset, DS-8.1 `wcag22aa`, DS-10.10 Lighthouse ka median (D-425); DS-10.1 location ki accuracy (D-423); DS-10.6 emails me link nahi (D-419).                                                                                       |
+| v1.1.13 | 2026-11-22 | DS-4.1 font ki metadata, DS-6.15 license notice aur logos, DS-10.1 map pehal pe aur Ola ki line (D-436, D-437).                                                                                                                                     |
