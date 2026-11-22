@@ -1,6 +1,6 @@
 # OPEN QUESTIONS: Beautinique
 
-> **Status:** v1.8.2 (2026-11-22). Khule sawal, aage ke topics aur jaanchna baaki. Cheezein ek-ek karke judengi.
+> **Status:** v1.8.5 (2026-11-22). Khule sawal, aage ke topics aur jaanchna baaki. Cheezein ek-ek karke judengi.
 
 ## Is file me kya aayega
 
@@ -60,7 +60,6 @@ Claude ka kaam: owner ka faisla nahi chahiye, sirf saboot. Nateeja saboot ke saa
 | Neon: khula par khaali connection compute ko jagaye rakhta hai ya nahi: test                                                                                                                                                                                                                                | D-288, D-309                             | CU-ghante                                                            |
 | Node ke MongoDB driver me saade integer `int32` me jaate hain ya `double` me: test                                                                                                                                                                                                                          | D-310                                    | Paise ka money codec (`long`)                                        |
 | GitHub: public repo pe repo ka push protection muft chalu hota hai ya nahi (repo ki settings me dekhna)                                                                                                                                                                                                     | SR-080, D-327, D-338                     | CI ka secret scan asli pehra hai; repo ka pehra mile to ek aur parat |
-| Area settings (D-107, D-117, D-109) aur ingredient master list (D-132) kis app aur role me: planning me module ke saath (D-010, D-017). Seller Ops ki manzoori, synonyms aur HSN table Admin app me pehle se ([FLOWS.md](FLOWS.md), [ACCEPTANCE.md](ACCEPTANCE.md) AC-ADMIN-5)                              | D-010, D-017                             | Apps ki screens aur permissions                                      |
 | Installed app (PWA) me payment: gateway UPI app ke intent aur bank ke 3DS page ke baad wapas app me aata hai ya nahi (test mode, asli phone pe)                                                                                                                                                             | D-345, SR-048                            | Payment ka flow                                                      |
 | Camera ka `capture`: Android Chrome aur iOS Safari pe file input seedha camera kholta hai aur gallery rukti hai ya nahi (spec me guarantee nahi; asli phone pe)                                                                                                                                             | SR-055, D-072                            | Delivery ka saboot                                                   |
 | Ola Maps: geocoding ke nateeje (lat/lng) apne database me rakhna: terms me caching ka niyam nahi mila; vyakhya Lawyer (AI) se                                                                                                                                                                               | D-347                                    | Address ka data rakhna                                               |
@@ -7189,140 +7188,250 @@ Claude ka kaam: owner ka faisla nahi chahiye, sirf saboot. Nateeja saboot ke saa
 - **R1 ya baad me:** R1.
 - **Owner ka jawab (2026-11-22):** **(a)**, saare 13 sudhaar. Record: [DECISIONS.md](DECISIONS.md) D-425.
 
+### Q-362. PRODUCT.md me kya aaye, aur roles ki poori list kaisi ho?
+
+- **Status:** `Tay`. Topic: B2 (apps aur roles), B16 (docs).
+- **Sawal:** [PRODUCT.md](PRODUCT.md) khaali hai, jabki D-017 aur kam se kam 8 faisle "roles ki list (D-017) me" kehte hain, aur wo list kahin likhi nahi. PRODUCT me kya aaye?
+- **Kyun zaroori:** har module ki `TASK.md` ki screens aur permissions roles pe tiki hain; aur product ka saar, business model aur scope abhi sirf faislon me bikhre hain.
+- **Vikalp:**
+  - **(a) Poora PRODUCT.md:** product ka saar, business model, har app ke roles (kaam, kab chalu, faisla), kaun kise report kare, bina login wale kaam, jo roles nahi chahiye, apps, launch aur scope; sab faislon ki links ke saath. Roles naye faislon se: State Admin ki jagah poore desh ki Seller Ops team (D-084), Admin sub-district aur Super Admin district (D-015, SR-035), city ka level nahi (D-015), listing ka content staff nahi badalta (D-098).
+  - **(b) Sirf roles ki list:** baaki hisse baad me.
+  - **(c) Abhi nahi:** planning me modules ke saath.
+- **Salah:** **(a)**. Ek jagah poori tasveer, aur faislon ki khuli links band hoti hain.
+- **Trade-off:** (a) me ek lambi file, aur jo roles faislon me nahi the unke kaam Claude ki salah hain. (c) me TASK.md ke permissions bina list ke bante.
+- **R1 ya baad me:** R1 se pehle (planning ki neev).
+- **Owner ka jawab (2026-11-22):** **(a)**, poora PRODUCT.md: product ka saar, business model, 11 apps ke roles naye faislon ke hisaab se, reporting, bina login wale kaam, jo roles nahi chahiye, apps, launch aur scope. Record: [DECISIONS.md](DECISIONS.md) D-426.
+
+### Q-363. Roles aur permissions ka model kahan aur kaisa?
+
+- **Status:** `Tay`. Topic: B2 (roles), B14 (security).
+- **Sawal:** permission ke naam ka dhaancha, scope ke type, grant, kaun kise appoint kare aur kaam ka bantwara abhi sirf SR-032 aur SR-037 me thoda hai. [ARCHITECTURE.md](ARCHITECTURE.md) me naya hissa aaye?
+- **Kyun zaroori:** identity aur har service ka `authorize` isi model pe banta hai; scope nayi seedhi (D-015) pe hona chahiye.
+- **Vikalp:**
+  - **(a) ARCHITECTURE §11:** permission ka naam `<service>.<resource>.<action>`; role data me; grant umar ke saath; scope `self`, `seller`, `state`, `district`, `subDistrict`, `hub`, `warehouse`, `national`, `global`; appointment ki table; kaam ke bantwara ke 6 niyam, har ek ka test.
+  - **(b) Planning me identity ke TASK.md me.**
+- **Salah:** **(a)**. Ye poore system ka niyam hai, kisi ek module ka nahi.
+- **Trade-off:** (a) me appointment ki table aur "fees aur policies me do account" Claude ki salah hain. (b) me har module apna andaaza lagata.
+- **R1 ya baad me:** R1.
+- **Owner ka jawab (2026-11-22):** **(a)**, ARCHITECTURE §11 me roles aur permissions ka model. Record: [DECISIONS.md](DECISIONS.md) D-427.
+
+### Q-364. Saajhe packages ka naksha?
+
+- **Status:** `Tay`. Topic: B15 (technical).
+- **Sawal:** saajhe packages (contracts, typed client, app-shell, components, auth ka UI, tables, maps waghera) ki list kahin nahi. Kahan aaye?
+- **Kyun zaroori:** modules ki dependencies inhi pe tiki hain, aur 11 apps ek jaise tabhi bante hain jab saajha kaam ek jagah ho.
+- **Vikalp:**
+  - **(a) ARCHITECTURE §12:** category, misaal naam aur kaam ki table; pakki list PROJECT_PLAN ke modules ke saath.
+  - **(b) Seedha PROJECT_PLAN me:** abhi planning khuli nahi.
+- **Salah:** **(a)**. Naksha architecture ka hai; pakki list planning me.
+- **Trade-off:** (a) me naam misaal hain aur planning me badal sakte. (b) planning stage ke bina nahi.
+- **R1 ya baad me:** R1.
+- **Owner ka jawab (2026-11-22):** **(a)**, ARCHITECTURE §12 me saajhe packages ki table, naam misaal. Record: [DECISIONS.md](DECISIONS.md) D-428.
+
+### Q-365. Code ke niyam aur testing ke jaal RULES me?
+
+- **Status:** `Tay`. Topic: B15 (technical), B16 (docs).
+- **Sawal:** D-002 kehta hai conventions RULES me ek-ek karke aayenge, par [RULES.md](RULES.md) §3 (Code) khaali hai, aur Conventional Commits kisi doc me nahi. Kya aaye?
+- **Kyun zaroori:** code shuru hone se pehle naming, validation, config, hard-coding ki rok, role ke naam se faisla na karna aur frontend ke niyam tay hon; aur pehle ke kaam ke jaane-pehchaane jaal tests me dobara na hon.
+- **Vikalp:**
+  - **(a) RULES §3 (CR-1 se CR-36) aur §4.8 (RT-49 se RT-55):** sabke liye, backend, frontend aur packages ke niyam (lint ke pehron ke saath), aur testing ke 7 jaal.
+  - **(b) Sirf §3:** jaal baad me.
+  - **(c) Code ke saath:** implementation me.
+- **Salah:** **(a)**. Niyam pehle se likhe hon to pehla code hi sahi bane.
+- **Trade-off:** (a) me lint ke kai pehre banane padte (har ek ke "galat" misaal wale test ke saath). (c) me shuru ka code baad me badalna padta.
+- **R1 ya baad me:** R1.
+- **Owner ka jawab (2026-11-22):** **(a)**, RULES §3 me code ke 36 niyam aur §4.8 me testing ke 7 jaal. Record: [DECISIONS.md](DECISIONS.md) D-429.
+
+### Q-366. RULES ke khaali §5, §6 aur §7?
+
+- **Status:** `Tay`. Topic: B16 (docs).
+- **Sawal:** [RULES.md](RULES.md) ki list me §5 (security aur privacy), §6 (docs) aur §7 (AI ke saath kaam) hain, par likhe nahi gaye. Inme kya aaye?
+- **Kyun zaroori:** RULES padhne wale ko sab niyam ek jagah se mil jaayein; zyadatar niyam CLAUDE.md aur SR me pehle se hain.
+- **Vikalp:**
+  - **(a) Links aur jo bacha:** har section me sahi doc ki links, aur bache niyam: nayi env key tabhi jab code padhe ([OPERATIONS.md](OPERATIONS.md) §4 niyam 11), har UI badlav asli browser me, aur har daawa source se.
+  - **(b) Section hata do:** list chhoti.
+- **Salah:** **(a)**. Har baat ek jagah rehti hai, aur RULES se raasta milta hai.
+- **Trade-off:** (a) me thodi dohraav jaisi links. (b) me RULES se kuch niyam chhoot jaate.
+- **R1 ya baad me:** R1.
+- **Owner ka jawab (2026-11-22):** **(a)**, §5 se §7 me links aur bache niyam, aur OPERATIONS §4 me env key ka niyam. Record: [DECISIONS.md](DECISIONS.md) D-430.
+
+### Q-367. GLOSSARY ke shabd?
+
+- **Status:** `Tay`. Topic: B16 (docs).
+- **Sawal:** [GLOSSARY.md](GLOSSARY.md) me sirf RTO hai, jabki docs bundle mode, outbox, grant, scope, switch aur live, FEFO, payable, payout jaise shabd baar-baar use karte hain. Kaunse shabd aayein?
+- **Kyun zaroori:** docs aur code ek bhasha bolein; naye session ya agent ko har shabd ka ek matlab mile.
+- **Vikalp:**
+  - **(a) Docs me baar-baar aane wale 51 shabd:** matlab aur faisle ki link ke saath, A se Z ke kram me.
+  - **(b) Shabd tab jab koi poochhe.**
+- **Salah:** **(a)**.
+- **Trade-off:** (a) me shabd badle to GLOSSARY bhi badalna. (b) me ek shabd ke kai matlab ban sakte.
+- **R1 ya baad me:** R1 se pehle.
+- **Owner ka jawab (2026-11-22):** **(a)**, 51 shabd matlab aur link ke saath. Record: [DECISIONS.md](DECISIONS.md) D-431.
+
+### Q-368. GIT_SKILLS ka manual?
+
+- **Status:** `Tay`. Topic: B16 (docs).
+- **Sawal:** [GIT_SKILLS.md](GIT_SKILLS.md) khaali hai, jabki skills ke saajhe niyam kehte hain ki insaan ka manual wahi hai. Kya aaye?
+- **Kyun zaroori:** implementation me roz ka flow (branch, commit, push, PR, sync, release) owner ke saamne ek jagah ho.
+- **Vikalp:**
+  - **(a) Poora manual:** ek nazar me, hamesha laagu niyam, branch ka flow, roz ka kaam, release, commit message, checks, aur skill rukne pe kya.
+  - **(b) Sirf commands ki table.**
+- **Salah:** **(a)**.
+- **Trade-off:** (a) me skills badlein to manual bhi badalna. (b) me rukne pe kya karna, ye nahi milta.
+- **R1 ya baad me:** R1 se pehle.
+- **Owner ka jawab (2026-11-22):** **(a)**, poora manual. Record: [DECISIONS.md](DECISIONS.md) D-432.
+
+### Q-369. State Admin ka kaam kya ho?
+
+- **Status:** `Tay`. Topic: B2 (apps aur roles).
+- **Sawal:** owner chahte hain ki roles me State Admin rahe (2026-11-22). [PRODUCT.md](PRODUCT.md) §3 me abhi State Admin nahi hai, kyunki do faislon ke baad uska purana kaam kisi aur ke paas hai: state ka switch aur live Master ke paas (D-015), aur sellers ki manzoori poore desh ki ek team ke paas (D-084). State Admin kya kare, aur kis app me?
+- **Kyun zaroori:** har state ke liye ek zimmedar milta hai jo uske districts, Super Admins aur state ke kanooni kaam sambhale; par uska kaam D-015 aur D-084 se takraana nahi chahiye, warna do roles ek hi kaam ka faisla karte.
+- **Vikalp:**
+  - **(a) State ka area aur operations ka head:** Super Admin app me, scope `state`. Kaam: apne state ke districts aur Super Admins ki nigrani aur unki appointment (Master → State Admin → Super Admin → Admin); naye district kholne ki tayyari; state ke kanooni kaam ki checklist (state ka GST aur TCS registration, warehouse ke licence, state ke gig-worker niyam; sab dummy); state ki escalations. State ka switch Master ke paas hi (D-015 jaisa), aur sellers ki manzoori poore desh ki team ke paas hi (D-084 jaisa).
+  - **(b) (a) ke saath state ka switch bhi:** state ka switch aur live State Admin kare; Master upar se kar sake, audit ke saath. D-015 ka "Master = State" badalta hai.
+  - **(c) (a) ke saath apne state ke sellers ki manzoori bhi:** jis state ke warehouse me maal aata hai, wahan ke sellers aur unke GSTIN ki jaanch us state ka State Admin kare; listing ki jaanch poore desh ki team hi kare. D-084 niyam 1 badalta hai.
+- **Salah:** **(a)**. State ka ek zimmedar milta hai, aur D-015 aur D-084 jaise hain: state jaisa bada switch owner ke paas rehta hai, aur poore India ke sellers (D-036) ek hi tarah jaanche jaate hain.
+- **Trade-off:** (a) me ek role aur ek account zyada, aur state ka switch abhi bhi Master ka kaam. (b) me Master ka kaam kam, par state live karne jaisa bada kaam ek level neeche. (c) me har naye state ke saath seller ki nayi team, niyam state-state me alag hone ka khatra, aur kai warehouse states wala seller kai State Admins ke paas.
+- **R1 ya baad me:** R1 (area ka module R1 me).
+- **Owner ka jawab (2026-11-22):** **(a)**, State Admin state ka area aur operations ka head: Super Admin app me, scope `state`; apne state ke districts aur Super Admins ki nigrani aur appointment, naye district kholne ki tayyari, state ke kanooni kaam ki checklist aur escalations. State ka switch Master ke paas aur sellers ki jaanch poore desh ki team ke paas, jaisa tha. Record: [DECISIONS.md](DECISIONS.md) D-426.
+
 ## Change log
 
-| Version | Date       | Badlav                                                                                                                                                                                    |
-| ------- | ---------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| v1.0.0  | 2026-11-17 | Khaali file bani.                                                                                                                                                                         |
-| v1.1.1  | 2026-11-18 | §1 aage ke topics (B1 se B16) aur §2 jaanchna baaki bane.                                                                                                                                 |
-| v1.2.1  | 2026-11-18 | §3 Sawal bana; Q-001 (warehouse me rakhe maal ka maalik).                                                                                                                                 |
-| v1.2.2  | 2026-11-18 | Q-001 tay: (a) brand maalik (D-060).                                                                                                                                                      |
-| v1.2.3  | 2026-11-18 | Q-002 (customer ko dikhne wala price kaun tay kare).                                                                                                                                      |
-| v1.2.4  | 2026-11-18 | Q-002 tay: (c) brand + platform ke niyam (D-061).                                                                                                                                         |
-| v1.2.5  | 2026-11-18 | Q-003 (expire hone wala ya na bika maal).                                                                                                                                                 |
-| v1.2.6  | 2026-11-18 | Q-003 tay: (b) brand ka nuksaan + platform ke niyam (D-062).                                                                                                                              |
-| v1.2.7  | 2026-11-18 | Q-004 (hamare haath se hue nuksaan ki bharpai ka daam).                                                                                                                                   |
-| v1.2.8  | 2026-11-18 | Q-004 tay: (b) bikne wala daam (D-063).                                                                                                                                                   |
-| v1.2.9  | 2026-11-18 | Q-005 (alag batches ka alag MRP).                                                                                                                                                         |
-| v1.2.10 | 2026-11-18 | Q-005 tay: (b) batch ke hisaab se (D-064).                                                                                                                                                |
-| v1.2.11 | 2026-11-18 | Q-006 (Beauty Pro buyers ka daam).                                                                                                                                                        |
-| v1.2.12 | 2026-11-18 | Q-006 tay: (b) Pro daam (D-065); Q-007 (storage fee).                                                                                                                                     |
-| v1.2.13 | 2026-11-18 | Q-007 tay: (c) muft, phir fee (D-066); Q-008 (product page pe expiry).                                                                                                                    |
-| v1.2.14 | 2026-11-18 | Q-008 tay: (b) exact expiry (D-067); Q-009 (nuksaan ki vasooli).                                                                                                                          |
-| v1.2.15 | 2026-11-18 | Q-009 tay: (b) saboot se vasooli (D-068); Q-010 (Beauty Pro ki jaanch).                                                                                                                   |
-| v1.2.16 | 2026-11-18 | Q-010 tay: (b) saboot + staff (D-069); Q-011 (Pro daam ki quantity seema).                                                                                                                |
-| v1.2.17 | 2026-11-18 | Q-011 tay: (b) seller tay kare (D-070).                                                                                                                                                   |
-| v1.2.18 | 2026-11-18 | Q-012 (bachi fee) aur Q-013 (parcel nahi mila par "delivered").                                                                                                                           |
-| v1.2.19 | 2026-11-18 | Q-012 tay: (b) seema ke baad kadam (D-071).                                                                                                                                               |
-| v1.2.20 | 2026-11-18 | Q-013 tay: (b) saboot se faisla (D-072).                                                                                                                                                  |
-| v1.2.21 | 2026-11-18 | Q-014 (pehle ka kaam kab aur kaise hatega).                                                                                                                                               |
-| v1.2.22 | 2026-11-18 | Q-014 tay: (b) do kadam me (D-073).                                                                                                                                                       |
-| v1.2.23 | 2026-11-18 | Q-015 (pehle ke kaam se kya naye me aaye, list kab aur kaise).                                                                                                                            |
-| v1.2.24 | 2026-11-18 | Q-015 tay: (b) chalti list discovery ke saath (D-074).                                                                                                                                    |
-| v1.2.25 | 2026-11-18 | Q-016 (ek brand ka maal kai sellers bechna chahein).                                                                                                                                      |
-| v1.2.26 | 2026-11-18 | Q-016 tay: (a) ek brand, ek seller (D-075); Q-017 (variants kin cheezon se).                                                                                                              |
-| v1.2.27 | 2026-11-18 | Q-017 tay: (b) category ke hisaab se (D-076); Q-018 (kai sellers wala order aur parcel).                                                                                                  |
-| v1.2.28 | 2026-11-18 | Q-018 tay: (c) normal ek parcel (D-077); Q-019 (seller ki fees aur commission ka aadhaar).                                                                                                |
-| v1.2.29 | 2026-11-18 | Q-019 tay: (b) + (ii) (D-078); Q-020 (return ki wajahein aur "band" ka matlab).                                                                                                           |
-| v1.2.30 | 2026-11-18 | Q-020 tay: (b) man badla sirf band maal pe (D-079); Q-021 (return ki samay-seema).                                                                                                        |
-| v1.2.31 | 2026-11-18 | Q-021 tay: (b) wajah ke hisaab se (D-080); Q-022 (seller ka paisa kab payable, payout).                                                                                                   |
-| v1.2.32 | 2026-11-18 | Q-022 tay: (b) samay-seema ke baad, hafte me payout (D-081); Q-023 (expiry ki seemaon ke number).                                                                                         |
-| v1.2.33 | 2026-11-18 | Q-023 tay: (b) default + category override (D-082); Q-024 (pack pe expiry date na ho to).                                                                                                 |
-| v1.3.1  | 2026-11-18 | Niyam badla (owner): bina dependency wale sawal ek saath; har sawal se "Iske baad" aur agle sawal ke zikr hataye.                                                                         |
-| v1.3.2  | 2026-11-18 | Q-025 se Q-036 ek saath (kisi khule sawal pe tike nahi).                                                                                                                                  |
-| v1.3.3  | 2026-11-18 | Q-024 se Q-036 tay: owner ne saari salah maani (D-083 se D-095).                                                                                                                          |
-| v1.3.4  | 2026-11-18 | Q-037 se Q-057: aapas me jude sawal 6 group (G1 se G6) me ek saath (owner ne group ka tareeka chuna); group ka niyam upar.                                                                |
-| v1.3.5  | 2026-11-18 | Q-037 se Q-057 tay (D-096 se D-116; Q-040 me teeno kadam R1 me); §1 ke "Ab tak" me naye faisle; topic wali line se "ek-ek karke" hataya.                                                  |
-| v1.3.6  | 2026-11-18 | Q-058 se Q-071 khule: Agent 2 ke pehle run ke baaki 10 sawal aur report ke 4 dhyaan points (G7, G8 group).                                                                                |
-| v1.3.7  | 2026-11-18 | Q-058 se Q-071 tay (D-117 se D-130); §1 ke "Ab tak" me naye faisle; koi sawal khula nahi.                                                                                                 |
-| v1.3.8  | 2026-11-18 | Q-072 (push band customer ko kin khabaron ka email) aur Q-073 (ingredient master list aur blocklist) khule.                                                                               |
-| v1.3.9  | 2026-11-18 | Q-072 aur Q-073 tay (D-131, D-132); §2 me public ingredient database ki jaanch.                                                                                                           |
-| v1.3.10 | 2026-11-19 | Q-074 se Q-100 khule: Agent 2 ke doosre run ke R1 wale sawal aur report ke 2 dhyaan points (email lines ki chhat, allergen chetavni); jude sawal G9, G10, G11 me.                         |
-| v1.3.11 | 2026-11-19 | Q-074 se Q-100 tay (D-133 se D-159; owner ne saari salah maani); §1 ke "Ab tak" me naye faisle.                                                                                           |
-| v1.3.12 | 2026-11-19 | Q-101 se Q-120 khule: Agent 2 ke doosre run ke R2 wale sawal; jude sawal G12, G13, G14 me.                                                                                                |
-| v1.3.13 | 2026-11-19 | Q-101 se Q-120 tay (D-160 se D-179; owner ne saari salah maani); §1 ke "Ab tak" me naye faisle; koi sawal khula nahi.                                                                     |
-| v1.3.14 | 2026-11-19 | Q-121 se Q-145 khule: Security Architect ke pehle run ke R1 wale sawal; jude sawal G15, G16, G17 me.                                                                                      |
-| v1.3.15 | 2026-11-19 | Q-121 se Q-145 tay (D-180 se D-204; owner ne saari salah maani); §1 me B14 ke "Ab tak" me naye faisle.                                                                                    |
-| v1.3.16 | 2026-11-19 | Q-146 se Q-149 khule: Security Architect ke pehle run ke R2 wale sawal; jude sawal G18 me.                                                                                                |
-| v1.3.17 | 2026-11-19 | Q-146 se Q-149 tay (D-205 se D-208; owner ne saari salah maani); Q-150 khula (security report ke niyam, threats aur risks docs me kaise).                                                 |
-| v1.3.18 | 2026-11-19 | Q-150 tay: (a) area ke hisaab se batches (D-209); Q-151 khula (security batch 1: edge aur hosting); §2 me Vercel aur Render ki jaanch.                                                    |
-| v1.3.19 | 2026-11-19 | Q-151 tay: (a) batch 1 maana (D-210); Q-152 khula (security batch 2: sign-in).                                                                                                            |
-| v1.3.20 | 2026-11-19 | Q-152 tay: (a) batch 2 maana (D-211); Q-153 khula (security batch 3: sessions aur tokens).                                                                                                |
-| v1.3.21 | 2026-11-19 | Q-153 tay: (a) batch 3 maana (D-212); Q-154 khula (security batch 4: authorization aur sellers ki deewar).                                                                                |
-| v1.3.22 | 2026-11-19 | Q-154 tay: (a) batch 4 maana (D-213); Q-155 khula (security batch 5: catalog, checkout aur paisa).                                                                                        |
-| v1.3.23 | 2026-11-19 | Q-155 tay: (a) batch 5 maana (D-214); Q-156 khula (security batch 6: delivery, daawe aur reviews).                                                                                        |
-| v1.3.24 | 2026-11-19 | Q-156 tay: (a) batch 6 maana (D-215); Q-157 khula (security batch 7: files aur personal data).                                                                                            |
-| v1.3.25 | 2026-11-19 | Q-157 tay: (a) batch 7 maana (D-216); Q-158 khula (security batch 8: data stores, services aur khabrein); §2 me databases ke network ki jaanch.                                           |
-| v1.3.26 | 2026-11-19 | Q-158 tay: (a) batch 8 maana (D-217); Q-159 khula (security batch 9: export, audit, logs aur DevOps); §2 me Render ke logs aur GitHub ki jaanch.                                          |
-| v1.3.27 | 2026-11-19 | Q-159 tay: (a) batch 9 maana (D-218); Q-160 khula (security batch 10: R2 ke hisse aur seller ko invoice ki copy); §2 me security report ki baaki tathya wali jaanch.                      |
-| v1.3.28 | 2026-11-19 | Q-160 tay: (a) batch 10 maana (D-219); security report ki saari batches poori; koi sawal khula nahi.                                                                                      |
-| v1.3.29 | 2026-11-19 | Q-161 khula (kanooni jaanch ke pehle run ke nateeje docs me kaise aayein).                                                                                                                |
-| v1.3.30 | 2026-11-19 | Q-161 tay: (a) pehle asar ke sawal, phir batches (D-220); asar ke 29 points (15 nahi); Q-162 se Q-168 khule (sabse zyada jokhim wale; G19).                                               |
-| v1.3.31 | 2026-11-19 | Q-162 se Q-168 tay: saari salah (a) (D-221 se D-227).                                                                                                                                     |
-| v1.3.32 | 2026-11-19 | Q-169 se Q-181 khule: kanooni asar ke baaki 22 points (G20 chhote packs, G21 grievance; tax aur listing ke chhote sudhaar ek-ek sawal me).                                                |
-| v1.3.33 | 2026-11-19 | Q-169 se Q-181 tay (D-228 se D-241): Q-178 pe owner ka apna jawab (Grievance Officer aur nodal person apne roles), baaki salah; Q-182 khula (COMPLIANCE batch 1: tax).                    |
-| v1.3.34 | 2026-11-19 | Q-174 ka jawab badla: naam platform jaisa (D-242); apne brand ke liye customer ke data ke consent ka ek sawal khula (baad me hataya).                                                     |
-| v1.3.35 | 2026-11-19 | Q-174 ka aakhri jawab: brand "Unibelle", naam platform se alag (D-243); consent wala sawal laagu nahi.                                                                                    |
-| v1.3.36 | 2026-11-19 | Consent wale sawal ka text "agar naam platform jaisa ho" ke roop me; "Beautinique brand" ki jagah "apna brand".                                                                           |
-| v1.3.37 | 2026-11-19 | Q-182 tay: (a) tax ki 24 rows (D-244, COMPLIANCE §1); Q-183 khula (COMPLIANCE batch 2: Legal Metrology).                                                                                  |
-| v1.3.38 | 2026-11-19 | Owner ke kehne pe: apne brand ke consent wala sawal hataya (zaroorat nahi; naam ka faisla D-243 me waisa hi); Legal Metrology batch ab Q-183 (numbering ke niyam ka ek apvaad, owner ka). |
-| v1.3.39 | 2026-11-19 | Q-183 tay: (a) Legal Metrology ki 14 rows (D-245, COMPLIANCE §2); Q-184 khula (COMPLIANCE batch 3: cosmetics kanoon).                                                                     |
-| v1.3.40 | 2026-11-19 | Q-184 tay: (a) cosmetics kanoon ki 20 rows (D-246, COMPLIANCE §3); Q-185 khula (COMPLIANCE batch 4: e-commerce aur consumer kanoon).                                                      |
-| v1.3.41 | 2026-11-19 | Q-185 tay: (a) e-commerce aur consumer kanoon ki 29 rows (D-247, COMPLIANCE §4); koi sawal khula nahi.                                                                                    |
-| v1.3.42 | 2026-11-20 | Q-186 se Q-194 khule (kanooni jaanch ke doosre run ke asar ke sawal).                                                                                                                     |
-| v1.3.43 | 2026-11-20 | Q-186 se Q-194 tay: saari salah maani (D-248 se D-256); §2 me gift card issuer ki jaanch.                                                                                                 |
-| v1.3.44 | 2026-11-20 | Q-195 khula (COMPLIANCE batch 5: personal data ki 17 rows).                                                                                                                               |
-| v1.3.45 | 2026-11-20 | Q-195 tay: (a) personal data ki 17 rows (D-258, COMPLIANCE §5); Q-196 khula (COMPLIANCE batch 6: IT Rules, CERT-In aur payments).                                                         |
-| v1.3.46 | 2026-11-20 | Q-196 tay: (a) IT Rules, CERT-In aur payments ki 7 rows (D-259, COMPLIANCE §6 se §8); Q-197 khula (COMPLIANCE batch 7: gig partners, warehouse aur environment).                          |
-| v1.3.47 | 2026-11-20 | Q-197 tay: (a) gig partners, warehouse aur environment ki 9 rows (D-260, COMPLIANCE §9, §10); Q-198 khula (aakhri COMPLIANCE batch: sehat, AYUSH, IP aur contracts, aur chhote badlav).   |
-| v1.3.48 | 2026-11-20 | Q-198 tay: (a) sehat, AYUSH, IP aur contracts ki 8 rows aur chhote badlav (D-261, COMPLIANCE §11 se §13); koi sawal khula nahi.                                                           |
-| v1.3.49 | 2026-11-20 | Q-199 se Q-208 khule: Lawyer (AI) ki report ke asar ke points aur owner ke sawal (ek saath; kisi khule sawal pe tike nahi).                                                               |
-| v1.3.50 | 2026-11-20 | Q-199 se Q-208 tay: owner ne saari salah maani (D-262 se D-271).                                                                                                                          |
-| v1.3.51 | 2026-11-20 | Q-209 khula (COMPLIANCE ki 18 rows pe Lawyer (AI) ki raay aur nishaan).                                                                                                                   |
-| v1.3.52 | 2026-11-20 | Q-209 tay: (a) Lawyer (AI) ke nishaan (D-272, COMPLIANCE); Q-210 khula (documents ka dhaancha docs me kahan).                                                                             |
-| v1.3.53 | 2026-11-20 | Q-210 tay: (a) COMPLIANCE §14 (D-273); Q-211 khula (COMPLIANCE batch 9: documents ka dhaancha).                                                                                           |
-| v1.3.54 | 2026-11-20 | Q-211 tay: (a) documents ka dhaancha (D-274, COMPLIANCE §14); koi sawal khula nahi.                                                                                                       |
-| v1.4.1  | 2026-11-20 | Q-212 se Q-217 (CA (AI) ki report ke sawal aur jod) tay; D-275 se D-280.                                                                                                                  |
-| v1.4.2  | 2026-11-20 | Q-218 (COMPLIANCE pe CA (AI) ki raay) tay; D-281.                                                                                                                                         |
-| v1.4.3  | 2026-11-20 | Q-219 (CA ke ledger aur statements ke niyam kahan) tay; D-282.                                                                                                                            |
-| v1.5.1  | 2026-11-20 | Q-220 se Q-227 (Principal Software Architect ke 8 sawal; G22 media aur logs) tay; D-283 se D-290; §2 me media aur email provider ki jaanch.                                               |
-| v1.6.1  | 2026-11-20 | Q-228 se Q-235 (ARCHITECTURE ki 8 batches) tay; D-291 se D-298; §2 me Atlas, Render aur Atlas Search ki 3 jaanch.                                                                         |
-| v1.6.2  | 2026-11-20 | Q-236 se Q-240 (Architect ke risks aur tay faislon pe dhyaan ke points) tay; D-299 se D-303.                                                                                              |
-| v1.6.3  | 2026-11-21 | §2 media wali jaanch me jod: mitayi files provider ke trash ya backup me kitne din (D-296 ka jod).                                                                                        |
-| v1.7.1  | 2026-11-21 | Q-241 se Q-246 (Database Architect ke 6 sawal) tay; D-304 se D-309; §2 me Neon ki jagah ki jaanch.                                                                                        |
-| v1.7.2  | 2026-11-21 | Q-247 se Q-254 (ARCHITECTURE §10 data ki 8 batches) tay; D-310 se D-317.                                                                                                                  |
-| v1.7.3  | 2026-11-21 | Q-255 se Q-258 (Database Architect ke risks aur tay faislon pe dhyaan ke points) tay; D-318 se D-321.                                                                                     |
-| v1.7.4  | 2026-11-21 | §2 me Database Architect ki 7 aur jaanch (Neon pooler, M0 ki seemaayein, Atlas Search, TTL, driver ka `Long`, Razorpay ki pehchaan, transfer aur validators).                             |
-| v1.7.5  | 2026-11-21 | Q-259 se Q-262 (DevOps / SRE ke 4 sawal: server jagane ka samay, backup kitni baar, raat ke alerts, npm publish) tay; D-322 se D-325.                                                     |
-| v1.7.6  | 2026-11-21 | Q-263 se Q-273 (OPERATIONS ki 11 batches) tay; D-326 se D-336. Q-261 ki kanooni line me D-248 ki ghadi saaf ki.                                                                           |
-| v1.7.7  | 2026-11-21 | Q-274 (DevOps ke 12 risks) aur Q-275 (operations ke 6 sudhaar) tay; D-337, D-338. §2 me GitHub push protection ki jaanch.                                                                 |
-| v1.7.8  | 2026-11-21 | §2: DevOps / SRE ki jaanch se 8 rows ke suljhe hisse hataye (nateeja RISKS §2.5 me), aur 5 nayi jaanch judi.                                                                              |
-| v1.7.9  | 2026-11-21 | Q-276 se Q-287 (UX / Product Architect ke 12 sawal; G23 rang aur fonts) tay; D-340 se D-351.                                                                                              |
-| v1.7.10 | 2026-11-21 | Q-288 se Q-297 (DESIGN ki 10 batches) tay; D-352 se D-361.                                                                                                                                |
-| v1.7.11 | 2026-11-21 | Q-298 se Q-303 (FLOWS ki 6 batches) tay; D-362 se D-367.                                                                                                                                  |
-| v1.7.12 | 2026-11-21 | Q-304 se Q-306 tay (UX ke 9 risks, seller ka payable, 2 chhote sudhaar; D-368 se D-370); §2 me UX ki 10 jaanch judi.                                                                      |
-| v1.7.13 | 2026-11-21 | Q-283 me owner ka naya jawab: Ola Maps (D-347); §2 me Ola Maps ki 4 jaanch.                                                                                                               |
-| v1.7.14 | 2026-11-21 | Q-283 me owner ka poora jawab (form aur Ola Maps dono, autofill, pin, current location); §2 se Ola ki limit wali jaanch hati (owner).                                                     |
-| v1.7.15 | 2026-11-21 | Q-285 me owner ka jawab: (d) parda sirf pehli jaag pe, tab tak app band, phir background ping (D-349).                                                                                    |
-| v1.7.16 | 2026-11-21 | Q-286 me owner ka jawab: (d) icones.js.org se copy, apna icons package (D-350).                                                                                                           |
-| v1.7.17 | 2026-11-21 | Q-286: mukhya set Solar, doosra Lucide, har app me credit page (owner, D-350).                                                                                                            |
-| v1.7.18 | 2026-11-21 | Q-286: ek saajha Credits page, har package ka credit component (owner, D-350).                                                                                                            |
-| v1.7.19 | 2026-11-21 | Q-287 ki salah me RTO ka matlab saaf kiya (GLOSSARY ki link).                                                                                                                             |
-| v1.7.20 | 2026-11-21 | Q-307 se Q-316 (QA Architect ke 10 sawal; G24 asli phone aur screen reader) tay; D-371 se D-380.                                                                                          |
-| v1.7.21 | 2026-11-21 | Q-317 se Q-323 (QA ki 7 batches: RULES ke testing niyam, Definition of Done, R1 release gate) tay; D-381 se D-387.                                                                        |
-| v1.7.22 | 2026-11-21 | Q-324 (criteria ki jagah: naya ACCEPTANCE.md) aur Q-325 se Q-331 (QA ke criteria ki 7 batches, 184 criteria) tay; D-388 se D-395.                                                         |
-| v1.7.23 | 2026-11-21 | Q-332 (QA ke 12 risks, R-065 se R-076) tay; D-396.                                                                                                                                        |
-| v1.7.24 | 2026-11-21 | §2 me QA ki 18 jaanch judi; Q-333 (5 chhote sudhaar) aur Q-334 (5 lene layak niyam) tay; D-397, D-398.                                                                                    |
-| v1.7.25 | 2026-11-21 | Q-335 se Q-343 (Security Architect ke doosre run ke 9 sawal; G25 security bug ka record) tay; D-399 se D-407.                                                                             |
-| v1.7.26 | 2026-11-21 | Q-344 (security review batch 1: edge aur hosting) tay; D-408.                                                                                                                             |
-| v1.7.27 | 2026-11-22 | Q-345 (security review batch 2: sign-in aur sessions) tay; D-409.                                                                                                                         |
-| v1.7.28 | 2026-11-22 | Q-346 (security review batch 3: authorization aur paisa) tay; D-410.                                                                                                                      |
-| v1.7.29 | 2026-11-22 | Q-347 (security review batch 4: delivery, reviews aur content ki ghadiyaan) tay; D-411.                                                                                                   |
-| v1.7.30 | 2026-11-22 | Q-348 (security review batch 5: files, media, map aur band data) tay; D-412.                                                                                                              |
-| v1.7.31 | 2026-11-22 | Q-349 (security review batch 6: logs, audit, errors aur alerts) tay; D-413.                                                                                                               |
-| v1.7.32 | 2026-11-22 | Q-350 (security review batch 7: DevOps, testing aur security bugs) tay; D-414.                                                                                                            |
-| v1.7.33 | 2026-11-22 | Q-351 (security review batch 8: 7 naye risks) tay; D-415.                                                                                                                                 |
-| v1.7.34 | 2026-11-22 | Q-352 (security review batch 9: SR doc ka dhaancha aur OWASP ke versions) tay; D-416.                                                                                                     |
-| v1.7.35 | 2026-11-22 | §2 me security review ki 11 nayi jaanch aur 4 rows me jod; Q-353 (security review ke baaki hisse) tay; D-417.                                                                             |
-| v1.8.1  | 2026-11-22 | §2 ki jaanch: suljhi rows hati, baaki me sirf bacha hissa (34 rows; tathya RISKS §2.7 se §2.12); Q-354 se Q-361 khule.                                                                    |
-| v1.8.2  | 2026-11-22 | Q-354 se Q-361 Tay (D-418 se D-425); §2 me object storage ki row, Brevo aur Cloudinary ki rows chhoti.                                                                                    |
+| Version | Date       | Badlav                                                                                                                                                                                              |
+| ------- | ---------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| v1.0.0  | 2026-11-17 | Khaali file bani.                                                                                                                                                                                   |
+| v1.1.1  | 2026-11-18 | §1 aage ke topics (B1 se B16) aur §2 jaanchna baaki bane.                                                                                                                                           |
+| v1.2.1  | 2026-11-18 | §3 Sawal bana; Q-001 (warehouse me rakhe maal ka maalik).                                                                                                                                           |
+| v1.2.2  | 2026-11-18 | Q-001 tay: (a) brand maalik (D-060).                                                                                                                                                                |
+| v1.2.3  | 2026-11-18 | Q-002 (customer ko dikhne wala price kaun tay kare).                                                                                                                                                |
+| v1.2.4  | 2026-11-18 | Q-002 tay: (c) brand + platform ke niyam (D-061).                                                                                                                                                   |
+| v1.2.5  | 2026-11-18 | Q-003 (expire hone wala ya na bika maal).                                                                                                                                                           |
+| v1.2.6  | 2026-11-18 | Q-003 tay: (b) brand ka nuksaan + platform ke niyam (D-062).                                                                                                                                        |
+| v1.2.7  | 2026-11-18 | Q-004 (hamare haath se hue nuksaan ki bharpai ka daam).                                                                                                                                             |
+| v1.2.8  | 2026-11-18 | Q-004 tay: (b) bikne wala daam (D-063).                                                                                                                                                             |
+| v1.2.9  | 2026-11-18 | Q-005 (alag batches ka alag MRP).                                                                                                                                                                   |
+| v1.2.10 | 2026-11-18 | Q-005 tay: (b) batch ke hisaab se (D-064).                                                                                                                                                          |
+| v1.2.11 | 2026-11-18 | Q-006 (Beauty Pro buyers ka daam).                                                                                                                                                                  |
+| v1.2.12 | 2026-11-18 | Q-006 tay: (b) Pro daam (D-065); Q-007 (storage fee).                                                                                                                                               |
+| v1.2.13 | 2026-11-18 | Q-007 tay: (c) muft, phir fee (D-066); Q-008 (product page pe expiry).                                                                                                                              |
+| v1.2.14 | 2026-11-18 | Q-008 tay: (b) exact expiry (D-067); Q-009 (nuksaan ki vasooli).                                                                                                                                    |
+| v1.2.15 | 2026-11-18 | Q-009 tay: (b) saboot se vasooli (D-068); Q-010 (Beauty Pro ki jaanch).                                                                                                                             |
+| v1.2.16 | 2026-11-18 | Q-010 tay: (b) saboot + staff (D-069); Q-011 (Pro daam ki quantity seema).                                                                                                                          |
+| v1.2.17 | 2026-11-18 | Q-011 tay: (b) seller tay kare (D-070).                                                                                                                                                             |
+| v1.2.18 | 2026-11-18 | Q-012 (bachi fee) aur Q-013 (parcel nahi mila par "delivered").                                                                                                                                     |
+| v1.2.19 | 2026-11-18 | Q-012 tay: (b) seema ke baad kadam (D-071).                                                                                                                                                         |
+| v1.2.20 | 2026-11-18 | Q-013 tay: (b) saboot se faisla (D-072).                                                                                                                                                            |
+| v1.2.21 | 2026-11-18 | Q-014 (pehle ka kaam kab aur kaise hatega).                                                                                                                                                         |
+| v1.2.22 | 2026-11-18 | Q-014 tay: (b) do kadam me (D-073).                                                                                                                                                                 |
+| v1.2.23 | 2026-11-18 | Q-015 (pehle ke kaam se kya naye me aaye, list kab aur kaise).                                                                                                                                      |
+| v1.2.24 | 2026-11-18 | Q-015 tay: (b) chalti list discovery ke saath (D-074).                                                                                                                                              |
+| v1.2.25 | 2026-11-18 | Q-016 (ek brand ka maal kai sellers bechna chahein).                                                                                                                                                |
+| v1.2.26 | 2026-11-18 | Q-016 tay: (a) ek brand, ek seller (D-075); Q-017 (variants kin cheezon se).                                                                                                                        |
+| v1.2.27 | 2026-11-18 | Q-017 tay: (b) category ke hisaab se (D-076); Q-018 (kai sellers wala order aur parcel).                                                                                                            |
+| v1.2.28 | 2026-11-18 | Q-018 tay: (c) normal ek parcel (D-077); Q-019 (seller ki fees aur commission ka aadhaar).                                                                                                          |
+| v1.2.29 | 2026-11-18 | Q-019 tay: (b) + (ii) (D-078); Q-020 (return ki wajahein aur "band" ka matlab).                                                                                                                     |
+| v1.2.30 | 2026-11-18 | Q-020 tay: (b) man badla sirf band maal pe (D-079); Q-021 (return ki samay-seema).                                                                                                                  |
+| v1.2.31 | 2026-11-18 | Q-021 tay: (b) wajah ke hisaab se (D-080); Q-022 (seller ka paisa kab payable, payout).                                                                                                             |
+| v1.2.32 | 2026-11-18 | Q-022 tay: (b) samay-seema ke baad, hafte me payout (D-081); Q-023 (expiry ki seemaon ke number).                                                                                                   |
+| v1.2.33 | 2026-11-18 | Q-023 tay: (b) default + category override (D-082); Q-024 (pack pe expiry date na ho to).                                                                                                           |
+| v1.3.1  | 2026-11-18 | Niyam badla (owner): bina dependency wale sawal ek saath; har sawal se "Iske baad" aur agle sawal ke zikr hataye.                                                                                   |
+| v1.3.2  | 2026-11-18 | Q-025 se Q-036 ek saath (kisi khule sawal pe tike nahi).                                                                                                                                            |
+| v1.3.3  | 2026-11-18 | Q-024 se Q-036 tay: owner ne saari salah maani (D-083 se D-095).                                                                                                                                    |
+| v1.3.4  | 2026-11-18 | Q-037 se Q-057: aapas me jude sawal 6 group (G1 se G6) me ek saath (owner ne group ka tareeka chuna); group ka niyam upar.                                                                          |
+| v1.3.5  | 2026-11-18 | Q-037 se Q-057 tay (D-096 se D-116; Q-040 me teeno kadam R1 me); §1 ke "Ab tak" me naye faisle; topic wali line se "ek-ek karke" hataya.                                                            |
+| v1.3.6  | 2026-11-18 | Q-058 se Q-071 khule: Agent 2 ke pehle run ke baaki 10 sawal aur report ke 4 dhyaan points (G7, G8 group).                                                                                          |
+| v1.3.7  | 2026-11-18 | Q-058 se Q-071 tay (D-117 se D-130); §1 ke "Ab tak" me naye faisle; koi sawal khula nahi.                                                                                                           |
+| v1.3.8  | 2026-11-18 | Q-072 (push band customer ko kin khabaron ka email) aur Q-073 (ingredient master list aur blocklist) khule.                                                                                         |
+| v1.3.9  | 2026-11-18 | Q-072 aur Q-073 tay (D-131, D-132); §2 me public ingredient database ki jaanch.                                                                                                                     |
+| v1.3.10 | 2026-11-19 | Q-074 se Q-100 khule: Agent 2 ke doosre run ke R1 wale sawal aur report ke 2 dhyaan points (email lines ki chhat, allergen chetavni); jude sawal G9, G10, G11 me.                                   |
+| v1.3.11 | 2026-11-19 | Q-074 se Q-100 tay (D-133 se D-159; owner ne saari salah maani); §1 ke "Ab tak" me naye faisle.                                                                                                     |
+| v1.3.12 | 2026-11-19 | Q-101 se Q-120 khule: Agent 2 ke doosre run ke R2 wale sawal; jude sawal G12, G13, G14 me.                                                                                                          |
+| v1.3.13 | 2026-11-19 | Q-101 se Q-120 tay (D-160 se D-179; owner ne saari salah maani); §1 ke "Ab tak" me naye faisle; koi sawal khula nahi.                                                                               |
+| v1.3.14 | 2026-11-19 | Q-121 se Q-145 khule: Security Architect ke pehle run ke R1 wale sawal; jude sawal G15, G16, G17 me.                                                                                                |
+| v1.3.15 | 2026-11-19 | Q-121 se Q-145 tay (D-180 se D-204; owner ne saari salah maani); §1 me B14 ke "Ab tak" me naye faisle.                                                                                              |
+| v1.3.16 | 2026-11-19 | Q-146 se Q-149 khule: Security Architect ke pehle run ke R2 wale sawal; jude sawal G18 me.                                                                                                          |
+| v1.3.17 | 2026-11-19 | Q-146 se Q-149 tay (D-205 se D-208; owner ne saari salah maani); Q-150 khula (security report ke niyam, threats aur risks docs me kaise).                                                           |
+| v1.3.18 | 2026-11-19 | Q-150 tay: (a) area ke hisaab se batches (D-209); Q-151 khula (security batch 1: edge aur hosting); §2 me Vercel aur Render ki jaanch.                                                              |
+| v1.3.19 | 2026-11-19 | Q-151 tay: (a) batch 1 maana (D-210); Q-152 khula (security batch 2: sign-in).                                                                                                                      |
+| v1.3.20 | 2026-11-19 | Q-152 tay: (a) batch 2 maana (D-211); Q-153 khula (security batch 3: sessions aur tokens).                                                                                                          |
+| v1.3.21 | 2026-11-19 | Q-153 tay: (a) batch 3 maana (D-212); Q-154 khula (security batch 4: authorization aur sellers ki deewar).                                                                                          |
+| v1.3.22 | 2026-11-19 | Q-154 tay: (a) batch 4 maana (D-213); Q-155 khula (security batch 5: catalog, checkout aur paisa).                                                                                                  |
+| v1.3.23 | 2026-11-19 | Q-155 tay: (a) batch 5 maana (D-214); Q-156 khula (security batch 6: delivery, daawe aur reviews).                                                                                                  |
+| v1.3.24 | 2026-11-19 | Q-156 tay: (a) batch 6 maana (D-215); Q-157 khula (security batch 7: files aur personal data).                                                                                                      |
+| v1.3.25 | 2026-11-19 | Q-157 tay: (a) batch 7 maana (D-216); Q-158 khula (security batch 8: data stores, services aur khabrein); §2 me databases ke network ki jaanch.                                                     |
+| v1.3.26 | 2026-11-19 | Q-158 tay: (a) batch 8 maana (D-217); Q-159 khula (security batch 9: export, audit, logs aur DevOps); §2 me Render ke logs aur GitHub ki jaanch.                                                    |
+| v1.3.27 | 2026-11-19 | Q-159 tay: (a) batch 9 maana (D-218); Q-160 khula (security batch 10: R2 ke hisse aur seller ko invoice ki copy); §2 me security report ki baaki tathya wali jaanch.                                |
+| v1.3.28 | 2026-11-19 | Q-160 tay: (a) batch 10 maana (D-219); security report ki saari batches poori; koi sawal khula nahi.                                                                                                |
+| v1.3.29 | 2026-11-19 | Q-161 khula (kanooni jaanch ke pehle run ke nateeje docs me kaise aayein).                                                                                                                          |
+| v1.3.30 | 2026-11-19 | Q-161 tay: (a) pehle asar ke sawal, phir batches (D-220); asar ke 29 points (15 nahi); Q-162 se Q-168 khule (sabse zyada jokhim wale; G19).                                                         |
+| v1.3.31 | 2026-11-19 | Q-162 se Q-168 tay: saari salah (a) (D-221 se D-227).                                                                                                                                               |
+| v1.3.32 | 2026-11-19 | Q-169 se Q-181 khule: kanooni asar ke baaki 22 points (G20 chhote packs, G21 grievance; tax aur listing ke chhote sudhaar ek-ek sawal me).                                                          |
+| v1.3.33 | 2026-11-19 | Q-169 se Q-181 tay (D-228 se D-241): Q-178 pe owner ka apna jawab (Grievance Officer aur nodal person apne roles), baaki salah; Q-182 khula (COMPLIANCE batch 1: tax).                              |
+| v1.3.34 | 2026-11-19 | Q-174 ka jawab badla: naam platform jaisa (D-242); apne brand ke liye customer ke data ke consent ka ek sawal khula (baad me hataya).                                                               |
+| v1.3.35 | 2026-11-19 | Q-174 ka aakhri jawab: brand "Unibelle", naam platform se alag (D-243); consent wala sawal laagu nahi.                                                                                              |
+| v1.3.36 | 2026-11-19 | Consent wale sawal ka text "agar naam platform jaisa ho" ke roop me; "Beautinique brand" ki jagah "apna brand".                                                                                     |
+| v1.3.37 | 2026-11-19 | Q-182 tay: (a) tax ki 24 rows (D-244, COMPLIANCE §1); Q-183 khula (COMPLIANCE batch 2: Legal Metrology).                                                                                            |
+| v1.3.38 | 2026-11-19 | Owner ke kehne pe: apne brand ke consent wala sawal hataya (zaroorat nahi; naam ka faisla D-243 me waisa hi); Legal Metrology batch ab Q-183 (numbering ke niyam ka ek apvaad, owner ka).           |
+| v1.3.39 | 2026-11-19 | Q-183 tay: (a) Legal Metrology ki 14 rows (D-245, COMPLIANCE §2); Q-184 khula (COMPLIANCE batch 3: cosmetics kanoon).                                                                               |
+| v1.3.40 | 2026-11-19 | Q-184 tay: (a) cosmetics kanoon ki 20 rows (D-246, COMPLIANCE §3); Q-185 khula (COMPLIANCE batch 4: e-commerce aur consumer kanoon).                                                                |
+| v1.3.41 | 2026-11-19 | Q-185 tay: (a) e-commerce aur consumer kanoon ki 29 rows (D-247, COMPLIANCE §4); koi sawal khula nahi.                                                                                              |
+| v1.3.42 | 2026-11-20 | Q-186 se Q-194 khule (kanooni jaanch ke doosre run ke asar ke sawal).                                                                                                                               |
+| v1.3.43 | 2026-11-20 | Q-186 se Q-194 tay: saari salah maani (D-248 se D-256); §2 me gift card issuer ki jaanch.                                                                                                           |
+| v1.3.44 | 2026-11-20 | Q-195 khula (COMPLIANCE batch 5: personal data ki 17 rows).                                                                                                                                         |
+| v1.3.45 | 2026-11-20 | Q-195 tay: (a) personal data ki 17 rows (D-258, COMPLIANCE §5); Q-196 khula (COMPLIANCE batch 6: IT Rules, CERT-In aur payments).                                                                   |
+| v1.3.46 | 2026-11-20 | Q-196 tay: (a) IT Rules, CERT-In aur payments ki 7 rows (D-259, COMPLIANCE §6 se §8); Q-197 khula (COMPLIANCE batch 7: gig partners, warehouse aur environment).                                    |
+| v1.3.47 | 2026-11-20 | Q-197 tay: (a) gig partners, warehouse aur environment ki 9 rows (D-260, COMPLIANCE §9, §10); Q-198 khula (aakhri COMPLIANCE batch: sehat, AYUSH, IP aur contracts, aur chhote badlav).             |
+| v1.3.48 | 2026-11-20 | Q-198 tay: (a) sehat, AYUSH, IP aur contracts ki 8 rows aur chhote badlav (D-261, COMPLIANCE §11 se §13); koi sawal khula nahi.                                                                     |
+| v1.3.49 | 2026-11-20 | Q-199 se Q-208 khule: Lawyer (AI) ki report ke asar ke points aur owner ke sawal (ek saath; kisi khule sawal pe tike nahi).                                                                         |
+| v1.3.50 | 2026-11-20 | Q-199 se Q-208 tay: owner ne saari salah maani (D-262 se D-271).                                                                                                                                    |
+| v1.3.51 | 2026-11-20 | Q-209 khula (COMPLIANCE ki 18 rows pe Lawyer (AI) ki raay aur nishaan).                                                                                                                             |
+| v1.3.52 | 2026-11-20 | Q-209 tay: (a) Lawyer (AI) ke nishaan (D-272, COMPLIANCE); Q-210 khula (documents ka dhaancha docs me kahan).                                                                                       |
+| v1.3.53 | 2026-11-20 | Q-210 tay: (a) COMPLIANCE §14 (D-273); Q-211 khula (COMPLIANCE batch 9: documents ka dhaancha).                                                                                                     |
+| v1.3.54 | 2026-11-20 | Q-211 tay: (a) documents ka dhaancha (D-274, COMPLIANCE §14); koi sawal khula nahi.                                                                                                                 |
+| v1.4.1  | 2026-11-20 | Q-212 se Q-217 (CA (AI) ki report ke sawal aur jod) tay; D-275 se D-280.                                                                                                                            |
+| v1.4.2  | 2026-11-20 | Q-218 (COMPLIANCE pe CA (AI) ki raay) tay; D-281.                                                                                                                                                   |
+| v1.4.3  | 2026-11-20 | Q-219 (CA ke ledger aur statements ke niyam kahan) tay; D-282.                                                                                                                                      |
+| v1.5.1  | 2026-11-20 | Q-220 se Q-227 (Principal Software Architect ke 8 sawal; G22 media aur logs) tay; D-283 se D-290; §2 me media aur email provider ki jaanch.                                                         |
+| v1.6.1  | 2026-11-20 | Q-228 se Q-235 (ARCHITECTURE ki 8 batches) tay; D-291 se D-298; §2 me Atlas, Render aur Atlas Search ki 3 jaanch.                                                                                   |
+| v1.6.2  | 2026-11-20 | Q-236 se Q-240 (Architect ke risks aur tay faislon pe dhyaan ke points) tay; D-299 se D-303.                                                                                                        |
+| v1.6.3  | 2026-11-21 | §2 media wali jaanch me jod: mitayi files provider ke trash ya backup me kitne din (D-296 ka jod).                                                                                                  |
+| v1.7.1  | 2026-11-21 | Q-241 se Q-246 (Database Architect ke 6 sawal) tay; D-304 se D-309; §2 me Neon ki jagah ki jaanch.                                                                                                  |
+| v1.7.2  | 2026-11-21 | Q-247 se Q-254 (ARCHITECTURE §10 data ki 8 batches) tay; D-310 se D-317.                                                                                                                            |
+| v1.7.3  | 2026-11-21 | Q-255 se Q-258 (Database Architect ke risks aur tay faislon pe dhyaan ke points) tay; D-318 se D-321.                                                                                               |
+| v1.7.4  | 2026-11-21 | §2 me Database Architect ki 7 aur jaanch (Neon pooler, M0 ki seemaayein, Atlas Search, TTL, driver ka `Long`, Razorpay ki pehchaan, transfer aur validators).                                       |
+| v1.7.5  | 2026-11-21 | Q-259 se Q-262 (DevOps / SRE ke 4 sawal: server jagane ka samay, backup kitni baar, raat ke alerts, npm publish) tay; D-322 se D-325.                                                               |
+| v1.7.6  | 2026-11-21 | Q-263 se Q-273 (OPERATIONS ki 11 batches) tay; D-326 se D-336. Q-261 ki kanooni line me D-248 ki ghadi saaf ki.                                                                                     |
+| v1.7.7  | 2026-11-21 | Q-274 (DevOps ke 12 risks) aur Q-275 (operations ke 6 sudhaar) tay; D-337, D-338. §2 me GitHub push protection ki jaanch.                                                                           |
+| v1.7.8  | 2026-11-21 | §2: DevOps / SRE ki jaanch se 8 rows ke suljhe hisse hataye (nateeja RISKS §2.5 me), aur 5 nayi jaanch judi.                                                                                        |
+| v1.7.9  | 2026-11-21 | Q-276 se Q-287 (UX / Product Architect ke 12 sawal; G23 rang aur fonts) tay; D-340 se D-351.                                                                                                        |
+| v1.7.10 | 2026-11-21 | Q-288 se Q-297 (DESIGN ki 10 batches) tay; D-352 se D-361.                                                                                                                                          |
+| v1.7.11 | 2026-11-21 | Q-298 se Q-303 (FLOWS ki 6 batches) tay; D-362 se D-367.                                                                                                                                            |
+| v1.7.12 | 2026-11-21 | Q-304 se Q-306 tay (UX ke 9 risks, seller ka payable, 2 chhote sudhaar; D-368 se D-370); §2 me UX ki 10 jaanch judi.                                                                                |
+| v1.7.13 | 2026-11-21 | Q-283 me owner ka naya jawab: Ola Maps (D-347); §2 me Ola Maps ki 4 jaanch.                                                                                                                         |
+| v1.7.14 | 2026-11-21 | Q-283 me owner ka poora jawab (form aur Ola Maps dono, autofill, pin, current location); §2 se Ola ki limit wali jaanch hati (owner).                                                               |
+| v1.7.15 | 2026-11-21 | Q-285 me owner ka jawab: (d) parda sirf pehli jaag pe, tab tak app band, phir background ping (D-349).                                                                                              |
+| v1.7.16 | 2026-11-21 | Q-286 me owner ka jawab: (d) icones.js.org se copy, apna icons package (D-350).                                                                                                                     |
+| v1.7.17 | 2026-11-21 | Q-286: mukhya set Solar, doosra Lucide, har app me credit page (owner, D-350).                                                                                                                      |
+| v1.7.18 | 2026-11-21 | Q-286: ek saajha Credits page, har package ka credit component (owner, D-350).                                                                                                                      |
+| v1.7.19 | 2026-11-21 | Q-287 ki salah me RTO ka matlab saaf kiya (GLOSSARY ki link).                                                                                                                                       |
+| v1.7.20 | 2026-11-21 | Q-307 se Q-316 (QA Architect ke 10 sawal; G24 asli phone aur screen reader) tay; D-371 se D-380.                                                                                                    |
+| v1.7.21 | 2026-11-21 | Q-317 se Q-323 (QA ki 7 batches: RULES ke testing niyam, Definition of Done, R1 release gate) tay; D-381 se D-387.                                                                                  |
+| v1.7.22 | 2026-11-21 | Q-324 (criteria ki jagah: naya ACCEPTANCE.md) aur Q-325 se Q-331 (QA ke criteria ki 7 batches, 184 criteria) tay; D-388 se D-395.                                                                   |
+| v1.7.23 | 2026-11-21 | Q-332 (QA ke 12 risks, R-065 se R-076) tay; D-396.                                                                                                                                                  |
+| v1.7.24 | 2026-11-21 | §2 me QA ki 18 jaanch judi; Q-333 (5 chhote sudhaar) aur Q-334 (5 lene layak niyam) tay; D-397, D-398.                                                                                              |
+| v1.7.25 | 2026-11-21 | Q-335 se Q-343 (Security Architect ke doosre run ke 9 sawal; G25 security bug ka record) tay; D-399 se D-407.                                                                                       |
+| v1.7.26 | 2026-11-21 | Q-344 (security review batch 1: edge aur hosting) tay; D-408.                                                                                                                                       |
+| v1.7.27 | 2026-11-22 | Q-345 (security review batch 2: sign-in aur sessions) tay; D-409.                                                                                                                                   |
+| v1.7.28 | 2026-11-22 | Q-346 (security review batch 3: authorization aur paisa) tay; D-410.                                                                                                                                |
+| v1.7.29 | 2026-11-22 | Q-347 (security review batch 4: delivery, reviews aur content ki ghadiyaan) tay; D-411.                                                                                                             |
+| v1.7.30 | 2026-11-22 | Q-348 (security review batch 5: files, media, map aur band data) tay; D-412.                                                                                                                        |
+| v1.7.31 | 2026-11-22 | Q-349 (security review batch 6: logs, audit, errors aur alerts) tay; D-413.                                                                                                                         |
+| v1.7.32 | 2026-11-22 | Q-350 (security review batch 7: DevOps, testing aur security bugs) tay; D-414.                                                                                                                      |
+| v1.7.33 | 2026-11-22 | Q-351 (security review batch 8: 7 naye risks) tay; D-415.                                                                                                                                           |
+| v1.7.34 | 2026-11-22 | Q-352 (security review batch 9: SR doc ka dhaancha aur OWASP ke versions) tay; D-416.                                                                                                               |
+| v1.7.35 | 2026-11-22 | §2 me security review ki 11 nayi jaanch aur 4 rows me jod; Q-353 (security review ke baaki hisse) tay; D-417.                                                                                       |
+| v1.8.1  | 2026-11-22 | §2 ki jaanch: suljhi rows hati, baaki me sirf bacha hissa (34 rows; tathya RISKS §2.7 se §2.12); Q-354 se Q-361 khule.                                                                              |
+| v1.8.2  | 2026-11-22 | Q-354 se Q-361 Tay (D-418 se D-425); §2 me object storage ki row, Brevo aur Cloudinary ki rows chhoti.                                                                                              |
+| v1.8.3  | 2026-11-22 | Q-362 se Q-368 Tay (D-426 se D-432): PRODUCT, roles aur permissions, saajhe packages, code ke niyam, RULES §5 se §7, GLOSSARY, GIT_SKILLS; §2 se area settings wali row hati (roles PRODUCT §3 me). |
+| v1.8.4  | 2026-11-22 | Q-369 khula: State Admin ka kaam (owner chahte hain role rahe).                                                                                                                                     |
+| v1.8.5  | 2026-11-22 | Q-369 Tay: State Admin state ka area aur operations ka head (D-426).                                                                                                                                |

@@ -1,6 +1,6 @@
 # DECISIONS: Beautinique
 
-> **Status:** v1.14.35 (2026-11-22). Har faisla ek jagah. Sirf wahi "Tay" jo owner ne khud kaha; Claude ki salah faisla nahi. Cheezein ek-ek karke judti hain.
+> **Status:** v1.14.37 (2026-11-22). Har faisla ek jagah. Sirf wahi "Tay" jo owner ne khud kaha; Claude ki salah faisla nahi. Cheezein ek-ek karke judti hain.
 
 ## 0. Kaise likhein
 
@@ -440,6 +440,13 @@
 | D-423 | "Use my current location": accuracy misaal 100 m se zyada ho to pin apne aap nahi; map paas khule, sandesh "Move the pin to your door".                                                                                                                                                 | Business     | 2026-11-22 |
 | D-424 | cron-job.org ka har jagana do ping se: pehla jagaaye, doosra kuch minute baad jaage server pe, taaki lagataar fail se job band na ho.                                                                                                                                                   | Operations   | 2026-11-22 |
 | D-425 | §2 ki jaanch se 13 chhote sudhaar: Neon ka seedha connection, release user ka role, Key Value ki seema, MongoDB ka pin, rollback, ₹ ka font, axe, zrok, service worker tests, Lighthouse, private fork, PgBouncer, aur Ola ka data.                                                     | Process      | 2026-11-22 |
+| D-426 | PRODUCT.md ke saare hisse aur roles ki poori list naye faislon se (State Admin har state ka area aur operations ka head; city ke roles nahi; area settings Logistics Head, ingredient master Senior Catalog Reviewer).                                                                  | Business     | 2026-11-22 |
+| D-427 | Roles aur permissions ka model ARCHITECTURE §11 me: permission ka naam, scope ke type, grant, appointment ki table, kaam ka bantwara.                                                                                                                                                   | Security     | 2026-11-22 |
+| D-428 | Saajhe packages ka naksha ARCHITECTURE §12 me, misaal naam; pakki list planning me.                                                                                                                                                                                                     | Architecture | 2026-11-22 |
+| D-429 | Code ke niyam RULES §3 (CR-1 se CR-36) aur testing ke jaal §4.8 (RT-49 se RT-55); commits Conventional Commits me.                                                                                                                                                                      | Process      | 2026-11-22 |
+| D-430 | RULES §5 se §7 me links aur bache niyam; nayi env key tabhi jab code padhe (OPERATIONS §4).                                                                                                                                                                                             | Process      | 2026-11-22 |
+| D-431 | GLOSSARY me docs ke 51 shabd, matlab aur link ke saath.                                                                                                                                                                                                                                 | Process      | 2026-11-22 |
+| D-432 | GIT_SKILLS ka poora manual.                                                                                                                                                                                                                                                             | Process      | 2026-11-22 |
 
 ## 2. Record
 
@@ -469,6 +476,7 @@
 - **Chhode vikalp:** koi charcha nahi hui.
 - **Kab dobara khulega:** owner khud khole.
 - **Kisne, kab:** owner, 2026-11-17. **Nishaan:** Owner.
+- **Jod (owner, 2026-11-22, D-429):** kaam ke conventions [RULES.md](RULES.md) §3 me (CR-1 se CR-36), aur saajhe packages ka naksha [ARCHITECTURE.md](ARCHITECTURE.md) §12 me (D-428).
 
 ### D-003. Sab naye sire se
 
@@ -628,6 +636,7 @@
 - **Kab dobara khulega:** owner khud khole.
 - **Kisne, kab:** owner, 2026-11-17. **Nishaan:** Salah maani (roles); Owner (accounts, alias).
 - **Jod (owner, 2026-11-20, D-253):** naya staff role "Security Contact" (CERT-In ka Point of Contact), owner ke paas.
+- **Jod (owner, 2026-11-22, D-426, D-427):** roles ki poori list [PRODUCT.md](PRODUCT.md) §3 me; permissions, scope aur appointment ka model [ARCHITECTURE.md](ARCHITECTURE.md) §11 me.
 
 ### D-018. Faislon ki process
 
@@ -5071,6 +5080,74 @@
 - **Kisne, kab:** owner, 2026-11-22. **Nishaan:** Salah maani.
 - **Asar (Claude):** niyam 4 ki wajah: Linux kernel 6.19 se 7.0.13 pe purane 8.0 crash karte ya band hote hain; laptop ka WSL kernel abhi 6.18.58 ([RISKS.md](RISKS.md) §2.8, §2.11). Niyam 13 ki kanooni detail (D-255, CL-104) Lawyer (AI) ne nahi dekhi.
 
+### D-426. PRODUCT.md aur roles ki poori list
+
+- **Faisla:** [PRODUCT.md](PRODUCT.md) ke saare hisse bhare: product ka saar, business model, har app ke roles (kaam, kab chalu, faisla), kaun kise report kare, bina login wale kaam, jo roles nahi chahiye, apps, launch aur scope. Roles naye faislon ke hisaab se:
+  1. **State Admin** (Super Admin app, scope `state`): apne state ke districts aur Super Admins ki nigrani aur unki appointment, naye district kholne ki tayyari, state ke kanooni kaam ki checklist (state ka GST aur TCS registration, warehouse ke licence, state ke gig-worker niyam; sab dummy) aur state ki escalations. State ka switch Master ke paas (D-015), aur sellers aur listings ki jaanch poore desh ki teams (Seller Ops, Listing Reviewer, Senior Catalog Reviewer) Admin app me (D-084).
+  2. Admin sub-district ka, Super Admin district ka, State Admin state ka; state ka switch Master ka (D-015, SR-035). Appointment: Master → State Admin → Super Admin → Admin.
+  3. City ka koi role nahi (seedhi me city nahi, D-015); uski jagah District Logistics Manager.
+  4. Catalog Content Executive nahi (staff listing ka field nahi badalta, D-098); Demand Planner nahi (maal seller ka, D-060); L2 Support nahi (seema se upar Support Lead, D-188); Data Protection Officer nahi (D-253).
+  5. Area settings (delivery fee, cut-off, chhuttiyan, delivery pe UPI ki seema) Logistics Head ke paas Logistics Ops app me; ingredient master list aur blocklist Senior Catalog Reviewer ke paas Admin app me; HSN ki allowed list aur synonyms Category Manager ke paas.
+  6. Seller ke reject ki appeal Seller Ops Lead, listing ke reject ki appeal Senior Catalog Reviewer (jisne reject kiya wo nahi, D-084).
+- **Wajah:** owner ne khud chuna (2026-11-22) ki State Admin role rahe, aur uska kaam (a): state ka area aur operations ka head, bina D-015 aur D-084 badle. Baaki Claude ki salah, owner ne maani: D-017 aur kai faisle roles ki list ki taraf ishara karte the par list kahin nahi thi; har module ki permissions isi pe tiki hain.
+- **Chhode vikalp:** sirf roles ki list (product ka saar bikhra rehta); abhi nahi, planning me (TASK.md bina list ke); State Admin ke paas state ka switch bhi (D-015 badalta); State Admin ke paas apne state ke sellers ki manzoori (D-084 badalta, har state ki nayi seller team).
+- **Kab dobara khulega:** koi module apne roles badle, ya owner khud khole.
+- **Kisne, kab:** owner, 2026-11-22. **Nishaan:** Owner (State Admin rakhna aur uska kaam); Salah maani (baaki list).
+- **Asar (Claude):** jo roles faislon me nahi the, unke kaam aur "kab chalu" Claude ki salah hain; module ki `TASK.md` me pakke hote hain. [OPEN_QUESTIONS.md](OPEN_QUESTIONS.md) §2 ki area settings aur ingredient master wali row isi se hati.
+
+### D-427. Roles aur permissions ka model
+
+- **Faisla:** [ARCHITECTURE.md](ARCHITECTURE.md) §11: permission ka naam `<service>.<resource>.<action>`, role data me, grant umar ke saath, scope ke type (`self`, `seller`, `state`, `district`, `subDistrict`, `hub`, `warehouse`, `national`, `global`) aur unka kram, kaun kise appoint kare ki table, aur kaam ke bantwara ke 6 niyam, har ek ka test.
+- **Wajah:** Claude ki salah, owner ne maani: identity aur har service ka `authorize` ek hi model pe bane, aur scope nayi seedhi (D-015) pe ho.
+- **Chhode vikalp:** identity ke TASK.md me (har module apna andaaza lagata).
+- **Kab dobara khulega:** identity ke module ki planning me, ya owner khud khole.
+- **Kisne, kab:** owner, 2026-11-22. **Nishaan:** Salah maani.
+- **Asar (Claude):** appointment ki table aur "fees, commission aur policies me do account" Claude ki salah hain. SR-032 se SR-037 isi model pe lagte hain.
+
+### D-428. Saajhe packages ka naksha
+
+- **Faisla:** [ARCHITECTURE.md](ARCHITECTURE.md) §12 me saajhe packages ki table (shared, backend, frontend), misaal naam aur kaam ke saath; pakki list [PROJECT_PLAN.md](PROJECT_PLAN.md) ke modules ke saath.
+- **Wajah:** Claude ki salah, owner ne maani: modules ki dependencies inhi pe tiki hain, aur 11 apps ek jaise tabhi bante hain jab saajha kaam ek jagah ho.
+- **Chhode vikalp:** seedha PROJECT_PLAN me (planning stage abhi khula nahi).
+- **Kab dobara khulega:** planning ke modules ke saath.
+- **Kisne, kab:** owner, 2026-11-22. **Nishaan:** Salah maani.
+- **Asar (Claude):** naam misaal hain; abhi koi publish nahi (D-325).
+
+### D-429. Code ke niyam aur testing ke jaal
+
+- **Faisla:** [RULES.md](RULES.md) §3 me code ke niyam CR-1 se CR-36 (sabke liye, backend, frontend, packages), aur §4.8 me testing ke jaane-pehchaane jaal RT-49 se RT-55. Commits Conventional Commits me (CR-11).
+- **Wajah:** Claude ki salah, owner ne maani: D-002 ke conventions code shuru hone se pehle likhe hon, aur pehle ke kaam ke jaal naye tests me dobara na hon.
+- **Chhode vikalp:** sirf §3 (jaal baad me); code ke saath (shuru ka code baad me badalna padta).
+- **Kab dobara khulega:** code ke saath koi niyam badle, ya owner khud khole.
+- **Kisne, kab:** owner, 2026-11-22. **Nishaan:** Salah maani.
+- **Asar (Claude):** lint ke pehre (`process.env`, hard-coded data, role ke naam se tulna, service ki deewar) naye root setup ke saath bante hain, har ek ke "galat" misaal wale test ke saath.
+
+### D-430. RULES §5 se §7 aur env key ka niyam
+
+- **Faisla:** [RULES.md](RULES.md) §5 (security aur privacy), §6 (docs) aur §7 (AI ke saath kaam) me sahi docs ki links aur bache niyam; [OPERATIONS.md](OPERATIONS.md) §4 niyam 11: nayi env key Render ya Vercel me tabhi jab code use padhta ho.
+- **Wajah:** Claude ki salah, owner ne maani: RULES se har niyam ka raasta mile, aur har baat ek hi jagah rahe.
+- **Chhode vikalp:** sections hata do (RULES se kuch niyam chhoot jaate).
+- **Kab dobara khulega:** owner khud khole.
+- **Kisne, kab:** owner, 2026-11-22. **Nishaan:** Salah maani.
+- **Asar (Claude):** env key wala niyam isliye ki boot anjaan key pe rukta hai (OPERATIONS §4 niyam 5).
+
+### D-431. GLOSSARY ke shabd
+
+- **Faisla:** [GLOSSARY.md](GLOSSARY.md) me docs ke 51 naye shabd, matlab aur faisle ki link ke saath, A se Z ke kram me.
+- **Wajah:** Claude ki salah, owner ne maani: docs aur code ek bhasha bolein.
+- **Chhode vikalp:** shabd tab jab koi poochhe (ek shabd ke kai matlab ban sakte).
+- **Kab dobara khulega:** naya shabd aaye ya matlab badle.
+- **Kisne, kab:** owner, 2026-11-22. **Nishaan:** Salah maani.
+
+### D-432. GIT_SKILLS ka manual
+
+- **Faisla:** [GIT_SKILLS.md](GIT_SKILLS.md) me poora manual: ek nazar me, hamesha laagu niyam, branch ka flow, roz ka kaam, release, commit message, checks, aur skill rukne pe kya.
+- **Wajah:** Claude ki salah, owner ne maani: implementation me roz ka flow owner ke saamne ek jagah ho.
+- **Chhode vikalp:** sirf commands ki table (rukne pe kya karna, nahi milta).
+- **Kab dobara khulega:** koi skill badle.
+- **Kisne, kab:** owner, 2026-11-22. **Nishaan:** Salah maani.
+- **Asar (Claude):** manual skills ke saajhe niyam se milta hai; skill badle to manual bhi usi badlav me.
+
 ## Change log
 
 | Version  | Date       | Badlav                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      |
@@ -5201,3 +5278,5 @@
 | v1.14.33 | 2026-11-22 | D-416 aaya (security review batch 9: SR doc ka dhaancha aur OWASP ke versions; Q-352).                                                                                                                                                                                                                                                                                                                                                                                                      |
 | v1.14.34 | 2026-11-22 | D-417 aaya (security review ke baaki hisse; Q-353).                                                                                                                                                                                                                                                                                                                                                                                                                                         |
 | v1.14.35 | 2026-11-22 | D-418 se D-425 aaye (§2 ki jaanch ke sawal Q-354 se Q-361); D-109, D-284, D-287, D-322, D-341, D-347, D-374 aur D-403 me Jod, D-295 me Badla.                                                                                                                                                                                                                                                                                                                                               |
+| v1.14.36 | 2026-11-22 | D-426 se D-432 aaye (pehle ke kaam ke bache hisse; Q-362 se Q-368); D-002 aur D-017 me Jod.                                                                                                                                                                                                                                                                                                                                                                                                 |
+| v1.14.37 | 2026-11-22 | D-426 me State Admin (owner ka chunav, Q-369): state ka area aur operations ka head.                                                                                                                                                                                                                                                                                                                                                                                                        |

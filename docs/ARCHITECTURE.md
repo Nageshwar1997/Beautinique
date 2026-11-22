@@ -1,6 +1,6 @@
 # ARCHITECTURE: Beautinique
 
-> **Status:** v1.3.11 (2026-11-22). System kaise bana hai, ek nazar me. Cheezein ek-ek karke, owner ki haan ke baad judengi. Abhi §1 (finance ke accounting niyam, D-282), §2 se §9 (system ke hisse, D-291 se D-298) aur §10 (data aur database, D-310 se D-317).
+> **Status:** v1.3.13 (2026-11-22). System kaise bana hai, ek nazar me. Cheezein ek-ek karke, owner ki haan ke baad judengi. Abhi §1 (finance ke accounting niyam, D-282), §2 se §9 (system ke hisse, D-291 se D-298) aur §10 (data aur database, D-310 se D-317).
 
 ## Is file me kya aayega
 
@@ -8,7 +8,8 @@
 - Services aur unki seemaayein.
 - Data: kis data ka maalik kaun, kaunsa database.
 - Services ke beech baat: seedhe request aur events.
-- Auth aur permissions.
+- Auth aur permissions (roles aur permissions ka model §11).
+- Saajhe packages (§12).
 - Deployment aur environments.
 - Logs, monitoring aur alerts.
 - Finance ke accounting niyam: ledger, documents, statements aur milaan (§1, D-282).
@@ -666,6 +667,71 @@ Database Architect ki raay se (D-257 ka kram), owner ki haan ke baad. Ye saare s
 
 Design target pe ₹0 ke clusters kuch hafton me bhar jaate hain: target sirf code aur tests ke liye hai (D-283), ₹0 ki asli seema §9 me.
 
+## 11. Roles aur permissions ka model (D-427)
+
+Roles ki list aur har role ka kaam [PRODUCT.md](PRODUCT.md) §3 me; yahan sirf system ka model.
+
+1. **Permission ka naam** `<service>.<resource>.<action>` (misaal `catalog.listing.approve`, `logistics.hub.switch`, `finance.payout_batch.approve`). Har permission contracts me ek jagah, saath me: kis scope ke type pe lagti hai, authenticator aur step-up (D-185) chahiye ya nahi, aur sub-role me di ja sakti hai ya nahi (SR-037).
+2. **Role** permissions ka set hai, data me. Shuru ke roles release step ke seed se aate hain (§10.4 niyam 9); Master bina deploy naya sub-role bana sakta hai (D-017), par SR-037 wali permissions kisi sub-role me kabhi nahi.
+3. **Grant** = account + role + scope + shuru aur khatam ki tareekh + kisne diya. Har grant ki umar hoti hai (SR-037); grant ka har badlav dobara authenticator code ke saath aur audit me.
+4. **Scope ke type:** `self` (apni cheez), `seller` (ek seller ka data, SR-034), area ke levels `state`, `district`, `subDistrict` (D-015), `hub`, `warehouse`, `national` (poore desh ki teams, D-084) aur `global` (sirf Master). Andar aane ka kram: `global` ⊇ `national` ⊇ `state` ⊇ `district` ⊇ `subDistrict` ⊇ `hub`; warehouse apne district ke andar. Scope ke bahar ki cheez pe 404, permission na ho to 403 (SR-032).
+5. **Kaun kise appoint kare:**
+
+   | Kaun                 | Kise                                                                                                                                 |
+   | -------------------- | ------------------------------------------------------------------------------------------------------------------------------------ |
+   | Master               | State Admins, Head of Operations, har app ka main role ya head, Nodal Officer, Security Contact, Grievance Officer, Internal Auditor |
+   | Head of Operations   | Seller Ops Lead, Support Lead aur Logistics Head ki teams ke senior roles                                                            |
+   | State Admin          | Apne state ke Super Admins                                                                                                           |
+   | Super Admin          | Apne district ke Admins                                                                                                              |
+   | Logistics Head       | Warehouse Managers, Hub Managers, Network Planner aur Logistics ke baaki roles                                                       |
+   | Warehouse Manager    | Apne warehouse ke Receiving, Pick-Pack, Returns QC aur Inventory roles                                                               |
+   | Hub Manager          | Apne hub ke Hub Operations aur Delivery Partners (invite)                                                                            |
+   | Har team ka Lead     | Apni team ke roles (Seller Ops Lead, Support Lead, Senior Catalog Reviewer, Finance Manager, Marketing Head)                         |
+   | Seller Account Owner | Apne seller ka staff; Own-Brand Manager Unibelle ka staff                                                                            |
+
+   Koi role khud ko ya apne barabar ke role ko appoint nahi kar sakta (SR-037). Shuru ke staff ki list (D-123) data me hai aur use sirf Master badalta hai (D-022).
+
+6. **Kaam ka bantwara (separation of duties), har ek ka test:**
+   1. Jisne reject kiya, wo us appeal ka faisla nahi karta (D-084, D-147).
+   2. Payout batch banane wala account use manzoor nahi karta (D-189).
+   3. Support Agent ki manzoori ki seema; upar Support Lead (D-188).
+   4. Fees, commission aur policies ka badlav ek account kare aur doosra manzoor kare.
+   5. Master ke paas koi "decide" permission nahi; uske kaam bhi baaki niyamon se guzarte hain (SR-037).
+   6. Unibelle ka staff (Own-Brand Manager samet) platform ki jaanch ka koi kaam nahi karta: listing ki jaanch, review ki moderation, aur Unibelle ke product pe review likhna (D-031, D-271, D-156).
+7. **Lagana:** har handler `authorize(actor, permission, resource)` se (SR-032); customer aur seller ki har query owner ke filter ke saath (SR-033, SR-034); staff ka area scope (SR-035). Apps me nav aur buttons permission ke hisaab se chhupte hain, par faisla hamesha server pe.
+
+## 12. Saajhe packages (D-428)
+
+Naam aur folder D-002 ke hisaab se: `packages/<shared|frontend|backend>/<name>`, naam `@beautinique/<category>-<name>`. Ye list sujhaav hai; pakki list aur har package ka kaam [PROJECT_PLAN.md](PROJECT_PLAN.md) ke modules ke saath aata hai. Abhi koi package publish nahi hota (D-325).
+
+| Category | Package (misaal naam) | Kaam                                                                                                                                 |
+| -------- | --------------------- | ------------------------------------------------------------------------------------------------------------------------------------ |
+| shared   | `shared-contracts`    | Routes, events, permissions, error codes aur settings ki keys ek jagah (§5 niyam 1); typed client, route manifest aur OpenAPI isi se |
+| shared   | `shared-validators`   | India ke format: GSTIN (check digit ke saath), PAN, IFSC, pincode, UPI id; email aur phone                                           |
+| shared   | `shared-money`        | Paise aur basis points ka hisaab, GST, aur rakam ka bantwara bina paisa khoye (§10.1)                                                |
+| shared   | `shared-clock`        | Injected clock; business code "abhi" sirf isi se (RULES RT-13)                                                                       |
+| backend  | `backend-server-kit`  | Route chalana, actor ka context, `authorize`, errors ka roop, idempotency, rate limit                                                |
+| backend  | `backend-config`      | Har service ka config module aur env ki jaanch (OPERATIONS §1 niyam 9)                                                               |
+| backend  | `backend-mongo`       | Transaction helper (§10.2), repositories, release step aur indexes (§10.4)                                                           |
+| backend  | `backend-postgres`    | Finance ke liye pool, migrations aur transactions (§10.6)                                                                            |
+| backend  | `backend-events`      | Outbox, dispatcher, `processed_events`, dead letters aur samay wale kaam (§3, §4)                                                    |
+| backend  | `backend-media`       | Media provider aur object storage ke ports aur fakes (§7)                                                                            |
+| backend  | `backend-logger`      | Structured logs aur redaction (SR-077, SR-098)                                                                                       |
+| frontend | `frontend-styles`     | Tokens, themes, fonts aur Tailwind ki base (DESIGN §2 se §5)                                                                         |
+| frontend | `frontend-icons`      | Apne icon components (DESIGN §7)                                                                                                     |
+| frontend | `frontend-components` | react-aria-components pe bane components (DESIGN §6)                                                                                 |
+| frontend | `frontend-api-client` | Typed client, query keys, timeout, retry ke niyam aur idempotency key (§5 niyam 11, 13)                                              |
+| frontend | `frontend-authz`      | Permission ke hisaab se nav, buttons aur route guards (§11 niyam 7)                                                                  |
+| frontend | `frontend-app-shell`  | Layout, nav, jaagne ka parda (§5 niyam 14), errors, offline aur idle ki chetavni                                                     |
+| frontend | `frontend-auth-ui`    | Sign-up, sign-in ke teen raaste, authenticator aur recovery codes                                                                    |
+| frontend | `frontend-forms`      | Form ke fields, galti ke sandesh aur accessibility (DESIGN §8)                                                                       |
+| frontend | `frontend-data-table` | Staff apps ki tables: cursor pages, URL me filters, phone pe cards                                                                   |
+| frontend | `frontend-maps`       | Ola Maps ka alag chunk: address ka pin aur stop ki detail (SR-091)                                                                   |
+| frontend | `frontend-pwa`        | Service worker, install aur push (SR-072, SR-074)                                                                                    |
+| frontend | `frontend-test-utils` | Tests ke helpers, fakes aur fixtures (RULES §4.2)                                                                                    |
+
+Lint aur TypeScript ke saajhe config `configs/` me (D-002), package nahi.
+
 ## Change log
 
 | Version | Date       | Badlav                                                                                                                                                                                                                                    |
@@ -685,3 +751,5 @@ Design target pe ₹0 ke clusters kuch hafton me bhar jaate hain: target sirf co
 | v1.3.9  | 2026-11-22 | §10.3 niyam 4 aur commerce row, §10.6 niyam 15: band data public key se, archive ka delete (security review batch 5, D-412).                                                                                                              |
 | v1.3.10 | 2026-11-22 | §8 niyam 3 aur 5, §10.4 niyam 5, §10.8 niyam 1 aur 5: logger, errors ka route, audit aur logs (security review batch 6, D-413).                                                                                                           |
 | v1.3.11 | 2026-11-22 | §6 niyam 7 local Atlas container (D-422); §7 niyam 1, 3, 4 private files object storage pe (D-420); §9 Redis row aur §10.4 niyam 5, 6 (D-425).                                                                                            |
+| v1.3.12 | 2026-11-22 | Naye §11 roles aur permissions ka model (D-427) aur §12 saajhe packages (D-428).                                                                                                                                                          |
+| v1.3.13 | 2026-11-22 | §11 ki appointment table me State Admin (D-426).                                                                                                                                                                                          |

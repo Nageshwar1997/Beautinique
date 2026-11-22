@@ -1,6 +1,6 @@
 # OPERATIONS: Beautinique
 
-> **Status:** v1.1.9 (2026-11-22). System chalane ka manual. Cheezein ek-ek karke judengi.
+> **Status:** v1.1.10 (2026-11-22). System chalane ka manual. Cheezein ek-ek karke judengi.
 
 ## Is file me kya aayega
 
@@ -70,6 +70,7 @@ DevOps / SRE Architect ki raay se (D-257 ka kram), owner ki haan ke baad (D-326 
 8. Kab: shak ya incident pe turant (gambhirta 1 pe misaal 1 ghante me, 2 pe 1 din); baaki saal me ek baar, tay mahine me (misaal April), ops inbox me yaad ke saath; signing keys apne aap.
 9. Providers ke accounts pe MFA, recovery codes offline, tokens kam haq aur kam umar ke, production dashboards ek alag browser profile me.
 10. Settings (thresholds, allowlist, kill switches, emails ki chhat) maalik service ke DB me aur Master app se badalti hain, bina deploy; env me sirf boot ka config aur secrets.
+11. Nayi env key Render ya Vercel me tabhi daali jaaye jab code use padhta ho, kyunki niyam 5 anjaan key pe boot rok deta hai; PR ke note me nayi keys ke naam aur value kahan se aayegi, aur dashboard me daalna owner ka kaam (D-430).
 
 ## 5. Soya server, jagana aur samay wale kaam (D-330)
 
@@ -184,3 +185,4 @@ DevOps / SRE Architect ki raay se (D-257 ka kram), owner ki haan ke baad (D-326 
 | v1.1.7  | 2026-11-22 | §7 niyam 9 me roz ka test push (security review batch 6, D-413).                                                                                                                                               |
 | v1.1.8  | 2026-11-22 | §3 niyam 9 aur 10, naya §12 Security ke record (security review batch 7, D-414).                                                                                                                               |
 | v1.1.9  | 2026-11-22 | §1 local Atlas container, PgBouncer, MongoDB 8.0.30 ka pin aur Valkey `noeviction`; §3 rollback ke baad auto-deploy; §5 do ping (D-424); §6 aur §9 Atlas ki IP list (D-421); §12 niyam 4 private fork (D-425). |
+| v1.1.10 | 2026-11-22 | §4 niyam 11: nayi env key tabhi jab code padhe (D-430).                                                                                                                                                        |

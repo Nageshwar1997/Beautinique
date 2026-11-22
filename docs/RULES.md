@@ -1,6 +1,6 @@
 # RULES: Beautinique
 
-> **Status:** v1.1.9 (2026-11-22). Kaam ke niyam. Abhi §1 (Definition of Done), §2.1 (R1 ka release gate) aur §4 (Testing), D-381 se D-387, D-397, D-398. Baaki cheezein ek-ek karke, owner ki haan ke baad judengi.
+> **Status:** v1.2.1 (2026-11-22). Kaam ke niyam. Saare sections: §1 (Definition of Done), §2 (Git aur release gate), §3 (Code), §4 (Testing), §5 se §7 (security, docs, AI); D-381 se D-387, D-397, D-398, D-429, D-430. Cheezein ek-ek karke, owner ki haan ke baad judti hain.
 
 ## Is file me kya aayega
 
@@ -12,7 +12,7 @@
 6. Docs.
 7. AI ke saath kaam.
 
-Section ke number isi list ke kram se; jo section abhi khaali hai, wo likha nahi gaya. Niyamon ke id: testing `RT-<n>`, Definition of Done `DD-<n>`, release gate `RG-<n>`. "Misaal" wale numbers settings ya code me badal sakte hain. Tools ke naam (Vitest, Playwright, StrykerJS, axe, fast-check) prastaav hain; jahan tool ya provider ki jaanch baaki hai, wahan "jaanchna baaki" likha hai.
+Section ke number isi list ke kram se; jo section abhi khaali hai, wo likha nahi gaya. Niyamon ke id: code `CR-<n>`, testing `RT-<n>`, Definition of Done `DD-<n>`, release gate `RG-<n>`. "Misaal" wale numbers settings ya code me badal sakte hain. Tools ke naam (Vitest, Playwright, StrykerJS, axe, fast-check) prastaav hain; jahan tool ya provider ki jaanch baaki hai, wahan "jaanchna baaki" likha hai.
 
 ## Tab tak
 
@@ -59,6 +59,58 @@ R1 tab release ho jab saari sharten poori hon ([OPERATIONS.md](OPERATIONS.md) §
 | RG-12 | Asli phone pe checks (D-375): Android pe Delivery aur Customer, iPhone pe Customer; iPhone na mila to release note me khula                                                                                 | Haath ka record                     |
 | RG-13 | Koi khula P0 ya P1 bug nahi; P2 release note me (D-378)                                                                                                                                                     | Bugs ki list                        |
 | RG-14 | Deploy ke baad live smoke check pass ([OPERATIONS.md](OPERATIONS.md) §3 niyam 9, smoke order D-380); iske baad hi "R1 live pe verified"                                                                     | Smoke ka record                     |
+
+## 3. Code (D-429)
+
+Tools D-001 ke; folder aur naam D-002 ke. Jahan niyam ke saath lint ya CI ka pehra likha hai, wo pehra niyam ke saath hi banta hai, aur ek "galat" misaal wala test jo pehre ke bina fail ho (RT-43 jaisa).
+
+### 3.1 Sabke liye
+
+1. **CR-1:** TypeScript strict, sirf ESM. `any` nahi; bahar se aaya data `unknown` hai jab tak zod se parse na ho.
+2. **CR-2:** bahar se aane wala har data zod se jaancha jaaye: API input, env, webhooks, events (RT-6), queue ke jobs, files ki jaankari, aur providers ke jawab.
+3. **CR-3:** config sirf us service ke config module se; `process.env` uske bahar nahi padha jaata (lint). Har service sirf apne namespace ke secrets (SR-071).
+4. **CR-4:** jo data hai wo code me nahi likha jaata: states, districts, sub-districts, pincodes, hubs, warehouses, roles, rates (GST, TCS, TDS, fees) aur kanooni seemaayein; ye data ya settings me (D-037). Lint `src/` me state ke naam aur pincode jaisi 6 ank ki string rokta hai (tests aur fixtures chhod ke). _Wajah:_ naya area bina code change ke khule.
+5. **CR-5:** role ke naam se koi faisla nahi (jaise `role === "MASTER"`); faisla hamesha permission aur scope se ([ARCHITECTURE.md](ARCHITECTURE.md) §11). Lint role ki keys ki tulna rokta hai. _Wajah:_ sub-role bina deploy judte hain (D-017), aur bypass ka raasta na bane.
+6. **CR-6:** naam: files `kebab-case`; React components `PascalCase`; functions aur variables `camelCase`; constants `UPPER_SNAKE_CASE`; events `<service>.<cheez>.<past tense>` (jaise `logistics.area.changed`); permissions `<service>.<resource>.<action>`.
+7. **CR-7:** paisa hamesha integer paise me, rates basis points me; float kabhi nahi ([ARCHITECTURE.md](ARCHITECTURE.md) §10.1). Ids ka niyam bhi wahi.
+8. **CR-8:** id kabhi secret nahi: andaaza lag sakta hai, to har cheez permission aur scope se khulti hai. Bina sign-in wale link ke liye alag random token (jaise D-418 ka QR).
+9. **CR-9:** HTTP calls axios se (D-001). Chhoot sirf jahan stream chahiye (jaise gateway ka proxy), wajah ke comment ke saath.
+10. **CR-10:** comments sirf "kyun" ke liye, "kya" ke liye nahi. Formatting Prettier aur ESLint se, CI me jaanch.
+11. **CR-11:** commits Conventional Commits me (`type(scope): description`), ek commit me ek baat; koi AI attribution nahi ([CLAUDE.md](../CLAUDE.md)). Poora tareeka [GIT_SKILLS.md](GIT_SKILLS.md) me.
+
+### 3.2 Backend
+
+1. **CR-12:** contracts pehle: har route, event, permission aur error code pehle contracts me, phir handler ([ARCHITECTURE.md](ARCHITECTURE.md) §5 niyam 1). Bina contract ka route nahi banta.
+2. **CR-13:** service ki deewar SR-071 se: doosri service ka database ya andar ka code import nahi, sirf facade aur events (lint).
+3. **CR-14:** transaction ke niyam [ARCHITECTURE.md](ARCHITECTURE.md) §10.2 se: andar queries ek ke baad ek (kabhi `Promise.all` nahi), bahar ki koi call nahi, jawab commit ke baad.
+4. **CR-15:** doosri service ka kaam aur bahar ke side effects (email, push) sirf outbox ke events se ([ARCHITECTURE.md](ARCHITECTURE.md) §3).
+5. **CR-16:** paise, stock, order aur delivery ke har likhne wale route pe idempotency key ([ARCHITECTURE.md](ARCHITECTURE.md) §5 niyam 10).
+6. **CR-17:** har handler `authorize` se (SR-032); koi bypass nahi, Master ke liye bhi nahi.
+7. **CR-18:** errors ek hi roop me ([ARCHITECTURE.md](ARCHITECTURE.md) §5 niyam 8); user ka sandesh error code se, sandesh ka text ek jagah.
+8. **CR-19:** samay wale kaam ki due date database me aur kaam queue se ([ARCHITECTURE.md](ARCHITECTURE.md) §4); `setInterval` se business ka kaam nahi. "Abhi" sirf injected clock se (RT-13).
+9. **CR-20:** har query aur har sort index se ([ARCHITECTURE.md](ARCHITECTURE.md) §10.4 niyam 8); jaan-boojh ke poora padhna sirf wajah ke comment ke saath (RT-43).
+10. **CR-21:** files sirf media service ke port se; business data me sirf `assetId` ([ARCHITECTURE.md](ARCHITECTURE.md) §7).
+11. **CR-22:** logs me OTP, password, token, cookie, PAN, bank number aur poora address kabhi nahi (SR-077, SR-098); redaction ka test.
+12. **CR-23:** async kaam ke dono sire jaanchein: job queue me jaana aur consumer ka asli kaam (jaise email sach me bana). _Wajah:_ queue me jaata job kabhi chala hi nahi, ye sirf producer ke test se nahi dikhta.
+
+### 3.3 Frontend
+
+1. **CR-24:** pehle saajhe packages ([ARCHITECTURE.md](ARCHITECTURE.md) §12); wahan jo hai wo app me dobara nahi banta.
+2. **CR-25:** components props aur config se chalein, kisi ek app se jude nahi. Naya hook ya component pehle app me asli browser me saabit, phir package me.
+3. **CR-26:** icons sirf apne icons package se ([DESIGN.md](DESIGN.md) §7); app me inline SVG ya bahar ki icon library ka import nahi.
+4. **CR-27:** API sirf saajhe typed client aur uski query keys se; app me seedha axios ya `fetch` nahi.
+5. **CR-28:** user ka data aur tokens browser storage me nahi (SR-027); `localStorage` sirf UI ki pasand (jaise theme) ke liye.
+6. **CR-29:** permission ke hisaab se nav aur buttons, par faisla server pe ([ARCHITECTURE.md](ARCHITECTURE.md) §11 niyam 7).
+7. **CR-30:** paisa, numbers aur dates `Intl` (`en-IN`) se, haath se format nahi.
+8. **CR-31:** jo attribute component khud bhi lagata hai (`id`, `aria-describedby`, `className`, event handlers), wo bahar ke props ke saath milaya jaaye, chupke se overwrite nahi; iska test. _Wajah:_ TypeScript aise overwrite ko nahi pakadta.
+9. **CR-32:** focus ring kabhi bina apne focus style ke nahi hatta ([DESIGN.md](DESIGN.md) §8).
+10. **CR-33:** har package ki Tailwind CSS har us app aur playground me import ho jo uske components dikhata hai. _Wajah:_ Tailwind `node_modules` scan nahi karta, to bina import ke classes chupke se gayab.
+
+### 3.4 Packages
+
+1. **CR-34:** naam aur folder D-002 se; sirf ESM; build tsdown se (D-001); har package me README, aur frontend package me playground.
+2. **CR-35:** bahar ki library peer dependency ho to devDependencies me bilkul wahi range; jis library ke types package ki public types me aate hain, wo peer dependency ho.
+3. **CR-36:** abhi har package `private: true`; publish ka niyam [OPERATIONS.md](OPERATIONS.md) §11 me (D-325).
 
 ## 4. Testing
 
@@ -340,6 +392,36 @@ Kuch niyamon ka saboot test nahi, record hai (jaise schema ki review checklist, 
 4. **RT-46:** release ka test report: har command ka nateeja aur samay ki chhoti table, release note ke saath (RT-42). _Wajah:_ "kaise jaancha" ka saboot dohraane layak rahe.
 5. **RT-47:** in galtiyon ke regression tests: Valkey ruka par connection juda (disconnect nahi) to signed-in route jaldi 503 de, latke nahi; apps ki har API call pe timeout; edge ya proxy ka 5xx user ko raw text me na dikhe, saaf screen pe; E2E ki safai backend band hone ke baad bhi chale. _Wajah:_ ye galtiyan ek baar asli me ho chuki hain.
 
+### 4.8 Testing ke jaane-pehchaane jaal (D-429)
+
+1. **RT-49:** kisi library ke callback ka test library ki asli value se likho (jaise "koi error nahi" pe `null` ya `undefined`, jo library sach me bhejti hai). _Wajah:_ galat maani value pe test pass aur app galat.
+2. **RT-50:** input ki seemaayein (`maxlength`, `pattern`, paste) user ke jaise events se jaanchi jaayein, aur ek baar asli browser ki E2E me; value seedhi set karne wala event in seemaon ko chhod deta hai.
+3. **RT-51:** E2E me har bharne aur dabane se pehle element dikhe aur chalu ho, ye jaancha jaaye. _Wajah:_ dhake ya inert field pe bharna chupchaap kuch nahi karta, aur khaali form submit ho jaata hai.
+4. **RT-52:** mobile ki chaudai ki jaanch test ki apni viewport chaudai (misaal 320 ya 360) se ho, page ki `innerWidth` se nahi. _Wajah:_ overflow pe emulation me `innerWidth` bhi badh jaati hai, to side-scroll kabhi pakda nahi jaata.
+5. **RT-53:** layout, focus aur blur se judi baatein (button ka khisakna, focus ka kram) sirf asli browser ki E2E me; jsdom me layout nahi hota.
+6. **RT-54:** jo test kisi platform ke header ya vyavhaar pe tika ho (jaise forwarded IP), wo pehle deploy pe asli data se ek baar milaya jaaye (RT-14); test khud wahi header bhejte hain, to galti chhup jaati hai.
+7. **RT-55:** har test run ke baad uske databases aur keys mitein, aur bache hue test databases ki ginti ka pehra ho. _Wajah:_ atke runs ke bache databases engine ko dheema karke doosre tests ko timeout pe girate hain, jabki code theek hota hai.
+
+## 5. Security aur privacy (D-430)
+
+1. Saare security niyam [security/SECURITY_REQUIREMENTS.md](security/SECURITY_REQUIREMENTS.md) me, threats [security/THREAT_MODEL.md](security/THREAT_MODEL.md) me; har niyam ka test ya record (RT-48, [OPERATIONS.md](OPERATIONS.md) §12).
+2. Public repo: koi secret, `.env`, token, password, DB dump ya asli personal data commit nahi; sirf `.env.example` ([CLAUDE.md](../CLAUDE.md)). Secrets kahan rehte hain: [OPERATIONS.md](OPERATIONS.md) §4.
+3. Security bug ki detail fix live hone tak sirf private record me (RT-39, D-403).
+4. Dummy jaankari pe hamesha demo ka nishaan (D-145); kabhi asli registration ya filing jaisa nahi dikhta.
+
+## 6. Docs (D-430)
+
+1. Docs ke niyam [README.md](README.md) aur root [CLAUDE.md](../CLAUDE.md) me: Hinglish, har file ke top pe status (version aur date), neeche change log, `vX.Y.Z` ka niyam, aur har baat sirf ek jagah (D-019).
+2. "Bana hai" sirf code ya test ki link ke saath (D-019).
+3. Har package me README (CR-34); code ka koi niyam badle to usi PR me uska doc.
+
+## 7. AI ke saath kaam (D-430)
+
+1. Kaam ke niyam root [CLAUDE.md](../CLAUDE.md) me: kam tokens, agents ek waqt me ek, commit aur push sirf owner ke kehne pe, destructive kaam se pehle poochhna, mutation testing copy me, `.env` files kabhi nahi kholna, aur "verified" tabhi jab asli user wala action kiya ho.
+2. Har UI badlav asli browser me light, dark aur mobile chaudai pe dekha jaaye, phir hi "ho gaya" (DD-8).
+3. Nayi env key Render ya Vercel me tabhi daali jaaye jab code use padhta ho; AI owner ko key ka naam aur value kahan se aayegi bataata hai, khud dashboard me nahi daalta ([OPERATIONS.md](OPERATIONS.md) §4).
+4. Har daawa (daam, seemaayein, kanoon) source se jaancha jaaye, tareekh ke saath; jo nahi jaancha wo saaf likha ho.
+
 ## Change log
 
 | Version | Date       | Badlav                                                                                                                                                                                                                           |
@@ -354,3 +436,4 @@ Kuch niyamon ka saboot test nahi, record hai (jaise schema ki review checklist, 
 | v1.1.7  | 2026-11-22 | §4.1 me DAST, §4.6 ki table, RT-39 ki jagah aur naya RT-48 (security review batch 7, D-414).                                                                                                                                     |
 | v1.1.8  | 2026-11-22 | RG-2 ki ginti SECURITY_REQUIREMENTS ke Release column se (security review batch 9, D-416).                                                                                                                                       |
 | v1.1.9  | 2026-11-22 | RT-2 (MongoDB pin, local Atlas container, PgBouncer, `noeviction`), RT-14 (`zrok`), accessibility me `wcag22aa`, Lighthouse ka median, §4.6 finance migrations aur PgBouncer, nightly me service worker ke tests (D-422, D-425). |
+| v1.2.1  | 2026-11-22 | Naye §3 code ke niyam CR-1 se CR-36, §4.8 testing ke jaal RT-49 se RT-55 (D-429), aur §5 se §7 (D-430).                                                                                                                          |
