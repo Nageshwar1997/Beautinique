@@ -1,6 +1,6 @@
 # DECISIONS: Beautinique
 
-> **Status:** v1.14.59 (2026-11-22). Har faisla ek jagah. Sirf wahi "Tay" jo owner ne khud kaha; Claude ki salah faisla nahi. Cheezein ek-ek karke judti hain.
+> **Status:** v1.14.60 (2026-11-22). Har faisla ek jagah. Sirf wahi "Tay" jo owner ne khud kaha; Claude ki salah faisla nahi. Cheezein ek-ek karke judti hain.
 
 ## 0. Kaise likhein
 
@@ -468,6 +468,7 @@
 | D-451 | Admin app ka dhaancha aur area ki screens (hub ka switch, pincode ka primary sub-district) charan 2 me; D-446 badla.                                                                                                                                                                    | Process      | 2026-11-22 |
 | D-452 | Waitlist ka acceptance criterion `AC-LOGISTICS-13` ACCEPTANCE §1.8 me.                                                                                                                                                                                                                  | Process      | 2026-11-22 |
 | D-453 | Finance app ka dhaancha aur fail refund ka raasta charan 10 me; D-446 badla.                                                                                                                                                                                                            | Process      | 2026-11-22 |
+| D-454 | R2 ke `25` aur `26` ki TASK.md abhi, draft ke roop me; R2 ki planning me badal sakti hain.                                                                                                                                                                                              | Process      | 2026-11-22 |
 
 ## 2. Record
 
@@ -5458,8 +5459,17 @@
 - **Kisne, kab:** owner, 2026-11-22. **Nishaan:** Salah maani.
 - **Asar (Claude):** charan 10 me lagbhag 5 points aur, aur ek aur app ka dhaancha.
 
+### D-454. R2 ke modules ki TASK.md abhi, draft ke roop me
+
+- **Faisla:** `25-app-growth-studio` aur `26-app-creator` ki `TASK.md` abhi, R2 ke tay faislon se (D-055, D-101, D-102, D-173 se D-179, D-279); R2 ki planning me inke features, subtasks aur sizes badal sakte hain. R2 ke features (offers, coupons, points, referral, creators) ka maalik service R2 ki planning me tay hoga (D-444 niyam 5).
+- **Wajah:** owner ne khud kaha (2026-11-22): abhi banao, aur note rakho ki R2 me badlav ho sakte hain. Claude ki salah thi ki R2 ki `TASK.md` R2 ki planning me bane.
+- **Chhode vikalp:** R2 ki planning tak folder na banana (D-446 jaisa).
+- **Kab dobara khulega:** R2 ki planning me.
+- **Kisne, kab:** owner, 2026-11-22. **Nishaan:** Salah nahi maani.
+- **Asar (Claude):** ecosystem ke % me R2 ke in do modules ke points judte hain; baaki modules ke R2 subtasks R2 ki planning me.
+
 ## Change log
 
 | Version            | Date                     | Badlav                                                             |
 | ------------------ | ------------------------ | ------------------------------------------------------------------ |
-| v1.0.0 se v1.14.59 | 2026-11-17 se 2026-11-22 | Faisle D-001 se D-453; har badlav ka poora itihaas git me (D-442). |
+| v1.0.0 se v1.14.60 | 2026-11-17 se 2026-11-22 | Faisle D-001 se D-454; har badlav ka poora itihaas git me (D-442). |

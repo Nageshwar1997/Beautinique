@@ -1,6 +1,6 @@
 # PROJECT PLAN: Beautinique
 
-> **Status:** v1.5.12 (2026-11-22). Project ki kendriya file. Cheezein ek-ek karke, owner ki haan ke baad judti hain.
+> **Status:** v1.5.13 (2026-11-22). Project ki kendriya file. Cheezein ek-ek karke, owner ki haan ke baad judti hain.
 
 ## 0. Is file me kya aayega
 
@@ -87,8 +87,8 @@ Har module ka folder `tasks/NN-<module>/` aur uski `TASK.md` ([tasks/README.md](
 | `22-app-finance`       | Finance ki team: seller ka hisaab, payout ko "paid" mark karna, reports ([TASK.md](tasks/22-app-finance/TASK.md))                                                                                                                             | R1             | 03, 14                                 |
 | `23-app-logistics-ops` | Warehouse aur hub ki team: receiving, pick aur pack, trips, assign, returns ki jaanch ([TASK.md](tasks/23-app-logistics-ops/TASK.md))                                                                                                         | R1             | 03, 10, 13                             |
 | `24-app-delivery`      | Delivery partners ka PWA (offline): delivery, saboot, UPI QR, return pickup ([TASK.md](tasks/24-app-delivery/TASK.md))                                                                                                                        | R1             | 03, 10, 12                             |
-| `25-app-growth-studio` | Marketing aur growth ki team                                                                                                                                                                                                                  | R2             | 03, aur R2 ke features                 |
-| `26-app-creator`       | Creators aur affiliates                                                                                                                                                                                                                       | R2             | 03, aur R2 ke features                 |
+| `25-app-growth-studio` | Marketing aur growth ki team ([TASK.md](tasks/25-app-growth-studio/TASK.md), draft)                                                                                                                                                           | R2             | 03, aur R2 ke features                 |
+| `26-app-creator`       | Creators aur affiliates ([TASK.md](tasks/26-app-creator/TASK.md), draft)                                                                                                                                                                      | R2             | 03, aur R2 ke features                 |
 | `27-operations`        | Deploy (Render, Vercel), backup aur restore (D-013), jagane ke pings aur nigrani (D-028), R1 ka release gate ([RULES.md](RULES.md) §2.1) ([TASK.md](tasks/27-operations/TASK.md))                                                             | R1             | 01, 09                                 |
 | `28-packages`          | Packages ka flow (D-445): CLI ke `create`, `build`, `verify`, `status`, `republish`, `publish` aur `update-deps`, aur GitHub ka publish workflow; saare packages public npm pe, tests me fake registry ([TASK.md](tasks/28-packages/TASK.md)) | R1             | 01                                     |
 
@@ -99,8 +99,8 @@ Har module ka folder `tasks/NN-<module>/` aur uski `TASK.md` ([tasks/README.md](
 
 §2 ke hisaab se. "—" ka matlab: us module ki `TASK.md` abhi nahi bani, to points tay nahi.
 
-- **R1:** 0 / 547 points = 0%. R1 ke saare 26 modules ke points tay hain; R2 ke modules (`25`, `26`) aur baaki modules ke R2 subtasks R2 ki planning me judenge.
-- **Ecosystem:** 0 / 547 points = 0%; R2 ke points abhi tay nahi.
+- **R1:** 0 / 547 points = 0%. R1 ke saare 26 modules ke points tay hain; R2 ke `25` aur `26` ki `TASK.md` draft hai (D-454); baaki modules ke R2 subtasks R2 ki planning me judenge.
+- **Ecosystem:** 0 / 585 points = 0%; R2 me abhi sirf `25` (23) aur `26` (15) ke draft points.
 
 | Module                 | Release        | Kul points | Poore | %   |
 | ---------------------- | -------------- | ---------- | ----- | --- |
@@ -128,8 +128,8 @@ Har module ka folder `tasks/NN-<module>/` aur uski `TASK.md` ([tasks/README.md](
 | `22-app-finance`       | R1             | 12         | 0     | 0%  |
 | `23-app-logistics-ops` | R1             | 21         | 0     | 0%  |
 | `24-app-delivery`      | R1             | 15         | 0     | 0%  |
-| `25-app-growth-studio` | R2             | —          | —     | —   |
-| `26-app-creator`       | R2             | —          | —     | —   |
+| `25-app-growth-studio` | R2             | 23         | 0     | 0%  |
+| `26-app-creator`       | R2             | 15         | 0     | 0%  |
 | `27-operations`        | R1             | 20         | 0     | 0%  |
 | `28-packages`          | R1             | 18         | 0     | 0%  |
 
@@ -163,4 +163,4 @@ Modules charan wise bante hain. Har charan me us hisse ke liye zaroori service a
 
 | Version           | Date                     | Badlav                                                                                                                                                                                          |
 | ----------------- | ------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| v1.0.0 se v1.5.12 | 2026-11-17 se 2026-11-22 | R1 ka scope (§1), progress % ka hisaab (§2) modules ki list (§3, D-444, D-445) progress ki table (§4) aur banane ka kram (§5, D-446, D-451, D-453); har badlav ka poora itihaas git me (D-442). |
+| v1.0.0 se v1.5.13 | 2026-11-17 se 2026-11-22 | R1 ka scope (§1), progress % ka hisaab (§2) modules ki list (§3, D-444, D-445) progress ki table (§4) aur banane ka kram (§5, D-446, D-451, D-453); har badlav ka poora itihaas git me (D-442). |
