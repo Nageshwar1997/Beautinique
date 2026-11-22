@@ -1,6 +1,6 @@
 # DESIGN: Beautinique
 
-> **Status:** v1.1.13 (2026-11-22). Saare apps ka UI design system (§1 se §10). Cheezein ek-ek karke, owner ki haan ke baad judti hain.
+> **Status:** v1.1.14 (2026-11-22). Saare apps ka UI design system (§1 se §10). Cheezein ek-ek karke, owner ki haan ke baad judti hain.
 
 ## Is file me kya aayega
 
@@ -259,19 +259,6 @@ Har niyam ka id `DS-<section>.<n>`. Tokens ke naam code me waise hi (CSS custom 
 
 ## Change log
 
-| Version | Date       | Badlav                                                                                                                                                                                                                                              |
-| ------- | ---------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| v1.0.0  | 2026-11-17 | Khaali file bani.                                                                                                                                                                                                                                   |
-| v1.1.1  | 2026-11-21 | §1 se §10 aaye: siddhaant, rang (light, dark, high contrast), typography aur baaki tokens, layout aur app parivaar, components, icons aur media, accessibility, kanooni jaankari UI me kahan, security aur performance (121 niyam; D-352 se D-361). |
-| v1.1.2  | 2026-11-21 | DS-7.10 (Ola Maps ka map, D-347).                                                                                                                                                                                                                   |
-| v1.1.3  | 2026-11-21 | DS-7.10: form aur map dono, map se fields bharna (D-347).                                                                                                                                                                                           |
-| v1.1.4  | 2026-11-21 | DS-6.9: parda sirf jaagne tak, tab tak app band, ping bina loading (D-349).                                                                                                                                                                         |
-| v1.1.5  | 2026-11-21 | DS-7.1: icons icones.js.org se, script aur test ke saath (D-350).                                                                                                                                                                                   |
-| v1.1.6  | 2026-11-21 | DS-7.1: mukhya set Solar, phir Lucide; har app me Icon credits page (D-350).                                                                                                                                                                        |
-| v1.1.7  | 2026-11-21 | DS-6.15 saajha Credits page; DS-7.1 me icons ka credit component (D-350).                                                                                                                                                                           |
-| v1.1.8  | 2026-11-21 | DS-8.1 me screen readers ke naam (D-376, D-397).                                                                                                                                                                                                    |
-| v1.1.9  | 2026-11-21 | DS-10.9: gateway ki script sirf Payment ke alag document pe (security review batch 1, D-408).                                                                                                                                                       |
-| v1.1.10 | 2026-11-22 | DS-6.10: polling aur ping bina kaam ka samay nahi badhate (security review batch 2, D-409).                                                                                                                                                         |
-| v1.1.11 | 2026-11-22 | DS-7.10: map ka code bundle me, bahar ki script nahi (security review batch 5, D-412).                                                                                                                                                              |
-| v1.1.12 | 2026-11-22 | DS-4.1 ₹ ka apna subset, DS-8.1 `wcag22aa`, DS-10.10 Lighthouse ka median (D-425); DS-10.1 location ki accuracy (D-423); DS-10.6 emails me link nahi (D-419).                                                                                       |
-| v1.1.13 | 2026-11-22 | DS-4.1 font ki metadata, DS-6.15 license notice aur logos, DS-10.1 map pehal pe aur Ola ki line (D-436, D-437).                                                                                                                                     |
+| Version           | Date                     | Badlav                                                                 |
+| ----------------- | ------------------------ | ---------------------------------------------------------------------- |
+| v1.0.0 se v1.1.14 | 2026-11-17 se 2026-11-22 | Design system Â§1 se Â§10; har badlav ka poora itihaas git me (D-442). |

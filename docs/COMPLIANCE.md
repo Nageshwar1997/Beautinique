@@ -1,6 +1,6 @@
 # COMPLIANCE: Beautinique
 
-> **Status:** v1.2.4 (2026-11-22). Kanooni matrix. System me sab poori tarah banta hai, par registrations aur bahar ki companies ki details dummy hain (D-026); apne roles ki jaankari asli (D-241). Project ke Lawyer aur CA AI agents hain (D-257); Lawyer ne 18 rows dekhin (D-272), CA ne 32 rows dekhin aur 8 nayi rows di (D-281). Cheezein ek-ek karke, owner ki haan se, judti hain (D-220).
+> **Status:** v1.2.5 (2026-11-22). Kanooni matrix. System me sab poori tarah banta hai, par registrations aur bahar ki companies ki details dummy hain (D-026); apne roles ki jaankari asli (D-241). Project ke Lawyer aur CA AI agents hain (D-257); Lawyer ne 18 rows dekhin (D-272), CA ne 32 rows dekhin aur 8 nayi rows di (D-281). Cheezein ek-ek karke, owner ki haan se, judti hain (D-220).
 
 ## Is file me kya aayega
 
@@ -1540,21 +1540,6 @@ Do parat: sign-up pe chhota **Data notice** (alag, itemised) aur poora **Privacy
 
 ## Change log
 
-| Version | Date       | Badlav                                                                                                                                                                                                               |
-| ------- | ---------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| v1.0.0  | 2026-11-17 | Khaali file bani.                                                                                                                                                                                                    |
-| v1.1.1  | 2026-11-19 | §1 tax: CL-001 se CL-024, sources ke saath (D-244); file ka dhaancha.                                                                                                                                                |
-| v1.1.2  | 2026-11-19 | §2 Legal Metrology: CL-025 se CL-038, sources ke saath (D-245).                                                                                                                                                      |
-| v1.1.3  | 2026-11-19 | §3 cosmetics kanoon: CL-039 se CL-058, sources ke saath (D-246).                                                                                                                                                     |
-| v1.1.4  | 2026-11-19 | §4 e-commerce aur consumer kanoon: CL-059 se CL-087, sources ke saath (D-247); kanooni jaanch ka pehla run poora.                                                                                                    |
-| v1.1.5  | 2026-11-20 | Lawyer aur CA ki paribhasha: project ke AI agents, unki raay hi lawyer aur CA ki raay (D-257).                                                                                                                       |
-| v1.1.6  | 2026-11-20 | §5 personal data: CL-088 se CL-104, sources ke saath (D-258).                                                                                                                                                        |
-| v1.1.7  | 2026-11-20 | §6 IT Rules, §7 CERT-In aur data ki jagah, §8 payments: CL-105 se CL-111, sources ke saath (D-259).                                                                                                                  |
-| v1.1.8  | 2026-11-20 | §9 gig delivery partners, §10 warehouse, transport aur environment: CL-112 se CL-120, sources ke saath (D-260).                                                                                                      |
-| v1.1.9  | 2026-11-20 | §11 sehat aur AYUSH, §12 IP aur contracts: CL-121 se CL-128; §13 Nazar; CL-081 bhara (D-261); kanooni jaanch ke dono run ke nateeje poore.                                                                           |
-| v1.1.10 | 2026-11-20 | Lawyer (AI) ke nishaan 18 rows pe (D-272): 4 jaancha, 11 aadha, 3 hisse nahi; D-262 se D-271 se badli rows; §13 me FDI ki row (D-271).                                                                               |
-| v1.1.11 | 2026-11-20 | §14 Documents ka dhaancha (D-274): 6 documents, 108 clauses, D-262 se D-272 ke saath.                                                                                                                                |
-| v1.2.1  | 2026-11-20 | CA (AI) ki raay (D-281): 32 rows pe CA ke nishaan, 20 rows me badlav, §1.1 me nayi rows CL-129 se CL-136, sources T11 se T27, §13 me 4 Nazar rows, §14 me Seller clause 10 aur 13 aur Partner clause 9 ke tax hisse. |
-| v1.2.2  | 2026-11-22 | §14.6 row 12 me security.txt (security review batch 7, D-414).                                                                                                                                                       |
-| v1.2.3  | 2026-11-22 | §14.2 Privacy page: row 6 me Ola ke paas jaane wala location data (D-425), row 7 me media ki jagah (D-420).                                                                                                          |
-| v1.2.4  | 2026-11-22 | Lawyer (AI) ke chhote run se (D-436, D-437, D-438): §14.2 rows 4, 6, 7, 8; CL-107, CL-125, CL-131; §13 me doosre on-call insaan ki row.                                                                              |
+| Version          | Date                     | Badlav                                                                                                                                          |
+| ---------------- | ------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------- |
+| v1.0.0 se v1.2.5 | 2026-11-17 se 2026-11-22 | Kanooni matrix CL-001 se CL-136, documents ka dhaancha (Â§14), aur Lawyer (AI) aur CA (AI) ki raay; har badlav ka poora itihaas git me (D-442). |

@@ -1,6 +1,6 @@
 # PRODUCT: Beautinique
 
-> **Status:** v1.1.2 (2026-11-22). Kya bana rahe hain aur kyun. Har baat ka faisla [DECISIONS.md](DECISIONS.md) me hai; yahan saar aur faislon ki links. Cheezein ek-ek karke, owner ki haan ke baad judti hain.
+> **Status:** v1.1.3 (2026-11-22). Kya bana rahe hain aur kyun. Har baat ka faisla [DECISIONS.md](DECISIONS.md) me hai; yahan saar aur faislon ki links. Cheezein ek-ek karke, owner ki haan ke baad judti hain.
 
 ## Is file me kya aayega
 
@@ -270,8 +270,6 @@ HR aur payroll, statutory auditor, company secretary, bahar ka lawyer aur CA, de
 
 ## Change log
 
-| Version | Date       | Badlav                                                                                                                        |
-| ------- | ---------- | ----------------------------------------------------------------------------------------------------------------------------- |
-| v1.0.0  | 2026-11-17 | Khaali file bani.                                                                                                             |
-| v1.1.1  | 2026-11-22 | Saare hisse bhare (D-426): product ka saar, business model, 11 apps ke roles aur reporting, apps, launch aur scope.           |
-| v1.1.2  | 2026-11-22 | State Admin juda (D-426, Q-369): Super Admin app me state ka area aur operations ka head; reporting aur apps ki table me bhi. |
+| Version          | Date                     | Badlav                                                                                                         |
+| ---------------- | ------------------------ | -------------------------------------------------------------------------------------------------------------- |
+| v1.0.0 se v1.1.3 | 2026-11-17 se 2026-11-22 | Product, business model, 11 apps ke roles, apps, launch aur scope; har badlav ka poora itihaas git me (D-442). |

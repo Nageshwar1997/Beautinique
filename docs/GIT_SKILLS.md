@@ -1,6 +1,6 @@
 # GIT SKILLS: Beautinique
 
-> **Status:** v1.1.5 (2026-11-22). Git skills (`/commit`, `/push`, `/pr`, `/sync`, `/git-status`, `/undo-commit`) ka manual, owner ke liye. Skills ka asli kaam `.claude/skills/` me; dono saath badlein.
+> **Status:** v1.1.6 (2026-11-22). Git skills (`/commit`, `/push`, `/pr`, `/sync`, `/git-status`, `/undo-commit`) ka manual, owner ke liye. Skills ka asli kaam `.claude/skills/` me; dono saath badlein.
 
 ## Is file me kya aayega
 
@@ -80,11 +80,6 @@ Flow root [CLAUDE.md](../CLAUDE.md) ka hai: `prerelease` se feature branch → P
 
 ## Change log
 
-| Version | Date       | Badlav                                                                                                                |
-| ------- | ---------- | --------------------------------------------------------------------------------------------------------------------- |
-| v1.0.0  | 2026-11-17 | Khaali file bani.                                                                                                     |
-| v1.1.1  | 2026-11-22 | Poora manual (D-432): ek nazar me, niyam, branch ka flow, roz ka kaam, release, commit message, checks, rukne pe kya. |
-| v1.1.2  | 2026-11-22 | §2: suraksha ke niyam ab `.claude/settings.json` ke deny aur ask rules se bhi laagu.                                  |
-| v1.1.3  | 2026-11-22 | §7: PR pe abhi ka CI (guard, Prettier, check); fail hone wali baat hati.                                              |
-| v1.1.4  | 2026-11-22 | §1, §3 se §5: `main` hata; default branch `release`, nayi branch `origin/prerelease` se (D-024).                      |
-| v1.1.5  | 2026-11-22 | §4 kadam 2: manual, testing file aur owner ke kaam usi PR me (D-440).                                                 |
+| Version          | Date                     | Badlav                                                                  |
+| ---------------- | ------------------------ | ----------------------------------------------------------------------- |
+| v1.0.0 se v1.1.6 | 2026-11-17 se 2026-11-22 | Git skills ka poora manual; har badlav ka poora itihaas git me (D-442). |

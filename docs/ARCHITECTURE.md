@@ -1,6 +1,6 @@
 # ARCHITECTURE: Beautinique
 
-> **Status:** v1.3.14 (2026-11-22). System kaise bana hai, ek nazar me. Cheezein ek-ek karke, owner ki haan ke baad judengi. Abhi §1 (finance ke accounting niyam, D-282), §2 se §9 (system ke hisse, D-291 se D-298) aur §10 (data aur database, D-310 se D-317).
+> **Status:** v1.3.15 (2026-11-22). System kaise bana hai, ek nazar me. Cheezein ek-ek karke, owner ki haan ke baad judengi. Abhi §1 (finance ke accounting niyam, D-282), §2 se §9 (system ke hisse, D-291 se D-298) aur §10 (data aur database, D-310 se D-317).
 
 ## Is file me kya aayega
 
@@ -735,23 +735,6 @@ Lint aur TypeScript ke saajhe config `configs/` me (D-002), package nahi.
 
 ## Change log
 
-| Version | Date       | Badlav                                                                                                                                                                                                                                    |
-| ------- | ---------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| v1.0.0  | 2026-11-17 | Khaali file bani.                                                                                                                                                                                                                         |
-| v1.1.1  | 2026-11-20 | §1 finance ke accounting niyam (CA (AI) ki raay, D-282): ledger, documents, numbering, rounding, statements aur milaan.                                                                                                                   |
-| v1.2.1  | 2026-11-20 | §2 se §9 (Principal Software Architect, D-291 se D-298): services aur data, events, jobs, API, search aur caching, media, observability, scale aur capacity.                                                                              |
-| v1.2.2  | 2026-11-21 | §7 niyam 10: file badalne pe purani file ka niyam (owner, D-296 me jod).                                                                                                                                                                  |
-| v1.3.1  | 2026-11-21 | §10 data aur database (Database Architect, D-310 se D-317): ids aur paisa, transactions, personal data aur rok, migrations aur seeds, commerce, finance ka PostgreSQL, baaki services, audit aur jagah; §1.7 me seller code 3 characters. |
-| v1.3.2  | 2026-11-21 | D-319 se D-321 ke sudhaar: §2.3 me logistics → commerce, §2.2 me finance ke naye events aur `packVoided`, §9 me Neon ki jagah, §10.3 aur §10.5 me jod.                                                                                    |
-| v1.3.3  | 2026-11-21 | §10.4 niyam 1 me jod: schema wala hissa listen se pehle, lambi data migration background me (D-338).                                                                                                                                      |
-| v1.3.4  | 2026-11-21 | §9 aur §10.8 me Neon ki jagah 1 GB pakki (RISKS §2.5): finance lagbhag 2.8 saal me bharta hai.                                                                                                                                            |
-| v1.3.5  | 2026-11-21 | §5 niyam 14: jaagne tak app band, phir background ping (D-349).                                                                                                                                                                           |
-| v1.3.6  | 2026-11-21 | §5 niyam 14 me `/wake` SR-089 se; niyam 15 me Payment ka alag document (security review batch 1, D-408).                                                                                                                                  |
-| v1.3.7  | 2026-11-22 | §5 niyam 7 me background header (SR-094); §10.7 niyam 1 me `emailNorm` ka roop (SR-092) (security review batch 2, D-409).                                                                                                                 |
-| v1.3.8  | 2026-11-22 | §7 niyam 8: export ki file pehle download ke baad ya 24 ghante me mite (security review batch 3, D-410).                                                                                                                                  |
-| v1.3.9  | 2026-11-22 | §10.3 niyam 4 aur commerce row, §10.6 niyam 15: band data public key se, archive ka delete (security review batch 5, D-412).                                                                                                              |
-| v1.3.10 | 2026-11-22 | §8 niyam 3 aur 5, §10.4 niyam 5, §10.8 niyam 1 aur 5: logger, errors ka route, audit aur logs (security review batch 6, D-413).                                                                                                           |
-| v1.3.11 | 2026-11-22 | §6 niyam 7 local Atlas container (D-422); §7 niyam 1, 3, 4 private files object storage pe (D-420); §9 Redis row aur §10.4 niyam 5, 6 (D-425).                                                                                            |
-| v1.3.12 | 2026-11-22 | Naye §11 roles aur permissions ka model (D-427) aur §12 saajhe packages (D-428).                                                                                                                                                          |
-| v1.3.13 | 2026-11-22 | §11 ki appointment table me State Admin (D-426).                                                                                                                                                                                          |
-| v1.3.14 | 2026-11-22 | §7 niyam 11 rok wali files pe lock (D-439); §10.3 niyam 4 tech ki shart aur catalog row (D-436, D-438).                                                                                                                                   |
+| Version           | Date                     | Badlav                                                                                                   |
+| ----------------- | ------------------------ | -------------------------------------------------------------------------------------------------------- |
+| v1.0.0 se v1.3.15 | 2026-11-17 se 2026-11-22 | Â§1 finance ke accounting niyam se Â§12 saajhe packages tak; har badlav ka poora itihaas git me (D-442). |

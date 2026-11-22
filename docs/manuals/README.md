@@ -1,6 +1,6 @@
 # MANUALS: Beautinique
 
-> **Status:** v1.0.1 (2026-11-22). Har role ka apna manual: us role ke bane features ko kaise use karein. Feature bante hi Claude usi PR me manual banata ya badalta hai (D-440).
+> **Status:** v1.0.2 (2026-11-22). Har role ka apna manual: us role ke bane features ko kaise use karein. Feature bante hi Claude usi PR me manual banata ya badalta hai (D-440).
 
 ## Niyam
 
@@ -33,18 +33,7 @@ App kahan khulta hai, sign-in kaise (aur authenticator ho to wo bhi).
 - **Niyam:** faisle aur acceptance criteria ki links (D-xxx, AC-xxx).
 
 ## Change log
-```
 
-## Manuals ki list
-
-Saajhe features ki list [COMMON.md](COMMON.md) me. Roles ki files ki list yahan; jaise-jaise files banti hain, ek line judti hai.
-
-| App | Role | File | Pehla feature |
-| --- | ---- | ---- | ------------- |
-
-## Change log
-
-| Version | Date       | Badlav                                                   |
-| ------- | ---------- | -------------------------------------------------------- |
-| v1.0.0  | 2026-11-22 | Nayi file (D-440): niyam, dhaancha aur khaali list.      |
-| v1.0.1  | 2026-11-22 | Niyam 2: saajhe features ka manual COMMON.md me (D-440). |
+| Version | Date | Badlav |
+| --- | --- | --- |
+| v1.0.0 se v1.0.2 | 2026-11-22 | Manuals ke niyam, dhaancha aur list; har badlav ka poora itihaas git me (D-442). |

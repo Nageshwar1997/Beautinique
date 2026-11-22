@@ -1,6 +1,6 @@
 # GLOSSARY: Beautinique
 
-> **Status:** v1.1.2 (2026-11-22). Har shabd ka ek hi matlab, taaki saare docs aur code ek bhasha bolein. Cheezein ek-ek karke judti hain.
+> **Status:** v1.1.3 (2026-11-22). Har shabd ka ek hi matlab, taaki saare docs aur code ek bhasha bolein. Cheezein ek-ek karke judti hain.
 
 ## Is file me kya aayega
 
@@ -65,8 +65,6 @@ Har shabd: **Shabd**, **Matlab**, **Kahan tay hua** (DECISIONS ya kisi doc ki li
 
 ## Change log
 
-| Version | Date       | Badlav                                                                           |
-| ------- | ---------- | -------------------------------------------------------------------------------- |
-| v1.0.0  | 2026-11-17 | Khaali file bani.                                                                |
-| v1.1.1  | 2026-11-21 | Shabd ki table bani; pehla shabd RTO (owner ki haan se).                         |
-| v1.1.2  | 2026-11-22 | 51 naye shabd docs ke shabdon se (D-431), A se Z ke kram me; RTO ki link chhoti. |
+| Version          | Date                     | Badlav                                                        |
+| ---------------- | ------------------------ | ------------------------------------------------------------- |
+| v1.0.0 se v1.1.3 | 2026-11-17 se 2026-11-22 | Docs ke 52 shabd; har badlav ka poora itihaas git me (D-442). |

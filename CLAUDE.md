@@ -1,6 +1,6 @@
 # CLAUDE.md: Beautinique
 
-> **Status:** v1.0.6 (2026-11-22). Docs aur code naye sire se ban rahe hain.
+> **Status:** v1.0.7 (2026-11-22). Docs aur code naye sire se ban rahe hain.
 
 Ye file Claude Code har session ki shuruaat me padhta hai. Project pe ek hi insaan (owner) kaam karta hai,
 2 Claude accounts se baari-baari. **Kaam shuru karne se pehle [docs/HANDOFF.md](docs/HANDOFF.md) padho.**
@@ -31,7 +31,8 @@ Ye file Claude Code har session ki shuruaat me padhta hai. Project pe ek hi insa
   baare me repo me kuch mat likho (na code, na comments, na docs, na "ye nahi hai" jaise notes), aur
   koi language feature propose mat karo. Owner ka sakht niyam hai.
 - **Docs Hinglish me** (jaise ye file). Code, identifiers, comments aur app UI English me. Har doc ke top
-  pe status (version + date), neeche change log; har badlav ki ek line.
+  pe status (version + date), neeche chhota change log: ek din ki ek hi line (us din ke badlavon ka saar,
+  version range ke saath); purana itihaas git me (owner, 2026-11-22; D-442).
 - **Version `vX.Y.Z` (owner, 2026-11-17):** nayi file `v1.0.0`. Chhota badlav: Z badhta hai (`v1.0.1`,
   `v1.0.2`). Bada badlav: Y badhta hai aur Z 1 se (`v1.1.1`, `v1.1.2`). Ek poora flow pura hua: X badhta hai,
   Y aur Z 1 se (`v2.1.1`, `v2.1.2`).
@@ -87,17 +88,11 @@ Abhi koi npm command nahi chalta: naya root setup implementation stage me banega
 ## Kaam rokte waqt
 
 [docs/HANDOFF.md](docs/HANDOFF.md) update karo: kya kiya, kya adhoora hai, kya uncommitted hai, kaunsa sawal
-khula hai. Jis doc me badlav kiya, uske change log me ek line. Progress % ka niyam
+khula hai. Jis doc me badlav kiya, uske change log me us din ki line (D-442). Progress % ka niyam
 [docs/PROJECT_PLAN.md](docs/PROJECT_PLAN.md) §2 me (D-433).
 
 ## Change log
 
-| Version | Date       | Badlav                                                                           |
-| ------- | ---------- | -------------------------------------------------------------------------------- |
-| v1.0.0  | 2026-11-17 | Pehla version: abhi ki halat, discovery ke niyam aur hamesha laagu niyam.        |
-| v1.0.1  | 2026-11-18 | Discovery: bina dependency wale sawal ek saath; agle sawal ka zikr nahi (owner). |
-| v1.0.2  | 2026-11-22 | Progress % ka niyam ab PROJECT_PLAN §2 me (D-433).                               |
-| v1.0.3  | 2026-11-22 | `.env` aur `All-ENVs` ka niyam `.claude/settings.json` ke deny rules se bhi.     |
-| v1.0.4  | 2026-11-22 | Git flow se `main` hata; default branch `release`, nayi branch `prerelease` se.  |
-| v1.0.5  | 2026-11-22 | Owner ke kaam, manuals aur testing ki files apne aap update (D-440).             |
-| v1.0.6  | 2026-11-22 | Kai apps ka saajha feature: manual ek hi baar manuals/COMMON.md me (D-440).      |
+| Version          | Date                     | Badlav                                                                                                 |
+| ---------------- | ------------------------ | ------------------------------------------------------------------------------------------------------ |
+| v1.0.0 se v1.0.7 | 2026-11-17 se 2026-11-22 | Abhi ki halat, discovery ke niyam aur hamesha laagu niyam; har badlav ka poora itihaas git me (D-442). |

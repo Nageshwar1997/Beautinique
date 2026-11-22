@@ -1,6 +1,6 @@
 # TASKS: Beautinique
 
-> **Status:** v1.0.2 (2026-11-22), **khaali**. Har module ka apna folder. Modules ki list discovery ke baad aayegi; cheezein ek-ek karke judengi.
+> **Status:** v1.0.3 (2026-11-22), **khaali**. Har module ka apna folder. Modules ki list discovery ke baad aayegi; cheezein ek-ek karke judengi.
 
 ## Dhaancha
 
@@ -18,8 +18,6 @@ tasks/
 
 ## Change log
 
-| Version | Date       | Badlav                                                                   |
-| ------- | ---------- | ------------------------------------------------------------------------ |
-| v1.0.0  | 2026-11-17 | Khaali dhaancha bana.                                                    |
-| v1.0.1  | 2026-11-21 | `TASK.md` me acceptance criteria ki jagah ACCEPTANCE.md ki link (D-388). |
-| v1.0.2  | 2026-11-22 | `TASK.md` me manuals aur testing files ki links (D-440).                 |
+| Version          | Date                     | Badlav                                                                     |
+| ---------------- | ------------------------ | -------------------------------------------------------------------------- |
+| v1.0.0 se v1.0.3 | 2026-11-17 se 2026-11-22 | Modules ke folder ka dhaancha; har badlav ka poora itihaas git me (D-442). |

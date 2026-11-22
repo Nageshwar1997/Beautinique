@@ -1,6 +1,6 @@
 # ACCEPTANCE: Beautinique
 
-> **Status:** v1.0.5 (2026-11-22). R1 ke har service aur app ke acceptance criteria (D-388 se D-395). Cheezein ek-ek karke, owner ki haan ke baad judti hain.
+> **Status:** v1.0.6 (2026-11-22). R1 ke har service aur app ke acceptance criteria (D-388 se D-395). Cheezein ek-ek karke, owner ki haan ke baad judti hain.
 
 ## Is file me kya aayega
 
@@ -305,11 +305,6 @@ Kul 187 criteria (R1).
 
 ## Change log
 
-| Version | Date       | Badlav                                                                                                             |
-| ------- | ---------- | ------------------------------------------------------------------------------------------------------------------ |
-| v1.0.0  | 2026-11-21 | Pehla version: R1 ke 184 acceptance criteria (13 services, 9 apps), ginti aur R2 ka khaka; D-388 se D-395.         |
-| v1.0.1  | 2026-11-21 | AC-CUSTOMER-6 me Payment ka alag document; naya AC-GATEWAY-10 (`/wake`); kul 185 (security review batch 1, D-408). |
-| v1.0.2  | 2026-11-22 | Naya AC-IDENTITY-13 (aliases aur allowlist); kul 186 (security review batch 2, D-409).                             |
-| v1.0.3  | 2026-11-22 | AC-LOGS-3 me jod; naya AC-MASTER-7; kul 187 (security review batch 6, D-413).                                      |
-| v1.0.4  | 2026-11-22 | AC-PAYMENTS-8 aur AC-DELIVERY-4 me test mode ka QR (D-418).                                                        |
-| v1.0.5  | 2026-11-22 | AC-PLATFORM-12 me D-441 (env ki chaar files).                                                                      |
+| Version          | Date                     | Badlav                                                                     |
+| ---------------- | ------------------------ | -------------------------------------------------------------------------- |
+| v1.0.0 se v1.0.6 | 2026-11-21 se 2026-11-22 | R1 ke 184 acceptance criteria; har badlav ka poora itihaas git me (D-442). |

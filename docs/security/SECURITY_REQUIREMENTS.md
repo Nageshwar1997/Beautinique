@@ -1,6 +1,6 @@
 # SECURITY REQUIREMENTS: Beautinique
 
-> **Status:** v1.3.4 (2026-11-22). Security ke niyam, module-wise. Cheezein ek-ek karke judti hain.
+> **Status:** v1.3.5 (2026-11-22). Security ke niyam, module-wise. Cheezein ek-ek karke judti hain.
 
 ## 0. Kaise likhein
 
@@ -150,31 +150,6 @@ Versions owasp.org pe 2026-11-21 ko jaanche: OWASP Top 10:2025, OWASP API Securi
 
 ## Change log
 
-| Version | Date       | Badlav                                                                                                                                                              |
-| ------- | ---------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| v1.0.0  | 2026-11-17 | Khaali file bani.                                                                                                                                                   |
-| v1.1.1  | 2026-11-17 | §0 aur §1 bane; pehla niyam SR-001 (customer app me camera aur location sirf apni site ke liye).                                                                    |
-| v1.2.1  | 2026-11-19 | SR-002 se SR-010 aaye: edge aur hosting (security batch 1, D-210).                                                                                                  |
-| v1.2.2  | 2026-11-19 | SR-011 se SR-026 aaye: sign-in (security batch 2, D-211).                                                                                                           |
-| v1.2.3  | 2026-11-19 | SR-027 se SR-031 aaye: sessions aur tokens (security batch 3, D-212).                                                                                               |
-| v1.2.4  | 2026-11-19 | SR-032 se SR-039 aaye: authorization aur sellers ki deewar (security batch 4, D-213).                                                                               |
-| v1.2.5  | 2026-11-19 | SR-040 se SR-053 aaye: catalog, checkout aur paisa (security batch 5, D-214).                                                                                       |
-| v1.2.6  | 2026-11-19 | SR-054 se SR-060 aaye: delivery, daawe aur reviews (security batch 6, D-215).                                                                                       |
-| v1.2.7  | 2026-11-19 | SR-061 se SR-067 aaye: files aur personal data (security batch 7, D-216).                                                                                           |
-| v1.2.8  | 2026-11-19 | SR-068 se SR-074 aaye: data stores, services aur khabrein (security batch 8, D-217).                                                                                |
-| v1.2.9  | 2026-11-19 | SR-075 se SR-084 aaye: export, audit, logs aur DevOps (security batch 9, D-218).                                                                                    |
-| v1.2.10 | 2026-11-19 | SR-085 se SR-088 aaye: R2 ke hisse aur seller ko invoice ki copy (security batch 10, D-219).                                                                        |
-| v1.2.11 | 2026-11-21 | SR-063 me jod: delivery code encrypted, milaan server pe (D-319).                                                                                                   |
-| v1.2.12 | 2026-11-21 | SR-078, SR-080 aur SR-084 me jod (UptimeRobot ka samay, CI ka secret scan asli pehra, seekh fix ke baad; D-338).                                                    |
-| v1.2.13 | 2026-11-21 | SR-055 me jod: address ka pin D-347 se, "No pin", location na mile to D-351 (D-370).                                                                                |
-| v1.2.14 | 2026-11-21 | SR-089, SR-090, SR-105 aaye aur SR-005, SR-006 badle: `/wake`, Payment ka alag document, Render host ki baadh (security review batch 1, D-408).                     |
-| v1.2.15 | 2026-11-22 | SR-092 se SR-095 aaye aur SR-012, SR-020 badle: email ka roop aur mailbox key, seemaon ka jod, background requests, apps ka state (security review batch 2, D-409). |
-| v1.2.16 | 2026-11-22 | SR-032, SR-033, SR-043, SR-059, SR-075 badle: matrix ke aayam, bahar ke number, milaan ke imports, alias, export ki file (security review batch 3, D-410).          |
-| v1.2.17 | 2026-11-22 | SR-060 (D-251 ki ghadiyaan, jhoothi reports) aur SR-078 (har event ki gambhirta) badle (security review batch 4, D-411).                                            |
-| v1.2.18 | 2026-11-22 | SR-091, SR-096, SR-097 aaye aur SR-006, SR-062, SR-065, SR-066 badle: map, media provider, band data ki chaabi, archive (security review batch 5, D-412).           |
-| v1.2.19 | 2026-11-22 | SR-098 se SR-101 aaye aur SR-005, SR-072, SR-074 badle: logger, errors ka route, audit aur logs, owner ke alerts (security review batch 6, D-413).                  |
-| v1.2.20 | 2026-11-22 | SR-102 se SR-104 aaye aur SR-081, SR-084 badle: test ka raasta, security bug ka raasta, icons (security review batch 7, D-414).                                     |
-| v1.3.1  | 2026-11-22 | Naya dhaancha: Release column, Kahan se ASVS 5.0.0 ke chapter, naya §2 OWASP Top 10:2025 aur API Top 10 2023 ka naksha (security review batch 9, D-416).            |
-| v1.3.2  | 2026-11-22 | SR-002 ke test me Vercel ki routing library se config ki jaanch (D-417).                                                                                            |
-| v1.3.3  | 2026-11-22 | SR-012 kisi email me link nahi (D-419); SR-050 test mode ka QR (D-418); SR-062 aur SR-096 private files object storage pe (D-420).                                  |
-| v1.3.4  | 2026-11-22 | SR-091: map aur search sirf customer ke dabane pe (D-437).                                                                                                          |
+| Version          | Date                     | Badlav                                                                                                           |
+| ---------------- | ------------------------ | ---------------------------------------------------------------------------------------------------------------- |
+| v1.0.0 se v1.3.5 | 2026-11-17 se 2026-11-22 | Security niyam SR-001 se SR-105, Release column aur OWASP ka naksha; har badlav ka poora itihaas git me (D-442). |

@@ -1,13 +1,13 @@
 # Docs: Beautinique
 
-> **Status:** v1.0.3 (2026-11-22). Docs ka index. Files khaali shuru hui hain; cheezein ek-ek karke, owner ki haan ke baad judti hain.
+> **Status:** v1.0.4 (2026-11-22). Docs ka index. Files khaali shuru hui hain; cheezein ek-ek karke, owner ki haan ke baad judti hain.
 
 ## Niyam
 
 - Har file ka ek hi kaam. Har baat sirf ek jagah; baaki jagah uski link.
 - "Bana hai" sirf code ya test ki link ke saath.
 - Sirf naye docs aur naye code ki baat: kisi purane doc ya purane code ka zikr ya link nahi.
-- Har file ke top pe status (version + date), neeche change log: har badlav ki ek line.
+- Har file ke top pe status (version + date), neeche chhota change log: ek din ki ek hi line, version range ke saath; purana itihaas git me (D-442).
 
 ## Files
 
@@ -46,9 +46,6 @@
 
 ## Change log
 
-| Version | Date       | Badlav                                                    |
-| ------- | ---------- | --------------------------------------------------------- |
-| v1.0.0  | 2026-11-17 | Pehla version: docs ka index aur niyam.                   |
-| v1.0.1  | 2026-11-18 | OPEN_QUESTIONS ki line: topics aur jaanchna baaki bhi.    |
-| v1.0.2  | 2026-11-21 | Nayi file ACCEPTANCE.md (D-388).                          |
-| v1.0.3  | 2026-11-22 | Nayi files OWNER_TASKS.md, manuals/ aur testing/ (D-440). |
+| Version          | Date                     | Badlav                                                                            |
+| ---------------- | ------------------------ | --------------------------------------------------------------------------------- |
+| v1.0.0 se v1.0.4 | 2026-11-17 se 2026-11-22 | Docs ka index; nayi files judti gayi; har badlav ka poora itihaas git me (D-442). |

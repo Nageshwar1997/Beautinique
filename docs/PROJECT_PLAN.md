@@ -1,6 +1,6 @@
 # PROJECT PLAN: Beautinique
 
-> **Status:** v1.2.1 (2026-11-22). Project ki kendriya file. Cheezein ek-ek karke, owner ki haan ke baad judti hain.
+> **Status:** v1.2.2 (2026-11-22). Project ki kendriya file. Cheezein ek-ek karke, owner ki haan ke baad judti hain.
 
 ## 0. Is file me kya aayega
 
@@ -59,14 +59,6 @@ Design poore ecosystem ka, banana releases me; koi feature kata nahi (D-008). Jo
 
 ## Change log
 
-| Version | Date       | Badlav                                                                                                                                                                           |
-| ------- | ---------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| v1.0.0  | 2026-11-17 | Khaali file bani.                                                                                                                                                                |
-| v1.1.1  | 2026-11-17 | §1 Releases bana; R1 ka scope (D-055).                                                                                                                                           |
-| v1.1.2  | 2026-11-18 | R1 me jod (owner): ingredients ki structured list aur filters (D-099), Support Desk ka patla hissa (D-105).                                                                      |
-| v1.1.3  | 2026-11-19 | R1 me jod (owner): skin type aur concern ke fields (D-137), Support Lead appeal (D-147), review photo (D-155); R1 hisson me D-133 se D-159 ke niyam.                             |
-| v1.1.4  | 2026-11-19 | R1 review me listing version aur seller ka reviews dekhna (D-160, D-171); "Bahar" me R2 ke naye faisle (D-160 se D-179).                                                         |
-| v1.1.5  | 2026-11-19 | R1 me kanooni jaanch se jod (owner): test claims ka saboot (D-224), 30 din ka daam (D-223), tax archive (D-225), der se delivery ka return (D-222); return ki muddatein (D-221). |
-| v1.1.6  | 2026-11-19 | R1 roles me Grievance Officer aur Nodal Officer, asli staff jaankari ke saath (D-237, D-241).                                                                                    |
-| v1.1.7  | 2026-11-20 | R1 me kanooni rok aur 180 din ke logs (D-250), aur Security Contact role (D-253).                                                                                                |
-| v1.2.1  | 2026-11-22 | Naya §2: progress % ka hisaab (D-433).                                                                                                                                           |
+| Version          | Date                     | Badlav                                                                                        |
+| ---------------- | ------------------------ | --------------------------------------------------------------------------------------------- |
+| v1.0.0 se v1.2.2 | 2026-11-17 se 2026-11-22 | R1 ka scope (Â§1) aur progress % ka hisaab (Â§2); har badlav ka poora itihaas git me (D-442). |

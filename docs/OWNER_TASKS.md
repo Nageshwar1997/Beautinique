@@ -1,6 +1,6 @@
 # OWNER TASKS: Beautinique
 
-> **Status:** v1.0.1 (2026-11-22). Owner ke bahar ke kaam: wo kaam jo sirf owner kar sakta hai (account banana, env key daalna, download, provider ki setting, kisi se poochhna). Claude naya kaam yahan jodta hai, aur owner "ho gaya" kahe to yahin update karta hai (D-440).
+> **Status:** v1.0.2 (2026-11-22). Owner ke bahar ke kaam: wo kaam jo sirf owner kar sakta hai (account banana, env key daalna, download, provider ki setting, kisi se poochhna). Claude naya kaam yahan jodta hai, aur owner "ho gaya" kahe to yahin update karta hai (D-440).
 
 ## Kaise padhein
 
@@ -46,7 +46,6 @@ Har provider pe account owner ka hota hai, MFA aur recovery codes ke saath (SR-0
 
 ## Change log
 
-| Version | Date       | Badlav                                                                                                               |
-| ------- | ---------- | -------------------------------------------------------------------------------------------------------------------- |
-| v1.0.0  | 2026-11-22 | Nayi file (D-440): 4 khule kaam (location data, disk encryption, object storage, gift card issuer) aur aage ke kaam. |
-| v1.0.1  | 2026-11-22 | Aage ke kaam me `.env.production` aur `.env.development` (D-441).                                                    |
+| Version          | Date       | Badlav                                                                       |
+| ---------------- | ---------- | ---------------------------------------------------------------------------- |
+| v1.0.0 se v1.0.2 | 2026-11-22 | Owner ke khule aur aage ke kaam; har badlav ka poora itihaas git me (D-442). |

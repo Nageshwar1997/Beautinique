@@ -1,6 +1,6 @@
 # RULES: Beautinique
 
-> **Status:** v1.2.4 (2026-11-22). Kaam ke niyam. Saare sections: §1 (Definition of Done), §2 (Git aur release gate), §3 (Code), §4 (Testing), §5 se §7 (security, docs, AI); D-381 se D-387, D-397, D-398, D-429, D-430. Cheezein ek-ek karke, owner ki haan ke baad judti hain.
+> **Status:** v1.2.5 (2026-11-22). Kaam ke niyam. Saare sections: §1 (Definition of Done), §2 (Git aur release gate), §3 (Code), §4 (Testing), §5 se §7 (security, docs, AI); D-381 se D-387, D-397, D-398, D-429, D-430. Cheezein ek-ek karke, owner ki haan ke baad judti hain.
 
 ## Is file me kya aayega
 
@@ -428,20 +428,6 @@ Kuch niyamon ka saboot test nahi, record hai (jaise schema ki review checklist, 
 
 ## Change log
 
-| Version | Date       | Badlav                                                                                                                                                                                                                           |
-| ------- | ---------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| v1.0.0  | 2026-11-17 | Khaali file bani.                                                                                                                                                                                                                |
-| v1.1.1  | 2026-11-21 | QA ki 7 batches: §4 Testing (§4.1 se §4.6, RT-1 se RT-42), §1 Definition of Done (DD-1 se DD-12), §2.1 R1 ka release gate (RG-1 se RG-14); D-381 se D-387.                                                                       |
-| v1.1.2  | 2026-11-21 | DD-1 aur RT-24 me criteria ki jagah ACCEPTANCE.md (D-388).                                                                                                                                                                       |
-| v1.1.3  | 2026-11-21 | RT-19 me budget ki jagah, RT-31 me CPU seema, §4.6 me SR-019 ka naap (D-397); naya §4.7, RT-43 se RT-47 (D-398).                                                                                                                 |
-| v1.1.4  | 2026-11-21 | RT-14 me edge ka milaan; RT-36 release se pehle bhi aur findings private (security review batch 1, D-408).                                                                                                                       |
-| v1.1.5  | 2026-11-22 | RT-35 me matrix ke aayam (security review batch 3, D-410).                                                                                                                                                                       |
-| v1.1.6  | 2026-11-22 | RT-14 me map ki key ki whitelist (security review batch 5, D-412).                                                                                                                                                               |
-| v1.1.7  | 2026-11-22 | §4.1 me DAST, §4.6 ki table, RT-39 ki jagah aur naya RT-48 (security review batch 7, D-414).                                                                                                                                     |
-| v1.1.8  | 2026-11-22 | RG-2 ki ginti SECURITY_REQUIREMENTS ke Release column se (security review batch 9, D-416).                                                                                                                                       |
-| v1.1.9  | 2026-11-22 | RT-2 (MongoDB pin, local Atlas container, PgBouncer, `noeviction`), RT-14 (`zrok`), accessibility me `wcag22aa`, Lighthouse ka median, §4.6 finance migrations aur PgBouncer, nightly me service worker ke tests (D-422, D-425). |
-| v1.2.1  | 2026-11-22 | Naye §3 code ke niyam CR-1 se CR-36, §4.8 testing ke jaal RT-49 se RT-55 (D-429), aur §5 se §7 (D-430).                                                                                                                          |
-| v1.2.2  | 2026-11-22 | §4.1 ki table se `main` pe push hata (D-024).                                                                                                                                                                                    |
-| v1.2.2  | 2026-11-22 | DD-13, RT-56 aur §6 niyam 4: manuals, testing aur owner ke kaam ki files (D-440).                                                                                                                                                |
-| v1.2.3  | 2026-11-22 | CR-3 me har key required aur koi default nahi; naya RT-57 env files ka test (D-441).                                                                                                                                             |
-| v1.2.4  | 2026-11-22 | DD-13 me saajhe features ka manual COMMON.md me (D-440).                                                                                                                                                                         |
+| Version          | Date                     | Badlav                                                                                                                                   |
+| ---------------- | ------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------- |
+| v1.0.0 se v1.2.5 | 2026-11-17 se 2026-11-22 | Definition of Done, release gate, code ke niyam, testing aur security, docs aur AI ke niyam; har badlav ka poora itihaas git me (D-442). |

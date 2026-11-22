@@ -1,6 +1,6 @@
 # FLOWS: Beautinique
 
-> **Status:** v1.1.6 (2026-11-22). Poore flows jo kai modules me chalte hain (jaise order se delivery, return se refund): §1 se §6, 20 flows. Cheezein ek-ek karke, owner ki haan ke baad judti hain.
+> **Status:** v1.1.7 (2026-11-22). Poore flows jo kai modules me chalte hain (jaise order se delivery, return se refund): §1 se §6, 20 flows. Cheezein ek-ek karke, owner ki haan ke baad judti hain.
 
 ## Is file me kya aayega
 
@@ -210,12 +210,6 @@ Har flow ka id `FL-<n>`. Har step ke saath module (`identity`, `notify`, `paymen
 
 ## Change log
 
-| Version | Date       | Badlav                                                                                                                                                                     |
-| ------- | ---------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| v1.0.0  | 2026-11-17 | Khaali file bani.                                                                                                                                                          |
-| v1.1.1  | 2026-11-21 | §1 se §6 aaye: account aur sign-in, browse se order aur payment, order se delivery, cancel, return, daawa aur refund, seller ke flows, reviews (20 flows; D-362 se D-367). |
-| v1.1.2  | 2026-11-21 | FL-18 step 1 me payable ki muddat (D-369).                                                                                                                                 |
-| v1.1.3  | 2026-11-21 | FL-7 kadam 4: Payment alag document (security review batch 1, D-408).                                                                                                      |
-| v1.1.4  | 2026-11-22 | FL-5: khule order wali jaanch D-151 niyam 1 se poori.                                                                                                                      |
-| v1.1.5  | 2026-11-22 | FL-9 kadam 5: test mode me QR me Payment page ka link (D-418).                                                                                                             |
-| v1.1.6  | 2026-11-22 | FL-5 kadam 1: "Also delete my reviews" ka vikalp (D-438).                                                                                                                  |
+| Version          | Date                     | Badlav                                                                 |
+| ---------------- | ------------------------ | ---------------------------------------------------------------------- |
+| v1.0.0 se v1.1.7 | 2026-11-17 se 2026-11-22 | 20 flows aur unke sudhaar; har badlav ka poora itihaas git me (D-442). |

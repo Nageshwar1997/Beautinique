@@ -1,6 +1,6 @@
 # OPERATIONS: Beautinique
 
-> **Status:** v1.1.13 (2026-11-22). System chalane ka manual. Cheezein ek-ek karke judengi.
+> **Status:** v1.1.14 (2026-11-22). System chalane ka manual. Cheezein ek-ek karke judengi.
 
 ## Is file me kya aayega
 
@@ -182,20 +182,6 @@ DevOps / SRE Architect ki raay se (D-257 ka kram), owner ki haan ke baad (D-326 
 
 ## Change log
 
-| Version | Date       | Badlav                                                                                                                                                                                                         |
-| ------- | ---------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| v1.0.0  | 2026-11-17 | Khaali file bani.                                                                                                                                                                                              |
-| v1.1.1  | 2026-11-21 | §1 se §11 aaye (DevOps / SRE ki 11 batches; D-326 se D-336): environments, CI, release aur rollback, secrets, soya server, backup aur restore, alerts, runbooks, capacity, memory ka naap, dependencies.       |
-| v1.1.2  | 2026-11-21 | §5 niyam 13: app ki background ping (D-349).                                                                                                                                                                   |
-| v1.1.3  | 2026-11-21 | §2 niyam 6 me nightly WebKit (D-374) aur RULES ki link; §3 niyam 9 me smoke order (D-380); D-397.                                                                                                              |
-| v1.1.4  | 2026-11-21 | §3 niyam 9 me security ki live jaanch (security review batch 1, D-408).                                                                                                                                        |
-| v1.1.5  | 2026-11-22 | §7 niyam 3 me gambhirta ki poori list (security review batch 4, D-411).                                                                                                                                        |
-| v1.1.6  | 2026-11-22 | §4 niyam 2 aur 3 me band data aur map ki keys, §6 niyam 10 me saal ka abhyaas (security review batch 5, D-412).                                                                                                |
-| v1.1.7  | 2026-11-22 | §7 niyam 9 me roz ka test push (security review batch 6, D-413).                                                                                                                                               |
-| v1.1.8  | 2026-11-22 | §3 niyam 9 aur 10, naya §12 Security ke record (security review batch 7, D-414).                                                                                                                               |
-| v1.1.9  | 2026-11-22 | §1 local Atlas container, PgBouncer, MongoDB 8.0.30 ka pin aur Valkey `noeviction`; §3 rollback ke baad auto-deploy; §5 do ping (D-424); §6 aur §9 Atlas ki IP list (D-421); §12 niyam 4 private fork (D-425). |
-| v1.1.10 | 2026-11-22 | §4 niyam 11: nayi env key tabhi jab code padhe (D-430).                                                                                                                                                        |
-| v1.1.11 | 2026-11-22 | §6 niyam 1 private files ka kho jaana breach (D-439); §8 niyam 2 CERT-In ki ghadi aur niyam 3 breach ki paribhasha (D-436).                                                                                    |
-| v1.1.12 | 2026-11-22 | §2 niyam 3, 10, 11 aur §3 niyam 1 se `main` hata; default branch `release` (D-024).                                                                                                                            |
-| v1.1.12 | 2026-11-22 | §4 niyam 11: env key ka kaam OWNER_TASKS me bhi (D-440).                                                                                                                                                       |
-| v1.1.13 | 2026-11-22 | §1 niyam 9 aur 10, §4 niyam 5 aur 6, §6 niyam 12: env ki chaar files, har key required, koi default nahi (D-441).                                                                                              |
+| Version           | Date                     | Badlav                                                                    |
+| ----------------- | ------------------------ | ------------------------------------------------------------------------- |
+| v1.0.0 se v1.1.14 | 2026-11-17 se 2026-11-22 | Chalane ke niyam Â§1 se Â§12; har badlav ka poora itihaas git me (D-442). |
