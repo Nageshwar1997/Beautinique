@@ -1,6 +1,6 @@
 # HANDOFF: Beautinique
 
-> **Status:** v1.1.197 (2026-11-23). Ek session ya account se agle tak ki halat. Chhota rakho: sirf abhi ki halat aur agla kaam.
+> **Status:** v1.1.198 (2026-11-23). Ek session ya account se agle tak ki halat. Chhota rakho: sirf abhi ki halat aur agla kaam.
 
 ## 1. Abhi ki halat (2026-11-23)
 
@@ -20,13 +20,13 @@
 
 ## 2. Uncommitted
 
-- **Is session ke badlav, uncommitted** (branch `feat/two-machine-infra`, ab bina upstream ke): is file aur [tasks/01-foundation/TASK.md](tasks/01-foundation/TASK.md) me ST-8 ki asli halat; `.claude/skills/_shared/git-rules.md`, `.claude/skills/commit/SKILL.md` aur [GIT_SKILLS.md](GIT_SKILLS.md) me nayi branch `--no-track` se; `.claude/skills/push/SKILL.md` me push se pehle upstream ka naam jaanchna; [LESSONS.md](LESSONS.md) me pehla sabak.
+- **Is session ke badlav, uncommitted** (branch `feat/packages-cli-skeleton`, `origin/prerelease` se `--no-track`): `28-packages` ST-1 ka code `scripts/packages/` (CLI ka dhaancha: args, errors, logger, poochhna; `build` with cycle ki jaanch), root `packages:build`, README aur CLAUDE.md me command, [tasks/28-packages/TASK.md](tasks/28-packages/TASK.md). Pichhli branch (ST-8) PR #103 se `prerelease` me merge ho chuki. Unit tests (21), typecheck, lint, format green; asli `turbo` build abhi nahi chala kyunki koi package hi nahi (pehla package ST-3 ke `create` se).
 - **ST-8 ka code `prerelease` me (`19be6c2`)**, PR ke bina seedha push: branch `origin/prerelease` se `--no-track` ke bina bani thi, to uska upstream `origin/prerelease` tha ([LESSONS.md](LESSONS.md)). Push ka CI (`check`) green. Usme: D-462, [OPERATIONS.md](OPERATIONS.md) §1 niyam 11 se 14, [OWNER_TASKS.md](OWNER_TASKS.md) OT-9 se OT-13, TASK §3.9, [tasks/27-operations/TASK.md](tasks/27-operations/TASK.md) §4 niyam 5, [ACCEPTANCE.md](ACCEPTANCE.md) (235 criteria, `AC-FOUNDATION-12` se `15`), README aur CLAUDE.md; code `scripts/foundation` ke `machine.ts`, `remote-infra.ts`, `dev-data.ts`, `bin/infra.ts`, `bin/dev-data.ts` aur `infra/compose.ephemeral.yaml`.
 - **Jaancha nahi gaya:** secondary abhi bani nahi, to asli SSH tunnel, remote snapshot, `dev-data:copy`, `dev-data:restore` aur `infra:use -- secondary` kisi asli remote Docker pe nahi chale (sirf pure functions aur local ports wale tests). Local Docker pe dono int tests scheduled run ke waqt pass hue; `infra:use`/`infra:status` ke baad unit tests (80), `lint`, `typecheck`, `format:check` aur `docs:check` green, int tests dobara nahi chale.
 
 ## 3. Agla kaam
 
-1. **Do laptop (ST-8, D-462):** owner ke OT-9 se OT-13 ke baad Claude secondary ko ssh se set kare, phir asli `infra:up`, tunnel, snapshot aur `dev-data:copy` jaanche; tab ST-8 ho gaya. **Implementation, charan 0:** `01-foundation` ke baaki saath subtasks ho gaye. Agla module [tasks/28-packages/TASK.md](tasks/28-packages/TASK.md) ST-1 (CLI ka dhaancha aur `build`), nayi branch `origin/prerelease` se; phir `02-platform` aur `03-frontend-kit` ([PROJECT_PLAN.md](PROJECT_PLAN.md) §5). R1 ki saari `TASK.md` [tasks/](tasks/README.md) me; R2 ke `25` aur `26` draft (D-454).
+1. **28-packages ST-1:** PR baaki (commit/push owner ke kehne pe), phir ST-2 (fake npm registry aur tests ka dhaancha). **Do laptop (ST-8, D-462):** owner ke OT-9 se OT-13 ke baad Claude secondary ko ssh se set kare, phir asli `infra:up`, tunnel, snapshot aur `dev-data:copy` jaanche; tab ST-8 ho gaya. **Implementation, charan 0:** `01-foundation` ke baaki saath subtasks ho gaye. Agla module [tasks/28-packages/TASK.md](tasks/28-packages/TASK.md) ST-1 (CLI ka dhaancha aur `build`), nayi branch `origin/prerelease` se; phir `02-platform` aur `03-frontend-kit` ([PROJECT_PLAN.md](PROJECT_PLAN.md) §5). R1 ki saari `TASK.md` [tasks/](tasks/README.md) me; R2 ke `25` aur `26` draft (D-454).
 2. **Owner ke kaam:** OT-9 se OT-13 khule ([OWNER_TASKS.md](OWNER_TASKS.md) §1), do laptop ke setup ke liye, ST-8 se pehle; aage ke provider accounts §3 me, apne module ke kaam ke saath.
 3. **Bachi jaanch:** Dependabot ka pehla run `release` pe pahunchne ke baad; images wala hissa (`docker-compose`) tab pehli baar dekhna hai (D-461). [OPEN_QUESTIONS.md](OPEN_QUESTIONS.md) §2 ki 33 rows (location data ki ginti 2026-11-22 ko ho gayi, [RISKS.md](RISKS.md) §2); zyadatar implementation ke pehle test me ya asli phone pe hongi.
 

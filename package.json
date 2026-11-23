@@ -32,6 +32,7 @@
     "infra:down": "node scripts/foundation/bin/infra.ts down",
     "infra:use": "node scripts/foundation/bin/infra.ts use",
     "infra:status": "node scripts/foundation/bin/infra.ts status",
+    "packages:build": "node scripts/packages/bin/packages.ts build",
     "dev-data:copy": "node scripts/foundation/bin/dev-data.ts copy",
     "dev-data:restore": "node scripts/foundation/bin/dev-data.ts restore",
     "format": "prettier . --write",

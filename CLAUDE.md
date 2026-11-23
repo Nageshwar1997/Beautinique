@@ -88,7 +88,7 @@ Naksha: `packages/<category>/<name>/` (npm pe public packages), `frontend/<app>/
 TypeScript, ESLint, Vitest), `infra/compose.yaml` (laptop ke containers) aur `.github/` (CI, Dependabot). Har
 workspace npm workspaces me, tasks Turborepo se; Node 24.22.3 aur npm 12.2.3 exact pinned (D-458).
 
-Commands (root se): `npm run setup`, `npm run infra:up -- backend`, `npm run infra:down`, `npm run infra:use -- secondary`, `npm run infra:status`, `npm run dev-data:copy`,
+Commands (root se): `npm run setup`, `npm run infra:up -- backend`, `npm run infra:down`, `npm run infra:use -- secondary`, `npm run infra:status`, `npm run packages:build`, `npm run dev-data:copy`,
 `npm run dev-data:restore`, `npm test`, `npm run build`,
 `npm run dev`, `npm run lint`, `npm run typecheck`, `npm run format:check`, `npm run format`, `npm run docs:check` aur
 `npm run secrets:scan`. Ek workspace: `npm test -w <name>`; ek test file: workspace me `npx vitest run <file>`. Docs ke

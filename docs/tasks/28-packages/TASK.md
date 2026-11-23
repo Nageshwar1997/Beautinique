@@ -1,6 +1,6 @@
 # TASK 28: packages ka flow
 
-> **Status:** v1.0.2 (2026-11-22). Halat: planning; code abhi nahi. Module [PROJECT_PLAN.md](../../PROJECT_PLAN.md) §3 ka `28-packages` (D-445). Progress: 0 / 18 points.
+> **Status:** v1.0.3 (2026-11-23). Halat: implementation; ST-1 ka code branch pe (`scripts/packages`), PR baaki. Module [PROJECT_PLAN.md](../../PROJECT_PLAN.md) §3 ka `28-packages` (D-445). Progress: 0 / 18 points.
 
 ## 1. Lakshya
 
@@ -167,3 +167,4 @@ Har subtask lagbhag ek PR jitna, aur saare charan 0 me ([PROJECT_PLAN.md](../../
 | Version          | Date       | Badlav                                                                                                        |
 | ---------------- | ---------- | ------------------------------------------------------------------------------------------------------------- |
 | v1.0.0 se v1.0.2 | 2026-11-22 | Module 28 ka pehla spec, 8 subtasks acceptance criteria ki link (D-445) aur charan 0 (D-446); code abhi nahi. |
+| v1.0.3          | 2026-11-23 | ST-1 ka code: `scripts/packages` (CLI ka dhaancha, `build`, `npm run packages:build`); tests `scripts/packages/test/` (AC-PACKAGES-4). |
