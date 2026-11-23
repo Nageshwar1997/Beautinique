@@ -6,6 +6,8 @@ package-lock.json
 backups
 # Claude Code worktrees: other checkouts of this repo, each checked in its own right
 .claude/worktrees/
+# Claude Code's own settings on a laptop, never in git; Claude Code writes it
+.claude/settings.local.json
 
 # Planning docs are hand-formatted (wide tables).
 docs
