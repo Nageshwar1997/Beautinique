@@ -1,0 +1,13 @@
+{
+  "name": "@beautinique/scripts-packages",
+  "version": "1.0.0",
+  "private": true,
+  "description": "The packages CLI: creates, builds, verifies, versions and publishes the shared packages.",
+  "license": "MIT",
+  "type": "module",
+  "scripts": {
+    "typecheck": "tsc -p tsconfig.json",
+    "lint": "eslint .",
+    "test": "vitest run --coverage"
+  }
+}
