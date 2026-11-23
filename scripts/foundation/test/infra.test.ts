@@ -3,9 +3,13 @@ import assert from 'node:assert/strict';
 import { describe, test } from 'vitest';
 
 import {
+  compose,
+  COMPOSE_FILE,
+  composeFiles,
   composeProblems,
   composeProfiles,
   downArgs,
+  EPHEMERAL_FILE,
   readComposeConfig,
   upArgs,
   WAIT_SECONDS,
@@ -70,3 +74,54 @@ describe('infra/compose.yaml', { timeout: 60_000 }, () => {
     assert.deepEqual(downArgs(), ['--profile', '*', 'down']);
   });
 });
+
+interface MongoConfig {
+  services: { mongo: { command: string[]; tmpfs?: string[]; volumes?: unknown[] } };
+}
+
+function mongoConfig(env: NodeJS.ProcessEnv): MongoConfig {
+  const result = compose(['--profile', 'backend', 'config', '--format', 'json'], {
+    env: { ...process.env, ...env },
+  });
+  assert.equal(result.status, 0, String(result.stderr));
+  return JSON.parse(String(result.stdout)) as MongoConfig;
+}
+
+describe(
+  'AC-FOUNDATION-14: the containers fit the 8 GB machine with an HDD',
+  { timeout: 60_000 },
+  () => {
+    test('MongoDB caps its WiredTiger cache at 0.25 GB, and the development data stays on a volume', () => {
+      const { mongo } = mongoConfig({ BQ_DATA_IN_MEMORY: '' }).services;
+      const at = mongo.command.indexOf('--wiredTigerCacheSizeGB');
+      assert.ok(at > 0, 'the cache flag is missing');
+      assert.equal(mongo.command[at + 1], '0.25');
+      assert.equal(mongo.tmpfs, undefined);
+      assert.equal(mongo.volumes?.length, 1);
+    });
+
+    test('a test or mutation project keeps MongoDB data in memory, with no volume', () => {
+      const env = { BQ_DATA_IN_MEMORY: 'true', COMPOSE_PROJECT_NAME: 'bq-memory-test' };
+      assert.deepEqual(composeFiles(env), [COMPOSE_FILE, EPHEMERAL_FILE]);
+      const { mongo } = mongoConfig(env).services;
+      assert.deepEqual(mongo.tmpfs, ['/data/db']);
+      assert.equal(mongo.volumes, undefined);
+      assert.ok(mongo.command.includes('--wiredTigerCacheSizeGB'));
+    });
+
+    test('without BQ_DATA_IN_MEMORY only the one compose file is used', () => {
+      assert.deepEqual(composeFiles({}), [COMPOSE_FILE]);
+      assert.deepEqual(composeFiles({ BQ_DATA_IN_MEMORY: 'false', COMPOSE_PROJECT_NAME: 'x' }), [
+        COMPOSE_FILE,
+      ]);
+    });
+
+    test('in-memory data is refused for the development project, or for no project name at all', () => {
+      assert.throws(() => composeFiles({ BQ_DATA_IN_MEMORY: 'true' }), /own COMPOSE_PROJECT_NAME/);
+      assert.throws(
+        () => composeFiles({ BQ_DATA_IN_MEMORY: 'true', COMPOSE_PROJECT_NAME: 'beautinique' }),
+        /own COMPOSE_PROJECT_NAME/,
+      );
+    });
+  },
+);

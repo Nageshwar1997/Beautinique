@@ -6,6 +6,13 @@ import { ROOT } from './constants/paths.ts';
 // The one compose file of the laptop's and CI's containers (docs/OPERATIONS.md §1 rules 2 to 4).
 export const COMPOSE_FILE = join(ROOT, 'infra', 'compose.yaml');
 
+// The override of the containers that tests and mutation runs start: MongoDB keeps its data in memory
+// (tmpfs), because the secondary laptop has an HDD (docs/OPERATIONS.md §1 rule 12).
+export const EPHEMERAL_FILE = join(ROOT, 'infra', 'compose.ephemeral.yaml');
+
+// The one compose project of the development containers, whose data is worth keeping and copying.
+export const DEV_PROJECT = 'beautinique';
+
 // How long `infra:up` waits for every container to report healthy (a first run pulls the images).
 export const WAIT_SECONDS = 180;
 
@@ -48,8 +55,22 @@ export function composeProblems(config: ComposeConfig): string[] {
   return problems;
 }
 
+// The compose files of a run. `BQ_DATA_IN_MEMORY=true` adds the in-memory override, and only for a
+// project of its own (COMPOSE_PROJECT_NAME): it would replace the development data volume.
+export function composeFiles(env: NodeJS.ProcessEnv = process.env): string[] {
+  if (env.BQ_DATA_IN_MEMORY !== 'true') return [COMPOSE_FILE];
+  const project = env.COMPOSE_PROJECT_NAME ?? '';
+  if (project === '' || project === DEV_PROJECT) {
+    throw new Error(
+      `BQ_DATA_IN_MEMORY=true needs its own COMPOSE_PROJECT_NAME, not the development project "${DEV_PROJECT}".`,
+    );
+  }
+  return [COMPOSE_FILE, EPHEMERAL_FILE];
+}
+
 export function compose(args: string[], options: SpawnSyncOptions = {}) {
-  return spawnSync('docker', ['compose', '-f', COMPOSE_FILE, ...args], {
+  const files = composeFiles(options.env ?? process.env).flatMap((file) => ['-f', file]);
+  return spawnSync('docker', ['compose', ...files, ...args], {
     encoding: 'utf8',
     ...options,
   });
@@ -64,11 +85,10 @@ function composeOutput(args: string[]): string {
   return String(result.stdout);
 }
 
-// The whole file with every profile switched on, as Compose itself reads it.
-export function readComposeConfig(): ComposeConfig {
-  return JSON.parse(
-    composeOutput(['--profile', '*', 'config', '--format', 'json']),
-  ) as ComposeConfig;
+// The file with the given profiles switched on (every profile by default), as Compose itself reads it.
+export function readComposeConfig(profiles: string[] = ['*']): ComposeConfig {
+  const switches = profiles.flatMap((profile) => ['--profile', profile]);
+  return JSON.parse(composeOutput([...switches, 'config', '--format', 'json'])) as ComposeConfig;
 }
 
 export function composeProfiles(): string[] {

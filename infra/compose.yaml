@@ -14,7 +14,16 @@ services:
     profiles: [backend]
     # A single-member replica set, since transactions need one. The member's address is the one the
     # laptop's clients use, so mongod listens on the same port inside the container as outside.
-    command: [mongod, --replSet, rs0, --bind_ip_all, --port, '${BQ_MONGO_PORT:-27017}']
+    # The WiredTiger cache is capped at 0.25 GB: the machine that runs the containers has 8 GB.
+    command:
+      - mongod
+      - --replSet
+      - rs0
+      - --bind_ip_all
+      - --port
+      - '${BQ_MONGO_PORT:-27017}'
+      - --wiredTigerCacheSizeGB
+      - '0.25'
     ports:
       - '127.0.0.1:${BQ_MONGO_PORT:-27017}:${BQ_MONGO_PORT:-27017}'
     volumes:

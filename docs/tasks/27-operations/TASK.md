@@ -1,6 +1,6 @@
 # TASK 27: operations (deploy, jagana, backup aur release)
 
-> **Status:** v1.0.2 (2026-11-23). Halat: planning; code abhi nahi. Module [PROJECT_PLAN.md](../../PROJECT_PLAN.md) §3 ka `27-operations`; charan 1 me pehla deploy, baaki charan 2 aur 13 me (D-446). Progress: 0 / 20 points.
+> **Status:** v1.0.3 (2026-11-23). Halat: planning; code abhi nahi. Module [PROJECT_PLAN.md](../../PROJECT_PLAN.md) §3 ka `27-operations`; charan 1 me pehla deploy, baaki charan 2 aur 13 me (D-446). Progress: 0 / 20 points.
 
 ## 1. Lakshya
 
@@ -57,6 +57,7 @@ System ko ₹0 pe live chalana aur bachana: Render aur Vercel pe deploy, soye se
 2. Laptop, tests aur CI kabhi live databases se nahi judte; live tak laptop ki pahunch sirf backup, restore ke abhyaas aur break-glass ko (§1 niyam 7).
 3. Render ki keep-alive pe chetavni aaye to bahar ke pinger turant band (§5 niyam 11).
 4. Tag aur release notes sirf owner ke kehne pe; kahin koi AI attribution nahi (§3 niyam 12, CLAUDE.md).
+5. **Backup, restore ka abhyaas aur break-glass ke tools remote Docker context pe chalne se mana karte hain** (owner, 2026-11-23; D-462). Live data sirf primary laptop pe ([OPERATIONS.md](../../OPERATIONS.md) §1 niyam 11): tool shuru me current Docker context ka endpoint dekhta hai (`ssh://` se shuru ho to remote), `DOCKER_HOST` bhi, aur remote hone pe kuch kiye bina saaf sandesh ke saath ruk jata hai. Test: remote context pe har tool ruke, local pe na ruke (galat misaal ke saath); restore ke abhyaas ke containers apne compose project aur volumes me, development ke `beautinique` project se alag.
 
 ## 5. Data model aur API
 
@@ -98,7 +99,7 @@ Charan [PROJECT_PLAN.md](../../PROJECT_PLAN.md) §5 se (D-446). Points D-433 ke 
 
 ## Change log
 
-| Version          | Date       | Badlav                                                                                     |
-| ---------------- | ---------- | ------------------------------------------------------------------------------------------ |
-| v1.0.0 se v1.0.1 | 2026-11-22 | Module 27 ka pehla spec, 11 subtasks (D-446) aur criteria ki link (D-450); code abhi nahi. |
-| v1.0.2           | 2026-11-23 | OT-2 ho gaya (owner).                                                                      |
+| Version          | Date       | Badlav                                                                                       |
+| ---------------- | ---------- | -------------------------------------------------------------------------------------------- |
+| v1.0.0 se v1.0.1 | 2026-11-22 | Module 27 ka pehla spec, 11 subtasks (D-446) aur criteria ki link (D-450); code abhi nahi.   |
+| v1.0.2 se v1.0.3 | 2026-11-23 | OT-2 ho gaya (owner); remote Docker context pe backup, restore aur break-glass mana (D-462). |

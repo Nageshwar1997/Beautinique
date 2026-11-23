@@ -25,6 +25,7 @@ let clone = '';
 const ENV = {
   ...cleanEnv(),
   COMPOSE_PROJECT_NAME: 'bq-setup-test',
+  BQ_DATA_IN_MEMORY: 'true',
   BQ_MONGO_PORT: '37018',
   BQ_VALKEY_PORT: '36380',
 };

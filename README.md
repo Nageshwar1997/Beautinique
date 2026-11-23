@@ -37,23 +37,31 @@ Setup stops with the fix if Node or npm is the wrong version. Then it installs t
 
 When the work is over, stop the containers with `npm run infra:down`.
 
+### Two laptops
+
+The code, VS Code and Node always run on the primary laptop. The containers run every day on a second laptop (Ubuntu Server), which the primary drives through the Docker context `bq-infra` over SSH (`npm run infra:use -- secondary`, or `-- primary` in an emergency; `npm run infra:status` shows which): `npm run infra:up -- backend` then also opens one SSH tunnel (ssh host `bq-infra-tunnel`), so the containers' ports answer on the primary's `127.0.0.1` and the env files stay as they are. Live data (backup, restore drill, break-glass) is handled on the primary only. Details: [docs/OPERATIONS.md](docs/OPERATIONS.md) §1 rules 11 to 14.
+
 ## Commands
 
 Run them from the repository root.
 
-| Command                                   | What it does                                                                                                 |
-| ----------------------------------------- | ------------------------------------------------------------------------------------------------------------ |
-| `npm run setup`                           | Sets up a laptop (above)                                                                                     |
-| `npm run infra:up -- backend`             | Starts one profile's containers (`backend`: MongoDB replica set and Valkey) and waits until they are healthy |
-| `npm run infra:down`                      | Stops every container                                                                                        |
-| `npm test`                                | Unit and integration tests with coverage; the integration tests need Docker running                          |
-| `npm run build`                           | Builds every workspace                                                                                       |
-| `npm run dev`                             | Starts every workspace's dev task                                                                            |
-| `npm run lint`                            | ESLint, with type information                                                                                |
-| `npm run typecheck`                       | TypeScript                                                                                                   |
-| `npm run format:check` / `npm run format` | Prettier: check, or fix                                                                                      |
-| `npm run docs:check`                      | Checks that every relative link in the docs points at a file in the repository                               |
-| `npm run secrets:scan`                    | Scans the git history for secrets (needs gitleaks 8.30.1 on the laptop)                                      |
+| Command                                   | What it does                                                                                                                             |
+| ----------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------- |
+| `npm run setup`                           | Sets up a laptop (above)                                                                                                                 |
+| `npm run infra:up -- backend`             | Starts one profile's containers (`backend`: MongoDB replica set and Valkey) and waits until they are healthy                             |
+| `npm run infra:down`                      | Stops every container; on the secondary laptop it first saves a MongoDB snapshot to this laptop and closes the SSH tunnel                |
+| `npm run infra:use -- secondary`          | Picks the laptop that runs the containers (`secondary` daily, `primary` in an emergency); waits while containers or the tunnel still run |
+| `npm run infra:status`                    | Says which laptop runs the containers, whether Docker answers, which containers run and whether the SSH tunnel is open                   |
+| `npm run dev-data:copy`                   | Copies the secondary laptop's development MongoDB straight into this laptop's (never the other way)                                      |
+| `npm run dev-data:restore`                | Restores the latest snapshot (`%USERPROFILE%\bq-dev-data\`, the newest 3 are kept) into this laptop's MongoDB                            |
+| `npm test`                                | Unit and integration tests with coverage; the integration tests need Docker running                                                      |
+| `npm run build`                           | Builds every workspace                                                                                                                   |
+| `npm run dev`                             | Starts every workspace's dev task                                                                                                        |
+| `npm run lint`                            | ESLint, with type information                                                                                                            |
+| `npm run typecheck`                       | TypeScript                                                                                                                               |
+| `npm run format:check` / `npm run format` | Prettier: check, or fix                                                                                                                  |
+| `npm run docs:check`                      | Checks that every relative link in the docs points at a file in the repository                                                           |
+| `npm run secrets:scan`                    | Scans the git history for secrets (needs gitleaks 8.30.1 on the laptop)                                                                  |
 
 One workspace: `npm test -w <workspace name>`. One test file: `npx vitest run <file>` inside the workspace.
 

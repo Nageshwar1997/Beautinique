@@ -1,0 +1,8 @@
+# Added to compose.yaml for the containers of tests and mutation runs (BQ_DATA_IN_MEMORY=true, in a
+# project of their own): MongoDB keeps its data in memory instead of a volume, because the secondary
+# laptop that runs the containers has an HDD (docs/OPERATIONS.md §1 rule 12). Valkey writes nothing.
+services:
+  mongo:
+    volumes: !override []
+    tmpfs:
+      - /data/db

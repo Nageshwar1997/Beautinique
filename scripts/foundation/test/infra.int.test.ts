@@ -17,6 +17,7 @@ const PORTS: Record<string, number> = { mongo: MONGO_PORT, valkey: VALKEY_PORT }
 const ENV = {
   ...cleanEnv(),
   COMPOSE_PROJECT_NAME: 'bq-infra-test',
+  BQ_DATA_IN_MEMORY: 'true',
   BQ_MONGO_PORT: String(MONGO_PORT),
   BQ_VALKEY_PORT: String(VALKEY_PORT),
 };

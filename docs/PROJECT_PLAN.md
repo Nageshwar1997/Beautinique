@@ -1,6 +1,6 @@
 # PROJECT PLAN: Beautinique
 
-> **Status:** v1.5.14 (2026-11-23). Project ki kendriya file. Cheezein ek-ek karke, owner ki haan ke baad judti hain.
+> **Status:** v1.5.15 (2026-11-23). Project ki kendriya file. Cheezein ek-ek karke, owner ki haan ke baad judti hain.
 
 ## 0. Is file me kya aayega
 
@@ -99,39 +99,39 @@ Har module ka folder `tasks/NN-<module>/` aur uski `TASK.md` ([tasks/README.md](
 
 §2 ke hisaab se. "—" ka matlab: us module ki `TASK.md` abhi nahi bani, to points tay nahi.
 
-- **R1:** 14 / 547 points = 3%. R1 ke saare 26 modules ke points tay hain; R2 ke `25` aur `26` ki `TASK.md` draft hai (D-454); baaki modules ke R2 subtasks R2 ki planning me judenge.
-- **Ecosystem:** 14 / 585 points = 2%; R2 me abhi sirf `25` (23) aur `26` (15) ke draft points.
+- **R1:** 14 / 549 points = 3%. R1 ke saare 26 modules ke points tay hain; R2 ke `25` aur `26` ki `TASK.md` draft hai (D-454); baaki modules ke R2 subtasks R2 ki planning me judenge.
+- **Ecosystem:** 14 / 587 points = 2%; R2 me abhi sirf `25` (23) aur `26` (15) ke draft points.
 
-| Module                 | Release        | Kul points | Poore | %    |
-| ---------------------- | -------------- | ---------- | ----- | ---- |
-| `01-foundation`        | R1             | 14         | 14    | 100% |
-| `02-platform`          | R1             | 31         | 0     | 0%   |
-| `03-frontend-kit`      | R1             | 41         | 0     | 0%   |
-| `04-logs`              | R1             | 9          | 0     | 0%   |
-| `05-audit`             | R1             | 9          | 0     | 0%   |
-| `06-media`             | R1             | 14         | 0     | 0%   |
-| `07-notify`            | R1             | 15         | 0     | 0%   |
-| `08-identity`          | R1             | 32         | 0     | 0%   |
-| `09-gateway`           | R1             | 13         | 0     | 0%   |
-| `10-logistics`         | R1             | 29         | 0     | 0%   |
-| `11-catalog`           | R1             | 27         | 0     | 0%   |
-| `12-payments`          | R1             | 17         | 0     | 0%   |
-| `13-commerce`          | R1             | 30         | 0     | 0%   |
-| `14-finance`           | R1             | 33         | 0     | 0%   |
-| `15-support`           | R1 (patla), R2 | 13         | 0     | 0%   |
-| `16-app-customer`      | R1             | 35         | 0     | 0%   |
-| `17-app-seller`        | R1             | 25         | 0     | 0%   |
-| `18-app-admin`         | R1             | 22         | 0     | 0%   |
-| `19-app-super-admin`   | R1             | 11         | 0     | 0%   |
-| `20-app-master`        | R1             | 26         | 0     | 0%   |
-| `21-app-support-desk`  | R1 (patla), R2 | 15         | 0     | 0%   |
-| `22-app-finance`       | R1             | 12         | 0     | 0%   |
-| `23-app-logistics-ops` | R1             | 21         | 0     | 0%   |
-| `24-app-delivery`      | R1             | 15         | 0     | 0%   |
-| `25-app-growth-studio` | R2             | 23         | 0     | 0%   |
-| `26-app-creator`       | R2             | 15         | 0     | 0%   |
-| `27-operations`        | R1             | 20         | 0     | 0%   |
-| `28-packages`          | R1             | 18         | 0     | 0%   |
+| Module                 | Release        | Kul points | Poore | %   |
+| ---------------------- | -------------- | ---------- | ----- | --- |
+| `01-foundation`        | R1             | 16         | 14    | 88% |
+| `02-platform`          | R1             | 31         | 0     | 0%  |
+| `03-frontend-kit`      | R1             | 41         | 0     | 0%  |
+| `04-logs`              | R1             | 9          | 0     | 0%  |
+| `05-audit`             | R1             | 9          | 0     | 0%  |
+| `06-media`             | R1             | 14         | 0     | 0%  |
+| `07-notify`            | R1             | 15         | 0     | 0%  |
+| `08-identity`          | R1             | 32         | 0     | 0%  |
+| `09-gateway`           | R1             | 13         | 0     | 0%  |
+| `10-logistics`         | R1             | 29         | 0     | 0%  |
+| `11-catalog`           | R1             | 27         | 0     | 0%  |
+| `12-payments`          | R1             | 17         | 0     | 0%  |
+| `13-commerce`          | R1             | 30         | 0     | 0%  |
+| `14-finance`           | R1             | 33         | 0     | 0%  |
+| `15-support`           | R1 (patla), R2 | 13         | 0     | 0%  |
+| `16-app-customer`      | R1             | 35         | 0     | 0%  |
+| `17-app-seller`        | R1             | 25         | 0     | 0%  |
+| `18-app-admin`         | R1             | 22         | 0     | 0%  |
+| `19-app-super-admin`   | R1             | 11         | 0     | 0%  |
+| `20-app-master`        | R1             | 26         | 0     | 0%  |
+| `21-app-support-desk`  | R1 (patla), R2 | 15         | 0     | 0%  |
+| `22-app-finance`       | R1             | 12         | 0     | 0%  |
+| `23-app-logistics-ops` | R1             | 21         | 0     | 0%  |
+| `24-app-delivery`      | R1             | 15         | 0     | 0%  |
+| `25-app-growth-studio` | R2             | 23         | 0     | 0%  |
+| `26-app-creator`       | R2             | 15         | 0     | 0%  |
+| `27-operations`        | R1             | 20         | 0     | 0%  |
+| `28-packages`          | R1             | 18         | 0     | 0%  |
 
 ## 5. Banane ka kram (D-446)
 
@@ -161,7 +161,7 @@ Modules charan wise bante hain. Har charan me us hisse ke liye zaroori service a
 
 ## Change log
 
-| Version           | Date                     | Badlav                                                                                                                                                                                          |
-| ----------------- | ------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| v1.0.0 se v1.5.13 | 2026-11-17 se 2026-11-22 | R1 ka scope (§1), progress % ka hisaab (§2) modules ki list (§3, D-444, D-445) progress ki table (§4) aur banane ka kram (§5, D-446, D-451, D-453); har badlav ka poora itihaas git me (D-442). |
-| v1.5.14           | 2026-11-23               | `01-foundation` poora (14 / 14): R1 3%, ecosystem 2% (§4).                                                                                                                                      |
+| Version            | Date                     | Badlav                                                                                                                                                                                          |
+| ------------------ | ------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| v1.0.0 se v1.5.13  | 2026-11-17 se 2026-11-22 | R1 ka scope (§1), progress % ka hisaab (§2) modules ki list (§3, D-444, D-445) progress ki table (§4) aur banane ka kram (§5, D-446, D-451, D-453); har badlav ka poora itihaas git me (D-442). |
+| v1.5.14 se v1.5.15 | 2026-11-23               | `01-foundation` ke 7 subtasks poore (14 / 14), phir ST-8 juda (D-462): 14 / 16, R1 3%, ecosystem 2% (§4).                                                                                       |
