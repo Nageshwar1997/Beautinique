@@ -1,6 +1,6 @@
 # TASK 01: foundation (root setup)
 
-> **Status:** v1.0.11 (2026-11-23). Halat: ST-1 se ST-7, saare subtasks ka code branch `feat/foundation-root` pe; PR [#102](https://github.com/Nageshwar1997/Beautinique/pull/102) `prerelease` pe khuli, CI abhi green nahi. Module [PROJECT_PLAN.md](../../PROJECT_PLAN.md) §3 ka `01-foundation`, charan 0 ka pehla module (D-446). Progress: 0 / 14 points.
+> **Status:** v1.0.12 (2026-11-23). Halat: **ho gaya** (2026-11-23). Saaton subtasks PR [#102](https://github.com/Nageshwar1997/Beautinique/pull/102) se `prerelease` me (`ad42467`); PR aur merge ke baad `prerelease` dono pe CI ka `check` green. Module [PROJECT_PLAN.md](../../PROJECT_PLAN.md) §3 ka `01-foundation`, charan 0 ka pehla module (D-446). Progress: 14 / 14 points.
 
 ## 1. Lakshya
 
@@ -144,20 +144,20 @@ Koi database ya HTTP API nahi. Is module ki "API" root ke commands hain: `setup`
 
 Har subtask lagbhag ek PR jitna, aur saare charan 0 me ([PROJECT_PLAN.md](../../PROJECT_PLAN.md) §5, D-446). Points D-433 ke hisaab se, aur "ho gaya" sirf [RULES.md](../../RULES.md) §1 ki Definition of Done ke baad.
 
-| #    | Subtask                                                                               | Size   | Halat     |
-| ---- | ------------------------------------------------------------------------------------- | ------ | --------- |
-| ST-1 | Purana code hatana (owner ki haan), naya root `package.json`, lockfile aur Turborepo  | M (2)  | Branch pe |
-| ST-2 | `configs/`: TypeScript, ESLint, Prettier aur Vitest ke saajhe config                  | M (2)  | Branch pe |
-| ST-3 | `infra/` ki compose file (`mongo` replica set, `valkey`), `infra:up` aur `infra:down` | M (2)  | Branch pe |
-| ST-4 | Env files ka dhaancha aur `npm run setup`                                             | M (2)  | Branch pe |
-| ST-5 | CI: `static` aur `test` jobs, repo ke pehre, aur `check` me sab                       | L (4)  | Branch pe |
-| ST-6 | Mahine ke dependency PRs                                                              | S (1)  | Branch pe |
-| ST-7 | Root README, CLAUDE.md ke commands aur OPERATIONS §1 ki commands ki list              | S (1)  | Branch pe |
-|      | **Kul**                                                                               | **14** |           |
+| #    | Subtask                                                                               | Size   | Halat   |
+| ---- | ------------------------------------------------------------------------------------- | ------ | ------- |
+| ST-1 | Purana code hatana (owner ki haan), naya root `package.json`, lockfile aur Turborepo  | M (2)  | Ho gaya |
+| ST-2 | `configs/`: TypeScript, ESLint, Prettier aur Vitest ke saajhe config                  | M (2)  | Ho gaya |
+| ST-3 | `infra/` ki compose file (`mongo` replica set, `valkey`), `infra:up` aur `infra:down` | M (2)  | Ho gaya |
+| ST-4 | Env files ka dhaancha aur `npm run setup`                                             | M (2)  | Ho gaya |
+| ST-5 | CI: `static` aur `test` jobs, repo ke pehre, aur `check` me sab                       | L (4)  | Ho gaya |
+| ST-6 | Mahine ke dependency PRs                                                              | S (1)  | Ho gaya |
+| ST-7 | Root README, CLAUDE.md ke commands aur OPERATIONS §1 ki commands ki list              | S (1)  | Ho gaya |
+|      | **Kul**                                                                               | **14** |         |
 
 ## Change log
 
-| Version           | Date       | Badlav                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          |
-| ----------------- | ---------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| v1.0.0 se v1.0.2  | 2026-11-22 | Module 01 ka pehla spec, 7 subtasks (D-446) acceptance criteria ki link (D-447) aur deployables pe `private: true`; code abhi nahi.                                                                                                                                                                                                                                                                                                                                                                             |
-| v1.0.3 se v1.0.11 | 2026-11-23 | Purane code ki shart aur `external.command` (D-455); ST-1 ka code: naya root aur Turborepo, purana code hata (D-457, D-458); ST-2 ka code: `configs/` ke TypeScript, ESLint aur Vitest config. ST-3 ka code: `infra/compose.yaml`, `infra:up` aur `infra:down`. ST-4 ka code: env files ka dhaancha aur `npm run setup`. ST-5 ka code: CI ki jobs aur repo ke pehre. ST-6 ka code: mahine ke dependency PRs (D-461). ST-7 ka code: root README, CLAUDE.md aur OPERATIONS §1 ki commands, aur commands ka pehra. PR #102 ke CI me infra ke test ka fix. |
+| Version           | Date       | Badlav                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  |
+| ----------------- | ---------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| v1.0.0 se v1.0.2  | 2026-11-22 | Module 01 ka pehla spec, 7 subtasks (D-446) acceptance criteria ki link (D-447) aur deployables pe `private: true`; code abhi nahi.                                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
+| v1.0.3 se v1.0.12 | 2026-11-23 | Purane code ki shart aur `external.command` (D-455); ST-1 ka code: naya root aur Turborepo, purana code hata (D-457, D-458); ST-2 ka code: `configs/` ke TypeScript, ESLint aur Vitest config. ST-3 ka code: `infra/compose.yaml`, `infra:up` aur `infra:down`. ST-4 ka code: env files ka dhaancha aur `npm run setup`. ST-5 ka code: CI ki jobs aur repo ke pehre. ST-6 ka code: mahine ke dependency PRs (D-461). ST-7 ka code: root README, CLAUDE.md aur OPERATIONS §1 ki commands, aur commands ka pehra. PR #102 ke CI me infra ke test ka fix. PR #102 merge, saare subtasks ho gaye (14 / 14). |

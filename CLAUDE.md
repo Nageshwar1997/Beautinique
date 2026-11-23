@@ -1,6 +1,6 @@
 # CLAUDE.md: Beautinique
 
-> **Status:** v1.0.12 (2026-11-23). Docs aur code naye sire se ban rahe hain.
+> **Status:** v1.0.13 (2026-11-23). Docs aur code naye sire se ban rahe hain.
 
 Ye file Claude Code har session ki shuruaat me padhta hai. Project pe ek hi insaan (owner) kaam karta hai,
 2 Claude accounts se baari-baari. **Kaam shuru karne se pehle [docs/HANDOFF.md](docs/HANDOFF.md) padho.**
@@ -8,7 +8,7 @@ Ye file Claude Code har session ki shuruaat me padhta hai. Project pe ek hi insa
 ## Abhi kya chal raha hai
 
 - **Implementation stage (2026-11-23 se, D-455):** discovery aur planning poori (R1 ke 26 modules ki `TASK.md`,
-  [docs/PROJECT_PLAN.md](docs/PROJECT_PLAN.md) §3 se §5). Kaam charan ke kram se; pehla kaam `01-foundation` ST-1.
+  [docs/PROJECT_PLAN.md](docs/PROJECT_PLAN.md) §3 se §5). Kaam charan ke kram se; `01-foundation` ho gaya (2026-11-23), agla `28-packages` ST-1.
   Code `origin/prerelease` se nayi branch pe, PR ke saath. Purana code tabhi hat-ta hai jab kahin use na ho.
 - **Naye docs khaali shuru hue hain.** Unme cheezein ek-ek karke judti hain, owner ki haan ke baad. Index:
   [docs/README.md](docs/README.md).
@@ -101,7 +101,7 @@ khula hai. Jis doc me badlav kiya, uske change log me us din ki line (D-442). Pr
 
 ## Change log
 
-| Version           | Date                     | Badlav                                                                                                                                                    |
-| ----------------- | ------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| v1.0.0 se v1.0.8  | 2026-11-17 se 2026-11-22 | Abhi ki halat (planning stage, D-443), sawal-jawab ke niyam aur hamesha laagu niyam; har badlav ka poora itihaas git me (D-442).                          |
-| v1.0.9 se v1.0.12 | 2026-11-23               | Implementation stage khula (D-455); naye root ke commands (ST-1, D-458); Claude `backups/` nahi kholta (D-460); repo ka naksha aur saari commands (ST-7). |
+| Version           | Date                     | Badlav                                                                                                                                                                             |
+| ----------------- | ------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| v1.0.0 se v1.0.8  | 2026-11-17 se 2026-11-22 | Abhi ki halat (planning stage, D-443), sawal-jawab ke niyam aur hamesha laagu niyam; har badlav ka poora itihaas git me (D-442).                                                   |
+| v1.0.9 se v1.0.13 | 2026-11-23               | Implementation stage khula (D-455); naye root ke commands (ST-1, D-458); Claude `backups/` nahi kholta (D-460); repo ka naksha aur saari commands (ST-7); `01-foundation` ho gaya. |
