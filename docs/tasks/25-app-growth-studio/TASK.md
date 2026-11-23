@@ -1,6 +1,6 @@
 # TASK 25: Growth Studio app (marketing aur growth ki team)
 
-> **Status:** v1.0.0 (2026-11-22). Halat: planning (R2); code abhi nahi. Module [PROJECT_PLAN.md](../../PROJECT_PLAN.md) §3 ka `25-app-growth-studio`, R2 (D-055, D-446). Progress: 0 / 23 points (sirf ecosystem ke % me).
+> **Status:** v1.0.1 (2026-11-23). Halat: planning (R2); code abhi nahi. Module [PROJECT_PLAN.md](../../PROJECT_PLAN.md) §3 ka `25-app-growth-studio`, R2 (D-055, D-446). Progress: 0 / 23 points (sirf ecosystem ke % me).
 
 > **R2 ka draft:** ye `TASK.md` R2 ke tay faislon se abhi bani hai; R2 ki planning me iske features, subtasks aur sizes badal sakte hain (owner, 2026-11-22; D-454).
 
@@ -16,7 +16,7 @@ Marketing aur growth ki andar ki team ka app: storefront ke banners aur collecti
 
 - Offers, coupons, points, referral aur creators ka data: inka maalik service abhi tay nahi (R2 ki planning me tay; D-444 niyam 5).
 - Pro daam aur sponsored ka data: `11-catalog`. Khabrein: `07-notify`. Points aur offers ki entries: `14-finance` ([ARCHITECTURE.md](../../ARCHITECTURE.md) §1.3).
-- Gift cards: kanooni jaanch aur RBI-authorised PPI issuer ke baad (D-179, D-249; OWNER_TASKS OT-4). Store credit nahi (D-177). Subscriptions baad me (D-178).
+- Gift cards: kanooni jaanch aur RBI-authorised PPI issuer ke baad (D-179, D-249; OWNER_TASKS §3). Store credit nahi (D-177). Subscriptions baad me (D-178).
 
 ## 3. Functional requirements
 
@@ -48,7 +48,7 @@ SR-085 (coupons, points aur gift cards ki redemption ka race), SR-039, SR-043, S
 ## 7. Dependencies
 
 - **Tika hai:** `03-frontend-kit`, `08-identity`, `09-gateway`, `11-catalog`, `07-notify`, `14-finance`, aur R2 ke features ka maalik service (R2 ki planning me tay).
-- **Owner ke kaam:** Growth Studio ka Vercel project; OT-4 (gift card issuer se poochhna) gift cards se pehle ([OWNER_TASKS.md](../../OWNER_TASKS.md)).
+- **Owner ke kaam:** Growth Studio ka Vercel project; gift card issuer se poochhna (OWNER_TASKS §3) gift cards se pehle ([OWNER_TASKS.md](../../OWNER_TASKS.md)).
 
 ## 8. Acceptance criteria, manuals aur testing
 
@@ -79,3 +79,4 @@ Saare R2 me ([PROJECT_PLAN.md](../../PROJECT_PLAN.md) §5). Sizes R2 ki planning
 | Version | Date       | Badlav                                                                                   |
 | ------- | ---------- | ---------------------------------------------------------------------------------------- |
 | v1.0.0  | 2026-11-22 | Module 25 ka pehla spec aur 10 subtasks (R2, D-446, D-454); R2 ka draft; code abhi nahi. |
+| v1.0.1  | 2026-11-23 | Gift card ka owner wala kaam OWNER_TASKS §3 me (R2).                                     |
