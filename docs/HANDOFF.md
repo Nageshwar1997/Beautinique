@@ -1,6 +1,6 @@
 # HANDOFF: Beautinique
 
-> **Status:** v1.1.180 (2026-11-23). Ek session ya account se agle tak ki halat. Chhota rakho: sirf abhi ki halat aur agla kaam.
+> **Status:** v1.1.181 (2026-11-23). Ek session ya account se agle tak ki halat. Chhota rakho: sirf abhi ki halat aur agla kaam.
 
 ## 1. Abhi ki halat (2026-11-22)
 
@@ -16,12 +16,11 @@
 - **Progress:** R1 0 / 547 points = 0%, ecosystem 0 / 585 = 0%; R1 ke saare 26 modules ke points tay; R2 me sirf `25` aur `26` ke draft points ([PROJECT_PLAN.md](PROJECT_PLAN.md) §4).
 - **Agle number:** faisla D-457, sawal Q-395, group G26.
 - **Owner ke khule kaam:** [OWNER_TASKS.md](OWNER_TASKS.md) §1 (abhi koi khula nahi; OT-1, OT-2, OT-3, OT-5 aur OT-6 ho gaye; gift card ka kaam R2 ke liye §3 me). Roles ke manuals [manuals/](manuals/README.md) me aur owner ki testing [testing/](testing/COMMON.md) me; teeno Claude apne aap update karta hai (D-440).
-- **Usage (2026-11-23, subah):** is account pe weekly 74% aur 5-hour 19% (5-hour reset lagbhag 18:00 IST, weekly 2026-11-25). Weekly ~85% pe naya kaam nahi, aur 5-hour ~80% pe naya agent nahi.
+- **Usage (2026-11-23, dopahar):** is account pe weekly 82% aur 5-hour 80% (5-hour reset lagbhag 18:00 IST, weekly 2026-11-25 lagbhag 17:30 IST). Weekly 85% ke paas hai, to `01-foundation` ST-1 jaisa bada kaam doosre account se. Weekly ~85% pe naya kaam nahi, aur 5-hour ~80% pe naya agent nahi.
 
 ## 2. Uncommitted
 
-- `prerelease` pe: D-456 me latency aur bina card ke B2 account ki roz ki seema, aur OT-3 ho gaya: DECISIONS, RISKS, OWNER_TASKS, `06-media` ki TASK.md aur ye file.
-- Baaki sab `prerelease` pe push (`f548424`).
+- Sirf is file ka ye badlav (usage aur halat). Baaki sab `prerelease` pe push (`9642178`).
 
 ## 3. Agla kaam
 
@@ -34,4 +33,4 @@
 | Version              | Date                     | Badlav                                                                                                                                                                                                                                       |
 | -------------------- | ------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | v1.0.0 se v1.1.170   | 2026-11-17 se 2026-11-22 | Discovery ke dauraan har session ki halat; 2026-11-22 ko §1 aur §3 chhote, planning stage khula (D-443), modules tay (D-444), packages ka flow R1 se pehle (D-445) aur kram charan wise (D-446); har badlav ka poora itihaas git me (D-442). |
-| v1.1.171 se v1.1.180 | 2026-11-23               | Implementation stage khula (D-455); pehla kaam `01-foundation` ST-1; OT-5 aur OT-6 ho gaye; private files B2 (EU Central) pe (D-456); OT-3 ho gaya.                                                                                          |
+| v1.1.171 se v1.1.181 | 2026-11-23               | Implementation stage khula (D-455); pehla kaam `01-foundation` ST-1; OT-5 aur OT-6 ho gaye; private files B2 (EU Central) pe (D-456); OT-3 ho gaya.                                                                                          |
