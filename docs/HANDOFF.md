@@ -20,7 +20,7 @@
 
 ## 2. Uncommitted
 
-- Sirf is file ka ye badlav (usage aur halat). Baaki sab `prerelease` pe push (`9642178`).
+- Kuch nhi
 
 ## 3. Agla kaam
 
