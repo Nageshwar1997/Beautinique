@@ -1,6 +1,6 @@
 # OPERATIONS: Beautinique
 
-> **Status:** v1.1.20 (2026-11-23). System chalane ka manual. Cheezein ek-ek karke judengi.
+> **Status:** v1.1.21 (2026-11-23). System chalane ka manual. Cheezein ek-ek karke judengi.
 
 ## Is file me kya aayega
 
@@ -29,13 +29,13 @@ DevOps / SRE Architect ki raay se (D-257 ka kram), owner ki haan ke baad (D-326 
    1. **`.env.development`** (laptop pe chalana): development ki har key, saaf aur required. Koi optional key nahi, aur code me koi default nahi.
    2. **`.env.test`** (unit, integration aur E2E tests, laptop aur CI dono pe): testing ki har key, required. Test runner sirf yahi file padhta hai.
    3. **`.env.production`** (live): production ki har key aur value. Ye file repo ke bahar owner ke private env folder me rehti hai, repo ke andar kabhi nahi. Render aur Vercel ke env me wahi values isi file se jaati hain; live process apne platform ka env padhta hai.
-   4. **`.env.example`** (git me, sirf yahi): teen hisse, **DEVELOPMENT**, **TEST** aur **PRODUCTION**. Har hisse me us environment ki saari keys, dummy values ke saath. DEVELOPMENT me laptop ke public values (jaise `127.0.0.1` ke ports) jaise hain, aur har secret ki jagah `<...>`. TEST me tests ki asli values hi, kyunki wo sab nakli hain (loopback ke hosts aur fake keys, RULES RT-12). PRODUCTION me sirf naam aur `<...>`.
+   4. **`.env.example`** (git me, sirf yahi): teen hisse, **DEVELOPMENT**, **TEST** aur **PRODUCTION**, har ek apni marker line se shuru: `# [DEVELOPMENT]`, `# [TEST]` aur `# [PRODUCTION]`. Pehle marker se pehle koi key nahi, aur teeno hisson me wahi keys, ek-ek baar. Har hisse me us environment ki saari keys, dummy values ke saath. DEVELOPMENT me laptop ke public values (jaise `127.0.0.1` ke ports) jaise hain, aur har secret ki jagah `<...>`. TEST me tests ki asli values hi, kyunki wo sab nakli hain (loopback ke hosts aur fake keys, RULES RT-12). PRODUCTION me sirf naam aur `<...>`.
 
    `.env.development` aur `.env.test` git se bahar hain (`.gitignore`). CI `.env.test` ko `.env.example` ke TEST hisse se banata hai. CI ka test (RULES RT-57) pakka karta hai:
    - har service ke config schema ki har key us environment ke hisse me hai;
    - koi anjaan key nahi hai;
    - TEST aur DEVELOPMENT me database, Redis aur providers ke hosts sirf loopback ya fake hain (SR-068).
-10. Naye laptop ka setup ek command se: Node aur npm ke version ki jaanch, `npm ci`, `.env.development` aur `.env.test` banana (`.env.example` ke DEVELOPMENT aur TEST hisson se; development ke secrets owner bhare), `infra:up`, seed. **Misaal:** `npm run setup`. Commands ki asli list code ke saath yahan judegi.
+10. Naye laptop ka setup ek command se, `npm run setup`: Node aur npm ke version ki jaanch (galat ho to install ka tareeka bata ke rukta hai), `npm ci`, har deployable ki `.env.development` aur `.env.test` (`.env.example` ke DEVELOPMENT aur TEST hisson se; pehle se bani file nahi chhedta, aur development ke jo secrets owner bhare unke naam batata hai), phir `infra:up` (`backend` profile). Seed tab judega jab pehli service ka data hoga. CI `.env.test` isi code se banata hai (`node scripts/foundation/bin/env-files.ts test`). Commands ki poori list aur har ek ka kaam root [README.md](../README.md) me.
 
 ## 2. CI aur branch ke pehre (D-327)
 
@@ -182,7 +182,7 @@ DevOps / SRE Architect ki raay se (D-257 ka kram), owner ki haan ke baad (D-326 
 
 ## Change log
 
-| Version           | Date                     | Badlav                                                                  |
-| ----------------- | ------------------------ | ----------------------------------------------------------------------- |
-| v1.0.0 se v1.1.18 | 2026-11-17 se 2026-11-22 | Chalane ke niyam §1 se §12; har badlav ka poora itihaas git me (D-442). |
-| v1.1.19 se v1.1.20 | 2026-11-23 | Backup: rok wali files ka bachav B2 ke Object Lock se (D-456); §11 niyam 1 me security alert, images aur cooldown (D-461). |
+| Version            | Date                     | Badlav                                                                                                                                                                                                        |
+| ------------------ | ------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| v1.0.0 se v1.1.18  | 2026-11-17 se 2026-11-22 | Chalane ke niyam §1 se §12; har badlav ka poora itihaas git me (D-442).                                                                                                                                       |
+| v1.1.19 se v1.1.21 | 2026-11-23               | Backup: rok wali files ka bachav B2 ke Object Lock se (D-456); §11 niyam 1 me security alert, images aur cooldown (D-461); §1 niyam 9 me `.env.example` ke markers aur niyam 10 me setup ka asli kaam (ST-7). |

@@ -1,6 +1,6 @@
 # TASK 01: foundation (root setup)
 
-> **Status:** v1.0.9 (2026-11-23). Halat: ST-1 se ST-6 ka code branch `feat/foundation-root` pe (PR ST-7 ke baad, owner); baaki subtasks baaki. Module [PROJECT_PLAN.md](../../PROJECT_PLAN.md) §3 ka `01-foundation`, charan 0 ka pehla module (D-446). Progress: 0 / 14 points.
+> **Status:** v1.0.10 (2026-11-23). Halat: ST-1 se ST-7, saare subtasks ka code branch `feat/foundation-root` pe; PR `prerelease` pe owner ke kehne pe. Module [PROJECT_PLAN.md](../../PROJECT_PLAN.md) §3 ka `01-foundation`, charan 0 ka pehla module (D-446). Progress: 0 / 14 points.
 
 ## 1. Lakshya
 
@@ -85,13 +85,14 @@ Mahine me ek baar apne aap PRs, `prerelease` pe: npm aur GitHub Actions ke minor
 2. Hatana destructive hai; owner ki haan is shart ke saath ki purana code tabhi hate jab wo kahin use nahi ho raha (D-073 niyam 4, D-455). Isliye pehle jaanch: naye root, CI, `.github/` aur docs me kuch bhi `*-old/` ya purani root files pe tika nahi. Abhi CI ka `static` job purane root `package.json` aur lockfile se Prettier laata hai, to naya root usi PR me.
 3. Purana kaam git tag `discovery-old-docs` se milta hai: us tag ke baad purane code me koi badlav nahi hua (2026-11-22 ko jaancha), isliye naya tag nahi chahiye.
 4. Repo ke root ki `external.command` file hati (owner, D-457). Uski secret scan wali command ab root ka `npm run secrets:scan` hai (laptop pe gitleaks chahiye).
-5. Purane folders ki git ke bahar ki files (build output, `node_modules`, development ki `.env`) bhi hatin, siwaye do `.env.production` ke, jo owner dekhega ([OWNER_TASKS.md](../../OWNER_TASKS.md) OT-7, D-457).
+5. Purane folders ki git ke bahar ki files (build output, `node_modules`, development ki `.env`) bhi hatin, siwaye do `.env.production` ke, jo owner ne khud hatayin ([OWNER_TASKS.md](../../OWNER_TASKS.md) OT-7, D-457).
 
 ### 3.8 Docs
 
-1. Root ka README: project kya hai, repo ka naksha, laptop pe kaise chalayein.
-2. [CLAUDE.md](../../../CLAUDE.md) ka "Commands aur repo ka naksha": asli commands, aur "abhi koi npm command nahi chalta" wali line ki jagah.
-3. [OPERATIONS.md](../../OPERATIONS.md) §1 niyam 10 me commands ki asli list.
+1. Root ka [README](../../../README.md): project kya hai, repo ka naksha, laptop pe kaise chalayein, aur commands ki poori list (har ek ka kaam). List sirf yahin; baaki jagah link (D-019).
+2. [CLAUDE.md](../../../CLAUDE.md) ka "Commands aur repo ka naksha": naksha aur commands ke naam, README ki link ke saath.
+3. [OPERATIONS.md](../../OPERATIONS.md) §1 niyam 10 me setup ka asli kaam aur commands ki list ki link; niyam 9 me `.env.example` ke marker.
+4. README aur CLAUDE.md ki har `npm run` command root `package.json` ki script ho; `npm run docs:check` ise bhi jaanchta hai (D-019).
 
 ## 4. Niyam
 
@@ -124,6 +125,7 @@ Koi database ya HTTP API nahi. Is module ki "API" root ke commands hain: `setup`
 - **ST-2 ke tests:** [shared-configs.test.ts](../../../scripts/foundation/test/shared-configs.test.ts), galat misaalein `test/fixtures/` me: `AC-FOUNDATION-6` ka ESLint aur typecheck wala hissa (`any`, type-aware floating promise, aur type error, file aur line ke saath), React aur Node base ka farak (DOM), aur `RT-23` (kernel 90% aur critical 85% se neeche run fail, baaki sirf report). Prettier aur docs ke paths wala hissa ST-5 me.
 - **ST-5 ke tests:** [workflows.test.ts](../../../scripts/foundation/test/workflows.test.ts): `AC-FOUNDATION-7` (har workflow, aur galat misaalein), `AC-FOUNDATION-4` (`check` ka niyam, aur galat misaalein), `AC-FOUNDATION-5` (`guard` ke steps aur unka kram; secret wala hissa `guard` me [secret-scan.test.mjs](../../../.github/scripts/secret-scan.test.mjs) se), `AC-FOUNDATION-6` (`static` ke steps, aur repo ka Prettier config galat formatting pe fail). [docs-paths.test.ts](../../../scripts/foundation/test/docs-paths.test.ts): `AC-FOUNDATION-6` docs ki links (asli docs, aur tooti link `file:line` ke saath). [root-checks.test.ts](../../../scripts/foundation/test/root-checks.test.ts): `AC-FOUNDATION-8` (`backups/` git ignore kare, koi backup file git me nahi; kamzor `.gitignore` aur git me backup file pakdi jaye). Process chalane wale tests ki seema 60 second, kyunki poora suite ek saath chalne pe 5 second kam padte the (RT-25).
 - **ST-6 ke tests:** [dependabot.test.ts](../../../scripts/foundation/test/dependabot.test.ts): `AC-FOUNDATION-10` (repo ka config: teeno ecosystem, mahine me, `prerelease` pe, 7 din ka cooldown, npm aur Actions ke minor aur patch ek group me aur major akele, images ke sirf patch); galat misaalein: hafte ka schedule, `release` target, cooldown nahi, group me major, major ignore, security ka group, images pe minor, ecosystem gayab aur galat directory.
+- **ST-7 ke tests:** [docs-paths.test.ts](../../../scripts/foundation/test/docs-paths.test.ts): `AC-FOUNDATION-6` (README aur CLAUDE.md ki har `npm run` command root script hai; galat misaal: anjaan command file aur line ke saath pakdi jaye).
 - **ST-4 ke tests:** [env-files.test.ts](../../../scripts/foundation/test/env-files.test.ts): `.env.example` ki jaanch (galat misaalein, value kabhi sandesh me nahi), `AC-FOUNDATION-1` (missing file bani, bani hui file chhodi), `AC-FOUNDATION-3` (`.env.production` na bani na chhui; git har env file ignore kare par `.env.example` nahi, kamzor `.gitignore` pakda jaye; koi env file git me nahi, aur ho to pakdi jaye). [setup.test.ts](../../../scripts/foundation/test/setup.test.ts): `AC-FOUNDATION-1` galat version ka sandesh, aur galat Node pe setup kuch install ya banane se pehle ruke. [setup.int.test.ts](../../../scripts/foundation/test/setup.int.test.ts): `AC-FOUNDATION-1` saaf clone (git ki files, ek nakli service ki `.env.example`, koi asli secret nahi) pe asli setup: `npm ci`, `.env.development` bani, `.env.test` chhodi, `.env.production` na chhui na sandesh me, aur alag project aur ports pe dono containers healthy.
 - **ST-3 ke tests:** [infra.test.ts](../../../scripts/foundation/test/infra.test.ts) (bina Docker chale, sirf CLI se config padh ke): `AC-FOUNDATION-2` ka pehra (har image exact version, har container profile ke peeche, har port `127.0.0.1` pe; galat misaal ke saath), versions live jaise, aur `backend` profile me sirf `mongo` aur `valkey`. [infra.int.test.ts](../../../scripts/foundation/test/infra.int.test.ts): `AC-FOUNDATION-2` asli containers pe, alag project `bq-infra-test` aur alag ports (37017, 36379) pe: `infra:up backend` ke baad sirf do containers, healthy, `127.0.0.1` pe; transaction commit; Valkey me 25 MB aur `noeviction`; `infra:down` ke baad koi container nahi, aur aakhir me volumes bhi saaf.
 
@@ -136,7 +138,7 @@ Koi database ya HTTP API nahi. Is module ki "API" root ke commands hain: `setup`
 ## 9. Acceptance criteria, manuals aur testing
 
 - **Acceptance criteria:** [ACCEPTANCE.md](../../ACCEPTANCE.md) §1.15 `FOUNDATION` (`AC-FOUNDATION-1` se `AC-FOUNDATION-11`, D-447). Har criterion ka kam se kam ek test, naam me criterion ka id ([RULES.md](../../RULES.md) DD-1).
-- **Manuals aur testing ki files:** kisi app ke role ka feature nahi, isliye laagu nahi. Laptop ka setup [OPERATIONS.md](../../OPERATIONS.md) §1 aur root README me (ST-7).
+- **Manuals aur testing ki files:** kisi app ke role ka feature nahi, isliye laagu nahi. Laptop ka setup [OPERATIONS.md](../../OPERATIONS.md) §1 aur root [README](../../../README.md) me.
 
 ## 10. Subtasks
 
@@ -150,12 +152,12 @@ Har subtask lagbhag ek PR jitna, aur saare charan 0 me ([PROJECT_PLAN.md](../../
 | ST-4 | Env files ka dhaancha aur `npm run setup`                                             | M (2)  | Branch pe |
 | ST-5 | CI: `static` aur `test` jobs, repo ke pehre, aur `check` me sab                       | L (4)  | Branch pe |
 | ST-6 | Mahine ke dependency PRs                                                              | S (1)  | Branch pe |
-| ST-7 | Root README, CLAUDE.md ke commands aur OPERATIONS §1 ki commands ki list              | S (1)  | Baaki     |
+| ST-7 | Root README, CLAUDE.md ke commands aur OPERATIONS §1 ki commands ki list              | S (1)  | Branch pe |
 |      | **Kul**                                                                               | **14** |           |
 
 ## Change log
 
-| Version          | Date       | Badlav                                                                                                                                                                                                                                                                                                                                                               |
-| ---------------- | ---------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| v1.0.0 se v1.0.2 | 2026-11-22 | Module 01 ka pehla spec, 7 subtasks (D-446) acceptance criteria ki link (D-447) aur deployables pe `private: true`; code abhi nahi.                                                                                                                                                                                                                                  |
-| v1.0.3 se v1.0.9 | 2026-11-23 | Purane code ki shart aur `external.command` (D-455); ST-1 ka code: naya root aur Turborepo, purana code hata (D-457, D-458); ST-2 ka code: `configs/` ke TypeScript, ESLint aur Vitest config. ST-3 ka code: `infra/compose.yaml`, `infra:up` aur `infra:down`. ST-4 ka code: env files ka dhaancha aur `npm run setup`. ST-5 ka code: CI ki jobs aur repo ke pehre. ST-6 ka code: mahine ke dependency PRs (D-461). |
+| Version           | Date       | Badlav                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          |
+| ----------------- | ---------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| v1.0.0 se v1.0.2  | 2026-11-22 | Module 01 ka pehla spec, 7 subtasks (D-446) acceptance criteria ki link (D-447) aur deployables pe `private: true`; code abhi nahi.                                                                                                                                                                                                                                                                                                                                                                             |
+| v1.0.3 se v1.0.10 | 2026-11-23 | Purane code ki shart aur `external.command` (D-455); ST-1 ka code: naya root aur Turborepo, purana code hata (D-457, D-458); ST-2 ka code: `configs/` ke TypeScript, ESLint aur Vitest config. ST-3 ka code: `infra/compose.yaml`, `infra:up` aur `infra:down`. ST-4 ka code: env files ka dhaancha aur `npm run setup`. ST-5 ka code: CI ki jobs aur repo ke pehre. ST-6 ka code: mahine ke dependency PRs (D-461). ST-7 ka code: root README, CLAUDE.md aur OPERATIONS §1 ki commands, aur commands ka pehra. |

@@ -1,6 +1,6 @@
 # CLAUDE.md: Beautinique
 
-> **Status:** v1.0.11 (2026-11-23). Docs aur code naye sire se ban rahe hain.
+> **Status:** v1.0.12 (2026-11-23). Docs aur code naye sire se ban rahe hain.
 
 Ye file Claude Code har session ki shuruaat me padhta hai. Project pe ek hi insaan (owner) kaam karta hai,
 2 Claude accounts se baari-baari. **Kaam shuru karne se pehle [docs/HANDOFF.md](docs/HANDOFF.md) padho.**
@@ -83,11 +83,15 @@ Ye file Claude Code har session ki shuruaat me padhta hai. Project pe ek hi insa
 
 ## Commands aur repo ka naksha
 
-Naya root (`01-foundation` ST-1): npm workspaces (`packages/*/*`, `frontend/*`, `backend/*`, `scripts/*`)
-aur Turborepo; Node 24.22.3 aur npm 12.2.3 exact pinned (D-458). Commands: `npm test`, `npm run build`,
-`lint`, `typecheck`, `dev` (Turborepo se), `npm run format:check` / `format` (Prettier) aur
-`npm run secrets:scan` (laptop ka gitleaks). Docs ke liye `npx prettier --check <files>`. Baaki commands
-aur poora naksha naye code ke saath yahan ek-ek karke aayenge (ST-7).
+Naksha: `packages/<category>/<name>/` (npm pe public packages), `frontend/<app>/`, `backend/<service>/`, `scripts/<area>/`
+(repo ke tools; abhi sirf `scripts/foundation`: setup, containers, env files aur repo ke pehre), `configs/` (saajhe
+TypeScript, ESLint, Vitest), `infra/compose.yaml` (laptop ke containers) aur `.github/` (CI, Dependabot). Har
+workspace npm workspaces me, tasks Turborepo se; Node 24.22.3 aur npm 12.2.3 exact pinned (D-458).
+
+Commands (root se): `npm run setup`, `npm run infra:up -- backend`, `npm run infra:down`, `npm test`, `npm run build`,
+`npm run dev`, `npm run lint`, `npm run typecheck`, `npm run format:check`, `npm run format`, `npm run docs:check` aur
+`npm run secrets:scan`. Ek workspace: `npm test -w <name>`; ek test file: workspace me `npx vitest run <file>`. Docs ke
+liye `npx prettier --check <files>`. Har command kya karti hai: root [README.md](README.md).
 
 ## Kaam rokte waqt
 
@@ -97,7 +101,7 @@ khula hai. Jis doc me badlav kiya, uske change log me us din ki line (D-442). Pr
 
 ## Change log
 
-| Version           | Date                     | Badlav                                                                                                                           |
-| ----------------- | ------------------------ | -------------------------------------------------------------------------------------------------------------------------------- |
-| v1.0.0 se v1.0.8  | 2026-11-17 se 2026-11-22 | Abhi ki halat (planning stage, D-443), sawal-jawab ke niyam aur hamesha laagu niyam; har badlav ka poora itihaas git me (D-442). |
-| v1.0.9 se v1.0.11 | 2026-11-23               | Implementation stage khula (D-455); naye root ke commands (ST-1, D-458); Claude `backups/` nahi kholta (D-460).                  |
+| Version           | Date                     | Badlav                                                                                                                                                    |
+| ----------------- | ------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| v1.0.0 se v1.0.8  | 2026-11-17 se 2026-11-22 | Abhi ki halat (planning stage, D-443), sawal-jawab ke niyam aur hamesha laagu niyam; har badlav ka poora itihaas git me (D-442).                          |
+| v1.0.9 se v1.0.12 | 2026-11-23               | Implementation stage khula (D-455); naye root ke commands (ST-1, D-458); Claude `backups/` nahi kholta (D-460); repo ka naksha aur saari commands (ST-7). |

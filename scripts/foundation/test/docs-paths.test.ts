@@ -6,7 +6,12 @@ import { join } from 'node:path';
 import { afterAll, describe, test } from 'vitest';
 
 import { ROOT } from '../src/constants/paths.ts';
-import { docFiles, docsPathProblems } from '../src/docs-paths.ts';
+import {
+  commandProblems,
+  docFiles,
+  docsCommandProblems,
+  docsPathProblems,
+} from '../src/docs-paths.ts';
 
 const dirs: string[] = [];
 afterAll(() => {
@@ -40,6 +45,21 @@ describe('docs paths (D-019)', () => {
     assert.deepEqual(docsPathProblems(root), [
       'docs/tasks/TASK.md:3: ../MOVED.md does not exist',
       'docs/tasks/TASK.md:3: ../missing/ does not exist',
+    ]);
+  });
+
+  test('AC-FOUNDATION-6: every npm run command in the README and CLAUDE.md is a root script', () => {
+    assert.deepEqual(docsCommandProblems(ROOT), []);
+  });
+
+  test('AC-FOUNDATION-6: a command that package.json lacks is named with its file and line', () => {
+    const text = [
+      'Run `npm run setup`, then `npm run infra:up -- backend`.',
+      'Old: `npm run start` and `npm run infra:start`.',
+    ].join('\n');
+    assert.deepEqual(commandProblems('README.md', text, new Set(['setup', 'infra:up'])), [
+      'README.md:2: npm run start is not a script of package.json',
+      'README.md:2: npm run infra:start is not a script of package.json',
     ]);
   });
 });

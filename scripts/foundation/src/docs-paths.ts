@@ -1,8 +1,11 @@
 // The docs' paths check (D-019): every relative link in the docs points at a file or folder that is
 // in the repository. Docs name a file by linking it, so a moved or deleted file shows here, with
 // the doc and line. Backticked names are not checked: they also name planned files, branches and ids.
+// The commands in the README and CLAUDE.md are checked against the root package.json.
 import { existsSync, readdirSync, readFileSync } from 'node:fs';
 import { dirname, join, relative, resolve } from 'node:path';
+
+import { readJson } from './utils/read-json.ts';
 
 // The docs: everything under docs/, and the root README.md and CLAUDE.md.
 export function docFiles(root: string): string[] {
@@ -48,4 +51,32 @@ export function linkProblems(root: string, file: string, text: string): string[]
 
 export function docsPathProblems(root: string): string[] {
   return docFiles(root).flatMap((file) => linkProblems(root, file, readFileSync(file, 'utf8')));
+}
+
+// The files people and Claude copy commands from. Each `npm run <name>` in them is a script of the
+// root package.json, so a renamed or removed command shows here (D-019).
+export const COMMAND_DOCS = ['README.md', 'CLAUDE.md'];
+const NPM_RUN = /npm run ([\w:-]+)/g;
+
+export function commandProblems(file: string, text: string, scripts: Set<string>): string[] {
+  const problems: string[] = [];
+  text.split(/\r?\n/).forEach((line, index) => {
+    for (const match of line.matchAll(NPM_RUN)) {
+      const name = match[1] ?? '';
+      if (!scripts.has(name)) {
+        problems.push(
+          `${file}:${String(index + 1)}: npm run ${name} is not a script of package.json`,
+        );
+      }
+    }
+  });
+  return problems;
+}
+
+export function docsCommandProblems(root: string): string[] {
+  const manifest = readJson(join(root, 'package.json')) as { scripts?: Record<string, string> };
+  const scripts = new Set(Object.keys(manifest.scripts ?? {}));
+  return COMMAND_DOCS.filter((file) => existsSync(join(root, file))).flatMap((file) =>
+    commandProblems(file, readFileSync(join(root, file), 'utf8'), scripts),
+  );
 }
