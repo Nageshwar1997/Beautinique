@@ -20,6 +20,7 @@
     "scripts/*"
   ],
   "scripts": {
+    "setup": "node scripts/foundation/bin/setup.ts",
     "build": "turbo run build",
     "typecheck": "turbo run typecheck typecheck:root",
     "typecheck:root": "tsc -p tsconfig.json",

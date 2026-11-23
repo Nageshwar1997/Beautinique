@@ -13,7 +13,7 @@ import {
   workspacePrivacyProblems,
 } from '../src/root-checks.ts';
 import { readJson } from '../src/utils/read-json.ts';
-import { ROOT } from './constants/paths.ts';
+import { ROOT } from '../src/constants/paths.ts';
 
 describe('old code', () => {
   test('AC-FOUNDATION-11: the repository tracks no *-old folder', () => {

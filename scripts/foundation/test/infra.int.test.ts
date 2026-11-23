@@ -6,7 +6,7 @@ import { join } from 'node:path';
 import { afterAll, test } from 'vitest';
 
 import { compose } from '../src/infra.ts';
-import { ROOT } from './constants/paths.ts';
+import { ROOT } from '../src/constants/paths.ts';
 import { cleanEnv } from './utils/env.ts';
 
 // A second set of containers beside the laptop's own: its own project name, volumes and ports, so the

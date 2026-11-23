@@ -16,7 +16,7 @@ import { afterAll, beforeAll, test } from 'vitest';
 
 import type { RootManifest } from '../src/root-checks.ts';
 import { readJson } from '../src/utils/read-json.ts';
-import { ROOT } from './constants/paths.ts';
+import { ROOT } from '../src/constants/paths.ts';
 import { cleanEnv } from './utils/env.ts';
 
 const TURBO = join(ROOT, 'node_modules', 'turbo', 'bin', 'turbo');

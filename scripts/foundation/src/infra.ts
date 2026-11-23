@@ -1,8 +1,10 @@
 import { spawnSync, type SpawnSyncOptions } from 'node:child_process';
-import { resolve } from 'node:path';
+import { join } from 'node:path';
+
+import { ROOT } from './constants/paths.ts';
 
 // The one compose file of the laptop's and CI's containers (docs/OPERATIONS.md §1 rules 2 to 4).
-export const COMPOSE_FILE = resolve(import.meta.dirname, '../../../infra/compose.yaml');
+export const COMPOSE_FILE = join(ROOT, 'infra', 'compose.yaml');
 
 // How long `infra:up` waits for every container to report healthy (a first run pulls the images).
 export const WAIT_SECONDS = 180;

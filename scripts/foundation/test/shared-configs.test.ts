@@ -8,7 +8,7 @@ import { ESLint } from 'eslint';
 import { afterAll, describe, test } from 'vitest';
 
 import { COVERAGE_LIMITS, coverageThresholds } from '../../../configs/vitest/coverage.ts';
-import { ROOT } from './constants/paths.ts';
+import { ROOT } from '../src/constants/paths.ts';
 import { cleanEnv } from './utils/env.ts';
 
 const FIXTURES = fileURLToPath(new URL('./fixtures/', import.meta.url));

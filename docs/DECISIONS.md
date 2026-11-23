@@ -5550,7 +5550,7 @@
   - Owner ne "utils ya helpers" kaha; repo me ek hi naam rahe, isliye `utils/`.
   - Pehchaan: helper kisi doosre project me bina badle chal sakta hai to `utils/`; module ke niyam ya data jaanta hai to module me.
   - Helper saajhe kaam ke liye hai; test ka expected nateeja us helper se nahi nikalta jisse code apna nateeja nikalta hai ([RULES.md](RULES.md) §4.1 siddhaant 1).
-  - Abhi: `scripts/foundation` ka `readJson` `src/utils/read-json.ts` me; `RootManifest` `src/root-checks.ts` se export; `COVERAGE_LIMITS`, `CoverageOptions` aur `coverageThresholds` `configs/vitest/coverage.ts` me; tests ka `cleanEnv` `test/utils/env.ts` me aur `ROOT` `test/constants/paths.ts` me.
+  - Abhi: `scripts/foundation` ka `readJson` `src/utils/read-json.ts` me; `RootManifest` `src/root-checks.ts` se export; `COVERAGE_LIMITS`, `CoverageOptions` aur `coverageThresholds` `configs/vitest/coverage.ts` me; tests ka `cleanEnv` `test/utils/env.ts` me; repo ka `ROOT` `src/constants/paths.ts` me (code aur tests dono use karte hain).
 
 ## Change log
 
