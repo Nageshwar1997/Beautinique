@@ -1,6 +1,6 @@
 # OWNER TASKS: Beautinique
 
-> **Status:** v1.0.13 (2026-11-23). Owner ke bahar ke kaam: wo kaam jo sirf owner kar sakta hai (account banana, env key daalna, download, provider ki setting, kisi se poochhna). Claude naya kaam yahan jodta hai, aur owner "ho gaya" kahe to yahin update karta hai (D-440).
+> **Status:** v1.0.14 (2026-11-23). Owner ke bahar ke kaam: wo kaam jo sirf owner kar sakta hai (account banana, env key daalna, download, provider ki setting, kisi se poochhna). Claude naya kaam yahan jodta hai, aur owner "ho gaya" kahe to yahin update karta hai (D-440).
 
 ## Kaise padhein
 
@@ -13,7 +13,6 @@
 
 | #    | Kaam                                                                                                                                                                                                                                                                                                                                                          | Kyun                                                                     | Kab tak                                     | Faisla              |
 | ---- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------ | ------------------------------------------- | ------------------- |
-| OT-2 | **Laptop ka disk encryption:** Settings → Privacy & security → Device encryption (ya BitLocker) me dekhein ki chalu hai ya nahi, aur Claude ko batayein. Band ho aur option mile to chalu karein.                                                                                                                                                             | Backups aur repo laptop pe hain; laptop kho jaaye to data surakshit rahe | Pehle backup se pehle                       | D-013, D-196, R-023 |
 | OT-3 | **Object storage ka account:** Cloudflare R2 (pehli pasand) ya Backblaze B2 pe account banate waqt dekhein ki card maangta hai ya nahi, aur free plan pe bucket lock milta hai ya nahi. Abhi sirf dekhna; banana Claude ke saath.                                                                                                                             | Private files ki jagah aur kanooni rok wali files ka lock                | Media ke module se pehle                    | D-420, D-439        |
 
 ## 2. Ho gaye
@@ -23,6 +22,7 @@
 | OT-1 | Location data: LGD ki 6 reports download | 2026-11-22 | Files Html me (Xls ka raasta khaali page deta tha), repo ke bahar `LGD-data/2026-11-22/` me; Claude ne ginti ki ([RISKS.md](RISKS.md) §2)                                                                                                                            |
 | OT-6 | GitHub ki security settings              | 2026-11-23 | Owner ne vulnerability reporting chalu ki, Actions me SHA pinning lagaya aur `release` ke ruleset se admin ka bypass hataya; 2FA chalu. Claude ne baaki settings aur rulesets jaanch ke sahi paaye. Non-provider patterns aur validity checks is plan pe nahi milte. |
 | OT-5 | npm account aur `@beautinique` scope     | 2026-11-23 | Owner ne bataya: account aur `@beautinique` scope owner ne khud register kiye hain, aur jaanch ho gayi. Trusted publishing ki setting har package ke pehle publish ke baad, Claude ke saath (D-445).                                                                 |
+| OT-2 | Laptop ka disk encryption                | 2026-11-23 | Owner ne bataya: Device encryption chalu hai, aur recovery key password manager me save hai.                                                                                                                                                                         |
 
 ## 3. Aage ke kaam (jab us module ka kaam shuru ho)
 
@@ -47,7 +47,7 @@ Har provider pe account owner ka hota hai, MFA aur recovery codes ke saath (SR-0
 
 ## Change log
 
-| Version           | Date       | Badlav                                                                                                                      |
-| ----------------- | ---------- | --------------------------------------------------------------------------------------------------------------------------- |
-| v1.0.0 se v1.0.7  | 2026-11-22 | Owner ke khule aur aage ke kaam; har badlav ka poora itihaas git me (D-442).                                                |
-| v1.0.8 se v1.0.13 | 2026-11-23 | OT-6 (GitHub ki security settings) juda aur ho gaya, aur OT-5 (npm) ho gaya (D-455); gift card wala kaam §3 me, R2 ke liye. |
+| Version           | Date       | Badlav                                                                                                                                                      |
+| ----------------- | ---------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| v1.0.0 se v1.0.7  | 2026-11-22 | Owner ke khule aur aage ke kaam; har badlav ka poora itihaas git me (D-442).                                                                                |
+| v1.0.8 se v1.0.14 | 2026-11-23 | OT-6 (GitHub ki security settings) juda aur ho gaya, aur OT-5 (npm) ho gaya (D-455); gift card wala kaam §3 me, R2 ke liye; OT-2 (disk encryption) ho gaya. |

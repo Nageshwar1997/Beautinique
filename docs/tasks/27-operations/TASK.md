@@ -1,6 +1,6 @@
 # TASK 27: operations (deploy, jagana, backup aur release)
 
-> **Status:** v1.0.1 (2026-11-22). Halat: planning; code abhi nahi. Module [PROJECT_PLAN.md](../../PROJECT_PLAN.md) §3 ka `27-operations`; charan 1 me pehla deploy, baaki charan 2 aur 13 me (D-446). Progress: 0 / 20 points.
+> **Status:** v1.0.2 (2026-11-23). Halat: planning; code abhi nahi. Module [PROJECT_PLAN.md](../../PROJECT_PLAN.md) §3 ka `27-operations`; charan 1 me pehla deploy, baaki charan 2 aur 13 me (D-446). Progress: 0 / 20 points.
 
 ## 1. Lakshya
 
@@ -70,7 +70,7 @@ SR-002, SR-005 aur SR-089 (apps ka template), SR-081 (providers pe MFA, deploy s
 
 - **Tika hai:** `01-foundation`, `09-gateway`, `04-logs`.
 - **Is pe tike:** har charan ka live deploy.
-- **Owner ke kaam:** Render, Vercel, Atlas, cron-job.org aur UptimeRobot ke accounts; har deployable ki `.env.production`; OT-2 (disk encryption) pehle backup se pehle ([OWNER_TASKS.md](../../OWNER_TASKS.md)).
+- **Owner ke kaam:** Render, Vercel, Atlas, cron-job.org aur UptimeRobot ke accounts; har deployable ki `.env.production`; OT-2 (disk encryption) ho gaya ([OWNER_TASKS.md](../../OWNER_TASKS.md)).
 
 ## 8. Acceptance criteria, manuals aur testing
 
@@ -101,3 +101,4 @@ Charan [PROJECT_PLAN.md](../../PROJECT_PLAN.md) §5 se (D-446). Points D-433 ke 
 | Version          | Date       | Badlav                                                                                     |
 | ---------------- | ---------- | ------------------------------------------------------------------------------------------ |
 | v1.0.0 se v1.0.1 | 2026-11-22 | Module 27 ka pehla spec, 11 subtasks (D-446) aur criteria ki link (D-450); code abhi nahi. |
+| v1.0.2           | 2026-11-23 | OT-2 ho gaya (owner).                                                                      |

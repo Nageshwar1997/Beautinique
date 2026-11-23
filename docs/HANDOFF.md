@@ -1,6 +1,6 @@
 # HANDOFF: Beautinique
 
-> **Status:** v1.1.175 (2026-11-23). Ek session ya account se agle tak ki halat. Chhota rakho: sirf abhi ki halat aur agla kaam.
+> **Status:** v1.1.176 (2026-11-23). Ek session ya account se agle tak ki halat. Chhota rakho: sirf abhi ki halat aur agla kaam.
 
 ## 1. Abhi ki halat (2026-11-22)
 
@@ -15,7 +15,7 @@
   - Saare 15 agent runs poore, aur unka kaam docs me (aakhri: Lawyer (AI) ka chhota run, D-435). Pichhle runs ne 5-hour window ka lagbhag 17% se 41% aur 13 se 45 minute liye.
 - **Progress:** R1 0 / 547 points = 0%, ecosystem 0 / 585 = 0%; R1 ke saare 26 modules ke points tay; R2 me sirf `25` aur `26` ke draft points ([PROJECT_PLAN.md](PROJECT_PLAN.md) §4).
 - **Agle number:** faisla D-456, sawal Q-393, group G26.
-- **Owner ke khule kaam:** [OWNER_TASKS.md](OWNER_TASKS.md) §1 (abhi OT-2 aur OT-3; OT-1, OT-5 aur OT-6 ho gaye; gift card ka kaam R2 ke liye §3 me). Roles ke manuals [manuals/](manuals/README.md) me aur owner ki testing [testing/](testing/COMMON.md) me; teeno Claude apne aap update karta hai (D-440).
+- **Owner ke khule kaam:** [OWNER_TASKS.md](OWNER_TASKS.md) §1 (abhi sirf OT-3; OT-1, OT-2, OT-5 aur OT-6 ho gaye; gift card ka kaam R2 ke liye §3 me). Roles ke manuals [manuals/](manuals/README.md) me aur owner ki testing [testing/](testing/COMMON.md) me; teeno Claude apne aap update karta hai (D-440).
 - **Usage (2026-11-23, subah):** is account pe weekly 74% aur 5-hour 19% (5-hour reset lagbhag 18:00 IST, weekly 2026-11-25). Weekly ~85% pe naya kaam nahi, aur 5-hour ~80% pe naya agent nahi.
 
 ## 2. Uncommitted
@@ -26,7 +26,7 @@
 ## 3. Agla kaam
 
 1. **Implementation, charan 0:** [tasks/01-foundation/TASK.md](tasks/01-foundation/TASK.md) ST-1: pehle jaanch ki naye root, CI aur docs me kuch bhi purane code pe tika nahi; phir purana code hatana aur naya root (`package.json`, lockfile, Turborepo) usi PR me (D-455). Phir ST-2 se ST-7, phir `28-packages`, `02-platform` aur `03-frontend-kit` ([PROJECT_PLAN.md](PROJECT_PLAN.md) §5). R1 ki saari `TASK.md` [tasks/](tasks/README.md) me; R2 ke `25` aur `26` draft (D-454).
-2. **Owner ke kaam:** [OWNER_TASKS.md](OWNER_TASKS.md) §1; charan ke hisaab se: OT-3 (object storage) charan 1 se pehle, OT-2 (disk encryption) pehle backup se pehle (D-446).
+2. **Owner ke kaam:** [OWNER_TASKS.md](OWNER_TASKS.md) §1; charan ke hisaab se: OT-3 (object storage) charan 1 se pehle (D-446).
 3. **Bachi jaanch:** [OPEN_QUESTIONS.md](OPEN_QUESTIONS.md) §2 ki 33 rows (location data ki ginti 2026-11-22 ko ho gayi, [RISKS.md](RISKS.md) §2); zyadatar implementation ke pehle test me ya asli phone pe hongi.
 
 ## Change log
@@ -34,4 +34,4 @@
 | Version              | Date                     | Badlav                                                                                                                                                                                                                                       |
 | -------------------- | ------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | v1.0.0 se v1.1.170   | 2026-11-17 se 2026-11-22 | Discovery ke dauraan har session ki halat; 2026-11-22 ko §1 aur §3 chhote, planning stage khula (D-443), modules tay (D-444), packages ka flow R1 se pehle (D-445) aur kram charan wise (D-446); har badlav ka poora itihaas git me (D-442). |
-| v1.1.171 se v1.1.175 | 2026-11-23               | Implementation stage khula (D-455); pehla kaam `01-foundation` ST-1; OT-5 aur OT-6 ho gaye.                                                                                                                                                  |
+| v1.1.171 se v1.1.176 | 2026-11-23               | Implementation stage khula (D-455); pehla kaam `01-foundation` ST-1; OT-5 aur OT-6 ho gaye.                                                                                                                                                  |
