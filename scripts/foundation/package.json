@@ -1,0 +1,13 @@
+{
+  "name": "@beautinique/scripts-foundation",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Checks of the root setup: workspaces, version pins, the Turborepo pipeline and the shared configs.",
+  "license": "MIT",
+  "type": "module",
+  "scripts": {
+    "typecheck": "tsc -p tsconfig.json",
+    "lint": "eslint .",
+    "test": "vitest run --coverage"
+  }
+}

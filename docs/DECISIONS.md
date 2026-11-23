@@ -1,6 +1,6 @@
 # DECISIONS: Beautinique
 
-> **Status:** v1.14.65 (2026-11-23). Har faisla ek jagah. Sirf wahi "Tay" jo owner ne khud kaha; Claude ki salah faisla nahi. Cheezein ek-ek karke judti hain.
+> **Status:** v1.14.69 (2026-11-23). Har faisla ek jagah. Sirf wahi "Tay" jo owner ne khud kaha; Claude ki salah faisla nahi. Cheezein ek-ek karke judti hain.
 
 ## 0. Kaise likhein
 
@@ -471,6 +471,11 @@
 | D-454 | R2 ke `25` aur `26` ki TASK.md abhi, draft ke roop me; R2 ki planning me badal sakti hain.                                                                                                                                                                                              | Process      | 2026-11-22 |
 | D-455 | Implementation stage khula (2026-11-23); pehla kaam `01-foundation` ST-1; purana code tabhi hate jab kahin use na ho; code ke saath PR.                                                                                                                                                 | Process      | 2026-11-23 |
 | D-456 | Private files Backblaze B2 (EU Central) pe, bina card; kanooni rok wali files alag bucket me Object Lock ke saath (D-439 badla).                                                                                                                                                        | Architecture | 2026-11-23 |
+| D-457 | Purane code ki local files bhi hatin, siwaye do `.env.production` (OT-7); `external.command` hati, secret scan `npm run secrets:scan` se (D-455 badla).                                                                                                                                 | Process      | 2026-11-23 |
+| D-458 | Node aur npm sabse naye security release pe exact pin (abhi 24.22.3 aur 12.2.3), ek hi jagah root `package.json` me.                                                                                                                                                                    | Architecture | 2026-11-23 |
+| D-459 | Aam helpers `utils/` me; module ka apna logic, type aur constant module me; `types/` aur `constants/` sirf kai modules ke saajhe ke liye.                                                                                                                                               | Process      | 2026-11-23 |
+| D-460 | Backup command ki files repo ke root ke `backups/` folder me, D-013 ke chaar pehron ke saath.                                                                                                                                                                                           | Operations   | 2026-11-23 |
+| D-461 | Dependency updates: GitHub ke security PR band aur alert ka fix `prerelease` se; images ke sirf patch; har naye version pe 7 din ka cooldown.                                                                                                                                         | Security     | 2026-11-23 |
 
 ## 2. Record
 
@@ -603,6 +608,7 @@
 - **Chhode vikalp:** repo ke bahar ka folder (Claude ki salah).
 - **Kab dobara khulega:** owner khud khole.
 - **Kisne, kab:** owner, 2026-11-17. **Nishaan:** Owner (command, jagah); Salah maani (format, restore, pehre).
+- **Jod (owner, 2026-11-23, D-460):** folder ka naam `backups/` (repo ke root pe).
 
 ### D-014. Fulfilment model
 
@@ -4252,6 +4258,7 @@
 - **Chhode vikalp:** badlav ke saath maanna (owner ne koi badlav nahi diya); batch rokna (dependencies ka kram baaki).
 - **Kab dobara khulega:** owner khud khole.
 - **Kisne, kab:** owner, 2026-11-21. **Nishaan:** Salah maani.
+- **Jod (owner, 2026-11-23, D-461):** niyam 1 me security alert ka fix `prerelease` se (GitHub ke security PR band), images ke sirf patch, aur 7 din ka cooldown.
 
 ### D-337. DevOps / SRE ke risks
 
@@ -5489,6 +5496,7 @@
   - CLAUDE.md aur HANDOFF ki "abhi ki halat" isi se badli.
   - Abhi CI ka `static` job purane root `package.json` aur lockfile se `npm ci` karke Prettier laata hai; isliye ST-1 me naya root usi PR me, taaki CI na toote.
   - CLAUDE.md ke "Commands aur repo ka naksha" naye root setup ke saath (`01-foundation` ST-7).
+- **Badla (owner, 2026-11-23, D-457):** niyam 4: `external.command` hati; uski secret scan wali command root ka `npm run secrets:scan` hai.
 
 ### D-456. Private files ke liye Backblaze B2
 
@@ -5508,9 +5516,67 @@
   - Bina card ke account pe har din ki pakki seema (owner ke account ka Caps & Alerts, 2026-11-23): storage 10 GB, download 1 GB, Class B (file ka download aur jaanch) aur Class C (list jaise kaam) 2,500 har ek. Card ke bina ye nahi badhti, aur paar hone pe us din wo kaam ruk jaata hai. Har private file ka dekhna ek Class B hai, to media ke monitoring me B2 ke alerts bhi.
   - Region account banate waqt hi tay hota hai aur baad me nahi badalta; badalne ke liye naya account aur saari files dobara. India (owner ka laptop) se TCP connect ka waqt naapa (2026-11-23): IPv4 pe EU Central lagbhag 146 ms, baaki teen regions 265 se 315 ms; IPv6 pe chaaron lagbhag 280 ms. Render Singapore se abhi naapa nahi (andaza: EU Central aur US West lagbhag barabar); pehle deploy ke baad naapna. Jaanch ke tathya [RISKS.md](RISKS.md) §2.9 me.
 
+### D-457. Purana code hatane ki detail
+
+- **Faisla:**
+  1. Purane folders ki git ke bahar ki files bhi hatin: build output, `node_modules` aur development ki `.env` files. Do `.env.production` files rahin; unhe owner khud dekh ke hatayega ([OWNER_TASKS.md](OWNER_TASKS.md) OT-7).
+  2. Root ki `external.command` file hati (D-455 niyam 4 badla). Uski secret scan wali command ab root ka `npm run secrets:scan` hai; master banane wala command apne module ke saath naye sire se banega.
+- **Wajah:** owner ne kaha (2026-11-23): pehle nayi branch, phir production ki env files chhod ke baaki hatao. `external.command` pe Claude ki salah owner ne maani: repo me commands ek hi jagah (root ke scripts) rahein, aur doosri command naye root me chalti nahi.
+- **Chhode vikalp:** saari `.env` files chhodna; pehle owner env files hataye, phir Claude poore folders; purane folders abhi rakhna (AC-FOUNDATION-11 ke khilaaf). `external.command` rakhna, ya waisi hi chhodna.
+- **Kab dobara khulega:** owner khud khole.
+- **Kisne, kab:** owner, 2026-11-23. **Nishaan:** Owner (local files); Salah maani (`external.command`).
+- **Asar (Claude):**
+  - Claude ne `.env` files kholi nahi, sirf hatayin (owner ki haan se). `.env.production` repo ke andar kabhi nahi rehti (D-441), isliye OT-7.
+  - `secrets:scan` laptop pe gitleaks maangta hai; CI ka `guard` apna pinned binary chalata hai.
+
+### D-458. Node aur npm ka pin
+
+- **Faisla:** Node aur npm sabse naye security release pe exact pin: abhi Node 24.22.3 aur npm 12.2.3. Pin ek hi jagah root `package.json` me (`engines`, `devEngines`, `packageManager`); CI wahin se padhta hai, aur Render `engines` se padhega. Laptop pe Claude ne nvm se lagaya.
+- **Wajah:** Claude ki salah, owner ne maani (2026-11-23): laptop pe 24.21.0 aur 12.2.0 the, aur unke baad Node 24.22.1 aur 24.22.3 security releases aaye; live pe bhi wahi version chalta hai ([OPERATIONS.md](OPERATIONS.md) §11 niyam 3).
+- **Chhode vikalp:** laptop wala 24.21.0 aur 12.2.0 (do security releases ke fixes ke bina); owner khud install kare.
+- **Kab dobara khulega:** owner khud khole.
+- **Kisne, kab:** owner, 2026-11-23. **Nishaan:** Salah maani.
+- **Asar (Claude):**
+  - `devEngines` me `onFail: error`: alag Node ya npm pe npm ke commands ruk jaate hain. CI ka setup-node `devEngines` se Node leta hai, aur npm usi file se.
+  - Naya release aane pe pin haath se badhta hai: `package.json` ki teeno jagah ek saath (`scripts/foundation` ka test jaanchta hai), aur laptop pe nvm.
+
+### D-459. Helpers, types aur constants kahan rehte hain
+
+- **Faisla:**
+  1. Aam helper (file padhna, paths, env, format), jo code aur tests ya kai modules use karein, alag `utils/` folder me (misaal `src/utils/`); sirf tests ke beech saajha aam helper `test/utils/` me ([RULES.md](RULES.md) CR-37).
+  2. Module ka apna logic, type aur constant usi module me aur wahin se export; test exported cheez import kar sakta hai, andar ki nahi. Bada module apna hissa apni file me rakhta hai, `utils/` me nahi. Sirf ek file ki cheez usi file me bina export (CR-38).
+  3. `types/` aur `constants/` folder sirf kai modules me saajhe types aur constants ke liye; sirf tests ke beech saajha constant `test/constants/` me; zod se bane types apne schema ke saath (CR-39).
+- **Wajah:** helpers ka niyam owner ne kaha (2026-11-23). Types aur constants pe owner ne pehle alag folder kahe; phir Claude ki salah owner ne final maani: ek baat ek jagah rahe (coverage ka logic chaar files me bikhar gaya tha), zod se bane types (is project me zyadatar yahi) apne schema se alag na hon, aur files ka dher na bane. Tests phir bhi kisi code file ke andar ke helper pe nahi tikte.
+- **Chhode vikalp:** har exported ya saajha type aur constant `types/` aur `constants/` me module ki file me (aazmaya, upar ki wajah se chhoda); sab kuch ek file me aur tests andar ke helpers bhi import karein.
+- **Kab dobara khulega:** owner khud khole.
+- **Kisne, kab:** owner, 2026-11-23. **Nishaan:** Owner (helpers); Salah maani (module ka logic, types aur constants).
+- **Asar (Claude):**
+  - Owner ne "utils ya helpers" kaha; repo me ek hi naam rahe, isliye `utils/`.
+  - Pehchaan: helper kisi doosre project me bina badle chal sakta hai to `utils/`; module ke niyam ya data jaanta hai to module me.
+  - Helper saajhe kaam ke liye hai; test ka expected nateeja us helper se nahi nikalta jisse code apna nateeja nikalta hai ([RULES.md](RULES.md) §4.1 siddhaant 1).
+  - Abhi: `scripts/foundation` ka `readJson` `src/utils/read-json.ts` me; `RootManifest` `src/root-checks.ts` se export; `COVERAGE_LIMITS`, `CoverageOptions` aur `coverageThresholds` `configs/vitest/coverage.ts` me; tests ka `cleanEnv` `test/utils/env.ts` me; repo ka `ROOT` `src/constants/paths.ts` me (code aur tests dono use karte hain).
+
+### D-460. Backup folder `backups/`
+
+- **Faisla:** backup command (D-013) ki files repo ke root ke `backups/` folder me. D-013 ke chaar pehre isi naam pe: `.gitignore`; CI ka pehra (is folder ki koi file git me ho to laal); Prettier, ESLint aur tests se bahar; aur Claude ke liye `.claude/settings.json` me Read aur Edit ka deny, jaise `.env` ke liye.
+- **Wajah:** Claude ki salah, owner ne maani (2026-11-23): seedha naam, turant samajh aata hai, aur commands aur docs me likhna aasaan.
+- **Chhode vikalp:** `.backups/` (chhupa, dhoondhna mushkil); `infra/backups/` (`infra/` Turborepo ke cache hash me hai, to har backup se poore repo ka cache toot-ta).
+- **Kab dobara khulega:** owner khud khole.
+- **Kisne, kab:** owner, 2026-11-23. **Nishaan:** Salah maani.
+- **Asar (Claude):** pehre `01-foundation` ST-5 me bane (`scripts/foundation` ke tests, `AC-FOUNDATION-8`); backup command khud `27-operations` me.
+
+### D-461. Dependency updates: security alert, Docker images aur cooldown
+
+- **Faisla:** [OPERATIONS.md](OPERATIONS.md) §11 niyam 1 ke teen hisse. (1) GitHub ke "Dependabot security updates" band, aur "Dependabot alerts" apni email ke saath chalu. High ya critical alert aate hi fix branch `origin/prerelease` se aur normal PR; live pe asar ho to `hotfix/*`. (2) `infra/compose.yaml` ki images ke updates bhi mahine ke PR se `prerelease` pe aate hain, par sirf patch; minor aur major tab badalte hain jab live (Atlas, Render) badle. (3) Har naya version 7 din purana hone ke baad hi PR me aata hai (cooldown); security alert pe ye rok nahi.
+- **Wajah:** Claude ki salah, owner ne maani (2026-11-23). GitHub security PR hamesha default branch `release` pe kholta hai, aur `target-branch` unpe laagu nahi hota, isliye aisa PR git flow (D-024) todta aur CI ka branch flow check use laal karta. CI ko live ke version pe rehna hai (§11 niyam 4). Chori hue maintainer account se chhapa bura version aksar kuch ghanton ya dinon me pakda jaata hai.
+- **Chhode vikalp:** security PR `release` pe, hotfix ki tarah (D-024 tootta, update `prerelease` pe jaanche bina live pe jaata); roz ka audit workflow (GitHub schedule sirf default branch se chalata aur 60 din bina halchal ke band kar deta, kaam alert email jaisa hi); images ke saare updates (CI live se aage nikal jaata); images haath se (patches chhoot-te); GitHub ka 3 din ka default cooldown.
+- **Kab dobara khulega:** owner khud khole.
+- **Kisne, kab:** owner, 2026-11-23. **Nishaan:** Salah maani.
+- **Asar (Claude):** [.github/dependabot.yml](../.github/dependabot.yml) aur uska pehra `01-foundation` ST-6 me (`scripts/foundation` ke tests, `AC-FOUNDATION-10`); setting owner ka kaam OT-8 ([OWNER_TASKS.md](OWNER_TASKS.md)).
+
 ## Change log
 
-| Version              | Date                     | Badlav                                                                                                |
-| -------------------- | ------------------------ | ----------------------------------------------------------------------------------------------------- |
-| v1.0.0 se v1.14.60   | 2026-11-17 se 2026-11-22 | Faisle D-001 se D-454; har badlav ka poora itihaas git me (D-442).                                    |
-| v1.14.61 se v1.14.65 | 2026-11-23               | D-455: implementation stage khula; D-443 badla; D-456: private files B2 (EU Central) pe; D-439 badla. |
+| Version              | Date                     | Badlav                                                                                                                                                                                                                                                                                           |
+| -------------------- | ------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| v1.0.0 se v1.14.60   | 2026-11-17 se 2026-11-22 | Faisle D-001 se D-454; har badlav ka poora itihaas git me (D-442).                                                                                                                                                                                                                               |
+| v1.14.61 se v1.14.69 | 2026-11-23               | D-455: implementation stage khula; D-443 badla; D-456: private files B2 (EU Central) pe; D-439 badla; D-457: purane code ki local files aur `external.command` (D-455 badla); D-458: Node aur npm ka pin; D-459: helpers, types aur constants kahan rehte hain; D-460: backup folder `backups/`; D-461: dependency updates (security alert, images, cooldown), D-336 me jod. |

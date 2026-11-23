@@ -1,8 +1,0 @@
-/* @beautinique/frontend-styles: import this once in each app, after `@import 'tailwindcss';`. */
-@import './variables.css';
-@import './fonts.css';
-@import './base.css';
-@import './animations.css';
-@import './utilities.css';
-@import './content.css';
-@import './print.css';

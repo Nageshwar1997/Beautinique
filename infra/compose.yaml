@@ -1,0 +1,67 @@
+# The laptop's and CI's containers (docs/OPERATIONS.md §1 rules 2 to 4). Every service sits behind a
+# profile, so `npm run infra:up -- <profile>` starts only what the work needs and
+# `npm run infra:down` stops them all. Ports listen on 127.0.0.1 only, and each port can move (the
+# BQ_*_PORT variables) so a second set of containers can run beside the first.
+#
+# Versions match live: MongoDB the major the Atlas free cluster runs (8.0, and at least 8.0.30), Valkey
+# the version Render Key Value runs (8.1). The other containers (atlas-local, postgres, pgbouncer,
+# mail) join with the first module that needs them.
+name: beautinique
+
+services:
+  mongo:
+    image: mongo:8.0.38
+    profiles: [backend]
+    # A single-member replica set, since transactions need one. The member's address is the one the
+    # laptop's clients use, so mongod listens on the same port inside the container as outside.
+    command: [mongod, --replSet, rs0, --bind_ip_all, --port, '${BQ_MONGO_PORT:-27017}']
+    ports:
+      - '127.0.0.1:${BQ_MONGO_PORT:-27017}:${BQ_MONGO_PORT:-27017}'
+    volumes:
+      - mongo-data:/data/db
+    healthcheck:
+      # Creates the replica set on the first check; healthy once this member is the writable primary.
+      test:
+        - CMD
+        - mongosh
+        - --quiet
+        - --port
+        - '${BQ_MONGO_PORT:-27017}'
+        - --eval
+        - >-
+          try { rs.status() } catch (error) { rs.initiate({ _id: 'rs0', members: [{ _id: 0, host:
+          '127.0.0.1:${BQ_MONGO_PORT:-27017}' }] }) } quit(db.hello().isWritablePrimary ? 0 : 1)
+      interval: 5s
+      timeout: 10s
+      retries: 30
+      start_period: 60s
+      start_interval: 1s
+
+  valkey:
+    image: valkey/valkey:8.1.12
+    profiles: [backend]
+    # Render Key Value's memory limit and the eviction policy BullMQ needs; nothing is kept on disk.
+    command:
+      - valkey-server
+      - --port
+      - '${BQ_VALKEY_PORT:-6379}'
+      - --maxmemory
+      - 25mb
+      - --maxmemory-policy
+      - noeviction
+      - --save
+      - ''
+      - --appendonly
+      - 'no'
+    ports:
+      - '127.0.0.1:${BQ_VALKEY_PORT:-6379}:${BQ_VALKEY_PORT:-6379}'
+    healthcheck:
+      test: [CMD, valkey-cli, -p, '${BQ_VALKEY_PORT:-6379}', ping]
+      interval: 5s
+      timeout: 5s
+      retries: 30
+      start_period: 30s
+      start_interval: 1s
+
+volumes:
+  mongo-data:

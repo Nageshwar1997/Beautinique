@@ -1,6 +1,6 @@
 # RULES: Beautinique
 
-> **Status:** v1.2.8 (2026-11-22). Kaam ke niyam. Saare sections: §1 (Definition of Done), §2 (Git aur release gate), §3 (Code), §4 (Testing), §5 se §7 (security, docs, AI); D-381 se D-387, D-397, D-398, D-429, D-430. Cheezein ek-ek karke, owner ki haan ke baad judti hain.
+> **Status:** v1.2.9 (2026-11-23). Kaam ke niyam. Saare sections: §1 (Definition of Done), §2 (Git aur release gate), §3 (Code), §4 (Testing), §5 se §7 (security, docs, AI); D-381 se D-387, D-397, D-398, D-429, D-430, D-459. Cheezein ek-ek karke, owner ki haan ke baad judti hain.
 
 ## Is file me kya aayega
 
@@ -78,6 +78,9 @@ Tools D-001 ke; folder aur naam D-002 ke. Jahan niyam ke saath lint ya CI ka peh
 9. **CR-9:** HTTP calls axios se (D-001). Chhoot sirf jahan stream chahiye (jaise gateway ka proxy), wajah ke comment ke saath.
 10. **CR-10:** comments sirf "kyun" ke liye, "kya" ke liye nahi. Formatting Prettier aur ESLint se, CI me jaanch.
 11. **CR-11:** commits Conventional Commits me (`type(scope): description`), ek commit me ek baat; koi AI attribution nahi ([CLAUDE.md](../CLAUDE.md)). Poora tareeka [GIT_SKILLS.md](GIT_SKILLS.md) me.
+12. **CR-37:** aam helper (file padhna, paths, env, format; jo kisi module ke niyam ya data nahi jaanta) jo code aur tests, ya kai modules use karte hain, ek alag `utils/` folder me (misaal `src/utils/`), aur sab wahin se import karte hain. Jo aam helper sirf tests ke beech saajha ho, wo `test/utils/` me. Module ka apna logic `utils/` me nahi jaata (CR-38) (owner, D-459).
+13. **CR-38:** module ka apna logic, type aur constant usi module me, aur wahin se export; test module ki exported cheez seedha import kar sakta hai, par andar ki (bina export wali) cheez nahi. Module bada ho to uska ek hissa apni file me (misaal `configs/vitest/coverage.ts`). Jo helper, type ya constant sirf ek file ke andar kaam aata hai, wo usi file me bina export (D-459).
+14. **CR-39:** `types/` aur `constants/` folder sirf un types aur constants ke liye jo kai modules me saajhe hain, module ya vishay ke naam ki file me; sirf tests ke beech saajha constant `test/constants/` me. zod se bane types (`z.infer`) hamesha apne schema ke saath (D-459).
 
 ### 3.2 Backend
 
@@ -428,6 +431,7 @@ Kuch niyamon ka saboot test nahi, record hai (jaise schema ki review checklist, 
 
 ## Change log
 
-| Version          | Date                     | Badlav                                                                                                                                   |
-| ---------------- | ------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------- |
-| v1.0.0 se v1.2.8 | 2026-11-17 se 2026-11-22 | Definition of Done, release gate, code ke niyam, testing aur security, docs aur AI ke niyam; har badlav ka poora itihaas git me (D-442). |
+| Version          | Date                     | Badlav                                                                                                                                                            |
+| ---------------- | ------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| v1.0.0 se v1.2.8 | 2026-11-17 se 2026-11-22 | Definition of Done, release gate, code ke niyam, testing aur security, docs aur AI ke niyam; har badlav ka poora itihaas git me (D-442).                          |
+| v1.2.9           | 2026-11-23               | CR-37 se CR-39: aam helpers `utils/` me; module ka apna logic, type aur constant module me; `types/` aur `constants/` sirf kai modules ke saajhe ke liye (D-459). |

@@ -1,5 +1,0 @@
-@import 'tailwindcss';
-@import '@beautinique/frontend-styles';
-
-/* the playground's own files, so Tailwind sees their classes */
-@source '.';

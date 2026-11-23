@@ -1,11 +1,32 @@
 {
   "$schema": "https://turborepo.com/schema.json",
-  "envMode": "loose",
-  "globalDependencies": ["package.json", "package-lock.json", "configs/**"],
+  "globalDependencies": ["configs/**", "infra/**", "tsconfig.json", "eslint.config.js"],
+  "globalPassThroughEnv": ["CI"],
+  "remoteCache": {
+    "enabled": false
+  },
   "tasks": {
     "build": {
       "dependsOn": ["^build"],
       "outputs": ["dist/**", "build/**"]
-    }
+    },
+    "typecheck": {
+      "dependsOn": ["^build"]
+    },
+    "lint": {
+      "dependsOn": ["^build"]
+    },
+    "test": {
+      "dependsOn": ["^build"],
+      "inputs": ["$TURBO_DEFAULT$", ".env.test"],
+      "outputs": ["coverage/**"]
+    },
+    "dev": {
+      "dependsOn": ["^build"],
+      "cache": false,
+      "persistent": true
+    },
+    "//#typecheck:root": {},
+    "//#lint:root": {}
   }
 }

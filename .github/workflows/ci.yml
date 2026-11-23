@@ -17,8 +17,8 @@ concurrency:
 # Jobs run side by side and none waits for another (needs) except `check` (rules 1 and 2): Render's
 # "After CI checks pass" deploys once every check it sees has passed, and a job that waits may have no
 # check yet. The rulesets and Vercel's Deployment Checks name `check`, so it keeps its name and has no
-# display name. Build, lint, typecheck, tests and E2E join as jobs here with the new root setup; until
-# then the repository holds docs, so guard and the format check are the whole run.
+# display name. Node and npm come from the root package.json (devEngines), the one place they are
+# pinned. scripts/foundation's tests hold these rules (workflows.test.ts). E2E joins with the first app.
 jobs:
   # Every run: the history, the branch flow and the advisories change even when the code does not.
   guard:
@@ -34,11 +34,16 @@ jobs:
           # Full history: the secret scan reads every commit, not only the tip.
           fetch-depth: 0
 
+      # No cache here: setup-node's cache step runs `npm config get cache` with the bundled npm, which
+      # the repository's devEngines (an exact npm 12, onFail error) rejects.
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version-file: package.json
+          package-manager-cache: false
+
       # The gitleaks binary is pinned and checked against its SHA-256 (no third-party action, licence
-      # or token). It scans every commit reachable from the tested commit (for a pull request: the
-      # base branch plus the PR's commits) with .gitleaks.toml. --verbose names the file, commit and
-      # rule of a finding, --redact keeps the secret itself out of the public log; any finding exits 1.
-      - name: Scan for secrets (gitleaks)
+      # or token).
+      - name: Install gitleaks
         env:
           GITLEAKS_VERSION: 8.30.1
           GITLEAKS_SHA256: 551f6fc83ea457d62a0d98237cbad105af8d557003051f41f3e7ca7b3f2470eb
@@ -47,16 +52,18 @@ jobs:
           curl -fsSL -o "$archive" "https://github.com/gitleaks/gitleaks/releases/download/v${GITLEAKS_VERSION}/gitleaks_${GITLEAKS_VERSION}_linux_x64.tar.gz"
           echo "${GITLEAKS_SHA256}  ${archive}" | sha256sum --check --strict
           tar -xzf "$archive" -C "$RUNNER_TEMP" gitleaks
-          "$RUNNER_TEMP/gitleaks" git --config .gitleaks.toml --log-opts="--full-history HEAD" --redact --verbose --no-banner --exit-code 1 .
 
-      # No cache here: setup-node's cache step runs `npm config get cache` with the bundled npm, which
-      # the repository's devEngines (npm >=12.2.0, onFail error) rejects.
-      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
-        with:
-          node-version: 24
-          package-manager-cache: false
+      # Each check's own tests first, so a broken check cannot pass a wrong commit: a secret fails the
+      # scan and stays out of the log (AC-FOUNDATION-5).
+      - name: Test the secret scan
+        run: GITLEAKS="$RUNNER_TEMP/gitleaks" node --test .github/scripts/secret-scan.test.mjs
 
-      # The check's own tests first, so a broken check cannot pass a wrong pull request.
+      # Every commit reachable from the tested commit (for a pull request: the base branch plus the
+      # PR's commits), with .gitleaks.toml. --verbose names the file, commit and rule of a finding,
+      # --redact keeps the secret itself out of the public log; any finding exits 1.
+      - name: Scan for secrets (gitleaks)
+        run: '"$RUNNER_TEMP/gitleaks" git --config .gitleaks.toml --log-opts="--full-history HEAD" --redact --verbose --no-banner --exit-code 1 .'
+
       - name: Test the branch flow check
         run: node --test .github/scripts/branch-flow.test.mjs
 
@@ -73,14 +80,15 @@ jobs:
           REPO: ${{ github.repository }}
         run: node .github/scripts/branch-flow.mjs
 
-      # Node 24 ships npm 11 and devEngines needs npm 12. A global install is not checked against
+      # Node 24 ships npm 11 and devEngines pins npm 12. A global install is not checked against
       # devEngines, so it runs with npm 11.
-      - run: npm install --global npm@12.2.0
+      - name: Install the pinned npm
+        run: npm install --global "npm@$(node -p 'require("./package.json").devEngines.packageManager.version')"
       # High and critical advisories fail the run (rule 3), read from the lockfile alone.
       - run: npm audit --audit-level=high --package-lock-only
 
   static:
-    name: static / format
+    name: static / format, lint, types, build, docs
     runs-on: ubuntu-latest
     timeout-minutes: 15
     permissions:
@@ -91,23 +99,77 @@ jobs:
           persist-credentials: false
       - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
         with:
-          node-version: 24
+          node-version-file: package.json
           package-manager-cache: false
-      - run: npm install --global npm@12.2.0
+      - name: Install the pinned npm
+        run: npm install --global "npm@$(node -p 'require("./package.json").devEngines.packageManager.version')"
       - uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         with:
           path: ~/.npm
           key: npm-${{ runner.os }}-${{ hashFiles('package-lock.json') }}
           restore-keys: npm-${{ runner.os }}-
-      # From the lockfile (rule 7). Prettier needs no install script, so none runs.
+      # From the lockfile (rule 7). No tool here needs an install script, so none runs.
       - run: npm ci --ignore-scripts
-      - run: npx prettier --check .
+      # Every step names the file and line of a mistake (AC-FOUNDATION-6). Prettier's check names the
+      # file only, so on a failure its own fix is shown as a diff, which names the lines.
+      - name: Format (Prettier)
+        run: |
+          if ! npm run format:check; then
+            npm run format > /dev/null
+            git --no-pager diff
+            exit 1
+          fi
+      - name: Lint (ESLint)
+        run: npm run lint
+      - name: Typecheck
+        run: npm run typecheck
+      - name: Build
+        run: npm run build
+      # Every relative link in the docs points at something in the repository (D-019).
+      - name: Docs links
+        run: npm run docs:check
+
+  test:
+    name: test / unit and integration
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version-file: package.json
+          package-manager-cache: false
+      - name: Install the pinned npm
+        run: npm install --global "npm@$(node -p 'require("./package.json").devEngines.packageManager.version')"
+      - uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: ~/.npm
+          key: npm-${{ runner.os }}-${{ hashFiles('package-lock.json') }}
+          restore-keys: npm-${{ runner.os }}-
+      # From the lockfile (rule 7). Turborepo's binary comes as an optional dependency, not from an
+      # install script, so none runs.
+      - run: npm ci --ignore-scripts
+      # Every deployable's .env.test from the [TEST] section of its .env.example: fake values only, so
+      # CI needs no secret (docs/OPERATIONS.md §1 rule 9).
+      - name: Env files for the tests
+        run: node scripts/foundation/bin/env-files.ts test
+      # The tests' real engines (rule 6): MongoDB as a replica set and Valkey, healthy before the
+      # first test. The infra and setup tests start their own beside them, on other ports.
+      - name: Containers (infra:up backend)
+        run: npm run infra:up -- backend
+      # Every workspace's unit and integration tests through Turborepo, dependencies first (no cache
+      # carried between runs). Coverage limits by area fail the run (RULES RT-23).
+      - run: npm test
 
   # The one check the rulesets require and Vercel's Deployment Checks wait for: green only when every
   # job above is.
   check:
     if: ${{ !cancelled() }}
-    needs: [guard, static]
+    needs: [guard, static, test]
     runs-on: ubuntu-latest
     timeout-minutes: 5
     permissions: {}
