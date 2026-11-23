@@ -1,6 +1,6 @@
 # TASK 06: media (photos, dastavez, video aur files)
 
-> **Status:** v1.0.2 (2026-11-23). Halat: planning; code abhi nahi. Module [PROJECT_PLAN.md](../../PROJECT_PLAN.md) §3 ka `06-media`; charan 1 se shuru (D-446). Progress: 0 / 14 points.
+> **Status:** v1.0.3 (2026-11-23). Halat: planning; code abhi nahi. Module [PROJECT_PLAN.md](../../PROJECT_PLAN.md) §3 ka `06-media`; charan 1 se shuru (D-446). Progress: 0 / 14 points.
 
 ## 1. Lakshya
 
@@ -76,7 +76,7 @@ SR-061 (uploads), SR-062 (private media), SR-065 (samay pe mitna), SR-096 (media
 
 - **Tika hai:** `02-platform` (`backend-media`, `backend-crypto`, `backend-events`).
 - **Is pe tike:** `10-logistics`, `11-catalog`, `13-commerce`, `14-finance`, `15-support`, aur upload wale apps.
-- **Owner ke kaam:** OT-3 (Backblaze B2 ka account, region EU Central, D-456), aur Cloudinary ka account ([OWNER_TASKS.md](../../OWNER_TASKS.md)).
+- **Owner ke kaam:** OT-3 (Backblaze B2 ka account, region EU Central, D-456) 2026-11-23 ko ho gaya; Cloudinary ka account abhi baaki ([OWNER_TASKS.md](../../OWNER_TASKS.md) §3).
 
 ## 9. Acceptance criteria, manuals aur testing
 
@@ -100,7 +100,7 @@ Charan [PROJECT_PLAN.md](../../PROJECT_PLAN.md) §5 se (D-446): exports charan 1
 
 ## Change log
 
-| Version          | Date       | Badlav                                                                           |
-| ---------------- | ---------- | -------------------------------------------------------------------------------- |
-| v1.0.0           | 2026-11-22 | Module 06 ka pehla spec aur 7 subtasks (D-446); code abhi nahi.                  |
-| v1.0.1 se v1.0.2 | 2026-11-23 | Object storage Backblaze B2 (EU Central), rok wali files alag bucket me (D-456). |
+| Version          | Date       | Badlav                                                                                         |
+| ---------------- | ---------- | ---------------------------------------------------------------------------------------------- |
+| v1.0.0           | 2026-11-22 | Module 06 ka pehla spec aur 7 subtasks (D-446); code abhi nahi.                                |
+| v1.0.1 se v1.0.3 | 2026-11-23 | Object storage Backblaze B2 (EU Central), rok wali files alag bucket me (D-456); OT-3 ho gaya. |

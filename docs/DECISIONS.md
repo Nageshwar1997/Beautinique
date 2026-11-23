@@ -1,6 +1,6 @@
 # DECISIONS: Beautinique
 
-> **Status:** v1.14.63 (2026-11-23). Har faisla ek jagah. Sirf wahi "Tay" jo owner ne khud kaha; Claude ki salah faisla nahi. Cheezein ek-ek karke judti hain.
+> **Status:** v1.14.65 (2026-11-23). Har faisla ek jagah. Sirf wahi "Tay" jo owner ne khud kaha; Claude ki salah faisla nahi. Cheezein ek-ek karke judti hain.
 
 ## 0. Kaise likhein
 
@@ -469,8 +469,8 @@
 | D-452 | Waitlist ka acceptance criterion `AC-LOGISTICS-13` ACCEPTANCE §1.8 me.                                                                                                                                                                                                                  | Process      | 2026-11-22 |
 | D-453 | Finance app ka dhaancha aur fail refund ka raasta charan 10 me; D-446 badla.                                                                                                                                                                                                            | Process      | 2026-11-22 |
 | D-454 | R2 ke `25` aur `26` ki TASK.md abhi, draft ke roop me; R2 ki planning me badal sakti hain.                                                                                                                                                                                              | Process      | 2026-11-22 |
-| D-455 | Implementation stage khula (2026-11-23); pehla kaam `01-foundation` ST-1; purana code tabhi hate jab kahin use na ho; code ke saath PR. | Process | 2026-11-23 |
-| D-456 | Private files Backblaze B2 (EU Central) pe, bina card; kanooni rok wali files alag bucket me Object Lock ke saath (D-439 badla). | Architecture | 2026-11-23 |
+| D-455 | Implementation stage khula (2026-11-23); pehla kaam `01-foundation` ST-1; purana code tabhi hate jab kahin use na ho; code ke saath PR.                                                                                                                                                 | Process      | 2026-11-23 |
+| D-456 | Private files Backblaze B2 (EU Central) pe, bina card; kanooni rok wali files alag bucket me Object Lock ke saath (D-439 badla).                                                                                                                                                        | Architecture | 2026-11-23 |
 
 ## 2. Record
 
@@ -5499,18 +5499,18 @@
   4. B2 account ka region EU Central (Amsterdam).
 - **Wajah:** Claude ki salah, owner ne maani ([OPEN_QUESTIONS.md](OPEN_QUESTIONS.md) Q-393, Q-394): card ke bina ₹0 pakka rehta hai (D-028), aur lock alag bucket se utna hi pakka. EU Central India ke sabse paas wala B2 region hai, aur daam sab regions me ek jaisa. Cloudflare R2 chalu karne ke checkout pe "payment method on file" chahiye tha.
 - **Chhode vikalp:** Cloudflare R2 card ya PayPal ke saath (folder pe lock aur download hamesha muft, par card judta, aur bill se bachav spend limit pe, jo abhi Beta me); faisla charan 1 ke media ke kaam tak rokna; region US West, US East ya CA East (India se zyada door).
-- **Kab dobara khulega:** B2 ka free hissa ya Object Lock ki shart badle, download ki seema baar baar paar ho, ya owner khud khole.
+- **Kab dobara khulega:** B2 ka free hissa ya Object Lock ki shart badle, download ya roz ke operations ki seema baar baar paar ho, ya owner khud khole.
 - **Kisne, kab:** owner, 2026-11-23. **Nishaan:** Salah maani.
 - **Asar (Claude):**
   - Do buckets, aur har bucket ki apni application key, sirf usi bucket tak (SR-071).
   - Lock wala bucket shuru se lock ke saath banta hai: Object Lock ek baar chalu ho to band nahi hota, aur pehle se padi files pe nahi lagta.
   - Object Lock ka alag kharcha nahi, par locked file rok ki muddat tak storage me ginti hai.
-  - Download har mahine ke average storage ke 3 guna tak muft, phir $0.01 / GB. Data cap lagne pe us din download ruk sakta hai, to media ke monitoring me B2 ke alerts bhi.
-  - Region account banate waqt hi tay hota hai aur baad me nahi badalta; badalne ke liye naya account aur saari files dobara. Latency naapi nahi; EU Central ka chunav doori ke andaze pe. Jaanch ke tathya [RISKS.md](RISKS.md) §2.9 me.
+  - Bina card ke account pe har din ki pakki seema (owner ke account ka Caps & Alerts, 2026-11-23): storage 10 GB, download 1 GB, Class B (file ka download aur jaanch) aur Class C (list jaise kaam) 2,500 har ek. Card ke bina ye nahi badhti, aur paar hone pe us din wo kaam ruk jaata hai. Har private file ka dekhna ek Class B hai, to media ke monitoring me B2 ke alerts bhi.
+  - Region account banate waqt hi tay hota hai aur baad me nahi badalta; badalne ke liye naya account aur saari files dobara. India (owner ka laptop) se TCP connect ka waqt naapa (2026-11-23): IPv4 pe EU Central lagbhag 146 ms, baaki teen regions 265 se 315 ms; IPv6 pe chaaron lagbhag 280 ms. Render Singapore se abhi naapa nahi (andaza: EU Central aur US West lagbhag barabar); pehle deploy ke baad naapna. Jaanch ke tathya [RISKS.md](RISKS.md) §2.9 me.
 
 ## Change log
 
 | Version              | Date                     | Badlav                                                                                                |
 | -------------------- | ------------------------ | ----------------------------------------------------------------------------------------------------- |
 | v1.0.0 se v1.14.60   | 2026-11-17 se 2026-11-22 | Faisle D-001 se D-454; har badlav ka poora itihaas git me (D-442).                                    |
-| v1.14.61 se v1.14.63 | 2026-11-23               | D-455: implementation stage khula; D-443 badla; D-456: private files B2 (EU Central) pe; D-439 badla. |
+| v1.14.61 se v1.14.65 | 2026-11-23               | D-455: implementation stage khula; D-443 badla; D-456: private files B2 (EU Central) pe; D-439 badla. |
