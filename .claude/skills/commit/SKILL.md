@@ -13,7 +13,7 @@ First read `.claude/skills/_shared/git-rules.md`; §1, §2 and §4 apply here.
 1. **State.** `git branch --show-current`, `git status --porcelain=v1 --branch`. Detached HEAD or an operation in
    progress (shared §2) → stop.
 2. **Branch.** `release` (the default branch, where a clone starts) → commits there cannot be pushed (PR only):
-   stop and offer `git switch -c feat/<task> origin/prerelease` (a hotfix: `git switch -c hotfix/<name> origin/release`).
+   stop and offer `git switch -c feat/<task> --no-track origin/prerelease` (a hotfix: `git switch -c hotfix/<name> --no-track origin/release`).
    Git carries the uncommitted changes over, or refuses and changes nothing if they clash; then stop and ask. `prerelease` → fine only for a small
    fix or `linkedin-posts/` work (shared §3); otherwise offer a `feat/<task>` branch. Ask; never switch silently.
 3. **Nothing changed** (no staged, unstaged or untracked files) → say no commit is needed and stop.

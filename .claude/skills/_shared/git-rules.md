@@ -49,8 +49,11 @@ differ, follow the repository and tell the user.
   owner's own step, not these skills.
 - `release` is the GitHub default branch, so a clone checks it out and `gh pr create` without `--base` (and GitHub's
   "Compare & pull request") targets it. Work branches still start from `origin/prerelease`
-  (`git switch -c feat/<task> origin/prerelease`): `feat/<task>`, `fix/<task>`, `docs/<topic>`. A hotfix starts from
-  `origin/release`: `hotfix/<name>`. Always pass the base explicitly (`--base`).
+  (`git switch -c feat/<task> --no-track origin/prerelease`): `feat/<task>`, `fix/<task>`, `docs/<topic>`. A hotfix starts from
+  `origin/release` (`git switch -c hotfix/<name> --no-track origin/release`). Always pass the base explicitly (`--base`).
+- **`--no-track` always.** Without it the new branch tracks `origin/prerelease` (or `origin/release`), and a plain
+  `git push` or VS Code's Sync pushes the work straight onto that long-lived branch, past the PR (docs/LESSONS.md).
+  A branch that already tracks another branch's name: `git branch --unset-upstream`, then `/push` sets its own.
 
 | Head                                | Allowed base                                    | PR title                                             |
 | ----------------------------------- | ----------------------------------------------- | ---------------------------------------------------- |
