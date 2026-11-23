@@ -1,6 +1,6 @@
 # ARCHITECTURE: Beautinique
 
-> **Status:** v1.3.21 (2026-11-22). System kaise bana hai, ek nazar me. Cheezein ek-ek karke, owner ki haan ke baad judengi. Abhi §1 (finance ke accounting niyam, D-282), §2 se §9 (system ke hisse, D-291 se D-298) aur §10 (data aur database, D-310 se D-317).
+> **Status:** v1.3.22 (2026-11-23). System kaise bana hai, ek nazar me. Cheezein ek-ek karke, owner ki haan ke baad judengi. Abhi §1 (finance ke accounting niyam, D-282), §2 se §9 (system ke hisse, D-291 se D-298) aur §10 (data aur database, D-310 se D-317).
 
 ## Is file me kya aayega
 
@@ -428,7 +428,7 @@ return: commerce.return.requested -> support.return.decided -> logistics.pickup.
 8. Export DB cursor se stream, CSV seedha private file me (buffer me poora nahi), ek baar ka chhota link (D-144, SR-075). File pehle download ke baad ya misaal 24 ghante me mite.
 9. Roz: 24 ghante se purane bina jude uploads aur atke deletes saaf; hafte: provider ki list se milaan.
 10. File badalna (jaise nayi photo): nayi file nayi `assetId` ke saath judti hai, to uska URL bhi naya hota hai aur CDN me purani cached copy nahi dikhti. Purani file turant `deleting` me jaati hai, aur niyam 9 ka roz ka job use provider se mitata hai. Apvaad: jis purani file ki kisi record ko zaroorat hai (niyam 5 aur 6, jaise jis product ka order hua uski images, ya kanooni rok wali review aur daawe ki photos), wo apne retention ke samay tak rehti hai. Nateeja: koi file bina kisi record ke hamesha nahi rehti; bina judi upload lagbhag 24 ghante tak, aur hafte ke milaan me pakdi file agle milaan tak.
-11. Kanooni rok wali private files ke folder (prefix) pe object storage ka lock, rok ki muddat jitna, lagbhag 13 May 2027 se; galti se ya code se bhi file na mite. Lock free plan pe milta hai ya nahi, object storage ki jaanch me (D-439).
+11. Kanooni rok wali private files ek alag Backblaze B2 bucket me, jisme Object Lock aur default retention rok ki muddat jitni, lagbhag 13 May 2027 se; galti se ya code se bhi file na mite. Baaki private files doosre bucket me, bina lock ke. Lock wala bucket shuru se lock ke saath banta hai, kyunki lock band nahi hota aur purani files pe peeche se nahi lagta (D-439, D-456).
 
 ## 8. Observability (D-297)
 
@@ -740,3 +740,4 @@ Lint aur TypeScript ke saajhe config `configs/` me (D-002), package nahi.
 | Version           | Date                     | Badlav                                                                                                                                                  |
 | ----------------- | ------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | v1.0.0 se v1.3.21 | 2026-11-17 se 2026-11-22 | §1 finance ke accounting niyam se §12 saajhe packages tak (`backend-crypto` aur `frontend-commerce` samet); har badlav ka poora itihaas git me (D-442). |
+| v1.3.22           | 2026-11-23               | §7 niyam 11: rok wali files alag B2 bucket me Object Lock ke saath (D-456).                                                                             |

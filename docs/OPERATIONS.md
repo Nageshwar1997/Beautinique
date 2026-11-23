@@ -1,6 +1,6 @@
 # OPERATIONS: Beautinique
 
-> **Status:** v1.1.18 (2026-11-22). System chalane ka manual. Cheezein ek-ek karke judengi.
+> **Status:** v1.1.19 (2026-11-23). System chalane ka manual. Cheezein ek-ek karke judengi.
 
 ## Is file me kya aayega
 
@@ -99,7 +99,7 @@ DevOps / SRE Architect ki raay se (D-257 ka kram), owner ki haan ke baad (D-326 
 
 ## 6. Backup aur restore (D-331)
 
-1. Backup me: saare Atlas clusters (Extended JSON, har collection ek file), Neon (`pg_dump` custom format, read-only backup role, usi major version ke container se) aur band FY ki export files (D-309). Backup me nahi: media provider ki files (D-303: product images seller se dobara; daawe aur saboot ki files apne samay pe waise bhi mitti hain), Redis (cache aur queue, dobara banta hai), aur providers ke logs. Private files (KYC, daawe, saboot, kanooni rok) ka kho jaana personal data breach maana jaata hai (§8 niyam 3); kanooni rok wali files ka bachav object storage ke lock se (D-439).
+1. Backup me: saare Atlas clusters (Extended JSON, har collection ek file), Neon (`pg_dump` custom format, read-only backup role, usi major version ke container se) aur band FY ki export files (D-309). Backup me nahi: media provider ki files (D-303: product images seller se dobara; daawe aur saboot ki files apne samay pe waise bhi mitti hain), Redis (cache aur queue, dobara banta hai), aur providers ke logs. Private files (KYC, daawe, saboot, kanooni rok) ka kho jaana personal data breach maana jaata hai (§8 niyam 3); kanooni rok wali files ka bachav alag B2 bucket ke Object Lock se (D-439, D-456).
 2. Providers ke apne backup pe bharosa nahi: Atlas ke free cluster pe backup nahi milta, aur Neon free me sirf 6 ghante ka instant restore aur ek manual snapshot (jaancha 2026-11-21). Neon ka 6 ghante ka restore sirf "abhi hui galti" ke liye.
 3. Kab (D-323): har release se pehle (har contract wale release se pehle zaroor), aur hafte me ek baar (misaal Sunday). Aakhri backup 8 din se purana ho to hafte ki jaanch (§9) me laal nishaan.
 4. Kahan: repo ke andar git se bahar wala folder, chaar pehron ke saath (D-013); encrypted; laptop pe aakhri 3; kabhi CI artifact ya cloud sync wale folder me nahi.
@@ -185,3 +185,4 @@ DevOps / SRE Architect ki raay se (D-257 ka kram), owner ki haan ke baad (D-326 
 | Version           | Date                     | Badlav                                                                  |
 | ----------------- | ------------------------ | ----------------------------------------------------------------------- |
 | v1.0.0 se v1.1.18 | 2026-11-17 se 2026-11-22 | Chalane ke niyam §1 se §12; har badlav ka poora itihaas git me (D-442). |
+| v1.1.19           | 2026-11-23               | Backup: rok wali files ka bachav B2 ke Object Lock se (D-456).          |

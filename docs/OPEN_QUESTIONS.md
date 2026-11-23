@@ -1,6 +1,6 @@
 # OPEN QUESTIONS: Beautinique
 
-> **Status:** v1.8.39 (2026-11-22). Khule sawal, aage ke topics aur jaanchna baaki. Cheezein ek-ek karke judengi.
+> **Status:** v1.8.42 (2026-11-23). Khule sawal, aage ke topics aur jaanchna baaki. Cheezein ek-ek karke judengi.
 
 ## Is file me kya aayega
 
@@ -53,7 +53,7 @@ Claude ka kaam: owner ka faisla nahi chahiye, sirf saboot. Nateeja saboot ke saa
 | Owner ka laptop: disk encryption chalu hai ya nahi (owner Settings me dekhe, [RISKS.md](RISKS.md) §2.8); Desktop folder kisi cloud sync me nahi (jaancha 2026-11-22)                                                                                                                                                                                                                                               | D-013, D-196, R-023                      | Backups ki suraksha                                                  |
 | Gift card: Pine Labs ya kisi aur RBI-authorised PPI issuer ka test API ya sandbox milta hai ya nahi: issuer se poochhna                                                                                                                                                                                                                                                                                            | D-249                                    | Gift card ka raasta                                                  |
 | Cloudinary free account pe ek test (ab sirf public aur review images, D-420): rakhi copy me EXIF, strict transformations, bina signature wale presets band karna, aur API keys ke roles                                                                                                                                                                                                                            | D-284, D-420, SR-096                     | Public media ki settings                                             |
-| Object storage (D-420): account banate waqt card maangta hai ya nahi (R2 ke product page pe "no credit card", par R2 chalu karne ka checkout ka kadam hai; B2 pe saaf nahi); presigned PUT me size ki rok signature me aati hai ya nahi; kanooni rok wali files ke liye lock (misaal R2 ka bucket lock) free plan pe milta hai ya nahi (D-439); phir R2 ya B2 ka chunav owner ke saath ([RISKS.md](RISKS.md) §2.9) | D-420, D-028                             | Private files ki jagah                                               |
+| Object storage (D-420): provider Backblaze B2, region EU Central (D-456). Baaki: presigned PUT me size ki rok signature me aati hai ya nahi ([RISKS.md](RISKS.md) §2.9) | D-420, D-028                             | Private files ki jagah                                               |
 | Atlas free cluster pe ek test: fuzzy aur autocomplete, search index 0.5 GB me ginta hai ya nahi, driver se `createSearchIndex`, `$out` aur `$merge`, multi-document transactions, validators aur partial indexes, aur TTL ke deletes 100 ops/second me gine jaate hain ya nahi                                                                                                                                     | D-295, D-311, D-313, D-314, R-006, R-032 | Search, transactions aur release step                                |
 | Atlas free cluster pe audit ke sirf `insert` aur `find` wale custom role ka asli test (custom roles free pe bante hain, [RISKS.md](RISKS.md) §2.7)                                                                                                                                                                                                                                                                 | D-313, D-317, D-400                      | Audit ka pehra                                                       |
 | Neon: khula par khaali connection compute ko jagaye rakhta hai ya nahi: test                                                                                                                                                                                                                                                                                                                                       | D-288, D-309                             | CU-ghante                                                            |
@@ -7757,8 +7757,47 @@ Claude ka kaam: owner ka faisla nahi chahiye, sirf saboot. Nateeja saboot ke saa
 - **R1 ya baad me:** abhi (charan 10 ki planning).
 - **Owner ka jawab (2026-11-22):** **(a)**, Finance app ka dhaancha aur fail refund ka raasta charan 10 me. Record: [DECISIONS.md](DECISIONS.md) D-453.
 
+
+### Q-393. Private files ke liye Backblaze B2 ya Cloudflare R2?
+
+- **Status:** `Tay`. Topic: B15 (technical), B14 (security).
+- **Sawal:** private files (KYC, daawe, saboot, kanooni rok wali files) S3 jaise object storage pe jaati hain (D-420), aur kanooni rok wali files pe lock chahiye (D-439). Claude ne 2026-11-23 ko dono dekhe. Kaunsa chunein?
+- **Kyun zaroori:** media ka module charan 1 me hai, aur provider ke hisaab se upload, signed URL aur lock ka code thoda alag banta hai. Hamara kharcha ₹0 rehna chahiye (D-028).
+- **Jo mila:**
+  - **R2:** free usage har mahine 10 GB storage, 10 lakh likhne aur 1 crore padhne ke operations, download (egress) muft. Bucket lock kisi folder (prefix) pe, din, tareekh ya hamesha ke liye. Par R2 chalu karne ke checkout pe "payment method on file" chahiye, aur owner ke account me abhi koi payment method nahi; to card ya PayPal jodna padega. Billing me "Spend limits (Beta)" hai.
+  - **B2:** sign-up bina card ke, 10 GB storage hamesha muft. Download har mahine ke average storage ke 3 guna tak muft, phir $0.01 / GB. Object Lock bucket ke level pe (default retention), naye aur purane dono bucket pe chalu ho sakta hai, par ek baar chalu ho to band nahi hota, aur folder (prefix) ke hisaab se alag niyam nahi. Har din ki kharch ki seema (data caps) aur alerts.
+- **Vikalp:**
+  - **(a) B2, bina card:** private files ek bucket me; kanooni rok wali files ek alag bucket me jisme Object Lock aur default retention (rok ki muddat). D-439 ka "folder pe lock" yahan "alag bucket pe lock" ban jaata hai. Data caps $0 pe.
+  - **(b) R2, card ke saath:** owner card ya PayPal jode, free usage ke andar rahein, aur spend limit lagayein; kanooni rok wali files ke folder pe bucket lock, jaisa D-439 me hai.
+  - **(c) Abhi tay nahi:** charan 1 ke media ke kaam tak ruk ke dekhein.
+- **Salah:** **(a)**. Card ke bina ₹0 pakka rehta hai, data caps se galti se bill nahi banta, aur lock ka kaam alag bucket se utna hi pakka ho jaata hai. Private files kam dekhi jaati hain, to 3 guna wali download ki seema kaafi hai.
+- **Trade-off:**
+  - (a) me do buckets sambhalne padte hain, lock wala bucket ek baar ke baad bina lock ke nahi ho sakta, aur download ki seema paar ho to thoda kharcha (data caps se ruk jaata hai).
+  - (b) me design D-439 jaisa hi rehta hai aur download hamesha muft, par card judta hai, aur free usage ke upar bill ka khatra, jise spend limit (abhi Beta) pe chhodna padta hai.
+  - (c) me charan 1 ke media ka kaam is faisle pe rukta hai.
+- **R1 ya baad me:** R1, charan 1 ke media module (`06-media`) se pehle.
+- **Owner ka jawab (2026-11-23):** **(a)**, Backblaze B2 bina card ke; kanooni rok wali files alag bucket me Object Lock ke saath. Record: [DECISIONS.md](DECISIONS.md) D-456.
+
+### Q-394. Backblaze B2 ka region kaunsa?
+
+- **Status:** `Tay`. Topic: B15 (technical).
+- **Sawal:** B2 me region sign-up ke waqt chunna padta hai (sign-up button ke neeche), aur account banne ke baad nahi badalta; badalne ke liye naya account aur saari files dobara (D-456). Regions: US West, US East, EU Central (Amsterdam) aur CA East (Toronto); Asia me koi nahi. Kaunsa chunein?
+- **Kyun zaroori:** owner ke sign-up karte hi region pakka ho jaata hai. Private files ka upload aur download customer, seller aur staff ke phone se seedha B2 pe hota hai (presigned URL), aur media service Render Singapore (D-058) se B2 se baat karti hai. Door ka region har upload aur download ko dheema karta hai.
+- **Vikalp:**
+  - **(a) EU Central (Amsterdam):** India ke sabse paas wala B2 region.
+  - **(b) US West:** Singapore se lagbhag utna hi door jitna Europe, par India se zyada door.
+  - **(c) US East ya CA East:** India aur Singapore dono se sabse door.
+- **Salah:** **(a)**. Daam sab regions me ek jaisa hai (Backblaze ke docs), to faisla sirf doori ka hai. India se Europe America se paas hai, to phone se upload aur download thoda tez. Shak: latency Claude ne naapi nahi; ye naqshe ki doori pe andaza hai.
+- **Trade-off:**
+  - (a) me India ke users ke liye sabse kam doori; Singapore se doori US West jaisi hi.
+  - (b) aur (c) me kharcha wahi, par India ke users ke liye har upload aur download thoda dheema.
+  - Desh koi bhi ho, files India ke bahar hi hain, jo Lawyer (AI) ki jaanch me jaayaz hai (D-420 ka jod); kisi khaas desh ki shart nahi.
+- **R1 ya baad me:** abhi, OWNER_TASKS OT-3 ke sign-up se pehle.
+- **Owner ka jawab (2026-11-23):** **(a)**, EU Central (Amsterdam). Record: [DECISIONS.md](DECISIONS.md) D-456.
+
 ## Change log
 
-| Version           | Date                     | Badlav                                                                                                               |
-| ----------------- | ------------------------ | -------------------------------------------------------------------------------------------------------------------- |
-| v1.0.0 se v1.8.39 | 2026-11-17 se 2026-11-22 | Topics B1 se B16, jaanchna baaki (§2) aur sawal Q-001 se Q-392, sab Tay; har badlav ka poora itihaas git me (D-442). |
+| Version            | Date                     | Badlav                                                                                                               |
+| ------------------ | ------------------------ | -------------------------------------------------------------------------------------------------------------------- |
+| v1.0.0 se v1.8.39  | 2026-11-17 se 2026-11-22 | Topics B1 se B16, jaanchna baaki (§2) aur sawal Q-001 se Q-392, sab Tay; har badlav ka poora itihaas git me (D-442). |
+| v1.8.40 se v1.8.42 | 2026-11-23               | Q-393 aur Q-394 tay (B2, EU Central; D-456).                                                                         |
