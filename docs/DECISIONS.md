@@ -1,6 +1,6 @@
 # DECISIONS: Beautinique
 
-> **Status:** v1.14.66 (2026-11-23). Har faisla ek jagah. Sirf wahi "Tay" jo owner ne khud kaha; Claude ki salah faisla nahi. Cheezein ek-ek karke judti hain.
+> **Status:** v1.14.67 (2026-11-23). Har faisla ek jagah. Sirf wahi "Tay" jo owner ne khud kaha; Claude ki salah faisla nahi. Cheezein ek-ek karke judti hain.
 
 ## 0. Kaise likhein
 
@@ -473,6 +473,7 @@
 | D-456 | Private files Backblaze B2 (EU Central) pe, bina card; kanooni rok wali files alag bucket me Object Lock ke saath (D-439 badla).                                                                                                                                                        | Architecture | 2026-11-23 |
 | D-457 | Purane code ki local files bhi hatin, siwaye do `.env.production` (OT-7); `external.command` hati, secret scan `npm run secrets:scan` se (D-455 badla).                                                                                                                                 | Process      | 2026-11-23 |
 | D-458 | Node aur npm sabse naye security release pe exact pin (abhi 24.22.3 aur 12.2.3), ek hi jagah root `package.json` me.                                                                                                                                                                    | Architecture | 2026-11-23 |
+| D-459 | Aam helpers `utils/` me; module ka apna logic, type aur constant module me; `types/` aur `constants/` sirf kai modules ke saajhe ke liye.                                                                                                                                               | Process      | 2026-11-23 |
 
 ## 2. Record
 
@@ -5535,9 +5536,25 @@
   - `devEngines` me `onFail: error`: alag Node ya npm pe npm ke commands ruk jaate hain. CI ka setup-node `devEngines` se Node leta hai, aur npm usi file se.
   - Naya release aane pe pin haath se badhta hai: `package.json` ki teeno jagah ek saath (`scripts/foundation` ka test jaanchta hai), aur laptop pe nvm.
 
+### D-459. Helpers, types aur constants kahan rehte hain
+
+- **Faisla:**
+  1. Aam helper (file padhna, paths, env, format), jo code aur tests ya kai modules use karein, alag `utils/` folder me (misaal `src/utils/`); sirf tests ke beech saajha aam helper `test/utils/` me ([RULES.md](RULES.md) CR-37).
+  2. Module ka apna logic, type aur constant usi module me aur wahin se export; test exported cheez import kar sakta hai, andar ki nahi. Bada module apna hissa apni file me rakhta hai, `utils/` me nahi. Sirf ek file ki cheez usi file me bina export (CR-38).
+  3. `types/` aur `constants/` folder sirf kai modules me saajhe types aur constants ke liye; sirf tests ke beech saajha constant `test/constants/` me; zod se bane types apne schema ke saath (CR-39).
+- **Wajah:** helpers ka niyam owner ne kaha (2026-11-23). Types aur constants pe owner ne pehle alag folder kahe; phir Claude ki salah owner ne final maani: ek baat ek jagah rahe (coverage ka logic chaar files me bikhar gaya tha), zod se bane types (is project me zyadatar yahi) apne schema se alag na hon, aur files ka dher na bane. Tests phir bhi kisi code file ke andar ke helper pe nahi tikte.
+- **Chhode vikalp:** har exported ya saajha type aur constant `types/` aur `constants/` me module ki file me (aazmaya, upar ki wajah se chhoda); sab kuch ek file me aur tests andar ke helpers bhi import karein.
+- **Kab dobara khulega:** owner khud khole.
+- **Kisne, kab:** owner, 2026-11-23. **Nishaan:** Owner (helpers); Salah maani (module ka logic, types aur constants).
+- **Asar (Claude):**
+  - Owner ne "utils ya helpers" kaha; repo me ek hi naam rahe, isliye `utils/`.
+  - Pehchaan: helper kisi doosre project me bina badle chal sakta hai to `utils/`; module ke niyam ya data jaanta hai to module me.
+  - Helper saajhe kaam ke liye hai; test ka expected nateeja us helper se nahi nikalta jisse code apna nateeja nikalta hai ([RULES.md](RULES.md) §4.1 siddhaant 1).
+  - Abhi: `scripts/foundation` ka `readJson` `src/utils/read-json.ts` me; `RootManifest` `src/root-checks.ts` se export; `COVERAGE_LIMITS`, `CoverageOptions` aur `coverageThresholds` `configs/vitest/coverage.ts` me; tests ka `cleanEnv` `test/utils/env.ts` me aur `ROOT` `test/constants/paths.ts` me.
+
 ## Change log
 
-| Version              | Date                     | Badlav                                                                                                                                                                                                    |
-| -------------------- | ------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| v1.0.0 se v1.14.60   | 2026-11-17 se 2026-11-22 | Faisle D-001 se D-454; har badlav ka poora itihaas git me (D-442).                                                                                                                                        |
-| v1.14.61 se v1.14.66 | 2026-11-23               | D-455: implementation stage khula; D-443 badla; D-456: private files B2 (EU Central) pe; D-439 badla; D-457: purane code ki local files aur `external.command` (D-455 badla); D-458: Node aur npm ka pin. |
+| Version              | Date                     | Badlav                                                                                                                                                                                                                                                          |
+| -------------------- | ------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| v1.0.0 se v1.14.60   | 2026-11-17 se 2026-11-22 | Faisle D-001 se D-454; har badlav ka poora itihaas git me (D-442).                                                                                                                                                                                              |
+| v1.14.61 se v1.14.67 | 2026-11-23               | D-455: implementation stage khula; D-443 badla; D-456: private files B2 (EU Central) pe; D-439 badla; D-457: purane code ki local files aur `external.command` (D-455 badla); D-458: Node aur npm ka pin; D-459: helpers, types aur constants kahan rehte hain. |

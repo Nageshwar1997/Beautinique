@@ -21,8 +21,10 @@
   ],
   "scripts": {
     "build": "turbo run build",
-    "typecheck": "turbo run typecheck",
-    "lint": "turbo run lint",
+    "typecheck": "turbo run typecheck typecheck:root",
+    "typecheck:root": "tsc -p tsconfig.json",
+    "lint": "turbo run lint lint:root",
+    "lint:root": "eslint eslint.config.js configs .github/scripts",
     "test": "turbo run test",
     "dev": "turbo run dev",
     "format": "prettier . --write",
@@ -46,7 +48,16 @@
   },
   "packageManager": "npm@12.2.3",
   "devDependencies": {
+    "@eslint/js": "10.0.1",
+    "@types/node": "24.19.2",
+    "@vitest/coverage-v8": "5.1.1",
+    "eslint": "10.15.0",
+    "eslint-config-prettier": "10.1.8",
+    "globals": "17.14.0",
     "prettier": "3.10.1",
-    "turbo": "2.11.13"
+    "turbo": "2.11.13",
+    "typescript": "6.0.3",
+    "typescript-eslint": "8.73.0",
+    "vitest": "5.1.1"
   }
 }

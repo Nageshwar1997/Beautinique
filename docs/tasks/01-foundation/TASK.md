@@ -1,6 +1,6 @@
 # TASK 01: foundation (root setup)
 
-> **Status:** v1.0.4 (2026-11-23). Halat: ST-1 ka code PR me; baaki subtasks baaki. Module [PROJECT_PLAN.md](../../PROJECT_PLAN.md) §3 ka `01-foundation`, charan 0 ka pehla module (D-446). Progress: 0 / 14 points.
+> **Status:** v1.0.5 (2026-11-23). Halat: ST-1 aur ST-2 ka code branch `feat/foundation-root` pe (PR ST-7 ke baad, owner); baaki subtasks baaki. Module [PROJECT_PLAN.md](../../PROJECT_PLAN.md) §3 ka `01-foundation`, charan 0 ka pehla module (D-446). Progress: 0 / 14 points.
 
 ## 1. Lakshya
 
@@ -35,14 +35,14 @@ Naya root setup, jis pe saara naya code chalta hai: npm workspaces ka monorepo, 
 1. Root `package.json`: `private: true` (root kabhi publish nahi hota), `type: module`, workspaces `packages/*/*`, `frontend/*`, `backend/*` aur `scripts/*`. `frontend/*` aur `backend/*` ke deployables aur `scripts/*` npm packages nahi, isliye unpe bhi `private: true`; "saare packages public" (CR-36, D-445) sirf `packages/` ke packages pe.
 2. Node ka version ek jagah pinned: `engines` aur `devEngines` ([OPERATIONS.md](../../OPERATIONS.md) §11 niyam 3). npm ka version bhi pinned (`devEngines` aur `packageManager`). Dono sabse naye security release pe exact: abhi Node 24.22.3 aur npm 12.2.3 (D-458). CI ka setup-node bhi `devEngines` se padhta hai.
 3. Turborepo ke tasks: `build`, `typecheck`, `lint`, `test`, `dev`. Dependency pehle, aur jo nahi badla uska kaam local cache se. Remote cache nahi.
-4. Root ke scripts sirf Turborepo ya `scripts/` ke tools bulate hain; root me koi business code nahi.
+4. Root ke scripts sirf Turborepo ya `scripts/` ke tools bulate hain; root me koi business code nahi. Root ki apni files (`configs/`, `eslint.config.js`, `.github/scripts`) ka lint aur typecheck Turborepo ke root tasks `lint:root` aur `typecheck:root` se; `format`, `format:check` aur `secrets:scan` seedha Prettier aur gitleaks bulate hain.
 
 ### 3.2 Saajhe config (`configs/`)
 
-1. **TypeScript:** strict, sirf ESM; Node (backend aur packages) aur React (frontend) ke do base config ([RULES.md](../../RULES.md) §3).
-2. **ESLint:** flat config ka dhaancha jis pe baad ke modules apne niyam jodte hain.
-3. **Prettier:** abhi wala config (`printWidth` 100, `endOfLine: lf`) waisa hi.
-4. **Vitest:** projects ka dhaancha, aur coverage ki seemaayein area ke hisaab se ([RULES.md](../../RULES.md) RT-23), jo apne area ka code aane pe laagu hoti hain.
+1. **TypeScript:** strict, sirf ESM; Node (backend aur packages) aur React (frontend) ke do base config ([RULES.md](../../RULES.md) §3). Bana: `configs/typescript/base.json` (strict, `noUncheckedIndexedAccess`, `exactOptionalPropertyTypes`, `verbatimModuleSyntax`, `erasableSyntaxOnly`, imports `.ts` extension ke saath, `noEmit`), `node.json` (`nodenext`, `@types/node` 24) aur `react.json` (`bundler`, `react-jsx`, DOM). TypeScript 6.0.3: typescript-eslint abhi `<6.1` hi maanta hai, isliye TypeScript 7 nahi.
+2. **ESLint:** flat config ka dhaancha jis pe baad ke modules apne niyam jodte hain. Bana: `configs/eslint/base.js` (ESLint 10, `@eslint/js` recommended, typescript-eslint `strictTypeChecked` type-aware, type imports, aur aakhir me `eslint-config-prettier`); root ka `eslint.config.js` yahi hai, aur workspace apne niyam apne `eslint.config.js` me `defineConfig(base, ...)` se jodta hai.
+3. **Prettier:** abhi wala config (`printWidth` 100, `endOfLine: lf`) waisa hi, root ki `.prettierrc.json` me.
+4. **Vitest:** projects ka dhaancha, aur coverage ki seemaayein area ke hisaab se ([RULES.md](../../RULES.md) RT-23), jo apne area ka code aane pe laagu hoti hain. Bana: `configs/vitest/workspace.ts`, workspace ke `vitest.config.ts` me `workspaceTestConfig({ area, critical })`; seemaayein aur unka hisaab `configs/vitest/coverage.ts` me. Projects: `unit` (`src/` ya `test/` me `*.test.ts`) aur `integration` (`*.int.test.ts`, containers pe, lambi timeout); `fixtures/` ki files kabhi apne aap nahi chalti. Coverage V8 se: `area: kernel` pe poore package pe 90% branch, `critical` globs (paisa, stock, permissions) pe 85% branch, aur in dono ke neeche run fail; baaki sirf report (70% lines release se pehle). Workspace ka `test` script `vitest run --coverage`.
 
 ### 3.3 Laptop ka infra (`infra/`)
 
@@ -114,6 +114,7 @@ Koi database ya HTTP API nahi. Is module ki "API" root ke commands hain: `setup`
 - **ST-1 ke tests** (`scripts/foundation`, `npm test` se, CI ke `test` job me):
   - [turbo-pipeline.test.ts](../../../scripts/foundation/test/turbo-pipeline.test.ts): `AC-FOUNDATION-9`, repo ke `turbo.json` ke saath do workspaces ka monorepo; dependency pehle, kuch na badle to sab local cache se, aur sirf badle package ka kaam dobara.
   - [root-checks.test.ts](../../../scripts/foundation/test/root-checks.test.ts): `AC-FOUNDATION-11` (git me koi `*-old/` folder nahi), Node aur npm ka ek hi exact pin, workspaces ka `private` (§3.1 niyam 1), aur remote cache band; har pehre ke saath galat misaal.
+- **ST-2 ke tests:** [shared-configs.test.ts](../../../scripts/foundation/test/shared-configs.test.ts), galat misaalein `test/fixtures/` me: `AC-FOUNDATION-6` ka ESLint aur typecheck wala hissa (`any`, type-aware floating promise, aur type error, file aur line ke saath), React aur Node base ka farak (DOM), aur `RT-23` (kernel 90% aur critical 85% se neeche run fail, baaki sirf report). Prettier aur docs ke paths wala hissa ST-5 me.
 
 ## 8. Dependencies
 
@@ -130,20 +131,20 @@ Koi database ya HTTP API nahi. Is module ki "API" root ke commands hain: `setup`
 
 Har subtask lagbhag ek PR jitna, aur saare charan 0 me ([PROJECT_PLAN.md](../../PROJECT_PLAN.md) §5, D-446). Points D-433 ke hisaab se, aur "ho gaya" sirf [RULES.md](../../RULES.md) §1 ki Definition of Done ke baad.
 
-| #    | Subtask                                                                               | Size   | Halat |
-| ---- | ------------------------------------------------------------------------------------- | ------ | ----- |
-| ST-1 | Purana code hatana (owner ki haan), naya root `package.json`, lockfile aur Turborepo  | M (2)  | PR me |
-| ST-2 | `configs/`: TypeScript, ESLint, Prettier aur Vitest ke saajhe config                  | M (2)  | Baaki |
-| ST-3 | `infra/` ki compose file (`mongo` replica set, `valkey`), `infra:up` aur `infra:down` | M (2)  | Baaki |
-| ST-4 | Env files ka dhaancha aur `npm run setup`                                             | M (2)  | Baaki |
-| ST-5 | CI: `static` aur `test` jobs, repo ke pehre, aur `check` me sab                       | L (4)  | Baaki |
-| ST-6 | Mahine ke dependency PRs                                                              | S (1)  | Baaki |
-| ST-7 | Root README, CLAUDE.md ke commands aur OPERATIONS §1 ki commands ki list              | S (1)  | Baaki |
-|      | **Kul**                                                                               | **14** |       |
+| #    | Subtask                                                                               | Size   | Halat     |
+| ---- | ------------------------------------------------------------------------------------- | ------ | --------- |
+| ST-1 | Purana code hatana (owner ki haan), naya root `package.json`, lockfile aur Turborepo  | M (2)  | Branch pe |
+| ST-2 | `configs/`: TypeScript, ESLint, Prettier aur Vitest ke saajhe config                  | M (2)  | Branch pe |
+| ST-3 | `infra/` ki compose file (`mongo` replica set, `valkey`), `infra:up` aur `infra:down` | M (2)  | Baaki     |
+| ST-4 | Env files ka dhaancha aur `npm run setup`                                             | M (2)  | Baaki     |
+| ST-5 | CI: `static` aur `test` jobs, repo ke pehre, aur `check` me sab                       | L (4)  | Baaki     |
+| ST-6 | Mahine ke dependency PRs                                                              | S (1)  | Baaki     |
+| ST-7 | Root README, CLAUDE.md ke commands aur OPERATIONS §1 ki commands ki list              | S (1)  | Baaki     |
+|      | **Kul**                                                                               | **14** |           |
 
 ## Change log
 
-| Version          | Date       | Badlav                                                                                                                              |
-| ---------------- | ---------- | ----------------------------------------------------------------------------------------------------------------------------------- |
-| v1.0.0 se v1.0.2 | 2026-11-22 | Module 01 ka pehla spec, 7 subtasks (D-446) acceptance criteria ki link (D-447) aur deployables pe `private: true`; code abhi nahi. |
-| v1.0.3 se v1.0.4 | 2026-11-23 | Purane code ki shart aur `external.command` (D-455); ST-1 ka code PR me: naya root aur Turborepo, purana code hata (D-457, D-458).  |
+| Version          | Date       | Badlav                                                                                                                                                                                         |
+| ---------------- | ---------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| v1.0.0 se v1.0.2 | 2026-11-22 | Module 01 ka pehla spec, 7 subtasks (D-446) acceptance criteria ki link (D-447) aur deployables pe `private: true`; code abhi nahi.                                                            |
+| v1.0.3 se v1.0.5 | 2026-11-23 | Purane code ki shart aur `external.command` (D-455); ST-1 ka code: naya root aur Turborepo, purana code hata (D-457, D-458); ST-2 ka code: `configs/` ke TypeScript, ESLint aur Vitest config. |

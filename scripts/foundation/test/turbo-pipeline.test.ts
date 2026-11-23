@@ -11,12 +11,14 @@ import {
 } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
-import { after, before, test } from 'node:test';
-import { fileURLToPath } from 'node:url';
 
-import { readJson } from '../src/root-checks.ts';
+import { afterAll, beforeAll, test } from 'vitest';
 
-const ROOT = fileURLToPath(new URL('../../../', import.meta.url));
+import type { RootManifest } from '../src/root-checks.ts';
+import { readJson } from '../src/utils/read-json.ts';
+import { ROOT } from './constants/paths.ts';
+import { cleanEnv } from './utils/env.ts';
+
 const TURBO = join(ROOT, 'node_modules', 'turbo', 'bin', 'turbo');
 
 // A throwaway monorepo with the repository's own turbo.json and workspace globs: `@fixture/b`
@@ -53,14 +55,10 @@ function writeWorkspace(name: 'a' | 'b', dependencies: Record<string, string>) {
 }
 
 function turbo(...args: string[]): string {
-  // The outer run's TURBO_* variables (hash, invocation dir) must not leak into the fixture's run.
-  const env = Object.fromEntries(
-    Object.entries(process.env).filter(([key]) => !key.startsWith('TURBO_')),
-  );
   const result = spawnSync(process.execPath, [TURBO, 'run', ...args, '--output-logs=errors-only'], {
     cwd: fixture,
     encoding: 'utf8',
-    env: { ...env, TURBO_TELEMETRY_DISABLED: '1', TURBO_NO_UPDATE_NOTIFIER: '1' },
+    env: { ...cleanEnv(), TURBO_TELEMETRY_DISABLED: '1', TURBO_NO_UPDATE_NOTIFIER: '1' },
   });
   assert.equal(
     result.status,
@@ -80,11 +78,9 @@ function newLogLines(): string[] {
   return fresh;
 }
 
-before(() => {
+beforeAll(() => {
   fixture = mkdtempSync(join(tmpdir(), 'bq-turbo-'));
-  const root = readJson<{ workspaces: string[]; packageManager: string }>(
-    join(ROOT, 'package.json'),
-  );
+  const root = readJson(join(ROOT, 'package.json')) as RootManifest;
 
   copyFileSync(join(ROOT, 'turbo.json'), join(fixture, 'turbo.json'));
   writeFileSync(
@@ -126,7 +122,9 @@ before(() => {
   assert.equal(git.status, 0, git.stderr);
 });
 
-after(() => rmSync(fixture, { recursive: true, force: true }));
+afterAll(() => {
+  rmSync(fixture, { recursive: true, force: true });
+});
 
 test('AC-FOUNDATION-9: build and test run the dependency first and reuse the local cache for unchanged work', () => {
   // First run: nothing is cached, and @fixture/a is built before anything of @fixture/b that needs it.
@@ -154,4 +152,5 @@ test('AC-FOUNDATION-9: build and test run the dependency first and reuse the loc
   const afterDependencyChange = newLogLines();
   assert.deepEqual([...afterDependencyChange].sort(), ['build a', 'build b', 'test a', 'test b']);
   assert.ok(afterDependencyChange.indexOf('build a') < afterDependencyChange.indexOf('build b'));
-});
+  // Four real Turborepo runs: seconds, not the default 5 s budget of a unit test.
+}, 60_000);

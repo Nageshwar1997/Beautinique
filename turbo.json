@@ -1,6 +1,6 @@
 {
   "$schema": "https://turborepo.com/schema.json",
-  "globalDependencies": ["configs/**"],
+  "globalDependencies": ["configs/**", "tsconfig.json", "eslint.config.js"],
   "remoteCache": {
     "enabled": false
   },
@@ -17,12 +17,15 @@
     },
     "test": {
       "dependsOn": ["^build"],
-      "inputs": ["$TURBO_DEFAULT$", ".env.test"]
+      "inputs": ["$TURBO_DEFAULT$", ".env.test"],
+      "outputs": ["coverage/**"]
     },
     "dev": {
       "dependsOn": ["^build"],
       "cache": false,
       "persistent": true
-    }
+    },
+    "//#typecheck:root": {},
+    "//#lint:root": {}
   }
 }

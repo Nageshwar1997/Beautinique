@@ -3,17 +3,17 @@ import { spawnSync } from 'node:child_process';
 import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
-import { after, describe, test } from 'node:test';
-import { fileURLToPath } from 'node:url';
+
+import { afterAll, describe, test } from 'vitest';
 
 import {
   oldCodeProblems,
-  readJson,
+  type RootManifest,
   versionPinProblems,
   workspacePrivacyProblems,
 } from '../src/root-checks.ts';
-
-const ROOT = fileURLToPath(new URL('../../../', import.meta.url));
+import { readJson } from '../src/utils/read-json.ts';
+import { ROOT } from './constants/paths.ts';
 
 describe('old code', () => {
   test('AC-FOUNDATION-11: the repository tracks no *-old folder', () => {
@@ -44,7 +44,7 @@ describe('old code', () => {
 
 describe('root package.json version pins', () => {
   test('the repository pins Node and npm to one exact version each', () => {
-    assert.deepEqual(versionPinProblems(readJson(join(ROOT, 'package.json'))), []);
+    assert.deepEqual(versionPinProblems(readJson(join(ROOT, 'package.json')) as RootManifest), []);
   });
 
   test('a range, a missing pin or two different versions is caught', () => {
@@ -79,7 +79,9 @@ describe('root package.json version pins', () => {
 
 describe('workspace privacy', () => {
   const dirs: string[] = [];
-  after(() => dirs.forEach((dir) => rmSync(dir, { recursive: true, force: true })));
+  afterAll(() => {
+    for (const dir of dirs) rmSync(dir, { recursive: true, force: true });
+  });
 
   const workspace = (root: string, dir: string, manifest: object) => {
     mkdirSync(join(root, dir), { recursive: true });
@@ -109,7 +111,7 @@ describe('workspace privacy', () => {
 
 describe('turbo.json', () => {
   test('remote cache is off: work is reused from the local cache only', () => {
-    const turbo = readJson<{ remoteCache?: { enabled?: boolean } }>(join(ROOT, 'turbo.json'));
+    const turbo = readJson(join(ROOT, 'turbo.json')) as { remoteCache?: { enabled?: boolean } };
     assert.equal(turbo.remoteCache?.enabled, false);
   });
 });

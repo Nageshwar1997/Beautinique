@@ -1,9 +1,12 @@
-import { existsSync, readdirSync, readFileSync } from 'node:fs';
+import { existsSync, readdirSync } from 'node:fs';
 import { join } from 'node:path';
+
+import { readJson } from './utils/read-json.ts';
 
 const EXACT_VERSION = /^\d+\.\d+\.\d+$/;
 
-interface RootManifest {
+// The fields of the root package.json that the root checks read.
+export interface RootManifest {
   engines?: { node?: string };
   devEngines?: {
     runtime?: { name?: string; version?: string };
@@ -16,10 +19,6 @@ interface RootManifest {
 interface WorkspaceManifest {
   name?: string;
   private?: boolean;
-}
-
-export function readJson<T>(path: string): T {
-  return JSON.parse(readFileSync(path, 'utf8')) as T;
 }
 
 // Node and npm are pinned once, in the root package.json: Render reads `engines`, npm and CI's
@@ -39,7 +38,7 @@ export function versionPinProblems(manifest: RootManifest): string[] {
   if (npm?.name !== 'npm' || !EXACT_VERSION.test(npm.version ?? '')) {
     problems.push('devEngines.packageManager must be npm with an exact version (x.y.z)');
   }
-  if (manifest.packageManager !== `npm@${npm?.version}`) {
+  if (!npm?.version || manifest.packageManager !== `npm@${npm.version}`) {
     problems.push('packageManager must be npm@<devEngines.packageManager.version>');
   }
   return problems;
@@ -53,7 +52,7 @@ export function workspacePrivacyProblems(rootDir: string): string[] {
   const check = (dir: string, mustBePrivate: boolean) => {
     const manifestPath = join(rootDir, dir, 'package.json');
     if (!existsSync(manifestPath)) return;
-    const manifest = readJson<WorkspaceManifest>(manifestPath);
+    const manifest = readJson(manifestPath) as WorkspaceManifest;
     if (mustBePrivate && manifest.private !== true) {
       problems.push(`${dir}: must have "private": true`);
     }
