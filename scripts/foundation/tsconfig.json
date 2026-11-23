@@ -1,6 +1,6 @@
 {
   "$schema": "https://json.schemastore.org/tsconfig",
   "extends": "../../configs/typescript/node.json",
-  "include": ["src", "test", "vitest.config.ts"],
+  "include": ["bin", "src", "test", "vitest.config.ts"],
   "exclude": ["test/fixtures"]
 }

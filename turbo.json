@@ -1,6 +1,6 @@
 {
   "$schema": "https://turborepo.com/schema.json",
-  "globalDependencies": ["configs/**", "tsconfig.json", "eslint.config.js"],
+  "globalDependencies": ["configs/**", "infra/**", "tsconfig.json", "eslint.config.js"],
   "remoteCache": {
     "enabled": false
   },

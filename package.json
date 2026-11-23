@@ -27,6 +27,8 @@
     "lint:root": "eslint eslint.config.js configs .github/scripts",
     "test": "turbo run test",
     "dev": "turbo run dev",
+    "infra:up": "node scripts/foundation/bin/infra.ts up",
+    "infra:down": "node scripts/foundation/bin/infra.ts down",
     "format": "prettier . --write",
     "format:check": "prettier . --check",
     "secrets:scan": "gitleaks git --config .gitleaks.toml --redact ."
