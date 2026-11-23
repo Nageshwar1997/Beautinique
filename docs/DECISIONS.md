@@ -1,6 +1,6 @@
 # DECISIONS: Beautinique
 
-> **Status:** v1.14.68 (2026-11-23). Har faisla ek jagah. Sirf wahi "Tay" jo owner ne khud kaha; Claude ki salah faisla nahi. Cheezein ek-ek karke judti hain.
+> **Status:** v1.14.69 (2026-11-23). Har faisla ek jagah. Sirf wahi "Tay" jo owner ne khud kaha; Claude ki salah faisla nahi. Cheezein ek-ek karke judti hain.
 
 ## 0. Kaise likhein
 
@@ -475,6 +475,7 @@
 | D-458 | Node aur npm sabse naye security release pe exact pin (abhi 24.22.3 aur 12.2.3), ek hi jagah root `package.json` me.                                                                                                                                                                    | Architecture | 2026-11-23 |
 | D-459 | Aam helpers `utils/` me; module ka apna logic, type aur constant module me; `types/` aur `constants/` sirf kai modules ke saajhe ke liye.                                                                                                                                               | Process      | 2026-11-23 |
 | D-460 | Backup command ki files repo ke root ke `backups/` folder me, D-013 ke chaar pehron ke saath.                                                                                                                                                                                           | Operations   | 2026-11-23 |
+| D-461 | Dependency updates: GitHub ke security PR band aur alert ka fix `prerelease` se; images ke sirf patch; har naye version pe 7 din ka cooldown.                                                                                                                                         | Security     | 2026-11-23 |
 
 ## 2. Record
 
@@ -4257,6 +4258,7 @@
 - **Chhode vikalp:** badlav ke saath maanna (owner ne koi badlav nahi diya); batch rokna (dependencies ka kram baaki).
 - **Kab dobara khulega:** owner khud khole.
 - **Kisne, kab:** owner, 2026-11-21. **Nishaan:** Salah maani.
+- **Jod (owner, 2026-11-23, D-461):** niyam 1 me security alert ka fix `prerelease` se (GitHub ke security PR band), images ke sirf patch, aur 7 din ka cooldown.
 
 ### D-337. DevOps / SRE ke risks
 
@@ -5563,9 +5565,18 @@
 - **Kisne, kab:** owner, 2026-11-23. **Nishaan:** Salah maani.
 - **Asar (Claude):** pehre `01-foundation` ST-5 me bane (`scripts/foundation` ke tests, `AC-FOUNDATION-8`); backup command khud `27-operations` me.
 
+### D-461. Dependency updates: security alert, Docker images aur cooldown
+
+- **Faisla:** [OPERATIONS.md](OPERATIONS.md) §11 niyam 1 ke teen hisse. (1) GitHub ke "Dependabot security updates" band, aur "Dependabot alerts" apni email ke saath chalu. High ya critical alert aate hi fix branch `origin/prerelease` se aur normal PR; live pe asar ho to `hotfix/*`. (2) `infra/compose.yaml` ki images ke updates bhi mahine ke PR se `prerelease` pe aate hain, par sirf patch; minor aur major tab badalte hain jab live (Atlas, Render) badle. (3) Har naya version 7 din purana hone ke baad hi PR me aata hai (cooldown); security alert pe ye rok nahi.
+- **Wajah:** Claude ki salah, owner ne maani (2026-11-23). GitHub security PR hamesha default branch `release` pe kholta hai, aur `target-branch` unpe laagu nahi hota, isliye aisa PR git flow (D-024) todta aur CI ka branch flow check use laal karta. CI ko live ke version pe rehna hai (§11 niyam 4). Chori hue maintainer account se chhapa bura version aksar kuch ghanton ya dinon me pakda jaata hai.
+- **Chhode vikalp:** security PR `release` pe, hotfix ki tarah (D-024 tootta, update `prerelease` pe jaanche bina live pe jaata); roz ka audit workflow (GitHub schedule sirf default branch se chalata aur 60 din bina halchal ke band kar deta, kaam alert email jaisa hi); images ke saare updates (CI live se aage nikal jaata); images haath se (patches chhoot-te); GitHub ka 3 din ka default cooldown.
+- **Kab dobara khulega:** owner khud khole.
+- **Kisne, kab:** owner, 2026-11-23. **Nishaan:** Salah maani.
+- **Asar (Claude):** [.github/dependabot.yml](../.github/dependabot.yml) aur uska pehra `01-foundation` ST-6 me (`scripts/foundation` ke tests, `AC-FOUNDATION-10`); setting owner ka kaam OT-8 ([OWNER_TASKS.md](OWNER_TASKS.md)).
+
 ## Change log
 
 | Version              | Date                     | Badlav                                                                                                                                                                                                                                                                                           |
 | -------------------- | ------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
 | v1.0.0 se v1.14.60   | 2026-11-17 se 2026-11-22 | Faisle D-001 se D-454; har badlav ka poora itihaas git me (D-442).                                                                                                                                                                                                                               |
-| v1.14.61 se v1.14.68 | 2026-11-23               | D-455: implementation stage khula; D-443 badla; D-456: private files B2 (EU Central) pe; D-439 badla; D-457: purane code ki local files aur `external.command` (D-455 badla); D-458: Node aur npm ka pin; D-459: helpers, types aur constants kahan rehte hain; D-460: backup folder `backups/`. |
+| v1.14.61 se v1.14.69 | 2026-11-23               | D-455: implementation stage khula; D-443 badla; D-456: private files B2 (EU Central) pe; D-439 badla; D-457: purane code ki local files aur `external.command` (D-455 badla); D-458: Node aur npm ka pin; D-459: helpers, types aur constants kahan rehte hain; D-460: backup folder `backups/`; D-461: dependency updates (security alert, images, cooldown), D-336 me jod. |

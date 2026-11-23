@@ -1,14 +1,61 @@
 version: 2
+# Monthly pull requests into the development branch (docs/OPERATIONS.md §11, rule 1; D-461):
+# - npm and GitHub Actions: minor and patch updates in one group, each major in its own pull request.
+# - Docker images: patch updates only; live's versions are set by Atlas and Render (rule 4).
+# - A new version waits 7 days (cooldown) before it is proposed.
+# Security updates are off: GitHub opens them only into the default branch (release), and target-branch
+# does not apply to them. A high or critical alert is fixed from prerelease instead (rule 1).
+# GitHub reads this file from the default branch, so it works once it is on release.
+# scripts/foundation's tests hold these rules (dependabot.test.ts, AC-FOUNDATION-10).
 updates:
-  # Monthly pull requests into the development branch; minor and patch updates in one group, each major
-  # in its own pull request (docs/OPERATIONS.md §11, rule 1). npm joins with the new root setup.
+  - package-ecosystem: npm
+    directory: /
+    target-branch: prerelease
+    schedule:
+      interval: monthly
+    cooldown:
+      default-days: 7
+    # Every dependency is pinned to an exact version; a bump keeps it exact.
+    versioning-strategy: increase
+    # The group is one pull request; the rest are majors, one each.
+    open-pull-requests-limit: 10
+    commit-message:
+      prefix: build
+      include: scope
+    groups:
+      npm:
+        patterns: ['*']
+        update-types: [minor, patch]
+
   - package-ecosystem: github-actions
     directory: /
     target-branch: prerelease
     schedule:
       interval: monthly
+    cooldown:
+      default-days: 7
+    open-pull-requests-limit: 10
     commit-message:
       prefix: ci
     groups:
       github-actions:
+        patterns: ['*']
         update-types: [minor, patch]
+
+  - package-ecosystem: docker-compose
+    directory: /infra
+    target-branch: prerelease
+    schedule:
+      interval: monthly
+    cooldown:
+      default-days: 7
+    commit-message:
+      prefix: build
+      include: scope
+    ignore:
+      - dependency-name: '*'
+        update-types: ['version-update:semver-major', 'version-update:semver-minor']
+    groups:
+      docker:
+        patterns: ['*']
+        update-types: [patch]

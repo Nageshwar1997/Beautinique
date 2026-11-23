@@ -1,6 +1,6 @@
 # OPERATIONS: Beautinique
 
-> **Status:** v1.1.19 (2026-11-23). System chalane ka manual. Cheezein ek-ek karke judengi.
+> **Status:** v1.1.20 (2026-11-23). System chalane ka manual. Cheezein ek-ek karke judengi.
 
 ## Is file me kya aayega
 
@@ -161,7 +161,7 @@ DevOps / SRE Architect ki raay se (D-257 ka kram), owner ki haan ke baad (D-326 
 
 ## 11. Dependencies aur packages ka publish (D-336)
 
-1. Dependency updates mahine me ek baar apne aap PRs se, `prerelease` pe; minor aur patch ek group me, major alag PR me. Security alert (high ya critical) pe turant.
+1. Dependency updates mahine me ek baar apne aap PRs se, `prerelease` pe; minor aur patch ek group me, major alag PR me. `infra/` ki images ke sirf patch; minor aur major tab, jab live (Atlas, Render) badle. Har naya version 7 din purana hone pe hi PR me (cooldown). Security alert (high ya critical) pe turant: GitHub ki alert email aate hi fix branch `prerelease` se, aur live pe asar ho to `hotfix/*`. GitHub ke apne security PR band, kyunki wo sirf default branch `release` pe khulte hain (D-461).
 2. Har naya dependency review ke baad: maintainers aur halchal, install scripts, license, size aur memory (512 MB), aur kya Node ya pehle ka koi package wahi kaam karta hai.
 3. Node ka version ek jagah pinned (`engines` aur `devEngines`), Render pe wahi version, Docker images exact version pe.
 4. Atlas free cluster ka MongoDB version Atlas khud badhata hai aur maintenance ka samay hum nahi chunte (jaancha 2026-11-21): CI usi major ke taaza patch pe chale, aur Atlas ke upgrade ke email ke baad live pe smoke check.
@@ -185,4 +185,4 @@ DevOps / SRE Architect ki raay se (D-257 ka kram), owner ki haan ke baad (D-326 
 | Version           | Date                     | Badlav                                                                  |
 | ----------------- | ------------------------ | ----------------------------------------------------------------------- |
 | v1.0.0 se v1.1.18 | 2026-11-17 se 2026-11-22 | Chalane ke niyam §1 se §12; har badlav ka poora itihaas git me (D-442). |
-| v1.1.19           | 2026-11-23               | Backup: rok wali files ka bachav B2 ke Object Lock se (D-456).          |
+| v1.1.19 se v1.1.20 | 2026-11-23 | Backup: rok wali files ka bachav B2 ke Object Lock se (D-456); §11 niyam 1 me security alert, images aur cooldown (D-461). |

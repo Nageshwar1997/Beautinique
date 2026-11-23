@@ -1,6 +1,6 @@
 # OWNER TASKS: Beautinique
 
-> **Status:** v1.0.21 (2026-11-23). Owner ke bahar ke kaam: wo kaam jo sirf owner kar sakta hai (account banana, env key daalna, download, provider ki setting, kisi se poochhna). Claude naya kaam yahan jodta hai, aur owner "ho gaya" kahe to yahin update karta hai (D-440).
+> **Status:** v1.0.22 (2026-11-23). Owner ke bahar ke kaam: wo kaam jo sirf owner kar sakta hai (account banana, env key daalna, download, provider ki setting, kisi se poochhna). Claude naya kaam yahan jodta hai, aur owner "ho gaya" kahe to yahin update karta hai (D-440).
 
 ## Kaise padhein
 
@@ -14,6 +14,7 @@
 | #    | Kaam                                                                                                                                                                                                                                                                                                                                              | Kyun                                             | Kab tak                                   | Faisla       |
 | ---- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------ | ----------------------------------------- | ------------ |
 | OT-7 | **Repo ke andar bachi do `.env.production` files:** laptop pe `backend-old/bundle/.env.production` aur `frontend-old/.env.production` (git se bahar). Jo value kaam ki ho wo apne private env folder (repo ke bahar) me rakhein, phir dono files aur khaali `backend-old/` aur `frontend-old/` folder khud hatayein. Claude ye files nahi kholta. | `.env.production` repo ke andar kabhi nahi rehti | `01-foundation` ST-4 (env files) se pehle | D-441, D-457 |
+| OT-8 | **GitHub pe Dependabot security updates band:** repo ki Settings → Advanced Security me "Dependabot security updates" Disable karein, aur "Dependabot alerts" chalu rehne dein. Apni GitHub Settings → Notifications me Dependabot alerts ki email chalu rakhein. Ho jaane pe Claude setting padh ke jaanchega. | GitHub security PR sirf default branch `release` pe kholta hai, jo git flow todta hai; high ya critical alert ka fix `prerelease` se aata hai | `feat/foundation-root` ke PR ke merge se pehle | D-461 |
 
 ## 2. Ho gaye
 
@@ -51,4 +52,4 @@ Har provider pe account owner ka hota hai, MFA aur recovery codes ke saath (SR-0
 | Version           | Date       | Badlav                                                                                                                                                                                                                                                                                           |
 | ----------------- | ---------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
 | v1.0.0 se v1.0.7  | 2026-11-22 | Owner ke khule aur aage ke kaam; har badlav ka poora itihaas git me (D-442).                                                                                                                                                                                                                     |
-| v1.0.8 se v1.0.21 | 2026-11-23 | OT-6 (GitHub ki security settings) juda aur ho gaya, aur OT-5 (npm) ho gaya (D-455); gift card wala kaam §3 me, R2 ke liye; OT-2 (disk encryption) ho gaya; OT-3 me R2 aur B2 ki jaanch, B2 (EU Central) chuna (D-456); OT-3 ho gaya. OT-7 (repo ke andar bachi `.env.production`) juda (D-457). |
+| v1.0.8 se v1.0.22 | 2026-11-23 | OT-6 (GitHub ki security settings) juda aur ho gaya, aur OT-5 (npm) ho gaya (D-455); gift card wala kaam §3 me, R2 ke liye; OT-2 (disk encryption) ho gaya; OT-3 me R2 aur B2 ki jaanch, B2 (EU Central) chuna (D-456); OT-3 ho gaya. OT-7 (repo ke andar bachi `.env.production`) juda (D-457). OT-8 (Dependabot security updates band) juda (D-461). |
