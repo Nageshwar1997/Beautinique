@@ -1,6 +1,6 @@
 # TASK 01: foundation (root setup)
 
-> **Status:** v1.0.3 (2026-11-23). Halat: planning; code abhi nahi. Module [PROJECT_PLAN.md](../../PROJECT_PLAN.md) §3 ka `01-foundation`, charan 0 ka pehla module (D-446). Progress: 0 / 14 points.
+> **Status:** v1.0.4 (2026-11-23). Halat: ST-1 ka code PR me; baaki subtasks baaki. Module [PROJECT_PLAN.md](../../PROJECT_PLAN.md) §3 ka `01-foundation`, charan 0 ka pehla module (D-446). Progress: 0 / 14 points.
 
 ## 1. Lakshya
 
@@ -33,7 +33,7 @@ Naya root setup, jis pe saara naya code chalta hai: npm workspaces ka monorepo, 
 ### 3.1 Root aur workspaces
 
 1. Root `package.json`: `private: true` (root kabhi publish nahi hota), `type: module`, workspaces `packages/*/*`, `frontend/*`, `backend/*` aur `scripts/*`. `frontend/*` aur `backend/*` ke deployables aur `scripts/*` npm packages nahi, isliye unpe bhi `private: true`; "saare packages public" (CR-36, D-445) sirf `packages/` ke packages pe.
-2. Node ka version ek jagah pinned: `engines` aur `devEngines` ([OPERATIONS.md](../../OPERATIONS.md) §11 niyam 3). npm ka version bhi pinned.
+2. Node ka version ek jagah pinned: `engines` aur `devEngines` ([OPERATIONS.md](../../OPERATIONS.md) §11 niyam 3). npm ka version bhi pinned (`devEngines` aur `packageManager`). Dono sabse naye security release pe exact: abhi Node 24.22.3 aur npm 12.2.3 (D-458). CI ka setup-node bhi `devEngines` se padhta hai.
 3. Turborepo ke tasks: `build`, `typecheck`, `lint`, `test`, `dev`. Dependency pehle, aur jo nahi badla uska kaam local cache se. Remote cache nahi.
 4. Root ke scripts sirf Turborepo ya `scripts/` ke tools bulate hain; root me koi business code nahi.
 
@@ -77,7 +77,8 @@ Mahine me ek baar apne aap PRs, `prerelease` pe: minor aur patch ek group me, ma
 1. `*-old/` folders aur purani root files (purana `package.json`, lockfile, `turbo.json`, `eslint.config.js`, `vitest.config.mjs`, `.vscode/`) naye root setup ke PR me hi hat-te hain, taaki repo kabhi do setup ke saath na rahe.
 2. Hatana destructive hai; owner ki haan is shart ke saath ki purana code tabhi hate jab wo kahin use nahi ho raha (D-073 niyam 4, D-455). Isliye pehle jaanch: naye root, CI, `.github/` aur docs me kuch bhi `*-old/` ya purani root files pe tika nahi. Abhi CI ka `static` job purane root `package.json` aur lockfile se Prettier laata hai, to naya root usi PR me.
 3. Purana kaam git tag `discovery-old-docs` se milta hai: us tag ke baad purane code me koi badlav nahi hua (2026-11-22 ko jaancha), isliye naya tag nahi chahiye.
-4. Repo ke root ki `external.command` file abhi rakhi jaati hai (owner, D-455). Iski gitleaks wali command naye root ke script me aa sakti hai, aur doosri command purane code ki hai; file ka aage kya ho, ye ST-1 me owner se poochh ke.
+4. Repo ke root ki `external.command` file hati (owner, D-457). Uski secret scan wali command ab root ka `npm run secrets:scan` hai (laptop pe gitleaks chahiye).
+5. Purane folders ki git ke bahar ki files (build output, `node_modules`, development ki `.env`) bhi hatin, siwaye do `.env.production` ke, jo owner dekhega ([OWNER_TASKS.md](../../OWNER_TASKS.md) OT-7, D-457).
 
 ### 3.8 Docs
 
@@ -110,6 +111,9 @@ Koi database ya HTTP API nahi. Is module ki "API" root ke commands hain: `setup`
 - Har criterion ka kam se kam ek test ([RULES.md](../../RULES.md) DD-1). CI ke pehron ke liye "galat" misaal wala test, jo pehre ke bina fail ho ([RULES.md](../../RULES.md) §3).
 - `setup` ka test ek saaf clone jaisi jagah pe, bina asli secrets ke.
 - Mutation testing is module me nahi.
+- **ST-1 ke tests** (`scripts/foundation`, `npm test` se, CI ke `test` job me):
+  - [turbo-pipeline.test.ts](../../../scripts/foundation/test/turbo-pipeline.test.ts): `AC-FOUNDATION-9`, repo ke `turbo.json` ke saath do workspaces ka monorepo; dependency pehle, kuch na badle to sab local cache se, aur sirf badle package ka kaam dobara.
+  - [root-checks.test.ts](../../../scripts/foundation/test/root-checks.test.ts): `AC-FOUNDATION-11` (git me koi `*-old/` folder nahi), Node aur npm ka ek hi exact pin, workspaces ka `private` (§3.1 niyam 1), aur remote cache band; har pehre ke saath galat misaal.
 
 ## 8. Dependencies
 
@@ -128,7 +132,7 @@ Har subtask lagbhag ek PR jitna, aur saare charan 0 me ([PROJECT_PLAN.md](../../
 
 | #    | Subtask                                                                               | Size   | Halat |
 | ---- | ------------------------------------------------------------------------------------- | ------ | ----- |
-| ST-1 | Purana code hatana (owner ki haan), naya root `package.json`, lockfile aur Turborepo  | M (2)  | Baaki |
+| ST-1 | Purana code hatana (owner ki haan), naya root `package.json`, lockfile aur Turborepo  | M (2)  | PR me |
 | ST-2 | `configs/`: TypeScript, ESLint, Prettier aur Vitest ke saajhe config                  | M (2)  | Baaki |
 | ST-3 | `infra/` ki compose file (`mongo` replica set, `valkey`), `infra:up` aur `infra:down` | M (2)  | Baaki |
 | ST-4 | Env files ka dhaancha aur `npm run setup`                                             | M (2)  | Baaki |
@@ -142,4 +146,4 @@ Har subtask lagbhag ek PR jitna, aur saare charan 0 me ([PROJECT_PLAN.md](../../
 | Version          | Date       | Badlav                                                                                                                              |
 | ---------------- | ---------- | ----------------------------------------------------------------------------------------------------------------------------------- |
 | v1.0.0 se v1.0.2 | 2026-11-22 | Module 01 ka pehla spec, 7 subtasks (D-446) acceptance criteria ki link (D-447) aur deployables pe `private: true`; code abhi nahi. |
-| v1.0.3           | 2026-11-23 | Purane code ki shart aur `external.command` (D-455).                                                                                |
+| v1.0.3 se v1.0.4 | 2026-11-23 | Purane code ki shart aur `external.command` (D-455); ST-1 ka code PR me: naya root aur Turborepo, purana code hata (D-457, D-458).  |

@@ -17,8 +17,8 @@ concurrency:
 # Jobs run side by side and none waits for another (needs) except `check` (rules 1 and 2): Render's
 # "After CI checks pass" deploys once every check it sees has passed, and a job that waits may have no
 # check yet. The rulesets and Vercel's Deployment Checks name `check`, so it keeps its name and has no
-# display name. Build, lint, typecheck, tests and E2E join as jobs here with the new root setup; until
-# then the repository holds docs, so guard and the format check are the whole run.
+# display name. Node and npm come from the root package.json (devEngines), the one place they are
+# pinned. ESLint, typecheck, build, the containers and E2E join these jobs with their own subtasks.
 jobs:
   # Every run: the history, the branch flow and the advisories change even when the code does not.
   guard:
@@ -50,10 +50,10 @@ jobs:
           "$RUNNER_TEMP/gitleaks" git --config .gitleaks.toml --log-opts="--full-history HEAD" --redact --verbose --no-banner --exit-code 1 .
 
       # No cache here: setup-node's cache step runs `npm config get cache` with the bundled npm, which
-      # the repository's devEngines (npm >=12.2.0, onFail error) rejects.
+      # the repository's devEngines (an exact npm 12, onFail error) rejects.
       - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
         with:
-          node-version: 24
+          node-version-file: package.json
           package-manager-cache: false
 
       # The check's own tests first, so a broken check cannot pass a wrong pull request.
@@ -73,9 +73,10 @@ jobs:
           REPO: ${{ github.repository }}
         run: node .github/scripts/branch-flow.mjs
 
-      # Node 24 ships npm 11 and devEngines needs npm 12. A global install is not checked against
+      # Node 24 ships npm 11 and devEngines pins npm 12. A global install is not checked against
       # devEngines, so it runs with npm 11.
-      - run: npm install --global npm@12.2.0
+      - name: Install the pinned npm
+        run: npm install --global "npm@$(node -p 'require("./package.json").devEngines.packageManager.version')"
       # High and critical advisories fail the run (rule 3), read from the lockfile alone.
       - run: npm audit --audit-level=high --package-lock-only
 
@@ -91,9 +92,10 @@ jobs:
           persist-credentials: false
       - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
         with:
-          node-version: 24
+          node-version-file: package.json
           package-manager-cache: false
-      - run: npm install --global npm@12.2.0
+      - name: Install the pinned npm
+        run: npm install --global "npm@$(node -p 'require("./package.json").devEngines.packageManager.version')"
       - uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         with:
           path: ~/.npm
@@ -101,13 +103,40 @@ jobs:
           restore-keys: npm-${{ runner.os }}-
       # From the lockfile (rule 7). Prettier needs no install script, so none runs.
       - run: npm ci --ignore-scripts
-      - run: npx prettier --check .
+      - run: npm run format:check
+
+  test:
+    name: test / unit
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version-file: package.json
+          package-manager-cache: false
+      - name: Install the pinned npm
+        run: npm install --global "npm@$(node -p 'require("./package.json").devEngines.packageManager.version')"
+      - uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: ~/.npm
+          key: npm-${{ runner.os }}-${{ hashFiles('package-lock.json') }}
+          restore-keys: npm-${{ runner.os }}-
+      # From the lockfile (rule 7). Turborepo's binary comes as an optional dependency, not from an
+      # install script, so none runs.
+      - run: npm ci --ignore-scripts
+      # Every workspace's tests through Turborepo, dependencies first (no cache carried between runs).
+      - run: npm test
 
   # The one check the rulesets require and Vercel's Deployment Checks wait for: green only when every
   # job above is.
   check:
     if: ${{ !cancelled() }}
-    needs: [guard, static]
+    needs: [guard, static, test]
     runs-on: ubuntu-latest
     timeout-minutes: 5
     permissions: {}

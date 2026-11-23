@@ -1,6 +1,6 @@
 # DECISIONS: Beautinique
 
-> **Status:** v1.14.65 (2026-11-23). Har faisla ek jagah. Sirf wahi "Tay" jo owner ne khud kaha; Claude ki salah faisla nahi. Cheezein ek-ek karke judti hain.
+> **Status:** v1.14.66 (2026-11-23). Har faisla ek jagah. Sirf wahi "Tay" jo owner ne khud kaha; Claude ki salah faisla nahi. Cheezein ek-ek karke judti hain.
 
 ## 0. Kaise likhein
 
@@ -471,6 +471,8 @@
 | D-454 | R2 ke `25` aur `26` ki TASK.md abhi, draft ke roop me; R2 ki planning me badal sakti hain.                                                                                                                                                                                              | Process      | 2026-11-22 |
 | D-455 | Implementation stage khula (2026-11-23); pehla kaam `01-foundation` ST-1; purana code tabhi hate jab kahin use na ho; code ke saath PR.                                                                                                                                                 | Process      | 2026-11-23 |
 | D-456 | Private files Backblaze B2 (EU Central) pe, bina card; kanooni rok wali files alag bucket me Object Lock ke saath (D-439 badla).                                                                                                                                                        | Architecture | 2026-11-23 |
+| D-457 | Purane code ki local files bhi hatin, siwaye do `.env.production` (OT-7); `external.command` hati, secret scan `npm run secrets:scan` se (D-455 badla).                                                                                                                                 | Process      | 2026-11-23 |
+| D-458 | Node aur npm sabse naye security release pe exact pin (abhi 24.22.3 aur 12.2.3), ek hi jagah root `package.json` me.                                                                                                                                                                    | Architecture | 2026-11-23 |
 
 ## 2. Record
 
@@ -5489,6 +5491,7 @@
   - CLAUDE.md aur HANDOFF ki "abhi ki halat" isi se badli.
   - Abhi CI ka `static` job purane root `package.json` aur lockfile se `npm ci` karke Prettier laata hai; isliye ST-1 me naya root usi PR me, taaki CI na toote.
   - CLAUDE.md ke "Commands aur repo ka naksha" naye root setup ke saath (`01-foundation` ST-7).
+- **Badla (owner, 2026-11-23, D-457):** niyam 4: `external.command` hati; uski secret scan wali command root ka `npm run secrets:scan` hai.
 
 ### D-456. Private files ke liye Backblaze B2
 
@@ -5508,9 +5511,33 @@
   - Bina card ke account pe har din ki pakki seema (owner ke account ka Caps & Alerts, 2026-11-23): storage 10 GB, download 1 GB, Class B (file ka download aur jaanch) aur Class C (list jaise kaam) 2,500 har ek. Card ke bina ye nahi badhti, aur paar hone pe us din wo kaam ruk jaata hai. Har private file ka dekhna ek Class B hai, to media ke monitoring me B2 ke alerts bhi.
   - Region account banate waqt hi tay hota hai aur baad me nahi badalta; badalne ke liye naya account aur saari files dobara. India (owner ka laptop) se TCP connect ka waqt naapa (2026-11-23): IPv4 pe EU Central lagbhag 146 ms, baaki teen regions 265 se 315 ms; IPv6 pe chaaron lagbhag 280 ms. Render Singapore se abhi naapa nahi (andaza: EU Central aur US West lagbhag barabar); pehle deploy ke baad naapna. Jaanch ke tathya [RISKS.md](RISKS.md) §2.9 me.
 
+### D-457. Purana code hatane ki detail
+
+- **Faisla:**
+  1. Purane folders ki git ke bahar ki files bhi hatin: build output, `node_modules` aur development ki `.env` files. Do `.env.production` files rahin; unhe owner khud dekh ke hatayega ([OWNER_TASKS.md](OWNER_TASKS.md) OT-7).
+  2. Root ki `external.command` file hati (D-455 niyam 4 badla). Uski secret scan wali command ab root ka `npm run secrets:scan` hai; master banane wala command apne module ke saath naye sire se banega.
+- **Wajah:** owner ne kaha (2026-11-23): pehle nayi branch, phir production ki env files chhod ke baaki hatao. `external.command` pe Claude ki salah owner ne maani: repo me commands ek hi jagah (root ke scripts) rahein, aur doosri command naye root me chalti nahi.
+- **Chhode vikalp:** saari `.env` files chhodna; pehle owner env files hataye, phir Claude poore folders; purane folders abhi rakhna (AC-FOUNDATION-11 ke khilaaf). `external.command` rakhna, ya waisi hi chhodna.
+- **Kab dobara khulega:** owner khud khole.
+- **Kisne, kab:** owner, 2026-11-23. **Nishaan:** Owner (local files); Salah maani (`external.command`).
+- **Asar (Claude):**
+  - Claude ne `.env` files kholi nahi, sirf hatayin (owner ki haan se). `.env.production` repo ke andar kabhi nahi rehti (D-441), isliye OT-7.
+  - `secrets:scan` laptop pe gitleaks maangta hai; CI ka `guard` apna pinned binary chalata hai.
+
+### D-458. Node aur npm ka pin
+
+- **Faisla:** Node aur npm sabse naye security release pe exact pin: abhi Node 24.22.3 aur npm 12.2.3. Pin ek hi jagah root `package.json` me (`engines`, `devEngines`, `packageManager`); CI wahin se padhta hai, aur Render `engines` se padhega. Laptop pe Claude ne nvm se lagaya.
+- **Wajah:** Claude ki salah, owner ne maani (2026-11-23): laptop pe 24.21.0 aur 12.2.0 the, aur unke baad Node 24.22.1 aur 24.22.3 security releases aaye; live pe bhi wahi version chalta hai ([OPERATIONS.md](OPERATIONS.md) §11 niyam 3).
+- **Chhode vikalp:** laptop wala 24.21.0 aur 12.2.0 (do security releases ke fixes ke bina); owner khud install kare.
+- **Kab dobara khulega:** owner khud khole.
+- **Kisne, kab:** owner, 2026-11-23. **Nishaan:** Salah maani.
+- **Asar (Claude):**
+  - `devEngines` me `onFail: error`: alag Node ya npm pe npm ke commands ruk jaate hain. CI ka setup-node `devEngines` se Node leta hai, aur npm usi file se.
+  - Naya release aane pe pin haath se badhta hai: `package.json` ki teeno jagah ek saath (`scripts/foundation` ka test jaanchta hai), aur laptop pe nvm.
+
 ## Change log
 
-| Version              | Date                     | Badlav                                                                                                |
-| -------------------- | ------------------------ | ----------------------------------------------------------------------------------------------------- |
-| v1.0.0 se v1.14.60   | 2026-11-17 se 2026-11-22 | Faisle D-001 se D-454; har badlav ka poora itihaas git me (D-442).                                    |
-| v1.14.61 se v1.14.65 | 2026-11-23               | D-455: implementation stage khula; D-443 badla; D-456: private files B2 (EU Central) pe; D-439 badla. |
+| Version              | Date                     | Badlav                                                                                                                                                                                                    |
+| -------------------- | ------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| v1.0.0 se v1.14.60   | 2026-11-17 se 2026-11-22 | Faisle D-001 se D-454; har badlav ka poora itihaas git me (D-442).                                                                                                                                        |
+| v1.14.61 se v1.14.66 | 2026-11-23               | D-455: implementation stage khula; D-443 badla; D-456: private files B2 (EU Central) pe; D-439 badla; D-457: purane code ki local files aur `external.command` (D-455 badla); D-458: Node aur npm ka pin. |

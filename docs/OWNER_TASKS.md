@@ -1,6 +1,6 @@
 # OWNER TASKS: Beautinique
 
-> **Status:** v1.0.20 (2026-11-23). Owner ke bahar ke kaam: wo kaam jo sirf owner kar sakta hai (account banana, env key daalna, download, provider ki setting, kisi se poochhna). Claude naya kaam yahan jodta hai, aur owner "ho gaya" kahe to yahin update karta hai (D-440).
+> **Status:** v1.0.21 (2026-11-23). Owner ke bahar ke kaam: wo kaam jo sirf owner kar sakta hai (account banana, env key daalna, download, provider ki setting, kisi se poochhna). Claude naya kaam yahan jodta hai, aur owner "ho gaya" kahe to yahin update karta hai (D-440).
 
 ## Kaise padhein
 
@@ -11,7 +11,9 @@
 
 ## 1. Khule kaam
 
-Abhi koi khula kaam nahi.
+| #    | Kaam                                                                                                                                                                                                                                                                                                                                              | Kyun                                             | Kab tak                                   | Faisla       |
+| ---- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------ | ----------------------------------------- | ------------ |
+| OT-7 | **Repo ke andar bachi do `.env.production` files:** laptop pe `backend-old/bundle/.env.production` aur `frontend-old/.env.production` (git se bahar). Jo value kaam ki ho wo apne private env folder (repo ke bahar) me rakhein, phir dono files aur khaali `backend-old/` aur `frontend-old/` folder khud hatayein. Claude ye files nahi kholta. | `.env.production` repo ke andar kabhi nahi rehti | `01-foundation` ST-4 (env files) se pehle | D-441, D-457 |
 
 ## 2. Ho gaye
 
@@ -46,7 +48,7 @@ Har provider pe account owner ka hota hai, MFA aur recovery codes ke saath (SR-0
 
 ## Change log
 
-| Version           | Date       | Badlav                                                                                                                                                                                                                                |
-| ----------------- | ---------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| v1.0.0 se v1.0.7  | 2026-11-22 | Owner ke khule aur aage ke kaam; har badlav ka poora itihaas git me (D-442).                                                                                                                                                          |
-| v1.0.8 se v1.0.20 | 2026-11-23 | OT-6 (GitHub ki security settings) juda aur ho gaya, aur OT-5 (npm) ho gaya (D-455); gift card wala kaam §3 me, R2 ke liye; OT-2 (disk encryption) ho gaya; OT-3 me R2 aur B2 ki jaanch, B2 (EU Central) chuna (D-456); OT-3 ho gaya. |
+| Version           | Date       | Badlav                                                                                                                                                                                                                                                                                           |
+| ----------------- | ---------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| v1.0.0 se v1.0.7  | 2026-11-22 | Owner ke khule aur aage ke kaam; har badlav ka poora itihaas git me (D-442).                                                                                                                                                                                                                     |
+| v1.0.8 se v1.0.21 | 2026-11-23 | OT-6 (GitHub ki security settings) juda aur ho gaya, aur OT-5 (npm) ho gaya (D-455); gift card wala kaam §3 me, R2 ke liye; OT-2 (disk encryption) ho gaya; OT-3 me R2 aur B2 ki jaanch, B2 (EU Central) chuna (D-456); OT-3 ho gaya. OT-7 (repo ke andar bachi `.env.production`) juda (D-457). |

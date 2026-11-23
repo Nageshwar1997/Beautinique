@@ -15,9 +15,6 @@ coverage/
 .DS_Store
 Thumbs.db
 
-# npm 12 that the Render build installs inside the repo (backend/bundle/README.md "Render")
-.npm12/
-
 # Playwright E2E output (traces, reports)
 test-results/
 playwright-report/
@@ -26,5 +23,5 @@ blob-report/
 # LinkedIn carousel images and PDFs (prompts stay in git)
 linkedin-posts/*/slides/
 
-# Claude Code worktrees: other checkouts of this repo inside it (QA-TOOL-001)
+# Claude Code worktrees: other checkouts of this repo inside it
 .claude/worktrees/
