@@ -1,6 +1,6 @@
 # GIT SKILLS: Beautinique
 
-> **Status:** v1.1.6 (2026-11-22). Git skills (`/commit`, `/push`, `/pr`, `/sync`, `/git-status`, `/undo-commit`) ka manual, owner ke liye. Skills ka asli kaam `.claude/skills/` me; dono saath badlein.
+> **Status:** v1.1.7 (2026-11-23). Git skills (`/commit`, `/push`, `/pr`, `/sync`, `/git-status`, `/undo-commit`) ka manual, owner ke liye. Skills ka asli kaam `.claude/skills/` me; dono saath badlein.
 
 ## Is file me kya aayega
 
@@ -44,7 +44,7 @@ Flow root [CLAUDE.md](../CLAUDE.md) ka hai: `prerelease` se feature branch → P
 
 ## 4. Roz ka kaam (ek kaam)
 
-1. `prerelease` se nayi branch: `git fetch origin`, phir `git switch -c feat/<kaam> origin/prerelease`.
+1. `prerelease` se nayi branch: `git fetch origin`, phir `git switch -c feat/<kaam> --no-track origin/prerelease`. `--no-track` zaroori hai: iske bina branch `origin/prerelease` ko track karti hai, aur saada `git push` ya VS Code ka Sync kaam ko PR ke bina seedha `prerelease` pe bhej deta hai ([LESSONS.md](LESSONS.md)).
 2. Kaam aur local checks; saath me us role ka manual, us app ki testing file aur owner ke naye kaam (RULES DD-13, D-440).
 3. `/commit` (zaroorat ho to kai baar, har baar ek baat).
 4. `/push`.
@@ -80,6 +80,7 @@ Flow root [CLAUDE.md](../CLAUDE.md) ka hai: `prerelease` se feature branch → P
 
 ## Change log
 
-| Version          | Date                     | Badlav                                                                  |
-| ---------------- | ------------------------ | ----------------------------------------------------------------------- |
-| v1.0.0 se v1.1.6 | 2026-11-17 se 2026-11-22 | Git skills ka poora manual; har badlav ka poora itihaas git me (D-442). |
+| Version          | Date                     | Badlav                                                                      |
+| ---------------- | ------------------------ | --------------------------------------------------------------------------- |
+| v1.0.0 se v1.1.6 | 2026-11-17 se 2026-11-22 | Git skills ka poora manual; har badlav ka poora itihaas git me (D-442).     |
+| v1.1.7           | 2026-11-23               | Nayi branch `--no-track` se, taaki push PR ke bina `prerelease` pe na jaye. |

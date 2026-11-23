@@ -20,7 +20,9 @@ First read `.claude/skills/_shared/git-rules.md`; §1 to §3 apply here.
    - A branch that had a PR → `gh pr view <branch> --json state,url,baseRefName`. `MERGED` or `CLOSED` → stop and
      propose a new branch plus cherry-pick (shared §3).
 4. **Remote and upstream.** `git remote -v`: one remote → use it; several → the branch's upstream remote, else ask.
-   `git rev-parse --abbrev-ref --symbolic-full-name @{upstream}` (none → set it on push). `git fetch <remote>`.
+   `git rev-parse --abbrev-ref --symbolic-full-name @{upstream}` (none → set it on push). An upstream with another
+   branch's name (`feat/x` tracking `origin/prerelease`) → treat it as none: push to the same-named branch with
+   `--set-upstream` and say so (shared §3, `--no-track`). `git fetch <remote>`.
 5. **Local vs remote.** If `<remote>/<branch>` exists: `git rev-list --left-right --count <remote>/<branch>...HEAD`
    (behind, ahead).
    - Ahead 0 → nothing to push; report and stop.
