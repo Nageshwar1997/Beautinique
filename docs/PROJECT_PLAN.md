@@ -1,6 +1,6 @@
 # PROJECT PLAN: Beautinique
 
-> **Status:** v1.5.15 (2026-11-23). Project ki kendriya file. Cheezein ek-ek karke, owner ki haan ke baad judti hain.
+> **Status:** v1.5.16 (2026-11-23). Project ki kendriya file. Cheezein ek-ek karke, owner ki haan ke baad judti hain.
 
 ## 0. Is file me kya aayega
 
@@ -99,8 +99,8 @@ Har module ka folder `tasks/NN-<module>/` aur uski `TASK.md` ([tasks/README.md](
 
 §2 ke hisaab se. "—" ka matlab: us module ki `TASK.md` abhi nahi bani, to points tay nahi.
 
-- **R1:** 14 / 549 points = 3%. R1 ke saare 26 modules ke points tay hain; R2 ke `25` aur `26` ki `TASK.md` draft hai (D-454); baaki modules ke R2 subtasks R2 ki planning me judenge.
-- **Ecosystem:** 14 / 587 points = 2%; R2 me abhi sirf `25` (23) aur `26` (15) ke draft points.
+- **R1:** 16 / 549 points = 3%. R1 ke saare 26 modules ke points tay hain; R2 ke `25` aur `26` ki `TASK.md` draft hai (D-454); baaki modules ke R2 subtasks R2 ki planning me judenge.
+- **Ecosystem:** 16 / 587 points = 3%; R2 me abhi sirf `25` (23) aur `26` (15) ke draft points.
 
 | Module                 | Release        | Kul points | Poore | %   |
 | ---------------------- | -------------- | ---------- | ----- | --- |
@@ -131,7 +131,7 @@ Har module ka folder `tasks/NN-<module>/` aur uski `TASK.md` ([tasks/README.md](
 | `25-app-growth-studio` | R2             | 23         | 0     | 0%  |
 | `26-app-creator`       | R2             | 15         | 0     | 0%  |
 | `27-operations`        | R1             | 20         | 0     | 0%  |
-| `28-packages`          | R1             | 18         | 0     | 0%  |
+| `28-packages`          | R1             | 18         | 2     | 11% |
 
 ## 5. Banane ka kram (D-446)
 
@@ -164,4 +164,4 @@ Modules charan wise bante hain. Har charan me us hisse ke liye zaroori service a
 | Version            | Date                     | Badlav                                                                                                                                                                                          |
 | ------------------ | ------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | v1.0.0 se v1.5.13  | 2026-11-17 se 2026-11-22 | R1 ka scope (§1), progress % ka hisaab (§2) modules ki list (§3, D-444, D-445) progress ki table (§4) aur banane ka kram (§5, D-446, D-451, D-453); har badlav ka poora itihaas git me (D-442). |
-| v1.5.14 se v1.5.15 | 2026-11-23               | `01-foundation` ke 7 subtasks poore (14 / 14), phir ST-8 juda (D-462): 14 / 16, R1 3%, ecosystem 2% (§4).                                                                                       |
+| v1.5.14 se v1.5.16 | 2026-11-23               | `01-foundation` ke 7 subtasks poore (14 / 14), phir ST-8 juda (D-462): 14 / 16, R1 3%, ecosystem 2% (§4). `28-packages` ST-1 poora (PR #104): 16 / 549, R1 3%, ecosystem 3% (v1.5.16). |
