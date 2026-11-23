@@ -1,6 +1,6 @@
 # OWNER TASKS: Beautinique
 
-> **Status:** v1.0.7 (2026-11-22). Owner ke bahar ke kaam: wo kaam jo sirf owner kar sakta hai (account banana, env key daalna, download, provider ki setting, kisi se poochhna). Claude naya kaam yahan jodta hai, aur owner "ho gaya" kahe to yahin update karta hai (D-440).
+> **Status:** v1.0.11 (2026-11-23). Owner ke bahar ke kaam: wo kaam jo sirf owner kar sakta hai (account banana, env key daalna, download, provider ki setting, kisi se poochhna). Claude naya kaam yahan jodta hai, aur owner "ho gaya" kahe to yahin update karta hai (D-440).
 
 ## Kaise padhein
 
@@ -20,9 +20,10 @@
 
 ## 2. Ho gaye
 
-| #    | Kaam                                     | Kab hua    | Nateeja                                                                                                                                   |
-| ---- | ---------------------------------------- | ---------- | ----------------------------------------------------------------------------------------------------------------------------------------- |
-| OT-1 | Location data: LGD ki 6 reports download | 2026-11-22 | Files Html me (Xls ka raasta khaali page deta tha), repo ke bahar `LGD-data/2026-11-22/` me; Claude ne ginti ki ([RISKS.md](RISKS.md) §2) |
+| #    | Kaam                                     | Kab hua    | Nateeja                                                                                                                                                                                                                                                              |
+| ---- | ---------------------------------------- | ---------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| OT-1 | Location data: LGD ki 6 reports download | 2026-11-22 | Files Html me (Xls ka raasta khaali page deta tha), repo ke bahar `LGD-data/2026-11-22/` me; Claude ne ginti ki ([RISKS.md](RISKS.md) §2)                                                                                                                            |
+| OT-6 | GitHub ki security settings              | 2026-11-23 | Owner ne vulnerability reporting chalu ki, Actions me SHA pinning lagaya aur `release` ke ruleset se admin ka bypass hataya; 2FA chalu. Claude ne baaki settings aur rulesets jaanch ke sahi paaye. Non-provider patterns aur validity checks is plan pe nahi milte. |
 
 ## 3. Aage ke kaam (jab us module ka kaam shuru ho)
 
@@ -30,7 +31,6 @@ Har provider pe account owner ka hota hai, MFA aur recovery codes ke saath (SR-0
 
 | Kaam                                                                                                                        | Kab                                         | Faisla              |
 | --------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------- | ------------------- |
-| GitHub: repo ki security settings (push protection, private security advisory) dekhna                                       | Naye root setup aur CI se pehle             | SR-080, D-403       |
 | Render: ek free web service aur ek Key Value, Singapore region                                                              | Pehle live deploy se pehle                  | D-048, D-056, D-058 |
 | Vercel: 11 apps ke projects (Hobby), personal account se                                                                    | Har app ke pehle deploy se pehle            | D-048, D-010        |
 | MongoDB Atlas: har service ka alag project aur free cluster (audit aur logs ke bhi), AWS Singapore                          | Us service ke pehle live deploy se pehle    | D-011, D-058, D-421 |
@@ -47,6 +47,7 @@ Har provider pe account owner ka hota hai, MFA aur recovery codes ke saath (SR-0
 
 ## Change log
 
-| Version          | Date       | Badlav                                                                       |
-| ---------------- | ---------- | ---------------------------------------------------------------------------- |
-| v1.0.0 se v1.0.7 | 2026-11-22 | Owner ke khule aur aage ke kaam; har badlav ka poora itihaas git me (D-442). |
+| Version           | Date       | Badlav                                                                       |
+| ----------------- | ---------- | ---------------------------------------------------------------------------- |
+| v1.0.0 se v1.0.7  | 2026-11-22 | Owner ke khule aur aage ke kaam; har badlav ka poora itihaas git me (D-442). |
+| v1.0.8 se v1.0.11 | 2026-11-23 | OT-6 (GitHub ki security settings) juda aur ho gaya (D-455).                 |

@@ -1,6 +1,6 @@
 # TASK 01: foundation (root setup)
 
-> **Status:** v1.0.2 (2026-11-22). Halat: planning; code abhi nahi. Module [PROJECT_PLAN.md](../../PROJECT_PLAN.md) §3 ka `01-foundation`, charan 0 ka pehla module (D-446). Progress: 0 / 14 points.
+> **Status:** v1.0.3 (2026-11-23). Halat: planning; code abhi nahi. Module [PROJECT_PLAN.md](../../PROJECT_PLAN.md) §3 ka `01-foundation`, charan 0 ka pehla module (D-446). Progress: 0 / 14 points.
 
 ## 1. Lakshya
 
@@ -75,9 +75,9 @@ Mahine me ek baar apne aap PRs, `prerelease` pe: minor aur patch ek group me, ma
 ### 3.7 Purana code hatana (D-073)
 
 1. `*-old/` folders aur purani root files (purana `package.json`, lockfile, `turbo.json`, `eslint.config.js`, `vitest.config.mjs`, `.vscode/`) naye root setup ke PR me hi hat-te hain, taaki repo kabhi do setup ke saath na rahe.
-2. Hatana destructive hai, isliye us PR se pehle owner ki haan (D-073 niyam 4).
+2. Hatana destructive hai; owner ki haan is shart ke saath ki purana code tabhi hate jab wo kahin use nahi ho raha (D-073 niyam 4, D-455). Isliye pehle jaanch: naye root, CI, `.github/` aur docs me kuch bhi `*-old/` ya purani root files pe tika nahi. Abhi CI ka `static` job purane root `package.json` aur lockfile se Prettier laata hai, to naya root usi PR me.
 3. Purana kaam git tag `discovery-old-docs` se milta hai: us tag ke baad purane code me koi badlav nahi hua (2026-11-22 ko jaancha), isliye naya tag nahi chahiye.
-4. Repo ke root ki `external.command` file owner ki hai; use hatane ya rakhne ka faisla owner ka.
+4. Repo ke root ki `external.command` file abhi rakhi jaati hai (owner, D-455). Iski gitleaks wali command naye root ke script me aa sakti hai, aur doosri command purane code ki hai; file ka aage kya ho, ye ST-1 me owner se poochh ke.
 
 ### 3.8 Docs
 
@@ -142,3 +142,4 @@ Har subtask lagbhag ek PR jitna, aur saare charan 0 me ([PROJECT_PLAN.md](../../
 | Version          | Date       | Badlav                                                                                                                              |
 | ---------------- | ---------- | ----------------------------------------------------------------------------------------------------------------------------------- |
 | v1.0.0 se v1.0.2 | 2026-11-22 | Module 01 ka pehla spec, 7 subtasks (D-446) acceptance criteria ki link (D-447) aur deployables pe `private: true`; code abhi nahi. |
+| v1.0.3           | 2026-11-23 | Purane code ki shart aur `external.command` (D-455).                                                                                |

@@ -1,6 +1,6 @@
 # DECISIONS: Beautinique
 
-> **Status:** v1.14.60 (2026-11-22). Har faisla ek jagah. Sirf wahi "Tay" jo owner ne khud kaha; Claude ki salah faisla nahi. Cheezein ek-ek karke judti hain.
+> **Status:** v1.14.61 (2026-11-23). Har faisla ek jagah. Sirf wahi "Tay" jo owner ne khud kaha; Claude ki salah faisla nahi. Cheezein ek-ek karke judti hain.
 
 ## 0. Kaise likhein
 
@@ -469,6 +469,7 @@
 | D-452 | Waitlist ka acceptance criterion `AC-LOGISTICS-13` ACCEPTANCE §1.8 me.                                                                                                                                                                                                                  | Process      | 2026-11-22 |
 | D-453 | Finance app ka dhaancha aur fail refund ka raasta charan 10 me; D-446 badla.                                                                                                                                                                                                            | Process      | 2026-11-22 |
 | D-454 | R2 ke `25` aur `26` ki TASK.md abhi, draft ke roop me; R2 ki planning me badal sakti hain.                                                                                                                                                                                              | Process      | 2026-11-22 |
+| D-455 | Implementation stage khula (2026-11-23); pehla kaam `01-foundation` ST-1; purana code tabhi hate jab kahin use na ho; code ke saath PR. | Process | 2026-11-23 |
 
 ## 2. Record
 
@@ -5339,6 +5340,7 @@
 - **Chhode vikalp:** discovery aur chalana (koi sawal khula nahi tha); plan aur code saath shuru karna (plan ke bina code ka kram aur progress ka hisaab nahi banta).
 - **Kab dobara khulega:** jab owner implementation stage khole.
 - **Kisne, kab:** owner, 2026-11-22. **Nishaan:** Owner.
+- **Badla (owner, 2026-11-23, D-455):** implementation stage khula; code ke saath PR.
 - **Asar (Claude):** [CLAUDE.md](../CLAUDE.md) aur [HANDOFF.md](HANDOFF.md) ki "abhi ki halat" isi se badli. Modules ki list ka pehla sawal Q-378.
 
 ### D-444. Modules service aur app ke hisaab se
@@ -5468,8 +5470,26 @@
 - **Kisne, kab:** owner, 2026-11-22. **Nishaan:** Salah nahi maani.
 - **Asar (Claude):** ecosystem ke % me R2 ke in do modules ke points judte hain; baaki modules ke R2 subtasks R2 ki planning me.
 
+### D-455. Implementation stage khula
+
+- **Faisla:**
+  1. Implementation stage 2026-11-23 se khula (D-004 aur D-443 ka agla stage). Pehla kaam charan 0 ka `01-foundation` ST-1 ([tasks/01-foundation/TASK.md](tasks/01-foundation/TASK.md)).
+  2. Code ka kaam git flow se: `origin/prerelease` se nayi branch, PR → `prerelease` (CLAUDE.md). Code ke saath PR banti hai; D-443 ka "planning ke docs pe PR nahi" ab laagu nahi.
+  3. Purana code tabhi hat-ta hai jab wo kahin use nahi ho raha (owner): ST-1 me pehle jaanch ki naye root, CI aur docs me kuch bhi `*-old/` ya purani root files pe tika nahi; jo abhi tika hai, uski jagah usi PR me naya. D-073 ki haan isi shart ke saath.
+  4. Root ki `external.command` file abhi rakhi jaati hai (owner).
+  5. GitHub ki bachi security settings (OWNER_TASKS OT-6) `01-foundation` ke CI wale kaam (ST-5) se pehle.
+- **Wajah:** owner ne kaha (2026-11-23): implementation se pehle kuch karna ho to batao, warna khol sakte hain. Claude ki jaanch me kholne se pehle koi rukawat nahi mili: PR #101 merge ho chuki, aur owner ke bache kaam (GitHub ki settings, npm, disk encryption) apne subtask se pehle chahiye, stage kholne se pehle nahi. Purane code ki shart owner ki.
+- **Chhode vikalp:** pehle owner ke saare kaam, phir stage kholna.
+- **Kab dobara khulega:** owner khud khole.
+- **Kisne, kab:** owner, 2026-11-23. **Nishaan:** Owner.
+- **Asar (Claude):**
+  - CLAUDE.md aur HANDOFF ki "abhi ki halat" isi se badli.
+  - Abhi CI ka `static` job purane root `package.json` aur lockfile se `npm ci` karke Prettier laata hai; isliye ST-1 me naya root usi PR me, taaki CI na toote.
+  - CLAUDE.md ke "Commands aur repo ka naksha" naye root setup ke saath (`01-foundation` ST-7).
+
 ## Change log
 
 | Version            | Date                     | Badlav                                                             |
 | ------------------ | ------------------------ | ------------------------------------------------------------------ |
 | v1.0.0 se v1.14.60 | 2026-11-17 se 2026-11-22 | Faisle D-001 se D-454; har badlav ka poora itihaas git me (D-442). |
+| v1.14.61           | 2026-11-23               | D-455: implementation stage khula; D-443 badla.                    |
