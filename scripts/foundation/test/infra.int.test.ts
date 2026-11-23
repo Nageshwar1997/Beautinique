@@ -13,6 +13,7 @@ import { cleanEnv } from './utils/env.ts';
 // test never touches the containers the owner is working with.
 const MONGO_PORT = 37017;
 const VALKEY_PORT = 36379;
+const PORTS: Record<string, number> = { mongo: MONGO_PORT, valkey: VALKEY_PORT };
 const ENV = {
   ...cleanEnv(),
   COMPOSE_PROJECT_NAME: 'bq-infra-test',
@@ -68,15 +69,19 @@ test('AC-FOUNDATION-2: infra:up backend starts only MongoDB and Valkey, ready an
   const up = infra('up', 'backend');
   assert.equal(up.status, 0, `${up.stdout}\n${up.stderr}`);
 
-  // Only the profile's containers, each healthy (up --wait returned), each published on 127.0.0.1.
+  // Only the profile's containers, each healthy (up --wait returned), each published on 127.0.0.1 and
+  // its own port only. Some Compose versions also list the image's EXPOSE ports with no host port
+  // (PublishedPort 0, URL ''); nothing outside the container reaches those, so they are left out.
   const containers = running();
   assert.deepEqual(containers.map((c) => c.Service).sort(), ['mongo', 'valkey']);
   for (const container of containers) {
     assert.equal(container.Health, 'healthy', `${container.Service}: ${container.Health}`);
-    assert.ok(container.Publishers.length > 0, `${container.Service} publishes no port`);
-    for (const publisher of container.Publishers) {
-      assert.equal(publisher.URL, '127.0.0.1', `${container.Service}: ${publisher.URL}`);
-    }
+    const published = container.Publishers.filter((publisher) => publisher.PublishedPort > 0);
+    assert.deepEqual(
+      published.map((publisher) => `${publisher.URL}:${String(publisher.PublishedPort)}`),
+      [`127.0.0.1:${String(PORTS[container.Service])}`],
+      container.Service,
+    );
   }
   await listening(MONGO_PORT);
   await listening(VALKEY_PORT);
