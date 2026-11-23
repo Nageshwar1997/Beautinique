@@ -1,6 +1,7 @@
 {
   "$schema": "https://turborepo.com/schema.json",
   "globalDependencies": ["configs/**", "infra/**", "tsconfig.json", "eslint.config.js"],
+  "globalPassThroughEnv": ["CI"],
   "remoteCache": {
     "enabled": false
   },

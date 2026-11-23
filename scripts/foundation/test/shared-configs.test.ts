@@ -36,7 +36,8 @@ describe('ESLint (configs/eslint/base.js)', () => {
   }, 60_000);
 });
 
-describe('TypeScript (configs/typescript)', () => {
+// Each test runs tsc: seconds when the whole suite runs, not a unit test's 5 s budget.
+describe('TypeScript (configs/typescript)', { timeout: 60_000 }, () => {
   test('AC-FOUNDATION-6: a type error fails typecheck with file, line and column', () => {
     const { status, output } = run(
       [TSC, '-p', join(FIXTURES, 'typecheck'), '--pretty', 'false'],

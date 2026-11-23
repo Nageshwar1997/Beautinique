@@ -5,6 +5,9 @@ coverage/
 .turbo/
 *.tsbuildinfo
 
+# Backups of the live databases (D-013): the folder never goes into git.
+backups/
+
 # Secrets: never commit env files (public repo). Only .env.example is allowed.
 .env
 .env.*

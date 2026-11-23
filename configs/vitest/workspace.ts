@@ -9,7 +9,8 @@ import { type CoverageOptions, coverageThresholds } from './coverage.ts';
 
 const FIXTURES = '**/fixtures/**';
 const INTEGRATION = '**/*.int.test.{ts,tsx}';
-const NEVER = [...configDefaults.exclude, FIXTURES];
+// backups/ holds the live databases' backups (D-013): no test ever reads it.
+const NEVER = [...configDefaults.exclude, FIXTURES, '**/backups/**'];
 
 export function workspaceTestConfig(options: CoverageOptions = {}) {
   return defineConfig({

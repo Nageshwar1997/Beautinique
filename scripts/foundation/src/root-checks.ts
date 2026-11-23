@@ -1,6 +1,7 @@
 import { existsSync, readdirSync } from 'node:fs';
 import { join } from 'node:path';
 
+import { isIgnored } from './utils/git.ts';
 import { readJson } from './utils/read-json.ts';
 
 const EXACT_VERSION = /^\d+\.\d+\.\d+$/;
@@ -92,4 +93,19 @@ function subfolders(dir: string): string[] {
     .filter((entry) => entry.isDirectory())
     .map((entry) => entry.name)
     .sort();
+}
+
+// The backup command's files (D-013, D-460) live in backups/, outside git: git ignores the folder,
+// and a file of it that reaches git anyway is caught (AC-FOUNDATION-8).
+export const BACKUP_DIR = 'backups';
+
+export function backupProblems(trackedPaths: string[]): string[] {
+  return trackedPaths
+    .filter((path) => path.startsWith(`${BACKUP_DIR}/`))
+    .map((path) => `${path}: backup files never go into git`);
+}
+
+export function backupIgnoreProblems(repoDir: string): string[] {
+  const sample = `${BACKUP_DIR}/2026-01-01/manifest.json`;
+  return isIgnored(repoDir, sample) ? [] : [`${BACKUP_DIR}/: git must ignore the whole folder`];
 }

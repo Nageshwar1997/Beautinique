@@ -2,6 +2,8 @@ node_modules
 dist
 coverage
 package-lock.json
+# Backups of the live databases (D-013)
+backups
 # Claude Code worktrees: other checkouts of this repo, each checked in its own right
 .claude/worktrees/
 

@@ -1,6 +1,6 @@
 # DECISIONS: Beautinique
 
-> **Status:** v1.14.67 (2026-11-23). Har faisla ek jagah. Sirf wahi "Tay" jo owner ne khud kaha; Claude ki salah faisla nahi. Cheezein ek-ek karke judti hain.
+> **Status:** v1.14.68 (2026-11-23). Har faisla ek jagah. Sirf wahi "Tay" jo owner ne khud kaha; Claude ki salah faisla nahi. Cheezein ek-ek karke judti hain.
 
 ## 0. Kaise likhein
 
@@ -474,6 +474,7 @@
 | D-457 | Purane code ki local files bhi hatin, siwaye do `.env.production` (OT-7); `external.command` hati, secret scan `npm run secrets:scan` se (D-455 badla).                                                                                                                                 | Process      | 2026-11-23 |
 | D-458 | Node aur npm sabse naye security release pe exact pin (abhi 24.22.3 aur 12.2.3), ek hi jagah root `package.json` me.                                                                                                                                                                    | Architecture | 2026-11-23 |
 | D-459 | Aam helpers `utils/` me; module ka apna logic, type aur constant module me; `types/` aur `constants/` sirf kai modules ke saajhe ke liye.                                                                                                                                               | Process      | 2026-11-23 |
+| D-460 | Backup command ki files repo ke root ke `backups/` folder me, D-013 ke chaar pehron ke saath.                                                                                                                                                                                           | Operations   | 2026-11-23 |
 
 ## 2. Record
 
@@ -606,6 +607,7 @@
 - **Chhode vikalp:** repo ke bahar ka folder (Claude ki salah).
 - **Kab dobara khulega:** owner khud khole.
 - **Kisne, kab:** owner, 2026-11-17. **Nishaan:** Owner (command, jagah); Salah maani (format, restore, pehre).
+- **Jod (owner, 2026-11-23, D-460):** folder ka naam `backups/` (repo ke root pe).
 
 ### D-014. Fulfilment model
 
@@ -5552,9 +5554,18 @@
   - Helper saajhe kaam ke liye hai; test ka expected nateeja us helper se nahi nikalta jisse code apna nateeja nikalta hai ([RULES.md](RULES.md) §4.1 siddhaant 1).
   - Abhi: `scripts/foundation` ka `readJson` `src/utils/read-json.ts` me; `RootManifest` `src/root-checks.ts` se export; `COVERAGE_LIMITS`, `CoverageOptions` aur `coverageThresholds` `configs/vitest/coverage.ts` me; tests ka `cleanEnv` `test/utils/env.ts` me; repo ka `ROOT` `src/constants/paths.ts` me (code aur tests dono use karte hain).
 
+### D-460. Backup folder `backups/`
+
+- **Faisla:** backup command (D-013) ki files repo ke root ke `backups/` folder me. D-013 ke chaar pehre isi naam pe: `.gitignore`; CI ka pehra (is folder ki koi file git me ho to laal); Prettier, ESLint aur tests se bahar; aur Claude ke liye `.claude/settings.json` me Read aur Edit ka deny, jaise `.env` ke liye.
+- **Wajah:** Claude ki salah, owner ne maani (2026-11-23): seedha naam, turant samajh aata hai, aur commands aur docs me likhna aasaan.
+- **Chhode vikalp:** `.backups/` (chhupa, dhoondhna mushkil); `infra/backups/` (`infra/` Turborepo ke cache hash me hai, to har backup se poore repo ka cache toot-ta).
+- **Kab dobara khulega:** owner khud khole.
+- **Kisne, kab:** owner, 2026-11-23. **Nishaan:** Salah maani.
+- **Asar (Claude):** pehre `01-foundation` ST-5 me bane (`scripts/foundation` ke tests, `AC-FOUNDATION-8`); backup command khud `27-operations` me.
+
 ## Change log
 
-| Version              | Date                     | Badlav                                                                                                                                                                                                                                                          |
-| -------------------- | ------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| v1.0.0 se v1.14.60   | 2026-11-17 se 2026-11-22 | Faisle D-001 se D-454; har badlav ka poora itihaas git me (D-442).                                                                                                                                                                                              |
-| v1.14.61 se v1.14.67 | 2026-11-23               | D-455: implementation stage khula; D-443 badla; D-456: private files B2 (EU Central) pe; D-439 badla; D-457: purane code ki local files aur `external.command` (D-455 badla); D-458: Node aur npm ka pin; D-459: helpers, types aur constants kahan rehte hain. |
+| Version              | Date                     | Badlav                                                                                                                                                                                                                                                                                           |
+| -------------------- | ------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| v1.0.0 se v1.14.60   | 2026-11-17 se 2026-11-22 | Faisle D-001 se D-454; har badlav ka poora itihaas git me (D-442).                                                                                                                                                                                                                               |
+| v1.14.61 se v1.14.68 | 2026-11-23               | D-455: implementation stage khula; D-443 badla; D-456: private files B2 (EU Central) pe; D-439 badla; D-457: purane code ki local files aur `external.command` (D-455 badla); D-458: Node aur npm ka pin; D-459: helpers, types aur constants kahan rehte hain; D-460: backup folder `backups/`. |

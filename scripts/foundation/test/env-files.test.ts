@@ -14,6 +14,7 @@ import {
   trackedEnvFileProblems,
   writeEnvFiles,
 } from '../src/env-files.ts';
+import { trackedFiles } from '../src/utils/git.ts';
 
 const EXAMPLE = [
   '# Example of a service (fake values only).',
@@ -147,7 +148,8 @@ describe('writeEnvFiles', () => {
   });
 });
 
-describe('env files and git', () => {
+// These start git: seconds when the whole suite runs, not a unit test's 5 s budget.
+describe('env files and git', { timeout: 60_000 }, () => {
   test('AC-FOUNDATION-3: git ignores every env file but .env.example, anywhere in the repository', () => {
     assert.deepEqual(envIgnoreProblems(ROOT), []);
   });
@@ -162,9 +164,7 @@ describe('env files and git', () => {
   });
 
   test('AC-FOUNDATION-3: no env file is tracked; one in git would be caught', () => {
-    const git = spawnSync('git', ['ls-files', '-z'], { cwd: ROOT, encoding: 'utf8' });
-    assert.equal(git.status, 0, git.stderr);
-    assert.deepEqual(trackedEnvFileProblems(git.stdout.split('\0').filter(Boolean)), []);
+    assert.deepEqual(trackedEnvFileProblems(trackedFiles(ROOT)), []);
 
     assert.deepEqual(
       trackedEnvFileProblems([

@@ -7,9 +7,10 @@
 //
 // Setup makes `.env.development` and `.env.test` from the first two. PRODUCTION never becomes a file
 // here: `.env.production` lives outside the repository, and nothing in this module reads or writes it.
-import { spawnSync } from 'node:child_process';
 import { existsSync, readdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { basename, join } from 'node:path';
+
+import { isIgnored } from './utils/git.ts';
 
 export const SECTIONS = ['DEVELOPMENT', 'TEST', 'PRODUCTION'] as const;
 export type Section = (typeof SECTIONS)[number];
@@ -99,32 +100,37 @@ export function parseEnvExample(text: string): EnvExample {
 
 // Makes the deployable's `.env.development` and `.env.test` from its `.env.example`. A file that
 // already exists is kept as it is, unread.
-export function writeEnvFiles(dir: string): EnvFileResult[] {
+export function writeEnvFiles(
+  dir: string,
+  sections: Section[] = GENERATED.map((target) => target.section),
+): EnvFileResult[] {
   const examplePath = join(dir, '.env.example');
   const example = parseEnvExample(readFileSync(examplePath, 'utf8'));
   if (example.problems.length > 0) {
     throw new Error(`${examplePath}:\n  ${example.problems.join('\n  ')}`);
   }
 
-  return GENERATED.map(({ section, file }) => {
-    const lines = example.sections[section] ?? [];
-    const header = `# Made by \`npm run setup\` from .env.example [${section}]. Fill in every <...> value.`;
-    try {
-      // `wx`: create only; an existing file is never opened.
-      writeFileSync(join(dir, file), `${[header, ...lines].join('\n').trimEnd()}\n`, {
-        flag: 'wx',
-      });
-    } catch (error) {
-      if ((error as NodeJS.ErrnoException).code === 'EEXIST') {
-        return { file, status: 'kept', placeholders: [] };
+  return GENERATED.filter((target) => sections.includes(target.section)).map(
+    ({ section, file }) => {
+      const lines = example.sections[section] ?? [];
+      const header = `# Made by \`npm run setup\` from .env.example [${section}]. Fill in every <...> value.`;
+      try {
+        // `wx`: create only; an existing file is never opened.
+        writeFileSync(join(dir, file), `${[header, ...lines].join('\n').trimEnd()}\n`, {
+          flag: 'wx',
+        });
+      } catch (error) {
+        if ((error as NodeJS.ErrnoException).code === 'EEXIST') {
+          return { file, status: 'kept', placeholders: [] };
+        }
+        throw error;
       }
-      throw error;
-    }
-    const placeholders = keyValues(lines)
-      .filter(([, value]) => PLACEHOLDER.test(value))
-      .map(([key]) => key);
-    return { file, status: 'created', placeholders };
-  });
+      const placeholders = keyValues(lines)
+        .filter(([, value]) => PLACEHOLDER.test(value))
+        .map(([key]) => key);
+      return { file, status: 'created', placeholders };
+    },
+  );
 }
 
 // Deployables are frontend/<app> and backend/<service>; each one with env keys has `.env.example`.
@@ -163,9 +169,7 @@ export const ENV_NAMES_IGNORED = [
 export const ENV_NAMES_KEPT = ['.env.example', 'backend/identity/.env.example'];
 
 export function envIgnoreProblems(repoDir: string): string[] {
-  const ignored = (path: string) =>
-    spawnSync('git', ['check-ignore', '--quiet', '--no-index', path], { cwd: repoDir }).status ===
-    0;
+  const ignored = (path: string) => isIgnored(repoDir, path);
   return [
     ...ENV_NAMES_IGNORED.filter((path) => !ignored(path)).map(
       (path) => `${path}: git must ignore it`,

@@ -6,20 +6,50 @@ import { join } from 'node:path';
 
 import { afterAll, describe, test } from 'vitest';
 
+import { ROOT } from '../src/constants/paths.ts';
 import {
+  BACKUP_DIR,
+  backupIgnoreProblems,
+  backupProblems,
   oldCodeProblems,
   type RootManifest,
   versionPinProblems,
   workspacePrivacyProblems,
 } from '../src/root-checks.ts';
+import { trackedFiles } from '../src/utils/git.ts';
 import { readJson } from '../src/utils/read-json.ts';
-import { ROOT } from '../src/constants/paths.ts';
 
-describe('old code', () => {
+// The git and old-code checks start git: seconds when the whole suite runs, not 5 s.
+describe('backups (D-013)', { timeout: 60_000 }, () => {
+  test('AC-FOUNDATION-8: git ignores the backup folder, and no backup file is tracked', () => {
+    assert.equal(BACKUP_DIR, 'backups');
+    assert.deepEqual(backupIgnoreProblems(ROOT), []);
+    assert.deepEqual(backupProblems(trackedFiles(ROOT)), []);
+  });
+
+  test('AC-FOUNDATION-8: a backup file in git, or a .gitignore that lets the folder through, is caught', () => {
+    assert.deepEqual(
+      backupProblems([
+        'backups/2026-11-23/manifest.json',
+        'docs/backups.md',
+        'scripts/backups/x.ts',
+      ]),
+      ['backups/2026-11-23/manifest.json: backup files never go into git'],
+    );
+    const repo = mkdtempSync(join(tmpdir(), 'bq-backup-git-'));
+    try {
+      assert.equal(spawnSync('git', ['init', '--quiet'], { cwd: repo }).status, 0);
+      writeFileSync(join(repo, '.gitignore'), 'node_modules/\n');
+      assert.deepEqual(backupIgnoreProblems(repo), ['backups/: git must ignore the whole folder']);
+    } finally {
+      rmSync(repo, { recursive: true, force: true });
+    }
+  });
+});
+
+describe('old code', { timeout: 60_000 }, () => {
   test('AC-FOUNDATION-11: the repository tracks no *-old folder', () => {
-    const git = spawnSync('git', ['ls-files', '-z'], { cwd: ROOT, encoding: 'utf8' });
-    assert.equal(git.status, 0, git.stderr);
-    const tracked = git.stdout.split('\0').filter(Boolean);
+    const tracked = trackedFiles(ROOT);
     assert.ok(tracked.includes('package.json'), 'git ls-files must list the repository');
     assert.deepEqual(oldCodeProblems(tracked), []);
   });

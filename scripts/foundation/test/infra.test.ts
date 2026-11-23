@@ -11,8 +11,9 @@ import {
   WAIT_SECONDS,
 } from '../src/infra.ts';
 
-// These read the compose file through the Docker CLI only; no container starts.
-describe('infra/compose.yaml', () => {
+// These read the compose file through the Docker CLI only; no container starts. Each one starts the
+// CLI: seconds when the whole suite runs, not a unit test's 5 s budget.
+describe('infra/compose.yaml', { timeout: 60_000 }, () => {
   test('AC-FOUNDATION-2: every image is pinned, every container sits behind a profile, every port is on 127.0.0.1', () => {
     assert.deepEqual(composeProblems(readComposeConfig()), []);
   });

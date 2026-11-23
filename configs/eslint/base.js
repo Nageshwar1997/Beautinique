@@ -16,7 +16,8 @@ const ROOT = resolve(import.meta.dirname, '../..');
 export default defineConfig(
   {
     name: 'beautinique/ignores',
-    ignores: ['**/dist/', '**/build/', '**/coverage/', '**/.turbo/', '**/fixtures/'],
+    // backups/ holds the live databases' backups (D-013): never linted or read.
+    ignores: ['**/dist/', '**/build/', '**/coverage/', '**/.turbo/', '**/fixtures/', 'backups/'],
   },
   {
     name: 'beautinique/javascript',
