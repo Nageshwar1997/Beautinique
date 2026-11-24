@@ -1,6 +1,6 @@
 # DECISIONS: Beautinique
 
-> **Status:** v1.14.71 (2026-11-23). Har faisla ek jagah. Sirf wahi "Tay" jo owner ne khud kaha; Claude ki salah faisla nahi. Cheezein ek-ek karke judti hain.
+> **Status:** v1.14.73 (2026-11-24). Har faisla ek jagah. Sirf wahi "Tay" jo owner ne khud kaha; Claude ki salah faisla nahi. Cheezein ek-ek karke judti hain.
 
 ## 0. Kaise likhein
 
@@ -5583,6 +5583,16 @@
 - **Kab dobara khulega:** owner khud khole.
 - **Kisne, kab:** owner, 2026-11-23. **Nishaan:** Salah maani.
 - **Asar (Claude):** `01-foundation` ST-8 ([tasks/01-foundation/TASK.md](tasks/01-foundation/TASK.md), `AC-FOUNDATION-12` se `AC-FOUNDATION-15`); [OPERATIONS.md](OPERATIONS.md) §1 niyam 11 se 14; niyam 6 [tasks/27-operations/TASK.md](tasks/27-operations/TASK.md) §4 me; owner ke kaam OT-9 se OT-13 ([OWNER_TASKS.md](OWNER_TASKS.md)). Secondary abhi bani nahi, isliye ye sab uski asli machine pe abhi jaancha nahi gaya.
+- **Badla (owner, 2026-11-24, D-463):** secondary ka Windows 10 aur purana data nahi hatega; Ubuntu Server usi HDD ke ek partition pe, dual boot.
+
+### D-463. Secondary laptop ka purana data nahi mitna: usi HDD pe dual boot
+
+- **Faisla:** (1) **Secondary laptop ki disk poori nahi mitegi.** Windows 10 aur owner ka saara purana data rahega. (2) **Ubuntu Server 24.04 LTS usi HDD pe**, koi alag SSD nahi. (3) **Partition 3 pe Ubuntu.** Disk MBR hai aur chaaron primary partition bhare hain, isliye naya partition nahi banta. Partition 3 (302.7 GB, Windows me D:) ka saara data pehle E: aur C: ke `D-drive-copy` folder me copy hota hai, har file ka SHA-256 milake, aur owner E: wali copy khol ke dekhta hai; D: ke Recycle Bin ki deleted files (134 files, ~80 MB) copy nahi hoti, owner ne kaha unki zaroorat nahi (2026-11-24). Phir installer me sirf partition 3 ext4 (`/`) banta hai. Partition 1 (System Reserved), 2 (C:) aur 4 (E:) ko installer nahi chhoota. Windows me Fast Startup band. GRUB disk ke MBR me; Windows GRUB ke menu se khulta hai (Ubuntu 24.04 me os-prober pehle se band hai, isliye install ke baad Claude ssh se use chalu karke Windows ki entry jodta hai).
+- **Wajah:** owner (2026-11-24): erase nahi karni, purana data bhi rakhna hai, aur alag SSD nahi lena; owner pehle bhi keh chuke the ki purane data ko kuch nahi hona chahiye. (3) Claude ki salah, owner ne maani: partition 3 pe sabse kam data tha (~4.8 GB), aur us pe koi installed program, pagefile ya user folder nahi tha.
+- **Chhode vikalp:** poori disk mitana (owner ne mana kiya); alag SSD, caddy ya USB enclosure me (owner ne mana kiya); Windows pe hi WSL2 aur Docker (Windows 10 support ke bahar, 8 GB RAM me bhaari, D-462 ka ssh wala setup badalta); primary partition ko logical banane wale bahar ke tools (anjaan software, zyada risk); MBR se GPT (Windows ka `mbr2gpt` 3 se zyada primary partition pe nahi chalta).
+- **Kab dobara khulega:** owner khud khole.
+- **Kisne, kab:** owner, 2026-11-24. **Nishaan:** (1) aur (2) owner ne khud kaha; (3) salah maani.
+- **Asar (Claude):** D-462 (1) badla; [OPERATIONS.md](OPERATIONS.md) §1 niyam 11; owner ka kaam OT-10 ([OWNER_TASKS.md](OWNER_TASKS.md)).
 
 ## Change log
 
@@ -5590,3 +5600,4 @@
 | -------------------- | ------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | v1.0.0 se v1.14.60   | 2026-11-17 se 2026-11-22 | Faisle D-001 se D-454; har badlav ka poora itihaas git me (D-442).                                                                                                                                                                                                                                                                                                                                                                          |
 | v1.14.61 se v1.14.71 | 2026-11-23               | D-455: implementation stage khula; D-443 badla; D-456: private files B2 (EU Central) pe; D-439 badla; D-457: purane code ki local files aur `external.command` (D-455 badla); D-458: Node aur npm ka pin; D-459: helpers, types aur constants kahan rehte hain; D-460: backup folder `backups/`; D-461: dependency updates (security alert, images, cooldown), D-336 me jod; D-462: do laptop, primary pe code aur secondary pe containers. |
+| v1.14.72 se v1.14.73 | 2026-11-24               | D-463: secondary ka purana data nahi mitna, Ubuntu usi HDD ke partition 3 pe (dual boot), D: ke Recycle Bin ki deleted files copy nahi; D-462 badla.                                                                                                                                                                                                                                                                                        |
