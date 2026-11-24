@@ -5,13 +5,13 @@ import { CliError } from '../src/cli-error.ts';
 import { main } from '../src/cli.ts';
 import { confirm } from '../src/confirm.ts';
 import { createLogger } from '../src/logger.ts';
-import { fixtureRepo, recordingLogger } from './utils/fixture-repo.ts';
+import { fakeExec, fixtureRepo, recordingLogger } from './utils/fixture-repo.ts';
 
 const noAsk = () => Promise.resolve('');
 
 describe('parseArguments', () => {
   it('reads the command, the package names and the flags', () => {
-    expect(parseArguments(['build', 'shared-money', '--dry-run'])).toEqual({
+    expect(parseArguments(['build', 'shared-money', '--dry-run'])).toMatchObject({
       command: 'build',
       names: ['shared-money'],
       dryRun: true,
@@ -52,61 +52,71 @@ describe('createLogger', () => {
 });
 
 describe('main', () => {
-  const run = (argv: string[], root = fixtureRepo({}), runTurbo?: (args: string[]) => number) => {
+  const run = async (
+    argv: string[],
+    root = fixtureRepo({ 'shared/ids': [], 'shared/money': ['@beautinique/shared-ids'] }),
+    status = 0,
+  ) => {
     const logger = recordingLogger();
-    const code = main(argv, { root, log: logger.log, ask: noAsk, runTurbo });
-    return { code, ...logger };
+    const { exec, calls } = fakeExec(root, (call) =>
+      call.command === 'turbo' ? { status } : undefined,
+    );
+    const code = await main(argv, {
+      root,
+      log: logger.log,
+      ask: noAsk,
+      exec,
+      registry: 'http://127.0.0.1:1',
+      env: {},
+      now: () => new Date('2026-11-23T00:00:00Z'),
+    });
+    return { code, calls, ...logger };
   };
 
-  it('shows the usage with exit code 0 for --help, 1 for no command', () => {
-    expect(run(['--help']).code).toBe(0);
-    const bare = run([]);
+  it('shows the usage with exit code 0 for --help, 1 for no command', async () => {
+    expect((await run(['--help'])).code).toBe(0);
+    const bare = await run([]);
     expect(bare.code).toBe(1);
     expect(bare.out.join('\n')).toContain('build');
   });
 
-  it('exits non-zero with a code and hint for an unknown command', () => {
-    const { code, err } = run(['frobnicate']);
+  it('exits non-zero with a code and hint for an unknown command', async () => {
+    const { code, err } = await run(['frobnicate']);
     expect(code).toBe(1);
     expect(err[0]).toContain('COMMAND_UNKNOWN');
     expect(err[1]).toContain('build');
   });
 
-  it('prints the build order and builds nothing on --dry-run', () => {
-    const root = fixtureRepo({ 'shared/money': ['@beautinique/shared-ids'], 'shared/ids': [] });
-    const calls: string[][] = [];
-    const { code, out } = run(['build', '--dry-run'], root, (args) => calls.push(args) && 0);
+  it('prints the build order and builds nothing on --dry-run', async () => {
+    const { code, out, calls } = await run(['build', '--dry-run']);
     expect(code).toBe(0);
     expect(out[0]).toBe('Build order: @beautinique/shared-ids, @beautinique/shared-money');
     expect(calls).toEqual([]);
   });
 
-  it('builds everything through Turborepo, or only the named package and what it needs', () => {
-    const root = fixtureRepo({ 'shared/money': ['@beautinique/shared-ids'], 'shared/ids': [] });
-    const calls: string[][] = [];
-    const turbo = (args: string[]) => calls.push(args) && 0;
-    run(['build'], root, turbo);
-    run(['build', 'shared-money'], root, turbo);
-    expect(calls).toEqual([
+  it('builds everything through Turborepo, or only the named package and what it needs', async () => {
+    const all = await run(['build']);
+    const one = await run(['build', 'shared-money']);
+    expect(all.calls.map((call) => call.args)).toEqual([
       ['run', 'build', '--filter=./packages/*/*'],
+    ]);
+    expect(one.calls.map((call) => call.args)).toEqual([
       ['run', 'build', '--filter=@beautinique/shared-money...'],
     ]);
   });
 
-  it('reports BUILD_FAILED when Turborepo fails', () => {
-    const root = fixtureRepo({ 'shared/ids': [] });
-    const { code, err } = run(['build'], root, () => 2);
+  it('reports BUILD_FAILED when Turborepo fails', async () => {
+    const { code, err } = await run(['build'], undefined, 2);
     expect(code).toBe(1);
     expect(err[0]).toContain('BUILD_FAILED');
   });
 
-  it('AC-PACKAGES-4: a circle stops the build before Turborepo runs, naming the packages', () => {
+  it('AC-PACKAGES-4: a circle stops the build before Turborepo runs, naming the packages', async () => {
     const root = fixtureRepo({
       'shared/a': ['@beautinique/shared-b'],
       'shared/b': ['@beautinique/shared-a'],
     });
-    const calls: string[][] = [];
-    const { code, err } = run(['build'], root, (args) => calls.push(args) && 0);
+    const { code, err, calls } = await run(['build'], root);
     expect(code).toBe(1);
     expect(err[0]).toContain('PACKAGES_CYCLE');
     expect(err[0]).toContain(
@@ -115,8 +125,8 @@ describe('main', () => {
     expect(calls).toEqual([]);
   });
 
-  it('says so when there are no packages yet', () => {
-    const { code, out } = run(['build']);
+  it('says so when there are no packages yet', async () => {
+    const { code, out } = await run(['build'], fixtureRepo());
     expect(code).toBe(0);
     expect(out).toEqual(['No packages to build yet.']);
   });

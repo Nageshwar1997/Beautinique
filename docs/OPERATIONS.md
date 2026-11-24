@@ -1,6 +1,6 @@
 # OPERATIONS: Beautinique
 
-> **Status:** v1.1.23 (2026-11-23). System chalane ka manual. Cheezein ek-ek karke judengi.
+> **Status:** v1.1.24 (2026-11-24). System chalane ka manual. Cheezein ek-ek karke judengi.
 
 ## Is file me kya aayega
 
@@ -173,6 +173,15 @@ DevOps / SRE Architect ki raay se (D-257 ka kram), owner ki haan ke baad (D-326 
 6. Saare packages public npm pe (D-445): kisi package pe `private: true` nahi, kyunki npm free plan pe private packages nahi deta. CI pakka kare ki har package ke README me "Visibility" ka hissa ho (asal me private ya public, aur kyun).
 7. **Publish ke niyam (D-445):** npm pe publish, `npm login` aur `npm logout` aur `npm trust` sirf owner ke haath; workflow sirf `release` se, haath se chalaya; do jobs: ek bina haq ke build, test aur pack kare, doosri sirf bane tarballs utaar ke trusted publishing (OIDC) aur provenance se publish kare; naya package pehli baar owner laptop se publish kare; release ka sandesh `release` branch ka naam bataye, back-merge `release` → `prerelease` likha ho, aur CLI ke tests ke liye local infra chalu ho (D-023 ke teen niyam).
 8. Packages ke tests kabhi asli npm registry ko nahi chhoote; fake registry hi.
+9. **Publish ka manual (28-packages; D-445).** Saare commands repo ke root se; `--dry-run` har us command pe jo kuch likhta ya chhapta hai, aur "haan" ke bina wo kuch nahi karta.
+   - **Naya package:** work branch pe `npm run packages:create -- --category shared --name money --description "..."` (flags na do to poochhta hai). Wo folder banata hai, install karta hai aur `verify` chalata hai. PR `prerelease` me.
+   - **Har PR pe:** CI `npm run packages:verify` chalata hai (build, typecheck, lint, tests, package ke niyam, tarball me kya jaata hai, exports). Haath se bhi chala sakte ho.
+   - **Chhape package ka badlav:** work branch pe (`origin/prerelease` se, saaf tree) `npm run packages:republish -- --bump minor` (ya naam ke saath: `-- shared-money --bump patch`). Naye versions, tike packages ki ranges, `package-lock.json` aur CHANGELOG ek commit me; kuch publish nahi hota. Phir PR `prerelease` me, phir `release` me.
+   - **Publish (roz ka raasta):** `release` pe merge ke baad GitHub Actions me "Publish packages" workflow haath se chalao, branch `release`. Wo pehle verify aur tarballs banata hai, phir sirf tarballs se trusted publishing (provenance ke saath) chhapta hai, phir tags lagata hai. Summary me `release` branch ka naam aur back-merge ki yaad hai: `release` → `prerelease` PR.
+   - **Naya package pehli baar:** workflow mana karta hai. Laptop se, `release` branch pe, saaf tree aur git identity ke saath: `npm login` aap khud, phir `npm run packages:publish` (plan dikhta hai, "haan" ke baad chhapta hai, npm ka OTP aap khud daalte ho). Phir `npm trust` aap khud, taaki aage workflow chhape. Laptop pe provenance nahi lagta (wahan OIDC nahi); workflow me lagta hai. Tags ka push aap kehte ho tab.
+   - **Beech me fail:** `npm run packages:publish` ya workflow dobara chalao: jo versions chhap chuke wo chhoot jaate hain, baaki chhapte hain; tag sirf chhape versions ka.
+   - **Registry se milaan:** `npm run packages:status` har package ka repo version, npm ka aakhri version aur halat (chhapa, publish baaki, naya) dikhata hai.
+   - **Bahar ki dependencies ka turant update:** `npm run packages:update-deps -- --level minor` (patch, minor ya major tak); plan dikhata hai, poochhta hai; install fail ho to sab pehle jaisa. Mahine ke apne aap PRs (niyam 1) alag rehte hain.
 
 ## 12. Security ke record (D-404)
 
@@ -190,3 +199,4 @@ DevOps / SRE Architect ki raay se (D-257 ka kram), owner ki haan ke baad (D-326 
 | ------------------ | ------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | v1.0.0 se v1.1.18  | 2026-11-17 se 2026-11-22 | Chalane ke niyam §1 se §12; har badlav ka poora itihaas git me (D-442).                                                                                                                                                                                                                                                                              |
 | v1.1.19 se v1.1.23 | 2026-11-23               | Backup: rok wali files ka bachav B2 ke Object Lock se (D-456); §11 niyam 1 me security alert, images aur cooldown (D-461); §1 niyam 9 me `.env.example` ke markers aur niyam 10 me setup ka asli kaam (ST-7). Do laptop: primary pe code, secondary pe containers; §1 niyam 11 se 14 (D-462). §1 niyam 12 me `infra:use` aur `infra:status` (D-462). |
+| v1.1.24            | 2026-11-24               | §11 niyam 9: packages ka publish manual (28-packages ST-7).                                                                                                                                                                                                                                                                                          |
