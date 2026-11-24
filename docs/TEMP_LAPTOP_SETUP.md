@@ -1,6 +1,6 @@
 # TEMP: Do laptop ka setup, step by step
 
-> **Status:** v1.0.0 (2026-11-24). Temp doc: primary aur secondary laptop pe kya karna hai, kram se, ek jagah. Setup poora hone (`01-foundation` ST-8 ho gaya) ke baad ye file hategi. Kaam ki asli list OT-10 se OT-13 [OWNER_TASKS.md](OWNER_TASKS.md) me; faisle D-462 aur D-463 [DECISIONS.md](DECISIONS.md) me; roz ke niyam [OPERATIONS.md](OPERATIONS.md) §1 niyam 11 se 14 me.
+> **Status:** v1.0.1 (2026-11-24). Temp doc: primary aur secondary laptop pe kya karna hai, kram se, ek jagah. Setup poora hone (`01-foundation` ST-8 ho gaya) ke baad ye file hategi. Kaam ki asli list OT-10 se OT-13 [OWNER_TASKS.md](OWNER_TASKS.md) me; faisle D-462 aur D-463 [DECISIONS.md](DECISIONS.md) me; roz ke niyam [OPERATIONS.md](OPERATIONS.md) §1 niyam 11 se 14 me.
 
 ## 0. Pehle se ho chuka (2026-11-24)
 
@@ -18,11 +18,11 @@
 ## 2. Primary laptop: install ka USB banao (OT-10 ka kadam 3)
 
 1. Ek pendrive lo, kam se kam 4 GB. **Uska saara data mit jayega**, isliye koi zaroori file ho to pehle kahin aur rakh lo.
-2. Ubuntu Server 24.04 LTS ki ISO official site se download karo: <https://ubuntu.com/download/server> (file ka naam `ubuntu-24.04.x-live-server-amd64.iso` jaisa).
+2. Ubuntu Server 26.04 LTS ki ISO official site se download karo: <https://ubuntu.com/download/server> (file ka naam `ubuntu-26.04.x-live-server-amd64.iso` jaisa).
 3. ISO pakki hai, ye jaancho: usi release page se `SHA256SUMS` file lo, phir PowerShell me (Downloads folder me):
 
    ```powershell
-   Get-FileHash .\ubuntu-24.04.*-live-server-amd64.iso -Algorithm SHA256
+   Get-FileHash .\ubuntu-26.04.*-live-server-amd64.iso -Algorithm SHA256
    ```
 
    Jo hash aaye wo `SHA256SUMS` me us file ke saamne wale hash se bilkul mile. Na mile to ISO dobara download karo.
@@ -39,6 +39,8 @@
 ## 3. Secondary laptop: Ubuntu Server install (OT-10 ka kadam 4)
 
 **Taiyaari:** charger laga ho. LAN cable se router se jodna behtar hai (server ke liye Wi-Fi se zyada pakka); cable na ho to Wi-Fi bhi chalega. Windows me Start → Power → **Shut down** (Restart nahi).
+
+**Dhyan:** installer ki screens ka kram 26.04 me thoda alag ho sakta hai (naam ya jagah). Jo screen yahan likhi se mile na, **ruko aur photo Claude ko dikhao**. Partition wale niyam (§1) har haal me wahi.
 
 1. Pendrive lagao, laptop on karo, aur turant **Esc** baar-baar dabao. "Startup Menu" me **F9 (Boot Device Options)** → pendrive chuno (USB ya pendrive ke naam se).
 2. GRUB ka menu aaye to **"Try or Install Ubuntu Server"**.
@@ -62,7 +64,7 @@
    13. **SSH configuration:** **"Install OpenSSH server" pe tick**. "Allow password authentication over SSH" pe bhi tick rehne do (pehli baar key bhejne ke liye; baad me Claude band karega). "Import SSH key" nahi. Done.
    14. **Featured server snaps:** kuch mat chuno. Done.
    15. Install chalega (HDD pe kuch minute). "Install complete" pe **"Reboot Now"**; pendrive nikaalne ko bole to nikaal ke Enter.
-4. Reboot ke baad laptop seedha Ubuntu me jayega. **Windows abhi menu me nahi dikhega**: Ubuntu 24.04 me os-prober pehle se band hai. Windows aur saara data disk pe hai; kadam 6 me Claude Windows ki entry jod dega.
+4. Reboot ke baad laptop seedha Ubuntu me jayega. **Windows abhi menu me nahi dikhega**: Ubuntu me os-prober aam taur pe pehle se band hota hai. Windows aur saara data disk pe hai; kadam 6 me Claude Windows ki entry jod dega.
 5. `bq-infra login:` pe `bq` aur password. Phir ye chalao aur screen ki photo Claude ko dikhao:
 
    ```bash
@@ -155,4 +157,4 @@ Claude primary pe chalta hai aur ye kaam karta hai; har `sudo` pe secondary ke `
 
 | Version | Date       | Badlav                                                                                      |
 | ------- | ---------- | ------------------------------------------------------------------------------------------- |
-| v1.0.0  | 2026-11-24 | Temp doc: primary aur secondary ke kadam, OT-10 se OT-13 aur Claude ka kaam (D-462, D-463). |
+| v1.0.0 se v1.0.1 | 2026-11-24 | Temp doc: primary aur secondary ke kadam, OT-10 se OT-13 aur Claude ka kaam (D-462, D-463). Ubuntu 26.04 LTS. |
