@@ -1,33 +1,20 @@
-import { spawnSync } from 'node:child_process';
-
 import { CliError } from './cli-error.ts';
+import type { Exec } from './exec.ts';
 import type { Logger } from './logger.ts';
 import { buildOrder, discoverPackages, resolvePackage } from './workspace.ts';
-
-export type RunTurbo = (args: string[], cwd: string) => number;
-
-// Turborepo runs from `npm run`, so `turbo` is on the PATH; on Windows it is a .cmd file.
-export const runTurbo: RunTurbo = (args, cwd) => {
-  const result = spawnSync('turbo', args, {
-    cwd,
-    stdio: 'inherit',
-    shell: process.platform === 'win32',
-  });
-  return result.status ?? 1;
-};
 
 export interface BuildOptions {
   root: string;
   names: string[];
   dryRun: boolean;
   log: Logger;
-  run?: RunTurbo | undefined;
+  exec: Exec;
 }
 
 // `build`: all packages, or the named ones, each after the packages it needs (devDependencies
 // included). The order is checked here first, so a circle is named instead of left to Turborepo's
 // message; Turborepo then builds, in parallel where the order allows and from cache where it can.
-export function build({ root, names, dryRun, log, run = runTurbo }: BuildOptions): number {
+export function build({ root, names, dryRun, log, exec }: BuildOptions): number {
   const all = discoverPackages(root);
   if (all.length === 0) {
     log.info('No packages to build yet.');
@@ -42,7 +29,7 @@ export function build({ root, names, dryRun, log, run = runTurbo }: BuildOptions
     selected.length > 0
       ? selected.map((pkg) => `--filter=${pkg.name}...`)
       : ['--filter=./packages/*/*'];
-  const status = run(['run', 'build', ...filters], root);
+  const { status } = exec('turbo', ['run', 'build', ...filters], { cwd: root, inherit: true });
   if (status !== 0) {
     throw new CliError(
       'BUILD_FAILED',

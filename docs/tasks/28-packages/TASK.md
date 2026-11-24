@@ -1,6 +1,6 @@
 # TASK 28: packages ka flow
 
-> **Status:** v1.0.4 (2026-11-23). Halat: implementation; ST-1 **ho gaya** (PR [#104](https://github.com/Nageshwar1997/Beautinique/pull/104), `scripts/packages`). Module [PROJECT_PLAN.md](../../PROJECT_PLAN.md) §3 ka `28-packages` (D-445). Progress: 2 / 18 points.
+> **Status:** v1.0.5 (2026-11-24). Halat: implementation; ST-1 **ho gaya** (PR [#104](https://github.com/Nageshwar1997/Beautinique/pull/104)), ST-2 se ST-8 ek PR me, `scripts/packages` aur `.github/workflows/publish.yml`. Module [PROJECT_PLAN.md](../../PROJECT_PLAN.md) §3 ka `28-packages` (D-445). Progress: 18 / 18 points.
 
 ## 1. Lakshya
 
@@ -148,23 +148,24 @@ HTTP API nahi. CLI ke commands §3 me. Saajhe flags: `--dry-run` (sirf plan aur 
 
 ## 11. Subtasks
 
-Har subtask lagbhag ek PR jitna, aur saare charan 0 me ([PROJECT_PLAN.md](../../PROJECT_PLAN.md) §5, D-446). Points D-433 ke hisaab se, aur "ho gaya" sirf [RULES.md](../../RULES.md) §1 ki Definition of Done ke baad.
+ST-2 se ST-8 ek hi PR me (ST-1 ka PR #104 pehle merge hua), aur saare charan 0 me ([PROJECT_PLAN.md](../../PROJECT_PLAN.md) §5, D-446). Points D-433 ke hisaab se, aur "ho gaya" sirf [RULES.md](../../RULES.md) §1 ki Definition of Done ke baad.
 
-| #    | Subtask                                                               | Size   | Halat |
-| ---- | --------------------------------------------------------------------- | ------ | ----- |
+| #    | Subtask                                                               | Size   | Halat   |
+| ---- | --------------------------------------------------------------------- | ------ | ------- |
 | ST-1 | CLI ka dhaancha (commands, flags, errors, poochhna, logs) aur `build` | M (2)  | Ho gaya |
-| ST-2 | Fake npm registry aur CLI ke tests ka dhaancha                        | M (2)  | Baaki |
-| ST-3 | `create` aur package ka template (README ke "Visibility" samet)       | M (2)  | Baaki |
-| ST-4 | `verify`, aur CI me har PR pe                                         | M (2)  | Baaki |
-| ST-5 | `status` aur laptop se `publish`                                      | M (2)  | Baaki |
-| ST-6 | `republish`: versions, tike packages aur CHANGELOG                    | L (4)  | Baaki |
-| ST-7 | GitHub ka publish workflow aur OPERATIONS me publish ka manual        | M (2)  | Baaki |
-| ST-8 | `update-deps`                                                         | M (2)  | Baaki |
-|      | **Kul**                                                               | **18** |       |
+| ST-2 | Fake npm registry aur CLI ke tests ka dhaancha                        | M (2)  | Ho gaya |
+| ST-3 | `create` aur package ka template (README ke "Visibility" samet)       | M (2)  | Ho gaya |
+| ST-4 | `verify`, aur CI me har PR pe                                         | M (2)  | Ho gaya |
+| ST-5 | `status` aur laptop se `publish`                                      | M (2)  | Ho gaya |
+| ST-6 | `republish`: versions, tike packages aur CHANGELOG                    | L (4)  | Ho gaya |
+| ST-7 | GitHub ka publish workflow aur OPERATIONS me publish ka manual        | M (2)  | Ho gaya |
+| ST-8 | `update-deps`                                                         | M (2)  | Ho gaya |
+|      | **Kul**                                                               | **18** |         |
 
 ## Change log
 
-| Version          | Date       | Badlav                                                                                                        |
-| ---------------- | ---------- | ------------------------------------------------------------------------------------------------------------- |
-| v1.0.0 se v1.0.2 | 2026-11-22 | Module 28 ka pehla spec, 8 subtasks acceptance criteria ki link (D-445) aur charan 0 (D-446); code abhi nahi. |
-| v1.0.3 se v1.0.4 | 2026-11-23 | ST-1 ka code (`scripts/packages`: CLI ka dhaancha, `build`, `npm run packages:build`; tests `scripts/packages/test/`, AC-PACKAGES-4) aur PR #104 merge: ST-1 ho gaya, 2 / 18. |
+| Version          | Date       | Badlav                                                                                                                                                                                                                          |
+| ---------------- | ---------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| v1.0.0 se v1.0.2 | 2026-11-22 | Module 28 ka pehla spec, 8 subtasks acceptance criteria ki link (D-445) aur charan 0 (D-446); code abhi nahi.                                                                                                                   |
+| v1.0.3 se v1.0.4 | 2026-11-23 | ST-1 ka code (`scripts/packages`: CLI ka dhaancha, `build`, `npm run packages:build`; tests `scripts/packages/test/`, AC-PACKAGES-4) aur PR #104 merge: ST-1 ho gaya, 2 / 18.                                                   |
+| v1.0.5           | 2026-11-24 | ST-2 se ST-8 ek PR me: fake registry aur network guard, `create`, `verify` (CI me har PR pe), `status`, `publish`, `republish`, publish workflow, `update-deps`; AC-PACKAGES-1 se 12 ke tests `scripts/packages/test/`. |

@@ -6,6 +6,7 @@ import { readJson } from './utils/read-json.ts';
 
 // packages/<category>/<name>/ (D-002).
 export const CATEGORIES = ['shared', 'frontend', 'backend'] as const;
+export type Category = (typeof CATEGORIES)[number];
 export const SCOPE = '@beautinique/';
 
 const DEPENDENCY_FIELDS = [
@@ -18,7 +19,11 @@ const DEPENDENCY_FIELDS = [
 export interface PackageInfo {
   /** `@beautinique/<category>-<name>`. */
   name: string;
+  category: Category;
+  /** The folder name, `money` in packages/shared/money. */
+  folder: string;
   dir: string;
+  manifest: Record<string, unknown>;
   /** Names of the repo's own packages this one needs, any kind of dependency. */
   internalDeps: string[];
 }
@@ -35,7 +40,7 @@ function dependencyNames(manifest: Record<string, unknown>): string[] {
 // Every package under packages/, with its dependencies on the others. A manifest that cannot be
 // read stops the whole run: building around a broken package would hide it.
 export function discoverPackages(root: string): PackageInfo[] {
-  const found: { name: string; dir: string; deps: string[] }[] = [];
+  const found: Omit<PackageInfo, 'internalDeps'>[] = [];
   for (const category of CATEGORIES) {
     const categoryDir = join(root, 'packages', category);
     if (!existsSync(categoryDir)) continue;
@@ -65,15 +70,16 @@ export function discoverPackages(root: string): PackageInfo[] {
           `Name it ${SCOPE}${category}-${entry.name} (docs/tasks/28-packages/TASK.md §4 rule 1).`,
         );
       }
-      found.push({ name: record.name, dir, deps: dependencyNames(record) });
+      found.push({ name: record.name, category, folder: entry.name, dir, manifest: record });
     }
   }
   const names = new Set(found.map((pkg) => pkg.name));
   return found
-    .map(({ name, dir, deps }) => ({
-      name,
-      dir,
-      internalDeps: deps.filter((dep) => names.has(dep) && dep !== name),
+    .map((pkg) => ({
+      ...pkg,
+      internalDeps: dependencyNames(pkg.manifest).filter(
+        (dep) => names.has(dep) && dep !== pkg.name,
+      ),
     }))
     .sort((a, b) => a.name.localeCompare(b.name));
 }

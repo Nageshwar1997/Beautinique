@@ -1,6 +1,6 @@
 # CLAUDE.md: Beautinique
 
-> **Status:** v1.0.15 (2026-11-23). Docs aur code naye sire se ban rahe hain.
+> **Status:** v1.0.16 (2026-11-24). Docs aur code naye sire se ban rahe hain.
 
 Ye file Claude Code har session ki shuruaat me padhta hai. Project pe ek hi insaan (owner) kaam karta hai,
 2 Claude accounts se baari-baari. **Kaam shuru karne se pehle [docs/HANDOFF.md](docs/HANDOFF.md) padho.**
@@ -8,7 +8,7 @@ Ye file Claude Code har session ki shuruaat me padhta hai. Project pe ek hi insa
 ## Abhi kya chal raha hai
 
 - **Implementation stage (2026-11-23 se, D-455):** discovery aur planning poori (R1 ke 26 modules ki `TASK.md`,
-  [docs/PROJECT_PLAN.md](docs/PROJECT_PLAN.md) §3 se §5). Kaam charan ke kram se; `01-foundation` ho gaya (2026-11-23), agla `28-packages` ST-1.
+  [docs/PROJECT_PLAN.md](docs/PROJECT_PLAN.md) §3 se §5). Kaam charan ke kram se; `01-foundation` aur `28-packages` ho gaye (2026-11-24), agla `02-platform` aur `03-frontend-kit`.
   Code `origin/prerelease` se nayi branch pe, PR ke saath. Purana code tabhi hat-ta hai jab kahin use na ho.
 - **Naye docs khaali shuru hue hain.** Unme cheezein ek-ek karke judti hain, owner ki haan ke baad. Index:
   [docs/README.md](docs/README.md).
@@ -88,7 +88,7 @@ Naksha: `packages/<category>/<name>/` (npm pe public packages), `frontend/<app>/
 TypeScript, ESLint, Vitest), `infra/compose.yaml` (laptop ke containers) aur `.github/` (CI, Dependabot). Har
 workspace npm workspaces me, tasks Turborepo se; Node 24.22.3 aur npm 12.2.3 exact pinned (D-458).
 
-Commands (root se): `npm run setup`, `npm run infra:up -- backend`, `npm run infra:down`, `npm run infra:use -- secondary`, `npm run infra:status`, `npm run packages:build`, `npm run dev-data:copy`,
+Commands (root se): `npm run setup`, `npm run infra:up -- backend`, `npm run infra:down`, `npm run infra:use -- secondary`, `npm run infra:status`, `npm run packages:build`, `npm run packages:create`, `npm run packages:verify`, `npm run packages:status`, `npm run packages:republish`, `npm run packages:publish`, `npm run packages:update-deps`, `npm run dev-data:copy`,
 `npm run dev-data:restore`, `npm test`, `npm run build`,
 `npm run dev`, `npm run lint`, `npm run typecheck`, `npm run format:check`, `npm run format`, `npm run docs:check` aur
 `npm run secrets:scan`. Ek workspace: `npm test -w <name>`; ek test file: workspace me `npx vitest run <file>`. Docs ke
@@ -102,7 +102,7 @@ khula hai. Jis doc me badlav kiya, uske change log me us din ki line (D-442). Pr
 
 ## Change log
 
-| Version           | Date                     | Badlav                                                                                                                                                                                                                                                  |
-| ----------------- | ------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| v1.0.0 se v1.0.8  | 2026-11-17 se 2026-11-22 | Abhi ki halat (planning stage, D-443), sawal-jawab ke niyam aur hamesha laagu niyam; har badlav ka poora itihaas git me (D-442).                                                                                                                        |
-| v1.0.9 se v1.0.15 | 2026-11-23               | Implementation stage khula (D-455); naye root ke commands (ST-1, D-458); Claude `backups/` nahi kholta (D-460); repo ka naksha aur saari commands (ST-7); `01-foundation` ho gaya; do laptop ka ST-8 (D-462) branch pe. `infra:use` aur `infra:status`. |
+| Version           | Date                     | Badlav                                                                                                                                                                                                                                                                                            |
+| ----------------- | ------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| v1.0.0 se v1.0.8  | 2026-11-17 se 2026-11-22 | Abhi ki halat (planning stage, D-443), sawal-jawab ke niyam aur hamesha laagu niyam; har badlav ka poora itihaas git me (D-442).                                                                                                                                                                  |
+| v1.0.9 se v1.0.15 | 2026-11-23               | Implementation stage khula (D-455); naye root ke commands (ST-1, D-458); Claude `backups/` nahi kholta (D-460); repo ka naksha aur saari commands (ST-7); `01-foundation` ho gaya; do laptop ka ST-8 (D-462) branch pe. `infra:use` aur `infra:status`. `28-packages` ke saare commands, v1.0.16. |

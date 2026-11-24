@@ -164,6 +164,11 @@ jobs:
       # Every workspace's unit and integration tests through Turborepo, dependencies first (no cache
       # carried between runs). Coverage limits by area fail the run (RULES RT-23).
       - run: npm test
+      # Everything a publish checks, without publishing: the package rules (README "Visibility",
+      # Tailwind imports, peer ranges, no private package), the tarball's contents and the exports.
+      # Needs the containers, like the tests above (docs/tasks/28-packages/TASK.md §3.3).
+      - name: Packages (verify)
+        run: npm run packages:verify
 
   # The one check the rulesets require and Vercel's Deployment Checks wait for: green only when every
   # job above is.
