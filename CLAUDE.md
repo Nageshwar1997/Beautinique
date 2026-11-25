@@ -1,6 +1,6 @@
 # CLAUDE.md: Beautinique
 
-> **Status:** v1.0.17 (2026-11-25). Docs aur code naye sire se ban rahe hain.
+> **Status:** v1.0.18 (2026-11-26). Docs aur code naye sire se ban rahe hain.
 
 Ye file Claude Code har session ki shuruaat me padhta hai. Project pe ek hi insaan (owner) kaam karta hai,
 2 Claude accounts se baari-baari. **Kaam shuru karne se pehle [docs/HANDOFF.md](docs/HANDOFF.md) padho.**
@@ -74,6 +74,12 @@ Ye file Claude Code har session ki shuruaat me padhta hai. Project pe ek hi insa
   (saajhe niyam `.claude/skills/_shared/git-rules.md`).
 - **npm pe kuch bhi publish, `npm login/logout` ya `npm trust` sirf owner ke kehne pe**; tests kabhi asli
   registry ko nahi chhoote (fake registry hai).
+- **`npm run packages:create` ki permission Claude ke paas hai (owner, 2026-11-26):** nayi package banane
+  ke liye owner se poochhna nahi, terminal me "haan" type karwana nahi. CLI bina terminal ke "haan" nahi
+  maanta (jaanbujhkar), isliye Claude CLI ka `main()` chalata hai jisme `ask` sirf `create` ke plan
+  ("Write these files, then install and verify?") ko "haan" deta hai; repo me koi badlav nahi. Ye sirf
+  `create` ke liye: `publish`, `republish`, `update-deps`, `npm login` aur `npm trust` pehle jaise sirf
+  owner ke kehne pe.
 - **Mutation testing copy me karo**, asli files me nahi (dev server file badalte hi reload hota hai). Sirf 3
   jagah: kernel packages pehli baar poora run (background) aur baad me badli lines; paisa/stock/permissions me
   badli lines; baaki apps aur modules me mutation nahi.
@@ -108,3 +114,4 @@ khula hai. Jis doc me badlav kiya, uske change log me us din ki line (D-442). Pr
 | v1.0.0 se v1.0.8  | 2026-11-17 se 2026-11-22 | Abhi ki halat (planning stage, D-443), sawal-jawab ke niyam aur hamesha laagu niyam; har badlav ka poora itihaas git me (D-442).                                                                                                                                                                  |
 | v1.0.9 se v1.0.15 | 2026-11-23               | Implementation stage khula (D-455); naye root ke commands (ST-1, D-458); Claude `backups/` nahi kholta (D-460); repo ka naksha aur saari commands (ST-7); `01-foundation` ho gaya; do laptop ka ST-8 (D-462) branch pe. `infra:use` aur `infra:status`. `28-packages` ke saare commands, v1.0.16. |
 | v1.0.17           | 2026-11-25               | Claude ke deny rules har `.env.*` pe, `.env.example` shell se (D-441 badla, QA audit).                                                                                                                                                                                                            |
+| v1.0.18           | 2026-11-26               | `npm run packages:create` ki permission Claude ke paas (owner): "haan" khud, publish aur `npm trust` pehle jaise sirf owner ke kehne pe.                                                                                                                                                          |
