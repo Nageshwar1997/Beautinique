@@ -1,6 +1,6 @@
 # TASK 02: platform (shared aur backend ke saajhe packages)
 
-> **Status:** v1.0.3 (2026-11-25). Halat: implementation; ST-1 **ho gaya** (`packages/shared/clock`, `packages/shared/validators`). Module [PROJECT_PLAN.md](../../PROJECT_PLAN.md) §3 ka `02-platform`, charan 0 (D-446). Progress: 2 / 31 points.
+> **Status:** v1.0.4 (2026-11-26). Halat: implementation; ST-1 **ho gaya** (PR [#109](https://github.com/Nageshwar1997/Beautinique/pull/109); `packages/shared/clock`, `packages/shared/validators`), ST-2 **ho gaya** (`packages/shared/money`). Module [PROJECT_PLAN.md](../../PROJECT_PLAN.md) §3 ka `02-platform`, charan 0 (D-446). Progress: 6 / 31 points.
 
 ## 1. Lakshya
 
@@ -60,6 +60,8 @@ Optional field (owner, 2026-11-26): koi alag helper nahi. Jahan field chhodna ho
 3. MongoDB ke BSON `long` ka codec yahan ke type ke saath `backend-mongo` me.
 4. Kernel package: property tests, mutation aur 90% branch coverage (RT-21, RT-23).
 5. Rakam ka `en-IN` format (₹1,299, ₹1,29,999; invoice, refund aur finance ki screens pe hamesha do decimal), taaki apps, emails aur PDF ek hi helper se chalein (DS-4.5, CR-30).
+
+Code ka roop: `Paise` aur `Bps` checked types hain (`paise()` aur `bps()` fraction, `NaN` aur safe range ke bahar ke number pe `RangeError` dete hain; plain `number` `Paise` nahi). `lineTax({ unitPrice, quantity, rate, supply })` poori line ka tax nikaalta hai, unit ka nahi: taxable value = daam x 10000 / (10000 + rate), paise tak, aadha paisa upar; `intra-state` me CGST aur SGST har ek rate/2 (rate / 20000 se, to odd bps bhi theek), `inter-state` me IGST; phir taxable value = daam - tax, to `taxable + cgst + sgst + igst` daam hi hai (₹49 pe 5% = 46.66 + 1.17 + 1.17). `allocate(total, weights)` largest remainder se (barabar fraction pe pehla index, 0 weight ko kuch nahi). `applyBps(amount, rate)` TCS, TDS aur commission ke liye. `formatMoney(amount, { fraction })` `Intl` (`en-IN`) se: `auto` me paise sirf jab hon, `always` me do decimal. Saara hisaab BigInt me, to float kahin nahi banta. `fast-check` 4.10.3 root devDependency hai (review ke baad, [OPERATIONS.md](../../OPERATIONS.md) §11 niyam 2). Abhi nahi: §1.8 niyam 5 (credit note ka hissa) `14-finance` ke saath, jahan uska roop tay hoga; mutation ka tooling ST-10.
 
 ### 3.4 `shared-clock`
 
@@ -162,6 +164,12 @@ SR-008 (rate limit ka counter), SR-032 aur SR-035 (`authorize` aur scope), SR-04
 - **ST-1 ke tests:**
   - [clock.test.ts](../../../packages/shared/clock/test/clock.test.ts) aur [ist.test.ts](../../../packages/shared/clock/test/ist.test.ts): `RT-13` (asli ghadi, fake ghadi, `istDay` ka IST ki aadhi raat pe badalna, month, saal aur leap day ke paar) aur `DS-4.5` ("21 Nov 2026", "2:30 pm", IST me).
   - [gstin.test.ts](../../../packages/shared/validators/test/gstin.test.ts), [pan.test.ts](../../../packages/shared/validators/test/pan.test.ts), [ifsc.test.ts](../../../packages/shared/validators/test/ifsc.test.ts), [pincode.test.ts](../../../packages/shared/validators/test/pincode.test.ts), [upi-id.test.ts](../../../packages/shared/validators/test/upi-id.test.ts), [email.test.ts](../../../packages/shared/validators/test/email.test.ts) aur [phone.test.ts](../../../packages/shared/validators/test/phone.test.ts): `AC-PLATFORM-13` (sahi roop maane jaate hain, galat pe field ke naam ke saath error; GSTIN ka galat check digit, aur koi bhi ek akshar ki galti pakdi jaati hai), `CR-22` aur `SR-077` (sandesh me refuse ki gayi value nahi).
+- **ST-2 ke tests:**
+  - [line-tax.test.ts](../../../packages/shared/money/test/line-tax.test.ts): `AC-PLATFORM-9` (docs ke misaal: ₹49 pe 5% = 46.66 + 1.17 + 1.17, ₹1,180 pe 18%, ₹29 ki fee; kai units; odd bps; property: taxable + CGST + SGST + IGST = daam, taxable ek-do paise ke andar, ek unit aur kai unit ka jawab ek) aur `SR-047` (BigInt: 9e15 paise x 10000, galat input ka `RangeError`).
+  - [allocate.test.ts](../../../packages/shared/money/test/allocate.test.ts): `AC-PLATFORM-9` (34 + 33 + 33, barabar fraction pe pehla index, 0 weight; property: jod bilkul barabar, har hissa exact share ke ek paise ke andar, bada weight chhota hissa nahi paata) aur `SR-047`.
+  - [apply-bps.test.ts](../../../packages/shared/money/test/apply-bps.test.ts): `AC-PLATFORM-9` (TCS 0.5% aur TDS 0.1% ke docs ke numbers, aadha paisa upar; property: exact jawab ke aadhe paise ke andar).
+  - [format-money.test.ts](../../../packages/shared/money/test/format-money.test.ts): `DS-4.5` aur `CR-30` (₹1,299, ₹1,29,999, ₹1,299.50, hamesha do decimal, negative; property: rupaye aur paise wahi, Indian grouping) aur `SR-047`.
+  - [paise.test.ts](../../../packages/shared/money/test/paise.test.ts): `SR-047` (`paise()` aur `bps()` ki jaanch, types).
 - **Manuals aur testing ki files:** kisi app ke role ka feature nahi, isliye laagu nahi.
 
 ## 10. Subtasks
@@ -171,7 +179,7 @@ Har subtask lagbhag ek PR jitna. Charan [PROJECT_PLAN.md](../../PROJECT_PLAN.md)
 | #     | Subtask                                                                                   | Charan | Size   | Halat   |
 | ----- | ----------------------------------------------------------------------------------------- | ------ | ------ | ------- |
 | ST-1  | `shared-clock` aur `shared-validators`                                                    | 0      | M (2)  | Ho gaya |
-| ST-2  | `shared-money`, property tests ke saath                                                   | 0      | L (4)  | Baaki   |
+| ST-2  | `shared-money`, property tests ke saath                                                   | 0      | L (4)  | Ho gaya |
 | ST-3  | `shared-contracts` ka dhaancha, route manifest, typed client ka aadhar aur `openapi.json` | 0      | L (4)  | Baaki   |
 | ST-4  | `backend-config` aur `backend-logger`                                                     | 0      | M (2)  | Baaki   |
 | ST-5  | `backend-server-kit`                                                                      | 0      | L (4)  | Baaki   |
@@ -189,3 +197,4 @@ Har subtask lagbhag ek PR jitna. Charan [PROJECT_PLAN.md](../../PROJECT_PLAN.md)
 | ---------------- | ---------- | ------------------------------------------------------------------------------------------------------------------------------------------- |
 | v1.0.0 se v1.0.2 | 2026-11-22 | Module 02 ka pehla spec, 12 packages, 11 subtasks (D-446) 16 criteria ki link (D-448) aur `en-IN` format; code abhi nahi.                   |
 | v1.0.3           | 2026-11-25 | ST-1 ka code: `shared-clock` aur `shared-validators` (`packages/shared/`), tests `RT-13`, `DS-4.5`, `AC-PLATFORM-13`; ST-1 ho gaya, 2 / 31. |
+| v1.0.4           | 2026-11-26 | PR #109 merge. ST-2 ka code: `shared-money` (`Paise`, `Bps`, `lineTax`, `allocate`, `applyBps`, `formatMoney`), property tests (`fast-check` 4.10.3), tests `AC-PLATFORM-9`, `SR-047`, `DS-4.5`; ST-2 ho gaya, 6 / 31. |
