@@ -3,10 +3,10 @@
 // 127.0.0.1 and reach the primary's 127.0.0.1 through one SSH tunnel, opened under its own ssh host
 // alias, so Docker's own ssh connections never try to bind a port.
 import { spawn, spawnSync } from 'node:child_process';
-import { mkdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
+import { mkdirSync, readFileSync, readlinkSync, rmSync, writeFileSync } from 'node:fs';
 import { createConnection } from 'node:net';
 import { homedir } from 'node:os';
-import { dirname, join } from 'node:path';
+import { basename, dirname, join } from 'node:path';
 
 import type { ComposeConfig } from './infra.ts';
 
@@ -163,6 +163,17 @@ export async function openTunnel(
 
 // The program name of a running process, lower case and without .exe; empty when there is none.
 export function processName(pid: number): string {
+  // Linux: the executable itself, since `ps -o comm=` shows the main thread's name, which a program
+  // may change (Node calls it MainThread). A process of another user or none at all reads as ''.
+  if (process.platform === 'linux') {
+    try {
+      return basename(readlinkSync(`/proc/${String(pid)}/exe`))
+        .replace(/ \(deleted\)$/, '')
+        .toLowerCase();
+    } catch {
+      return '';
+    }
+  }
   const result =
     process.platform === 'win32'
       ? spawnSync('tasklist', ['/FI', `PID eq ${String(pid)}`, '/FO', 'CSV', '/NH'], {
