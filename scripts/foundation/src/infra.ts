@@ -2,6 +2,7 @@ import { spawnSync, type SpawnSyncOptions } from 'node:child_process';
 import { join } from 'node:path';
 
 import { ROOT } from './constants/paths.ts';
+import { sshEnv } from './ssh.ts';
 
 // The one compose file of the laptop's and CI's containers (docs/OPERATIONS.md §1 rules 2 to 4).
 export const COMPOSE_FILE = join(ROOT, 'infra', 'compose.yaml');
@@ -83,10 +84,12 @@ export function composeFiles(env: NodeJS.ProcessEnv = process.env): string[] {
 }
 
 export function compose(args: string[], options: SpawnSyncOptions = {}) {
-  const files = composeFiles(options.env ?? process.env).flatMap((file) => ['-f', file]);
+  const env = options.env ?? process.env;
+  const files = composeFiles(env).flatMap((file) => ['-f', file]);
   return spawnSync('docker', ['compose', ...files, ...args], {
     encoding: 'utf8',
     ...options,
+    env: sshEnv(env),
   });
 }
 
@@ -128,7 +131,9 @@ export function downArgs(): string[] {
 
 export function dockerIsRunning(): boolean {
   return (
-    spawnSync('docker', ['info', '--format', '{{.ServerVersion}}'], { stdio: 'ignore' }).status ===
-    0
+    spawnSync('docker', ['info', '--format', '{{.ServerVersion}}'], {
+      stdio: 'ignore',
+      env: sshEnv(),
+    }).status === 0
   );
 }

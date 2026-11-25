@@ -17,6 +17,7 @@ import { pipeline } from 'node:stream/promises';
 
 import { COMPOSE_FILE, DEV_PROJECT, WAIT_SECONDS } from './infra.ts';
 import { INFRA_CONTEXT, isRemoteEndpoint } from './remote-infra.ts';
+import { sshEnv } from './ssh.ts';
 
 // Where the snapshots of `infra:down` on the secondary go: outside the repository.
 export const SNAPSHOT_DIR = join(homedir(), 'bq-dev-data');
@@ -196,7 +197,7 @@ function exitCode(child: ChildProcess): Promise<number> {
 }
 
 function dockerOutput(args: string[]): string | undefined {
-  const result = spawnSync('docker', args, { encoding: 'utf8' });
+  const result = spawnSync('docker', args, { encoding: 'utf8', env: sshEnv() });
   return result.status === 0 ? result.stdout : undefined;
 }
 
@@ -226,14 +227,20 @@ export function mongoIsRunning(context: string | undefined): boolean {
 // Starts the development MongoDB of `context` alone (see mongoUpArgs); false when it did not come up.
 export function startMongo(context: string): boolean {
   return (
-    spawnSync('docker', devComposeArgs(context, mongoUpArgs()), { stdio: 'inherit' }).status === 0
+    spawnSync('docker', devComposeArgs(context, mongoUpArgs()), {
+      stdio: 'inherit',
+      env: sshEnv(),
+    }).status === 0
   );
 }
 
 // Stops the development MongoDB of `context` again (see mongoStopArgs); false when that failed.
 export function stopMongo(context: string): boolean {
   return (
-    spawnSync('docker', devComposeArgs(context, mongoStopArgs()), { stdio: 'inherit' }).status === 0
+    spawnSync('docker', devComposeArgs(context, mongoStopArgs()), {
+      stdio: 'inherit',
+      env: sshEnv(),
+    }).status === 0
   );
 }
 
@@ -246,6 +253,7 @@ async function dumpMongo(context: string | undefined, file: string): Promise<voi
   const partial = `${file}.partial`;
   const dump = spawn('docker', devComposeArgs(context, mongoDumpArgs(mongoPort())), {
     stdio: ['ignore', 'pipe', 'inherit'],
+    env: sshEnv(),
   });
   const code = exitCode(dump);
   try {
@@ -284,6 +292,7 @@ export async function saveBeforeCopy(
 export async function restoreSnapshot(context: string | undefined, file: string): Promise<void> {
   const restore = spawn('docker', devComposeArgs(context, mongoRestoreArgs(mongoPort())), {
     stdio: ['pipe', 'inherit', 'inherit'],
+    env: sshEnv(),
   });
   const code = exitCode(restore);
   await pipeline(createReadStream(file), restore.stdin);
@@ -295,9 +304,11 @@ export async function copyFromSecondary(targetContext: string): Promise<void> {
   const port = mongoPort();
   const dump = spawn('docker', devComposeArgs(INFRA_CONTEXT, mongoDumpArgs(port)), {
     stdio: ['ignore', 'pipe', 'inherit'],
+    env: sshEnv(),
   });
   const restore = spawn('docker', devComposeArgs(targetContext, mongoRestoreArgs(port)), {
     stdio: ['pipe', 'inherit', 'inherit'],
+    env: sshEnv(),
   });
   const codes = Promise.all([exitCode(dump), exitCode(restore)]);
   await pipeline(dump.stdout, restore.stdin);
