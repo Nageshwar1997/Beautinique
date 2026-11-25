@@ -4,6 +4,7 @@
 import { spawnSync } from 'node:child_process';
 
 import { INFRA_CONTEXT, isRemoteEndpoint } from './remote-infra.ts';
+import { sshEnv } from './ssh.ts';
 
 // The Docker context of each laptop. On the primary, Docker Desktop's own context.
 export const MACHINES = { secondary: INFRA_CONTEXT, primary: 'desktop-linux' } as const;
@@ -59,14 +60,19 @@ export function switchProblem({
 }
 
 export function currentContext(): string {
-  const result = spawnSync('docker', ['context', 'show'], { encoding: 'utf8' });
+  const result = spawnSync('docker', ['context', 'show'], { encoding: 'utf8', env: sshEnv() });
   return result.status === 0 ? result.stdout.trim() : '';
 }
 
 export function contextExists(name: string): boolean {
-  return spawnSync('docker', ['context', 'inspect', name], { stdio: 'ignore' }).status === 0;
+  return (
+    spawnSync('docker', ['context', 'inspect', name], { stdio: 'ignore', env: sshEnv() }).status ===
+    0
+  );
 }
 
 export function useContext(name: string): boolean {
-  return spawnSync('docker', ['context', 'use', name], { stdio: 'ignore' }).status === 0;
+  return (
+    spawnSync('docker', ['context', 'use', name], { stdio: 'ignore', env: sshEnv() }).status === 0
+  );
 }

@@ -9,6 +9,7 @@ import { homedir } from 'node:os';
 import { basename, dirname, join } from 'node:path';
 
 import type { ComposeConfig } from './infra.ts';
+import { sshCommand, sshEnv } from './ssh.ts';
 
 // The Docker context of the secondary laptop and the two ssh host aliases (~/.ssh/config).
 export const INFRA_CONTEXT = 'bq-infra';
@@ -38,7 +39,7 @@ export function dockerEndpoint(env: NodeJS.ProcessEnv = process.env): string {
     ['context', 'inspect', '--format', '{{.Endpoints.docker.Host}}'],
     {
       encoding: 'utf8',
-      env,
+      env: sshEnv(env),
     },
   );
   return result.status === 0 ? result.stdout.trim() : '';
@@ -137,10 +138,11 @@ export async function openTunnel(
   const taken = await takenPorts(ports);
   if (taken.length > 0) throw new Error(portsTakenMessage(taken, readTunnel(stateFile)));
 
-  const child = spawn('ssh', tunnelArgs(ports), {
+  const child = spawn(sshCommand(), tunnelArgs(ports), {
     detached: true,
     stdio: 'ignore',
     windowsHide: true,
+    env: sshEnv(),
   });
   child.unref();
   if (child.pid === undefined) throw new Error('ssh did not start: is OpenSSH installed?');
