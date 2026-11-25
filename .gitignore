@@ -11,6 +11,10 @@ backups/
 # Secrets: never commit env files (public repo). Only .env.example is allowed.
 .env
 .env.*
+# The same names in any case (Linux and CI tell .ENV from .env; Windows does not), and direnv's file.
+.[Ee][Nn][Vv]
+.[Ee][Nn][Vv].*
+.envrc
 !.env.example
 
 # Logs and OS files

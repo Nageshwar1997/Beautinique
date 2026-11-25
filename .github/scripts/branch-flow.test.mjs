@@ -1,20 +1,24 @@
 // Tests of the branch flow check: node --test .github/scripts/branch-flow.test.mjs
 import assert from 'node:assert/strict';
 import { spawnSync } from 'node:child_process';
-import { fileURLToPath } from 'node:url';
 import { describe, it } from 'node:test';
+import { fileURLToPath } from 'node:url';
 
 import { branchFlowError, escapeCommand } from './branch-flow.mjs';
 
 const REPO = 'owner/repo';
+/** @param {string} base @param {string} head */
 const own = (base, head) => ({ base, head, headRepo: REPO, repo: REPO });
+/** The error of a pull request that must be refused (empty when there is none, so the match fails). */
+/** @param {Parameters<typeof branchFlowError>[0]} pullRequest */
+const errorOf = (pullRequest) => branchFlowError(pullRequest) ?? '';
 
 describe('branchFlowError', () => {
   it('lets release (the default branch) take only prerelease or hotfix/*', () => {
     assert.equal(branchFlowError(own('release', 'prerelease')), undefined);
     assert.equal(branchFlowError(own('release', 'hotfix/login-crash')), undefined);
     for (const head of ['feat/x', 'fix/y', 'docs/z', 'hotfix', 'dependabot/github_actions/x']) {
-      assert.match(branchFlowError(own('release', head)), /into release come only from/);
+      assert.match(errorOf(own('release', head)), /into release come only from/);
     }
   });
 
@@ -25,22 +29,24 @@ describe('branchFlowError', () => {
   });
 
   it('keeps hotfix/* out of prerelease', () => {
-    assert.match(branchFlowError(own('prerelease', 'hotfix/x')), /into prerelease come only from/);
+    assert.match(errorOf(own('prerelease', 'hotfix/x')), /into prerelease come only from/);
   });
 
   it('rejects a fork, even with an allowed branch name', () => {
-    for (const [base, head] of [
+    /** @type {[string, string][]} */
+    const pairs = [
       ['release', 'prerelease'],
       ['release', 'hotfix/x'],
       ['prerelease', 'feat/x'],
-    ]) {
-      const error = branchFlowError({ base, head, headRepo: 'someone/repo', repo: REPO });
+    ];
+    for (const [base, head] of pairs) {
+      const error = errorOf({ base, head, headRepo: 'someone/repo', repo: REPO });
       assert.match(error, /of someone\/repo\)/);
     }
   });
 
   it('rejects a deleted fork', () => {
-    const error = branchFlowError({ base: 'prerelease', head: 'feat/x', headRepo: '', repo: REPO });
+    const error = errorOf({ base: 'prerelease', head: 'feat/x', headRepo: '', repo: REPO });
     assert.match(error, /of a deleted fork\)/);
   });
 
@@ -63,6 +69,7 @@ describe('escapeCommand', () => {
 
 describe('the command line', () => {
   const script = fileURLToPath(new URL('./branch-flow.mjs', import.meta.url));
+  /** @param {Record<string, string>} env */
   const run = (env) =>
     spawnSync(process.execPath, [script], {
       env: { ...env, PATH: process.env.PATH },

@@ -1,5 +1,5 @@
 // The guards on GitHub Actions workflows (docs/OPERATIONS.md §2 rules 1, 2 and 7; SR-082).
-import { readdirSync, readFileSync } from 'node:fs';
+import { existsSync, readdirSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
 
 import { parse } from 'yaml';
@@ -19,6 +19,7 @@ export interface Workflow {
       needs?: string | string[];
       if?: string;
       uses?: string;
+      permissions?: unknown;
       'timeout-minutes'?: unknown;
       steps?: { uses?: string; run?: string }[];
     }
@@ -51,17 +52,29 @@ function isEmptyObject(value: unknown): boolean {
   );
 }
 
-// Every workflow: no rights by default, no pull_request_target (it runs a fork's pull request with
-// the repository's secrets), every action pinned to a commit SHA, every job with a time limit.
+// Triggers that run with the repository's secrets and write rights on behalf of a fork's pull
+// request: pull_request_target runs on the pull request itself, workflow_run after a workflow it ran.
+const FORK_TRIGGERS = ['pull_request_target', 'workflow_run'];
+
+// Every workflow: no rights by default, no trigger that hands a fork the repository's secrets, every
+// job naming the rights it needs (never write-all or read-all), every action pinned to a commit
+// SHA, every job with a time limit.
 export function workflowProblems(file: string, workflow: Workflow): string[] {
   const problems: string[] = [];
   if (!isEmptyObject(workflow.permissions)) {
     problems.push(`${file}: the workflow must start from no rights (permissions: {})`);
   }
-  if (triggers(workflow.on).includes('pull_request_target')) {
-    problems.push(`${file}: pull_request_target is not allowed`);
+  for (const trigger of FORK_TRIGGERS) {
+    if (triggers(workflow.on).includes(trigger)) {
+      problems.push(`${file}: ${trigger} is not allowed`);
+    }
   }
   for (const [id, job] of Object.entries(workflow.jobs ?? {})) {
+    if (typeof job.permissions === 'string') {
+      problems.push(
+        `${file}: job ${id} must name its rights one by one, not permissions: ${job.permissions}`,
+      );
+    }
     if (typeof job['timeout-minutes'] !== 'number' && !job.uses) {
       problems.push(`${file}: job ${id} needs timeout-minutes`);
     }
@@ -71,6 +84,31 @@ export function workflowProblems(file: string, workflow: Workflow): string[] {
     for (const action of uses) {
       if (!PINNED_ACTION.test(action)) {
         problems.push(`${file}: job ${id} uses ${action}, which is not pinned to a commit SHA`);
+      }
+    }
+  }
+  return problems;
+}
+
+// The repository's own composite actions (`uses: ./.github/actions/<name>` in a workflow): the
+// workflow guard does not look inside them, so the actions they use are checked here.
+export const ACTIONS_DIR = join(ROOT, '.github', 'actions');
+
+export function localActionProblems(dir: string = ACTIONS_DIR): string[] {
+  if (!existsSync(dir)) return [];
+  const problems: string[] = [];
+  for (const name of readdirSync(dir).sort()) {
+    const file = ['action.yml', 'action.yaml']
+      .map((candidate) => join(dir, name, candidate))
+      .find((candidate) => existsSync(candidate));
+    if (!file) continue;
+    const action = parse(readFileSync(file, 'utf8')) as {
+      runs?: { steps?: { uses?: string }[] };
+    };
+    for (const step of action.runs?.steps ?? []) {
+      const uses = step.uses;
+      if (typeof uses === 'string' && !uses.startsWith('./') && !PINNED_ACTION.test(uses)) {
+        problems.push(`actions/${name}: uses ${uses}, which is not pinned to a commit SHA`);
       }
     }
   }

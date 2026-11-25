@@ -155,12 +155,39 @@ export async function openTunnel(
   }
 }
 
+// The program name of a running process, lower case and without .exe; empty when there is none.
+export function processName(pid: number): string {
+  const result =
+    process.platform === 'win32'
+      ? spawnSync('tasklist', ['/FI', `PID eq ${String(pid)}`, '/FO', 'CSV', '/NH'], {
+          encoding: 'utf8',
+          windowsHide: true,
+        })
+      : spawnSync('ps', ['-p', String(pid), '-o', 'comm='], { encoding: 'utf8' });
+  if (result.status !== 0) return '';
+  const first = result.stdout.trim().split(/\r?\n/)[0] ?? '';
+  // tasklist: "ssh.exe","1234",...; with no such process it prints an INFO line, not a quoted name.
+  const name = process.platform === 'win32' ? (/^"([^"]+)"/.exec(first)?.[1] ?? '') : first;
+  return (
+    name
+      .toLowerCase()
+      .replace(/\.exe$/, '')
+      .split(/[\\/]/)
+      .at(-1) ?? ''
+  );
+}
+
 // Closes the tunnel the state file remembers. The process is only killed while its ports still
-// answer, so a process id that was reused after a reboot is never touched. True if a tunnel was closed.
-export async function closeTunnel(stateFile: string = TUNNEL_STATE_FILE): Promise<boolean> {
+// answer and it is still ssh, so a process id that was reused (after a reboot, or after ssh exited
+// when the network went) is never touched, even when another program now holds those ports. True
+// if a tunnel was closed.
+export async function closeTunnel(
+  stateFile: string = TUNNEL_STATE_FILE,
+  nameOf: (pid: number) => string = processName,
+): Promise<boolean> {
   const tunnel = readTunnel(stateFile);
   if (!tunnel) return false;
-  const alive = (await takenPorts(tunnel.ports)).length > 0;
+  const alive = (await takenPorts(tunnel.ports)).length > 0 && nameOf(tunnel.pid) === 'ssh';
   if (alive) {
     try {
       process.kill(tunnel.pid);

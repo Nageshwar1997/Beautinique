@@ -8,6 +8,7 @@ import { ESLint } from 'eslint';
 import { afterAll, describe, test } from 'vitest';
 
 import { COVERAGE_LIMITS, coverageThresholds } from '../../../configs/vitest/coverage.ts';
+import { unmatchedCriticalGlobs, workspaceTestConfig } from '../../../configs/vitest/workspace.ts';
 import { ROOT } from '../src/constants/paths.ts';
 import { cleanEnv } from './utils/env.ts';
 
@@ -47,6 +48,23 @@ describe('TypeScript (configs/typescript)', { timeout: 60_000 }, () => {
     assert.match(output, /bad\.ts\(1,14\): error TS2322/);
     // noUncheckedIndexedAccess: an array element may be missing.
     assert.match(output, /bad\.ts\(4,14\): error TS2322/);
+  });
+
+  test('the root typecheck covers the root files, the CI guard scripts too (QA-FND-001)', () => {
+    const { status, output } = run(
+      [TSC, '-p', join(ROOT, 'tsconfig.json'), '--listFilesOnly'],
+      ROOT,
+    );
+    assert.equal(status, 0, output);
+    const listed = output.replaceAll('\\', '/');
+    for (const file of [
+      'eslint.config.js',
+      'configs/vitest/workspace.ts',
+      '.github/scripts/branch-flow.mjs',
+      '.github/scripts/secret-scan.test.mjs',
+    ]) {
+      assert.ok(listed.includes(`/${file}`), `${file} is not typechecked`);
+    }
   });
 
   test('the React base knows the browser, the Node base does not', () => {
@@ -96,6 +114,15 @@ describe('coverage limits by area (configs/vitest)', () => {
     assert.equal(status, 1, output);
     assert.match(output, /does not meet "src\/sign\.ts" threshold \(85%\)/);
   }, 60_000);
+
+  test('RT-23: a critical glob that matches no file stops the config instead of switching its limit off (QA-FND-002)', () => {
+    assert.deepEqual(unmatchedCriticalGlobs(['src/sign.ts', 'src/**/*.ts'], gate), []);
+    assert.deepEqual(unmatchedCriticalGlobs(['src/sign.ts', 'src/mony/**'], gate), ['src/mony/**']);
+    assert.throws(
+      () => workspaceTestConfig({ critical: ['src/mony/**'], root: gate }),
+      /src\/mony\/\*\* match no file/,
+    );
+  });
 
   test('RT-23: the rest only reports its coverage', () => {
     const { status, output } = coverageRun('standard');

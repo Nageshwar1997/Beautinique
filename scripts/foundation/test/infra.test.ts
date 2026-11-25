@@ -8,9 +8,12 @@ import {
   composeFiles,
   composeProblems,
   composeProfiles,
+  composeProject,
+  DEV_PROJECT,
   downArgs,
   EPHEMERAL_FILE,
   readComposeConfig,
+  snapshotsOnDown,
   upArgs,
   WAIT_SECONDS,
 } from '../src/infra.ts';
@@ -97,14 +100,20 @@ describe(
       assert.ok(at > 0, 'the cache flag is missing');
       assert.equal(mongo.command[at + 1], '0.25');
       assert.equal(mongo.tmpfs, undefined);
-      assert.equal(mongo.volumes?.length, 1);
+      // Named volumes for both of the image's volume paths: none is left anonymous (QA-FND-003).
+      assert.deepEqual(
+        (mongo.volumes as { source?: string; target: string }[]).map(
+          (v) => `${v.source ?? ''}:${v.target}`,
+        ),
+        ['mongo-data:/data/db', 'mongo-config:/data/configdb'],
+      );
     });
 
     test('a test or mutation project keeps MongoDB data in memory, with no volume', () => {
       const env = { BQ_DATA_IN_MEMORY: 'true', COMPOSE_PROJECT_NAME: 'bq-memory-test' };
       assert.deepEqual(composeFiles(env), [COMPOSE_FILE, EPHEMERAL_FILE]);
       const { mongo } = mongoConfig(env).services;
-      assert.deepEqual(mongo.tmpfs, ['/data/db']);
+      assert.deepEqual(mongo.tmpfs, ['/data/db', '/data/configdb']);
       assert.equal(mongo.volumes, undefined);
       assert.ok(mongo.command.includes('--wiredTigerCacheSizeGB'));
     });
@@ -125,3 +134,20 @@ describe(
     });
   },
 );
+
+describe('AC-FOUNDATION-13: which infra:down saves a snapshot of the development data', () => {
+  test('the project is COMPOSE_PROJECT_NAME (in lower case), else the development one', () => {
+    assert.equal(composeProject({}), DEV_PROJECT);
+    assert.equal(composeProject({ COMPOSE_PROJECT_NAME: '' }), DEV_PROJECT);
+    assert.equal(composeProject({ COMPOSE_PROJECT_NAME: 'bq-infra-test' }), 'bq-infra-test');
+    assert.equal(composeProject({ COMPOSE_PROJECT_NAME: 'Beautinique' }), DEV_PROJECT);
+  });
+
+  test("only a down of the development project on the secondary saves one; a test project's never does (QA-Q-11)", () => {
+    assert.equal(snapshotsOnDown(true, {}), true);
+    assert.equal(snapshotsOnDown(true, { COMPOSE_PROJECT_NAME: DEV_PROJECT }), true);
+    // Wrong examples: a test project on the secondary, and anything on this laptop's own Docker.
+    assert.equal(snapshotsOnDown(true, { COMPOSE_PROJECT_NAME: 'bq-infra-test' }), false);
+    assert.equal(snapshotsOnDown(false, {}), false);
+  });
+});

@@ -55,6 +55,20 @@ export function composeProblems(config: ComposeConfig): string[] {
   return problems;
 }
 
+// The compose project a command works on: COMPOSE_PROJECT_NAME when it is set (Compose lowers its
+// case), else compose.yaml's own `name`, the development project.
+export function composeProject(env: NodeJS.ProcessEnv = process.env): string {
+  const name = env.COMPOSE_PROJECT_NAME ?? '';
+  return name === '' ? DEV_PROJECT : name.toLowerCase();
+}
+
+// Whether `infra:down` saves a snapshot of the development MongoDB first: only on the secondary and
+// only when it stops the development project itself. A test project's `down` (its own name, its
+// data in memory) never dumps the development data nor rotates its snapshots out (QA-Q-11).
+export function snapshotsOnDown(remote: boolean, env: NodeJS.ProcessEnv = process.env): boolean {
+  return remote && composeProject(env) === DEV_PROJECT;
+}
+
 // The compose files of a run. `BQ_DATA_IN_MEMORY=true` adds the in-memory override, and only for a
 // project of its own (COMPOSE_PROJECT_NAME): it would replace the development data volume.
 export function composeFiles(env: NodeJS.ProcessEnv = process.env): string[] {

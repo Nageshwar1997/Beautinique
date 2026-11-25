@@ -9,6 +9,7 @@ import {
   dockerIsRunning,
   downArgs,
   readComposeConfig,
+  snapshotsOnDown,
   upArgs,
 } from '../src/infra.ts';
 import {
@@ -162,9 +163,9 @@ if (ports.length > 0) {
   if (taken.length > 0) fail(portsTakenMessage(taken, readTunnel()));
 }
 
-if (command === 'down' && remote) {
+if (command === 'down' && snapshotsOnDown(remote)) {
   // A failed snapshot is a loud warning, not a reason to leave the containers running: `down`
-  // keeps the data volume.
+  // keeps the data volume. A test project's `down` takes none (snapshotsOnDown).
   try {
     console.log(`Saved the MongoDB snapshot ${await snapshotMongo(undefined)} to this laptop.`);
   } catch (error) {

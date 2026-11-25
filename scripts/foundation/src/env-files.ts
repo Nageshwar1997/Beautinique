@@ -150,8 +150,12 @@ export function deployablesWithEnvExample(root: string): string[] {
 export function trackedEnvFileProblems(trackedPaths: string[]): string[] {
   return trackedPaths
     .filter((path) => {
-      const name = basename(path);
-      return (name === '.env' || name.startsWith('.env.')) && name !== '.env.example';
+      // In any case: .ENV is .env on Windows, and a different file in git.
+      const name = basename(path).toLowerCase();
+      return (
+        (name === '.env' || name.startsWith('.env.') || name === '.envrc') &&
+        name !== '.env.example'
+      );
     })
     .map((path) => `${path}: env files never go into git; only .env.example does`);
 }
@@ -163,7 +167,10 @@ export const ENV_NAMES_IGNORED = [
   '.env.test',
   '.env.production',
   '.env.local',
+  '.ENV',
+  '.envrc',
   'backend/identity/.env.test',
+  'backend/identity/.Env.Production',
   'frontend/customer/.env.production',
 ];
 export const ENV_NAMES_KEPT = ['.env.example', 'backend/identity/.env.example'];

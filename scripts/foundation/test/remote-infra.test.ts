@@ -9,6 +9,7 @@ import { afterEach, describe, test } from 'vitest';
 
 import {
   closeTunnel,
+  processName,
   isListening,
   isRemoteEndpoint,
   openTunnel,
@@ -143,6 +144,20 @@ describe('AC-FOUNDATION-12: the secondary laptop is a remote Docker context', ()
     assert.equal(await closeTunnel(file), false);
   });
 
+  test('a process id that is no longer ssh is never killed, even while its ports answer (QA-Q-6)', async () => {
+    const port = await listen();
+    const file = stateFile();
+    // This very process stands for a reused id, and the listener for another program on the ports.
+    writeFileSync(file, JSON.stringify({ pid: process.pid, ports: [port] }));
+    assert.equal(await closeTunnel(file), false);
+    assert.equal(existsSync(file), false);
+  });
+
+  test('the name of a running process is read from the system', () => {
+    assert.equal(processName(process.pid), 'node');
+    assert.equal(processName(2 ** 22 + 12345), '');
+  });
+
   test('closing a live tunnel stops its process and removes the state', async () => {
     const port = await listen();
     const child = spawn(process.execPath, ['-e', 'setInterval(() => {}, 1000)'], {
@@ -151,7 +166,8 @@ describe('AC-FOUNDATION-12: the secondary laptop is a remote Docker context', ()
     const exited = new Promise((resolve) => child.once('exit', resolve));
     const file = stateFile();
     writeFileSync(file, JSON.stringify({ pid: child.pid, ports: [port] }));
-    assert.equal(await closeTunnel(file), true);
+    // The stand-in is node, not ssh: tell closeTunnel it is the tunnel.
+    assert.equal(await closeTunnel(file, () => 'ssh'), true);
     await exited;
     assert.equal(existsSync(file), false);
   });

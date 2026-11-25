@@ -14,7 +14,10 @@
 // BASE_REF=<base> HEAD_REF=<head> HEAD_REPO=<owner/name> REPO=<owner/name> node .github/scripts/branch-flow.mjs
 import { pathToFileURL } from 'node:url';
 
-/** The branches each protected branch takes, from this repository only. */
+/**
+ * The branches each protected branch takes, from this repository only.
+ * @type {Map<string, { allowed: (head: string) => boolean, names: string }>}
+ */
 const RULES = new Map([
   [
     'release',
@@ -52,7 +55,11 @@ export function branchFlowError({ base, head, headRepo, repo }) {
   return undefined;
 }
 
-/** A workflow command message with `%`, CR and LF escaped, so a branch name cannot start a new command. */
+/**
+ * A workflow command message with `%`, CR and LF escaped, so a branch name cannot start a new command.
+ * @param {string} message
+ * @returns {string}
+ */
 export function escapeCommand(message) {
   return message.replaceAll('%', '%25').replaceAll('\r', '%0D').replaceAll('\n', '%0A');
 }

@@ -26,8 +26,11 @@ services:
       - '0.25'
     ports:
       - '127.0.0.1:${BQ_MONGO_PORT:-27017}:${BQ_MONGO_PORT:-27017}'
+    # The image also declares /data/configdb a volume; it gets a name too, or every container would
+    # leave an anonymous one behind when it is removed.
     volumes:
       - mongo-data:/data/db
+      - mongo-config:/data/configdb
     healthcheck:
       # Creates the replica set on the first check; healthy once this member is the writable primary.
       test:
@@ -74,3 +77,4 @@ services:
 
 volumes:
   mongo-data:
+  mongo-config:

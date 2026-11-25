@@ -14,6 +14,7 @@ import {
   pickLocalContext,
   restoreProblems,
   restoreSnapshot,
+  saveBeforeCopy,
   SNAPSHOT_DIR,
   startMongo,
   stopMongo,
@@ -61,9 +62,27 @@ if (command === 'copy') {
       `MongoDB did not start on the secondary: is it on, on the same network as this laptop, and does ssh ${INFRA_CONTEXT} work?`,
     );
   }
+  // This laptop's data is saved first: a copy that breaks off (the network goes) would otherwise
+  // leave it half replaced, since the restore drops each collection before it fills it.
+  let broken: string | undefined;
   try {
-    await copyFromSecondary(target);
-    console.log("Copied the secondary's development MongoDB into this laptop's.");
+    const backup = await saveBeforeCopy(target);
+    console.log(`Saved this laptop's development MongoDB to ${backup} first.`);
+    try {
+      await copyFromSecondary(target);
+      console.log("Copied the secondary's development MongoDB into this laptop's.");
+    } catch (error) {
+      console.error(
+        `The copy broke off (${(error as Error).message}): putting this laptop's MongoDB back from ${backup}.`,
+      );
+      try {
+        await restoreSnapshot(target, backup);
+        broken =
+          "This laptop's development MongoDB is back as it was before the copy. Run npm run dev-data:copy again once the secondary answers.";
+      } catch (restoreError) {
+        broken = `Putting it back failed too (${(restoreError as Error).message}). The saved data is ${backup}: restore it with docker compose -p ${DEV_PROJECT} exec -T mongo mongorestore --archive --gzip --drop < "${backup}" (from the infra folder).`;
+      }
+    }
   } finally {
     if (startedHere && !stopMongo(INFRA_CONTEXT)) {
       console.error(
@@ -71,6 +90,7 @@ if (command === 'copy') {
       );
     }
   }
+  if (broken) fail(broken);
 } else {
   const found = restoreProblems(targetEndpoint, DEV_PROJECT);
   if (found.length > 0) fail(found);

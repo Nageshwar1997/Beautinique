@@ -174,11 +174,16 @@ describe('env files and git', { timeout: 60_000 }, () => {
         'backend/identity/.env.example',
         'docs/env-files.md',
         '.envrc',
+        '.ENV',
+        'backend/x/.Env.Production',
       ]),
       [
         '.env: env files never go into git; only .env.example does',
         'backend/identity/.env.production: env files never go into git; only .env.example does',
         'frontend/customer/.env.local: env files never go into git; only .env.example does',
+        '.envrc: env files never go into git; only .env.example does',
+        '.ENV: env files never go into git; only .env.example does',
+        'backend/x/.Env.Production: env files never go into git; only .env.example does',
       ],
     );
   });

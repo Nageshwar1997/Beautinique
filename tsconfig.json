@@ -5,5 +5,5 @@
     "allowJs": true,
     "checkJs": true
   },
-  "include": ["configs/**/*.ts", "configs/**/*.js", "eslint.config.js"]
+  "include": ["configs/**/*.ts", "configs/**/*.js", "eslint.config.js", ".github/scripts/**/*.mjs"]
 }

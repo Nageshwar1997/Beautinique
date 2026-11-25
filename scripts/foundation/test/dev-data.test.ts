@@ -1,8 +1,10 @@
 import assert from 'node:assert/strict';
+import { basename, dirname } from 'node:path';
 
 import { describe, test } from 'vitest';
 
 import {
+  BEFORE_COPY_FILE,
   copyProblems,
   devComposeArgs,
   dockerHostProblems,
@@ -16,6 +18,7 @@ import {
   pickLocalContext,
   restoreProblems,
   snapshotName,
+  SNAPSHOT_DIR,
   snapshotsToDelete,
 } from '../src/dev-data.ts';
 
@@ -57,6 +60,17 @@ describe('AC-FOUNDATION-13: development data moves only towards the primary lapt
       ]),
       [],
     );
+  });
+
+  test('the copy of this laptop saved before dev-data:copy is never restored as a snapshot nor rotated (QA-Q-5)', () => {
+    const before = basename(BEFORE_COPY_FILE);
+    assert.equal(dirname(BEFORE_COPY_FILE), SNAPSHOT_DIR);
+    const names = [before, 'mongo-20261121T100000Z.archive.gz'];
+    assert.equal(latestSnapshot(names), 'mongo-20261121T100000Z.archive.gz');
+    assert.equal(latestSnapshot([before]), undefined);
+    assert.deepEqual(snapshotsToDelete([before, ...names], 0), [
+      'mongo-20261121T100000Z.archive.gz',
+    ]);
   });
 
   test('the latest snapshot is the newest one, and none is found in an empty or foreign folder', () => {

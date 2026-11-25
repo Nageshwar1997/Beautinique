@@ -109,3 +109,36 @@ export function backupIgnoreProblems(repoDir: string): string[] {
   const sample = `${BACKUP_DIR}/2026-01-01/manifest.json`;
   return isIgnored(repoDir, sample) ? [] : [`${BACKUP_DIR}/: git must ignore the whole folder`];
 }
+
+// Claude Code's own guards in .claude/settings.json (CLAUDE.md): no AI attribution, and no reading
+// or editing of any env file, the backups or the All-ENVs folder through its file tools. A deny
+// beats an allow, so `.env.example` too is left to the shell (D-460).
+export const CLAUDE_SETTINGS = join('.claude', 'settings.json');
+export const REQUIRED_DENY = [
+  'Read(//**/.env)',
+  'Read(//**/.env.*)',
+  'Read(//**/All-ENVs/**)',
+  'Read(//**/backups/**)',
+  'Edit(//**/.env)',
+  'Edit(//**/.env.*)',
+  'Edit(//**/All-ENVs/**)',
+  'Edit(//**/backups/**)',
+];
+
+export interface ClaudeSettings {
+  attribution?: { commit?: unknown; pr?: unknown; sessionUrl?: unknown };
+  permissions?: { deny?: unknown };
+}
+
+export function claudeSettingsProblems(settings: ClaudeSettings): string[] {
+  const problems: string[] = [];
+  const { attribution } = settings;
+  if (attribution?.commit !== '' || attribution.pr !== '' || attribution.sessionUrl !== false) {
+    problems.push('attribution must be { commit: "", pr: "", sessionUrl: false }');
+  }
+  const deny = Array.isArray(settings.permissions?.deny) ? settings.permissions.deny : [];
+  for (const rule of REQUIRED_DENY) {
+    if (!deny.includes(rule)) problems.push(`permissions.deny lacks ${rule}`);
+  }
+  return problems;
+}

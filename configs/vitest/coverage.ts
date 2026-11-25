@@ -12,6 +12,8 @@ export interface CoverageOptions {
   area?: 'kernel' | 'standard';
   /** Globs (from the workspace folder) of money, stock and permissions code inside the workspace. */
   critical?: string[];
+  /** The workspace folder the globs start from; the current folder (Vitest's root) by default. */
+  root?: string;
 }
 
 // Vitest's `coverage.thresholds` for a workspace: a global limit for a kernel package, and one

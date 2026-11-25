@@ -13,6 +13,7 @@ import { fileURLToPath } from 'node:url';
 const GITLEAKS = process.env.GITLEAKS ?? 'gitleaks';
 const CONFIG = fileURLToPath(new URL('../../.gitleaks.toml', import.meta.url));
 
+/** @type {string[]} */
 const repos = [];
 after(() => {
   for (const repo of repos) rmSync(repo, { recursive: true, force: true });
@@ -20,9 +21,11 @@ after(() => {
 
 // A throwaway repository with one commit of `content`. The identity is the commit's own, given on
 // the command line, so no git config anywhere changes.
+/** @param {string} content */
 function repoWith(content) {
   const repo = mkdtempSync(join(tmpdir(), 'bq-secret-scan-'));
   repos.push(repo);
+  /** @param {string[]} args */
   const git = (...args) => {
     const result = spawnSync('git', args, { cwd: repo, encoding: 'utf8' });
     assert.equal(result.status, 0, result.stderr);
@@ -43,13 +46,18 @@ function repoWith(content) {
   return repo;
 }
 
+/** @param {string} repo */
 function scan(repo) {
   const result = spawnSync(
     GITLEAKS,
     ['git', '--config', CONFIG, '--redact', '--verbose', '--no-banner', '--exit-code', '1', repo],
     { encoding: 'utf8' },
   );
-  assert.notEqual(result.error?.code, 'ENOENT', `gitleaks not found at ${GITLEAKS}`);
+  assert.notEqual(
+    /** @type {NodeJS.ErrnoException | undefined} */ (result.error)?.code,
+    'ENOENT',
+    `gitleaks not found at ${GITLEAKS}`,
+  );
   return { status: result.status, output: `${result.stdout}${result.stderr}` };
 }
 
