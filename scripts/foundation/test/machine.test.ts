@@ -41,24 +41,45 @@ describe('which laptop runs the containers', () => {
 
   test('AC-FOUNDATION-15: a switch waits while the tunnel is open or containers still run', () => {
     const current = 'the secondary laptop (Docker context bq-infra)';
+    const leavingSecondary = true;
     assert.equal(
-      switchProblem({ current, tunnelOpen: true, running: 0 }),
+      switchProblem({ current, tunnelOpen: true, leavingSecondary, running: 0 }),
       'The SSH tunnel to the secondary laptop is still open: run npm run infra:down first.',
     );
     assert.equal(
-      switchProblem({ current, tunnelOpen: false, running: 2 }),
+      switchProblem({ current, tunnelOpen: false, leavingSecondary, running: 2 }),
       '2 containers are still running on the secondary laptop (Docker context bq-infra): run npm run infra:down first.',
     );
     assert.match(
-      switchProblem({ current, tunnelOpen: false, running: 1 }) ?? '',
+      switchProblem({ current, tunnelOpen: false, leavingSecondary, running: 1 }) ?? '',
       /^1 container is/,
     );
   });
 
   test('AC-FOUNDATION-15: nothing running, or the old laptop gone (an emergency), lets the switch happen', () => {
     const current = 'the secondary laptop (Docker context bq-infra)';
-    assert.equal(switchProblem({ current, tunnelOpen: false, running: 0 }), undefined);
-    assert.equal(switchProblem({ current, tunnelOpen: false, running: undefined }), undefined);
+    const leavingSecondary = true;
+    assert.equal(
+      switchProblem({ current, tunnelOpen: false, leavingSecondary, running: 0 }),
+      undefined,
+    );
+    assert.equal(
+      switchProblem({ current, tunnelOpen: false, leavingSecondary, running: undefined }),
+      undefined,
+    );
+  });
+
+  test("AC-FOUNDATION-15: a tunnel left open while this laptop's own Docker is current does not block switching to the secondary", () => {
+    const current = 'this laptop (Docker context desktop-linux)';
+    assert.equal(
+      switchProblem({ current, tunnelOpen: true, leavingSecondary: false, running: 0 }),
+      undefined,
+    );
+    // A wrong example: containers still running on this laptop still block, tunnel or not.
+    assert.match(
+      switchProblem({ current, tunnelOpen: true, leavingSecondary: false, running: 1 }) ?? '',
+      /^1 container is still running on this laptop/,
+    );
   });
 
   test('AC-FOUNDATION-15: DOCKER_HOST or DOCKER_CONTEXT in the shell stops the switch, since Docker would ignore it', () => {

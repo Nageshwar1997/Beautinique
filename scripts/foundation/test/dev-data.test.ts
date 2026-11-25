@@ -11,6 +11,8 @@ import {
   mongoDumpArgs,
   mongoPort,
   mongoRestoreArgs,
+  mongoStopArgs,
+  mongoUpArgs,
   pickLocalContext,
   restoreProblems,
   snapshotName,
@@ -131,6 +133,28 @@ describe('AC-FOUNDATION-13: development data moves only towards the primary lapt
     assert.deepEqual(args.slice(0, 2), ['--context', 'bq-infra']);
     assert.deepEqual(args.slice(-3), ['-p', 'beautinique', 'ps']);
     assert.equal(devComposeArgs(undefined, ['ps'])[0], 'compose');
+  });
+
+  test('the copy starts only MongoDB on the secondary and stops only MongoDB again, never touching the data', () => {
+    const up = devComposeArgs('bq-infra', mongoUpArgs());
+    assert.deepEqual(up.slice(0, 2), ['--context', 'bq-infra']);
+    assert.deepEqual(up.slice(-8), [
+      '--profile',
+      'backend',
+      'up',
+      '--detach',
+      '--wait',
+      '--wait-timeout',
+      '180',
+      'mongo',
+    ]);
+    assert.ok(up.includes('-p') && up.includes('beautinique'));
+    const stop = devComposeArgs('bq-infra', mongoStopArgs());
+    assert.deepEqual(stop.slice(-4), ['--profile', 'backend', 'stop', 'mongo']);
+    // Wrong examples: nothing that removes containers, networks or the data volume, and no other service.
+    for (const arg of [...mongoUpArgs(), ...mongoStopArgs()]) {
+      assert.ok(!['down', 'rm', '-v', '--volumes', 'valkey', 'mailpit'].includes(arg), arg);
+    }
   });
 
   test('the dump streams to stdout, and the restore skips the server-state databases', () => {

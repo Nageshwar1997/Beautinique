@@ -1,6 +1,6 @@
 # Docs: Beautinique
 
-> **Status:** v1.0.4 (2026-11-22). Docs ka index. Files khaali shuru hui hain; cheezein ek-ek karke, owner ki haan ke baad judti hain.
+> **Status:** v1.0.5 (2026-11-24). Docs ka index. Files khaali shuru hui hain; cheezein ek-ek karke, owner ki haan ke baad judti hain.
 
 ## Niyam
 
@@ -28,6 +28,7 @@
 | [RULES.md](RULES.md)                                                   | Kaam ke niyam                                                        |
 | [HANDOFF.md](HANDOFF.md)                                               | Abhi ki halat aur agla kaam                                          |
 | [OWNER_TASKS.md](OWNER_TASKS.md)                                       | Owner ke bahar ke kaam (account, env key, download)                  |
+| [TEMP_LAPTOP_SETUP.md](TEMP_LAPTOP_SETUP.md)                           | Temp: do laptop ke setup ke kadam (ST-8 ke baad hategi)              |
 | [LESSONS.md](LESSONS.md)                                               | Sabak aur traps                                                      |
 | [GIT_SKILLS.md](GIT_SKILLS.md)                                         | Git skills ka manual                                                 |
 | [security/THREAT_MODEL.md](security/THREAT_MODEL.md)                   | Har module ka threat model                                           |
@@ -46,6 +47,7 @@
 
 ## Change log
 
-| Version          | Date                     | Badlav                                                                            |
-| ---------------- | ------------------------ | --------------------------------------------------------------------------------- |
-| v1.0.0 se v1.0.4 | 2026-11-17 se 2026-11-22 | Docs ka index; nayi files judti gayi; har badlav ka poora itihaas git me (D-442). |
+| Version          | Date                     | Badlav                                                                                   |
+| ---------------- | ------------------------ | ---------------------------------------------------------------------------------------- |
+| v1.0.0 se v1.0.4 | 2026-11-17 se 2026-11-22 | Docs ka index; nayi files judti gayi; har badlav ka poora itihaas git me (D-442).        |
+| v1.0.5           | 2026-11-24               | Temp doc [TEMP_LAPTOP_SETUP.md](TEMP_LAPTOP_SETUP.md) juda: do laptop ke setup ke kadam. |

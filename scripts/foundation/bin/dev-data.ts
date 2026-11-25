@@ -15,6 +15,8 @@ import {
   restoreProblems,
   restoreSnapshot,
   SNAPSHOT_DIR,
+  startMongo,
+  stopMongo,
 } from '../src/dev-data.ts';
 import { DEV_PROJECT } from '../src/infra.ts';
 import { INFRA_CONTEXT } from '../src/remote-infra.ts';
@@ -45,18 +47,30 @@ if (command === 'copy') {
     targetEndpoint,
   });
   if (found.length > 0) fail(found);
-  if (!mongoIsRunning(INFRA_CONTEXT)) {
-    fail(
-      'MongoDB is not running on the secondary: start it there with npm run infra:up -- backend.',
-    );
-  }
   if (!mongoIsRunning(target)) {
     fail(
-      `MongoDB is not running on this laptop: set DOCKER_CONTEXT=${target} and start it with npm run infra:up -- backend.`,
+      `MongoDB is not running on this laptop: set DOCKER_CONTEXT=${target} and start it with npm run infra:up -- backend. ` +
+        'If infra:up is running on the secondary, its SSH tunnel holds the same ports on this laptop: stop it with npm run infra:down (that saves a snapshot) and use npm run dev-data:restore instead.',
     );
   }
-  await copyFromSecondary(target);
-  console.log("Copied the secondary's development MongoDB into this laptop's.");
+  // The secondary's MongoDB is started here, without the SSH tunnel, when it is not running, and
+  // stopped again afterwards, so the copy leaves the secondary as it found it.
+  const startedHere = !mongoIsRunning(INFRA_CONTEXT);
+  if (startedHere && !startMongo(INFRA_CONTEXT)) {
+    fail(
+      `MongoDB did not start on the secondary: is it on, on the same network as this laptop, and does ssh ${INFRA_CONTEXT} work?`,
+    );
+  }
+  try {
+    await copyFromSecondary(target);
+    console.log("Copied the secondary's development MongoDB into this laptop's.");
+  } finally {
+    if (startedHere && !stopMongo(INFRA_CONTEXT)) {
+      console.error(
+        'MongoDB could not be stopped on the secondary: stop it there with npm run infra:down.',
+      );
+    }
+  }
 } else {
   const found = restoreProblems(targetEndpoint, DEV_PROJECT);
   if (found.length > 0) fail(found);
