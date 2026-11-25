@@ -1,6 +1,6 @@
 # TASK 28: packages ka flow
 
-> **Status:** v1.0.6 (2026-11-25). Halat: implementation; ST-1 **ho gaya** (PR [#104](https://github.com/Nageshwar1997/Beautinique/pull/104)), ST-2 se ST-8 ek PR me, `scripts/packages` aur `.github/workflows/publish.yml`. Module [PROJECT_PLAN.md](../../PROJECT_PLAN.md) §3 ka `28-packages` (D-445). Progress: 18 / 18 points.
+> **Status:** v1.0.7 (2026-11-25). Halat: implementation; ST-1 **ho gaya** (PR [#104](https://github.com/Nageshwar1997/Beautinique/pull/104)), ST-2 se ST-8 ek PR me, `scripts/packages` aur `.github/workflows/publish.yml`. Module [PROJECT_PLAN.md](../../PROJECT_PLAN.md) §3 ka `28-packages` (D-445). Progress: 18 / 18 points.
 
 ## 1. Lakshya
 
@@ -74,7 +74,7 @@ Sirf naye package ki pehli baar ke liye, ya jab workflow na chal sake. Owner cha
 
 1. **Shartein:** `release` branch, saaf working tree, git identity, aur `npm whoami` se npm login (login owner khud karta hai).
 2. Jo version npm pe nahi, sirf wahi chunta hai, dependency ke kram me. Naam diye hon to chune package ki andar ki dependency (`dependencies`, `peerDependencies`, `optionalDependencies`) ka zaroori version npm pe na ho, wo bhi usi plan me pehle ("needed by a chosen package"); na npm pe na repo me ho to kuch chhapne se pehle ruke (D-445 badla). Plan dikhata hai aur "haan" maangta hai; npm ka MFA code owner khud daalta hai.
-3. Har chhape version ka git tag `@beautinique/<category>-<name>@<version>`, us commit pe. `git tag` fail ho to chetavni, tag khud banane ki command ke saath. Jo version npm pe hai par yahan uska tag nahi, uski chetavni (`git fetch --tags`; phir bhi na mile to workflow ka tag job banata hai).
+3. Har chhape version ka git tag `@beautinique/<category>-<name>@<version>`, us commit pe. `git tag` fail ho to chetavni, tag khud banane ki command ke saath. Jo version npm pe hai par yahan uska tag nahi, uski chetavni (`git fetch --tags`; phir bhi na mile to tag us commit pe jahan se wo chhapa tha, owner khud).
 4. **Ant me sandesh:** `release` branch ka naam, tags ka push owner ke kehne pe, back-merge `release` → `prerelease` (D-023), aur naye package pe trusted publisher jodne ki yaad (`npm trust`, owner).
 5. Beech me fail ho to dobara chalane pe jo chhap gaye wo chhoot jaate hain, aur baaki chhapte hain.
 
@@ -89,7 +89,7 @@ Bahar ki dependencies ke naye versions dhoondhta hai (patch, minor ya major ki s
 1. Sirf haath se (`workflow_dispatch`), aur sirf `release` branch se; baaki branch pe job chalta hi nahi.
 2. **Job 1, bina haq ke** (`contents: read`): `npm ci`, `verify`, chhapne wale packages ke tarballs, aur unka artifact.
 3. **Job 2, publish:** sirf artifact ke tarballs, trusted publishing (OIDC, `id-token: write`) aur provenance ke saath. Repo ya CI me npm ka koi token nahi. Code ka checkout nahi.
-4. **Job 3, tags** (`contents: write`): pack safal ho to chalta hai, publish beech me fail ho tab bhi (cancel pe nahi). Pack ki `tags.json` me plan ke versions aur npm pe pehle se maujood versions; har wo version tag hota hai jo npm pe hai (npm ko teen baar poochh ke) aur jiska tag remote pe nahi. Isse beech me fail hua run, ya pichhla bina tag chhapa version, agle run me tag paata hai. Summary me bane tags, `release` branch ka naam aur back-merge ki yaad.
+4. **Job 3, tags** (`contents: write`): pack safal ho to chalta hai, publish beech me fail ho tab bhi (cancel pe nahi). Pack ki `tags.json` me plan ke versions (`thisRun`) aur npm pe pehle se maujood versions. Isi run ka har wo version `release` commit pe tag hota hai jo npm pe pahunch gaya (npm ko teen baar poochh ke) aur jiska tag remote pe nahi, to beech me fail hua run bhi apne chhape versions ka tag usi run me paata hai. Npm pe pehle se maujood bina tag wale version ka tag nahi banta, sirf chetavni: wo laptop se chhapa ho sakta hai, aur uska tag us commit pe chahiye jahan se wo chhapa (code review, 2026-11-25). Summary me bane tags, `release` branch ka naam aur back-merge ki yaad.
 5. Naya package (npm pe kabhi chhapa nahi) ho to workflow mana karta hai: pehli baar laptop se (§3.6).
 6. Actions SHA pe pinned (SR-082).
 
@@ -169,4 +169,4 @@ ST-2 se ST-8 ek hi PR me (ST-1 ka PR #104 pehle merge hua), aur saare charan 0 m
 | v1.0.0 se v1.0.2 | 2026-11-22 | Module 28 ka pehla spec, 8 subtasks acceptance criteria ki link (D-445) aur charan 0 (D-446); code abhi nahi.                                                                                                            |
 | v1.0.3 se v1.0.4 | 2026-11-23 | ST-1 ka code (`scripts/packages`: CLI ka dhaancha, `build`, `npm run packages:build`; tests `scripts/packages/test/`, AC-PACKAGES-4) aur PR #104 merge: ST-1 ho gaya, 2 / 18.                                            |
 | v1.0.5           | 2026-11-24 | ST-2 se ST-8 ek PR me: fake registry aur network guard, `create`, `verify` (CI me har PR pe), `status`, `publish`, `republish`, publish workflow, `update-deps`; AC-PACKAGES-1 se 12 ke tests `scripts/packages/test/`.  |
-| v1.0.6           | 2026-11-25 | QA audit ke fixes: naam ke saath publish me zaroori dependency saath (D-445 badla), tag job beech me fail ke baad bhi, `verify` ke project wale secret patterns, network guard ke saare raaste, provenance ki line saaf. |
+| v1.0.6 se v1.0.7 | 2026-11-25 | QA audit ke fixes: naam ke saath publish me zaroori dependency saath (D-445 badla), tag job beech me fail ke baad bhi, `verify` ke project wale secret patterns, network guard ke saare raaste, provenance ki line saaf. Code review ke baad: tag job sirf isi run ke versions tag karta hai, purane bina tag wale ki chetavni. |
