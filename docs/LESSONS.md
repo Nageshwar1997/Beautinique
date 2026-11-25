@@ -1,6 +1,6 @@
 # LESSONS: Beautinique
 
-> **Status:** v1.1.5 (2026-11-25). Sabak aur traps: kya hua, kyun hua, ab kya karte hain. Faisle yahan nahi, [DECISIONS.md](DECISIONS.md) me. Cheezein ek-ek karke judengi.
+> **Status:** v1.1.6 (2026-11-25). Sabak aur traps: kya hua, kyun hua, ab kya karte hain. Faisle yahan nahi, [DECISIONS.md](DECISIONS.md) me. Cheezein ek-ek karke judengi.
 
 ## Is file me kya aayega
 
@@ -46,6 +46,13 @@ Har sabak: **Kya hua**, **Kyun**, **Ab kya karte hain**, **Kab** (date).
 - **Ab kya karte hain:** key ko bina case ka khayal kiye dhundo (`keyOf`), usi naam se likho, aur sirf tab `Path` banao jab koi PATH ho hi nahi. `scripts/foundation/test/ssh.test.ts` me `Path`, `PATH` aur `pAtH` ke test hain.
 - **Kab:** 2026-11-25.
 
+### PowerShell me `npm run <script> -- --flag` ka `--` kho jaata hai (2026-11-25)
+
+- **Kya hua:** primary laptop ke PowerShell me `npm run packages:create -- --category shared --name clock ...` chalane pe `npm error code EUNKNOWNCONFIG`, "Unknown cli flag: --category", aur pehle "`shared` is being parsed as a normal command line argument" ki chetavni aayi. Wahi command `npm.cmd run packages:create -- --category ...` se chali.
+- **Kyun:** PowerShell me `npm` asal me `npm.ps1` script hai, aur PowerShell script ko diye arguments me pehla `--` khud kha leta hai. npm ko `--` milta hi nahi, to uske aage ke flags npm ke apne flags maane jaate hain. Git Bash me `npm` seedha chalta hai, wahan ye nahi hota.
+- **Ab kya karte hain:** PowerShell me flags wali command `npm.cmd run <script> -- ...` se; Git Bash me jaise hai waise. README ki commands waise hi rehti hain (wo shell-neutral likhi hain).
+- **Kab:** 2026-11-25.
+
 ## Change log
 
 | Version          | Date       | Badlav                                                                                                                                                                                                                                      |
@@ -53,4 +60,4 @@ Har sabak: **Kya hua**, **Kyun**, **Ab kya karte hain**, **Kab** (date).
 | v1.0.0           | 2026-11-17 | Khaali file bani.                                                                                                                                                                                                                           |
 | v1.1.1           | 2026-11-23 | Pehla sabak: nayi branch ka upstream `prerelease` (`--no-track`).                                                                                                                                                                           |
 | v1.1.2           | 2026-11-25 | §2: secondary pe Ubuntu Server ke install ke sabak (Rufus, GRUB, network, Enter, partition 3).                                                                                                                                              |
-| v1.1.3 se v1.1.5 | 2026-11-25 | §3: Git Bash me ssh passphrase maangta hai; code me theek (`ssh.ts`), `.bash_profile` optional; Windows me child process ke env me PATH ke naam ka sabak. §2: internal keyboard ki atki key, `unbind` tikta nahi, `i8042.nokbd` chalta hai. |
+| v1.1.3 se v1.1.6 | 2026-11-25 | §3: Git Bash me ssh passphrase maangta hai; code me theek (`ssh.ts`), `.bash_profile` optional; Windows me child process ke env me PATH ke naam ka sabak. §2: internal keyboard ki atki key, `unbind` tikta nahi, `i8042.nokbd` chalta hai. §3: PowerShell me `npm run <script> -- --flag` ka `--` kho jaata hai, `npm.cmd` chalta hai. |
