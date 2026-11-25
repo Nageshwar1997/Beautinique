@@ -161,8 +161,20 @@ describe('what goes into the tarball', () => {
         false,
       );
     }
-    const tokenLine = ['//registry.npmjs.org/:_auth', 'Token=', '${NPM_TOKEN}'].join('');
-    expect(containsSecret(tokenLine)).toBe(false);
+    for (const value of [
+      '${NPM_TOKEN}',
+      '"${NPM_TOKEN}"',
+      '<your-token>',
+      '<your npm token>',
+      "'****'",
+      '""',
+    ]) {
+      const tokenLine = ['//registry.npmjs.org/:_auth', 'Token=', value].join('');
+      expect(containsSecret(tokenLine), value).toBe(false);
+    }
+    // A quoted real value is still a secret.
+    const quoted = ['//registry.npmjs.org/:_auth', 'Token="', 'b'.repeat(36), '"'].join('');
+    expect(containsSecret(quoted)).toBe(true);
     expect(containsSecret('see mongodb://localhost:27017/app')).toBe(false);
   });
 

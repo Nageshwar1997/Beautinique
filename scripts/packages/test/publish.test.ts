@@ -269,7 +269,7 @@ describe('publish --ci (the workflow)', () => {
     expect(await puts()).toEqual([]);
   });
 
-  it('AC-PACKAGES-10: lists for the tag job every version of the plan and every version npm already has (QA-PKG-001)', async () => {
+  it('AC-PACKAGES-10: lists for the tag job the versions of this run, and the ones npm already has only to report (QA-PKG-001)', async () => {
     // As after a run that failed midway: ids went out (without its tag), money did not.
     await registry.seed(IDS, ['0.9.0', '1.0.0']);
     await registry.seed(MONEY, ['0.9.0']);
@@ -278,9 +278,11 @@ describe('publish --ci (the workflow)', () => {
     const read = (file: string) =>
       JSON.parse(readFileSync(join(base.root, ARTIFACT_DIR, file), 'utf8')) as { tag: string }[];
     expect(read('plan.json').map((entry) => entry.tag)).toEqual([`${MONEY}@1.0.0`]);
+    // Only what this run publishes is tagged by the job; a version npm already had only gets a
+    // warning, since it may be a laptop publish whose tag belongs on another commit.
     expect(read(TAGS_FILE)).toEqual([
-      { name: IDS, version: '1.0.0', tag: `${IDS}@1.0.0` },
-      { name: MONEY, version: '1.0.0', tag: `${MONEY}@1.0.0` },
+      { name: IDS, version: '1.0.0', tag: `${IDS}@1.0.0`, thisRun: false },
+      { name: MONEY, version: '1.0.0', tag: `${MONEY}@1.0.0`, thisRun: true },
     ]);
   });
 

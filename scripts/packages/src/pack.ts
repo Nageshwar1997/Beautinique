@@ -29,12 +29,18 @@ const SECRET_CONTENT = [
 const URL_WITH_PASSWORD =
   /\b(?:mongodb(?:\+srv)?|rediss?|valkeys?|postgres(?:ql)?|amqps?|cloudinary):\/\/[^:/\s@'"`]+:([^@/\s'"`]+)@[^\s'"`]+/gi;
 const PLACEHOLDER = /^(?:<[^>]*>|\$\{[^}]*\}|\{\{[^}]*\}\}|\*+)$/;
-// An npm auth token line with a real value (not `${NPM_TOKEN}`).
-const NPM_AUTH = /_authToken\s*=\s*(?!\$\{)\S+/;
+// An npm auth token line on one line; its value is a secret unless it is empty or a placeholder. A
+// quoted value or one in <...> may hold spaces (`<your npm token>`).
+const NPM_AUTH = /_authToken[ \t]*=[ \t]*(?:"([^"\n]*)"|'([^'\n]*)'|(<[^>\n]*>)|([^\s"']+))/g;
 
 export function containsSecret(text: string): boolean {
-  if (SECRET_CONTENT.some((pattern) => pattern.test(text)) || NPM_AUTH.test(text)) return true;
-  return [...text.matchAll(URL_WITH_PASSWORD)].some((match) => !PLACEHOLDER.test(match[1] ?? ''));
+  if (SECRET_CONTENT.some((pattern) => pattern.test(text))) return true;
+  const realValue = (value: string) => value !== '' && !PLACEHOLDER.test(value);
+  return (
+    [...text.matchAll(NPM_AUTH)].some((match) =>
+      realValue(match[1] ?? match[2] ?? match[3] ?? match[4] ?? ''),
+    ) || [...text.matchAll(URL_WITH_PASSWORD)].some((match) => realValue(match[1] ?? ''))
+  );
 }
 
 const ALWAYS_PACKED = new Set(['package.json']);

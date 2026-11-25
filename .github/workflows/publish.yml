@@ -78,9 +78,10 @@ jobs:
             npm publish "publish-artifact/$tarball" --access public --provenance
           done
 
-  # Runs after the publish job even when it failed midway, so a version that went out always gets
-  # its tag: every version of tags.json that npm has and the repository has no tag for. A version
-  # an earlier run published without a tag is tagged here too.
+  # Runs after the publish job even when it failed midway, so a version this run sent out always
+  # gets its tag at the release commit. A version npm already had and the repository has no tag for
+  # is only reported: it may have gone out from the owner's laptop, whose tag belongs on the commit
+  # it was published from, not on this one.
   tag:
     name: tag / what is on npm
     needs: [pack, publish]
@@ -111,6 +112,10 @@ jobs:
             if git ls-remote --exit-code --tags origin "refs/tags/$tag" > /dev/null; then
               continue
             fi
+            if [ "$(jq -r '.thisRun' <<< "$entry")" != true ]; then
+              echo "::warning::$tag is on npm but has no tag: tag the commit it was published from (git tag $tag <commit>, then git push origin refs/tags/$tag)."
+              continue
+            fi
             found=''
             for attempt in 1 2 3; do
               if [ "$(npm view "$name@$version" version 2> /dev/null)" = "$version" ]; then
@@ -128,7 +133,9 @@ jobs:
             echo "$tag" >> tagged.txt
           done
 
+      # Also after the tag step failed midway, so the tags it did push are listed.
       - name: Summary
+        if: ${{ !cancelled() }}
         env:
           BRANCH: ${{ github.ref_name }}
         run: |

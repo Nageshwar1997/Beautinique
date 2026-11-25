@@ -10,6 +10,7 @@ const ROOT = join(import.meta.dirname, '../../..');
 const text = readFileSync(join(ROOT, '.github/workflows/publish.yml'), 'utf8');
 
 interface Step {
+  if?: string;
   uses?: string;
   run?: string;
   env?: Record<string, string>;
@@ -82,7 +83,13 @@ describe('the publish workflow', () => {
     expect(run).toContain(`publish-artifact/${TAGS_FILE}`);
     expect(run).toContain('git ls-remote --exit-code --tags origin');
     expect(run).toContain('npm view "$name@$version" version');
-    expect(run.indexOf('npm view')).toBeLessThan(run.indexOf('git tag'));
+    expect(run.indexOf('npm view')).toBeLessThan(run.indexOf('git tag "$tag"'));
+    // A version npm already had is reported, never tagged at this commit (code review, 2026-11-25).
+    expect(run).toContain("jq -r '.thisRun'");
+    expect(run.indexOf('.thisRun')).toBeLessThan(run.indexOf('npm view'));
+    // The summary lists what was tagged even when the tag step failed midway.
+    const summary = tag.steps.find((step) => step.run?.includes('GITHUB_STEP_SUMMARY'));
+    expect(summary?.if).toContain('!cancelled()');
   });
 
   it('AC-PACKAGES-9: no npm token exists anywhere', () => {

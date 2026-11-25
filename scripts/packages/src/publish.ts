@@ -36,13 +36,15 @@ export interface PlanEntry {
   tag: string;
 }
 
-// A version the tag job tags when npm has it and the repository has no such tag yet: every version
-// of the plan (also after a publish that failed midway), and every version npm already had, so a
-// version that went out without its tag gets it on the next run.
+// A version for the tag job. One this run publishes (`thisRun`) is tagged at the release commit when
+// npm has it and the repository has no such tag yet, also after a publish that failed midway. One
+// npm already had is never tagged here: it may have gone out from the owner's laptop, whose tag
+// belongs on the commit it was published from, so the job only warns that its tag is missing.
 export interface TagEntry {
   name: string;
   version: string;
   tag: string;
+  thisRun: boolean;
 }
 
 export const tagOf = (name: string, version: string) => `${name}@${version}`;
@@ -209,6 +211,7 @@ async function publishCi(options: PublishOptions): Promise<number> {
     name: row.pkg.name,
     version: row.repoVersion,
     tag: tagOf(row.pkg.name, row.repoVersion),
+    thisRun: row.state !== 'published',
   }));
   writeFileSync(join(artifact, 'plan.json'), `${JSON.stringify(plan, null, 2)}\n`);
   writeFileSync(join(artifact, TAGS_FILE), `${JSON.stringify(tags, null, 2)}\n`);
@@ -240,15 +243,15 @@ export async function publish(options: PublishOptions): Promise<number> {
   const statuses = await scopeStatuses(registry, all, selected);
   verify({ root, names: verifyNames(names, statuses), log, exec });
 
-  // A version on npm with no tag here: tags not fetched, or a workflow run that failed midway (its
-  // next run tags it, after checking npm and the remote tags).
+  // A version on npm with no tag here: tags not fetched, or a tag that was never made. Its tag belongs
+  // on the commit it was published from, which only the owner knows, so it is reported, not made.
   const untagged = statuses
     .filter((row) => row.state === 'published')
     .map((row) => tagOf(row.pkg.name, row.repoVersion))
     .filter((tag) => !hasTag(exec, root, tag));
   if (untagged.length > 0) {
     log.warn(
-      `On npm but without a tag here: ${untagged.join(', ')}. Run git fetch --tags; a tag still missing is added by the next run of the publish workflow.`,
+      `On npm but without a tag here: ${untagged.join(', ')}. Run git fetch --tags; a tag still missing goes on the commit the version was published from: git tag <tag> <commit>, then git push origin refs/tags/<tag>.`,
     );
   }
 
