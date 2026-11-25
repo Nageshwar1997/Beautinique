@@ -1,6 +1,6 @@
 # ACCEPTANCE: Beautinique
 
-> **Status:** v1.0.14 (2026-11-23). R1 ke har service aur app ke acceptance criteria (D-388 se D-395; packages ke flow ke D-445, root setup ke D-447, platform ke naye criteria D-448, frontend kit ke D-449, operations ke D-450, aur waitlist ka D-452). Cheezein ek-ek karke, owner ki haan ke baad judti hain.
+> **Status:** v1.0.15 (2026-11-25). R1 ke har service aur app ke acceptance criteria (D-388 se D-395; packages ke flow ke D-445, root setup ke D-447, platform ke naye criteria D-448, frontend kit ke D-449, operations ke D-450, aur waitlist ka D-452). Cheezein ek-ek karke, owner ki haan ke baad judti hain.
 
 ## Is file me kya aayega
 
@@ -214,7 +214,7 @@
 10. **AC-FOUNDATION-10** (OPERATIONS §11 niyam 1): **Given** dependency updates ka config, **When** mahine ka run ho, **Then** PRs `prerelease` pe, minor aur patch ek group me, major alag PR me.
 11. **AC-FOUNDATION-11** (D-073): **Given** naye root setup ka PR, **When** wo merge ho, **Then** repo me koi `*-old/` folder ya purani root config nahi, aur CI green.
 12. **AC-FOUNDATION-12** (OPERATIONS §1 niyam 12 aur 13, D-462): **Given** Docker ka remote (`ssh://`) context, **When** `infra:up` chale, **Then** published ports ke liye ek SSH tunnel alag host alias `bq-infra-tunnel` se khule, uska process id repo ke bahar yaad rahe, primary ka port pehle se liya ho to saaf error (aur kuch uthne se pehle), aur `infra:down` use band kare; local context pe kuch nahi badalta.
-13. **AC-FOUNDATION-13** (OPERATIONS §1 niyam 14, D-462): **Given** secondary pe development ka MongoDB data, **When** `infra:down`, `dev-data:copy` ya `dev-data:restore` chale, **Then** data sirf primary ki taraf jaye (secondary ya restore ke abhyaas ke project ki taraf kabhi nahi, galat misaal pe ruke), aur remote `infra:down` ke snapshots repo ke bahar aakhri 3 rahein.
+13. **AC-FOUNDATION-13** (OPERATIONS §1 niyam 14, D-462): **Given** secondary pe development ka MongoDB data, **When** `infra:down`, `dev-data:copy` ya `dev-data:restore` chale, **Then** data sirf primary ki taraf jaye (secondary ya restore ke abhyaas ke project ki taraf kabhi nahi, galat misaal pe ruke), aur remote `infra:down` ke snapshots repo ke bahar aakhri 3 rahein; `dev-data:copy` secondary ka MongoDB band ho to sirf use, bina tunnel ke, uthaye aur baad me band kare (data volume ko haath nahi).
 14. **AC-FOUNDATION-14** (OPERATIONS §1 niyam 12, D-462): **Given** tests ya mutation runs ke containers, **When** wo chalein, **Then** MongoDB ka data tmpfs me ho (volume nahi) aur sirf alag compose project me (development project pe mana), aur MongoDB ka cache 0.25 GB pe bandha ho.
 15. **AC-FOUNDATION-15** (OPERATIONS §1 niyam 12, D-462): **Given** do laptop, **When** `infra:use`, `infra:status` ya `infra:up` chale, **Then** abhi chuna laptop saaf naam se dikhe; `infra:use` containers ya tunnel chalu rehte na badle, `DOCKER_HOST` ya `DOCKER_CONTEXT` laga ho to ruke, aur purana laptop pahunch me na ho to chetavni ke saath badle.
 
@@ -373,3 +373,4 @@ Kul 235 criteria (R1).
 | ------------------ | ------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | v1.0.0 se v1.0.12  | 2026-11-21 se 2026-11-22 | R1 ke 231 acceptance criteria (packages ke 12, foundation ke 11, platform ke 4 naye, frontend kit ke 10, operations ke 6 aur waitlist ka 1 samet); har badlav ka poora itihaas git me (D-442). |
 | v1.0.13 se v1.0.14 | 2026-11-23               | AC-FOUNDATION-12 se AC-FOUNDATION-15 (do laptop, D-462): R1 ke 235 criteria.                                                                                                                   |
+| v1.0.15 | 2026-11-25 | AC-FOUNDATION-13: `dev-data:copy` secondary ka MongoDB khud bina tunnel uthaye aur band kare (D-462 badla). |

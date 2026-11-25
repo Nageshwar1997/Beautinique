@@ -15,7 +15,7 @@ import { homedir } from 'node:os';
 import { join } from 'node:path';
 import { pipeline } from 'node:stream/promises';
 
-import { COMPOSE_FILE, DEV_PROJECT } from './infra.ts';
+import { COMPOSE_FILE, DEV_PROJECT, WAIT_SECONDS } from './infra.ts';
 import { INFRA_CONTEXT, isRemoteEndpoint } from './remote-infra.ts';
 
 // Where the snapshots of `infra:down` on the secondary go: outside the repository.
@@ -85,6 +85,31 @@ export function devComposeArgs(context: string | undefined, args: string[]): str
     DEV_PROJECT,
     ...args,
   ];
+}
+
+// The development MongoDB alone, without the SSH tunnel that `infra:up` opens. The copy reaches both
+// MongoDB servers with `docker exec`, so it needs no ports on this laptop; the tunnel would take the
+// very ports (27017, 6379) that this laptop's own containers publish, and one of the two would not start.
+const MONGO_SERVICE = 'mongo';
+const MONGO_PROFILE = 'backend';
+
+// Starts only MongoDB and returns once it is healthy. Data volumes are never touched.
+export function mongoUpArgs(): string[] {
+  return [
+    '--profile',
+    MONGO_PROFILE,
+    'up',
+    '--detach',
+    '--wait',
+    '--wait-timeout',
+    String(WAIT_SECONDS),
+    MONGO_SERVICE,
+  ];
+}
+
+// Stops only MongoDB: the container and the data volume stay, so nothing is lost.
+export function mongoStopArgs(): string[] {
+  return ['--profile', MONGO_PROFILE, 'stop', MONGO_SERVICE];
 }
 
 export interface ContextRow {
@@ -181,6 +206,20 @@ export function contextEndpoint(context: string): string {
 export function mongoIsRunning(context: string | undefined): boolean {
   const output = dockerOutput(devComposeArgs(context, ['ps', '--status', 'running', '--services']));
   return (output ?? '').split(/\r?\n/).includes('mongo');
+}
+
+// Starts the development MongoDB of `context` alone (see mongoUpArgs); false when it did not come up.
+export function startMongo(context: string): boolean {
+  return (
+    spawnSync('docker', devComposeArgs(context, mongoUpArgs()), { stdio: 'inherit' }).status === 0
+  );
+}
+
+// Stops the development MongoDB of `context` again (see mongoStopArgs); false when that failed.
+export function stopMongo(context: string): boolean {
+  return (
+    spawnSync('docker', devComposeArgs(context, mongoStopArgs()), { stdio: 'inherit' }).status === 0
+  );
 }
 
 // Saves a dump of the running development MongoDB into SNAPSHOT_DIR, and keeps the newest three.

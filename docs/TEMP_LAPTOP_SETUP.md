@@ -1,12 +1,17 @@
 # TEMP: Do laptop ka setup, step by step
 
-> **Status:** v1.0.1 (2026-11-24). Temp doc: primary aur secondary laptop pe kya karna hai, kram se, ek jagah. Setup poora hone (`01-foundation` ST-8 ho gaya) ke baad ye file hategi. Kaam ki asli list OT-10 se OT-13 [OWNER_TASKS.md](OWNER_TASKS.md) me; faisle D-462 aur D-463 [DECISIONS.md](DECISIONS.md) me; roz ke niyam [OPERATIONS.md](OPERATIONS.md) §1 niyam 11 se 14 me.
+> **Status:** v1.0.3 (2026-11-25). Temp doc: primary aur secondary laptop pe kya karna hai, kram se, ek jagah. Setup poora hone (`01-foundation` ST-8 ho gaya) ke baad ye file hategi. Kaam ki asli list OT-10 se OT-13 [OWNER_TASKS.md](OWNER_TASKS.md) me; faisle D-462 aur D-463 [DECISIONS.md](DECISIONS.md) me; roz ke niyam [OPERATIONS.md](OPERATIONS.md) §1 niyam 11 se 14 me.
 
 ## 0. Pehle se ho chuka (2026-11-24)
 
 - Secondary ka CPU Core i5-6200U, AVX aur AVX2 hai (OT-9).
 - D: ka saara data `E:\D-drive-copy` aur `C:\D-drive-copy` me, har file ka SHA-256 mila; owner ne E: wali copy khol ke dekhi.
 - Secondary pe Fast Startup band; drives ke naam: D: `Ubuntu Disk`, E: `Personal Disk`, C: `Windows Disk`.
+
+## 0.1 Ho gaya (2026-11-25), aur jo asli install me seekha
+
+- Ubuntu Server 26.04.1 LTS secondary ke partition 3 pe install (legacy/BIOS mode, GRUB menu me Windows 10 bhi), Windows boot hota hai. Primary se ssh key se login, password login band, Docker aur `infra:up` / `infra:down` chal gaye, `dev-data:copy` ka dump-restore chala ([OWNER_TASKS.md](OWNER_TASKS.md)). Router nahi, network phone ka hotspot hai: fixed IP (OT-11) ki jagah secondary ka naam `bq-infra.local`, ssh hosts us naam par (OT-11 ho gaya). `infra:up` aur `dev-data:copy` ke ports ka takraav D-462 ke badle se theek: `dev-data:copy` ab secondary ka Mongo khud bina tunnel uthata hai ([HANDOFF.md](HANDOFF.md) §2). Baaki: `dev-data:restore` ki asli jaanch.
+- **Dobara install karna pade to:** Rufus me ISO Image mode, MBR, BIOS; "Grub 2.14 vs 2.16, Download required" pe **Yes** (24.04.5 legacy GRUB pe "Welcome to GRUB!" pe atka, 26.04.1 chala). Installer ko **network chahiye** (Wi-Fi ya cable): bina network "configuring apt" pe ghanton atka. Har screen pe **ek hi baar Enter**; baar-baar Enter dabane se screens skip hokar seedha "Installing system" pe chala jata hai. Keyboard laga ho tabhi Esc/F9 chalte hain; boot menu me **non-UEFI USB** wali entry chuno (UEFI wali GRUB menu me atak sakti hai).
 
 ## 1. Sabse zaroori niyam
 
@@ -77,12 +82,15 @@
    - `lsblk -f`: `sda1`, `sda2`, `sda4` abhi bhi `ntfs` hone chahiye, aur `sda3` `ext4` jo `/` pe mounted ho.
    - `ip link`: network card ka MAC (`link/ether` ke baad), router ke liye.
 
-## 4. Router: secondary ko fixed IP (OT-11)
+## 4. Secondary ka naam, fixed IP ki jagah (OT-11)
 
-1. Primary ke browser me router ka page kholo (aam taur pe `192.168.1.1` ya `192.168.0.1`; router ke neeche sticker pe likha hota hai) aur router ke admin password se login.
-2. "DHCP", "LAN" ya "Address Reservation" jaisa page dhoondo.
-3. Nayi reservation: MAC = secondary ka MAC (kadam 3.5 se), IP = wahi IP jo abhi mila. Save.
-4. Router reboot maange to karo; phir secondary pe `hostname -I` se dekho ki IP wahi hai.
+Owner ka network phone ka hotspot hai (2026-11-25), router nahi, to DHCP reservation ho nahi sakti. Hotspot har baar naya IP de sakta hai, isliye secondary ko IP ki jagah naam `bq-infra.local` se jodte hain:
+
+1. Claude secondary pe `avahi-daemon` chalu karne ka script bhejta hai (aur `ufw` me 5353/udp).
+2. Owner use `ssh.exe -t bq@<SECONDARY_IP> "sudo bash ~/bq-mdns.sh"` se chalata hai (`bq` ka password ek baar).
+3. Claude jaanchta hai ki primary se `bq-infra.local` milta hai, aur tab `%USERPROFILE%\.ssh\config` me `HostName` ko naam par karta hai.
+
+Hotspot band ho ya phone ka data khatam ho to secondary aur primary ek dusre ko nahi milenge; dono ek hi hotspot pe hone chahiye.
 
 ## 5. Primary laptop: SSH key, agent aur Docker Desktop (OT-12, OT-13)
 
@@ -139,14 +147,14 @@ Claude primary pe chalta hai aur ye kaam karta hai; har `sudo` pe secondary ke `
 3. Firewall `ufw`: sirf SSH khula.
 4. Docker Engine, Docker ke apne apt repo se (snap nahi); user `bq` docker group me.
 5. **Windows ki entry GRUB me:** `os-prober` chalu, GRUB ka menu 10 second dikhe, default Ubuntu; `update-grub` ke output me "Found Windows 10" dikhna chahiye. Iske baad laptop on karne pe menu me Ubuntu aur Windows dono.
-6. Key se login pakka hone ke baad hi ssh ka password login band.
+6. Key se login pakka hone ke baad hi ssh ka password login band (ho gaya 2026-11-25).
 
 **Primary pe:**
 
 7. `%USERPROFILE%\.ssh\config` me do host: `bq-infra` (Docker context ke liye) aur `bq-infra-tunnel` (sirf tunnel ke liye), dono `bq@<SECONDARY_IP>` aur aapki ed25519 key ke saath.
 8. Docker context `bq-infra` (`ssh://bq-infra`), phir `npm run infra:use -- secondary` aur `npm run infra:status`.
 9. Pehla asli `npm run infra:up -- backend`: containers secondary pe, tunnel primary ke `127.0.0.1` tak; phir `npm run infra:down` (snapshot primary pe `%USERPROFILE%\bq-dev-data\` me).
-10. `npm run dev-data:copy` ki jaanch (Docker Desktop thodi der haath se chalu karke). Sab theek to `01-foundation` ST-8 ho gaya, aur ye temp file hat jayegi.
+10. `npm run dev-data:copy` ki jaanch (Docker Desktop thodi der haath se chalu karke): dump aur restore chala (2026-11-25); `infra:up` ke saath ports ka takraav aaya, jo D-462 ke badle se theek hua ([HANDOFF.md](HANDOFF.md) §2). `dev-data:restore` ki asli jaanch aur code ke commit ke baad `01-foundation` ST-8 ho gaya, aur ye temp file hat jayegi.
 
 ## 7. Baad me roz
 
@@ -157,4 +165,4 @@ Claude primary pe chalta hai aur ye kaam karta hai; har `sudo` pe secondary ke `
 
 | Version | Date       | Badlav                                                                                      |
 | ------- | ---------- | ------------------------------------------------------------------------------------------- |
-| v1.0.0 se v1.0.1 | 2026-11-24 | Temp doc: primary aur secondary ke kadam, OT-10 se OT-13 aur Claude ka kaam (D-462, D-463). Ubuntu 26.04 LTS. |
+| v1.0.0 se v1.0.3 | 2026-11-24 se 2026-11-25 | Temp doc: primary aur secondary ke kadam, OT-10 se OT-13 aur Claude ka kaam (D-462, D-463). Ubuntu 26.04 LTS. Asli install ke sabak (Rufus GRUB, network, Enter) aur ab tak jo ho gaya. |
