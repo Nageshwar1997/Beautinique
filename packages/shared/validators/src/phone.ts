@@ -1,4 +1,4 @@
-import { z } from 'zod';
+import { string } from 'zod';
 
 // An Indian mobile number: 10 digits that start with 6, 7, 8 or 9, kept as +91 and the 10 digits.
 const PHONE_FORMAT = /^\+91[6-9][0-9]{9}$/;
@@ -19,8 +19,8 @@ function toInternationalFormat(value: string): string {
  * An Indian mobile number, as `+91` and 10 digits. Only the format is checked: a phone number is
  * for contact, and nothing is ever sent to it.
  */
-export const phoneSchema = z
-  .string()
+export const phoneSchema = string('Phone number is required.')
   .trim()
+  .min(1, { error: 'Phone number is required.', abort: true })
   .overwrite(toInternationalFormat)
-  .regex(PHONE_FORMAT, 'Enter a valid 10-digit mobile number.');
+  .regex(PHONE_FORMAT, 'Phone number must be a valid 10-digit Indian mobile number.');

@@ -2,11 +2,11 @@ import { describe, expect, it } from 'vitest';
 
 import { gstinCheckCharacter, gstinSchema } from '../src/gstin.ts';
 import { refusals } from './utils/refusals.ts';
+import { itAnswersRequired } from './utils/text-field-cases.ts';
 
 const ALPHABET = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ';
-const FORMAT_MESSAGE = 'gstin: Enter a valid GSTIN.';
-const CHECK_MESSAGE =
-  'gstin: The last character of this GSTIN does not match the rest. Check it for a typo.';
+const FORMAT_MESSAGE = 'gstin: GSTIN must be a valid 15-character GSTIN, like 27ABCPE1234F1ZB.';
+const CHECK_MESSAGE = 'gstin: GSTIN check character is wrong, check it for a typo.';
 
 // The PAN is made up. The check character of each was worked out by hand with the Luhn mod 36
 // rule; the first one below is a GSTIN that is widely published as an example, so the rule is
@@ -66,7 +66,6 @@ describe('gstinSchema', () => {
 
   it('AC-PLATFORM-13: a wrong shape fails with the field name and says nothing about the check', () => {
     const wrong = [
-      '', // empty
       '27ABCPE1234F1Z', // 14 characters
       '27ABCPE1234F1ZBB', // 16 characters
       'ABABCPE1234F1ZB', // the state is letters
@@ -84,12 +83,7 @@ describe('gstinSchema', () => {
     }
   });
 
-  it('AC-PLATFORM-13: refuses what is not text, with the field name', () => {
-    for (const value of [undefined, null, 27, {}, ['27ABCPE1234F1ZB']]) {
-      const [refusal] = refusals(gstinSchema, 'gstin', value);
-      expect(refusal).toMatch(/^gstin: Invalid input: expected string/);
-    }
-  });
+  itAnswersRequired(gstinSchema, 'gstin', 'GSTIN');
 
   it('CR-22: never repeats the value it refused', () => {
     const issues = gstinSchema.safeParse('27ABCPE1234F1ZA').error?.issues;

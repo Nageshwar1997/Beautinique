@@ -2,6 +2,9 @@ import { describe, expect, it } from 'vitest';
 
 import { ifscSchema } from '../src/ifsc.ts';
 import { refusals } from './utils/refusals.ts';
+import { itAnswersRequired } from './utils/text-field-cases.ts';
+
+const MESSAGE = 'IFSC code must be a valid 11-character IFSC code, like HDFC0001234.';
 
 describe('ifscSchema', () => {
   it('AC-PLATFORM-13: accepts a right IFSC code', () => {
@@ -17,7 +20,6 @@ describe('ifscSchema', () => {
 
   it('AC-PLATFORM-13: a wrong IFSC code fails with the field name', () => {
     const wrong = [
-      '', // empty
       'HDFC000123', // 10 characters
       'HDFC00012345', // 12 characters
       'HDF00001234', // the bank part is 3 letters
@@ -28,18 +30,10 @@ describe('ifscSchema', () => {
       'HDFC 001234', // a space inside
     ];
     for (const ifsc of wrong) {
-      expect(refusals(ifscSchema, 'ifsc', ifsc), ifsc).toEqual(['ifsc: Enter a valid IFSC code.']);
+      expect(refusals(ifscSchema, 'ifsc', ifsc), ifsc).toEqual([`ifsc: ${MESSAGE}`]);
     }
-    expect(refusals(ifscSchema, 'bankIfsc', 'nope')).toEqual([
-      'bankIfsc: Enter a valid IFSC code.',
-    ]);
+    expect(refusals(ifscSchema, 'bankIfsc', 'nope')).toEqual([`bankIfsc: ${MESSAGE}`]);
   });
 
-  it('AC-PLATFORM-13: refuses what is not text, with the field name', () => {
-    for (const value of [undefined, null, 12345678901, {}]) {
-      expect(refusals(ifscSchema, 'ifsc', value)[0]).toMatch(
-        /^ifsc: Invalid input: expected string/,
-      );
-    }
-  });
+  itAnswersRequired(ifscSchema, 'ifsc', 'IFSC code');
 });

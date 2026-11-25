@@ -2,8 +2,9 @@ import { describe, expect, it } from 'vitest';
 
 import { emailSchema } from '../src/email.ts';
 import { refusals } from './utils/refusals.ts';
+import { itAnswersRequired } from './utils/text-field-cases.ts';
 
-const MESSAGE = 'Enter a valid email address.';
+const MESSAGE = 'Email must be a valid email address.';
 
 describe('emailSchema', () => {
   it('AC-PLATFORM-13: accepts a right email address', () => {
@@ -24,7 +25,6 @@ describe('emailSchema', () => {
 
   it('AC-PLATFORM-13: a wrong email address fails with the field name', () => {
     const wrong = [
-      '', // empty
       'asha', // no @
       'asha@', // no domain
       '@example.com', // no name
@@ -44,21 +44,17 @@ describe('emailSchema', () => {
     expect(refusals(emailSchema, 'contactEmail', 'nope')).toEqual([`contactEmail: ${MESSAGE}`]);
   });
 
-  it('AC-PLATFORM-13: accepts 254 characters and refuses 255 (RFC 5321)', () => {
+  it('AC-PLATFORM-13: accepts 254 characters, and 255 says it is too long (RFC 5321)', () => {
     const domain = `${'b'.repeat(60)}.${'b'.repeat(60)}.${'b'.repeat(60)}.com`;
     const at254 = `${'a'.repeat(254 - domain.length - 1)}@${domain}`;
     expect(at254).toHaveLength(254);
     expect(refusals(emailSchema, 'email', at254)).toEqual([]);
-    expect(refusals(emailSchema, 'email', `a${at254}`)).toEqual([`email: ${MESSAGE}`]);
+    expect(refusals(emailSchema, 'email', `a${at254}`)).toEqual([
+      'email: Email must be at most 254 characters.',
+    ]);
   });
 
-  it('AC-PLATFORM-13: refuses what is not text, with the field name', () => {
-    for (const value of [undefined, null, 5, {}]) {
-      expect(refusals(emailSchema, 'email', value)[0]).toMatch(
-        /^email: Invalid input: expected string/,
-      );
-    }
-  });
+  itAnswersRequired(emailSchema, 'email', 'Email');
 
   it('CR-22, SR-077: never repeats the value it refused', () => {
     const issues = emailSchema.safeParse('asha.private@example').error?.issues;

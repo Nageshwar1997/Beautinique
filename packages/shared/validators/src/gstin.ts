@@ -1,4 +1,4 @@
-import { z } from 'zod';
+import { string } from 'zod';
 
 import { PAN_FORMAT } from './pan.ts';
 
@@ -47,12 +47,12 @@ function hasRightCheckCharacter(value: string): boolean {
  * A GSTIN, trimmed and in capitals: the format, a real state code, the holder's PAN and the check
  * character. A wrong check character gets its own message, because it is usually one typo.
  */
-export const gstinSchema = z
-  .string()
+export const gstinSchema = string('GSTIN is required.')
   .trim()
+  .min(1, { error: 'GSTIN is required.', abort: true })
   .toUpperCase()
-  .refine(hasGstinFormat, { error: 'Enter a valid GSTIN.', abort: true })
-  .refine(
-    hasRightCheckCharacter,
-    'The last character of this GSTIN does not match the rest. Check it for a typo.',
-  );
+  .refine(hasGstinFormat, {
+    error: 'GSTIN must be a valid 15-character GSTIN, like 27ABCPE1234F1ZB.',
+    abort: true,
+  })
+  .refine(hasRightCheckCharacter, 'GSTIN check character is wrong, check it for a typo.');

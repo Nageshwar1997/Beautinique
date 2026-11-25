@@ -2,6 +2,9 @@ import { describe, expect, it } from 'vitest';
 
 import { upiIdSchema } from '../src/upi-id.ts';
 import { refusals } from './utils/refusals.ts';
+import { itAnswersRequired } from './utils/text-field-cases.ts';
+
+const MESSAGE = 'UPI ID must be a valid UPI ID, like name@bank.';
 
 describe('upiIdSchema', () => {
   it('AC-PLATFORM-13: accepts a right UPI id', () => {
@@ -23,7 +26,6 @@ describe('upiIdSchema', () => {
 
   it('AC-PLATFORM-13: a wrong UPI id fails with the field name', () => {
     const wrong = [
-      '', // empty
       'asha.k', // no handle
       'asha.k@', // empty handle
       '@okaxis', // empty name
@@ -38,20 +40,10 @@ describe('upiIdSchema', () => {
       `asha@${'b'.repeat(65)}`, // a handle that is too long
     ];
     for (const upiId of wrong) {
-      expect(refusals(upiIdSchema, 'upiId', upiId), upiId).toEqual([
-        'upiId: Enter a valid UPI ID.',
-      ]);
+      expect(refusals(upiIdSchema, 'upiId', upiId), upiId).toEqual([`upiId: ${MESSAGE}`]);
     }
-    expect(refusals(upiIdSchema, 'payoutUpi', 'nope')).toEqual([
-      'payoutUpi: Enter a valid UPI ID.',
-    ]);
+    expect(refusals(upiIdSchema, 'payoutUpi', 'nope')).toEqual([`payoutUpi: ${MESSAGE}`]);
   });
 
-  it('AC-PLATFORM-13: refuses what is not text, with the field name', () => {
-    for (const value of [undefined, null, 9876543210, {}]) {
-      expect(refusals(upiIdSchema, 'upiId', value)[0]).toMatch(
-        /^upiId: Invalid input: expected string/,
-      );
-    }
-  });
+  itAnswersRequired(upiIdSchema, 'upiId', 'UPI ID');
 });

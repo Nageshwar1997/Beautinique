@@ -49,7 +49,9 @@ Har package `packages/<category>/<name>`, naam `@beautinique/<category>-<name>` 
 
 GSTIN (check digit ke saath), PAN, IFSC, pincode, UPI id, email aur phone (sirf format; phone pe koi message nahi). Zod schemas ke roop me, taaki contracts seedha use karein.
 
-Code ka roop: har schema trim karke ek hi standard roop me deta hai: GSTIN, PAN aur IFSC capitals me, UPI id aur email small letters me, phone `+91` aur 10 ank (Indian mobile, 6 se 9 se shuru; space, `-`, `+91`, `91` aur `0` wale roop maane jaate hain). GSTIN me state code (01 se 38, 97, 99), beech ka PAN aur Luhn mod 36 ka check character; galat check character ka apna sandesh. Galti ka sandesh field ke naam (zod path) ke saath aata hai, aur value kabhi nahi (CR-22, SR-077). `zod` peer dependency hai (CR-35).
+Code ka roop: har schema trim karke ek hi standard roop me deta hai: GSTIN, PAN aur IFSC capitals me, UPI id aur email small letters me, phone `+91` aur 10 ank (Indian mobile, 6 se 9 se shuru; space, `-`, `+91`, `91` aur `0` wale roop maane jaate hain). GSTIN me state code (01 se 38, 97, 99), beech ka PAN aur Luhn mod 36 ka check character; galat check character ka apna sandesh. Galti ka sandesh field ke naam (zod path) ke saath aata hai, aur value kabhi nahi (CR-22, SR-077). Har schema do tarah se jawab deta hai: value na ho, `null` ho, khaali ya sirf spaces ho, ya text hi na ho to "Email is required."; text ho par format galat ho to "Email must be a valid email address." jaisa (GSTIN, PAN, IFSC code, Pincode, UPI ID, Phone number ke apne naam aur udaharan). Messages seedha `string("...")`, `.min(1, ...)` aur `.regex(...)` me likhe hain.
+
+Optional field (owner, 2026-11-26): koi alag helper nahi. Jahan field chhodna ho wahan zod ka `.optional()`, aur value `null` ho sakti ho to `.nullable()` (dono ke liye `.nullish()`). `.optional()` sirf `undefined` ko chhodta hai, to form ka khaali input `""` pehle `undefined` banna chahiye (form ka kaam). `zod` peer dependency hai (CR-35).
 
 ### 3.3 `shared-money`
 
@@ -166,24 +168,24 @@ SR-008 (rate limit ka counter), SR-032 aur SR-035 (`authorize` aur scope), SR-04
 
 Har subtask lagbhag ek PR jitna. Charan [PROJECT_PLAN.md](../../PROJECT_PLAN.md) §5 se (D-446): `backend-postgres` charan 8 me, jab finance pehli baar aata hai; baaki charan 0 me. Points D-433 ke hisaab se, aur "ho gaya" sirf [RULES.md](../../RULES.md) §1 ki Definition of Done ke baad.
 
-| #     | Subtask                                                                                   | Charan | Size   | Halat |
-| ----- | ----------------------------------------------------------------------------------------- | ------ | ------ | ----- |
+| #     | Subtask                                                                                   | Charan | Size   | Halat   |
+| ----- | ----------------------------------------------------------------------------------------- | ------ | ------ | ------- |
 | ST-1  | `shared-clock` aur `shared-validators`                                                    | 0      | M (2)  | Ho gaya |
-| ST-2  | `shared-money`, property tests ke saath                                                   | 0      | L (4)  | Baaki |
-| ST-3  | `shared-contracts` ka dhaancha, route manifest, typed client ka aadhar aur `openapi.json` | 0      | L (4)  | Baaki |
-| ST-4  | `backend-config` aur `backend-logger`                                                     | 0      | M (2)  | Baaki |
-| ST-5  | `backend-server-kit`                                                                      | 0      | L (4)  | Baaki |
-| ST-6  | `backend-mongo`                                                                           | 0      | L (4)  | Baaki |
-| ST-7  | `backend-events`                                                                          | 0      | L (4)  | Baaki |
-| ST-8  | `backend-crypto`                                                                          | 0      | M (2)  | Baaki |
-| ST-9  | `backend-media` (ports aur fakes)                                                         | 0      | S (1)  | Baaki |
-| ST-10 | Mutation testing ka tooling aur kernel packages ka pehla poora run                        | 0      | M (2)  | Baaki |
-| ST-11 | `backend-postgres`                                                                        | 8      | M (2)  | Baaki |
-|       | **Kul**                                                                                   |        | **31** |       |
+| ST-2  | `shared-money`, property tests ke saath                                                   | 0      | L (4)  | Baaki   |
+| ST-3  | `shared-contracts` ka dhaancha, route manifest, typed client ka aadhar aur `openapi.json` | 0      | L (4)  | Baaki   |
+| ST-4  | `backend-config` aur `backend-logger`                                                     | 0      | M (2)  | Baaki   |
+| ST-5  | `backend-server-kit`                                                                      | 0      | L (4)  | Baaki   |
+| ST-6  | `backend-mongo`                                                                           | 0      | L (4)  | Baaki   |
+| ST-7  | `backend-events`                                                                          | 0      | L (4)  | Baaki   |
+| ST-8  | `backend-crypto`                                                                          | 0      | M (2)  | Baaki   |
+| ST-9  | `backend-media` (ports aur fakes)                                                         | 0      | S (1)  | Baaki   |
+| ST-10 | Mutation testing ka tooling aur kernel packages ka pehla poora run                        | 0      | M (2)  | Baaki   |
+| ST-11 | `backend-postgres`                                                                        | 8      | M (2)  | Baaki   |
+|       | **Kul**                                                                                   |        | **31** |         |
 
 ## Change log
 
-| Version          | Date       | Badlav                                                                                                                    |
-| ---------------- | ---------- | ------------------------------------------------------------------------------------------------------------------------- |
-| v1.0.0 se v1.0.2 | 2026-11-22 | Module 02 ka pehla spec, 12 packages, 11 subtasks (D-446) 16 criteria ki link (D-448) aur `en-IN` format; code abhi nahi. |
-| v1.0.3 | 2026-11-25 | ST-1 ka code: `shared-clock` aur `shared-validators` (`packages/shared/`), tests `RT-13`, `DS-4.5`, `AC-PLATFORM-13`; ST-1 ho gaya, 2 / 31. |
+| Version          | Date       | Badlav                                                                                                                                      |
+| ---------------- | ---------- | ------------------------------------------------------------------------------------------------------------------------------------------- |
+| v1.0.0 se v1.0.2 | 2026-11-22 | Module 02 ka pehla spec, 12 packages, 11 subtasks (D-446) 16 criteria ki link (D-448) aur `en-IN` format; code abhi nahi.                   |
+| v1.0.3           | 2026-11-25 | ST-1 ka code: `shared-clock` aur `shared-validators` (`packages/shared/`), tests `RT-13`, `DS-4.5`, `AC-PLATFORM-13`; ST-1 ho gaya, 2 / 31. |

@@ -2,8 +2,9 @@ import { describe, expect, it } from 'vitest';
 
 import { phoneSchema } from '../src/phone.ts';
 import { refusals } from './utils/refusals.ts';
+import { itAnswersRequired } from './utils/text-field-cases.ts';
 
-const MESSAGE = 'Enter a valid 10-digit mobile number.';
+const MESSAGE = 'Phone number must be a valid 10-digit Indian mobile number.';
 
 describe('phoneSchema', () => {
   it('AC-PLATFORM-13: accepts the ways people write one mobile number, and keeps +91 and 10 digits', () => {
@@ -38,7 +39,6 @@ describe('phoneSchema', () => {
 
   it('AC-PLATFORM-13: a wrong number fails with the field name', () => {
     const wrong = [
-      '', // empty
       '987654321', // 9 digits
       '98765432101', // 11 digits that do not start with 0
       '5876543210', // starts with 5
@@ -58,13 +58,7 @@ describe('phoneSchema', () => {
     expect(refusals(phoneSchema, 'contactPhone', 'nope')).toEqual([`contactPhone: ${MESSAGE}`]);
   });
 
-  it('AC-PLATFORM-13: refuses what is not text, with the field name', () => {
-    for (const value of [undefined, null, 9876543210, {}]) {
-      expect(refusals(phoneSchema, 'phone', value)[0]).toMatch(
-        /^phone: Invalid input: expected string/,
-      );
-    }
-  });
+  itAnswersRequired(phoneSchema, 'phone', 'Phone number');
 
   it('CR-22, SR-077: never repeats the value it refused', () => {
     const issues = phoneSchema.safeParse('5876543210').error?.issues;

@@ -15,23 +15,49 @@ npm install @beautinique/shared-validators zod
 Use the schemas as the fields of your own zod objects. A refusal names the field.
 
 ```ts
-import { z } from 'zod';
+import { object } from 'zod';
 import { gstinSchema, ifscSchema, phoneSchema } from '@beautinique/shared-validators';
 
-const sellerPayout = z.object({
+const sellerPayout = object({
   gstin: gstinSchema,
   ifsc: ifscSchema,
-  phone: phoneSchema,
+  phone: phoneSchema.optional(),
 });
 
 sellerPayout.parse({ gstin: ' 27abcpe1234f1zb', ifsc: 'hdfc0001234', phone: '98765 43210' });
 // { gstin: '27ABCPE1234F1ZB', ifsc: 'HDFC0001234', phone: '+919876543210' }
 
 sellerPayout.safeParse({ gstin: '27ABCPE1234F1ZA', ifsc: 'hdfc0001234', phone: '98765 43210' });
-// refused: path ['gstin'], "The last character of this GSTIN does not match the rest. Check it for a typo."
+// refused: path ['gstin'], "GSTIN check character is wrong, check it for a typo."
 ```
 
-Every schema trims what a person typed and returns it in one standard form, so the same value is stored one way. A message never repeats the value it refused, as a PAN, an email address or a phone number must not reach a log.
+Every schema trims what a person typed and returns it in one standard form, so the same value is stored one way.
+
+## Messages
+
+A refusal has the field in its `path` and a message that starts with the name of the thing, so it can be shown as it is. Every schema answers in the same two ways, here for `emailSchema`:
+
+| The value is                                            | The message                            |
+| ------------------------------------------------------- | -------------------------------------- |
+| missing, `null`, empty, only spaces, or not text at all | `Email is required.`                   |
+| text, but not a right email address                     | `Email must be a valid email address.` |
+
+The names are `Email`, `GSTIN`, `PAN`, `IFSC code`, `Pincode`, `UPI ID` and `Phone number`. A format message says what is expected, with an example where it helps (`PAN must be a valid 10-character PAN, like ABCPE1234F.`). One mistake gives one message. A message never repeats the value it refused, as a PAN, an email address or a phone number must not reach a log.
+
+## Optional fields
+
+Every schema asks for its value. Where a field may be left out, use zod's own `.optional()`, and `.nullable()` where the value may also be `null` (`.nullish()` for both):
+
+```ts
+const contact = object({
+  email: emailSchema.optional(), // a string or missing
+  phone: phoneSchema.nullable(), // a string or null
+});
+```
+
+Each one lets through only what it names. `emailSchema.optional()` takes a string or a missing value, and still refuses `null` (`Email is required.`). `phoneSchema.nullable()` takes a string or `null`, but not a missing value. If `null` must not be allowed, add nothing: a schema without `.nullable()` refuses it.
+
+`.optional()` lets only `undefined` through. A form that sends `""` for an input the person left empty gets `Email is required.` back, so such an input is turned into `undefined` before it reaches the schema (that is the form's job, not the schema's).
 
 ## API
 

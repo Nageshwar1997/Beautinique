@@ -2,6 +2,9 @@ import { describe, expect, it } from 'vitest';
 
 import { pincodeSchema } from '../src/pincode.ts';
 import { refusals } from './utils/refusals.ts';
+import { itAnswersRequired } from './utils/text-field-cases.ts';
+
+const MESSAGE = 'Pincode must be 6 digits and cannot start with 0.';
 
 describe('pincodeSchema', () => {
   it('AC-PLATFORM-13: accepts a right pincode', () => {
@@ -17,7 +20,6 @@ describe('pincodeSchema', () => {
 
   it('AC-PLATFORM-13: a wrong pincode fails with the field name', () => {
     const wrong = [
-      '', // empty
       '40001', // 5 digits
       '4000011', // 7 digits
       '000001', // never starts with 0
@@ -27,20 +29,10 @@ describe('pincodeSchema', () => {
       '४००००१', // Devanagari digits
     ];
     for (const pincode of wrong) {
-      expect(refusals(pincodeSchema, 'pincode', pincode), pincode).toEqual([
-        'pincode: Enter a valid 6-digit pincode.',
-      ]);
+      expect(refusals(pincodeSchema, 'pincode', pincode), pincode).toEqual([`pincode: ${MESSAGE}`]);
     }
-    expect(refusals(pincodeSchema, 'shipToPincode', 'nope')).toEqual([
-      'shipToPincode: Enter a valid 6-digit pincode.',
-    ]);
+    expect(refusals(pincodeSchema, 'shipToPincode', 'nope')).toEqual([`shipToPincode: ${MESSAGE}`]);
   });
 
-  it('AC-PLATFORM-13: refuses what is not text, with the field name', () => {
-    for (const value of [undefined, null, 400001, {}]) {
-      expect(refusals(pincodeSchema, 'pincode', value)[0]).toMatch(
-        /^pincode: Invalid input: expected string/,
-      );
-    }
-  });
+  itAnswersRequired(pincodeSchema, 'pincode', 'Pincode');
 });
