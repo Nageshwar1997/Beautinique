@@ -1,6 +1,6 @@
 # TEMP: Do laptop ka setup, step by step
 
-> **Status:** v1.0.3 (2026-11-25). Temp doc: primary aur secondary laptop pe kya karna hai, kram se, ek jagah. Setup poora hone (`01-foundation` ST-8 ho gaya) ke baad ye file hategi. Kaam ki asli list OT-10 se OT-13 [OWNER_TASKS.md](OWNER_TASKS.md) me; faisle D-462 aur D-463 [DECISIONS.md](DECISIONS.md) me; roz ke niyam [OPERATIONS.md](OPERATIONS.md) §1 niyam 11 se 14 me.
+> **Status:** v1.0.4 (2026-11-25). Temp doc: primary aur secondary laptop pe kya karna hai, kram se, ek jagah. Setup poora hone (`01-foundation` ST-8 ho gaya) ke baad ye file hategi. Kaam ki asli list OT-10 se OT-13 [OWNER_TASKS.md](OWNER_TASKS.md) me; faisle D-462 aur D-463 [DECISIONS.md](DECISIONS.md) me; roz ke niyam [OPERATIONS.md](OPERATIONS.md) §1 niyam 11 se 14 me.
 
 ## 0. Pehle se ho chuka (2026-11-24)
 
@@ -10,7 +10,7 @@
 
 ## 0.1 Ho gaya (2026-11-25), aur jo asli install me seekha
 
-- Ubuntu Server 26.04.1 LTS secondary ke partition 3 pe install (legacy/BIOS mode, GRUB menu me Windows 10 bhi), Windows boot hota hai. Primary se ssh key se login, password login band, Docker aur `infra:up` / `infra:down` chal gaye, `dev-data:copy` ka dump-restore chala ([OWNER_TASKS.md](OWNER_TASKS.md)). Router nahi, network phone ka hotspot hai: fixed IP (OT-11) ki jagah secondary ka naam `bq-infra.local`, ssh hosts us naam par (OT-11 ho gaya). `infra:up` aur `dev-data:copy` ke ports ka takraav D-462 ke badle se theek: `dev-data:copy` ab secondary ka Mongo khud bina tunnel uthata hai ([HANDOFF.md](HANDOFF.md) §2). Baaki: `dev-data:restore` ki asli jaanch.
+- Ubuntu Server 26.04.1 LTS secondary ke partition 3 pe install (legacy/BIOS mode, GRUB menu me Windows 10 bhi), Windows boot hota hai. Primary se ssh key se login, password login band, Docker aur `infra:up` / `infra:down` chal gaye, `dev-data:copy` ka dump-restore chala ([OWNER_TASKS.md](OWNER_TASKS.md)). Router nahi, network phone ka hotspot hai: fixed IP (OT-11) ki jagah secondary ka naam `bq-infra.local`, ssh hosts us naam par (OT-11 ho gaya). `infra:up` aur `dev-data:copy` ke ports ka takraav D-462 ke badle se theek: `dev-data:copy` ab secondary ka Mongo khud bina tunnel uthata hai ([HANDOFF.md](HANDOFF.md) §2). `dev-data:restore` aur tunnel ke upar asli jawab bhi chal gaye.
 - **Dobara install karna pade to:** Rufus me ISO Image mode, MBR, BIOS; "Grub 2.14 vs 2.16, Download required" pe **Yes** (24.04.5 legacy GRUB pe "Welcome to GRUB!" pe atka, 26.04.1 chala). Installer ko **network chahiye** (Wi-Fi ya cable): bina network "configuring apt" pe ghanton atka. Har screen pe **ek hi baar Enter**; baar-baar Enter dabane se screens skip hokar seedha "Installing system" pe chala jata hai. Keyboard laga ho tabhi Esc/F9 chalte hain; boot menu me **non-UEFI USB** wali entry chuno (UEFI wali GRUB menu me atak sakti hai).
 
 ## 1. Sabse zaroori niyam
@@ -154,7 +154,7 @@ Claude primary pe chalta hai aur ye kaam karta hai; har `sudo` pe secondary ke `
 7. `%USERPROFILE%\.ssh\config` me do host: `bq-infra` (Docker context ke liye) aur `bq-infra-tunnel` (sirf tunnel ke liye), dono `bq@<SECONDARY_IP>` aur aapki ed25519 key ke saath.
 8. Docker context `bq-infra` (`ssh://bq-infra`), phir `npm run infra:use -- secondary` aur `npm run infra:status`.
 9. Pehla asli `npm run infra:up -- backend`: containers secondary pe, tunnel primary ke `127.0.0.1` tak; phir `npm run infra:down` (snapshot primary pe `%USERPROFILE%\bq-dev-data\` me).
-10. `npm run dev-data:copy` ki jaanch (Docker Desktop thodi der haath se chalu karke): dump aur restore chala (2026-11-25); `infra:up` ke saath ports ka takraav aaya, jo D-462 ke badle se theek hua ([HANDOFF.md](HANDOFF.md) §2). `dev-data:restore` ki asli jaanch aur code ke commit ke baad `01-foundation` ST-8 ho gaya, aur ye temp file hat jayegi.
+10. `npm run dev-data:copy` ki jaanch (Docker Desktop thodi der haath se chalu karke): dump aur restore chala (2026-11-25); `infra:up` ke saath ports ka takraav aaya, jo D-462 ke badle se theek hua ([HANDOFF.md](HANDOFF.md) §2). PR ke CI aur merge ke baad `01-foundation` ST-8 ho gaya, aur ye temp file hat jayegi.
 
 ## 7. Baad me roz
 
@@ -165,4 +165,4 @@ Claude primary pe chalta hai aur ye kaam karta hai; har `sudo` pe secondary ke `
 
 | Version | Date       | Badlav                                                                                      |
 | ------- | ---------- | ------------------------------------------------------------------------------------------- |
-| v1.0.0 se v1.0.3 | 2026-11-24 se 2026-11-25 | Temp doc: primary aur secondary ke kadam, OT-10 se OT-13 aur Claude ka kaam (D-462, D-463). Ubuntu 26.04 LTS. Asli install ke sabak (Rufus GRUB, network, Enter) aur ab tak jo ho gaya. |
+| v1.0.0 se v1.0.4 | 2026-11-24 se 2026-11-25 | Temp doc: primary aur secondary ke kadam, OT-10 se OT-13 aur Claude ka kaam (D-462, D-463). Ubuntu 26.04 LTS. Asli install ke sabak (Rufus GRUB, network, Enter) aur ab tak jo ho gaya. |

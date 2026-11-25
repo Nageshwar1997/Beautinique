@@ -109,6 +109,16 @@ export function portsTakenMessage(taken: number[], tunnel: TunnelState | undefin
   return `Port ${list} on 127.0.0.1 is already taken, so the secondary's containers cannot be reached there. ${cause}`;
 }
 
+// The tunnel belongs to the secondary's containers, so only `down` on the secondary closes it. A `down`
+// on this laptop's own Docker leaves it open and says so, because the secondary's containers keep running.
+export function tunnelLeftOpenNotice(
+  tunnel: TunnelState | undefined,
+  open: boolean,
+): string | undefined {
+  if (!tunnel || !open) return undefined;
+  return `An SSH tunnel to the secondary laptop (process ${String(tunnel.pid)}) is still open, and its containers keep running: run npm run infra:use -- secondary, then npm run infra:down.`;
+}
+
 async function waitForPorts(ports: number[], timeoutMs: number): Promise<boolean> {
   const deadline = Date.now() + timeoutMs;
   while (Date.now() < deadline) {

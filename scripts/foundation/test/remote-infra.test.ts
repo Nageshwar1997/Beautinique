@@ -17,6 +17,7 @@ import {
   takenPorts,
   TUNNEL_HOST,
   tunnelArgs,
+  tunnelLeftOpenNotice,
 } from '../src/remote-infra.ts';
 
 const servers: Server[] = [];
@@ -93,6 +94,15 @@ describe('AC-FOUNDATION-12: the secondary laptop is a remote Docker context', ()
     // A wrong example: no forward listens on a network address, and Docker's own alias is not used.
     assert.ok(args.every((arg) => !/^0\.0\.0\.0|^\*:/.test(arg)));
     assert.ok(!args.includes('bq-infra'));
+  });
+
+  test("AC-FOUNDATION-12: a down on this laptop's own Docker leaves the secondary's tunnel open and says so", () => {
+    const notice = tunnelLeftOpenNotice({ pid: 4242, ports: [27017] }, true) ?? '';
+    assert.match(notice, /tunnel to the secondary laptop \(process 4242\) is still open/);
+    assert.match(notice, /npm run infra:use -- secondary, then npm run infra:down/);
+    // Wrong examples: no tunnel remembered, or a remembered one that no longer answers, says nothing.
+    assert.equal(tunnelLeftOpenNotice(undefined, false), undefined);
+    assert.equal(tunnelLeftOpenNotice({ pid: 4242, ports: [27017] }, false), undefined);
   });
 
   test('a port already taken on this laptop is found, and the error says what to do', async () => {

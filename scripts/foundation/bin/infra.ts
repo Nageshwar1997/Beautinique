@@ -30,6 +30,7 @@ import {
   publishedPorts,
   readTunnel,
   takenPorts,
+  tunnelLeftOpenNotice,
 } from '../src/remote-infra.ts';
 
 const [command, ...profiles] = process.argv.slice(2);
@@ -88,6 +89,7 @@ if (command === 'use') {
   const problem = switchProblem({
     current: before,
     tunnelOpen: (await tunnelState()).open,
+    leavingSecondary: isRemoteEndpoint(dockerEndpoint()),
     running,
   });
   if (problem) fail(problem);
@@ -181,4 +183,13 @@ if (command === 'up' && ports.length > 0) {
     fail((error as Error).message);
   }
 }
-if (command === 'down' && (await closeTunnel())) console.log('SSH tunnel closed.');
+if (command === 'down') {
+  if (remote) {
+    if (await closeTunnel()) console.log('SSH tunnel closed.');
+  } else {
+    // A `down` on this laptop's own Docker never closes the secondary's tunnel.
+    const { tunnel, open } = await tunnelState();
+    const notice = tunnelLeftOpenNotice(tunnel, open);
+    if (notice) console.warn(notice);
+  }
+}

@@ -34,13 +34,22 @@ export interface SwitchState {
   current: string;
   /** Whether the SSH tunnel to the secondary still answers on its ports. */
   tunnelOpen: boolean;
+  /** Whether the current laptop is the secondary: the tunnel is its own, so only then does it block leaving. */
+  leavingSecondary: boolean;
   /** Running containers of the development project on the current laptop; undefined if it cannot be reached. */
   running: number | undefined;
 }
 
-// Switching while something still runs would leave containers or a tunnel nobody stops.
-export function switchProblem({ current, tunnelOpen, running }: SwitchState): string | undefined {
-  if (tunnelOpen) {
+// Switching while something still runs would leave containers or a tunnel nobody stops. A tunnel left
+// open while this laptop's own Docker is current (Docker Desktop resets the context when it starts)
+// belongs to the secondary, so switching to the secondary is the way to stop it, not blocked.
+export function switchProblem({
+  current,
+  tunnelOpen,
+  leavingSecondary,
+  running,
+}: SwitchState): string | undefined {
+  if (tunnelOpen && leavingSecondary) {
     return 'The SSH tunnel to the secondary laptop is still open: run npm run infra:down first.';
   }
   if (running !== undefined && running > 0) {
