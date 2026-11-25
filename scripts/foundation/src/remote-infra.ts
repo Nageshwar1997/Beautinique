@@ -148,9 +148,15 @@ export async function openTunnel(
   writeFileSync(stateFile, JSON.stringify({ pid: child.pid, ports } satisfies TunnelState));
 
   if (!(await waitForPorts(ports, TUNNEL_WAIT_MS))) {
-    await closeTunnel(stateFile);
+    // The tunnel not opening is the news; a problem closing what did open comes second.
+    let closing = '';
+    try {
+      await closeTunnel(stateFile);
+    } catch (error) {
+      closing = `\n${(error as Error).message}`;
+    }
     throw new Error(
-      `The SSH tunnel (${TUNNEL_HOST}) did not open its ports. Check that ${TUNNEL_HOST} is in ~/.ssh/config, the secondary is on and the ssh agent holds the key.`,
+      `The SSH tunnel (${TUNNEL_HOST}) did not open its ports. Check that ${TUNNEL_HOST} is in ~/.ssh/config, the secondary is on and the ssh agent holds the key.${closing}`,
     );
   }
 }
@@ -179,15 +185,24 @@ export function processName(pid: number): string {
 
 // Closes the tunnel the state file remembers. The process is only killed while its ports still
 // answer and it is still ssh, so a process id that was reused (after a reboot, or after ssh exited
-// when the network went) is never touched, even when another program now holds those ports. True
-// if a tunnel was closed.
+// when the network went) is never touched, even when another program now holds those ports. When
+// its name cannot be read at all, nothing is killed and the state stays, so a live tunnel is never
+// forgotten: the error says how to check it. True if a tunnel was closed.
 export async function closeTunnel(
   stateFile: string = TUNNEL_STATE_FILE,
   nameOf: (pid: number) => string = processName,
 ): Promise<boolean> {
   const tunnel = readTunnel(stateFile);
   if (!tunnel) return false;
-  const alive = (await takenPorts(tunnel.ports)).length > 0 && nameOf(tunnel.pid) === 'ssh';
+  const answering = (await takenPorts(tunnel.ports)).length > 0;
+  const name = answering ? nameOf(tunnel.pid) : '';
+  if (answering && name === '') {
+    const pid = String(tunnel.pid);
+    throw new Error(
+      `The SSH tunnel's ports still answer, but the name of process ${pid} could not be read, so it is left running and still remembered in ${stateFile}. Check it (tasklist /FI "PID eq ${pid}"); if it is ssh, stop it (Stop-Process -Id ${pid}) and run npm run infra:down again.`,
+    );
+  }
+  const alive = answering && name === 'ssh';
   if (alive) {
     try {
       process.kill(tunnel.pid);

@@ -27,6 +27,16 @@ export const KEEP_SNAPSHOTS = 3;
 // a snapshot's, so `dev-data:restore` and the rotation never pick it.
 export const BEFORE_COPY_FILE = join(SNAPSHOT_DIR, 'before-copy.archive.gz');
 
+// That saved copy, kept aside when putting it back failed too: the next `dev-data:copy` waits until
+// it is restored (`npm run dev-data:restore -- --before-copy`) or deleted, so it is never replaced
+// by a dump of the half-copied data.
+export const KEPT_BEFORE_COPY_FILE = join(SNAPSHOT_DIR, 'before-copy.kept.archive.gz');
+
+// The file `dev-data:restore -- --before-copy` restores: the kept one first, else the last saved one.
+export function beforeCopySource(exists: (path: string) => boolean): string | undefined {
+  return [KEPT_BEFORE_COPY_FILE, BEFORE_COPY_FILE].find((path) => exists(path));
+}
+
 const SNAPSHOT_NAME = /^mongo-\d{8}T\d{6}Z\.archive\.gz$/;
 
 export function snapshotName(date: Date): string {

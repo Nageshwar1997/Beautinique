@@ -5,10 +5,12 @@ import { describe, test } from 'vitest';
 
 import {
   BEFORE_COPY_FILE,
+  beforeCopySource,
   copyProblems,
   devComposeArgs,
   dockerHostProblems,
   KEEP_SNAPSHOTS,
+  KEPT_BEFORE_COPY_FILE,
   latestSnapshot,
   mongoDumpArgs,
   mongoPort,
@@ -71,6 +73,25 @@ describe('AC-FOUNDATION-13: development data moves only towards the primary lapt
     assert.deepEqual(snapshotsToDelete([before, ...names], 0), [
       'mongo-20261121T100000Z.archive.gz',
     ]);
+  });
+
+  test('--before-copy restores the kept copy first, else the last saved one, and neither is a snapshot (code review)', () => {
+    assert.equal(dirname(KEPT_BEFORE_COPY_FILE), SNAPSHOT_DIR);
+    assert.equal(latestSnapshot([basename(KEPT_BEFORE_COPY_FILE)]), undefined);
+    assert.deepEqual(snapshotsToDelete([basename(KEPT_BEFORE_COPY_FILE)], 0), []);
+    const both = new Set([KEPT_BEFORE_COPY_FILE, BEFORE_COPY_FILE]);
+    assert.equal(
+      beforeCopySource((path) => both.has(path)),
+      KEPT_BEFORE_COPY_FILE,
+    );
+    assert.equal(
+      beforeCopySource((path) => path === BEFORE_COPY_FILE),
+      BEFORE_COPY_FILE,
+    );
+    assert.equal(
+      beforeCopySource(() => false),
+      undefined,
+    );
   });
 
   test('the latest snapshot is the newest one, and none is found in an empty or foreign folder', () => {

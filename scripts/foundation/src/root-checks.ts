@@ -112,7 +112,7 @@ export function backupIgnoreProblems(repoDir: string): string[] {
 
 // Claude Code's own guards in .claude/settings.json (CLAUDE.md): no AI attribution, and no reading
 // or editing of any env file, the backups or the All-ENVs folder through its file tools. A deny
-// beats an allow, so `.env.example` too is left to the shell (D-460).
+// beats an allow, so `.env.example` too is left to the shell (D-441).
 export const CLAUDE_SETTINGS = join('.claude', 'settings.json');
 export const REQUIRED_DENY = [
   'Read(//**/.env)',

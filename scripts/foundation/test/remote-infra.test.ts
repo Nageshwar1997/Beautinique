@@ -153,6 +153,17 @@ describe('AC-FOUNDATION-12: the secondary laptop is a remote Docker context', ()
     assert.equal(existsSync(file), false);
   });
 
+  test('a tunnel whose process name cannot be read is neither killed nor forgotten (code review)', async () => {
+    const port = await listen();
+    const file = stateFile();
+    writeFileSync(file, JSON.stringify({ pid: process.pid, ports: [port] }));
+    await assert.rejects(
+      closeTunnel(file, () => ''),
+      /could not be read/,
+    );
+    assert.equal(existsSync(file), true);
+  });
+
   test('the name of a running process is read from the system', () => {
     assert.equal(processName(process.pid), 'node');
     assert.equal(processName(2 ** 22 + 12345), '');

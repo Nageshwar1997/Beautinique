@@ -186,7 +186,11 @@ if (command === 'up' && ports.length > 0) {
 }
 if (command === 'down') {
   if (remote) {
-    if (await closeTunnel()) console.log('SSH tunnel closed.');
+    try {
+      if (await closeTunnel()) console.log('SSH tunnel closed.');
+    } catch (error) {
+      fail((error as Error).message);
+    }
   } else {
     // A `down` on this laptop's own Docker never closes the secondary's tunnel.
     const { tunnel, open } = await tunnelState();
