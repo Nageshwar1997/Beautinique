@@ -1,6 +1,6 @@
 # LESSONS: Beautinique
 
-> **Status:** v1.1.3 (2026-11-25). Sabak aur traps: kya hua, kyun hua, ab kya karte hain. Faisle yahan nahi, [DECISIONS.md](DECISIONS.md) me. Cheezein ek-ek karke judengi.
+> **Status:** v1.1.4 (2026-11-25). Sabak aur traps: kya hua, kyun hua, ab kya karte hain. Faisle yahan nahi, [DECISIONS.md](DECISIONS.md) me. Cheezein ek-ek karke judengi.
 
 ## Is file me kya aayega
 
@@ -29,7 +29,14 @@ Har sabak: **Kya hua**, **Kyun**, **Ab kya karte hain**, **Kab** (date).
 
 - **Kya hua:** VS Code ke Git Bash terminal me `npm run infra:status` Docker ke check pe atka aur "Git for Windows" ka dialog "Enter passphrase for key '/c/Users/<aap>/.ssh/id_ed25519'" aaya, jabki Windows ke ssh-agent me key thi (service `Running`, `Automatic`).
 - **Kyun:** Git Bash me PATH me Git ka apna `ssh` (`C:\Program Files\Git\usr\bin\ssh.exe`) Windows ke `ssh.exe` se pehle aata hai. Wo Windows ke agent ko nahi dekhta, to key ke liye passphrase maangta hai; background tunnel ke liye wo dialog kaam bhi nahi karta. Docker context aur `infra:up` ka tunnel dono `ssh` PATH se lete hain. BatchMode me Windows ka `ssh.exe` seedha `bq-infra` likh ke aaya, Git ka `Permission denied (publickey)`.
-- **Ab kya karte hain:** `C:\Users\<aap>\.bash_profile` me `export PATH="/c/Windows/System32/OpenSSH:$PATH"` (aur `~/.bashrc` load karne ki line): har naya Git Bash terminal Windows ka ssh pehle chalata hai. Ya PowerShell. Dialog aaye to **Cancel**, passphrase wahan nahi ([OPERATIONS.md](OPERATIONS.md) §1 niyam 16 (3)).
+- **Ab kya karte hain:** code me theek kiya: `scripts/foundation/src/ssh.ts` Windows par docker aur tunnel ke har child process me Windows ka OpenSSH PATH me sabse pehle rakhta hai, to `npm run infra:*` aur `dev-data:*` kisi bhi terminal se chalte hain. Haath se type kiye `ssh` aur `docker` ke liye `C:\Users\<aap>\.bash_profile` me `export PATH="/c/Windows/System32/OpenSSH:$PATH"` (aur `~/.bashrc` load karne ki line), optional. Dialog aaye to **Cancel**, passphrase wahan nahi ([OPERATIONS.md](OPERATIONS.md) §1 niyam 16 (3)).
+- **Kab:** 2026-11-25.
+
+### Windows me child process ke env me PATH ka naam (2026-11-25)
+
+- **Kya hua:** koi failure nahi dekha; `ssh.ts` likhte waqt pakda gaya. Windows ke `process.env` me PATH ka naam `Path` hota hai.
+- **Kyun:** Windows ka environment case-insensitive hai, par `{ ...process.env }` ki copy ek saada JavaScript object hai, jisme keys case-sensitive hain. Copy me `PATH` set karne se ya `env.PATH` padhne se `Path` chhoot jaata hai, aur child ko do PATH ya galat PATH milta hai.
+- **Ab kya karte hain:** key ko bina case ka khayal kiye dhundo (`keyOf`), usi naam se likho, aur sirf tab `Path` banao jab koi PATH ho hi nahi. `scripts/foundation/test/ssh.test.ts` me `Path`, `PATH` aur `pAtH` ke test hain.
 - **Kab:** 2026-11-25.
 
 ## Change log
@@ -39,4 +46,4 @@ Har sabak: **Kya hua**, **Kyun**, **Ab kya karte hain**, **Kab** (date).
 | v1.0.0  | 2026-11-17 | Khaali file bani.                                                                              |
 | v1.1.1  | 2026-11-23 | Pehla sabak: nayi branch ka upstream `prerelease` (`--no-track`).                              |
 | v1.1.2  | 2026-11-25 | §2: secondary pe Ubuntu Server ke install ke sabak (Rufus, GRUB, network, Enter, partition 3). |
-| v1.1.3  | 2026-11-25 | §3: Git Bash me ssh passphrase maangta hai (Windows ka ssh pehle PATH me).                     |
+| v1.1.3 se v1.1.4 | 2026-11-25 | §3: Git Bash me ssh passphrase maangta hai; code me theek (`ssh.ts`), `.bash_profile` optional; Windows me child process ke env me PATH ke naam ka sabak. |
