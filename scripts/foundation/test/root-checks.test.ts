@@ -11,7 +11,11 @@ import {
   BACKUP_DIR,
   backupIgnoreProblems,
   backupProblems,
+  CLAUDE_SETTINGS,
+  type ClaudeSettings,
+  claudeSettingsProblems,
   oldCodeProblems,
+  REQUIRED_DENY,
   type RootManifest,
   versionPinProblems,
   workspacePrivacyProblems,
@@ -136,6 +140,27 @@ describe('workspace privacy', () => {
       'backend/identity: must have "private": true',
       'packages/shared/ids: packages are public on npm, remove "private": true',
     ]);
+  });
+});
+
+describe('.claude/settings.json (CLAUDE.md)', () => {
+  test('no AI attribution, and Claude may not read or edit any env file, the backups or All-ENVs (QA-TOOL-001)', () => {
+    const settings = readJson(join(ROOT, CLAUDE_SETTINGS)) as ClaudeSettings;
+    assert.deepEqual(claudeSettingsProblems(settings), []);
+  });
+
+  test('a deny list without the broad env rule, or with attribution on, is caught', () => {
+    assert.deepEqual(
+      claudeSettingsProblems({
+        attribution: { commit: 'Co-Authored-By', pr: '', sessionUrl: false },
+        permissions: { deny: REQUIRED_DENY.filter((rule) => !rule.includes('.env.*')) },
+      }),
+      [
+        'attribution must be { commit: "", pr: "", sessionUrl: false }',
+        'permissions.deny lacks Read(//**/.env.*)',
+        'permissions.deny lacks Edit(//**/.env.*)',
+      ],
+    );
   });
 });
 

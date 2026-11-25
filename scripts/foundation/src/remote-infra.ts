@@ -3,10 +3,10 @@
 // 127.0.0.1 and reach the primary's 127.0.0.1 through one SSH tunnel, opened under its own ssh host
 // alias, so Docker's own ssh connections never try to bind a port.
 import { spawn, spawnSync } from 'node:child_process';
-import { mkdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
+import { mkdirSync, readFileSync, readlinkSync, rmSync, writeFileSync } from 'node:fs';
 import { createConnection } from 'node:net';
 import { homedir } from 'node:os';
-import { dirname, join } from 'node:path';
+import { basename, dirname, join } from 'node:path';
 
 import type { ComposeConfig } from './infra.ts';
 
@@ -148,19 +148,72 @@ export async function openTunnel(
   writeFileSync(stateFile, JSON.stringify({ pid: child.pid, ports } satisfies TunnelState));
 
   if (!(await waitForPorts(ports, TUNNEL_WAIT_MS))) {
-    await closeTunnel(stateFile);
+    // The tunnel not opening is the news; a problem closing what did open comes second.
+    let closing = '';
+    try {
+      await closeTunnel(stateFile);
+    } catch (error) {
+      closing = `\n${(error as Error).message}`;
+    }
     throw new Error(
-      `The SSH tunnel (${TUNNEL_HOST}) did not open its ports. Check that ${TUNNEL_HOST} is in ~/.ssh/config, the secondary is on and the ssh agent holds the key.`,
+      `The SSH tunnel (${TUNNEL_HOST}) did not open its ports. Check that ${TUNNEL_HOST} is in ~/.ssh/config, the secondary is on and the ssh agent holds the key.${closing}`,
     );
   }
 }
 
+// The program name of a running process, lower case and without .exe; empty when there is none.
+export function processName(pid: number): string {
+  // Linux: the executable itself, since `ps -o comm=` shows the main thread's name, which a program
+  // may change (Node calls it MainThread). A process of another user or none at all reads as ''.
+  if (process.platform === 'linux') {
+    try {
+      return basename(readlinkSync(`/proc/${String(pid)}/exe`))
+        .replace(/ \(deleted\)$/, '')
+        .toLowerCase();
+    } catch {
+      return '';
+    }
+  }
+  const result =
+    process.platform === 'win32'
+      ? spawnSync('tasklist', ['/FI', `PID eq ${String(pid)}`, '/FO', 'CSV', '/NH'], {
+          encoding: 'utf8',
+          windowsHide: true,
+        })
+      : spawnSync('ps', ['-p', String(pid), '-o', 'comm='], { encoding: 'utf8' });
+  if (result.status !== 0) return '';
+  const first = result.stdout.trim().split(/\r?\n/)[0] ?? '';
+  // tasklist: "ssh.exe","1234",...; with no such process it prints an INFO line, not a quoted name.
+  const name = process.platform === 'win32' ? (/^"([^"]+)"/.exec(first)?.[1] ?? '') : first;
+  return (
+    name
+      .toLowerCase()
+      .replace(/\.exe$/, '')
+      .split(/[\\/]/)
+      .at(-1) ?? ''
+  );
+}
+
 // Closes the tunnel the state file remembers. The process is only killed while its ports still
-// answer, so a process id that was reused after a reboot is never touched. True if a tunnel was closed.
-export async function closeTunnel(stateFile: string = TUNNEL_STATE_FILE): Promise<boolean> {
+// answer and it is still ssh, so a process id that was reused (after a reboot, or after ssh exited
+// when the network went) is never touched, even when another program now holds those ports. When
+// its name cannot be read at all, nothing is killed and the state stays, so a live tunnel is never
+// forgotten: the error says how to check it. True if a tunnel was closed.
+export async function closeTunnel(
+  stateFile: string = TUNNEL_STATE_FILE,
+  nameOf: (pid: number) => string = processName,
+): Promise<boolean> {
   const tunnel = readTunnel(stateFile);
   if (!tunnel) return false;
-  const alive = (await takenPorts(tunnel.ports)).length > 0;
+  const answering = (await takenPorts(tunnel.ports)).length > 0;
+  const name = answering ? nameOf(tunnel.pid) : '';
+  if (answering && name === '') {
+    const pid = String(tunnel.pid);
+    throw new Error(
+      `The SSH tunnel's ports still answer, but the name of process ${pid} could not be read, so it is left running and still remembered in ${stateFile}. Check it (tasklist /FI "PID eq ${pid}"); if it is ssh, stop it (Stop-Process -Id ${pid}) and run npm run infra:down again.`,
+    );
+  }
+  const alive = answering && name === 'ssh';
   if (alive) {
     try {
       process.kill(tunnel.pid);

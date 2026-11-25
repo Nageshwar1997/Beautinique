@@ -1,12 +1,16 @@
 import assert from 'node:assert/strict';
+import { basename, dirname } from 'node:path';
 
 import { describe, test } from 'vitest';
 
 import {
+  BEFORE_COPY_FILE,
+  beforeCopySource,
   copyProblems,
   devComposeArgs,
   dockerHostProblems,
   KEEP_SNAPSHOTS,
+  KEPT_BEFORE_COPY_FILE,
   latestSnapshot,
   mongoDumpArgs,
   mongoPort,
@@ -16,6 +20,7 @@ import {
   pickLocalContext,
   restoreProblems,
   snapshotName,
+  SNAPSHOT_DIR,
   snapshotsToDelete,
 } from '../src/dev-data.ts';
 
@@ -56,6 +61,36 @@ describe('AC-FOUNDATION-13: development data moves only towards the primary lapt
         'mongo-20261121T100000Z.archive.gz.partial',
       ]),
       [],
+    );
+  });
+
+  test('the copy of this laptop saved before dev-data:copy is never restored as a snapshot nor rotated (QA-Q-5)', () => {
+    const before = basename(BEFORE_COPY_FILE);
+    assert.equal(dirname(BEFORE_COPY_FILE), SNAPSHOT_DIR);
+    const names = [before, 'mongo-20261121T100000Z.archive.gz'];
+    assert.equal(latestSnapshot(names), 'mongo-20261121T100000Z.archive.gz');
+    assert.equal(latestSnapshot([before]), undefined);
+    assert.deepEqual(snapshotsToDelete([before, ...names], 0), [
+      'mongo-20261121T100000Z.archive.gz',
+    ]);
+  });
+
+  test('--before-copy restores the kept copy first, else the last saved one, and neither is a snapshot (code review)', () => {
+    assert.equal(dirname(KEPT_BEFORE_COPY_FILE), SNAPSHOT_DIR);
+    assert.equal(latestSnapshot([basename(KEPT_BEFORE_COPY_FILE)]), undefined);
+    assert.deepEqual(snapshotsToDelete([basename(KEPT_BEFORE_COPY_FILE)], 0), []);
+    const both = new Set([KEPT_BEFORE_COPY_FILE, BEFORE_COPY_FILE]);
+    assert.equal(
+      beforeCopySource((path) => both.has(path)),
+      KEPT_BEFORE_COPY_FILE,
+    );
+    assert.equal(
+      beforeCopySource((path) => path === BEFORE_COPY_FILE),
+      BEFORE_COPY_FILE,
+    );
+    assert.equal(
+      beforeCopySource(() => false),
+      undefined,
     );
   });
 

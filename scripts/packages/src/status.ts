@@ -12,6 +12,8 @@ export interface PackageStatus {
   repoVersion: string;
   /** The highest version on npm; undefined for a new package. */
   npmVersion: string | undefined;
+  /** Every version on npm; empty for a new package. */
+  npmVersions: string[];
   state: PackageState;
 }
 
@@ -38,6 +40,7 @@ export async function packageStatuses(
       pkg,
       repoVersion: version,
       npmVersion: packument ? highestVersion(packument.versions) : undefined,
+      npmVersions: packument?.versions ?? [],
       state,
     });
   }

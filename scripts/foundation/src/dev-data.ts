@@ -12,7 +12,7 @@ import {
   rmSync,
 } from 'node:fs';
 import { homedir } from 'node:os';
-import { join } from 'node:path';
+import { dirname, join } from 'node:path';
 import { pipeline } from 'node:stream/promises';
 
 import { COMPOSE_FILE, DEV_PROJECT, WAIT_SECONDS } from './infra.ts';
@@ -21,6 +21,21 @@ import { INFRA_CONTEXT, isRemoteEndpoint } from './remote-infra.ts';
 // Where the snapshots of `infra:down` on the secondary go: outside the repository.
 export const SNAPSHOT_DIR = join(homedir(), 'bq-dev-data');
 export const KEEP_SNAPSHOTS = 3;
+
+// The primary's own development MongoDB, saved just before `dev-data:copy` overwrites it, so a copy
+// that breaks off (the network goes) can put it back. One file, replaced each time; its name is not
+// a snapshot's, so `dev-data:restore` and the rotation never pick it.
+export const BEFORE_COPY_FILE = join(SNAPSHOT_DIR, 'before-copy.archive.gz');
+
+// That saved copy, kept aside when putting it back failed too: the next `dev-data:copy` waits until
+// it is restored (`npm run dev-data:restore -- --before-copy`) or deleted, so it is never replaced
+// by a dump of the half-copied data.
+export const KEPT_BEFORE_COPY_FILE = join(SNAPSHOT_DIR, 'before-copy.kept.archive.gz');
+
+// The file `dev-data:restore -- --before-copy` restores: the kept one first, else the last saved one.
+export function beforeCopySource(exists: (path: string) => boolean): string | undefined {
+  return [KEPT_BEFORE_COPY_FILE, BEFORE_COPY_FILE].find((path) => exists(path));
+}
 
 const SNAPSHOT_NAME = /^mongo-\d{8}T\d{6}Z\.archive\.gz$/;
 
@@ -222,18 +237,13 @@ export function stopMongo(context: string): boolean {
   );
 }
 
-// Saves a dump of the running development MongoDB into SNAPSHOT_DIR, and keeps the newest three.
-// `context` undefined means the current Docker context. Returns the file's name.
-export async function snapshotMongo(
-  context: string | undefined,
-  dir: string = SNAPSHOT_DIR,
-  now: Date = new Date(),
-): Promise<string> {
+// Dumps the running development MongoDB of `context` into `file`, through a .partial file, so a
+// dump that breaks off never leaves a half file under the real name.
+async function dumpMongo(context: string | undefined, file: string): Promise<void> {
   if (!mongoIsRunning(context))
     throw new Error('MongoDB is not running, so there is nothing to save.');
-  mkdirSync(dir, { recursive: true });
-  const name = snapshotName(now);
-  const partial = join(dir, `${name}.partial`);
+  mkdirSync(dirname(file), { recursive: true });
+  const partial = `${file}.partial`;
   const dump = spawn('docker', devComposeArgs(context, mongoDumpArgs(mongoPort())), {
     stdio: ['ignore', 'pipe', 'inherit'],
   });
@@ -245,9 +255,29 @@ export async function snapshotMongo(
     rmSync(partial, { force: true });
     throw error;
   }
-  renameSync(partial, join(dir, name));
+  renameSync(partial, file);
+}
+
+// Saves a dump of the running development MongoDB into SNAPSHOT_DIR, and keeps the newest three.
+// `context` undefined means the current Docker context. Returns the file's name.
+export async function snapshotMongo(
+  context: string | undefined,
+  dir: string = SNAPSHOT_DIR,
+  now: Date = new Date(),
+): Promise<string> {
+  const name = snapshotName(now);
+  await dumpMongo(context, join(dir, name));
   for (const old of snapshotsToDelete(readdirSync(dir))) rmSync(join(dir, old), { force: true });
   return name;
+}
+
+// Saves this laptop's development MongoDB as BEFORE_COPY_FILE, before `dev-data:copy` overwrites it.
+export async function saveBeforeCopy(
+  context: string,
+  file: string = BEFORE_COPY_FILE,
+): Promise<string> {
+  await dumpMongo(context, file);
+  return file;
 }
 
 // Restores one snapshot into the running development MongoDB of `context`.

@@ -102,6 +102,22 @@ test('AC-FOUNDATION-2: infra:up backend starts only MongoDB and Valkey, ready an
   assert.equal(mongo.status, 0, `${String(mongo.stdout)}\n${String(mongo.stderr)}`);
   assert.match(String(mongo.stdout), /committed 1/);
 
+  // In memory and without any volume, so removing the container leaves nothing behind (QA-FND-003).
+  const id = String(inProject(['ps', '-q', 'mongo']).stdout).trim();
+  const inspect = spawnSync('docker', ['inspect', '--format', '{{json .Mounts}}', id], {
+    env: ENV,
+    encoding: 'utf8',
+  });
+  assert.equal(inspect.status, 0, inspect.stderr);
+  const mounts = (JSON.parse(inspect.stdout) as { Type: string; Destination: string }[]).map(
+    (mount) => `${mount.Type}:${mount.Destination}`,
+  );
+  assert.deepEqual(
+    mounts.filter((mount) => mount.startsWith('volume:')),
+    [],
+    mounts.join(', '),
+  );
+
   // Valkey has Render's memory limit (25 MB) and the policy BullMQ needs.
   const valkey = inProject([
     'exec',
@@ -121,6 +137,8 @@ test('AC-FOUNDATION-2: infra:up backend starts only MongoDB and Valkey, ready an
   // infra:down stops and removes every container of the project.
   const down = infra('down');
   assert.equal(down.status, 0, `${down.stdout}\n${down.stderr}`);
+  // A test project's down never dumps the development data or rotates its snapshots (QA-Q-11).
+  assert.doesNotMatch(`${down.stdout}${down.stderr}`, /MongoDB snapshot/);
   const left = inProject(['--profile', '*', 'ps', '--all', '--quiet']);
   assert.equal(String(left.stdout).trim(), '');
 }, 300_000);

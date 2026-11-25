@@ -4,5 +4,7 @@
 services:
   mongo:
     volumes: !override []
+    # Both of the image's volume paths, so the container leaves no anonymous volume behind.
     tmpfs:
       - /data/db
+      - /data/configdb

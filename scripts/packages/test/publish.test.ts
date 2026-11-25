@@ -3,7 +3,13 @@ import { join } from 'node:path';
 
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
-import { ARTIFACT_DIR, publish, type PlanEntry, type PublishOptions } from '../src/publish.ts';
+import {
+  ARTIFACT_DIR,
+  publish,
+  TAGS_FILE,
+  type PlanEntry,
+  type PublishOptions,
+} from '../src/publish.ts';
 import { status } from '../src/status.ts';
 import { startFakeRegistry, type FakeRegistry } from './utils/fake-registry.ts';
 import { addPackage, fixtureRepo, recordingLogger } from './utils/fixture-repo.ts';
@@ -158,6 +164,57 @@ describe('publish from the laptop', () => {
     expect(await registry.versionsOf(IDS)).toEqual(['1.0.0']);
   });
 
+  it('AC-PACKAGES-7: a named package goes out with the own package it needs when npm lacks the needed version (QA-PKG-003)', async () => {
+    const { base, out } = setup();
+    await publish({ ...base, names: [MONEY] });
+    expect(await puts()).toEqual([`PUT /${IDS}`, `PUT /${MONEY}`]);
+    expect(out.join('\n')).toContain(`${IDS}@1.0.0  (new package, needed by a chosen package)`);
+    // What goes out with it is verified too.
+    expect(out.join('\n')).toContain(`Verified 2 package(s): ${IDS}, ${MONEY}`);
+  });
+
+  it('AC-PACKAGES-7: a named package goes out alone when npm already has a version it can use', async () => {
+    await registry.seed(IDS, ['1.0.0']);
+    const { base } = setup();
+    await publish({ ...base, names: [MONEY] });
+    expect(await puts()).toEqual([`PUT /${MONEY}`]);
+  });
+
+  it('stops before publishing when a needed own version is neither on npm nor in the repository', async () => {
+    const { root, env, base } = setup();
+    const manifestPath = join(root, 'packages/shared/money/package.json');
+    const manifest = JSON.parse(readFileSync(manifestPath, 'utf8')) as Record<string, unknown>;
+    manifest.dependencies = { [IDS]: '^2.0.0' };
+    writeFileSync(manifestPath, JSON.stringify(manifest, null, 2));
+    git(root, ['commit', '-q', '-am', 'needs ids 2'], env);
+    await expect(publish({ ...base, names: [MONEY] })).rejects.toMatchObject({
+      code: 'PUBLISH_DEPENDENCY_MISSING',
+      message: expect.stringContaining(`${IDS} ^2.0.0`) as string,
+    });
+    expect(await puts()).toEqual([]);
+  });
+
+  it('warns about a version that is on npm but has no tag here (QA-PKG-001)', async () => {
+    await registry.seed(IDS, ['1.0.0']);
+    const { base, err } = setup();
+    await publish(base);
+    expect(err.join('\n')).toContain(`On npm but without a tag here: ${IDS}@1.0.0`);
+  });
+
+  it('says so when git cannot make the tag of a published version', async () => {
+    await registry.seed(IDS, ['1.0.0']);
+    const { root, env, base, out, err } = setup();
+    const exec: PublishOptions['exec'] = (command, args, options) =>
+      command === 'git' && args[0] === 'tag'
+        ? { status: 128, stdout: '', stderr: 'fatal: cannot lock ref' }
+        : base.exec(command, args, options);
+    await publish({ ...base, exec });
+    expect(await registry.versionsOf(MONEY)).toEqual(['1.0.0']);
+    expect(tags(root, env)).toEqual([]);
+    expect(err.join('\n')).toContain(`${MONEY}@1.0.0 is on npm, but git could not tag it`);
+    expect(out.join('\n')).toContain(`Published 1 version(s): ${MONEY}@1.0.0`);
+  });
+
   it('reminds the owner of the tags, the back-merge and npm trust for a new package', async () => {
     const { base, out } = setup();
     await publish(base);
@@ -210,6 +267,23 @@ describe('publish --ci (the workflow)', () => {
     ]);
     expect(existsSync(join(base.root, ARTIFACT_DIR, plan[0]?.tarball ?? 'x'))).toBe(true);
     expect(await puts()).toEqual([]);
+  });
+
+  it('AC-PACKAGES-10: lists for the tag job the versions of this run, and the ones npm already has only to report (QA-PKG-001)', async () => {
+    // As after a run that failed midway: ids went out (without its tag), money did not.
+    await registry.seed(IDS, ['0.9.0', '1.0.0']);
+    await registry.seed(MONEY, ['0.9.0']);
+    const { base } = setup();
+    await publish({ ...base, ci: true, env: inActions });
+    const read = (file: string) =>
+      JSON.parse(readFileSync(join(base.root, ARTIFACT_DIR, file), 'utf8')) as { tag: string }[];
+    expect(read('plan.json').map((entry) => entry.tag)).toEqual([`${MONEY}@1.0.0`]);
+    // Only what this run publishes is tagged by the job; a version npm already had only gets a
+    // warning, since it may be a laptop publish whose tag belongs on another commit.
+    expect(read(TAGS_FILE)).toEqual([
+      { name: IDS, version: '1.0.0', tag: `${IDS}@1.0.0`, thisRun: false },
+      { name: MONEY, version: '1.0.0', tag: `${MONEY}@1.0.0`, thisRun: true },
+    ]);
   });
 
   it('writes an empty plan when every version is already on npm', async () => {

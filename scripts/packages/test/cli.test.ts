@@ -4,6 +4,7 @@ import { parseArguments } from '../src/args.ts';
 import { CliError } from '../src/cli-error.ts';
 import { main } from '../src/cli.ts';
 import { confirm } from '../src/confirm.ts';
+import { exec, shellLine } from '../src/exec.ts';
 import { createLogger } from '../src/logger.ts';
 import { fakeExec, fixtureRepo, recordingLogger } from './utils/fixture-repo.ts';
 
@@ -21,6 +22,23 @@ describe('parseArguments', () => {
 
   it('refuses a flag it does not know, with a hint', () => {
     expect(() => parseArguments(['build', '--force'])).toThrow(CliError);
+  });
+});
+
+describe('shell commands (QA-Q-9)', () => {
+  it('quotes an argument with spaces and passes plain ones as they are', () => {
+    expect(shellLine('npm', ['run', 'a b', '--filter=@beautinique/shared-x...'])).toBe(
+      'npm run "a b" --filter=@beautinique/shared-x...',
+    );
+  });
+
+  it('refuses a quote, a % or a line break, which cmd.exe would act on', () => {
+    for (const arg of ['a"b', '%PATH%', 'a\nb', 'a\rb']) {
+      expect(() => shellLine('npm', ['view', arg])).toThrow(
+        expect.objectContaining({ code: 'EXEC_UNSAFE_ARGUMENT' }),
+      );
+    }
+    expect(() => exec('npm', ['view', '%PATH%'], { cwd: '.' })).toThrow(/a shell would act on/);
   });
 });
 

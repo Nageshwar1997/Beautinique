@@ -22,6 +22,7 @@
     ],
     "deny": [
       "Read(//**/.env)",
+      "Read(//**/.env.*)",
       "Read(//**/.env.local)",
       "Read(//**/.env.*.local)",
       "Read(//**/.env.development)",
@@ -32,6 +33,7 @@
       "Read(//**/All-ENVs/**)",
       "Read(//**/backups/**)",
       "Edit(//**/.env)",
+      "Edit(//**/.env.*)",
       "Edit(//**/.env.local)",
       "Edit(//**/.env.*.local)",
       "Edit(//**/.env.development)",

@@ -70,18 +70,22 @@ jobs:
           name: publish-artifact
           path: publish-artifact
 
-      # In dependency order, as the plan lists them. A failure stops here and no tag is made; the
-      # next run publishes what is left.
+      # In dependency order, as the plan lists them. A failure stops here; the next run publishes
+      # what is left, and the tag job still tags what did go out.
       - name: Publish the tarballs
         run: |
           jq -r '.[].tarball' publish-artifact/plan.json | while read -r tarball; do
             npm publish "publish-artifact/$tarball" --access public --provenance
           done
 
+  # Runs after the publish job even when it failed midway, so a version this run sent out always
+  # gets its tag at the release commit. A version npm already had and the repository has no tag for
+  # is only reported: it may have gone out from the owner's laptop, whose tag belongs on the commit
+  # it was published from, not on this one.
   tag:
-    name: tag / what was published
+    name: tag / what is on npm
     needs: [pack, publish]
-    if: github.ref == 'refs/heads/release'
+    if: ${{ !cancelled() && needs.pack.result == 'success' && github.ref == 'refs/heads/release' }}
     runs-on: ubuntu-latest
     timeout-minutes: 10
     permissions:
@@ -94,23 +98,51 @@ jobs:
           name: publish-artifact
           path: publish-artifact
 
-      - name: Tag the published versions
+      # npm can take a little while to list a version it has just taken, so each one is asked up
+      # to three times; one it still lacks (its publish failed) gets no tag.
+      - name: Tag the versions on npm
         env:
           RELEASE_SHA: ${{ github.sha }}
         run: |
-          jq -r '.[].tag' publish-artifact/plan.json | while read -r tag; do
+          : > tagged.txt
+          jq -c '.[]' publish-artifact/tags.json | while read -r entry; do
+            name=$(jq -r '.name' <<< "$entry")
+            version=$(jq -r '.version' <<< "$entry")
+            tag=$(jq -r '.tag' <<< "$entry")
+            if git ls-remote --exit-code --tags origin "refs/tags/$tag" > /dev/null; then
+              continue
+            fi
+            if [ "$(jq -r '.thisRun' <<< "$entry")" != true ]; then
+              echo "::warning::$tag is on npm but has no tag: tag the commit it was published from (git tag $tag <commit>, then git push origin refs/tags/$tag)."
+              continue
+            fi
+            found=''
+            for attempt in 1 2 3; do
+              if [ "$(npm view "$name@$version" version 2> /dev/null)" = "$version" ]; then
+                found=yes
+                break
+              fi
+              [ "$attempt" = 3 ] || sleep 10
+            done
+            if [ -z "$found" ]; then
+              echo "::warning::$name@$version is not on npm, so it gets no tag."
+              continue
+            fi
             git tag "$tag" "$RELEASE_SHA"
             git push origin "refs/tags/$tag"
+            echo "$tag" >> tagged.txt
           done
 
+      # Also after the tag step failed midway, so the tags it did push are listed.
       - name: Summary
+        if: ${{ !cancelled() }}
         env:
           BRANCH: ${{ github.ref_name }}
         run: |
           {
-            echo "### Published from \`$BRANCH\`"
+            echo "### Tagged from \`$BRANCH\`"
             echo
-            jq -r '.[] | "- `\(.tag)`"' publish-artifact/plan.json
+            if [ -s tagged.txt ]; then sed 's/.*/- `&`/' tagged.txt; else echo "No new tag."; fi
             echo
             echo "Next: open a PR that back-merges \`$BRANCH\` into \`prerelease\` (docs/OPERATIONS.md §2)."
           } >> "$GITHUB_STEP_SUMMARY"

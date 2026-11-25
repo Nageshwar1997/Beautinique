@@ -224,6 +224,20 @@ describe('republish', () => {
     expect(git(root, ['status', '--porcelain'], env)).toBe('');
     await close();
   });
+
+  it('removes a CHANGELOG.md it made when the lockfile cannot be updated (QA-PKG-004)', async () => {
+    const { root, env, base, close } = await setup();
+    git(root, ['rm', '-q', 'packages/shared/ids/CHANGELOG.md'], env);
+    git(root, ['commit', '-q', '-m', 'docs: drop the changelog'], env);
+    const { exec } = gitOnlyExec(root, env);
+    const failing: RepublishOptions['exec'] = (command, args, options) =>
+      command === 'npm' ? { status: 1, stdout: '', stderr: 'boom' } : exec(command, args, options);
+    await expect(
+      republish({ ...base, names: ['shared-ids'], exec: failing }),
+    ).rejects.toMatchObject({ code: 'REPUBLISH_LOCK_FAILED' });
+    expect(git(root, ['status', '--porcelain'], env)).toBe('');
+    await close();
+  });
 });
 
 describe('ranges', () => {

@@ -1,4 +1,6 @@
 import assert from 'node:assert/strict';
+import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from 'node:fs';
+import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 
 import * as prettier from 'prettier';
@@ -8,6 +10,7 @@ import { ROOT } from '../src/constants/paths.ts';
 import {
   ALL_SUCCEEDED,
   checkJobProblems,
+  localActionProblems,
   readWorkflows,
   type Workflow,
   workflowProblems,
@@ -56,6 +59,49 @@ describe('every workflow (SR-082)', () => {
       workflowProblems('list.yml', { on: ['pull_request_target'], permissions: {} }),
       ['list.yml: pull_request_target is not allowed'],
     );
+  });
+
+  test('AC-FOUNDATION-7: a workflow_run trigger and a job with write-all or read-all are caught (QA-Q-7)', () => {
+    const bad: Workflow = {
+      on: { workflow_run: { workflows: ['CI'] } },
+      permissions: {},
+      jobs: {
+        deploy: { permissions: 'write-all', 'timeout-minutes': 5, steps: [] },
+        read: { permissions: 'read-all', 'timeout-minutes': 5, steps: [] },
+        fine: { permissions: { contents: 'read' }, 'timeout-minutes': 5, steps: [] },
+      },
+    };
+    assert.deepEqual(workflowProblems('bad.yml', bad), [
+      'bad.yml: workflow_run is not allowed',
+      'bad.yml: job deploy must name its rights one by one, not permissions: write-all',
+      'bad.yml: job read must name its rights one by one, not permissions: read-all',
+    ]);
+  });
+
+  test("AC-FOUNDATION-7: the repository's own composite actions pin what they use too (QA-Q-7)", () => {
+    assert.deepEqual(localActionProblems(), []);
+    const dir = mkdtempSync(join(tmpdir(), 'bq-actions-'));
+    try {
+      mkdirSync(join(dir, 'setup'));
+      writeFileSync(
+        join(dir, 'setup', 'action.yml'),
+        [
+          'runs:',
+          '  using: composite',
+          '  steps:',
+          '    - uses: actions/setup-node@v7',
+          `    - uses: actions/cache@${PIN}`,
+          '    - uses: ./.github/actions/other',
+          '    - run: echo hi',
+          '      shell: bash',
+        ].join('\n'),
+      );
+      assert.deepEqual(localActionProblems(dir), [
+        'actions/setup: uses actions/setup-node@v7, which is not pinned to a commit SHA',
+      ]);
+    } finally {
+      rmSync(dir, { recursive: true, force: true });
+    }
   });
 });
 
