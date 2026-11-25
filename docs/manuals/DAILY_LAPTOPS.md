@@ -1,6 +1,6 @@
 # MANUAL: Roz ka kaam, dono laptop on aur off (owner)
 
-> **Status:** v1.0.3 (2026-11-25). Roz subah dono laptop on karne aur raat ko band karne ke kadam, aur har kadam andar kya karta hai. Niyam aur kaaran [OPERATIONS.md](../OPERATIONS.md) §1 niyam 11 se 14 me; yahan sirf kram.
+> **Status:** v1.0.4 (2026-11-25). Roz subah dono laptop on karne aur raat ko band karne ke kadam, aur har kadam andar kya karta hai. Niyam aur kaaran [OPERATIONS.md](../OPERATIONS.md) §1 niyam 11 se 16 me; yahan sirf kram.
 
 ## Kaun sa laptop kya karta hai
 
@@ -14,7 +14,7 @@ Dono laptop **ek hi hotspot** (phone) pe hone chahiye. Secondary `bq-infra.local
 ## Subah: dono on karna
 
 1. **Phone ka hotspot on karo.**
-2. **Secondary on karo** (power button). GRUB ka menu 10 second dikhta hai: kuch mat dabao, default **Ubuntu** hai. Windows 10 chahiye ho tabhi uski entry chuno (roz ka kaam nahi). Login nahi karna: ye server hai, primary se hi chalta hai. Boot me lagbhag 1 se 2 minute lagte hain (HDD). Boot hone ke baad lid band rakh sakte ho.
+2. **Secondary on karo** (power button). GRUB ka menu 10 second dikhta hai: kuch mat dabao, default **Ubuntu** hai. Windows 10 chahiye ho tabhi uski entry chuno (roz ka kaam nahi). Login nahi karna: ye server hai, primary se hi chalta hai. Boot me lagbhag 1 se 2 minute lagte hain (HDD). Boot hone ke baad lid band rakh sakte ho (neeche "Secondary ka screen aur lid").
    - **Andar kya hota hai:** Ubuntu uthta hai, SSH, Docker Engine aur `bq-infra.local` naam wali service apne aap chalu. Containers apne aap **nahi** uthte; wo kadam 6 me.
 3. **Primary on karo**, Windows me sign-in karo, aur wahi hotspot juda ho. Docker Desktop **mat kholo**.
    - **Andar kya hota hai:** ssh-agent apne aap chalta hai aur key yaad rakhta hai (passphrase dobara nahi). Docker ka current context `bq-infra` hi rehta hai.
@@ -51,6 +51,14 @@ Dono laptop **ek hi hotspot** (phone) pe hone chahiye. Secondary `bq-infra.local
 - Beech ka chhota break: kuch mat karo, containers aur tunnel chalte rahte hain.
 - Containers kisi bhi waqt `npm run infra:status` se dekho.
 - Primary restart karni ho, ya hotspot beech me gaya aur wapas aaya: tunnel toot sakta hai. `npm run infra:down` phir `npm run infra:up -- backend`.
+
+## Secondary ka screen aur lid
+
+- **Screen on rakhna zaroori nahi.** `infra:up` chalne ke baad **lid band kar do**: laptop chalta rahta hai (lid band hone pe bhi chalne ki setting, [OPERATIONS.md](../OPERATIONS.md) §1 niyam 15). Charger laga rahe, battery ke bharose nahi.
+- **Lock ya sleep ki zaroorat nahi, aur ho bhi nahi sakta:** Ubuntu Server me desktop nahi, to lock screen nahi; sleep, suspend aur hibernate band hain. Sleep ho jaye to containers aur tunnel band ho jaate.
+- **Power button mat dabana:** default me wo laptop ko shutdown kar deta hai. Band karna ho to neeche "Raat" ke kadam.
+- **Hawa:** band lid ke saath bhi laptop khuli jagah rakho, bag ya kapde me nahi; band lid me wo garam hota hai.
+- **Pehli baar test:** `infra:up` ke baad lid band karo, 1 se 2 minute ruko, phir primary pe `npm run infra:status`: `Docker: answering` aana chahiye. `not answering` aaye to ye setting kaam nahi kar rahi (Claude ko batao). Ye test abhi hua nahi.
 
 ## Raat: dono band karna
 
@@ -94,16 +102,17 @@ Kram yahi rakho: **pehle containers, phir secondary, aakhir me primary.**
 
 ## Dikkat aaye to
 
-| Kya dikha                                                                                                       | Matlab                                                                          | Kya karo                                                                                                                                                                                              |
-| --------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `Docker is not running ... check that it is on and that ssh bq-infra works`                                     | Secondary band hai, abhi boot ho rahi hai, ya alag hotspot pe hai               | 1 se 2 minute ruko. Dono ek hi hotspot pe hain, ye dekho. Phir `ssh bq-infra hostname`: `bq-infra` aana chahiye.                                                                                      |
-| `infra:status` ki pehli line me `this laptop (Docker context desktop-linux)`                                    | Docker Desktop khula, to context apne aap primary pe aa gaya                    | Docker Desktop ke containers chal rahe hon to `npm run infra:down`, Docker Desktop band (tray icon se Quit), phir `npm run infra:use -- secondary`. `infra:use` rukne ka karan batata hai, wahi karo. |
-| `Port 27017 on 127.0.0.1 is already taken ...`                                                                  | Primary ke local Docker ke containers ya purana tunnel ports le kar baithe hain | Message ka karan padho. Local containers hon to upar wali tarah; `An SSH tunnel is still open` likha ho to `npm run infra:down`.                                                                      |
-| `The SSH tunnel (bq-infra-tunnel) did not open its ports ...`                                                   | Tunnel nahi khula: secondary band, ya ssh key agent me nahi                     | Secondary on hai ye dekho. Key: `ssh-add $env:USERPROFILE\.ssh\id_ed25519` (passphrase ek baar), phir `infra:down` aur `infra:up -- backend`.                                                         |
-| `SSH tunnel: remembered but not answering`                                                                      | Tunnel ki yaad bachi hai par wo mar chuka (restart, hotspot)                    | `npm run infra:down`: purani yaad saaf karta hai. Snapshot ki warning aa sakti hai agar containers chal hi nahi rahe the. Phir `infra:up -- backend`.                                                 |
-| Secondary `infra:down` ke bina band ho gayi (bijli gayi, ya bhool gaye)                                         | Snapshot nahi bana; containers apne aap nahi uthte                              | Secondary on karo, `infra:down` (tunnel saaf), phir `infra:up -- backend`. Data volume `down` nahi hatata. Snapshot chahiye tha to agle `infra:down` pe banega.                                       |
-| `infra:use` ya `infra:down` ne kaha "run npm run infra:down first" ya "infra:use -- secondary, then infra:down" | Containers ya tunnel abhi chalu hai                                             | Jo message kahe, usi kram se.                                                                                                                                                                         |
-| Secondary Windows 10 me boot ho gayi                                                                            | GRUB menu me Windows chuna gaya                                                 | Windows me Start, Power, Shut down; wapas on karke menu me Ubuntu (ya kuch mat dabao).                                                                                                                |
+| Kya dikha                                                                                                       | Matlab                                                                          | Kya karo                                                                                                                                                                                                                            |
+| --------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `Docker is not running ... check that it is on and that ssh bq-infra works`                                     | Secondary band hai, abhi boot ho rahi hai, ya alag hotspot pe hai               | 1 se 2 minute ruko. Dono ek hi hotspot pe hain, ye dekho. Phir `ssh bq-infra hostname`: `bq-infra` aana chahiye.                                                                                                                    |
+| `infra:status` ki pehli line me `this laptop (Docker context desktop-linux)`                                    | Docker Desktop khula, to context apne aap primary pe aa gaya                    | Docker Desktop ke containers chal rahe hon to `npm run infra:down`, Docker Desktop band (tray icon se Quit), phir `npm run infra:use -- secondary`. `infra:use` rukne ka karan batata hai, wahi karo.                               |
+| `Port 27017 on 127.0.0.1 is already taken ...`                                                                  | Primary ke local Docker ke containers ya purana tunnel ports le kar baithe hain | Message ka karan padho. Local containers hon to upar wali tarah; `An SSH tunnel is still open` likha ho to `npm run infra:down`.                                                                                                    |
+| `The SSH tunnel (bq-infra-tunnel) did not open its ports ...`                                                   | Tunnel nahi khula: secondary band, ya ssh key agent me nahi                     | Secondary on hai ye dekho. Key: `ssh-add $env:USERPROFILE\.ssh\id_ed25519` (passphrase ek baar), phir `infra:down` aur `infra:up -- backend`.                                                                                       |
+| `SSH tunnel: remembered but not answering`                                                                      | Tunnel ki yaad bachi hai par wo mar chuka (restart, hotspot)                    | `npm run infra:down`: purani yaad saaf karta hai. Snapshot ki warning aa sakti hai agar containers chal hi nahi rahe the. Phir `infra:up -- backend`.                                                                               |
+| Secondary `infra:down` ke bina band ho gayi (bijli gayi, ya bhool gaye)                                         | Snapshot nahi bana; containers apne aap nahi uthte                              | Secondary on karo, `infra:down` (tunnel saaf), phir `infra:up -- backend`. Data volume `down` nahi hatata. Snapshot chahiye tha to agle `infra:down` pe banega.                                                                     |
+| `infra:use` ya `infra:down` ne kaha "run npm run infra:down first" ya "infra:use -- secondary, then infra:down" | Containers ya tunnel abhi chalu hai                                             | Jo message kahe, usi kram se.                                                                                                                                                                                                       |
+| Lid band karne ke baad `Docker: not answering` ya tunnel toota                                                  | Secondary lid band hone pe so gayi, ya hotspot gaya                             | Lid kholo aur power button ek baar dabao (so rahi ho to jaag jaati hai, band ho to boot hoti hai), 1 se 2 minute ruko, phir `infra:down` aur `infra:up -- backend`. Dobara ho to Claude ko batao, taaki lid ki setting dekhi jaaye. |
+| Secondary Windows 10 me boot ho gayi                                                                            | GRUB menu me Windows chuna gaya                                                 | Windows me Start, Power, Shut down; wapas on karke menu me Ubuntu (ya kuch mat dabao).                                                                                                                                              |
 
 ## Kabhi-kabhi: secondary ka development data primary me lana
 
@@ -129,6 +138,6 @@ Snapshot se wapas lana ho (jaise secondary ka data ud gaya): kadam 2 se 4 wahi, 
 
 ## Change log
 
-| Version          | Date       | Badlav                                                                                                |
-| ---------------- | ---------- | ----------------------------------------------------------------------------------------------------- |
-| v1.0.0 se v1.0.3 | 2026-11-25 | Nayi file: roz subah dono laptop on aur raat ko off karne ke kadam, commands, dikkat ki list (D-462). |
+| Version          | Date       | Badlav                                                                                                                                                 |
+| ---------------- | ---------- | ------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| v1.0.0 se v1.0.4 | 2026-11-25 | Nayi file: roz subah dono laptop on aur raat ko off karne ke kadam, commands, dikkat ki list (D-462). Secondary ka screen aur lid band karne ka hissa. |
