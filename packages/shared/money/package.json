@@ -1,0 +1,38 @@
+{
+  "name": "@beautinique/shared-money",
+  "version": "1.0.0",
+  "description": "Integer paise and basis points: GST split, discount allocation, TCS and TDS rounding, and en-IN rupee formatting. Never a float.",
+  "license": "MIT",
+  "type": "module",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.mts",
+      "import": "./dist/index.mjs"
+    },
+    "./package.json": "./package.json"
+  },
+  "files": [
+    "dist",
+    "README.md",
+    "CHANGELOG.md",
+    "LICENSE"
+  ],
+  "engines": {
+    "node": "24.22.3"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Nageshwar1997/Beautinique.git",
+    "directory": "packages/shared/money"
+  },
+  "publishConfig": {
+    "access": "public",
+    "provenance": true
+  },
+  "scripts": {
+    "build": "tsdown",
+    "typecheck": "tsc -p tsconfig.json",
+    "lint": "eslint .",
+    "test": "vitest run --coverage"
+  }
+}

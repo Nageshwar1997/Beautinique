@@ -68,6 +68,7 @@
     "@vitest/coverage-v8": "5.1.1",
     "eslint": "10.15.0",
     "eslint-config-prettier": "10.1.8",
+    "fast-check": "4.10.3",
     "globals": "17.14.0",
     "prettier": "3.10.1",
     "tsdown": "0.23.7",
