@@ -1,6 +1,6 @@
 # LESSONS: Beautinique
 
-> **Status:** v1.1.2 (2026-11-25). Sabak aur traps: kya hua, kyun hua, ab kya karte hain. Faisle yahan nahi, [DECISIONS.md](DECISIONS.md) me. Cheezein ek-ek karke judengi.
+> **Status:** v1.1.3 (2026-11-25). Sabak aur traps: kya hua, kyun hua, ab kya karte hain. Faisle yahan nahi, [DECISIONS.md](DECISIONS.md) me. Cheezein ek-ek karke judengi.
 
 ## Is file me kya aayega
 
@@ -23,6 +23,15 @@ Har sabak: **Kya hua**, **Kyun**, **Ab kya karte hain**, **Kab** (date).
 - **Ab kya karte hain:** Ubuntu Server **26.04.1 LTS**. Rufus me **ISO Image mode**, partition scheme **MBR**, target **BIOS (or UEFI-CSM)**, aur "Grub 2.14 vs 2.16, Download required" pe **Yes**. Boot menu me **non-UEFI USB** wali entry chuno (UEFI wali GRUB menu me atak sakti hai); Esc aur F9 tabhi chalte hain jab keyboard laga ho. Install ke waqt **network** (Wi-Fi ya cable) ho. Har screen pe **ek hi baar Enter**. Storage me **kabhi "Use an entire disk" nahi**, sirf **"Custom storage layout"**: sirf partition 3 (302.7 GB, `Ubuntu Disk`, pehle D:) `ext4` aur mount `/`, disk `sda` "Use As Boot Device"; partition 1, 2 aur 4 ko haath nahi (D-463). Koi screen samajh na aaye, ya kisi aur partition pe "format" dikhe, to wahin ruko. Windows GRUB menu me tab dikhta hai jab `os-prober` chalu ho: `update-grub` ke output me "Found Windows 10" dekho. Poora purana kadam-ba-kadam text git me hai.
 - **Kab:** 2026-11-25.
 
+## 3. SSH aur terminal
+
+### Git Bash me ssh passphrase maangta hai (2026-11-25)
+
+- **Kya hua:** VS Code ke Git Bash terminal me `npm run infra:status` Docker ke check pe atka aur "Git for Windows" ka dialog "Enter passphrase for key '/c/Users/<aap>/.ssh/id_ed25519'" aaya, jabki Windows ke ssh-agent me key thi (service `Running`, `Automatic`).
+- **Kyun:** Git Bash me PATH me Git ka apna `ssh` (`C:\Program Files\Git\usr\bin\ssh.exe`) Windows ke `ssh.exe` se pehle aata hai. Wo Windows ke agent ko nahi dekhta, to key ke liye passphrase maangta hai; background tunnel ke liye wo dialog kaam bhi nahi karta. Docker context aur `infra:up` ka tunnel dono `ssh` PATH se lete hain. BatchMode me Windows ka `ssh.exe` seedha `bq-infra` likh ke aaya, Git ka `Permission denied (publickey)`.
+- **Ab kya karte hain:** `C:\Users\<aap>\.bash_profile` me `export PATH="/c/Windows/System32/OpenSSH:$PATH"` (aur `~/.bashrc` load karne ki line): har naya Git Bash terminal Windows ka ssh pehle chalata hai. Ya PowerShell. Dialog aaye to **Cancel**, passphrase wahan nahi ([OPERATIONS.md](OPERATIONS.md) §1 niyam 16 (3)).
+- **Kab:** 2026-11-25.
+
 ## Change log
 
 | Version | Date       | Badlav                                                                                         |
@@ -30,3 +39,4 @@ Har sabak: **Kya hua**, **Kyun**, **Ab kya karte hain**, **Kab** (date).
 | v1.0.0  | 2026-11-17 | Khaali file bani.                                                                              |
 | v1.1.1  | 2026-11-23 | Pehla sabak: nayi branch ka upstream `prerelease` (`--no-track`).                              |
 | v1.1.2  | 2026-11-25 | §2: secondary pe Ubuntu Server ke install ke sabak (Rufus, GRUB, network, Enter, partition 3). |
+| v1.1.3  | 2026-11-25 | §3: Git Bash me ssh passphrase maangta hai (Windows ka ssh pehle PATH me).                     |
