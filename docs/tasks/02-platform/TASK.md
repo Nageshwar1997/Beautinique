@@ -1,6 +1,6 @@
 # TASK 02: platform (shared aur backend ke saajhe packages)
 
-> **Status:** v1.0.4 (2026-11-26). Halat: implementation; ST-1 **ho gaya** (PR [#109](https://github.com/Nageshwar1997/Beautinique/pull/109); `packages/shared/clock`, `packages/shared/validators`), ST-2 **ho gaya** (`packages/shared/money`). Module [PROJECT_PLAN.md](../../PROJECT_PLAN.md) §3 ka `02-platform`, charan 0 (D-446). Progress: 6 / 31 points.
+> **Status:** v1.0.5 (2026-11-26). Halat: implementation; ST-1 **ho gaya** (PR [#109](https://github.com/Nageshwar1997/Beautinique/pull/109); `packages/shared/clock`, `packages/shared/validators`), ST-2 **ho gaya** (PR [#110](https://github.com/Nageshwar1997/Beautinique/pull/110); `packages/shared/money`), ST-3 **ho gaya** (`packages/shared/contracts`). Module [PROJECT_PLAN.md](../../PROJECT_PLAN.md) §3 ka `02-platform`, charan 0 (D-446). Progress: 10 / 31 points.
 
 ## 1. Lakshya
 
@@ -44,6 +44,8 @@ Har package `packages/<category>/<name>`, naam `@beautinique/<category>-<name>` 
 2. Event ka envelope aur har event ki definition ([ARCHITECTURE.md](../../ARCHITECTURE.md) §3 niyam 7 se 9), permission ka naam `<service>.<resource>.<action>` (§11 niyam 1), error codes aur settings ki keys.
 3. Inhi definitions se route manifest (gateway ke liye), typed client (`03-frontend-kit` ka `frontend-api-client`) aur `openapi.json` bante hain. Bina contract ka route nahi (CR-12).
 4. Yahan sirf dhaancha aur saajhe hisse (common error codes, envelope). Har service apni definitions apne module me jodti hai.
+
+Code ka roop (ST-3): `defineRoute` route ka poora contract ek jagah leta hai: `id` (`<service>.<resource>.<action>`), `method`, `path` (`/api/v1/<service>/...`, `:name` ke saath), `apps`, `permission` (ya `'public'`), `rateLimit` ki class, `idempotency`, `cache` (sirf public GET), `params`, `query`, `body` (ye teeno fields ke roop me diye jaate hain aur package unhe strict object banata hai, to anjaana field refuse, SR-036), `response`, `status` aur `errors`. Step-up permission ka hai (D-185: list ek jagah), route usse leta hai. Route khud se takraaye to `RangeError`: path doosri service ka, `:name` aur `params` alag, GET me body ya idempotency, cache gair-public GET pe, 204 me body. `buildRouteManifest` gateway ke liye (apps, permission, step-up, rate limit class aur fail-closed, idempotency, cache; path aur method se sorted; do route ek id ya ek jagah pe to refuse), `matchRoute` (likha hua hissa `:name` se upar) aur `uncontractedRoutes` (bina contract ka route pakadne ke liye, CR-12). `buildOpenApi` aur `openApiJson` se `openapi.json` (OpenAPI 3.1; request input se, jawab output se; error jawab status ke hisaab se). `createClient`, `buildRequest` aur `ApiError` typed client ka aadhar: input contract ke schemas se jaancha jaata hai, path ke hisse URL me, query kunji ke kram se, body JSON, `idempotency: 'required'` pe key zaroori, error jawab `ApiError`; retry, timeout aur app version header app ke client ke (`frontend-api-client`). `defineEvent` (type `<service>.<aggregate>.<pastTense>`, service hi producer; galat producer, type, version ya `data` ka anjaana field refuse; `data` me `otp`, `password`, `token`, `deliveryCode`, `pan`, `address` jaise naam nahi, §3 niyam 8), `eventEnvelopeSchema` aur 16 KB ki seema. `definePermission`, `defineSetting` (kunji `<service>.<naam>`, default schema se guzarta hai), `COMMON_ERRORS`, `defineErrors` (kod ke aage service ka naam) aur `errorBodySchema`. Services, apps, rate limit classes (SR-008), scope types aur methods ki list `constants/` me. `openapi.json` abhi kisi file me likhi nahi jaati: jab services ke asli routes honge tab unhe jodne wali script (charan 1 se) use likhegi; yahan function aur uske tests.
 
 ### 3.2 `shared-validators`
 
@@ -170,6 +172,12 @@ SR-008 (rate limit ka counter), SR-032 aur SR-035 (`authorize` aur scope), SR-04
   - [apply-bps.test.ts](../../../packages/shared/money/test/apply-bps.test.ts): `AC-PLATFORM-9` (TCS 0.5% aur TDS 0.1% ke docs ke numbers, aadha paisa upar; property: exact jawab ke aadhe paise ke andar).
   - [format-money.test.ts](../../../packages/shared/money/test/format-money.test.ts): `DS-4.5` aur `CR-30` (₹1,299, ₹1,29,999, ₹1,299.50, hamesha do decimal, negative; property: rupaye aur paise wahi, Indian grouping) aur `SR-047`.
   - [paise.test.ts](../../../packages/shared/money/test/paise.test.ts): `SR-047` (`paise()` aur `bps()` ki jaanch, types).
+- **ST-3 ke tests:**
+  - [route.test.ts](../../../packages/shared/contracts/test/route.test.ts): `CR-12`, `SR-032`, `SR-036` (contract ek jagah, service id se, step-up permission ka, anjaana field refuse; route khud se takraaye to har tarah ka `RangeError`).
+  - [manifest.test.ts](../../../packages/shared/contracts/test/manifest.test.ts): `AC-PLATFORM-15`, `SR-032`, `SR-035`, `SR-008`, `SR-045` (manifest ka roop aur kram, kisi bhi kram se wahi, do route ek id ya ek jagah pe refuse, `matchRoute` aur `uncontractedRoutes`: contract ke bahar ka route pakda jaata hai).
+  - [openapi.test.ts](../../../packages/shared/contracts/test/openapi.test.ts): `AC-PLATFORM-15`, `SR-036`, `SR-045`, `SR-008`, `SR-032`, `CR-18` (document usi se, kram se badle bina wahi, path `{name}`, parameters, idempotency header, error jawab status ke hisaab se, public route bina session).
+  - [client.test.ts](../../../packages/shared/contracts/test/client.test.ts): `AC-PLATFORM-15`, `SR-045`, `SR-036`, `CR-18` (request ka roop, query ka kram, key ke bina nahi, galat input transport tak nahi, `ApiError`, aur types: bina cast ke input aur jawab, galat call compile nahi hota).
+  - [permission-setting.test.ts](../../../packages/shared/contracts/test/permission-setting.test.ts), [event.test.ts](../../../packages/shared/contracts/test/event.test.ts) aur [error-codes.test.ts](../../../packages/shared/contracts/test/error-codes.test.ts): `SR-037`, `SR-071`, `SR-015`, `SR-054`, `SR-063`, `SR-077`, `CR-12`, `CR-18` (nam ka roop, galat producer ka event refuse, event ke `data` me secret nahi, kod ke aage service ka naam).
 - **Manuals aur testing ki files:** kisi app ke role ka feature nahi, isliye laagu nahi.
 
 ## 10. Subtasks
@@ -180,7 +188,7 @@ Har subtask lagbhag ek PR jitna. Charan [PROJECT_PLAN.md](../../PROJECT_PLAN.md)
 | ----- | ----------------------------------------------------------------------------------------- | ------ | ------ | ------- |
 | ST-1  | `shared-clock` aur `shared-validators`                                                    | 0      | M (2)  | Ho gaya |
 | ST-2  | `shared-money`, property tests ke saath                                                   | 0      | L (4)  | Ho gaya |
-| ST-3  | `shared-contracts` ka dhaancha, route manifest, typed client ka aadhar aur `openapi.json` | 0      | L (4)  | Baaki   |
+| ST-3  | `shared-contracts` ka dhaancha, route manifest, typed client ka aadhar aur `openapi.json` | 0      | L (4)  | Ho gaya |
 | ST-4  | `backend-config` aur `backend-logger`                                                     | 0      | M (2)  | Baaki   |
 | ST-5  | `backend-server-kit`                                                                      | 0      | L (4)  | Baaki   |
 | ST-6  | `backend-mongo`                                                                           | 0      | L (4)  | Baaki   |
@@ -197,4 +205,4 @@ Har subtask lagbhag ek PR jitna. Charan [PROJECT_PLAN.md](../../PROJECT_PLAN.md)
 | ---------------- | ---------- | ------------------------------------------------------------------------------------------------------------------------------------------- |
 | v1.0.0 se v1.0.2 | 2026-11-22 | Module 02 ka pehla spec, 12 packages, 11 subtasks (D-446) 16 criteria ki link (D-448) aur `en-IN` format; code abhi nahi.                   |
 | v1.0.3           | 2026-11-25 | ST-1 ka code: `shared-clock` aur `shared-validators` (`packages/shared/`), tests `RT-13`, `DS-4.5`, `AC-PLATFORM-13`; ST-1 ho gaya, 2 / 31. |
-| v1.0.4           | 2026-11-26 | PR #109 merge. ST-2 ka code: `shared-money` (`Paise`, `Bps`, `lineTax`, `allocate`, `applyBps`, `formatMoney`), property tests (`fast-check` 4.10.3), tests `AC-PLATFORM-9`, `SR-047`, `DS-4.5`; ST-2 ho gaya, 6 / 31. |
+| v1.0.4 se v1.0.5 | 2026-11-26 | PR #109 merge. ST-2 ka code: `shared-money` (`Paise`, `Bps`, `lineTax`, `allocate`, `applyBps`, `formatMoney`), property tests (`fast-check` 4.10.3), tests `AC-PLATFORM-9`, `SR-047`, `DS-4.5`; ST-2 ho gaya, 6 / 31. PR #110 merge. ST-3 ka code: `shared-contracts` (`defineRoute`, route manifest, `buildOpenApi`, typed client ka aadhar, `defineEvent`, `definePermission`, `defineSetting`, `defineErrors`), tests `AC-PLATFORM-15`, `SR-032`, `SR-035`, `SR-036`, `SR-045`, `SR-071`; ST-3 ho gaya, 10 / 31. |
