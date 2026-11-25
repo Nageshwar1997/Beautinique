@@ -1,3 +1,7 @@
+import http from 'node:http';
+import net from 'node:net';
+import tls from 'node:tls';
+
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 
 import { fetchPackument } from '../src/registry.ts';
@@ -44,5 +48,21 @@ describe('AC-PACKAGES-12: the tests never reach the real npm registry', () => {
     await registry.seed('@beautinique/shared-money', ['1.0.0']);
     await fetchPackument(registry.url, '@beautinique/shared-money');
     expect(await registry.requests()).toEqual(['GET /@beautinique/shared-money']);
+  });
+
+  it('blocks plain TCP and HTTP as well as TLS (QA-PKG-005)', async () => {
+    // 127.0.0.2 is this machine too but not on the allowlist, so nothing leaves it even if the
+    // guard failed.
+    const host = '127.0.0.2';
+    const attempts: [string, () => unknown][] = [
+      ['net.connect', () => net.connect({ host, port: 65530 })],
+      ['net.createConnection', () => net.createConnection(65530, host)],
+      ['http.get', () => http.get(`http://${host}:65530/`)],
+      ['tls.connect', () => tls.connect({ host, port: 65530 })],
+    ];
+    for (const [label, attempt] of attempts) expect(attempt, label).toThrow(/Network guard/);
+    await expect(fetch(`http://${host}:65530/`)).rejects.toMatchObject({
+      cause: { message: expect.stringContaining('Network guard') as string },
+    });
   });
 });

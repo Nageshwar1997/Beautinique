@@ -1,4 +1,4 @@
-import { existsSync, readFileSync, writeFileSync } from 'node:fs';
+import { existsSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { join, relative } from 'node:path';
 
 import { addEntry, changelogEntry, type Commit } from './changelog.ts';
@@ -240,9 +240,12 @@ export async function republish(options: RepublishOptions): Promise<number> {
   for (const path of [...writes.keys(), lockPath]) {
     originals.set(path, existsSync(path) ? readFileSync(path, 'utf8') : undefined);
   }
+  // Every file back as it was: a file this run made (a first CHANGELOG.md) is removed again.
   const restore = () => {
-    for (const [path, content] of originals)
-      if (content !== undefined) writeFileSync(path, content);
+    for (const [path, content] of originals) {
+      if (content === undefined) rmSync(path, { force: true });
+      else writeFileSync(path, content);
+    }
   };
   for (const [path, content] of writes) writeFileSync(path, content);
   const lock = exec('npm', ['install', '--package-lock-only', '--ignore-scripts'], { cwd: root });

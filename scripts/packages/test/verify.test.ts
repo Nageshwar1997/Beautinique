@@ -3,7 +3,7 @@ import { join } from 'node:path';
 
 import { describe, expect, it } from 'vitest';
 
-import { packedPathProblems } from '../src/pack.ts';
+import { containsSecret, packedPathProblems } from '../src/pack.ts';
 import { staticProblems, verify } from '../src/verify.ts';
 import { discoverPackages } from '../src/workspace.ts';
 import {
@@ -134,6 +134,42 @@ describe('what goes into the tarball', () => {
     writeText(dir, 'dist/index.mjs', `const key = "AKIA${'A'.repeat(16)}";\n`);
     expect(packedPathProblems(firstPackage(root), ['dist/index.mjs'])).toEqual([
       expect.objectContaining({ message: 'dist/index.mjs contains a secret' }),
+    ]);
+  });
+
+  // Made at run time, so the secret scan of this repository never sees a secret-shaped literal.
+  const password = 'x'.repeat(12);
+  const projectSecrets: [label: string, text: string][] = [
+    ['MongoDB URL', `${['mongodb+srv://bq', password].join(':')}@cluster0.example.net/app`],
+    ['Valkey URL', `${['rediss://default', password].join(':')}@red-x.example.com:6379`],
+    ['Postgres URL', `${['postgresql://bq', password].join(':')}@db.example.com/finance`],
+    ['Cloudinary URL', `${['cloudinary://123456789012345', password].join(':')}@bq`],
+    ['Razorpay key', ['rzp', 'live', 'A'.repeat(14)].join('_')],
+    ['npm auth token', ['//registry.npmjs.org/:_auth', 'Token=', 'b'.repeat(36)].join('')],
+  ];
+
+  it.each(projectSecrets)(
+    'AC-PACKAGES-3: a %s inside a packed file fails (QA-PKG-002)',
+    (_label, text) => {
+      expect(containsSecret(`export const v = ${JSON.stringify(text)};\n`)).toBe(true);
+    },
+  );
+
+  it('AC-PACKAGES-3: placeholders in a connection URL or an npm token line are not secrets', () => {
+    for (const secret of ['<password>', '${MONGO_PASSWORD}', '{{password}}', '****']) {
+      expect(containsSecret(`${['mongodb://bq', secret].join(':')}@localhost:27017/app`)).toBe(
+        false,
+      );
+    }
+    const tokenLine = ['//registry.npmjs.org/:_auth', 'Token=', '${NPM_TOKEN}'].join('');
+    expect(containsSecret(tokenLine)).toBe(false);
+    expect(containsSecret('see mongodb://localhost:27017/app')).toBe(false);
+  });
+
+  it('AC-PACKAGES-3: an .npmrc in dist looks like a secret', () => {
+    const root = fixtureRepo({ 'shared/money': [] });
+    expect(packedPathProblems(firstPackage(root), ['dist/.npmrc']).map((p) => p.message)).toEqual([
+      'dist/.npmrc looks like a secret',
     ]);
   });
 

@@ -9,7 +9,8 @@ import type { PackageInfo } from './workspace.ts';
 // outside the allowlist, a file that looks like a secret or a test, or a secret in a packed file
 // fails the check.
 const SECRET_NAMES = [
-  /^\.env(\..*)?$/,
+  /^\.env(\..*)?$/i,
+  /^\.npmrc$/i,
   /\.(pem|key|p12|pfx)$/i,
   /(^|[-_.])(secret|credentials)s?([-_.]|$)/i,
 ];
@@ -19,7 +20,22 @@ const SECRET_CONTENT = [
   /\bAKIA[0-9A-Z]{16}\b/,
   /\bnpm_[A-Za-z0-9]{36}\b/,
   /\bgh[pousr]_[A-Za-z0-9]{36,}\b/,
+  // Razorpay key ids (live and test mode).
+  /\brzp_(?:live|test)_[A-Za-z0-9]{14,}\b/,
 ];
+// The connection URLs with a password that .gitleaks.toml's `url-with-password` rule finds in git
+// (MongoDB, Valkey/Redis, Postgres, AMQP, Cloudinary): `dist/` never reaches git, so the same check
+// runs here. A placeholder (`<password>`, `${VAR}`, `{{password}}`, `****`) is not a secret.
+const URL_WITH_PASSWORD =
+  /\b(?:mongodb(?:\+srv)?|rediss?|valkeys?|postgres(?:ql)?|amqps?|cloudinary):\/\/[^:/\s@'"`]+:([^@/\s'"`]+)@[^\s'"`]+/gi;
+const PLACEHOLDER = /^(?:<[^>]*>|\$\{[^}]*\}|\{\{[^}]*\}\}|\*+)$/;
+// An npm auth token line with a real value (not `${NPM_TOKEN}`).
+const NPM_AUTH = /_authToken\s*=\s*(?!\$\{)\S+/;
+
+export function containsSecret(text: string): boolean {
+  if (SECRET_CONTENT.some((pattern) => pattern.test(text)) || NPM_AUTH.test(text)) return true;
+  return [...text.matchAll(URL_WITH_PASSWORD)].some((match) => !PLACEHOLDER.test(match[1] ?? ''));
+}
 
 const ALWAYS_PACKED = new Set(['package.json']);
 
@@ -36,7 +52,7 @@ function folderEnvFiles(dir: string, base: string = dir): string[] {
     if (entry.name === 'node_modules') continue;
     const path = join(dir, entry.name);
     if (entry.isDirectory()) found.push(...folderEnvFiles(path, base));
-    else if (/^\.env(\..*)?$/.test(entry.name) && entry.name !== '.env.example') {
+    else if (/^\.env(\..*)?$/i.test(entry.name) && entry.name.toLowerCase() !== '.env.example') {
       found.push(relative(base, path).replaceAll('\\', '/'));
     }
   }
@@ -53,10 +69,7 @@ export function packedPathProblems(pkg: PackageInfo, paths: string[]): Problem[]
     else if (TEST_NAMES.some((pattern) => pattern.test(path))) add(`${path} is a test file`);
     else {
       const full = join(pkg.dir, path);
-      if (
-        existsSync(full) &&
-        SECRET_CONTENT.some((pattern) => pattern.test(readFileSync(full, 'utf8')))
-      ) {
+      if (existsSync(full) && containsSecret(readFileSync(full, 'utf8'))) {
         add(`${path} contains a secret`);
       }
     }

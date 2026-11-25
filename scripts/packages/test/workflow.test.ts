@@ -4,7 +4,7 @@ import { join } from 'node:path';
 import { describe, expect, it } from 'vitest';
 import { parse } from 'yaml';
 
-import { ARTIFACT_DIR } from '../src/publish.ts';
+import { ARTIFACT_DIR, TAGS_FILE } from '../src/publish.ts';
 
 const ROOT = join(import.meta.dirname, '../../..');
 const text = readFileSync(join(ROOT, '.github/workflows/publish.yml'), 'utf8');
@@ -32,9 +32,9 @@ const job = (id: string): Job => {
 describe('the publish workflow', () => {
   it('AC-PACKAGES-9: starts by hand only, and no job runs outside the release branch', () => {
     expect(workflow.on).toEqual({ workflow_dispatch: null });
-    for (const id of Object.keys(jobs)) {
-      expect(job(id).if).toBe("github.ref == 'refs/heads/release'");
-    }
+    expect(job('pack').if).toBe("github.ref == 'refs/heads/release'");
+    expect(job('publish').if).toBe("github.ref == 'refs/heads/release'");
+    expect(job('tag').if).toContain("github.ref == 'refs/heads/release'");
   });
 
   it('has three jobs, each with only the rights it needs', () => {
@@ -71,8 +71,21 @@ describe('the publish workflow', () => {
     expect(String(setup?.with?.['node-version'])).toBe(root.engines.node);
   });
 
-  it('AC-PACKAGES-9: tags only after a successful publish, and no npm token exists anywhere', () => {
-    expect(job('tag').needs).toEqual(['pack', 'publish']);
+  it('AC-PACKAGES-10: tags what is on npm, also after a publish that failed midway (QA-PKG-001)', () => {
+    const tag = job('tag');
+    expect(tag.needs).toEqual(['pack', 'publish']);
+    // Runs after a failed publish job, never after a cancelled run or a failed pack.
+    expect(tag.if).toContain('!cancelled()');
+    expect(tag.if).toContain("needs.pack.result == 'success'");
+    expect(tag.if).not.toContain('always()');
+    const run = tag.steps.find((step) => step.run?.includes('git tag'))?.run ?? '';
+    expect(run).toContain(`publish-artifact/${TAGS_FILE}`);
+    expect(run).toContain('git ls-remote --exit-code --tags origin');
+    expect(run).toContain('npm view "$name@$version" version');
+    expect(run.indexOf('npm view')).toBeLessThan(run.indexOf('git tag'));
+  });
+
+  it('AC-PACKAGES-9: no npm token exists anywhere', () => {
     expect(text).not.toMatch(/NODE_AUTH_TOKEN|NPM_TOKEN|secrets\./);
   });
 
