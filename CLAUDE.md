@@ -1,6 +1,6 @@
 # CLAUDE.md: Beautinique
 
-> **Status:** v1.0.16 (2026-11-24). Docs aur code naye sire se ban rahe hain.
+> **Status:** v1.0.17 (2026-11-25). Docs aur code naye sire se ban rahe hain.
 
 Ye file Claude Code har session ki shuruaat me padhta hai. Project pe ek hi insaan (owner) kaam karta hai,
 2 Claude accounts se baari-baari. **Kaam shuru karne se pehle [docs/HANDOFF.md](docs/HANDOFF.md) padho.**
@@ -48,7 +48,8 @@ Ye file Claude Code har session ki shuruaat me padhta hai. Project pe ek hi insa
   output ke saath batao.
 - **Public repo:** koi secret, `.env`, token, password, DB dump ya asli personal data commit nahi; sirf
   `.env.example`. Claude `.env`/`.env.*` files, `backups/` (D-013, D-460) aur repo ke bahar ka `All-ENVs` folder kabhi nahi kholta;
-  `.claude/settings.json` ke deny rules ise tool ke level pe bhi rokte hain, unhe mat hatao.
+  `.claude/settings.json` ke deny rules ise tool ke level pe bhi rokte hain (har `.env.*`; isliye `.env.example` Claude
+  shell se padhta aur likhta hai, D-441), unhe mat hatao.
 - **Git flow (owner, 2026-10-25; D-024, 2026-11-22):** `prerelease` se feature branch → PR →
   **`prerelease`** (development) → PR → **`release`** (production). `main` branch nahi hai. GitHub ki
   default branch `release` hai, par nayi branch hamesha `origin/prerelease` se banti hai aur PR ka base
@@ -106,3 +107,4 @@ khula hai. Jis doc me badlav kiya, uske change log me us din ki line (D-442). Pr
 | ----------------- | ------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | v1.0.0 se v1.0.8  | 2026-11-17 se 2026-11-22 | Abhi ki halat (planning stage, D-443), sawal-jawab ke niyam aur hamesha laagu niyam; har badlav ka poora itihaas git me (D-442).                                                                                                                                                                  |
 | v1.0.9 se v1.0.15 | 2026-11-23               | Implementation stage khula (D-455); naye root ke commands (ST-1, D-458); Claude `backups/` nahi kholta (D-460); repo ka naksha aur saari commands (ST-7); `01-foundation` ho gaya; do laptop ka ST-8 (D-462) branch pe. `infra:use` aur `infra:status`. `28-packages` ke saare commands, v1.0.16. |
+| v1.0.17           | 2026-11-25               | Claude ke deny rules har `.env.*` pe, `.env.example` shell se (D-441 badla, QA audit).                                                                                                                                                                                                            |

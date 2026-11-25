@@ -1,6 +1,6 @@
 # Docs: Beautinique
 
-> **Status:** v1.0.5 (2026-11-24). Docs ka index. Files khaali shuru hui hain; cheezein ek-ek karke, owner ki haan ke baad judti hain.
+> **Status:** v1.0.6 (2026-11-25). Docs ka index. Files khaali shuru hui hain; cheezein ek-ek karke, owner ki haan ke baad judti hain.
 
 ## Niyam
 
@@ -31,6 +31,7 @@
 | [TEMP_LAPTOP_SETUP.md](TEMP_LAPTOP_SETUP.md)                           | Temp: do laptop ke setup ke kadam (ST-8 ke baad hategi)              |
 | [LESSONS.md](LESSONS.md)                                               | Sabak aur traps                                                      |
 | [GIT_SKILLS.md](GIT_SKILLS.md)                                         | Git skills ka manual                                                 |
+| [QA_AUDIT_REPORT.md](QA_AUDIT_REPORT.md)                               | QA audit: bane hisson ke test, bugs, unke fix aur fix ka kram        |
 | [security/THREAT_MODEL.md](security/THREAT_MODEL.md)                   | Har module ka threat model                                           |
 | [security/SECURITY_REQUIREMENTS.md](security/SECURITY_REQUIREMENTS.md) | Security ke niyam, module-wise                                       |
 | [tasks/](tasks/README.md)                                              | Har module ka folder: `TASK.md` aur subtasks                         |
@@ -51,3 +52,4 @@
 | ---------------- | ------------------------ | ---------------------------------------------------------------------------------------- |
 | v1.0.0 se v1.0.4 | 2026-11-17 se 2026-11-22 | Docs ka index; nayi files judti gayi; har badlav ka poora itihaas git me (D-442).        |
 | v1.0.5           | 2026-11-24               | Temp doc [TEMP_LAPTOP_SETUP.md](TEMP_LAPTOP_SETUP.md) juda: do laptop ke setup ke kadam. |
+| v1.0.6           | 2026-11-25               | [QA_AUDIT_REPORT.md](QA_AUDIT_REPORT.md) juda: QA audit ki report.                       |

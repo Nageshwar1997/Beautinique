@@ -1,6 +1,6 @@
 # TASK 28: packages ka flow
 
-> **Status:** v1.0.5 (2026-11-24). Halat: implementation; ST-1 **ho gaya** (PR [#104](https://github.com/Nageshwar1997/Beautinique/pull/104)), ST-2 se ST-8 ek PR me, `scripts/packages` aur `.github/workflows/publish.yml`. Module [PROJECT_PLAN.md](../../PROJECT_PLAN.md) §3 ka `28-packages` (D-445). Progress: 18 / 18 points.
+> **Status:** v1.0.6 (2026-11-25). Halat: implementation; ST-1 **ho gaya** (PR [#104](https://github.com/Nageshwar1997/Beautinique/pull/104)), ST-2 se ST-8 ek PR me, `scripts/packages` aur `.github/workflows/publish.yml`. Module [PROJECT_PLAN.md](../../PROJECT_PLAN.md) §3 ka `28-packages` (D-445). Progress: 18 / 18 points.
 
 ## 1. Lakshya
 
@@ -48,7 +48,7 @@ Saare packages (ya chune hue) unki andar ki dependencies ke kram me build karta 
 Publish wali saari jaanch, bina publish ke. Fresh clone pe bhi chalta hai, kyunki andar ki dependencies pehle build hoti hain. Har PR pe CI me bhi chalta hai.
 
 1. Build, typecheck, lint aur tests.
-2. **Package me kya jaata hai:** `npm pack --dry-run` ki list me sirf `files` ki allowlist. `.env`, test files ya secret jaisa koi pattern ho to fail (DD-7).
+2. **Package me kya jaata hai:** `npm pack --dry-run` ki list me sirf `files` ki allowlist. `.env`, `.npmrc`, test files ya secret jaisa koi pattern ho to fail (DD-7): private key, AWS, npm aur GitHub tokens, Razorpay key, npm ka `_authToken`, aur `.gitleaks.toml` ke `url-with-password` jaise connection URL password ke saath (MongoDB, Valkey, Postgres, AMQP, Cloudinary); `<...>` jaisa placeholder secret nahi. Ye `dist/` pe bhi, jo git me nahi jaata aur gitleaks use kabhi nahi dekhta.
 3. Exports aur types sahi resolve hote hain. Iske liye koi naya tool chahiye ho, to pehle review ([OPERATIONS.md](../../OPERATIONS.md) §11 niyam 2).
 4. Package ke niyam: CR-33 (Tailwind import), CR-34 (naam, ESM, README, playground), CR-35 (peer aur dev ki range), CR-36 (`private: true` nahi, README ka "Visibility" hissa).
 5. `publishConfig` aur `repository` sahi.
@@ -73,8 +73,8 @@ Chhape packages ka naya version taiyaar karta hai; chhapta nahi.
 Sirf naye package ki pehli baar ke liye, ya jab workflow na chal sake. Owner chalata hai.
 
 1. **Shartein:** `release` branch, saaf working tree, git identity, aur `npm whoami` se npm login (login owner khud karta hai).
-2. Jo version npm pe nahi, sirf wahi chunta hai, dependency ke kram me. Plan dikhata hai aur "haan" maangta hai; npm ka MFA code owner khud daalta hai.
-3. Har chhape version ka git tag `@beautinique/<category>-<name>@<version>`, us commit pe.
+2. Jo version npm pe nahi, sirf wahi chunta hai, dependency ke kram me. Naam diye hon to chune package ki andar ki dependency (`dependencies`, `peerDependencies`, `optionalDependencies`) ka zaroori version npm pe na ho, wo bhi usi plan me pehle ("needed by a chosen package"); na npm pe na repo me ho to kuch chhapne se pehle ruke (D-445 badla). Plan dikhata hai aur "haan" maangta hai; npm ka MFA code owner khud daalta hai.
+3. Har chhape version ka git tag `@beautinique/<category>-<name>@<version>`, us commit pe. `git tag` fail ho to chetavni, tag khud banane ki command ke saath. Jo version npm pe hai par yahan uska tag nahi, uski chetavni (`git fetch --tags`; phir bhi na mile to workflow ka tag job banata hai).
 4. **Ant me sandesh:** `release` branch ka naam, tags ka push owner ke kehne pe, back-merge `release` → `prerelease` (D-023), aur naye package pe trusted publisher jodne ki yaad (`npm trust`, owner).
 5. Beech me fail ho to dobara chalane pe jo chhap gaye wo chhoot jaate hain, aur baaki chhapte hain.
 
@@ -89,7 +89,7 @@ Bahar ki dependencies ke naye versions dhoondhta hai (patch, minor ya major ki s
 1. Sirf haath se (`workflow_dispatch`), aur sirf `release` branch se; baaki branch pe job chalta hi nahi.
 2. **Job 1, bina haq ke** (`contents: read`): `npm ci`, `verify`, chhapne wale packages ke tarballs, aur unka artifact.
 3. **Job 2, publish:** sirf artifact ke tarballs, trusted publishing (OIDC, `id-token: write`) aur provenance ke saath. Repo ya CI me npm ka koi token nahi. Code ka checkout nahi.
-4. **Job 3, tags:** sirf publish safal hone pe (`contents: write`). Har chhape version ka tag, aur summary me `release` branch ka naam aur back-merge ki yaad.
+4. **Job 3, tags** (`contents: write`): pack safal ho to chalta hai, publish beech me fail ho tab bhi (cancel pe nahi). Pack ki `tags.json` me plan ke versions aur npm pe pehle se maujood versions; har wo version tag hota hai jo npm pe hai (npm ko teen baar poochh ke) aur jiska tag remote pe nahi. Isse beech me fail hua run, ya pichhla bina tag chhapa version, agle run me tag paata hai. Summary me bane tags, `release` branch ka naam aur back-merge ki yaad.
 5. Naya package (npm pe kabhi chhapa nahi) ho to workflow mana karta hai: pehli baar laptop se (§3.6).
 6. Actions SHA pe pinned (SR-082).
 
@@ -99,7 +99,7 @@ Bahar ki dependencies ke naye versions dhoondhta hai (patch, minor ya major ki s
 2. **Version:** semver. Ek version number dobara kabhi nahi, aur chhape version ka code kabhi nahi badalta.
 3. **Andar ki dependencies** asli version ranges se, kyunki npm `workspace:` nahi samajhta.
 4. **Kaun kahan:** `republish` kaam ki branch pe, aur PR se aage. `publish` sirf `release` se. Naya package pehli baar owner ke laptop se, uske baad workflow.
-5. **Har publish provenance ke saath.** npm ka token kahin save nahi hota.
+5. **Workflow ka har publish provenance ke saath;** laptop ka publish (naye package ki pehli baar) bina provenance, kyunki laptop pe OIDC nahi ([OPERATIONS.md](../../OPERATIONS.md) §11). npm ka token kahin save nahi hota.
 6. **Saare packages public** (D-445): kisi pe `private: true` nahi.
 7. **README ke hisse:** kya karta hai, install, use, API ka saar, aur **Visibility**. Visibility me likha hota hai ki security ke hisaab se ye package asal me private hona chahiye ya public, aur kyun (misaal: Beautinique ke routes aur permissions batane wala package asal me private; India ke formats jaanchne wala public). Ye sirf samajh ke liye hai; publish saare hote hain.
 8. **Tests kabhi asli npm ko nahi chhoote** (§8).
@@ -131,7 +131,7 @@ HTTP API nahi. CLI ke commands §3 me. Saajhe flags: `--dry-run` (sirf plan aur 
 ## 8. Tests
 
 - CLI ke saare tests fake npm registry pe ([RULES.md](../../RULES.md) §4.2): asli npm CLI usi pe publish karta hai, `whoami` aur package ke documents wahin se aate hain, aur publish fail aur session khatam jaise haalat bhi.
-- Network ka pehra: tests me asli npm registry tak koi request nahi ([OPERATIONS.md](../../OPERATIONS.md) §11 niyam 8).
+- Network ka pehra: tests me asli npm registry tak koi request nahi ([OPERATIONS.md](../../OPERATIONS.md) §11 niyam 8). Pehra har raasta rokta hai: TLS, `net.connect`, `http` aur `fetch`; sirf is machine ke `127.0.0.1`, `::1` aur `localhost`.
 - Tests ke liye koi local infra chahiye ho to uski baat docs me (D-023).
 - Mutation testing is module me nahi (CLAUDE.md ki teen jagah me ye nahi aata).
 
@@ -164,8 +164,9 @@ ST-2 se ST-8 ek hi PR me (ST-1 ka PR #104 pehle merge hua), aur saare charan 0 m
 
 ## Change log
 
-| Version          | Date       | Badlav                                                                                                                                                                                                                          |
-| ---------------- | ---------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| v1.0.0 se v1.0.2 | 2026-11-22 | Module 28 ka pehla spec, 8 subtasks acceptance criteria ki link (D-445) aur charan 0 (D-446); code abhi nahi.                                                                                                                   |
-| v1.0.3 se v1.0.4 | 2026-11-23 | ST-1 ka code (`scripts/packages`: CLI ka dhaancha, `build`, `npm run packages:build`; tests `scripts/packages/test/`, AC-PACKAGES-4) aur PR #104 merge: ST-1 ho gaya, 2 / 18.                                                   |
-| v1.0.5           | 2026-11-24 | ST-2 se ST-8 ek PR me: fake registry aur network guard, `create`, `verify` (CI me har PR pe), `status`, `publish`, `republish`, publish workflow, `update-deps`; AC-PACKAGES-1 se 12 ke tests `scripts/packages/test/`. |
+| Version          | Date       | Badlav                                                                                                                                                                                                                   |
+| ---------------- | ---------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| v1.0.0 se v1.0.2 | 2026-11-22 | Module 28 ka pehla spec, 8 subtasks acceptance criteria ki link (D-445) aur charan 0 (D-446); code abhi nahi.                                                                                                            |
+| v1.0.3 se v1.0.4 | 2026-11-23 | ST-1 ka code (`scripts/packages`: CLI ka dhaancha, `build`, `npm run packages:build`; tests `scripts/packages/test/`, AC-PACKAGES-4) aur PR #104 merge: ST-1 ho gaya, 2 / 18.                                            |
+| v1.0.5           | 2026-11-24 | ST-2 se ST-8 ek PR me: fake registry aur network guard, `create`, `verify` (CI me har PR pe), `status`, `publish`, `republish`, publish workflow, `update-deps`; AC-PACKAGES-1 se 12 ke tests `scripts/packages/test/`.  |
+| v1.0.6           | 2026-11-25 | QA audit ke fixes: naam ke saath publish me zaroori dependency saath (D-445 badla), tag job beech me fail ke baad bhi, `verify` ke project wale secret patterns, network guard ke saare raaste, provenance ki line saaf. |
