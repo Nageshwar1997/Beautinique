@@ -1,6 +1,6 @@
 # DECISIONS: Beautinique
 
-> **Status:** v1.14.78 (2026-11-25). Har faisla ek jagah. Sirf wahi "Tay" jo owner ne khud kaha; Claude ki salah faisla nahi. Cheezein ek-ek karke judti hain.
+> **Status:** v1.14.79 (2026-11-26). Har faisla ek jagah. Sirf wahi "Tay" jo owner ne khud kaha; Claude ki salah faisla nahi. Cheezein ek-ek karke judti hain.
 
 ## 0. Kaise likhein
 
@@ -477,6 +477,8 @@
 | D-460 | Backup command ki files repo ke root ke `backups/` folder me, D-013 ke chaar pehron ke saath.                                                                                                                                                                                           | Operations   | 2026-11-23 |
 | D-461 | Dependency updates: GitHub ke security PR band aur alert ka fix `prerelease` se; images ke sirf patch; har naye version pe 7 din ka cooldown.                                                                                                                                           | Security     | 2026-11-23 |
 | D-462 | Do machine: primary laptop pe code, secondary pe roz ke containers (Docker context over SSH); live data wala kaam sirf primary pe; development data sirf primary ki taraf.                                                                                                              | Operations   | 2026-11-23 |
+| D-463 | Secondary laptop ka purana data nahi mitna: usi HDD ke partition 3 pe Ubuntu Server (dual boot), D: ka data pehle copy. | Operations | 2026-11-24 |
+| D-464 | Code me sahi data structure aur algorithm (DSA): `Set` aur `Map` se milan, bhaari O(n²) sirf seema ke saath, sort ek baar, lookup boot pe ek baar, bade input ka test. | Process | 2026-11-26 |
 
 ## 2. Record
 
@@ -5598,6 +5600,23 @@
 - **Kisne, kab:** owner, 2026-11-24. **Nishaan:** (1) aur (2) owner ne khud kaha; (3) salah maani.
 - **Asar (Claude):** D-462 (1) badla; [OPERATIONS.md](OPERATIONS.md) §1 niyam 11; owner ka kaam OT-10 ([OWNER_TASKS.md](OWNER_TASKS.md)).
 
+### D-464. Code me sahi data structure aur algorithm (DSA)
+
+- **Faisla:** code me jahan data pe kaam ho (dhoondhna, milana, dedupe, group, sort, queue, path ya range ka milan), wahan sahi data structure aur algorithm lagana hai ([RULES.md](RULES.md) CR-40):
+  1. "Hai ya nahi" aur milan `Set` aur `Map` se, ek baar banake; loop ke andar `includes`, `find` ya `indexOf` se nahi.
+  2. Do lists ka milan ya group ek pass me `Map` se; loop ke andar loop (O(n²)) sirf jab dono sire chhote aur seema wale hon, aur seema likhi ho.
+  3. Sort ek baar aur sirf zaroorat pe; top-k, sabse bada ya chhota chahiye to poora sort nahi; comparator poora.
+  4. Queue me loop ke andar `shift()` nahi; path, prefix aur range ke milan ke liye uska sahi tareeka; jo har request pe chalta hai uska lookup boot pe ek baar bane.
+  5. Tareeke ka chunav saaf na dikhe to ek line comment (tareeka aur O()); bahar ke input ki seema pehle (SR-007).
+  6. Bade input (misaal 10^5) ka test bina time ki shart ke, kernel packages me zaroor.
+- **Wajah:** owner ne kaha (2026-11-26): proper DSA lagana hai, aur uska ek rule aur ek faisla likho. Claude ki taraf se wajah: code asli users maan ke likha jaata hai (CLAUDE.md "production-grade"), aur chhupa O(n²) tab dikhta hai jab data badh chuka ho; free tier ka 512 MB aur ek hi process isko aur mehnga banate hain.
+- **Chhode vikalp:** pehle sab simple likho aur dhima hone pe naap ke sudharo (chhoda: kernel aur har-request ke raaste me sudhar baad me mehnga aur risky); har jagah sabse tez tareeka (chhoda: chhote bounded data pe ye bekaar jatil code deta hai, isliye O(n²) ki chhoot seema ke saath di).
+- **Kab dobara khulega:** owner khud khole.
+- **Kisne, kab:** owner, 2026-11-26. **Nishaan:** Owner.
+- **Asar (Claude):**
+  - Naye code me laagu, aur code review me "complexity" ek jaanch.
+  - Jo purana code isse nahi milta, wo HANDOFF me khula likha: abhi `matchRoute` ([`shared-contracts`](tasks/02-platform/TASK.md) §3.1) har request pe manifest ki saari entries ek-ek karke dekhta hai; gateway aur `backend-server-kit` se pehle uska lookup ek baar banne wala banega.
+
 ## Change log
 
 | Version              | Date                     | Badlav                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          |
@@ -5606,3 +5625,4 @@
 | v1.14.61 se v1.14.71 | 2026-11-23               | D-455: implementation stage khula; D-443 badla; D-456: private files B2 (EU Central) pe; D-439 badla; D-457: purane code ki local files aur `external.command` (D-455 badla); D-458: Node aur npm ka pin; D-459: helpers, types aur constants kahan rehte hain; D-460: backup folder `backups/`; D-461: dependency updates (security alert, images, cooldown), D-336 me jod; D-462: do laptop, primary pe code aur secondary pe containers.                                                                                     |
 | v1.14.72 se v1.14.74 | 2026-11-24               | D-463: secondary ka purana data nahi mitna, Ubuntu usi HDD ke partition 3 pe (dual boot), D: ke Recycle Bin ki deleted files copy nahi; D-462 badla. Ubuntu Server 26.04 LTS (latest LTS).                                                                                                                                                                                                                                                                                                                                      |
 | v1.14.75 se v1.14.78 | 2026-11-25               | D-462 badla: `dev-data:copy` secondary ka MongoDB khud bina tunnel uthata hai; local `infra:down` secondary ka tunnel nahi chhoota; network phone ka hotspot, secondary ka naam `bq-infra.local`. QA audit ke baad: D-441 badla (Claude ke liye har `.env.*` ka deny, env file ka pehra case ke bina), D-445 badla (naam ke saath publish me zaroori dependency saath), D-462 badla (configdb ka naam wala volume, copy se pehle local snapshot, tunnel ka pid `ssh` ho to hi, snapshot sirf development project ke `down` pe); code review ke baad D-445 aur D-462 ki "Badla" lines saaf (tag job sirf isi run ke versions, `dev-data:restore -- --before-copy`). |
+| v1.14.79 | 2026-11-26 | D-464: code me sahi data structure aur algorithm (DSA), RULES CR-40. Index me D-463 ki row (record pehle se tha). |
