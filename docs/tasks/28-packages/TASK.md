@@ -1,6 +1,6 @@
 # TASK 28: packages ka flow
 
-> **Status:** v1.0.7 (2026-11-25). Halat: implementation; ST-1 **ho gaya** (PR [#104](https://github.com/Nageshwar1997/Beautinique/pull/104)), ST-2 se ST-8 ek PR me, `scripts/packages` aur `.github/workflows/publish.yml`. Module [PROJECT_PLAN.md](../../PROJECT_PLAN.md) §3 ka `28-packages` (D-445). Progress: 18 / 18 points.
+> **Status:** v1.0.8 (2026-11-26). Halat: implementation; ST-1 **ho gaya** (PR [#104](https://github.com/Nageshwar1997/Beautinique/pull/104)), ST-2 se ST-8 ek PR me, `scripts/packages` aur `.github/workflows/publish.yml`. Module [PROJECT_PLAN.md](../../PROJECT_PLAN.md) §3 ka `28-packages` (D-445). Progress: 18 / 18 points.
 
 ## 1. Lakshya
 
@@ -164,9 +164,10 @@ ST-2 se ST-8 ek hi PR me (ST-1 ka PR #104 pehle merge hua), aur saare charan 0 m
 
 ## Change log
 
-| Version          | Date       | Badlav                                                                                                                                                                                                                   |
-| ---------------- | ---------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| v1.0.0 se v1.0.2 | 2026-11-22 | Module 28 ka pehla spec, 8 subtasks acceptance criteria ki link (D-445) aur charan 0 (D-446); code abhi nahi.                                                                                                            |
-| v1.0.3 se v1.0.4 | 2026-11-23 | ST-1 ka code (`scripts/packages`: CLI ka dhaancha, `build`, `npm run packages:build`; tests `scripts/packages/test/`, AC-PACKAGES-4) aur PR #104 merge: ST-1 ho gaya, 2 / 18.                                            |
-| v1.0.5           | 2026-11-24 | ST-2 se ST-8 ek PR me: fake registry aur network guard, `create`, `verify` (CI me har PR pe), `status`, `publish`, `republish`, publish workflow, `update-deps`; AC-PACKAGES-1 se 12 ke tests `scripts/packages/test/`.  |
+| Version          | Date       | Badlav                                                                                                                                                                                                                                                                                                                          |
+| ---------------- | ---------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| v1.0.0 se v1.0.2 | 2026-11-22 | Module 28 ka pehla spec, 8 subtasks acceptance criteria ki link (D-445) aur charan 0 (D-446); code abhi nahi.                                                                                                                                                                                                                   |
+| v1.0.3 se v1.0.4 | 2026-11-23 | ST-1 ka code (`scripts/packages`: CLI ka dhaancha, `build`, `npm run packages:build`; tests `scripts/packages/test/`, AC-PACKAGES-4) aur PR #104 merge: ST-1 ho gaya, 2 / 18.                                                                                                                                                   |
+| v1.0.5           | 2026-11-24 | ST-2 se ST-8 ek PR me: fake registry aur network guard, `create`, `verify` (CI me har PR pe), `status`, `publish`, `republish`, publish workflow, `update-deps`; AC-PACKAGES-1 se 12 ke tests `scripts/packages/test/`.                                                                                                         |
 | v1.0.6 se v1.0.7 | 2026-11-25 | QA audit ke fixes: naam ke saath publish me zaroori dependency saath (D-445 badla), tag job beech me fail ke baad bhi, `verify` ke project wale secret patterns, network guard ke saare raaste, provenance ki line saaf. Code review ke baad: tag job sirf isi run ke versions tag karta hai, purane bina tag wale ki chetavni. |
+| v1.0.8           | 2026-11-26 | `create` ki template ab `tsconfig.json` Prettier ke format me likhti hai (chhoti list ek line me), to naya package `format:check` pe fail nahi hota; test `template.test.ts` (har category ki har file Prettier ke format me, `AC-PACKAGES-1`).                                                                                 |
