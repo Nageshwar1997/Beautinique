@@ -201,6 +201,9 @@ describe('eventEnvelopeSchema: the messages', () => {
     ]);
     expect(messages({ ...envelope, version: 0 })).toEqual(['version must be at least 1.']);
     expect(messages({ ...envelope, version: 1.5 })).toEqual(['version must be a whole number.']);
+    expect(messages({ ...envelope, occurredAt: '26 Nov 2026' })).toEqual([
+      'occurredAt must be a UTC date and time, like 2026-11-26T09:00:00.000Z.',
+    ]);
     expect(messages({ ...envelope, producer: 'shop' })).toEqual([
       'producer must be a service of the list.',
     ]);

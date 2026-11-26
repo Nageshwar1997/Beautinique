@@ -54,9 +54,9 @@ export const eventEnvelopeSchema = strictObject(
     version: number('version must be a number.')
       .int('version must be a whole number.')
       .min(1, 'version must be at least 1.'),
-    occurredAt: iso.datetime({
-      error: 'occurredAt must be a UTC date and time, like 2026-11-26T09:00:00.000Z.',
-    }),
+    occurredAt: iso.datetime(
+      'occurredAt must be a UTC date and time, like 2026-11-26T09:00:00.000Z.',
+    ),
     producer: enumOf(SERVICES, 'producer must be a service of the list.'),
     aggregate: strictObject(
       {
