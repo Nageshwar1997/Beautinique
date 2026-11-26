@@ -23,6 +23,16 @@ export interface StoredResponse {
   body: unknown;
 }
 
+/**
+ * The request that holds a key: what it asked for, and when its lease ends. A request is the one
+ * that holds the key only while the record has both; once its lease is out another request may take
+ * the key, and from then on what the first one does to the record changes nothing.
+ */
+export interface IdempotencyClaim {
+  fingerprint: string;
+  leaseUntil: Date;
+}
+
 export type BeginResult =
   | { kind: 'started' }
   | { kind: 'in-progress' }
@@ -37,22 +47,35 @@ export type BeginResult =
  */
 export interface IdempotencyStore {
   /**
-   * Starts the request, unless the id is in use and in force:
-   * - the same id with another `fingerprint`: `key-reused`;
-   * - the same id and `fingerprint`, ended: `replay` of what it answered;
-   * - the same id and `fingerprint`, not ended: `in-progress`.
+   * Starts the request (the record is then the claim's), unless the id is in use and in force:
+   * - the same id with another fingerprint: `key-reused`;
+   * - the same id and fingerprint, ended: `replay` of what it answered;
+   * - the same id and fingerprint, not ended: `in-progress`.
    * A record whose time is out (an ended one after 48 hours, a begun one after its lease) is as if
    * it were not there.
    */
-  begin(id: IdempotencyId, fingerprint: string, now: Date, leaseUntil: Date): Promise<BeginResult>;
-  /** Keeps the answer, until `expiresAt`. */
-  complete(id: IdempotencyId, response: StoredResponse, expiresAt: Date): Promise<void>;
-  /** Forgets a request that ended in a 5xx, so that the same key can try again. */
-  release(id: IdempotencyId): Promise<void>;
+  begin(id: IdempotencyId, claim: IdempotencyClaim, now: Date): Promise<BeginResult>;
+  /**
+   * Keeps the answer, until `expiresAt`, if the record is still the claim's and not ended. A
+   * request whose lease ran out and whose key another request took leaves that request's record
+   * as it is.
+   */
+  complete(
+    id: IdempotencyId,
+    claim: IdempotencyClaim,
+    response: StoredResponse,
+    expiresAt: Date,
+  ): Promise<void>;
+  /**
+   * Forgets a request that ended in a 5xx, so that the same key can try again; only if the record
+   * is still the claim's and not ended.
+   */
+  release(id: IdempotencyId, claim: IdempotencyClaim): Promise<void>;
 }
 
 interface MemoryRecord {
   fingerprint: string;
+  leaseUntil: number;
   until: number;
   response: StoredResponse | undefined;
 }
@@ -64,9 +87,18 @@ interface MemoryRecord {
 export function createMemoryIdempotencyStore(): IdempotencyStore {
   const records = new Map<string, MemoryRecord>();
   const keyOf = (id: IdempotencyId): string => JSON.stringify([id.caller, id.routeId, id.key]);
+  // The record, if it is the claim's and has not ended.
+  const heldBy = (id: IdempotencyId, claim: IdempotencyClaim): MemoryRecord | undefined => {
+    const found = records.get(keyOf(id));
+    return found?.response === undefined &&
+      found?.fingerprint === claim.fingerprint &&
+      found.leaseUntil === claim.leaseUntil.getTime()
+      ? found
+      : undefined;
+  };
 
   return {
-    begin(id, fingerprint, now, leaseUntil) {
+    begin(id, { fingerprint, leaseUntil }, now) {
       const key = keyOf(id);
       const found = records.get(key);
       if (found !== undefined && found.until > now.getTime()) {
@@ -77,19 +109,20 @@ export function createMemoryIdempotencyStore(): IdempotencyStore {
             : { kind: 'replay', response: found.response },
         );
       }
-      records.set(key, { fingerprint, until: leaseUntil.getTime(), response: undefined });
+      const lease = leaseUntil.getTime();
+      records.set(key, { fingerprint, leaseUntil: lease, until: lease, response: undefined });
       return Promise.resolve({ kind: 'started' });
     },
-    complete(id, response, expiresAt) {
-      const found = records.get(keyOf(id));
+    complete(id, claim, response, expiresAt) {
+      const found = heldBy(id, claim);
       if (found !== undefined) {
         found.until = expiresAt.getTime();
         found.response = response;
       }
       return Promise.resolve();
     },
-    release(id) {
-      records.delete(keyOf(id));
+    release(id, claim) {
+      if (heldBy(id, claim) !== undefined) records.delete(keyOf(id));
       return Promise.resolve();
     },
   };

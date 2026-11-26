@@ -15,6 +15,9 @@ services:
     # A single-member replica set, since transactions need one. The member's address is the one the
     # laptop's clients use, so mongod listens on the same port inside the container as outside.
     # The WiredTiger cache is capped at 0.25 GB: the machine that runs the containers has 8 GB.
+    # The test commands are on, so that the tests can make a command fail on purpose (the
+    # `failCommand` fail point, for the transaction helper's retries); Atlas never has them, and
+    # these containers listen only on 127.0.0.1.
     command:
       - mongod
       - --replSet
@@ -24,6 +27,8 @@ services:
       - '${BQ_MONGO_PORT:-27017}'
       - --wiredTigerCacheSizeGB
       - '0.25'
+      - --setParameter
+      - enableTestCommands=1
     ports:
       - '127.0.0.1:${BQ_MONGO_PORT:-27017}:${BQ_MONGO_PORT:-27017}'
     # The image also declares /data/configdb a volume; it gets a name too, or every container would

@@ -55,6 +55,8 @@ export const forbidden = (): AppError => common('FORBIDDEN', 'You are not allowe
 export const stepUpRequired = (): AppError =>
   common('STEP_UP_REQUIRED', 'Enter your authenticator code to continue.');
 export const notFound = (): AppError => common('NOT_FOUND', 'This was not found.');
+export const conflict = (): AppError =>
+  common('CONFLICT', 'This was changed by someone else. Load it again and retry.');
 export const payloadTooLarge = (): AppError =>
   common('PAYLOAD_TOO_LARGE', 'The request is too large.');
 export const idempotencyInProgress = (): AppError =>

@@ -118,6 +118,18 @@ describe(
       assert.ok(mongo.command.includes('--wiredTigerCacheSizeGB'));
     });
 
+    test('AC-PLATFORM-1: MongoDB has its test commands on, for the fail points of the tests', () => {
+      for (const env of [
+        { BQ_DATA_IN_MEMORY: '' },
+        { BQ_DATA_IN_MEMORY: 'true', COMPOSE_PROJECT_NAME: 'bq-memory-test' },
+      ]) {
+        const { mongo } = mongoConfig(env).services;
+        const at = mongo.command.indexOf('--setParameter');
+        assert.ok(at > 0, 'the --setParameter flag is missing');
+        assert.equal(mongo.command[at + 1], 'enableTestCommands=1');
+      }
+    });
+
     test('without BQ_DATA_IN_MEMORY only the one compose file is used', () => {
       assert.deepEqual(composeFiles({}), [COMPOSE_FILE]);
       assert.deepEqual(composeFiles({ BQ_DATA_IN_MEMORY: 'false', COMPOSE_PROJECT_NAME: 'x' }), [

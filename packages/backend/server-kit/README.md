@@ -55,13 +55,13 @@ What a request goes through, in this order: the actor (401), the app of its toke
 
 ### Errors
 
-- `AppError({ status, code, message, details?, retryAfterSeconds? })` and the common ones: `validationFailed`, `unauthenticated`, `forbidden`, `stepUpRequired`, `notFound`, `payloadTooLarge`, `idempotencyInProgress`, `idempotencyKeyReused`, `rateLimited`, `serviceUnavailable`, `internalError`. A route answers only with the common codes and the ones its contract lists, with the status it lists; any other is a 500 (and is logged). What is thrown that is not an `AppError` is a 500 that says nothing of itself (SR-077).
+- `AppError({ status, code, message, details?, retryAfterSeconds? })` and the common ones: `validationFailed`, `unauthenticated`, `forbidden`, `stepUpRequired`, `notFound`, `conflict` (409, a record that someone else changed first), `payloadTooLarge`, `idempotencyInProgress`, `idempotencyKeyReused`, `rateLimited`, `serviceUnavailable`, `internalError`. A route answers only with the common codes and the ones its contract lists, with the status it lists; any other is a 500 (and is logged). What is thrown that is not an `AppError` is a 500 that says nothing of itself (SR-077).
 - `errorBody(error, requestId)`: `{ error: { code, message, details, requestId } }`, with `details` always there (`null` when there is nothing).
 
 ### Idempotency
 
 - A route with `idempotency: 'required'` needs the `Idempotency-Key` header (8 to 128 of letters, digits, `-` and `_`). Key + route + caller: the same request gives the first answer; the key with another request is 422 `IDEMPOTENCY_KEY_REUSED`; one that is still running is 409 `IDEMPOTENCY_IN_PROGRESS` (SR-045). The 2xx and 4xx are kept for 48 hours, a 5xx is not. A request that began and never ended frees its key after 60 seconds. When the store cannot say whether a request has run, it does not run: 503.
-- `IdempotencyStore` (`begin`, `complete`, `release`): where the records are kept; the live one is the owner service's database. `createMemoryIdempotencyStore()` is for tests and a laptop. A public route cannot ask for a key (it has no caller).
+- `IdempotencyStore` (`begin(id, claim, now)`, `complete(id, claim, response, expiresAt)`, `release(id, claim)`): where the records are kept; the live one is the owner service's database (`createMongoIdempotencyStore` of `@beautinique/backend-mongo`). The `claim` is the request's fingerprint and the end of its lease: `complete` and `release` change the record only while it is still that request's, so a request whose lease ran out never touches the record of the one that took its key. `createMemoryIdempotencyStore()` is for tests and a laptop. A public route cannot ask for a key (it has no caller).
 
 ### Rate limit
 

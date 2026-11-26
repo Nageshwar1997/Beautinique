@@ -31,6 +31,27 @@ function json(value: unknown): string {
   return `${JSON.stringify(value, null, 2)}\n`;
 }
 
+// A list of plain values on one line, as Prettier prints it in a `.json` file when the line fits
+// in its 100 characters (an object stays as it is written). Without it a new package's
+// tsconfig.json fails `format:check`. (package.json is printed as JSON.stringify prints it.)
+const PRINT_WIDTH = 100;
+const LIST = /^( *)("[^"\n]+": )\[\n([^[\]{}]*?)\n\1\]/gm;
+
+function prettierJson(value: unknown): string {
+  const text = JSON.stringify(value, null, 2).replace(
+    LIST,
+    (whole, indent: string, key: string, items: string) => {
+      const line = `${indent}${key}[${items
+        .split('\n')
+        .map((item) => item.trim())
+        .join(' ')}]`;
+      // A comma may follow the list.
+      return line.length + 1 <= PRINT_WIDTH ? line : whole;
+    },
+  );
+  return `${text}\n`;
+}
+
 function readme({ packageName, description, category }: TemplateInput): string {
   const tailwind =
     category === 'frontend'
@@ -121,7 +142,7 @@ export function packageFiles(input: TemplateInput): Record<string, string> {
 
   const result: Record<string, string> = {
     'package.json': json(manifest),
-    'tsconfig.json': json(tsconfig),
+    'tsconfig.json': prettierJson(tsconfig),
     'tsdown.config.ts': `import { defineConfig } from 'tsdown';
 
 export default defineConfig({ entry: ['src/index.ts'], format: 'esm', dts: true, clean: true });

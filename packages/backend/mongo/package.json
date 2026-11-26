@@ -1,0 +1,52 @@
+{
+  "name": "@beautinique/backend-mongo",
+  "version": "1.0.0",
+  "description": "The MongoDB helpers of a service: the transaction helper, the repository base, the money codec, the release step, the retention registry, the query plan guard and the idempotency store.",
+  "license": "MIT",
+  "type": "module",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.mts",
+      "import": "./dist/index.mjs"
+    },
+    "./package.json": "./package.json"
+  },
+  "files": [
+    "dist",
+    "README.md",
+    "CHANGELOG.md",
+    "LICENSE"
+  ],
+  "engines": {
+    "node": "24.22.3"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Nageshwar1997/Beautinique.git",
+    "directory": "packages/backend/mongo"
+  },
+  "publishConfig": {
+    "access": "public",
+    "provenance": true
+  },
+  "scripts": {
+    "build": "tsdown",
+    "typecheck": "tsc -p tsconfig.json",
+    "lint": "eslint .",
+    "test": "vitest run --coverage"
+  },
+  "peerDependencies": {
+    "@beautinique/backend-server-kit": "^1.0.0",
+    "@beautinique/shared-clock": "^1.0.0",
+    "@beautinique/shared-money": "^1.0.0",
+    "mongodb": "^7.9.1",
+    "zod": "^4.6.7"
+  },
+  "devDependencies": {
+    "@beautinique/backend-server-kit": "^1.0.0",
+    "@beautinique/shared-clock": "^1.0.0",
+    "@beautinique/shared-money": "^1.0.0",
+    "mongodb": "^7.9.1",
+    "zod": "^4.6.7"
+  }
+}

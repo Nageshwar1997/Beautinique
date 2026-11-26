@@ -278,14 +278,13 @@ export function createRouteRunner<C extends AnyRoute>(
   ): Promise<RouteResponse> {
     const { requestId } = request;
     const now = deps.clock.now();
+    const claim = {
+      fingerprint: fingerprintOf(context),
+      leaseUntil: new Date(now.getTime() + IDEMPOTENCY_LEASE_MS),
+    };
     let begun;
     try {
-      begun = await store.begin(
-        id,
-        fingerprintOf(context),
-        now,
-        new Date(now.getTime() + IDEMPOTENCY_LEASE_MS),
-      );
+      begun = await store.begin(id, claim, now);
     } catch (thrown) {
       // Without the store there is no telling whether this request has run, so it does not run.
       deps.logger.error(
@@ -303,10 +302,11 @@ export function createRouteRunner<C extends AnyRoute>(
 
     const response = await handle(request, context, scopes);
     try {
-      if (response.status >= 500) await store.release(id);
+      if (response.status >= 500) await store.release(id, claim);
       else {
         await store.complete(
           id,
+          claim,
           { status: response.status, body: response.body },
           new Date(now.getTime() + IDEMPOTENCY_TTL_MS),
         );
