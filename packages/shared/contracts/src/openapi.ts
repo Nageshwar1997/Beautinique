@@ -55,6 +55,7 @@ function errorCodesByStatus(route: AnyRoute): Map<number, string[]> {
   }
   if (route.body !== undefined) codes.push('PAYLOAD_TOO_LARGE');
   if (route.permission !== 'public') codes.push('UNAUTHENTICATED', 'FORBIDDEN');
+  if (route.stepUp) codes.push('STEP_UP_REQUIRED');
   if (route.params !== undefined) codes.push('NOT_FOUND');
   if (route.idempotency === 'required') {
     codes.push('IDEMPOTENCY_IN_PROGRESS', 'IDEMPOTENCY_KEY_REUSED');

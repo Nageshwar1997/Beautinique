@@ -1,0 +1,51 @@
+{
+  "name": "@beautinique/backend-server-kit",
+  "version": "1.0.0",
+  "description": "Runs a route from its contract: the checks of what comes in and goes out, the actor and authorize, the error shape, idempotency and the rate limit counter.",
+  "license": "MIT",
+  "type": "module",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.mts",
+      "import": "./dist/index.mjs"
+    },
+    "./package.json": "./package.json"
+  },
+  "files": [
+    "dist",
+    "README.md",
+    "CHANGELOG.md",
+    "LICENSE"
+  ],
+  "engines": {
+    "node": "24.22.3"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Nageshwar1997/Beautinique.git",
+    "directory": "packages/backend/server-kit"
+  },
+  "publishConfig": {
+    "access": "public",
+    "provenance": true
+  },
+  "scripts": {
+    "build": "tsdown",
+    "typecheck": "tsc -p tsconfig.json",
+    "lint": "eslint .",
+    "test": "vitest run --coverage"
+  },
+  "peerDependencies": {
+    "@beautinique/shared-clock": "^1.0.0",
+    "@beautinique/shared-contracts": "^1.0.0",
+    "express": "^5.3.0",
+    "zod": "^4.6.7"
+  },
+  "devDependencies": {
+    "@beautinique/shared-clock": "^1.0.0",
+    "@beautinique/shared-contracts": "^1.0.0",
+    "@types/express": "^5.0.6",
+    "express": "^5.3.0",
+    "zod": "^4.6.7"
+  }
+}

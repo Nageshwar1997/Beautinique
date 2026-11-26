@@ -1,6 +1,6 @@
 # LESSONS: Beautinique
 
-> **Status:** v1.1.7 (2026-11-26). Sabak aur traps: kya hua, kyun hua, ab kya karte hain. Faisle yahan nahi, [DECISIONS.md](DECISIONS.md) me. Cheezein ek-ek karke judengi.
+> **Status:** v1.1.8 (2026-11-26). Sabak aur traps: kya hua, kyun hua, ab kya karte hain. Faisle yahan nahi, [DECISIONS.md](DECISIONS.md) me. Cheezein ek-ek karke judengi.
 
 ## Is file me kya aayega
 
@@ -62,12 +62,33 @@ Har sabak: **Kya hua**, **Kyun**, **Ab kya karte hain**, **Kab** (date).
 - **Ab kya karte hain:** (1) push se pehle wahi scan locally, jo CI chalata hai: `npm run secrets:scan` (gitleaks 8.30.1, `.gitleaks.toml` ke saath, poori history); sirf commit ke baad, kyunki scan commits dekhta hai. (2) Test me token ya key jaisi value literal nahi, run time pe bane, jaise `'tok-'.concat('z'.repeat(12))`. (3) Finding commit me aa chuki ho to force push ke bina uska fingerprint reason ke saath `.gitleaksignore` me (commit:file:rule:line, kabhi poora path nahi); wahi purani entries ka tareeka hai. Force push sirf owner ki haan se.
 - **Kab:** 2026-11-26.
 
+## 5. Server aur tests
+
+### Router ka `express.json()` har request ka body padh leta hai (2026-11-26)
+
+- **Kya hua:** `kit.router` me `router.use(express.json())` tha; usi app me facade ka `/internal/...` route signature ke liye body ke asli bytes chahta hai (`express.raw`), par body pehle hi padh liya gaya tha, to har signed call 401 hui.
+- **Kyun:** `router.use` us router ke saath mount hui har request pe chalta hai, sirf us router ke routes pe nahi; body ek hi baar padhi jaati hai.
+- **Ab kya karte hain:** body parser sirf us route pe jiske contract me `body` hai (`router.post(path, parser, handler)`), router pe `use` nahi. Test: ek hi app me JSON route aur raw-body route saath chalein.
+- **Kab:** 2026-11-26 (ST-5).
+
+### Error body me `details: undefined` JSON me gayab, aur client use "INTERNAL" padhta hai (2026-11-26)
+
+- **Kya hua:** server ne `{ error: { ..., details: undefined } }` bheja; JSON me `details` key hi nahi hoti, aur contracts ka `errorBodySchema` (`details: unknown()`) zod 4 me missing key ko refuse karta hai, to `ApiError` ka code `INTERNAL` ho gaya aur asli code (`NOT_FOUND`) kho gaya.
+- **Ab kya karte hain:** `errorBody` me `details` hamesha (`null` jab kuch nahi). Error body ka test sirf object pe nahi, `JSON.parse(JSON.stringify(body))` pe bhi `errorBodySchema` se; aur server ka jawab client ke saath asli HTTP pe (`express.test.ts`).
+- **Kab:** 2026-11-26 (ST-5).
+
+### Query me ek hi item ki list text hoti hai, aur test helper ka default `undefined` nigal leta hai (2026-11-26)
+
+- **Kya hua:** client `ids=7` bhejta hai (ek item ki list), Express use text deta hai, aur schema `array` maangta hai: server ne 400 diya; 3 items ke test me ye chhup gaya tha. Aur: test helper `place(body, key = 'k')` ko `undefined` do to default lag jaata hai, to "key ke bina" ka test asal me key ke saath chala.
+- **Ab kya karte hain:** server text ko schema ke hisaab se padhta hai (number, boolean, date, list, aur list ke items; `decodeText`). Round-trip test chhote aur ek-item wale input pe bhi. Test helper me "kuch nahi" ke liye `null`, `undefined` nahi.
+- **Kab:** 2026-11-26 (ST-5).
+
 ## Change log
 
-| Version          | Date       | Badlav                                                                                                                                                                                                                                      |
-| ---------------- | ---------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| v1.0.0           | 2026-11-17 | Khaali file bani.                                                                                                                                                                                                                           |
-| v1.1.1           | 2026-11-23 | Pehla sabak: nayi branch ka upstream `prerelease` (`--no-track`).                                                                                                                                                                           |
-| v1.1.2           | 2026-11-25 | §2: secondary pe Ubuntu Server ke install ke sabak (Rufus, GRUB, network, Enter, partition 3).                                                                                                                                              |
+| Version          | Date       | Badlav                                                                                                                                                                                                                                                                                                                                  |
+| ---------------- | ---------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| v1.0.0           | 2026-11-17 | Khaali file bani.                                                                                                                                                                                                                                                                                                                       |
+| v1.1.1           | 2026-11-23 | Pehla sabak: nayi branch ka upstream `prerelease` (`--no-track`).                                                                                                                                                                                                                                                                       |
+| v1.1.2           | 2026-11-25 | §2: secondary pe Ubuntu Server ke install ke sabak (Rufus, GRUB, network, Enter, partition 3).                                                                                                                                                                                                                                          |
 | v1.1.3 se v1.1.6 | 2026-11-25 | §3: Git Bash me ssh passphrase maangta hai; code me theek (`ssh.ts`), `.bash_profile` optional; Windows me child process ke env me PATH ke naam ka sabak. §2: internal keyboard ki atki key, `unbind` tikta nahi, `i8042.nokbd` chalta hai. §3: PowerShell me `npm run <script> -- --flag` ka `--` kho jaata hai, `npm.cmd` chalta hai. |
-| v1.1.7 | 2026-11-26 | §4: secret scan poori history dekhta hai, nakli value ko bhi; test me token jaisi value run time pe, aur push se pehle `npm run secrets:scan`. |
+| v1.1.7 se v1.1.8 | 2026-11-26 | §4: secret scan poori history dekhta hai, nakli value ko bhi; test me token jaisi value run time pe, aur push se pehle `npm run secrets:scan`. §5: server aur tests: router ka `express.json()` har body padhta hai; error body ka `details`; ek item ki list.                                                                          |

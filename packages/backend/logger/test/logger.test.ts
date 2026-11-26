@@ -74,10 +74,9 @@ describe('createLogger: a log line', () => {
 });
 
 describe('createLogger: the options', () => {
-  it('SR-098: an option that is not in the list is refused, so no transport or pretty can be added', () => {
+  it('SR-098: an option that is not in the list is refused, so no transport can be added', () => {
     for (const option of [
       'transport',
-      'pretty',
       'prettyPrint',
       'redact',
       'serializers',
@@ -172,7 +171,7 @@ describe('createLogger: what is logged is cleaned (AC-PLATFORM-14)', () => {
     authorization: 'Bearer eyJhbGciOi.eyJzdWIi.signature123',
   };
 
-  it('AC-PLATFORM-14: a log with an OTP, a password, a token, a cookie, a PAN, a bank number and an address shows none of the values', () => {
+  it('AC-PLATFORM-14: a log with an OTP, a password, a token, a cookie, a PAN, a bank number and an address shows none of the values, and keeps the keys', () => {
     const { logger, raw, lines } = capture();
 
     logger.info(
@@ -192,7 +191,7 @@ describe('createLogger: what is logged is cleaned (AC-PLATFORM-14)', () => {
     for (const value of Object.values(VALUES)) expect(raw()).not.toContain(value);
     expect(lines()[0]).toMatchObject({ orderId: 'o1', msg: 'signed in' });
     for (const key of ['otp', 'password', 'token', 'cookie', 'pan', 'bankAccount', 'address']) {
-      expect(lines()[0]).not.toHaveProperty(key);
+      expect(lines()[0], key).toMatchObject({ [key]: '[redacted]' });
     }
   });
 
@@ -296,16 +295,66 @@ describe('createLogger: an error in a log (SR-098)', () => {
   });
 });
 
-describe('createLogger: no pretty transport in production (SR-098, RT-34)', () => {
+describe('createLogger: pino-pretty is for development only (D-339, SR-098, RT-34)', () => {
   const manifest = JSON.parse(
     readFileSync(new URL('../package.json', import.meta.url), 'utf8'),
   ) as Record<string, Record<string, string> | undefined>;
 
-  it('SR-098, RT-34: pino-pretty is not a dependency of the package', () => {
-    for (const field of ['dependencies', 'peerDependencies', 'optionalDependencies']) {
+  it('SR-098, RT-34: pino-pretty is not a dependency of the package, only an optional peer and a development dependency', () => {
+    for (const field of ['dependencies', 'optionalDependencies']) {
       expect(Object.keys(manifest[field] ?? {}), field).not.toContain('pino-pretty');
     }
     expect(Object.keys(manifest.dependencies ?? {})).toEqual(['pino']);
+    expect(Object.keys(manifest.peerDependencies ?? {})).toEqual(['pino-pretty']);
+    expect(manifest.peerDependenciesMeta).toEqual({ 'pino-pretty': { optional: true } });
+    expect(manifest.devDependencies).toEqual(manifest.peerDependencies);
+  });
+
+  it('SR-098: pretty lines are refused unless NODE_ENV is development: not in production, not in CI, not when it is not set', () => {
+    for (const environment of ['production', 'test', 'staging', '']) {
+      vi.stubEnv('NODE_ENV', environment);
+      expect(
+        () => createLogger({ service: 'identity', level: 'info', pretty: true }),
+        environment,
+      ).toThrow('only when NODE_ENV is development');
+    }
+    vi.unstubAllEnvs();
+    delete process.env['NODE_ENV'];
+    expect(() => createLogger({ service: 'identity', level: 'info', pretty: true })).toThrow(
+      RangeError,
+    );
+    vi.unstubAllEnvs();
+  });
+
+  it('D-339: in development a person reads lines, not JSON, with the same clean-up as a JSON line', () => {
+    vi.stubEnv('NODE_ENV', 'development');
+    const written: string[] = [];
+    const logger = createLogger({
+      service: 'identity',
+      level: 'info',
+      pretty: true,
+      destination: { write: (line) => written.push(line) },
+    });
+
+    forRequest(logger, 'req-1').info(
+      { orderId: 'o1', password: 'Hunter2-secret', user: { email: 'a@b.in', city: 'Pune' } },
+      'signed in as a@b.in',
+    );
+    logger.error({ err: Object.assign(new Error('boom a@b.in'), { code: 'E_BOOM' }) }, 'failed');
+    vi.unstubAllEnvs();
+
+    // The colours are taken out to read the text.
+    // eslint-disable-next-line no-control-regex
+    const text = written.join('').replaceAll(/\u001B\[\d+m/g, '');
+    expect(text).toMatch(/INFO: signed in as <email>/);
+    expect(text).toMatch(/requestId: "req-1"/);
+    expect(text).toMatch(/password: "\[redacted\]"/);
+    expect(text).toMatch(/"email": "\[redacted\]"/);
+    expect(text).toMatch(/"code": "E_BOOM"/);
+    expect(text).toMatch(/ERROR: failed/);
+    expect(text).not.toContain('Hunter2-secret');
+    expect(text).not.toContain('a@b.in');
+    expect(text.trimStart().startsWith('{')).toBe(false);
   });
 
   it('SR-098: the logs are JSON on a plain stream: pino made no transport and no worker thread', () => {
