@@ -38,24 +38,59 @@ const EVENT_TYPE_FORMAT = new RegExp(
   `^(${SERVICES.join('|')})\\.[a-z][A-Za-z0-9]*\\.[a-z][A-Za-z0-9]*$`,
 );
 
-const id = string().min(1).max(64);
-
 /**
  * The envelope every event has (docs/ARCHITECTURE.md §3 rule 7). What `data` holds, and which
  * type, version and producer, is given by `defineEvent`.
  */
-export const eventEnvelopeSchema = strictObject({
-  eventId: id,
-  type: string().regex(EVENT_TYPE_FORMAT),
-  version: number().int().min(1),
-  occurredAt: iso.datetime(),
-  producer: enumOf(SERVICES),
-  aggregate: strictObject({ type: string().min(1).max(64), id, version: number().int().min(0) }),
-  actor: strictObject({ type: enumOf(['account', 'system']), id }),
-  correlationId: id,
-  causationId: id,
-  data: unknown(),
-});
+export const eventEnvelopeSchema = strictObject(
+  {
+    eventId: string('eventId is required.')
+      .min(1, 'eventId is required.')
+      .max(64, 'eventId must be at most 64 characters.'),
+    type: string('type is required.').regex(
+      EVENT_TYPE_FORMAT,
+      'type must be <service>.<aggregate>.<pastTense>, with a service of the list.',
+    ),
+    version: number('version must be a number.')
+      .int('version must be a whole number.')
+      .min(1, 'version must be at least 1.'),
+    occurredAt: iso.datetime({
+      error: 'occurredAt must be a UTC date and time, like 2026-11-26T09:00:00.000Z.',
+    }),
+    producer: enumOf(SERVICES, 'producer must be a service of the list.'),
+    aggregate: strictObject(
+      {
+        type: string('aggregate.type is required.')
+          .min(1, 'aggregate.type is required.')
+          .max(64, 'aggregate.type must be at most 64 characters.'),
+        id: string('aggregate.id is required.')
+          .min(1, 'aggregate.id is required.')
+          .max(64, 'aggregate.id must be at most 64 characters.'),
+        version: number('aggregate.version must be a number.')
+          .int('aggregate.version must be a whole number.')
+          .min(0, 'aggregate.version must be at least 0.'),
+      },
+      'aggregate must be { type, id, version }.',
+    ),
+    actor: strictObject(
+      {
+        type: enumOf(['account', 'system'], 'actor.type must be account or system.'),
+        id: string('actor.id is required.')
+          .min(1, 'actor.id is required.')
+          .max(64, 'actor.id must be at most 64 characters.'),
+      },
+      'actor must be { type, id }.',
+    ),
+    correlationId: string('correlationId is required.')
+      .min(1, 'correlationId is required.')
+      .max(64, 'correlationId must be at most 64 characters.'),
+    causationId: string('causationId is required.')
+      .min(1, 'causationId is required.')
+      .max(64, 'causationId must be at most 64 characters.'),
+    data: unknown(),
+  },
+  'An event must have the fields of the envelope and nothing else.',
+);
 
 // The envelope of one event: its own type, version and producer, and its own `data`, nothing else.
 function envelopeOf<T extends string, V extends number, S extends Service, D extends ZodRawShape>(

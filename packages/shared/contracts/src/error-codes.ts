@@ -51,13 +51,22 @@ export function defineErrors<S extends Service, E extends Readonly<Record<string
 }
 
 /** The body of every error answer: `{ error: { code, message, details, requestId } }`. */
-export const errorBodySchema = strictObject({
-  error: strictObject({
-    code: string().regex(CODE_FORMAT),
-    message: string(),
-    details: unknown(),
-    requestId: string().min(1),
-  }),
-});
+export const errorBodySchema = strictObject(
+  {
+    error: strictObject(
+      {
+        code: string('code is required.').regex(
+          CODE_FORMAT,
+          'code must be in capitals, digits and _, and start with a letter.',
+        ),
+        message: string('message is required.'),
+        details: unknown(),
+        requestId: string('requestId is required.').min(1, 'requestId is required.'),
+      },
+      'error must be { code, message, details, requestId }.',
+    ),
+  },
+  'The error body must be { error } and nothing else.',
+);
 
 export type ErrorBody = output<typeof errorBodySchema>;

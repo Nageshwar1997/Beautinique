@@ -76,4 +76,20 @@ describe('errorBodySchema', () => {
       false,
     );
   });
+
+  it('CR-18: says what is wrong, by the name of the field', () => {
+    const messages = (value: unknown) =>
+      errorBodySchema.safeParse(value).error?.issues.map((issue) => issue.message);
+
+    expect(messages({ error: { ...body.error, code: undefined } })).toEqual(['code is required.']);
+    expect(messages({ error: { ...body.error, code: 'stock' } })).toEqual([
+      'code must be in capitals, digits and _, and start with a letter.',
+    ]);
+    expect(messages({ error: { ...body.error, message: undefined } })).toEqual([
+      'message is required.',
+    ]);
+    expect(messages({ error: { ...body.error, requestId: '' } })).toEqual([
+      'requestId is required.',
+    ]);
+  });
 });
