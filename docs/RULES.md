@@ -1,6 +1,6 @@
 # RULES: Beautinique
 
-> **Status:** v1.2.10 (2026-11-26). Kaam ke niyam. Saare sections: §1 (Definition of Done), §2 (Git aur release gate), §3 (Code), §4 (Testing), §5 se §7 (security, docs, AI); D-381 se D-387, D-397, D-398, D-429, D-430, D-459, D-464. Cheezein ek-ek karke, owner ki haan ke baad judti hain.
+> **Status:** v1.2.11 (2026-11-26). Kaam ke niyam. Saare sections: §1 (Definition of Done), §2 (Git aur release gate), §3 (Code), §4 (Testing), §5 se §7 (security, docs, AI); D-381 se D-387, D-397, D-398, D-429, D-430, D-459, D-464. Cheezein ek-ek karke, owner ki haan ke baad judti hain.
 
 ## Is file me kya aayega
 
@@ -89,6 +89,7 @@ Tools D-001 ke; folder aur naam D-002 ke. Jahan niyam ke saath lint ya CI ka peh
     5. Jahan tareeke ka chunav saaf nahi dikhta, wahan ek line comment: kaun sa tareeka, aur uska O(). Bahar se aane wale input ki seema pehle (SR-007), phir kaam.
     6. Jo function bade input pe chalta hai, uska ek bade input (misaal 10^5 items) ka test, bina time ki shart ke (RT-25): hang ya O(n²) test ke apne timeout se pakda jaata hai. Kernel packages me zaroor.
     _Wajah:_ live system chhota hai (512 MB, free tier), par code asli users maan ke likha jaata hai; ek chhupa O(n²) tab dikhta hai jab data badh chuka ho.
+16. **CR-41:** zod ka har schema aur har check message ke saath, jisme field ya key ka naam ho (owner, 2026-11-26): `string('email is required.')`, `.min(1, 'email is required.')`, `.regex(re, 'email must be a valid email address.')`, `enum(['test', 'live'], 'mode must be test or live.')`, `strictObject({ ... }, 'The body takes only a, b.')`. Message ke aakhir me period. Named imports (`import { string } from 'zod'`), `z.` nahi. Message seedha schema me likha dikhe; koi helper jo use chhupaye nahi. Jahan field chhodna ho wahan `.optional()`, `null` ho sakta ho to `.nullable()`. Tests ke schemas par bhi yehi. _Wajah:_ error akela padhne par bata de ki kaunsi field galat hai, bina schema kholne ke.
 
 ### 3.2 Backend
 
@@ -444,3 +445,4 @@ Kuch niyamon ka saboot test nahi, record hai (jaise schema ki review checklist, 
 | v1.0.0 se v1.2.8 | 2026-11-17 se 2026-11-22 | Definition of Done, release gate, code ke niyam, testing aur security, docs aur AI ke niyam; har badlav ka poora itihaas git me (D-442).                          |
 | v1.2.9           | 2026-11-23               | CR-37 se CR-39: aam helpers `utils/` me; module ka apna logic, type aur constant module me; `types/` aur `constants/` sirf kai modules ke saajhe ke liye (D-459). |
 | v1.2.10 | 2026-11-26 | CR-40: code me sahi data structure aur algorithm: `Set` aur `Map` se milan, loop ke andar loop sirf seema ke saath, sort ek baar, queue me `shift()` nahi, lookup boot pe ek baar, aur bade input ka test (D-464). |
+| v1.2.11 | 2026-11-26 | CR-41: zod ka har schema aur har check message ke saath, field ya key ke naam se (owner). |
