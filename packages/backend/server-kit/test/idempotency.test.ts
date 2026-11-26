@@ -6,6 +6,7 @@ import {
   fingerprintOf,
   IDEMPOTENCY_LEASE_MS,
   IDEMPOTENCY_TTL_MS,
+  type IdempotencyClaim,
   type IdempotencyId,
 } from '../src/idempotency.ts';
 import { NOW } from './utils/fixtures.ts';
@@ -13,98 +14,120 @@ import { NOW } from './utils/fixtures.ts';
 const id: IdempotencyId = { caller: 'acc-1', routeId: 'commerce.order.place', key: 'key-0001' };
 const at = (ms: number) => new Date(NOW.getTime() + ms);
 const answer = { status: 201, body: { orderId: 'o1' } };
+// The claim of a request with this fingerprint that begins `ms` after NOW.
+const claimAt = (fingerprint: string, ms = 0): IdempotencyClaim => ({
+  fingerprint,
+  leaseUntil: at(ms + IDEMPOTENCY_LEASE_MS),
+});
 
 describe('the idempotency store in memory (AC-PLATFORM-8, SR-045)', () => {
   it('AC-PLATFORM-8: the first request starts, and the same key and body while it runs is in progress', async () => {
     const store = createMemoryIdempotencyStore();
 
-    expect(await store.begin(id, 'f1', NOW, at(IDEMPOTENCY_LEASE_MS))).toEqual({ kind: 'started' });
-    expect(await store.begin(id, 'f1', at(1), at(IDEMPOTENCY_LEASE_MS))).toEqual({
-      kind: 'in-progress',
-    });
+    expect(await store.begin(id, claimAt('f1'), NOW)).toEqual({ kind: 'started' });
+    expect(await store.begin(id, claimAt('f1', 1), at(1))).toEqual({ kind: 'in-progress' });
   });
 
   it('AC-PLATFORM-8: the same key and body after it ended is its answer; another body is a key that was reused', async () => {
     const store = createMemoryIdempotencyStore();
-    await store.begin(id, 'f1', NOW, at(IDEMPOTENCY_LEASE_MS));
-    await store.complete(id, answer, at(IDEMPOTENCY_TTL_MS));
+    const first = claimAt('f1');
+    await store.begin(id, first, NOW);
+    await store.complete(id, first, answer, at(IDEMPOTENCY_TTL_MS));
 
-    expect(await store.begin(id, 'f1', at(1000), at(1000 + IDEMPOTENCY_LEASE_MS))).toEqual({
+    expect(await store.begin(id, claimAt('f1', 1000), at(1000))).toEqual({
       kind: 'replay',
       response: answer,
     });
-    expect(await store.begin(id, 'f2', at(1000), at(1000 + IDEMPOTENCY_LEASE_MS))).toEqual({
-      kind: 'key-reused',
-    });
+    expect(await store.begin(id, claimAt('f2', 1000), at(1000))).toEqual({ kind: 'key-reused' });
     // Also while it is still running: another body with the key is not the same request.
     const other = { ...id, key: 'key-0002' };
-    await store.begin(other, 'f1', NOW, at(IDEMPOTENCY_LEASE_MS));
-    expect(await store.begin(other, 'f2', at(1), at(IDEMPOTENCY_LEASE_MS))).toEqual({
-      kind: 'key-reused',
-    });
+    await store.begin(other, claimAt('f1'), NOW);
+    expect(await store.begin(other, claimAt('f2', 1), at(1))).toEqual({ kind: 'key-reused' });
   });
 
   it('SR-045: the key is of the caller and of the route: the same key of another is another request', async () => {
     const store = createMemoryIdempotencyStore();
-    await store.begin(id, 'f1', NOW, at(IDEMPOTENCY_LEASE_MS));
-    await store.complete(id, answer, at(IDEMPOTENCY_TTL_MS));
+    const first = claimAt('f1');
+    await store.begin(id, first, NOW);
+    await store.complete(id, first, answer, at(IDEMPOTENCY_TTL_MS));
 
     const otherCaller = { ...id, caller: 'acc-2' };
     const otherRoute = { ...id, routeId: 'commerce.order.close' };
-    expect(await store.begin(otherCaller, 'f1', at(1), at(IDEMPOTENCY_LEASE_MS))).toEqual({
-      kind: 'started',
-    });
-    expect(await store.begin(otherRoute, 'f1', at(1), at(IDEMPOTENCY_LEASE_MS))).toEqual({
-      kind: 'started',
-    });
+    expect(await store.begin(otherCaller, claimAt('f1', 1), at(1))).toEqual({ kind: 'started' });
+    expect(await store.begin(otherRoute, claimAt('f1', 1), at(1))).toEqual({ kind: 'started' });
     // A caller or a route with a `|` or a quote in it cannot be made to look like another.
     const tricky = { caller: 'a","b', routeId: 'c', key: 'k' };
     const other = { caller: 'a', routeId: 'b","c', key: 'k' };
-    await store.begin(tricky, 'f1', NOW, at(IDEMPOTENCY_LEASE_MS));
-    expect(await store.begin(other, 'f1', NOW, at(IDEMPOTENCY_LEASE_MS))).toEqual({
-      kind: 'started',
-    });
+    await store.begin(tricky, claimAt('f1'), NOW);
+    expect(await store.begin(other, claimAt('f1'), NOW)).toEqual({ kind: 'started' });
   });
 
   it('AC-PLATFORM-8: a record is kept about 48 hours, and then the key is free', async () => {
     const store = createMemoryIdempotencyStore();
-    await store.begin(id, 'f1', NOW, at(IDEMPOTENCY_LEASE_MS));
-    await store.complete(id, answer, at(IDEMPOTENCY_TTL_MS));
+    const first = claimAt('f1');
+    await store.begin(id, first, NOW);
+    await store.complete(id, first, answer, at(IDEMPOTENCY_TTL_MS));
 
-    const before = at(IDEMPOTENCY_TTL_MS - 1);
-    expect((await store.begin(id, 'f1', before, at(IDEMPOTENCY_TTL_MS))).kind).toBe('replay');
-    const after = at(IDEMPOTENCY_TTL_MS);
-    expect((await store.begin(id, 'f2', after, at(IDEMPOTENCY_TTL_MS + 1000))).kind).toBe(
-      'started',
-    );
+    const before = IDEMPOTENCY_TTL_MS - 1;
+    expect((await store.begin(id, claimAt('f1', before), at(before))).kind).toBe('replay');
+    const after = IDEMPOTENCY_TTL_MS;
+    expect((await store.begin(id, claimAt('f2', after), at(after))).kind).toBe('started');
   });
 
   it('SR-007: a request that began and never ended frees its key when the lease is out', async () => {
     const store = createMemoryIdempotencyStore();
-    await store.begin(id, 'f1', NOW, at(IDEMPOTENCY_LEASE_MS));
+    await store.begin(id, claimAt('f1'), NOW);
 
-    expect((await store.begin(id, 'f1', at(IDEMPOTENCY_LEASE_MS - 1), at(120_000))).kind).toBe(
-      'in-progress',
-    );
-    expect((await store.begin(id, 'f1', at(IDEMPOTENCY_LEASE_MS), at(120_000))).kind).toBe(
-      'started',
-    );
+    const before = IDEMPOTENCY_LEASE_MS - 1;
+    expect((await store.begin(id, claimAt('f1', before), at(before))).kind).toBe('in-progress');
+    const after = IDEMPOTENCY_LEASE_MS;
+    expect((await store.begin(id, claimAt('f1', after), at(after))).kind).toBe('started');
   });
 
   it('AC-PLATFORM-8: a request that ended in a 5xx is forgotten, so the same key can try again', async () => {
     const store = createMemoryIdempotencyStore();
-    await store.begin(id, 'f1', NOW, at(IDEMPOTENCY_LEASE_MS));
-    await store.release(id);
+    const first = claimAt('f1');
+    await store.begin(id, first, NOW);
+    await store.release(id, first);
 
-    expect((await store.begin(id, 'f2', at(1), at(IDEMPOTENCY_LEASE_MS))).kind).toBe('started');
+    expect((await store.begin(id, claimAt('f2', 1), at(1))).kind).toBe('started');
+  });
+
+  it('SR-045: a request whose lease ran out leaves the record of the request that took its key as it is', async () => {
+    const store = createMemoryIdempotencyStore();
+    const late = claimAt('f1');
+    await store.begin(id, late, NOW);
+    // Its lease runs out, and the same request (the same body) is sent again and starts.
+    const retry = claimAt('f1', IDEMPOTENCY_LEASE_MS);
+    expect((await store.begin(id, retry, at(IDEMPOTENCY_LEASE_MS))).kind).toBe('started');
+
+    // The late one ends in a 5xx: the retry's record is not forgotten, so a third does not start.
+    await store.release(id, late);
+    const third = IDEMPOTENCY_LEASE_MS + 1;
+    expect((await store.begin(id, claimAt('f1', third), at(third))).kind).toBe('in-progress');
+    // Nor is its answer kept in the retry's place.
+    await store.complete(id, late, { status: 200, body: { late: true } }, at(IDEMPOTENCY_TTL_MS));
+    expect((await store.begin(id, claimAt('f1', third), at(third))).kind).toBe('in-progress');
+
+    // The retry's own end is kept; after that its claim changes nothing more.
+    await store.complete(id, retry, answer, at(IDEMPOTENCY_TTL_MS));
+    await store.release(id, retry);
+    await store.complete(id, retry, { status: 200, body: {} }, at(IDEMPOTENCY_TTL_MS));
+    expect(await store.begin(id, claimAt('f1', third), at(third))).toEqual({
+      kind: 'replay',
+      response: answer,
+    });
   });
 
   it('SR-045: ending or releasing a key that is not there changes nothing', async () => {
     const store = createMemoryIdempotencyStore();
+    const first = claimAt('f1');
 
-    await expect(store.complete(id, answer, at(IDEMPOTENCY_TTL_MS))).resolves.toBeUndefined();
-    await expect(store.release(id)).resolves.toBeUndefined();
-    expect((await store.begin(id, 'f1', NOW, at(IDEMPOTENCY_LEASE_MS))).kind).toBe('started');
+    await expect(
+      store.complete(id, first, answer, at(IDEMPOTENCY_TTL_MS)),
+    ).resolves.toBeUndefined();
+    await expect(store.release(id, first)).resolves.toBeUndefined();
+    expect((await store.begin(id, first, NOW)).kind).toBe('started');
   });
 });
 

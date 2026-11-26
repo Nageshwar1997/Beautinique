@@ -3,6 +3,7 @@ import { describe, expect, it } from 'vitest';
 
 import {
   AppError,
+  conflict,
   errorBody,
   forbidden,
   idempotencyInProgress,
@@ -25,6 +26,7 @@ describe('the errors of the kit (docs/ARCHITECTURE.md §5 rules 8 and 9)', () =>
     forbidden(),
     stepUpRequired(),
     notFound(),
+    conflict(),
     payloadTooLarge(),
     idempotencyInProgress(),
     idempotencyKeyReused(),
@@ -45,6 +47,7 @@ describe('the errors of the kit (docs/ARCHITECTURE.md §5 rules 8 and 9)', () =>
       'FORBIDDEN',
       'STEP_UP_REQUIRED',
       'NOT_FOUND',
+      'CONFLICT',
       'PAYLOAD_TOO_LARGE',
       'IDEMPOTENCY_IN_PROGRESS',
       'IDEMPOTENCY_KEY_REUSED',

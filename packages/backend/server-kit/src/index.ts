@@ -11,6 +11,7 @@ export {
 export { authorize, type Decision, type Denial } from './authorize.ts';
 export {
   AppError,
+  conflict,
   errorBody,
   forbidden,
   idempotencyInProgress,
@@ -60,6 +61,7 @@ export {
   IDEMPOTENCY_LEASE_MS,
   IDEMPOTENCY_TTL_MS,
   type BeginResult,
+  type IdempotencyClaim,
   type IdempotencyId,
   type IdempotencyStore,
   type StoredResponse,
