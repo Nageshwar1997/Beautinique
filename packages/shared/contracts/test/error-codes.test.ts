@@ -8,6 +8,7 @@ describe('the common error codes', () => {
       VALIDATION_FAILED: 400,
       UNAUTHENTICATED: 401,
       FORBIDDEN: 403,
+      STEP_UP_REQUIRED: 403,
       NOT_FOUND: 404,
       CONFLICT: 409,
       IDEMPOTENCY_IN_PROGRESS: 409,

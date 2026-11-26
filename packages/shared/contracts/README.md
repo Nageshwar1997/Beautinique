@@ -105,7 +105,7 @@ const { orderId } = await client.placeOrder({ body }, { idempotencyKey });
 
 - `definePermission({ name, scope, authenticator, stepUp, subRoleAllowed })`: `<service>.<resource>.<action>`, the scope it applies to, and the flags of docs/ARCHITECTURE.md §11 rule 1. A step-up needs an authenticator.
 - `defineSetting({ key, schema, defaultValue, description })`: a settings key (`<service>.<name>`, in camelCase), the shape of its value and a default that passes it.
-- `COMMON_ERRORS`, `defineErrors(service, codes)`, `errorBodySchema`: the codes every service uses, the codes of one service (`COMMERCE_STOCK_UNAVAILABLE` for `defineErrors('commerce', { STOCK_UNAVAILABLE: 409 })`, so two services never share a code), and the one error body `{ error: { code, message, details, requestId } }`.
+- `COMMON_ERRORS`, `defineErrors(service, codes)`, `errorBodySchema`: the codes every service uses (`STEP_UP_REQUIRED` is a 403 that asks the app for a fresh authenticator code, D-185), the codes of one service (`COMMERCE_STOCK_UNAVAILABLE` for `defineErrors('commerce', { STOCK_UNAVAILABLE: 409 })`, so two services never share a code), and the one error body `{ error: { code, message, details, requestId } }`.
 - `SERVICES`, `APPS`, `RATE_LIMIT_CLASSES`, `SCOPE_TYPES`, `HTTP_METHODS`: the lists the names above are taken from.
 
 The routes, events, permissions and settings of each service are told in that service, not here: this package holds the structure and the parts every service shares.

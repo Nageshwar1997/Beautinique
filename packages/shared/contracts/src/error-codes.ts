@@ -14,6 +14,8 @@ export const COMMON_ERRORS = {
   VALIDATION_FAILED: 400,
   UNAUTHENTICATED: 401,
   FORBIDDEN: 403,
+  /** A fresh authenticator code is asked first (D-185): the app shows its step-up dialog and sends the request again. */
+  STEP_UP_REQUIRED: 403,
   NOT_FOUND: 404,
   CONFLICT: 409,
   IDEMPOTENCY_IN_PROGRESS: 409,

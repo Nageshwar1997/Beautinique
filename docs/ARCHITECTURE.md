@@ -1,6 +1,6 @@
 # ARCHITECTURE: Beautinique
 
-> **Status:** v1.3.22 (2026-11-23). System kaise bana hai, ek nazar me. Cheezein ek-ek karke, owner ki haan ke baad judengi. Abhi §1 (finance ke accounting niyam, D-282), §2 se §9 (system ke hisse, D-291 se D-298) aur §10 (data aur database, D-310 se D-317).
+> **Status:** v1.3.23 (2026-11-26). System kaise bana hai, ek nazar me. Cheezein ek-ek karke, owner ki haan ke baad judengi. Abhi §1 (finance ke accounting niyam, D-282), §2 se §9 (system ke hisse, D-291 se D-298) aur §10 (data aur database, D-310 se D-317).
 
 ## Is file me kya aayega
 
@@ -394,7 +394,7 @@ return: commerce.return.requested -> support.return.decided -> logistics.pickup.
 6. Delivery app ka sync ek batch route (misaal 50 kaam tak): har kaam ka client ka UUIDv7 id idempotency key, har kaam ka alag nateeja, device ka samay `deviceAt` aur server ka `serverAt` (SR-055); photos alag upload, sync me sirf `assetId`. Delivery code ka milaan sirf online (SR-054).
 7. Live halat polling se (misaal har 60 second, sirf jab tab dikhe; delivery pe UPI ke 10 minute me order page misaal har 5 second) aur browser push (D-126, D-141). Khule connection (WebSocket, SSE) nahi (R-008). Polling aur ping background ke header ke saath; ye session ka bina kaam ka samay nahi badhate (SR-094).
 8. Error ka ek roop: `{"error": {"code", "message", "details", "requestId"}}`. `code` sthir aur bade aksharon me (common codes ke alawa module ka prefix, jaise `COMMERCE_STOCK_UNAVAILABLE`); `message` user ke liye saada; stack kabhi nahi (SR-077).
-9. Status codes: 400 validation (SR-036), 401, 403 permission, 404 scope ke bahar (SR-032), 409 halat ka takrav ya wahi idempotency key chal rahi (SR-045), 413 (SR-007), 422 business niyam ya key alag body ke saath (SR-045), 426 app purana, 429 `Retry-After` ke saath (SR-008), 503 `Retry-After` ke saath (fail-closed ya server ki seema, SR-031).
+9. Status codes: 400 validation (SR-036), 401, 403 permission (ya `STEP_UP_REQUIRED`: dobara authenticator code, D-185), 404 scope ke bahar (SR-032), 409 halat ka takrav ya wahi idempotency key chal rahi (SR-045), 413 (SR-007), 422 business niyam ya key alag body ke saath (SR-045), 426 app purana, 429 `Retry-After` ke saath (SR-008), 503 `Retry-After` ke saath (fail-closed ya server ki seema, SR-031).
 10. Idempotency key in routes pe zaroori: place order (SR-045), payment retry, refund aur daawe ka faisla, payout ki manzoori, receiving aur scans, delivery attempt aur saboot, offline sync, upload ka jodna, export. Key + route + caller; wahi body pe pehla jawab; 2xx aur 4xx yaad, 5xx nahi; record misaal 48 ghante maalik service ke DB me.
 11. Client sirf GET aur idempotency key wale routes ko retry karta hai, network ya 503 pe, backoff aur `Retry-After` ke saath, misaal 2 baar; baaki mutations pe apne aap retry nahi.
 12. Server se provider ki har call pe timeout (misaal payment 10 s, email 10 s, push 5 s); retry sirf job queue se, request ke andar nahi; provider ki idempotency (jaise refund) jahan mile wahan. Redis na mile to sign-in, codes, payment shuru, review, report aur daawa 503; padhna chalta rahe (SR-008).
@@ -737,7 +737,7 @@ Lint aur TypeScript ke saajhe config `configs/` me (D-002), package nahi.
 
 ## Change log
 
-| Version           | Date                     | Badlav                                                                                                                                                  |
-| ----------------- | ------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| v1.0.0 se v1.3.21 | 2026-11-17 se 2026-11-22 | §1 finance ke accounting niyam se §12 saajhe packages tak (`backend-crypto` aur `frontend-commerce` samet); har badlav ka poora itihaas git me (D-442). |
-| v1.3.22           | 2026-11-23               | §7 niyam 11: rok wali files alag B2 bucket me Object Lock ke saath (D-456).                                                                             |
+| Version            | Date                     | Badlav                                                                                                                                                  |
+| ------------------ | ------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| v1.0.0 se v1.3.21  | 2026-11-17 se 2026-11-22 | §1 finance ke accounting niyam se §12 saajhe packages tak (`backend-crypto` aur `frontend-commerce` samet); har badlav ka poora itihaas git me (D-442). |
+| v1.3.22 se v1.3.23 | 2026-11-23 se 2026-11-26 | §7 niyam 11: rok wali files alag B2 bucket me Object Lock ke saath (D-456). §5 niyam 9: 403 me `STEP_UP_REQUIRED` (D-185), ST-5 ke saath.               |

@@ -161,6 +161,14 @@ describe('buildOpenApi: the answers', () => {
     });
   });
 
+  it('D-185: a route whose permission asks for a step-up lists STEP_UP_REQUIRED under 403, and the others do not', () => {
+    const approve = operation('/api/v1/finance/payout-batches/{batchId}/approve', 'post').responses;
+    const place = operation('/api/v1/commerce/orders', 'post').responses;
+
+    expect(approve['403']?.description).toBe('FORBIDDEN, STEP_UP_REQUIRED');
+    expect(place['403']?.description).toBe('FORBIDDEN');
+  });
+
   it('SR-008: 429 and 503 tell the caller when to come back', () => {
     const responses = operation('/api/v1/commerce/orders', 'post').responses;
 
