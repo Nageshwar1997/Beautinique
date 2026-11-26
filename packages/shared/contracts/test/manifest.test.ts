@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { string, strictObject } from 'zod';
 
-import { buildRouteManifest, defineRoute, matchRoute, uncontractedRoutes } from '../src/index.ts';
+import { buildRouteManifest, defineRoute, uncontractedRoutes } from '../src/index.ts';
 import {
   allSampleRoutes,
   approvePayoutBatch,
@@ -101,36 +101,6 @@ describe('buildRouteManifest', () => {
   it('CR-12: the same path with another method is another route', () => {
     expect(buildRouteManifest([placeOrder, myOrders])).toHaveLength(2);
     expect(manifest.filter((entry) => entry.path === '/api/v1/commerce/orders')).toHaveLength(1);
-  });
-});
-
-describe('matchRoute', () => {
-  it('SR-032: finds the route of a real path, with the right method', () => {
-    expect(matchRoute(manifest, 'GET', '/api/v1/commerce/orders/66f0')?.id).toBe(
-      'commerce.order.get',
-    );
-    expect(matchRoute(manifest, 'POST', '/api/v1/commerce/orders')?.id).toBe(
-      'commerce.order.place',
-    );
-    expect(matchRoute(manifest, 'GET', '/api/v1/catalog/home')?.id).toBe('catalog.home.get');
-    expect(matchRoute(manifest, 'POST', '/api/v1/finance/payout-batches/b1/approve')?.id).toBe(
-      'finance.payout_batch.approve',
-    );
-  });
-
-  it('SR-032: a path that is written wins over a :name part', () => {
-    expect(matchRoute(manifest, 'GET', '/api/v1/commerce/orders/mine')?.id).toBe(
-      'commerce.order.mine',
-    );
-  });
-
-  it('SR-032: what is not in the contracts cannot be reached', () => {
-    expect(matchRoute(manifest, 'DELETE', '/api/v1/commerce/orders/66f0')).toBeUndefined();
-    expect(matchRoute(manifest, 'GET', '/api/v1/commerce/carts')).toBeUndefined();
-    expect(matchRoute(manifest, 'GET', '/api/v1/commerce/orders/66f0/lines')).toBeUndefined();
-    expect(matchRoute(manifest, 'GET', '/api/v1/commerce/orders/')).toBeUndefined();
-    expect(matchRoute(manifest, 'GET', '/api/v1/commerce')).toBeUndefined();
-    expect(matchRoute([], 'GET', '/api/v1/commerce/orders/66f0')).toBeUndefined();
   });
 });
 

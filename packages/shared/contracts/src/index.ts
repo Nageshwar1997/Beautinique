@@ -32,14 +32,10 @@ export {
   type EventContract,
   type EventDefinition,
 } from './event.ts';
-export {
-  buildRouteManifest,
-  matchRoute,
-  uncontractedRoutes,
-  type ManifestEntry,
-} from './manifest.ts';
+export { buildRouteManifest, uncontractedRoutes, type ManifestEntry } from './manifest.ts';
 export { buildOpenApi, openApiJson, type OpenApiDocument, type OpenApiInfo } from './openapi.ts';
 export { definePermission, type PermissionDefinition } from './permission.ts';
+export { createRouteMatcher, type RouteMatcher } from './route-matcher.ts';
 export {
   defineRoute,
   pathParamNames,
