@@ -5,6 +5,7 @@ import {
   MAX_DEPTH,
   MAX_ITEMS,
   normalizedKeys,
+  REDACTED,
   redactFields,
 } from '../src/index.ts';
 
@@ -96,7 +97,7 @@ describe('isSensitiveKey', () => {
 });
 
 describe('redactFields', () => {
-  it('AC-PLATFORM-14: takes the key and its value out at every depth, and in lists', () => {
+  it('AC-PLATFORM-14: keeps the key and hides its value at every depth, and in lists', () => {
     const result = redactFields({
       orderId: 'o1',
       password: 'pw-1',
@@ -107,17 +108,34 @@ describe('redactFields', () => {
 
     expect(result).toEqual({
       orderId: 'o1',
-      user: { id: 'u1', profile: { city: 'Pune' } },
-      list: [{ ok: 1 }, 'plain', [{ ok: 2 }]],
-      req: { headers: { accept: 'json' } },
+      password: REDACTED,
+      user: { id: 'u1', otp: REDACTED, profile: { pan: REDACTED, city: 'Pune' } },
+      list: [{ token: REDACTED, ok: 1 }, 'plain', [{ cookie: REDACTED, ok: 2 }]],
+      req: { headers: { authorization: REDACTED, 'set-cookie': REDACTED, accept: 'json' } },
     });
   });
 
-  it('SR-098: the key is gone, not set to a mask', () => {
-    const result = redactFields({ password: 'pw', ok: true }) as Record<string, unknown>;
+  it('SR-098, D-465: the key stays and its value is the one mask, whatever the value was', () => {
+    const result = redactFields({
+      password: 'pw',
+      otp: 123456,
+      pan: { a: 1 },
+      token: ['t', 'u'],
+      email: null,
+      address: undefined,
+      ok: true,
+    });
 
-    expect(Object.keys(result)).toEqual(['ok']);
-    expect('password' in result).toBe(false);
+    expect(result).toEqual({
+      password: REDACTED,
+      otp: REDACTED,
+      pan: REDACTED,
+      token: REDACTED,
+      email: REDACTED,
+      address: REDACTED,
+      ok: true,
+    });
+    expect(REDACTED).toBe('[redacted]');
   });
 
   it('AC-PLATFORM-14: never changes what it was given', () => {
@@ -131,7 +149,10 @@ describe('redactFields', () => {
 
   it('SR-098: an object that is the same twice side by side is read twice, and a loop is cut', () => {
     const shared = { id: 1, password: 'x' };
-    expect(redactFields({ a: shared, b: shared })).toEqual({ a: { id: 1 }, b: { id: 1 } });
+    expect(redactFields({ a: shared, b: shared })).toEqual({
+      a: { id: 1, password: REDACTED },
+      b: { id: 1, password: REDACTED },
+    });
 
     const loop: Record<string, unknown> = { id: 1 };
     loop.self = loop;
@@ -167,9 +188,10 @@ describe('redactFields', () => {
     const wide: Record<string, number> = {};
     for (let key = 0; key < 100_000; key += 1) wide[`key${String(key)}`] = key;
     wide.password = 1;
-    const result = redactFields(wide) as Record<string, number>;
-    expect(Object.keys(result)).toHaveLength(100_000);
-    expect('password' in result).toBe(false);
+    const result = redactFields(wide) as Record<string, unknown>;
+    expect(Object.keys(result)).toHaveLength(100_001);
+    expect(result.password).toBe(REDACTED);
+    expect(result.key99999).toBe(99_999);
   });
 
   it('SR-077: bytes are written as their size, never as themselves', () => {
@@ -228,23 +250,26 @@ describe('redactFields', () => {
       u: undefined,
     });
     // An instance of a class is read by its fields, like a plain object.
-    expect(redactFields({ money: new Money(4900) })).toEqual({ money: { paise: 4900 } });
+    expect(redactFields({ money: new Money(4900) })).toEqual({
+      money: { paise: 4900, token: REDACTED },
+    });
     expect(redactFields('text')).toBe('text');
     expect(redactFields(undefined)).toBeUndefined();
     expect(redactFields(null)).toBeNull();
     expect(
       redactFields(Object.assign(Object.create(null) as object, { password: 'x', ok: 1 })),
     ).toEqual({
+      password: REDACTED,
       ok: 1,
     });
   });
 
-  it('SR-098: the keys that a service adds are taken out too', () => {
+  it('SR-098: the keys that a service adds have their value hidden too', () => {
     const result = redactFields(
       { 'x-edge-key': 'k', ok: 1, nested: { 'X-Edge-Key': 'k' } },
       normalizedKeys(['x-edge-key']),
     );
 
-    expect(result).toEqual({ ok: 1, nested: {} });
+    expect(result).toEqual({ 'x-edge-key': REDACTED, ok: 1, nested: { 'X-Edge-Key': REDACTED } });
   });
 });

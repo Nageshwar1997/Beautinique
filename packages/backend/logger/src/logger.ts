@@ -1,4 +1,8 @@
+import { createRequire } from 'node:module';
+import { Writable } from 'node:stream';
+
 import { pino } from 'pino';
+import type { PrettyOptions } from 'pino-pretty';
 
 import { maskSensitiveText } from './mask-text.ts';
 import { normalizedKeys, redactFields } from './redact.ts';
@@ -33,8 +37,16 @@ export interface LoggerOptions {
   level: LogLevel;
   /** Where the lines go. Stdout when it is not given. */
   destination?: { write(line: string): void };
-  /** Names of keys, besides the ones every log drops, that this service never logs: its own secret headers. */
+  /** Names of keys, besides the ones every log keeps the value of out, that this service never logs: its own secret headers. */
   secretKeys?: readonly string[];
+  /**
+   * Lines that a person reads, with colours and the time of the laptop, in place of JSON (D-339):
+   * for development only. It needs `pino-pretty` in the service's own development dependencies,
+   * and is refused unless `NODE_ENV` is `development`, so a production or a CI process cannot have
+   * it (SR-098). It is a stream in this process, not a transport, and the clean-up of what is
+   * logged is done before it, so a pretty line shows no more than a JSON line.
+   */
+  pretty?: boolean;
 }
 
 /** The most of a log message that is kept. Messages are short; what is long goes in the fields. */
@@ -45,13 +57,14 @@ const OPTION_NAMES: ReadonlySet<string> = new Set([
   'level',
   'destination',
   'secretKeys',
+  'pretty',
 ]);
 const SERVICE_FORMAT = /^[a-z][a-z0-9-]*$/;
 const REQUEST_ID_FORMAT = /^[\x21-\x7E]{1,128}$/;
 
 function checkOptions(options: LoggerOptions): void {
-  // A `transport`, a `pretty` or any other option of pino is not an option here: in production the
-  // logs are JSON on stdout and nothing else (docs/security/SECURITY_REQUIREMENTS.md SR-098).
+  // A `transport`, a `prettyPrint` or any other option of pino is not an option here: in production
+  // the logs are JSON on stdout and nothing else (docs/security/SECURITY_REQUIREMENTS.md SR-098).
   const unknown = Object.keys(options).filter((name) => !OPTION_NAMES.has(name));
   if (unknown.length > 0) {
     throw new RangeError(`The logger has no option ${unknown.join(', ')}.`);
@@ -62,6 +75,43 @@ function checkOptions(options: LoggerOptions): void {
   if (!LOG_LEVELS.includes(options.level)) {
     throw new RangeError(`The level ${options.level} is not one of ${LOG_LEVELS.join(', ')}.`);
   }
+}
+
+// `pino-pretty` is the service's own development dependency (an optional peer of this package), so
+// it is looked for only when `pretty` is asked, and a production install need not have it.
+const require = createRequire(import.meta.url);
+
+function prettyStream(destination: LoggerOptions['destination']): { write(line: string): void } {
+  if (process.env['NODE_ENV'] !== 'development') {
+    throw new RangeError(
+      'The logger writes pretty lines only when NODE_ENV is development; otherwise it writes JSON on stdout (SR-098).',
+    );
+  }
+  let build: (options: PrettyOptions) => { write(line: string): void };
+  try {
+    build = require('pino-pretty') as typeof build;
+  } catch {
+    throw new RangeError(
+      'The logger needs pino-pretty for pretty lines: add it to the development dependencies of the service.',
+    );
+  }
+  // pino-pretty writes to a stream of Node; a destination that only has `write` is put in one.
+  const sink =
+    destination === undefined
+      ? undefined
+      : new Writable({
+          write(chunk: Buffer | string, _encoding, done) {
+            destination.write(chunk.toString());
+            done();
+          },
+        });
+  return build({
+    colorize: true,
+    ignore: 'pid,hostname',
+    translateTime: 'SYS:HH:MM:ss.l',
+    sync: true,
+    ...(sink === undefined ? {} : { destination: sink }),
+  });
 }
 
 type Method = 'trace' | 'debug' | 'info' | 'warn' | 'error' | 'fatal';
@@ -89,9 +139,10 @@ function wrap(instance: pino.Logger, secrets: ReadonlySet<string>): Logger {
 
 /**
  * The logger of a service: one JSON line per log on stdout, with the service, the level as a word
- * and the time in UTC (docs/ARCHITECTURE.md §8, D-297). Whatever is logged goes through the same
- * clean-up first (docs/RULES.md CR-22, SR-077, SR-098): the keys of secrets and personal data are
- * taken out at every depth, an error is written as its type, code, short message and stack, and a
+ * and the time in UTC (docs/ARCHITECTURE.md §8, D-297); with `pretty`, in development only, lines
+ * for a person to read. Whatever is logged goes through the same clean-up first (docs/RULES.md
+ * CR-22, SR-077, SR-098): the value of every key of a secret or personal data is written as
+ * `[redacted]` at every depth, the key staying, an error is written as its type, code, short message and stack, and a
  * message has its emails, tokens, PAN, GSTIN and phone numbers masked.
  */
 export function createLogger(options: LoggerOptions): Logger {
@@ -116,7 +167,7 @@ export function createLogger(options: LoggerOptions): Logger {
         },
       },
     },
-    options.destination,
+    options.pretty === true ? prettyStream(options.destination) : options.destination,
   );
   return wrap(instance, secrets);
 }

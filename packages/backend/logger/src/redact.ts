@@ -4,8 +4,10 @@ import { serializeError } from './serialize-error.ts';
 export const MAX_DEPTH = 8;
 /** More items than this in a list are left out, with one note of how many. */
 export const MAX_ITEMS = 100;
+/** What the value of a secret key is written as: the key stays, so a log says that it was there, and the value is gone. */
+export const REDACTED = '[redacted]';
 
-// Keys that a log never shows, with the case, `-`, `_` and spaces taken out of them (docs/security/
+// Keys whose value a log never shows, with the case, `-`, `_` and spaces taken out of them (docs/security/
 // SECURITY_REQUIREMENTS.md SR-077, SR-098). `code` is here as it is: the code that a person is
 // sent by email. The code of an error is kept by the error serializer.
 const SENSITIVE_KEYS: ReadonlySet<string> = new Set([
@@ -105,7 +107,7 @@ function walk(
     }
     const copy: Record<string, unknown> = {};
     for (const [key, item] of Object.entries(value)) {
-      if (!isSensitiveKey(key, extra)) copy[key] = walk(item, extra, depth + 1, path);
+      copy[key] = isSensitiveKey(key, extra) ? REDACTED : walk(item, extra, depth + 1, path);
     }
     return copy;
   } finally {
@@ -115,10 +117,11 @@ function walk(
 }
 
 /**
- * A copy of what a log is given, with every key that is a secret or personal data taken out at
- * every depth (docs/security/SECURITY_REQUIREMENTS.md SR-098: `remove`, not a mask), the errors
- * in it serialized, bytes written as their size, and the depth and the lists cut. The value that
- * was given is never changed. One pass over the value, so the work is the size of what is logged
+ * A copy of what a log is given, with the value of every key that is a secret or personal data
+ * written as `[redacted]` at every depth (docs/security/SECURITY_REQUIREMENTS.md SR-098, D-465): the
+ * key stays and the value is gone, whatever it was (a text, a number, a whole object). The errors
+ * in it are serialized, bytes are written as their size, and the depth and the lists are cut. The
+ * value that was given is never changed. One pass over the value, so the work is the size of what is logged
  * and no more (docs/RULES.md CR-40).
  */
 export function redactFields(value: unknown, extra: ReadonlySet<string> = new Set()): unknown {
