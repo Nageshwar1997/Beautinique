@@ -198,7 +198,7 @@ describe('buildOpenApi: the answers', () => {
       apps: ['customer'],
       permission: orderRead,
       rateLimit: 'read',
-      response: strictObject({ items: string() }),
+      response: strictObject({ items: string('items is required.') }, 'The answer has items only.'),
     });
     const both = buildOpenApi([placeOrder, list], info);
 

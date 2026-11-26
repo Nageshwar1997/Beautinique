@@ -64,7 +64,9 @@ describe('defineSetting', () => {
   it('CR-12: keeps the key, the shape of the value and a default that passes it', () => {
     const setting = defineSetting({
       key: 'gateway.rateLimit.signIn.perIp',
-      schema: number().int().min(1),
+      schema: number('The value must be a number.')
+        .int('The value must be a whole number.')
+        .min(1, 'The value must be at least 1.'),
       defaultValue: 20,
       description: 'Password sign-ins from one IP in ten minutes.',
     });
@@ -78,7 +80,7 @@ describe('defineSetting', () => {
   it('CR-12: the default is the parsed value of the schema', () => {
     const setting = defineSetting({
       key: 'notify.digest.hours',
-      schema: array(string().trim()),
+      schema: array(string('An item must be text.').trim(), 'The value must be a list.'),
       defaultValue: [' 09:00 '],
       description: 'When the digest goes.',
     });
@@ -88,7 +90,12 @@ describe('defineSetting', () => {
 
   it('CR-12: a key is <service>.<name> in camelCase', () => {
     const make = (key: string) => () =>
-      defineSetting({ key: key as never, schema: string(), defaultValue: 'x', description: 'd' });
+      defineSetting({
+        key: key as never,
+        schema: string('The value is required.'),
+        defaultValue: 'x',
+        description: 'd',
+      });
 
     expect(make('identity.session.idleMinutes')).not.toThrow();
     for (const wrong of [
@@ -108,7 +115,9 @@ describe('defineSetting', () => {
     expect(() =>
       defineSetting({
         key: 'gateway.rateLimit.signIn.perIp',
-        schema: number().int().min(1),
+        schema: number('The value must be a number.')
+          .int('The value must be a whole number.')
+          .min(1, 'The value must be at least 1.'),
         defaultValue: 0,
         description: 'd',
       }),

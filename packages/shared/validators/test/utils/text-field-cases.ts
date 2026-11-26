@@ -15,7 +15,7 @@ export function itAnswersRequired(schema: ZodType, field: string, label: string)
       ]);
     }
     // The key is not in the object at all.
-    const absent = object({ [field]: schema }).safeParse({});
+    const absent = object({ [field]: schema }, `${field} must be in an object.`).safeParse({});
     expect(
       absent.error?.issues.map((issue) => `${issue.path.join('.')}: ${issue.message}`),
     ).toEqual([`${field}: ${label} is required.`]);

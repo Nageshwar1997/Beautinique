@@ -57,8 +57,8 @@ describe('buildRouteManifest', () => {
       apps: ['customer'],
       permission: 'public',
       rateLimit: 'sign-in',
-      body: { email: string() },
-      response: strictObject({ ok: string() }),
+      body: { email: string('email is required.') },
+      response: strictObject({ ok: string('ok is required.') }, 'The answer has ok only.'),
     });
     expect(buildRouteManifest([signIn])[0]?.failClosed).toBe(true);
   });
@@ -86,8 +86,11 @@ describe('buildRouteManifest', () => {
       apps: ['customer'],
       permission: orderRead,
       rateLimit: 'read',
-      params: { id: string() },
-      response: strictObject({ orderId: string() }),
+      params: { id: string('id is required.') },
+      response: strictObject(
+        { orderId: string('orderId is required.') },
+        'The answer has orderId only.',
+      ),
     });
 
     expect(() => buildRouteManifest([getOrder, sameOrder])).toThrow(
