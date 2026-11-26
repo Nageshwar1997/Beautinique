@@ -43,10 +43,24 @@ export const placeOrder = defineRoute({
   rateLimit: 'place-order',
   idempotency: 'required',
   body: {
-    addressId: string(),
-    items: array(strictObject({ variantId: string(), quantity: number().int().min(1) })).min(1),
+    addressId: string('addressId is required.'),
+    items: array(
+      strictObject(
+        {
+          variantId: string('variantId is required.'),
+          quantity: number('quantity must be a number.')
+            .int('quantity must be a whole number.')
+            .min(1, 'quantity must be at least 1.'),
+        },
+        'An item has variantId and quantity only.',
+      ),
+      'items must be a list.',
+    ).min(1, 'items must have at least 1 item.'),
   },
-  response: strictObject({ orderId: string() }),
+  response: strictObject(
+    { orderId: string('orderId is required.') },
+    'The answer has orderId only.',
+  ),
   status: 201,
 });
 

@@ -32,7 +32,13 @@ export const payoutApprove = definePermission({
 
 export const commerceErrors = defineErrors('commerce', { STOCK_UNAVAILABLE: 409 });
 
-const orderSummary = strictObject({ orderId: string(), status: string() });
+const orderSummary = strictObject(
+  {
+    orderId: string('orderId is required.'),
+    status: string('status is required.'),
+  },
+  'An order has orderId and status only.',
+);
 
 export const placeOrder = defineRoute({
   id: 'commerce.order.place',
@@ -44,8 +50,19 @@ export const placeOrder = defineRoute({
   rateLimit: 'place-order',
   idempotency: 'required',
   body: {
-    addressId: string(),
-    items: array(strictObject({ variantId: string(), quantity: number().int().min(1) })).min(1),
+    addressId: string('addressId is required.'),
+    items: array(
+      strictObject(
+        {
+          variantId: string('variantId is required.'),
+          quantity: number('quantity must be a number.')
+            .int('quantity must be a whole number.')
+            .min(1, 'quantity must be at least 1.'),
+        },
+        'An item has variantId and quantity only.',
+      ),
+      'items must be a list.',
+    ).min(1, 'items must have at least 1 item.'),
   },
   response: orderSummary,
   status: 201,
@@ -60,7 +77,7 @@ export const getOrder = defineRoute({
   apps: ['customer', 'seller'],
   permission: orderRead,
   rateLimit: 'read',
-  params: { orderId: string() },
+  params: { orderId: string('orderId is required.') },
   response: orderSummary,
 });
 
@@ -72,8 +89,21 @@ export const myOrders = defineRoute({
   apps: ['customer'],
   permission: orderRead,
   rateLimit: 'read',
-  query: { cursor: string().optional(), limit: number().int().min(1).max(100).optional() },
-  response: strictObject({ items: array(orderSummary), nextCursor: string().optional() }),
+  query: {
+    cursor: string('cursor must be text.').optional(),
+    limit: number('limit must be a number.')
+      .int('limit must be a whole number.')
+      .min(1, 'limit must be at least 1.')
+      .max(100, 'limit must be at most 100.')
+      .optional(),
+  },
+  response: strictObject(
+    {
+      items: array(orderSummary, 'items must be a list.'),
+      nextCursor: string('nextCursor must be text.').optional(),
+    },
+    'The orders have items and nextCursor only.',
+  ),
 });
 
 export const catalogHome = defineRoute({
@@ -85,7 +115,10 @@ export const catalogHome = defineRoute({
   permission: 'public',
   rateLimit: 'read',
   cache: { maxAgeSeconds: 60 },
-  response: strictObject({ banners: array(string()) }),
+  response: strictObject(
+    { banners: array(string('A banner must be text.'), 'banners must be a list.') },
+    'The home page has banners only.',
+  ),
 });
 
 export const approvePayoutBatch = defineRoute({
@@ -97,9 +130,9 @@ export const approvePayoutBatch = defineRoute({
   permission: payoutApprove,
   rateLimit: 'write',
   idempotency: 'required',
-  params: { batchId: string() },
-  body: { confirm: boolean() },
-  response: nothing(),
+  params: { batchId: string('batchId is required.') },
+  body: { confirm: boolean('confirm must be true or false.') },
+  response: nothing('The answer has no body.'),
   status: 204,
 });
 

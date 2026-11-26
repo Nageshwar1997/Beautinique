@@ -113,6 +113,16 @@ function fail(id: string, reason: string): never {
   throw new RangeError(`The route ${id} ${reason}.`);
 }
 
+// A part of a request as a strict object: a field that is not named is refused (SR-036), and the
+// message says which route and what the part takes, like "The body of commerce.order.place takes
+// only addressId, items."
+function strictPart(id: string, part: 'path' | 'query' | 'body', shape: Shape | undefined) {
+  if (shape === undefined) return undefined;
+  const names = Object.keys(shape);
+  const takes = names.length === 0 ? 'nothing' : `only ${names.join(', ')}`;
+  return strictObject(shape, `The ${part} of ${id} takes ${takes}.`);
+}
+
 /**
  * The one place a route is told (docs/ARCHITECTURE.md §5 rule 1): its method and path, what it takes
  * and gives, the apps, the permission, the rate limit class, the idempotency and the cache. The
@@ -175,9 +185,9 @@ export function defineRoute<
     rateLimit: route.rateLimit,
     idempotency,
     cache: route.cache,
-    params: (route.params === undefined ? undefined : strictObject(route.params)) as SchemaOf<P>,
-    query: (route.query === undefined ? undefined : strictObject(route.query)) as SchemaOf<Q>,
-    body: (route.body === undefined ? undefined : strictObject(route.body)) as SchemaOf<B>,
+    params: strictPart(id, 'path', route.params) as SchemaOf<P>,
+    query: strictPart(id, 'query', route.query) as SchemaOf<Q>,
+    body: strictPart(id, 'body', route.body) as SchemaOf<B>,
     response: route.response,
     status,
     errors: route.errors ?? {},

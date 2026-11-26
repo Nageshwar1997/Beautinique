@@ -100,10 +100,15 @@ function envelopeOf<T extends string, V extends number, S extends Service, D ext
   data: D,
 ) {
   return eventEnvelopeSchema.extend({
-    type: literal(type),
-    version: literal(version),
-    producer: literal(producer),
-    data: strictObject(data),
+    type: literal(type, `type must be ${type}.`),
+    version: literal(version, `version must be ${String(version)}.`),
+    producer: literal(producer, `producer must be ${producer}.`),
+    data: strictObject(
+      data,
+      Object.keys(data).length === 0
+        ? `The data of ${type} has no fields.`
+        : `The data of ${type} has only ${Object.keys(data).join(', ')}.`,
+    ),
   });
 }
 

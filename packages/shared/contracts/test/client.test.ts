@@ -30,11 +30,14 @@ const search = defineRoute({
   permission: 'public',
   rateLimit: 'search-public',
   query: {
-    q: string().optional(),
-    tags: array(string()).optional(),
-    inStock: boolean().optional(),
+    q: string('q must be text.').optional(),
+    tags: array(string('A tag must be text.'), 'tags must be a list.').optional(),
+    inStock: boolean('inStock must be true or false.').optional(),
   },
-  response: strictObject({ ids: array(string()) }),
+  response: strictObject(
+    { ids: array(string('An id must be text.'), 'ids must be a list.') },
+    'The answer has ids only.',
+  ),
 });
 
 describe('buildRequest', () => {
@@ -117,7 +120,10 @@ describe('buildRequest', () => {
       permission: 'public',
       rateLimit: 'read',
       query: { when: unknown(), filter: unknown() },
-      response: strictObject({ ok: boolean() }),
+      response: strictObject(
+        { ok: boolean('ok must be true or false.') },
+        'The answer has ok only.',
+      ),
     });
 
     expect(

@@ -6,6 +6,7 @@ import {
   approvePayoutBatch,
   catalogHome,
   getOrder,
+  myOrders,
   orderRead,
   placeOrder,
 } from './utils/sample-contracts.ts';
@@ -19,8 +20,11 @@ const base = {
   apps: ['customer'],
   permission: orderRead,
   rateLimit: 'read',
-  params: { orderId: string() },
-  response: strictObject({ orderId: string() }),
+  params: { orderId: string('orderId is required.') },
+  response: strictObject(
+    { orderId: string('orderId is required.') },
+    'The answer has orderId only.',
+  ),
 };
 
 function refused(change: Record<string, unknown>): string {
@@ -91,10 +95,14 @@ describe('defineRoute: what it refuses', () => {
 
   it('CR-12: the :name parts of the path and the params must be the same', () => {
     expect(refused({ params: undefined })).toContain('(orderId) and the params ()');
-    expect(refused({ params: { orderId: string(), extra: string() } })).toContain(
-      '(orderId) and the params (extra, orderId)',
+    expect(
+      refused({
+        params: { orderId: string('orderId is required.'), extra: string('extra is required.') },
+      }),
+    ).toContain('(orderId) and the params (extra, orderId)');
+    expect(refused({ params: { id: string('id is required.') } })).toContain(
+      '(orderId) and the params (id)',
     );
-    expect(refused({ params: { id: string() } })).toContain('(orderId) and the params (id)');
   });
 
   it('CR-12: an app named twice', () => {
@@ -102,7 +110,7 @@ describe('defineRoute: what it refuses', () => {
   });
 
   it('SR-045, CR-12: a GET with a body or with an idempotency key', () => {
-    expect(refused({ body: { note: string() } })).toContain('GET with a body');
+    expect(refused({ body: { note: string('note is required.') } })).toContain('GET with a body');
     expect(refused({ idempotency: 'required' })).toContain('GET with an idempotency key');
     expect(refused({ idempotency: 'none' })).toBe('accepted');
   });
@@ -125,7 +133,63 @@ describe('defineRoute: what it refuses', () => {
 
   it('CR-12: a 204 whose response needs a body', () => {
     expect(refused({ status: 204 })).toContain('answers 204');
-    expect(refused({ status: 204, response: nothing() })).toBe('accepted');
+    expect(refused({ status: 204, response: nothing('The answer has no body.') })).toBe('accepted');
+  });
+});
+
+describe('defineRoute: the messages of the parts of a request', () => {
+  const messages = (
+    schema: { safeParse(value: unknown): { error?: { issues: { message: string }[] } } },
+    value: unknown,
+  ) => schema.safeParse(value).error?.issues.map((issue) => issue.message);
+
+  it('SR-036: a field that the route does not name is refused, and the message says the route and what it takes', () => {
+    expect(messages(getOrder.params, { orderId: '1', extra: 1 })).toEqual([
+      'The path of commerce.order.get takes only orderId.',
+    ]);
+    expect(
+      messages(placeOrder.body, {
+        addressId: 'a',
+        items: [{ variantId: 'v', quantity: 1 }],
+        role: 'admin',
+      }),
+    ).toEqual(['The body of commerce.order.place takes only addressId, items.']);
+  });
+
+  it('SR-036: the query says it too, and a field of the route says its own message', () => {
+    expect(messages(myOrders.query, { page: 2 })).toEqual([
+      'The query of commerce.order.mine takes only cursor, limit.',
+    ]);
+    expect(messages(myOrders.query, { limit: 0 })).toEqual(['limit must be at least 1.']);
+    expect(messages(getOrder.params, {})).toEqual(['orderId is required.']);
+  });
+
+  it('SR-036: a part with no field says that it takes nothing', () => {
+    const route = defineRoute({
+      id: 'catalog.home.refresh',
+      method: 'POST',
+      path: '/api/v1/catalog/refresh',
+      summary: 'Refresh the home page',
+      apps: ['master'],
+      permission: orderRead,
+      rateLimit: 'write',
+      params: {},
+      query: {},
+      body: {},
+      response: nothing('The answer has no body.'),
+      status: 204,
+    });
+
+    expect(messages(route.params, { x: 1 })).toEqual([
+      'The path of catalog.home.refresh takes nothing.',
+    ]);
+    expect(messages(route.query, { x: 1 })).toEqual([
+      'The query of catalog.home.refresh takes nothing.',
+    ]);
+    expect(messages(route.body, { x: 1 })).toEqual([
+      'The body of catalog.home.refresh takes nothing.',
+    ]);
+    expect(route.body.safeParse({}).success).toBe(true);
   });
 });
 

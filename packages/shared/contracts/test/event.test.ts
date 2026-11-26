@@ -6,7 +6,12 @@ import { defineEvent, EVENT_MAX_BYTES, eventEnvelopeSchema } from '../src/index.
 const orderPlaced = defineEvent({
   type: 'commerce.order.placed',
   version: 1,
-  data: { orderId: string(), totalPaise: number().int().min(0) },
+  data: {
+    orderId: string('orderId is required.'),
+    totalPaise: number('totalPaise must be a number.')
+      .int('totalPaise must be a whole number.')
+      .min(0, 'totalPaise must be at least 0.'),
+  },
   description: 'A customer placed an order.',
 });
 
@@ -125,7 +130,7 @@ describe('defineEvent', () => {
           defineEvent({
             type: 'identity.account.created',
             version: 1,
-            data: { [key]: string() },
+            data: { [key]: string(`${key} is required.`) },
             description: 'd',
           }),
         key,
@@ -136,10 +141,49 @@ describe('defineEvent', () => {
       defineEvent({
         type: 'identity.account.created',
         version: 1,
-        data: { accountId: string(), addressId: string() },
+        data: {
+          accountId: string('accountId is required.'),
+          addressId: string('addressId is required.'),
+        },
         description: 'd',
       }),
     ).not.toThrow();
+  });
+});
+
+describe('defineEvent: the messages of one event', () => {
+  const messages = (value: unknown) =>
+    orderPlaced.schema.safeParse(value).error?.issues.map((issue) => issue.message);
+
+  it('SR-071: says what the event must be, by the name of the field', () => {
+    expect(messages({ ...envelope, type: 'commerce.order.cancelled' })).toEqual([
+      'type must be commerce.order.placed.',
+    ]);
+    expect(messages({ ...envelope, version: 2 })).toEqual(['version must be 1.']);
+    expect(messages({ ...envelope, producer: 'catalog' })).toEqual(['producer must be commerce.']);
+    expect(messages({ ...envelope, data: { ...envelope.data, note: 'x' } })).toEqual([
+      'The data of commerce.order.placed has only orderId, totalPaise.',
+    ]);
+    expect(messages({ ...envelope, data: { orderId: 'o1', totalPaise: 49.5 } })).toEqual([
+      'totalPaise must be a whole number.',
+    ]);
+  });
+
+  it('SR-071: an event with no field in its data says that it has none', () => {
+    const reset = defineEvent({
+      type: 'catalog.home.refreshed',
+      version: 1,
+      data: {},
+      description: 'The home page was refreshed.',
+    });
+    const empty = { ...envelope, type: 'catalog.home.refreshed', producer: 'catalog', data: {} };
+
+    expect(reset.schema.safeParse(empty).success).toBe(true);
+    expect(
+      reset.schema
+        .safeParse({ ...empty, data: { x: 1 } })
+        .error?.issues.map((issue) => issue.message),
+    ).toEqual(['The data of catalog.home.refreshed has no fields.']);
   });
 });
 
