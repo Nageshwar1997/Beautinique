@@ -17,3 +17,11 @@ e533ace71e5d9adc7d5b04d70e6f870dffb5b78a:packages/backend/server-mongo/test/inde
 # (`<uuid>.secret-part`) only to check that tokens stay out of the answer; no real token. The test
 # now makes its token-shaped values at run time.
 924617192d5f3d50e0682a5f8dc5986334567c57:backend/identity/test/cookies.test.ts:generic-api-key:14
+
+# 2026-11-26: the first commit of backend-config and backend-logger (ST-4, PR 112) had two literals in
+# tests, made up only to check that a value never reaches a log or a config error: the fake token
+# `tok-` and 12 letters in the logger's redaction test, and the fake key `sk-live-` and 16 letters in
+# the config's test of a message that quotes its value. Neither is a real credential. The tests now
+# make these values at run time.
+fe88a57992ab09d258c28457649c4f23c51a4e60:packages/backend/logger/test/logger.test.ts:generic-api-key:166
+fe88a57992ab09d258c28457649c4f23c51a4e60:packages/backend/config/test/parse-config.test.ts:generic-api-key:134

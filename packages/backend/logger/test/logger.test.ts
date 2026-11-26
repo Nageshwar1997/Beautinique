@@ -163,7 +163,8 @@ describe('createLogger: what is logged is cleaned (AC-PLATFORM-14)', () => {
   const VALUES = {
     otp: '482913',
     password: 'Hunter2-secret',
-    token: 'tok-abcdef-123456',
+    // Made at run time: a token-shaped literal in a test is what the secret scan looks for.
+    token: `tok-${'z'.repeat(12)}`,
     cookie: 'session=abcdef123456',
     pan: 'ABCPE1234F',
     bank: '123456789012',
