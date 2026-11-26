@@ -1,0 +1,44 @@
+{
+  "name": "@beautinique/backend-config",
+  "version": "1.0.0",
+  "description": "Typed config of one service: every key required and in the service's own namespace, read from its own env file or the platform env, refused at boot by key name and never by value.",
+  "license": "MIT",
+  "type": "module",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.mts",
+      "import": "./dist/index.mjs"
+    },
+    "./package.json": "./package.json"
+  },
+  "files": [
+    "dist",
+    "README.md",
+    "CHANGELOG.md",
+    "LICENSE"
+  ],
+  "engines": {
+    "node": "24.22.3"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Nageshwar1997/Beautinique.git",
+    "directory": "packages/backend/config"
+  },
+  "publishConfig": {
+    "access": "public",
+    "provenance": true
+  },
+  "scripts": {
+    "build": "tsdown",
+    "typecheck": "tsc -p tsconfig.json",
+    "lint": "eslint .",
+    "test": "vitest run --coverage"
+  },
+  "peerDependencies": {
+    "zod": "^4.6.7"
+  },
+  "devDependencies": {
+    "zod": "^4.6.7"
+  }
+}
