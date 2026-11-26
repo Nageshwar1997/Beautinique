@@ -1,6 +1,6 @@
 # DECISIONS: Beautinique
 
-> **Status:** v1.14.79 (2026-11-26). Har faisla ek jagah. Sirf wahi "Tay" jo owner ne khud kaha; Claude ki salah faisla nahi. Cheezein ek-ek karke judti hain.
+> **Status:** v1.14.80 (2026-11-26). Har faisla ek jagah. Sirf wahi "Tay" jo owner ne khud kaha; Claude ki salah faisla nahi. Cheezein ek-ek karke judti hain.
 
 ## 0. Kaise likhein
 
@@ -5615,7 +5615,7 @@
 - **Kisne, kab:** owner, 2026-11-26. **Nishaan:** Owner.
 - **Asar (Claude):**
   - Naye code me laagu, aur code review me "complexity" ek jaanch.
-  - Jo purana code isse nahi milta, wo HANDOFF me khula likha: abhi `matchRoute` ([`shared-contracts`](tasks/02-platform/TASK.md) §3.1) har request pe manifest ki saari entries ek-ek karke dekhta hai; gateway aur `backend-server-kit` se pehle uska lookup ek baar banne wala banega.
+  - Jo purana code isse nahi milta tha, wo `matchRoute` ([`shared-contracts`](tasks/02-platform/TASK.md) §3.1) tha: har request pe manifest ki saari entries ek-ek karke dekhta tha. 2026-11-26 ko uski jagah `createRouteMatcher` aaya: boot pe ek baar bana path ke hisson ka trie (har method ka); 10^5 routes pe ek request ~46 ms se ~1 µs. Gateway aur `backend-server-kit` isi se chalenge.
 
 ## Change log
 
@@ -5625,4 +5625,4 @@
 | v1.14.61 se v1.14.71 | 2026-11-23               | D-455: implementation stage khula; D-443 badla; D-456: private files B2 (EU Central) pe; D-439 badla; D-457: purane code ki local files aur `external.command` (D-455 badla); D-458: Node aur npm ka pin; D-459: helpers, types aur constants kahan rehte hain; D-460: backup folder `backups/`; D-461: dependency updates (security alert, images, cooldown), D-336 me jod; D-462: do laptop, primary pe code aur secondary pe containers.                                                                                     |
 | v1.14.72 se v1.14.74 | 2026-11-24               | D-463: secondary ka purana data nahi mitna, Ubuntu usi HDD ke partition 3 pe (dual boot), D: ke Recycle Bin ki deleted files copy nahi; D-462 badla. Ubuntu Server 26.04 LTS (latest LTS).                                                                                                                                                                                                                                                                                                                                      |
 | v1.14.75 se v1.14.78 | 2026-11-25               | D-462 badla: `dev-data:copy` secondary ka MongoDB khud bina tunnel uthata hai; local `infra:down` secondary ka tunnel nahi chhoota; network phone ka hotspot, secondary ka naam `bq-infra.local`. QA audit ke baad: D-441 badla (Claude ke liye har `.env.*` ka deny, env file ka pehra case ke bina), D-445 badla (naam ke saath publish me zaroori dependency saath), D-462 badla (configdb ka naam wala volume, copy se pehle local snapshot, tunnel ka pid `ssh` ho to hi, snapshot sirf development project ke `down` pe); code review ke baad D-445 aur D-462 ki "Badla" lines saaf (tag job sirf isi run ke versions, `dev-data:restore -- --before-copy`). |
-| v1.14.79 | 2026-11-26 | D-464: code me sahi data structure aur algorithm (DSA), RULES CR-40. Index me D-463 ki row (record pehle se tha). |
+| v1.14.79 se v1.14.80 | 2026-11-26 | D-464: code me sahi data structure aur algorithm (DSA), RULES CR-40. Index me D-463 ki row (record pehle se tha). D-464 ka purana `matchRoute` ab `createRouteMatcher` (trie). |

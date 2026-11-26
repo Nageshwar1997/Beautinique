@@ -68,33 +68,6 @@ export function buildRouteManifest(routes: readonly AnyRoute[]): ManifestEntry[]
 }
 
 /**
- * The entry of a request: the method and the real path (`/api/v1/commerce/orders/66f...`). A path
- * part that is written (`/orders/mine`) wins over a `:name` part (`/orders/:orderId`).
- */
-export function matchRoute(
-  manifest: readonly ManifestEntry[],
-  method: string,
-  pathname: string,
-): ManifestEntry | undefined {
-  const parts = pathname.split('/');
-  let best: { entry: ManifestEntry; written: number } | undefined;
-  for (const entry of manifest) {
-    const pattern = entry.path.split('/');
-    if (entry.method !== method || pattern.length !== parts.length) continue;
-    let written = 0;
-    const fits = pattern.every((part, index) => {
-      const actual = parts[index] as string; // the two have the same length
-      if (part.startsWith(':')) return actual !== '';
-      if (part !== actual) return false;
-      written += 1;
-      return true;
-    });
-    if (fits && (best === undefined || written > best.written)) best = { entry, written };
-  }
-  return best?.entry;
-}
-
-/**
  * The routes that a service has registered (a method and a path) and that are not in the manifest.
  * There should be none: a route without a contract stops the boot, or the CI (CR-12).
  */
