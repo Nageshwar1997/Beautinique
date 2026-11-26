@@ -1,6 +1,6 @@
 # LESSONS: Beautinique
 
-> **Status:** v1.1.6 (2026-11-25). Sabak aur traps: kya hua, kyun hua, ab kya karte hain. Faisle yahan nahi, [DECISIONS.md](DECISIONS.md) me. Cheezein ek-ek karke judengi.
+> **Status:** v1.1.7 (2026-11-26). Sabak aur traps: kya hua, kyun hua, ab kya karte hain. Faisle yahan nahi, [DECISIONS.md](DECISIONS.md) me. Cheezein ek-ek karke judengi.
 
 ## Is file me kya aayega
 
@@ -53,6 +53,15 @@ Har sabak: **Kya hua**, **Kyun**, **Ab kya karte hain**, **Kab** (date).
 - **Ab kya karte hain:** PowerShell me flags wali command `npm.cmd run <script> -- ...` se; Git Bash me jaise hai waise. README ki commands waise hi rehti hain (wo shell-neutral likhi hain).
 - **Kab:** 2026-11-25.
 
+## 4. CI aur secret scan
+
+### Secret scan poori history dekhta hai, nakli value ko bhi (2026-11-26)
+
+- **Kya hua:** ST-4 ke PR #112 me `guard` job (gitleaks) fail hua, "leaks found: 2", aur `check` job uske saath. Dono findings tests ke nakli literals the: `token: 'tok-...'` (logger ka redaction test) aur `const secret = 'sk-live-...'` (config ka test jo dekhta hai ki message me value nahi aati). Wahi value jo test isliye banata hai ki wo kahin dikhe nahi.
+- **Kyun:** gitleaks ka `generic-api-key` rule naam (`token`, `secret`, `key`) ke saath bandha ek lamba, alag-alag akshar wala literal dekhta hai, aur CI scan har us commit pe chalta hai jo tested commit se pahunch me hai (`--log-opts="--full-history HEAD"`), sirf aakhri files pe nahi. Isliye baad ke commit me value badalne se pehle commit ka finding nahi jaata. Guard ke jo steps scan ke baad hain (branch flow, audit) fail ke baad chalte hi nahi, to ek finding unhe bhi chhupa deta hai.
+- **Ab kya karte hain:** (1) push se pehle wahi scan locally, jo CI chalata hai: `npm run secrets:scan` (gitleaks 8.30.1, `.gitleaks.toml` ke saath, poori history); sirf commit ke baad, kyunki scan commits dekhta hai. (2) Test me token ya key jaisi value literal nahi, run time pe bane, jaise `'tok-'.concat('z'.repeat(12))`. (3) Finding commit me aa chuki ho to force push ke bina uska fingerprint reason ke saath `.gitleaksignore` me (commit:file:rule:line, kabhi poora path nahi); wahi purani entries ka tareeka hai. Force push sirf owner ki haan se.
+- **Kab:** 2026-11-26.
+
 ## Change log
 
 | Version          | Date       | Badlav                                                                                                                                                                                                                                      |
@@ -61,3 +70,4 @@ Har sabak: **Kya hua**, **Kyun**, **Ab kya karte hain**, **Kab** (date).
 | v1.1.1           | 2026-11-23 | Pehla sabak: nayi branch ka upstream `prerelease` (`--no-track`).                                                                                                                                                                           |
 | v1.1.2           | 2026-11-25 | §2: secondary pe Ubuntu Server ke install ke sabak (Rufus, GRUB, network, Enter, partition 3).                                                                                                                                              |
 | v1.1.3 se v1.1.6 | 2026-11-25 | §3: Git Bash me ssh passphrase maangta hai; code me theek (`ssh.ts`), `.bash_profile` optional; Windows me child process ke env me PATH ke naam ka sabak. §2: internal keyboard ki atki key, `unbind` tikta nahi, `i8042.nokbd` chalta hai. §3: PowerShell me `npm run <script> -- --flag` ka `--` kho jaata hai, `npm.cmd` chalta hai. |
+| v1.1.7 | 2026-11-26 | §4: secret scan poori history dekhta hai, nakli value ko bhi; test me token jaisi value run time pe, aur push se pehle `npm run secrets:scan`. |

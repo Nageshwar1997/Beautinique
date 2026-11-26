@@ -143,6 +143,36 @@ describe('defineEvent', () => {
   });
 });
 
+describe('eventEnvelopeSchema: the messages', () => {
+  const messages = (value: unknown) =>
+    eventEnvelopeSchema.safeParse(value).error?.issues.map((issue) => issue.message);
+
+  it('SR-071: says what is wrong, by the name of the field', () => {
+    expect(messages({ ...envelope, eventId: '' })).toEqual(['eventId is required.']);
+    expect(messages({ ...envelope, eventId: 'x'.repeat(65) })).toEqual([
+      'eventId must be at most 64 characters.',
+    ]);
+    expect(messages({ ...envelope, type: 'placed' })).toEqual([
+      'type must be <service>.<aggregate>.<pastTense>, with a service of the list.',
+    ]);
+    expect(messages({ ...envelope, version: 0 })).toEqual(['version must be at least 1.']);
+    expect(messages({ ...envelope, version: 1.5 })).toEqual(['version must be a whole number.']);
+    expect(messages({ ...envelope, producer: 'shop' })).toEqual([
+      'producer must be a service of the list.',
+    ]);
+    expect(messages({ ...envelope, actor: { type: 'robot', id: 'x' } })).toEqual([
+      'actor.type must be account or system.',
+    ]);
+    expect(messages({ ...envelope, correlationId: '' })).toEqual(['correlationId is required.']);
+    expect(messages({ ...envelope, aggregate: { type: 'order', id: '', version: 0 } })).toEqual([
+      'aggregate.id is required.',
+    ]);
+    expect(messages({ ...envelope, extra: 1 })).toEqual([
+      'An event must have the fields of the envelope and nothing else.',
+    ]);
+  });
+});
+
 describe('EVENT_MAX_BYTES', () => {
   it('SR-071: an event is at most 16 KB', () => {
     expect(EVENT_MAX_BYTES).toBe(16_384);
