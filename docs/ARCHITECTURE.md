@@ -1,6 +1,6 @@
 # ARCHITECTURE: Beautinique
 
-> **Status:** v1.3.23 (2026-11-26). System kaise bana hai, ek nazar me. Cheezein ek-ek karke, owner ki haan ke baad judengi. Abhi §1 (finance ke accounting niyam, D-282), §2 se §9 (system ke hisse, D-291 se D-298) aur §10 (data aur database, D-310 se D-317).
+> **Status:** v1.3.24 (2026-11-27). System kaise bana hai, ek nazar me. Cheezein ek-ek karke, owner ki haan ke baad judengi. Abhi §1 (finance ke accounting niyam, D-282), §2 se §9 (system ke hisse, D-291 se D-298) aur §10 (data aur database, D-310 se D-317).
 
 ## Is file me kya aayega
 
@@ -551,10 +551,10 @@ Database Architect ki raay se (D-257 ka kram), owner ki haan ke baad. Ye saare s
 1. Har collection ki ek retention class (`tech`, `case`, `account`, `book`, `tax`, `ref`, `agg`) code ki registry me; koi collection bina class ya bina delete handler ke ho to CI fail.
 2. Business ki cheez (product, variant, seller, hub) jise koi order ya document dekhta hai, kabhi delete nahi; `archived`.
 3. Personal data ka erase = field hatana ya document delete, usi transaction me rok ki copy aur event; sirf flag kaafi nahi.
-4. Rok ki copy har service ke apne `sealed_records` me: hate fields ka JSON, ek public key se band (sealed; SR-097, D-399), live server ke paas sirf public key, `eraseAt` setting se (abhi 180 din, lagbhag 13 May 2027 se 365 din; D-250, D-262). Sirf break-glass facade se, Master aur wajah ke saath, audit me; kisi staff screen ya list me kabhi nahi. Retention class `tech` ke records (OTP ke hash, idempotency ke jawab, sessions, outbox, inbox) rok me nahi aate; unka personal data request logs me pehle se rehta hai (D-321). Ye chhoot tabhi jab session ka shuru aur band hona, OTP ka bhejna aur jaanch (bina code), aur har outbox event ka asal kaam security events, audit ya request logs me kam se kam 1 saal rahe; iska ek test (D-436).
+4. Rok ki copy har service ke apne `sealed_records` me: hate fields ka JSON, ek public key se band (sealed; SR-097, D-399; har copy ki nayi X25519 key, HKDF-SHA256 aur AES-256-GCM, D-469), live server ke paas sirf public key, `eraseAt` setting se (abhi 180 din, lagbhag 13 May 2027 se 365 din; D-250, D-262). Sirf break-glass facade se, Master aur wajah ke saath, audit me; kisi staff screen ya list me kabhi nahi. Retention class `tech` ke records (OTP ke hash, idempotency ke jawab, sessions, outbox, inbox) rok me nahi aate; unka personal data request logs me pehle se rehta hai (D-321). Ye chhoot tabhi jab session ka shuru aur band hona, OTP ka bhejna aur jaanch (bina code), aur har outbox event ka asal kaam security events, audit ya request logs me kam se kam 1 saal rahe; iska ek test (D-436).
 5. Field encryption AES-256-GCM, roop `v1.<keyId>.<iv>.<ciphertext>.<tag>`, associated data `<service>.<collection>.<field>:<recordId>` (SR-063). Keys service ke namespace me (`field`, `blind`, `hold`, finance me `taxArchive`), har key ka id, aur purane records ka roz ka chhota re-encrypt.
 6. Dhoondhne ke liye HMAC-SHA256 blind index (alag key); dikhane ke liye aakhri 4.
-7. Codes, recovery codes aur invite tokens sirf hash. Delivery code encrypted, kyunki customer ko dikhana zaroori hai; milaan server pe (SR-054).
+7. Codes, recovery codes aur invite tokens sirf hash: OTP aur recovery codes HMAC-SHA256 `blind` key se, apne kaam ke context ke saath; invite tokens (128 bit ya zyada random) SHA-256 (D-469). Delivery code encrypted, kyunki customer ko dikhana zaroori hai; milaan server pe (SR-054).
 8. Seller aur partner ka PAN aur bank khaata finance me encrypted; catalog me sirf KYC ke dastavez ke `assetId` aur GSTIN.
 9. Invoice pe naam aur pata sirf finance ke `archive.tax_copies` me (alag key); isliye account delete pe finance ke documents nahi badalte (D-225, D-226).
 10. Account delete ka event har service ka handler chalata hai (neeche ki table); identity har subscriber ka "ho gaya" outbox ki delivery se dekhti hai. Delete hue ids ki list (bina personal data) restore ke baad deletes dobara chalane ke liye.
@@ -741,3 +741,4 @@ Lint aur TypeScript ke saajhe config `configs/` me (D-002), package nahi.
 | ------------------ | ------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | v1.0.0 se v1.3.21  | 2026-11-17 se 2026-11-22 | §1 finance ke accounting niyam se §12 saajhe packages tak (`backend-crypto` aur `frontend-commerce` samet); har badlav ka poora itihaas git me (D-442). |
 | v1.3.22 se v1.3.23 | 2026-11-23 se 2026-11-26 | §7 niyam 11: rok wali files alag B2 bucket me Object Lock ke saath (D-456). §5 niyam 9: 403 me `STEP_UP_REQUIRED` (D-185), ST-5 ke saath.               |
+| v1.3.24            | 2026-11-27               | §10.3 niyam 4: band copy X25519, HKDF-SHA256 aur AES-256-GCM se; niyam 7: OTP aur recovery codes ka HMAC `blind` key se, invite tokens SHA-256 (D-469). |

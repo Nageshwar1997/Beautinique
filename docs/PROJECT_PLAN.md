@@ -1,6 +1,6 @@
 # PROJECT PLAN: Beautinique
 
-> **Status:** v1.5.28 (2026-11-27). Project ki kendriya file. Cheezein ek-ek karke, owner ki haan ke baad judti hain.
+> **Status:** v1.5.29 (2026-11-27). Project ki kendriya file. Cheezein ek-ek karke, owner ki haan ke baad judti hain.
 
 ## 0. Is file me kya aayega
 
@@ -99,13 +99,13 @@ Har module ka folder `tasks/NN-<module>/` aur uski `TASK.md` ([tasks/README.md](
 
 §2 ke hisaab se. "—" ka matlab: us module ki `TASK.md` abhi nahi bani, to points tay nahi.
 
-- **R1:** 58 / 549 points = 11%. R1 ke saare 26 modules ke points tay hain; R2 ke `25` aur `26` ki `TASK.md` draft hai (D-454); baaki modules ke R2 subtasks R2 ki planning me judenge.
-- **Ecosystem:** 58 / 587 points = 10%; R2 me abhi sirf `25` (23) aur `26` (15) ke draft points.
+- **R1:** 60 / 549 points = 11%. R1 ke saare 26 modules ke points tay hain; R2 ke `25` aur `26` ki `TASK.md` draft hai (D-454); baaki modules ke R2 subtasks R2 ki planning me judenge.
+- **Ecosystem:** 60 / 587 points = 10%; R2 me abhi sirf `25` (23) aur `26` (15) ke draft points.
 
 | Module                 | Release        | Kul points | Poore | %    |
 | ---------------------- | -------------- | ---------- | ----- | ---- |
 | `01-foundation`        | R1             | 16         | 16    | 100% |
-| `02-platform`          | R1             | 31         | 24    | 77%  |
+| `02-platform`          | R1             | 31         | 26    | 84%  |
 | `03-frontend-kit`      | R1             | 41         | 0     | 0%   |
 | `04-logs`              | R1             | 9          | 0     | 0%   |
 | `05-audit`             | R1             | 9          | 0     | 0%   |
@@ -169,4 +169,4 @@ Modules charan wise bante hain. Har charan me us hisse ke liye zaroori service a
 | v1.5.18 se v1.5.19 | 2026-11-25               | `01-foundation` ST-8 poora (16 / 16): PR #106, #107 aur #108 merge, CI green: 34 / 549, R1 6%, ecosystem 6% (§4). `02-platform` ST-1 poora (2 / 31): 36 / 549, R1 7%, ecosystem 6% (§4).                                                                          |
 | v1.5.20 se v1.5.21 | 2026-11-26               | `02-platform` ST-1 ka PR #109 merge; ST-2 poora (6 / 31): 40 / 549, R1 7%, ecosystem 7% (§4). ST-2 ka PR #110 merge; ST-3 poora (10 / 31): 44 / 549, R1 8%, ecosystem 7% (§4).                                                                                    |
 | v1.5.22 se v1.5.26 | 2026-11-26               | `02-platform` ST-3 ka PR #111 merge; ST-4 poora (12 / 31): 46 / 549, R1 8%, ecosystem 8% (§4). ST-5 poora (16 / 31): 50 / 549, R1 9%, ecosystem 9% (§4). ST-5 ka PR #114 merge. ST-6 poora (20 / 31): 54 / 549, R1 10%, ecosystem 9% (§4). ST-6 ka PR #115 merge. |
-| v1.5.27 se v1.5.28 | 2026-11-27               | `02-platform` ST-7 poora (24 / 31): 58 / 549, R1 11%, ecosystem 10% (§4). ST-7 ka PR #116 merge.                                                                                                                                                                  |
+| v1.5.27 se v1.5.29 | 2026-11-27               | `02-platform` ST-7 poora (24 / 31): 58 / 549, R1 11%, ecosystem 10% (§4). ST-7 ka PR #116 merge. ST-8 poora (26 / 31): 60 / 549, R1 11%, ecosystem 10% (§4).                                                                                                      |
