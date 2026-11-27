@@ -1,0 +1,72 @@
+{
+  "name": "@beautinique/backend-crypto",
+  "version": "1.0.0",
+  "description": "Field encryption, blind indexes, code hashes and the sealed copy of held data, for a service.",
+  "license": "MIT",
+  "type": "module",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.mts",
+      "import": "./dist/index.mjs"
+    },
+    "./break-glass": {
+      "types": "./dist/break-glass.d.mts",
+      "import": "./dist/break-glass.mjs"
+    },
+    "./mongo": {
+      "types": "./dist/mongo.d.mts",
+      "import": "./dist/mongo.mjs"
+    },
+    "./package.json": "./package.json"
+  },
+  "files": [
+    "dist",
+    "README.md",
+    "CHANGELOG.md",
+    "LICENSE"
+  ],
+  "engines": {
+    "node": "24.22.3"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Nageshwar1997/Beautinique.git",
+    "directory": "packages/backend/crypto"
+  },
+  "publishConfig": {
+    "access": "public",
+    "provenance": true
+  },
+  "scripts": {
+    "build": "tsdown",
+    "typecheck": "tsc -p tsconfig.json",
+    "lint": "eslint .",
+    "test": "vitest run --coverage"
+  },
+  "peerDependencies": {
+    "@beautinique/backend-mongo": "^1.0.0",
+    "@beautinique/shared-clock": "^1.0.0",
+    "mongodb": "^7.9.1",
+    "zod": "^4.6.7"
+  },
+  "peerDependenciesMeta": {
+    "@beautinique/backend-mongo": {
+      "optional": true
+    },
+    "@beautinique/shared-clock": {
+      "optional": true
+    },
+    "mongodb": {
+      "optional": true
+    }
+  },
+  "devDependencies": {
+    "@beautinique/backend-config": "^1.0.0",
+    "@beautinique/backend-events": "^1.0.0",
+    "@beautinique/backend-mongo": "^1.0.0",
+    "@beautinique/shared-clock": "^1.0.0",
+    "@beautinique/shared-contracts": "^1.0.0",
+    "mongodb": "^7.9.1",
+    "zod": "^4.6.7"
+  }
+}
