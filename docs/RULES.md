@@ -1,6 +1,6 @@
 # RULES: Beautinique
 
-> **Status:** v1.2.11 (2026-11-26). Kaam ke niyam. Saare sections: §1 (Definition of Done), §2 (Git aur release gate), §3 (Code), §4 (Testing), §5 se §7 (security, docs, AI); D-381 se D-387, D-397, D-398, D-429, D-430, D-459, D-464. Cheezein ek-ek karke, owner ki haan ke baad judti hain.
+> **Status:** v1.2.12 (2026-11-27). Kaam ke niyam. Saare sections: §1 (Definition of Done), §2 (Git aur release gate), §3 (Code), §4 (Testing), §5 se §7 (security, docs, AI); D-381 se D-387, D-397, D-398, D-429, D-430, D-459, D-464, D-470. Cheezein ek-ek karke, owner ki haan ke baad judti hain.
 
 ## Is file me kya aayega
 
@@ -220,7 +220,7 @@ Har fake ka apna chhota test, aur har fake ka vyavhaar provider ke docs ke saath
 
 **Ghadi aur samay:**
 
-1. Business code `Date.now()` ya `new Date()` seedha nahi bulata; ek `Clock` port (UTC ka abhi, aur IST ka din) inject hota hai (RT-13).
+1. Business code `Date.now()`, bina argument ka `new Date()` ya `Date()` seedha nahi bulata; ek `Clock` port (UTC ka abhi, aur IST ka din) inject hota hai (RT-13).
 2. Unit tests me fake clock; integration me clock aage badhao aur ticker ka ek "tick" haath se chalao (koi asli intezaar nahi).
 3. E2E me ghadi ka koi route app me nahi: E2E ka harness us run ke database me timer ka samay peeche karta hai aur sweep chalata hai, ya process ko fake clock ke saath chalata hai (RT-11).
 4. Zaroori samay wale scenarios (misaal): 15 minute ka reservation (D-118), payment fail aur delivery pe UPI ki seemaayein (D-109), hub pe 3 din (D-108), return ki khidkiyan (D-221), daawe ki khidkiyan (D-148), payable (D-081, D-369), hafte ka payout, mahine ka TCS aur close, 1 April pe nayi series, raat 11:30 PM IST ka invoice usi din ka, session ki umar aur idle (D-180, D-181), invite, step-up, signed URL, idempotency ki umar, delete ke 7 din.
@@ -232,7 +232,7 @@ Har fake ka apna chhota test, aur har fake ka vyavhaar provider ke docs ke saath
 2. **RT-10:** E2E ke traces, screenshots aur logs me sirf fake data; artifacts chhoti umar ke; backup files kabhi artifact nahi. _Wajah:_ public repo ke artifacts koi bhi dekh sakta hai.
 3. **RT-11:** production bundle me koi test route, test switch, fake adapter ya test seed nahi. Boot pe jaanch: production config me fake adapter ya test seed mile to process na uthe. E2E ka harness halat seedha us run ke database me badalta hai, app ke kisi route se nahi. _Wajah:_ test ka raasta hamle ka raasta na bane.
 4. **RT-12:** tests ka koi network request loopback ke bahar nahi jaata; test setup bahar ke connections band karta hai, aur har bahar ki service ka fake hota hai. _Wajah:_ galti se asli provider, asli paisa ya asli inbox tak na pahunchein.
-5. **RT-13:** business code "abhi" sirf injected clock se leta hai; `Date.now()` aur bina argument ka `new Date()` lint se mana (clock package aur tests ko chhod ke); tests me asli `sleep` nahi. _Wajah:_ samay wale niyam seconds me aur pakke jaanchein.
+5. **RT-13:** business code "abhi" sirf injected clock se leta hai; `Date.now` (bulana ya reference), bina argument ka `new Date()` aur `Date()` lint se mana: `configs/eslint/base.js` ka block `beautinique/injected-clock`, `packages/*/*/src`, `backend/*/src` aur `frontend/*/src` pe; clock package (`packages/shared/clock`), tests aur `scripts/` bahar (D-470). Tests me asli `sleep` nahi. _Wajah:_ samay wale niyam seconds me aur pakke jaanchein.
 6. **RT-14:** har fake ka vyavhaar provider ke docs ke saath likha ho. R1 se pehle aur jab bhi kisi provider ka integration badle, laptop pe ek baar provider ke asli test mode se milaan (payment, email, social sign-in, media, aur edge: Vercel ka rewrite, secret header, forwarded IP aur CDN cache, aur map ki key ki whitelist), test key sirf us din (OPERATIONS §1 niyam 8). Razorpay ke webhooks laptop tak `zrok` se (Razorpay `ngrok` aur `loca.lt` ko block karta hai), ya fake se (D-425). _Wajah:_ fake aur asli ka farak tests ko jhootha green kar deta hai.
 7. **RT-15:** packages ke tests me npm registry hamesha local fake; test process me registry ki setting jabran fake pe, aur asli registry ka koi request test ko fail kare (CLAUDE.md). _Wajah:_ koi test kabhi asli registry ko na chhoe.
 8. **RT-16:** E2E ka edge proxy live ke rewrite jaisa: secret header aur har test ka alag forwarded IP. Rate limits aur seemaayein asli settings ke saath jaanchi jaati hain; tests seemaayein badal ke nahi, apna IP aur apna account le ke alag rehte hain. _Wajah:_ niyam usi roop me jaanche jaayein jo live pe chalta hai.
@@ -440,9 +440,9 @@ Kuch niyamon ka saboot test nahi, record hai (jaise schema ki review checklist, 
 
 ## Change log
 
-| Version          | Date                     | Badlav                                                                                                                                                            |
-| ---------------- | ------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| v1.0.0 se v1.2.8 | 2026-11-17 se 2026-11-22 | Definition of Done, release gate, code ke niyam, testing aur security, docs aur AI ke niyam; har badlav ka poora itihaas git me (D-442).                          |
-| v1.2.9           | 2026-11-23               | CR-37 se CR-39: aam helpers `utils/` me; module ka apna logic, type aur constant module me; `types/` aur `constants/` sirf kai modules ke saajhe ke liye (D-459). |
-| v1.2.10 | 2026-11-26 | CR-40: code me sahi data structure aur algorithm: `Set` aur `Map` se milan, loop ke andar loop sirf seema ke saath, sort ek baar, queue me `shift()` nahi, lookup boot pe ek baar, aur bade input ka test (D-464). |
-| v1.2.11 | 2026-11-26 | CR-41: zod ka har schema aur har check message ke saath, field ya key ke naam se (owner). |
+| Version            | Date                     | Badlav                                                                                                                                                                                                                                                                                                       |
+| ------------------ | ------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| v1.0.0 se v1.2.8   | 2026-11-17 se 2026-11-22 | Definition of Done, release gate, code ke niyam, testing aur security, docs aur AI ke niyam; har badlav ka poora itihaas git me (D-442).                                                                                                                                                                     |
+| v1.2.9             | 2026-11-23               | CR-37 se CR-39: aam helpers `utils/` me; module ka apna logic, type aur constant module me; `types/` aur `constants/` sirf kai modules ke saajhe ke liye (D-459).                                                                                                                                            |
+| v1.2.10 se v1.2.11 | 2026-11-26               | CR-40: code me sahi data structure aur algorithm: `Set` aur `Map` se milan, loop ke andar loop sirf seema ke saath, sort ek baar, queue me `shift()` nahi, lookup boot pe ek baar, aur bade input ka test (D-464). CR-41: zod ka har schema aur har check message ke saath, field ya key ke naam se (owner). |
+| v1.2.12            | 2026-11-27               | RT-13 ka lint bana: `Date.now`, bina argument ka `new Date()` aur `Date()` mana, packages, services aur apps ke `src` pe; clock package, tests aur `scripts/` bahar (D-470).                                                                                                                                 |

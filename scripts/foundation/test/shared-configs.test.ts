@@ -4,7 +4,7 @@ import { rmSync } from 'node:fs';
 import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
-import { ESLint } from 'eslint';
+import { ESLint, Linter } from 'eslint';
 import { afterAll, describe, test } from 'vitest';
 
 import { COVERAGE_LIMITS, coverageThresholds } from '../../../configs/vitest/coverage.ts';
@@ -35,6 +35,77 @@ describe('ESLint (configs/eslint/base.js)', () => {
     assert.ok(found.includes('11:@typescript-eslint/no-floating-promises'), found.join(', '));
     // Type-aware lint builds a TypeScript program first: seconds, not a unit test's 5 s budget.
   }, 60_000);
+});
+
+describe('the injected clock lint (RULES RT-13, D-470)', () => {
+  const CLOCK_RULES = ['no-restricted-properties', 'no-restricted-syntax'];
+
+  async function clockRules(path: string): Promise<Linter.RulesRecord> {
+    const eslint = new ESLint({ cwd: ROOT });
+    const config = (await eslint.calculateConfigForFile(join(ROOT, path))) as
+      Linter.Config | undefined;
+    const rules = config?.rules ?? {};
+    const found: Linter.RulesRecord = {};
+    for (const rule of CLOCK_RULES) {
+      const entry = rules[rule];
+      if (entry !== undefined) found[rule] = entry;
+    }
+    return found;
+  }
+
+  test('RT-13: package, service and app source gets it; the clock package, tests and scripts do not', async () => {
+    const covered = [
+      'packages/shared/money/src/money.ts',
+      'packages/backend/events/src/utils/ist.ts',
+      'backend/identity/src/main.ts',
+      'frontend/customer/src/app.tsx',
+    ];
+    const free = [
+      'packages/shared/clock/src/clock.ts',
+      'packages/backend/events/test/outbox.test.ts',
+      'packages/backend/mongo/test/utils/mongo.ts',
+      'frontend/customer/src/cart.test.tsx',
+      'scripts/foundation/src/dev-data.ts',
+      'scripts/packages/bin/packages.ts',
+    ];
+    for (const path of covered) {
+      assert.deepEqual(Object.keys(await clockRules(path)), CLOCK_RULES, path);
+    }
+    for (const path of free) {
+      assert.deepEqual(await clockRules(path), {}, path);
+    }
+    // Loading the config imports typescript-eslint once: about a second, more on a slow CI runner.
+  }, 30_000);
+
+  test('RT-13: reading the real clock fails lint, a given time does not', async () => {
+    // The rules exactly as the config sets them, on plain JavaScript: no TypeScript program needed.
+    const linter = new Linter();
+    const config: Linter.Config[] = [
+      { rules: await clockRules('packages/shared/money/src/money.ts') },
+    ];
+    const flagged = (code: string) => linter.verify(code, config, 'source.js').map((m) => m.ruleId);
+
+    for (const code of [
+      'Date.now();',
+      'const t = Date.now;',
+      'const { now } = Date;',
+      'new Date();',
+      'new Date;',
+      'Date();',
+    ]) {
+      const found = flagged(code);
+      assert.equal(found.length, 1, `${code} -> ${found.join(', ')}`);
+    }
+    for (const code of [
+      'new Date(0);',
+      "new Date('2026-11-27T00:00:00.000Z');",
+      'clock.now();',
+      "Date.parse('2026-11-27');",
+      'Date.UTC(2026, 10, 27);',
+    ]) {
+      assert.deepEqual(flagged(code), [], code);
+    }
+  }, 30_000);
 });
 
 // Each test runs tsc: seconds when the whole suite runs, not a unit test's 5 s budget.
