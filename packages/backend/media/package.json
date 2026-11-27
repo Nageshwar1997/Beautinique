@@ -1,0 +1,53 @@
+{
+  "name": "@beautinique/backend-media",
+  "version": "1.0.0",
+  "description": "The media provider and object storage ports of the media service, with fakes for tests.",
+  "license": "MIT",
+  "type": "module",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.mts",
+      "import": "./dist/index.mjs"
+    },
+    "./testing": {
+      "types": "./dist/testing.d.mts",
+      "import": "./dist/testing.mjs"
+    },
+    "./package.json": "./package.json"
+  },
+  "files": [
+    "dist",
+    "README.md",
+    "CHANGELOG.md",
+    "LICENSE"
+  ],
+  "engines": {
+    "node": "24.22.3"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Nageshwar1997/Beautinique.git",
+    "directory": "packages/backend/media"
+  },
+  "publishConfig": {
+    "access": "public",
+    "provenance": true
+  },
+  "scripts": {
+    "build": "tsdown",
+    "typecheck": "tsc -p tsconfig.json",
+    "lint": "eslint .",
+    "test": "vitest run --coverage"
+  },
+  "peerDependencies": {
+    "@beautinique/shared-clock": "^1.0.0"
+  },
+  "peerDependenciesMeta": {
+    "@beautinique/shared-clock": {
+      "optional": true
+    }
+  },
+  "devDependencies": {
+    "@beautinique/shared-clock": "^1.0.0"
+  }
+}
