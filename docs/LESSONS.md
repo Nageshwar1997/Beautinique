@@ -1,6 +1,6 @@
 # LESSONS: Beautinique
 
-> **Status:** v1.1.8 (2026-11-26). Sabak aur traps: kya hua, kyun hua, ab kya karte hain. Faisle yahan nahi, [DECISIONS.md](DECISIONS.md) me. Cheezein ek-ek karke judengi.
+> **Status:** v1.1.9 (2026-11-27). Sabak aur traps: kya hua, kyun hua, ab kya karte hain. Faisle yahan nahi, [DECISIONS.md](DECISIONS.md) me. Cheezein ek-ek karke judengi.
 
 ## Is file me kya aayega
 
@@ -83,6 +83,13 @@ Har sabak: **Kya hua**, **Kyun**, **Ab kya karte hain**, **Kab** (date).
 - **Ab kya karte hain:** server text ko schema ke hisaab se padhta hai (number, boolean, date, list, aur list ke items; `decodeText`). Round-trip test chhote aur ek-item wale input pe bhi. Test helper me "kuch nahi" ke liye `null`, `undefined` nahi.
 - **Kab:** 2026-11-26 (ST-5).
 
+### `packages:verify` me kai packages ke int tests ek saath, aur HDD pe majority write 2 second ke paar (2026-11-27)
+
+- **Kya hua:** secondary pe `packages:verify -- backend-crypto` teen baar aur `-- backend-events` ek baar fail hua: kisi dependency ke int test me `MongoWriteConcernError: operation exceeded time limit` (lease ki write), jabki wahi package akela green tha.
+- **Kyun:** `--filter=<pkg>...` package ke saath uski dependencies bhi chunta hai, aur turbo unke `test` ek saath chalata hai; har test file apna database, collections aur indexes banati aur hatati hai. Har write `w: majority` aur `maxTimeMS` 2 second pe hai, aur majority (journal) ka intezaar isi samay me ginta hai; HDD pe ek saath ke in kaamon se wo intezaar badhta hai. Pass hone wale parallel run me bhi sabse bada intezaar 1151 ms tha (mongod ka slow-op log), yaani margin chhota aur fail load pe tika.
+- **Ab kya karte hain:** `packages:verify` me tests ek package ek waqt me (`turbo run test --concurrency=1`); usi jaanch me sabse bada intezaar 846 ms. Aisi error pe pehle mongod ke slow-op log me `waitForWriteConcernDurationMillis` dekho. Test ke liye `maxTimeMS` badhana ilaaj nahi: live ki seema wahi rehni chahiye.
+- **Kab:** 2026-11-27.
+
 ## Change log
 
 | Version          | Date       | Badlav                                                                                                                                                                                                                                                                                                                                  |
@@ -92,3 +99,4 @@ Har sabak: **Kya hua**, **Kyun**, **Ab kya karte hain**, **Kab** (date).
 | v1.1.2           | 2026-11-25 | §2: secondary pe Ubuntu Server ke install ke sabak (Rufus, GRUB, network, Enter, partition 3).                                                                                                                                                                                                                                          |
 | v1.1.3 se v1.1.6 | 2026-11-25 | §3: Git Bash me ssh passphrase maangta hai; code me theek (`ssh.ts`), `.bash_profile` optional; Windows me child process ke env me PATH ke naam ka sabak. §2: internal keyboard ki atki key, `unbind` tikta nahi, `i8042.nokbd` chalta hai. §3: PowerShell me `npm run <script> -- --flag` ka `--` kho jaata hai, `npm.cmd` chalta hai. |
 | v1.1.7 se v1.1.8 | 2026-11-26 | §4: secret scan poori history dekhta hai, nakli value ko bhi; test me token jaisi value run time pe, aur push se pehle `npm run secrets:scan`. §5: server aur tests: router ka `express.json()` har body padhta hai; error body ka `details`; ek item ki list.                                                                          |
+| v1.1.9           | 2026-11-27 | §5: `packages:verify` me kai packages ke int tests ek saath HDD pe majority write ko 2 second paar kara dete the; ab tests ek package ek waqt me.                                                                                                                                                                                       |

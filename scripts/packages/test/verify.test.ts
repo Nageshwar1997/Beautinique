@@ -205,13 +205,32 @@ describe('verify', () => {
     expect(verify({ root, names: [], log, exec })).toBe(0);
     expect(calls[0]).toMatchObject({
       command: 'turbo',
-      args: ['run', 'build', 'typecheck', 'lint', 'test', '--filter=./packages/*/*'],
+      args: ['run', 'build', 'typecheck', 'lint', '--filter=./packages/*/*'],
     });
+    // One package's tests at a time: the integration tests of several packages share one MongoDB.
     expect(calls[1]).toMatchObject({
+      command: 'turbo',
+      args: ['run', 'test', '--concurrency=1', '--filter=./packages/*/*'],
+    });
+    expect(calls[2]).toMatchObject({
       command: 'npm',
       args: expect.arrayContaining(['pack', '--dry-run']) as string[],
     });
     expect(out.at(-1)).toContain('Verified 1 package(s): @beautinique/shared-money');
+  });
+
+  it('runs the tests of a named package and of what it needs, one package at a time', () => {
+    const root = fixtureRepo({
+      'shared/money': [],
+      'backend/mongo': ['@beautinique/shared-money'],
+    });
+    const { exec, calls } = fakeExec(root);
+    const { log } = recordingLogger();
+    expect(verify({ root, names: ['backend-mongo'], log, exec })).toBe(0);
+    expect(calls.filter((call) => call.command === 'turbo').map((call) => call.args)).toEqual([
+      ['run', 'build', 'typecheck', 'lint', '--filter=@beautinique/backend-mongo...'],
+      ['run', 'test', '--concurrency=1', '--filter=@beautinique/backend-mongo...'],
+    ]);
   });
 
   it('lists every problem with its rule and fails', () => {
@@ -240,15 +259,34 @@ describe('verify', () => {
     expect(() => verify({ root, names: [], log, exec })).toThrow(/does not exist after the build/);
   });
 
-  it('stops when the build, typecheck, lint or tests fail', () => {
+  it('stops when the build, typecheck or lint fail, before the tests', () => {
     const root = fixtureRepo({ 'shared/money': [] });
-    const { exec } = fakeExec(root, (call) =>
+    const { exec, calls } = fakeExec(root, (call) =>
       call.command === 'turbo' ? { status: 3 } : undefined,
     );
     const { log } = recordingLogger();
     expect(() => verify({ root, names: [], log, exec })).toThrow(
-      expect.objectContaining({ code: 'VERIFY_CHECKS_FAILED' }),
+      expect.objectContaining({
+        code: 'VERIFY_CHECKS_FAILED',
+        message: 'Build, typecheck or lint failed (turbo exit code 3).',
+      }),
     );
+    expect(calls).toHaveLength(1);
+  });
+
+  it('stops when the tests fail', () => {
+    const root = fixtureRepo({ 'shared/money': [] });
+    const { exec, calls } = fakeExec(root, (call) =>
+      call.command === 'turbo' && call.args[1] === 'test' ? { status: 1 } : undefined,
+    );
+    const { log } = recordingLogger();
+    expect(() => verify({ root, names: [], log, exec })).toThrow(
+      expect.objectContaining({
+        code: 'VERIFY_CHECKS_FAILED',
+        message: 'Tests failed (turbo exit code 1).',
+      }),
+    );
+    expect(calls.map((call) => call.command)).toEqual(['turbo', 'turbo']);
   });
 
   it('says so when there is nothing to verify', () => {

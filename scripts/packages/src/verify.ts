@@ -56,21 +56,27 @@ export function verify({ root, names, log, exec }: VerifyOptions): number {
   const context = { repositoryUrl: repositoryUrl(root), all };
   const problems = selected.flatMap((pkg) => packageProblems(pkg, context));
 
-  // Build, typecheck, lint and tests of the chosen packages and what they need.
+  // Build, typecheck, lint and tests of the chosen packages and what they need. The checks run side
+  // by side; the tests one package at a time, since the integration tests of several packages at
+  // once share one MongoDB, and on a slow disk their index builds push a majority write past its
+  // 2 s (docs/LESSONS.md §5). In the CI `npm test` runs first, so these tests come from its cache.
   const filters =
     names.length > 0
       ? selected.map((pkg) => `--filter=${pkg.name}...`)
       : ['--filter=./packages/*/*'];
-  const turbo = exec('turbo', ['run', 'build', 'typecheck', 'lint', 'test', ...filters], {
-    cwd: root,
-    inherit: true,
-  });
-  if (turbo.status !== 0) {
-    throw new CliError(
-      'VERIFY_CHECKS_FAILED',
-      `Build, typecheck, lint or tests failed (turbo exit code ${String(turbo.status)}).`,
-      'Read the output above, fix what it names, then run verify again.',
-    );
+  const runs = [
+    { tasks: ['build', 'typecheck', 'lint'], what: 'Build, typecheck or lint' },
+    { tasks: ['test', '--concurrency=1'], what: 'Tests' },
+  ];
+  for (const { tasks, what } of runs) {
+    const turbo = exec('turbo', ['run', ...tasks, ...filters], { cwd: root, inherit: true });
+    if (turbo.status !== 0) {
+      throw new CliError(
+        'VERIFY_CHECKS_FAILED',
+        `${what} failed (turbo exit code ${String(turbo.status)}).`,
+        'Read the output above, fix what it names, then run verify again.',
+      );
+    }
   }
 
   for (const pkg of selected) {

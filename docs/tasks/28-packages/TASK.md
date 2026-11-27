@@ -1,6 +1,6 @@
 # TASK 28: packages ka flow
 
-> **Status:** v1.0.8 (2026-11-26). Halat: implementation; ST-1 **ho gaya** (PR [#104](https://github.com/Nageshwar1997/Beautinique/pull/104)), ST-2 se ST-8 ek PR me, `scripts/packages` aur `.github/workflows/publish.yml`. Module [PROJECT_PLAN.md](../../PROJECT_PLAN.md) §3 ka `28-packages` (D-445). Progress: 18 / 18 points.
+> **Status:** v1.0.9 (2026-11-27). Halat: implementation; ST-1 **ho gaya** (PR [#104](https://github.com/Nageshwar1997/Beautinique/pull/104)), ST-2 se ST-8 ek PR me, `scripts/packages` aur `.github/workflows/publish.yml`. Module [PROJECT_PLAN.md](../../PROJECT_PLAN.md) §3 ka `28-packages` (D-445). Progress: 18 / 18 points.
 
 ## 1. Lakshya
 
@@ -47,7 +47,7 @@ Saare packages (ya chune hue) unki andar ki dependencies ke kram me build karta 
 
 Publish wali saari jaanch, bina publish ke. Fresh clone pe bhi chalta hai, kyunki andar ki dependencies pehle build hoti hain. Har PR pe CI me bhi chalta hai.
 
-1. Build, typecheck, lint aur tests.
+1. Build, typecheck aur lint ek saath; phir tests ek package ek waqt me (`turbo run test --concurrency=1`), kyunki kai packages ke int tests ek hi MongoDB pe ek saath dheeme disk pe majority write ko 2 second ki seema ke paar kara dete hain ([LESSONS.md](../../LESSONS.md) §5). CI me `npm test` pehle chalta hai, to wahan ye tests cache se aate hain.
 2. **Package me kya jaata hai:** `npm pack --dry-run` ki list me sirf `files` ki allowlist. `.env`, `.npmrc`, test files ya secret jaisa koi pattern ho to fail (DD-7): private key, AWS, npm aur GitHub tokens, Razorpay key, npm ka `_authToken`, aur `.gitleaks.toml` ke `url-with-password` jaise connection URL password ke saath (MongoDB, Valkey, Postgres, AMQP, Cloudinary); `<...>` jaisa placeholder secret nahi. Ye `dist/` pe bhi, jo git me nahi jaata aur gitleaks use kabhi nahi dekhta.
 3. Exports aur types sahi resolve hote hain. Iske liye koi naya tool chahiye ho, to pehle review ([OPERATIONS.md](../../OPERATIONS.md) §11 niyam 2).
 4. Package ke niyam: CR-33 (Tailwind import), CR-34 (naam, ESM, README, playground), CR-35 (peer aur dev ki range), CR-36 (`private: true` nahi, README ka "Visibility" hissa).
@@ -171,3 +171,4 @@ ST-2 se ST-8 ek hi PR me (ST-1 ka PR #104 pehle merge hua), aur saare charan 0 m
 | v1.0.5           | 2026-11-24 | ST-2 se ST-8 ek PR me: fake registry aur network guard, `create`, `verify` (CI me har PR pe), `status`, `publish`, `republish`, publish workflow, `update-deps`; AC-PACKAGES-1 se 12 ke tests `scripts/packages/test/`.                                                                                                         |
 | v1.0.6 se v1.0.7 | 2026-11-25 | QA audit ke fixes: naam ke saath publish me zaroori dependency saath (D-445 badla), tag job beech me fail ke baad bhi, `verify` ke project wale secret patterns, network guard ke saare raaste, provenance ki line saaf. Code review ke baad: tag job sirf isi run ke versions tag karta hai, purane bina tag wale ki chetavni. |
 | v1.0.8           | 2026-11-26 | `create` ki template ab `tsconfig.json` Prettier ke format me likhti hai (chhoti list ek line me), to naya package `format:check` pe fail nahi hota; test `template.test.ts` (har category ki har file Prettier ke format me, `AC-PACKAGES-1`).                                                                                 |
+| v1.0.9           | 2026-11-27 | `verify` ke tests ek package ek waqt me (`--concurrency=1`): kai packages ke int tests ek saath secondary ke HDD pe majority write ko 2 second paar kara dete the (LESSONS §5).                                                                                                                                                 |
