@@ -1,6 +1,7 @@
 import { randomUUID } from 'node:crypto';
 
 import { createFakeClock } from '@beautinique/shared-clock';
+import { Redis } from 'ioredis';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 
 import { createMemoryCounter, createRateLimiter, createValkeyCounter } from '../src/rate-limit.ts';
@@ -144,3 +145,88 @@ describe.skipIf(!up && process.env['CI'] === undefined)('the counter on Valkey (
     });
   });
 });
+
+// The same counter with the client the services use (`ioredis`), as it will be wired. Its
+// connection for the rate limit fails at once when Valkey is down (no retries, no offline queue),
+// so a fail-closed class answers 503 at once instead of waiting.
+describe.skipIf(!up && process.env['CI'] === undefined)(
+  'the counter on Valkey with ioredis (SR-008)',
+  () => {
+    const ioPrefix = `bq-test:server-kit:ioredis:${randomUUID()}:`;
+    let client: Redis;
+
+    beforeAll(async () => {
+      client = new Redis(PORT, '127.0.0.1', {
+        maxRetriesPerRequest: 0,
+        enableOfflineQueue: false,
+        lazyConnect: true,
+      });
+      await client.connect();
+    });
+
+    afterAll(async () => {
+      const keys = await client.keys(`${ioPrefix}*`);
+      if (keys.length > 0) await client.del(...keys);
+      client.disconnect();
+    });
+
+    it('SR-008: counts the hits of a key with ioredis, and the key has its time', async () => {
+      const counter = createValkeyCounter(client, { prefix: ioPrefix });
+
+      const counts = [];
+      for (let hit = 0; hit < 3; hit += 1) counts.push(await counter.hit('count', MINUTE));
+
+      expect(counts.map((reading) => reading.count)).toEqual([1, 2, 3]);
+      for (const reading of counts) {
+        expect(reading.resetInMs).toBeGreaterThan(0);
+        expect(reading.resetInMs).toBeLessThanOrEqual(MINUTE);
+      }
+      const ttl = await client.pttl(`${ioPrefix}count`);
+      expect(ttl).toBeGreaterThan(0);
+      expect(ttl).toBeLessThanOrEqual(MINUTE);
+    });
+
+    it('SR-008: 50 hits at once from 5 ioredis connections are 1 to 50, each once', async () => {
+      const clients = Array.from(
+        { length: 5 },
+        () => new Redis(PORT, '127.0.0.1', { maxRetriesPerRequest: 0 }),
+      );
+      try {
+        const runs = clients.map(async (connection) => {
+          const mine = createValkeyCounter(connection, { prefix: ioPrefix });
+          const counts: number[] = [];
+          for (let hit = 0; hit < 10; hit += 1)
+            counts.push((await mine.hit('parallel', MINUTE)).count);
+          return counts;
+        });
+        const counts = (await Promise.all(runs)).flat().sort((a, b) => a - b);
+
+        expect(counts).toEqual(Array.from({ length: 50 }, (_, index) => index + 1));
+      } finally {
+        for (const connection of clients) connection.disconnect();
+      }
+    });
+
+    it('SR-008: an ioredis connection to a Valkey that is down: sign-in is 503 at once, a read goes on with the small limit', async () => {
+      const down = new Redis(1, '127.0.0.1', {
+        maxRetriesPerRequest: 0,
+        enableOfflineQueue: false,
+        lazyConnect: true,
+        retryStrategy: () => null,
+      });
+      const limiter = createRateLimiter({
+        counter: createValkeyCounter(down, { prefix: ioPrefix }),
+        local: createMemoryCounter(createFakeClock(NOW)),
+        fallback: { limit: 1, windowMs: MINUTE },
+      });
+      const limit = { limit: 100, windowMs: MINUTE };
+
+      expect(await limiter.check('sign-in', 'ip:1', limit)).toMatchObject({
+        ok: false,
+        reason: 'unavailable',
+      });
+      expect(await limiter.check('read', 'ip:1', limit)).toEqual({ ok: true, remaining: 0 });
+      down.disconnect();
+    });
+  },
+);

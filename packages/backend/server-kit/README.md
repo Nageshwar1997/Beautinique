@@ -66,7 +66,7 @@ What a request goes through, in this order: the actor (401), the app of its toke
 ### Rate limit
 
 - `createRateLimiter({ counter, local, fallback })` with `check(class, subject, { limit, windowMs })` and `enforce(...)` (throws 429 or 503, with `Retry-After`). The limits and which key (address or account) are the gateway's (SR-008). When the shared counter is out of reach, the classes that are fail-closed in the contracts (sign-in, codes, starting a payment, review, report, claim) are 503, and the others go on with the small limit of the process (`fallback`).
-- `createValkeyCounter(client)`: the counter on Valkey, one script (`HIT_SCRIPT`) that counts and sets the window together; `client` needs only `eval(script, numberOfKeys, ...args)` (as `ioredis` has it). A window is fixed: a caller can have up to twice the limit across the end of one window and the start of the next. `createMemoryCounter(clock)`: the process's own, with at most 10,000 keys.
+- `createValkeyCounter(client)`: the counter on Valkey, one script (`HIT_SCRIPT`) that counts and sets the window together; `client` needs only `eval(script, numberOfKeys, ...args)` (as `ioredis` has it; tested with `ioredis` on the real Valkey). Give it a connection of its own that fails at once when Valkey is down (`maxRetriesPerRequest: 0`, `enableOfflineQueue: false`), not the job queues' one, so a fail-closed class answers 503 at once. A window is fixed: a caller can have up to twice the limit across the end of one window and the start of the next. `createMemoryCounter(clock)`: the process's own, with at most 10,000 keys.
 
 ### Facade (SR-071)
 
