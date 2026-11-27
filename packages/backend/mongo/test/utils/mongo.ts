@@ -4,6 +4,7 @@ import { Socket } from 'node:net';
 import type { Db, Document, MongoClient } from 'mongodb';
 
 import { createMongoClient } from '../../src/client.ts';
+import { acquireLease, releaseLease } from '../../src/lease.ts';
 
 // The tests' real MongoDB (docs/OPERATIONS.md §1 rule 6): `npm run infra:up -- backend`. The CI has
 // it up. On a laptop with no container up the integration tests are skipped, and say so; in the CI
@@ -58,10 +59,33 @@ export function testDatabase(client: MongoClient, label: string): Db {
   return client.db(`bq_test_${label}_${randomUUID().slice(0, 8)}`);
 }
 
+// The `failCommand` fail point is one for the whole server: a test file that sets it would undo
+// another's. So a file takes this lock first (in the server, across the files and the packages
+// that test at once, `backend-events` too), holds it until it turns the fail point off, and the
+// others wait for it.
+const FAIL_POINT_LOCK = 'failCommand';
+const LOCK_MS = 60_000;
+const owner = randomUUID();
+let holding = false;
+
+async function takeFailPointLock(client: MongoClient): Promise<void> {
+  const locks = client.db('bq_test_locks');
+  const end = performance.now() + 2 * LOCK_MS;
+  // A wait on a condition (the lock is free), never a fixed sleep (docs/RULES.md RT-25).
+  while (
+    !(await acquireLease(locks, { name: FAIL_POINT_LOCK, owner, now: new Date(), ttlMs: LOCK_MS }))
+  ) {
+    if (performance.now() > end) throw new Error('The fail point lock stayed taken.');
+    await new Promise((resolve) => setTimeout(resolve, 25));
+  }
+  holding = true;
+}
+
 /**
  * Makes the next `times` of the given commands from `appName` fail (the `failCommand` fail point;
  * the containers have the test commands on). Only that app's commands fail, so the tests of other
- * packages that run beside it are not touched.
+ * packages that run beside it are not touched; the lock above keeps two files from setting it at
+ * once.
  */
 export async function failCommands(
   client: MongoClient,
@@ -69,6 +93,7 @@ export async function failCommands(
   times: number,
   data: Document,
 ): Promise<void> {
+  await takeFailPointLock(client);
   await client.db('admin').command({
     configureFailPoint: 'failCommand',
     mode: { times },
@@ -76,6 +101,10 @@ export async function failCommands(
   });
 }
 
+/** Turns the fail point off and gives the lock back; a file that did not set it does nothing. */
 export async function failPointOff(client: MongoClient): Promise<void> {
+  if (!holding) return;
   await client.db('admin').command({ configureFailPoint: 'failCommand', mode: 'off' });
+  await releaseLease(client.db('bq_test_locks'), { name: FAIL_POINT_LOCK, owner });
+  holding = false;
 }

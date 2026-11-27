@@ -1,0 +1,60 @@
+{
+  "name": "@beautinique/backend-events",
+  "version": "1.0.0",
+  "description": "The events and timed work of a service: the outbox, the inbox, the dispatcher, timers, the ticker and the job queues.",
+  "license": "MIT",
+  "type": "module",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.mts",
+      "import": "./dist/index.mjs"
+    },
+    "./package.json": "./package.json"
+  },
+  "files": [
+    "dist",
+    "README.md",
+    "CHANGELOG.md",
+    "LICENSE"
+  ],
+  "engines": {
+    "node": "24.22.3"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Nageshwar1997/Beautinique.git",
+    "directory": "packages/backend/events"
+  },
+  "publishConfig": {
+    "access": "public",
+    "provenance": true
+  },
+  "scripts": {
+    "build": "tsdown",
+    "typecheck": "tsc -p tsconfig.json",
+    "lint": "eslint .",
+    "test": "vitest run --coverage"
+  },
+  "peerDependencies": {
+    "@beautinique/backend-logger": "^2.0.0",
+    "@beautinique/backend-mongo": "^1.0.0",
+    "@beautinique/backend-server-kit": "^1.0.0",
+    "@beautinique/shared-clock": "^1.0.0",
+    "@beautinique/shared-contracts": "^1.0.0",
+    "bullmq": "^6.7.8",
+    "ioredis": "^6.0.0",
+    "mongodb": "^7.9.1",
+    "zod": "^4.6.7"
+  },
+  "devDependencies": {
+    "@beautinique/backend-logger": "^2.0.0",
+    "@beautinique/backend-mongo": "^1.0.0",
+    "@beautinique/backend-server-kit": "^1.0.0",
+    "@beautinique/shared-clock": "^1.0.0",
+    "@beautinique/shared-contracts": "^1.0.0",
+    "bullmq": "^6.7.8",
+    "ioredis": "^6.0.0",
+    "mongodb": "^7.9.1",
+    "zod": "^4.6.7"
+  }
+}

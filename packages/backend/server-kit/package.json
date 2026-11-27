@@ -46,6 +46,7 @@
     "@beautinique/shared-contracts": "^1.0.0",
     "@types/express": "^5.0.6",
     "express": "^5.3.0",
+    "ioredis": "^6.0.0",
     "zod": "^4.6.7"
   }
 }
